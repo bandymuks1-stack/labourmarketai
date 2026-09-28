@@ -395,7 +395,9 @@ export function AgencyBridgeSection({
                     {roster.length === 0 ? (
                       <p className="text-xs text-text-muted">
                         {labels.noRoster}{" "}
-                        <a href="#company-team" className="text-brand-blue hover:underline" data-testid="agency-bridge-no-roster-link">
+                        {/* The roster lives on the people page — "#company-team"
+                            alone pointed at an anchor this page does not have. */}
+                        <a href={`/${locale}/dashboard/company/people#company-team`} className="text-brand-blue hover:underline" data-testid="agency-bridge-no-roster-link">
                           {labels.goToRoster} →
                         </a>
                       </p>

@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { getAccessibleCompanyById } from "@/lib/company/company-setup";
+import { readActsAsAgency } from "@/lib/company/agency-capability-read";
 import { listActiveCompanyWorkers } from "@/lib/company/company-workers";
 import {
   listAgencyConnections,
@@ -52,7 +53,10 @@ export async function loadAgencyBridgeForChat(): Promise<AgencyBridgeChatResult>
   const companyRead = await getAccessibleCompanyById(company.companyId);
   if (companyRead.kind === "needs-migration") return { kind: "needs-migration" };
   if (companyRead.kind !== "ok" || !companyRead.row) return { kind: "no-company" };
-  if (companyRead.row.companyType !== "staffing_agency") return { kind: "not-agency" };
+  // The ONE agency rule (lib/company/agency-capability): type OR declared role.
+  if (!(await readActsAsAgency(companyRead.row.companyType, company.organizationId))) {
+    return { kind: "not-agency" };
+  }
   const agencyCompanyId = companyRead.row.id;
 
   const [connections, shared, progress, roster, tBridge, tChat] = await Promise.all([

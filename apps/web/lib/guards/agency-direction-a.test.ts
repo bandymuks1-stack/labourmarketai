@@ -40,11 +40,11 @@ const STUBS = [
 ] as const;
 
 describe("staffing-agency mode is a typed view on the company room", () => {
-  it("renders only behind companyType === 'staffing_agency'", () => {
-    // The section testid appears exactly once, inside the typed conditional.
-    expect(companyPage).toMatch(
-      /const isStaffingAgency = companyRow\.companyType === "staffing_agency"/,
-    );
+  it("renders only behind the ONE agency rule (type OR declared workforce role)", () => {
+    // Owner decision 2026-09-28: a construction company that declared
+    // workforce_provider / recruitment_partner is an agency too. The section
+    // testid appears exactly once, inside that conditional.
+    expect(companyPage).toMatch(/const isStaffingAgency = await readActsAsAgency\(/);
     expect(
       companyPage.match(/data-testid="company-agency-mode"/g) ?? [],
     ).toHaveLength(1);

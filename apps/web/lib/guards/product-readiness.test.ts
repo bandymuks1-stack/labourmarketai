@@ -2702,7 +2702,10 @@ describe("no migration files added by this sprint", () => {
 // not rewritten by proposing again (production walk 2026-09-28). RED by rule
 // (redefined definer), carries @human-gate-approved, ships as a DRAFT and is NOT
 // APPLIED until the owner approves the exact diff. RECOUNTED: 312.
-const SPRINT_BASELINE = 312;
+// Bumped 312 -> 314 for 20260928180000_agency_capability_one_rule_v1 (one agency rule in
+// two definers) and 20260928181000_booking_reopen_lifecycle_edges_v1 (reopened-booking
+// engagement end + expiry clock). Both RED, owner-approved 2026-09-28. RECOUNTED: 314.
+const SPRINT_BASELINE = 314;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
