@@ -214,7 +214,7 @@ describe("the save control cannot become an application", () => {
     // workspace renders them in the SAME saved section, which is also what
     // stops a second "saved jobs" surface from appearing next to this one.
     const loader = read(LOADER);
-    expect(loader).toContain("listSavedPublicVacancyIds(\n    supabase,");
+    expect(loader).toMatch(/listSavedPublicVacancyIds\(\s*supabase,/);
     expect(loader).toContain("listPublicVacancyPreviewsByIds(");
     const page = read(WORKSPACE);
     expect(page).toContain("result.savedVacancies.length > 0");

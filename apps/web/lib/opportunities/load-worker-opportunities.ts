@@ -186,7 +186,14 @@ export async function loadWorkerOpportunities(
   const ctx = await buildOwnWorkerContext(supabase, user.id);
   if (!ctx) return { kind: "no-worker" };
 
-  // Both depend only on `ctx.workerId`, so they travel as one round trip.
+  // EVERY read below depends only on `ctx` — none on another's result — so
+  // they start together and are awaited once. They used to run as ~8
+  // sequential round trips (documents+entries → interest → handoffs → saved →
+  // demand RPC → external vacancies → saved vacancy ids → their previews) in
+  // front of Today's opportunities (production trace 2026-09-28); now the
+  // longest single branch sets the pace. Each read keeps its own error
+  // behaviour: the demand RPC's absence still means `needsDataAccess`, and a
+  // read that threw before still throws.
   //
   // The entry count exists to tell two different silences apart. `hasSkills`
   // still gates the fit — with no skill evidence there is genuinely nothing to
@@ -194,16 +201,61 @@ export async function loadWorkerOpportunities(
   // who already did: production has two workers with journal entries and no
   // confirmed skills, and the board was telling them to start writing. Their
   // real next step is confirming what their entries already describe.
-  const [{ data: docs }, entryCountRes] = await Promise.all([
-    asAny(supabase)
-      .from("worker_documents")
-      .select("id")
-      .eq("worker_id", ctx.workerId),
-    liveJournalEntriesOnly(
+  const nowIso = new Date().toISOString();
+  const [
+    [{ data: docs }, entryCountRes],
+    { myInterest, handoffByVacancy },
+    mySaved,
+    demandRead,
+    externalVacancies,
+    savedVacancyPreviews,
+  ] = await Promise.all([
+    Promise.all([
       asAny(supabase)
-        .from("journal_entries")
-        .select("id", { count: "exact", head: true })
+        .from("worker_documents")
+        .select("id")
         .eq("worker_id", ctx.workerId),
+      liveJournalEntriesOnly(
+        asAny(supabase)
+          .from("journal_entries")
+          .select("id", { count: "exact", head: true })
+          .eq("worker_id", ctx.workerId),
+      ),
+    ]),
+    // Own interest map (empty + unavailable until the owner-gated table
+    // exists), then own handoff rows (empty until migration 20260917160000
+    // is applied) — the one read here that depends on another.
+    listMyInterestSignals(supabase, ctx.workerId).then(async (interest) => ({
+      myInterest: interest,
+      handoffByVacancy: interest.vacancyInterestAvailable
+        ? await listMyHandoffsByVacancy(supabase, ctx.workerId)
+        : new Map<string, MyHandoffRow>(),
+    })),
+    // Own PRIVATE bookmarks (P2-PR5) — same honest feature detection: absent
+    // store → unavailable, and the board never renders the save toggle.
+    listMySavedOpportunities(supabase, ctx.workerId),
+    // Gated worker-visibility RPC — a throw is kept as a value so the honest
+    // fallback below still applies instead of failing the whole board.
+    Promise.resolve(asAny(supabase).rpc("list_open_demand_for_workers")).then(
+      (res: { data: unknown; error: unknown }) => ({ threw: false as const, res }),
+      () => ({ threw: true as const }),
+    ),
+    // External public-source ads, RLS-scoped through the worker's OWN client —
+    // a board that needed service_role to render would mean the policy was
+    // wrong. Matched with the SAME subject the platform demands use below.
+    loadExternalVacancyCards(supabase, ctx.subject, {
+      nowIso,
+      professionSlug: options?.externalDiscovery?.professionSlug ?? null,
+      country: options?.externalDiscovery?.country ?? null,
+    }),
+    // Own saved PUBLIC VACANCIES — the second source of the same bookmark. The
+    // ids come from the worker's own rows; the titles come from the live ads
+    // through the same browsable predicate the board uses, so an expired
+    // bookmark drops out instead of rendering a job that no longer exists.
+    listSavedPublicVacancyIds(supabase, ctx.workerId).then((saved) =>
+      saved.available && saved.vacancyIds.size > 0
+        ? listPublicVacancyPreviewsByIds(supabase, [...saved.vacancyIds], nowIso)
+        : null,
     ),
   ]);
   const journalEntryCount =
@@ -263,24 +315,12 @@ export async function loadWorkerOpportunities(
     },
   };
 
-  // Own interest map (empty + unavailable until the owner-gated table exists).
-  const myInterest = await listMyInterestSignals(supabase, ctx.workerId);
-  // Own handoff rows (empty until migration 20260917160000 is applied).
-  const handoffByVacancy = myInterest.vacancyInterestAvailable
-    ? await listMyHandoffsByVacancy(supabase, ctx.workerId)
-    : new Map<string, MyHandoffRow>();
-
-  // Own PRIVATE bookmarks (P2-PR5) — same honest feature detection: absent
-  // store → unavailable, and the board never renders the save toggle.
-  const mySaved = await listMySavedOpportunities(supabase, ctx.workerId);
-
   // Gated worker-visibility RPC — honest fallback when not yet applied.
   let needsDataAccess = true;
   let opportunities: OpportunityCard[] = [];
   try {
-    const { data, error } = await asAny(supabase).rpc(
-      "list_open_demand_for_workers",
-    );
+    if (demandRead.threw) throw new Error("list_open_demand_for_workers threw");
+    const { data, error } = demandRead.res;
     if (!error && Array.isArray(data)) {
       needsDataAccess = false;
       opportunities = (data as Record<string, unknown>[])
@@ -368,18 +408,6 @@ export async function loadWorkerOpportunities(
       },
     ]),
   );
-  // External public-source ads, RLS-scoped through the worker's OWN client —
-  // a board that needed service_role to render would mean the policy was
-  // wrong. Matched with the SAME subject the platform demands used above.
-  const externalVacancies = await loadExternalVacancyCards(
-    supabase,
-    ctx.subject,
-    {
-      nowIso: new Date().toISOString(),
-      professionSlug: options?.externalDiscovery?.professionSlug ?? null,
-      country: options?.externalDiscovery?.country ?? null,
-    },
-  );
   // The SAME join for the second source: a vacancy interest whose ad is on
   // this render is "still open"; one whose ad expired keeps its snapshot.
   for (const card of externalVacancies.cards) {
@@ -393,21 +421,10 @@ export async function loadWorkerOpportunities(
   }
   const myInterestRows = buildMyInterestView(myInterest.rows, liveNeedById);
 
-  // Own saved PUBLIC VACANCIES — the second source of the same bookmark. The
-  // ids come from the worker's own rows; the titles come from the live ads
-  // through the same browsable predicate the board uses, so an expired
-  // bookmark drops out instead of rendering a job that no longer exists.
+  // Own saved public vacancies, read above (ids → live previews).
   let savedVacancies: readonly SavedVacancyRow[] = [];
-  const mySavedVacancies = await listSavedPublicVacancyIds(
-    supabase,
-    ctx.workerId,
-  );
-  if (mySavedVacancies.available && mySavedVacancies.vacancyIds.size > 0) {
-    const previews = await listPublicVacancyPreviewsByIds(
-      supabase,
-      [...mySavedVacancies.vacancyIds],
-      new Date().toISOString(),
-    );
+  if (savedVacancyPreviews) {
+    const previews = savedVacancyPreviews;
     if (previews.status === "ok") {
       savedVacancies = previews.previews.map((v) => ({
         id: v.id,
