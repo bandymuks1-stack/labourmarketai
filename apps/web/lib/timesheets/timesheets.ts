@@ -15,6 +15,7 @@ import {
 import {
   deriveEntryWorkTime,
   workTimeHoursByDay,
+  type EntryWorkTime,
   type WorkTimeDayHours,
   type WorkTimeMetricRow,
 } from "@/lib/journal/work-time";
@@ -565,6 +566,34 @@ export async function getMyJournalWorkHours(
   if (!DAY_RX.test(rangeStart) || !DAY_RX.test(rangeEnd)) {
     return { status: "unavailable" };
   }
+  const read = await readMyEntryWorkTime();
+  if (read.status !== "ok") return { status: "unavailable" };
+  return { status: "ok", days: workTimeHoursByDay(read.entries, rangeStart, rangeEnd) };
+}
+
+/** Where an entry was recorded — ids only; names are resolved by the caller
+ *  that needs them (the hours export). */
+export type EntryWorkRefs = {
+  readonly engagementContextId: string | null;
+  readonly projectId: string | null;
+};
+
+/**
+ * The caller's OWN live journal entries with their canonical work time — ONE
+ * read shared by the workload strip and the hours export, so a day's hours
+ * can never differ between the calendar and the file a person downloads.
+ * Unchanged rules: newest `WORKLOAD_READ_LIMIT` entries, one active entry per
+ * correction chain, `deriveEntryWorkTime` over `journal_entry_metrics`, and a
+ * failed read is `unavailable`, never a confident zero.
+ */
+export async function readMyEntryWorkTime(): Promise<
+  | { readonly status: "unavailable" }
+  | {
+      readonly status: "ok";
+      readonly entries: readonly EntryWorkTime[];
+      readonly refs: ReadonlyMap<string, EntryWorkRefs>;
+    }
+> {
   const workerId = await getOwnWorkerId();
   if (!workerId) return { status: "unavailable" };
   const supabase = await createClient();
@@ -581,7 +610,7 @@ export async function getMyJournalWorkHours(
   // the cap itself is a known remaining limit, not a hidden one.
   const entriesRes = await asAny(supabase)
     .from("journal_entries")
-    .select("id, created_at, original_text, correction_of")
+    .select("id, created_at, original_text, correction_of, engagement_context_id, project_id")
     .eq("worker_id", workerId)
     .is("deleted_at", null)
     .is("superseded_by", null)
@@ -595,14 +624,16 @@ export async function getMyJournalWorkHours(
     created_at: string;
     original_text: string | null;
     correction_of: string | null;
+    engagement_context_id: string | null;
+    project_id: string | null;
   };
   const rows = (entriesRes.data ?? []) as EntryRow[];
-  if (rows.length === 0) return { status: "ok", days: [] };
+  if (rows.length === 0) return { status: "ok", entries: [], refs: new Map() };
   // ONE ACTIVE ENTRY PER CORRECTION CHAIN — the same rule the journal list,
   // the section, the CV and the calendar apply (`counted-once.ts`).
   const liveRows = countedOnce(rows);
   const entryIds = liveRows.map((r) => r.id);
-  if (entryIds.length === 0) return { status: "ok", days: [] };
+  if (entryIds.length === 0) return { status: "ok", entries: [], refs: new Map() };
 
   const metricsRes = await asAny(supabase)
     .from("journal_entry_metrics")
@@ -630,5 +661,11 @@ export async function getMyJournalWorkHours(
     }),
   );
 
-  return { status: "ok", days: workTimeHoursByDay(derived, rangeStart, rangeEnd) };
+  const refs = new Map<string, EntryWorkRefs>(
+    liveRows.map((r) => [
+      r.id,
+      { engagementContextId: r.engagement_context_id, projectId: r.project_id },
+    ]),
+  );
+  return { status: "ok", entries: derived, refs };
 }

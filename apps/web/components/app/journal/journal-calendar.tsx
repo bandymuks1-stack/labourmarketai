@@ -50,6 +50,11 @@ export async function JournalCalendar({
   carry?: Readonly<Record<string, string>>;
 }) {
   const t = await getTranslations("journal.calendar");
+  // The day whose week / fortnight / month the hours export covers.
+  const exportDay =
+    selected ??
+    grid.weeks.flat().find((c) => c.isToday && c.inScope)?.iso ??
+    grid.rangeEnd;
 
   const href = (params: Readonly<Record<string, string | null>>): "/dashboard" => {
     const q = new URLSearchParams({ ...(carry ?? {}) });
@@ -336,6 +341,28 @@ export async function JournalCalendar({
                 days: grid.recordedDays,
                 entries: grid.recordedEntries,
               })}
+      </p>
+      {/* HOURS OUT (owner command 2026-09-28 §13): the same canonical hours as
+          a file, for one week, two weeks or one calendar month around the
+          picked day (else today in view, else the period's last day). A
+          download link to a route handler — not a navigation — and nothing
+          is stored: the file is a representation of the journal's facts. */}
+      <p
+        className="flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-text-muted"
+        data-testid="journal-hours-export"
+      >
+        <span>{t("exportHours")}</span>
+        {(["week", "2weeks", "month"] as const).map((period) => (
+          <a
+            key={period}
+            href={`/${locale}/dashboard/journal/hours?period=${period}&date=${exportDay}`}
+            download
+            className="inline-flex min-h-11 items-center font-medium text-brand-blue hover:underline"
+            data-testid={`journal-hours-export-${period}`}
+          >
+            {t(`exportPeriod.${period}`)}
+          </a>
+        ))}
       </p>
       {/* THE ORGANIZATION'S LAYER COULD NOT BE READ. Nothing was placed on
           any day above — and that is not the same as "the organization

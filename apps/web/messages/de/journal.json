@@ -886,6 +886,12 @@
     "allDays": "Alle Tage",
     "dayWithRecords": "{day} — {count, plural, one {# Eintrag} other {# Einträge}}",
     "dayEmpty": "{day} — keine Einträge",
+    "exportHours": "Stunden herunterladen:",
+    "exportPeriod": {
+      "week": "Woche",
+      "2weeks": "2 Wochen",
+      "month": "Monat"
+    },
     "periodEmpty": "Keine Einträge in diesem Zeitraum.",
     "periodSummary": "{days, plural, one {# Tag} other {# Tage}}, {entries, plural, one {# Eintrag} other {# Einträge}}.",
     "periodSummaryWithTime": "{days, plural, one {# Tag} other {# Tage}}, {entries, plural, one {# Eintrag} other {# Einträge}}, {time}",

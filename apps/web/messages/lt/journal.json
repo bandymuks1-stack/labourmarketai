@@ -886,6 +886,12 @@
     "allDays": "Visos dienos",
     "dayWithRecords": "{day} — {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
     "dayEmpty": "{day} — įrašų nėra",
+    "exportHours": "Atsisiųsti valandas:",
+    "exportPeriod": {
+      "week": "savaitė",
+      "2weeks": "2 savaitės",
+      "month": "mėnuo"
+    },
     "periodEmpty": "Šiame laikotarpyje įrašų nėra.",
     "periodSummary": "{days, plural, one {# diena} few {# dienos} other {# dienų}}, {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}}.",
     "periodSummaryWithTime": "{days, plural, one {# diena} few {# dienos} other {# dienų}}, {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}}, {time}",
