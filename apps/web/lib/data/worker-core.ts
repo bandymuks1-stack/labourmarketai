@@ -79,29 +79,9 @@ export interface WorkerCoreRow {
  * result: `{ ok: false }` on a failed read, `{ ok: true, value: null }` when
  * the caller has no worker row (#1314 — absence and failure are different
  * facts, and bearer consumers must be able to tell them apart).
- *
- * Read ONCE per server render for a given client + user: Home reached this
- * from three independent callers (the opportunities subject, the journal
- * list, work intelligence) — three identical `workers` round-trips per load
- * on an 11-connection PostgREST pool (production trace 2026-09-28). The
- * web session's client is itself request-memoized, so those callers share a
- * key. `cache()` is request-scoped deduplication only: outside a render (a
- * server action, a bearer/MCP call) every call reads. Callers treat the row
- * as read-only.
  */
 export async function readWorkerCoreRow(
   caller: DomainCaller,
-): Promise<CoreRead<WorkerCoreRow | null>> {
-  return readWorkerCoreRowOnce(caller.supabase, caller.userId);
-}
-
-const readWorkerCoreRowOnce = cache(
-  (supabase: DomainCaller["supabase"], userId: string) =>
-    readWorkerCoreRowUncached({ supabase, userId }),
-);
-
-async function readWorkerCoreRowUncached(
-  caller: Pick<DomainCaller, "supabase" | "userId">,
 ): Promise<CoreRead<WorkerCoreRow | null>> {
   try {
     const full = await asAny(caller.supabase)
