@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getProfessionEntries } from "@/lib/data/worker-core";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import Link from "next/link";
@@ -216,7 +217,7 @@ export default async function OpportunitiesPage({
   // Board + salary benchmark + weekly digest + world view + the person's
   // own work-seeking intent are independent reads — one combined await so
   // TTFB pays the slowest of them, not their sum.
-  const [result, salaryIntel, weekly, partnerSupply, discoverability, tVisibility] = await Promise.all([
+  const [result, salaryIntel, weekly, partnerSupply, discoverability, tVisibility, professionEntries] = await Promise.all([
     loadWorkerOpportunityBoard("opportunities_board", {
       externalDiscovery: {
         professionSlug: filters.profession,
@@ -243,8 +244,17 @@ export default async function OpportunitiesPage({
     // a read failed.
     getMyDiscoverabilityState().catch(() => null),
     getTranslations("privacyConsent.employerVisibility"),
+    // What the person SAYS they do — the same cached reader Home, the profile
+    // and the Living CV use. Display only: matching still reads the catalogue
+    // slug alone (#1881 pins that it never reads the words).
+    getProfessionEntries().catch(() => []),
   ]);
   const employerVisibility = employerVisibilityOf(discoverability);
+  // Their own words, when no catalogue profession names them (owner walk
+  // 2026-09-28 §9: one declared fact on Home, Profile, CV AND here — this
+  // page said "profesija nenurodyta" to a person who had stated it).
+  const ownProfessionWords =
+    professionEntries.map((e) => (e.label ?? "").trim()).find((w) => w.length > 0) ?? null;
   const declaredIntent: WorkerIntentState | null = (() => {
     if (!partnerSupply || partnerSupply.kind !== "ok") return null;
     const d = partnerSupply.declaration;
@@ -643,15 +653,25 @@ export default async function OpportunitiesPage({
       ? (() => {
           const r = result.readiness;
           const facts: string[] = [];
-          facts.push(
-            r.professionSlug
-              ? t("world.fact.profession", { value: roleLabel(r.professionSlug) })
-              : r.evidencedProfessionSlug
-                ? t("world.fact.professionEvidenced", {
-                    value: roleLabel(r.evidencedProfessionSlug),
-                  })
-                : t("world.fact.professionMissing"),
-          );
+          if (r.professionSlug) {
+            facts.push(t("world.fact.profession", { value: roleLabel(r.professionSlug) }));
+          } else {
+            // The declaration is shown as the person wrote it; when the fit
+            // was assessed against a profession read from their records, that
+            // is said too — beside the words, never instead of them.
+            if (ownProfessionWords) {
+              facts.push(t("world.fact.profession", { value: ownProfessionWords }));
+            }
+            if (r.evidencedProfessionSlug) {
+              facts.push(
+                t("world.fact.professionEvidenced", {
+                  value: roleLabel(r.evidencedProfessionSlug),
+                }),
+              );
+            } else if (!ownProfessionWords) {
+              facts.push(t("world.fact.professionMissing"));
+            }
+          }
           facts.push(
             r.assessedAgainst.skillCount > 0
               ? t("world.fact.skills", { count: r.assessedAgainst.skillCount })
