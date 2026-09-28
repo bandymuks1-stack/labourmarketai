@@ -309,16 +309,32 @@ export function fold(input: string): string {
  *  boundary, across ~600 patterns, on the first calls of every fresh
  *  process — about 2.8 s before the router answered at its normal 1–5 ms
  *  (measured 2026-09-24; 1.5 s without `i`). The chat pays that on its
- *  first sentences, and CI's intent suites timed out on it. */
+ *  first sentences, and CI's intent suites timed out on it.
+ *
+ *  COMPILED ON FIRST USE, not at import (measured on production 2026-09-28):
+ *  building all ~700 `u` patterns eagerly was the single largest piece of
+ *  main-thread work when Home opened — 1.45 s of 2.6 s at a phone-class 4×
+ *  CPU, ~0.36 s on desktop — paid before anyone had typed a word, because the
+ *  chat imports this module. The getter builds the SAME RegExp from the SAME
+ *  source and flags the first time `.re` is read, and keeps it; routing is
+ *  unchanged. `prewarmIntentRouter` pays the rest in idle slices after Home
+ *  is usable, so the first sentence does not inherit the cost either. */
 function p(source: string, weight = 1): Pattern {
-  return { re: new RegExp(fold(source).replace(/\\b/g, UB), "u"), weight };
+  let re: RegExp | undefined;
+  return {
+    get re() {
+      return (re ??= new RegExp(fold(source).replace(/\\b/g, UB), "u"));
+    },
+    weight,
+  };
 }
 
 /** `p()`, but the pattern only counts when the sentence is NOT also asking
  *  for work or for workers — see `Pattern.noSeek` for why this is a flag and
- *  not a lookahead. */
+ *  not a lookahead. `Object.assign`, not a spread: a spread would read the
+ *  lazy `re` getter and compile the pattern at import again. */
 function pNoSeek(source: string, weight = 1): Pattern {
-  return { ...p(source, weight), noSeek: true };
+  return Object.assign(p(source, weight), { noSeek: true as const });
 }
 
 /**
@@ -3276,6 +3292,43 @@ const AVAILABILITY_CHANGE_REQUEST = p(
  */
 export function isAvailabilityChangeRequest(text: string): boolean {
   return AVAILABILITY_CHANGE_REQUEST.test(fold(text));
+}
+
+/**
+ * Compile every routing pattern in small idle slices, so the first sentence
+ * finds them ready without Home paying for them while it opens (see `p()`).
+ * Browser-only; a no-op wherever there is no `window`. Returns a cancel
+ * function for effect cleanup. Reading `.re` is the whole warm-up — the
+ * getter memoises, so a slice interrupted by a real `classifyIntent` call
+ * simply finds those patterns already built.
+ */
+export function prewarmIntentRouter(): () => void {
+  if (typeof window === "undefined") return () => {};
+  const pending = RULES.flatMap((rule) => rule.patterns);
+  let cancelled = false;
+  let handle: number | undefined;
+  const idle: (cb: (d?: IdleDeadline) => void) => number =
+    typeof window.requestIdleCallback === "function"
+      ? (cb) => window.requestIdleCallback(cb, { timeout: 2000 })
+      : (cb) => window.setTimeout(() => cb(), 50);
+  const slice = (deadline?: IdleDeadline) => {
+    if (cancelled) return;
+    // Stop while the browser's idle deadline still has room; without a
+    // deadline (setTimeout fallback), stop after ~8 ms.
+    const until = performance.now() + 8;
+    while (pending.length > 0) {
+      void pending.pop()!.re;
+      if (deadline ? deadline.timeRemaining() < 2 : performance.now() > until) break;
+    }
+    if (pending.length > 0) handle = idle(slice);
+  };
+  handle = idle(slice);
+  return () => {
+    cancelled = true;
+    if (handle === undefined) return;
+    if (typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(handle);
+    else window.clearTimeout(handle);
+  };
 }
 
 export function classifyIntent(text: string): IntentMatch {
