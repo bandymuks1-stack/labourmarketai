@@ -206,6 +206,9 @@ export default async function CompanyPeoplePage({
           roleCoordinationEnabled={isOperationsRoleEnabled("foreman")}
           canAssignRoles
           canManageInvitations={canManageInvitations}
+          reviewElsewhere={
+            orgMembers ? { href: "#org-members", label: orgMembersLabels.title } : undefined
+          }
         />
         {/* Užfiksuotas darbas (owner req. 15–17, #1724): the roster's
             recorded work through THE one work-intelligence reader, one call
@@ -293,14 +296,16 @@ export default async function CompanyPeoplePage({
       {managerEvidence && <ManagerEvidenceCard evidence={managerEvidence} />}
 
       {orgMembers && (
-        <OrgMembersPanel
+        <div id="org-members" className="scroll-mt-20">
+          <OrgMembersPanel
           orgId={orgMembers.orgId}
           members={orgMembers.members}
           addable={orgMembers.addable}
           labels={orgMembersLabels}
           viewerIsRegisteredOwner={orgMembers.viewerIsRegisteredOwner}
           governanceWithoutReviewer={orgMembers.governanceWithoutReviewer}
-        />
+          />
+        </div>
       )}
 
       {/* Employment lifecycle on the SAME canonical engagement_contexts rows
