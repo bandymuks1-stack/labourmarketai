@@ -23,7 +23,20 @@ MEASURED before this lane (origin/main `94dbde1da`): the vacancy provider
 registry held exactly one provider (`arbetsformedlingen`); there was no NAV
 descriptor, no NAV governance row, no NAV parser, no bearer-auth path, no
 continuation-token walk, and no code path that ever sourced a provider
-credential. `EXISTING_NAV_IMPLEMENTATION = NONE`.
+credential. `EXISTING_NAV_IMPLEMENTATION = NONE` **on main** — that boundary
+was main only.
+
+Git history holds an earlier implementation (re-measured 2026-09-28): PR #798
+"Official Vacancy Source — NAV Norway v1" (commit `ac34e7b7b`, 2026-07-17,
+2 283 lines), closed unmerged 2026-08-24 as SUPERSEDED because its
+`external_vacancies` table would have been a second vacancy store beside
+`public_vacancies`. Branch `feat/cc/official-vacancy-source-nav-norway-v1` is
+preserved. Its STORE and UI must not be revived; its feed knowledge is prior
+art for §5: `lib/vacancy-sources/nav-feed-contract.ts` (models the page
+wrapper as `items[]._feed_entry` + `next_url` / `next_id`, and the ad keys
+`businessName`, `jobtitle`, `engagementtype`, `occupationCategories`,
+`updated`), `nav-fixtures.ts`, and `scripts/nav-vacancy-dry-run.ts`. Neither
+version has ever called nav.no, so both key sets are assumptions.
 
 After this lane, ADDITIVELY and reusing the existing structures (no second
 connector):
@@ -120,7 +133,10 @@ row (`PublicVacancyV1` → `public_vacancies`):
 
 FIRST STEP of activation: capture ONE real feed page under an owner-provisioned
 token (dry run, `VACANCY_SOURCE_NAV_ENABLED=on`, governance still off) and
-diff it against `NAV_FIELD_MAP`. Every mismatch is a parser edit and a
+diff it against `NAV_FIELD_MAP` AND against #798's `nav-feed-contract.ts`
+(§1) — where the two disagree (`_feed_entry` vs `ad_content`, `next_url` vs
+`next_id`, `businessName` vs `employer.name`), the real page decides, and
+#798's fixtures can seed the parser tests. Every mismatch is a parser edit and a
 `transformVersion` bump BEFORE any persist run.
 
 ## 6. ESCO mapping
