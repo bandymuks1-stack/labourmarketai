@@ -174,6 +174,7 @@ export function JournalEntryComposer({
   directions,
   workerSkills,
   editingEntry,
+  defaultWorkDate = null,
   templates,
   onSaved,
   onCancelEdit,
@@ -188,6 +189,9 @@ export function JournalEntryComposer({
    *  `supersedeJournalEntry(editingEntry.id, …)` (RPC from migration 0018)
    *  instead of the create path. */
   editingEntry?: JournalEditingEntry | null;
+  /** The day the person already picked on the journal calendar. A NEW
+   *  record starts on it instead of today; an edit keeps its saved day. */
+  defaultWorkDate?: string | null;
   /** ACTIVE profession templates from the §10 registry
    *  (journal_profession_templates — owner-gated draft migration). Empty /
    *  omitted → the picker renders NOTHING (honest absence). A template only
@@ -414,16 +418,16 @@ export function JournalEntryComposer({
     engagements.find((e) => e.id === engagementId)?.relationshipSlug ?? null;
   // Preserve the entry's saved work date on edit (do NOT reset to today).
   const [workDate, setWorkDate] = useState<string>(
-    editingEntry?.workDate ?? today,
+    editingEntry?.workDate ?? defaultWorkDate ?? today,
   );
   // A NEW entry defaults to the PERSON's calendar day, not the server's UTC
   // day (re-audit F10): at 01:30 in Vilnius the UTC key still says
   // yesterday. Applied after mount so server and client hydrate the same
   // markup; an already-edited date is left alone.
   useEffect(() => {
-    if (editingEntry?.workDate) return;
+    if (editingEntry?.workDate || defaultWorkDate) return;
     setWorkDate((d) => (d === today ? personCalendarDay() : d));
-  }, [editingEntry?.workDate, today]);
+  }, [editingEntry?.workDate, defaultWorkDate, today]);
 
   const existingSkillRefs = useMemo(
     () => workerSkills.map((s) => ({ slug: s.slug, label: s.name })),

@@ -1339,8 +1339,11 @@ describe("17b · the journal page: recording first, one numbers card, the statio
     expect(page).toMatch(/editingEntry \? \([\s\S]*?<JournalEntryComposer[\s\S]*?\) : composeFull \? \([\s\S]*?<JournalEntryComposer[\s\S]*?\) : \(\s*<JournalQuickRecord/);
     expect(page).toContain('data-testid="journal-compose-full-link"');
     // the recorder rides the conversation's reader and its readback+confirm
-    // surface: no second parser, no second write path
-    expect(quickRecord).toContain("extractWorkLog(text, personCalendarDay())");
+    // surface: no second parser, no second write path. The person's own
+    // clock is still "today"; the calendar's picked day is only the default
+    // (journal-selected-day-survives.test.ts).
+    expect(quickRecord).toContain("const today = personCalendarDay();");
+    expect(quickRecord).toContain("extractWorkLog(text, today, selectedDay ?? today)");
     expect(quickRecord).toMatch(/<WorkerWorkLogFlow\s/);
     const quickRecordCode = quickRecord.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, "");
     expect(quickRecordCode).not.toMatch(/createJournalEntry|supersedeJournalEntry|from\("journal_entr|fragments_json/);

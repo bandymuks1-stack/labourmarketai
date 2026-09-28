@@ -34,10 +34,18 @@ import { personCalendarDay } from "@/lib/time/person-calendar-day";
 export function JournalQuickRecord({
   locale,
   labels,
+  selectedDay = null,
+  selectedDayLabel = null,
   otherDoors,
 }: {
   locale: string;
   labels: WorkLogLabels;
+  /** The day the person picked on the journal calendar (`?date=`). The
+   *  readback carries it unless the sentence names its own day — the person
+   *  never re-picks a day they already chose. */
+  selectedDay?: string | null;
+  /** The same day, already formatted by the page for display. */
+  selectedDayLabel?: string | null;
   /** The other ways to record (conversation, voice, the full form) — text
    *  links the page composes, rendered under the recorder so every existing
    *  door stays one tap away without competing with the one primary action. */
@@ -77,12 +85,24 @@ export function JournalQuickRecord({
             className="w-full rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-body text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-brand-blue"
           />
           <div className="flex flex-wrap items-center gap-3">
+            {selectedDay && selectedDayLabel && (
+              <span
+                className="text-support font-medium text-text-secondary"
+                data-testid="journal-quick-record-day"
+                data-day={selectedDay}
+              >
+                {t("forDay", { day: selectedDayLabel })}
+              </span>
+            )}
             <Button
               type="button"
               variant="primary"
               disabled={!canUnderstand}
               data-testid="journal-quick-record-understand"
-              onClick={() => setDraft(extractWorkLog(text, personCalendarDay()))}
+              onClick={() => {
+                const today = personCalendarDay();
+                setDraft(extractWorkLog(text, today, selectedDay ?? today));
+              }}
             >
               {t("understand")}
             </Button>
