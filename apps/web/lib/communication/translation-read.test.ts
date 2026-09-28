@@ -190,7 +190,9 @@ describe("RED-2 — safe fallback and authority, with the gate open", () => {
     expect(page).toContain("const supabase = await createClient();");
     expect(page).not.toContain("createAdminClient");
     const rlsRead = page.indexOf('.from("conversation_messages")');
-    const resolve = page.indexOf("await resolveViewerTexts(");
+    // Started, not awaited, since 2026-09-28 (each message streams behind its
+    // own Suspense boundary) — the call still follows the RLS read.
+    const resolve = page.indexOf("= resolveViewerTexts(");
     expect(rlsRead).toBeGreaterThan(-1);
     expect(resolve).toBeGreaterThan(rlsRead);
   });
