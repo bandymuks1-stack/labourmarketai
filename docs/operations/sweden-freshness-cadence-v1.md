@@ -20,7 +20,9 @@ No new importer, no relaxed gate. The scheduled path invokes EXACTLY
 env gates (`VACANCY_SOURCE_ARBETSFORMEDLINGEN_ENABLED` + service key).
 
 Candidate trigger (recommended): **GitHub Actions scheduled workflow**, cron
-`17 5,11,17 * * *` (3×/day, off-peak minutes), concurrency group so runs
+`17 */3 * * *` (every 3 h since 2026-09-28; was `17 5,11,17 * * *`,
+3×/day — too sparse: the public count fell ~2 500 overnight as deadlines
+passed with no run to add new ads), concurrency group so runs
 never overlap, 15-min timeout, each run uploads the JSON accounting as an
 artifact. Kill switch = deleting one repo variable
 (`VACANCY_SCHEDULE_ENABLED`), checked as the first step. Failure = red

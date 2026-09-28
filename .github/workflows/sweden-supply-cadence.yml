@@ -23,7 +23,12 @@ name: sweden-supply-cadence
 
 on:
   schedule:
-    - cron: "17 5,11,17 * * *"
+    # Every 3 hours (was 5/11/17 UTC). Ads carry a deadline; the public
+    # count drops as they pass (2 515 expired at one midnight, 2026-09-27),
+    # and three runs a day left a ~14 h overnight gap in which the count only
+    # fell. A stream run takes about a minute; JobStream is built for
+    # frequent polling.
+    - cron: "17 */3 * * *"
   workflow_dispatch:
     inputs:
       channel:
