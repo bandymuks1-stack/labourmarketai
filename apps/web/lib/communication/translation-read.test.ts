@@ -16,7 +16,7 @@ vi.mock("server-only", () => ({}));
 const runAiAgent = vi.fn();
 vi.mock("@/lib/ai/run-agent-server", () => ({ runAiAgent: (...a: unknown[]) => runAiAgent(...a) }));
 
-const { resolveViewerTexts, __clearTranslationCache } = await import("./translation-read");
+const { resolveViewerTexts, __clearTranslationCache, isTransientProviderRefusal } = await import("./translation-read");
 
 const lt = { id: "m1", body: "Rytoj pradedame 7 val. objekte Hoofdgracht 3.", original_language: "lt" };
 const ka = { id: "m2", body: "გასაგებია, ვიქნები.", original_language: "ka" };
@@ -29,7 +29,7 @@ beforeEach(() => {
 
 describe("resolveViewerTexts", () => {
   it("without an egress grant every foreign message stays the original, with its language badge", async () => {
-    runAiAgent.mockResolvedValue({ status: "needs_review", reason: "egress_blocked" });
+    runAiAgent.mockResolvedValue({ status: "needs_review", reason: "route_blocked" });
     const out = await resolveViewerTexts([lt, ka, en], "en", "viewer-1");
     expect(out.get("m1")).toMatchObject({ kind: "original", text: lt.body, languageBadge: "lt", provider: null });
     expect(out.get("m2")).toMatchObject({ kind: "original", text: ka.body, languageBadge: "ka" });
@@ -153,7 +153,7 @@ describe("RED-2 — safe fallback and authority, with the gate open", () => {
 
   it("every message carries ONE explicit state, and a foreign original says WHY it is not translated", async () => {
     // declined by the gate → original_foreign / declined
-    runAiAgent.mockResolvedValueOnce({ status: "needs_review", reason: "egress_blocked" });
+    runAiAgent.mockResolvedValueOnce({ status: "needs_review", reason: "route_blocked" });
     const declined = await resolveViewerTexts([ka, en, { id: "m0", body: "?", original_language: null }], "en", "viewer-12");
     expect(declined.get("m2")).toMatchObject({ state: "original_foreign", unavailable: "declined", kind: "original" });
     expect(declined.get("m3")).toMatchObject({ state: "same_language", unavailable: null, languageBadge: null });
@@ -171,7 +171,7 @@ describe("RED-2 — safe fallback and authority, with the gate open", () => {
     expect((await resolveViewerTexts([ka], "lt", "viewer-14")).get("m2")).toMatchObject({ state: "original_foreign", unavailable: "failed" });
 
     // beyond the per-read bound → not_attempted, and the runtime is not called for it
-    runAiAgent.mockResolvedValue({ status: "needs_review", reason: "egress_blocked" });
+    runAiAgent.mockResolvedValue({ status: "needs_review", reason: "route_blocked" });
     const many = Array.from({ length: 45 }, (_, i) => ({ id: `x${i}`, body: `t${i}`, original_language: "ka" }));
     const bounded = await resolveViewerTexts(many, "lt", "viewer-15");
     expect(bounded.get("x0")).toMatchObject({ state: "original_foreign", unavailable: "not_attempted" });
@@ -195,5 +195,47 @@ describe("RED-2 — safe fallback and authority, with the gate open", () => {
     const resolve = page.indexOf("= resolveViewerTexts(");
     expect(rlsRead).toBeGreaterThan(-1);
     expect(resolve).toBeGreaterThan(rlsRead);
+  });
+});
+
+/**
+ * Production walk 2026-09-28 (LT ↔ RU synthetic pair): Gemini answered
+ * "503 UNAVAILABLE — high demand" in 0.7–2.6 s, and every such answer was
+ * filed as a gate refusal ("declined"), which also stopped the rest of the
+ * thread. A busy provider now gets ONE short retry, and a failure never
+ * stops the other messages; the original stays canonical throughout.
+ */
+describe("a busy provider is retried once and never stops the thread", () => {
+  const busy = { status: "needs_review", reason: "provider_error", detail: "gemini http 503 — UNAVAILABLE: high demand" };
+  const ok = (text: string) => ({
+    status: "suggestion", agent: "translation_copy", provider: "gemini", model: "x",
+    value: { data: { localized_copy: text, plain_language_version: null, wording_warnings: [] } },
+  });
+
+  it("503 then success → translated, with the original beside it", async () => {
+    runAiAgent.mockResolvedValueOnce(busy).mockResolvedValueOnce(ok("Понял, буду."));
+    const out = await resolveViewerTexts([lt], "ru", "viewer-busy-1");
+    expect(out.get("m1")).toMatchObject({ kind: "translated", text: "Понял, буду.", original: lt.body });
+    expect(runAiAgent).toHaveBeenCalledTimes(2);
+  });
+
+  it("503 twice → failed (not declined); a timeout → failed; the next message is still attempted", async () => {
+    runAiAgent
+      .mockResolvedValueOnce(busy)
+      .mockResolvedValueOnce(busy)
+      .mockResolvedValueOnce({ status: "needs_review", reason: "timeout", detail: "policy latency ceiling 15000ms exceeded" });
+    const out = await resolveViewerTexts([lt], "ru", "viewer-busy-2");
+    expect(out.get("m1")).toMatchObject({ kind: "original", text: lt.body, unavailable: "failed" });
+    expect(runAiAgent).toHaveBeenCalledTimes(2);
+    const timedOut = await resolveViewerTexts([ka], "ru", "viewer-busy-3");
+    expect(timedOut.get("m2")).toMatchObject({ kind: "original", unavailable: "failed" });
+    expect(runAiAgent).toHaveBeenCalledTimes(3); // a timeout is not retried here
+  });
+
+  it("only load answers count as busy", () => {
+    expect(isTransientProviderRefusal("provider_error", "gemini http 503 — UNAVAILABLE")).toBe(true);
+    expect(isTransientProviderRefusal("provider_error", "gemini http 429 RESOURCE_EXHAUSTED")).toBe(true);
+    expect(isTransientProviderRefusal("provider_error", "gemini http 400 INVALID_ARGUMENT")).toBe(false);
+    expect(isTransientProviderRefusal("timeout", "503")).toBe(false);
   });
 });
