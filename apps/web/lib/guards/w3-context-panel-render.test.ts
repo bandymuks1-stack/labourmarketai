@@ -128,7 +128,7 @@ describe("W3 render proof — the panel is part of the workspace", () => {
   it("contains no navigation at all", () => {
     // Not one anchor, not one href. Opening something in the workspace can
     // never become a page load by accident.
-    expect(html).not.toMatch(/<a/);
+    expect(html).not.toMatch(/<a\b/);
     expect(html).not.toContain("href=");
   });
 
