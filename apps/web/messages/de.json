@@ -8505,7 +8505,11 @@
       "availableFromChip": "Verfügbar ab {date}",
       "availableFromNote": "Zum gewünschten Beginn noch nicht verfügbar — diese Person nennt einen späteren Start. Ihr eigenes Datum, keine Schätzung."
     },
-    "sharedNeed": "Vom Kunden geteilter Bedarf: {title}"
+    "sharedNeed": "Vom Kunden geteilter Bedarf: {title}",
+    "agencyPresent": {
+      "note": "Ihr Kunde hat diesen Bedarf mit Ihnen geteilt. Sie stellen Kandidaten aus Ihrem eigenen Personalbestand vor.",
+      "link": "Kandidaten vorstellen"
+    }
   },
   "planBoundary": {
     "title": "Was bezahlte Pläne enthalten",
