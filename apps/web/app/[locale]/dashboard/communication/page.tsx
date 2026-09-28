@@ -1,7 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { Link } from "@/lib/i18n/navigation";
-import { Lock } from "lucide-react";
+import { Lock, MessageSquare } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { Card } from "@/components/ui/Card";
 import { SupportConversationLauncher } from "@/components/app/support-conversation-launcher";
@@ -513,14 +513,19 @@ export default async function CommunicationListPage({
             composer here: a composer needs a real conversation to send into,
             and a disabled one would pretend otherwise. */}
         <section data-testid="communication-thread-pane" className="flex min-w-0 flex-col">
-          <Card className="flex flex-1 flex-col items-center justify-center gap-4">
-          {conversations.length > 0 && (
-            <p className="text-center text-sm text-text-secondary" data-testid="communication-pane-pick">
-              {t("panePick")}
-            </p>
-          )}
-          <SupportConversationLauncher locale={locale} />
-          <p className="text-center text-meta text-text-muted">{t("footnote")}</p>
+          {/* Card wraps its children in one block, so the pane's own column
+              lives inside it: icon, the pick prompt, support, privacy. */}
+          <Card className="flex flex-1 flex-col justify-center">
+            <div className="flex flex-col items-center gap-4 py-6 text-center">
+              <MessageSquare className="h-8 w-8 text-text-muted" strokeWidth={1.5} aria-hidden />
+              {conversations.length > 0 && (
+                <p className="text-sm text-text-secondary" data-testid="communication-pane-pick">
+                  {t("panePick")}
+                </p>
+              )}
+              <SupportConversationLauncher locale={locale} />
+              <p className="max-w-sm text-meta text-text-muted">{t("footnote")}</p>
+            </div>
           </Card>
         </section>
       </div>
