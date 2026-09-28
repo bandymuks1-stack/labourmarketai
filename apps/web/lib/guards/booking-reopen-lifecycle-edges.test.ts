@@ -30,3 +30,21 @@ describe("reopened booking lifecycle edges", () => {
     expect(fn).toMatch(/where id = r\.id and status = 'proposed'/);
   });
 });
+
+describe("a re-accepted booking has an active engagement again (walk 2026-09-28)", () => {
+  const RE = readFileSync(
+    join(__dirname, "..", "..", "..", "..", "supabase", "migrations", "20260928200000_booking_reaccept_restores_engagement_v1.sql"),
+    "utf8",
+  );
+  it("proposed -> accepted restores the engagement this booking minted, unless another is active", () => {
+    expect(RE).toMatch(/elsif old\.status = 'proposed' and new\.status = 'accepted' then/);
+    expect(RE).toMatch(/set status = 'active', ended_at = null, ended_by = null/);
+    expect(RE).toMatch(/where ce\.source_booking_id = new\.id\s+and ce\.status = 'ended'/);
+    expect(RE).toMatch(/o\.status = 'active'\);/);
+  });
+  it("the 'terms changed' line is only for the LATEST move into proposed", () => {
+    const src = readFileSync(join(__dirname, "..", "booking", "booking-actions.ts"), "utf8");
+    expect(src).toMatch(/\.eq\("to_status", "proposed"\)/);
+    expect(src).toMatch(/seen\.add\(e\.booking_request_id\);\s+if \(!e\.previous_terms\) continue;/);
+  });
+});
