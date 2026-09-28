@@ -141,6 +141,19 @@ const DIARY_DAY_LIMIT = 7;
 /** Worker "Mano dienoraštis" — the closed self-declare loop (M1). Logs work
  *  against an engagement context; entries stay private (visibility 'closed')
  *  until a manager confirms them (§13). */
+/**
+ * The link to the recorder. It KEEPS the day the person picked on the
+ * calendar (`?date=`), so "record on this day" records on that day and the
+ * readback never falls back to today (owner walk 2026-09-28: 27 → 28).
+ */
+function journalComposerHref(selectedDate: string | null, full: boolean): string {
+  const q = new URLSearchParams();
+  if (full) q.set("compose", "full");
+  if (selectedDate) q.set("date", selectedDate);
+  const qs = q.toString();
+  return `/dashboard/journal${qs ? `?${qs}` : ""}#journal-composer`;
+}
+
 export default async function JournalPage({
   params,
   searchParams,
@@ -1168,7 +1181,8 @@ export default async function JournalPage({
         ) : composeFull ? (
           <div className="flex flex-col gap-2" data-testid="journal-compose-full">
             <JournalEntryComposer
-              key="new"
+              key={selectedDate ?? "new"}
+              defaultWorkDate={selectedDate}
               engagements={engagements}
               contextResolution={contextResolution}
               directions={directions}
@@ -1176,7 +1190,7 @@ export default async function JournalPage({
               templates={journalTemplates}
             />
             <Link
-              href={"/dashboard/journal#journal-composer" as "/dashboard"}
+              href={journalComposerHref(selectedDate, false) as "/dashboard"}
               className="inline-flex min-h-11 items-center self-start text-support font-medium text-brand-blue underline-offset-4 hover:underline"
               data-testid="journal-compose-full-back"
             >
@@ -1185,8 +1199,11 @@ export default async function JournalPage({
           </div>
         ) : (
           <JournalQuickRecord
+            key={selectedDate ?? "today"}
             locale={locale}
             labels={workLogLabels}
+            selectedDay={selectedDate}
+            selectedDayLabel={selectedDate ? formatUtcDate(selectedDate, locale) : null}
             otherDoors={
               <p
                 className="flex flex-wrap items-center gap-x-4 gap-y-1 text-meta text-text-muted"
@@ -1211,7 +1228,7 @@ export default async function JournalPage({
                   {t("logViaVoiceCta")} →
                 </Link>
                 <Link
-                  href={"/dashboard/journal?compose=full#journal-composer" as "/dashboard"}
+                  href={journalComposerHref(selectedDate, true) as "/dashboard"}
                   className="inline-flex min-h-11 items-center font-medium text-brand-blue hover:underline"
                   data-testid="journal-compose-full-link"
                 >
@@ -1352,7 +1369,7 @@ export default async function JournalPage({
               {formatUtcDate(selectedDate, locale)}
             </span>
             <Link
-              href={"/dashboard/journal#journal-composer" as "/dashboard"}
+              href={journalComposerHref(selectedDate, false) as "/dashboard"}
               data-testid="journal-day-record"
               className="inline-flex min-h-11 items-center rounded-md border border-brand-blue/40 px-2.5 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
             >
@@ -1460,7 +1477,7 @@ export default async function JournalPage({
               {diaryScope === "day" ? t("dayNav.dayEmpty") : t("dayNav.periodEmpty")}
             </p>
             <Link
-              href={"/dashboard/journal#journal-composer" as "/dashboard"}
+              href={journalComposerHref(selectedDate, false) as "/dashboard"}
               className="self-start text-support font-medium text-brand-blue underline-offset-4 hover:underline"
               data-testid="journal-day-empty-record"
             >

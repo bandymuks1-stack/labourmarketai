@@ -139,12 +139,21 @@ function shiftIso(iso: string, deltaDays: number): string {
   return `${dt.getUTCFullYear()}-${pad2(dt.getUTCMonth() + 1)}-${pad2(dt.getUTCDate())}`;
 }
 
-export function extractWorkLog(text: string, today: string): WorkLogParse {
+/**
+ * `defaultDay` is the day the person already chose (the journal calendar's
+ * selected day). It is used ONLY when the sentence names no day of its own;
+ * "vakar"/"šiandien" stay relative to the real `today`. Omitted → `today`.
+ */
+export function extractWorkLog(
+  text: string,
+  today: string,
+  defaultDay: string = today,
+): WorkLogParse {
   const raw = (text ?? "").trim();
   const q = raw.toLowerCase();
 
   // ── date ────────────────────────────────────────────────────────────────
-  let date = today;
+  let date = defaultDay;
   let dateSignal = false;
   const iso = raw.match(ISO_RE);
   if (iso) {

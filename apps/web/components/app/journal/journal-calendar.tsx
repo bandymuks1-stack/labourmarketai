@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
 import type { ActiveLocale } from "@/lib/i18n/config";
+import { NavLinkPending } from "@/components/app/nav-link-pending";
 import { Link } from "@/lib/i18n/navigation";
 import {
   WEEKDAY_ANCHOR_ISO,
@@ -24,7 +25,8 @@ const REALITY_CLASS = { observed: "text-brand-cyan border-brand-cyan/40" } as co
  * day, and the page below shows exactly that day's records and that day's
  * actions. Quick recording stays where it is, above.
  *
- * WHAT IT IS. Links and text. No client JavaScript, no state, no store: the
+ * WHAT IT IS. Links and text (the only client leaf is the in-flight tap
+ * indicator). No client state, no store: the
  * selected day, the scale and the anchored period all live in the URL
  * (`?date=`, `?cal=`, `?month=`), so a day is shareable, survives a reload
  * and works with JS still loading. Every figure in a cell is the journal's
@@ -251,6 +253,11 @@ export async function JournalCalendar({
                       : "border-transparent text-text-secondary hover:border-ink-500"
               } ${cell.isToday && !cell.isSelected ? "ring-1 ring-inset ring-ink-500" : ""}`}
             >
+              {/* The tap is acknowledged at once: the day re-reads on the
+                  server, and until it answers the cell says so (owner walk
+                  2026-09-28 — "the click seemed dead"). Honest: shown only
+                  while that navigation is actually in flight. */}
+              <NavLinkPending className="absolute right-1 top-1 h-2.5 w-2.5 text-brand-blue" />
               <span aria-hidden>{cell.dayOfMonth}</span>
               {/* WHAT THE DAY HOLDS, on the date itself: the recorded HOURS
                   when the day carries time, and the confirmation STATE as the

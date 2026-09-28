@@ -869,6 +869,7 @@
     "hint": "Jedno zdanie: co zrobiłeś, gdzie i jak długo. Zdjęcie jest opcjonalne i dodaje się je przed zapisaniem.",
     "placeholder": "np. płytkowanie 6 godz. na budowie w Kownie",
     "understand": "Odczytaj z powrotem",
+    "forDay": "Dzień: {day}",
     "startOver": "Zacznij od nowa",
     "detailed": "Szczegółowo (pełny formularz)",
     "detailedBack": "Powrót do prostego wpisu"
