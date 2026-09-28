@@ -8351,7 +8351,7 @@
     "request": {
       "button": "Request to communicate",
       "opening": "Opening…",
-      "opened": "Conversation opened — waiting for the worker's reply.",
+      "opened": "Conversation open — write the worker a message.",
       "view": "Open conversation",
       "error": "Couldn't open the conversation. Please try again.",
       "limitReached": "Daily limit for new conversations reached. Try again tomorrow."

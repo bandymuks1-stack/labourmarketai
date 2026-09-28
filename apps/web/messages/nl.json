@@ -8351,7 +8351,7 @@
     "request": {
       "button": "Communicatie aanvragen",
       "opening": "Openen…",
-      "opened": "Gesprek geopend — wachten op het antwoord van de werknemer.",
+      "opened": "Gesprek geopend — stuur de werknemer een bericht.",
       "view": "Gesprek openen",
       "error": "Kon het gesprek niet openen. Probeer het opnieuw.",
       "limitReached": "Daglimiet voor nieuwe gesprekken bereikt. Probeer het morgen opnieuw."

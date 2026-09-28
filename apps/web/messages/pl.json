@@ -8351,7 +8351,7 @@
     "request": {
       "button": "Poproś o kontakt",
       "opening": "Otwieranie…",
-      "opened": "Rozmowa otwarta — czeka na odpowiedź pracownika.",
+      "opened": "Rozmowa otwarta — napisz wiadomość do pracownika.",
       "view": "Otwórz rozmowę",
       "error": "Nie udało się otworzyć rozmowy. Spróbuj ponownie.",
       "limitReached": "Osiągnięto dzienny limit nowych rozmów. Spróbuj ponownie jutro."
