@@ -54,6 +54,11 @@ describe("the journal page hands the picked day to the recorder", () => {
     expect(recorder).not.toMatch(/extractWorkLog\(text, personCalendarDay\(\)\)/);
   });
 
+  it("a picked past day is named in the question — never 'Ką šiandien dirbai?' over another day", () => {
+    expect(recorder).toMatch(/const heading = selectedDayLabel\s*\?\s*t\("whatOnDay", \{ day: selectedDayLabel \}\)/);
+    expect(page).toMatch(/selectedDate && selectedDate !== todayIsoKey\s*\?\s*formatUtcDate\(selectedDate, locale\)/);
+  });
+
   it("the full form starts a NEW record on the picked day", () => {
     expect(page).toMatch(/defaultWorkDate=\{selectedDate\}/);
     expect(composer).toMatch(/editingEntry\?\.workDate \?\? defaultWorkDate \?\? today/);

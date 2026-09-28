@@ -869,7 +869,7 @@
     "hint": "In één zin: wat je deed, waar en hoe lang. Een foto is optioneel en wordt vóór het opslaan toegevoegd.",
     "placeholder": "bv. 6 u getegeld op de locatie in Kaunas",
     "understand": "Begrijpen",
-    "forDay": "Dag: {day}",
+    "whatOnDay": "Wat deed je op {day}?",
     "startOver": "Opnieuw beginnen",
     "detailed": "Uitgebreid (volledig formulier)",
     "detailedBack": "Terug naar de eenvoudige registratie"

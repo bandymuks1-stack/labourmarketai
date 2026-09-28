@@ -869,7 +869,7 @@
     "hint": "One sentence: what you did, where and for how long. A photo is optional and is added before saving.",
     "placeholder": "e.g. tiled 6 h at the site in Kaunas",
     "understand": "Read it back",
-    "forDay": "Day: {day}",
+    "whatOnDay": "What did you do on {day}?",
     "startOver": "Start over",
     "detailed": "In detail (full form)",
     "detailedBack": "Back to the simple entry"

@@ -869,7 +869,7 @@
     "hint": "In einem Satz: was Sie getan haben, wo und wie lange. Ein Foto ist optional und wird vor dem Speichern hinzugefügt.",
     "placeholder": "z. B. 6 Std. Fliesen verlegt auf der Baustelle in Kaunas",
     "understand": "Verstehen",
-    "forDay": "Tag: {day}",
+    "whatOnDay": "Was hast du am {day} gemacht?",
     "startOver": "Neu schreiben",
     "detailed": "Im Detail (vollständiges Formular)",
     "detailedBack": "Zurück zum einfachen Eintrag"
