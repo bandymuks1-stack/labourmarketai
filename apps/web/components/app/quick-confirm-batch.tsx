@@ -169,7 +169,7 @@ export function QuickConfirmBatch({
                         {e.workerName}
                       </span>
                       <span className="text-meta text-text-muted">
-                        {formatUtcDate(e.createdAt, locale)}
+                        {formatUtcDate(e.workDay ?? e.createdAt, locale)}
                       </span>
                     </div>
                     <p className="mt-0.5 text-meta text-text-secondary">

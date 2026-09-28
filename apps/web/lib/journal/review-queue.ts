@@ -2,6 +2,7 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
+import { resolveWorkDay, type WorkTimeMetricRow } from "@/lib/journal/work-time";
 import {
   WORKER_NAME_FIELDS,
   resolveWorkerName,
@@ -34,6 +35,11 @@ export type QuickQueueEntry = {
   id: string;
   workerName: string;
   createdAt: string;
+  /** The day the work happened — the SAME rule as the journal and the
+   *  calendar (`resolveWorkDay`): the stated `work_date`, else the filing day.
+   *  A reviewer confirms WORK; showing the filing day put the wrong date on
+   *  the card (production walk 2026-09-28). */
+  workDay: string;
   originalText: string;
   /** Deterministic work items recognized from the text — display only. */
   recognizedSlugs: string[];
@@ -129,6 +135,20 @@ export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
     }
   }
 
+  // Stated work days, one bounded read. Unreadable → the filing day, the
+  // same fallback `resolveWorkDay` applies to an entry with no stated day.
+  const workDateRows = new Map<string, WorkTimeMetricRow[]>();
+  const wdRes = await supabase
+    .from("journal_entry_metrics")
+    .select("entry_id, metric_slug, value_text, value_numeric, unit_slug, created_at")
+    .in("entry_id", entryIds)
+    .eq("metric_slug", "work_date");
+  for (const m of (wdRes.data ?? []) as (WorkTimeMetricRow & { entry_id: string })[]) {
+    const list = workDateRows.get(m.entry_id) ?? [];
+    list.push(m);
+    workDateRows.set(m.entry_id, list);
+  }
+
   return entries.map((r) => {
     const workerName = resolveWorkerName(r.workers as WorkerNameRow);
     const depth = recognizeEntryDepth(r.original_text ?? "");
@@ -144,6 +164,7 @@ export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
       id: r.id,
       workerName,
       createdAt: r.created_at,
+      workDay: resolveWorkDay(workDateRows.get(r.id) ?? [], r.created_at),
       originalText: r.original_text ?? "",
       recognizedSlugs: depth.works.map((w) => w.slug),
       skillsToConfirm: scoped.skills,
