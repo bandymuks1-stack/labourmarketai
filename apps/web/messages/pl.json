@@ -8505,7 +8505,11 @@
       "availableFromChip": "Dostępny od {date}",
       "availableFromNote": "Niedostępny na wskazany termin rozpoczęcia — ta osoba podaje późniejszy start. To jej własna data, nie szacunek."
     },
-    "sharedNeed": "Zapotrzebowanie udostępnione przez klienta: {title}"
+    "sharedNeed": "Zapotrzebowanie udostępnione przez klienta: {title}",
+    "agencyPresent": {
+      "note": "Klient udostępnił Ci to zapotrzebowanie. Kandydatów przedstawiasz klientowi z własnej listy pracowników.",
+      "link": "Zaproponuj kandydata"
+    }
   },
   "planBoundary": {
     "title": "Co obejmują płatne plany",

@@ -2403,7 +2403,11 @@
         "unverified": "Pierādījumi: tikai paša deklarēti"
       }
     },
-    "sharedNeed": "Need shared by the client: {title}"
+    "sharedNeed": "Need shared by the client: {title}",
+    "agencyPresent": {
+      "note": "Your client shared this need with you. You present candidates to the client from your own roster.",
+      "link": "Present a candidate"
+    }
   },
   "waze": {
     "open": "Atvērt Waze"

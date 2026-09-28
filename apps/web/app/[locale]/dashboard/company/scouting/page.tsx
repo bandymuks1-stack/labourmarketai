@@ -164,6 +164,13 @@ export default async function CompanyScoutingPage({
     demands[0]?.id ??
     null;
   const result = selected ? await runScouting(selected, requestedFilters) : null;
+  // An AGENCY working on a need its client SHARED (owner decision 2026-09-28
+  // B): it may read the need and see who fits, and it presents candidates from
+  // its OWN roster (partners page). The client-owner actions — contact,
+  // booking, contact-detail ask, shortlist, interest acknowledgement — are
+  // refused server-side for it, so they are not offered here either.
+  const actsForClient =
+    result?.kind === "ok" && !demands.some((d) => d.id === result.demand.id);
   // A need that is not closed takes decisions; a closed one shows history.
   const needOpen = result?.kind === "ok" ? result.demand.status !== "closed" : true;
   // Agency-proposed candidates for THIS demand (the caller owns it; the RPC
@@ -758,6 +765,7 @@ export default async function CompanyScoutingPage({
                   >
                     {tPipe(`stage.${stage}` as never)}
                   </span>
+                  {actsForClient ? null : (
                   <Link
                     href={nextAction.href}
                     className="text-meta font-medium text-brand-blue hover:text-brand-champagne"
@@ -765,6 +773,7 @@ export default async function CompanyScoutingPage({
                   >
                     {tPipe(nextAction.key.replace("candidatePipeline.", "") as never)} →
                   </Link>
+                  )}
                 </div>
 
                 {/* Profile-safe facts (owner-approved fields only). */}
@@ -1060,6 +1069,14 @@ export default async function CompanyScoutingPage({
                     (Step 3A rule 6) + ownership + shortlist, re-checked
                     server-side. When not contactable, only a transparent status
                     shows (no dead/broken button). No booking persistence yet. */}
+                {actsForClient ? (
+                  <p className="text-meta text-text-muted" data-testid={`scout-agency-present-${c.workerId}`}>
+                    {t("agencyPresent.note")}{" "}
+                    <Link href={"/dashboard/company/partners" as "/dashboard"} className="text-brand-blue hover:underline">
+                      {t("agencyPresent.link")} →
+                    </Link>
+                  </p>
+                ) : (
                 <div
                   className="flex flex-col gap-2 rounded-md border border-ink-500/70 bg-ink-800/60 px-2.5 py-2"
                   data-testid={`scout-comms-${c.workerId}`}
@@ -1147,11 +1164,12 @@ export default async function CompanyScoutingPage({
                     </div>
                   ) : null}
                 </div>
+                )}
 
                 {/* Company acknowledgement of a REAL worker interest signal
                     (PR7) — internal record only; never rendered without an
                     actual signal, nothing is sent anywhere. */}
-                {result.interestByWorker[c.workerId] ? (
+                {!actsForClient && result.interestByWorker[c.workerId] ? (
                   <CompanyInterestAck
                     locale={locale}
                     requestId={result.demand.id}
@@ -1172,6 +1190,8 @@ export default async function CompanyScoutingPage({
                   />
                 ) : null}
 
+                {actsForClient ? null : (
+                <>
                 {needOpen ? (
                 <ScoutingShortlistButtons
                   locale={locale}
@@ -1206,6 +1226,8 @@ export default async function CompanyScoutingPage({
                     {shortlistLabels[c.shortlistStatus] ?? c.shortlistStatus}
                   </p>
                 ) : null}
+                </>
+                )}
               </li>
             );
           })}

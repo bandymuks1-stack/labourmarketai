@@ -8505,7 +8505,11 @@
       "availableFromChip": "Beschikbaar vanaf {date}",
       "availableFromNote": "Niet beschikbaar op de door u gevraagde startdatum — deze persoon geeft een latere start op. Hun eigen datum, geen schatting."
     },
-    "sharedNeed": "Door de klant gedeelde behoefte: {title}"
+    "sharedNeed": "Door de klant gedeelde behoefte: {title}",
+    "agencyPresent": {
+      "note": "Uw klant heeft deze behoefte met u gedeeld. U stelt kandidaten voor uit uw eigen bestand.",
+      "link": "Kandidaat voorstellen"
+    }
   },
   "planBoundary": {
     "title": "Wat betaalde plannen omvatten",
