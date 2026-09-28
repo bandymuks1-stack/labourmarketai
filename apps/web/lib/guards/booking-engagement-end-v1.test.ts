@@ -1499,6 +1499,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260928200000_booking_reaccept_restores_engagement_v1.sql",
       // walk 2026-09-28: an agency placement booking carries the need's role.
       "20260928210000_agency_placement_booking_role_v1.sql",
+      // owner decision 2026-09-28 (Option A): agency placement opens a client collaborator context.
+      "20260928220000_placement_opens_client_collaboration_v1.sql",
 ]);
   });
 
