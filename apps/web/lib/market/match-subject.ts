@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { excludeSyntheticFixtures } from "@/lib/qa/synthetic-fixture";
 import {
   sourceToEvidence,
   type EvidenceTier,
@@ -76,8 +77,10 @@ export interface SupplyPool {
  *  states its retrieval basis, so "which workers did we even look at?" always
  *  has an answer. */
 export type SupplyRetrievalInput =
-  /** Plan Stage 1 from this demand (company scouting). */
-  | { readonly need: MatchNeed; readonly budget?: number }
+  /** Plan Stage 1 from this demand (company scouting). `excludeFixtures`
+   *  drops fixture-marked workers (lib/qa/synthetic-fixture.ts) — set for a
+   *  real organization's scouting, off for a synthetic one. */
+  | { readonly need: MatchNeed; readonly budget?: number; readonly excludeFixtures?: boolean }
   /** The caller already knows which workers it wants (admin workbench). */
   | { readonly workerIds: readonly string[]; readonly budget?: number };
 
@@ -526,8 +529,16 @@ export async function buildSupplyCandidates(
     };
   });
 
+  // Test accounts are not candidates for a real organization (production walk
+  // 2026-09-28: every scoutable worker was one). Filtered here, where names
+  // already live, so the scouting layer never handles them; `poolSize` then
+  // counts only what the viewer may see.
+  const shown =
+    "need" in input && input.excludeFixtures
+      ? excludeSyntheticFixtures(candidates, (c) => [c.displayName, c.headline])
+      : candidates;
   return {
-    candidates,
-    retrieval: { ...retrieval, poolSize: candidates.length, unreadableFacts },
+    candidates: shown,
+    retrieval: { ...retrieval, poolSize: shown.length, unreadableFacts },
   };
 }

@@ -13,6 +13,7 @@ import type { NeedSkillSource } from "@/lib/market/need-skills";
 import { buildNeedFromRequestRow } from "@/lib/market/need-from-request";
 import { matchWorkerToNeed, compareMatches } from "@/lib/market/match-v1";
 import { buildSupplyCandidates } from "@/lib/market/match-subject";
+import { isSyntheticFixtureLabel } from "@/lib/qa/synthetic-fixture";
 import type { SupplyRetrievalReport } from "@/lib/market/supply-retrieval";
 import {
   toScoutSafeCandidate,
@@ -281,7 +282,13 @@ export async function runScouting(
   // now planned FROM `need` (skills → profession → country, all index-backed),
   // with a deterministic id-ordered backfill so nobody who was reachable
   // before became unreachable. The ranking below is unchanged.
-  const { candidates: supply, retrieval } = await buildSupplyCandidates(supabase, { need });
+  // Test accounts are not candidates for a real organization; a synthetic
+  // organization may still scout them — that is how the company chain is
+  // proven on the real database (lib/qa/synthetic-fixture.ts).
+  const { candidates: supply, retrieval } = await buildSupplyCandidates(supabase, {
+    need,
+    excludeFixtures: !isSyntheticFixtureLabel(employer.organizationName),
+  });
 
   // Worker-initiated interest signals on THIS demand (owner-scoped read via
   // RLS; table absent pre-apply → empty, the view is simply unchanged).
