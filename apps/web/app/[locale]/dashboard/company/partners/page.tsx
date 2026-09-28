@@ -1,5 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 
+import { readActsAsAgency } from "@/lib/company/agency-capability-read";
 import { Link } from "@/lib/i18n/navigation";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
@@ -94,7 +95,14 @@ export default async function CompanyPartnersPage({
       </div>
     );
   }
-  const isStaffingAgency = companyRow.companyType === "staffing_agency";
+  // The ONE agency rule (lib/company/agency-capability): company type OR a
+  // declared workforce role. A construction company that also supplies
+  // people is BOTH — an agency to its clients and a client of other agencies.
+  const isStaffingAgency = await readActsAsAgency(
+    companyRow.companyType,
+    employerCtx.kind === "ok" ? employerCtx.organizationId : null,
+  );
+  const alsoClient = companyRow.companyType !== "staffing_agency";
   const ownCompany = { id: companyRow.id };
 
   const header = (
@@ -107,6 +115,22 @@ export default async function CompanyPartnersPage({
   );
 
   if (isStaffingAgency) {
+    const dualClient = alsoClient
+      ? await Promise.all([
+          listMyClientBridgeConnections(ownCompany.id),
+          listAgencyDemands(),
+          readClientBridgeLabels(),
+        ])
+      : null;
+    const dualInvites = dualClient?.[0];
+    const dualShares =
+      dualInvites && dualInvites.kind === "ok" && dualInvites.rows.length > 0
+        ? (localizeTitles(
+            await listSharedRequestsByClient(
+              dualInvites.rows.filter((r) => r.status === "active").map((r) => r.id),
+            ),
+          ) as Awaited<ReturnType<typeof listSharedRequestsByClient>>)
+        : null;
     const [
       agencyClientsState,
       agencyDemandsState,
@@ -207,6 +231,27 @@ export default async function CompanyPartnersPage({
             locale={locale}
           />
         </div>
+        {/* The same organization as a CLIENT of other agencies — shown only
+            when such a connection exists. */}
+        {dualClient && dualInvites && dualInvites.kind === "ok" && dualInvites.rows.length > 0 && dualShares ? (
+          <div id="company-partners-bridge" className="scroll-mt-20">
+            <ClientAgencyBridgeSection
+              invites={dualInvites}
+              clientCompanyId={ownCompany.id}
+              demands={
+                dualClient[1].kind === "ok"
+                  ? dualClient[1].rows.map((d) => ({
+                      id: d.id,
+                      title: resolveDemandTitle(d.title, syntheticTitle),
+                    }))
+                  : []
+              }
+              shared={dualShares}
+              labels={dualClient[2]}
+              locale={locale}
+            />
+          </div>
+        ) : null}
       </div>
     );
   }

@@ -298,7 +298,8 @@ describe("4. the bridge's spine signals are state-derived, mapped and localized"
 
   it("the counts come from the bridge reads, side-gated by the active workspace company", () => {
     expect(read("lib/notifications/spine.ts")).toMatch(/getBridgeSpineCounts\(\)/);
-    expect(READS).toMatch(/companyType === "staffing_agency"/);
+    // side-gated by the ONE agency rule (owner decision 2026-09-28)
+    expect(READS).toMatch(/readActsAsAgency\(company\.row\.companyType, ctx\.organizationId\)/);
     expect(READS).toMatch(/countSharesAwaitingOffer\(shared, progress\)/);
     expect(READS).toMatch(/countPendingConnectionInvites\(invites\)/);
     expect(READS).toMatch(/countOpenCandidateOffersForClient\(company\.row\.id\)/);

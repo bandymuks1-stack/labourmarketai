@@ -24,6 +24,7 @@ import {
 } from "@/lib/agency/bridge-model";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getOwnedCompanyById } from "@/lib/company/company-setup";
+import { readActsAsAgency } from "@/lib/company/agency-capability-read";
 import { AGENCY_CLIENT_PROPOSED_ROLE } from "@/lib/invitations/model";
 import { listMySentInvitations } from "@/lib/invitations/network";
 
@@ -423,7 +424,7 @@ export const getBridgeSpineCounts = cache(async (): Promise<BridgeSpineCounts> =
     if (ctx.kind !== "ok") return ZERO_BRIDGE_SPINE_COUNTS;
     const company = await getOwnedCompanyById(ctx.companyId);
     if (company.kind !== "ok" || !company.row) return ZERO_BRIDGE_SPINE_COUNTS;
-    if (company.row.companyType === "staffing_agency") {
+    if (await readActsAsAgency(company.row.companyType, ctx.organizationId)) {
       const [shared, progress] = await Promise.all([
         listSharedRequestsForAgency(),
         listAgencyOfferProgress(),

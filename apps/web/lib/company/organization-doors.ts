@@ -4,6 +4,7 @@ import { cache } from "react";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getAccessibleCompanyById } from "@/lib/company/company-setup";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
+import { actsAsAgency } from "@/lib/company/agency-capability";
 import { listMyClientBridgeConnections } from "@/lib/agency/bridge-read";
 
 /**
@@ -97,12 +98,11 @@ export const loadOrganizationDoors = cache(
     // the employer resolver accepted (owner/admin/manager) opens them — the
     // owner/admin-only read used to leave a manager with no doors at all.
     const company = await getAccessibleCompanyById(ctx.companyId);
-    const isStaffingAgency =
-      company.kind === "ok" && company.row?.companyType === "staffing_agency";
-    const [capabilities, invites] = await Promise.all([
-      readOrganizationCapabilities(ctx.organizationId),
-      isStaffingAgency ? null : listMyClientBridgeConnections(ctx.companyId),
-    ]);
+    const companyType = company.kind === "ok" ? (company.row?.companyType ?? null) : null;
+    const capabilities = await readOrganizationCapabilities(ctx.organizationId);
+    // The ONE agency rule (lib/company/agency-capability): type OR declared role.
+    const isStaffingAgency = actsAsAgency(companyType, capabilities);
+    const invites = isStaffingAgency ? null : await listMyClientBridgeConnections(ctx.companyId);
     const hasEducation = capabilities.includes("training_provider");
     const hasPartners =
       isStaffingAgency ||

@@ -35,6 +35,7 @@
  */
 
 import type { ChatLabels } from "@/components/app/conversation/chat/conversation-chat";
+import { actsAsAgency } from "@/lib/company/agency-capability";
 
 /** Owner ruling 2026-07-29 §D: the greeting offers 1–3 meaningful starts. */
 export const STARTER_CAP = 3;
@@ -213,15 +214,6 @@ export function personStarters(
  * its client chain; an education-first institution's is its learners; a plain
  * employer's is its need. After that, round-robin.
  */
-/**
- * Roles that mean "this organization supplies or introduces PEOPLE" — the
- * agency track. Three of the owner's ten roles say it, and reading only one
- * column said it for none of them.
- *
- * Taken from `ORGANIZATION_ROLES`, the single owner-locked list; no second
- * vocabulary is defined here (guard: organization-capabilities.test.ts).
- */
-const AGENCY_ROLES = ["workforce_provider", "talent_provider", "recruitment_partner"] as const;
 
 /**
  * WHICH TRACKS DOES THIS ORGANIZATION ACTUALLY HOLD?
@@ -267,7 +259,12 @@ export function companyTracks(
   // UNION, not replacement. Production carries four `staffing_agency`
   // companies and three `workforce_provider` organizations; reading either
   // source alone erases a real agency.
-  const hasAgency = signals.staffingAgency || AGENCY_ROLES.some((r) => held.has(r));
+  // The ONE rule (lib/company/agency-capability) — the same one the chat, the
+  // partners page and the agency RPCs apply.
+  const hasAgency = actsAsAgency(
+    signals.staffingAgency ? "staffing_agency" : null,
+    signals.capabilities,
+  );
 
   const primary: CapabilityTrack = hasAgency
     ? "agency"

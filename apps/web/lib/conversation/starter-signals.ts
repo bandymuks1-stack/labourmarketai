@@ -1,6 +1,7 @@
 import "server-only";
 
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
+import { actsAsAgency } from "@/lib/company/agency-capability";
 import { createClient } from "@/lib/supabase/server";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getAccessibleCompanyById } from "@/lib/company/company-setup";
@@ -290,7 +291,9 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
       facts,
       learnerLinked: false,
     },
-    agencyWorkspace: staffingAgency,
+    // The SAME rule Home's agency track uses (lib/company/agency-capability):
+    // a declared workforce role opens the agency workspace too.
+    agencyWorkspace: actsAsAgency(staffingAgency ? "staffing_agency" : null, held),
     educationWorkspace: educationFirst,
     organizationName,
     organizationId,

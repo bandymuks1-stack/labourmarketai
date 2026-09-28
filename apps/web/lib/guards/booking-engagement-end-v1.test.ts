@@ -1487,6 +1487,12 @@ describe("the migration set is exactly what this slice declared", () => {
       // refuses first. DRAFT + needs-human-gate — NOT APPLIED until the owner
       // approves this exact diff.
       "20260928140000_booking_accepted_not_rewritten_v1.sql",
+      // 2026-09-28 — owner-approved RED: one agency rule (type OR declared
+      // workforce role) in the two agency definers; and the reopened-booking
+      // lifecycle edges (engagement ended when changed terms are not accepted;
+      // expiry measured from the latest proposal).
+      "20260928180000_agency_capability_one_rule_v1.sql",
+      "20260928181000_booking_reopen_lifecycle_edges_v1.sql",
 ]);
   });
 
