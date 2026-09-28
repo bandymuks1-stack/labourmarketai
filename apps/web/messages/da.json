@@ -2728,7 +2728,8 @@
     "propose": {
       "modeNote": "Dette er et bookingforslag med datoer — arbejdstageren bekræfter eller afviser det. Intet er booket, før arbejdstageren accepterer.",
       "againModeNote": "Dette genåbner det samme forslag til den samme arbejdstager med nye datoer — arbejdstageren beslutter igen. Intet er booket, før arbejdstageren accepterer.",
-      "afterSent": "Arbejdstageren har modtaget dit forslag og vil acceptere eller afvise det. Du ser svaret under Bookinger; indtil da kan du trække forslaget tilbage."
+      "afterSent": "Arbejdstageren har modtaget dit forslag og vil acceptere eller afvise det. Du ser svaret under Bookinger; indtil da kan du trække forslaget tilbage.",
+      "alreadyAccepted": "Medarbejderen har allerede accepteret dette forslag — aftalte vilkår overskrives ikke her. Aftal ændringer i samtalen."
     },
     "reason": {
       "optionalTitle": "Årsag (valgfrit)",

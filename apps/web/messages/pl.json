@@ -8656,7 +8656,8 @@
       "modeNote": "To propozycja rezerwacji z datami — pracownik ją potwierdza lub odrzuca. Nic nie jest zarezerwowane, dopóki pracownik nie zaakceptuje.",
       "againModeNote": "To ponownie otwiera tę samą propozycję dla tego samego pracownika z nowymi datami — pracownik podejmuje decyzję ponownie. Nic nie jest zarezerwowane, dopóki nie zaakceptuje.",
       "afterSent": "Pracownik otrzymał Twoją propozycję i zaakceptuje ją lub odrzuci. Odpowiedź zobaczysz w sekcji Rezerwacje, a do tego czasu możesz wycofać propozycję.",
-      "rateLimited": "Osiągnięto limit propozycji rezerwacji (10 otwartych, 30 dziennie). Spróbuj ponownie później."
+      "rateLimited": "Osiągnięto limit propozycji rezerwacji (10 otwartych, 30 dziennie). Spróbuj ponownie później.",
+      "alreadyAccepted": "Pracownik już przyjął tę propozycję — uzgodnione warunki nie są tu nadpisywane. Zmiany ustalcie w rozmowie."
     },
     "reason": {
       "optionalTitle": "Powód (opcjonalnie)",

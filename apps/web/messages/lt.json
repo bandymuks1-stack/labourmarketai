@@ -8656,7 +8656,8 @@
       "modeNote": "Tai rezervacijos pasiūlymas su datomis — darbuotojas jį patvirtina arba atmeta. Niekas nerezervuota, kol darbuotojas nepriima.",
       "againModeNote": "Tai iš naujo atveria tą patį pasiūlymą tam pačiam darbuotojui su naujomis datomis — darbuotojas sprendžia iš naujo. Niekas nerezervuota, kol darbuotojas nepriima.",
       "afterSent": "Darbuotojas gavo tavo pasiūlymą ir jį priims arba atmes. Atsakymą matysi skiltyje „Rezervacijos“; iki tol pasiūlymą gali atšaukti.",
-      "rateLimited": "Pasiektas rezervacijos pasiūlymų limitas (10 atvirų, 30 per dieną). Bandykite vėliau."
+      "rateLimited": "Pasiektas rezervacijos pasiūlymų limitas (10 atvirų, 30 per dieną). Bandykite vėliau.",
+      "alreadyAccepted": "Darbuotojas šį pasiūlymą jau priėmė — sutartos sąlygos čia neperrašomos. Pakeitimus aptarkite pokalbyje."
     },
     "reason": {
       "optionalTitle": "Priežastis (nebūtina)",
