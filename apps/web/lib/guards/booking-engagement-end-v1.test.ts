@@ -1501,6 +1501,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260928210000_agency_placement_booking_role_v1.sql",
       // owner decision 2026-09-28 (Option A): agency placement opens a client collaborator context.
       "20260928220000_placement_opens_client_collaboration_v1.sql",
+      // owner 2026-09-28: the last assignment's end closes the placement's client collaboration.
+      "20260928230000_placement_end_closes_client_collaboration_v1.sql",
 ]);
   });
 
