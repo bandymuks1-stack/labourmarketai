@@ -44,6 +44,7 @@ export const CANONICAL_APP_RPCS = [
   "assign_company_worker_role",
   "assign_worker_to_project",
   "batch_review_exceptions",
+  "booking_proposer_names_v1",
   "cancel_worker_absence_v1",
   "close_stale_learning_review_items",
   "company_worker_engagement_links",

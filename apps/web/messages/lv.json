@@ -2760,7 +2760,11 @@
       "save": "[EN] Save new dates",
       "saved": "[EN] Dates updated. The worker sees the new dates.",
       "notChanged": "[EN] The dates weren't changed. Please try again later.",
-      "cancel": "[EN] Cancel"
+      "cancel": "[EN] Cancel",
+      "openAccepted": "Mainīt datumus (darbinieks lems vēlreiz)",
+      "reopenHint": "Darbinieks jau piekrita. Jauni datumi atkal atver piedāvājumu: darbiniekam jāpiekrīt vēlreiz. Iepriekšējā vienošanās paliek vēsturē.",
+      "reopened": "Jaunie datumi nosūtīti. Darbiniekam jāpiekrīt vēlreiz.",
+      "sameDates": "Šie ir saskaņotie datumi — nekas nemainījās."
     },
     "deadline": {
       "open": "[EN] Set a respond-by date",
@@ -2775,7 +2779,9 @@
       "acceptAnyway": "Zinu, ka pārklājas — tomēr pieņemt",
       "stillStands": "Pieņemšana pārklāšanos nenovērsīs. Abas rezervācijas saglabā savus datumus, konflikts paliek redzams kalendārā, un jūsu lēmums tiek reģistrēts.",
       "acknowledged": "Pieņemts ar zināmu pārklāšanos. Joprojām pārklājas rezervācijas: {count}. Nekas nav atcelts vai paslēpts, un jūsu lēmums ir reģistrēts."
-    }
+    },
+    "proposedBy": "Piedāvā: {name}",
+    "termsChanged": "Uzņēmums mainīja nosacījumus. Jūs bijāt piekritis: {previous}. Izlemiet par jaunajiem datumiem vēlreiz."
   },
   "marketplace": {
     "requestAgain": "[EN] Request again",

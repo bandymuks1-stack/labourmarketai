@@ -1062,7 +1062,12 @@ describe("NO new DB migration in this PR", () => {
     //   language of that self-declared profession; additive, GREEN by the
     //   static gate, owner-approved by procedure and APPLIED 2026-09-27,
     //   ledger 20260927062927). Not this read layer's file. RECOUNTED: 311.
-    expect(count).toBeLessThanOrEqual(311);
+    // Bumped 311 -> 312 for
+    //   20260928140000_booking_accepted_not_rewritten_v1 (propose_booking_request
+    //   refuses to rewrite an ACCEPTED booking; RED by rule — redefined
+    //   definer — DRAFT, NOT APPLIED, owner-gated). Not this read layer's
+    //   file. RECOUNTED: 312.
+    expect(count).toBeLessThanOrEqual(312);
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

@@ -8693,7 +8693,11 @@
       "save": "Zapisz nowe daty",
       "saved": "Daty zaktualizowane. Pracownik widzi nowe daty.",
       "notChanged": "Daty nie zostały zmienione. Spróbuj ponownie później.",
-      "cancel": "Anuluj"
+      "cancel": "Anuluj",
+      "openAccepted": "Zmień daty (pracownik zdecyduje ponownie)",
+      "reopenHint": "Pracownik już zaakceptował. Nowe daty ponownie otwierają propozycję: pracownik musi zaakceptować ją ponownie. Poprzednie uzgodnienie zostaje w historii.",
+      "reopened": "Nowe daty wysłane. Pracownik musi zaakceptować ponownie.",
+      "sameDates": "To są już uzgodnione daty — nic się nie zmieniło."
     },
     "deadline": {
       "open": "Ustaw termin odpowiedzi",
@@ -8708,7 +8712,9 @@
       "acceptAnyway": "Wiem, że się pokrywa — mimo to akceptuję",
       "stillStands": "Akceptacja nie usunie nakładania się. Obie rezerwacje zachowują swoje daty, konflikt pozostaje widoczny w kalendarzu, a Twoja decyzja zostaje zapisana.",
       "acknowledged": "Zaakceptowano ze znanym nakładaniem. Nadal koliduje rezerwacji: {count}. Nic nie zostało anulowane ani ukryte, a Twoja decyzja jest zapisana."
-    }
+    },
+    "proposedBy": "Proponuje: {name}",
+    "termsChanged": "Firma zmieniła warunki. Wcześniej zgodziłeś się na: {previous}. Zdecyduj ponownie co do nowych dat."
   },
   "adminReadiness": {
     "eyebrow": "GOTOWOŚĆ PŁATNOŚCI",

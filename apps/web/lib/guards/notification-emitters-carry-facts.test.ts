@@ -297,9 +297,11 @@ describe("every write path resolves its facts under the CALLER's session", () =>
     expect(facts).toContain('.from("booking_requests")');
     expect(facts).toContain('.select("owner_id, worker_id, start_date, location_country")');
     expect(src).not.toMatch(/createAdminClient|supabase\/admin/);
-    // propose ×1, declined ×3, accepted ×3, withdrawn ×3 — every lifecycle
-    // success return rings its bell through the one facts-carrying helper.
-    expect(src.match(/notifyBooking\(supabase, /g) ?? []).toHaveLength(10);
+    // propose ×1, declined ×3, accepted ×3, withdrawn ×3, and the accepted
+    // booking reopened by a date change ×1 (the worker is asked again) —
+    // every lifecycle success return rings its bell through the one
+    // facts-carrying helper.
+    expect(src.match(/notifyBooking\(supabase, /g) ?? []).toHaveLength(11);
     // The two engagement-minting accepts ring BOTH bells from one read.
     expect(
       src.match(/notifyBooking\(supabase, input\.bookingId, "booking_accepted", engagement === "created"\)/g) ?? [],

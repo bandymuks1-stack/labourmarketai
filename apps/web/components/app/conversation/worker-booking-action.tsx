@@ -15,6 +15,10 @@ export type BookingOffer = {
   bookingId: string;
   title: string; // roleText (may be empty → generic offer label used)
   subtitle: string | null; // period line
+  /** WHO proposes — "Siūlo: <organization>" (owner decision 2026-09-28). */
+  proposerLine?: string | null;
+  /** Set when the company changed an accepted booking: what was agreed before. */
+  changedLine?: string | null;
 };
 
 export type BookingActionLabels = {
@@ -76,12 +80,16 @@ export function WorkerBookingAction({
   locale,
   title,
   subtitle,
+  proposerLine = null,
+  changedLine = null,
   labels,
 }: {
   bookingId: string;
   locale: string;
   title: string; // offer heading (company/role)
   subtitle: string | null; // period line
+  proposerLine?: string | null;
+  changedLine?: string | null;
   labels: BookingActionLabels;
 }) {
   const router = useRouter();
@@ -220,6 +228,16 @@ export function WorkerBookingAction({
             {subtitle}
           </span>
         )}
+        {proposerLine ? (
+          <span className="text-meta text-text-secondary" data-testid="conversation-booking-proposer">
+            {proposerLine}
+          </span>
+        ) : null}
+        {changedLine ? (
+          <span className="text-meta text-state-warning" data-testid="conversation-booking-terms-changed">
+            {changedLine}
+          </span>
+        ) : null}
       </div>
 
       {phase.kind === "confirm" ? (

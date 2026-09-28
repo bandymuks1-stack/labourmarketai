@@ -64,6 +64,11 @@ export type BookingActionResult =
   | {
       kind: "ok";
       status?: string;
+      /** A change of dates on an ACCEPTED booking reopened it: the worker
+       *  decides again on the new terms (owner decision 2026-09-28). */
+      reopened?: boolean;
+      /** The dates asked for were already the accepted ones — nothing changed. */
+      unchanged?: boolean;
       /** Reason-capture outcome tag (P2-PR6). Present ONLY when the caller
        *  chose a reason: true = the v2 RPC stored it; false = the v2 RPC is
        *  not installed yet, the v1 RPC completed the action WITHOUT the
@@ -525,10 +530,10 @@ export async function withdrawBookingAction(input: {
 }
 
 /**
- * Change the dates of an OPEN outgoing proposal (P2-PR6). Owner-only and
- * proposed-only — both enforced server-side by the owner-gated
- * reschedule_booking_proposal_v1 RPC; an ACCEPTED booking is NEVER mutated in
- * place. Until the owner applies the function, the call classifies as
+ * Change the dates of an outgoing proposal (P2-PR6). Owner-only, enforced by
+ * reschedule_booking_proposal_v1. An ACCEPTED booking never changes while
+ * staying accepted: the RPC reopens it ("reopened"), keeping the previous
+ * accepted terms in the event log, and the worker decides again. Until the owner applies the function, the call classifies as
  * `needs-migration` and the UI says honestly that the dates were not changed.
  */
 export async function rescheduleBookingAction(input: {
@@ -548,14 +553,21 @@ export async function rescheduleBookingAction(input: {
   }
 
   const note = (input.note ?? "").trim().slice(0, 500);
-  const { error } = await asAny(supabase).rpc("reschedule_booking_proposal_v1", {
+  const { data, error } = await asAny(supabase).rpc("reschedule_booking_proposal_v1", {
     p_booking_id: input.bookingId,
     p_start_date: input.startDate,
     p_end_date: input.endDate?.trim() ? input.endDate : null,
     p_note: note.length > 0 ? note : null,
   });
   if (error) return classify(error);
+  if (data === "unchanged") return { kind: "ok", status: "accepted", unchanged: true };
   revalidatePath(`/${input.locale}/dashboard/bookings`);
+  if (data === "reopened") {
+    // The accepted terms changed: the worker is asked again, exactly like a
+    // new proposal. AWAITED — survives the serverless freeze; never throws.
+    await notifyBooking(supabase, input.bookingId, "booking_proposed");
+    return { kind: "ok", status: "proposed", reopened: true };
+  }
   return { kind: "ok", status: "proposed" };
 }
 
@@ -611,6 +623,13 @@ export interface BookingRow {
   /** Owner-set respond-by date (lifecycle v2). Null while the owner-gated
    *  column is not applied yet OR simply unset — both render nothing. */
   responseDeadlineDate: string | null;
+  /** WHO proposes: the booking's organization's public name (owner decision
+   *  2026-09-28), read through booking_proposer_names_v1 for parties only.
+   *  Null while the read is not installed or the booking has no organization. */
+  proposerName: string | null;
+  /** The ACCEPTED terms this open proposal replaced — set only while the
+   *  worker is asked again after the company changed an accepted booking. */
+  changedFrom: { startDate: string | null; expectedEndDate: string | null } | null;
 }
 
 export type BookingsListResult =
@@ -702,11 +721,62 @@ async function readMyBookings(): Promise<BookingsListResult> {
       updatedAt: r.updated_at ?? r.created_at,
       responseDeadlineDate:
         typeof r.response_deadline_date === "string" ? r.response_deadline_date : null,
+      proposerName: null,
+      changedFrom: null,
     };
     if (row.isOwner) outgoing.push(row);
     else incoming.push(row);
   }
+  await attachProposerAndChangedTerms(supabase, incoming);
   return { kind: "ok", incoming, outgoing };
+}
+
+/**
+ * The two facts a worker needs to decide on an incoming proposal that the
+ * row alone cannot carry: WHO proposes (the organization's public name) and,
+ * after the company changed an accepted booking, WHAT they had agreed to
+ * before. Both reads are tolerant: absent function / column → the row simply
+ * renders without them, never an error.
+ */
+async function attachProposerAndChangedTerms(
+  supabase: SupabaseClient,
+  incoming: BookingRow[],
+): Promise<void> {
+  if (incoming.length === 0) return;
+  const ids = incoming.slice(0, 50).map((r) => r.id);
+  const reopenedIds = incoming.filter((r) => r.status === "proposed").map((r) => r.id);
+  const [names, events] = await Promise.all([
+    asAny(supabase).rpc("booking_proposer_names_v1", { p_booking_ids: ids }),
+    reopenedIds.length > 0
+      ? asAny(supabase)
+          .from("booking_request_events")
+          .select("booking_request_id, previous_terms, created_at")
+          .in("booking_request_id", reopenedIds)
+          .not("previous_terms", "is", null)
+          .order("created_at", { ascending: false })
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+  const byId = new Map(incoming.map((r) => [r.id, r]));
+  if (!names.error) {
+    for (const n of (names.data ?? []) as { booking_id: string; organization_name: string | null }[]) {
+      const row = byId.get(n.booking_id);
+      if (row && n.organization_name) row.proposerName = n.organization_name;
+    }
+  }
+  if (!events.error) {
+    for (const e of (events.data ?? []) as {
+      booking_request_id: string;
+      previous_terms: { start_date?: string | null; expected_end_date?: string | null } | null;
+    }[]) {
+      const row = byId.get(e.booking_request_id);
+      // newest first: the first event per booking is the terms it replaced
+      if (!row || row.changedFrom || !e.previous_terms) continue;
+      row.changedFrom = {
+        startDate: e.previous_terms.start_date ?? null,
+        expectedEndDate: e.previous_terms.expected_end_date ?? null,
+      };
+    }
+  }
 }
 
 /**

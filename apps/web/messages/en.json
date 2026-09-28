@@ -8693,7 +8693,11 @@
       "save": "Save new dates",
       "saved": "Dates updated. The worker sees the new dates.",
       "notChanged": "The dates weren't changed. Please try again later.",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "openAccepted": "Change dates (worker decides again)",
+      "reopenHint": "The worker already accepted. New dates reopen the proposal: the worker must accept again. The previous agreement stays in the history.",
+      "reopened": "New dates sent. The worker must accept again.",
+      "sameDates": "These are the accepted dates — nothing changed."
     },
     "deadline": {
       "open": "Set a respond-by date",
@@ -8708,7 +8712,9 @@
       "acceptAnyway": "I know it overlaps — accept anyway",
       "stillStands": "Accepting will not remove the overlap. Both bookings keep their dates, the clash stays visible in your calendar, and it is recorded that you chose it.",
       "acknowledged": "Accepted with a known overlap. {count} existing booking(s) still clash — nothing was cancelled or hidden, and your decision is on file."
-    }
+    },
+    "proposedBy": "Proposed by {name}",
+    "termsChanged": "The company changed the terms. You had agreed to: {previous}. Decide again on the new dates."
   },
   "adminReadiness": {
     "eyebrow": "PAYMENT READINESS",

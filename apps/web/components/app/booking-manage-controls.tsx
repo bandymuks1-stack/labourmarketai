@@ -12,22 +12,26 @@ import {
  * Owner-side lifecycle controls for an OPEN outgoing proposal (P2-PR6):
  * "Change dates" (reschedule_booking_proposal_v1) and "Respond-by date"
  * (set_booking_response_deadline_v1). Mounted ONLY under
- * canRescheduleProposal(row.status) — i.e. `proposed` rows — an ACCEPTED
- * booking is never mutated in place, so accepted rows never see these
- * controls. Both RPCs are owner-gated (lifecycle v2, not applied yet):
- * until then each action degrades honestly — the row is untouched and one
+ * canRescheduleProposal(row.status) — `proposed` and `accepted` rows. On an
+ * ACCEPTED booking (`reopensDecision`) only "change dates" is offered, and
+ * saving it reopens the worker's decision: the booking never stays accepted
+ * on terms the worker did not see (owner decision 2026-09-28). An absent
+ * RPC degrades honestly — the row is untouched and one
  * calm sentence says the dates / deadline were not changed. Never a fake
  * success, never an error wall.
  */
 export function BookingManageControls({
   locale,
   bookingId,
+  reopensDecision = false,
   startDate,
   expectedEndDate,
   responseDeadlineDate,
 }: {
   locale: string;
   bookingId: string;
+  /** ACCEPTED booking: a date change asks the worker to decide again. */
+  reopensDecision?: boolean;
   startDate: string | null;
   expectedEndDate: string | null;
   responseDeadlineDate: string | null;
@@ -43,6 +47,8 @@ export function BookingManageControls({
   const [notice, setNotice] = useState<
     | "idle"
     | "dates-saved"
+    | "dates-reopened"
+    | "dates-same"
     | "dates-unchanged"
     | "deadline-saved"
     | "deadline-unsaved"
@@ -59,7 +65,13 @@ export function BookingManageControls({
         note: note || null,
       });
       if (res.kind === "ok") {
-        setNotice("dates-saved");
+        setNotice(
+          res.reopened
+            ? "dates-reopened"
+            : res.unchanged
+              ? "dates-same"
+              : "dates-saved",
+        );
         setPanel("none");
         router.refresh();
       } else if (res.kind === "needs-migration") {
@@ -74,7 +86,11 @@ export function BookingManageControls({
 
   function saveDeadline() {
     startTransition(async () => {
-      const res = await setBookingDeadlineAction({ locale, bookingId, deadline });
+      const res = await setBookingDeadlineAction({
+        locale,
+        bookingId,
+        deadline,
+      });
       if (res.kind === "ok") {
         setNotice("deadline-saved");
         setPanel("none");
@@ -94,7 +110,10 @@ export function BookingManageControls({
     "inline-flex min-h-11 w-full items-center justify-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto";
 
   return (
-    <div className="flex w-full flex-col gap-1.5" data-testid="booking-manage-controls">
+    <div
+      className="flex w-full flex-col gap-1.5"
+      data-testid="booking-manage-controls"
+    >
       <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
         <button
           type="button"
@@ -103,17 +122,21 @@ export function BookingManageControls({
           data-testid="booking-reschedule-open"
           className={buttonCls}
         >
-          {t("reschedule.open")}
+          {reopensDecision
+            ? t("reschedule.openAccepted")
+            : t("reschedule.open")}
         </button>
-        <button
-          type="button"
-          disabled={pending}
-          onClick={() => setPanel(panel === "deadline" ? "none" : "deadline")}
-          data-testid="booking-deadline-open"
-          className={buttonCls}
-        >
-          {t("deadline.open")}
-        </button>
+        {reopensDecision ? null : (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => setPanel(panel === "deadline" ? "none" : "deadline")}
+            data-testid="booking-deadline-open"
+            className={buttonCls}
+          >
+            {t("deadline.open")}
+          </button>
+        )}
       </div>
 
       {panel === "dates" ? (
@@ -121,6 +144,14 @@ export function BookingManageControls({
           className="flex w-full flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/60 p-2.5"
           data-testid="booking-reschedule-form"
         >
+          {reopensDecision ? (
+            <p
+              className="text-meta text-state-warning"
+              data-testid="booking-reschedule-reopen-hint"
+            >
+              {t("reschedule.reopenHint")}
+            </p>
+          ) : null}
           <label className="flex flex-col gap-1 text-meta text-text-muted">
             {t("reschedule.startDate")}
             <input
@@ -205,20 +236,43 @@ export function BookingManageControls({
         </div>
       ) : null}
 
-      {notice === "dates-saved" ? (
-        <span className="text-meta text-state-success">{t("reschedule.saved")}</span>
+      {notice === "dates-reopened" ? (
+        <span
+          className="text-meta text-state-success"
+          data-testid="booking-reschedule-reopened"
+        >
+          {t("reschedule.reopened")}
+        </span>
+      ) : notice === "dates-same" ? (
+        <span className="text-meta text-text-muted">
+          {t("reschedule.sameDates")}
+        </span>
+      ) : notice === "dates-saved" ? (
+        <span className="text-meta text-state-success">
+          {t("reschedule.saved")}
+        </span>
       ) : notice === "dates-unchanged" ? (
-        <span className="text-meta text-text-muted" data-testid="booking-reschedule-unchanged">
+        <span
+          className="text-meta text-text-muted"
+          data-testid="booking-reschedule-unchanged"
+        >
           {t("reschedule.notChanged")}
         </span>
       ) : notice === "deadline-saved" ? (
-        <span className="text-meta text-state-success">{t("deadline.saved")}</span>
+        <span className="text-meta text-state-success">
+          {t("deadline.saved")}
+        </span>
       ) : notice === "deadline-unsaved" ? (
-        <span className="text-meta text-text-muted" data-testid="booking-deadline-unsaved">
+        <span
+          className="text-meta text-text-muted"
+          data-testid="booking-deadline-unsaved"
+        >
           {t("deadline.notSet")}
         </span>
       ) : notice === "error" ? (
-        <span className="text-meta text-state-danger">{t("actions.error")}</span>
+        <span className="text-meta text-state-danger">
+          {t("actions.error")}
+        </span>
       ) : null}
     </div>
   );

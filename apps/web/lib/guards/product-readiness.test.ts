@@ -2697,7 +2697,12 @@ describe("no migration files added by this sprint", () => {
 // annotation; it was owner-gated by procedure and APPLIED 2026-09-27, ledger
 // 20260927062927 — deliberately BEFORE any writer, so no row ever needs a backfill.
 // RECOUNTED: 311.
-const SPRINT_BASELINE = 311;
+// Bumped 311 -> 312 for 20260928140000_booking_accepted_not_rewritten_v1: one
+// guard in the SECURITY DEFINER propose_booking_request so an ACCEPTED booking is
+// not rewritten by proposing again (production walk 2026-09-28). RED by rule
+// (redefined definer), carries @human-gate-approved, ships as a DRAFT and is NOT
+// APPLIED until the owner approves the exact diff. RECOUNTED: 312.
+const SPRINT_BASELINE = 312;
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT

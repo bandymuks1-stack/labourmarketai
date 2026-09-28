@@ -8693,7 +8693,11 @@
       "save": "Nieuwe datums opslaan",
       "saved": "Datums bijgewerkt. De werknemer ziet de nieuwe datums.",
       "notChanged": "De datums zijn niet gewijzigd. Probeer het later opnieuw.",
-      "cancel": "Annuleren"
+      "cancel": "Annuleren",
+      "openAccepted": "Data wijzigen (werknemer beslist opnieuw)",
+      "reopenHint": "De werknemer heeft al geaccepteerd. Nieuwe data heropenen het voorstel: de werknemer moet opnieuw accepteren. De vorige afspraak blijft in de geschiedenis.",
+      "reopened": "Nieuwe data verstuurd. De werknemer moet opnieuw accepteren.",
+      "sameDates": "Dit zijn de geaccepteerde data — er is niets gewijzigd."
     },
     "deadline": {
       "open": "Reactiedatum instellen",
@@ -8708,7 +8712,9 @@
       "acceptAnyway": "Ik weet dat het overlapt — toch accepteren",
       "stillStands": "Accepteren heft de overlap niet op. Beide boekingen houden hun data, het conflict blijft zichtbaar in uw agenda, en uw keuze wordt vastgelegd.",
       "acknowledged": "Geaccepteerd met een bekende overlap. {count} bestaande boeking(en) overlappen nog steeds — er is niets geannuleerd of verborgen, en uw keuze staat geregistreerd."
-    }
+    },
+    "proposedBy": "Voorgesteld door {name}",
+    "termsChanged": "Het bedrijf heeft de voorwaarden gewijzigd. U ging akkoord met: {previous}. Beslis opnieuw over de nieuwe data."
   },
   "adminReadiness": {
     "eyebrow": "BETALINGSGEREEDHEID",
