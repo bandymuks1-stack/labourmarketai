@@ -140,10 +140,31 @@ export async function getOrgMembersData(
     .in("relationship_slug", [...MEMBERSHIP_SLUGS])
     .eq("status", "active");
 
+  // An owner cannot read another person's `profiles` row, so a member's name
+  // came back "—" (production walk 2026-09-28). Fill only those from the
+  // worker rows' `display_name` — what the roster on the same page shows — in
+  // one bounded read, and only when some name is missing.
+  const unnamed = (ecRows ?? [])
+    .filter((r) => profName(r.profiles) === "—" && r.profile_id)
+    .map((r) => r.profile_id as string);
+  const displayByProfile = new Map<string, string>();
+  if (unnamed.length > 0) {
+    const { data: wRows } = await supabase
+      .from("workers")
+      .select("profile_id, display_name")
+      .in("profile_id", unnamed);
+    for (const w of (wRows ?? []) as { profile_id: string | null; display_name: string | null }[]) {
+      const d = w.display_name?.trim();
+      if (w.profile_id && d) displayByProfile.set(w.profile_id, d);
+    }
+  }
   const members: OrgMember[] = (ecRows ?? []).map((r) => ({
     engagementId: r.id as string,
     profileId: (r.profile_id as string | null) ?? null,
-    name: profName(r.profiles),
+    name:
+      profName(r.profiles) === "—"
+        ? (displayByProfile.get(r.profile_id as string) ?? "—")
+        : profName(r.profiles),
     reviewEnabled: r.journal_review_enabled === true,
     role: (r.relationship_slug as string | null) ?? "other",
     isRegisteredOwner:
@@ -158,17 +179,22 @@ export async function getOrgMembersData(
   const linkTable = kind === "company" ? "company_workers" : "agency_workers";
   const { data: linkRows } = await supabase
     .from(linkTable)
-    .select("worker_id, workers(profile_id, profiles(full_name, email))")
+    .select("worker_id, workers(profile_id, display_name, profiles(full_name, email))")
     .eq("status", "active");
   const addable: AddableWorker[] = (linkRows ?? [])
     .map((r) => {
       const w = (Array.isArray(r.workers) ? r.workers[0] : r.workers) as
-        | { profile_id: string | null; profiles: unknown }
+        | { profile_id: string | null; display_name: string | null; profiles: unknown }
         | null;
       const workerId = (r as { worker_id: string | null }).worker_id;
       const profileId = w?.profile_id ?? null;
       if (!workerId || !profileId || memberProfileIds.has(profileId)) return null;
-      return { workerId, name: profName(w?.profiles) };
+      // The worker row's own display name first: an owner cannot read another
+      // person's `profiles` row, so that embed comes back empty and the option
+      // read "—" (production walk 2026-09-28). The roster on the same page
+      // shows this same `display_name`.
+      const display = w?.display_name?.trim();
+      return { workerId, name: display || profName(w?.profiles) };
     })
     .filter((x): x is AddableWorker => x !== null);
 
