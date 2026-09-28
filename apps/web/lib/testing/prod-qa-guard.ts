@@ -48,20 +48,37 @@ export class ProdQaGuardError extends Error {
 }
 
 /**
- * THE ONE ALLOWLISTED SYNTHETIC IDENTITY.
+ * THE ALLOWLISTED SYNTHETIC IDENTITIES.
  *
  * Hard-coded on purpose. If this were an environment variable, the allowlist
  * would be whatever the caller's shell happened to say, which is not an
  * allowlist. Widening it is a code change, in a diff, in a PR — which is
  * exactly the review surface an identity with production access deserves.
  *
- * `+` addressing keeps it unmistakably synthetic and routable to a real
+ * `+` addressing keeps each unmistakably synthetic and routable to a real
  * mailbox the owner controls, without inventing a domain.
+ *
+ * 2026-09-28 (owner decision: production-walk the COMPANY and AGENCY chains
+ * and two-person messaging): the three `+multiw` identities are added back
+ * BESIDE the worker. They were provisioned 2026-08-06 for the closed #1042
+ * and already exist in production marked `app_metadata.qa_synthetic`, named
+ * "(test)", owning only the "QA-SYNTHETIC … (testinis subjektas)"
+ * organizations. A minted session is the account's own ordinary session —
+ * nothing here grants a permission the account does not already have.
  */
 export const PROD_QA_WORKER_EMAIL = "qa.worker+goal3@labourmarket.ai" as const;
+export const PROD_QA_OWNER_EMAIL = "qa.owner+multiw@labourmarket.ai" as const;
+export const PROD_QA_MANAGER_EMAIL = "qa.manager+multiw@labourmarket.ai" as const;
+export const PROD_QA_SECOND_WORKER_EMAIL = "qa.worker+multiw@labourmarket.ai" as const;
 
-/** Every allowlisted synthetic identity. Exactly one, today and by intent. */
-export const PROD_QA_IDENTITIES: readonly string[] = [PROD_QA_WORKER_EMAIL];
+/** Every allowlisted synthetic identity — equality-matched, never by prefix
+ *  or pattern. */
+export const PROD_QA_IDENTITIES: readonly string[] = [
+  PROD_QA_WORKER_EMAIL,
+  PROD_QA_OWNER_EMAIL,
+  PROD_QA_MANAGER_EMAIL,
+  PROD_QA_SECOND_WORKER_EMAIL,
+];
 
 export const PRODUCTION_ORIGIN = `https://${PRODUCTION_PROJECT_REF}.supabase.co`;
 

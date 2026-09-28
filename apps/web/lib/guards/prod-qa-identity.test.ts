@@ -58,14 +58,22 @@ const FORBIDDEN_PROVISIONING_SQL: readonly RegExp[] = [
   /alter\s+table/i,
 ];
 
-describe("exactly one synthetic identity is allowlisted", () => {
-  it("the allowlist has one entry, and it is unmistakably synthetic", () => {
-    expect(PROD_QA_IDENTITIES).toHaveLength(1);
+describe("exactly the synthetic cast is allowlisted", () => {
+  it("the allowlist is exactly these four, each unmistakably synthetic", () => {
+    // Widening is a reviewed code change (owner decision 2026-09-28 added the
+    // three +multiw identities beside the worker). Pinned exactly.
+    expect([...PROD_QA_IDENTITIES].sort()).toEqual(
+      [
+        "qa.manager+multiw@labourmarket.ai",
+        "qa.owner+multiw@labourmarket.ai",
+        "qa.worker+goal3@labourmarket.ai",
+        "qa.worker+multiw@labourmarket.ai",
+      ].sort(),
+    );
     expect(PROD_QA_IDENTITIES[0]).toBe(PROD_QA_WORKER_EMAIL);
-    expect(PROD_QA_WORKER_EMAIL).toMatch(/^qa\./);
-    // `+` addressing keeps it routable to a mailbox the owner controls while
-    // being obviously not a person's address.
-    expect(PROD_QA_WORKER_EMAIL).toContain("+");
+    for (const email of PROD_QA_IDENTITIES) {
+      expect(email).toMatch(/^qa\.[a-z]+\+[a-z0-9]+@labourmarket\.ai$/);
+    }
   });
 
   it("accepts the allowlisted identity against production", () => {
@@ -89,6 +97,9 @@ describe("exactly one synthetic identity is allowlisted", () => {
       "qa.worker+goal4@labourmarket.ai", //  same prefix, different tag
       "qa.worker+goal3@evil.example", //     same local part, other domain
       "qa.worker+goal3@labourmarket.ai.evil.example", // suffix attack
+      "qa.owner@labourmarket.ai", //         cast prefix without its tag
+      "qa.owner+multiw2@labourmarket.ai", // cast tag extended
+      "qa.agency+multiw@labourmarket.ai", // plausible, never allowlisted
       "", //                                  nothing
       undefined,
     ]) {

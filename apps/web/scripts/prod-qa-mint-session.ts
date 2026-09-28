@@ -81,12 +81,14 @@ async function main(): Promise<void> {
     return;
   }
 
-  // STEP 2 — production, and only the one allowlisted synthetic identity.
+  // STEP 2 — production, and only an allowlisted synthetic identity.
+  // `PROD_QA_IDENTITY` only SELECTS among the hard-coded allowlist (the guard
+  // below refuses anything else); absent, it is the original worker.
   let target;
   try {
     target = assertProdQaTarget({
       url,
-      email: PROD_QA_WORKER_EMAIL,
+      email: process.env.PROD_QA_IDENTITY ?? PROD_QA_WORKER_EMAIL,
       anonKey,
       serviceKey,
     });
