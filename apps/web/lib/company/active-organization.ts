@@ -514,6 +514,20 @@ export async function resolveActiveWorkspaceForCaller(
   caller: DomainCaller,
   identity: "person" | "company" | null,
 ): Promise<WorkspaceContext> {
+  // The pointer read depends only on the caller, not on the memberships, so
+  // it starts with them instead of after them: one serial database hop less
+  // on every dashboard layout (production 2026-09-28 — the workspace chain is
+  // on the path to Home's first byte). Same query, same error handling below.
+  const pointerRead: Promise<{ data: unknown; error: unknown }> = Promise.resolve(
+    asAny(caller.supabase)
+      .from("profiles")
+      .select("active_organization_id")
+      .eq("id", caller.userId)
+      .maybeSingle(),
+  );
+  // Awaited (and so thrown, exactly as before) below; this only keeps a
+  // rejection from being reported as unhandled if the memberships throw first.
+  pointerRead.catch(() => {});
   const memberships = await readWorkspaceMemberships(caller);
   const workspaces = memberships.workspaces;
   const orgWorkspaces = workspaces.filter((w) => w.kind === "organization");
@@ -533,11 +547,7 @@ export async function resolveActiveWorkspaceForCaller(
   // is then the resolver's default rather than a choice anyone made, and
   // saying otherwise is the claim that misleads).
   let pointerAvailable = true;
-  const { data, error } = await asAny(caller.supabase)
-    .from("profiles")
-    .select("active_organization_id")
-    .eq("id", caller.userId)
-    .maybeSingle();
+  const { data, error } = await pointerRead;
   if (error) {
     pointerAvailable = false;
   } else {
