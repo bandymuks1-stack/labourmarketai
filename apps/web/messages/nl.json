@@ -6560,10 +6560,11 @@
       "you": "Jij bent dit gesprek gestart",
       "other": "Gestart door iemand anders"
     },
-    "title": "Mijn berichten",
+    "title": "Berichten",
     "subtitle": "Wat er nu toe doet en waar het de moeite waard is op te reageren. Hier zie je berichten en belangrijke aanvragen.",
-    "empty": "Nog geen berichten. Als iemand je schrijft of er een belangrijke aanvraag binnenkomt, zie je die hier.",
+    "empty": "Nog geen berichten.",
     "emptyCta": "Mensen of bedrijven vinden om mee te werken",
+    "panePick": "Kies een gesprek uit de lijst.",
     "counterparty": {
       "support": "Supportteam",
       "permitted": "Gesprekspartner",
@@ -6584,7 +6585,7 @@
       "support": "Support",
       "team": "Team"
     },
-    "backToList": "← Alle berichten",
+    "backToList": "Alle berichten",
     "noMessages": "Nog geen berichten in dit gesprek. Begin hieronder met typen.",
     "byYou": "Jij",
     "byOther": "Ander",

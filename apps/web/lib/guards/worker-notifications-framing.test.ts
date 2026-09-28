@@ -23,28 +23,36 @@ const comm = (j: Record<string, unknown>) =>
   j.communication as Record<string, string>;
 
 describe("notifications/messages use 'Mano pranešimai / Kas dabar svarbu' framing", () => {
-  it("LT bell + messages are framed as the person's own messages", () => {
+  it("LT bell is framed as the person's own notifications", () => {
     expect(notif(lt).label).toMatch(/mano pranešim/i);
-    expect(comm(lt).title).toMatch(/pranešim/i);
-    expect(comm(lt).subtitle).toMatch(/svarbu/i);
   });
-  it("EN bell + messages mirror the framing", () => {
+  it("EN bell mirrors the framing", () => {
     expect(notif(en).label).toMatch(/notification/i);
-    expect(comm(en).title).toMatch(/message/i);
-    expect(comm(en).subtitle).toMatch(/matters now/i);
   });
+  // ONE SURFACE, ONE NAME (owner walk 2026-09-28): the page is called what
+  // the nav calls it — "Žinutės" — not a second name for the same place.
+  for (const [name, j] of [["lt", lt], ["en", en]] as const) {
+    it(`${name}: the messages page carries the nav's own name`, () => {
+      const tabs = (j.auth as { dashboard: { tabs: Record<string, string> } }).dashboard.tabs;
+      expect(comm(j).title).toBe(tabs.communication);
+    });
+  }
 });
 
 describe("empty states are calm and reassuring (not a scary failure)", () => {
   it("LT empty states reassure + point forward", () => {
     expect(notif(lt).emptyTitle).toMatch(/nieko nereikia/i);
     expect(notif(lt).emptyBody).toMatch(/matysite tai čia/i);
-    expect(comm(lt).empty).toMatch(/matysite tai čia/i);
+    // The messages empty state is one calm sentence INSIDE the workspace
+    // (owner walk 2026-09-28) — no explanation of what will appear where.
+    expect(comm(lt).empty).toMatch(/nėra/i);
+    expect(comm(lt).empty.split(/[.!?]\s/).length).toBe(1);
   });
   it("EN empty states reassure + point forward", () => {
     expect(notif(en).emptyTitle).toMatch(/nothing needs your attention/i);
     expect(notif(en).emptyBody).toMatch(/you'll see it here/i);
-    expect(comm(en).empty).toMatch(/you'll see it here/i);
+    expect(comm(en).empty).toMatch(/no messages yet/i);
+    expect(comm(en).empty.split(/[.!?]\s/).length).toBe(1);
   });
 });
 
@@ -54,7 +62,6 @@ describe("no fake urgency / matches / employer interest / 'viewed you'", () => {
       const blob = [
         JSON.stringify(notif(j)),
         comm(j).title,
-        comm(j).subtitle,
         comm(j).empty,
         comm(j).footnote,
       ].join(" • ");
