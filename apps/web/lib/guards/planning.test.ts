@@ -500,11 +500,17 @@ describe("7. the page is an honest server-rendered agenda", () => {
     expect(PAGE).toMatch(/isPlanningSourceType/);
   });
 
-  it("renders the per-source honest degradation notes", () => {
-    expect(PAGE).toMatch(/planning-source-note-booking/);
-    expect(PAGE).toMatch(/planning-source-note-task/);
-    expect(PAGE).toMatch(/planning-source-note-project/);
+  it("states a FAILED source read; never narrates backlog (owner walk 2026-09-28)", () => {
+    // A read that failed is said per source (SEP-7: unknown is not zero)…
+    expect(PAGE).toMatch(/planning-source-note-task-error/);
+    expect(PAGE).toMatch(/planning-source-note-project-error/);
+    expect(PAGE).toMatch(/planning-source-note-journal-error/);
     expect(PAGE).toMatch(/sourceNotes\./);
+    // …but a source that is not switched on, or that only managers read, is
+    // silent: "the worker's schedule will appear when that view is built" is
+    // implementation backlog shown to a person, and it is gone.
+    expect(PAGE).not.toMatch(/sourceNotes\.\w+Unavailable/);
+    expect(PAGE).not.toMatch(/sourceNotes\.projectManagersOnly/);
     // The composition maps each source to an independent honest state.
     expect(COMPOSE).toMatch(/"unavailable"/);
     expect(COMPOSE).toMatch(/"managers-only"/);
@@ -681,15 +687,10 @@ describe("8. copy resolves in every ACTIVE locale (frozen-subset convention)", (
     "planning.source.journal",
     "planning.source.finance",
     "planning.source.invitation",
-    "planning.sourceNotes.bookingUnavailable",
-    "planning.sourceNotes.taskUnavailable",
     "planning.sourceNotes.taskError",
-    "planning.sourceNotes.projectManagersOnly",
     "planning.sourceNotes.projectError",
     "planning.sourceNotes.journalError",
-    "planning.sourceNotes.financeUnavailable",
     "planning.sourceNotes.financeError",
-    "planning.sourceNotes.invitationUnavailable",
     "planning.sourceNotes.invitationError",
     "planning.week.label",
     "planning.today",

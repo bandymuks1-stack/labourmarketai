@@ -10381,19 +10381,12 @@
       "stage": "Fasen"
     },
     "sourceNotes": {
-      "bookingUnavailable": "Boekingen zijn nog niet beschikbaar — ze sluiten aan op de planning zodra de boekingslaag is ingeschakeld.",
-      "taskUnavailable": "Taken zijn nog niet beschikbaar — taakdeadlines sluiten aan op de planning zodra de takenlaag is ingeschakeld.",
       "taskError": "Taken konden nu niet worden geladen. De rest van de planning blijft gewoon zichtbaar.",
-      "projectManagersOnly": "Projectdatabanden zijn zichtbaar voor projectmanagers. Een projectplanning voor werknemers volgt zodra die weergave bestaat.",
       "projectError": "Projecten konden nu niet worden geladen. De rest van de planning blijft gewoon zichtbaar.",
       "journalError": "Journaalregistraties konden nu niet worden geladen. De rest van de planning wordt normaal getoond.",
-      "financeUnavailable": "Financiële records zijn nog niet ingeschakeld — betaaltermijnen sluiten aan bij het plan zodra de financiële laag is ingeschakeld.",
       "financeError": "Financiële records konden nu niet worden geladen. De rest van het plan wordt normaal weergegeven.",
-      "invitationUnavailable": "Uitnodigingen zijn nog niet ingeschakeld — uitnodigingstermijnen sluiten aan bij het plan zodra de uitnodigingenlaag is ingeschakeld.",
       "invitationError": "Uitnodigingen konden nu niet worden geladen. De rest van het plan wordt normaal weergegeven.",
-      "absenceUnavailable": "De verlofmodule is in deze omgeving nog niet ingeschakeld.",
       "absenceError": "Verlofrecords konden niet worden gelezen — het plan wordt zonder deze getoond.",
-      "stageUnavailable": "De projectfasenmodule is in deze omgeving nog niet ingeschakeld.",
       "stageError": "Projectfasen konden niet worden gelezen — het plan wordt zonder deze getoond."
     },
     "week": {

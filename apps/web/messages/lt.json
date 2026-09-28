@@ -10381,19 +10381,12 @@
       "stage": "Etapai"
     },
     "sourceNotes": {
-      "bookingUnavailable": "Rezervacijos dar neįjungtos — jos prisijungs prie plano, kai bus įjungtas rezervacijų sluoksnis.",
-      "taskUnavailable": "Užduotys dar neįjungtos — užduočių terminai prisijungs prie plano, kai bus įjungtas užduočių sluoksnis.",
       "taskError": "Užduočių šiuo metu nepavyko įkelti. Likusi plano dalis rodoma įprastai.",
-      "projectManagersOnly": "Projektų datų juostos rodomos projektų vadovams. Darbuotojo projektų grafikas atsiras, kai toks vaizdas bus sukurtas.",
       "projectError": "Projektų šiuo metu nepavyko įkelti. Likusi plano dalis rodoma įprastai.",
       "journalError": "Žurnalo įrašų šiuo metu nepavyko įkelti. Likusi plano dalis rodoma įprastai.",
-      "financeUnavailable": "Finansų įrašai dar neįjungti — mokėjimų terminai prisijungs prie plano, kai bus įjungtas finansų sluoksnis.",
       "financeError": "Finansų įrašų šiuo metu nepavyko įkelti. Likusi plano dalis rodoma įprastai.",
-      "invitationUnavailable": "Kvietimai dar neįjungti — kvietimų terminai prisijungs prie plano, kai bus įjungtas kvietimų sluoksnis.",
       "invitationError": "Kvietimų šiuo metu nepavyko įkelti. Likusi plano dalis rodoma įprastai.",
-      "absenceUnavailable": "Atostogų modulis dar neįjungtas šioje aplinkoje.",
       "absenceError": "Atostogų įrašų nepavyko perskaityti — planas rodomas be jų.",
-      "stageUnavailable": "Projektų etapų modulis dar neįjungtas šioje aplinkoje.",
       "stageError": "Projektų etapų nepavyko perskaityti — planas rodomas be jų."
     },
     "week": {

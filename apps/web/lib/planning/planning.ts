@@ -952,7 +952,7 @@ export async function getPlanning(
   ];
   const projectState: PlanningSourceState =
     managed.state.status === "managers-only" &&
-    (assigned.state.status !== "ok" || assigned.items.length === 0)
+    assigned.state.status !== "ok"
       ? managed.state
       : {
           status:

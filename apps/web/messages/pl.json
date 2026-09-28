@@ -10381,19 +10381,12 @@
       "stage": "Etapy"
     },
     "sourceNotes": {
-      "bookingUnavailable": "Rezerwacje nie są jeszcze dostępne — pojawią się w planie po włączeniu warstwy rezerwacji.",
-      "taskUnavailable": "Zadania nie są jeszcze dostępne — terminy zadań pojawią się w planie po włączeniu warstwy zadań.",
       "taskError": "Nie udało się teraz wczytać zadań. Reszta planu nie jest tym dotknięta.",
-      "projectManagersOnly": "Pasma dat projektów są pokazywane kierownikom projektów. Harmonogram projektu po stronie pracownika pojawi się, gdy taki widok powstanie.",
       "projectError": "Nie udało się teraz wczytać projektów. Reszta planu nie jest tym dotknięta.",
       "journalError": "Nie udało się teraz wczytać wpisów dziennika. Reszta planu wyświetla się normalnie.",
-      "financeUnavailable": "Zapisy finansowe nie są jeszcze włączone — terminy płatności pojawią się w planie po włączeniu warstwy finansowej.",
       "financeError": "Nie udało się teraz wczytać zapisów finansowych. Reszta planu wyświetla się normalnie.",
-      "invitationUnavailable": "Zaproszenia nie są jeszcze włączone — terminy zaproszeń pojawią się w planie po włączeniu warstwy zaproszeń.",
       "invitationError": "Nie udało się teraz wczytać zaproszeń. Reszta planu wyświetla się normalnie.",
-      "absenceUnavailable": "Moduł urlopów nie jest jeszcze włączony w tym środowisku.",
       "absenceError": "Nie udało się odczytać zapisów urlopowych — plan jest pokazany bez nich.",
-      "stageUnavailable": "Moduł etapów projektu nie jest jeszcze włączony w tym środowisku.",
       "stageError": "Nie udało się odczytać etapów projektu — plan jest pokazany bez nich."
     },
     "week": {
