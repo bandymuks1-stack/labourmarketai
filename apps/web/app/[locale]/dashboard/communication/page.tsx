@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Link } from "@/lib/i18n/navigation";
 import { Lock } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { Card } from "@/components/ui/Card";
 import { SupportConversationLauncher } from "@/components/app/support-conversation-launcher";
 import { AttentionInstructions } from "@/components/app/attention-instructions";
 import { RefreshOnFocus } from "@/components/app/refresh-on-focus";
@@ -371,12 +372,13 @@ export default async function CommunicationListPage({
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
+    <div className="flex flex-col gap-4">
+      {/* One name for one surface: the nav says "Žinutės", so does the page.
+          No explanatory subtitle — the workspace below says what it is. */}
+      <header>
+        <h1 className="font-display text-title font-bold tracking-tightest text-text-primary">
           {t("title")}
         </h1>
-        <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 
       {/* Honest restricted state when a "message" entry point could not open a
@@ -431,70 +433,97 @@ export default async function CommunicationListPage({
         </Link>
       )}
 
-      {conversationsFailed ? (
-        <p
-          role="alert"
-          className="card-border border-state-danger/40 p-4 text-sm text-text-secondary"
-          data-testid="communication-load-error"
+      {/* THE COMMUNICATION WORKSPACE (owner production walk 2026-09-28: the
+          empty page was a heading, an explanation, two stacked CTAs and a
+          privacy note — not a place to talk). Conversations on one side, the
+          conversation pane on the other; an empty inbox is a state INSIDE
+          this frame, never a page instead of it. A conversation still opens
+          on its own thread route (translation, attachments, composer). */}
+      <div
+        data-testid="communication-workspace"
+        className="grid gap-4 lg:min-h-[28rem] lg:grid-cols-[minmax(18rem,24rem)_1fr]"
+      >
+        <section
+          data-testid="communication-list-pane"
+          className="flex min-w-0 flex-col gap-3"
         >
-          {t("loadError")}
-        </p>
-      ) : conversations.length === 0 ? (
-        <div className="card-border flex flex-col gap-3 p-4" data-testid="communication-empty">
-          <p className="text-sm text-text-secondary">{t("empty")}</p>
-          {/* A dead end is not an empty state (2026-09-19): the next useful
-              canonical action is to find someone to work with. */}
-          <Link
-            href="/dashboard/network"
-            className="inline-flex min-h-11 w-fit items-center rounded-md border border-brand-blue/40 px-4 text-sm font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
-            data-testid="communication-empty-cta"
+        {conversationsFailed ? (
+          <p
+            role="alert"
+            className="card-border border-state-danger/40 p-4 text-sm text-text-secondary"
+            data-testid="communication-load-error"
           >
-            {t("emptyCta")} →
-          </Link>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {/* Unread first, as a labelled section — what needs attention is
-              visible structure, not just sort order. */}
-          {unreadConversations.length > 0 && (
-            <section
-              className="flex flex-col gap-2"
-              data-testid="communication-unread-section"
+            {t("loadError")}
+          </p>
+        ) : conversations.length === 0 ? (
+          <div className="card-border flex flex-col gap-3 p-4" data-testid="communication-empty">
+            <p className="text-sm text-text-secondary">{t("empty")}</p>
+            {/* A dead end is not an empty state (2026-09-19): the next useful
+                canonical action is to find someone to work with. */}
+            <Link
+              href="/dashboard/network"
+              className="inline-flex min-h-11 w-fit items-center rounded-md border border-brand-blue/40 px-4 text-sm font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+              data-testid="communication-empty-cta"
             >
-              <h2 className="flex items-baseline gap-2 font-display text-sm font-semibold text-text-primary">
-                {t("sections.unread")}
-                <span className="font-mono text-xs font-normal text-text-muted tabular-nums">
-                  {unreadConversations.length}
-                </span>
-              </h2>
-              <ul className="flex flex-col gap-2">
-                {unreadConversations.map(renderConversation)}
-              </ul>
-            </section>
-          )}
-          {readConversations.length > 0 && (
-            <section
-              className="flex flex-col gap-2"
-              data-testid="communication-read-section"
-            >
-              {unreadConversations.length > 0 && (
-                <h2 className="font-display text-sm font-semibold text-text-secondary">
-                  {t("sections.earlier")}
+              {t("emptyCta")} →
+            </Link>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {/* Unread first, as a labelled section — what needs attention is
+                visible structure, not just sort order. */}
+            {unreadConversations.length > 0 && (
+              <section
+                className="flex flex-col gap-2"
+                data-testid="communication-unread-section"
+              >
+                <h2 className="flex items-baseline gap-2 font-display text-sm font-semibold text-text-primary">
+                  {t("sections.unread")}
+                  <span className="font-mono text-xs font-normal text-text-muted tabular-nums">
+                    {unreadConversations.length}
+                  </span>
                 </h2>
-              )}
-              <ul className="flex flex-col gap-2">
-                {readConversations.map(renderConversation)}
-              </ul>
-            </section>
+                <ul className="flex flex-col gap-2">
+                  {unreadConversations.map(renderConversation)}
+                </ul>
+              </section>
+            )}
+            {readConversations.length > 0 && (
+              <section
+                className="flex flex-col gap-2"
+                data-testid="communication-read-section"
+              >
+                {unreadConversations.length > 0 && (
+                  <h2 className="font-display text-sm font-semibold text-text-secondary">
+                    {t("sections.earlier")}
+                  </h2>
+                )}
+                <ul className="flex flex-col gap-2">
+                  {readConversations.map(renderConversation)}
+                </ul>
+              </section>
+            )}
+          </div>
+        )}
+        </section>
+
+        {/* THE CONVERSATION PANE. With conversations it asks for one; empty or
+            not, it carries the secondary support entry (after the list — real
+            conversations own the first place) and the one privacy line. No
+            composer here: a composer needs a real conversation to send into,
+            and a disabled one would pretend otherwise. */}
+        <section data-testid="communication-thread-pane" className="flex min-w-0 flex-col">
+          <Card className="flex flex-1 flex-col items-center justify-center gap-4">
+          {conversations.length > 0 && (
+            <p className="text-center text-sm text-text-secondary" data-testid="communication-pane-pick">
+              {t("panePick")}
+            </p>
           )}
-        </div>
-      )}
-
-      {/* Support entry — secondary by design: real conversations own the top
-          of this page; help lives below the list, still one tap away. */}
-      <SupportConversationLauncher locale={locale} />
-
-      <p className="text-meta text-text-muted">{t("footnote")}</p>
+          <SupportConversationLauncher locale={locale} />
+          <p className="text-center text-meta text-text-muted">{t("footnote")}</p>
+          </Card>
+        </section>
+      </div>
     </div>
   );
 }

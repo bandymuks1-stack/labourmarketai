@@ -6560,10 +6560,11 @@
       "you": "Ta rozmowa została rozpoczęta przez Ciebie",
       "other": "Rozpoczęta przez kogoś innego"
     },
-    "title": "Moje wiadomości",
+    "title": "Wiadomości",
     "subtitle": "Co jest ważne teraz i na co warto odpowiedzieć. Tutaj zobaczysz wiadomości i ważne zapytania.",
-    "empty": "Jeszcze brak wiadomości. Jeśli ktoś do Ciebie napisze albo pojawi się ważne zapytanie, zobaczysz to tutaj.",
+    "empty": "Jeszcze brak wiadomości.",
     "emptyCta": "Znajdź osoby lub firmy do współpracy",
+    "panePick": "Wybierz rozmowę z listy.",
     "counterparty": {
       "support": "Zespół wsparcia",
       "permitted": "Rozmówca",
@@ -6584,7 +6585,7 @@
       "support": "Wsparcie",
       "team": "Zespół"
     },
-    "backToList": "← Wszystkie wiadomości",
+    "backToList": "Wszystkie wiadomości",
     "noMessages": "W tej rozmowie nie ma jeszcze wiadomości. Zacznij pisać poniżej.",
     "byYou": "Ty",
     "byOther": "Druga strona",

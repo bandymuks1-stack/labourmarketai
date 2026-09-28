@@ -6560,10 +6560,11 @@
       "you": "Sie haben diese Unterhaltung begonnen",
       "other": "Von jemand anderem begonnen"
     },
-    "title": "Meine Nachrichten",
+    "title": "Nachrichten",
     "subtitle": "Was jetzt wichtig ist und worauf sich eine Antwort lohnt. Hier sehen Sie Nachrichten und wichtige Anfragen.",
-    "empty": "Noch keine Nachrichten. Wenn Ihnen jemand schreibt oder eine wichtige Anfrage eingeht, sehen Sie sie hier.",
+    "empty": "Noch keine Nachrichten.",
     "emptyCta": "Menschen oder Unternehmen zum Zusammenarbeiten finden",
+    "panePick": "Wählen Sie ein Gespräch aus der Liste.",
     "counterparty": {
       "support": "Support-Team",
       "permitted": "Gesprächspartner",
@@ -6584,7 +6585,7 @@
       "support": "Support",
       "team": "Team"
     },
-    "backToList": "← Alle Nachrichten",
+    "backToList": "Alle Nachrichten",
     "noMessages": "Noch keine Nachrichten in dieser Unterhaltung. Schreiben Sie unten los.",
     "byYou": "Sie",
     "byOther": "Andere Person",

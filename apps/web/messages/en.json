@@ -6560,10 +6560,11 @@
       "you": "You started this conversation",
       "other": "Started by someone else"
     },
-    "title": "My messages",
+    "title": "Messages",
     "subtitle": "What matters now and what's worth replying to. You'll see messages and important requests here.",
-    "empty": "No messages yet. If someone writes to you or an important request comes up, you'll see it here.",
+    "empty": "No messages yet.",
     "emptyCta": "Find people or companies to work with",
+    "panePick": "Choose a conversation from the list.",
     "counterparty": {
       "support": "Support team",
       "permitted": "Conversation partner",
@@ -6584,7 +6585,7 @@
       "support": "Support",
       "team": "Team"
     },
-    "backToList": "← All messages",
+    "backToList": "All messages",
     "noMessages": "No messages in this conversation yet. Start typing below.",
     "byYou": "You",
     "byOther": "Other",
