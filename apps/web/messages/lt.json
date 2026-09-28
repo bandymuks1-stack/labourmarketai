@@ -8351,7 +8351,7 @@
     "request": {
       "button": "Prašyti susisiekti",
       "opening": "Atidaroma…",
-      "opened": "Pokalbis pradėtas — laukiama darbuotojo atsakymo.",
+      "opened": "Pokalbis atvertas — parašykite darbuotojui žinutę.",
       "view": "Atverti pokalbį",
       "error": "Pokalbio atverti nepavyko. Bandykite dar kartą.",
       "limitReached": "Pasiektas dienos naujų pokalbių limitas. Bandykite rytoj."

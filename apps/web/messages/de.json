@@ -8351,7 +8351,7 @@
     "request": {
       "button": "Kommunikation anfragen",
       "opening": "Wird geöffnet…",
-      "opened": "Unterhaltung eröffnet — Antwort der Arbeitskraft wird erwartet.",
+      "opened": "Unterhaltung geöffnet — schreiben Sie der Arbeitskraft eine Nachricht.",
       "view": "Unterhaltung öffnen",
       "error": "Die Unterhaltung konnte nicht geöffnet werden. Bitte versuchen Sie es erneut.",
       "limitReached": "Tageslimit für neue Unterhaltungen erreicht. Versuchen Sie es morgen erneut."
