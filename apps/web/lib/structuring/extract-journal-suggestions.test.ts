@@ -23,6 +23,20 @@ describe("extractJournalSuggestions (rule-based, LT)", () => {
     expect(s.hasAny).toBe(true);
   });
 
+  it("keeps the stated hours when a day mention precedes them (production walk 2026-09-28)", () => {
+    // "25 d." is how Lithuanian writes a date ("rugsėjo 25 d."). It split off
+    // as a time-only "25 d" fragment, merged into the next one, and the merge
+    // kept 25 DAYS and dropped the 6 hours — Home then showed 0 h for the week.
+    const s = extractJournalSuggestions("25 d. 6 valandas klijavau plyteles vonioje");
+    expect(s.fragments).toHaveLength(1);
+    expect(s.fragments[0]?.time).toEqual({ value: 6, unitSlug: "hours" });
+    // Days alone are still days.
+    expect(extractJournalSuggestions("Dirbau 2 dienas objektuose.").time).toEqual({
+      value: 2,
+      unitSlug: "days",
+    });
+  });
+
   it("recognises days as a time unit when no hours are mentioned", () => {
     const s = extractJournalSuggestions("Dirbau 2 dienas objektuose.");
     expect(s.time).toEqual({ value: 2, unitSlug: "days" });

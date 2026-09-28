@@ -740,8 +740,15 @@ function addTimes(
   a: { value: number; unitSlug: "hours" | "minutes" | "days" },
   b: { value: number; unitSlug: "hours" | "minutes" | "days" },
 ): { value: number; unitSlug: "hours" | "minutes" | "days" } {
-  // Days never combine with hours/minutes in journal language.
-  if (a.unitSlug === "days" || b.unitSlug === "days") return a;
+  // Days never combine with hours/minutes in journal language. When exactly
+  // one side is days, the hours/minutes side is the recorded time — the same
+  // rule `detectFragmentTime` applies inside one fragment (days count only
+  // when no hours/minutes are present). Returning `a` unconditionally kept
+  // "25 d." (a date, "the 25th") as 25 DAYS and dropped the "6 valandas" that
+  // followed it (production walk 2026-09-28).
+  if (a.unitSlug === "days" && b.unitSlug === "days") return a;
+  if (a.unitSlug === "days") return b;
+  if (b.unitSlug === "days") return a;
   const aMin = a.unitSlug === "hours" ? a.value * 60 : a.value;
   const bMin = b.unitSlug === "hours" ? b.value * 60 : b.value;
   const total = aMin + bMin;
