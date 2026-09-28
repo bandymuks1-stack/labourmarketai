@@ -206,11 +206,26 @@ describe("synthetic fixtures stay out of normal surfaces", () => {
     "lib/demand/canonical-demand.ts",
     "lib/opportunities/load-worker-opportunities.ts",
     "lib/supply/employer-supply-discovery.ts",
+    "lib/scouting/scouting.ts",
   ]) {
     it(`${file} applies the predicate`, () => {
       expect(read(file)).toMatch(/isSyntheticFixtureLabel|excludeSyntheticFixtures/);
     });
   }
+  it("scouting hides fixture workers from a real organization, not from a synthetic one", () => {
+    // Production walk 2026-09-28: every scoutable worker was a test account.
+    const src = read("lib/scouting/scouting.ts");
+    expect(src).toMatch(
+      /isSyntheticFixtureLabel\(employer\.organizationName\)\s*\?\s*pool\s*:\s*excludeSyntheticFixtures\(pool, \(c\) => \[c\.displayName, c\.headline\]\)/,
+    );
+    // …and the "compared with all N" count describes what the viewer sees.
+    expect(src).toMatch(/retrieval: shownRetrieval/);
+  });
+  it("the renamed fixture workers carry a documented marker", () => {
+    expect(isSyntheticFixtureLabel("QA-SYNTHETIC Vytas Darbininkas (test)")).toBe(true);
+    expect(isSyntheticFixtureLabel("[E2E] Proof Worker")).toBe(true);
+    expect(isSyntheticFixtureLabel("E2E Proof Worker")).toBe(false);
+  });
   it("no active-locale product copy carries a fixture marker or QA instruction", () => {
     for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const text = read(`messages/${locale}.json`);
