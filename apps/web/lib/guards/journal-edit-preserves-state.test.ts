@@ -15,7 +15,9 @@ const page = read("app/[locale]/dashboard/journal/page.tsx");
 
 describe("composer preloads structured state from editingEntry", () => {
   it("preloads work date from the entry (not reset to today)", () => {
-    expect(composer).toMatch(/editingEntry\?\.workDate\s*\?\?\s*today/);
+    // The entry's own saved day always wins; a NEW record may start on the
+    // calendar's picked day (journal-selected-day-survives), then today.
+    expect(composer).toMatch(/editingEntry\?\.workDate\s*\?\?\s*(?:defaultWorkDate\s*\?\?\s*)?today/);
   });
   it("preloads time + quantity as confirmed so they re-save", () => {
     expect(composer).toMatch(/editingEntry\?\.time\s*\?\s*"confirmed"/);
