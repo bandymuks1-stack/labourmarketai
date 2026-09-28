@@ -1495,6 +1495,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260928181000_booking_reopen_lifecycle_edges_v1.sql",
       // owner-approved RED 2026-09-28: agency drafts client need / share-scoped read / placement lifecycle.
       "20260928190000_agency_delegated_demand_and_placement_v1.sql",
+      // walk 2026-09-28: a re-accepted booking restores the engagement it minted.
+      "20260928200000_booking_reaccept_restores_engagement_v1.sql",
 ]);
   });
 
