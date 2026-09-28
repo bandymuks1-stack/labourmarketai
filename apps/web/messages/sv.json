@@ -2402,7 +2402,8 @@
         "mixed": "Underlag: delvis bekräftat",
         "unverified": "Underlag: endast egenuppgivet"
       }
-    }
+    },
+    "sharedNeed": "Need shared by the client: {title}"
   },
   "waze": {
     "open": "Öppna i Waze"
