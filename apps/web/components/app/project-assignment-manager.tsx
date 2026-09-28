@@ -187,6 +187,8 @@ export function ProjectAssignmentManager({
   >(assignWorkerToProjectAction, null);
   const [endPending, startEnd] = useTransition();
   const [ended, setEnded] = useState<Set<string>>(new Set());
+  const onTeam = new Set(workers.map((w) => w.profileId));
+  const engagementOnly = engagementWorkers.filter((w) => !onTeam.has(w.workerProfileId));
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">
@@ -244,12 +246,15 @@ export function ProjectAssignmentManager({
                   ))}
                 </optgroup>
               )}
-              {engagementWorkers.length > 0 && (
+              {/* Each person once: someone already on the team who ALSO
+                  accepted a proposal was listed twice, the same option in both
+                  groups (production walk 2026-09-28). The team entry stands. */}
+              {engagementOnly.length > 0 && (
                 <optgroup
                   label={labels.engagementGroupLabel}
                   data-testid="assign-engagement-group"
                 >
-                  {engagementWorkers.map((w) => (
+                  {engagementOnly.map((w) => (
                     <option key={w.engagementId} value={w.workerProfileId}>
                       {w.name}
                     </option>
