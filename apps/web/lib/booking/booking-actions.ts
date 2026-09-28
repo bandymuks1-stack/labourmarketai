@@ -752,7 +752,7 @@ async function attachProposerAndChangedTerms(
           .from("booking_request_events")
           .select("booking_request_id, previous_terms, created_at")
           .in("booking_request_id", reopenedIds)
-          .not("previous_terms", "is", null)
+          .eq("to_status", "proposed")
           .order("created_at", { ascending: false })
       : Promise.resolve({ data: [], error: null }),
   ]);
@@ -764,13 +764,18 @@ async function attachProposerAndChangedTerms(
     }
   }
   if (!events.error) {
+    const seen = new Set<string>();
     for (const e of (events.data ?? []) as {
       booking_request_id: string;
       previous_terms: { start_date?: string | null; expected_end_date?: string | null } | null;
     }[]) {
       const row = byId.get(e.booking_request_id);
-      // newest first: the first event per booking is the terms it replaced
-      if (!row || row.changedFrom || !e.previous_terms) continue;
+      if (!row || seen.has(e.booking_request_id)) continue;
+      // Newest first: only the LATEST move into 'proposed' counts. If that was
+      // the reopening of an accepted booking, show what was agreed before; a
+      // fresh proposal after a decline is not "changed terms" (walk 2026-09-28).
+      seen.add(e.booking_request_id);
+      if (!e.previous_terms) continue;
       row.changedFrom = {
         startDate: e.previous_terms.start_date ?? null,
         expectedEndDate: e.previous_terms.expected_end_date ?? null,
