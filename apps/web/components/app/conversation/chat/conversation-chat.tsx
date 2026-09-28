@@ -10,7 +10,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
+import { SkeletonText } from "@/components/app/skeleton";
 import { useAuthOptional } from "@/lib/auth/context";
 import { ConversationHeader } from "./conversation-header";
 import { MySpaceRow } from "./my-space-row";
@@ -35,10 +37,7 @@ import {
   type BookingActionLabels,
   type BookingOffer,
 } from "@/components/app/conversation/worker-booking-action";
-import {
-  WorkerWorkLogFlow,
-  type WorkLogLabels,
-} from "@/components/app/conversation/worker-worklog-flow";
+import type { WorkLogLabels } from "@/components/app/conversation/worker-worklog-flow";
 import { getWorkerForm, type WorkerFormSpec } from "@/lib/conversation/worker-forms";
 import {
   agencyProposeCandidateForm,
@@ -205,6 +204,15 @@ import { PersonalWorkspaceIntro } from "@/components/app/workspace/personal-work
 import type { PersonalWorkspaceIntro as PersonalWorkspaceIntroModel } from "@/lib/workspace/personal-workspace-intro";
 import type { PersonalWorkspaceLabels } from "@/lib/workspace/personal-workspace-labels";
 import { personCalendarDay } from "@/lib/time/person-calendar-day";
+
+/* The work-log card opens only after a log-work sentence. It is the one path
+ * on Home into the browser Supabase client (photo upload) and its zod schemas
+ * — ~270 KB of script the first screen never ran (production, 2026-09-28) —
+ * so it loads when first rendered. Same component, same props. */
+const WorkerWorkLogFlow = dynamic(
+  () => import("@/components/app/conversation/worker-worklog-flow").then((m) => m.WorkerWorkLogFlow),
+  { loading: () => <SkeletonText lines={3} /> },
+);
 
 /** The S2 payload the page streams to the chat without awaiting (#1011):
  *  the intro model plus its server-resolved label bag, as one promise. */
