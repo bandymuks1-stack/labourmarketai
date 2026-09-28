@@ -103,6 +103,7 @@ export function CompanyWorkersSection({
   labels,
   roleCoordinationEnabled,
   canAssignRoles = false,
+  reviewElsewhere,
   canManageInvitations = false,
 }: {
   readonly workersResult: ListState<LinkedCompanyWorker>;
@@ -115,6 +116,8 @@ export function CompanyWorkersSection({
   /** Owner/admin viewing their own company → show the role-select control.
    *  The RPC re-validates ownership regardless. */
   readonly canAssignRoles?: boolean;
+  /** Where the page's ONE journal-review control lives (org members panel). */
+  readonly reviewElsewhere?: { readonly href: string; readonly label: string };
   /** `manage-invitations` (owner/admin, never a job title): the invite form
    *  and the pending-invitations list. Without it, a neutral explanation. */
   readonly canManageInvitations?: boolean;
@@ -289,6 +292,7 @@ export function CompanyWorkersSection({
                               provisionCompanyWorkerEngagementContextAction
                             }
                             setReviewAction={setCompanyWorkerJournalReviewAction}
+                            reviewElsewhere={reviewElsewhere}
                             labels={{
                               ...labels.operations.assign,
                               roleOptionLabels: labels.operations.roleLabels,

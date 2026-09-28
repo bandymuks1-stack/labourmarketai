@@ -127,6 +127,7 @@ export function WorkerOperationsRoleForm({
   action,
   provisionAction,
   setReviewAction,
+  reviewElsewhere,
   labels,
 }: {
   readonly workerId: string;
@@ -140,6 +141,14 @@ export function WorkerOperationsRoleForm({
   readonly action: AssignAction;
   readonly provisionAction: ProvisionAction;
   readonly setReviewAction: SetReviewAction;
+  /**
+   * The page already carries THE journal-review control (the organization
+   * members panel, engagement contexts — the path the production walk proved
+   * end to end on 2026-09-28). Then this legacy block renders one link there
+   * instead of a second, competing toggle that dead-ends for an ordinary
+   * worker (it needs a reviewer operations role first).
+   */
+  readonly reviewElsewhere?: { readonly href: string; readonly label: string };
   readonly labels: OperationsRoleControlLabels;
 }) {
   const [state, formAction, isPending] = useActionState<
@@ -260,7 +269,8 @@ export function WorkerOperationsRoleForm({
   })();
 
   const defaultRole =
-    currentRole && (ASSIGNABLE_OPERATIONS_ROLES as readonly string[]).includes(currentRole)
+    currentRole &&
+    (ASSIGNABLE_OPERATIONS_ROLES as readonly string[]).includes(currentRole)
       ? currentRole
       : "";
   const [opsRole, setOpsRole] = useState(defaultRole);
@@ -336,118 +346,130 @@ export function WorkerOperationsRoleForm({
         ) : null}
       </form>
 
-      {/* Journal-review section. Progressive + honest:
+      {reviewElsewhere ? (
+        <a
+          href={reviewElsewhere.href}
+          className="mt-1 border-t border-ink-700 pt-2 text-meta text-brand-blue underline-offset-2 hover:underline"
+          data-testid={`worker-ops-review-elsewhere-${workerId}`}
+        >
+          {labels.review.toggleLabel} → {reviewElsewhere.label}
+        </a>
+      ) : (
+        /* Journal-review section. Progressive + honest:
           - missing_engagement_context → owner provisioning button.
           - bridgeReady → interactive enable/disable toggle.
-          - otherwise → visibly disabled with the exact blocker note. */}
-      <div className="mt-1 flex flex-col gap-1 border-t border-ink-700 pt-2">
-        {/* A <label>, not a <div>: the 13x13 native box was the whole tap
+          - otherwise → visibly disabled with the exact blocker note. */
+        <div className="mt-1 flex flex-col gap-1 border-t border-ink-700 pt-2">
+          {/* A <label>, not a <div>: the 13x13 native box was the whole tap
             area on phones (measured 2026-09-06); the label is the tap area
             and carries the mobile floor (globals.css). State itself is
             changed by the toggle button below, exactly as before. */}
-        <label className="flex items-center gap-2 text-meta text-text-muted">
-          <input
-            type="checkbox"
-            checked={bridge.reviewActive}
-            disabled={!bridge.bridgeReady}
-            readOnly
-            aria-disabled={bridge.bridgeReady ? undefined : "true"}
-            data-testid={`worker-ops-review-toggle-${workerId}`}
-          />
-          <span>{labels.review.toggleLabel}</span>
-        </label>
+          <label className="flex items-center gap-2 text-meta text-text-muted">
+            <input
+              type="checkbox"
+              checked={bridge.reviewActive}
+              disabled={!bridge.bridgeReady}
+              readOnly
+              aria-disabled={bridge.bridgeReady ? undefined : "true"}
+              data-testid={`worker-ops-review-toggle-${workerId}`}
+            />
+            <span>{labels.review.toggleLabel}</span>
+          </label>
 
-        {/* Owner provisioning button — only when a reviewer role is set but no
+          {/* Owner provisioning button — only when a reviewer role is set but no
             real engagement link exists yet. */}
-        {canProvision ? (
-          <form action={provisionFormAction} className="flex flex-col gap-1">
-            <DisplayedWorkspaceField />
-            <input type="hidden" name="workerId" value={workerId} />
-            <button
-              type="submit"
-              disabled={isProvisioning}
-              className="self-start rounded-md border border-brand-blue px-3 py-1 text-meta font-semibold text-brand-blue hover:bg-brand-blue/10 disabled:opacity-50"
-              data-testid={`worker-ops-provision-${workerId}`}
-            >
-              {isProvisioning ? labels.provision.provisioning : labels.provision.button}
-            </button>
-            {provisionMessage ? (
-              <p
-                className={
-                  provisionMessage.ok
-                    ? "rounded-md border border-state-success bg-state-success/10 px-2 py-1 text-meta text-state-success"
-                    : "rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-meta text-state-warning"
-                }
-                role="status"
-                data-testid={`worker-ops-provision-result-${workerId}`}
+          {canProvision ? (
+            <form action={provisionFormAction} className="flex flex-col gap-1">
+              <DisplayedWorkspaceField />
+              <input type="hidden" name="workerId" value={workerId} />
+              <button
+                type="submit"
+                disabled={isProvisioning}
+                className="self-start rounded-md border border-brand-blue px-3 py-1 text-meta font-semibold text-brand-blue hover:bg-brand-blue/10 disabled:opacity-50"
+                data-testid={`worker-ops-provision-${workerId}`}
               >
-                {provisionMessage.text}
-              </p>
-            ) : null}
-          </form>
-        ) : null}
+                {isProvisioning
+                  ? labels.provision.provisioning
+                  : labels.provision.button}
+              </button>
+              {provisionMessage ? (
+                <p
+                  className={
+                    provisionMessage.ok
+                      ? "rounded-md border border-state-success bg-state-success/10 px-2 py-1 text-meta text-state-success"
+                      : "rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-meta text-state-warning"
+                  }
+                  role="status"
+                  data-testid={`worker-ops-provision-result-${workerId}`}
+                >
+                  {provisionMessage.text}
+                </p>
+              ) : null}
+            </form>
+          ) : null}
 
-        {/* Interactive enable/disable toggle — ONLY when genuinely bridge-ready. */}
-        {bridge.bridgeReady ? (
-          <form action={reviewFormAction} className="flex flex-col gap-1">
-            <DisplayedWorkspaceField />
-            <input type="hidden" name="workerId" value={workerId} />
-            <input type="hidden" name="enabled" value={nextEnabled} />
-            <button
-              type="submit"
-              disabled={isReviewPending}
-              className="self-start rounded-md bg-brand-blue px-3 py-1 text-meta font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
-              data-testid={`worker-ops-review-submit-${workerId}`}
-            >
-              {bridge.reviewActive
-                ? isReviewPending
-                  ? labels.review.disabling
-                  : labels.review.disableButton
-                : isReviewPending
-                  ? labels.review.enabling
-                  : labels.review.enableButton}
-            </button>
-            {reviewMessage ? (
-              <p
-                className={
-                  reviewMessage.ok
-                    ? "rounded-md border border-state-success bg-state-success/10 px-2 py-1 text-meta text-state-success"
-                    : "rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-meta text-state-warning"
-                }
-                role="status"
-                data-testid={`worker-ops-review-result-${workerId}`}
+          {/* Interactive enable/disable toggle — ONLY when genuinely bridge-ready. */}
+          {bridge.bridgeReady ? (
+            <form action={reviewFormAction} className="flex flex-col gap-1">
+              <DisplayedWorkspaceField />
+              <input type="hidden" name="workerId" value={workerId} />
+              <input type="hidden" name="enabled" value={nextEnabled} />
+              <button
+                type="submit"
+                disabled={isReviewPending}
+                className="self-start rounded-md bg-brand-blue px-3 py-1 text-meta font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
+                data-testid={`worker-ops-review-submit-${workerId}`}
               >
-                {reviewMessage.text}
-              </p>
-            ) : null}
-          </form>
-        ) : (
-          // Not bridge-ready → exact disabled-state blocker text.
-          <p
-            className="text-meta leading-relaxed text-text-muted"
-            data-testid={`worker-ops-review-disabled-note-${workerId}`}
-          >
-            {labels.review.blockerNotReady}
-          </p>
-        )}
+                {bridge.reviewActive
+                  ? isReviewPending
+                    ? labels.review.disabling
+                    : labels.review.disableButton
+                  : isReviewPending
+                    ? labels.review.enabling
+                    : labels.review.enableButton}
+              </button>
+              {reviewMessage ? (
+                <p
+                  className={
+                    reviewMessage.ok
+                      ? "rounded-md border border-state-success bg-state-success/10 px-2 py-1 text-meta text-state-success"
+                      : "rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-meta text-state-warning"
+                  }
+                  role="status"
+                  data-testid={`worker-ops-review-result-${workerId}`}
+                >
+                  {reviewMessage.text}
+                </p>
+              ) : null}
+            </form>
+          ) : (
+            // Not bridge-ready → exact disabled-state blocker text.
+            <p
+              className="text-meta leading-relaxed text-text-muted"
+              data-testid={`worker-ops-review-disabled-note-${workerId}`}
+            >
+              {labels.review.blockerNotReady}
+            </p>
+          )}
 
-        {/* Specific engagement-context bridge reason for this relationship.
+          {/* Specific engagement-context bridge reason for this relationship.
             Affirmative styling ONLY when the bridge is ready (review can be set
             up or is active) — never claims review is active unless reviewActive. */}
-        <p
-          className={
-            bridge.bridgeReady
-              ? "text-meta leading-relaxed text-brand-blue"
-              : "text-meta leading-relaxed text-text-muted"
-          }
-          data-testid={`worker-ops-bridge-reason-${workerId}`}
-          data-bridge-state={bridge.state}
-          data-bridge-ready={bridge.bridgeReady ? "true" : "false"}
-          data-review-active={bridge.reviewActive ? "true" : "false"}
-        >
-          {bridgeReasonText}
-        </p>
-      </div>
+          <p
+            className={
+              bridge.bridgeReady
+                ? "text-meta leading-relaxed text-brand-blue"
+                : "text-meta leading-relaxed text-text-muted"
+            }
+            data-testid={`worker-ops-bridge-reason-${workerId}`}
+            data-bridge-state={bridge.state}
+            data-bridge-ready={bridge.bridgeReady ? "true" : "false"}
+            data-review-active={bridge.reviewActive ? "true" : "false"}
+          >
+            {bridgeReasonText}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

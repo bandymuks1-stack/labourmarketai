@@ -81,7 +81,9 @@ export default async function CompanyPeoplePage({
   // READ access (any governance role the resolver accepted) — a manager
   // opens the People door of the organization they belong to.
   const companyProfile =
-    employerCtx.kind === "ok" ? await getAccessibleCompanyById(employerCtx.companyId) : null;
+    employerCtx.kind === "ok"
+      ? await getAccessibleCompanyById(employerCtx.companyId)
+      : null;
   const companyRow =
     companyProfile && companyProfile.kind === "ok" ? companyProfile.row : null;
   if (!companyRow || companyRow.legalName === null) {
@@ -89,7 +91,9 @@ export default async function CompanyPeoplePage({
       <div className="flex flex-col gap-6" data-testid="company-people">
         <CompanyNoProfileGuide
           reason={employerCtx.kind === "ok" ? null : employerCtx.reason}
-          activeWorkspaceName={employerCtx.kind === "ok" ? null : employerCtx.activeWorkspaceName}
+          activeWorkspaceName={
+            employerCtx.kind === "ok" ? null : employerCtx.activeWorkspaceName
+          }
         />
       </div>
     );
@@ -109,7 +113,8 @@ export default async function CompanyPeoplePage({
 
   const orgContext = await getActiveOrganizationContext();
   const capabilityOrgId =
-    orgContext.organizations.find((o) => o.legacyCompanyId === companyRow.id)?.id ??
+    orgContext.organizations.find((o) => o.legacyCompanyId === companyRow.id)
+      ?.id ??
     // Only a GOVERNED active organization — never an employee-only one.
     governedActiveOrganizationId(orgContext);
   const declaredCapabilities = capabilityOrgId
@@ -126,14 +131,20 @@ export default async function CompanyPeoplePage({
     ]);
   const workersResult = rWorkers ?? ({ kind: "ok", rows: [] } as const);
   const invitationsResult = rInvitations ?? ({ kind: "ok", rows: [] } as const);
-  const activeWorkerRows = workersResult.kind === "ok" ? workersResult.rows : [];
+  const activeWorkerRows =
+    workersResult.kind === "ok" ? workersResult.rows : [];
   // Roster-link candidates = the DATABASE's rule (active engagement or
   // membership + a worker row), not the legacy company_workers list alone —
   // the organization's own owner, named on its timesheet, is eligible too.
   const engagementCandidates = capabilityOrgId
-    ? await listRosterLinkCandidatesFromEngagements(await createClient(), capabilityOrgId)
+    ? await listRosterLinkCandidatesFromEngagements(
+        await createClient(),
+        capabilityOrgId,
+      )
     : [];
-  const readinessMap = await getWorkerReadiness(activeWorkerRows.map((w) => w.workerId));
+  const readinessMap = await getWorkerReadiness(
+    activeWorkerRows.map((w) => w.workerId),
+  );
   // Booked people (R-2 GREEN half): the direct-booking relationship, visible
   // beside the roster it is not part of, with its honest journal state. The
   // read is RLS-scoped to this company's own engagement rows.
@@ -160,7 +171,8 @@ export default async function CompanyPeoplePage({
       ? invitationsResult.rows.filter((i) => i.status === "pending").length
       : 0;
   const memberCount = orgMembers?.members.length ?? 0;
-  const reviewCount = orgMembers?.members.filter((m) => m.reviewEnabled).length ?? 0;
+  const reviewCount =
+    orgMembers?.members.filter((m) => m.reviewEnabled).length ?? 0;
 
   const [workersLabels, orgMembersLabels] = await Promise.all([
     readWorkersLabels(),
@@ -196,7 +208,9 @@ export default async function CompanyPeoplePage({
       {/* A manager's roster read is refused by `company_workers_select`
           (owner/admin only) and answers ZERO rows — said here, so the empty
           roster below is never read as "nobody works here" (SEP-7). */}
-      {employerCtx.kind === "ok" ? <ManagerScopeNotice role={employerCtx.role} /> : null}
+      {employerCtx.kind === "ok" ? (
+        <ManagerScopeNotice role={employerCtx.role} />
+      ) : null}
 
       <div id="company-team" className="scroll-mt-20">
         <CompanyWorkersSection
@@ -206,6 +220,11 @@ export default async function CompanyPeoplePage({
           roleCoordinationEnabled={isOperationsRoleEnabled("foreman")}
           canAssignRoles
           canManageInvitations={canManageInvitations}
+          reviewElsewhere={
+            orgMembers
+              ? { href: "#org-members", label: orgMembersLabels.title }
+              : undefined
+          }
         />
         {/* Užfiksuotas darbas (owner req. 15–17, #1724): the roster's
             recorded work through THE one work-intelligence reader, one call
@@ -251,7 +270,9 @@ export default async function CompanyPeoplePage({
           enquiriesApplied={teamBrigades.enquiriesApplied}
         />
       ) : (
-        <TeamRosterEmptyState variant={isStaffingAgency ? "agency" : "company"} />
+        <TeamRosterEmptyState
+          variant={isStaffingAgency ? "agency" : "company"}
+        />
       )}
 
       {/* BRINGING PEOPLE IN. The relationship that LEADS follows what the
@@ -261,7 +282,11 @@ export default async function CompanyPeoplePage({
       {capabilityOrgId ? (
         <div id="people-import-section" className="scroll-mt-20">
           <PeopleImportPanel
-            organizationName={(companyRow.displayName || companyRow.legalName || "").trim()}
+            organizationName={(
+              companyRow.displayName ||
+              companyRow.legalName ||
+              ""
+            ).trim()}
             suggested={
               declaredCapabilities.includes("training_provider")
                 ? "student"
@@ -282,7 +307,11 @@ export default async function CompanyPeoplePage({
           linkCandidates={mergeRosterLinkCandidates(
             activeWorkerRows
               .filter((w) => w.status === "active")
-              .map((w) => ({ workerId: w.workerId, profileId: w.profileId, name: w.displayName ?? w.email ?? w.workerId })),
+              .map((w) => ({
+                workerId: w.workerId,
+                profileId: w.profileId,
+                name: w.displayName ?? w.email ?? w.workerId,
+              })),
             engagementCandidates,
           )}
         />
@@ -293,20 +322,26 @@ export default async function CompanyPeoplePage({
       {managerEvidence && <ManagerEvidenceCard evidence={managerEvidence} />}
 
       {orgMembers && (
-        <OrgMembersPanel
-          orgId={orgMembers.orgId}
-          members={orgMembers.members}
-          addable={orgMembers.addable}
-          labels={orgMembersLabels}
-          viewerIsRegisteredOwner={orgMembers.viewerIsRegisteredOwner}
-          governanceWithoutReviewer={orgMembers.governanceWithoutReviewer}
-        />
+        <div id="org-members" className="scroll-mt-20">
+          <OrgMembersPanel
+            orgId={orgMembers.orgId}
+            members={orgMembers.members}
+            addable={orgMembers.addable}
+            labels={orgMembersLabels}
+            viewerIsRegisteredOwner={orgMembers.viewerIsRegisteredOwner}
+            governanceWithoutReviewer={orgMembers.governanceWithoutReviewer}
+          />
+        </div>
       )}
 
       {/* Employment lifecycle on the SAME canonical engagement_contexts rows
           the members panel above manages. Honest gated state until applied. */}
       {orgMembers && (
-        <LifecycleSection locale={locale} orgId={orgMembers.orgId} notice={lifecycleNotice} />
+        <LifecycleSection
+          locale={locale}
+          orgId={orgMembers.orgId}
+          notice={lifecycleNotice}
+        />
       )}
     </div>
   );
