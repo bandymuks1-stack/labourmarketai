@@ -118,15 +118,19 @@ export function WorkerTradeProfile({
           purpose: that section is gated on a primary REGISTRY profession, so
           somebody whose profession the catalogue does not carry would have
           seen nothing at all of what they told us (owner walk 2026-09-27).
-          Verbatim, never translated, never matched to a catalogue entry. */}
-      {ownProfessions.length > 0 && (
-        <section
+          Verbatim, never translated, never matched to a catalogue entry.
+          The section — and so its "add" form — renders for everyone: gated
+          on having one already, a person whose trade the catalogue lacks and
+          who did not type it at onboarding could never add their first
+          (production walk 2026-09-28). Only the list waits for entries. */}
+      <section
           className="card-border flex flex-col gap-3 p-5"
           data-testid="worker-own-professions"
         >
           <h3 className="font-display text-sm font-semibold text-text-primary">
             {t("ownProfessionsTitle")}
           </h3>
+          {ownProfessions.length > 0 && (
           <ul className="flex flex-wrap gap-2">
             {ownProfessions.map((own) => (
               <li
@@ -149,6 +153,7 @@ export function WorkerTradeProfile({
               </li>
             ))}
           </ul>
+          )}
           {/* The writer onboarding's copy promised: "Vėliau galėsite jas
               papildyti". Without it these words could only ever be entered in
               the first minutes of an account. */}
@@ -181,11 +186,12 @@ export function WorkerTradeProfile({
               {t("ownProfessionAdd")}
             </Button>
           </form>
-          <p className="text-meta leading-relaxed text-text-muted">
-            {t("ownProfessionsNote")}
-          </p>
+          {ownProfessions.length > 0 && (
+            <p className="text-meta leading-relaxed text-text-muted">
+              {t("ownProfessionsNote")}
+            </p>
+          )}
         </section>
-      )}
 
       {currentProfessionId && (
         <section className="card-border flex flex-col gap-3 p-5">
