@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -10,6 +11,7 @@ import { RefreshOnFocus } from "@/components/app/refresh-on-focus";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { createClient } from "@/lib/supabase/server";
 import { resolveViewerTexts } from "@/lib/communication/translation-read";
+import type { ViewerText } from "@/lib/communication/translation";
 import { describeConversationCard } from "@/lib/communication/conversation-display";
 import { readCounterpartIdentities } from "@/lib/communication/contact-permission";
 import { readConversationSourceContexts } from "@/lib/communication/conversation-source";
@@ -105,7 +107,13 @@ export default async function ConversationDetailPage({
   // language through the existing AI runtime (egress-gated, audited), the
   // original always one tap away. Without an owner egress grant every
   // message comes back as its original — honestly, with a language badge.
-  const viewerTexts = await resolveViewerTexts(
+  //
+  // NOT awaited here: each message streams in behind its own Suspense
+  // boundary, showing the ORIGINAL until the viewer's rendering arrives.
+  // Awaited, a slow provider held the whole conversation back — production
+  // walk 2026-09-28: 32 s before any message appeared (two 15 s provider
+  // timeouts), then "no translation" anyway. A failed read yields originals.
+  const viewerTexts = resolveViewerTexts(
     messages.map((m) => ({
       id: m.id,
       body: m.body,
@@ -114,7 +122,7 @@ export default async function ConversationDetailPage({
     })),
     locale,
     user.id,
-  );
+  ).catch(() => new Map<string, ViewerText>());
 
   // Message attachments (user-journey repair v1) — participant-scoped
   // metadata + short-lived signed URLs from the PRIVATE bucket. Degrades to
@@ -307,58 +315,9 @@ export default async function ConversationDetailPage({
                     {formatUtcDateTime(m.created_at, locale)}
                   </PlaceTimeStamp>
                 </div>
-                {(() => {
-                  const vt = viewerTexts.get(m.id) ?? {
-                    text: m.body,
-                    kind: "original" as const,
-                    state: "unknown_language" as const,
-                    unavailable: null,
-                    languageBadge: null,
-                    original: m.body,
-                    provider: null,
-                  };
-                  return (
-                    <>
-                      {vt.languageBadge ? (
-                        <span
-                          className="self-start rounded-sm border border-ink-500 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
-                          data-testid={`message-lang-${m.id}`}
-                          data-kind={vt.kind}
-                          data-state={vt.state}
-                          data-unavailable={vt.unavailable ?? undefined}
-                        >
-                          {vt.kind === "translated"
-                            ? t("translatedFrom", { lang: vt.languageBadge.toUpperCase() })
-                            : vt.state === "original_foreign"
-                              ? t("translationUnavailable", { lang: vt.languageBadge.toUpperCase() })
-                              : t("originalLanguage", { lang: vt.languageBadge.toUpperCase() })}
-                        </span>
-                      ) : null}
-                      {vt.text.length > 0 ? (
-                        <p
-                          className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary"
-                          data-testid={`message-text-${m.id}`}
-                          data-kind={vt.kind}
-                        >
-                          {vt.text}
-                        </p>
-                      ) : null}
-                      {vt.kind === "translated" ? (
-                        <details
-                          className="text-meta text-text-muted"
-                          data-testid={`message-original-${m.id}`}
-                        >
-                          <summary className="cursor-pointer font-mono uppercase tracking-label">
-                            {t("showOriginal", { lang: (vt.languageBadge ?? "").toUpperCase() })}
-                          </summary>
-                          <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-text-secondary">
-                            {vt.original}
-                          </p>
-                        </details>
-                      ) : null}
-                    </>
-                  );
-                })()}
+                <Suspense fallback={<OriginalMessageText id={m.id} body={m.body} />}>
+                  <ViewerMessageText m={m} viewerTexts={viewerTexts} t={t} />
+                </Suspense>
                 {(() => {
                   const atts = attachmentsByMessage.get(m.id) ?? [];
                   if (atts.length === 0) return null;
@@ -423,5 +382,82 @@ export default async function ConversationDetailPage({
         locale={locale}
       />
     </div>
+  );
+}
+
+/** A message's text as the viewer reads it — awaited INSIDE its Suspense
+ *  boundary, so a slow translation never holds the conversation back. */
+async function ViewerMessageText({
+  m,
+  viewerTexts,
+  t,
+}: {
+  m: { id: string; body: string };
+  viewerTexts: Promise<ReadonlyMap<string, ViewerText>>;
+  t: Awaited<ReturnType<typeof getTranslations<"communication">>>;
+}) {
+  const vt = (await viewerTexts).get(m.id) ?? {
+    text: m.body,
+    kind: "original" as const,
+    state: "unknown_language" as const,
+    unavailable: null,
+    languageBadge: null,
+    original: m.body,
+    provider: null,
+  };
+  return (
+    <>
+      {vt.languageBadge ? (
+        <span
+          className="self-start rounded-sm border border-ink-500 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
+          data-testid={`message-lang-${m.id}`}
+          data-kind={vt.kind}
+          data-state={vt.state}
+          data-unavailable={vt.unavailable ?? undefined}
+        >
+          {vt.kind === "translated"
+            ? t("translatedFrom", { lang: vt.languageBadge.toUpperCase() })
+            : vt.state === "original_foreign"
+              ? t("translationUnavailable", { lang: vt.languageBadge.toUpperCase() })
+              : t("originalLanguage", { lang: vt.languageBadge.toUpperCase() })}
+        </span>
+      ) : null}
+      {vt.text.length > 0 ? (
+        <p
+          className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary"
+          data-testid={`message-text-${m.id}`}
+          data-kind={vt.kind}
+        >
+          {vt.text}
+        </p>
+      ) : null}
+      {vt.kind === "translated" ? (
+        <details
+          className="text-meta text-text-muted"
+          data-testid={`message-original-${m.id}`}
+        >
+          <summary className="cursor-pointer font-mono uppercase tracking-label">
+            {t("showOriginal", { lang: (vt.languageBadge ?? "").toUpperCase() })}
+          </summary>
+          <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-text-secondary">
+            {vt.original}
+          </p>
+        </details>
+      ) : null}
+    </>
+  );
+}
+
+/** Until the viewer's rendering arrives: the original, as written. */
+function OriginalMessageText({ id, body }: { id: string; body: string }) {
+  if (body.length === 0) return null;
+  return (
+    <p
+      className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary"
+      data-testid={`message-text-${id}`}
+      data-kind="original"
+    >
+      {body}
+    </p>
   );
 }
