@@ -13800,7 +13800,7 @@
       },
       "opportunities": {
         "title": "Passende Jobs",
-        "titleDiscovery": "Gefundene Anzeigen (noch nicht bewertet)"
+        "titleDiscovery": "Gefundene Anzeigen"
       },
       "opportunitiesError": "Die passenden Jobs konnten nicht geladen werden.",
       "opportunitiesUnavailable": "Die Bedarfsquelle ist noch nicht aktiviert, es gibt also noch nichts zum Abgleichen.",
