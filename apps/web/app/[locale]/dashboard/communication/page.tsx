@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Link } from "@/lib/i18n/navigation";
 import { Lock } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { Card } from "@/components/ui/Card";
 import { SupportConversationLauncher } from "@/components/app/support-conversation-launcher";
 import { AttentionInstructions } from "@/components/app/attention-instructions";
 import { RefreshOnFocus } from "@/components/app/refresh-on-focus";
@@ -511,10 +512,8 @@ export default async function CommunicationListPage({
             conversations own the first place) and the one privacy line. No
             composer here: a composer needs a real conversation to send into,
             and a disabled one would pretend otherwise. */}
-        <section
-          data-testid="communication-thread-pane"
-          className="card-border flex flex-col items-center justify-center gap-4 p-6"
-        >
+        <section data-testid="communication-thread-pane" className="flex min-w-0 flex-col">
+          <Card className="flex flex-1 flex-col items-center justify-center gap-4">
           {conversations.length > 0 && (
             <p className="text-center text-sm text-text-secondary" data-testid="communication-pane-pick">
               {t("panePick")}
@@ -522,6 +521,7 @@ export default async function CommunicationListPage({
           )}
           <SupportConversationLauncher locale={locale} />
           <p className="text-center text-meta text-text-muted">{t("footnote")}</p>
+          </Card>
         </section>
       </div>
     </div>
