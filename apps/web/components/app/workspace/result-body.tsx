@@ -1,17 +1,54 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/Button";
-import { CalendarResult } from "@/components/app/workspace/calendar-result";
-import { CandidatesResult } from "@/components/app/workspace/candidates-result";
-import { EngagementsResult } from "@/components/app/workspace/engagements-result";
-import { ExperiencesResult } from "@/components/app/workspace/experiences-result";
-import { MarketDrilldown } from "@/components/app/workspace/market-drilldown";
-import { OpportunitiesResult } from "@/components/app/workspace/opportunities-result";
-import { PlayerCardResult } from "@/components/app/workspace/player-card-result";
-import { ProjectResult } from "@/components/app/workspace/project-result";
+import { SkeletonText } from "@/components/app/skeleton";
 import type { GeographySelection } from "@/lib/market-map/geography-selection";
+
+/*
+ * Each result renders only after the person opens it, and at most one is on
+ * screen at a time — so each loads when it is first rendered instead of with
+ * Home. Measured on production 2026-09-28: these eight, with what they pull
+ * in (the player card's motion ring, the market drilldown, the candidate and
+ * project views), were ~190 KB of Home's initial script that nothing on the
+ * first screen used. Same components, same props; a deep link that opens a
+ * result still renders it on the server.
+ */
+const loadingResult = () => <SkeletonText lines={4} />;
+const CalendarResult = dynamic(
+  () => import("@/components/app/workspace/calendar-result").then((m) => m.CalendarResult),
+  { loading: loadingResult },
+);
+const CandidatesResult = dynamic(
+  () => import("@/components/app/workspace/candidates-result").then((m) => m.CandidatesResult),
+  { loading: loadingResult },
+);
+const EngagementsResult = dynamic(
+  () => import("@/components/app/workspace/engagements-result").then((m) => m.EngagementsResult),
+  { loading: loadingResult },
+);
+const ExperiencesResult = dynamic(
+  () => import("@/components/app/workspace/experiences-result").then((m) => m.ExperiencesResult),
+  { loading: loadingResult },
+);
+const MarketDrilldown = dynamic(
+  () => import("@/components/app/workspace/market-drilldown").then((m) => m.MarketDrilldown),
+  { loading: loadingResult },
+);
+const OpportunitiesResult = dynamic(
+  () => import("@/components/app/workspace/opportunities-result").then((m) => m.OpportunitiesResult),
+  { loading: loadingResult },
+);
+const PlayerCardResult = dynamic(
+  () => import("@/components/app/workspace/player-card-result").then((m) => m.PlayerCardResult),
+  { loading: loadingResult },
+);
+const ProjectResult = dynamic(
+  () => import("@/components/app/workspace/project-result").then((m) => m.ProjectResult),
+  { loading: loadingResult },
+);
 
 import {
   canRenderInline,
