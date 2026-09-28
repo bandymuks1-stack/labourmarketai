@@ -653,7 +653,13 @@ export default async function OpportunitiesPage({
       ? (() => {
           const r = result.readiness;
           const facts: string[] = [];
-          if (r.professionSlug) {
+          if (r.professionSlugs.length > 1) {
+            // Every declared profession fed this board — so the basis names
+            // them all, never only the primary (owner decision 2026-09-28).
+            facts.push(
+              t("world.fact.professions", { value: r.professionSlugs.map(roleLabel).join(", ") }),
+            );
+          } else if (r.professionSlug) {
             facts.push(t("world.fact.profession", { value: roleLabel(r.professionSlug) }));
           } else {
             // The declaration is shown as the person wrote it; when the fit

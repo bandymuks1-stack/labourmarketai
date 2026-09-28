@@ -9433,6 +9433,7 @@
       "assessedAgainst": "Оценено по: {facts}",
       "fact": {
         "profession": "профессия — {value}",
+        "professions": "профессии — {value}",
         "professionEvidenced": "профессия по записям о работе — {value}",
         "professionMissing": "профессия не указана",
         "skills": "навыки — {count}",
