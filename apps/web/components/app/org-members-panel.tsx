@@ -163,9 +163,10 @@ export function OrgMembersPanel({
                 {m.name}
               </span>
               <span className="flex flex-wrap items-center gap-2">
-                {/* Journal review is an employee-engagement flag — the RPC
-                    rejects any other slug, so the control is not offered. */}
-                {m.role === "employee" && (
+                {/* Journal review is offered exactly where the RPC accepts it
+                    (relationship_types.journal_reviewable): an employee, and
+                    since 2026-09-28 a collaborator placed by an agency. */}
+                {m.reviewable && (
                   <Button
                     type="button"
                     size="sm"

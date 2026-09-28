@@ -47,6 +47,10 @@ export type OrgMember = {
   profileId: string | null;
   name: string;
   reviewEnabled: boolean;
+  /** The relationship's journal review can be switched on — the SAME data
+   *  rule `set_engagement_journal_review` applies
+   *  (relationship_types.journal_reviewable), never a UI literal. */
+  reviewable: boolean;
   /** Canonical relationship_slug — what this membership actually grants. */
   role: string;
   /** True when this profile is the organization's registered owner. The
@@ -158,6 +162,18 @@ export async function getOrgMembersData(
       if (w.profile_id && d) displayByProfile.set(w.profile_id, d);
     }
   }
+  // Which relationships may carry journal review — read from the catalog the
+  // RPC itself consults. Unreadable → employee only (the previous rule), so a
+  // failed read never offers a control the RPC would refuse.
+  // (`journal_reviewable` is newer than the generated types — untyped read.)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: rtRows, error: rtError } = await (supabase as any)
+    .from("relationship_types")
+    .select("slug")
+    .eq("journal_reviewable", true);
+  const reviewableSlugs = new Set<string>(
+    rtError || !rtRows ? ["employee"] : (rtRows as { slug: string }[]).map((r) => r.slug),
+  );
   const members: OrgMember[] = (ecRows ?? []).map((r) => ({
     engagementId: r.id as string,
     profileId: (r.profile_id as string | null) ?? null,
@@ -166,6 +182,7 @@ export async function getOrgMembersData(
         ? (displayByProfile.get(r.profile_id as string) ?? "—")
         : profName(r.profiles),
     reviewEnabled: r.journal_review_enabled === true,
+    reviewable: reviewableSlugs.has(String(r.relationship_slug ?? "")),
     role: (r.relationship_slug as string | null) ?? "other",
     isRegisteredOwner:
       org.ownerProfileId !== null && r.profile_id === org.ownerProfileId,
