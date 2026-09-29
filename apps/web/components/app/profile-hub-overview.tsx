@@ -671,11 +671,19 @@ export async function ProfileHubOverview({
                               {/* An unknown employer or date renders as an
                                   honest gap, not a guess — the model already
                                   nulled them. */}
-                              <span>{e.organizationName ?? tLive("orgUnknown")}</span>
+                              {/* A self-declared job with no organization record
+                                  (chat history entry, 2026-09-29) is its own
+                                  title — "(organizacija nerodoma)" read as if an
+                                  employer were being hidden. */}
+                              {e.organizationName ? (
+                                <span>{e.organizationName}</span>
+                              ) : e.title ? null : (
+                                <span>{tLive("orgUnknown")}</span>
+                              )}
                               {e.title ? (
-                                <span className="text-text-secondary">
-                                  {" "}
-                                  — {e.title}
+                                <span className={e.organizationName ? "text-text-secondary" : undefined}>
+                                  {e.organizationName ? " — " : ""}
+                                  {e.title}
                                 </span>
                               ) : null}
                             </span>
