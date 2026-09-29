@@ -110,6 +110,7 @@ import { loadCompanyStagesForChat } from "@/lib/conversation/company-stages";
 import { loadProjectMoveOptionsForChat, loadProjectMoveWhatIfForChat } from "@/lib/conversation/project-move";
 import type { StageStatus } from "@/lib/projects/stages-model";
 import { stripEndDatePhrase, parseEndDate, parseStartDate } from "@/lib/structuring/time-window";
+import { payPrefill, readPayStatement } from "@/lib/conversation/pay-statement";
 import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace-contract";
 import { STARTER_CAP, personStarters, type StarterChipSpec } from "@/lib/conversation/starters";
 import { trackFunnel } from "@/lib/telemetry/task";
@@ -6076,6 +6077,37 @@ export function ConversationChat({
                   ...(from ? { availableFrom: from } : {}),
                 },
           );
+        },
+        /**
+         * "Mano atlyginimo lūkestis nuo 2500 iki 3500 eurų" (2026-09-29): the
+         * person states a PAY EXPECTATION. Its one home is the work card's
+         * monthly range, so the SAME `worker.save-work-card` form opens with
+         * the figures laid over what the card holds; nothing is written until
+         * the person saves it. An hourly rate or an unreadable figure is
+         * asked about, never stored as a monthly one.
+         */
+        payStatement: () => {
+          if (identity === "company") {
+            const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+            assistant(
+              t("pay.notInCompany"),
+              personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+            );
+            return;
+          }
+          const pay = readPayStatement(text);
+          assistant(
+            pay.kind === "range"
+              ? t("pay.understoodRange", { min: pay.min, max: pay.max })
+              : pay.kind === "min"
+                ? t("pay.understoodMin", { min: pay.min })
+                : pay.kind === "max"
+                  ? t("pay.understoodMax", { max: pay.max })
+                  : pay.kind === "not-monthly"
+                    ? t("pay.notMonthly")
+                    : t("pay.askFigure"),
+          );
+          openForm("worker.save-work-card", undefined, undefined, payPrefill(pay));
         },
         skillGap: () => runWorkflow(() => runSkillGap()),
         recentJournal: () => runWorkflow(() => runRecentJournal(text)),

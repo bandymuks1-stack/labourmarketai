@@ -13212,6 +13212,14 @@
         "notInCompany": "Vanaf wanneer je kunt werken is jouw eigen gegeven, niet dat van het bedrijf. Schakel over naar je persoonlijke ruimte en zeg het opnieuw.",
         "changeRequested": "Ik open je werkkaart — geef aan vanaf wanneer je kunt werken en sla op. Er verandert niets tot je dat doet."
       },
+      "pay": {
+        "understoodRange": "Begrepen: salarisverwachting {min}–{max} € per maand. Ik heb de bedragen in je werkkaart gezet — controleer en sla op. Er verandert niets tot je opslaat.",
+        "understoodMin": "Begrepen: salarisverwachting minimaal {min} € per maand. Ik heb het bedrag in je werkkaart gezet — controleer en sla op. Er verandert niets tot je opslaat.",
+        "understoodMax": "Begrepen: salarisverwachting tot {max} € per maand. Ik heb het bedrag in je werkkaart gezet — controleer en sla op. Er verandert niets tot je opslaat.",
+        "notMonthly": "Je werkkaart bewaart een maandsalaris in euro, en je noemde een uur- of dagtarief. Vul het maandbedrag in en sla op.",
+        "askFigure": "Ik open je werkkaart — vul je maandelijkse salarisverwachting in (van / tot) en sla op.",
+        "notInCompany": "Je salarisverwachting is jouw eigen gegeven, niet dat van het bedrijf. Schakel naar je persoonlijke ruimte en zeg het opnieuw."
+      },
       "findWorkInCompanyContext": "Werk zoeken is je eigen handeling — in de bedrijfsruimte voer ik die niet uit. Schakel over naar je persoonlijke ruimte en vraag het opnieuw.",
       "findWorkInCompanyWhy": "Een persoon zoekt werk, geen bedrijf — ik antwoord vanuit je persoonlijke ruimte.",
       "journalAskWhatYouDid": "Wat heb je vandaag gedaan? Schrijf het in het veld „Wat je deed“ in je eigen woorden — bijv. „ramen gemonteerd op de locatie Kaunas van 8 tot 17“. Het verzoek zelf wordt niet in het dagboek opgeslagen.",

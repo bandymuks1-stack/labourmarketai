@@ -13212,6 +13212,14 @@
         "notInCompany": "Od kiedy możesz pracować to Twój własny fakt, nie firmy. Przełącz się na przestrzeń osobistą i napisz ponownie.",
         "changeRequested": "Otwieram twoją kartę pracy — wskaż, od kiedy możesz pracować, i zapisz. Nic się nie zmieni, dopóki tego nie zrobisz."
       },
+      "pay": {
+        "understoodRange": "Rozumiem: oczekiwane wynagrodzenie {min}–{max} € miesięcznie. Wpisałem kwoty do Twojej karty pracy — sprawdź i zapisz. Dopóki nie zapiszesz, nic się nie zmieni.",
+        "understoodMin": "Rozumiem: oczekiwane wynagrodzenie co najmniej {min} € miesięcznie. Wpisałem kwotę do Twojej karty pracy — sprawdź i zapisz. Dopóki nie zapiszesz, nic się nie zmieni.",
+        "understoodMax": "Rozumiem: oczekiwane wynagrodzenie do {max} € miesięcznie. Wpisałem kwotę do Twojej karty pracy — sprawdź i zapisz. Dopóki nie zapiszesz, nic się nie zmieni.",
+        "notMonthly": "Karta pracy przechowuje miesięczne wynagrodzenie w euro, a podałeś stawkę godzinową lub dzienną. Wpisz kwotę miesięczną i zapisz.",
+        "askFigure": "Otwieram Twoją kartę pracy — wpisz oczekiwane wynagrodzenie miesięczne (od / do) i zapisz.",
+        "notInCompany": "Oczekiwane wynagrodzenie to Twoja własna informacja, nie firmy. Przełącz się na przestrzeń osobistą i napisz jeszcze raz."
+      },
       "findWorkInCompanyContext": "Szukanie pracy to Twoje własne działanie — w przestrzeni firmy go nie uruchamiam. Przełącz się na przestrzeń osobistą i zapytaj ponownie.",
       "findWorkInCompanyWhy": "Pracy szuka człowiek, nie firma — odpowiadam z Twojej przestrzeni osobistej.",
       "journalAskWhatYouDid": "Co dziś robiłeś? Wpisz w polu „Co robiłeś” własnymi słowami — np. „montowałem okna na budowie w Kownie od 8 do 17”. Sama prośba nie jest zapisywana do dziennika.",
