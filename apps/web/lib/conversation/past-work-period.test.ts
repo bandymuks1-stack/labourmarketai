@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { classifyIntent } from "@/lib/conversation/intent-router";
+import { readCompoundStatement } from "@/lib/conversation/compound-statement";
 import { pastWorkOwnWords, readPastWorkPeriod } from "@/lib/conversation/past-work-period";
 import { readProfessionStatement } from "@/lib/structuring/role-label";
 
@@ -38,5 +39,13 @@ describe("past work with years", () => {
     expect(readProfessionStatement("2018–2020 dirbau stogdengiu Norvegijoje.")?.label).toBe("Stogdengys");
     expect(readProfessionStatement("Esu stogdengys")?.label).toBe("Stogdengys");
     expect(readProfessionStatement("Dar dirbu ir stogdengiu.")?.label).toBe("Stogdengys");
+  });
+});
+
+
+describe("a dated past job is not split into a list of facts", () => {
+  it("the trade's own word form is not a second 'skill' fact", () => {
+    const c = readCompoundStatement("Dirbu stogdengiu jau 5 metus.");
+    expect(c.facts.filter((f) => f.kind === "skill").map((f) => f.statedAs.toLowerCase())).not.toContain("stogdengiu");
   });
 });
