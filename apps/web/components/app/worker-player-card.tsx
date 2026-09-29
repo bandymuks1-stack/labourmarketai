@@ -34,6 +34,8 @@ import type { ProvenanceClass } from "@/lib/evidence/provenance";
 import { cn } from "@/lib/utils";
 import { Link } from "@/lib/i18n/navigation";
 import { IdentityStage, type IdentityFact } from "@/components/app/player-card/identity-stage";
+import { PlayerCardModes } from "@/components/app/player-card/player-card-modes";
+import type { PlayerCardMode } from "@/lib/player-card/card-modes";
 
 /**
  * Worker player-card — the premium scouting card (TASK 07 slice
@@ -64,7 +66,16 @@ export interface PlayerCardLabels {
   /** The journal's own all-time figures; empty when not read by this mount. */
   identityFacts: IdentityFact[];
   /** The card's mode rail — the same person, seen as work / skills / … */
-  modes: { label: string; work: string; skills: string; evidence: string; history: string };
+  modes: {
+    label: string;
+    identity: string;
+    work: string;
+    skills: string;
+    evidence: string;
+    history: string;
+    next: string;
+    nextOpportunities: string;
+  };
   title: string;
   subtitle: string;
   /** P6 — the provenance class + its already-localised text equivalent
@@ -242,6 +253,7 @@ export function WorkerPlayerCard({
   thermometer,
   avatarUrl = null,
   sample = false,
+  initialMode = "identity",
 }: {
   card: WorkerPlayerCardData;
   labels: PlayerCardLabels;
@@ -259,6 +271,8 @@ export function WorkerPlayerCard({
    * render — only the links are withheld.
    */
   sample?: boolean;
+  /** The mode the card opens in (a page's `?card=`, the chat's request). */
+  initialMode?: PlayerCardMode;
 }) {
   const confirmed = card.workCardConfirmed;
   // Honest readiness signals (real met/total), drives the status ring + line.
@@ -318,6 +332,389 @@ export function WorkerPlayerCard({
   const historyUnavailable = card.unavailable.includes("workHistory");
   const verifiedUnavailable = card.unavailable.includes("verifiedSkills");
   const skillsUnavailable = card.unavailable.includes("skillsDeclared");
+  const secA = (
+    <>
+        {/* ── Readiness signal line: what is met + what to do next (honest) ── */}
+        <div
+          id="player-card-work"
+          className="flex scroll-mt-20 flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+          data-testid="player-card-readiness"
+          data-readiness-level={readiness.level}
+        >
+          <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
+            {labels.readiness.label}
+            <span className="text-text-secondary">
+              {readiness.met}/{readiness.total} {labels.readiness.signalsTemplate}
+            </span>
+          </span>
+          {missing.length > 0 ? (
+            <span className="flex flex-wrap items-center gap-1.5 text-meta leading-relaxed text-text-secondary">
+              <span className="text-text-muted">{labels.readiness.nextLabel}</span>
+              {missing.map((k) => (
+                <span
+                  key={k}
+                  className="inline-flex items-center rounded-sm border border-ink-500 px-1.5 py-0.5 text-meta text-text-secondary"
+                >
+                  {labels.readiness.pillars[k]}
+                </span>
+              ))}
+            </span>
+          ) : (
+            <span className="text-meta leading-relaxed text-text-secondary">
+              {labels.readiness.hint}
+            </span>
+          )}
+        </div>
+    </>
+  );
+  const secB = (
+    <>
+        {/* ── Real-state chips: availability + work-card confirmation ── */}
+        <div className="flex flex-wrap items-center gap-2">
+          {labels.availabilityLabel ? (
+            <span
+              className="inline-flex min-h-7 items-center gap-2 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
+              data-testid="player-card-availability"
+            >
+              {card.availabilityStatus === "available" ? (
+                <span className="live-dot" aria-hidden />
+              ) : null}
+              {labels.availabilityLabel}
+            </span>
+          ) : null}
+          {labels.availabilityFrom ? (
+            <span
+              className="inline-flex min-h-7 items-center rounded-full border border-ink-500 bg-ink-800 px-3 py-1 text-meta text-text-secondary"
+              data-testid="player-card-available-from"
+            >
+              {labels.availabilityFrom}
+            </span>
+          ) : null}
+          {/* §5.2 LOCATION — the worker's own stated country, country
+              precision only (the card never implies an address). */}
+          {labels.locationName ? (
+            <span
+              className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 text-meta text-text-secondary"
+              data-testid="player-card-location"
+            >
+              <MapPin className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />
+              {labels.locationName}
+            </span>
+          ) : null}
+          <span
+            className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
+            data-testid="player-card-workcard"
+          >
+            <Shield className="h-3.5 w-3.5" aria-hidden />
+            {confirmed ? labels.workCardConfirmed : labels.workCardPending}
+            <span className="sr-only">{labels.workCardLabel}</span>
+          </span>
+        </div>
+    </>
+  );
+  const secC = (
+    <>
+        {/* ── Skill signals: neutral list (silent-trust rule). No green
+            "verified" glow, no certification badge — confirmation stays an
+            internal signal and is never advertised on this self-view card. ── */}
+        <div id="player-card-skills" className="flex scroll-mt-20 flex-col gap-2" data-testid="player-card-skill-signals">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {labels.verifiedTitle}
+          </span>
+          {verifiedUnavailable ? (
+            <p
+              role="status"
+              data-testid="player-card-verified-unavailable"
+              className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-meta leading-relaxed text-text-secondary"
+            >
+              {labels.verifiedUnavailable}
+            </p>
+          ) : card.verifiedSkills.length > 0 ? (
+            <ul className="flex flex-wrap gap-2">
+              {card.verifiedSkills.map((s, i) => (
+                <li
+                  key={s.slug}
+                  className="inline-flex min-h-8 items-center gap-1.5 rounded-md border border-ink-500 bg-ink-800 px-2.5 py-1.5 text-xs font-medium text-text-secondary"
+                >
+                  <SkillIcon slug={s.iconSlug} className="h-3.5 w-3.5" />
+                  {labels.verifiedSkillNames[i] ?? s.slug}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-meta leading-relaxed text-text-muted">
+              {labels.verifiedEmpty}
+            </p>
+          )}
+          {/* Evidence ladder middle rung: work-journal-supported skills. Shown
+              ONLY when there are any — a calm cyan tone (NOT the green
+              manager-verified glow, NOT the gold trust ring), so the three
+              tiers stay visually distinct and honest (DESIGN_SOUL §1). */}
+          {card.journalSupportedSkills > 0 ? (
+            <p
+              className="inline-flex items-center gap-2 self-start rounded-md border border-brand-cyan/30 bg-brand-cyan/10 px-2.5 py-1.5 text-meta leading-relaxed text-brand-cyan"
+              data-testid="player-card-journal-supported"
+              title={labels.journalSupportedHint}
+            >
+              <Sparkle className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              <span className="font-mono font-bold">{card.journalSupportedSkills}</span>
+              <span>· {labels.journalSupportedLabel}</span>
+            </p>
+          ) : null}
+        </div>
+    </>
+  );
+  const secD = (
+    <>
+        {/* ── §5.2 EVIDENCE VIEWS — the card's real data visualizations.
+              Growth over time and per-skill strength sit side by side on wide
+              screens and stack on a phone; both read from the worker's OWN rows
+              and both state an honest empty case instead of an empty frame. ── */}
+        <div
+          id="player-card-evidence"
+          className="grid scroll-mt-20 gap-3 lg:grid-cols-2"
+          data-testid="player-card-visualizations"
+        >
+          <EvidenceTimelineChart
+            months={card.evidenceTimeline}
+            labels={labels.visuals.evidence}
+          />
+          <SkillEvidenceChart
+            skills={card.skillEvidence}
+            labels={labels.visuals.skills}
+            // W5 slice 3: this card renders the worker's OWN rows only, so the
+            // drill-down never widens visibility — it opens their own journal.
+            // A sample card has no journal behind it, so it never drills down.
+            linkBarsToJournal={!sample}
+          />
+        </div>
+    </>
+  );
+  const secE = (
+    <>
+        {/* ── §5.2 WORK HISTORY as a real time band (the text list follows) ── */}
+        <span id="player-card-history" aria-hidden className="block scroll-mt-20" />
+        <WorkHistoryTimeline
+          timeline={historyTimeline}
+          labels={labels.visuals.history}
+          readState={historyUnavailable ? "unavailable" : "ok"}
+        />
+    </>
+  );
+  const secF = (
+    <>
+        {/* ── Honest dimensions (real counts, plain zeros — and a named
+              "could not be read" where the read failed, never a zero) ── */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Stat
+            testid="player-card-skills"
+            value={skillsUnavailable ? "—" : String(card.skillsDeclared)}
+            label={labels.skillsLabel}
+            hint={skillsUnavailable ? labels.skillsUnavailable : labels.skillsHint}
+            href="/dashboard/profile#capabilities"
+            inert={sample}
+          />
+          <Stat
+            testid="player-card-candidate"
+            value={String(card.candidateSkills)}
+            label={labels.candidateLabel}
+            hint={labels.candidateHint}
+            href="/dashboard/profile#candidate-skills"
+            inert={sample}
+          />
+          <Stat
+            testid="player-card-evidence"
+            value={String(card.evidenceEntries)}
+            label={labels.evidenceLabel}
+            hint={labels.evidenceHint}
+            href="/dashboard/journal#journal-entries"
+            inert={sample}
+          />
+          <Stat
+            testid="player-card-attention"
+            value={String(card.attentionInstructions)}
+            label={labels.attentionLabel}
+            hint={card.attentionInstructions === 0 ? labels.attentionZero : labels.attentionHint}
+            href="/dashboard/communication"
+            inert={sample}
+          />
+        </div>
+    </>
+  );
+  const secG = (
+    <>
+        {/* ── §5.2 WORK HISTORY — WHERE the work happened, from the canonical
+              engagement spine. Newest first, bounded to the most recent few:
+              the card states a history, it does not become a CV page. An empty
+              history renders nothing (it is a fact, not a gap to pad). */}
+        {unplacedHistory.length > 0 ? (
+          <div className="flex flex-col gap-1.5" data-testid="player-card-work-history">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+              {labels.workHistoryLabel}
+            </span>
+            <ul className="flex flex-col gap-1">
+              {unplacedHistory.slice(0, 3).map((h) => (
+                <li
+                  key={h.id}
+                  className="flex flex-wrap items-baseline gap-x-2 text-basis text-text-primary"
+                >
+                  <span className="font-medium">
+                    {h.organizationName ?? h.title}
+                  </span>
+                  {h.startedAt ? (
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {h.startedAt}
+                      {h.current ? ` — ${labels.workHistoryCurrent}` : h.endedAt ? ` — ${h.endedAt}` : ""}
+                    </span>
+                  ) : null}
+                  {labels.visuals.history.hoursById?.[h.id] ? (
+                    <span
+                      className="text-meta leading-relaxed text-text-secondary"
+                      data-testid="player-card-history-hours"
+                    >
+                      {labels.visuals.history.hoursById[h.id]}
+                    </span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+    </>
+  );
+  const secH = (
+    <>
+        {/* ── §5.2 DOCUMENTS + REPUTATION ──────────────────────────────────
+              Two facts other people actually care about, both from real rows:
+              how many of the worker's documents are currently valid (with the
+              genuinely-expiring ones called out), and what other people have
+              really CONFIRMED about this work. There is no universal human
+              score here and no medal tier — a reputation with nothing
+              confirmed yet says exactly that. */}
+        <div className="grid gap-3 sm:grid-cols-2">
+          {labels.documentsLabel && labels.documentsValue ? (
+            <div
+              className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+              data-testid="player-card-documents"
+            >
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                {labels.documentsLabel}
+              </span>
+              <span className="text-sm text-text-primary">{labels.documentsValue}</span>
+            </div>
+          ) : null}
+          <div
+            className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+            data-testid="player-card-reputation"
+          >
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+              {labels.reputationLabel}
+            </span>
+            <span className="text-sm text-text-primary">
+              {labels.reputationValue ?? labels.reputationEmpty}
+            </span>
+            <span className="text-meta leading-relaxed text-text-muted">
+              {labels.reputationHint}
+            </span>
+          </div>
+        </div>
+    </>
+  );
+  const secI = (
+    <>
+        {/* ── Thermometer (S4) — owner-locked formula; a number ONLY when both
+              components exist, otherwise the honest missing-data state ── */}
+        {thermometer ? (
+          <div
+            className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+            data-testid="player-card-thermometer"
+          >
+            <span className="inline-flex items-center gap-1.5 font-mono text-meta uppercase tracking-label text-text-muted">
+              <Thermometer className="h-3.5 w-3.5" aria-hidden />
+              {labels.thermoLabel}
+            </span>
+            {thermometer.kind === "score" ? (
+              <>
+                <span className="font-mono text-2xl font-bold tracking-tightest text-text-primary">
+                  ~{thermometer.scoreEur} €
+                </span>
+                {thermometer.smallSample ? (
+                  <span
+                    className="text-meta leading-relaxed text-state-warning"
+                    data-testid="player-card-thermometer-small-sample"
+                  >
+                    {labels.thermoSmallSample}
+                  </span>
+                ) : null}
+                <span className="text-meta leading-relaxed text-text-secondary">
+                  {labels.thermoHint}
+                </span>
+              </>
+            ) : (
+              <span
+                className="text-meta leading-relaxed text-text-muted"
+                data-testid="player-card-thermometer-missing"
+              >
+                {thermometer.missing === "position"
+                  ? labels.thermoMissingPosition
+                  : thermometer.missing === "market"
+                    ? labels.thermoMissingMarket
+                    : labels.thermoMissingBoth}
+              </span>
+            )}
+          </div>
+        ) : null}
+    </>
+  );
+  const secJ = (
+    <>
+        {/* ── Latest work proof (real entry or honest emptiness) ── */}
+        <div
+          className="flex items-center gap-2 border-t border-ink-600 pt-4 text-xs text-text-secondary"
+          data-testid="player-card-latest-evidence"
+        >
+          {labels.latestEvidenceValue ? (
+            <CalendarCheck2 className="h-4 w-4 shrink-0 text-brand-cyan" aria-hidden />
+          ) : (
+            <Sparkle className="h-4 w-4 shrink-0 text-text-muted" aria-hidden />
+          )}
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {labels.latestEvidenceLabel}
+          </span>
+          <span className="text-text-primary">
+            {labels.latestEvidenceValue ?? labels.latestEvidenceEmpty}
+          </span>
+        </div>
+    </>
+  );
+  const secEvidenceChart = (
+    <EvidenceTimelineChart
+            months={card.evidenceTimeline}
+            labels={labels.visuals.evidence}
+          />
+  );
+  const secSkillChart = (
+    <SkillEvidenceChart
+            skills={card.skillEvidence}
+            labels={labels.visuals.skills}
+            // W5 slice 3: this card renders the worker's OWN rows only, so the
+            // drill-down never widens visibility — it opens their own journal.
+            // A sample card has no journal behind it, so it never drills down.
+            linkBarsToJournal={!sample}
+          />
+  );
+  // NEXT: what would open the next step — the readiness still missing, the
+  // market pay reading, and the door to where the person can go.
+  const secNextDoor = sample ? null : (
+    <Link
+      href={"/dashboard/opportunities" as "/dashboard"}
+      data-testid="player-card-next-opportunities"
+      className="inline-flex min-h-11 w-fit items-center rounded-full border border-brand-blue/50 px-4 text-sm font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+    >
+      {labels.modes.nextOpportunities} →
+    </Link>
+  );
+
   return (
     <section
       className={cn(
@@ -394,357 +791,73 @@ export function WorkerPlayerCard({
         </p>
       </IdentityStage>
 
-      {/* ── THE SAME PERSON, SEEN AS … — the card's modes. One identity, four
-          lenses on it: each chip moves to that part of this same card (no
-          second page, no second card). Plain anchors: works without JS. */}
-      <nav
-        aria-label={labels.modes.label}
-        className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5"
-        data-testid="player-card-modes"
-      >
-        {(
-          [
-            ["work", labels.modes.work],
-            ["skills", labels.modes.skills],
-            ["evidence", labels.modes.evidence],
-            ["history", labels.modes.history],
-          ] as const
-        ).map(([key, label]) => (
-          <a
-            key={key}
-            href={`#player-card-${key}`}
-            data-testid={`player-card-mode-${key}`}
-            className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-ink-600 bg-ink-800/50 px-4 font-mono text-meta uppercase tracking-label text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
-          >
-            {label}
-          </a>
-        ))}
-      </nav>
-
-      {/* ── Readiness signal line: what is met + what to do next (honest) ── */}
-      <div
-        id="player-card-work"
-        className="flex scroll-mt-20 flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
-        data-testid="player-card-readiness"
-        data-readiness-level={readiness.level}
-      >
-        <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
-          {labels.readiness.label}
-          <span className="text-text-secondary">
-            {readiness.met}/{readiness.total} {labels.readiness.signalsTemplate}
-          </span>
-        </span>
-        {missing.length > 0 ? (
-          <span className="flex flex-wrap items-center gap-1.5 text-meta leading-relaxed text-text-secondary">
-            <span className="text-text-muted">{labels.readiness.nextLabel}</span>
-            {missing.map((k) => (
-              <span
-                key={k}
-                className="inline-flex items-center rounded-sm border border-ink-500 px-1.5 py-0.5 text-meta text-text-secondary"
-              >
-                {labels.readiness.pillars[k]}
-              </span>
-            ))}
-          </span>
-        ) : (
-          <span className="text-meta leading-relaxed text-text-secondary">
-            {labels.readiness.hint}
-          </span>
-        )}
-      </div>
-
-      {/* ── Real-state chips: availability + work-card confirmation ── */}
-      <div className="flex flex-wrap items-center gap-2">
-        {labels.availabilityLabel ? (
-          <span
-            className="inline-flex min-h-7 items-center gap-2 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
-            data-testid="player-card-availability"
-          >
-            {card.availabilityStatus === "available" ? (
-              <span className="live-dot" aria-hidden />
-            ) : null}
-            {labels.availabilityLabel}
-          </span>
-        ) : null}
-        {labels.availabilityFrom ? (
-          <span
-            className="inline-flex min-h-7 items-center rounded-full border border-ink-500 bg-ink-800 px-3 py-1 text-meta text-text-secondary"
-            data-testid="player-card-available-from"
-          >
-            {labels.availabilityFrom}
-          </span>
-        ) : null}
-        {/* §5.2 LOCATION — the worker's own stated country, country
-            precision only (the card never implies an address). */}
-        {labels.locationName ? (
-          <span
-            className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 text-meta text-text-secondary"
-            data-testid="player-card-location"
-          >
-            <MapPin className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />
-            {labels.locationName}
-          </span>
-        ) : null}
-        <span
-          className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
-          data-testid="player-card-workcard"
-        >
-          <Shield className="h-3.5 w-3.5" aria-hidden />
-          {confirmed ? labels.workCardConfirmed : labels.workCardPending}
-          <span className="sr-only">{labels.workCardLabel}</span>
-        </span>
-      </div>
-
-      {/* ── Skill signals: neutral list (silent-trust rule). No green
-          "verified" glow, no certification badge — confirmation stays an
-          internal signal and is never advertised on this self-view card. ── */}
-      <div id="player-card-skills" className="flex scroll-mt-20 flex-col gap-2" data-testid="player-card-skill-signals">
-        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {labels.verifiedTitle}
-        </span>
-        {verifiedUnavailable ? (
-          <p
-            role="status"
-            data-testid="player-card-verified-unavailable"
-            className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-meta leading-relaxed text-text-secondary"
-          >
-            {labels.verifiedUnavailable}
-          </p>
-        ) : card.verifiedSkills.length > 0 ? (
-          <ul className="flex flex-wrap gap-2">
-            {card.verifiedSkills.map((s, i) => (
-              <li
-                key={s.slug}
-                className="inline-flex min-h-8 items-center gap-1.5 rounded-md border border-ink-500 bg-ink-800 px-2.5 py-1.5 text-xs font-medium text-text-secondary"
-              >
-                <SkillIcon slug={s.iconSlug} className="h-3.5 w-3.5" />
-                {labels.verifiedSkillNames[i] ?? s.slug}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-meta leading-relaxed text-text-muted">
-            {labels.verifiedEmpty}
-          </p>
-        )}
-        {/* Evidence ladder middle rung: work-journal-supported skills. Shown
-            ONLY when there are any — a calm cyan tone (NOT the green
-            manager-verified glow, NOT the gold trust ring), so the three
-            tiers stay visually distinct and honest (DESIGN_SOUL §1). */}
-        {card.journalSupportedSkills > 0 ? (
-          <p
-            className="inline-flex items-center gap-2 self-start rounded-md border border-brand-cyan/30 bg-brand-cyan/10 px-2.5 py-1.5 text-meta leading-relaxed text-brand-cyan"
-            data-testid="player-card-journal-supported"
-            title={labels.journalSupportedHint}
-          >
-            <Sparkle className="h-3.5 w-3.5 shrink-0" aria-hidden />
-            <span className="font-mono font-bold">{card.journalSupportedSkills}</span>
-            <span>· {labels.journalSupportedLabel}</span>
-          </p>
-        ) : null}
-      </div>
-
-      {/* ── §5.2 EVIDENCE VIEWS — the card's real data visualizations.
-            Growth over time and per-skill strength sit side by side on wide
-            screens and stack on a phone; both read from the worker's OWN rows
-            and both state an honest empty case instead of an empty frame. ── */}
-      <div
-        id="player-card-evidence"
-        className="grid scroll-mt-20 gap-3 lg:grid-cols-2"
-        data-testid="player-card-visualizations"
-      >
-        <EvidenceTimelineChart
-          months={card.evidenceTimeline}
-          labels={labels.visuals.evidence}
-        />
-        <SkillEvidenceChart
-          skills={card.skillEvidence}
-          labels={labels.visuals.skills}
-          // W5 slice 3: this card renders the worker's OWN rows only, so the
-          // drill-down never widens visibility — it opens their own journal.
-          // A sample card has no journal behind it, so it never drills down.
-          linkBarsToJournal={!sample}
-        />
-      </div>
-
-      {/* ── §5.2 WORK HISTORY as a real time band (the text list follows) ── */}
-      <span id="player-card-history" aria-hidden className="block scroll-mt-20" />
-      <WorkHistoryTimeline
-        timeline={historyTimeline}
-        labels={labels.visuals.history}
-        readState={historyUnavailable ? "unavailable" : "ok"}
-      />
-
-      {/* ── Honest dimensions (real counts, plain zeros — and a named
-            "could not be read" where the read failed, never a zero) ── */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat
-          testid="player-card-skills"
-          value={skillsUnavailable ? "—" : String(card.skillsDeclared)}
-          label={labels.skillsLabel}
-          hint={skillsUnavailable ? labels.skillsUnavailable : labels.skillsHint}
-          href="/dashboard/profile#capabilities"
-          inert={sample}
-        />
-        <Stat
-          testid="player-card-candidate"
-          value={String(card.candidateSkills)}
-          label={labels.candidateLabel}
-          hint={labels.candidateHint}
-          href="/dashboard/profile#candidate-skills"
-          inert={sample}
-        />
-        <Stat
-          testid="player-card-evidence"
-          value={String(card.evidenceEntries)}
-          label={labels.evidenceLabel}
-          hint={labels.evidenceHint}
-          href="/dashboard/journal#journal-entries"
-          inert={sample}
-        />
-        <Stat
-          testid="player-card-attention"
-          value={String(card.attentionInstructions)}
-          label={labels.attentionLabel}
-          hint={card.attentionInstructions === 0 ? labels.attentionZero : labels.attentionHint}
-          href="/dashboard/communication"
-          inert={sample}
-        />
-      </div>
-
-      {/* ── §5.2 WORK HISTORY — WHERE the work happened, from the canonical
-            engagement spine. Newest first, bounded to the most recent few:
-            the card states a history, it does not become a CV page. An empty
-            history renders nothing (it is a fact, not a gap to pad). */}
-      {unplacedHistory.length > 0 ? (
-        <div className="flex flex-col gap-1.5" data-testid="player-card-work-history">
-          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-            {labels.workHistoryLabel}
-          </span>
-          <ul className="flex flex-col gap-1">
-            {unplacedHistory.slice(0, 3).map((h) => (
-              <li
-                key={h.id}
-                className="flex flex-wrap items-baseline gap-x-2 text-basis text-text-primary"
-              >
-                <span className="font-medium">
-                  {h.organizationName ?? h.title}
-                </span>
-                {h.startedAt ? (
-                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                    {h.startedAt}
-                    {h.current ? ` — ${labels.workHistoryCurrent}` : h.endedAt ? ` — ${h.endedAt}` : ""}
-                  </span>
-                ) : null}
-                {labels.visuals.history.hoursById?.[h.id] ? (
-                  <span
-                    className="text-meta leading-relaxed text-text-secondary"
-                    data-testid="player-card-history-hours"
-                  >
-                    {labels.visuals.history.hoursById[h.id]}
-                  </span>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
-      {/* ── §5.2 DOCUMENTS + REPUTATION ──────────────────────────────────
-            Two facts other people actually care about, both from real rows:
-            how many of the worker's documents are currently valid (with the
-            genuinely-expiring ones called out), and what other people have
-            really CONFIRMED about this work. There is no universal human
-            score here and no medal tier — a reputation with nothing
-            confirmed yet says exactly that. */}
-      <div className="grid gap-3 sm:grid-cols-2">
-        {labels.documentsLabel && labels.documentsValue ? (
-          <div
-            className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-3"
-            data-testid="player-card-documents"
-          >
-            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-              {labels.documentsLabel}
-            </span>
-            <span className="text-sm text-text-primary">{labels.documentsValue}</span>
-          </div>
-        ) : null}
-        <div
-          className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-3"
-          data-testid="player-card-reputation"
-        >
-          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-            {labels.reputationLabel}
-          </span>
-          <span className="text-sm text-text-primary">
-            {labels.reputationValue ?? labels.reputationEmpty}
-          </span>
-          <span className="text-meta leading-relaxed text-text-muted">
-            {labels.reputationHint}
-          </span>
-        </div>
-      </div>
-
-      {/* ── Thermometer (S4) — owner-locked formula; a number ONLY when both
-            components exist, otherwise the honest missing-data state ── */}
-      {thermometer ? (
-        <div
-          className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-3"
-          data-testid="player-card-thermometer"
-        >
-          <span className="inline-flex items-center gap-1.5 font-mono text-meta uppercase tracking-label text-text-muted">
-            <Thermometer className="h-3.5 w-3.5" aria-hidden />
-            {labels.thermoLabel}
-          </span>
-          {thermometer.kind === "score" ? (
+      {/* ── THE SAME PERSON, SEEN AS … — the card's modes (owner 2026-09-29
+            §9). IDENTITY is the whole card as it was (the floor); each other
+            mode brings forward the sections that answer it, under the SAME
+            identity stage. Server-rendered slots; the switcher reads nothing. */}
+      <PlayerCardModes
+        label={labels.modes.label}
+        initialMode={initialMode}
+        syncUrl={!sample}
+        modeLabels={{
+          identity: labels.modes.identity,
+          work: labels.modes.work,
+          skills: labels.modes.skills,
+          evidence: labels.modes.evidence,
+          history: labels.modes.history,
+          next: labels.modes.next,
+        }}
+        sections={{
+          identity: (
             <>
-              <span className="font-mono text-2xl font-bold tracking-tightest text-text-primary">
-                ~{thermometer.scoreEur} €
-              </span>
-              {thermometer.smallSample ? (
-                <span
-                  className="text-meta leading-relaxed text-state-warning"
-                  data-testid="player-card-thermometer-small-sample"
-                >
-                  {labels.thermoSmallSample}
-                </span>
-              ) : null}
-              <span className="text-meta leading-relaxed text-text-secondary">
-                {labels.thermoHint}
-              </span>
+              {secA}
+              {secB}
+              {secC}
+              {secD}
+              {secE}
+              {secF}
+              {secG}
+              {secH}
+              {secI}
+              {secJ}
             </>
-          ) : (
-            <span
-              className="text-meta leading-relaxed text-text-muted"
-              data-testid="player-card-thermometer-missing"
-            >
-              {thermometer.missing === "position"
-                ? labels.thermoMissingPosition
-                : thermometer.missing === "market"
-                  ? labels.thermoMissingMarket
-                  : labels.thermoMissingBoth}
-            </span>
-          )}
-        </div>
-      ) : null}
-
-      {/* ── Latest work proof (real entry or honest emptiness) ── */}
-      <div
-        className="flex items-center gap-2 border-t border-ink-600 pt-4 text-xs text-text-secondary"
-        data-testid="player-card-latest-evidence"
-      >
-        {labels.latestEvidenceValue ? (
-          <CalendarCheck2 className="h-4 w-4 shrink-0 text-brand-cyan" aria-hidden />
-        ) : (
-          <Sparkle className="h-4 w-4 shrink-0 text-text-muted" aria-hidden />
-        )}
-        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {labels.latestEvidenceLabel}
-        </span>
-        <span className="text-text-primary">
-          {labels.latestEvidenceValue ?? labels.latestEvidenceEmpty}
-        </span>
-      </div>
+          ),
+          work: (
+            <>
+              {secA}
+              {secB}
+              {secF}
+              {secJ}
+            </>
+          ),
+          skills: (
+            <>
+              {secC}
+              {secSkillChart}
+            </>
+          ),
+          evidence: (
+            <>
+              {secEvidenceChart}
+              {secH}
+              {secJ}
+            </>
+          ),
+          history: (
+            <>
+              {secE}
+              {secG}
+            </>
+          ),
+          next: (
+            <>
+              {secA}
+              {secI}
+              {secNextDoor}
+            </>
+          ),
+        }}
+      />
     </section>
   );
 }

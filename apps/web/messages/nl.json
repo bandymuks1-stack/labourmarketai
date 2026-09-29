@@ -7569,7 +7569,10 @@
         "work": "Werk",
         "skills": "Vaardigheden",
         "evidence": "Registraties",
-        "history": "Geschiedenis"
+        "history": "Geschiedenis",
+        "identity": "Persoon",
+        "next": "Volgende",
+        "nextOpportunities": "Waar u verder kunt gaan"
       }
     }
   },

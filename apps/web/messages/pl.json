@@ -7569,7 +7569,10 @@
         "work": "Praca",
         "skills": "Umiejętności",
         "evidence": "Wpisy",
-        "history": "Historia"
+        "history": "Historia",
+        "identity": "Osoba",
+        "next": "Dalej",
+        "nextOpportunities": "Dokąd możesz pójść dalej"
       }
     }
   },

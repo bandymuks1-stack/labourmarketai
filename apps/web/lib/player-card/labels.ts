@@ -138,6 +138,9 @@ export async function buildPlayerCardLabels(
     identityFacts,
     modes: {
       label: t("identity.modes.label"),
+      identity: t("identity.modes.identity"),
+      next: t("identity.modes.next"),
+      nextOpportunities: t("identity.modes.nextOpportunities"),
       work: t("identity.modes.work"),
       skills: t("identity.modes.skills"),
       evidence: t("identity.modes.evidence"),

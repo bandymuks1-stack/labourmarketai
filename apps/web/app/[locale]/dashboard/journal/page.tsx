@@ -69,6 +69,7 @@ import { Link } from "@/lib/i18n/navigation";
 // records below (owner IA: Mano CV = marketplace identity + work records).
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { WorkerPlayerCard } from "@/components/app/worker-player-card";
+import { isPlayerCardMode } from "@/lib/player-card/card-modes";
 import { WorkerReadinessPanel } from "@/components/app/worker-readiness-panel";
 import { getWorkerPlayerCard } from "@/lib/player-card/player-card";
 import { buildPlayerCardLabels } from "@/lib/player-card/labels";
@@ -166,6 +167,7 @@ export default async function JournalPage({
     skill?: string | string[];
     period?: string | string[];
     compose?: string | string[];
+    card?: string | string[];
     /** Journal calendar: the scale (`month` default, `week`) and the
      *  anchored period. See `lib/journal/journal-calendar.ts`. */
     cal?: string | string[];
@@ -174,6 +176,8 @@ export default async function JournalPage({
 }) {
   const { locale } = await params;
   const sp = (await searchParams) ?? {};
+  // The Player Card mode a link or the chat asked for (?card=), else none.
+  const cardMode = isPlayerCardMode(sp.card) ? sp.card : null;
   // The full composer for a NEW record only behind the explicit "detaliau"
   // door (`?compose=full`); the compact text-first recording is the default.
   const composeFull = sp.compose === "full";
@@ -1135,6 +1139,9 @@ export default async function JournalPage({
       {manoCard && manoCardLabels ? (
         <details
           id="mano-cv-identity"
+          // A requested card mode (?card=skills — a link, the chat) opens the
+          // card on that mode; otherwise it stays one tap away as before.
+          open={cardMode !== null || undefined}
           className="group order-4 rounded-md border border-border-subtle bg-surface-1/50 scroll-mt-20"
           data-testid="mano-cv-player-card-lead"
         >
@@ -1159,6 +1166,7 @@ export default async function JournalPage({
               labels={manoCardLabels}
               thermometer={manoThermometer}
               avatarUrl={manoAvatar.signedUrl}
+              initialMode={cardMode ?? "identity"}
             />
             <WorkerReadinessPanel card={manoCard} />
           </div>
