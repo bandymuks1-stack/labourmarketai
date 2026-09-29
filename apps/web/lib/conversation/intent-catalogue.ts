@@ -53,6 +53,7 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   availability: "the person states from when they can work ('galiu dirbti nuo spalio 1 d.', 'available from October')",
   "pay-statement": "the person states their monthly pay / salary expectation ('mano atlyginimo lūkestis nuo 2500 iki 3500 eurų', 'at least 3000 EUR')",
   "correct-work": "the person corrects their newest work-journal entry in words ('ne 5, o 6 valandas', 'tai buvo vakar')",
+  "current-work": "where the person works now: their active work relationships with organizations ('kur dabar dirbu?')",
   "company-overview": "overview of the company workspace",
   "create-organization": "create a company or organization",
   "rename-organization":

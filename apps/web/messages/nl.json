@@ -13225,6 +13225,13 @@
         "notInCompany": "Werkjournaal-invoer is van jou. Schakel naar je persoonlijke ruimte en zeg het opnieuw.",
         "chipEdit": "Invoer corrigeren"
       },
+      "currentWork": {
+        "now": "Je werkt nu bij: {list}.",
+        "none": "Je hebt nu geen actieve werkrelatie met een organisatie — invoer gaat naar je persoonlijke journaal.",
+        "ended": "Beëindigde werkrelaties: {list} (hun geschiedenis blijft in je werkgeschiedenis).",
+        "unreadable": "Ik kon je werkrelaties niet lezen — er is niets gewijzigd. Probeer het opnieuw.",
+        "notInCompany": "Waar je werkt is jouw eigen gegeven. Schakel naar je persoonlijke ruimte en vraag het opnieuw."
+      },
       "pay": {
         "understoodRange": "Begrepen: salarisverwachting {min}–{max} € per maand. Ik heb de bedragen in je werkkaart gezet — controleer en sla op. Er verandert niets tot je opslaat.",
         "understoodMin": "Begrepen: salarisverwachting minimaal {min} € per maand. Ik heb het bedrag in je werkkaart gezet — controleer en sla op. Er verandert niets tot je opslaat.",

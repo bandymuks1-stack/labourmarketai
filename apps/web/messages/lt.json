@@ -13225,6 +13225,13 @@
         "notInCompany": "Darbo žurnalo įrašai — tavo asmeniniai. Persijunk į asmeninę erdvę ir parašyk dar kartą.",
         "chipEdit": "Taisyti įrašą"
       },
+      "currentWork": {
+        "now": "Dabar dirbi: {list}.",
+        "none": "Aktyvaus darbo santykio su organizacija dabar neturi — įrašai eina į tavo asmeninį žurnalą.",
+        "ended": "Baigti darbo santykiai: {list} (jų istorija lieka tavo darbo istorijoje).",
+        "unreadable": "Nepavyko perskaityti tavo darbo santykių — nieko nekeičiu. Pabandyk dar kartą.",
+        "notInCompany": "Kur dirbi — tavo asmeninis faktas. Persijunk į asmeninę erdvę ir paklausk dar kartą."
+      },
       "pay": {
         "understoodRange": "Supratau: atlyginimo lūkestis nuo {min} iki {max} € per mėnesį. Įrašiau sumas į darbo kortelę — peržiūrėk ir išsaugok. Kol neišsaugosi, niekas nepasikeis.",
         "understoodMin": "Supratau: atlyginimo lūkestis ne mažiau kaip {min} € per mėnesį. Įrašiau sumą į darbo kortelę — peržiūrėk ir išsaugok. Kol neišsaugosi, niekas nepasikeis.",

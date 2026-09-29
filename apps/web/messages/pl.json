@@ -13225,6 +13225,13 @@
         "notInCompany": "Wpisy w dzienniku pracy są Twoje. Przełącz się na przestrzeń osobistą i napisz jeszcze raz.",
         "chipEdit": "Popraw wpis"
       },
+      "currentWork": {
+        "now": "Obecnie pracujesz w: {list}.",
+        "none": "Nie masz teraz aktywnej relacji pracy z organizacją — wpisy trafiają do Twojego osobistego dziennika.",
+        "ended": "Zakończone relacje pracy: {list} (ich historia zostaje w Twojej historii pracy).",
+        "unreadable": "Nie udało się odczytać Twoich relacji pracy — nic nie zmieniono. Spróbuj ponownie.",
+        "notInCompany": "To, gdzie pracujesz, jest Twoją informacją. Przełącz się na przestrzeń osobistą i zapytaj ponownie."
+      },
       "pay": {
         "understoodRange": "Rozumiem: oczekiwane wynagrodzenie {min}–{max} € miesięcznie. Wpisałem kwoty do Twojej karty pracy — sprawdź i zapisz. Dopóki nie zapiszesz, nic się nie zmieni.",
         "understoodMin": "Rozumiem: oczekiwane wynagrodzenie co najmniej {min} € miesięcznie. Wpisałem kwotę do Twojej karty pracy — sprawdź i zapisz. Dopóki nie zapiszesz, nic się nie zmieni.",

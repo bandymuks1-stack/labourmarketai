@@ -13225,6 +13225,13 @@
         "notInCompany": "Work journal entries are your own. Switch to your personal space and say it again.",
         "chipEdit": "Correct entry"
       },
+      "currentWork": {
+        "now": "You currently work with: {list}.",
+        "none": "You have no active work relationship with an organization right now — entries go to your personal journal.",
+        "ended": "Ended work relationships: {list} (their history stays in your work history).",
+        "unreadable": "I couldn’t read your work relationships — nothing was changed. Try again.",
+        "notInCompany": "Where you work is your own fact. Switch to your personal space and ask again."
+      },
       "pay": {
         "understoodRange": "Got it: pay expectation {min}–{max} € per month. I put the figures into your work card — check and save. Nothing changes until you save.",
         "understoodMin": "Got it: pay expectation at least {min} € per month. I put the figure into your work card — check and save. Nothing changes until you save.",

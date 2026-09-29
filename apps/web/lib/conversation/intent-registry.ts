@@ -67,6 +67,7 @@ export type IntentHandlerId =
   | "availabilityStatement"
   | "payStatement"
   | "correctWork"
+  | "currentWork"
   | "skillGap"
   | "recentJournal"
   | "workIntelligence"
@@ -254,6 +255,9 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // the person to the canonical supersede editor for it (a link chip); the
   // sentence writes nothing (2026-09-29).
   "correct-work": { domain: "journal", access: "read", handler: "correctWork", ownTyping: true },
+  // "Kur dabar dirbu?" — the person's active work contexts and the ended
+  // ones by name, from engagement_contexts (2026-09-29).
+  "current-work": { domain: "context", access: "read", handler: "currentWork", ownTyping: true },
   "company-overview": { domain: "company", access: "route", handler: "companyOverview", ownTyping: false },
   "create-organization": { domain: "company", access: "route", handler: "createOrganization", ownTyping: false },
   // RENAME THE ACTIVE ORGANIZATION (owner program 2026-09-23). `write`: it
