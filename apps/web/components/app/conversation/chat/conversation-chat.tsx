@@ -111,6 +111,7 @@ import { loadProjectMoveOptionsForChat, loadProjectMoveWhatIfForChat } from "@/l
 import type { StageStatus } from "@/lib/projects/stages-model";
 import { stripEndDatePhrase, parseEndDate, parseStartDate } from "@/lib/structuring/time-window";
 import { payPrefill, readPayStatement } from "@/lib/conversation/pay-statement";
+import { pastWorkOwnWords, readPastWorkPeriod } from "@/lib/conversation/past-work-period";
 import { correctionHref, readCorrectionAsk } from "@/lib/conversation/correct-work-model";
 import { loadLatestOwnEntryForCorrection } from "@/lib/conversation/correct-work";
 import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace-contract";
@@ -6006,6 +6007,43 @@ export function ConversationChat({
          * with the title already in it. Nothing is persisted here.
          */
         professionStatement: () => {
+          /**
+           * A PAST JOB WITH ITS YEARS (2026-09-29): "2019–2022 dirbau įmonėje
+           * X Vokietijoje" used to open TODAY's journal card with the current
+           * employer preselected. It is the person's own work history: the
+           * self-declared history form opens with the years and their words,
+           * said plainly to be a claim of theirs — not employer-confirmed.
+           * The store has no organization / country field yet, so those stay
+           * in their words in the title, and the answer says so.
+           */
+          const period = readPastWorkPeriod(text, Number(todayIso().slice(0, 4)));
+          if (period) {
+            if (identity === "company") {
+              const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+              assistant(
+                t("pastWork.notInCompany"),
+                personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+              );
+              return;
+            }
+            const role = readProfessionStatement(text);
+            const words = pastWorkOwnWords(text);
+            const rest = role ? words.replace(role.raw, "").replace(/\s+/g, " ").trim() : words;
+            const title = role ? (rest ? `${role.label}, ${rest}` : role.label) : words;
+            const years = period.isCurrent
+              ? t("pastWork.yearsCurrent", { from: period.startYear })
+              : period.startYear === period.endYear
+                ? String(period.startYear)
+                : `${period.startYear}–${period.endYear}`;
+            assistant(t("pastWork.understood", { years, title: title || "…" }));
+            openForm("worker.add-work-history", undefined, undefined, {
+              ...(title.length >= 3 ? { title } : {}),
+              startYear: String(period.startYear),
+              ...(period.endYear !== null ? { endYear: String(period.endYear) } : {}),
+              isCurrent: period.isCurrent,
+            });
+            return;
+          }
           const stated = readProfessionStatement(text);
           if (!stated) {
             assistant(fallbackText, starterChips);

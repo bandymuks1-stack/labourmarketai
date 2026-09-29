@@ -2836,6 +2836,15 @@ const RULES: IntentRule[] = [
      */
     intent: "profession-statement",
     patterns: [
+      // A PAST JOB WITH ITS YEARS (owner continuation 2026-09-29 §6):
+      // "2019–2022 dirbau įmonėje X Vokietijoje" opened TODAY's journal card
+      // (log-work, "dirbau") with the current employer preselected. A period
+      // of years + a past work verb is the person's work history — the
+      // handler opens the self-declared history form. A calendar date
+      // ("2026-09-28 dirbau 5 val.") is not a period and stays log-work.
+      p("(?<![-./\\d])(19|20)\\d{2}(?![-./]\\d{1,2}(?!\\d))\\s*(m\\.?\\s*)?(-|–|—|iki|to|until|до|по|bis|tot|do)\\s*((19|20)\\d{2}|dabar|siol|now|present|сейчас|heute|nu|teraz|obecnie)(?=.*(dirbau|dirbo|worked|работал|arbeitete|werkte|pracowa))", 8),
+      p("(dirbau|dirbo|worked|работал|arbeitete|werkte|pracowa).*(?<![-./\\d])(19|20)\\d{2}(?![-./]\\d{1,2}(?!\\d))\\s*(-|–|—|iki|to|until|до|по|bis|tot|do)\\s*((19|20)\\d{2}|dabar|now|present|сейчас|heute|nu|teraz)", 8),
+      p("(?<![-./\\d])(19|20)\\d{2}\\s*(m\\.|metais|metu)\\s.{0,30}(dirbau|dirbo)", 8),
       pNoSeek(
         // NB `[^\s]`, never `\S`: pattern sources are lower-cased and `\S`
         // would silently become `\s`.

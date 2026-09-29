@@ -13213,6 +13213,11 @@
         "notInCompany": "When you can work is your own fact, not the company's. Switch to your personal space and say it again.",
         "changeRequested": "Opening your work card — set when you can work and save. Nothing is changed until you do."
       },
+      "pastWork": {
+        "understood": "Got it: {years} — “{title}”. I’ll add it to your work history as experience you stated yourself — it won’t be marked as employer-confirmed. The company and country stay in your words in the title (there’s no separate field for them yet). Check and save.",
+        "yearsCurrent": "from {from} until now",
+        "notInCompany": "Your work history is your own. Switch to your personal space and say it again."
+      },
       "correctWork": {
         "found": "Correcting your latest entry: {date} — “{text}”. {change} Opening it for editing; once saved, the old entry stays in history as corrected — no new entry is added.",
         "changeHours": "Enter {to} h instead.",

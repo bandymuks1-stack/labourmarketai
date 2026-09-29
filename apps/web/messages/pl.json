@@ -13213,6 +13213,11 @@
         "notInCompany": "Od kiedy możesz pracować to Twój własny fakt, nie firmy. Przełącz się na przestrzeń osobistą i napisz ponownie.",
         "changeRequested": "Otwieram twoją kartę pracy — wskaż, od kiedy możesz pracować, i zapisz. Nic się nie zmieni, dopóki tego nie zrobisz."
       },
+      "pastWork": {
+        "understood": "Rozumiem: {years} — „{title}”. Dodam to do Twojej historii pracy jako doświadczenie podane przez Ciebie — nie jako potwierdzone przez pracodawcę. Firma i kraj zostają Twoimi słowami w tytule (nie ma jeszcze na nie osobnego pola). Sprawdź i zapisz.",
+        "yearsCurrent": "od {from} do teraz",
+        "notInCompany": "Historia pracy jest Twoja. Przełącz się na przestrzeń osobistą i napisz jeszcze raz."
+      },
       "correctWork": {
         "found": "Poprawiamy Twój ostatni wpis: {date} — „{text}”. {change} Otwieram go do edycji; po zapisaniu stary wpis zostanie w historii jako poprawiony — nie powstanie nowy.",
         "changeHours": "Wpisz {to} godz.",

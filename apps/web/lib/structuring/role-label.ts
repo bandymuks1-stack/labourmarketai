@@ -175,11 +175,11 @@ export const DURATION_UNIT_SOURCE =
 
 /** Nominative endings after "esu" (masc./fem.). */
 export const ROLE_SUFFIX_NOMINATIVE_SOURCE =
-  "ininkas|ininke|tojas|toja|ejas|eja|eris|ere|istas|iste|ierius|iere|orius|ore|ovas|ove|ikas|ike|antas|ante|ologas|ologe";
+  "ininkas|ininke|tojas|toja|ejas|eja|eris|ere|istas|iste|ierius|iere|orius|ore|ovas|ove|ikas|ike|antas|ante|ologas|ologe|dengys";
 
 /** Instrumental endings after "dirbu / dirbau" ("inžinieriumi", "vadovu"). */
 export const ROLE_SUFFIX_INSTRUMENTAL_SOURCE =
-  "ininku|ininke|toju|toja|eju|eja|eriu|ere|istu|iste|ieriumi|iere|oriumi|ore|ovu|ove|iku|ike|antu|ante|ologu|ologe";
+  "ininku|ininke|toju|toja|eju|eja|eriu|ere|istu|iste|ieriumi|iere|oriumi|ore|ovu|ove|iku|ike|antu|ante|ologu|ologe|dengiu";
 
 /** Tokens that share a suffix but are never a role: generic person nouns,
  *  the service noun, learners, and everyday equipment ("kompiuterio"). */
@@ -296,6 +296,9 @@ const INSTRUMENTAL_TO_NOMINATIVE: ReadonlyArray<readonly [string, string]> = [
   ["ologu", "ologas"], ["ologe", "ologė"],
   ["toju", "tojas"], ["ėju", "ėjas"], ["eju", "ejas"],
   ["eriu", "eris"], ["istu", "istas"], ["antu", "antas"], ["ovu", "ovas"], ["iku", "ikas"],
+  // "stogdengys" (owner example 2026-09-29, "Dar dirbu ir stogdengiu"): the
+  // -ys → -iu class, narrowed to the -dengys trades.
+  ["dengiu", "dengys"],
   // feminine instrumental equals the nominative for these classes
   ["toja", "toja"], ["ėja", "ėja"], ["eja", "eja"], ["ere", "erė"], ["iste", "istė"], ["ante", "antė"], ["ove", "ovė"], ["ike", "ikė"],
 ];
@@ -445,6 +448,9 @@ export function readProfessionStatement(text: string): ProfessionStatementReadin
   if (start === -1) return null;
   for (let i = start; i < Math.min(tokens.length, start + 5); i++) {
     const t = tokens[i];
+    // "Dar dirbu IR stogdengiu" (owner example 2026-09-29): a connective right
+    // after the verb adds a trade, it does not end the phrase.
+    if (i === start && /^(ir|and|и|und|en)$/u.test(t.folded)) continue;
     if (STOP_WORD_RE.test(t.folded)) break;
     // A capitalised word after "esu" / "dirbu" is a NAME ("esu Jonas"), never
     // a role — the suffix classes are open enough that a surname ("Ivanovas")

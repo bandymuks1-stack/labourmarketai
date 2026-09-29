@@ -13213,6 +13213,11 @@
         "notInCompany": "Ab wann du arbeiten kannst, ist dein eigener Fakt, nicht der des Unternehmens. Wechsle in deinen persönlichen Bereich und sag es noch einmal.",
         "changeRequested": "Ich öffne deine Arbeitskarte — gib an, ab wann du arbeiten kannst, und speichere. Bis dahin ändert sich nichts."
       },
+      "pastWork": {
+        "understood": "Verstanden: {years} — „{title}“. Ich trage es als von dir selbst angegebene Erfahrung in deinen Werdegang ein — nicht als vom Arbeitgeber bestätigt. Firma und Land bleiben in deinen Worten im Titel (dafür gibt es noch kein eigenes Feld). Prüfen und speichern.",
+        "yearsCurrent": "seit {from}",
+        "notInCompany": "Dein Werdegang gehört dir. Wechsle in deinen persönlichen Bereich und sag es noch einmal."
+      },
       "correctWork": {
         "found": "Ich korrigiere deinen letzten Eintrag: {date} — „{text}“. {change} Ich öffne ihn zum Bearbeiten; nach dem Speichern bleibt der alte Eintrag als korrigiert im Verlauf — es entsteht kein neuer.",
         "changeHours": "Trage {to} Std. ein.",
