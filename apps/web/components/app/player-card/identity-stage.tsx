@@ -111,9 +111,9 @@ export function IdentityStage({
 
       {/* Phone: the portrait sits BESIDE the name and the details run full
           width below; wider: the portrait holds its own column. */}
-      <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-4 gap-y-4 sm:gap-x-6">
+      <div className="identity-stage-grid grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-4 gap-y-4 sm:gap-x-6">
         {/* ── THE PERSON ───────────────────────────────────────────────── */}
-        <div className="flex items-stretch gap-3 sm:row-span-2">
+        <div className="identity-stage-person flex items-stretch gap-3 sm:row-span-2">
           {edge}
           <div
             className="identity-portrait relative shrink-0 overflow-hidden rounded-xl"
@@ -162,7 +162,7 @@ export function IdentityStage({
             {trailing ? <div className="shrink-0">{trailing}</div> : null}
         </div>
 
-        <div className="col-span-2 flex min-w-0 flex-col gap-3 sm:col-span-1 sm:col-start-2">
+        <div className="identity-stage-details col-span-2 flex min-w-0 flex-col gap-3 sm:col-span-1 sm:col-start-2">
 
           {professions.length > 0 ? (
             <ul
