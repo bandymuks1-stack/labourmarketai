@@ -1140,6 +1140,13 @@ const RULES: IntentRule[] = [
   {
     intent: "client-demand",
     patterns: [
+      // "PARODYK KLIENTUS, KURIEMS VIS DAR TRŪKSTA DARBUOTOJŲ" (owner's own
+      // agency example, production chat walk 2026-09-29): read as the
+      // company's OWN need intake ("trūksta darbuotojų"). Clients + a lack /
+      // need is the agency's shared-needs read.
+      p("\\bklient\\w*.{0,40}(truksta|reikia|neuzpildyt|laukia|tebereikia)", 9),
+      p("\\bclients?\\b.{0,40}(still\\s+need|short\\s+of|missing|unfilled)", 9),
+      p("клиент.{0,40}(не\\s+хватает|нужн|незаполн)", 9),
       // "kliento poreikis", "klientų užklausos", "client demand / requests",
       // "Kundenbedarf", "aanvraag van de klant", "запрос клиента"
       p("(klient|client|kunde|klant|užsakov|клиент|заказчик)\\w*\\s*.{0,24}(poreik|užklaus|paklaus|demand|need|request|order|bedarf|anfrage|auftrag|aanvra|vraag|behoefte|потребн|запрос|заявк|zapotrzebowan|zapytani|zlecen)", 7),
@@ -1169,6 +1176,9 @@ const RULES: IntentRule[] = [
   {
     intent: "proposal-status",
     patterns: [
+      // "KAIP SEKASI ĮDARBINIMAI?" (production chat walk 2026-09-29): scored 0.
+      // Placements are the offers' lifecycle — this read.
+      p("\\b(idarbinim\\w*|placements?\\b|трудоустройств\\w*)", 7),
       // "pasiūlymų būsena", "kaip sekasi mano pasiūlymams", "proposal status",
       // "Stand der Vorschläge", "status van mijn voorstellen", "статус предложений"
       p("(pasiūlym|proposal|offer|vorschl|voorstel|предлож|propozycj)\\w*\\s*.{0,20}(būsen|status|eig|progress|stadij|stand|состоян|статус)", 7),
@@ -1996,6 +2006,12 @@ const RULES: IntentRule[] = [
   {
     intent: "who-available",
     patterns: [
+      // "PARODYK MANO DARBUOTOJUS" (production chat walk 2026-09-29): read as
+      // a people SEARCH for the company's own needs. "My workers" is the
+      // team the organization already has — this read.
+      // Never when the sentence states a NEED ("We need a developer for our
+      // team" stays need-workers).
+      p("^(?!.*(reikia|truksta|ieskom|ieskau|need|looking|нужн|ищем|ищу)).*\\b(mano|musu|my|our|мои|наши)\\s+(darbuotoj|workers|employees|работник|сотрудник)", 8),
       // ── A HAVE VERB PLUS A WORKER NOUN IS NEVER EMPLOYER DEMAND ─────────
       //
       // "Turime 20 darbuotojų" measured `need-workers` on 2026-09-08: WE HAVE
