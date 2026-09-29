@@ -254,6 +254,7 @@ export function WorkerWorkLogFlow({
   locale,
   labels,
   onClose,
+  onSaved,
   photoFirst = false,
   initialFile = null,
   onRegisterAttachSink,
@@ -262,6 +263,10 @@ export function WorkerWorkLogFlow({
   locale: string;
   labels: WorkLogLabels;
   onClose?: () => void;
+  /** Called once when the entry is persisted (the "done" phase) — the chat
+   *  retires the work-log goal so a later "ne 5, o 6" corrects THIS entry
+   *  instead of opening a second one (2026-09-29). */
+  onSaved?: (entryId: string) => void;
   /** Opened via the composer's attach path — the photo field leads and is the
    *  reason the flow is on screen. The short text stays REQUIRED either way: a
    *  photo alone is evidence without a claim, which the journal cannot store. */
@@ -278,6 +283,12 @@ export function WorkerWorkLogFlow({
 }) {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>({ kind: "loading" });
+  const savedEntryId = phase.kind === "done" ? phase.entryId : null;
+  useEffect(() => {
+    if (savedEntryId) onSaved?.(savedEntryId);
+    // Once per persisted entry; the callback identity is not a trigger.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedEntryId]);
   const [engagements, setEngagements] = useState<WorkLogEngagement[]>([]);
   const [engagementId, setEngagementId] = useState<string>("");
   /** Rule C: several engagements are legitimately possible, so the flow must

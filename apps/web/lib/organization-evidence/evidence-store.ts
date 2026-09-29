@@ -127,6 +127,9 @@ export interface EvidenceStore {
   readonly kind: "evidence-store";
   /** The authenticated human the store acts as — every write names them. */
   readonly userId: string;
+  /** Who performs the steps through this store (`DomainCaller.actorKind`);
+   *  audit events default to it. Absent = human. */
+  readonly actorKind?: "human" | "agent";
 
   // ── organization ──────────────────────────────────────────────────────────
   resolveOrganization(requested?: string | null): Promise<EvidenceOrgContext>;
@@ -217,6 +220,7 @@ export function supabaseEvidenceStore(caller: DomainCaller): EvidenceStore {
   return {
     kind: "evidence-store",
     userId: caller.userId,
+    actorKind: caller.actorKind,
 
     resolveOrganization: (requested) => resolveEvidenceOrganization(caller, requested),
 

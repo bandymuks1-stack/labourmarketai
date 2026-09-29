@@ -66,6 +66,14 @@ export type DomainCaller = {
    * resolver re-validates it. Bearer transports leave it unset.
    */
   readonly sessionWorkspacePointer?: string | null;
+  /**
+   * WHO PERFORMS the step (owner continuation 2026-09-29 §10): `agent` when an
+   * authorized assistant acts through the capability layer (MCP), absent =
+   * the person in the product UI. METADATA ONLY — authority is always the
+   * human identity behind `userId`; this only keeps an assistant's action
+   * from being recorded as the person's own click.
+   */
+  readonly actorKind?: "human" | "agent";
 };
 
 /**

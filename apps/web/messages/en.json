@@ -13218,6 +13218,18 @@
         "yearsCurrent": "from {from} until now",
         "notInCompany": "Your work history is your own. Switch to your personal space and say it again."
       },
+      "correctWork": {
+        "found": "Correcting your latest entry: {date} — “{text}”. {change} Opening it for editing; once saved, the old entry stays in history as corrected — no new entry is added.",
+        "changeHours": "Enter {to} h instead.",
+        "changeYesterday": "Change the date to yesterday.",
+        "changeDayBefore": "Change the date to the day before yesterday.",
+        "changeUnspecified": "Change what is wrong.",
+        "confirmed": "Your latest entry ({date} — “{text}”) is already confirmed by a manager, so it can’t be changed. If it’s wrong, write to your manager.",
+        "none": "You have no entries to correct yet. Record your work first — then you can correct it.",
+        "unreadable": "I couldn’t read your entries, so nothing was changed. Try again or open your work journal.",
+        "notInCompany": "Work journal entries are your own. Switch to your personal space and say it again.",
+        "chipEdit": "Correct entry"
+      },
       "pay": {
         "understoodRange": "Got it: pay expectation {min}–{max} € per month. I put the figures into your work card — check and save. Nothing changes until you save.",
         "understoodMin": "Got it: pay expectation at least {min} € per month. I put the figure into your work card — check and save. Nothing changes until you save.",

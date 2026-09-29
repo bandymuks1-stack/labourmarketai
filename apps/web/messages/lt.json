@@ -13218,6 +13218,18 @@
         "yearsCurrent": "nuo {from} iki dabar",
         "notInCompany": "Darbo istorija — tavo asmeninė. Persijunk į asmeninę erdvę ir parašyk dar kartą."
       },
+      "correctWork": {
+        "found": "Taisome paskutinį įrašą: {date} — „{text}“. {change} Atidarau jį redaguoti; išsaugojus senas įrašas liks istorijoje kaip pataisytas, naujas neatsiras.",
+        "changeHours": "Nurodyk {to} val. vietoj buvusių.",
+        "changeYesterday": "Pakeisk datą į vakar.",
+        "changeDayBefore": "Pakeisk datą į užvakar.",
+        "changeUnspecified": "Pakeisk tai, kas netikslu.",
+        "confirmed": "Paskutinį įrašą ({date} — „{text}“) jau patvirtino vadovas, todėl jo keisti negalima. Jei jame klaida, parašyk vadovui.",
+        "none": "Dar neturi įrašų, kuriuos būtų galima taisyti. Užfiksuok darbą — tada galėsi jį pataisyti.",
+        "unreadable": "Nepavyko perskaityti tavo įrašų, todėl nieko nekeičiu. Pabandyk dar kartą arba atsidaryk darbo žurnalą.",
+        "notInCompany": "Darbo žurnalo įrašai — tavo asmeniniai. Persijunk į asmeninę erdvę ir parašyk dar kartą.",
+        "chipEdit": "Taisyti įrašą"
+      },
       "pay": {
         "understoodRange": "Supratau: atlyginimo lūkestis nuo {min} iki {max} € per mėnesį. Įrašiau sumas į darbo kortelę — peržiūrėk ir išsaugok. Kol neišsaugosi, niekas nepasikeis.",
         "understoodMin": "Supratau: atlyginimo lūkestis ne mažiau kaip {min} € per mėnesį. Įrašiau sumą į darbo kortelę — peržiūrėk ir išsaugok. Kol neišsaugosi, niekas nepasikeis.",

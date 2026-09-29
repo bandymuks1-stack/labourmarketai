@@ -13218,6 +13218,18 @@
         "yearsCurrent": "od {from} do teraz",
         "notInCompany": "Historia pracy jest Twoja. Przełącz się na przestrzeń osobistą i napisz jeszcze raz."
       },
+      "correctWork": {
+        "found": "Poprawiamy Twój ostatni wpis: {date} — „{text}”. {change} Otwieram go do edycji; po zapisaniu stary wpis zostanie w historii jako poprawiony — nie powstanie nowy.",
+        "changeHours": "Wpisz {to} godz.",
+        "changeYesterday": "Zmień datę na wczoraj.",
+        "changeDayBefore": "Zmień datę na przedwczoraj.",
+        "changeUnspecified": "Zmień to, co się nie zgadza.",
+        "confirmed": "Twój ostatni wpis ({date} — „{text}”) został już potwierdzony przez przełożonego, więc nie można go zmienić. Jeśli jest błędny, napisz do przełożonego.",
+        "none": "Nie masz jeszcze wpisów do poprawienia. Najpierw zapisz swoją pracę.",
+        "unreadable": "Nie udało się odczytać Twoich wpisów, więc nic nie zmieniono. Spróbuj ponownie lub otwórz dziennik pracy.",
+        "notInCompany": "Wpisy w dzienniku pracy są Twoje. Przełącz się na przestrzeń osobistą i napisz jeszcze raz.",
+        "chipEdit": "Popraw wpis"
+      },
       "pay": {
         "understoodRange": "Rozumiem: oczekiwane wynagrodzenie {min}–{max} € miesięcznie. Wpisałem kwoty do Twojej karty pracy — sprawdź i zapisz. Dopóki nie zapiszesz, nic się nie zmieni.",
         "understoodMin": "Rozumiem: oczekiwane wynagrodzenie co najmniej {min} € miesięcznie. Wpisałem kwotę do Twojej karty pracy — sprawdź i zapisz. Dopóki nie zapiszesz, nic się nie zmieni.",
