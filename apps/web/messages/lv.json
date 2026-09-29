@@ -3988,6 +3988,7 @@
       "chipInviteClient": "[EN] Invite a client",
       "chipInviteCandidate": "[EN] Invite a candidate",
       "chipClientDemand": "[EN] Client requests",
+      "chipProposeReplacement": "Piedāvāt citu kandidātu",
       "chipProposalStatus": "[EN] Proposal status",
       "chipProposeFor": "[EN] Propose a candidate",
       "userClientDemand": "[EN] Show client requests",

@@ -300,7 +300,8 @@ describe("4. the bridge's spine signals are state-derived, mapped and localized"
     expect(read("lib/notifications/spine.ts")).toMatch(/getBridgeSpineCounts\(\)/);
     // side-gated by the ONE agency rule (owner decision 2026-09-28)
     expect(READS).toMatch(/readActsAsAgency\(company\.row\.companyType, ctx\.organizationId\)/);
-    expect(READS).toMatch(/countSharesAwaitingOffer\(shared, progress\)/);
+    // with the placement read: a declined / ended placement re-opens the need
+    expect(READS).toMatch(/countSharesAwaitingOffer\(shared, progress, placements\)/);
     expect(READS).toMatch(/countPendingConnectionInvites\(invites\)/);
     expect(READS).toMatch(/countOpenCandidateOffersForClient\(company\.row\.id\)/);
     // A head count on the client's own offers, never rows.

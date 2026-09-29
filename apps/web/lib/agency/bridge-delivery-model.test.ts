@@ -6,6 +6,7 @@ import {
   countPendingConnectionInvites,
   countSharesAwaitingOffer,
   deliveryByEmail,
+  sharedNeedsAwaitingWorker,
   toBridgeInviteDelivery,
   type ClientConnectionInvite,
   type ClientInviteDeliveryRow,
@@ -202,6 +203,48 @@ describe("bridge spine counts — state-derived, never fabricated from an unknow
     expect(
       countSharesAwaitingOffer(shared, progress([[R1, "withdrawn"], [R2, "declined"]])),
     ).toBe(3);
+  });
+
+  it("a need whose accepted candidate DECLINED the booking or whose placement ENDED is open again", () => {
+    const prog = progress([[R1, "accepted"], [R2, "accepted"], [R3, "accepted"]]);
+    const placed = (rows: ReadonlyArray<readonly [string, string | null, string | null]>) => ({
+      kind: "ok" as const,
+      rows: rows.map(([offerId, bookingStatus, engagementStatus]) => ({ offerId, bookingStatus, engagementStatus })),
+    });
+    // o0 = R1 worker declined; o1 = R2 placement ended; o2 = R3 still working
+    const p = placed([["o0", "declined", null], ["o1", "accepted", "ended"], ["o2", "accepted", "active"]]);
+    expect(countSharesAwaitingOffer(shared, prog, p)).toBe(2);
+    const rows = sharedNeedsAwaitingWorker(shared, prog, p);
+    expect(rows.map((r) => [r.requestId, r.reason])).toEqual([
+      [R1, "placement_did_not_proceed"],
+      [R2, "placement_did_not_proceed"],
+    ]);
+    // a NEW offer on the re-opened need answers it again
+    const reoffered = progress([[R1, "accepted"], [R2, "accepted"], [R3, "accepted"], [R1, "offered"]]);
+    expect(sharedNeedsAwaitingWorker(shared, reoffered, p).map((r) => r.requestId)).toEqual([R2]);
+  });
+
+  it("NEGATIVE: an accepted placement that is proposed / accepted / not yet booked still answers the need", () => {
+    const prog = progress([[R1, "accepted"], [R2, "accepted"]]);
+    const p = {
+      kind: "ok" as const,
+      rows: [
+        { offerId: "o0", bookingStatus: "proposed", engagementStatus: null },
+        { offerId: "o1", bookingStatus: null, engagementStatus: null },
+      ],
+    };
+    expect(countSharesAwaitingOffer(shared, prog, p)).toBe(1);
+  });
+
+  it("NEGATIVE: an unreadable placement read never invents attention; a closed need is not open", () => {
+    const prog = progress([[R1, "accepted"], [R2, "accepted"], [R3, "accepted"]]);
+    expect(countSharesAwaitingOffer(shared, prog, { kind: "error" })).toBe(0);
+    expect(countSharesAwaitingOffer(shared, prog)).toBe(0);
+    const closed = {
+      kind: "ok" as const,
+      rows: shared.kind === "ok" ? shared.rows.map((r) => ({ ...r, status: "closed" })) : [],
+    };
+    expect(countSharesAwaitingOffer(closed, progress([]))).toBe(0);
   });
 
   it("NEGATIVE: either read failing counts 0 — the bell never invents a number", () => {
