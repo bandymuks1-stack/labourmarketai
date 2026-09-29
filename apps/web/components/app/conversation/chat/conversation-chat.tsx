@@ -6786,7 +6786,10 @@ export function ConversationChat({
       // correctly. And it is person-only: a profession/credential claim is a
       // personal fact, so in a company or agency space the existing routes
       // keep the sentence (the same rule `availabilityStatement` follows).
-      if (identity === "person") {
+      // A dated past job ("2018–2020 dirbau stogdengiu Norvegijoje") is ONE
+      // fact with its period — the work-history door, not a list of facts
+      // that loses the years (production walk 2026-09-29).
+      if (identity === "person" && !readPastWorkPeriod(text, Number(todayIso().slice(0, 4)))) {
         const compound = readCompoundStatement(text);
         if (compound.isCompound) {
           presentCompoundStatement(compound);

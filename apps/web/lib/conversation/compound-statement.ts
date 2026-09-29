@@ -177,7 +177,14 @@ export function readCompoundStatement(text: string): CompoundStatementV1 {
   // `mig-mag-welding` and an unknown process simply does not appear —
   // there is no branch here that could mint one.
   for (const skill of recognizeSkills(raw).slice(0, RECOGNITION_LIMIT)) {
-    if (isSameFragmentAsProfession(skill.matchedText, profession?.label ?? null)) continue;
+    // Also the profession's OWN word form in the sentence ("stogdengiu" for
+    // "Stogdengys", 2026-09-29) — an inflected trade word is not a second fact.
+    if (
+      isSameFragmentAsProfession(skill.matchedText, profession?.label ?? null) ||
+      isSameFragmentAsProfession(skill.matchedText, profession?.raw ?? null)
+    ) {
+      continue;
+    }
     facts.push({
       kind: "skill",
       statedAs: statedFragment(raw, skill.matchedText) || skill.matchedText,
