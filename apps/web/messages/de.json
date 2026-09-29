@@ -8534,6 +8534,18 @@
     "agencyPresent": {
       "note": "Ihr Kunde hat diesen Bedarf mit Ihnen geteilt. Sie stellen Kandidaten aus Ihrem eigenen Personalbestand vor.",
       "link": "Kandidaten vorstellen"
+    },
+    "journey": {
+      "title": "Der Weg des Bedarfs",
+      "step": {
+        "need": "Bedarf",
+        "candidates": "Verglichene Personen",
+        "shortlist": "Vorausgewählt",
+        "contact": "Im Kontakt",
+        "offer": "Angeboten",
+        "accepted": "Angenommen",
+        "closed": "Geschlossen"
+      }
     }
   },
   "planBoundary": {

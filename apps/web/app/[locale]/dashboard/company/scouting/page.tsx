@@ -23,6 +23,8 @@ import { RequestContactDetailsButton } from "@/components/app/request-contact-de
 import { ScoutingShortlistButtons } from "@/components/app/scouting-shortlist-buttons";
 import { CompanyInterestAck } from "@/components/app/company-interest-ack";
 import { DemandLifecycleControls } from "@/components/app/demand-lifecycle-controls";
+import { JourneyStrip } from "@/components/app/journey-strip";
+import { buildDemandJourney } from "@/lib/demand/demand-journey-model";
 import { FeatureNote } from "@/components/app/feature-note";
 import { AvailableSupplySection } from "@/components/app/available-supply-section";
 import { listAvailableSupplyForEmployer } from "@/lib/supply/employer-supply-discovery";
@@ -499,6 +501,47 @@ export default async function CompanyScoutingPage({
         >
           {t("recognizedNote")}
         </p>
+      ) : null}
+
+      {/* THE NEED'S JOURNEY (premium company view, 2026-09-29): how many of
+          the compared people reached each step, from the SAME canonical
+          stage each card below derives. Owner only — an agency acting for a
+          client never sees the client's shortlist or contacts. */}
+      {result?.kind === "ok" && !actsForClient ? (
+        <section
+          className="flex flex-col gap-3 rounded-xl border border-border-subtle bg-surface-1/50 p-4"
+          data-testid="demand-journey"
+        >
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {t("journey.title")}
+          </span>
+          <JourneyStrip
+            ariaLabel={t("journey.title")}
+            testid="demand-journey-strip"
+            steps={buildDemandJourney({
+              demandStatus: result.demand.status,
+              stages: result.candidates.map((c) => ({
+                workerId: c.workerId,
+                stage: deriveCandidatePipelineStage({
+                  shortlistStatus: c.shortlistStatus,
+                  interestStatus: result.interestByWorker[c.workerId] ?? null,
+                  bookingStatus: pipelineFacts?.bookingByWorker.get(c.workerId) ?? null,
+                  conversationExists: pipelineFacts?.conversationByWorker.has(c.workerId) ?? false,
+                }),
+              })),
+              agencyOffers: offeredCandidates.map((oc) => ({
+                workerId: oc.workerId,
+                bookingStatus: oc.bookingId ? (offerBookingStatus.get(oc.bookingId) ?? "proposed") : null,
+              })),
+            }).map((s) => ({
+              key: s.key,
+              label: t(`journey.step.${s.key}`),
+              detail: s.count === null ? null : String(s.count),
+              state: s.state,
+              testid: `demand-journey-step-${s.key}`,
+            }))}
+          />
+        </section>
       ) : null}
 
       {/* Demand lifecycle (PR10): confirm recognized skills (§19 human act)

@@ -8534,6 +8534,18 @@
     "agencyPresent": {
       "note": "Your client shared this need with you. You present candidates to the client from your own roster.",
       "link": "Present a candidate"
+    },
+    "journey": {
+      "title": "The need's journey",
+      "step": {
+        "need": "Need",
+        "candidates": "People compared",
+        "shortlist": "Shortlisted",
+        "contact": "In contact",
+        "offer": "Offered",
+        "accepted": "Accepted",
+        "closed": "Closed"
+      }
     }
   },
   "planBoundary": {
