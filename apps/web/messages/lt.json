@@ -13250,6 +13250,20 @@
         "unreadable": "Nepavyko perskaityti tavo darbo santykių — nieko nekeičiu. Pabandyk dar kartą.",
         "notInCompany": "Kur dirbi — tavo asmeninis faktas. Persijunk į asmeninę erdvę ir paklausk dar kartą."
       },
+      "professionSave": {
+        "nowHeld": "Tavo profesijos profilyje: {list}. Pagrindinė: {primary}.",
+        "alreadyHeld": "„{name}“ jau yra tavo profilyje.",
+        "chipSavePrimary": "Įrašyti „{name}“ kaip pagrindinę",
+        "chipMakePrimary": "Padaryti „{name}“ pagrindine",
+        "chipAddDirection": "Pridėti „{name}“ kaip dar vieną kryptį",
+        "chipSaveOwn": "Įrašyti „{name}“ savo žodžiais",
+        "ask": "Pasirink, ką įrašyti — kol nepasirinksi, niekas nepasikeis.",
+        "saved": "Išsaugota profilyje.",
+        "noWorker": "Profesiją galima įrašyti tik darbuotojo profilyje — jo dar neturi.",
+        "unreadable": "Nepavyko perskaityti tavo profesijų — nieko nekeičiu. Pabandyk dar kartą.",
+        "invalid": "Šios profesijos sąraše nėra — įrašyk ją savo žodžiais.",
+        "failed": "Nepavyko išsaugoti — niekas nepasikeitė. Pabandyk dar kartą."
+      },
       "pay": {
         "understoodRange": "Supratau: atlyginimo lūkestis nuo {min} iki {max} € per mėnesį. Įrašiau sumas į darbo kortelę — peržiūrėk ir išsaugok. Kol neišsaugosi, niekas nepasikeis.",
         "understoodMin": "Supratau: atlyginimo lūkestis ne mažiau kaip {min} € per mėnesį. Įrašiau sumą į darbo kortelę — peržiūrėk ir išsaugok. Kol neišsaugosi, niekas nepasikeis.",

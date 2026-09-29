@@ -13250,6 +13250,20 @@
         "unreadable": "Nie udało się odczytać Twoich relacji pracy — nic nie zmieniono. Spróbuj ponownie.",
         "notInCompany": "To, gdzie pracujesz, jest Twoją informacją. Przełącz się na przestrzeń osobistą i zapytaj ponownie."
       },
+      "professionSave": {
+        "nowHeld": "Zawody w Twoim profilu: {list}. Główny: {primary}.",
+        "alreadyHeld": "„{name}” jest już w Twoim profilu.",
+        "chipSavePrimary": "Zapisz „{name}” jako główny",
+        "chipMakePrimary": "Ustaw „{name}” jako główny",
+        "chipAddDirection": "Dodaj „{name}” jako kolejny kierunek",
+        "chipSaveOwn": "Zapisz „{name}” własnymi słowami",
+        "ask": "Wybierz, co zapisać — do tego czasu nic się nie zmieni.",
+        "saved": "Zapisano w profilu.",
+        "noWorker": "Zawód można zapisać tylko w profilu pracownika — jeszcze go nie masz.",
+        "unreadable": "Nie udało się odczytać Twoich zawodów — nic nie zmieniono. Spróbuj ponownie.",
+        "invalid": "Tego zawodu nie ma na liście — zapisz go własnymi słowami.",
+        "failed": "Zapis nie powiódł się — nic nie zmieniono. Spróbuj ponownie."
+      },
       "pay": {
         "understoodRange": "Rozumiem: oczekiwane wynagrodzenie {min}–{max} € miesięcznie. Wpisałem kwoty do Twojej karty pracy — sprawdź i zapisz. Dopóki nie zapiszesz, nic się nie zmieni.",
         "understoodMin": "Rozumiem: oczekiwane wynagrodzenie co najmniej {min} € miesięcznie. Wpisałem kwotę do Twojej karty pracy — sprawdź i zapisz. Dopóki nie zapiszesz, nic się nie zmieni.",

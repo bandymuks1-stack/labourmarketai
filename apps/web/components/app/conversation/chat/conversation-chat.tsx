@@ -198,6 +198,12 @@ import {
 import { readProfessionStatement } from "@/lib/structuring/role-label";
 import { readCompoundStatement } from "@/lib/conversation/compound-statement";
 import { secondaryWorkStatement } from "@/lib/conversation/secondary-work-statement";
+import { readStatedProfessions } from "@/lib/conversation/stated-professions";
+import {
+  readMyProfessions,
+  saveStatedProfessionAction,
+  type MyProfessionState,
+} from "@/lib/worker/stated-profession-actions";
 import { applyCorrection } from "@/lib/structuring/apply-correction";
 import { discoverChannels } from "@/lib/value-channels/discovery";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
@@ -1889,6 +1895,111 @@ export function ConversationChat({
   );
   /** Late-bound so earlier flows (work-log onClose) can show the card. */
   const startPlayerCardRef = useRef(startPlayerCard);
+
+  /**
+   * A PROFESSION SAID IN CHAT — REVIEWED, THEN SAVED (owner continuation
+   * 2026-09-29). "Esu pastolininkas" used to get a link to the profile page.
+   * Now the person's current professions are read, and for each stated one
+   * (0/1/N) the chat offers the explicit choice the profile offers: make it
+   * the primary, add it as another direction, or keep it in their own words
+   * when the catalogue has no entry. A chip is the confirmation; the write is
+   * the existing profile action; the answer is the read-back.
+   */
+  const professionLabelOf = useCallback(
+    (slug: string | null, label: string) =>
+      slug && tProfessions.has(slug as never) ? tProfessions(slug as never) : label,
+    [tProfessions],
+  );
+  const professionSummary = useCallback(
+    (state: MyProfessionState) => {
+      if (state.kind !== "ok") return "";
+      const names = [
+        ...state.slugs.map((s) => (tProfessions.has(s as never) ? tProfessions(s as never) : s)),
+        ...state.ownLabels,
+      ];
+      const primary = state.primarySlug ? professionLabelOf(state.primarySlug, state.primarySlug) : null;
+      return t("professionSave.nowHeld", {
+        list: names.join(", ") || "—",
+        primary: primary ?? "—",
+      });
+    },
+    [t, tProfessions, professionLabelOf],
+  );
+  const offerProfessionSave = useCallback(
+    (text: string) => {
+      const items = readStatedProfessions(text).filter((r) => r.tense === "present");
+      if (items.length === 0) return false;
+      setTyping(true);
+      readMyProfessions()
+        .then((state) => {
+          setTyping(false);
+          if (state.kind !== "ok") {
+            assistant(t(state.kind === "no-worker" ? "professionSave.noWorker" : "professionSave.unreadable"));
+            return;
+          }
+          const lines: string[] = [];
+          const chips: ChoiceChip[] = [];
+          for (const it of items) {
+            const name = professionLabelOf(it.professionSlug, it.label);
+            if (it.professionSlug && tProfessions.has(it.professionSlug as never)) {
+              if (state.slugs.includes(it.professionSlug)) {
+                lines.push(t("professionSave.alreadyHeld", { name }));
+                if (state.primarySlug !== it.professionSlug) {
+                  chips.push({ id: `prof:primary:${it.professionSlug}`, label: t("professionSave.chipMakePrimary", { name }) });
+                }
+              } else if (!state.primarySlug) {
+                chips.push({ id: `prof:primary:${it.professionSlug}`, label: t("professionSave.chipSavePrimary", { name }) });
+              } else {
+                chips.push({ id: `prof:direction:${it.professionSlug}`, label: t("professionSave.chipAddDirection", { name }) });
+                chips.push({ id: `prof:primary:${it.professionSlug}`, label: t("professionSave.chipMakePrimary", { name }) });
+              }
+            } else if (state.ownLabels.some((l) => l.toLowerCase() === it.label.toLowerCase())) {
+              lines.push(t("professionSave.alreadyHeld", { name }));
+            } else {
+              chips.push({ id: `prof:own:${encodeURIComponent(it.label)}`, label: t("professionSave.chipSaveOwn", { name }) });
+            }
+          }
+          lines.push(professionSummary(state));
+          if (chips.length > 0) lines.push(t("professionSave.ask"));
+          assistant(lines.join("\n"), chips.length > 0 ? chips : undefined);
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(t("professionSave.unreadable"));
+        });
+      return true;
+    },
+    [assistant, t, tProfessions, professionLabelOf, professionSummary],
+  );
+  const offerProfessionSaveRef = useRef(offerProfessionSave);
+  offerProfessionSaveRef.current = offerProfessionSave;
+  const runProfessionSave = useCallback(
+    (chipId: string) => {
+      const [, mode, raw] = chipId.split(":");
+      const value = decodeURIComponent(raw ?? "");
+      if (!value || (mode !== "primary" && mode !== "direction" && mode !== "own")) return;
+      setTyping(true);
+      saveStatedProfessionAction(
+        mode === "own" ? { mode, label: value, locale } : { mode, slug: value },
+      )
+        .then((res) => {
+          setTyping(false);
+          if (!res.ok) {
+            assistant(t(res.reason === "invalid" ? "professionSave.invalid" : "professionSave.failed"));
+            return;
+          }
+          assistant([t("professionSave.saved"), professionSummary(res.state)].join("\n"), [
+            { id: "jobs", label: labels.chipJobs },
+            { id: "profile", label: labels.chipProfile },
+          ]);
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(t("professionSave.failed"));
+        });
+    },
+    [assistant, t, locale, professionSummary, labels.chipJobs, labels.chipProfile],
+  );
   startPlayerCardRef.current = startPlayerCard;
 
   /**
@@ -5025,6 +5136,16 @@ export function ConversationChat({
           runAgencyRead("progress");
           break;
         default:
+          if (chip.id.startsWith("prof:")) {
+            user(chip.label);
+            runProfessionSave(chip.id);
+            break;
+          }
+          if (chip.id.startsWith("profask:")) {
+            user(chip.label);
+            offerProfessionSaveRef.current(decodeURIComponent(chip.id.slice("profask:".length)));
+            break;
+          }
           if (chip.id === "edu:create" || chip.id === "edu:cohort" || chip.id === "edu:assign") {
             runEducationProgrammes(chip.id.slice(4) as "create" | "cohort" | "assign");
             break;
@@ -5986,9 +6107,7 @@ export function ConversationChat({
                 ? tProfessions(stated.professionSlug as never)
                 : stated.label;
             assistant(t("professionStatement.readBesideSearch", { label }), [
-              stated.professionSlug
-                ? { id: "link:/dashboard/profile#profile-edit", label: t("professionStatement.chipSetProfession") }
-                : { id: "f:worker.add-work-history", label: t("professionStatement.chipRecordExperience") },
+              { id: `profask:${encodeURIComponent(text)}`, label: t("professionStatement.chipSetProfession") },
             ]);
           }
           // The world earlier turns of THIS goal already narrowed travels
@@ -6064,19 +6183,11 @@ export function ConversationChat({
             openForm("worker.add-work-history", undefined, undefined, { title: stated.label });
             return;
           }
-          assistant(
-            [
-              t("professionStatement.understood", { label }),
-              inCatalogue ? t("professionStatement.inCatalogue") : t("professionStatement.notInCatalogue"),
-            ].join("\n"),
-            [
-              ...(inCatalogue
-                ? [{ id: "link:/dashboard/profile#profile-edit", label: t("professionStatement.chipSetProfession") }]
-                : []),
-              { id: "f:worker.add-work-history", label: t("professionStatement.chipRecordExperience") },
-              { id: "jobs", label: labels.chipJobs },
-            ],
-          );
+          // Understood, then the REVIEW: the person's current professions are
+          // read and the save choices offered (0/1/N stated professions) —
+          // the profile's own write path, confirmed by a chip.
+          assistant(t("professionStatement.understood", { label }));
+          offerProfessionSave(text);
         },
         /**
          * "galiu dirbti nuo spalio 1 d." (production 2026-09-06: answered as a

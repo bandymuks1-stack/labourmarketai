@@ -13250,6 +13250,20 @@
         "unreadable": "Ik kon je werkrelaties niet lezen — er is niets gewijzigd. Probeer het opnieuw.",
         "notInCompany": "Waar je werkt is jouw eigen gegeven. Schakel naar je persoonlijke ruimte en vraag het opnieuw."
       },
+      "professionSave": {
+        "nowHeld": "Beroepen in je profiel: {list}. Hoofdberoep: {primary}.",
+        "alreadyHeld": "‘{name}’ staat al in je profiel.",
+        "chipSavePrimary": "‘{name}’ opslaan als hoofdberoep",
+        "chipMakePrimary": "‘{name}’ hoofdberoep maken",
+        "chipAddDirection": "‘{name}’ toevoegen als extra richting",
+        "chipSaveOwn": "‘{name}’ in eigen woorden opslaan",
+        "ask": "Kies wat je opslaat — tot dan verandert er niets.",
+        "saved": "Opgeslagen in je profiel.",
+        "noWorker": "Een beroep kan alleen in een werknemersprofiel worden opgeslagen — dat heb je nog niet.",
+        "unreadable": "Ik kon je beroepen niet lezen — er is niets gewijzigd. Probeer het opnieuw.",
+        "invalid": "Dit beroep staat niet in de lijst — sla het op in eigen woorden.",
+        "failed": "Opslaan mislukt — er is niets gewijzigd. Probeer het opnieuw."
+      },
       "pay": {
         "understoodRange": "Begrepen: salarisverwachting {min}–{max} € per maand. Ik heb de bedragen in je werkkaart gezet — controleer en sla op. Er verandert niets tot je opslaat.",
         "understoodMin": "Begrepen: salarisverwachting minimaal {min} € per maand. Ik heb het bedrag in je werkkaart gezet — controleer en sla op. Er verandert niets tot je opslaat.",

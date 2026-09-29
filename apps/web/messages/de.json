@@ -13250,6 +13250,20 @@
         "unreadable": "Ich konnte deine Arbeitsverhältnisse nicht lesen — nichts wurde geändert. Versuch es erneut.",
         "notInCompany": "Wo du arbeitest, ist deine eigene Angabe. Wechsle in deinen persönlichen Bereich und frag noch einmal."
       },
+      "professionSave": {
+        "nowHeld": "Berufe in deinem Profil: {list}. Hauptberuf: {primary}.",
+        "alreadyHeld": "„{name}“ ist bereits in deinem Profil.",
+        "chipSavePrimary": "„{name}“ als Hauptberuf speichern",
+        "chipMakePrimary": "„{name}“ zum Hauptberuf machen",
+        "chipAddDirection": "„{name}“ als weitere Richtung hinzufügen",
+        "chipSaveOwn": "„{name}“ in eigenen Worten speichern",
+        "ask": "Wähle, was gespeichert wird — bis dahin ändert sich nichts.",
+        "saved": "Im Profil gespeichert.",
+        "noWorker": "Ein Beruf kann nur in einem Arbeitnehmerprofil gespeichert werden — du hast noch keins.",
+        "unreadable": "Ich konnte deine Berufe nicht lesen — nichts wurde geändert. Versuch es erneut.",
+        "invalid": "Dieser Beruf ist nicht in der Liste — speichere ihn in eigenen Worten.",
+        "failed": "Speichern fehlgeschlagen — nichts wurde geändert. Versuch es erneut."
+      },
       "pay": {
         "understoodRange": "Verstanden: Gehaltswunsch {min}–{max} € pro Monat. Ich habe die Beträge in deine Arbeitskarte eingetragen — prüfen und speichern. Bis du speicherst, ändert sich nichts.",
         "understoodMin": "Verstanden: Gehaltswunsch mindestens {min} € pro Monat. Ich habe den Betrag in deine Arbeitskarte eingetragen — prüfen und speichern. Bis du speicherst, ändert sich nichts.",
