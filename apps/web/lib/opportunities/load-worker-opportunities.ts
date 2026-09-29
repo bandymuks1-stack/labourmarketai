@@ -314,7 +314,12 @@ export async function loadWorkerOpportunities(
     // never re-read from a second source.
     assessedAgainst: {
       skillCount: ctx.subject.skills.length,
-      languages: ctx.subject.languages ?? [],
+      // The engine reads the person's languages as `languageLevels` (from
+      // worker_languages); `languages` is set by neither subject builder, so
+      // the board said "kalbos nenurodytos" to a worker who had saved English
+      // B2 (production walk 2026-09-29). Report what the engine ran on.
+      languages:
+        ctx.subject.languages ?? (ctx.subject.languageLevels ?? []).map((l) => l.lang),
       salaryMinEur: ctx.subject.salaryMinEur ?? null,
       city: ctx.subject.city ?? null,
     },
