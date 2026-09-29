@@ -7017,7 +7017,14 @@ export function ConversationChat({
         //
         // It now READS the record before saying anything about it, for the
         // person whatever workspace they are sitting in — see `startCvState`.
-        cvView: () => startCvState(),
+        cvView: () => {
+          // "Parodyk mano darbo istoriją" (owner §20–§21): the CV reply is
+          // unchanged; a sentence that asks for a HISTORY also opens the SAME
+          // Player Card on its History lens beside it. Not gated on the
+          // workspace — the history belongs to the human (SEP-5).
+          if (cardModeFromText(text) === "history") openPlayerCardRef.current("history");
+          startCvState();
+        },
         // Derived at ask time from the active context — see `startCapabilities`.
         capabilities: () => startCapabilities(),
         // The sentence named the CV and stopped. Three real doors, no guess
