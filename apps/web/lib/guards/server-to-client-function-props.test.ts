@@ -36,7 +36,26 @@ function walk(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-const isClientSource = (src: string) => /^\s*(\/\/[^\n]*\n\s*|\/\*[\s\S]*?\*\/\s*)*["']use client["']/.test(src);
+/** Does the module open with the "use client" directive? Leading comments
+ *  are skipped by a linear scan — no backtracking regex (CodeQL js/redos). */
+function isClientSource(src: string): boolean {
+  let i = 0;
+  for (;;) {
+    while (i < src.length && (src[i] === " " || src[i] === "\t" || src[i] === "\n" || src[i] === "\r")) i++;
+    if (src.startsWith("//", i)) {
+      const nl = src.indexOf("\n", i);
+      if (nl < 0) return false;
+      i = nl + 1;
+    } else if (src.startsWith("/*", i)) {
+      const end = src.indexOf("*/", i + 2);
+      if (end < 0) return false;
+      i = end + 2;
+    } else break;
+  }
+  return src.startsWith('"use client"', i) || src.startsWith("'use client'", i);
+}
+
+const IMPORT_FROM = /from\s+["']([^"']+)["']/g;
 
 function resolveModule(spec: string, fromFile: string): string | null {
   const base = spec.startsWith("@/") ? join(WEB, spec.slice(2)) : spec.startsWith(".") ? resolve(dirname(fromFile), spec) : null;
@@ -69,6 +88,13 @@ function hasInlineFunction(node: ts.Node): boolean {
 function violationsIn(file: string): string[] {
   const src = readFileSync(file, "utf8");
   if (isClientSource(src)) return [];
+  // Cheap first pass: a file that imports no client module cannot violate,
+  // so only the rest pay for a full parse (keeps the guard inside CI budget).
+  const importsClient = [...src.matchAll(IMPORT_FROM)].some((m) => {
+    const target = resolveModule(m[1], file);
+    return target !== null && isClientModule(target);
+  });
+  if (!importsClient) return [];
   const sf = ts.createSourceFile(file, src, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
   const clientNames = new Set<string>();
   for (const st of sf.statements) {
@@ -107,7 +133,7 @@ describe("server → client boundary: no inline function props", () => {
   it("no server file under app/ hands a \"use client\" component an inline function", () => {
     const violations = walk(join(WEB, "app")).flatMap(violationsIn);
     expect(violations).toEqual([]);
-  });
+  }, 180_000);
 
   it("the guard itself sees the 2026-09-29 shape", () => {
     // the exact shape that broke /jobs/[id], parsed through the same visitor
