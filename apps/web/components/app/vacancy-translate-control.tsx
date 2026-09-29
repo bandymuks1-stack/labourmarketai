@@ -30,10 +30,23 @@ export interface VacancyTranslateLabels {
   readonly translate: string;
   readonly translating: string;
   readonly machineNote: string;
-  readonly remaining: (count: number, limit: number) => string;
-  readonly exhausted: (limit: number) => string;
+  /** "{count} of {limit} left" — a TEMPLATE string, filled here. Labels
+   *  cross the server→client boundary, so they must be serializable: a
+   *  function prop made React throw during render and the whole public job
+   *  page fell to the error screen for every signed-in reader of a
+   *  foreign-language ad (P0, 2026-09-29). */
+  readonly remaining: string;
+  /** "all {limit} used" — a TEMPLATE string, filled here. */
+  readonly exhausted: string;
   readonly unavailable: string;
   readonly signedOut: string;
+}
+
+/** Fill `{name}` placeholders in a label template (numbers only). */
+export function fillTemplate(template: string, values: Readonly<Record<string, number>>): string {
+  return template.replace(/\{(\w+)\}/g, (whole, name: string) =>
+    name in values ? String(values[name]) : whole,
+  );
 }
 
 export function VacancyTranslateControl({
@@ -76,7 +89,7 @@ export function VacancyTranslateControl({
           {result.kind === "signed_out"
             ? labels.signedOut
             : result.kind === "over_allowance" && typeof result.limit === "number"
-              ? labels.exhausted(result.limit)
+              ? fillTemplate(labels.exhausted, { limit: result.limit })
               : labels.unavailable}
         </p>
       )}
@@ -115,7 +128,7 @@ export function VacancyTranslateControl({
         typeof result.limit === "number" &&
         result.kind !== "over_allowance" && (
           <p className="mt-2 text-meta text-text-muted" data-testid="vacancy-translate-allowance">
-            {labels.remaining(result.remaining, result.limit)}
+            {fillTemplate(labels.remaining, { count: result.remaining, limit: result.limit })}
           </p>
         )}
     </section>

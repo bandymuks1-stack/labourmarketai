@@ -839,10 +839,14 @@ export default async function JobDetailPage({
                   }),
                   translating: t("vacancySources.language.translating"),
                   machineNote: t("vacancySources.language.machineNote"),
-                  remaining: (count, limit) =>
-                    t("vacancySources.language.allowanceRemaining", { count, limit }),
-                  exhausted: (limit) =>
-                    t("vacancySources.language.allowanceExhausted", { limit }),
+                  // TEMPLATES, not functions: this is a client component,
+                  // and a function prop threw the page to the error screen
+                  // (P0 2026-09-29). The control fills {count}/{limit}.
+                  remaining: t("vacancySources.language.allowanceRemaining", {
+                    count: "{count}",
+                    limit: "{limit}",
+                  }),
+                  exhausted: t("vacancySources.language.allowanceExhausted", { limit: "{limit}" }),
                   unavailable: t("vacancySources.language.unavailable"),
                   signedOut: t("vacancySources.language.signedOut"),
                 }}
