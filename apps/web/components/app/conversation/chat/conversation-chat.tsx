@@ -115,6 +115,7 @@ import { stripEndDatePhrase, parseEndDate, parseStartDate } from "@/lib/structur
 import { payPrefill, readPayStatement } from "@/lib/conversation/pay-statement";
 import { readStatedLanguages } from "@/lib/conversation/language-statement";
 import { readSkillStatement } from "@/lib/conversation/skill-statement";
+import { projectNamedInSentence } from "@/lib/conversation/project-mention";
 import { loadSavedOpportunitiesForChat } from "@/lib/conversation/saved-opportunities";
 import { saveStatedSkillAction } from "@/lib/profile/stated-skill-actions";
 import { WORKER_LANGUAGE_NATIVE_NAMES } from "@/lib/worker/worker-languages-model";
@@ -4074,8 +4075,9 @@ export function ConversationChat({
           // the deadline the sentence stated is its own field — not a title tail
           const rawTitle = colon >= 0 ? sentence.slice(colon + 1).trim() : "";
           const title = dueDate ? stripEndDatePhrase(rawTitle) : rawTitle;
-          const lower = sentence.toLowerCase();
-          const named = projects.find((p) => p.label.length >= 4 && lower.includes(p.label.toLowerCase()));
+          // The project the sentence NAMES — by its core words, only when
+          // exactly one matches (2026-09-29: the whole stored title was required).
+          const named = projectNamedInSentence(sentence, projects);
           const prefill: Record<string, string> = {};
           if (title) prefill.title = title.slice(0, 160);
           if (dueDate) prefill.dueDate = dueDate;
