@@ -20,7 +20,11 @@ import {
   buildPlayerCardMinimum,
   type PlayerCardMinimumSource,
 } from "@/lib/identity/player-card-minimum";
-import { AvatarDisplay } from "@/components/app/avatar-display";
+import { IdentityStage } from "@/components/app/player-card/identity-stage";
+import { buildIdentityFacts } from "@/lib/player-card/identity-facts";
+import { playerInitials } from "@/lib/identity/player-identity";
+import { professionDisplayName } from "@/lib/worker/self-declared-profession";
+import type { WorkPeriodTotals } from "@/lib/journal/work-intelligence";
 import {
   EmployerVisibilityItem,
   employerVisibilityItemLabels,
@@ -124,6 +128,7 @@ export async function ProfileHubOverview({
   cvSections,
   workerId,
   workContexts = null,
+  workAllTime = null,
 }: {
   cvProvided: boolean;
   selfDeclaredCount: number;
@@ -152,6 +157,10 @@ export async function ProfileHubOverview({
    *  page already loaded — joined on engagement id so each history row can
    *  say "recorded h / confirmed h". Null = not loaded → no hours line. */
   workContexts?: readonly ContextWorkTime[] | null;
+  /** The journal's ALL-TIME period row the page already loaded (and whether
+   *  that read was truncated) — the identity stage's fact strip. Null → no
+   *  strip (the journal was not read), never zeros. */
+  workAllTime?: { readonly totals: WorkPeriodTotals; readonly truncated: boolean } | null;
 }) {
   /**
    * W7-S3: seven namespaces and the locale in ONE stage. They were eight
@@ -160,7 +169,7 @@ export async function ProfileHubOverview({
    * even be started. `tReview` is the absorbed SkillsReviewBanner's own copy,
    * reused verbatim — the message and destination the worker already knows.
    */
-  const [t, tStep, tState, tLive, tAction, tReview, tSkill, tVisuals, tVisibility, locale] =
+  const [t, tStep, tState, tLive, tAction, tReview, tSkill, tVisuals, tVisibility, tProf, tIdentity, locale] =
     await Promise.all([
       getTranslations("profileHub"),
       getTranslations("setupJourney"),
@@ -174,6 +183,9 @@ export async function ProfileHubOverview({
       getTranslations("playerCard.visuals"),
       // "Matomas darbdaviams" — the readiness item shared with the board.
       getTranslations("privacyConsent.employerVisibility"),
+      // The identity stage: every profession's name + the fact strip's words.
+      getTranslations("professions"),
+      getTranslations("playerCard.identity"),
       getLocale(),
     ]);
 
@@ -396,61 +408,91 @@ export async function ProfileHubOverview({
       data-testid="profile-hub-overview"
     >
       {/* ── WHO AM I ─────────────────────────────────────────────────────── */}
-      <header className="flex items-start gap-3">
-        <AvatarDisplay
-          signedUrl={avatarUrl}
-          displayName={personName}
-          alt={personName}
-        />
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <h2 className="truncate font-display text-lg font-semibold text-text-primary">
+      {/* ── WHO AM I — the identity stage (premium Player Card, 2026-09-29):
+          the person at portrait scale, EVERY profession, where they work now
+          and the journal's own figures. The status line below is unchanged. */}
+      <IdentityStage
+        name={personName}
+        avatarUrl={avatarUrl}
+        initials={playerInitials(personName)}
+        heading={
+          <h2 className="truncate font-display text-2xl font-bold leading-tight tracking-tightest text-text-primary max-sm:whitespace-normal max-sm:break-words sm:text-4xl">
             {personName}
           </h2>
-          {/* STATUS — one honest state word from the ONE readiness model,
-              plus "N of M" so the word is never the only information. */}
-          {readiness ? (
-            <p
-              className="text-sm text-text-secondary"
-              data-testid="profile-hub-status"
-            >
-              <span
-                data-status={readiness.level}
-                className={
-                  readiness.level === "ready"
-                    ? "font-medium text-state-success"
-                    : "font-medium text-text-primary"
-                }
+        }
+        professions={[
+          ...new Set(
+            (playerCard?.professions ?? [])
+              .map((e) =>
+                professionDisplayName(e, (slug) =>
+                  tProf.has(slug as never) ? tProf(slug as never) : null,
+                ),
+              )
+              .filter((n): n is string => Boolean(n)),
+          ),
+        ]}
+        location={null}
+        availability={null}
+        currentWork={[
+          ...new Set(
+            (playerCard?.workHistory ?? [])
+              .filter((h) => h.current)
+              .map((h) => (h.organizationName ?? "").trim())
+              .filter((n) => n.length > 0),
+          ),
+        ]}
+        currentWorkLabel={tIdentity("currentWork")}
+        facts={buildIdentityFacts({
+          allTime: workAllTime?.totals,
+          truncated: workAllTime?.truncated ?? false,
+          locale,
+          t: (key, values) => tIdentity(key, values),
+        })}
+      >
+        <div className="flex min-w-0 flex-col gap-0.5">
+            {readiness ? (
+              <p
+                className="text-sm text-text-secondary"
+                data-testid="profile-hub-status"
               >
-                {tState(`readiness.${readiness.level}`)}
-              </span>
-              {" · "}
-              {/* ONE READINESS, ONE DENOMINATOR (§8, 2026-09-27).
-                  This read `{ done: doneCount, total: steps.length }` — a
-                  fraction over the 5 actionable STEPS — and it was wrong twice.
-                  Against ITSELF: this component separately lists the two
-                  `STEPLESS_PILLARS` (journal, evidence) as missing, so the
-                  progress number excluded two things the same screen was
-                  telling the person they still had to do. And against the REST
-                  OF THE PRODUCT: the player card renders `readiness.met`/
-                  `readiness.total` over all 6 pillars, so a person moving
-                  between the hub and their card met two different
-                  denominators — "0 iš 5" here and "0/6" there — for one
-                  underlying fact, with nothing explaining the difference.
-                  The canonical readiness is `deriveWorkerReadiness`, so it is
-                  the denominator everywhere. The 5 steps are unchanged and
-                  still the ACTIONABLE list; only the count is canonical now. */}
-              {tStep("progress", {
-                done: readiness.met,
-                total: readiness.total,
-              })}
-              {" · "}
-              <span data-testid="profile-hub-freshness">{freshness}</span>
-            </p>
-          ) : (
-            <p className="text-sm text-text-secondary">{t("explainer")}</p>
-          )}
+                <span
+                  data-status={readiness.level}
+                  className={
+                    readiness.level === "ready"
+                      ? "font-medium text-state-success"
+                      : "font-medium text-text-primary"
+                  }
+                >
+                  {tState(`readiness.${readiness.level}`)}
+                </span>
+                {" · "}
+                {/* ONE READINESS, ONE DENOMINATOR (§8, 2026-09-27).
+                    This read `{ done: doneCount, total: steps.length }` — a
+                    fraction over the 5 actionable STEPS — and it was wrong twice.
+                    Against ITSELF: this component separately lists the two
+                    `STEPLESS_PILLARS` (journal, evidence) as missing, so the
+                    progress number excluded two things the same screen was
+                    telling the person they still had to do. And against the REST
+                    OF THE PRODUCT: the player card renders `readiness.met`/
+                    `readiness.total` over all 6 pillars, so a person moving
+                    between the hub and their card met two different
+                    denominators — "0 iš 5" here and "0/6" there — for one
+                    underlying fact, with nothing explaining the difference.
+                    The canonical readiness is `deriveWorkerReadiness`, so it is
+                    the denominator everywhere. The 5 steps are unchanged and
+                    still the ACTIONABLE list; only the count is canonical now. */}
+                {tStep("progress", {
+                  done: readiness.met,
+                  total: readiness.total,
+                })}
+                {" · "}
+                <span data-testid="profile-hub-freshness">{freshness}</span>
+              </p>
+            ) : (
+              <p className="text-sm text-text-secondary">{t("explainer")}</p>
+            )}
         </div>
-      </header>
+      </IdentityStage>
 
       {/* ── WHAT IS MISSING ──────────────────────────────────────────────── */}
       {steps.length > 0 && (

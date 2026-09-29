@@ -1068,7 +1068,12 @@ export default async function JournalPage({
         // Hours per engagement on the card — the SAME journal model this
         // page already assembled above, joined on engagement id; no second
         // read, no second ledger.
-        buildPlayerCardLabels(manoCard, { contexts: workIntelligence?.contexts ?? null }),
+        buildPlayerCardLabels(manoCard, {
+          contexts: workIntelligence?.contexts ?? null,
+          // The identity stage's fact strip: the SAME model's all-time row.
+          allTime: workIntelligence?.periods.find((p) => p.key === "all") ?? null,
+          allTimeTruncated: workIntelligence?.coverage.truncated ?? false,
+        }),
         getOwnThermometer().then(toThermometerView),
       ])
     : [null, null];

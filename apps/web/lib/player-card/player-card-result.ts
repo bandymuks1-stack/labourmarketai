@@ -7,6 +7,7 @@ import { getTranslations } from "next-intl/server";
 import { getWorkerPlayerCard, type WorkerPlayerCard } from "./player-card";
 import { deriveWorkCardChecks } from "@/lib/worker/work-card-plausibility";
 import { buildPlayerCardLabels } from "./labels";
+import { loadOwnWorkIntelligence } from "@/lib/journal/work-intelligence-read";
 import {
   getOwnThermometer,
   toThermometerView,
@@ -73,7 +74,17 @@ export async function loadPlayerCardResult(): Promise<PlayerCardResult> {
       return { kind: "blocked", message: t("playerCardBlocked") };
     }
     const [labels, thermometer, avatar, editor] = await Promise.all([
-      buildPlayerCardLabels(card),
+      // The journal's own figures for the identity stage and the per-engagement
+      // hours — the ONE hour ledger; an unreadable journal yields no strip.
+      loadOwnWorkIntelligence()
+        .catch(() => null)
+        .then((intel) =>
+          buildPlayerCardLabels(card, {
+            contexts: intel?.contexts ?? null,
+            allTime: intel?.periods.find((p) => p.key === "all") ?? null,
+            allTimeTruncated: intel?.coverage.truncated ?? false,
+          }),
+        ),
       getOwnThermometer().then(toThermometerView),
       getOwnAvatar(),
       resolveWorkEditor(card),

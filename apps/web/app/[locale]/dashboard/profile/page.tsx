@@ -84,7 +84,7 @@ import { OrganizationHistorySkillSuggestionsSection } from "@/components/app/org
 import { listMyTeamLinks } from "@/lib/company/team-links";
 import { TeamLinkWithdrawals } from "@/components/app/roster-link-end";
 import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
-import type { ContextWorkTime } from "@/lib/journal/work-intelligence";
+import type { ContextWorkTime, WorkPeriodTotals } from "@/lib/journal/work-intelligence";
 import {
   presentSkills,
   skillMagnitude,
@@ -359,6 +359,8 @@ export default async function ProfilePage({
   // the hub so each history row can say "recorded h / confirmed h". Stays
   // null when the journal was not read → no hours line, never "0 h".
   let workContexts: readonly ContextWorkTime[] | null = null;
+  // The identity stage's fact strip: the SAME model's all-time row.
+  let workAllTime: { totals: WorkPeriodTotals; truncated: boolean } | null = null;
   // Self-stated languages (P2-PR3) — `worker_languages`, APPLIED in production
   // 2026-07-11 (ledger `20260711203623`; 11 real rows). The needs-migration
   // branch is kept for fresh/local databases, not because production lacks it.
@@ -487,6 +489,12 @@ export default async function ProfilePage({
     availabilityPrefs = prefsRes;
     playerCardResult = playerCardRes;
     workContexts = workIntelligence?.contexts ?? null;
+    {
+      const all = workIntelligence?.periods.find((p) => p.key === "all");
+      workAllTime = all
+        ? { totals: all, truncated: workIntelligence?.coverage.truncated ?? false }
+        : null;
+    }
     workerLanguages = langsRes;
     externalProfiles = extRes;
     workerEducation = eduRes;
@@ -1123,6 +1131,7 @@ export default async function ProfilePage({
         // The journal's per-engagement hours, joined on engagement id in the
         // hub's history list (the same ledger the skills above read).
         workContexts={workContexts}
+        workAllTime={workAllTime}
         // Identity-essential presence sourced from the ONE minimum card contract
         // (launch audit §7.3) — only data already fetched above, no new reads.
         cardSource={{

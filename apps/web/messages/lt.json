@@ -7553,7 +7553,20 @@
       "historyUnavailable": "Tavo darbo istorijos šiuo metu nepavyko nuskaityti."
     },
     "skillsUnavailable": "Šiuo metu nepavyko nuskaityti.",
-    "verifiedUnavailable": "Įgūdžių su vadovo įrašu šiuo metu nepavyko nuskaityti."
+    "verifiedUnavailable": "Įgūdžių su vadovo įrašu šiuo metu nepavyko nuskaityti.",
+    "identity": {
+      "currentWork": "Dirba dabar",
+      "recorded": "val. užfiksuota",
+      "confirmed": "val. su vadovo įrašu",
+      "days": "{count, plural, one {darbo diena} few {darbo dienos} other {darbo dienų}}",
+      "modes": {
+        "label": "Kortelės dalys",
+        "work": "Darbas",
+        "skills": "Gebėjimai",
+        "evidence": "Įrodymai",
+        "history": "Istorija"
+      }
+    }
   },
   "skillClarify": {
     "title": "Mano įgūdžiai",
