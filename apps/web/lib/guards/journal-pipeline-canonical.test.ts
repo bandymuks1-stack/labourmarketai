@@ -385,8 +385,8 @@ describe("the stated total (#1689) — lane 4c reads the extractor's ONE rule, n
     expect(RECOGNITION).toMatch(/headerNamedWork = outcomes\.length > 0/);
     // every own lane yields to it: taxonomy, ambiguity, claims, the offer
     expect(RECOGNITION).toMatch(/for \(const r of describesWhere \? \[\] : recognizeSkills\(workText, 8\)\)/);
-    expect(RECOGNITION).toMatch(/for \(const a of describesWhere \? \[\] : extractAmbiguousCandidates\(f\.text\)\)/);
-    expect(RECOGNITION).toMatch(/for \(const c of describesWhere \? \[\] : extractProfileSkillClaims\(f\.text\)\)/);
+    expect(RECOGNITION).toMatch(/for \(const a of describesWhere \? \[\] : extractAmbiguousCandidates\(workText\)\)/);
+    expect(RECOGNITION).toMatch(/for \(const c of describesWhere \? \[\] : extractProfileSkillClaims\(workText\)\)/);
     // the rule is structural: the function body names no place word
     const start = EXTRACTOR.indexOf("export function describesWhereOnly(");
     const body = EXTRACTOR.slice(start, EXTRACTOR.indexOf("return true;", start));
@@ -405,7 +405,8 @@ describe("the stated total (#1689) — lane 4c reads the extractor's ONE rule, n
     expect(EXTRACTOR).toMatch(/const localTime = detectFragmentTime\(raw\);/);
     // the whole-text suggestions (the card) read the same join
     expect(EXTRACTOR).toMatch(/\.map\(workPartOf\)\s*\.join\("\. "\)/);
-    // the recognition side's lane 1 reads the rule — never a second grammar
+    // the recognition side's lanes 1-3 read the rule — never a second grammar
+    // (lane 3 on the whole phrase raised "Maisto gamyba" beside tiling, 2026-09-29)
     expect(RECOGNITION).toMatch(/const workText = workPartOf\(f\.text\);/);
     expect(RECOGNITION).toMatch(/recognizeSkills\(workText, 8\)/);
     expect(RECOGNITION).not.toMatch(/function workPartOf/);
