@@ -17361,5 +17361,133 @@
       "confirmed": "Bestätigt und geteilt",
       "failed": "Bestätigung fehlgeschlagen."
     }
+  },
+  "landingJourney": {
+    "sampleLabel": "Beispielgeschichte",
+    "title": "Wie LabourMarket.ai ein Arbeitsleben begleitet",
+    "currentWork": "Arbeitet derzeit",
+    "person": {
+      "profession": "Köchin",
+      "nextProfession": "Oberköchin"
+    },
+    "steps": {
+      "identity": {
+        "label": "Mensch",
+        "caption": "Das ist ein Mensch — kein Formular, ein Arbeitsleben."
+      },
+      "profession": {
+        "label": "Beruf",
+        "caption": "Sie ist Köchin."
+      },
+      "direction": {
+        "label": "Richtung",
+        "caption": "Sie will in Norwegen arbeiten, ab 2.800 € im Monat."
+      },
+      "opportunities": {
+        "label": "Chancen",
+        "caption": "Passende Chancen erscheinen — mit den Gründen, warum sie passen."
+      },
+      "conversation": {
+        "label": "Gespräch",
+        "caption": "Ein Arbeitgeber fragt — sie antwortet."
+      },
+      "project": {
+        "label": "Arbeit",
+        "caption": "Sie beginnt in einer Restaurantküche."
+      },
+      "hours": {
+        "label": "Stunden",
+        "caption": "Jeder Arbeitstag wird im Arbeitsbuch erfasst."
+      },
+      "confirmation": {
+        "label": "Bestätigung",
+        "caption": "Die Leitung bestätigt ihre Arbeitsbuch-Einträge."
+      },
+      "capability": {
+        "label": "Fähigkeiten",
+        "caption": "Ihre Einträge zeigen, was sie wirklich kann."
+      },
+      "cv": {
+        "label": "Lebender Lebenslauf",
+        "caption": "Der Lebenslauf wächst aus bestätigter Arbeit."
+      },
+      "next": {
+        "label": "Weiter",
+        "caption": "Und der nächste Schritt öffnet sich."
+      }
+    },
+    "direction": {
+      "country": "Norwegen",
+      "pay": "ab 2.800 €"
+    },
+    "opportunities": [
+      {
+        "role": "Köchin",
+        "place": "Restaurant · Oslo (Norwegen)",
+        "fits": [
+          "Beruf",
+          "Land",
+          "Lohn"
+        ]
+      },
+      {
+        "role": "Küchenhilfe",
+        "place": "Hotel · Bergen (Norwegen)",
+        "fits": [
+          "Land",
+          "Lohn"
+        ]
+      }
+    ],
+    "conversation": {
+      "employer": "Könnten Sie am 6. Oktober anfangen?",
+      "person": "Ja, gern."
+    },
+    "project": {
+      "name": "Restaurant Zum Fjord",
+      "place": "Oslo, Norwegen",
+      "team": "Küchenteam — 6 Personen"
+    },
+    "week": {
+      "label": "Diese Woche",
+      "total": "40 Std.",
+      "days": [
+        "Mo.",
+        "Di.",
+        "Mi.",
+        "Do.",
+        "Fr.",
+        "Sa.",
+        "So."
+      ]
+    },
+    "confirmedBy": "Die Leitung bestätigte 5 Arbeitsbuch-Einträge",
+    "facts": {
+      "recorded": "Std. erfasst",
+      "confirmed": "Std. mit Eintrag der Leitung",
+      "days": "Arbeitstage"
+    },
+    "cv": [
+      {
+        "org": "Restaurant Zum Fjord · Oslo",
+        "period": "2026 — heute",
+        "standing": "Arbeitsbuch-Einträge von der Leitung bestätigt"
+      },
+      {
+        "org": "Restaurant Ąžuolas · Vilnius (Litauen)",
+        "period": "2021 bis 2026",
+        "standing": "Von ihr selbst angegeben"
+      }
+    ],
+    "next": {
+      "role": "Oberköchin",
+      "place": "Restaurant · Bergen (Norwegen)",
+      "why": "Bestätigte Berufserfahrung"
+    },
+    "controls": {
+      "play": "Abspielen",
+      "pause": "Anhalten",
+      "steps": "Schritte der Geschichte"
+    }
   }
 }

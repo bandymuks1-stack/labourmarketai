@@ -662,6 +662,10 @@ export const FROZEN_LANDING_FILES = [
   "components/marketing/public-market-map-band.tsx",
   "components/marketing/landing-primary-actions.tsx",
   "components/marketing/landing-open-jobs-band.tsx",
+  // Owner decision 2026-09-29: the freeze was lifted for the ENTRY HERO
+  // only; the new entry story is frozen with it as the new floor.
+  "components/marketing/landing-journey.tsx",
+  "lib/marketing/sample-journey.ts",
 ] as const;
 
 /**
@@ -677,6 +681,7 @@ export const FROZEN_LANDING_NAMESPACES = [
   "professions",
   "workEntryReview",
   "live",
+  "landingJourney",
 ] as const;
 
 export const FROZEN_LOCALES = ["lt", "en", "ru"] as const;

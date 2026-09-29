@@ -406,7 +406,9 @@ describe("§22 the first screen says what this is, then offers one next step", (
   it("the page mounts the pair once in the hero and once as the closing band", () => {
     const focus = read("app/[locale]/focus-landing/focus-landing.tsx");
     const hero = focus.slice(
-      focus.indexOf('<section className="flex flex-col gap-5">'),
+      // The entry hero section (owner decision 2026-09-29: the hero became a
+      // two-column entry with the product story; the pair rule is unchanged).
+      focus.indexOf('<section className="grid gap-8 lg:grid-cols-2'),
       focus.indexOf("</section>"),
     );
     expect(hero.match(/<LandingPrimaryActions\b/g) ?? []).toHaveLength(1);

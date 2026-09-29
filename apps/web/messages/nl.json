@@ -17361,5 +17361,133 @@
       "confirmed": "Bevestigd en gedeeld",
       "failed": "Bevestigen is mislukt."
     }
+  },
+  "landingJourney": {
+    "sampleLabel": "Voorbeeldverhaal",
+    "title": "Hoe LabourMarket.ai een werkend leven volgt",
+    "currentWork": "Werkt nu",
+    "person": {
+      "profession": "Kok",
+      "nextProfession": "Chef-kok"
+    },
+    "steps": {
+      "identity": {
+        "label": "Persoon",
+        "caption": "Dit is een mens — geen formulier, een werkend leven."
+      },
+      "profession": {
+        "label": "Beroep",
+        "caption": "Zij is kok."
+      },
+      "direction": {
+        "label": "Richting",
+        "caption": "Ze wil in Noorwegen werken, vanaf € 2.800 per maand."
+      },
+      "opportunities": {
+        "label": "Kansen",
+        "caption": "Passende kansen verschijnen — met de redenen waarom ze passen."
+      },
+      "conversation": {
+        "label": "Gesprek",
+        "caption": "Een werkgever vraagt — zij antwoordt."
+      },
+      "project": {
+        "label": "Werk",
+        "caption": "Ze begint in een restaurantkeuken."
+      },
+      "hours": {
+        "label": "Uren",
+        "caption": "Elke werkdag wordt vastgelegd in het werklogboek."
+      },
+      "confirmation": {
+        "label": "Bevestiging",
+        "caption": "Een leidinggevende bevestigt haar logboekregistraties."
+      },
+      "capability": {
+        "label": "Vaardigheden",
+        "caption": "Haar registraties tonen wat ze echt kan."
+      },
+      "cv": {
+        "label": "Levend cv",
+        "caption": "Het cv groeit uit bevestigd werk."
+      },
+      "next": {
+        "label": "Verder",
+        "caption": "En de volgende stap gaat open."
+      }
+    },
+    "direction": {
+      "country": "Noorwegen",
+      "pay": "vanaf € 2.800"
+    },
+    "opportunities": [
+      {
+        "role": "Kok",
+        "place": "Restaurant · Oslo (Noorwegen)",
+        "fits": [
+          "Beroep",
+          "Land",
+          "Loon"
+        ]
+      },
+      {
+        "role": "Keukenmedewerker",
+        "place": "Hotel · Bergen (Noorwegen)",
+        "fits": [
+          "Land",
+          "Loon"
+        ]
+      }
+    ],
+    "conversation": {
+      "employer": "Kunt u op 6 oktober beginnen?",
+      "person": "Ja, dat kan."
+    },
+    "project": {
+      "name": "Restaurant De Fjord",
+      "place": "Oslo, Noorwegen",
+      "team": "keukenploeg — 6 mensen"
+    },
+    "week": {
+      "label": "Deze week",
+      "total": "40 u",
+      "days": [
+        "Ma",
+        "Di",
+        "Wo",
+        "Do",
+        "Vr",
+        "Za",
+        "Zo"
+      ]
+    },
+    "confirmedBy": "Een leidinggevende bevestigde 5 logboekregistraties",
+    "facts": {
+      "recorded": "u vastgelegd",
+      "confirmed": "u met registratie van leidinggevende",
+      "days": "werkdagen"
+    },
+    "cv": [
+      {
+        "org": "Restaurant De Fjord · Oslo",
+        "period": "2026 — nu",
+        "standing": "Logboekregistraties bevestigd door leidinggevende"
+      },
+      {
+        "org": "Restaurant Ąžuolas · Vilnius (Litouwen)",
+        "period": "2021 tot 2026",
+        "standing": "Door haarzelf opgegeven"
+      }
+    ],
+    "next": {
+      "role": "Chef-kok",
+      "place": "Restaurant · Bergen (Noorwegen)",
+      "why": "Bevestigde werkervaring"
+    },
+    "controls": {
+      "play": "Afspelen",
+      "pause": "Pauzeren",
+      "steps": "Stappen van het verhaal"
+    }
   }
 }

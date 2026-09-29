@@ -6,7 +6,7 @@
     "app/[locale]/live-market-review/live-market-command.module.css": "686aae3983346345f6064e70df790d6f03fc05c897bb44f3e4e236811f676382",
     "lib/market/live-market-landing.ts": "2953b2835101594604e8d0273e4c6becd3be6fb9c0427a2a3f1c3608c065d99a",
     "lib/telemetry/landing-experience.ts": "5691bb61b38b49a8904f870ce028418e931873939c16e075f9d773e244c648e7",
-    "app/[locale]/focus-landing/focus-landing.tsx": "eb12f09181e643d7fdbadf4e298f2fb6b2d01703583e6ac9ed0bbee6683bef9b",
+    "app/[locale]/focus-landing/focus-landing.tsx": "4eb5c01907e7b5854661ccea3c7b6156edbad2cec8554f48f18287c80c84193b",
     "app/[locale]/focus-landing/landing-mode-switcher.tsx": "4927ce0c36c73176262f71e199ac66c0760c711c3c24bea85948a6e8998396c0",
     "app/[locale]/focus-landing/landing-mode-switcher.module.css": "13f538cc3c1e8b95c4b2b3262aa90d047b583178c033a1294266e755bc4519b9",
     "components/marketing/public-entry.tsx": "e01d1a84ef97d923bed451e702f106ceba20b24b3e70145b28d035f0e198145e",
@@ -21,7 +21,9 @@
     "components/marketing/starting-contexts-band.tsx": "5707b1c54093e5d3aa9ca44f2968633535bf9fd6134080d72676ea7c38546204",
     "components/marketing/public-market-map-band.tsx": "996c87d45f44d5dc02f8cce9c9ece066df7def66da353f6ef9fff275d82522b7",
     "components/marketing/landing-primary-actions.tsx": "1ff914c67a14d87041c517b95d386d779e26a899ed9bb6e1d3f2e1ad7a2da85f",
-    "components/marketing/landing-open-jobs-band.tsx": "d4aca1f453b24c178d9a68144b1f0147426c0affd015113edd3490b3a4370e3b"
+    "components/marketing/landing-open-jobs-band.tsx": "d4aca1f453b24c178d9a68144b1f0147426c0affd015113edd3490b3a4370e3b",
+    "components/marketing/landing-journey.tsx": "5b45e5c2c73080ff08f10cfa678c36f30d26e37dfc8ca83997b8ff93c605328e",
+    "lib/marketing/sample-journey.ts": "f1d836eeecc8a20552e3570d7427fa62e777c072619b352c3a726c86f9208b12"
   },
   "namespaces": {
     "lt.livingMarketReview": "98b406d2fef30e1eefd7d9895a1fbe62e6702fa65231ca764a223a5f989882e6",
@@ -31,6 +33,7 @@
     "lt.professions": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
     "lt.workEntryReview": "51e1dd6220b9aaf86ca7953a1079147b2a3237de8dffc155d15b2c0586f18225",
     "lt.live": "3e12d18461f135562e554b2431831b4439d9c75af7cd44c93587bcdc69215f45",
+    "lt.landingJourney": "da647a2c8684163e28aa29e06ae3f214b9a1faa83ada6699fb07d0b73719e80a",
     "en.livingMarketReview": "7bc2983204e3b174ba36d52bcbcd34f703c7dd5981e6f5aafffee4e4fef08913",
     "en.landing": "6eeacd36ea9a991badf95a23838fa15fdecff4c5baf21dc56d2a8595ca6b893d",
     "en.hero": "91113bb9cb3520323b3c471343465609938234043a64a6d16a2c9319b7ffd217",
@@ -38,12 +41,14 @@
     "en.professions": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
     "en.workEntryReview": "8d1ef142cbf354f731f658acf528e8a4b7f5edd0621b5a80aece8ea9bb69f2d9",
     "en.live": "22babb83156da2d0fe1fdbfac6e8fa7f82287ed751840b81654f978934e2d0f4",
+    "en.landingJourney": "e9d7d0ffdd55ca52954daf1296127c16927a6f33e09564df9eed5386f26eac61",
     "ru.livingMarketReview": "270fac33ed486a10b6f045ea384e8ac1fd82a947c4ad6b259da9fcb059c45a27",
     "ru.landing": "6c7ce69063f89b9e87a36b4fdd780c123d439b7dd90c4b16f059d5fd664f36fc",
     "ru.hero": "c1881b1db9c2e22b258e17c73bd6a4ba576d651cc828490bc0e75bc53f716296",
     "ru.nav": "643c288cf0167e785108e5c9b83d9a3012267bd0ec26f2992d59141629b3dd18",
     "ru.professions": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
     "ru.workEntryReview": "793d647015d8566086d21064c7ea5851c3f21fd54a91d713cd625c45a08b3d7f",
-    "ru.live": "3744647acbf943b632961e767c222407d60e0e96aa48dec0b1ddcdb5b0004fdc"
+    "ru.live": "3744647acbf943b632961e767c222407d60e0e96aa48dec0b1ddcdb5b0004fdc",
+    "ru.landingJourney": "58c94ac5a04eba29ba9da38c9cb2f4eff275e445f1010385b96d03476027a40e"
   }
 }
