@@ -13325,6 +13325,12 @@
         "failed": "Saving failed — nothing changed. Try again.",
         "notInCompany": "Skills are your own. Switch to your personal space and say it again."
       },
+      "savedOpportunities": {
+        "intro": "Your saved opportunities ({count}):",
+        "none": "No saved opportunities yet — press “Save” on a job on the opportunities page to keep it.",
+        "unavailable": "I couldn't read your saved opportunities — I won't guess.",
+        "chipOpen": "Open saved"
+      },
       "pay": {
         "understoodRange": "Got it: pay expectation {min}–{max} € per month. I put the figures into your work card — check and save. Nothing changes until you save.",
         "understoodMin": "Got it: pay expectation at least {min} € per month. I put the figure into your work card — check and save. Nothing changes until you save.",
@@ -13370,6 +13376,9 @@
       "agencyNotAgencyWorkspace": "This workspace is not a staffing agency, so client invitations do not apply here. Agency actions live in an agency workspace.",
       "agencySwitchHint": "You can do that as your company — pick the workspace:",
       "agencyClientDemandIntro": "Requests your clients shared:",
+      "agencyClientsLine": "Clients: {list}.",
+      "agencyClientActive": "active",
+      "agencyClientPending": "awaiting confirmation",
       "agencyClientDemandNone": "No client has shared a request yet. Once a connected client shares one, it appears here.",
       "agencyProposalsIntro": "Your proposals:",
       "agencyProposalsNone": "No proposals yet. Once a client shares a need, you can propose a roster worker.",

@@ -54,6 +54,7 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   "pay-statement": "the person states their monthly pay / salary expectation ('mano atlyginimo lūkestis nuo 2500 iki 3500 eurų', 'at least 3000 EUR')",
   "language-statement": "the person states which languages they speak ('kalbu angliškai ir rusiškai', 'I speak English B2')",
   "skill-statement": "the person states a skill they learned or have ('išmokau skaityti techninius brėžinius')",
+  "saved-opportunities": "the jobs / opportunities the person saved (bookmarked) on the opportunities page",
   "correct-work": "the person corrects their newest work-journal entry in words ('ne 5, o 6 valandas', 'tai buvo vakar')",
   "current-work": "where the person works now: their active work relationships with organizations ('kur dabar dirbu?')",
   "company-overview": "overview of the company workspace",

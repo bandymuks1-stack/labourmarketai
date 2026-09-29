@@ -585,7 +585,7 @@ describe("every depth is a real, restorable address", () => {
     // result must still drop it (a stale `full=1` would make the NEXT result
     // open already expanded), which is exactly what this line confirms.
     expect(src).toMatch(
-      /result: null, geo: null, project: null, interaction: null, demand: null, full: null \}/,
+      /result: null, geo: null, project: null, interaction: null, demand: null, full: null, card: null \}/,
     );
     expect(src).toMatch(/full: null \},\s*"replace",?\s*\)/);
     // Expanding and collapsing touch ONLY the flag — never the result, never
@@ -599,8 +599,10 @@ describe("every depth is a real, restorable address", () => {
     // W8 added `demand` as the fourth depth — see the note in the test above.
     // `full` (2026-09-23) is the size, not a depth: a fresh result opens at
     // its ordinary size, and the invariant below holds it to closing too.
+    // `card` (2026-09-29) is the Player Card's lens: a fresh result never
+    // reopens the card on a lens nobody asked for this time.
     expect(src).toMatch(
-      /result: kind, geo: null, project: null, interaction: null, demand: null, full: null \}/,
+      /result: kind, geo: null, project: null, interaction: null, demand: null, full: null, card: null \}/,
     );
     // Stated as an invariant, not a snapshot: whatever `write` clears when a
     // result opens must also be cleared when it closes. A depth that survived

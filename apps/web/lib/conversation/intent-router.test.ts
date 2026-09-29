@@ -916,6 +916,14 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     de: "Nicht 5, sondern 6 Stunden",
     pl: "Nie 5, a 6 godzin",
   },
+  "saved-opportunities": {
+    lt: "Parodyk išsaugotus darbus",
+    en: "Show my saved jobs",
+    ru: "Покажи сохранённые вакансии",
+    nl: "Mijn opgeslagen vacatures",
+    de: "Meine gespeicherten Jobs",
+    pl: "Pokaż zapisane oferty",
+  },
   "skill-statement": {
     lt: "Išmokau skaityti techninius brėžinius",
     en: "I learned to read blueprints",

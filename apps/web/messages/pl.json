@@ -13325,6 +13325,12 @@
         "failed": "Zapis nie powiódł się — nic nie zmieniono. Spróbuj ponownie.",
         "notInCompany": "Umiejętności są Twoje. Przełącz się na przestrzeń osobistą i napisz jeszcze raz."
       },
+      "savedOpportunities": {
+        "intro": "Twoje zapisane możliwości ({count}):",
+        "none": "Nic jeszcze nie zapisano — na stronie możliwości naciśnij „Zapisz” przy ofercie.",
+        "unavailable": "Nie udało się odczytać zapisanych możliwości — nie zgaduję.",
+        "chipOpen": "Otwórz zapisane"
+      },
       "pay": {
         "understoodRange": "Rozumiem: oczekiwane wynagrodzenie {min}–{max} € miesięcznie. Wpisałem kwoty do Twojej karty pracy — sprawdź i zapisz. Dopóki nie zapiszesz, nic się nie zmieni.",
         "understoodMin": "Rozumiem: oczekiwane wynagrodzenie co najmniej {min} € miesięcznie. Wpisałem kwotę do Twojej karty pracy — sprawdź i zapisz. Dopóki nie zapiszesz, nic się nie zmieni.",
@@ -13370,6 +13376,9 @@
       "agencyNotAgencyWorkspace": "Ta przestrzeń nie jest agencją zatrudnienia, więc zaproszenia dla klientów tu nie obowiązują. Działania agencji dostępne są w przestrzeni agencji.",
       "agencySwitchHint": "Możesz to zrobić jako Twoja firma — wybierz przestrzeń:",
       "agencyClientDemandIntro": "Wnioski udostępnione przez Twoich klientów:",
+      "agencyClientsLine": "Klienci: {list}.",
+      "agencyClientActive": "aktywny",
+      "agencyClientPending": "czeka na potwierdzenie",
       "agencyClientDemandNone": "Żaden klient nie udostępnił jeszcze wniosku. Gdy połączony klient go udostępni, pojawi się tutaj.",
       "agencyProposalsIntro": "Twoje propozycje:",
       "agencyProposalsNone": "Brak propozycji. Gdy klient udostępni potrzebę, będziesz mógł/mogła zaproponować pracownika z listy.",

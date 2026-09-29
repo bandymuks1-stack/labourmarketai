@@ -1,5 +1,7 @@
 "use client";
 
+import { cardModeFromText } from "@/lib/player-card/card-mode-from-text";
+import type { PlayerCardMode } from "@/lib/player-card/card-modes";
 import {
   Suspense,
   use,
@@ -114,6 +116,7 @@ import { payPrefill, readPayStatement } from "@/lib/conversation/pay-statement";
 import { readStatedLanguages } from "@/lib/conversation/language-statement";
 import { readSkillStatement } from "@/lib/conversation/skill-statement";
 import { projectNamedInSentence } from "@/lib/conversation/project-mention";
+import { loadSavedOpportunitiesForChat } from "@/lib/conversation/saved-opportunities";
 import { saveStatedSkillAction } from "@/lib/profile/stated-skill-actions";
 import { WORKER_LANGUAGE_NATIVE_NAMES } from "@/lib/worker/worker-languages-model";
 import { pastWorkOwnWords, readPastWorkPeriod } from "@/lib/conversation/past-work-period";
@@ -666,6 +669,9 @@ export type ChatLabels = {
   agencyNotAgencyWorkspace: string;
   agencySwitchHint: string;
   agencyClientDemandIntro: string;
+  agencyClientsLine: string;
+  agencyClientActive: string;
+  agencyClientPending: string;
   agencyClientDemandNone: string;
   agencyProposalsIntro: string;
   agencyProposalsNone: string;
@@ -1465,6 +1471,10 @@ export function ConversationChat({
    * `startProfileSummaryRef` — a ref, not a second copy of the hook.
    */
   const openResultRef = useRef<(kind: ResultKind) => void>(() => {});
+  /** Opens the Player Card result in a mode (bound with `openResultRef`). */
+  const openPlayerCardRef = useRef<(mode: PlayerCardMode) => void>(() => {});
+  /** The sentence the router just routed — read once by the card opener. */
+  const routedTextRef = useRef<string | null>(null);
   /** Late-bound for the same reason as `openResultRef`: the chip handler is
    *  declared above `useResultParam()`, and the experience handoff needs the
    *  ONE writer that sets result + interaction in a single push. */
@@ -1895,7 +1905,12 @@ export function ConversationChat({
   const startPlayerCard = useCallback(
     (opts?: { intro?: string }) => {
       assistant(opts?.intro ?? labels.playerCardOpened);
-      openResultRef.current("player-card");
+      // THE LENS THE SENTENCE ASKED FOR (owner 2026-09-29 §21): "kokie mano
+      // įgūdžiai patvirtinti?" opens the SAME card on its skills; a sentence
+      // that names no lens opens the whole card. Chips and flows that call
+      // this without a routed sentence open the whole card as before.
+      openPlayerCardRef.current(cardModeFromText(routedTextRef.current));
+      routedTextRef.current = null;
     },
     [assistant, labels.playerCardOpened],
   );
@@ -3450,8 +3465,20 @@ export function ConversationChat({
             ]);
             return;
           }
+          // THE CLIENTS THEMSELVES first (AGENCY loop walk 2026-09-29): the
+          // partners page lists each connection by its invited address and
+          // status; the chat says the same before the needs.
+          const clientsLine =
+            res.connections.length > 0
+              ? labels.agencyClientsLine.replace(
+                  "{list}",
+                  res.connections
+                    .map((c) => `${c.invitedEmail} (${c.status === "active" ? labels.agencyClientActive : labels.agencyClientPending})`)
+                    .join(", "),
+                )
+              : null;
           if (res.shared.length === 0) {
-            assistant(labels.agencyClientDemandNone, [
+            assistant([clientsLine, labels.agencyClientDemandNone].filter(Boolean).join("\n"), [
               { id: "f:agency.invite-client", label: labels.chipInviteClient },
               { id: "agency:progress", label: labels.chipProposalStatus },
             ]);
@@ -3463,7 +3490,7 @@ export function ConversationChat({
           }
           const lines = res.shared.map((r) => `• ${r.title}`);
           assistant(
-            [mode === "propose" ? labels.agencyProposeAsk : labels.agencyClientDemandIntro, ...lines].join("\n"),
+            [...(mode === "propose" || !clientsLine ? [] : [clientsLine]), mode === "propose" ? labels.agencyProposeAsk : labels.agencyClientDemandIntro, ...lines].join("\n"),
             res.shared.slice(0, 3).map((r) => ({
               id: `agency-propose:${r.shareId}`,
               label: `${labels.chipProposeFor}: ${r.title}`,
@@ -6292,6 +6319,47 @@ export function ConversationChat({
          * words, offered as their own skill claim; the chip saves it through
          * the profile's path. Never marked verified.
          */
+        /**
+         * "Parodyk išsaugotus darbus" (Chat ↔ visual loop walk, 2026-09-29):
+         * the private saved list the opportunities page renders — the SAME
+         * board read — with doors back into the real page and the saved ads.
+         */
+        savedOpportunities: () => {
+          if (identity === "company") {
+            assistant(fallbackText, starterChips);
+            return;
+          }
+          setTyping(true);
+          loadSavedOpportunitiesForChat()
+            .then((res) => {
+              setTyping(false);
+              if (res.kind !== "ok") {
+                assistant(t("savedOpportunities.unavailable"));
+                return;
+              }
+              if (res.items.length === 0) {
+                assistant(t("savedOpportunities.none"), [{ id: "jobs", label: labels.chipJobs }]);
+                return;
+              }
+              assistant(
+                [
+                  t("savedOpportunities.intro", { count: res.items.length }),
+                  ...res.items.slice(0, 8).map((it) => `• ${it.label}`),
+                ].join("\n"),
+                [
+                  { id: "link:/dashboard/opportunities#opportunities-saved", label: t("savedOpportunities.chipOpen") },
+                  ...res.items
+                    .filter((it) => it.kind === "vacancy")
+                    .slice(0, 2)
+                    .map((it) => ({ id: `link:/jobs/${it.id}`, label: it.label.slice(0, 40) })),
+                ],
+              );
+            })
+            .catch(() => {
+              setTyping(false);
+              assistant(t("savedOpportunities.unavailable"));
+            });
+        },
         skillStatement: () => {
           if (identity === "company") {
             const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
@@ -7012,6 +7080,7 @@ export function ConversationChat({
       }
 
       if (intent !== "unknown") {
+        routedTextRef.current = text;
         dispatchIntent(intent, handlers, withTyping, fallback);
         // THE DAY'S WORK INSIDE A LONGER MESSAGE (2026-09-29): "Esu
         // pastolininkas. … Šiandien 7 valandas montavau pastolius. Ieškau …"
@@ -7192,6 +7261,7 @@ export function ConversationChat({
     expandResult,
     collapseResult,
     openResult,
+    openPlayerCard,
     closeResult,
     selectGeography,
     selectProject,
@@ -7206,6 +7276,7 @@ export function ConversationChat({
   // Bind the late-bound opener: the find-work flow above calls this to put its
   // answer in the panel instead of drawing a second card list in the thread.
   openResultRef.current = openResult;
+  openPlayerCardRef.current = openPlayerCard;
   selectInteractionRef.current = selectInteraction;
   selectDemandRef.current = selectDemand;
   selectProjectRef.current = openProjectResult;
