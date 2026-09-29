@@ -6261,7 +6261,12 @@
         "photoAlt": "Darbo nuotrauka iš žurnalo įrašo",
         "unknownWorker": "Darbuotojas",
         "sourceNote": "Nuotraukos yra darbuotojų žurnalo įrašų dalis — jos niekada nekeičiamos ir nevertinamos automatiškai."
-      }
+      },
+      "areasLabel": "Darbo sritys",
+      "allAreas": "Visi",
+      "areaUnknown": "Profesija nenurodyta",
+      "areaBasis": "Pagal pagrindinę žmogaus profesiją",
+      "teamLabel": "Komanda"
     },
     "workerView": {
       "eyebrow": "Mano projektas",

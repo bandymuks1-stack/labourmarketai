@@ -6261,7 +6261,12 @@
         "photoAlt": "Werkfoto uit een journaalregistratie",
         "unknownWorker": "Werknemer",
         "sourceNote": "Foto's zijn onderdeel van de journaalregistraties van werknemers — ze worden nooit aangepast of automatisch beoordeeld."
-      }
+      },
+      "areasLabel": "Werkgebieden",
+      "allAreas": "Alle",
+      "areaUnknown": "Beroep niet ingesteld",
+      "areaBasis": "Op basis van ieders hoofdberoep",
+      "teamLabel": "Ploeg"
     },
     "workerView": {
       "eyebrow": "Mijn project",

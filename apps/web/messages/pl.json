@@ -6261,7 +6261,12 @@
         "photoAlt": "Zdjęcie pracy z wpisu w dzienniku",
         "unknownWorker": "Pracownik",
         "sourceNote": "Zdjęcia są częścią wpisów pracowników w dzienniku — nigdy nie są zmieniane ani automatycznie oceniane."
-      }
+      },
+      "areasLabel": "Obszary pracy",
+      "allAreas": "Wszyscy",
+      "areaUnknown": "Nie podano zawodu",
+      "areaBasis": "Według głównego zawodu osoby",
+      "teamLabel": "Zespół"
     },
     "workerView": {
       "eyebrow": "Mój projekt",

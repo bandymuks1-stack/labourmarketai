@@ -6261,7 +6261,12 @@
         "photoAlt": "Arbeitsfoto aus einem Journaleintrag",
         "unknownWorker": "Arbeitskraft",
         "sourceNote": "Fotos sind Teil der Journaleinträge der Arbeitskräfte — sie werden niemals verändert oder automatisch bewertet."
-      }
+      },
+      "areasLabel": "Arbeitsbereiche",
+      "allAreas": "Alle",
+      "areaUnknown": "Beruf nicht angegeben",
+      "areaBasis": "Nach dem Hauptberuf der Person",
+      "teamLabel": "Mannschaft"
     },
     "workerView": {
       "eyebrow": "Mein Projekt",
