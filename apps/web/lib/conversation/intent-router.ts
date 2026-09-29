@@ -1938,12 +1938,13 @@ const RULES: IntentRule[] = [
     patterns: [
       // "PARODYK MANO DARBO ISTORIJĄ" (owner continuation 2026-09-29 §8):
       // measured as a JOB SEARCH ("darbo"). The person's work history is the
-      // Living CV — the projection of their confirmed and stated work.
-      p("\\b(darbo|profesin\\w*)\\s+istorij", 9),
-      p("\\b(work|employment|professional)\\s+history\\b", 9),
-      p("истори[а-яё]*\\s+(моей\\s+)?работ", 9),
-      p("\\b(werkgeschiedenis|arbeitsverlauf|berufsverlauf)\\b", 9),
-      p("\\bhistori\\w*\\s+(mojej\\s+)?(pracy|zatrudnienia)\\b", 9),
+      // Living CV — the projection of their confirmed and stated work. An
+      // UPLOAD of old history stays the import door (hours-import guards).
+      p("^(?!.*(ikel|upload|import|загруз|hochlad|uploaden|wgra|przesl)).*\\b(darbo|profesin\\w*)\\s+istorij", 9),
+      p("^(?!.*(ikel|upload|import|загруз|hochlad|uploaden|wgra|przesl)).*\\b(work|employment|professional)\\s+history\\b", 9),
+      p("^(?!.*(ikel|upload|import|загруз|hochlad|uploaden|wgra|przesl)).*истори[а-яё]*\\s+(моей\\s+)?работ", 9),
+      p("^(?!.*(ikel|upload|import|загруз|hochlad|uploaden|wgra|przesl)).*\\b(werkgeschiedenis|arbeitsverlauf|berufsverlauf)\\b", 9),
+      p("^(?!.*(ikel|upload|import|загруз|hochlad|uploaden|wgra|przesl)).*\\bhistori\\w*\\s+(mojej\\s+)?(pracy|zatrudnienia)\\b", 9),
       // SEEING / OPENING what already exists. Every verb here was measured
       // against the live router on 2026-09-07 and reached the IMPORT flow.
       // LT: pamatyti / peržiūrėti / atidaryti / atverti / rodyk / parodyk
@@ -2831,7 +2832,7 @@ const RULES: IntentRule[] = [
       p("\\b(mano|my|мои|моя|meine?|mijn|moje|moja)\\s+(profesij|professions?\\b|професси|beruf|beroep|zaw[oó]d)", 7),
       p("\\bprofesij\\w*\\s+(nurodyt|pazymet|irasyt)", 7),
       p("\\b(kokia|kokios|kokias)\\s+(yra\\s+)?mano\\s+profesij", 7),
-      p("\\b(mano|my|мои|meine|mijn|moje)\\s+(igudzi|skills?\\b|навык|f[aä]higkeit|vaardighed|umiej[eę]tno)", 7),
+      p("\\b(mano|my|мои|meine|mijn|moje)\\s+(igudzi|skills?\\b|навык|f[aä]higkeit|vaardighed|umiej[eę]tno)\\w*.{0,20}(patvirtint|confirmed|verified|подтвержд|best[aä]tigt|bevestigd|potwierdz)", 8),
       p(
         "(parodyk|rodyk|atidaryk|show|open|покажи|открой|zeig|toon|laat|poka[zż]|otw[oó]rz|wy[sś]wietl)\\s*.{0,14}(kortel|card\\b|карточк|karte\\b|kaart\\b|kart[aeoy]\\b|kart[eę]\\b)",
         7,
