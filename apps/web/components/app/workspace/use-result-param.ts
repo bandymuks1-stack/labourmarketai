@@ -1,5 +1,6 @@
 "use client";
 
+import type { PlayerCardMode } from "@/lib/player-card/card-modes";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -106,6 +107,8 @@ export function useResultParam(): {
   collapseResult: () => void;
   /** Show a result — replaces the query, never pushes a new page. */
   openResult: (kind: ResultKind) => void;
+  /** Open the Player Card result in one of its modes (`?card=`), in ONE write. */
+  openPlayerCard: (mode: PlayerCardMode) => void;
   /** Drill into one demand's candidates. Pushes, so Back returns to the list. */
   selectDemand: (requestId: string) => void;
   /** W11 — open the PROJECT result at one project, in ONE push. Distinct from
@@ -268,7 +271,26 @@ export function useResultParam(): {
     openResult: useCallback(
       (kind: ResultKind) =>
         write(
-          { result: kind, geo: null, project: null, interaction: null, demand: null, full: null },
+          { result: kind, geo: null, project: null, interaction: null, demand: null, full: null, card: null },
+          "replace",
+        ),
+      [write],
+    ),
+    // The chat asked for a LENS of the card ("kokie mano įgūdžiai
+    // patvirtinti?" → skills): the same fresh-result write, carrying the mode.
+    // IDENTITY is the card's default, so it writes no param at all.
+    openPlayerCard: useCallback(
+      (mode: PlayerCardMode) =>
+        write(
+          {
+            result: "player-card",
+            geo: null,
+            project: null,
+            interaction: null,
+            demand: null,
+            full: null,
+            card: mode === "identity" ? null : mode,
+          },
           "replace",
         ),
       [write],
@@ -349,7 +371,7 @@ export function useResultParam(): {
     closeResult: useCallback(
       () =>
         write(
-          { result: null, geo: null, project: null, interaction: null, demand: null, full: null },
+          { result: null, geo: null, project: null, interaction: null, demand: null, full: null, card: null },
           "replace",
         ),
       [write],

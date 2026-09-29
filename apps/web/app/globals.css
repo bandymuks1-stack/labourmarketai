@@ -605,6 +605,32 @@ a {
   animation: rise-in var(--motion-base) var(--motion-ease-out) both;
 }
 
+/* THE IDENTITY STAGE SIZES TO ITS CONTAINER, not the viewport (2026-09-29).
+   In the chat side panel the stage is ~550 px wide on a 1440 px screen: the
+   viewport breakpoints gave it the wide layout and the name broke mid-word.
+   Below 560 px of its OWN width it takes the phone composition: a small
+   portrait beside the name, the details full width. */
+.identity-stage {
+  container-type: inline-size;
+}
+@container (max-width: 560px) {
+  .identity-stage-person {
+    grid-row: auto !important;
+  }
+  .identity-stage-details {
+    grid-column: 1 / -1 !important;
+  }
+  .identity-stage .identity-portrait {
+    width: clamp(84px, 24cqi, 120px) !important;
+  }
+  .identity-stage h2 {
+    font-size: 1.5rem;
+    line-height: 1.1;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+}
+
 /* The work rhythm (calendar week): a day's bar and a block's duration line
    GROW to their recorded length — the motion says "this much time", once. */
 @keyframes rhythm-grow {

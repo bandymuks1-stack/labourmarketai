@@ -1,5 +1,7 @@
 "use client";
 
+import { cardModeFromText } from "@/lib/player-card/card-mode-from-text";
+import type { PlayerCardMode } from "@/lib/player-card/card-modes";
 import {
   Suspense,
   use,
@@ -1464,6 +1466,10 @@ export function ConversationChat({
    * `startProfileSummaryRef` — a ref, not a second copy of the hook.
    */
   const openResultRef = useRef<(kind: ResultKind) => void>(() => {});
+  /** Opens the Player Card result in a mode (bound with `openResultRef`). */
+  const openPlayerCardRef = useRef<(mode: PlayerCardMode) => void>(() => {});
+  /** The sentence the router just routed — read once by the card opener. */
+  const routedTextRef = useRef<string | null>(null);
   /** Late-bound for the same reason as `openResultRef`: the chip handler is
    *  declared above `useResultParam()`, and the experience handoff needs the
    *  ONE writer that sets result + interaction in a single push. */
@@ -1894,7 +1900,12 @@ export function ConversationChat({
   const startPlayerCard = useCallback(
     (opts?: { intro?: string }) => {
       assistant(opts?.intro ?? labels.playerCardOpened);
-      openResultRef.current("player-card");
+      // THE LENS THE SENTENCE ASKED FOR (owner 2026-09-29 §21): "kokie mano
+      // įgūdžiai patvirtinti?" opens the SAME card on its skills; a sentence
+      // that names no lens opens the whole card. Chips and flows that call
+      // this without a routed sentence open the whole card as before.
+      openPlayerCardRef.current(cardModeFromText(routedTextRef.current));
+      routedTextRef.current = null;
     },
     [assistant, labels.playerCardOpened],
   );
@@ -7010,6 +7021,7 @@ export function ConversationChat({
       }
 
       if (intent !== "unknown") {
+        routedTextRef.current = text;
         dispatchIntent(intent, handlers, withTyping, fallback);
         // THE DAY'S WORK INSIDE A LONGER MESSAGE (2026-09-29): "Esu
         // pastolininkas. … Šiandien 7 valandas montavau pastolius. Ieškau …"
@@ -7190,6 +7202,7 @@ export function ConversationChat({
     expandResult,
     collapseResult,
     openResult,
+    openPlayerCard,
     closeResult,
     selectGeography,
     selectProject,
@@ -7204,6 +7217,7 @@ export function ConversationChat({
   // Bind the late-bound opener: the find-work flow above calls this to put its
   // answer in the panel instead of drawing a second card list in the thread.
   openResultRef.current = openResult;
+  openPlayerCardRef.current = openPlayerCard;
   selectInteractionRef.current = selectInteraction;
   selectDemandRef.current = selectDemand;
   selectProjectRef.current = openProjectResult;

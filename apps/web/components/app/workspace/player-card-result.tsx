@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { isPlayerCardMode } from "@/lib/player-card/card-modes";
 
 import { WORK_CARD_SAVED_EVENT, WorkCardEditor } from "@/components/app/work-card-editor";
 import { WorkerPlayerCard } from "@/components/app/worker-player-card";
@@ -54,6 +56,10 @@ export function PlayerCardResult({
   onOpenFull: (route: string) => void;
 }) {
   const t = useTranslations("conversation.results");
+  // The lens the chat (or a shared link) asked for — `?card=`; else the
+  // whole card.
+  const rawMode = useSearchParams()?.get("card");
+  const mode = isPlayerCardMode(rawMode) ? rawMode : "identity";
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   // Bumping this re-runs the read — that is the whole of RETRY.
   const [attempt, setAttempt] = useState(0);
@@ -152,6 +158,7 @@ export function PlayerCardResult({
         labels={view.labels}
         thermometer={view.thermometer}
         avatarUrl={view.avatarUrl}
+        initialMode={mode}
       />
 
       {/* THE EDITOR THE ABSORB HAD TO CARRY. It was folded into the premium
