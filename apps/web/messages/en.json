@@ -10518,6 +10518,19 @@
       "thisMonth": "{hours} h this month (derived)",
       "sourceLink": "Open the period record",
       "unavailable": "Period records could not be read right now — the plan is shown without them."
+    },
+    "rhythm": {
+      "label": "Work rhythm",
+      "daysWorked": "{count, plural, one {# day worked} other {# days worked}}",
+      "empty": "No work recorded this week",
+      "confirmedOf": "{confirmed} of {total} confirmed",
+      "confirmed": "Confirmed",
+      "hoursUnit": "h",
+      "openJournal": "Open in journal",
+      "confirmation": {
+        "all": "Every entry of the day confirmed",
+        "partial": "Some of the day's entries confirmed"
+      }
     }
   },
   "workforcePlanning": {

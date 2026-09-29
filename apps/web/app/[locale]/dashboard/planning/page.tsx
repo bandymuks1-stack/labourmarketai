@@ -39,6 +39,8 @@ import { TimesheetsSection } from "./timesheets-section";
 import { TimeReality } from "@/components/app/work-world/primitives";
 import { temporalReality } from "@/lib/planning/temporal-reality";
 import { DerivedPeriodEvidence } from "@/components/app/planning/derived-period-evidence";
+import { WorkWeek } from "@/components/app/planning/work-week";
+import { buildWorkRhythm, compactHours } from "@/lib/planning/work-rhythm";
 import { createUtcFormatter } from "@/lib/time/display";
 
 /**
@@ -452,6 +454,32 @@ export default async function PlanningPage({
       : null;
   const weekDays =
     view === "week" ? buildWeekView(anchor, visibleItems, today) : null;
+  // THE WORK RHYTHM (premium calendar 2026-09-29): the week's days re-shaped
+  // into recorded work blocks + plan bands. Render follows the filter; the
+  // confirmation and conflict truths come from the full model.
+  const weekRhythm = weekDays
+    ? buildWorkRhythm({
+        days: weekDays,
+        todayIso: today,
+        confirmedIds: result.journalConfirmedIds,
+        conflictIds,
+      })
+    : null;
+  // The month cells get the journal grid's facts back — the HOURS on the
+  // date and the confirmation state — read from the FULL model, like the
+  // journal mark: a filter changes what is shown, never what was worked.
+  const monthRhythm = monthGrid
+    ? new Map(
+        buildWorkRhythm({
+          days: monthGrid.weeks
+            .flat()
+            .map((c) => ({ day: c.day, items: itemsForDay(result.items, c.day) })),
+          todayIso: today,
+          confirmedIds: result.journalConfirmedIds,
+          conflictIds,
+        }).days.map((d) => [d.day, d]),
+      )
+    : null;
   const yearCells =
     view === "year"
       ? buildYearOverview(Number(anchor.slice(0, 4)), visibleItems, today)
@@ -641,7 +669,7 @@ export default async function PlanningPage({
                 key={cell.day}
                 href={planningHref({ view: "day", date: cell.day, source: sourceFilter, today }) as "/dashboard"}
                 data-testid={`planning-month-cell-${cell.day}`}
-                className={`flex min-h-14 min-w-0 flex-col items-center gap-0.5 rounded-md border px-1 py-1.5 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
+                className={`relative flex min-h-16 min-w-0 flex-col items-start gap-1 overflow-hidden rounded-lg border px-1.5 py-1.5 transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue sm:min-h-24 sm:px-2.5 sm:py-2 ${
                   cell.isToday
                     ? "border-brand-blue/60 bg-brand-blue/5"
                     : cell.isUnfilled
@@ -651,22 +679,75 @@ export default async function PlanningPage({
                         : "border-ink-700/60 bg-transparent opacity-50"
                 }`}
               >
-                <span className="text-sm font-semibold tabular-nums text-text-primary">
-                  {cell.day.slice(8, 10)}
-                </span>
-                {cell.count > 0 ? (
-                  <span
-                    className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-meta font-bold leading-none tabular-nums ${
-                      cell.hasConflict
-                        ? "bg-state-danger/15 text-state-danger"
-                        : "bg-brand-blue/15 text-brand-blue"
-                    }`}
-                  >
-                    {cell.count}
-                  </span>
-                ) : (
-                  <span className="h-5 text-meta text-text-muted">·</span>
-                )}
+                {(() => {
+                  const r = monthRhythm?.get(cell.day);
+                  // The plan's band on the date: a committed booking /
+                  // project / stage is a gold line, leave an amber one.
+                  const band = r?.hasAbsence
+                    ? "bg-state-amber/70"
+                    : r?.plans.some((p) => p.sourceType === "booking" || p.sourceType === "project" || p.sourceType === "stage")
+                      ? "bg-brand-blue/70"
+                      : null;
+                  const planCount = r ? r.plans.length : cell.count;
+                  return (
+                    <>
+                      {band ? (
+                        <span aria-hidden className={`absolute inset-x-1.5 top-0 h-0.5 rounded-b-full ${band}`} />
+                      ) : null}
+                      <span className="flex w-full items-start justify-between gap-1">
+                        <span className="font-display text-sm font-semibold tabular-nums text-text-primary sm:text-base">
+                          {Number(cell.day.slice(8, 10))}
+                        </span>
+                        {/* Plans still counted — the number no longer
+                            stands in for the day's work. */}
+                        {planCount > 0 ? (
+                          <span
+                            className={`mr-3 hidden h-4 min-w-4 items-center justify-center rounded-full px-1 text-[0.625rem] font-bold leading-none tabular-nums sm:inline-flex ${
+                              cell.hasConflict
+                                ? "bg-state-danger/15 text-state-danger"
+                                : "bg-brand-blue/15 text-brand-blue"
+                            }`}
+                            data-testid={`planning-month-plans-${cell.day}`}
+                          >
+                            {planCount}
+                          </span>
+                        ) : cell.hasConflict ? (
+                          <span className="size-1.5 rounded-full bg-state-danger" />
+                        ) : null}
+                      </span>
+                      {/* THE HOURS ON THE DATE — the journal grid's own
+                          grammar, the calendar the owner remembers. */}
+                      {r && r.recordedMinutes > 0 ? (
+                        <span
+                          className="mt-auto self-start font-mono text-base font-semibold leading-none tabular-nums text-brand-cyan sm:text-lg"
+                          data-testid={`planning-month-hours-${cell.day}`}
+                        >
+                          {compactHours(r.recordedMinutes, locale)}
+                          <span className="ml-0.5 hidden text-[0.625rem] font-normal text-text-muted sm:inline">
+                            {t("rhythm.hoursUnit")}
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="mt-auto" />
+                      )}
+                      {r && r.confirmation !== "none" && r.confirmation !== "unknown" ? (
+                        <span
+                          className="absolute right-1 top-1 flex items-center sm:right-2 sm:top-2"
+                          data-testid={`planning-month-confirmed-${cell.day}`}
+                          data-confirmation={r.confirmation}
+                        >
+                          <span
+                            aria-hidden
+                            className={`size-2 rounded-full border border-trust-accent ${
+                              r.confirmation === "all" ? "bg-trust-accent" : "bg-transparent"
+                            }`}
+                          />
+                          <span className="sr-only">{t(`rhythm.confirmation.${r.confirmation}`)}</span>
+                        </span>
+                      ) : null}
+                    </>
+                  );
+                })()}
                 {/* D-13 — WHICH DAYS DID I FILL, AND WHICH DID I MISS.
                     The count alone cannot answer either: a day holding one
                     booking and a day holding one journal entry both read "1".
@@ -676,20 +757,20 @@ export default async function PlanningPage({
                 {cell.hasJournal ? (
                   <span
                     data-testid={`planning-month-journal-${cell.day}`}
-                    className="size-1.5 rounded-full bg-brand-cyan"
+                    className={`size-1.5 rounded-full bg-brand-cyan ${
+                      (monthRhythm?.get(cell.day)?.recordedMinutes ?? 0) > 0 ? "sr-only" : "absolute bottom-2 left-2"
+                    }`}
                   >
                     <span className="sr-only">{t("month.legend.journal")}</span>
                   </span>
                 ) : cell.isUnfilled ? (
                   <span
                     data-testid={`planning-month-unfilled-${cell.day}`}
-                    className="size-1.5 rounded-full border border-state-warning"
+                    className="absolute bottom-1.5 left-1.5 size-1.5 rounded-full border border-state-warning"
                   >
                     <span className="sr-only">{t("month.legend.unfilled")}</span>
                   </span>
-                ) : (
-                  <span className="size-1.5" />
-                )}
+                ) : null}
               </Link>
             ))}
           </div>
@@ -710,6 +791,10 @@ export default async function PlanningPage({
               />
               {t("month.legend.unfilled")}
             </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden className="size-2 rounded-full border border-trust-accent bg-trust-accent" />
+              {t("rhythm.confirmed")}
+            </span>
           </div>
           {/* DERIVED period evidence for this month — a confirmed period
               record's even monthly share, on the same PeriodBand the profile
@@ -719,32 +804,20 @@ export default async function PlanningPage({
         </section>
       ) : null}
 
-      {/* ---------------- WEEK ---------------- */}
-      {weekDays ? (
-        <section className="flex flex-col gap-4" data-testid="planning-week-view">
-          {weekDays.map((d) => (
-            <div key={d.day} className="flex flex-col gap-2">
-              <h2 className="flex flex-wrap items-center gap-2 font-mono text-meta uppercase tracking-label text-text-secondary">
-                <Link
-                  href={planningHref({ view: "day", date: d.day, source: sourceFilter, today }) as "/dashboard"}
-                  className="hover:text-brand-blue"
-                >
-                  {fmtDay(d.day)}
-                </Link>
-                {d.isToday ? (
-                  <span className="inline-flex items-center rounded-full border border-brand-blue/50 bg-brand-blue/10 px-2 py-0.5 text-meta text-brand-blue">
-                    {t("today")}
-                  </span>
-                ) : null}
-              </h2>
-              {d.items.length > 0 ? (
-                <ItemList items={d.items} testid={`planning-week-day-${d.day}`} />
-              ) : (
-                <p className="text-xs text-text-muted">—</p>
-              )}
-            </div>
-          ))}
-        </section>
+      {/* ---------------- WEEK ----------------
+          The week as the RHYTHM of working time (premium calendar
+          2026-09-29): seven bars, then seven days of recorded work blocks and
+          plan bands — see components/app/planning/work-week.tsx. */}
+      {weekRhythm ? (
+        <div data-testid="planning-week-view">
+        <WorkWeek
+          rhythm={weekRhythm}
+          locale={locale}
+          dayViewHref={(day: string) =>
+            planningHref({ view: "day", date: day, source: sourceFilter, today })
+          }
+        />
+        </div>
       ) : null}
 
       {/* ---------------- DAY ---------------- */}

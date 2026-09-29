@@ -146,6 +146,9 @@ describe("1. read-only composition of existing RLS-scoped reads", () => {
         "journal_entries",
         "journal_entry_metrics",
         "engagement_contexts",
+        // premium calendar 2026-09-29: the review rows of the SAME entry ids,
+        // so a week block can say an entry was confirmed by someone else.
+        "journal_entry_confirmations",
         "project_worker_assignments",
         "project_stages",
         "business_trips",

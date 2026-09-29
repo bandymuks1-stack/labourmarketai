@@ -21,6 +21,10 @@ import {
   type WorkTimeMetricRow,
 } from "@/lib/journal/work-time";
 import {
+  deriveIndependentReviewResult,
+  type ConfirmationRow,
+} from "@/lib/journal/review-status";
+import {
   PLANNING_PROJECT_READ_LIMIT,
   clockTime,
   combineInvitationItems,
@@ -105,6 +109,15 @@ export type PlanningReadResult =
       readonly status: "ok";
       readonly items: readonly PlanningItem[];
       readonly sources: PlanningSources;
+      /**
+       * Journal item ids (`journal:<entryId>`) whose latest review decision
+       * by someone OTHER than the worker is "approved"
+       * (`deriveIndependentReviewResult`) — the only state the calendar may
+       * paint as confirmed. Null when the review rows could not be read: the
+       * calendar then shows no confirmation mark at all, never "unconfirmed"
+       * (SEP-7: unknown ≠ zero).
+       */
+      readonly journalConfirmedIds: ReadonlySet<string> | null;
     };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -546,7 +559,12 @@ async function readJournalItems(
   userId: string,
   rangeStart: string,
   rangeEnd: string,
-): Promise<{ state: PlanningSourceState; items: PlanningItem[] }> {
+): Promise<{
+  state: PlanningSourceState;
+  items: PlanningItem[];
+  /** See `PlanningReadResult.journalConfirmedIds`; absent = not read. */
+  confirmedIds?: ReadonlySet<string> | null;
+}> {
   // The journal is FACT (calendar = plan; journal = what really happened):
   // the caller's OWN entries only, shown at their real recorded day and
   // deep-linked to the entry itself. Managers keep reading team journals on
@@ -669,8 +687,13 @@ async function readJournalItems(
     { hours: string | null; site: string | null; workDate: string | null }
   >();
   const orgByEngagement = new Map<string, string | null>();
+  // WHO CONFIRMED (premium calendar, 2026-09-29): the same entry ids' review
+  // rows, under `journal_entry_confirmations_select` (rows on the caller's own
+  // entries). `confirmer_id` is selected so a self-approval is never painted
+  // as someone else's confirmation (review-status.ts). Null = not readable.
+  let confirmedIds: Set<string> | null = entryIds.length > 0 ? null : new Set();
   if (entryIds.length > 0) {
-    const [metricsRes, ecRes] = await Promise.all([
+    const [metricsRes, ecRes, reviewRes] = await Promise.all([
       asAny(supabase)
         .from("journal_entry_metrics")
         // The FK column is `entry_id`. This read asked for `journal_entry_id`,
@@ -698,7 +721,26 @@ async function readJournalItems(
           .select("id, organizations(display_name, legal_name)")
           .in("id", ecIds);
       })(),
+      asAny(supabase)
+        .from("journal_entry_confirmations")
+        .select("entry_id, confirmation_scope, confirmer_role, confirmer_id, created_at")
+        .in("entry_id", entryIds)
+        .order("created_at", { ascending: true })
+        .limit(PLANNING_JOURNAL_READ_LIMIT * 4),
     ]);
+    if (!reviewRes.error) {
+      const reviewsByEntry = new Map<string, ConfirmationRow[]>();
+      for (const r of (reviewRes.data ?? []) as (ConfirmationRow & { entry_id: string })[]) {
+        const list = reviewsByEntry.get(r.entry_id);
+        if (list) list.push(r);
+        else reviewsByEntry.set(r.entry_id, [r]);
+      }
+      confirmedIds = new Set(
+        [...reviewsByEntry.entries()]
+          .filter(([, rows]) => deriveIndependentReviewResult(rows, userId) === "approved")
+          .map(([entryId]) => `journal:${entryId}`),
+      );
+    }
     if (!metricsRes.error) {
       type MetricRow = WorkTimeMetricRow & { entry_id: string };
       const rowsByEntry = new Map<string, WorkTimeMetricRow[]>();
@@ -800,7 +842,7 @@ async function readJournalItems(
       roleContext: "mine" as const,
     };
   });
-  return { state: { status: "ok", count: items.length }, items };
+  return { state: { status: "ok", count: items.length }, items, confirmedIds };
 }
 
 /**
@@ -986,5 +1028,6 @@ export async function getPlanning(
       stage: stage.state,
       trip: trip.state,
     },
+    journalConfirmedIds: journal.confirmedIds ?? null,
   };
 }

@@ -10518,6 +10518,19 @@
       "thisMonth": "{hours} h in diesem Monat (abgeleitet)",
       "sourceLink": "Zeitraumeintrag öffnen",
       "unavailable": "Zeitraumeinträge konnten gerade nicht gelesen werden — der Plan wird ohne sie angezeigt."
+    },
+    "rhythm": {
+      "label": "Arbeitsrhythmus",
+      "daysWorked": "{count, plural, one {# Arbeitstag} other {# Arbeitstage}}",
+      "empty": "Diese Woche keine Arbeit erfasst",
+      "confirmedOf": "{confirmed} von {total} bestätigt",
+      "confirmed": "Bestätigt",
+      "hoursUnit": "Std.",
+      "openJournal": "Im Arbeitsbuch öffnen",
+      "confirmation": {
+        "all": "Alle Einträge des Tages bestätigt",
+        "partial": "Ein Teil der Einträge bestätigt"
+      }
     }
   },
   "workforcePlanning": {
