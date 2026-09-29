@@ -8,6 +8,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadWorkerOpportunityBoard } from "@/lib/marketplace/worker-opportunities";
 import { getReportsView } from "@/lib/reports/reports-hub";
+import { getJournalWindowReport, type JournalWindowKey } from "@/lib/journal/journal-window-report";
 import { listManagedProjects } from "@/lib/projects/projects";
 import { listCompanyDemands } from "@/lib/scouting/scouting";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
@@ -548,6 +549,62 @@ const PERIOD_WINDOW_DAYS: Record<Exclude<JournalPeriodPhrase, "all" | "today" | 
  * model is said as such (UNKNOWN), never re-derived from another surface;
  * a model built over a capped read says how many entries it rests on.
  */
+/**
+ * "Kiek valandų komanda dirbo šią savaitę?" asked in a COMPANY space
+ * (production walk 2026-09-29) was answered from the owner's PERSONAL
+ * journal ("Iš tavo paties žurnalo įrašų"). The organization's answer is its
+ * own journal report — the SAME `getJournalWindowReport` the reports page
+ * renders (org-manager RLS, per-member work time, approved = confirmed).
+ * today / week (default) / month; nothing else is re-derived here.
+ */
+export async function runOrganizationJournal(text?: string): Promise<WorkflowResult> {
+  const t = await getTranslations("workspace.ai");
+  const locale = await getLocale();
+  const period = parseJournalPeriodPhrase(text);
+  const key: JournalWindowKey = period === "today" ? "today" : period === "month" ? "month" : "week";
+  const report = await getJournalWindowReport(key, undefined, { workTime: true });
+  if (!report.applied) {
+    return blocked(t("orgJournalUnavailable"), t("whyOrgJournal"));
+  }
+  const windowLabel = t(`orgJournalWindow_${key}` as never) as string;
+  const why = t("whyOrgJournal");
+  if (report.totals.entries === 0) {
+    return {
+      kind: "answer",
+      text: t("orgJournalEmpty", { window: windowLabel }),
+      explanation: { why },
+      chips: [{ id: "link:/dashboard/reports", label: t("chipReports") }],
+    };
+  }
+  const work = report.totals.work;
+  const lines = [
+    t("orgJournalTotals", {
+      window: windowLabel,
+      hours: fmtHours(work?.hours ?? 0, locale),
+      confirmed: fmtHours(work?.confirmedHours ?? 0, locale),
+      entries: report.totals.entries,
+      workers: report.totals.workers,
+      awaiting: report.totals.awaitingReview,
+    }),
+    ...[...report.workers]
+      .sort((a, b) => (b.work?.hours ?? 0) - (a.work?.hours ?? 0))
+      .slice(0, ANSWER_LIMIT)
+      .map((w) =>
+        t("orgJournalMember", {
+          name: w.name,
+          hours: fmtHours(w.work?.hours ?? 0, locale),
+          entries: w.entries,
+        }),
+      ),
+  ];
+  return {
+    kind: "answer",
+    text: lines.join("\n"),
+    explanation: { why },
+    chips: [{ id: "link:/dashboard/reports", label: t("chipReports") }],
+  };
+}
+
 export async function runRecentJournal(text?: string): Promise<WorkflowResult> {
   const t = await getTranslations("workspace.ai");
   const locale = await getLocale();

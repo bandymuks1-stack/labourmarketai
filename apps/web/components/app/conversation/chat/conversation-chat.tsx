@@ -183,6 +183,7 @@ import {
   runFindWorkers,
   runOpenProject,
   runRecentJournal,
+  runOrganizationJournal,
   runWorkIntelligenceQuestion,
   runSkillGap,
   runDocumentsReadiness,
@@ -6394,7 +6395,10 @@ export function ConversationChat({
             });
         },
         skillGap: () => runWorkflow(() => runSkillGap()),
-        recentJournal: () => runWorkflow(() => runRecentJournal(text)),
+        // A company space asks about the TEAM's work — the organization's
+        // journal report, never the person's own (2026-09-29).
+        recentJournal: () =>
+          runWorkflow(() => (identity === "company" ? runOrganizationJournal(text) : runRecentJournal(text))),
         // Work intelligence by sentence (issue #1689, owner lines 2–7): the
         // intent names the facet, ONE workflow reads the ONE model.
         workIntelligence: () => runWorkflow(() => runWorkIntelligenceQuestion(text, routedIntent)),
