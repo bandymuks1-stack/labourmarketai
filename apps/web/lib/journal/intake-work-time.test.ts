@@ -113,6 +113,25 @@ describe("deriveIntakeWorkTime — the stated time becomes time on the record", 
     });
   });
 
+  it("an English break is never a work fragment — the pattern held a backspace byte, not `\\b` (#1689)", () => {
+    const t = deriveIntakeWorkTime("3 hours laid tiles, 30 min break, 2 hours grouting", TODAY);
+    expect(t.fragments.map((f) => f.rawPhrase).some((p) => /break/i.test(p))).toBe(false);
+    expect(t.fragments.map((f) => [f.timeValue, f.timeUnit])).toEqual([
+      [3, "hours"],
+      [2, "hours"],
+    ]);
+    // a word that merely CONTAINS "break" is still work
+    const w = deriveIntakeWorkTime("2 hours breakdown of old tiles", TODAY);
+    expect(w.fragments.map((f) => [f.timeValue, f.timeUnit])).toEqual([[2, "hours"]]);
+  });
+
+  it("the LT / RU break words still keep a break out of the fragments", () => {
+    for (const text of ["3 val. klojau plyteles, 30 min pertrauka", "Клал плитку 3 часа, перерыв 30 минут"]) {
+      const t = deriveIntakeWorkTime(text, TODAY);
+      expect(t.fragments.map((f) => [f.timeValue, f.timeUnit])).toEqual([[3, "hours"]]);
+    }
+  });
+
   it("no time in the text → nothing is invented", () => {
     expect(deriveIntakeWorkTime("Montavau langus objekte", TODAY)).toEqual({
       fragmentsJson: null,
