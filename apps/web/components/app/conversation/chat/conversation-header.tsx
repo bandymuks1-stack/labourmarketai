@@ -58,8 +58,14 @@ export function ConversationHeader({
   const isProjection = pathname !== "/dashboard";
 
   return (
-    <header className="flex flex-none items-center justify-between gap-3 border-b border-ink-600 bg-ink-900/80 px-4 py-2.5 backdrop-blur">
-      <span className="flex min-w-0 items-center gap-2">
+    /* ONE ROW FROM `sm`, TWO ON A PHONE (2026-09-29). At 390 px the logo,
+          the workspace chip, four destinations and three controls cannot share
+          one row: the nav (flex-none) was laid over the logo and the chip on
+          every screen. On a phone the bar is now: row 1 = the way home + the
+          three controls; row 2 = the active workspace + the four destinations.
+          From `sm` every item keeps its original place (order-none). */
+    <header className="flex flex-none flex-wrap items-center justify-between gap-x-3 gap-y-0 border-b border-ink-600 bg-ink-900/80 px-4 py-2.5 backdrop-blur sm:flex-nowrap">
+      <span className="order-1 flex min-w-0 items-center gap-2 sm:order-none">
         {isProjection && (
           <Link
             href="/dashboard"
@@ -92,12 +98,12 @@ export function ConversationHeader({
             the user must never have to guess which work context they are in.
             min-w-0 so the chip TRUNCATES on a phone instead of ramming into
             the right-side controls. */}
-        {auth && (
-          <span className="flex min-w-0">
-            <WorkspaceChip />
-          </span>
-        )}
       </span>
+      {auth && (
+        <span className="order-4 flex min-w-0 max-sm:mt-2 sm:order-none">
+          <WorkspaceChip />
+        </span>
+      )}
 
       {/* THE CORE WORK LOOP, IN THE ONE BAR — chat · journal · calendar ·
           messages, from `getCoreNavItems()` (the catalogue is the only source;
@@ -139,7 +145,7 @@ export function ConversationHeader({
         <nav
           aria-label={nav.chat}
           data-testid="header-core-nav"
-          className="flex min-w-0 flex-none items-center gap-0.5"
+          className="order-5 flex min-w-0 flex-none items-center gap-0.5 max-sm:mt-2 sm:order-none sm:mx-auto"
         >
           {getCoreNavItems().map(({ id, href, tabLabelKey, iconKey }) => {
             const Icon = NAV_ICONS[iconKey];
@@ -169,7 +175,9 @@ export function ConversationHeader({
         </nav>
       )}
 
-      <div className="flex flex-none items-center gap-1">
+      {/* Phone only: the row break before the workspace + destinations row. */}
+      <span aria-hidden className="order-3 h-0 basis-full sm:hidden" />
+      <div className="order-2 flex flex-none items-center gap-1 sm:order-none">
         {auth && (
           <HeaderSearch
             testId="chat-command-search"
