@@ -13289,6 +13289,11 @@
         "invalid": "Tego zawodu nie ma na liście — zapisz go własnymi słowami.",
         "failed": "Zapis nie powiódł się — nic nie zmieniono. Spróbuj ponownie."
       },
+      "languageStatement": {
+        "understood": "Rozumiem — języki: {list}. Dodam każdy do profilu — wybierz poziom i zapisz. Do tego czasu nic się nie zmieni.",
+        "askWhich": "Jaki język znasz? Wybierz język i poziom, potem zapisz.",
+        "notInCompany": "Języki to Twoja własna informacja. Przełącz się na przestrzeń osobistą i napisz jeszcze raz."
+      },
       "pay": {
         "understoodRange": "Rozumiem: oczekiwane wynagrodzenie {min}–{max} € miesięcznie. Wpisałem kwoty do Twojej karty pracy — sprawdź i zapisz. Dopóki nie zapiszesz, nic się nie zmieni.",
         "understoodMin": "Rozumiem: oczekiwane wynagrodzenie co najmniej {min} € miesięcznie. Wpisałem kwotę do Twojej karty pracy — sprawdź i zapisz. Dopóki nie zapiszesz, nic się nie zmieni.",

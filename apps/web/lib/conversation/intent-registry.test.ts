@@ -120,7 +120,9 @@ describe("the intent registry is the enumerable routing contract", () => {
     // 84 → 85 (2026-09-29): current-work — "Kur dabar dirbu?" answered from
     // the canonical work contexts; the booking-engagements panel listed only
     // an ended placement.
-    expect(entries.length).toBe(85);
+    // 85 → 86 (2026-09-29): language-statement — "Kalbu angliškai ir
+    // rusiškai" scored 0; one language form per stated language.
+    expect(entries.length).toBe(86);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -164,6 +166,8 @@ describe("the intent registry is the enumerable routing contract", () => {
       // through the `programmes` handler), all important-tier over the ONE
       // dispatcher.
       "invite-student",
+      // "kalbu angliškai" — the language form per language; its save is the write.
+      "language-statement",
       "log-work",
       "move-worker",
       "need-workers",

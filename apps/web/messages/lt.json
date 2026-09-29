@@ -13289,6 +13289,11 @@
         "invalid": "Šios profesijos sąraše nėra — įrašyk ją savo žodžiais.",
         "failed": "Nepavyko išsaugoti — niekas nepasikeitė. Pabandyk dar kartą."
       },
+      "languageStatement": {
+        "understood": "Supratau kalbas: {list}. Įrašau kiekvieną į profilį — pasirink lygį ir išsaugok. Kol neišsaugosi, niekas nepasikeis.",
+        "askWhich": "Kokią kalbą moki? Pasirink kalbą ir lygį, tada išsaugok.",
+        "notInCompany": "Kalbos — tavo asmeninis faktas. Persijunk į asmeninę erdvę ir parašyk dar kartą."
+      },
       "pay": {
         "understoodRange": "Supratau: atlyginimo lūkestis nuo {min} iki {max} € per mėnesį. Įrašiau sumas į darbo kortelę — peržiūrėk ir išsaugok. Kol neišsaugosi, niekas nepasikeis.",
         "understoodMin": "Supratau: atlyginimo lūkestis ne mažiau kaip {min} € per mėnesį. Įrašiau sumą į darbo kortelę — peržiūrėk ir išsaugok. Kol neišsaugosi, niekas nepasikeis.",

@@ -916,6 +916,14 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     de: "Nicht 5, sondern 6 Stunden",
     pl: "Nie 5, a 6 godzin",
   },
+  "language-statement": {
+    lt: "Kalbu angliškai ir rusiškai",
+    en: "I speak English and German",
+    ru: "Я говорю по-английски",
+    nl: "Ik spreek Engels",
+    de: "Ich spreche Englisch",
+    pl: "Mówię po angielsku",
+  },
   "pay-statement": {
     lt: "Mano atlyginimo lūkestis nuo 2500 iki 3500 eurų",
     en: "My salary expectation is 2500 to 3500 EUR",

@@ -135,6 +135,8 @@ export type ConversationIntent =
   | "profession-statement"
   // A stated pay expectation — opens the work card prefilled (2026-09-29).
   | "pay-statement"
+  // Languages said in words — the language form per language (2026-09-29).
+  | "language-statement"
   // A correction of the newest entry said in words (2026-09-29).
   | "correct-work"
   // "Kur dabar dirbu?" — the canonical work contexts (2026-09-29).
@@ -2303,6 +2305,26 @@ const RULES: IntentRule[] = [
       p("\\b(corrigeer|wijzig|verander)\\b.{0,30}(invoer|uren|registratie)", 9),
       p("\\b(popraw|zmien|zmień)\\w*\\b.{0,30}(wpis|godzin)", 9),
       p("^\\s*(tai|that|это|das|dat|to)\\s+(buvo|was|было|war|by[lł]o)\\s+(vakar|uzvakar|yesterday|вчера|позавчера|gestern|vorgestern|gisteren|eergisteren|wczoraj|przedwczoraj)\\b", 9),
+    ],
+  },
+  {
+    /**
+     * LANGUAGES SAID IN WORDS (owner continuation 2026-09-29): "Kalbu
+     * angliškai ir rusiškai." scored 0 and the fallback showed the profile
+     * card. A speak/know verb bound to a language word opens the ONE
+     * language form (worker.add-language) per stated language — the sentence
+     * writes nothing (lib/conversation/language-statement.ts).
+     */
+    intent: "language-statement",
+    patterns: [
+      pNoSeek("\\b(kalbu|moku|suprantu|snekau|kalbame)\\b.{0,40}(anglisk|rusisk|lietuvisk|latvisk|estisk|olandisk|vokisk|danisk|norvegisk|svedisk|lenkisk|anglu|rusu|lietuviu|latviu|estu|olandu|vokieciu|danu|norvegu|svedu|lenku)", 7),
+      pNoSeek("\\b(speak|know|fluent\\s+in)\\b.{0,30}(english|russian|lithuanian|latvian|estonian|dutch|german|danish|norwegian|swedish|polish)", 7),
+      pNoSeek("(говорю|владею|знаю)\\s.{0,30}(англ|русск|литов|латыш|эстон|голланд|нидерланд|немец|датск|норвеж|шведск|польск)", 7),
+      // "spreche", never "ich kann" — "Ich kann in Deutschland ab Montag
+      // arbeiten" is availability (guard availability-survives-a-place).
+      pNoSeek("\\b(spreche)\\b.{0,30}(englisch|russisch|litauisch|lettisch|estnisch|niederl|deutsch(?!land)|danisch|norwegisch|schwedisch|polnisch)", 7),
+      pNoSeek("\\b(spreek)\\b.{0,30}(engels|russisch|litouws|lets|estisch|nederlands|duits|deens|noors|zweeds|pools)", 7),
+      pNoSeek("\\b(mowie|mówię|znam)\\b.{0,30}(angielsk|rosyjsk|litewsk|lotewsk|estonsk|niderlandzk|niemieck|dunsk|norwesk|szwedzk|polsk|po\\s+angielsku|po\\s+rosyjsku)", 7),
     ],
   },
   {

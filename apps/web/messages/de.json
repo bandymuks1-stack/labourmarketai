@@ -13289,6 +13289,11 @@
         "invalid": "Dieser Beruf ist nicht in der Liste — speichere ihn in eigenen Worten.",
         "failed": "Speichern fehlgeschlagen — nichts wurde geändert. Versuch es erneut."
       },
+      "languageStatement": {
+        "understood": "Verstanden — Sprachen: {list}. Ich trage jede in dein Profil ein — wähle das Niveau und speichere. Bis dahin ändert sich nichts.",
+        "askWhich": "Welche Sprache sprichst du? Wähle Sprache und Niveau, dann speichern.",
+        "notInCompany": "Deine Sprachen sind deine eigene Angabe. Wechsle in deinen persönlichen Bereich und sag es noch einmal."
+      },
       "pay": {
         "understoodRange": "Verstanden: Gehaltswunsch {min}–{max} € pro Monat. Ich habe die Beträge in deine Arbeitskarte eingetragen — prüfen und speichern. Bis du speicherst, ändert sich nichts.",
         "understoodMin": "Verstanden: Gehaltswunsch mindestens {min} € pro Monat. Ich habe den Betrag in deine Arbeitskarte eingetragen — prüfen und speichern. Bis du speicherst, ändert sich nichts.",
