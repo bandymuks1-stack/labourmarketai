@@ -66,6 +66,7 @@ export interface PlayerCardLabels {
     sceneLabel: string;
     empty: string;
     emptyNext: string;
+    allDetails: string;
     directions: { id: string; label: string; detail: string | null; shared: number }[];
   };
   /** Identity stage: EVERY profession's display name, primary-first (0/1/N). */
@@ -756,6 +757,10 @@ export function WorkerPlayerCard({
                 ? [labels.professionName]
                 : [],
           confirmedEdge: card.provenance.class === "EMPLOYER_CONFIRMED",
+          currentWork: labels.currentWork,
+          currentWorkLabel: labels.currentWorkLabel,
+          facts: labels.identityFacts.map((f) => ({ value: f.value, label: f.label })),
+          provenance: { label: labels.provenance.label, text: labels.provenance.text },
         },
         modeLabels: {
           work: labels.modes.work,
@@ -776,7 +781,12 @@ export function WorkerPlayerCard({
         laneDetails: labels.visuals.history.laneDetails,
         currentLabel: labels.visuals.history.current,
         directions: labels.world.directions,
-        words: { sceneLabel: labels.world.sceneLabel, empty: labels.world.empty, emptyNext: labels.world.emptyNext },
+        words: {
+          sceneLabel: labels.world.sceneLabel,
+          empty: labels.world.empty,
+          emptyNext: labels.world.emptyNext,
+          allDetails: labels.world.allDetails,
+        },
       })
     : null;
 

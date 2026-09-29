@@ -42,6 +42,8 @@ export type WorldNode = {
   /** 0..1 — size only. */
   readonly weight: number;
   readonly tone: WorldNodeTone;
+  /** The real number behind it when there is one (records for a skill). */
+  readonly count?: number;
 };
 
 export type WorldSatellite = {
@@ -69,6 +71,13 @@ export type PlayerCardWorldModel = {
     readonly professions: readonly string[];
     /** Gold edge ONLY when a real confirmation row derives it (P6). */
     readonly confirmedEdge: boolean;
+    /** Where they work now — the organizations of CURRENT engagements. */
+    readonly currentWork: readonly string[];
+    readonly currentWorkLabel: string;
+    /** The journal's own all-time figures, already formatted (may be empty). */
+    readonly facts: readonly { readonly value: string; readonly label: string }[];
+    /** The provenance edge in words (P6: never colour alone). */
+    readonly provenance: { readonly label: string; readonly text: string };
   };
   readonly satellites: readonly WorldSatellite[];
   readonly work: readonly WorldNode[];
@@ -85,6 +94,8 @@ export type PlayerCardWorldModel = {
     readonly empty: string;
     /** NEXT is not a record — its empty state says what would open it. */
     readonly emptyNext: string;
+    /** The disclosure that holds the whole card's facts under the scene. */
+    readonly allDetails: string;
   };
 };
 
@@ -128,6 +139,7 @@ export function buildCardWorld(input: CardWorldInput): PlayerCardWorldModel {
     // a declared skill with no record still exists — drawn small, never absent
     weight: bar.entries > 0 ? Math.max(0.25, weigh(bar.entries, maxEntries)) : 0.12,
     tone: bar.tier === "verified" ? "confirmed" : bar.tier === "journal" ? "recorded" : "declared",
+    count: bar.entries,
   }));
 
   const sources: WorldEvidenceSource[] = (

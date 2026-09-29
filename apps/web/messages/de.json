@@ -7582,7 +7582,8 @@
         "empty": "Hier ist noch nichts erfasst.",
         "directionDetail": "Gemeinsam: {shared} · fehlt: {missing}",
         "directionDetailNoGap": "Gemeinsam: {shared} · nichts fehlt",
-        "emptyNext": "Richtungen erscheinen, sobald deine Arbeitseinträge mindestens zwei Fähigkeiten belegen."
+        "emptyNext": "Richtungen erscheinen, sobald deine Arbeitseinträge mindestens zwei Fähigkeiten belegen.",
+        "allDetails": "Alles auf der Karte"
       }
     }
   },

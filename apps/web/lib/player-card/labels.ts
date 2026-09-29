@@ -165,6 +165,7 @@ export async function buildPlayerCardLabels(
       sceneLabel: tWorld("sceneLabel"),
       empty: tWorld("empty"),
       emptyNext: tWorld("emptyNext"),
+      allDetails: tWorld("allDetails"),
       directions,
     },
     professionNames,

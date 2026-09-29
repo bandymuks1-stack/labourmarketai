@@ -2,7 +2,17 @@ import { describe, expect, it } from "vitest";
 import { buildCardWorld, type CardWorldInput } from "./card-world";
 
 const base: CardWorldInput = {
-  person: { name: "Rasa J.", initials: "RJ", avatarUrl: null, professions: ["Virėja"], confirmedEdge: false },
+  person: {
+    name: "Rasa J.",
+    initials: "RJ",
+    avatarUrl: null,
+    professions: ["Virėja"],
+    confirmedEdge: false,
+    currentWork: [],
+    currentWorkLabel: "Dirba dabar",
+    facts: [],
+    provenance: { label: "Kilmė", text: "Nurodė pati" },
+  },
   modeLabels: { work: "Darbas", skills: "Gebėjimai", evidence: "Įrašai", history: "Istorija", next: "Toliau" },
   currentWork: [],
   skillBars: [],
@@ -16,7 +26,7 @@ const base: CardWorldInput = {
   laneDetails: [],
   currentLabel: "Vyksta dabar",
   directions: [],
-  words: { sceneLabel: "scene", empty: "empty", emptyNext: "emptyNext" },
+  words: { sceneLabel: "scene", empty: "empty", emptyNext: "emptyNext", allDetails: "all" },
 };
 
 describe("the person's world is the card's own rows, placed in space", () => {

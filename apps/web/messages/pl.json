@@ -7582,7 +7582,8 @@
         "empty": "Nic tu jeszcze nie zapisano.",
         "directionDetail": "Wspólne: {shared} · brakuje: {missing}",
         "directionDetailNoGap": "Wspólne: {shared} · niczego nie brakuje",
-        "emptyNext": "Kierunki pojawią się, gdy wpisy o pracy potwierdzą co najmniej dwie umiejętności."
+        "emptyNext": "Kierunki pojawią się, gdy wpisy o pracy potwierdzą co najmniej dwie umiejętności.",
+        "allDetails": "Wszystko na karcie"
       }
     }
   },

@@ -7582,7 +7582,8 @@
         "empty": "Hier is nog niets vastgelegd.",
         "directionDetail": "Gedeeld: {shared} · ontbreekt: {missing}",
         "directionDetailNoGap": "Gedeeld: {shared} · niets ontbreekt",
-        "emptyNext": "Richtingen verschijnen zodra je werkregistraties minstens twee vaardigheden onderbouwen."
+        "emptyNext": "Richtingen verschijnen zodra je werkregistraties minstens twee vaardigheden onderbouwen.",
+        "allDetails": "Alles op de kaart"
       }
     }
   },

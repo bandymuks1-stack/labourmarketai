@@ -98,60 +98,79 @@ export function PlayerCardModes({
     return () => io.disconnect();
   }, [drawable]);
 
+  const tabs = (inScene: boolean) => (
+    <div
+      role="tablist"
+      aria-label={label}
+      className={cn("-mx-1 flex gap-1 overflow-x-auto px-1 pb-0.5", inScene && "justify-start sm:justify-center")}
+      data-testid="player-card-modes"
+    >
+      {PLAYER_CARD_MODES.map((key) => (
+        <button
+          key={key}
+          type="button"
+          role="tab"
+          aria-selected={mode === key}
+          onClick={() => choose(key)}
+          data-testid={`player-card-mode-${key}`}
+          className={cn(
+            "inline-flex min-h-11 shrink-0 items-center border-b-2 px-3 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue",
+            mode === key ? "border-brand-blue text-text-primary" : "border-transparent text-text-muted hover:text-text-primary",
+          )}
+        >
+          {modeLabels[key]}
+        </button>
+      ))}
+    </div>
+  );
+
+  // ONE IDENTITY (owner visual correction 2026-09-29 §4): with the world
+  // drawn, the person, their profession, where they work and their figures
+  // live IN the scene — the identity stage is not repeated as a card, and
+  // the whole card's facts wait behind one disclosure instead of competing
+  // with the person. Without the world, the card is exactly what it was.
+  const scene = Boolean(world && drawable);
+
   return (
     <>
-      {world && drawable ? (
-        <div
+      {scene && world ? (
+        <section
           ref={host}
-          role="img"
           aria-label={world.words.sceneLabel}
           data-testid="player-card-world"
           data-mode={mode}
-          className="relative -mx-5 -mt-5 h-[21rem] overflow-hidden sm:-mx-6 sm:-mt-6 sm:h-[30rem]"
+          className="relative -mx-5 -mt-5 h-[34rem] overflow-hidden bg-ink-900 sm:-mx-6 sm:-mt-6 sm:h-[38rem] lg:h-[42rem]"
         >
-          {inView ? <PlayerCardWorldScene model={world} mode={mode} onChoose={choose} reduced={reduced} /> : null}
+          {inView ? <PlayerCardWorldScene model={world} mode={mode} reduced={reduced} controls={tabs(true)} /> : null}
+        </section>
+      ) : (
+        <>
+          {stage}
+          {tabs(false)}
+        </>
+      )}
+      {scene && mode === "identity" ? (
+        <details className="group rounded-lg border border-ink-600" data-testid="player-card-all-details">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-4 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
+            {world?.words.allDetails}
+            <span aria-hidden className="transition-transform group-open:rotate-180">⌄</span>
+          </summary>
+          <div role="tabpanel" data-mode={mode} data-testid="player-card-mode-panel" className="flex flex-col gap-5 border-t border-ink-600 p-4">
+            {stage}
+            {sections[mode]}
+          </div>
+        </details>
+      ) : (
+        <div
+          key={mode}
+          role="tabpanel"
+          data-mode={mode}
+          data-testid="player-card-mode-panel"
+          className="rise-in flex flex-col gap-5"
+        >
+          {sections[mode]}
         </div>
-      ) : null}
-      {/* With the world drawn, the person already stands in it: the stage
-          keeps its words and figures, not a second monogram tile. */}
-      <div className={world && drawable ? "[&_.identity-stage-person]:hidden" : "contents"}>{stage}</div>
-      <div
-        role="tablist"
-        aria-label={label}
-        className={cn(
-          "-mx-1 flex gap-1 overflow-x-auto px-1 pb-0.5",
-          world && drawable && "border-b border-ink-600",
-        )}
-        data-testid="player-card-modes"
-      >
-        {PLAYER_CARD_MODES.map((key) => (
-          <button
-            key={key}
-            type="button"
-            role="tab"
-            aria-selected={mode === key}
-            onClick={() => choose(key)}
-            data-testid={`player-card-mode-${key}`}
-            className={cn(
-              "inline-flex min-h-11 shrink-0 items-center border-b-2 px-3 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue",
-              mode === key
-                ? "border-brand-blue text-text-primary"
-                : "border-transparent text-text-muted hover:text-text-primary",
-            )}
-          >
-            {modeLabels[key]}
-          </button>
-        ))}
-      </div>
-      <div
-        key={mode}
-        role="tabpanel"
-        data-mode={mode}
-        data-testid="player-card-mode-panel"
-        className="rise-in flex flex-col gap-5"
-      >
-        {sections[mode]}
-      </div>
+      )}
     </>
   );
 }

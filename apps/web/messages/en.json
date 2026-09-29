@@ -7582,7 +7582,8 @@
         "empty": "Nothing recorded here yet.",
         "directionDetail": "Shared: {shared} · missing: {missing}",
         "directionDetailNoGap": "Shared: {shared} · nothing missing",
-        "emptyNext": "Directions appear once your work records back at least two skills."
+        "emptyNext": "Directions appear once your work records back at least two skills.",
+        "allDetails": "Everything on the card"
       }
     }
   },
