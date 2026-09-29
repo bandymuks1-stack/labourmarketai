@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PlacePrecision } from "@/components/app/work-world/primitives";
 import { notFound } from "next/navigation";
+import { hreflangAlternates } from "@/lib/seo/metadata";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { buttonLinkClassName } from "@/components/ui/Button";
@@ -105,7 +106,14 @@ export async function generateMetadata({
   return {
     title,
     description: DESCRIPTION[active],
-    alternates: { canonical: `/${active}/jobs/${id}` },
+    // The page's head declares the SAME localized variants the jobs sitemap
+    // already declares for it (`hreflangAlternates`, one helper) — a crawler
+    // reading either source reads one entity in six languages, not six
+    // unrelated pages (GEO/AEO P0, 2026-09-29).
+    alternates: {
+      canonical: `/${active}/jobs/${id}`,
+      languages: hreflangAlternates(`/jobs/${id}`),
+    },
     openGraph: { title, description: DESCRIPTION[active] },
   };
 }
