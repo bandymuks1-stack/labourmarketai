@@ -8534,6 +8534,18 @@
     "agencyPresent": {
       "note": "Uw klant heeft deze behoefte met u gedeeld. U stelt kandidaten voor uit uw eigen bestand.",
       "link": "Kandidaat voorstellen"
+    },
+    "journey": {
+      "title": "Het traject van de vraag",
+      "step": {
+        "need": "Vraag",
+        "candidates": "Vergeleken mensen",
+        "shortlist": "Geselecteerd",
+        "contact": "Gesproken",
+        "offer": "Aangeboden",
+        "accepted": "Aanvaard",
+        "closed": "Gesloten"
+      }
     }
   },
   "planBoundary": {

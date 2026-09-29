@@ -8534,6 +8534,18 @@
     "agencyPresent": {
       "note": "Klient udostępnił Ci to zapotrzebowanie. Kandydatów przedstawiasz klientowi z własnej listy pracowników.",
       "link": "Zaproponuj kandydata"
+    },
+    "journey": {
+      "title": "Droga zapotrzebowania",
+      "step": {
+        "need": "Zapotrzebowanie",
+        "candidates": "Porównane osoby",
+        "shortlist": "Wybrani",
+        "contact": "W kontakcie",
+        "offer": "Zaproponowano",
+        "accepted": "Przyjęli",
+        "closed": "Zamknięte"
+      }
     }
   },
   "planBoundary": {

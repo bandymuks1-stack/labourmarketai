@@ -1,5 +1,6 @@
 "use client";
 
+import { JourneyStrip } from "@/components/app/journey-strip";
 import { useActionState } from "react";
 
 import {
@@ -245,17 +246,26 @@ export function AgencyDelegationPanel({
                   <span className="font-medium text-text-primary">
                     {requestTitles[p.requestId] ?? "—"}
                   </span>
-                  <ol className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-meta text-text-secondary">
-                    {placementSteps(p).map((s) => (
-                      <li
-                        key={s.key}
-                        data-testid={`agency-placement-step-${s.key}`}
-                      >
-                        {labels.lifecycle[s.key] ?? s.key}
-                        {s.at ? ` · ${s.at.slice(0, 10)}` : ""}
-                      </li>
-                    ))}
-                  </ol>
+                  {/* The placement's journey — the steps that actually
+                      happened, drawn as one line (premium agency view,
+                      2026-09-29). Same steps and ids as before; the strip is
+                      presentational and receives nothing but these steps. */}
+                  <div className="mt-2">
+                    <JourneyStrip
+                      ariaLabel={labels.placementsTitle}
+                      steps={placementSteps(p).map((s, i, all) => ({
+                        key: s.key,
+                        label: labels.lifecycle[s.key] ?? s.key,
+                        detail: s.at ? s.at.slice(0, 10) : null,
+                        state: PLACEMENT_SETBACK.has(s.key)
+                          ? "ended"
+                          : i === all.length - 1
+                            ? "current"
+                            : "done",
+                        testid: `agency-placement-step-${s.key}`,
+                      }))}
+                    />
+                  </div>
                 </li>
               ))}
             </ul>
@@ -265,6 +275,9 @@ export function AgencyDelegationPanel({
     </Card>
   );
 }
+
+/** Steps where the placement did not go ahead — drawn as a setback, in words. */
+const PLACEMENT_SETBACK = new Set(["workerDeclined", "booking_withdrawn", "booking_expired"]);
 
 /** The placement's lifecycle as the steps that actually happened, in order. */
 export function placementSteps(

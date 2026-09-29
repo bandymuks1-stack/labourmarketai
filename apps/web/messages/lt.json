@@ -8534,6 +8534,18 @@
     "agencyPresent": {
       "note": "Šį poreikį jums pasidalino klientas. Kandidatus klientui pristatote iš savo darbuotojų sąrašo.",
       "link": "Pasiūlyti kandidatą"
+    },
+    "journey": {
+      "title": "Poreikio kelias",
+      "step": {
+        "need": "Poreikis",
+        "candidates": "Palyginti žmonės",
+        "shortlist": "Atrinkti",
+        "contact": "Susisiekta",
+        "offer": "Pasiūlyta",
+        "accepted": "Priėmė",
+        "closed": "Uždaryta"
+      }
     }
   },
   "planBoundary": {
