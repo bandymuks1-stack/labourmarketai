@@ -593,9 +593,14 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // removes was a disclaimer compensating for a confusing component — its own
     // source comment said so — and became false when #1890 gave every card its
     // own language line. Verified on deployed production before removal.
+    //
+    // #1991 and #1993 (2026-09-29) on the owner's verbatim approval: "I approve
+    // adding PR #1991 and PR #1993 to the existing public-acquisition-route-jobs
+    // waiver pullRequests, strictly for the /jobs/[id] signed-in crash fix and
+    // the job-page hreflang fix." Bounded — not general authority.
     expect(jobs.pullRequests).toEqual([
       1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809, 1810, 1838, 1837, 1890,
-      1892,
+      1892, 1991, 1993,
     ]);
     expect(jobs.owner).toMatch(/2026-08-18/);
     expect(jobs.resolvedBy).toMatch(/gate-learns-public-acquisition-route-category/);
