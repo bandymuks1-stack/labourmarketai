@@ -1,5 +1,6 @@
 "use client";
 
+import { asksAboutAWeek } from "@/lib/planning/week-question";
 import { cardModeFromText } from "@/lib/player-card/card-mode-from-text";
 import type { PlayerCardMode } from "@/lib/player-card/card-modes";
 import {
@@ -6569,7 +6570,12 @@ export function ConversationChat({
         skillGap: () => runWorkflow(() => runSkillGap()),
         // A company space asks about the TEAM's work — the organization's
         // journal report, never the person's own (2026-09-29).
-        recentJournal: () => runWorkflow(() => (identity === "company" ? runOrganizationJournal(text) : runRecentJournal(text))),
+        recentJournal: () => runWorkflow(() => {
+          // A person asking about A WEEK also sees it (owner §21): the reply
+          // is unchanged, and the calendar panel opens on this week's rhythm.
+          if (identity !== "company" && asksAboutAWeek(text)) openResultRef.current("calendar");
+          return identity === "company" ? runOrganizationJournal(text) : runRecentJournal(text);
+        }),
         // Work intelligence by sentence (issue #1689, owner lines 2–7): the
         // intent names the facet, ONE workflow reads the ONE model.
         workIntelligence: () => runWorkflow(() => runWorkIntelligenceQuestion(text, routedIntent)),
@@ -6903,10 +6909,13 @@ export function ConversationChat({
                   label: labels.historyImportChip,
                 },
               ]),
-        workHours: () =>
+        workHours: () => {
+          // Same rule: "kiek valandų dirbau šią savaitę?" also shows the week.
+          if (identity !== "company" && asksAboutAWeek(text)) openResultRef.current("calendar");
           assistant(labels.adminRouteHint, [
             { id: "link:/dashboard/hours", label: labels.workHoursChip },
-          ]),
+          ]);
+        },
         absences: () =>
           assistant(labels.adminRouteHint, [
             { id: "link:/dashboard/absences", label: labels.absencesChip },
