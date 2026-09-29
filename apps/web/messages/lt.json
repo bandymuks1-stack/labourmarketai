@@ -10569,7 +10569,11 @@
       "confirmation": {
         "all": "Patvirtinti visi dienos įrašai",
         "partial": "Dalis dienos įrašų patvirtinta"
-      }
+      },
+      "dayConfirmed": "Kitas asmuo patvirtino {confirmed} iš {total} dienos žurnalo įrašų",
+      "dayNoWork": "Šią dieną darbas neužfiksuotas.",
+      "dayFuture": "Ši diena dar neatėjo.",
+      "recordOnDay": "Įrašyti darbą šiai dienai"
     }
   },
   "workforcePlanning": {

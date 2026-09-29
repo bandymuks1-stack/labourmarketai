@@ -148,3 +148,31 @@ describe("the calendar wiring keeps the floor", () => {
     expect(COMPOSE).toMatch(/deriveIndependentReviewResult\(rows, userId\)/);
   });
 });
+
+describe("the recovered floor (owner 2026-09-29): never count-only again", () => {
+  const PAGE = read("app/[locale]/dashboard/planning/page.tsx");
+  const DAY = read("components/app/planning/work-day.tsx");
+
+  it("the month grid states the HOURS on the date; a count is only secondary", () => {
+    // The good month (hours on the date) was once displaced by a count-per-
+    // cell grid. The hours line must stay, and the count may never be the
+    // cell's only statement about the day's work.
+    expect(PAGE).toContain("planning-month-hours-");
+    expect(PAGE).toMatch(/compactHours\(r\.recordedMinutes, locale\)/);
+    expect(PAGE).toMatch(/planning-month-plans-/);
+    expect(PAGE).toMatch(/hidden h-4 min-w-4[^"]*sm:inline-flex/);
+  });
+
+  it("the day view is a stage over the same rhythm model, with both doors to the journal", () => {
+    expect(PAGE).toMatch(/<WorkDay day=\{dayRhythm\}/);
+    expect(PAGE).toMatch(/itemsForDay\(result\.items, anchor\)/);
+    expect(DAY).toContain("/dashboard/journal?date=${day.day}#journal-entries");
+    expect(DAY).toContain("/dashboard/journal?date=${day.day}#journal-composer");
+    expect(DAY).toMatch(/!day\.isFuture \?/);
+    expect(DAY).not.toMatch(/createClient|supabase|\.from\(/);
+  });
+
+  it("the detailed day rows stay below the stage", () => {
+    expect(PAGE).toMatch(/<WorkDay[\s\S]{0,200}<ItemList items=\{dayItems\}/);
+  });
+});

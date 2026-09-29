@@ -40,6 +40,7 @@ import { TimeReality } from "@/components/app/work-world/primitives";
 import { temporalReality } from "@/lib/planning/temporal-reality";
 import { DerivedPeriodEvidence } from "@/components/app/planning/derived-period-evidence";
 import { WorkWeek } from "@/components/app/planning/work-week";
+import { WorkDay } from "@/components/app/planning/work-day";
 import { buildWorkRhythm, compactHours } from "@/lib/planning/work-rhythm";
 import { createUtcFormatter } from "@/lib/time/display";
 
@@ -485,6 +486,18 @@ export default async function PlanningPage({
       ? buildYearOverview(Number(anchor.slice(0, 4)), visibleItems, today)
       : null;
   const dayItems = view === "day" ? itemsForDay(visibleItems, anchor) : null;
+  // THE DAY STAGE (premium day view, 2026-09-29): the same rhythm model the
+  // week and month draw, over the FULL model — a filter changes the rows
+  // shown below, never the day's recorded time.
+  const dayRhythm =
+    view === "day"
+      ? buildWorkRhythm({
+          days: [{ day: anchor, items: itemsForDay(result.items, anchor) }],
+          todayIso: today,
+          confirmedIds: result.journalConfirmedIds,
+          conflictIds,
+        }).days[0]
+      : null;
 
   const { prev, next } = navAnchors(view, anchor);
 
@@ -822,7 +835,8 @@ export default async function PlanningPage({
 
       {/* ---------------- DAY ---------------- */}
       {dayItems ? (
-        <section className="flex flex-col gap-2" data-testid="planning-day-view">
+        <section className="flex flex-col gap-4" data-testid="planning-day-view">
+          {dayRhythm ? <WorkDay day={dayRhythm} locale={locale} /> : null}
           {dayItems.length > 0 ? (
             <ItemList items={dayItems} testid={`planning-day-${anchor}`} />
           ) : (
