@@ -490,10 +490,19 @@ export default async function VerifiedCvPage({
             >
               {confirmations.slice(0, 3).map((c, ci) => (
                 <li key={`${c.confirmedAt}-${ci}`} className="text-xs text-text-secondary">
-                  {t("history.chain.confirmedBy", {
-                    role: tRel.has(c.confirmerRole) ? tRel(c.confirmerRole) : c.confirmerRole,
-                    date: formatUtcDate(c.entryDate, locale) ?? "",
-                  })}
+                  {/* The confirmation leads to the day of the work it
+                      confirms — the same fact in the Work Journal (one
+                      system). Printed as plain text. */}
+                  <a
+                    href={`/${locale}/dashboard/journal?date=${c.entryDate.slice(0, 10)}#journal-entries`}
+                    className="underline-offset-2 hover:text-text-primary hover:underline print:no-underline"
+                    data-testid="cv-history-confirmation-day"
+                  >
+                    {t("history.chain.confirmedBy", {
+                      role: tRel.has(c.confirmerRole) ? tRel(c.confirmerRole) : c.confirmerRole,
+                      date: formatUtcDate(c.entryDate, locale) ?? "",
+                    })}
+                  </a>
                   {c.automatic ? <span className="text-text-muted"> · {tTier("autoConfirmQualifier")}</span> : null}
                   {c.selfConfirmed ? <span className="text-text-muted"> · {tTier("selfConfirmQualifier")}</span> : null}
                 </li>

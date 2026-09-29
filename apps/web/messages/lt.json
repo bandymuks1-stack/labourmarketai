@@ -7572,7 +7572,10 @@
         "history": "Istorija",
         "identity": "Asmuo",
         "next": "Toliau",
-        "nextOpportunities": "Kur galite eiti toliau"
+        "nextOpportunities": "Kur galite eiti toliau",
+        "doorCalendar": "Ši savaitė kalendoriuje",
+        "doorJournal": "Visi darbo žurnalo įrašai",
+        "doorCv": "Gyvas CV"
       }
     }
   },
