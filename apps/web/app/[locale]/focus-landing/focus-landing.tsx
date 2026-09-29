@@ -28,6 +28,8 @@ import { resolveActiveLocale } from "@/lib/seo/metadata";
 import { LandingModeSwitcher } from "./landing-mode-switcher";
 import { LandingJourney } from "@/components/marketing/landing-journey";
 import { buildSampleJourney } from "@/lib/marketing/sample-journey";
+import { buildLivingWorkerHero } from "@/lib/marketing/living-worker-hero";
+import { LivingWorkerHero } from "@/components/marketing/living-worker-hero";
 
 /**
  * FOCUS — the previous production landing, RESTORED.
@@ -89,7 +91,7 @@ export async function FocusLanding({
   // The SAME canonical snapshot LIVE reads, through the SAME 300 s
   // `unstable_cache` entry — one market truth, one freshness window, no
   // FOCUS-only reader (owner command §9/§12).
-  const [market, t, tHero, journey] = await Promise.all([
+  const [market, t, tHero, journey, livingHero] = await Promise.all([
     // FOCUS renders the supply counts only; it reads `professions`
     // nowhere, so it does not pay for the per-profession reads. Same
     // reader, same freshness window, same market numbers as LIVE.
@@ -99,7 +101,24 @@ export async function FocusLanding({
     // The entry's SAMPLE story (owner decision 2026-09-29): translation copy
     // + the existing sample persona — no read, no production fact.
     buildSampleJourney(),
+    buildLivingWorkerHero(),
   ]);
+
+  // THE PROMISE — one headline, one sub, one set of primary doors, whichever
+  // hero carries it (the living worker hero, or the entry hero without it).
+  // `text-hero` was never defined (no token, no Tailwind entry): the h1
+  // rendered at body size. A real display scale now.
+  const promise = (
+    <>
+      <h1 className="font-display text-4xl font-bold leading-[1.04] tracking-tightest text-text-primary sm:text-5xl lg:text-6xl">
+        {tHero("headline")}
+      </h1>
+      <p className="mt-3 text-lead text-text-secondary">{tHero("sub")}</p>
+      <div className="mt-6">
+        <LandingPrimaryActions locale={locale} surface="landing_hero" />
+      </div>
+    </>
+  );
 
   return (
     <NextIntlClientProvider
@@ -142,37 +161,52 @@ export async function FocusLanding({
                 beneath. Phone: promise → entry → story, so the working entry
                 stays near the top. The story is the product's own pieces with
                 the landing's sample persona — see <LandingJourney>. */}
-            <section className="grid gap-8 lg:grid-cols-2 lg:items-start lg:gap-x-12">
-              <div className="order-1 max-w-3xl lg:col-start-1 lg:row-start-1 lg:self-center">
-                {/* `text-hero` was never defined (no token, no Tailwind entry): the h1
-                    rendered at body size. A real display scale now. */}
-                <h1 className="font-display text-4xl font-bold leading-[1.04] tracking-tightest text-text-primary sm:text-5xl lg:text-6xl">
-                  {tHero("headline")}
-                </h1>
-                <p className="mt-3 text-lead text-text-secondary">
-                  {tHero("sub")}
-                </p>
-                <div className="mt-6">
-                  <LandingPrimaryActions locale={locale} surface="landing_hero" />
-                </div>
-              </div>
-              <div className="order-3 lg:col-start-2 lg:row-start-1" data-testid="landing-entry-story">
-                <LandingJourney journey={journey} />
-              </div>
-              <div className="order-2 lg:col-span-2 lg:row-start-2">
+            {/* THE LIVING WORKER HERO (owner 2026-09-29): with its
+                photographs in place, the same sample person stands at the
+                centre of the hero and the promise sits over them; the working
+                sentence entry follows. Without the photographs, the entry
+                hero above stays exactly as it was — never an abstract
+                stand-in. */}
+            {livingHero ? (
+              <>
+                <LivingWorkerHero data={livingHero}>{promise}</LivingWorkerHero>
+                <section className="mt-8">
               <PublicEntry
-                supply={
-                  market.activeVacancies !== null && market.distinctEmployers !== null
-                    ? {
-                        vacancies: market.activeVacancies,
-                        employers: market.distinctEmployers,
-                        refreshedAt: market.lastRefreshedAt,
-                      }
-                    : null
-                }
-              />
-              </div>
-            </section>
+                  supply={
+                    market.activeVacancies !== null && market.distinctEmployers !== null
+                      ? {
+                          vacancies: market.activeVacancies,
+                          employers: market.distinctEmployers,
+                          refreshedAt: market.lastRefreshedAt,
+                        }
+                      : null
+                  }
+                />
+                </section>
+              </>
+            ) : (
+              <section className="grid gap-8 lg:grid-cols-2 lg:items-start lg:gap-x-12">
+                <div className="order-1 max-w-3xl lg:col-start-1 lg:row-start-1 lg:self-center">
+                  {promise}
+                </div>
+                <div className="order-3 lg:col-start-2 lg:row-start-1" data-testid="landing-entry-story">
+                  <LandingJourney journey={journey} />
+                </div>
+                <div className="order-2 lg:col-span-2 lg:row-start-2">
+                <PublicEntry
+                  supply={
+                    market.activeVacancies !== null && market.distinctEmployers !== null
+                      ? {
+                          vacancies: market.activeVacancies,
+                          employers: market.distinctEmployers,
+                          refreshedAt: market.lastRefreshedAt,
+                        }
+                      : null
+                  }
+                />
+                </div>
+              </section>
+            )}
 
             {/* ── §17 THE MARKET, IN PLACES ─────────────────────────────
                    Second, directly under the entry, because it answers the

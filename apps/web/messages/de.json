@@ -17509,5 +17509,105 @@
       "pause": "Anhalten",
       "steps": "Schritte der Geschichte"
     }
+  },
+  "livingWorkerHero": {
+    "sampleLabel": "Beispiel",
+    "pause": "Anhalten",
+    "play": "Abspielen",
+    "next": "Nächster Moment",
+    "previous": "Vorheriger Moment",
+    "cardLabel": "Berufskarte",
+    "personas": {
+      "tomas": {
+        "stages": {
+          "base": {
+            "alt": "Tomas K. in einem dunklen Studio",
+            "caption": "Tomas K., 29 Jahre, Vilnius."
+          },
+          "tool": {
+            "alt": "Tomas K. mit Gerüstschlüssel und Sicherheitsgurt",
+            "caption": "Erstes Werkzeug: ein Gerüstschlüssel."
+          },
+          "site-lt": {
+            "alt": "Tomas K. arbeitet auf einem Gerüst in der Altstadt von Vilnius",
+            "caption": "Gerüst, Altstadt Vilnius."
+          },
+          "van": {
+            "alt": "Tomas K. am Arbeitstransporter am Morgen",
+            "caption": "Zur Baustelle im Transporter, 6:40."
+          },
+          "country-no": {
+            "alt": "Tomas K. auf einer Baustelle über einem Fjord in Norwegen",
+            "caption": "Bergen, Norwegen.",
+            "card": {
+              "profession": "Gerüstbauer",
+              "country": "Norwegen",
+              "skills": "Gerüstbau · Arbeit in der Höhe · Sicherheitsplan",
+              "path": "Von Vilnius nach Bergen",
+              "experience": "2 Jahre Berufserfahrung",
+              "places": "3 Baustellen"
+            }
+          },
+          "specialist": {
+            "alt": "Tomas K. liest Pläne auf einer Baustelle in Stockholm",
+            "caption": "Drei Jahre später — Baufachmann, Stockholm."
+          },
+          "foreman": {
+            "alt": "Tomas K. mit Tablet, sein Team arbeitet hinter ihm",
+            "caption": "Vorarbeiter: ein Team von vier."
+          },
+          "owner": {
+            "alt": "Tomas K. in seinem Firmenbüro an den Bauplänen",
+            "caption": "Seine eigene Baufirma.",
+            "team": "14 Leute · 3 Baustellen · Diese Woche: 540 Std."
+          }
+        }
+      },
+      "rasa": {
+        "stages": {
+          "base": {
+            "alt": "Rasa J. in einem dunklen Studio",
+            "caption": "Rasa J., 27 Jahre, Vilnius."
+          },
+          "tool": {
+            "alt": "Rasa J. mit Küchenmesser und Schneidebrett",
+            "caption": "Erstes Werkzeug: ein Küchenmesser."
+          },
+          "kitchen-lt": {
+            "alt": "Rasa J. arbeitet in einer Restaurantküche in Vilnius",
+            "caption": "Küchenhilfe, Vilnius."
+          },
+          "car": {
+            "alt": "Rasa J. am frühen Morgen neben ihrem Auto",
+            "caption": "Zur Arbeit, früh am Morgen."
+          },
+          "country-no": {
+            "alt": "Rasa J. am Pass eines Restaurants in Oslo",
+            "caption": "Oslo, Norwegen.",
+            "card": {
+              "profession": "Köchin",
+              "country": "Norwegen",
+              "skills": "Kochen · Anrichten · Küchenhygiene",
+              "path": "Von Vilnius nach Oslo",
+              "experience": "3 Jahre in der Küche",
+              "places": "2 Restaurants"
+            }
+          },
+          "cook": {
+            "alt": "Rasa J. am Herd in einem Restaurant in Oslo",
+            "caption": "Professionelle Köchin."
+          },
+          "head-chef": {
+            "alt": "Rasa J. leitet ihre Küchenbrigade",
+            "caption": "Küchenchefin: eine Brigade von vier."
+          },
+          "owner": {
+            "alt": "Rasa J. im Gastraum ihres eigenen Restaurants vor dem Service",
+            "caption": "Ihr eigenes Restaurant.",
+            "team": "12 Leute · 2 Schichten · Diese Woche: 420 Std."
+          }
+        }
+      }
+    }
   }
 }

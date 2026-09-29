@@ -17509,5 +17509,105 @@
       "pause": "Pause",
       "steps": "Story steps"
     }
+  },
+  "livingWorkerHero": {
+    "sampleLabel": "Sample",
+    "pause": "Pause",
+    "play": "Play",
+    "next": "Next moment",
+    "previous": "Previous moment",
+    "cardLabel": "Professional card",
+    "personas": {
+      "tomas": {
+        "stages": {
+          "base": {
+            "alt": "Tomas K. standing in a dark studio",
+            "caption": "Tomas K., 29, Vilnius."
+          },
+          "tool": {
+            "alt": "Tomas K. with a scaffold spanner and safety harness",
+            "caption": "First tool: a scaffold spanner."
+          },
+          "site-lt": {
+            "alt": "Tomas K. working on scaffolding in Vilnius old town",
+            "caption": "Scaffolding, Vilnius old town."
+          },
+          "van": {
+            "alt": "Tomas K. beside a work van in the morning",
+            "caption": "To the site by work van, 6:40."
+          },
+          "country-no": {
+            "alt": "Tomas K. on a construction site above a fjord in Norway",
+            "caption": "Bergen, Norway.",
+            "card": {
+              "profession": "Scaffolder",
+              "country": "Norway",
+              "skills": "Scaffold erection · Work at height · Safety plan",
+              "path": "Vilnius → Bergen",
+              "experience": "2 years of work",
+              "places": "3 sites"
+            }
+          },
+          "specialist": {
+            "alt": "Tomas K. reading drawings on a site in Stockholm",
+            "caption": "Three years on — construction specialist, Stockholm."
+          },
+          "foreman": {
+            "alt": "Tomas K. with a tablet, his crew at work behind him",
+            "caption": "Foreman: a team of four."
+          },
+          "owner": {
+            "alt": "Tomas K. in his company office by the site plans",
+            "caption": "His own construction company.",
+            "team": "14 people · 3 sites · This week: 540 h"
+          }
+        }
+      },
+      "rasa": {
+        "stages": {
+          "base": {
+            "alt": "Rasa J. standing in a dark studio",
+            "caption": "Rasa J., 27, Vilnius."
+          },
+          "tool": {
+            "alt": "Rasa J. with a kitchen knife and cutting board",
+            "caption": "First tool: a kitchen knife."
+          },
+          "kitchen-lt": {
+            "alt": "Rasa J. working in a restaurant kitchen in Vilnius",
+            "caption": "Kitchen helper, Vilnius."
+          },
+          "car": {
+            "alt": "Rasa J. beside her car early in the morning",
+            "caption": "To work, early morning."
+          },
+          "country-no": {
+            "alt": "Rasa J. at a restaurant pass in Oslo",
+            "caption": "Oslo, Norway.",
+            "card": {
+              "profession": "Cook",
+              "country": "Norway",
+              "skills": "Cooking · Plating · Kitchen hygiene",
+              "path": "Vilnius → Oslo",
+              "experience": "3 years in kitchens",
+              "places": "2 restaurants"
+            }
+          },
+          "cook": {
+            "alt": "Rasa J. at the stove in an Oslo restaurant",
+            "caption": "Professional cook."
+          },
+          "head-chef": {
+            "alt": "Rasa J. leading her brigade of cooks",
+            "caption": "Head chef: a brigade of four."
+          },
+          "owner": {
+            "alt": "Rasa J. in her own restaurant's dining room before service",
+            "caption": "Her own restaurant.",
+            "team": "12 people · 2 shifts · This week: 420 h"
+          }
+        }
+      }
+    }
   }
 }
