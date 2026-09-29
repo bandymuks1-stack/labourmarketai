@@ -20,6 +20,7 @@ import {
 } from "@/lib/documents/readiness";
 import { getOwnWorkHistory } from "./work-history";
 import type { WorkHistoryEntry } from "./work-history-model";
+import type { ProfessionEntry } from "@/lib/worker/self-declared-profession";
 import {
   deriveEvidenceTimeline,
   deriveSkillEvidence,
@@ -120,6 +121,14 @@ export interface WorkerPlayerCard {
    * translated: these are their words, in the language they wrote them.
    */
   professionOwnWords: string | null;
+  /**
+   * EVERY profession the person holds, primary-first — 0 / 1 / N, never
+   * narrowed to one "true" profession (owner command 2026-09-29 §7). The
+   * SAME rows `professionSlug` / `professionOwnWords` are read from
+   * (`getProfessionEntries`, zero extra queries); each entry keeps the
+   * registry slug and the person's own words apart.
+   */
+  professions: readonly ProfessionEntry[];
   /** ISO timestamp of the newest live journal entry — the latest work proof. */
   latestEvidenceAt: string | null;
   /**
@@ -603,6 +612,7 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
       professionEntries.find(
         (e) => typeof e.label === "string" && e.label.length > 0,
       )?.label ?? null,
+    professions: professionEntries,
     latestEvidenceAt: latestEntry?.created_at ?? null,
     workHistory,
     unavailable,

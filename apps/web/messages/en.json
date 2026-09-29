@@ -7553,7 +7553,20 @@
       "historyUnavailable": "Your work history could not be read right now."
     },
     "skillsUnavailable": "Could not be read right now.",
-    "verifiedUnavailable": "Skills with a manager record could not be read right now."
+    "verifiedUnavailable": "Skills with a manager record could not be read right now.",
+    "identity": {
+      "currentWork": "Working now",
+      "recorded": "h recorded",
+      "confirmed": "h with a manager's record",
+      "days": "{count, plural, one {day worked} other {days worked}}",
+      "modes": {
+        "label": "Card sections",
+        "work": "Work",
+        "skills": "Skills",
+        "evidence": "Records",
+        "history": "History"
+      }
+    }
   },
   "skillClarify": {
     "title": "My skills",

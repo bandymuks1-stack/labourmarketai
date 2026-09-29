@@ -7553,7 +7553,20 @@
       "historyUnavailable": "Nie udało się teraz odczytać Twojej historii pracy."
     },
     "skillsUnavailable": "Nie udało się teraz odczytać.",
-    "verifiedUnavailable": "Nie udało się teraz odczytać umiejętności z wpisem kierownika."
+    "verifiedUnavailable": "Nie udało się teraz odczytać umiejętności z wpisem kierownika.",
+    "identity": {
+      "currentWork": "Pracuje teraz",
+      "recorded": "godz. zapisano",
+      "confirmed": "godz. z wpisem przełożonego",
+      "days": "{count, plural, one {dzień pracy} few {dni pracy} many {dni pracy} other {dnia pracy}}",
+      "modes": {
+        "label": "Części karty",
+        "work": "Praca",
+        "skills": "Umiejętności",
+        "evidence": "Wpisy",
+        "history": "Historia"
+      }
+    }
   },
   "skillClarify": {
     "title": "Moje umiejętności",

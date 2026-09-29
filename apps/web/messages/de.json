@@ -7553,7 +7553,20 @@
       "historyUnavailable": "Ihr Arbeitsverlauf konnte gerade nicht gelesen werden."
     },
     "skillsUnavailable": "Konnte gerade nicht gelesen werden.",
-    "verifiedUnavailable": "Fähigkeiten mit Eintrag einer Führungskraft konnten gerade nicht gelesen werden."
+    "verifiedUnavailable": "Fähigkeiten mit Eintrag einer Führungskraft konnten gerade nicht gelesen werden.",
+    "identity": {
+      "currentWork": "Arbeitet derzeit",
+      "recorded": "Std. erfasst",
+      "confirmed": "Std. mit Eintrag der Leitung",
+      "days": "{count, plural, one {Arbeitstag} other {Arbeitstage}}",
+      "modes": {
+        "label": "Teile der Karte",
+        "work": "Arbeit",
+        "skills": "Fähigkeiten",
+        "evidence": "Einträge",
+        "history": "Verlauf"
+      }
+    }
   },
   "skillClarify": {
     "title": "Meine Fähigkeiten",

@@ -7553,7 +7553,20 @@
       "historyUnavailable": "Uw werkgeschiedenis kon nu niet worden gelezen."
     },
     "skillsUnavailable": "Kon nu niet worden gelezen.",
-    "verifiedUnavailable": "Vaardigheden met een record van een leidinggevende konden nu niet worden gelezen."
+    "verifiedUnavailable": "Vaardigheden met een record van een leidinggevende konden nu niet worden gelezen.",
+    "identity": {
+      "currentWork": "Werkt nu",
+      "recorded": "u vastgelegd",
+      "confirmed": "u met registratie van leidinggevende",
+      "days": "{count, plural, one {werkdag} other {werkdagen}}",
+      "modes": {
+        "label": "Onderdelen van de kaart",
+        "work": "Werk",
+        "skills": "Vaardigheden",
+        "evidence": "Registraties",
+        "history": "Geschiedenis"
+      }
+    }
   },
   "skillClarify": {
     "title": "Mijn vaardigheden",

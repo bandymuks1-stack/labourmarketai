@@ -33,6 +33,7 @@ import { ProvenanceEdge, ProvenanceLine } from "@/components/app/provenance/prov
 import type { ProvenanceClass } from "@/lib/evidence/provenance";
 import { cn } from "@/lib/utils";
 import { Link } from "@/lib/i18n/navigation";
+import { IdentityStage, type IdentityFact } from "@/components/app/player-card/identity-stage";
 
 /**
  * Worker player-card — the premium scouting card (TASK 07 slice
@@ -55,6 +56,15 @@ import { Link } from "@/lib/i18n/navigation";
  */
 
 export interface PlayerCardLabels {
+  /** Identity stage: EVERY profession's display name, primary-first (0/1/N). */
+  professionNames: string[];
+  /** Organizations of the CURRENT engagements only. */
+  currentWork: string[];
+  currentWorkLabel: string;
+  /** The journal's own all-time figures; empty when not read by this mount. */
+  identityFacts: IdentityFact[];
+  /** The card's mode rail — the same person, seen as work / skills / … */
+  modes: { label: string; work: string; skills: string; evidence: string; history: string };
   title: string;
   subtitle: string;
   /** P6 — the provenance class + its already-localised text equivalent
@@ -323,81 +333,98 @@ export function WorkerPlayerCard({
       data-testid="worker-player-card"
       data-provenance={card.provenance.class}
     >
-      {/* ── Identity: provenance edge + avatar + name + profession + readiness ring ── */}
-      <header className="flex items-center justify-between gap-4">
-        <div className="flex min-w-0 items-stretch gap-3">
-          {/* P6 — the provenance edge (design M): dashed grey = self-declared,
-              cyan = evidence, gold = employer-confirmed. Derived class only;
-              the text equivalent sits under the name. */}
-          <ProvenanceEdge provenanceClass={card.provenance.class} />
-          <div className="flex min-w-0 items-center gap-4">
-          {identity.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={identity.avatarUrl}
-              alt={name}
-              data-testid="player-card-avatar-photo"
-              loading="lazy"
-              className={cn(
-                "h-14 w-14 shrink-0 rounded-card border object-cover",
-                "border-ink-500",
-              )}
-            />
-          ) : (
-            <span
-              aria-hidden
-              data-testid="player-card-avatar-monogram"
-              className={cn(
-                "flex h-14 w-14 shrink-0 items-center justify-center rounded-card border bg-ink-700 font-display text-lg font-bold text-text-primary",
-                "border-ink-500",
-              )}
-            >
-              {identity.initials}
-            </span>
-          )}
-          <div className="min-w-0 flex-col">
-            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-              {labels.title}
-            </span>
-            <h2 className="truncate font-display text-xl font-bold tracking-tightest text-text-primary">
-              {name}
-            </h2>
-            <p className="truncate text-xs leading-relaxed text-text-secondary">
-              {labels.professionName ?? labels.subtitle}
-            </p>
-            {/* P6 — the SAME fact as the edge, in words (a11y: state is never
-                colour alone). "Kilmė · patvirtino E2E Walker UAB, 2026-09-05". */}
-            {/* The words WRAP — never truncate: on a 390 px screen the header row
-                leaves ~100 px here and "Patvirtino E2E Walker UAB, 2026-09-05" was
-                clipped to "Patvirtino E…" (prod walk c893557b). The fact must be
-                readable in full, the name above may still truncate. */}
-            <p className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
-              <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">
-                {labels.provenance.label}
-              </span>
-              <ProvenanceLine
-                provenanceClass={card.provenance.class}
-                text={labels.provenance.text}
-                testid="player-card-provenance"
-                className="min-w-0 break-words"
-              />
-            </p>
-          </div>
-          </div>
-        </div>
-        {/* Status ring — same premium gauge as the landing card, honest signals */}
-        <ReadinessRing
-          met={readiness.met}
-          total={readiness.total}
-          level={readiness.level}
-          levelLabel={levelLabel}
-          size="md"
-        />
-      </header>
+      {/* ── THE PERSON (premium Player Card, 2026-09-29) ─────────────────
+          The identity stage: portrait-scale person, display-type name, EVERY
+          profession, where they work now and the journal's own figures. The
+          provenance edge stays THIS card's (gold only when derived from a
+          real confirmation, P6); the words sit under the name. */}
+      <IdentityStage
+        name={name}
+        avatarUrl={identity.avatarUrl}
+        initials={identity.initials}
+        avatarTestids={{ photo: "player-card-avatar-photo", monogram: "player-card-avatar-monogram" }}
+        edge={<ProvenanceEdge provenanceClass={card.provenance.class} />}
+        eyebrow={
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {labels.title}
+          </span>
+        }
+        heading={
+          <h2 className="break-words font-display text-2xl font-bold leading-[1.05] tracking-tightest text-text-primary sm:text-4xl">
+            {name}
+          </h2>
+        }
+        professions={
+          labels.professionNames.length > 0
+            ? labels.professionNames
+            : labels.professionName
+              ? [labels.professionName]
+              : []
+        }
+        location={null}
+        availability={null}
+        currentWork={labels.currentWork}
+        currentWorkLabel={labels.currentWorkLabel}
+        facts={labels.identityFacts}
+        trailing={
+          <ReadinessRing
+            met={readiness.met}
+            total={readiness.total}
+            level={readiness.level}
+            levelLabel={levelLabel}
+            size="md"
+          />
+        }
+      >
+        {labels.professionNames.length === 0 && !labels.professionName ? (
+          <p className="text-xs leading-relaxed text-text-secondary">{labels.subtitle}</p>
+        ) : null}
+        {/* P6 — the SAME fact as the edge, in words (a11y: state is never
+            colour alone). The words WRAP — never truncate (prod walk c893557b). */}
+        <p className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
+          <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">
+            {labels.provenance.label}
+          </span>
+          <ProvenanceLine
+            provenanceClass={card.provenance.class}
+            text={labels.provenance.text}
+            testid="player-card-provenance"
+            className="min-w-0 break-words"
+          />
+        </p>
+      </IdentityStage>
+
+      {/* ── THE SAME PERSON, SEEN AS … — the card's modes. One identity, four
+          lenses on it: each chip moves to that part of this same card (no
+          second page, no second card). Plain anchors: works without JS. */}
+      <nav
+        aria-label={labels.modes.label}
+        className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5"
+        data-testid="player-card-modes"
+      >
+        {(
+          [
+            ["work", labels.modes.work],
+            ["skills", labels.modes.skills],
+            ["evidence", labels.modes.evidence],
+            ["history", labels.modes.history],
+          ] as const
+        ).map(([key, label]) => (
+          <a
+            key={key}
+            href={`#player-card-${key}`}
+            data-testid={`player-card-mode-${key}`}
+            className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-ink-600 bg-ink-800/50 px-4 font-mono text-meta uppercase tracking-label text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+          >
+            {label}
+          </a>
+        ))}
+      </nav>
 
       {/* ── Readiness signal line: what is met + what to do next (honest) ── */}
       <div
-        className="flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+        id="player-card-work"
+        className="flex scroll-mt-20 flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
         data-testid="player-card-readiness"
         data-readiness-level={readiness.level}
       >
@@ -471,7 +498,7 @@ export function WorkerPlayerCard({
       {/* ── Skill signals: neutral list (silent-trust rule). No green
           "verified" glow, no certification badge — confirmation stays an
           internal signal and is never advertised on this self-view card. ── */}
-      <div className="flex flex-col gap-2" data-testid="player-card-skill-signals">
+      <div id="player-card-skills" className="flex scroll-mt-20 flex-col gap-2" data-testid="player-card-skill-signals">
         <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {labels.verifiedTitle}
         </span>
@@ -522,7 +549,8 @@ export function WorkerPlayerCard({
             screens and stack on a phone; both read from the worker's OWN rows
             and both state an honest empty case instead of an empty frame. ── */}
       <div
-        className="grid gap-3 lg:grid-cols-2"
+        id="player-card-evidence"
+        className="grid scroll-mt-20 gap-3 lg:grid-cols-2"
         data-testid="player-card-visualizations"
       >
         <EvidenceTimelineChart
@@ -540,6 +568,7 @@ export function WorkerPlayerCard({
       </div>
 
       {/* ── §5.2 WORK HISTORY as a real time band (the text list follows) ── */}
+      <span id="player-card-history" aria-hidden className="block scroll-mt-20" />
       <WorkHistoryTimeline
         timeline={historyTimeline}
         labels={labels.visuals.history}

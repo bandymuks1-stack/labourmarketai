@@ -9,7 +9,9 @@ import { deriveWorkHistoryTimeline } from "@/lib/player-card/evidence-visuals";
 import { contextHoursById } from "@/lib/player-card/context-hours";
 import { EVIDENCE_SCALE_MAX } from "@/components/app/player-card/skill-evidence-chart";
 import { provenanceTextKey, provenanceTextParams } from "@/lib/evidence/provenance";
-import type { ContextWorkTime } from "@/lib/journal/work-intelligence";
+import type { ContextWorkTime, WorkPeriodTotals } from "@/lib/journal/work-intelligence";
+import { professionDisplayName } from "@/lib/worker/self-declared-profession";
+import { buildIdentityFacts } from "@/lib/player-card/identity-facts";
 
 /**
  * One place that turns the player-card's REAL data into resolved viewer-locale
@@ -24,7 +26,17 @@ import type { ContextWorkTime } from "@/lib/journal/work-intelligence";
  */
 export async function buildPlayerCardLabels(
   card: WorkerPlayerCard,
-  opts: { readonly contexts?: readonly ContextWorkTime[] | null } = {},
+  opts: {
+    readonly contexts?: readonly ContextWorkTime[] | null;
+    /**
+     * The journal's ALL-TIME period row (`WorkIntelligence.periods` key
+     * "all") when the mount loaded it, and whether that read was truncated.
+     * Drives the identity stage's fact strip; absent → no strip (the journal
+     * was not read here — never "0 h").
+     */
+    readonly allTime?: WorkPeriodTotals | null;
+    readonly allTimeTruncated?: boolean;
+  } = {},
 ): Promise<PlayerCardLabels> {
   const locale = await getLocale();
   const t = await getTranslations("playerCard");
@@ -85,7 +97,52 @@ export async function buildPlayerCardLabels(
   }
   const historyUnavailable = card.unavailable.includes("workHistory");
 
+  // ── THE IDENTITY STAGE (premium Player Card, 2026-09-29) ─────────────────
+  // EVERY profession (0 / 1 / N), each through the ONE display rule: the
+  // localized registry name, else the person's own words. Deduped by the
+  // shown name so a registry row and its own-words twin never read twice.
+  const professionNames = [
+    ...new Set(
+      card.professions
+        .map((e) =>
+          professionDisplayName(e, (slug) =>
+            tProf.has(slug as never) ? tProf(slug as never) : null,
+          ),
+        )
+        .filter((n): n is string => Boolean(n)),
+    ),
+  ];
+  // WORKING NOW — only engagements the model marks current (active AND no
+  // end date); an ended organization stays in the history, never here.
+  const currentWork = [
+    ...new Set(
+      card.workHistory
+        .filter((h) => h.current)
+        .map((h) => (h.organizationName ?? "").trim())
+        .filter((n) => n.length > 0),
+    ),
+  ];
+  // THE FACT STRIP — the ONE rule (identity-facts.ts) the profile hub uses too.
+  const tIdentity = await getTranslations("playerCard.identity");
+  const identityFacts = buildIdentityFacts({
+    allTime: opts.allTime,
+    truncated: opts.allTimeTruncated ?? false,
+    locale,
+    t: (key, values) => tIdentity(key, values),
+  });
+
   return {
+    professionNames,
+    currentWork,
+    currentWorkLabel: t("identity.currentWork"),
+    identityFacts,
+    modes: {
+      label: t("identity.modes.label"),
+      work: t("identity.modes.work"),
+      skills: t("identity.modes.skills"),
+      evidence: t("identity.modes.evidence"),
+      history: t("identity.modes.history"),
+    },
     title: t("title"),
     subtitle: t("subtitle"),
     // P6 — the text equivalent of the provenance edge (the edge is never the
