@@ -41,7 +41,7 @@ function asAny(c: SupabaseClient): any {
  *  (player-card, worker-subject primary + mirrored-facts reads, hub
  *  availability). Every column exists in the generated Database types. */
 const WORKER_FULL_COLS =
-  "id, profile_id, availability_status, available_from, current_location_country, preferred_countries, preferred_contract_type, willing_to_relocate, has_transport, driving_licence_categories, pay_basis_preference, night_shifts_ok, weekend_shifts_ok, overtime_ok, own_vehicle, own_tools, work_card_confirmed_at";
+  "id, profile_id, availability_status, available_from, current_location_country, preferred_countries, preferred_contract_type, willing_to_relocate, has_transport, driving_licence_categories, pay_basis_preference, night_shifts_ok, weekend_shifts_ok, overtime_ok, own_vehicle, own_tools, work_card_confirmed_at, salary_min_eur, salary_max_eur";
 
 /** Fallback column set for environments where the human-gated MP-2 /
  *  work-card columns are not applied yet (Postgres 42703). Mirrors the old
@@ -70,6 +70,10 @@ export interface WorkerCoreRow {
   own_vehicle: boolean | null;
   own_tools: boolean | null;
   work_card_confirmed_at: string | null;
+  /** The work card's monthly EUR range (`save_worker_card`); absent on the
+   *  base-column fallback, read as "not stated". */
+  salary_min_eur?: number | null;
+  salary_max_eur?: number | null;
 }
 
 /**
