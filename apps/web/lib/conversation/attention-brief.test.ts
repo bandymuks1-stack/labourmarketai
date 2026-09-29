@@ -17,7 +17,8 @@ const FN = SRC.slice(SRC.indexOf("export async function loadEmployerOpeningBrief
 describe("the employer brief carries agency and institution attention", () => {
   it("reads the capability flags from the ONE starter-context read, then the canonical bridge / learner reads", () => {
     expect(FN).toMatch(/loadCompanyStarterContext\(\)/);
-    expect(FN).toMatch(/ws\.signals\.staffingAgency/);
+    // the agency rung follows the ONE agency rule (type OR declared role)
+    expect(FN).toMatch(/if \(ws\.agencyWorkspace\) \{/);
     expect(FN).toMatch(/listAgencyOfferProgress\(\), listSharedRequestsForAgency\(\)/);
     expect(FN).toMatch(/ws\.signals\.capabilities\.includes\("training_provider"\)/);
     expect(FN).toMatch(/readInstitutionLearners\(ws\.organizationId\)/);

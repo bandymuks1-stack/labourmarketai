@@ -393,7 +393,9 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
   try {
     const { loadCompanyStarterContext } = await import("@/lib/conversation/starter-signals");
     const ws = await loadCompanyStarterContext();
-    if (ws.signals.staffingAgency) {
+    // The ONE agency rule (type OR declared workforce role), as computed by
+    // the starter context — never the company type alone.
+    if (ws.agencyWorkspace) {
       const { listAgencyOfferProgress, listSharedRequestsForAgency } = await import("@/lib/agency/bridge-read");
       const { listAgencyPlacements } = await import("@/lib/agency/delegation-read");
       const { sharedNeedsAwaitingWorker } = await import("@/lib/agency/bridge-model");
