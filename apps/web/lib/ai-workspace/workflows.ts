@@ -573,7 +573,6 @@ export async function runOrganizationJournal(text?: string): Promise<WorkflowRes
       kind: "answer",
       text: t("orgJournalEmpty", { window: windowLabel }),
       explanation: { why },
-      chips: [{ id: "link:/dashboard/reports", label: t("chipReports") }],
     };
   }
   const work = report.totals.work;
@@ -601,7 +600,6 @@ export async function runOrganizationJournal(text?: string): Promise<WorkflowRes
     kind: "answer",
     text: lines.join("\n"),
     explanation: { why },
-    chips: [{ id: "link:/dashboard/reports", label: t("chipReports") }],
   };
 }
 
