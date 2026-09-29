@@ -14077,7 +14077,8 @@
       "engagementsAlreadyEnded": "Šis darbo santykis jau buvo baigtas. Niekas nepakeista.",
       "engagementsAlreadyEndedAt": "Šis darbo santykis jau buvo baigtas {date}. Niekas nepakeista.",
       "opportunitiesCounts": "Iš viso {total}: {bands}.",
-      "opportunitiesDiscoveryOnly": "Nė vienas dar neįvertintas kaip tinkantis — kodėl, matysite prie kiekvieno galimybių puslapyje."
+      "opportunitiesDiscoveryOnly": "Nė vienas dar neįvertintas kaip tinkantis — kodėl, matysite prie kiekvieno galimybių puslapyje.",
+      "calendarThisWeek": "Ši savaitė"
     }
   },
   "landing": {

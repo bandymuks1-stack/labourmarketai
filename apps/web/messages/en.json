@@ -14077,7 +14077,8 @@
       "engagementsAlreadyEnded": "This engagement was already ended. Nothing was changed.",
       "engagementsAlreadyEndedAt": "This engagement was already ended on {date}. Nothing was changed.",
       "opportunitiesCounts": "Total {total}: {bands}.",
-      "opportunitiesDiscoveryOnly": "None assessed as a fit yet — the opportunities page says why beside each."
+      "opportunitiesDiscoveryOnly": "None assessed as a fit yet — the opportunities page says why beside each.",
+      "calendarThisWeek": "This week"
     }
   },
   "landing": {
