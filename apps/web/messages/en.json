@@ -13213,6 +13213,11 @@
         "notInCompany": "When you can work is your own fact, not the company's. Switch to your personal space and say it again.",
         "changeRequested": "Opening your work card — set when you can work and save. Nothing is changed until you do."
       },
+      "pastWork": {
+        "understood": "Got it: {years} — “{title}”. I’ll add it to your work history as experience you stated yourself — it won’t be marked as employer-confirmed. The company and country stay in your words in the title (there’s no separate field for them yet). Check and save.",
+        "yearsCurrent": "from {from} until now",
+        "notInCompany": "Your work history is your own. Switch to your personal space and say it again."
+      },
       "pay": {
         "understoodRange": "Got it: pay expectation {min}–{max} € per month. I put the figures into your work card — check and save. Nothing changes until you save.",
         "understoodMin": "Got it: pay expectation at least {min} € per month. I put the figure into your work card — check and save. Nothing changes until you save.",

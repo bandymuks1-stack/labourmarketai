@@ -13213,6 +13213,11 @@
         "notInCompany": "Vanaf wanneer je kunt werken is jouw eigen gegeven, niet dat van het bedrijf. Schakel over naar je persoonlijke ruimte en zeg het opnieuw.",
         "changeRequested": "Ik open je werkkaart — geef aan vanaf wanneer je kunt werken en sla op. Er verandert niets tot je dat doet."
       },
+      "pastWork": {
+        "understood": "Begrepen: {years} — ‘{title}’. Ik zet het in je werkgeschiedenis als ervaring die je zelf opgeeft — niet als bevestigd door een werkgever. Bedrijf en land blijven in jouw woorden in de titel (daar is nog geen apart veld voor). Controleer en sla op.",
+        "yearsCurrent": "van {from} tot nu",
+        "notInCompany": "Je werkgeschiedenis is van jou. Schakel naar je persoonlijke ruimte en zeg het opnieuw."
+      },
       "pay": {
         "understoodRange": "Begrepen: salarisverwachting {min}–{max} € per maand. Ik heb de bedragen in je werkkaart gezet — controleer en sla op. Er verandert niets tot je opslaat.",
         "understoodMin": "Begrepen: salarisverwachting minimaal {min} € per maand. Ik heb het bedrag in je werkkaart gezet — controleer en sla op. Er verandert niets tot je opslaat.",

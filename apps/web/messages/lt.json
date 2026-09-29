@@ -13213,6 +13213,11 @@
         "notInCompany": "Kada gali dirbti — tai tavo asmeninis faktas, ne įmonės. Persijunk į asmeninę erdvę ir parašyk dar kartą.",
         "changeRequested": "Atidarau tavo darbo kortelę — nurodyk, nuo kada gali dirbti, ir išsaugok. Kol neišsaugosi, niekas nepasikeis."
       },
+      "pastWork": {
+        "understood": "Supratau: {years} — „{title}“. Įrašau tai į tavo darbo istoriją kaip tavo paties nurodytą patirtį — ji nebus pažymėta kaip darbdavio patvirtinta. Įmonė ir šalis lieka tavo žodžiais pavadinime (atskiro lauko joms dar nėra). Peržiūrėk ir išsaugok.",
+        "yearsCurrent": "nuo {from} iki dabar",
+        "notInCompany": "Darbo istorija — tavo asmeninė. Persijunk į asmeninę erdvę ir parašyk dar kartą."
+      },
       "pay": {
         "understoodRange": "Supratau: atlyginimo lūkestis nuo {min} iki {max} € per mėnesį. Įrašiau sumas į darbo kortelę — peržiūrėk ir išsaugok. Kol neišsaugosi, niekas nepasikeis.",
         "understoodMin": "Supratau: atlyginimo lūkestis ne mažiau kaip {min} € per mėnesį. Įrašiau sumą į darbo kortelę — peržiūrėk ir išsaugok. Kol neišsaugosi, niekas nepasikeis.",
@@ -13493,7 +13498,7 @@
       "chipInstructions": "Nurodymai",
       "briefWorkConfirmed": "Vadovas patvirtino {count, plural, one {# jūsų darbo įrašą} few {# jūsų darbo įrašus} other {# jūsų darbo įrašų}} per 7 d. — patvirtinta įgūdžių: {skills}.",
       "chipMyCard": "Mano kortelė",
-      "confirmIntro": "Laukia patvirtinimo: {count} įraš.",
+      "confirmIntro": "Laukia patvirtinimo įrašų: {count}.",
       "confirmLine": "• {name} · {date} — {text} (+{skills} įgūdž.)",
       "confirmChip": "Patvirtinti: {name} · {date}",
       "confirmDone": "Patvirtinta: {name} — įgūdžių patvirtinta: {count}.",
