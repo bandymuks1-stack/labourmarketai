@@ -114,7 +114,10 @@ describe("the intent registry is the enumerable routing contract", () => {
     // atlyginimo lūkestis nuo 2500 iki 3500 eurų" scored 0 and the fallback
     // only READ the criteria back. It opens the SAME work-card form with the
     // figures in it; the sentence writes nothing.
-    expect(entries.length).toBe(83);
+    // 83 → 84 (2026-09-29, owner continuation §7): correct-work — "Ne 5, o 6
+    // valandas" after a saved entry opened a SECOND 6 h entry. It names the
+    // newest entry and hands over one chip to the canonical supersede editor.
+    expect(entries.length).toBe(84);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 

@@ -135,6 +135,8 @@ export type ConversationIntent =
   | "profession-statement"
   // A stated pay expectation — opens the work card prefilled (2026-09-29).
   | "pay-statement"
+  // A correction of the newest entry said in words (2026-09-29).
+  | "correct-work"
   // ── AGENCY (real recruiter pilot, 2026-09-04). The first real recruiter
   //    typed "noriu pakviesti klientą" and got the generic fallback: the
   //    agency's whole vocabulary was missing here, although the canonical
@@ -2264,6 +2266,28 @@ const RULES: IntentRule[] = [
           "м²|м2|кв\\.?\\s*м|км\\b|шт\\.?|кг\\b|паллет|поддон)",
         3,
       ),
+    ],
+  },
+  {
+    /**
+     * A CORRECTION SAID IN WORDS (owner continuation 2026-09-29 §7). Walked
+     * on production after a saved entry: "Ne 5, o 6 valandas." and "Pataisyk
+     * šiandienos įrašą: ne 5, o 6 valandos." each opened a NEW 6 h entry, so
+     * the correction would have counted on top of the original. The answer
+     * names the entry that exists and opens the canonical supersede editor
+     * for it (the old entry stays in history as corrected); the sentence
+     * itself writes nothing. Weight 9 beats log-work's bare hours reading.
+     */
+    intent: "correct-work",
+    patterns: [
+      p("^\\s*(ne|not|не|nicht|niet|nie)\\s+\\d+([.,]\\d+)?\\s*(val\\w*|h|hours?|час[а-я]*|std\\w*|uur|godz\\w*)?\\s*,?\\s*(o|but|а|sondern|maar|a|ale)\\s+\\d+", 9),
+      p("\\b(pataisyk|pakeisk|taisyk|koreguok|pataisykite)\\b.{0,30}(iras|valand|data|laik)", 9),
+      p("\\b(correct|fix|change|edit)\\b.{0,20}(entry|hours|log\\b)", 9),
+      p("(исправь|измени|поправь).{0,30}(запис|час)", 9),
+      p("\\b(korrigiere|andere|ändere)\\b.{0,30}(eintrag|stunden)", 9),
+      p("\\b(corrigeer|wijzig|verander)\\b.{0,30}(invoer|uren|registratie)", 9),
+      p("\\b(popraw|zmien|zmień)\\w*\\b.{0,30}(wpis|godzin)", 9),
+      p("^\\s*(tai|that|это|das|dat|to)\\s+(buvo|was|было|war|by[lł]o)\\s+(vakar|uzvakar|yesterday|вчера|позавчера|gestern|vorgestern|gisteren|eergisteren|wczoraj|przedwczoraj)\\b", 9),
     ],
   },
   {

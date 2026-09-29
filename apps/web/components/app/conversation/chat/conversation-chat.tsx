@@ -111,6 +111,8 @@ import { loadProjectMoveOptionsForChat, loadProjectMoveWhatIfForChat } from "@/l
 import type { StageStatus } from "@/lib/projects/stages-model";
 import { stripEndDatePhrase, parseEndDate, parseStartDate } from "@/lib/structuring/time-window";
 import { payPrefill, readPayStatement } from "@/lib/conversation/pay-statement";
+import { correctionHref, readCorrectionAsk } from "@/lib/conversation/correct-work-model";
+import { loadLatestOwnEntryForCorrection } from "@/lib/conversation/correct-work";
 import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace-contract";
 import { STARTER_CAP, personStarters, type StarterChipSpec } from "@/lib/conversation/starters";
 import { trackFunnel } from "@/lib/telemetry/task";
@@ -3103,6 +3105,12 @@ export function ConversationChat({
           // canonical Player Card re-renders with the just-strengthened
           // record — the real payoff of logging work, not a generic menu.
           onClose={() => startPlayerCardRef.current({ intro: labels.playerCardAfterLog })}
+          // The entry exists now: the work-log goal is finished. A later
+          // "ne 5, o 6" is a correction of THIS entry (correct-work), not a
+          // continuation that would open a second one (2026-09-29).
+          onSaved={() => {
+            if (goalRef.current?.intent === "log-work") goalRef.current = null;
+          }}
         />,
       );
     },
@@ -6108,6 +6116,57 @@ export function ConversationChat({
                     : t("pay.askFigure"),
           );
           openForm("worker.save-work-card", undefined, undefined, payPrefill(pay));
+        },
+        /**
+         * "Ne 5, o 6 valandas" / "Tai buvo vakar" (2026-09-29): a correction of
+         * the entry that EXISTS, never a new one — walked on production, the
+         * sentence opened a second 6 h entry that would have counted on top
+         * of the first. The newest live entry is named and the canonical
+         * supersede editor opens for it (the old entry stays in history as
+         * corrected). A confirmed entry is said to be closed to edits. The
+         * sentence writes nothing.
+         */
+        correctWork: () => {
+          if (identity === "company") {
+            const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+            assistant(
+              t("correctWork.notInCompany"),
+              personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+            );
+            return;
+          }
+          const ask = readCorrectionAsk(text);
+          setTyping(true);
+          loadLatestOwnEntryForCorrection()
+            .then((entry) => {
+              setTyping(false);
+              if (entry.kind === "none" || entry.kind === "no-worker") {
+                assistant(t("correctWork.none"), [{ id: "logwork", label: t("chipLogWork") }]);
+                return;
+              }
+              if (entry.kind !== "entry") {
+                assistant(t("correctWork.unreadable"));
+                return;
+              }
+              const excerpt = entry.text.length > 80 ? `${entry.text.slice(0, 77)}…` : entry.text;
+              if (entry.confirmed) {
+                assistant(t("correctWork.confirmed", { date: entry.workDate, text: excerpt }));
+                return;
+              }
+              const change =
+                ask.kind === "hours"
+                  ? t("correctWork.changeHours", { to: ask.to })
+                  : ask.kind === "day"
+                    ? t(ask.day === "yesterday" ? "correctWork.changeYesterday" : "correctWork.changeDayBefore")
+                    : t("correctWork.changeUnspecified");
+              assistant(t("correctWork.found", { date: entry.workDate, text: excerpt, change }), [
+                { id: `link:${correctionHref(entry.id)}`, label: t("correctWork.chipEdit") },
+              ]);
+            })
+            .catch(() => {
+              setTyping(false);
+              assistant(t("correctWork.unreadable"));
+            });
         },
         skillGap: () => runWorkflow(() => runSkillGap()),
         recentJournal: () => runWorkflow(() => runRecentJournal(text)),

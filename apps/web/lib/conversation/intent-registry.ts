@@ -66,6 +66,7 @@ export type IntentHandlerId =
   | "professionStatement"
   | "availabilityStatement"
   | "payStatement"
+  | "correctWork"
   | "skillGap"
   | "recentJournal"
   | "workIntelligence"
@@ -249,6 +250,10 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // pay expectation. Opens the SAME work-card form with the figures in it;
   // the write stays behind the form's own review (2026-09-29).
   "pay-statement": { domain: "profile", access: "write", handler: "payStatement", ownTyping: false },
+  // "ne 5, o 6 valandas" / "tai buvo vakar" — names the newest entry and hands
+  // the person to the canonical supersede editor for it (a link chip); the
+  // sentence writes nothing (2026-09-29).
+  "correct-work": { domain: "journal", access: "read", handler: "correctWork", ownTyping: true },
   "company-overview": { domain: "company", access: "route", handler: "companyOverview", ownTyping: false },
   "create-organization": { domain: "company", access: "route", handler: "createOrganization", ownTyping: false },
   // RENAME THE ACTIVE ORGANIZATION (owner program 2026-09-23). `write`: it

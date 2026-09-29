@@ -13213,6 +13213,18 @@
         "notInCompany": "Vanaf wanneer je kunt werken is jouw eigen gegeven, niet dat van het bedrijf. Schakel over naar je persoonlijke ruimte en zeg het opnieuw.",
         "changeRequested": "Ik open je werkkaart — geef aan vanaf wanneer je kunt werken en sla op. Er verandert niets tot je dat doet."
       },
+      "correctWork": {
+        "found": "Ik corrigeer je laatste invoer: {date} — ‘{text}’. {change} Ik open hem om te bewerken; na opslaan blijft de oude invoer als gecorrigeerd in de geschiedenis — er komt geen nieuwe bij.",
+        "changeHours": "Vul {to} uur in.",
+        "changeYesterday": "Zet de datum op gisteren.",
+        "changeDayBefore": "Zet de datum op eergisteren.",
+        "changeUnspecified": "Pas aan wat niet klopt.",
+        "confirmed": "Je laatste invoer ({date} — ‘{text}’) is al bevestigd door een leidinggevende en kan niet meer worden gewijzigd. Klopt hij niet, schrijf dan je leidinggevende.",
+        "none": "Je hebt nog geen invoer om te corrigeren. Registreer eerst je werk.",
+        "unreadable": "Ik kon je invoer niet lezen, dus er is niets gewijzigd. Probeer het opnieuw of open je werkjournaal.",
+        "notInCompany": "Werkjournaal-invoer is van jou. Schakel naar je persoonlijke ruimte en zeg het opnieuw.",
+        "chipEdit": "Invoer corrigeren"
+      },
       "pay": {
         "understoodRange": "Begrepen: salarisverwachting {min}–{max} € per maand. Ik heb de bedragen in je werkkaart gezet — controleer en sla op. Er verandert niets tot je opslaat.",
         "understoodMin": "Begrepen: salarisverwachting minimaal {min} € per maand. Ik heb het bedrag in je werkkaart gezet — controleer en sla op. Er verandert niets tot je opslaat.",
