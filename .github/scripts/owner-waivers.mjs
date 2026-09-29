@@ -571,6 +571,19 @@ export const SCOPED_OWNER_WAIVERS = [
       // nothing translated and nothing egressed. The anonymous visitor receives
       // fewer words and the same fields.
       1892,
+      // OWNER APPROVAL 2026-09-29, verbatim: "I approve adding PR #1991 and PR #1993 to the existing
+      // public-acquisition-route-jobs waiver pullRequests, strictly for the
+      // /jobs/[id] signed-in crash fix and the job-page hreflang fix."
+      // Bounded: not authority for any future waived change.
+      //
+      // #1991 — a signed-in reader of a foreign-language ad got the route
+      //         error page: server-to-client FUNCTION labels on the translate
+      //         control. Labels become template strings; no field, policy,
+      //         RLS or copy change.
+      // #1993 — the job page head declares the same language alternates its
+      //         sitemap already declares (one helper). Metadata still reads
+      //         only the anonymous projection.
+      1991, 1993,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
