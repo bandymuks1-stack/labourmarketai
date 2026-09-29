@@ -13325,6 +13325,12 @@
         "failed": "Speichern fehlgeschlagen — nichts geändert. Versuch es erneut.",
         "notInCompany": "Fähigkeiten gehören dir. Wechsle in deinen persönlichen Bereich und sag es noch einmal."
       },
+      "savedOpportunities": {
+        "intro": "Deine gespeicherten Möglichkeiten ({count}):",
+        "none": "Noch nichts gespeichert — tippe auf der Möglichkeiten-Seite bei einem Job auf „Speichern“.",
+        "unavailable": "Ich konnte deine gespeicherten Möglichkeiten nicht lesen — ich rate nicht.",
+        "chipOpen": "Gespeicherte öffnen"
+      },
       "pay": {
         "understoodRange": "Verstanden: Gehaltswunsch {min}–{max} € pro Monat. Ich habe die Beträge in deine Arbeitskarte eingetragen — prüfen und speichern. Bis du speicherst, ändert sich nichts.",
         "understoodMin": "Verstanden: Gehaltswunsch mindestens {min} € pro Monat. Ich habe den Betrag in deine Arbeitskarte eingetragen — prüfen und speichern. Bis du speicherst, ändert sich nichts.",

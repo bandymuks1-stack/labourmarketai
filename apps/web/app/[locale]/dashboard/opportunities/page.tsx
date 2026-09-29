@@ -1743,6 +1743,7 @@ export default async function OpportunitiesPage({
                   result.savedVacancies.length > 0) ? (
                   <section
                     className="flex flex-col gap-2 rounded-lg border border-ink-600 bg-ink-800/30 p-4"
+                    id="opportunities-saved"
                     data-testid="opportunities-saved"
                     aria-label={t("saved.sectionTitle")}
                   >

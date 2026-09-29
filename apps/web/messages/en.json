@@ -13325,6 +13325,12 @@
         "failed": "Saving failed — nothing changed. Try again.",
         "notInCompany": "Skills are your own. Switch to your personal space and say it again."
       },
+      "savedOpportunities": {
+        "intro": "Your saved opportunities ({count}):",
+        "none": "No saved opportunities yet — press “Save” on a job on the opportunities page to keep it.",
+        "unavailable": "I couldn't read your saved opportunities — I won't guess.",
+        "chipOpen": "Open saved"
+      },
       "pay": {
         "understoodRange": "Got it: pay expectation {min}–{max} € per month. I put the figures into your work card — check and save. Nothing changes until you save.",
         "understoodMin": "Got it: pay expectation at least {min} € per month. I put the figure into your work card — check and save. Nothing changes until you save.",

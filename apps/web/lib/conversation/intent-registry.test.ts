@@ -124,7 +124,9 @@ describe("the intent registry is the enumerable routing contract", () => {
     // rusiškai" scored 0; one language form per stated language.
     // 86 → 87 (2026-09-29): skill-statement — "Išmokau skaityti techninius
     // brėžinius" scored 0; the words are offered as the person's own claim.
-    expect(entries.length).toBe(87);
+    // 87 → 88 (2026-09-29): saved-opportunities — a job saved on the page
+    // was invisible to the chat ("parodyk išsaugotus darbus" ran a search).
+    expect(entries.length).toBe(88);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
