@@ -264,8 +264,12 @@ describe("dead-end deep links into the profile are gone", () => {
 
   it("'set profession' lands on the section that sets it", () => {
     const chips = [...chat.matchAll(/\{ id: "([^"]+)", label: t\("professionStatement\.chipSetProfession"\) \}/g)];
-    expect(chips.length).toBe(3);
+    // Since 2026-09-29 the person's own chips SAVE the profession in the chat
+    // (profask: → review → the profile's write path); the one remaining link
+    // (company space) still lands on the section, never the bare page.
+    expect(chips.length).toBe(1);
     for (const [, id] of chips) expect(id).toBe("link:/dashboard/profile#profile-edit");
+    expect(chat).toMatch(/\{ id: `profask:\$\{encodeURIComponent\(text\)\}`, label: t\("professionStatement\.chipSetProfession"\) \}/);
   });
 
   it("…and the flow starts in the profession picker when there is no profession", () => {

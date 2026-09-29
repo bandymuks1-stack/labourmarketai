@@ -176,7 +176,11 @@ describe("5. a profession outside both catalogues still reaches the form, honest
     // away from the one selector the chip promised (2026-09-23).
     expect(handler).toContain('id: "link:/dashboard/profile#profile-edit"');
     expect(handler).not.toContain('id: "link:/dashboard/profile"');
-    expect(handler).toContain('id: "f:worker.add-work-history"');
+    // Owner continuation 2026-09-29: a stated profession is REVIEWED and saved
+    // through the profile's own write path — the handler only offers it
+    // (chips run `saveStatedProfessionAction`, which calls the existing
+    // profile actions); the sentence itself still writes nothing.
+    expect(handler).toMatch(/offerProfessionSave\(text\);/);
     expect(handler).toMatch(/openForm\("worker\.add-work-history", undefined, undefined, \{ title: stated\.label \}\)/);
     // Nothing is persisted from the sentence itself.
     expect(handler).not.toMatch(/dispatch|execute|\.from\(/);

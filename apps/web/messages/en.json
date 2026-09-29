@@ -13270,6 +13270,20 @@
         "unreadable": "I couldn’t read your work relationships — nothing was changed. Try again.",
         "notInCompany": "Where you work is your own fact. Switch to your personal space and ask again."
       },
+      "professionSave": {
+        "nowHeld": "Professions on your profile: {list}. Primary: {primary}.",
+        "alreadyHeld": "“{name}” is already on your profile.",
+        "chipSavePrimary": "Save “{name}” as primary",
+        "chipMakePrimary": "Make “{name}” primary",
+        "chipAddDirection": "Add “{name}” as another direction",
+        "chipSaveOwn": "Save “{name}” in my own words",
+        "ask": "Choose what to save — nothing changes until you do.",
+        "saved": "Saved to your profile.",
+        "noWorker": "A profession can only be saved on a worker profile, and you don’t have one yet.",
+        "unreadable": "I couldn’t read your professions — nothing was changed. Try again.",
+        "invalid": "This profession isn’t in the list — save it in your own words.",
+        "failed": "Saving failed — nothing changed. Try again."
+      },
       "pay": {
         "understoodRange": "Got it: pay expectation {min}–{max} € per month. I put the figures into your work card — check and save. Nothing changes until you save.",
         "understoodMin": "Got it: pay expectation at least {min} € per month. I put the figure into your work card — check and save. Nothing changes until you save.",
