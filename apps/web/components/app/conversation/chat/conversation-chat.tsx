@@ -197,6 +197,7 @@ import {
 } from "@/lib/structuring/value-statement";
 import { readProfessionStatement } from "@/lib/structuring/role-label";
 import { readCompoundStatement } from "@/lib/conversation/compound-statement";
+import { secondaryWorkStatement } from "@/lib/conversation/secondary-work-statement";
 import { applyCorrection } from "@/lib/structuring/apply-correction";
 import { discoverChannels } from "@/lib/value-channels/discovery";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
@@ -6795,6 +6796,18 @@ export function ConversationChat({
 
       if (intent !== "unknown") {
         dispatchIntent(intent, handlers, withTyping, fallback);
+        // THE DAY'S WORK INSIDE A LONGER MESSAGE (2026-09-29): "Esu
+        // pastolininkas. … Šiandien 7 valandas montavau pastolius. Ieškau …"
+        // answered the search and dropped the seven hours. A sentence that is
+        // itself a clear work statement also opens the SAME work-log card —
+        // reviewed and saved by the person, nothing written from here.
+        if (identity === "person" && intent !== "log-work" && !continuing) {
+          const work = secondaryWorkStatement(text, todayIso());
+          if (work) {
+            assistant(t("alsoWorkLog"));
+            startWorkLog(work);
+          }
+        }
         return;
       }
       // THE MODEL HALF OF UNDERSTANDING (owner approval 2026-09-05, contract
