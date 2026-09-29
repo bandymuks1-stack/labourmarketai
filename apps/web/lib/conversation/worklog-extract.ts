@@ -87,7 +87,17 @@ const SPAN_RE =
 // "45 min", "45 minučių", "45 мин", optionally near a break word.
 const BREAK_RE =
   /(\d{1,3})\s*(?:min|минут|мин)\w*/iu;
-const BREAK_CONTEXT_RE = /(pertrauk|piet[uū]|break|lunch|обед|перерыв|pauze|pause)/iu;
+// `\b` bounds the ASCII "break" only — "breakdown" is work, not a pause.
+const BREAK_CONTEXT_RE = /(pertrauk|piet[uū]|\bbreaks?\b|lunch|обед|перерыв|pauze|pause)/iu;
+// A break stated in HOURS — "1 h break", "1 val. pertrauka", "перерыв 1 час".
+// Read only when the hour figure stands BESIDE the break word, so the day's
+// own "9 valandas" is never taken for the break.
+const BREAK_HOUR_UNIT = String.raw`(\d{1,2})(?:[.,](\d))?\s*(?:h(?!\p{L})|hrs?(?!\p{L})|hour\w*|val\.?|valand\w*|ч(?!\p{L})|час\w*)`;
+const BREAK_WORD = String.raw`(?:pertrauk\w*|piet\w*|\bbreaks?\b|lunch|обед\w*|перерыв\w*|pauze|pause)`;
+const BREAK_HOURS_RE = new RegExp(
+  `${BREAK_HOUR_UNIT}\\s*${BREAK_WORD}|${BREAK_WORD}\\s*(?:of\\s+|for\\s+|[:–—-]\\s*)?${BREAK_HOUR_UNIT}`,
+  "iu",
+);
 // explicit "8 valandas / hours / часов"
 const EXPLICIT_HOURS_RE = /(\d{1,2})(?:[:.,](\d{1,2}))?\s*(?:val\.?|valand\w*|hour\w*|hrs?|час\w*|uur|stunden?)/iu;
 // site after "objekte X" / "statyboje X" / "site X" / "на объекте в X" —
@@ -191,6 +201,14 @@ export function extractWorkLog(
     if (br) {
       const n = Number(br[1]);
       if (Number.isFinite(n) && n >= 0 && n <= 600) breakMinutes = n;
+    } else {
+      const bh = raw.match(BREAK_HOURS_RE);
+      if (bh) {
+        const h = Number(bh[1] ?? bh[3]);
+        const tenth = Number(bh[2] ?? bh[4] ?? 0);
+        const n = Math.round((h + tenth / 10) * 60);
+        if (Number.isFinite(n) && n >= 0 && n <= 600) breakMinutes = n;
+      }
     }
   }
 
@@ -228,6 +246,7 @@ export function extractWorkLog(
     /[A-Za-zÀ-ÿА-Яа-яĀ-ž]/.test(last) &&
     !SPAN_RE.test(last) &&
     !BREAK_RE.test(last) &&
+    !BREAK_HOURS_RE.test(last) &&
     last.length <= 80
   ) {
     task = last;
