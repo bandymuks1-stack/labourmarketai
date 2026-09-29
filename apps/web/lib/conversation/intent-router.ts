@@ -1834,6 +1834,12 @@ const RULES: IntentRule[] = [
   {
     intent: "propose-booking",
     patterns: [
+      // A PERSON NAMED, not a person noun (COMPANY loop walk 2026-09-29):
+      // "Pasiūlyk Vytui darbą nuo spalio 20." was read as a JOB SEARCH. The
+      // imperative offer verb + a dative name (-ui / -iui / -ai / -ei) + work.
+      // "Pasiūlyk man darbą" (me) stays the person's own search.
+      p("\\b(pasiulyk|pasiulykite|pasiulyti)\\s+(?!man\\b|mums\\b|jam\\b|jai\\b)[^\\s]+(iui|ui|ai|ei)\\s+(darb|rezerv)", 14),
+      p("\\b(pasiulyk|pasiulykite|pasiulyti)\\s+(darb[aą]|rezervacij[aą])\\s+(?!man\\b|mums\\b)[^\\s]+(iui|ui)\\b", 14),
       // The DIRECT employer offers work, by sentence ("pasiūlyti darbą
       // kandidatui", "offer the job to a worker", "предложить работу
       // кандидату", "werk aanbieden aan een kandidaat", "einem Kandidaten
