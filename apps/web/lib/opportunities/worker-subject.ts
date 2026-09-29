@@ -275,6 +275,11 @@ function assembleOwnWorkerContext({
       preferredCountries,
       availabilityStatus: worker.availability_status ?? null,
       availableFrom: worker.available_from ?? null,
+      // The work card's pay floor (production walk 2026-09-29): the board
+      // said "atlygio lūkestis nenurodytas" to a worker whose card held
+      // 2750–3750, because this OWN subject never carried it — the employer
+      // side's supply subject always did (match-subject). Same column.
+      salaryMinEur: worker.salary_min_eur ?? null,
       // Contract v2 — engagement-form criterion (fires only when the demand
       // also states its engagement form via structured_v2).
       preferredContractType: worker.preferred_contract_type ?? null,

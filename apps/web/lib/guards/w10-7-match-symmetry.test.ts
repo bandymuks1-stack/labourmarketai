@@ -93,8 +93,8 @@ interface WorkerFacts {
 }
 
 /** Mirrors buildOwnWorkerContext's subject literal
- *  (lib/opportunities/worker-subject.ts) — carries `city`, carries NO
- *  salaryMinEur / experienceYears. Source-pinned below. */
+ *  (lib/opportunities/worker-subject.ts) — carries `city` and (since
+ *  2026-09-29) salaryMinEur, carries NO experienceYears. Source-pinned below. */
 function workerSideSubject(f: WorkerFacts): MatchSubject {
   return {
     skills: f.skillSlugs.map((uri) => ({ uri, evidence: "manager_confirmed" as const })),
@@ -104,6 +104,7 @@ function workerSideSubject(f: WorkerFacts): MatchSubject {
     preferredCountries: [],
     availabilityStatus: "available",
     availableFrom: null,
+    salaryMinEur: null,
     preferredContractType: f.preferredContractType,
     languageLevels: null,
     drivingLicenceCategories: null,
@@ -262,13 +263,14 @@ describe("w10-7 §5.2 — pinned asymmetry: city tier fires worker-side ONLY", (
     expect(workerSrc).toMatch(/from\("preferred_locations"\)/);
   });
 
-  it("SOURCE pin: the remaining subject-shape diff is exactly {salaryMinEur, experienceYears} (supply-side only)", () => {
+  it("SOURCE pin: the remaining subject-shape diff is exactly {experienceYears} (supply-side only)", () => {
     // Observed (not doctrine-mandated) asymmetry, pinned so it can only change
-    // DELIBERATELY: the worker's own subject omits salaryMinEur and
-    // experienceYears, the supply subject carries both. Closing or widening
-    // this gap must update this guard.
+    // DELIBERATELY. CLOSED 2026-09-29 for salaryMinEur: the worker's own board
+    // said "atlygio lūkestis nenurodytas" to a worker whose card held a
+    // salary, because only the supply subject carried it — both now read the
+    // same workers.salary_min_eur. experienceYears stays supply-side only.
     const workerSrc = stripComments(read("lib/opportunities/worker-subject.ts"));
-    expect(workerSrc).not.toMatch(/salaryMinEur/);
+    expect(workerSrc).toMatch(/salaryMinEur: worker\.salary_min_eur \?\? null/);
     expect(workerSrc).not.toMatch(/experienceYears/);
 
     const supplySrc = stripComments(read("lib/market/match-subject.ts"));
