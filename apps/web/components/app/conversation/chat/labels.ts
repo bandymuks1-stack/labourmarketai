@@ -393,6 +393,8 @@ const WORKLOG_KEYS = [
   // possible, so the flow asks instead of preselecting one.
   "contextChoose",
   "contextAmbiguous",
+  // The sentence named an organization whose relationship has ended.
+  "contextEndedOrg",
   "save",
   "cancel",
   "working",

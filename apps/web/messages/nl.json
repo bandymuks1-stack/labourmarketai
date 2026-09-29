@@ -13620,6 +13620,7 @@
       "labelContext": "Werkcontext",
       "contextChoose": "Kies de werkcontext…",
       "contextAmbiguous": "Dit werk kan bij meer dan één context horen. Kies vóór het opslaan bij welke.",
+      "contextEndedOrg": "De zin noemt een organisatie waarmee je werkrelatie is beëindigd — deze invoer telt niet als werk voor haar. Kies waar je dit deed:",
       "save": "Opslaan",
       "cancel": "Bewerken",
       "working": "Opslaan…",

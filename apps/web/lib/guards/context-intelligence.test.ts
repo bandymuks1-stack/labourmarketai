@@ -201,8 +201,11 @@ describe("CIE integration — the workspace resolves defaults, the user re-picks
     // If they diverge, identical hours land in different places depending on
     // where they were typed.
     const flow = read("components/app/conversation/worker-worklog-flow.tsx");
-    expect(flow).toMatch(/setEngagementId\(res\.resolution\.selectedId \?\? ""\)/);
-    expect(flow).toMatch(/setMustChooseEngagement\(res\.resolution\.rule === "C"\)/);
+    // The resolved default stands unless the SENTENCE named an organization
+    // (2026-09-29): an active one it names wins; an ended one preselects
+    // nothing and forces the choice.
+    expect(flow).toMatch(/setEngagementId\(named \? named\.id : endedNamed \? "" : \(res\.resolution\.selectedId \?\? ""\)\)/);
+    expect(flow).toMatch(/setMustChooseEngagement\(!named && \(endedNamed !== null \|\| res\.resolution\.rule === "C"\)\)/);
     // ...and it must not silently fall back to the first row again.
     expect(flow).not.toMatch(/setEngagementId\(res\.engagements\[0\]\.id\)/);
 

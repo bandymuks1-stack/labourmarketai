@@ -4208,6 +4208,7 @@
       "labelContext": "[EN] Work context",
       "contextChoose": "Valige töö kontekst…",
       "contextAmbiguous": "See töö võib kuuluda rohkem kui ühte konteksti. Valige enne salvestamist, millisesse.",
+      "contextEndedOrg": "Lauses on nimetatud organisatsioon, kellega sinu töösuhe on lõppenud — see kanne ei loe tööks tema heaks. Vali, kus sa seda tegid:",
       "save": "[EN] Save",
       "cancel": "[EN] Edit",
       "working": "[EN] Saving…",

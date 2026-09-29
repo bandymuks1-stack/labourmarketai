@@ -4208,6 +4208,7 @@
       "labelContext": "[EN] Work context",
       "contextChoose": "Izvēlieties darba kontekstu…",
       "contextAmbiguous": "Šis darbs var piederēt vairāk nekā vienam kontekstam. Pirms saglabāšanas izvēlieties, kuram.",
+      "contextEndedOrg": "Teikumā minēta organizācija, ar kuru tavas darba attiecības ir beigušās — šis ieraksts netiks uzskatīts par darbu tai. Izvēlies, kur to darīji:",
       "save": "[EN] Save",
       "cancel": "[EN] Edit",
       "working": "[EN] Saving…",

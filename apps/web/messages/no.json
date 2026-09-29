@@ -4208,6 +4208,7 @@
       "labelContext": "[EN] Work context",
       "contextChoose": "Velg arbeidskontekst…",
       "contextAmbiguous": "Dette arbeidet kan høre til mer enn én kontekst. Velg hvilken før du lagrer.",
+      "contextEndedOrg": "Setningen nevner en organisasjon der arbeidsforholdet ditt er avsluttet — oppføringen teller ikke som arbeid for den. Velg hvor du gjorde dette:",
       "save": "[EN] Save",
       "cancel": "[EN] Edit",
       "working": "[EN] Saving…",

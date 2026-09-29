@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { mentionsOrganization } from "@/lib/journal/org-mention";
 import { useTranslations } from "next-intl";
 import {
   ChatAction,
@@ -57,6 +58,7 @@ export type WorkLogLabels = {
   labelContext: string;
   contextChoose: string;
   contextAmbiguous: string;
+  contextEndedOrg: string;
   save: string;
   cancel: string;
   working: string;
@@ -294,6 +296,8 @@ export function WorkerWorkLogFlow({
   /** Rule C: several engagements are legitimately possible, so the flow must
    *  ask instead of preselecting one. */
   const [mustChooseEngagement, setMustChooseEngagement] = useState(false);
+  /** The sentence named an organization whose relationship has ENDED. */
+  const [endedOrgNamed, setEndedOrgNamed] = useState<string | null>(null);
   const [workDate, setWorkDate] = useState(draft.date);
   const [site, setSite] = useState(draft.site ?? "");
   const [notes, setNotes] = useState(draft.notes);
@@ -440,8 +444,20 @@ export function WorkerWorkLogFlow({
           // legitimately possible — NOTHING, because guessing between
           // employers is what put 15 production entries where no employer
           // could ever read them. An empty id makes the picker a question.
-          setEngagementId(res.resolution.selectedId ?? "");
-          setMustChooseEngagement(res.resolution.rule === "C");
+          // WHAT THE PERSON SAID OUTRANKS THE DEFAULT (2026-09-29): a sentence
+          // naming one of their ACTIVE organizations files there; one naming
+          // an organization whose relationship ENDED preselects nothing and
+          // says so — it was one click from landing at a different employer.
+          const said = draft.notes ?? "";
+          const named = res.engagements.find(
+            (e) => e.orgName && mentionsOrganization(said, e.orgName),
+          );
+          const endedNamed = named
+            ? null
+            : ((res.endedOrgNames ?? []).find((n) => mentionsOrganization(said, n)) ?? null);
+          setEndedOrgNamed(endedNamed);
+          setEngagementId(named ? named.id : endedNamed ? "" : (res.resolution.selectedId ?? ""));
+          setMustChooseEngagement(!named && (endedNamed !== null || res.resolution.rule === "C"));
           setPhase({ kind: "ready", token: null });
         } else if (res.kind === "no-context") {
           setPhase({ kind: "blocked", reason: "no-context" });
@@ -1022,7 +1038,7 @@ export function WorkerWorkLogFlow({
         />
       </label>
 
-      {engagements.length > 1 && (
+      {(engagements.length > 1 || mustChooseEngagement) && (
         <label className="flex flex-col gap-1 text-support">
           <span className="text-text-muted">{labels.labelContext}</span>
           <select
@@ -1046,7 +1062,15 @@ export function WorkerWorkLogFlow({
               </option>
             ))}
           </select>
-          {mustChooseEngagement && !engagementId ? (
+          {endedOrgNamed ? (
+            <span
+              className="text-meta leading-relaxed text-state-warning"
+              data-testid="worklog-context-ended-org"
+            >
+              {labels.contextEndedOrg} „{endedOrgNamed}“
+            </span>
+          ) : null}
+          {mustChooseEngagement && !engagementId && !endedOrgNamed ? (
             <span
               className="text-meta leading-relaxed text-state-warning"
               data-testid="worklog-context-must-choose"
