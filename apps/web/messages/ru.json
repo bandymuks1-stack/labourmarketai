@@ -14072,7 +14072,8 @@
       "engagementsAlreadyEnded": "Это рабочее отношение уже было завершено. Ничего не изменилось.",
       "engagementsAlreadyEndedAt": "Это рабочее отношение уже было завершено {date}. Ничего не изменилось.",
       "opportunitiesCounts": "Всего {total}: {bands}.",
-      "opportunitiesDiscoveryOnly": "Ни одно ещё не оценено как подходящее — почему, увидите рядом с каждым на странице возможностей."
+      "opportunitiesDiscoveryOnly": "Ни одно ещё не оценено как подходящее — почему, увидите рядом с каждым на странице возможностей.",
+      "calendarThisWeek": "Эта неделя"
     }
   },
   "landing": {

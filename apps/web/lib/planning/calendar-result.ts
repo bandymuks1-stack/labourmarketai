@@ -7,9 +7,15 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { getPlanning, type PlanningSources } from "@/lib/planning/planning";
 import {
   PLANNING_WINDOW_DAYS,
+  addDays,
   buildAgenda,
+  conflictItemIds,
+  detectConflicts,
+  itemsForDay,
+  startOfWeekMonday,
   visibleRange,
 } from "@/lib/planning/planning-model";
+import { buildWorkRhythm, compactHours } from "@/lib/planning/work-rhythm";
 
 /**
  * THE CALENDAR RESULT (W3 — the panel presentation of the Time Engine).
@@ -75,7 +81,29 @@ export type CalendarResultView =
       readonly laterCount: number;
       /** Localized nouns of sources whose read ERRORED — the partial marker. */
       readonly degraded: readonly string[];
+      /**
+       * THIS WEEK'S WORK RHYTHM (premium chat, 2026-09-29) — the same
+       * `buildWorkRhythm` the calendar week draws, over the same planning
+       * read: Monday–Sunday, recorded time per day and whether someone other
+       * than the worker confirmed it. Already formatted; the panel draws it.
+       */
+      readonly week: CalendarResultWeek;
     };
+
+export interface CalendarResultWeek {
+  readonly totalLabel: string | null;
+  readonly days: readonly {
+    readonly day: string;
+    readonly weekday: string;
+    readonly minutes: number;
+    readonly hoursLabel: string | null;
+    readonly confirmed: "all" | "partial" | "none" | "unknown";
+    readonly isToday: boolean;
+    readonly isFuture: boolean;
+  }[];
+  /** The longest day in view, for bar heights (never below 8 h). */
+  readonly scaleMinutes: number;
+}
 
 /** Sources whose read state is an ERROR (not an owner-gated absence — an
  *  unapplied migration is an honest 0, not a failed read). */
@@ -89,8 +117,12 @@ export async function loadCalendarResult(): Promise<CalendarResultView> {
   const locale = await getLocale();
   const todayIso = new Date().toISOString().slice(0, 10);
   const range = visibleRange("agenda", todayIso);
+  // ONE read, widened back to this week's Monday so the rhythm strip sees
+  // the days already worked. The agenda below is built from exactly the
+  // items it saw before (see `agendaItems`), so its answer is unchanged.
+  const weekStart = startOfWeekMonday(todayIso);
   const planning = await getPlanning({
-    rangeStart: range.start,
+    rangeStart: weekStart < range.start ? weekStart : range.start,
     rangeEnd: range.end,
   });
   if (planning.status !== "ok") return { kind: "blocked" };
@@ -100,7 +132,36 @@ export async function loadCalendarResult(): Promise<CalendarResultView> {
     getTranslations({ locale }),
   ]);
 
-  const agenda = buildAgenda(planning.items, new Date(), PLANNING_WINDOW_DAYS);
+  const agendaItems = planning.items.filter(
+    (it) => it.startDate === null || (it.endDate ?? it.startDate) >= range.start,
+  );
+  const agenda = buildAgenda(agendaItems, new Date(), PLANNING_WINDOW_DAYS);
+
+  const rhythm = buildWorkRhythm({
+    days: [...Array(7).keys()].map((i) => {
+      const day = addDays(weekStart, i);
+      return { day, items: itemsForDay(planning.items, day) };
+    }),
+    todayIso,
+    confirmedIds: planning.journalConfirmedIds,
+    conflictIds: conflictItemIds(detectConflicts(planning.items)),
+  });
+  const weekdayFmt = new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" });
+  const durLabel = (m: number) =>
+    `${compactHours(m, locale)} ${tPlanning("rhythm.hoursUnit")}`;
+  const week: CalendarResultWeek = {
+    totalLabel: rhythm.recordedMinutes > 0 ? durLabel(rhythm.recordedMinutes) : null,
+    scaleMinutes: Math.max(rhythm.maxDayMinutes, 8 * 60),
+    days: rhythm.days.map((d) => ({
+      day: d.day,
+      weekday: weekdayFmt.format(new Date(`${d.day}T00:00:00Z`)).slice(0, 2),
+      minutes: d.recordedMinutes,
+      hoursLabel: d.recordedMinutes > 0 ? compactHours(d.recordedMinutes, locale) : null,
+      confirmed: d.confirmation,
+      isToday: d.isToday,
+      isFuture: d.isFuture,
+    })),
+  };
 
   const dayFmt = new Intl.DateTimeFormat(locale, {
     month: "2-digit",
@@ -139,5 +200,6 @@ export async function loadCalendarResult(): Promise<CalendarResultView> {
     degraded: degradedSourceKeys(planning.sources).map((k) =>
       tPlanning(`source.${k}`),
     ),
+    week,
   };
 }

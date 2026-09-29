@@ -14072,7 +14072,8 @@
       "engagementsAlreadyEnded": "Deze werkrelatie was al beëindigd. Er is niets gewijzigd.",
       "engagementsAlreadyEndedAt": "Deze werkrelatie was al beëindigd op {date}. Er is niets gewijzigd.",
       "opportunitiesCounts": "Totaal {total}: {bands}.",
-      "opportunitiesDiscoveryOnly": "Nog geen enkele beoordeeld als passend — waarom staat naast elke rij op de pagina met kansen."
+      "opportunitiesDiscoveryOnly": "Nog geen enkele beoordeeld als passend — waarom staat naast elke rij op de pagina met kansen.",
+      "calendarThisWeek": "Deze week"
     }
   },
   "landing": {

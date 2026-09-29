@@ -14072,7 +14072,8 @@
       "engagementsAlreadyEnded": "Ta relacja robocza była już zakończona. Nic nie zmieniono.",
       "engagementsAlreadyEndedAt": "Ta relacja robocza była już zakończona {date}. Nic nie zmieniono.",
       "opportunitiesCounts": "Razem {total}: {bands}.",
-      "opportunitiesDiscoveryOnly": "Żadna nie jest jeszcze oceniona jako dopasowanie — strona ofert podaje przyczynę przy każdej z nich."
+      "opportunitiesDiscoveryOnly": "Żadna nie jest jeszcze oceniona jako dopasowanie — strona ofert podaje przyczynę przy każdej z nich.",
+      "calendarThisWeek": "Ten tydzień"
     }
   },
   "landing": {

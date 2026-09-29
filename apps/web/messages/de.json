@@ -14072,7 +14072,8 @@
       "engagementsAlreadyEnded": "Diese Arbeitsbeziehung war bereits beendet. Es wurde nichts geändert.",
       "engagementsAlreadyEndedAt": "Diese Arbeitsbeziehung war bereits am {date} beendet. Es wurde nichts geändert.",
       "opportunitiesCounts": "Gesamt {total}: {bands}.",
-      "opportunitiesDiscoveryOnly": "Noch keine als passend bewertet — warum, steht neben jeder Zeile auf der Seite der Möglichkeiten."
+      "opportunitiesDiscoveryOnly": "Noch keine als passend bewertet — warum, steht neben jeder Zeile auf der Seite der Möglichkeiten.",
+      "calendarThisWeek": "Diese Woche"
     }
   },
   "landing": {
