@@ -1,5 +1,6 @@
 import { extractWorkLog, type WorkLogParse } from "./worklog-extract";
 import type { WorkEvidenceDraft } from "./evidence-goal";
+import { readCorrectionAsk } from "./correct-work-model";
 
 /**
  * ASK → PREFILL → THE EXISTING SAVE FLOW.
@@ -91,10 +92,43 @@ export function composeEvidenceText(
  * to put in front of every call — a discovery goal, a chip, or the journal
  * page's hand-off all behave as they did.
  */
+/**
+ * "NE 5, O 6 VALANDAS" INSIDE AN OPEN WORK LOG (production walk 2026-09-29).
+ * The correction was composed into the evidence as one more sentence, and the
+ * reader counted it as a SECOND 6 h activity next to the 5 h one. A spoken
+ * hours correction replaces the corrected figure in what was already said and
+ * is not itself evidence; when the corrected figure is not found in what was
+ * said, the sentences are left exactly as they were. Pure.
+ */
+export function applySpokenHoursCorrection(
+  said: readonly string[],
+  latest?: string,
+): { said: readonly string[]; latest?: string; applied: boolean } {
+  const last = (latest ?? said[said.length - 1] ?? "").trim();
+  const ask = readCorrectionAsk(last);
+  if (ask.kind !== "hours" || ask.from === null) return { said, latest, applied: false };
+  const earlier = said.filter((x) => x.trim() !== last);
+  const fromRe = new RegExp(
+    String.raw`(^|[^\d.,])` +
+      String(ask.from).replace(".", "[.,]") +
+      String.raw`(?=\s*(val|h\b|hours?|час|std|stund|uur|godz))`,
+    "iu",
+  );
+  for (let i = earlier.length - 1; i >= 0; i--) {
+    if (fromRe.test(earlier[i]!)) {
+      const next = [...earlier];
+      next[i] = earlier[i]!.replace(fromRe, `$1${ask.to}`);
+      return { said: next, latest: undefined, applied: true };
+    }
+  }
+  return { said, latest, applied: false };
+}
+
 export function worklogDraftFromEvidence(
   input: EvidenceToWorklogInput,
 ): WorkLogParse {
-  const text = composeEvidenceText(input.said, input.latest);
+  const fixed = applySpokenHoursCorrection(input.said, input.latest);
+  const text = composeEvidenceText(fixed.said, fixed.latest);
   const base = extractWorkLog(text, input.today);
   const stated = input.evidence?.stated;
   if (!stated) return base;

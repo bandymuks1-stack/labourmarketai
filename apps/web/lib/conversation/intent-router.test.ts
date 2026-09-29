@@ -900,6 +900,14 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     de: "Ich kann ab Oktober arbeiten",
     pl: "Mogę pracować od października",
   },
+  "correct-work": {
+    lt: "Ne 5, o 6 valandas",
+    en: "Not 5 but 6 hours",
+    ru: "Не 5, а 6 часов",
+    nl: "Niet 5 maar 6 uur",
+    de: "Nicht 5, sondern 6 Stunden",
+    pl: "Nie 5, a 6 godzin",
+  },
   "pay-statement": {
     lt: "Mano atlyginimo lūkestis nuo 2500 iki 3500 eurų",
     en: "My salary expectation is 2500 to 3500 EUR",
