@@ -900,6 +900,14 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     de: "Ich kann ab Oktober arbeiten",
     pl: "Mogę pracować od października",
   },
+  "current-work": {
+    lt: "Kur dabar dirbu?",
+    en: "Where do I work now?",
+    ru: "Где я сейчас работаю?",
+    nl: "Waar werk ik?",
+    de: "Wo arbeite ich?",
+    pl: "Gdzie teraz pracuję?",
+  },
   "correct-work": {
     lt: "Ne 5, o 6 valandas",
     en: "Not 5 but 6 hours",

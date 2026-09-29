@@ -137,6 +137,8 @@ export type ConversationIntent =
   | "pay-statement"
   // A correction of the newest entry said in words (2026-09-29).
   | "correct-work"
+  // "Kur dabar dirbu?" — the canonical work contexts (2026-09-29).
+  | "current-work"
   // ── AGENCY (real recruiter pilot, 2026-09-04). The first real recruiter
   //    typed "noriu pakviesti klientą" and got the generic fallback: the
   //    agency's whole vocabulary was missing here, although the canonical
@@ -2931,6 +2933,25 @@ const RULES: IntentRule[] = [
   },
   {
     /**
+     * "KUR DABAR DIRBU?" (owner continuation 2026-09-29 §8). Routed to the
+     * booking-engagements panel first, it listed only an ENDED placement and
+     * not the active organization the person had just logged work under.
+     * The answer is the canonical work contexts (engagement_contexts: active
+     * organizations, ended ones by name) — the same read the work-log card
+     * files under.
+     */
+    intent: "current-work",
+    patterns: [
+      p("\\bkur\\s+(as\\s+)?(dabar\\s+)?(as\\s+)?dirbu\\b", 7),
+      p("\\bwhere\\s+(do|am)\\s+i\\s+(currently\\s+|now\\s+)?work(ing)?\\b", 7),
+      p("где\\s+я\\s+(сейчас\\s+)?работаю", 7),
+      p("\\bwo\\s+arbeite\\s+ich\\b", 7),
+      p("\\bwaar\\s+werk\\s+ik\\b", 7),
+      p("\\bgdzie\\s+(teraz\\s+)?pracuj[eę]\\b", 7),
+    ],
+  },
+  {
+    /**
      * §7.1 — the work RELATIONSHIPS, asked for in words.
      *
      * This is how the domain is reached at all: the greeting is capped at
@@ -2948,15 +2969,6 @@ const RULES: IntentRule[] = [
      */
     intent: "engagements",
     patterns: [
-      // "KUR DABAR DIRBU?" (owner continuation 2026-09-29 §8): scored 0 and
-      // was answered "no answer yet" while the person's work relationships
-      // are exactly this read. Where-do-I-work, six locales.
-      p("\\bkur\\s+(as\\s+)?(dabar\\s+)?(as\\s+)?dirbu\\b", 7),
-      p("\\bwhere\\s+(do|am)\\s+i\\s+(currently\\s+|now\\s+)?work(ing)?\\b", 7),
-      p("где\\s+я\\s+(сейчас\\s+)?работаю", 7),
-      p("\\bwo\\s+arbeite\\s+ich\\b", 7),
-      p("\\bwaar\\s+werk\\s+ik\\b", 7),
-      p("\\bgdzie\\s+(teraz\\s+)?pracuj[eę]\\b", 7),
       p("(darbo\\s+santyk|work\\s+relationship|working\\s+relationship|рабочие\\s+отношени|werkrelatie|arbeitsbeziehung|stosunek\\s+pracy|relacj\\w*\\s+zawodow)", 7),
       p("(su\\s+kuo)\\s*.{0,14}(dirb)", 7),
       p("(z\\s+kim)\\s*.{0,14}(pracuj|wsp[oó][lł]prac)", 7), // pl

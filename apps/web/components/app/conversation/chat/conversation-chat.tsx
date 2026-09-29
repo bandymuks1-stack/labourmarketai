@@ -114,6 +114,7 @@ import { payPrefill, readPayStatement } from "@/lib/conversation/pay-statement";
 import { pastWorkOwnWords, readPastWorkPeriod } from "@/lib/conversation/past-work-period";
 import { correctionHref, readCorrectionAsk } from "@/lib/conversation/correct-work-model";
 import { loadLatestOwnEntryForCorrection } from "@/lib/conversation/correct-work";
+import { listWorkLogEngagements } from "@/lib/conversation/worklog-engagements";
 import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace-contract";
 import { STARTER_CAP, personStarters, type StarterChipSpec } from "@/lib/conversation/starters";
 import { trackFunnel } from "@/lib/telemetry/task";
@@ -6204,6 +6205,45 @@ export function ConversationChat({
             .catch(() => {
               setTyping(false);
               assistant(t("correctWork.unreadable"));
+            });
+        },
+        /**
+         * "Kur dabar dirbu?" (2026-09-29): answered from the person's canonical
+         * work contexts — the SAME read the work-log card files under — never
+         * from the booking-engagements panel alone, which listed only an ended
+         * placement while the active organization was missing. Ended
+         * relationships are named as ended. Read-only.
+         */
+        currentWork: () => {
+          if (identity === "company") {
+            const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+            assistant(
+              t("currentWork.notInCompany"),
+              personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+            );
+            return;
+          }
+          setTyping(true);
+          listWorkLogEngagements()
+            .then((res) => {
+              setTyping(false);
+              const active = res.kind === "ok" ? res.engagements.filter((e) => e.orgName) : [];
+              const ended =
+                res.kind === "ok" ? (res.endedOrgNames ?? []) : [];
+              const lines = [
+                active.length > 0
+                  ? t("currentWork.now", { list: active.map((e) => e.label).join("; ") })
+                  : t("currentWork.none"),
+                ...(ended.length > 0 ? [t("currentWork.ended", { list: ended.join(", ") })] : []),
+              ];
+              assistant(lines.join("\n"), [
+                { id: "logwork", label: t("chipLogWork") },
+                { id: "engagements", label: labels.chipEngagements },
+              ]);
+            })
+            .catch(() => {
+              setTyping(false);
+              assistant(t("currentWork.unreadable"));
             });
         },
         skillGap: () => runWorkflow(() => runSkillGap()),

@@ -13230,6 +13230,13 @@
         "notInCompany": "Arbeitsjournal-Einträge gehören dir. Wechsle in deinen persönlichen Bereich und sag es noch einmal.",
         "chipEdit": "Eintrag korrigieren"
       },
+      "currentWork": {
+        "now": "Du arbeitest derzeit bei: {list}.",
+        "none": "Du hast derzeit kein aktives Arbeitsverhältnis mit einer Organisation — Einträge gehen in dein persönliches Journal.",
+        "ended": "Beendete Arbeitsverhältnisse: {list} (ihr Verlauf bleibt in deinem Werdegang).",
+        "unreadable": "Ich konnte deine Arbeitsverhältnisse nicht lesen — nichts wurde geändert. Versuch es erneut.",
+        "notInCompany": "Wo du arbeitest, ist deine eigene Angabe. Wechsle in deinen persönlichen Bereich und frag noch einmal."
+      },
       "pay": {
         "understoodRange": "Verstanden: Gehaltswunsch {min}–{max} € pro Monat. Ich habe die Beträge in deine Arbeitskarte eingetragen — prüfen und speichern. Bis du speicherst, ändert sich nichts.",
         "understoodMin": "Verstanden: Gehaltswunsch mindestens {min} € pro Monat. Ich habe den Betrag in deine Arbeitskarte eingetragen — prüfen und speichern. Bis du speicherst, ändert sich nichts.",

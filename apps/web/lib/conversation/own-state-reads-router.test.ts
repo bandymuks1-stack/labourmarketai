@@ -13,10 +13,10 @@ import { classifyIntent } from "@/lib/conversation/intent-router";
  */
 describe("own-state questions reach the reads that answer them", () => {
   it.each([
-    ["Kur dabar dirbu?", "engagements"],
-    ["Where do I work now?", "engagements"],
-    ["Где я сейчас работаю?", "engagements"],
-    ["Wo arbeite ich?", "engagements"],
+    ["Kur dabar dirbu?", "current-work"],
+    ["Where do I work now?", "current-work"],
+    ["Где я сейчас работаю?", "current-work"],
+    ["Wo arbeite ich?", "current-work"],
     ["Kokios profesijos nurodytos?", "player-card"],
     ["Kokia mano profesija?", "player-card"],
     ["Kokie mano įgūdžiai patvirtinti?", "player-card"],

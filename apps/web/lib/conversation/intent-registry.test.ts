@@ -117,7 +117,10 @@ describe("the intent registry is the enumerable routing contract", () => {
     // 83 → 84 (2026-09-29, owner continuation §7): correct-work — "Ne 5, o 6
     // valandas" after a saved entry opened a SECOND 6 h entry. It names the
     // newest entry and hands over one chip to the canonical supersede editor.
-    expect(entries.length).toBe(84);
+    // 84 → 85 (2026-09-29): current-work — "Kur dabar dirbu?" answered from
+    // the canonical work contexts; the booking-engagements panel listed only
+    // an ended placement.
+    expect(entries.length).toBe(85);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
