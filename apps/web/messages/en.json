@@ -11651,7 +11651,8 @@
     "serviceRemote": "Remote",
     "photoAlt": "Photo of completed work",
     "historyTitle": "Imported history",
-    "historyUnavailable": "Imported history could not be read"
+    "historyUnavailable": "Imported history could not be read",
+    "currentWork": "Working now"
   },
   "companyGallery": {
     "title": "Gallery",

@@ -11651,7 +11651,8 @@
     "serviceRemote": "Zdalnie",
     "photoAlt": "Zdjęcie wykonanej pracy",
     "historyTitle": "Zaimportowana historia",
-    "historyUnavailable": "Nie udało się odczytać zaimportowanej historii"
+    "historyUnavailable": "Nie udało się odczytać zaimportowanej historii",
+    "currentWork": "Pracuje teraz"
   },
   "companyGallery": {
     "title": "Galeria",

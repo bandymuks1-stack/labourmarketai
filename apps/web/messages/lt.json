@@ -11651,7 +11651,8 @@
     "serviceRemote": "Nuotoliniu būdu",
     "photoAlt": "Atlikto darbo nuotrauka",
     "historyTitle": "Įkelta istorija",
-    "historyUnavailable": "Įkeltos istorijos nepavyko perskaityti"
+    "historyUnavailable": "Įkeltos istorijos nepavyko perskaityti",
+    "currentWork": "Dirba dabar"
   },
   "companyGallery": {
     "title": "Galerija",

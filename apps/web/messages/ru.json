@@ -11651,7 +11651,8 @@
     "serviceRemote": "Удалённо",
     "photoAlt": "Фотография выполненной работы",
     "historyTitle": "Загруженная история",
-    "historyUnavailable": "Загруженную историю не удалось прочитать"
+    "historyUnavailable": "Загруженную историю не удалось прочитать",
+    "currentWork": "Работает сейчас"
   },
   "companyGallery": {
     "title": "Галерея",
