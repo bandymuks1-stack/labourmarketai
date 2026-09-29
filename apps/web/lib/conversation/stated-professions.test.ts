@@ -25,3 +25,11 @@ describe("two professions are not a compound of profession + skill", () => {
     expect(c.isCompound).toBe(false);
   });
 });
+
+describe("a word naming the document is not a skill", () => {
+  it("'Turiu B kategorijos vairuotojo pažymėjimą' is one credential, no skill", () => {
+    const c = readCompoundStatement("Turiu B kategorijos vairuotojo pažymėjimą.");
+    expect(c.facts.map((f) => f.kind)).toEqual(["credential"]);
+    expect(c.isCompound).toBe(false);
+  });
+});
