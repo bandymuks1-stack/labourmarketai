@@ -7569,7 +7569,10 @@
         "work": "Work",
         "skills": "Skills",
         "evidence": "Records",
-        "history": "History"
+        "history": "History",
+        "identity": "Person",
+        "next": "Next",
+        "nextOpportunities": "Where you can go next"
       }
     }
   },

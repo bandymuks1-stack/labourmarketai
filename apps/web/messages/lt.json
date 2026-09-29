@@ -7569,7 +7569,10 @@
         "work": "Darbas",
         "skills": "Gebėjimai",
         "evidence": "Įrašai",
-        "history": "Istorija"
+        "history": "Istorija",
+        "identity": "Asmuo",
+        "next": "Toliau",
+        "nextOpportunities": "Kur galite eiti toliau"
       }
     }
   },

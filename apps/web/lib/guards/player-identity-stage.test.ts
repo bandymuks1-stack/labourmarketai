@@ -99,10 +99,18 @@ describe("the stage", () => {
     expect(HUB).toMatch(/\.filter\(\(h\) => h\.current\)/);
   });
 
-  it("the card's modes are anchors into the same card, not new pages", () => {
-    for (const k of ["work", "skills", "evidence", "history"]) {
-      expect(CARD).toContain(`id="player-card-${k}"`);
-    }
-    expect(CARD).toMatch(/href=\{`#player-card-\$\{key\}`\}/);
+  it("the card transforms through its modes under ONE identity stage — IDENTITY is the whole card (the floor)", () => {
+    const MODES = read("components/app/player-card/player-card-modes.tsx");
+    expect(read("lib/player-card/card-modes.ts")).toContain('["identity", "work", "skills", "evidence", "history", "next"]');
+    expect(CARD).toMatch(/<PlayerCardModes/);
+    // IDENTITY renders every section, in the original order.
+    expect(CARD.replace(/\s+/g, "")).toContain(
+      "identity:(<>{secA}{secB}{secC}{secD}{secE}{secF}{secG}{secH}{secI}{secJ}</>)",
+    );
+    // The identity stage sits OUTSIDE the switching body — the person is the constant.
+    expect(CARD.indexOf("<IdentityStage")).toBeLessThan(CARD.indexOf("<PlayerCardModes"));
+    // The switcher reads nothing; the public sample never writes the URL.
+    expect(MODES).not.toMatch(/supabase|fetch\(|\.from\(/);
+    expect(CARD).toContain("syncUrl={!sample}");
   });
 });

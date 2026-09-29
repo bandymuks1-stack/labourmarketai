@@ -7569,7 +7569,10 @@
         "work": "Arbeit",
         "skills": "Fähigkeiten",
         "evidence": "Einträge",
-        "history": "Verlauf"
+        "history": "Verlauf",
+        "identity": "Die Person",
+        "next": "Weiter",
+        "nextOpportunities": "Wohin Sie als Nächstes gehen können"
       }
     }
   },
