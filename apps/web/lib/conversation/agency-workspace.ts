@@ -13,6 +13,7 @@ import {
   listAgencyOfferProgress,
   listSharedRequestsForAgency,
 } from "@/lib/agency/bridge-read";
+import { listAgencyPlacements } from "@/lib/agency/delegation-read";
 
 import {
   AGENCY_CHAT_LIST_LIMIT,
@@ -59,7 +60,7 @@ export async function loadAgencyBridgeForChat(): Promise<AgencyBridgeChatResult>
   }
   const agencyCompanyId = companyRead.row.id;
 
-  const [connections, shared, progress, roster, tBridge, tChat] = await Promise.all([
+  const [connections, shared, progress, roster, tBridge, tChat, placements, tLifecycle] = await Promise.all([
     listAgencyConnections(agencyCompanyId),
     listSharedRequestsForAgency(),
     listAgencyOfferProgress(),
@@ -68,7 +69,35 @@ export async function loadAgencyBridgeForChat(): Promise<AgencyBridgeChatResult>
     // P2 object language (L1): a person or a need the rows cannot name is
     // said in ordinary words, never as a raw id fragment.
     getTranslations("conversation.chat"),
+    // THE PLACEMENT'S OWN OUTCOME (production chat walk 2026-09-29): the
+    // progress list said "Pasiūlyta · Klientas priėmė" for a placement the
+    // worker had DECLINED and "Rezervacija priimta" for one that had ENDED —
+    // the partners page already showed both. Same read (lifecycle only).
+    listAgencyPlacements(),
+    getTranslations("agencyDelegation.lifecycle"),
   ]);
+  const outcomeByOffer = new Map<string, string>();
+  if (placements.kind === "ok") {
+    for (const pl of placements.rows) {
+      const label =
+        pl.engagementStatus === "ended" || pl.engagementEndedAt
+          ? tLifecycle("engagementEnded")
+          : pl.assignmentEndedAt
+            ? tLifecycle("assignmentEnded")
+            : pl.bookingStatus === "declined"
+              ? tLifecycle("workerDeclined")
+              : pl.bookingStatus === "withdrawn"
+                ? tLifecycle("booking_withdrawn")
+                : pl.bookingStatus === "expired"
+                  ? tLifecycle("booking_expired")
+                  : pl.assignmentStatus === "active"
+                    ? tLifecycle("assigned")
+                    : pl.bookingStatus === "accepted"
+                      ? tLifecycle("workerAccepted")
+                      : null;
+      if (label) outcomeByOffer.set(pl.offerId, label);
+    }
+  }
 
   if (
     connections.kind === "needs-migration" ||
@@ -112,7 +141,7 @@ export async function loadAgencyBridgeForChat(): Promise<AgencyBridgeChatResult>
     stageLabel: stage(p.reviewStage),
     decisionLabel:
       p.offerStatus === "accepted" || p.offerStatus === "declined"
-        ? stage(`decision_${p.offerStatus}`)
+        ? [stage(`decision_${p.offerStatus}`), outcomeByOffer.get(p.offerId)].filter(Boolean).join(" · ")
         : null,
     offerStatus: p.offerStatus,
   }));
