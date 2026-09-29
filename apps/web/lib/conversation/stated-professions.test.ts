@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { classifyIntent } from "@/lib/conversation/intent-router";
 import { readCompoundStatement } from "@/lib/conversation/compound-statement";
 import { readStatedProfessions } from "@/lib/conversation/stated-professions";
 
@@ -32,4 +33,11 @@ describe("a word naming the document is not a skill", () => {
     expect(c.facts.map((f) => f.kind)).toEqual(["credential"]);
     expect(c.isCompound).toBe(false);
   });
+});
+
+
+describe("a stated driving licence reaches the add-document door", () => {
+  it("routes with the category between 'turiu' and the document noun", () => {
+    expect(classifyIntent("Turiu B kategorijos vairuotojo pažymėjimą.").intent).toBe("add-document");
+  }, 20_000);
 });
