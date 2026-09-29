@@ -646,6 +646,11 @@ const RULES: IntentRule[] = [
     patterns: [
       p("(trūksta|nemoku|neturiu)\\s*.{0,20}(įgūd|kvalifik)", 5),
       p("(kokių|kurių)\\s+įgūdž", 5),
+      // "Ką turėčiau išmokti, kad galėčiau dirbti X?" (owner 2026-09-29
+      // §28): scored 0 ("išmokti" is not "mokytis"); 11 outweighs find-work's
+      // "I need … work" (10) — a LEARN verb is not a job search. Bound to WORK, so the
+      // bare "ką turėčiau mokytis?" stays the learning compass (8).
+      p("(ką|ka|what|что)\\s*.{0,16}(turėčiau|reikėtų|reikia|should\\s+i|do\\s+i\\s+need\\s+to|need\\s+to|нужно|надо)\\s*.{0,8}(išmokti|pramokti|learn|выучить|освоить|научиться)\\s*.{0,40}(dirbti|darb|work|job|работ)", 11),
       p("(what|which)\\s+skills?\\s*(am\\s+i|do\\s+i)?\\s*(missing|lack|need)", 5),
       p("(каких|какие)\\s+навык", 5),
       p("skill\\s*gap", 4),
@@ -766,6 +771,13 @@ const RULES: IntentRule[] = [
         "(kokius|kokiu|kurius|kuriu|which|what|какие|каких|welche|welke|jakich|jakie|kt[oó]rych)\\s+.{0,12}(įgūd|skill|навык|fähigkeit|kompetenz|vaardigh|competent|umiej[eę]tno|kompetencj)[^\\s]*\\s*.{0,20}(naudoj|use|использ|nutze|benutze|verwende|gebruik|u[zż]ywam|u[zż]ywa|korzystam|wykorzystuj)",
         8,
       ),
+      // "Kokius gebėjimus įgijau per šį darbą?" / "What skills did I gain?"
+      // (owner 2026-09-29 §28): scored 0 — the skills the person's recorded
+      // work backs are this read, never a profile edit.
+      p(
+        "(kokius|kokių|kuriuos|which|what|какие|каким)\\s+.{0,12}(gebėjim|įgūd|skill|навык)[^\\s]*\\s*.{0,24}(įgijau|išmokau|pramokau|did\\s+i\\s+(gain|acquire|learn|pick\\s+up)|gained|acquired|learned|learnt|picked\\s+up|приобрел|освоил|научил)",
+        8,
+      ),
     ],
   },
   {
@@ -827,6 +839,11 @@ const RULES: IntentRule[] = [
       p("(kur|kaip|kame|where|how|где|куда|как|wo|wie|waar|hoe|gdzie|\\bjak\\b)\\s*.{0,24}(galėčiau|galiu|galėsiu|could\\s+i|can\\s+i|might\\s+i|могу|мог\\s+бы|kann\\s+ich|könnte\\s+ich|kan\\s+ik|zou\\s+ik|mog[eę]|m[oó]g[lł]bym)\\s*.{0,16}(augti|tobulėti|gilinti|plėsti|grow|deepen|expand|develop|расти|углуб|развива|wachsen|vertiefen|erweitern|groeien|verdiepen|uitbreiden|rozwija|rozwin|pog[lł][eę]bi|poszerzy)", 8),
       // "Ką galėčiau gilinti / plėsti?", "What could I deepen?"
       p("(ką|ka|what|что|was|wat|\\bco\\b)\\s*.{0,10}(galėčiau|galiu|could\\s+i|can\\s+i|могу|kann\\s+ich|könnte\\s+ich|kan\\s+ik|zou\\s+ik|mog[eę]|m[oó]g[lł]bym)\\s*.{0,10}(gilinti|plėsti|deepen|expand|углуб|расшир|vertiefen|erweitern|verdiepen|uitbreiden|pog[lł][eę]bi|poszerzy|rozwin)", 8),
+      // "Ką dar galėčiau dirbti?" / "What else could I work as?" (owner
+      // 2026-09-29 §28): landed `availability` (5) on "galėčiau … dirbti" —
+      // the person asked WHAT ELSE, not WHEN. "dar / kitą / else / other"
+      // is required, so "galiu dirbti nuo pirmadienio" keeps its door.
+      p("(ką|ka|kokį|kokius|kokio|kuo|what|which|что|кем)\\s+(dar|kit[^\\s]*|else|other|ещё|еще|друг[^\\s]*)\\s*.{0,16}(galėčiau|galiu|galėsiu|could\\s+i|can\\s+i|might\\s+i|мог\\s+бы|могу)\\s*.{0,12}(dirbti|daryti|work|do|работать|делать)", 9),
     ],
   },
   {
