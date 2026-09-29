@@ -7576,6 +7576,13 @@
         "doorCalendar": "Diese Woche im Kalender",
         "doorJournal": "Alle Einträge im Arbeitsbuch",
         "doorCv": "Lebender Lebenslauf"
+      },
+      "world": {
+        "sceneLabel": "Die Arbeitswelt dieser Person: Arbeit, Fähigkeiten, Nachweise, Verlauf und was als Nächstes kommen kann. Dieselben Fakten stehen unten.",
+        "empty": "Hier ist noch nichts erfasst.",
+        "directionDetail": "Gemeinsam: {shared} · fehlt: {missing}",
+        "directionDetailNoGap": "Gemeinsam: {shared} · nichts fehlt",
+        "emptyNext": "Richtungen erscheinen, sobald deine Arbeitseinträge mindestens zwei Fähigkeiten belegen."
       }
     }
   },
