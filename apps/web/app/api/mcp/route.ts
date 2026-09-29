@@ -257,6 +257,10 @@ export async function POST(req: Request) {
     // the DB as a "locale" and tripping the original_language constraint.
     // Only an ACTIVE locale is accepted; everything else is the default.
     locale: localeFromAcceptLanguage(req.headers.get("accept-language")),
+    // Everything arriving here is an authorized assistant acting for the
+    // person, never the person's own click — recorded as such wherever the
+    // store keeps a performer (evidence import audit today).
+    actorKind: "agent" as const,
   };
 
   const marks: Record<string, number> = { auth: authMs };

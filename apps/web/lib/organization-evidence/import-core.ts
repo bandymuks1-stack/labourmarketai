@@ -322,7 +322,7 @@ export async function createImportSession(
     source_language: input.sourceLanguage,
     supplied_by_organization_id: org.organizationId,
     supplier_role: input.supplierRole,
-    actor_kind: input.actorKind ?? "human",
+    actor_kind: input.actorKind ?? store.actorKind ?? "human",
     agent_label: input.agentLabel ?? null,
     created_by: store.userId,
     notes: input.notes ?? null,
@@ -335,7 +335,7 @@ export async function createImportSession(
     organizationId: org.organizationId,
     sessionId: inserted.data.id,
     eventType: "created",
-    actorKind: input.actorKind ?? "human",
+    actorKind: input.actorKind ?? store.actorKind ?? "human",
     payload: {
       sourceKind: input.sourceKind,
       supplierRole: input.supplierRole,
@@ -383,7 +383,11 @@ function importEventRow(
     session_id: e.sessionId,
     event_type: e.eventType,
     actor_profile_id: store.userId,
-    actor_kind: e.actorKind ?? "human",
+    // The step's own performer: an explicit kind, else the caller's (an
+    // assistant driving the import through MCP stays `agent` on EVERY event —
+    // production audit 2026-09-29 found the `committed` event recorded as
+    // `human` after an agent-created session).
+    actor_kind: e.actorKind ?? store.actorKind ?? "human",
     payload: e.payload ?? {},
   };
 }
