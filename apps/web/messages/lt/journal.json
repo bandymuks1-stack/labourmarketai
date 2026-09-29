@@ -904,5 +904,9 @@
     "periodReportedOnly": "Jūsų pačių įrašų nėra; organizacija užfiksavo {days, plural, one {# dieną} few {# dienas} other {# dienų}}, {time}.",
     "reportedUnknown": "Organizacijos įrašų šiam laikotarpiui nepavyko perskaityti — tai nereiškia, kad jų nėra."
   },
-  "contextEnded": "baigta"
+  "contextEnded": "baigta",
+  "stream": {
+    "today": "Šiandien",
+    "yesterday": "Vakar"
+  }
 }

@@ -904,5 +904,9 @@
     "periodReportedOnly": "Своих записей нет; организация зафиксировала {days, plural, one {# день} few {# дня} other {# дней}}, {time}.",
     "reportedUnknown": "Записи организации за этот период не удалось прочитать — это не значит, что их нет."
   },
-  "contextEnded": "завершено"
+  "contextEnded": "завершено",
+  "stream": {
+    "today": "Сегодня",
+    "yesterday": "Вчера"
+  }
 }

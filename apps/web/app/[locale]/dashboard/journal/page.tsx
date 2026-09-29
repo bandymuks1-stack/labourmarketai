@@ -77,7 +77,7 @@ import {
   toThermometerView,
 } from "@/lib/market/thermometer-data";
 import { getOwnAvatar } from "@/lib/profile/avatar";
-import { formatUtcDate, utcTodayKey } from "@/lib/time/display";
+import { createUtcFormatter, formatUtcDate, utcTodayKey } from "@/lib/time/display";
 // ONE day-resolution rule for the Work Journal — the canonical work-time
 // rule's own (`resolveWorkDayDetail`), the same one the work-in-numbers
 // model groups by, so a record cannot sit on one day in the diary and
@@ -1539,7 +1539,21 @@ export default async function JournalPage({
           />
         ) : (
           <div className="flex flex-col gap-4">
-            {visibleDayGroups.map((group, idx) => {
+            {(() => {
+              // THE STREAM'S SCALE (premium journal, 2026-09-29): each day's
+              // bar is drawn against the longest day on screen — the same
+              // rhythm the calendar week draws, from the same figures.
+              const maxDayMinutes = Math.max(
+                60,
+                ...visibleDayGroups.map((g) => g.totalMinutes),
+              );
+              const weekdayFmt = createUtcFormatter(locale, { weekday: "long" });
+              const yesterdayIso = new Date(
+                Date.parse(`${todayIsoKey}T00:00:00Z`) - 86_400_000,
+              )
+                .toISOString()
+                .slice(0, 10);
+              return visibleDayGroups.map((group, idx) => {
               // Compact day card: date + entry count + summed hours (only when
               // the day has time entries). Newest day open, older days collapse
               // so the records surface stays a tidy diary, not an endless raw
@@ -1560,24 +1574,46 @@ export default async function JournalPage({
                   data-testid="journal-day-group"
                   data-day={group.key}
                 >
-                  <summary className="flex min-h-[3rem] cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden">
-                    <span className="flex items-center gap-2">
+                  <summary className="relative flex min-h-[3.5rem] cursor-pointer list-none items-center justify-between gap-3 overflow-hidden px-4 py-3 [&::-webkit-details-marker]:hidden">
+                    {/* The day's length as a line along the header's foot. */}
+                    {group.totalMinutes > 0 ? (
+                      <span
+                        aria-hidden
+                        className="rhythm-grow-x absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-brand-cyan/70 to-brand-cyan/20"
+                        style={{
+                          width: `${Math.max(4, (group.totalMinutes / maxDayMinutes) * 100)}%`,
+                        }}
+                      />
+                    ) : null}
+                    <span className="flex min-w-0 items-center gap-3">
                       <span
                         aria-hidden
                         className="text-text-muted transition-transform group-open:rotate-90"
                       >
                         ▸
                       </span>
-                      <span
-                        className="font-display text-sm font-semibold text-text-primary"
-                        data-testid="journal-day-header"
-                      >
-                        {group.label}
+                      <span className="flex min-w-0 flex-col">
+                        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                          {group.isoKey === todayIsoKey
+                            ? t("stream.today")
+                            : group.isoKey === yesterdayIso
+                              ? t("stream.yesterday")
+                              : (weekdayFmt(group.isoKey) ?? "")}
+                        </span>
+                        <span
+                          className="font-display text-base font-semibold text-text-primary sm:text-lg"
+                          data-testid="journal-day-header"
+                        >
+                          {group.label}
+                        </span>
                       </span>
                     </span>
-                    <span className="flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
+                    <span className="flex items-center gap-3 font-mono text-meta uppercase tracking-label text-text-muted">
                       {totalLabel && (
-                        <span data-testid="journal-day-hours">
+                        <span
+                          className="font-display text-xl font-bold normal-case tracking-tightest text-brand-cyan tabular-nums sm:text-2xl"
+                          data-testid="journal-day-hours"
+                        >
                           {totalLabel}
                         </span>
                       )}
@@ -1758,13 +1794,55 @@ export default async function JournalPage({
                             </>
                           }
                         >
-                          {/* 1 · Entry text — first, so the worker immediately sees
-                        what they wrote. Long unbroken strings wrap cleanly. */}
+                          {/* 0 · WHERE · HOW LONG (premium journal, 2026-09-29):
+                              the organization the entry was recorded for and
+                              the entry's OWN site snapshot, then its length
+                              through THE canonical work-time rule. Nothing is
+                              inherited: no site → the org alone; no org → the
+                              site alone; neither → the line is not drawn. */}
+                          {(() => {
+                            const where = [
+                              e.engagement_context_id
+                                ? engagementChips.get(e.engagement_context_id)?.label
+                                : null,
+                              site?.value_text?.trim() || null,
+                            ].filter((v): v is string => Boolean(v) && v !== "—");
+                            const minutes = Math.round(
+                              deriveEntryWorkTime({
+                                entryId: e.id,
+                                createdAt: e.created_at,
+                                originalText: e.original_text,
+                                metrics: e.journal_entry_metrics ?? [],
+                              }).totalHours * 60,
+                            );
+                            if (where.length === 0 && minutes <= 0) return null;
+                            return (
+                              <div
+                                className="flex items-start justify-between gap-3"
+                                data-testid={`journal-entry-head-${e.id}`}
+                              >
+                                <span className="min-w-0 break-words pt-1 font-mono text-meta font-semibold uppercase tracking-label text-text-secondary">
+                                  {where.join(" · ")}
+                                </span>
+                                {minutes > 0 ? (
+                                  <span
+                                    className="shrink-0 font-display text-2xl font-bold leading-none tracking-tightest text-text-primary tabular-nums"
+                                    data-testid={`journal-entry-duration-${e.id}`}
+                                  >
+                                    {formatDuration(minutes, "minutes", locale === "en" ? "en" : "lt")}
+                                  </span>
+                                ) : null}
+                              </div>
+                            );
+                          })()}
+                          {/* 1 · Entry text — first among the words, so the worker
+                        immediately sees what they wrote. The label stays for
+                        screen readers; the words speak for themselves. */}
                           <div className="flex flex-col gap-1">
-                            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+                            <p className="sr-only">
                               {t("entry.textLabel")}
                             </p>
-                            <p className="whitespace-pre-wrap break-words text-sm text-text-primary">
+                            <p className="whitespace-pre-wrap break-words text-base leading-relaxed text-text-primary">
                               {e.original_text}
                             </p>
                             {/* RECOVERY HINT (audit v1). Until 2026-08-20 a
@@ -1846,7 +1924,9 @@ export default async function JournalPage({
                               e.engagement_context_id &&
                               engagementChips.has(e.engagement_context_id) && (
                                 <p
-                                  className="flex items-center gap-1.5 text-meta text-text-muted"
+                                  // The entry head above names the organization; this line stays
+                                  // for screen readers (the dot is a visual cue only).
+                                  className="sr-only"
                                   data-testid={`journal-entry-context-${e.id}`}
                                 >
                                   <span
@@ -1955,7 +2035,8 @@ export default async function JournalPage({
                   </div>
                 </details>
               );
-            })}
+              });
+            })()}
             {hiddenDayCount > 0 && (
               /* The diary is bounded, and says so. Every other day is one tap
                  away on the calendar above — nothing is hidden, only not
