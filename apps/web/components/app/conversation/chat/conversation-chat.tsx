@@ -111,6 +111,8 @@ import { loadProjectMoveOptionsForChat, loadProjectMoveWhatIfForChat } from "@/l
 import type { StageStatus } from "@/lib/projects/stages-model";
 import { stripEndDatePhrase, parseEndDate, parseStartDate } from "@/lib/structuring/time-window";
 import { payPrefill, readPayStatement } from "@/lib/conversation/pay-statement";
+import { readStatedLanguages } from "@/lib/conversation/language-statement";
+import { WORKER_LANGUAGE_NATIVE_NAMES } from "@/lib/worker/worker-languages-model";
 import { pastWorkOwnWords, readPastWorkPeriod } from "@/lib/conversation/past-work-period";
 import { correctionHref, readCorrectionAsk } from "@/lib/conversation/correct-work-model";
 import { loadLatestOwnEntryForCorrection } from "@/lib/conversation/correct-work";
@@ -6245,6 +6247,39 @@ export function ConversationChat({
          * the person saves it. An hourly rate or an unreadable figure is
          * asked about, never stored as a monthly one.
          */
+        /**
+         * "Kalbu angliškai ir rusiškai" (2026-09-29): the languages the person
+         * named, one language form each (worker.add-language — the profile's
+         * own write), prefilled; a level only when they said one. The
+         * sentence writes nothing.
+         */
+        languageStatement: () => {
+          if (identity === "company") {
+            const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+            assistant(
+              t("languageStatement.notInCompany"),
+              personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+            );
+            return;
+          }
+          const langs = readStatedLanguages(text);
+          if (langs.length === 0) {
+            assistant(t("languageStatement.askWhich"));
+            openForm("worker.add-language");
+            return;
+          }
+          assistant(
+            t("languageStatement.understood", {
+              list: langs.map((l) => WORKER_LANGUAGE_NATIVE_NAMES[l.lang]).join(", "),
+            }),
+          );
+          for (const l of langs) {
+            openForm("worker.add-language", undefined, undefined, {
+              lang: l.lang,
+              ...(l.level ? { level: l.level } : {}),
+            });
+          }
+        },
         payStatement: () => {
           if (identity === "company") {
             const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");

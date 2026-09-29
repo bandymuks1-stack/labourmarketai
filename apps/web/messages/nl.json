@@ -13284,6 +13284,11 @@
         "invalid": "Dit beroep staat niet in de lijst — sla het op in eigen woorden.",
         "failed": "Opslaan mislukt — er is niets gewijzigd. Probeer het opnieuw."
       },
+      "languageStatement": {
+        "understood": "Begrepen — talen: {list}. Ik zet elke taal in je profiel — kies het niveau en sla op. Tot dan verandert er niets.",
+        "askWhich": "Welke taal spreek je? Kies taal en niveau en sla op.",
+        "notInCompany": "Je talen zijn jouw eigen gegeven. Schakel naar je persoonlijke ruimte en zeg het opnieuw."
+      },
       "pay": {
         "understoodRange": "Begrepen: salarisverwachting {min}–{max} € per maand. Ik heb de bedragen in je werkkaart gezet — controleer en sla op. Er verandert niets tot je opslaat.",
         "understoodMin": "Begrepen: salarisverwachting minimaal {min} € per maand. Ik heb het bedrag in je werkkaart gezet — controleer en sla op. Er verandert niets tot je opslaat.",

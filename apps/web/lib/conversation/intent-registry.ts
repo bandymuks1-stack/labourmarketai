@@ -66,6 +66,7 @@ export type IntentHandlerId =
   | "professionStatement"
   | "availabilityStatement"
   | "payStatement"
+  | "languageStatement"
   | "correctWork"
   | "currentWork"
   | "skillGap"
@@ -251,6 +252,9 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // pay expectation. Opens the SAME work-card form with the figures in it;
   // the write stays behind the form's own review (2026-09-29).
   "pay-statement": { domain: "profile", access: "write", handler: "payStatement", ownTyping: false },
+  // "kalbu angliškai ir rusiškai" — the ONE language form per stated
+  // language, prefilled; the form's save is the write (2026-09-29).
+  "language-statement": { domain: "profile", access: "write", handler: "languageStatement", ownTyping: false },
   // "ne 5, o 6 valandas" / "tai buvo vakar" — names the newest entry and hands
   // the person to the canonical supersede editor for it (a link chip); the
   // sentence writes nothing (2026-09-29).

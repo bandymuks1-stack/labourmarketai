@@ -13284,6 +13284,11 @@
         "invalid": "This profession isn’t in the list — save it in your own words.",
         "failed": "Saving failed — nothing changed. Try again."
       },
+      "languageStatement": {
+        "understood": "Got it — languages: {list}. I'll add each to your profile — choose the level and save. Nothing changes until you save.",
+        "askWhich": "Which language do you speak? Choose the language and level, then save.",
+        "notInCompany": "Your languages are your own fact. Switch to your personal space and say it again."
+      },
       "pay": {
         "understoodRange": "Got it: pay expectation {min}–{max} € per month. I put the figures into your work card — check and save. Nothing changes until you save.",
         "understoodMin": "Got it: pay expectation at least {min} € per month. I put the figure into your work card — check and save. Nothing changes until you save.",
