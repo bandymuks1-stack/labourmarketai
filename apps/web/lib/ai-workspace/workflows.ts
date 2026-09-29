@@ -16,6 +16,7 @@ import { getPlanning } from "@/lib/planning/planning";
 import { loadOwnPrimaryProfessionSlug, loadOwnWorkIntelligence } from "@/lib/journal/work-intelligence-read";
 import type { WorkIntelligence, WorkPeriodKey, WorkPeriodScope } from "@/lib/journal/work-intelligence";
 import { deriveGrowthReading } from "@/lib/journal/growth-reading";
+import { readTargetOccupationGap, targetOccupationFromSentence } from "@/lib/conversation/target-occupation-gap";
 import { parseJournalPeriodPhrase, type JournalPeriodPhrase } from "@/lib/conversation/journal-period-phrase";
 import type { ConversationIntent } from "@/lib/conversation/intent-router";
 import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
@@ -225,10 +226,19 @@ export async function runFindWork(
  * matched/missing sets the Context Panel shows for one demand. This aggregates
  * them; it computes no score and invents no "recommended skill".
  */
-export async function runSkillGap(): Promise<WorkflowResult> {
+export async function runSkillGap(text = ""): Promise<WorkflowResult> {
   const t = await getTranslations("workspace.ai");
   const ctx = await loadAiWorkspaceContext();
   if (!ctx.hasWorkerProfile) return blocked(t("blockedNoWorker"), t("whyNoWorker"));
+
+  // "Ką turėčiau išmokti, kad galėčiau dirbti X?" names ITS target — the
+  // answer measures against X, not against whatever the board happens to
+  // hold (owner 2026-09-29 §13).
+  const target = text ? targetOccupationFromSentence(text) : null;
+  if (target) {
+    const answer = await runTargetOccupationGap(target, t);
+    if (answer) return answer;
+  }
 
   const board = await loadWorkerOpportunityBoard("conversation");
   if (board.kind !== "ready") return blocked(t("blockedNoWorker"), t("whyNoWorker"));
@@ -289,6 +299,48 @@ export async function runSkillGap(): Promise<WorkflowResult> {
     explanation: { why: t("whySkillGap", { demands: board.opportunities.length }) },
     // The journal is where a skill becomes real — never a self-declaration.
     chips: [{ id: "logwork", label: t("chipLogWork") }, ...docChips],
+  };
+}
+
+/**
+ * The named-target gap: what occupation X needs (canonical
+ * `profession_skills`) against the person's OWN evidence rows (the one
+ * work-intelligence reader), each required skill on the rung the rows
+ * support — confirmed / recorded / said only / not yet. No score, no
+ * verdict. `null` when X has no requirements on file or the rows could not
+ * be read — the general answer then stands (never "nothing missing").
+ */
+async function runTargetOccupationGap(
+  professionSlug: string,
+  t: Awaited<ReturnType<typeof getTranslations>>,
+): Promise<WorkflowResult | null> {
+  const wi = await loadOwnWorkIntelligence({ focus: "all" }).catch(() => null);
+  if (wi === null) return null;
+  const gap = readTargetOccupationGap(professionSlug, wi.skills);
+  if (gap === null) return null;
+  const tSkill = await getTranslations("skillNames");
+  const tProf = await getTranslations("professions");
+  const list = (slugs: readonly string[]): string =>
+    slugs.map((slug) => (tSkill.has(slug) ? tSkill(slug) : slug)).join(", ");
+  const occupation = tProf.has(professionSlug) ? tProf(professionSlug) : professionSlug;
+  const lines = [t("targetGapIntro", { occupation })];
+  if (gap.confirmed.length > 0) lines.push(t("targetGapConfirmed", { list: list(gap.confirmed) }));
+  if (gap.recorded.length > 0) lines.push(t("targetGapRecorded", { list: list(gap.recorded) }));
+  if (gap.stated.length > 0) lines.push(t("targetGapStated", { list: list(gap.stated) }));
+  lines.push(
+    gap.missing.length > 0
+      ? t("targetGapMissing", { list: list(gap.missing) })
+      : t("targetGapNoneMissing"),
+  );
+  if (gap.missing.length > 0 || gap.stated.length > 0) lines.push(t("targetGapHow"));
+  return {
+    kind: "answer",
+    text: lines.join("\n"),
+    explanation: { why: t("whyTargetGap", { occupation }) },
+    chips: [
+      { id: "logwork", label: t("chipLogWork") },
+      { id: "compass-page", label: t("targetGapChipCompass") },
+    ],
   };
 }
 

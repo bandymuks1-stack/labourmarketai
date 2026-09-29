@@ -6567,7 +6567,7 @@ export function ConversationChat({
               assistant(t("currentWork.unreadable"));
             });
         },
-        skillGap: () => runWorkflow(() => runSkillGap()),
+        skillGap: () => runWorkflow(() => runSkillGap(text)),
         // A company space asks about the TEAM's work — the organization's
         // journal report, never the person's own (2026-09-29).
         recentJournal: () => runWorkflow(() => {

@@ -14749,7 +14749,16 @@
       "whyVerifierNone": "Keine deiner aktiven Beziehungen verweist auf eine Organisation, die Arbeit bestätigen kann.",
       "whyVerifierUnavailable": "Das heißt, die Daten konnten nicht gelesen werden — nicht, dass niemand bestätigen kann.",
       "journalOrgRecords": "Außerdem in der Erfassung Ihrer Organisation ({period}): {hours} Std. an {days, plural, one {# Tag} other {# Tagen}} — Stunden aus Stundenzettel oder Import, getrennt geführt und nicht zur Zahl oben addiert.",
-      "journalCoverageTruncated": "Angezeigt aus den letzten {count} Einträgen — ältere Einträge sind in dieser Zahl nicht enthalten."
+      "journalCoverageTruncated": "Angezeigt aus den letzten {count} Einträgen — ältere Einträge sind in dieser Zahl nicht enthalten.",
+      "targetGapIntro": "Was die Arbeit als „{occupation}“ braucht und was deine Einträge schon zeigen:",
+      "targetGapConfirmed": "— Durch Arbeit bestätigt: {list}",
+      "targetGapRecorded": "— Im Journal, noch nicht bestätigt: {list}",
+      "targetGapStated": "— Von dir angegeben, noch keine Einträge: {list}",
+      "targetGapMissing": "— Noch nicht: {list}",
+      "targetGapNoneMissing": "— Alle Fähigkeiten für diese Arbeit stehen schon in deinem Profil.",
+      "targetGapHow": "Eine Fähigkeit wird stärker, wenn du sie als geleistete Arbeit einträgst — Probearbeit, Praxis oder Arbeit mit Schulung.",
+      "whyTargetGap": "Verglichen mit den Fähigkeiten, die die Plattform „{occupation}“ zuordnet, und mit deinen Journal- und Profileinträgen.",
+      "targetGapChipCompass": "Was lernen"
     },
     "project": {
       "fieldStatus": "Status",

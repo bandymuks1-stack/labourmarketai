@@ -4781,7 +4781,16 @@
       "whyVerifierChoice": "Mitu organisatsiooni sobivad võrdselt, seega ma ei oleta — valid sina.",
       "whyVerifierSelf": "Sa ei saa oma tööd ise kinnitada — kinnitus peab tulema kelleltki teiselt.",
       "whyVerifierNone": "Ükski sinu aktiivne suhe ei viita organisatsioonile, kes saaks tööd kinnitada.",
-      "whyVerifierUnavailable": "See tähendab, et andmeid ei õnnestunud lugeda — mitte seda, et kinnitajat pole."
+      "whyVerifierUnavailable": "See tähendab, et andmeid ei õnnestunud lugeda — mitte seda, et kinnitajat pole.",
+      "targetGapIntro": "Mida töö „{occupation}“ vajab ja mis sinu kirjetes juba olemas on:",
+      "targetGapConfirmed": "— Tööga kinnitatud: {list}",
+      "targetGapRecorded": "— Päevikus, veel kinnitamata: {list}",
+      "targetGapStated": "— Märkisid ise, kirjeid veel pole: {list}",
+      "targetGapMissing": "— Veel pole: {list}",
+      "targetGapNoneMissing": "— Kõik selle töö oskused on sinu profiilis juba olemas.",
+      "targetGapHow": "Oskus tugevneb, kui kirjutad selle üles tehtud tööna — proovitöö, praktika või töö koos koolitusega.",
+      "whyTargetGap": "Võrreldud oskustega, mida platvorm seob tööga „{occupation}“, ning sinu päeviku- ja profiilikirjetega.",
+      "targetGapChipCompass": "Mida õppida"
     },
     "project": {
       "fieldStatus": "[EN] Status",

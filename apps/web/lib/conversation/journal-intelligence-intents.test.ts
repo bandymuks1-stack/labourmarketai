@@ -121,6 +121,22 @@ describe("work intelligence by sentence — the owner's lines reach their door",
     for (const s of ["Ką turėčiau išmokti, kad galėčiau dirbti virėju?", "What do I need to learn to work as a cook?"]) {
       expect(classifyIntent(s).intent, s).toBe("skill-gap");
     }
+    // named-target gap phrasings (owner 2026-09-29 §13) — measured before:
+    // need-workers (a hiring flow for a person asking about themselves) /
+    // unknown
+    for (const s of [
+      "Ką turėčiau išmokti, kad galėčiau dirbti suvirintoju?",
+      "Ko man trūksta, kad galėčiau dirbti virėju?",
+      "Ko reikia, kad galėčiau dirbti suvirintoju?",
+      "What am I missing to work as a welder?",
+      "Was muss ich lernen, um als Schweißer zu arbeiten?",
+      "Чему мне нужно научиться, чтобы работать сварщиком?",
+    ]) {
+      expect(classifyIntent(s).intent, s).toBe("skill-gap");
+    }
+    // an employer naming a role keeps the hiring door
+    expect(classifyIntent("I need someone to work as a welder").intent).not.toBe("skill-gap");
+    expect(classifyIntent("Reikia suvirintojo objektui").intent).not.toBe("skill-gap");
     // the neighbours keep their doors
     expect(classifyIntent("Galiu dirbti nuo pirmadienio").intent).toBe("availability");
     expect(classifyIntent("Ką man mokytis?").intent).toBe("learning-compass");

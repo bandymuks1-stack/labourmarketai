@@ -651,6 +651,17 @@ const RULES: IntentRule[] = [
       // "I need … work" (10) — a LEARN verb is not a job search. Bound to WORK, so the
       // bare "ką turėčiau mokytis?" stays the learning compass (8).
       p("(ką|ka|what|что)\\s*.{0,16}(turėčiau|reikėtų|reikia|should\\s+i|do\\s+i\\s+need\\s+to|need\\s+to|нужно|надо)\\s*.{0,8}(išmokti|pramokti|learn|выучить|освоить|научиться)\\s*.{0,40}(dirbti|darb|work|job|работ)", 11),
+      // "Ko man trūksta / ko reikia, kad galėčiau dirbti X?" — the person
+      // asks what THEY lack for a named work (owner 2026-09-29 §13).
+      // Measured: need-workers (a hiring flow for a person asking about
+      // themselves) / unknown. Bound to the FIRST PERSON doing the work
+      // ("kad galėčiau dirbti", "am I missing … to work as", "um … zu
+      // arbeiten", "чтобы работать"), so "I need someone to work as a
+      // welder" keeps need-workers.
+      p("(ko|ką|ka)\\s+.{0,12}(trūksta|reikia|reikėtų)\\s*.{0,24}kad\\s+(galėčiau\\s+(dirbti|būti|tapti)|dirbčiau|tapčiau)", 12),
+      p("(what|which)\\s+.{0,20}(am\\s+i\\s+(missing|lacking)|do\\s+i\\s+(need|lack|miss))\\s*.{0,24}to\\s+(work\\s+as|become)\\b", 12),
+      p("(was|welche)\\s+.{0,30}(lernen|fehlt\\s+mir)\\s*.{0,30}(um\\s+.{0,30}zu\\s+arbeiten|zu\\s+werden)", 12),
+      p("(чему|что)\\s+.{0,20}(научиться|выучить|освоить|не\\s+хватает)\\s*.{0,24}чтобы\\s+(работать|стать)", 12),
       p("(what|which)\\s+skills?\\s*(am\\s+i|do\\s+i)?\\s*(missing|lack|need)", 5),
       p("(каких|какие)\\s+навык", 5),
       p("skill\\s*gap", 4),
