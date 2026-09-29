@@ -208,6 +208,17 @@ export function readCompoundStatement(text: string): CompoundStatementV1 {
   // owner's VCA rule.
   const documentTypeSlug = guessDocumentType(raw);
   if (documentTypeSlug) {
+    // A word that NAMES the document is not a skill (production walk
+    // 2026-09-29: "Turiu B kategorijos vairuotojo pažymėjimą" listed
+    // "Įgūdis: vairuotojo" beside the driving licence).
+    const DOC_NOUN =
+      /^\s*(pažymėj|pazymej|liudijim|licen|удостовер|прав|führerschein|fuhrerschein|rijbewijs|prawo|certifikat|sertifikat|kortel)/iu;
+    for (let i = facts.length - 1; i >= 0; i--) {
+      const f = facts[i]!;
+      if (f.kind !== "skill") continue;
+      const at = raw.toLowerCase().indexOf(f.statedAs.toLowerCase());
+      if (at >= 0 && DOC_NOUN.test(raw.slice(at + f.statedAs.length))) facts.splice(i, 1);
+    }
     facts.push({
       kind: "credential",
       statedAs: raw,
