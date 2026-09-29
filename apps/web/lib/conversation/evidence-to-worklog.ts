@@ -107,7 +107,10 @@ export function applySpokenHoursCorrection(
   const last = (latest ?? said[said.length - 1] ?? "").trim();
   const ask = readCorrectionAsk(last);
   if (ask.kind !== "hours" || ask.from === null) return { said, latest, applied: false };
-  const earlier = said.filter((x) => x.trim() !== last);
+  // The correction is never evidence — whether it arrives as its own sentence
+  // or inside the goal's combined `latest` (production walk 2026-09-29: the
+  // card still showed "o 4 valandas" as a second 4 h activity).
+  const earlier = said.filter((x) => x.trim() !== last && readCorrectionAsk(x).kind !== "hours");
   const fromRe = new RegExp(
     String.raw`(^|[^\d.,])` +
       String(ask.from).replace(".", "[.,]") +

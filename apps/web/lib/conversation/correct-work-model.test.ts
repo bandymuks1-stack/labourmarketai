@@ -54,3 +54,13 @@ describe("a spoken hours correction inside an open work log", () => {
     expect(applySpokenHoursCorrection(["Šiandien 5 valandas betonavau."])).toMatchObject({ applied: false });
   });
 });
+
+describe("the goal's combined sentence (production shape)", () => {
+  it("drops the correction sentence even when `latest` is everything said", () => {
+    const said = ["[QA-SYNTHETIC] Šiandien 3 valandas armavau.", "Ne 3, o 4 valandas."];
+    const latest = said.join(" ");
+    const draft = worklogDraftFromEvidence({ said, latest, evidence: null, today: "2026-09-29" });
+    expect(draft.workedMinutes).toBe(240);
+    expect(draft.notes).toBe("[QA-SYNTHETIC] Šiandien 4 valandas armavau.");
+  });
+});
