@@ -6782,7 +6782,16 @@ export function ConversationChat({
         taskStatus: () => startTaskStatus(text),
         projectRisk: () => startProjectRisk(),
         projectReadiness: () => startProjectReadiness(text),
-        confirmWork: () => startConfirmWork(text),
+        // "Kas laukia vadovo patvirtinimo?" said by a WORKER in their own space
+        // (owner continuation 2026-09-29) fell to the fallback: confirm-work is
+        // the manager's queue. In the person space it is answered from the
+        // person's own entries — the SAME confirmed-vs-recorded read as "kiek
+        // patvirtinta?" — and someone who can also manage is offered the switch.
+        confirmWork: () => {
+          if (identity === "company") return startConfirmWork(text);
+          runWorkflow(() => runWorkIntelligenceQuestion(text, "journal-confirmed"));
+          if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
+        },
         moveWorker: () => startMoveWorker(text),
         // "Atsisiųsk mano CV" is the verified CV SHEET (print-to-PDF), not the
         // import flow the bare "cv" chip starts. One chip to the one canonical
