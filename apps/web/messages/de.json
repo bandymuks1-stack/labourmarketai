@@ -11651,7 +11651,8 @@
     "serviceRemote": "Ortsunabhängig",
     "photoAlt": "Foto abgeschlossener Arbeit",
     "historyTitle": "Importierter Verlauf",
-    "historyUnavailable": "Importierter Verlauf konnte nicht gelesen werden"
+    "historyUnavailable": "Importierter Verlauf konnte nicht gelesen werden",
+    "currentWork": "Arbeitet derzeit"
   },
   "companyGallery": {
     "title": "Galerie",

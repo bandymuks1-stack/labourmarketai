@@ -11651,7 +11651,8 @@
     "serviceRemote": "Op afstand",
     "photoAlt": "Foto van uitgevoerd werk",
     "historyTitle": "Geïmporteerde geschiedenis",
-    "historyUnavailable": "Geïmporteerde geschiedenis kon niet worden gelezen"
+    "historyUnavailable": "Geïmporteerde geschiedenis kon niet worden gelezen",
+    "currentWork": "Werkt nu"
   },
   "companyGallery": {
     "title": "Galerij",

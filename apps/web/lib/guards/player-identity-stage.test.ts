@@ -114,3 +114,16 @@ describe("the stage", () => {
     expect(CARD).toContain("syncUrl={!sample}");
   });
 });
+
+describe("the company-side person page speaks the same identity language", () => {
+  const PERSON = read("app/[locale]/dashboard/people/[workerId]/page.tsx");
+  it("uses the ONE identity stage — no private avatar tile", () => {
+    expect(PERSON).toMatch(/<IdentityStage/);
+    expect(PERSON).not.toMatch(/flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-ink-500 bg-ink-700/);
+  });
+  it("shows no hours strip: the viewer reads only their own organization's entries", () => {
+    const stage = PERSON.slice(PERSON.indexOf("<IdentityStage"), PERSON.indexOf("</IdentityStage>"));
+    expect(stage).not.toMatch(/facts=/);
+    expect(stage).toMatch(/\.filter\(\(e\) => e\.current\)/);
+  });
+});

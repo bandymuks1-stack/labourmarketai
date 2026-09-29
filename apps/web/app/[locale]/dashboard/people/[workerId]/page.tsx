@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { IdentityStage } from "@/components/app/player-card/identity-stage";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import {
   availabilityDateLabel,
@@ -270,38 +271,59 @@ export default async function PersonPage({
           <UserRound className="h-3.5 w-3.5" aria-hidden />
           {t("eyebrow")}
         </span>
-        <div className="flex flex-wrap items-center gap-4">
-          <span
-            aria-hidden
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-ink-500 bg-ink-700 font-display text-lg font-bold text-text-primary"
-          >
-            {name
+        {/* THE PERSON — the SAME identity stage the Player Card and the
+            profile use (premium team view, 2026-09-29): one professional
+            identity language across the product. Only what THIS viewer may
+            see: current work is the RLS-visible engagements; no hours strip
+            here, because the viewer reads only their own organization's
+            entries — the scoped figures stay in the work-in-numbers section. */}
+        <IdentityStage
+          name={name}
+          avatarUrl={null}
+          initials={
+            name
               .trim()
               .split(/\s+/)
               .slice(0, 2)
               .map((p) => p[0]?.toUpperCase() ?? "")
-              .join("") || "•"}
-          </span>
-          <div className="min-w-0">
-            <h1
-              className="font-display text-2xl font-bold tracking-tightest text-text-primary"
-              data-testid="person-name"
-            >
-              {name}
-            </h1>
-            {worker.headline ? (
-              <p className="text-sm text-text-secondary">
-                {worker.headline as string}
-              </p>
-            ) : null}
-          </div>
-        </div>
+              .join("") || "•"
+          }
+          heading={
+                <h1
+                  className="font-display text-2xl font-bold tracking-tightest text-text-primary"
+                  data-testid="person-name"
+                >
+                  {name}
+                </h1>
+          }
+          professions={[]}
+          location={
+            worker.current_location_country
+              ? countryLabel(worker.current_location_country as string, countries)
+              : null
+          }
+          availability={available ? { label: t("available"), live: true } : null}
+          currentWork={
+            recordedWork.status === "ok"
+              ? [
+                  ...new Set(
+                    recordedWork.entries
+                      .filter((e) => e.current)
+                      .map((e) => (e.organizationName ?? "").trim())
+                      .filter((n) => n.length > 0),
+                  ),
+                ]
+              : []
+          }
+          currentWorkLabel={t("currentWork")}
+        >
+              {worker.headline ? (
+                <p className="text-sm text-text-secondary">
+                  {worker.headline as string}
+                </p>
+              ) : null}
+        </IdentityStage>
         <div className="flex flex-wrap gap-2">
-          {available ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-state-success/40 bg-state-success/10 px-3 py-1 font-mono text-meta uppercase tracking-label text-state-success">
-              {t("available")}
-            </span>
-          ) : null}
           {worker.available_from ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
               <CalendarDays className="h-3 w-3" aria-hidden />
@@ -316,12 +338,6 @@ export default async function PersonPage({
                   format,
                 ),
               })}
-            </span>
-          ) : null}
-          {worker.current_location_country ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
-              <MapPin className="h-3 w-3" aria-hidden />
-              {countryLabel(worker.current_location_country as string, countries)}
             </span>
           ) : null}
           {typeof worker.experience_years === "number" &&
