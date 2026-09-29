@@ -1142,6 +1142,10 @@ const RULES: IntentRule[] = [
   {
     intent: "client-demand",
     patterns: [
+      // "PARODYK MANO KLIENTUS" (AGENCY Chat ↔ visual loop walk, 2026-09-29):
+      // scored 0 and the model fallback opened the INVITE form — a write for a
+      // read. Showing the clients is this read; an invite verb keeps invite.
+      p("^(?!.*(pakvies|kviesk|kviesti|prid[eė]|invite|add\\s|приглас|добав|einlad|uitnodig|zapro)).*\\b(parodyk|rodyk|kokie|kas|mano|musu|show|list|my|our|who\\s+are|покажи|мои|наши|zeige|meine|toon|mijn|pokaz|moi|moich)\\b.{0,20}(klient|clients?\\b|клиент|kunde|klant)", 8),
       // "PARODYK KLIENTUS, KURIEMS VIS DAR TRŪKSTA DARBUOTOJŲ" (owner's own
       // agency example, production chat walk 2026-09-29): read as the
       // company's OWN need intake ("trūksta darbuotojų"). Clients + a lack /
