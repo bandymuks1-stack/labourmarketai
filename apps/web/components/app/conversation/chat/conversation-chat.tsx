@@ -112,6 +112,8 @@ import type { StageStatus } from "@/lib/projects/stages-model";
 import { stripEndDatePhrase, parseEndDate, parseStartDate } from "@/lib/structuring/time-window";
 import { payPrefill, readPayStatement } from "@/lib/conversation/pay-statement";
 import { readStatedLanguages } from "@/lib/conversation/language-statement";
+import { readSkillStatement } from "@/lib/conversation/skill-statement";
+import { saveStatedSkillAction } from "@/lib/profile/stated-skill-actions";
 import { WORKER_LANGUAGE_NATIVE_NAMES } from "@/lib/worker/worker-languages-model";
 import { pastWorkOwnWords, readPastWorkPeriod } from "@/lib/conversation/past-work-period";
 import { correctionHref, readCorrectionAsk } from "@/lib/conversation/correct-work-model";
@@ -5138,6 +5140,35 @@ export function ConversationChat({
           runAgencyRead("progress");
           break;
         default:
+          if (chip.id.startsWith("skill:save:")) {
+            user(chip.label);
+            const phrase = decodeURIComponent(chip.id.slice("skill:save:".length));
+            setTyping(true);
+            saveStatedSkillAction(phrase)
+              .then((res) => {
+                setTyping(false);
+                if (!res.ok || !res.saved) {
+                  assistant(t("skillStatement.failed"));
+                  return;
+                }
+                assistant(
+                  [
+                    t("skillStatement.saved", { phrase }),
+                    res.promoted > 0 || res.alreadySaved > 0
+                      ? t("skillStatement.linked")
+                      : res.outsideDirections > 0
+                        ? t("skillStatement.outsideDirections")
+                        : t("skillStatement.wordsOnly"),
+                  ].join("\n"),
+                  [{ id: "profile", label: labels.chipProfile }],
+                );
+              })
+              .catch(() => {
+                setTyping(false);
+                assistant(t("skillStatement.failed"));
+              });
+            break;
+          }
           if (chip.id.startsWith("prof:")) {
             user(chip.label);
             runProfessionSave(chip.id);
@@ -6253,6 +6284,29 @@ export function ConversationChat({
          * own write), prefilled; a level only when they said one. The
          * sentence writes nothing.
          */
+        /**
+         * "Išmokau skaityti techninius brėžinius" (2026-09-29): the person's
+         * words, offered as their own skill claim; the chip saves it through
+         * the profile's path. Never marked verified.
+         */
+        skillStatement: () => {
+          if (identity === "company") {
+            const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+            assistant(
+              t("skillStatement.notInCompany"),
+              personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+            );
+            return;
+          }
+          const stated = readSkillStatement(text);
+          if (!stated) {
+            startProfileSummary("profile");
+            return;
+          }
+          assistant(t("skillStatement.understood", { phrase: stated.phrase }), [
+            { id: `skill:save:${encodeURIComponent(stated.phrase)}`, label: t("skillStatement.chipSave") },
+          ]);
+        },
         languageStatement: () => {
           if (identity === "company") {
             const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");

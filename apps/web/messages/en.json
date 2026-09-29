@@ -13294,6 +13294,16 @@
         "askWhich": "Which language do you speak? Choose the language and level, then save.",
         "notInCompany": "Your languages are your own fact. Switch to your personal space and say it again."
       },
+      "skillStatement": {
+        "understood": "Got it: “{phrase}”. I can add it to your profile as a skill you state yourself — not verified. Save it?",
+        "chipSave": "Save skill",
+        "saved": "Saved to your profile: “{phrase}” (self-stated).",
+        "linked": "Linked to the skills list — used for matching.",
+        "outsideDirections": "The skill is in the list but outside your professions — it stays in your words; add the fitting direction for matching.",
+        "wordsOnly": "It stays in your words — no match in the skills list.",
+        "failed": "Saving failed — nothing changed. Try again.",
+        "notInCompany": "Skills are your own. Switch to your personal space and say it again."
+      },
       "pay": {
         "understoodRange": "Got it: pay expectation {min}–{max} € per month. I put the figures into your work card — check and save. Nothing changes until you save.",
         "understoodMin": "Got it: pay expectation at least {min} € per month. I put the figure into your work card — check and save. Nothing changes until you save.",

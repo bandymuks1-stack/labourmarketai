@@ -137,6 +137,8 @@ export type ConversationIntent =
   | "pay-statement"
   // Languages said in words — the language form per language (2026-09-29).
   | "language-statement"
+  // A skill said in words — reviewed, saved as the person's claim (2026-09-29).
+  | "skill-statement"
   // A correction of the newest entry said in words (2026-09-29).
   | "correct-work"
   // "Kur dabar dirbu?" — the canonical work contexts (2026-09-29).
@@ -2305,6 +2307,24 @@ const RULES: IntentRule[] = [
       p("\\b(corrigeer|wijzig|verander)\\b.{0,30}(invoer|uren|registratie)", 9),
       p("\\b(popraw|zmien|zmień)\\w*\\b.{0,30}(wpis|godzin)", 9),
       p("^\\s*(tai|that|это|das|dat|to)\\s+(buvo|was|было|war|by[lł]o)\\s+(vakar|uzvakar|yesterday|вчера|позавчера|gestern|vorgestern|gisteren|eergisteren|wczoraj|przedwczoraj)\\b", 9),
+    ],
+  },
+  {
+    /**
+     * A SKILL SAID IN WORDS (owner continuation 2026-09-29): "Išmokau skaityti
+     * techninius brėžinius." scored 0. A learn/know verb opens the review of
+     * the person's own words as a skill claim, saved through the profile's
+     * own path on an explicit chip (lib/conversation/skill-statement.ts).
+     * Weight 6 so a LANGUAGE ("moku anglų kalbą", 7) keeps its own door.
+     */
+    intent: "skill-statement",
+    patterns: [
+      // `[^\\s]`, not `\\S`: pattern sources are folded (lower-cased) by p().
+      pNoSeek("\\b(ismokau|ismokes|ismokusi|moku|gebu|sugebu)\\b\\s+[^\\s]", 6),
+      pNoSeek("\\b(i\\s+learned|i\\s+learnt|i\\s+know\\s+how\\s+to|skilled\\s+in)\\b", 6),
+      pNoSeek("(научился|научилась|умею)\\s", 6),
+      pNoSeek("\\b(gelernt|beherrsche|geleerd|beheers)\\b", 6),
+      pNoSeek("(nauczy[lł]em\\s+si[eę]|nauczy[lł]am\\s+si[eę]|potrafi[eę]|umiem)\\s", 6),
     ],
   },
   {

@@ -13294,6 +13294,16 @@
         "askWhich": "Kokią kalbą moki? Pasirink kalbą ir lygį, tada išsaugok.",
         "notInCompany": "Kalbos — tavo asmeninis faktas. Persijunk į asmeninę erdvę ir parašyk dar kartą."
       },
+      "skillStatement": {
+        "understood": "Supratau: „{phrase}“. Galiu įrašyti tai į tavo profilį kaip tavo paties nurodytą įgūdį — ne patvirtintą. Įrašyti?",
+        "chipSave": "Įrašyti įgūdį",
+        "saved": "Išsaugota profilyje: „{phrase}“ (tavo paties nurodyta).",
+        "linked": "Susieta su įgūdžių sąrašu — naudojama atitikimams.",
+        "outsideDirections": "Įgūdis sąraše yra, bet ne tavo nurodytose profesijose — liko tavo žodžiais; atitikimams pridėk tinkamą kryptį.",
+        "wordsOnly": "Liko tavo žodžiais — įgūdžių sąraše atitikmens neradau.",
+        "failed": "Nepavyko išsaugoti — niekas nepasikeitė. Pabandyk dar kartą.",
+        "notInCompany": "Įgūdžiai — tavo asmeniniai. Persijunk į asmeninę erdvę ir parašyk dar kartą."
+      },
       "pay": {
         "understoodRange": "Supratau: atlyginimo lūkestis nuo {min} iki {max} € per mėnesį. Įrašiau sumas į darbo kortelę — peržiūrėk ir išsaugok. Kol neišsaugosi, niekas nepasikeis.",
         "understoodMin": "Supratau: atlyginimo lūkestis ne mažiau kaip {min} € per mėnesį. Įrašiau sumą į darbo kortelę — peržiūrėk ir išsaugok. Kol neišsaugosi, niekas nepasikeis.",

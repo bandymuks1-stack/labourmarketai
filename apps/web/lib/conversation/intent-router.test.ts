@@ -916,6 +916,14 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     de: "Nicht 5, sondern 6 Stunden",
     pl: "Nie 5, a 6 godzin",
   },
+  "skill-statement": {
+    lt: "Išmokau skaityti techninius brėžinius",
+    en: "I learned to read blueprints",
+    ru: "Я научился читать чертежи",
+    nl: "Ik heb tegelwerk geleerd",
+    de: "Ich habe Fliesenlegen gelernt",
+    pl: "Nauczyłem się czytać rysunki",
+  },
   "language-statement": {
     lt: "Kalbu angliškai ir rusiškai",
     en: "I speak English and German",

@@ -13294,6 +13294,16 @@
         "askWhich": "Welche Sprache sprichst du? Wähle Sprache und Niveau, dann speichern.",
         "notInCompany": "Deine Sprachen sind deine eigene Angabe. Wechsle in deinen persönlichen Bereich und sag es noch einmal."
       },
+      "skillStatement": {
+        "understood": "Verstanden: „{phrase}“. Ich kann das als selbst angegebene Fähigkeit in dein Profil eintragen — nicht bestätigt. Speichern?",
+        "chipSave": "Fähigkeit speichern",
+        "saved": "Im Profil gespeichert: „{phrase}“ (selbst angegeben).",
+        "linked": "Mit der Fähigkeitenliste verknüpft — wird für Treffer genutzt.",
+        "outsideDirections": "Die Fähigkeit ist in der Liste, aber nicht in deinen Berufen — sie bleibt in deinen Worten; füge die passende Richtung hinzu.",
+        "wordsOnly": "Sie bleibt in deinen Worten — kein Treffer in der Liste.",
+        "failed": "Speichern fehlgeschlagen — nichts geändert. Versuch es erneut.",
+        "notInCompany": "Fähigkeiten gehören dir. Wechsle in deinen persönlichen Bereich und sag es noch einmal."
+      },
       "pay": {
         "understoodRange": "Verstanden: Gehaltswunsch {min}–{max} € pro Monat. Ich habe die Beträge in deine Arbeitskarte eingetragen — prüfen und speichern. Bis du speicherst, ändert sich nichts.",
         "understoodMin": "Verstanden: Gehaltswunsch mindestens {min} € pro Monat. Ich habe den Betrag in deine Arbeitskarte eingetragen — prüfen und speichern. Bis du speicherst, ändert sich nichts.",

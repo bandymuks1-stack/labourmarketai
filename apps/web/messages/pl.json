@@ -13294,6 +13294,16 @@
         "askWhich": "Jaki język znasz? Wybierz język i poziom, potem zapisz.",
         "notInCompany": "Języki to Twoja własna informacja. Przełącz się na przestrzeń osobistą i napisz jeszcze raz."
       },
+      "skillStatement": {
+        "understood": "Rozumiem: „{phrase}”. Mogę dodać to do profilu jako umiejętność podaną przez Ciebie — niepotwierdzoną. Zapisać?",
+        "chipSave": "Zapisz umiejętność",
+        "saved": "Zapisano w profilu: „{phrase}” (podane przez Ciebie).",
+        "linked": "Połączono z listą umiejętności — używane do dopasowań.",
+        "outsideDirections": "Umiejętność jest na liście, ale poza Twoimi zawodami — zostaje Twoimi słowami; dodaj pasujący kierunek.",
+        "wordsOnly": "Zostaje Twoimi słowami — brak dopasowania na liście.",
+        "failed": "Zapis nie powiódł się — nic nie zmieniono. Spróbuj ponownie.",
+        "notInCompany": "Umiejętności są Twoje. Przełącz się na przestrzeń osobistą i napisz jeszcze raz."
+      },
       "pay": {
         "understoodRange": "Rozumiem: oczekiwane wynagrodzenie {min}–{max} € miesięcznie. Wpisałem kwoty do Twojej karty pracy — sprawdź i zapisz. Dopóki nie zapiszesz, nic się nie zmieni.",
         "understoodMin": "Rozumiem: oczekiwane wynagrodzenie co najmniej {min} € miesięcznie. Wpisałem kwotę do Twojej karty pracy — sprawdź i zapisz. Dopóki nie zapiszesz, nic się nie zmieni.",

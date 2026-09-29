@@ -122,7 +122,9 @@ describe("the intent registry is the enumerable routing contract", () => {
     // an ended placement.
     // 85 → 86 (2026-09-29): language-statement — "Kalbu angliškai ir
     // rusiškai" scored 0; one language form per stated language.
-    expect(entries.length).toBe(86);
+    // 86 → 87 (2026-09-29): skill-statement — "Išmokau skaityti techninius
+    // brėžinius" scored 0; the words are offered as the person's own claim.
+    expect(entries.length).toBe(87);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -181,6 +183,8 @@ describe("the intent registry is the enumerable routing contract", () => {
       // Owner program 2026-09-23: rename the ACTIVE organization — the ONE
       // confirm form over `company.rename-organization` (important tier).
       "rename-organization",
+      // "išmokau …" — the person's words as a skill claim, saved by an explicit chip.
+      "skill-statement",
       // PROJECT → PROGRESS: a stage moved to a real status, by sentence.
       "stage-status",
       "switch-context",
