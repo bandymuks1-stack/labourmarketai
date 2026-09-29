@@ -6261,7 +6261,12 @@
         "photoAlt": "Work photo from a journal entry",
         "unknownWorker": "Worker",
         "sourceNote": "Photos are part of workers' journal entries — they are never altered or automatically assessed."
-      }
+      },
+      "areasLabel": "Work areas",
+      "allAreas": "All",
+      "areaUnknown": "Profession not set",
+      "areaBasis": "By each person's primary profession",
+      "teamLabel": "Team"
     },
     "workerView": {
       "eyebrow": "My project",
