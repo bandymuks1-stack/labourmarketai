@@ -55,6 +55,7 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   "language-statement": "the person states which languages they speak ('kalbu angliškai ir rusiškai', 'I speak English B2')",
   "skill-statement": "the person states a skill they learned or have ('išmokau skaityti techninius brėžinius')",
   "saved-opportunities": "the jobs / opportunities the person saved (bookmarked) on the opportunities page",
+  "open-tasks": "which tasks are still open — all, or in a named project ('kokios užduotys projekte X?')",
   "correct-work": "the person corrects their newest work-journal entry in words ('ne 5, o 6 valandas', 'tai buvo vakar')",
   "current-work": "where the person works now: their active work relationships with organizations ('kur dabar dirbu?')",
   "company-overview": "overview of the company workspace",

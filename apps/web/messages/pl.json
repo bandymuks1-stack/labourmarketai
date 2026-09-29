@@ -13334,6 +13334,16 @@
         "unavailable": "Nie udało się odczytać zapisanych możliwości — nie zgaduję.",
         "chipOpen": "Otwórz zapisane"
       },
+      "openTasks": {
+        "intro": "Otwarte zadania ({count}):",
+        "introProject": "Otwarte zadania w „{project}” ({count}):",
+        "none": "Brak otwartych zadań.",
+        "noneInProject": "Brak otwartych zadań w „{project}”.",
+        "unavailable": "Nie udało się odczytać zadań — nie zgaduję.",
+        "status_todo": "do zrobienia",
+        "status_in_progress": "w toku",
+        "status_blocked": "zablokowane"
+      },
       "pay": {
         "understoodRange": "Rozumiem: oczekiwane wynagrodzenie {min}–{max} € miesięcznie. Wpisałem kwoty do Twojej karty pracy — sprawdź i zapisz. Dopóki nie zapiszesz, nic się nie zmieni.",
         "understoodMin": "Rozumiem: oczekiwane wynagrodzenie co najmniej {min} € miesięcznie. Wpisałem kwotę do Twojej karty pracy — sprawdź i zapisz. Dopóki nie zapiszesz, nic się nie zmieni.",

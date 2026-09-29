@@ -916,6 +916,14 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     de: "Nicht 5, sondern 6 Stunden",
     pl: "Nie 5, a 6 godzin",
   },
+  "open-tasks": {
+    lt: "Kokios užduotys dar atviros?",
+    en: "Which tasks are open?",
+    ru: "Какие задачи открыты?",
+    nl: "Welke taken staan open?",
+    de: "Welche Aufgaben sind offen?",
+    pl: "Jakie zadania są otwarte?",
+  },
   "saved-opportunities": {
     lt: "Parodyk išsaugotus darbus",
     en: "Show my saved jobs",

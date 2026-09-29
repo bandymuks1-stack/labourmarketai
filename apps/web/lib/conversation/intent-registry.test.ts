@@ -126,7 +126,9 @@ describe("the intent registry is the enumerable routing contract", () => {
     // brėžinius" scored 0; the words are offered as the person's own claim.
     // 87 → 88 (2026-09-29): saved-opportunities — a job saved on the page
     // was invisible to the chat ("parodyk išsaugotus darbus" ran a search).
-    expect(entries.length).toBe(88);
+    // 88 → 89 (2026-09-29): open-tasks — "Kokios užduotys projekte …?" could
+    // not read the task the project panel already counted.
+    expect(entries.length).toBe(89);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 

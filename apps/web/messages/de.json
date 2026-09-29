@@ -13334,6 +13334,16 @@
         "unavailable": "Ich konnte deine gespeicherten Möglichkeiten nicht lesen — ich rate nicht.",
         "chipOpen": "Gespeicherte öffnen"
       },
+      "openTasks": {
+        "intro": "Offene Aufgaben ({count}):",
+        "introProject": "Offene Aufgaben in „{project}“ ({count}):",
+        "none": "Keine offenen Aufgaben.",
+        "noneInProject": "Keine offenen Aufgaben in „{project}“.",
+        "unavailable": "Ich konnte die Aufgaben nicht lesen — ich rate nicht.",
+        "status_todo": "zu erledigen",
+        "status_in_progress": "in Arbeit",
+        "status_blocked": "blockiert"
+      },
       "pay": {
         "understoodRange": "Verstanden: Gehaltswunsch {min}–{max} € pro Monat. Ich habe die Beträge in deine Arbeitskarte eingetragen — prüfen und speichern. Bis du speicherst, ändert sich nichts.",
         "understoodMin": "Verstanden: Gehaltswunsch mindestens {min} € pro Monat. Ich habe den Betrag in deine Arbeitskarte eingetragen — prüfen und speichern. Bis du speicherst, ändert sich nichts.",
