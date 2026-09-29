@@ -10518,6 +10518,19 @@
       "thisMonth": "{hours} godz. w tym miesiącu (wyliczone)",
       "sourceLink": "Otwórz zapis okresu",
       "unavailable": "Nie udało się teraz odczytać zapisów okresowych — plan jest pokazany bez nich."
+    },
+    "rhythm": {
+      "label": "Rytm pracy",
+      "daysWorked": "{count, plural, one {# dzień pracy} few {# dni pracy} many {# dni pracy} other {# dnia pracy}}",
+      "empty": "W tym tygodniu nie zapisano pracy",
+      "confirmedOf": "Potwierdzono {confirmed} z {total}",
+      "confirmed": "Potwierdzone",
+      "hoursUnit": "godz.",
+      "openJournal": "Otwórz w dzienniku",
+      "confirmation": {
+        "all": "Wszystkie wpisy dnia potwierdzone",
+        "partial": "Część wpisów dnia potwierdzona"
+      }
     }
   },
   "workforcePlanning": {

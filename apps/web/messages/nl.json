@@ -10518,6 +10518,19 @@
       "thisMonth": "{hours} u deze maand (afgeleid)",
       "sourceLink": "Periode-record openen",
       "unavailable": "Periode-records konden nu niet worden gelezen — het plan wordt zonder getoond."
+    },
+    "rhythm": {
+      "label": "Werkritme",
+      "daysWorked": "{count, plural, one {# dag gewerkt} other {# dagen gewerkt}}",
+      "empty": "Deze week geen werk vastgelegd",
+      "confirmedOf": "{confirmed} van {total} bevestigd",
+      "confirmed": "Bevestigd",
+      "hoursUnit": "u",
+      "openJournal": "Openen in logboek",
+      "confirmation": {
+        "all": "Alle registraties van de dag bevestigd",
+        "partial": "Een deel van de registraties bevestigd"
+      }
     }
   },
   "workforcePlanning": {

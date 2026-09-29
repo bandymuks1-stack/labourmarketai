@@ -10518,6 +10518,19 @@
       "thisMonth": "{hours} val. šį mėnesį (išvestinė)",
       "sourceLink": "Atidaryti laikotarpio įrašą",
       "unavailable": "Laikotarpio įrašų dabar nepavyko perskaityti — planas rodomas be jų."
+    },
+    "rhythm": {
+      "label": "Darbo ritmas",
+      "daysWorked": "{count, plural, one {# diena su darbu} few {# dienos su darbu} other {# dienų su darbu}}",
+      "empty": "Šią savaitę darbas neužfiksuotas",
+      "confirmedOf": "{confirmed} iš {total} patvirtinta",
+      "confirmed": "Patvirtinta",
+      "hoursUnit": "val.",
+      "openJournal": "Atidaryti žurnale",
+      "confirmation": {
+        "all": "Visi dienos įrašai patvirtinti",
+        "partial": "Dalis dienos įrašų patvirtinta"
+      }
     }
   },
   "workforcePlanning": {

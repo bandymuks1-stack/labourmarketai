@@ -605,6 +605,33 @@ a {
   animation: rise-in var(--motion-base) var(--motion-ease-out) both;
 }
 
+/* The work rhythm (calendar week): a day's bar and a block's duration line
+   GROW to their recorded length — the motion says "this much time", once. */
+@keyframes rhythm-grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes rhythm-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.rhythm-grow {
+  transform-origin: bottom;
+  animation: rhythm-grow var(--motion-slow) var(--motion-ease-out) both;
+}
+.rhythm-grow-x {
+  transform-origin: left;
+  animation: rhythm-grow-x var(--motion-slow) var(--motion-ease-out) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .live-dot,
   [data-decor],
@@ -617,6 +644,8 @@ a {
   .signal-dot,
   .verified-pop,
   .rise-in,
+  .rhythm-grow,
+  .rhythm-grow-x,
   /* UX 2.0 conversation motion — folded into the ONE reduced-motion block so
      there is a single place to verify that every animation is covered. */
   .ua-msg-in,
