@@ -1940,6 +1940,15 @@ const RULES: IntentRule[] = [
   {
     intent: "cv-view",
     patterns: [
+      // "PARODYK MANO DARBO ISTORIJĄ" (owner continuation 2026-09-29 §8):
+      // measured as a JOB SEARCH ("darbo"). The person's work history is the
+      // Living CV — the projection of their confirmed and stated work. An
+      // UPLOAD of old history stays the import door (hours-import guards).
+      p("^(?!.*(ikel|upload|import|загруз|hochlad|uploaden|wgra|przesl)).*\\b(darbo|profesin\\w*)\\s+istorij", 9),
+      p("^(?!.*(ikel|upload|import|загруз|hochlad|uploaden|wgra|przesl)).*\\b(work|employment|professional)\\s+history\\b", 9),
+      p("^(?!.*(ikel|upload|import|загруз|hochlad|uploaden|wgra|przesl)).*истори[а-яё]*\\s+(моей\\s+)?работ", 9),
+      p("^(?!.*(ikel|upload|import|загруз|hochlad|uploaden|wgra|przesl)).*\\b(werkgeschiedenis|arbeitsverlauf|berufsverlauf)\\b", 9),
+      p("^(?!.*(ikel|upload|import|загруз|hochlad|uploaden|wgra|przesl)).*\\bhistori\\w*\\s+(mojej\\s+)?(pracy|zatrudnienia)\\b", 9),
       // SEEING / OPENING what already exists. Every verb here was measured
       // against the live router on 2026-09-07 and reached the IMPORT flow.
       // LT: pamatyti / peržiūrėti / atidaryti / atverti / rodyk / parodyk
@@ -2865,6 +2874,15 @@ const RULES: IntentRule[] = [
     // reached through its explicit chip, never through this sentence.
     intent: "player-card",
     patterns: [
+      // "KOKIOS PROFESIJOS NURODYTOS?" / "KOKIE MANO ĮGŪDŽIAI PATVIRTINTI?"
+      // (owner continuation 2026-09-29 §8): the first scored 0, the second
+      // reached the ADMIN approvals area on the word "patvirtinti". The card
+      // is where the person's professions and skills stand, each skill with
+      // the evidence behind it — the read both questions ask for.
+      p("\\b(mano|my|мои|моя|meine?|mijn|moje|moja)\\s+(profesij|professions?\\b|професси|beruf|beroep|zaw[oó]d)", 7),
+      p("\\bprofesij\\w*\\s+(nurodyt|pazymet|irasyt)", 7),
+      p("\\b(kokia|kokios|kokias)\\s+(yra\\s+)?mano\\s+profesij", 7),
+      p("\\b(mano|my|мои|meine|mijn|moje)\\s+(igudzi|skills?\\b|навык|f[aä]higkeit|vaardighed|umiej[eę]tno)\\w*.{0,20}(patvirtint|confirmed|verified|подтвержд|best[aä]tigt|bevestigd|potwierdz)", 8),
       p(
         "(parodyk|rodyk|atidaryk|show|open|покажи|открой|zeig|toon|laat|poka[zż]|otw[oó]rz|wy[sś]wietl)\\s*.{0,14}(kortel|card\\b|карточк|karte\\b|kaart\\b|kart[aeoy]\\b|kart[eę]\\b)",
         7,
@@ -2921,6 +2939,15 @@ const RULES: IntentRule[] = [
      */
     intent: "engagements",
     patterns: [
+      // "KUR DABAR DIRBU?" (owner continuation 2026-09-29 §8): scored 0 and
+      // was answered "no answer yet" while the person's work relationships
+      // are exactly this read. Where-do-I-work, six locales.
+      p("\\bkur\\s+(as\\s+)?(dabar\\s+)?(as\\s+)?dirbu\\b", 7),
+      p("\\bwhere\\s+(do|am)\\s+i\\s+(currently\\s+|now\\s+)?work(ing)?\\b", 7),
+      p("где\\s+я\\s+(сейчас\\s+)?работаю", 7),
+      p("\\bwo\\s+arbeite\\s+ich\\b", 7),
+      p("\\bwaar\\s+werk\\s+ik\\b", 7),
+      p("\\bgdzie\\s+(teraz\\s+)?pracuj[eę]\\b", 7),
       p("(darbo\\s+santyk|work\\s+relationship|working\\s+relationship|рабочие\\s+отношени|werkrelatie|arbeitsbeziehung|stosunek\\s+pracy|relacj\\w*\\s+zawodow)", 7),
       p("(su\\s+kuo)\\s*.{0,14}(dirb)", 7),
       p("(z\\s+kim)\\s*.{0,14}(pracuj|wsp[oó][lł]prac)", 7), // pl
