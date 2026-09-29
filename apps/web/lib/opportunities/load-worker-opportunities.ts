@@ -322,6 +322,7 @@ export async function loadWorkerOpportunities(
         ctx.subject.languages ?? (ctx.subject.languageLevels ?? []).map((l) => l.lang),
       salaryMinEur: ctx.subject.salaryMinEur ?? null,
       city: ctx.subject.city ?? null,
+      preferredCountries: ctx.subject.preferredCountries ?? [],
     },
   };
 

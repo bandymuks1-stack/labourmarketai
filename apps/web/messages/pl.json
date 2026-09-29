@@ -9485,7 +9485,8 @@
         "pay": "oczekiwane wynagrodzenie — od {amount} EUR",
         "payMissing": "nie podano oczekiwanego wynagrodzenia",
         "languages": "języki — {list}",
-        "languagesMissing": "nie podano języków"
+        "languagesMissing": "nie podano języków",
+        "preferredCountries": "preferowane kraje — {value}"
       },
       "countsPlatform": "zapytania z platformy: pokazano {shown} z {retrieved}",
       "countsPlatformUnavailable": "zapytania z platformy: jeszcze niewłączone",
@@ -9520,7 +9521,8 @@
       "mapTitle": "Gdzie jest praca",
       "skipToList": "Do listy",
       "placeLink": "Pokaż możliwości w tym kraju",
-      "sourcesIncomplete": "Część źródeł ofert jest chwilowo niedostępna, więc ta lista może być niepełna."
+      "sourcesIncomplete": "Część źródeł ofert jest chwilowo niedostępna, więc ta lista może być niepełna.",
+      "youTitle": "To Ty — według tego szukamy, dokąd możesz pójść"
     },
     "savedSearches": {
       "title": "Zapisane wyszukiwania",
