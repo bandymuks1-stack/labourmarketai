@@ -68,6 +68,7 @@ export type IntentHandlerId =
   | "payStatement"
   | "languageStatement"
   | "skillStatement"
+  | "savedOpportunities"
   | "correctWork"
   | "currentWork"
   | "skillGap"
@@ -259,6 +260,9 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // "išmokau skaityti brėžinius" — the person's words offered as a skill
   // claim; an explicit chip saves it through the profile's path (2026-09-29).
   "skill-statement": { domain: "profile", access: "write", handler: "skillStatement", ownTyping: false },
+  // "parodyk išsaugotus darbus" — the saved list the opportunities page
+  // renders, from the same board read, with doors back into it (2026-09-29).
+  "saved-opportunities": { domain: "matching", access: "read", handler: "savedOpportunities", ownTyping: true },
   // "ne 5, o 6 valandas" / "tai buvo vakar" — names the newest entry and hands
   // the person to the canonical supersede editor for it (a link chip); the
   // sentence writes nothing (2026-09-29).

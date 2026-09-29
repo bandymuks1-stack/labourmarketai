@@ -13322,6 +13322,12 @@
         "failed": "Opslaan mislukt — er is niets gewijzigd. Probeer het opnieuw.",
         "notInCompany": "Vaardigheden zijn van jou. Schakel naar je persoonlijke ruimte en zeg het opnieuw."
       },
+      "savedOpportunities": {
+        "intro": "Je opgeslagen kansen ({count}):",
+        "none": "Nog niets opgeslagen — druk op de kansenpagina op „Opslaan” bij een baan.",
+        "unavailable": "Ik kon je opgeslagen kansen niet lezen — ik gok niet.",
+        "chipOpen": "Opgeslagen openen"
+      },
       "pay": {
         "understoodRange": "Begrepen: salarisverwachting {min}–{max} € per maand. Ik heb de bedragen in je werkkaart gezet — controleer en sla op. Er verandert niets tot je opslaat.",
         "understoodMin": "Begrepen: salarisverwachting minimaal {min} € per maand. Ik heb het bedrag in je werkkaart gezet — controleer en sla op. Er verandert niets tot je opslaat.",

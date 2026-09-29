@@ -139,6 +139,8 @@ export type ConversationIntent =
   | "language-statement"
   // A skill said in words — reviewed, saved as the person's claim (2026-09-29).
   | "skill-statement"
+  // The person's saved jobs — the board read's own list (2026-09-29).
+  | "saved-opportunities"
   // A correction of the newest entry said in words (2026-09-29).
   | "correct-work"
   // "Kur dabar dirbu?" — the canonical work contexts (2026-09-29).
@@ -2341,6 +2343,24 @@ const RULES: IntentRule[] = [
       pNoSeek("(научился|научилась|умею)\\s", 6),
       pNoSeek("\\b(gelernt|beherrsche|geleerd|beheers)\\b", 6),
       pNoSeek("(nauczy[lł]em\\s+si[eę]|nauczy[lł]am\\s+si[eę]|potrafi[eę]|umiem)\\s", 6),
+    ],
+  },
+  {
+    /**
+     * SAVED OPPORTUNITIES (Chat ↔ visual loop walk, 2026-09-29): a job saved
+     * on the opportunities page, then "Parodyk išsaugotus darbus" → a NEW
+     * search. The saved list is the board read's own (saved-opportunities).
+     */
+    intent: "saved-opportunities",
+    patterns: [
+      p("(issaugot|issaugoj|pazymet)\\w*.{0,24}(darb|galimyb|skelbim|pasiulym|vakansij)", 9),
+      p("(darb|galimyb|skelbim|pasiulym|vakansij)\\w*.{0,24}(issaugoj|issaugot|pazymejau)", 9),
+      p("\\b(saved|bookmarked)\\s+(jobs?|opportunit\\w*|ads?|vacanc\\w*)", 9),
+      p("\\b(jobs?|opportunit\\w*|ads?)\\s+(i\\s+)?(saved|bookmarked)", 9),
+      p("(сохранённ|сохраненн|сохранил)\\w*.{0,20}(ваканс|работ|предложен)", 9),
+      p("\\b(gespeichert|gemerkt)\\w*.{0,20}(jobs?|stellen|angebot)", 9),
+      p("\\b(opgeslagen|bewaarde)\\s+(vacatures|banen|jobs)", 9),
+      p("\\b(zapisane|zapisa[lł]em)\\s+(oferty|prace|og[lł]oszenia)", 9),
     ],
   },
   {

@@ -13322,6 +13322,12 @@
         "failed": "Zapis nie powiódł się — nic nie zmieniono. Spróbuj ponownie.",
         "notInCompany": "Umiejętności są Twoje. Przełącz się na przestrzeń osobistą i napisz jeszcze raz."
       },
+      "savedOpportunities": {
+        "intro": "Twoje zapisane możliwości ({count}):",
+        "none": "Nic jeszcze nie zapisano — na stronie możliwości naciśnij „Zapisz” przy ofercie.",
+        "unavailable": "Nie udało się odczytać zapisanych możliwości — nie zgaduję.",
+        "chipOpen": "Otwórz zapisane"
+      },
       "pay": {
         "understoodRange": "Rozumiem: oczekiwane wynagrodzenie {min}–{max} € miesięcznie. Wpisałem kwoty do Twojej karty pracy — sprawdź i zapisz. Dopóki nie zapiszesz, nic się nie zmieni.",
         "understoodMin": "Rozumiem: oczekiwane wynagrodzenie co najmniej {min} € miesięcznie. Wpisałem kwotę do Twojej karty pracy — sprawdź i zapisz. Dopóki nie zapiszesz, nic się nie zmieni.",

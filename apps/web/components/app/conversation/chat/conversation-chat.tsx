@@ -113,6 +113,7 @@ import { stripEndDatePhrase, parseEndDate, parseStartDate } from "@/lib/structur
 import { payPrefill, readPayStatement } from "@/lib/conversation/pay-statement";
 import { readStatedLanguages } from "@/lib/conversation/language-statement";
 import { readSkillStatement } from "@/lib/conversation/skill-statement";
+import { loadSavedOpportunitiesForChat } from "@/lib/conversation/saved-opportunities";
 import { saveStatedSkillAction } from "@/lib/profile/stated-skill-actions";
 import { WORKER_LANGUAGE_NATIVE_NAMES } from "@/lib/worker/worker-languages-model";
 import { pastWorkOwnWords, readPastWorkPeriod } from "@/lib/conversation/past-work-period";
@@ -6290,6 +6291,47 @@ export function ConversationChat({
          * words, offered as their own skill claim; the chip saves it through
          * the profile's path. Never marked verified.
          */
+        /**
+         * "Parodyk išsaugotus darbus" (Chat ↔ visual loop walk, 2026-09-29):
+         * the private saved list the opportunities page renders — the SAME
+         * board read — with doors back into the real page and the saved ads.
+         */
+        savedOpportunities: () => {
+          if (identity === "company") {
+            assistant(fallbackText, starterChips);
+            return;
+          }
+          setTyping(true);
+          loadSavedOpportunitiesForChat()
+            .then((res) => {
+              setTyping(false);
+              if (res.kind !== "ok") {
+                assistant(t("savedOpportunities.unavailable"));
+                return;
+              }
+              if (res.items.length === 0) {
+                assistant(t("savedOpportunities.none"), [{ id: "jobs", label: labels.chipJobs }]);
+                return;
+              }
+              assistant(
+                [
+                  t("savedOpportunities.intro", { count: res.items.length }),
+                  ...res.items.slice(0, 8).map((it) => `• ${it.label}`),
+                ].join("\n"),
+                [
+                  { id: "link:/dashboard/opportunities#opportunities-saved", label: t("savedOpportunities.chipOpen") },
+                  ...res.items
+                    .filter((it) => it.kind === "vacancy")
+                    .slice(0, 2)
+                    .map((it) => ({ id: `link:/jobs/${it.id}`, label: it.label.slice(0, 40) })),
+                ],
+              );
+            })
+            .catch(() => {
+              setTyping(false);
+              assistant(t("savedOpportunities.unavailable"));
+            });
+        },
         skillStatement: () => {
           if (identity === "company") {
             const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
