@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -435,6 +436,37 @@ export default async function JournalPage({
       ];
     }),
   );
+  // ENDED relationships still name their entries (owner 2026-09-29): an entry
+  // recorded for an organization the person no longer works with keeps
+  // "Org · Relationship", marked as ended — never presented as current, never
+  // anonymized. The org name comes through the historical read (names only).
+  {
+    const { data: endedRows } = await supabase
+      .from("engagement_contexts")
+      .select("id, relationship_slug, organization_id, organizations(display_name, legal_name)")
+      .eq("profile_id", user.id)
+      .eq("status", "ended")
+      .in("relationship_slug", HISTORY_RELATIONSHIPS);
+    const named = await withHistoricalOrgNames(
+      supabase,
+      (endedRows ?? []) as {
+        id: string;
+        relationship_slug: string;
+        organization_id: string | null;
+        organizations: { display_name: string | null; legal_name: string | null } | null;
+      }[],
+    );
+    for (const r of named) {
+      if (engagementChips.has(r.id)) continue;
+      const org = r.organizations?.display_name ?? r.organizations?.legal_name ?? null;
+      engagementChips.set(r.id, {
+        label: [org ?? t("personalEntry"), tRel(r.relationship_slug), t("contextEnded")].join(" · "),
+        dot: r.organization_id
+          ? WORKSPACE_ACCENT_DOT[workspaceAccentIndex(r.organization_id) % WORKSPACE_ACCENT_DOT.length]
+          : WORKSPACE_PERSONAL_DOT,
+      });
+    }
+  }
 
   if (!worker || engagements.length === 0) {
     // Fix C — distinguish the REAL reason there is no writable context, so

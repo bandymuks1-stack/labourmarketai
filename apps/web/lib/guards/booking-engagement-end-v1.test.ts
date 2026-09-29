@@ -1503,6 +1503,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260928220000_placement_opens_client_collaboration_v1.sql",
       // owner 2026-09-28: the last assignment's end closes the placement's client collaboration.
       "20260928230000_placement_end_closes_client_collaboration_v1.sql",
+      // owner 2026-09-29: own history keeps naming a former organization (names only).
+      "20260929090000_historical_organization_names_v1.sql",
 ]);
   });
 

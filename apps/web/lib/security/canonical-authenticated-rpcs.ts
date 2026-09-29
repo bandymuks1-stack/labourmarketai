@@ -100,6 +100,7 @@ export const CANONICAL_APP_RPCS = [
   "list_shared_requests_for_agency_v1",
   "mark_agency_can_offer",
   "mark_booking_requests_seen",
+  "my_historical_organization_names_v1",
   "mark_invitation_delivery_v1",
   "mark_service_requests_seen",
   "mark_worker_opportunities_seen_v1",

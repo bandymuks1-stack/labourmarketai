@@ -903,5 +903,6 @@
     "reported": "Organisation erfasste {time}",
     "periodReportedOnly": "Keine eigenen Einträge; die Organisation erfasste {days, plural, one {# Tag} other {# Tage}}, {time}.",
     "reportedUnknown": "Die Einträge der Organisation für diesen Zeitraum konnten nicht gelesen werden — das ist nicht dasselbe wie keine."
-  }
+  },
+  "contextEnded": "beendet"
 }

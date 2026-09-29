@@ -266,5 +266,6 @@
     "cannotRestoreCorrectionConflict": "Denne post kan ikke gendannes — der findes allerede en anden aktuel rettet version for det samme arbejde.",
     "metricsInsertFailed": "Posten blev ikke gemt fuldstændigt: {reason}. Posten blev afvist — prøv igen.",
     "moduleFieldInvalid": "Disse oplysninger hører ikke til denne type engagement: {fields}. Intet blev gemt — fjern dem, og prøv igen."
-  }
+  },
+  "contextEnded": "afsluttet"
 }

@@ -903,5 +903,6 @@
     "reported": "organisatie registreerde {time}",
     "periodReportedOnly": "Geen eigen registraties; de organisatie registreerde {days, plural, one {# dag} other {# dagen}}, {time}.",
     "reportedUnknown": "De registraties van de organisatie voor deze periode konden niet worden gelezen — dat is niet hetzelfde als geen."
-  }
+  },
+  "contextEnded": "beëindigd"
 }
