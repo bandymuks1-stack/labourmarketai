@@ -66,6 +66,10 @@ export type CapabilityCaller = {
   /** BCP-47-ish locale for human-facing strings; capability data itself is
    *  locale-independent facts. */
   readonly locale: string;
+  /** WHO performs the call — `agent` for an external assistant (the MCP
+   *  endpoint). Metadata only; authority is the human `userId`. See
+   *  `DomainCaller.actorKind`. */
+  readonly actorKind?: "human" | "agent";
 };
 
 export type CapabilityDescriptor = {
