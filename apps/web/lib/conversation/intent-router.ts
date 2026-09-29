@@ -1864,7 +1864,7 @@ const RULES: IntentRule[] = [
       // pažymėjimą", "I have a new VCA", "renewed my certificate", "habe
       // einen neuen Ausweis", "ik heb een nieuwe vergunning", "получил
       // разрешение": a document to RECORD, not the documents folder to open.
-      p("(turiu|gavau|atsinaujin|prat[eę]s|prid[eė]|[iį]kel|u[zž]ra[sš]|užregistr|have|got|renewed|add|upload|record|habe|bekommen|erneuert|hinzuf|heb|gekregen|verlengd|toevoeg|получил|продлил|добав|загруз|запиш|\\bmam\\b|otrzyma|przed[lł]u[zż]y|dosta[lł])\\w*\\s*.{0,24}(dokument|pa[zž]ym|sertifik|certif|certyfik|za[sś]wiadczeni|leidim|permit|pozwoleni|pas[aą]\\b|passport|\\ba1\\b|\\bvca\\b|zertifik|ausweis|vergunning|paspoort|документ|сертиф|разрешен|паспорт)", 9),
+      p("(turiu|gavau|atsinaujin|prat[eę]s|prid[eė]|[iį]kel|u[zž]ra[sš]|užregistr|have|got|renewed|add|upload|record|habe|bekommen|erneuert|hinzuf|heb|gekregen|verlengd|toevoeg|получил|продлил|добав|загруз|запиш|\\bmam\\b|otrzyma|przed[lł]u[zż]y|dosta[lł])\\w*\\s*.{0,40}(dokument|pa[zž]ym|sertifik|certif|certyfik|za[sś]wiadczeni|leidim|permit|pozwoleni|pas[aą]\\b|passport|\\ba1\\b|\\bvca\\b|zertifik|ausweis|vergunning|paspoort|документ|сертиф|разрешен|паспорт)", 9),
       p("(nauj|new|neu|nieuw|нов|\\bnow)\\w*\\s*.{0,10}(pa[zž]ym|sertifik|certificate|zertifikat|certificaat|certyfik|za[sś]wiadczeni|сертификат|leidim|permit|pozwoleni|vergunning|\\ba1\\b|\\bvca\\b)", 9),
     ],
   },
