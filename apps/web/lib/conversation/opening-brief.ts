@@ -395,16 +395,34 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
     const ws = await loadCompanyStarterContext();
     if (ws.signals.staffingAgency) {
       const { listAgencyOfferProgress, listSharedRequestsForAgency } = await import("@/lib/agency/bridge-read");
-      const [progress, shared] = await Promise.all([listAgencyOfferProgress(), listSharedRequestsForAgency()]);
+      const { listAgencyPlacements } = await import("@/lib/agency/delegation-read");
+      const { sharedNeedsAwaitingWorker } = await import("@/lib/agency/bridge-model");
+      const [[progress, shared], placements] = await Promise.all([
+        Promise.all([listAgencyOfferProgress(), listSharedRequestsForAgency()]),
+        listAgencyPlacements(),
+      ]);
       if (progress.kind === "ok") {
+        // A client's shared need whose accepted person did not start (the
+        // worker declined) or whose placement ended is OPEN AGAIN: the client
+        // still needs someone and this agency may propose another roster
+        // worker. First, because it is the one thing that stops the client's
+        // work (production walk 2026-09-29: the need stayed open and shared
+        // while this Home said nothing).
+        const awaitingWorker = sharedNeedsAwaitingWorker(shared, progress, placements);
+        const reopened = awaitingWorker.filter((n) => n.reason === "placement_did_not_proceed");
+        if (reopened.length > 0 && lines.length < MAX_LINES) {
+          lines.push(t("briefAgencyNeedReopened", { count: reopened.length }));
+          // The in-chat shared-needs read, where each need carries its own
+          // "propose someone" action — the existing presentation path.
+          addChip("agency:demand", t("chipProposeReplacement"));
+        }
         const awaiting = progress.rows.filter((r) => r.offerStatus === "offered").length;
         if (awaiting > 0 && lines.length < MAX_LINES) {
           lines.push(t("briefAgencyOffersAwaiting", { count: awaiting }));
           addChip("agency:progress", t("chipProposalStatus"));
         }
         if (shared.kind === "ok") {
-          const offeredFor = new Set(progress.rows.map((r) => r.requestId));
-          const withoutOffer = shared.rows.filter((s) => s.status !== "closed" && !offeredFor.has(s.requestId)).length;
+          const withoutOffer = awaitingWorker.filter((n) => n.reason === "no_offer").length;
           if (withoutOffer > 0 && lines.length < MAX_LINES) {
             lines.push(t("briefAgencySharedWithoutOffer", { count: withoutOffer }));
             addChip("agency:demand", t("chipClientDemand"));

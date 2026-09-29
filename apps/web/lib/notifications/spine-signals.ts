@@ -205,7 +205,8 @@ export const SPINE_SIGNALS: readonly SpineSignalDef[] = [
     type: "shared_requests_awaiting_offer",
     // A connected client shared a request and this agency has not offered
     // anyone yet — offering a roster worker on the partners door clears it
-    // (state-derived; a withdrawn offer makes it wait again). No featureKey,
+    // (state-derived; a withdrawn offer, or a placement the worker declined /
+    // that ended, makes it wait again — `sharedNeedsAwaitingWorker`). No featureKey,
     // same reasoning as the connection invites above.
     href: "/dashboard/company/partners",
     count: (c) => c.sharedRequestsAwaitingOffer,

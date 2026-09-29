@@ -25,6 +25,7 @@ import {
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getOwnedCompanyById } from "@/lib/company/company-setup";
 import { readActsAsAgency } from "@/lib/company/agency-capability-read";
+import { listAgencyPlacements } from "@/lib/agency/delegation-read";
 import { AGENCY_CLIENT_PROPOSED_ROLE } from "@/lib/invitations/model";
 import { listMySentInvitations } from "@/lib/invitations/network";
 
@@ -425,13 +426,16 @@ export const getBridgeSpineCounts = cache(async (): Promise<BridgeSpineCounts> =
     const company = await getOwnedCompanyById(ctx.companyId);
     if (company.kind !== "ok" || !company.row) return ZERO_BRIDGE_SPINE_COUNTS;
     if (await readActsAsAgency(company.row.companyType, ctx.organizationId)) {
-      const [shared, progress] = await Promise.all([
+      // The placement read says whether an accepted candidate actually went
+      // (worker declined / placement ended re-opens the need for this agency).
+      const [shared, progress, placements] = await Promise.all([
         listSharedRequestsForAgency(),
         listAgencyOfferProgress(),
+        listAgencyPlacements(),
       ]);
       return {
         ...ZERO_BRIDGE_SPINE_COUNTS,
-        sharedRequestsAwaitingOffer: countSharesAwaitingOffer(shared, progress),
+        sharedRequestsAwaitingOffer: countSharesAwaitingOffer(shared, progress, placements),
       };
     }
     const [invites, openCandidateOffers] = await Promise.all([

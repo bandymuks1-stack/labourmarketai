@@ -27,7 +27,11 @@ describe("the employer brief carries agency and institution attention", () => {
     expect(FN).toMatch(/r\.offerStatus === "offered"/);
     expect(FN).toMatch(/briefAgencyOffersAwaiting/);
     expect(FN).toMatch(/addChip\("agency:progress"/);
-    expect(FN).toMatch(/!offeredFor\.has\(s\.requestId\)/);
+    // ONE rule for "still needs a worker" (bridge-model), shared with the bell
+    expect(FN).toMatch(/sharedNeedsAwaitingWorker\(shared, progress, placements\)/);
+    expect(FN).toMatch(/listAgencyPlacements\(\)/);
+    expect(FN).toMatch(/briefAgencyNeedReopened/);
+    expect(FN).toMatch(/addChip\("agency:demand", t\("chipProposeReplacement"\)\)/);
     expect(FN).toMatch(/briefAgencySharedWithoutOffer/);
     expect(FN).toMatch(/addChip\("agency:demand"/);
     expect(FN).toMatch(/clientConnectionsPending/);

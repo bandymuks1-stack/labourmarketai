@@ -325,7 +325,7 @@ export function clientInviteRowState(
 export interface BridgeSpineCounts {
   /** CLIENT: connection invitations addressed to me still pending. */
   readonly pendingConnectionInvites: number;
-  /** AGENCY: shared requests with no open/accepted offer from me yet. */
+  /** AGENCY: open shared needs with nobody on the way (`sharedNeedsAwaitingWorker`). */
   readonly sharedRequestsAwaitingOffer: number;
   /** CLIENT: agency offers on my requests still awaiting my decision. */
   readonly openCandidateOffers: number;
@@ -345,20 +345,100 @@ export function countPendingConnectionInvites(state: ClientInvitesState): number
 
 /**
  * Shared requests the agency has not answered: no offer of this agency on
- * that request is `offered` or `accepted` (a withdrawn or declined offer
- * leaves the request unanswered again). Either read failing counts 0. Pure.
+ * that request is `offered`, or `accepted` with a placement still going (a
+ * withdrawn or declined offer, or a placement the worker declined / that
+ * ended, leaves the request unanswered again). Count of
+ * `sharedNeedsAwaitingWorker`. Either bridge read failing counts 0. Pure.
  */
 export function countSharesAwaitingOffer(
   shared: SharedRequestsState,
   progress: OfferProgressState,
+  placements?: PlacementOutcomesState,
 ): number {
-  if (shared.kind !== "ok" || progress.kind !== "ok") return 0;
-  const answered = new Set(
-    progress.rows
-      .filter((p) => p.offerStatus === "offered" || p.offerStatus === "accepted")
-      .map((p) => p.requestId),
+  return sharedNeedsAwaitingWorker(shared, progress, placements).length;
+}
+
+/**
+ * What the agency's placement read (`list_agency_placements_v1`, one row per
+ * ACCEPTED offer) says about how that placement went — only the two facts
+ * this rule needs, so the pure model does not import the server read.
+ */
+export interface PlacementOutcome {
+  readonly offerId: string;
+  readonly bookingStatus: string | null;
+  readonly engagementStatus: string | null;
+}
+export type PlacementOutcomesState =
+  | { kind: "ok"; rows: readonly PlacementOutcome[] }
+  | { kind: "error" };
+
+/** Booking answers after which the placement did not go ahead. */
+const PLACEMENT_FELL_THROUGH_BOOKING = new Set(["declined", "withdrawn", "expired"]);
+
+/** The client's accepted candidate is no longer going to / no longer working
+ *  there: the worker declined, the booking lapsed, or the placement ended. */
+export function placementNoLongerFillsNeed(p: PlacementOutcome): boolean {
+  return (
+    (p.bookingStatus !== null && PLACEMENT_FELL_THROUGH_BOOKING.has(p.bookingStatus)) ||
+    p.engagementStatus === "ended"
   );
-  return shared.rows.filter((s) => !answered.has(s.requestId)).length;
+}
+
+export interface SharedNeedAwaitingWorker {
+  readonly requestId: string;
+  readonly title: string;
+  /** `no_offer` — nobody proposed yet; `placement_did_not_proceed` — an
+   *  accepted candidate declined / lapsed / ended and nobody replaced them. */
+  readonly reason: "no_offer" | "placement_did_not_proceed";
+}
+
+/**
+ * THE ONE RULE (production walk 2026-09-29): which OPEN needs a client shared
+ * with this agency still have nobody on the way. The Home bell, the opening
+ * brief and the starter chips all read it — they used to carry three copies
+ * that treated ANY accepted offer as "answered", so after the worker declined
+ * the booking the need stayed open and shared while the agency Home went
+ * silent.
+ *
+ * A candidate is ON THE WAY when their offer is `offered` (client deciding) or
+ * `accepted` and the placement read does not show it fell through. A placement
+ * read that failed keeps every accepted offer counting as on the way — the
+ * bell never invents attention from an unknown. A closed request is not open.
+ * Derived from current state only; a new offer clears it. Pure.
+ */
+export function sharedNeedsAwaitingWorker(
+  shared: SharedRequestsState,
+  progress: OfferProgressState,
+  placements?: PlacementOutcomesState,
+): readonly SharedNeedAwaitingWorker[] {
+  if (shared.kind !== "ok" || progress.kind !== "ok") return [];
+  const fellThrough = new Set(
+    placements?.kind === "ok"
+      ? placements.rows.filter(placementNoLongerFillsNeed).map((p) => p.offerId)
+      : [],
+  );
+  const onTheWay = new Set<string>();
+  const didNotProceed = new Set<string>();
+  for (const p of progress.rows) {
+    if (p.offerStatus === "offered") onTheWay.add(p.requestId);
+    else if (p.offerStatus === "accepted") {
+      if (fellThrough.has(p.offerId)) didNotProceed.add(p.requestId);
+      else onTheWay.add(p.requestId);
+    }
+  }
+  const out: SharedNeedAwaitingWorker[] = [];
+  const seen = new Set<string>();
+  for (const s of shared.rows) {
+    if (s.status === "closed" || s.status === "draft") continue;
+    if (onTheWay.has(s.requestId) || seen.has(s.requestId)) continue;
+    seen.add(s.requestId);
+    out.push({
+      requestId: s.requestId,
+      title: s.title,
+      reason: didNotProceed.has(s.requestId) ? "placement_did_not_proceed" : "no_offer",
+    });
+  }
+  return out;
 }
 
 /** Visual tone per derived review stage — display only. */
