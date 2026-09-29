@@ -9485,7 +9485,8 @@
         "pay": "Vergütungserwartung — ab {amount} EUR",
         "payMissing": "Vergütungserwartung nicht angegeben",
         "languages": "Sprachen — {list}",
-        "languagesMissing": "Sprachen nicht angegeben"
+        "languagesMissing": "Sprachen nicht angegeben",
+        "preferredCountries": "gewünschte Länder — {value}"
       },
       "countsPlatform": "Plattformanfragen: {shown} von {retrieved} angezeigt",
       "countsPlatformUnavailable": "Plattformanfragen: noch nicht freigeschaltet",
@@ -9520,7 +9521,8 @@
       "mapTitle": "Wo die Arbeit ist",
       "skipToList": "Zur Liste",
       "placeLink": "Möglichkeiten in diesem Land zeigen",
-      "sourcesIncomplete": "Einige Stellenquellen sind derzeit nicht verfügbar, daher ist diese Liste möglicherweise unvollständig."
+      "sourcesIncomplete": "Einige Stellenquellen sind derzeit nicht verfügbar, daher ist diese Liste möglicherweise unvollständig.",
+      "youTitle": "Das sind Sie — danach suchen wir, wohin Sie gehen können"
     },
     "savedSearches": {
       "title": "Gespeicherte Suchen",

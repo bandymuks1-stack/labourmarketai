@@ -9485,7 +9485,8 @@
         "pay": "atlygio lūkestis — nuo {amount} EUR",
         "payMissing": "atlygio lūkestis nenurodytas",
         "languages": "kalbos — {list}",
-        "languagesMissing": "kalbos nenurodytos"
+        "languagesMissing": "kalbos nenurodytos",
+        "preferredCountries": "norimos šalys — {value}"
       },
       "countsPlatform": "platformos užklausos: rodoma {shown} iš {retrieved}",
       "countsPlatformUnavailable": "platformos užklausos: dar neįjungta",
@@ -9520,7 +9521,8 @@
       "mapTitle": "Kur yra darbo",
       "skipToList": "Į sąrašą",
       "placeLink": "Rodyti šios šalies galimybes",
-      "sourcesIncomplete": "Kai kurie darbo šaltiniai šiuo metu nepasiekiami, todėl sąrašas gali būti nepilnas."
+      "sourcesIncomplete": "Kai kurie darbo šaltiniai šiuo metu nepasiekiami, todėl sąrašas gali būti nepilnas.",
+      "youTitle": "Tai jūs — pagal tai ieškome, kur galite eiti"
     },
     "savedSearches": {
       "title": "Išsaugotos paieškos",

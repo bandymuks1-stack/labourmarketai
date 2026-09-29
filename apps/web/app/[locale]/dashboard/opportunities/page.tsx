@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { isAssessedFit } from "@/lib/opportunities/fit-band";
 import { getProfessionEntries } from "@/lib/data/worker-core";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -648,6 +649,14 @@ export default async function OpportunitiesPage({
   // ── The assessment line: WHAT the fit was assessed against, in words,
   //    from the subject reader's own facts. "Not stated" is a stated fact
   //    here, never an omission. ─────────────────────────────────────────────
+  // Each fact knows whether it is a MISSING one, so the identity panel can
+  // draw it as an open (dashed) chip instead of hiding it (premium
+  // opportunities, 2026-09-29). The one-line sentence below is unchanged.
+  const missingFacts = new Set<string>(
+    (["professionMissing", "skillsMissing", "placeMissing", "payMissing", "languagesMissing"] as const).map(
+      (k) => t(`world.fact.${k}`),
+    ),
+  );
   const assessedFacts: string[] =
     result.kind === "ready"
       ? (() => {
@@ -687,6 +696,15 @@ export default async function OpportunitiesPage({
             .filter(Boolean)
             .join(", ");
           facts.push(place ? t("world.fact.place", { value: place }) : t("world.fact.placeMissing"));
+          // WHERE THE PERSON WANTS TO GO — already in the match subject, said
+          // back here for the first time.
+          if (r.assessedAgainst.preferredCountries.length > 0) {
+            facts.push(
+              t("world.fact.preferredCountries", {
+                value: r.assessedAgainst.preferredCountries.map(countryLabel).join(", "),
+              }),
+            );
+          }
           facts.push(
             r.assessedAgainst.salaryMinEur != null
               ? t("world.fact.pay", { amount: r.assessedAgainst.salaryMinEur })
@@ -823,13 +841,36 @@ export default async function OpportunitiesPage({
         </h1>
         {result.kind === "ready" ? (
           <>
-            {/* ONE line: what the fit was assessed against. */}
-            <p
-              className="text-support leading-relaxed text-text-secondary"
+            {/* THIS IS YOU → WHERE YOU CAN GO (premium opportunities,
+                2026-09-29). The facts the fit was assessed against, each a
+                chip; a missing one is an open dashed chip — said, never
+                hidden. The one-line sentence stays for screen readers. */}
+            <div
+              className="flex flex-col gap-2 rounded-xl border border-border-subtle bg-surface-1/50 p-3 sm:p-4"
               data-testid="opportunities-assessment"
             >
-              {t("world.assessedAgainst", { facts: assessedFacts.join(" · ") })}
-            </p>
+              <p className="sr-only">
+                {t("world.assessedAgainst", { facts: assessedFacts.join(" · ") })}
+              </p>
+              <span aria-hidden className="font-mono text-meta uppercase tracking-label text-text-muted">
+                {t("world.youTitle")}
+              </span>
+              <ul aria-hidden className="flex flex-wrap gap-1.5" data-testid="opportunities-identity-facts">
+                {assessedFacts.map((f) => (
+                  <li
+                    key={f}
+                    data-missing={missingFacts.has(f) ? "true" : undefined}
+                    className={
+                      missingFacts.has(f)
+                        ? "inline-flex min-h-8 items-center rounded-full border border-dashed border-ink-500 px-3 text-support text-text-muted"
+                        : "inline-flex min-h-8 items-center rounded-full border border-ink-500 bg-ink-800/60 px-3 text-support text-text-primary"
+                    }
+                  >
+                    {f}
+                  </li>
+                ))}
+              </ul>
+            </div>
             {/* WHY YOU MAY BE SEEING LESS — and nothing else (§7). A capability
                 that is off, a read that FAILED, or the person's own filters
                 holding rows back. Rendered only when there is something to say,
@@ -1356,6 +1397,22 @@ export default async function OpportunitiesPage({
                                               ? t("world.whyUnknown")
                                               : t("world.whyNoGaps")}
                                       </p>
+
+                                      {/* WHAT ALREADY FITS — the engine's own met criteria,
+                                          brought up from the details disclosure; only
+                                          on a strong / possible row, never a score. */}
+                                      {isAssessedFit(row.band) && match.strengths.length > 0 ? (
+                                        <ul className="flex flex-wrap gap-1.5" data-testid="opportunity-strengths">
+                                          {match.strengths.slice(0, 3).map((s) => (
+                                            <li
+                                              key={s.criterion}
+                                              className="inline-flex min-h-7 items-center rounded-full border border-brand-cyan/40 bg-brand-cyan/[0.06] px-2.5 text-meta text-brand-cyan"
+                                            >
+                                              {criterionLabel(s.criterion)}
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      ) : null}
 
                                       {/* The one clear next step for this row. */}
                                       <p

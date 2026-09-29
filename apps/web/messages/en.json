@@ -9485,7 +9485,8 @@
         "pay": "pay expectation — from {amount} EUR",
         "payMissing": "pay expectation not stated",
         "languages": "languages — {list}",
-        "languagesMissing": "languages not stated"
+        "languagesMissing": "languages not stated",
+        "preferredCountries": "preferred countries — {value}"
       },
       "countsPlatform": "platform inquiries: showing {shown} of {retrieved}",
       "countsPlatformUnavailable": "platform inquiries: not enabled yet",
@@ -9520,7 +9521,8 @@
       "mapTitle": "Where the work is",
       "skipToList": "To the list",
       "placeLink": "Show this country's opportunities",
-      "sourcesIncomplete": "Some opportunity sources are temporarily unavailable, so this list may be incomplete."
+      "sourcesIncomplete": "Some opportunity sources are temporarily unavailable, so this list may be incomplete.",
+      "youTitle": "This is you — what we look for where you can go next"
     },
     "savedSearches": {
       "title": "Saved searches",

@@ -317,6 +317,7 @@ export async function loadWorkerOpportunities(
       languages: ctx.subject.languages ?? [],
       salaryMinEur: ctx.subject.salaryMinEur ?? null,
       city: ctx.subject.city ?? null,
+      preferredCountries: ctx.subject.preferredCountries ?? [],
     },
   };
 

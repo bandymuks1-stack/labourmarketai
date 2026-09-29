@@ -9485,7 +9485,8 @@
         "pay": "loonverwachting — vanaf {amount} EUR",
         "payMissing": "loonverwachting niet opgegeven",
         "languages": "talen — {list}",
-        "languagesMissing": "talen niet opgegeven"
+        "languagesMissing": "talen niet opgegeven",
+        "preferredCountries": "gewenste landen — {value}"
       },
       "countsPlatform": "platformaanvragen: {shown} van {retrieved} getoond",
       "countsPlatformUnavailable": "platformaanvragen: nog niet ingeschakeld",
@@ -9520,7 +9521,8 @@
       "mapTitle": "Waar het werk is",
       "skipToList": "Naar de lijst",
       "placeLink": "Toon de kansen in dit land",
-      "sourcesIncomplete": "Sommige vacaturebronnen zijn tijdelijk niet beschikbaar, dus deze lijst kan onvolledig zijn."
+      "sourcesIncomplete": "Sommige vacaturebronnen zijn tijdelijk niet beschikbaar, dus deze lijst kan onvolledig zijn.",
+      "youTitle": "Dit bent u — hiermee zoeken we waar u heen kunt"
     },
     "savedSearches": {
       "title": "Opgeslagen zoekopdrachten",
