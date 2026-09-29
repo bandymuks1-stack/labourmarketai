@@ -81,10 +81,14 @@ const primaryCta =
 const secondaryBtn =
   "inline-flex items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue";
 
+/** Fired after a save the server confirmed — a surface that read the card
+ *  BEFORE the save (the chat's result panel) re-reads it. */
+export const WORK_CARD_SAVED_EVENT = "lm:work-card-saved";
+
 export function WorkCardEditor({
   state,
   nextHref,
-  values,
+  values: propValues,
   labels,
   checks = [],
 }: {
@@ -119,6 +123,14 @@ export function WorkCardEditor({
     WorkCardActionResult | null,
     FormData
   >(saveWorkerCardAction, null);
+  // WHAT PERSISTED, not what was typed (production walk 2026-09-29): the chat
+  // panel's props were read before the save, and React resets an action form
+  // to its defaults — so the card said "Išsaugota" beside the OLD salary. After
+  // a confirmed save the fields show the row the server read back.
+  const values = saveState?.ok && saveState.saved ? saveState.saved : propValues;
+  useEffect(() => {
+    if (saveState?.ok) window.dispatchEvent(new Event(WORK_CARD_SAVED_EVENT));
+  }, [saveState]);
   const [confirmPending, startConfirm] = useTransition();
   const [confirmDone, setConfirmDone] = useState(false);
   const hasSavedFigures =
@@ -242,6 +254,9 @@ export function WorkCardEditor({
 
         {open && (
           <form
+            // Re-mounted on the persisted values, so the reset after the
+            // action lands on them rather than on the pre-save defaults.
+            key={JSON.stringify(values)}
             action={saveAction}
             className="mt-3 flex flex-col gap-4 rounded-md border border-ink-600 bg-ink-800/40 p-4"
             data-testid="work-card-editor"

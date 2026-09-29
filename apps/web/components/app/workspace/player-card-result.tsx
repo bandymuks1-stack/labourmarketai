@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { WorkCardEditor } from "@/components/app/work-card-editor";
+import { WORK_CARD_SAVED_EVENT, WorkCardEditor } from "@/components/app/work-card-editor";
 import { WorkerPlayerCard } from "@/components/app/worker-player-card";
 import { loadPlayerCardResult } from "@/lib/player-card/player-card-result";
 import type { PlayerCardResult as PlayerCardResultView } from "@/lib/player-card/player-card-result";
@@ -75,6 +75,27 @@ export function PlayerCardResult({
   }, [attempt]);
 
   const retry = useCallback(() => setAttempt((n) => n + 1), []);
+
+  // A save from the card's own editor changed the row this view was read
+  // from: re-read it QUIETLY (no loading frame — the editor and its
+  // "Išsaugota" stay mounted), so the figures above match what persisted.
+  useEffect(() => {
+    let cancelled = false;
+    const reread = () => {
+      loadPlayerCardResult()
+        .then((view) => {
+          if (!cancelled) setPhase({ kind: "loaded", view });
+        })
+        .catch(() => {
+          /* keep the card on screen; the editor already shows the saved row */
+        });
+    };
+    window.addEventListener(WORK_CARD_SAVED_EVENT, reread);
+    return () => {
+      cancelled = true;
+      window.removeEventListener(WORK_CARD_SAVED_EVENT, reread);
+    };
+  }, []);
 
   if (phase.kind === "idle" || phase.kind === "loading") {
     return (
