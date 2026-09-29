@@ -67,6 +67,7 @@ export type IntentHandlerId =
   | "availabilityStatement"
   | "payStatement"
   | "languageStatement"
+  | "skillStatement"
   | "correctWork"
   | "currentWork"
   | "skillGap"
@@ -255,6 +256,9 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // "kalbu angliškai ir rusiškai" — the ONE language form per stated
   // language, prefilled; the form's save is the write (2026-09-29).
   "language-statement": { domain: "profile", access: "write", handler: "languageStatement", ownTyping: false },
+  // "išmokau skaityti brėžinius" — the person's words offered as a skill
+  // claim; an explicit chip saves it through the profile's path (2026-09-29).
+  "skill-statement": { domain: "profile", access: "write", handler: "skillStatement", ownTyping: false },
   // "ne 5, o 6 valandas" / "tai buvo vakar" — names the newest entry and hands
   // the person to the canonical supersede editor for it (a link chip); the
   // sentence writes nothing (2026-09-29).

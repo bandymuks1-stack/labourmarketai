@@ -13294,6 +13294,16 @@
         "askWhich": "Welke taal spreek je? Kies taal en niveau en sla op.",
         "notInCompany": "Je talen zijn jouw eigen gegeven. Schakel naar je persoonlijke ruimte en zeg het opnieuw."
       },
+      "skillStatement": {
+        "understood": "Begrepen: ‘{phrase}’. Ik kan dit als zelf opgegeven vaardigheid in je profiel zetten — niet bevestigd. Opslaan?",
+        "chipSave": "Vaardigheid opslaan",
+        "saved": "Opgeslagen in je profiel: ‘{phrase}’ (zelf opgegeven).",
+        "linked": "Gekoppeld aan de vaardighedenlijst — gebruikt voor matches.",
+        "outsideDirections": "De vaardigheid staat in de lijst maar buiten je beroepen — ze blijft in jouw woorden; voeg de passende richting toe.",
+        "wordsOnly": "Ze blijft in jouw woorden — geen match in de lijst.",
+        "failed": "Opslaan mislukt — er is niets gewijzigd. Probeer het opnieuw.",
+        "notInCompany": "Vaardigheden zijn van jou. Schakel naar je persoonlijke ruimte en zeg het opnieuw."
+      },
       "pay": {
         "understoodRange": "Begrepen: salarisverwachting {min}–{max} € per maand. Ik heb de bedragen in je werkkaart gezet — controleer en sla op. Er verandert niets tot je opslaat.",
         "understoodMin": "Begrepen: salarisverwachting minimaal {min} € per maand. Ik heb het bedrag in je werkkaart gezet — controleer en sla op. Er verandert niets tot je opslaat.",
