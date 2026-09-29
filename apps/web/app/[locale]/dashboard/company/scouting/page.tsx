@@ -12,7 +12,7 @@ import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibilit
 // Real two-subject bridge (issue #859): candidates a connected agency proposed
 // for THIS demand (which the client owns) — reviewed with the SAME canonical
 // controls below, keyed on (requestId, workerId).
-import { listOfferedCandidatesForRequest } from "@/lib/agency/bridge-read";
+import { listOfferedCandidatesForRequest, readOfferBookingStatuses } from "@/lib/agency/bridge-read";
 import {
   hasActiveScoutFilters,
   parseScoutFilterParams,
@@ -177,6 +177,10 @@ export default async function CompanyScoutingPage({
   // returns rows only to the request owner). Empty until the owner-gated bridge
   // migration is applied.
   const offeredCandidates = selected ? await listOfferedCandidatesForRequest(selected) : [];
+  // The worker's own answer to each booking an accepted offer proposed.
+  const offerBookingStatus = await readOfferBookingStatuses(
+    offeredCandidates.map((oc) => oc.bookingId).filter((id): id is string => Boolean(id)),
+  );
   // ONE source of truth for the synthetic-title labels — the same catalogue
   // node the company hub and the buyer surface already read.
   const tDemandReadback = await getTranslations("demandReadback");
@@ -611,6 +615,15 @@ export default async function CompanyScoutingPage({
                   >
                     {tOffered(`status.${oc.offerStatus}`)}
                   </span>
+                  {oc.bookingId && offerBookingStatus.get(oc.bookingId) &&
+                  tOffered.has(`worker.${offerBookingStatus.get(oc.bookingId)}` as never) ? (
+                    <span
+                      className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary"
+                      data-testid={`scout-offer-worker-${offerBookingStatus.get(oc.bookingId)}`}
+                    >
+                      {tOffered(`worker.${offerBookingStatus.get(oc.bookingId)}` as never)}
+                    </span>
+                  ) : null}
                   {oc.note ? <span className="min-w-0 flex-1 truncate text-xs text-text-secondary">{oc.note}</span> : null}
                 </div>
                 {/* The client's decision on THIS candidate (agency first value):

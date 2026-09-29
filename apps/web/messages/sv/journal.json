@@ -266,5 +266,6 @@
     "cannotRestoreCorrectionConflict": "Denna post kan inte återställas — det finns redan en annan aktuell korrigerad version för samma arbete.",
     "metricsInsertFailed": "Posten sparades inte fullständigt: {reason}. Posten förkastades — försök igen.",
     "moduleFieldInvalid": "Dessa uppgifter hör inte till den här typen av engagemang: {fields}. Inget sparades — ta bort dem och försök igen."
-  }
+  },
+  "contextEnded": "avslutad"
 }

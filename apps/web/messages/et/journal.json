@@ -266,5 +266,6 @@
     "cannotRestoreCorrectionConflict": "Seda sissekannet ei saa taastada — sama töö kohta on juba olemas teine kehtiv parandatud versioon.",
     "metricsInsertFailed": "Sissekannet ei salvestatud täielikult: {reason}. Sissekanne lükati tagasi — proovige uuesti.",
     "moduleFieldInvalid": "Need väljad ei sobi seda tüüpi seotusega: {fields}. Midagi ei salvestatud — eemaldage need ja proovige uuesti."
-  }
+  },
+  "contextEnded": "lõppenud"
 }

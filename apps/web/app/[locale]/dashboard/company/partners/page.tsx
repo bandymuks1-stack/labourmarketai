@@ -248,6 +248,23 @@ export default async function CompanyPartnersPage({
           />
           {/* REAL two-subject bridge (issue #859) — agency side. */}
           <AgencyBridgeSection
+            workerOutcomeByOffer={
+              delegatedPlacements.kind === "ok"
+                ? Object.fromEntries(
+                    delegatedPlacements.rows
+                      .filter((pl) => pl.bookingStatus && pl.bookingStatus !== "accepted" && pl.bookingStatus !== "proposed")
+                      .map((pl) => [
+                        pl.offerId,
+                        {
+                          label: tDelegation(
+                            `lifecycle.${pl.bookingStatus === "declined" ? "workerDeclined" : `booking_${pl.bookingStatus}`}` as never,
+                          ),
+                          closed: true,
+                        },
+                      ]),
+                  )
+                : {}
+            }
             agencyCompanyId={ownCompany.id}
             connections={bridgeConnections}
             shared={localizeTitles(bridgeShared) as typeof bridgeShared}

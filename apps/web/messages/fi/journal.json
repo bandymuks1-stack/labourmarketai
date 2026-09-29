@@ -386,5 +386,6 @@
     "topicLabel": "[EN] Topic",
     "conflictNote": "Tätä merkintää on jo muutettu toisessa välilehdessä tai istunnossa. Jos haluat säilyttää tähän kirjoitetut muutokset, kopioi teksti ensin — sivun uudelleenlataus hävittää ne, ja muokkaat sen jälkeen uusinta versiota.",
     "conflictReload": "Lataa sivu uudelleen"
-  }
+  },
+  "contextEnded": "päättynyt"
 }

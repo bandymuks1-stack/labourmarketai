@@ -11762,7 +11762,14 @@
     },
     "title": "Agentūros pasiūlyti kandidatai",
     "subtitle": "Prijungta personalo agentūra pasiūlė šiuos darbuotojus šiam poreikiui. Peržiūrėkite, susisiekite arba rezervuokite juos tais pačiais valdikliais žemiau.",
-    "via": "Per"
+    "via": "Per",
+    "worker": {
+      "proposed": "laukia darbuotojo sprendimo",
+      "accepted": "darbuotojas sutiko",
+      "declined": "darbuotojas atsisakė",
+      "withdrawn": "pasiūlymas atšauktas",
+      "expired": "pasiūlymas nebegalioja"
+    }
   },
   "cvSections": {
     "grid": {

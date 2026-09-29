@@ -1,5 +1,6 @@
 import "server-only";
 
+import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
@@ -301,13 +302,13 @@ async function ownNewestConfirmations(
     const { data, error } = await asAny(supabase)
       .from("journal_entry_confirmations")
       .select(
-        "created_at, confirmer_id, confirmer_role, confirmation_scope, journal_entries!inner(worker_id, engagement_contexts(organizations(display_name, legal_name)))",
+        "created_at, confirmer_id, confirmer_role, confirmation_scope, journal_entries!inner(worker_id, engagement_contexts(organization_id, organizations(display_name, legal_name)))",
       )
       .eq("journal_entries.worker_id", workerId)
       .order("created_at", { ascending: false })
       .limit(PROVENANCE_CONFIRMATION_LIMIT);
     if (error || !Array.isArray(data)) return [];
-    return (
+    const rows = (
       data as {
         created_at: string | null;
         confirmer_id: string | null;
@@ -315,12 +316,23 @@ async function ownNewestConfirmations(
         confirmation_scope: unknown;
         journal_entries: {
           engagement_contexts: {
+            organization_id?: string | null;
             organizations: { display_name: string | null; legal_name: string | null } | null;
           } | null;
         } | null;
       }[]
-    ).map((r) => {
-      const org = r.journal_entries?.engagement_contexts?.organizations ?? null;
+    );
+    // The confirming organization stays named after the relationship ended
+    // (owner 2026-09-29) — names only, through the historical read.
+    const named = await withHistoricalOrgNames(
+      supabase,
+      rows.map((r) => ({
+        organization_id: r.journal_entries?.engagement_contexts?.organization_id ?? null,
+        organizations: r.journal_entries?.engagement_contexts?.organizations ?? null,
+      })),
+    );
+    return rows.map((r, i) => {
+      const org = named[i]?.organizations ?? null;
       return {
         created_at: r.created_at,
         // WHO decided — selected so `deriveProvenance` can tell an independent

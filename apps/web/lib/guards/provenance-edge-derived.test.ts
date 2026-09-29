@@ -142,7 +142,8 @@ describe("2. derived, not stored", () => {
     expect(MODEL).toMatch(/\.eq\("journal_entries\.worker_id", workerId\)/);
     expect(MODEL).toMatch(/\.limit\(PROVENANCE_CONFIRMATION_LIMIT\)/);
     // The confirming organisation is a LEFT join: unreadable → null → dash.
-    expect(MODEL).toMatch(/engagement_contexts\(organizations\(display_name, legal_name\)\)/);
+    // organization_id rides along so an ENDED relationship keeps its name (owner 2026-09-29).
+    expect(MODEL).toMatch(/engagement_contexts\(organization_id, organizations\(display_name, legal_name\)\)/);
     expect(MODEL).not.toMatch(/engagement_contexts!inner/);
   });
 

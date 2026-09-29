@@ -127,7 +127,13 @@ export function AgencyBridgeSection({
   deliveries,
   labels,
   locale,
+  workerOutcomeByOffer = {},
 }: {
+  /** The WORKER's answer to the booking an accepted offer proposed, as a
+   *  display label (from the agency's bounded placement read). Where the
+   *  booking did not go ahead it replaces the stale review stage — the
+   *  client's own decision stays beside it as history. */
+  workerOutcomeByOffer?: Readonly<Record<string, { label: string; closed: boolean }>>;
   agencyCompanyId: string;
   connections: AgencyConnectionsState;
   shared: SharedRequestsState;
@@ -440,9 +446,18 @@ export function AgencyBridgeSection({
                   const stage = effectiveReviewStage(p.offerStatus, p.reviewStage);
                   return (
                     <li key={p.offerId} className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2" data-testid="agency-bridge-progress-row" data-stage={stage}>
+                      {workerOutcomeByOffer[p.offerId]?.closed ? (
+                        <span
+                          className="shrink-0 rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
+                          data-testid="agency-bridge-worker-outcome"
+                        >
+                          {workerOutcomeByOffer[p.offerId].label}
+                        </span>
+                      ) : (
                       <span className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${TONE[reviewStageTone(stage)]}`}>
                         {labels.stageLabels[stage] ?? stage}
                       </span>
+                      )}
                       {/* The CLIENT's explicit decision on this candidate
                           (migration 20260903101000): accepted → a booking was
                           proposed to the worker; declined → closed. Shown

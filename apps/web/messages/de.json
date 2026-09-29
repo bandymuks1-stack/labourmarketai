@@ -11762,7 +11762,14 @@
     },
     "title": "Von der Agentur vorgeschlagene Kandidaten",
     "subtitle": "Eine verbundene Personalagentur hat diese Mitarbeiter für diese Anfrage vorgeschlagen. Prüfen, kontaktieren oder buchen Sie sie mit denselben Steuerelementen unten.",
-    "via": "Über"
+    "via": "Über",
+    "worker": {
+      "proposed": "wartet auf die Arbeitskraft",
+      "accepted": "Arbeitskraft hat zugestimmt",
+      "declined": "Arbeitskraft hat abgelehnt",
+      "withdrawn": "Angebot zurückgezogen",
+      "expired": "Angebot abgelaufen"
+    }
   },
   "cvSections": {
     "grid": {

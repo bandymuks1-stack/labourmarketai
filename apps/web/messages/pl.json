@@ -11762,7 +11762,14 @@
     },
     "title": "Kandydaci zaproponowani przez agencję",
     "subtitle": "Połączona agencja pracy zaproponowała tych pracowników do tego zapytania. Przejrzyj, skontaktuj się lub zarezerwuj ich za pomocą tych samych elementów poniżej.",
-    "via": "Przez"
+    "via": "Przez",
+    "worker": {
+      "proposed": "czeka na decyzję pracownika",
+      "accepted": "pracownik zgodził się",
+      "declined": "pracownik odmówił",
+      "withdrawn": "propozycja wycofana",
+      "expired": "propozycja wygasła"
+    }
   },
   "cvSections": {
     "grid": {

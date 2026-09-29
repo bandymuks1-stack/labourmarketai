@@ -903,5 +903,6 @@
     "reported": "organization recorded {time}",
     "periodReportedOnly": "No records of your own; the organization recorded {days, plural, one {# day} other {# days}}, {time}.",
     "reportedUnknown": "The organization's records for this period could not be read — that is not the same as none."
-  }
+  },
+  "contextEnded": "ended"
 }

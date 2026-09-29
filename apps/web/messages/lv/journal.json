@@ -266,5 +266,6 @@
     "cannotRestoreCorrectionConflict": "Šo ierakstu nevar atjaunot — tam pašam darbam jau ir cita aktuāla labota versija.",
     "metricsInsertFailed": "Ieraksts netika saglabāts pilnībā: {reason}. Ieraksts tika noraidīts — mēģiniet vēlreiz.",
     "moduleFieldInvalid": "Šie lauki neatbilst šāda veida iesaistei: {fields}. Nekas netika saglabāts — noņemiet tos un mēģiniet vēlreiz."
-  }
+  },
+  "contextEnded": "beidzies"
 }

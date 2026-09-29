@@ -11762,7 +11762,14 @@
     },
     "title": "Agency-proposed candidates",
     "subtitle": "A connected staffing agency proposed these workers for this request. Review, contact, or book them with the same controls below.",
-    "via": "Via"
+    "via": "Via",
+    "worker": {
+      "proposed": "awaiting the worker",
+      "accepted": "worker accepted",
+      "declined": "worker declined",
+      "withdrawn": "proposal withdrawn",
+      "expired": "proposal expired"
+    }
   },
   "cvSections": {
     "grid": {

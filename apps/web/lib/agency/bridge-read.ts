@@ -484,3 +484,29 @@ export async function listOfferedCandidatesForRequest(
     return [];
   }
 }
+
+/**
+ * CLIENT side: the WORKER's answer to the bookings its accepted agency
+ * offers proposed (production walk 2026-09-28: a declined placement still
+ * read "priimtas" — the client's decision — with no trace of the worker's).
+ * The client owns those booking rows, so this is its own RLS read; an
+ * unreadable row simply shows no worker decision.
+ */
+export async function readOfferBookingStatuses(
+  bookingIds: readonly string[],
+): Promise<ReadonlyMap<string, string>> {
+  const out = new Map<string, string>();
+  if (bookingIds.length === 0) return out;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await asAny(supabase)
+      .from("booking_requests")
+      .select("id, status")
+      .in("id", [...bookingIds]);
+    if (error) return out;
+    for (const r of (data ?? []) as { id: string; status: string }[]) out.set(r.id, r.status);
+  } catch {
+    /* no worker decision shown */
+  }
+  return out;
+}

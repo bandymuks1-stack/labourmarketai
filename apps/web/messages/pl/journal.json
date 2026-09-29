@@ -903,5 +903,6 @@
     "reported": "organizacja zarejestrowała {time}",
     "periodReportedOnly": "Brak własnych zapisów; organizacja zarejestrowała {days, plural, one {# dzień} few {# dni} many {# dni} other {# dnia}}, {time}.",
     "reportedUnknown": "Nie udało się odczytać zapisów organizacji za ten okres — to nie to samo, co ich brak."
-  }
+  },
+  "contextEnded": "zakończone"
 }

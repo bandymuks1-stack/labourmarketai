@@ -1,4 +1,5 @@
 import "server-only";
+import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
 import { orgDisplayName } from "@/lib/company/org-display";
 
 import { createClient } from "@/lib/supabase/server";
@@ -326,7 +327,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       supabase
         .from("engagement_contexts")
         .select(
-          "id, relationship_slug, title, description, operations_role, project_id, is_primary, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
+          "id, relationship_slug, title, description, operations_role, project_id, is_primary, started_at, ended_at, organization_id, organizations(display_name, legal_name, organization_type)",
         )
         .eq("profile_id", user.id)
         .in("relationship_slug", PROFESSIONAL_HISTORY_RELATIONSHIPS)
@@ -434,7 +435,13 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       )
     : null;
 
-  const workHistory: VerifiedCvEngagement[] = (ecRes.data ?? []).map((e) => {
+  // An ENDED relationship keeps naming its organization (owner 2026-09-29).
+  const ecNamed = await withHistoricalOrgNames(
+    supabase,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (ecRes.data ?? []) as any[],
+  );
+  const workHistory: VerifiedCvEngagement[] = (ecNamed as NonNullable<typeof ecRes.data>).map((e) => {
     const org = e.organizations as
       | {
           display_name: string | null;
