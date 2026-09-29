@@ -7572,7 +7572,10 @@
         "history": "Geschiedenis",
         "identity": "Persoon",
         "next": "Volgende",
-        "nextOpportunities": "Waar u verder kunt gaan"
+        "nextOpportunities": "Waar u verder kunt gaan",
+        "doorCalendar": "Deze week in de kalender",
+        "doorJournal": "Alle registraties in het werklogboek",
+        "doorCv": "Levend cv"
       }
     }
   },

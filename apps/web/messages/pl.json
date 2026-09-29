@@ -7572,7 +7572,10 @@
         "history": "Historia",
         "identity": "Osoba",
         "next": "Dalej",
-        "nextOpportunities": "Dokąd możesz pójść dalej"
+        "nextOpportunities": "Dokąd możesz pójść dalej",
+        "doorCalendar": "Ten tydzień w kalendarzu",
+        "doorJournal": "Wszystkie wpisy w dzienniku pracy",
+        "doorCv": "Żywe CV"
       }
     }
   },

@@ -75,6 +75,9 @@ export interface PlayerCardLabels {
     history: string;
     next: string;
     nextOpportunities: string;
+    doorCalendar: string;
+    doorJournal: string;
+    doorCv: string;
   };
   title: string;
   subtitle: string;
@@ -705,6 +708,18 @@ export function WorkerPlayerCard({
   );
   // NEXT: what would open the next step — the readiness still missing, the
   // market pay reading, and the door to where the person can go.
+  // ONE SYSTEM (owner 2026-09-29 item 5): each lens opens the surface that
+  // OWNS its facts — the week's work in the calendar, the records in the
+  // journal, the history in the Living CV. Never on the public sample.
+  const door = (href: string, testid: string, text: string) =>
+    sample ? null : (
+      <Link href={href as "/dashboard"} data-testid={testid} className={"inline-flex min-h-11 w-fit items-center rounded-full border border-brand-blue/50 px-4 text-sm font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"}>
+        {text} →
+      </Link>
+    );
+  const secWorkDoor = door("/dashboard/planning?view=week", "player-card-work-calendar", labels.modes.doorCalendar);
+  const secRecordsDoor = door("/dashboard/journal#journal-entries", "player-card-records-journal", labels.modes.doorJournal);
+  const secHistoryDoor = door("/cv#cv-work-history", "player-card-history-cv", labels.modes.doorCv);
   const secNextDoor = sample ? null : (
     <Link
       href={"/dashboard/opportunities" as "/dashboard"}
@@ -828,6 +843,7 @@ export function WorkerPlayerCard({
               {secB}
               {secF}
               {secJ}
+              {secWorkDoor}
             </>
           ),
           skills: (
@@ -841,12 +857,14 @@ export function WorkerPlayerCard({
               {secEvidenceChart}
               {secH}
               {secJ}
+              {secRecordsDoor}
             </>
           ),
           history: (
             <>
               {secE}
               {secG}
+              {secHistoryDoor}
             </>
           ),
           next: (
