@@ -1,4 +1,5 @@
 import { readProfessionStatement } from "@/lib/structuring/role-label";
+import { readStatedProfessions } from "@/lib/conversation/stated-professions";
 import { recognizeSkills, RECOGNITION_LIMIT } from "@/lib/structuring/skill-recognition";
 import { guessDocumentType } from "@/lib/conversation/document-type-guess";
 
@@ -176,12 +177,20 @@ export function readCompoundStatement(text: string): CompoundStatementV1 {
   // own limit. Only catalogue slugs come back, so "MIG/MAG" becomes
   // `mig-mag-welding` and an unknown process simply does not appear —
   // there is no branch here that could mint one.
+  // Every profession the sentence states (0/1/N — "Esu pastolininkas ir
+  // stogdengys"): a trade word is a PROFESSION, never also a skill fact.
+  const statedProfessions = readStatedProfessions(raw);
   for (const skill of recognizeSkills(raw).slice(0, RECOGNITION_LIMIT)) {
     // Also the profession's OWN word form in the sentence ("stogdengiu" for
     // "Stogdengys", 2026-09-29) — an inflected trade word is not a second fact.
     if (
       isSameFragmentAsProfession(skill.matchedText, profession?.label ?? null) ||
-      isSameFragmentAsProfession(skill.matchedText, profession?.raw ?? null)
+      isSameFragmentAsProfession(skill.matchedText, profession?.raw ?? null) ||
+      statedProfessions.some(
+        (p) =>
+          isSameFragmentAsProfession(skill.matchedText, p.label) ||
+          isSameFragmentAsProfession(skill.matchedText, p.raw),
+      )
     ) {
       continue;
     }
