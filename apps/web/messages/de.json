@@ -8007,7 +8007,14 @@
     "history": {
       "project": "Projekt: {name}",
       "recorded": "Arbeitsjournal: {hours} Std., {count, plural, one {# Eintrag} other {# Einträge}}",
-      "recordedConfirmed": "Arbeitsjournal: {hours} Std., {count, plural, one {# Eintrag} other {# Einträge}}, davon {confirmed} Std. von einem Vorgesetzten freigegeben"
+      "recordedConfirmed": "Arbeitsjournal: {hours} Std., {count, plural, one {# Eintrag} other {# Einträge}}, davon {confirmed} Std. von einem Vorgesetzten freigegeben",
+      "chain": {
+        "confirmed": "Arbeitsbuch-Einträge von jemand anderem bestätigt",
+        "recorded": "Im Arbeitsbuch erfasst",
+        "stated": "Von der Person selbst angegeben",
+        "confirmedBy": "Arbeitsbuch-Eintrag bestätigt von: {role}, Arbeit am {date}",
+        "more": "{count} weitere — vollständige Liste unten"
+      }
     },
     "languagesTitle": "Sprachen",
     "languagesSelfStated": "Sprachen laut Angabe des Arbeiters.",

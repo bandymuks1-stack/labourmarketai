@@ -8007,7 +8007,14 @@
     "history": {
       "project": "Проект: {name}",
       "recorded": "Рабочий журнал: {hours} ч, {count, plural, one {# запись} few {# записи} other {# записей}}",
-      "recordedConfirmed": "Рабочий журнал: {hours} ч, {count, plural, one {# запись} few {# записи} other {# записей}}, из них подтверждено руководителем {confirmed} ч"
+      "recordedConfirmed": "Рабочий журнал: {hours} ч, {count, plural, one {# запись} few {# записи} other {# записей}}, из них подтверждено руководителем {confirmed} ч",
+      "chain": {
+        "confirmed": "Записи журнала подтвердил другой человек",
+        "recorded": "Записано в рабочем журнале",
+        "stated": "Указано самим человеком",
+        "confirmedBy": "Запись журнала подтвердил: {role}, работа {date}",
+        "more": "Ещё {count} — полный список ниже"
+      }
     },
     "languagesTitle": "Языки",
     "languagesSelfStated": "Языки, как их указал работник.",

@@ -134,6 +134,14 @@ export type VerifiedCvProofRow = {
    * legible, which is what the owner asked for before any data change.
    */
   selfConfirmed: boolean;
+  /**
+   * The engagement (`engagement_contexts.id`) the confirmed entry was
+   * recorded for, or null when it was recorded without one. Lets the CV
+   * print a confirmation UNDER the job it confirms — work → confirmation →
+   * history as one chain (premium Living CV, 2026-09-29). An id the person's
+   * own entry already carries; never a name, never the confirmer.
+   */
+  engagementId: string | null;
 };
 
 export type VerifiedCvLanguage = { lang: string; level: string };
@@ -322,7 +330,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       getOwnTrustSignals(workerId),
       supabase
         .from("journal_entries")
-        .select("id, created_at, project_id, deleted_at, superseded_by")
+        .select("id, created_at, project_id, engagement_context_id, deleted_at, superseded_by")
         .eq("worker_id", workerId),
       supabase
         .from("engagement_contexts")
@@ -593,7 +601,11 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
   const entryById = new Map(
     entries.map((e) => [
       e.id,
-      { createdAt: e.created_at, projectId: (e.project_id as string | null) ?? null },
+      {
+        createdAt: e.created_at,
+        projectId: (e.project_id as string | null) ?? null,
+        engagementId: (e.engagement_context_id as string | null) ?? null,
+      },
     ]),
   );
   const proof: VerifiedCvProofRow[] = [];
@@ -687,6 +699,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         confirmerRole: row.confirmerRole,
         automatic: row.automatic,
         selfConfirmed: row.selfConfirmed,
+        engagementId: entry?.engagementId ?? null,
       });
     }
     proof.sort((a, b) => (a.confirmedAt < b.confirmedAt ? 1 : -1));

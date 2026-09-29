@@ -8007,7 +8007,14 @@
     "history": {
       "project": "Projekt: {name}",
       "recorded": "Dziennik pracy: {hours} h, {count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}",
-      "recordedConfirmed": "Dziennik pracy: {hours} h, {count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}, z czego {confirmed} h zatwierdzonych przez kierownika"
+      "recordedConfirmed": "Dziennik pracy: {hours} h, {count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}, z czego {confirmed} h zatwierdzonych przez kierownika",
+      "chain": {
+        "confirmed": "Wpisy w dzienniku potwierdziła inna osoba",
+        "recorded": "Zapisano w dzienniku pracy",
+        "stated": "Podane przez samą osobę",
+        "confirmedBy": "Wpis w dzienniku potwierdził(a): {role}, praca {date}",
+        "more": "Jeszcze {count} — pełna lista niżej"
+      }
     },
     "languagesTitle": "Języki",
     "languagesSelfStated": "Języki podane przez pracownika.",
