@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { readCompoundStatement } from "@/lib/conversation/compound-statement";
 import { readStatedProfessions } from "@/lib/conversation/stated-professions";
 
 /** 0/1/N professions stated in one message (owner continuation 2026-09-29). */
@@ -13,5 +14,14 @@ describe("readStatedProfessions", () => {
     expect(readStatedProfessions("Dar dirbu ir stogdengiu.").map((r) => r.professionSlug)).toEqual(["roofer"]);
     expect(readStatedProfessions("Ieškau darbo")).toEqual([]);
     expect(readStatedProfessions("Esu Jonas")).toEqual([]);
+  });
+});
+
+
+describe("two professions are not a compound of profession + skill", () => {
+  it("'Esu pastolininkas ir stogdengys' reaches the profession review", () => {
+    const c = readCompoundStatement("Esu pastolininkas ir stogdengys.");
+    expect(c.facts.some((f) => f.kind === "skill")).toBe(false);
+    expect(c.isCompound).toBe(false);
   });
 });
