@@ -76,6 +76,13 @@ describe("the person's world is the card's own rows, placed in space", () => {
     expect(w.history[1].tone).toBe("current");
   });
 
+  it("the environment follows the catalogue profession, neutral otherwise", () => {
+    expect(buildCardWorld({ ...base, professionSlug: "cook" }).environment).toBe("kitchen");
+    expect(buildCardWorld({ ...base, professionSlug: "welder" }).environment).toBe("workshop");
+    expect(buildCardWorld({ ...base, professionSlug: null }).environment).toBe("neutral");
+    expect(buildCardWorld({ ...base, professionSlug: "astronaut" }).environment).toBe("neutral");
+  });
+
   it("the model is plain data — it can cross into a client component", () => {
     const w = buildCardWorld({ ...base, currentWork: ["Restoranas", "Restoranas", " "] });
     expect(w.work.map((n) => n.label)).toEqual(["Restoranas"]);

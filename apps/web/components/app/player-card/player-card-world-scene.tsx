@@ -36,6 +36,17 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 
 import type { PlayerCardMode } from "@/lib/player-card/card-modes";
 import type { PlayerCardWorldModel, WorldNode } from "@/lib/player-card/card-world";
+import {
+  Backdrop,
+  Capability,
+  EvidenceShard,
+  Ground,
+  Milestone,
+  PathForward,
+  Thread,
+  Trail,
+  WorkPlace,
+} from "./player-card-world-objects";
 
 type V3 = readonly [number, number, number];
 
@@ -73,38 +84,43 @@ function shotFor(mode: PlayerCardMode, L: Layout): Shot {
         ? { pos: [px, 1.3, 6.9], look: [px, 1.62, 0] }
         : { pos: [px - off * 0.45, 1.3, 5.9], look: [px - off * 0.45, 1.1, 0] };
     case "work":
-      return { pos: [px - 0.4, 1.9, 8.6], look: [px, 1.35, -1.4] };
+      return { pos: [px + 0.9, 1.75, 6.4], look: [px - 0.6, 1.15, -0.8] };
     case "skills":
-      return { pos: [px + 1.4, 1.7, 6.6], look: [px + 1.9, 0.9, 0.1] };
+      return { pos: [px + 1.1, 1.5, 5.6], look: [px + 0.95, 1.25, 0.3] };
     case "evidence":
-      return { pos: [px + 1.9, 1.3, 4.4], look: [px + 2.1, 0.25, 0.2] };
+      return { pos: [px + 1.3, 1.45, 4.6], look: [px + 1.05, 1.25, 0.3] };
     case "history":
-      return { pos: [px + 0.6, 2.6, 8.8], look: [px - 2.6, 1.1, -5.0] };
+      return { pos: [px + 1.4, 2.9, 5.6], look: [px - 2.0, 0.3, -3.8] };
     case "next":
-      return { pos: [px - 1.0, 2.2, -3.6], look: [px + 1.4, 1.0, 3.6] };
+      return { pos: [px - 1.5, 2.05, -1.1], look: [px + 1.9, 0.45, 3.9] };
   }
 }
 
-function skillColumns(count: number, L: Layout): V3[] {
+/** Capabilities stand around the person at hand height — all the same
+ *  size; where they stand says nothing about how "good" they are. */
+function capabilityRing(count: number, L: Layout): V3[] {
   const [px] = L.person;
-  const step = L.mobile ? 0.5 : 0.62;
-  // two staggered rows beside the person: the front row nearer the viewer,
-  // so no column hides another and every capability keeps its own words
-  return Array.from({ length: count }, (_, i) => [px + (L.mobile ? 0.8 : 1.15) + i * step, 0, i % 2 === 0 ? 0.75 : -0.45] as const);
-}
-
-function pastPortals(count: number, L: Layout): V3[] {
-  const [px] = L.person;
-  // index 0 = oldest; the newest past step stands nearest behind the person
   return Array.from({ length: count }, (_, i) => {
-    const back = count - i; // 1 = nearest
-    return [px - 1.35 * back, 0, -1.9 - 2.1 * back] as const;
+    const t = count === 1 ? 0.5 : i / (count - 1);
+    const a = THREE.MathUtils.lerp(-0.45, 1.25, t); // right of the person, curving toward the viewer
+    const r = L.mobile ? 1.05 : 1.6;
+    return [px + Math.cos(a) * r, 0.75 + t * 1.2, Math.sin(a) * r * 0.8 + 0.1] as const;
   });
 }
 
-function nextDoors(count: number, L: Layout): V3[] {
+/** Earlier engagements on the trail behind the person, the oldest farthest. */
+function milestones(count: number, L: Layout): V3[] {
   const [px] = L.person;
-  return Array.from({ length: count }, (_, i) => [px + 0.9 + i * 1.45, 0, 3.4 + i * 1.1] as const);
+  return Array.from({ length: count }, (_, i) => {
+    const back = count - i; // 1 = most recent past step
+    return [px - 0.9 * back - 0.3, 0, -1.3 - 1.9 * back] as const;
+  });
+}
+
+/** Where each direction's path arrives, ahead of the person. */
+function destinations(count: number, L: Layout): V3[] {
+  const [px] = L.person;
+  return Array.from({ length: count }, (_, i) => [px + 1.2 + i * 1.3, 0, 3.0 + i * 0.9] as const);
 }
 
 // ── words placed in space ───────────────────────────────────────────────────
@@ -121,6 +137,10 @@ function Projector({ specs, refs, mode }: { specs: readonly LabelSpec[]; refs: M
   const { camera, size } = useThree();
   const v = useMemo(() => new THREE.Vector3(), []);
   useFrame(() => {
+    // the camera rig moved the camera THIS frame; its matrices update only at
+    // render — project against the current pose, or the words land where the
+    // camera was a frame ago (and stay there once on-demand frames stop)
+    camera.updateMatrixWorld();
     for (const s of specs) {
       const el = refs.current.get(s.id);
       if (!el) continue;
@@ -280,108 +300,6 @@ function Person({ model, p, at, mode, reduced }: { model: PlayerCardWorldModel; 
   );
 }
 
-// ── the world around the person ─────────────────────────────────────────────
-function Portal({ at, w, h, p, lit, opacity = 1 }: { at: V3; w: number; h: number; p: Palette; lit: boolean; opacity?: number }) {
-  const t = 0.16;
-  const mat = (
-    <meshPhysicalMaterial color={p.body} metalness={0.7} roughness={0.35} clearcoat={0.5} transparent={opacity < 1} opacity={opacity} envMapIntensity={0.8} />
-  );
-  return (
-    <group position={at as unknown as THREE.Vector3Tuple}>
-      <mesh position={[-w / 2, h / 2, 0]} castShadow receiveShadow>
-        <boxGeometry args={[t, h, t * 1.6]} />
-        {mat}
-      </mesh>
-      <mesh position={[w / 2, h / 2, 0]} castShadow receiveShadow>
-        <boxGeometry args={[t, h, t * 1.6]} />
-        {mat}
-      </mesh>
-      <mesh position={[0, h + t / 2, 0]} castShadow>
-        <boxGeometry args={[w + t, t, t * 1.6]} />
-        {mat}
-      </mesh>
-      {lit ? (
-        // warm light along the underside of the lintel — the place is in use
-        <mesh position={[0, h - 0.02, t * 0.81]}>
-          <boxGeometry args={[w - t, 0.025, 0.02]} />
-          <meshBasicMaterial color={p.gold} toneMapped={false} transparent opacity={0.9 * opacity} />
-        </mesh>
-      ) : null}
-    </group>
-  );
-}
-
-function Column({ at, node, p }: { at: V3; node: WorldNode; p: Palette }) {
-  const h = 0.3 + node.weight * 1.7;
-  const r = 0.12;
-  return (
-    <group position={at as unknown as THREE.Vector3Tuple}>
-      <mesh position={[0, h / 2, 0]} castShadow>
-        <cylinderGeometry args={[r, r, h, 48]} />
-        {node.tone === "confirmed" ? (
-          // confirmed by someone else: solid, polished — gold as material
-          <meshPhysicalMaterial color={p.gold} metalness={1} roughness={0.22} clearcoat={1} envMapIntensity={1.3} />
-        ) : node.tone === "recorded" ? (
-          // seen in the journal: frosted glass carrying light
-          <meshPhysicalMaterial color={p.ivory} transmission={0.85} thickness={0.5} roughness={0.3} ior={1.45} metalness={0} attenuationColor={p.cyan} attenuationDistance={0.9} />
-        ) : (
-          // only said: the shape without the substance
-          <meshBasicMaterial color={p.muted} wireframe transparent opacity={0.35} />
-        )}
-      </mesh>
-    </group>
-  );
-}
-
-/** The records behind a capability, stacked at its foot (at most eight). */
-function RecordStack({ at, entries, confirmed, p }: { at: V3; entries: number; confirmed: boolean; p: Palette }) {
-  const n = Math.min(8, entries);
-  return (
-    <group position={[at[0] + 0.3, 0, at[2] + 0.18]}>
-      {Array.from({ length: n }, (_, i) => (
-        <mesh key={i} position={[Math.sin(i * 1.7) * 0.03, 0.018 + i * 0.036, Math.cos(i * 2.3) * 0.03]} rotation={[0, i * 0.23, 0]} castShadow receiveShadow>
-          <boxGeometry args={[0.3, 0.026, 0.21]} />
-          <meshStandardMaterial color={p.ivory} roughness={0.85} metalness={0} />
-        </mesh>
-      ))}
-      {confirmed && n > 0 ? (
-        // a seal on the top record: someone else confirmed this work
-        <mesh position={[0.07, 0.036 * n + 0.012, 0.04]}>
-          <cylinderGeometry args={[0.045, 0.045, 0.014, 32]} />
-          <meshPhysicalMaterial color={p.gold} metalness={1} roughness={0.25} />
-        </mesh>
-      ) : null}
-    </group>
-  );
-}
-
-function Door({ at, weight, p }: { at: V3; weight: number; p: Palette }) {
-  const light = useMemo(() => {
-    const c = document.createElement("canvas");
-    c.width = 64;
-    c.height = 128;
-    const ctx = c.getContext("2d")!;
-    const g = ctx.createLinearGradient(0, 128, 0, 0);
-    g.addColorStop(0, "rgba(255,236,190,0.95)");
-    g.addColorStop(1, "rgba(255,236,190,0.05)");
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, 64, 128);
-    const t = new THREE.CanvasTexture(c);
-    t.colorSpace = THREE.SRGBColorSpace;
-    return t;
-  }, []);
-  useEffect(() => () => light.dispose(), [light]);
-  return (
-    <group position={at as unknown as THREE.Vector3Tuple} rotation={[0, Math.PI - 0.35, 0]}>
-      <Portal at={[0, 0, 0]} w={0.95} h={1.75} p={p} lit={false} />
-      <mesh position={[0, 0.875, -0.02]}>
-        <planeGeometry args={[0.8, 1.72]} />
-        <meshBasicMaterial map={light} transparent opacity={0.35 + weight * 0.45} toneMapped={false} depthWrite={false} side={THREE.DoubleSide} />
-      </mesh>
-    </group>
-  );
-}
-
 /** A group that rises from the floor when its dimension is explored. */
 function Stage({ show, reduced, children }: { show: boolean; reduced: boolean; children: ReactNode }) {
   const g = useRef<THREE.Group>(null);
@@ -399,37 +317,6 @@ function Stage({ show, reduced, children }: { show: boolean; reduced: boolean; c
   return (
     <group ref={g} scale={[1, 0.0001, 1]}>
       {children}
-    </group>
-  );
-}
-
-function Floor({ p, at }: { p: Palette; at: V3 }) {
-  const pool = useMemo(() => {
-    const c = document.createElement("canvas");
-    c.width = c.height = 512;
-    const ctx = c.getContext("2d")!;
-    const g = ctx.createRadialGradient(256, 256, 0, 256, 256, 256);
-    g.addColorStop(0, "rgba(255,244,220,0.22)");
-    g.addColorStop(0.3, "rgba(255,244,220,0.1)");
-    g.addColorStop(1, "rgba(255,244,220,0)");
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, 512, 512);
-    const t = new THREE.CanvasTexture(c);
-    t.colorSpace = THREE.SRGBColorSpace;
-    return t;
-  }, []);
-  useEffect(() => () => pool.dispose(), [pool]);
-  return (
-    <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[60, 60]} />
-        <meshStandardMaterial color={p.ground} roughness={0.62} metalness={0.2} envMapIntensity={0.08} />
-      </mesh>
-      {/* the light the person stands in */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[at[0], 0.003, at[2] + 0.3]}>
-        <planeGeometry args={[6, 6]} />
-        <meshBasicMaterial map={pool} transparent depthWrite={false} />
-      </mesh>
     </group>
   );
 }
@@ -519,26 +406,31 @@ export default function PlayerCardWorldScene({
   const layout: Layout = useMemo(() => ({ person: [mobile ? 0 : 1.2, 0, 0], mobile }), [mobile]);
   const skills = useMemo(() => model.skills.slice(0, mobile ? 5 : 8), [model.skills, mobile]);
   const past = useMemo(() => model.history.filter((h) => h.tone !== "current").slice(-(mobile ? 3 : 5)), [model.history, mobile]);
-  const skillAt = useMemo(() => skillColumns(skills.length, layout), [skills.length, layout]);
-  const pastAt = useMemo(() => pastPortals(past.length, layout), [past.length, layout]);
-  const nextAt = useMemo(() => nextDoors(model.next.length, layout), [model.next.length, layout]);
+  const capAt = useMemo(() => capabilityRing(skills.length, layout), [skills.length, layout]);
+  const pastAt = useMemo(() => milestones(past.length, layout), [past.length, layout]);
+  const nextAt = useMemo(() => destinations(model.next.length, layout), [model.next.length, layout]);
   const workplace = model.person.currentWork[0] ?? null;
   const [px, , pz] = layout.person;
+  const chest: V3 = [px, 1.4, pz + 0.1];
+  const shardAt = (i: number, k: number): V3 => {
+    const c = capAt[i];
+    const a = 2.3 + k * 0.42; // behind-left of the capability, clear of its words
+    return [c[0] + Math.cos(a) * 0.24, c[1] + Math.sin(a) * 0.16, c[2] - 0.18];
+  };
 
   const specs: LabelSpec[] = useMemo(() => {
     const tierLabel = (tone: WorldNode["tone"]) =>
       model.evidence.sources.find((s) => (tone === "confirmed" ? s.key === "confirmed" : tone === "recorded" ? s.key === "journal" : s.key === "declared"))?.label ?? null;
     const out: LabelSpec[] = [];
-    if (workplace) out.push({ id: "workplace", at: [px, 3.35, pz - 1.5], modes: ["work"], title: workplace, detail: model.person.currentWorkLabel });
+    if (workplace) out.push({ id: "workplace", at: [px - 0.9, 2.95, pz - 1.3], modes: ["work"], title: workplace, detail: model.person.currentWorkLabel });
     skills.forEach((n, i) => {
-      const h = 0.3 + n.weight * 1.7;
-      out.push({ id: n.id, at: [skillAt[i][0], h + 0.42, skillAt[i][2]], modes: ["skills"], title: n.label, detail: n.detail });
-      out.push({ id: `${n.id}:source`, at: [skillAt[i][0] + 0.3, 0.02, skillAt[i][2] + 0.35], modes: ["evidence"], title: n.label, detail: tierLabel(n.tone) });
+      out.push({ id: n.id, at: capAt[i], modes: ["skills"], title: n.label, detail: n.detail, align: "right" });
+      out.push({ id: `${n.id}:source`, at: capAt[i], modes: ["evidence"], title: n.label, detail: tierLabel(n.tone), align: "right" });
     });
-    past.forEach((n, i) => out.push({ id: n.id, at: [pastAt[i][0], 2.25, pastAt[i][2]], modes: ["history"], title: n.label, detail: n.detail }));
-    model.next.forEach((n, i) => out.push({ id: n.id, at: [nextAt[i][0], 2.05, nextAt[i][2]], modes: ["next"], title: n.label, detail: n.detail }));
+    past.forEach((n, i) => out.push({ id: n.id, at: [pastAt[i][0], 0.35, pastAt[i][2]], modes: ["history"], title: n.label, detail: n.detail }));
+    model.next.forEach((n, i) => out.push({ id: n.id, at: [nextAt[i][0], 0.25, nextAt[i][2]], modes: ["next"], title: n.label, detail: n.detail }));
     return out;
-  }, [model, workplace, skills, past, skillAt, pastAt, nextAt, px, pz]);
+  }, [model, workplace, skills, past, capAt, pastAt, nextAt, px, pz]);
 
   useEffect(() => invalidateRef.current(), [mode, specs]);
 
@@ -574,54 +466,74 @@ export default function PlayerCardWorldScene({
         onCreated={({ invalidate, scene }) => {
           invalidateRef.current = invalidate;
           scene.background = new THREE.Color(p.ground);
-          scene.fog = new THREE.Fog(p.ground, 8, 20);
+          scene.fog = new THREE.Fog(p.ground, 9, 24);
         }}
       >
         <Environment />
-        <hemisphereLight args={["#fff6e6", p.ground, 0.25]} />
-        {/* key: a warm spot from the front-left, the only shadow caster */}
+        <hemisphereLight args={["#fff6e6", p.ground, 0.3]} />
+        {/* KEY — warm, from the front-left: the person is read first; the
+            only shadow caster, so the contact shadow grounds them */}
         <spotLight
-          position={[px - 3.2, 5.6, 4.2]}
-          angle={0.5}
-          penumbra={0.9}
-          intensity={70}
-          color="#fff1dc"
+          position={[px - 2.6, 5.2, 4.6]}
+          angle={0.42}
+          penumbra={0.85}
+          intensity={95}
+          color="#fff0d8"
           castShadow
-          shadow-mapSize={[1024, 1024]}
-          shadow-bias={-0.0004}
-          target-position={[px, 1, 0]}
+          shadow-mapSize={[2048, 2048]}
+          shadow-bias={-0.0003}
+          shadow-radius={6}
+          target-position={[px, 1.1, 0]}
         />
-        {/* rim: gold light from behind carves the silhouette out of the dark */}
-        <spotLight position={[px + 2.0, 3.6, -3.4]} angle={0.28} penumbra={1} intensity={40} color={p.gold} target-position={[px, 1.9, 0]} />
+        {/* FILL — cool and low from the right, so the dark side keeps its shape */}
+        <directionalLight position={[px + 4, 2.2, 3]} intensity={0.55} color="#cfe0ff" />
+        {/* RIM — gold from behind: separation from the dark, gold as light */}
+        <spotLight position={[px + 1.6, 3.8, -3.2]} angle={0.3} penumbra={1} intensity={60} color={p.gold} target-position={[px, 1.6, 0]} />
         <CameraRig mode={mode} reduced={reduced} layout={layout} pointer={pointer} />
-        <Floor p={p} at={layout.person} />
+        <Backdrop p={p} />
+        <Ground p={p} at={layout.person} />
 
-        {/* WORK — the place they stand in now (only when a real one exists) */}
-        {workplace ? <Portal at={[px, 0, pz - 1.5]} w={3.2} h={3.0} p={p} lit /> : null}
+        {/* WORK — the kind of place this work happens, only with a real current engagement */}
+        {workplace ? <WorkPlace kind={model.environment} at={layout.person} p={p} /> : null}
 
         <Person model={model} p={p} at={layout.person} mode={mode} reduced={reduced} />
 
-        {/* HISTORY — earlier workplaces recede behind the person */}
+        {/* HISTORY — a trail behind the person, earlier engagements as milestones */}
         <Stage show={mode === "history"} reduced={reduced}>
+          {past.length > 0 ? <Trail points={[[px - 0.15, 0, pz - 0.35], ...pastAt]} p={p} /> : null}
           {past.map((n, i) => (
-            <Portal key={n.id} at={pastAt[i]} w={2.2} h={2.0} p={p} lit={false} opacity={0.55 + 0.45 * ((i + 1) / past.length)} />
+            <Milestone key={n.id} at={pastAt[i]} p={p} nearness={(i + 1) / past.length} />
           ))}
         </Stage>
 
-        {/* SKILLS / EVIDENCE — capability beside them, records at its foot */}
+        {/* SKILLS / EVIDENCE — each capability related to the person; in
+            EVIDENCE its real records come forward beside it */}
         <Stage show={mode === "skills" || mode === "evidence"} reduced={reduced}>
-          {skills.map((n, i) => (
-            <group key={n.id}>
-              <Column at={skillAt[i]} node={n} p={p} />
-              <RecordStack at={skillAt[i]} entries={n.count ?? 0} confirmed={n.tone === "confirmed"} p={p} />
-            </group>
-          ))}
+          {skills.map((n, i) => {
+            const state = n.tone === "confirmed" ? "confirmed" : n.tone === "recorded" ? "recorded" : "declared";
+            return (
+              <group key={n.id}>
+                <Thread from={chest} to={capAt[i]} color={state === "confirmed" ? p.gold : p.ivory} opacity={state === "declared" ? 0.12 : 0.32} />
+                <Capability at={capAt[i]} state={state} p={p} />
+              </group>
+            );
+          })}
+        </Stage>
+        <Stage show={mode === "evidence"} reduced={reduced}>
+          {skills.map((n, i) =>
+            Array.from({ length: Math.min(4, n.count ?? 0) }, (_, k) => (
+              <group key={`${n.id}:${k}`}>
+                <Thread from={capAt[i]} to={shardAt(i, k)} color={n.tone === "confirmed" ? p.gold : p.ivory} opacity={0.35} sag={0.02} />
+                <EvidenceShard at={shardAt(i, k)} confirmed={n.tone === "confirmed"} p={p} tilt={-0.4 + k * 0.2} />
+              </group>
+            )),
+          )}
         </Stage>
 
-        {/* NEXT — the world opens ahead */}
+        {/* NEXT — lit paths from the person to where the evidence reaches */}
         <Stage show={mode === "next"} reduced={reduced}>
           {model.next.map((n, i) => (
-            <Door key={n.id} at={nextAt[i]} weight={n.weight} p={p} />
+            <PathForward key={n.id} from={[px + 0.15, 0, pz + 0.35]} to={nextAt[i]} p={p} strength={n.weight} />
           ))}
         </Stage>
 

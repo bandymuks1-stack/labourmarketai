@@ -762,6 +762,7 @@ export function WorkerPlayerCard({
           facts: labels.identityFacts.map((f) => ({ value: f.value, label: f.label })),
           provenance: { label: labels.provenance.label, text: labels.provenance.text },
         },
+        professionSlug: card.professionSlug,
         modeLabels: {
           work: labels.modes.work,
           skills: labels.modes.skills,

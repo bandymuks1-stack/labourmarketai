@@ -26,6 +26,29 @@ import type { SkillEvidenceBar, EvidenceMonth, HistoryLane } from "@/lib/player-
 
 export type WorldSatelliteKey = Exclude<PlayerCardMode, "identity">;
 
+/** The kind of place the person's work happens in — art direction for the
+ *  scene's environment only, derived from the catalogue profession. Never a
+ *  claim about a specific site. */
+export type WorldEnvironment = "kitchen" | "construction" | "workshop" | "logistics" | "care" | "office" | "neutral";
+
+const ENVIRONMENT_BY_PROFESSION: Readonly<Record<string, WorldEnvironment>> = {
+  cook: "kitchen", baker: "kitchen", kitchen_helper: "kitchen", waiter: "kitchen", barista: "kitchen",
+  builder: "construction", carpenter: "construction", concrete_worker: "construction", drywaller: "construction",
+  mason: "construction", painter: "construction", rebar_worker: "construction", roofer: "construction",
+  tiler: "construction", general_laborer: "construction", foreman: "construction", site_manager: "construction",
+  site_engineer: "construction", crane_operator: "construction", heavy_equipment_operator: "construction",
+  welder: "workshop", electrician: "workshop", plumber: "workshop", auto_mechanic: "workshop",
+  handyman: "workshop", furniture_assembler: "workshop", production_worker: "workshop",
+  driver: "logistics", warehouse_worker: "logistics", merchandiser: "logistics",
+  caregiver: "care", teacher: "care",
+  office_administrator: "office", software_developer: "office", recruiter: "office", translator: "office",
+  customer_service_specialist: "office", call_centre_agent: "office", receptionist: "office",
+};
+
+export function environmentForProfession(slug: string | null | undefined): WorldEnvironment {
+  return (slug && ENVIRONMENT_BY_PROFESSION[slug]) || "neutral";
+}
+
 export type WorldNodeTone =
   | "confirmed" // a manager/client confirmed it — trust green
   | "recorded" // the journal backs it — evidence cyan
@@ -79,6 +102,7 @@ export type PlayerCardWorldModel = {
     /** The provenance edge in words (P6: never colour alone). */
     readonly provenance: { readonly label: string; readonly text: string };
   };
+  readonly environment: WorldEnvironment;
   readonly satellites: readonly WorldSatellite[];
   readonly work: readonly WorldNode[];
   readonly skills: readonly WorldNode[];
@@ -113,6 +137,7 @@ const MAX_MONTHS = 12;
 
 export type CardWorldInput = {
   readonly person: PlayerCardWorldModel["person"];
+  readonly professionSlug?: string | null;
   readonly modeLabels: Readonly<Record<WorldSatelliteKey, string>>;
   readonly currentWork: readonly string[];
   readonly skillBars: readonly SkillEvidenceBar[];
@@ -214,5 +239,5 @@ export function buildCardWorld(input: CardWorldInput): PlayerCardWorldModel {
     weight: weigh(counts[key], maxCount),
   }));
 
-  return { person: input.person, satellites, work, skills, evidence: { sources, months }, history, next, words: input.words };
+  return { person: input.person, environment: environmentForProfession(input.professionSlug), satellites, work, skills, evidence: { sources, months }, history, next, words: input.words };
 }
