@@ -784,6 +784,10 @@ const RULES: IntentRule[] = [
   {
     intent: "journal-confirmed",
     patterns: [
+      // "Kas dar nepatvirtinta?" / "What is not confirmed yet?" (owner
+      // continuation 2026-09-29): scored 0 — the same read, asked from the
+      // other side.
+      p("^\\s*(kas|what|что|was|wat|co)\\s+(dar\\s+|still\\s+|ещё\\s+|noch\\s+|nog\\s+)?(yra\\s+|is\\s+)?(nepatvirtint|not\\s+(yet\\s+)?confirmed|unconfirmed|не\\s+подтвержд|nicht\\s+bestätigt|niet\\s+bevestigd|niepotwierdz)", 8),
       // "Kas patvirtinta?" / "What is confirmed?" / "Что подтверждено?" /
       // "Was ist bestätigt?" / "Wat is bevestigd?"
       p("^\\s*(kas|what|что|was|wat|co)\\s+(yra\\s+|is\\s+|ist\\s+|jest\\s+)?(jau\\s+|already\\s+|уже\\s+|schon\\s+|al\\s+|ju[zż]\\s+)?(patvirtint|confirmed|подтвержд|bestätigt|bevestigd|potwierdz)", 8),

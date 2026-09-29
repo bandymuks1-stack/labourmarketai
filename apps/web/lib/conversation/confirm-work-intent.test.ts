@@ -93,7 +93,9 @@ describe("§14 employer confirmation of work, by sentence", () => {
     expect(CHAT).toContain("id: `review-on:${m.engagementId}`");
     expect(CHAT).toContain('chip.id.startsWith("confirm:")');
     expect(CHAT).toContain('chip.id.startsWith("review-on:")');
-    expect(CHAT).toMatch(/confirmWork: \(\) => startConfirmWork\(text\)/);
+    // The company space runs the manager's queue; a person asking the same
+    // words gets their own entries (worker-pending-confirmation, 2026-09-29).
+    expect(CHAT).toMatch(/if \(identity === "company"\) return startConfirmWork\(text\);/);
   });
 
   it("every catalogue carries real copy for the confirmation lines and the two actions", () => {
