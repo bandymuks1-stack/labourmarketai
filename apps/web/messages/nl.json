@@ -14749,7 +14749,16 @@
       "whyVerifierNone": "Geen van je actieve relaties wijst naar een organisatie die werk kan bevestigen.",
       "whyVerifierUnavailable": "Dat betekent dat de gegevens niet gelezen konden worden — niet dat niemand het kan bevestigen.",
       "journalOrgRecords": "Ook in de registratie van uw organisatie ({period}): {hours} u op {days, plural, one {# dag} other {# dagen}} — uren uit een urenstaat of import, apart gehouden en niet bij het cijfer hierboven opgeteld.",
-      "journalCoverageTruncated": "Getoond op basis van de laatste {count} registraties — oudere registraties zitten niet in dit cijfer."
+      "journalCoverageTruncated": "Getoond op basis van de laatste {count} registraties — oudere registraties zitten niet in dit cijfer.",
+      "targetGapIntro": "Wat werk als ‘{occupation}’ vraagt en wat je eigen registraties al laten zien:",
+      "targetGapConfirmed": "— Bevestigd door werk: {list}",
+      "targetGapRecorded": "— In je logboek, nog niet bevestigd: {list}",
+      "targetGapStated": "— Door jou opgegeven, nog geen registraties: {list}",
+      "targetGapMissing": "— Nog niet: {list}",
+      "targetGapNoneMissing": "— Alle vaardigheden voor dit werk staan al in je profiel.",
+      "targetGapHow": "Een vaardigheid wordt sterker als je hem vastlegt als gedaan werk — proefwerk, praktijk of werk met opleiding.",
+      "whyTargetGap": "Vergeleken met de vaardigheden die het platform aan ‘{occupation}’ koppelt en met je eigen logboek- en profielregistraties.",
+      "targetGapChipCompass": "Wat je kunt leren"
     },
     "project": {
       "fieldStatus": "Status",

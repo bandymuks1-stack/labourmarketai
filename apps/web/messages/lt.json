@@ -14749,7 +14749,16 @@
       "whyVerifierNone": "Nė vienas tavo aktyvus ryšys nenurodo organizacijos, galinčios patvirtinti darbą.",
       "whyVerifierUnavailable": "Tai reiškia, kad nepavyko perskaityti duomenų — ne tai, kad patvirtinti nėra kam.",
       "journalOrgRecords": "Dar jūsų organizacijos apskaitoje ({period}): {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} — žiniaraščio ar importo valandos, skaičiuojamos atskirai ir prie skaičiaus aukščiau nepridedamos.",
-      "journalCoverageTruncated": "Rodoma iš paskutinių {count} įrašų — senesni įrašai į šį skaičių neįtraukti."
+      "journalCoverageTruncated": "Rodoma iš paskutinių {count} įrašų — senesni įrašai į šį skaičių neįtraukti.",
+      "targetGapIntro": "Ko reikia darbui „{occupation}“ ir kas iš to jau yra tavo įrašuose:",
+      "targetGapConfirmed": "— Patvirtinta darbu: {list}",
+      "targetGapRecorded": "— Įrašyta žurnale, dar nepatvirtinta: {list}",
+      "targetGapStated": "— Nurodei pats, bet įrašų dar nėra: {list}",
+      "targetGapMissing": "— Dar nėra: {list}",
+      "targetGapNoneMissing": "— Visi šiam darbui priskirti įgūdžiai tavo profilyje jau yra.",
+      "targetGapHow": "Įgūdis sustiprėja, kai jį užrašai kaip atliktą darbą — bandomąjį darbą, praktiką ar darbą su mokymais.",
+      "whyTargetGap": "Palyginta su įgūdžiais, kuriuos platforma priskiria darbui „{occupation}“, ir su tavo žurnalo bei profilio įrašais.",
+      "targetGapChipCompass": "Ko mokytis"
     },
     "project": {
       "fieldStatus": "Būsena",

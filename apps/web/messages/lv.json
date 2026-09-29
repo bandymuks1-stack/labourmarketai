@@ -4781,7 +4781,16 @@
       "whyVerifierChoice": "Vairākas organizācijas der vienlīdz labi, tāpēc es neminu — izvēlies tu.",
       "whyVerifierSelf": "Savu paša darbu apstiprināt nevari — apstiprinājumam jānāk no kāda cita.",
       "whyVerifierNone": "Neviena no tavām aktīvajām attiecībām nenorāda uz organizāciju, kas var apstiprināt darbu.",
-      "whyVerifierUnavailable": "Tas nozīmē, ka datus neizdevās nolasīt — nevis to, ka nav kam apstiprināt."
+      "whyVerifierUnavailable": "Tas nozīmē, ka datus neizdevās nolasīt — nevis to, ka nav kam apstiprināt.",
+      "targetGapIntro": "Kas vajadzīgs darbam “{occupation}” un kas no tā jau ir tavos ierakstos:",
+      "targetGapConfirmed": "— Apstiprināts ar darbu: {list}",
+      "targetGapRecorded": "— Žurnālā, vēl nav apstiprināts: {list}",
+      "targetGapStated": "— Norādīji pats, ierakstu vēl nav: {list}",
+      "targetGapMissing": "— Vēl nav: {list}",
+      "targetGapNoneMissing": "— Visas šim darbam vajadzīgās prasmes jau ir tavā profilā.",
+      "targetGapHow": "Prasme kļūst stiprāka, kad to ieraksti kā paveiktu darbu — izmēģinājuma darbu, praksi vai darbu ar apmācību.",
+      "whyTargetGap": "Salīdzināts ar prasmēm, ko platforma piesaista darbam “{occupation}”, un ar taviem žurnāla un profila ierakstiem.",
+      "targetGapChipCompass": "Ko mācīties"
     },
     "project": {
       "fieldStatus": "[EN] Status",

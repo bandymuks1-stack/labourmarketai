@@ -14749,7 +14749,16 @@
       "whyVerifierNone": "None of your active relationships points to an organization that can confirm work.",
       "whyVerifierUnavailable": "That means the data could not be read — not that nobody can confirm it.",
       "journalOrgRecords": "Also in your organization's records ({period}): {hours} h on {days, plural, one {# day} other {# days}} — timesheet or imported hours, kept apart and not added to the figure above.",
-      "journalCoverageTruncated": "Shown from the last {count} entries — older entries are not in this figure."
+      "journalCoverageTruncated": "Shown from the last {count} entries — older entries are not in this figure.",
+      "targetGapIntro": "What “{occupation}” work needs, and what your records already show:",
+      "targetGapConfirmed": "— Confirmed through work: {list}",
+      "targetGapRecorded": "— In your journal, not confirmed yet: {list}",
+      "targetGapStated": "— You said you have it, no records yet: {list}",
+      "targetGapMissing": "— Not yet: {list}",
+      "targetGapNoneMissing": "— Every skill this work needs is already in your profile.",
+      "targetGapHow": "A skill gets stronger when you record it as work you did — a trial, practice, or work alongside training.",
+      "whyTargetGap": "Compared with the skills the platform links to “{occupation}” and with your own journal and profile records.",
+      "targetGapChipCompass": "What to learn"
     },
     "project": {
       "fieldStatus": "Status",

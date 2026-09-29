@@ -4781,7 +4781,16 @@
       "whyVerifierChoice": "Flere organisasjoner passer like godt, så jeg gjetter ikke — du velger.",
       "whyVerifierSelf": "Du kan ikke bekrefte ditt eget arbeid — bekreftelsen må komme fra noen andre.",
       "whyVerifierNone": "Ingen av dine aktive forhold peker på en organisasjon som kan bekrefte arbeid.",
-      "whyVerifierUnavailable": "Det betyr at dataene ikke kunne leses — ikke at ingen kan bekrefte."
+      "whyVerifierUnavailable": "Det betyr at dataene ikke kunne leses — ikke at ingen kan bekrefte.",
+      "targetGapIntro": "Hva arbeidet som «{occupation}» krever, og hva oppføringene dine allerede viser:",
+      "targetGapConfirmed": "— Bekreftet gjennom arbeid: {list}",
+      "targetGapRecorded": "— I journalen, ikke bekreftet ennå: {list}",
+      "targetGapStated": "— Oppgitt av deg, ingen oppføringer ennå: {list}",
+      "targetGapMissing": "— Ikke ennå: {list}",
+      "targetGapNoneMissing": "— Alle ferdighetene dette arbeidet krever, står allerede i profilen din.",
+      "targetGapHow": "En ferdighet blir sterkere når du fører den som utført arbeid — prøvearbeid, praksis eller arbeid med opplæring.",
+      "whyTargetGap": "Sammenlignet med ferdighetene plattformen knytter til «{occupation}» og med dine egne journal- og profiloppføringer.",
+      "targetGapChipCompass": "Hva du kan lære"
     },
     "project": {
       "fieldStatus": "[EN] Status",
