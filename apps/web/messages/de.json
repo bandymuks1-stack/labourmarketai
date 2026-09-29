@@ -13620,6 +13620,7 @@
       "labelContext": "Arbeitskontext",
       "contextChoose": "Arbeitskontext wählen…",
       "contextAmbiguous": "Diese Arbeit könnte zu mehr als einem Kontext gehören. Wählen Sie vor dem Speichern aus, zu welchem.",
+      "contextEndedOrg": "Der Satz nennt eine Organisation, mit der dein Arbeitsverhältnis beendet ist — dieser Eintrag zählt nicht als Arbeit für sie. Wähle, wo du das gemacht hast:",
       "save": "Speichern",
       "cancel": "Bearbeiten",
       "working": "Wird gespeichert…",

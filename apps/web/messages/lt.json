@@ -13620,6 +13620,7 @@
       "labelContext": "Darbo kontekstas",
       "contextChoose": "Pasirinkite darbo kontekstą…",
       "contextAmbiguous": "Šis darbas gali priklausyti daugiau nei vienam kontekstui. Prieš išsaugant pasirinkite, kuriam.",
+      "contextEndedOrg": "Sakinyje minima organizacija, su kuria darbo santykis baigtas — šis įrašas nebus jos darbo įrodymas. Pasirink, kur tai dirbai:",
       "save": "Išsaugoti",
       "cancel": "Taisyti",
       "working": "Saugoma…",

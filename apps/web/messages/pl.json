@@ -13620,6 +13620,7 @@
       "labelContext": "Kontekst pracy",
       "contextChoose": "Wybierz kontekst pracy…",
       "contextAmbiguous": "Ta praca może należeć do więcej niż jednego kontekstu. Wybierz, do którego, przed zapisaniem.",
+      "contextEndedOrg": "Zdanie wymienia organizację, z którą Twoja współpraca się zakończyła — ten wpis nie będzie pracą dla niej. Wybierz, gdzie to robiłeś:",
       "save": "Zapisz",
       "cancel": "Edytuj",
       "working": "Zapisywanie…",

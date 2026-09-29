@@ -13,6 +13,7 @@ import {
 } from "@/lib/journal/engagement-context-selection";
 import { composeDistinctEngagementLabels } from "@/lib/journal/engagement-label";
 import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
+import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
 
 /**
  * Read the worker's WRITABLE engagement contexts for the conversation work-log
@@ -36,6 +37,9 @@ export type WorkLogEngagement = {
   id: string;
   label: string;
   isPrimary: boolean;
+  /** The organization's own name (null = the personal context) — what a
+   *  sentence that names its employer is matched against. */
+  orgName?: string | null;
 };
 
 export type WorkLogEngagementsResult =
@@ -46,6 +50,10 @@ export type WorkLogEngagementsResult =
        *  are legitimately possible and `selectedId` is null — the flow must
        *  ASK rather than preselect. */
       resolution: ContextResolution;
+      /** Organizations the person's relationship with has ENDED (and none is
+       *  active) — names only, through the narrow historical-names read. A
+       *  sentence naming one of these must not be filed under another org. */
+      endedOrgNames?: string[];
     }
   | { kind: "no-worker" }
   | { kind: "no-context" }
@@ -167,6 +175,7 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
       id: e.id,
       label: labels[i],
       isPrimary: Boolean(e.is_primary),
+      orgName: rows[i].input.orgName,
       organizationId:
         ((e as { organization_id?: string | null }).organization_id as
           | string
@@ -220,9 +229,42 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
     }),
   });
 
+  // ENDED relationships, named (2026-09-29): "…betonavau pamatus Alfa
+  // objekte" by a worker whose Alfa relationship had ended preselected their
+  // only active organization. Best-effort: a failed read names nothing and the
+  // card behaves exactly as before.
+  let endedOrgNames: string[] = [];
+  try {
+    const activeOrgIds = new Set(engagements.map((e) => e.organizationId).filter(Boolean));
+    const { data: endedRows } = await supabase
+      .from("engagement_contexts")
+      .select("organization_id, organizations(display_name, legal_name)")
+      .eq("profile_id", user.id)
+      .neq("status", "active")
+      .not("organization_id", "is", null)
+      .limit(50);
+    const named = await withHistoricalOrgNames(
+      supabase,
+      ((endedRows ?? []) as unknown as {
+        organization_id: string | null;
+        organizations: { display_name: string | null; legal_name: string | null } | null;
+      }[]).filter((r) => r.organization_id && !activeOrgIds.has(r.organization_id)),
+    );
+    endedOrgNames = [
+      ...new Set(
+        named
+          .map((r) => orgDisplayName(r.organizations?.display_name, r.organizations?.legal_name))
+          .filter((n): n is string => Boolean(n)),
+      ),
+    ];
+  } catch {
+    endedOrgNames = [];
+  }
+
   return {
     kind: "ok",
-    engagements: ordered.map(({ id, label, isPrimary }) => ({ id, label, isPrimary })),
+    engagements: ordered.map(({ id, label, isPrimary, orgName }) => ({ id, label, isPrimary, orgName })),
     resolution,
+    endedOrgNames,
   };
 }
