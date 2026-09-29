@@ -10528,7 +10528,7 @@
       "hoursUnit": "val.",
       "openJournal": "Atidaryti žurnale",
       "confirmation": {
-        "all": "Visi dienos įrašai patvirtinti",
+        "all": "Patvirtinti visi dienos įrašai",
         "partial": "Dalis dienos įrašų patvirtinta"
       }
     }
