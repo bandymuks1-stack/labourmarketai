@@ -13241,6 +13241,7 @@
       "findWorkInCompanyContext": "A job search is your own act — I don't run it inside the company space. Switch to your personal space and ask again.",
       "findWorkInCompanyWhy": "A person looks for work, not a company — I answer from your personal space.",
       "journalAskWhatYouDid": "What did you do today? Write it in the “What you did” field in your own words — e.g. “installed windows at the Kaunas site from 8 to 17”. The request itself is not saved to the journal.",
+      "alsoWorkLog": "I also understood that you worked today — check it and save it to your work journal:",
       "serviceNeedHint": "That is a job to be done — I will show you who offers that service.",
       "chipServiceRequests": "Find a service",
       "interestInboxAmbiguous": "That can mean two things — which one do you want?",
