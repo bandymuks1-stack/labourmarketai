@@ -92,7 +92,15 @@ export async function runFindWork(
 
   const board = await loadWorkerOpportunityBoard("conversation");
   const needs = board.kind === "ready" ? board.opportunities.map((o) => o.need) : [];
-  const { terms, facets } = await buildWorkspaceVocabulary(needs);
+  // The board's public ads are part of what the person can see (the page
+  // renders them) — their countries count as "there is work there".
+  const adCountries =
+    board.kind === "ready"
+      ? board.externalVacancies.cards
+          .map((c) => c.view.country?.toUpperCase() ?? null)
+          .filter((c): c is string => Boolean(c))
+      : [];
+  const { terms, facets } = await buildWorkspaceVocabulary(needs, adCountries);
   const unavailable = await buildUnavailableCountryTerms(facets);
 
   const reading = readWorldState(text, [...terms, ...unavailable]);
