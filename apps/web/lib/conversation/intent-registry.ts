@@ -65,6 +65,7 @@ export type IntentHandlerId =
   | "offerCapacity"
   | "professionStatement"
   | "availabilityStatement"
+  | "payStatement"
   | "skillGap"
   | "recentJournal"
   | "workIntelligence"
@@ -244,6 +245,10 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // Opens the ONE work-card form (`worker.save-work-card`) with the parsed
   // date in it; the write stays behind the form's own review.
   availability: { domain: "profile", access: "write", handler: "availabilityStatement", ownTyping: false },
+  // "mano atlyginimo lūkestis nuo 2500 iki 3500" — the person states their
+  // pay expectation. Opens the SAME work-card form with the figures in it;
+  // the write stays behind the form's own review (2026-09-29).
+  "pay-statement": { domain: "profile", access: "write", handler: "payStatement", ownTyping: false },
   "company-overview": { domain: "company", access: "route", handler: "companyOverview", ownTyping: false },
   "create-organization": { domain: "company", access: "route", handler: "createOrganization", ownTyping: false },
   // RENAME THE ACTIVE ORGANIZATION (owner program 2026-09-23). `write`: it

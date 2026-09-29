@@ -13213,6 +13213,14 @@
         "notInCompany": "When you can work is your own fact, not the company's. Switch to your personal space and say it again.",
         "changeRequested": "Opening your work card — set when you can work and save. Nothing is changed until you do."
       },
+      "pay": {
+        "understoodRange": "Got it: pay expectation {min}–{max} € per month. I put the figures into your work card — check and save. Nothing changes until you save.",
+        "understoodMin": "Got it: pay expectation at least {min} € per month. I put the figure into your work card — check and save. Nothing changes until you save.",
+        "understoodMax": "Got it: pay expectation up to {max} € per month. I put the figure into your work card — check and save. Nothing changes until you save.",
+        "notMonthly": "Your work card holds a monthly salary in euros, and you gave an hourly or daily rate. Enter what that is per month and save.",
+        "askFigure": "Opening your work card — enter your monthly pay expectation (from / to) and save.",
+        "notInCompany": "Your pay expectation is your own fact, not the company's. Switch to your personal space and say it again."
+      },
       "findWorkInCompanyContext": "A job search is your own act — I don't run it inside the company space. Switch to your personal space and ask again.",
       "findWorkInCompanyWhy": "A person looks for work, not a company — I answer from your personal space.",
       "journalAskWhatYouDid": "What did you do today? Write it in the “What you did” field in your own words — e.g. “installed windows at the Kaunas site from 8 to 17”. The request itself is not saved to the journal.",

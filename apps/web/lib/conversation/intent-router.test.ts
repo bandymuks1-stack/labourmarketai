@@ -900,6 +900,14 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     de: "Ich kann ab Oktober arbeiten",
     pl: "Mogę pracować od października",
   },
+  "pay-statement": {
+    lt: "Mano atlyginimo lūkestis nuo 2500 iki 3500 eurų",
+    en: "My salary expectation is 2500 to 3500 EUR",
+    ru: "Моя зарплата от 2500 до 3500 евро",
+    nl: "Mijn salaris minimaal 2500 euro",
+    de: "Mein Gehalt mindestens 2500 Euro",
+    pl: "Moje wynagrodzenie od 2500 do 3500 euro",
+  },
   // ── AGENCY (real recruiter pilot, 2026-09-04) — the first row is the exact
   //    sentence the first real recruiter typed and the product did not
   //    understand. ────────────────────────────────────────────────────────────

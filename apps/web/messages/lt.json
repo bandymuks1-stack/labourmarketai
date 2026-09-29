@@ -13213,6 +13213,14 @@
         "notInCompany": "Kada gali dirbti — tai tavo asmeninis faktas, ne įmonės. Persijunk į asmeninę erdvę ir parašyk dar kartą.",
         "changeRequested": "Atidarau tavo darbo kortelę — nurodyk, nuo kada gali dirbti, ir išsaugok. Kol neišsaugosi, niekas nepasikeis."
       },
+      "pay": {
+        "understoodRange": "Supratau: atlyginimo lūkestis nuo {min} iki {max} € per mėnesį. Įrašiau sumas į darbo kortelę — peržiūrėk ir išsaugok. Kol neišsaugosi, niekas nepasikeis.",
+        "understoodMin": "Supratau: atlyginimo lūkestis ne mažiau kaip {min} € per mėnesį. Įrašiau sumą į darbo kortelę — peržiūrėk ir išsaugok. Kol neišsaugosi, niekas nepasikeis.",
+        "understoodMax": "Supratau: atlyginimo lūkestis iki {max} € per mėnesį. Įrašiau sumą į darbo kortelę — peržiūrėk ir išsaugok. Kol neišsaugosi, niekas nepasikeis.",
+        "notMonthly": "Darbo kortelė saugo mėnesio atlyginimą eurais, o tu nurodei valandinį ar dienos tarifą. Įrašyk, kiek tai būtų per mėnesį, ir išsaugok.",
+        "askFigure": "Atidarau darbo kortelę — įrašyk atlyginimo lūkestį per mėnesį (nuo / iki) ir išsaugok.",
+        "notInCompany": "Atlyginimo lūkestis — tavo asmeninis faktas, ne įmonės. Persijunk į asmeninę erdvę ir parašyk dar kartą."
+      },
       "findWorkInCompanyContext": "Darbo paieška yra tavo asmeninis veiksmas — įmonės erdvėje jos nevykdau. Persijunk į asmeninę erdvę ir paklausk dar kartą.",
       "findWorkInCompanyWhy": "Darbo ieško žmogus, ne įmonė — atsakau iš tavo asmeninės erdvės.",
       "journalAskWhatYouDid": "Ką šiandien dirbai? Įrašyk į lauką „Ką dirbai“ savais žodžiais — pvz. „montavau langus objekte Kaune nuo 8 iki 17“. Pati užklausa į žurnalą neįrašoma.",

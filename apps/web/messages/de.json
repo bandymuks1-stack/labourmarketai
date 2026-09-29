@@ -13213,6 +13213,14 @@
         "notInCompany": "Ab wann du arbeiten kannst, ist dein eigener Fakt, nicht der des Unternehmens. Wechsle in deinen persönlichen Bereich und sag es noch einmal.",
         "changeRequested": "Ich öffne deine Arbeitskarte — gib an, ab wann du arbeiten kannst, und speichere. Bis dahin ändert sich nichts."
       },
+      "pay": {
+        "understoodRange": "Verstanden: Gehaltswunsch {min}–{max} € pro Monat. Ich habe die Beträge in deine Arbeitskarte eingetragen — prüfen und speichern. Bis du speicherst, ändert sich nichts.",
+        "understoodMin": "Verstanden: Gehaltswunsch mindestens {min} € pro Monat. Ich habe den Betrag in deine Arbeitskarte eingetragen — prüfen und speichern. Bis du speicherst, ändert sich nichts.",
+        "understoodMax": "Verstanden: Gehaltswunsch bis {max} € pro Monat. Ich habe den Betrag in deine Arbeitskarte eingetragen — prüfen und speichern. Bis du speicherst, ändert sich nichts.",
+        "notMonthly": "Deine Arbeitskarte speichert ein Monatsgehalt in Euro, du hast einen Stunden- oder Tagessatz genannt. Trage den Monatsbetrag ein und speichere.",
+        "askFigure": "Ich öffne deine Arbeitskarte — trage deinen monatlichen Gehaltswunsch (von / bis) ein und speichere.",
+        "notInCompany": "Dein Gehaltswunsch ist deine eigene Angabe, nicht die des Unternehmens. Wechsle in deinen persönlichen Bereich und sag es noch einmal."
+      },
       "findWorkInCompanyContext": "Die Jobsuche ist deine eigene Sache — im Unternehmensbereich führe ich sie nicht aus. Wechsle in deinen persönlichen Bereich und frag noch einmal.",
       "findWorkInCompanyWhy": "Arbeit sucht ein Mensch, kein Unternehmen — ich antworte aus deinem persönlichen Bereich.",
       "journalAskWhatYouDid": "Was hast du heute gearbeitet? Schreib es in das Feld „Was du gearbeitet hast“ in deinen Worten — z. B. „Fenster auf der Baustelle Kaunas von 8 bis 17 montiert“. Die Anfrage selbst wird nicht ins Tagebuch gespeichert.",

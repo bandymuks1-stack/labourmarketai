@@ -133,6 +133,8 @@ export type ConversationIntent =
   //    "dirbau projektų vadovu 5 metus". Measured on production: the first
   //    two answered nothing and the third opened the PROJECTS list. ────────
   | "profession-statement"
+  // A stated pay expectation — opens the work card prefilled (2026-09-29).
+  | "pay-statement"
   // ── AGENCY (real recruiter pilot, 2026-09-04). The first real recruiter
   //    typed "noriu pakviesti klientą" and got the generic fallback: the
   //    agency's whole vocabulary was missing here, although the canonical
@@ -2262,6 +2264,30 @@ const RULES: IntentRule[] = [
           "м²|м2|кв\\.?\\s*м|км\\b|шт\\.?|кг\\b|паллет|поддон)",
         3,
       ),
+    ],
+  },
+  {
+    /**
+     * A STATED PAY EXPECTATION (owner continuation command 2026-09-29 §5).
+     * "Mano atlyginimo lūkestis nuo 2500 iki 3500 eurų" and "Mažiausiai 3000
+     * eurų" measured `unknown`; the fallback then READ the criteria back and
+     * nothing offered to record the new figures. The fact's one home is the
+     * work card (`worker.save-work-card`), so this opens that form with the
+     * figures in it (`lib/conversation/pay-statement.ts`) — never a write from
+     * the sentence. A pay noun bound to a 3+ digit figure, or a "at least N €"
+     * shape; a sentence that also SEEKS work keeps find-work (noSeek).
+     */
+    intent: "pay-statement",
+    patterns: [
+      pNoSeek(`\\b(atlyginim|atlygi|alg[aoųue]|uzdarb|lukest)\\w*\\b.{0,60}\\d{3,}`, 7),
+      pNoSeek(`\\b(maziausiai|ne\\s+maziau(\\s+(kaip|nei))?|bent)\\s+(€\\s*)?\\d[\\d\\s.]{2,}\\s*(eur|€)`, 7),
+      pNoSeek(`\\b(salary|pay|wage|wages|earnings)\\b.{0,60}\\d{3,}`, 7),
+      pNoSeek(`\\bat\\s+least\\s+(€\\s*)?\\d[\\d\\s,.]{2,}\\s*(eur|euro|€)`, 7),
+      pNoSeek(`(зарплат|оплат|заработ|оклад).{0,60}\\d{3,}`, 7),
+      pNoSeek(`(минимум|не\\s+менее)\\s+\\d[\\d\\s.]{2,}\\s*(евро|eur|€)`, 7),
+      pNoSeek(`\\b(gehalt|lohn|verdienst)\\w*\\b.{0,60}\\d{3,}`, 7),
+      pNoSeek(`\\b(salaris|loon|verdien)\\w*\\b.{0,60}\\d{3,}`, 7),
+      pNoSeek(`\\b(wynagrodz|pensj|zarob)\\w*\\b.{0,60}\\d{3,}`, 7),
     ],
   },
   {

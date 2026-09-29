@@ -51,6 +51,7 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   "offer-value": "offer a service or value on the marketplace",
   "profession-statement": "the person states their profession or a past job ('esu buhalteris', 'dirbau projektų vadovu 5 metus')",
   availability: "the person states from when they can work ('galiu dirbti nuo spalio 1 d.', 'available from October')",
+  "pay-statement": "the person states their monthly pay / salary expectation ('mano atlyginimo lūkestis nuo 2500 iki 3500 eurų', 'at least 3000 EUR')",
   "company-overview": "overview of the company workspace",
   "create-organization": "create a company or organization",
   "rename-organization":

@@ -110,7 +110,11 @@ describe("the intent registry is the enumerable routing contract", () => {
     // consent reachable only behind the profile's closed "More". The state is
     // read and said first, then the EXISTING consent component is embedded;
     // the sentence itself writes nothing.
-    expect(entries.length).toBe(82);
+    // 82 → 83 (2026-09-29, owner continuation §5): pay-statement — "Mano
+    // atlyginimo lūkestis nuo 2500 iki 3500 eurų" scored 0 and the fallback
+    // only READ the criteria back. It opens the SAME work-card form with the
+    // figures in it; the sentence writes nothing.
+    expect(entries.length).toBe(83);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -159,6 +163,9 @@ describe("the intent registry is the enumerable routing contract", () => {
       "need-workers",
       // SUPPLY — the same canonical intake as a need, stamped "partner".
       "offer-capacity",
+      // "mano atlyginimo lūkestis nuo 2500 iki 3500" — the work card opened
+      // with the figures; the form's save is the write.
+      "pay-statement",
       "programmes",
       "propose-candidate",
       // Owner program 2026-09-23: rename the ACTIVE organization — the ONE
