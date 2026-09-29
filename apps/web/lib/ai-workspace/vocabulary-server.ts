@@ -96,8 +96,19 @@ export interface WorkspaceVocabulary {
  */
 export async function buildWorkspaceVocabulary(
   needs: readonly OpportunityNeed[],
+  /**
+   * Countries of the public ads the SAME board read carries (the page shows
+   * them). Production walk 2026-09-29: a worker's page listed Swedish ads
+   * while the chat, reading only platform needs, said "nothing visible in
+   * Sweden — visible: NL".
+   */
+  extraCountries: readonly string[] = [],
 ): Promise<WorkspaceVocabulary> {
-  const facets = collectDiscoveryFacets(needs);
+  const base = collectDiscoveryFacets(needs);
+  const facets = {
+    ...base,
+    countries: [...new Set([...base.countries, ...extraCountries.filter(Boolean)])].sort(),
+  };
   const terms: VocabularyTerm[] = [];
 
   // ── countries ────────────────────────────────────────────────────────────
