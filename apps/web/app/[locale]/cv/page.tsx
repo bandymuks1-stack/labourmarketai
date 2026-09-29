@@ -358,10 +358,35 @@ export default async function VerifiedCvPage({
     { href: "#cv-proof", label: t("proofTitle") },
   ].filter((i): i is { href: string; label: string } => i !== null);
 
+  // WORK → CONFIRMATION → HISTORY AS ONE CHAIN (premium Living CV,
+  // 2026-09-29). Each confirmation row knows the engagement its entry was
+  // recorded for, so it is printed UNDER that job as well as in the full
+  // register below. Grouped here once; nothing is read or derived anew.
+  const proofByEngagement = new Map<string, typeof cv.proof>();
+  for (const row of cv.proof) {
+    if (!row.engagementId) continue;
+    const list = proofByEngagement.get(row.engagementId);
+    if (list) list.push(row);
+    else proofByEngagement.set(row.engagementId, [row]);
+  }
+
   // One renderer for both history sections — employment and placements differ
   // in their HEADING, never in how a real engagement is described.
   const historyItems = (rows: typeof cv.workHistory) =>
     rows.map((e, i) => {
+      const confirmations = e.id ? (proofByEngagement.get(e.id) ?? []) : [];
+      // THE NODE'S STANDING — said in words, never by colour alone:
+      //   confirmed  = someone other than the person confirmed work here;
+      //   recorded   = the person's own journal holds work here;
+      //   stated     = the person states the job (a job needs no journal to
+      //                be real — it is simply not yet backed by records).
+      const standing: "confirmed" | "recorded" | "stated" = confirmations.some(
+        (c) => !c.selfConfirmed,
+      )
+        ? "confirmed"
+        : e.recorded && e.recorded.entries > 0
+          ? "recorded"
+          : "stated";
       const orgDisplay =
         e.orgName ??
         (e.organizationType === "company"
@@ -384,12 +409,37 @@ export default async function VerifiedCvPage({
       return (
         <li
           key={`${e.relationship}-${i}`}
-          className="flex flex-col border-l-2 border-ink-600 pl-3"
+          className="group/node relative flex flex-col pb-4 pl-6 last:pb-0 print:pl-4"
+          data-testid="cv-history-node"
+          data-standing={standing}
         >
-          <span className={`font-semibold ${bodyText}`}>{orgDisplay}</span>
+          {/* The spine: one continuous line through the person's history. */}
+          <span
+            aria-hidden
+            className="absolute bottom-0 left-[5px] top-2 w-px bg-ink-600 group-last/node:hidden print:hidden"
+          />
+          <span
+            aria-hidden
+            className={`absolute left-0 top-1.5 size-[11px] rounded-full border-2 print:hidden ${
+              standing === "confirmed"
+                ? "border-trust-accent bg-trust-accent"
+                : standing === "recorded"
+                  ? "border-brand-cyan bg-brand-cyan/30"
+                  : "border-dashed border-ink-500 bg-transparent"
+            }`}
+          />
+          <span className={`font-display text-base font-semibold sm:text-lg ${bodyText}`}>
+            {orgDisplay}
+          </span>
           <span className="text-xs text-text-secondary">
             {roleLabel}
             {range ? ` · ${range}` : ""}
+          </span>
+          <span
+            className="mt-0.5 font-mono text-[0.625rem] uppercase tracking-label text-text-muted"
+            data-testid="cv-history-standing"
+          >
+            {t(`history.chain.${standing}`)}
           </span>
           {e.title && e.title !== orgDisplay ? (
             <span className="text-xs text-text-muted">{e.title}</span>
@@ -430,6 +480,32 @@ export default async function VerifiedCvPage({
                     count: e.recorded.entries,
                   })}
             </span>
+          ) : null}
+          {/* The confirmations of THIS job's work — role and date only, the
+              same honest qualifiers as the full register. */}
+          {confirmations.length > 0 ? (
+            <ul
+              className="mt-1.5 flex flex-col gap-0.5 border-l border-ink-600 pl-2.5"
+              data-testid="cv-history-confirmations"
+            >
+              {confirmations.slice(0, 3).map((c, ci) => (
+                <li key={`${c.confirmedAt}-${ci}`} className="text-xs text-text-secondary">
+                  {t("history.chain.confirmedBy", {
+                    role: tRel.has(c.confirmerRole) ? tRel(c.confirmerRole) : c.confirmerRole,
+                    date: formatUtcDate(c.entryDate, locale) ?? "",
+                  })}
+                  {c.automatic ? <span className="text-text-muted"> · {tTier("autoConfirmQualifier")}</span> : null}
+                  {c.selfConfirmed ? <span className="text-text-muted"> · {tTier("selfConfirmQualifier")}</span> : null}
+                </li>
+              ))}
+              {confirmations.length > 3 ? (
+                <li className="text-xs text-text-muted">
+                  <a href="#cv-proof" className="underline-offset-2 hover:underline">
+                    {t("history.chain.more", { count: confirmations.length - 3 })}
+                  </a>
+                </li>
+              ) : null}
+            </ul>
           ) : null}
         </li>
       );
@@ -691,7 +767,7 @@ export default async function VerifiedCvPage({
             data-testid="cv-work-history"
           >
             <h2 className={sectionTitle}>{t("workHistoryTitle")}</h2>
-            <ul className="flex flex-col gap-2">
+            <ul className="flex flex-col">
               {historyItems(employmentHistory)}
             </ul>
           </section>
@@ -708,7 +784,7 @@ export default async function VerifiedCvPage({
             data-testid="cv-practice-history"
           >
             <h2 className={sectionTitle}>{t("practiceHistoryTitle")}</h2>
-            <ul className="flex flex-col gap-2">
+            <ul className="flex flex-col">
               {historyItems(practiceHistory)}
             </ul>
           </section>

@@ -8020,7 +8020,14 @@
     "history": {
       "project": "Binnen project: {name}",
       "recorded": "Werkjournaal: {hours} u, {count, plural, one {# record} other {# records}}",
-      "recordedConfirmed": "Werkjournaal: {hours} u, {count, plural, one {# record} other {# records}}, waarvan {confirmed} u goedgekeurd door een manager"
+      "recordedConfirmed": "Werkjournaal: {hours} u, {count, plural, one {# record} other {# records}}, waarvan {confirmed} u goedgekeurd door een manager",
+      "chain": {
+        "confirmed": "Journaalregels bevestigd door iemand anders",
+        "recorded": "Vastgelegd in het werklogboek",
+        "stated": "Door de persoon zelf opgegeven",
+        "confirmedBy": "Journaalregel bevestigd door: {role}, werk op {date}",
+        "more": "Nog {count} — volledige lijst hieronder"
+      }
     },
     "languagesTitle": "Talen",
     "languagesSelfStated": "Talen zoals opgegeven door de werker.",

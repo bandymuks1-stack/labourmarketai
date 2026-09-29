@@ -8020,7 +8020,14 @@
     "history": {
       "project": "Projektas: {name}",
       "recorded": "Darbo žurnale: {hours} val., {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
-      "recordedConfirmed": "Darbo žurnale: {hours} val., {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}, iš jų vadovo patvirtinta {confirmed} val."
+      "recordedConfirmed": "Darbo žurnale: {hours} val., {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}, iš jų vadovo patvirtinta {confirmed} val.",
+      "chain": {
+        "confirmed": "Darbo žurnalo įrašus patvirtino kitas asmuo",
+        "recorded": "Užfiksuota darbo žurnale",
+        "stated": "Nurodė pats asmuo",
+        "confirmedBy": "Žurnalo įrašą patvirtino: {role}, darbas {date}",
+        "more": "Dar {count} — visas sąrašas žemiau"
+      }
     },
     "languagesTitle": "Kalbos",
     "languagesSelfStated": "Kalbos, kaip jas nurodė darbuotojas.",

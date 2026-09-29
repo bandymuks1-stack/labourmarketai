@@ -8020,7 +8020,14 @@
     "history": {
       "project": "Project: {name}",
       "recorded": "Work journal: {hours} h, {count, plural, one {# entry} other {# entries}}",
-      "recordedConfirmed": "Work journal: {hours} h, {count, plural, one {# entry} other {# entries}}, of which {confirmed} h approved by a manager"
+      "recordedConfirmed": "Work journal: {hours} h, {count, plural, one {# entry} other {# entries}}, of which {confirmed} h approved by a manager",
+      "chain": {
+        "confirmed": "Journal entries confirmed by someone else",
+        "recorded": "Recorded in the work journal",
+        "stated": "Stated by the person",
+        "confirmedBy": "Journal entry confirmed by: {role}, work on {date}",
+        "more": "{count} more — full list below"
+      }
     },
     "languagesTitle": "Languages",
     "languagesSelfStated": "Languages as stated by the worker.",
