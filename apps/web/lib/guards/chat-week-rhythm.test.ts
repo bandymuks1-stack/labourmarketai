@@ -27,6 +27,6 @@ describe("chat calendar panel — this week's rhythm", () => {
 
   it("the panel draws the strip in both the ready and the empty state", () => {
     expect(PANEL.match(/<WeekStrip week=\{view\.week\}/g)?.length).toBe(2);
-    expect(PANEL).toContain('data-testid="calendar-result-week"');
+    expect(readFileSync(join(ROOT, "components/app/workspace/week-strip.tsx"), "utf8")).toContain('data-testid="calendar-result-week"');
   });
 });

@@ -17358,5 +17358,133 @@
       "confirmed": "Patvirtinta ir pasidalinta",
       "failed": "Nepavyko patvirtinti."
     }
+  },
+  "landingJourney": {
+    "sampleLabel": "Pavyzdinė istorija",
+    "title": "Kaip LabourMarket.ai seka darbo gyvenimą",
+    "currentWork": "Dirba dabar",
+    "person": {
+      "profession": "Virėja",
+      "nextProfession": "Vyresnioji virėja"
+    },
+    "steps": {
+      "identity": {
+        "label": "Žmogus",
+        "caption": "Tai žmogus — ne forma, o jo darbo gyvenimas."
+      },
+      "profession": {
+        "label": "Profesija",
+        "caption": "Ji — virėja."
+      },
+      "direction": {
+        "label": "Kryptis",
+        "caption": "Nori dirbti Norvegijoje, nuo 2 800 € per mėnesį."
+      },
+      "opportunities": {
+        "label": "Galimybės",
+        "caption": "Atsiranda tinkančios galimybės — su priežastimis, kodėl tinka."
+      },
+      "conversation": {
+        "label": "Pokalbis",
+        "caption": "Darbdavys klausia — ji atsako."
+      },
+      "project": {
+        "label": "Darbas",
+        "caption": "Ji pradeda dirbti restorano virtuvėje."
+      },
+      "hours": {
+        "label": "Valandos",
+        "caption": "Kiekviena darbo diena užrašoma darbo žurnale."
+      },
+      "confirmation": {
+        "label": "Patvirtinimas",
+        "caption": "Vadovas patvirtina jos darbo žurnalo įrašus."
+      },
+      "capability": {
+        "label": "Gebėjimai",
+        "caption": "Iš darbo įrašų matyti, ką ji tikrai moka."
+      },
+      "cv": {
+        "label": "Gyvas CV",
+        "caption": "CV auga iš patvirtinto darbo."
+      },
+      "next": {
+        "label": "Toliau",
+        "caption": "Ir atsiveria kitas žingsnis."
+      }
+    },
+    "direction": {
+      "country": "Norvegija",
+      "pay": "nuo 2 800 €"
+    },
+    "opportunities": [
+      {
+        "role": "Virėja",
+        "place": "Restoranas · Oslas",
+        "fits": [
+          "Profesija",
+          "Šalis",
+          "Atlygis"
+        ]
+      },
+      {
+        "role": "Virtuvės darbuotoja",
+        "place": "Viešbutis · Bergenas",
+        "fits": [
+          "Šalis",
+          "Atlygis"
+        ]
+      }
+    ],
+    "conversation": {
+      "employer": "Ar galėtumėte pradėti spalio 6 d.?",
+      "person": "Taip, galiu."
+    },
+    "project": {
+      "name": "Restoranas „Fjordas“",
+      "place": "Oslas",
+      "team": "virtuvės komanda — 6 žmonės"
+    },
+    "week": {
+      "label": "Ši savaitė",
+      "total": "40 val.",
+      "days": [
+        "Pr",
+        "An",
+        "Tr",
+        "Kt",
+        "Pn",
+        "Št",
+        "Sk"
+      ]
+    },
+    "confirmedBy": "Vadovas patvirtino 5 darbo žurnalo įrašus",
+    "facts": {
+      "recorded": "val. užfiksuota",
+      "confirmed": "val. su vadovo įrašu",
+      "days": "darbo dienos"
+    },
+    "cv": [
+      {
+        "org": "Restoranas „Fjordas“ · Oslas",
+        "period": "2026 — dabar",
+        "standing": "Darbo žurnalo įrašus patvirtino vadovas"
+      },
+      {
+        "org": "Restoranas „Ąžuolas“ · Vilnius",
+        "period": "2021–2026 m.",
+        "standing": "Nurodė pati"
+      }
+    ],
+    "next": {
+      "role": "Vyresnioji virėja",
+      "place": "Restoranas · Bergenas",
+      "why": "Patvirtinta darbo patirtis"
+    },
+    "controls": {
+      "play": "Leisti",
+      "pause": "Sustabdyti",
+      "steps": "Istorijos žingsniai"
+    }
   }
 }

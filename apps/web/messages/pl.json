@@ -17358,5 +17358,133 @@
       "confirmed": "Potwierdzono i udostępniono",
       "failed": "Nie udało się potwierdzić."
     }
+  },
+  "landingJourney": {
+    "sampleLabel": "Przykładowa historia",
+    "title": "Jak LabourMarket.ai podąża za życiem zawodowym",
+    "currentWork": "Pracuje teraz",
+    "person": {
+      "profession": "Kucharka",
+      "nextProfession": "Starsza kucharka"
+    },
+    "steps": {
+      "identity": {
+        "label": "Osoba",
+        "caption": "To człowiek — nie formularz, lecz życie zawodowe."
+      },
+      "profession": {
+        "label": "Zawód",
+        "caption": "Jest kucharką."
+      },
+      "direction": {
+        "label": "Kierunek",
+        "caption": "Chce pracować w Norwegii, od 2 800 € miesięcznie."
+      },
+      "opportunities": {
+        "label": "Oferty",
+        "caption": "Pojawiają się pasujące oferty — z powodami, dlaczego pasują."
+      },
+      "conversation": {
+        "label": "Rozmowa",
+        "caption": "Pracodawca pyta — ona odpowiada."
+      },
+      "project": {
+        "label": "Praca",
+        "caption": "Zaczyna pracę w kuchni restauracji."
+      },
+      "hours": {
+        "label": "Godziny",
+        "caption": "Każdy dzień pracy jest zapisywany w dzienniku."
+      },
+      "confirmation": {
+        "label": "Potwierdzenie",
+        "caption": "Przełożony potwierdza jej wpisy w dzienniku."
+      },
+      "capability": {
+        "label": "Umiejętności",
+        "caption": "Jej wpisy pokazują, co naprawdę potrafi."
+      },
+      "cv": {
+        "label": "Żywe CV",
+        "caption": "CV rośnie z potwierdzonej pracy."
+      },
+      "next": {
+        "label": "Dalej",
+        "caption": "I otwiera się kolejny krok."
+      }
+    },
+    "direction": {
+      "country": "Norwegia",
+      "pay": "od 2 800 €"
+    },
+    "opportunities": [
+      {
+        "role": "Kucharka",
+        "place": "Restauracja · Oslo",
+        "fits": [
+          "Zawód",
+          "Kraj",
+          "Wynagrodzenie"
+        ]
+      },
+      {
+        "role": "Pomoc kuchenna",
+        "place": "Hotel · Bergen (Norwegia)",
+        "fits": [
+          "Kraj",
+          "Wynagrodzenie"
+        ]
+      }
+    ],
+    "conversation": {
+      "employer": "Czy mogłaby Pani zacząć 6 października?",
+      "person": "Tak, mogę."
+    },
+    "project": {
+      "name": "Restauracja Fjord",
+      "place": "Oslo, Norwegia",
+      "team": "zespół kuchni — 6 osób"
+    },
+    "week": {
+      "label": "Ten tydzień",
+      "total": "40 godz.",
+      "days": [
+        "Pn",
+        "Wt",
+        "Śr",
+        "Cz",
+        "Pt",
+        "So",
+        "Nd"
+      ]
+    },
+    "confirmedBy": "Przełożony potwierdził 5 wpisów w dzienniku",
+    "facts": {
+      "recorded": "godz. zapisano",
+      "confirmed": "godz. z wpisem przełożonego",
+      "days": "dni pracy"
+    },
+    "cv": [
+      {
+        "org": "Restauracja Fjord · Oslo",
+        "period": "2026 — teraz",
+        "standing": "Wpisy w dzienniku potwierdził przełożony"
+      },
+      {
+        "org": "Restauracja Ąžuolas · Wilno",
+        "period": "od 2021 do 2026",
+        "standing": "Podane przez nią samą"
+      }
+    ],
+    "next": {
+      "role": "Starsza kucharka",
+      "place": "Restauracja · Bergen",
+      "why": "Potwierdzone doświadczenie"
+    },
+    "controls": {
+      "play": "Odtwórz",
+      "pause": "Wstrzymaj",
+      "steps": "Kroki historii"
+    }
   }
 }

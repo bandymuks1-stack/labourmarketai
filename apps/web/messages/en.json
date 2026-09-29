@@ -17358,5 +17358,133 @@
       "confirmed": "Confirmed and shared",
       "failed": "Could not confirm."
     }
+  },
+  "landingJourney": {
+    "sampleLabel": "Sample story",
+    "title": "How LabourMarket.ai follows a working life",
+    "currentWork": "Working now",
+    "person": {
+      "profession": "Cook",
+      "nextProfession": "Senior cook"
+    },
+    "steps": {
+      "identity": {
+        "label": "Person",
+        "caption": "This is a person — not a form, a working life."
+      },
+      "profession": {
+        "label": "Profession",
+        "caption": "She is a cook."
+      },
+      "direction": {
+        "label": "Direction",
+        "caption": "She wants to work in Norway, from €2,800 a month."
+      },
+      "opportunities": {
+        "label": "Opportunities",
+        "caption": "Fitting opportunities appear — with the reasons they fit."
+      },
+      "conversation": {
+        "label": "Conversation",
+        "caption": "An employer asks — she answers."
+      },
+      "project": {
+        "label": "Work",
+        "caption": "She starts in a restaurant kitchen."
+      },
+      "hours": {
+        "label": "Hours",
+        "caption": "Every working day is recorded in the work journal."
+      },
+      "confirmation": {
+        "label": "Confirmation",
+        "caption": "A manager confirms her work journal entries."
+      },
+      "capability": {
+        "label": "Skills",
+        "caption": "Her records show what she can really do."
+      },
+      "cv": {
+        "label": "Living CV",
+        "caption": "The CV grows from confirmed work."
+      },
+      "next": {
+        "label": "Next",
+        "caption": "And the next step opens."
+      }
+    },
+    "direction": {
+      "country": "Norway",
+      "pay": "from €2,800"
+    },
+    "opportunities": [
+      {
+        "role": "Cook",
+        "place": "Restaurant · Oslo",
+        "fits": [
+          "Profession",
+          "Country",
+          "Pay"
+        ]
+      },
+      {
+        "role": "Kitchen worker",
+        "place": "Hotel · Bergen",
+        "fits": [
+          "Country",
+          "Pay"
+        ]
+      }
+    ],
+    "conversation": {
+      "employer": "Could you start on 6 October?",
+      "person": "Yes, I can."
+    },
+    "project": {
+      "name": "Restaurant Fjord",
+      "place": "Oslo",
+      "team": "kitchen team — 6 people"
+    },
+    "week": {
+      "label": "This week",
+      "total": "40 h",
+      "days": [
+        "Mo",
+        "Tu",
+        "We",
+        "Th",
+        "Fr",
+        "Sa",
+        "Su"
+      ]
+    },
+    "confirmedBy": "A manager confirmed 5 work journal entries",
+    "facts": {
+      "recorded": "h recorded",
+      "confirmed": "h with a manager's record",
+      "days": "days worked"
+    },
+    "cv": [
+      {
+        "org": "Restaurant Fjord · Oslo",
+        "period": "2026 — now",
+        "standing": "Journal entries confirmed by a manager"
+      },
+      {
+        "org": "Restaurant Ąžuolas · Vilnius",
+        "period": "2021 — 2026",
+        "standing": "Stated by herself"
+      }
+    ],
+    "next": {
+      "role": "Senior cook",
+      "place": "Restaurant · Bergen",
+      "why": "Confirmed work experience"
+    },
+    "controls": {
+      "play": "Play",
+      "pause": "Pause",
+      "steps": "Story steps"
+    }
   }
 }
