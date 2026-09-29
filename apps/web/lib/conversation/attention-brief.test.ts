@@ -31,7 +31,7 @@ describe("the employer brief carries agency and institution attention", () => {
     expect(FN).toMatch(/sharedNeedsAwaitingWorker\(shared, progress, placements\)/);
     expect(FN).toMatch(/listAgencyPlacements\(\)/);
     expect(FN).toMatch(/briefAgencyNeedReopened/);
-    expect(FN).toMatch(/link:\/dashboard\/company\/scouting\?request=\$\{reopened\[0\]\.requestId\}/);
+    expect(FN).toMatch(/addChip\("agency:demand", t\("chipProposeReplacement"\)\)/);
     expect(FN).toMatch(/briefAgencySharedWithoutOffer/);
     expect(FN).toMatch(/addChip\("agency:demand"/);
     expect(FN).toMatch(/clientConnectionsPending/);

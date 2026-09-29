@@ -402,22 +402,19 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
         listAgencyPlacements(),
       ]);
       if (progress.kind === "ok") {
-        // A client's shared need whose accepted candidate did not start (the
+        // A client's shared need whose accepted person did not start (the
         // worker declined) or whose placement ended is OPEN AGAIN: the client
         // still needs someone and this agency may propose another roster
         // worker. First, because it is the one thing that stops the client's
         // work (production walk 2026-09-29: the need stayed open and shared
-        // while this Home said nothing). One such need → its own scouting.
+        // while this Home said nothing).
         const awaitingWorker = sharedNeedsAwaitingWorker(shared, progress, placements);
         const reopened = awaitingWorker.filter((n) => n.reason === "placement_did_not_proceed");
         if (reopened.length > 0 && lines.length < MAX_LINES) {
           lines.push(t("briefAgencyNeedReopened", { count: reopened.length }));
-          addChip(
-            reopened.length === 1
-              ? `link:/dashboard/company/scouting?request=${reopened[0].requestId}`
-              : "agency:demand",
-            t("chipProposeReplacement"),
-          );
+          // The in-chat shared-needs read, where each need carries its own
+          // "propose someone" action — the existing presentation path.
+          addChip("agency:demand", t("chipProposeReplacement"));
         }
         const awaiting = progress.rows.filter((r) => r.offerStatus === "offered").length;
         if (awaiting > 0 && lines.length < MAX_LINES) {
