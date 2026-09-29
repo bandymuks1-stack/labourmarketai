@@ -2,7 +2,10 @@
 
 import "server-only";
 
+import { getLocale } from "next-intl/server";
+
 import { loadWorkerOpportunityBoard } from "@/lib/marketplace/worker-opportunities";
+import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
 
 /**
  * "PARODYK IŠSAUGOTUS DARBUS" (Chat ↔ visual loop walk, production
@@ -29,9 +32,16 @@ export async function loadSavedOpportunitiesForChat(): Promise<SavedOpportunitie
     if (board.kind !== "ready") return { kind: "no-worker" };
     if (!board.capabilities.savedAvailable) return { kind: "unavailable" };
     const saved = new Set(board.savedRequestIds);
+    // The role is a work-type SLUG ("mason"); the page names it through the
+    // work-type labels — the chat says the same word (walk 2026-09-29).
+    const workLabels = buildWorkTypeLabelMap(await getLocale());
     const needs: SavedOpportunityItem[] = board.opportunities
       .filter((o) => saved.has(o.need.id))
-      .map((o) => ({ kind: "need", id: o.need.id, label: o.need.roleText ?? o.need.id }));
+      .map((o) => ({
+        kind: "need",
+        id: o.need.id,
+        label: (o.need.roleText && workLabels[o.need.roleText]) || o.need.roleText || o.need.id,
+      }));
     const vacancies: SavedOpportunityItem[] = board.savedVacancies.map((v) => ({
       kind: "vacancy",
       id: v.id,
