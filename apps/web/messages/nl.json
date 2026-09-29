@@ -10569,7 +10569,11 @@
       "confirmation": {
         "all": "Alle registraties van de dag bevestigd",
         "partial": "Een deel van de registraties bevestigd"
-      }
+      },
+      "dayConfirmed": "{confirmed} van {total} journaalregels van de dag bevestigd door iemand anders",
+      "dayNoWork": "Op deze dag is geen werk vastgelegd.",
+      "dayFuture": "Deze dag is nog niet gekomen.",
+      "recordOnDay": "Werk vastleggen voor deze dag"
     }
   },
   "workforcePlanning": {

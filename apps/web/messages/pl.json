@@ -10569,7 +10569,11 @@
       "confirmation": {
         "all": "Wszystkie wpisy dnia potwierdzone",
         "partial": "Część wpisów dnia potwierdzona"
-      }
+      },
+      "dayConfirmed": "Inna osoba potwierdziła {confirmed} z {total} wpisów dnia w dzienniku",
+      "dayNoWork": "W tym dniu nie zapisano pracy.",
+      "dayFuture": "Ten dzień jeszcze nie nadszedł.",
+      "recordOnDay": "Zapisz pracę na ten dzień"
     }
   },
   "workforcePlanning": {

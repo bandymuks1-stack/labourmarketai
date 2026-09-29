@@ -10569,7 +10569,11 @@
       "confirmation": {
         "all": "Every entry of the day confirmed",
         "partial": "Some of the day's entries confirmed"
-      }
+      },
+      "dayConfirmed": "{confirmed} of {total} journal entries of the day confirmed by someone else",
+      "dayNoWork": "No work recorded on this day.",
+      "dayFuture": "This day has not come yet.",
+      "recordOnDay": "Record work on this day"
     }
   },
   "workforcePlanning": {

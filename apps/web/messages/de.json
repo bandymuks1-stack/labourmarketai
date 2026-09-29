@@ -10569,7 +10569,11 @@
       "confirmation": {
         "all": "Alle Einträge des Tages bestätigt",
         "partial": "Ein Teil der Einträge bestätigt"
-      }
+      },
+      "dayConfirmed": "{confirmed} von {total} Arbeitsbuch-Einträgen des Tages von jemand anderem bestätigt",
+      "dayNoWork": "An diesem Tag wurde keine Arbeit erfasst.",
+      "dayFuture": "Dieser Tag ist noch nicht gekommen.",
+      "recordOnDay": "Arbeit für diesen Tag erfassen"
     }
   },
   "workforcePlanning": {
