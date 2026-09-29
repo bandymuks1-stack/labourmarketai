@@ -665,6 +665,9 @@ export type ChatLabels = {
   agencyNotAgencyWorkspace: string;
   agencySwitchHint: string;
   agencyClientDemandIntro: string;
+  agencyClientsLine: string;
+  agencyClientActive: string;
+  agencyClientPending: string;
   agencyClientDemandNone: string;
   agencyProposalsIntro: string;
   agencyProposalsNone: string;
@@ -3449,8 +3452,20 @@ export function ConversationChat({
             ]);
             return;
           }
+          // THE CLIENTS THEMSELVES first (AGENCY loop walk 2026-09-29): the
+          // partners page lists each connection by its invited address and
+          // status; the chat says the same before the needs.
+          const clientsLine =
+            res.connections.length > 0
+              ? labels.agencyClientsLine.replace(
+                  "{list}",
+                  res.connections
+                    .map((c) => `${c.invitedEmail} (${c.status === "active" ? labels.agencyClientActive : labels.agencyClientPending})`)
+                    .join(", "),
+                )
+              : null;
           if (res.shared.length === 0) {
-            assistant(labels.agencyClientDemandNone, [
+            assistant([clientsLine, labels.agencyClientDemandNone].filter(Boolean).join("\n"), [
               { id: "f:agency.invite-client", label: labels.chipInviteClient },
               { id: "agency:progress", label: labels.chipProposalStatus },
             ]);
@@ -3462,7 +3477,7 @@ export function ConversationChat({
           }
           const lines = res.shared.map((r) => `• ${r.title}`);
           assistant(
-            [mode === "propose" ? labels.agencyProposeAsk : labels.agencyClientDemandIntro, ...lines].join("\n"),
+            [...(mode === "propose" || !clientsLine ? [] : [clientsLine]), mode === "propose" ? labels.agencyProposeAsk : labels.agencyClientDemandIntro, ...lines].join("\n"),
             res.shared.slice(0, 3).map((r) => ({
               id: `agency-propose:${r.shareId}`,
               label: `${labels.chipProposeFor}: ${r.title}`,
