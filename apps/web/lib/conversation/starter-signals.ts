@@ -182,6 +182,13 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
   const held = organizationCapabilities({ roleSlugs: capabilities, legacyType });
   const educationFirst = isEducationFirstWorkspace({ roleSlugs: capabilities, legacyType });
   const hasEducation = held.includes("training_provider");
+  // THE ONE AGENCY RULE (lib/company/agency-capability, owner decision
+  // 2026-09-28): company type OR a declared workforce role. The bridge reads
+  // below were gated on the TYPE alone, so an organization that is an agency
+  // by its declared roles (production: QA-SYNTHETIC Gama, type
+  // "construction") had no agency facts and its Home brief never ran the
+  // agency rung — a worker's declined placement stayed invisible there.
+  const agencyWorkspace = actsAsAgency(staffingAgency ? "staffing_agency" : null, held);
 
   const supabase = await createClient();
   const count = async (build: (c: ReturnType<typeof asAny>) => Promise<{ count: number | null; error: unknown }>): Promise<Fact> => {
@@ -219,7 +226,7 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
           .eq("company_id", companyId)
           .eq("status", "active"),
       ),
-      staffingAgency
+      agencyWorkspace
         ? count((c) =>
             c
               .from("agency_client_connections")
@@ -228,7 +235,7 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
               .eq("status", "active"),
           )
         : Promise.resolve<Fact>(null),
-      staffingAgency
+      agencyWorkspace
         ? count((c) =>
             c
               .from("agency_client_connections")
@@ -237,13 +244,13 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
               .eq("status", "pending"),
           )
         : Promise.resolve<Fact>(null),
-      staffingAgency
+      agencyWorkspace
         ? safe(async () => {
             const res = await listSharedRequestsForAgency();
             return res.kind === "ok" ? res.rows.length : null;
           }, null as Fact)
         : Promise.resolve<Fact>(null),
-      staffingAgency
+      agencyWorkspace
         ? safe(async () => {
             const res = await listAgencyOfferProgress();
             return res.kind === "ok" ? res.rows.length : null;
@@ -293,7 +300,7 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
     },
     // The SAME rule Home's agency track uses (lib/company/agency-capability):
     // a declared workforce role opens the agency workspace too.
-    agencyWorkspace: actsAsAgency(staffingAgency ? "staffing_agency" : null, held),
+    agencyWorkspace,
     educationWorkspace: educationFirst,
     organizationName,
     organizationId,
