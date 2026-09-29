@@ -141,6 +141,8 @@ export type ConversationIntent =
   | "skill-statement"
   // The person's saved jobs — the board read's own list (2026-09-29).
   | "saved-opportunities"
+  // The open tasks — the same read task-status resolves against (2026-09-29).
+  | "open-tasks"
   // A correction of the newest entry said in words (2026-09-29).
   | "correct-work"
   // "Kur dabar dirbu?" — the canonical work contexts (2026-09-29).
@@ -2353,6 +2355,24 @@ const RULES: IntentRule[] = [
       pNoSeek("(научился|научилась|умею)\\s", 6),
       pNoSeek("\\b(gelernt|beherrsche|geleerd|beheers)\\b", 6),
       pNoSeek("(nauczy[lł]em\\s+si[eę]|nauczy[lł]am\\s+si[eę]|potrafi[eę]|umiem)\\s", 6),
+    ],
+  },
+  {
+    /**
+     * OPEN TASKS, READ (COMPANY Chat ↔ visual loop walk, 2026-09-29): a task
+     * added to a project showed on the project panel ("1 atvirų"), but "Kokios
+     * užduotys projekte …?" answered only "Štai jūsų vykdomi darbai." A show /
+     * which question about tasks reads the open tasks (optionally one project).
+     */
+    intent: "open-tasks",
+    patterns: [
+      p("\\b(kokios|kokias|kurios|parodyk|rodyk|kiek)\\b.{0,24}uzduot", 9),
+      p("\\buzduot\\w*.{0,20}(atvir|laukia|neatlikt|liko)", 8),
+      p("\\b(what|which|show|list|open)\\b.{0,20}\\btasks\\b", 9),
+      p("(какие|покажи|сколько).{0,20}задач", 9),
+      p("\\b(welche|zeige)\\b.{0,20}aufgaben", 9),
+      p("\\b(welke|toon)\\b.{0,20}taken", 9),
+      p("\\b(jakie|pokaz|pokaż)\\b.{0,20}zada", 9),
     ],
   },
   {

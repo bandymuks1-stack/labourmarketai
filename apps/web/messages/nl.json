@@ -13334,6 +13334,16 @@
         "unavailable": "Ik kon je opgeslagen kansen niet lezen — ik gok niet.",
         "chipOpen": "Opgeslagen openen"
       },
+      "openTasks": {
+        "intro": "Open taken ({count}):",
+        "introProject": "Open taken in ‘{project}’ ({count}):",
+        "none": "Geen open taken.",
+        "noneInProject": "Geen open taken in ‘{project}’.",
+        "unavailable": "Ik kon de taken niet lezen — ik gok niet.",
+        "status_todo": "te doen",
+        "status_in_progress": "bezig",
+        "status_blocked": "geblokkeerd"
+      },
       "pay": {
         "understoodRange": "Begrepen: salarisverwachting {min}–{max} € per maand. Ik heb de bedragen in je werkkaart gezet — controleer en sla op. Er verandert niets tot je opslaat.",
         "understoodMin": "Begrepen: salarisverwachting minimaal {min} € per maand. Ik heb het bedrag in je werkkaart gezet — controleer en sla op. Er verandert niets tot je opslaat.",

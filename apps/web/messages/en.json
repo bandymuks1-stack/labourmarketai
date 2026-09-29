@@ -13334,6 +13334,16 @@
         "unavailable": "I couldn't read your saved opportunities — I won't guess.",
         "chipOpen": "Open saved"
       },
+      "openTasks": {
+        "intro": "Open tasks ({count}):",
+        "introProject": "Open tasks in “{project}” ({count}):",
+        "none": "No open tasks.",
+        "noneInProject": "No open tasks in “{project}”.",
+        "unavailable": "I couldn't read the tasks — I won't guess.",
+        "status_todo": "to do",
+        "status_in_progress": "in progress",
+        "status_blocked": "blocked"
+      },
       "pay": {
         "understoodRange": "Got it: pay expectation {min}–{max} € per month. I put the figures into your work card — check and save. Nothing changes until you save.",
         "understoodMin": "Got it: pay expectation at least {min} € per month. I put the figure into your work card — check and save. Nothing changes until you save.",

@@ -69,6 +69,7 @@ export type IntentHandlerId =
   | "languageStatement"
   | "skillStatement"
   | "savedOpportunities"
+  | "openTasks"
   | "correctWork"
   | "currentWork"
   | "skillGap"
@@ -263,6 +264,9 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // "parodyk išsaugotus darbus" — the saved list the opportunities page
   // renders, from the same board read, with doors back into it (2026-09-29).
   "saved-opportunities": { domain: "matching", access: "read", handler: "savedOpportunities", ownTyping: true },
+  // "kokios užduotys projekte X?" — the open tasks (the person's and, for a
+  // company, its projects'), one project when the sentence names it (2026-09-29).
+  "open-tasks": { domain: "project", access: "read", handler: "openTasks", ownTyping: true },
   // "ne 5, o 6 valandas" / "tai buvo vakar" — names the newest entry and hands
   // the person to the canonical supersede editor for it (a link chip); the
   // sentence writes nothing (2026-09-29).

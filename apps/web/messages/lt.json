@@ -13334,6 +13334,16 @@
         "unavailable": "Nepavyko perskaityti išsaugotų galimybių — nieko nerodau spėjimu.",
         "chipOpen": "Atidaryti išsaugotas"
       },
+      "openTasks": {
+        "intro": "Atviros užduotys ({count}):",
+        "introProject": "Atviros užduotys projekte „{project}“ ({count}):",
+        "none": "Atvirų užduočių nėra.",
+        "noneInProject": "Projekte „{project}“ atvirų užduočių nėra.",
+        "unavailable": "Nepavyko perskaityti užduočių — nieko nerodau spėjimu.",
+        "status_todo": "reikia padaryti",
+        "status_in_progress": "vykdoma",
+        "status_blocked": "užstrigo"
+      },
       "pay": {
         "understoodRange": "Supratau: atlyginimo lūkestis nuo {min} iki {max} € per mėnesį. Įrašiau sumas į darbo kortelę — peržiūrėk ir išsaugok. Kol neišsaugosi, niekas nepasikeis.",
         "understoodMin": "Supratau: atlyginimo lūkestis ne mažiau kaip {min} € per mėnesį. Įrašiau sumą į darbo kortelę — peržiūrėk ir išsaugok. Kol neišsaugosi, niekas nepasikeis.",

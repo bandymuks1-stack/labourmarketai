@@ -6324,6 +6324,54 @@ export function ConversationChat({
          * the private saved list the opportunities page renders — the SAME
          * board read — with doors back into the real page and the saved ads.
          */
+        /**
+         * "Kokios užduotys projekte …?" (COMPANY loop walk, 2026-09-29): the
+         * open tasks from the SAME read task-status resolves against — one
+         * project when the sentence names it — with the door to the tasks page.
+         */
+        openTasks: () => {
+          setTyping(true);
+          loadOpenTasksForChat()
+            .then((res) => {
+              setTyping(false);
+              if (res.kind !== "ok") {
+                assistant(t("openTasks.unavailable"));
+                return;
+              }
+              const projectsSeen = [
+                ...new Map(
+                  res.tasks
+                    .filter((x) => x.projectId && x.projectTitle)
+                    .map((x) => [x.projectId as string, { value: x.projectId as string, label: x.projectTitle as string }]),
+                ).values(),
+              ];
+              const named = projectNamedInSentence(text, projectsSeen);
+              const tasks = named ? res.tasks.filter((x) => x.projectId === named.value) : res.tasks;
+              if (tasks.length === 0) {
+                assistant(named ? t("openTasks.noneInProject", { project: named.label }) : t("openTasks.none"), [
+                  { id: "link:/dashboard/tasks", label: labels.chipTasks },
+                ]);
+                return;
+              }
+              const statusLabel = (st: string) =>
+                t.has(`openTasks.status_${st}` as never) ? t(`openTasks.status_${st}` as never) : st;
+              assistant(
+                [
+                  named
+                    ? t("openTasks.introProject", { count: tasks.length, project: named.label })
+                    : t("openTasks.intro", { count: tasks.length }),
+                  ...tasks.map(
+                    (x) => `• ${x.title}${!named && x.projectTitle ? ` — ${x.projectTitle}` : ""} (${statusLabel(x.status)})`,
+                  ),
+                ].join("\n"),
+                [{ id: "link:/dashboard/tasks", label: labels.chipTasks }],
+              );
+            })
+            .catch(() => {
+              setTyping(false);
+              assistant(t("openTasks.unavailable"));
+            });
+        },
         savedOpportunities: () => {
           if (identity === "company") {
             assistant(fallbackText, starterChips);
