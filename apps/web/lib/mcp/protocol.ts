@@ -116,6 +116,8 @@ export type McpToolDef = {
   /** JSON Schema (draft 2020-12) for the tool's arguments. */
   readonly inputSchema: Record<string, unknown>;
   readonly annotations?: McpToolAnnotations;
+  /** Host-specific metadata (`_meta`), e.g. `openai/fileParams`. */
+  readonly _meta?: Readonly<Record<string, unknown>>;
 };
 
 export type McpToolOutcome = {
@@ -287,6 +289,7 @@ export async function handleMcpMessage(
             description: t.description,
             inputSchema: t.inputSchema,
             ...(t.annotations ? { annotations: t.annotations } : {}),
+            ...(t._meta ? { _meta: t._meta } : {}),
           })),
           // 2026-07-28 cache directives. Additive: an older client ignores
           // unknown result fields, exactly as JSON has always worked.
