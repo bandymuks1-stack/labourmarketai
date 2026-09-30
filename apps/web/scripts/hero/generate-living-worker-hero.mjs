@@ -18,14 +18,14 @@
 //   node scripts/hero/generate-living-worker-hero.mjs [--persona tomas|rasa] [--from <stage>] [--model <id>]
 // Output: public/hero/<persona>/<nn>-<stage>-{1920,960}.webp and
 //         lib/marketing/living-worker-hero.manifest.json (what exists).
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { tmpdir } from "node:os";
 import sharp from "sharp";
 
 const WEB = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
-const RAW = join(tmpdir(), "lm-living-worker-hero-raw");
+// raw originals stay in the project (gitignored), never in a shared temp dir
+const RAW = join(WEB, ".hero-raw");
 const PUBLIC = join(WEB, "public", "hero");
 const MANIFEST = join(WEB, "lib", "marketing", "living-worker-hero.manifest.json");
 
@@ -123,6 +123,23 @@ const PERSONAS = {
   },
 };
 
+/** A file's bytes, or null when it is not there (one read, no check-then-use). */
+function readIf(path) {
+  try {
+    return readFileSync(path);
+  } catch {
+    return null;
+  }
+}
+
+/** What the API returned, accepted only as a real image and re-encoded, so
+ *  nothing but decoded pixels is ever written to disk. */
+async function asImage(bytes) {
+  const meta = await sharp(bytes).metadata();
+  if (!meta.width || !meta.height || !["png", "jpeg", "webp"].includes(meta.format ?? "")) throw new Error("the response is not an image");
+  return sharp(bytes).png().toBuffer();
+}
+
 async function generate(parts, aspectRatio = "3:2") {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
   for (let attempt = 1; attempt <= 3; attempt++) {
@@ -146,7 +163,7 @@ async function generate(parts, aspectRatio = "3:2") {
     const json = await res.json();
     const img = json.candidates?.[0]?.content?.parts?.find((p) => p.inlineData || p.inline_data);
     const data = img?.inlineData?.data ?? img?.inline_data?.data;
-    if (data) return Buffer.from(data, "base64");
+    if (data) return asImage(Buffer.from(data, "base64"));
     console.error(`  attempt ${attempt}: no image in response (${JSON.stringify(json).slice(0, 200)})`);
   }
   throw new Error("generation failed after retries");
@@ -166,7 +183,8 @@ async function publish(persona, index, key, raw) {
 }
 
 mkdirSync(RAW, { recursive: true });
-const manifest = existsSync(MANIFEST) ? JSON.parse(readFileSync(MANIFEST, "utf8")) : { personas: {} };
+const manifestBytes = readIf(MANIFEST);
+const manifest = manifestBytes ? JSON.parse(manifestBytes.toString("utf8")) : { personas: {} };
 
 /** Where the face and the figure stand in one published moment (0–1 of the frame). */
 async function locate(file) {
@@ -207,9 +225,9 @@ if (BRIDGES.length > 0) {
   for (const { persona: id, from, to } of BRIDGES) {
     const stages = manifest.personas[id]?.stages ?? [];
     const toAt = stages.findIndex((s) => s.key === to && !s.bridge);
-    const fromRaw = join(RAW, `${id}-${from}.png`);
-    const toRaw = join(RAW, `${id}-${to}.png`);
-    if (toAt < 0 || !existsSync(fromRaw) || !existsSync(toRaw)) throw new Error(`bridge ${id}:${from}>${to}: stage or raw missing`);
+    const fromRaw = readIf(join(RAW, `${id}-${from}.png`));
+    const toRaw = readIf(join(RAW, `${id}-${to}.png`));
+    if (toAt < 0 || !fromRaw || !toRaw) throw new Error(`bridge ${id}:${from}>${to}: stage or raw missing`);
     const key = `${from}~${to}`;
     process.stdout.write(`  bridge ${id} ${key} … `);
     const raw = await generate([
@@ -222,8 +240,8 @@ if (BRIDGES.length > 0) {
           `Nothing else in the scene changes.\n\n${LOOK}\n\n` +
           `The first image is the photograph to keep. The second image only shows the pose to take.`,
       },
-      asPart(readFileSync(fromRaw)),
-      asPart(readFileSync(toRaw)),
+      asPart(fromRaw),
+      asPart(toRaw),
     ]);
     writeFileSync(join(RAW, `${id}-${key}.png`), raw);
     const pub = await publish(id, toAt, `b-${from}-${to}`, raw);
@@ -251,15 +269,15 @@ for (const [id, persona] of Object.entries(PERSONAS)) {
   }
 
   if (PORTRAIT_ONLY) {
-    const base = join(RAW, `${id}-base.png`);
-    const card = join(RAW, `${id}-${CARD_STAGE}.png`);
-    if (!existsSync(base) || !existsSync(card)) throw new Error(`raw base / ${CARD_STAGE} of ${id} missing in ${RAW}`);
+    const base = readIf(join(RAW, `${id}-base.png`));
+    const card = readIf(join(RAW, `${id}-${CARD_STAGE}.png`));
+    if (!base || !card) throw new Error(`raw base / ${CARD_STAGE} of ${id} missing in ${RAW}`);
     process.stdout.write(`\n== ${persona.name}: Player Card portrait … `);
     const raw = await generate(
       [
         { text: `${KEEP}\n\nA head-and-shoulders portrait of this same person for their professional identity card: they wear exactly the workwear of the second image, they look calmly into the camera with a quiet, confident half-smile. Dark obsidian studio background with a soft warm key light from the left and a faint warm rim light. Eyes sharp, natural skin texture, no retouching gloss.\n\n${PORTRAIT_LOOK}\n\nThe first image is the identity reference (the person). The second image shows the clothing.` },
-        asPart(readFileSync(base)),
-        asPart(readFileSync(card)),
+        asPart(base),
+        asPart(card),
       ],
       "4:5",
     );
@@ -279,8 +297,8 @@ for (const [id, persona] of Object.entries(PERSONAS)) {
   const startAt = FROM ? stages.findIndex((s) => s.key === FROM) : 0;
   const out = manifest.personas[id]?.stages?.slice(0, Math.max(0, startAt)) ?? [];
 
-  let base = existsSync(rawPath("base")) && startAt > 0 ? readFileSync(rawPath("base")) : null;
-  let previous = startAt > 0 && existsSync(rawPath(stages[startAt - 1].key)) ? readFileSync(rawPath(stages[startAt - 1].key)) : base;
+  let base = startAt > 0 ? readIf(rawPath("base")) : null;
+  let previous = (startAt > 0 ? readIf(rawPath(stages[startAt - 1].key)) : null) ?? base;
 
   for (let i = Math.max(0, startAt); i < stages.length; i++) {
     const stage = stages[i];
