@@ -674,6 +674,12 @@ export const FROZEN_LANDING_FILES = [
   // person under the headline on a wide screen, so the photograph now starts
   // right of the words (md:left-[18%]) and the Player Card sits at the right
   // edge. The regeneration touched EXACTLY ONE hash — living-worker-hero.tsx.
+  // 2026-09-30 (owner review of #1995: "direction approved, not accepted —
+  // the card is too plain, the motion is a slideshow"): the photographs
+  // became keyframes of a person-centred motion system and the card became
+  // the Player Card with the person's own portrait. The regeneration touched
+  // EXACTLY the two hero files and the three frozen `livingWorkerHero`
+  // namespaces (one added line, `cardNote`); no other landing copy moved.
   "components/marketing/living-worker-hero.tsx",
   "lib/marketing/living-worker-hero.ts",
 ] as const;

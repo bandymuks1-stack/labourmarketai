@@ -30,6 +30,10 @@ export type HeroMoment = {
   readonly card: HeroCard | null;
   /** On the owner moment: the people and work they now run. */
   readonly team: readonly string[] | null;
+  /** Where the person stands in this photograph (0–1 of the frame): the
+   *  camera moves around them and the next moment grows out of them. */
+  readonly face: { readonly x: number; readonly y: number; readonly h: number };
+  readonly figure: { readonly x0: number; readonly y0: number; readonly x1: number; readonly y1: number };
 };
 
 export type HeroCard = {
@@ -39,12 +43,15 @@ export type HeroCard = {
   /** Two short facts, each one localized phrase ("3 sites"). */
   readonly facts: readonly string[];
   readonly skills: readonly string[];
-  readonly path: string;
+  /** The places the work has taken them, in order ("Vilnius", "Bergen"). */
+  readonly path: readonly string[];
 };
 
 export type HeroStory = {
   readonly id: string;
   readonly name: string;
+  /** The Player Card portrait: the same person, head and shoulders. */
+  readonly portrait: { readonly src: string; readonly srcSmall: string; readonly width: number; readonly height: number } | null;
   readonly moments: readonly HeroMoment[];
 };
 
@@ -52,11 +59,25 @@ export type LivingWorkerHeroData = {
   readonly sampleLabel: string;
   readonly controls: { readonly pause: string; readonly play: string; readonly next: string; readonly previous: string };
   readonly cardLabel: string;
+  /** One line under the card: the record travels with the person. */
+  readonly cardNote: string;
   readonly stories: readonly HeroStory[];
 };
 
-type ManifestStage = { key: string; stem: string; width: number; height: number };
-type Manifest = { personas: Record<string, { name: string; stages: ManifestStage[] }> };
+type ManifestStage = {
+  key: string;
+  stem: string;
+  width: number;
+  height: number;
+  face?: HeroMoment["face"];
+  figure?: HeroMoment["figure"];
+};
+type Manifest = {
+  personas: Record<string, { name: string; stages: ManifestStage[]; portrait?: { stem: string; width: number; height: number } }>;
+};
+
+/** A photograph not yet located: the person is framed in the centre third. */
+const CENTRED = { face: { x: 0.5, y: 0.25, h: 0.1 }, figure: { x0: 0.38, y0: 0.12, x1: 0.62, y1: 1 } } as const;
 
 /** The order the two stories alternate in. */
 const STORY_ORDER = ["tomas", "rasa"] as const;
@@ -78,7 +99,7 @@ export async function buildLivingWorkerHero(): Promise<LivingWorkerHeroData | nu
             country: t(`${cardKey}.country`),
             facts: [t(`${cardKey}.experience`), t(`${cardKey}.places`)],
             skills: t(`${cardKey}.skills`).split(" · "),
-            path: t(`${cardKey}.path`),
+            path: t(`${cardKey}.path`).split(/\s*→\s*/),
           }
         : null;
       return {
@@ -90,15 +111,22 @@ export async function buildLivingWorkerHero(): Promise<LivingWorkerHeroData | nu
         caption: t(`${k}.caption`),
         card,
         team: t.has(`${k}.team`) ? t(`${k}.team`).split(" · ") : null,
+        face: s.face ?? CENTRED.face,
+        figure: s.figure ?? CENTRED.figure,
       };
     });
-    stories.push({ id, name: persona.name, moments });
+    const p = persona.portrait;
+    const portrait = p
+      ? { src: `/hero/${id}/${p.stem}-800.webp`, srcSmall: `/hero/${id}/${p.stem}-400.webp`, width: p.width, height: p.height }
+      : null;
+    stories.push({ id, name: persona.name, portrait, moments });
   }
   if (stories.length === 0) return null;
   return {
     sampleLabel: t("sampleLabel"),
     controls: { pause: t("pause"), play: t("play"), next: t("next"), previous: t("previous") },
     cardLabel: t("cardLabel"),
+    cardNote: t("cardNote"),
     stories,
   };
 }

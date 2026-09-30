@@ -37,6 +37,15 @@ const arg = (name, fallback = null) => {
 const MODEL = arg("model", "gemini-3-pro-image");
 const ONLY = arg("persona");
 const FROM = arg("from");
+// --portrait: only the Player Card portrait (head and shoulders, the same
+// person in the card moment's workwear). --focus: only locate the face and
+// the figure in every published moment (the motion keeps the person in
+// place across moments). Neither regenerates a moment.
+const PORTRAIT_ONLY = args.includes("--portrait");
+const FOCUS_ONLY = args.includes("--focus");
+const FOCUS_MODEL = arg("focus-model", "gemini-flash-latest");
+/** The moment whose workwear the Player Card portrait wears. */
+const CARD_STAGE = "country-no";
 const KEY = process.env.GEMINI_API_KEY;
 if (!KEY) {
   console.error("GEMINI_API_KEY is not set (add it to apps/web/.env.local; never paste it in chat).");
@@ -50,6 +59,14 @@ const LOOK =
   "or knees-up, generous space left and right. Colour: deep obsidian shadows, warm ivory highlights, a restrained " +
   "warm-gold accent only where light naturally falls. No text, no logos, no brand marks, no watermarks, no flags. " +
   "Clothing is plain: no embroidered or printed names, titles, words or badges on any garment or helmet.";
+
+/** The card portrait keeps the look but not the moments' full-figure framing. */
+const PORTRAIT_LOOK =
+  "Photorealistic, premium cinematic commercial portrait photography, natural skin texture, real fabric, subtle film " +
+  "grain, 85mm lens at eye level. Composition: a 4:5 frame, HEAD AND SHOULDERS ONLY — the top of the head a little " +
+  "below the upper edge, the eyes on the upper third, the frame ending at mid-chest; the face centred horizontally. " +
+  "Nothing in the foreground, no props, no hands in frame. Colour: deep obsidian shadows, warm ivory highlights. " +
+  "No text, no logos, no brand marks, no watermarks. Clothing is plain: no names, titles, words or badges.";
 
 const KEEP =
   "This is the SAME person as in the reference photograph: keep the face, facial structure, skin, eyes, hair colour " +
@@ -92,7 +109,7 @@ const PERSONAS = {
   },
 };
 
-async function generate(parts) {
+async function generate(parts, aspectRatio = "3:2") {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
   for (let attempt = 1; attempt <= 3; attempt++) {
     const res = await fetch(url, {
@@ -100,7 +117,7 @@ async function generate(parts) {
       headers: { "content-type": "application/json", "x-goog-api-key": KEY },
       body: JSON.stringify({
         contents: [{ role: "user", parts }],
-        generationConfig: { responseModalities: ["IMAGE"], imageConfig: { aspectRatio: "3:2", imageSize: "2K" } },
+        generationConfig: { responseModalities: ["IMAGE"], imageConfig: { aspectRatio, imageSize: "2K" } },
       }),
     });
     if (!res.ok) {
@@ -137,8 +154,77 @@ async function publish(persona, index, key, raw) {
 mkdirSync(RAW, { recursive: true });
 const manifest = existsSync(MANIFEST) ? JSON.parse(readFileSync(MANIFEST, "utf8")) : { personas: {} };
 
+/** Where the face and the figure stand in one published moment (0–1 of the frame). */
+async function locate(file) {
+  const png = await sharp(file).resize({ width: 1024 }).png().toBuffer();
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${FOCUS_MODEL}:generateContent`;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-goog-api-key": KEY },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [
+          { text: 'Find the MAIN person (the one in sharp focus, nearest the centre). Return JSON {"face":[ymin,xmin,ymax,xmax],"person":[ymin,xmin,ymax,xmax]} — boxes normalised to 0-1000; "person" is their whole visible figure.' },
+          asPart(png),
+        ] }],
+        generationConfig: { responseMimeType: "application/json", temperature: 0 },
+      }),
+    });
+    if (!res.ok) {
+      console.error(`  attempt ${attempt}: HTTP ${res.status}`);
+      await new Promise((r) => setTimeout(r, 3000 * attempt));
+      continue;
+    }
+    const json = await res.json();
+    try {
+      const box = JSON.parse(json.candidates[0].content.parts[0].text);
+      const b = (a) => a.map((v) => Math.round(v) / 1000);
+      const [fy0, fx0, fy1, fx1] = b(box.face);
+      const [py0, px0, py1, px1] = b(box.person);
+      return { face: { x: (fx0 + fx1) / 2, y: (fy0 + fy1) / 2, h: fy1 - fy0 }, figure: { x0: px0, y0: py0, x1: px1, y1: py1 } };
+    } catch {
+      console.error(`  attempt ${attempt}: unreadable box`);
+    }
+  }
+  throw new Error(`could not locate the person in ${file}`);
+}
+
 for (const [id, persona] of Object.entries(PERSONAS)) {
   if (ONLY && ONLY !== id) continue;
+
+  if (FOCUS_ONLY) {
+    console.log(`\n== ${persona.name}: locating the person in every moment (${FOCUS_MODEL})`);
+    for (const stage of manifest.personas[id]?.stages ?? []) {
+      Object.assign(stage, await locate(join(PUBLIC, id, `${stage.stem}-1920.webp`)));
+      console.log(`  ${stage.key}: face ${stage.face.x.toFixed(2)},${stage.face.y.toFixed(2)}`);
+    }
+    writeFileSync(MANIFEST, JSON.stringify(manifest, null, 2) + "\n");
+    continue;
+  }
+
+  if (PORTRAIT_ONLY) {
+    const base = join(RAW, `${id}-base.png`);
+    const card = join(RAW, `${id}-${CARD_STAGE}.png`);
+    if (!existsSync(base) || !existsSync(card)) throw new Error(`raw base / ${CARD_STAGE} of ${id} missing in ${RAW}`);
+    process.stdout.write(`\n== ${persona.name}: Player Card portrait … `);
+    const raw = await generate(
+      [
+        { text: `${KEEP}\n\nA head-and-shoulders portrait of this same person for their professional identity card: they wear exactly the workwear of the second image, they look calmly into the camera with a quiet, confident half-smile. Dark obsidian studio background with a soft warm key light from the left and a faint warm rim light. Eyes sharp, natural skin texture, no retouching gloss.\n\n${PORTRAIT_LOOK}\n\nThe first image is the identity reference (the person). The second image shows the clothing.` },
+        asPart(readFileSync(base)),
+        asPart(readFileSync(card)),
+      ],
+      "4:5",
+    );
+    writeFileSync(join(RAW, `${id}-portrait.png`), raw);
+    const dir = join(PUBLIC, id);
+    for (const w of [800, 400]) await sharp(raw).resize({ width: w }).webp({ quality: 82 }).toFile(join(dir, `portrait-${w}.webp`));
+    const { width, height } = await sharp(raw).metadata();
+    manifest.personas[id].portrait = { stem: "portrait", width, height };
+    writeFileSync(MANIFEST, JSON.stringify(manifest, null, 2) + "\n");
+    console.log("ok");
+    continue;
+  }
+
   console.log(`\n== ${persona.name} (${id}) with ${MODEL}`);
   const rawPath = (key) => join(RAW, `${id}-${key}.png`);
   const stages = [{ key: "base", edit: null }, ...persona.stages];
@@ -165,7 +251,8 @@ for (const [id, persona] of Object.entries(PERSONAS)) {
     out.push(await publish(id, i, stage.key, raw));
     console.log("ok");
   }
-  manifest.personas[id] = { name: persona.name, model: MODEL, stages: out };
+  // a regenerated moment must be located again (`--focus`); the portrait stays
+  manifest.personas[id] = { ...manifest.personas[id], name: persona.name, model: MODEL, stages: out };
   writeFileSync(MANIFEST, JSON.stringify(manifest, null, 2) + "\n");
 }
 console.log(`\nmanifest → ${MANIFEST}\nraw originals (not committed) → ${RAW}`);
