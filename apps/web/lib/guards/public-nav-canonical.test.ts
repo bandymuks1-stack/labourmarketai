@@ -154,19 +154,17 @@ describe("footer matches the public IA and never duplicates 'about'", () => {
 });
 
 describe("canonical demand funnel — action CTAs route to /company-need only", () => {
-  it("landing employer-path card routes to /company-need (not /for-companies)", () => {
-    // The canonical page delegates through the shared V1 server assembler to
-    // the command surface, so depth 2 reaches the CTA without walking into
-    // unrelated application chrome.
-    // Both href forms — the JSX attribute and the CTA descriptor object. See
-    // the note in `public-market-entry.test.ts`.
+  it("landing employer-path door routes to /company-need (not /for-companies)", () => {
+    // One landing since the LIVE arm was removed (owner decision 2026-09-30):
+    // the employer path is the landing's door registry, which the starting
+    // contexts band renders. The ACTION goes to /company-need; the
+    // educational page stays only as its "learn more".
     const landing = landingTreeSource(APP_ROOT, 2);
-    const entryStart = landing.indexOf("className={styles.entryBand}");
-    const entryEnd = landing.indexOf("</section>", entryStart);
-    const employerPath = landing.slice(entryStart, entryEnd);
-    expect(entryStart).toBeGreaterThan(-1);
-    expect(employerPath).not.toMatch(/href[=:]\s*"\/for-companies"/);
-    expect(employerPath).toMatch(/href[=:]\s*"\/company-need"/);
+    expect(landing).toContain("StartingContextsBand");
+    const doors = read("lib/marketing/public-doors.ts");
+    const employer = /\{\s*key:\s*"employer"[^}]*\}/.exec(doors)?.[0] ?? "";
+    expect(employer).toMatch(/href:\s*"\/company-need"/);
+    expect(employer).not.toMatch(/href:\s*"\/for-companies"/);
   });
 
   it("for-companies hero CTA routes into /company-need (educational page, canonical action)", () => {
