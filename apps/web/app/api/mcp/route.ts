@@ -14,6 +14,7 @@ import {
   exposedCapabilities,
   runCapability,
 } from "@/lib/capabilities/registry";
+import { recordExternalReceipt } from "@/lib/capabilities/external-receipt";
 import {
   handleMcpMessage,
   parseErrorResponse,
@@ -312,6 +313,13 @@ export async function POST(req: Request) {
       const tCap = performance.now();
       const result = await runCapability(capabilityId, caller, args);
       marks.capability = performance.now() - tCap;
+      // AUDIT RECEIPT for every write through this door (confirm/execute):
+      // who, which capability, which object, which confirmation, outcome.
+      // Never undoes nor fails the write; the client is told its state.
+      const descriptor = exposedCapabilities().find((c) => c.id === capabilityId);
+      const receipt = descriptor
+        ? await recordExternalReceipt(caller, descriptor, args, result)
+        : ({ state: "not_applicable" } as const);
       logEvent({
         event: "external_client.tool",
         door: DOOR,
@@ -344,7 +352,11 @@ export async function POST(req: Request) {
         }
         marks.presentation = performance.now() - tPres;
       }
-      return { isError: !result.ok, payload: result, humanText };
+      return {
+        isError: !result.ok,
+        payload: receipt.state === "not_applicable" ? result : { ...result, receipt },
+        humanText,
+      };
     },
   });
 
