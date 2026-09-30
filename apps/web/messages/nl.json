@@ -17509,5 +17509,130 @@
       "pause": "Pauzeren",
       "steps": "Stappen van het verhaal"
     }
+  },
+  "livingWorkerHero": {
+    "sampleLabel": "Voorbeeld",
+    "pause": "Pauze",
+    "play": "Afspelen",
+    "next": "Volgend moment",
+    "previous": "Vorig moment",
+    "cardLabel": "Beroepskaart",
+    "cardNote": "Een echte werkgeschiedenis die met de persoon meereist.",
+    "cardSections": {
+      "work": "Echt werk",
+      "capability": "Vaardigheden uit werk",
+      "mobility": "Werkgeografie",
+      "path": "Loopbaan",
+      "history": "Werkgeschiedenis",
+      "now": "nu",
+      "next": "volgende",
+      "more": "Meer over het werk"
+    },
+    "personas": {
+      "tomas": {
+        "identity": {
+          "place": "Bergen, Noorwegen",
+          "stats": "2 jr|werkervaring · 3|bouwplaatsen · 1.860 u|in het werkjournaal",
+          "history": "2023|Vilnius|Gevelsteiger in de oude binnenstad · 2024|Vilnius|Renovatie van een flatgebouw · 2025|Bergen|Woonwijk",
+          "progression": "Steigerbouwer · Bouwspecialist · Voorman · Bedrijfseigenaar",
+          "next": "Beschikbaar voor werk in Noorwegen en Zweden"
+        },
+        "stages": {
+          "base": {
+            "alt": "Tomas K. in een donkere studio",
+            "caption": "Tomas K., 29 jaar, Vilnius."
+          },
+          "tool": {
+            "alt": "Tomas K. met steigersleutel en veiligheidsharnas",
+            "caption": "Eerste gereedschap: een steigersleutel."
+          },
+          "site-lt": {
+            "alt": "Tomas K. werkt op een steiger in de oude stad van Vilnius",
+            "caption": "Steiger, oude stad Vilnius."
+          },
+          "van": {
+            "alt": "Tomas K. bij een bedrijfsbus in de ochtend",
+            "caption": "Met de bus naar de bouwplaats, 6:40."
+          },
+          "country-no": {
+            "alt": "Tomas K. op een bouwplaats boven een fjord in Noorwegen",
+            "caption": "Bergen, Noorwegen.",
+            "card": {
+              "profession": "Steigerbouwer",
+              "country": "Noorwegen",
+              "skills": "Steigerbouw · Werken op hoogte · Veiligheidsplan",
+              "path": "Van Vilnius naar Bergen",
+              "experience": "2 jaar werkervaring",
+              "places": "3 bouwplaatsen"
+            }
+          },
+          "specialist": {
+            "alt": "Tomas K. leest tekeningen op een bouwplaats in Stockholm",
+            "caption": "Drie jaar later — bouwspecialist, Stockholm."
+          },
+          "foreman": {
+            "alt": "Tomas K. met tablet, zijn ploeg werkt achter hem",
+            "caption": "Voorman: een team van vier."
+          },
+          "owner": {
+            "alt": "Tomas K. in zijn bedrijfskantoor bij de bouwplannen",
+            "caption": "Zijn eigen bouwbedrijf.",
+            "team": "14 mensen · 3 bouwplaatsen · Deze week: 540 u"
+          }
+        }
+      },
+      "rasa": {
+        "identity": {
+          "place": "Oslo, Noorwegen",
+          "stats": "3 jr|in de keuken · 2|restaurantkeukens · 2.400 u|in het werkjournaal",
+          "history": "2022|Vilnius|Restaurantkeuken, voorbereiding · 2023|Vilnius|Warme lijn · 2025|Oslo|Noords restaurant",
+          "progression": "Keukenhulp · Kok · Chef-kok · Restauranteigenaar",
+          "next": "Beschikbaar voor werk in Noorwegen"
+        },
+        "stages": {
+          "base": {
+            "alt": "Rasa J. in een donkere studio",
+            "caption": "Rasa J., 27 jaar, Vilnius."
+          },
+          "tool": {
+            "alt": "Rasa J. met koksmes en snijplank",
+            "caption": "Eerste gereedschap: een koksmes."
+          },
+          "kitchen-lt": {
+            "alt": "Rasa J. werkt in een restaurantkeuken in Vilnius",
+            "caption": "Keukenhulp, Vilnius."
+          },
+          "car": {
+            "alt": "Rasa J. vroeg in de ochtend bij haar auto",
+            "caption": "Naar het werk, vroeg in de ochtend."
+          },
+          "country-no": {
+            "alt": "Rasa J. aan de pass van een restaurant in Oslo",
+            "caption": "Oslo, Noorwegen.",
+            "card": {
+              "profession": "Kok",
+              "country": "Noorwegen",
+              "skills": "Koken · Opmaken · Keukenhygiëne",
+              "path": "Van Vilnius naar Oslo",
+              "experience": "3 jaar in de keuken",
+              "places": "2 restaurantkeukens"
+            }
+          },
+          "cook": {
+            "alt": "Rasa J. aan het fornuis in een restaurant in Oslo",
+            "caption": "Professionele kok."
+          },
+          "head-chef": {
+            "alt": "Rasa J. leidt haar keukenbrigade",
+            "caption": "Chef-kok: een brigade van vier."
+          },
+          "owner": {
+            "alt": "Rasa J. in de zaal van haar eigen restaurant voor de service",
+            "caption": "Haar eigen restaurant.",
+            "team": "12 mensen · 2 diensten · Deze week: 420 u"
+          }
+        }
+      }
+    }
   }
 }
