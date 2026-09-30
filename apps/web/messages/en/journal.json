@@ -908,5 +908,35 @@
   "stream": {
     "today": "Today",
     "yesterday": "Yesterday"
+  },
+  "dayObject": {
+    "title": "This day of work",
+    "where": "Where I worked",
+    "what": "What I did",
+    "howLong": "How long",
+    "evidence": "What proves it",
+    "confirmed": "Who stood behind it",
+    "added": "What it added to my professional history",
+    "records": "{count, plural, one {# record} other {# records}}",
+    "whereNone": "No place recorded on this day.",
+    "whatNone": "No activity named — see the records below.",
+    "timeNone": "No time recorded yet.",
+    "untimed": "{count, plural, one {# record has no recorded time — it is not counted as zero work.} other {# records have no recorded time — they are not counted as zero work.}}",
+    "photosNone": "No photos on this day.",
+    "photosUnavailable": "Photos could not be read right now.",
+    "photoCount": "{count, plural, one {# photo you added} other {# photos you added}}",
+    "photoAlt": "Work photo you added",
+    "previewUnavailable": "Photo saved — preview unavailable right now.",
+    "photosMore": "{count, plural, one {+# more in the gallery} other {+# more in the gallery}}",
+    "confirmedByOther": "{count, plural, one {# record confirmed by someone else} other {# records confirmed by someone else}}",
+    "selfConfirmed": "{count, plural, one {# confirmed by you alone} other {# confirmed by you alone}}",
+    "waiting": "{count, plural, one {# waiting for confirmation} other {# waiting for confirmation}}",
+    "contested": "{count, plural, one {# returned or disputed} other {# returned or disputed}}",
+    "automatic": "automatic",
+    "confirmedNone": "No manager has answered for this day yet.",
+    "addedNoSkills": "No skills are linked to this day's records yet.",
+    "addedProof": "{time} of this day now stand as a manager-confirmed record in your professional history.",
+    "addedNoProof": "None of this day is a manager-confirmed record yet — a manager's answer is what turns your own record into a confirmed one.",
+    "openHistory": "Open my professional history"
   }
 }

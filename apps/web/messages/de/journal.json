@@ -908,5 +908,35 @@
   "stream": {
     "today": "Heute",
     "yesterday": "Gestern"
+  },
+  "dayObject": {
+    "title": "Dieser Arbeitstag",
+    "where": "Wo ich gearbeitet habe",
+    "what": "Was ich gemacht habe",
+    "howLong": "Wie lange",
+    "evidence": "Was es belegt",
+    "confirmed": "Wer es bestätigt hat",
+    "added": "Was es meiner beruflichen Geschichte hinzugefügt hat",
+    "records": "{count, plural, one {# Eintrag} other {# Einträge}}",
+    "whereNone": "Für diesen Tag ist kein Ort erfasst.",
+    "whatNone": "Keine Tätigkeit benannt — siehe die Einträge unten.",
+    "timeNone": "Noch keine Zeit erfasst.",
+    "untimed": "{count, plural, one {# Eintrag hat keine erfasste Zeit — er zählt nicht als null Arbeit.} other {# Einträge haben keine erfasste Zeit — sie zählen nicht als null Arbeit.}}",
+    "photosNone": "Keine Fotos an diesem Tag.",
+    "photosUnavailable": "Fotos konnten gerade nicht gelesen werden.",
+    "photoCount": "{count, plural, one {# Foto von dir} other {# Fotos von dir}}",
+    "photoAlt": "Arbeitsfoto von dir",
+    "previewUnavailable": "Foto gespeichert — Vorschau gerade nicht verfügbar.",
+    "photosMore": "{count, plural, one {+# weitere in der Galerie} other {+# weitere in der Galerie}}",
+    "confirmedByOther": "{count, plural, one {# Eintrag von jemand anderem bestätigt} other {# Einträge von jemand anderem bestätigt}}",
+    "selfConfirmed": "{count, plural, one {# nur von dir bestätigt} other {# nur von dir bestätigt}}",
+    "waiting": "{count, plural, one {# wartet auf Bestätigung} other {# warten auf Bestätigung}}",
+    "contested": "{count, plural, one {# zurückgegeben oder bestritten} other {# zurückgegeben oder bestritten}}",
+    "automatic": "automatisch",
+    "confirmedNone": "Diesen Tag hat noch niemand bestätigt.",
+    "addedNoSkills": "Mit den Einträgen dieses Tages sind noch keine Fähigkeiten verknüpft.",
+    "addedProof": "{time} dieses Tages stehen jetzt als von der Leitung bestätigter Eintrag in deiner beruflichen Geschichte.",
+    "addedNoProof": "Von diesem Tag ist noch nichts von der Leitung bestätigt — erst die Antwort der Leitung macht aus deinem Eintrag einen bestätigten.",
+    "openHistory": "Meine berufliche Geschichte öffnen"
   }
 }
