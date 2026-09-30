@@ -195,6 +195,11 @@ describe("the registry itself", () => {
       "shortlist.remove_confirm",
       "worker.activation_queue.get",
       "marketplace.funnel.get",
+      // In-app messaging (2026-09-30) over the shared communication core.
+      "conversation.list",
+      "conversation.get",
+      "message.send_draft",
+      "message.send_confirm",
       // Market companies in as DISCOVERED organizations (2026-09-30, #2000).
       "company.ingest.preview",
       "company.ingest.confirm",
@@ -272,6 +277,11 @@ describe("the registry itself", () => {
       "shortlist.remove_confirm",
       "worker.activation_queue.get",
       "marketplace.funnel.get",
+      // In-app messaging (2026-09-30) over the shared communication core.
+      "conversation.list",
+      "conversation.get",
+      "message.send_draft",
+      "message.send_confirm",
       // Market companies in as DISCOVERED organizations (2026-09-30, #2000).
       "company.ingest.preview",
       "company.ingest.confirm",

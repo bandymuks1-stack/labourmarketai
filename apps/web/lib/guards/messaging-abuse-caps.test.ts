@@ -30,7 +30,8 @@ import {
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 
-const COMM_ACTIONS = "lib/communication/actions.ts";
+// The capped write logic lives in the shared core since 2026-09-30 (actions.ts delegates).
+const COMM_ACTIONS = "lib/communication/communication-core.ts";
 const INSTR_ACTIONS = "lib/instructions/actions.ts";
 
 /** All non-test source files under the app-side trees. */

@@ -34,6 +34,7 @@ import {
 import { demandContextRefusal } from "./employer-context-refusal";
 import { EMPLOYER_OPERATIONS_CAPABILITIES } from "./employer-operations-capabilities";
 import { MARKETPLACE_CAPABILITIES } from "./marketplace-capabilities";
+import { MESSAGING_CAPABILITIES } from "./messaging-capabilities";
 import { COMPANY_INGEST_CAPABILITIES } from "./company-ingest-capabilities";
 import { EVIDENCE_IMPORT_CAPABILITIES } from "./evidence-import-capabilities";
 import { PEOPLE_INGEST_CAPABILITIES } from "./people-ingest-capabilities";
@@ -1711,6 +1712,8 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   // the SAME scouting/shortlist cores the web page runs, plus the named
   // conditions that keep a person from being matchable or discoverable.
   ...MARKETPLACE_CAPABILITIES,
+  // In-app conversations over the SAME core the web composer runs.
+  ...MESSAGING_CAPABILITIES,
   // Real market companies in as DISCOVERED organizations (owner NULL) —
   // the marketplace_company_ingest capability only; import is never a claim.
   ...COMPANY_INGEST_CAPABILITIES,

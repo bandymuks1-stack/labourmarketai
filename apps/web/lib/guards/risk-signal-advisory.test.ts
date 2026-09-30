@@ -327,7 +327,7 @@ describe("slice 4 — rate caps limit an action, they do not judge a person", ()
   });
 
   it("hitting a cap writes nothing and escalates to nothing", () => {
-    const actions = readSource("lib/communication/actions.ts");
+    const actions = readSource("lib/communication/communication-core.ts");
     expect(actions).toContain("rate_limited");
     // The refusal returns; it does not record a strike, a flag, or a count.
     expect(actions).not.toMatch(/strike|violation_count|abuse_record|offen[cs]e/i);
@@ -336,7 +336,7 @@ describe("slice 4 — rate caps limit an action, they do not judge a person", ()
   });
 
   it("caps are scoped to the caller's OWN counts — no cross-workspace effect", () => {
-    const actions = readSource("lib/communication/actions.ts");
+    const actions = readSource("lib/communication/communication-core.ts");
     // The windowed reads filter on the caller, so one person's flood cannot
     // rate-limit anyone else, in any organization.
     expect(actions).toMatch(/rateCapWindowStartIso/);
