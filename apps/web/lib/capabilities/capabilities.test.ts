@@ -179,6 +179,15 @@ describe("the registry itself", () => {
       "assignment.end_draft",
       "assignment.end_confirm",
       "journal.review_queue.get",
+      // Marketplace (2026-09-30) — candidate search + shortlist over the SAME
+      // scouting cores as the web page; the activation queue names facts.
+      "candidate.search",
+      "shortlist.get",
+      "shortlist.add_draft",
+      "shortlist.add_confirm",
+      "shortlist.remove_draft",
+      "shortlist.remove_confirm",
+      "worker.activation_queue.get",
       // Organization evidence import (2026-09-07) — one flow, eleven steps,
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product
@@ -237,6 +246,15 @@ describe("the registry itself", () => {
       "assignment.end_draft",
       "assignment.end_confirm",
       "journal.review_queue.get",
+      // Marketplace (2026-09-30) — candidate search + shortlist over the SAME
+      // scouting cores as the web page; the activation queue names facts.
+      "candidate.search",
+      "shortlist.get",
+      "shortlist.add_draft",
+      "shortlist.add_confirm",
+      "shortlist.remove_draft",
+      "shortlist.remove_confirm",
+      "worker.activation_queue.get",
       // Organization evidence import (2026-09-07) — one flow, eleven steps,
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product

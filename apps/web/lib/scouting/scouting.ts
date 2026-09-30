@@ -7,6 +7,7 @@ import {
   resolveEmployerCompanyContext,
   type EmployerContextReason,
 } from "@/lib/company/employer-company-context";
+import { hasOrganizationCapability, type GovernanceRole } from "@/lib/company/role-capabilities";
 import { isDemandKind } from "@/lib/demand/market-direction";
 import { parseStructuredNeed } from "@/lib/market/fit";
 import type { NeedSkillSource } from "@/lib/market/need-skills";
@@ -205,6 +206,37 @@ export async function runScouting(
   // context that is not acting for a company.
   const employer = await requireEmployerCompany();
   if (!employer.ok) return { kind: "no-company-context", reason: employer.reason };
+  return runScoutingCore({ supabase, userId: user.id }, employer, requestId, requestedFilters);
+}
+
+/**
+ * The employer the scouting and shortlist cores act for — ALWAYS resolved by
+ * the caller's own gate chain (`requireEmployerCompany` on the web,
+ * `requireEmployerCompanyForCaller` on a bearer transport), never a client id.
+ */
+export type ScoutingEmployer = {
+  readonly companyId: string;
+  readonly organizationId: string;
+  readonly organizationName: string;
+  readonly role: GovernanceRole;
+};
+
+/**
+ * THE scouting core (G4 bridge): the SAME retrieval, match-v1 ranking and
+ * actionability rules for the web page and for an authorized assistant
+ * (`candidate.search` on /api/mcp). The transport hands in its own
+ * RLS-scoped client and the employer its own gate resolved; nothing else
+ * differs, so the two can never disagree about who the candidates are.
+ */
+export async function runScoutingCore(
+  caller: { readonly supabase: SupabaseClient; readonly userId: string },
+  employer: ScoutingEmployer,
+  requestId: string,
+  requestedFilters: ScoutFilters = EMPTY_SCOUT_FILTERS,
+): Promise<ScoutResult> {
+  if (!requestId) return { kind: "not-found" };
+  const supabase = caller.supabase;
+  const user = { id: caller.userId };
 
   // R-15: own row OR a row of the active workspace's organization (SELECT
   // policy: creator or has_org_demand_access). Pinned to the active org so a
@@ -488,17 +520,60 @@ export async function setShortlist(input: {
   // refused before it reaches the demand row. Mapped onto the existing
   // `not-owner` kind on purpose: no second error vocabulary, and the surface
   // already renders it honestly.
-  if ((await resolveEmployerCompanyContext()).kind !== "ok") return { kind: "not-owner" };
+  const employer = await requireEmployerCompany();
+  if (!employer.ok) return { kind: "not-owner" };
+  return setShortlistCore({ supabase, userId: user.id }, employer, input);
+}
 
-  // Verify the demand is the caller's own (RLS would also filter, but we want
-  // a clean not-owner signal, not a silent FK error).
+/**
+ * THE shortlist write core — the web action and `shortlist.*` on /api/mcp
+ * both land here.
+ *
+ * WHO MAY DECIDE (2026-09-30 fix). The need's CREATOR, as before, OR a
+ * colleague whose governance role in the ACTING organization carries
+ * `manage-demand` (owner / admin / manager / external manager — the same set
+ * `has_org_demand_access` admits at the database) on a need stamped with that
+ * organization. Membership alone is never enough: a `member` is refused.
+ * Before this, a manager who could SEE and scout a colleague's need (R-15)
+ * was refused the shortlist write with `not-owner` — one screen, two answers.
+ *
+ * Rows stay per-decider (`owner_id = auth.uid()` — the write policy), so a
+ * colleague's decision is added beside the creator's, never overwrites it.
+ */
+export async function setShortlistCore(
+  caller: { readonly supabase: SupabaseClient; readonly userId: string },
+  employer: ScoutingEmployer,
+  input: {
+    requestId: string;
+    workerId: string;
+    status: ShortlistStatus;
+    note?: string | null;
+  },
+): Promise<ShortlistWriteResult> {
+  if (
+    !input.requestId ||
+    !input.workerId ||
+    !(SHORTLIST_STATUSES as readonly string[]).includes(input.status)
+  ) {
+    return { kind: "invalid" };
+  }
+  const supabase = caller.supabase;
+  const user = { id: caller.userId };
+
+  // The need: own row OR a row of the acting organization (SELECT policy:
+  // creator or has_org_demand_access). A clean not-owner signal, never a
+  // silent FK error.
   const { data: req } = await asAny(supabase)
     .from("customer_requests")
-    .select("id, status")
+    .select("id, status, profile_id")
     .eq("id", input.requestId)
-    .eq("profile_id", user.id)
+    .or(`profile_id.eq.${user.id},organization_id.eq.${employer.organizationId}`)
     .maybeSingle();
   if (!req) return { kind: "not-owner" };
+  // A colleague's need: role/capability, not membership, decides.
+  if (req.profile_id !== user.id && !hasOrganizationCapability(employer.role, "manage-demand")) {
+    return { kind: "not-owner" };
+  }
   // LIFECYCLE (owner P0 2026-09-22 §12): a candidate on a CLOSED need is a
   // historical relationship, not an actionable one. The shortlist rows stay
   // (audit/history); no new decision may be written against a need that is

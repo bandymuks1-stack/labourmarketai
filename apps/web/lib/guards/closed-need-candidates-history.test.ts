@@ -18,7 +18,8 @@ const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 describe("a closed need's candidates are history, not decisions", () => {
   it("setShortlist refuses a write on a closed need (server rule)", () => {
     const src = read("lib/scouting/scouting.ts");
-    expect(src).toMatch(/\.select\("id, status"\)/);
+    // 2026-09-30: the creator column joined the read (colleague rule).
+    expect(src).toMatch(/\.select\("id, status(, profile_id)?"\)/);
     expect(src).toMatch(/if \(req\.status === "closed"\) return \{ kind: "closed" \};/);
     expect(src).toMatch(/\| \{ kind: "closed" \}/);
   });
