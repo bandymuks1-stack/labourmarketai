@@ -190,6 +190,9 @@ describe("the registry itself", () => {
       "shortlist.remove_draft",
       "shortlist.remove_confirm",
       "worker.activation_queue.get",
+      // Market companies in as DISCOVERED organizations (2026-09-30, #2000).
+      "company.ingest.preview",
+      "company.ingest.confirm",
       // Organization evidence import (2026-09-07) — one flow, eleven steps,
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product
@@ -259,6 +262,9 @@ describe("the registry itself", () => {
       "shortlist.remove_draft",
       "shortlist.remove_confirm",
       "worker.activation_queue.get",
+      // Market companies in as DISCOVERED organizations (2026-09-30, #2000).
+      "company.ingest.preview",
+      "company.ingest.confirm",
       // Organization evidence import (2026-09-07) — one flow, eleven steps,
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product

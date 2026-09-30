@@ -88,6 +88,10 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "dashboard_preferences", key: "profile_id" },
   { table: "preferred_locations", key: "profile_id" },
   { table: "consented_login_location_signals", key: "profile_id" },
+  // Platform capabilities granted to the person (e.g. marketplace company
+  // ingest) and the organization claims they made — both are about them.
+  { table: "platform_capability_grants", key: "profile_id" },
+  { table: "organization_claims", key: "profile_id", column: "claimant_profile_id" },
 
   // ── What the person says about themselves ─────────────────────────────
   { table: "profile_skill_claims", key: "profile_id" },
@@ -370,6 +374,10 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
  * them names a subject, the table must be exported or withheld instead.
  */
 export const ACTOR_ONLY_RELATIONS: readonly string[] = [
+  // Discovered-organization provenance: the person is only the recorder of a
+  // fact or identifier about a COMPANY, never its subject.
+  "organization_facts",
+  "organization_identifiers",
   "agency_client_connections",
   "agency_client_request_shares",
   "agreement_amendments",
