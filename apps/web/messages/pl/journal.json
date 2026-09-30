@@ -935,8 +935,8 @@
     "automatic": "automatyczne",
     "confirmedNone": "Nikt jeszcze nie potwierdził tego dnia.",
     "addedNoSkills": "Z wpisami tego dnia nie powiązano jeszcze umiejętności.",
-    "addedProof": "{time} z tego dnia jest teraz potwierdzonym dowodem w Twojej historii zawodowej.",
-    "addedNoProof": "Nic z tego dnia nie liczy się jeszcze jako potwierdzony dowód — dopiero potwierdzenie przez kogoś innego zmienia wpis w dowód.",
+    "addedProof": "{time} z tego dnia jest teraz wpisem potwierdzonym przez kierownictwo w Twojej historii zawodowej.",
+    "addedNoProof": "Nic z tego dnia nie jest jeszcze potwierdzone przez kierownictwo — dopiero odpowiedź kierownictwa zmienia Twój wpis w potwierdzony.",
     "openHistory": "Otwórz moją historię zawodową"
   }
 }

@@ -935,8 +935,8 @@
     "automatic": "automatisch",
     "confirmedNone": "Diesen Tag hat noch niemand bestätigt.",
     "addedNoSkills": "Mit den Einträgen dieses Tages sind noch keine Fähigkeiten verknüpft.",
-    "addedProof": "{time} dieses Tages stehen jetzt als bestätigter Nachweis in deiner beruflichen Geschichte.",
-    "addedNoProof": "Von diesem Tag zählt noch nichts als bestätigter Nachweis — erst die Bestätigung durch jemand anderen macht einen Eintrag zum Nachweis.",
+    "addedProof": "{time} dieses Tages stehen jetzt als von der Leitung bestätigter Eintrag in deiner beruflichen Geschichte.",
+    "addedNoProof": "Von diesem Tag ist noch nichts von der Leitung bestätigt — erst die Antwort der Leitung macht aus deinem Eintrag einen bestätigten.",
     "openHistory": "Meine berufliche Geschichte öffnen"
   }
 }

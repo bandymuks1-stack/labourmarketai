@@ -935,8 +935,8 @@
     "automatic": "automatisch",
     "confirmedNone": "Niemand heeft deze dag nog bevestigd.",
     "addedNoSkills": "Aan de registraties van deze dag zijn nog geen vaardigheden gekoppeld.",
-    "addedProof": "{time} van deze dag staat nu als bevestigd bewijs in je beroepsgeschiedenis.",
-    "addedNoProof": "Van deze dag telt nog niets als bevestigd bewijs — pas de bevestiging door een ander maakt een registratie tot bewijs.",
+    "addedProof": "{time} van deze dag staat nu als door de leiding bevestigde registratie in je beroepsgeschiedenis.",
+    "addedNoProof": "Van deze dag is nog niets door de leiding bevestigd — pas het antwoord van de leiding maakt van je registratie een bevestigde.",
     "openHistory": "Mijn beroepsgeschiedenis openen"
   }
 }
