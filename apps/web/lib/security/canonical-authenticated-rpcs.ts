@@ -86,6 +86,8 @@ export const CANONICAL_APP_RPCS = [
   "grant_employer_data_disclosure",
   "grant_profile_discoverability_consent",
   "has_employer_data_disclosure",
+  "has_platform_capability",
+  "ingest_discovered_organizations_v1",
   "invite_agency_worker",
   "invite_company_worker",
   "issue_asset_v1",
