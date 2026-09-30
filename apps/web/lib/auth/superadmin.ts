@@ -1,4 +1,5 @@
 import "server-only";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -60,11 +61,14 @@ import { OPERATOR_ACCESS_NOTICE } from "@/lib/auth/role-gated-routes";
  * Throws `RoleSignalUnavailableError` when either read never answered.
  * A missing profile row is an ANSWER (not an admin), not a failure.
  */
-async function readAdminSignals(userId: string): Promise<{
+async function readAdminSignals(
+  userId: string,
+  client?: SupabaseClient,
+): Promise<{
   activeRoleAdmin: boolean;
   profileRolesAdmin: boolean;
 }> {
-  const supabase = await createClient();
+  const supabase = client ?? (await createClient());
   const profile = await readRoleSignal("profiles.active_role", () =>
     supabase.from("profiles").select("active_role").eq("id", userId).maybeSingle(),
   );
@@ -99,6 +103,21 @@ export async function isSuperadmin(): Promise<boolean> {
     // unknown answer must never grant. It must not be reported to the user as
     // "you are not an admin" either — callers that render a denial should use
     // `requireSuperadmin`, which surfaces the error instead.
+    if (e instanceof RoleSignalUnavailableError) return false;
+    throw e;
+  }
+}
+
+/**
+ * The same probe for an EXPLICIT caller (a bearer / agent transport): its own
+ * RLS-scoped client and verified user id instead of the cookie session, which
+ * such a request does not carry. Fails closed exactly like `isSuperadmin`.
+ */
+export async function isSuperadminFor(supabase: SupabaseClient, userId: string): Promise<boolean> {
+  try {
+    const { activeRoleAdmin, profileRolesAdmin } = await readAdminSignals(userId, supabase);
+    return activeRoleAdmin || profileRolesAdmin;
+  } catch (e) {
     if (e instanceof RoleSignalUnavailableError) return false;
     throw e;
   }
