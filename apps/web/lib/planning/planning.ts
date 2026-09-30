@@ -345,6 +345,37 @@ async function readProjectItems(): Promise<{
   const ownedOrgIds: string[] = ((ownedOrgsRes.data ?? []) as { id: string }[]).map(
     (o) => o.id,
   );
+  // MANAGED, NOT ONLY OWNED. `manages_organization()` — the predicate the
+  // projects RLS and `can_manage_project()` use — also admits an ACTIVE
+  // membership (owner/admin/manager/external_manager) and an ACTIVE manager
+  // engagement. A manager who does not own the organization can open its
+  // projects, yet this scope used to lose them. Same predicate, the caller's
+  // own rows only; the projects RLS below remains the gate.
+  if (user) {
+    const [membershipsRes, engagementsRes] = await Promise.all([
+      asAny(supabase)
+        .from("company_memberships")
+        .select("organization_id")
+        .eq("profile_id", user.id)
+        .eq("status", "active")
+        .in("role", ["owner", "admin", "manager", "external_manager"])
+        .limit(50),
+      asAny(supabase)
+        .from("engagement_contexts")
+        .select("organization_id")
+        .eq("profile_id", user.id)
+        .eq("status", "active")
+        .in("relationship_slug", ["manager", "owner", "external_manager"])
+        .limit(50),
+    ]);
+    for (const res of [membershipsRes, engagementsRes]) {
+      for (const r of (res.data ?? []) as { organization_id: string | null }[]) {
+        if (r.organization_id && !ownedOrgIds.includes(r.organization_id)) {
+          ownedOrgIds.push(r.organization_id);
+        }
+      }
+    }
+  }
 
   if (!companyId && ownedOrgIds.length === 0) {
     return {
