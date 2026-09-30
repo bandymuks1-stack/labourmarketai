@@ -141,8 +141,15 @@ describe("the device-local ask record — one key, one of two values", () => {
 
 describe("consent provenance — the ledger's source is a closed set", () => {
   it("the conversation records itself; anything else records the canonical screen", () => {
-    expect(DISCOVERABILITY_CONSENT_SOURCES).toEqual(["dashboard_privacy_screen", "conversation"]);
+    expect(DISCOVERABILITY_CONSENT_SOURCES).toEqual([
+      "dashboard_privacy_screen",
+      "conversation",
+      "onboarding",
+      "work_card",
+    ]);
     expect(discoverabilityConsentSourceOf("conversation")).toBe("conversation");
+    expect(discoverabilityConsentSourceOf("onboarding")).toBe("onboarding");
+    expect(discoverabilityConsentSourceOf("work_card")).toBe("work_card");
     expect(discoverabilityConsentSourceOf("dashboard_privacy_screen")).toBe(
       "dashboard_privacy_screen",
     );
