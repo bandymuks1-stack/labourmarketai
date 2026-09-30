@@ -170,6 +170,10 @@ describe("the registry itself", () => {
       // assignments (draft → confirm) and the review queue, over the SAME
       // cores/RPCs the web company surfaces call.
       "demand.list",
+      "demand.close_draft",
+      "demand.close_confirm",
+      "demand.reopen_draft",
+      "demand.reopen_confirm",
       "roster.list",
       "projects.list",
       "project.create_draft",
@@ -239,6 +243,10 @@ describe("the registry itself", () => {
       // assignments (draft → confirm) and the review queue, over the SAME
       // cores/RPCs the web company surfaces call.
       "demand.list",
+      "demand.close_draft",
+      "demand.close_confirm",
+      "demand.reopen_draft",
+      "demand.reopen_confirm",
       "roster.list",
       "projects.list",
       "project.create_draft",
@@ -289,8 +297,12 @@ describe("the registry itself", () => {
     const bridged = listCapabilities().filter((c) => c.conversationActionId);
     // Wagon 1 bridged express-interest; wagon 2 the work card; wagon 3 demand.
     expect(bridged.map((c) => c.id).sort()).toEqual([
+      "demand.close_confirm",
+      "demand.close_draft",
       "demand.create_confirm",
       "demand.create_draft",
+      "demand.reopen_confirm",
+      "demand.reopen_draft",
       "interest.express_confirm",
       "interest.express_draft",
       "work_card.save_confirm",
