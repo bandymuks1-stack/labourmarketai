@@ -937,6 +937,11 @@
     "addedNoSkills": "No skills are linked to this day's records yet.",
     "addedProof": "{time} of this day now stand as a manager-confirmed record in your professional history.",
     "addedNoProof": "None of this day is a manager-confirmed record yet — a manager's answer is what turns your own record into a confirmed one.",
-    "openHistory": "Open my professional history"
+    "openHistory": "Open my professional history",
+    "photoOpen": "Open photo larger",
+    "photoClose": "Close photo",
+    "photoPrev": "Previous photo",
+    "photoNext": "Next photo",
+    "photoCounter": "{index} / {total}"
   }
 }

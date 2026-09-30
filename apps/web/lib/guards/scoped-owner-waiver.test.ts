@@ -304,7 +304,7 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // "no" answers and refused to waive itself; the waiver record arrived
     // WITH the owner approval, in the same commit that carries the
     // @human-gate-approved annotation on the RED migration.
-    expect(SCOPED_OWNER_WAIVERS).toHaveLength(6);
+    expect(SCOPED_OWNER_WAIVERS).toHaveLength(7);
     expect(SCOPED_OWNER_WAIVERS.map((r) => r.id)).toEqual([
       "public-acquisition-route-create-cv",
       "public-acquisition-route-jobs",
@@ -312,6 +312,7 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
       "organization-multi-capability-card",
       "oauth-consent-auth-infrastructure",
       "work-hours-allocation-surface",
+      "journal-photo-viewer-modal",
     ]);
 
     // The 2026-08-31 boundary, executable rather than trusted: three codes,

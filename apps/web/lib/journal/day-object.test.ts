@@ -128,3 +128,27 @@ describe("the day object surface stays honest", () => {
     expect(view).toMatch(/state="ORGANIZATION_ATTESTED"/);
   });
 });
+
+describe("the day photo viewer", () => {
+  const root = join(__dirname, "..", "..");
+  const viewer = readFileSync(join(root, "components/app/journal/journal-photo-viewer.tsx"), "utf8");
+  const view = readFileSync(join(root, "components/app/journal/journal-day-object.tsx"), "utf8");
+
+  it("opens only the already-signed private URLs — it fetches, signs and stores nothing", () => {
+    expect(viewer).not.toMatch(/createClient|createSignedUrl|supabase|fetch\(|getPublicUrl|service_role/);
+    expect(view).toMatch(/<JournalPhotoViewer/);
+  });
+
+  it("is a real modal: shared focus contract, explicit close, Escape via the hook", () => {
+    expect(viewer).toMatch(/useDialogFocus\(/);
+    expect(viewer).toMatch(/role="dialog"/);
+    expect(viewer).toMatch(/aria-modal="true"/);
+    expect(viewer).toMatch(/journal-photo-viewer-close/);
+  });
+
+  it("the image always fits the viewport and labels cross the boundary as strings", () => {
+    expect(viewer).toMatch(/max-h-\[78dvh\]/);
+    expect(viewer).toMatch(/max-w-full/);
+    expect(viewer).toMatch(/counterTemplate: string/);
+  });
+});

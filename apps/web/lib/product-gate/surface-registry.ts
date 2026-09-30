@@ -1424,6 +1424,61 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     },
   },
 
+  // JOURNAL PHOTO VIEWER — owner request 2026-09-30 ("paspaudus Journal Day
+  // Object nuotraukos miniatiūrą, nuotrauka turi atsidaryti didesnei
+  // peržiūrai"). An image zoom over the day's own already-signed private
+  // photos. Recorded as honest NO answers below — NOT dressed up as a
+  // workspace surface; the exception arrives as a scoped owner waiver.
+  {
+    id: "components/app/journal/journal-photo-viewer.tsx",
+    kind: "popup",
+    originAxiom: "A-09",
+    purpose:
+      "Shows one of the person's OWN journal-day photos larger (with previous/next and an explicit close), so a thumbnail of real work evidence can actually be looked at.",
+    whyNotChat:
+      "A photo is looked at, not asked about. The conversation cannot render a zoomable image of a private journal photo at the moment a person taps its thumbnail on the day view; the thumbnail is already the entry point and the viewer is its only sensible continuation.",
+    whyNotExistingComponent:
+      "No shared image viewer/lightbox exists in components/ (searched: lightbox, image-viewer, photo-viewer, ImageDialog; the only shared dialog, MobileSheet, is a phone-only bottom sheet). The viewer reuses the shared focus contract (useDialogFocus) rather than inventing its own.",
+    owner: "Product owner — Journal photo viewer request 2026-09-30",
+    ownsAction: null,
+
+    worldElement: "work_journal",
+    whyNotExistingElement:
+      "It extends the Work Journal element on the EVIDENCE edge: the day object already lists the day's photos; this only enlarges them. No new element.",
+    chatIntegration:
+      "None, recorded as a NO. The viewer is opened by tapping a thumbnail and is not an action the assistant performs.",
+    avatarEffect:
+      "None. It reads nothing new and writes nothing; it cannot change a person's profile, skills or history.",
+    mapEffect:
+      "None — recorded as reflectedOnMap: false rather than invented.",
+    journalRelation:
+      "Read-only presentation of journal_entry_photos rows the day object already loaded and signed (private bucket, one hour). No upload, no new table, no Journal model change.",
+
+    pillar: "avatar",
+    objectType: "avatar",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: true,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: false,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+  },
+
 ] as const;
 
 /**

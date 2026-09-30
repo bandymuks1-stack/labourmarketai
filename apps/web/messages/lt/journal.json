@@ -937,6 +937,11 @@
     "addedNoSkills": "Prie šios dienos įrašų dar nesusieta jokių įgūdžių.",
     "addedProof": "{time} šios dienos darbo dabar yra vadovo patvirtintas įrašas jūsų profesinėje istorijoje.",
     "addedNoProof": "Iš šios dienos kol kas nėra vadovo patvirtinto įrašo — tik vadovo atsakymas paverčia jūsų įrašą patvirtintu.",
-    "openHistory": "Atverti mano profesinę istoriją"
+    "openHistory": "Atverti mano profesinę istoriją",
+    "photoOpen": "Atidaryti nuotrauką didesnę",
+    "photoClose": "Uždaryti nuotrauką",
+    "photoPrev": "Ankstesnė nuotrauka",
+    "photoNext": "Kita nuotrauka",
+    "photoCounter": "{index} / {total}"
   }
 }

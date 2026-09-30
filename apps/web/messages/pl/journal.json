@@ -937,6 +937,11 @@
     "addedNoSkills": "Z wpisami tego dnia nie powiązano jeszcze umiejętności.",
     "addedProof": "{time} z tego dnia jest teraz wpisem potwierdzonym przez kierownictwo w Twojej historii zawodowej.",
     "addedNoProof": "Nic z tego dnia nie jest jeszcze potwierdzone przez kierownictwo — dopiero odpowiedź kierownictwa zmienia Twój wpis w potwierdzony.",
-    "openHistory": "Otwórz moją historię zawodową"
+    "openHistory": "Otwórz moją historię zawodową",
+    "photoOpen": "Otwórz zdjęcie większe",
+    "photoClose": "Zamknij zdjęcie",
+    "photoPrev": "Poprzednie zdjęcie",
+    "photoNext": "Następne zdjęcie",
+    "photoCounter": "{index} / {total}"
   }
 }
