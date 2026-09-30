@@ -117,7 +117,7 @@ export function IdentityStage({
           {edge}
           <div
             className="identity-portrait relative shrink-0 overflow-hidden rounded-xl"
-            style={{ width: `clamp(84px, 26vw, ${px}px)`, aspectRatio: "4 / 5" }}
+            style={{ width: `clamp(96px, 30vw, ${px}px)`, aspectRatio: "4 / 5" }}
           >
             {avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element

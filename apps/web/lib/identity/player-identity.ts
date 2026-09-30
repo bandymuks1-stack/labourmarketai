@@ -55,8 +55,9 @@ export const PLAYER_AVATAR_PX = {
   header: 64,
   hero: 96,
   /** The Professional Player Card identity stage: the person is the
-   *  primary visual object, a portrait rather than a dot (2026-09-29). */
-  portrait: 176,
+   *  primary visual object, a portrait rather than a dot (2026-09-29) —
+   *  and, closed, the whole card's centre (owner direction 2026-09-30). */
+  portrait: 224,
 } as const;
 export type PlayerAvatarSize = keyof typeof PLAYER_AVATAR_PX;
 
