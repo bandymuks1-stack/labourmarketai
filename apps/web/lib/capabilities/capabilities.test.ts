@@ -166,6 +166,19 @@ describe("the registry itself", () => {
       // company questions to become an authorized action rather than a
       // chat-only answer, over the SAME core the chat calls.
       "workforce.availability",
+      // Employer operations (2026-09-30) — demand read, roster, projects,
+      // assignments (draft → confirm) and the review queue, over the SAME
+      // cores/RPCs the web company surfaces call.
+      "demand.list",
+      "roster.list",
+      "projects.list",
+      "project.create_draft",
+      "project.create_confirm",
+      "assignment.create_draft",
+      "assignment.create_confirm",
+      "assignment.end_draft",
+      "assignment.end_confirm",
+      "journal.review_queue.get",
       // Organization evidence import (2026-09-07) — one flow, eleven steps,
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product
@@ -211,6 +224,19 @@ describe("the registry itself", () => {
       // company questions to become an authorized action rather than a
       // chat-only answer, over the SAME core the chat calls.
       "workforce.availability",
+      // Employer operations (2026-09-30) — demand read, roster, projects,
+      // assignments (draft → confirm) and the review queue, over the SAME
+      // cores/RPCs the web company surfaces call.
+      "demand.list",
+      "roster.list",
+      "projects.list",
+      "project.create_draft",
+      "project.create_confirm",
+      "assignment.create_draft",
+      "assignment.create_confirm",
+      "assignment.end_draft",
+      "assignment.end_confirm",
+      "journal.review_queue.get",
       // Organization evidence import (2026-09-07) — one flow, eleven steps,
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product

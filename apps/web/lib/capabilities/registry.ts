@@ -31,6 +31,8 @@ import {
   mintCapabilityConfirmation,
   verifyCapabilityConfirmation,
 } from "./confirmable";
+import { demandContextRefusal } from "./employer-context-refusal";
+import { EMPLOYER_OPERATIONS_CAPABILITIES } from "./employer-operations-capabilities";
 import { EVIDENCE_IMPORT_CAPABILITIES } from "./evidence-import-capabilities";
 import { PEOPLE_INGEST_CAPABILITIES } from "./people-ingest-capabilities";
 import {
@@ -1430,39 +1432,6 @@ function normalizedDemandForHash(draft: DemandDraftInput): Record<string, unknow
   return out;
 }
 
-/** Employer-context refusal → an honest capability failure. `context.switch`
- *  is named because it is the caller's own way out of the personal space. */
-function demandContextRefusal(reason: string): ExecResult {
-  if (reason === "personal-workspace") {
-    return {
-      ok: false,
-      code: "personal_workspace",
-      message:
-        "The caller is acting in their personal space. A structured need belongs to an organization — switch with context.switch first.",
-    };
-  }
-  if (reason === "no-organization") {
-    return {
-      ok: false,
-      code: "no_organization",
-      message: "This account belongs to no organization, so it cannot create a demand.",
-    };
-  }
-  if (reason === "needs-migration") {
-    return {
-      ok: false,
-      code: "needs_migration",
-      message: "The organization store is not enabled on this environment.",
-    };
-  }
-  return {
-    ok: false,
-    code: "no_company_context",
-    message:
-      "No employer company resolves for this caller right now (workspace not company-bound, membership missing, or the read failed).",
-  };
-}
-
 const demandCreateDraft: CapabilityDescriptor = {
   id: "demand.create_draft",
   kind: "draft",
@@ -1732,6 +1701,10 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   contextList,
   contextSwitch,
   workforceAvailability,
+  // Employer operations — what the organization needs, who it has, where
+  // they work, what waits for its review — over the SAME cores and RPCs the
+  // web company surfaces call (`employer-operations-capabilities.ts`).
+  ...EMPLOYER_OPERATIONS_CAPABILITIES,
   // Organization evidence import — the ELEVEN capabilities that give an
   // authorized assistant the same historical-import flow the web UI performs,
   // over the same domain core (`lib/organization-evidence/import-core.ts`).
