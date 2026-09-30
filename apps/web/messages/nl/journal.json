@@ -908,5 +908,35 @@
   "stream": {
     "today": "Vandaag",
     "yesterday": "Gisteren"
+  },
+  "dayObject": {
+    "title": "Deze werkdag",
+    "where": "Waar ik werkte",
+    "what": "Wat ik deed",
+    "howLong": "Hoe lang",
+    "evidence": "Wat het bewijst",
+    "confirmed": "Wie het bevestigde",
+    "added": "Wat het toevoegde aan mijn beroepsgeschiedenis",
+    "records": "{count, plural, one {# registratie} other {# registraties}}",
+    "whereNone": "Voor deze dag is geen plaats vastgelegd.",
+    "whatNone": "Geen activiteit benoemd — zie de registraties hieronder.",
+    "timeNone": "Nog geen tijd vastgelegd.",
+    "untimed": "{count, plural, one {# registratie heeft geen vastgelegde tijd — telt niet als nul werk.} other {# registraties hebben geen vastgelegde tijd — ze tellen niet als nul werk.}}",
+    "photosNone": "Geen foto's op deze dag.",
+    "photosUnavailable": "Foto's konden nu niet worden gelezen.",
+    "photoCount": "{count, plural, one {# foto die je toevoegde} other {# foto's die je toevoegde}}",
+    "photoAlt": "Werkfoto die je toevoegde",
+    "previewUnavailable": "Foto opgeslagen — voorbeeld nu niet beschikbaar.",
+    "photosMore": "{count, plural, one {+# meer in de galerij} other {+# meer in de galerij}}",
+    "confirmedByOther": "{count, plural, one {# registratie bevestigd door een ander} other {# registraties bevestigd door een ander}}",
+    "selfConfirmed": "{count, plural, one {# alleen door jou bevestigd} other {# alleen door jou bevestigd}}",
+    "waiting": "{count, plural, one {# wacht op bevestiging} other {# wachten op bevestiging}}",
+    "contested": "{count, plural, one {# teruggestuurd of betwist} other {# teruggestuurd of betwist}}",
+    "automatic": "automatisch",
+    "confirmedNone": "Niemand heeft deze dag nog bevestigd.",
+    "addedNoSkills": "Aan de registraties van deze dag zijn nog geen vaardigheden gekoppeld.",
+    "addedProof": "{time} van deze dag staat nu als bevestigd bewijs in je beroepsgeschiedenis.",
+    "addedNoProof": "Van deze dag telt nog niets als bevestigd bewijs — pas de bevestiging door een ander maakt een registratie tot bewijs.",
+    "openHistory": "Mijn beroepsgeschiedenis openen"
   }
 }

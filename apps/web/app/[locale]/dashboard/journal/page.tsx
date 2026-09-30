@@ -113,6 +113,12 @@ import {
 import { resolveWorkLogLabels } from "@/components/app/conversation/chat/labels";
 import { JournalQuickRecord } from "./quick-record";
 import { JournalCalendar } from "@/components/app/journal/journal-calendar";
+import { JournalDayObject } from "@/components/app/journal/journal-day-object";
+import { buildDayObject } from "@/lib/journal/day-object";
+import {
+  readDayPhotoPreviews,
+  type DayPhotoPreviews,
+} from "@/lib/journal/day-photo-previews";
 import {
   buildJournalCalendar,
   isIsoDay,
@@ -976,6 +982,64 @@ export default async function JournalPage({
   if (skillFilterSlug) calendarCarry.skill = skillFilterSlug;
   if (periodKey !== "all") calendarCarry.period = periodKey;
   if (calendarScale !== "month") calendarCarry.cal = calendarScale;
+  // THE SELECTED DAY AS ONE OBJECT (Step 2). Built only from the rows already
+  // loaded above — the same entries, metrics, confirmations and skill links
+  // the cards below render — plus the day's own photo previews under the
+  // viewer's session. A day with no entries draws no object.
+  const selectedDayGroup =
+    dayFilterActive && selectedDate
+      ? (entryDayGroups.find((g) => g.isoKey === selectedDate) ?? null)
+      : null;
+  let dayObject: ReturnType<typeof buildDayObject> | null = null;
+  let dayPhotos: DayPhotoPreviews = { status: "ok", photos: [], total: 0 };
+  if (selectedDayGroup && selectedDayGroup.entries.length > 0) {
+    const photoCounts = await readPhotoCountsByEntry(
+      supabase,
+      selectedDayGroup.entries.map((e) => e.id),
+    );
+    dayObject = buildDayObject(
+      selectedDayGroup.entries.map((e) => {
+        const metrics = e.journal_entry_metrics ?? [];
+        const site = metrics.find((m) => m.metric_slug === "site_name");
+        const dir = metrics.find((m) => m.metric_slug === "work_direction");
+        const verification = deriveWorkVerificationState({
+          reviewResult: deriveReviewResult(e.journal_entry_confirmations),
+          context: e.engagement_context_id
+            ? (contextFacts.get(e.engagement_context_id) ?? null)
+            : null,
+        });
+        const org = e.engagement_context_id
+          ? engagementChips.get(e.engagement_context_id)?.label
+          : null;
+        return {
+          id: e.id,
+          places: [org, site?.value_text?.trim() || null].filter(
+            (v): v is string => Boolean(v) && v !== "—",
+          ),
+          activity: dir?.value_text ? tProf(dir.value_text) : null,
+          minutes: Math.round(
+            deriveEntryWorkTime({
+              entryId: e.id,
+              createdAt: e.created_at,
+              originalText: e.original_text,
+              metrics,
+            }).totalHours * 60,
+          ),
+          verification: verification.state,
+          decisions: deriveReviewTimeline(e.journal_entry_confirmations),
+          photoCount: photoCounts.get(e.id) ?? 0,
+          skills: (linksByEntry.get(e.id) ?? []).flatMap((sid) => {
+            const slug = idToSlug.get(sid);
+            const name = slug ? skillNameOf(slug) : null;
+            return name
+              ? [{ id: sid, name, confirmed: verification.state === "verified" }]
+              : [];
+          }),
+        };
+      }),
+    );
+    dayPhotos = await readDayPhotoPreviews(selectedDayGroup.entries.map((e) => e.id));
+  }
   const journalEvidenceActive: EvidenceStatus[] = ["self_declared"];
   if (
     evidenceStatuses.some((s) => s === "submitted" || s === "changes_requested")
@@ -1435,6 +1499,14 @@ export default async function JournalPage({
             </Link>
           </div>
         )}
+        {dayObject && selectedDate ? (
+          <JournalDayObject
+            day={dayObject}
+            iso={selectedDate}
+            locale={locale}
+            photos={dayPhotos}
+          />
+        ) : null}
         {/* Wagon 5 first view: the status/legend/count lines are REAL and
             stay word-for-word — but behind ONE deliberate disclosure, so the
             default view is input + history, not a wall of technical status.
