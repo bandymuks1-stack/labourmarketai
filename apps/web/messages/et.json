@@ -3091,7 +3091,7 @@
         "statGovLt": "Ametlik statistika; allikaviide nõutav; aktiveerimine ootab omaniku kinnitust.",
         "eurostat": "Ametlik ELi statistika; allikaviide nõutav; aktiveerimine ootab omaniku kinnitust.",
         "arbetsformedlingen": "Aktiivne allikas. Kasutustingimused kinnitatud: tasuta avalik andmeallikas (CC0). Iga kuulutuse juures näidatakse allikat ja iga kuulutus viib algse kuulutuse juurde.",
-        "nav": "Kavandatud allikas. NAV-i API tingimused lubavad taasavaldamist pidevate kohustustega: tagasi võetud kuulutus tuleb kohe eemaldada, uuendatud kuulutus kohe uuendada ja kandideerimislink peab viima algse kuulutuseni. Tingimustega nõustumine ja tunnuse saamine nõuavad omaniku tegevust — täna midagi ei laadita.",
+        "nav": "Aktiivne allikas. NAV-i API tingimused on vastu võetud ja juurdepääs antud. Jooksvaid kohustusi täidetakse: tagasi võetud kuulutus eemaldatakse kohe, uuendatud kuulutus värskendatakse kiiresti ja kandideerimislink viib algse kuulutuseni.",
         "cvbankas": "Ainult ettepanek — kasutusluba kinnitamata; ei segata kunagi sisemiste numbritega.",
         "eures": "Kavandatud allikas. Kasutustingimusi pole veel üle vaadatud — aktiveerimine nõuab omaniku kinnitust. Täna midagi ei laadita.",
         "uztLt": "Kavandatud allikas. Kasutustingimusi pole veel üle vaadatud — aktiveerimine nõuab omaniku kinnitust. Täna midagi ei laadita."

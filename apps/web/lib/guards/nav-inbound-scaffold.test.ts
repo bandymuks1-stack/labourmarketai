@@ -31,8 +31,8 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 const ctl = vi.hoisted(() => ({
-  // Simulates a FUTURE owner decision for `nav` — the state (3) needs in
-  // order to reach the cursor write. Null = the real registry row (off).
+  // Overrides the governance row for `nav` to prove the SECOND gate: with
+  // governance switched off, nothing is stored. Null = the real row (on).
   navGovernance: null as null | { activation: string; legalStatus: string },
 }));
 
@@ -63,7 +63,6 @@ import {
 import { getVacancyParser } from "@/lib/vacancy-sources/providers";
 import { NAV_FIELD_MAP, parseNavBatch } from "@/lib/vacancy-sources/providers/nav-parse";
 import { evaluateVacancyBatchGate } from "@/lib/vacancy-sources/vacancy-validation";
-import { isActivationGatedOnly } from "@/lib/vacancy-sources/vacancy-contract";
 import {
   cursorRequestBound,
   decodeContinuationTokenCursor,
@@ -108,44 +107,82 @@ function enableNav(withToken: boolean): void {
   if (withToken) vi.stubEnv("VACANCY_SOURCE_NAV_API_TOKEN", TOKEN);
 }
 
-/** A feed ad in the ASSUMED shape (see NAV_FIELD_MAP). */
+/** A detail record in the REAL shape (verified 2026-09-30): `{ uuid, status,
+ *  ad_content{...} }`, the ad body itself carrying its own uuid. */
 function navAd(over: Record<string, unknown> = {}): Record<string, unknown> {
+  const uuid = String(over.uuid ?? "nav-1");
+  const { status, ...content } = over;
   return {
-    uuid: "nav-1",
-    status: "ACTIVE",
-    title: "Tømrer til byggeprosjekt",
-    description: "Vi søker tømrer med erfaring fra bygg.",
-    published: "2026-09-20T08:00:00+02:00",
-    expires: "2026-10-20T00:00:00+02:00",
-    positioncount: 2,
-    employmentType: "Fast",
-    extent: "Heltid",
-    employer: { name: "Bygg AS", orgnr: "123456789" },
-    workLocations: [{ country: "NO", county: "Viken", municipal: "Drammen" }],
-    categoryList: [{ categoryType: "STYRK08", code: "7115", name: "Tømrer" }],
-    applicationUrl: "https://arbeidsplassen.nav.no/stillinger/stilling/nav-1",
-    ...over,
+    uuid,
+    status: status ?? "ACTIVE",
+    ad_content: {
+      uuid,
+      title: "Tømrer til byggeprosjekt",
+      description: "Vi søker tømrer med erfaring fra bygg.",
+      published: "2026-09-20T08:00:00+02:00",
+      expires: "2026-10-20T00:00:00+02:00",
+      positioncount: 2,
+      engagementtype: "Fast",
+      extent: "Heltid",
+      employer: { name: "Bygg AS", orgnr: "123456789" },
+      workLocations: [{ country: "NORGE", county: "Viken", municipal: "Drammen" }],
+      categoryList: [
+        { categoryType: "STYRK08", code: "7115", name: "Tømrer" },
+        { categoryType: "ESCO", code: "http://data.europa.eu/esco/occupation/x", name: "tømrer" },
+      ],
+      applicationUrl: "https://arbeidsplassen.nav.no/stillinger/stilling/nav-1",
+      // Personal data the parser must never read or keep.
+      contactList: [{ name: "Not Stored", email: "nobody@example.invalid" }],
+      ...content,
+    },
   };
 }
 
-/** Serve pages keyed on the continuation token the request carries. */
+/** A feed entry as the PAGE lists it: a relative detail url + `_feed_entry`. */
+function navEntry(uuid: string, status = "ACTIVE"): Record<string, unknown> {
+  return {
+    id: uuid,
+    url: `/api/v1/feedentry/${uuid}`,
+    title: "t",
+    date_modified: "2026-09-20T08:00:00+02:00",
+    _feed_entry: { uuid, status, title: "t", sistEndret: "2026-09-20T08:00:00+02:00" },
+  };
+}
+
+/**
+ * Serve the real two-level feed. Pages are keyed on the path token
+ * (`/api/v1/feed` = head/cold start, `/api/v1/feed/<token>`); details on
+ * `/api/v1/feedentry/<uuid>` from `details` (a missing uuid answers 404).
+ */
 function stubFeed(
   pages: Readonly<Record<string, unknown>>,
+  details: Readonly<Record<string, unknown>> = {},
 ): ReturnType<typeof vi.fn> {
-  const impl = vi.fn().mockImplementation(async (url: string) => {
-    const last = new URL(String(url)).searchParams.get("last") ?? "";
-    const body = pages[last];
-    if (body === undefined) {
-      return new Response("{}", { status: 404, headers: { "content-type": "application/json" } });
-    }
-    return new Response(JSON.stringify(body), {
-      status: 200,
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), {
+      status,
       headers: { "content-type": "application/json" },
     });
+  const impl = vi.fn().mockImplementation(async (url: string) => {
+    const path = new URL(String(url)).pathname;
+    const entry = /^\/api\/v1\/feedentry\/([^/]+)$/.exec(path);
+    if (entry) {
+      const body = details[entry[1]];
+      return body === undefined ? json({}, 404) : json(body);
+    }
+    const token = /^\/api\/v1\/feed\/([^/]+)$/.exec(path)?.[1] ?? "";
+    const body = pages[token];
+    return body === undefined ? json({}, 404) : json(body);
   });
   vi.stubGlobal("fetch", impl);
   return impl;
 }
+
+const pageTokens = (impl: ReturnType<typeof vi.fn>) =>
+  impl.mock.calls
+    .map((c) => new URL(String(c[0])).pathname)
+    .filter((p) => p.startsWith("/api/v1/feed") && !p.startsWith("/api/v1/feedentry"))
+    .map((p) => p.split("/")[4] ?? "");
 
 const read = (p: string) => readFileSync(p, "utf8");
 /**
@@ -182,32 +219,29 @@ describe("(1) nav is registered but inactive at every gate", () => {
     expect(getVacancyParser("nav")).not.toBeNull();
   });
 
-  it("the governance row is unconfirmed, off and a proposal", () => {
+  it("the governance row is CONFIRMED and on, yet inert without the env switch and the token", () => {
     const row = INTELLIGENCE_SOURCE_PROFILES.find((p) => p.key === "nav")!;
     expect(row).toBeTruthy();
-    expect(row.legalStatus).toBe("unconfirmed");
-    expect(row.activation).toBe("off");
-    expect(row.proposedOnly).toBe(true);
+    expect(row.legalStatus).toBe("confirmed");
+    expect(row.activation).toBe("on");
+    expect(row.proposedOnly).toBe(false);
     expect(row.attributionRequired).toBe(true);
     expect(row.importPolicy).toBeNull();
-    expect(isExternalSourceActive("nav")).toBe(false);
+    expect(isExternalSourceActive("nav")).toBe(true);
   });
 
-  it("the env switch is closed in an empty environment and the batch gate refuses", () => {
+  it("the env switch is closed in an empty environment (the gate that keeps it inert)", () => {
     const state = evaluateVacancySwitch("nav", {});
     expect(state.operational).toBe(false);
     expect(state.blockedReason).toBe("provider_disabled");
     expect(providerEnabledEnvName("nav")).toBe("VACANCY_SOURCE_NAV_ENABLED");
-
+    // Governance is open, so the batch gate has no activation reason left:
+    // what keeps the source inert is the env switch and the missing token.
     const gate = evaluateVacancyBatchGate(
       { providerKey: "nav", snapshotRef: "s", requestRef: "nav:stream", capturedAt: NOW },
       "stream",
     );
-    expect(gate.ok).toBe(false);
-    if (gate.ok) return;
-    // Blocked ONLY by owner-activation reasons — a well-formed source
-    // awaiting a decision, not a data defect.
-    expect(isActivationGatedOnly(gate.reasons)).toBe(true);
+    expect(gate.ok).toBe(true);
   });
 });
 
@@ -271,15 +305,17 @@ describe("(2) the adapter sends the credential in the declared header shape", ()
     expect(impl).not.toHaveBeenCalled();
   });
 
-  it("the descriptor's cursor key is accepted by the URL builder; foreign keys are still dropped", () => {
-    const url = buildVacancyRequestUrl(NAV_STREAM, {
-      last: "abc",
-      "redirect-to": "https://evil.invalid",
-    });
-    const parsed = new URL(url);
-    expect(parsed.searchParams.get("last")).toBe("abc");
-    expect(parsed.searchParams.has("redirect-to")).toBe(false);
-    // The same key is NOT accepted on an endpoint that did not declare it.
+  it("the continuation token is a PATH segment; foreign query keys are dropped; bad tokens are refused", () => {
+    const head = new URL(buildVacancyRequestUrl(NAV_STREAM, {}));
+    expect(head.pathname).toBe("/api/v1/feed");
+    const next = new URL(
+      buildVacancyRequestUrl(NAV_STREAM, { "redirect-to": "https://evil.invalid" }, "abcdEFGH_12-3"),
+    );
+    expect(next.pathname).toBe("/api/v1/feed/abcdEFGH_12-3");
+    expect(next.searchParams.has("redirect-to")).toBe(false);
+    // A token that is not one identifier segment never reaches the path.
+    expect(new URL(buildVacancyRequestUrl(NAV_STREAM, {}, "../../etc?x=1")).pathname).toBe("/api/v1/feed");
+    // A token is NOT a query key on an endpoint that declares none.
     const se = buildVacancyRequestUrl(getVacancyEndpoint(SE, "links")!, { last: "abc" });
     expect(new URL(se).searchParams.has("last")).toBe(false);
   });
@@ -305,13 +341,23 @@ describe("(3) a cursor channel walks by continuation token and checkpoints on it
     expect(readContinuationToken([], ["next_id"])).toBeNull();
   });
 
-  it("dry run: walks page → page by token, stops at the head, reports the token checkpoint", async () => {
+  it("dry run: walks page → page by path token, fans out to each ad, stops at the head", async () => {
     enableNav(true);
-    const impl = stubFeed({
-      "": { items: [{ ad_content: navAd({ uuid: "nav-1" }) }], next_id: "p2" },
-      p2: { items: [{ ad_content: navAd({ uuid: "nav-2" }) }], next_id: "p3" },
-      p3: { items: [{ ad_content: navAd({ uuid: "nav-3" }) }] },
-    });
+    const impl = stubFeed(
+      {
+        "": { items: [navEntry("nav-1")], next_id: "token-page-2" },
+        "token-page-2": {
+          items: [navEntry("nav-2"), navEntry("nav-x", "INACTIVE")],
+          next_id: "token-page-3",
+        },
+        "token-page-3": { items: [navEntry("nav-3")] },
+      },
+      {
+        "nav-1": navAd({ uuid: "nav-1" }),
+        "nav-2": navAd({ uuid: "nav-2" }),
+        "nav-3": navAd({ uuid: "nav-3" }),
+      },
+    );
 
     const result = await runVacancyImport({
       provider: NAV,
@@ -325,30 +371,59 @@ describe("(3) a cursor channel walks by continuation token and checkpoints on it
       cursor: null,
     });
 
-    expect(impl).toHaveBeenCalledTimes(3);
-    const urls = impl.mock.calls.map((c) => new URL(String(c[0])));
-    expect(urls[0].searchParams.has("last")).toBe(false);
-    expect(urls[1].searchParams.get("last")).toBe("p2");
-    expect(urls[2].searchParams.get("last")).toBe("p3");
+    expect(pageTokens(impl)).toEqual(["", "token-page-2", "token-page-3"]);
+    const detailUrls = impl.mock.calls
+      .map((c) => new URL(String(c[0])).pathname)
+      .filter((p) => p.startsWith("/api/v1/feedentry/"));
+    // INACTIVE entries are never fetched: they become withdrawals directly.
+    expect(detailUrls).toEqual([
+      "/api/v1/feedentry/nav-1",
+      "/api/v1/feedentry/nav-2",
+      "/api/v1/feedentry/nav-3",
+    ]);
     expect(result.metrics.pagesRequested).toBe(3);
-    expect(result.metrics.itemsParsed).toBe(3);
-    // Governance is off: nothing enters, but the well-formed rows are counted
-    // as the evidence the owner needs.
-    expect(result.activated).toBe(false);
-    expect(result.acceptedVacancies).toEqual([]);
-    expect(result.metrics.validAfterActivation).toBe(3);
-    // The checkpoint is the token of the last page read (p3 named no
-    // successor, so the next poll re-reads it), and the walk drained.
-    expect(result.nextCursor).toBe("continuation-token:p3");
+    expect(result.metrics.itemsParsed).toBe(4);
+    // Governance is confirmed: the live ads are accepted. The INACTIVE entry
+    // withdraws an ad we do not hold, which is nothing to remove.
+    expect(result.activated).toBe(true);
+    expect(result.acceptedVacancies.map((v) => v.externalId).sort()).toEqual([
+      "nav-1",
+      "nav-2",
+      "nav-3",
+    ]);
+    expect(result.nextCursor).toBe("continuation-token:token-page-3");
     expect(result.caughtUp).toBe(true);
+  });
+
+  it("the cold start sends If-Modified-Since on the head page", async () => {
+    enableNav(true);
+    const impl = stubFeed({ "": { items: [] } });
+    await await runVacancyImport({
+      provider: NAV,
+      channel: "stream",
+      mode: "dry_run",
+      sessionId: "s1b",
+      startedAtIso: NOW,
+      finishedAtIso: NOW,
+      capturedAt: NOW,
+      apiKey: TOKEN,
+      cursor: null,
+    });
+    const headers = (impl.mock.calls[0][1] as RequestInit).headers as Record<string, string>;
+    const since = headers["If-Modified-Since"];
+    expect(since).toBeTruthy();
+    const lookbackMs = Date.parse(NOW) - Date.parse(since);
+    expect(lookbackMs).toBeGreaterThan(59 * 86_400_000);
+    expect(lookbackMs).toBeLessThan(61 * 86_400_000);
   });
 
   it("resumes from a stored token and leaves the checkpoint at the last consumed page on failure", async () => {
     enableNav(true);
-    const impl = stubFeed({
-      p2: { items: [{ ad_content: navAd({ uuid: "nav-2" }) }], next_id: "p3" },
-      // p3 is missing → 404 → fetch failure mid-walk.
-    });
+    // token-page-3 is missing -> 404 -> fetch failure mid-walk.
+    const impl = stubFeed(
+      { "token-page-2": { items: [navEntry("nav-2")], next_id: "token-page-3" } },
+      { "nav-2": navAd({ uuid: "nav-2" }) },
+    );
 
     const result = await runVacancyImport({
       provider: NAV,
@@ -359,24 +434,70 @@ describe("(3) a cursor channel walks by continuation token and checkpoints on it
       finishedAtIso: NOW,
       capturedAt: NOW,
       apiKey: TOKEN,
-      cursor: "continuation-token:p2",
+      cursor: "continuation-token:token-page-2",
     });
 
-    expect(new URL(String(impl.mock.calls[0][0])).searchParams.get("last")).toBe("p2");
+    expect(pageTokens(impl)[0]).toBe("token-page-2");
     expect(result.metrics.pagesFailed).toBe(1);
-    // p2 was fully consumed and named p3, so p3 is the honest resume point.
-    expect(result.nextCursor).toBe("continuation-token:p3");
+    expect(result.nextCursor).toBe("continuation-token:token-page-3");
     expect(result.caughtUp).toBe(false);
   });
 
-  it("persist mode under a SIMULATED owner activation writes the token through vacancy_import_cursors", async () => {
-    // A simulated future decision, scoped to this test — the real row is off.
-    ctl.navGovernance = { activation: "on", legalStatus: "confirmed" };
+  it("a detail failure other than 404/410 fails the WHOLE page closed and does not advance the checkpoint", async () => {
     enableNav(true);
-    stubFeed({
-      "": { items: [{ ad_content: navAd({ uuid: "nav-1" }) }], next_id: "p2" },
-      p2: { items: [] },
+    const impl = vi.fn().mockImplementation(async (url: string) => {
+      const path = new URL(String(url)).pathname;
+      if (path.startsWith("/api/v1/feedentry/")) return new Response("{}", { status: 500 });
+      return new Response(
+        JSON.stringify({ items: [navEntry("nav-1")], next_id: "token-page-2" }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
     });
+    vi.stubGlobal("fetch", impl);
+    const result = await runVacancyImport({
+      provider: NAV,
+      channel: "stream",
+      mode: "dry_run",
+      sessionId: "s2b",
+      startedAtIso: NOW,
+      finishedAtIso: NOW,
+      capturedAt: NOW,
+      apiKey: TOKEN,
+      cursor: null,
+    });
+    expect(result.metrics.pagesFailed).toBe(1);
+    expect(result.metrics.itemsParsed).toBe(0);
+    expect(result.nextCursor).not.toBe("continuation-token:token-page-2");
+  });
+
+  it("a 404 on a listed ad is a withdrawal, not a failure", async () => {
+    enableNav(true);
+    stubFeed({ "": { items: [navEntry("gone-1")] } }, {});
+    const result = await runVacancyImport({
+      provider: NAV,
+      channel: "stream",
+      mode: "dry_run",
+      sessionId: "s2c",
+      startedAtIso: NOW,
+      finishedAtIso: NOW,
+      capturedAt: NOW,
+      apiKey: TOKEN,
+      cursor: null,
+    });
+    expect(result.metrics.pagesFailed).toBe(0);
+    expect(result.metrics.itemsParsed).toBe(1);
+  });
+
+  it("persist mode under the recorded owner activation writes the token through vacancy_import_cursors", async () => {
+    // The real governance row is confirmed + on.
+    enableNav(true);
+    stubFeed(
+      {
+        "": { items: [navEntry("nav-1")], next_id: "token-page-2" },
+        "token-page-2": { items: [] },
+      },
+      { "nav-1": navAd({ uuid: "nav-1" }) },
+    );
 
     const ops: { table: string; kind: string; payload?: unknown }[] = [];
     const chainFor = (table: string) => {
@@ -389,6 +510,8 @@ describe("(3) a cursor channel walks by continuation token and checkpoints on it
       chain.eq = self;
       chain.in = self;
       chain.or = self;
+      chain.order = self;
+      chain.range = self;
       chain.maybeSingle = () => Promise.resolve({ data: null, error: null });
       chain.then = (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) =>
         Promise.resolve({ data: [], error: null }).then(ok, err);
@@ -418,7 +541,7 @@ describe("(3) a cursor channel walks by continuation token and checkpoints on it
     const written = cursorWrites[0].payload as Record<string, unknown>;
     expect(written.provider_key).toBe("nav");
     expect(written.channel).toBe("stream");
-    expect(written.cursor_value).toBe("continuation-token:p2");
+    expect(written.cursor_value).toBe("continuation-token:token-page-2");
     expect(written.consecutive_failures).toBe(0);
     expect(session.cursorAdvanced).toBe(true);
     // The token itself is nowhere in what was written or reported.
@@ -474,8 +597,9 @@ describe("(4) no nav.no host is reachable while the switch is closed", () => {
   });
 
   it("env on but governance off: a persist run stores NOTHING and never advances a cursor", async () => {
+    ctl.navGovernance = { activation: "off", legalStatus: "confirmed" };
     enableNav(true);
-    stubFeed({ "": { items: [{ ad_content: navAd() }] } });
+    stubFeed({ "": { items: [navEntry("nav-1")] } }, { "nav-1": navAd() });
     const ops: string[] = [];
     const chainFor = (table: string) => {
       const chain: Record<string, unknown> = {};
@@ -484,6 +608,8 @@ describe("(4) no nav.no host is reachable while the switch is closed", () => {
       chain.eq = self;
       chain.in = self;
       chain.or = self;
+      chain.order = self;
+      chain.range = self;
       chain.maybeSingle = () => Promise.resolve({ data: null, error: null });
       chain.then = (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) =>
         Promise.resolve({ data: [], error: null }).then(ok, err);
@@ -617,17 +743,17 @@ describe("(6) NAV is named only through i18n codes, present in every locale", ()
 
 // ── parser stub: assumed fields are declared, occupation stays verbatim ─────
 
-describe("nav parser stub — every mapped field is declared ASSUMED; nothing is invented", () => {
-  it("declares every key it reads as assumed until a real payload is captured", () => {
+describe("nav parser: the field map is VERIFIED against a real payload; nothing is invented", () => {
+  it("declares every key it reads as observed, none assumed", () => {
     for (const [name, entry] of Object.entries(NAV_FIELD_MAP)) {
-      expect(entry.assumed, name).toBe(true);
+      expect(entry.assumed, name).toBe(false);
       expect(entry.keys.length, name).toBeGreaterThan(0);
     }
   });
 
-  it("maps a documented-shape ad verbatim, with occupation raw and no ESCO invention", () => {
+  it("maps a real-shape ad verbatim, ESCO preferred, occupation raw, no contact data", () => {
     const batch = parseNavBatch({
-      body: { items: [{ ad_content: navAd() }], next_id: "p2" },
+      body: [navAd()],
       channel: "stream",
       capturedAt: NOW,
       requestRef: "https://pam-stilling-feed.nav.no/api/v1/feed",
@@ -645,8 +771,8 @@ describe("nav parser stub — every mapped field is declared ASSUMED; nothing is
     expect(v.location.country).toBe("NO");
     expect(v.location.city).toBe("Drammen");
     expect(v.employer.externalOrgId).toBe("123456789");
-    expect(v.occupationRaw).toBe("Tømrer");
-    expect(v.occupationConceptId).toBe("STYRK08:7115");
+    expect(v.occupationRaw).toBe("tømrer");
+    expect(v.occupationConceptId).toBe("ESCO:http://data.europa.eu/esco/occupation/x");
     expect(v.categorizationOrigin).toBe("derived");
     expect(v.positions).toBe(2);
     expect(v.employmentForm).toBe("permanent");
@@ -654,28 +780,40 @@ describe("nav parser stub — every mapped field is declared ASSUMED; nothing is
     expect(v.expiresAt).not.toBeNull();
     expect(v.applicationUrl).toContain("arbeidsplassen.nav.no");
     expect(v.attributionCode).toBe("vacancySources.attribution.nav");
-    // No coordinates, no salary, no languages are invented.
     expect(v.location.lat).toBeNull();
     expect(v.compensation.min).toBeNull();
     expect(v.requiredLanguages).toEqual([]);
+    // contactList (named persons, e-mail, phone) is never read or stored.
+    expect(JSON.stringify(v)).not.toMatch(/Not Stored|nobody@example/);
   });
 
-  it("an inactive status is a withdrawal — the shape the removal duty needs", () => {
+  it("an INACTIVE withdrawal (title only) is the shape the removal duty needs", () => {
     const batch = parseNavBatch({
-      body: [navAd({ status: "INACTIVE", title: "" })],
+      body: [{ uuid: "nav-9", status: "INACTIVE", title: "" }, navAd({ uuid: "nav-8", status: "INACTIVE" })],
       channel: "stream",
       capturedAt: NOW,
       requestRef: "r",
     });
-    const outcome = batch.outcomes[0];
+    expect(batch.outcomes).toHaveLength(2);
+    for (const outcome of batch.outcomes) {
+      expect(outcome.kind).toBe("parsed");
+      if (outcome.kind !== "parsed") return;
+      expect(outcome.vacancy.lifecycle).toBe("removed");
+    }
+  });
+
+  it("a MISSING status is a withdrawal, never a live ad", () => {
+    const ad = navAd();
+    delete (ad as Record<string, unknown>).status;
+    const outcome = parseNavBatch({ body: [ad], channel: "stream", capturedAt: NOW, requestRef: "r" })
+      .outcomes[0];
     expect(outcome.kind).toBe("parsed");
-    if (outcome.kind !== "parsed") return;
-    expect(outcome.vacancy.lifecycle).toBe("removed");
+    if (outcome.kind === "parsed") expect(outcome.vacancy.lifecycle).toBe("removed");
   });
 
   it("rejects, never throws, on a malformed item; a non-list body is a body rejection", () => {
     const batch = parseNavBatch({
-      body: [42, { uuid: "x" }, { title: "no id" }],
+      body: [42, { uuid: "x", status: "ACTIVE" }, { title: "no id", status: "ACTIVE" }],
       channel: "stream",
       capturedAt: NOW,
       requestRef: "r",
@@ -685,8 +823,84 @@ describe("nav parser stub — every mapped field is declared ASSUMED; nothing is
       "missing_title",
       "missing_external_id",
     ]);
-    expect(parseNavBatch({ body: "nope", channel: "stream", capturedAt: NOW, requestRef: "r" }).bodyReason).toBe(
-      "body_not_a_list",
-    );
+    expect(
+      parseNavBatch({ body: "nope", channel: "stream", capturedAt: NOW, requestRef: "r" }).bodyReason,
+    ).toBe("body_not_a_list");
+  });
+});
+
+// ── scheduler + removal duty at store scale ─────────────────────────────────
+
+describe("the NAV scheduler is its own workflow, inert without the switch and the token", () => {
+  const wf = read(join(APP_ROOT, "..", "..", ".github", "workflows", "nav-supply-cadence.yml"));
+  const se = read(join(APP_ROOT, "..", "..", ".github", "workflows", "sweden-supply-cadence.yml"));
+
+  it("runs the canonical operator runner for nav, on a schedule, gated by var + secret", () => {
+    expect(wf).toMatch(/--provider nav\b/);
+    expect(wf).toMatch(/cron:/);
+    expect(wf).toContain("vars.VACANCY_SOURCE_NAV_ENABLED");
+    expect(wf).toContain("secrets.VACANCY_SOURCE_NAV_API_TOKEN");
+    expect(wf).toMatch(/group: nav-supply-cadence/);
+    // Sweden's workflow still cannot reach NAV, and NAV's cannot reach Sweden.
+    expect(se).not.toMatch(/--provider nav\b/);
+    expect(wf).not.toMatch(/--provider arbetsformedlingen/);
+  });
+
+  it("never echoes the token and never puts it in a command line", () => {
+    const runLines = wf
+      .split("\n")
+      .filter((l) => !/^\s*#/.test(l))
+      .filter((l) => /TOKEN/.test(l) && !/^\s+(HAS_TOKEN|VACANCY_SOURCE_NAV_API_TOKEN):/.test(l));
+    expect(runLines.join("\n")).not.toMatch(/echo|tee|--token|\$\{\{ secrets\.VACANCY_SOURCE_NAV_API_TOKEN \}\}.*\|/);
+  });
+});
+
+describe("removal duty at store scale: the dedup state is read PAGED, never as a prefix", () => {
+  it("a withdrawal of an ad held beyond the first 1,000 stored rows is still a removal", async () => {
+    enableNav(true);
+    // 2,500 stored NAV rows; the one being withdrawn sits at index 1,700.
+    const stored = Array.from({ length: 2500 }, (_, i) => ({
+      external_id: `held-${String(i).padStart(5, "0")}`,
+      content_hash: `hash-${i}`,
+    }));
+    const target = stored[1700].external_id;
+    stubFeed({ "": { items: [navEntry(target, "INACTIVE")] } });
+
+    const ranges: [number, number][] = [];
+    const chainFor = (table: string) => {
+      const chain: Record<string, unknown> = {};
+      let range: [number, number] | null = null;
+      const self = () => chain;
+      chain.select = self;
+      chain.eq = self;
+      chain.in = self;
+      chain.or = self;
+      chain.order = self;
+      chain.range = (from: number, to: number) => {
+        range = [from, to];
+        ranges.push([from, to]);
+        return chain;
+      };
+      chain.maybeSingle = () => Promise.resolve({ data: null, error: null });
+      chain.then = (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) =>
+        Promise.resolve({
+          data: table === "public_vacancies" && range ? stored.slice(range[0], range[1] + 1) : [],
+          error: null,
+        }).then(ok, err);
+      chain.upsert = () => Promise.resolve({ data: null, error: null });
+      return chain;
+    };
+    const client = { from: (t: string) => chainFor(t) as never } as never;
+    const session = await runVacancyIngestionSession(client, NAV, {
+      channel: "stream",
+      mode: "dry_run",
+      nowIso: NOW,
+    });
+    expect(ranges).toEqual([
+      [0, 999],
+      [1000, 1999],
+      [2000, 2999],
+    ]);
+    expect(session.metrics?.itemsRemoval).toBe(1);
   });
 });
