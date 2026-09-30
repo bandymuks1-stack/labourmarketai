@@ -99,7 +99,7 @@ describe("the app: RPC-first with the owner-only fallback; confirm stays the cre
 describe("the surface: the organization's needs are listed; only the creator sees the confirm act", () => {
   it("scouting reads own rows OR the active organization's rows and carries ownedByCaller", () => {
     const scouting = read(WEB, "lib", "scouting", "scouting.ts");
-    expect((scouting.match(/\.or\(`profile_id\.eq\.\$\{user\.id\},organization_id\.eq\.\$\{[a-z]+\.organizationId\}`\)/g) ?? []).length).toBe(2);
+    expect((scouting.match(/\.or\(`profile_id\.eq\.\$\{user\.id\},organization_id\.eq\.\$\{[a-z]+\.organizationId\}`\)/g) ?? []).length).toBe(3); // list, scout, shortlist write (2026-09-30)
     expect(scouting).toContain("readonly ownedByCaller: boolean;");
     expect((scouting.match(/ownedByCaller: (r|req)\.profile_id === user\.id/g) ?? []).length).toBe(2);
   });

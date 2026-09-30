@@ -33,6 +33,7 @@ import {
 } from "./confirmable";
 import { demandContextRefusal } from "./employer-context-refusal";
 import { EMPLOYER_OPERATIONS_CAPABILITIES } from "./employer-operations-capabilities";
+import { MARKETPLACE_CAPABILITIES } from "./marketplace-capabilities";
 import { EVIDENCE_IMPORT_CAPABILITIES } from "./evidence-import-capabilities";
 import { PEOPLE_INGEST_CAPABILITIES } from "./people-ingest-capabilities";
 import {
@@ -1705,6 +1706,10 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   // they work, what waits for its review — over the SAME cores and RPCs the
   // web company surfaces call (`employer-operations-capabilities.ts`).
   ...EMPLOYER_OPERATIONS_CAPABILITIES,
+  // The marketplace meeting point — candidate search and the shortlist over
+  // the SAME scouting/shortlist cores the web page runs, plus the named
+  // conditions that keep a person from being matchable or discoverable.
+  ...MARKETPLACE_CAPABILITIES,
   // Organization evidence import — the ELEVEN capabilities that give an
   // authorized assistant the same historical-import flow the web UI performs,
   // over the same domain core (`lib/organization-evidence/import-core.ts`).
