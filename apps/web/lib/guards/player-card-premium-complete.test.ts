@@ -25,7 +25,9 @@ describe("§5.2 the card carries every agreed dimension", () => {
       "professionName", // professional identity
       "player-card-availability",
       "player-card-available-from",
-      "player-card-location", // §5.2 addition
+      // §5.2 addition — since 2026-09-30 said once, in the identity stage
+      // (closed card: who, what, WHERE now), not as a chip in a lens.
+      "location={labels.locationName}",
     ]) {
       expect(CARD, marker).toContain(marker);
     }

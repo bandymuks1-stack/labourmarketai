@@ -12,6 +12,7 @@ import { provenanceTextKey, provenanceTextParams } from "@/lib/evidence/provenan
 import type { ContextWorkTime, WorkPeriodTotals } from "@/lib/journal/work-intelligence";
 import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import { buildIdentityFacts } from "@/lib/player-card/identity-facts";
+import { mobilityLabels } from "@/lib/people/person-page-labels";
 
 /**
  * One place that turns the player-card's REAL data into resolved viewer-locale
@@ -49,6 +50,10 @@ export async function buildPlayerCardLabels(
   // P6 — the provenance line's words: ONE namespace, one key per fact shape
   // (`provenanceTextKey`), so every mount of the card says the same thing.
   const tProv = await getTranslations("provenance");
+  // Mobility words already exist where the same facts are shown elsewhere
+  // (the person page, the CV export) — one wording, no new copy.
+  const tPeople = await getTranslations("people");
+  const tCvPrivate = await getTranslations("cvExport.privateDetails");
 
   const availabilityKey = card.availabilityStatus
     ? `editor.availabilityOption.${card.availabilityStatus}`
@@ -198,6 +203,15 @@ export async function buildPlayerCardLabels(
         ? (tlm(`countryNames.${card.locationCountry}`) as string)
         : card.locationCountry
       : null,
+    // MOBILITY — where the worker says they would work, and whether they
+    // would relocate. Country NAMES from the one catalogue (an unknown code
+    // stays the code, never a guess); nothing is shown for facts not given.
+    mobilityLabel: tPeople("mobility"),
+    mobilityCountries: mobilityLabels(card.preferredCountries ?? [], {
+      has: (key: string) => tlm.has(`countryNames.${key}`),
+      get: (key: string) => tlm(`countryNames.${key}`) as string,
+    }),
+    relocateLabel: card.willingToRelocate === true ? tCvPrivate("relocate") : null,
     // §5.2 DOCUMENTS — real counts only; absent when the surface is not
     // available for this account (the card then shows no documents block).
     documentsLabel: card.documents ? t("documentsLabel") : null,

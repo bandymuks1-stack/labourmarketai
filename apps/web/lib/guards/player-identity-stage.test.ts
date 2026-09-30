@@ -99,14 +99,25 @@ describe("the stage", () => {
     expect(HUB).toMatch(/\.filter\(\(h\) => h\.current\)/);
   });
 
-  it("the card transforms through its modes under ONE identity stage — IDENTITY is the whole card (the floor)", () => {
+  it("the card transforms through its modes under ONE identity stage — IDENTITY is the card CLOSED", () => {
     const MODES = read("components/app/player-card/player-card-modes.tsx");
     expect(read("lib/player-card/card-modes.ts")).toContain('["identity", "work", "skills", "evidence", "history", "next"]');
     expect(CARD).toMatch(/<PlayerCardModes/);
-    // IDENTITY renders every section, in the original order.
-    expect(CARD.replace(/\s+/g, "")).toContain(
-      "identity:(<>{secA}{secB}{secC}{secD}{secE}{secF}{secG}{secH}{secI}{secJ}</>)",
-    );
+    // Owner direction 2026-09-30 ("one central object, information opening
+    // on demand — not everything at once"): closed, the person IS the card.
+    // (Until then IDENTITY rendered every section at once — a 2 000 px wall.)
+    const flat = CARD.replace(/\s+/g, "");
+    expect(flat).toContain("identity:null,");
+    // Nothing is lost: every section is still one lens away.
+    for (const sec of ["secA", "secB", "secC", "secE", "secF", "secG", "secH", "secI", "secJ", "secEvidenceChart", "secSkillChart", "secMobility"]) {
+      const lensBody = flat.slice(flat.indexOf("identity:null,"), flat.indexOf("}}/>"));
+      expect(lensBody, `${sec} reachable through a lens`).toContain(`{${sec}}`);
+    }
+    // Each lens opens in the owner's order.
+    expect(flat).toContain("work:(<>{secJ}{secG}{secEvidenceChart}{secF}{secWorkDoor}</>)");
+    expect(flat).toContain("next:(<>{secB}{secMobility}{secA}{secI}{secNextDoor}</>)");
+    // A closed card shows no empty panel.
+    expect(MODES.replace(/\s+/g, "")).toContain("{sections[mode]?(");
     // The identity stage sits OUTSIDE the switching body — the person is the constant.
     expect(CARD.indexOf("<IdentityStage")).toBeLessThan(CARD.indexOf("<PlayerCardModes"));
     // The switcher reads nothing; the public sample never writes the URL.
