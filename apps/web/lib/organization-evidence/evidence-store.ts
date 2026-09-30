@@ -170,6 +170,12 @@ export interface EvidenceStore {
   insertRecords(rows: readonly StoreRow[]): Promise<StoreResult<readonly { readonly id: string; readonly import_row_id: string }[]>>;
   insertCompetencySignals(rows: readonly StoreRow[]): Promise<StoreResult<null>>;
   readRecord(recordId: string): Promise<StoreResult<StoreRow | null>>;
+  /** EVERY column of one record (the correction writer copies it whole). */
+  readRecordFull(recordId: string): Promise<StoreResult<StoreRow | null>>;
+  /** The record that CORRECTS this one (`correction_of = recordId`), if any. */
+  readCorrectionOf(recordId: string): Promise<StoreResult<StoreRow | null>>;
+  /** One record's lifecycle rows, oldest first. */
+  readRecordEvents(recordId: string): Promise<StoreResult<readonly StoreRow[]>>;
   /** One page of a session's records with their lifecycle rows, stable order. */
   listSessionRecords(
     sessionId: string,
@@ -390,6 +396,39 @@ export function supabaseEvidenceStore(caller: DomainCaller): EvidenceStore {
         .maybeSingle();
       if (res.error) return fail(res.error);
       return { data: (res.data as StoreRow | null) ?? null, error: null };
+    },
+
+    async readRecordFull(recordId) {
+      const res = await db()
+        .from("organization_evidence_records")
+        .select("*")
+        .eq("id", recordId)
+        .maybeSingle();
+      if (res.error) return fail(res.error);
+      return { data: (res.data as StoreRow | null) ?? null, error: null };
+    },
+
+    async readCorrectionOf(recordId) {
+      const res = await db()
+        .from("organization_evidence_records")
+        .select("id, record_fingerprint, correction_of, organization_id")
+        .eq("correction_of", recordId)
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if (res.error) return fail(res.error);
+      return { data: (res.data as StoreRow | null) ?? null, error: null };
+    },
+
+    async readRecordEvents(recordId) {
+      const res = await db()
+        .from("organization_evidence_events")
+        .select("id, event_type, actor_role, actor_profile_id, replacement_record_id, note, created_at")
+        .eq("record_id", recordId)
+        .order("created_at", { ascending: true })
+        .limit(200);
+      if (res.error) return fail(res.error);
+      return { data: (res.data ?? []) as StoreRow[], error: null };
     },
 
     async listSessionRecords(sessionId, page) {

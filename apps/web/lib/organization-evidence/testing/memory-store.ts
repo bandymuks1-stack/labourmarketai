@@ -354,6 +354,20 @@ function memoryStore(db: MemoryEvidenceDb, actor: MemoryActor): EvidenceStore {
       return ok(r ? clone(r) : null);
     },
 
+    async readRecordFull(recordId) {
+      const r = t.records.find((x) => x.id === recordId);
+      return ok(r ? clone(r) : null);
+    },
+
+    async readCorrectionOf(recordId) {
+      const r = t.records.find((x) => x.correction_of === recordId);
+      return ok(r ? clone(r) : null);
+    },
+
+    async readRecordEvents(recordId) {
+      return ok(t.recordEvents.filter((e) => e.record_id === recordId).map(clone));
+    },
+
     async listSessionRecords(sessionId, page) {
       const rows: SessionRecordWithEvents[] = t.records
         .filter((r) => r.session_id === sessionId)

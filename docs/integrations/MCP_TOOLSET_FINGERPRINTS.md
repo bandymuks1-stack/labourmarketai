@@ -18,6 +18,7 @@ equals the version the tree publishes.
 
 | Fingerprint | Tools | Release | What changed |
 |---|---|---|---|
+| `0.1.0+t63.7b5b17d3` | 63 | correction-writer PR | +evidence_record_correct, evidence_session_correct_date_provenance (insert-only correction chain; effective-leaf reading) |
 | `0.1.0+t61.f62b81d8` | 61 | file-import PR | +evidence_import_stage_file (ChatGPT file argument → the existing audited reader → `stageImportSource`; first tool with `_meta["openai/fileParams"]`) |
 | `0.1.0+t60.eaa3316a` | 60 | messaging PR | +conversation_list, conversation_get, message_send_draft, message_send_confirm |
 | `0.1.0+t56.a895a20a` | 56 | #2004 | +company_ingest_preview, company_ingest_confirm (marketplace_company_ingest capability) |

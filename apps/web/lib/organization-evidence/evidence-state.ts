@@ -225,6 +225,15 @@ export interface EvidenceStanding {
   } | null;
   /** The ONE flag counts, ranking and trust signals may read. */
   readonly independentlyVerified: boolean;
+  /**
+   * A correcting record replaced this one (a `corrected` event exists). Unlike
+   * `state`, which shows the strongest signal (a dispute outranks a
+   * correction), this can never be masked: an EFFECTIVE reading — hours,
+   * counts, timelines — counts a record only while it is NOT superseded, so a
+   * correction can never add a second copy of the same work. Permanent: a
+   * correction is never undone, it is corrected again (A -> B -> C).
+   */
+  readonly superseded: boolean;
 }
 
 function ts(v: string | null | undefined): number {
@@ -329,6 +338,7 @@ export function deriveEvidenceStanding(
     attestation,
     verification,
     independentlyVerified: countsAsIndependentlyVerified(state),
+    superseded: correctedAt > 0,
   };
 }
 

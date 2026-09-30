@@ -221,6 +221,8 @@ describe("the registry itself", () => {
       "evidence.records.list",
       "evidence.record.attest",
       "evidence.import.withdraw",
+      "evidence.record.correct",
+      "evidence.session.correct_date_provenance",
       // Organization PEOPLE ingestion (2026-09-10) — the roster half of that
       // same architecture, over `lib/organization-people/ingest-service.ts`,
       // which the web import panel calls too. Look, answer, commit: the
@@ -304,6 +306,8 @@ describe("the registry itself", () => {
       "evidence.records.list",
       "evidence.record.attest",
       "evidence.import.withdraw",
+      "evidence.record.correct",
+      "evidence.session.correct_date_provenance",
       // Organization PEOPLE ingestion (2026-09-10) — the roster half of that
       // same architecture, over `lib/organization-people/ingest-service.ts`,
       // which the web import panel calls too. Look, answer, commit: the

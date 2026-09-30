@@ -142,7 +142,9 @@ export async function readEvidenceRecordsForWorker(
       }),
     );
     const standing = deriveEvidenceStanding(r.evidence_state as ReportedEvidenceState, events);
-    if (standing.withdrawn) continue;
+    // EFFECTIVE reading: a record a correction replaced is not counted (the
+    // replacement is), so the same work never appears twice.
+    if (standing.withdrawn || standing.superseded) continue;
 
     const periodStart = (r.period_start as string | null) ?? null;
     const periodEnd = (r.period_end as string | null) ?? null;

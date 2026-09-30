@@ -13,6 +13,8 @@ import {
   buildPreview,
   committableRows,
   commitImport,
+  correctRecord,
+  correctSessionDateProvenance,
   createImportSession,
   createRosterPerson,
   listEvidenceRecords,
@@ -26,6 +28,7 @@ import {
   type EvidenceImportFailure,
 } from "@/lib/organization-evidence/import-core";
 import { resolveEvidenceOrganization } from "@/lib/organization-evidence/evidence-org-context";
+import { correctionInputSchema } from "@/lib/organization-evidence/record-correction";
 import { fetchSourceFile } from "@/lib/organization-evidence/fetch-source-file";
 import { detectHeaderLanguage } from "@/lib/organization-evidence/parse-tabular";
 import { readEvidenceSourceFile } from "@/lib/organization-evidence/read-source-file";
@@ -817,7 +820,10 @@ const recordsList: CapabilityDescriptor = {
     "at import, are never among them — `derived.timeSemantics` says how such " +
     "a period came to be), and the DERIVED standing (reported / attested / self-attested / " +
     "independently verified / withdrawn). `independentlyVerified` is true ONLY " +
-    "for a real independent verification event; a self-attestation never counts.",
+    "for a real independent verification event; a self-attestation never counts. " +
+    "EFFECTIVE reading: a record replaced by a correction is not listed — its " +
+    "replacement is, and `correctionOf` names the record it replaced — so the " +
+    "same work is never counted twice.",
   exposed: true,
   annotations: readOnly,
   inputSchema: recordsListInput,
@@ -917,6 +923,97 @@ const importWithdraw: CapabilityDescriptor = {
   },
 };
 
+// ── evidence.record.correct / evidence.session.correct_date_provenance ────
+
+const recordCorrect: CapabilityDescriptor = {
+  id: "evidence.record.correct",
+  kind: "execute",
+  title: "Correct a committed evidence record (insert-only)",
+  description:
+    "Corrects ONE committed record without touching it: the original is never edited or " +
+    "deleted. A replacement record is written (`correction_of` = the original, hash chained " +
+    "from it) and a `corrected` event (actor, reason, time, replacement) is appended to the " +
+    "original. Only the CURRENT record of a chain can be corrected (A -> B -> C); every " +
+    "effective reading — hours, counts, timelines — counts only the leaf, so the work is " +
+    "never counted twice. `derivedPatch` adds or replaces DERIVED entries (each with method " +
+    "and confidence): this is how a field the source never stated stops being reported as a " +
+    "source FACT. `overrides` may restate the date/period, hours, object or place label; the " +
+    "person, work text and source line can never change. `carryAttestation` re-attests the " +
+    "replacement as the acting organization, only when the original's attestation stands and " +
+    "no content field changed. Idempotent: repeating the same correction writes nothing new. " +
+    "A withdrawn record is reinstated first. Requires authority over the record's organization.",
+  exposed: true,
+  annotations: appendWrite,
+  inputSchema: correctionInputSchema,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = correctionInputSchema.parse(input);
+    const res = await correctRecord(caller, parsed);
+    if (res.kind !== "ok") return fail(res);
+    return {
+      ok: true,
+      data: {
+        recordId: res.recordId,
+        correctionOf: res.correctionOf,
+        eventId: res.eventId,
+        changed: res.changed,
+        attestationCarried: res.attestationCarried,
+        idempotent: res.idempotent,
+        note: res.idempotent
+          ? "This exact correction already existed; nothing new was written."
+          : "The original is unchanged and now marked corrected; the replacement is the record that stands.",
+      },
+    };
+  },
+};
+
+const sessionDatesInput = z
+  .object({
+    sessionId: z.uuid(),
+    reason: z.string().trim().min(3).max(1000),
+    /** Re-attest each replacement as the acting organization where the original's attestation stands. */
+    carryAttestation: z.boolean().optional(),
+    /** false (default) = a dry run that only counts; true writes the corrections. */
+    apply: z.boolean().optional(),
+  })
+  .strict();
+
+const sessionDatesCorrect: CapabilityDescriptor = {
+  id: "evidence.session.correct_date_provenance",
+  kind: "execute",
+  title: "Reclassify reconstructed dates of an import session as DERIVED",
+  description:
+    "For one import session: every committed record whose OWN source line says its calendar " +
+    "date was reconstructed (year + week + weekday — the `Date provenance` column) is " +
+    "corrected through evidence.record.correct so the date is recorded as DERIVED " +
+    "(`iso_week_weekday_reconstruction`, confidence 0.8), not as a stated source fact. A date " +
+    "the source explicitly stated stays a FACT, undated period records are untouched, and " +
+    "nothing is guessed: the rule re-reads what each line already said. DRY RUN BY DEFAULT — " +
+    "returns the candidate count; pass `apply: true` to write. Idempotent and resumable: a " +
+    "record already classified is not a candidate again.",
+  exposed: true,
+  annotations: appendWrite,
+  inputSchema: sessionDatesInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = sessionDatesInput.parse(input);
+    const res = await correctSessionDateProvenance(caller, parsed);
+    if (res.kind !== "ok") return fail(res);
+    return {
+      ok: true,
+      data: {
+        applied: res.applied,
+        examined: res.examined,
+        candidates: res.candidates,
+        corrected: res.corrected,
+        alreadyClassified: res.alreadyClassified,
+        failed: res.failed,
+        note: res.applied
+          ? "Corrections written; originals unchanged. Read the session back with evidence.records.list."
+          : "Dry run: nothing was written. Call again with apply: true to write the corrections.",
+      },
+    };
+  },
+};
+
 export const EVIDENCE_IMPORT_CAPABILITIES: readonly CapabilityDescriptor[] = [
   organizationResolve,
   peopleList,
@@ -932,4 +1029,6 @@ export const EVIDENCE_IMPORT_CAPABILITIES: readonly CapabilityDescriptor[] = [
   recordsList,
   recordAttest,
   importWithdraw,
+  recordCorrect,
+  sessionDatesCorrect,
 ];
