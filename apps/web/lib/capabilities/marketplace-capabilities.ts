@@ -661,6 +661,147 @@ const workerActivationQueue: CapabilityDescriptor = {
   },
 };
 
+// ── marketplace.funnel.get ─────────────────────────────────────────────────
+//
+// WHERE REAL PEOPLE STOP (owner §6, 2026-09-30). One ordered funnel over the
+// accounts `account_classifications` names `real` — never a name heuristic,
+// never test/internal accounts. Each stage is a RECORDED fact read under the
+// caller's own (admin) RLS; a stage that could not be read is null
+// (NOT_MEASURED / UNKNOWN), never 0.
+//
+// EMPLOYER_SEARCH_RESULT is NOT_MEASURED by design: the search emits counts
+// only (`match_preview_generated` carries no worker ids — privacy), so "was
+// this person ever shown to an employer" is not a recorded fact.
+
+export const FUNNEL_STAGES = [
+  "REAL_WORKER",
+  "PROFESSION_COMPLETE",
+  "COUNTRY_COMPLETE",
+  "DESIRED_COUNTRY_COMPLETE",
+  "AVAILABILITY_COMPLETE",
+  "SKILLS_COMPLETE",
+  "DISCOVERABILITY_GRANTED",
+  "MATCHABLE",
+  "DISCOVERABLE",
+  "EMPLOYER_SEARCH_RESULT",
+  "SHORTLIST",
+  "CONVERSATION",
+  "OFFER_OR_ASSIGNMENT",
+] as const;
+export type FunnelStage = (typeof FUNNEL_STAGES)[number];
+
+type ClassRow = { profile_id: string; account_class: "real" | "test" | "internal" };
+
+const funnelInput = z.object({}).strict();
+
+const marketplaceFunnel: CapabilityDescriptor = {
+  id: "marketplace.funnel.get",
+  kind: "read",
+  title: "Where real workers stop on the way to a match",
+  description:
+    "Platform administrators only. The worker activation funnel over accounts " +
+    "classified REAL (test and internal accounts are excluded and only counted " +
+    "separately; unclassified accounts are reported as UNKNOWN, never as real): " +
+    "REAL_WORKER → PROFESSION_COMPLETE → COUNTRY_COMPLETE → " +
+    "DESIRED_COUNTRY_COMPLETE → AVAILABILITY_COMPLETE → SKILLS_COMPLETE → " +
+    "DISCOVERABILITY_GRANTED → MATCHABLE → DISCOVERABLE → EMPLOYER_SEARCH_RESULT " +
+    "→ SHORTLIST → CONVERSATION → OFFER_OR_ASSIGNMENT. Each stage counts people " +
+    "for whom the fact is recorded; null = could not be measured. Writes nothing.",
+  exposed: true,
+  annotations: readOnly,
+  inputSchema: funnelInput,
+  run: async (caller): Promise<ExecResult> => {
+    const { data: admin, error: adminErr } = await asAny(caller.supabase).rpc("is_admin");
+    if (adminErr) return { ok: false, code: "unavailable", message: "The authority check failed." };
+    if (admin !== true) {
+      return { ok: false, code: "not_authorized", message: "The marketplace funnel is for platform administrators only." };
+    }
+    const { data: cls, error: clsErr } = await asAny(caller.supabase)
+      .from("account_classifications")
+      .select("profile_id, account_class");
+    if (clsErr) {
+      return clsErr.code === "42P01"
+        ? { ok: false, code: "needs_migration", message: "Account classification is not enabled on this environment." }
+        : { ok: false, code: "unavailable", message: "The account classification read failed." };
+    }
+    const classOf = new Map(((cls ?? []) as ClassRow[]).map((r) => [r.profile_id, r.account_class]));
+
+    const { data: all, error: wErr } = await asAny(caller.supabase)
+      .from("workers")
+      .select(WORKER_COLS)
+      .limit(5000);
+    if (wErr) return { ok: false, code: "unavailable", message: "The worker read failed." };
+    const workers = (all ?? []) as WorkerRow[];
+    const byClass = { real: 0, test: 0, internal: 0, unknown: 0 };
+    for (const w of workers) {
+      const c = (w.profile_id && classOf.get(w.profile_id)) || "unknown";
+      byClass[c as keyof typeof byClass] += 1;
+    }
+    const real = workers.filter((w) => w.profile_id && classOf.get(w.profile_id) === "real");
+
+    const act = await activationFor(caller, real, true);
+    if (!act.ok) return { ok: false, code: "unavailable", message: "An activation read failed." };
+    const rows = act.rows;
+    const has = (code: ActivationCode) => rows.filter((r) => !r.missing.includes(code)).length;
+    const unknownConsent = rows.some((r) => r.discoverable === null);
+
+    const ids = real.map((w) => w.id);
+    const pids = real.map((w) => w.profile_id).filter((p): p is string => !!p);
+    const countDistinct = async (table: string, column: string, values: string[]): Promise<number | null> => {
+      if (values.length === 0) return 0;
+      const { data, error } = await asAny(caller.supabase).from(table).select(column).in(column, values);
+      if (error) return null;
+      return new Set(((data ?? []) as Record<string, string>[]).map((r) => r[column])).size;
+    };
+    const [shortlisted, conversed] = await Promise.all([
+      countDistinct("demand_shortlist", "worker_id", ids),
+      countDistinct("conversation_participants", "profile_id", pids),
+    ]);
+    // An offer or an assignment — either is the relationship becoming real.
+    let offerOrAssignment: number | null = 0;
+    if (ids.length > 0) {
+      const [a, o] = await Promise.all([
+        asAny(caller.supabase).from("project_worker_assignments").select("worker_id").in("worker_id", ids),
+        asAny(caller.supabase).from("agency_candidate_offers").select("worker_id").in("worker_id", ids),
+      ]);
+      offerOrAssignment =
+        a.error || o.error
+          ? null
+          : new Set([...(a.data ?? []), ...(o.data ?? [])].map((r: { worker_id: string }) => r.worker_id)).size;
+    }
+
+    const matchable = rows.filter((r) => r.matchable).length;
+    const funnel: Record<FunnelStage, number | null> = {
+      REAL_WORKER: rows.length,
+      PROFESSION_COMPLETE: has("MISSING_PROFESSION"),
+      COUNTRY_COMPLETE: has("MISSING_CURRENT_COUNTRY"),
+      DESIRED_COUNTRY_COMPLETE: has("MISSING_PREFERRED_COUNTRY"),
+      AVAILABILITY_COMPLETE: has("MISSING_AVAILABILITY"),
+      SKILLS_COMPLETE: has("MISSING_SKILLS"),
+      DISCOVERABILITY_GRANTED: unknownConsent ? null : rows.filter((r) => r.discoverable === true).length,
+      MATCHABLE: matchable,
+      DISCOVERABLE: unknownConsent ? null : rows.filter((r) => r.matchable && r.discoverable === true).length,
+      EMPLOYER_SEARCH_RESULT: null,
+      SHORTLIST: shortlisted,
+      CONVERSATION: conversed,
+      OFFER_OR_ASSIGNMENT: offerOrAssignment,
+    };
+    return {
+      ok: true,
+      data: {
+        accountsByClass: byClass,
+        funnel,
+        notMeasured: ["EMPLOYER_SEARCH_RESULT"],
+        definitions: {
+          MATCHABLE: "profession, current country and availability are all recorded",
+          DISCOVERABLE: "matchable AND a current granted profile_discoverability consent",
+          CONVERSATION: "a participant in at least one conversation",
+        },
+      },
+    };
+  },
+};
+
 export const MARKETPLACE_CAPABILITIES: readonly CapabilityDescriptor[] = [
   candidateSearch,
   shortlistGet,
@@ -669,4 +810,5 @@ export const MARKETPLACE_CAPABILITIES: readonly CapabilityDescriptor[] = [
   shortlistRemoveDraft,
   shortlistRemoveConfirm,
   workerActivationQueue,
+  marketplaceFunnel,
 ];
