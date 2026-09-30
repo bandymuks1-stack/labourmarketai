@@ -495,7 +495,7 @@ describe("employer funnel closure — server emitters at the real write points",
   });
 
   it("a sent message emits once, after the insert returned an id, with the conversation id only", () => {
-    const src = readApp("lib/communication/actions.ts");
+    const src = readApp("lib/communication/communication-core.ts");
     const send = src.slice(
       src.indexOf("export async function sendMessage"),
       src.indexOf("export async function joinConversationAsAdmin"),

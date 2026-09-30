@@ -195,6 +195,11 @@ describe("the registry itself", () => {
       "shortlist.remove_confirm",
       "worker.activation_queue.get",
       "marketplace.funnel.get",
+      // In-app messaging (2026-09-30) over the shared communication core.
+      "conversation.list",
+      "conversation.get",
+      "message.send_draft",
+      "message.send_confirm",
       // Organization evidence import (2026-09-07) — one flow, eleven steps,
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product
@@ -269,6 +274,11 @@ describe("the registry itself", () => {
       "shortlist.remove_confirm",
       "worker.activation_queue.get",
       "marketplace.funnel.get",
+      // In-app messaging (2026-09-30) over the shared communication core.
+      "conversation.list",
+      "conversation.get",
+      "message.send_draft",
+      "message.send_confirm",
       // Organization evidence import (2026-09-07) — one flow, eleven steps,
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product

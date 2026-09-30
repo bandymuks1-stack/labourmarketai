@@ -25,7 +25,7 @@ const migration = readFileSync(join(REPO, MIG_REL), "utf8");
 const sqlNoComments = migration.replace(/^\s*--.*$/gm, "");
 
 const composer = readApp("components/app/communication-composer.tsx");
-const actions = readApp("lib/communication/actions.ts");
+const actions = readApp("lib/communication/communication-core.ts");
 const service = readApp("lib/communication/attachments.ts");
 const threadPage = readApp("app/[locale]/dashboard/communication/[conversationId]/page.tsx");
 
