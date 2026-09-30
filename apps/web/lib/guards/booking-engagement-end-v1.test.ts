@@ -1511,6 +1511,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260930110000_discovered_organizations_v1.sql",
       // owner 2026-09-30: PASVINTINIAI duplicate marked, nothing deleted.
       "20260930120000_project_duplicate_marker_v1.sql",
+      // owner 2026-09-30: continuing-business history periods (RED, GRANT on a new table).
+      "20260930130000_organization_history_periods_v1.sql",
 ]);
   });
 
