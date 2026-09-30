@@ -6,6 +6,8 @@ import { requireEmployerCompanyForCaller } from "@/lib/company/employer-company-
 import { listActiveCompanyWorkers } from "@/lib/company/company-workers";
 import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
 import { isDemandKind } from "@/lib/demand/market-direction";
+import { closeDemand, reopenDemand } from "@/lib/demand/demand-lifecycle";
+import { canCloseFrom, canReopenFrom } from "@/lib/demand/demand-lifecycle-model";
 import {
   insertProjectForCompany,
   PROJECT_TITLE_MAX,
@@ -194,6 +196,150 @@ const demandList: CapabilityDescriptor = {
     };
   },
 };
+
+// ── demand.close_* / demand.reopen_* ──────────────────────────────────────
+//
+// The SAME lifecycle the scouting page and the chat run (`closeDemand` /
+// `reopenDemand` → the gated `close_demand_v1` / `reopen_demand_v1`: the
+// creator, an admin, or a colleague with demand access on the need's
+// organization). Reopening passes the SAME open-needs plan ceiling as creating.
+
+const demandLifecycleFields = z.object({ requestId: z.string().uuid() }).strict();
+
+async function readNeedForLifecycle(
+  caller: CapabilityCaller,
+  organizationId: string,
+  requestId: string,
+): Promise<{ id: string; title: string | null; status: string | null; kind: string | null } | null> {
+  const { data } = await asAny(caller.supabase)
+    .from("customer_requests")
+    .select("id, title, status, kind")
+    .eq("id", requestId)
+    .or(`profile_id.eq.${caller.userId},organization_id.eq.${organizationId}`)
+    .maybeSingle();
+  return (data as { id: string; title: string | null; status: string | null; kind: string | null } | null) ?? null;
+}
+
+function makeDemandLifecyclePair(op: "close" | "reopen"): [CapabilityDescriptor, CapabilityDescriptor] {
+  const draftId = `demand.${op}_draft`;
+  const confirmId = `demand.${op}_confirm`;
+  const actionId = op === "close" ? "company.close-demand" : "company.reopen-demand";
+  const confirmInput = demandLifecycleFields.extend({ confirmationToken: z.string().min(10) });
+  const allowed = (status: string | null) => (op === "close" ? canCloseFrom(status) : canReopenFrom(status));
+
+  const draft: CapabilityDescriptor = {
+    id: draftId,
+    kind: "draft",
+    conversationActionId: actionId,
+    title: op === "close" ? "Draft closing a worker need" : "Draft reopening a closed worker need",
+    description:
+      (op === "close"
+        ? "Previews closing one need of the organization the caller is acting for: it leaves the worker board; its candidates and shortlist stay as history. Reversible with demand.reopen_*. "
+        : "Previews reopening a closed need: it returns to the worker board, subject to the SAME active-positions plan ceiling as creating one. ") +
+      `Returns a one-time token bound to the need's CURRENT status. NOTHING is written. Confirm with ${confirmId}.`,
+    exposed: true,
+    annotations: readOnly,
+    inputSchema: demandLifecycleFields,
+    run: async (caller, input): Promise<ExecResult> => {
+      const { requestId } = demandLifecycleFields.parse(input);
+      const employer = await employerOrRefusal(caller);
+      if (!employer.ok) return demandContextRefusal(employer.reason);
+      const need = await readNeedForLifecycle(caller, employer.organizationId, requestId);
+      if (!need || !isDemandKind(need.kind)) {
+        return { ok: false, code: "not_found", message: "No such need in the organization the caller is acting for." };
+      }
+      if (!allowed(need.status)) {
+        return {
+          ok: false,
+          code: "invalid_transition",
+          message: op === "close" ? `A need in status ${need.status} cannot be closed.` : `A need in status ${need.status} cannot be reopened.`,
+        };
+      }
+      const token = mintCapabilityConfirmation({
+        actionId: confirmId,
+        input: { requestId },
+        userId: caller.userId,
+        stateFingerprint: `demand-${op}:${employer.organizationId}:${requestId}:${need.status}`,
+      });
+      return {
+        ok: true,
+        data: {
+          preview: {
+            actingFor: employer.organizationName,
+            need: { id: need.id, title: need.title },
+            from: need.status,
+            to: op === "close" ? "closed" : "submitted",
+          },
+          confirmationToken: token,
+          note: `Nothing was written. Confirming requires ${confirmId} with this exact input and token.`,
+        },
+      };
+    },
+  };
+
+  const confirm: CapabilityDescriptor = {
+    id: confirmId,
+    kind: "confirm",
+    conversationActionId: actionId,
+    title: op === "close" ? "Confirm closing the need" : "Confirm reopening the need",
+    description:
+      "Verifies the token against the need's CURRENT status and the caller's CURRENT organization, runs the same lifecycle the web page and chat use, and reads the need back.",
+    exposed: true,
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    inputSchema: confirmInput,
+    run: async (caller, input): Promise<ExecResult> => {
+      const { confirmationToken, requestId } = confirmInput.parse(input);
+      const employer = await employerOrRefusal(caller);
+      if (!employer.ok) return demandContextRefusal(employer.reason);
+      const need = await readNeedForLifecycle(caller, employer.organizationId, requestId);
+      if (!need) return { ok: false, code: "not_found", message: "No such need in the organization the caller is acting for." };
+      const verdict = verifyCapabilityConfirmation({
+        actionId: confirmId,
+        token: confirmationToken,
+        input: { requestId },
+        userId: caller.userId,
+        currentStateFingerprint: `demand-${op}:${employer.organizationId}:${requestId}:${need.status}`,
+      });
+      if (!verdict.ok) {
+        return { ok: false, code: "confirmation_rejected", message: `Confirmation token rejected (${verdict.reason}). Draft again.` };
+      }
+      const lifecycleCaller = { supabase: caller.supabase, userId: caller.userId, organizationId: employer.organizationId };
+      const res = op === "close" ? await closeDemand(requestId, lifecycleCaller) : await reopenDemand(requestId, lifecycleCaller);
+      if (res.kind !== "ok") {
+        if (res.kind === "over-limit") {
+          return {
+            ok: false,
+            code: "over_open_need_limit",
+            message:
+              res.next === "individual_plan"
+                ? `This organization already has ${res.limit} active positions (the Organization plan ceiling). Nothing was reopened or charged.`
+                : `This organization's plan allows ${res.limit} active position(s). Close one or activate the Organization plan. Nothing was reopened or charged.`,
+          };
+        }
+        return {
+          ok: false,
+          code: res.kind === "not-owner" ? "not_authorized" : res.kind === "invalid" ? "invalid_transition" : "unavailable",
+          message: "The need's status did not change.",
+        };
+      }
+      const back = await readNeedForLifecycle(caller, employer.organizationId, requestId);
+      return {
+        ok: true,
+        data: {
+          status: op === "close" ? "closed" : "reopened",
+          actingFor: employer.organizationName,
+          requestId,
+          readBack: back ? { id: back.id, title: back.title, status: back.status } : null,
+          structuredDestination: "/dashboard/company/scouting",
+        },
+      };
+    },
+  };
+  return [draft, confirm];
+}
+
+const [demandCloseDraft, demandCloseConfirm] = makeDemandLifecyclePair("close");
+const [demandReopenDraft, demandReopenConfirm] = makeDemandLifecyclePair("reopen");
 
 // ── roster.list ────────────────────────────────────────────────────────────
 
@@ -886,6 +1032,10 @@ const journalReviewQueueGet: CapabilityDescriptor = {
  *  has, where they work, what waits for its review. */
 export const EMPLOYER_OPERATIONS_CAPABILITIES: readonly CapabilityDescriptor[] = [
   demandList,
+  demandCloseDraft,
+  demandCloseConfirm,
+  demandReopenDraft,
+  demandReopenConfirm,
   rosterList,
   projectsList,
   projectCreateDraft,
