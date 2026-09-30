@@ -154,8 +154,8 @@ export function IdentityStage({
         </div>
 
         {/* ── WHO, WHAT, WHERE, NOW ───────────────────────────────────── */}
-        <div className="flex min-w-0 items-start justify-between gap-3 self-center sm:self-start">
-            <div className="flex min-w-0 flex-col gap-1">
+        <div className="flex min-w-0 flex-wrap items-start justify-between gap-x-3 gap-y-2 self-center sm:flex-nowrap sm:self-start">
+            <div className="flex min-w-[9rem] flex-1 flex-col gap-1 [overflow-wrap:anywhere]">
               {eyebrow}
               {heading}
             </div>
@@ -225,7 +225,7 @@ export function IdentityStage({
             >
               {facts.map((f) => (
                 <div key={f.testid} className="flex min-w-0 flex-col gap-0.5" data-testid={f.testid}>
-                  <dt className="order-2 truncate font-mono text-[0.625rem] uppercase tracking-label text-text-muted sm:text-meta">
+                  <dt className="order-2 min-w-0 break-words font-mono text-[0.625rem] uppercase tracking-label text-text-muted sm:text-meta">
                     {f.label}
                   </dt>
                   <dd
