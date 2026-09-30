@@ -238,4 +238,45 @@ describe("employer operations capabilities", () => {
     const r2 = await cap("journal.review_queue.get").run(failed.caller, {});
     expect(r2.ok).toBe(false);
   });
+
+  it("project status: the lifecycle matrix refuses before any write", async () => {
+    const { caller, rpcCalls } = makeCaller({
+      projects: projectRow("org-1"),
+      project_worker_assignments: { data: [], error: null },
+    });
+    const r = await cap("project.status_set_draft").run(caller, { projectId: PROJECT, toStatus: "completed" });
+    expect(r.ok === false && r.code).toBe("invalid_transition");
+    expect(rpcCalls).toEqual([]);
+  });
+
+  it("project status: completing names the assignments it ends; a moved status voids the token", async () => {
+    const script: Record<string, Outcome> = {
+      projects: { data: { ...projectRow("org-1").data, status: "live" }, error: null },
+      project_worker_assignments: { data: [{ id: "a1" }, { id: "a2" }], error: null },
+      "rpc:set_project_status_v1": { data: { outcome: "transitioned" }, error: null },
+    };
+    const { caller, rpcCalls } = makeCaller(script);
+    const d = await cap("project.status_set_draft").run(caller, { projectId: PROJECT, toStatus: "completed" });
+    expect(d.ok).toBe(true);
+    expect(d.ok && (d.data as { preview: { endsActiveAssignments: number } }).preview.endsActiveAssignments).toBe(2);
+    const token = d.ok ? (d.data as { confirmationToken: string }).confirmationToken : "";
+
+    script.projects = { data: { ...projectRow("org-1").data, status: "paused" }, error: null };
+    const stale = await cap("project.status_set_confirm").run(caller, {
+      projectId: PROJECT,
+      toStatus: "completed",
+      confirmationToken: token,
+    });
+    expect(stale.ok === false && stale.code).toBe("confirmation_rejected");
+    expect(rpcCalls).toEqual([]);
+
+    script.projects = { data: { ...projectRow("org-1").data, status: "live" }, error: null };
+    const ok = await cap("project.status_set_confirm").run(caller, {
+      projectId: PROJECT,
+      toStatus: "completed",
+      confirmationToken: token,
+    });
+    expect(ok.ok).toBe(true);
+    expect(rpcCalls).toEqual(["set_project_status_v1"]);
+  });
 });

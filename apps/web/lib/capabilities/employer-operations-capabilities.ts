@@ -11,6 +11,12 @@ import {
   PROJECT_TITLE_MAX,
   PROJECT_TITLE_MIN,
 } from "@/lib/projects/create-project-core";
+import {
+  canTransition,
+  isTerminalStatus,
+  nextStatuses,
+  PROJECT_STATUSES,
+} from "@/lib/projects/project-lifecycle-model";
 import type { ExecResult } from "@/lib/conversation/executor-contract";
 
 import {
@@ -454,6 +460,163 @@ const projectCreateConfirm: CapabilityDescriptor = {
   },
 };
 
+// ── project.status_set_draft / project.status_set_confirm ─────────────────
+//
+// THE one lifecycle write (`set_project_status_v1`, W11): draft → live,
+// live ⇄ paused, live/paused → completed. Completing is terminal and ends the
+// project's active assignments inside the RPC (audited) — the preview says so.
+
+const projectStatusFields = z
+  .object({
+    projectId: z.string().uuid(),
+    toStatus: z.enum(PROJECT_STATUSES),
+  })
+  .strict();
+
+async function readProjectForStatus(
+  caller: CapabilityCaller,
+  employer: { companyId: string; organizationId: string },
+  projectId: string,
+): Promise<{ ok: true; project: ProjectRow; activeAssignments: number | null } | { ok: false; result: ExecResult }> {
+  const { data, error } = await asAny(caller.supabase)
+    .from("projects")
+    .select("id, title, status, country, city, start_date, end_date, company_id, organization_id")
+    .eq("id", projectId)
+    .maybeSingle();
+  if (error) return { ok: false, result: { ok: false, code: "unavailable", message: "The project read failed." } };
+  const p = data as ProjectRow | null;
+  if (!p || (p.organization_id !== employer.organizationId && p.company_id !== employer.companyId)) {
+    return {
+      ok: false,
+      result: { ok: false, code: "not_found", message: "No such project in the organization the caller is acting for." },
+    };
+  }
+  const { data: a, error: aErr } = await asAny(caller.supabase)
+    .from("project_worker_assignments")
+    .select("id")
+    .eq("project_id", p.id)
+    .eq("status", "active");
+  return { ok: true, project: p, activeAssignments: aErr ? null : ((a ?? []) as unknown[]).length };
+}
+
+const projectStatusDraft: CapabilityDescriptor = {
+  id: "project.status_set_draft",
+  kind: "draft",
+  title: "Draft changing a project's status",
+  description:
+    "Previews a project lifecycle change for a project of the organization " +
+    "the caller is acting for: draft → live (start), live ⇄ paused, " +
+    "live/paused → completed. COMPLETED IS TERMINAL and ends every active " +
+    "assignment on the project (kept as history) — the preview names how many. " +
+    "Returns a one-time token bound to the project's CURRENT status. NOTHING is written.",
+  exposed: true,
+  annotations: readOnly,
+  inputSchema: projectStatusFields,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = projectStatusFields.parse(input);
+    const employer = await employerOrRefusal(caller);
+    if (!employer.ok) return demandContextRefusal(employer.reason);
+    if (!hasOrganizationCapability(employer.role, "manage-projects")) return manageProjectsRefusal();
+    const read = await readProjectForStatus(caller, employer, parsed.projectId);
+    if (!read.ok) return read.result;
+    const from = read.project.status;
+    if (!canTransition(from, parsed.toStatus)) {
+      return {
+        ok: false,
+        code: "invalid_transition",
+        message: isTerminalStatus(from)
+          ? "This project is completed; a completed project is never reopened."
+          : `A project cannot go from ${from} to ${parsed.toStatus}. Allowed next: ${nextStatuses(from).join(", ") || "none"}.`,
+      };
+    }
+    const token = mintCapabilityConfirmation({
+      actionId: "project.status_set_confirm",
+      input: parsed,
+      userId: caller.userId,
+      stateFingerprint: `project-status:${employer.organizationId}:${read.project.id}:${from}`,
+    });
+    return {
+      ok: true,
+      data: {
+        preview: {
+          actingFor: employer.organizationName,
+          project: { id: read.project.id, title: read.project.title },
+          from,
+          to: parsed.toStatus,
+          endsActiveAssignments: parsed.toStatus === "completed" ? read.activeAssignments : 0,
+          terminal: isTerminalStatus(parsed.toStatus),
+        },
+        confirmationToken: token,
+        note: "Nothing was written. Confirming requires project.status_set_confirm with this exact input and token.",
+      },
+    };
+  },
+};
+
+const projectStatusConfirmInput = projectStatusFields.extend({ confirmationToken: z.string().min(10) });
+
+const projectStatusConfirm: CapabilityDescriptor = {
+  id: "project.status_set_confirm",
+  kind: "confirm",
+  title: "Confirm the project status change",
+  description:
+    "Verifies the token against the exact input, the caller's CURRENT " +
+    "organization and the project's CURRENT status, then performs the one " +
+    "canonical lifecycle write (the same the project page uses; the database " +
+    "decides authority and records the audit) and reads the project back.",
+  exposed: true,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: projectStatusConfirmInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const { confirmationToken, ...parsed } = projectStatusConfirmInput.parse(input);
+    const employer = await employerOrRefusal(caller);
+    if (!employer.ok) return demandContextRefusal(employer.reason);
+    if (!hasOrganizationCapability(employer.role, "manage-projects")) return manageProjectsRefusal();
+    const read = await readProjectForStatus(caller, employer, parsed.projectId);
+    if (!read.ok) return read.result;
+    const verdict = verifyCapabilityConfirmation({
+      actionId: "project.status_set_confirm",
+      token: confirmationToken,
+      input: parsed,
+      userId: caller.userId,
+      currentStateFingerprint: `project-status:${employer.organizationId}:${read.project.id}:${read.project.status}`,
+    });
+    if (!verdict.ok) {
+      return { ok: false, code: "confirmation_rejected", message: `Confirmation token rejected (${verdict.reason}). Draft again.` };
+    }
+    const { data, error } = await asAny(caller.supabase).rpc("set_project_status_v1", {
+      p_project_id: parsed.projectId,
+      p_status: parsed.toStatus,
+    });
+    if (error) return rpcFailure(error);
+    const outcome = String((data as { outcome?: string } | null)?.outcome ?? "");
+    if (outcome !== "transitioned" && outcome !== "already_in_state") {
+      return {
+        ok: false,
+        code: outcome === "not_authorized" ? "not_authorized" : outcome === "not_found" ? "not_found" : "invalid_transition",
+        message: `The lifecycle write answered: ${outcome || "unknown"}. Nothing changed.`,
+      };
+    }
+    const back = await readProjectForStatus(caller, employer, parsed.projectId);
+    return {
+      ok: true,
+      data: {
+        status: outcome,
+        actingFor: employer.organizationName,
+        readBack: back.ok
+          ? { id: back.project.id, title: back.project.title, status: back.project.status, activeAssignments: back.activeAssignments }
+          : null,
+        structuredDestination: `/dashboard/projects/${parsed.projectId}/operations`,
+      },
+    };
+  },
+};
+
 // ── assignment.* ───────────────────────────────────────────────────────────
 
 const assignmentFields = z
@@ -727,6 +890,8 @@ export const EMPLOYER_OPERATIONS_CAPABILITIES: readonly CapabilityDescriptor[] =
   projectsList,
   projectCreateDraft,
   projectCreateConfirm,
+  projectStatusDraft,
+  projectStatusConfirm,
   assignmentCreateDraft,
   assignmentCreateConfirm,
   assignmentEndDraft,
