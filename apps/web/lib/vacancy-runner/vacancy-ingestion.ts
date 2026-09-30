@@ -130,35 +130,52 @@ async function loadDedupState(
   client: VacancyDbClient,
   providerKey: string,
 ): Promise<VacancyDedupState> {
-  const { data, error } = await client
-    .from("public_vacancies")
-    .select("external_id, content_hash")
-    .eq("provider_key", providerKey);
-
-  if (error) {
-    // A missing table (owner has not applied the migration) is a legitimate
-    // empty store, not an exception — the importer then treats everything as
-    // new, which is exactly right for a first run.
-    if (error.code === "42P01") {
-      return {
-        knownContentHashes: new Set(),
-        knownIdentityHashes: new Map(),
-      };
-    }
-    throw new Error(`dedup_state_read_failed:${error.code ?? "unknown"}`);
-  }
-
+  // PAGED. PostgREST answers at most `max_rows` (1,000 by default) per request,
+  // and a single unpaged select silently returns a PREFIX of the store: every
+  // stored ad beyond it would then look "unheld", so its withdrawal would be
+  // classified as a replay and never applied. That is the removal duty broken
+  // without an error. Keyset order on the unique (provider_key, external_id)
+  // key makes each page stable.
+  const PAGE = 1000;
+  const MAX_PAGES = 1000;
   const hashes = new Set<string>();
   const identities = new Map<string, string>();
-  for (const row of data ?? []) {
-    const r = row as { external_id: string; content_hash: string };
-    hashes.add(r.content_hash);
-    identities.set(
-      vacancyIdentityKey(providerKey as never, r.external_id),
-      r.content_hash,
-    );
+  for (let page = 0; page < MAX_PAGES; page += 1) {
+    const { data, error } = await client
+      .from("public_vacancies")
+      .select("external_id, content_hash")
+      .eq("provider_key", providerKey)
+      .order("external_id", { ascending: true })
+      .range(page * PAGE, page * PAGE + PAGE - 1);
+
+    if (error) {
+      // A missing table (owner has not applied the migration) is a legitimate
+      // empty store, not an exception — the importer then treats everything as
+      // new, which is exactly right for a first run.
+      if (error.code === "42P01") {
+        return {
+          knownContentHashes: new Set(),
+          knownIdentityHashes: new Map(),
+        };
+      }
+      throw new Error(`dedup_state_read_failed:${error.code ?? "unknown"}`);
+    }
+
+    const rows = data ?? [];
+    for (const row of rows) {
+      const r = row as { external_id: string; content_hash: string };
+      hashes.add(r.content_hash);
+      identities.set(
+        vacancyIdentityKey(providerKey as never, r.external_id),
+        r.content_hash,
+      );
+    }
+    if (rows.length < PAGE) {
+      return { knownContentHashes: hashes, knownIdentityHashes: identities };
+    }
   }
-  return { knownContentHashes: hashes, knownIdentityHashes: identities };
+  // An incomplete state must never be used: fail the session closed.
+  throw new Error("dedup_state_read_failed:too_many_rows");
 }
 
 /** One provider, one channel, one session. Never throws — every failure is a

@@ -3091,7 +3091,7 @@
         "statGovLt": "Officiel statistik; kildeangivelse påkrævet; aktivering afventer ejerens bekræftelse.",
         "eurostat": "Officiel EU-statistik; kildeangivelse påkrævet; aktivering afventer ejerens bekræftelse.",
         "arbetsformedlingen": "Aktiv kilde. Brugsvilkår bekræftet: en gratis offentlig datakilde (CC0). Kilden vises ved hver annonce, og hver annonce linker tilbage til det oprindelige opslag.",
-        "nav": "Foreslået kilde. NAV's API-vilkår tillader genudgivelse med løbende forpligtelser: en tilbagetrukket annonce skal fjernes med det samme, en opdateret annonce skal opdateres med det samme, og ansøgningslinket skal føre til den oprindelige annonce. Accept af vilkårene og et token kræver ejerens handling — intet hentes i dag.",
+        "nav": "Aktiv kilde. NAV's API-vilkår er accepteret, og adgang er givet. De løbende pligter overholdes: et tilbagetrukket opslag fjernes straks, et opdateret opslag genopfriskes hurtigt, og ansøgningslinket fører til det oprindelige opslag.",
         "cvbankas": "Kun et forslag — brugstilladelse ubekræftet; blandes aldrig med interne tal.",
         "eures": "Foreslået kilde. Brugsvilkår endnu ikke gennemgået — aktivering kræver ejerens bekræftelse. Intet hentes i dag.",
         "uztLt": "Foreslået kilde. Brugsvilkår endnu ikke gennemgået — aktivering kræver ejerens bekræftelse. Intet hentes i dag."

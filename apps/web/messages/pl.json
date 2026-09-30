@@ -12297,7 +12297,7 @@
         "statGovLt": "Statystyka urzędowa; wymagane wskazanie źródła; aktywacja czeka na potwierdzenie właściciela.",
         "eurostat": "Urzędowa statystyka UE; wymagane wskazanie źródła; aktywacja czeka na potwierdzenie właściciela.",
         "arbetsformedlingen": "Aktywne źródło. Warunki użytkowania potwierdzone: bezpłatne publiczne źródło danych (CC0). Przy każdym ogłoszeniu podawane jest źródło, a ogłoszenie prowadzi do oryginalnej publikacji.",
-        "nav": "Źródło zaproponowane. Warunki API NAV zezwalają na ponowną publikację z bieżącymi obowiązkami: wycofane ogłoszenie musi zostać natychmiast usunięte, zaktualizowane — natychmiast odświeżone, a link do aplikowania musi prowadzić do pierwotnego ogłoszenia. Akceptacja warunków i uzyskanie tokenu wymagają działania właściciela — dziś nic nie jest pobierane.",
+        "nav": "Aktywne źródło. Warunki API NAV zostały zaakceptowane, dostęp przyznano. Stałe obowiązki są realizowane: wycofane ogłoszenie jest natychmiast usuwane, zmienione – szybko aktualizowane, a aplikowanie prowadzi do oryginalnego ogłoszenia.",
         "cvbankas": "Tylko propozycja — zgoda na użycie niepotwierdzona; nigdy nie mieszane z liczbami wewnętrznymi.",
         "eures": "Źródło zaproponowane. Warunki użytkowania nie zostały jeszcze sprawdzone — aktywacja wymaga potwierdzenia właściciela. Dziś nic nie jest pobierane.",
         "uztLt": "Źródło zaproponowane. Warunki użytkowania nie zostały jeszcze sprawdzone — aktywacja wymaga potwierdzenia właściciela. Dziś nic nie jest pobierane."

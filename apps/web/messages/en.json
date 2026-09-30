@@ -12297,7 +12297,7 @@
         "statGovLt": "Official statistics; attribution required; activation awaits owner confirmation.",
         "eurostat": "Official EU statistics; attribution required; activation awaits owner confirmation.",
         "arbetsformedlingen": "Active source. Usage terms confirmed: a free public data source (CC0). Attribution is shown with every advertisement, and each advertisement links back to the original posting.",
-        "nav": "Proposed source. NAV's API terms permit republication with ongoing duties: a withdrawn advertisement must be removed immediately, an updated one refreshed immediately, and the apply link must lead to the original posting. Accepting the terms and obtaining a token require owner action — nothing is fetched today.",
+        "nav": "Active source. NAV's API terms are accepted and production access is granted. Ongoing duties are applied: a withdrawn advertisement is removed immediately, an updated one is refreshed promptly, and the apply link leads to the original posting.",
         "cvbankas": "Proposal only — usage permission unconfirmed; never blended with internal figures.",
         "eures": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today.",
         "uztLt": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today."

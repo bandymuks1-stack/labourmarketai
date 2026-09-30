@@ -12297,7 +12297,7 @@
         "statGovLt": "Amtliche Statistik; Quellenangabe erforderlich; Aktivierung wartet auf Bestätigung des Eigentümers.",
         "eurostat": "Amtliche EU-Statistik; Quellenangabe erforderlich; Aktivierung wartet auf Bestätigung des Eigentümers.",
         "arbetsformedlingen": "Aktive Quelle. Nutzungsbedingungen bestätigt: eine kostenlose öffentliche Datenquelle (CC0). Bei jeder Anzeige wird die Quelle genannt, und jede Anzeige verlinkt zurück auf die Originalveröffentlichung.",
-        "nav": "Vorgeschlagene Quelle. Die API-Bedingungen von NAV erlauben die Weiterveröffentlichung mit laufenden Pflichten: Eine zurückgezogene Anzeige muss sofort entfernt, eine aktualisierte sofort aktualisiert werden, und der Bewerbungslink muss zur ursprünglichen Anzeige führen. Die Annahme der Bedingungen und ein Token erfordern eine Handlung des Inhabers — heute wird nichts abgerufen.",
+        "nav": "Aktive Quelle. Die API-Bedingungen von NAV sind akzeptiert und der Zugang ist erteilt. Die laufenden Pflichten werden umgesetzt: Eine zurückgezogene Anzeige wird sofort entfernt, eine geänderte zeitnah aktualisiert, und die Bewerbung führt zur Originalanzeige.",
         "cvbankas": "Nur ein Vorschlag — Nutzungserlaubnis unbestätigt; wird nie mit internen Zahlen vermischt.",
         "eures": "Vorgeschlagene Quelle. Nutzungsbedingungen noch nicht geprüft — die Aktivierung erfordert die Bestätigung des Inhabers. Heute wird nichts abgerufen.",
         "uztLt": "Vorgeschlagene Quelle. Nutzungsbedingungen noch nicht geprüft — die Aktivierung erfordert die Bestätigung des Inhabers. Heute wird nichts abgerufen."

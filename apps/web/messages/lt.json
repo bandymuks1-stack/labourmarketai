@@ -12297,7 +12297,7 @@
         "statGovLt": "Oficiali statistika; būtina nuoroda į šaltinį; aktyvavimas laukia savininko patvirtinimo.",
         "eurostat": "Oficiali ES statistika; būtina nuoroda į šaltinį; aktyvavimas laukia savininko patvirtinimo.",
         "arbetsformedlingen": "Aktyvus šaltinis. Naudojimo sąlygos patvirtintos: nemokamas viešas duomenų šaltinis (CC0). Prie kiekvieno skelbimo nurodomas šaltinis, o skelbimas veda atgal į originalų skelbimą.",
-        "nav": "Siūlomas šaltinis. NAV API sąlygos leidžia pakartotinai skelbti su nuolatinėmis pareigomis: atšauktas skelbimas turi būti pašalintas nedelsiant, atnaujintas — atnaujintas nedelsiant, o kandidatavimo nuoroda turi vesti į pirminį skelbimą. Sąlygų priėmimas ir prieigos raktas reikalauja savininko veiksmo — šiandien niekas neatsiunčiama.",
+        "nav": "Aktyvus šaltinis. NAV API sąlygos priimtos, gauta prieiga. Nuolatiniai įsipareigojimai vykdomi: pašalintas skelbimas iškart išimamas, atnaujintas – greitai atnaujinamas, o paraiška nukreipiama į originalų skelbimą.",
         "cvbankas": "Tik pasiūlymas — naudojimo leidimas nepatvirtintas; niekada nemaišoma su vidiniais skaičiais.",
         "eures": "Siūlomas šaltinis. Naudojimo sąlygos dar neperžiūrėtos — aktyvavimui reikia savininko patvirtinimo. Šiandien niekas neatsiunčiama.",
         "uztLt": "Siūlomas šaltinis. Naudojimo sąlygos dar neperžiūrėtos — aktyvavimui reikia savininko patvirtinimo. Šiandien niekas neatsiunčiama."
