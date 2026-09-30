@@ -1,7 +1,4 @@
-import { createHash } from "node:crypto";
-
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { resolveApiIdentity } from "@/lib/api/api-identity";
 import {
@@ -23,6 +20,7 @@ import {
   type McpToolDef,
 } from "@/lib/mcp/protocol";
 import { localeFromAcceptLanguage } from "@/lib/mcp/accept-language";
+import { toolDefsOf, toolName, toolsetVersionOf } from "@/lib/mcp/toolset";
 import { summarizeCapabilityResult } from "@/lib/capabilities/presentation";
 
 export const runtime = "nodejs";
@@ -71,8 +69,6 @@ function logEvent(event: Parameters<typeof serializeAuthEvent>[0]): void {
   }
 }
 
-/** MCP tool names allow [a-zA-Z0-9_-]; capability ids use dots. */
-const toolName = (capabilityId: string): string => capabilityId.replace(/\./g, "_");
 
 /**
  * The tool list is DERIVED FROM THE REGISTRY AND CONSTANT for the lifetime of
@@ -91,15 +87,7 @@ let TOOL_DEFS: McpToolDef[] | null = null;
 
 function toolDefs(): McpToolDef[] {
   if (TOOL_DEFS) return TOOL_DEFS;
-  TOOL_DEFS = exposedCapabilities().map((c) => ({
-    name: toolName(c.id),
-    title: c.title,
-    description: c.description,
-    inputSchema: z.toJSONSchema(c.inputSchema) as Record<string, unknown>,
-    // Honest behavior hints declared per capability in review — clients can
-    // tell reads from writes without parsing prose.
-    annotations: c.annotations,
-  }));
+  TOOL_DEFS = toolDefsOf(exposedCapabilities());
   return TOOL_DEFS;
 }
 
@@ -129,26 +117,11 @@ function capabilityIdForTool(name: string): string | undefined {
  * decision — see docs/integrations/CHATGPT_MCP_CLIENT_V1.md for what remains
  * an owner action inside ChatGPT itself.
  */
-/**
- * THE PUBLISHED TOOLSET, AS A VERSION. The server is stateless streamable
- * HTTP, so it cannot push `notifications/tools/list_changed`
- * (`listChanged: false` is the honest declaration). What it CAN do is make a
- * changed toolset visible in the one identity field every client reads on
- * connect: `0.1.0+t<count>.<hash>` changes exactly when a deploy adds,
- * removes or re-describes a tool, so a client (or a person comparing what
- * ChatGPT shows with what the server serves) can tell a stale snapshot from
- * a current one. Semver build metadata — ignored for precedence by design.
- */
+/** The published toolset as a version (`lib/mcp/toolset.ts`), memoized. */
 let TOOLSET_VERSION: string | null = null;
 
 function toolsetVersion(): string {
-  if (TOOLSET_VERSION) return TOOLSET_VERSION;
-  const defs = toolDefs();
-  const digest = createHash("sha256")
-    .update(JSON.stringify(defs.map((d) => [d.name, d.description, d.inputSchema, d.annotations])))
-    .digest("hex")
-    .slice(0, 8);
-  TOOLSET_VERSION = `0.1.0+t${defs.length}.${digest}`;
+  if (!TOOLSET_VERSION) TOOLSET_VERSION = toolsetVersionOf(toolDefs());
   return TOOLSET_VERSION;
 }
 
