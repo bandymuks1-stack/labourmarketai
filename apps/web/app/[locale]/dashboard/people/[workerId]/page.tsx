@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
+import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
 import { deriveEvidenceTier } from "@/lib/evidence/evidence-tier";
 import { Card } from "@/components/ui/Card";
 import { MessageButton } from "@/components/app/message-button";
@@ -197,9 +198,13 @@ export default async function PersonPage({
   // everywhere except on a person's own page: the photos on the author's own
   // gallery, the offerings on the provider's own list and on the ORGANIZATION
   // public page. Both reads are RLS-scoped and neither is a second store.
-  const [workPhotos, offerings] = await Promise.all([
+  // D1 (owner 2026-09-30): the worker's own photo, only for a viewer with a
+  // REAL work relationship with them — decided by the database
+  // (worker_avatar_path_v1), not by a manager role or a discoverable profile.
+  const [workPhotos, offerings, avatarUrl] = await Promise.all([
     readWorkPhotosFor((worker.profile_id as string | null) ?? ""),
     listActiveOfferingsByProvider((worker.profile_id as string | null) ?? ""),
+    getAvatarForVisibleWorker(worker.id as string),
   ]);
 
   /**
@@ -279,7 +284,7 @@ export default async function PersonPage({
             entries — the scoped figures stay in the work-in-numbers section. */}
         <IdentityStage
           name={name}
-          avatarUrl={null}
+          avatarUrl={avatarUrl}
           initials={
             name
               .trim()

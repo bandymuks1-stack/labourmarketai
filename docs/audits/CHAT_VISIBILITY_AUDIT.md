@@ -390,3 +390,17 @@ audit.
   `not_configured` before the key is touched. Touches no chat table. Pinned
   in the `chat-visibility-rls.test.ts` caller inventory. Contract:
   `docs/integrations/NONSTOP_COMMERCIAL_HANDOFF_V1.md`.
+- **2026-09-30 — `lib/profile/avatar.ts` `getAvatarForVisibleWorker()`**
+  (owner decision D1: a worker's profile photo for the people who have a
+  REAL work relationship with them). The service key is used for ONE
+  operation only — `storage.createSignedUrl(path, 3600)` on the private
+  `profile-avatars` bucket — and only for a path the database has just
+  returned to the VIEWER's own session through the SECURITY DEFINER RPC
+  `worker_avatar_path_v1` (migration `20260930133500`, RED, owner-gated):
+  the worker themselves, or an ACTIVE company roster / agency roster /
+  engagement in a managed organization / assignment on a manageable
+  project. The discovery-consent branch of `can_view_worker()` is
+  deliberately NOT a basis, and a role alone never is. The path must lie in
+  the worker's own `<profile_id>/` folder. No table read with the key, no
+  chat table, no write, nothing public; any failure → the initials
+  monogram. Pinned in the `chat-visibility-rls.test.ts` caller inventory.
