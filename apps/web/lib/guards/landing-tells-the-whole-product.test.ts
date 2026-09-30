@@ -405,17 +405,24 @@ describe("§22 the first screen says what this is, then offers one next step", (
 
   it("the page mounts the pair once in the hero and once as the closing band", () => {
     const focus = read("app/[locale]/focus-landing/focus-landing.tsx");
-    const hero = focus.slice(
-      // The entry hero section (owner decision 2026-09-29: the hero became a
-      // two-column entry with the product story; the pair rule is unchanged).
-      focus.indexOf('<section className="grid gap-8 lg:grid-cols-2'),
-      focus.indexOf("</section>"),
-    );
-    expect(hero.match(/<LandingPrimaryActions\b/g) ?? []).toHaveLength(1);
-    expect(hero).toContain('surface="landing_hero"');
-    // The pair sits OUTSIDE the entry, so the entry's own door scan
-    // (landing-mobile-overflow.spec) still measures only the entry's doors.
-    expect(hero.indexOf("<LandingPrimaryActions")).toBeLessThan(hero.indexOf("<PublicEntry"));
+    // Owner directive 2026-09-29 (living worker hero): the pair lives in ONE
+    // `promise` element that whichever hero is shown renders — the living
+    // worker hero over its photographs, or the entry hero without them. The
+    // rule is unchanged: mounted once, as `landing_hero`, before the entry.
+    const bodyStart = focus.lastIndexOf("<NextIntlClientProvider"); // the tag, not a comment naming it
+    const promise = focus.slice(focus.indexOf("const promise = ("), bodyStart);
+    expect(promise.match(/<LandingPrimaryActions\b/g) ?? []).toHaveLength(1);
+    expect(promise).toContain('surface="landing_hero"');
+    // the hero pair exists exactly once in the file; the closing band is its own component
+    expect(focus.match(/<LandingPrimaryActions\b/g) ?? []).toHaveLength(1);
+    const body = focus.slice(bodyStart);
+    // each hero branch renders the promise before the working entry
+    for (const branch of [body.indexOf("<LivingWorkerHero"), body.indexOf('<section className="grid gap-8 lg:grid-cols-2')]) {
+      expect(branch).toBeGreaterThan(-1);
+      const from = body.slice(branch);
+      expect(from.indexOf("{promise}")).toBeGreaterThan(-1);
+      expect(from.indexOf("{promise}")).toBeLessThan(from.indexOf("<PublicEntry"));
+    }
     expect(focus.indexOf("<LandingClosingBand")).toBeGreaterThan(focus.indexOf("<TrustBand"));
     // And still no per-request read: the landing stays static.
     const code = focus.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");

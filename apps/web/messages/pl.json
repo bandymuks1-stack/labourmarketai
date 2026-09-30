@@ -17509,5 +17509,130 @@
       "pause": "Wstrzymaj",
       "steps": "Kroki historii"
     }
+  },
+  "livingWorkerHero": {
+    "sampleLabel": "Przykład",
+    "pause": "Pauza",
+    "play": "Odtwórz",
+    "next": "Następny moment",
+    "previous": "Poprzedni moment",
+    "cardLabel": "Karta zawodowa",
+    "cardNote": "Prawdziwa historia pracy, która podróżuje razem z człowiekiem.",
+    "cardSections": {
+      "work": "Prawdziwa praca",
+      "capability": "Umiejętności z pracy",
+      "mobility": "Geografia pracy",
+      "path": "Ścieżka zawodowa",
+      "history": "Historia pracy",
+      "now": "teraz",
+      "next": "dalej",
+      "more": "Więcej o pracy"
+    },
+    "personas": {
+      "tomas": {
+        "identity": {
+          "place": "Bergen, Norwegia",
+          "stats": "2 lata|doświadczenia · 3|budowy · 1 860 godz.|w dzienniku pracy",
+          "history": "2023|Wilno|Rusztowania na fasadzie Starego Miasta · 2024|Wilno|Renowacja bloku mieszkalnego · 2025|Bergen|Osiedle mieszkaniowe",
+          "progression": "Monter rusztowań · Specjalista budowlany · Brygadzista · Właściciel firmy",
+          "next": "Otwarty na pracę w Norwegii i Szwecji"
+        },
+        "stages": {
+          "base": {
+            "alt": "Tomas K. w ciemnym studiu",
+            "caption": "Tomas K., 29 lat, Wilno."
+          },
+          "tool": {
+            "alt": "Tomas K. z kluczem do rusztowań i szelkami bezpieczeństwa",
+            "caption": "Pierwsze narzędzie: klucz do rusztowań."
+          },
+          "site-lt": {
+            "alt": "Tomas K. pracuje na rusztowaniu na starówce w Wilnie",
+            "caption": "Rusztowanie, starówka w Wilnie."
+          },
+          "van": {
+            "alt": "Tomas K. przy busie roboczym rano",
+            "caption": "Na budowę busem, 6:40."
+          },
+          "country-no": {
+            "alt": "Tomas K. na budowie nad fiordem w Norwegii",
+            "caption": "Bergen, Norwegia.",
+            "card": {
+              "profession": "Monter rusztowań",
+              "country": "Norwegia",
+              "skills": "Montaż rusztowań · Praca na wysokości · Plan BHP",
+              "path": "Wilno → Bergen",
+              "experience": "2 lata doświadczenia",
+              "places": "3 budowy"
+            }
+          },
+          "specialist": {
+            "alt": "Tomas K. czyta rysunki na budowie w Sztokholmie",
+            "caption": "Trzy lata później — specjalista budowlany, Sztokholm."
+          },
+          "foreman": {
+            "alt": "Tomas K. z tabletem, za nim pracuje jego brygada",
+            "caption": "Brygadzista: zespół czterech osób."
+          },
+          "owner": {
+            "alt": "Tomas K. w biurze swojej firmy przy planach budów",
+            "caption": "Własna firma budowlana.",
+            "team": "14 osób · 3 budowy · Ten tydzień: 540 godz."
+          }
+        }
+      },
+      "rasa": {
+        "identity": {
+          "place": "Oslo, Norwegia",
+          "stats": "3 lata|w kuchni · 2|restauracje · 2 400 godz.|w dzienniku pracy",
+          "history": "2022|Wilno|Kuchnia restauracji, przygotowanie · 2023|Wilno|Gorąca linia · 2025|Oslo|Restauracja nordycka",
+          "progression": "Pomoc kuchenna · Kucharka · Szefowa kuchni · Właścicielka restauracji",
+          "next": "Otwarta na pracę w Norwegii"
+        },
+        "stages": {
+          "base": {
+            "alt": "Rasa J. w ciemnym studiu",
+            "caption": "Rasa J., 27 lat, Wilno."
+          },
+          "tool": {
+            "alt": "Rasa J. z nożem kuchennym i deską",
+            "caption": "Pierwsze narzędzie: nóż kuchenny."
+          },
+          "kitchen-lt": {
+            "alt": "Rasa J. pracuje w kuchni restauracji w Wilnie",
+            "caption": "Pomoc kuchenna, Wilno."
+          },
+          "car": {
+            "alt": "Rasa J. przy samochodzie wczesnym rankiem",
+            "caption": "Do pracy, wcześnie rano."
+          },
+          "country-no": {
+            "alt": "Rasa J. przy wydawce restauracji w Oslo",
+            "caption": "Oslo, Norwegia.",
+            "card": {
+              "profession": "Kucharka",
+              "country": "Norwegia",
+              "skills": "Gotowanie · Wydawanie · Higiena kuchni",
+              "path": "Wilno → Oslo",
+              "experience": "3 lata w kuchni",
+              "places": "2 restauracje"
+            }
+          },
+          "cook": {
+            "alt": "Rasa J. przy kuchence w restauracji w Oslo",
+            "caption": "Zawodowa kucharka."
+          },
+          "head-chef": {
+            "alt": "Rasa J. kieruje brygadą kucharzy",
+            "caption": "Szefowa kuchni: brygada czterech osób."
+          },
+          "owner": {
+            "alt": "Rasa J. na sali własnej restauracji przed serwisem",
+            "caption": "Własna restauracja.",
+            "team": "12 osób · 2 zmiany · Ten tydzień: 420 godz."
+          }
+        }
+      }
+    }
   }
 }

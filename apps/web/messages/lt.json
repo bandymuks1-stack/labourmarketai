@@ -17509,5 +17509,130 @@
       "pause": "Sustabdyti",
       "steps": "Istorijos žingsniai"
     }
+  },
+  "livingWorkerHero": {
+    "sampleLabel": "Pavyzdys",
+    "pause": "Pauzė",
+    "play": "Rodyti",
+    "next": "Kitas momentas",
+    "previous": "Ankstesnis momentas",
+    "cardLabel": "Profesinė kortelė",
+    "cardNote": "Tikra darbo istorija keliauja kartu su žmogumi.",
+    "cardSections": {
+      "work": "Realus darbas",
+      "capability": "Gebėjimai iš darbo",
+      "mobility": "Darbo geografija",
+      "path": "Profesinis kelias",
+      "history": "Darbo istorija",
+      "now": "dabar",
+      "next": "toliau",
+      "more": "Daugiau apie darbą"
+    },
+    "personas": {
+      "tomas": {
+        "identity": {
+          "place": "Bergenas, Norvegija",
+          "stats": "2 m.|darbo patirties · 3|objektai · 1 860 val.|darbo žurnale",
+          "history": "2023|Vilnius|Senamiesčio fasado pastoliai · 2024|Vilnius|Daugiabučio renovacija · 2025|Bergenas|Gyvenamųjų namų kvartalas",
+          "progression": "Pastolininkas · Statybų specialistas · Brigadininkas · Įmonės vadovas",
+          "next": "Atviras darbui Norvegijoje ir Švedijoje"
+        },
+        "stages": {
+          "base": {
+            "alt": "Tomas K. stovi tamsioje studijoje",
+            "caption": "Tomas K., 29 m., Vilnius."
+          },
+          "tool": {
+            "alt": "Tomas K. su pastolių raktu ir saugos diržais",
+            "caption": "Pirmasis įrankis: pastolių raktas."
+          },
+          "site-lt": {
+            "alt": "Tomas K. dirba ant pastolių Vilniaus senamiestyje",
+            "caption": "Pastoliai, Vilniaus senamiestis."
+          },
+          "van": {
+            "alt": "Tomas K. prie darbo furgono ryte",
+            "caption": "Į objektą — darbo furgonu, 6:40."
+          },
+          "country-no": {
+            "alt": "Tomas K. statybvietėje prie fjordo Norvegijoje",
+            "caption": "Bergenas, Norvegija.",
+            "card": {
+              "profession": "Pastolininkas",
+              "country": "Norvegija",
+              "skills": "Pastolių montavimas · Darbas aukštyje · Saugos planas",
+              "path": "Vilnius → Bergenas",
+              "experience": "2 m. darbo patirties",
+              "places": "3 objektai"
+            }
+          },
+          "specialist": {
+            "alt": "Tomas K. skaito brėžinius statybvietėje Stokholme",
+            "caption": "Po trejų metų — statybų specialistas, Stokholmas."
+          },
+          "foreman": {
+            "alt": "Tomas K. su planšete, už jo dirba jo brigada",
+            "caption": "Brigadininkas: keturių žmonių komanda."
+          },
+          "owner": {
+            "alt": "Tomas K. savo įmonės biure prie objektų planų",
+            "caption": "Savo statybų įmonė.",
+            "team": "14 žmonių · 3 objektai · Ši savaitė: 540 val."
+          }
+        }
+      },
+      "rasa": {
+        "identity": {
+          "place": "Oslas, Norvegija",
+          "stats": "3 m.|virtuvėje · 2|restoranai · 2 400 val.|darbo žurnale",
+          "history": "2022|Vilnius|Restorano virtuvė, paruošimas · 2023|Vilnius|Karštoji linija · 2025|Oslas|Šiaurietiškos virtuvės restoranas",
+          "progression": "Virtuvės pagalbininkė · Virėja · Vyriausioji virėja · Restorano savininkė",
+          "next": "Atvira darbui Norvegijoje"
+        },
+        "stages": {
+          "base": {
+            "alt": "Rasa J. stovi tamsioje studijoje",
+            "caption": "Rasa J., 27 m., Vilnius."
+          },
+          "tool": {
+            "alt": "Rasa J. su virtuvės peiliu ir pjaustymo lenta",
+            "caption": "Pirmasis įrankis: virtuvės peilis."
+          },
+          "kitchen-lt": {
+            "alt": "Rasa J. dirba restorano virtuvėje Vilniuje",
+            "caption": "Virtuvės pagalbininkė, Vilnius."
+          },
+          "car": {
+            "alt": "Rasa J. prie automobilio ankstyvą rytą",
+            "caption": "Į darbą — anksti ryte."
+          },
+          "country-no": {
+            "alt": "Rasa J. prie restorano išdavimo stalo Osle",
+            "caption": "Oslas, Norvegija.",
+            "card": {
+              "profession": "Virėja",
+              "country": "Norvegija",
+              "skills": "Maisto gamyba · Patiekimas · Virtuvės higiena",
+              "path": "Vilnius → Oslas",
+              "experience": "3 m. virtuvėje",
+              "places": "2 restoranai"
+            }
+          },
+          "cook": {
+            "alt": "Rasa J. prie viryklės Oslo restorane",
+            "caption": "Profesionali virėja."
+          },
+          "head-chef": {
+            "alt": "Rasa J. vadovauja virėjų komandai",
+            "caption": "Vyriausioji virėja: keturių virėjų komanda."
+          },
+          "owner": {
+            "alt": "Rasa J. savo restorano salėje prieš aptarnavimą",
+            "caption": "Savo restoranas.",
+            "team": "12 žmonių · 2 pamainos · Ši savaitė: 420 val."
+          }
+        }
+      }
+    }
   }
 }
