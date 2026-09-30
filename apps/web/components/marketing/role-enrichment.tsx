@@ -66,7 +66,10 @@ export async function RoleEnrichment({
           {t(`${previewKey}.subcopy`)}
         </p>
         <div className="mt-10 grid items-center gap-10 lg:grid-cols-2">
-          <div className="flex justify-center">{preview}</div>
+          {/* min-w-0: a grid item defaults to its content's min width, so a
+              wide preview pushed the column past a phone screen (622 px in
+              375 px, prod 2026-09-29) and the card was clipped. */}
+          <div className="flex min-w-0 justify-center">{preview}</div>
           <ul className="flex flex-col gap-4">
             {bullets.map((b) => (
               <li key={b} className="flex items-start gap-3 text-sm text-text-secondary">

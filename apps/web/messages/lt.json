@@ -7576,6 +7576,14 @@
         "doorCalendar": "Ši savaitė kalendoriuje",
         "doorJournal": "Visi darbo žurnalo įrašai",
         "doorCv": "Gyvas CV"
+      },
+      "world": {
+        "sceneLabel": "Žmogaus profesinis pasaulis: darbas, gebėjimai, įrodymai, istorija ir kas toliau. Tie patys faktai surašyti žemiau.",
+        "empty": "Čia dar nėra įrašų.",
+        "directionDetail": "Sutampa: {shared} · trūksta: {missing}",
+        "directionDetailNoGap": "Sutampa: {shared} · nieko netrūksta",
+        "emptyNext": "Kryptys atsiras, kai darbo įrašai parems bent du gebėjimus.",
+        "allDetails": "Visa kortelės informacija"
       }
     }
   },
