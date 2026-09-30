@@ -146,6 +146,9 @@ describe("1. read-only composition of existing RLS-scoped reads", () => {
         "journal_entries",
         "journal_entry_metrics",
         "engagement_contexts",
+        // 2026-09-30: the caller's OWN active manager-class memberships — the
+        // manages_organization() predicate, so a manager sees what they manage.
+        "company_memberships",
         // premium calendar 2026-09-29: the review rows of the SAME entry ids,
         // so a week block can say an entry was confirmed by someone else.
         "journal_entry_confirmations",
