@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
+import { JournalPhotoViewer } from "@/components/app/journal/journal-photo-viewer";
 import { EvidenceState } from "@/components/app/work-world/primitives";
 import { Link } from "@/lib/i18n/navigation";
 import { formatDuration } from "@/lib/journal/format-duration";
@@ -126,31 +127,18 @@ export async function JournalDayObject({
                 {t("photoCount", { count: photoTotal })}
               </p>
               {shownPhotos.length > 0 ? (
-                <ul
-                  className="grid list-none grid-cols-3 gap-2 sm:grid-cols-4"
-                  data-testid="journal-day-object-photos"
-                >
-                  {shownPhotos.map((p) => (
-                    <li
-                      key={p.photoId}
-                      className="overflow-hidden rounded-lg border border-ink-600 bg-ink-800"
-                    >
-                      {p.signedUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={p.signedUrl}
-                          alt={t("photoAlt")}
-                          className="aspect-square w-full object-cover"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="flex aspect-square w-full items-center justify-center p-2 text-center text-meta text-text-muted">
-                          {t("previewUnavailable")}
-                        </div>
-                      )}
-                    </li>
-                  ))}
-                </ul>
+                <JournalPhotoViewer
+                  photos={shownPhotos.map((p) => ({ photoId: p.photoId, signedUrl: p.signedUrl }))}
+                  labels={{
+                    photoAlt: t("photoAlt"),
+                    previewUnavailable: t("previewUnavailable"),
+                    open: t("photoOpen"),
+                    close: t("photoClose"),
+                    prev: t("photoPrev"),
+                    next: t("photoNext"),
+                    counterTemplate: t.raw("photoCounter") as string,
+                  }}
+                />
               ) : (
                 <p className="text-meta text-text-muted">{t("previewUnavailable")}</p>
               )}
