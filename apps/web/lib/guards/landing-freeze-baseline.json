@@ -24,7 +24,7 @@
     "components/marketing/landing-open-jobs-band.tsx": "d4aca1f453b24c178d9a68144b1f0147426c0affd015113edd3490b3a4370e3b",
     "components/marketing/landing-journey.tsx": "5b45e5c2c73080ff08f10cfa678c36f30d26e37dfc8ca83997b8ff93c605328e",
     "lib/marketing/sample-journey.ts": "f1d836eeecc8a20552e3570d7427fa62e777c072619b352c3a726c86f9208b12",
-    "components/marketing/living-worker-hero.tsx": "a14d688fe6f6fb5b2bd528d65ccc70c9cfe840a02d7c8b662ac633e20a5ce15c",
+    "components/marketing/living-worker-hero.tsx": "f904c921893c331bc04cf150877cbd4fd84b4bcbac2342b3d10d166257cff357",
     "lib/marketing/living-worker-hero.ts": "7855371657eb13ea1aaaf8814474a7ce6b3fe794b900f0adb761532b92b9b7e8"
   },
   "namespaces": {

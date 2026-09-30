@@ -39,10 +39,17 @@ import { cn } from "@/lib/utils";
 const HOLD_MS = 4600;
 const CARD_HOLD_MS = 11500;
 const TR_MS = 2600;
-/** An intermediate pose frame is held only for a breath, and the pose change
- *  into it is a short, quiet dissolve (the faces are already aligned). */
+/** An intermediate pose frame is held only for a breath. The pose change into
+ *  it is a MOTION CUT, never a dissolve or a wipe: the frame softens as in a
+ *  quick movement, warm light blooms from the face, and at the peak the
+ *  photograph changes in one instant — at every moment there is ONE body on
+ *  screen, and the change of pose reads as the person moving. */
 const BRIDGE_HOLD_MS = 350;
-const POSE_TR_MS = 1200;
+const POSE_TR_MS = 820;
+/** The instant of the cut, and the few hundredths either side where the two
+ *  heavily softened frames meet so the change is not a pop. */
+const CUT_AT = 0.5;
+const CUT_BLEND = 0.02;
 const SEEK_MS = 1700;
 /** Card choreography, measured from the start of the card moment. */
 const GATHER_AT = 500;
@@ -201,7 +208,19 @@ function stepOf(x: { story: HeroStory; flat: Flat }): number {
   return x.story.moments.slice(0, x.flat.moment + 1).filter((m) => !m.bridge).length - 1;
 }
 
-/** THE PLAYER CARD — the person's living professional identity. */
+/** THE PLAYER CARD — the person's Living Professional Identity.
+ *
+ *  ONE OBJECT, TWO STATES. Closed, it is the person: their portrait fills the
+ *  card, their name and profession stand on it, and one line says what their
+ *  real work adds up to. Open, the portrait settles into the card's crown —
+ *  the name stays — and the identity unfolds beneath it in order: real work,
+ *  what the work has made them able to do, the path they are on, what they
+ *  did where, and where they can go next. Nothing competes at once.
+ *
+ *  RECOGNISABLE WITHOUT A LOGO: the product's own identity grammar — the
+ *  person first and lit, the gold provenance edge beside them (the same rule
+ *  the in-product identity stage carries), the work spine of diamond nodes
+ *  for the path and the history, figures with their own units. */
 function PlayerCard({
   card,
   story,
@@ -219,181 +238,173 @@ function PlayerCard({
 }) {
   const id = card.identity;
   const s = data.cardSections;
-  const section = (label: string) => <p className="font-mono text-meta uppercase tracking-label text-text-muted">{label}</p>;
+  const crown = compact ? (more ? 134 : 278) : more ? 148 : 336;
+  const label = (text: string) => <p className="font-mono text-meta uppercase tracking-label text-text-muted">{text}</p>;
+  // the open layer arrives in order, never all at once
+  const unfold = (i: number) => ({
+    className: cn("transition-[opacity,transform] duration-500 ease-out", more ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"),
+    style: { transitionDelay: more ? `${280 + i * 120}ms` : "0ms" },
+  });
 
-  const identity = (
-    <div className="flex items-stretch gap-4">
-      <div className={cn("relative shrink-0 overflow-hidden rounded-xl ring-1 ring-inset ring-ink-500/60", compact ? "h-[6.5rem] w-[5.25rem]" : "h-[7rem] w-[5.75rem]")}>
+  const spine = (
+    <ol className="relative grid" style={{ gridTemplateColumns: `repeat(${id.progression.length}, minmax(0, 1fr))` }}>
+      <span aria-hidden className="absolute left-[12.5%] right-[12.5%] top-[5px] h-px bg-gradient-to-r from-text-muted/70 via-ink-500 to-ink-600" />
+      {id.progression.map((step, k) => {
+        const now = k === id.current;
+        const next = k === id.current + 1;
+        return (
+          <li key={step} className="relative flex min-w-0 flex-col items-center gap-1 text-center" aria-current={now ? "step" : undefined}>
+            <span
+              aria-hidden
+              className={cn(
+                "h-[11px] w-[11px] rotate-45 border",
+                now ? "border-brand-blue bg-brand-blue shadow-[0_0_12px_rgb(212_175_55/0.5)]" : k < id.current ? "border-text-secondary bg-text-secondary" : "border-ink-500 bg-ink-900",
+              )}
+            />
+            <span className={cn("text-meta leading-tight", now ? "text-text-primary" : "text-text-muted", compact && !now && !next && "sr-only")}>{step}</span>
+            {now || next ? <span className={cn("font-mono text-meta uppercase tracking-label", now ? "text-brand-blue" : "text-text-muted")}>{now ? s.now : s.next}</span> : null}
+          </li>
+        );
+      })}
+    </ol>
+  );
+
+  return (
+    <div
+      className="relative overflow-hidden rounded-[1.375rem] border border-ink-500/60 bg-ink-900/90 shadow-[0_50px_110px_-40px_rgb(0_0_0/0.95)] backdrop-blur-xl"
+      style={{ width }}
+    >
+      {/* the provenance edge: gold, beside the person — the product's identity mark */}
+      <span aria-hidden className="absolute inset-y-8 left-0 z-10 w-[2px] bg-gradient-to-b from-transparent via-brand-blue to-transparent" />
+
+      {/* THE PERSON — the card's crown */}
+      <div className="relative overflow-hidden transition-[height] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]" style={{ height: crown }}>
         {story.portrait ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={story.portrait.src}
             srcSet={`${story.portrait.srcSmall} 400w, ${story.portrait.src} 800w`}
-            sizes="160px"
+            sizes={`${width}px`}
             alt=""
             width={story.portrait.width}
             height={story.portrait.height}
             decoding="async"
-            className="lwh-portrait h-full w-full object-cover object-[50%_20%]"
+            className="lwh-portrait absolute inset-0 h-full w-full object-cover transition-[object-position] duration-700"
+            style={{ objectPosition: more ? "50% 24%" : "50% 30%" }}
           />
         ) : null}
-        <div aria-hidden className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink-900/60 to-transparent" />
-        <div aria-hidden className="lwh-sheen pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
-      </div>
-      <div className="flex min-w-0 flex-col justify-end gap-1.5 pb-0.5">
-        <p className={cn("font-display font-bold leading-none tracking-tight text-text-primary", compact ? "text-title" : "text-title-lg")}>{card.name}</p>
-        <p className="font-mono text-meta uppercase tracking-label text-text-primary">{card.profession}</p>
-        <p className="flex items-center gap-1.5 text-support text-text-secondary">
-          <span aria-hidden className="h-1.5 w-1.5 rotate-45 bg-brand-blue" />
-          {id.place}
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-ink-900 via-ink-900/35 via-40% to-transparent" />
+        <div aria-hidden className="lwh-sheen pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/12 to-transparent" />
+        <p className="absolute inset-x-5 top-4 flex items-center justify-between font-mono text-meta uppercase tracking-label text-text-secondary">
+          <span className={cn("transition-opacity duration-300", compact && more && "opacity-0")}>{data.cardLabel}</span>
+          <span className="rounded-sm border border-ink-500/80 bg-ink-900/40 px-1.5 text-text-muted backdrop-blur-sm">{data.sampleLabel}</span>
         </p>
+        <div className="absolute inset-x-5 bottom-4">
+          <p
+            className="origin-bottom-left font-display text-[2.5rem] font-bold leading-[0.95] tracking-tight text-text-primary transition-transform duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
+            style={{ transform: more ? "scale(0.66)" : "none" }}
+          >
+            {card.name}
+          </p>
+          <p className="mt-2 font-mono text-support uppercase tracking-label text-text-primary">{card.profession}</p>
+          <p className="mt-1 flex items-center gap-1.5 text-support text-text-secondary">
+            <span aria-hidden className="h-1.5 w-1.5 rotate-45 bg-brand-blue" />
+            {id.place}
+          </p>
+        </div>
       </div>
-    </div>
-  );
 
-  // PROGRESSION — where they have been, where they stand, where they can go
-  const path = (
-    <div className="space-y-1.5">
-      {section(s.path)}
-      <ol className="relative grid" style={{ gridTemplateColumns: `repeat(${id.progression.length}, minmax(0, 1fr))` }}>
-        <span aria-hidden className="absolute left-[12.5%] right-[12.5%] top-[5px] h-px bg-gradient-to-r from-text-muted/70 via-ink-500 to-ink-600" />
-        {id.progression.map((step, k) => {
-          const done = k < id.current;
-          const now = k === id.current;
-          const next = k === id.current + 1;
-          return (
-            <li key={step} className="relative flex min-w-0 flex-col items-center gap-1.5 text-center" aria-current={now ? "step" : undefined}>
-              <span
-                aria-hidden
-                className={cn(
-                  "relative h-[11px] w-[11px] rotate-45 border",
-                  now ? "border-brand-blue bg-brand-blue shadow-[0_0_12px_rgb(212_175_55/0.55)]" : done ? "border-text-secondary bg-text-secondary" : "border-ink-500 bg-ink-900",
-                )}
-              />
-              <span className={cn("text-meta leading-tight", now ? "font-medium text-text-primary" : done ? "text-text-secondary" : "text-text-muted", compact && !now && !next && "sr-only")}>{step}</span>
-              {now || next ? <span className={cn("font-mono text-meta uppercase tracking-label", now ? "text-brand-blue" : "text-text-muted")}>{now ? s.now : s.next}</span> : null}
-            </li>
-          );
-        })}
-      </ol>
-    </div>
-  );
-
-  // REAL WORK — the figures their journal carries
-  const work = (
-    <div className="space-y-1.5">
-      {section(s.work)}
-      <dl className="grid grid-cols-3 gap-3">
-        {id.stats.map((x) => (
-          <div key={x.unit} className="min-w-0">
-            <dt className="sr-only">{x.unit}</dt>
-            <dd className="flex flex-col">
-              <span className="font-display text-card-title font-semibold leading-none text-text-primary">{x.figure}</span>
-              <span className="mt-1 text-meta leading-tight text-text-muted">{x.unit}</span>
-            </dd>
+      <div className={cn("relative", compact ? (more ? "px-4 pb-3 pt-2" : "px-5 pb-4 pt-3") : more ? "px-5 pb-4 pt-2.5" : "px-5 pb-5 pt-3.5")}>
+        {/* closed: what the real work adds up to, in one line */}
+        <div
+          className={cn(
+            "grid transition-[grid-template-rows,opacity] duration-500 ease-out",
+            more ? "grid-rows-[0fr] opacity-0" : "grid-rows-[1fr] opacity-100",
+          )}
+          aria-hidden={more}
+        >
+          <div className="min-h-0 overflow-hidden">
+            <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              {id.stats.map((x, i) => (
+                <span key={x.unit} className="flex items-baseline gap-1.5">
+                  {i > 0 ? <span aria-hidden className="mr-1.5 h-1 w-1 rotate-45 self-center bg-text-muted/70" /> : null}
+                  <span className="font-display text-card-title font-semibold text-text-primary">{x.figure}</span>
+                  <span className="text-meta text-text-muted">{x.unit}</span>
+                </span>
+              ))}
+            </p>
+            <p className="mt-3 flex items-center justify-between gap-3 border-t border-ink-600/70 pt-3 text-meta text-text-muted">
+              <span>{data.cardNote}</span>
+              <span aria-hidden className="shrink-0 font-mono uppercase tracking-label text-text-secondary">{s.more} ›</span>
+            </p>
           </div>
-        ))}
-      </dl>
-    </div>
-  );
+        </div>
 
-  // CAPABILITY — what the work has made them able to do
-  const capability = (
-    <div className="space-y-1.5">
-      {section(s.capability)}
-      <ul className="flex flex-wrap gap-1.5">
-        {card.skills.map((k) => (
-          <li key={k} className="rounded-full border border-ink-500 bg-ink-800/60 px-2.5 py-1 text-meta text-text-secondary">
-            {k}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-
-  // WORK HISTORY — what they really did, where, when
-  const history = (
-    <div className="space-y-1.5">
-      {section(s.history)}
-      <ol className="relative space-y-1.5 pl-4">
-        <span aria-hidden className="absolute bottom-1 left-[3px] top-1 w-px bg-ink-500" />
-        {id.history.map((h, k) => (
-          <li key={`${h.when}-${h.what}`} className="relative flex min-w-0 gap-3 text-support">
-            <span aria-hidden className={cn("absolute -left-4 top-[0.45rem] h-[7px] w-[7px] rotate-45", k === id.history.length - 1 ? "bg-brand-blue" : "bg-text-muted")} />
-            <span className="w-10 shrink-0 font-mono text-meta text-text-muted">{h.when}</span>
-            <span className="min-w-0 truncate text-text-secondary" title={`${h.where} · ${h.what}`}>
-              <span className="text-text-primary">{h.where}</span> · {h.what}
-            </span>
-          </li>
-        ))}
-      </ol>
-    </div>
-  );
-
-  // MOBILITY — the road so far and where they can go next
-  const mobility = (
-    <div className="space-y-1.5">
-      {section(s.mobility)}
-      <p className="flex items-center gap-2 text-support text-text-primary">
-        {card.path.map((p, k) => (
-          <span key={p} className="flex items-center gap-2">
-            {k > 0 ? <span aria-hidden className="h-px w-6 bg-text-muted/70" /> : null}
-            {p}
-          </span>
-        ))}
-      </p>
-      <p className="text-support text-text-secondary">
-        <span className="font-mono text-meta uppercase tracking-label text-text-muted">{s.next}</span> · {id.next}
-      </p>
-    </div>
-  );
-
-  return (
-    <div
-      className="relative overflow-hidden rounded-2xl border border-ink-500/70 bg-ink-900/90 shadow-[0_40px_90px_-30px_rgb(0_0_0/0.9)] backdrop-blur-xl"
-      style={{ width }}
-    >
-      <div aria-hidden className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-brand-blue to-transparent" />
-      <div className={cn(compact ? "space-y-3.5 p-4" : "space-y-3 px-5 py-4")}>
-        <p className="flex items-center justify-between gap-2 font-mono text-meta uppercase tracking-label text-text-secondary">
-          <span>{data.cardLabel}</span>
-          <span className="rounded-sm border border-ink-500 px-1.5 text-text-muted">{data.sampleLabel}</span>
-        </p>
-        {identity}
-        <div className="h-px bg-ink-600/80" />
-        {compact ? (
-          // a phone: the same card in two layers of the same height
-          <div className="grid">
-            <div className={cn("col-start-1 row-start-1 space-y-3.5 transition-opacity duration-500", more ? "pointer-events-none opacity-0" : "opacity-100")} aria-hidden={more}>
-              {work}
-              {capability}
-              {path}
-            </div>
-            <div className={cn("col-start-1 row-start-1 space-y-3.5 transition-opacity duration-500", more ? "opacity-100" : "pointer-events-none opacity-0")} aria-hidden={!more}>
-              {history}
-              {mobility}
-            </div>
-          </div>
-        ) : (
-          <>
-            {work}
-            {/* the second layer takes the place of the first, so the card
-                keeps its size in the scene: skills ⇄ history and geography */}
-            <div className={cn("grid transition-[grid-template-rows,opacity] duration-700 ease-out", more ? "grid-rows-[0fr] opacity-0" : "grid-rows-[1fr] opacity-100")} aria-hidden={more}>
-              <div className="min-h-0 overflow-hidden">{capability}</div>
-            </div>
-            <div className={cn("grid transition-[grid-template-rows,opacity] duration-700 ease-out", more ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")} aria-hidden={!more}>
-              <div className="min-h-0 overflow-hidden">
-                <div className="space-y-3">
-                  {history}
-                  {mobility}
-                </div>
+        {/* open: the identity unfolds beneath the person, in order */}
+        <div
+          className={cn("grid transition-[grid-template-rows] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]", more ? "grid-rows-[1fr]" : "grid-rows-[0fr]")}
+          aria-hidden={!more}
+        >
+          <div className={cn("min-h-0 overflow-hidden", compact && "overflow-y-auto")}>
+            <div className={cn(compact ? "space-y-2" : "space-y-2.5")}>
+              <div {...unfold(0)}>
+                {label(s.work)}
+                <dl className="mt-1.5 grid grid-cols-3 gap-3">
+                  {id.stats.map((x) => (
+                    <div key={x.unit} className="min-w-0">
+                      <dt className="sr-only">{x.unit}</dt>
+                      <dd className="flex flex-col">
+                        <span className="font-display text-card-title font-semibold leading-none text-text-primary">{x.figure}</span>
+                        <span className="mt-1 text-meta leading-tight text-text-muted">{x.unit}</span>
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+              <div {...unfold(1)}>
+                {label(s.capability)}
+                <ul className="mt-1.5 flex flex-wrap gap-1.5">
+                  {card.skills.map((k) => (
+                    <li key={k} className="rounded-full border border-ink-500 bg-ink-800/60 px-2.5 py-0.5 text-meta text-text-secondary">
+                      {k}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div {...unfold(2)}>
+                {label(s.path)}
+                <div className="mt-2">{spine}</div>
+              </div>
+              <div {...unfold(3)}>
+                {label(s.history)}
+                <ol className="relative mt-1 space-y-0.5 pl-4">
+                  <span aria-hidden className="absolute bottom-1 left-[3px] top-1 w-px bg-ink-500" />
+                  {id.history.map((h, k) => (
+                    <li key={`${h.when}-${h.what}`} className="relative flex min-w-0 gap-3 text-support">
+                      <span aria-hidden className={cn("absolute -left-4 top-[0.45rem] h-[7px] w-[7px] rotate-45", k === id.history.length - 1 ? "bg-brand-blue" : "bg-text-muted")} />
+                      <span className="w-10 shrink-0 font-mono text-meta text-text-muted">{h.when}</span>
+                      <span className="min-w-0 truncate text-text-secondary" title={`${h.where} · ${h.what}`}>
+                        <span className="text-text-primary">{h.where}</span> · {h.what}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div {...unfold(4)}>
+                {label(s.mobility)}
+                <p className="mt-1.5 flex flex-wrap items-center gap-x-2 text-support text-text-primary">
+                  {card.path.map((p, k) => (
+                    <span key={p} className="flex items-center gap-2">
+                      {k > 0 ? <span aria-hidden className="h-px w-5 bg-text-muted/70" /> : null}
+                      {p}
+                    </span>
+                  ))}
+                  <span className="text-text-secondary">· {id.next}</span>
+                </p>
               </div>
             </div>
-            {path}
-          </>
-        )}
-        <p className="text-meta leading-snug text-text-muted">{data.cardNote}</p>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -458,6 +469,7 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
 
   const stage = useRef<HTMLDivElement>(null);
   const sweep = useRef<HTMLDivElement>(null);
+  const poseLight = useRef<HTMLDivElement>(null);
   const vignette = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const cardBody = useRef<HTMLDivElement>(null);
@@ -569,7 +581,8 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
       phaseRef.current = ph;
       setPhase(ph);
     }
-    const autoMore = ph === "card" && (u >= MORE_AT || !flags.current.motion);
+    // closed → open → closed, then it folds back into the person
+    const autoMore = ph === "card" && flags.current.motion && u >= MORE_AT && u < hold - RETURN_BEFORE - 1600;
     if (autoMore !== moreAuto.current) {
       moreAuto.current = autoMore;
       setMore(autoMore);
@@ -601,8 +614,11 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
 
     for (const [i, layer] of layers.current) {
       if (i !== j && !(i === next && p > 0)) layer.root.style.opacity = "0";
+      if (!(poseChange && p > 0 && (i === j || i === next))) layer.root.style.filter = "";
     }
-    const cur = put(j, 1 + 0.03 * e, 1 + 0.022 * e);
+    // a pose change happens in one place: neither photograph moves, so the
+    // scene stays continuous across the seam
+    const cur = poseChange ? put(j, 1, 1) : put(j, 1 + 0.03 * e, 1 + 0.022 * e);
     if (cur) {
       cur.layer.root.style.opacity = storyChange ? String(1 - smooth(0, 0.45, p)) : "1";
       cur.layer.root.style.maskImage = "";
@@ -617,13 +633,20 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
       };
     }
     if (p > 0) {
-      const nx = put(next, 1 + 0.05 * (1 - e), 1 + 0.04 * (1 - e));
+      const nx = poseChange ? put(next, 1, 1) : put(next, 1 + 0.05 * (1 - e), 1 + 0.04 * (1 - e));
       if (nx) {
         if (poseChange) {
-          // the same place, the next pose: a quiet dissolve on the aligned face
-          nx.layer.root.style.opacity = String(e);
+          // the same place, the next pose: one body at a time
+          const blur = `blur(${(6 * Math.sin(Math.PI * clamp(p, 0, 1))).toFixed(2)}px)`;
+          const inNext = smooth(CUT_AT - CUT_BLEND, CUT_AT + CUT_BLEND, p);
+          nx.layer.root.style.opacity = String(inNext);
           nx.layer.root.style.maskImage = "";
           nx.layer.root.style.webkitMaskImage = "";
+          nx.layer.root.style.filter = blur;
+          if (cur) {
+            cur.layer.root.style.opacity = String(1 - inNext);
+            cur.layer.root.style.filter = blur;
+          }
         } else if (storyChange) {
           nx.layer.root.style.opacity = String(smooth(0.55, 1, p));
           nx.layer.root.style.maskImage = "";
@@ -637,6 +660,14 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
           nx.layer.root.style.webkitMaskImage = mask;
         }
       }
+    }
+    if (poseLight.current) {
+      // the band of light that carries the seam
+      const edge = -8 + 116 * e;
+      const on = p > 0 && poseChange;
+      void edge;
+      poseLight.current.style.opacity = on ? String(Math.sin(Math.PI * clamp(p, 0, 1))) : "0";
+      poseLight.current.style.background = `radial-gradient(circle at ${cam.x}px ${cam.y}px, rgb(255 236 205 / 0.3), transparent 62%)`;
     }
     if (sweep.current) {
       const on = p > 0 && !storyChange && !poseChange;
@@ -730,9 +761,12 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
   const cur = momentOf(k);
   const capM = momentOf(cap);
   const card = cur.m.card;
-  const cardW = box ? (small ? Math.min(372, box.w - 24) : 452) : 452;
+  const cardW = box ? (small ? Math.min(360, box.w - 24) : 400) : 400;
   const cardX = box ? (small ? (box.w - cardW) / 2 : box.w - cardW - 28) : 0;
-  const cardTop = small ? 52 : 64;
+  // on a phone the card carries the sample label itself, so while it stands the
+  // hero's own label steps aside and the whole card fits above the controls
+  const cardShown = card !== null && (phase === "card" || phase === "return");
+  const cardTop = small ? (cardShown ? 12 : 52) : 64;
   const cardBottom = small ? 72 : 100;
   const cardCy = box ? Math.max(cardH / 2 + cardTop, Math.min(box.h * (small ? 0.47 : 0.5), box.h - cardH / 2 - cardBottom)) : 0;
   const open = more || holdCard;
@@ -865,6 +899,7 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
             aria-hidden
             className="pointer-events-none absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-[rgb(255_236_205/0.14)] to-transparent opacity-0 mix-blend-screen"
           />
+          <div ref={poseLight} aria-hidden className="pointer-events-none absolute inset-0 opacity-0 mix-blend-screen" />
           {/* light falls off to the words: bottom and left, never across the face */}
           <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-900 via-ink-900/10 via-35% to-transparent" />
           <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 hidden w-[28%] bg-gradient-to-r from-ink-900 via-ink-900/60 to-transparent md:block" />
@@ -948,7 +983,7 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
           ) : null}
         </div>
 
-        <span className="absolute left-4 top-4 rounded-sm border border-ink-500 bg-ink-900/60 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary backdrop-blur-sm sm:left-8 sm:top-6">
+        <span className={cn("absolute left-4 top-4 rounded-sm border border-ink-500 bg-ink-900/60 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary backdrop-blur-sm transition-opacity duration-500 sm:left-8 sm:top-6", small && cardShown && "opacity-0")}>
           {data.sampleLabel}
         </span>
 

@@ -687,6 +687,10 @@ export const FROZEN_LANDING_FILES = [
   // regeneration touched EXACTLY the two hero files and the three frozen
   // `livingWorkerHero` namespaces (the card's `identity` and `cardSections`
   // copy); no other landing copy, navigation or structure moved.
+  // 2026-09-30 (owner review 3, final polish): a pose change is a motion cut
+  // (one body on screen, never a dissolve), and the Player Card became one
+  // identity object — the person closed, the identity unfolding when open.
+  // The regeneration touched EXACTLY ONE hash — living-worker-hero.tsx.
   "components/marketing/living-worker-hero.tsx",
   "lib/marketing/living-worker-hero.ts",
 ] as const;
