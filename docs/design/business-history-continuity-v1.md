@@ -78,16 +78,21 @@ table, no copy.
   the files reviewed. Until a registry extract or contract exists the basis is
   `owner_statement` and the relation stays `not_asserted`.
 - The label `Nonstop-Vivat Rex PL` names Nonstop, but Nonstop Group is a separate
-  organization. It is NOT recorded as a party to the 2025 records without a stated role
-  (owner question).
+  organization. Owner decision 2026-09-30: it is preserved verbatim as SOURCE/DATASET
+  provenance and NOT recorded as a party to any row until documents establish that it is
+  the same organization and what role it had; if proven later the party is added without
+  rewriting the original evidence.
 
-## 6. Conflict with an earlier governing record (named, not worked around)
+## 6. Earlier governing record: superseded (owner, 2026-09-30)
 
-`docs/design/historical-timesheet-import-v3.md` §1 states "The canonical supplying
-organization is `20b2c802`" (Nonstop Group). The 2026-09-30 decision places the 2025
-history in the LabourMarket.ai continuous history (`19f47e78`). This record follows the
-later decision and asks the owner to confirm the supplying organization for part1/part2
-explicitly (smallest amendment: v3 §1 line 15 read "for the 2025 package: 19f47e78").
+`docs/design/historical-timesheet-import-v3.md` §1 named `20b2c802` (Nonstop Group) the
+canonical supplying organization. The owner CONFIRMED that assumption is superseded for
+the 2025 package: the continuous business-history anchor is LabourMarket.ai `19f47e78`,
+part1 and part2 join the same history as part3, and nothing is copied under Nonstop.
+The v3 record is amended in place (header row **Amended**, §1, §2 and §3), so the two
+documents no longer state conflicting rules. Nonstop Group stays a separate organization;
+the label `Nonstop-Vivat Rex PL` is dataset provenance only and is NOT a row-level party
+until source evidence establishes that it is the same organization and what role it had.
 
 ## 7. Not done in this change (follow-ups, each additive)
 

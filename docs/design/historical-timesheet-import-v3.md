@@ -4,6 +4,7 @@
 |---|---|
 | **Status** | SUPPORTING design, PROPOSED. **NOT THE CANONICAL ARCHITECTURE.** It realises §1.6 *Historical ingestion and provenance* of [`docs/OWNER_TARGET_ARCHITECTURE_V1.md`](../OWNER_TARGET_ARCHITECTURE_V1.md) and adds no graph node. Nothing in it has been applied. |
 | **Date** | 2026-09-23 |
+| **Amended** | 2026-09-30, owner decision "BUSINESS HISTORY CONTINUITY": the Nonstop supplying-organization assumption in §1, §2 and §3 is SUPERSEDED for the 2025 package. The continuous business-history anchor is LabourMarket.ai `19f47e78`; see [`business-history-continuity-v1.md`](business-history-continuity-v1.md). Wherever this record names `20b2c802` as the supplying organization of the 2025 history, read `19f47e78`. Nonstop Group stays a separate organization and is a party to a record only where the source establishes its role. |
 | **Governing input** | Owner rules of 2026-09-23 (§1). They are authoritative over everything below. |
 | **Supersedes** | The v2 "historical evidence graph" draft. It was never committed. Its **commercial expansion is SUPERSEDED by owner decision A**: invoices, payments, payroll, settlement, money columns and commercial links. v3 keeps only v2's reuse map and security analysis, and only where this record re-verifies them. |
 | **Companion** | [`historical-timesheet-fixture-v3.md`](historical-timesheet-fixture-v3.md): the synthetic acceptance fixture, T1 to T18. |
@@ -36,7 +37,7 @@ Standing platform rules that apply:
 - Every migration trips the three count ratchets.
 - There are no ratings or scores anywhere.
 - The 158 existing records in org `19f47e78` are never touched.
-- The canonical supplying organization is `20b2c802`.
+- ~~The canonical supplying organization is `20b2c802`.~~ **SUPERSEDED 2026-09-30 (owner):** for the 2025 history the continuous business-history organization is LabourMarket.ai `19f47e78`; the Vivat Rex period and the original source labels are preserved as provenance (`organization_history_periods`, dataset/session provenance). Nonstop Group is a separate organization.
 - Automation never commits real data.
 - No service-role path is used or added.
 
@@ -46,7 +47,7 @@ Standing platform rules that apply:
 
 | Fact | Value | Consequence |
 |---|---|---|
-| Evidence in prod | 158 records in 1 session, all in org `19f47e78`. The supplying org `20b2c802` has 0 records, 0 people and 0 objects. | The supplying org starts from nothing. |
+| Evidence in prod | 158 records in 1 session, all in org `19f47e78`. The supplying org `20b2c802` has 0 records, 0 people and 0 objects. **(2026-09-30: the 158 stay in `19f47e78`, which is the anchor for the whole 2025 package; `20b2c802` receives no copy.)** | ~~The supplying org starts from nothing.~~ Superseded: part1 and part2 join the SAME `19f47e78` history as part3. |
 | Supplying org | It holds the roles `employer` + `workforce_provider`, with an active owner membership and an active manager membership. Its legacy company is `048aa7e1`. | N1 applies (supplier-role precedence). The owner can create projects. The manager cannot. |
 | `projects` columns | `status` is nullable text with `CHECK (status in ('draft','live','paused','completed'))` and **no default**. `authenticated` holds INSERT, SELECT and UPDATE, and **no DELETE**. | A historical project never needs a live status (§5.1), and nobody can delete one (§5.3). |
 | `projects` RLS | Insert/update: `owns_company(company_id) OR is_admin()`. Select: `owns_company OR is_admin OR is_assigned_to_project`. **`organization_id` is not bound to `company_id`.** | A manager cannot SELECT projects. The owner of any company could create a project that names another org (N8, §8 P9). |
@@ -96,7 +97,7 @@ CUSTOMER (project_clients row with customer_key)          <- identified from the
    |
    +-- OBJECT / ADDRESS (work_objects address fields; source spellings kept on records)
           |
-SUPPLYING ORG (org 20b2c802, supplier_role employer)
+SUPPLYING ORG (2025 package: org 19f47e78 = continuous business-history anchor, supplier_role employer; 20b2c802 superseded 2026-09-30)
    |
 WORKERS (organization_people roster)
    |
