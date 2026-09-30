@@ -3,31 +3,30 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * SPORTS OPERATING MODEL guards (Commercial Readiness train WAGON 6, audit
- * area 10).
+ * PROJECT STAFFING MODEL guards (formerly "sports operating model", Commercial
+ * Readiness train WAGON 6, audit area 10 — renamed 2026-09-30).
  *
- * The wagon makes the sports metaphor USABLE — an operating model, never a
- * game layer. These pins keep that true:
+ * Owner decision 2026-09-30: LabourMarket.ai is NOT a game. The sports
+ * vocabulary (player card, playing field, divisions/leagues) is removed from
+ * every public string and from /about; `no-gamification-terms.test.ts` keeps it
+ * removed. What this file keeps is everything that was never about vocabulary:
+ * the staffing view is real rows, one identity system, real actions, no
+ * duplicate system.
  *
- *   1. EXPLAINER PRESENT + HONEST — /about carries the model section
- *      (player card = capability card, team/brigade = work unit,
- *      object/project = field of play, owner/operator = assignment manager,
- *      divisions/leagues = grouping/status layers). Any mention of a
- *      ranking-token in the explainer copy MUST be a negation ("never to
- *      rank", "no rankings") — a ranking CLAIM fails; invented score tokens
- *      (points totals, player values) are banned outright.
+ *   1. EXPLAINER — /about carries the work-evidence explanation the projects
+ *      board links to (`/about#evidence`), in professional terms.
  *   2. STAFFING VIEW IS REAL ROWS ONLY — the per-object roster renders
  *      project_worker_assignments reads (status=active, RLS-scoped); no
- *      sample/demo data pin, no private contact fields on the read path.
+ *      sample data pin, no private contact fields on the read path.
  *   3. ONE IDENTITY SYSTEM — roster chips + ops-board cards use the SAME
- *      playerInitials monogram as the worker Player Card (no local initials
+ *      playerInitials monogram as the worker profile header (no local initials
  *      copies — the old ops-board `split(/s+/)` bug stays dead).
  *   4. ACTIONS RESOLVE TO REAL EXISTING WRITES — assign/end go through the
  *      EXISTING assign_worker_to_project / end_worker_project_assignment
  *      RPCs; no app-side insert into project_worker_assignments.
- *   5. NO GAME LAYER / NO DUPLICATE SYSTEM — no new card/team/league/game
- *      component files, no non-admin league route, no cross-user worker-card
- *      route invented; the admin league page stays admin-gated as-is.
+ *   5. NO DUPLICATE SYSTEM — no new card/team/league/game component files, no
+ *      non-admin league route, no cross-user worker-card route invented; the
+ *      admin market page stays admin-gated as-is.
  */
 
 const APP = join(process.cwd());
@@ -59,45 +58,24 @@ function stringValues(node: unknown, out: string[] = []): string[] {
   return out;
 }
 
-describe("1 · the model explainer exists on /about and is honest", () => {
-  it("about page renders the sports-model section with a linkable anchor", () => {
-    expect(aboutPage).toContain('data-testid="about-sports-model"');
-    expect(aboutPage).toContain('id="sports-model"');
-    expect(aboutPage).toMatch(/t\.raw\("sportsModel\.rows"\)/);
-    expect(aboutPage).toMatch(/t\("sportsModel\.heading"\)/);
-    expect(aboutPage).toMatch(/t\("sportsModel\.noRanking"\)/);
+describe("1 · /about explains the work-evidence model and the projects board links to it", () => {
+  const visuals = read("components/marketing/about-visuals.tsx");
+
+  it("about page renders the evidence explanation with the anchor the projects board uses", () => {
+    expect(aboutPage).toContain("AboutEvidenceGraph");
+    expect(visuals).toContain('id="evidence"');
+    expect(visuals).toContain('data-testid="about-evidence"');
+    // the old sports section is gone for good
+    expect(aboutPage).not.toMatch(/sportsModel|about-sports-model|sports-model/);
   });
 
   for (const locale of LOCALES) {
     const messages = JSON.parse(read(`messages/${locale}.json`));
-    const ns = messages.about?.sportsModel;
-    const values = stringValues(ns);
 
-    it(`${locale}: full explainer catalogue (5 mappings + honesty line)`, () => {
-      expect(ns, `${locale} about.sportsModel`).toBeTruthy();
-      expect(String(ns.heading ?? "").length).toBeGreaterThan(0);
-      expect(String(ns.intro ?? "").length).toBeGreaterThan(0);
-      expect(Array.isArray(ns.rows) && ns.rows.length === 5).toBe(true);
-      for (const row of ns.rows) {
-        expect(String(row.term ?? "").length).toBeGreaterThan(0);
-        expect(String(row.meaning ?? "").length).toBeGreaterThan(0);
-      }
-      expect(String(ns.noRanking ?? "").length).toBeGreaterThan(0);
-    });
-
-    it(`${locale}: ranking-tokens appear ONLY as negations, never as claims`, () => {
-      const offenders = values.filter(
-        (v) => RANKING_TOKEN.test(v) && !NEGATION_TOKEN.test(v),
-      );
-      expect(offenders, offenders.join(" | ")).toEqual([]);
-      // The honesty line explicitly negates rankings.
-      expect(RANKING_TOKEN.test(String(ns.noRanking))).toBe(true);
-      expect(NEGATION_TOKEN.test(String(ns.noRanking))).toBe(true);
-    });
-
-    it(`${locale}: no invented score/value tokens anywhere in the explainer`, () => {
-      const offenders = values.filter((v) => SCORE_TOKEN.test(v));
-      expect(offenders, offenders.join(" | ")).toEqual([]);
+    it(`${locale}: no sportsModel namespace; the evidence copy exists`, () => {
+      expect(messages.about?.sportsModel).toBeUndefined();
+      expect(String(messages.about?.evidence?.heading ?? "").length).toBeGreaterThan(0);
+      expect(Array.isArray(messages.about?.evidence?.chain)).toBe(true);
     });
 
     it(`${locale}: projects-board compact explainer keys present and claim-free`, () => {
@@ -105,10 +83,7 @@ describe("1 · the model explainer exists on /about and is honest", () => {
       expect(String(projects.model?.note ?? "").length).toBeGreaterThan(0);
       expect(String(projects.model?.link ?? "").length).toBeGreaterThan(0);
       expect(String(projects.assign?.fromRoster ?? "").length).toBeGreaterThan(0);
-      const boardValues = stringValues([
-        projects.model,
-        projects.assign?.fromRoster,
-      ]);
+      const boardValues = stringValues([projects.model, projects.assign?.fromRoster]);
       const offenders = boardValues.filter(
         (v) => (RANKING_TOKEN.test(v) && !NEGATION_TOKEN.test(v)) || SCORE_TOKEN.test(v),
       );
@@ -116,10 +91,10 @@ describe("1 · the model explainer exists on /about and is honest", () => {
     });
   }
 
-  it("projects board links the compact note to the /about explainer", () => {
+  it("projects board links the compact note to the /about evidence explanation", () => {
     expect(projectsPage).toContain('data-testid="projects-model-note"');
     expect(projectsPage).toMatch(/t\("model\.note"\)/);
-    expect(projectsPage).toMatch(/href="\/about#sports-model"/);
+    expect(projectsPage).toMatch(/href="\/about#evidence"/);
   });
 });
 
@@ -151,7 +126,7 @@ describe("2 · the staffing view renders ONLY real assignment rows", () => {
   });
 });
 
-describe("3 · one Player Card identity system (shared monogram, no local copies)", () => {
+describe("3 · one identity system (shared monogram, no local copies)", () => {
   it("roster chips use the canonical playerInitials monogram", () => {
     expect(manager).toMatch(
       /import \{ playerInitials \} from "@\/lib\/identity\/player-identity"/,
@@ -212,7 +187,7 @@ describe("4 · every roster action resolves to a REAL existing route/action", ()
   });
 });
 
-describe("5 · no game layer, no duplicate system, league stays admin-gated", () => {
+describe("5 · no game layer, no duplicate system, the country market page stays admin-gated", () => {
   it("no new sports/game/league/division/ranking component files", () => {
     const offenders = readdirSync(join(APP, "components", "app")).filter((f) =>
       /^(sports|game|league|division|ranking)-/i.test(f),

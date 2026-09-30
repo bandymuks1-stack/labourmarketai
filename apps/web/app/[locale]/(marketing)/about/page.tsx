@@ -2,19 +2,32 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import {
+  AboutAudience,
+  AboutBeforeAfter,
+  AboutEvidenceGraph,
+  AboutLifecycle,
+  AboutPrivacySplit,
+  AboutSystemMap,
+  AboutTrustTiers,
+} from "@/components/marketing/about-visuals";
 
 /**
- * Project explanation page (CR train WAGON 2, audit area 1).
+ * "What is LabourMarket.ai" — the public explanation of the whole system.
  *
- * The user-facing "what Labour Market AI is and how it works" page the wagon-1
- * audit found missing: the marketing tree explained the product per audience,
- * but nothing reachable explained the whole loop (worker / company / team) plus
- * the honest limits in one place. Lives in the marketing tree (NOT a new
- * dashboard) and reuses the honest copy patterns of the existing pages: only
- * shipped behaviour is described, prepared features are named as prepared,
- * payments stay explicitly not active, and the data explanation links to the
- * legal pack. The vision page stays separately owner-gated — this page is the
- * public, catalogue-consistent explanation.
+ * REBUILT 2026-09-30 on an owner decision: the platform is a labour-market
+ * operating platform for real people, professions, companies, projects, hours,
+ * evidence and income — NOT a game. The earlier page carried a "sports
+ * operating model" section (player cards, playing field, divisions/leagues);
+ * that vocabulary is gone from this page and from every public string, and a
+ * guard (`no-gamification-terms.test.ts`) keeps it gone.
+ *
+ * The page explains how the system works; it is NOT a deployment-status page.
+ * There is deliberately no blanket "everything here works today" claim: what a
+ * person can use is what their account shows, and a direction is written as a
+ * direction. It shows no live numbers (a stale or wrongly-defined vacancy count
+ * on an explanatory page is worse than none). Copy: `about.*` in every
+ * catalogue that carries it; visuals: `components/marketing/about-visuals.tsx`.
  */
 export async function generateMetadata({
   params,
@@ -31,6 +44,16 @@ export async function generateMetadata({
   });
 }
 
+type Audience = {
+  id: string;
+  heading: string;
+  lead: string;
+  flow: string[];
+  participants?: string[];
+  pointsLabel: string;
+  points: string[];
+};
+
 export default async function AboutPage({
   params,
 }: {
@@ -40,85 +63,131 @@ export default async function AboutPage({
   setRequestLocale(locale);
   const t = await getTranslations("about");
   const legal = await getTranslations("legal");
-  const loops = t.raw("loops") as { heading: string; points: string[] }[];
+  const audiences = t.raw("loops") as Audience[];
+  const tones = ["cyan", "blue", "violet"] as const;
   const notYetPoints = t.raw("notYet.points") as string[];
-  const sportsRows = t.raw("sportsModel.rows") as { term: string; meaning: string }[];
+  const europePoints = t.raw("europe.points") as string[];
+  const tiers = t.raw("trust.tiers") as { term: string; meaning: string; example: string }[];
 
   return (
     <article
-      className="mx-auto flex max-w-container flex-col gap-12 px-6 py-12 sm:gap-16 sm:px-12 sm:py-16"
+      className="mx-auto flex max-w-container flex-col gap-16 px-6 py-12 sm:gap-20 sm:px-12 sm:py-16"
       data-testid="about-page"
     >
-      <header className="flex flex-col gap-4">
-        <span className="font-mono text-xs uppercase tracking-label text-brand-orange">
+      <header className="flex flex-col gap-6">
+        <p className="inline-flex w-fit items-center gap-2 rounded-sm border border-ink-500 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
+          <span className="live-dot" aria-hidden />
           {t("eyebrow")}
-        </span>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary sm:text-5xl">
+        </p>
+        <h1 className="max-w-3xl font-display text-4xl font-bold leading-[1.05] tracking-tightest text-text-primary sm:text-6xl">
           {t("title")}
         </h1>
-        <p className="max-w-prose text-base leading-relaxed text-text-secondary sm:text-lg">
-          {t("lede")}
-        </p>
-        <p className="max-w-prose rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-text-secondary">
-          {t("honesty")}
+        <p className="max-w-prose text-lg leading-relaxed text-text-secondary">{t("lede")}</p>
+
+        <AboutSystemMap
+          people={{ label: t("hero.railPeopleLabel"), steps: t.raw("hero.railPeople") as string[] }}
+          companies={{ label: t("hero.railCompaniesLabel"), steps: t.raw("hero.railCompanies") as string[] }}
+          accumulate={t("hero.accumulate")}
+          ariaLabel={t("hero.railAria")}
+        />
+
+        <div className="grid max-w-4xl gap-4 md:grid-cols-2">
+          <p className="text-base leading-relaxed text-text-secondary">{t("hero.lead")}</p>
+          <p className="text-base leading-relaxed text-text-secondary">{t("hero.leadOrg")}</p>
+        </div>
+
+        <nav className="flex flex-wrap gap-x-6 gap-y-2" aria-label={t("navLabel")}>
+          <Link href="/for-workers" className="text-sm font-semibold text-text-primary hover:text-brand-cyan">
+            {t("links.workers")} →
+          </Link>
+          <Link href="/for-companies" className="text-sm font-semibold text-text-primary hover:text-brand-cyan">
+            {t("links.companies")} →
+          </Link>
+          <Link href="/for-agencies" className="text-sm font-semibold text-text-primary hover:text-brand-cyan">
+            {t("links.agencies")} →
+          </Link>
+        </nav>
+
+        <p className="max-w-prose text-xs leading-relaxed text-text-muted" data-testid="about-status-note">
+          {t("statusNote")}
         </p>
       </header>
 
-      <section className="grid gap-6 lg:grid-cols-3" data-testid="about-loops">
-        {loops.map((loop) => (
-          <div
-            key={loop.heading}
-            className="flex flex-col gap-3 rounded-md border border-border-subtle bg-surface-1 p-5"
-          >
-            <h2 className="font-display text-xl font-bold tracking-tightest text-text-primary">
-              {loop.heading}
-            </h2>
-            <ul className="flex flex-col gap-2">
-              {loop.points.map((point, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm leading-relaxed text-text-secondary">
-                  <span aria-hidden className="mt-0.5 font-mono text-xs text-text-muted">
-                    •
-                  </span>
-                  <span>{point}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </section>
+      <AboutLifecycle
+        label={t("lifecycle.label")}
+        steps={t.raw("lifecycle.steps") as string[]}
+        note={t("lifecycle.note")}
+      />
 
-      {/* WAGON 6 — the sports operating model, explained (audit area 10).
-          Every term maps to a REAL existing surface; divisions/leagues are
-          grouping/status layers, never a ranking (constitution §10). */}
-      <section
-        id="sports-model"
-        className="flex flex-col gap-4"
-        data-testid="about-sports-model"
-      >
-        <h2 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("sportsModel.heading")}
+      <div className="flex flex-col gap-14" data-testid="about-loops">
+        {audiences.map((a, i) => (
+          <AboutAudience
+            key={a.id}
+            id={a.id}
+            heading={a.heading}
+            lead={a.lead}
+            flow={a.flow}
+            participants={a.participants}
+            pointsLabel={a.pointsLabel}
+            points={a.points}
+            tone={tones[i] ?? "cyan"}
+          />
+        ))}
+      </div>
+
+      <AboutEvidenceGraph
+        heading={t("evidence.heading")}
+        lead={t("evidence.lead")}
+        chainLabel={t("evidence.chainLabel")}
+        chain={t.raw("evidence.chain") as string[]}
+        projectionsLabel={t("evidence.projectionsLabel")}
+        projections={t.raw("evidence.projections") as string[]}
+        note={t("evidence.note")}
+      />
+
+      <AboutBeforeAfter
+        heading={t("afterHire.heading")}
+        lead={t("afterHire.lead")}
+        stages={t.raw("afterHire.stages") as string[]}
+        boardLabel={t("afterHire.boardLabel")}
+        boardPoints={t.raw("afterHire.boardPoints") as string[]}
+        platformLabel="LabourMarket.ai"
+        platformPoints={t.raw("afterHire.platformPoints") as string[]}
+        schematicNote={t("afterHire.schematicNote")}
+        conclusion={t("afterHire.conclusion")}
+      />
+
+      <AboutTrustTiers
+        heading={t("trust.heading")}
+        lead={t("trust.lead")}
+        tiers={tiers}
+        noLabel={t("trust.noLabel")}
+        no={t.raw("trust.no") as string[]}
+      />
+
+      <AboutPrivacySplit
+        heading={t("privacy.heading")}
+        lead={t("privacy.lead")}
+        privateLabel={t("privacy.privateLabel")}
+        privateItems={t.raw("privacy.private") as string[]}
+        publicNotLabel={t("privacy.publicNotLabel")}
+        publicNot={t.raw("privacy.publicNot") as string[]}
+        control={t("privacy.control")}
+      />
+
+      <section id="europe" className="scroll-mt-24 flex max-w-prose flex-col gap-4" data-testid="about-europe">
+        <h2 className="font-display text-2xl font-bold tracking-tightest text-text-primary sm:text-3xl">
+          {t("europe.heading")}
         </h2>
-        <p className="max-w-prose text-sm leading-relaxed text-text-secondary">
-          {t("sportsModel.intro")}
-        </p>
-        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {sportsRows.map((row) => (
-            <div
-              key={row.term}
-              className="flex flex-col gap-2 rounded-md border border-border-subtle bg-surface-1 p-4"
-            >
-              <dt className="font-mono text-xs uppercase tracking-label text-brand-orange">
-                {row.term}
-              </dt>
-              <dd className="text-sm leading-relaxed text-text-secondary">
-                {row.meaning}
-              </dd>
-            </div>
+        <p className="text-base leading-relaxed text-text-secondary">{t("europe.body")}</p>
+        <ul className="flex flex-col gap-2">
+          {europePoints.map((point) => (
+            <li key={point} className="flex items-start gap-2 text-sm leading-relaxed text-text-secondary">
+              <span aria-hidden className="mt-2 size-1 shrink-0 rounded-full bg-brand-blue" />
+              <span>{point}</span>
+            </li>
           ))}
-        </dl>
-        <p className="max-w-prose rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-text-secondary">
-          {t("sportsModel.noRanking")}
-        </p>
+        </ul>
       </section>
 
       <section
@@ -129,8 +198,8 @@ export default async function AboutPage({
           {t("notYet.heading")}
         </h2>
         <ul className="mt-3 flex flex-col gap-2">
-          {notYetPoints.map((point, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm leading-relaxed text-text-secondary">
+          {notYetPoints.map((point) => (
+            <li key={point} className="flex items-start gap-2 text-sm leading-relaxed text-text-secondary">
               <span aria-hidden className="mt-0.5 font-mono text-xs text-text-muted">
                 •
               </span>
@@ -146,38 +215,17 @@ export default async function AboutPage({
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-text-secondary">{t("data.body")}</p>
         <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
-          <Link
-            href="/legal/privacy"
-            className="text-sm text-text-secondary hover:text-text-primary"
-          >
+          <Link href="/legal/privacy" className="text-sm text-text-secondary hover:text-text-primary">
             {legal("privacy.title")} →
           </Link>
-          <Link
-            href="/legal/data-access"
-            className="text-sm text-text-secondary hover:text-text-primary"
-          >
+          <Link href="/legal/data-access" className="text-sm text-text-secondary hover:text-text-primary">
             {legal("dataAccess.title")} →
           </Link>
-          <Link
-            href="/legal/data-protection"
-            className="text-sm text-text-secondary hover:text-text-primary"
-          >
+          <Link href="/legal/data-protection" className="text-sm text-text-secondary hover:text-text-primary">
             {legal("dataProtection.title")} →
           </Link>
         </div>
       </section>
-
-      <nav className="flex flex-wrap gap-x-6 gap-y-2 border-t border-ink-600/60 pt-6">
-        <Link href="/for-workers" className="text-sm text-text-secondary hover:text-text-primary">
-          {t("links.workers")} →
-        </Link>
-        <Link
-          href="/for-companies"
-          className="text-sm text-text-secondary hover:text-text-primary"
-        >
-          {t("links.companies")} →
-        </Link>
-      </nav>
     </article>
   );
 }

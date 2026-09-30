@@ -292,7 +292,7 @@
         "journal": "Minu CV",
         "search": "[EN] Search",
         "advanced": "Täpsem haldus",
-        "playerCard": "Minu kaart"
+        "playerCard": "Minu ametiprofiil"
       },
       "moreSection": {
         "title": "Üksikasjalik ülevaade",
@@ -1532,7 +1532,7 @@
     "hub": {
       "matching": "[EN] Matching workbench",
       "market": "[EN] Market situation",
-      "league": "[EN] Country league"
+      "league": "[EN] Country labour market"
     },
     "market": {
       "eyebrow": "[EN] Admin · Market",
@@ -1606,12 +1606,12 @@
       }
     },
     "league": {
-      "eyebrow": "[EN] Country league",
-      "title": "[EN] Labour market league",
+      "eyebrow": "[EN] Country labour market",
+      "title": "[EN] Labour market by country",
       "subtitle": "[EN] Profession tables per country — real teams, availability and the market thermometer.",
       "methodNote": "[EN] A thermometer value renders ONLY where an admin entered a sourced market average AND the declared-expectation sample is at least 2 people. Everywhere else the cell says \"insufficient market data\" — the table never assesses a person.",
       "back": "[EN] Back to admin hub",
-      "empty": "[EN] No league data yet — tables appear by themselves once workers set their professions.",
+      "empty": "[EN] No data yet — tables appear by themselves once workers set their professions.",
       "unknownCountry": "[EN] Country not set",
       "cellCount": "[EN] {n, plural, one {# profession} other {# professions}}",
       "availableNow": "[EN] available now",
@@ -1643,7 +1643,7 @@
       "items": {
         "public_market_entry": "[EN] Public market entry",
         "user_identity": "[EN] User identity system",
-        "worker_profile_player_card": "[EN] Worker profile / player card",
+        "worker_profile_player_card": "[EN] Worker professional profile",
         "skill_intelligence": "[EN] Skill intelligence",
         "work_journal": "[EN] Work journal / real work records",
         "company_demand": "[EN] Company / demand system",
@@ -1829,7 +1829,7 @@
       "sections": {
         "action": "[EN] Today's action",
         "overview": "[EN] Week & growth",
-        "playerCard": "[EN] Player card"
+        "playerCard": "[EN] Professional profile"
       }
     }
   },
@@ -3890,7 +3890,7 @@
       "briefOverdue": "[EN] {count} tasks are past their due day.",
       "briefLogToday": "[EN] You are working today and nothing is logged yet.",
       "briefProfileGap": "[EN] Your profile is still missing: {step}.",
-      "playerCardOpened": "Sinu kaart on paneelil avatud — päris andmed sinu enda kirjetest.",
+      "playerCardOpened": "Sinu ametiprofiil on paneelil avatud — päris andmed sinu enda kirjetest.",
       "attachChoice": "[EN] What is this file for?",
       "chipAttachPhoto": "[EN] My work photo",
       "chipAttachCv": "[EN] My résumé (CV)",
@@ -4122,7 +4122,7 @@
       "briefInstructions": "Ootel juhised: {count}.",
       "chipInstructions": "Juhised",
       "briefWorkConfirmed": "Juht kinnitas viimase 7 päeva jooksul {count, plural, one {# teie töökande} other {# teie töökannet}} — kinnitatud oskusi: {skills}.",
-      "chipMyCard": "Minu kaart",
+      "chipMyCard": "Minu ametiprofiil",
       "confirmIntro": "Ootab teie kinnitust: {count} kannet.",
       "confirmLine": "• {name} · {date} — {text} (+{skills} oskust)",
       "confirmChip": "Kinnita: {name} · {date}",
@@ -6369,7 +6369,7 @@
     "badge": "Eelvaade / omaniku ülevaatus · ainult näidisandmed",
     "workers": {
       "title": "Töötajakaardid",
-      "description": "Kvaliteetsed mängijakaardi stiilis töötajapaanid. Geomeetriline monogramm varuvariandina — nägu ei genereerita kunagi.",
+      "description": "Kvaliteetsed töötajaprofiilide paanid. Geomeetriline monogramm varuvariandina — nägu ei genereerita kunagi.",
       "listLabel": "Töötajakaartide näidised"
     },
     "jobs": {
