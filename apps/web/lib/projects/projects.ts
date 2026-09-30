@@ -56,6 +56,24 @@ function migMissing(code?: string): boolean {
   return code === UNDEFINED_COLUMN || code === RELATION_NOT_FOUND;
 }
 
+/**
+ * Ids among `ids` marked as a DUPLICATE of a canonical project. The ONE reader
+ * of the marker for project lists; an unreadable marker hides nothing.
+ */
+export async function readDuplicateProjectIds(
+  supabase: SupabaseClient,
+  ids: readonly string[],
+): Promise<Set<string>> {
+  if (ids.length === 0) return new Set();
+  const { data, error } = await asAny(supabase)
+    .from("projects")
+    .select("id")
+    .in("id", ids)
+    .eq("record_state", "duplicate");
+  if (error) return new Set();
+  return new Set(((data ?? []) as { id: string }[]).map((r) => r.id));
+}
+
 /** Projects the caller manages (owns_company → projects RLS). */
 export async function listManagedProjects(): Promise<ManagedProject[]> {
   const supabase = await createClient();
@@ -82,6 +100,13 @@ export async function listManagedProjects(): Promise<ManagedProject[]> {
     res = await run(columnsV1);
   }
   if (res.error) return [];
+  // A project marked DUPLICATE of its canonical twin (20260930120000) is a
+  // record fact, not work — it leaves the working list, never the database.
+  // Unreadable marker (not applied) → nothing is hidden.
+  const duplicateIds = await readDuplicateProjectIds(
+    supabase,
+    ((res.data ?? []) as { id: string }[]).map((r) => r.id),
+  );
   type Row = {
     id: string;
     title: string | null;
@@ -92,7 +117,7 @@ export async function listManagedProjects(): Promise<ManagedProject[]> {
     organization_id: string | null;
     organizations: { display_name: string | null; legal_name: string | null } | null;
   };
-  return ((res.data ?? []) as Row[]).map((p) => ({
+  return ((res.data ?? []) as Row[]).filter((p) => !duplicateIds.has(p.id)).map((p) => ({
     id: p.id,
     title: p.title ?? null,
     city: p.city ?? null,

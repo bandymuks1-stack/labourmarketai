@@ -6,6 +6,7 @@ import { requireEmployerCompanyForCaller } from "@/lib/company/employer-company-
 import { listActiveCompanyWorkers } from "@/lib/company/company-workers";
 import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
 import { isDemandKind } from "@/lib/demand/market-direction";
+import { readDuplicateProjectIds } from "@/lib/projects/projects";
 import { closeDemand, reopenDemand } from "@/lib/demand/demand-lifecycle";
 import { canCloseFrom, canReopenFrom } from "@/lib/demand/demand-lifecycle-model";
 import {
@@ -413,7 +414,11 @@ async function readOrgProjects(
     .order("created_at", { ascending: false })
     .limit(100);
   if (error) return { ok: false };
-  return { ok: true, rows: (data ?? []) as ProjectRow[] };
+  // A DUPLICATE project (record fact, 20260930120000) leaves the working list
+  // — the same one reader the web list uses.
+  const rows = (data ?? []) as ProjectRow[];
+  const duplicates = await readDuplicateProjectIds(caller.supabase, rows.map((r) => r.id));
+  return { ok: true, rows: rows.filter((r) => !duplicates.has(r.id)) };
 }
 
 const projectsList: CapabilityDescriptor = {
