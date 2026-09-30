@@ -155,6 +155,49 @@ describe("the target must be production — this is not a general-purpose mint",
   });
 });
 
+describe("the current Supabase key formats are accepted — strictly, by role", () => {
+  const secret = "sb_secret_" + "a1B2c3D4e5F6g7H8i9J0";
+  const publishable = "sb_publishable_" + "a1B2c3D4e5F6g7H8i9J0";
+
+  it("accepts a current-format service key and anon key against production", () => {
+    expect(() =>
+      assertProdQaTarget({ url: PROD_URL, email: PROD_QA_WORKER_EMAIL, serviceKey: secret, anonKey: publishable }),
+    ).not.toThrow();
+  });
+
+  it("a key of the wrong role, a truncated key or a lookalike is still refused", () => {
+    for (const bad of [
+      { serviceKey: publishable },
+      { anonKey: secret },
+      { serviceKey: "sb_secret_short" },
+      { serviceKey: "sb_secret_" + "a".repeat(20) + " x" },
+      { serviceKey: "xsb_secret_" + "a".repeat(20) },
+      { serviceKey: "not-a-key-at-all" },
+    ]) {
+      expect(
+        () => assertProdQaTarget({ url: PROD_URL, email: PROD_QA_WORKER_EMAIL, ...bad }),
+        JSON.stringify(Object.keys(bad)),
+      ).toThrow(ProdQaGuardError);
+    }
+  });
+
+  it("the production origin and the allowlisted identity are still required with such a key", () => {
+    expect(() =>
+      assertProdQaTarget({ url: "https://some-other-ref.supabase.co", email: PROD_QA_WORKER_EMAIL, serviceKey: secret }),
+    ).toThrow(ProdQaGuardError);
+    expect(() =>
+      assertProdQaTarget({ url: PROD_URL, email: "someone.real@example.com", serviceKey: secret }),
+    ).toThrow(ProdQaGuardError);
+  });
+
+  it("the redacted form of such a key never contains the key", () => {
+    const line = describeProdQaTarget(
+      assertProdQaTarget({ url: PROD_URL, email: PROD_QA_WORKER_EMAIL, serviceKey: secret }),
+    );
+    expect(line).not.toContain("sb_secret_");
+  });
+});
+
 describe("no secret ever reaches a log, a report or an artefact", () => {
   it("the target description carries origin and identity, never a key", () => {
     const line = describeProdQaTarget(

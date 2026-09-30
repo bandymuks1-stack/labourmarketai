@@ -101,6 +101,22 @@ export interface ProdQaTarget {
 }
 
 /**
+ * Supabase's CURRENT opaque key formats: `sb_secret_…` (service) and
+ * `sb_publishable_…` (anon). Unlike the legacy JWTs they carry no `ref`
+ * claim, so the key itself cannot be bound to a project here. That binding is
+ * already enforced where it matters: the target origin must be EXACTLY the
+ * production project (check 1 above), and the key is only ever sent to that
+ * origin — a key for another project simply fails to authenticate. The shape
+ * is matched strictly and by role, so a service key cannot stand in for the
+ * anon key (or the reverse), and nothing else is widened.
+ */
+function isCurrentFormatKey(label: "service" | "anon", key: string): boolean {
+  const pattern =
+    label === "service" ? /^sb_secret_[A-Za-z0-9_-]{16,}$/ : /^sb_publishable_[A-Za-z0-9_-]{16,}$/;
+  return pattern.test(key);
+}
+
+/**
  * Assert this is the production project AND the one synthetic QA identity, or
  * throw. Every check below is independently sufficient to refuse.
  */
@@ -158,7 +174,7 @@ export function assertProdQaTarget(input: ProdQaTargetInput): ProdQaTarget {
           `"${PRODUCTION_PROJECT_REF}" (${redactKey(key)}).`,
       );
     }
-    if (!decodeJwtClaims(key)) {
+    if (!decodeJwtClaims(key) && !isCurrentFormatKey(label, key)) {
       throw new ProdQaGuardError(
         `the ${label} key is not a decodable Supabase key (${redactKey(key)}).`,
       );
