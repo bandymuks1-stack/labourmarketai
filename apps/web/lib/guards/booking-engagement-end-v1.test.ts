@@ -1505,6 +1505,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260928230000_placement_end_closes_client_collaboration_v1.sql",
       // owner 2026-09-29: own history keeps naming a former organization (names only).
       "20260929090000_historical_organization_names_v1.sql",
+      // owner 2026-09-30 (#2001 APPROVED): assistant writes leave an audit receipt.
+      "20260930090000_external_action_receipts_v1.sql",
       // owner 2026-09-30 (#2000 model approved): discovered organizations + company ingest.
       "20260930110000_discovered_organizations_v1.sql",
 ]);

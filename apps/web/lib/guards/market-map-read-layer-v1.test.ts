@@ -1070,7 +1070,7 @@ describe("NO new DB migration in this PR", () => {
     // Bumped 312 -> 314 for 20260928180000_agency_capability_one_rule_v1 and
     //   20260928181000_booking_reopen_lifecycle_edges_v1 (owner-approved RED,
     //   2026-09-28). Not this read layer's files. RECOUNTED: 314.
-    expect(count).toBeLessThanOrEqual(321); // +20260928190000_agency_delegated_demand_and_placement_v1 (owner-approved RED 2026-09-28) // +20260928200000_booking_reaccept_restores_engagement_v1 // +20260928210000_agency_placement_booking_role_v1 // +20260928220000_placement_opens_client_collaboration_v1 // +20260928230000_placement_end_closes_client_collaboration_v1 // +20260929090000_historical_organization_names_v1 // +20260930110000_discovered_organizations_v1
+    expect(count).toBeLessThanOrEqual(323); // +20260928190000_agency_delegated_demand_and_placement_v1 (owner-approved RED 2026-09-28) // +20260928200000_booking_reaccept_restores_engagement_v1 // +20260928210000_agency_placement_booking_role_v1 // +20260928220000_placement_opens_client_collaboration_v1 // +20260928230000_placement_end_closes_client_collaboration_v1 // +20260929090000_historical_organization_names_v1 // +20260930090000_external_action_receipts_v1 (owner-approved RED 2026-09-30) // +20260930100000_account_classifications_v1 // +20260930110000_discovered_organizations_v1
   });
 });
     // Bumped 170 -> 171 for the W6 slice 3 experience domain

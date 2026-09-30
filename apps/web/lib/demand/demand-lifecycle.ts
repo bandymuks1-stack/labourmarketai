@@ -47,16 +47,30 @@ export type DemandLifecycleResult =
   | { kind: "over-limit"; limit: number; next: "upgrade" | "individual_plan" }
   | { kind: "error"; message: string };
 
-async function visibleRequest(requestId: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+/**
+ * An EXPLICIT caller (G4 bridge): a bearer / agent transport hands in its own
+ * RLS-scoped client and the organization its OWN employer gate resolved
+ * (`requireEmployerCompanyForCaller`). Absent = the cookie session and the
+ * cookie workspace gate — every existing web call site, unchanged.
+ */
+export type DemandLifecycleCaller = {
+  readonly supabase: SupabaseClient;
+  readonly userId: string;
+  readonly organizationId: string;
+};
+
+async function visibleRequest(requestId: string, caller?: DemandLifecycleCaller) {
+  const supabase = caller?.supabase ?? (await createClient());
+  const user = caller
+    ? { id: caller.userId }
+    : (await supabase.auth.getUser()).data.user;
   if (!user) return { supabase, user: null, req: null, organizationId: null };
   // W8 slice 1 — the ONE workspace gate for all three lifecycle writes
   // (confirm / close / reopen). Not acting for a company ⇒ `not-owner`, which
   // is what every caller already renders honestly.
-  const employer = await resolveEmployerCompanyContext();
+  const employer = caller
+    ? ({ kind: "ok", organizationId: caller.organizationId } as const)
+    : await resolveEmployerCompanyContext();
   if (employer.kind !== "ok") {
     return { supabase, user: null, req: null, organizationId: null };
   }
@@ -148,9 +162,12 @@ export async function confirmRecognizedNeed(
 
 /** Close the company's own demand — instantly hidden from the worker board
  *  (its RPC serves status='submitted' only). Row + history stay (§3). */
-export async function closeDemand(requestId: string): Promise<DemandLifecycleResult> {
+export async function closeDemand(
+  requestId: string,
+  caller?: DemandLifecycleCaller,
+): Promise<DemandLifecycleResult> {
   if (!requestId) return { kind: "invalid" };
-  const { supabase, user, req } = await visibleRequest(requestId);
+  const { supabase, user, req } = await visibleRequest(requestId, caller);
   if (!user || !req) return { kind: "not-owner" };
   if (!canCloseFrom(req.status)) return { kind: "invalid" };
   // R-15: the gated RPC first (creator / admin / has_org_demand_access);
@@ -170,9 +187,12 @@ export async function closeDemand(requestId: string): Promise<DemandLifecycleRes
 
 /** Reopen a previously closed demand (back to submitted → worker-visible
  *  again through the same verified-company gate). */
-export async function reopenDemand(requestId: string): Promise<DemandLifecycleResult> {
+export async function reopenDemand(
+  requestId: string,
+  caller?: DemandLifecycleCaller,
+): Promise<DemandLifecycleResult> {
   if (!requestId) return { kind: "invalid" };
-  const { supabase, user, req, organizationId } = await visibleRequest(requestId);
+  const { supabase, user, req, organizationId } = await visibleRequest(requestId, caller);
   if (!user || !req || !organizationId) return { kind: "not-owner" };
   if (!canReopenFrom(req.status)) return { kind: "invalid" };
   // A reopened need is an ACTIVE need again: the SAME ceiling as creating one

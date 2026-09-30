@@ -114,6 +114,7 @@ export const CANONICAL_APP_RPCS = [
   "propose_team_enquiry_v1",
   "provision_agency_worker_engagement_context",
   "provision_company_worker_engagement_context",
+  "record_external_action_receipt_v1",
   "record_identity_resolution_event_v1",
   "record_talent_source_v1",
   "register_conversation_message_attachment",
