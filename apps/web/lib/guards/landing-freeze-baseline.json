@@ -1,6 +1,6 @@
 {
   "files": {
-    "app/[locale]/page.tsx": "868d4ae312ab08bbf0234e4270776f52c9397f033e49daab2304287058a3c0c5",
+    "app/[locale]/page.tsx": "29818d172da3311417844a7ac066c8dfd3e72aa873829c4ec1e2e0da8067ecfb",
     "lib/market/live-market-landing.ts": "2953b2835101594604e8d0273e4c6becd3be6fb9c0427a2a3f1c3608c065d99a",
     "app/[locale]/focus-landing/focus-landing.tsx": "3f438d832562e7da9ca889fe990dab5d4d9b462b7e71deee5653a103f16b70c2",
     "components/marketing/public-entry.tsx": "e01d1a84ef97d923bed451e702f106ceba20b24b3e70145b28d035f0e198145e",

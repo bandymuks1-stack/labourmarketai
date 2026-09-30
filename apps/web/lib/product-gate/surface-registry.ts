@@ -537,7 +537,7 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     whyNotChat:
       "The audience is an anonymous visitor arriving before authentication, when no AI conversation, avatar or World State exists. The surface explains the product and routes intent into the existing flows; after authentication the AI-first workspace remains the operating interface.",
     whyNotExistingComponent:
-      "The previous public homepage did not expose the governed supply reader. This route renders the ONE public landing (the optional LIVE arm was removed by owner decision 2026-09-30) over that shared reader and creates no duplicate workflow, write path or authenticated workspace.",
+      "The previous public homepage did not expose the approved living-market V1 composition or its governed supply reader. This route reuses one shared LiveMarketLanding component with the review alias and creates no duplicate workflow, write path or authenticated workspace.",
     owner:
       "Product owner — OWNER DECISION: SHIP THIS LANDING AS V1 (2026-08-20)",
     ownsAction: null,

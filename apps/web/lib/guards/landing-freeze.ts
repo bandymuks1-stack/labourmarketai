@@ -631,10 +631,12 @@ export const FROZEN_LANDING_FILES = [
   // (landing-experience.ts) and the FOCUS switcher (+ its stylesheet) — was
   // REMOVED from the landing, so those files left this frozen set with it.
   // The shared market reader stays frozen: the landing bands still read it.
-  // The regeneration dropped exactly those six file hashes and moved two —
-  // focus-landing.tsx (the switcher's import and mount removed) and page.tsx
-  // (its doc comment only; the code is unchanged) — and ZERO namespace
-  // hashes: no copy moved.
+  // The regeneration dropped exactly those six file hashes and moved one —
+  // focus-landing.tsx (the switcher's import and mount removed) — and ZERO
+  // namespace hashes: no copy moved. (page.tsx and the "/" surface-registry
+  // entry still describe two arms in prose; they are covered by the
+  // public-acquisition-route-landing-v1 owner waiver and are updated only
+  // when that waiver is extended by the owner.)
   "app/[locale]/page.tsx",
   "lib/market/live-market-landing.ts",
   // Owner approval 2026-08-22: FOCUS is the RESTORED previous production
