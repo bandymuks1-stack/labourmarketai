@@ -75,6 +75,14 @@ export interface VacancyChannelEndpointV1 {
    */
   readonly cursor?: VacancyChannelCursorV1;
   /**
+   * A TWO-LEVEL feed: the page lists entries (uuid, status, title…) and each
+   * ACTIVE entry's full ad lives at its own URL. NAV publishes exactly this.
+   * The adapter resolves the entries into full ads BEFORE the pure parser sees
+   * the page, so the parser and the importer stay provider-agnostic. An
+   * INACTIVE entry is never fetched: it is handed on as a withdrawal.
+   */
+  readonly detailFanOut?: VacancyDetailFanOutV1;
+  /**
    * True when the endpoint requires an API key. The adapter refuses to run a
    * key-requiring endpoint unless the owner has provisioned the secret — it
    * never falls back to an unauthenticated call, and never logs the key.
@@ -154,6 +162,30 @@ export interface VacancyChannelWindowV1 {
 }
 
 /**
+ * How a two-level feed's entries become full ads. Every fact is the
+ * publisher's, so it lives on the descriptor, not in the adapter.
+ */
+export interface VacancyDetailFanOutV1 {
+  /** Key of the entries array in the page body. */
+  readonly itemsKey: string;
+  /** Key, on each entry, of the URL that returns the full ad (path or absolute
+   *  on the SAME host — anything else is refused). */
+  readonly entryUrlKey: string;
+  /** Path, root first, to the entry's own status. */
+  readonly statusPath: readonly string[];
+  /** The status value that means "live: fetch the ad". Anything else is a
+   *  withdrawal and is never fetched. */
+  readonly activeValue: string;
+  /** Keys to copy from an INACTIVE entry into the withdrawal record. */
+  readonly withdrawalKeys: readonly string[];
+  /** Most detail requests one page may cost. Entries beyond it are not
+   *  consumed: the page fails closed instead of silently dropping ads. */
+  readonly maxDetailFetchesPerPage: number;
+  /** Detail requests in flight at once. */
+  readonly concurrency: number;
+}
+
+/**
  * How a `cursor` channel continues. A continuation-token feed hands back, in
  * each response, the token that names the NEXT page; the importer sends it
  * on the next request and stores it as the channel checkpoint (through the
@@ -164,8 +196,25 @@ export interface VacancyChannelWindowV1 {
  * stage must never learn one publisher's vocabulary.
  */
 export interface VacancyChannelCursorV1 {
-  /** Query key carrying the continuation token on the NEXT request. */
-  readonly queryKey: string;
+  /** Query key carrying the continuation token on the NEXT request. Absent
+   *  when the publisher names the next page by PATH (`pathTemplate`). */
+  readonly queryKey?: string;
+  /**
+   * The publisher names the next page by PATH, not by query — NAV's feed
+   * answers `next_url: /api/v1/feed/<id>`. The template carries a single
+   * `{token}` placeholder; the adapter substitutes the continuation token
+   * after checking it is a plain identifier, so the token can never widen the
+   * path (no `/`, no `..`, no query). Verified against a real page 2026-09-30.
+   */
+  readonly pathTemplate?: string;
+  /**
+   * Where a COLD START begins when the feed's head is years old. NAV's feed
+   * starts in 2019 and lists every change since; walking it from the head
+   * would read years of long-expired ads. The first request instead carries an
+   * `If-Modified-Since` header this many seconds before the capture instant
+   * (the publisher documents that header as the way to start at a time).
+   */
+  readonly coldStart?: { readonly ifModifiedSinceLookbackSeconds: number };
   /**
    * Path of keys, root first, to where the response body carries the next
    * token. A missing, empty or non-string value at that path means the walk
@@ -393,26 +442,40 @@ const NAV: VacancyProviderDescriptorV1 = {
       // `stream` channel. There is no separate snapshot endpoint recorded.
       channel: "stream",
       host: "pam-stilling-feed.nav.no",
-      // ASSUMED from the docs matrix (`/api/v1/` base + the documented feed
-      // resource). Re-verify against the OpenAPI document before activation.
+      // VERIFIED against a real page 2026-09-30 (public token, read-only).
       path: "/api/v1/feed",
       pagination: "cursor",
       cursor: {
-        // ASSUMED: the query parameter that carries the continuation token.
-        queryKey: "last",
-        // ASSUMED: where each page names its successor. A missing value
-        // means the head of the feed was reached.
+        // VERIFIED: a page names its successor as `next_url`
+        // (`/api/v1/feed/<id>`) and `next_id`; the next page is a PATH.
+        pathTemplate: "/api/v1/feed/{token}",
         nextTokenPath: ["next_id"],
+        // VERIFIED: the head of the feed is 2019; the docs' way to start at a
+        // time is `If-Modified-Since`. Sixty days back reaches the ads a job
+        // seeker can still act on without reading years of expired entries.
+        coldStart: { ifModifiedSinceLookbackSeconds: 60 * 24 * 60 * 60 },
+      },
+      // VERIFIED: feed entries carry `_feed_entry {uuid,status,title,
+      // businessName,municipal,sistEndret}` and a relative `url` to the full ad
+      // (`/api/v1/feedentry/<uuid>` → `{uuid, ad_content, sistEndret, status}`).
+      detailFanOut: {
+        itemsKey: "items",
+        entryUrlKey: "url",
+        statusPath: ["_feed_entry", "status"],
+        activeValue: "ACTIVE",
+        withdrawalKeys: ["uuid", "status", "title"],
+        maxDetailFetchesPerPage: 1000,
+        concurrency: 8,
       },
       // RECORDED: a signed JWT, sent as `Authorization: Bearer <token>`.
       requiresApiKey: true,
       authScheme: "bearer",
       cadence: {
-        // No provider recommendation is recorded. Polling once an hour is
-        // the conservative placeholder until NAV states one; the duties in
-        // the terms (immediate removal/update) may require a tighter
-        // interval, which is an activation-gate decision, not a code default.
-        intervalSeconds: 60 * 60,
+        // NAV's documentation suggests sleeping about two minutes after
+        // reaching the end of the feed before checking again, and its terms
+        // require immediate removal and update. Five minutes is the shortest
+        // interval a scheduled runner can honour honestly.
+        intervalSeconds: 5 * 60,
         runOnce: false,
         // Resumes from the stored continuation token. A missing token is a
         // cold start from the head of the feed — by the publisher's own
@@ -422,7 +485,10 @@ const NAV: VacancyProviderDescriptorV1 = {
       },
     },
   ],
-  transformVersion: "vacancy-nav-v0-scaffold",
+  // A page is 1000 entries and every live one costs a detail request, so a
+  // session reads at most five pages (bounds may only ever be TIGHTENED).
+  boundOverrides: { maxPagesPerSession: 5, requestTimeoutMs: 20_000 },
+  transformVersion: "vacancy-nav-v1",
 };
 
 export const VACANCY_PROVIDERS: readonly VacancyProviderDescriptorV1[] = [
