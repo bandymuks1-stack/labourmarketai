@@ -1,14 +1,8 @@
 {
   "files": {
-    "app/[locale]/page.tsx": "29818d172da3311417844a7ac066c8dfd3e72aa873829c4ec1e2e0da8067ecfb",
-    "app/[locale]/live-market-review/live-market-page.tsx": "a19ab9c7d17ba47ca3842b77726b3c91ba5a7e02da694bad3e602a0df19e39e5",
-    "app/[locale]/live-market-review/live-market-command.tsx": "eb5d1b91f0ab342ab7fd9d2a62e02ee301714fc765333e4189abda7ac6572522",
-    "app/[locale]/live-market-review/live-market-command.module.css": "686aae3983346345f6064e70df790d6f03fc05c897bb44f3e4e236811f676382",
+    "app/[locale]/page.tsx": "868d4ae312ab08bbf0234e4270776f52c9397f033e49daab2304287058a3c0c5",
     "lib/market/live-market-landing.ts": "2953b2835101594604e8d0273e4c6becd3be6fb9c0427a2a3f1c3608c065d99a",
-    "lib/telemetry/landing-experience.ts": "5691bb61b38b49a8904f870ce028418e931873939c16e075f9d773e244c648e7",
-    "app/[locale]/focus-landing/focus-landing.tsx": "ef34a94759588d8ac6e69d3cd08cabf32bb33984ac88d6ec98c4763df246e25c",
-    "app/[locale]/focus-landing/landing-mode-switcher.tsx": "4927ce0c36c73176262f71e199ac66c0760c711c3c24bea85948a6e8998396c0",
-    "app/[locale]/focus-landing/landing-mode-switcher.module.css": "13f538cc3c1e8b95c4b2b3262aa90d047b583178c033a1294266e755bc4519b9",
+    "app/[locale]/focus-landing/focus-landing.tsx": "3f438d832562e7da9ca889fe990dab5d4d9b462b7e71deee5653a103f16b70c2",
     "components/marketing/public-entry.tsx": "e01d1a84ef97d923bed451e702f106ceba20b24b3e70145b28d035f0e198145e",
     "lib/marketing/public-entry.ts": "51848fe4a89f9d1cc8d8563c28660cc13b8b989cfdf0163473dbe989ffd61b85",
     "components/marketing/product-chain-band.tsx": "7c783b5307ad308396157d91bbe9002f889728a603c07a8072df52f492d78024",

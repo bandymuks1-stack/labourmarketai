@@ -3,38 +3,23 @@ import { buildPageMetadata } from "@/lib/seo/metadata";
 import { FocusLanding } from "./focus-landing/focus-landing";
 
 /**
- * ONE canonical landing URL, two alternative landing experiences.
+ * ONE canonical landing URL, ONE landing experience (owner decision
+ * 2026-09-30).
  *
- *   FOCUS — the previous production landing, restored from 7179882. The
- *           PRIMARY landing: the stable, clear explanation of the product,
- *           and what every visitor without an explicit choice receives.
- *   LIVE  — the living European labour-market surface. OPTIONAL: it opens
- *           only after the visitor explicitly selects it.
+ * The landing used to offer two alternative experiences — FOCUS for every
+ * visitor, and an optional LIVE living-market scene behind a cookie, a
+ * switcher and a middleware rewrite. The owner withdrew the LIVE
+ * presentation until LabourMarket.ai has enough real market signals to show
+ * a living market honestly; the idea and its shared data stay.
  *
- * DEFAULT = FOCUS (owner command 2026-08-22 §2). No cookie means no explicit
- * choice, and no explicit choice means FOCUS. Nothing else is consulted — no
- * device class, no locale, no geography, no user agent — so no heuristic can
- * ever silently land a fresh visitor in LIVE.
+ * STATIC AND CDN-CACHED (P0 entry-point fix, 2026-08-31). The page reads no
+ * per-request state, so a fresh visitor's first paint never waits on a
+ * serverless function being warm. `revalidate = 300` matches the market
+ * snapshot's own `unstable_cache` freshness window (owner command §9/§12:
+ * one market truth, one freshness window) — the page can never be staler
+ * than the data layer already allows.
  *
- * WHERE THE ARM IS RESOLVED — P0 entry-point fix, 2026-08-31. This route used
- * to read the mode cookie itself (forced dynamic rendering), which made EVERY
- * fresh visit invoke a serverless function: `cache-control: no-store`, zero
- * CDN caching, and after a deploy the first visitors paid the full cold-start +
- * SSR chain (measured 7.6 s of serial document time on a cold hit; the owner
- * observed ~60 s inside the post-deploy window). The arm is still resolved
- * on the SERVER and only one tree is shipped — but in MIDDLEWARE now: a
- * visitor whose cookie records the explicit LIVE choice is rewritten to the
- * cookie-gated LIVE route before rendering, and everyone else gets THIS
- * page, which is statically generated and CDN-cached. A fresh visitor's
- * first paint no longer depends on a function being warm.
- *
- * `revalidate = 300` matches the market snapshot's own `unstable_cache`
- * freshness window (owner command §9/§12: one market truth, one freshness
- * window) — the static page can never be staler than the data layer already
- * allowed the dynamic one to be.
- *
- * SEO is unaffected: a crawler sends no cookie, so it gets this FOCUS page —
- * one indexed landing, no cloaking, and the canonical stays `/{locale}`.
+ * SEO: one indexed landing, no cloaking; the canonical stays `/{locale}`.
  */
 export const revalidate = 300;
 

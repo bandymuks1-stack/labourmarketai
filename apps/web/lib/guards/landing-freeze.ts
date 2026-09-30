@@ -626,18 +626,21 @@ export const FROZEN_LANDING_FILES = [
   // Owner decision 2026-08-20: the living European labour-market command is
   // the production V1. Freeze the actual root composition, its shared server
   // assembler, cinematic client, styling and governed public-data reader.
+  // Owner decision 2026-09-30: the LIVE arm — its route (live-market-page,
+  // live-market-command + its stylesheet), the mode contract
+  // (landing-experience.ts) and the FOCUS switcher (+ its stylesheet) — was
+  // REMOVED from the landing, so those files left this frozen set with it.
+  // The shared market reader stays frozen: the landing bands still read it.
+  // The regeneration dropped exactly those six file hashes and moved two —
+  // focus-landing.tsx (the switcher's import and mount removed) and page.tsx
+  // (its doc comment only; the code is unchanged) — and ZERO namespace
+  // hashes: no copy moved.
   "app/[locale]/page.tsx",
-  "app/[locale]/live-market-review/live-market-page.tsx",
-  "app/[locale]/live-market-review/live-market-command.tsx",
-  "app/[locale]/live-market-review/live-market-command.module.css",
   "lib/market/live-market-landing.ts",
-  "lib/telemetry/landing-experience.ts",
   // Owner approval 2026-08-22: FOCUS is the RESTORED previous production
-  // landing, so its composition, its switcher and the original components
-  // it renders are part of the landing render tree again.
+  // landing, so its composition and the original components it renders are
+  // part of the landing render tree again.
   "app/[locale]/focus-landing/focus-landing.tsx",
-  "app/[locale]/focus-landing/landing-mode-switcher.tsx",
-  "app/[locale]/focus-landing/landing-mode-switcher.module.css",
   // Frozen design contract 2026-09-05, P1: the public entry (component + the
   // pure read-only hook into the conversation router) replaces the scripted
   // hero scenario at the top of the render tree.

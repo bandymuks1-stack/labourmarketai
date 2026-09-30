@@ -17,28 +17,22 @@ import { describe, expect, it } from "vitest";
  *     -> readPublicVacancySupplyCounts   (lib/vacancy-store/public-vacancy-preview.ts)
  *     -> readLiveMarketLandingSnapshot   (lib/market/live-market-landing.ts)
  *
- * ONE MARKET TRUTH, TWO PRESENTATIONS (owner command 2026-08-22 §9). FOCUS
- * used to state typed marketing floors while LIVE stated real counts — the
- * exact "static counters here, real counters there" split the owner forbade.
- * Both arms now read the SAME snapshot through the SAME cache entry, so this
- * file pins the FOCUS band alongside the LIVE panel: neither may hard-code a
+ * ONE MARKET TRUTH (owner command 2026-08-22 §9). The landing's market band
+ * reads the ONE snapshot through its cache entry: it may not hard-code a
  * total, invent a second reader, or substitute a constant when the reader is
- * unavailable.
+ * unavailable. (The optional LIVE arm, which used to render the same counts in
+ * a second panel, was removed by owner decision 2026-09-30.)
  */
 
 const WEB = join(__dirname, "..", "..");
 const read = (path: string) => readFileSync(join(WEB, path), "utf8");
 
 const reader = read("lib/market/live-market-landing.ts");
-const command = read(
-  "app/[locale]/live-market-review/live-market-command.tsx",
-);
-const page = read("app/[locale]/live-market-review/live-market-page.tsx");
 const focusBand = read("components/marketing/market-proof-band.tsx");
 const focusPage = read("app/[locale]/focus-landing/focus-landing.tsx");
 
-/** Every surface that renders a market count, in either presentation. */
-const ALL_MARKET_SURFACES = [reader, command, page, focusBand, focusPage];
+/** Every surface that renders a market count. */
+const ALL_MARKET_SURFACES = [reader, focusBand, focusPage];
 
 /** The floors that were previously rendered as if they were current. */
 const BANNED_TOTALS = [
@@ -55,8 +49,8 @@ const BANNED_TOTALS = [
 describe("VERIFIED MARKET DATA is live, never hard-coded", () => {
   it("reads the counts from the canonical public vacancy contract", () => {
     expect(reader).toContain("readPublicVacancySupplyCounts");
-    expect(command).toContain("market.activeVacancies");
-    expect(command).toContain("market.distinctEmployers");
+    expect(focusBand).toContain("market.activeVacancies");
+    expect(focusBand).toContain("market.distinctEmployers");
   });
 
   it("does not import or render a static coverage claim in the panel", () => {
@@ -78,8 +72,7 @@ describe("VERIFIED MARKET DATA is live, never hard-coded", () => {
   });
 
   it("carries no bare four-or-more-digit literal in the landing reader", () => {
-    // Composition coordinates and image dimensions live in the command file,
-    // so this pins the reader — the only place a count could be introduced.
+    // The reader is the only place a count could be introduced.
     const literals = reader.match(/(?<![\w.-])\d{4,}(?![\w.])/g) ?? [];
     expect(literals).toEqual([]);
   });
@@ -88,8 +81,6 @@ describe("VERIFIED MARKET DATA is live, never hard-coded", () => {
     expect(reader).toContain("activeVacancies: null");
     expect(reader).toContain("distinctEmployers: null");
     expect(reader).toContain('basis: "unavailable"');
-    expect(command).toContain("market.activeVacancies !== null");
-    expect(command).toContain("market.distinctEmployers !== null");
   });
 
   it("never rounds or re-buckets the canonical counts", () => {
@@ -102,7 +93,7 @@ describe("VERIFIED MARKET DATA is live, never hard-coded", () => {
       "maximumSignificantDigits",
       "roundingIncrement",
     ]) {
-      expect(command).not.toContain(fn);
+      expect(focusBand).not.toContain(fn);
       expect(reader).not.toContain(fn);
     }
   });
@@ -111,16 +102,13 @@ describe("VERIFIED MARKET DATA is live, never hard-coded", () => {
     // The field, not the word — the reader's prose still explains why no
     // region distribution is exposed.
     expect(reader).not.toMatch(/^\s*(readonly\s+)?regions\s*[:?]/m);
-    expect(command).not.toMatch(/^\s*(readonly\s+)?regions\s*[:?]/m);
-    expect(command).not.toContain("market.regions");
-    expect(command).toContain("labels.dataSourceLabel");
-    expect(command).toContain("labels.verifiedMarketData");
+    expect(focusBand).not.toContain("market.regions");
   });
 
-  it("serves BOTH presentations from the one canonical reader", () => {
-    // FOCUS must not grow its own reader, its own RPC or client polling: it
-    // receives the snapshot the page already resolved, so both arms converge
-    // inside the same 300 s freshness window.
+  it("serves the landing from the one canonical reader", () => {
+    // The band must not grow its own reader, its own RPC or client polling:
+    // it receives the snapshot the page already resolved, inside the one
+    // 300 s freshness window.
     expect(focusPage).toContain("readLiveMarketLandingSnapshot");
     expect(focusBand).toContain("LiveMarketLandingSnapshot");
     expect(focusBand).toContain("market.activeVacancies");
@@ -134,7 +122,7 @@ describe("VERIFIED MARKET DATA is live, never hard-coded", () => {
     expect(focusPage).not.toContain("setInterval");
   });
 
-  it("omits the FOCUS counts too, rather than falling back to a floor", () => {
+  it("omits an unavailable count in the band, rather than falling back to a floor", () => {
     expect(focusBand).toContain("market.activeVacancies !== null");
     expect(focusBand).toContain("market.distinctEmployers !== null");
     expect(focusBand).not.toContain("asOfNote");
@@ -158,11 +146,10 @@ describe("VERIFIED MARKET DATA is live, never hard-coded", () => {
 
   it("shows the reader's own refresh timestamp as provenance", () => {
     expect(reader).toContain("lastRefreshedAt");
-    expect(command).toContain("market.lastRefreshedAt");
     expect(focusBand).toContain("market.lastRefreshedAt");
     expect(focusBand).toContain('review("verifiedMarketData")');
     expect(focusBand).toContain('review("dataSourceLabel")');
     // The stale hard-coded "as of <date>" note must not come back.
-    expect(command).not.toContain("basisNote");
+    expect(focusBand).not.toContain("basisNote");
   });
 });

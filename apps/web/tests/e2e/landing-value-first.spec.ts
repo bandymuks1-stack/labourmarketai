@@ -15,7 +15,7 @@ import { join } from "node:path";
  *   · a looking-for-work reading offers the public board beside sign-up;
  *   · the real-jobs band, when the market reader answered, shows at most four
  *     cards, each a link to the ONE public detail route;
- *   · the page ends on the next step, and the LIVE/FOCUS label is readable.
+ *   · the page ends on the next step.
  *
  * Public page, no session needed. Developer proof: not in the CI e2e subset
  * (whose MIN_EXPECTED floor is measured, not guessed).
@@ -99,12 +99,5 @@ test.describe("@1440px desktop", () => {
     await expect(close.getByTestId("landing-actions").locator("a")).toHaveCount(2);
     await expect(close.getByTestId("landing-actions")).toHaveAttribute("data-surface", "landing_close");
 
-    // The LIVE/FOCUS label is at least the 12px floor (it was 7px).
-    const px = await page
-      .getByTestId("landing-mode-switcher")
-      .locator("button")
-      .first()
-      .evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
-    expect(px).toBeGreaterThanOrEqual(12);
   });
 });
