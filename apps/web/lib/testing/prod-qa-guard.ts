@@ -70,6 +70,9 @@ export const PROD_QA_WORKER_EMAIL = "qa.worker+goal3@labourmarket.ai" as const;
 export const PROD_QA_OWNER_EMAIL = "qa.owner+multiw@labourmarket.ai" as const;
 export const PROD_QA_MANAGER_EMAIL = "qa.manager+multiw@labourmarket.ai" as const;
 export const PROD_QA_SECOND_WORKER_EMAIL = "qa.worker+multiw@labourmarket.ai" as const;
+/** Owner decision 2026-09-30: the synthetic AGENCY identity, to walk
+ *  Agency → Calendar. Synthetic QA only; it changes no real user's rights. */
+export const PROD_QA_AGENCY_EMAIL = "qa.agency+multiw@labourmarket.ai" as const;
 
 /** Every allowlisted synthetic identity — equality-matched, never by prefix
  *  or pattern. */
@@ -78,6 +81,7 @@ export const PROD_QA_IDENTITIES: readonly string[] = [
   PROD_QA_OWNER_EMAIL,
   PROD_QA_MANAGER_EMAIL,
   PROD_QA_SECOND_WORKER_EMAIL,
+  PROD_QA_AGENCY_EMAIL,
 ];
 
 export const PRODUCTION_ORIGIN = `https://${PRODUCTION_PROJECT_REF}.supabase.co`;

@@ -59,11 +59,12 @@ const FORBIDDEN_PROVISIONING_SQL: readonly RegExp[] = [
 ];
 
 describe("exactly the synthetic cast is allowlisted", () => {
-  it("the allowlist is exactly these four, each unmistakably synthetic", () => {
+  it("the allowlist is exactly these five, each unmistakably synthetic", () => {
     // Widening is a reviewed code change (owner decision 2026-09-28 added the
     // three +multiw identities beside the worker). Pinned exactly.
     expect([...PROD_QA_IDENTITIES].sort()).toEqual(
       [
+        "qa.agency+multiw@labourmarket.ai",
         "qa.manager+multiw@labourmarket.ai",
         "qa.owner+multiw@labourmarket.ai",
         "qa.worker+goal3@labourmarket.ai",
@@ -99,7 +100,7 @@ describe("exactly the synthetic cast is allowlisted", () => {
       "qa.worker+goal3@labourmarket.ai.evil.example", // suffix attack
       "qa.owner@labourmarket.ai", //         cast prefix without its tag
       "qa.owner+multiw2@labourmarket.ai", // cast tag extended
-      "qa.agency+multiw@labourmarket.ai", // plausible, never allowlisted
+      "qa.agency+other@labourmarket.ai", // plausible, never allowlisted
       "", //                                  nothing
       undefined,
     ]) {
