@@ -95,7 +95,7 @@ const MAX_FRAGMENTS = 20;
 
 /** A timed fragment that names the BREAK, not work — "30 min pertrauka",
  *  "30 min break", "перерыв 30 мин". Never work time. */
-const BREAK_RX = /pertrauk|break|перерыв|обед|pietų|pietu|lunch/i;
+const BREAK_RX = /pertrauk|\bbreak\b|перерыв|обед|pietų|pietu|lunch/i;
 
 export function deriveIntakeWorkTime(notes: string, todayIso: string): IntakeWorkTime {
   const text = String(notes ?? "").trim();

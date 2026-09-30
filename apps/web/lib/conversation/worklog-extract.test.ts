@@ -55,6 +55,31 @@ describe("extractWorkLog — variants + honest ambiguity", () => {
     expect(p.workedMinutes).toBe(9 * 60);
   });
 
+  it("a break stated in HOURS is subtracted from the span like one stated in minutes", () => {
+    const cases: Array<[string, number, number]> = [
+      ["8-17 with 1 h break", 60, 8 * 60],
+      ["8-17 with 30 min break", 30, 8 * 60 + 30],
+      ["8-17, 1 val. pertrauka", 60, 8 * 60],
+      ["nuo 8 iki 17, pertrauka 1 valanda", 60, 8 * 60],
+      ["с 8 до 17, перерыв 1 час", 60, 8 * 60],
+      ["с 8 до 17, 1 ч перерыв", 60, 8 * 60],
+    ];
+    for (const [text, breakMinutes, workedMinutes] of cases) {
+      const p = extractWorkLog(text, TODAY);
+      expect([text, p.breakMinutes, p.workedMinutes]).toEqual([text, breakMinutes, workedMinutes]);
+    }
+  });
+
+  it("the day's own hours are never read as the break", () => {
+    const p = extractWorkLog("dirbau 9 valandas, 1 val. pertrauka", TODAY);
+    expect([p.breakMinutes, p.workedMinutes]).toEqual([60, 8 * 60]);
+  });
+
+  it("a word that merely contains 'break' is work, not a break", () => {
+    const p = extractWorkLog("8-17, 45 min breakdown of old formwork", TODAY);
+    expect([p.breakMinutes, p.workedMinutes]).toEqual([0, 9 * 60]);
+  });
+
   it("no date/time signal → hasSignal false (flow asks one question)", () => {
     expect(extractWorkLog("montavau langus", TODAY).hasSignal).toBe(false);
   });
