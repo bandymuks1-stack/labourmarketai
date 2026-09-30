@@ -878,7 +878,7 @@
       "create_project": "Ga verder naar je project",
       "request_more_info": "Vraag om de ontbrekende details",
       "review_matches": "Bekijk de beste opties",
-      "complete_player_card": "Vul je Player Card aan",
+      "complete_player_card": "Vul je professionele profiel aan",
       "add_work_proof": "Voeg werkbewijs toe",
       "search_opportunities": "Ga verder naar werk zoeken",
       "continue_to_demand": "Ga verder naar je wervingsaanvraag",
@@ -912,7 +912,7 @@
   "quickNav": {
     "ariaLabel": "Snelle paginanavigatie",
     "top": "Boven",
-    "identity": "Kaart",
+    "identity": "Profiel",
     "records": "Registraties",
     "skills": "Vaardigheden",
     "offers": "Aanbiedingen",
@@ -2822,7 +2822,7 @@
       "companyVerification": "Bedrijfsverificatie",
       "matching": "Matching-werkbank",
       "market": "Marktsituatie",
-      "league": "Landenranglijst",
+      "league": "Landen — arbeidsmarkt",
       "readiness": "Gereedheidscentrum",
       "billing": "Facturatie (test)",
       "permissionMatrix": "Rechtenmatrix (wie ziet wat)"
@@ -3216,12 +3216,12 @@
       }
     },
     "league": {
-      "eyebrow": "Landencompetitie",
-      "title": "Arbeidsmarktcompetitie",
+      "eyebrow": "Arbeidsmarkt per land",
+      "title": "Arbeidsmarkt per land",
       "subtitle": "Beroepstabellen per land — echte ploegen, beschikbaarheid en het marktsignaal.",
       "methodNote": "Een marktsignaalwaarde wordt ALLEEN getoond waar een admin een van een bron voorzien marktgemiddelde heeft ingevoerd EN de steekproef van opgegeven verwachtingen minstens 2 personen telt. Overal elders toont de cel \"onvoldoende marktdata\" — de tabel beoordeelt nooit een persoon.",
       "back": "Terug naar admin-hub",
-      "empty": "Nog geen competitiedata — tabellen verschijnen vanzelf zodra werknemers hun beroepen instellen.",
+      "empty": "Nog geen gegevens — tabellen verschijnen vanzelf zodra werknemers hun beroepen instellen.",
       "unknownCountry": "Land niet ingesteld",
       "cellCount": "{n, plural, one {# beroep} other {# beroepen}}",
       "availableNow": "nu beschikbaar",
@@ -3254,7 +3254,7 @@
       "items": {
         "public_market_entry": "Publieke markttoegang",
         "user_identity": "Gebruikersidentiteitssysteem",
-        "worker_profile_player_card": "Werknemersprofiel / spelerskaart",
+        "worker_profile_player_card": "Professioneel profiel van de werknemer",
         "skill_intelligence": "Vaardigheidsintelligentie",
         "work_journal": "Werkjournaal / echte werkregistraties",
         "company_demand": "Bedrijfs-/behoeftesysteem",
@@ -4488,7 +4488,7 @@
         "admin": "Admin",
         "planning": "Kalender",
         "network": "Netwerk",
-        "playerCard": "Mijn kaart",
+        "playerCard": "Mijn professionele profiel",
         "adminPlatform": "Platformbeheer"
       },
       "roleNotice": {
@@ -4609,7 +4609,7 @@
         "body_meanwhile": "In de tussentijd kun je het platform bekijken via het tabblad \"Ontdekken\" (alleen bekijken)."
       },
       "menuLinks": {
-        "playerCard": "Mijn kaart",
+        "playerCard": "Mijn professionele profiel",
         "projects": "Projecten",
         "instructions": "Instructies",
         "bookings": "Boekingen",
@@ -5989,7 +5989,7 @@
       }
     },
     "model": {
-      "note": "Dit bord volgt het werkmodel van het platform: spelerskaarten van werknemers worden toegewezen aan objecten (projecten), en jij beheert de toewijzingen.",
+      "note": "Dit bord volgt het werkmodel van het platform: professionele profielen van werknemers worden toegewezen aan objecten (projecten), en jij beheert de toewijzingen.",
       "link": "Hoe dit model werkt"
     },
     "map": {
@@ -6131,7 +6131,7 @@
       "missingDeclaredSkills": "Opgegeven vaardigheden",
       "missingEvidence": "Werkbewijs",
       "followUpChip": "Geen activiteit — opvolgen",
-      "playerCardLink": "Spelerskaart",
+      "playerCardLink": "Profiel",
       "instructionLink": "Instructies",
       "skillClarifyLink": "Vaardigheidsverduidelijking"
     },
@@ -6139,7 +6139,7 @@
     "notes": {
       "readiness": "\"Klaar\" betekent alleen dat de hier gecontroleerde velden aanwezig zijn (naam, minstens één opgegeven vaardigheid, minstens één werkbewijsvermelding). Het is geen verificatie, geen documentgoedkeuring en geen AI-oordeel.",
       "documents": "Documenten worden nog niet bijgehouden — nergens op dit bord wordt een document als goedgekeurd of geverifieerd getoond.",
-      "candidateSkill": "Verduidelijkingen van kandidaat-vaardigheden zijn privé voor elke werknemer; ze staan op de eigen spelerskaart van de werknemer, niet hier."
+      "candidateSkill": "Verduidelijkingen van kandidaat-vaardigheden zijn privé voor elke werknemer; ze staan in het eigen professionele profiel van de werknemer, niet hier."
     },
     "report": {
       "title": "Operationeel statusrapport"
@@ -7430,9 +7430,9 @@
     ]
   },
   "playerCard": {
-    "pageTitle": "Mijn kaart",
+    "pageTitle": "Mijn professionele profiel",
     "pageIntro": "Een samenvatting van je werkprofiel — alleen zichtbaar voor jou.",
-    "title": "Werknemerskaart",
+    "title": "Professioneel profiel",
     "subtitle": "Een overzicht van je profiel. De cijfers zijn echt — niets toegevoegd.",
     "skillsLabel": "Vaardigheden",
     "skillsHint": "Vaardigheden die je hebt opgegeven (nog niet beoordeeld).",
@@ -8158,7 +8158,7 @@
       "sections": {
         "action": "Actie van vandaag",
         "overview": "Week & groei",
-        "playerCard": "Spelerskaart"
+        "playerCard": "Professioneel profiel"
       }
     },
     "home": {
@@ -10114,82 +10114,247 @@
   },
   "about": {
     "metaTitle": "Wat is LabourMarket.ai",
-    "metaDescription": "Een uitleg in duidelijke taal van LabourMarket.ai: hoe werknemers een echt profiel opbouwen uit echt werk, hoe bedrijven behoeften beschrijven en teams vinden, en hoe het platform eerlijk blijft.",
+    "metaDescription": "LabourMarket.ai is een besturingsplatform voor de arbeidsmarkt: echt werk wordt professionele geschiedenis, bewijs en een levend cv voor een persoon, en een werkgeschiedenis en capaciteitsoverzicht voor een organisatie.",
     "navLabel": "Over LabourMarket.ai",
     "eyebrow": "Over het platform",
-    "title": "Wat LabourMarket.ai is en hoe het werkt",
-    "lede": "LabourMarket.ai is een arbeidsmarktplatform waar werknemers, bedrijven en teams echte vaardigheden tonen, echte behoeften zien en echt werk organiseren — lokaal en in heel Europa.",
-    "honesty": "Alles wat op deze pagina wordt beschreven, bestaat vandaag in het product. Functies die nog in voorbereiding zijn, worden als zodanig benoemd, en betalingen zijn nog niet actief.",
+    "title": "Wat is LabourMarket.ai",
+    "lede": "LabourMarket.ai is een besturingsplatform voor de arbeidsmarkt. Het verbindt mensen, werkgevers, bureaus, teams, projecten, opleidingen en arbeidsmarktdiensten rond echt werk — niet alleen een zoektocht naar vacatures.",
+    "statusNote": "Deze pagina legt uit hoe het systeem werkt, niet wat de uitrolstatus is. Wat u vandaag kunt gebruiken, ziet u in uw account; wat nog een richting is, staat als richting aangegeven.",
+    "hero": {
+      "lead": "De professionele waarde van een persoon mag niet verdwijnen telkens wanneer die van werkgever wisselt. Echt werk kan blijvende professionele geschiedenis worden: wat de persoon deed, waar, wanneer, hoe lang, in welke rol, met welke vaardigheden en welk bewijs en welke bevestiging dat ondersteunt.",
+      "leadOrg": "Voor organisaties bouwt datzelfde echte werk het overzicht op van wat het bedrijf werkelijk heeft gedaan: projecten, teams, uitgevoerd werk, uren, competenties en bewijs.",
+      "railPeopleLabel": "Voor een persoon",
+      "railPeople": [
+        "Mensen",
+        "Kansen",
+        "Echt werk",
+        "Bewijs",
+        "Professionele groei"
+      ],
+      "railCompaniesLabel": "Voor een bedrijf",
+      "railCompanies": [
+        "Bedrijven",
+        "Mensen",
+        "Projecten",
+        "Geverifieerd werk",
+        "Organisatiecapaciteit"
+      ],
+      "accumulate": "Elke echte werkperiode voegt iets toe aan de geschiedenis — die stopt niet als de werkgever wisselt.",
+      "railAria": "Hoe mensen en bedrijven groeien uit echt werk"
+    },
+    "lifecycle": {
+      "label": "De hele levenscyclus van professioneel werk",
+      "steps": [
+        "Kans",
+        "Dienstverband / samenwerking",
+        "Echt werk",
+        "Werkjournaal",
+        "Projecten en taken",
+        "Werktijd",
+        "Bewijs van werk",
+        "Bevestigingen",
+        "Vaardigheden en competenties",
+        "Living CV — een levend professioneel cv",
+        "Nieuwe kansen",
+        "Teams",
+        "Bedrijfscapaciteit",
+        "Arbeidsmarktdiensten"
+      ],
+      "note": "Dit legt het systeem uit; het is niet de grens ervan. Andere delen van de arbeidsmarkt breiden de keten uit."
+    },
     "loops": [
       {
-        "heading": "Voor werknemers",
+        "id": "people",
+        "heading": "Voor mensen",
+        "lead": "Een professioneel profiel is geen kaart of score. Het is de ervaring, werkgeschiedenis en het bewijs van een echt persoon.",
+        "flow": [
+          "Kansen vinden",
+          "Professionele ervaring presenteren",
+          "Werken",
+          "Het werkelijk gedane werk vastleggen",
+          "Bewijs bewaren",
+          "Bevestigingen ontvangen waar van toepassing",
+          "Professionele geschiedenis opbouwen — Living CV",
+          "Opgebouwde ervaring gebruiken voor nieuwe kansen"
+        ],
+        "pointsLabel": "Wat een professioneel profiel weergeeft",
         "points": [
-          "Je maakt je profiel aan — je spelerskaart — met je vaardigheden en ervaring.",
-          "Je houdt een werkjournaal bij: korte vermeldingen over het werk dat je daadwerkelijk hebt gedaan.",
-          "Het platform leest je journaaltekst en stelt vaardigheden voor die het herkent. Herkenning is op regels gebaseerd, kan dingen missen, en niets wordt aan je profiel toegevoegd zonder jouw bevestiging.",
-          "Je profiel toont eerlijk hoe elke vaardigheid wordt ondersteund: door jou ingevoerd, ondersteund door journaalvermeldingen, of bevestigd door mensen met wie je daadwerkelijk hebt gewerkt."
+          "ervaring en werkgeschiedenis;",
+          "vaardigheden en competenties;",
+          "kwalificaties en certificaten, waar vastgelegd;",
+          "uitgevoerd werk, uren, projecten en objecten;",
+          "bewijs en bevestigingen;",
+          "beschikbaarheid en professionele voorkeuren, waar van toepassing."
         ]
       },
       {
-        "heading": "Voor bedrijven",
+        "id": "employers",
+        "heading": "Voor werkgevers",
+        "lead": "De waarde voor een werkgever is niet alleen vacatures plaatsen. Het gaat erom te bewaren wie er werkte, wat er gedaan is, waar, wanneer, hoe lang, wat is afgerond, welk bewijs bestaat en welke capaciteit de organisatie heeft opgebouwd.",
+        "flow": [
+          "Behoefte",
+          "Mensen",
+          "Team",
+          "Project / object",
+          "Werk",
+          "Uren en voortgang",
+          "Bewijs",
+          "Bevestiging",
+          "De geschiedenis van werkelijk uitgevoerd werk van het bedrijf",
+          "Toekomstige personeelsplanning (een richting)"
+        ],
+        "pointsLabel": "Wat de organisatie bewaart",
         "points": [
-          "Je beschrijft je behoefte: welk werk, waar en wanneer.",
-          "Je ziet de marktkaart en eerlijke marktsignalen in plaats van beloften.",
-          "Je kunt werknemers scouten: profielen verschijnen geanonimiseerd, en contact vindt alleen plaats met toestemming.",
-          "Projecten, teams en boekingen houden het werk georganiseerd op één plek."
+          "wie er werkte en in welke rol;",
+          "welk werk is gedaan, waar en wanneer;",
+          "hoeveel uren en welke voortgang;",
+          "welk bewijs en welke bevestigingen bestaan;",
+          "welke capaciteiten het team echt heeft opgebouwd."
         ]
       },
       {
-        "heading": "Voor teams en communicatie",
+        "id": "network",
+        "heading": "Voor bureaus en andere arbeidsmarktpartijen",
+        "lead": "LabourMarket.ai is niet alleen een systeem voor werknemer en werkgever. Andere legitieme partijen hebben een plaats in hetzelfde arbeidsmarktnetwerk.",
+        "flow": [],
+        "participants": [
+          "Werving- en selectiebureaus",
+          "Uitzendbureaus",
+          "Aannemers en onderaannemers",
+          "Opleidingsaanbieders",
+          "Scholen en beroepsonderwijs",
+          "Zelfstandige professionals",
+          "Aanbieders van arbeidsmarktdiensten",
+          "Andere legitieme arbeidsmarktpartijen"
+        ],
+        "pointsLabel": "Hun plaats in hetzelfde netwerk",
         "points": [
-          "Teams en ploegen worden beheerd binnen de bedrijfswerkruimte.",
-          "Werkinstructies kunnen in je eigen taal worden geschreven — de originele tekst blijft altijd bewaard, en niets doet alsof het vertaald is wanneer dat niet zo is.",
-          "Berichten zijn standaard gesloten: alleen de deelnemers aan een gesprek kunnen het zien."
+          "ze werken met dezelfde echte werkregistraties, niet met losse bestanden;",
+          "rollen en verantwoordelijkheid blijven duidelijk gescheiden: wie publiceerde, wie werkte, wie bevestigde."
         ]
       }
     ],
+    "evidence": {
+      "heading": "Echt werk wordt professioneel bewijs",
+      "lead": "Eén werkgebeurtenis is één registratie. Ze kan meerdere weergaven voeden, maar wordt nooit gekopieerd en nooit uit het niets aangemaakt.",
+      "chainLabel": "De bewijsketen",
+      "chain": [
+        "Persoon",
+        "Datum / periode",
+        "Uren",
+        "Project / object",
+        "Uitgevoerd werk",
+        "Vaardigheden en competenties",
+        "Bron / bewijs",
+        "Bevestiging",
+        "Professionele geschiedenis — Living CV"
+      ],
+      "projectionsLabel": "Dezelfde registratie — meerdere weergaven",
+      "projections": [
+        "De professionele geschiedenis van de persoon",
+        "Teamgeschiedenis",
+        "Projectgeschiedenis",
+        "Geschiedenis van bedrijfscapaciteit"
+      ],
+      "note": "Eén werkgebeurtenis kan meerdere weergaven voeden. Bewijs wordt nooit gedupliceerd of verzonnen."
+    },
+    "afterHire": {
+      "heading": "Waarom gebruiken nadat u werk hebt gevonden?",
+      "lead": "Een gewone vacaturesite levert de meeste waarde vóór de aanname. LabourMarket.ai moet nuttiger worden zodra het echte werk begint.",
+      "boardLabel": "Een gewone vacaturesite",
+      "boardPoints": [
+        "De waarde is het hoogst tijdens het zoeken.",
+        "Na de aanname blijft de geschiedenis in aparte systemen.",
+        "Een nieuwe werkgever begint bij nul."
+      ],
+      "platformPoints": [
+        "Elke echte werkperiode voegt toe aan de professionele geschiedenis.",
+        "Bewijs, competenties en het Living CV groeien.",
+        "De werkgeschiedenis van team en bedrijf groeit mee.",
+        "Opgebouwde ervaring wordt context voor nieuwe kansen."
+      ],
+      "stages": [
+        "Zoeken",
+        "Aanname",
+        "Werk",
+        "Latere kansen"
+      ],
+      "schematicNote": "Schematisch — geen meting.",
+      "conclusion": "De waarde eindigt niet bij de aannamebeslissing — ze groeit elke dag dat er gewerkt wordt."
+    },
+    "trust": {
+      "heading": "Vertrouwen: feit ≠ afgeleid ≠ bevestigd",
+      "lead": "Het oorspronkelijke bewijs en de bron blijven bewaard. Wat de bron aangaf, blijft altijd gescheiden van wat het systeem afleidde en van wat een persoon of organisatie bevestigde. Een AI-interpretatie wordt nooit als feit behandeld.",
+      "tiers": [
+        {
+          "term": "Feit",
+          "meaning": "Wat de bron zelf aangaf: een datum, uren, een beschrijving van het werk.",
+          "example": "Bijvoorbeeld “8 u, 2025-03-12” in de brontabel."
+        },
+        {
+          "term": "Afgeleid",
+          "meaning": "Een interpretatie door het systeem of door regels. Altijd gemarkeerd als afgeleid en nooit een feit.",
+          "example": "Bijvoorbeeld een vaardigheid herkend uit de tekst van een werkbeschrijving."
+        },
+        {
+          "term": "Bevestigd",
+          "meaning": "Bevestiging door een persoon of organisatie. Gescheiden van wat de persoon zelf opgaf.",
+          "example": "Bijvoorbeeld een leidinggevende bevestigde de werkperiode."
+        }
+      ],
+      "noLabel": "Wat hier niet is",
+      "no": [
+        "Geen sterbeoordelingen.",
+        "Geen punten.",
+        "Geen ranglijsten van werknemers.",
+        "Geen kunstmatige rangschikking van de waarde van een persoon."
+      ]
+    },
+    "privacy": {
+      "heading": "Privacy en controle",
+      "lead": "Professioneel bewijs kan privé gedetailleerd zijn. Publieke vindbaarheid onthult niet wat beschermd moet worden.",
+      "privateLabel": "Alleen privé gedetailleerd",
+      "private": [
+        "Volledige werkregistraties en bewijs.",
+        "Het werkjournaal.",
+        "Project- en objectdetails."
+      ],
+      "publicNotLabel": "Publiek zoeken onthult niet",
+      "publicNot": [
+        "privécontacten;",
+        "vertrouwelijke klanten;",
+        "privé-informatie uit het werkjournaal;",
+        "beperkte persoonlijke informatie;",
+        "vertrouwelijke projectinformatie."
+      ],
+      "control": "Mensen en organisaties houden passende controle over wat openbaar is."
+    },
+    "europe": {
+      "heading": "De Europese arbeidsmarkt",
+      "body": "LabourMarket.ai is eerst voor Europa gebouwd en kan wereldwijd uitbreiden. Het is niet de vacaturesite van één land: het doel is arbeidsmarktpartijen te verbinden over landen, beroepen en sectoren heen.",
+      "points": [
+        "Een meertalige interface; de oorspronkelijke tekst blijft altijd bewaard.",
+        "Uitleg over documenten en vereisten per land.",
+        "Bronnen van openbare vacatures worden land voor land aangesloten — alleen zodra de voorwaarden van de bron zijn bevestigd."
+      ]
+    },
     "notYet": {
       "heading": "Wat het platform niet doet",
       "points": [
-        "Het markeert niemand uit zichzelf als bevestigd — een bevestigde status komt altijd van een echt persoon.",
-        "Betalingen lopen nog niet via het platform, en er is geen afrekenproces.",
-        "Het geeft geen juridisch advies. Documentbegeleiding is alleen informatief."
+        "Het markeert zelf nooit iets als bevestigd — een bevestigde status komt altijd van een echt persoon.",
+        "Betalingen via het platform zijn nog niet actief; er is geen afrekening.",
+        "Het geeft geen juridisch advies. Documentbegeleiding is alleen informatief.",
+        "Het beoordeelt mensen niet met punten of rangschikkingen."
       ]
     },
-    "sportsModel": {
-      "heading": "Het werkingsmodel: spelerskaarten, teams en objecten",
-      "intro": "Het product leent sportvocabulaire omdat het werkorganisatie zichtbaar maakt. Het is een werkingsmodel, geen spel — elke laag hieronder is een echt productonderdeel.",
-      "rows": [
-        {
-          "term": "Spelerskaart",
-          "meaning": "De capaciteitenkaart van een werknemer: echte vaardigheden, echt werkbewijs, en bevestigingen die altijd van echte mensen komen."
-        },
-        {
-          "term": "Team / ploeg",
-          "meaning": "Een echte werkeenheid binnen een bedrijf — aangemaakt en beheerd in de bedrijfswerkruimte."
-        },
-        {
-          "term": "Object / project",
-          "meaning": "Het speelveld: de plek waar het werk daadwerkelijk gebeurt en waar werknemers worden ingedeeld."
-        },
-        {
-          "term": "Eigenaar / beheerder",
-          "meaning": "De persoon die toewijzingen beheert: wie op welk object werkt, en wanneer een toewijzing eindigt."
-        },
-        {
-          "term": "Divisies / competities",
-          "meaning": "Optionele groeperings- en statuslagen voor markten en beroepen — het platform gebruikt ze om te groeperen, nooit om te rangschikken."
-        }
-      ],
-      "noRanking": "Geen ranglijsten en geen scores: niets in dit model beoordeelt mensen of zet ze op volgorde tegenover elkaar. Je ziet alleen groepering en eerlijke capaciteitssignalen."
-    },
     "data": {
-      "heading": "Jouw gegevens",
-      "body": "Toegang tot gegevens is standaard gesloten en wordt in duidelijke taal uitgelegd op de onderstaande pagina's."
+      "heading": "Uw gegevens",
+      "body": "Toegang tot gegevens is standaard gesloten en wordt in gewone woorden uitgelegd op de pagina's hieronder."
     },
     "links": {
       "workers": "Voor werknemers",
-      "companies": "Voor bedrijven"
+      "companies": "Voor bedrijven",
+      "agencies": "Voor bureaus"
     }
   },
   "accountBilling": {
@@ -13096,8 +13261,8 @@
       "chipPrefs": "Voorkeuren",
       "offersEmpty": "Je hebt nog geen aanbiedingen. Zodra je profiel klaar is, kunnen werkgevers je aanbiedingen sturen.",
       "searchAskCriteria": "Om goed te zoeken leggen we eerst je criteria vast — waar, wanneer en onder welke voorwaarden je wilt werken. Vul dit hieronder in en ik zoek meteen.",
-      "playerCardAfterLog": "Dit is je kaart na die invoer — je werkgeschiedenis is net sterker geworden.",
-      "playerCardBlocked": "Dit account heeft nog geen werknemerskaart. Registreer je eerste werk of upload een cv — de kaart groeit uit echte gegevens.",
+      "playerCardAfterLog": "Dit is je professionele profiel na die invoer — je werkgeschiedenis is net sterker geworden.",
+      "playerCardBlocked": "Dit account heeft nog geen professioneel profiel. Registreer je eerste werk of upload een cv — het profiel groeit uit echte registraties.",
       "fallback": "Ik kan je helpen met je cv, profiel en aanbiedingen. Wat wil je doen?",
       "userCv": "Ik upload mijn cv",
       "userProfile": "Toon mijn profiel",
@@ -13178,7 +13343,7 @@
       "chipEmployerAbsences": "Afwezigheden",
       "briefUnreadMessages": "Je hebt {count, plural, one {# ongelezen bericht} other {# ongelezen berichten}}.",
       "briefProfileGap": "Je profiel mist nog: {step}.",
-      "playerCardOpened": "Je kaart staat open in het paneel — echte gegevens uit je eigen records.",
+      "playerCardOpened": "Je professionele profiel staat open in het paneel — echte gegevens uit je eigen registraties.",
       "attachChoice": "Waarvoor is dit bestand?",
       "chipAttachPhoto": "Mijn werkfoto",
       "chipAttachCv": "Mijn cv",
@@ -13628,7 +13793,7 @@
       "briefInstructions": "Wachtende instructies: {count}.",
       "chipInstructions": "Instructies",
       "briefWorkConfirmed": "Een leidinggevende heeft de afgelopen 7 dagen {count, plural, one {# van uw werkregistraties} other {# van uw werkregistraties}} bevestigd — bevestigde vaardigheden: {skills}.",
-      "chipMyCard": "Mijn kaart",
+      "chipMyCard": "Mijn professionele profiel",
       "confirmIntro": "Wacht op uw bevestiging: {count} items.",
       "confirmLine": "• {name} · {date} — {text} (+{skills} vaardigh.)",
       "confirmChip": "Bevestigen: {name} · {date}",
@@ -13870,7 +14035,7 @@
     },
     "results": {
       "playerCard": {
-        "title": "Werknemerskaart"
+        "title": "Professioneel profiel"
       },
       "journal": {
         "title": "Werkjournaal"
@@ -13982,7 +14147,7 @@
       "opportunitiesPartial": "De ‘nieuw’-markeringen konden deze keer niet worden gelezen — de rijen zijn echt, nieuwheid wordt niet getoond.",
       "opportunitiesMore": "Nog {n} in de volledige lijst.",
       "retry": "Opnieuw proberen",
-      "playerCardError": "We konden je kaart niet lezen.",
+      "playerCardError": "We konden je professionele profiel niet lezen.",
       "calendarError": "We konden de kalender niet lezen.",
       "calendarBlocked": "De kalender kon niet worden gelezen — log opnieuw in.",
       "calendarEmpty": "Er is niets gepland voor de komende {days} dagen.",
@@ -16169,7 +16334,7 @@
     "badge": "Voorbeeld / beoordeling door de eigenaar · alleen voorbeelddata",
     "workers": {
       "title": "Werknemerskaarten",
-      "description": "Premium tegels voor werknemers in spelerskaartstijl. Geometrisch monogram als terugval — er wordt nooit een gezicht verzonnen.",
+      "description": "Verzorgde tegels met werknemersprofielen. Geometrisch monogram als terugval — er wordt nooit een gezicht verzonnen.",
       "listLabel": "Voorbeeldkaarten van werknemers"
     },
     "jobs": {
@@ -17516,7 +17681,7 @@
     "play": "Afspelen",
     "next": "Volgend moment",
     "previous": "Vorig moment",
-    "cardLabel": "Beroepskaart",
+    "cardLabel": "Professioneel profiel",
     "cardNote": "Een echte werkgeschiedenis die met de persoon meereist.",
     "cardSections": {
       "work": "Echt werk",

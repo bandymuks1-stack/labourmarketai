@@ -908,5 +908,35 @@
   "stream": {
     "today": "Šiandien",
     "yesterday": "Vakar"
+  },
+  "dayObject": {
+    "title": "Šios dienos darbas",
+    "where": "Kur dirbau",
+    "what": "Ką dariau",
+    "howLong": "Kiek laiko",
+    "evidence": "Kas tai įrodo",
+    "confirmed": "Kas už tai stovi",
+    "added": "Ką tai pridėjo prie mano profesinės istorijos",
+    "records": "{count, plural, one {# įrašas} other {# įrašai}}",
+    "whereNone": "Šią dieną vieta nenurodyta.",
+    "whatNone": "Veikla nenurodyta — žr. įrašus žemiau.",
+    "timeNone": "Laikas dar neįrašytas.",
+    "untimed": "{count, plural, one {# įrašas be įrašyto laiko — jis neskaičiuojamas kaip nulis darbo.} other {# įrašai be įrašyto laiko — jie neskaičiuojami kaip nulis darbo.}}",
+    "photosNone": "Šią dieną nuotraukų nėra.",
+    "photosUnavailable": "Nuotraukų dabar nepavyko perskaityti.",
+    "photoCount": "{count, plural, one {# jūsų pridėta nuotrauka} other {# jūsų pridėtos nuotraukos}}",
+    "photoAlt": "Jūsų pridėta darbo nuotrauka",
+    "previewUnavailable": "Nuotrauka išsaugota — peržiūra šiuo metu neprieinama.",
+    "photosMore": "{count, plural, one {+# galerijoje} other {+# galerijoje}}",
+    "confirmedByOther": "{count, plural, one {# įrašą patvirtino kitas žmogus} other {# įrašus patvirtino kitas žmogus}}",
+    "selfConfirmed": "{count, plural, one {# patvirtinta tik jūsų} other {# patvirtinta tik jūsų}}",
+    "waiting": "{count, plural, one {# laukia patvirtinimo} other {# laukia patvirtinimo}}",
+    "contested": "{count, plural, one {# grąžinta arba ginčijama} other {# grąžinta arba ginčijama}}",
+    "automatic": "automatinis",
+    "confirmedNone": "Vadovas šios dienos dar nėra patvirtinęs.",
+    "addedNoSkills": "Prie šios dienos įrašų dar nesusieta jokių įgūdžių.",
+    "addedProof": "{time} šios dienos darbo dabar yra vadovo patvirtintas įrašas jūsų profesinėje istorijoje.",
+    "addedNoProof": "Iš šios dienos kol kas nėra vadovo patvirtinto įrašo — tik vadovo atsakymas paverčia jūsų įrašą patvirtintu.",
+    "openHistory": "Atverti mano profesinę istoriją"
   }
 }

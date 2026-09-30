@@ -908,5 +908,35 @@
   "stream": {
     "today": "Dziś",
     "yesterday": "Wczoraj"
+  },
+  "dayObject": {
+    "title": "Ten dzień pracy",
+    "where": "Gdzie pracowałem",
+    "what": "Co robiłem",
+    "howLong": "Jak długo",
+    "evidence": "Co to potwierdza",
+    "confirmed": "Kto potwierdził",
+    "added": "Co to dodało do mojej historii zawodowej",
+    "records": "{count, plural, one {# wpis} other {# wpisy}}",
+    "whereNone": "Dla tego dnia nie zapisano miejsca.",
+    "whatNone": "Nie nazwano czynności — zobacz wpisy poniżej.",
+    "timeNone": "Czas nie został jeszcze zapisany.",
+    "untimed": "{count, plural, one {# wpis nie ma zapisanego czasu — nie liczy się jako zero pracy.} other {# wpisy nie mają zapisanego czasu — nie liczą się jako zero pracy.}}",
+    "photosNone": "Brak zdjęć z tego dnia.",
+    "photosUnavailable": "Nie udało się teraz odczytać zdjęć.",
+    "photoCount": "{count, plural, one {# dodane przez Ciebie zdjęcie} other {# dodane przez Ciebie zdjęcia}}",
+    "photoAlt": "Zdjęcie z pracy dodane przez Ciebie",
+    "previewUnavailable": "Zdjęcie zapisane — podgląd chwilowo niedostępny.",
+    "photosMore": "{count, plural, one {+# więcej w galerii} other {+# więcej w galerii}}",
+    "confirmedByOther": "{count, plural, one {# wpis potwierdzony przez kogoś innego} other {# wpisy potwierdzone przez kogoś innego}}",
+    "selfConfirmed": "{count, plural, one {# potwierdzony tylko przez Ciebie} other {# potwierdzone tylko przez Ciebie}}",
+    "waiting": "{count, plural, one {# czeka na potwierdzenie} other {# czekają na potwierdzenie}}",
+    "contested": "{count, plural, one {# zwrócony lub zakwestionowany} other {# zwrócone lub zakwestionowane}}",
+    "automatic": "automatyczne",
+    "confirmedNone": "Nikt jeszcze nie potwierdził tego dnia.",
+    "addedNoSkills": "Z wpisami tego dnia nie powiązano jeszcze umiejętności.",
+    "addedProof": "{time} z tego dnia jest teraz wpisem potwierdzonym przez kierownictwo w Twojej historii zawodowej.",
+    "addedNoProof": "Nic z tego dnia nie jest jeszcze potwierdzone przez kierownictwo — dopiero odpowiedź kierownictwa zmienia Twój wpis w potwierdzony.",
+    "openHistory": "Otwórz moją historię zawodową"
   }
 }

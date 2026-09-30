@@ -878,7 +878,7 @@
       "create_project": "Przejdź do swojego projektu",
       "request_more_info": "Poproś o brakujące szczegóły",
       "review_matches": "Sprawdź najlepsze opcje",
-      "complete_player_card": "Uzupełnij swoją kartę zawodową",
+      "complete_player_card": "Uzupełnij swój profil zawodowy",
       "add_work_proof": "Dodaj dowód pracy",
       "search_opportunities": "Przejdź do wyszukiwania pracy",
       "continue_to_demand": "Przejdź do swojego zapytania o pracowników",
@@ -912,7 +912,7 @@
   "quickNav": {
     "ariaLabel": "Szybka nawigacja po stronie",
     "top": "Góra",
-    "identity": "Karta",
+    "identity": "Profil",
     "records": "Dowody",
     "skills": "Umiejętności",
     "offers": "Oferty",
@@ -2822,7 +2822,7 @@
       "companyVerification": "Weryfikacja firm",
       "matching": "Warsztat dopasowania",
       "market": "Sytuacja rynkowa",
-      "league": "Liga krajów",
+      "league": "Kraje — rynek pracy",
       "readiness": "Centrum gotowości",
       "billing": "Rozliczenia (test)",
       "permissionMatrix": "Macierz uprawnień (kto co widzi)"
@@ -3216,12 +3216,12 @@
       }
     },
     "league": {
-      "eyebrow": "Liga krajów",
-      "title": "Liga rynku pracy",
+      "eyebrow": "Rynek pracy według kraju",
+      "title": "Rynek pracy według kraju",
       "subtitle": "Tabele zawodów wg kraju — rzeczywiste zespoły, dostępność i sygnał rynkowy.",
       "methodNote": "Wartość sygnału rynkowego pojawia się TYLKO tam, gdzie administrator wprowadził udokumentowaną średnią rynkową ORAZ próba zadeklarowanych oczekiwań liczy co najmniej 2 osoby. Wszędzie indziej komórka pokazuje „niewystarczające dane rynkowe” — tabela nigdy nie ocenia osoby.",
       "back": "Wróć do centrum administratora",
-      "empty": "Brak jeszcze danych ligi — tabele pojawią się same, gdy pracownicy ustawią swoje zawody.",
+      "empty": "Brak jeszcze danych — tabele pojawią się same, gdy pracownicy ustawią swoje zawody.",
       "unknownCountry": "Nie ustawiono kraju",
       "cellCount": "{n, plural, one {# zawód} few {# zawody} many {# zawodów} other {# zawodu}}",
       "availableNow": "dostępny teraz",
@@ -3254,7 +3254,7 @@
       "items": {
         "public_market_entry": "Publiczne wejście na rynek",
         "user_identity": "System tożsamości użytkownika",
-        "worker_profile_player_card": "Profil pracownika / karta zawodowa",
+        "worker_profile_player_card": "Profil zawodowy pracownika",
         "skill_intelligence": "Inteligencja umiejętności",
         "work_journal": "Dziennik pracy / rzeczywiste zapisy pracy",
         "company_demand": "System firm / zapotrzebowania",
@@ -4488,7 +4488,7 @@
         "admin": "Administracja",
         "planning": "Kalendarz",
         "network": "Sieć kontaktów",
-        "playerCard": "Moja karta",
+        "playerCard": "Mój profil zawodowy",
         "adminPlatform": "Administracja platformy"
       },
       "roleNotice": {
@@ -4609,7 +4609,7 @@
         "body_meanwhile": "W międzyczasie możesz przeglądać platformę w zakładce „Odkrywaj” (tylko podgląd)."
       },
       "menuLinks": {
-        "playerCard": "Moja karta",
+        "playerCard": "Mój profil zawodowy",
         "projects": "Projekty",
         "instructions": "Instrukcje",
         "bookings": "Rezerwacje",
@@ -5989,7 +5989,7 @@
       }
     },
     "model": {
-      "note": "Ta tablica podąża za modelem operacyjnym platformy: karty zawodowe pracowników są przypisywane do obiektów (projektów), a Ty zarządzasz przypisaniami.",
+      "note": "Ta tablica podąża za modelem operacyjnym platformy: profile zawodowe pracowników są przypisywane do obiektów (projektów), a Ty zarządzasz przypisaniami.",
       "link": "Jak działa ten model"
     },
     "map": {
@@ -6131,7 +6131,7 @@
       "missingDeclaredSkills": "Zadeklarowane umiejętności",
       "missingEvidence": "Dowody pracy",
       "followUpChip": "Brak aktywności — skontaktuj się",
-      "playerCardLink": "Karta zawodowa",
+      "playerCardLink": "Profil",
       "instructionLink": "Instrukcje",
       "skillClarifyLink": "Wyjaśnienie umiejętności"
     },
@@ -6139,7 +6139,7 @@
     "notes": {
       "readiness": "„Gotowy” oznacza wyłącznie, że pola sprawdzane tutaj są uzupełnione (imię i nazwisko, co najmniej jedna zadeklarowana umiejętność, co najmniej jeden wpis z dowodem pracy). To nie jest weryfikacja, zatwierdzenie dokumentu ani ocena AI.",
       "documents": "Dokumenty nie są jeszcze śledzone — żaden dokument nie jest nigdzie na tej tablicy pokazywany jako zatwierdzony lub zweryfikowany.",
-      "candidateSkill": "Wyjaśnienia umiejętności kandydatów są prywatne dla każdego pracownika; są pokazywane na własnej karcie zawodowej pracownika, nie tutaj."
+      "candidateSkill": "Wyjaśnienia umiejętności kandydatów są prywatne dla każdego pracownika; są pokazywane w profilu zawodowym pracownika, nie tutaj."
     },
     "report": {
       "title": "Raport statusu operacyjnego"
@@ -7430,9 +7430,9 @@
     ]
   },
   "playerCard": {
-    "pageTitle": "Moja karta",
+    "pageTitle": "Mój profil zawodowy",
     "pageIntro": "Podsumowanie Twojego profilu zawodowego — widoczne tylko dla Ciebie.",
-    "title": "Karta pracownika",
+    "title": "Profil zawodowy",
     "subtitle": "Przegląd Twojego profilu. Liczby są prawdziwe — nic nie zostało dodane.",
     "skillsLabel": "Umiejętności",
     "skillsHint": "Umiejętności podane przez Ciebie (jeszcze niesprawdzone).",
@@ -8158,7 +8158,7 @@
       "sections": {
         "action": "Dzisiejsze działanie",
         "overview": "Tydzień i rozwój",
-        "playerCard": "Karta zawodowa"
+        "playerCard": "Profil zawodowy"
       }
     },
     "home": {
@@ -10113,83 +10113,248 @@
     "footer": "Ten raport pokazuje wyłącznie rzeczywiste sygnały. Weryfikacja to decyzja człowieka."
   },
   "about": {
-    "metaTitle": "Czym jest Labour Market AI",
-    "metaDescription": "Proste wyjaśnienie, czym jest Labour Market AI: jak pracownicy budują prawdziwy profil na podstawie prawdziwej pracy, jak firmy opisują potrzeby i znajdują zespoły oraz jak platforma pozostaje uczciwa.",
-    "navLabel": "O Labour Market AI",
+    "metaTitle": "Czym jest LabourMarket.ai",
+    "metaDescription": "LabourMarket.ai to operacyjna platforma rynku pracy: prawdziwa praca staje się dla osoby historią zawodową, dowodami i żywym CV, a dla organizacji — historią wykonanej pracy i jej możliwości.",
+    "navLabel": "O LabourMarket.ai",
     "eyebrow": "O platformie",
-    "title": "Czym jest Labour Market AI i jak działa",
-    "lede": "Labour Market AI to platforma rynku pracy, na której pracownicy, firmy i zespoły pokazują prawdziwe umiejętności, widzą prawdziwe potrzeby i organizują prawdziwą pracę — lokalnie i w całej Europie.",
-    "honesty": "Wszystko opisane na tej stronie istnieje dziś w produkcie. Funkcje wciąż przygotowywane są tak oznaczone, a płatności nie są jeszcze aktywne.",
+    "title": "Czym jest LabourMarket.ai",
+    "lede": "LabourMarket.ai to operacyjna platforma rynku pracy. Łączy ludzi, pracodawców, agencje, zespoły, projekty, szkolenia i usługi rynku pracy wokół prawdziwej pracy — a nie tylko wyszukiwania ofert.",
+    "statusNote": "Ta strona wyjaśnia logikę systemu, a nie stan wdrożenia. To, z czego możesz korzystać dziś, widzisz na swoim koncie; wszystko, co jest jeszcze kierunkiem, jest oznaczone jako kierunek.",
+    "hero": {
+      "lead": "Zawodowa wartość człowieka nie powinna znikać za każdym razem, gdy zmienia pracodawcę. Prawdziwa praca może stać się trwałą historią zawodową: co osoba robiła, gdzie, kiedy, jak długo, w jakiej roli, z jakimi umiejętnościami i jakie dowody oraz potwierdzenia to wspierają.",
+      "leadOrg": "Dla organizacji ta sama prawdziwa praca buduje historię tego, co firma faktycznie zrobiła: projekty, zespoły, wykonane prace, godziny, kompetencje i dowody.",
+      "railPeopleLabel": "Dla osoby",
+      "railPeople": [
+        "Ludzie",
+        "Możliwości",
+        "Prawdziwa praca",
+        "Dowody",
+        "Rozwój zawodowy"
+      ],
+      "railCompaniesLabel": "Dla firmy",
+      "railCompanies": [
+        "Firmy",
+        "Ludzie",
+        "Projekty",
+        "Potwierdzona praca",
+        "Możliwości organizacji"
+      ],
+      "accumulate": "Każdy prawdziwy okres pracy dopisuje się do historii — nie kończy się ze zmianą pracodawcy.",
+      "railAria": "Jak ludzie i firmy rosną z prawdziwej pracy"
+    },
+    "lifecycle": {
+      "label": "Cały cykl pracy zawodowej",
+      "steps": [
+        "Możliwość",
+        "Zatrudnienie / współpraca",
+        "Prawdziwa praca",
+        "Dziennik pracy",
+        "Projekty i zadania",
+        "Czas pracy",
+        "Dowody pracy",
+        "Potwierdzenia",
+        "Umiejętności i kompetencje",
+        "Living CV — żywe CV zawodowe",
+        "Nowe możliwości",
+        "Zespoły",
+        "Możliwości firmy",
+        "Usługi rynku pracy"
+      ],
+      "note": "To wyjaśnienie systemu, a nie jego granica: łańcuch uzupełniają inne części rynku pracy."
+    },
     "loops": [
       {
-        "heading": "Dla pracowników",
+        "id": "people",
+        "heading": "Dla ludzi",
+        "lead": "Profil zawodowy to nie karta ani punkty, lecz doświadczenie, historia pracy i dowody prawdziwego człowieka.",
+        "flow": [
+          "Znaleźć możliwości",
+          "Przedstawić doświadczenie zawodowe",
+          "Pracować",
+          "Zapisywać wykonaną pracę",
+          "Zachować dowody",
+          "Otrzymywać potwierdzenia, gdy mają zastosowanie",
+          "Budować historię zawodową — Living CV",
+          "Wykorzystać zgromadzone doświadczenie do nowych możliwości"
+        ],
+        "pointsLabel": "Co odzwierciedla profil zawodowy",
         "points": [
-          "Tworzysz swój profil — swoją kartę zawodową — z umiejętnościami i doświadczeniem.",
-          "Prowadzisz dziennik pracy: krótkie wpisy o pracy, którą faktycznie wykonałeś.",
-          "Platforma czyta tekst Twojego dziennika i proponuje umiejętności, które rozpoznaje. Rozpoznawanie opiera się na regułach, może czegoś nie wychwycić, a nic nie trafia do Twojego profilu bez Twojego potwierdzenia.",
-          "Twój profil uczciwie pokazuje, czym poparta jest każda umiejętność: wpisana przez Ciebie, poparta wpisami w dzienniku albo potwierdzona przez osoby, z którymi faktycznie pracowałeś."
+          "doświadczenie i historię pracy;",
+          "umiejętności i kompetencje;",
+          "kwalifikacje i certyfikaty, jeśli są zapisane;",
+          "wykonaną pracę, godziny, projekty i obiekty;",
+          "dowody i potwierdzenia;",
+          "dostępność i preferencje zawodowe, gdy mają zastosowanie."
         ]
       },
       {
-        "heading": "Dla firm",
+        "id": "employers",
+        "heading": "Dla pracodawców",
+        "lead": "Wartość dla pracodawcy to nie tylko publikowanie ofert. Liczy się zachowanie wiedzy o tym, kto pracował, co zrobił, gdzie, kiedy, jak długo, co zostało ukończone, jakie są dowody i jakie możliwości zgromadziła organizacja.",
+        "flow": [
+          "Potrzeba",
+          "Ludzie",
+          "Zespół",
+          "Projekt / obiekt",
+          "Praca",
+          "Godziny i postęp",
+          "Dowody",
+          "Potwierdzenie",
+          "Historia faktycznie wykonanej pracy firmy",
+          "Przyszłe planowanie zasobów pracy (kierunek)"
+        ],
+        "pointsLabel": "Co zachowuje organizacja",
         "points": [
-          "Opisujesz swoje zapotrzebowanie: jaka praca, gdzie i kiedy.",
-          "Widzisz mapę rynku i uczciwe sygnały rynkowe zamiast obietnic.",
-          "Możesz szukać pracowników: profile pojawiają się zanonimizowane, a kontakt następuje wyłącznie za zgodą.",
-          "Projekty, zespoły i rezerwacje utrzymują pracę uporządkowaną w jednym miejscu."
+          "kto pracował i w jakiej roli;",
+          "jakie prace wykonano, gdzie i kiedy;",
+          "ile godzin i jaki postęp;",
+          "jakie dowody i potwierdzenia istnieją;",
+          "jakie możliwości zespół faktycznie zgromadził."
         ]
       },
       {
-        "heading": "Dla zespołów i komunikacji",
+        "id": "network",
+        "heading": "Dla agencji i innych uczestników rynku pracy",
+        "lead": "LabourMarket.ai to nie tylko system dla pracownika i pracodawcy. W tej samej sieci rynku pracy jest miejsce dla innych legalnych uczestników.",
+        "flow": [],
+        "participants": [
+          "Agencje rekrutacji i selekcji",
+          "Firmy pracy tymczasowej",
+          "Wykonawcy i podwykonawcy",
+          "Dostawcy szkoleń",
+          "Szkoły i placówki kształcenia zawodowego",
+          "Niezależni specjaliści",
+          "Dostawcy usług rynku pracy",
+          "Inni legalni uczestnicy rynku pracy"
+        ],
+        "pointsLabel": "Ich miejsce w tej samej sieci",
         "points": [
-          "Zespołami i brygadami zarządza się wewnątrz przestrzeni roboczej firmy.",
-          "Instrukcje pracy można pisać we własnym języku — oryginalny tekst jest zawsze zachowywany i nic nie udaje przetłumaczonego, gdy takie nie jest.",
-          "Wiadomości są domyślnie zamknięte: widzą je wyłącznie uczestnicy rozmowy."
+          "pracują na tych samych prawdziwych zapisach pracy, a nie na osobnych plikach;",
+          "role i odpowiedzialność pozostają wyraźnie rozdzielone: kto opublikował, kto pracował, kto potwierdził."
         ]
       }
     ],
+    "evidence": {
+      "heading": "Prawdziwa praca staje się dowodem zawodowym",
+      "lead": "Jedno zdarzenie pracy to jeden zapis. Może zasilać kilka widoków, ale nigdy nie jest kopiowany ani tworzony z niczego.",
+      "chainLabel": "Łańcuch dowodów",
+      "chain": [
+        "Osoba",
+        "Data / okres",
+        "Godziny",
+        "Projekt / obiekt",
+        "Wykonana praca",
+        "Umiejętności i kompetencje",
+        "Źródło / dowód",
+        "Potwierdzenie",
+        "Historia zawodowa — Living CV"
+      ],
+      "projectionsLabel": "Ten sam zapis — kilka widoków",
+      "projections": [
+        "Historia zawodowa osoby",
+        "Historia zespołu",
+        "Historia projektu",
+        "Historia możliwości firmy"
+      ],
+      "note": "Jedno zdarzenie pracy może zasilać kilka widoków. Dowody nigdy nie są duplikowane ani zmyślane."
+    },
+    "afterHire": {
+      "heading": "Po co korzystać, gdy praca jest już znaleziona?",
+      "lead": "Zwykły portal z ofertami daje najwięcej wartości przed zatrudnieniem. LabourMarket.ai ma stawać się bardziej użyteczna, gdy zaczyna się prawdziwa praca.",
+      "boardLabel": "Zwykły portal z ofertami",
+      "boardPoints": [
+        "Wartość jest największa podczas szukania.",
+        "Po zatrudnieniu historia zostaje w osobnych systemach.",
+        "Nowy pracodawca zaczyna od zera."
+      ],
+      "platformPoints": [
+        "Każdy prawdziwy okres pracy dopisuje się do historii zawodowej.",
+        "Rosną dowody, kompetencje i Living CV.",
+        "Razem z nimi rośnie historia pracy zespołu i firmy.",
+        "Zgromadzone doświadczenie staje się kontekstem dla nowych możliwości."
+      ],
+      "stages": [
+        "Szukanie",
+        "Zatrudnienie",
+        "Praca",
+        "Późniejsze możliwości"
+      ],
+      "schematicNote": "Schemat — nie pomiar.",
+      "conclusion": "Wartość nie kończy się wraz z decyzją o zatrudnieniu — rośnie każdego dnia, w którym się pracuje."
+    },
+    "trust": {
+      "heading": "Zaufanie: fakt ≠ wyprowadzone ≠ potwierdzone",
+      "lead": "Oryginalne dowody i ich źródło są zachowane. To, co podało źródło, jest zawsze oddzielone od tego, co wyprowadził system, i od tego, co potwierdziła osoba lub organizacja. Interpretacja sztucznej inteligencji nigdy nie jest traktowana jako fakt.",
+      "tiers": [
+        {
+          "term": "Fakt",
+          "meaning": "To, co podało samo źródło: data, godziny, opis pracy.",
+          "example": "Na przykład „8 godz., 2025-03-12” w tabeli źródłowej."
+        },
+        {
+          "term": "Wyprowadzone",
+          "meaning": "Interpretacja systemu lub reguł. Zawsze oznaczona jako wyprowadzona i nigdy nie staje się faktem.",
+          "example": "Na przykład umiejętność rozpoznana z tekstu opisu pracy."
+        },
+        {
+          "term": "Potwierdzone",
+          "meaning": "Potwierdzenie przez osobę lub organizację. Oddzielone od tego, co osoba podała o sobie sama.",
+          "example": "Na przykład przełożony potwierdził okres pracy."
+        }
+      ],
+      "noLabel": "Czego tu nie ma",
+      "no": [
+        "Żadnych ocen w gwiazdkach.",
+        "Żadnych punktów.",
+        "Żadnych rankingów pracowników.",
+        "Żadnego sztucznego szeregowania wartości człowieka."
+      ]
+    },
+    "privacy": {
+      "heading": "Prywatność",
+      "lead": "Dowody zawodowe mogą być szczegółowe prywatnie. Publiczne wyszukiwanie nie ujawnia tego, co trzeba chronić.",
+      "privateLabel": "Szczegółowo tylko prywatnie",
+      "private": [
+        "Pełne zapisy pracy i dowody.",
+        "Dziennik pracy.",
+        "Szczegóły projektów i obiektów."
+      ],
+      "publicNotLabel": "Publiczne wyszukiwanie nie ujawnia",
+      "publicNot": [
+        "prywatnych kontaktów;",
+        "poufnych klientów;",
+        "prywatnych informacji z dziennika pracy;",
+        "ograniczonych informacji osobistych;",
+        "poufnych informacji o projektach."
+      ],
+      "control": "Ludzie i organizacje zachowują odpowiednią kontrolę nad tym, co jest publiczne."
+    },
+    "europe": {
+      "heading": "Europejski rynek pracy",
+      "body": "LabourMarket.ai powstaje przede wszystkim dla Europy, ale może rozszerzać się na cały świat. To nie portal z ofertami jednego kraju: celem jest łączenie uczestników rynku pracy w różnych krajach, zawodach i sektorach.",
+      "points": [
+        "Wielojęzyczny interfejs; oryginalny tekst jest zawsze zachowany.",
+        "Wyjaśnienia dokumentów i wymagań dla każdego kraju.",
+        "Źródła publicznych ofert pracy są podłączane kraj po kraju — dopiero gdy warunki źródła są potwierdzone."
+      ]
+    },
     "notYet": {
       "heading": "Czego platforma nie robi",
       "points": [
-        "Sama z siebie nie oznacza nikogo jako potwierdzonego — status potwierdzenia zawsze pochodzi od realnej osoby.",
-        "Płatności nie przechodzą jeszcze przez platformę i nie ma finalizacji zamówienia.",
-        "Nie udziela porad prawnych. Wskazówki dotyczące dokumentów mają charakter wyłącznie informacyjny."
+        "Sama niczego nie oznacza jako potwierdzone — potwierdzony stan zawsze pochodzi od prawdziwej osoby.",
+        "Płatności przez platformę jeszcze nie działają; nie ma rozliczeń.",
+        "Nie udziela porad prawnych. Wskazówki dotyczące dokumentów mają charakter informacyjny.",
+        "Nie ocenia ludzi punktami ani rankingami."
       ]
-    },
-    "sportsModel": {
-      "heading": "Model działania: karty zawodowe, zespoły i obiekty",
-      "intro": "Produkt zapożycza słownictwo sportowe, ponieważ sprawia ono, że organizacja pracy staje się widoczna. To model działania, nie gra — każda warstwa poniżej to rzeczywisty element produktu.",
-      "rows": [
-        {
-          "term": "Karta zawodowa",
-          "meaning": "Karta kompetencji pracownika: realne umiejętności, realne dowody pracy i potwierdzenia, które zawsze pochodzą od prawdziwych osób."
-        },
-        {
-          "term": "Zespół / brygada",
-          "meaning": "Realna jednostka robocza wewnątrz firmy — tworzona i zarządzana w przestrzeni roboczej firmy."
-        },
-        {
-          "term": "Obiekt / projekt",
-          "meaning": "Boisko: miejsce, w którym praca faktycznie się odbywa i do którego przydzielani są pracownicy."
-        },
-        {
-          "term": "Właściciel / operator",
-          "meaning": "Osoba, która zarządza przydziałami: kto pracuje na którym obiekcie i kiedy przydział się kończy."
-        },
-        {
-          "term": "Dywizje / ligi",
-          "meaning": "Opcjonalne warstwy grupowania i statusu dla rynków i zawodów — platforma używa ich do grupowania, nigdy do tworzenia rankingu."
-        }
-      ],
-      "noRanking": "Brak rankingów i punktacji: nic w tym modelu nie ocenia ludzi ani nie porządkuje ich względem siebie. Widzisz jedynie grupowanie i uczciwe sygnały kompetencji."
     },
     "data": {
       "heading": "Twoje dane",
-      "body": "Dostęp do danych jest domyślnie zamknięty i wyjaśniony prostym językiem na poniższych stronach."
+      "body": "Dostęp do danych jest domyślnie zamknięty i prosto wyjaśniony na stronach poniżej."
     },
     "links": {
       "workers": "Dla pracowników",
-      "companies": "Dla firm"
+      "companies": "Dla firm",
+      "agencies": "Dla agencji"
     }
   },
   "accountBilling": {
@@ -13096,8 +13261,8 @@
       "chipPrefs": "Preferencje",
       "offersEmpty": "Nie masz jeszcze żadnych ofert. Gdy Twój profil będzie gotowy, pracodawcy będą mogli wysyłać Ci oferty, a te pojawią się właśnie tutaj.",
       "searchAskCriteria": "Żeby dobrze wyszukać, ustalmy najpierw Twoje kryteria — gdzie, kiedy i na jakich warunkach chcesz pracować. Uzupełnij to poniżej, a od razu wyszukam.",
-      "playerCardAfterLog": "Oto Twoja karta po tym wpisie — Twój rejestr pracy właśnie się wzmocnił.",
-      "playerCardBlocked": "To konto nie ma jeszcze karty zawodowej pracownika. Zapisz swoją pierwszą pracę lub prześlij CV — karta rośnie na podstawie prawdziwych zapisów.",
+      "playerCardAfterLog": "Oto Twój profil zawodowy po tym wpisie — Twój rejestr pracy właśnie się wzmocnił.",
+      "playerCardBlocked": "To konto nie ma jeszcze profilu zawodowego. Zapisz swoją pierwszą pracę lub prześlij CV — profil powstaje z prawdziwych wpisów.",
       "fallback": "Mogę pomóc z Twoim CV, profilem i ofertami pracy. Co chciałbyś/chciałabyś zrobić?",
       "userCv": "Chcę przesłać CV",
       "userProfile": "Pokaż mój profil",
@@ -13178,7 +13343,7 @@
       "chipEmployerAbsences": "Nieobecności",
       "briefUnreadMessages": "Masz {count, plural, one {# nieprzeczytaną wiadomość} few {# nieprzeczytane wiadomości} many {# nieprzeczytanych wiadomości} other {# nieprzeczytanej wiadomości}}.",
       "briefProfileGap": "W Twoim profilu wciąż brakuje: {step}.",
-      "playerCardOpened": "Twoja karta jest otwarta w panelu — prawdziwe dane z Twoich wpisów.",
+      "playerCardOpened": "Twój profil zawodowy jest otwarty w panelu — prawdziwe dane z Twoich wpisów.",
       "attachChoice": "Do czego służy ten plik?",
       "chipAttachPhoto": "Moje zdjęcie z pracy",
       "chipAttachCv": "Moje CV",
@@ -13628,7 +13793,7 @@
       "briefInstructions": "Oczekujące polecenia: {count}.",
       "chipInstructions": "Polecenia",
       "briefWorkConfirmed": "Przełożony potwierdził {count, plural, one {# Twój wpis pracy} few {# Twoje wpisy pracy} other {# Twoich wpisów pracy}} w ciągu ostatnich 7 dni — potwierdzone umiejętności: {skills}.",
-      "chipMyCard": "Moja karta",
+      "chipMyCard": "Mój profil zawodowy",
       "confirmIntro": "Czeka na potwierdzenie: {count} wpisów.",
       "confirmLine": "• {name} · {date} — {text} (+{skills} umiej.)",
       "confirmChip": "Potwierdź: {name} · {date}",
@@ -13870,7 +14035,7 @@
     },
     "results": {
       "playerCard": {
-        "title": "Karta pracownika"
+        "title": "Profil zawodowy"
       },
       "journal": {
         "title": "Dziennik pracy"
@@ -13982,7 +14147,7 @@
       "opportunitiesPartial": "Nie udało się teraz odczytać oznaczeń „nowe” — wiersze są prawdziwe, nowość nie jest pokazana.",
       "opportunitiesMore": "{n} więcej na pełnej liście.",
       "retry": "Spróbuj ponownie",
-      "playerCardError": "Nie udało się odczytać Twojej karty.",
+      "playerCardError": "Nie udało się odczytać Twojego profilu zawodowego.",
       "calendarError": "Nie udało się odczytać kalendarza.",
       "calendarBlocked": "Nie udało się odczytać kalendarza — zaloguj się ponownie.",
       "calendarEmpty": "Nic nie jest zaplanowane na najbliższe {days} dni.",
@@ -16169,7 +16334,7 @@
     "badge": "Podgląd / przegląd właściciela · wyłącznie dane przykładowe",
     "workers": {
       "title": "Karty pracowników",
-      "description": "Dopracowane kafelki pracowników w stylu karty zawodnika. Geometryczny monogram jako element zastępczy — twarz nigdy nie jest generowana.",
+      "description": "Dopracowane kafelki profili pracowników. Geometryczny monogram jako element zastępczy — twarz nigdy nie jest generowana.",
       "listLabel": "Przykładowe karty pracowników"
     },
     "jobs": {
@@ -17516,7 +17681,7 @@
     "play": "Odtwórz",
     "next": "Następny moment",
     "previous": "Poprzedni moment",
-    "cardLabel": "Karta zawodowa",
+    "cardLabel": "Profil zawodowy",
     "cardNote": "Prawdziwa historia pracy, która podróżuje razem z człowiekiem.",
     "cardSections": {
       "work": "Prawdziwa praca",

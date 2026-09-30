@@ -878,7 +878,7 @@
       "create_project": "Weiter zu Ihrem Projekt",
       "request_more_info": "Fehlende Details erfragen",
       "review_matches": "Die besten Optionen prüfen",
-      "complete_player_card": "Player Card vervollständigen",
+      "complete_player_card": "Berufsprofil vervollständigen",
       "add_work_proof": "Arbeitsnachweis hinzufügen",
       "search_opportunities": "Weiter zur Arbeitssuche",
       "continue_to_demand": "Weiter zu Ihrer Einstellungsanfrage",
@@ -912,7 +912,7 @@
   "quickNav": {
     "ariaLabel": "Schnelle Seitennavigation",
     "top": "Anfang",
-    "identity": "Karte",
+    "identity": "Profil",
     "records": "Einträge",
     "skills": "Fähigkeiten",
     "offers": "Angebote",
@@ -2822,7 +2822,7 @@
       "companyVerification": "Unternehmensverifizierung",
       "matching": "Matching-Werkbank",
       "market": "Marktlage",
-      "league": "Länderliga",
+      "league": "Länder — Arbeitsmarkt",
       "readiness": "Bereitschaftszentrum",
       "billing": "Abrechnung (Test)",
       "permissionMatrix": "Berechtigungsmatrix (wer sieht was)"
@@ -3216,12 +3216,12 @@
       }
     },
     "league": {
-      "eyebrow": "Länderliga",
-      "title": "Arbeitsmarkt-Liga",
+      "eyebrow": "Arbeitsmarkt nach Land",
+      "title": "Arbeitsmarkt nach Land",
       "subtitle": "Berufstabellen pro Land — echte Teams, Verfügbarkeit und das Markt-Thermometer.",
       "methodNote": "Ein Thermometerwert erscheint NUR dort, wo ein Admin einen belegten Marktdurchschnitt eingetragen hat UND die Stichprobe der erklärten Erwartungen mindestens 2 Personen umfasst. Überall sonst sagt die Zelle „unzureichende Marktdaten“ — die Tabelle bewertet niemals einen Menschen.",
       "back": "Zurück zum Admin-Hub",
-      "empty": "Noch keine Liga-Daten — Tabellen erscheinen von selbst, sobald Arbeitskräfte ihre Berufe angeben.",
+      "empty": "Noch keine Daten — Tabellen erscheinen von selbst, sobald Arbeitskräfte ihre Berufe angeben.",
       "unknownCountry": "Land nicht angegeben",
       "cellCount": "{n, plural, one {# Beruf} other {# Berufe}}",
       "availableNow": "jetzt verfügbar",
@@ -3254,7 +3254,7 @@
       "items": {
         "public_market_entry": "Öffentlicher Markteintritt",
         "user_identity": "Benutzeridentitätssystem",
-        "worker_profile_player_card": "Arbeitskraft-Profil / Spielerkarte",
+        "worker_profile_player_card": "Berufliches Profil der Arbeitskraft",
         "skill_intelligence": "Fähigkeits-Intelligenz",
         "work_journal": "Arbeitsjournal / echte Arbeitsnachweise",
         "company_demand": "Unternehmens- / Bedarfssystem",
@@ -4488,7 +4488,7 @@
         "admin": "Admin",
         "planning": "Kalender",
         "network": "Netzwerk",
-        "playerCard": "Meine Karte",
+        "playerCard": "Mein Berufsprofil",
         "adminPlatform": "Plattform-Administration"
       },
       "roleNotice": {
@@ -4609,7 +4609,7 @@
         "body_meanwhile": "In der Zwischenzeit — Sie können die Plattform über den Tab „Entdecken“ durchstöbern (nur Ansicht)."
       },
       "menuLinks": {
-        "playerCard": "Meine Karte",
+        "playerCard": "Mein Berufsprofil",
         "projects": "Projekte",
         "instructions": "Anleitungen",
         "bookings": "Buchungen",
@@ -5989,7 +5989,7 @@
       }
     },
     "model": {
-      "note": "Dieses Board folgt dem Betriebsmodell der Plattform: Spielerkarten von Arbeitskräften werden Objekten (Projekten) zugewiesen, und Sie verwalten die Zuweisungen.",
+      "note": "Dieses Board folgt dem Betriebsmodell der Plattform: berufliche Profile von Arbeitskräften werden Objekten (Projekten) zugewiesen, und Sie verwalten die Zuweisungen.",
       "link": "So funktioniert dieses Modell"
     },
     "map": {
@@ -6131,7 +6131,7 @@
       "missingDeclaredSkills": "Angegebene Fähigkeiten",
       "missingEvidence": "Arbeitsnachweise",
       "followUpChip": "Keine Aktivität — nachfassen",
-      "playerCardLink": "Spielerkarte",
+      "playerCardLink": "Profil",
       "instructionLink": "Anweisungen",
       "skillClarifyLink": "Fähigkeitsklärung"
     },
@@ -6139,7 +6139,7 @@
     "notes": {
       "readiness": "\"Bereit\" bedeutet nur, dass die hier geprüften Felder vorhanden sind (Name, mindestens eine angegebene Fähigkeit, mindestens ein Arbeitsnachweis-Eintrag). Es ist keine Verifizierung, keine Dokumentenfreigabe und kein KI-Urteil.",
       "documents": "Dokumente werden noch nicht erfasst — kein Dokument wird irgendwo auf diesem Board als freigegeben oder verifiziert angezeigt.",
-      "candidateSkill": "Klärungen zu Kandidaten-Fähigkeiten sind für jede Arbeitskraft privat; sie werden auf der eigenen Spielerkarte der Arbeitskraft angezeigt, nicht hier."
+      "candidateSkill": "Klärungen zu Kandidaten-Fähigkeiten sind für jede Arbeitskraft privat; sie werden im eigenen Berufsprofil der Arbeitskraft angezeigt, nicht hier."
     },
     "report": {
       "title": "Bericht zum Einsatzstatus"
@@ -7430,9 +7430,9 @@
     ]
   },
   "playerCard": {
-    "pageTitle": "Meine Karte",
+    "pageTitle": "Mein Berufsprofil",
     "pageIntro": "Eine Zusammenfassung Ihres Arbeitsprofils — nur für Sie sichtbar.",
-    "title": "Arbeitskraft-Karte",
+    "title": "Berufsprofil",
     "subtitle": "Ein Überblick über Ihr Profil. Die Zahlen sind echt — nichts hinzugefügt.",
     "skillsLabel": "Fähigkeiten",
     "skillsHint": "Von Ihnen angegebene Fähigkeiten (noch nicht geprüft).",
@@ -8158,7 +8158,7 @@
       "sections": {
         "action": "Heutige Aktion",
         "overview": "Woche & Wachstum",
-        "playerCard": "Spielerkarte"
+        "playerCard": "Berufsprofil"
       }
     },
     "home": {
@@ -10114,82 +10114,247 @@
   },
   "about": {
     "metaTitle": "Was ist LabourMarket.ai",
-    "metaDescription": "Eine Erklärung in einfacher Sprache zu LabourMarket.ai: wie Arbeitskräfte ein echtes Profil aus echter Arbeit aufbauen, wie Unternehmen Bedarfe beschreiben und Teams finden, und wie die Plattform ehrlich bleibt.",
+    "metaDescription": "LabourMarket.ai ist eine Betriebsplattform für den Arbeitsmarkt: Echte Arbeit wird für eine Person zu beruflicher Geschichte, Nachweisen und einem lebendigen Lebenslauf, für eine Organisation zu einer Arbeitshistorie und einem Leistungsprofil.",
     "navLabel": "Über LabourMarket.ai",
     "eyebrow": "Über die Plattform",
-    "title": "Was LabourMarket.ai ist und wie es funktioniert",
-    "lede": "LabourMarket.ai ist eine Arbeitsmarktplattform, auf der Arbeitskräfte, Unternehmen und Teams echte Fähigkeiten zeigen, echte Bedarfe sehen und echte Arbeit organisieren — lokal und in ganz Europa.",
-    "honesty": "Alles, was auf dieser Seite beschrieben wird, existiert heute im Produkt. Funktionen, die noch vorbereitet werden, sind als solche benannt, und Zahlungen sind noch nicht aktiv.",
+    "title": "Was ist LabourMarket.ai",
+    "lede": "LabourMarket.ai ist eine Betriebsplattform für den Arbeitsmarkt. Sie verbindet Menschen, Arbeitgeber, Agenturen, Teams, Projekte, Weiterbildung und Arbeitsmarktdienste rund um echte Arbeit — nicht nur die Stellensuche.",
+    "statusNote": "Diese Seite erklärt die Logik des Systems, nicht den Einführungsstand. Was Sie heute nutzen können, sehen Sie in Ihrem Konto; was noch eine Richtung ist, ist als Richtung gekennzeichnet.",
+    "hero": {
+      "lead": "Der berufliche Wert eines Menschen sollte nicht jedes Mal verschwinden, wenn er den Arbeitgeber wechselt. Echte Arbeit kann zu dauerhafter beruflicher Geschichte werden: was die Person getan hat, wo, wann, wie lange, in welcher Rolle, mit welchen Fähigkeiten und welche Nachweise und Bestätigungen das stützen.",
+      "leadOrg": "Für Organisationen baut dieselbe echte Arbeit die Historie dessen auf, was das Unternehmen tatsächlich geleistet hat: Projekte, Teams, ausgeführte Arbeiten, Stunden, Kompetenzen und Nachweise.",
+      "railPeopleLabel": "Für Personen",
+      "railPeople": [
+        "Menschen",
+        "Chancen",
+        "Echte Arbeit",
+        "Nachweise",
+        "Berufliches Wachstum"
+      ],
+      "railCompaniesLabel": "Für Unternehmen",
+      "railCompanies": [
+        "Unternehmen",
+        "Menschen",
+        "Projekte",
+        "Bestätigte Arbeit",
+        "Leistungsfähigkeit der Organisation"
+      ],
+      "accumulate": "Jeder echte Arbeitszeitraum ergänzt die Geschichte — sie endet nicht mit dem Arbeitgeberwechsel.",
+      "railAria": "Wie Menschen und Unternehmen aus echter Arbeit wachsen"
+    },
+    "lifecycle": {
+      "label": "Der gesamte Lebenszyklus beruflicher Arbeit",
+      "steps": [
+        "Chance",
+        "Beschäftigung / Zusammenarbeit",
+        "Echte Arbeit",
+        "Arbeitsjournal",
+        "Projekte und Aufgaben",
+        "Arbeitszeit",
+        "Arbeitsnachweise",
+        "Bestätigungen",
+        "Fähigkeiten und Kompetenzen",
+        "Living CV — ein lebendiger beruflicher Lebenslauf",
+        "Neue Chancen",
+        "Teams",
+        "Leistungsfähigkeit des Unternehmens",
+        "Arbeitsmarktdienste"
+      ],
+      "note": "Das erklärt das System; es ist nicht seine Grenze. Weitere Teile des Arbeitsmarkts erweitern die Kette."
+    },
     "loops": [
       {
-        "heading": "Für Arbeitskräfte",
+        "id": "people",
+        "heading": "Für Menschen",
+        "lead": "Ein berufliches Profil ist keine Karte und keine Punktzahl, sondern Erfahrung, Arbeitshistorie und Nachweise eines echten Menschen.",
+        "flow": [
+          "Chancen finden",
+          "Berufserfahrung darstellen",
+          "Arbeiten",
+          "Tatsächlich geleistete Arbeit erfassen",
+          "Nachweise bewahren",
+          "Bestätigungen erhalten, wo zutreffend",
+          "Berufliche Geschichte aufbauen — Living CV",
+          "Gesammelte Erfahrung für neue Chancen nutzen"
+        ],
+        "pointsLabel": "Was ein berufliches Profil abbildet",
         "points": [
-          "Sie erstellen Ihr Profil — Ihre Spielerkarte — mit Ihren Fähigkeiten und Ihrer Erfahrung.",
-          "Sie führen ein Arbeitsjournal: kurze Einträge über die Arbeit, die Sie tatsächlich erledigt haben.",
-          "Die Plattform liest Ihren Journaltext und schlägt Fähigkeiten vor, die sie erkennt. Die Erkennung ist regelbasiert, sie kann Dinge übersehen, und nichts wird ohne Ihre Bestätigung zu Ihrem Profil hinzugefügt.",
-          "Ihr Profil zeigt ehrlich, wie jede Fähigkeit gestützt ist: von Ihnen eingetragen, durch Journaleinträge gestützt oder von Personen bestätigt, mit denen Sie tatsächlich gearbeitet haben."
+          "Erfahrung und Arbeitshistorie;",
+          "Fähigkeiten und Kompetenzen;",
+          "Qualifikationen und Zertifikate, wo erfasst;",
+          "geleistete Arbeit, Stunden, Projekte und Objekte;",
+          "Nachweise und Bestätigungen;",
+          "Verfügbarkeit und berufliche Präferenzen, wo zutreffend."
         ]
       },
       {
-        "heading": "Für Unternehmen",
+        "id": "employers",
+        "heading": "Für Arbeitgeber",
+        "lead": "Der Wert für Arbeitgeber liegt nicht nur im Ausschreiben von Stellen. Wichtig ist, das Wissen zu bewahren, wer gearbeitet hat, was getan wurde, wo, wann, wie lange, was abgeschlossen ist, welche Nachweise es gibt und welche Leistungsfähigkeit die Organisation aufgebaut hat.",
+        "flow": [
+          "Bedarf",
+          "Menschen",
+          "Team",
+          "Projekt / Objekt",
+          "Arbeit",
+          "Stunden und Fortschritt",
+          "Nachweise",
+          "Bestätigung",
+          "Die Historie der tatsächlich geleisteten Arbeit des Unternehmens",
+          "Künftige Personalplanung (eine Richtung)"
+        ],
+        "pointsLabel": "Was die Organisation bewahrt",
         "points": [
-          "Sie beschreiben Ihren Bedarf: welche Arbeit, wo und wann.",
-          "Sie sehen die Marktkarte und ehrliche Marktsignale statt Versprechen.",
-          "Sie können nach Arbeitskräften suchen: Profile erscheinen anonymisiert, und Kontakt erfolgt nur mit Erlaubnis.",
-          "Projekte, Teams und Buchungen halten die Arbeit an einem Ort organisiert."
+          "wer gearbeitet hat und in welcher Rolle;",
+          "welche Arbeiten wo und wann ausgeführt wurden;",
+          "wie viele Stunden und welcher Fortschritt;",
+          "welche Nachweise und Bestätigungen es gibt;",
+          "welche Fähigkeiten das Team tatsächlich aufgebaut hat."
         ]
       },
       {
-        "heading": "Für Teams und Kommunikation",
+        "id": "network",
+        "heading": "Für Agenturen und andere Arbeitsmarktteilnehmer",
+        "lead": "LabourMarket.ai ist nicht nur ein System für Beschäftigte und Arbeitgeber. Auch andere legitime Teilnehmer haben ihren Platz im selben Arbeitsmarktnetzwerk.",
+        "flow": [],
+        "participants": [
+          "Personalvermittlungs- und Auswahlagenturen",
+          "Zeitarbeitsunternehmen",
+          "Auftragnehmer und Subunternehmer",
+          "Weiterbildungsanbieter",
+          "Schulen und berufsbildende Einrichtungen",
+          "Selbstständige Fachleute",
+          "Anbieter von Arbeitsmarktdiensten",
+          "Weitere legitime Arbeitsmarktteilnehmer"
+        ],
+        "pointsLabel": "Ihr Platz im selben Netzwerk",
         "points": [
-          "Teams und Kolonnen werden im Unternehmens-Arbeitsbereich verwaltet.",
-          "Arbeitsanweisungen können in Ihrer eigenen Sprache geschrieben werden — der Originaltext bleibt immer erhalten, und nichts gibt vor, übersetzt zu sein, wenn es das nicht ist.",
-          "Nachrichten sind standardmäßig geschlossen: Nur die Teilnehmer einer Unterhaltung können sie sehen."
+          "sie arbeiten mit denselben echten Arbeitsaufzeichnungen, nicht mit getrennten Dateien;",
+          "Rollen und Verantwortung bleiben klar getrennt: wer veröffentlicht hat, wer gearbeitet hat, wer bestätigt hat."
         ]
       }
     ],
+    "evidence": {
+      "heading": "Echte Arbeit wird zum beruflichen Nachweis",
+      "lead": "Ein Arbeitsereignis ist ein Datensatz. Er kann mehrere Ansichten speisen, wird aber nie kopiert und nie aus dem Nichts erzeugt.",
+      "chainLabel": "Die Nachweiskette",
+      "chain": [
+        "Person",
+        "Datum / Zeitraum",
+        "Stunden",
+        "Projekt / Objekt",
+        "Ausgeführte Arbeit",
+        "Fähigkeiten und Kompetenzen",
+        "Quelle / Nachweis",
+        "Bestätigung",
+        "Berufliche Geschichte — Living CV"
+      ],
+      "projectionsLabel": "Derselbe Datensatz — mehrere Ansichten",
+      "projections": [
+        "Die berufliche Geschichte der Person",
+        "Teamhistorie",
+        "Projekthistorie",
+        "Historie der Unternehmensleistung"
+      ],
+      "note": "Ein Arbeitsereignis kann mehrere Ansichten speisen. Nachweise werden nie dupliziert oder erfunden."
+    },
+    "afterHire": {
+      "heading": "Warum nutzen, wenn die Arbeit schon gefunden ist?",
+      "lead": "Eine herkömmliche Jobbörse liefert ihren größten Nutzen vor der Einstellung. LabourMarket.ai soll nützlicher werden, sobald echte Arbeit beginnt.",
+      "boardLabel": "Eine herkömmliche Jobbörse",
+      "boardPoints": [
+        "Der Nutzen ist bei der Suche am größten.",
+        "Nach der Einstellung bleibt die Geschichte in getrennten Systemen.",
+        "Ein neuer Arbeitgeber beginnt bei null."
+      ],
+      "platformPoints": [
+        "Jeder echte Arbeitszeitraum ergänzt die berufliche Geschichte.",
+        "Nachweise, Kompetenzen und der Living CV wachsen.",
+        "Die Arbeitshistorie von Team und Unternehmen wächst mit.",
+        "Gesammelte Erfahrung wird Kontext für neue Chancen."
+      ],
+      "stages": [
+        "Suche",
+        "Einstellung",
+        "Arbeit",
+        "Spätere Chancen"
+      ],
+      "schematicNote": "Schema — keine Messung.",
+      "conclusion": "Der Wert endet nicht mit der Einstellungsentscheidung — er wächst an jedem Tag, an dem gearbeitet wird."
+    },
+    "trust": {
+      "heading": "Vertrauen: Fakt ≠ abgeleitet ≠ bestätigt",
+      "lead": "Die ursprünglichen Nachweise und ihre Quelle bleiben erhalten. Was die Quelle angab, bleibt stets getrennt von dem, was das System ableitete, und von dem, was eine Person oder Organisation bestätigte. Eine KI-Interpretation gilt nie als Fakt.",
+      "tiers": [
+        {
+          "term": "Fakt",
+          "meaning": "Was die Quelle selbst angab: ein Datum, Stunden, eine Beschreibung der Arbeit.",
+          "example": "Zum Beispiel „8 Std., 2025-03-12“ in der Quelltabelle."
+        },
+        {
+          "term": "Abgeleitet",
+          "meaning": "Eine Interpretation durch das System oder durch Regeln. Immer als abgeleitet gekennzeichnet und nie ein Fakt.",
+          "example": "Zum Beispiel eine Fähigkeit, die aus dem Text einer Arbeitsbeschreibung erkannt wurde."
+        },
+        {
+          "term": "Bestätigt",
+          "meaning": "Bestätigung durch eine Person oder Organisation. Getrennt von dem, was die Person selbst angab.",
+          "example": "Zum Beispiel bestätigte eine Führungskraft den Arbeitszeitraum."
+        }
+      ],
+      "noLabel": "Was es hier nicht gibt",
+      "no": [
+        "Keine Sternebewertungen.",
+        "Keine Punkte.",
+        "Keine Ranglisten von Beschäftigten.",
+        "Keine künstliche Rangfolge des Wertes eines Menschen."
+      ]
+    },
+    "privacy": {
+      "heading": "Datenschutz",
+      "lead": "Berufliche Nachweise können privat detailliert sein. Öffentliche Auffindbarkeit legt nicht offen, was geschützt werden muss.",
+      "privateLabel": "Nur privat detailliert",
+      "private": [
+        "Vollständige Arbeitsaufzeichnungen und Nachweise.",
+        "Das Arbeitsjournal.",
+        "Projekt- und Objektdetails."
+      ],
+      "publicNotLabel": "Die öffentliche Suche legt nicht offen",
+      "publicNot": [
+        "private Kontakte;",
+        "vertrauliche Kunden;",
+        "private Angaben aus dem Arbeitsjournal;",
+        "eingeschränkte persönliche Angaben;",
+        "vertrauliche Projektinformationen."
+      ],
+      "control": "Menschen und Organisationen behalten angemessene Kontrolle darüber, was öffentlich ist."
+    },
+    "europe": {
+      "heading": "Der europäische Arbeitsmarkt",
+      "body": "LabourMarket.ai wird zuerst für Europa gebaut und kann weltweit wachsen. Es ist nicht die Jobbörse eines einzelnen Landes: Ziel ist es, Arbeitsmarktteilnehmer über Länder, Berufe und Branchen hinweg zu verbinden.",
+      "points": [
+        "Eine mehrsprachige Oberfläche; der Originaltext bleibt immer erhalten.",
+        "Erläuterungen zu Dokumenten und Anforderungen je Land.",
+        "Quellen öffentlicher Stellenanzeigen werden Land für Land angebunden — erst wenn die Bedingungen der Quelle bestätigt sind."
+      ]
+    },
     "notYet": {
       "heading": "Was die Plattform nicht tut",
       "points": [
-        "Sie markiert niemanden von selbst als bestätigt — ein Bestätigt-Status kommt immer von einer echten Person.",
-        "Zahlungen laufen noch nicht über die Plattform, und es gibt keinen Checkout.",
-        "Sie gibt keine Rechtsberatung. Hinweise zu Dokumenten sind nur informativ."
+        "Sie markiert selbst nie etwas als bestätigt — ein bestätigter Zustand kommt immer von einer echten Person.",
+        "Zahlungen über die Plattform sind noch nicht aktiv; es gibt keine Abrechnung.",
+        "Sie gibt keine Rechtsberatung. Dokumenthinweise dienen nur der Information.",
+        "Sie bewertet Menschen nicht mit Punkten oder Rankings."
       ]
-    },
-    "sportsModel": {
-      "heading": "Das Betriebsmodell: Spielerkarten, Teams und Objekte",
-      "intro": "Das Produkt verwendet Sport-Vokabular, weil es die Arbeitsorganisation sichtbar macht. Es ist ein Betriebsmodell, kein Spiel — jede Ebene unten ist eine echte Produktoberfläche.",
-      "rows": [
-        {
-          "term": "Spielerkarte",
-          "meaning": "Die Kompetenzkarte einer Arbeitskraft: echte Fähigkeiten, echte Arbeitsnachweise und Bestätigungen, die immer von echten Personen kommen."
-        },
-        {
-          "term": "Team / Kolonne",
-          "meaning": "Eine echte Arbeitseinheit innerhalb eines Unternehmens — erstellt und verwaltet im Unternehmens-Arbeitsbereich."
-        },
-        {
-          "term": "Objekt / Projekt",
-          "meaning": "Das Spielfeld: der Ort, an dem die Arbeit tatsächlich stattfindet und an dem Arbeitskräfte eingesetzt werden."
-        },
-        {
-          "term": "Eigentümer / Betreiber",
-          "meaning": "Die Person, die Einsätze verwaltet: wer an welchem Objekt arbeitet und wann ein Einsatz endet."
-        },
-        {
-          "term": "Divisionen / Ligen",
-          "meaning": "Optionale Gruppierungs- und Statusebenen für Märkte und Berufe — die Plattform nutzt sie zum Gruppieren, nie für Rangfolgen."
-        }
-      ],
-      "noRanking": "Keine Ranglisten und keine Punktzahlen: Nichts in diesem Modell bewertet Menschen oder ordnet sie gegeneinander. Sie sehen nur Gruppierungen und ehrliche Kompetenzsignale."
     },
     "data": {
       "heading": "Ihre Daten",
-      "body": "Der Zugriff auf Daten ist standardmäßig geschlossen und wird auf den folgenden Seiten in einfacher Sprache erklärt."
+      "body": "Der Zugriff auf Daten ist standardmäßig geschlossen und wird auf den Seiten unten in einfachen Worten erklärt."
     },
     "links": {
-      "workers": "Für Arbeitskräfte",
-      "companies": "Für Unternehmen"
+      "workers": "Für Beschäftigte",
+      "companies": "Für Unternehmen",
+      "agencies": "Für Agenturen"
     }
   },
   "accountBilling": {
@@ -13096,8 +13261,8 @@
       "chipPrefs": "Präferenzen",
       "offersEmpty": "Du hast noch keine Angebote. Sobald dein Profil fertig ist, können Arbeitgeber dir Angebote senden.",
       "searchAskCriteria": "Für eine genaue Suche legen wir zuerst deine Kriterien fest — wo, wann und zu welchen Bedingungen du arbeiten möchtest. Fülle das unten aus und ich suche sofort.",
-      "playerCardAfterLog": "Hier ist deine Karte nach diesem Eintrag — deine Arbeitshistorie ist gerade stärker geworden.",
-      "playerCardBlocked": "Dieses Konto hat noch keine Arbeitskarte. Erfasse deine erste Arbeit oder lade einen Lebenslauf hoch — die Karte wächst aus echten Einträgen.",
+      "playerCardAfterLog": "Hier ist dein Berufsprofil nach diesem Eintrag — deine Arbeitshistorie ist gerade stärker geworden.",
+      "playerCardBlocked": "Dieses Konto hat noch kein Berufsprofil. Erfasse deine erste Arbeit oder lade einen Lebenslauf hoch — das Profil entsteht aus echten Einträgen.",
       "fallback": "Ich kann dir mit Lebenslauf, Profil und Angeboten helfen. Was möchtest du tun?",
       "userCv": "Ich lade meinen Lebenslauf hoch",
       "userProfile": "Zeig mein Profil",
@@ -13178,7 +13343,7 @@
       "chipEmployerAbsences": "Abwesenheiten",
       "briefUnreadMessages": "Du hast {count, plural, one {# ungelesene Nachricht} other {# ungelesene Nachrichten}}.",
       "briefProfileGap": "Deinem Profil fehlt noch: {step}.",
-      "playerCardOpened": "Deine Karte ist im Panel geöffnet — echte Daten aus deinen eigenen Einträgen.",
+      "playerCardOpened": "Dein Berufsprofil ist im Panel geöffnet — echte Daten aus deinen eigenen Einträgen.",
       "attachChoice": "Wofür ist diese Datei?",
       "chipAttachPhoto": "Mein Arbeitsfoto",
       "chipAttachCv": "Mein Lebenslauf",
@@ -13628,7 +13793,7 @@
       "briefInstructions": "Wartende Anweisungen: {count}.",
       "chipInstructions": "Anweisungen",
       "briefWorkConfirmed": "Eine Führungskraft hat in den letzten 7 Tagen {count, plural, one {# Ihrer Arbeitseinträge} other {# Ihrer Arbeitseinträge}} bestätigt — bestätigte Fähigkeiten: {skills}.",
-      "chipMyCard": "Meine Karte",
+      "chipMyCard": "Mein Berufsprofil",
       "confirmIntro": "Wartet auf Ihre Bestätigung: {count} Einträge.",
       "confirmLine": "• {name} · {date} — {text} (+{skills} Fähigk.)",
       "confirmChip": "Bestätigen: {name} · {date}",
@@ -13870,7 +14035,7 @@
     },
     "results": {
       "playerCard": {
-        "title": "Arbeitskraft-Karte"
+        "title": "Berufsprofil"
       },
       "journal": {
         "title": "Arbeitsjournal"
@@ -13982,7 +14147,7 @@
       "opportunitiesPartial": "Die „neu“-Markierungen konnten diesmal nicht gelesen werden — die Einträge sind echt, Neuheit wird nicht angezeigt.",
       "opportunitiesMore": "Noch {n} in der vollständigen Liste.",
       "retry": "Erneut versuchen",
-      "playerCardError": "Deine Karte konnte nicht gelesen werden.",
+      "playerCardError": "Dein Berufsprofil konnte nicht gelesen werden.",
       "calendarError": "Der Kalender konnte nicht gelesen werden.",
       "calendarBlocked": "Der Kalender konnte nicht gelesen werden — bitte erneut anmelden.",
       "calendarEmpty": "Für die nächsten {days} Tage ist nichts geplant.",
@@ -16169,7 +16334,7 @@
     "badge": "Vorschau / Eigentümerprüfung · nur Beispieldaten",
     "workers": {
       "title": "Karten für Arbeitskräfte",
-      "description": "Hochwertige Kacheln für Arbeitskräfte im Spielerkarten-Stil. Geometrisches Monogramm als Rückfallebene — es wird nie ein Gesicht erfunden.",
+      "description": "Hochwertige Kacheln mit Profilen von Arbeitskräften. Geometrisches Monogramm als Rückfallebene — es wird nie ein Gesicht erfunden.",
       "listLabel": "Beispielkarten für Arbeitskräfte"
     },
     "jobs": {
@@ -17516,7 +17681,7 @@
     "play": "Abspielen",
     "next": "Nächster Moment",
     "previous": "Vorheriger Moment",
-    "cardLabel": "Berufskarte",
+    "cardLabel": "Berufsprofil",
     "cardNote": "Eine echte Arbeitsgeschichte, die mit der Person mitreist.",
     "cardSections": {
       "work": "Echte Arbeit",
