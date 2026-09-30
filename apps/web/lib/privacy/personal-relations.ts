@@ -88,6 +88,9 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "dashboard_preferences", key: "profile_id" },
   { table: "preferred_locations", key: "profile_id" },
   { table: "consented_login_location_signals", key: "profile_id" },
+  // How the platform classifies the account for reporting (real / test /
+  // internal) and why — data about the person, so it is theirs to see.
+  { table: "account_classifications", key: "profile_id" },
 
   // ── What the person says about themselves ─────────────────────────────
   { table: "profile_skill_claims", key: "profile_id" },

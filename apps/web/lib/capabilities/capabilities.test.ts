@@ -194,6 +194,7 @@ describe("the registry itself", () => {
       "shortlist.remove_draft",
       "shortlist.remove_confirm",
       "worker.activation_queue.get",
+      "marketplace.funnel.get",
       // Organization evidence import (2026-09-07) — one flow, eleven steps,
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product
@@ -267,6 +268,7 @@ describe("the registry itself", () => {
       "shortlist.remove_draft",
       "shortlist.remove_confirm",
       "worker.activation_queue.get",
+      "marketplace.funnel.get",
       // Organization evidence import (2026-09-07) — one flow, eleven steps,
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product
