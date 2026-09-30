@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -126,10 +128,33 @@ function capabilityIdForTool(name: string): string | undefined {
  * decision — see docs/integrations/CHATGPT_MCP_CLIENT_V1.md for what remains
  * an owner action inside ChatGPT itself.
  */
+/**
+ * THE PUBLISHED TOOLSET, AS A VERSION. The server is stateless streamable
+ * HTTP, so it cannot push `notifications/tools/list_changed`
+ * (`listChanged: false` is the honest declaration). What it CAN do is make a
+ * changed toolset visible in the one identity field every client reads on
+ * connect: `0.1.0+t<count>.<hash>` changes exactly when a deploy adds,
+ * removes or re-describes a tool, so a client (or a person comparing what
+ * ChatGPT shows with what the server serves) can tell a stale snapshot from
+ * a current one. Semver build metadata — ignored for precedence by design.
+ */
+let TOOLSET_VERSION: string | null = null;
+
+function toolsetVersion(): string {
+  if (TOOLSET_VERSION) return TOOLSET_VERSION;
+  const defs = toolDefs();
+  const digest = createHash("sha256")
+    .update(JSON.stringify(defs.map((d) => [d.name, d.description, d.inputSchema, d.annotations])))
+    .digest("hex")
+    .slice(0, 8);
+  TOOLSET_VERSION = `0.1.0+t${defs.length}.${digest}`;
+  return TOOLSET_VERSION;
+}
+
 function serverInfo(origin: string) {
   return {
     name: "labourmarket-ai",
-    version: "0.1.0",
+    version: toolsetVersion(),
     title: "LabourMarket.ai",
     websiteUrl: origin,
     icons: [
