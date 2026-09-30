@@ -8,7 +8,6 @@ import {
   stripLocaleSegment,
 } from "@/lib/auth/role-gated-routes";
 import { unsupportedLanguageRedirectPath } from "@/lib/i18n/unsupported-language";
-import { LANDING_MODE_COOKIE } from "@/lib/telemetry/landing-experience";
 import { env } from "@/lib/env";
 import {
   ONBOARDING_RETURN_HEADER,
@@ -292,30 +291,10 @@ export async function middleware(request: NextRequest) {
 
   const { locale, rest } = stripLocale(request.nextUrl.pathname);
 
-  // 1b. Landing arm (P0 entry-point fix, 2026-08-31). The root landing page
-  //     is STATIC (CDN-cached) and renders FOCUS — the default for every
-  //     visitor without an explicit choice, crawler included. A visitor
-  //     whose cookie records the explicit LIVE choice is rewritten to the
-  //     cookie-gated LIVE route HERE, so the arm is still resolved on the
-  //     server and only one tree is ever shipped, while the default entry
-  //     point no longer pays a serverless invocation (the failure mode
-  //     behind the 2026-08-31 ~60 s post-deploy fresh-visit report).
-  //     Rewrite, not redirect: the address bar keeps the ONE canonical
-  //     landing URL. `set-cookie`s from the intl response (NEXT_LOCALE)
-  //     are carried over so locale persistence is unaffected.
-  // `stripLocale("/lt")` yields rest === "/" — the locale root.
-  if (rest === "/") {
-    const landingMode = request.cookies.get(LANDING_MODE_COOKIE)?.value;
-    if (landingMode === "live") {
-      const liveUrl = request.nextUrl.clone();
-      liveUrl.pathname = `/${locale}/live-market-review`;
-      const liveResponse = NextResponse.rewrite(liveUrl);
-      intlResponse.headers.getSetCookie().forEach((cookie) => {
-        liveResponse.headers.append("set-cookie", cookie);
-      });
-      return liveResponse;
-    }
-  }
+  // 1b. The landing has ONE arm (owner decision 2026-09-30: the optional
+  //     LIVE arm and its cookie rewrite are removed). The root landing page
+  //     stays STATIC and CDN-cached for every visitor; an old LIVE cookie
+  //     no longer changes what is served.
 
   const needsAuth = REQUIRES_AUTH.some((p) => rest === p || rest.startsWith(p + "/"));
 

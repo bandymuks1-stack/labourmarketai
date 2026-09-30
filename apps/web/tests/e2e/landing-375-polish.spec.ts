@@ -21,10 +21,6 @@ const ENABLED = process.env.E2E_PUBLIC_LANDING === "1";
 const BASE = (process.env.E2E_PUBLIC_LANDING_URL ?? "https://labourmarket.ai").replace(/\/$/, "");
 const LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
-type Box = { x: number; y: number; w: number; h: number };
-const intersects = (a: Box, b: Box) =>
-  !(a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y);
-
 test.describe("@375px the public landing", () => {
   test.skip(!ENABLED, "anonymous read-only walk of a deployed landing; set E2E_PUBLIC_LANDING=1");
   test.use({ viewport: { width: 375, height: 812 } });
@@ -53,45 +49,12 @@ test.describe("@375px the public landing", () => {
       }
     });
 
-    test(`/${locale}: the LIVE/FOCUS control is in the flow and covers nothing`, async ({ page }) => {
+    // The LIVE / FOCUS control that once covered the counter line is gone
+    // with the LIVE arm (owner decision 2026-09-30): nothing of it renders.
+    test(`/${locale}: no LIVE/FOCUS control floats over the page`, async ({ page }) => {
       await page.goto(`${BASE}/${locale}`, { waitUntil: "networkidle" });
-      const switcher = page.getByTestId("landing-mode-switcher");
-      await expect(switcher).toHaveCount(1);
-      expect(await switcher.evaluate((el) => getComputedStyle(el).position)).toBe("static");
-
-      const boxOf = async (selector: string): Promise<Box[]> =>
-        page.locator(selector).evaluateAll((els) =>
-          els.map((el) => {
-            const r = el.getBoundingClientRect();
-            return { x: r.x, y: r.y, w: r.width, h: r.height };
-          }),
-        );
-      // Against the counter line (when the reader answered) and every sample
-      // card (when the band rendered): the control's box meets none of them,
-      // at the fold and after scrolling each into view.
-      for (const target of ["[data-testid='entry-numbers']", "[data-testid='landing-open-job']"]) {
-        const targets = page.locator(target);
-        const n = await targets.count();
-        for (let i = 0; i < n; i += 1) {
-          await targets.nth(i).scrollIntoViewIfNeeded();
-          const [sw] = await boxOf("[data-testid='landing-mode-switcher']");
-          const [t] = await targets.nth(i).evaluateAll((els) =>
-            els.map((el) => {
-              const r = el.getBoundingClientRect();
-              return { x: r.x, y: r.y, w: r.width, h: r.height };
-            }),
-          );
-          expect(intersects(sw, t), `${target}[${i}] is under the switcher`).toBe(false);
-        }
-      }
-      // And it is still the same two-button control, tappable, 44px tall.
-      const buttons = switcher.locator("button");
-      await expect(buttons).toHaveCount(2);
-      await switcher.scrollIntoViewIfNeeded();
-      for (const b of await buttons.all()) {
-        const box = await b.boundingBox();
-        expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
-      }
+      await expect(page.getByRole("group", { name: "LIVE / FOCUS" })).toHaveCount(0);
+      await expect(page.getByText(/^LIVE$/)).toHaveCount(0);
     });
 
     test(`/${locale}: no two sample cards read the same`, async ({ page }) => {
