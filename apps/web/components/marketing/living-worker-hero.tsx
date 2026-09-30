@@ -123,14 +123,20 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
     >
       {/* the person: full-bleed photograph, always centred */}
       <div className="relative h-[78svh] min-h-[30rem] w-full md:h-[min(86vh,56rem)]">
-        {/* a slow push-in, restarted with every moment */}
-        <div
-          key={index}
-          className={cn("absolute inset-0", playing && !held && "living-hero-push")}
-          style={{ animationDuration: `${MOMENT_MS + FADE_MS}ms` }}
-        >
-          {layers.b !== null ? layer(layers.b, false) : null}
-          {layer(layers.a, true)}
+        {/* on a wide screen the photograph starts right of the words, so the
+            person never stands under the headline (the 3:2 frame then fits
+            without cropping); on a phone it is full-bleed above them */}
+        <div className="absolute inset-0 overflow-hidden md:left-[18%]">
+          {/* a slow push-in, restarted with every moment */}
+          <div
+            key={index}
+            className={cn("absolute inset-0", playing && !held && "living-hero-push")}
+            style={{ animationDuration: `${MOMENT_MS + FADE_MS}ms` }}
+          >
+            {layers.b !== null ? layer(layers.b, false) : null}
+            {layer(layers.a, true)}
+          </div>
+          <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 hidden w-1/4 bg-gradient-to-r from-ink-900 to-transparent md:block" />
         </div>
         {/* light falls off to the words: bottom and left, never across the face */}
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-900 via-ink-900/25 to-transparent" />
@@ -144,7 +150,7 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
         <div
           className={cn(
             "absolute z-10 w-[min(21rem,calc(100%-2rem))] origin-left rounded-xl border border-ink-600 bg-ink-800/85 p-4 shadow-2xl backdrop-blur-md transition-all duration-700 ease-out",
-            "bottom-28 left-1/2 -translate-x-1/2 md:bottom-auto md:left-[58%] md:top-1/2 md:-translate-y-1/2 md:translate-x-0",
+            "bottom-28 left-1/2 -translate-x-1/2 md:bottom-auto md:left-auto md:right-8 md:top-1/2 md:-translate-y-1/2 md:translate-x-0",
             moment.card ? "scale-100 opacity-100" : "pointer-events-none scale-90 opacity-0",
           )}
           aria-hidden={moment.card ? undefined : true}

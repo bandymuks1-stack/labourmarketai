@@ -48,7 +48,8 @@ const LOOK =
   "soft motivated light with gentle falloff, subtle film grain, 50mm lens at eye level, shallow depth of field. " +
   "Composition: the person stands in the CENTRAL THIRD of a 3:2 frame, head near the upper third, full figure " +
   "or knees-up, generous space left and right. Colour: deep obsidian shadows, warm ivory highlights, a restrained " +
-  "warm-gold accent only where light naturally falls. No text, no logos, no brand marks, no watermarks, no flags.";
+  "warm-gold accent only where light naturally falls. No text, no logos, no brand marks, no watermarks, no flags. " +
+  "Clothing is plain: no embroidered or printed names, titles, words or badges on any garment or helmet.";
 
 const KEEP =
   "This is the SAME person as in the reference photograph: keep the face, facial structure, skin, eyes, hair colour " +

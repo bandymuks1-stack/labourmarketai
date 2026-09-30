@@ -1,3 +1,112 @@
 {
-  "personas": {}
+  "personas": {
+    "tomas": {
+      "name": "Tomas K.",
+      "model": "gemini-3-pro-image",
+      "stages": [
+        {
+          "key": "base",
+          "stem": "00-base",
+          "width": 2528,
+          "height": 1696
+        },
+        {
+          "key": "tool",
+          "stem": "01-tool",
+          "width": 2528,
+          "height": 1696
+        },
+        {
+          "key": "site-lt",
+          "stem": "02-site-lt",
+          "width": 2528,
+          "height": 1696
+        },
+        {
+          "key": "van",
+          "stem": "03-van",
+          "width": 2528,
+          "height": 1696
+        },
+        {
+          "key": "country-no",
+          "stem": "04-country-no",
+          "width": 2528,
+          "height": 1696
+        },
+        {
+          "key": "specialist",
+          "stem": "05-specialist",
+          "width": 2528,
+          "height": 1696
+        },
+        {
+          "key": "foreman",
+          "stem": "06-foreman",
+          "width": 2528,
+          "height": 1696
+        },
+        {
+          "key": "owner",
+          "stem": "07-owner",
+          "width": 2528,
+          "height": 1696
+        }
+      ]
+    },
+    "rasa": {
+      "name": "Rasa J.",
+      "model": "gemini-3-pro-image",
+      "stages": [
+        {
+          "key": "base",
+          "stem": "00-base",
+          "width": 2528,
+          "height": 1696
+        },
+        {
+          "key": "tool",
+          "stem": "01-tool",
+          "width": 2528,
+          "height": 1696
+        },
+        {
+          "key": "kitchen-lt",
+          "stem": "02-kitchen-lt",
+          "width": 2528,
+          "height": 1696
+        },
+        {
+          "key": "car",
+          "stem": "03-car",
+          "width": 2528,
+          "height": 1696
+        },
+        {
+          "key": "country-no",
+          "stem": "04-country-no",
+          "width": 2528,
+          "height": 1696
+        },
+        {
+          "key": "cook",
+          "stem": "05-cook",
+          "width": 2528,
+          "height": 1696
+        },
+        {
+          "key": "head-chef",
+          "stem": "06-head-chef",
+          "width": 2528,
+          "height": 1696
+        },
+        {
+          "key": "owner",
+          "stem": "07-owner",
+          "width": 2528,
+          "height": 1696
+        }
+      ]
+    }
+  }
 }
