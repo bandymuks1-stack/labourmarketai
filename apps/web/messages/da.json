@@ -292,7 +292,7 @@
         "journal": "Mit CV",
         "search": "[EN] Search",
         "advanced": "Avanceret styring",
-        "playerCard": "Mit kort"
+        "playerCard": "Min faglige profil"
       },
       "moreSection": {
         "title": "Detaljeret overblik",
@@ -1532,7 +1532,7 @@
     "hub": {
       "matching": "[EN] Matching workbench",
       "market": "[EN] Market situation",
-      "league": "Landsliga"
+      "league": "Lande — arbejdsmarked"
     },
     "market": {
       "eyebrow": "[EN] Admin · Market",
@@ -1606,12 +1606,12 @@
       }
     },
     "league": {
-      "eyebrow": "Landsliga",
-      "title": "Arbejdsmarkedsliga",
+      "eyebrow": "Arbejdsmarked pr. land",
+      "title": "Arbejdsmarked pr. land",
       "subtitle": "Faglige tabeller pr. land — rigtige hold, tilgængelighed og markedstermometeret.",
       "methodNote": "En termometerværdi vises KUN dér, hvor en admin har indtastet et kildebelagt markedsgennemsnit, OG stikprøven af erklærede forventninger er mindst 2 personer. Alle andre steder siger cellen \"utilstrækkelige markedsdata\" — tabellen vurderer aldrig et menneske.",
       "back": "Tilbage til admin-hub",
-      "empty": "Ingen liga-data endnu — tabellerne kommer af sig selv, når arbejdere angiver deres fag.",
+      "empty": "Ingen data endnu — tabellerne kommer af sig selv, når arbejdere angiver deres fag.",
       "unknownCountry": "Land ikke angivet",
       "cellCount": "{n, plural, one {# fag} other {# fag}}",
       "availableNow": "ledige nu",
@@ -1643,7 +1643,7 @@
       "items": {
         "public_market_entry": "[EN] Public market entry",
         "user_identity": "[EN] User identity system",
-        "worker_profile_player_card": "[EN] Worker profile / player card",
+        "worker_profile_player_card": "[EN] Worker professional profile",
         "skill_intelligence": "[EN] Skill intelligence",
         "work_journal": "[EN] Work journal / real work records",
         "company_demand": "[EN] Company / demand system",
@@ -1829,7 +1829,7 @@
       "sections": {
         "action": "Dagens handling",
         "overview": "Uge & vækst",
-        "playerCard": "Spillerkort"
+        "playerCard": "Professionelt profil"
       }
     }
   },
@@ -3890,7 +3890,7 @@
       "briefOverdue": "[EN] {count} tasks are past their due day.",
       "briefLogToday": "[EN] You are working today and nothing is logged yet.",
       "briefProfileGap": "[EN] Your profile is still missing: {step}.",
-      "playerCardOpened": "Dit kort er åbent i panelet — rigtige data fra dine egne registreringer.",
+      "playerCardOpened": "Din faglige profil er åben i panelet — rigtige data fra dine egne registreringer.",
       "attachChoice": "Hvad er denne fil til?",
       "chipAttachPhoto": "Mit arbejdsfoto",
       "chipAttachCv": "Mit CV",
@@ -4122,7 +4122,7 @@
       "briefInstructions": "Ventende instruktioner: {count}.",
       "chipInstructions": "Instruktioner",
       "briefWorkConfirmed": "En leder har bekræftet {count, plural, one {# af dine arbejdsposter} other {# af dine arbejdsposter}} de seneste 7 dage — bekræftede kompetencer: {skills}.",
-      "chipMyCard": "Mit kort",
+      "chipMyCard": "Min faglige profil",
       "confirmIntro": "Afventer din bekræftelse: {count} poster.",
       "confirmLine": "• {name} · {date} — {text} (+{skills} kompet.)",
       "confirmChip": "Bekræft: {name} · {date}",
@@ -6369,7 +6369,7 @@
     "badge": "Forhåndsvisning / ejerens gennemgang · kun eksempeldata",
     "workers": {
       "title": "Medarbejderkort",
-      "description": "Gennemarbejdede medarbejderfelter i spillerkortstil. Geometrisk monogram som reserve — der opdigtes aldrig et ansigt.",
+      "description": "Gennemarbejdede medarbejderprofiler. Geometrisk monogram som reserve — der opdigtes aldrig et ansigt.",
       "listLabel": "Eksempler på medarbejderkort"
     },
     "jobs": {

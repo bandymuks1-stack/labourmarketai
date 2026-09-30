@@ -878,7 +878,7 @@
       "create_project": "Continue to your project",
       "request_more_info": "Ask for the missing details",
       "review_matches": "Review the best options",
-      "complete_player_card": "Complete your Player Card",
+      "complete_player_card": "Complete your professional profile",
       "add_work_proof": "Add work proof",
       "search_opportunities": "Continue to work search",
       "continue_to_demand": "Continue to your hiring request",
@@ -912,7 +912,7 @@
   "quickNav": {
     "ariaLabel": "Quick page navigation",
     "top": "Top",
-    "identity": "Card",
+    "identity": "Profile",
     "records": "Records",
     "skills": "Skills",
     "offers": "Offers",
@@ -2822,7 +2822,7 @@
       "companyVerification": "Company verification",
       "matching": "Matching workbench",
       "market": "Market situation",
-      "league": "Country league",
+      "league": "Country labour market",
       "readiness": "Readiness center",
       "billing": "Billing (test)",
       "permissionMatrix": "Permission matrix (who sees what)"
@@ -3216,12 +3216,12 @@
       }
     },
     "league": {
-      "eyebrow": "Country league",
-      "title": "Labour market league",
+      "eyebrow": "Country labour market",
+      "title": "Labour market by country",
       "subtitle": "Profession tables per country — real teams, availability and the market signal.",
       "methodNote": "A market-signal value renders ONLY where an admin entered a sourced market average AND the declared-expectation sample is at least 2 people. Everywhere else the cell says \"insufficient market data\" — the table never assesses a person.",
       "back": "Back to admin hub",
-      "empty": "No league data yet — tables appear by themselves once workers set their professions.",
+      "empty": "No data yet — tables appear by themselves once workers set their professions.",
       "unknownCountry": "Country not set",
       "cellCount": "{n, plural, one {# profession} other {# professions}}",
       "availableNow": "available now",
@@ -3254,7 +3254,7 @@
       "items": {
         "public_market_entry": "Public market entry",
         "user_identity": "User identity system",
-        "worker_profile_player_card": "Worker profile / player card",
+        "worker_profile_player_card": "Worker professional profile",
         "skill_intelligence": "Skill intelligence",
         "work_journal": "Work journal / real work records",
         "company_demand": "Company / demand system",
@@ -4488,7 +4488,7 @@
         "admin": "Admin",
         "planning": "Calendar",
         "network": "Network",
-        "playerCard": "My card",
+        "playerCard": "My professional profile",
         "adminPlatform": "Platform administration"
       },
       "roleNotice": {
@@ -4609,7 +4609,7 @@
         "body_meanwhile": "In the meantime — you can browse the platform via the \"Discover\" tab (view only)."
       },
       "menuLinks": {
-        "playerCard": "My card",
+        "playerCard": "My professional profile",
         "projects": "Projects",
         "instructions": "Instructions",
         "bookings": "Bookings",
@@ -5989,7 +5989,7 @@
       }
     },
     "model": {
-      "note": "This board follows the platform's operating model: worker player cards are assigned to objects (projects), and you manage the assignments.",
+      "note": "This board follows the platform's operating model: workers' professional profiles are assigned to objects (projects), and you manage the assignments.",
       "link": "How this model works"
     },
     "map": {
@@ -6131,7 +6131,7 @@
       "missingDeclaredSkills": "Declared skills",
       "missingEvidence": "Work evidence",
       "followUpChip": "No activity — follow up",
-      "playerCardLink": "Player card",
+      "playerCardLink": "Profile",
       "instructionLink": "Instructions",
       "skillClarifyLink": "Skill clarification"
     },
@@ -6139,7 +6139,7 @@
     "notes": {
       "readiness": "\"Ready\" means only that the fields checked here are present (name, at least one declared skill, at least one work-evidence entry). It is not a verification, a document approval, or an AI judgement.",
       "documents": "Documents are not tracked yet — no document is shown as approved or verified anywhere on this board.",
-      "candidateSkill": "Candidate skill clarifications are private to each worker; they are shown on the worker's own player card, not here."
+      "candidateSkill": "Candidate skill clarifications are private to each worker; they are shown on the worker's own professional profile, not here."
     },
     "report": {
       "title": "Operational status report"
@@ -7430,9 +7430,9 @@
     ]
   },
   "playerCard": {
-    "pageTitle": "My card",
+    "pageTitle": "My professional profile",
     "pageIntro": "A summary of your work profile — visible only to you.",
-    "title": "Worker card",
+    "title": "Professional profile",
     "subtitle": "An overview of your profile. The numbers are real — nothing added.",
     "skillsLabel": "Skills",
     "skillsHint": "Skills you listed (not reviewed yet).",
@@ -8158,7 +8158,7 @@
       "sections": {
         "action": "Today's action",
         "overview": "Week & growth",
-        "playerCard": "Player card"
+        "playerCard": "Professional profile"
       }
     },
     "home": {
@@ -10114,82 +10114,247 @@
   },
   "about": {
     "metaTitle": "What is LabourMarket.ai",
-    "metaDescription": "A plain-language explanation of LabourMarket.ai: how workers build a real profile from real work, how companies describe needs and find teams, and how the platform stays honest.",
+    "metaDescription": "LabourMarket.ai is a labour-market operating platform: real work becomes professional history, evidence and a living CV for a person, and a work history and capability record for an organisation.",
     "navLabel": "About LabourMarket.ai",
     "eyebrow": "About the platform",
-    "title": "What LabourMarket.ai is and how it works",
-    "lede": "LabourMarket.ai is a labour-market platform where workers, companies and teams show real skills, see real needs and organise real work — locally and across Europe.",
-    "honesty": "Everything described on this page exists in the product today. Features still being prepared are named as such, and payments are not active yet.",
+    "title": "What is LabourMarket.ai",
+    "lede": "LabourMarket.ai is a labour-market operating platform. It connects people, employers, agencies, teams, projects, training and labour-market services around real work — not just a job search.",
+    "statusNote": "This page explains how the system works, not its deployment status. What you can use today is what you see in your account; anything that is still a direction is marked as a direction.",
+    "hero": {
+      "lead": "A person's professional value should not disappear every time they change employer. Real work can become lasting professional history: what the person did, where, when, for how long, in what role, with which skills, and what evidence and confirmation supports it.",
+      "leadOrg": "For organisations, the same real work builds the record of what the company has actually done: projects, teams, work performed, hours, competencies and evidence.",
+      "railPeopleLabel": "For a person",
+      "railPeople": [
+        "People",
+        "Opportunities",
+        "Real work",
+        "Evidence",
+        "Professional growth"
+      ],
+      "railCompaniesLabel": "For a company",
+      "railCompanies": [
+        "Companies",
+        "People",
+        "Projects",
+        "Verified work",
+        "Organisational capability"
+      ],
+      "accumulate": "Every real period of work adds to the history — it does not end when the employer changes.",
+      "railAria": "How people and companies grow from real work"
+    },
+    "lifecycle": {
+      "label": "The whole professional-work lifecycle",
+      "steps": [
+        "Opportunity",
+        "Employment / cooperation",
+        "Real work",
+        "Work Journal",
+        "Projects and tasks",
+        "Working time",
+        "Work evidence",
+        "Confirmations",
+        "Skills and competencies",
+        "Living CV — a living professional CV",
+        "New opportunities",
+        "Teams",
+        "Company capability",
+        "Labour-market services"
+      ],
+      "note": "This explains the system; it is not its boundary. Other parts of the labour market extend the chain."
+    },
     "loops": [
       {
-        "heading": "For workers",
+        "id": "people",
+        "heading": "For people",
+        "lead": "A professional profile is not a card or a score. It is a real person's experience, work history and evidence.",
+        "flow": [
+          "Find opportunities",
+          "Present professional experience",
+          "Work",
+          "Record the work actually done",
+          "Preserve evidence",
+          "Receive confirmations where applicable",
+          "Build professional history — Living CV",
+          "Use accumulated experience for future opportunities"
+        ],
+        "pointsLabel": "What a professional profile represents",
         "points": [
-          "You create your profile — your player card — with your skills and experience.",
-          "You keep a work journal: short entries about the work you actually did.",
-          "The platform reads your journal text and suggests skills it recognises. Recognition is rule-based, it can miss things, and nothing is added to your profile without your confirmation.",
-          "Your profile shows honestly how each skill is supported: entered by you, supported by journal entries, or confirmed by people you actually worked with."
+          "experience and work history;",
+          "skills and competencies;",
+          "qualifications and certificates, where recorded;",
+          "completed work, hours, projects and objects;",
+          "evidence and confirmations;",
+          "availability and professional preferences, where applicable."
         ]
       },
       {
-        "heading": "For companies",
+        "id": "employers",
+        "heading": "For employers",
+        "lead": "An employer's value is not only posting vacancies. What matters is keeping the knowledge of who worked, what they did, where, when, for how long, what was completed, what evidence exists and what capability the organisation has built.",
+        "flow": [
+          "Need",
+          "People",
+          "Team",
+          "Project / object",
+          "Work",
+          "Hours and progress",
+          "Evidence",
+          "Confirmation",
+          "The company's history of work actually done",
+          "Future workforce planning (a direction)"
+        ],
+        "pointsLabel": "What the organisation keeps",
         "points": [
-          "You describe your need: what work, where and when.",
-          "You see the market map and honest market signals instead of promises.",
-          "You can scout for workers: profiles appear anonymised, and contact happens only with permission.",
-          "Projects, teams and bookings keep the work organised in one place."
+          "who worked, and in what role;",
+          "what work was done, where and when;",
+          "how many hours and what progress;",
+          "what evidence and confirmations exist;",
+          "what capabilities the team has really built."
         ]
       },
       {
-        "heading": "For teams and communication",
+        "id": "network",
+        "heading": "For agencies and other labour-market participants",
+        "lead": "LabourMarket.ai is not only a worker-and-employer system. Other legitimate participants have a place in the same labour-market network.",
+        "flow": [],
+        "participants": [
+          "Recruitment and selection agencies",
+          "Staffing companies",
+          "Contractors and subcontractors",
+          "Training providers",
+          "Schools and vocational institutions",
+          "Independent professionals",
+          "Labour-market service providers",
+          "Other legitimate labour-market participants"
+        ],
+        "pointsLabel": "Their place in the same network",
         "points": [
-          "Teams and brigades are managed inside the company workspace.",
-          "Work instructions can be written in your own language — the original text is always kept, and nothing pretends to be translated when it is not.",
-          "Messaging is closed by default: only the participants of a conversation can see it."
+          "they work with the same real work records, not separate files;",
+          "roles and responsibility stay clearly separate: who published, who worked, who confirmed."
         ]
       }
     ],
+    "evidence": {
+      "heading": "Real work becomes professional evidence",
+      "lead": "One work event is one record. It can feed several views, but it is never copied and never created from nothing.",
+      "chainLabel": "The evidence chain",
+      "chain": [
+        "Person",
+        "Date / period",
+        "Hours",
+        "Project / object",
+        "Work performed",
+        "Skills and competencies",
+        "Source / evidence",
+        "Confirmation",
+        "Professional history — Living CV"
+      ],
+      "projectionsLabel": "The same record — several views",
+      "projections": [
+        "The person's professional history",
+        "Team history",
+        "Project history",
+        "Company capability history"
+      ],
+      "note": "One work event can feed several views. Evidence is never duplicated or fabricated."
+    },
+    "afterHire": {
+      "heading": "Why use it after you have found the job?",
+      "lead": "A conventional job board delivers most of its value before hiring. LabourMarket.ai should become more useful once real work begins.",
+      "boardLabel": "A conventional job board",
+      "boardPoints": [
+        "Value is highest while searching.",
+        "After hiring, the history stays in separate systems.",
+        "A new employer starts from zero."
+      ],
+      "platformPoints": [
+        "Every real period of work adds to professional history.",
+        "Evidence, competencies and the Living CV grow.",
+        "Team and company work history grows with it.",
+        "Accumulated experience becomes context for new opportunities."
+      ],
+      "stages": [
+        "Search",
+        "Hiring",
+        "Work",
+        "Later opportunities"
+      ],
+      "schematicNote": "Schematic — not a measurement.",
+      "conclusion": "Value does not end when a hiring decision is made — it grows every day work is done."
+    },
+    "trust": {
+      "heading": "Trust: fact ≠ derived ≠ confirmed",
+      "lead": "The original evidence and its source are preserved. What the source stated is always kept apart from what the system derived and from what a person or organisation confirmed. An AI interpretation is never treated as a fact.",
+      "tiers": [
+        {
+          "term": "Fact",
+          "meaning": "What the source itself stated: a date, hours, a description of the work.",
+          "example": "For example, “8 h, 2025-03-12” in the source table."
+        },
+        {
+          "term": "Derived",
+          "meaning": "An interpretation by the system or by rules. Always marked as derived and never becomes a fact.",
+          "example": "For example, a skill recognised from the text of a work description."
+        },
+        {
+          "term": "Confirmed",
+          "meaning": "Confirmation by a person or an organisation. Kept apart from what the person reported about themselves.",
+          "example": "For example, a manager confirmed the period of work."
+        }
+      ],
+      "noLabel": "What is not here",
+      "no": [
+        "No star ratings.",
+        "No points.",
+        "No worker leaderboards.",
+        "No artificial ranking of a person's worth."
+      ]
+    },
+    "privacy": {
+      "heading": "Privacy",
+      "lead": "Professional evidence can be detailed privately. Public discovery does not expose what must be protected.",
+      "privateLabel": "Detailed only in private",
+      "private": [
+        "Full work records and evidence.",
+        "The Work Journal.",
+        "Project and object details."
+      ],
+      "publicNotLabel": "Public search does not expose",
+      "publicNot": [
+        "private contacts;",
+        "confidential clients;",
+        "private Work Journal information;",
+        "restricted personal information;",
+        "confidential project information."
+      ],
+      "control": "People and organisations keep appropriate control over what is public."
+    },
+    "europe": {
+      "heading": "The European labour market",
+      "body": "LabourMarket.ai is built for Europe first and can extend worldwide. It is not one country's job board: the aim is to connect labour-market participants across countries, professions and sectors.",
+      "points": [
+        "A multilingual interface; the original text is always kept.",
+        "Country-specific document and requirement guidance.",
+        "Public job-ad sources are connected country by country — only once the source's terms are confirmed."
+      ]
+    },
     "notYet": {
       "heading": "What the platform does not do",
       "points": [
-        "It does not mark anyone as confirmed by itself — a confirmed status always comes from a real person.",
-        "Payments do not run through the platform yet, and there is no checkout.",
-        "It does not give legal advice. Document guidance is informational only."
+        "It never marks anything as confirmed itself — a confirmed state always comes from a real person.",
+        "Payments through the platform are not active yet; there is no settlement.",
+        "It does not give legal advice. Document guidance is for information only.",
+        "It does not rate people with points or rankings."
       ]
-    },
-    "sportsModel": {
-      "heading": "The operating model: player cards, teams and objects",
-      "intro": "The product borrows sports vocabulary because it makes work organisation visible. It is an operating model, not a game — every layer below is a real product surface.",
-      "rows": [
-        {
-          "term": "Player card",
-          "meaning": "A worker's capability card: real skills, real work evidence, and confirmations that always come from real people."
-        },
-        {
-          "term": "Team / brigade",
-          "meaning": "A real work unit inside a company — created and managed in the company workspace."
-        },
-        {
-          "term": "Object / project",
-          "meaning": "The field of play: the place where work actually happens and where workers are assigned."
-        },
-        {
-          "term": "Owner / operator",
-          "meaning": "The person who manages assignments: who works on which object, and when an assignment ends."
-        },
-        {
-          "term": "Divisions / leagues",
-          "meaning": "Optional grouping and status layers for markets and professions — the platform uses them to group, never to rank."
-        }
-      ],
-      "noRanking": "No rankings and no scores: nothing in this model rates people or orders them against each other. You see grouping and honest capability signals only."
     },
     "data": {
       "heading": "Your data",
-      "body": "Access to data is closed by default and explained in plain language on the pages below."
+      "body": "Access to data is closed by default and explained in plain words on the pages below."
     },
     "links": {
       "workers": "For workers",
-      "companies": "For companies"
+      "companies": "For companies",
+      "agencies": "For agencies"
     }
   },
   "accountBilling": {
@@ -13096,8 +13261,8 @@
       "chipPrefs": "Preferences",
       "offersEmpty": "You have no offers yet. Once your profile is ready, employers can send you offers and they'll appear right here.",
       "searchAskCriteria": "To search well, let's first pin down your criteria — where, when and on what terms you want to work. Fill this in below and I'll search right away.",
-      "playerCardAfterLog": "Here's your card after that entry — your work record just got stronger.",
-      "playerCardBlocked": "This account has no worker card yet. Log your first work or upload a CV — the card grows from real records.",
+      "playerCardAfterLog": "Here's your professional profile after that entry — your work record just got stronger.",
+      "playerCardBlocked": "This account has no professional profile yet. Log your first work or upload a CV — the profile grows from real records.",
       "fallback": "I can help you with your CV, your profile, and job offers. What would you like to do?",
       "userCv": "I'll upload my CV",
       "userProfile": "Show my profile",
@@ -13178,7 +13343,7 @@
       "chipEmployerAbsences": "Absences",
       "briefUnreadMessages": "You have {count, plural, one {# unread message} other {# unread messages}}.",
       "briefProfileGap": "Your profile is still missing: {step}.",
-      "playerCardOpened": "Your card is open in the panel — real data from your own records.",
+      "playerCardOpened": "Your professional profile is open in the panel — real data from your own records.",
       "attachChoice": "What is this file for?",
       "chipAttachPhoto": "My work photo",
       "chipAttachCv": "My résumé (CV)",
@@ -13628,7 +13793,7 @@
       "briefInstructions": "Instructions waiting: {count}.",
       "chipInstructions": "Instructions",
       "briefWorkConfirmed": "A manager confirmed {count, plural, one {# of your work entries} other {# of your work entries}} in the last 7 days — skills verified: {skills}.",
-      "chipMyCard": "My card",
+      "chipMyCard": "My professional profile",
       "confirmIntro": "Awaiting your confirmation: {count} entries.",
       "confirmLine": "• {name} · {date} — {text} (+{skills} skills)",
       "confirmChip": "Confirm: {name} · {date}",
@@ -13870,7 +14035,7 @@
     },
     "results": {
       "playerCard": {
-        "title": "Worker card"
+        "title": "Professional profile"
       },
       "journal": {
         "title": "Work journal"
@@ -13982,7 +14147,7 @@
       "opportunitiesPartial": "The “new” markers could not be read this time — the rows are real, novelty is not shown.",
       "opportunitiesMore": "{n} more in the full list.",
       "retry": "Try again",
-      "playerCardError": "We could not read your card.",
+      "playerCardError": "We could not read your professional profile.",
       "calendarError": "We could not read the calendar.",
       "calendarBlocked": "The calendar could not be read — please sign in again.",
       "calendarEmpty": "Nothing is planned for the next {days} days.",
@@ -16169,7 +16334,7 @@
     "badge": "Preview / Owner review · sample data only",
     "workers": {
       "title": "Worker cards",
-      "description": "Premium player-card-style worker tiles. Geometric monogram fallback — never synthesises a face.",
+      "description": "Polished worker profile tiles. Geometric monogram fallback — never synthesises a face.",
       "listLabel": "Sample worker cards"
     },
     "jobs": {
@@ -17516,7 +17681,7 @@
     "play": "Play",
     "next": "Next moment",
     "previous": "Previous moment",
-    "cardLabel": "Professional card",
+    "cardLabel": "Professional profile",
     "cardNote": "A real work history that travels with the person.",
     "cardSections": {
       "work": "Real work",

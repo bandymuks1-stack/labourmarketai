@@ -292,7 +292,7 @@
         "journal": "Mitt CV",
         "search": "[EN] Search",
         "advanced": "Avancerad hantering",
-        "playerCard": "Mitt kort"
+        "playerCard": "Min yrkesprofil"
       },
       "moreSection": {
         "title": "Detaljerad översikt",
@@ -1532,7 +1532,7 @@
     "hub": {
       "matching": "[EN] Matching workbench",
       "market": "[EN] Market situation",
-      "league": "[EN] Country league"
+      "league": "[EN] Country labour market"
     },
     "market": {
       "eyebrow": "[EN] Admin · Market",
@@ -1606,12 +1606,12 @@
       }
     },
     "league": {
-      "eyebrow": "[EN] Country league",
-      "title": "[EN] Labour market league",
+      "eyebrow": "[EN] Country labour market",
+      "title": "[EN] Labour market by country",
       "subtitle": "[EN] Profession tables per country — real teams, availability and the market thermometer.",
       "methodNote": "[EN] A thermometer value renders ONLY where an admin entered a sourced market average AND the declared-expectation sample is at least 2 people. Everywhere else the cell says \"insufficient market data\" — the table never assesses a person.",
       "back": "[EN] Back to admin hub",
-      "empty": "[EN] No league data yet — tables appear by themselves once workers set their professions.",
+      "empty": "[EN] No data yet — tables appear by themselves once workers set their professions.",
       "unknownCountry": "[EN] Country not set",
       "cellCount": "[EN] {n, plural, one {# profession} other {# professions}}",
       "availableNow": "[EN] available now",
@@ -1643,7 +1643,7 @@
       "items": {
         "public_market_entry": "[EN] Public market entry",
         "user_identity": "[EN] User identity system",
-        "worker_profile_player_card": "[EN] Worker profile / player card",
+        "worker_profile_player_card": "[EN] Worker professional profile",
         "skill_intelligence": "[EN] Skill intelligence",
         "work_journal": "[EN] Work journal / real work records",
         "company_demand": "[EN] Company / demand system",
@@ -1829,7 +1829,7 @@
       "sections": {
         "action": "[EN] Today's action",
         "overview": "[EN] Week & growth",
-        "playerCard": "[EN] Player card"
+        "playerCard": "[EN] Professional profile"
       }
     }
   },
@@ -3890,7 +3890,7 @@
       "briefOverdue": "[EN] {count} tasks are past their due day.",
       "briefLogToday": "[EN] You are working today and nothing is logged yet.",
       "briefProfileGap": "[EN] Your profile is still missing: {step}.",
-      "playerCardOpened": "Ditt kort är öppet i panelen — riktiga data från dina egna poster.",
+      "playerCardOpened": "Din yrkesprofil är öppen i panelen — riktiga data från dina egna poster.",
       "attachChoice": "Vad är den här filen till för?",
       "chipAttachPhoto": "Mitt arbetsfoto",
       "chipAttachCv": "Mitt CV",
@@ -4122,7 +4122,7 @@
       "briefInstructions": "Väntande instruktioner: {count}.",
       "chipInstructions": "Instruktioner",
       "briefWorkConfirmed": "En chef har bekräftat {count, plural, one {# av dina arbetsposter} other {# av dina arbetsposter}} de senaste 7 dagarna — bekräftade kompetenser: {skills}.",
-      "chipMyCard": "Mitt kort",
+      "chipMyCard": "Min yrkesprofil",
       "confirmIntro": "Väntar på din bekräftelse: {count} poster.",
       "confirmLine": "• {name} · {date} — {text} (+{skills} färdigh.)",
       "confirmChip": "Bekräfta: {name} · {date}",
@@ -6369,7 +6369,7 @@
     "badge": "Förhandsvisning / ägarens granskning · endast exempeldata",
     "workers": {
       "title": "Arbetarkort",
-      "description": "Genomarbetade arbetarrutor i spelarkortsstil. Geometriskt monogram som reserv — ett ansikte hittas aldrig på.",
+      "description": "Genomarbetade arbetarprofiler. Geometriskt monogram som reserv — ett ansikte hittas aldrig på.",
       "listLabel": "Exempel på arbetarkort"
     },
     "jobs": {

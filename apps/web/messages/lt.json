@@ -878,7 +878,7 @@
       "create_project": "Tęsti prie projekto",
       "request_more_info": "Paprašyti trūkstamų detalių",
       "review_matches": "Peržiūrėti geriausius variantus",
-      "complete_player_card": "Užpildyti profesinę kortelę",
+      "complete_player_card": "Užpildyti profesinį profilį",
       "add_work_proof": "Pridėti darbo įrodymų",
       "search_opportunities": "Tęsti į darbo paiešką",
       "continue_to_demand": "Tęsti į darbuotojų užklausą",
@@ -912,7 +912,7 @@
   "quickNav": {
     "ariaLabel": "Greita puslapio navigacija",
     "top": "Viršus",
-    "identity": "Kortelė",
+    "identity": "Profilis",
     "records": "Įrašai",
     "skills": "Įgūdžiai",
     "offers": "Pasiūlymai",
@@ -2822,7 +2822,7 @@
       "companyVerification": "Įmonių patvirtinimas",
       "matching": "Matching darbastalis",
       "market": "Rinkos situacija",
-      "league": "Šalies lyga",
+      "league": "Šalių darbo rinka",
       "readiness": "Pasiruošimo centras",
       "billing": "Mokėjimai (test)",
       "permissionMatrix": "Teisių matrica (kas ką mato)"
@@ -3216,12 +3216,12 @@
       }
     },
     "league": {
-      "eyebrow": "Šalies lyga",
-      "title": "Darbo rinkos lyga",
+      "eyebrow": "Šalių darbo rinka",
+      "title": "Darbo rinka pagal šalį",
       "subtitle": "Profesijų lentelės pagal šalį — realios komandos, prieinamumas ir rinkos signalas.",
       "methodNote": "Rinkos signalo reikšmė rodoma TIK ten, kur admin įvedė pagrįstą rinkos vidurkį IR deklaruotų lūkesčių imtis yra bent 2 žmonės. Visur kitur langelis sako „nepakanka rinkos duomenų“ — lentelė niekada nevertina žmogaus.",
       "back": "Į admin centrą",
-      "empty": "Lygai dar nėra duomenų — kai darbuotojai pasižymės profesijas, lentelės atsiras savaime.",
+      "empty": "Duomenų dar nėra — kai darbuotojai nurodys profesijas, lentelės atsiras savaime.",
       "unknownCountry": "Šalis nenurodyta",
       "cellCount": "{n, plural, one {# profesija} few {# profesijos} other {# profesijų}}",
       "availableNow": "laisvi dabar",
@@ -3254,7 +3254,7 @@
       "items": {
         "public_market_entry": "Vieša rinkos prieiga",
         "user_identity": "Naudotojų tapatybės sistema",
-        "worker_profile_player_card": "Darbuotojo profilis / kortelė",
+        "worker_profile_player_card": "Darbuotojo profesinis profilis",
         "skill_intelligence": "Įgūdžių intelektas",
         "work_journal": "Darbo žurnalas / tikri įrašai",
         "company_demand": "Įmonių / poreikių sistema",
@@ -4488,7 +4488,7 @@
         "admin": "Administravimas",
         "planning": "Kalendorius",
         "network": "Ryšiai",
-        "playerCard": "Mano kortelė",
+        "playerCard": "Mano profesinis profilis",
         "adminPlatform": "Platformos administravimas"
       },
       "roleNotice": {
@@ -4609,7 +4609,7 @@
         "body_meanwhile": "Tuo tarpu — gali apžiūrėti platformą per „Naršyti\" skiltį (tik peržiūrai)."
       },
       "menuLinks": {
-        "playerCard": "Mano kortelė",
+        "playerCard": "Mano profesinis profilis",
         "projects": "Projektai",
         "instructions": "Nurodymai",
         "bookings": "Rezervacijos",
@@ -5989,7 +5989,7 @@
       }
     },
     "model": {
-      "note": "Ši lenta veikia pagal platformos veikimo modelį: darbuotojų žaidėjo kortelės priskiriamos objektams (projektams), o priskyrimus valdote jūs.",
+      "note": "Ši lenta veikia pagal platformos veikimo modelį: darbuotojų profesiniai profiliai priskiriami objektams (projektams), o priskyrimus valdote jūs.",
       "link": "Kaip veikia šis modelis"
     },
     "map": {
@@ -6131,7 +6131,7 @@
       "missingDeclaredSkills": "Nurodytų įgūdžių",
       "missingEvidence": "Darbo įrodymų",
       "followUpChip": "Nėra veiklos — susisiekite",
-      "playerCardLink": "Kortelė",
+      "playerCardLink": "Profilis",
       "instructionLink": "Nurodymai",
       "skillClarifyLink": "Įgūdžių patikslinimas"
     },
@@ -6139,7 +6139,7 @@
     "notes": {
       "readiness": "„Pasiruošęs“ reiškia tik tai, kad yra čia tikrinami laukai (vardas, bent vienas nurodytas įgūdis, bent vienas darbo įrodymo įrašas). Tai nėra patvirtinimas, dokumento priėmimas ar dirbtinio intelekto vertinimas.",
       "documents": "Dokumentai dar nesekami — jokioje šios lentos vietoje dokumentas nerodomas kaip priimtas ar patvirtintas.",
-      "candidateSkill": "Įgūdžių patikslinimai yra privatūs kiekvienam darbuotojui; jie rodomi paties darbuotojo kortelėje, o ne čia."
+      "candidateSkill": "Įgūdžių patikslinimai yra privatūs kiekvienam darbuotojui; jie rodomi paties darbuotojo profesiniame profilyje, o ne čia."
     },
     "report": {
       "title": "Operacijų būsenos ataskaita"
@@ -7430,9 +7430,9 @@
     ]
   },
   "playerCard": {
-    "pageTitle": "Mano kortelė",
+    "pageTitle": "Mano profesinis profilis",
     "pageIntro": "Tavo darbo profilio santrauka — matoma tik tau.",
-    "title": "Profesinė kortelė",
+    "title": "Profesinis profilis",
     "subtitle": "Tavo profilio apžvalga. Skaičiai tikri — nieko nepridėta.",
     "skillsLabel": "Įgūdžiai",
     "skillsHint": "Tavo nurodyti įgūdžiai (dar neperžiūrėti).",
@@ -8158,7 +8158,7 @@
       "sections": {
         "action": "Šiandienos veiksmas",
         "overview": "Savaitė ir augimas",
-        "playerCard": "Profesinė kortelė"
+        "playerCard": "Profesinis profilis"
       }
     },
     "home": {
@@ -10114,74 +10114,238 @@
   },
   "about": {
     "metaTitle": "Kas yra LabourMarket.ai",
-    "metaDescription": "Paprastas paaiškinimas, kas yra LabourMarket.ai: kaip darbuotojai kuria tikrą profilį iš tikro darbo, kaip įmonės aprašo poreikius ir randa komandas ir kaip platforma išlieka sąžininga.",
+    "metaDescription": "LabourMarket.ai — darbo rinkos operacinė platforma: tikras darbas tampa profesine istorija, įrodymais ir gyvu CV žmogui, o įmonei — realiai atlikto darbo istorija ir gebėjimais.",
     "navLabel": "Apie LabourMarket.ai",
     "eyebrow": "Apie platformą",
-    "title": "Kas yra LabourMarket.ai ir kaip ji veikia",
-    "lede": "LabourMarket.ai — darbo rinkos platforma, kurioje darbuotojai, įmonės ir komandos parodo tikrus įgūdžius, mato tikrus poreikius ir organizuoja tikrą darbą — vietoje ir visoje Europoje.",
-    "honesty": "Viskas, kas aprašyta šiame puslapyje, produkte veikia jau šiandien. Dar ruošiamos funkcijos taip ir įvardijamos, o mokėjimai dar neaktyvūs.",
+    "title": "Kas yra LabourMarket.ai",
+    "lede": "LabourMarket.ai — darbo rinkos operacinė platforma. Ji jungia žmones, darbdavius, agentūras, komandas, projektus, mokymus ir darbo rinkos paslaugas aplink tikrą darbą — ne tik skelbimų paiešką.",
+    "statusNote": "Šis puslapis paaiškina sistemos logiką, o ne diegimo būseną. Ką galite naudoti dabar, matote savo paskyroje; kas dar yra kryptis, žymima kaip kryptis.",
+    "hero": {
+      "lead": "Žmogaus profesinė vertė neturi dingti kaskart, kai jis keičia darbdavį. Tikras darbas gali tapti ilgalaike profesine istorija: ką žmogus dirbo, kur, kada, kiek laiko, kokiu vaidmeniu, kokiais įgūdžiais ir kokie įrodymai bei patvirtinimai tai remia.",
+      "leadOrg": "Organizacijoms tas pats tikras darbas kaupia įmonės realiai atlikto darbo istoriją: projektus, komandas, atliktus darbus, valandas, kompetencijas ir įrodymus.",
+      "railPeopleLabel": "Žmogui",
+      "railPeople": [
+        "Žmonės",
+        "Galimybės",
+        "Tikras darbas",
+        "Įrodymai",
+        "Profesinis augimas"
+      ],
+      "railCompaniesLabel": "Įmonei",
+      "railCompanies": [
+        "Įmonės",
+        "Žmonės",
+        "Projektai",
+        "Patvirtintas darbas",
+        "Organizacijos gebėjimai"
+      ],
+      "accumulate": "Kiekvienas tikras darbo laikotarpis prideda prie istorijos — ji nesibaigia pakeitus darbdavį.",
+      "railAria": "Kaip žmonės ir įmonės auga iš tikro darbo"
+    },
+    "lifecycle": {
+      "label": "Visas profesinio darbo ciklas",
+      "steps": [
+        "Galimybė",
+        "Įdarbinimas / bendradarbiavimas",
+        "Tikras darbas",
+        "Darbo žurnalas",
+        "Projektai ir užduotys",
+        "Darbo laikas",
+        "Darbo įrodymai",
+        "Patvirtinimai",
+        "Įgūdžiai ir kompetencijos",
+        "Living CV — gyvas profesinis CV",
+        "Naujos galimybės",
+        "Komandos",
+        "Įmonės gebėjimai",
+        "Darbo rinkos paslaugos"
+      ],
+      "note": "Tai sistemos paaiškinimas, o ne jos riba: seką papildo ir kitos darbo rinkos dalys."
+    },
     "loops": [
       {
-        "heading": "Darbuotojams",
+        "id": "people",
+        "heading": "Žmonėms",
+        "lead": "Profesinis profilis — tai ne kortelė ar taškai, o tikro žmogaus patirtis, darbo istorija ir įrodymai.",
+        "flow": [
+          "Rasti galimybes",
+          "Pateikti profesinę patirtį",
+          "Dirbti",
+          "Fiksuoti atliktą darbą",
+          "Išsaugoti įrodymus",
+          "Gauti patvirtinimus, kai taikoma",
+          "Kaupti profesinę istoriją — Living CV",
+          "Naudoti sukauptą patirtį naujoms galimybėms"
+        ],
+        "pointsLabel": "Ką atspindi profesinis profilis",
         "points": [
-          "Susikuriate profilį — savo žaidėjo kortelę — su įgūdžiais ir patirtimi.",
-          "Pildote darbo žurnalą: trumpus įrašus apie iš tikrųjų atliktą darbą.",
-          "Platforma skaito jūsų žurnalo tekstą ir siūlo atpažintus įgūdžius. Atpažinimas grįstas taisyklėmis, jis gali ko nors nepastebėti, ir niekas nepridedama prie profilio be jūsų patvirtinimo.",
-          "Profilis sąžiningai rodo, kuo pagrįstas kiekvienas įgūdis: įvestas jūsų, paremtas žurnalo įrašais ar patvirtintas žmonių, su kuriais iš tikrųjų dirbote."
+          "patirtį ir darbo istoriją;",
+          "įgūdžius ir kompetencijas;",
+          "kvalifikacijas ir pažymėjimus, kai jie užfiksuoti;",
+          "atliktą darbą, valandas, projektus ir objektus;",
+          "įrodymus ir patvirtinimus;",
+          "prieinamumą ir profesinius pageidavimus, kai taikoma."
         ]
       },
       {
-        "heading": "Įmonėms",
+        "id": "employers",
+        "heading": "Darbdaviams",
+        "lead": "Darbdavio vertė — ne vien paskelbtos vakansijos. Svarbu išsaugoti žinias, kas dirbo, ką padarė, kur, kada, kiek laiko, kas užbaigta, kokie įrodymai yra ir kokį gebėjimą organizacija sukaupė.",
+        "flow": [
+          "Poreikis",
+          "Žmonės",
+          "Komanda",
+          "Projektas / objektas",
+          "Darbas",
+          "Valandos ir eiga",
+          "Įrodymai",
+          "Patvirtinimas",
+          "Įmonės realiai atlikto darbo istorija",
+          "Būsimas darbo jėgos planavimas (kryptis)"
+        ],
+        "pointsLabel": "Ką organizacija išsaugo",
         "points": [
-          "Aprašote savo poreikį: koks darbas, kur ir kada.",
-          "Matote rinkos žemėlapį ir sąžiningus rinkos signalus, o ne pažadus.",
-          "Galite ieškoti darbuotojų: profiliai rodomi anonimizuoti, o kontaktas užmezgamas tik gavus leidimą.",
-          "Projektai, komandos ir rezervacijos laiko darbą sutvarkytą vienoje vietoje."
+          "kas dirbo ir kokiame vaidmenyje;",
+          "kokie darbai atlikti, kur ir kada;",
+          "kiek valandų ir kokia eiga;",
+          "kokie įrodymai ir patvirtinimai yra;",
+          "kokius gebėjimus kolektyvas realiai sukaupė."
         ]
       },
       {
-        "heading": "Komandoms ir susirašinėjimui",
+        "id": "network",
+        "heading": "Agentūroms ir kitiems darbo rinkos dalyviams",
+        "lead": "LabourMarket.ai nėra vien darbuotojo ir darbdavio sistema. Tame pačiame darbo rinkos tinkle yra vieta ir kitiems teisėtiems dalyviams.",
+        "flow": [],
+        "participants": [
+          "Įdarbinimo ir atrankos agentūros",
+          "Personalo nuomos įmonės",
+          "Rangovai ir subrangovai",
+          "Mokymo teikėjai",
+          "Mokyklos ir profesinio mokymo įstaigos",
+          "Savarankiški specialistai",
+          "Darbo rinkos paslaugų teikėjai",
+          "Kiti teisėti darbo rinkos dalyviai"
+        ],
+        "pointsLabel": "Jų vieta tame pačiame tinkle",
         "points": [
-          "Komandos ir brigados valdomos įmonės darbo erdvėje.",
-          "Darbo instrukcijas galima rašyti sava kalba — originalus tekstas visada išsaugomas, ir niekas neapsimeta išversta, jei nėra išversta.",
-          "Susirašinėjimas uždarytas pagal nutylėjimą: pokalbį mato tik jo dalyviai."
+          "dirba su tais pačiais tikrais darbo įrašais, o ne su atskirais failais;",
+          "vaidmuo ir atsakomybė aiškiai atskirti: kas paskelbė, kas dirbo, kas patvirtino."
         ]
       }
     ],
+    "evidence": {
+      "heading": "Tikras darbas tampa profesiniu įrodymu",
+      "lead": "Vienas darbo įvykis — vienas įrašas. Jis gali papildyti kelis vaizdus, bet nėra kopijuojamas ir niekada nekuriamas iš nieko.",
+      "chainLabel": "Įrodymų seka",
+      "chain": [
+        "Žmogus",
+        "Data / laikotarpis",
+        "Valandos",
+        "Projektas / objektas",
+        "Atliktas darbas",
+        "Įgūdžiai ir kompetencijos",
+        "Šaltinis / įrodymas",
+        "Patvirtinimas",
+        "Profesinė istorija — Living CV"
+      ],
+      "projectionsLabel": "Tas pats įrašas — keli vaizdai",
+      "projections": [
+        "Žmogaus profesinė istorija",
+        "Komandos istorija",
+        "Projekto istorija",
+        "Įmonės gebėjimų istorija"
+      ],
+      "note": "Vienas darbo įvykis gali papildyti kelis vaizdus. Įrodymai nekopijuojami ir nekuriami."
+    },
+    "afterHire": {
+      "heading": "Kam naudotis, kai darbas jau rastas?",
+      "lead": "Įprasta skelbimų svetainė daugiausia vertės suteikia iki įdarbinimo. LabourMarket.ai turi tapti naudingesnė tada, kai prasideda tikras darbas.",
+      "boardLabel": "Įprasta darbo skelbimų svetainė",
+      "boardPoints": [
+        "Vertė didžiausia ieškant darbo.",
+        "Po įdarbinimo istorija lieka atskirose sistemose.",
+        "Naujas darbdavys pradeda nuo nulio."
+      ],
+      "platformPoints": [
+        "Kiekvienas tikras darbo laikotarpis prideda prie profesinės istorijos.",
+        "Auga įrodymai, kompetencijos ir Living CV.",
+        "Kartu auga komandos ir įmonės realiai atlikto darbo istorija.",
+        "Sukaupta patirtis tampa kontekstu naujoms galimybėms."
+      ],
+      "stages": [
+        "Paieška",
+        "Įdarbinimas",
+        "Darbas",
+        "Vėlesnės galimybės"
+      ],
+      "schematicNote": "Schema, o ne matavimo rezultatas.",
+      "conclusion": "Vertė nesibaigia, kai priimamas sprendimas dėl darbo — ji auga kiekvieną dieną, kai dirbama."
+    },
+    "trust": {
+      "heading": "Pasitikėjimas: faktas ≠ išvesta ≠ patvirtinta",
+      "lead": "Originalūs įrodymai ir jų šaltinis išsaugomi. Tai, ką nurodė šaltinis, visada atskirta nuo to, ką išvedė sistema, ir nuo to, ką patvirtino žmogus ar organizacija. Dirbtinio intelekto interpretacija niekada nelaikoma faktu.",
+      "tiers": [
+        {
+          "term": "Faktas",
+          "meaning": "Tai, ką šaltinis pats nurodė: data, valandos, darbo aprašymas.",
+          "example": "Pavyzdžiui, „8 val., 2025-03-12“ šaltinio lentelėje."
+        },
+        {
+          "term": "Išvesta",
+          "meaning": "Sistemos ar taisyklių interpretacija. Visada pažymima kaip išvesta ir niekada netampa faktu.",
+          "example": "Pavyzdžiui, įgūdis, atpažintas iš darbo aprašymo teksto."
+        },
+        {
+          "term": "Patvirtinta",
+          "meaning": "Žmogaus ar organizacijos patvirtinimas. Atskirtas nuo paties žmogaus pateiktos informacijos.",
+          "example": "Pavyzdžiui, vadovas patvirtino darbo laikotarpį."
+        }
+      ],
+      "noLabel": "Ko čia nėra",
+      "no": [
+        "Jokių žvaigždučių įvertinimų.",
+        "Jokių taškų.",
+        "Jokių darbuotojų reitingų lentelių.",
+        "Jokio dirbtinio žmogaus vertės reitingavimo."
+      ]
+    },
+    "privacy": {
+      "heading": "Privatumas",
+      "lead": "Profesiniai įrodymai gali būti detalūs privačiai. Viešas atradimas neatskleidžia to, ką privaloma saugoti.",
+      "privateLabel": "Detalu tik privačiai",
+      "private": [
+        "Išsamūs darbo įrašai ir įrodymai.",
+        "Darbo žurnalas.",
+        "Projektų ir objektų detalės."
+      ],
+      "publicNotLabel": "Vieša paieška neatskleidžia",
+      "publicNot": [
+        "privačių kontaktų;",
+        "konfidencialių klientų;",
+        "privataus darbo žurnalo informacijos;",
+        "ribojamos asmeninės informacijos;",
+        "konfidencialios projekto informacijos."
+      ],
+      "control": "Žmonės ir organizacijos išlaiko tinkamą kontrolę, kas matoma viešai."
+    },
+    "europe": {
+      "heading": "Europos darbo rinka",
+      "body": "LabourMarket.ai kuriama pirmiausia Europai, bet gali plėstis visame pasaulyje. Tai ne vienos šalies skelbimų svetainė: tikslas — jungti darbo rinkos dalyvius skirtingose šalyse, profesijose ir sektoriuose.",
+      "points": [
+        "Daugiakalbė sąsaja; originalus tekstas visada išsaugomas.",
+        "Šalies dokumentų ir reikalavimų aiškinimas pagal šalį.",
+        "Viešų darbo skelbimų šaltiniai jungiami šalis po šalies — tik kai šaltinio sąlygos patvirtintos."
+      ]
+    },
     "notYet": {
       "heading": "Ko platforma nedaro",
       "points": [
         "Ji pati nieko nepažymi kaip patvirtinto — patvirtinta būsena visada ateina iš tikro žmogaus.",
         "Mokėjimai per platformą dar nevyksta, atsiskaitymo nėra.",
-        "Ji neteikia teisinių konsultacijų. Dokumentų gairės yra tik informacinės."
+        "Ji neteikia teisinių konsultacijų. Dokumentų gairės yra tik informacinės.",
+        "Ji nevertina žmonių taškais ar reitingais."
       ]
-    },
-    "sportsModel": {
-      "heading": "Veikimo modelis: žaidėjo kortelės, komandos ir objektai",
-      "intro": "Produktas naudoja sporto žodyną, nes taip darbo organizavimas tampa matomas. Tai veikimo modelis, o ne žaidimas — kiekvienas žemiau esantis sluoksnis yra tikra produkto dalis.",
-      "rows": [
-        {
-          "term": "Žaidėjo kortelė",
-          "meaning": "Darbuotojo gebėjimų kortelė: tikri įgūdžiai, tikri darbo įrodymai, o patvirtinimai visada ateina iš tikrų žmonių."
-        },
-        {
-          "term": "Komanda / brigada",
-          "meaning": "Tikras darbo vienetas įmonėje — kuriamas ir valdomas įmonės darbo erdvėje."
-        },
-        {
-          "term": "Objektas / projektas",
-          "meaning": "Žaidimo aikštė: vieta, kur realiai vyksta darbas ir į kurią priskiriami darbuotojai."
-        },
-        {
-          "term": "Savininkas / operatorius",
-          "meaning": "Žmogus, kuris valdo priskyrimus: kas dirba kuriame objekte ir kada priskyrimas baigiasi."
-        },
-        {
-          "term": "Divizionai / lygos",
-          "meaning": "Pasirenkami grupavimo ir būsenos sluoksniai rinkoms bei profesijoms — platforma juos naudoja grupavimui, niekada ne reitingavimui."
-        }
-      ],
-      "noRanking": "Jokių reitingų ir jokių taškų: šiame modelyje niekas nevertina žmonių ir nerikiuoja jų vieno prieš kitą. Matote tik grupavimą ir sąžiningus gebėjimų signalus."
     },
     "data": {
       "heading": "Jūsų duomenys",
@@ -10189,7 +10353,8 @@
     },
     "links": {
       "workers": "Darbuotojams",
-      "companies": "Įmonėms"
+      "companies": "Įmonėms",
+      "agencies": "Agentūroms"
     }
   },
   "accountBilling": {
@@ -13096,8 +13261,8 @@
       "chipPrefs": "Pageidavimus",
       "offersEmpty": "Kol kas neturi pasiūlymų. Kai profilis bus paruoštas, darbdaviai galės siųsti pasiūlymus ir jie atsiras čia.",
       "searchAskCriteria": "Kad paieška būtų tiksli, pirmiausia patikslinkime kriterijus — kur, kada ir kokiomis sąlygomis nori dirbti. Užpildyk žemiau, ir iškart ieškosiu.",
-      "playerCardAfterLog": "Štai tavo kortelė po šio įrašo — darbo istorija ką tik sustiprėjo.",
-      "playerCardBlocked": "Profesinė kortelė šioje paskyroje dar nesukurta. Užfiksuok pirmą darbą arba įkelk CV — kortelė atsiras iš realių įrašų.",
+      "playerCardAfterLog": "Štai tavo profesinis profilis po šio įrašo — darbo istorija ką tik sustiprėjo.",
+      "playerCardBlocked": "Profesinis profilis šioje paskyroje dar nesukurtas. Užfiksuok pirmą darbą arba įkelk CV — profilis atsiras iš realių įrašų.",
       "fallback": "Galiu padėti su CV, profiliu ir darbo pasiūlymais. Ką norėtum daryti?",
       "userCv": "Įkelsiu CV",
       "userProfile": "Parodyk mano profilį",
@@ -13178,7 +13343,7 @@
       "chipEmployerAbsences": "Neatvykimai",
       "briefUnreadMessages": "Turi {count, plural, one {# neperskaitytą žinutę} few {# neperskaitytas žinutes} other {# neperskaitytų žinučių}}.",
       "briefProfileGap": "Profilyje dar trūksta: {step}.",
-      "playerCardOpened": "Tavo kortelė atidaryta šone — ten matai tikrus savo duomenis.",
+      "playerCardOpened": "Tavo profesinis profilis atidarytas šone — ten matai tikrus savo duomenis.",
       "attachChoice": "Kam skirtas šis failas?",
       "chipAttachPhoto": "Mano darbo nuotrauka",
       "chipAttachCv": "Mano gyvenimo aprašymas (CV)",
@@ -13628,7 +13793,7 @@
       "briefInstructions": "Laukia nurodymų: {count}.",
       "chipInstructions": "Nurodymai",
       "briefWorkConfirmed": "Vadovas patvirtino {count, plural, one {# jūsų darbo įrašą} few {# jūsų darbo įrašus} other {# jūsų darbo įrašų}} per 7 d. — patvirtinta įgūdžių: {skills}.",
-      "chipMyCard": "Mano kortelė",
+      "chipMyCard": "Mano profesinis profilis",
       "confirmIntro": "Laukia patvirtinimo įrašų: {count}.",
       "confirmLine": "• {name} · {date} — {text} (+{skills} įgūdž.)",
       "confirmChip": "Patvirtinti: {name} · {date}",
@@ -13870,7 +14035,7 @@
     },
     "results": {
       "playerCard": {
-        "title": "Profesinė kortelė"
+        "title": "Profesinis profilis"
       },
       "journal": {
         "title": "Darbo žurnalas"
@@ -13982,7 +14147,7 @@
       "opportunitiesPartial": "Naujumo žymų šįkart nuskaityti nepavyko — įrašai tikri, bet „nauja“ nerodoma.",
       "opportunitiesMore": "Sąraše dar {n}.",
       "retry": "Bandyti dar kartą",
-      "playerCardError": "Nepavyko perskaityti tavo kortelės.",
+      "playerCardError": "Nepavyko perskaityti tavo profesinio profilio.",
       "calendarError": "Nepavyko nuskaityti kalendoriaus.",
       "calendarBlocked": "Kalendoriaus nuskaityti nepavyko — prisijunkite iš naujo.",
       "calendarEmpty": "Artimiausioms {days} d. suplanuotų įsipareigojimų nėra.",
@@ -16169,7 +16334,7 @@
     "badge": "Peržiūra / savininko apžiūra · tik pavyzdiniai duomenys",
     "workers": {
       "title": "Darbuotojų kortelės",
-      "description": "Aukščiausios klasės žaidėjo kortelės stiliaus darbuotojų plytelės. Geometrinė monogramos atsarga — veidas niekada negeneruojamas.",
+      "description": "Aukštos kokybės darbuotojų profilių plytelės. Geometrinė monogramos atsarga — veidas niekada negeneruojamas.",
       "listLabel": "Pavyzdinės darbuotojų kortelės"
     },
     "jobs": {
@@ -17516,7 +17681,7 @@
     "play": "Rodyti",
     "next": "Kitas momentas",
     "previous": "Ankstesnis momentas",
-    "cardLabel": "Profesinė kortelė",
+    "cardLabel": "Profesinis profilis",
     "cardNote": "Tikra darbo istorija keliauja kartu su žmogumi.",
     "cardSections": {
       "work": "Realus darbas",

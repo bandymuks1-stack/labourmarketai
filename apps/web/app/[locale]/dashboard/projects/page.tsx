@@ -280,14 +280,14 @@ export default async function ProjectsPage({
           {t("intro")}
         </p>
         {/* WAGON 6 — compact operating-model explainer: one honest line +
-            a link to the full /about#sports-model section. No game layer. */}
+            a link to the /about#evidence explanation. No game layer. */}
         <p
           className="mt-1 max-w-prose rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
           data-testid="projects-model-note"
         >
           {t("model.note")}{" "}
           <Link
-            href="/about#sports-model"
+            href="/about#evidence"
             className="whitespace-nowrap text-brand-blue hover:underline"
           >
             {t("model.link")} →
