@@ -17518,8 +17518,25 @@
     "previous": "Previous moment",
     "cardLabel": "Professional card",
     "cardNote": "A real work history that travels with the person.",
+    "cardSections": {
+      "work": "Real work",
+      "capability": "Skills from work",
+      "mobility": "Work geography",
+      "path": "Career path",
+      "history": "Work history",
+      "now": "now",
+      "next": "next",
+      "more": "More about the work"
+    },
     "personas": {
       "tomas": {
+        "identity": {
+          "place": "Bergen, Norway",
+          "stats": "2 yrs|of work · 3|sites · 1,860 h|in the work journal",
+          "history": "2023|Vilnius|Old Town façade scaffolding · 2024|Vilnius|Apartment block renovation · 2025|Bergen|Residential quarter",
+          "progression": "Scaffolder · Construction specialist · Foreman · Company owner",
+          "next": "Open to work in Norway and Sweden"
+        },
         "stages": {
           "base": {
             "alt": "Tomas K. standing in a dark studio",
@@ -17565,6 +17582,13 @@
         }
       },
       "rasa": {
+        "identity": {
+          "place": "Oslo, Norway",
+          "stats": "3 yrs|in kitchens · 2|restaurants · 2,400 h|in the work journal",
+          "history": "2022|Vilnius|Restaurant kitchen, prep · 2023|Vilnius|Hot line · 2025|Oslo|Nordic restaurant",
+          "progression": "Kitchen assistant · Cook · Head chef · Restaurant owner",
+          "next": "Open to work in Norway"
+        },
         "stages": {
           "base": {
             "alt": "Rasa J. standing in a dark studio",

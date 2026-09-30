@@ -33,6 +33,10 @@ export type HeroMoment = {
   /** Where the person stands in this photograph (0–1 of the frame): the
    *  camera moves around them and the next moment grows out of them. */
   readonly face: { readonly x: number; readonly y: number; readonly h: number };
+  /** An intermediate frame (the previous place, the next pose): it carries
+   *  the change of pose so the next change of world finds the person already
+   *  standing as they will. Not a moment of the story — no caption, no step. */
+  readonly bridge: boolean;
   readonly figure: { readonly x0: number; readonly y0: number; readonly x1: number; readonly y1: number };
 };
 
@@ -45,6 +49,24 @@ export type HeroCard = {
   readonly skills: readonly string[];
   /** The places the work has taken them, in order ("Vilnius", "Bergen"). */
   readonly path: readonly string[];
+  /** The living professional identity the card reveals in layers. */
+  readonly identity: HeroIdentity;
+};
+
+/** What the sample person's real work has made them — all translation copy
+ *  of a labelled sample, never a record, a score or a verification. */
+export type HeroIdentity = {
+  /** Where they work now ("Bergen, Norway"). */
+  readonly place: string;
+  /** REAL WORK: figure + unit ("2 yrs" / "of work"), each from the journal story. */
+  readonly stats: readonly { readonly figure: string; readonly unit: string }[];
+  /** WORK HISTORY: what they did where, oldest first. */
+  readonly history: readonly { readonly when: string; readonly where: string; readonly what: string }[];
+  /** PROGRESSION: every step of their path; `current` is where they stand. */
+  readonly progression: readonly string[];
+  readonly current: number;
+  /** MOBILITY: where they can go next. */
+  readonly next: string;
 };
 
 export type HeroStory = {
@@ -61,6 +83,16 @@ export type LivingWorkerHeroData = {
   readonly cardLabel: string;
   /** One line under the card: the record travels with the person. */
   readonly cardNote: string;
+  readonly cardSections: {
+    readonly work: string;
+    readonly capability: string;
+    readonly mobility: string;
+    readonly path: string;
+    readonly history: string;
+    readonly now: string;
+    readonly next: string;
+    readonly more: string;
+  };
   readonly stories: readonly HeroStory[];
 };
 
@@ -71,6 +103,7 @@ type ManifestStage = {
   height: number;
   face?: HeroMoment["face"];
   figure?: HeroMoment["figure"];
+  bridge?: boolean;
 };
 type Manifest = {
   personas: Record<string, { name: string; stages: ManifestStage[]; portrait?: { stem: string; width: number; height: number } }>;
@@ -78,6 +111,28 @@ type Manifest = {
 
 /** A photograph not yet located: the person is framed in the centre third. */
 const CENTRED = { face: { x: 0.5, y: 0.25, h: 0.1 }, figure: { x0: 0.38, y0: 0.12, x1: 0.62, y1: 1 } } as const;
+
+const items = (s: string) => s.split(" · ").map((x) => x.trim()).filter(Boolean);
+
+function identityOf(t: Awaited<ReturnType<typeof getTranslations>>, id: string, profession: string): HeroIdentity {
+  const k = `personas.${id}.identity`;
+  const progression = items(t(`${k}.progression`));
+  return {
+    place: t(`${k}.place`),
+    stats: items(t(`${k}.stats`)).map((s) => {
+      const [figure = "", unit = ""] = s.split("|");
+      return { figure, unit };
+    }),
+    history: items(t(`${k}.history`)).map((s) => {
+      const [when = "", where = "", what = ""] = s.split("|");
+      return { when, where, what };
+    }),
+    progression,
+    // where they stand is the card's own profession on that path
+    current: Math.max(0, progression.indexOf(profession)),
+    next: t(`${k}.next`),
+  };
+}
 
 /** The order the two stories alternate in. */
 const STORY_ORDER = ["tomas", "rasa"] as const;
@@ -90,9 +145,10 @@ export async function buildLivingWorkerHero(): Promise<LivingWorkerHeroData | nu
     const persona = data.personas[id];
     if (!persona || persona.stages.length === 0) continue;
     const moments = persona.stages.map((s): HeroMoment => {
-      const k = `personas.${id}.stages.${s.key}`;
+      // a bridge shows the previous moment's place: it speaks with its words
+      const k = `personas.${id}.stages.${s.bridge ? s.key.split("~")[0] : s.key}`;
       const cardKey = `${k}.card`;
-      const card: HeroCard | null = t.has(`${cardKey}.profession`)
+      const card: HeroCard | null = !s.bridge && t.has(`${cardKey}.profession`)
         ? {
             name: persona.name,
             profession: t(`${cardKey}.profession`),
@@ -100,6 +156,7 @@ export async function buildLivingWorkerHero(): Promise<LivingWorkerHeroData | nu
             facts: [t(`${cardKey}.experience`), t(`${cardKey}.places`)],
             skills: t(`${cardKey}.skills`).split(" · "),
             path: t(`${cardKey}.path`).split(/\s*→\s*/),
+            identity: identityOf(t, id, t(`${cardKey}.profession`)),
           }
         : null;
       return {
@@ -110,7 +167,8 @@ export async function buildLivingWorkerHero(): Promise<LivingWorkerHeroData | nu
         alt: t(`${k}.alt`),
         caption: t(`${k}.caption`),
         card,
-        team: t.has(`${k}.team`) ? t(`${k}.team`).split(" · ") : null,
+        team: !s.bridge && t.has(`${k}.team`) ? t(`${k}.team`).split(" · ") : null,
+        bridge: s.bridge === true,
         face: s.face ?? CENTRED.face,
         figure: s.figure ?? CENTRED.figure,
       };
@@ -127,6 +185,16 @@ export async function buildLivingWorkerHero(): Promise<LivingWorkerHeroData | nu
     controls: { pause: t("pause"), play: t("play"), next: t("next"), previous: t("previous") },
     cardLabel: t("cardLabel"),
     cardNote: t("cardNote"),
+    cardSections: {
+      work: t("cardSections.work"),
+      capability: t("cardSections.capability"),
+      mobility: t("cardSections.mobility"),
+      path: t("cardSections.path"),
+      history: t("cardSections.history"),
+      now: t("cardSections.now"),
+      next: t("cardSections.next"),
+      more: t("cardSections.more"),
+    },
     stories,
   };
 }

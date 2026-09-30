@@ -680,6 +680,13 @@ export const FROZEN_LANDING_FILES = [
   // the Player Card with the person's own portrait. The regeneration touched
   // EXACTLY the two hero files and the three frozen `livingWorkerHero`
   // namespaces (one added line, `cardNote`); no other landing copy moved.
+  // 2026-09-30 (owner review 2: "transitions still read as a slideshow; the
+  // hero must react; the card must be a living professional identity"): one
+  // clock and one face-anchored camera, pose bridges for the pairs whose pose
+  // changes, pointer/hover/tap reactions, and the card's identity layers. The
+  // regeneration touched EXACTLY the two hero files and the three frozen
+  // `livingWorkerHero` namespaces (the card's `identity` and `cardSections`
+  // copy); no other landing copy, navigation or structure moved.
   "components/marketing/living-worker-hero.tsx",
   "lib/marketing/living-worker-hero.ts",
 ] as const;

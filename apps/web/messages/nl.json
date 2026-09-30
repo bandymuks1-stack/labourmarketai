@@ -17518,8 +17518,25 @@
     "previous": "Vorig moment",
     "cardLabel": "Beroepskaart",
     "cardNote": "Een echte werkgeschiedenis die met de persoon meereist.",
+    "cardSections": {
+      "work": "Echt werk",
+      "capability": "Vaardigheden uit werk",
+      "mobility": "Werkgeografie",
+      "path": "Loopbaan",
+      "history": "Werkgeschiedenis",
+      "now": "nu",
+      "next": "volgende",
+      "more": "Meer over het werk"
+    },
     "personas": {
       "tomas": {
+        "identity": {
+          "place": "Bergen, Noorwegen",
+          "stats": "2 jr|werkervaring · 3|bouwplaatsen · 1.860 u|in het werkjournaal",
+          "history": "2023|Vilnius|Gevelsteiger in de oude binnenstad · 2024|Vilnius|Renovatie van een flatgebouw · 2025|Bergen|Woonwijk",
+          "progression": "Steigerbouwer · Bouwspecialist · Voorman · Bedrijfseigenaar",
+          "next": "Beschikbaar voor werk in Noorwegen en Zweden"
+        },
         "stages": {
           "base": {
             "alt": "Tomas K. in een donkere studio",
@@ -17565,6 +17582,13 @@
         }
       },
       "rasa": {
+        "identity": {
+          "place": "Oslo, Noorwegen",
+          "stats": "3 jr|in de keuken · 2|restaurantkeukens · 2.400 u|in het werkjournaal",
+          "history": "2022|Vilnius|Restaurantkeuken, voorbereiding · 2023|Vilnius|Warme lijn · 2025|Oslo|Noords restaurant",
+          "progression": "Keukenhulp · Kok · Chef-kok · Restauranteigenaar",
+          "next": "Beschikbaar voor werk in Noorwegen"
+        },
         "stages": {
           "base": {
             "alt": "Rasa J. in een donkere studio",

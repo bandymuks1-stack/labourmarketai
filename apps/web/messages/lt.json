@@ -17518,8 +17518,25 @@
     "previous": "Ankstesnis momentas",
     "cardLabel": "Profesinė kortelė",
     "cardNote": "Tikra darbo istorija keliauja kartu su žmogumi.",
+    "cardSections": {
+      "work": "Realus darbas",
+      "capability": "Gebėjimai iš darbo",
+      "mobility": "Darbo geografija",
+      "path": "Profesinis kelias",
+      "history": "Darbo istorija",
+      "now": "dabar",
+      "next": "toliau",
+      "more": "Daugiau apie darbą"
+    },
     "personas": {
       "tomas": {
+        "identity": {
+          "place": "Bergenas, Norvegija",
+          "stats": "2 m.|darbo patirties · 3|objektai · 1 860 val.|darbo žurnale",
+          "history": "2023|Vilnius|Senamiesčio fasado pastoliai · 2024|Vilnius|Daugiabučio renovacija · 2025|Bergenas|Gyvenamųjų namų kvartalas",
+          "progression": "Pastolininkas · Statybų specialistas · Brigadininkas · Įmonės vadovas",
+          "next": "Atviras darbui Norvegijoje ir Švedijoje"
+        },
         "stages": {
           "base": {
             "alt": "Tomas K. stovi tamsioje studijoje",
@@ -17565,6 +17582,13 @@
         }
       },
       "rasa": {
+        "identity": {
+          "place": "Oslas, Norvegija",
+          "stats": "3 m.|virtuvėje · 2|restoranai · 2 400 val.|darbo žurnale",
+          "history": "2022|Vilnius|Restorano virtuvė, paruošimas · 2023|Vilnius|Karštoji linija · 2025|Oslas|Šiaurietiškos virtuvės restoranas",
+          "progression": "Virtuvės pagalbininkė · Virėja · Vyriausioji virėja · Restorano savininkė",
+          "next": "Atvira darbui Norvegijoje"
+        },
         "stages": {
           "base": {
             "alt": "Rasa J. stovi tamsioje studijoje",

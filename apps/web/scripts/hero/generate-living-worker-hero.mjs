@@ -43,6 +43,20 @@ const FROM = arg("from");
 // place across moments). Neither regenerates a moment.
 const PORTRAIT_ONLY = args.includes("--portrait");
 const FOCUS_ONLY = args.includes("--focus");
+// --bridge persona:from>to[,persona:from>to…]: an intermediate frame for a
+// change of moment where the POSE changes (head down → looking ahead). It is
+// the FROM photograph — same place, light, framing and clothes — with the
+// person already in the TO pose, so the pose changes inside a familiar scene
+// and the world then changes around a person whose pose already matches.
+// Inserted before TO in the manifest as { bridge: true }; run --focus after.
+const BRIDGES = (arg("bridge") ?? "")
+  .split(",")
+  .filter(Boolean)
+  .map((s) => {
+    const [persona, pair] = s.split(":");
+    const [from, to] = (pair ?? "").split(">");
+    return { persona, from, to };
+  });
 const FOCUS_MODEL = arg("focus-model", "gemini-flash-latest");
 /** The moment whose workwear the Player Card portrait wears. */
 const CARD_STAGE = "country-no";
@@ -187,6 +201,40 @@ async function locate(file) {
     }
   }
   throw new Error(`could not locate the person in ${file}`);
+}
+
+if (BRIDGES.length > 0) {
+  for (const { persona: id, from, to } of BRIDGES) {
+    const stages = manifest.personas[id]?.stages ?? [];
+    const toAt = stages.findIndex((s) => s.key === to && !s.bridge);
+    const fromRaw = join(RAW, `${id}-${from}.png`);
+    const toRaw = join(RAW, `${id}-${to}.png`);
+    if (toAt < 0 || !existsSync(fromRaw) || !existsSync(toRaw)) throw new Error(`bridge ${id}:${from}>${to}: stage or raw missing`);
+    const key = `${from}~${to}`;
+    process.stdout.write(`  bridge ${id} ${key} … `);
+    const raw = await generate([
+      {
+        text:
+          `${KEEP}\n\nKeep the FIRST photograph exactly: the same place, background, light, camera position, lens and framing, ` +
+          `and the same clothing. Change ONLY the person's pose, posture and the direction of their head and gaze so that ` +
+          `they match the SECOND photograph (how they stand, where they look, how the head is turned and tilted). ` +
+          `Whatever they held that the new pose cannot hold is put down naturally within the scene. ` +
+          `Nothing else in the scene changes.\n\n${LOOK}\n\n` +
+          `The first image is the photograph to keep. The second image only shows the pose to take.`,
+      },
+      asPart(readFileSync(fromRaw)),
+      asPart(readFileSync(toRaw)),
+    ]);
+    writeFileSync(join(RAW, `${id}-${key}.png`), raw);
+    const pub = await publish(id, toAt, `b-${from}-${to}`, raw);
+    const entry = { ...pub, key, bridge: true };
+    const existing = stages.findIndex((s) => s.key === key);
+    if (existing >= 0) stages[existing] = entry;
+    else stages.splice(toAt, 0, entry);
+    writeFileSync(MANIFEST, JSON.stringify(manifest, null, 2) + "\n");
+    console.log("ok");
+  }
+  process.exit(0);
 }
 
 for (const [id, persona] of Object.entries(PERSONAS)) {

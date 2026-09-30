@@ -17518,8 +17518,25 @@
     "previous": "Poprzedni moment",
     "cardLabel": "Karta zawodowa",
     "cardNote": "Prawdziwa historia pracy, która podróżuje razem z człowiekiem.",
+    "cardSections": {
+      "work": "Prawdziwa praca",
+      "capability": "Umiejętności z pracy",
+      "mobility": "Geografia pracy",
+      "path": "Ścieżka zawodowa",
+      "history": "Historia pracy",
+      "now": "teraz",
+      "next": "dalej",
+      "more": "Więcej o pracy"
+    },
     "personas": {
       "tomas": {
+        "identity": {
+          "place": "Bergen, Norwegia",
+          "stats": "2 lata|doświadczenia · 3|budowy · 1 860 godz.|w dzienniku pracy",
+          "history": "2023|Wilno|Rusztowania na fasadzie Starego Miasta · 2024|Wilno|Renowacja bloku mieszkalnego · 2025|Bergen|Osiedle mieszkaniowe",
+          "progression": "Monter rusztowań · Specjalista budowlany · Brygadzista · Właściciel firmy",
+          "next": "Otwarty na pracę w Norwegii i Szwecji"
+        },
         "stages": {
           "base": {
             "alt": "Tomas K. w ciemnym studiu",
@@ -17565,6 +17582,13 @@
         }
       },
       "rasa": {
+        "identity": {
+          "place": "Oslo, Norwegia",
+          "stats": "3 lata|w kuchni · 2|restauracje · 2 400 godz.|w dzienniku pracy",
+          "history": "2022|Wilno|Kuchnia restauracji, przygotowanie · 2023|Wilno|Gorąca linia · 2025|Oslo|Restauracja nordycka",
+          "progression": "Pomoc kuchenna · Kucharka · Szefowa kuchni · Właścicielka restauracji",
+          "next": "Otwarta na pracę w Norwegii"
+        },
         "stages": {
           "base": {
             "alt": "Rasa J. w ciemnym studiu",
