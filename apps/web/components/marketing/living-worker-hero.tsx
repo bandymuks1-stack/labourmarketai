@@ -290,7 +290,7 @@ function PlayerCard({
             height={story.portrait.height}
             decoding="async"
             className="lwh-portrait absolute inset-0 h-full w-full object-cover transition-[object-position] duration-700"
-            style={{ objectPosition: more ? "50% 24%" : "50% 30%" }}
+            style={{ objectPosition: more ? "50% 10%" : "50% 14%" }}
           />
         ) : null}
         <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-ink-900 via-ink-900/35 via-40% to-transparent" />
@@ -486,6 +486,8 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
   const flags = useRef({ playing: false, holdCard: false, holdPerson: false, motion: false });
   const camNow = useRef<Cam>({ x: 0, y: 0, f: 0 });
   const figNow = useRef({ x0: 0, y0: 0, x1: 0, y1: 0 });
+  // (development review only: the highest head top among the visible figures)
+  const headNow = useRef(Infinity);
   const kRef = useRef(0);
   const capRef = useRef(0);
   const phaseRef = useRef<Phase>("none");
@@ -554,6 +556,51 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
     [N, timeline],
   );
 
+  /** HEAD SAFETY. Holding the face on one point must never push anyone's
+   *  head (hair, helmet) out of the frame or under the controls. For every
+   *  instant of the story this is how far the camera's face point has to be
+   *  lowered so the top of every visible figure keeps a safe margin — worked
+   *  out once per stage size, spread over the neighbouring seconds and
+   *  smoothed, so the camera eases down and back up and never jumps. */
+  const lift = useMemo(() => {
+    if (!box || !cams || !nodes) return null;
+    const STEP = 50;
+    const n = Math.ceil(timeline.T / STEP);
+    const safe = small ? 60 : 76;
+    const need = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      const c = i * STEP;
+      const cam = spline(nodes, timeline.T, c);
+      // the person-focus zoom may add up to 5 %
+      const camZ: Cam = { ...cam, f: cam.f * 1.05 };
+      const { j, p, next } = locate(c);
+      let worst = 0;
+      for (const idx of p > 0 ? [j, next] : [j]) {
+        const m = momentOf(idx).m;
+        const { s } = placeOn(m, box, camZ, 1.05, cams[idx]!.sc);
+        const headTop = cam.y - (m.face.y - m.figure.y0) * m.height * s;
+        worst = Math.max(worst, safe - headTop);
+      }
+      need[i] = worst;
+    }
+    // spread: the camera starts easing before it is needed and stays after
+    const W = Math.round(1800 / STEP);
+    const spread = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      let v = 0;
+      for (let d = -W; d <= W; d++) v = Math.max(v, need[mod(i + d, n)]!);
+      spread[i] = v;
+    }
+    const B = Math.round(900 / STEP);
+    const out = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      let sum = 0;
+      for (let d = -B; d <= B; d++) sum += spread[mod(i + d, n)]!;
+      out[i] = sum / (2 * B + 1);
+    }
+    return { STEP, out };
+  }, [box, cams, nodes, small, timeline.T, locate, momentOf]);
+
   /** Render the scene at the clock's current value. */
   const apply = useCallback(() => {
     if (!box || !cams || !nodes) return;
@@ -590,7 +637,14 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
 
     // the camera
     const cam0 = spline(nodes, timeline.T, st.c);
-    const cam: Cam = { ...cam0, f: cam0.f * (1 + 0.05 * st.focus) };
+    let down = 0;
+    if (lift) {
+      const x = st.c / lift.STEP;
+      const i0 = Math.floor(x) % lift.out.length;
+      const i1 = (i0 + 1) % lift.out.length;
+      down = lift.out[i0]! + (lift.out[i1]! - lift.out[i0]!) * (x - Math.floor(x));
+    }
+    const cam: Cam = { ...cam0, y: cam0.y + Math.max(0, down), f: cam0.f * (1 + 0.05 * st.focus) };
     camNow.current = cam;
     // a subtle orbit around the person: the world shifts a little more than
     // they do, never so much that their outline doubles at the layer edge
@@ -600,6 +654,7 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
     const poseChange = momentOf(next).m.bridge;
     const e = easeSine(clamp(p, 0, 1));
 
+    headNow.current = Infinity;
     const put = (i: number, zoomBg: number, zoomFg: number) => {
       const layer = layers.current.get(i);
       if (!layer) return null;
@@ -609,6 +664,7 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
       const f = placeOn(m, box, cam, zoomFg, sc0);
       layer.bg.style.transform = `translate3d(${b.tx + par.x}px, ${b.ty + par.y}px, 0) scale(${b.k})`;
       layer.fg.style.transform = `translate3d(${f.tx + parFg.x}px, ${f.ty + parFg.y}px, 0) scale(${f.k})`;
+      headNow.current = Math.min(headNow.current, f.ty + m.figure.y0 * m.height * f.s);
       return { layer, f, m };
     };
 
@@ -678,7 +734,7 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
       vignette.current.style.opacity = String(0.55 * st.focus);
       vignette.current.style.background = `radial-gradient(ellipse 34% 60% at ${cam.x}px ${cam.y + cam.f * 2.2}px, transparent 45%, rgb(var(--c-ink-900) / 0.85) 100%)`;
     }
-  }, [box, cams, nodes, locate, momentOf, shownOf, timeline.T]);
+  }, [box, cams, nodes, lift, locate, momentOf, shownOf, timeline.T]);
 
   // the clock
   useEffect(() => {
@@ -727,6 +783,7 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
         apply();
       },
       clock: () => clock.current.c,
+      head: () => headNow.current,
       /** where the person's face is on the page right now */
       face: () => {
         const r = stage.current?.getBoundingClientRect();

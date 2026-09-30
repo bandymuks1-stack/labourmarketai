@@ -691,6 +691,10 @@ export const FROZEN_LANDING_FILES = [
   // (one body on screen, never a dissolve), and the Player Card became one
   // identity object — the person closed, the identity unfolding when open.
   // The regeneration touched EXACTLY ONE hash — living-worker-hero.tsx.
+  // 2026-09-30 (owner visual direction: heads were cut): tight source frames
+  // recomposed with safe space above the head (media), and a head-safety
+  // rule in the camera so holding the face never pushes a head out of frame.
+  // The regeneration touched EXACTLY ONE hash — living-worker-hero.tsx.
   "components/marketing/living-worker-hero.tsx",
   "lib/marketing/living-worker-hero.ts",
 ] as const;
