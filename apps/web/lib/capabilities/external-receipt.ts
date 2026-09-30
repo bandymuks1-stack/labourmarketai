@@ -13,14 +13,19 @@ import type { CapabilityCaller, CapabilityKind } from "./contract";
  * `audit_logs` table, written by `record_external_action_receipt_v1`
  * (SECURITY DEFINER; actor = auth.uid(), never a client value):
  *
- *   actor          the signed-in person the assistant acted for
+ *   actor          the signed-in person the assistant acted for — also the
+ *                  CONFIRMATION actor: the one-time token is bound to them
+ *   context        the organization the caller was acting for (the durable
+ *                  active-workspace pointer; null in the personal space) —
+ *                  the database refuses an organization the caller is not in
  *   when           occurred_at (database clock)
  *   operation      the capability id (`project.create_confirm`, …)
  *   object         the primary id the write produced or touched
- *   source         transport = mcp (an assistant, not the person's own click)
+ *   channel        assistant_mcp (an assistant, not the person's own click)
  *   confirmation   the first 16 hex of sha256(token) — a reference that ties
  *                  the receipt to the exact draft, never the token itself
  *   outcome        ok | the refusal code
+ *   read-back      whether the capability returned the canonical row
  *
  * The domain row itself (the project, the assignment, the shortlist decision)
  * stays the canonical record of WHAT changed; this is the record of WHO did
@@ -73,11 +78,26 @@ export async function recordExternalReceipt(
   const data = result.ok ? ((result.data ?? undefined) as Record<string, unknown> | undefined) : undefined;
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: id, error } = await (caller.supabase as any).rpc("record_external_action_receipt_v1", {
+    const sb = caller.supabase as any;
+    // The context the employer gate itself reads: the durable active-workspace
+    // pointer. Null = personal space. The RPC re-checks membership.
+    const { data: profile } = await sb
+      .from("profiles")
+      .select("active_organization_id")
+      .eq("id", caller.userId)
+      .maybeSingle();
+    const organizationId =
+      typeof profile?.active_organization_id === "string" && UUID.test(profile.active_organization_id)
+        ? (profile.active_organization_id as string)
+        : null;
+    const outcome = result.ok ? "ok" : ((result as { code?: string }).code ?? "error");
+    const { data: id, error } = await sb.rpc("record_external_action_receipt_v1", {
       p_capability: capability.id,
+      p_organization_id: organizationId,
       p_entity_id: pickObjectId(args, data),
       p_confirmation_ref: confirmationRef(args.confirmationToken),
-      p_outcome: result.ok ? "ok" : (result as { code?: string }).code ?? "error",
+      p_outcome: /^[a-z_]{1,40}$/.test(outcome) ? outcome : "error",
+      p_readback_ok: result.ok ? data?.readBack !== undefined && data?.readBack !== null : null,
     });
     if (error) return UNDEFINED_FN.has(error.code ?? "") ? { state: "not_enabled" } : { state: "failed" };
     return typeof id === "string" ? { state: "recorded", id } : { state: "failed" };

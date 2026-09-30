@@ -8,9 +8,17 @@ import type { CapabilityCaller } from "./contract";
 const TOKEN = "a-real-one-time-confirmation-token-value";
 const PROJECT = "11111111-1111-4111-8111-111111111111";
 
-function caller(answer: { data: unknown; error: { code?: string } | null }) {
+const ORG = "22222222-2222-4222-8222-222222222222";
+
+function caller(answer: { data: unknown; error: { code?: string } | null }, activeOrg: string | null = ORG) {
   const calls: { fn: string; args: Record<string, unknown> }[] = [];
   const supabase = {
+    from() {
+      const chain: Record<string, unknown> = {};
+      for (const m of ["select", "eq"]) chain[m] = () => chain;
+      chain.maybeSingle = async () => ({ data: { active_organization_id: activeOrg }, error: null });
+      return chain;
+    },
     async rpc(fn: string, args: Record<string, unknown>) {
       calls.push({ fn, args });
       return answer;
@@ -33,15 +41,17 @@ describe("the audit receipt for an assistant's write", () => {
       c,
       { id: "project.create_confirm", kind: "confirm" },
       { title: "Site", confirmationToken: TOKEN },
-      { ok: true, data: { projectId: PROJECT } },
+      { ok: true, data: { projectId: PROJECT, readBack: { id: PROJECT } } },
     );
     expect(r).toEqual({ state: "recorded", id: "rcpt-1" });
     expect(calls[0].fn).toBe("record_external_action_receipt_v1");
     expect(calls[0].args).toMatchObject({
       p_capability: "project.create_confirm",
+      p_organization_id: ORG,
       p_entity_id: PROJECT,
       p_outcome: "ok",
       p_confirmation_ref: confirmationRef(TOKEN),
+      p_readback_ok: true,
     });
     expect(JSON.stringify(calls[0].args)).not.toContain(TOKEN);
   });
@@ -66,5 +76,16 @@ describe("the audit receipt for an assistant's write", () => {
     expect(await recordExternalReceipt(b.c, { id: "x.y_confirm", kind: "confirm" }, {}, { ok: true, data: {} })).toEqual({
       state: "failed",
     });
+  });
+
+  it("the personal space records no organization; a refusal carries no read-back claim", async () => {
+    const { c, calls } = caller({ data: "rcpt-3", error: null }, null);
+    await recordExternalReceipt(
+      c,
+      { id: "work_card.save_confirm", kind: "confirm" },
+      { confirmationToken: TOKEN },
+      { ok: false, code: "confirmation_rejected", message: "x" },
+    );
+    expect(calls[0].args).toMatchObject({ p_organization_id: null, p_readback_ok: null });
   });
 });
