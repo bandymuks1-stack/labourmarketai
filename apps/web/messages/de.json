@@ -4489,6 +4489,7 @@
         "planning": "Kalender",
         "network": "Netzwerk",
         "playerCard": "Mein Berufsprofil",
+        "companyProfile": "Firmenprofil",
         "adminPlatform": "Plattform-Administration"
       },
       "roleNotice": {
@@ -6470,7 +6471,13 @@
       "map": "Karte",
       "mapNote": "Wo sich Arbeit und Dienstleistungen befinden",
       "diary": "Arbeitsjournal",
-      "diaryNote": "Abgeschlossene Arbeit wird als Fakt erfasst"
+      "diaryNote": "Abgeschlossene Arbeit wird als Fakt erfasst",
+      "scouting": "Kandidaten",
+      "scoutingNote": "Finde passende Personen für deinen Bedarf",
+      "listings": "Inserate",
+      "listingsNote": "Räume, Geräte, Fahrzeuge – anbieten oder suchen",
+      "needs": "Bedarf & Angebot",
+      "needsNote": "Veröffentliche, was du brauchst oder anbieten kannst"
     }
   },
   "learning": {
@@ -11542,7 +11549,8 @@
         "team": "Team",
         "other": "Organisation"
       },
-      "visibilityReason": "Angezeigt werden nur Personen, die auffindbar sein möchten oder eine echte Arbeitsbeziehung zu Ihnen haben."
+      "visibilityReason": "Angezeigt werden nur Personen, die auffindbar sein möchten oder eine echte Arbeitsbeziehung zu Ihnen haben.",
+      "noContactYet": "Nachrichten sind erst nach einer Einladung oder gemeinsamer Arbeit möglich. Lade ein — oder frage eine Dienstleistung an."
     },
     "sent": {
       "title": "Meine gesendeten Einladungen",
@@ -17339,6 +17347,7 @@
     "needs": "Bedarf",
     "calendar": "Kalender",
     "partners": "Kunden & Partner",
+    "market": "Marktplatz",
     "education": "Ausbildung",
     "history": "Verlauf",
     "settings": "Einstellungen",

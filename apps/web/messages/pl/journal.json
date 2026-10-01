@@ -247,6 +247,8 @@
   "listTitle": "Wpisy pracy",
   "navTitle": "Dziennik pracy",
   "navSubtitle": "Pokaż, co zrobiłeś — to wzmacnia Twoją kartę zawodową.",
+  "orgContextNotice": "To jest twój osobisty dziennik pracy, a nie dziennik „{org}”. Działasz w imieniu firmy — jej prace i osoby są gdzie indziej.",
+  "orgContextCta": "Prace firmy →",
   "composerBenefit": "Ten wpis wzmacnia Twoją kartę zawodową.",
   "newEntry": "Nowy wpis",
   "noEngagement": "Nie masz jeszcze aktywnego kontekstu pracy. Dołącz do organizacji lub projektu, aby budować swoje CV.",

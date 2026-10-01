@@ -236,6 +236,8 @@
   "listTitle": "Työkirjaukset",
   "navTitle": "Työtiedot",
   "navSubtitle": "Näytä mitä teit — se vahvistaa työkorttiasi.",
+  "orgContextNotice": "Tämä on henkilökohtainen työpäiväkirjasi, ei yrityksen „{org}“. Toimit yrityksen puolesta — sen työt ja ihmiset ovat muualla.",
+  "orgContextCta": "Yrityksen työt →",
   "composerBenefit": "Tämä kirjaus vahvistaa työkorttiasi.",
   "newEntry": "Uusi kirjaus",
   "noEngagement": "Sinulla ei ole vielä aktiivista työkontekstia. Liity organisaatioon tai projektiin kartuttaaksesi CV:täsi.",

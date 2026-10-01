@@ -292,7 +292,8 @@
         "journal": "Mit CV",
         "search": "[EN] Search",
         "advanced": "Avanceret styring",
-        "playerCard": "Min faglige profil"
+        "playerCard": "Min faglige profil",
+        "companyProfile": "Virksomhedsprofil"
       },
       "moreSection": {
         "title": "Detaljeret overblik",

@@ -292,7 +292,8 @@
         "journal": "Min CV",
         "search": "[EN] Search",
         "advanced": "Avansert styring",
-        "playerCard": "Min profesjonelle profil"
+        "playerCard": "Min profesjonelle profil",
+        "companyProfile": "Bedriftsprofil"
       },
       "moreSection": {
         "title": "Detaljert oversikt",

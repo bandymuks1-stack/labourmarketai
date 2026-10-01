@@ -292,7 +292,8 @@
         "journal": "Minu CV",
         "search": "[EN] Search",
         "advanced": "Täpsem haldus",
-        "playerCard": "Minu ametiprofiil"
+        "playerCard": "Minu ametiprofiil",
+        "companyProfile": "Ettevõtte profiil"
       },
       "moreSection": {
         "title": "Üksikasjalik ülevaade",

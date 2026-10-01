@@ -292,7 +292,8 @@
         "journal": "Mitt CV",
         "search": "[EN] Search",
         "advanced": "Avancerad hantering",
-        "playerCard": "Min yrkesprofil"
+        "playerCard": "Min yrkesprofil",
+        "companyProfile": "Företagsprofil"
       },
       "moreSection": {
         "title": "Detaljerad översikt",

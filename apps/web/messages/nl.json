@@ -4489,6 +4489,7 @@
         "planning": "Kalender",
         "network": "Netwerk",
         "playerCard": "Mijn professionele profiel",
+        "companyProfile": "Bedrijfsprofiel",
         "adminPlatform": "Platformbeheer"
       },
       "roleNotice": {
@@ -6470,7 +6471,13 @@
       "map": "Kaart",
       "mapNote": "Waar het werk en de diensten zijn",
       "diary": "Werkjournaal",
-      "diaryNote": "Afgerond werk wordt als feit vastgelegd"
+      "diaryNote": "Afgerond werk wordt als feit vastgelegd",
+      "scouting": "Kandidaten",
+      "scoutingNote": "Vind de juiste mensen voor je behoefte",
+      "listings": "Advertenties",
+      "listingsNote": "Ruimtes, uitrusting, voertuigen – aanbieden of zoeken",
+      "needs": "Vraag & aanbod",
+      "needsNote": "Publiceer wat je nodig hebt of kunt bieden"
     }
   },
   "learning": {
@@ -11542,7 +11549,8 @@
         "team": "Team",
         "other": "Organisatie"
       },
-      "visibilityReason": "Alleen mensen die vindbaar willen zijn of een echte werkrelatie met u hebben, worden getoond."
+      "visibilityReason": "Alleen mensen die vindbaar willen zijn of een echte werkrelatie met u hebben, worden getoond.",
+      "noContactYet": "Berichten kan pas na een uitnodiging of samenwerking. Nodig uit — of vraag een van hun diensten aan."
     },
     "sent": {
       "title": "Mijn verzonden uitnodigingen",
@@ -17339,6 +17347,7 @@
     "needs": "Behoeften",
     "calendar": "Kalender",
     "partners": "Klanten en partners",
+    "market": "Marktplaats",
     "education": "Opleiding",
     "history": "Geschiedenis",
     "settings": "Instellingen",

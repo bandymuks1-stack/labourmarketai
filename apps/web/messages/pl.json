@@ -4489,6 +4489,7 @@
         "planning": "Kalendarz",
         "network": "Sieć kontaktów",
         "playerCard": "Mój profil zawodowy",
+        "companyProfile": "Profil firmy",
         "adminPlatform": "Administracja platformy"
       },
       "roleNotice": {
@@ -6470,7 +6471,13 @@
       "map": "Mapa",
       "mapNote": "Gdzie znajduje się praca i usługi",
       "diary": "Dziennik pracy",
-      "diaryNote": "Wykonana praca jest zapisywana jako fakt"
+      "diaryNote": "Wykonana praca jest zapisywana jako fakt",
+      "scouting": "Kandydaci",
+      "scoutingNote": "Znajdź odpowiednie osoby do swoich potrzeb",
+      "listings": "Ogłoszenia",
+      "listingsNote": "Lokale, sprzęt, pojazdy – oferuj lub szukaj",
+      "needs": "Potrzeby i oferty",
+      "needsNote": "Opublikuj, czego potrzebujesz lub co możesz zaoferować"
     }
   },
   "learning": {
@@ -11542,7 +11549,8 @@
         "team": "Zespół",
         "other": "Organizacja"
       },
-      "visibilityReason": "Pokazywane są tylko osoby, które wyraziły zgodę na bycie widocznymi, lub które mają z Tobą rzeczywistą relację zawodową."
+      "visibilityReason": "Pokazywane są tylko osoby, które wyraziły zgodę na bycie widocznymi, lub które mają z Tobą rzeczywistą relację zawodową.",
+      "noContactYet": "Wiadomości są możliwe dopiero po zaproszeniu lub wspólnej pracy. Zaproś — albo poproś o usługę."
     },
     "sent": {
       "title": "Moje wysłane zaproszenia",
@@ -17339,6 +17347,7 @@
     "needs": "Zapotrzebowanie",
     "calendar": "Kalendarz",
     "partners": "Klienci i partnerzy",
+    "market": "Rynek",
     "education": "Nauka",
     "history": "Historia",
     "settings": "Ustawienia",

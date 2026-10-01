@@ -300,6 +300,10 @@ export default async function JournalPage({
   // Ordering still puts the active workspace first so the list reads sensibly,
   // but the DEFAULT is the resolution, and on ambiguity there is none.
   const activeWorkspaceOrgId = workspaceForDefault.activeWorkspaceId;
+  const actingOrgName =
+    workspaceForDefault.workspaces.find(
+      (w) => w.id === activeWorkspaceOrgId && w.kind === "organization",
+    )?.name || null;
   const ecOrdered = [...(ecRows ?? [])].sort(
     (a, b) =>
       Number(
@@ -1171,9 +1175,28 @@ export default async function JournalPage({
         >
           {t("navSubtitle")}
         </p>
+        {actingOrgName ? (
+          // WHOSE journal this is, said plainly (owner order 2026-10-01:
+          // company context is company management, not the owner's personal
+          // CV). The core nav is deliberately the same in every context, so
+          // the page itself says it is the PERSON's diary and points at the
+          // organization's own work — never a silent mix of the two.
+          <p
+            className="mt-1 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+            data-testid="journal-org-context-notice"
+          >
+            {t("orgContextNotice", { org: actingOrgName })}{" "}
+            <Link
+              href="/dashboard/projects"
+              className="font-medium text-brand-blue underline-offset-2 hover:underline"
+            >
+              {t("orgContextCta")}
+            </Link>
+          </p>
+        ) : null}
       </header>
 
-      {/* The page-local quick-nav strip is gone (target worker IA 2026-09-13
+{/* The page-local quick-nav strip is gone (target worker IA 2026-09-13
           §4: a second nav strip is card soup) — three first-level blocks
           lead on a phone: recording, today's records, one numbers card. */}
 

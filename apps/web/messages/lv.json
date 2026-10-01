@@ -292,7 +292,8 @@
         "journal": "Mans CV",
         "search": "[EN] Search",
         "advanced": "Paplašinātā pārvaldība",
-        "playerCard": "Mans profesionālais profils"
+        "playerCard": "Mans profesionālais profils",
+        "companyProfile": "Uzņēmuma profils"
       },
       "moreSection": {
         "title": "Detalizēts pārskats",
