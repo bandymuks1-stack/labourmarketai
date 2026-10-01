@@ -1515,6 +1515,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260930133500_worker_avatar_path_for_relations_v1.sql",
       // owner 2026-10-01 (#2041 APPROVED): the human decision on a staffing collision is audited.
       "20261001100000_assignment_decision_audit_v1.sql",
+      // stream N (owner approval PENDING): service_role SELECT for the job-alert sweep.
+      "20261001120000_job_alert_sweep_service_role_select.sql",
 ]);
   });
 
