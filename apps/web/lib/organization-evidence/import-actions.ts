@@ -12,6 +12,8 @@ import {
   SUPPLIER_ROLES,
   attestRecord,
   attestSessionRecords,
+  attributeRecordsToPerformingOrganization,
+  listEvidenceRecords,
   buildPreview,
   committableRows,
   commitImport,
@@ -37,7 +39,7 @@ import {
   rowsFromGrid,
 } from "@/lib/organization-evidence/parse-tabular";
 import { resolveEvidenceOrganization } from "@/lib/organization-evidence/evidence-org-context";
-import { withSessionWorkspacePointer } from "@/lib/company/active-organization";
+import { listWorkspaceMemberships, withSessionWorkspacePointer } from "@/lib/company/active-organization";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { activeLocales } from "@/lib/i18n/config";
 import { getLocale } from "next-intl/server";
@@ -579,4 +581,61 @@ export async function attestEvidenceRecordAction(
   if (res.kind !== "ok") return refuse(res);
   revalidatePath(PATH, "page");
   return { kind: "ok", sessionId: text(form, "session_id") || undefined };
+}
+
+/**
+ * NAME THE COMPANY THAT PERFORMED ONE PERSON'S RECORDS (additive, no copy).
+ *
+ * The records stay in the active organization's books; each gets one party
+ * row naming another organization the CALLER ALSO BELONGS TO as the
+ * performing company (`attributeRecordsToPerformingOrganization`). The form
+ * supplies a roster person id, the performing organization id and an
+ * optional note; the organization acting is re-derived here, the performing
+ * organization is checked against the caller's own memberships, and the
+ * insert still runs under the caller's own RLS (a manager of the record's
+ * organization).
+ */
+export async function attributePersonToPerformingCompanyAction(
+  _previous: EvidenceImportActionState,
+  form: FormData,
+): Promise<EvidenceImportActionState> {
+  const c = await caller();
+  if (!c) return { kind: "refused", reason: "unauthenticated" };
+  const personId = text(form, "person_id");
+  const performingOrganizationId = text(form, "performing_organization_id");
+  const note = text(form, "note");
+  if (personId === "" || performingOrganizationId === "" || note.length > 200) {
+    return { kind: "refused", reason: "invalid", detail: "form" };
+  }
+  const org = await resolveEvidenceOrganization(c, null);
+  if (!org.ok) {
+    return { kind: "refused", reason: org.reason === "not-authorized" ? "not_authorized" : "invalid", detail: org.reason };
+  }
+  let memberships: Awaited<ReturnType<typeof listWorkspaceMemberships>>;
+  try {
+    memberships = await listWorkspaceMemberships(c);
+  } catch {
+    return { kind: "refused", reason: "unavailable" };
+  }
+  const allowed = memberships.some(
+    (w) => w.kind === "organization" && w.id === performingOrganizationId && w.id !== org.organizationId,
+  );
+  if (!allowed) return { kind: "refused", reason: "invalid", detail: "performing_organization" };
+
+  const recs = await listEvidenceRecords(c, {
+    organizationId: org.organizationId,
+    organizationPersonId: personId,
+    limit: 1000,
+  });
+  if (recs.kind !== "ok") return refuse(recs);
+  const ids = recs.records.filter((r) => !r.withdrawn).map((r) => r.id);
+  const res = await attributeRecordsToPerformingOrganization(c, {
+    recordIds: ids,
+    performingOrganizationId,
+    role: "employer",
+    label: note === "" ? null : note,
+  });
+  if (res.kind !== "ok") return refuse(res);
+  revalidatePath(PATH, "page");
+  return { kind: "ok", note: `attributed:${res.attributed}:skipped:${res.skipped}` };
 }

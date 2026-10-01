@@ -16,4 +16,14 @@ describe("scouting: the request-to-communicate button matches its server gate", 
     expect(page).toMatch(/isShortlistedForContact\(c\.shortlistStatus\)\s*\?\s*\(\s*<RequestCommunicationButton/);
     expect(page).toMatch(/request\.shortlistFirst/);
   });
+
+  it("the offered-candidates card follows the SAME shortlist rule (button, hint, or nothing — never a dead button)", () => {
+    const start = page.indexOf("scout-offered-");
+    const offered = page.slice(start, page.indexOf("ProposeBookingButton", start));
+    expect(offered).toMatch(/isShortlistedForContact\(/);
+    expect(offered).toMatch(/\?\s*\(\s*<RequestCommunicationButton/);
+    expect(offered).toMatch(/scout-offered-shortlist-first-/);
+    // no unconditional button in that card
+    expect(offered).not.toMatch(/<div className="flex flex-col gap-2">\s*<RequestCommunicationButton/);
+  });
 });

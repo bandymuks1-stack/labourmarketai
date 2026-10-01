@@ -5,6 +5,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { EvidenceImportSection } from "@/components/app/evidence-import-section";
 import { CompanyWorkHistory, CompanyPlaceHistory } from "@/components/app/organization/company-work-history";
+import { PerformingCompanyPanel } from "@/components/app/organization/performing-company-panel";
 import { EvidenceImportSessions } from "@/components/app/organization/evidence-import-sessions";
 
 /**
@@ -56,6 +57,10 @@ export default async function CompanyHistoryPage({
       {/* WHAT IS ALREADY ON RECORD — the committed history seen by place,
           before the door for adding more. */}
       <CompanyWorkHistory locale={locale} />
+
+      {/* WHO PERFORMED IT — only when this organization's books hold work that
+          another organization of the same caller performed. */}
+      <PerformingCompanyPanel locale={locale} />
 
       <div id="evidence-import-zone" className="scroll-mt-20">
         <EvidenceImportSection locale={locale} sessionId={evidenceSession} />
