@@ -13438,6 +13438,7 @@
       "briefEmployerPendingAbsences": "{count, plural, one {# запрос на отсутствие ожидает} few {# запроса на отсутствие ожидают} other {# запросов на отсутствие ожидают}} вашего решения.",
       "briefEmployerAbsentToday": "{count, plural, one {Сегодня отсутствует # ваш работник} few {Сегодня отсутствуют # ваших работника} other {Сегодня отсутствуют # ваших работников}}.",
       "chipEmployerInbox": "Очередь проверки",
+      "chipEmployerLearningReview": "Проверить предложения",
       "chipEmployerAbsences": "Отсутствия",
       "briefUnreadMessages": "У вас {count, plural, one {# непрочитанное сообщение} few {# непрочитанных сообщения} other {# непрочитанных сообщений}}.",
       "briefProfileGap": "В профиле ещё не хватает: {step}.",

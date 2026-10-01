@@ -24,7 +24,8 @@ import {
  * Idempotent per (entry, skill): see `planReviewQueueInserts`. There is no
  * unique index behind it (that would be a migration), so two managers opening
  * the brief in the same instant could in principle both insert; the cost is
- * one duplicate pending suggestion, never a confirmation.
+ * one duplicate pending suggestion, never a confirmation. The queue is
+ * re-read right before the insert to shrink that window.
  *
  * NEVER throws and NEVER confirms. Absent tables / refused reads degrade to
  * "nothing produced".
@@ -57,18 +58,26 @@ export async function produceReviewQueueFromSignals(
     ];
     if (entryIds.length === 0) return { inserted: 0 };
 
-    const [{ data: entryRows }, { data: queued }] = await Promise.all([
-      asAny(supabase)
-        .from("journal_entries")
-        .select(
-          "id, worker_id, superseded_by, deleted_at, engagement_contexts(organization_id, journal_review_enabled)",
-        )
-        .in("id", entryIds),
-      asAny(supabase)
+    const readQueuedKeys = async (): Promise<Set<string>> => {
+      const { data: queued } = await asAny(supabase)
         .from("learning_review_queue")
         .select("journal_entry_id, subject_skill_id")
-        .in("journal_entry_id", entryIds),
-    ]);
+        .in("journal_entry_id", entryIds);
+      const keys = new Set<string>();
+      for (const q of (queued ?? []) as Array<Record<string, unknown>>) {
+        if (q.journal_entry_id && q.subject_skill_id) {
+          keys.add(entrySkillKey(String(q.journal_entry_id), String(q.subject_skill_id)));
+        }
+      }
+      return keys;
+    };
+
+    const { data: entryRows } = await asAny(supabase)
+      .from("journal_entries")
+      .select(
+        "id, worker_id, superseded_by, deleted_at, engagement_contexts(organization_id, journal_review_enabled)",
+      )
+      .in("id", entryIds);
 
     const entries = new Map<string, QueueEntryFacts>();
     for (const e of (entryRows ?? []) as Array<Record<string, unknown>>) {
@@ -83,14 +92,14 @@ export async function produceReviewQueueFromSignals(
         stale: e.superseded_by != null || e.deleted_at != null,
       });
     }
-    const already = new Set<string>();
-    for (const q of (queued ?? []) as Array<Record<string, unknown>>) {
-      if (q.journal_entry_id && q.subject_skill_id) {
-        already.add(entrySkillKey(String(q.journal_entry_id), String(q.subject_skill_id)));
-      }
+    // Plan, then RE-READ the queue and plan again immediately before the
+    // insert: a concurrent session that queued the same (entry, skill) in
+    // between is seen and skipped. This narrows the window to a few
+    // milliseconds; only a unique index closes it entirely (follow-up).
+    if (planReviewQueueInserts(signals, entries, await readQueuedKeys()).length === 0) {
+      return { inserted: 0 };
     }
-
-    const rows = planReviewQueueInserts(signals, entries, already);
+    const rows = planReviewQueueInserts(signals, entries, await readQueuedKeys());
     if (rows.length === 0) return { inserted: 0 };
     const { error } = await asAny(supabase).from("learning_review_queue").insert(rows);
     if (error) {

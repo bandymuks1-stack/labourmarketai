@@ -13438,6 +13438,7 @@
       "briefEmployerPendingAbsences": "{count, plural, one {# wniosek o nieobecność czeka} few {# wnioski o nieobecność czekają} many {# wniosków o nieobecność czeka} other {# wniosku o nieobecność czekają}} na Twoją decyzję.",
       "briefEmployerAbsentToday": "{count, plural, one {# z Twoich pracowników jest} few {# z Twoich pracowników są} many {# z Twoich pracowników jest} other {# z Twoich pracowników są}} dziś nieobecnych.",
       "chipEmployerInbox": "Kolejka przeglądu",
+      "chipEmployerLearningReview": "Przejrzyj propozycje",
       "chipEmployerAbsences": "Nieobecności",
       "briefUnreadMessages": "Masz {count, plural, one {# nieprzeczytaną wiadomość} few {# nieprzeczytane wiadomości} many {# nieprzeczytanych wiadomości} other {# nieprzeczytanej wiadomości}}.",
       "briefProfileGap": "W Twoim profilu wciąż brakuje: {step}.",

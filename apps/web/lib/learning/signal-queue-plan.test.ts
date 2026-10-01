@@ -107,11 +107,24 @@ describe("EDU-5 wiring is pinned", () => {
     expect(src).toMatch(/learning_review_queue/);
   });
 
-  it("the manager brief states the count and links nowhere (the surface stays unlinked)", () => {
+  it("the manager brief links the review page ONLY in the N>0 branch", () => {
     const src = read("lib/conversation/opening-brief.ts");
     const at = src.indexOf("briefEmployerLearningReview");
     expect(at).toBeGreaterThan(0);
-    expect(src.slice(at - 300, at + 200)).toMatch(/waiting > 0/);
-    expect(src).not.toMatch(/link:\/dashboard\/learning/);
+    const branch = src.slice(src.lastIndexOf("if (waiting > 0)", at), at + 400);
+    expect(branch).toMatch(/link:\/dashboard\/learning/);
+    // exactly one occurrence: the door cannot exist outside that branch
+    expect(src.match(/link:\/dashboard\/learning/g)).toHaveLength(1);
+  });
+
+  it("no static navigation surface or catalogue links the review page (zero-state has no door)", () => {
+    for (const rel of ["lib/config/navigation.ts", "lib/config/feature-availability.ts"]) {
+      expect(read(rel)).not.toMatch(/dashboard\/learning/);
+    }
+  });
+
+  it("the producer re-reads the queue right before inserting (duplicate window)", () => {
+    const src = read("lib/learning/signal-queue-producer.ts");
+    expect(src.match(/readQueuedKeys\(\)/g)!.length).toBeGreaterThanOrEqual(2);
   });
 });

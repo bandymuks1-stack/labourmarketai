@@ -13438,6 +13438,7 @@
       "briefEmployerPendingAbsences": "{count, plural, one {# afwezigheidsverzoek wacht} other {# afwezigheidsverzoeken wachten}} op uw besluit.",
       "briefEmployerAbsentToday": "{count, plural, one {# van uw medewerkers is} other {# van uw medewerkers zijn}} vandaag afwezig.",
       "chipEmployerInbox": "Beoordelingsrij",
+      "chipEmployerLearningReview": "Suggesties beoordelen",
       "chipEmployerAbsences": "Afwezigheden",
       "briefUnreadMessages": "Je hebt {count, plural, one {# ongelezen bericht} other {# ongelezen berichten}}.",
       "briefProfileGap": "Je profiel mist nog: {step}.",
