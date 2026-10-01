@@ -19,7 +19,10 @@ import {
   type WorkCardActionResult,
 } from "@/lib/worker/work-card-actions";
 import type { WorkCardValues } from "@/lib/worker/work-card";
-import type { WorkCardState } from "@/lib/worker/work-card-state";
+import {
+  preferredCountriesCleared,
+  type WorkCardState,
+} from "@/lib/worker/work-card-state";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
@@ -106,6 +109,9 @@ export function WorkCardEditor({
   checks?: WorkCardCheckItem[];
 }) {
   const [open, setOpen] = useState(false);
+  // What is typed in the preferred-countries field, so an emptied field that
+  // had saved countries is sent as an EXPLICIT clear (not as "keep").
+  const [typedCountries, setTypedCountries] = useState<string | null>(null);
 
   // Inline-dim "+" chips (availability/location/pay) open this editor via a
   // window event — they used to self-anchor to #work-card and do nothing
@@ -356,9 +362,15 @@ export function WorkCardEditor({
                 name="preferred_countries"
                 placeholder={labels.preferredHint}
                 defaultValue={values.preferredCountries.join(", ")}
+                onChange={(e) => setTypedCountries(e.target.value)}
                 className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm uppercase text-text-primary"
               />
             </label>
+
+            {typedCountries !== null &&
+            preferredCountriesCleared(values.preferredCountries, typedCountries) ? (
+              <input type="hidden" name="preferred_countries_clear" value="1" />
+            ) : null}
 
             {/* kiek — pay */}
             <div className="grid grid-cols-2 gap-3">
