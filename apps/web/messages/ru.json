@@ -6439,6 +6439,7 @@
     "discoverEmpty": "Пока нет активных услуг для показа.",
     "request": "Запросить",
     "requested": "Запрошено",
+    "requestMessagePlaceholder": "Напишите исполнителю, что вам нужно (необязательно)",
     "remoteBadge": "Удалённо",
     "outgoingHeading": "Мои запросы",
     "outgoingEmpty": "Вы ещё не запрашивали ни одной услуги.",

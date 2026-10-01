@@ -6439,6 +6439,7 @@
     "discoverEmpty": "No active services to show yet.",
     "request": "Request",
     "requested": "Requested",
+    "requestMessagePlaceholder": "Tell the provider what you need (optional)",
     "remoteBadge": "Remote",
     "outgoingHeading": "My requests",
     "outgoingEmpty": "You haven't requested any service yet.",

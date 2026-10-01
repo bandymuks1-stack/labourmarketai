@@ -6439,6 +6439,7 @@
     "discoverEmpty": "Kol kas nėra rodomų aktyvių paslaugų.",
     "request": "Pateikti užklausą",
     "requested": "Užklausa pateikta",
+    "requestMessagePlaceholder": "Parašykite teikėjui, ko reikia (neprivaloma)",
     "remoteBadge": "Nuotoliu",
     "outgoingHeading": "Mano užklausos",
     "outgoingEmpty": "Dar nepateikei nė vienos užklausos.",
