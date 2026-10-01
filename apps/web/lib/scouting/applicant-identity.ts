@@ -1,7 +1,6 @@
 import "server-only";
 
-import { AVATAR_BUCKET } from "@/lib/profile/avatar";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { signAvatarPath } from "@/lib/profile/avatar";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -47,13 +46,7 @@ export async function getApplicantIdentity(
     const row = data[0] as { display_name?: unknown; avatar_path?: unknown };
     const name = typeof row.display_name === "string" && row.display_name.trim() ? row.display_name.trim() : null;
     const path = typeof row.avatar_path === "string" && row.avatar_path.length > 0 ? row.avatar_path : null;
-    let avatarUrl: string | null = null;
-    if (path) {
-      const { data: signed } = await createAdminClient()
-        .storage.from(AVATAR_BUCKET)
-        .createSignedUrl(path, 60 * 60);
-      avatarUrl = signed?.signedUrl ?? null;
-    }
+    const avatarUrl = path ? await signAvatarPath(path) : null;
     if (!name && !avatarUrl) return null;
     return { name, avatarUrl };
   } catch {
