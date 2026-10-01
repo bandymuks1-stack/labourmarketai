@@ -2142,7 +2142,7 @@
       },
       "workersBlocker": {
         "title": "Coś poszło nie tak",
-        "subtitle": "Ścieżka firmowa jest tymczasowo zablokowana na poziomie bazy danych. Rzeczywiste łączenie pracowników i zaproszenia już działają po stronie agencji.",
+        "subtitle": "Chwilowo niedostępne.",
         "statusLabel": "Coś poszło nie tak",
         "statusBody": "Zarządzanie pracownikami firmy jest wciąż przygotowywane i zostanie włączone później.",
         "nextStep": "Samodzielna rejestracja pracowników pozostaje zawsze dostępna."
@@ -2254,6 +2254,12 @@
         "statusInvited": "Zaproszenie utworzone (nie zostało wysłane e-mailem). Zaproszona osoba zobaczy je po zalogowaniu tym adresem e-mail.",
         "statusAlreadyPending": "Dla tego e-maila z Twojej firmy istnieje już oczekujące zaproszenie.",
         "statusAlreadyLinked": "Ten pracownik jest już połączony z Twoją firmą.",
+        "statusWordActive": "Aktywny",
+        "statusWordPending": "Zaproszony",
+        "statusWordAccepted": "Przyjęte",
+        "statusWordCancelled": "Anulowane",
+        "statusWordExpired": "Wygasło",
+        "statusWordEnded": "Zakończone",
         "statusNotOwner": "Działanie odrzucone: nie jesteś właścicielem firmy.",
         "statusInvalidEmail": "Nieprawidłowy adres e-mail.",
         "statusError": "Coś poszło nie tak. Spróbuj ponownie.",
@@ -4732,6 +4738,7 @@
         "event_demand_interest_reviewed": "Firma oznaczyła Twoje zainteresowanie jako rozpatrzone",
         "event_weekly_digest": "Twoje tygodniowe podsumowanie pracy i możliwości jest gotowe",
         "event_saved_search_match": "Zapisane wyszukiwanie ma nowe wyniki",
+        "event_job_alert": "Pojawiła się nowa oferta pasująca do Twoich kryteriów",
         "event_invitation_accepted": "Ktoś przyjął Twoje zaproszenie",
         "event_weekly_digest_profile_completion": "Aby pokazać pasujące oferty, potwierdź, jaką pracę wykonujesz",
         "event_weekly_digest_journal": "Podsumowanie Twojego dziennika pracy z tego tygodnia jest gotowe"
@@ -7671,7 +7678,7 @@
     "eyebrow": "MOJE DOKUMENTY",
     "title": "Moje dokumenty",
     "subtitle": "Co masz, czego brakuje i jaki jest następny krok — dla każdego kraju.",
-    "preparing": "Gotowość dokumentów jest przygotowywana — zostanie uruchomiona, gdy warstwa przechowywania dokumentów zostanie sprawdzona i włączona. Nic tutaj nie jest jeszcze aktywne.",
+    "preparing": "Chwilowo niedostępne.",
     "reports": {
       "title": "Raporty i eksporty",
       "intro": "Zbuduj gotowy do druku raport na podstawie własnych danych. PDF działa przez funkcję drukowania/zapisu w przeglądarce; Excel i Word nie są jeszcze dostępne.",
@@ -8452,7 +8459,8 @@
       "opened": "Rozmowa otwarta — napisz wiadomość do pracownika.",
       "view": "Otwórz rozmowę",
       "error": "Nie udało się otworzyć rozmowy. Spróbuj ponownie.",
-      "limitReached": "Osiągnięto dzienny limit nowych rozmów. Spróbuj ponownie jutro."
+      "limitReached": "Osiągnięto dzienny limit nowych rozmów. Spróbuj ponownie jutro.",
+      "shortlistFirst": "Najpierw dodaj osobę do krótkiej listy, wtedy możesz poprosić o rozmowę."
     },
     "how": {
       "title": "Jak działa dopasowanie",
@@ -9513,7 +9521,7 @@
     "external": {
       "sectionTitle": "Publiczne ogłoszenia o pracę",
       "sectionNote": "Ogłoszenia z oficjalnych publicznych służb zatrudnienia. Publikuje je pracodawca u źródła — labourmarket.ai je pokazuje, aby można je było znaleźć, a aplikowanie odbywa się przez oryginalne ogłoszenie.",
-      "shownOfTotal": "najlepsze {shown} z {total}",
+      "shownOfTotal": "pokazano {shown} z {total}",
       "bandBest": "Najlepiej dopasowane",
       "bandPossible": "Możliwe dopasowania",
       "bandExplore": "Pozostałe ogłoszenia",
@@ -9665,6 +9673,14 @@
         "LOOKING_FOR_WORK": "Szukam pracy",
         "LOOKING_FOR_PROJECTS": "Szukam projektów"
       }
+    },
+    "jobAlerts": {
+      "title": "Powiadomienia o nowych ofertach",
+      "ready": "Gdy pojawi się nowa prawdziwa oferta pasująca do Twojego zawodu i wybranych krajów, zobaczysz ją w powiadomieniach. Oferta bez podanego wynagrodzenia nigdy nie jest ukrywana z powodu wynagrodzenia.",
+      "missing": "Aby dostawać powiadomienia o nowych ofertach, podaj:",
+      "profession": "jaką pracę wykonujesz",
+      "country": "w jakich krajach chcesz pracować",
+      "cta": "Uzupełnij preferencje"
     }
   },
   "workerIntake": {
@@ -13936,7 +13952,7 @@
       "moveToLine": "• „{to}”: osób {before} → {after}; lista gotowości tam zacznie się od 0/{total}.",
       "moveCountryLine": "• Zmienia się kraj: {from} → {to} — inne wymagania dokumentowe.",
       "moveNoDatesLine": "• „{to}” nie ma dat — nieobecności nie można sprawdzić.",
-      "moveAvailabilityUnknownLine": "• Nieobecności nieznane — model urlopów tu nie odpowiada.",
+      "moveAvailabilityUnknownLine": "• Nieobecności nieznane.",
       "moveAvailabilityLine": "• W oknie {start}–{end} ma {count} wpisów nieobecności.",
       "moveAvailabilityFreeLine": "• Brak nieobecności w datach „{to}”.",
       "moveOnlyConfirmLine": "Na razie nic się nie zmieniło — zmieni dopiero potwierdzenie.",

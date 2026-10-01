@@ -263,15 +263,18 @@ describe("the gate is on the PATH, not in an optional argument", () => {
       join(__dirname, "..", "ai", "runtime", "run-core.ts"),
       "utf8",
     );
+    // Multi-provider order (2026-10-01): the walk covers EVERY secondary
+    // engine, each judged by its own profile before its adapter is invoked.
     const secondary = src.slice(
-      src.indexOf("function tryPreferredSecondary"),
-      src.indexOf("const DEEPL_PROFILE"),
+      src.indexOf("async function tryPreferredSecondary"),
+      src.indexOf("/** DeepL has no"),
     );
     expect(secondary).toContain("egressPermitted");
-    expect(secondary).toContain("DEEPL_PROFILE");
+    expect(src).toContain("DEEPL_PROFILE");
+    expect(src).toMatch(/id: "deepl", adapter: deeplCompletionProvider, profile: \(\) => DEEPL_PROFILE/);
     // The refusal must happen BEFORE the adapter call, not after it.
     expect(secondary.indexOf("egressPermitted")).toBeLessThan(
-      secondary.indexOf("deeplCompletionProvider.complete"),
+      secondary.indexOf("secondary.adapter.complete"),
     );
   });
 

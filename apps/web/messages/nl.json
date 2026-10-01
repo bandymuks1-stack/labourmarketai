@@ -2142,7 +2142,7 @@
       },
       "workersBlocker": {
         "title": "Er is iets misgegaan",
-        "subtitle": "Het bedrijfspad is tijdelijk geblokkeerd op de DB-laag. Echte werknemerskoppeling + uitnodigingen werken al aan de uitzendbureaukant.",
+        "subtitle": "Momenteel niet beschikbaar.",
         "statusLabel": "Er is iets misgegaan",
         "statusBody": "Beheer van bedrijfswerknemers wordt nog voorbereid en wordt later ingeschakeld.",
         "nextStep": "Zelfaanmelding voor werknemers blijft altijd open."
@@ -2254,6 +2254,12 @@
         "statusInvited": "Uitnodiging aangemaakt (er wordt geen e-mail verstuurd). De genodigde ziet de uitnodiging na het inloggen met dit e-mailadres.",
         "statusAlreadyPending": "Er bestaat al een openstaande uitnodiging voor dit e-mailadres vanuit jouw bedrijf.",
         "statusAlreadyLinked": "Deze werknemer is al aan jouw bedrijf gekoppeld.",
+        "statusWordActive": "Actief",
+        "statusWordPending": "Uitgenodigd",
+        "statusWordAccepted": "Geaccepteerd",
+        "statusWordCancelled": "Geannuleerd",
+        "statusWordExpired": "Verlopen",
+        "statusWordEnded": "Beëindigd",
         "statusNotOwner": "Actie geweigerd: je bent niet de eigenaar van het bedrijf.",
         "statusInvalidEmail": "Ongeldig e-mailadres.",
         "statusError": "Er is iets misgegaan. Probeer het opnieuw.",
@@ -4732,6 +4738,7 @@
         "event_demand_interest_reviewed": "Een bedrijf heeft je interesse als bekeken gemarkeerd",
         "event_weekly_digest": "Je wekelijkse samenvatting van werk en kansen staat klaar",
         "event_saved_search_match": "Een opgeslagen zoekopdracht heeft nieuwe resultaten",
+        "event_job_alert": "Er is een nieuwe baan die bij je zoekopdracht past",
         "event_invitation_accepted": "Iemand heeft je uitnodiging aangenomen",
         "event_weekly_digest_profile_completion": "Om je passende banen te tonen, bevestig welk werk je doet",
         "event_weekly_digest_journal": "Het weekoverzicht van je werkjournaal is klaar"
@@ -7671,7 +7678,7 @@
     "eyebrow": "MIJN DOCUMENTEN",
     "title": "Mijn documenten",
     "subtitle": "Wat je hebt, wat ontbreekt en de volgende stap — per land.",
-    "preparing": "Documentgereedheid wordt voorbereid — het gaat live zodra de documentopslaglaag is beoordeeld en ingeschakeld. Hier is nog niets actief.",
+    "preparing": "Momenteel niet beschikbaar.",
     "reports": {
       "title": "Rapporten & exports",
       "intro": "Stel een printklaar rapport samen uit je eigen data. PDF werkt via de print-/opslaanfunctie van je browser; Excel en Word zijn nog niet beschikbaar.",
@@ -8452,7 +8459,8 @@
       "opened": "Gesprek geopend — stuur de werknemer een bericht.",
       "view": "Gesprek openen",
       "error": "Kon het gesprek niet openen. Probeer het opnieuw.",
-      "limitReached": "Daglimiet voor nieuwe gesprekken bereikt. Probeer het morgen opnieuw."
+      "limitReached": "Daglimiet voor nieuwe gesprekken bereikt. Probeer het morgen opnieuw.",
+      "shortlistFirst": "Zet de persoon eerst op je shortlist, daarna kun je een gesprek aanvragen."
     },
     "how": {
       "title": "Hoe matching werkt",
@@ -9513,7 +9521,7 @@
     "external": {
       "sectionTitle": "Openbare vacatures",
       "sectionNote": "Advertenties van officiële publieke arbeidsbureaus. Ze worden door de werkgever bij de bron gepubliceerd — labourmarket.ai toont ze zodat u ze kunt vinden; solliciteren gaat via de originele advertentie.",
-      "shownOfTotal": "top {shown} van {total}",
+      "shownOfTotal": "{shown} van {total} getoond",
       "bandBest": "Past het best",
       "bandPossible": "Mogelijk passend",
       "bandExplore": "Overige advertenties",
@@ -9665,6 +9673,14 @@
         "LOOKING_FOR_WORK": "Op zoek naar werk",
         "LOOKING_FOR_PROJECTS": "Op zoek naar projecten"
       }
+    },
+    "jobAlerts": {
+      "title": "Meldingen over nieuwe banen",
+      "ready": "Zodra er een nieuwe echte baan verschijnt die past bij je beroep en de gekozen landen, zie je die in je meldingen. Een baan zonder vermeld loon wordt nooit verborgen vanwege het loon.",
+      "missing": "Om meldingen over nieuwe banen te krijgen, geef aan:",
+      "profession": "welk werk je doet",
+      "country": "in welke landen je wilt werken",
+      "cta": "Mijn voorkeuren invullen"
     }
   },
   "workerIntake": {
@@ -13936,7 +13952,7 @@
       "moveToLine": "• “{to}”: mensen {before} → {after}; de gereedheidslijst daar begint op 0/{total}.",
       "moveCountryLine": "• Het land verandert: {from} → {to} — andere documenteisen.",
       "moveNoDatesLine": "• “{to}” heeft geen datums — afwezigheden kunnen niet worden gecontroleerd.",
-      "moveAvailabilityUnknownLine": "• Afwezigheden onbekend — het verlofmodel antwoordt hier niet.",
+      "moveAvailabilityUnknownLine": "• Afwezigheden onbekend.",
       "moveAvailabilityLine": "• Binnen {start}–{end} heeft hij {count} afwezigheidsregistraties.",
       "moveAvailabilityFreeLine": "• Geen afwezigheden binnen de datums van “{to}”.",
       "moveOnlyConfirmLine": "Er is nog niets veranderd — alleen uw bevestiging verandert iets.",

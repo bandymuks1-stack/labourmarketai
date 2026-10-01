@@ -191,6 +191,27 @@ describe("no game or sports vocabulary in the command finder registry", () => {
 });
 
 /**
+ * "Data model" is system vocabulary: a person using the journal does not need
+ * to know there is one. Banned in every locale outside operator namespaces.
+ */
+describe("no 'data model' wording in user-facing copy (any locale)", () => {
+  const RE =
+    /duomenų model|data model|datenmodell|datamodel|модел[ьи] данных|model danych|tietomalli|datu modeļ|andmemudel/i;
+  const OPERATOR = /^(admin|adminLaunchReadiness|adminPilots|agentOs|intelligence|vacancySources|evidenceImport|crmPipeline|projectOps|salesIntake|telemetry)$/;
+  it("finds none", () => {
+    const offenders: string[] = [];
+    for (const file of jsonFiles(MESSAGES)) {
+      const json = JSON.parse(readFileSync(file, "utf8"));
+      for (const [path, value] of strings(json)) {
+        if (OPERATOR.test(path.split(".")[0])) continue;
+        if (RE.test(value)) offenders.push(`${file.slice(MESSAGES.length + 1)} · ${path}`);
+      }
+    }
+    expect(offenders, offenders.join(", ")).toEqual([]);
+  });
+});
+
+/**
  * Internal-mechanics leaks: user-facing copy must not explain deployment
  * internals ("not enabled in this environment", "the update is not applied",
  * "this database"). Say what the person can do, not how the system is

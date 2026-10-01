@@ -390,6 +390,7 @@
         "event_demand_interest_reviewed": "Ett företag har markerat ditt intresse som granskat",
         "event_weekly_digest": "Din veckoöversikt över arbete och möjligheter är klar",
         "event_saved_search_match": "En sparad sökning har nya resultat",
+        "event_job_alert": "Det finns ett nytt jobb som passar det du söker",
         "event_weekly_digest_profile_completion": "För att visa dig passande jobb, bekräfta vilket arbete du utför",
         "event_weekly_digest_journal": "Veckans sammanfattning av din arbetsjournal är klar"
       },
@@ -1664,7 +1665,7 @@
     "eyebrow": "[EN] MY DOCUMENTS",
     "title": "[EN] My documents",
     "subtitle": "[EN] What you have, what is missing, and the next step — per country.",
-    "preparing": "[EN] Document readiness is being prepared — it goes live once the document storage layer is reviewed and enabled. Nothing here is active yet.",
+    "preparing": "Inte tillgängligt just nu.",
     "disclaimer": "[EN] Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
     "needsMigration": "Inte tillgängligt just nu.",
     "noWorker": "[EN] Create your worker profile first — documents attach to it.",
@@ -2241,7 +2242,7 @@
     "external": {
       "sectionTitle": "Offentliga jobbannonser",
       "sectionNote": "Annonser från officiella offentliga arbetsförmedlingar. De publiceras av arbetsgivaren vid källan — labourmarket.ai visar dem så att du kan hitta dem; ansökan sker via originalannonsen.",
-      "shownOfTotal": "topp {shown} av {total}",
+      "shownOfTotal": "visar {shown} av {total}",
       "bandBest": "Passar bäst",
       "bandPossible": "Möjligen passande",
       "bandExplore": "Övriga annonser",
@@ -2298,6 +2299,14 @@
         "LOOKING_FOR_WORK": "Söker arbete",
         "LOOKING_FOR_PROJECTS": "Söker projekt"
       }
+    },
+    "jobAlerts": {
+      "title": "Aviseringar om nya jobb",
+      "ready": "När ett nytt riktigt jobb dyker upp som passar ditt yrke och de länder du valt visas det i dina aviseringar. Ett jobb utan angiven lön döljs aldrig på grund av lönen.",
+      "missing": "För att få aviseringar om nya jobb, ange:",
+      "profession": "vilket arbete du gör",
+      "country": "vilka länder du vill arbeta i",
+      "cta": "Fyll i mina önskemål"
     }
   },
   "scouting": {
@@ -4192,7 +4201,7 @@
       "moveToLine": "• “{to}”: personer {before} → {after}; beredskapslistan där börjar på 0/{total}.",
       "moveCountryLine": "• Landet byts: {from} → {to} — andra dokumentkrav.",
       "moveNoDatesLine": "• “{to}” saknar datum — frånvaro kan inte kontrolleras.",
-      "moveAvailabilityUnknownLine": "• Frånvaro okänd — ledighetsmodellen svarar inte här.",
+      "moveAvailabilityUnknownLine": "• Frånvaro okänd.",
       "moveAvailabilityLine": "• Inom {start}–{end} har han {count} frånvaroposter.",
       "moveAvailabilityFreeLine": "• Ingen frånvaro inom datumen för “{to}”.",
       "moveOnlyConfirmLine": "Inget har ändrats ännu — bara din bekräftelse ändrar något.",

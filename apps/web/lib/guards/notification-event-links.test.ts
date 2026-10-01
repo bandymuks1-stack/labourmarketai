@@ -32,6 +32,13 @@ function routeExists(href: string): boolean {
   for (const ext of ["tsx", "ts"]) {
     if (existsSync(join(APP_ROOT, "app", "[locale]", rel, `page.${ext}`)))
       return true;
+    // Public job pages live in the (marketing) group (job alerts open /jobs/<id>).
+    if (
+      existsSync(
+        join(APP_ROOT, "app", "[locale]", "(marketing)", rel, `page.${ext}`),
+      )
+    )
+      return true;
   }
   return false;
 }

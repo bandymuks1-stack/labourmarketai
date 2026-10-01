@@ -117,6 +117,7 @@ export default async function ConversationDetailPage({
     messages.map((m) => ({
       id: m.id,
       body: m.body,
+      author_id: m.author_id,
       original_language:
         (m as { original_language?: string | null }).original_language ?? null,
     })),
