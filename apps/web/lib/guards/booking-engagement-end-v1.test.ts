@@ -1517,6 +1517,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261001100000_assignment_decision_audit_v1.sql",
       // stream N (owner approval PENDING): service_role SELECT for the job-alert sweep.
       "20261001120000_job_alert_sweep_service_role_select.sql",
+      // owner 2026-10-01: a manager staffs a project they manage from that project company roster.
+      "20261001170000_manager_assigns_roster_worker_on_managed_project_v1.sql",
       // owner 2026-10-01 (#2065 APPROVED in chat): board reads without parallel workers; drop the unused 129 MB GIN.
       "20261001180000_public_vacancy_board_no_parallel_v1.sql",
       "20261001180100_drop_unused_vacancy_fulltext_gin_v1.sql",
