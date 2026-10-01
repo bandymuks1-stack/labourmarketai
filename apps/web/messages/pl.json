@@ -5980,6 +5980,10 @@
       "reservation": {
         "collidesTitle": "Już zaangażowany w tych terminach",
         "notBlocking": "To nie blokuje przypisania — Ty decydujesz, co jest właściwe.",
+        "alternativesTitle": "Wolni w tych dniach",
+        "swap": "Przypisz zamiast tego",
+        "undo": "Cofnij przypisanie",
+        "decided": "Gotowe",
         "unknown": "Nie mogliśmy potwierdzić, że te terminy są wolne. To nie to samo, co wolne.",
         "source": {
           "project": "Projekt",

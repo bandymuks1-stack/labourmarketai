@@ -5980,6 +5980,10 @@
       "reservation": {
         "collidesTitle": "Šiomis dienomis jau turi įsipareigojimų",
         "notBlocking": "Tai neužkerta kelio priskyrimui — sprendimas jūsų.",
+        "alternativesTitle": "Laisvi šiomis dienomis",
+        "swap": "Priskirti vietoj to",
+        "undo": "Atšaukti priskyrimą",
+        "decided": "Atlikta",
         "unknown": "Nepavyko patvirtinti, kad šios dienos laisvos. Tai nėra tas pat, kas laisva.",
         "source": {
           "project": "Objektas",
