@@ -2324,7 +2324,7 @@
     "needsSetup": "[EN] Scouting is not available yet on this environment.",
     "noCandidates": "[EN] No matching workers yet for this need.",
     "namePlaceholder": "[EN] Worker",
-    "skillFit": "[EN] {pct}% — {matched}/{total} required skills, {confirmed} manager-confirmed",
+    "skillFit": "[EN] {matched}/{total} required skills, {confirmed} manager-confirmed",
     "evidence": "[EN] Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
     "shortlistError": "[EN] Could not save. Try again.",
     "footnote": "[EN] Matches are computed deterministically for this need only. No global rating, no fake candidates.",
@@ -2408,6 +2408,14 @@
     "agencyPresent": {
       "note": "Your client shared this need with you. You present candidates to the client from your own roster.",
       "link": "Present a candidate"
+    },
+    "identity": {
+      "why": "Varför den här personen är relevant",
+      "skills": "Relevanta färdigheter och vad de vilar på",
+      "readiness": "Tillgänglighet, beredskap och dokument",
+      "openTo": "Även öppen för: {countries}",
+      "skillCount": "{matched} av {total} efterfrågade färdigheter",
+      "nameHidden": "Namn och kontaktuppgifter visas först när personen tillåter det."
     }
   },
   "waze": {

@@ -2261,7 +2261,14 @@
         "columnEmail": "E-Mail",
         "columnStatus": "Status",
         "columnInvitedAt": "Datum",
-        "openProfile": "Profil ansehen"
+        "openProfile": "Profil ansehen",
+        "identity": {
+          "availability": {
+            "available": "Verfügbar",
+            "busy": "Ausgelastet",
+            "unavailable": "Nicht verfügbar"
+          }
+        }
       },
       "scoutingBridge": {
         "title": "Arbeitskräfte für diesen Bedarf finden",
@@ -8369,7 +8376,7 @@
     "needsSetup": "Scouting ist in dieser Umgebung noch nicht verfügbar.",
     "noCandidates": "Noch keine passenden Arbeitskräfte für diesen Bedarf.",
     "namePlaceholder": "Arbeitskraft",
-    "skillFit": "{pct}% — {matched}/{total} benötigte Fähigkeiten, {confirmed} vom Manager bestätigt",
+    "skillFit": "{matched}/{total} benötigte Fähigkeiten, {confirmed} vom Manager bestätigt",
     "evidence": "Nachweise — bestätigt: {confirmed} · Journal: {journal} · selbst angegeben: {self}",
     "shortlistError": "Konnte nicht gespeichert werden. Bitte erneut versuchen.",
     "footnote": "Matches werden deterministisch nur für diesen Bedarf berechnet. Keine globale Bewertung, keine erfundenen Kandidaten.",
@@ -8600,6 +8607,14 @@
         "accepted": "Angenommen",
         "closed": "Geschlossen"
       }
+    },
+    "identity": {
+      "why": "Warum diese Person relevant ist",
+      "skills": "Relevante Fähigkeiten und worauf sie beruhen",
+      "readiness": "Verfügbarkeit, Bereitschaft und Dokumente",
+      "openTo": "Auch offen für: {countries}",
+      "skillCount": "{matched} von {total} geforderten Fähigkeiten",
+      "nameHidden": "Name und Kontaktdaten erscheinen erst, wenn die Person sie freigibt."
     }
   },
   "planBoundary": {

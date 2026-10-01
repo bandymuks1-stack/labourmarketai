@@ -731,6 +731,78 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     },
   },
   {
+    // components/app/identity/person-identity-card.tsx — the compact,
+    // list-friendly depth of the ONE person identity (owner order 2026-10-01:
+    // one reusable professional-identity layer travelling PROFILE → APPLICATION
+    // → CANDIDATE → SHORTLIST → TEAM → PROJECT → ASSIGNMENT → CALENDAR, with
+    // different depth by context). Variants candidate-review and team-member.
+    // Presentation only: it takes already-authorized facts from its caller and
+    // shows no score, percentage or stars.
+    id: "components/app/identity/person-identity-card.tsx",
+    kind: "persistent_card",
+    originAxiom: "A-01",
+    purpose:
+      "Shows ONE person as a professional identity — portrait or monogram, name, main profession, place, availability, a few facts for the context — with deeper layers opened on demand, so an employer reading an application and a manager reading the team see the same identity at different depth.",
+    whyNotChat:
+      "Scanning and comparing several people side by side (who, where, when free, on which project) is a visual act; chat can name one person's facts but cannot lay a team or a candidate list side by side. The assistant reaches the same facts through the existing capabilities; the card is their visual form, not a second source.",
+    whyNotExistingComponent:
+      "IdentityStage is the full-width portrait stage of one person's own card (hero scale, readiness ring, fact strip) and WorkerPlayerCard is bound to the worker's own data; neither is a list-row depth with disclosure layers and a caller-owned action slot. This component reuses their tokens (monogram source, fallback surface, hairline) and extends the identity variant registry (candidate-review, team-member) instead of forking it.",
+    owner:
+      "Product owner — owner order 2026-10-01 (one reusable professional-identity presentation layer)",
+    ownsAction: null,
+
+    worldElement: "user_avatar",
+    whyNotExistingElement:
+      "Same element. It presents the existing worker/person and creates no new world element.",
+    chatIntegration:
+      "The chat opens the same candidate and team surfaces; the card only presents what those surfaces already read and authorize. Every action on it is the caller's existing control.",
+    avatarEffect:
+      "None: presentation of the existing avatar identity (monogram or consented photo).",
+    mapEffect:
+      "None. Country and availability are the person's own stated facts; nothing here renders on the market map.",
+    journalRelation:
+      "None written. Evidence tiers (self-declared, journal-grounded, manager-confirmed) are shown by the caller exactly as before, never merged and never scored.",
+
+    pillar: "avatar",
+    objectType: "worker",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: true,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "Recognise WHO a person is at a glance in a list (candidate, team member), then open only the depth the decision needs.",
+      graphEdge:
+        "PERSON ↔ WORK ↔ TIME ↔ PLACE (nodes PEOPLE, REAL WORK, TIME, OBJECT): the person-as-presence edge in every list view of the graph.",
+      whyReuseDamages:
+        "Reusing the full identity stage in a list would stack a hero portrait and fact strip per row; leaving each list to its own text row (e-mail as the headline, a wall of badges) is what the owner rejected.",
+      evidence: [
+        "docs/design/player-identity-adaptation-plan.md §10 (candidate-review, team-member variants)",
+        "lib/guards/person-identity-card.test.ts (no score, same tokens, native disclosure, anonymity kept)",
+      ],
+      ownerRuling:
+        "Owner order 2026-10-01: ONE reusable professional-identity presentation layer (avatar / visual professional identity) that travels with the person across the product, showing different depth by context.",
+    },
+  },
+  {
     // ═══════════════════════════════════════════════════════════════════════
     // /dashboard/hours — where a day of real work becomes a record.
     //

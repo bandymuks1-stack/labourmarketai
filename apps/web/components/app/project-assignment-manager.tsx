@@ -1,5 +1,7 @@
 "use client";
 
+import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
+
 import { useActionState, useTransition, useState } from "react";
 
 import {
@@ -381,16 +383,20 @@ export function ProjectAssignmentManager({
                 const key = `${p.id}:${a.workerProfileId}`;
                 const isEnded = ended.has(key);
                 return (
-                  <li key={key} className="flex items-center justify-between gap-3 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2" data-testid="roster-worker-chip">
-                    <span className="flex min-w-0 items-center gap-2.5">
-                      <span
-                        aria-hidden
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-ink-500 bg-ink-700 font-display text-meta font-bold text-text-primary"
-                      >
-                        {playerInitials(a.name)}
-                      </span>
-                      <span className={`truncate text-sm ${isEnded ? "text-text-muted line-through" : "text-text-primary"}`}>{a.name}</span>
-                    </span>
+                  <li key={key} className={`flex items-center justify-between gap-3 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2 ${isEnded ? "opacity-60" : ""}`} data-testid="roster-worker-chip">
+                    {/* The SAME identity the team list and the candidate read
+                        use, at row density; a photo only where the one photo
+                        rule gave the viewer one. */}
+                    <PersonIdentityCard
+                      variant="assignment"
+                      density="compact"
+                      testid={`assignment-identity-${key}`}
+                      name={a.name}
+                      initials={playerInitials(a.name)}
+                      avatarUrl={a.avatarUrl ?? null}
+                      professions={[]}
+                      meta={[]}
+                    />
                     {!isEnded && (
                       <button
                         type="button"

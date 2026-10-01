@@ -4,7 +4,12 @@ import Link from "next/link";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { EmployerContextNotice } from "@/components/app/employer-context-notice";
-import { listCompanyDemands, runScouting, type ShortlistStatus } from "@/lib/scouting/scouting";
+import {
+  listCompanyDemands,
+  runScouting,
+  type ScoutSafeCandidate,
+  type ShortlistStatus,
+} from "@/lib/scouting/scouting";
 import { listPendingInterestCountsForCompany } from "@/lib/opportunities/interest";
 import { resolveDemandTitle } from "@/lib/demand/sanitize-demand-title";
 import { anonymizedToken } from "@/lib/scouting/scout-safe-view";
@@ -20,6 +25,11 @@ import {
 } from "@/lib/scouting/scout-filters";
 import { getScoutingContactRequestStates } from "@/lib/privacy/contact-disclosure-actions";
 import { RequestContactDetailsButton } from "@/components/app/request-contact-details-button";
+import {
+  IdentityDisclosure,
+  PersonIdentityCard,
+  type IdentityMeta,
+} from "@/components/app/identity/person-identity-card";
 import { ScoutingShortlistButtons } from "@/components/app/scouting-shortlist-buttons";
 import { CompanyInterestAck } from "@/components/app/company-interest-ack";
 import { DemandLifecycleControls } from "@/components/app/demand-lifecycle-controls";
@@ -247,6 +257,32 @@ export default async function CompanyScoutingPage({
     interested: t("shortlist.interested"),
     not_fit: t("shortlist.not_fit"),
     reviewed: t("shortlist.reviewed"),
+  };
+  const tProfession = await getTranslations("professions");
+  const professionName = (slug: string): string =>
+    tProfession.has(slug as never) ? tProfession(slug as never) : slug;
+  /** Layer-1 facts of the identity: place, mobility, availability. */
+  const identityMeta = (c: ScoutSafeCandidate): IdentityMeta[] => {
+    const p = c.preview;
+    const meta: IdentityMeta[] = [];
+    if (p.location) meta.push({ key: "loc", kind: "location", label: p.location });
+    const openTo = p.preferredCountries.filter((cc) => cc !== p.location);
+    if (openTo.length > 0) {
+      meta.push({
+        key: "mob",
+        kind: "mobility",
+        label: t("identity.openTo", { countries: openTo.join(", ") }),
+      });
+    }
+    meta.push({
+      key: "avail",
+      kind: "availability",
+      label: p.availableFrom
+        ? `${availabilityLabel(p.availability)} \u00b7 ${p.availableFrom}`
+        : availabilityLabel(p.availability),
+      live: p.availability === "available",
+    });
+    return meta;
   };
   const reason = (code: string): string =>
     t.has(`reason.${code}`) ? t(`reason.${code}`) : code;
@@ -757,174 +793,50 @@ export default async function CompanyScoutingPage({
                 className="card-border flex flex-col gap-3 p-4"
                 data-testid={`scout-candidate-${c.workerId}`}
               >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex min-w-0 items-center gap-2">
-                    {/* Anonymized handle — never a name (Step 3A). */}
-                    <span
-                      aria-hidden
-                      className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-ink-500 bg-ink-800 font-mono text-xs font-semibold text-text-secondary"
-                    >
-                      {anonymizedToken(p.anonymizedLabel).slice(0, 2)}
-                    </span>
-                    <p className="truncate font-display text-base font-bold text-text-primary">
-                      {t("candidate")}{" "}
-                      <span className="font-mono text-sm text-text-secondary">
-                        {anonymizedToken(p.anonymizedLabel)}
-                      </span>
-                    </p>
-                  </div>
-                  {/* `flex-wrap`, measured: three status badges on one line
-                      rendered 355px wide inside a 309px parent at 375px, which
-                      is the 13px of body overflow this page carried. They are
-                      independent labels with no reading order between them, so
-                      wrapping costs nothing and a second line is the honest
-                      answer on a phone. */}
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {/* Worker-initiated interest — a REAL internal signal
-                        (demand_interest_signals row), never fabricated. */}
-                    {result.interestByWorker[c.workerId] ? (
-                      <span
-                        className="rounded-full border border-state-success/40 bg-state-success/10 px-2.5 py-1 font-mono text-meta uppercase tracking-label text-state-success"
-                        data-testid={`scout-interest-${c.workerId}`}
-                      >
-                        {t("interestBadge")}
-                      </span>
-                    ) : null}
-                    {/* Honest profile freshness (Wagon 1) — real updated_at
-                        bucket; dormant is ranked lower, never hidden. */}
-                    <span
-                      className={`rounded-full border px-2.5 py-1 font-mono text-meta uppercase tracking-label ${FRESHNESS_TONE[c.lastActiveBucket]}`}
-                      data-testid={`scout-freshness-${c.workerId}`}
-                      data-freshness={c.lastActiveBucket}
-                    >
-                      {t(`freshness.${c.lastActiveBucket}` as never)}
-                    </span>
-                    <span
-                      className="rounded-full border border-ink-500 bg-ink-800 px-2.5 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
-                      data-testid={`scout-status-${c.workerId}`}
-                    >
-                      {statusLabels[c.match.status]}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Canonical pipeline (P4): the ONE derived stage of this
-                    (demand, worker) pair + its ONE next action. Derived at
-                    read time from real facts — never a stored 7th enum. */}
-                <div
-                  className="flex flex-wrap items-center justify-between gap-2"
-                  data-testid={`scout-pipeline-${c.workerId}`}
-                  data-stage={stage}
-                >
-                  <span
-                    className={`rounded-full border px-2.5 py-1 font-mono text-meta uppercase tracking-label ${PIPELINE_TONE[stage]}`}
-                  >
-                    {tPipe(`stage.${stage}` as never)}
-                  </span>
-                  {actsForClient ? null : (
-                  <Link
-                    href={nextAction.href}
-                    className="text-meta font-medium text-brand-blue hover:text-brand-champagne"
-                    data-testid={`scout-pipeline-next-${c.workerId}`}
-                  >
-                    {tPipe(nextAction.key.replace("candidatePipeline.", "") as never)} →
-                  </Link>
-                  )}
-                </div>
-
-                {/* Profile-safe facts (owner-approved fields only). */}
-                <dl className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
-                  <div className="min-w-0">
-                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
-                      {t("fields.location")}
-                    </dt>
-                    <dd className="truncate text-xs text-text-primary">
-                      {p.location ?? t("availabilityValue.unknown")}
-                    </dd>
-                  </div>
-                  <div className="min-w-0">
-                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
-                      {t("fields.availability")}
-                    </dt>
-                    <dd className="text-xs text-text-primary">
-                      {availabilityLabel(p.availability)}
-                      {p.availableFrom ? (
-                        <span className="text-text-secondary"> · {p.availableFrom}</span>
-                      ) : null}
-                      {/* ACTIONABLE LATER (owner ruling 2026-09-22). Real
-                          future supply: kept in the list, never presented as
-                          available now. The date is the worker's OWN stated
-                          one — the canonical verdict carries it, so nothing
-                          here estimates anything. */}
-                      {c.actionability.kind === "actionable_later" ? (
+                <PersonIdentityCard
+                  variant="candidate-review"
+                  testid={`scout-identity-${c.workerId}`}
+                  name={`${t("candidate")} ${anonymizedToken(p.anonymizedLabel)}`}
+                  initials={anonymizedToken(p.anonymizedLabel).slice(0, 2)}
+                  professions={c.professionSlug ? [professionName(c.professionSlug)] : []}
+                  meta={identityMeta(c)}
+                  status={
+                    <>
+                      {/* Worker-initiated interest — a REAL internal signal
+                          (demand_interest_signals row), never fabricated. */}
+                      {result.interestByWorker[c.workerId] ? (
                         <span
-                          className="mt-1 block text-text-secondary"
-                          data-testid="candidate-available-later"
+                          className="rounded-full border border-state-success/40 bg-state-success/10 px-2.5 py-1 font-mono text-meta uppercase tracking-label text-state-success"
+                          data-testid={`scout-interest-${c.workerId}`}
                         >
-                          {t("actionability.availableFromChip", {
-                            date: c.actionability.availableFrom,
+                          {t("interestBadge")}
+                        </span>
+                      ) : null}
+                      {/* Canonical pipeline (P4): the ONE derived stage of this
+                          (demand, worker) pair — derived at read time from
+                          real facts, never a stored 7th enum. */}
+                      <span
+                        data-testid={`scout-pipeline-${c.workerId}`}
+                        data-stage={stage}
+                        className={`rounded-full border px-2.5 py-1 font-mono text-meta uppercase tracking-label ${PIPELINE_TONE[stage]}`}
+                      >
+                        {tPipe(`stage.${stage}` as never)}
+                      </span>
+                    </>
+                  }
+                  chips={
+                    <>
+                      {fit ? (
+                        <span
+                          className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
+                          data-testid={`scout-skill-count-${c.workerId}`}
+                        >
+                          {t("identity.skillCount", {
+                            matched: fit.matchedTotal,
+                            total: fit.needTotal,
                           })}
                         </span>
                       ) : null}
-                    </dd>
-                  </div>
-                  <div className="min-w-0">
-                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
-                      {t("fields.rate")}
-                    </dt>
-                    <dd className="truncate text-xs text-text-primary">
-                      {p.rate.minEur != null ? t("rateFrom", { min: p.rate.minEur }) : t("noRate")}
-                    </dd>
-                  </div>
-                  <div className="min-w-0">
-                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
-                      {t("fields.evidence")}
-                    </dt>
-                    <dd className="truncate text-xs text-text-primary">{p.evidenceCount}</dd>
-                  </div>
-                </dl>
-
-                {/* §19 skill-fit basis line — always with its basis, confirmed split */}
-                {fit ? (
-                  <p className="text-xs text-text-secondary">
-                    {t("skillFit", {
-                      pct: fit.pct,
-                      matched: fit.matchedTotal,
-                      total: fit.needTotal,
-                      confirmed: fit.matchedConfirmed,
-                    })}
-                  </p>
-                ) : null}
-                {/* Evidence ladder counts for the matched skills */}
-                <p className="font-mono text-meta text-text-muted">
-                  {t("evidence", {
-                    confirmed: c.match.evidence.matchedManagerConfirmed,
-                    journal: c.match.evidence.matchedJournalSupported,
-                    self: c.match.evidence.matchedSelfDeclared,
-                  })}
-                </p>
-
-                {/* Stage 7 — safe readiness signal: country + availability fit
-                    only. Document readiness stays consent-gated (a company can
-                    never see a worker's private documents). No fake doc claim. */}
-                <div
-                  className="flex flex-wrap items-center gap-1.5"
-                  data-testid={`scout-readiness-${c.workerId}`}
-                  data-readiness={c.readiness.label}
-                >
-                  <span
-                    className={`rounded-md border px-2 py-0.5 text-meta ${READINESS_TONE[c.readiness.label]}`}
-                  >
-                    {t(`readiness.label.${c.readiness.label}` as never)}
-                  </span>
-                  <span className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary">
-                    {t(`readiness.country.${c.readiness.countryFit}` as never)}
-                  </span>
-                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                    {t("readiness.docsConsent")}
-                  </span>
-                </div>
-
                 {/* P4-B (2026-08-09): the verdict the employer could never
                     see. The engine has always computed `eligible` and the
                     hard-failed criteria behind it, and this surface rendered
@@ -958,158 +870,22 @@ export default async function CompanyScoutingPage({
                     </span>
                   ) : null}
                 </div>
-                {/* REQUIREMENT LEDGER for the employer (2026-09-19): the
-                    same deterministic per-criterion results the engine
-                    already returns, now ALL rendered — MET (hard criteria
-                    checked and met + weighted strengths) beside FAILED
-                    (blocking) and UNKNOWN (missing facts). Evidence
-                    comparison, never a formal qualification and never a
-                    ranking: an unknown stays unknown. */}
-                {c.match.matchedHard.length + c.match.strengths.length > 0 ? (
-                  <div
-                    className="flex flex-col gap-1"
-                    data-testid={`scout-met-${c.workerId}`}
+                      <p className="basis-full text-meta leading-relaxed text-text-muted" data-testid="identity-name-hidden-note">
+                        {t("identity.nameHidden")}
+                      </p>
+                    </>
+                  }
+                  actions={
+                    <div className="flex flex-col gap-3">
+                  {actsForClient ? null : (
+                  <Link
+                    href={nextAction.href}
+                    className="text-meta font-medium text-brand-blue hover:text-brand-champagne"
+                    data-testid={`scout-pipeline-next-${c.workerId}`}
                   >
-                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                      {t("tiers.met")}
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {[...c.match.matchedHard, ...c.match.strengths].map((m) => (
-                        <span
-                          key={`${m.class}-${m.criterion}`}
-                          className="rounded-md border border-state-success/30 bg-state-success/10 px-2 py-0.5 text-meta text-state-success"
-                          data-criterion={m.criterion}
-                          data-class={m.class}
-                          title={m.source}
-                        >
-                          {criterionLabel(m.criterion)}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-                {c.match.matchedHard.length +
-                  c.match.strengths.length +
-                  c.match.blocking.length +
-                  c.match.missingFacts.length >
-                0 ? (
-                  <p
-                    className="text-meta leading-relaxed text-text-muted"
-                    data-testid={`scout-ledger-note-${c.workerId}`}
-                  >
-                    {t("tiers.evidenceNote")}
-                  </p>
-                ) : null}
-                {c.match.blocking.length > 0 ? (
-                  <div
-                    className="flex flex-col gap-1"
-                    data-testid={`scout-blocking-${c.workerId}`}
-                  >
-                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                      {t("tiers.blocking")}
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {c.match.blocking.map((b) => (
-                        <span
-                          key={b.criterion}
-                          className="rounded-md border border-state-danger/40 bg-state-danger/10 px-2 py-0.5 text-meta text-state-danger"
-                          data-criterion={b.criterion}
-                          title={b.source}
-                        >
-                          {criterionLabel(b.criterion)}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-
-                {/* Why */}
-                {c.match.reasons.length > 0 ? (
-                  <div className="flex flex-wrap gap-1.5">
-                    {c.match.reasons
-                      .filter((r) => r.code !== "skill_fit")
-                      .map((r, i) => (
-                        <span
-                          key={`${r.code}-${i}`}
-                          className="rounded-md border border-state-success/30 bg-state-success/10 px-2 py-0.5 text-meta text-state-success"
-                        >
-                          {reason(r.code)}
-                        </span>
-                      ))}
-                  </div>
-                ) : null}
-                {/* Gaps */}
-                {c.match.gaps.length > 0 ? (
-                  <div className="flex flex-wrap gap-1.5">
-                    {c.match.gaps.map((g, i) => (
-                      <span
-                        key={`${g.code}-${i}`}
-                        className="rounded-md border border-state-warning/30 bg-state-warning/5 px-2 py-0.5 text-meta text-state-warning"
-                      >
-                        {gap(g.code)}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-
-                {/* Contract v2 (PR 4): discussion points — never a block,
-                    never a silent boost. Same deterministic engine fields the
-                    worker board renders. */}
-                {c.match.negotiables.length > 0 ? (
-                  <div
-                    className="flex flex-col gap-1"
-                    data-testid={`scout-negotiables-${c.workerId}`}
-                  >
-                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                      {t("tiers.negotiables")}
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {c.match.negotiables.map((n) => (
-                        <span
-                          key={n.criterion}
-                          className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-2 py-0.5 text-meta text-brand-blue"
-                          data-criterion={n.criterion}
-                          title={n.source}
-                        >
-                          {criterionLabel(n.criterion)}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-
-                {/* Contract v2 (PR 4): missing facts — which side has not
-                    stated what. Honest absence, never an assumed outcome. */}
-                {c.match.missingFacts.length > 0 ? (
-                  <div
-                    className="flex flex-col gap-1"
-                    data-testid={`scout-missing-${c.workerId}`}
-                  >
-                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                      {t("tiers.missing")}
-                    </span>
-                    <ul className="flex flex-col gap-0.5">
-                      {c.match.missingFacts.map((m) => (
-                        <li
-                          key={`${m.criterion}-${m.side}`}
-                          className="text-meta text-text-muted"
-                          data-criterion={m.criterion}
-                          data-side={m.side}
-                          title={m.source}
-                        >
-                          {m.side === "worker"
-                            ? t("missingSide.worker", {
-                                criterion: criterionLabel(m.criterion),
-                              })
-                            : t("missingSide.demand", {
-                                criterion: criterionLabel(m.criterion),
-                              })}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-
+                    {tPipe(nextAction.key.replace("candidatePipeline.", "") as never)} →
+                  </Link>
+                  )}
                 {/* The one clear next step for this result (PR4). */}
                 <p
                   className="font-mono text-meta uppercase tracking-label text-text-muted"
@@ -1284,6 +1060,279 @@ export default async function CompanyScoutingPage({
                 ) : null}
                 </>
                 )}
+                    </div>
+                  }
+                >
+                  <IdentityDisclosure
+                    id="why"
+                    title={t("identity.why")}
+                    summary={statusLabels[c.match.status]}
+                  >
+                    <span
+                      className="sr-only"
+                      data-testid={`scout-status-${c.workerId}`}
+                    >
+                      {statusLabels[c.match.status]}
+                    </span>
+                {/* REQUIREMENT LEDGER for the employer (2026-09-19): the
+                    same deterministic per-criterion results the engine
+                    already returns, now ALL rendered — MET (hard criteria
+                    checked and met + weighted strengths) beside FAILED
+                    (blocking) and UNKNOWN (missing facts). Evidence
+                    comparison, never a formal qualification and never a
+                    ranking: an unknown stays unknown. */}
+                {c.match.matchedHard.length + c.match.strengths.length > 0 ? (
+                  <div
+                    className="flex flex-col gap-1"
+                    data-testid={`scout-met-${c.workerId}`}
+                  >
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {t("tiers.met")}
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {[...c.match.matchedHard, ...c.match.strengths].map((m) => (
+                        <span
+                          key={`${m.class}-${m.criterion}`}
+                          className="rounded-md border border-state-success/30 bg-state-success/10 px-2 py-0.5 text-meta text-state-success"
+                          data-criterion={m.criterion}
+                          data-class={m.class}
+                          title={m.source}
+                        >
+                          {criterionLabel(m.criterion)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                {c.match.matchedHard.length +
+                  c.match.strengths.length +
+                  c.match.blocking.length +
+                  c.match.missingFacts.length >
+                0 ? (
+                  <p
+                    className="text-meta leading-relaxed text-text-muted"
+                    data-testid={`scout-ledger-note-${c.workerId}`}
+                  >
+                    {t("tiers.evidenceNote")}
+                  </p>
+                ) : null}
+                {c.match.blocking.length > 0 ? (
+                  <div
+                    className="flex flex-col gap-1"
+                    data-testid={`scout-blocking-${c.workerId}`}
+                  >
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {t("tiers.blocking")}
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {c.match.blocking.map((b) => (
+                        <span
+                          key={b.criterion}
+                          className="rounded-md border border-state-danger/40 bg-state-danger/10 px-2 py-0.5 text-meta text-state-danger"
+                          data-criterion={b.criterion}
+                          title={b.source}
+                        >
+                          {criterionLabel(b.criterion)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Why */}
+                {c.match.reasons.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {c.match.reasons
+                      .filter((r) => r.code !== "skill_fit")
+                      .map((r, i) => (
+                        <span
+                          key={`${r.code}-${i}`}
+                          className="rounded-md border border-state-success/30 bg-state-success/10 px-2 py-0.5 text-meta text-state-success"
+                        >
+                          {reason(r.code)}
+                        </span>
+                      ))}
+                  </div>
+                ) : null}
+                {/* Gaps */}
+                {c.match.gaps.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {c.match.gaps.map((g, i) => (
+                      <span
+                        key={`${g.code}-${i}`}
+                        className="rounded-md border border-state-warning/30 bg-state-warning/5 px-2 py-0.5 text-meta text-state-warning"
+                      >
+                        {gap(g.code)}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+
+                {/* Contract v2 (PR 4): discussion points — never a block,
+                    never a silent boost. Same deterministic engine fields the
+                    worker board renders. */}
+                {c.match.negotiables.length > 0 ? (
+                  <div
+                    className="flex flex-col gap-1"
+                    data-testid={`scout-negotiables-${c.workerId}`}
+                  >
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {t("tiers.negotiables")}
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {c.match.negotiables.map((n) => (
+                        <span
+                          key={n.criterion}
+                          className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-2 py-0.5 text-meta text-brand-blue"
+                          data-criterion={n.criterion}
+                          title={n.source}
+                        >
+                          {criterionLabel(n.criterion)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Contract v2 (PR 4): missing facts — which side has not
+                    stated what. Honest absence, never an assumed outcome. */}
+                {c.match.missingFacts.length > 0 ? (
+                  <div
+                    className="flex flex-col gap-1"
+                    data-testid={`scout-missing-${c.workerId}`}
+                  >
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {t("tiers.missing")}
+                    </span>
+                    <ul className="flex flex-col gap-0.5">
+                      {c.match.missingFacts.map((m) => (
+                        <li
+                          key={`${m.criterion}-${m.side}`}
+                          className="text-meta text-text-muted"
+                          data-criterion={m.criterion}
+                          data-side={m.side}
+                          title={m.source}
+                        >
+                          {m.side === "worker"
+                            ? t("missingSide.worker", {
+                                criterion: criterionLabel(m.criterion),
+                              })
+                            : t("missingSide.demand", {
+                                criterion: criterionLabel(m.criterion),
+                              })}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+
+                  </IdentityDisclosure>
+                  <IdentityDisclosure id="skills" title={t("identity.skills")}>
+                {/* §19 skill-fit basis line — always with its basis, confirmed split */}
+                {fit ? (
+                  <p className="text-xs text-text-secondary">
+                    {t("skillFit", {
+                      matched: fit.matchedTotal,
+                      total: fit.needTotal,
+                      confirmed: fit.matchedConfirmed,
+                    })}
+                  </p>
+                ) : null}
+                {/* Evidence ladder counts for the matched skills */}
+                <p className="font-mono text-meta text-text-muted">
+                  {t("evidence", {
+                    confirmed: c.match.evidence.matchedManagerConfirmed,
+                    journal: c.match.evidence.matchedJournalSupported,
+                    self: c.match.evidence.matchedSelfDeclared,
+                  })}
+                </p>
+
+                  </IdentityDisclosure>
+                  <IdentityDisclosure id="readiness" title={t("identity.readiness")}>
+                    {/* Honest profile freshness (Wagon 1) — real updated_at
+                        bucket; dormant is ranked lower, never hidden. */}
+                    <span
+                      className={`w-fit rounded-full border px-2.5 py-1 font-mono text-meta uppercase tracking-label ${FRESHNESS_TONE[c.lastActiveBucket]}`}
+                      data-testid={`scout-freshness-${c.workerId}`}
+                      data-freshness={c.lastActiveBucket}
+                    >
+                      {t(`freshness.${c.lastActiveBucket}` as never)}
+                    </span>
+                {/* Profile-safe facts (owner-approved fields only). */}
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
+                  <div className="min-w-0">
+                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {t("fields.location")}
+                    </dt>
+                    <dd className="truncate text-xs text-text-primary">
+                      {p.location ?? t("availabilityValue.unknown")}
+                    </dd>
+                  </div>
+                  <div className="min-w-0">
+                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {t("fields.availability")}
+                    </dt>
+                    <dd className="text-xs text-text-primary">
+                      {availabilityLabel(p.availability)}
+                      {p.availableFrom ? (
+                        <span className="text-text-secondary"> · {p.availableFrom}</span>
+                      ) : null}
+                      {/* ACTIONABLE LATER (owner ruling 2026-09-22). Real
+                          future supply: kept in the list, never presented as
+                          available now. The date is the worker's OWN stated
+                          one — the canonical verdict carries it, so nothing
+                          here estimates anything. */}
+                      {c.actionability.kind === "actionable_later" ? (
+                        <span
+                          className="mt-1 block text-text-secondary"
+                          data-testid="candidate-available-later"
+                        >
+                          {t("actionability.availableFromChip", {
+                            date: c.actionability.availableFrom,
+                          })}
+                        </span>
+                      ) : null}
+                    </dd>
+                  </div>
+                  <div className="min-w-0">
+                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {t("fields.rate")}
+                    </dt>
+                    <dd className="truncate text-xs text-text-primary">
+                      {p.rate.minEur != null ? t("rateFrom", { min: p.rate.minEur }) : t("noRate")}
+                    </dd>
+                  </div>
+                  <div className="min-w-0">
+                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {t("fields.evidence")}
+                    </dt>
+                    <dd className="truncate text-xs text-text-primary">{p.evidenceCount}</dd>
+                  </div>
+                </dl>
+
+                {/* Stage 7 — safe readiness signal: country + availability fit
+                    only. Document readiness stays consent-gated (a company can
+                    never see a worker's private documents). No fake doc claim. */}
+                <div
+                  className="flex flex-wrap items-center gap-1.5"
+                  data-testid={`scout-readiness-${c.workerId}`}
+                  data-readiness={c.readiness.label}
+                >
+                  <span
+                    className={`rounded-md border px-2 py-0.5 text-meta ${READINESS_TONE[c.readiness.label]}`}
+                  >
+                    {t(`readiness.label.${c.readiness.label}` as never)}
+                  </span>
+                  <span className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary">
+                    {t(`readiness.country.${c.readiness.countryFit}` as never)}
+                  </span>
+                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                    {t("readiness.docsConsent")}
+                  </span>
+                </div>
+
+                  </IdentityDisclosure>
+                </PersonIdentityCard>
               </li>
             );
           })}

@@ -24,6 +24,7 @@ import {
   mergeRosterLinkCandidates,
 } from "@/lib/organization-evidence/roster-link-candidates";
 import { createClient } from "@/lib/supabase/server";
+import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
 import { isOperationsRoleEnabled } from "@/lib/operations/role-capabilities";
 import { isLifecycleNotice } from "@/lib/lifecycle/lifecycle-model";
 import {
@@ -134,6 +135,17 @@ export default async function CompanyPeoplePage({
     ? await listRosterLinkCandidatesFromEngagements(await createClient(), capabilityOrgId)
     : [];
   const readinessMap = await getWorkerReadiness(activeWorkerRows.map((w) => w.workerId));
+  // The team's PHOTOS (owner D1, 2026-09-30): an ACTIVE company_workers row is
+  // a real work relationship, which the one photo rule
+  // (worker_avatar_path_v1) already admits. The database decides per person;
+  // anything else stays initials.
+  const avatarByWorker: Record<string, string | null> = Object.fromEntries(
+    await Promise.all(
+      activeWorkerRows.map(
+        async (w) => [w.workerId, await getAvatarForVisibleWorker(w.workerId)] as const,
+      ),
+    ),
+  );
   // Booked people (R-2 GREEN half): the direct-booking relationship, visible
   // beside the roster it is not part of, with its honest journal state. The
   // read is RLS-scoped to this company's own engagement rows.
@@ -203,6 +215,7 @@ export default async function CompanyPeoplePage({
           workersResult={workersResult}
           invitationsResult={invitationsResult}
           labels={workersLabels}
+          avatarByWorker={avatarByWorker}
           roleCoordinationEnabled={isOperationsRoleEnabled("foreman")}
           canAssignRoles
           canManageInvitations={canManageInvitations}

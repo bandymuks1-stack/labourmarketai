@@ -2261,7 +2261,14 @@
         "columnEmail": "Email",
         "columnStatus": "Status",
         "columnInvitedAt": "Date",
-        "openProfile": "View profile"
+        "openProfile": "View profile",
+        "identity": {
+          "availability": {
+            "available": "Available",
+            "busy": "Busy",
+            "unavailable": "Unavailable"
+          }
+        }
       },
       "scoutingBridge": {
         "title": "Find workers for this need",
@@ -8369,7 +8376,7 @@
     "needsSetup": "Couldn’t load. Please try again.",
     "noCandidates": "No matching workers yet for this need. Matches appear as workers add journal-backed skills — check back later or broaden the need.",
     "namePlaceholder": "Worker",
-    "skillFit": "{pct}% — {matched}/{total} required skills, {confirmed} manager-confirmed",
+    "skillFit": "{matched}/{total} required skills, {confirmed} manager-confirmed",
     "evidence": "Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
     "shortlistError": "Could not save. Try again.",
     "footnote": "Matches are computed deterministically for this need only. No global rating, no fake candidates.",
@@ -8600,6 +8607,14 @@
         "accepted": "Accepted",
         "closed": "Closed"
       }
+    },
+    "identity": {
+      "why": "Why this person is relevant",
+      "skills": "Relevant skills and what they rest on",
+      "readiness": "Availability, readiness and documents",
+      "openTo": "Also open to: {countries}",
+      "skillCount": "{matched} of {total} required skills",
+      "nameHidden": "Name and contact details appear only when the person allows them."
     }
   },
   "planBoundary": {

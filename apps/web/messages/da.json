@@ -2324,7 +2324,7 @@
     "needsSetup": "Scouting er ikke tilgængelig i dette miljø endnu.",
     "noCandidates": "Ingen matchende arbejdere endnu til dette behov.",
     "namePlaceholder": "Arbejder",
-    "skillFit": "{pct}% — {matched}/{total} krævede færdigheder, {confirmed} bekræftet af leder",
+    "skillFit": "{matched}/{total} krævede færdigheder, {confirmed} bekræftet af leder",
     "evidence": "Dokumentation — bekræftet: {confirmed} · journal: {journal} · selvangivet: {self}",
     "shortlistError": "Kunne ikke gemme. Prøv igen.",
     "footnote": "Match beregnes deterministisk kun for dette behov. Ingen global rating, ingen falske kandidater.",
@@ -2408,6 +2408,14 @@
     "agencyPresent": {
       "note": "Your client shared this need with you. You present candidates to the client from your own roster.",
       "link": "Present a candidate"
+    },
+    "identity": {
+      "why": "Hvorfor denne person er relevant",
+      "skills": "Relevante færdigheder og hvad de bygger på",
+      "readiness": "Tilgængelighed, parathed og dokumenter",
+      "openTo": "Også åben for: {countries}",
+      "skillCount": "{matched} af {total} krævede færdigheder",
+      "nameHidden": "Navn og kontaktoplysninger vises først, når personen tillader det."
     }
   },
   "waze": {
