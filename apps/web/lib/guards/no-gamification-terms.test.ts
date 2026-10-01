@@ -189,3 +189,27 @@ describe("no game or sports vocabulary in the command finder registry", () => {
     expect(offenders, offenders.join(", ")).toEqual([]);
   });
 });
+
+/**
+ * Internal-mechanics leaks: user-facing copy must not explain deployment
+ * internals ("not enabled in this environment", "the update is not applied",
+ * "this database"). Say what the person can do, not how the system is
+ * deployed. Operator namespaces are exempt, and `assist` carries the pinned
+ * honest AI-state copy (assist-centre.test.ts).
+ */
+describe("no deployment-internals wording in user-facing English copy", () => {
+  const EXEMPT =
+    /^(admin|agentOs|intelligence|vacancySources|evidenceImport|talentPreview|crmPipeline|projectOps|salesIntake|assist)$/;
+  it("en.json user namespaces carry no environment/migration wording", () => {
+    const en = JSON.parse(readFileSync(join(MESSAGES, "en.json"), "utf8"));
+    const re = /in this environment|(not|isn.t) applied|this database|reviewed and applied|switched on/i;
+    const offenders: string[] = [];
+    for (const [path, value] of strings(en)) {
+      if (EXEMPT.test(path.split(".")[0])) continue;
+      // Honest AI-state lines are pinned by llm-proposal-reasons.test.ts.
+      if (/aiNotConfigured$|companyWorkHistory\.provenance$/.test(path)) continue;
+      if (re.test(value)) offenders.push(`${path}: ${value.slice(0, 80)}`);
+    }
+    expect(offenders, offenders.join(", ")).toEqual([]);
+  });
+});

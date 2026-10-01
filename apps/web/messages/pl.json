@@ -205,7 +205,7 @@
     "outcome": {
       "saved": "Zapisano.",
       "reported": "Usterka zgłoszona.",
-      "needs_migration": "Jeszcze niedostępne — aktualizacja nie została zastosowana.",
+      "needs_migration": "Chwilowo niedostępne.",
       "invalid": "Sprawdź podane dane.",
       "auth": "Zaloguj się ponownie.",
       "not_authorized": "Możesz zarządzać usterkami tylko we własnych projektach.",
@@ -254,7 +254,7 @@
     },
     "outcome": {
       "saved": "Zapisano.",
-      "needs_migration": "Jeszcze niedostępne — aktualizacja sprzedażowa nie została zastosowana.",
+      "needs_migration": "Chwilowo niedostępne.",
       "invalid": "Sprawdź szczegóły.",
       "auth": "Zaloguj się ponownie.",
       "not_authorized": "Możesz zarządzać tylko własnymi wpisami.",
@@ -321,7 +321,7 @@
     "outcome": {
       "saved": "Zapisano.",
       "acknowledged": "Potwierdzono.",
-      "needs_migration": "Jeszcze niedostępne — aktualizacja zasobów nie została wdrożona.",
+      "needs_migration": "Chwilowo niedostępne.",
       "invalid": "Sprawdź wprowadzone dane.",
       "auth": "Zaloguj się ponownie.",
       "not_authorized": "Nie masz uprawnień, aby to zrobić.",
@@ -379,7 +379,7 @@
     "outcome": {
       "saved": "Zapisano.",
       "deleted": "Usunięto.",
-      "needs_migration": "Jeszcze niedostępne — aktualizacja ekonomiczna nie została zastosowana.",
+      "needs_migration": "Chwilowo niedostępne.",
       "invalid": "Wprowadź prawidłową kwotę.",
       "auth": "Zaloguj się ponownie.",
       "not_authorized": "Możesz zarządzać budżetami tylko dla własnych projektów.",
@@ -394,7 +394,7 @@
       "noneToday": "Nikt spośród zarządzanych przez Ciebie osób nie ma dziś zatwierdzonej nieobecności.",
       "noneWeek": "Brak zatwierdzonych nieobecności w ciągu najbliższych 7 dni.",
       "coverage": "Na podstawie zatwierdzonych nieobecności {count} zarządzanych pracowników. Powody pozostają prywatne.",
-      "unavailable": "Harmonogram nieobecności nie jest tu jeszcze włączony."
+      "unavailable": "Chwilowo niedostępne."
     },
     "types": {
       "annual_leave": "Urlop wypoczynkowy",
@@ -414,7 +414,7 @@
       "cancelled": "Wniosek anulowany.",
       "approved": "Zatwierdzono.",
       "rejected": "Odrzucono.",
-      "needs_migration": "Jeszcze niedostępne — aktualizacja dotycząca kadr nie została zastosowana.",
+      "needs_migration": "Chwilowo niedostępne.",
       "invalid": "Sprawdź daty i szczegóły.",
       "auth": "Zaloguj się ponownie.",
       "not_authorized": "Nie masz uprawnień, aby to zrobić.",
@@ -476,7 +476,7 @@
     "laneWork": "{n} prac",
     "lanesTitle": "Etapy",
     "moreInList": "+{n} więcej na liście",
-    "lanesUnavailable": "Etapy nie są jeszcze dostępne — aktualizacja operacji projektowych nie została zastosowana.",
+    "lanesUnavailable": "Chwilowo niedostępne.",
     "lanesEmpty": "Jeszcze brak etapów. Dodaj pierwszy etap w sekcji etapów poniżej.",
     "unplacedWork": "{n} otwartych prac bez daty etapu — zobacz sekcję zadań poniżej.",
     "peopleTitle": "Na projekcie",
@@ -500,7 +500,7 @@
       "emptyRoster": "Twoja lista nie zawiera jeszcze żadnych aktywnych osób.",
       "unavailable": "Nie udało się teraz odczytać listy.",
       "why": "Dlaczego te osoby: są na Twojej liście i nie mają zatwierdzonej nieobecności między {from} a {to}.",
-      "absencesUnknown": "Nieobecności nie są jeszcze włączone, więc nic nie wskazuje inaczej.",
+      "absencesUnknown": "Chwilowo niedostępne.",
       "more": "+{n} więcej wolnych osób poza tym widokiem.",
       "alreadyOn": "może przyjść — ma już pracę w tym okresie",
       "alreadyOnNamed": "może przyjść — jest już na {what}"
@@ -513,7 +513,7 @@
     },
     "saved": "Zapisano — odczytano ponownie z zapisu.",
     "errors": {
-      "needs_migration": "Jeszcze niedostępne — aktualizacja nie została zastosowana.",
+      "needs_migration": "Chwilowo niedostępne.",
       "not_authorized": "Nie możesz zmieniać tego projektu.",
       "invalid": "Ta zmiana nie jest tu dozwolona.",
       "error": "Coś poszło nie tak. Spróbuj ponownie."
@@ -585,7 +585,7 @@
       "added": "Etap dodany.",
       "updated": "Etap zaktualizowany.",
       "deleted": "Etap usunięty.",
-      "needs_migration": "Jeszcze niedostępne — aktualizacja operacji projektowych nie została zastosowana.",
+      "needs_migration": "Chwilowo niedostępne.",
       "invalid": "Sprawdź szczegóły i spróbuj ponownie.",
       "auth": "Zaloguj się ponownie.",
       "not_authorized": "Możesz zarządzać etapami tylko dla własnych projektów.",
@@ -664,7 +664,7 @@
     "intro": "Liczby policzone na podstawie Twoich własnych danych, z podaną podstawą obliczeń pod każdą sekcją, oraz eksporty, które już istnieją.",
     "honestyNote": "Liczby wyłącznie na podstawie Twoich własnych danych — bez benchmarków, wyników punktowych ani prognoz.",
     "state": {
-      "needsMigration": "Te liczby nie są jeszcze włączone w tym środowisku. Zamiast rzeczywistych danych nie pokazujemy żadnej liczby.",
+      "needsMigration": "Chwilowo niedostępne.",
       "unavailable": "Nie udało się teraz odczytać tych liczb. Niczego nie szacujemy w ich miejsce."
     },
     "basis": {
@@ -798,7 +798,7 @@
       "collapse": "Ukryj szczegółowy raport",
       "ledger": {
         "measured": "Własne zapisy Twojej organizacji w tym oknie: {hours} godz. u {workers, plural, one {# osoby} few {# osób} many {# osób} other {# osoby}} — trzymane osobno, nigdy nie dodawane do dziennika.",
-        "none": "Ta baza danych nie zawiera zapisów godzin organizacji.",
+        "none": "Chwilowo niedostępne.",
         "unknown": "Nie udało się odczytać zapisów organizacji — to nie oznacza zera godzin.",
         "truncated": "Opiera się na pierwszych {count} zapisach."
       }
@@ -963,7 +963,7 @@
     "uploadFailed": "Nie udało się przesłać zdjęcia. Spróbuj ponownie.",
     "invalidFile": "Zdjęcie musi być w formacie JPG, PNG lub WebP.",
     "tooLarge": "Zdjęcie jest za duże. Spróbuj innego.",
-    "notReady": "Przesyłanie zdjęć nie jest jeszcze dostępne w tym środowisku.",
+    "notReady": "Chwilowo niedostępne.",
     "alt": "Zdjęcie profilowe",
     "hint": "JPG, PNG lub WebP, do 5 MB. Zdjęcie jest widoczne tylko dla Ciebie."
   },
@@ -1093,7 +1093,7 @@
           "desired_market": "Docelowy rynek",
           "demand_anchor": "Zweryfikowana lokalizacja potrzeby"
         },
-        "storeInactive": "Magazyn obszarów działania firm nie jest jeszcze aktywowany w tym środowisku — aktywacja to decyzja właściciela.",
+        "storeInactive": "Chwilowo niedostępne.",
         "readError": "Nie udało się teraz wczytać obszarów działania firm.",
         "empty": "Nie ma jeszcze obszarów działania firm. Dodaj lokalizacje działania swojej firmy w przestrzeni firmy.",
         "visibilityNote": "Obszary działania firm są rysowane jako obrysowane obszary na podstawie geografii wprowadzonej przez firmę — nigdy jako znaczniki przypominające osoby."
@@ -5386,7 +5386,7 @@
       "submit": "Złóż wniosek o usunięcie",
       "submitted": "Wniosek złożony",
       "submittedBody": "Osoba go rozpatrzy i skontaktuje się z Tobą na adres e-mail konta.",
-      "unavailable": "Wnioski o usunięcie nie są jeszcze przyjmowane — ta funkcja nie jest włączona. Możesz już teraz pobrać kopię swoich danych.",
+      "unavailable": "Chwilowo niedostępne.",
       "tooManyOpen": "Masz zbyt wiele otwartych wniosków — poczekaj, aż zostaną rozpatrzone.",
       "error": "Coś poszło nie tak. Spróbuj ponownie."
     },
@@ -5566,8 +5566,8 @@
         {
           "heading": "Domyślnie zamknięte",
           "items": [
-            "Tabele z danymi użytkowników są chronione regułami dostępu wewnątrz samej bazy danych. Jeśli żadna reguła nie przyznaje wyraźnie dostępu, dane nie są widoczne — nawet dla innych zalogowanych użytkowników.",
-            "Reguły te działają w warstwie bazy danych, a nie tylko w interfejsie, i są objęte automatycznymi testami."
+            "Chwilowo niedostępne.",
+            "Chwilowo niedostępne."
           ]
         },
         {
@@ -5611,7 +5611,7 @@
         {
           "heading": "Dostawcy infrastruktury (podprocesorzy)",
           "items": [
-            "Supabase — baza danych, logowanie użytkowników i przechowywanie plików. Dane są hostowane w Unii Europejskiej (region eu-west-1).",
+            "Chwilowo niedostępne.",
             "Vercel — hosting aplikacji i dostarczanie treści.",
             "GitHub — hosting kodu źródłowego. Nie są tam przechowywane żadne dane użytkowników.",
             "Żaden dostawca poczty e-mail, dostawca AI, dostawca tłumaczeń ani dostawca płatności nie jest obecnie aktywny. Jeśli któryś zostanie uruchomiony, ta lista zostanie wcześniej zaktualizowana."
@@ -5671,7 +5671,7 @@
         {
           "heading": "Jeśli coś wygląda nieprawidłowo",
           "items": [
-            "Reguły dostępu w bazie danych są źródłem prawdy, a ta strona za nimi podąża. Jeśli coś tutaj nie zgadza się z tym, co widzisz, skontaktuj się z nami — człowiek to sprawdzi."
+            "Chwilowo niedostępne."
           ]
         }
       ],
@@ -6527,7 +6527,7 @@
     "pageLead": "Wystaw rzeczywiste usługi, które oferujesz, i zarządzaj swoją ofertą.",
     "title": "Twoje oferty usług",
     "intro": "Rzeczywiste usługi, które oferujesz. Aktywuj, aby stała się widoczna dla zalogowanych członków; szkice i wstrzymane usługi pozostają prywatne.",
-    "notAvailable": "Oferty usług nie są jeszcze włączone w tym środowisku.",
+    "notAvailable": "Chwilowo niedostępne.",
     "empty": "Brak jeszcze ofert usług. Dodaj pierwszą rzeczywistą usługę, którą oferujesz.",
     "addButton": "Dodaj usługę",
     "form": {
@@ -6620,7 +6620,7 @@
         "errorTooLarge": "Plik jest zbyt duży (maksymalnie 10 MB).",
         "errorBadType": "Ten typ pliku nie jest obsługiwany. Dozwolone: JPG, PNG, WebP, PDF, TXT.",
         "errorTooMany": "Maksymalnie 5 załączników na wiadomość.",
-        "errorNeedsSetup": "Załączniki nie są jeszcze włączone w tym środowisku.",
+        "errorNeedsSetup": "Chwilowo niedostępne.",
         "blockedWhileUploading": "Poczekaj, aż załączniki zostaną przesłane.",
         "blockedFailed": "Usuń lub prześlij ponownie nieudany załącznik.",
         "partialFailure": "Wiadomość została wysłana, ale niektórych załączników nie udało się dołączyć. Spróbuj wysłać je ponownie."
@@ -6756,7 +6756,7 @@
     "sentTitle": "Zgłoszenie zarejestrowane",
     "sentBody": "Osoba z zespołu je przejrzy i skontaktuje się przez platformę. Żaden specjalista nie jest przydzielany automatycznie — o kolejnych krokach dowiesz się po przeglądzie.",
     "errorGeneric": "Nie udało się zarejestrować. Spróbuj ponownie.",
-    "notReady": "Zgłoszenia pomocy nie są jeszcze włączone w tym środowisku.",
+    "notReady": "Chwilowo niedostępne.",
     "tooManyOpen": "Masz zbyt wiele otwartych zgłoszeń pomocy — poczekaj, aż istniejące zostaną rozpatrzone.",
     "noteTooLong": "Opis jest za długi (maks. 500 znaków).",
     "internalNote": "Wpis wewnętrzny — nie są wysyłane żadne e-maile ani wiadomości.",
@@ -6846,7 +6846,7 @@
     "title": "Kolejka działań do wykonania",
     "intro": "Wewnętrzne kolejne działania dla zespołu operatora: co należy dalej śledzić, dla kogo i w jakim jest to stanie. Tylko rzeczywiście zapisane zadania.",
     "honestNote": "Tylko wewnętrznie. Utworzenie lub rozwiązanie zadania niczego nikomu nie wysyła — żadnego e-maila, SMS-a ani wiadomości. To własna pamięć zespołu o kolejnych działaniach.",
-    "preApply": "Kolejka działań do wykonania nie jest jeszcze dostępna w tym środowisku. Nic nie jest pokazywane, ponieważ nic nie zostało zapisane.",
+    "preApply": "Chwilowo niedostępne.",
     "queueHeading": "Otwarte",
     "queueEmpty": "Brak otwartych zadań do wykonania. Gdy zespół zapisze kolejne działanie, pojawi się tutaj.",
     "resolvedHeading": "Ostatnio rozwiązane",
@@ -6877,7 +6877,7 @@
     "outcome": {
       "created": "Zadanie zapisane. Nic nikomu nie zostało wysłane.",
       "updated": "Zadanie zaktualizowane.",
-      "needsMigration": "Magazyn zadań do wykonania nie jest jeszcze dostępny w tym środowisku.",
+      "needsMigration": "Chwilowo niedostępne.",
       "notAuthorized": "Tylko operatorzy mogą zarządzać zadaniami do wykonania.",
       "limitReached": "Osiągnięto limit otwartych zadań — najpierw rozwiąż istniejące zadania.",
       "notFound": "To zadanie już nie istnieje.",
@@ -6892,7 +6892,7 @@
     "responsibleHeading": "Odpowiedzialny",
     "responsibleEmpty": "Nie ma jeszcze aktywnych przypisań pracowników — przypisz pracowników powyżej, aby zapisać, kto jest odpowiedzialny.",
     "checklistNote": "Dokumenty i gotowość są śledzone na liście kontrolnej dla poszczególnych pracowników powyżej — paszport tego nie powiela. Załączniki zdjęciowe nie są jeszcze obsługiwane.",
-    "preApply": "Zapis przekazania nie jest jeszcze dostępny w tym środowisku. Nic nie jest pokazywane, ponieważ nic nie zostało zapisane.",
+    "preApply": "Chwilowo niedostępne.",
     "statusHeading": "Zadeklarowany etap",
     "statusNone": "Nie zadeklarowano jeszcze etapu.",
     "statusDisclaimer": "Zadeklarowane przez kierownika projektu. „Przekazanie zadeklarowane” oznacza, że kierownik oświadczył, że przekazanie miało miejsce — platforma tego nie weryfikuje.",
@@ -6919,7 +6919,7 @@
     },
     "outcome": {
       "added": "Wpis zapisany.",
-      "needsMigration": "Zapis przekazania nie jest jeszcze dostępny w tym środowisku.",
+      "needsMigration": "Chwilowo niedostępne.",
       "notAuthorized": "Tylko kierownik tego projektu może dodawać wpisy do paszportu.",
       "limitReached": "Paszport tego projektu osiągnął limit wpisów.",
       "invalid": "Wpis jest nieprawidłowy — sprawdź rodzaj, etap i treść.",
@@ -6950,11 +6950,11 @@
       "invalidName": "Nazwa musi mieć od 2 do 80 znaków.",
       "notAllowed": "Tylko właściciel organizacji może utworzyć brygadę.",
       "limitReached": "Osiągnięto limit brygad (20).",
-      "needsMigration": "Model brygad nie jest jeszcze włączony w tym środowisku.",
+      "needsMigration": "Chwilowo niedostępne.",
       "error": "Nie udało się utworzyć brygady. Nic nie zostało zapisane."
     },
     "consentNote": "Członkostwo zaczyna się dopiero, gdy pracownik sam zaakceptuje zaproszenie — nigdy nie dodajemy nikogo po cichu.",
-    "inviteNotEnabled": "Zaproszenia do zespołu nie są jeszcze włączone w tym środowisku, więc nie można stąd zapraszać członków.",
+    "inviteNotEnabled": "Chwilowo niedostępne.",
     "invitePendingOption": "{name} (zaproszenie wysłane)",
     "provenance": {
       "invited": "dołączył(a) po własnej akceptacji",
@@ -6968,7 +6968,7 @@
       "rateLimited": "Osiągnięto na razie limit zaproszeń. Spróbuj ponownie później.",
       "notAuthorized": "Tylko właściciel brygady może wysyłać zaproszenia.",
       "noEmail": "Ten pracownik nie ma zapisanego użytecznego adresu e-mail, więc nie można utworzyć zaproszenia.",
-      "needsMigration": "Zaproszenia nie są jeszcze włączone w tym środowisku.",
+      "needsMigration": "Chwilowo niedostępne.",
       "error": "Nie udało się wysłać zaproszenia. Nic nie zostało zmienione."
     },
     "details": {
@@ -6981,7 +6981,7 @@
       "noteLabel": "Notatka (widoczna tylko dla Twoich kierowników)",
       "save": "Zapisz dane",
       "saving": "Zapisywanie…",
-      "notEnabled": "Dane zespołu są przygotowane, ale jeszcze nie włączone w tym środowisku.",
+      "notEnabled": "Chwilowo niedostępne.",
       "status": {
         "availableNow": "Dostępny teraz",
         "availableFrom": "Dostępny od daty",
@@ -7015,7 +7015,7 @@
     "enquiries": {
       "heading": "Zapytania do tego zespołu ({count} otwartych)",
       "empty": "Brak jeszcze zapytań. Gdy pracodawca zapyta o ten zespół, pojawi się tutaj.",
-      "notEnabled": "Zapytania do zespołu są przygotowane, ale jeszcze nie włączone w tym środowisku.",
+      "notEnabled": "Chwilowo niedostępne.",
       "accept": "Akceptuj",
       "decline": "Odrzuć",
       "unknownProposer": "Nieznany nadawca",
@@ -7048,7 +7048,7 @@
     "submit": "Wyślij zapytanie",
     "sending": "Wysyłanie…",
     "cancel": "Anuluj",
-    "notEnabled": "Zapytania do zespołów są przygotowane, ale jeszcze niewłączone w tym środowisku.",
+    "notEnabled": "Chwilowo niedostępne.",
     "outcome": {
       "created": "Zapytanie wysłane. Odpowiedź zespołu zobaczysz w sekcji Moja sieć.",
       "duplicateOpen": "Masz już otwarte zapytanie do tego zespołu.",
@@ -7629,7 +7629,7 @@
       "formatStatus": "PDF: dostępny · CSV: dostępny · Excel / Word: w przygotowaniu"
     },
     "disclaimer": "Statusy opierają się na publicznie podanych wymaganiach i Twoich własnych danych. Ostateczną zgodność sprawdzają władze lub prawnik — to nie jest gwarancja prawna.",
-    "needsMigration": "Warstwa przechowywania dokumentów nie jest jeszcze włączona w tym środowisku.",
+    "needsMigration": "Chwilowo niedostępne.",
     "guidance": {
       "title": "Wskazówki dotyczące dokumentów według kraju (szkic)",
       "intro": "Informacyjne wskazówki dotyczące dokumentów, które mogą być potrzebne. To nie jest porada prawna.",
@@ -7768,14 +7768,14 @@
       "submit": "Wyślij do weryfikacji",
       "sent": "Wysłano do weryfikacji",
       "notReady": "Do weryfikacji można wysłać tylko dokument oznaczony jako gotowy.",
-      "unavailable": "Weryfikacja nie jest dostępna w tym środowisku.",
+      "unavailable": "Chwilowo niedostępne.",
       "error": "Nie udało się wysłać — spróbuj ponownie."
     },
     "workProof": {
       "title": "Dowody pracy i eksporty",
       "journalTitle": "Dowody z dziennika pracy",
       "journalCounts": "Wpisy: {entries} · Zdjęcia: {photos}",
-      "countsUnavailable": "Liczby nie są dostępne w tym środowisku.",
+      "countsUnavailable": "Chwilowo niedostępne.",
       "galleryNote": "Zdjęcia znajdują się wewnątrz wpisów dziennika; galerie zdjęć projektów są na stronie każdego projektu."
     },
     "uploadNote": "Przesyłanie plików nie jest jeszcze dostępne. Zapisujesz, co posiadasz i do kiedy jest ważne — same pliki zostają u Ciebie.",
@@ -7788,8 +7788,8 @@
       "expiringLabel": "Wygasają wkrótce",
       "attentionLabel": "Wymaga uwagi",
       "consentNote": "Tylko liczby — nigdy treść dokumentów. Pracownik, który nie wyraził zgody, po prostu się nie pojawia.",
-      "noConsented": "Brak zbiorczych danych dokumentów opartych na zgodzie — żaden pracownik puli nie włączył udostępniania albo Twoja organizacja nie zarządza pulą agencji.",
-      "unavailable": "Zbiorcze dane dokumentów oparte na zgodzie nie są dostępne w tym środowisku. Pracownicy są właścicielami swoich dokumentów.",
+      "noConsented": "Chwilowo niedostępne.",
+      "unavailable": "Chwilowo niedostępne.",
       "projectAxisLink": "Listy kontrolne gotowości projektu",
       "projectAxisNote": "Gotowość pracowników dla poszczególnych projektów znajduje się na stronie operacyjnej każdego projektu."
     },
@@ -7865,7 +7865,7 @@
       "path_mismatch": "Nie udało się zweryfikować przesłanego pliku — nic nie zostało zapisane. Spróbuj ponownie.",
       "file_too_large": "Plik jest większy niż 5 MB — nic nie zostało zapisane.",
       "unsupported_type": "Ten typ pliku nie jest obsługiwany — użyj PDF, Word lub zdjęcia.",
-      "needs_migration": "Przesyłanie plików nie jest jeszcze włączone w tym środowisku — nic nie zostało zapisane.",
+      "needs_migration": "Chwilowo niedostępne. Nic nie zapisano.",
       "error": "Coś poszło nie tak — nic nie zostało zapisane.",
       "updated": "Zmiana została zapisana.",
       "submitted": "Dokument został wysłany do zatwierdzenia.",
@@ -7880,7 +7880,7 @@
     "title": "Rejestr dokumentów firmy",
     "intro": "Dokumenty {org}: polityki, procedury, instrukcje i korespondencja, wraz z wersjami i potwierdzeniami odczytania.",
     "unavailable": "Nie udało się teraz wczytać rejestru dokumentów.",
-    "preparing": "Rejestr dokumentów jest przygotowany, ale jeszcze niewłączony w tym środowisku.",
+    "preparing": "Chwilowo niedostępne.",
     "error": "Nie udało się wczytać rejestru dokumentów — spróbuj ponownie później.",
     "empty": "Jeszcze nie zarejestrowano żadnych dokumentów.",
     "scopeNote": "Ten rejestr zawiera własne dokumenty organizacji. Osobiste dokumenty pracowników pozostają w ich rękach i nigdy nie są tu pokazywane.",
@@ -8529,7 +8529,7 @@
     "availableSupply": {
       "title": "Dostępna siła robocza",
       "intro": "Ekipy i specjaliści zgłoszeni jako dostępni przez agencje i firmy. Widzisz kształt dostępnych zasobów i ich lokalizację — nie to, kto je oferuje.",
-      "notEnabled": "Jeszcze niewłączone w tym środowisku. To fakt dotyczący wdrożenia, nie stwierdzenie o rynku.",
+      "notEnabled": "Chwilowo niedostępne.",
       "readFailed": "Nie udało się odczytać listy dostępnej siły roboczej. To problem systemu, nie pusty rynek.",
       "empty": "Obecnie nikt nie zgłosił dostępnej siły roboczej widocznej dla Ciebie.",
       "unstatedRole": "Nie podano rodzaju pracy",
@@ -8599,7 +8599,7 @@
       "freeTitle": "Darmowe dziś",
       "free": "Wszystko, co obecnie możesz wykorzystać w produkcie, jest darmowe — pilotaż działa bez płatności i nic nie prosi o kartę.",
       "paidTitle": "Przygotowane płatne plany",
-      "paid": "Poniższe płatne plany to przygotowane granice: opisują, co będzie należeć do planów Osoba Plus, Firma i Agencja, gdy płatności zostaną później włączone.",
+      "paid": "Chwilowo niedostępne.",
       "preparedTitle": "Przygotowane, niedostępne do zakupu",
       "prepared": "Nie ma strony płatności i niczego nie można kupić. Dostęp pilotażowy do zakresu płatnego planu jest nadawany ręcznie przez zespół."
     },
@@ -8837,7 +8837,7 @@
   },
   "adminLmc": {
     "title": "Rejestr LMC",
-    "intro": "Wewnętrzny kredyt platformy (1 LMC = 1 EUR kredytu wewnętrznego). Stan bazy danych na żywo: wyłączniki awaryjne, zaległe zobowiązania i przyznanie testowe. Wszystkie przełączniki komercyjne domyślnie są WYŁĄCZONE; włączenie któregokolwiek to decyzja właściciela.",
+    "intro": "Chwilowo niedostępne.",
     "unavailable": "Nie udało się odczytać rejestru w tej sesji — to nieudany odczyt, a nie pusty rejestr.",
     "on": "Wł.",
     "off": "Wyłączone",
@@ -8864,7 +8864,7 @@
       "submitting": "Zasilanie…",
       "granted": "Zasilono",
       "replay": "Już wcześniej zasilono tym kluczem — nic nie zostało zasilone dwukrotnie",
-      "disabledHint": "Przyznania promocyjne są WYŁĄCZONE w bazie danych — rejestr odrzuci to przyznanie. Włączenie tego przełącznika to decyzja podejmowana kanałem właściciela.",
+      "disabledHint": "Chwilowo niedostępne.",
       "reasons": {
         "grants_disabled": "Odrzucono: przyznania promocyjne są wyłączone",
         "not_admin": "Odrzucono: wymagana tożsamość administratora",
@@ -8905,7 +8905,7 @@
     },
     "subs": {
       "title": "Subskrypcje",
-      "unavailable": "Tabele rozliczeniowe nie zostały jeszcze zastosowane (PR2 oczekuje).",
+      "unavailable": "Chwilowo niedostępne.",
       "empty": "Nie ma jeszcze subskrypcji.",
       "manual": "ręczne nadpisanie"
     },
@@ -9565,7 +9565,7 @@
         "invalid": "Sprawdź nazwę i filtry.",
         "limit": "Osiągnięto limit zapisanych wyszukiwań.",
         "auth": "Zaloguj się ponownie.",
-        "feature-absent": "Jeszcze niedostępne — aktualizacja zapisanych wyszukiwań nie została wdrożona.",
+        "feature-absent": "Chwilowo niedostępne.",
         "error": "Coś poszło nie tak. Spróbuj ponownie."
       }
     },
@@ -10882,7 +10882,7 @@
     "intro": "Twoja lista pracy: co czeka, co jest w toku i co utknęło.",
     "honestNote": "To tylko lista wewnętrzna — utworzenie zadania niczego nikomu nie wysyła.",
     "notAuthed": "Zaloguj się, aby zobaczyć swoje zadania.",
-    "unavailable": "Zadania nie są jeszcze włączone. Gdy zostaną włączone, pojawią się tutaj.",
+    "unavailable": "Chwilowo niedostępne.",
     "loadError": "Nie udało się wczytać zadań. Spróbuj odświeżyć stronę.",
     "myEmpty": "Brak otwartych zadań — utwórz jedno powyżej.",
     "views": {
@@ -10947,7 +10947,7 @@
       "created": "Zadanie utworzone.",
       "updated": "Zadanie zaktualizowane.",
       "invalid": "Sprawdź pola — tytuł musi mieć od 3 do 160 znaków.",
-      "needs_migration": "Zadania nie są jeszcze włączone — zmiana nie została zapisana.",
+      "needs_migration": "Chwilowo niedostępne. Nic nie zapisano.",
       "not_authorized": "Nie masz uprawnień, aby to zrobić.",
       "not_found": "Nie znaleziono zadania.",
       "limit_reached": "Osiągnięto limit otwartych zadań — najpierw ukończ lub anuluj starsze zadania.",
@@ -11005,7 +11005,7 @@
       "title": "Dowody",
       "intro": "Wpisy z Dziennika pracy dołączone do tego zadania. Dołączenie nigdy nie zmienia wpisu — jedynie wskazuje, jakie zadanie potwierdza.",
       "empty": "Jeszcze żaden wpis z Dziennika pracy nie jest dołączony do tego zadania.",
-      "unavailable": "Dołączanie dowodów nie jest jeszcze włączone.",
+      "unavailable": "Chwilowo niedostępne.",
       "summary": "{total} dołączonych · {confirmed} potwierdzonych przez kierownika",
       "confirmed": "Potwierdzone przez kierownika",
       "unconfirmed": "Niepotwierdzone",
@@ -11116,7 +11116,7 @@
     "intro": "Ręczna ewidencja wystawionych faktur, otrzymanych faktur i wydatków — z rzeczywistymi sumami i wyliczanymi oznaczeniami zaległości.",
     "scopeNote": "Tylko ręczne wpisy — to nie jest oprogramowanie księgowe, podatkowe, płacowe, bankowe ani do przetwarzania płatności. Zapisanie wpisu nie przenosi żadnych pieniędzy i nie kontaktuje się z nikim.",
     "notAuthed": "Zaloguj się, aby zobaczyć swoje wpisy finansowe.",
-    "unavailable": "Finanse nie są jeszcze włączone. Gdy zostaną włączone, Twoje wpisy pojawią się tutaj.",
+    "unavailable": "Chwilowo niedostępne.",
     "loadError": "Nie udało się wczytać wpisów. Spróbuj odświeżyć stronę.",
     "empty": "Brak wpisów finansowych — dodaj pierwszy powyżej.",
     "emptyFiltered": "Żaden wpis nie pasuje do wybranych filtrów.",
@@ -11192,7 +11192,7 @@
       "created": "Wpis dodany.",
       "updated": "Wpis zaktualizowany.",
       "invalid": "Sprawdź pola — tytuł 3–160 znaków, kontrahent 2–160, kwota w formacie takim jak 123,45.",
-      "needs_migration": "Finanse nie są jeszcze włączone — zmiana nie została zapisana.",
+      "needs_migration": "Chwilowo niedostępne. Nic nie zapisano.",
       "not_authorized": "Nie masz uprawnień, aby to zrobić.",
       "not_found": "Nie znaleziono wpisu.",
       "limit_reached": "Osiągnięto limit wpisów — ta ręczna lista ma ograniczoną pojemność.",
@@ -11494,7 +11494,7 @@
     "visibility": "Widoczność",
     "visibilityPrivate": "Prywatna",
     "visibilityEmployers": "Pracodawcy",
-    "visibilityNote": "Podgląd przez pracodawców nie jest jeszcze włączony — Twój wybór widoczności jest zapisany i zacznie obowiązywać, gdy zostanie włączony.",
+    "visibilityNote": "Chwilowo niedostępne.",
     "importNote": "Automatyczny import z tych stron nie jest oferowany. Aby przenieść swoje dane, prześlij wyeksportowany plik CV w edytorze profilu.",
     "importLink": "Otwórz edytor profilu",
     "empty": "Nie powiązano jeszcze żadnych profili zewnętrznych.",
@@ -11518,7 +11518,7 @@
     "eyebrow": "SIEĆ",
     "title": "Sieć",
     "intro": "Twoje firmy, zespoły, partnerzy i zaproszenia. Zaproś osobę lub firmę bezpośrednio stąd.",
-    "notEnabled": "Zaproszenia nie są jeszcze włączone w tym środowisku.",
+    "notEnabled": "Chwilowo niedostępne.",
     "incoming": {
       "title": "Zaproszenia dla Ciebie",
       "from": "Zaproszenie od {name}",
@@ -11646,7 +11646,7 @@
       "messageLabel": "Wiadomość osobista",
       "send": "Wyślij zaproszenie",
       "sending": "Wysyłanie…",
-      "notEnabled": "Zaproszenia nie są jeszcze włączone w tym środowisku.",
+      "notEnabled": "Chwilowo niedostępne.",
       "notAuthed": "Zaloguj się, aby wysyłać zaproszenia.",
       "linkModeNote": "Wysyłanie e-maili nie jest jeszcze aktywne — udostępnij link zapraszający bezpośrednio.",
       "invalidEmails": "Nieprawidłowe adresy",
@@ -11693,7 +11693,7 @@
     },
     "invitePage": {
       "eyebrow": "ZAPROSZENIE",
-      "notEnabled": "Zaproszenia nie są jeszcze włączone w tym środowisku.",
+      "notEnabled": "Chwilowo niedostępne.",
       "loadError": "Nie udało się teraz wczytać zaproszenia. Spróbuj ponownie.",
       "invalidTitle": "Nie znaleziono zaproszenia",
       "invalidBody": "Link jest nieprawidłowy lub już nie działa. Poproś o nowe zaproszenie.",
@@ -11723,7 +11723,7 @@
         "exhausted": "Wszystkie miejsca w tym zaproszeniu są zajęte. Poproś o nowy link."
       },
       "notices": {
-        "not_enabled": "Zaproszenia nie są jeszcze włączone w tym środowisku.",
+        "not_enabled": "Chwilowo niedostępne.",
         "already_accepted": "Już zaakceptowano.",
         "expired": "To zaproszenie wygasło.",
         "revoked": "To zaproszenie zostało cofnięte.",
@@ -11782,7 +11782,7 @@
       "cancel": "Anuluj",
       "correctionPlaceholder": "Twoje sformułowanie",
       "failed": {
-        "not_enabled": "Przegląd nie jest jeszcze włączony w tym środowisku.",
+        "not_enabled": "Chwilowo niedostępne.",
         "error": "Nie udało się zapisać Twojej odpowiedzi. Spróbuj ponownie."
       },
       "boundary": "Potwierdzenie pozycji tutaj nie tworzy umiejętności ani zawodu. Dodaj do swojego profilu to, co jest prawdą, samodzielnie:",
@@ -11872,7 +11872,7 @@
     "title": "Klienci",
     "subtitle": "Dla kogo prowadzisz obsadę — zapotrzebowania każdego klienta łączą się z Twoimi zapotrzebowaniami i scoutingiem kandydatów.",
     "gatedHeading": "Przygotowane — oczekuje na aktywację przez właściciela",
-    "gatedBody": "Zapisy klientów są gotowe, ale jeszcze niewłączone.",
+    "gatedBody": "Chwilowo niedostępne.",
     "notLinkable": "Zapotrzebowań nie można jeszcze łączyć z klientami.",
     "clientsEmpty": "Brak jeszcze klientów. Dodaj pierwszego klienta poniżej.",
     "demandsHeading": "Twoje zapotrzebowania",
@@ -11905,7 +11905,7 @@
     "title": "Firmy klientów",
     "subtitle": "Połącz się z prawdziwą firmą klienta, widź tylko udostępnione przez nią zapytania i zaproponuj jednego ze swoich aktywnych pracowników z listy.",
     "gatedHeading": "Przygotowane — oczekuje na aktywację przez właściciela",
-    "gatedBody": "Most do klientów jest gotowy, ale jeszcze niewłączony.",
+    "gatedBody": "Chwilowo niedostępne.",
     "connectionsHeading": "Połączenia",
     "inviteEmailLabel": "E-mail klienta",
     "inviteButton": "Zaproś klienta",
@@ -11957,7 +11957,7 @@
     "title": "Agencje pracy",
     "subtitle": "Zaakceptuj agencję pracy, z którą chcesz współpracować, udostępniaj jej konkretne zapytania i przeglądaj proponowanych przez nią kandydatów na własnej stronie scoutingu.",
     "gatedHeading": "Przygotowane — oczekuje na aktywację przez właściciela",
-    "gatedBody": "Most do agencji jest gotowy, ale jeszcze niewłączony.",
+    "gatedBody": "Chwilowo niedostępne.",
     "invitesHeading": "Zaproszenia do połączenia",
     "noInvites": "Brak oczekujących zaproszeń.",
     "acceptButton": "Akceptuj",
@@ -13734,7 +13734,7 @@
       "capacityIntro": "Zespół {from} – {to} ({count} os.):",
       "capacityFree": "dostępny",
       "capacityBusyUntil": "niedostępny do {date}",
-      "capacityAbsencesUnknown": "Dane o nieobecnościach nie są dostępne w tym środowisku — pokazana jest tylko lista.",
+      "capacityAbsencesUnknown": "Chwilowo niedostępne.",
       "capacityEmpty": "W zespole nie ma jeszcze nikogo — zaproś ludzi.",
       "capacityUnavailable": "Nie udało się teraz odczytać dostępności zespołu.",
       "chipAddTask": "Dodaj zadanie",
@@ -13810,9 +13810,9 @@
       "confirmChip": "Potwierdź: {name} · {date}",
       "confirmDone": "Potwierdzono: {name} — umiejętności potwierdzone: {count}.",
       "confirmNone": "Brak oczekujących wpisów pracy.",
-      "confirmNotEnabled": "Przegląd pracy nie jest jeszcze włączony: {names}. Włącz — a ich wpisy pojawią się tutaj.",
+      "confirmNotEnabled": "Chwilowo niedostępne.",
       "confirmEnableChip": "Włącz przegląd: {name}",
-      "confirmEnabled": "Przegląd włączony: {name} — wpisy pracy czekają na potwierdzenie.",
+      "confirmEnabled": "Chwilowo niedostępne.",
       "confirmFailed": "Nie udało się potwierdzić.",
       "confirmUnavailable": "Nie udało się teraz odczytać potwierdzeń.",
       "chipOpenInbox": "Otwórz skrzynkę potwierdzeń",
@@ -13957,7 +13957,7 @@
     "findWork": {
       "emptyState": "Nie znalazłem teraz żadnych aktywnych ofert pasujących do Twoich kryteriów. Nie mam jeszcze alertów, więc nie obiecuję powiadomienia — zapytaj mnie ponownie później albo uzupełnij profil, aby pasowało więcej potrzeb.",
       "blockedNoWorker": "Aby szukać pracy, włącz rolę pracownika w ustawieniach konta.",
-      "blockedNoAccess": "Lista ofert nie jest jeszcze włączona w tym środowisku. Gdy będzie, pokażę realne potrzeby.",
+      "blockedNoAccess": "Chwilowo niedostępne.",
       "fitStrong": "Silne dopasowanie",
       "fitPossible": "Możliwe dopasowanie",
       "fitWeak": "Słabe dopasowanie",
@@ -14174,13 +14174,13 @@
       },
       "candidatesError": "Nie udało się odczytać kandydatów.",
       "candidatesNoCompany": "Nie działasz teraz w imieniu firmy, więc nie ma tu firmowych potrzeb rekrutacyjnych.",
-      "candidatesBlocked": "To nie jest teraz dostępne w tym środowisku.",
+      "candidatesBlocked": "Chwilowo niedostępne.",
       "candidatesNoDemands": "Twoja firma nie opisała jeszcze potrzeby.",
       "candidatesPickDemand": "Do której potrzeby rekrutujesz?",
       "candidatesUnstructuredBadge": "niesustrukturyzowane",
       "candidatesBackToDemands": "Powrót do potrzeb",
       "candidatesNotFound": "Ta potrzeba nie została znaleziona albo nie jest Twoja.",
-      "candidatesNeedsMigration": "Źródło kandydatów nie jest dostępne w tym środowisku.",
+      "candidatesNeedsMigration": "Chwilowo niedostępne.",
       "candidatesNotStructured": "Z tej potrzeby nie można jeszcze nic wyprowadzić, więc nie ma z czym porównać. To nie to samo, co brak dopasowań.",
       "candidatesRetrievalCapped": "Dostępnych osób było więcej, niż mogliśmy teraz przejrzeć, więc ta lista nie obejmuje całej dostępnej puli.",
       "candidatesEmpty": "Nikt w widocznej puli nie pasuje teraz do tej potrzeby.",
@@ -14234,7 +14234,7 @@
       "bookingNote": "Notatka",
       "projectError": "Nie udało się odczytać projektu.",
       "projectNoCompany": "Nie działasz teraz w imieniu firmy, więc nie ma tu firmowych projektów.",
-      "projectBlocked": "To nie jest teraz dostępne w tym środowisku.",
+      "projectBlocked": "Chwilowo niedostępne.",
       "projectEmpty": "Nie ma jeszcze żadnego projektu.",
       "projectPick": "Który projekt?",
       "projectBackToList": "Powrót do projektów",
@@ -14261,7 +14261,7 @@
       "pulseNextNoWork": "Dalej: nie zapisano jeszcze żadnej pracy — gdy ludzie zapiszą pracę, pojawi się ona tutaj i w ich CV.",
       "projectStages": "Etapy",
       "projectStagesEmpty": "Dla tego projektu nie wprowadzono żadnych etapów.",
-      "projectStagesUnavailable": "Etapów nie można odczytać w tym środowisku, więc nie pokazujemy pustej listy tak, jakby ich nie było.",
+      "projectStagesUnavailable": "Chwilowo niedostępne.",
       "projectStageMarkDone": "Oznacz jako zakończony",
       "projectAssignWorker": "Przypisz pracownika",
       "projectOpenOperations": "Otwórz zarządzanie projektem",
@@ -14282,14 +14282,14 @@
       "projectAlreadyInState": "Projekt jest już w tym stanie. Nic nie zostało zmienione.",
       "projectInvalidTransition": "Nie można dokonać tej zmiany statusu.",
       "projectNotAuthorized": "Nie możesz zmienić statusu tego projektu.",
-      "projectNeedsMigration": "Zmiany statusu projektu nie są jeszcze dostępne w tym środowisku.",
+      "projectNeedsMigration": "Chwilowo niedostępne.",
       "projectConflict": "Projekt zmienił się, gdy na niego patrzyłeś/aś. Otwórz go ponownie.",
       "engagements": {
         "title": "Relacje robocze"
       },
       "engagementsError": "Nie udało się wczytać relacji roboczych.",
       "engagementsBlocked": "Nie można teraz odczytać relacji roboczych. To nie to samo, co ich brak.",
-      "engagementsNeedsMigration": "Relacje robocze nie są jeszcze dostępne w tym środowisku.",
+      "engagementsNeedsMigration": "Chwilowo niedostępne.",
       "engagementsEmptyCompany": "Ta organizacja nie ma zapisanych relacji roboczych.",
       "engagementsEmptyWorker": "Nie masz zapisanych relacji roboczych.",
       "engagementsUnavailable": "Ta relacja robocza nie jest dla Ciebie dostępna.",
@@ -14988,7 +14988,7 @@
     "page": {
       "title": "Doświadczenia",
       "lead": "Subiektywne doświadczenia z rzeczywistych, zakończonych interakcji zawodowych. Doświadczenie to relacja jednej osoby — nie fakt dotyczący czyichś umiejętności zawodowych.",
-      "unavailableTitle": "Doświadczenia nie są jeszcze dostępne w tym środowisku.",
+      "unavailableTitle": "Chwilowo niedostępne.",
       "unavailableBody": "Nic nie zostało zapisane. Możesz pracować dalej jak dotychczas.",
       "aboutMe": "O mnie",
       "aboutMeEmpty": "Brak jeszcze opublikowanych doświadczeń na Twój temat.",
@@ -15003,7 +15003,7 @@
       "caution": "Więcej negatywnych niż pozytywnych doświadczeń — warto przyjrzeć się bliżej przed podjęciem decyzji.",
       "meaning": "To subiektywne relacje z rzeczywistych interakcji. Nie są to oceny, wyniki punktowe ani werdykt platformy.",
       "notEnough": "Za mało jeszcze opublikowanych doświadczeń.",
-      "unavailable": "Liczby doświadczeń nie są jeszcze dostępne w tym środowisku."
+      "unavailable": "Chwilowo niedostępne."
     },
     "sentiment": {
       "positive": "Pozytywne doświadczenie",
@@ -15028,7 +15028,7 @@
       "rejected": "Odrzucone",
       "title": "Moderacja doświadczeń",
       "lead": "Każde doświadczenie przechodzi moderację przed publikacją. Każda decyzja wymaga uzasadnienia i jest zapisywana w dzienniku audytu.",
-      "unavailable": "Moduł doświadczeń nie jest dostępny w tym środowisku.",
+      "unavailable": "Chwilowo niedostępne.",
       "queueTitle": "Oczekujące na moderację",
       "queueEmpty": "Nic nie oczekuje na moderację.",
       "disputeQueueTitle": "Spory",
@@ -15045,7 +15045,7 @@
         "removed": "Usuń z widoku publicznego"
       },
       "errors": {
-        "needs_migration": "Doświadczenia nie są jeszcze dostępne w tym środowisku. Nic nie zostało zapisane.",
+        "needs_migration": "Chwilowo niedostępne. Nic nie zapisano.",
         "not_authenticated": "Najpierw się zaloguj.",
         "not_eligible": "Możesz opisać tylko interakcję, w której faktycznie uczestniczyłeś i która się zakończyła.",
         "duplicate_for_interaction": "Zgłosiłeś już doświadczenie dla tej interakcji.",
@@ -15075,7 +15075,7 @@
       "sending": "Otwieranie…",
       "openedNote": "Spór otwarty. Doświadczenie pozostaje opublikowane do czasu decyzji moderatora.",
       "errors": {
-        "needs_migration": "Doświadczenia nie są jeszcze dostępne w tym środowisku. Nic nie zostało zapisane.",
+        "needs_migration": "Chwilowo niedostępne. Nic nie zapisano.",
         "not_authenticated": "Najpierw się zaloguj.",
         "not_eligible": "Możesz opisać tylko interakcję, w której faktycznie uczestniczyłeś i która się zakończyła.",
         "duplicate_for_interaction": "Zgłosiłeś już doświadczenie dla tej interakcji.",
@@ -15099,7 +15099,7 @@
       "sending": "Wysyłanie…",
       "submitted": "Odpowiedź wysłana. Stanie się widoczna po zakończeniu moderacji.",
       "errors": {
-        "needs_migration": "Doświadczenia nie są jeszcze dostępne w tym środowisku. Nic nie zostało zapisane.",
+        "needs_migration": "Chwilowo niedostępne. Nic nie zapisano.",
         "not_authenticated": "Najpierw się zaloguj.",
         "not_eligible": "Możesz opisać tylko interakcję, w której faktycznie uczestniczyłeś i która się zakończyła.",
         "duplicate_for_interaction": "Zgłosiłeś już doświadczenie dla tej interakcji.",
@@ -15133,7 +15133,7 @@
       "submitted": "Doświadczenie wysłane.",
       "awaitingModeration": "Oczekuje na moderację i nie jest jeszcze opublikowane.",
       "errors": {
-        "needs_migration": "Doświadczenia nie są jeszcze dostępne w tym środowisku. Nic nie zostało zapisane.",
+        "needs_migration": "Chwilowo niedostępne. Nic nie zapisano.",
         "not_authenticated": "Najpierw się zaloguj.",
         "not_eligible": "Możesz opisać tylko interakcję, w której faktycznie uczestniczyłeś i która się zakończyła.",
         "duplicate_for_interaction": "Zgłosiłeś już doświadczenie dla tej interakcji.",
@@ -15284,7 +15284,7 @@
   "approvals": {
     "title": "Zatwierdzenia",
     "intro": "Wnioski o zatwierdzenie w Twoich organizacjach: złóż wniosek, podejmij czekające na Ciebie decyzje i śledź każdy etap.",
-    "unavailable": "Zatwierdzenia nie są jeszcze włączone w tym środowisku. Nic nie przepada — ta sekcja otworzy się, gdy magazyn zatwierdzeń zostanie sprawdzony i wdrożony.",
+    "unavailable": "Chwilowo niedostępne.",
     "honestNote": "Decyzje pozostają wewnątrz produktu. Nic nie jest wysyłane e-mailem ani nigdzie indziej — aktualizacje widać na tej stronie i w dzwonku powiadomień.",
     "loadError": "Części danych o zatwierdzeniach nie udało się teraz wczytać. To, co widzisz, jest prawdziwe, ale może być niepełne.",
     "inbox": {
@@ -15423,7 +15423,7 @@
       "not_pending": "Ten wniosek nie jest już otwarty.",
       "invalid": "Sprawdź wprowadzone wartości i spróbuj ponownie.",
       "invalid_delegate": "Nie znaleziono takiego współpracownika w tej organizacji.",
-      "needs_migration": "Zatwierdzenia nie są jeszcze włączone w tym środowisku. Nic nie zapisano.",
+      "needs_migration": "Chwilowo niedostępne. Nic nie zapisano.",
       "not_authorized": "Nie masz na to pozwolenia.",
       "not_found": "Nie znaleziono tego wniosku.",
       "limit_reached": "Osiągnięto limit otwartych pozycji. Najpierw coś zamknij.",
@@ -15439,7 +15439,7 @@
     "tpl": {
       "title": "Konfiguracja szablonów",
       "intro": "Ustal, kto co zatwierdza w każdej z Twoich organizacji. Wszystko, co tu zmienisz, dotyczy wyłącznie nowych wniosków.",
-      "unavailable": "Konfiguracja szablonów jest przygotowana, ale w tym środowisku jeszcze nie włączona.",
+      "unavailable": "Chwilowo niedostępne.",
       "runningImmuneNote": "Opublikowanie nowej wersji dotyczy tylko wniosków rozpoczętych później. Wniosek, który już trwa, zachowuje etapy i osoby, z którymi się zaczął.",
       "templateCount": "Szablony: {count}",
       "installTitle": "Zainstaluj zestaw domyślny",
@@ -15497,7 +15497,7 @@
   "timesheets": {
     "title": "Karty czasu pracy",
     "intro": "Dokumenty godzin za okres, tworzone z Twojego dziennika pracy. Godziny zawsze poprawia się w dzienniku; karta czasu pracy to zamrożona kopia wysyłana do zatwierdzenia.",
-    "needsMigration": "Karty czasu pracy nie są jeszcze włączone w tym środowisku.",
+    "needsMigration": "Chwilowo niedostępne.",
     "readError": "Części danych kart czasu pracy nie udało się teraz wczytać.",
     "noLines": "W tym okresie nie ma jeszcze zapisanych godzin. Zapisz pracę w dzienniku i odśwież.",
     "linesTitle": "Wiersze ({count})",
@@ -15575,7 +15575,7 @@
       "no_approvers": "Według szablonu tej organizacji nie znaleziono zatwierdzających.",
       "not_published": "Szablon zatwierdzania nie jest jeszcze opublikowany.",
       "invalid": "Żądanie było nieprawidłowe.",
-      "needs_migration": "Karty czasu pracy nie są jeszcze włączone w tym środowisku.",
+      "needs_migration": "Chwilowo niedostępne.",
       "not_authorized": "Nie masz do tego uprawnień.",
       "not_found": "Karty nie znaleziono.",
       "limit_reached": "Za dużo otwartych kart — najpierw wyślij lub uporządkuj istniejące.",
@@ -15605,7 +15605,7 @@
     "archivedBadge": "Zarchiwizowano",
     "empty": "Brak jeszcze obiektów. Dodaj miejsca, w których odbywa się Twoja praca.",
     "gatedHeading": "Przygotowane — oczekuje na aktywację",
-    "gatedBody": "Obiekty są gotowe, ale jeszcze niewłączone. Włączenie ich jest decyzją właściciela.",
+    "gatedBody": "Chwilowo niedostępne.",
     "errorLabel": "Nie udało się zapisać. Spróbuj ponownie.",
     "notAuthorizedLabel": "Tylko kierownicy mogą zmieniać obiekty.",
     "savedLabel": "Zapisano."
@@ -15613,7 +15613,7 @@
   "requests": {
     "title": "Wnioski",
     "intro": "Poproś pracodawcę o coś i śledź, co dzieje się dalej. Każdy wniosek przechodzi ścieżkę zatwierdzania ustawioną przez Twoją firmę.",
-    "unavailable": "Wnioski nie są jeszcze włączone w tym środowisku. Nic nie przepada — sekcja otworzy się, gdy aktualizacja zostanie sprawdzona i zainstalowana.",
+    "unavailable": "Chwilowo niedostępne.",
     "honestNote": "O wniosku decydują prawdziwi ludzie w Twojej firmie. Nic nie jest zatwierdzane automatycznie i nic nie opuszcza produktu.",
     "notice": {
       "created": "Wniosek złożony. Odpowiednie osoby zostały poproszone o jego rozpatrzenie.",
@@ -15626,7 +15626,7 @@
       "not_published": "Ścieżka zatwierdzania wniosków nie jest jeszcze gotowa.",
       "not_pending": "Ten wniosek już nie czeka — poniżej widać jego obecny stan.",
       "invalid": "Sprawdź dane i spróbuj ponownie.",
-      "needs_migration": "Jeszcze niedostępne — aktualizacja wniosków nie jest zainstalowana w tym środowisku.",
+      "needs_migration": "Chwilowo niedostępne.",
       "not_authorized": "Nie możesz tego zrobić.",
       "not_found": "Nie znaleziono.",
       "limit_reached": "Za dużo otwartych wniosków. Najpierw poczekaj na decyzje w sprawie istniejących.",
@@ -15726,7 +15726,7 @@
     "relationshipNote": "Lista kontraktów powyżej to wcześniejszy osobisty rejestr handlowy i działa bez zmian. Nowe umowy należą tutaj.",
     "unavailable": "Rejestru umów nie można teraz wyświetlić.",
     "needsOrgWorkspace": "Rejestr umów działa w przestrzeni organizacji. Przełącz się na swoją organizację.",
-    "preparing": "Rejestr umów jest przygotowany, ale w tym środowisku jeszcze nie włączony.",
+    "preparing": "Chwilowo niedostępne.",
     "error": "Nie udało się odczytać rejestru umów.",
     "empty": "Nie zarejestrowano jeszcze żadnych umów.",
     "emptyFiltered": "Żadna umowa nie pasuje do tych filtrów.",
@@ -15829,14 +15829,14 @@
       "not_found": "Wpis nie znaleziony.",
       "not_allowed": "Może to zrobić tylko właściciel lub administrator organizacji.",
       "limit_reached": "Osiągnięto limit rejestru.",
-      "needs_migration": "Rejestr umów w tym środowisku nie jest jeszcze włączony.",
+      "needs_migration": "Chwilowo niedostępne.",
       "error": "Coś poszło nie tak. Niczego nie zapisano."
     }
   },
   "lifecycle": {
     "title": "Cykl życia zatrudnienia",
     "intro": "Wdrożenie, okres próbny, zmiany, odejście i zakończenie dla zapisów zatrudnienia tej organizacji — z listami kontrolnymi i pełną historią.",
-    "unavailable": "Cykl życia zatrudnienia nie jest jeszcze włączony w tym środowisku. Nic nie przepada — ta sekcja otworzy się po przeglądzie i wdrożeniu magazynu.",
+    "unavailable": "Chwilowo niedostępne.",
     "honestNote": "Wszystko zostaje w produkcie. Oznaczenie kroku jako wykonanego zapisuje tylko kto, co i kiedy potwierdził — nic nigdzie nie jest wysyłane.",
     "loadError": "Części danych nie udało się teraz wczytać. To, co widzisz, jest prawdziwe, ale może być niepełne.",
     "stage": {
@@ -15967,7 +15967,7 @@
       "last_owner": "Zapisu ostatniego właściciela nie można zakończyć — najpierw wyznacz innego właściciela.",
       "limit_reached": "Osiągnięto limit tej organizacji.",
       "invalid": "Nieprawidłowe dane.",
-      "needs_migration": "Ta funkcja nie jest jeszcze włączona w tym środowisku.",
+      "needs_migration": "Chwilowo niedostępne.",
       "not_authorized": "Nie masz uprawnień do tego działania.",
       "not_found": "Zapis niedostępny.",
       "error": "Nie udało się — spróbuj ponownie."
@@ -15976,7 +15976,7 @@
   "procurement": {
     "title": "Zakupy",
     "intro": "Poproś o materiały lub usługi, zapisuj oferty dostawców i odnotuj, co wybrano. Nic tutaj nie kontaktuje się z dostawcą ani niczego nie zamawia — to Twoja ewidencja.",
-    "needsMigration": "Wnioski zakupowe nie są jeszcze włączone w tym środowisku.",
+    "needsMigration": "Chwilowo niedostępne.",
     "readError": "Nie udało się wczytać wniosków zakupowych. Spróbuj ponownie.",
     "empty": "Brak wniosków zakupowych.",
     "noOffers": "Nie zapisano jeszcze ofert dostawców.",
@@ -16035,7 +16035,7 @@
       "unlinked": "Powiązanie faktury usunięte.",
       "cancelled": "Wniosek zakupowy anulowany.",
       "invalid": "Sprawdź wprowadzone dane.",
-      "needs_migration": "Wnioski zakupowe nie są jeszcze włączone w tym środowisku.",
+      "needs_migration": "Chwilowo niedostępne.",
       "not_authorized": "Nie możesz tego zrobić dla tego wniosku.",
       "not_found": "Nie znaleziono tego wniosku zakupowego.",
       "not_editable": "W tym stanie ten krok nie jest możliwy.",
@@ -16054,7 +16054,7 @@
   "trips": {
     "title": "Delegacje",
     "intro": "Poproś o delegację, uzyskaj zatwierdzenie i trzymaj jej koszty razem. Nic tutaj nie rezerwuje podróży ani nie wypłaca pieniędzy — to Twoja ewidencja.",
-    "needsMigration": "Delegacje nie są jeszcze włączone w tym środowisku.",
+    "needsMigration": "Chwilowo niedostępne.",
     "readError": "Nie udało się wczytać delegacji. Spróbuj ponownie.",
     "empty": "Brak delegacji.",
     "orgHeading": "Delegacje osób, którymi zarządzasz",
@@ -16107,7 +16107,7 @@
       "unlinked": "Wpis usunięty z delegacji.",
       "invalid": "Sprawdź wprowadzone dane.",
       "invalid_dates": "Sprawdź daty delegacji.",
-      "needs_migration": "Delegacje nie są jeszcze włączone w tym środowisku.",
+      "needs_migration": "Chwilowo niedostępne.",
       "not_authorized": "Nie możesz tego zrobić dla tej delegacji.",
       "not_found": "Nie znaleziono tej delegacji.",
       "not_editable": "W tym stanie ten krok nie jest możliwy.",
@@ -16124,7 +16124,7 @@
     "title": "Szkolenia i certyfikaty",
     "intro": "Kursy, które Twoja organizacja prosi ludzi o ukończenie, oraz certyfikaty, które po nich następują.",
     "evidenceNote": "Certyfikat tutaj pokazuje, że kurs został ukończony. Nie mówi, jak dobrze ktoś pracuje — to pozostaje w Twoich wpisach pracy i potwierdzeniach kierownika.",
-    "notAvailable": "Szkolenia nie są jeszcze włączone w tej przestrzeni roboczej.",
+    "notAvailable": "Chwilowo niedostępne.",
     "status": {
       "assigned": "Do zrobienia",
       "completed": "Ukończone",
@@ -16186,7 +16186,7 @@
       "invalid_file": "Ten plik nie należy do Twojej organizacji.",
       "invalid_skill": "Nie znaleziono tej umiejętności.",
       "invalid_state": "Tego nie można zrobić na tym etapie.",
-      "needs_migration": "Szkolenia nie są jeszcze włączone w tej przestrzeni roboczej.",
+      "needs_migration": "Chwilowo niedostępne.",
       "not_authorized": "Nie masz uprawnień do tego.",
       "not_found": "Nie znaleziono.",
       "limit_reached": "Jest tu już zbyt dużo.",
@@ -16197,7 +16197,7 @@
     "title": "Rozmowy rozwojowe",
     "intro": "Zarejestrowana rozmowa między dwiema imiennie wskazanymi osobami o pracy i kolejnych krokach.",
     "noScoreNote": "Nie ma tu ocen, punktacji ani rankingu — celowo. Wszystko poniżej to zarejestrowany fakt, odnośnik do prawdziwej pracy albo słowa jednej z osób, wyraźnie oznaczone.",
-    "notAvailable": "Rozmowy rozwojowe nie są jeszcze włączone w tej przestrzeni roboczej.",
+    "notAvailable": "Chwilowo niedostępne.",
     "empty": "Żadna rozmowa jeszcze Cię nie dotyczy.",
     "cycles": {
       "heading": "Okresy",
@@ -16263,7 +16263,7 @@
       "invalid_subject": "Ta osoba nie należy do Twojej organizacji.",
       "invalid_reviewer": "Ta osoba nie może być prowadzącym rozmowę.",
       "invalid_reference": "Ten odnośnik nie wskazuje na rzeczywistą pracę tej osoby.",
-      "needs_migration": "Rozmowy rozwojowe nie są jeszcze włączone w tej przestrzeni roboczej.",
+      "needs_migration": "Chwilowo niedostępne.",
       "not_authorized": "Nie masz do tego uprawnień.",
       "not_found": "Nie znaleziono.",
       "limit_reached": "Jest tu już za dużo.",
@@ -16274,7 +16274,7 @@
     "title": "Decyzje zarządu",
     "intro": "Co zostało przedstawione zarządowi, co zdecydowano, kto jest odpowiedzialny i do kiedy.",
     "engineNote": "Głosowanie odbywa się na liście zatwierdzeń powyżej: szablon wymagający każdego zatwierdzającego to głosowanie jednomyślne, taki, który wymaga dowolnego zatwierdzającego, jest rozstrzygany przez pierwszą odpowiedź. Nic tutaj nie liczy głosów.",
-    "notAvailable": "Decyzje zarządu nie są jeszcze włączone w tej przestrzeni roboczej.",
+    "notAvailable": "Chwilowo niedostępne.",
     "empty": "Nie zapisano jeszcze żadnych decyzji.",
     "form": {
       "title": "Pytanie",
@@ -16327,7 +16327,7 @@
       "invalid_document": "Ten dokument nie należy do Twojej organizacji.",
       "invalid_task": "To zadanie nie jest Twoje.",
       "invalid_responsible": "Ta osoba nie należy do Twojej organizacji.",
-      "needs_migration": "Decyzje zarządu nie są jeszcze włączone w tej przestrzeni roboczej.",
+      "needs_migration": "Chwilowo niedostępne.",
       "not_authorized": "Nie masz uprawnień do tego.",
       "not_found": "Nie znaleziono.",
       "limit_reached": "Jest tu już zbyt dużo.",
@@ -16476,7 +16476,7 @@
       "generic": "Nie udało się zapisać. Spróbuj ponownie."
     },
     "states": {
-      "needsMigration": "Ta funkcja nie jest jeszcze włączona w tej bazie danych.",
+      "needsMigration": "Chwilowo niedostępne.",
       "noCompany": "Przełącz się na przestrzeń roboczą firmy.",
       "noObjects": "Nie ma jeszcze budów, na które można zapisać dzisiejsze godziny.",
       "error": "Nie udało się wczytać tego dnia."
@@ -16546,7 +16546,7 @@
         "duplicatesFound": "Identyczne istniejące wpisy: {count}. Nic nie zapisano — zaznacz potwierdzenie, aby mimo to je zapisać.",
         "noRows": "Brak wierszy do zapisania.",
         "tooManyRows": "Zbyt wiele wierszy na jeden import — podziel plik.",
-        "needsMigration": "Ta funkcja nie jest jeszcze włączona w tej bazie danych.",
+        "needsMigration": "Chwilowo niedostępne.",
         "notAuthorized": "Nie możesz zapisać tych godzin.",
         "generic": "Przetwarzanie nie powiodło się. Spróbuj ponownie."
       }
@@ -17206,7 +17206,7 @@
       "notAMember": "Nie jesteś członkiem tej organizacji.",
       "chooseOrganization": "Zarządzasz więcej niż jedną organizacją. Wybierz, w imieniu której działasz.",
       "notAuthorized": "Nie masz w tej organizacji roli uprawniającej do widzenia jej osób.",
-      "needsMigration": "Magazyn osób nie jest jeszcze włączony w tym środowisku.",
+      "needsMigration": "Chwilowo niedostępne.",
       "unavailable": "Nie udało się odczytać listy osób. To nie to samo co pusta lista — spróbuj ponownie za chwilę."
     },
     "offer": {
@@ -17230,7 +17230,7 @@
     "detected": "Znaleziono osób w {file}: {count}",
     "duplicates": "{count} powtórzonych w pliku",
     "errFailed": "To się nie powiodło i nic nie zostało zapisane. Spróbuj ponownie za chwilę.",
-    "errNeedsMigration": "Ta relacja nie jest jeszcze dostępna w tym środowisku.",
+    "errNeedsMigration": "Chwilowo niedostępne.",
     "errNoName": "Żadna kolumna w tym pliku nie mówi, kim są te osoby. Dodaj nagłówek taki jak „Imię i nazwisko” i załącz plik ponownie.",
     "errNotAuthorized": "Nie możesz dodawać osób dla tej organizacji.",
     "errNothing": "Nie udało się nic odczytać z tego pliku.",
@@ -17459,7 +17459,7 @@
       "invalid_role": "Nieprawidłowa rola.",
       "last_owner": "Ostatni właściciel nie może ustąpić — najpierw aktywuj innego właściciela.",
       "no_workspace": "Najpierw wybierz przestrzeń organizacji.",
-      "needs_migration": "Ta funkcja nie jest jeszcze włączona w tym środowisku.",
+      "needs_migration": "Chwilowo niedostępne.",
       "invalid": "Nieprawidłowe dane.",
       "error": "Coś się nie udało — spróbuj ponownie."
     },
@@ -17513,7 +17513,7 @@
     "cancel": "Anuluj",
     "doneSelf": "Opuściłeś ten zespół.",
     "doneOwner": "Usunięto z listy.",
-    "needsMigration": "Kończenie powiązania z listą nie jest jeszcze włączone w tym środowisku.",
+    "needsMigration": "Chwilowo niedostępne.",
     "notFound": "To powiązanie już nie istnieje albo nie możesz go zakończyć.",
     "failed": "Nie udało się zakończyć powiązania. Spróbuj ponownie.",
     "readFailed": "Nie udało się teraz odczytać Twoich zespołów. To nie oznacza, że nie należysz do żadnego."
