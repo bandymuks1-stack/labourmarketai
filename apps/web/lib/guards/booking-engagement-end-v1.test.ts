@@ -1513,6 +1513,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260930120000_project_duplicate_marker_v1.sql",
       // owner 2026-09-30 (D1 #2015 APPROVED): a worker photo for real work relationships.
       "20260930133500_worker_avatar_path_for_relations_v1.sql",
+      "20260930150000_historical_timesheet_m2_ordered_work.sql",
+      "20260930160000_historical_timesheet_m3_source_preservation.sql",
 ]);
   });
 

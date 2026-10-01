@@ -1,5 +1,5 @@
 -- ============================================================================
--- 20260924120000_historical_timesheet_m3_source_preservation
+-- 20260930160000_historical_timesheet_m3_source_preservation
 -- Historical timesheet import PR-4 = migration M3 of
 -- docs/design/historical-timesheet-import-v3.md: §9.3 (schema for source
 -- preservation), §14 row M3 and §15 row PR-4. Owner rule F (§1): preserve the
@@ -78,7 +78,7 @@
 --   4. the rolled-back DO block docs/design/historical-timesheet-m2-m3-dryrun.sql
 --      (it embeds the M3 body below byte-for-byte) — executed by the lead.
 --
--- ROLLBACK: supabase/rollbacks/20260924120000_historical_timesheet_m3_source_preservation.down.sql
+-- ROLLBACK: supabase/rollbacks/20260930160000_historical_timesheet_m3_source_preservation.down.sql
 -- REFUSES while any org_import_source document or any CSV / XLSX document_files
 -- row exists; otherwise restores the function body byte-for-byte to production
 -- (the five-type list), restores the CHECK and the bucket array, drops the
@@ -281,7 +281,7 @@ end $hist_m_three_verify$;
 
 commit;
 
--- ROLLBACK (down): supabase/rollbacks/20260924120000_historical_timesheet_m3_source_preservation.down.sql
+-- ROLLBACK (down): supabase/rollbacks/20260930160000_historical_timesheet_m3_source_preservation.down.sql
 -- Refuses while any org_import_source document or CSV / XLSX file row exists;
 -- otherwise restores the production function body (md5 23ee05137f9e6529fdf989cdbf2ca717),
 -- the five-type CHECK and bucket list, drops the index and deletes the slug.

@@ -30,8 +30,8 @@ import { join } from "node:path";
  */
 
 const REPO_ROOT = join(process.cwd(), "..", "..");
-const M2 = "20260924110000_historical_timesheet_m2_ordered_work";
-const M3 = "20260924120000_historical_timesheet_m3_source_preservation";
+const M2 = "20260930150000_historical_timesheet_m2_ordered_work";
+const M3 = "20260930160000_historical_timesheet_m3_source_preservation";
 const M1_VERSION = "20260924100000";
 const MIGRATIONS_DIR = join(REPO_ROOT, "supabase/migrations");
 const ROLLBACKS_DIR = join(REPO_ROOT, "supabase/rollbacks");

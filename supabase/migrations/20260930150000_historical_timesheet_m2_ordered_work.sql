@@ -1,5 +1,5 @@
 -- ============================================================================
--- 20260924110000_historical_timesheet_m2_ordered_work
+-- 20260930150000_historical_timesheet_m2_ordered_work
 -- Historical timesheet import PR-4 = migration M2 of
 -- docs/design/historical-timesheet-import-v3.md: §5.3 (ONE additive relation
 -- for ordered-work steps), §14 row M2 and §15 row PR-4. Owner rules
@@ -52,7 +52,7 @@
 --   4. the rolled-back DO block docs/design/historical-timesheet-m2-m3-dryrun.sql
 --      (it embeds the M2 body below byte-for-byte) — executed by the lead.
 --
--- ROLLBACK: supabase/rollbacks/20260924110000_historical_timesheet_m2_ordered_work.down.sql
+-- ROLLBACK: supabase/rollbacks/20260930150000_historical_timesheet_m2_ordered_work.down.sql
 -- REFUSES while any row exists; otherwise drops the two policies, the two
 -- indexes and the table (its grants go with it).
 -- ============================================================================
@@ -159,6 +159,6 @@ end $hist_m_two_insert$;
 
 commit;
 
--- ROLLBACK (down): supabase/rollbacks/20260924110000_historical_timesheet_m2_ordered_work.down.sql
+-- ROLLBACK (down): supabase/rollbacks/20260930150000_historical_timesheet_m2_ordered_work.down.sql
 -- Refuses while any project_ordered_work row exists; otherwise drops
 -- pow_insert, pow_select, pow_project_idx, pow_one_live_initial and the table.

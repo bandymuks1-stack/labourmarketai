@@ -28,9 +28,9 @@
 --      recorded (table absent, 0 documents / type rows / CSV-XLSX files, the
 --      bucket, the CHECK and the function without text/csv).
 --   1. applies the M2 body of
---      supabase/migrations/20260924110000_historical_timesheet_m2_ordered_work.sql
+--      supabase/migrations/20260930150000_historical_timesheet_m2_ordered_work.sql
 --      and the M3 body of
---      supabase/migrations/20260924120000_historical_timesheet_m3_source_preservation.sql,
+--      supabase/migrations/20260930160000_historical_timesheet_m3_source_preservation.sql,
 --      each embedded BYTE-FOR-BYTE between its two markers below
 --      (apps/web/lib/guards/historical-timesheet-m2-m3-migration.test.ts pins
 --      the identity). Both are idempotent, so after the real apply this file
