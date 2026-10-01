@@ -56,6 +56,10 @@ export interface WorkCardLabels {
   availableFromLabel: string;
   locationLabel: string;
   locationHint: string;
+  /** The country list for the "country I am in" field. When present the field
+   *  is a <select> that submits the ISO code; when absent it stays free text
+   *  (the action resolves a code or a name either way). */
+  locationOptions?: ReadonlyArray<{ code: string; label: string }>;
   preferredLabel: string;
   preferredHint: string;
   salaryMinLabel: string;
@@ -317,14 +321,30 @@ export function WorkCardEditor({
               <span className="font-mono uppercase tracking-label text-text-muted">
                 {labels.locationLabel}
               </span>
-              <input
-                type="text"
-                name="location_country"
-                maxLength={80}
-                placeholder={labels.locationHint}
-                defaultValue={values.locationCountry ?? ""}
-                className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
-              />
+              {labels.locationOptions && labels.locationOptions.length > 0 ? (
+                <select
+                  name="location_country"
+                  defaultValue={values.locationCountry ?? ""}
+                  data-testid="work-card-location-select"
+                  className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
+                >
+                  <option value="">—</option>
+                  {labels.locationOptions.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  name="location_country"
+                  maxLength={80}
+                  placeholder={labels.locationHint}
+                  defaultValue={values.locationCountry ?? ""}
+                  className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
+                />
+              )}
             </label>
 
             <label className="flex flex-col gap-1 text-xs">
