@@ -21,7 +21,7 @@ describe("the company context's centre is the company model, over existing surfa
   });
   it("is mounted as the opening context only inside a company organization workspace", () => {
     const page = read("app/[locale]/dashboard/page.tsx");
-    expect(page).toMatch(/activeOrgWorkspace && identity === "company" \? \(\s*<CompanyModelScreen \/>/);
+    expect(page).toMatch(/activeOrgWorkspace && identity === "company" \? <CompanyModelScreen \/> : null/);
   });
   it("copy exists in every routed locale", () => {
     for (const loc of ["lt", "en", "de", "nl", "pl", "ru"]) {

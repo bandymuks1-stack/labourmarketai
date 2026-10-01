@@ -375,6 +375,9 @@ export default async function DashboardHomePage({
   // the new context (decision d1). One-shot deep links (`?say=`, `?intent=`)
   // were stripped from the URL on first consumption, so a remount never
   // re-sends them.
+  // The company workspace opens on the company model (existing doors).
+  const companyOpeningContext =
+    activeOrgWorkspace && identity === "company" ? <CompanyModelScreen /> : null;
   const conversationKey = `${rootWorkspace.activeWorkspaceId}:${identity}`;
 
   // No overlay: the thin dashboard layout renders no chrome, so the chat simply
@@ -408,13 +411,7 @@ export default async function DashboardHomePage({
         // ŠIANDIEN — server-rendered, streamed section by section inside the
         // chat's own opening composition (the worker's "now" above the
         // greeting and the composer). One home, one conversation.
-        openingContext={
-          workerToday ? (
-            <TodayScreen locale={locale as ActiveLocale} />
-          ) : activeOrgWorkspace && identity === "company" ? (
-            <CompanyModelScreen />
-          ) : null
-        }
+        openingContext={workerToday ? <TodayScreen locale={locale as ActiveLocale} /> : companyOpeningContext}
         countryLabels={countryLabels}
         educationWorkspace={educationWorkspace}
         agencyWorkspace={agencyWorkspace}

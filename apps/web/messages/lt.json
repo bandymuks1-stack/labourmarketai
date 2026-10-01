@@ -124,6 +124,7 @@
     "browseTitle": "Naršyti aktyvius skelbimus",
     "browseIntro": "Šiuo metu tinkle siūlomi darbo ištekliai.",
     "browseEmpty": "Aktyvių skelbimų dar nėra.",
+    "enquire": "Užklausti",
     "linkToServices": "Ieškote profesinių paslaugų? Atverti Paslaugas",
     "formKindLabel": "Tipas",
     "formCategoryLabel": "Kategorija",
@@ -1762,6 +1763,14 @@
       "free": "laisvas",
       "away": "nedirba",
       "awayUntil": "nedirba iki {date}",
+      "summary": "{free} laisvi · {committed} dirba · {away} nedirba",
+      "onWork": "projekte {project}",
+      "booked": "užimtas",
+      "until": "iki {date}",
+      "undated": "datos nenurodytos",
+      "outlookHeading": "Laisvi žmonės artimiausias 4 savaites",
+      "outlookWeek": "Nuo {date}: laisvi {free} iš {total}",
+      "outlookNote": "Pagal įrašytas rezervacijas ir atostogas — įvertis, ne pažadas.",
       "absencesUnknown": "Nebuvimai dar neužrašomi — „laisvas“ reiškia, kad niekas nepasakė kitaip.",
       "more": "{count, plural, one {dar # žmogus planavimo puslapyje} few {dar # žmonės planavimo puslapyje} many {dar # žmogaus planavimo puslapyje} other {dar # žmonių planavimo puslapyje}}",
       "assign": "Priskirti projektui",
@@ -6415,7 +6424,6 @@
     "discoverEmpty": "Kol kas nėra rodomų aktyvių paslaugų.",
     "request": "Pateikti užklausą",
     "requested": "Užklausa pateikta",
-    "enquire": "Rašyti teikėjui",
     "remoteBadge": "Nuotoliu",
     "outgoingHeading": "Mano užklausos",
     "outgoingEmpty": "Dar nepateikei nė vienos užklausos.",
@@ -13543,6 +13551,7 @@
       },
       "findWorkInCompanyContext": "Darbo paieška yra tavo asmeninis veiksmas — įmonės erdvėje jos nevykdau. Persijunk į asmeninę erdvę ir paklausk dar kartą.",
       "findWorkInCompanyWhy": "Darbo ieško žmogus, ne įmonė — atsakau iš tavo asmeninės erdvės.",
+      "personalOnlyInCompany": "Tai tavo asmeninis veiksmas — įmonės erdvėje jo nevykdau. Persijunk į asmeninę erdvę ir tęsk ten.",
       "journalAskWhatYouDid": "Ką šiandien dirbai? Įrašyk į lauką „Ką dirbai“ savais žodžiais — pvz. „montavau langus objekte Kaune nuo 8 iki 17“. Pati užklausa į žurnalą neįrašoma.",
       "alsoWorkLog": "Taip pat supratau, kad šiandien dirbai — patikrink ir išsaugok darbo žurnale:",
       "serviceNeedHint": "Tai darbas, kurį reikia atlikti — parodysiu, kas siūlo tokias paslaugas.",
@@ -13553,6 +13562,23 @@
       "chipPartnersServices": "Paslaugų teikėjai",
       "chipPartnersListings": "Rinkos skelbimai",
       "chipPartnersRelations": "Klientai ir partneriai",
+      "productHelp": {
+        "projectUse": "Projektas — tai vieta, kur laikai darbus, žmones ir terminus. Atidaryk projektą, pridėk užduotis ir žmones, o atliktą darbą matysi čia pat.",
+        "addPerson": "Žmogų pridedi kvietimu: įrašai jo kontaktą, o jis patvirtina savo paskyroje. Kvietimus ir komandą rasi komandos skiltyje.",
+        "hours": "Valandos saugomos valandų skiltyje — ten matai dienas, savaitę ir tabelį.",
+        "offerService": "Paslaugą pasiūlai paslaugų skiltyje: aprašai ją, ir ją pamato kiti verslai bei žmonės.",
+        "warning": "Perspėjimas atsiranda, kai kas nors gali sutrukdyti darbui — pavyzdžiui, baigiasi dokumentas ar trūksta duomenų. Visus pranešimus ir jų priežastis matysi pranešimų skiltyje.",
+        "forecast": "Prognozė — tai apskaičiavimas iš jau užfiksuotų valandų ir suplanuotų darbų. Tai ne pažadas, o orientyras, kuris keičiasi kartu su duomenimis. Planą ir skaičius rasi planavime.",
+        "scheduleWorker": "Darbuotoją suplanuoji planavime: pasirink dieną ir projektą, o žmogų priskirk toje pačioje vietoje.",
+        "doneWork": "Atliktą darbą matai ten, kur jis užfiksuotas — darbo žurnale arba valandų skiltyje: įrašai, valandos ir patvirtinimai.",
+        "chips": {
+          "chipHelpProjects": "Atidaryti projektus",
+          "chipHelpPeople": "Komanda ir kvietimai",
+          "chipHelpPlanning": "Atidaryti planavimą",
+          "chipHelpServices": "Mano paslaugos",
+          "chipHelpJournal": "Darbo žurnalas"
+        }
+      },
       "interestInboxAmbiguous": "Tai gali reikšti du dalykus — ką nori pamatyti?",
       "chipInterestOnMyNeeds": "Kas susidomėjo mano poreikiais",
       "chipMyOwnInterest": "Mano susidomėjimai",
@@ -17829,5 +17855,44 @@
         }
       }
     }
+  },
+  "companyWorkHistory": {
+    "title": "Importuota įmonės darbų istorija",
+    "subtitle": "Ką {name} turi įrašyta iš savo praeities darbo laiko apskaitos: kur dirbta, kada, kas dirbo, kas daryta ir kiek valandų.",
+    "badge": "Importuota įmonės istorija",
+    "provenance": "Paimta iš {name} pačios darbo laiko apskaitos. Kai šis darbas buvo daromas, žmonės nenaudojo LabourMarket.ai, o įrašai nėra nepriklausomai patikrinti.",
+    "unavailable": "Importuotos darbų istorijos dabar nepavyko perskaityti. Tai nereiškia, kad jos nėra.",
+    "empty": "{name} neturi įrašytos importuotos darbų istorijos.",
+    "elsewhere": "{name} turi {count, plural, one {# importuotą praeities darbo įrašą} few {# importuotus praeities darbo įrašus} other {# importuotų praeities darbo įrašų}}. Norėdami pamatyti, perjunkite į tą darbo erdvę.",
+    "stats": {
+      "places": "Vietos",
+      "people": "Žmonės",
+      "hours": "Įrašytos valandos",
+      "period": "Laikotarpis"
+    },
+    "place": "Vieta",
+    "noPlaceName": "Vieta nenurodyta",
+    "open": "Atidaryti",
+    "people": "{count, plural, one {# žmogus} few {# žmonės} other {# žmonių}}",
+    "entries": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
+    "hoursShare": "{hours} val. šioje vietoje, palyginti su daugiausia dirbtąja vieta",
+    "noPlace": "{count, plural, one {# įraše} few {# įrašuose} other {# įrašų}} ({hours} val.) šaltinyje vieta nenurodyta.",
+    "periodAside": "Iš jų {hours} val. yra laikotarpio sumos, nurodytos visam tarpsniui, laikomos atskirai nuo pavienių dienų.",
+    "scope": {
+      "title": "Ką šis importas apima",
+      "carried": "Šaltinyje yra: kas dirbo, kurią dieną, kiek valandų, kas daryta ir vieta taip, kaip parašyta.",
+      "missing": "Šaltinyje nėra: užsakovo, gatvės adreso ir projekto. Jie rodomi kaip „šaltinyje nėra“ ir niekada neišgalvojami."
+    },
+    "facts": {
+      "customer": "Užsakovas",
+      "address": "Adresas",
+      "project": "Projektas",
+      "notInSource": "Šaltinyje nėra",
+      "linked": "Susieta"
+    },
+    "whoWorked": "Kas čia dirbo",
+    "timeline": "Kas daryta",
+    "back": "Atgal į istoriją",
+    "placeMissing": "Šios vietos nėra aktyvios darbo erdvės importuotoje istorijoje."
   }
 }

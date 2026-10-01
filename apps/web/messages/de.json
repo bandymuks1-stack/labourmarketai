@@ -124,6 +124,7 @@
     "browseTitle": "Aktive Anzeigen durchsuchen",
     "browseIntro": "Derzeit im Netzwerk angebotene Arbeitsressourcen.",
     "browseEmpty": "Noch keine aktiven Anzeigen.",
+    "enquire": "Anfragen",
     "linkToServices": "Suchen Sie professionelle Dienstleistungen? Dienste öffnen",
     "formKindLabel": "Art",
     "formCategoryLabel": "Kategorie",
@@ -1762,6 +1763,14 @@
       "free": "frei",
       "away": "abwesend",
       "awayUntil": "abwesend bis {date}",
+      "summary": "{free} frei · {committed} im Einsatz · {away} abwesend",
+      "onWork": "auf {project}",
+      "booked": "gebucht",
+      "until": "bis {date}",
+      "undated": "ohne Termine",
+      "outlookHeading": "Freie Personen, nächste 4 Wochen",
+      "outlookWeek": "Ab {date}: {free} von {total} frei",
+      "outlookNote": "Nach erfassten Buchungen und Abwesenheiten — eine Schätzung, kein Versprechen.",
       "absencesUnknown": "Abwesenheiten werden noch nicht erfasst — frei heißt, niemand hat etwas anderes gesagt.",
       "more": "{count, plural, =1 {1 weitere Person auf der Planungsseite} other {# weitere Personen auf der Planungsseite}}",
       "assign": "Einem Projekt zuweisen",
@@ -6415,7 +6424,6 @@
     "discoverEmpty": "Noch keine aktiven Dienstleistungen vorhanden.",
     "request": "Anfragen",
     "requested": "Angefragt",
-    "enquire": "Anbieter fragen",
     "remoteBadge": "Remote",
     "outgoingHeading": "Meine Anfragen",
     "outgoingEmpty": "Sie haben noch keine Dienstleistung angefragt.",
@@ -13543,6 +13551,7 @@
       },
       "findWorkInCompanyContext": "Die Jobsuche ist deine eigene Sache — im Unternehmensbereich führe ich sie nicht aus. Wechsle in deinen persönlichen Bereich und frag noch einmal.",
       "findWorkInCompanyWhy": "Arbeit sucht ein Mensch, kein Unternehmen — ich antworte aus deinem persönlichen Bereich.",
+      "personalOnlyInCompany": "Das ist eine persönliche Aktion — im Unternehmensbereich führe ich sie nicht aus. Wechsle in deinen persönlichen Bereich und mach dort weiter.",
       "journalAskWhatYouDid": "Was hast du heute gearbeitet? Schreib es in das Feld „Was du gearbeitet hast“ in deinen Worten — z. B. „Fenster auf der Baustelle Kaunas von 8 bis 17 montiert“. Die Anfrage selbst wird nicht ins Tagebuch gespeichert.",
       "alsoWorkLog": "Ich habe auch verstanden, dass du heute gearbeitet hast — prüfe es und speichere es im Arbeitsjournal:",
       "serviceNeedHint": "Das ist eine Aufgabe, die erledigt werden muss — ich zeige dir, wer diese Leistung anbietet.",
@@ -13553,6 +13562,23 @@
       "chipPartnersServices": "Dienstleister",
       "chipPartnersListings": "Marktplatz-Anzeigen",
       "chipPartnersRelations": "Kunden und Partner",
+      "productHelp": {
+        "projectUse": "Ein Projekt ist der Ort für Arbeit, Menschen und Termine. Öffne ein Projekt, füge Aufgaben und Personen hinzu, und die erledigte Arbeit erscheint genau dort.",
+        "addPerson": "Eine Person fügst du per Einladung hinzu: Gib ihren Kontakt ein, und sie bestätigt in ihrem eigenen Konto. Einladungen und Team findest du im Teambereich.",
+        "hours": "Stunden stehen im Stundenbereich — dort siehst du Tage, die Woche und den Stundenzettel.",
+        "offerService": "Eine Leistung bietest du im Leistungsbereich an: Beschreibe sie, dann können andere Unternehmen und Personen sie sehen.",
+        "warning": "Eine Warnung erscheint, wenn etwas die Arbeit behindern könnte — zum Beispiel läuft ein Dokument ab oder es fehlen Daten. Alle Meldungen und ihre Gründe siehst du im Meldungsbereich.",
+        "forecast": "Eine Prognose ist eine Berechnung aus den bereits erfassten Stunden und der geplanten Arbeit. Sie ist ein Richtwert, kein Versprechen, und ändert sich mit den Daten. Plan und Zahlen findest du in der Planung.",
+        "scheduleWorker": "Eine Person planst du in der Planung ein: Wähle Tag und Projekt und weise die Person am selben Ort zu.",
+        "doneWork": "Erledigte Arbeit siehst du dort, wo sie erfasst wurde — im Arbeitsjournal oder im Stundenbereich: Einträge, Stunden und Bestätigungen.",
+        "chips": {
+          "chipHelpProjects": "Projekte öffnen",
+          "chipHelpPeople": "Team und Einladungen",
+          "chipHelpPlanning": "Planung öffnen",
+          "chipHelpServices": "Meine Leistungen",
+          "chipHelpJournal": "Arbeitsjournal"
+        }
+      },
       "interestInboxAmbiguous": "Das kann zweierlei heißen — was möchtest du sehen?",
       "chipInterestOnMyNeeds": "Interesse an meinen Anfragen",
       "chipMyOwnInterest": "Mein eigenes Interesse",
@@ -17829,5 +17855,44 @@
         }
       }
     }
+  },
+  "companyWorkHistory": {
+    "title": "Importierte Arbeitshistorie des Unternehmens",
+    "subtitle": "Was {name} aus den eigenen früheren Stundenzetteln festgehalten hat: wo gearbeitet wurde, wann, wer dort gearbeitet hat, was getan wurde und wie lange.",
+    "badge": "Importierte Unternehmenshistorie",
+    "provenance": "Aus den eigenen Stundenzetteln von {name}. Die Personen haben LabourMarket.ai damals nicht genutzt, und die Angaben sind nicht unabhängig geprüft.",
+    "unavailable": "Die importierte Arbeitshistorie konnte gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
+    "empty": "{name} hat keine importierte Arbeitshistorie hinterlegt.",
+    "elsewhere": "{name} enthält {count, plural, one {# importierten Eintrag} other {# importierte Einträge}} früherer Arbeit. Wechseln Sie in diesen Arbeitsbereich, um sie zu sehen.",
+    "stats": {
+      "places": "Orte",
+      "people": "Personen",
+      "hours": "Erfasste Stunden",
+      "period": "Zeitraum"
+    },
+    "place": "Ort",
+    "noPlaceName": "Kein Ort angegeben",
+    "open": "Öffnen",
+    "people": "{count, plural, one {# Person} other {# Personen}}",
+    "entries": "{count, plural, one {# Eintrag} other {# Einträge}}",
+    "hoursShare": "{hours} Std. an diesem Ort, im Vergleich zum meistbearbeiteten Ort",
+    "noPlace": "{count, plural, one {# Eintrag} other {# Einträge}} ({hours} Std.) nennen in der Quelle keinen Ort.",
+    "periodAside": "Davon sind {hours} Std. Zeitraumsummen für eine Spanne, getrennt von einzelnen Tagen.",
+    "scope": {
+      "title": "Was dieser Import enthält",
+      "carried": "Die Quelle enthält: wer gearbeitet hat, an welchem Tag, wie viele Stunden, was getan wurde und den Ort wie geschrieben.",
+      "missing": "Nicht in der Quelle: Kunde, Straßenadresse und Projekt. Sie werden als nicht in der Quelle angezeigt und nie ergänzt."
+    },
+    "facts": {
+      "customer": "Kunde",
+      "address": "Adresse",
+      "project": "Projekt",
+      "notInSource": "Nicht in der Quelle",
+      "linked": "Verknüpft"
+    },
+    "whoWorked": "Wer hier gearbeitet hat",
+    "timeline": "Was getan wurde",
+    "back": "Zurück zur Historie",
+    "placeMissing": "Dieser Ort ist nicht in der importierten Historie des aktiven Arbeitsbereichs."
   }
 }

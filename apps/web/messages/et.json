@@ -3947,6 +3947,7 @@
       },
       "findWorkInCompanyContext": "Tööotsing on sinu enda tegevus — ettevõtte ruumis ma seda ei käivita. Lülitu oma isiklikku ruumi ja küsi uuesti.",
       "findWorkInCompanyWhy": "Tööd otsib inimene, mitte ettevõte — vastan sinu isiklikust ruumist.",
+      "personalOnlyInCompany": "See on isiklik tegevus — ettevõtte ruumis ma seda ei tee. Lülitu isiklikku ruumi ja jätka seal.",
       "journalAskWhatYouDid": "Mida sa täna tegid? Kirjuta see väljale „Mida tegid“ oma sõnadega — nt „paigaldasin aknaid Kaunase objektil 8–17“. Palvet ennast päevikusse ei salvestata.",
       "serviceNeedHint": "See on töö, mis tuleb ära teha — näitan, kes sellist teenust pakub.",
       "chipServiceRequests": "Leia teenus",
@@ -3956,6 +3957,23 @@
       "chipPartnersServices": "Teenuse pakkujad",
       "chipPartnersListings": "Turu kuulutused",
       "chipPartnersRelations": "Kliendid ja partnerid",
+      "productHelp": {
+        "projectUse": "Projekt on koht töö, inimeste ja tähtaegade jaoks. Ava projekt, lisa ülesandeid ja inimesi ning tehtud töö ilmub kohe sinna.",
+        "addPerson": "Inimese lisad kutsega: sisesta tema kontakt ja ta kinnitab oma kontol. Kutsed ja meeskond on meeskonna jaotises.",
+        "hours": "Tunnid on tundide jaotises — seal näed päevi, nädalat ja töölehte.",
+        "offerService": "Teenust pakud teenuste jaotises: kirjelda seda ja teised ettevõtted ning inimesed näevad seda.",
+        "warning": "Hoiatus ilmub, kui miski võib tööd takistada — näiteks dokument aegub või andmed puuduvad. Kõik teated ja nende põhjused näed teadete jaotises.",
+        "forecast": "Prognoos on arvutus juba registreeritud tundide ja planeeritud töö põhjal. See on suunis, mitte lubadus, ja muutub andmetega. Plaani ja numbrid leiad planeerimisest.",
+        "scheduleWorker": "Töötaja planeerid planeerimises: vali päev ja projekt ning määra inimene samas kohas.",
+        "doneWork": "Tehtud tööd näed seal, kuhu see on kirja pandud — tööpäevikus või tundide jaotises: kirjed, tunnid ja kinnitused.",
+        "chips": {
+          "chipHelpProjects": "Ava projektid",
+          "chipHelpPeople": "Meeskond ja kutsed",
+          "chipHelpPlanning": "Ava planeerimine",
+          "chipHelpServices": "Minu teenused",
+          "chipHelpJournal": "Tööpäevik"
+        }
+      },
       "interestInboxAmbiguous": "See võib tähendada kahte asja — mida soovid näha?",
       "chipInterestOnMyNeeds": "Huvi minu päringute vastu",
       "chipMyOwnInterest": "Minu enda huvi",
@@ -6538,6 +6556,14 @@
       "free": "vaba",
       "away": "eemal",
       "awayUntil": "eemal kuni {date}",
+      "summary": "{free} vaba · {committed} tööl · {away} eemal",
+      "onWork": "projektil {project}",
+      "booked": "broneeritud",
+      "until": "kuni {date}",
+      "undated": "kuupäevad puuduvad",
+      "outlookHeading": "Vabad inimesed, järgmised 4 nädalat",
+      "outlookWeek": "Alates {date}: {free} / {total} vaba",
+      "outlookNote": "Registreeritud broneeringute ja puhkuste põhjal — hinnang, mitte lubadus.",
       "absencesUnknown": "Puudumisi veel ei salvestata — vaba tähendab, et keegi pole teisiti öelnud.",
       "more": "{count, plural, =1 {veel 1 inimene planeerimislehel} other {veel # inimest planeerimislehel}}",
       "assign": "Määra projekti",
@@ -6744,5 +6770,44 @@
       "confirmed": "Confirmed and shared",
       "failed": "Could not confirm."
     }
+  },
+  "companyWorkHistory": {
+    "title": "Ettevõtte imporditud töö ajalugu",
+    "subtitle": "Mida {name} on oma varasematest töölehtedest talletanud: kus töö toimus, millal, kes töötas, mida tehti ja kui kaua.",
+    "badge": "Imporditud ettevõtte ajalugu",
+    "provenance": "Võetud ettevõtte {name} enda töölehelt. Inimesed ei kasutanud tollal LabourMarket.ai-d ja andmeid ei ole sõltumatult kontrollitud.",
+    "unavailable": "Imporditud töö ajalugu ei õnnestunud praegu lugeda. See ei tähenda, et seda poleks.",
+    "empty": "Ettevõttel {name} pole imporditud töö ajalugu salvestatud.",
+    "elsewhere": "{name} sisaldab {count, plural, one {# imporditud kirje} other {# imporditud kirjet}} varasema töö kohta. Vaatamiseks lülitu sellesse tööruumi.",
+    "stats": {
+      "places": "Kohad",
+      "people": "Inimesed",
+      "hours": "Salvestatud tunnid",
+      "period": "Periood"
+    },
+    "place": "Koht",
+    "noPlaceName": "Kohta pole märgitud",
+    "open": "Ava",
+    "people": "{count, plural, one {# inimene} other {# inimest}}",
+    "entries": "{count, plural, one {# kirje} other {# kirjet}}",
+    "hoursShare": "{hours} h sellel kohal, võrreldes kõige tihedama kohaga",
+    "noPlace": "{count, plural, one {# kirje} other {# kirjet}} ({hours} h) ei nimeta allikas kohta.",
+    "periodAside": "Sellest {hours} h on perioodi kogusummad, mis on antud ajavahemikule ja hoitud eraldi üksikutest päevadest.",
+    "scope": {
+      "title": "Mida see import sisaldab",
+      "carried": "Allikas sisaldab: kes töötas, mis päeval, mitu tundi, mida tehti ja koht nii, nagu see on kirjutatud.",
+      "missing": "Allikas puudub: klient, aadress ja projekt. Neid näidatakse allikas puuduvatena ning neid ei täideta kunagi."
+    },
+    "facts": {
+      "customer": "Klient",
+      "address": "Aadress",
+      "project": "Projekt",
+      "notInSource": "Allikas puudub",
+      "linked": "Seotud"
+    },
+    "whoWorked": "Kes siin töötas",
+    "timeline": "Mida tehti",
+    "back": "Tagasi ajaloo juurde",
+    "placeMissing": "Seda kohta pole aktiivse tööruumi imporditud ajaloos."
   }
 }

@@ -3947,6 +3947,7 @@
       },
       "findWorkInCompanyContext": "At søge job er din egen handling — i virksomhedsrummet kører jeg den ikke. Skift til dit personlige rum og spørg igen.",
       "findWorkInCompanyWhy": "En person søger job, ikke en virksomhed — jeg svarer fra dit personlige rum.",
+      "personalOnlyInCompany": "Det er en personlig handling — i en virksomhedsplads udfører jeg den ikke. Skift til dit personlige rum, og fortsæt der.",
       "journalAskWhatYouDid": "Hvad lavede du i dag? Skriv det i feltet »Hvad du lavede« med dine egne ord — f.eks. »monterede vinduer på byggepladsen i Kaunas fra 8 til 17«. Selve anmodningen gemmes ikke i dagbogen.",
       "serviceNeedHint": "Det er en opgave, der skal løses — jeg viser dig, hvem der tilbyder den ydelse.",
       "chipServiceRequests": "Find en ydelse",
@@ -3956,6 +3957,23 @@
       "chipPartnersServices": "Ydelsesudbydere",
       "chipPartnersListings": "Markedspladsens annoncer",
       "chipPartnersRelations": "Kunder og partnere",
+      "productHelp": {
+        "projectUse": "Et projekt er stedet for arbejde, mennesker og deadlines. Åbn et projekt, tilføj opgaver og personer, og det udførte arbejde vises lige der.",
+        "addPerson": "Du tilføjer en person med en invitation: skriv kontakten, og personen bekræfter i sin egen konto. Invitationer og dit team finder du under team.",
+        "hours": "Timer ligger i timesektionen — der ser du dage, ugen og timesedlen.",
+        "offerService": "Du tilbyder en ydelse under ydelser: beskriv den, så kan andre virksomheder og personer se den.",
+        "warning": "En advarsel vises, når noget kan stå i vejen for arbejdet — for eksempel et dokument, der udløber, eller manglende data. Alle beskeder og deres årsag ser du under beskeder.",
+        "forecast": "En prognose er en beregning ud fra de allerede registrerede timer og det planlagte arbejde. Den er en pejling, ikke et løfte, og ændrer sig med data. Planen og tallene finder du under planlægning.",
+        "scheduleWorker": "Du planlægger en medarbejder under planlægning: vælg dag og projekt, og tildel personen samme sted.",
+        "doneWork": "Udført arbejde ser du, hvor det er registreret — i arbejdsjournalen eller timesektionen: registreringer, timer og bekræftelser.",
+        "chips": {
+          "chipHelpProjects": "Åbn projekter",
+          "chipHelpPeople": "Team og invitationer",
+          "chipHelpPlanning": "Åbn planlægning",
+          "chipHelpServices": "Mine ydelser",
+          "chipHelpJournal": "Arbejdsjournal"
+        }
+      },
       "interestInboxAmbiguous": "Det kan betyde to ting — hvad vil du se?",
       "chipInterestOnMyNeeds": "Interesse i mine forespørgsler",
       "chipMyOwnInterest": "Min egen interesse",
@@ -6538,6 +6556,14 @@
       "free": "ledig",
       "away": "fraværende",
       "awayUntil": "fraværende indtil {date}",
+      "summary": "{free} ledige · {committed} i arbejde · {away} fraværende",
+      "onWork": "på {project}",
+      "booked": "booket",
+      "until": "til {date}",
+      "undated": "uden datoer",
+      "outlookHeading": "Ledige personer, næste 4 uger",
+      "outlookWeek": "Fra {date}: {free} af {total} ledige",
+      "outlookNote": "Ud fra registrerede bookinger og fravær — et skøn, ikke et løfte.",
       "absencesUnknown": "Fravær registreres endnu ikke — ledig betyder, at ingen har sagt andet.",
       "more": "{count, plural, =1 {1 person mere på planlægningssiden} other {# personer mere på planlægningssiden}}",
       "assign": "Sæt på et projekt",
@@ -6744,5 +6770,44 @@
       "confirmed": "Confirmed and shared",
       "failed": "Could not confirm."
     }
+  },
+  "companyWorkHistory": {
+    "title": "Importeret arbejdshistorik for virksomheden",
+    "subtitle": "Hvad {name} har registreret fra egne gamle timesedler: hvor arbejdet var, hvornår, hvem der arbejdede, hvad der blev gjort og hvor længe.",
+    "badge": "Importeret virksomhedshistorik",
+    "provenance": "Hentet fra {name}s egen timeseddel. Personerne brugte ikke LabourMarket.ai dengang, og oplysningerne er ikke uafhængigt verificeret.",
+    "unavailable": "Den importerede arbejdshistorik kunne ikke læses lige nu. Det betyder ikke, at der ikke er nogen.",
+    "empty": "{name} har ingen importeret arbejdshistorik registreret.",
+    "elsewhere": "{name} har {count, plural, one {# importeret post} other {# importerede poster}} om tidligere arbejde. Skift til det arbejdsområde for at se dem.",
+    "stats": {
+      "places": "Steder",
+      "people": "Personer",
+      "hours": "Registrerede timer",
+      "period": "Periode"
+    },
+    "place": "Sted",
+    "noPlaceName": "Intet sted angivet",
+    "open": "Åbn",
+    "people": "{count, plural, one {# person} other {# personer}}",
+    "entries": "{count, plural, one {# post} other {# poster}}",
+    "hoursShare": "{hours} t på dette sted, sammenlignet med det travleste sted",
+    "noPlace": "{count, plural, one {# post} other {# poster}} ({hours} t) angiver intet sted i kilden.",
+    "periodAside": "Heraf er {hours} t periodesummer angivet for et tidsrum, holdt adskilt fra enkeltdage.",
+    "scope": {
+      "title": "Hvad denne import indeholder",
+      "carried": "Kilden indeholder: hvem der arbejdede, hvilken dag, hvor mange timer, hvad der blev gjort og stedet som skrevet.",
+      "missing": "Ikke i kilden: kunden, adressen og projektet. De vises som ikke i kilden og udfyldes aldrig."
+    },
+    "facts": {
+      "customer": "Kunde",
+      "address": "Adresse",
+      "project": "Projekt",
+      "notInSource": "Ikke i kilden",
+      "linked": "Knyttet"
+    },
+    "whoWorked": "Hvem der arbejdede her",
+    "timeline": "Hvad der blev gjort",
+    "back": "Tilbage til historik",
+    "placeMissing": "Dette sted findes ikke i den importerede historik for det aktive arbejdsområde."
   }
 }

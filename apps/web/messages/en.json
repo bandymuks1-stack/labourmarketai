@@ -124,6 +124,7 @@
     "browseTitle": "Browse active listings",
     "browseIntro": "Work resources currently offered across the network.",
     "browseEmpty": "No active listings to show yet.",
+    "enquire": "Enquire",
     "linkToServices": "Looking for professional services? Open Services",
     "formKindLabel": "Type",
     "formCategoryLabel": "Category",
@@ -1762,6 +1763,14 @@
       "free": "free",
       "away": "away",
       "awayUntil": "away until {date}",
+      "summary": "{free} free · {committed} on work · {away} away",
+      "onWork": "on {project}",
+      "booked": "booked",
+      "until": "until {date}",
+      "undated": "no dates set",
+      "outlookHeading": "Free people, next 4 weeks",
+      "outlookWeek": "From {date}: {free} of {total} free",
+      "outlookNote": "From bookings and leave on record — an estimate, not a promise.",
       "absencesUnknown": "Absences are not recorded yet — free means nobody has said otherwise.",
       "more": "{count, plural, =1 {1 more person on the planning page} other {# more people on the planning page}}",
       "assign": "Put on a project",
@@ -6415,7 +6424,6 @@
     "discoverEmpty": "No active services to show yet.",
     "request": "Request",
     "requested": "Requested",
-    "enquire": "Ask the provider",
     "remoteBadge": "Remote",
     "outgoingHeading": "My requests",
     "outgoingEmpty": "You haven't requested any service yet.",
@@ -13543,6 +13551,7 @@
       },
       "findWorkInCompanyContext": "A job search is your own act — I don't run it inside the company space. Switch to your personal space and ask again.",
       "findWorkInCompanyWhy": "A person looks for work, not a company — I answer from your personal space.",
+      "personalOnlyInCompany": "That is a personal action — I do not run it in a company workspace. Switch to your personal space and continue there.",
       "journalAskWhatYouDid": "What did you do today? Write it in the “What you did” field in your own words — e.g. “installed windows at the Kaunas site from 8 to 17”. The request itself is not saved to the journal.",
       "alsoWorkLog": "I also understood that you worked today — check it and save it to your work journal:",
       "serviceNeedHint": "That is a job to be done — I will show you who offers that service.",
@@ -13553,6 +13562,23 @@
       "chipPartnersServices": "Service providers",
       "chipPartnersListings": "Marketplace listings",
       "chipPartnersRelations": "Clients and partners",
+      "productHelp": {
+        "projectUse": "A project is where you keep the work, the people and the deadlines. Open a project, add tasks and people, and the work done shows up right there.",
+        "addPerson": "You add a person by inviting them: enter their contact and they confirm in their own account. Invitations and your team are in the team section.",
+        "hours": "Hours are kept in the hours section — there you see days, the week and the timesheet.",
+        "offerService": "You offer a service in the services section: describe it, and other businesses and people can see it.",
+        "warning": "A warning appears when something could get in the way of the work — for example a document is about to expire or data is missing. You will see every notice and its reason in the notices section.",
+        "forecast": "A forecast is a calculation from the hours already recorded and the work already planned. It is a guide, not a promise, and it changes with the data. You will find the plan and the numbers in planning.",
+        "scheduleWorker": "You schedule a worker in planning: pick the day and the project, and assign the person in the same place.",
+        "doneWork": "You see finished work where it was recorded — in the work journal or the hours section: entries, hours and confirmations.",
+        "chips": {
+          "chipHelpProjects": "Open projects",
+          "chipHelpPeople": "Team and invitations",
+          "chipHelpPlanning": "Open planning",
+          "chipHelpServices": "My services",
+          "chipHelpJournal": "Work journal"
+        }
+      },
       "interestInboxAmbiguous": "That can mean two things — which one do you want?",
       "chipInterestOnMyNeeds": "Interest in my needs",
       "chipMyOwnInterest": "My own interest",
@@ -17829,5 +17855,44 @@
         }
       }
     }
+  },
+  "companyWorkHistory": {
+    "title": "Imported company work history",
+    "subtitle": "What {name} has on record from its own past timesheets: where the work was, when, who worked there, what was done and for how long.",
+    "badge": "Imported company history",
+    "provenance": "Taken from {name}'s own timesheet. The people did not use LabourMarket.ai when this work was done, and it is not independently verified.",
+    "unavailable": "The imported work history could not be read right now. That does not mean there is none.",
+    "empty": "{name} has no imported work history on record.",
+    "elsewhere": "{name} holds {count, plural, one {# imported record} other {# imported records}} of past work. Switch to that workspace to see it.",
+    "stats": {
+      "places": "Places",
+      "people": "People",
+      "hours": "Hours on record",
+      "period": "Period"
+    },
+    "place": "Place",
+    "noPlaceName": "No place stated",
+    "open": "Open",
+    "people": "{count, plural, one {# person} other {# people}}",
+    "entries": "{count, plural, one {# entry} other {# entries}}",
+    "hoursShare": "{hours} h on this place, compared with the busiest place",
+    "noPlace": "{count, plural, one {# entry} other {# entries}} ({hours} h) in the source name no place.",
+    "periodAside": "Of this, {hours} h are period totals stated for a span, kept apart from single days.",
+    "scope": {
+      "title": "What this import carries",
+      "carried": "Carried by the source: who worked, on which day, how many hours, what was done and the place as written.",
+      "missing": "Not in the source: the customer, the street address and the project. They are shown as not in the source and are never filled in."
+    },
+    "facts": {
+      "customer": "Customer",
+      "address": "Address",
+      "project": "Project",
+      "notInSource": "Not in the source",
+      "linked": "Linked"
+    },
+    "whoWorked": "Who worked here",
+    "timeline": "What was done",
+    "back": "Back to history",
+    "placeMissing": "This place is not in the imported history of the active workspace."
   }
 }
