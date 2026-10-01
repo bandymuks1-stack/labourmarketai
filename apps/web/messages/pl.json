@@ -7734,6 +7734,7 @@
     "country": {
       "title": "Czego brakuje dla danego kraju",
       "help": "Wybierz kraj docelowy, aby zobaczyć, jakich dokumentów wymaga.",
+      "mine": "Najpierw kraje, w których chcesz pracować.",
       "unknown": "Lista wymagań dla kraju {country} nie została jeszcze opracowana — nie pokazujemy niczego zamiast zgadywać.",
       "next": "Następny krok: zajmij się — {doc}.",
       "ok": "Wszystkie opracowane wymagania dla kraju {country} są spełnione."

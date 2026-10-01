@@ -7734,6 +7734,7 @@
     "country": {
       "title": "Ko trūksta į šalį",
       "help": "Pasirink paskirties šalį ir matysi, kokių dokumentų ji prašo.",
+      "mine": "Pirmiausia — šalys, kuriose nori dirbti.",
       "unknown": "Šalies {country} reikalavimų sąrašas dar nesuvestas — nerodome nieko, vietoj spėliojimo.",
       "next": "Kitas žingsnis: pasirūpink — {doc}.",
       "ok": "Visi suvesti {country} reikalavimai padengti."

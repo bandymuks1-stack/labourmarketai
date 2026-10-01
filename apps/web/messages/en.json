@@ -7734,6 +7734,7 @@
     "country": {
       "title": "What is missing for a country",
       "help": "Pick a destination country to see which documents it asks for.",
+      "mine": "Your preferred countries come first.",
       "unknown": "The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
       "next": "Next step: take care of — {doc}.",
       "ok": "All curated requirements for {country} are covered."
