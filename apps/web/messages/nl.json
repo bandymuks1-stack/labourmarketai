@@ -5988,6 +5988,10 @@
       "reservation": {
         "collidesTitle": "Op deze dagen al vastgelegd",
         "notBlocking": "Dit blokkeert de toewijzing niet — jij beslist.",
+        "alternativesTitle": "Vrij in deze periode",
+        "swap": "In plaats daarvan toewijzen",
+        "undo": "Toewijzing ongedaan maken",
+        "decided": "Klaar",
         "unknown": "We konden niet bevestigen dat deze dagen vrij zijn. Dat is niet hetzelfde als vrij.",
         "source": {
           "project": "Projecttoewijzing",

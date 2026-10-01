@@ -5988,6 +5988,10 @@
       "reservation": {
         "collidesTitle": "Already committed on these dates",
         "notBlocking": "This does not block the assignment — you decide what is right.",
+        "alternativesTitle": "Free on these dates",
+        "swap": "Assign instead",
+        "undo": "Undo assignment",
+        "decided": "Done",
         "unknown": "We could not confirm these dates are free. That is not the same as free.",
         "source": {
           "project": "Project",
