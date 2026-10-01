@@ -57,3 +57,25 @@ describe("company people — one canonical identity", () => {
     }
   });
 });
+
+describe("company people - the card names the trade, from the one canonical store", () => {
+  const WORKERS = read("lib/company/company-workers.ts");
+
+  it("reads professions from worker_professions under RLS: no new table, no service role", () => {
+    expect(WORKERS).toMatch(/\.from\("worker_professions"\)/);
+    expect(WORKERS).toMatch(/professions\(slug\)/);
+    expect(WORKERS).not.toMatch(/createAdminClient|SERVICE_ROLE_KEY/);
+    // an unanswered read is "none declared", never a guessed trade
+    expect(WORKERS).toMatch(/if \(res\.error \|\| !Array\.isArray\(res\.data\)\) return out;/);
+  });
+
+  it("names go through the one display rule (catalogue slug or the person's own words)", () => {
+    expect(PAGE).toContain("professionDisplayName");
+    expect(SECTION).toContain("professionsByWorker");
+  });
+
+  it("the trade leads and the role is its own fact, not a stand-in", () => {
+    expect(SECTION).toMatch(/professions=\{tradeNames\.length > 0 \? \[\.\.\.tradeNames\] : roleText/);
+    expect(SECTION).toMatch(/key: "role", kind: "role"/);
+  });
+});
