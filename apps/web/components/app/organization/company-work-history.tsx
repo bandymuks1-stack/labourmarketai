@@ -158,7 +158,7 @@ export async function CompanyWorkHistory({ locale }: { locale: string }) {
 }
 
 export function placeHref(key: string): string {
-  return `/dashboard/company/history/place?p=${encodeURIComponent(key)}`;
+  return `/dashboard/company/history?place=${encodeURIComponent(key)}#company-place-detail`;
 }
 
 function PlaceTile({
