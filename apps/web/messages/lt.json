@@ -1807,7 +1807,9 @@
         "unknown": "Per mažai informacijos palyginti"
       },
       "opportunity": "{count, plural, one {Iki # žmogaus laisvas nuo {date}} few {Iki # žmonių laisvi nuo {date}} other {Iki # žmonių laisvi nuo {date}}}",
-      "opportunityCta": "Ieškoti darbo"
+      "opportunityCta": "Ieškoti darbo",
+      "interest": "{count, plural, one {# žmogus pareiškė susidomėjimą jūsų poreikiais} few {# žmonės pareiškė susidomėjimą jūsų poreikiais} other {# žmonių pareiškė susidomėjimą jūsų poreikiais}}",
+      "interestCta": "Žiūrėti kas"
     },
     "attention": {
       "heading": "Reikia jūsų",
@@ -2140,7 +2142,7 @@
       },
       "workersBlocker": {
         "title": "Nepavyko",
-        "subtitle": "Įmonės kelias laikinai blokuotas DB lygmenyje. Realus darbuotojų pridėjimas / pakvietimas jau veikia agentūros pusėje.",
+        "subtitle": "Šiuo metu nepasiekiama.",
         "statusLabel": "Nepavyko",
         "statusBody": "Įmonės darbuotojų valdymas dar ruošiamas ir bus įjungtas vėliau.",
         "nextStep": "Savaiminis užsiregistravimas darbuotojams lieka atviras visada."
@@ -2252,6 +2254,12 @@
         "statusInvited": "Kvietimas sukurtas (el. paštu nesiunčiamas). Pakviestasis jį matys prisijungęs tuo pačiu el. paštu.",
         "statusAlreadyPending": "Šiam el. pašto adresui jau yra laukiantis pakvietimas iš jūsų įmonės.",
         "statusAlreadyLinked": "Šis darbuotojas jau susietas su jūsų įmone.",
+        "statusWordActive": "Aktyvus",
+        "statusWordPending": "Pakviestas",
+        "statusWordAccepted": "Priimta",
+        "statusWordCancelled": "Atšaukta",
+        "statusWordExpired": "Pasibaigė",
+        "statusWordEnded": "Baigta",
         "statusNotOwner": "Veiksmas atmestas: jūs neturite šios įmonės savininko teisės.",
         "statusInvalidEmail": "Neteisingas el. pašto adresas.",
         "statusError": "Įvyko klaida. Pabandykite dar kartą.",
@@ -4730,6 +4738,7 @@
         "event_demand_interest_reviewed": "Įmonė pažymėjo jūsų susidomėjimą kaip peržiūrėtą",
         "event_weekly_digest": "Paruošta tavo savaitės darbo ir galimybių apžvalga",
         "event_saved_search_match": "Tavo išsaugotoje paieškoje yra naujų rezultatų",
+        "event_job_alert": "Atsirado naujas darbas pagal tavo paieškos kriterijus",
         "event_invitation_accepted": "Kažkas priėmė jūsų kvietimą",
         "event_weekly_digest_profile_completion": "Norint pamatyti tau tinkamus darbus, patvirtink, kokį darbą dirbi",
         "event_weekly_digest_journal": "Paruošta tavo savaitės darbo žurnalo apžvalga"
@@ -6447,6 +6456,8 @@
     "discoverEmpty": "Kol kas nėra rodomų aktyvių paslaugų.",
     "request": "Pateikti užklausą",
     "requested": "Užklausa pateikta",
+    "partnershipBadge": "Ieškoma partnerių",
+    "partnershipRequest": "Siūlyti partnerystę",
     "requestMessagePlaceholder": "Parašykite teikėjui, ko reikia (neprivaloma)",
     "remoteBadge": "Nuotoliu",
     "outgoingHeading": "Mano užklausos",
@@ -6580,6 +6591,7 @@
     "notAvailable": "Šiuo metu nepasiekiama.",
     "empty": "Paslaugų pasiūlymų dar nėra. Pridėkite pirmą realią paslaugą, kurią siūlote.",
     "addButton": "Pridėti paslaugą",
+    "addPartnership": "Ieškau partnerių",
     "form": {
       "titleLabel": "Paslaugos pavadinimas",
       "titlePlaceholder": "pvz. Vidaus dažymas",
@@ -7666,7 +7678,7 @@
     "eyebrow": "MANO DOKUMENTAI",
     "title": "Mano dokumentai",
     "subtitle": "Ką turi, ko trūksta ir koks kitas žingsnis — pagal šalį.",
-    "preparing": "Dokumentų parengtis ruošiama — funkcija įsijungs, kai dokumentų saugojimo sluoksnis bus peržiūrėtas ir įjungtas. Kol kas čia niekas neaktyvu.",
+    "preparing": "Šiuo metu nepasiekiama.",
     "reports": {
       "title": "Ataskaitos ir eksportas",
       "intro": "Sukurk spausdinimui paruoštą ataskaitą iš savo duomenų. PDF veikia per naršyklės spausdinimą / išsaugojimą; Excel ir Word dar negalimi.",
@@ -7723,6 +7735,7 @@
     "country": {
       "title": "Ko trūksta į šalį",
       "help": "Pasirink paskirties šalį ir matysi, kokių dokumentų ji prašo.",
+      "mine": "Pirmiausia — šalys, kuriose nori dirbti.",
       "unknown": "Šalies {country} reikalavimų sąrašas dar nesuvestas — nerodome nieko, vietoj spėliojimo.",
       "next": "Kitas žingsnis: pasirūpink — {doc}.",
       "ok": "Visi suvesti {country} reikalavimai padengti."
@@ -8447,7 +8460,8 @@
       "opened": "Pokalbis atvertas — parašykite darbuotojui žinutę.",
       "view": "Atverti pokalbį",
       "error": "Pokalbio atverti nepavyko. Bandykite dar kartą.",
-      "limitReached": "Pasiektas dienos naujų pokalbių limitas. Bandykite rytoj."
+      "limitReached": "Pasiektas dienos naujų pokalbių limitas. Bandykite rytoj.",
+      "shortlistFirst": "Pirmiausia įtraukite darbuotoją į trumpąjį sąrašą, tada galėsite prašyti pokalbio."
     },
     "how": {
       "title": "Kaip veikia atitikimas",
@@ -9508,7 +9522,7 @@
     "external": {
       "sectionTitle": "Vieši darbo skelbimai",
       "sectionNote": "Skelbimai iš oficialių valstybinių užimtumo tarnybų. Juos skelbia darbdavys šaltinyje — labourmarket.ai juos rodo, kad rastumėte, o kandidatuojama per originalų skelbimą.",
-      "shownOfTotal": "geriausi {shown} iš {total}",
+      "shownOfTotal": "rodoma {shown} iš {total}",
       "bandBest": "Geriausiai tinkantys",
       "bandPossible": "Galimai tinkantys",
       "bandExplore": "Kiti skelbimai",
@@ -9660,6 +9674,14 @@
         "LOOKING_FOR_WORK": "Ieškau darbo",
         "LOOKING_FOR_PROJECTS": "Ieškau projektų"
       }
+    },
+    "jobAlerts": {
+      "title": "Pranešimai apie naujus darbus",
+      "ready": "Kai atsiranda naujas tikras darbas, tinkantis tavo profesijai ir pasirinktoms šalims, jis pasirodo tavo pranešimuose. Darbas, kuriame atlyginimas nenurodytas, dėl atlyginimo niekada neatmetamas.",
+      "missing": "Kad gautum pranešimus apie naujus darbus, nurodyk:",
+      "profession": "kokį darbą dirbi",
+      "country": "kuriose šalyse nori dirbti",
+      "cta": "Užpildyti pageidavimus"
     }
   },
   "workerIntake": {
@@ -13931,7 +13953,7 @@
       "moveToLine": "• „{to}“: žmonių {before} → {after}; pasirengimo sąrašas ten prasidės nuo 0/{total}.",
       "moveCountryLine": "• Šalis keičiasi: {from} → {to} — dokumentų reikalavimai kitokie.",
       "moveNoDatesLine": "• „{to}“ neturi datų — nebuvimų sutikrinti negaliu.",
-      "moveAvailabilityUnknownLine": "• Nebuvimai nežinomi — nebuvimų modelis šioje aplinkoje neatsako.",
+      "moveAvailabilityUnknownLine": "• Nebuvimai nežinomi.",
       "moveAvailabilityLine": "• {start}–{end} lange jis turi {count} nebuvimo įrašų.",
       "moveAvailabilityFreeLine": "• „{to}“ datose nebuvimų neužfiksuota.",
       "moveOnlyConfirmLine": "Kol kas niekas nepakeista — pakeis tik patvirtinimas.",
@@ -17944,6 +17966,17 @@
     "timeline": "Kas daryta",
     "back": "Atgal į istoriją",
     "placeMissing": "Šios vietos nėra aktyvios darbo erdvės importuotoje istorijoje.",
-    "attributedNote": "Įskaitant {count, plural, one {# įrašą} few {# įrašus} other {# įrašų}}, saugomus kitos organizacijos knygose ir čia priskirtus kaip darbą atlikusiai įmonei."
+    "attributedNote": "Įskaitant {count, plural, one {# įrašą} few {# įrašus} other {# įrašų}}, saugomus kitos organizacijos knygose ir čia priskirtus kaip darbą atlikusiai įmonei.",
+    "attribution": {
+      "title": "Kas atliko šį darbą?",
+      "intro": "Šios organizacijos knygose saugomą darbą galima priskirti kitai jūsų organizacijai kaip darbą atlikusiai įmonei. Nieko neperkeliama ir nekopijuojama: įrašai lieka kaip yra, o kita organizacija gali juos skaityti.",
+      "performedBy": "Atliko",
+      "note": "Pastaba (neprivaloma), pvz. nurodyta valandų dalis",
+      "button": "Priskirti",
+      "progress": "{attributed} iš {total} priskirta: {name}",
+      "done": "Priskirta įrašų: {count}; jau buvo priskirta: {skipped}.",
+      "refused": "Nepavyko išsaugoti. Nieko nepakeista.",
+      "person": "{hours} val., {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}"
+    }
   }
 }

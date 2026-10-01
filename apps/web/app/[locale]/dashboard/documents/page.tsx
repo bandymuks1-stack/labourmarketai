@@ -3,6 +3,7 @@ import type { CredentialValidityState } from "@/lib/documents/credential-validit
 
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { readMyPreferredCountries } from "@/lib/documents/my-countries";
 import {
   DOCUMENT_COUNTRIES,
   DOCUMENTS_READINESS_ENABLED,
@@ -351,6 +352,17 @@ export default async function WorkerDocumentsPage({
   )
     ? (sp.country as string)
     : null;
+
+  // MOBILITY -> DOCUMENTS. The countries the person said they would work in
+  // (workers.preferred_countries, owner-scoped by RLS) lead the chip row. It
+  // only orders the chips and selects nothing: a preference is not a right
+  // to work, and the checklist still appears only after the person picks.
+  const myCountries = user ? await readMyPreferredCountries(user.id) : [];
+  const orderedCountries = [
+    ...DOCUMENT_COUNTRIES.filter((c) => myCountries.includes(c)),
+    ...DOCUMENT_COUNTRIES.filter((c) => !myCountries.includes(c)),
+  ];
+  const hasMyCountries = orderedCountries.some((c) => myCountries.includes(c));
 
   const now = new Date();
   // S6 — the worker's documents-aggregate consent (null until the gated
@@ -702,8 +714,13 @@ export default async function WorkerDocumentsPage({
               {t("country.title")}
             </h2>
             <p className="text-xs text-text-secondary">{t("country.help")}</p>
+            {hasMyCountries ? (
+              <p className="text-xs text-text-secondary" data-testid="documents-country-mine">
+                {t("country.mine")}
+              </p>
+            ) : null}
             <div className="flex flex-wrap gap-2">
-              {DOCUMENT_COUNTRIES.map((c) => (
+              {orderedCountries.map((c) => (
                 <Link
                   key={c}
                   href={`/dashboard/documents?country=${c}` as "/dashboard"}

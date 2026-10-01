@@ -105,6 +105,7 @@ import { worklogDraftFromEvidence } from "@/lib/conversation/evidence-to-worklog
 import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
 import type { ConversationIntent } from "@/lib/conversation/intent-router";
 import { helpChipsFor, readHelpTopic } from "@/lib/conversation/product-help";
+import { readAvailabilityDay } from "@/lib/conversation/availability-day";
 import { findConversationPeople, openConversationWith } from "@/lib/communication/chat-open-conversation";
 import type { ProjectReadinessChatResult, ReadinessMissingCode } from "@/lib/conversation/project-readiness-contract";
 import { PROJECT_RISK_CHIP_LIMIT, type ProjectRiskRow } from "@/lib/conversation/project-risk-contract";
@@ -4659,14 +4660,17 @@ export function ConversationChat({
       });
   }, [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips]);
 
-  const startWhoAvailable = useCallback(() => {
+  const startWhoAvailable = useCallback((sentence = "") => {
     if (identity !== "company") {
       if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
       else assistant(fallbackText, starterChips);
       return;
     }
     setTyping(true);
-    loadWhoIsAvailableForChat()
+    // The day the sentence named ("pirmadienį", "rytoj", an ISO date) narrows the
+    // ONE availability read to that day; no day named keeps the default window.
+    const day = readAvailabilityDay(sentence, todayIso());
+    loadWhoIsAvailableForChat(undefined, day)
       .then((res) => {
         setTyping(false);
         if (res.kind === "empty") {
@@ -4702,7 +4706,11 @@ export function ConversationChat({
             ? `• ${r.label} — ${labels.capacityCommittedToUntil.replace("{what}", r.committedTo).replace("{date}", until)}`
             : `• ${r.label} — ${labels.capacityCommittedUntil.replace("{date}", until)}`;
         });
-        const head = labels.capacityIntro.replace("{from}", res.from).replace("{to}", res.to).replace("{count}", String(res.rosterTotal));
+        const head = labels.capacityIntro
+          .replace("{from} – {to}", res.from === res.to ? res.from : "{from} – {to}")
+          .replace("{from}", res.from)
+          .replace("{to}", res.to)
+          .replace("{count}", String(res.rosterTotal));
         // An input that did not answer is named. Production carried ZERO
         // absence rows and three real commitments, so "everybody is free" was
         // once produced entirely from signals nobody had checked.
@@ -6318,7 +6326,13 @@ export function ConversationChat({
           // door to the personal space (the same membership-validated `ws:`
           // switch the context chips run) — rendered through the workflow
           // contract, so the WHY is stated like every other answer.
-          if (identity === "company") {
+          // THE ACTIVE WORKSPACE decides, not only the acting role (production
+          // walk 2026-10-01): a worker standing in an ORGANIZATION workspace has
+          // the person identity but an organization result context, and the
+          // search ran and drew a card beside "Šis rezultatas nepasiekiamas
+          // dabartiniame kontekste" — the result registry offers the job matches
+          // in the personal context only. Same one-line answer + door instead.
+          if (identity === "company" || Boolean(auth?.activeOrganizationId || auth?.activeOrgName)) {
             const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
             return {
               kind: "answer" as const,
@@ -7215,7 +7229,7 @@ export function ConversationChat({
         clientBridge: () => startClientBridge(),
         addDocument: () => startAddDocument(text),
         addTask: () => startCreateTask(text),
-        whoAvailable: () => startWhoAvailable(),
+        whoAvailable: () => startWhoAvailable(text),
         stageStatus: () => startStageStatus(text),
         taskStatus: () => startTaskStatus(text),
         projectRisk: () => startProjectRisk(),

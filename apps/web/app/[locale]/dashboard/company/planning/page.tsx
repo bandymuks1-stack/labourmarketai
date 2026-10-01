@@ -562,8 +562,11 @@ export default async function CompanyWorkforcePlanningPage({
           today: todayIso,
         })
       : null;
-  const NAV_CHIP =
-    "inline-flex min-h-11 items-center rounded-md border border-ink-500 px-3 py-1.5 font-mono text-meta uppercase tracking-label text-text-secondary transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+  const NAV_CHIP_BASE =
+    "inline-flex min-h-11 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+  const NAV_CHIP = `${NAV_CHIP_BASE} border-ink-500 text-text-secondary`;
+  const NAV_CHIP_ON = `${NAV_CHIP_BASE} border-brand-blue text-brand-blue`;
+  const tickFmt = createUtcFormatter(locale, { day: "numeric", month: "short" });
   const timelineSection =
     timeline && timeline.people.length > 0 ? (
       <section
@@ -578,7 +581,7 @@ export default async function CompanyWorkforcePlanningPage({
             <Link
               href={timelineHref(timeline.from, "person")}
               aria-current={byProject ? undefined : "true"}
-              className={`${NAV_CHIP} ${byProject ? "" : "border-brand-blue text-brand-blue"}`}
+              className={byProject ? NAV_CHIP : NAV_CHIP_ON}
             >
               {t("rosterTimeline.byPerson")}
             </Link>
@@ -586,7 +589,7 @@ export default async function CompanyWorkforcePlanningPage({
               href={timelineHref(timeline.from, "project")}
               aria-current={byProject ? "true" : undefined}
               data-testid="roster-timeline-by-project"
-              className={`${NAV_CHIP} ${byProject ? "border-brand-blue text-brand-blue" : ""}`}
+              className={byProject ? NAV_CHIP_ON : NAV_CHIP}
             >
               {t("rosterTimeline.byProject")}
             </Link>
@@ -650,7 +653,7 @@ export default async function CompanyWorkforcePlanningPage({
                     className="absolute top-0 font-mono text-meta text-text-muted"
                     style={{ left: `${tick.leftPct}%` }}
                   >
-                    {dayFmt(tick.day)?.split(" ").slice(-2).join(" ") ?? tick.day}
+                    {tickFmt(tick.day) ?? tick.day}
                   </span>
                 ))}
               </div>

@@ -55,6 +55,12 @@ export interface AiCompletionRequest {
    */
   readonly preferredProvider?: AiSecondaryProviderKind;
   /**
+   * The language the INPUT is written in, when the caller knows it (never
+   * guessed). Machine-translation providers need it; absent → they either use
+   * auto-detection (when the engine offers it) or decline.
+   */
+  readonly sourceLanguage?: string;
+  /**
    * Deterministic output for the MOCK provider only (tests/dev). The live
    * provider ignores it entirely — it can never inject a fabricated live result.
    */

@@ -1807,7 +1807,9 @@
         "unknown": "Zu wenig Angaben zum Vergleich"
       },
       "opportunity": "{count, plural, =1 {Bis zu 1 Person ist ab {date} frei} other {Bis zu # Personen sind ab {date} frei}}",
-      "opportunityCta": "Arbeit suchen"
+      "opportunityCta": "Arbeit suchen",
+      "interest": "{count, plural, =1 {1 Person hat Interesse an Ihrem Bedarf gezeigt} other {# Personen haben Interesse an Ihrem Bedarf gezeigt}}",
+      "interestCta": "Ansehen"
     },
     "attention": {
       "heading": "Braucht Sie",
@@ -2140,7 +2142,7 @@
       },
       "workersBlocker": {
         "title": "Etwas ist schiefgelaufen",
-        "subtitle": "Der Unternehmenspfad ist auf DB-Ebene vorübergehend blockiert. Echte Arbeitskräfte-Verknüpfung + Einladungen funktionieren bereits auf der Agenturseite.",
+        "subtitle": "Derzeit nicht verfügbar.",
         "statusLabel": "Etwas ist schiefgelaufen",
         "statusBody": "Die Verwaltung der Unternehmens-Arbeitskräfte wird noch vorbereitet und später aktiviert.",
         "nextStep": "Die Selbstregistrierung für Arbeitskräfte bleibt jederzeit offen."
@@ -2252,6 +2254,12 @@
         "statusInvited": "Einladung erstellt (sie wird nicht per E-Mail versendet). Die eingeladene Person sieht sie nach der Anmeldung mit dieser E-Mail-Adresse.",
         "statusAlreadyPending": "Für diese E-Mail-Adresse existiert bereits eine ausstehende Einladung von Ihrem Unternehmen.",
         "statusAlreadyLinked": "Diese Arbeitskraft ist bereits mit Ihrem Unternehmen verknüpft.",
+        "statusWordActive": "Aktiv",
+        "statusWordPending": "Eingeladen",
+        "statusWordAccepted": "Angenommen",
+        "statusWordCancelled": "Storniert",
+        "statusWordExpired": "Abgelaufen",
+        "statusWordEnded": "Beendet",
         "statusNotOwner": "Aktion abgelehnt: Sie sind nicht der Inhaber des Unternehmens.",
         "statusInvalidEmail": "Ungültige E-Mail-Adresse.",
         "statusError": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
@@ -4730,6 +4738,7 @@
         "event_demand_interest_reviewed": "Ein Unternehmen hat Ihr Interesse als geprüft markiert",
         "event_weekly_digest": "Deine wöchentliche Übersicht zu Arbeit und Chancen ist bereit",
         "event_saved_search_match": "Eine gespeicherte Suche hat neue Ergebnisse",
+        "event_job_alert": "Eine neue Stelle passt zu Ihrer Suche",
         "event_invitation_accepted": "Jemand hat Ihre Einladung angenommen",
         "event_weekly_digest_profile_completion": "Damit wir dir passende Jobs zeigen können, bestätige, welche Arbeit du machst",
         "event_weekly_digest_journal": "Die Wochenübersicht deines Arbeitsjournals ist fertig"
@@ -6447,6 +6456,8 @@
     "discoverEmpty": "Noch keine aktiven Dienstleistungen vorhanden.",
     "request": "Anfragen",
     "requested": "Angefragt",
+    "partnershipBadge": "Sucht Partner",
+    "partnershipRequest": "Partnerschaft anbieten",
     "requestMessagePlaceholder": "Schreibe dem Anbieter, was du brauchst (optional)",
     "remoteBadge": "Remote",
     "outgoingHeading": "Meine Anfragen",
@@ -6580,6 +6591,7 @@
     "notAvailable": "Derzeit nicht verfügbar.",
     "empty": "Noch keine Dienstleistungsangebote. Fügen Sie die erste echte Dienstleistung hinzu, die Sie anbieten.",
     "addButton": "Dienstleistung hinzufügen",
+    "addPartnership": "Partner suchen",
     "form": {
       "titleLabel": "Titel der Dienstleistung",
       "titlePlaceholder": "z. B. Innenanstrich",
@@ -7666,7 +7678,7 @@
     "eyebrow": "MEINE DOKUMENTE",
     "title": "Meine Dokumente",
     "subtitle": "Was Sie haben, was fehlt und der nächste Schritt — pro Land.",
-    "preparing": "Die Dokumentenbereitschaft wird vorbereitet — sie geht live, sobald die Dokumentenspeicherschicht geprüft und aktiviert ist. Hier ist noch nichts aktiv.",
+    "preparing": "Derzeit nicht verfügbar.",
     "reports": {
       "title": "Berichte & Exporte",
       "intro": "Erstellen Sie einen druckfertigen Bericht aus Ihren eigenen Daten. PDF funktioniert über die Druck-/Speicherfunktion Ihres Browsers; Excel und Word sind noch nicht verfügbar.",
@@ -7723,6 +7735,7 @@
     "country": {
       "title": "Was für ein Land fehlt",
       "help": "Wählen Sie ein Zielland, um zu sehen, welche Dokumente dort verlangt werden.",
+      "mine": "Ihre Wunschländer stehen zuerst.",
       "unknown": "Die Anforderungsliste für {country} wurde noch nicht kuratiert — wir zeigen lieber nichts an, statt zu raten.",
       "next": "Nächster Schritt: kümmern Sie sich um — {doc}.",
       "ok": "Alle kuratierten Anforderungen für {country} sind abgedeckt."
@@ -8447,7 +8460,8 @@
       "opened": "Unterhaltung geöffnet — schreiben Sie der Arbeitskraft eine Nachricht.",
       "view": "Unterhaltung öffnen",
       "error": "Die Unterhaltung konnte nicht geöffnet werden. Bitte versuchen Sie es erneut.",
-      "limitReached": "Tageslimit für neue Unterhaltungen erreicht. Versuchen Sie es morgen erneut."
+      "limitReached": "Tageslimit für neue Unterhaltungen erreicht. Versuchen Sie es morgen erneut.",
+      "shortlistFirst": "Setzen Sie die Person zuerst auf Ihre Shortlist, dann können Sie ein Gespräch anfragen."
     },
     "how": {
       "title": "So funktioniert das Matching",
@@ -9508,7 +9522,7 @@
     "external": {
       "sectionTitle": "Öffentliche Stellenanzeigen",
       "sectionNote": "Anzeigen öffentlicher Arbeitsverwaltungen. Sie werden vom Arbeitgeber an der Quelle veröffentlicht — labourmarket.ai listet sie zum Finden, die Bewerbung läuft über die Originalanzeige.",
-      "shownOfTotal": "Top {shown} von {total}",
+      "shownOfTotal": "{shown} von {total} angezeigt",
       "bandBest": "Passt am besten",
       "bandPossible": "Möglicherweise passend",
       "bandExplore": "Weitere Anzeigen",
@@ -9660,6 +9674,14 @@
         "LOOKING_FOR_WORK": "Auf Arbeitssuche",
         "LOOKING_FOR_PROJECTS": "Auf Projektsuche"
       }
+    },
+    "jobAlerts": {
+      "title": "Meldungen zu neuen Stellen",
+      "ready": "Sobald eine neue echte Stelle erscheint, die zu Ihrem Beruf und den gewählten Ländern passt, sehen Sie sie in Ihren Benachrichtigungen. Eine Stelle ohne Gehaltsangabe wird nie wegen des Gehalts ausgeblendet.",
+      "missing": "Für Meldungen zu neuen Stellen geben Sie bitte an:",
+      "profession": "welche Arbeit Sie machen",
+      "country": "in welchen Ländern Sie arbeiten möchten",
+      "cta": "Meine Angaben ausfüllen"
     }
   },
   "workerIntake": {
@@ -13931,7 +13953,7 @@
       "moveToLine": "• „{to}“: Personen {before} → {after}; die Bereitschaftsliste dort beginnt bei 0/{total}.",
       "moveCountryLine": "• Das Land wechselt: {from} → {to} — andere Dokumentanforderungen.",
       "moveNoDatesLine": "• „{to}“ hat keine Daten — Abwesenheiten können nicht geprüft werden.",
-      "moveAvailabilityUnknownLine": "• Abwesenheiten unbekannt — das Urlaubsmodell antwortet hier nicht.",
+      "moveAvailabilityUnknownLine": "• Abwesenheiten unbekannt.",
       "moveAvailabilityLine": "• Im Fenster {start}–{end} hat er {count} Abwesenheitseinträge.",
       "moveAvailabilityFreeLine": "• Keine Abwesenheiten in den Daten von „{to}“.",
       "moveOnlyConfirmLine": "Noch ist nichts geändert — erst Ihre Bestätigung ändert etwas.",
@@ -17944,6 +17966,17 @@
     "timeline": "Was getan wurde",
     "back": "Zurück zur Historie",
     "placeMissing": "Dieser Ort ist nicht in der importierten Historie des aktiven Arbeitsbereichs.",
-    "attributedNote": "Enthält {count, plural, one {# Eintrag} other {# Einträge}}, die in den Büchern einer anderen Organisation liegen und hier als ausführendes Unternehmen zugeordnet sind."
+    "attributedNote": "Enthält {count, plural, one {# Eintrag} other {# Einträge}}, die in den Büchern einer anderen Organisation liegen und hier als ausführendes Unternehmen zugeordnet sind.",
+    "attribution": {
+      "title": "Wer hat diese Arbeit ausgeführt?",
+      "intro": "Arbeit, die in den Büchern dieser Organisation liegt, kann einer anderen Ihrer Organisationen als ausführendem Unternehmen zugeordnet werden. Nichts wird verschoben oder kopiert: die Einträge bleiben, die andere Organisation kann sie lesen.",
+      "performedBy": "Ausgeführt von",
+      "note": "Notiz (optional), zum Beispiel der genannte Stundenanteil",
+      "button": "Zuordnen",
+      "progress": "{attributed} von {total} zugeordnet: {name}",
+      "done": "{count} Einträge zugeordnet; {skipped} waren bereits zugeordnet.",
+      "refused": "Das konnte nicht gespeichert werden. Nichts wurde geändert.",
+      "person": "{hours} Std., {count, plural, one {# Eintrag} other {# Einträge}}"
+    }
   }
 }

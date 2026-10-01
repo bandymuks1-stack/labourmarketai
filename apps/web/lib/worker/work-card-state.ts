@@ -96,7 +96,7 @@ const WHY: Record<WorkDim, string> = {
 
 /** Route for dimensions whose editing lives on another page; null = inline. */
 const HREF: Record<WorkDim, string | null> = {
-  work: "/dashboard/profile",
+  work: "/dashboard/profile#profile-edit",
   availability: null,
   location: null,
   pay: null,

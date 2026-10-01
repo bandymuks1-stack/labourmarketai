@@ -4,7 +4,6 @@ import {
   ArrowRight,
   Ban,
   Bell,
-  CalendarClock,
   CheckCircle2,
   CircleDashed,
   FileWarning,
@@ -15,6 +14,8 @@ import {
 } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
+import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
+import { personMonogram } from "@/lib/visual/avatar-monogram";
 import { createUtcFormatter } from "@/lib/time/display";
 import { CAPABILITY_CHOICES } from "@/lib/organizations/capability-choices";
 import type { CustomerRequestRow } from "@/lib/buyer/customer-requests";
@@ -419,23 +420,13 @@ export async function CompanyHomeFieldSection({
                 </p>
               ) : null}
               <ul className="flex flex-col gap-1">
-                {field.capacity.rows.map((w) => (
-                  <li
-                    key={w.workerId}
-                    className={`flex flex-wrap items-center justify-between gap-1 rounded-control bg-ink-900/40 px-2.5 py-1.5 ${w.state === "free" ? TONE_EDGE.ok : TONE_EDGE.quiet}`}
-                    data-testid={`company-home-capacity-${w.state}`}
-                  >
-                    <span className="min-w-0 break-words text-sm text-text-primary">{w.label}</span>
-                    <span className="inline-flex items-center gap-1 text-meta text-text-secondary">
-                      {w.state === "free" ? (
-                        <>
-                          <CheckCircle2 className="h-3 w-3 text-state-success" aria-hidden />
-                          {t("capacity.free")}
-                        </>
-                      ) : w.state === "committed" ? (
-                        <>
-                          <Play className="h-3 w-3 text-brand-cyan" aria-hidden />
-                          {[
+                {field.capacity.rows.map((w) => {
+                  // The state in words — the same strings the row always carried.
+                  const stateText =
+                    w.state === "free"
+                      ? t("capacity.free")
+                      : w.state === "committed"
+                        ? [
                             w.committedTo
                               ? t("capacity.onWork", { project: w.committedTo })
                               : t("capacity.booked"),
@@ -446,19 +437,38 @@ export async function CompanyHomeFieldSection({
                                 : null,
                           ]
                             .filter(Boolean)
-                            .join(" · ")}
-                        </>
-                      ) : (
-                        <>
-                          <CalendarClock className="h-3 w-3 text-text-muted" aria-hidden />
-                          {w.unavailableUntil
-                            ? t("capacity.awayUntil", { date: day(w.unavailableUntil) ?? w.unavailableUntil })
-                            : t("capacity.away")}
-                        </>
-                      )}
-                    </span>
-                  </li>
-                ))}
+                            .join(" · ")
+                        : w.unavailableUntil
+                          ? t("capacity.awayUntil", { date: day(w.unavailableUntil) ?? w.unavailableUntil })
+                          : t("capacity.away");
+                  return (
+                    <li
+                      key={w.workerId}
+                      className={`min-w-0 rounded-control bg-ink-900/40 px-2.5 py-1.5 ${w.state === "free" ? TONE_EDGE.ok : TONE_EDGE.quiet}`}
+                      data-testid={`company-home-capacity-${w.state}`}
+                    >
+                      {/* ONE professional identity, compact: the same card the
+                          team list and the application read use. The state
+                          rides in its meta line; nothing else is invented. */}
+                      <PersonIdentityCard
+                        variant="roster-person"
+                        density="compact"
+                        testid={`company-home-capacity-identity-${w.workerId}`}
+                        name={w.label}
+                        initials={personMonogram(w.label)}
+                        professions={[]}
+                        meta={[
+                          {
+                            key: "state",
+                            kind: w.state === "committed" ? "assignment" : "availability",
+                            label: stateText,
+                            live: w.state === "free",
+                          },
+                        ]}
+                      />
+                    </li>
+                  );
+                })}
               </ul>
               {field.capacity.outlook ? (
                 <div className="flex flex-col gap-1" data-testid="company-home-outlook">
@@ -621,6 +631,17 @@ export async function CompanyHomeFieldSection({
                 </li>
               ))}
             </ul>
+          ) : null}
+          {field.interest.kind === "ok" && field.interest.waiting > 0 ? (
+            <div className="flex flex-col gap-1" data-testid="company-home-interest">
+              <span className="text-sm text-text-primary">
+                {t("missing.interest", { count: field.interest.waiting })}
+              </span>
+              <Link href={"/dashboard/company/scouting" as "/dashboard"} className={`${ACTION_LINK} w-fit`}>
+                {t("missing.interestCta")}
+                <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+              </Link>
+            </div>
           ) : null}
           {gaps && gaps.peakFree > 0 && gaps.peakFreeFrom && openNeeds.every((n) => deriveNeedFit(n.teamSize, outlook).kind !== "short") ? (
             <div className="flex flex-col gap-1" data-testid="company-home-opportunity">

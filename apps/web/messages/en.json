@@ -1807,7 +1807,9 @@
         "unknown": "Not enough detail to compare"
       },
       "opportunity": "{count, plural, =1 {Up to 1 person is free from {date}} other {Up to # people are free from {date}}}",
-      "opportunityCta": "Look for work"
+      "opportunityCta": "Look for work",
+      "interest": "{count, plural, =1 {1 person showed interest in your needs} other {# people showed interest in your needs}}",
+      "interestCta": "See who"
     },
     "attention": {
       "heading": "Needs you",
@@ -2140,7 +2142,7 @@
       },
       "workersBlocker": {
         "title": "Something went wrong",
-        "subtitle": "The company path is temporarily blocked at the DB layer. Real worker linking + invitations already work on the agency side.",
+        "subtitle": "Not available right now.",
         "statusLabel": "Something went wrong",
         "statusBody": "Company worker management is still being prepared and will be enabled later.",
         "nextStep": "Self-entry for workers stays open at all times."
@@ -2252,6 +2254,12 @@
         "statusInvited": "Invitation created (it is not emailed). The invitee sees it after signing in with this email.",
         "statusAlreadyPending": "A pending invitation already exists for this email from your company.",
         "statusAlreadyLinked": "This worker is already linked to your company.",
+        "statusWordActive": "Active",
+        "statusWordPending": "Invited",
+        "statusWordAccepted": "Accepted",
+        "statusWordCancelled": "Cancelled",
+        "statusWordExpired": "Expired",
+        "statusWordEnded": "Ended",
         "statusNotOwner": "Action rejected: you are not the company owner.",
         "statusInvalidEmail": "Invalid email address.",
         "statusError": "Something went wrong. Please try again.",
@@ -4730,6 +4738,7 @@
         "event_demand_interest_reviewed": "A company marked your interest as reviewed",
         "event_weekly_digest": "Your weekly work and opportunities summary is ready",
         "event_saved_search_match": "A search you saved has new results",
+        "event_job_alert": "A new job fits what you are looking for",
         "event_invitation_accepted": "Somebody accepted your invitation",
         "event_weekly_digest_profile_completion": "To see jobs that fit you, confirm what work you do",
         "event_weekly_digest_journal": "Your week’s work journal summary is ready"
@@ -6447,6 +6456,8 @@
     "discoverEmpty": "No active services to show yet.",
     "request": "Request",
     "requested": "Requested",
+    "partnershipBadge": "Looking for partners",
+    "partnershipRequest": "Offer to partner",
     "requestMessagePlaceholder": "Tell the provider what you need (optional)",
     "remoteBadge": "Remote",
     "outgoingHeading": "My requests",
@@ -6580,6 +6591,7 @@
     "notAvailable": "Not available right now.",
     "empty": "No service offerings yet. Add the first real service you offer.",
     "addButton": "Add a service",
+    "addPartnership": "Look for partners",
     "form": {
       "titleLabel": "Service title",
       "titlePlaceholder": "e.g. Interior painting",
@@ -7666,7 +7678,7 @@
     "eyebrow": "MY DOCUMENTS",
     "title": "My documents",
     "subtitle": "What you have, what is missing, and the next step — per country.",
-    "preparing": "Document readiness is being prepared — it goes live once the document storage layer is reviewed and enabled. Nothing here is active yet.",
+    "preparing": "Not available right now.",
     "reports": {
       "title": "Reports & exports",
       "intro": "Build a print-ready report from your own data. PDF works through your browser's print/save; Excel and Word are not available yet.",
@@ -7723,6 +7735,7 @@
     "country": {
       "title": "What is missing for a country",
       "help": "Pick a destination country to see which documents it asks for.",
+      "mine": "Your preferred countries come first.",
       "unknown": "The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
       "next": "Next step: take care of — {doc}.",
       "ok": "All curated requirements for {country} are covered."
@@ -8447,7 +8460,8 @@
       "opened": "Conversation open — write the worker a message.",
       "view": "Open conversation",
       "error": "Couldn't open the conversation. Please try again.",
-      "limitReached": "Daily limit for new conversations reached. Try again tomorrow."
+      "limitReached": "Daily limit for new conversations reached. Try again tomorrow.",
+      "shortlistFirst": "Add the worker to your shortlist first, then you can request to communicate."
     },
     "how": {
       "title": "How matching works",
@@ -9508,7 +9522,7 @@
     "external": {
       "sectionTitle": "Public job advertisements",
       "sectionNote": "Advertisements from official public employment services. They are published by the employer at the source — labourmarket.ai lists them so you can find them, and applying happens through the original advertisement.",
-      "shownOfTotal": "top {shown} of {total}",
+      "shownOfTotal": "showing {shown} of {total}",
       "bandBest": "Best fits",
       "bandPossible": "Possible fits",
       "bandExplore": "Explore",
@@ -9660,6 +9674,14 @@
         "LOOKING_FOR_WORK": "Looking for work",
         "LOOKING_FOR_PROJECTS": "Looking for projects"
       }
+    },
+    "jobAlerts": {
+      "title": "New-job alerts",
+      "ready": "When a new real job appears that fits your profession and the countries you chose, it shows up in your notifications. A job that states no pay is never hidden because of pay.",
+      "missing": "To get new-job alerts, tell us:",
+      "profession": "what work you do",
+      "country": "which countries you want to work in",
+      "cta": "Fill in my preferences"
     }
   },
   "workerIntake": {
@@ -13931,7 +13953,7 @@
       "moveToLine": "• “{to}”: people {before} → {after}; the readiness checklist there starts at 0/{total}.",
       "moveCountryLine": "• The country changes: {from} → {to} — document requirements differ.",
       "moveNoDatesLine": "• “{to}” has no dates — absences cannot be checked.",
-      "moveAvailabilityUnknownLine": "• Absences unknown — the leave model does not answer here.",
+      "moveAvailabilityUnknownLine": "• Absences unknown.",
       "moveAvailabilityLine": "• Inside {start}–{end} they have {count} absence records.",
       "moveAvailabilityFreeLine": "• No absences inside “{to}”'s dates.",
       "moveOnlyConfirmLine": "Nothing has changed yet — only your confirmation will.",
@@ -17944,6 +17966,17 @@
     "timeline": "What was done",
     "back": "Back to history",
     "placeMissing": "This place is not in the imported history of the active workspace.",
-    "attributedNote": "Includes {count, plural, one {# record} other {# records}} kept in another organization's books and attributed here as the performing company."
+    "attributedNote": "Includes {count, plural, one {# record} other {# records}} kept in another organization's books and attributed here as the performing company.",
+    "attribution": {
+      "title": "Who performed this work?",
+      "intro": "Work stored in this organization's books can be attributed to another organization of yours as the performing company. Nothing is moved or copied: the records stay as they are and the other organization can read them.",
+      "performedBy": "Performed by",
+      "note": "Note (optional), for example the stated share of hours",
+      "button": "Attribute",
+      "progress": "{attributed} of {total} attributed to {name}",
+      "done": "Attributed {count} records; {skipped} were already attributed.",
+      "refused": "This could not be saved. Nothing was changed.",
+      "person": "{hours} h, {count, plural, one {# record} other {# records}}"
+    }
   }
 }

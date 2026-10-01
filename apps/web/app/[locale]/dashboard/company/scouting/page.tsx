@@ -38,6 +38,7 @@ import { buildDemandJourney } from "@/lib/demand/demand-journey-model";
 import { FeatureNote } from "@/components/app/feature-note";
 import { AvailableSupplySection } from "@/components/app/available-supply-section";
 import { listAvailableSupplyForEmployer } from "@/lib/supply/employer-supply-discovery";
+import { isShortlistedForContact } from "@/lib/communication/communication-eligibility";
 import { RequestCommunicationButton } from "@/components/app/request-communication-button";
 import { ProposeBookingButton } from "@/components/app/propose-booking-button";
 import { OfferDecisionButtons } from "@/components/app/offer-decision-buttons";
@@ -720,16 +721,35 @@ export default async function CompanyScoutingPage({
                   />
                 ) : null}
                 <div className="flex flex-col gap-2">
-                  <RequestCommunicationButton
-                    locale={locale}
-                    requestId={selected}
-                    workerId={oc.workerId}
-                    labels={{
-                      button: t("request.button"), opening: t("request.opening"),
-                      opened: t("request.opened"), view: t("request.view"),
-                      error: t("request.error"), limitReached: t("request.limitReached"),
-                    }}
-                  />
+                  {/* SAME rule as the candidate card: the server gate needs the
+                      worker on THIS company's shortlist. An offered person who
+                      is shortlisted gets the button; one who appears among the
+                      matches below is told to shortlist first; one who is not
+                      on the list at all has no contact step here (the offer
+                      decision above is this card's own action). */}
+                  {isShortlistedForContact(
+                    result?.kind === "ok"
+                      ? (result.candidates.find((c) => c.workerId === oc.workerId)?.shortlistStatus ?? null)
+                      : null,
+                  ) ? (
+                    <RequestCommunicationButton
+                      locale={locale}
+                      requestId={selected}
+                      workerId={oc.workerId}
+                      labels={{
+                        button: t("request.button"), opening: t("request.opening"),
+                        opened: t("request.opened"), view: t("request.view"),
+                        error: t("request.error"), limitReached: t("request.limitReached"),
+                      }}
+                    />
+                  ) : result?.kind === "ok" && result.candidates.some((c) => c.workerId === oc.workerId) ? (
+                    <p
+                      className="text-meta text-text-muted"
+                      data-testid={`scout-offered-shortlist-first-${oc.workerId}`}
+                    >
+                      {t("request.shortlistFirst")}
+                    </p>
+                  ) : null}
                   <ProposeBookingButton
                     locale={locale}
                     requestId={selected}
@@ -924,19 +944,33 @@ export default async function CompanyScoutingPage({
                   </p>
                   {c.canContact && needOpen ? (
                     <div className="flex flex-col gap-2">
-                      <RequestCommunicationButton
-                        locale={locale}
-                        requestId={result.demand.id}
-                        workerId={c.workerId}
-                        labels={{
-                          button: t("request.button"),
-                          opening: t("request.opening"),
-                          opened: t("request.opened"),
-                          view: t("request.view"),
-                          error: t("request.error"),
-                          limitReached: t("request.limitReached"),
-                        }}
-                      />
+                      {/* The server gate needs a deliberate shortlist (owner +
+                          shortlisted + contactable). Offering the button before
+                          that only produced a generic error, so it appears once
+                          the worker is on the shortlist; until then the page
+                          says what to do — the shortlist control is below. */}
+                      {isShortlistedForContact(c.shortlistStatus) ? (
+                        <RequestCommunicationButton
+                          locale={locale}
+                          requestId={result.demand.id}
+                          workerId={c.workerId}
+                          labels={{
+                            button: t("request.button"),
+                            opening: t("request.opening"),
+                            opened: t("request.opened"),
+                            view: t("request.view"),
+                            error: t("request.error"),
+                            limitReached: t("request.limitReached"),
+                          }}
+                        />
+                      ) : (
+                        <p
+                          className="text-meta text-text-muted"
+                          data-testid={`scout-shortlist-first-${c.workerId}`}
+                        >
+                          {t("request.shortlistFirst")}
+                        </p>
+                      )}
                       <ProposeBookingButton
                         locale={locale}
                         requestId={result.demand.id}

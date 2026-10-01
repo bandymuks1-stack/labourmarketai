@@ -63,6 +63,12 @@ export interface CompanyWorkersSectionLabels {
   readonly statusInvited: string;
   readonly statusAlreadyPending: string;
   readonly statusAlreadyLinked: string;
+  readonly statusWordActive: string;
+  readonly statusWordPending: string;
+  readonly statusWordAccepted: string;
+  readonly statusWordCancelled: string;
+  readonly statusWordExpired: string;
+  readonly statusWordEnded: string;
   readonly statusNotOwner: string;
   readonly statusInvalidEmail: string;
   readonly statusError: string;
@@ -96,6 +102,27 @@ export interface OpsCellLabels {
   readonly nextActionLabels: Record<string, string>;
   /** Owner-only role-select control copy (assign / clear + disabled review). */
   readonly assign: OperationsRoleControlLabels;
+}
+
+/** Human word for a stored link/invitation status; an unknown value falls back to the stored word. */
+function statusWord(labels: CompanyWorkersSectionLabels, status: string): string {
+  switch (status) {
+    case "active":
+      return labels.statusWordActive;
+    case "pending":
+      return labels.statusWordPending;
+    case "accepted":
+      return labels.statusWordAccepted;
+    case "cancelled":
+      return labels.statusWordCancelled;
+    case "expired":
+      return labels.statusWordExpired;
+    case "ended":
+    case "inactive":
+      return labels.statusWordEnded;
+    default:
+      return status;
+  }
 }
 
 /** Subtle left status rail per review capability (Step 9, visual only). */
@@ -278,7 +305,7 @@ export function CompanyWorkersSection({
                       meta={meta}
                       status={
                         <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
-                          {w.status ?? "active"}
+                          {statusWord(labels, w.status ?? "active")}
                         </span>
                       }
                       actions={
@@ -481,7 +508,7 @@ export function CompanyWorkersSection({
                   >
                     <div className="flex items-start justify-between gap-2">
                       <span className="break-all text-sm text-text-primary">{inv.invitedEmail}</span>
-                      <span className="shrink-0 rounded-full border border-state-warning/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning">{inv.status}</span>
+                      <span className="shrink-0 rounded-full border border-state-warning/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning">{statusWord(labels, inv.status)}</span>
                     </div>
                     <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {labels.columnInvitedAt}: {inv.createdAt.slice(0, 10)}
