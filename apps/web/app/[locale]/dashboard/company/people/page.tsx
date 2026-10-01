@@ -34,6 +34,7 @@ import {
 import { whoIsAvailableCore } from "@/lib/conversation/capacity-core";
 import { derivePeopleTeamState } from "@/lib/company/people-team-state";
 import { createUtcFormatter } from "@/lib/time/display";
+import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import { listBookedPeople } from "@/lib/company/booked-people";
 import { BookedPeopleSection } from "@/components/app/booked-people-section";
 import {
@@ -189,6 +190,18 @@ export default async function CompanyPeoplePage({
       ),
     ),
   );
+  // What each person DOES: the canonical profession read (registry slug via the
+  // catalogue, or their own words exactly as typed), primary first. Names are
+  // resolved here so the client section receives plain strings.
+  const tProf = await getTranslations("professions");
+  const professionsByWorker: Record<string, string[]> = Object.fromEntries(
+    activeWorkerRows.map((w) => [
+      w.workerId,
+      w.professions
+        .map((e) => professionDisplayName(e, (slug) => (tProf.has(slug) ? tProf(slug) : null)))
+        .filter((n): n is string => !!n),
+    ]),
+  );
   // Booked people (R-2 GREEN half): the direct-booking relationship, visible
   // beside the roster it is not part of, with its honest journal state. The
   // read is RLS-scoped to this company's own engagement rows.
@@ -259,6 +272,7 @@ export default async function CompanyPeoplePage({
           invitationsResult={invitationsResult}
           labels={workersLabels}
           avatarByWorker={avatarByWorker}
+          professionsByWorker={professionsByWorker}
           roleCoordinationEnabled={isOperationsRoleEnabled("foreman")}
           canAssignRoles
           canManageInvitations={canManageInvitations}

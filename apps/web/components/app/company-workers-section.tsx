@@ -155,6 +155,7 @@ export function CompanyWorkersSection({
   invitationsResult,
   labels,
   avatarByWorker,
+  professionsByWorker,
   roleCoordinationEnabled,
   canAssignRoles = false,
   reviewElsewhere,
@@ -167,6 +168,10 @@ export function CompanyWorkersSection({
   /** Signed photo URL per workerId, resolved by the page through the one
    *  photo rule; absent / null = initials. */
   readonly avatarByWorker?: Record<string, string | null>;
+  /** Profession names per workerId from the canonical profession read (primary
+   *  first), already in the viewer's language. Absent / empty = the person has
+   *  declared none that could be named; the card then shows the role alone. */
+  readonly professionsByWorker?: Record<string, readonly string[]>;
   /** From the operations role-capability map — false today (foreman /
    *  manager coordination is not enabled). When false, show the honest
    *  not-enabled note instead of pretending coordination works. */
@@ -308,6 +313,7 @@ export function CompanyWorkersSection({
                   ? (labels.identity.availability[w.availabilityStatus] ?? null)
                   : null;
                 const ts = team?.byWorker[w.workerId] ?? null;
+                const tradeNames = professionsByWorker?.[w.workerId] ?? [];
                 // The one real role: a stated title, or an assigned role. An
                 // unassigned role is simply not said (SEP-5: identity ≠ role).
                 const roleText =
@@ -345,6 +351,11 @@ export function CompanyWorkersSection({
                 if (w.locationCountry) {
                   meta.push({ key: "loc", kind: "location", label: w.locationCountry });
                 }
+                // The trade leads the card; the role (a different fact, SEP-5)
+                // moves to its own meta entry instead of standing in for it.
+                if (tradeNames.length > 0 && roleText) {
+                  meta.unshift({ key: "role", kind: "role", label: roleText });
+                }
                 // ONE contextual primary action by state; everything else is
                 // quieter. free → give work; working → see it in time; away or
                 // unknown → reach the person.
@@ -369,7 +380,7 @@ export function CompanyWorkersSection({
                       initials={personMonogram(personName)}
                       avatarUrl={avatarByWorker?.[w.workerId] ?? null}
                       nameHref={`/dashboard/people/${w.workerId}`}
-                      professions={roleText ? [roleText] : []}
+                      professions={tradeNames.length > 0 ? [...tradeNames] : roleText ? [roleText] : []}
                       meta={meta}
                       status={
                         w.status && w.status !== "active" ? (
