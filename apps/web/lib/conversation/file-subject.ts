@@ -171,7 +171,11 @@ export function readFileIntent(text: string): FileIntent | null {
   const raw = (text ?? "").trim();
   if (!raw) return null;
   const q = ` ${fold(raw)} `;
-  if (!hasAny(withoutReadbackForms(q), DEPOSIT)) return null;
+  // "Ką ČIA galiu padaryti?" asks WHERE/WHAT, it hands nothing over: a question
+  // word directly before "čia" is not the deposit "čia mano CV" (production
+  // 2026-10-01: the capabilities question was answered with "Kieno šis dokumentas?").
+  const asked = withoutReadbackForms(q).replace(/(?<!\p{L})(ka|kas|kur|kaip|kodel|kam|ko|kuo|koks|kokia|kokie)\s+cia(?!\p{L})/gu, " ");
+  if (!hasAny(asked, DEPOSIT)) return null;
 
   const documentTypeSlug = guessDocumentType(raw);
   const evidence = hasAny(q, WORK_EVIDENCE);

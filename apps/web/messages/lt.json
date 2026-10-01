@@ -1807,7 +1807,9 @@
         "unknown": "Per mažai informacijos palyginti"
       },
       "opportunity": "{count, plural, one {Iki # žmogaus laisvas nuo {date}} few {Iki # žmonių laisvi nuo {date}} other {Iki # žmonių laisvi nuo {date}}}",
-      "opportunityCta": "Ieškoti darbo"
+      "opportunityCta": "Ieškoti darbo",
+      "interest": "{count, plural, one {# žmogus pareiškė susidomėjimą jūsų poreikiais} few {# žmonės pareiškė susidomėjimą jūsų poreikiais} other {# žmonių pareiškė susidomėjimą jūsų poreikiais}}",
+      "interestCta": "Žiūrėti kas"
     },
     "attention": {
       "heading": "Reikia jūsų",
@@ -2140,7 +2142,7 @@
       },
       "workersBlocker": {
         "title": "Nepavyko",
-        "subtitle": "Įmonės kelias laikinai blokuotas DB lygmenyje. Realus darbuotojų pridėjimas / pakvietimas jau veikia agentūros pusėje.",
+        "subtitle": "Šiuo metu nepasiekiama.",
         "statusLabel": "Nepavyko",
         "statusBody": "Įmonės darbuotojų valdymas dar ruošiamas ir bus įjungtas vėliau.",
         "nextStep": "Savaiminis užsiregistravimas darbuotojams lieka atviras visada."
@@ -2252,6 +2254,12 @@
         "statusInvited": "Kvietimas sukurtas (el. paštu nesiunčiamas). Pakviestasis jį matys prisijungęs tuo pačiu el. paštu.",
         "statusAlreadyPending": "Šiam el. pašto adresui jau yra laukiantis pakvietimas iš jūsų įmonės.",
         "statusAlreadyLinked": "Šis darbuotojas jau susietas su jūsų įmone.",
+        "statusWordActive": "Aktyvus",
+        "statusWordPending": "Pakviestas",
+        "statusWordAccepted": "Priimta",
+        "statusWordCancelled": "Atšaukta",
+        "statusWordExpired": "Pasibaigė",
+        "statusWordEnded": "Baigta",
         "statusNotOwner": "Veiksmas atmestas: jūs neturite šios įmonės savininko teisės.",
         "statusInvalidEmail": "Neteisingas el. pašto adresas.",
         "statusError": "Įvyko klaida. Pabandykite dar kartą.",
@@ -6448,6 +6456,8 @@
     "discoverEmpty": "Kol kas nėra rodomų aktyvių paslaugų.",
     "request": "Pateikti užklausą",
     "requested": "Užklausa pateikta",
+    "partnershipBadge": "Ieškoma partnerių",
+    "partnershipRequest": "Siūlyti partnerystę",
     "requestMessagePlaceholder": "Parašykite teikėjui, ko reikia (neprivaloma)",
     "remoteBadge": "Nuotoliu",
     "outgoingHeading": "Mano užklausos",
@@ -6581,6 +6591,7 @@
     "notAvailable": "Šiuo metu nepasiekiama.",
     "empty": "Paslaugų pasiūlymų dar nėra. Pridėkite pirmą realią paslaugą, kurią siūlote.",
     "addButton": "Pridėti paslaugą",
+    "addPartnership": "Ieškau partnerių",
     "form": {
       "titleLabel": "Paslaugos pavadinimas",
       "titlePlaceholder": "pvz. Vidaus dažymas",
@@ -7667,7 +7678,7 @@
     "eyebrow": "MANO DOKUMENTAI",
     "title": "Mano dokumentai",
     "subtitle": "Ką turi, ko trūksta ir koks kitas žingsnis — pagal šalį.",
-    "preparing": "Dokumentų parengtis ruošiama — funkcija įsijungs, kai dokumentų saugojimo sluoksnis bus peržiūrėtas ir įjungtas. Kol kas čia niekas neaktyvu.",
+    "preparing": "Šiuo metu nepasiekiama.",
     "reports": {
       "title": "Ataskaitos ir eksportas",
       "intro": "Sukurk spausdinimui paruoštą ataskaitą iš savo duomenų. PDF veikia per naršyklės spausdinimą / išsaugojimą; Excel ir Word dar negalimi.",
@@ -8448,7 +8459,8 @@
       "opened": "Pokalbis atvertas — parašykite darbuotojui žinutę.",
       "view": "Atverti pokalbį",
       "error": "Pokalbio atverti nepavyko. Bandykite dar kartą.",
-      "limitReached": "Pasiektas dienos naujų pokalbių limitas. Bandykite rytoj."
+      "limitReached": "Pasiektas dienos naujų pokalbių limitas. Bandykite rytoj.",
+      "shortlistFirst": "Pirmiausia įtraukite darbuotoją į trumpąjį sąrašą, tada galėsite prašyti pokalbio."
     },
     "how": {
       "title": "Kaip veikia atitikimas",
@@ -9509,7 +9521,7 @@
     "external": {
       "sectionTitle": "Vieši darbo skelbimai",
       "sectionNote": "Skelbimai iš oficialių valstybinių užimtumo tarnybų. Juos skelbia darbdavys šaltinyje — labourmarket.ai juos rodo, kad rastumėte, o kandidatuojama per originalų skelbimą.",
-      "shownOfTotal": "geriausi {shown} iš {total}",
+      "shownOfTotal": "rodoma {shown} iš {total}",
       "bandBest": "Geriausiai tinkantys",
       "bandPossible": "Galimai tinkantys",
       "bandExplore": "Kiti skelbimai",
@@ -10924,6 +10936,18 @@
       "partial": "{count} iš jų nepavyko suskaičiuoti iki galo — kai kas neturi datų, todėl skaičius viršuje yra minimumas.",
       "unknown": "{count} iš vis nepavyko perskaityti. Tai nėra tas pat, kas laisva.",
       "denominatorNote": "Skaičiuojama kalendorinėmis dienomis. Sutartų valandų nefiksuojame, todėl tai nėra etatų rodiklis."
+    },
+    "rosterTimeline": {
+      "byPerson": "Žmonės",
+      "byProject": "Projektai",
+      "prev": "Anksčiau",
+      "next": "Vėliau",
+      "today": "Šiandien",
+      "dateLabel": "Nuo datos",
+      "go": "Eiti",
+      "away": "Nėra",
+      "outside": "Dar {count} už šio laikotarpio",
+      "nothing": "Šiuo laikotarpiu įrašų nėra"
     },
     "committedWhere": {
       "title": "Kas kur įsipareigojęs",
@@ -13928,7 +13952,7 @@
       "moveToLine": "• „{to}“: žmonių {before} → {after}; pasirengimo sąrašas ten prasidės nuo 0/{total}.",
       "moveCountryLine": "• Šalis keičiasi: {from} → {to} — dokumentų reikalavimai kitokie.",
       "moveNoDatesLine": "• „{to}“ neturi datų — nebuvimų sutikrinti negaliu.",
-      "moveAvailabilityUnknownLine": "• Nebuvimai nežinomi — nebuvimų modelis šioje aplinkoje neatsako.",
+      "moveAvailabilityUnknownLine": "• Nebuvimai nežinomi.",
       "moveAvailabilityLine": "• {start}–{end} lange jis turi {count} nebuvimo įrašų.",
       "moveAvailabilityFreeLine": "• „{to}“ datose nebuvimų neužfiksuota.",
       "moveOnlyConfirmLine": "Kol kas niekas nepakeista — pakeis tik patvirtinimas.",
@@ -17940,6 +17964,7 @@
     "whoWorked": "Kas čia dirbo",
     "timeline": "Kas daryta",
     "back": "Atgal į istoriją",
-    "placeMissing": "Šios vietos nėra aktyvios darbo erdvės importuotoje istorijoje."
+    "placeMissing": "Šios vietos nėra aktyvios darbo erdvės importuotoje istorijoje.",
+    "attributedNote": "Įskaitant {count, plural, one {# įrašą} few {# įrašus} other {# įrašų}}, saugomus kitos organizacijos knygose ir čia priskirtus kaip darbą atlikusiai įmonei."
   }
 }

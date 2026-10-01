@@ -1665,7 +1665,7 @@
     "eyebrow": "[EN] MY DOCUMENTS",
     "title": "[EN] My documents",
     "subtitle": "[EN] What you have, what is missing, and the next step — per country.",
-    "preparing": "[EN] Document readiness is being prepared — it goes live once the document storage layer is reviewed and enabled. Nothing here is active yet.",
+    "preparing": "Pašlaik nav pieejams.",
     "disclaimer": "[EN] Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
     "needsMigration": "Pašlaik nav pieejams.",
     "noWorker": "[EN] Create your worker profile first — documents attach to it.",
@@ -2242,7 +2242,7 @@
     "external": {
       "sectionTitle": "Publiski darba sludinājumi",
       "sectionNote": "Sludinājumi no oficiālajiem valsts nodarbinātības dienestiem. Tos avotā publicē darba devējs — labourmarket.ai tos rāda, lai jūs tos atrastu; pieteikšanās notiek caur oriģinālo sludinājumu.",
-      "shownOfTotal": "labākās {shown} no {total}",
+      "shownOfTotal": "rāda {shown} no {total}",
       "bandBest": "Vispiemērotākie",
       "bandPossible": "Iespējami piemēroti",
       "bandExplore": "Citi sludinājumi",
@@ -4201,7 +4201,7 @@
       "moveToLine": "• „{to}“: cilvēku {before} → {after}; gatavības saraksts tur sāksies no 0/{total}.",
       "moveCountryLine": "• Mainās valsts: {from} → {to} — citas dokumentu prasības.",
       "moveNoDatesLine": "• „{to}“ nav datumu — prombūtnes nevar pārbaudīt.",
-      "moveAvailabilityUnknownLine": "• Prombūtnes nav zināmas — atvaļinājumu modelis šeit neatbild.",
+      "moveAvailabilityUnknownLine": "• Prombūtnes nav zināmas.",
       "moveAvailabilityLine": "• Laikā {start}–{end} viņam ir {count} prombūtnes ieraksti.",
       "moveAvailabilityFreeLine": "• „{to}“ datumos prombūtņu nav.",
       "moveOnlyConfirmLine": "Pagaidām nekas nav mainīts — mainīs tikai jūsu apstiprinājums.",
@@ -6622,7 +6622,9 @@
         "unknown": "Salīdzināšanai nepietiek informācijas"
       },
       "opportunity": "{count, plural, one {Līdz # cilvēkam ir brīvs no {date}} other {Līdz # cilvēkiem ir brīvi no {date}}}",
-      "opportunityCta": "Meklēt darbu"
+      "opportunityCta": "Meklēt darbu",
+      "interest": "{count, plural, one {# cilvēks izrādīja interesi par jūsu vajadzībām} other {# cilvēki izrādīja interesi par jūsu vajadzībām}}",
+      "interestCta": "Skatīt, kas"
     },
     "attention": {
       "heading": "Vajadzīgs jūs",
@@ -6841,6 +6843,7 @@
     "whoWorked": "Kas šeit strādāja",
     "timeline": "Kas darīts",
     "back": "Atpakaļ uz vēsturi",
-    "placeMissing": "Šīs vietas nav aktīvās darbvietas importētajā vēsturē."
+    "placeMissing": "Šīs vietas nav aktīvās darbvietas importētajā vēsturē.",
+    "attributedNote": "Ietver {count, plural, zero {# ierakstu} one {# ierakstu} other {# ierakstus}}, kas glabājas citas organizācijas uzskaitē un šeit piešķirti kā darbu veikušajam uzņēmumam."
   }
 }

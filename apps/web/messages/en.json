@@ -1807,7 +1807,9 @@
         "unknown": "Not enough detail to compare"
       },
       "opportunity": "{count, plural, =1 {Up to 1 person is free from {date}} other {Up to # people are free from {date}}}",
-      "opportunityCta": "Look for work"
+      "opportunityCta": "Look for work",
+      "interest": "{count, plural, =1 {1 person showed interest in your needs} other {# people showed interest in your needs}}",
+      "interestCta": "See who"
     },
     "attention": {
       "heading": "Needs you",
@@ -2140,7 +2142,7 @@
       },
       "workersBlocker": {
         "title": "Something went wrong",
-        "subtitle": "The company path is temporarily blocked at the DB layer. Real worker linking + invitations already work on the agency side.",
+        "subtitle": "Not available right now.",
         "statusLabel": "Something went wrong",
         "statusBody": "Company worker management is still being prepared and will be enabled later.",
         "nextStep": "Self-entry for workers stays open at all times."
@@ -2252,6 +2254,12 @@
         "statusInvited": "Invitation created (it is not emailed). The invitee sees it after signing in with this email.",
         "statusAlreadyPending": "A pending invitation already exists for this email from your company.",
         "statusAlreadyLinked": "This worker is already linked to your company.",
+        "statusWordActive": "Active",
+        "statusWordPending": "Invited",
+        "statusWordAccepted": "Accepted",
+        "statusWordCancelled": "Cancelled",
+        "statusWordExpired": "Expired",
+        "statusWordEnded": "Ended",
         "statusNotOwner": "Action rejected: you are not the company owner.",
         "statusInvalidEmail": "Invalid email address.",
         "statusError": "Something went wrong. Please try again.",
@@ -6448,6 +6456,8 @@
     "discoverEmpty": "No active services to show yet.",
     "request": "Request",
     "requested": "Requested",
+    "partnershipBadge": "Looking for partners",
+    "partnershipRequest": "Offer to partner",
     "requestMessagePlaceholder": "Tell the provider what you need (optional)",
     "remoteBadge": "Remote",
     "outgoingHeading": "My requests",
@@ -6581,6 +6591,7 @@
     "notAvailable": "Not available right now.",
     "empty": "No service offerings yet. Add the first real service you offer.",
     "addButton": "Add a service",
+    "addPartnership": "Look for partners",
     "form": {
       "titleLabel": "Service title",
       "titlePlaceholder": "e.g. Interior painting",
@@ -7667,7 +7678,7 @@
     "eyebrow": "MY DOCUMENTS",
     "title": "My documents",
     "subtitle": "What you have, what is missing, and the next step — per country.",
-    "preparing": "Document readiness is being prepared — it goes live once the document storage layer is reviewed and enabled. Nothing here is active yet.",
+    "preparing": "Not available right now.",
     "reports": {
       "title": "Reports & exports",
       "intro": "Build a print-ready report from your own data. PDF works through your browser's print/save; Excel and Word are not available yet.",
@@ -8448,7 +8459,8 @@
       "opened": "Conversation open — write the worker a message.",
       "view": "Open conversation",
       "error": "Couldn't open the conversation. Please try again.",
-      "limitReached": "Daily limit for new conversations reached. Try again tomorrow."
+      "limitReached": "Daily limit for new conversations reached. Try again tomorrow.",
+      "shortlistFirst": "Add the worker to your shortlist first, then you can request to communicate."
     },
     "how": {
       "title": "How matching works",
@@ -9509,7 +9521,7 @@
     "external": {
       "sectionTitle": "Public job advertisements",
       "sectionNote": "Advertisements from official public employment services. They are published by the employer at the source — labourmarket.ai lists them so you can find them, and applying happens through the original advertisement.",
-      "shownOfTotal": "top {shown} of {total}",
+      "shownOfTotal": "showing {shown} of {total}",
       "bandBest": "Best fits",
       "bandPossible": "Possible fits",
       "bandExplore": "Explore",
@@ -10924,6 +10936,18 @@
       "partial": "{count} of them could not be counted in full — something real has no dates, so the figure above is a floor.",
       "unknown": "{count} could not be read at all. That is not the same as free.",
       "denominatorNote": "Counted in calendar days. We do not record contracted hours, so this is not an FTE figure."
+    },
+    "rosterTimeline": {
+      "byPerson": "People",
+      "byProject": "Projects",
+      "prev": "Earlier",
+      "next": "Later",
+      "today": "Today",
+      "dateLabel": "From date",
+      "go": "Go",
+      "away": "Away",
+      "outside": "{count} more outside this period",
+      "nothing": "Nothing on record in this period"
     },
     "committedWhere": {
       "title": "Who is committed where",
@@ -13928,7 +13952,7 @@
       "moveToLine": "• “{to}”: people {before} → {after}; the readiness checklist there starts at 0/{total}.",
       "moveCountryLine": "• The country changes: {from} → {to} — document requirements differ.",
       "moveNoDatesLine": "• “{to}” has no dates — absences cannot be checked.",
-      "moveAvailabilityUnknownLine": "• Absences unknown — the leave model does not answer here.",
+      "moveAvailabilityUnknownLine": "• Absences unknown.",
       "moveAvailabilityLine": "• Inside {start}–{end} they have {count} absence records.",
       "moveAvailabilityFreeLine": "• No absences inside “{to}”'s dates.",
       "moveOnlyConfirmLine": "Nothing has changed yet — only your confirmation will.",
@@ -17940,6 +17964,7 @@
     "whoWorked": "Who worked here",
     "timeline": "What was done",
     "back": "Back to history",
-    "placeMissing": "This place is not in the imported history of the active workspace."
+    "placeMissing": "This place is not in the imported history of the active workspace.",
+    "attributedNote": "Includes {count, plural, one {# record} other {# records}} kept in another organization's books and attributed here as the performing company."
   }
 }

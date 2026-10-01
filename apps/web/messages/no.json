@@ -1665,7 +1665,7 @@
     "eyebrow": "[EN] MY DOCUMENTS",
     "title": "[EN] My documents",
     "subtitle": "[EN] What you have, what is missing, and the next step — per country.",
-    "preparing": "[EN] Document readiness is being prepared — it goes live once the document storage layer is reviewed and enabled. Nothing here is active yet.",
+    "preparing": "Ikke tilgjengelig akkurat nå.",
     "disclaimer": "[EN] Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
     "needsMigration": "Ikke tilgjengelig akkurat nå.",
     "noWorker": "[EN] Create your worker profile first — documents attach to it.",
@@ -2242,7 +2242,7 @@
     "external": {
       "sectionTitle": "Offentlige stillingsannonser",
       "sectionNote": "Annonser fra offisielle offentlige arbeidsformidlinger. De publiseres av arbeidsgiveren ved kilden — labourmarket.ai viser dem så du kan finne dem; søknad skjer via originalannonsen.",
-      "shownOfTotal": "topp {shown} av {total}",
+      "shownOfTotal": "viser {shown} av {total}",
       "bandBest": "Passer best",
       "bandPossible": "Mulig passende",
       "bandExplore": "Øvrige annonser",
@@ -4201,7 +4201,7 @@
       "moveToLine": "• “{to}”: personer {before} → {after}; beredskapslisten der starter på 0/{total}.",
       "moveCountryLine": "• Landet endres: {from} → {to} — andre dokumentkrav.",
       "moveNoDatesLine": "• “{to}” har ingen datoer — fravær kan ikke sjekkes.",
-      "moveAvailabilityUnknownLine": "• Fravær ukjent — fraværsmodellen svarer ikke her.",
+      "moveAvailabilityUnknownLine": "• Fravær ukjent.",
       "moveAvailabilityLine": "• Innenfor {start}–{end} har han {count} fraværsregistreringer.",
       "moveAvailabilityFreeLine": "• Ingen fravær innenfor datoene til “{to}”.",
       "moveOnlyConfirmLine": "Ingenting er endret ennå — bare din bekreftelse endrer noe.",
@@ -6622,7 +6622,9 @@
         "unknown": "For lite informasjon til å sammenligne"
       },
       "opportunity": "{count, plural, =1 {Opptil 1 person er ledig fra {date}} other {Opptil # personer er ledige fra {date}}}",
-      "opportunityCta": "Finn arbeid"
+      "opportunityCta": "Finn arbeid",
+      "interest": "{count, plural, =1 {1 person har vist interesse for behovene deres} other {# personer har vist interesse for behovene deres}}",
+      "interestCta": "Se hvem"
     },
     "attention": {
       "heading": "Trenger deg",
@@ -6841,6 +6843,7 @@
     "whoWorked": "Hvem som jobbet her",
     "timeline": "Hva som ble gjort",
     "back": "Tilbake til historikk",
-    "placeMissing": "Dette stedet finnes ikke i den importerte historikken for det aktive arbeidsområdet."
+    "placeMissing": "Dette stedet finnes ikke i den importerte historikken for det aktive arbeidsområdet.",
+    "attributedNote": "Omfatter {count, plural, one {# post} other {# poster}} som ligger i en annen organisasjons bøker og er tilskrevet her som utførende firma."
   }
 }

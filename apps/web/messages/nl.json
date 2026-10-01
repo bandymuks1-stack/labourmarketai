@@ -1807,7 +1807,9 @@
         "unknown": "Te weinig gegevens om te vergelijken"
       },
       "opportunity": "{count, plural, =1 {Tot 1 persoon is vrij vanaf {date}} other {Tot # personen zijn vrij vanaf {date}}}",
-      "opportunityCta": "Zoek werk"
+      "opportunityCta": "Zoek werk",
+      "interest": "{count, plural, =1 {1 persoon toonde interesse in uw vraag} other {# personen toonden interesse in uw vraag}}",
+      "interestCta": "Bekijk wie"
     },
     "attention": {
       "heading": "Heeft u nodig",
@@ -2140,7 +2142,7 @@
       },
       "workersBlocker": {
         "title": "Er is iets misgegaan",
-        "subtitle": "Het bedrijfspad is tijdelijk geblokkeerd op de DB-laag. Echte werknemerskoppeling + uitnodigingen werken al aan de uitzendbureaukant.",
+        "subtitle": "Momenteel niet beschikbaar.",
         "statusLabel": "Er is iets misgegaan",
         "statusBody": "Beheer van bedrijfswerknemers wordt nog voorbereid en wordt later ingeschakeld.",
         "nextStep": "Zelfaanmelding voor werknemers blijft altijd open."
@@ -2252,6 +2254,12 @@
         "statusInvited": "Uitnodiging aangemaakt (er wordt geen e-mail verstuurd). De genodigde ziet de uitnodiging na het inloggen met dit e-mailadres.",
         "statusAlreadyPending": "Er bestaat al een openstaande uitnodiging voor dit e-mailadres vanuit jouw bedrijf.",
         "statusAlreadyLinked": "Deze werknemer is al aan jouw bedrijf gekoppeld.",
+        "statusWordActive": "Actief",
+        "statusWordPending": "Uitgenodigd",
+        "statusWordAccepted": "Geaccepteerd",
+        "statusWordCancelled": "Geannuleerd",
+        "statusWordExpired": "Verlopen",
+        "statusWordEnded": "Beëindigd",
         "statusNotOwner": "Actie geweigerd: je bent niet de eigenaar van het bedrijf.",
         "statusInvalidEmail": "Ongeldig e-mailadres.",
         "statusError": "Er is iets misgegaan. Probeer het opnieuw.",
@@ -6448,6 +6456,8 @@
     "discoverEmpty": "Nog geen actieve diensten om te tonen.",
     "request": "Aanvragen",
     "requested": "Aangevraagd",
+    "partnershipBadge": "Zoekt partners",
+    "partnershipRequest": "Partnerschap aanbieden",
     "requestMessagePlaceholder": "Vertel de aanbieder wat je nodig hebt (optioneel)",
     "remoteBadge": "Op afstand",
     "outgoingHeading": "Mijn aanvragen",
@@ -6581,6 +6591,7 @@
     "notAvailable": "Momenteel niet beschikbaar.",
     "empty": "Nog geen dienstenaanbod. Voeg de eerste echte dienst toe die je aanbiedt.",
     "addButton": "Dienst toevoegen",
+    "addPartnership": "Partners zoeken",
     "form": {
       "titleLabel": "Diensttitel",
       "titlePlaceholder": "bijv. Binnenschilderwerk",
@@ -7667,7 +7678,7 @@
     "eyebrow": "MIJN DOCUMENTEN",
     "title": "Mijn documenten",
     "subtitle": "Wat je hebt, wat ontbreekt en de volgende stap — per land.",
-    "preparing": "Documentgereedheid wordt voorbereid — het gaat live zodra de documentopslaglaag is beoordeeld en ingeschakeld. Hier is nog niets actief.",
+    "preparing": "Momenteel niet beschikbaar.",
     "reports": {
       "title": "Rapporten & exports",
       "intro": "Stel een printklaar rapport samen uit je eigen data. PDF werkt via de print-/opslaanfunctie van je browser; Excel en Word zijn nog niet beschikbaar.",
@@ -8448,7 +8459,8 @@
       "opened": "Gesprek geopend — stuur de werknemer een bericht.",
       "view": "Gesprek openen",
       "error": "Kon het gesprek niet openen. Probeer het opnieuw.",
-      "limitReached": "Daglimiet voor nieuwe gesprekken bereikt. Probeer het morgen opnieuw."
+      "limitReached": "Daglimiet voor nieuwe gesprekken bereikt. Probeer het morgen opnieuw.",
+      "shortlistFirst": "Zet de persoon eerst op je shortlist, daarna kun je een gesprek aanvragen."
     },
     "how": {
       "title": "Hoe matching werkt",
@@ -9509,7 +9521,7 @@
     "external": {
       "sectionTitle": "Openbare vacatures",
       "sectionNote": "Advertenties van officiële publieke arbeidsbureaus. Ze worden door de werkgever bij de bron gepubliceerd — labourmarket.ai toont ze zodat u ze kunt vinden; solliciteren gaat via de originele advertentie.",
-      "shownOfTotal": "top {shown} van {total}",
+      "shownOfTotal": "{shown} van {total} getoond",
       "bandBest": "Past het best",
       "bandPossible": "Mogelijk passend",
       "bandExplore": "Overige advertenties",
@@ -10924,6 +10936,18 @@
       "partial": "{count} daarvan konden niet volledig worden geteld — iets echts heeft geen datums, dus het getal hierboven is een ondergrens.",
       "unknown": "{count} konden helemaal niet worden gelezen. Dat is niet hetzelfde als vrij.",
       "denominatorNote": "Geteld in kalenderdagen. We leggen geen contracturen vast, dus dit is geen fte-cijfer."
+    },
+    "rosterTimeline": {
+      "byPerson": "Mensen",
+      "byProject": "Projecten",
+      "prev": "Eerder",
+      "next": "Daarna",
+      "today": "Vandaag",
+      "dateLabel": "Vanaf datum",
+      "go": "Ga",
+      "away": "Afwezig",
+      "outside": "{count} meer buiten deze periode",
+      "nothing": "Niets geregistreerd in deze periode"
     },
     "committedWhere": {
       "title": "Wie is waar ingezet",
@@ -13928,7 +13952,7 @@
       "moveToLine": "• “{to}”: mensen {before} → {after}; de gereedheidslijst daar begint op 0/{total}.",
       "moveCountryLine": "• Het land verandert: {from} → {to} — andere documenteisen.",
       "moveNoDatesLine": "• “{to}” heeft geen datums — afwezigheden kunnen niet worden gecontroleerd.",
-      "moveAvailabilityUnknownLine": "• Afwezigheden onbekend — het verlofmodel antwoordt hier niet.",
+      "moveAvailabilityUnknownLine": "• Afwezigheden onbekend.",
       "moveAvailabilityLine": "• Binnen {start}–{end} heeft hij {count} afwezigheidsregistraties.",
       "moveAvailabilityFreeLine": "• Geen afwezigheden binnen de datums van “{to}”.",
       "moveOnlyConfirmLine": "Er is nog niets veranderd — alleen uw bevestiging verandert iets.",
@@ -17940,6 +17964,7 @@
     "whoWorked": "Wie hier werkte",
     "timeline": "Wat er is gedaan",
     "back": "Terug naar geschiedenis",
-    "placeMissing": "Deze plaats staat niet in de geïmporteerde geschiedenis van de actieve werkruimte."
+    "placeMissing": "Deze plaats staat niet in de geïmporteerde geschiedenis van de actieve werkruimte.",
+    "attributedNote": "Bevat {count, plural, one {# registratie} other {# registraties}} uit de administratie van een andere organisatie, hier toegewezen als uitvoerend bedrijf."
   }
 }

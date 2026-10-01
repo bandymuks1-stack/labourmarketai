@@ -158,7 +158,7 @@
       "pending": "Wartet auf Überprüfung",
       "confirmed": "Bestätigt"
     },
-    "projectNote": "Einträge können mit einem Projekt verknüpft werden — das Datenmodell ist bereit, aber noch ist kein Eintrag verknüpft und nichts wird automatisch ausgefüllt. Die Ebene für Projekte / Baustellen / Kunden wird in einem separaten Schritt befüllt.",
+    "projectNote": "Einträge können mit einem Projekt verknüpft werden. Nichts wird automatisch ausgefüllt.",
     "reviewClarity": {
       "lead": "Ihre Überprüfung macht aus dem selbst deklarierten Eintrag einer Arbeitskraft einen bestätigten Nachweis. Nur ein Manager, Inhaber oder Kundenmanager kann das tun — jede Bestätigung ist eine echte menschliche Entscheidung.",
       "actionsTitle": "Was jede Aktion bewirkt",
