@@ -6669,7 +6669,20 @@
         "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company."
       },
       "workers": {
-        "invitationsManagedElsewhere": "Par ielūgumiem rūpējas par to atbildīgā uzņēmuma persona."
+        "invitationsManagedElsewhere": "Par ielūgumiem rūpējas par to atbildīgā uzņēmuma persona.",
+        "team": {
+          "free": "Brīvs",
+          "working": "Strādā",
+          "away": "Prombūtnē",
+          "countFree": "Brīvi",
+          "countWorking": "Strādā",
+          "countAway": "Prombūtnē",
+          "workingOn": "Strādā: {project}",
+          "until": "līdz {date}",
+          "awayUntil": "Prombūtnē līdz {date}",
+          "assign": "Piešķirt projektam",
+          "openCalendar": "Atvērt kalendāru"
+        }
       }
     }
   },

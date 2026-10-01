@@ -2149,14 +2149,14 @@
       },
       "workers": {
         "title": "Company workers",
-        "subtitle": "Link your company with real workers. Self-entry stays open: a person can sign up on their own and be linked later. Invitations by email are an additional channel, not the only one.",
+        "subtitle": "Who works with you, and who is free.",
         "activeWorkersHeading": "Linked workers",
         "noWorkersHeading": "No linked workers yet",
-        "noWorkersBody": "Invite by email, or wait for a worker to sign up on their own and be linked.",
+        "noWorkersBody": "Invite the first person by email.",
         "inviteHeading": "Invite a worker by email",
         "inviteDescription": "No account is created automatically — the invited person registers or signs in themselves. Real email sending is not activated yet.",
         "operations": {
-          "columnHeading": "Operations role / review",
+          "columnHeading": "Role and journal",
           "setupNote": "Operational roles are not assigned yet. Work journal review will be enabled only after safe setup.",
           "nextActionLabels": {
             "assign_role": "Next: assign an operations role (setup required)",
@@ -2276,6 +2276,19 @@
             "busy": "Busy",
             "unavailable": "Unavailable"
           }
+        },
+        "team": {
+          "free": "Free",
+          "working": "Working",
+          "away": "Away",
+          "countFree": "Free",
+          "countWorking": "Working",
+          "countAway": "Away",
+          "workingOn": "Working: {project}",
+          "until": "until {date}",
+          "awayUntil": "Away until {date}",
+          "assign": "Assign to a project",
+          "openCalendar": "Open calendar"
         }
       },
       "scoutingBridge": {

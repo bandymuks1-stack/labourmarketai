@@ -1,8 +1,6 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { ChevronRight } from "lucide-react";
-
 import { Link } from "@/lib/i18n/navigation";
 
 import {
@@ -88,7 +86,34 @@ export interface CompanyWorkersSectionLabels {
   readonly operations: OpsCellLabels;
   /** Identity-card copy: the worker's own stated availability, by status. */
   readonly identity: { readonly availability: Record<string, string> };
+  /** Team-at-a-glance copy: the state of each person and the one action it asks for. */
+  readonly team: {
+    readonly free: string;
+    readonly working: string;
+    readonly away: string;
+    readonly assign: string;
+    readonly openCalendar: string;
+  };
 }
+
+/** The team as a whole + each person's state, resolved by the page from the
+ *  ONE capacity read. `byWorker` text is display-ready (dates formatted).
+ *  Absent = the read did not answer; nothing is then said about anyone. */
+export interface CompanyWorkersTeamView {
+  readonly counts: {
+    readonly free: number;
+    readonly working: number;
+    readonly away: number;
+  } | null;
+  readonly byWorker: Readonly<
+    Record<string, { readonly state: "free" | "working" | "away"; readonly text: string }>
+  >;
+}
+
+const PRIMARY_ACTION =
+  "inline-flex min-h-11 items-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 py-2 text-xs font-semibold text-brand-blue transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan";
+const QUIET_ACTION =
+  "inline-flex min-h-11 items-center rounded-control px-2.5 py-2 text-xs font-medium text-text-secondary underline-offset-4 hover:text-text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan";
 
 export interface OpsCellLabels {
   readonly columnHeading: string;
@@ -125,13 +150,6 @@ function statusWord(labels: CompanyWorkersSectionLabels, status: string): string
   }
 }
 
-/** Subtle left status rail per review capability (Step 9, visual only). */
-const REVIEW_RAIL: Record<string, string> = {
-  can_review: "border-l-2 border-l-state-success/60",
-  can_view: "border-l-2 border-l-brand-blue/50",
-  not_enabled: "border-l-2 border-l-ink-500",
-};
-
 export function CompanyWorkersSection({
   workersResult,
   invitationsResult,
@@ -141,6 +159,7 @@ export function CompanyWorkersSection({
   canAssignRoles = false,
   reviewElsewhere,
   canManageInvitations = false,
+  team,
 }: {
   readonly workersResult: ListState<LinkedCompanyWorker>;
   readonly invitationsResult: ListState<CompanyWorkerInvitation>;
@@ -160,6 +179,8 @@ export function CompanyWorkersSection({
   /** `manage-invitations` (owner/admin, never a job title): the invite form
    *  and the pending-invitations list. Without it, a neutral explanation. */
   readonly canManageInvitations?: boolean;
+  /** Team state from the ONE capacity read (see `derivePeopleTeamState`). */
+  readonly team?: CompanyWorkersTeamView;
 }) {
   const [state, formAction, isPending] = useActionState<
     InviteCompanyFormState | null,
@@ -210,8 +231,33 @@ export function CompanyWorkersSection({
         <h2 className="font-display text-lg font-semibold text-text-primary">
           {labels.title}
         </h2>
-        <p className="text-sm text-text-secondary">{labels.subtitle}</p>
+        {labels.subtitle ? <p className="text-sm text-text-secondary">{labels.subtitle}</p> : null}
       </header>
+
+      {team?.counts ? (
+        <ul
+          className="grid grid-cols-3 gap-2"
+          data-testid="company-team-counts"
+          aria-label={labels.title}
+        >
+          {(
+            [
+              ["free", team.counts.free, labels.team.free],
+              ["working", team.counts.working, labels.team.working],
+              ["away", team.counts.away, labels.team.away],
+            ] as const
+          ).map(([key, n, label]) => (
+            <li
+              key={key}
+              className="flex min-w-0 flex-col rounded-control border border-ink-600 bg-ink-900/40 px-3 py-2"
+              data-testid={`company-team-count-${key}`}
+            >
+              <span className="font-display text-2xl font-bold tabular-nums text-text-primary">{n}</span>
+              <span className="min-w-0 break-words text-meta text-text-secondary">{label}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       {migrationNeeded ? (
         <div
@@ -261,39 +307,61 @@ export function CompanyWorkersSection({
                 const availabilityText = w.availabilityStatus
                   ? (labels.identity.availability[w.availabilityStatus] ?? null)
                   : null;
+                const ts = team?.byWorker[w.workerId] ?? null;
+                // The one real role: a stated title, or an assigned role. An
+                // unassigned role is simply not said (SEP-5: identity ≠ role).
+                const roleText =
+                  w.operationsTitle?.trim() ||
+                  (ctx.operationsRole === "not_enabled" ? "" : roleLabel);
+                // State in ONE meta line: from the capacity read when it
+                // answered, otherwise the person's own stated availability.
                 const meta: IdentityMeta[] = [];
+                if (ts) {
+                  meta.push({
+                    key: "state",
+                    kind: ts.state === "working" ? "assignment" : "availability",
+                    label: ts.text,
+                    live: ts.state === "free",
+                  });
+                } else {
+                  if (availabilityText) {
+                    meta.push({
+                      key: "avail",
+                      kind: "availability",
+                      label: w.availableFrom
+                        ? `${availabilityText} · ${w.availableFrom.slice(0, 10)}`
+                        : availabilityText,
+                      live: w.availabilityStatus === "available",
+                    });
+                  }
+                  if (w.currentProjects.length > 0) {
+                    meta.push({
+                      key: "project",
+                      kind: "assignment",
+                      label: w.currentProjects.join(" · "),
+                    });
+                  }
+                }
                 if (w.locationCountry) {
                   meta.push({ key: "loc", kind: "location", label: w.locationCountry });
                 }
-                if (availabilityText) {
-                  meta.push({
-                    key: "avail",
-                    kind: "availability",
-                    label: w.availableFrom
-                      ? `${availabilityText} \u00b7 ${w.availableFrom.slice(0, 10)}`
-                      : availabilityText,
-                    live: w.availabilityStatus === "available",
-                  });
-                }
-                if (w.currentProjects.length > 0) {
-                  meta.push({
-                    key: "project",
-                    kind: "assignment",
-                    label: w.currentProjects.join(" \u00b7 "),
-                  });
-                }
-                const roleText = w.operationsTitle?.trim() ? w.operationsTitle : roleLabel;
+                // ONE contextual primary action by state; everything else is
+                // quieter. free → give work; working → see it in time; away or
+                // unknown → reach the person.
+                const primary: "assign" | "calendar" | "message" =
+                  ts?.state === "free" ? "assign" : ts?.state === "working" ? "calendar" : "message";
                 return (
                   <li
                     key={w.workerId}
-                    className={`card-border flex flex-col gap-2 p-3 ${REVIEW_RAIL[ctx.reviewCapability] ?? ""}`}
+                    className="card-border flex flex-col gap-2 p-3"
                     data-testid={`company-worker-row-${w.workerId}`}
                     data-review-capability={ctx.reviewCapability}
+                    data-team-state={ts?.state ?? "unknown"}
                   >
                     {/* ONE identity, team depth (owner 2026-10-01): the same
                         PersonIdentityCard the employer reads an application
-                        with. Layer 1 = who, role, place, availability, current
-                        assignment; the operations controls open as a layer. */}
+                        with. Layer 1 = who, role, state, place; the role and
+                        journal controls open as a layer. */}
                     <PersonIdentityCard
                       variant="team-member"
                       testid={`company-worker-identity-${w.workerId}`}
@@ -304,29 +372,56 @@ export function CompanyWorkersSection({
                       professions={roleText ? [roleText] : []}
                       meta={meta}
                       status={
-                        <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
-                          {statusWord(labels, w.status ?? "active")}
-                        </span>
+                        w.status && w.status !== "active" ? (
+                          <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 text-meta text-text-secondary">
+                            {statusWord(labels, w.status)}
+                          </span>
+                        ) : null
                       }
                       actions={
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
+                          {primary === "assign" ? (
+                            <Link
+                              href={"/dashboard/projects" as "/dashboard"}
+                              className={PRIMARY_ACTION}
+                              data-testid={`company-worker-assign-${w.workerId}`}
+                            >
+                              {labels.team.assign}
+                            </Link>
+                          ) : null}
+                          {primary === "calendar" ? (
+                            <Link
+                              href={"/dashboard/company/planning" as "/dashboard"}
+                              className={PRIMARY_ACTION}
+                              data-testid={`company-worker-calendar-${w.workerId}`}
+                            >
+                              {labels.team.openCalendar}
+                            </Link>
+                          ) : null}
+                          <MessageButton
+                            profileId={w.profileId}
+                            labelKey="messageWorker"
+                            variant={primary === "message" ? "primary" : "quiet"}
+                          />
                           <Link
                             href={`/dashboard/people/${w.workerId}`}
-                            className="w-fit rounded-md border border-ink-500 px-2.5 py-1 text-xs font-medium text-text-secondary hover:border-brand-blue hover:text-text-primary"
+                            className={QUIET_ACTION}
                             data-testid={`company-worker-open-${w.workerId}`}
                           >
                             {labels.openProfile}
                           </Link>
-                          <MessageButton profileId={w.profileId} labelKey="messageWorker" />
                           {/* R-9: the owner ends the relationship through the one
-                              gated write (the RPC re-derives ownership). */}
+                              gated write (the RPC re-derives ownership). Destructive,
+                              so it is the quietest control on the card. */}
                           {canAssignRoles && w.companyId ? (
-                            <RosterLinkEndControl
-                              kind="company"
-                              orgLegacyId={w.companyId}
-                              workerId={w.workerId}
-                              side="owner"
-                            />
+                            <span className="ml-auto">
+                              <RosterLinkEndControl
+                                kind="company"
+                                orgLegacyId={w.companyId}
+                                workerId={w.workerId}
+                                side="owner"
+                              />
+                            </span>
                           ) : null}
                         </div>
                       }
@@ -334,11 +429,6 @@ export function CompanyWorkersSection({
                       <IdentityDisclosure
                         id="operations"
                         title={labels.operations.columnHeading}
-                        summary={
-                          ctx.reviewCapability === "can_review"
-                            ? labels.operations.reviewEnabled
-                            : labels.operations.reviewNotEnabled
-                        }
                       >
                         <div className="flex flex-col gap-1 text-xs text-text-secondary">
                           <span>

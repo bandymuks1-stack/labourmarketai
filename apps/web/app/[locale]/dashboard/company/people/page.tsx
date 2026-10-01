@@ -31,9 +31,15 @@ import {
   readOrgMembersLabels,
   readWorkersLabels,
 } from "@/lib/company/company-section-labels";
+import { whoIsAvailableCore } from "@/lib/conversation/capacity-core";
+import { derivePeopleTeamState } from "@/lib/company/people-team-state";
+import { createUtcFormatter } from "@/lib/time/display";
 import { listBookedPeople } from "@/lib/company/booked-people";
 import { BookedPeopleSection } from "@/components/app/booked-people-section";
-import { CompanyWorkersSection } from "@/components/app/company-workers-section";
+import {
+  CompanyWorkersSection,
+  type CompanyWorkersTeamView,
+} from "@/components/app/company-workers-section";
 import { TeamRecordedWork } from "@/components/app/organization/team-recorded-work";
 import { TeamBrigadesPanel } from "@/components/app/team-brigades-panel";
 import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
@@ -134,6 +140,43 @@ export default async function CompanyPeoplePage({
   const engagementCandidates = capabilityOrgId
     ? await listRosterLinkCandidatesFromEngagements(await createClient(), capabilityOrgId)
     : [];
+  // The team's STATE (free / working / away) is the ONE capacity read the chat,
+  // the home and the planning page already use — handed the roster read above so
+  // the roster is not queried twice, for today, every person. A failed read says
+  // nothing about anyone (unknown is not zero).
+  const teamState = derivePeopleTeamState(
+    await whoIsAvailableCore(
+      companyRow.id,
+      null,
+      { roster: workersResult },
+      new Date().toISOString().slice(0, 10),
+      500,
+    ),
+  );
+  const tTeam = await getTranslations("roleDashboards.company.workers.team");
+  const dayFmt = createUtcFormatter(locale, { day: "numeric", month: "short" });
+  const teamView: CompanyWorkersTeamView = {
+    counts: teamState.counts,
+    byWorker: Object.fromEntries(
+      Object.entries(teamState.byWorker).map(([id, r]) => {
+        const date = r.until ? (dayFmt(r.until) ?? r.until) : null;
+        const text =
+          r.state === "free"
+            ? tTeam("free")
+            : r.state === "away"
+              ? date
+                ? tTeam("awayUntil", { date })
+                : tTeam("away")
+              : [
+                  r.project ? tTeam("workingOn", { project: r.project }) : tTeam("working"),
+                  date ? tTeam("until", { date }) : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ");
+        return [id, { state: r.state, text }] as const;
+      }),
+    ),
+  };
   const readinessMap = await getWorkerReadiness(activeWorkerRows.map((w) => w.workerId));
   // The team's PHOTOS (owner D1, 2026-09-30): an ACTIVE company_workers row is
   // a real work relationship, which the one photo rule
@@ -219,6 +262,7 @@ export default async function CompanyPeoplePage({
           roleCoordinationEnabled={isOperationsRoleEnabled("foreman")}
           canAssignRoles
           canManageInvitations={canManageInvitations}
+          team={teamView}
           reviewElsewhere={
             orgMembers ? { href: "#org-members", label: orgMembersLabels.title } : undefined
           }

@@ -2149,14 +2149,14 @@
       },
       "workers": {
         "title": "Pracownicy firmy",
-        "subtitle": "Połącz swoją firmę z realnymi pracownikami. Samodzielna rejestracja pozostaje dostępna: osoba może zarejestrować się sama i zostać połączona później. Zaproszenia e-mailem to dodatkowy kanał, nie jedyny.",
+        "subtitle": "Kto z wami pracuje i kto jest wolny.",
         "activeWorkersHeading": "Połączeni pracownicy",
         "noWorkersHeading": "Brak jeszcze połączonych pracowników",
-        "noWorkersBody": "Zaproś przez e-mail lub poczekaj, aż pracownik zarejestruje się sam i zostanie połączony.",
+        "noWorkersBody": "Zaproś pierwszą osobę e-mailem.",
         "inviteHeading": "Zaproś pracownika przez e-mail",
         "inviteDescription": "Konto nie jest tworzone automatycznie — zaproszona osoba rejestruje się lub loguje sama. Rzeczywiste wysyłanie e-maili nie jest jeszcze włączone.",
         "operations": {
-          "columnHeading": "Rola operacyjna / przegląd",
+          "columnHeading": "Rola i dziennik",
           "setupNote": "Role operacyjne nie są jeszcze przypisane. Przegląd dziennika pracy zostanie włączony dopiero po bezpiecznej konfiguracji.",
           "nextActionLabels": {
             "assign_role": "Dalej: przypisz rolę operacyjną (wymagana konfiguracja)",
@@ -2276,6 +2276,19 @@
             "busy": "Zajęty",
             "unavailable": "Niedostępny"
           }
+        },
+        "team": {
+          "free": "Wolny",
+          "working": "Pracuje",
+          "away": "Nieobecny",
+          "countFree": "Wolni",
+          "countWorking": "Pracują",
+          "countAway": "Nieobecni",
+          "workingOn": "Pracuje: {project}",
+          "until": "do {date}",
+          "awayUntil": "Nieobecny do {date}",
+          "assign": "Przypisz do projektu",
+          "openCalendar": "Otwórz kalendarz"
         }
       },
       "scoutingBridge": {

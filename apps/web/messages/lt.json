@@ -2149,14 +2149,14 @@
       },
       "workers": {
         "title": "Įmonės darbuotojai",
-        "subtitle": "Susiekite savo įmonę su realiais darbuotojais. Savaiminis užsiregistravimas lieka atviras: žmogus gali užsiregistruoti pats ir vėliau būti susietas. Pakvietimas el. paštu — papildomas kanalas, ne vienintelis.",
+        "subtitle": "Kas dirba su jumis ir kas laisvas.",
         "activeWorkersHeading": "Susiję darbuotojai",
         "noWorkersHeading": "Dar nėra susietų darbuotojų",
-        "noWorkersBody": "Pakvieskite el. paštu arba palaukite, kol darbuotojas užsiregistruos savaime ir bus susietas.",
+        "noWorkersBody": "Pakvieskite pirmą žmogų el. paštu.",
         "inviteHeading": "Pakviesti darbuotoją el. paštu",
         "inviteDescription": "Jokia paskyra nesukuriama automatiškai — pakviestas žmogus pats užsiregistruoja arba prisijungia. Realių laiškų siuntimas dar neaktyvuotas.",
         "operations": {
-          "columnHeading": "Operacinė rolė / peržiūra",
+          "columnHeading": "Rolė ir žurnalas",
           "setupNote": "Operacinės rolės dar nepriskirtos. Darbo žurnalo peržiūros ryšys bus įjungiamas tik po saugaus nustatymo.",
           "nextActionLabels": {
             "assign_role": "Tolesnis žingsnis: priskirti operacinę rolę (reikia nustatymo)",
@@ -2276,6 +2276,19 @@
             "busy": "Užimtas",
             "unavailable": "Neprieinamas"
           }
+        },
+        "team": {
+          "free": "Laisvas",
+          "working": "Dirba",
+          "away": "Nedirba",
+          "countFree": "Laisvi",
+          "countWorking": "Dirba",
+          "countAway": "Nedirba",
+          "workingOn": "Dirba: {project}",
+          "until": "iki {date}",
+          "awayUntil": "Nedirba iki {date}",
+          "assign": "Priskirti objektui",
+          "openCalendar": "Atidaryti kalendorių"
         }
       },
       "scoutingBridge": {

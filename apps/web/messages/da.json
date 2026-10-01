@@ -6669,7 +6669,20 @@
         "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company."
       },
       "workers": {
-        "invitationsManagedElsewhere": "Invitationer håndteres af den person i virksomheden, der har ansvaret for dem."
+        "invitationsManagedElsewhere": "Invitationer håndteres af den person i virksomheden, der har ansvaret for dem.",
+        "team": {
+          "free": "Ledig",
+          "working": "Arbejder",
+          "away": "Fraværende",
+          "countFree": "Ledige",
+          "countWorking": "Arbejder",
+          "countAway": "Fraværende",
+          "workingOn": "Arbejder på: {project}",
+          "until": "til {date}",
+          "awayUntil": "Fraværende til {date}",
+          "assign": "Tildel til projekt",
+          "openCalendar": "Åbn kalender"
+        }
       }
     }
   },
