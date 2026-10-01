@@ -621,7 +621,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 
 | ID | Capability | Canonical objects | Status | AI | P | Next action |
 |---|---|---|---|---|---|---|
-| GEO-1 | Market map / world view | `lib/market-map` | PARTIAL | — | 1 | owner-scoped only; cross-user aggregate deliberately absent |
+| GEO-1 | Market map / world view | `lib/market-map` | PARTIAL | — | 1 | owner-scoped only; cross-user aggregate deliberately absent. ONE canonical map (2026-10-01); prior human proof not re-earned until production screenshots at 390/1280/1440 exist |
 | GEO-2 | Personal location privacy | `preferred_locations`, `consented_login_location_signals` | PROD_DATA | — | — | **no coordinates for people, by schema construction** |
 | GEO-3 | Mobility / cross-border requirements | `lib/country-readiness` | PARTIAL | — | 2 | checklist only; no permit/posting workflow |
 | GEO-4 | Labour-market intelligence | `market_intelligence_observations` (76) | PARTIAL | — | 2 | exactly one path into an operational action |

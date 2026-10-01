@@ -944,32 +944,6 @@
     "compass": "Mokymosi kompasas",
     "moreDestinations": "Daugiau vietų"
   },
-  "mapLayers": {
-    "title": "Žemėlapio sluoksniai",
-    "intro": "Žemėlapis pamažu taps pagrindiniu vizualiu rinkos sluoksniu. Žemiau – kas matoma dabar ir kokie sluoksniai ruošiami.",
-    "visibleNow": "Matoma dabar",
-    "futureLayers": "Būsimi sluoksniai",
-    "futureBadge": "Ruošiama",
-    "personSignal": "Mano žmogaus signalas",
-    "companyLayer": "Įmonės sluoksnis",
-    "companyIncomplete": "vieta dar nepridėta",
-    "personIncomplete": "Pridėkite savo vietą, kad būtumėte rodomi rinkos žemėlapyje",
-    "needsLayer": "Mano poreikiai",
-    "notOnMapYet": "dar ne žemėlapyje",
-    "items": {
-      "workers": "Darbuotojai",
-      "selfSignal": "Tavo vietos signalas",
-      "companies": "Įmonės",
-      "teams": "Komandos / brigados",
-      "opportunities": "Galimybės",
-      "workNeeds": "Darbo poreikiai",
-      "services": "Paslaugos",
-      "rentals": "Nuoma / būstas",
-      "shops": "Parduotuvės / pasiūlymai",
-      "availability": "Prieinamumas / kalendorius",
-      "trust": "Pasitikėjimas / pasirengimas"
-    }
-  },
   "profileAvatar": {
     "upload": "Įkelti nuotrauką",
     "change": "Pakeisti nuotrauką",
@@ -1085,59 +1059,15 @@
       "lead": "Atviri poreikiai iš tikrosios šios platformos paklausos — kur darbo prašoma dabar."
     },
     "vacancyVolume": {
-      "title": "Viešų skelbimų apimtis",
-      "scope": "{count} importuotų viešų darbo skelbimų profesijai „{profession}“. Dabartinė šaltinių aprėptis: {countries}.",
-      "window": "Miestų apimtys skaičiuojamos pagal naujausius {window} skelbimų, ne visą fondą."
-    },
-    "entities": {
-      "title": "Trys dalykai žemėlapyje",
-      "intro": "Žemėlapyje rodomi trys skirtingi dalykai: žmonės, įmonių veiklos teritorijos ir projektų vietos. Kiekvienas rodomas pagal savo taisyklę ir atrodo skirtingai.",
-      "neverMixedNote": "Šie trys dalykai niekada nesujungiami į vieną žymeklį.",
-      "contactNote": "Susisiekimas visada vyksta tik per LabourMarket.ai platformą — žemėlapyje niekada nerodomi telefonai ar el. pašto adresai.",
-      "person": {
-        "name": "Žmonės",
-        "legend": "Žmonių skaičius pagal sritį (užpildytas kvadratas)",
-        "countLabel": "{count}",
-        "smallSample": "<5",
-        "empty": "Žmonių skaičių rodyti dar nėra. Žmonės čia matomi tik kaip srities skaičiai, kai srityje susikaupia pakankamai sutikimą davusių žmonių (tikslus skaičius — tik nuo 5).",
-        "visibilityNote": "Žmonės rodomi tik kaip srities skaičiai — niekada kaip atskiras taškas, vardas ar kontaktas. Sritys, kuriose matomų žmonių mažiau nei 5, rodomos kaip „<5“."
-      },
-      "company": {
-        "name": "Įmonių teritorijos",
-        "legend": "Veiklos teritorijos kontūras (brūkšninis žiedas) — niekada taškas",
-        "kinds": {
-          "headquarters": "Būstinė",
-          "operating": "Veiklos sritis",
-          "desired_market": "Norima rinka",
-          "demand_anchor": "Patvirtinta poreikio vieta"
-        },
-        "storeInactive": "Šiuo metu nepasiekiama.",
-        "readError": "Šiuo metu įmonių teritorijų įkelti nepavyko.",
-        "empty": "Įmonių teritorijų dar nėra. Pridėkite įmonės veiklos vietas įmonės darbo erdvėje.",
-        "visibilityNote": "Įmonių teritorijos braižomos kaip kontūrinės sritys iš įmonės įvestos geografijos — niekada kaip į asmenį panašūs žymekliai."
-      },
-      "project": {
-        "name": "Projektų vietos",
-        "legend": "Projekto žymeklis (rombas)",
-        "confirmedTag": "vieta patvirtinta",
-        "unconfirmedTag": "srities lygis",
-        "empty": "Projektų vietų dar nėra. Projektai su vieta čia atsiranda iš jūsų projektų sąrašo.",
-        "visibilityNote": "Projektas rodo tikslų miesto tašką tik aiškiai patvirtinus jo vietą; kitaip jis lieka srities lygyje."
-      }
+      "scope": "{count} importuotų viešų darbo skelbimų profesijai „{profession}“. Dabartinė šaltinių aprėptis: {countries}."
     },
     "backToActions": "Veiksmų centras",
     "pageTitle": "Žemėlapis",
-    "pageLead": "Tavo ir rinkos vaizdas viename žemėlapyje.",
     "advanced": "Mano vietos ir rinkos sluoksniai",
     "connections": {
-      "title": "Operacinis sluoksnis jungiasi su",
-      "intro": "Žemėlapis rodo, kur kas yra — tvarkyk tai šiose srityse.",
       "marketplace": "Prekyvietė",
-      "marketplaceNote": "Paslaugos ir užklausos",
       "opportunities": "Galimybės",
-      "opportunitiesNote": "Jums tinkantis darbas",
-      "bookings": "Planas ir rezervacijos",
-      "bookingsNote": "Suplanuotas darbas ir paskyrimai"
+      "bookings": "Planas ir rezervacijos"
     },
     "companyContext": {
       "title": "Įmonės kontekstas",
@@ -1388,34 +1318,29 @@
       "accommodationNote": "Apgyvendinimo vietos dar nėra atskiras duomenų sluoksnis — jos pasirodys kaip realūs signalai, kai sluoksnis bus pridėtas."
     },
     "world": {
-      "title": "Pasaulio vaizdas",
-      "lead": "Kur yra poreikiai, žmonės ir projektai toje žemėlapio dalyje, kurią matote. Pastumkite ar priartinkite žemėlapį — skaičiai seka kartu.",
       "layersLabel": "Žemėlapio sluoksniai",
       "layers": {
         "demand": "Poreikiai",
         "supply": "Žmonės",
-        "projects": "Projektai"
+        "projects": "Projektai",
+        "jobs": "Laisvos vietos",
+        "territory": "Įmonės teritorija"
       },
       "counts": {
         "inView": "Matoma: {places} vietos, {objects} objektai",
         "overflow": "Nenupiešta: dar {places} vietos ({objects} objektai) — priartinkite, kad pamatytumėte",
         "unplaced": "Be žinomos vietos: {count}",
         "withheld": "Nerodomos mažos grupės: {count} (mažiau nei 5 žmonės)",
-        "truncated": "Šioje dalyje daugiau nei {limit} įrašų — skaičiai yra apatinė riba",
-        "cap": "Vienu metu piešiama ne daugiau kaip {cap} vietų"
+        "truncated": "Šioje dalyje daugiau nei {limit} įrašų — skaičiai yra apatinė riba"
       },
       "loading": "Atnaujinama…",
-      "provenance": {
-        "fact": "Faktas",
-        "factHint": "vieta nurodyta įraše",
-        "derived": "Apskaičiuota",
-        "derivedHint": "šalies lygio padėtis — tiksli vieta nenurodyta"
-      },
       "state": {
         "empty": {
           "demand": "Šioje žemėlapio dalyje atvirų poreikių nėra.",
           "supply": "Šioje žemėlapio dalyje nėra rodomų žmonių grupių.",
-          "projects": "Šioje žemėlapio dalyje jūsų projektų nėra."
+          "projects": "Šioje žemėlapio dalyje jūsų projektų nėra.",
+          "jobs": "Šioje žemėlapio dalyje laisvų vietų nėra.",
+          "territory": "Šioje žemėlapio dalyje įmonės teritorijų nėra."
         },
         "error": "Šio sluoksnio dabar nepavyko nuskaityti. Vietoj spėjimo nerodoma nieko.",
         "noPlaces": "Šioje žemėlapio dalyje nėra žinomų vietų. Pastumkite žemėlapį į šalį ar miestą.",
@@ -1432,12 +1357,6 @@
         "selected": "pasirinkta",
         "more": "dar {count}"
       },
-      "scale": {
-        "label": "Mastelis: {scale}",
-        "country": "šalys",
-        "place": "vietos"
-      },
-      "placeLinkHint": "Pasirinkę vietą pereisite prie tos vietos galimybių sąrašo.",
       "precision": {
         "city": "Miestas",
         "country": "Tik šalis"
@@ -9911,10 +9830,6 @@
     "statusInvalid": "Užpildykite darbuotojo ir poreikio laukus."
   },
   "marketMapBase": {
-    "title": "Tavo vieta rinkos žemėlapyje",
-    "subtitle": "Šią vietą ir spindulį naudojame tavo signalams žemėlapyje.",
-    "panelTitle": "Vietos sritis",
-    "panelEmpty": "Vieta dar nepasirinkta",
     "mapTapHint": "Bakstelėkite žemėlapį, kad pažymėtumėte savo vietą",
     "precisionDevice": "Tiksli įrenginio vieta",
     "precisionCity": "Pasirinktas miestas",
@@ -9933,7 +9848,6 @@
     "geoInsecure": "Šiame puslapyje vietos nustatymas negalimas. Pasirinkite miestą rankiniu būdu.",
     "geoRetry": "Bandyti dar kartą",
     "manualToggle": "Nurodyti vietą rankiniu būdu",
-    "manualHint": "Jeigu nenorite leisti buvimo vietos, pasirinkite miestą arba regioną rankiniu būdu.",
     "countryLabel": "Šalis",
     "regionLabel": "Miestas arba regionas",
     "regionPlaceholder": "pvz. Vilnius",
@@ -9941,16 +9855,11 @@
     "addressPlaceholder": "pvz. rajonas ar objektas",
     "errorCountry": "Pasirinkite šalį.",
     "save": "Išsaugoti vietą",
-    "selectedTitle": "Pasirinkta vieta",
     "sourceAuto": "Dabartinė buvimo vieta",
     "sourceManual": "Nurodyta rankiniu būdu",
-    "usableNote": "Naudosime šią vietą ir {km} km spindulį tavo rinkos signalams.",
-    "savedLocally": "Vieta išsaugota šiame įrenginyje.",
     "updateButton": "Atnaujinti vietą",
     "editButton": "Keisti vietą",
     "resetButton": "Pašalinti vietą",
-    "emptyBody": "Dar nepasirinkote vietos. Naudokite mygtuką aukščiau arba nurodykite rankiniu būdu.",
-    "radiusHelp": "Spindulys – paieškos zona aplink pasirinktą tašką: {km} km reiškia darbus ir paklausą iki {km} km nuo to taško.",
     "previewTitle": "Nauja vieta parinkta — dar neišsaugota",
     "previewKeepNote": "Sena vieta lieka, kol paspausite „Išsaugoti“.",
     "previewSave": "Išsaugoti vietą",

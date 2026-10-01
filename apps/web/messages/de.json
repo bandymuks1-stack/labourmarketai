@@ -944,32 +944,6 @@
     "compass": "Lernkompass",
     "moreDestinations": "Weitere Ziele"
   },
-  "mapLayers": {
-    "title": "Kartenebenen",
-    "intro": "Die Karte wird zur wichtigsten visuellen Marktebene. Unten sehen Sie, was jetzt sichtbar ist und welche Ebenen in Vorbereitung sind.",
-    "visibleNow": "Jetzt sichtbar",
-    "futureLayers": "Zukünftige Ebenen",
-    "futureBadge": "In Vorbereitung",
-    "personSignal": "Mein Personensignal",
-    "companyLayer": "Unternehmensebene",
-    "companyIncomplete": "Standort noch nicht hinzugefügt",
-    "personIncomplete": "Fügen Sie Ihren Standort hinzu, um auf der Marktkarte zu erscheinen",
-    "needsLayer": "Meine Bedarfe",
-    "notOnMapYet": "noch nicht auf der Karte",
-    "items": {
-      "workers": "Arbeitskräfte",
-      "selfSignal": "Ihr Standortsignal",
-      "companies": "Unternehmen",
-      "teams": "Teams / Kolonnen",
-      "opportunities": "Chancen",
-      "workNeeds": "Arbeitsbedarfe",
-      "services": "Dienstleistungen",
-      "rentals": "Vermietungen / Wohnraum",
-      "shops": "Geschäfte / Angebote",
-      "availability": "Verfügbarkeit / Kalender",
-      "trust": "Vertrauen / Bereitschaft"
-    }
-  },
   "profileAvatar": {
     "upload": "Foto hochladen",
     "change": "Foto ändern",
@@ -1085,59 +1059,15 @@
       "lead": "Offene Bedarfe aus der realen Nachfrage dieser Plattform — wo gerade Arbeit gesucht wird."
     },
     "vacancyVolume": {
-      "title": "Volumen öffentlicher Stellenanzeigen",
-      "scope": "{count} importierte öffentliche Stellenanzeigen für {profession}. Aktuelle Quellenabdeckung: {countries}.",
-      "window": "Stadtvolumen werden über die neuesten {window} Anzeigen gezählt, nicht über den gesamten Bestand."
-    },
-    "entities": {
-      "title": "Drei Dinge auf der Karte",
-      "intro": "Die Karte zeigt drei verschiedene Dinge: Personen, Tätigkeitsgebiete von Unternehmen und Projektstandorte. Jedes folgt seiner eigenen Sichtbarkeitsregel und sieht anders aus.",
-      "neverMixedNote": "Die drei werden nie zu einem einzigen Markertyp zusammengeführt.",
-      "contactNote": "Kontakt läuft immer über den LabourMarket.ai-Workflow — die Karte zeigt nie Telefonnummern oder E-Mail-Adressen.",
-      "person": {
-        "name": "Personen",
-        "legend": "Personenzahl je Gebiet (gefülltes Quadrat)",
-        "countLabel": "{count}",
-        "smallSample": "<5",
-        "empty": "Noch keine Zahlen anzuzeigen. Personen erscheinen hier nur als Gebietszahlen, sobald genug Personen in einem Gebiet eingewilligt haben (eine genaue Zahl erst ab 5).",
-        "visibilityNote": "Personen werden nur als Gebietszahlen gezeigt — nie als einzelner Punkt, Name oder Kontakt. Gebiete mit weniger als 5 sichtbaren Personen zeigen \"<5\"."
-      },
-      "company": {
-        "name": "Unternehmensgebiete",
-        "legend": "Umriss des Tätigkeitsgebiets (gestrichelter Ring) — nie ein Punkt",
-        "kinds": {
-          "headquarters": "Hauptsitz",
-          "operating": "Tätigkeitsgebiet",
-          "desired_market": "Wunschmarkt",
-          "demand_anchor": "Verifizierter Bedarfsstandort"
-        },
-        "storeInactive": "Derzeit nicht verfügbar.",
-        "readError": "Unternehmensgebiete konnten gerade nicht geladen werden.",
-        "empty": "Noch keine Unternehmensgebiete. Fügen Sie die Tätigkeitsorte Ihres Unternehmens im Unternehmensbereich hinzu.",
-        "visibilityNote": "Unternehmensgebiete werden als umrandete Flächen aus der vom Unternehmen eingegebenen Geografie gezeichnet — nie als personenähnliche Marker."
-      },
-      "project": {
-        "name": "Projektstandorte",
-        "legend": "Projektmarker (Raute)",
-        "confirmedTag": "Standort bestätigt",
-        "unconfirmedTag": "Gebietsebene",
-        "empty": "Noch keine Projektstandorte. Projekte mit Standort erscheinen hier aus Ihrer Projektliste.",
-        "visibilityNote": "Ein Projekt zeigt erst nach ausdrücklicher Bestätigung seines Standorts einen genauen Stadtpunkt; sonst bleibt es auf Gebietsebene."
-      }
+      "scope": "{count} importierte öffentliche Stellenanzeigen für {profession}. Aktuelle Quellenabdeckung: {countries}."
     },
     "backToActions": "Aktionszentrum",
     "pageTitle": "Karte",
-    "pageLead": "Sie und der Markt auf einer Karte.",
     "advanced": "Meine Standorte & Marktebenen",
     "connections": {
-      "title": "Die Betriebsebene verbindet sich mit",
-      "intro": "Die Karte zeigt, wo sich die Dinge befinden — verwalten Sie sie auf diesen Oberflächen.",
       "marketplace": "Marktplatz",
-      "marketplaceNote": "Dienstleistungen und Anfragen",
       "opportunities": "Chancen",
-      "opportunitiesNote": "Passende Arbeit",
-      "bookings": "Plan & Buchungen",
-      "bookingsNote": "Geplante Arbeit und Einsätze"
+      "bookings": "Plan & Buchungen"
     },
     "companyContext": {
       "title": "Unternehmenskontext",
@@ -1388,34 +1318,29 @@
       "accommodationNote": "Unterkunftsstandorte sind noch keine eigene Datenebene — sie erscheinen als echte Signale, sobald diese Ebene hinzugefügt wird."
     },
     "world": {
-      "title": "Weltansicht",
-      "lead": "Wo Bedarf, Menschen und Projekte in dem Kartenausschnitt liegen, den Sie gerade sehen. Verschieben oder zoomen Sie die Karte — die Zahlen folgen.",
       "layersLabel": "Kartenebenen",
       "layers": {
         "demand": "Bedarf",
         "supply": "Menschen",
-        "projects": "Projekte"
+        "projects": "Projekte",
+        "jobs": "Offene Stellen",
+        "territory": "Unternehmensgebiet"
       },
       "counts": {
         "inView": "Im Ausschnitt: {places} Orte, {objects} Objekte",
         "overflow": "Nicht gezeichnet: {places} weitere Orte ({objects} Objekte) — hineinzoomen, um sie zu sehen",
         "unplaced": "Ohne bekannten Ort: {count}",
         "withheld": "Kleine Gruppen zurückgehalten: {count} (weniger als 5 Personen)",
-        "truncated": "Mehr als {limit} Einträge im Ausschnitt — die Zahlen sind eine Untergrenze",
-        "cap": "Es werden höchstens {cap} Orte gleichzeitig gezeichnet"
+        "truncated": "Mehr als {limit} Einträge im Ausschnitt — die Zahlen sind eine Untergrenze"
       },
       "loading": "Wird aktualisiert…",
-      "provenance": {
-        "fact": "Fakt",
-        "factHint": "der Ort ist im Eintrag angegeben",
-        "derived": "Abgeleitet",
-        "derivedHint": "Position auf Länderebene — der genaue Ort ist nicht angegeben"
-      },
       "state": {
         "empty": {
           "demand": "Kein offener Bedarf in diesem Kartenausschnitt.",
           "supply": "Keine Personengruppen in diesem Kartenausschnitt zu zeigen.",
-          "projects": "Keines Ihrer Projekte liegt in diesem Kartenausschnitt."
+          "projects": "Keines Ihrer Projekte liegt in diesem Kartenausschnitt.",
+          "jobs": "In diesem Kartenausschnitt gibt es keine offenen Stellen.",
+          "territory": "In diesem Kartenausschnitt gibt es kein Unternehmensgebiet."
         },
         "error": "Diese Ebene konnte gerade nicht gelesen werden. Statt einer Vermutung wird nichts angezeigt.",
         "noPlaces": "Keine bekannten Orte in diesem Kartenausschnitt. Verschieben Sie die Karte zu einem Land oder einer Stadt.",
@@ -1432,12 +1357,6 @@
         "selected": "ausgewählt",
         "more": "+{count} weitere"
       },
-      "scale": {
-        "label": "Maßstab: {scale}",
-        "country": "Länder",
-        "place": "Orte"
-      },
-      "placeLinkHint": "Ein Ort führt zur Liste der Möglichkeiten dieses Ortes.",
       "precision": {
         "city": "Stadt",
         "country": "Nur Land"
@@ -9911,10 +9830,6 @@
     "statusInvalid": "Bitte füllen Sie die Felder für Arbeitskraft und Bedarf aus."
   },
   "marketMapBase": {
-    "title": "Ihr Platz auf der Marktkarte",
-    "subtitle": "Wir verwenden diesen Standort und Radius für Ihre Signale auf der Karte.",
-    "panelTitle": "Standortbereich",
-    "panelEmpty": "Noch kein Standort gewählt",
     "mapTapHint": "Tippen Sie auf die Karte, um Ihren Standort zu markieren",
     "precisionDevice": "Genauer Gerätestandort",
     "precisionCity": "Ausgewählte Stadt",
@@ -9933,7 +9848,6 @@
     "geoInsecure": "Auf dieser Seite ist keine Standortbestimmung möglich. Wählen Sie manuell eine Stadt.",
     "geoRetry": "Erneut versuchen",
     "manualToggle": "Standort manuell festlegen",
-    "manualHint": "Wenn Sie den Standortzugriff nicht erlauben möchten, wählen Sie eine Stadt oder Region manuell.",
     "countryLabel": "Land",
     "regionLabel": "Stadt oder Region",
     "regionPlaceholder": "z. B. Vilnius",
@@ -9941,16 +9855,11 @@
     "addressPlaceholder": "z. B. Stadtteil oder Baustelle",
     "errorCountry": "Wählen Sie ein Land.",
     "save": "Standort speichern",
-    "selectedTitle": "Ausgewählter Standort",
     "sourceAuto": "Aktueller Standort",
     "sourceManual": "Manuell festgelegt",
-    "usableNote": "Wir verwenden diesen Standort und einen Radius von {km} km für Ihre Marktsignale.",
-    "savedLocally": "Standort auf diesem Gerät gespeichert.",
     "updateButton": "Standort aktualisieren",
     "editButton": "Standort ändern",
     "resetButton": "Standort entfernen",
-    "emptyBody": "Sie haben noch keinen Standort gewählt. Verwenden Sie die Schaltfläche oben oder legen Sie einen manuell fest.",
-    "radiusHelp": "Der Radius ist das Suchgebiet um Ihren gewählten Punkt: {km} km bedeutet Arbeit und Nachfrage bis zu {km} km von diesem Punkt.",
     "previewTitle": "Neuer Punkt gewählt — noch nicht gespeichert",
     "previewKeepNote": "Ihr bisheriger Standort bleibt, bis Sie auf Speichern drücken.",
     "previewSave": "Standort speichern",

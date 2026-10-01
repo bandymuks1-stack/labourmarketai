@@ -378,8 +378,8 @@ function analyse(base) {
   //      World Map architektūrą, architektūra laikoma neteisinga."
   const MAP_ARCH_FILES = [
     "apps/web/lib/market-map/spatial-entities.ts",
-    "apps/web/components/app/market-map-entity-layers.tsx",
-    "apps/web/components/app/market-map-base.tsx",
+    "apps/web/components/app/market-map/world-discovery.tsx",
+    "apps/web/lib/market-map/territory-view.ts",
   ];
   for (const file of MAP_ARCH_FILES) {
     if (!modified.includes(file) && !added.includes(file)) continue;
