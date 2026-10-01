@@ -1143,10 +1143,10 @@
     "primaryBadge": "[EN] Primary",
     "directionAdded": "[EN] Direction added",
     "coreBadge": "[EN] Core",
-    "customComingSoon": "[EN] coming soon",
+    "customComingSoon": "Ikke tilgængelig lige nu.",
     "customPrompt": "[EN] Can't find your skill?",
     "empty": "[EN] No skills yet for this profession",
-    "importComingSoon": "[EN] CV import will be enabled in M2.",
+    "importComingSoon": "Ikke tilgængelig lige nu.",
     "importNotSaved": "[EN] Selected: {file}. The file isn't uploaded or stored yet.",
     "importPrompt": "[EN] Have an old CV? Upload PDF or DOCX",
     "loading": "[EN] Loading...",
@@ -1712,7 +1712,7 @@
     "consent": {
       "title": "Hvad mit bureau må se",
       "explainer": "Hvis du slår dette til, ser DIT bureau kun tal på kategoriniveau om din dokumentparathed (gyldige / udløber snart / kræver opmærksomhed). Det ser aldrig dokumentindhold, filer, noter eller typer. Standard er fra; du kan slå det fra når som helst.",
-      "needsGate": "Samtykkelaget er under forberedelse — det aktiveres, når den godkendelseskrævende ændring er anvendt.",
+      "needsGate": "Ikke tilgængelig lige nu.",
       "onLabel": "Deling af aggregater: TIL",
       "offLabel": "Deling af aggregater: FRA",
       "onHint": "Dit bureau ser kun tal. Tryk for at slå fra.",
@@ -2041,7 +2041,7 @@
     "demand": {
       "title": "Åben efterspørgsel",
       "humanNote": "\"Vi kan tilbyde\" er dit forslag til en forespørgsel — det endelige match registreres altid af et menneske på platformsiden.",
-      "needsGate": "Synlighed af åben efterspørgsel for bureauer er under forberedelse — den aktiveres, når den godkendelseskrævende ændring er anvendt.",
+      "needsGate": "Ikke tilgængelig lige nu.",
       "empty": "Ingen åbne forespørgsler lige nu.",
       "noRole": "Rolle ikke angivet",
       "teamSize": "{n} pers.",
@@ -2382,7 +2382,7 @@
       "markContacted": "[EN] Mark contacted",
       "internalNote": "[EN] Internal record only — nothing is sent to the worker or outside the platform.",
       "error": "[EN] Could not save. Try again.",
-      "notAvailable": "[EN] Acknowledgement is not enabled yet."
+      "notAvailable": "Ikke tilgængelig lige nu."
     },
     "lifecycle": {
       "confirm": "[EN] Confirm recognized skills",
@@ -2637,7 +2637,7 @@
     "saving": "Gemmer…",
     "saved": "Præferencer gemt.",
     "error": "Kunne ikke gemme. Prøv igen.",
-    "needsMigration": "Denne sektion er ikke aktiveret endnu — intet blev gemt.",
+    "needsMigration": "Ikke tilgængelig lige nu. Intet blev gemt.",
     "v2": {
       "title": "Flere arbejdspræferencer",
       "hint": "Samme regel gælder — alt, der står som “Ikke angivet”, forbliver ikke angivet.",
@@ -2652,7 +2652,7 @@
       "licenceCategories": "Kørekortkategorier",
       "ownVehicle": "Har eget køretøj",
       "ownTools": "Har eget værktøj",
-      "notEnabled": "Disse ekstra præferencer er ikke aktiveret endnu — intet gemmes her indtil videre.",
+      "notEnabled": "Ikke tilgængelig lige nu.",
       "notSaved": "Gemt, undtagen de ekstra præferencer — den del er ikke aktiveret endnu."
     }
   },
@@ -2667,7 +2667,7 @@
     "adding": "Tilføjer…",
     "remove": "Fjern",
     "empty": "Ingen sprog tilføjet endnu.",
-    "notEnabled": "Denne sektion er ikke aktiveret endnu — intet blev gemt.",
+    "notEnabled": "Ikke tilgængelig lige nu. Intet blev gemt.",
     "error": "Kunne ikke gemme. Prøv igen.",
     "invalid": "Vælg et sprog og et niveau."
   },
@@ -2690,7 +2690,7 @@
     "importNote": "Automatisk import fra disse sider tilbydes ikke. Upload en eksporteret CV-fil i profileditoren for at få dine data ind.",
     "importLink": "Åbn profileditoren",
     "empty": "Ingen eksterne profiler tilknyttet endnu.",
-    "notEnabled": "Denne sektion er ikke aktiveret endnu — intet blev gemt.",
+    "notEnabled": "Ikke tilgængelig lige nu. Intet blev gemt.",
     "error": "Kunne ikke gemme. Prøv igen.",
     "invalid": "Indtast et fuldt https://-link og vælg en side.",
     "platformNames": {
