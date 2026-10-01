@@ -23,9 +23,9 @@ import {
  * guard (`no-gamification-terms.test.ts`) keeps it gone.
  *
  * The page explains how the system works; it is NOT a deployment-status page.
- * There is deliberately no blanket "everything here works today" claim: what a
- * person can use is what their account shows, and a direction is written as a
- * direction. It shows no live numbers (a stale or wrongly-defined vacancy count
+ * There is deliberately no "works today" / "not active yet" statement of any
+ * kind: those are technical product states, not something a visitor can decide
+ * or act on. It shows no live numbers (a stale or wrongly-defined vacancy count
  * on an explanatory page is worse than none). Copy: `about.*` in every
  * catalogue that carries it; visuals: `components/marketing/about-visuals.tsx`.
  */
@@ -107,10 +107,6 @@ export default async function AboutPage({
             {t("links.agencies")} →
           </Link>
         </nav>
-
-        <p className="max-w-prose text-xs leading-relaxed text-text-muted" data-testid="about-status-note">
-          {t("statusNote")}
-        </p>
       </header>
 
       <AboutLifecycle

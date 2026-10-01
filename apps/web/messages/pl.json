@@ -10119,7 +10119,6 @@
     "eyebrow": "O platformie",
     "title": "Czym jest LabourMarket.ai",
     "lede": "LabourMarket.ai to operacyjna platforma rynku pracy. Łączy ludzi, pracodawców, agencje, zespoły, projekty, szkolenia i usługi rynku pracy wokół prawdziwej pracy — a nie tylko wyszukiwania ofert.",
-    "statusNote": "Ta strona wyjaśnia logikę systemu, a nie stan wdrożenia. To, z czego możesz korzystać dziś, widzisz na swoim koncie; wszystko, co jest jeszcze kierunkiem, jest oznaczone jako kierunek.",
     "hero": {
       "lead": "Zawodowa wartość człowieka nie powinna znikać za każdym razem, gdy zmienia pracodawcę. Prawdziwa praca może stać się trwałą historią zawodową: co osoba robiła, gdzie, kiedy, jak długo, w jakiej roli, z jakimi umiejętnościami i jakie dowody oraz potwierdzenia to wspierają.",
       "leadOrg": "Dla organizacji ta sama prawdziwa praca buduje historię tego, co firma faktycznie zrobiła: projekty, zespoły, wykonane prace, godziny, kompetencje i dowody.",
@@ -10342,7 +10341,6 @@
       "heading": "Czego platforma nie robi",
       "points": [
         "Sama niczego nie oznacza jako potwierdzone — potwierdzony stan zawsze pochodzi od prawdziwej osoby.",
-        "Płatności przez platformę jeszcze nie działają; nie ma rozliczeń.",
         "Nie udziela porad prawnych. Wskazówki dotyczące dokumentów mają charakter informacyjny.",
         "Nie ocenia ludzi punktami ani rankingami."
       ]

@@ -10119,7 +10119,6 @@
     "eyebrow": "Over het platform",
     "title": "Wat is LabourMarket.ai",
     "lede": "LabourMarket.ai is een besturingsplatform voor de arbeidsmarkt. Het verbindt mensen, werkgevers, bureaus, teams, projecten, opleidingen en arbeidsmarktdiensten rond echt werk — niet alleen een zoektocht naar vacatures.",
-    "statusNote": "Deze pagina legt uit hoe het systeem werkt, niet wat de uitrolstatus is. Wat u vandaag kunt gebruiken, ziet u in uw account; wat nog een richting is, staat als richting aangegeven.",
     "hero": {
       "lead": "De professionele waarde van een persoon mag niet verdwijnen telkens wanneer die van werkgever wisselt. Echt werk kan blijvende professionele geschiedenis worden: wat de persoon deed, waar, wanneer, hoe lang, in welke rol, met welke vaardigheden en welk bewijs en welke bevestiging dat ondersteunt.",
       "leadOrg": "Voor organisaties bouwt datzelfde echte werk het overzicht op van wat het bedrijf werkelijk heeft gedaan: projecten, teams, uitgevoerd werk, uren, competenties en bewijs.",
@@ -10342,7 +10341,6 @@
       "heading": "Wat het platform niet doet",
       "points": [
         "Het markeert zelf nooit iets als bevestigd — een bevestigde status komt altijd van een echt persoon.",
-        "Betalingen via het platform zijn nog niet actief; er is geen afrekening.",
         "Het geeft geen juridisch advies. Documentbegeleiding is alleen informatief.",
         "Het beoordeelt mensen niet met punten of rangschikkingen."
       ]
