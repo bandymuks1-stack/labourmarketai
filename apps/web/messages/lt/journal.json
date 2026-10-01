@@ -247,6 +247,8 @@
   "listTitle": "Darbo įrašai",
   "navTitle": "Darbo žurnalas",
   "navSubtitle": "Parodykite, ką dirbote — taip stiprėja jūsų darbo kortelė.",
+  "orgContextNotice": "Tai jūsų asmeninis darbo žurnalas, o ne „{org}“. Veikiate įmonės vardu — įmonės darbai ir žmonės yra kitur.",
+  "orgContextCta": "Įmonės darbai →",
   "composerBenefit": "Šis įrašas sustiprina jūsų darbo kortelę.",
   "newEntry": "Naujas įrašas",
   "noEngagement": "Kol kas neturi aktyvaus darbo konteksto. Prisijunk prie organizacijos ar projekto, kad pildytum CV.",

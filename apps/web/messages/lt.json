@@ -4489,6 +4489,7 @@
         "planning": "Kalendorius",
         "network": "Ryšiai",
         "playerCard": "Mano profesinis profilis",
+        "companyProfile": "Įmonės profilis",
         "adminPlatform": "Platformos administravimas"
       },
       "roleNotice": {
@@ -6470,7 +6471,13 @@
       "map": "Žemėlapis",
       "mapNote": "Kur vyksta darbas ir paslaugos",
       "diary": "Darbo žurnalas",
-      "diaryNote": "Atliktas darbas užfiksuojamas kaip faktas"
+      "diaryNote": "Atliktas darbas užfiksuojamas kaip faktas",
+      "scouting": "Kandidatai",
+      "scoutingNote": "Rask tinkamus žmones savo poreikiams",
+      "listings": "Skelbimai",
+      "listingsNote": "Patalpos, įranga, transportas — siūlyk ar ieškok",
+      "needs": "Poreikiai ir pasiūla",
+      "needsNote": "Paskelbk, ko reikia ar ką gali pasiūlyti"
     }
   },
   "learning": {
@@ -11545,7 +11552,8 @@
         "team": "Komanda",
         "other": "Organizacija"
       },
-      "visibilityReason": "Rodomi tik žmonės, kurie sutiko būti randami arba turi realų darbo ryšį su jumis."
+      "visibilityReason": "Rodomi tik žmonės, kurie sutiko būti randami arba turi realų darbo ryšį su jumis.",
+      "noContactYet": "Žinutę čia galima rašyti tik po pakvietimo ar bendro darbo. Pakvieskite — arba pasirinkite jo paslaugą."
     },
     "sent": {
       "title": "Mano išsiųsti kvietimai",
@@ -17336,6 +17344,7 @@
     "needs": "Poreikiai",
     "calendar": "Kalendorius",
     "partners": "Klientai ir partneriai",
+    "market": "Rinka",
     "education": "Mokymai",
     "history": "Istorija",
     "settings": "Nustatymai",

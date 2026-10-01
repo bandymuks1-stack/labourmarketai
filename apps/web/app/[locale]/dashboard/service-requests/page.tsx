@@ -18,6 +18,7 @@ import {
   normalizeDiscoveryCountry,
 } from "@/lib/marketplace/service-requests-shared";
 import { listOwnServiceOfferings } from "@/lib/services/service-offerings";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import {
   MarketplaceLoopSection,
   type MarketplaceLabels,
@@ -65,12 +66,14 @@ export default async function ServiceRequestsPage({
   // The caller's OWN offerings are read alongside the loop (RLS-scoped, own
   // rows only) so the provider inbox's empty state can tell the truth: no
   // active service → no request can arrive; N active → nobody asked yet.
-  const [disc, out, inc, own] = await Promise.all([
+  const [disc, out, inc, own, employer] = await Promise.all([
     listDiscoverableOfferings({ country }),
     listOutgoingRequests(),
     listIncomingRequests(),
     listOwnServiceOfferings(),
+    resolveEmployerCompanyContext(),
   ]);
+  const isCompany = employer.kind === "ok";
   const needsMigration =
     disc.kind === "needs-migration" ||
     out.kind === "needs-migration" ||
@@ -178,7 +181,7 @@ export default async function ServiceRequestsPage({
           copy must never claim one — concept cleanup PR7), map (where), and
           the diary (completed work as fact). Reuses existing canonical routes;
           navigation only, no fake data. */}
-      <MarketplaceConnections t={t} />
+      <MarketplaceConnections t={t} isCompany={isCompany} />
     </div>
   );
 }
@@ -187,15 +190,35 @@ export default async function ServiceRequestsPage({
  *  (matching / planning / map / diary). Existing routes only — no duplicates. */
 function MarketplaceConnections({
   t,
+  isCompany,
 }: {
   t: Awaited<ReturnType<typeof getTranslations>>;
+  /** Acting for a company workspace. `/dashboard/opportunities` is the
+   *  WORKER's board — a company is redirected away from it with a "no
+   *  personal space" notice (walked 2026-10-01), so a company's matching
+   *  door is its own candidate search, and its diary slot is the needs
+   *  it publishes. */
+  isCompany: boolean;
 }) {
   const links = [
+    isCompany
+      ? {
+          key: "matching",
+          href: "/dashboard/company/scouting",
+          label: t("connections.scouting"),
+          note: t("connections.scoutingNote"),
+        }
+      : {
+          key: "matching",
+          href: "/dashboard/opportunities",
+          label: t("connections.matching"),
+          note: t("connections.matchingNote"),
+        },
     {
-      key: "matching",
-      href: "/dashboard/opportunities",
-      label: t("connections.matching"),
-      note: t("connections.matchingNote"),
+      key: "listings",
+      href: "/dashboard/listings",
+      label: t("connections.listings"),
+      note: t("connections.listingsNote"),
     },
     {
       key: "calendar",
@@ -209,12 +232,19 @@ function MarketplaceConnections({
       label: t("connections.map"),
       note: t("connections.mapNote"),
     },
-    {
-      key: "diary",
-      href: "/dashboard/journal",
-      label: t("connections.diary"),
-      note: t("connections.diaryNote"),
-    },
+    isCompany
+      ? {
+          key: "needs",
+          href: "/dashboard/company/needs",
+          label: t("connections.needs"),
+          note: t("connections.needsNote"),
+        }
+      : {
+          key: "diary",
+          href: "/dashboard/journal",
+          label: t("connections.diary"),
+          note: t("connections.diaryNote"),
+        },
   ];
   return (
     <section
@@ -227,7 +257,7 @@ function MarketplaceConnections({
       <p className="text-xs text-text-secondary">{t("connections.intro")}</p>
       {/* Shared ActionCard pattern (audit PR8) — one visual grammar for
           navigation cards across the app. */}
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
         {links.map((l) => (
           <ActionCard
             key={l.key}

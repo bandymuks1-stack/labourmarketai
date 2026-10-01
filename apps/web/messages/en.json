@@ -4489,6 +4489,7 @@
         "planning": "Calendar",
         "network": "Network",
         "playerCard": "My professional profile",
+        "companyProfile": "Company profile",
         "adminPlatform": "Platform administration"
       },
       "roleNotice": {
@@ -6470,7 +6471,13 @@
       "map": "Map",
       "mapNote": "Where the work and services are",
       "diary": "Work diary",
-      "diaryNote": "Completed work is recorded as fact"
+      "diaryNote": "Completed work is recorded as fact",
+      "scouting": "Candidates",
+      "scoutingNote": "Find the right people for your needs",
+      "listings": "Listings",
+      "listingsNote": "Premises, equipment, vehicles — offer or look",
+      "needs": "Needs & offers",
+      "needsNote": "Publish what you need or what you can offer"
     }
   },
   "learning": {
@@ -11545,7 +11552,8 @@
         "team": "Team",
         "other": "Organization"
       },
-      "visibilityReason": "Only people who consented to be discoverable, or who have a real work relationship with you, are shown."
+      "visibilityReason": "Only people who consented to be discoverable, or who have a real work relationship with you, are shown.",
+      "noContactYet": "Messaging opens only after an invitation or shared work. Invite them — or request one of their services."
     },
     "sent": {
       "title": "My sent invitations",
@@ -17336,6 +17344,7 @@
     "needs": "Needs",
     "calendar": "Calendar",
     "partners": "Clients & partners",
+    "market": "Marketplace",
     "education": "Learning",
     "history": "History",
     "settings": "Settings",
