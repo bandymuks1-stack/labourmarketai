@@ -10119,7 +10119,6 @@
     "eyebrow": "About the platform",
     "title": "What is LabourMarket.ai",
     "lede": "LabourMarket.ai is a labour-market operating platform. It connects people, employers, agencies, teams, projects, training and labour-market services around real work — not just a job search.",
-    "statusNote": "This page explains how the system works, not its deployment status. What you can use today is what you see in your account; anything that is still a direction is marked as a direction.",
     "hero": {
       "lead": "A person's professional value should not disappear every time they change employer. Real work can become lasting professional history: what the person did, where, when, for how long, in what role, with which skills, and what evidence and confirmation supports it.",
       "leadOrg": "For organisations, the same real work builds the record of what the company has actually done: projects, teams, work performed, hours, competencies and evidence.",
@@ -10342,7 +10341,6 @@
       "heading": "What the platform does not do",
       "points": [
         "It never marks anything as confirmed itself — a confirmed state always comes from a real person.",
-        "Payments through the platform are not active yet; there is no settlement.",
         "It does not give legal advice. Document guidance is for information only.",
         "It does not rate people with points or rankings."
       ]

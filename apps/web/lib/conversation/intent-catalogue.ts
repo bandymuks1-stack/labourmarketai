@@ -25,7 +25,7 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   "evidence-photos":
     "show the work photos / files the person already uploaded to their work journal — did the photo save, show the one just uploaded, open the gallery. NOT the CV.",
   profile: "the person's profile: add a language, skill, experience or education",
-  "player-card": "show the person's professional card (player card)",
+  "player-card": "show the person's professional card (work card)",
   experiences: "the person's work experience list",
   engagements: "the person's engagements, contracts and memberships",
   offers: "incoming booking offers the person received",

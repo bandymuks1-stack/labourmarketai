@@ -10119,7 +10119,6 @@
     "eyebrow": "Apie platformą",
     "title": "Kas yra LabourMarket.ai",
     "lede": "LabourMarket.ai — darbo rinkos operacinė platforma. Ji jungia žmones, darbdavius, agentūras, komandas, projektus, mokymus ir darbo rinkos paslaugas aplink tikrą darbą — ne tik skelbimų paiešką.",
-    "statusNote": "Šis puslapis paaiškina sistemos logiką, o ne diegimo būseną. Ką galite naudoti dabar, matote savo paskyroje; kas dar yra kryptis, žymima kaip kryptis.",
     "hero": {
       "lead": "Žmogaus profesinė vertė neturi dingti kaskart, kai jis keičia darbdavį. Tikras darbas gali tapti ilgalaike profesine istorija: ką žmogus dirbo, kur, kada, kiek laiko, kokiu vaidmeniu, kokiais įgūdžiais ir kokie įrodymai bei patvirtinimai tai remia.",
       "leadOrg": "Organizacijoms tas pats tikras darbas kaupia įmonės realiai atlikto darbo istoriją: projektus, komandas, atliktus darbus, valandas, kompetencijas ir įrodymus.",
@@ -10342,7 +10341,6 @@
       "heading": "Ko platforma nedaro",
       "points": [
         "Ji pati nieko nepažymi kaip patvirtinto — patvirtinta būsena visada ateina iš tikro žmogaus.",
-        "Mokėjimai per platformą dar nevyksta, atsiskaitymo nėra.",
         "Ji neteikia teisinių konsultacijų. Dokumentų gairės yra tik informacinės.",
         "Ji nevertina žmonių taškais ar reitingais."
       ]
