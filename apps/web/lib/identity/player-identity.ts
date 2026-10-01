@@ -42,6 +42,8 @@ export const PLAYER_IDENTITY_VARIANTS = [
   "history-card", // historical reconstruction — an organization's evidence about a person (2026-09-16)
   "candidate-review", // an employer reading an application / candidate — layer 1 + disclosure (2026-10-01)
   "team-member", // a person in the company's team list — role, assignment, availability (2026-10-01)
+  "assignment", // a person on a project's assignment list (2026-10-01)
+  "roster-person", // a person the organization's roster / booking records name (2026-10-01)
 ] as const;
 export type PlayerIdentityVariant = (typeof PLAYER_IDENTITY_VARIANTS)[number];
 

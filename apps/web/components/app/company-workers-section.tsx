@@ -109,6 +109,7 @@ export function CompanyWorkersSection({
   workersResult,
   invitationsResult,
   labels,
+  avatarByWorker,
   roleCoordinationEnabled,
   canAssignRoles = false,
   reviewElsewhere,
@@ -117,6 +118,9 @@ export function CompanyWorkersSection({
   readonly workersResult: ListState<LinkedCompanyWorker>;
   readonly invitationsResult: ListState<CompanyWorkerInvitation>;
   readonly labels: CompanyWorkersSectionLabels;
+  /** Signed photo URL per workerId, resolved by the page through the one
+   *  photo rule; absent / null = initials. */
+  readonly avatarByWorker?: Record<string, string | null>;
   /** From the operations role-capability map — false today (foreman /
    *  manager coordination is not enabled). When false, show the honest
    *  not-enabled note instead of pretending coordination works. */
@@ -268,6 +272,7 @@ export function CompanyWorkersSection({
                       testid={`company-worker-identity-${w.workerId}`}
                       name={personName}
                       initials={personMonogram(personName)}
+                      avatarUrl={avatarByWorker?.[w.workerId] ?? null}
                       nameHref={`/dashboard/people/${w.workerId}`}
                       professions={roleText ? [roleText] : []}
                       meta={meta}

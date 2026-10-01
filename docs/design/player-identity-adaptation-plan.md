@@ -198,3 +198,8 @@ is the compact, list-friendly depth of the same vocabulary `IdentityStage` uses
 
 Presentation only: no score, no percentage, no stars. No DB, no route, no auth
 change.
+
+- `assignment` — a person on a project assignment list (compact density).
+- `roster-person` — a person the organization roster / booking records name (compact density).
+
+`PersonIdentityCard` takes `density="full" | "compact"`; the API is otherwise stable so the calendar can reuse it.

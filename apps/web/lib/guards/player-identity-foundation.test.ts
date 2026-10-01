@@ -25,7 +25,7 @@ const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 const readRepo = (rel: string) => readFileSync(join(REPO, rel), "utf8");
 
 describe("canonical player-identity contract", () => {
-  it("defines exactly the ten canonical variants", () => {
+  it("defines exactly the twelve canonical variants", () => {
     expect([...PLAYER_IDENTITY_VARIANTS]).toEqual([
       "hero",
       "profile",
@@ -44,6 +44,8 @@ describe("canonical player-identity contract", () => {
       // team list render the SAME identity through PersonIdentityCard.
       "candidate-review",
       "team-member",
+      "assignment",
+      "roster-person",
     ]);
   });
 
@@ -93,7 +95,7 @@ describe("the adaptation plan doc is present and principle-only", () => {
     expect(doc.length).toBeGreaterThan(2000);
   });
 
-  it("documents the canonical anatomy + the ten variants", () => {
+  it("documents the canonical anatomy + the twelve variants", () => {
     expect(doc.toLowerCase()).toContain("playeridentitycard");
     for (const v of PLAYER_IDENTITY_VARIANTS) {
       expect(doc, `variant ${v} documented`).toContain(v);

@@ -66,9 +66,13 @@ export function PersonIdentityCard({
   children,
   actions,
   dataAttrs,
+  density = "full",
 }: {
+  /** `compact` = a row-sized identity (calendar day, assignment, roster):
+   *  same atoms, smaller portrait, quieter name. Default `full`. */
+  readonly density?: "full" | "compact";
   /** Which depth/context this card renders — carried as `data-identity`. */
-  readonly variant: "candidate-review" | "team-member";
+  readonly variant: "candidate-review" | "team-member" | "assignment" | "roster-person";
   readonly testid: string;
   /** The name — or, where the person has not allowed it yet, the honest
    *  anonymized handle the caller resolved. Already display-ready. */
@@ -99,7 +103,11 @@ export function PersonIdentityCard({
       <div className="flex items-start gap-3 sm:gap-4">
         <div
           className="identity-card-portrait relative shrink-0 overflow-hidden rounded-xl"
-          style={{ width: "clamp(64px, 20vw, 88px)", aspectRatio: "4 / 5" }}
+          style={
+            density === "compact"
+              ? { width: 44, aspectRatio: "1 / 1" }
+              : { width: "clamp(64px, 20vw, 88px)", aspectRatio: "4 / 5" }
+          }
         >
           {avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -115,7 +123,8 @@ export function PersonIdentityCard({
               aria-hidden
               data-testid="identity-card-monogram"
               className={cn(
-                "flex h-full w-full items-center justify-center rounded-xl font-display text-2xl font-bold tracking-tightest sm:text-3xl",
+                "flex h-full w-full items-center justify-center rounded-xl font-display font-bold tracking-tightest",
+                density === "compact" ? "text-sm" : "text-2xl sm:text-3xl",
                 PLAYER_IDENTITY_FALLBACK_SURFACE,
                 PLAYER_IDENTITY_AVATAR_BORDER,
               )}
@@ -136,7 +145,10 @@ export function PersonIdentityCard({
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1.5">
             <h3
-              className="min-w-0 font-display text-lg font-bold leading-tight tracking-tightest text-text-primary [overflow-wrap:anywhere]"
+              className={cn(
+                "min-w-0 font-display font-bold leading-tight tracking-tightest text-text-primary [overflow-wrap:anywhere]",
+                density === "compact" ? "text-sm" : "text-lg",
+              )}
               data-testid="identity-card-name"
             >
               {nameHref ? (
