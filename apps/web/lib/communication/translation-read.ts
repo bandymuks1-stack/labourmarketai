@@ -54,7 +54,7 @@ export interface TranslatableMessage {
   readonly author_id?: string | null;
 }
 
-const MAX_PER_READ = 40;
+const MAX_PER_READ = 12;
 const RATE = { limit: 120, windowMs: 60 * 60 * 1000 } as const;
 const CACHE_MAX = 2000;
 const AI_LOCALES = new Set(["en", "lt", "ru"]);
@@ -109,6 +109,26 @@ function translationContext(target: string, source: string | null | undefined): 
  */
 const inFlight = new Map<string, Promise<TranslateResult>>();
 
+/**
+ * Do not hammer a provider that said no. Measured in production 2026-10-01: a
+ * thread re-render (focus refresh, second tab, page reload) re-asked for every
+ * foreign message, each failure was retried, and the burst itself kept the
+ * provider's quota exhausted: 42 of 58 calls in three minutes were 429s.
+ *   - a QUOTA answer (429 / RESOURCE_EXHAUSTED) opens a short instance-wide
+ *     cooldown during which no new provider call is made (originals show, the
+ *     next render after the cooldown tries again);
+ *   - any other failure is remembered per message for a few seconds.
+ * In-memory only; nothing is stored.
+ */
+const QUOTA_COOLDOWN_MS = 60_000;
+const FAILURE_MEMO_MS = 20_000;
+let quotaCooldownUntil = 0;
+const failedUntil = new Map<string, number>();
+
+export function isQuotaRefusal(detail: string | undefined): boolean {
+  return /\b429\b|RESOURCE_EXHAUSTED|quota/i.test(detail ?? "");
+}
+
 /** One message → one runtime call, or the cache, or the call already in flight. Never throws. */
 function translateOne(
   m: TranslatableMessage,
@@ -119,6 +139,10 @@ function translateOne(
   if (cached) return Promise.resolve({ ok: true, value: cached });
   const pending = inFlight.get(key);
   if (pending) return pending;
+  const now = Date.now();
+  if (now < quotaCooldownUntil || (failedUntil.get(key) ?? 0) > now) {
+    return Promise.resolve({ ok: false, reason: "failed" });
+  }
   const run = translateWithRetry(m, viewerLocale, key).finally(() => {
     inFlight.delete(key);
   });
@@ -133,14 +157,17 @@ async function translateWithRetry(
 ): Promise<TranslateResult> {
   const first = await translateOnce(m, viewerLocale, key);
   if (first.ok || first.reason !== "transient") {
+    if (!first.ok && first.reason === "failed") failedUntil.set(key, Date.now() + FAILURE_MEMO_MS);
     return first.ok ? first : { ok: false, reason: first.reason };
   }
   // The provider said "busy" (HTTP 503 UNAVAILABLE / 429) — measured
   // 2026-09-28: Gemini answered "high demand" in 0.7–2.6 s. ONE short retry;
   // a timeout is not retried here (the runtime already retried it once).
   await new Promise((resolve) => setTimeout(resolve, TRANSIENT_RETRY_DELAY_MS));
+  if (Date.now() < quotaCooldownUntil) return { ok: false, reason: "failed" };
   const second = await translateOnce(m, viewerLocale, key);
   if (second.ok) return second;
+  failedUntil.set(key, Date.now() + FAILURE_MEMO_MS);
   return { ok: false, reason: second.reason === "transient" ? "failed" : second.reason };
 }
 
@@ -186,6 +213,10 @@ async function translateOnce(
       // The provider was asked and could not answer (busy, timed out,
       // off-shape). That is a FAILURE, not a refusal: it must not stop the
       // rest of the thread the way a closed gate does.
+      if (outcome.reason === "provider_error" && isQuotaRefusal(outcome.detail)) {
+        quotaCooldownUntil = Date.now() + QUOTA_COOLDOWN_MS;
+        return { ok: false, reason: "failed" };
+      }
       return isTransientProviderRefusal(outcome.reason, outcome.detail)
         ? { ok: false, reason: "transient" }
         : { ok: false, reason: "failed" };
@@ -291,4 +322,6 @@ export async function resolveViewerTexts(
 export function __clearTranslationCache(): void {
   cache.clear();
   inFlight.clear();
+  failedUntil.clear();
+  quotaCooldownUntil = 0;
 }
