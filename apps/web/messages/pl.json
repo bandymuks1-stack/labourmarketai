@@ -8447,7 +8447,8 @@
       "opened": "Rozmowa otwarta — napisz wiadomość do pracownika.",
       "view": "Otwórz rozmowę",
       "error": "Nie udało się otworzyć rozmowy. Spróbuj ponownie.",
-      "limitReached": "Osiągnięto dzienny limit nowych rozmów. Spróbuj ponownie jutro."
+      "limitReached": "Osiągnięto dzienny limit nowych rozmów. Spróbuj ponownie jutro.",
+      "shortlistFirst": "Najpierw dodaj osobę do krótkiej listy, wtedy możesz poprosić o rozmowę."
     },
     "how": {
       "title": "Jak działa dopasowanie",
