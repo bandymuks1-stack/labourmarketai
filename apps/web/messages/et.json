@@ -6744,5 +6744,44 @@
       "confirmed": "Confirmed and shared",
       "failed": "Could not confirm."
     }
+  },
+  "companyWorkHistory": {
+    "title": "Ettevõtte imporditud töö ajalugu",
+    "subtitle": "Mida {name} on oma varasematest töölehtedest talletanud: kus töö toimus, millal, kes töötas, mida tehti ja kui kaua.",
+    "badge": "Imporditud ettevõtte ajalugu",
+    "provenance": "Võetud ettevõtte {name} enda töölehelt. Inimesed ei kasutanud tollal LabourMarket.ai-d ja andmeid ei ole sõltumatult kontrollitud.",
+    "unavailable": "Imporditud töö ajalugu ei õnnestunud praegu lugeda. See ei tähenda, et seda poleks.",
+    "empty": "Ettevõttel {name} pole imporditud töö ajalugu salvestatud.",
+    "elsewhere": "{name} sisaldab {count, plural, one {# imporditud kirje} other {# imporditud kirjet}} varasema töö kohta. Vaatamiseks lülitu sellesse tööruumi.",
+    "stats": {
+      "places": "Kohad",
+      "people": "Inimesed",
+      "hours": "Salvestatud tunnid",
+      "period": "Periood"
+    },
+    "place": "Koht",
+    "noPlaceName": "Kohta pole märgitud",
+    "open": "Ava",
+    "people": "{count, plural, one {# inimene} other {# inimest}}",
+    "entries": "{count, plural, one {# kirje} other {# kirjet}}",
+    "hoursShare": "{hours} h sellel kohal, võrreldes kõige tihedama kohaga",
+    "noPlace": "{count, plural, one {# kirje} other {# kirjet}} ({hours} h) ei nimeta allikas kohta.",
+    "periodAside": "Sellest {hours} h on perioodi kogusummad, mis on antud ajavahemikule ja hoitud eraldi üksikutest päevadest.",
+    "scope": {
+      "title": "Mida see import sisaldab",
+      "carried": "Allikas sisaldab: kes töötas, mis päeval, mitu tundi, mida tehti ja koht nii, nagu see on kirjutatud.",
+      "missing": "Allikas puudub: klient, aadress ja projekt. Neid näidatakse allikas puuduvatena ning neid ei täideta kunagi."
+    },
+    "facts": {
+      "customer": "Klient",
+      "address": "Aadress",
+      "project": "Projekt",
+      "notInSource": "Allikas puudub",
+      "linked": "Seotud"
+    },
+    "whoWorked": "Kes siin töötas",
+    "timeline": "Mida tehti",
+    "back": "Tagasi ajaloo juurde",
+    "placeMissing": "Seda kohta pole aktiivse tööruumi imporditud ajaloos."
   }
 }

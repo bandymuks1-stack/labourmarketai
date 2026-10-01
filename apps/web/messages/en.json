@@ -17811,5 +17811,44 @@
         }
       }
     }
+  },
+  "companyWorkHistory": {
+    "title": "Imported company work history",
+    "subtitle": "What {name} has on record from its own past timesheets: where the work was, when, who worked there, what was done and for how long.",
+    "badge": "Imported company history",
+    "provenance": "Taken from {name}'s own timesheet. The people did not use LabourMarket.ai when this work was done, and it is not independently verified.",
+    "unavailable": "The imported work history could not be read right now. That does not mean there is none.",
+    "empty": "{name} has no imported work history on record.",
+    "elsewhere": "{name} holds {count, plural, one {# imported record} other {# imported records}} of past work. Switch to that workspace to see it.",
+    "stats": {
+      "places": "Places",
+      "people": "People",
+      "hours": "Hours on record",
+      "period": "Period"
+    },
+    "place": "Place",
+    "noPlaceName": "No place stated",
+    "open": "Open",
+    "people": "{count, plural, one {# person} other {# people}}",
+    "entries": "{count, plural, one {# entry} other {# entries}}",
+    "hoursShare": "{hours} h on this place, compared with the busiest place",
+    "noPlace": "{count, plural, one {# entry} other {# entries}} ({hours} h) in the source name no place.",
+    "periodAside": "Of this, {hours} h are period totals stated for a span, kept apart from single days.",
+    "scope": {
+      "title": "What this import carries",
+      "carried": "Carried by the source: who worked, on which day, how many hours, what was done and the place as written.",
+      "missing": "Not in the source: the customer, the street address and the project. They are shown as not in the source and are never filled in."
+    },
+    "facts": {
+      "customer": "Customer",
+      "address": "Address",
+      "project": "Project",
+      "notInSource": "Not in the source",
+      "linked": "Linked"
+    },
+    "whoWorked": "Who worked here",
+    "timeline": "What was done",
+    "back": "Back to history",
+    "placeMissing": "This place is not in the imported history of the active workspace."
   }
 }

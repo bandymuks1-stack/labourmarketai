@@ -17811,5 +17811,44 @@
         }
       }
     }
+  },
+  "companyWorkHistory": {
+    "title": "Importuota įmonės darbų istorija",
+    "subtitle": "Ką {name} turi įrašyta iš savo praeities darbo laiko apskaitos: kur dirbta, kada, kas dirbo, kas daryta ir kiek valandų.",
+    "badge": "Importuota įmonės istorija",
+    "provenance": "Paimta iš {name} pačios darbo laiko apskaitos. Kai šis darbas buvo daromas, žmonės nenaudojo LabourMarket.ai, o įrašai nėra nepriklausomai patikrinti.",
+    "unavailable": "Importuotos darbų istorijos dabar nepavyko perskaityti. Tai nereiškia, kad jos nėra.",
+    "empty": "{name} neturi įrašytos importuotos darbų istorijos.",
+    "elsewhere": "{name} turi {count, plural, one {# importuotą praeities darbo įrašą} few {# importuotus praeities darbo įrašus} other {# importuotų praeities darbo įrašų}}. Norėdami pamatyti, perjunkite į tą darbo erdvę.",
+    "stats": {
+      "places": "Vietos",
+      "people": "Žmonės",
+      "hours": "Įrašytos valandos",
+      "period": "Laikotarpis"
+    },
+    "place": "Vieta",
+    "noPlaceName": "Vieta nenurodyta",
+    "open": "Atidaryti",
+    "people": "{count, plural, one {# žmogus} few {# žmonės} other {# žmonių}}",
+    "entries": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
+    "hoursShare": "{hours} val. šioje vietoje, palyginti su daugiausia dirbtąja vieta",
+    "noPlace": "{count, plural, one {# įraše} few {# įrašuose} other {# įrašų}} ({hours} val.) šaltinyje vieta nenurodyta.",
+    "periodAside": "Iš jų {hours} val. yra laikotarpio sumos, nurodytos visam tarpsniui, laikomos atskirai nuo pavienių dienų.",
+    "scope": {
+      "title": "Ką šis importas apima",
+      "carried": "Šaltinyje yra: kas dirbo, kurią dieną, kiek valandų, kas daryta ir vieta taip, kaip parašyta.",
+      "missing": "Šaltinyje nėra: užsakovo, gatvės adreso ir projekto. Jie rodomi kaip „šaltinyje nėra“ ir niekada neišgalvojami."
+    },
+    "facts": {
+      "customer": "Užsakovas",
+      "address": "Adresas",
+      "project": "Projektas",
+      "notInSource": "Šaltinyje nėra",
+      "linked": "Susieta"
+    },
+    "whoWorked": "Kas čia dirbo",
+    "timeline": "Kas daryta",
+    "back": "Atgal į istoriją",
+    "placeMissing": "Šios vietos nėra aktyvios darbo erdvės importuotoje istorijoje."
   }
 }

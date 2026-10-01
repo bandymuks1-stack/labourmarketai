@@ -6744,5 +6744,44 @@
       "confirmed": "Confirmed and shared",
       "failed": "Could not confirm."
     }
+  },
+  "companyWorkHistory": {
+    "title": "Importētā uzņēmuma darba vēsture",
+    "subtitle": "Ko {name} ir ierakstījis no saviem iepriekšējiem darba laika uzskaites lapām: kur strādāts, kad, kas strādāja, kas darīts un cik ilgi.",
+    "badge": "Importētā uzņēmuma vēsture",
+    "provenance": "Ņemts no {name} paša darba laika uzskaites. Cilvēki toreiz nelietoja LabourMarket.ai, un dati nav neatkarīgi pārbaudīti.",
+    "unavailable": "Importēto darba vēsturi pašlaik neizdevās nolasīt. Tas nenozīmē, ka tās nav.",
+    "empty": "{name} nav ierakstīta importēta darba vēsture.",
+    "elsewhere": "{name} ir {count, plural, zero {# importētu ierakstu} one {# importēts ieraksts} other {# importēti ieraksti}} par iepriekšējo darbu. Pārslēdzieties uz šo darbvietu, lai tos redzētu.",
+    "stats": {
+      "places": "Vietas",
+      "people": "Cilvēki",
+      "hours": "Ierakstītās stundas",
+      "period": "Periods"
+    },
+    "place": "Vieta",
+    "noPlaceName": "Vieta nav norādīta",
+    "open": "Atvērt",
+    "people": "{count, plural, zero {# cilvēku} one {# cilvēks} other {# cilvēki}}",
+    "entries": "{count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}",
+    "hoursShare": "{hours} h šajā vietā, salīdzinot ar visvairāk strādāto vietu",
+    "noPlace": "{count, plural, zero {# ierakstiem} one {# ierakstam} other {# ierakstiem}} ({hours} h) avotā vieta nav norādīta.",
+    "periodAside": "No tā {hours} h ir perioda kopsummas, kas norādītas laika posmam un glabātas atsevišķi no atsevišķām dienām.",
+    "scope": {
+      "title": "Ko ietver šis imports",
+      "carried": "Avotā ir: kas strādāja, kurā dienā, cik stundas, kas darīts un vieta tā, kā rakstīts.",
+      "missing": "Avotā nav: pasūtītāja, adreses un projekta. Tie tiek rādīti kā avotā neesoši un nekad netiek izdomāti."
+    },
+    "facts": {
+      "customer": "Pasūtītājs",
+      "address": "Adrese",
+      "project": "Projekts",
+      "notInSource": "Avotā nav",
+      "linked": "Saistīts"
+    },
+    "whoWorked": "Kas šeit strādāja",
+    "timeline": "Kas darīts",
+    "back": "Atpakaļ uz vēsturi",
+    "placeMissing": "Šīs vietas nav aktīvās darbvietas importētajā vēsturē."
   }
 }

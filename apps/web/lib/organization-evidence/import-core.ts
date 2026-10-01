@@ -2951,6 +2951,11 @@ export async function listEvidenceRecords(
      * passing it can never widen that.
      */
     readonly viewerProfileId?: string | null;
+    /** ONE organization's records. A caller who belongs to several organizations
+     *  is shown every organization's rows by RLS; a surface that speaks for the
+     *  ACTIVE workspace passes it so another organization's work never lands in
+     *  it. A narrowing only — RLS still decides what is visible. */
+    readonly organizationId?: string | null;
     readonly limit?: number;
   } = {},
 ): Promise<EvidenceImportResult<{ records: readonly EvidenceRecordView[] }>> {
@@ -2971,6 +2976,7 @@ export async function listEvidenceRecords(
     .order("activity_date", { ascending: false })
     .limit(Math.min(Math.max(filter.limit ?? 200, 1), 1000));
   if (filter.sessionId) q = q.eq("session_id", filter.sessionId);
+  if (filter.organizationId) q = q.eq("organization_id", filter.organizationId);
   if (filter.organizationPersonId) {
     q = q.eq("organization_person_id", filter.organizationPersonId);
   }

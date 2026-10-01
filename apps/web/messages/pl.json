@@ -17811,5 +17811,44 @@
         }
       }
     }
+  },
+  "companyWorkHistory": {
+    "title": "Zaimportowana historia pracy firmy",
+    "subtitle": "Co {name} ma zapisane z własnych dawnych ewidencji czasu pracy: gdzie pracowano, kiedy, kto pracował, co zrobiono i ile godzin.",
+    "badge": "Zaimportowana historia firmy",
+    "provenance": "Z własnej ewidencji czasu pracy {name}. Osoby nie korzystały wtedy z LabourMarket.ai, a dane nie są niezależnie zweryfikowane.",
+    "unavailable": "Nie udało się teraz odczytać zaimportowanej historii pracy. To nie znaczy, że jej nie ma.",
+    "empty": "{name} nie ma zapisanej zaimportowanej historii pracy.",
+    "elsewhere": "{name} zawiera {count, plural, one {# zaimportowany wpis} few {# zaimportowane wpisy} many {# zaimportowanych wpisów} other {# zaimportowanego wpisu}} dawnej pracy. Przełącz się na tę przestrzeń roboczą, aby je zobaczyć.",
+    "stats": {
+      "places": "Miejsca",
+      "people": "Osoby",
+      "hours": "Zapisane godziny",
+      "period": "Okres"
+    },
+    "place": "Miejsce",
+    "noPlaceName": "Nie podano miejsca",
+    "open": "Otwórz",
+    "people": "{count, plural, one {# osoba} few {# osoby} many {# osób} other {# osoby}}",
+    "entries": "{count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}",
+    "hoursShare": "{hours} godz. w tym miejscu, w porównaniu z najczęstszym miejscem",
+    "noPlace": "{count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}} ({hours} godz.) nie wskazuje w źródle miejsca.",
+    "periodAside": "Z tego {hours} godz. to sumy okresowe podane dla przedziału, trzymane osobno od pojedynczych dni.",
+    "scope": {
+      "title": "Co zawiera ten import",
+      "carried": "Źródło zawiera: kto pracował, którego dnia, ile godzin, co zrobiono i miejsce tak, jak je zapisano.",
+      "missing": "Brak w źródle: klienta, adresu i projektu. Pokazujemy je jako brak w źródle i nigdy ich nie uzupełniamy."
+    },
+    "facts": {
+      "customer": "Klient",
+      "address": "Adres",
+      "project": "Projekt",
+      "notInSource": "Brak w źródle",
+      "linked": "Powiązano"
+    },
+    "whoWorked": "Kto tu pracował",
+    "timeline": "Co zrobiono",
+    "back": "Wróć do historii",
+    "placeMissing": "Tego miejsca nie ma w zaimportowanej historii aktywnej przestrzeni roboczej."
   }
 }

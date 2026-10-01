@@ -6744,5 +6744,44 @@
       "confirmed": "Confirmed and shared",
       "failed": "Could not confirm."
     }
+  },
+  "companyWorkHistory": {
+    "title": "Importeret arbejdshistorik for virksomheden",
+    "subtitle": "Hvad {name} har registreret fra egne gamle timesedler: hvor arbejdet var, hvornår, hvem der arbejdede, hvad der blev gjort og hvor længe.",
+    "badge": "Importeret virksomhedshistorik",
+    "provenance": "Hentet fra {name}s egen timeseddel. Personerne brugte ikke LabourMarket.ai dengang, og oplysningerne er ikke uafhængigt verificeret.",
+    "unavailable": "Den importerede arbejdshistorik kunne ikke læses lige nu. Det betyder ikke, at der ikke er nogen.",
+    "empty": "{name} har ingen importeret arbejdshistorik registreret.",
+    "elsewhere": "{name} har {count, plural, one {# importeret post} other {# importerede poster}} om tidligere arbejde. Skift til det arbejdsområde for at se dem.",
+    "stats": {
+      "places": "Steder",
+      "people": "Personer",
+      "hours": "Registrerede timer",
+      "period": "Periode"
+    },
+    "place": "Sted",
+    "noPlaceName": "Intet sted angivet",
+    "open": "Åbn",
+    "people": "{count, plural, one {# person} other {# personer}}",
+    "entries": "{count, plural, one {# post} other {# poster}}",
+    "hoursShare": "{hours} t på dette sted, sammenlignet med det travleste sted",
+    "noPlace": "{count, plural, one {# post} other {# poster}} ({hours} t) angiver intet sted i kilden.",
+    "periodAside": "Heraf er {hours} t periodesummer angivet for et tidsrum, holdt adskilt fra enkeltdage.",
+    "scope": {
+      "title": "Hvad denne import indeholder",
+      "carried": "Kilden indeholder: hvem der arbejdede, hvilken dag, hvor mange timer, hvad der blev gjort og stedet som skrevet.",
+      "missing": "Ikke i kilden: kunden, adressen og projektet. De vises som ikke i kilden og udfyldes aldrig."
+    },
+    "facts": {
+      "customer": "Kunde",
+      "address": "Adresse",
+      "project": "Projekt",
+      "notInSource": "Ikke i kilden",
+      "linked": "Knyttet"
+    },
+    "whoWorked": "Hvem der arbejdede her",
+    "timeline": "Hvad der blev gjort",
+    "back": "Tilbage til historik",
+    "placeMissing": "Dette sted findes ikke i den importerede historik for det aktive arbejdsområde."
   }
 }
