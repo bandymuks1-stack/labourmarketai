@@ -10866,6 +10866,16 @@
       "unknown": "{count} konnten gar nicht gelesen werden. Das ist nicht dasselbe wie frei.",
       "denominatorNote": "Gezählt in Kalendertagen. Vertragsstunden werden nicht erfasst, dies ist also keine VZÄ-Kennzahl."
     },
+    "timeline": {
+      "prev": "Früher",
+      "next": "Später",
+      "today": "Heute",
+      "dateLabel": "Ab Datum",
+      "go": "Los",
+      "away": "Abwesend",
+      "outside": "{count} weitere außerhalb dieses Zeitraums",
+      "nothing": "Keine Einträge in diesem Zeitraum"
+    },
     "committedWhere": {
       "title": "Wer ist wo gebunden",
       "intro": "Die datierten Verpflichtungen jeder Person — Projektzuweisungen, angenommene Buchungen und genehmigte Dienstreisen — aus denselben Datensätzen, die Kalender und Kapazitätsantwort nutzen. Nichts hier ist abgeleitet.",

@@ -22,6 +22,23 @@ import {
 } from "@/lib/workforce/planning-zone-view";
 import type { GapRiskLevel } from "@/lib/workforce/gap-timeline";
 import { createUtcFormatter } from "@/lib/time/display";
+import { parseIsoDay } from "@/lib/planning/planning-model";
+import {
+  buildRosterTimeline,
+  mondayOf,
+  shiftDay,
+  type TimelineKind,
+} from "@/lib/planning/roster-timeline-model";
+import { playerInitials } from "@/lib/identity/player-identity";
+
+/** The timeline window: four weeks, moved by whole windows. */
+const TIMELINE_DAYS = 28;
+const TIMELINE_TONE: Record<TimelineKind, string> = {
+  project: "bg-brand-blue/40 border-brand-blue/60",
+  booking: "bg-brand-cyan/35 border-brand-cyan/60",
+  trip: "bg-brand-violet/35 border-brand-violet/60",
+  absence: "bg-state-amber/30 border-state-amber/60",
+};
 
 /**
  * Workforce planning zone (Labour Market OS P10) — ONE visual planning zone
@@ -72,10 +89,13 @@ const PRIMARY_CTA_CLASS =
 
 export default async function CompanyWorkforcePlanningPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ from?: string }>;
 }) {
   const { locale } = await params;
+  const { from: rawFrom } = await searchParams;
   setRequestLocale(locale);
   await requireRoleOrRedirect(locale, "company");
 
@@ -506,6 +526,174 @@ export default async function CompanyWorkforcePlanningPage({
       </section>
     );
 
+  /* WHO IS WHERE, WHEN — the same commitments and approved absences laid out
+     per person on one shared day axis. Busy / away / overlapping read at a
+     glance; an empty stretch is "nothing on record", never "free". The window
+     moves by whole four-week steps or jumps to any date (?from=). */
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const timelineFrom = mondayOf(parseIsoDay(rawFrom) ?? todayIso);
+  const timelineHref = (from: string) =>
+    (from === mondayOf(todayIso)
+      ? "/dashboard/company/planning"
+      : `/dashboard/company/planning?from=${from}`) as "/dashboard";
+  const timeline =
+    commitments.status === "ok" && rosterWorkerIds.length > 0
+      ? buildRosterTimeline({
+          rows: commitments.rows,
+          absences:
+            availability.status === "ok"
+              ? availability.unavailability.map((u) => ({
+                  workerId: u.workerId,
+                  workerName: u.workerName,
+                  sourceId: u.item.id,
+                  startDate: u.item.startDate,
+                  endDate: u.item.endDate,
+                }))
+              : [],
+          from: timelineFrom,
+          days: TIMELINE_DAYS,
+          today: todayIso,
+        })
+      : null;
+  const NAV_CHIP =
+    "inline-flex min-h-11 items-center rounded-md border border-ink-500 px-3 py-1.5 font-mono text-meta uppercase tracking-label text-text-secondary transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+  const timelineSection =
+    timeline && timeline.people.length > 0 ? (
+      <section
+        className="flex flex-col gap-3 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+        data-testid="roster-timeline"
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="mr-auto font-display text-base font-semibold text-text-primary">
+            {t("committedWhere.title")}
+          </h2>
+          <Link
+            href={timelineHref(shiftDay(timeline.from, -TIMELINE_DAYS))}
+            aria-label={t("timeline.prev")}
+            data-testid="roster-timeline-prev"
+            className={NAV_CHIP}
+          >
+            ←
+          </Link>
+          <Link
+            href={timelineHref(mondayOf(todayIso))}
+            data-testid="roster-timeline-today"
+            className={NAV_CHIP}
+          >
+            {t("timeline.today")}
+          </Link>
+          <Link
+            href={timelineHref(shiftDay(timeline.from, TIMELINE_DAYS))}
+            aria-label={t("timeline.next")}
+            data-testid="roster-timeline-next"
+            className={NAV_CHIP}
+          >
+            →
+          </Link>
+          <form
+            action={`/${locale}/dashboard/company/planning`}
+            method="get"
+            className="flex items-center gap-2"
+            data-testid="roster-timeline-jump"
+          >
+            <label className="sr-only" htmlFor="roster-timeline-date">
+              {t("timeline.dateLabel")}
+            </label>
+            <input
+              id="roster-timeline-date"
+              type="date"
+              name="from"
+              defaultValue={timeline.from}
+              className="min-h-11 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-xs text-text-primary"
+            />
+            <button type="submit" className={NAV_CHIP}>
+              {t("timeline.go")}
+            </button>
+          </form>
+        </div>
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {fmtDay(timeline.from)} – {fmtDay(timeline.to)}
+        </p>
+        <div className="overflow-x-auto">
+          <div className="flex min-w-[34rem] flex-col gap-1">
+            <div className="flex">
+              <div className="w-32 shrink-0 sm:w-44" />
+              <div className="relative h-5 flex-1">
+                {timeline.ticks.map((tick) => (
+                  <span
+                    key={tick.day}
+                    className="absolute top-0 font-mono text-meta text-text-muted"
+                    style={{ left: `${tick.leftPct}%` }}
+                  >
+                    {dayFmt(tick.day)?.split(" ").slice(-2).join(" ") ?? tick.day}
+                  </span>
+                ))}
+              </div>
+            </div>
+            {timeline.people.map((p) => (
+              <div
+                key={p.workerId}
+                className="flex items-center"
+                data-testid={`roster-timeline-row-${p.workerId}`}
+              >
+                <div className="flex w-32 shrink-0 items-center gap-2 pr-2 sm:w-44">
+                  <span
+                    aria-hidden
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-ink-500 bg-ink-700 font-display text-meta font-bold text-text-primary"
+                  >
+                    {playerInitials(p.name ?? "?")}
+                  </span>
+                  <span className="min-w-0 truncate text-xs font-semibold text-text-primary">
+                    {p.name ?? t("availability.unnamedWorker")}
+                  </span>
+                </div>
+                <div className="relative h-9 flex-1 rounded-md border border-ink-600 bg-ink-900/40">
+                  {timeline.todayPct !== null ? (
+                    <span
+                      aria-hidden
+                      className="absolute inset-y-0 w-px bg-brand-blue/60"
+                      style={{ left: `${timeline.todayPct}%` }}
+                    />
+                  ) : null}
+                  {p.bars.map((b, i) => (
+                    <span
+                      key={b.key}
+                      title={`${b.kind === "absence" ? t("timeline.away") : (b.label ?? t("committedWhere.untitled"))} · ${formatCommitmentWhen(b.startDate, b.endDate)}`}
+                      data-testid={`roster-timeline-bar-${b.key}`}
+                      data-conflict={b.conflict ? "true" : undefined}
+                      className={`absolute flex items-center overflow-hidden rounded border px-1 text-meta text-text-primary ${TIMELINE_TONE[b.kind]} ${b.conflict ? "ring-2 ring-state-danger" : ""}`}
+                      style={{
+                        left: `${b.leftPct}%`,
+                        width: `${b.widthPct}%`,
+                        top: i % 2 === 0 ? "2px" : "auto",
+                        bottom: i % 2 === 0 ? "auto" : "2px",
+                        height: "calc(50% - 3px)",
+                      }}
+                    >
+                      <span className="truncate">
+                        {b.kind === "absence" ? t("timeline.away") : (b.label ?? t(`committedWhere.kind.${b.kind}`))}
+                      </span>
+                    </span>
+                  ))}
+                  {p.bars.length === 0 ? (
+                    <span className="absolute inset-0 flex items-center px-2 text-meta text-text-muted">
+                      {t("timeline.nothing")}
+                      {p.outsideWindow > 0 ? ` · ${t("timeline.outside", { count: p.outsideWindow })}` : ""}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        {timeline.people.some((p) => p.bars.some((b) => b.conflict)) ? (
+          <p className="text-meta text-state-danger" data-testid="roster-timeline-conflict-note">
+            {t("committedWhere.conflictNote")}
+          </p>
+        ) : null}
+      </section>
+    ) : null;
+
   const availabilitySection =
     availability.status === "ok" && availability.unavailability.length > 0 ? (
       <section
@@ -558,6 +746,7 @@ export default async function CompanyWorkforcePlanningPage({
             entered — an employer with an empty planning zone is precisely the
             one about to schedule someone. */}
         {utilisationSection}
+        {timelineSection}
         {commitmentsSection}
         {availabilitySection}
         <div
@@ -591,6 +780,7 @@ export default async function CompanyWorkforcePlanningPage({
       <Notes notes={view.notes} />
 
       {utilisationSection}
+      {timelineSection}
       {commitmentsSection}
       {availabilitySection}
 

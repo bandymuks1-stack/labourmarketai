@@ -10866,6 +10866,16 @@
       "unknown": "{count} w ogóle nie udało się odczytać. To nie to samo, co wolny.",
       "denominatorNote": "Liczone w dniach kalendarzowych. Nie rejestrujemy godzin umownych, więc to nie jest wskaźnik FTE."
     },
+    "timeline": {
+      "prev": "Wcześniej",
+      "next": "Później",
+      "today": "Dziś",
+      "dateLabel": "Od daty",
+      "go": "Idź",
+      "away": "Nieobecny",
+      "outside": "Jeszcze {count} poza tym okresem",
+      "nothing": "Brak wpisów w tym okresie"
+    },
     "committedWhere": {
       "title": "Kto jest zaangażowany i gdzie",
       "intro": "Terminowe zaangażowania każdej osoby — przydziały do projektów, zaakceptowane rezerwacje i zatwierdzone podróże służbowe — na podstawie tych samych danych, z których korzysta kalendarz i odpowiedź o wydajności. Nic tutaj nie jest wywnioskowane.",
