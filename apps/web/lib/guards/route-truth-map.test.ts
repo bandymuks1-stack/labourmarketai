@@ -64,6 +64,7 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/company/partners": "REAL_LAUNCH_SURFACE",
   "dashboard/company/education": "REAL_LAUNCH_SURFACE",
   "dashboard/company/history": "REAL_LAUNCH_SURFACE",
+  "dashboard/company/history/place": "REAL_LAUNCH_SURFACE",
   "dashboard/company/settings": "REAL_LAUNCH_SURFACE",
   "dashboard/company/projects/new": "REAL_LAUNCH_SURFACE",
   "dashboard/company/scouting": "REAL_LAUNCH_SURFACE",
