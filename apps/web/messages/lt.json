@@ -2224,7 +2224,14 @@
         "columnEmail": "El. paštas",
         "columnStatus": "Būsena",
         "columnInvitedAt": "Data",
-        "openProfile": "Peržiūrėti profilį"
+        "openProfile": "Peržiūrėti profilį",
+        "identity": {
+          "availability": {
+            "available": "Laisvas",
+            "busy": "Užimtas",
+            "unavailable": "Neprieinamas"
+          }
+        }
       },
       "scoutingBridge": {
         "title": "Raskite darbuotojų šiam poreikiui",
@@ -8321,7 +8328,7 @@
     "needsSetup": "Nepavyko įkelti. Bandykite dar kartą.",
     "noCandidates": "Šiam poreikiui kol kas nėra tinkamų darbuotojų. Atitikmenų atsiras darbuotojams pildant žurnalu pagrįstus gebėjimus — užsukite vėliau arba praplėskite poreikį.",
     "namePlaceholder": "Darbuotojas",
-    "skillFit": "{pct}% — {matched}/{total} reikalaujamų įgūdžių, {confirmed} patvirtinti vadovo",
+    "skillFit": "{matched}/{total} reikalaujamų įgūdžių, {confirmed} patvirtinti vadovo",
     "evidence": "Įrodymai — patvirtinti: {confirmed} · žurnalas: {journal} · savideklaruoti: {self}",
     "shortlistError": "Nepavyko išsaugoti. Bandyk dar kartą.",
     "footnote": "Atitiktis skaičiuojama deterministiškai tik šiam poreikiui. Jokio bendro reitingo, jokių išgalvotų kandidatų.",
@@ -8552,6 +8559,14 @@
         "accepted": "Priėmė",
         "closed": "Uždaryta"
       }
+    },
+    "identity": {
+      "why": "Kodėl šis žmogus tinka",
+      "skills": "Reikalingi įgūdžiai ir kuo jie grįsti",
+      "readiness": "Prieinamumas, pasirengimas ir dokumentai",
+      "openTo": "Taip pat atviras: {countries}",
+      "skillCount": "{matched} iš {total} reikalaujamų įgūdžių",
+      "nameHidden": "Vardas ir kontaktai rodomi tik tada, kai žmogus tai leidžia."
     }
   },
   "planBoundary": {

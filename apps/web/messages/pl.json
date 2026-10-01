@@ -2224,7 +2224,14 @@
         "columnEmail": "E-mail",
         "columnStatus": "Stan",
         "columnInvitedAt": "Data",
-        "openProfile": "Zobacz profil"
+        "openProfile": "Zobacz profil",
+        "identity": {
+          "availability": {
+            "available": "Dostępny",
+            "busy": "Zajęty",
+            "unavailable": "Niedostępny"
+          }
+        }
       },
       "scoutingBridge": {
         "title": "Znajdź pracowników do tego zapotrzebowania",
@@ -8321,7 +8328,7 @@
     "needsSetup": "Nie udało się wczytać. Spróbuj ponownie.",
     "noCandidates": "Brak jeszcze pasujących pracowników dla tej potrzeby. Dopasowania pojawiają się, gdy pracownicy dodają umiejętności potwierdzone dziennikiem — sprawdź później lub rozszerz potrzebę.",
     "namePlaceholder": "Pracownik",
-    "skillFit": "{pct}% — {matched}/{total} wymaganych umiejętności, {confirmed} potwierdzonych przez kierownika",
+    "skillFit": "{matched}/{total} wymaganych umiejętności, {confirmed} potwierdzonych przez kierownika",
     "evidence": "Dowody — potwierdzone: {confirmed} · dziennik: {journal} · zadeklarowane samodzielnie: {self}",
     "shortlistError": "Nie udało się zapisać. Spróbuj ponownie.",
     "footnote": "Dopasowania są obliczane deterministycznie wyłącznie dla tej potrzeby. Bez globalnej oceny, bez fałszywych kandydatów.",
@@ -8552,6 +8559,14 @@
         "accepted": "Przyjęli",
         "closed": "Zamknięte"
       }
+    },
+    "identity": {
+      "why": "Dlaczego ta osoba jest istotna",
+      "skills": "Istotne umiejętności i na czym się opierają",
+      "readiness": "Dostępność, gotowość i dokumenty",
+      "openTo": "Otwarta także na: {countries}",
+      "skillCount": "{matched} z {total} wymaganych umiejętności",
+      "nameHidden": "Imię i dane kontaktowe pojawiają się dopiero, gdy osoba na to pozwoli."
     }
   },
   "planBoundary": {

@@ -2224,7 +2224,14 @@
         "columnEmail": "E-mail",
         "columnStatus": "Status",
         "columnInvitedAt": "Datum",
-        "openProfile": "Profiel bekijken"
+        "openProfile": "Profiel bekijken",
+        "identity": {
+          "availability": {
+            "available": "Beschikbaar",
+            "busy": "Bezet",
+            "unavailable": "Niet beschikbaar"
+          }
+        }
       },
       "scoutingBridge": {
         "title": "Vind werknemers voor deze personeelsbehoefte",
@@ -8321,7 +8328,7 @@
     "needsSetup": "Laden is niet gelukt. Probeer het opnieuw.",
     "noCandidates": "Nog geen passende werknemers voor deze personeelsbehoefte. Matches verschijnen naarmate werknemers journaal-onderbouwde vaardigheden toevoegen — kijk later terug of verbreed de behoefte.",
     "namePlaceholder": "Werknemer",
-    "skillFit": "{pct}% — {matched}/{total} vereiste vaardigheden, {confirmed} door manager bevestigd",
+    "skillFit": "{matched}/{total} vereiste vaardigheden, {confirmed} door manager bevestigd",
     "evidence": "Bewijs — bevestigd: {confirmed} · journaal: {journal} · zelf opgegeven: {self}",
     "shortlistError": "Opslaan is niet gelukt. Probeer opnieuw.",
     "footnote": "Matches worden deterministisch berekend, alleen voor deze personeelsbehoefte. Geen globale rating, geen nepkandidaten.",
@@ -8552,6 +8559,14 @@
         "accepted": "Aanvaard",
         "closed": "Gesloten"
       }
+    },
+    "identity": {
+      "why": "Waarom deze persoon relevant is",
+      "skills": "Relevante vaardigheden en waarop ze rusten",
+      "readiness": "Beschikbaarheid, gereedheid en documenten",
+      "openTo": "Ook open voor: {countries}",
+      "skillCount": "{matched} van {total} vereiste vaardigheden",
+      "nameHidden": "Naam en contactgegevens verschijnen pas wanneer de persoon dat toestaat."
     }
   },
   "planBoundary": {
