@@ -7735,6 +7735,7 @@
     "country": {
       "title": "Wat ontbreekt voor een land",
       "help": "Kies een bestemmingsland om te zien welke documenten het vraagt.",
+      "mine": "Jouw voorkeurslanden staan vooraan.",
       "unknown": "De lijst met vereisten voor {country} is nog niet samengesteld — we tonen liever niets dan te gokken.",
       "next": "Volgende stap: regel — {doc}.",
       "ok": "Alle samengestelde vereisten voor {country} zijn gedekt."

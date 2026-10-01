@@ -7735,6 +7735,7 @@
     "country": {
       "title": "Was für ein Land fehlt",
       "help": "Wählen Sie ein Zielland, um zu sehen, welche Dokumente dort verlangt werden.",
+      "mine": "Ihre Wunschländer stehen zuerst.",
       "unknown": "Die Anforderungsliste für {country} wurde noch nicht kuratiert — wir zeigen lieber nichts an, statt zu raten.",
       "next": "Nächster Schritt: kümmern Sie sich um — {doc}.",
       "ok": "Alle kuratierten Anforderungen für {country} sind abgedeckt."

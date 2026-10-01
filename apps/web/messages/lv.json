@@ -1686,6 +1686,7 @@
     "country": {
       "title": "[EN] What is missing for a country",
       "help": "[EN] Pick a destination country to see which documents it asks for.",
+      "mine": "[EN] Your preferred countries come first.",
       "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
       "next": "[EN] Next step: take care of — {doc}.",
       "ok": "[EN] All curated requirements for {country} are covered."
