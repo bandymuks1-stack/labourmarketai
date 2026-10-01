@@ -518,7 +518,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | SKL-6 | ESCO taxonomy | 4 tables, 1,045,186 labels | IMPL | — | 2 | 0 of 161 platform skills carry an `esco_uri` — the bridge is inert |
 | SKL-7 | Documents / credential validity | `worker_documents`, `document_files` | IMPL | W (add only) | 1 | one download door, versioned, ack-bound |
 | SKL-8 | Country requirement matrix | `lib/country-readiness` (code), `country_document_requirements` (empty) | PARTIAL | — | 2 | no route of its own |
-| SKL-9 | **Qualification recognition / RPL / equivalence** | — | **MISSING** | — | 2 | nothing at any layer; keep in the architecture |
+| SKL-9 | **Qualification recognition / RPL / equivalence** | `lib/qualification/capability-standing`, `lib/skills/recognition-model` (pure); `competency_recognitions` (unapplied RED packet P-3, PR #1741) | **PARTIAL** (EXISTS pure + READ wired; **DISCONNECTED** at the write: no assessor act, 0 training providers) | — | 2 | corrected 2026-10-01 from MISSING; `hasRecognizedEquivalence` stays false until P-3 is applied and an assessor records one |
 | SKL-10 | Training & certification register | `training_programs`, `training_assignments` | IMPL (0 rows) | — | 2 | applied; writes nothing into the skill ladder, by decision |
 
 #### C. ORGANIZATION · WORKSPACE · AUTHORITY
