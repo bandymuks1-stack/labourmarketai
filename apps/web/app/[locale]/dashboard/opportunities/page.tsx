@@ -75,6 +75,7 @@ import { MarketExplanationPanel } from "@/components/app/market-explanation-pane
    render site). Every one of those modules still exists and still serves
    /dashboard/market-map unchanged. */
 import { SavedSearchesStrip } from "@/components/app/saved-searches-strip";
+import { JobAlertReadinessCard } from "@/components/app/job-alert-readiness-card";
 import { getMySavedSearches, notifySavedSearchMatches } from "@/lib/opportunities/saved-searches";
 import { hasAnyCriteria, readSavedSearches } from "@/lib/opportunities/saved-search-model";
 import {
@@ -1136,6 +1137,8 @@ export default async function OpportunitiesPage({
                     </Link>
                   </section>
                 ) : null}
+
+                <JobAlertReadinessCard locale={locale} />
 
                 {savedSearches.available ? (
                   <SavedSearchesStrip

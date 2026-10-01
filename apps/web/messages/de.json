@@ -4686,6 +4686,7 @@
         "event_demand_interest_reviewed": "Ein Unternehmen hat Ihr Interesse als geprüft markiert",
         "event_weekly_digest": "Deine wöchentliche Übersicht zu Arbeit und Chancen ist bereit",
         "event_saved_search_match": "Eine gespeicherte Suche hat neue Ergebnisse",
+        "event_job_alert": "Eine neue Stelle passt zu Ihrer Suche",
         "event_invitation_accepted": "Jemand hat Ihre Einladung angenommen",
         "event_weekly_digest_profile_completion": "Damit wir dir passende Jobs zeigen können, bestätige, welche Arbeit du machst",
         "event_weekly_digest_journal": "Die Wochenübersicht deines Arbeitsjournals ist fertig"
@@ -9602,6 +9603,14 @@
         "LOOKING_FOR_WORK": "Auf Arbeitssuche",
         "LOOKING_FOR_PROJECTS": "Auf Projektsuche"
       }
+    },
+    "jobAlerts": {
+      "title": "Meldungen zu neuen Stellen",
+      "ready": "Sobald eine neue echte Stelle erscheint, die zu Ihrem Beruf und den gewählten Ländern passt, sehen Sie sie in Ihren Benachrichtigungen. Eine Stelle ohne Gehaltsangabe wird nie wegen des Gehalts ausgeblendet.",
+      "missing": "Für Meldungen zu neuen Stellen geben Sie bitte an:",
+      "profession": "welche Arbeit Sie machen",
+      "country": "in welchen Ländern Sie arbeiten möchten",
+      "cta": "Meine Angaben ausfüllen"
     }
   },
   "workerIntake": {

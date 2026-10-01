@@ -101,6 +101,8 @@ import { maybeDispatchNotificationEmail } from "./email-dispatch";
 import { deterministicEntityId } from "./deterministic-entity-id";
 import { isoWeekKey } from "../worker/weekly-intelligence-model";
 import { getWorkerCoreRow } from "../data/worker-core";
+import { createClient as createServerClient } from "@/lib/supabase/server";
+import { buildOwnWorkerContext } from "@/lib/opportunities/worker-subject";
 import { getWorkerJobRecommendations } from "@/lib/opportunities/recommendations";
 import { getWeeklyPersonalIntelligence } from "../worker/weekly-intelligence";
 
@@ -1638,5 +1640,240 @@ export async function emitInvitationAcceptedNotification(input: {
     });
   } catch {
     undelivered("invitation_accepted_emit_failed");
+  }
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+ * JOB ALERTS (stream N, 2026-10-01) — a REAL active job that fits what the
+ * worker said they want reaches them in the bell, once.
+ *
+ * ONE chain, two entrances, ONE pure judgement (lib/opportunities/
+ * job-alert-model.ts, which applies the match engine's own profession /
+ * country / pay rules) and ONE canonical read (searchPublicVacancies):
+ *
+ *   read-time  — the worker's own dashboard render (below): their OWN session
+ *                supplies profession + countries + salary under RLS, so it
+ *                needs no privilege beyond the emit grant production holds.
+ *   sweep      — `emitJobAlertNotificationsForCron`: reaches workers who have
+ *                not logged in. Needs service_role SELECT on worker_professions
+ *                + professions (RED grant, separate PR); until then it reports
+ *                `unavailable` and the read-time path carries the feature.
+ *
+ * CONSENT is the existing rule, unchanged: `deliver` honours a stored in-app
+ * opt-out for `job_alert`; e-mail goes out ONLY with an explicit
+ * (job_alert, email, enabled) row, through the existing dispatcher.
+ * EXACTLY ONCE: entity id = hash(ad id + content hash); the store's UNIQUE
+ * (recipient, dedupe_key) refuses the second send of an unchanged job.
+ * ═════════════════════════════════════════════════════════════════════════ */
+
+import {
+  jobAlertEntityId,
+  jobAlertFacts,
+  missingJobAlertCriteria,
+  type JobAlertCriteria,
+} from "@/lib/opportunities/job-alert-model";
+import {
+  loadJobAlertVacancies,
+  pairReaderFor,
+  type JobAlertPairReader,
+} from "@/lib/opportunities/job-alert-candidates";
+import type { StoredPublicVacancyV1 } from "@/lib/vacancy-store/vacancy-read";
+
+export interface JobAlertRunCounts {
+  written: number;
+  duplicates: number;
+  suppressed: number;
+  failures: number;
+}
+
+/** Deliver the selected ads to one person. Counts only. */
+async function announceJobs(
+  admin: AdminClient,
+  recipientProfileId: string,
+  vacancies: readonly StoredPublicVacancyV1[],
+): Promise<JobAlertRunCounts | "blocked"> {
+  const counts: JobAlertRunCounts = {
+    written: 0,
+    duplicates: 0,
+    suppressed: 0,
+    failures: 0,
+  };
+  for (const v of vacancies) {
+    const facts = jobAlertFacts(v);
+    if (!facts || !v.storeId) continue;
+    const outcome = await deliver(admin, {
+      recipientProfileId,
+      eventType: "job_alert",
+      entityType: "public_vacancy",
+      entityId: jobAlertEntityId(v.storeId, v.contentHash),
+      metadata: {
+        title: facts.title,
+        ...(facts.country ? { country: facts.country } : {}),
+        ...(facts.salary ? { salary: facts.salary } : {}),
+        vacancyId: facts.vacancyId,
+      },
+    });
+    if (outcome === "written") counts.written += 1;
+    else if (outcome === "duplicate") counts.duplicates += 1;
+    else if (outcome === "suppressed_preference") {
+      counts.suppressed += 1;
+      break; // opted out of the type: every further ad is suppressed too
+    } else if (outcome === "unexpected_error") counts.failures += 1;
+    else if (outcome === "feature_unavailable" || outcome === "write_blocked") {
+      return "blocked";
+    }
+  }
+  return counts;
+}
+
+/** Best-effort throttle for the read-time path: one evaluation per person per
+ *  window per warm instance. The dedupe key, not this map, is the authority. */
+const JOB_ALERT_READ_TIME_TTL_MS = 30 * 60 * 1000;
+const jobAlertLastRun = new Map<string, number>();
+
+/**
+ * Read-time entrance — fired from the worker's own dashboard render, detached
+ * like the weekly digest (an insert killed by the serverless freeze self-heals
+ * on the next visit: same deterministic ids).
+ */
+export function maybeEmitJobAlertsInBackground(): void {
+  void (async () => {
+    try {
+      if (isNotificationStoreWriteBlocked()) return;
+      const supabase = await createServerClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+      const last = jobAlertLastRun.get(user.id) ?? 0;
+      if (Date.now() - last < JOB_ALERT_READ_TIME_TTL_MS) return;
+      jobAlertLastRun.set(user.id, Date.now());
+
+      const ctx = await buildOwnWorkerContext(supabase, user.id);
+      if (!ctx) return;
+      const criteria: JobAlertCriteria = {
+        professionSlugs: ctx.subject.professionSlugs?.length
+          ? [...ctx.subject.professionSlugs]
+          : ctx.subject.professionSlug
+            ? [ctx.subject.professionSlug]
+            : [],
+        preferredCountries: [...(ctx.subject.preferredCountries ?? [])],
+        salaryMinEur: ctx.subject.salaryMinEur ?? null,
+      };
+      if (missingJobAlertCriteria(criteria).length > 0) return;
+
+      const nowIso = new Date().toISOString();
+      const vacancies = await loadJobAlertVacancies(
+        pairReaderFor(supabase, nowIso),
+        criteria,
+        nowIso,
+      );
+      if (vacancies.length === 0) return;
+      await announceJobs(createAdminClient(), user.id, vacancies);
+    } catch {
+      // Observability only — never the page. The next visit tries again.
+    }
+  })();
+}
+
+export type JobAlertCronResult =
+  | ({ readonly kind: "ran"; readonly candidates: number } & JobAlertRunCounts)
+  | { readonly kind: "unavailable"; readonly reason: string };
+
+/** Workers a single sweep considers. */
+const JOB_ALERT_CRON_WORKER_LIMIT = 2000;
+
+/**
+ * Sweep entrance — service role. Reads ONLY: workers (profile, preferred
+ * countries, salary), their catalogue professions, public ads. Returns counts,
+ * never ids or people. `unavailable` (with a reason code) when a read is
+ * refused — e.g. 42501 until the owner applies the SELECT grant — so a missing
+ * grant is a named state, not silence.
+ */
+export async function emitJobAlertNotificationsForCron(): Promise<JobAlertCronResult> {
+  try {
+    const admin = createAdminClient();
+    const nowIso = new Date().toISOString();
+
+    const wres = await admin
+      .from("workers")
+      .select("id, profile_id, preferred_countries, salary_min_eur")
+      .not("profile_id", "is", null)
+      .not("preferred_countries", "eq", "{}")
+      .limit(JOB_ALERT_CRON_WORKER_LIMIT);
+    if (wres.error) {
+      return { kind: "unavailable", reason: `workers_${wres.error.code ?? "read"}` };
+    }
+    const workers = (wres.data ?? []) as {
+      id: string;
+      profile_id: string;
+      preferred_countries: string[] | null;
+      salary_min_eur: number | string | null;
+    }[];
+
+    const professionsByWorker = new Map<string, string[]>();
+    for (let i = 0; i < workers.length; i += 100) {
+      const ids = workers.slice(i, i + 100).map((w) => w.id);
+      const pres = await admin
+        .from("worker_professions")
+        .select("worker_id, professions ( slug )")
+        .in("worker_id", ids);
+      if (pres.error) {
+        return {
+          kind: "unavailable",
+          reason: `worker_professions_${pres.error.code ?? "read"}`,
+        };
+      }
+      for (const r of (pres.data ?? []) as unknown as {
+        worker_id: string;
+        professions: { slug?: string | null } | { slug?: string | null }[] | null;
+      }[]) {
+        const p = Array.isArray(r.professions) ? r.professions[0] : r.professions;
+        const slug = p?.slug?.trim();
+        if (!slug) continue;
+        const list = professionsByWorker.get(r.worker_id) ?? [];
+        if (!list.includes(slug)) list.push(slug);
+        professionsByWorker.set(r.worker_id, list);
+      }
+    }
+
+    // One canonical read per distinct (country, profession) across ALL workers.
+    const cache = new Map<string, Promise<readonly StoredPublicVacancyV1[]>>();
+    const base = pairReaderFor(admin, nowIso);
+    const read: JobAlertPairReader = (country, professionSlug) => {
+      const key = `${country}:${professionSlug}`;
+      let hit = cache.get(key);
+      if (!hit) {
+        hit = base(country, professionSlug);
+        cache.set(key, hit);
+      }
+      return hit;
+    };
+
+    const total: JobAlertRunCounts = { written: 0, duplicates: 0, suppressed: 0, failures: 0 };
+    let candidates = 0;
+    for (const w of workers) {
+      const criteria: JobAlertCriteria = {
+        professionSlugs: professionsByWorker.get(w.id) ?? [],
+        preferredCountries: w.preferred_countries ?? [],
+        salaryMinEur:
+          w.salary_min_eur === null || w.salary_min_eur === undefined
+            ? null
+            : Number(w.salary_min_eur),
+      };
+      if (missingJobAlertCriteria(criteria).length > 0) continue;
+      candidates += 1;
+      const vacancies = await loadJobAlertVacancies(read, criteria, nowIso);
+      if (vacancies.length === 0) continue;
+      const res = await announceJobs(admin, w.profile_id, vacancies);
+      if (res === "blocked") return { kind: "unavailable", reason: "store_blocked" };
+      total.written += res.written;
+      total.duplicates += res.duplicates;
+      total.suppressed += res.suppressed;
+      total.failures += res.failures;
+    }
+    return { kind: "ran", candidates, ...total };
+  } catch {
+    return { kind: "unavailable", reason: "thrown" };
   }
 }

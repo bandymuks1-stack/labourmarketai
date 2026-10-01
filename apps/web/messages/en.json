@@ -4686,6 +4686,7 @@
         "event_demand_interest_reviewed": "A company marked your interest as reviewed",
         "event_weekly_digest": "Your weekly work and opportunities summary is ready",
         "event_saved_search_match": "A search you saved has new results",
+        "event_job_alert": "A new job fits what you are looking for",
         "event_invitation_accepted": "Somebody accepted your invitation",
         "event_weekly_digest_profile_completion": "To see jobs that fit you, confirm what work you do",
         "event_weekly_digest_journal": "Your week’s work journal summary is ready"
@@ -9602,6 +9603,14 @@
         "LOOKING_FOR_WORK": "Looking for work",
         "LOOKING_FOR_PROJECTS": "Looking for projects"
       }
+    },
+    "jobAlerts": {
+      "title": "New-job alerts",
+      "ready": "When a new real job appears that fits your profession and the countries you chose, it shows up in your notifications. A job that states no pay is never hidden because of pay.",
+      "missing": "To get new-job alerts, tell us:",
+      "profession": "what work you do",
+      "country": "which countries you want to work in",
+      "cta": "Fill in my preferences"
     }
   },
   "workerIntake": {

@@ -390,6 +390,7 @@
         "event_demand_interest_reviewed": "En virksomhed har markeret din interesse som gennemgået",
         "event_weekly_digest": "Din ugentlige oversigt over arbejde og muligheder er klar",
         "event_saved_search_match": "En gemt søgning har nye resultater",
+        "event_job_alert": "Der er et nyt job, der passer til det, du søger",
         "event_weekly_digest_profile_completion": "For at vise dig passende job, bekræft hvilket arbejde du udfører",
         "event_weekly_digest_journal": "Ugens oversigt over din arbejdsjournal er klar"
       },
@@ -2298,6 +2299,14 @@
         "LOOKING_FOR_WORK": "Søger arbejde",
         "LOOKING_FOR_PROJECTS": "Søger projekter"
       }
+    },
+    "jobAlerts": {
+      "title": "Beskeder om nye job",
+      "ready": "Når et nyt rigtigt job passer til dit fag og de lande, du har valgt, vises det i dine notifikationer. Et job uden oplyst løn skjules aldrig på grund af løn.",
+      "missing": "For at få beskeder om nye job skal du oplyse:",
+      "profession": "hvilket arbejde du udfører",
+      "country": "hvilke lande du vil arbejde i",
+      "cta": "Udfyld mine ønsker"
     }
   },
   "scouting": {

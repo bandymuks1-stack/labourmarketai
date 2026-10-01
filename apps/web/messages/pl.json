@@ -4686,6 +4686,7 @@
         "event_demand_interest_reviewed": "Firma oznaczyła Twoje zainteresowanie jako rozpatrzone",
         "event_weekly_digest": "Twoje tygodniowe podsumowanie pracy i możliwości jest gotowe",
         "event_saved_search_match": "Zapisane wyszukiwanie ma nowe wyniki",
+        "event_job_alert": "Pojawiła się nowa oferta pasująca do Twoich kryteriów",
         "event_invitation_accepted": "Ktoś przyjął Twoje zaproszenie",
         "event_weekly_digest_profile_completion": "Aby pokazać pasujące oferty, potwierdź, jaką pracę wykonujesz",
         "event_weekly_digest_journal": "Podsumowanie Twojego dziennika pracy z tego tygodnia jest gotowe"
@@ -9602,6 +9603,14 @@
         "LOOKING_FOR_WORK": "Szukam pracy",
         "LOOKING_FOR_PROJECTS": "Szukam projektów"
       }
+    },
+    "jobAlerts": {
+      "title": "Powiadomienia o nowych ofertach",
+      "ready": "Gdy pojawi się nowa prawdziwa oferta pasująca do Twojego zawodu i wybranych krajów, zobaczysz ją w powiadomieniach. Oferta bez podanego wynagrodzenia nigdy nie jest ukrywana z powodu wynagrodzenia.",
+      "missing": "Aby dostawać powiadomienia o nowych ofertach, podaj:",
+      "profession": "jaką pracę wykonujesz",
+      "country": "w jakich krajach chcesz pracować",
+      "cta": "Uzupełnij preferencje"
     }
   },
   "workerIntake": {
