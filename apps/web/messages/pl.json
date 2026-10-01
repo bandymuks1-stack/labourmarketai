@@ -1807,7 +1807,9 @@
         "unknown": "Za mało danych do porównania"
       },
       "opportunity": "{count, plural, one {Do # osoby wolnej od {date}} few {Do # osób wolnych od {date}} many {Do # osób wolnych od {date}} other {Do # osoby wolnych od {date}}}",
-      "opportunityCta": "Szukaj pracy"
+      "opportunityCta": "Szukaj pracy",
+      "interest": "{count, plural, one {# osoba wyraziła zainteresowanie Twoimi potrzebami} few {# osoby wyraziły zainteresowanie Twoimi potrzebami} many {# osób wyraziło zainteresowanie Twoimi potrzebami} other {# osoby wyraziło zainteresowanie Twoimi potrzebami}}",
+      "interestCta": "Zobacz kto"
     },
     "attention": {
       "heading": "Wymaga Ciebie",
