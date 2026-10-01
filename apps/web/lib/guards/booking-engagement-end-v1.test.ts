@@ -1513,6 +1513,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260930120000_project_duplicate_marker_v1.sql",
       // owner 2026-09-30 (D1 #2015 APPROVED): a worker photo for real work relationships.
       "20260930133500_worker_avatar_path_for_relations_v1.sql",
+      // owner 2026-10-01 (#2041 APPROVED): the human decision on a staffing collision is audited.
+      "20261001100000_assignment_decision_audit_v1.sql",
 ]);
   });
 
