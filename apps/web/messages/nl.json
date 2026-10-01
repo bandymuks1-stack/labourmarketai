@@ -7102,7 +7102,7 @@
     "assign": {
       "heading": "Het hele team aan een project toewijzen",
       "intro": "Elk van de {count} leden wordt apart toegewezen en u ziet het resultaat per persoon.",
-      "projectLabel": "Project",
+      "projectLabel": "Project voor het team",
       "projectPlaceholder": "Kies een project",
       "submit": "Team toewijzen",
       "assigning": "Bezig met toewijzen…",
