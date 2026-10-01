@@ -17931,6 +17931,7 @@
     "whoWorked": "Wie hier werkte",
     "timeline": "Wat er is gedaan",
     "back": "Terug naar geschiedenis",
-    "placeMissing": "Deze plaats staat niet in de geïmporteerde geschiedenis van de actieve werkruimte."
+    "placeMissing": "Deze plaats staat niet in de geïmporteerde geschiedenis van de actieve werkruimte.",
+    "attributedNote": "Bevat {count, plural, one {# registratie} other {# registraties}} uit de administratie van een andere organisatie, hier toegewezen als uitvoerend bedrijf."
   }
 }

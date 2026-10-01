@@ -5,7 +5,7 @@ import { withSessionWorkspacePointer, listWorkspaceMemberships } from "@/lib/com
 import type { DomainCaller } from "@/lib/domain/caller";
 import { resolveEvidenceOrganization } from "./evidence-org-context";
 import { untypedClient } from "./evidence-store";
-import { listEvidenceRecords } from "./import-core";
+import { listEvidenceRecords, listRecordIdsAttributedTo } from "./import-core";
 import {
   buildCompanyWorkHistory,
   type CompanyWorkHistory,
@@ -33,6 +33,8 @@ export type CompanyWorkHistoryLoad =
       readonly elsewhere: readonly { readonly id: string; readonly name: string; readonly count: number }[];
       /** Roster person id → linked worker id (only `linked` rows). */
       readonly linkedWorkers: Readonly<Record<string, string>>;
+      /** Records stored in ANOTHER organization's books that name this one as the performing company. */
+      readonly attributedCount: number;
     }
   | { readonly kind: "unavailable" }
   | { readonly kind: "hidden" };
@@ -100,7 +102,20 @@ export async function loadCompanyWorkHistory(locale: string): Promise<CompanyWor
     if (p.link_state === "linked" && p.linked_worker_id) linkedWorkers[p.id] = p.linked_worker_id;
   }
 
-  const history = buildCompanyWorkHistory(recs.records, objects);
+  // Work stored in another organization's books but attributed HERE (a party
+  // row naming this organization). The records SELECT policy already admits
+  // them; they are read, never copied.
+  let attributed: readonly (typeof recs.records)[number][] = [];
+  const attributedIds = await listRecordIdsAttributedTo(caller, org.organizationId);
+  if (attributedIds.kind === "ok") {
+    const own = new Set(recs.records.map((r) => r.id));
+    const wanted = attributedIds.recordIds.filter((id) => !own.has(id));
+    if (wanted.length > 0) {
+      const extra = await listEvidenceRecords(caller, { recordIds: wanted, limit: LIMIT });
+      if (extra.kind === "ok") attributed = extra.records.filter((r) => r.organizationId !== org.organizationId);
+    }
+  }
+  const history = buildCompanyWorkHistory([...recs.records, ...attributed], objects);
 
   // Where is the work if not here? Only when this organization holds none.
   const elsewhere: { id: string; name: string; count: number }[] = [];
@@ -125,5 +140,6 @@ export async function loadCompanyWorkHistory(locale: string): Promise<CompanyWor
     history,
     elsewhere,
     linkedWorkers,
+    attributedCount: attributed.length,
   };
 }

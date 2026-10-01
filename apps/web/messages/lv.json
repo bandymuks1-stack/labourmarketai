@@ -6832,6 +6832,7 @@
     "whoWorked": "Kas šeit strādāja",
     "timeline": "Kas darīts",
     "back": "Atpakaļ uz vēsturi",
-    "placeMissing": "Šīs vietas nav aktīvās darbvietas importētajā vēsturē."
+    "placeMissing": "Šīs vietas nav aktīvās darbvietas importētajā vēsturē.",
+    "attributedNote": "Ietver {count, plural, zero {# ierakstu} one {# ierakstu} other {# ierakstus}}, kas glabājas citas organizācijas uzskaitē un šeit piešķirti kā darbu veikušajam uzņēmumam."
   }
 }

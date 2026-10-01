@@ -17931,6 +17931,7 @@
     "whoWorked": "Kas čia dirbo",
     "timeline": "Kas daryta",
     "back": "Atgal į istoriją",
-    "placeMissing": "Šios vietos nėra aktyvios darbo erdvės importuotoje istorijoje."
+    "placeMissing": "Šios vietos nėra aktyvios darbo erdvės importuotoje istorijoje.",
+    "attributedNote": "Įskaitant {count, plural, one {# įrašą} few {# įrašus} other {# įrašų}}, saugomus kitos organizacijos knygose ir čia priskirtus kaip darbą atlikusiai įmonei."
   }
 }
