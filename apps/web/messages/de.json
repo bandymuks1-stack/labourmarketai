@@ -1745,6 +1745,14 @@
       "free": "frei",
       "away": "abwesend",
       "awayUntil": "abwesend bis {date}",
+      "summary": "{free} frei · {committed} im Einsatz · {away} abwesend",
+      "onWork": "auf {project}",
+      "booked": "gebucht",
+      "until": "bis {date}",
+      "undated": "ohne Termine",
+      "outlookHeading": "Freie Personen, nächste 4 Wochen",
+      "outlookWeek": "Ab {date}: {free} von {total} frei",
+      "outlookNote": "Nach erfassten Buchungen und Abwesenheiten — eine Schätzung, kein Versprechen.",
       "absencesUnknown": "Abwesenheiten werden noch nicht erfasst — frei heißt, niemand hat etwas anderes gesagt.",
       "more": "{count, plural, =1 {1 weitere Person auf der Planungsseite} other {# weitere Personen auf der Planungsseite}}",
       "assign": "Einem Projekt zuweisen",
@@ -4496,6 +4504,7 @@
         "planning": "Kalender",
         "network": "Netzwerk",
         "playerCard": "Mein Berufsprofil",
+        "companyProfile": "Firmenprofil",
         "adminPlatform": "Plattform-Administration"
       },
       "roleNotice": {
@@ -5986,6 +5995,10 @@
       "reservation": {
         "collidesTitle": "An diesen Tagen bereits verplant",
         "notBlocking": "Das blockiert die Zuweisung nicht — Sie entscheiden.",
+        "alternativesTitle": "In diesem Zeitraum frei",
+        "swap": "Stattdessen zuweisen",
+        "undo": "Zuweisung rückgängig",
+        "decided": "Erledigt",
         "unknown": "Wir konnten nicht bestätigen, dass diese Tage frei sind. Das ist nicht dasselbe wie frei.",
         "source": {
           "project": "Projekt",
@@ -6477,7 +6490,13 @@
       "map": "Karte",
       "mapNote": "Wo sich Arbeit und Dienstleistungen befinden",
       "diary": "Arbeitsjournal",
-      "diaryNote": "Abgeschlossene Arbeit wird als Fakt erfasst"
+      "diaryNote": "Abgeschlossene Arbeit wird als Fakt erfasst",
+      "scouting": "Kandidaten",
+      "scoutingNote": "Finde passende Personen für deinen Bedarf",
+      "listings": "Inserate",
+      "listingsNote": "Räume, Geräte, Fahrzeuge – anbieten oder suchen",
+      "needs": "Bedarf & Angebot",
+      "needsNote": "Veröffentliche, was du brauchst oder anbieten kannst"
     }
   },
   "learning": {
@@ -9554,8 +9573,7 @@
       "mapTitle": "Wo die Arbeit ist",
       "skipToList": "Zur Liste",
       "placeLink": "Möglichkeiten in diesem Land zeigen",
-      "sourcesIncomplete": "Einige Stellenquellen sind derzeit nicht verfügbar, daher ist diese Liste möglicherweise unvollständig.",
-      "youTitle": "Das sind Sie — danach suchen wir, wohin Sie gehen können"
+      "sourcesIncomplete": "Einige Stellenquellen sind derzeit nicht verfügbar, daher ist diese Liste möglicherweise unvollständig."
     },
     "savedSearches": {
       "title": "Gespeicherte Suchen",
@@ -10134,7 +10152,6 @@
     "eyebrow": "Über die Plattform",
     "title": "Was ist LabourMarket.ai",
     "lede": "LabourMarket.ai ist eine Betriebsplattform für den Arbeitsmarkt. Sie verbindet Menschen, Arbeitgeber, Agenturen, Teams, Projekte, Weiterbildung und Arbeitsmarktdienste rund um echte Arbeit — nicht nur die Stellensuche.",
-    "statusNote": "Diese Seite erklärt die Logik des Systems, nicht den Einführungsstand. Was Sie heute nutzen können, sehen Sie in Ihrem Konto; was noch eine Richtung ist, ist als Richtung gekennzeichnet.",
     "hero": {
       "lead": "Der berufliche Wert eines Menschen sollte nicht jedes Mal verschwinden, wenn er den Arbeitgeber wechselt. Echte Arbeit kann zu dauerhafter beruflicher Geschichte werden: was die Person getan hat, wo, wann, wie lange, in welcher Rolle, mit welchen Fähigkeiten und welche Nachweise und Bestätigungen das stützen.",
       "leadOrg": "Für Organisationen baut dieselbe echte Arbeit die Historie dessen auf, was das Unternehmen tatsächlich geleistet hat: Projekte, Teams, ausgeführte Arbeiten, Stunden, Kompetenzen und Nachweise.",
@@ -10357,7 +10374,6 @@
       "heading": "Was die Plattform nicht tut",
       "points": [
         "Sie markiert selbst nie etwas als bestätigt — ein bestätigter Zustand kommt immer von einer echten Person.",
-        "Zahlungen über die Plattform sind noch nicht aktiv; es gibt keine Abrechnung.",
         "Sie gibt keine Rechtsberatung. Dokumenthinweise dienen nur der Information.",
         "Sie bewertet Menschen nicht mit Punkten oder Rankings."
       ]
@@ -11560,7 +11576,8 @@
         "team": "Team",
         "other": "Organisation"
       },
-      "visibilityReason": "Angezeigt werden nur Personen, die auffindbar sein möchten oder eine echte Arbeitsbeziehung zu Ihnen haben."
+      "visibilityReason": "Angezeigt werden nur Personen, die auffindbar sein möchten oder eine echte Arbeitsbeziehung zu Ihnen haben.",
+      "noContactYet": "Nachrichten sind erst nach einer Einladung oder gemeinsamer Arbeit möglich. Lade ein — oder frage eine Dienstleistung an."
     },
     "sent": {
       "title": "Meine gesendeten Einladungen",
@@ -13535,10 +13552,34 @@
       },
       "findWorkInCompanyContext": "Die Jobsuche ist deine eigene Sache — im Unternehmensbereich führe ich sie nicht aus. Wechsle in deinen persönlichen Bereich und frag noch einmal.",
       "findWorkInCompanyWhy": "Arbeit sucht ein Mensch, kein Unternehmen — ich antworte aus deinem persönlichen Bereich.",
+      "personalOnlyInCompany": "Das ist eine persönliche Aktion — im Unternehmensbereich führe ich sie nicht aus. Wechsle in deinen persönlichen Bereich und mach dort weiter.",
       "journalAskWhatYouDid": "Was hast du heute gearbeitet? Schreib es in das Feld „Was du gearbeitet hast“ in deinen Worten — z. B. „Fenster auf der Baustelle Kaunas von 8 bis 17 montiert“. Die Anfrage selbst wird nicht ins Tagebuch gespeichert.",
       "alsoWorkLog": "Ich habe auch verstanden, dass du heute gearbeitet hast — prüfe es und speichere es im Arbeitsjournal:",
       "serviceNeedHint": "Das ist eine Aufgabe, die erledigt werden muss — ich zeige dir, wer diese Leistung anbietet.",
       "chipServiceRequests": "Leistung finden",
+      "findPartnersDoors": "Das ist eine Suche nach Geschäftspartnern, keine Jobsuche. Sie läuft über den bestehenden Marktplatz — wähle, wo du anfängst.",
+      "findPartnersPickCompany": "Geschäftspartner werden im Namen eines Unternehmens gesucht. Welches Unternehmen meinst du?",
+      "findPartnersNoCompany": "Geschäftspartner werden im Namen eines Unternehmens gesucht, und es gibt noch kein Unternehmensprofil. Lege eines an oder durchsuche den Leistungsmarkt.",
+      "chipPartnersServices": "Dienstleister",
+      "chipPartnersListings": "Marktplatz-Anzeigen",
+      "chipPartnersRelations": "Kunden und Partner",
+      "productHelp": {
+        "projectUse": "Ein Projekt ist der Ort für Arbeit, Menschen und Termine. Öffne ein Projekt, füge Aufgaben und Personen hinzu, und die erledigte Arbeit erscheint genau dort.",
+        "addPerson": "Eine Person fügst du per Einladung hinzu: Gib ihren Kontakt ein, und sie bestätigt in ihrem eigenen Konto. Einladungen und Team findest du im Teambereich.",
+        "hours": "Stunden stehen im Stundenbereich — dort siehst du Tage, die Woche und den Stundenzettel.",
+        "offerService": "Eine Leistung bietest du im Leistungsbereich an: Beschreibe sie, dann können andere Unternehmen und Personen sie sehen.",
+        "warning": "Eine Warnung erscheint, wenn etwas die Arbeit behindern könnte — zum Beispiel läuft ein Dokument ab oder es fehlen Daten. Alle Meldungen und ihre Gründe siehst du im Meldungsbereich.",
+        "forecast": "Eine Prognose ist eine Berechnung aus den bereits erfassten Stunden und der geplanten Arbeit. Sie ist ein Richtwert, kein Versprechen, und ändert sich mit den Daten. Plan und Zahlen findest du in der Planung.",
+        "scheduleWorker": "Eine Person planst du in der Planung ein: Wähle Tag und Projekt und weise die Person am selben Ort zu.",
+        "doneWork": "Erledigte Arbeit siehst du dort, wo sie erfasst wurde — im Arbeitsjournal oder im Stundenbereich: Einträge, Stunden und Bestätigungen.",
+        "chips": {
+          "chipHelpProjects": "Projekte öffnen",
+          "chipHelpPeople": "Team und Einladungen",
+          "chipHelpPlanning": "Planung öffnen",
+          "chipHelpServices": "Meine Leistungen",
+          "chipHelpJournal": "Arbeitsjournal"
+        }
+      },
       "interestInboxAmbiguous": "Das kann zweierlei heißen — was möchtest du sehen?",
       "chipInterestOnMyNeeds": "Interesse an meinen Anfragen",
       "chipMyOwnInterest": "Mein eigenes Interesse",
@@ -14742,7 +14783,7 @@
         "radius": "Entfernung"
       },
       "whyFiltered": "Du hast gesagt: {words}. Danach habe ich die Suche eingegrenzt.",
-      "whyUnfiltered": "Ich habe deine ganze Liste durchsucht — du hast nichts eingegrenzt.",
+      "whyUnfiltered": "Keine zusätzlichen Filter — ich zeige alles, was für dich sichtbar ist.",
       "whyFromYourBoard": "Aus den Anfragen, die dir gerade sichtbar sind.",
       "whyNoWorker": "Dafür braucht es ein Arbeitnehmerprofil, und dieses Konto hat noch keines.",
       "whyNoAccess": "Offene Anfragen sind für dein Konto noch nicht verfügbar.",
@@ -17351,6 +17392,7 @@
     "needs": "Bedarf",
     "calendar": "Kalender",
     "partners": "Kunden & Partner",
+    "market": "Marktplatz",
     "education": "Ausbildung",
     "history": "Verlauf",
     "settings": "Einstellungen",
@@ -17814,5 +17856,44 @@
         }
       }
     }
+  },
+  "companyWorkHistory": {
+    "title": "Importierte Arbeitshistorie des Unternehmens",
+    "subtitle": "Was {name} aus den eigenen früheren Stundenzetteln festgehalten hat: wo gearbeitet wurde, wann, wer dort gearbeitet hat, was getan wurde und wie lange.",
+    "badge": "Importierte Unternehmenshistorie",
+    "provenance": "Aus den eigenen Stundenzetteln von {name}. Die Personen haben LabourMarket.ai damals nicht genutzt, und die Angaben sind nicht unabhängig geprüft.",
+    "unavailable": "Die importierte Arbeitshistorie konnte gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
+    "empty": "{name} hat keine importierte Arbeitshistorie hinterlegt.",
+    "elsewhere": "{name} enthält {count, plural, one {# importierten Eintrag} other {# importierte Einträge}} früherer Arbeit. Wechseln Sie in diesen Arbeitsbereich, um sie zu sehen.",
+    "stats": {
+      "places": "Orte",
+      "people": "Personen",
+      "hours": "Erfasste Stunden",
+      "period": "Zeitraum"
+    },
+    "place": "Ort",
+    "noPlaceName": "Kein Ort angegeben",
+    "open": "Öffnen",
+    "people": "{count, plural, one {# Person} other {# Personen}}",
+    "entries": "{count, plural, one {# Eintrag} other {# Einträge}}",
+    "hoursShare": "{hours} Std. an diesem Ort, im Vergleich zum meistbearbeiteten Ort",
+    "noPlace": "{count, plural, one {# Eintrag} other {# Einträge}} ({hours} Std.) nennen in der Quelle keinen Ort.",
+    "periodAside": "Davon sind {hours} Std. Zeitraumsummen für eine Spanne, getrennt von einzelnen Tagen.",
+    "scope": {
+      "title": "Was dieser Import enthält",
+      "carried": "Die Quelle enthält: wer gearbeitet hat, an welchem Tag, wie viele Stunden, was getan wurde und den Ort wie geschrieben.",
+      "missing": "Nicht in der Quelle: Kunde, Straßenadresse und Projekt. Sie werden als nicht in der Quelle angezeigt und nie ergänzt."
+    },
+    "facts": {
+      "customer": "Kunde",
+      "address": "Adresse",
+      "project": "Projekt",
+      "notInSource": "Nicht in der Quelle",
+      "linked": "Verknüpft"
+    },
+    "whoWorked": "Wer hier gearbeitet hat",
+    "timeline": "Was getan wurde",
+    "back": "Zurück zur Historie",
+    "placeMissing": "Dieser Ort ist nicht in der importierten Historie des aktiven Arbeitsbereichs."
   }
 }

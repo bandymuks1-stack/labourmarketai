@@ -292,7 +292,8 @@
         "journal": "Mans CV",
         "search": "[EN] Search",
         "advanced": "Paplašinātā pārvaldība",
-        "playerCard": "Mans profesionālais profils"
+        "playerCard": "Mans profesionālais profils",
+        "companyProfile": "Uzņēmuma profils"
       },
       "moreSection": {
         "title": "Detalizēts pārskats",
@@ -3954,9 +3955,33 @@
       },
       "findWorkInCompanyContext": "Darba meklēšana ir tava paša darbība — uzņēmuma telpā es to neveicu. Pārslēdzies uz personīgo telpu un pajautā vēlreiz.",
       "findWorkInCompanyWhy": "Darbu meklē cilvēks, ne uzņēmums — atbildu no tavas personīgās telpas.",
+      "personalOnlyInCompany": "Šī ir personiska darbība — uzņēmuma telpā es to neveicu. Pārslēdzies uz personisko telpu un turpini tur.",
       "journalAskWhatYouDid": "Ko tu šodien darīji? Ieraksti laukā „Ko darīji“ saviem vārdiem — piem. „montēju logus Kauņas objektā no 8 līdz 17“. Pats pieprasījums žurnālā netiek saglabāts.",
       "serviceNeedHint": "Tas ir darbs, kas jāpaveic — parādīšu, kas piedāvā šādu pakalpojumu.",
       "chipServiceRequests": "Atrast pakalpojumu",
+      "findPartnersDoors": "Šī ir uzņēmējdarbības partneru meklēšana, nevis darba meklēšana. Tā notiek esošajā tirgū — izvēlies, ar ko sākt.",
+      "findPartnersPickCompany": "Uzņēmējdarbības partnerus meklē uzņēmuma vārdā. Kuru uzņēmumu tu domā?",
+      "findPartnersNoCompany": "Uzņēmējdarbības partnerus meklē uzņēmuma vārdā, un uzņēmuma profila vēl nav. Izveido to vai apskati pakalpojumu tirgu.",
+      "chipPartnersServices": "Pakalpojumu sniedzēji",
+      "chipPartnersListings": "Tirgus sludinājumi",
+      "chipPartnersRelations": "Klienti un partneri",
+      "productHelp": {
+        "projectUse": "Projekts ir vieta darbam, cilvēkiem un termiņiem. Atver projektu, pievieno uzdevumus un cilvēkus, un paveiktais darbs parādās turpat.",
+        "addPerson": "Cilvēku pievieno ar uzaicinājumu: ieraksti viņa kontaktu, un viņš apstiprina savā kontā. Uzaicinājumus un komandu atradīsi komandas sadaļā.",
+        "hours": "Stundas glabājas stundu sadaļā — tur redzi dienas, nedēļu un darba laika lapu.",
+        "offerService": "Pakalpojumu piedāvā pakalpojumu sadaļā: apraksti to, un citi uzņēmumi un cilvēki to redz.",
+        "warning": "Brīdinājums parādās, kad kaut kas var traucēt darbu — piemēram, beidzas dokumenta derīgums vai trūkst datu. Visus paziņojumus un to iemeslus redzēsi paziņojumu sadaļā.",
+        "forecast": "Prognoze ir aprēķins no jau reģistrētajām stundām un plānotā darba. Tā ir norāde, nevis solījums, un mainās līdz ar datiem. Plānu un skaitļus atradīsi plānošanā.",
+        "scheduleWorker": "Darbinieku ieplāno plānošanā: izvēlies dienu un projektu un piešķir cilvēku tajā pašā vietā.",
+        "doneWork": "Paveikto darbu redzi tur, kur tas reģistrēts — darba žurnālā vai stundu sadaļā: ieraksti, stundas un apstiprinājumi.",
+        "chips": {
+          "chipHelpProjects": "Atvērt projektus",
+          "chipHelpPeople": "Komanda un uzaicinājumi",
+          "chipHelpPlanning": "Atvērt plānošanu",
+          "chipHelpServices": "Mani pakalpojumi",
+          "chipHelpJournal": "Darba žurnāls"
+        }
+      },
       "interestInboxAmbiguous": "Tas var nozīmēt divas lietas — ko vēlies redzēt?",
       "chipInterestOnMyNeeds": "Interese par maniem pieprasījumiem",
       "chipMyOwnInterest": "Manas intereses",
@@ -4680,7 +4705,7 @@
         "radius": "attāluma"
       },
       "whyFiltered": "[EN] You said: {words}. I narrowed the search to that.",
-      "whyUnfiltered": "[EN] I searched your whole board — you did not narrow it.",
+      "whyUnfiltered": "Bez papildu filtriem — rādu visu, kas tev redzams.",
       "whyFromYourBoard": "[EN] From the demands that are visible to you right now.",
       "whyNoWorker": "[EN] This needs a worker profile, and there is none on this account yet.",
       "whyNoAccess": "[EN] Open demands are not available to your account yet.",
@@ -6539,6 +6564,14 @@
       "free": "brīvs",
       "away": "prombūtnē",
       "awayUntil": "prombūtnē līdz {date}",
+      "summary": "{free} brīvi · {committed} darbā · {away} prombūtnē",
+      "onWork": "projektā {project}",
+      "booked": "rezervēts",
+      "until": "līdz {date}",
+      "undated": "datumi nav norādīti",
+      "outlookHeading": "Brīvie cilvēki, nākamās 4 nedēļas",
+      "outlookWeek": "No {date}: brīvi {free} no {total}",
+      "outlookNote": "Pēc reģistrētajām rezervācijām un atvaļinājumiem — aplēse, nevis solījums.",
       "absencesUnknown": "Prombūtnes vēl netiek reģistrētas — brīvs nozīmē, ka neviens nav teicis citādi.",
       "more": "{count, plural, zero {vēl # cilvēku plānošanas lapā} one {vēl # cilvēks plānošanas lapā} other {vēl # cilvēki plānošanas lapā}}",
       "assign": "Piešķirt projektam",
@@ -6745,5 +6778,44 @@
       "confirmed": "Confirmed and shared",
       "failed": "Could not confirm."
     }
+  },
+  "companyWorkHistory": {
+    "title": "Importētā uzņēmuma darba vēsture",
+    "subtitle": "Ko {name} ir ierakstījis no saviem iepriekšējiem darba laika uzskaites lapām: kur strādāts, kad, kas strādāja, kas darīts un cik ilgi.",
+    "badge": "Importētā uzņēmuma vēsture",
+    "provenance": "Ņemts no {name} paša darba laika uzskaites. Cilvēki toreiz nelietoja LabourMarket.ai, un dati nav neatkarīgi pārbaudīti.",
+    "unavailable": "Importēto darba vēsturi pašlaik neizdevās nolasīt. Tas nenozīmē, ka tās nav.",
+    "empty": "{name} nav ierakstīta importēta darba vēsture.",
+    "elsewhere": "{name} ir {count, plural, zero {# importētu ierakstu} one {# importēts ieraksts} other {# importēti ieraksti}} par iepriekšējo darbu. Pārslēdzieties uz šo darbvietu, lai tos redzētu.",
+    "stats": {
+      "places": "Vietas",
+      "people": "Cilvēki",
+      "hours": "Ierakstītās stundas",
+      "period": "Periods"
+    },
+    "place": "Vieta",
+    "noPlaceName": "Vieta nav norādīta",
+    "open": "Atvērt",
+    "people": "{count, plural, zero {# cilvēku} one {# cilvēks} other {# cilvēki}}",
+    "entries": "{count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}",
+    "hoursShare": "{hours} h šajā vietā, salīdzinot ar visvairāk strādāto vietu",
+    "noPlace": "{count, plural, zero {# ierakstiem} one {# ierakstam} other {# ierakstiem}} ({hours} h) avotā vieta nav norādīta.",
+    "periodAside": "No tā {hours} h ir perioda kopsummas, kas norādītas laika posmam un glabātas atsevišķi no atsevišķām dienām.",
+    "scope": {
+      "title": "Ko ietver šis imports",
+      "carried": "Avotā ir: kas strādāja, kurā dienā, cik stundas, kas darīts un vieta tā, kā rakstīts.",
+      "missing": "Avotā nav: pasūtītāja, adreses un projekta. Tie tiek rādīti kā avotā neesoši un nekad netiek izdomāti."
+    },
+    "facts": {
+      "customer": "Pasūtītājs",
+      "address": "Adrese",
+      "project": "Projekts",
+      "notInSource": "Avotā nav",
+      "linked": "Saistīts"
+    },
+    "whoWorked": "Kas šeit strādāja",
+    "timeline": "Kas darīts",
+    "back": "Atpakaļ uz vēsturi",
+    "placeMissing": "Šīs vietas nav aktīvās darbvietas importētajā vēsturē."
   }
 }

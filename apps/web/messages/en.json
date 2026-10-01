@@ -1745,6 +1745,14 @@
       "free": "free",
       "away": "away",
       "awayUntil": "away until {date}",
+      "summary": "{free} free · {committed} on work · {away} away",
+      "onWork": "on {project}",
+      "booked": "booked",
+      "until": "until {date}",
+      "undated": "no dates set",
+      "outlookHeading": "Free people, next 4 weeks",
+      "outlookWeek": "From {date}: {free} of {total} free",
+      "outlookNote": "From bookings and leave on record — an estimate, not a promise.",
       "absencesUnknown": "Absences are not recorded yet — free means nobody has said otherwise.",
       "more": "{count, plural, =1 {1 more person on the planning page} other {# more people on the planning page}}",
       "assign": "Put on a project",
@@ -4496,6 +4504,7 @@
         "planning": "Calendar",
         "network": "Network",
         "playerCard": "My professional profile",
+        "companyProfile": "Company profile",
         "adminPlatform": "Platform administration"
       },
       "roleNotice": {
@@ -5986,6 +5995,10 @@
       "reservation": {
         "collidesTitle": "Already committed on these dates",
         "notBlocking": "This does not block the assignment — you decide what is right.",
+        "alternativesTitle": "Free on these dates",
+        "swap": "Assign instead",
+        "undo": "Undo assignment",
+        "decided": "Done",
         "unknown": "We could not confirm these dates are free. That is not the same as free.",
         "source": {
           "project": "Project",
@@ -6477,7 +6490,13 @@
       "map": "Map",
       "mapNote": "Where the work and services are",
       "diary": "Work diary",
-      "diaryNote": "Completed work is recorded as fact"
+      "diaryNote": "Completed work is recorded as fact",
+      "scouting": "Candidates",
+      "scoutingNote": "Find the right people for your needs",
+      "listings": "Listings",
+      "listingsNote": "Premises, equipment, vehicles — offer or look",
+      "needs": "Needs & offers",
+      "needsNote": "Publish what you need or what you can offer"
     }
   },
   "learning": {
@@ -9554,8 +9573,7 @@
       "mapTitle": "Where the work is",
       "skipToList": "To the list",
       "placeLink": "Show this country's opportunities",
-      "sourcesIncomplete": "Some opportunity sources are temporarily unavailable, so this list may be incomplete.",
-      "youTitle": "This is you — what we look for where you can go next"
+      "sourcesIncomplete": "Some opportunity sources are temporarily unavailable, so this list may be incomplete."
     },
     "savedSearches": {
       "title": "Saved searches",
@@ -10134,7 +10152,6 @@
     "eyebrow": "About the platform",
     "title": "What is LabourMarket.ai",
     "lede": "LabourMarket.ai is a labour-market operating platform. It connects people, employers, agencies, teams, projects, training and labour-market services around real work — not just a job search.",
-    "statusNote": "This page explains how the system works, not its deployment status. What you can use today is what you see in your account; anything that is still a direction is marked as a direction.",
     "hero": {
       "lead": "A person's professional value should not disappear every time they change employer. Real work can become lasting professional history: what the person did, where, when, for how long, in what role, with which skills, and what evidence and confirmation supports it.",
       "leadOrg": "For organisations, the same real work builds the record of what the company has actually done: projects, teams, work performed, hours, competencies and evidence.",
@@ -10357,7 +10374,6 @@
       "heading": "What the platform does not do",
       "points": [
         "It never marks anything as confirmed itself — a confirmed state always comes from a real person.",
-        "Payments through the platform are not active yet; there is no settlement.",
         "It does not give legal advice. Document guidance is for information only.",
         "It does not rate people with points or rankings."
       ]
@@ -11560,7 +11576,8 @@
         "team": "Team",
         "other": "Organization"
       },
-      "visibilityReason": "Only people who consented to be discoverable, or who have a real work relationship with you, are shown."
+      "visibilityReason": "Only people who consented to be discoverable, or who have a real work relationship with you, are shown.",
+      "noContactYet": "Messaging opens only after an invitation or shared work. Invite them — or request one of their services."
     },
     "sent": {
       "title": "My sent invitations",
@@ -13535,10 +13552,34 @@
       },
       "findWorkInCompanyContext": "A job search is your own act — I don't run it inside the company space. Switch to your personal space and ask again.",
       "findWorkInCompanyWhy": "A person looks for work, not a company — I answer from your personal space.",
+      "personalOnlyInCompany": "That is a personal action — I do not run it in a company workspace. Switch to your personal space and continue there.",
       "journalAskWhatYouDid": "What did you do today? Write it in the “What you did” field in your own words — e.g. “installed windows at the Kaunas site from 8 to 17”. The request itself is not saved to the journal.",
       "alsoWorkLog": "I also understood that you worked today — check it and save it to your work journal:",
       "serviceNeedHint": "That is a job to be done — I will show you who offers that service.",
       "chipServiceRequests": "Find a service",
+      "findPartnersDoors": "This is a business-partner search, not a job search. It runs over the existing marketplace — pick where to start.",
+      "findPartnersPickCompany": "Business partners are searched for on behalf of a company. Which company do you mean?",
+      "findPartnersNoCompany": "Business partners are searched for on behalf of a company, and there is no company profile yet. Create one, or browse the services marketplace.",
+      "chipPartnersServices": "Service providers",
+      "chipPartnersListings": "Marketplace listings",
+      "chipPartnersRelations": "Clients and partners",
+      "productHelp": {
+        "projectUse": "A project is where you keep the work, the people and the deadlines. Open a project, add tasks and people, and the work done shows up right there.",
+        "addPerson": "You add a person by inviting them: enter their contact and they confirm in their own account. Invitations and your team are in the team section.",
+        "hours": "Hours are kept in the hours section — there you see days, the week and the timesheet.",
+        "offerService": "You offer a service in the services section: describe it, and other businesses and people can see it.",
+        "warning": "A warning appears when something could get in the way of the work — for example a document is about to expire or data is missing. You will see every notice and its reason in the notices section.",
+        "forecast": "A forecast is a calculation from the hours already recorded and the work already planned. It is a guide, not a promise, and it changes with the data. You will find the plan and the numbers in planning.",
+        "scheduleWorker": "You schedule a worker in planning: pick the day and the project, and assign the person in the same place.",
+        "doneWork": "You see finished work where it was recorded — in the work journal or the hours section: entries, hours and confirmations.",
+        "chips": {
+          "chipHelpProjects": "Open projects",
+          "chipHelpPeople": "Team and invitations",
+          "chipHelpPlanning": "Open planning",
+          "chipHelpServices": "My services",
+          "chipHelpJournal": "Work journal"
+        }
+      },
       "interestInboxAmbiguous": "That can mean two things — which one do you want?",
       "chipInterestOnMyNeeds": "Interest in my needs",
       "chipMyOwnInterest": "My own interest",
@@ -14742,7 +14783,7 @@
         "radius": "distance"
       },
       "whyFiltered": "You said: {words}. I narrowed the search to that.",
-      "whyUnfiltered": "I searched your whole board — you did not narrow it.",
+      "whyUnfiltered": "No extra filters — showing everything visible to you.",
       "whyFromYourBoard": "From the demands that are visible to you right now.",
       "whyNoWorker": "This needs a worker profile, and there is none on this account yet.",
       "whyNoAccess": "Open demands are not available to your account yet.",
@@ -17351,6 +17392,7 @@
     "needs": "Needs",
     "calendar": "Calendar",
     "partners": "Clients & partners",
+    "market": "Marketplace",
     "education": "Learning",
     "history": "History",
     "settings": "Settings",
@@ -17814,5 +17856,44 @@
         }
       }
     }
+  },
+  "companyWorkHistory": {
+    "title": "Imported company work history",
+    "subtitle": "What {name} has on record from its own past timesheets: where the work was, when, who worked there, what was done and for how long.",
+    "badge": "Imported company history",
+    "provenance": "Taken from {name}'s own timesheet. The people did not use LabourMarket.ai when this work was done, and it is not independently verified.",
+    "unavailable": "The imported work history could not be read right now. That does not mean there is none.",
+    "empty": "{name} has no imported work history on record.",
+    "elsewhere": "{name} holds {count, plural, one {# imported record} other {# imported records}} of past work. Switch to that workspace to see it.",
+    "stats": {
+      "places": "Places",
+      "people": "People",
+      "hours": "Hours on record",
+      "period": "Period"
+    },
+    "place": "Place",
+    "noPlaceName": "No place stated",
+    "open": "Open",
+    "people": "{count, plural, one {# person} other {# people}}",
+    "entries": "{count, plural, one {# entry} other {# entries}}",
+    "hoursShare": "{hours} h on this place, compared with the busiest place",
+    "noPlace": "{count, plural, one {# entry} other {# entries}} ({hours} h) in the source name no place.",
+    "periodAside": "Of this, {hours} h are period totals stated for a span, kept apart from single days.",
+    "scope": {
+      "title": "What this import carries",
+      "carried": "Carried by the source: who worked, on which day, how many hours, what was done and the place as written.",
+      "missing": "Not in the source: the customer, the street address and the project. They are shown as not in the source and are never filled in."
+    },
+    "facts": {
+      "customer": "Customer",
+      "address": "Address",
+      "project": "Project",
+      "notInSource": "Not in the source",
+      "linked": "Linked"
+    },
+    "whoWorked": "Who worked here",
+    "timeline": "What was done",
+    "back": "Back to history",
+    "placeMissing": "This place is not in the imported history of the active workspace."
   }
 }

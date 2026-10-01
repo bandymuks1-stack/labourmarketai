@@ -45,6 +45,10 @@ export function AccountMenu() {
   // section on the profile instead of a dead end.
   const menuResultContext: ResultContext =
     activeOrganizationId || activeOrgName ? "organization" : "personal";
+  // Company context is company management: the personal profile / CV
+  // entries are not offered while acting as an organization (owner order
+  // 2026-10-01); the workspace chip is the one way back to the person.
+  const isOrgContext = menuResultContext === "organization";
   const playerCardHref = canRenderInline("player-card", menuResultContext)
     ? "/dashboard?result=player-card"
     : "/dashboard/profile#cv-availability";
@@ -86,14 +90,21 @@ export function AccountMenu() {
     // Profile — moved here from the top bar (owner ruling 2026-07-29, §B):
     // the bar carried TWO avatars for the same person; now this menu is the
     // one avatar and Profile is its first entry.
-    { href: "/dashboard/profile", label: t("tabs.profile"), icon: UserRound, testid: "account-menu-profile-link" },
+    // In an ORGANIZATION workspace the first entry is the organization's
+    // profile, never the owner's personal profile/CV (owner order
+    // 2026-10-01: company context is company management).
+    isOrgContext
+      ? { href: "/dashboard/company/settings", label: t("tabs.companyProfile"), icon: UserRound, testid: "account-menu-profile-link" }
+      : { href: "/dashboard/profile", label: t("tabs.profile"), icon: UserRound, testid: "account-menu-profile-link" },
     // The Premium Player Card, reachable through the avatar (owner audit
     // §5.1). ONE home for one object (2026-09-23): the chat, ŠIANDIEN and the
     // profile hub all open the card as the workspace RESULT, so the menu does
     // too — it used to open a closed disclosure on the journal instead, the
     // same card with different surroundings. (In an organization context the
     // result does not render — see `playerCardHref` above.)
-    { href: playerCardHref, label: t("tabs.playerCard"), icon: FileText, testid: "account-menu-player-card-link" },
+    ...(isOrgContext
+      ? []
+      : [{ href: playerCardHref, label: t("tabs.playerCard"), icon: FileText, testid: "account-menu-player-card-link" }]),
     // Admin — gated; kept OFF the mobile bottom nav to avoid crowding it.
     // (The advanced control-room escape hatch died with the route — W3
     // Package 4 deleted /dashboard/advanced entirely.)
@@ -203,16 +214,18 @@ export function AccountMenu() {
                 mousedown and click. */}
             <LocaleSwitcher inline />
           </div>
-          <Link
-            href="/cv"
-            role="menuitem"
-            onClick={() => setOpen(false)}
-            data-testid="account-menu-cv-link"
-            className="flex min-h-[2.75rem] w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-primary hover:bg-ink-700"
-          >
-            <FileText className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
-            {tCv("pageTitle")}
-          </Link>
+          {isOrgContext ? null : (
+            <Link
+              href="/cv"
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              data-testid="account-menu-cv-link"
+              className="flex min-h-[2.75rem] w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-primary hover:bg-ink-700"
+            >
+              <FileText className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
+              {tCv("pageTitle")}
+            </Link>
+          )}
           {/* EMPLOYER VISIBILITY (capability matrix P0, 2026-09-23) — the
               profile-discoverability consent, one tap from every dashboard
               page. An account utility (a privacy setting), not a product

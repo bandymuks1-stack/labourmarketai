@@ -4,6 +4,7 @@ import { FileSpreadsheet, ClipboardList } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { EvidenceImportSection } from "@/components/app/evidence-import-section";
+import { CompanyWorkHistory, CompanyPlaceHistory } from "@/components/app/organization/company-work-history";
 import { EvidenceImportSessions } from "@/components/app/organization/evidence-import-sessions";
 
 /**
@@ -39,6 +40,8 @@ export default async function CompanyHistoryPage({
     typeof sp.evidenceSession === "string" && sp.evidenceSession.trim() !== ""
       ? sp.evidenceSession.trim()
       : undefined;
+  const place =
+    typeof sp.place === "string" && sp.place.trim() !== "" ? sp.place : undefined;
   const t = await getTranslations("organizationDoors.pages.history");
 
   return (
@@ -49,6 +52,10 @@ export default async function CompanyHistoryPage({
         </h1>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
+
+      {/* WHAT IS ALREADY ON RECORD — the committed history seen by place,
+          before the door for adding more. */}
+      <CompanyWorkHistory locale={locale} />
 
       <div id="evidence-import-zone" className="scroll-mt-20">
         <EvidenceImportSection locale={locale} sessionId={evidenceSession} />

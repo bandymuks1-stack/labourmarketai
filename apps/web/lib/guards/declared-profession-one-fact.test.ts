@@ -18,26 +18,19 @@ import { join } from "node:path";
 const web = join(__dirname, "..", "..");
 const read = (p: string) => readFileSync(join(web, p), "utf8");
 
-describe("Opportunities shows what the person said they do", () => {
+describe("Opportunities does not repeat the person's own settings back at them", () => {
+  // Owner order 2026-10-01: the "this is you" block (profession / skills /
+  // place / pay / languages) is gone from Darbo galimybės — the person's own
+  // facts are not search filters and need not be restated above the results.
   const page = read("app/[locale]/dashboard/opportunities/page.tsx");
 
-  it("reads the one shared profession reader", () => {
-    expect(page).toMatch(/getProfessionEntries\(\)/);
+  it("the declared-profession reader still serves Today (the one shared reader)", () => {
     expect(read("lib/today/today-server.ts")).toMatch(/getProfessionEntries\(\)/);
   });
 
-  it("own words are shown when no catalogue profession names them", () => {
-    expect(page).toMatch(/if \(ownProfessionWords\) \{\s*facts\.push\(t\("world\.fact\.profession", \{ value: ownProfessionWords \}\)\)/);
-  });
-
-  it("'not stated' only when nothing was stated", () => {
-    expect(page).toMatch(/else if \(!ownProfessionWords\) \{\s*facts\.push\(t\("world\.fact\.professionMissing"\)\)/);
-  });
-
-  it("a records-derived profession is said beside the words, not instead of them", () => {
-    const i = page.indexOf("if (ownProfessionWords) {");
-    const j = page.indexOf('t("world.fact.professionEvidenced"', i);
-    expect(i).toBeGreaterThan(-1);
-    expect(j).toBeGreaterThan(i);
+  it("the page carries no assessed-facts identity panel", () => {
+    expect(page).not.toMatch(/opportunities-identity-facts|opportunities-assessment/);
+    expect(page).not.toMatch(/world\.fact\./);
+    expect(page).not.toMatch(/world\.youTitle/);
   });
 });

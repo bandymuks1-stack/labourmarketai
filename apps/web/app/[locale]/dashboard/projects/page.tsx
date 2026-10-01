@@ -255,6 +255,10 @@ export default async function ProjectsPage({
     reservationCollidesTitle: t("assign.reservation.collidesTitle"),
     reservationNotBlocking: t("assign.reservation.notBlocking"),
     reservationUnknown: t("assign.reservation.unknown"),
+    reservationAlternativesTitle: t("assign.reservation.alternativesTitle"),
+    reservationSwap: t("assign.reservation.swap"),
+    reservationUndo: t("assign.reservation.undo"),
+    reservationDecided: t("assign.reservation.decided"),
     reservationSource: {
       project: t("assign.reservation.source.project"),
       booking: t("assign.reservation.source.booking"),

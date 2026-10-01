@@ -96,6 +96,8 @@ export type IntentHandlerId =
   | "logWork"
   | "needWorkers"
   | "needService"
+  | "findPartners"
+  | "productHelp"
   | "offerValue"
   | "companyOverview"
   | "createOrganization"
@@ -240,6 +242,16 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // Opens the canonical demand-intake form (identity-gated in the handler).
   "need-workers": { domain: "company", access: "write", handler: "needWorkers", ownTyping: false },
   "need-service": { domain: "value", access: "route", handler: "needService", ownTyping: false },
+  // "Noriu rasti partnerių savo verslui" — a BUSINESS-side market question,
+  // never a job search. Route-class: it hands over chips to the marketplace
+  // surfaces that already exist (and, from the personal space, asks which
+  // company the person means) — it writes nothing and builds no second
+  // marketplace.
+  // "Kaip pridėti žmogų?" / "Kur mano valandos?" - HOW to use the product,
+  // answered in words with the chip to the surface that does it. Reads the
+  // topic from the sentence; writes nothing.
+  "product-help": { domain: "context", access: "read", handler: "productHelp", ownTyping: false },
+  "find-partners": { domain: "company", access: "route", handler: "findPartners", ownTyping: false },
   // V9/V10: reads the statement, runs channel discovery, renders honest
   // options — state only, nothing persisted.
   "offer-value": { domain: "value", access: "read", handler: "offerValue", ownTyping: false },

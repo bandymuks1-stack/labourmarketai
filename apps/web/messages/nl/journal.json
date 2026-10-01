@@ -247,6 +247,8 @@
   "listTitle": "Werkitems",
   "navTitle": "Werkjournaal",
   "navSubtitle": "Laat zien wat je hebt gedaan — het versterkt je werkkaart.",
+  "orgContextNotice": "Dit is je persoonlijke werkjournaal, niet dat van “{org}”. Je handelt namens het bedrijf — het werk en de mensen van het bedrijf staan elders.",
+  "orgContextCta": "Werk van het bedrijf →",
   "composerBenefit": "Dit item versterkt je werkkaart.",
   "newEntry": "Nieuw item",
   "noEngagement": "Je hebt nog geen actieve werkcontext. Sluit je aan bij een organisatie of project om je CV op te bouwen.",

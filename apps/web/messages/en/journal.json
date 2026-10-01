@@ -247,6 +247,8 @@
   "listTitle": "Work entries",
   "navTitle": "Work journal",
   "navSubtitle": "Show what you did — it strengthens your work card.",
+  "orgContextNotice": "This is your personal work journal, not “{org}”. You are acting for the company — its work and people live elsewhere.",
+  "orgContextCta": "Company work →",
   "composerBenefit": "This entry strengthens your work card.",
   "newEntry": "New entry",
   "noEngagement": "You don't have an active work context yet. Join an organization or project to build your CV.",

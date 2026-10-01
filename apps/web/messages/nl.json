@@ -1745,6 +1745,14 @@
       "free": "vrij",
       "away": "afwezig",
       "awayUntil": "afwezig tot {date}",
+      "summary": "{free} vrij · {committed} aan het werk · {away} afwezig",
+      "onWork": "op {project}",
+      "booked": "geboekt",
+      "until": "tot {date}",
+      "undated": "geen data ingesteld",
+      "outlookHeading": "Vrije mensen, komende 4 weken",
+      "outlookWeek": "Vanaf {date}: {free} van {total} vrij",
+      "outlookNote": "Op basis van geregistreerde boekingen en verlof — een schatting, geen belofte.",
       "absencesUnknown": "Afwezigheden worden nog niet vastgelegd — vrij betekent dat niemand iets anders heeft gezegd.",
       "more": "{count, plural, =1 {nog 1 persoon op de planningspagina} other {nog # mensen op de planningspagina}}",
       "assign": "Op een project zetten",
@@ -4496,6 +4504,7 @@
         "planning": "Kalender",
         "network": "Netwerk",
         "playerCard": "Mijn professionele profiel",
+        "companyProfile": "Bedrijfsprofiel",
         "adminPlatform": "Platformbeheer"
       },
       "roleNotice": {
@@ -5986,6 +5995,10 @@
       "reservation": {
         "collidesTitle": "Op deze dagen al vastgelegd",
         "notBlocking": "Dit blokkeert de toewijzing niet — jij beslist.",
+        "alternativesTitle": "Vrij in deze periode",
+        "swap": "In plaats daarvan toewijzen",
+        "undo": "Toewijzing ongedaan maken",
+        "decided": "Klaar",
         "unknown": "We konden niet bevestigen dat deze dagen vrij zijn. Dat is niet hetzelfde als vrij.",
         "source": {
           "project": "Projecttoewijzing",
@@ -6477,7 +6490,13 @@
       "map": "Kaart",
       "mapNote": "Waar het werk en de diensten zijn",
       "diary": "Werkjournaal",
-      "diaryNote": "Afgerond werk wordt als feit vastgelegd"
+      "diaryNote": "Afgerond werk wordt als feit vastgelegd",
+      "scouting": "Kandidaten",
+      "scoutingNote": "Vind de juiste mensen voor je behoefte",
+      "listings": "Advertenties",
+      "listingsNote": "Ruimtes, uitrusting, voertuigen – aanbieden of zoeken",
+      "needs": "Vraag & aanbod",
+      "needsNote": "Publiceer wat je nodig hebt of kunt bieden"
     }
   },
   "learning": {
@@ -9554,8 +9573,7 @@
       "mapTitle": "Waar het werk is",
       "skipToList": "Naar de lijst",
       "placeLink": "Toon de kansen in dit land",
-      "sourcesIncomplete": "Sommige vacaturebronnen zijn tijdelijk niet beschikbaar, dus deze lijst kan onvolledig zijn.",
-      "youTitle": "Dit bent u — hiermee zoeken we waar u heen kunt"
+      "sourcesIncomplete": "Sommige vacaturebronnen zijn tijdelijk niet beschikbaar, dus deze lijst kan onvolledig zijn."
     },
     "savedSearches": {
       "title": "Opgeslagen zoekopdrachten",
@@ -10134,7 +10152,6 @@
     "eyebrow": "Over het platform",
     "title": "Wat is LabourMarket.ai",
     "lede": "LabourMarket.ai is een besturingsplatform voor de arbeidsmarkt. Het verbindt mensen, werkgevers, bureaus, teams, projecten, opleidingen en arbeidsmarktdiensten rond echt werk — niet alleen een zoektocht naar vacatures.",
-    "statusNote": "Deze pagina legt uit hoe het systeem werkt, niet wat de uitrolstatus is. Wat u vandaag kunt gebruiken, ziet u in uw account; wat nog een richting is, staat als richting aangegeven.",
     "hero": {
       "lead": "De professionele waarde van een persoon mag niet verdwijnen telkens wanneer die van werkgever wisselt. Echt werk kan blijvende professionele geschiedenis worden: wat de persoon deed, waar, wanneer, hoe lang, in welke rol, met welke vaardigheden en welk bewijs en welke bevestiging dat ondersteunt.",
       "leadOrg": "Voor organisaties bouwt datzelfde echte werk het overzicht op van wat het bedrijf werkelijk heeft gedaan: projecten, teams, uitgevoerd werk, uren, competenties en bewijs.",
@@ -10357,7 +10374,6 @@
       "heading": "Wat het platform niet doet",
       "points": [
         "Het markeert zelf nooit iets als bevestigd — een bevestigde status komt altijd van een echt persoon.",
-        "Betalingen via het platform zijn nog niet actief; er is geen afrekening.",
         "Het geeft geen juridisch advies. Documentbegeleiding is alleen informatief.",
         "Het beoordeelt mensen niet met punten of rangschikkingen."
       ]
@@ -11560,7 +11576,8 @@
         "team": "Team",
         "other": "Organisatie"
       },
-      "visibilityReason": "Alleen mensen die vindbaar willen zijn of een echte werkrelatie met u hebben, worden getoond."
+      "visibilityReason": "Alleen mensen die vindbaar willen zijn of een echte werkrelatie met u hebben, worden getoond.",
+      "noContactYet": "Berichten kan pas na een uitnodiging of samenwerking. Nodig uit — of vraag een van hun diensten aan."
     },
     "sent": {
       "title": "Mijn verzonden uitnodigingen",
@@ -13535,10 +13552,34 @@
       },
       "findWorkInCompanyContext": "Werk zoeken is je eigen handeling — in de bedrijfsruimte voer ik die niet uit. Schakel over naar je persoonlijke ruimte en vraag het opnieuw.",
       "findWorkInCompanyWhy": "Een persoon zoekt werk, geen bedrijf — ik antwoord vanuit je persoonlijke ruimte.",
+      "personalOnlyInCompany": "Dat is een persoonlijke actie — in een bedrijfsomgeving voer ik die niet uit. Schakel over naar je persoonlijke ruimte en ga daar verder.",
       "journalAskWhatYouDid": "Wat heb je vandaag gedaan? Schrijf het in het veld „Wat je deed“ in je eigen woorden — bijv. „ramen gemonteerd op de locatie Kaunas van 8 tot 17“. Het verzoek zelf wordt niet in het dagboek opgeslagen.",
       "alsoWorkLog": "Ik begreep ook dat je vandaag hebt gewerkt — controleer het en sla het op in je werkjournaal:",
       "serviceNeedHint": "Dat is een klus — ik laat je zien wie die dienst aanbiedt.",
       "chipServiceRequests": "Een dienst zoeken",
+      "findPartnersDoors": "Dit is een zoektocht naar zakelijke partners, geen baan zoeken. Hij loopt via de bestaande marktplaats — kies waar je begint.",
+      "findPartnersPickCompany": "Zakelijke partners worden gezocht namens een bedrijf. Welk bedrijf bedoel je?",
+      "findPartnersNoCompany": "Zakelijke partners worden gezocht namens een bedrijf, en er is nog geen bedrijfsprofiel. Maak er een aan of bekijk de dienstenmarkt.",
+      "chipPartnersServices": "Dienstverleners",
+      "chipPartnersListings": "Marktplaats-advertenties",
+      "chipPartnersRelations": "Klanten en partners",
+      "productHelp": {
+        "projectUse": "Een project is de plek voor werk, mensen en deadlines. Open een project, voeg taken en mensen toe, en het uitgevoerde werk verschijnt daar meteen.",
+        "addPerson": "Je voegt iemand toe met een uitnodiging: vul het contact in en die persoon bevestigt in het eigen account. Uitnodigingen en je team vind je bij team.",
+        "hours": "Uren staan in het urenoverzicht — daar zie je dagen, de week en het urenstaat.",
+        "offerService": "Je biedt een dienst aan bij diensten: beschrijf hem, en andere bedrijven en mensen kunnen hem zien.",
+        "warning": "Een waarschuwing verschijnt wanneer iets het werk kan hinderen — bijvoorbeeld een document dat verloopt of ontbrekende gegevens. Alle meldingen en hun reden zie je bij meldingen.",
+        "forecast": "Een prognose is een berekening op basis van de al geregistreerde uren en het geplande werk. Het is een richtlijn, geen belofte, en verandert met de gegevens. Het plan en de cijfers vind je bij planning.",
+        "scheduleWorker": "Je plant een medewerker in bij planning: kies de dag en het project en wijs de persoon op dezelfde plek toe.",
+        "doneWork": "Uitgevoerd werk zie je waar het is vastgelegd — in het werkjournaal of het urenoverzicht: registraties, uren en bevestigingen.",
+        "chips": {
+          "chipHelpProjects": "Projecten openen",
+          "chipHelpPeople": "Team en uitnodigingen",
+          "chipHelpPlanning": "Planning openen",
+          "chipHelpServices": "Mijn diensten",
+          "chipHelpJournal": "Werkjournaal"
+        }
+      },
       "interestInboxAmbiguous": "Dat kan twee dingen betekenen — wat wil je zien?",
       "chipInterestOnMyNeeds": "Interesse in mijn aanvragen",
       "chipMyOwnInterest": "Mijn eigen interesse",
@@ -14742,7 +14783,7 @@
         "radius": "afstand"
       },
       "whyFiltered": "Je zei: {words}. Daarop heb ik de zoekopdracht versmald.",
-      "whyUnfiltered": "Ik heb je hele lijst doorzocht — je hebt niets versmald.",
+      "whyUnfiltered": "Geen extra filters — ik toon alles wat voor jou zichtbaar is.",
       "whyFromYourBoard": "Uit de aanvragen die nu voor jou zichtbaar zijn.",
       "whyNoWorker": "Hiervoor is een werknemersprofiel nodig, en dat is er nog niet.",
       "whyNoAccess": "Open aanvragen zijn nog niet beschikbaar voor je account.",
@@ -17351,6 +17392,7 @@
     "needs": "Behoeften",
     "calendar": "Kalender",
     "partners": "Klanten en partners",
+    "market": "Marktplaats",
     "education": "Opleiding",
     "history": "Geschiedenis",
     "settings": "Instellingen",
@@ -17814,5 +17856,44 @@
         }
       }
     }
+  },
+  "companyWorkHistory": {
+    "title": "Geïmporteerde werkgeschiedenis van het bedrijf",
+    "subtitle": "Wat {name} heeft vastgelegd uit de eigen oude urenstaten: waar het werk was, wanneer, wie er werkte, wat er is gedaan en hoe lang.",
+    "badge": "Geïmporteerde bedrijfsgeschiedenis",
+    "provenance": "Afkomstig uit de eigen urenstaat van {name}. De mensen gebruikten LabourMarket.ai toen niet, en dit is niet onafhankelijk geverifieerd.",
+    "unavailable": "De geïmporteerde werkgeschiedenis kon nu niet worden gelezen. Dat betekent niet dat er geen is.",
+    "empty": "{name} heeft geen geïmporteerde werkgeschiedenis vastgelegd.",
+    "elsewhere": "{name} bevat {count, plural, one {# geïmporteerd record} other {# geïmporteerde records}} van eerder werk. Schakel naar die werkruimte om het te zien.",
+    "stats": {
+      "places": "Plaatsen",
+      "people": "Mensen",
+      "hours": "Vastgelegde uren",
+      "period": "Periode"
+    },
+    "place": "Plaats",
+    "noPlaceName": "Geen plaats opgegeven",
+    "open": "Openen",
+    "people": "{count, plural, one {# persoon} other {# mensen}}",
+    "entries": "{count, plural, one {# regel} other {# regels}}",
+    "hoursShare": "{hours} u op deze plaats, vergeleken met de drukste plaats",
+    "noPlace": "{count, plural, one {# regel} other {# regels}} ({hours} u) in de bron noemen geen plaats.",
+    "periodAside": "Hiervan zijn {hours} u periodetotalen voor een tijdspanne, apart gehouden van losse dagen.",
+    "scope": {
+      "title": "Wat deze import bevat",
+      "carried": "De bron bevat: wie er werkte, op welke dag, hoeveel uur, wat er is gedaan en de plaats zoals geschreven.",
+      "missing": "Niet in de bron: de klant, het adres en het project. Ze worden getoond als niet in de bron en nooit aangevuld."
+    },
+    "facts": {
+      "customer": "Klant",
+      "address": "Adres",
+      "project": "Project (opdracht)",
+      "notInSource": "Niet in de bron",
+      "linked": "Gekoppeld"
+    },
+    "whoWorked": "Wie hier werkte",
+    "timeline": "Wat er is gedaan",
+    "back": "Terug naar geschiedenis",
+    "placeMissing": "Deze plaats staat niet in de geïmporteerde geschiedenis van de actieve werkruimte."
   }
 }

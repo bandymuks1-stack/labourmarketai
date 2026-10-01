@@ -1745,6 +1745,14 @@
       "free": "laisvas",
       "away": "nedirba",
       "awayUntil": "nedirba iki {date}",
+      "summary": "{free} laisvi · {committed} dirba · {away} nedirba",
+      "onWork": "projekte {project}",
+      "booked": "užimtas",
+      "until": "iki {date}",
+      "undated": "datos nenurodytos",
+      "outlookHeading": "Laisvi žmonės artimiausias 4 savaites",
+      "outlookWeek": "Nuo {date}: laisvi {free} iš {total}",
+      "outlookNote": "Pagal įrašytas rezervacijas ir atostogas — įvertis, ne pažadas.",
       "absencesUnknown": "Nebuvimai dar neužrašomi — „laisvas“ reiškia, kad niekas nepasakė kitaip.",
       "more": "{count, plural, one {dar # žmogus planavimo puslapyje} few {dar # žmonės planavimo puslapyje} many {dar # žmogaus planavimo puslapyje} other {dar # žmonių planavimo puslapyje}}",
       "assign": "Priskirti projektui",
@@ -4496,6 +4504,7 @@
         "planning": "Kalendorius",
         "network": "Ryšiai",
         "playerCard": "Mano profesinis profilis",
+        "companyProfile": "Įmonės profilis",
         "adminPlatform": "Platformos administravimas"
       },
       "roleNotice": {
@@ -5986,6 +5995,10 @@
       "reservation": {
         "collidesTitle": "Šiomis dienomis jau turi įsipareigojimų",
         "notBlocking": "Tai neužkerta kelio priskyrimui — sprendimas jūsų.",
+        "alternativesTitle": "Laisvi šiomis dienomis",
+        "swap": "Priskirti vietoj to",
+        "undo": "Atšaukti priskyrimą",
+        "decided": "Atlikta",
         "unknown": "Nepavyko patvirtinti, kad šios dienos laisvos. Tai nėra tas pat, kas laisva.",
         "source": {
           "project": "Objektas",
@@ -6477,7 +6490,13 @@
       "map": "Žemėlapis",
       "mapNote": "Kur vyksta darbas ir paslaugos",
       "diary": "Darbo žurnalas",
-      "diaryNote": "Atliktas darbas užfiksuojamas kaip faktas"
+      "diaryNote": "Atliktas darbas užfiksuojamas kaip faktas",
+      "scouting": "Kandidatai",
+      "scoutingNote": "Rask tinkamus žmones savo poreikiams",
+      "listings": "Skelbimai",
+      "listingsNote": "Patalpos, įranga, transportas — siūlyk ar ieškok",
+      "needs": "Poreikiai ir pasiūla",
+      "needsNote": "Paskelbk, ko reikia ar ką gali pasiūlyti"
     }
   },
   "learning": {
@@ -9554,8 +9573,7 @@
       "mapTitle": "Kur yra darbo",
       "skipToList": "Į sąrašą",
       "placeLink": "Rodyti šios šalies galimybes",
-      "sourcesIncomplete": "Kai kurie darbo šaltiniai šiuo metu nepasiekiami, todėl sąrašas gali būti nepilnas.",
-      "youTitle": "Tai jūs — pagal tai ieškome, kur galite eiti"
+      "sourcesIncomplete": "Kai kurie darbo šaltiniai šiuo metu nepasiekiami, todėl sąrašas gali būti nepilnas."
     },
     "savedSearches": {
       "title": "Išsaugotos paieškos",
@@ -10134,7 +10152,6 @@
     "eyebrow": "Apie platformą",
     "title": "Kas yra LabourMarket.ai",
     "lede": "LabourMarket.ai — darbo rinkos operacinė platforma. Ji jungia žmones, darbdavius, agentūras, komandas, projektus, mokymus ir darbo rinkos paslaugas aplink tikrą darbą — ne tik skelbimų paiešką.",
-    "statusNote": "Šis puslapis paaiškina sistemos logiką, o ne diegimo būseną. Ką galite naudoti dabar, matote savo paskyroje; kas dar yra kryptis, žymima kaip kryptis.",
     "hero": {
       "lead": "Žmogaus profesinė vertė neturi dingti kaskart, kai jis keičia darbdavį. Tikras darbas gali tapti ilgalaike profesine istorija: ką žmogus dirbo, kur, kada, kiek laiko, kokiu vaidmeniu, kokiais įgūdžiais ir kokie įrodymai bei patvirtinimai tai remia.",
       "leadOrg": "Organizacijoms tas pats tikras darbas kaupia įmonės realiai atlikto darbo istoriją: projektus, komandas, atliktus darbus, valandas, kompetencijas ir įrodymus.",
@@ -10357,7 +10374,6 @@
       "heading": "Ko platforma nedaro",
       "points": [
         "Ji pati nieko nepažymi kaip patvirtinto — patvirtinta būsena visada ateina iš tikro žmogaus.",
-        "Mokėjimai per platformą dar nevyksta, atsiskaitymo nėra.",
         "Ji neteikia teisinių konsultacijų. Dokumentų gairės yra tik informacinės.",
         "Ji nevertina žmonių taškais ar reitingais."
       ]
@@ -11560,7 +11576,8 @@
         "team": "Komanda",
         "other": "Organizacija"
       },
-      "visibilityReason": "Rodomi tik žmonės, kurie sutiko būti randami arba turi realų darbo ryšį su jumis."
+      "visibilityReason": "Rodomi tik žmonės, kurie sutiko būti randami arba turi realų darbo ryšį su jumis.",
+      "noContactYet": "Žinutę čia galima rašyti tik po pakvietimo ar bendro darbo. Pakvieskite — arba pasirinkite jo paslaugą."
     },
     "sent": {
       "title": "Mano išsiųsti kvietimai",
@@ -13535,10 +13552,34 @@
       },
       "findWorkInCompanyContext": "Darbo paieška yra tavo asmeninis veiksmas — įmonės erdvėje jos nevykdau. Persijunk į asmeninę erdvę ir paklausk dar kartą.",
       "findWorkInCompanyWhy": "Darbo ieško žmogus, ne įmonė — atsakau iš tavo asmeninės erdvės.",
+      "personalOnlyInCompany": "Tai tavo asmeninis veiksmas — įmonės erdvėje jo nevykdau. Persijunk į asmeninę erdvę ir tęsk ten.",
       "journalAskWhatYouDid": "Ką šiandien dirbai? Įrašyk į lauką „Ką dirbai“ savais žodžiais — pvz. „montavau langus objekte Kaune nuo 8 iki 17“. Pati užklausa į žurnalą neįrašoma.",
       "alsoWorkLog": "Taip pat supratau, kad šiandien dirbai — patikrink ir išsaugok darbo žurnale:",
       "serviceNeedHint": "Tai darbas, kurį reikia atlikti — parodysiu, kas siūlo tokias paslaugas.",
       "chipServiceRequests": "Rasti paslaugą",
+      "findPartnersDoors": "Tai verslo partnerių paieška, o ne darbo. Ieškoma per esamą rinką — pasirink, kur pradėti.",
+      "findPartnersPickCompany": "Verslo partnerių ieškoma įmonės vardu. Kurią įmonę turi omenyje?",
+      "findPartnersNoCompany": "Verslo partnerių ieškoma įmonės vardu, o įmonės profilio dar nėra. Susikurk jį arba peržiūrėk paslaugų rinką.",
+      "chipPartnersServices": "Paslaugų teikėjai",
+      "chipPartnersListings": "Rinkos skelbimai",
+      "chipPartnersRelations": "Klientai ir partneriai",
+      "productHelp": {
+        "projectUse": "Projektas — tai vieta, kur laikai darbus, žmones ir terminus. Atidaryk projektą, pridėk užduotis ir žmones, o atliktą darbą matysi čia pat.",
+        "addPerson": "Žmogų pridedi kvietimu: įrašai jo kontaktą, o jis patvirtina savo paskyroje. Kvietimus ir komandą rasi komandos skiltyje.",
+        "hours": "Valandos saugomos valandų skiltyje — ten matai dienas, savaitę ir tabelį.",
+        "offerService": "Paslaugą pasiūlai paslaugų skiltyje: aprašai ją, ir ją pamato kiti verslai bei žmonės.",
+        "warning": "Perspėjimas atsiranda, kai kas nors gali sutrukdyti darbui — pavyzdžiui, baigiasi dokumentas ar trūksta duomenų. Visus pranešimus ir jų priežastis matysi pranešimų skiltyje.",
+        "forecast": "Prognozė — tai apskaičiavimas iš jau užfiksuotų valandų ir suplanuotų darbų. Tai ne pažadas, o orientyras, kuris keičiasi kartu su duomenimis. Planą ir skaičius rasi planavime.",
+        "scheduleWorker": "Darbuotoją suplanuoji planavime: pasirink dieną ir projektą, o žmogų priskirk toje pačioje vietoje.",
+        "doneWork": "Atliktą darbą matai ten, kur jis užfiksuotas — darbo žurnale arba valandų skiltyje: įrašai, valandos ir patvirtinimai.",
+        "chips": {
+          "chipHelpProjects": "Atidaryti projektus",
+          "chipHelpPeople": "Komanda ir kvietimai",
+          "chipHelpPlanning": "Atidaryti planavimą",
+          "chipHelpServices": "Mano paslaugos",
+          "chipHelpJournal": "Darbo žurnalas"
+        }
+      },
       "interestInboxAmbiguous": "Tai gali reikšti du dalykus — ką nori pamatyti?",
       "chipInterestOnMyNeeds": "Kas susidomėjo mano poreikiais",
       "chipMyOwnInterest": "Mano susidomėjimai",
@@ -14742,7 +14783,7 @@
         "radius": "atstumą"
       },
       "whyFiltered": "Pasakei: {words}. Pagal tai ir susiaurinau paiešką.",
-      "whyUnfiltered": "Ieškojau visame tavo sąraše — nieko nesusiaurinai.",
+      "whyUnfiltered": "Be papildomų filtrų — rodau viską, kas tau matoma.",
       "whyFromYourBoard": "Iš poreikių, kurie tau dabar matomi.",
       "whyNoWorker": "Tam reikia darbuotojo profilio, o šioje paskyroje jo dar nėra.",
       "whyNoAccess": "Atviri poreikiai tavo paskyrai dar nepasiekiami.",
@@ -17351,6 +17392,7 @@
     "needs": "Poreikiai",
     "calendar": "Kalendorius",
     "partners": "Klientai ir partneriai",
+    "market": "Rinka",
     "education": "Mokymai",
     "history": "Istorija",
     "settings": "Nustatymai",
@@ -17814,5 +17856,44 @@
         }
       }
     }
+  },
+  "companyWorkHistory": {
+    "title": "Importuota įmonės darbų istorija",
+    "subtitle": "Ką {name} turi įrašyta iš savo praeities darbo laiko apskaitos: kur dirbta, kada, kas dirbo, kas daryta ir kiek valandų.",
+    "badge": "Importuota įmonės istorija",
+    "provenance": "Paimta iš {name} pačios darbo laiko apskaitos. Kai šis darbas buvo daromas, žmonės nenaudojo LabourMarket.ai, o įrašai nėra nepriklausomai patikrinti.",
+    "unavailable": "Importuotos darbų istorijos dabar nepavyko perskaityti. Tai nereiškia, kad jos nėra.",
+    "empty": "{name} neturi įrašytos importuotos darbų istorijos.",
+    "elsewhere": "{name} turi {count, plural, one {# importuotą praeities darbo įrašą} few {# importuotus praeities darbo įrašus} other {# importuotų praeities darbo įrašų}}. Norėdami pamatyti, perjunkite į tą darbo erdvę.",
+    "stats": {
+      "places": "Vietos",
+      "people": "Žmonės",
+      "hours": "Įrašytos valandos",
+      "period": "Laikotarpis"
+    },
+    "place": "Vieta",
+    "noPlaceName": "Vieta nenurodyta",
+    "open": "Atidaryti",
+    "people": "{count, plural, one {# žmogus} few {# žmonės} other {# žmonių}}",
+    "entries": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
+    "hoursShare": "{hours} val. šioje vietoje, palyginti su daugiausia dirbtąja vieta",
+    "noPlace": "{count, plural, one {# įraše} few {# įrašuose} other {# įrašų}} ({hours} val.) šaltinyje vieta nenurodyta.",
+    "periodAside": "Iš jų {hours} val. yra laikotarpio sumos, nurodytos visam tarpsniui, laikomos atskirai nuo pavienių dienų.",
+    "scope": {
+      "title": "Ką šis importas apima",
+      "carried": "Šaltinyje yra: kas dirbo, kurią dieną, kiek valandų, kas daryta ir vieta taip, kaip parašyta.",
+      "missing": "Šaltinyje nėra: užsakovo, gatvės adreso ir projekto. Jie rodomi kaip „šaltinyje nėra“ ir niekada neišgalvojami."
+    },
+    "facts": {
+      "customer": "Užsakovas",
+      "address": "Adresas",
+      "project": "Projektas",
+      "notInSource": "Šaltinyje nėra",
+      "linked": "Susieta"
+    },
+    "whoWorked": "Kas čia dirbo",
+    "timeline": "Kas daryta",
+    "back": "Atgal į istoriją",
+    "placeMissing": "Šios vietos nėra aktyvios darbo erdvės importuotoje istorijoje."
   }
 }

@@ -9,6 +9,7 @@ import {
   unavailabilityOverlaps,
 } from "@/lib/planning/employer-availability";
 import { getEmployerWorkerCommitments } from "@/lib/planning/employer-committed-work";
+import { buildCapacityOutlook, OUTLOOK_WEEKS } from "@/lib/conversation/capacity-outlook";
 import {
   CAPACITY_CHAT_LIMIT,
   CAPACITY_WINDOW_DAYS,
@@ -81,6 +82,17 @@ export async function whoIsAvailableCore(
 
     const commitmentsKnown = committed.status === "ok";
     const commitments = committed.status === "ok" ? committed.commitments : [];
+    // An assignment nobody dated is a real commitment with an unknown window.
+    // It was read and then dropped here, so such a person read as "free" — the
+    // exact false calm SEP-7 forbids. Named, not invented into a band.
+    const undatedBy = new Map<string, string | null>();
+    if (committed.status === "ok") {
+      for (const u of committed.undatedProjects ?? []) {
+        if (!undatedBy.has(u.workerId) || undatedBy.get(u.workerId) === null) {
+          undatedBy.set(u.workerId, u.label);
+        }
+      }
+    }
 
     /** The last day inside the window that a set of bands covers. */
     const lastDayOf = (
@@ -109,6 +121,7 @@ export async function whoIsAvailableCore(
           overridable: false,
           unavailableUntil: lastDayOf(absent.map((u) => u.item)),
           committedTo: null,
+          undated: false,
         };
       }
       // The SAME overlap helper the absence branch uses, so the two kinds of
@@ -129,6 +142,19 @@ export async function whoIsAvailableCore(
           unavailableUntil: lastDayOf(busy),
           // A real title or nothing — never an invented name for the work.
           committedTo: busy.map((c) => c.label).find((l): l is string => !!l) ?? null,
+          undated: false,
+        };
+      }
+      if (undatedBy.has(w.workerId)) {
+        return {
+          workerId: w.workerId,
+          label,
+          state: "committed",
+          constraint: "commitment",
+          overridable: true,
+          unavailableUntil: null,
+          committedTo: undatedBy.get(w.workerId) ?? null,
+          undated: true,
         };
       }
       return {
@@ -139,6 +165,7 @@ export async function whoIsAvailableCore(
         overridable: true,
         unavailableUntil: null,
         committedTo: null,
+        undated: false,
       };
     });
     // Free first, then committed (reprioritisable), then away (not).
@@ -149,7 +176,25 @@ export async function whoIsAvailableCore(
         ? a.label.localeCompare(b.label)
         : rank(a.state) - rank(b.state),
     );
-    return { kind: "ok", from: window.startDate, to: window.endDate, rows: rows.slice(0, CAPACITY_CHAT_LIMIT), rosterTotal: active.length, absencesKnown, commitmentsKnown };
+    const counts = {
+      free: rows.filter((r) => r.state === "free").length,
+      committed: rows.filter((r) => r.state === "committed").length,
+      unavailable: rows.filter((r) => r.state === "unavailable").length,
+    };
+    // The outlook needs BOTH reads; if either failed it says nothing rather
+    // than a row of calm zeros.
+    const outlook =
+      absencesKnown && commitmentsKnown
+        ? buildCapacityOutlook({
+            workerIds: active.map((w) => w.workerId),
+            startDay: window.startDate,
+            absences: unavailability.map((u) => ({ workerId: u.workerId, ...u.item })),
+            commitments,
+            undatedWorkerIds: new Set(undatedBy.keys()),
+            weeks: OUTLOOK_WEEKS,
+          })
+        : null;
+    return { kind: "ok", from: window.startDate, to: window.endDate, rows: rows.slice(0, CAPACITY_CHAT_LIMIT), rosterTotal: active.length, absencesKnown, commitmentsKnown, counts, outlook };
   } catch {
     return { kind: "error" };
   }

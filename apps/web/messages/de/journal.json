@@ -247,6 +247,8 @@
   "listTitle": "Arbeitseinträge",
   "navTitle": "Arbeitsjournal",
   "navSubtitle": "Zeigen Sie, was Sie getan haben — das stärkt Ihre Arbeitskarte.",
+  "orgContextNotice": "Das ist dein persönliches Arbeitsjournal, nicht das von „{org}“. Du handelst für das Unternehmen — dessen Arbeit und Personen findest du an anderer Stelle.",
+  "orgContextCta": "Arbeit des Unternehmens →",
   "composerBenefit": "Dieser Eintrag stärkt Ihre Arbeitskarte.",
   "newEntry": "Neuer Eintrag",
   "noEngagement": "Sie haben noch keinen aktiven Arbeitskontext. Treten Sie einer Organisation oder einem Projekt bei, um Ihren Lebenslauf aufzubauen.",

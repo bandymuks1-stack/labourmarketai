@@ -292,7 +292,8 @@
         "journal": "Mitt CV",
         "search": "[EN] Search",
         "advanced": "Avancerad hantering",
-        "playerCard": "Min yrkesprofil"
+        "playerCard": "Min yrkesprofil",
+        "companyProfile": "Företagsprofil"
       },
       "moreSection": {
         "title": "Detaljerad översikt",
@@ -3954,9 +3955,33 @@
       },
       "findWorkInCompanyContext": "Att söka jobb är din egen handling — i företagsutrymmet kör jag den inte. Byt till ditt personliga utrymme och fråga igen.",
       "findWorkInCompanyWhy": "En person söker jobb, inte ett företag — jag svarar från ditt personliga utrymme.",
+      "personalOnlyInCompany": "Det är en personlig åtgärd — i ett företagsutrymme utför jag den inte. Byt till ditt personliga utrymme och fortsätt där.",
       "journalAskWhatYouDid": "Vad gjorde du i dag? Skriv det i fältet ”Vad du gjorde” med egna ord — t.ex. ”monterade fönster på bygget i Kaunas från 8 till 17”. Själva begäran sparas inte i dagboken.",
       "serviceNeedHint": "Det är ett jobb som ska göras — jag visar vem som erbjuder den tjänsten.",
       "chipServiceRequests": "Hitta en tjänst",
+      "findPartnersDoors": "Det här är en sökning efter affärspartners, inte efter jobb. Den går via den befintliga marknadsplatsen — välj var du vill börja.",
+      "findPartnersPickCompany": "Affärspartners söks på ett företags vägnar. Vilket företag menar du?",
+      "findPartnersNoCompany": "Affärspartners söks på ett företags vägnar, och det finns ännu ingen företagsprofil. Skapa en eller bläddra i tjänstemarknaden.",
+      "chipPartnersServices": "Tjänsteleverantörer",
+      "chipPartnersListings": "Marknadsplatsens annonser",
+      "chipPartnersRelations": "Kunder och partners",
+      "productHelp": {
+        "projectUse": "Ett projekt är platsen för arbete, människor och tidsfrister. Öppna ett projekt, lägg till uppgifter och personer, så syns det utförda arbetet direkt där.",
+        "addPerson": "Du lägger till en person med en inbjudan: ange kontakten, så bekräftar personen i sitt eget konto. Inbjudningar och ditt team hittar du under team.",
+        "hours": "Timmar finns i timavsnittet — där ser du dagar, veckan och tidrapporten.",
+        "offerService": "Du erbjuder en tjänst under tjänster: beskriv den, så kan andra företag och personer se den.",
+        "warning": "En varning visas när något kan hindra arbetet — till exempel ett dokument som går ut eller saknade uppgifter. Alla aviseringar och orsakerna ser du under aviseringar.",
+        "forecast": "En prognos är en beräkning utifrån de timmar som redan registrerats och det arbete som planerats. Den är en fingervisning, inte ett löfte, och ändras med uppgifterna. Planen och siffrorna hittar du under planering.",
+        "scheduleWorker": "Du planerar en medarbetare under planering: välj dag och projekt och tilldela personen på samma ställe.",
+        "doneWork": "Utfört arbete ser du där det registrerats — i arbetsjournalen eller timavsnittet: registreringar, timmar och bekräftelser.",
+        "chips": {
+          "chipHelpProjects": "Öppna projekt",
+          "chipHelpPeople": "Team och inbjudningar",
+          "chipHelpPlanning": "Öppna planering",
+          "chipHelpServices": "Mina tjänster",
+          "chipHelpJournal": "Arbetsjournal"
+        }
+      },
       "interestInboxAmbiguous": "Det kan betyda två saker — vad vill du se?",
       "chipInterestOnMyNeeds": "Intresse för mina förfrågningar",
       "chipMyOwnInterest": "Mitt eget intresse",
@@ -4680,7 +4705,7 @@
         "radius": "avstånd"
       },
       "whyFiltered": "[EN] You said: {words}. I narrowed the search to that.",
-      "whyUnfiltered": "[EN] I searched your whole board — you did not narrow it.",
+      "whyUnfiltered": "Inga extra filter — jag visar allt som är synligt för dig.",
       "whyFromYourBoard": "[EN] From the demands that are visible to you right now.",
       "whyNoWorker": "[EN] This needs a worker profile, and there is none on this account yet.",
       "whyNoAccess": "[EN] Open demands are not available to your account yet.",
@@ -6539,6 +6564,14 @@
       "free": "ledig",
       "away": "borta",
       "awayUntil": "borta till {date}",
+      "summary": "{free} lediga · {committed} i arbete · {away} borta",
+      "onWork": "på {project}",
+      "booked": "bokad",
+      "until": "till {date}",
+      "undated": "utan datum",
+      "outlookHeading": "Lediga personer, nästa 4 veckor",
+      "outlookWeek": "Från {date}: {free} av {total} lediga",
+      "outlookNote": "Utifrån registrerade bokningar och frånvaro — en uppskattning, inget löfte.",
       "absencesUnknown": "Frånvaro registreras inte ännu — ledig betyder att ingen sagt något annat.",
       "more": "{count, plural, =1 {1 person till på planeringssidan} other {# personer till på planeringssidan}}",
       "assign": "Sätt på ett projekt",
@@ -6745,5 +6778,44 @@
       "confirmed": "Confirmed and shared",
       "failed": "Could not confirm."
     }
+  },
+  "companyWorkHistory": {
+    "title": "Importerad arbetshistorik för företaget",
+    "subtitle": "Vad {name} har registrerat från egna gamla tidrapporter: var arbetet utfördes, när, vem som arbetade, vad som gjordes och hur länge.",
+    "badge": "Importerad företagshistorik",
+    "provenance": "Hämtat från {name}s egen tidrapport. Personerna använde inte LabourMarket.ai då, och uppgifterna är inte oberoende verifierade.",
+    "unavailable": "Den importerade arbetshistoriken kunde inte läsas just nu. Det betyder inte att det saknas någon.",
+    "empty": "{name} har ingen importerad arbetshistorik registrerad.",
+    "elsewhere": "{name} har {count, plural, one {# importerad post} other {# importerade poster}} om tidigare arbete. Byt till den arbetsytan för att se dem.",
+    "stats": {
+      "places": "Platser",
+      "people": "Personer",
+      "hours": "Registrerade timmar",
+      "period": "Period"
+    },
+    "place": "Plats",
+    "noPlaceName": "Ingen plats angiven",
+    "open": "Öppna",
+    "people": "{count, plural, one {# person} other {# personer}}",
+    "entries": "{count, plural, one {# post} other {# poster}}",
+    "hoursShare": "{hours} h på denna plats, jämfört med den mest arbetade platsen",
+    "noPlace": "{count, plural, one {# post} other {# poster}} ({hours} h) anger ingen plats i källan.",
+    "periodAside": "Av detta är {hours} h periodsummor angivna för en tidsrymd, hållna åtskilda från enskilda dagar.",
+    "scope": {
+      "title": "Vad denna import innehåller",
+      "carried": "Källan innehåller: vem som arbetade, vilken dag, hur många timmar, vad som gjordes och platsen som den skrevs.",
+      "missing": "Finns inte i källan: kunden, adressen och projektet. De visas som saknade i källan och fylls aldrig i."
+    },
+    "facts": {
+      "customer": "Kund",
+      "address": "Adress",
+      "project": "Projekt",
+      "notInSource": "Finns inte i källan",
+      "linked": "Länkad"
+    },
+    "whoWorked": "Vem som arbetade här",
+    "timeline": "Vad som gjordes",
+    "back": "Tillbaka till historiken",
+    "placeMissing": "Den här platsen finns inte i den importerade historiken för den aktiva arbetsytan."
   }
 }
