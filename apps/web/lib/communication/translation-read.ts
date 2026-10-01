@@ -48,6 +48,10 @@ export interface TranslatableMessage {
   readonly id: string;
   readonly body: string;
   readonly original_language?: string | null;
+  /** Who wrote it. A viewer is never shown a rendering of their OWN words —
+   *  they know what they wrote, and translating it spends a provider call for
+   *  nothing (owner order 2026-10-01: never translate what is not needed). */
+  readonly author_id?: string | null;
 }
 
 const MAX_PER_READ = 40;
@@ -97,14 +101,36 @@ function translationContext(target: string, source: string | null | undefined): 
   return `work message between colleagues — translate it${from} into ${name(target)}; keep the meaning exact`;
 }
 
-/** One message → one runtime call, or the cache. Never throws. */
-async function translateOne(
+/**
+ * In-flight de-duplication: two renders (a double page load, a refocus refresh,
+ * two tabs of the same viewer) that ask for the same message in the same
+ * language at the same moment share ONE provider call. In-memory only — a
+ * translation is a rendering, never stored.
+ */
+const inFlight = new Map<string, Promise<TranslateResult>>();
+
+/** One message → one runtime call, or the cache, or the call already in flight. Never throws. */
+function translateOne(
   m: TranslatableMessage,
   viewerLocale: string,
 ): Promise<TranslateResult> {
   const key = cacheKey(m, viewerLocale);
   const cached = cache.get(key);
-  if (cached) return { ok: true, value: cached };
+  if (cached) return Promise.resolve({ ok: true, value: cached });
+  const pending = inFlight.get(key);
+  if (pending) return pending;
+  const run = translateWithRetry(m, viewerLocale, key).finally(() => {
+    inFlight.delete(key);
+  });
+  inFlight.set(key, run);
+  return run;
+}
+
+async function translateWithRetry(
+  m: TranslatableMessage,
+  viewerLocale: string,
+  key: string,
+): Promise<TranslateResult> {
   const first = await translateOnce(m, viewerLocale, key);
   if (first.ok || first.reason !== "transient") {
     return first.ok ? first : { ok: false, reason: first.reason };
@@ -206,14 +232,21 @@ export async function resolveViewerTexts(
       unavailable,
     });
 
-  const candidates = messages.filter((m) =>
-    needsTranslation({ body: m.body, originalLanguage: m.original_language ?? null, viewerLocale }),
+  const candidates = messages.filter(
+    (m) =>
+      m.author_id !== viewerId &&
+      needsTranslation({ body: m.body, originalLanguage: m.original_language ?? null, viewerLocale }),
   );
   // Newest first: the tail of the thread is what the reader is looking at.
   const chosen = candidates.slice(-MAX_PER_READ);
   const chosenIds = new Set(chosen.map((m) => m.id));
 
   for (const m of messages) {
+    // The viewer's own words are shown as written — no badge, no call.
+    if (m.author_id === viewerId) {
+      out.set(m.id, resolveViewerText({ body: m.body, originalLanguage: viewerLocale, viewerLocale }));
+      continue;
+    }
     // Same-language and unknown-language messages resolve to their own
     // state; a foreign message beyond the per-read bound is honestly
     // "not attempted".
@@ -257,4 +290,5 @@ export async function resolveViewerTexts(
 /** Test seam: forget every cached rendering. */
 export function __clearTranslationCache(): void {
   cache.clear();
+  inFlight.clear();
 }

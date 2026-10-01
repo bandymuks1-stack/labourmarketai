@@ -63,6 +63,38 @@ describe("resolveViewerTexts", () => {
     expect(runAiAgent).toHaveBeenCalledTimes(1);
   });
 
+  it("the viewer's own words are never sent to a provider and carry no badge", async () => {
+    runAiAgent.mockResolvedValue({ status: "needs_review", reason: "route_blocked" });
+    const mine = { ...lt, id: "own", author_id: "viewer-9" };
+    const out = await resolveViewerTexts([mine], "en", "viewer-9");
+    expect(runAiAgent).not.toHaveBeenCalled();
+    expect(out.get("own")).toMatchObject({ kind: "original", text: lt.body, languageBadge: null });
+  });
+
+  it("two simultaneous renders of the same message share ONE provider call (in-flight de-duplication)", async () => {
+    let release: (v: unknown) => void = () => {};
+    runAiAgent.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          release = resolve;
+        }),
+    );
+    const first = resolveViewerTexts([lt], "en", "viewer-10");
+    const second = resolveViewerTexts([lt], "en", "viewer-11");
+    await new Promise((r) => setTimeout(r, 0));
+    release({
+      status: "suggestion",
+      agent: "translation_copy",
+      provider: "libretranslate",
+      model: "m",
+      value: { data: { localized_copy: "Tomorrow we start at 7.", plain_language_version: null, wording_warnings: [] } },
+    });
+    const [a, b] = await Promise.all([first, second]);
+    expect(runAiAgent).toHaveBeenCalledTimes(1);
+    expect(a.get("m1")?.kind).toBe("translated");
+    expect(b.get("m1")?.kind).toBe("translated");
+  });
+
   it("an echo of the original is not a translation", async () => {
     runAiAgent.mockResolvedValue({
       status: "suggestion",
