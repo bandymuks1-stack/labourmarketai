@@ -48,6 +48,8 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   "learning-compass": "what the person should learn next (learning compass)",
   "need-workers": "a company needs workers: describe a demand / need",
   "need-service": "a company or person needs a service from the marketplace",
+  "find-partners":
+    "the speaker wants to find other BUSINESSES to partner or cooperate with ('noriu rasti partnerių savo verslui', 'find business partners'). NOT a job search and NOT hiring workers.",
   "offer-value": "offer a service or value on the marketplace",
   "profession-statement": "the person states their profession or a past job ('esu buhalteris', 'dirbau projektų vadovu 5 metus')",
   availability: "the person states from when they can work ('galiu dirbti nuo spalio 1 d.', 'available from October')",

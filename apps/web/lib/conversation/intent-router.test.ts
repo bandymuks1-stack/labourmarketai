@@ -680,6 +680,14 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     de: "Jemand, der das Dach repariert",
     pl: "Potrzebuję kogoś do naprawy dachu",
   },
+  "find-partners": {
+    lt: "Noriu rasti partnerių savo verslui",
+    en: "I want to find business partners",
+    ru: "Хочу найти партнёров для бизнеса",
+    nl: "Ik wil zakelijke partners vinden",
+    de: "Ich möchte Geschäftspartner finden",
+    pl: "Chcę znaleźć partnerów biznesowych",
+  },
   context: {
     lt: "Ką tu apie mane žinai?",
     en: "What do you know about me?",
