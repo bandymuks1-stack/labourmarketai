@@ -8615,7 +8615,8 @@
       "readiness": "Verfügbarkeit, Bereitschaft und Dokumente",
       "openTo": "Auch offen für: {countries}",
       "skillCount": "{matched} von {total} geforderten Fähigkeiten",
-      "nameHidden": "Name und Kontaktdaten erscheinen erst, wenn die Person sie freigibt."
+      "nameHidden": "Name und Kontaktdaten erscheinen erst, wenn die Person sie freigibt.",
+      "appliedToYou": "Hat sich auf diesen Bedarf beworben — Name und Foto gehören zur Bewerbung. Telefon und E-Mail bleiben verborgen."
     }
   },
   "planBoundary": {

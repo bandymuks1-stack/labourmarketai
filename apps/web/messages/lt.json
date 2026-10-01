@@ -8615,7 +8615,8 @@
       "readiness": "Prieinamumas, pasirengimas ir dokumentai",
       "openTo": "Taip pat atviras: {countries}",
       "skillCount": "{matched} iš {total} reikalaujamų įgūdžių",
-      "nameHidden": "Vardas ir kontaktai rodomi tik tada, kai žmogus tai leidžia."
+      "nameHidden": "Vardas ir kontaktai rodomi tik tada, kai žmogus tai leidžia.",
+      "appliedToYou": "Pateikė paraišką šiam poreikiui — vardas ir nuotrauka matomi dėl paraiškos. Telefonas ir el. paštas lieka paslėpti."
     }
   },
   "planBoundary": {

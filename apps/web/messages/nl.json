@@ -8615,7 +8615,8 @@
       "readiness": "Beschikbaarheid, gereedheid en documenten",
       "openTo": "Ook open voor: {countries}",
       "skillCount": "{matched} van {total} vereiste vaardigheden",
-      "nameHidden": "Naam en contactgegevens verschijnen pas wanneer de persoon dat toestaat."
+      "nameHidden": "Naam en contactgegevens verschijnen pas wanneer de persoon dat toestaat.",
+      "appliedToYou": "Heeft gereageerd op deze vraag — naam en foto horen bij de reactie. Telefoon en e-mail blijven verborgen."
     }
   },
   "planBoundary": {

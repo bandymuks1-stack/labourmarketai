@@ -2415,7 +2415,8 @@
       "readiness": "Tilgjengelighet, beredskap og dokumenter",
       "openTo": "Også åpen for: {countries}",
       "skillCount": "{matched} av {total} nødvendige ferdigheter",
-      "nameHidden": "Navn og kontaktopplysninger vises først når personen tillater det."
+      "nameHidden": "Navn og kontaktopplysninger vises først når personen tillater det.",
+      "appliedToYou": "Har søkt på dette behovet — navn og bilde følger med søknaden. Telefon og e-post forblir skjult."
     }
   },
   "waze": {

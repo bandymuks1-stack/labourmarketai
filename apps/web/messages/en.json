@@ -8615,7 +8615,8 @@
       "readiness": "Availability, readiness and documents",
       "openTo": "Also open to: {countries}",
       "skillCount": "{matched} of {total} required skills",
-      "nameHidden": "Name and contact details appear only when the person allows them."
+      "nameHidden": "Name and contact details appear only when the person allows them.",
+      "appliedToYou": "Applied for this need — name and photo come with the application. Phone and e-mail stay hidden."
     }
   },
   "planBoundary": {

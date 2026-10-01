@@ -30,6 +30,8 @@ import {
   PersonIdentityCard,
   type IdentityMeta,
 } from "@/components/app/identity/person-identity-card";
+import { getApplicantIdentity, type ApplicantIdentity } from "@/lib/scouting/applicant-identity";
+import { personMonogram } from "@/lib/visual/avatar-monogram";
 import { ScoutingShortlistButtons } from "@/components/app/scouting-shortlist-buttons";
 import { CompanyInterestAck } from "@/components/app/company-interest-ack";
 import { DemandLifecycleControls } from "@/components/app/demand-lifecycle-controls";
@@ -189,6 +191,22 @@ export default async function CompanyScoutingPage({
   // returns rows only to the request owner). Empty until the owner-gated bridge
   // migration is applied.
   const offeredCandidates = selected ? await listOfferedCandidatesForRequest(selected) : [];
+  // WHO APPLIED (owner order 2026-10-01): for a worker whose application is
+  // on THIS employer's own need, the database (applicant_identity_v1, owner of
+  // the demand + application not withdrawn) may release the name and photo.
+  // Absent function / no standing / agency acting for a client -> null and the
+  // anonymized handle stays. Nothing is guessed.
+  const applicantIdentity = new Map<string, ApplicantIdentity>();
+  if (result?.kind === "ok" && !actsForClient) {
+    const applied = result.candidates.filter((c) => {
+      const st = result.interestByWorker[c.workerId];
+      return st === "interested" || st === "reviewed" || st === "contacted";
+    });
+    const found = await Promise.all(
+      applied.map(async (c) => [c.workerId, await getApplicantIdentity(result.demand.id, c.workerId)] as const),
+    );
+    for (const [id, who] of found) if (who) applicantIdentity.set(id, who);
+  }
   // The worker's own answer to each booking an accepted offer proposed.
   const offerBookingStatus = await readOfferBookingStatuses(
     offeredCandidates.map((oc) => oc.bookingId).filter((id): id is string => Boolean(id)),
@@ -796,8 +814,16 @@ export default async function CompanyScoutingPage({
                 <PersonIdentityCard
                   variant="candidate-review"
                   testid={`scout-identity-${c.workerId}`}
-                  name={`${t("candidate")} ${anonymizedToken(p.anonymizedLabel)}`}
-                  initials={anonymizedToken(p.anonymizedLabel).slice(0, 2)}
+                  name={
+                    applicantIdentity.get(c.workerId)?.name ??
+                    `${t("candidate")} ${anonymizedToken(p.anonymizedLabel)}`
+                  }
+                  initials={
+                    applicantIdentity.get(c.workerId)?.name
+                      ? personMonogram(applicantIdentity.get(c.workerId)?.name)
+                      : anonymizedToken(p.anonymizedLabel).slice(0, 2)
+                  }
+                  avatarUrl={applicantIdentity.get(c.workerId)?.avatarUrl ?? null}
                   professions={c.professionSlug ? [professionName(c.professionSlug)] : []}
                   meta={identityMeta(c)}
                   status={
@@ -870,9 +896,15 @@ export default async function CompanyScoutingPage({
                     </span>
                   ) : null}
                 </div>
-                      <p className="basis-full text-meta leading-relaxed text-text-muted" data-testid="identity-name-hidden-note">
-                        {t("identity.nameHidden")}
-                      </p>
+                      {applicantIdentity.get(c.workerId)?.name ? (
+                        <p className="basis-full text-meta leading-relaxed text-text-muted" data-testid="identity-applied-note">
+                          {t("identity.appliedToYou")}
+                        </p>
+                      ) : (
+                        <p className="basis-full text-meta leading-relaxed text-text-muted" data-testid="identity-name-hidden-note">
+                          {t("identity.nameHidden")}
+                        </p>
+                      )}
                     </>
                   }
                   actions={

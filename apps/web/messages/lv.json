@@ -2415,7 +2415,8 @@
       "readiness": "Pieejamība, gatavība un dokumenti",
       "openTo": "Atvērts arī: {countries}",
       "skillCount": "{matched} no {total} nepieciešamajām prasmēm",
-      "nameHidden": "Vārds un kontaktinformācija parādās tikai tad, kad persona to atļauj."
+      "nameHidden": "Vārds un kontaktinformācija parādās tikai tad, kad persona to atļauj.",
+      "appliedToYou": "Iesniedza pieteikumu šai vajadzībai — vārds un foto nāk ar pieteikumu. Tālrunis un e-pasts paliek paslēpti."
     }
   },
   "waze": {
