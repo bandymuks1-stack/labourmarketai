@@ -17830,7 +17830,7 @@
     "facts": {
       "customer": "Klant",
       "address": "Adres",
-      "project": "Project",
+      "project": "Project (opdracht)",
       "notInSource": "Niet in de bron",
       "linked": "Gekoppeld"
     },
