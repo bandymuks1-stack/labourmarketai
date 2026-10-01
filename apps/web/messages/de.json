@@ -2149,14 +2149,14 @@
       },
       "workers": {
         "title": "Arbeitskräfte des Unternehmens",
-        "subtitle": "Verknüpfen Sie Ihr Unternehmen mit echten Arbeitskräften. Die Selbstregistrierung bleibt offen: Eine Person kann sich selbst registrieren und später verknüpft werden. Einladungen per E-Mail sind ein zusätzlicher Kanal, nicht der einzige.",
+        "subtitle": "Wer mit Ihnen arbeitet und wer frei ist.",
         "activeWorkersHeading": "Verknüpfte Arbeitskräfte",
         "noWorkersHeading": "Noch keine verknüpften Arbeitskräfte",
-        "noWorkersBody": "Laden Sie per E-Mail ein oder warten Sie, bis sich eine Arbeitskraft selbst registriert und verknüpft wird.",
+        "noWorkersBody": "Laden Sie die erste Person per E-Mail ein.",
         "inviteHeading": "Arbeitskraft per E-Mail einladen",
         "inviteDescription": "Es wird kein Konto automatisch erstellt — die eingeladene Person registriert sich selbst oder meldet sich an. Echter E-Mail-Versand ist noch nicht aktiviert.",
         "operations": {
-          "columnHeading": "Betriebsrolle / Prüfung",
+          "columnHeading": "Rolle und Journal",
           "setupNote": "Betriebsrollen sind noch nicht zugewiesen. Die Arbeitsjournal-Prüfung wird erst nach sicherer Einrichtung aktiviert.",
           "nextActionLabels": {
             "assign_role": "Weiter: Betriebsrolle zuweisen (Einrichtung erforderlich)",
@@ -2276,6 +2276,19 @@
             "busy": "Ausgelastet",
             "unavailable": "Nicht verfügbar"
           }
+        },
+        "team": {
+          "free": "Frei",
+          "working": "Im Einsatz",
+          "away": "Abwesend",
+          "countFree": "Frei",
+          "countWorking": "Im Einsatz",
+          "countAway": "Abwesend",
+          "workingOn": "Im Einsatz: {project}",
+          "until": "bis {date}",
+          "awayUntil": "Abwesend bis {date}",
+          "assign": "Einem Projekt zuweisen",
+          "openCalendar": "Kalender öffnen"
         }
       },
       "scoutingBridge": {

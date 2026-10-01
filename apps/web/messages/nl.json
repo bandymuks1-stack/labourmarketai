@@ -2149,14 +2149,14 @@
       },
       "workers": {
         "title": "Bedrijfswerknemers",
-        "subtitle": "Koppel je bedrijf aan echte werknemers. Zelfaanmelding blijft open: een persoon kan zich zelf aanmelden en later worden gekoppeld. Uitnodigingen per e-mail zijn een extra kanaal, niet het enige.",
+        "subtitle": "Wie met je werkt en wie vrij is.",
         "activeWorkersHeading": "Gekoppelde werknemers",
         "noWorkersHeading": "Nog geen gekoppelde werknemers",
-        "noWorkersBody": "Nodig uit per e-mail, of wacht tot een werknemer zich zelf aanmeldt en wordt gekoppeld.",
+        "noWorkersBody": "Nodig de eerste persoon uit per e-mail.",
         "inviteHeading": "Nodig een werknemer uit per e-mail",
         "inviteDescription": "Er wordt geen account automatisch aangemaakt — de uitgenodigde persoon registreert zich zelf of logt in. Echt e-mails versturen is nog niet geactiveerd.",
         "operations": {
-          "columnHeading": "Operationele rol / beoordeling",
+          "columnHeading": "Rol en logboek",
           "setupNote": "Operationele rollen zijn nog niet toegewezen. Werkjournaalbeoordeling wordt pas ingeschakeld na veilige configuratie.",
           "nextActionLabels": {
             "assign_role": "Volgende: wijs een operationele rol toe (configuratie vereist)",
@@ -2276,6 +2276,19 @@
             "busy": "Bezet",
             "unavailable": "Niet beschikbaar"
           }
+        },
+        "team": {
+          "free": "Vrij",
+          "working": "Aan het werk",
+          "away": "Afwezig",
+          "countFree": "Vrij",
+          "countWorking": "Aan het werk",
+          "countAway": "Afwezig",
+          "workingOn": "Werkt aan: {project}",
+          "until": "tot {date}",
+          "awayUntil": "Afwezig tot {date}",
+          "assign": "Toewijzen aan project",
+          "openCalendar": "Agenda openen"
         }
       },
       "scoutingBridge": {
