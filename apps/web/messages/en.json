@@ -1778,7 +1778,18 @@
       "openNeed": "Open the need",
       "gapsRow": "{count, plural, =1 {1 person on {project} has missing documents} other {# people on {project} have missing documents}}",
       "gapsCta": "Check documents",
-      "needsCta": "Describe a need"
+      "needsCta": "Describe a need",
+      "noOneFrom": "No one is free from {date}",
+      "unclear": "{count, plural, =1 {1 person has work with no dates — free time may be lower} other {# people have work with no dates — free time may be lower}}",
+      "fit": {
+        "fits": "Your free people cover it",
+        "from": "Free people cover it from {date}",
+        "short": "{count, plural, =1 {Short by 1 person} other {Short by # people}}",
+        "some": "Free people cover only some weeks",
+        "unknown": "Not enough detail to compare"
+      },
+      "opportunity": "{count, plural, =1 {Up to 1 person is free from {date}} other {Up to # people are free from {date}}}",
+      "opportunityCta": "Look for work"
     },
     "attention": {
       "heading": "Needs you",
@@ -13900,6 +13911,7 @@
       },
       "capacityCommittedUntil": "already committed until {date}",
       "capacityCommittedToUntil": "on {what} until {date}",
+      "capacityCommittedUndated": "on {what}, dates not set",
       "capacityCommitmentsUnknown": "Bookings and project assignments could not be read, so someone shown as free may already be committed.",
       "workspaceUnnamedCompany": "Company without a name",
       "workspaceUnnamedAgency": "Agency without a name",

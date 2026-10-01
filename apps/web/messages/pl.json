@@ -1778,7 +1778,18 @@
       "openNeed": "Otwórz potrzebę",
       "gapsRow": "{count, plural, one {# osobie w projekcie „{project}” brakuje dokumentów} few {# osobom w projekcie „{project}” brakuje dokumentów} many {# osobom w projekcie „{project}” brakuje dokumentów} other {# osobom w projekcie „{project}” brakuje dokumentów}}",
       "gapsCta": "Sprawdź dokumenty",
-      "needsCta": "Opisz potrzebę"
+      "needsCta": "Opisz potrzebę",
+      "noOneFrom": "Od {date} nikt nie jest wolny",
+      "unclear": "{count, plural, one {# osoba ma pracę bez dat — wolnego czasu może być mniej} few {# osoby mają pracę bez dat — wolnego czasu może być mniej} many {# osób ma pracę bez dat — wolnego czasu może być mniej} other {# osoby ma pracę bez dat — wolnego czasu może być mniej}}",
+      "fit": {
+        "fits": "Wolne osoby wystarczą",
+        "from": "Wolne osoby wystarczą od {date}",
+        "short": "{count, plural, one {Brakuje # osoby} few {Brakuje # osób} many {Brakuje # osób} other {Brakuje # osoby}}",
+        "some": "Wolne osoby wystarczą tylko w niektórych tygodniach",
+        "unknown": "Za mało danych do porównania"
+      },
+      "opportunity": "{count, plural, one {Do # osoby wolnej od {date}} few {Do # osób wolnych od {date}} many {Do # osób wolnych od {date}} other {Do # osoby wolnych od {date}}}",
+      "opportunityCta": "Szukaj pracy"
     },
     "attention": {
       "heading": "Wymaga Ciebie",
@@ -13900,6 +13911,7 @@
       },
       "capacityCommittedUntil": "już zaangażowany/a do {date}",
       "capacityCommittedToUntil": "przy {what} do {date}",
+      "capacityCommittedUndated": "przy {what}, bez dat",
       "capacityCommitmentsUnknown": "Nie udało się odczytać rezerwacji i przypisań do projektów, więc osoba pokazana jako wolna może być już zaangażowana.",
       "workspaceUnnamedCompany": "Firma bez nazwy",
       "workspaceUnnamedAgency": "Agencja bez nazwy",
