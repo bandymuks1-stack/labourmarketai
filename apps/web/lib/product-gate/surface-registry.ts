@@ -766,8 +766,8 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     pillar: "avatar",
     objectType: "worker",
     registeredInObjectModel: true,
-    hasTimeline: false,
-    hasHistory: false,
+    hasTimeline: true,
+    hasHistory: true,
     addableWithoutMapChange: true,
 
     changesWorldState: false,
