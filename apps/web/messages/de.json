@@ -10866,7 +10866,7 @@
       "unknown": "{count} konnten gar nicht gelesen werden. Das ist nicht dasselbe wie frei.",
       "denominatorNote": "Gezählt in Kalendertagen. Vertragsstunden werden nicht erfasst, dies ist also keine VZÄ-Kennzahl."
     },
-    "timeline": {
+    "rosterTimeline": {
       "prev": "Früher",
       "next": "Später",
       "today": "Heute",

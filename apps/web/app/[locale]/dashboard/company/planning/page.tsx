@@ -569,7 +569,7 @@ export default async function CompanyWorkforcePlanningPage({
           </h2>
           <Link
             href={timelineHref(shiftDay(timeline.from, -TIMELINE_DAYS))}
-            aria-label={t("timeline.prev")}
+            aria-label={t("rosterTimeline.prev")}
             data-testid="roster-timeline-prev"
             className={NAV_CHIP}
           >
@@ -580,11 +580,11 @@ export default async function CompanyWorkforcePlanningPage({
             data-testid="roster-timeline-today"
             className={NAV_CHIP}
           >
-            {t("timeline.today")}
+            {t("rosterTimeline.today")}
           </Link>
           <Link
             href={timelineHref(shiftDay(timeline.from, TIMELINE_DAYS))}
-            aria-label={t("timeline.next")}
+            aria-label={t("rosterTimeline.next")}
             data-testid="roster-timeline-next"
             className={NAV_CHIP}
           >
@@ -597,7 +597,7 @@ export default async function CompanyWorkforcePlanningPage({
             data-testid="roster-timeline-jump"
           >
             <label className="sr-only" htmlFor="roster-timeline-date">
-              {t("timeline.dateLabel")}
+              {t("rosterTimeline.dateLabel")}
             </label>
             <input
               id="roster-timeline-date"
@@ -607,7 +607,7 @@ export default async function CompanyWorkforcePlanningPage({
               className="min-h-11 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-xs text-text-primary"
             />
             <button type="submit" className={NAV_CHIP}>
-              {t("timeline.go")}
+              {t("rosterTimeline.go")}
             </button>
           </form>
         </div>
@@ -658,7 +658,7 @@ export default async function CompanyWorkforcePlanningPage({
                   {p.bars.map((b, i) => (
                     <span
                       key={b.key}
-                      title={`${b.kind === "absence" ? t("timeline.away") : (b.label ?? t("committedWhere.untitled"))} · ${formatCommitmentWhen(b.startDate, b.endDate)}`}
+                      title={`${b.kind === "absence" ? t("rosterTimeline.away") : (b.label ?? t("committedWhere.untitled"))} · ${formatCommitmentWhen(b.startDate, b.endDate)}`}
                       data-testid={`roster-timeline-bar-${b.key}`}
                       data-conflict={b.conflict ? "true" : undefined}
                       className={`absolute flex items-center overflow-hidden rounded border px-1 text-meta text-text-primary ${TIMELINE_TONE[b.kind]} ${b.conflict ? "ring-2 ring-state-danger" : ""}`}
@@ -671,14 +671,14 @@ export default async function CompanyWorkforcePlanningPage({
                       }}
                     >
                       <span className="truncate">
-                        {b.kind === "absence" ? t("timeline.away") : (b.label ?? t(`committedWhere.kind.${b.kind}`))}
+                        {b.kind === "absence" ? t("rosterTimeline.away") : (b.label ?? t(`committedWhere.kind.${b.kind}`))}
                       </span>
                     </span>
                   ))}
                   {p.bars.length === 0 ? (
                     <span className="absolute inset-0 flex items-center px-2 text-meta text-text-muted">
-                      {t("timeline.nothing")}
-                      {p.outsideWindow > 0 ? ` · ${t("timeline.outside", { count: p.outsideWindow })}` : ""}
+                      {t("rosterTimeline.nothing")}
+                      {p.outsideWindow > 0 ? ` · ${t("rosterTimeline.outside", { count: p.outsideWindow })}` : ""}
                     </span>
                   ) : null}
                 </div>

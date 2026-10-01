@@ -10866,7 +10866,7 @@
       "unknown": "{count} w ogóle nie udało się odczytać. To nie to samo, co wolny.",
       "denominatorNote": "Liczone w dniach kalendarzowych. Nie rejestrujemy godzin umownych, więc to nie jest wskaźnik FTE."
     },
-    "timeline": {
+    "rosterTimeline": {
       "prev": "Wcześniej",
       "next": "Później",
       "today": "Dziś",

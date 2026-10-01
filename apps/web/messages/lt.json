@@ -10866,7 +10866,7 @@
       "unknown": "{count} iš vis nepavyko perskaityti. Tai nėra tas pat, kas laisva.",
       "denominatorNote": "Skaičiuojama kalendorinėmis dienomis. Sutartų valandų nefiksuojame, todėl tai nėra etatų rodiklis."
     },
-    "timeline": {
+    "rosterTimeline": {
       "prev": "Anksčiau",
       "next": "Vėliau",
       "today": "Šiandien",

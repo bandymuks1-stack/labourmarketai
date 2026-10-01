@@ -10866,7 +10866,7 @@
       "unknown": "{count} could not be read at all. That is not the same as free.",
       "denominatorNote": "Counted in calendar days. We do not record contracted hours, so this is not an FTE figure."
     },
-    "timeline": {
+    "rosterTimeline": {
       "prev": "Earlier",
       "next": "Later",
       "today": "Today",

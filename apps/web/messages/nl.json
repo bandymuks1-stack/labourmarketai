@@ -10866,9 +10866,9 @@
       "unknown": "{count} konden helemaal niet worden gelezen. Dat is niet hetzelfde als vrij.",
       "denominatorNote": "Geteld in kalenderdagen. We leggen geen contracturen vast, dus dit is geen fte-cijfer."
     },
-    "timeline": {
+    "rosterTimeline": {
       "prev": "Eerder",
-      "next": "Later",
+      "next": "Daarna",
       "today": "Vandaag",
       "dateLabel": "Vanaf datum",
       "go": "Ga",
