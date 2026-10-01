@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Link } from "@/lib/i18n/navigation";
+import { Link, redirect } from "@/lib/i18n/navigation";
+import { matchProfessionByLabel } from "@/lib/vacancy-store/public-vacancy-profession-match";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
 import type { ActiveLocale } from "@/lib/i18n/config";
@@ -322,6 +323,14 @@ export default async function JobsPage({
     slug,
     label: professionName(slug),
   })).sort((a, b) => a.label.localeCompare(b.label, active));
+  // A typed word that IS a catalogue profession in the reader's language
+  // ("valytojas") would otherwise search Swedish publisher labels and report a
+  // false zero. Resolve it through the same slug filter, in the URL, so reload,
+  // share and "clear filter" all behave as for a picked profession.
+  if (!profession && query && sp.saved !== "1") {
+    const mapped = matchProfessionByLabel(query, professionOptions);
+    if (mapped) redirect({ href: `/jobs?profession=${mapped}`, locale: active });
+  }
   const page = Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1);
   const wantsSaved = sp.saved === "1";
 
@@ -414,7 +423,7 @@ export default async function JobsPage({
           defaultValue={query}
           placeholder={SEARCH_LABEL[active]}
           maxLength={120}
-          className="min-w-0 flex-1 rounded-md border border-border-subtle bg-surface-1 px-3 py-2 text-sm"
+          className="min-w-0 basis-full rounded-md border border-border-subtle bg-surface-1 px-3 py-2 text-sm sm:flex-1 sm:basis-0"
         />
         {/* THE FILTER THAT LETS A WORKER SEARCH IN THEIR OWN LANGUAGE. The
             free-text box matches the publisher's own words, so on a supply
