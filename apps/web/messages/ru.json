@@ -4497,7 +4497,7 @@
             "none": "Не указано"
           },
           "availableFromLabel": "Могу начать с",
-          "locationLabel": "Страна, в которой я нахожусь (код, напр. LT)",
+          "locationLabel": "Страна, в которой я нахожусь",
           "locationHint": "LT",
           "preferredLabel": "Страны, в которых я хотел(а) бы работать",
           "preferredHint": "LT, DE, NL",

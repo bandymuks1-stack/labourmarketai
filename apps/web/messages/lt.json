@@ -4497,7 +4497,7 @@
             "none": "Nenurodyta"
           },
           "availableFromLabel": "Galiu pradėti nuo",
-          "locationLabel": "Šalis, kurioje esu (kodas, pvz. LT)",
+          "locationLabel": "Šalis, kurioje esu",
           "locationHint": "LT",
           "preferredLabel": "Šalys, kuriose norėčiau dirbti",
           "preferredHint": "LT, DE, NL",

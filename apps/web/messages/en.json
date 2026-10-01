@@ -4497,7 +4497,7 @@
             "none": "Not set"
           },
           "availableFromLabel": "Can start from",
-          "locationLabel": "Country I'm in (code, e.g. LT)",
+          "locationLabel": "Country I'm in",
           "locationHint": "LT",
           "preferredLabel": "Countries I'd like to work in",
           "preferredHint": "LT, DE, NL",

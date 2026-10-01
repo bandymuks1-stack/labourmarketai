@@ -4497,7 +4497,7 @@
             "none": "Nie ustawiono"
           },
           "availableFromLabel": "Mogę zacząć od",
-          "locationLabel": "Kraj, w którym jestem (kod, np. LT)",
+          "locationLabel": "Kraj, w którym jestem",
           "locationHint": "LT",
           "preferredLabel": "Kraje, w których chcę pracować",
           "preferredHint": "LT, DE, NL",
