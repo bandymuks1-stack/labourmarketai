@@ -10916,6 +10916,18 @@
       "unknown": "{count} iš vis nepavyko perskaityti. Tai nėra tas pat, kas laisva.",
       "denominatorNote": "Skaičiuojama kalendorinėmis dienomis. Sutartų valandų nefiksuojame, todėl tai nėra etatų rodiklis."
     },
+    "rosterTimeline": {
+      "byPerson": "Žmonės",
+      "byProject": "Projektai",
+      "prev": "Anksčiau",
+      "next": "Vėliau",
+      "today": "Šiandien",
+      "dateLabel": "Nuo datos",
+      "go": "Eiti",
+      "away": "Nėra",
+      "outside": "Dar {count} už šio laikotarpio",
+      "nothing": "Šiuo laikotarpiu įrašų nėra"
+    },
     "committedWhere": {
       "title": "Kas kur įsipareigojęs",
       "intro": "Kiekvieno žmogaus įsipareigojimai su datomis — priskyrimai projektams, priimti užsakymai ir patvirtintos komandiruotės — iš tų pačių įrašų, kuriuos naudoja kalendorius ir pajėgumų atsakymas. Nieko čia nespėjama.",

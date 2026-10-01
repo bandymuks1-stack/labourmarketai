@@ -10916,6 +10916,18 @@
       "unknown": "{count} could not be read at all. That is not the same as free.",
       "denominatorNote": "Counted in calendar days. We do not record contracted hours, so this is not an FTE figure."
     },
+    "rosterTimeline": {
+      "byPerson": "People",
+      "byProject": "Projects",
+      "prev": "Earlier",
+      "next": "Later",
+      "today": "Today",
+      "dateLabel": "From date",
+      "go": "Go",
+      "away": "Away",
+      "outside": "{count} more outside this period",
+      "nothing": "Nothing on record in this period"
+    },
     "committedWhere": {
       "title": "Who is committed where",
       "intro": "Each person's dated commitments — project assignments, accepted bookings and approved business trips — from the same records the calendar and the capacity answer use. Nothing here is inferred.",
