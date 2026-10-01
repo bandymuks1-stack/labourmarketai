@@ -6318,7 +6318,13 @@ export function ConversationChat({
           // door to the personal space (the same membership-validated `ws:`
           // switch the context chips run) — rendered through the workflow
           // contract, so the WHY is stated like every other answer.
-          if (identity === "company") {
+          // THE ACTIVE WORKSPACE decides, not only the acting role (production
+          // walk 2026-10-01): a worker standing in an ORGANIZATION workspace has
+          // the person identity but an organization result context, and the
+          // search ran and drew a card beside "Šis rezultatas nepasiekiamas
+          // dabartiniame kontekste" — the result registry offers the job matches
+          // in the personal context only. Same one-line answer + door instead.
+          if (identity === "company" || Boolean(auth?.activeOrganizationId || auth?.activeOrgName)) {
             const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
             return {
               kind: "answer" as const,
