@@ -316,7 +316,7 @@ describe("the one next action is the work-card engine's, with a real route", () 
   it("a routed dimension keeps the engine's own route and why", () => {
     const card = deriveWorkCardState({ ...SIGNALS, hasProfession: false }, 0);
     const next = deriveTodayNext(card);
-    expect(next.kind === "action" && next.href).toBe("/dashboard/profile");
+    expect(next.kind === "action" && next.href).toBe("/dashboard/profile#profile-edit");
     expect(next.kind === "action" && next.whyKey).toBe("why.work");
   });
 
