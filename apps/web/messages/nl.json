@@ -1,4 +1,22 @@
 {
+  "companyModel": {
+    "title": "Bedrijfsbeheer",
+    "primary": "Behoefte publiceren",
+    "need": "Wat we nodig hebben",
+    "offer": "Wat we aanbieden",
+    "market": "Marktplaats",
+    "people": "Mensen & team",
+    "projects": "Projecten & objecten",
+    "messages": "Berichten",
+    "more": "Meer",
+    "clients": "Klanten & leveranciers",
+    "candidates": "Kandidaten",
+    "calendar": "Agenda",
+    "capacity": "Capaciteit",
+    "work": "Werk & uren",
+    "results": "Resultaten",
+    "history": "Geschiedenis"
+  },
   "publicDemand": {
     "title": "Actuele marktvraag",
     "subtitleAgency": "Wat de publieke markt nu vraagt — dezelfde pool die je kandidaten op het bord zien.",

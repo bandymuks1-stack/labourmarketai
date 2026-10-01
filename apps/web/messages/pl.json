@@ -1,4 +1,22 @@
 {
+  "companyModel": {
+    "title": "Zarządzanie firmą",
+    "primary": "Opublikuj potrzebę",
+    "need": "Czego potrzebujemy",
+    "offer": "Co oferujemy",
+    "market": "Rynek",
+    "people": "Ludzie i zespół",
+    "projects": "Projekty i obiekty",
+    "messages": "Wiadomości",
+    "more": "Więcej",
+    "clients": "Klienci i dostawcy",
+    "candidates": "Kandydaci",
+    "calendar": "Kalendarz",
+    "capacity": "Zdolności",
+    "work": "Praca i godziny",
+    "results": "Wyniki",
+    "history": "Historia"
+  },
   "publicDemand": {
     "title": "Aktualny popyt na rynku",
     "subtitleAgency": "O co pyta teraz rynek publiczny — ta sama pula, którą Twoi kandydaci widzą na tablicy.",

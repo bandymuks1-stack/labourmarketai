@@ -1,4 +1,22 @@
 {
+  "companyModel": {
+    "title": "Įmonės valdymas",
+    "primary": "Paskelbti poreikį",
+    "need": "Ko mums reikia",
+    "offer": "Ką siūlome",
+    "market": "Rinka",
+    "people": "Žmonės ir komanda",
+    "projects": "Projektai ir objektai",
+    "messages": "Žinutės",
+    "more": "Daugiau",
+    "clients": "Klientai ir tiekėjai",
+    "candidates": "Kandidatai",
+    "calendar": "Kalendorius",
+    "capacity": "Pajėgumai",
+    "work": "Darbas ir valandos",
+    "results": "Rezultatai",
+    "history": "Istorija"
+  },
   "publicDemand": {
     "title": "Gyva rinkos paklausa",
     "subtitleAgency": "Ko vieša rinka prašo dabar — tas pats fondas, kurį jūsų kandidatai mato lentoje.",

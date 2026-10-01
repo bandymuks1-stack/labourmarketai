@@ -1,4 +1,22 @@
 {
+  "companyModel": {
+    "title": "Company management",
+    "primary": "Publish a need",
+    "need": "What we need",
+    "offer": "What we offer",
+    "market": "Marketplace",
+    "people": "People & team",
+    "projects": "Projects & objects",
+    "messages": "Messages",
+    "more": "More",
+    "clients": "Clients & suppliers",
+    "candidates": "Candidates",
+    "calendar": "Calendar",
+    "capacity": "Capacity",
+    "work": "Work & hours",
+    "results": "Results",
+    "history": "History"
+  },
   "publicDemand": {
     "title": "Live market demand",
     "subtitleAgency": "What the public market asks for right now — the same pool your candidates see on the board.",

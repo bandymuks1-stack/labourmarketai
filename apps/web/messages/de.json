@@ -1,4 +1,22 @@
 {
+  "companyModel": {
+    "title": "Unternehmensführung",
+    "primary": "Bedarf veröffentlichen",
+    "need": "Was wir brauchen",
+    "offer": "Was wir anbieten",
+    "market": "Marktplatz",
+    "people": "Personen & Team",
+    "projects": "Projekte & Objekte",
+    "messages": "Nachrichten",
+    "more": "Mehr",
+    "clients": "Kunden & Lieferanten",
+    "candidates": "Kandidaten",
+    "calendar": "Kalender",
+    "capacity": "Kapazität",
+    "work": "Arbeit & Stunden",
+    "results": "Ergebnisse",
+    "history": "Verlauf"
+  },
   "publicDemand": {
     "title": "Aktuelle Marktnachfrage",
     "subtitleAgency": "Was der öffentliche Markt gerade verlangt — derselbe Pool, den Ihre Kandidaten auf der Übersicht sehen.",
