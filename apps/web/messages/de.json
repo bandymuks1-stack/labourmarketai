@@ -6446,6 +6446,7 @@
     "discoverEmpty": "Noch keine aktiven Dienstleistungen vorhanden.",
     "request": "Anfragen",
     "requested": "Angefragt",
+    "requestMessagePlaceholder": "Schreibe dem Anbieter, was du brauchst (optional)",
     "remoteBadge": "Remote",
     "outgoingHeading": "Meine Anfragen",
     "outgoingEmpty": "Sie haben noch keine Dienstleistung angefragt.",

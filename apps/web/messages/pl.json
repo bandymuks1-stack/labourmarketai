@@ -6446,6 +6446,7 @@
     "discoverEmpty": "Nie ma jeszcze aktywnych usług do wyświetlenia.",
     "request": "Wyślij zapytanie",
     "requested": "Wysłano zapytanie",
+    "requestMessagePlaceholder": "Napisz usługodawcy, czego potrzebujesz (opcjonalnie)",
     "remoteBadge": "Zdalnie",
     "outgoingHeading": "Moje zapytania",
     "outgoingEmpty": "Nie wysłałeś jeszcze zapytania o żadną usługę.",
