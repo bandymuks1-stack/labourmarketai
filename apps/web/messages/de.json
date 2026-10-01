@@ -17799,5 +17799,44 @@
         }
       }
     }
+  },
+  "companyWorkHistory": {
+    "title": "Importierte Arbeitshistorie des Unternehmens",
+    "subtitle": "Was {name} aus den eigenen früheren Stundenzetteln festgehalten hat: wo gearbeitet wurde, wann, wer dort gearbeitet hat, was getan wurde und wie lange.",
+    "badge": "Importierte Unternehmenshistorie",
+    "provenance": "Aus den eigenen Stundenzetteln von {name}. Die Personen haben LabourMarket.ai damals nicht genutzt, und die Angaben sind nicht unabhängig geprüft.",
+    "unavailable": "Die importierte Arbeitshistorie konnte gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
+    "empty": "{name} hat keine importierte Arbeitshistorie hinterlegt.",
+    "elsewhere": "{name} enthält {count, plural, one {# importierten Eintrag} other {# importierte Einträge}} früherer Arbeit. Wechseln Sie in diesen Arbeitsbereich, um sie zu sehen.",
+    "stats": {
+      "places": "Orte",
+      "people": "Personen",
+      "hours": "Erfasste Stunden",
+      "period": "Zeitraum"
+    },
+    "place": "Ort",
+    "noPlaceName": "Kein Ort angegeben",
+    "open": "Öffnen",
+    "people": "{count, plural, one {# Person} other {# Personen}}",
+    "entries": "{count, plural, one {# Eintrag} other {# Einträge}}",
+    "hoursShare": "{hours} Std. an diesem Ort, im Vergleich zum meistbearbeiteten Ort",
+    "noPlace": "{count, plural, one {# Eintrag} other {# Einträge}} ({hours} Std.) nennen in der Quelle keinen Ort.",
+    "periodAside": "Davon sind {hours} Std. Zeitraumsummen für eine Spanne, getrennt von einzelnen Tagen.",
+    "scope": {
+      "title": "Was dieser Import enthält",
+      "carried": "Die Quelle enthält: wer gearbeitet hat, an welchem Tag, wie viele Stunden, was getan wurde und den Ort wie geschrieben.",
+      "missing": "Nicht in der Quelle: Kunde, Straßenadresse und Projekt. Sie werden als nicht in der Quelle angezeigt und nie ergänzt."
+    },
+    "facts": {
+      "customer": "Kunde",
+      "address": "Adresse",
+      "project": "Projekt",
+      "notInSource": "Nicht in der Quelle",
+      "linked": "Verknüpft"
+    },
+    "whoWorked": "Wer hier gearbeitet hat",
+    "timeline": "Was getan wurde",
+    "back": "Zurück zur Historie",
+    "placeMissing": "Dieser Ort ist nicht in der importierten Historie des aktiven Arbeitsbereichs."
   }
 }

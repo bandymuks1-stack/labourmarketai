@@ -6737,5 +6737,44 @@
       "confirmed": "Confirmed and shared",
       "failed": "Could not confirm."
     }
+  },
+  "companyWorkHistory": {
+    "title": "Importerad arbetshistorik för företaget",
+    "subtitle": "Vad {name} har registrerat från egna gamla tidrapporter: var arbetet utfördes, när, vem som arbetade, vad som gjordes och hur länge.",
+    "badge": "Importerad företagshistorik",
+    "provenance": "Hämtat från {name}s egen tidrapport. Personerna använde inte LabourMarket.ai då, och uppgifterna är inte oberoende verifierade.",
+    "unavailable": "Den importerade arbetshistoriken kunde inte läsas just nu. Det betyder inte att det saknas någon.",
+    "empty": "{name} har ingen importerad arbetshistorik registrerad.",
+    "elsewhere": "{name} har {count, plural, one {# importerad post} other {# importerade poster}} om tidigare arbete. Byt till den arbetsytan för att se dem.",
+    "stats": {
+      "places": "Platser",
+      "people": "Personer",
+      "hours": "Registrerade timmar",
+      "period": "Period"
+    },
+    "place": "Plats",
+    "noPlaceName": "Ingen plats angiven",
+    "open": "Öppna",
+    "people": "{count, plural, one {# person} other {# personer}}",
+    "entries": "{count, plural, one {# post} other {# poster}}",
+    "hoursShare": "{hours} h på denna plats, jämfört med den mest arbetade platsen",
+    "noPlace": "{count, plural, one {# post} other {# poster}} ({hours} h) anger ingen plats i källan.",
+    "periodAside": "Av detta är {hours} h periodsummor angivna för en tidsrymd, hållna åtskilda från enskilda dagar.",
+    "scope": {
+      "title": "Vad denna import innehåller",
+      "carried": "Källan innehåller: vem som arbetade, vilken dag, hur många timmar, vad som gjordes och platsen som den skrevs.",
+      "missing": "Finns inte i källan: kunden, adressen och projektet. De visas som saknade i källan och fylls aldrig i."
+    },
+    "facts": {
+      "customer": "Kund",
+      "address": "Adress",
+      "project": "Projekt",
+      "notInSource": "Finns inte i källan",
+      "linked": "Länkad"
+    },
+    "whoWorked": "Vem som arbetade här",
+    "timeline": "Vad som gjordes",
+    "back": "Tillbaka till historiken",
+    "placeMissing": "Den här platsen finns inte i den importerade historiken för den aktiva arbetsytan."
   }
 }

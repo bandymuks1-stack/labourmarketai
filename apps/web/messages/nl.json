@@ -17799,5 +17799,44 @@
         }
       }
     }
+  },
+  "companyWorkHistory": {
+    "title": "Geïmporteerde werkgeschiedenis van het bedrijf",
+    "subtitle": "Wat {name} heeft vastgelegd uit de eigen oude urenstaten: waar het werk was, wanneer, wie er werkte, wat er is gedaan en hoe lang.",
+    "badge": "Geïmporteerde bedrijfsgeschiedenis",
+    "provenance": "Afkomstig uit de eigen urenstaat van {name}. De mensen gebruikten LabourMarket.ai toen niet, en dit is niet onafhankelijk geverifieerd.",
+    "unavailable": "De geïmporteerde werkgeschiedenis kon nu niet worden gelezen. Dat betekent niet dat er geen is.",
+    "empty": "{name} heeft geen geïmporteerde werkgeschiedenis vastgelegd.",
+    "elsewhere": "{name} bevat {count, plural, one {# geïmporteerd record} other {# geïmporteerde records}} van eerder werk. Schakel naar die werkruimte om het te zien.",
+    "stats": {
+      "places": "Plaatsen",
+      "people": "Mensen",
+      "hours": "Vastgelegde uren",
+      "period": "Periode"
+    },
+    "place": "Plaats",
+    "noPlaceName": "Geen plaats opgegeven",
+    "open": "Openen",
+    "people": "{count, plural, one {# persoon} other {# mensen}}",
+    "entries": "{count, plural, one {# regel} other {# regels}}",
+    "hoursShare": "{hours} u op deze plaats, vergeleken met de drukste plaats",
+    "noPlace": "{count, plural, one {# regel} other {# regels}} ({hours} u) in de bron noemen geen plaats.",
+    "periodAside": "Hiervan zijn {hours} u periodetotalen voor een tijdspanne, apart gehouden van losse dagen.",
+    "scope": {
+      "title": "Wat deze import bevat",
+      "carried": "De bron bevat: wie er werkte, op welke dag, hoeveel uur, wat er is gedaan en de plaats zoals geschreven.",
+      "missing": "Niet in de bron: de klant, het adres en het project. Ze worden getoond als niet in de bron en nooit aangevuld."
+    },
+    "facts": {
+      "customer": "Klant",
+      "address": "Adres",
+      "project": "Project",
+      "notInSource": "Niet in de bron",
+      "linked": "Gekoppeld"
+    },
+    "whoWorked": "Wie hier werkte",
+    "timeline": "Wat er is gedaan",
+    "back": "Terug naar geschiedenis",
+    "placeMissing": "Deze plaats staat niet in de geïmporteerde geschiedenis van de actieve werkruimte."
   }
 }

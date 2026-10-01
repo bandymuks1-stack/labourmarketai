@@ -4,6 +4,7 @@ import { FileSpreadsheet, ClipboardList } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { EvidenceImportSection } from "@/components/app/evidence-import-section";
+import { CompanyWorkHistory } from "@/components/app/organization/company-work-history";
 import { EvidenceImportSessions } from "@/components/app/organization/evidence-import-sessions";
 
 /**
@@ -49,6 +50,10 @@ export default async function CompanyHistoryPage({
         </h1>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
+
+      {/* WHAT IS ALREADY ON RECORD — the committed history seen by place,
+          before the door for adding more. */}
+      <CompanyWorkHistory locale={locale} />
 
       <div id="evidence-import-zone" className="scroll-mt-20">
         <EvidenceImportSection locale={locale} sessionId={evidenceSession} />
