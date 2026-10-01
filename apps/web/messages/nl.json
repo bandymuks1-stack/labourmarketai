@@ -7735,6 +7735,7 @@
     "country": {
       "title": "Wat ontbreekt voor een land",
       "help": "Kies een bestemmingsland om te zien welke documenten het vraagt.",
+      "mine": "Jouw voorkeurslanden staan vooraan.",
       "unknown": "De lijst met vereisten voor {country} is nog niet samengesteld — we tonen liever niets dan te gokken.",
       "next": "Volgende stap: regel — {doc}.",
       "ok": "Alle samengestelde vereisten voor {country} zijn gedekt."
@@ -17967,6 +17968,17 @@
     "timeline": "Wat er is gedaan",
     "back": "Terug naar geschiedenis",
     "placeMissing": "Deze plaats staat niet in de geïmporteerde geschiedenis van de actieve werkruimte.",
-    "attributedNote": "Bevat {count, plural, one {# registratie} other {# registraties}} uit de administratie van een andere organisatie, hier toegewezen als uitvoerend bedrijf."
+    "attributedNote": "Bevat {count, plural, one {# registratie} other {# registraties}} uit de administratie van een andere organisatie, hier toegewezen als uitvoerend bedrijf.",
+    "attribution": {
+      "title": "Wie heeft dit werk uitgevoerd?",
+      "intro": "Werk in de administratie van deze organisatie kan worden toegewezen aan een andere organisatie van u als uitvoerend bedrijf. Er wordt niets verplaatst of gekopieerd: de registraties blijven staan en de andere organisatie kan ze lezen.",
+      "performedBy": "Uitgevoerd door",
+      "note": "Notitie (optioneel), bijvoorbeeld het genoemde aandeel uren",
+      "button": "Toewijzen",
+      "progress": "{attributed} van {total} toegewezen aan {name}",
+      "done": "{count} registraties toegewezen; {skipped} waren al toegewezen.",
+      "refused": "Dit kon niet worden opgeslagen. Er is niets gewijzigd.",
+      "person": "{hours} u, {count, plural, one {# registratie} other {# registraties}}"
+    }
   }
 }

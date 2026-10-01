@@ -1686,6 +1686,7 @@
     "country": {
       "title": "[EN] What is missing for a country",
       "help": "[EN] Pick a destination country to see which documents it asks for.",
+      "mine": "[EN] Your preferred countries come first.",
       "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
       "next": "[EN] Next step: take care of — {doc}.",
       "ok": "[EN] All curated requirements for {country} are covered."
@@ -6845,6 +6846,17 @@
     "timeline": "Mida tehti",
     "back": "Tagasi ajaloo juurde",
     "placeMissing": "Seda kohta pole aktiivse tööruumi imporditud ajaloos.",
-    "attributedNote": "Sisaldab {count, plural, one {# kirjet} other {# kirjet}}, mis on talletatud teise organisatsiooni raamatupidamises ja omistatud siia töö teinud ettevõttele."
+    "attributedNote": "Sisaldab {count, plural, one {# kirjet} other {# kirjet}}, mis on talletatud teise organisatsiooni raamatupidamises ja omistatud siia töö teinud ettevõttele.",
+    "attribution": {
+      "title": "Kes selle töö tegi?",
+      "intro": "Selle organisatsiooni raamatupidamises olevat tööd saab omistada teisele teie organisatsioonile kui töö teinud ettevõttele. Midagi ei teisaldata ega kopeerita: kirjed jäävad ja teine organisatsioon saab neid lugeda.",
+      "performedBy": "Tegija",
+      "note": "Märkus (valikuline), näiteks nimetatud tundide osa",
+      "button": "Omista",
+      "progress": "{attributed} / {total} omistatud: {name}",
+      "done": "Omistatud kirjeid: {count}; juba omistatud: {skipped}.",
+      "refused": "Salvestamine ebaõnnestus. Midagi ei muudetud.",
+      "person": "{hours} h, {count, plural, one {# kirje} other {# kirjet}}"
+    }
   }
 }

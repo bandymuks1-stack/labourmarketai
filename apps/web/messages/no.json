@@ -1686,6 +1686,7 @@
     "country": {
       "title": "[EN] What is missing for a country",
       "help": "[EN] Pick a destination country to see which documents it asks for.",
+      "mine": "[EN] Your preferred countries come first.",
       "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
       "next": "[EN] Next step: take care of — {doc}.",
       "ok": "[EN] All curated requirements for {country} are covered."
@@ -6845,6 +6846,17 @@
     "timeline": "Hva som ble gjort",
     "back": "Tilbake til historikk",
     "placeMissing": "Dette stedet finnes ikke i den importerte historikken for det aktive arbeidsområdet.",
-    "attributedNote": "Omfatter {count, plural, one {# post} other {# poster}} som ligger i en annen organisasjons bøker og er tilskrevet her som utførende firma."
+    "attributedNote": "Omfatter {count, plural, one {# post} other {# poster}} som ligger i en annen organisasjons bøker og er tilskrevet her som utførende firma.",
+    "attribution": {
+      "title": "Hvem utførte dette arbeidet?",
+      "intro": "Arbeid i denne organisasjonens bøker kan tilskrives en annen av dine organisasjoner som utførende firma. Ingenting flyttes eller kopieres: postene blir, og den andre organisasjonen kan lese dem.",
+      "performedBy": "Utført av",
+      "note": "Notat (valgfritt), for eksempel oppgitt andel timer",
+      "button": "Tilskriv",
+      "progress": "{attributed} av {total} tilskrevet {name}",
+      "done": "{count} poster tilskrevet; {skipped} var allerede tilskrevet.",
+      "refused": "Dette kunne ikke lagres. Ingenting er endret.",
+      "person": "{hours} t, {count, plural, one {# post} other {# poster}}"
+    }
   }
 }

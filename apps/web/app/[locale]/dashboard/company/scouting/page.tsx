@@ -739,16 +739,35 @@ export default async function CompanyScoutingPage({
                   />
                 ) : null}
                 <div className="flex flex-col gap-2">
-                  <RequestCommunicationButton
-                    locale={locale}
-                    requestId={selected}
-                    workerId={oc.workerId}
-                    labels={{
-                      button: t("request.button"), opening: t("request.opening"),
-                      opened: t("request.opened"), view: t("request.view"),
-                      error: t("request.error"), limitReached: t("request.limitReached"),
-                    }}
-                  />
+                  {/* SAME rule as the candidate card: the server gate needs the
+                      worker on THIS company's shortlist. An offered person who
+                      is shortlisted gets the button; one who appears among the
+                      matches below is told to shortlist first; one who is not
+                      on the list at all has no contact step here (the offer
+                      decision above is this card's own action). */}
+                  {isShortlistedForContact(
+                    result?.kind === "ok"
+                      ? (result.candidates.find((c) => c.workerId === oc.workerId)?.shortlistStatus ?? null)
+                      : null,
+                  ) ? (
+                    <RequestCommunicationButton
+                      locale={locale}
+                      requestId={selected}
+                      workerId={oc.workerId}
+                      labels={{
+                        button: t("request.button"), opening: t("request.opening"),
+                        opened: t("request.opened"), view: t("request.view"),
+                        error: t("request.error"), limitReached: t("request.limitReached"),
+                      }}
+                    />
+                  ) : result?.kind === "ok" && result.candidates.some((c) => c.workerId === oc.workerId) ? (
+                    <p
+                      className="text-meta text-text-muted"
+                      data-testid={`scout-offered-shortlist-first-${oc.workerId}`}
+                    >
+                      {t("request.shortlistFirst")}
+                    </p>
+                  ) : null}
                   <ProposeBookingButton
                     locale={locale}
                     requestId={selected}
