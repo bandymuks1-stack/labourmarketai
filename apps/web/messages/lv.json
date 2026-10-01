@@ -6845,6 +6845,17 @@
     "timeline": "Kas darīts",
     "back": "Atpakaļ uz vēsturi",
     "placeMissing": "Šīs vietas nav aktīvās darbvietas importētajā vēsturē.",
-    "attributedNote": "Ietver {count, plural, zero {# ierakstu} one {# ierakstu} other {# ierakstus}}, kas glabājas citas organizācijas uzskaitē un šeit piešķirti kā darbu veikušajam uzņēmumam."
+    "attributedNote": "Ietver {count, plural, zero {# ierakstu} one {# ierakstu} other {# ierakstus}}, kas glabājas citas organizācijas uzskaitē un šeit piešķirti kā darbu veikušajam uzņēmumam.",
+    "attribution": {
+      "title": "Kas veica šo darbu?",
+      "intro": "Šīs organizācijas uzskaitē esošo darbu var piešķirt citai jūsu organizācijai kā darbu veikušajam uzņēmumam. Nekas netiek pārvietots vai kopēts: ieraksti paliek, un otra organizācija tos var lasīt.",
+      "performedBy": "Veica",
+      "note": "Piezīme (neobligāta), piemēram, norādītā stundu daļa",
+      "button": "Piešķirt",
+      "progress": "{attributed} no {total} piešķirti: {name}",
+      "done": "Piešķirti ieraksti: {count}; jau bija piešķirti: {skipped}.",
+      "refused": "Neizdevās saglabāt. Nekas nav mainīts.",
+      "person": "{hours} h, {count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}"
+    }
   }
 }

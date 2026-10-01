@@ -17966,6 +17966,17 @@
     "timeline": "Was getan wurde",
     "back": "Zurück zur Historie",
     "placeMissing": "Dieser Ort ist nicht in der importierten Historie des aktiven Arbeitsbereichs.",
-    "attributedNote": "Enthält {count, plural, one {# Eintrag} other {# Einträge}}, die in den Büchern einer anderen Organisation liegen und hier als ausführendes Unternehmen zugeordnet sind."
+    "attributedNote": "Enthält {count, plural, one {# Eintrag} other {# Einträge}}, die in den Büchern einer anderen Organisation liegen und hier als ausführendes Unternehmen zugeordnet sind.",
+    "attribution": {
+      "title": "Wer hat diese Arbeit ausgeführt?",
+      "intro": "Arbeit, die in den Büchern dieser Organisation liegt, kann einer anderen Ihrer Organisationen als ausführendem Unternehmen zugeordnet werden. Nichts wird verschoben oder kopiert: die Einträge bleiben, die andere Organisation kann sie lesen.",
+      "performedBy": "Ausgeführt von",
+      "note": "Notiz (optional), zum Beispiel der genannte Stundenanteil",
+      "button": "Zuordnen",
+      "progress": "{attributed} von {total} zugeordnet: {name}",
+      "done": "{count} Einträge zugeordnet; {skipped} waren bereits zugeordnet.",
+      "refused": "Das konnte nicht gespeichert werden. Nichts wurde geändert.",
+      "person": "{hours} Std., {count, plural, one {# Eintrag} other {# Einträge}}"
+    }
   }
 }
