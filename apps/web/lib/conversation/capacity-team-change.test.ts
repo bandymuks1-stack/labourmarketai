@@ -36,6 +36,8 @@ vi.mock("@/lib/planning/employer-availability", () => ({
 }));
 
 import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
+import { whoIsAvailableCore } from "@/lib/conversation/capacity-core";
+import { buildRosterCommitmentsView } from "@/lib/planning/roster-commitments-model";
 import type { CompanyWorkersListResult, LinkedCompanyWorker } from "@/lib/company/company-workers";
 
 function worker(workerId: string, displayName: string): LinkedCompanyWorker {
@@ -102,6 +104,33 @@ describe("capacity answer follows a real team change", () => {
     if (afterDated.kind !== "ok") throw new Error("expected ok");
     expect(afterDated.counts?.free).toBe(2);
     expect(afterDated.outlook?.map((w) => w.free)).toEqual([2, 1, 2, 2]);
+  });
+
+  it("chat, the company home, /api/mcp and the planning roster agree on the same change", async () => {
+    const committed = {
+      status: "ok" as const,
+      commitments: [],
+      undatedProjects: [{ workerId: "w1", projectId: "p1", label: "Roof" }],
+    };
+    h.getEmployerWorkerCommitments.mockResolvedValue(committed);
+    // chat + company home both go through loadWhoIsAvailableForChat; the MCP
+    // capability calls whoIsAvailableCore directly with its own caller.
+    const viaChatAndHome = await loadWhoIsAvailableForChat({ roster: ROSTER });
+    const viaMcp = await whoIsAvailableCore("c1", { supabase: {} as never, userId: "u1" });
+    expect(viaMcp).toEqual(viaChatAndHome);
+    if (viaMcp.kind !== "ok") throw new Error("expected ok");
+    // planning: the person with an undated assignment is NOT counted as
+    // "nothing on record", exactly as capacity does not count them as free.
+    const planning = buildRosterCommitmentsView(
+      [
+        { workerId: "w1", name: "Jonas" },
+        { workerId: "w2", name: "Rasa" },
+      ],
+      committed,
+    );
+    if (planning.status !== "ok") throw new Error("expected ok");
+    expect(planning.withoutCommitment).toBe(viaMcp.counts?.free);
+    expect(planning.rows.map((r) => r.workerId)).toEqual(["w1"]);
   });
 
   it("the outlook is null when a read did not answer", async () => {

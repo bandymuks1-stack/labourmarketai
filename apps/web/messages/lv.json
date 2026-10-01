@@ -6589,7 +6589,18 @@
       "openNeed": "Atvērt vajadzību",
       "gapsRow": "{count, plural, zero {# cilvēkiem projektā „{project}” trūkst dokumentu} one {# cilvēkam projektā „{project}” trūkst dokumentu} other {# cilvēkiem projektā „{project}” trūkst dokumentu}}",
       "gapsCta": "Pārbaudīt dokumentus",
-      "needsCta": "Aprakstīt vajadzību"
+      "needsCta": "Aprakstīt vajadzību",
+      "noOneFrom": "No {date} neviena nav brīva",
+      "unclear": "{count, plural, one {# cilvēkam ir darbs bez datumiem — brīvā laika var būt mazāk} other {# cilvēkiem ir darbs bez datumiem — brīvā laika var būt mazāk}}",
+      "fit": {
+        "fits": "Brīvo cilvēku pietiek",
+        "from": "Brīvo cilvēku pietiek no {date}",
+        "short": "{count, plural, one {Trūkst # cilvēka} other {Trūkst # cilvēku}}",
+        "some": "Brīvo cilvēku pietiek tikai dažās nedēļās",
+        "unknown": "Salīdzināšanai nepietiek informācijas"
+      },
+      "opportunity": "{count, plural, one {Līdz # cilvēkam ir brīvs no {date}} other {Līdz # cilvēkiem ir brīvi no {date}}}",
+      "opportunityCta": "Meklēt darbu"
     },
     "attention": {
       "heading": "Vajadzīgs jūs",

@@ -1,4 +1,22 @@
 {
+  "companyModel": {
+    "title": "Įmonės valdymas",
+    "primary": "Paskelbti poreikį",
+    "need": "Ko mums reikia",
+    "offer": "Ką siūlome",
+    "market": "Rinka",
+    "people": "Žmonės ir komanda",
+    "projects": "Projektai ir objektai",
+    "messages": "Žinutės",
+    "more": "Daugiau",
+    "clients": "Klientai ir tiekėjai",
+    "candidates": "Kandidatai",
+    "calendar": "Kalendorius",
+    "capacity": "Pajėgumai",
+    "work": "Darbas ir valandos",
+    "results": "Rezultatai",
+    "history": "Istorija"
+  },
   "publicDemand": {
     "title": "Gyva rinkos paklausa",
     "subtitleAgency": "Ko vieša rinka prašo dabar — tas pats fondas, kurį jūsų kandidatai mato lentoje.",
@@ -1778,7 +1796,18 @@
       "openNeed": "Atidaryti poreikį",
       "gapsRow": "{count, plural, one {# žmogui projekte „{project}“ trūksta dokumentų} few {# žmonėms projekte „{project}“ trūksta dokumentų} many {# žmogaus projekte „{project}“ trūksta dokumentų} other {# žmonių projekte „{project}“ trūksta dokumentų}}",
       "gapsCta": "Patikrinti dokumentus",
-      "needsCta": "Aprašyti poreikį"
+      "needsCta": "Aprašyti poreikį",
+      "noOneFrom": "Nuo {date} laisvų žmonių nėra",
+      "unclear": "{count, plural, one {# žmogus turi darbą be datų — laisvo laiko gali būti mažiau} few {# žmonės turi darbą be datų — laisvo laiko gali būti mažiau} other {# žmonių turi darbą be datų — laisvo laiko gali būti mažiau}}",
+      "fit": {
+        "fits": "Laisvų žmonių pakanka",
+        "from": "Laisvų žmonių pakanka nuo {date}",
+        "short": "{count, plural, one {Trūksta # žmogaus} few {Trūksta # žmonių} other {Trūksta # žmonių}}",
+        "some": "Laisvų žmonių pakanka tik kai kurias savaites",
+        "unknown": "Per mažai informacijos palyginti"
+      },
+      "opportunity": "{count, plural, one {Iki # žmogaus laisvas nuo {date}} few {Iki # žmonių laisvi nuo {date}} other {Iki # žmonių laisvi nuo {date}}}",
+      "opportunityCta": "Ieškoti darbo"
     },
     "attention": {
       "heading": "Reikia jūsų",
@@ -13904,6 +13933,7 @@
       },
       "capacityCommittedUntil": "jau užimtas iki {date}",
       "capacityCommittedToUntil": "dirba {what} iki {date}",
+      "capacityCommittedUndated": "dirba {what}, datos nenurodytos",
       "capacityCommitmentsUnknown": "Nepavyko perskaityti rezervacijų ir priskyrimų projektams, todėl kaip laisvas rodomas žmogus gali būti jau užimtas.",
       "workspaceUnnamedCompany": "Įmonė be pavadinimo",
       "workspaceUnnamedAgency": "Agentūra be pavadinimo",

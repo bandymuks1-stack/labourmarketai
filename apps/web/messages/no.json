@@ -6589,7 +6589,18 @@
       "openNeed": "Åpne behovet",
       "gapsRow": "{count, plural, =1 {1 person på {project} mangler dokumenter} other {# personer på {project} mangler dokumenter}}",
       "gapsCta": "Sjekk dokumenter",
-      "needsCta": "Beskriv et behov"
+      "needsCta": "Beskriv et behov",
+      "noOneFrom": "Ingen er ledig fra {date}",
+      "unclear": "{count, plural, =1 {1 person har arbeid uten datoer — ledig tid kan være mindre} other {# personer har arbeid uten datoer — ledig tid kan være mindre}}",
+      "fit": {
+        "fits": "Ledige folk dekker det",
+        "from": "Ledige folk dekker det fra {date}",
+        "short": "{count, plural, =1 {Mangler 1 person} other {Mangler # personer}}",
+        "some": "Ledige folk dekker det bare noen uker",
+        "unknown": "For lite informasjon til å sammenligne"
+      },
+      "opportunity": "{count, plural, =1 {Opptil 1 person er ledig fra {date}} other {Opptil # personer er ledige fra {date}}}",
+      "opportunityCta": "Finn arbeid"
     },
     "attention": {
       "heading": "Trenger deg",

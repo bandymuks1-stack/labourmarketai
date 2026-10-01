@@ -560,6 +560,7 @@ export type ChatLabels = {
   capacityBusyUntil: string;
   capacityCommittedUntil: string;
   capacityCommittedToUntil: string;
+  capacityCommittedUndated: string;
   capacityAbsencesUnknown: string;
   capacityCommitmentsUnknown: string;
   capacityEmpty: string;
@@ -4609,6 +4610,15 @@ export function ConversationChat({
           if (r.state === "free") return `• ${r.label} — ${labels.capacityFree}`;
           if (r.state === "unavailable") {
             return `• ${r.label} — ${labels.capacityBusyUntil.replace("{date}", until)}`;
+          }
+          // An assignment nobody dated: the work is named, the END is not
+          // invented (SEP-7) — `until` would otherwise fall back to the
+          // window's last day and read as a fact.
+          if (r.undated) {
+            const undatedText = r.committedTo
+              ? labels.capacityCommittedUndated.replace("{what}", r.committedTo)
+              : labels.capacityCommittedUndated.replace(/^[^,]*,\s*/, "");
+            return `• ${r.label} — ${undatedText}`;
           }
           // A real title when the source carries one, the plain phrasing when
           // it does not — never an invented name for the work.

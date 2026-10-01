@@ -6589,7 +6589,18 @@
       "openNeed": "Ava vajadus",
       "gapsRow": "{count, plural, =1 {1 inimesel projektis {project} puuduvad dokumendid} other {# inimesel projektis {project} puuduvad dokumendid}}",
       "gapsCta": "Kontrolli dokumente",
-      "needsCta": "Kirjelda vajadust"
+      "needsCta": "Kirjelda vajadust",
+      "noOneFrom": "Alates {date} pole kedagi vaba",
+      "unclear": "{count, plural, =1 {1 inimesel on töö ilma kuupäevadeta — vaba aega võib olla vähem} other {# inimesel on töö ilma kuupäevadeta — vaba aega võib olla vähem}}",
+      "fit": {
+        "fits": "Vabadest inimestest piisab",
+        "from": "Vabadest inimestest piisab alates {date}",
+        "short": "{count, plural, =1 {Puudu 1 inimene} other {Puudu # inimest}}",
+        "some": "Vabadest inimestest piisab vaid mõnel nädalal",
+        "unknown": "Võrdlemiseks pole piisavalt infot"
+      },
+      "opportunity": "{count, plural, =1 {Kuni 1 inimene on vaba alates {date}} other {Kuni # inimest on vabad alates {date}}}",
+      "opportunityCta": "Otsi tööd"
     },
     "attention": {
       "heading": "Vajab teid",

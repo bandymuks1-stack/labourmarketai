@@ -13,8 +13,11 @@ export function MessageButton({
   profileId,
   labelKey,
   fallback,
+  projectId,
 }: {
   profileId: string | null | undefined;
+  /** The project this person is on, when the contact is opened from it. */
+  projectId?: string | null;
   labelKey: "messageWorker" | "messageCompany";
   fallback?: string;
 }) {
@@ -25,6 +28,7 @@ export function MessageButton({
     <form action={openDirectConversationAction}>
       <input type="hidden" name="profileId" value={profileId} />
       <input type="hidden" name="locale" value={locale} />
+      {projectId && <input type="hidden" name="projectId" value={projectId} />}
       {fallback && <input type="hidden" name="fallback" value={fallback} />}
       <button
         type="submit"
