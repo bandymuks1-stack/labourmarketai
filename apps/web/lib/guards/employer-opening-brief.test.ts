@@ -39,7 +39,7 @@ describe("the employer opening brief", () => {
     const reviews = fn.indexOf("fetchQuickReviewQueue");
     const absences = fn.indexOf("getManagerPendingAbsences");
     const absentToday = fn.indexOf("absentOn");
-    const unread = fn.indexOf("getUnreadConversationCount");
+    const unread = fn.indexOf("getUnreadConversationIdsForOrganization");
     expect(reviews).toBeGreaterThan(-1);
     expect(absences).toBeGreaterThan(reviews);
     expect(absentToday).toBeGreaterThan(absences);

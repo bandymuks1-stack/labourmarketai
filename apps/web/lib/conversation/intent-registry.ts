@@ -98,6 +98,7 @@ export type IntentHandlerId =
   | "needService"
   | "findPartners"
   | "productHelp"
+  | "openConversation"
   | "offerValue"
   | "companyOverview"
   | "createOrganization"
@@ -250,6 +251,10 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // "Kaip pridėti žmogų?" / "Kur mano valandos?" - HOW to use the product,
   // answered in words with the chip to the surface that does it. Reads the
   // topic from the sentence; writes nothing.
+  // "Parašyk Jonui" / "atidaryk pokalbį su Jonu" - the chat resolves WHO and
+  // opens the ONE conversation (Messages); it sends no message. May create the
+  // empty 1:1 thread through the §8.1 gate, so it is classed as a route (the gated door itself lives in the conversation system).
+  "open-conversation": { domain: "communication", access: "route", handler: "openConversation", ownTyping: false },
   "product-help": { domain: "context", access: "read", handler: "productHelp", ownTyping: false },
   "find-partners": { domain: "company", access: "route", handler: "findPartners", ownTyping: false },
   // V9/V10: reads the statement, runs channel discovery, renders honest

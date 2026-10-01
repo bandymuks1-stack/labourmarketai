@@ -131,7 +131,8 @@ describe("the intent registry is the enumerable routing contract", () => {
     // 89 → 90 (2026-10-01): find-partners — "Noriu rasti partnerių savo
     // verslui" was answered as a job search; a business-side route intent.
     // 90 -> 91: product-help — how-to / where-is questions answered in words with the door.
-    expect(entries.length).toBe(91);
+    // 91 -> 92: open-conversation - 'parašyk Jonui' opens the ONE conversation.
+    expect(entries.length).toBe(92);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -233,6 +234,8 @@ describe("the intent registry is the enumerable routing contract", () => {
       // already carries. Route-class for exactly the reason above.
       "my-team",
       "need-service",
+      // "Parašyk Jonui" — resolves WHO, then navigates to the ONE conversation; sends nothing.
+      "open-conversation",
       "timesheets",
       "work-hours",
     ]);
