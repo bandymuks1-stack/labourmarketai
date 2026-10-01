@@ -91,6 +91,8 @@ export type ConversationIntent =
   | "find-partners"
   /** "Kaip pridėti žmogų?" / "Kur mano valandos?" — HOW to use the product, answered in words with the door that does it (product-help-topics.ts). */
   | "product-help"
+  /** "Kokių naujų darbų man atsirado?" — the NEW ads that fit the person's own preferences, over the one job-alert matching (new-jobs.ts). */
+  | "new-jobs"
   /** "Parašyk Jonui" / "atidaryk pokalbį su Jonu" — open the ONE conversation with a named person (chat-open-conversation). */
   | "open-conversation"
   | "context" // "ką tu apie mane žinai?"
@@ -2882,6 +2884,25 @@ const RULES: IntentRule[] = [
     // projects, "Kaip pasiūlyti paslaugą" 6 on offer-value).
     intent: "product-help",
     patterns: HELP_TOPICS.flatMap((topic) => topic.sources.map((src) => p(src, 16))),
+  },
+  {
+    // NEW WORK SINCE LAST TIME (owner 2026-10-01). "Kokių naujų darbų man
+    // atsirado?" is not a fresh search: it asks what APPEARED for this person,
+    // which the job-alert matching (the one behind the notification bell)
+    // answers from the person's own preferences. The new-work word and a
+    // "appeared / new for me" frame are both required, so "ieškau darbo" and
+    // "rask man darbą" stay the search.
+    intent: "new-jobs",
+    patterns: [
+      p("\\bnauj\\w*\\s+(?:\\w+\\s+){0,2}(?:\\bdarb(?:u|ai|o|us|a)\\b|skelbim|vakansij|galimyb|pasiulym)\\w*", 15),
+      p("(?:\\bdarb(?:u|ai|o|us|a)\\b|skelbim|vakansij|galimyb|pasiulym)\\w*\\s+(?:\\w+\\s+){0,2}(?:atsirad|pasirod|atsirasd)\\w*", 15),
+      p("\\b(?:any\\s+)?new\\s+(?:jobs?|vacanc\\w+|openings?|opportunit\\w+|postings?)\\b", 15),
+      p("\\bnew\\s+(?:jobs?|work)\\s+(?:for\\s+me|appeared|came\\s+up|since)", 15),
+      p("нов[^\\s]*\\s+(?:ваканс|работ|предложен)[^\\s]*", 15),
+      p("\\bneue\\s+(?:jobs?|stellen|stellenangebote)\\b", 15),
+      p("\\bnieuwe\\s+(?:vacatures|banen|jobs)\\b", 15),
+      p("\\bnowe\\s+(?:oferty|prace|og[lł]oszenia)\\b", 15),
+    ],
   },
   {
     intent: "find-work",
