@@ -6447,6 +6447,8 @@
     "discoverEmpty": "Nog geen actieve diensten om te tonen.",
     "request": "Aanvragen",
     "requested": "Aangevraagd",
+    "partnershipBadge": "Zoekt partners",
+    "partnershipRequest": "Partnerschap aanbieden",
     "requestMessagePlaceholder": "Vertel de aanbieder wat je nodig hebt (optioneel)",
     "remoteBadge": "Op afstand",
     "outgoingHeading": "Mijn aanvragen",
@@ -6580,6 +6582,7 @@
     "notAvailable": "Momenteel niet beschikbaar.",
     "empty": "Nog geen dienstenaanbod. Voeg de eerste echte dienst toe die je aanbiedt.",
     "addButton": "Dienst toevoegen",
+    "addPartnership": "Partners zoeken",
     "form": {
       "titleLabel": "Diensttitel",
       "titlePlaceholder": "bijv. Binnenschilderwerk",

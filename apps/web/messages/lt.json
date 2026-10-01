@@ -6447,6 +6447,8 @@
     "discoverEmpty": "Kol kas nėra rodomų aktyvių paslaugų.",
     "request": "Pateikti užklausą",
     "requested": "Užklausa pateikta",
+    "partnershipBadge": "Ieškoma partnerių",
+    "partnershipRequest": "Siūlyti partnerystę",
     "requestMessagePlaceholder": "Parašykite teikėjui, ko reikia (neprivaloma)",
     "remoteBadge": "Nuotoliu",
     "outgoingHeading": "Mano užklausos",
@@ -6580,6 +6582,7 @@
     "notAvailable": "Šiuo metu nepasiekiama.",
     "empty": "Paslaugų pasiūlymų dar nėra. Pridėkite pirmą realią paslaugą, kurią siūlote.",
     "addButton": "Pridėti paslaugą",
+    "addPartnership": "Ieškau partnerių",
     "form": {
       "titleLabel": "Paslaugos pavadinimas",
       "titlePlaceholder": "pvz. Vidaus dažymas",

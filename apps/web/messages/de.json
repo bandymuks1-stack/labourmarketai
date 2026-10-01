@@ -6447,6 +6447,8 @@
     "discoverEmpty": "Noch keine aktiven Dienstleistungen vorhanden.",
     "request": "Anfragen",
     "requested": "Angefragt",
+    "partnershipBadge": "Sucht Partner",
+    "partnershipRequest": "Partnerschaft anbieten",
     "requestMessagePlaceholder": "Schreibe dem Anbieter, was du brauchst (optional)",
     "remoteBadge": "Remote",
     "outgoingHeading": "Meine Anfragen",
@@ -6580,6 +6582,7 @@
     "notAvailable": "Derzeit nicht verfügbar.",
     "empty": "Noch keine Dienstleistungsangebote. Fügen Sie die erste echte Dienstleistung hinzu, die Sie anbieten.",
     "addButton": "Dienstleistung hinzufügen",
+    "addPartnership": "Partner suchen",
     "form": {
       "titleLabel": "Titel der Dienstleistung",
       "titlePlaceholder": "z. B. Innenanstrich",
