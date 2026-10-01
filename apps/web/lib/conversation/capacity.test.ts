@@ -49,6 +49,10 @@ function worker(
     operationsTitle: null,
     journalReviewEnabled: false,
     engagementContextLinked: false,
+    availabilityStatus: null,
+    availableFrom: null,
+    locationCountry: null,
+    currentProjects: [],
     ...overrides,
   };
 }

@@ -1,6 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
+import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
+import { personMonogram } from "@/lib/visual/avatar-monogram";
 import type { BookedPeopleResult } from "@/lib/company/booked-people";
 
 /**
@@ -72,14 +74,20 @@ export async function BookedPeopleSection({
               data-testid={`booked-person-${row.engagementId}`}
               data-member={row.isMember ? "true" : "false"}
             >
-              <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-                <span className="text-base font-semibold text-text-primary">
-                  {row.name ?? t("unnamed")}
-                </span>
-                <span className="font-mono text-meta tabular-nums text-text-muted">
-                  {t("since", { date: row.startedAt.slice(0, 10) })}
-                </span>
-              </div>
+              <PersonIdentityCard
+                variant="roster-person"
+                density="compact"
+                testid={`booked-identity-${row.engagementId}`}
+                name={row.name ?? t("unnamed")}
+                initials={personMonogram(row.name ?? "")}
+                professions={[]}
+                meta={[]}
+                status={
+                  <span className="font-mono text-meta tabular-nums text-text-muted">
+                    {t("since", { date: row.startedAt.slice(0, 10) })}
+                  </span>
+                }
+              />
               {row.isMember ? (
                 <p className="text-sm text-text-secondary" data-testid="booked-person-member">
                   {t("memberState")}

@@ -50,6 +50,12 @@ export interface ProjectAssignment {
   workerProfileId: string;
   name: string;
   assignedAt: string;
+  /** workers.id - lets the page ask the ONE photo rule (worker_avatar_path_v1)
+   *  whether this viewer may see the person's photo. */
+  workerId?: string | undefined;
+  /** A signed photo URL when the viewer has the real work relationship;
+   *  null/absent = initials. Filled by the page, never by this reader. */
+  avatarUrl?: string | null;
 }
 
 function migMissing(code?: string): boolean {
@@ -144,7 +150,7 @@ export async function listProjectAssignments(
     // every assignment and this list was always empty. The join only supplies
     // an optional display name that already has a fallback below.
     .select(
-      "assigned_at, worker:workers!inner(profile_id, display_name, profiles(full_name))",
+      "assigned_at, worker:workers!inner(id, profile_id, display_name, profiles(full_name))",
     )
     .eq("project_id", projectId)
     .eq("status", "active")
@@ -156,19 +162,21 @@ export async function listProjectAssignments(
   type Row = {
     assigned_at: string;
     worker: {
+      id: string | null;
       profile_id: string | null;
       display_name: string | null;
       profiles: { full_name: string | null } | null;
     } | null;
   };
   return ((res.data ?? []) as Row[])
-    .map((r) => {
+    .map((r): ProjectAssignment | null => {
       const w = r.worker;
       if (!w?.profile_id) return null;
       return {
         workerProfileId: w.profile_id,
         name: w.profiles?.full_name ?? w.display_name ?? w.profile_id.slice(0, 8),
         assignedAt: r.assigned_at,
+        workerId: w.id ?? undefined,
       };
     })
     .filter((x: ProjectAssignment | null): x is ProjectAssignment => x !== null);

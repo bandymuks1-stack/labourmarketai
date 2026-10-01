@@ -975,7 +975,10 @@ const RULES: IntentRule[] = [
       // …and the noun stem was `žmoni`, which does not occur in "žmones" —
       // the ordinary plural. Only "žmonių"/"žmonėms" ever matched, so the
       // most natural phrasing missed on the stem as well as on the gap.
-      p("(surask|parodyk|rodyk|peržiūrėk)\\s*.{0,24}(darbuotoj|žmon)", 6),
+      // "Rask darbuotoją" / "rasti darbuotojų" scored 4 on need-workers (the
+      // demand FORM) because `rask`/`rasti` were not scouting verbs; they are
+      // the same ask as "surask darbuotojų" (owner 2026-10-01).
+      p("(surask|\\brask\\b|\\brasti\\b|parodyk|rodyk|peržiūrėk)\\s*.{0,24}(darbuotoj|žmon)", 6),
       p("(найди|покажи)\\s*.{0,24}(работник)", 6),
       // The imperative SHOW/FIND framing in DE/NL — scouting, exactly like
       // "surask darbuotojų". "Wir brauchen/zoeken Mitarbeiter" (a NEED) stays

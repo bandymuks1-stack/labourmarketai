@@ -14,6 +14,9 @@ type Script = {
   managesProject?: boolean;
   assigned?: boolean;
   admin?: boolean;
+  /** The caller's own active org, and whether the OTHER person is active in it. */
+  myOrg?: boolean;
+  otherInMyOrg?: boolean;
 };
 
 /** A scripted client that answers exactly the reads the core makes. */
@@ -21,12 +24,22 @@ function caller(s: Script): CommunicationCaller {
   const supabase = {
     from(table: string) {
       const chain: Record<string, unknown> = {};
-      for (const m of ["select", "eq", "in", "order", "limit"]) chain[m] = () => chain;
+      const filters: { profile?: string } = {};
+      for (const m of ["select", "in", "order", "limit"]) chain[m] = () => chain;
+      chain.eq = (col: string, val: string) => {
+        if (col === "profile_id") filters.profile = val;
+        return chain;
+      };
       const rows = (): unknown[] => {
         if (table === "conversation_participants") return s.sharedConversation ? [{ conversation_id: "c-1" }] : [];
         if (table === "conversations") return s.sharedConversation ? [{ id: "c-1" }] : [];
         if (table === "project_worker_assignments") return s.assigned ? [{ id: "a-1" }] : [];
         if (table === "profile_roles") return s.admin ? [{ role: "admin" }] : [];
+        // Own memberships answer first; the other person's memberships are
+        // only returned when they share the caller's organization.
+        if (table === "company_memberships") {
+          return filters.profile === "me" ? (s.myOrg ? [{ organization_id: "org-1" }] : []) : s.otherInMyOrg ? [{ organization_id: "org-1" }] : [];
+        }
         return [];
       };
       chain.single = async () => ({ data: { active_role: "company" }, error: null });
@@ -62,6 +75,16 @@ describe("planDirectContact — the §8.1 gate for an explicit caller", () => {
   it("being assigned is not enough when the caller does not manage the project", async () => {
     const p = await planDirectContact(caller({ managesProject: false, assigned: true }), "them", { projectId: "p-1" });
     expect(p.kind).toBe("refused");
+  });
+
+  it("a colleague on the same team (both active in one organization) is team", async () => {
+    const p = await planDirectContact(caller({ myOrg: true, otherInMyOrg: true }), "them");
+    expect(p).toEqual({ kind: "new", permission: "allowed_team" });
+  });
+
+  it("the other person on a DIFFERENT team (or hidden by RLS) is not a team fact", async () => {
+    expect((await planDirectContact(caller({ myOrg: true, otherInMyOrg: false }), "them")).kind).toBe("refused");
+    expect((await planDirectContact(caller({ myOrg: false, otherInMyOrg: true }), "them")).kind).toBe("refused");
   });
 
   it("without a project, no relationship means no contact", async () => {

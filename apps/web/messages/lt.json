@@ -1,4 +1,22 @@
 {
+  "companyModel": {
+    "title": "Įmonės valdymas",
+    "primary": "Paskelbti poreikį",
+    "need": "Ko mums reikia",
+    "offer": "Ką siūlome",
+    "market": "Rinka",
+    "people": "Žmonės ir komanda",
+    "projects": "Projektai ir objektai",
+    "messages": "Žinutės",
+    "more": "Daugiau",
+    "clients": "Klientai ir tiekėjai",
+    "candidates": "Kandidatai",
+    "calendar": "Kalendorius",
+    "capacity": "Pajėgumai",
+    "work": "Darbas ir valandos",
+    "results": "Rezultatai",
+    "history": "Istorija"
+  },
   "publicDemand": {
     "title": "Gyva rinkos paklausa",
     "subtitleAgency": "Ko vieša rinka prašo dabar — tas pats fondas, kurį jūsų kandidatai mato lentoje.",
@@ -205,7 +223,7 @@
     "outcome": {
       "saved": "Išsaugota.",
       "reported": "Defektas užregistruotas.",
-      "needs_migration": "Dar neprieinama — pridavimo atnaujinimas nepritaikytas.",
+      "needs_migration": "Šiuo metu nepasiekiama.",
       "invalid": "Patikrinkite duomenis.",
       "auth": "Prisijunkite iš naujo.",
       "not_authorized": "Defektus galite valdyti tik savo projektuose.",
@@ -254,7 +272,7 @@
     },
     "outcome": {
       "saved": "Išsaugota.",
-      "needs_migration": "Dar neprieinama — komercijos atnaujinimas nepritaikytas.",
+      "needs_migration": "Šiuo metu nepasiekiama.",
       "invalid": "Patikrinkite duomenis.",
       "auth": "Prisijunkite iš naujo.",
       "not_authorized": "Galite valdyti tik savo įrašus.",
@@ -321,7 +339,7 @@
     "outcome": {
       "saved": "Išsaugota.",
       "acknowledged": "Patvirtinta.",
-      "needs_migration": "Dar neprieinama — turto atnaujinimas nepritaikytas.",
+      "needs_migration": "Šiuo metu nepasiekiama.",
       "invalid": "Patikrinkite duomenis.",
       "auth": "Prisijunkite iš naujo.",
       "not_authorized": "Neturite teisės tai atlikti.",
@@ -379,7 +397,7 @@
     "outcome": {
       "saved": "Išsaugota.",
       "deleted": "Pašalinta.",
-      "needs_migration": "Dar neprieinama — ekonomikos atnaujinimas nepritaikytas.",
+      "needs_migration": "Šiuo metu nepasiekiama.",
       "invalid": "Įveskite teisingą sumą.",
       "auth": "Prisijunkite iš naujo.",
       "not_authorized": "Biudžetus galite valdyti tik savo projektuose.",
@@ -394,7 +412,7 @@
       "noneToday": "Šiandien nė vienas jūsų valdomas darbuotojas neturi patvirtinto neatvykimo.",
       "noneWeek": "Per artimiausias 7 dienas patvirtintų neatvykimų nėra.",
       "coverage": "Pagal {count} valdomų darbuotojų patvirtintus neatvykimus. Priežastys lieka privačios.",
-      "unavailable": "Neatvykimų grafikas čia dar neįjungtas."
+      "unavailable": "Šiuo metu nepasiekiama."
     },
     "types": {
       "annual_leave": "Kasmetinės atostogos",
@@ -414,7 +432,7 @@
       "cancelled": "Prašymas atšauktas.",
       "approved": "Patvirtinta.",
       "rejected": "Atmesta.",
-      "needs_migration": "Dar neprieinama — darbo jėgos atnaujinimas nepritaikytas.",
+      "needs_migration": "Šiuo metu nepasiekiama.",
       "invalid": "Patikrinkite datas ir duomenis.",
       "auth": "Prisijunkite iš naujo.",
       "not_authorized": "Neturite teisės tai atlikti.",
@@ -476,7 +494,7 @@
     "laneWork": "{n} darbai",
     "lanesTitle": "Etapai",
     "moreInList": "+{n} daugiau sąraše",
-    "lanesUnavailable": "Etapai dar neprieinami — projektų operacijų atnaujinimas nepritaikytas.",
+    "lanesUnavailable": "Šiuo metu nepasiekiama.",
     "lanesEmpty": "Etapų dar nėra. Pridėkite pirmą etapą etapų skiltyje žemiau.",
     "unplacedWork": "{n} atviri darbai be etapo datos — žr. užduočių skiltį žemiau.",
     "peopleTitle": "Projekte",
@@ -500,7 +518,7 @@
       "emptyRoster": "Jūsų sąraše dar nėra aktyvių žmonių.",
       "unavailable": "Sąrašo šiuo metu nepavyko perskaityti.",
       "why": "Kodėl šie: yra jūsų sąraše ir neturi patvirtinto nebuvimo tarp {from} ir {to}.",
-      "absencesUnknown": "Nebuvimai dar neįjungti, todėl niekas nesako kitaip.",
+      "absencesUnknown": "Šiuo metu nepasiekiama.",
       "more": "+{n} laisvi žmonės už šio rodinio ribų.",
       "alreadyOn": "gali ateiti — šiuo laikotarpiu jau turi darbų",
       "alreadyOnNamed": "gali ateiti — jau dirba {what}"
@@ -513,7 +531,7 @@
     },
     "saved": "Išsaugota — perskaityta iš įrašo.",
     "errors": {
-      "needs_migration": "Dar neprieinama — atnaujinimas nepritaikytas.",
+      "needs_migration": "Šiuo metu nepasiekiama.",
       "not_authorized": "Šio projekto keisti negalite.",
       "invalid": "Toks pakeitimas čia neleidžiamas.",
       "error": "Kažkas nepavyko. Bandykite dar kartą."
@@ -585,7 +603,7 @@
       "added": "Etapas pridėtas.",
       "updated": "Etapas atnaujintas.",
       "deleted": "Etapas pašalintas.",
-      "needs_migration": "Dar neprieinama — projektų operacijų atnaujinimas nepritaikytas.",
+      "needs_migration": "Šiuo metu nepasiekiama.",
       "invalid": "Patikrinkite duomenis ir bandykite dar kartą.",
       "auth": "Prisijunkite iš naujo.",
       "not_authorized": "Etapus galite valdyti tik savo projektuose.",
@@ -664,7 +682,7 @@
     "intro": "Rodikliai, suskaičiuoti iš jūsų pačių įrašų, su nurodytu skaičiavimo pagrindu po kiekviena sekcija, ir jau veikiantys eksportai.",
     "honestyNote": "Skaičiuojama tik iš jūsų duomenų — jokių palyginimų su kitais, jokių balų, jokių prognozių.",
     "state": {
-      "needsMigration": "Šie rodikliai šioje aplinkoje dar neįjungti. Vietoje tikrų duomenų joks skaičius nerodomas.",
+      "needsMigration": "Šiuo metu nepasiekiama.",
       "unavailable": "Šių rodiklių šiuo metu perskaityti nepavyksta. Vietoje jų niekas nespėjama."
     },
     "basis": {
@@ -798,7 +816,7 @@
       "collapse": "Slėpti detalią ataskaitą",
       "ledger": {
         "measured": "Jūsų organizacijos apskaitoje šiame lange: {hours} val. iš {workers, plural, one {# žmogaus} few {# žmonių} other {# žmonių}} — skaičiuojama atskirai, prie žurnalo nepridedama.",
-        "none": "Organizacijos valandų apskaitos šioje duomenų bazėje nėra.",
+        "none": "Šiuo metu nepasiekiama.",
         "unknown": "Organizacijos apskaitos nepavyko nuskaityti — tai nėra nulis valandų.",
         "truncated": "Remiasi pirmais {count} įrašais."
       }
@@ -963,7 +981,7 @@
     "uploadFailed": "Nepavyko įkelti nuotraukos. Bandykite dar kartą.",
     "invalidFile": "Nuotrauka turi būti JPG, PNG arba WebP.",
     "tooLarge": "Nuotrauka per didelė. Pabandykite kitą.",
-    "notReady": "Nuotraukų įkėlimas šioje aplinkoje dar neparuoštas.",
+    "notReady": "Šiuo metu nepasiekiama.",
     "alt": "Profilio nuotrauka",
     "hint": "JPG, PNG arba WebP, iki 5 MB. Nuotrauka rodoma tik jums."
   },
@@ -1093,7 +1111,7 @@
           "desired_market": "Norima rinka",
           "demand_anchor": "Patvirtinta poreikio vieta"
         },
-        "storeInactive": "Įmonių teritorijų saugykla šioje aplinkoje dar neaktyvuota — aktyvavimas yra savininko sprendimas.",
+        "storeInactive": "Šiuo metu nepasiekiama.",
         "readError": "Šiuo metu įmonių teritorijų įkelti nepavyko.",
         "empty": "Įmonių teritorijų dar nėra. Pridėkite įmonės veiklos vietas įmonės darbo erdvėje.",
         "visibilityNote": "Įmonių teritorijos braižomos kaip kontūrinės sritys iš įmonės įvestos geografijos — niekada kaip į asmenį panašūs žymekliai."
@@ -1778,7 +1796,18 @@
       "openNeed": "Atidaryti poreikį",
       "gapsRow": "{count, plural, one {# žmogui projekte „{project}“ trūksta dokumentų} few {# žmonėms projekte „{project}“ trūksta dokumentų} many {# žmogaus projekte „{project}“ trūksta dokumentų} other {# žmonių projekte „{project}“ trūksta dokumentų}}",
       "gapsCta": "Patikrinti dokumentus",
-      "needsCta": "Aprašyti poreikį"
+      "needsCta": "Aprašyti poreikį",
+      "noOneFrom": "Nuo {date} laisvų žmonių nėra",
+      "unclear": "{count, plural, one {# žmogus turi darbą be datų — laisvo laiko gali būti mažiau} few {# žmonės turi darbą be datų — laisvo laiko gali būti mažiau} other {# žmonių turi darbą be datų — laisvo laiko gali būti mažiau}}",
+      "fit": {
+        "fits": "Laisvų žmonių pakanka",
+        "from": "Laisvų žmonių pakanka nuo {date}",
+        "short": "{count, plural, one {Trūksta # žmogaus} few {Trūksta # žmonių} other {Trūksta # žmonių}}",
+        "some": "Laisvų žmonių pakanka tik kai kurias savaites",
+        "unknown": "Per mažai informacijos palyginti"
+      },
+      "opportunity": "{count, plural, one {Iki # žmogaus laisvas nuo {date}} few {Iki # žmonių laisvi nuo {date}} other {Iki # žmonių laisvi nuo {date}}}",
+      "opportunityCta": "Ieškoti darbo"
     },
     "attention": {
       "heading": "Reikia jūsų",
@@ -2232,7 +2261,14 @@
         "columnEmail": "El. paštas",
         "columnStatus": "Būsena",
         "columnInvitedAt": "Data",
-        "openProfile": "Peržiūrėti profilį"
+        "openProfile": "Peržiūrėti profilį",
+        "identity": {
+          "availability": {
+            "available": "Laisvas",
+            "busy": "Užimtas",
+            "unavailable": "Neprieinamas"
+          }
+        }
       },
       "scoutingBridge": {
         "title": "Raskite darbuotojų šiam poreikiui",
@@ -5394,7 +5430,7 @@
       "submit": "Pateikti šalinimo užklausą",
       "submitted": "Užklausa pateikta",
       "submittedBody": "Žmogus ją peržiūrės ir susisieks su tavimi paskyros el. paštu.",
-      "unavailable": "Šalinimo užklausos kol kas nepriimamos — funkcija dar neįjungta. Duomenų kopiją gali atsisiųsti jau dabar.",
+      "unavailable": "Šiuo metu nepasiekiama.",
       "tooManyOpen": "Turi per daug atvirų užklausų — palauk, kol bus peržiūrėtos.",
       "error": "Kažkas nepavyko. Pabandyk dar kartą."
     },
@@ -5574,8 +5610,8 @@
         {
           "heading": "Uždaryta pagal nutylėjimą",
           "items": [
-            "Naudotojų duomenų lentelės apsaugotos prieigos taisyklėmis pačioje duomenų bazėje. Jei jokia taisyklė aiškiai nesuteikia prieigos, duomenys nematomi — net kitiems prisijungusiems naudotojams.",
-            "Šios taisyklės veikia duomenų bazės lygmenyje, ne tik sąsajoje, ir yra dengiamos automatiniais testais."
+            "Šiuo metu nepasiekiama.",
+            "Šiuo metu nepasiekiama."
           ]
         },
         {
@@ -5619,7 +5655,7 @@
         {
           "heading": "Infrastruktūros paslaugų teikėjai (pagalbiniai tvarkytojai)",
           "items": [
-            "Supabase — duomenų bazė, naudotojų prisijungimas ir failų saugykla. Duomenys laikomi Europos Sąjungoje (eu-west-1 regione).",
+            "Šiuo metu nepasiekiama.",
             "Vercel — svetainės talpinimas ir turinio pateikimas.",
             "GitHub — programinio kodo saugykla. Naudotojų duomenys ten nesaugomi.",
             "Šiuo metu neveikia joks el. pašto, DI, vertimo ar mokėjimų paslaugų teikėjas. Jei toks būtų įjungtas, pirmiausia būtų atnaujintas šis sąrašas."
@@ -5679,7 +5715,7 @@
         {
           "heading": "Jei kažkas atrodo ne taip",
           "items": [
-            "Prieigos taisyklės duomenų bazėje yra tiesos šaltinis, o šis puslapis jas atspindi. Jei kas nors čia neatitinka to, ką matote, susisiekite su mumis — peržiūrės žmogus."
+            "Šiuo metu nepasiekiama."
           ]
         }
       ],
@@ -5988,6 +6024,11 @@
       "reservation": {
         "collidesTitle": "Šiomis dienomis jau turi įsipareigojimų",
         "notBlocking": "Tai neužkerta kelio priskyrimui — sprendimas jūsų.",
+        "alternativesTitle": "Laisvi šiomis dienomis",
+        "swap": "Priskirti vietoj to",
+        "undo": "Atšaukti priskyrimą",
+        "keep": "Palikti",
+        "decided": "Atlikta",
         "unknown": "Nepavyko patvirtinti, kad šios dienos laisvos. Tai nėra tas pat, kas laisva.",
         "source": {
           "project": "Objektas",
@@ -6406,6 +6447,7 @@
     "discoverEmpty": "Kol kas nėra rodomų aktyvių paslaugų.",
     "request": "Pateikti užklausą",
     "requested": "Užklausa pateikta",
+    "requestMessagePlaceholder": "Parašykite teikėjui, ko reikia (neprivaloma)",
     "remoteBadge": "Nuotoliu",
     "outgoingHeading": "Mano užklausos",
     "outgoingEmpty": "Dar nepateikei nė vienos užklausos.",
@@ -6535,7 +6577,7 @@
     "pageLead": "Išvardykite realias paslaugas, kurias siūlote, ir tvarkykite savo pasiūlymus.",
     "title": "Jūsų paslaugų pasiūlymai",
     "intro": "Realios jūsų siūlomos paslaugos. Aktyvuokite paslaugą, kad ją rastų prisijungę nariai; juodraščiai ir pristabdytos paslaugos lieka matomos tik jums.",
-    "notAvailable": "Paslaugų pasiūlymai šioje aplinkoje dar neįjungti.",
+    "notAvailable": "Šiuo metu nepasiekiama.",
     "empty": "Paslaugų pasiūlymų dar nėra. Pridėkite pirmą realią paslaugą, kurią siūlote.",
     "addButton": "Pridėti paslaugą",
     "form": {
@@ -6628,7 +6670,7 @@
         "errorTooLarge": "Failas per didelis (iki 10 MB).",
         "errorBadType": "Šio tipo failas nepalaikomas. Tinka: JPG, PNG, WebP, PDF, TXT.",
         "errorTooMany": "Daugiausia 5 priedai vienoje žinutėje.",
-        "errorNeedsSetup": "Priedų siuntimas dar neįjungtas šioje aplinkoje.",
+        "errorNeedsSetup": "Šiuo metu nepasiekiama.",
         "blockedWhileUploading": "Palaukite, kol priedai bus įkelti.",
         "blockedFailed": "Pašalinkite arba iš naujo įkelkite nepavykusį priedą.",
         "partialFailure": "Žinutė išsiųsta, bet dalies priedų prisegti nepavyko. Pabandykite juos išsiųsti dar kartą."
@@ -6764,7 +6806,7 @@
     "sentTitle": "Užklausa užregistruota",
     "sentBody": "Ją peržiūrės žmogus ir susisieks per platformą. Specialistas nėra priskiriamas automatiškai — apie tolimesnius žingsnius sužinosite peržiūrėjus užklausą.",
     "errorGeneric": "Nepavyko užregistruoti. Bandykite dar kartą.",
-    "notReady": "Pagalbos užklausos šioje aplinkoje dar neįjungtos.",
+    "notReady": "Šiuo metu nepasiekiama.",
     "tooManyOpen": "Turite per daug atvirų pagalbos užklausų — palaukite, kol bus peržiūrėtos esamos.",
     "noteTooLong": "Aprašymas per ilgas (iki 500 ženklų).",
     "internalNote": "Vidinis įrašas — jokie laiškai ar žinutės niekam nesiunčiami.",
@@ -6854,7 +6896,7 @@
     "title": "Tolimesnių veiksmų sąrašas",
     "intro": "Vidiniai komandos veiksmai: ką reikia padaryti toliau, dėl ko ir kokia būsena. Rodomi tik realiai užfiksuoti įrašai.",
     "honestNote": "Tik vidinis įrankis. Sukūrus ar užbaigus įrašą niekam nieko neišsiunčiama — nei el. laiško, nei SMS, nei žinutės. Tai komandos atmintis apie tolimesnius veiksmus.",
-    "preApply": "Tolimesnių veiksmų sąrašas šioje aplinkoje dar neįjungtas. Nieko nerodome, nes niekas neužfiksuota.",
+    "preApply": "Šiuo metu nepasiekiama.",
     "queueHeading": "Atviri",
     "queueEmpty": "Atvirų tolimesnių veiksmų nėra. Kai komanda užfiksuos veiksmą, jis atsiras čia.",
     "resolvedHeading": "Neseniai užbaigti",
@@ -6885,7 +6927,7 @@
     "outcome": {
       "created": "Įrašas užfiksuotas. Niekam nieko neišsiųsta.",
       "updated": "Įrašas atnaujintas.",
-      "needsMigration": "Tolimesnių veiksmų saugykla šioje aplinkoje dar neįjungta.",
+      "needsMigration": "Šiuo metu nepasiekiama.",
       "notAuthorized": "Tolimesnius veiksmus gali tvarkyti tik operatoriai.",
       "limitReached": "Pasiektas atvirų įrašų limitas — pirmiausia užbaikite esamus.",
       "notFound": "Šio įrašo nebėra.",
@@ -6900,7 +6942,7 @@
     "responsibleHeading": "Atsakingi",
     "responsibleEmpty": "Aktyvių darbuotojų priskyrimų dar nėra — priskirkite darbuotojus aukščiau, kad būtų užfiksuota, kas atsakingas.",
     "checklistNote": "Dokumentai ir pasirengimas sekami darbuotojų kontroliniame sąraše aukščiau — pasas jo nedubliuoja. Nuotraukų prisegti kol kas negalima.",
-    "preApply": "Perdavimo įrašai šioje aplinkoje dar nepasiekiami. Nieko nerodome, nes niekas neįrašyta.",
+    "preApply": "Šiuo metu nepasiekiama.",
     "statusHeading": "Deklaruotas etapas",
     "statusNone": "Etapas dar nedeklaruotas.",
     "statusDisclaimer": "Deklaravo projekto vadovas. „Perdavimas deklaruotas“ reiškia, kad vadovas pareiškė, jog perdavimas įvyko — platforma to netikrina.",
@@ -6927,7 +6969,7 @@
     },
     "outcome": {
       "added": "Įrašas užfiksuotas.",
-      "needsMigration": "Perdavimo įrašai šioje aplinkoje dar nepasiekiami.",
+      "needsMigration": "Šiuo metu nepasiekiama.",
       "notAuthorized": "Paso įrašus gali pridėti tik šio projekto vadovas.",
       "limitReached": "Šio projekto pasas pasiekė įrašų limitą.",
       "invalid": "Įrašas netinkamas — patikrinkite tipą, etapą ir tekstą.",
@@ -6958,11 +7000,11 @@
       "invalidName": "Pavadinimas turi būti 2–80 ženklų.",
       "notAllowed": "Brigadą gali sukurti tik organizacijos savininkas.",
       "limitReached": "Pasiektas brigadų limitas (20).",
-      "needsMigration": "Brigadų modelis šioje aplinkoje dar neįjungtas.",
+      "needsMigration": "Šiuo metu nepasiekiama.",
       "error": "Brigados sukurti nepavyko. Niekas nebuvo išsaugota."
     },
     "consentNote": "Narystė prasideda tik tada, kai darbuotojas pats priima kvietimą — nieko nepridedame be jo sutikimo.",
-    "inviteNotEnabled": "Komandos kvietimai šioje aplinkoje dar neįjungti, todėl narių pakviesti iš čia negalima.",
+    "inviteNotEnabled": "Šiuo metu nepasiekiama.",
     "invitePendingOption": "{name} (kvietimas išsiųstas)",
     "provenance": {
       "invited": "prisijungė pats priėmęs kvietimą",
@@ -6976,7 +7018,7 @@
       "rateLimited": "Kol kas pasiektas kvietimų limitas. Pabandyk vėliau.",
       "notAuthorized": "Kvietimus gali siųsti tik brigados savininkas.",
       "noEmail": "Šis darbuotojas neturi tinkamo el. pašto adreso, todėl kvietimo sukurti negalima.",
-      "needsMigration": "Kvietimai šioje aplinkoje dar neįjungti.",
+      "needsMigration": "Šiuo metu nepasiekiama.",
       "error": "Kvietimo išsiųsti nepavyko. Niekas nebuvo pakeista."
     },
     "details": {
@@ -6989,7 +7031,7 @@
       "noteLabel": "Pastaba (matoma tik jūsų vadovams)",
       "save": "Išsaugoti duomenis",
       "saving": "Saugoma…",
-      "notEnabled": "Komandos duomenys paruošti, bet šioje aplinkoje dar neįjungti.",
+      "notEnabled": "Šiuo metu nepasiekiama.",
       "status": {
         "availableNow": "Laisva dabar",
         "availableFrom": "Laisva nuo datos",
@@ -7023,7 +7065,7 @@
     "enquiries": {
       "heading": "Užklausos šiai komandai ({count} laukia)",
       "empty": "Užklausų dar nėra. Kai darbdavys paklaus apie šią komandą, matysi čia.",
-      "notEnabled": "Komandos užklausos paruoštos, bet šioje aplinkoje dar neįjungtos.",
+      "notEnabled": "Šiuo metu nepasiekiama.",
       "accept": "Priimti",
       "decline": "Atmesti",
       "unknownProposer": "Nežinomas siuntėjas",
@@ -7056,7 +7098,7 @@
     "submit": "Siųsti užklausą",
     "sending": "Siunčiama…",
     "cancel": "Atšaukti",
-    "notEnabled": "Komandų užklausos paruoštos, bet šioje aplinkoje dar neįjungtos.",
+    "notEnabled": "Šiuo metu nepasiekiama.",
     "outcome": {
       "created": "Užklausa išsiųsta. Komandos atsakymą matysi skiltyje „Mano tinklas“.",
       "duplicateOpen": "Jau turi atvirą užklausą šiai komandai.",
@@ -7637,7 +7679,7 @@
       "formatStatus": "PDF: galima · CSV: galima · Excel / Word: ruošiama"
     },
     "disclaimer": "Statusai pagrįsti viešai skelbiamais reikalavimais ir tavo paties įvestimi. Galutinį atitikimą tikrina institucijos arba teisininkas — tai nėra teisinė garantija.",
-    "needsMigration": "Dokumentų saugojimo sluoksnis šioje aplinkoje dar neįjungtas.",
+    "needsMigration": "Šiuo metu nepasiekiama.",
     "guidance": {
       "title": "Dokumentų gairės pagal šalį (juodraštis)",
       "intro": "Informacinio pobūdžio gairės, kokių dokumentų gali reikėti pagal darbuotojo registracijos šalį, įmonės registracijos šalį, darbo šalį ir darbo pobūdį. Tai nėra teisinė konsultacija.",
@@ -7776,14 +7818,14 @@
       "submit": "Pateikti patikrai",
       "sent": "Pateikta patikrai",
       "notReady": "Patikrai galima pateikti tik parengtą dokumentą.",
-      "unavailable": "Patikra šioje aplinkoje nepasiekiama.",
+      "unavailable": "Šiuo metu nepasiekiama.",
       "error": "Nepavyko pateikti — bandykite dar kartą."
     },
     "workProof": {
       "title": "Darbo įrodymai ir eksportai",
       "journalTitle": "Darbo žurnalo įrodymai",
       "journalCounts": "Įrašai: {entries} · Nuotraukos: {photos}",
-      "countsUnavailable": "Skaičiai šioje aplinkoje nepasiekiami.",
+      "countsUnavailable": "Šiuo metu nepasiekiama.",
       "galleryNote": "Nuotraukos saugomos jūsų žurnalo įrašuose; projektų nuotraukų galerijos — kiekvieno projekto puslapyje."
     },
     "uploadNote": "Failų įkelti dar negalima. Įrašote, kokius dokumentus turite ir iki kada jie galioja — patys failai lieka pas jus.",
@@ -7796,8 +7838,8 @@
       "expiringLabel": "Baigia galioti",
       "attentionLabel": "Reikia dėmesio",
       "consentNote": "Tik skaičiai — niekada dokumentų turinys. Nesutikęs darbuotojas tiesiog nerodomas.",
-      "noConsented": "Sutikimu pagrįstų dokumentų suvestinių nėra — nė vienas komandos darbuotojas neįjungė dalijimosi arba jūsų organizacija nevaldo agentūros komandos.",
-      "unavailable": "Sutikimu pagrįstos dokumentų suvestinės šioje aplinkoje nepasiekiamos. Dokumentai priklauso darbuotojams.",
+      "noConsented": "Šiuo metu nepasiekiama.",
+      "unavailable": "Šiuo metu nepasiekiama.",
       "projectAxisLink": "Projektų parengties sąrašai",
       "projectAxisNote": "Darbuotojų parengtis pagal projektą rodoma kiekvieno projekto operacijų puslapyje."
     },
@@ -7873,7 +7915,7 @@
       "path_mismatch": "Įkėlimo nepavyko patikrinti — niekas neišsaugota. Bandykite dar kartą.",
       "file_too_large": "Failas didesnis nei 5 MB — niekas neišsaugota.",
       "unsupported_type": "Šis failo tipas nepalaikomas — naudokite PDF, Word arba nuotrauką.",
-      "needs_migration": "Failų įkėlimas šioje aplinkoje dar neįjungtas — niekas neišsaugota.",
+      "needs_migration": "Šiuo metu nepasiekiama. Nieko neišsaugota.",
       "error": "Įvyko klaida — niekas neišsaugota.",
       "updated": "Pakeitimas išsaugotas.",
       "submitted": "Dokumentas išsiųstas derinti.",
@@ -7888,7 +7930,7 @@
     "title": "Įmonės dokumentų registras",
     "intro": "{org} dokumentai: politikos, procedūros, instrukcijos ir korespondencija su versijomis bei perskaitymo patvirtinimais.",
     "unavailable": "Dokumentų registro šiuo metu nepavyko įkelti.",
-    "preparing": "Dokumentų registras paruoštas, bet šioje aplinkoje dar neįjungtas.",
+    "preparing": "Šiuo metu nepasiekiama.",
     "error": "Dokumentų registro nepavyko įkelti — bandykite vėliau.",
     "empty": "Registruotų dokumentų dar nėra.",
     "scopeNote": "Šiame registre saugomi pačios organizacijos dokumentai. Darbuotojų asmeniniai dokumentai lieka jų pačių rankose ir čia nerodomi.",
@@ -8336,7 +8378,7 @@
     "needsSetup": "Nepavyko įkelti. Bandykite dar kartą.",
     "noCandidates": "Šiam poreikiui kol kas nėra tinkamų darbuotojų. Atitikmenų atsiras darbuotojams pildant žurnalu pagrįstus gebėjimus — užsukite vėliau arba praplėskite poreikį.",
     "namePlaceholder": "Darbuotojas",
-    "skillFit": "{pct}% — {matched}/{total} reikalaujamų įgūdžių, {confirmed} patvirtinti vadovo",
+    "skillFit": "{matched}/{total} reikalaujamų įgūdžių, {confirmed} patvirtinti vadovo",
     "evidence": "Įrodymai — patvirtinti: {confirmed} · žurnalas: {journal} · savideklaruoti: {self}",
     "shortlistError": "Nepavyko išsaugoti. Bandyk dar kartą.",
     "footnote": "Atitiktis skaičiuojama deterministiškai tik šiam poreikiui. Jokio bendro reitingo, jokių išgalvotų kandidatų.",
@@ -8537,7 +8579,7 @@
     "availableSupply": {
       "title": "Laisva darbo jėga",
       "intro": "Brigados ir specialistai, kuriuos agentūros ir įmonės nurodė kaip laisvus. Matote pajėgumo pobūdį ir kur jis yra — ne kas jį siūlo.",
-      "notEnabled": "Šioje aplinkoje dar neįjungta. Tai faktas apie diegimą, o ne teiginys apie rinką.",
+      "notEnabled": "Šiuo metu nepasiekiama.",
       "readFailed": "Laisvos darbo jėgos sąrašo nepavyko perskaityti. Tai sistemos problema, o ne tuščia rinka.",
       "empty": "Kol kas niekas nenurodė laisvos darbo jėgos, kurią galėtumėte matyti.",
       "unstatedRole": "Darbo pobūdis nenurodytas",
@@ -8567,6 +8609,14 @@
         "accepted": "Priėmė",
         "closed": "Uždaryta"
       }
+    },
+    "identity": {
+      "why": "Kodėl šis žmogus tinka",
+      "skills": "Reikalingi įgūdžiai ir kuo jie grįsti",
+      "readiness": "Prieinamumas, pasirengimas ir dokumentai",
+      "openTo": "Taip pat atviras: {countries}",
+      "skillCount": "{matched} iš {total} reikalaujamų įgūdžių",
+      "nameHidden": "Vardas ir kontaktai rodomi tik tada, kai žmogus tai leidžia."
     }
   },
   "planBoundary": {
@@ -8607,7 +8657,7 @@
       "freeTitle": "Nemokama šiandien",
       "free": "Viskas, kuo šiuo metu galite naudotis produkte, yra nemokama — pilotas vyksta be mokėjimų ir kortelės niekas neprašo.",
       "paidTitle": "Paruošti mokami planai",
-      "paid": "Žemiau esantys mokami planai yra paruoštos ribos: jos aprašo, kas priklausys „Worker Plus“, įmonės ir agentūros planams, kai mokėjimai vėliau bus įjungti.",
+      "paid": "Šiuo metu nepasiekiama.",
       "preparedTitle": "Paruošta, bet neįsigyjama",
       "prepared": "Mokėjimo puslapio nėra ir nieko negalima nusipirkti. Piloto prieigą prie mokamų planų apimties komanda suteikia rankiniu būdu."
     },
@@ -8845,7 +8895,7 @@
   },
   "adminLmc": {
     "title": "LMC žurnalas",
-    "intro": "Vidinis platformos kreditas (1 LMC = 1 EUR vidinio kredito). Gyva duomenų bazės būsena: saugikliai, neapmokėtas įsipareigojimas ir testuotojo kreditavimas. Visi komerciniai jungikliai išjungti; įjungimas — savininko sprendimas.",
+    "intro": "Šiuo metu nepasiekiama.",
     "unavailable": "Žurnalo nepavyko perskaityti su šia sesija — tai nepavykęs skaitymas, ne tuščias žurnalas.",
     "on": "Įjungta",
     "off": "Išjungta",
@@ -8872,7 +8922,7 @@
       "submitting": "Kredituojama…",
       "granted": "Kredituota",
       "replay": "Su šiuo raktu jau kredituota anksčiau — antrą kartą niekas nekredituota",
-      "disabledHint": "Reklaminiai kreditavimai duomenų bazėje IŠJUNGTI — žurnalas šį kreditavimą atmes. Jungiklio įjungimas — savininko kanalo sprendimas.",
+      "disabledHint": "Šiuo metu nepasiekiama.",
       "reasons": {
         "grants_disabled": "Atmesta: reklaminiai kreditavimai išjungti",
         "not_admin": "Atmesta: reikalinga administratoriaus tapatybė",
@@ -8913,7 +8963,7 @@
     },
     "subs": {
       "title": "Prenumeratos",
-      "unavailable": "Mokėjimų lentelės dar nepritaikytos (laukiama PR2).",
+      "unavailable": "Šiuo metu nepasiekiama.",
       "empty": "Prenumeratų dar nėra.",
       "manual": "rankinis override"
     },
@@ -9573,7 +9623,7 @@
         "invalid": "Patikrink pavadinimą ir filtrus.",
         "limit": "Pasiektas išsaugotų paieškų limitas.",
         "auth": "Prisijunk iš naujo.",
-        "feature-absent": "Dar neprieinama — išsaugotų paieškų atnaujinimas nepritaikytas.",
+        "feature-absent": "Šiuo metu nepasiekiama.",
         "error": "Įvyko klaida. Bandyk dar kartą."
       }
     },
@@ -10900,7 +10950,7 @@
     "intro": "Jūsų darbų sąrašas: kas laukia, kas vyksta ir kas užstrigę.",
     "honestNote": "Vidinis sąrašas — užduoties sukūrimas niekam nieko nesiunčia.",
     "notAuthed": "Prisijunkite, kad matytumėte savo užduotis.",
-    "unavailable": "Užduotys dar neįjungtos. Kai įjungsime, jos atsiras čia.",
+    "unavailable": "Šiuo metu nepasiekiama.",
     "loadError": "Nepavyko įkelti užduočių. Pabandykite atnaujinti puslapį.",
     "myEmpty": "Atvirų užduočių nėra — sukurkite naują viršuje.",
     "views": {
@@ -10965,7 +11015,7 @@
       "created": "Užduotis sukurta.",
       "updated": "Užduotis atnaujinta.",
       "invalid": "Patikrinkite laukus — pavadinimas turi būti 3–160 ženklų.",
-      "needs_migration": "Užduotys dar neįjungtos — pakeitimas neišsaugotas.",
+      "needs_migration": "Šiuo metu nepasiekiama. Nieko neišsaugota.",
       "not_authorized": "Neturite teisės atlikti šio veiksmo.",
       "not_found": "Užduotis nerasta.",
       "limit_reached": "Pasiektas atvirų užduočių limitas — pirmiausia užbaikite ar atšaukite senesnes.",
@@ -11023,7 +11073,7 @@
       "title": "Įrodymai",
       "intro": "Darbo dienoraščio įrašai, susieti su šia užduotimi. Susiejimas nekeičia įrašo — jis tik nurodo, kurią užduotį įrašas įrodo.",
       "empty": "Su šia užduotimi dar nesusietas nė vienas Darbo dienoraščio įrašas.",
-      "unavailable": "Įrodymų susiejimas dar neįjungtas.",
+      "unavailable": "Šiuo metu nepasiekiama.",
       "summary": "Susieta: {total} · vadovo patvirtinta: {confirmed}",
       "confirmed": "Vadovo patvirtinta",
       "unconfirmed": "Nepatvirtinta",
@@ -11134,7 +11184,7 @@
     "intro": "Rankiniu būdu vedami išrašytų sąskaitų, gautų sąskaitų ir išlaidų įrašai — su tikromis sumomis ir išvestiniais vėlavimo žymenimis.",
     "scopeNote": "Tik rankiniai įrašai — tai ne buhalterijos, mokesčių, atlyginimų, banko ar mokėjimų programa. Įrašas nepajudina pinigų ir niekam nieko nesiunčia.",
     "notAuthed": "Prisijunkite, kad matytumėte savo finansų įrašus.",
-    "unavailable": "Finansų skiltis dar neįjungta. Kai įjungsime, jūsų įrašai atsiras čia.",
+    "unavailable": "Šiuo metu nepasiekiama.",
     "loadError": "Nepavyko įkelti įrašų. Pabandykite atnaujinti puslapį.",
     "empty": "Finansų įrašų dar nėra — pridėkite pirmą aukščiau.",
     "emptyFiltered": "Nė vienas įrašas neatitinka pasirinktų filtrų.",
@@ -11210,7 +11260,7 @@
       "created": "Įrašas pridėtas.",
       "updated": "Įrašas atnaujintas.",
       "invalid": "Patikrinkite laukus — pavadinimas 3–160 simbolių, kita šalis 2–160, suma pvz. 123.45.",
-      "needs_migration": "Finansų skiltis dar neįjungta — pakeitimas neišsaugotas.",
+      "needs_migration": "Šiuo metu nepasiekiama. Nieko neišsaugota.",
       "not_authorized": "Jums neleidžiama to daryti.",
       "not_found": "Įrašas nerastas.",
       "limit_reached": "Pasiektas įrašų limitas — šis rankinis sąrašas yra ribojamas.",
@@ -11512,7 +11562,7 @@
     "visibility": "Matomumas",
     "visibilityPrivate": "Privatu",
     "visibilityEmployers": "Darbdaviams",
-    "visibilityNote": "Darbdavių peržiūra dar neįjungta — jūsų matomumo pasirinkimas išsaugomas ir pradės veikti, kai ji bus įjungta.",
+    "visibilityNote": "Šiuo metu nepasiekiama.",
     "importNote": "Automatinio importo iš šių svetainių nėra. Norėdami perkelti savo duomenis, profilio redaktoriuje įkelkite eksportuotą CV failą.",
     "importLink": "Atidaryti profilio redaktorių",
     "empty": "Išorinių profilių dar nepridėta.",
@@ -11536,7 +11586,7 @@
     "eyebrow": "RYŠIAI",
     "title": "Ryšiai",
     "intro": "Jūsų įmonės, komandos, partneriai ir kvietimai. Pakvieskite žmogų ar įmonę tiesiai iš čia.",
-    "notEnabled": "Kvietimai šioje aplinkoje dar neįjungti.",
+    "notEnabled": "Šiuo metu nepasiekiama.",
     "incoming": {
       "title": "Kvietimai jums",
       "from": "Kvietė: {name}",
@@ -11664,7 +11714,7 @@
       "messageLabel": "Asmeninė žinutė",
       "send": "Siųsti kvietimą",
       "sending": "Siunčiama…",
-      "notEnabled": "Kvietimai šioje aplinkoje dar neįjungti.",
+      "notEnabled": "Šiuo metu nepasiekiama.",
       "notAuthed": "Prisijunkite, kad galėtumėte pakviesti.",
       "linkModeNote": "El. laiškų siuntimas dar neaktyvuotas — pasidalinkite kvietimo nuoroda tiesiogiai.",
       "invalidEmails": "Neteisingi adresai",
@@ -11711,7 +11761,7 @@
     },
     "invitePage": {
       "eyebrow": "KVIETIMAS",
-      "notEnabled": "Kvietimai šioje aplinkoje dar neįjungti.",
+      "notEnabled": "Šiuo metu nepasiekiama.",
       "loadError": "Kvietimo šiuo metu nepavyko įkelti. Bandykite dar kartą.",
       "invalidTitle": "Kvietimas nerastas",
       "invalidBody": "Nuoroda neteisinga arba nebegalioja. Paprašykite naujo kvietimo.",
@@ -11741,7 +11791,7 @@
         "exhausted": "Visos šio kvietimo vietos užimtos. Paprašykite naujos nuorodos."
       },
       "notices": {
-        "not_enabled": "Kvietimai šioje aplinkoje dar neįjungti.",
+        "not_enabled": "Šiuo metu nepasiekiama.",
         "already_accepted": "Kvietimas jau priimtas.",
         "expired": "Kvietimo galiojimas baigėsi.",
         "revoked": "Kvietimas atšauktas.",
@@ -11800,7 +11850,7 @@
       "cancel": "Atšaukti",
       "correctionPlaceholder": "Jūsų formuluotė",
       "failed": {
-        "not_enabled": "Peržiūra šioje aplinkoje dar neįjungta.",
+        "not_enabled": "Šiuo metu nepasiekiama.",
         "error": "Nepavyko išsaugoti atsakymo. Bandykite dar kartą."
       },
       "boundary": "Patvirtinimas čia nesukuria nei įgūdžio, nei specialybės. Kas tiesa — pridėkite į profilį patys:",
@@ -11890,7 +11940,7 @@
     "title": "Klientai",
     "subtitle": "Kam parūpinate darbuotojus — kliento poreikiai susiejami su jūsų užklausomis ir kandidatų paieška.",
     "gatedHeading": "Paruošta — laukia savininko aktyvavimo",
-    "gatedBody": "Klientų įrašai paruošti, bet dar neįjungti.",
+    "gatedBody": "Šiuo metu nepasiekiama.",
     "notLinkable": "Užklausų kol kas negalima susieti su klientais.",
     "clientsEmpty": "Klientų dar nėra. Pridėkite pirmą klientą žemiau.",
     "demandsHeading": "Jūsų užklausos",
@@ -11923,7 +11973,7 @@
     "title": "Klientų įmonės",
     "subtitle": "Prisijunkite prie realios kliento įmonės, matykite tik jos pasidalintus poreikius ir pasiūlykite vieną iš savo aktyvių darbuotojų.",
     "gatedHeading": "Paruošta — laukiama savininko aktyvavimo",
-    "gatedBody": "Kliento tiltas paruoštas, bet dar neįjungtas.",
+    "gatedBody": "Šiuo metu nepasiekiama.",
     "connectionsHeading": "Ryšiai",
     "inviteEmailLabel": "Kliento el. paštas",
     "inviteButton": "Pakviesti klientą",
@@ -11975,7 +12025,7 @@
     "title": "Personalo agentūros",
     "subtitle": "Priimkite personalo agentūrą, su kuria norite dirbti, pasidalinkite konkrečiais poreikiais ir peržiūrėkite jos pasiūlytus kandidatus savo žvalgybos puslapyje.",
     "gatedHeading": "Paruošta — laukiama savininko aktyvavimo",
-    "gatedBody": "Agentūros tiltas paruoštas, bet dar neįjungtas.",
+    "gatedBody": "Šiuo metu nepasiekiama.",
     "invitesHeading": "Ryšio kvietimai",
     "noInvites": "Laukiančių kvietimų nėra.",
     "acceptButton": "Priimti",
@@ -13770,7 +13820,7 @@
       "capacityIntro": "Komanda {from} – {to} ({count} žm.):",
       "capacityFree": "laisvas",
       "capacityBusyUntil": "nelaisvas iki {date}",
-      "capacityAbsencesUnknown": "Atostogų duomenys šioje aplinkoje neprieinami — rodomas tik sąrašas.",
+      "capacityAbsencesUnknown": "Šiuo metu nepasiekiama.",
       "capacityEmpty": "Komandoje kol kas nieko nėra — pakvieskite žmones.",
       "capacityUnavailable": "Komandos prieinamumo dabar nuskaityti nepavyko.",
       "chipAddTask": "Pridėti užduotį",
@@ -13846,9 +13896,9 @@
       "confirmChip": "Patvirtinti: {name} · {date}",
       "confirmDone": "Patvirtinta: {name} — įgūdžių patvirtinta: {count}.",
       "confirmNone": "Laukiančių darbo įrašų nėra.",
-      "confirmNotEnabled": "Darbų peržiūra dar neįjungta: {names}. Įjungę matysite jų įrašus čia.",
+      "confirmNotEnabled": "Šiuo metu nepasiekiama.",
       "confirmEnableChip": "Įjungti peržiūrą: {name}",
-      "confirmEnabled": "Peržiūra įjungta: {name} — jo darbo įrašai laukia jūsų patvirtinimo.",
+      "confirmEnabled": "Šiuo metu nepasiekiama.",
       "confirmFailed": "Patvirtinti nepavyko.",
       "confirmUnavailable": "Patvirtinimų dabar nuskaityti nepavyko.",
       "chipOpenInbox": "Atidaryti patvirtinimų dėžutę",
@@ -13910,6 +13960,7 @@
       },
       "capacityCommittedUntil": "jau užimtas iki {date}",
       "capacityCommittedToUntil": "dirba {what} iki {date}",
+      "capacityCommittedUndated": "dirba {what}, datos nenurodytos",
       "capacityCommitmentsUnknown": "Nepavyko perskaityti rezervacijų ir priskyrimų projektams, todėl kaip laisvas rodomas žmogus gali būti jau užimtas.",
       "workspaceUnnamedCompany": "Įmonė be pavadinimo",
       "workspaceUnnamedAgency": "Agentūra be pavadinimo",
@@ -13993,7 +14044,7 @@
     "findWork": {
       "emptyState": "Šiuo metu neradau aktyvių pasiūlymų, atitinkančių tavo kriterijus. Pranešimų mechanizmo dar nėra, todėl nežadu pranešti — paklausk vėliau arba papildyk profilį, kad atitiktų daugiau poreikių.",
       "blockedNoWorker": "Kad ieškočiau darbo, įjunk darbuotojo vaidmenį paskyros nustatymuose.",
-      "blockedNoAccess": "Darbo pasiūlymų sąrašas dar neįjungtas šioje aplinkoje. Kai bus, parodysiu tikrus poreikius.",
+      "blockedNoAccess": "Šiuo metu nepasiekiama.",
       "fitStrong": "Stiprus atitikimas",
       "fitPossible": "Galimas atitikimas",
       "fitWeak": "Silpnas atitikimas",
@@ -14210,13 +14261,13 @@
       },
       "candidatesError": "Nepavyko nuskaityti kandidatų.",
       "candidatesNoCompany": "Šiuo metu veikiate ne įmonės vardu, todėl čia nėra įmonės poreikių, kuriems ieškotume žmonių.",
-      "candidatesBlocked": "Šioje aplinkoje tai kol kas nepasiekiama.",
+      "candidatesBlocked": "Šiuo metu nepasiekiama.",
       "candidatesNoDemands": "Jūsų įmonė dar neaprašė poreikio.",
       "candidatesPickDemand": "Kuriam poreikiui ieškote žmonių?",
       "candidatesUnstructuredBadge": "nestruktūruotas",
       "candidatesBackToDemands": "Atgal į poreikius",
       "candidatesNotFound": "Toks poreikis nerastas arba jis ne jūsų.",
-      "candidatesNeedsMigration": "Kandidatų šaltinis šioje aplinkoje nepasiekiamas.",
+      "candidatesNeedsMigration": "Šiuo metu nepasiekiama.",
       "candidatesNotStructured": "Iš šio poreikio kol kas nieko negalima išvesti, todėl nėra su kuo lyginti. Tai nėra tas pats, kas „niekas netinka“.",
       "candidatesRetrievalCapped": "Žmonių buvo pasiekiama daugiau, nei šįkart spėjome peržiūrėti, todėl šis sąrašas nėra visa pasiūla.",
       "candidatesEmpty": "Šiuo metu matomoje pasiūloje šiam poreikiui tinkančių žmonių nėra.",
@@ -14270,7 +14321,7 @@
       "bookingNote": "Pastaba",
       "projectError": "Nepavyko nuskaityti projekto.",
       "projectNoCompany": "Šiuo metu veikiate ne įmonės vardu, todėl čia įmonės projektų nėra.",
-      "projectBlocked": "Šioje aplinkoje tai kol kas nepasiekiama.",
+      "projectBlocked": "Šiuo metu nepasiekiama.",
       "projectEmpty": "Projektų kol kas nėra.",
       "projectPick": "Kuris projektas?",
       "projectBackToList": "Atgal į projektus",
@@ -14297,7 +14348,7 @@
       "pulseNextNoWork": "Toliau: darbo įrašų dar nėra — kai žmonės užfiksuos darbą, jis atsiras čia ir jų CV.",
       "projectStages": "Etapai",
       "projectStagesEmpty": "Šiam projektui etapų dar neįvesta.",
-      "projectStagesUnavailable": "Šioje aplinkoje etapų nuskaityti negalima, todėl nerodome tuščio sąrašo, tarsi jų nebūtų.",
+      "projectStagesUnavailable": "Šiuo metu nepasiekiama.",
       "projectStageMarkDone": "Pažymėti atliktu",
       "projectAssignWorker": "Priskirti darbuotoją",
       "projectOpenOperations": "Atidaryti projekto valdymą",
@@ -14318,14 +14369,14 @@
       "projectAlreadyInState": "Projektas jau yra tokios būsenos. Niekas nepakeista.",
       "projectInvalidTransition": "Šio būsenos pakeitimo atlikti negalima.",
       "projectNotAuthorized": "Šio projekto būsenos keisti negalite.",
-      "projectNeedsMigration": "Projekto būsenos keitimai šioje aplinkoje dar nepasiekiami.",
+      "projectNeedsMigration": "Šiuo metu nepasiekiama.",
       "projectConflict": "Projektas pasikeitė, kol jį žiūrėjote. Atidarykite jį iš naujo.",
       "engagements": {
         "title": "Darbo santykiai"
       },
       "engagementsError": "Nepavyko įkelti darbo santykių.",
       "engagementsBlocked": "Šiuo metu darbo santykių perskaityti nepavyksta. Tai nereiškia, kad jų nėra.",
-      "engagementsNeedsMigration": "Darbo santykiai šioje aplinkoje dar neprieinami.",
+      "engagementsNeedsMigration": "Šiuo metu nepasiekiama.",
       "engagementsEmptyCompany": "Ši organizacija neturi įrašytų darbo santykių.",
       "engagementsEmptyWorker": "Neturite įrašytų darbo santykių.",
       "engagementsUnavailable": "Šis darbo santykis jums neprieinamas.",
@@ -15024,7 +15075,7 @@
     "page": {
       "title": "Patirtys",
       "lead": "Subjektyvios patirtys iš realių, užbaigtų darbo sąveikų. Patirtis yra vieno žmogaus pasakojimas — ne faktas apie kito profesinį gebėjimą.",
-      "unavailableTitle": "Patirtys šioje aplinkoje dar neveikia.",
+      "unavailableTitle": "Šiuo metu nepasiekiama.",
       "unavailableBody": "Niekas nebuvo išsaugota. Galite dirbti kaip įprasta.",
       "aboutMe": "Apie mane",
       "aboutMeEmpty": "Apie jus dar nėra paskelbtų patirčių.",
@@ -15039,7 +15090,7 @@
       "caution": "Neigiamų patirčių daugiau nei teigiamų — verta pasidomėti atidžiau prieš sprendžiant.",
       "meaning": "Tai subjektyvūs realių sąveikų pasakojimai. Tai nėra reitingas, balas ar platformos nuosprendis.",
       "notEnough": "Paskelbtų patirčių dar per mažai.",
-      "unavailable": "Patirčių skaičiai šioje aplinkoje dar neprieinami."
+      "unavailable": "Šiuo metu nepasiekiama."
     },
     "sentiment": {
       "positive": "Teigiama patirtis",
@@ -15064,7 +15115,7 @@
       "rejected": "Atmesta",
       "title": "Patirčių moderavimas",
       "lead": "Kiekviena patirtis prieš paskelbimą praeina moderavimą. Kiekvienam sprendimui reikia priežasties ir jis įrašomas į audito istoriją.",
-      "unavailable": "Patirčių sritis šioje aplinkoje neprieinama.",
+      "unavailable": "Šiuo metu nepasiekiama.",
       "queueTitle": "Laukia moderavimo",
       "queueEmpty": "Moderavimo nelaukia nė viena patirtis.",
       "disputeQueueTitle": "Ginčai",
@@ -15081,7 +15132,7 @@
         "removed": "Pašalinti iš viešo rodymo"
       },
       "errors": {
-        "needs_migration": "Patirtys šioje aplinkoje dar neveikia. Niekas nebuvo išsaugota.",
+        "needs_migration": "Šiuo metu nepasiekiama. Nieko neišsaugota.",
         "not_authenticated": "Pirma prisijunkite.",
         "not_eligible": "Aprašyti galima tik tą sąveiką, kurioje realiai dalyvavote ir kuri jau baigta.",
         "duplicate_for_interaction": "Šiai sąveikai patirtį jau pateikėte.",
@@ -15111,7 +15162,7 @@
       "sending": "Atidaroma…",
       "openedNote": "Ginčas atidarytas. Patirtis lieka paskelbta, kol moderatorius priims sprendimą.",
       "errors": {
-        "needs_migration": "Patirtys šioje aplinkoje dar neveikia. Niekas nebuvo išsaugota.",
+        "needs_migration": "Šiuo metu nepasiekiama. Nieko neišsaugota.",
         "not_authenticated": "Pirma prisijunkite.",
         "not_eligible": "Aprašyti galima tik tą sąveiką, kurioje realiai dalyvavote ir kuri jau baigta.",
         "duplicate_for_interaction": "Šiai sąveikai patirtį jau pateikėte.",
@@ -15135,7 +15186,7 @@
       "sending": "Siunčiama…",
       "submitted": "Atsakymas pateiktas. Jis taps matomas po moderavimo.",
       "errors": {
-        "needs_migration": "Patirtys šioje aplinkoje dar neveikia. Niekas nebuvo išsaugota.",
+        "needs_migration": "Šiuo metu nepasiekiama. Nieko neišsaugota.",
         "not_authenticated": "Pirma prisijunkite.",
         "not_eligible": "Aprašyti galima tik tą sąveiką, kurioje realiai dalyvavote ir kuri jau baigta.",
         "duplicate_for_interaction": "Šiai sąveikai patirtį jau pateikėte.",
@@ -15169,7 +15220,7 @@
       "submitted": "Patirtis pateikta.",
       "awaitingModeration": "Ji laukia moderavimo ir dar nėra paskelbta.",
       "errors": {
-        "needs_migration": "Patirtys šioje aplinkoje dar neveikia. Niekas nebuvo išsaugota.",
+        "needs_migration": "Šiuo metu nepasiekiama. Nieko neišsaugota.",
         "not_authenticated": "Pirma prisijunkite.",
         "not_eligible": "Aprašyti galima tik tą sąveiką, kurioje realiai dalyvavote ir kuri jau baigta.",
         "duplicate_for_interaction": "Šiai sąveikai patirtį jau pateikėte.",
@@ -15320,7 +15371,7 @@
   "approvals": {
     "title": "Tvirtinimai",
     "intro": "Tvirtinimo prašymai jūsų organizacijose: pateikite prašymą, priimkite jūsų laukiančius sprendimus ir sekite kiekvieną etapą.",
-    "unavailable": "Tvirtinimai šioje aplinkoje dar neįjungti. Niekas neprarasta — ši sritis atsivers, kai tvirtinimų saugykla bus peržiūrėta ir įdiegta.",
+    "unavailable": "Šiuo metu nepasiekiama.",
     "honestNote": "Sprendimai lieka produkto viduje. Niekam nieko nesiunčiame el. paštu — žmonės atnaujinimus mato šiame puslapyje ir pranešimų varpelyje.",
     "loadError": "Dalies tvirtinimų duomenų dabar nepavyko įkelti. Tai, ką matote, yra tikra, bet gali būti nepilna.",
     "inbox": {
@@ -15459,7 +15510,7 @@
       "not_pending": "Šis prašymas nebėra atviras.",
       "invalid": "Patikrinkite įvestas reikšmes ir bandykite dar kartą.",
       "invalid_delegate": "Tokio kolegos šioje organizacijoje rasti nepavyko.",
-      "needs_migration": "Tvirtinimai šioje aplinkoje dar neįjungti. Niekas nebuvo išsaugota.",
+      "needs_migration": "Šiuo metu nepasiekiama. Nieko neišsaugota.",
       "not_authorized": "Jums neleidžiama to daryti.",
       "not_found": "Prašymas nerastas.",
       "limit_reached": "Pasiektas atvirų įrašų limitas. Pirmiausia užbaikite esamus.",
@@ -15475,7 +15526,7 @@
     "tpl": {
       "title": "Šablonų konfigūracija",
       "intro": "Nustatykite, kas ką tvirtina kiekvienoje jūsų organizacijoje. Visi pakeitimai galioja tik naujiems prašymams.",
-      "unavailable": "Šablonų konfigūracija paruošta, bet šioje aplinkoje dar neįjungta.",
+      "unavailable": "Šiuo metu nepasiekiama.",
       "runningImmuneNote": "Naujos versijos paskelbimas keičia tik vėliau pradėtus prašymus. Jau vykstantis prašymas išlaiko tuos etapus ir tuos žmones, su kuriais prasidėjo.",
       "templateCount": "Šablonų: {count}",
       "installTitle": "Įdiegti numatytąjį rinkinį",
@@ -15533,7 +15584,7 @@
   "timesheets": {
     "title": "Darbo laiko žiniaraščiai",
     "intro": "Laikotarpio valandų dokumentai, sudaromi iš jūsų darbo žurnalo. Valandos visada taisomos žurnale; žiniaraštis — užfiksuota kopija, siunčiama tvirtinti.",
-    "needsMigration": "Žiniaraščiai šioje aplinkoje dar neįjungti.",
+    "needsMigration": "Šiuo metu nepasiekiama.",
     "readError": "Dalies žiniaraščių duomenų šiuo metu nepavyko įkelti.",
     "noLines": "Šiame laikotarpyje dar nėra užrašytų valandų. Įrašykite darbą į žurnalą ir atnaujinkite.",
     "linesTitle": "Eilutės ({count})",
@@ -15611,7 +15662,7 @@
       "no_approvers": "Pagal šios organizacijos šabloną tvirtintojų rasti nepavyko.",
       "not_published": "Tvirtinimo šablonas dar nepaskelbtas.",
       "invalid": "Užklausa buvo netinkama.",
-      "needs_migration": "Žiniaraščiai šioje aplinkoje dar neįjungti.",
+      "needs_migration": "Šiuo metu nepasiekiama.",
       "not_authorized": "Jums to daryti neleidžiama.",
       "not_found": "Žiniaraštis nerastas.",
       "limit_reached": "Per daug atvirų žiniaraščių — pirmiausia pateikite arba sutvarkykite esamus.",
@@ -15641,7 +15692,7 @@
     "archivedBadge": "Archyvuota",
     "empty": "Objektų dar nėra. Pridėkite vietas, kuriose vyksta jūsų darbai.",
     "gatedHeading": "Paruošta — laukiama įjungimo",
-    "gatedBody": "Objektai paruošti, bet dar neįjungti. Įjungimas yra savininko sprendimas.",
+    "gatedBody": "Šiuo metu nepasiekiama.",
     "errorLabel": "Nepavyko išsaugoti. Bandykite dar kartą.",
     "notAuthorizedLabel": "Objektus keisti gali tik vadovai.",
     "savedLabel": "Išsaugota."
@@ -15649,7 +15700,7 @@
   "requests": {
     "title": "Prašymai",
     "intro": "Paprašykite darbdavio ko nors ir sekite, kas vyksta toliau. Kiekvienas prašymas keliauja į jūsų įmonės nustatytą tvirtinimo eigą.",
-    "unavailable": "Prašymai šioje aplinkoje dar neįjungti. Niekas neprarasta — ši dalis atsivers, kai prašymų atnaujinimas bus peržiūrėtas ir įdiegtas.",
+    "unavailable": "Šiuo metu nepasiekiama.",
     "honestNote": "Prašymą sprendžia tikri jūsų įmonės žmonės. Niekas nepatvirtinama automatiškai ir niekas nesiunčiama už šio produkto ribų.",
     "notice": {
       "created": "Prašymas pateiktas. Atsakingi žmonės paprašyti jį peržiūrėti.",
@@ -15662,7 +15713,7 @@
       "not_published": "Prašymų tvirtinimo eiga dar neparuošta.",
       "not_pending": "Šis prašymas nebelaukia sprendimo — žemiau matote dabartinę jo būseną.",
       "invalid": "Patikrinkite duomenis ir bandykite dar kartą.",
-      "needs_migration": "Dar neprieinama — prašymų atnaujinimas šioje aplinkoje neįdiegtas.",
+      "needs_migration": "Šiuo metu nepasiekiama.",
       "not_authorized": "Jums to daryti neleidžiama.",
       "not_found": "Nerasta.",
       "limit_reached": "Per daug atvirų prašymų. Pirmiausia palaukite sprendimų dėl esamų.",
@@ -15762,7 +15813,7 @@
     "relationshipNote": "Aukščiau esantis kontraktų sąrašas yra ankstesnis asmeninis komercinis registras — jis veikia toliau be pakeitimų. Naujos sutartys registruojamos čia.",
     "unavailable": "Sutarčių registro šiuo metu parodyti nepavyksta.",
     "needsOrgWorkspace": "Sutarčių registras veikia organizacijos darbo erdvėje. Persijunkite į savo organizaciją.",
-    "preparing": "Sutarčių registras paruoštas, bet šioje aplinkoje dar neįjungtas.",
+    "preparing": "Šiuo metu nepasiekiama.",
     "error": "Sutarčių registro nepavyko nuskaityti.",
     "empty": "Sutarčių dar neužregistruota.",
     "emptyFiltered": "Nė viena sutartis neatitinka šių filtrų.",
@@ -15865,14 +15916,14 @@
       "not_found": "Įrašas nerastas.",
       "not_allowed": "Tai gali atlikti tik organizacijos savininkas arba administratorius.",
       "limit_reached": "Pasiektas registro limitas.",
-      "needs_migration": "Sutarčių registras šioje aplinkoje dar neįjungtas.",
+      "needs_migration": "Šiuo metu nepasiekiama.",
       "error": "Įvyko klaida. Niekas nebuvo išsaugota."
     }
   },
   "lifecycle": {
     "title": "Darbo santykių eiga",
     "intro": "Įdarbinimas, bandomasis laikotarpis, pokyčiai, išleidimas ir pabaiga šios organizacijos darbo įrašams — su kontroliniais sąrašais ir pilna istorija.",
-    "unavailable": "Darbo santykių eiga šioje aplinkoje dar neįjungta. Niekas neprarasta — ši sritis atsivers, kai saugykla bus peržiūrėta ir įdiegta.",
+    "unavailable": "Šiuo metu nepasiekiama.",
     "honestNote": "Viskas čia lieka produkte. Pažymėjus žingsnį atliktu, įrašoma tik kas, ką ir kada patvirtino — niekur nieko nesiunčiama.",
     "loadError": "Dalies eigos duomenų dabar nepavyko įkelti. Tai, ką matote, tikra, bet gali būti nepilna.",
     "stage": {
@@ -16003,7 +16054,7 @@
       "last_owner": "Paskutinio savininko įrašo baigti negalima — pirmiau paskirkite kitą savininką.",
       "limit_reached": "Pasiekta šios organizacijos riba.",
       "invalid": "Netinkami duomenys.",
-      "needs_migration": "Ši galimybė šioje aplinkoje dar neįjungta.",
+      "needs_migration": "Šiuo metu nepasiekiama.",
       "not_authorized": "Neturite teisės šiam veiksmui.",
       "not_found": "Įrašas neberastas.",
       "error": "Nepavyko — bandykite dar kartą."
@@ -16012,7 +16063,7 @@
   "procurement": {
     "title": "Pirkimai",
     "intro": "Paprašykite medžiagų ar paslaugų, užsirašykite tiekėjų pasiūlymus ir pažymėkite, kas pasirinkta. Niekas čia nesusisiekia su tiekėju ir nieko neužsako — tai jūsų įrašai.",
-    "needsMigration": "Pirkimų prašymai šioje aplinkoje dar neįjungti.",
+    "needsMigration": "Šiuo metu nepasiekiama.",
     "readError": "Pirkimų prašymų nepavyko įkelti. Bandykite dar kartą.",
     "empty": "Pirkimų prašymų dar nėra.",
     "noOffers": "Tiekėjų pasiūlymų dar neužrašyta.",
@@ -16071,7 +16122,7 @@
       "unlinked": "Sąskaitos susiejimas pašalintas.",
       "cancelled": "Pirkimo prašymas atšauktas.",
       "invalid": "Patikrinkite įvestus duomenis.",
-      "needs_migration": "Pirkimų prašymai šioje aplinkoje dar neįjungti.",
+      "needs_migration": "Šiuo metu nepasiekiama.",
       "not_authorized": "Šio veiksmo atlikti negalite.",
       "not_found": "Šis pirkimo prašymas nerastas.",
       "not_editable": "Šioje būsenoje šis žingsnis negalimas.",
@@ -16090,7 +16141,7 @@
   "trips": {
     "title": "Komandiruotės",
     "intro": "Paprašykite komandiruotės, gaukite patvirtinimą ir laikykite jos išlaidas vienoje vietoje. Niekas čia neužsako kelionių ir nemoka pinigų — tai jūsų įrašai.",
-    "needsMigration": "Komandiruotės šioje aplinkoje dar neįjungtos.",
+    "needsMigration": "Šiuo metu nepasiekiama.",
     "readError": "Komandiruočių nepavyko įkelti. Bandykite dar kartą.",
     "empty": "Komandiruočių dar nėra.",
     "orgHeading": "Jūsų valdomų žmonių komandiruotės",
@@ -16143,7 +16194,7 @@
       "unlinked": "Įrašas pašalintas iš komandiruotės.",
       "invalid": "Patikrinkite įvestus duomenis.",
       "invalid_dates": "Patikrinkite komandiruotės datas.",
-      "needs_migration": "Komandiruotės šioje aplinkoje dar neįjungtos.",
+      "needs_migration": "Šiuo metu nepasiekiama.",
       "not_authorized": "Šio veiksmo atlikti negalite.",
       "not_found": "Ši komandiruotė nerasta.",
       "not_editable": "Šioje būsenoje šis žingsnis negalimas.",
@@ -16160,7 +16211,7 @@
     "title": "Mokymai ir pažymėjimai",
     "intro": "Kursai, kuriuos organizacija prašo baigti, ir po jų gaunami pažymėjimai.",
     "evidenceNote": "Pažymėjimas rodo, kad kursai baigti. Jis nesako, kaip gerai žmogus dirba — tai lieka darbo įrašuose ir vadovo patvirtinimuose.",
-    "notAvailable": "Mokymai šioje erdvėje dar neįjungti.",
+    "notAvailable": "Šiuo metu nepasiekiama.",
     "status": {
       "assigned": "Reikia atlikti",
       "completed": "Atlikta",
@@ -16222,7 +16273,7 @@
       "invalid_file": "To failo jūsų organizacijoje nėra.",
       "invalid_skill": "Toks gebėjimas nerastas.",
       "invalid_state": "Šiame žingsnyje to padaryti negalima.",
-      "needs_migration": "Mokymai šioje erdvėje dar neįjungti.",
+      "needs_migration": "Šiuo metu nepasiekiama.",
       "not_authorized": "Neturite tam teisių.",
       "not_found": "Nerasta.",
       "limit_reached": "Čia jau per daug įrašų.",
@@ -16233,7 +16284,7 @@
     "title": "Pokalbiai apie tobulėjimą",
     "intro": "Įrašytas dviejų įvardytų žmonių pokalbis apie darbą ir tai, kas toliau.",
     "noScoreNote": "Čia nėra jokių balų, įvertinimų ar reitingų — taip sukurta sąmoningai. Viskas žemiau yra arba įrašytas faktas, arba nuoroda į tikrą darbą, arba vieno žmogaus asmeninė nuomonė su aiškiu užrašu.",
-    "notAvailable": "Pokalbiai apie tobulėjimą šioje erdvėje dar neįjungti.",
+    "notAvailable": "Šiuo metu nepasiekiama.",
     "empty": "Kol kas jūsų neliečia nė vienas pokalbis.",
     "cycles": {
       "heading": "Laikotarpiai",
@@ -16299,7 +16350,7 @@
       "invalid_subject": "To žmogaus jūsų organizacijoje nėra.",
       "invalid_reviewer": "Tas žmogus negali vesti pokalbio.",
       "invalid_reference": "Ta nuoroda nerodo į tikrą šio žmogaus darbą.",
-      "needs_migration": "Pokalbiai apie tobulėjimą šioje erdvėje dar neįjungti.",
+      "needs_migration": "Šiuo metu nepasiekiama.",
       "not_authorized": "Neturite tam teisių.",
       "not_found": "Nerasta.",
       "limit_reached": "Čia jau per daug įrašų.",
@@ -16310,7 +16361,7 @@
     "title": "Vadovybės sprendimai",
     "intro": "Kas buvo pateikta vadovybei, kas nuspręsta, kas atsakingas ir iki kada.",
     "engineNote": "Balsuojama aukščiau esančiame patvirtinimų sąraše: šablonas, kuriam reikia visų tvirtintojų, yra vieningas balsavimas, o tas, kuriam užtenka bet kurio, nusprendžiamas pirmu atsakymu. Čia balsai neskaičiuojami.",
-    "notAvailable": "Vadovybės sprendimai šioje erdvėje dar neįjungti.",
+    "notAvailable": "Šiuo metu nepasiekiama.",
     "empty": "Sprendimų dar nėra.",
     "form": {
       "title": "Klausimas",
@@ -16363,7 +16414,7 @@
       "invalid_document": "To dokumento jūsų organizacijoje nėra.",
       "invalid_task": "Ta užduotis ne jūsų.",
       "invalid_responsible": "To žmogaus jūsų organizacijoje nėra.",
-      "needs_migration": "Vadovybės sprendimai šioje erdvėje dar neįjungti.",
+      "needs_migration": "Šiuo metu nepasiekiama.",
       "not_authorized": "Neturite tam teisių.",
       "not_found": "Nerasta.",
       "limit_reached": "Čia jau per daug įrašų.",
@@ -16512,7 +16563,7 @@
       "generic": "Nepavyko išsaugoti. Bandykite dar kartą."
     },
     "states": {
-      "needsMigration": "Ši funkcija dar neįjungta šioje duomenų bazėje.",
+      "needsMigration": "Šiuo metu nepasiekiama.",
       "noCompany": "Pasirinkite įmonės darbo sritį.",
       "noObjects": "Šiai dienai dar nėra objektų, prie kurių priskirti valandas.",
       "error": "Nepavyko įkelti dienos duomenų."
@@ -16582,7 +16633,7 @@
         "duplicatesFound": "Identiškų esamų įrašų: {count}. Nieko neįrašyta — pažymėkite patvirtinimą, jei vis tiek norite įrašyti.",
         "noRows": "Nėra ką įrašyti.",
         "tooManyRows": "Per daug eilučių vienam importui — padalinkite failą.",
-        "needsMigration": "Ši funkcija šioje duomenų bazėje dar neįjungta.",
+        "needsMigration": "Šiuo metu nepasiekiama.",
         "notAuthorized": "Negalite įrašyti šių valandų.",
         "generic": "Nepavyko apdoroti. Bandykite dar kartą."
       }
@@ -17242,7 +17293,7 @@
       "notAMember": "Nesate tos organizacijos narys.",
       "chooseOrganization": "Valdote daugiau nei vieną organizaciją. Pasirinkite, kurios vardu veikiate.",
       "notAuthorized": "Šioje organizacijoje neturite vaidmens, leidžiančio matyti jos žmones.",
-      "needsMigration": "Žmonių saugykla šioje aplinkoje dar neįjungta.",
+      "needsMigration": "Šiuo metu nepasiekiama.",
       "unavailable": "Žmonių sąrašo nepavyko perskaityti. Tai nėra tas pat, kas tuščias sąrašas — pabandykite netrukus."
     },
     "offer": {
@@ -17266,7 +17317,7 @@
     "detected": "Faile {file} rasta žmonių: {count}",
     "duplicates": "Faile pasikartoja: {count}",
     "errFailed": "Nepavyko, ir niekas neįrašyta. Pabandykite po akimirkos.",
-    "errNeedsMigration": "Šis ryšys šioje aplinkoje dar neprieinamas.",
+    "errNeedsMigration": "Šiuo metu nepasiekiama.",
     "errNoName": "Jokiame šio failo stulpelyje nėra vardų. Pridėkite antraštę, pvz. „Vardas“, ir prisekite dar kartą.",
     "errNotAuthorized": "Šios organizacijos žmonių pridėti negalite.",
     "errNothing": "Iš šio failo nieko nepavyko perskaityti.",
@@ -17495,7 +17546,7 @@
       "invalid_role": "Netinkama rolė.",
       "last_owner": "Paskutinis savininkas negali pasitraukti — pirmiau paskirkite kitą savininką.",
       "no_workspace": "Pirmiausia pasirinkite organizacijos erdvę.",
-      "needs_migration": "Ši funkcija dar neįjungta šioje aplinkoje.",
+      "needs_migration": "Šiuo metu nepasiekiama.",
       "invalid": "Netinkami duomenys.",
       "error": "Nepavyko — bandykite dar kartą."
     },
@@ -17549,7 +17600,7 @@
     "cancel": "Atšaukti",
     "doneSelf": "Išėjote iš šios komandos.",
     "doneOwner": "Pašalinta iš sąrašo.",
-    "needsMigration": "Ryšio nutraukimas šioje aplinkoje dar neįjungtas.",
+    "needsMigration": "Šiuo metu nepasiekiama.",
     "notFound": "Šio ryšio nebėra arba negalite jo nutraukti.",
     "failed": "Nepavyko nutraukti ryšio. Bandykite dar kartą.",
     "readFailed": "Jūsų komandų dabar nepavyko nuskaityti. Tai nereiškia, kad jų neturite."

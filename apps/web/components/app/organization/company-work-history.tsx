@@ -272,7 +272,7 @@ export async function CompanyPlaceHistory({
           ).map(([k, present]) => (
             <div key={k} className="flex flex-col">
               <dt className="font-mono text-meta uppercase tracking-label text-text-muted">{t(`facts.${k}`)}</dt>
-              <dd className="text-text-secondary">{present ? t("facts.linked") : t("facts.notInSource")}</dd>
+              <dd className="text-text-secondary">{k === "address" && place.scope.addressText ? place.scope.addressText : present ? t("facts.linked") : t("facts.notInSource")}</dd>
             </div>
           ))}
         </dl>

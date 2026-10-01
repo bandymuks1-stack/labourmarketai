@@ -1,11 +1,14 @@
 "use client";
 
+import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
+
 import { useActionState, useTransition, useState } from "react";
 
 import {
   createProjectAction,
   assignWorkerToProjectAction,
   endAssignmentAction,
+  recordAssignmentDecisionAction,
   type ProjectActionResult,
 } from "@/lib/projects/actions";
 import type { ManagedProject, ProjectAssignment } from "@/lib/projects/projects";
@@ -76,6 +79,12 @@ export interface ProjectManagerLabels {
   reservationNotBlocking: string;
   reservationUnknown: string;
   reservationSource: Record<ReservationSource, string>;
+  /** The conflict flow's decision step: who is confirmed free, swap, undo. */
+  reservationAlternativesTitle: string;
+  reservationSwap: string;
+  reservationUndo: string;
+  reservationKeep: string;
+  reservationDecided: string;
 }
 
 type ProjectWithAssignments = ManagedProject & {
@@ -127,9 +136,20 @@ function resultError(
 function ReservationNotice({
   verdict,
   labels,
+  alternatives = [],
+  busy = false,
+  onSwap,
+  onUndo,
+  onKeep,
 }: {
   verdict: ReservationVerdict;
   labels: ProjectManagerLabels;
+  /** Colleagues CONFIRMED free on the same dates (server-verified). */
+  alternatives?: { profileId: string; name: string }[];
+  busy?: boolean;
+  onSwap?: (profileId: string) => void;
+  onUndo?: () => void;
+  onKeep?: () => void;
 }) {
   if (verdict.state === "clear") return null;
   if (verdict.state === "unknown") {
@@ -158,6 +178,53 @@ function ReservationNotice({
         ))}
       </ul>
       <p className="text-xs text-text-muted">{labels.reservationNotBlocking}</p>
+      {alternatives.length > 0 && onSwap ? (
+        <div className="flex flex-col gap-1" data-testid="assign-reservation-alternatives">
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {labels.reservationAlternativesTitle}
+          </p>
+          <ul className="flex flex-col gap-1">
+            {alternatives.map((a) => (
+              <li key={a.profileId} className="flex items-center justify-between gap-3">
+                <span className="min-w-0 truncate text-xs text-text-primary">{a.name}</span>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => onSwap(a.profileId)}
+                  data-testid="assign-reservation-swap"
+                  className="min-h-8 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-semibold text-text-secondary hover:border-brand-blue"
+                >
+                  {labels.reservationSwap}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      <div className="flex flex-wrap gap-2">
+        {onKeep ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={onKeep}
+            data-testid="assign-reservation-keep"
+            className="min-h-8 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-semibold text-text-secondary hover:border-brand-blue"
+          >
+            {labels.reservationKeep}
+          </button>
+        ) : null}
+        {onUndo ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={onUndo}
+            data-testid="assign-reservation-undo"
+            className="min-h-8 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-semibold text-text-secondary hover:border-brand-orange"
+          >
+            {labels.reservationUndo}
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -186,6 +253,46 @@ export function ProjectAssignmentManager({
     FormData
   >(assignWorkerToProjectAction, null);
   const [endPending, startEnd] = useTransition();
+  // The human decision on a collision, keyed to the result it answers so a new
+  // assignment never inherits the previous decision.
+  const [decision, setDecision] = useState<{ for: unknown } | null>(null);
+  const [deciding, startDeciding] = useTransition();
+  const decided = decision !== null && decision.for === assignState;
+  const undoAssignment = () => {
+    const a = assignState?.ok ? assignState.assigned : undefined;
+    if (!a) return;
+    startDeciding(async () => {
+      const r = await endAssignmentAction(a.projectId, a.workerProfileId);
+      if (r.ok) {
+        await recordAssignmentDecisionAction(a.projectId, a.workerProfileId, "undone");
+        setDecision({ for: assignState });
+      }
+    });
+  };
+  const keepAssignment = () => {
+    const a = assignState?.ok ? assignState.assigned : undefined;
+    if (!a) return;
+    startDeciding(async () => {
+      await recordAssignmentDecisionAction(a.projectId, a.workerProfileId, "kept");
+      setDecision({ for: assignState });
+    });
+  };
+  const swapAssignment = (profileId: string) => {
+    const a = assignState?.ok ? assignState.assigned : undefined;
+    if (!a) return;
+    startDeciding(async () => {
+      const ended = await endAssignmentAction(a.projectId, a.workerProfileId);
+      if (!ended.ok) return;
+      const fd = new FormData();
+      fd.set("project_id", a.projectId);
+      fd.set("worker_profile_id", profileId);
+      const r = await assignWorkerToProjectAction(null, fd);
+      if (r.ok) {
+        await recordAssignmentDecisionAction(a.projectId, a.workerProfileId, "swapped");
+        setDecision({ for: assignState });
+      }
+    });
+  };
   const [ended, setEnded] = useState<Set<string>>(new Set());
   const onTeam = new Set(workers.map((w) => w.profileId));
   const engagementOnly = engagementWorkers.filter((w) => !onTeam.has(w.workerProfileId));
@@ -267,13 +374,25 @@ export function ProjectAssignmentManager({
             <button type="submit" disabled={assigning} className={primary}>
               {assigning ? labels.sending : labels.assignSubmit}
             </button>
-            {assignState?.ok && (
+            {assignState?.ok && !decided && (
               <span className="text-xs text-state-success" role="status">{labels.assigned}</span>
             )}
             {resultError(assignState, labels)}
           </div>
-          {assignState?.ok && assignState.reservation ? (
-            <ReservationNotice verdict={assignState.reservation} labels={labels} />
+          {decided ? (
+            <p className="text-xs text-state-success" role="status" data-testid="assign-reservation-decided">
+              {labels.reservationDecided}
+            </p>
+          ) : assignState?.ok && assignState.reservation ? (
+            <ReservationNotice
+              verdict={assignState.reservation}
+              labels={labels}
+              alternatives={assignState.alternatives}
+              busy={deciding}
+              onSwap={swapAssignment}
+              onUndo={undoAssignment}
+              onKeep={keepAssignment}
+            />
           ) : null}
         </form>
       )}
@@ -296,16 +415,20 @@ export function ProjectAssignmentManager({
                 const key = `${p.id}:${a.workerProfileId}`;
                 const isEnded = ended.has(key);
                 return (
-                  <li key={key} className="flex items-center justify-between gap-3 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2" data-testid="roster-worker-chip">
-                    <span className="flex min-w-0 items-center gap-2.5">
-                      <span
-                        aria-hidden
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-ink-500 bg-ink-700 font-display text-meta font-bold text-text-primary"
-                      >
-                        {playerInitials(a.name)}
-                      </span>
-                      <span className={`truncate text-sm ${isEnded ? "text-text-muted line-through" : "text-text-primary"}`}>{a.name}</span>
-                    </span>
+                  <li key={key} className={`flex items-center justify-between gap-3 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2 ${isEnded ? "opacity-60" : ""}`} data-testid="roster-worker-chip">
+                    {/* The SAME identity the team list and the candidate read
+                        use, at row density; a photo only where the one photo
+                        rule gave the viewer one. */}
+                    <PersonIdentityCard
+                      variant="assignment"
+                      density="compact"
+                      testid={`assignment-identity-${key}`}
+                      name={a.name}
+                      initials={playerInitials(a.name)}
+                      avatarUrl={a.avatarUrl ?? null}
+                      professions={[]}
+                      meta={[]}
+                    />
                     {!isEnded && (
                       <button
                         type="button"

@@ -344,6 +344,13 @@ export async function readWorkersLabels() {
     coordinationHeading: tWorkers("coordinationHeading"),
     coordinationBody: tWorkers("coordinationBody"),
     coordinationNextAction: tWorkers("coordinationNextAction"),
+    identity: {
+      availability: {
+        available: tWorkers("identity.availability.available"),
+        busy: tWorkers("identity.availability.busy"),
+        unavailable: tWorkers("identity.availability.unavailable"),
+      },
+    },
     operations: {
       columnHeading: tWorkers("operations.columnHeading"),
       setupNote: tWorkers("operations.setupNote"),

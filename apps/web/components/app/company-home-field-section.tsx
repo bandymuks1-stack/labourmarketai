@@ -23,6 +23,8 @@ import type { AgencyClient } from "@/lib/agency/clients-model";
 import {
   COMPANY_HOME_BLOCK_LIMIT,
   attentionChipHref,
+  deriveNeedFit,
+  deriveOutlookGaps,
   selectOpenNeeds,
   type RiskSignal,
 } from "@/lib/company/company-home-field-model";
@@ -119,6 +121,11 @@ export async function CompanyHomeFieldSection({
           }))
           .filter((g) => g.count > 0)
       : [];
+
+  // ── capacity x needs: DERIVED from the SAME outlook the capacity box shows ──
+  const outlook = field.capacity.kind === "ok" ? (field.capacity.outlook ?? null) : null;
+  const gaps = deriveOutlookGaps(outlook);
+  const opportunityHref = "/dashboard/opportunities" as "/dashboard";
 
   // ── partners: only from reads that exist for this company; omitted otherwise ──
   const agencyRows = (partners.agencies ?? []).slice(0, COMPANY_HOME_BLOCK_LIMIT);
@@ -521,7 +528,21 @@ export async function CompanyHomeFieldSection({
             <CircleDashed className="h-4 w-4 text-state-amber" aria-hidden />
             {t("missing.heading")}
           </h3>
-          {openNeeds.length === 0 && docGaps.length === 0 ? (
+          {gaps && (gaps.firstEmptyWeek || gaps.unclear > 0) ? (
+            <ul className="flex flex-col gap-1" data-testid="company-home-capacity-gaps">
+              {gaps.firstEmptyWeek ? (
+                <li className={`rounded-control bg-ink-900/40 px-2.5 py-1.5 text-sm text-text-primary ${TONE_EDGE.risk}`}>
+                  {t("missing.noOneFrom", { date: day(gaps.firstEmptyWeek) ?? gaps.firstEmptyWeek })}
+                </li>
+              ) : null}
+              {gaps.unclear > 0 ? (
+                <li className={`rounded-control bg-ink-900/40 px-2.5 py-1.5 text-sm text-text-secondary ${TONE_EDGE.quiet}`}>
+                  {t("missing.unclear", { count: gaps.unclear })}
+                </li>
+              ) : null}
+            </ul>
+          ) : null}
+          {openNeeds.length === 0 && docGaps.length === 0 && !(gaps && gaps.firstEmptyWeek) ? (
             <p className="text-sm text-text-secondary">{t("missing.nothing")}</p>
           ) : null}
           {openNeeds.length > 0 ? (
@@ -542,6 +563,22 @@ export async function CompanyHomeFieldSection({
                       .filter(Boolean)
                       .join(" · ") || t(`missing.status.${n.status}`)}
                   </span>
+                  {n.status !== "draft" && n.status !== "approved" ? (
+                    <span className="text-meta italic text-text-muted" data-testid="company-home-need-fit">
+                      {(() => {
+                        const fit = deriveNeedFit(n.teamSize, outlook);
+                        return fit.kind === "fits"
+                          ? t("missing.fit.fits")
+                          : fit.kind === "some"
+                            ? t("missing.fit.some")
+                            : fit.kind === "from"
+                            ? t("missing.fit.from", { date: day(fit.date) ?? fit.date })
+                            : fit.kind === "short"
+                              ? t("missing.fit.short", { count: fit.short })
+                              : t("missing.fit.unknown");
+                      })()}
+                    </span>
+                  ) : null}
                   {n.status === "draft" ? (
                     <Link href={needsHref} className={`${ACTION_LINK} w-fit`} data-testid="company-home-need-continue">
                       {t("missing.continueDraft")}
@@ -584,6 +621,17 @@ export async function CompanyHomeFieldSection({
                 </li>
               ))}
             </ul>
+          ) : null}
+          {gaps && gaps.peakFree > 0 && gaps.peakFreeFrom && openNeeds.every((n) => deriveNeedFit(n.teamSize, outlook).kind !== "short") ? (
+            <div className="flex flex-col gap-1" data-testid="company-home-opportunity">
+              <span className="text-sm text-text-primary">
+                {t("missing.opportunity", { count: gaps.peakFree, date: day(gaps.peakFreeFrom) ?? gaps.peakFreeFrom })}
+              </span>
+              <Link href={opportunityHref} className={`${ACTION_LINK} w-fit`}>
+                {t("missing.opportunityCta")}
+                <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+              </Link>
+            </div>
           ) : null}
           <Link href={needsHref} className={`${PRIMARY_LINK} mt-auto w-fit`} data-testid="company-home-need-new">
             {t("missing.needsCta")}
