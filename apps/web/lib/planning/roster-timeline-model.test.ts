@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildRosterTimeline, mondayOf, shiftDay } from "./roster-timeline-model";
+import { buildRosterTimeline, groupTimelineByProject, mondayOf, shiftDay } from "./roster-timeline-model";
 
 const row = (workerId: string, commitments: { id: string; s: string; e: string | null }[]) => ({
   workerId,
@@ -77,6 +77,26 @@ describe("roster timeline", () => {
     });
     expect(t.people[0].name).toBe("Z");
     expect(t.people[0].bars[0].widthPct).toBeCloseTo((1 / 14) * 100);
+  });
+
+  it("regroups project bars by project and keeps the person's conflict", () => {
+    const t = buildRosterTimeline({
+      rows: [
+        row("a", [{ id: "p1", s: "2026-10-05", e: "2026-10-09" }]),
+        row("b", [
+          { id: "p1", s: "2026-10-06", e: "2026-10-07" },
+          { id: "p2", s: "2026-10-06", e: "2026-10-08" },
+        ]),
+      ],
+      absences: [],
+      from: "2026-10-05",
+      days: 28,
+      today: "2026-10-05",
+    });
+    const p1 = groupTimelineByProject(t).find((r) => r.projectId === "p1");
+    expect(p1?.bars.map((b) => b.workerId).sort()).toEqual(["a", "b"]);
+    expect(p1?.bars.find((b) => b.workerId === "b")?.conflict).toBe(true);
+    expect(p1?.bars.find((b) => b.workerId === "a")?.conflict).toBe(false);
   });
 
   it("date helpers are UTC and week-correct", () => {

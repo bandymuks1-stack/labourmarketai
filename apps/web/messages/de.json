@@ -10917,6 +10917,8 @@
       "denominatorNote": "Gezählt in Kalendertagen. Vertragsstunden werden nicht erfasst, dies ist also keine VZÄ-Kennzahl."
     },
     "rosterTimeline": {
+      "byPerson": "Personen",
+      "byProject": "Projekte",
       "prev": "Früher",
       "next": "Später",
       "today": "Heute",

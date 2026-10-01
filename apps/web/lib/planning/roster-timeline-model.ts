@@ -200,3 +200,57 @@ export function buildRosterTimeline(input: {
   const todayPct = todayIdx >= 0 && todayIdx < days ? ((todayIdx + 0.5) / days) * 100 : null;
   return { from, to, days, ticks, people, todayPct };
 }
+
+export interface ProjectTimelineBar {
+  readonly key: string;
+  readonly workerId: string;
+  readonly name: string | null;
+  readonly startDate: string;
+  readonly endDate: string;
+  readonly leftPct: number;
+  readonly widthPct: number;
+  /** This person has an overlapping commitment or absence elsewhere. */
+  readonly conflict: boolean;
+}
+
+export interface ProjectTimelineRow {
+  readonly projectId: string;
+  readonly label: string | null;
+  readonly bars: readonly ProjectTimelineBar[];
+}
+
+/**
+ * THE SAME TIMELINE, READ BY PROJECT — which project has whom, when. A pure
+ * regrouping of the per-person bars (no new read): each `project` bar becomes
+ * a person-bar on its project's row. The conflict flag stays the person's, so
+ * a project row shows that someone assigned to it is also somewhere else.
+ */
+export function groupTimelineByProject(timeline: RosterTimeline): ProjectTimelineRow[] {
+  const rows = new Map<string, { label: string | null; bars: ProjectTimelineBar[] }>();
+  for (const person of timeline.people) {
+    for (const b of person.bars) {
+      if (b.kind !== "project") continue;
+      const projectId = b.key.slice("project:".length);
+      const row = rows.get(projectId) ?? { label: b.label, bars: [] };
+      if (!row.label && b.label) row.label = b.label;
+      row.bars.push({
+        key: `${projectId}:${person.workerId}`,
+        workerId: person.workerId,
+        name: person.name,
+        startDate: b.startDate,
+        endDate: b.endDate,
+        leftPct: b.leftPct,
+        widthPct: b.widthPct,
+        conflict: b.conflict,
+      });
+      rows.set(projectId, row);
+    }
+  }
+  return [...rows.entries()]
+    .map(([projectId, r]) => ({ projectId, label: r.label, bars: r.bars }))
+    .sort(
+      (a, b) =>
+        (a.bars[0]?.startDate ?? "").localeCompare(b.bars[0]?.startDate ?? "") ||
+        (a.label ?? "").localeCompare(b.label ?? ""),
+    );
+}

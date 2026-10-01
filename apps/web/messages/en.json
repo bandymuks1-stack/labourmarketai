@@ -10917,6 +10917,8 @@
       "denominatorNote": "Counted in calendar days. We do not record contracted hours, so this is not an FTE figure."
     },
     "rosterTimeline": {
+      "byPerson": "People",
+      "byProject": "Projects",
       "prev": "Earlier",
       "next": "Later",
       "today": "Today",

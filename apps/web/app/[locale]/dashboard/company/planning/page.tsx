@@ -25,11 +25,13 @@ import { createUtcFormatter } from "@/lib/time/display";
 import { parseIsoDay } from "@/lib/planning/planning-model";
 import {
   buildRosterTimeline,
+  groupTimelineByProject,
   mondayOf,
   shiftDay,
   type TimelineKind,
 } from "@/lib/planning/roster-timeline-model";
 import { playerInitials } from "@/lib/identity/player-identity";
+import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
 
 /** The timeline window: four weeks, moved by whole windows. */
 const TIMELINE_DAYS = 28;
@@ -92,10 +94,10 @@ export default async function CompanyWorkforcePlanningPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ from?: string }>;
+  searchParams: Promise<{ from?: string; by?: string }>;
 }) {
   const { locale } = await params;
-  const { from: rawFrom } = await searchParams;
+  const { from: rawFrom, by: rawBy } = await searchParams;
   setRequestLocale(locale);
   await requireRoleOrRedirect(locale, "company");
 
@@ -532,10 +534,15 @@ export default async function CompanyWorkforcePlanningPage({
      moves by whole four-week steps or jumps to any date (?from=). */
   const todayIso = new Date().toISOString().slice(0, 10);
   const timelineFrom = mondayOf(parseIsoDay(rawFrom) ?? todayIso);
-  const timelineHref = (from: string) =>
-    (from === mondayOf(todayIso)
-      ? "/dashboard/company/planning"
-      : `/dashboard/company/planning?from=${from}`) as "/dashboard";
+  // Same data, two readings: by person (default) or by project.
+  const byProject = rawBy === "project";
+  const timelineHref = (from: string, by: "person" | "project" = byProject ? "project" : "person") => {
+    const qs = new URLSearchParams();
+    if (from !== mondayOf(todayIso)) qs.set("from", from);
+    if (by === "project") qs.set("by", "project");
+    const s = qs.toString();
+    return (s ? `/dashboard/company/planning?${s}` : "/dashboard/company/planning") as "/dashboard";
+  };
   const timeline =
     commitments.status === "ok" && rosterWorkerIds.length > 0
       ? buildRosterTimeline({
@@ -567,6 +574,23 @@ export default async function CompanyWorkforcePlanningPage({
           <h2 className="mr-auto font-display text-base font-semibold text-text-primary">
             {t("committedWhere.title")}
           </h2>
+          <nav className="flex items-center gap-2" data-testid="roster-timeline-by">
+            <Link
+              href={timelineHref(timeline.from, "person")}
+              aria-current={byProject ? undefined : "true"}
+              className={`${NAV_CHIP} ${byProject ? "" : "border-brand-blue text-brand-blue"}`}
+            >
+              {t("rosterTimeline.byPerson")}
+            </Link>
+            <Link
+              href={timelineHref(timeline.from, "project")}
+              aria-current={byProject ? "true" : undefined}
+              data-testid="roster-timeline-by-project"
+              className={`${NAV_CHIP} ${byProject ? "border-brand-blue text-brand-blue" : ""}`}
+            >
+              {t("rosterTimeline.byProject")}
+            </Link>
+          </nav>
           <Link
             href={timelineHref(shiftDay(timeline.from, -TIMELINE_DAYS))}
             aria-label={t("rosterTimeline.prev")}
@@ -596,6 +620,7 @@ export default async function CompanyWorkforcePlanningPage({
             className="flex items-center gap-2"
             data-testid="roster-timeline-jump"
           >
+            {byProject ? <input type="hidden" name="by" value="project" /> : null}
             <label className="sr-only" htmlFor="roster-timeline-date">
               {t("rosterTimeline.dateLabel")}
             </label>
@@ -617,7 +642,7 @@ export default async function CompanyWorkforcePlanningPage({
         <div className="overflow-x-auto">
           <div className="flex min-w-[34rem] flex-col gap-1">
             <div className="flex">
-              <div className="w-32 shrink-0 sm:w-44" />
+              <div className="w-36 shrink-0 sm:w-48" />
               <div className="relative h-5 flex-1">
                 {timeline.ticks.map((tick) => (
                   <span
@@ -630,22 +655,66 @@ export default async function CompanyWorkforcePlanningPage({
                 ))}
               </div>
             </div>
-            {timeline.people.map((p) => (
+            {byProject
+              ? groupTimelineByProject(timeline).map((row) => (
+                  <div
+                    key={row.projectId}
+                    className="flex items-center"
+                    data-testid={`roster-timeline-project-${row.projectId}`}
+                  >
+                    <div className="w-36 shrink-0 break-words pr-2 text-xs font-semibold text-text-primary sm:w-48">
+                      {row.label ?? t("committedWhere.untitled")}
+                    </div>
+                    <div
+                      className="relative flex-1 rounded-md border border-ink-600 bg-ink-900/40"
+                      style={{ height: `${Math.max(1, row.bars.length) * 1.75 + 0.25}rem` }}
+                    >
+                      {timeline.todayPct !== null ? (
+                        <span
+                          aria-hidden
+                          className="absolute inset-y-0 w-px bg-brand-blue/60"
+                          style={{ left: `${timeline.todayPct}%` }}
+                        />
+                      ) : null}
+                      {row.bars.map((b, i) => (
+                        <span
+                          key={b.key}
+                          title={`${b.name ?? t("availability.unnamedWorker")} · ${formatCommitmentWhen(b.startDate, b.endDate)}`}
+                          data-testid={`roster-timeline-project-bar-${b.key}`}
+                          data-conflict={b.conflict ? "true" : undefined}
+                          className={`absolute flex h-6 items-center overflow-hidden rounded border px-1 text-meta text-text-primary ${TIMELINE_TONE.project} ${b.conflict ? "ring-2 ring-state-danger" : ""}`}
+                          style={{
+                            left: `${b.leftPct}%`,
+                            width: `${b.widthPct}%`,
+                            top: `${i * 1.75 + 0.25}rem`,
+                          }}
+                        >
+                          <span className="truncate">{b.name ?? t("availability.unnamedWorker")}</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              : null}
+            {byProject
+              ? null
+              : timeline.people.map((p) => (
               <div
                 key={p.workerId}
                 className="flex items-center"
                 data-testid={`roster-timeline-row-${p.workerId}`}
               >
-                <div className="flex w-32 shrink-0 items-center gap-2 pr-2 sm:w-44">
-                  <span
-                    aria-hidden
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-ink-500 bg-ink-700 font-display text-meta font-bold text-text-primary"
-                  >
-                    {playerInitials(p.name ?? "?")}
-                  </span>
-                  <span className="min-w-0 truncate text-xs font-semibold text-text-primary">
-                    {p.name ?? t("availability.unnamedWorker")}
-                  </span>
+                <div className="w-36 shrink-0 pr-2 sm:w-48">
+                  {/* The one shared professional identity, at row density. */}
+                  <PersonIdentityCard
+                    variant="roster-person"
+                    density="compact"
+                    testid={`roster-timeline-identity-${p.workerId}`}
+                    name={p.name ?? t("availability.unnamedWorker")}
+                    initials={playerInitials(p.name ?? "?")}
+                    professions={[]}
+                    meta={[]}
+                  />
                 </div>
                 <div className="relative h-9 flex-1 rounded-md border border-ink-600 bg-ink-900/40">
                   {timeline.todayPct !== null ? (

@@ -10917,6 +10917,8 @@
       "denominatorNote": "Skaičiuojama kalendorinėmis dienomis. Sutartų valandų nefiksuojame, todėl tai nėra etatų rodiklis."
     },
     "rosterTimeline": {
+      "byPerson": "Žmonės",
+      "byProject": "Projektai",
       "prev": "Anksčiau",
       "next": "Vėliau",
       "today": "Šiandien",

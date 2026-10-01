@@ -10917,6 +10917,8 @@
       "denominatorNote": "Liczone w dniach kalendarzowych. Nie rejestrujemy godzin umownych, więc to nie jest wskaźnik FTE."
     },
     "rosterTimeline": {
+      "byPerson": "Osoby",
+      "byProject": "Projekty",
       "prev": "Wcześniej",
       "next": "Później",
       "today": "Dziś",

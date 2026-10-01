@@ -10917,6 +10917,8 @@
       "denominatorNote": "Geteld in kalenderdagen. We leggen geen contracturen vast, dus dit is geen fte-cijfer."
     },
     "rosterTimeline": {
+      "byPerson": "Mensen",
+      "byProject": "Projecten",
       "prev": "Eerder",
       "next": "Daarna",
       "today": "Vandaag",
