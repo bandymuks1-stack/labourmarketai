@@ -8458,7 +8458,8 @@
       "opened": "Pokalbis atvertas — parašykite darbuotojui žinutę.",
       "view": "Atverti pokalbį",
       "error": "Pokalbio atverti nepavyko. Bandykite dar kartą.",
-      "limitReached": "Pasiektas dienos naujų pokalbių limitas. Bandykite rytoj."
+      "limitReached": "Pasiektas dienos naujų pokalbių limitas. Bandykite rytoj.",
+      "shortlistFirst": "Pirmiausia įtraukite darbuotoją į trumpąjį sąrašą, tada galėsite prašyti pokalbio."
     },
     "how": {
       "title": "Kaip veikia atitikimas",

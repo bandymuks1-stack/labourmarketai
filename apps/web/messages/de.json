@@ -8458,7 +8458,8 @@
       "opened": "Unterhaltung geöffnet — schreiben Sie der Arbeitskraft eine Nachricht.",
       "view": "Unterhaltung öffnen",
       "error": "Die Unterhaltung konnte nicht geöffnet werden. Bitte versuchen Sie es erneut.",
-      "limitReached": "Tageslimit für neue Unterhaltungen erreicht. Versuchen Sie es morgen erneut."
+      "limitReached": "Tageslimit für neue Unterhaltungen erreicht. Versuchen Sie es morgen erneut.",
+      "shortlistFirst": "Setzen Sie die Person zuerst auf Ihre Shortlist, dann können Sie ein Gespräch anfragen."
     },
     "how": {
       "title": "So funktioniert das Matching",
