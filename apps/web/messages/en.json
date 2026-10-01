@@ -17875,6 +17875,7 @@
     "whoWorked": "Who worked here",
     "timeline": "What was done",
     "back": "Back to history",
-    "placeMissing": "This place is not in the imported history of the active workspace."
+    "placeMissing": "This place is not in the imported history of the active workspace.",
+    "attributedNote": "Includes {count, plural, one {# record} other {# records}} kept in another organization's books and attributed here as the performing company."
   }
 }

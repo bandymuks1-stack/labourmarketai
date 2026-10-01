@@ -17875,6 +17875,7 @@
     "whoWorked": "Wer hier gearbeitet hat",
     "timeline": "Was getan wurde",
     "back": "Zurück zur Historie",
-    "placeMissing": "Dieser Ort ist nicht in der importierten Historie des aktiven Arbeitsbereichs."
+    "placeMissing": "Dieser Ort ist nicht in der importierten Historie des aktiven Arbeitsbereichs.",
+    "attributedNote": "Enthält {count, plural, one {# Eintrag} other {# Einträge}}, die in den Büchern einer anderen Organisation liegen und hier als ausführendes Unternehmen zugeordnet sind."
   }
 }

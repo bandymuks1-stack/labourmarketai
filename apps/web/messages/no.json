@@ -6808,6 +6808,7 @@
     "whoWorked": "Hvem som jobbet her",
     "timeline": "Hva som ble gjort",
     "back": "Tilbake til historikk",
-    "placeMissing": "Dette stedet finnes ikke i den importerte historikken for det aktive arbeidsområdet."
+    "placeMissing": "Dette stedet finnes ikke i den importerte historikken for det aktive arbeidsområdet.",
+    "attributedNote": "Omfatter {count, plural, one {# post} other {# poster}} som ligger i en annen organisasjons bøker og er tilskrevet her som utførende firma."
   }
 }

@@ -6808,6 +6808,7 @@
     "whoWorked": "Kes siin töötas",
     "timeline": "Mida tehti",
     "back": "Tagasi ajaloo juurde",
-    "placeMissing": "Seda kohta pole aktiivse tööruumi imporditud ajaloos."
+    "placeMissing": "Seda kohta pole aktiivse tööruumi imporditud ajaloos.",
+    "attributedNote": "Sisaldab {count, plural, one {# kirjet} other {# kirjet}}, mis on talletatud teise organisatsiooni raamatupidamises ja omistatud siia töö teinud ettevõttele."
   }
 }

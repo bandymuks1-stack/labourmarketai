@@ -17875,6 +17875,7 @@
     "whoWorked": "Kto tu pracował",
     "timeline": "Co zrobiono",
     "back": "Wróć do historii",
-    "placeMissing": "Tego miejsca nie ma w zaimportowanej historii aktywnej przestrzeni roboczej."
+    "placeMissing": "Tego miejsca nie ma w zaimportowanej historii aktywnej przestrzeni roboczej.",
+    "attributedNote": "Zawiera {count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}} przechowywanych w księgach innej organizacji i przypisanych tutaj jako firmie wykonującej pracę."
   }
 }

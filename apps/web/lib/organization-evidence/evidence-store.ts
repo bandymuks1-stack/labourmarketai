@@ -177,6 +177,17 @@ export interface EvidenceStore {
   ): Promise<StoreResult<readonly SessionRecordWithEvents[]>>;
   /** Append-only lifecycle rows; returns the ids written. */
   insertRecordEvents(rows: readonly StoreRow[]): Promise<StoreResult<readonly { readonly id: string }[]>>;
+
+  // ── parties (append-only: INSERT and SELECT are the only grants) ──────────
+  /** The organization each record belongs to (RLS decides which are visible). */
+  readRecordOrganizations(
+    recordIds: readonly string[],
+  ): Promise<StoreResult<readonly { readonly id: string; readonly organization_id: string }[]>>;
+  /** The parties already recorded on these records. */
+  readParties(recordIds: readonly string[]): Promise<StoreResult<readonly StoreRow[]>>;
+  /** The record ids that name this organization as a party (its attributed work). */
+  readRecordIdsNamingOrganization(partyOrganizationId: string): Promise<StoreResult<readonly string[]>>;
+  insertParties(rows: readonly StoreRow[]): Promise<StoreResult<readonly { readonly id: string }[]>>;
 }
 
 /** A transport's caller, or a store that already IS the data plane. */
@@ -423,6 +434,47 @@ export function supabaseEvidenceStore(caller: DomainCaller): EvidenceStore {
 
     async insertRecordEvents(rows) {
       const res = await db().from("organization_evidence_events").insert(rows).select("id");
+      if (res.error) return fail(res.error);
+      return { data: (Array.isArray(res.data) ? res.data : []) as { id: string }[], error: null };
+    },
+
+    async readRecordOrganizations(recordIds) {
+      if (recordIds.length === 0) return { data: [], error: null };
+      const res = await db()
+        .from("organization_evidence_records")
+        .select("id, organization_id")
+        .in("id", recordIds as string[])
+        .limit(1000);
+      if (res.error) return fail(res.error);
+      return { data: (res.data ?? []) as { id: string; organization_id: string }[], error: null };
+    },
+
+    async readParties(recordIds) {
+      if (recordIds.length === 0) return { data: [], error: null };
+      const res = await db()
+        .from("organization_evidence_parties")
+        .select("id, record_id, organization_id, party_role, party_organization_id, party_label")
+        .in("record_id", recordIds as string[])
+        .limit(5000);
+      if (res.error) return fail(res.error);
+      return { data: (res.data ?? []) as StoreRow[], error: null };
+    },
+
+    async readRecordIdsNamingOrganization(partyOrganizationId) {
+      const res = await db()
+        .from("organization_evidence_parties")
+        .select("record_id")
+        .eq("party_organization_id", partyOrganizationId)
+        .limit(5000);
+      if (res.error) return fail(res.error);
+      return {
+        data: [...new Set(((res.data ?? []) as { record_id: string }[]).map((r) => r.record_id))],
+        error: null,
+      };
+    },
+
+    async insertParties(rows) {
+      const res = await db().from("organization_evidence_parties").insert(rows).select("id");
       if (res.error) return fail(res.error);
       return { data: (Array.isArray(res.data) ? res.data : []) as { id: string }[], error: null };
     },
