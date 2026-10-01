@@ -93,6 +93,8 @@ export default async function ServiceRequestsPage({
     discoverEmpty: t("discoverEmpty"),
     request: t("request"),
     requested: t("requested"),
+    partnershipBadge: t("partnershipBadge"),
+    partnershipRequest: t("partnershipRequest"),
     requestMessagePlaceholder: t("requestMessagePlaceholder"),
     remoteBadge: t("remoteBadge"),
     outgoingHeading: t("outgoingHeading"),

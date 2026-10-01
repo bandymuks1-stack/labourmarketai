@@ -6449,6 +6449,8 @@
     "discoverEmpty": "No active services to show yet.",
     "request": "Request",
     "requested": "Requested",
+    "partnershipBadge": "Looking for partners",
+    "partnershipRequest": "Offer to partner",
     "requestMessagePlaceholder": "Tell the provider what you need (optional)",
     "remoteBadge": "Remote",
     "outgoingHeading": "My requests",
@@ -6582,6 +6584,7 @@
     "notAvailable": "Not available right now.",
     "empty": "No service offerings yet. Add the first real service you offer.",
     "addButton": "Add a service",
+    "addPartnership": "Look for partners",
     "form": {
       "titleLabel": "Service title",
       "titlePlaceholder": "e.g. Interior painting",

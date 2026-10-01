@@ -6449,6 +6449,8 @@
     "discoverEmpty": "Пока нет активных услуг для показа.",
     "request": "Запросить",
     "requested": "Запрошено",
+    "partnershipBadge": "Ищет партнёров",
+    "partnershipRequest": "Предложить партнёрство",
     "requestMessagePlaceholder": "Напишите исполнителю, что вам нужно (необязательно)",
     "remoteBadge": "Удалённо",
     "outgoingHeading": "Мои запросы",
@@ -6582,6 +6584,7 @@
     "notAvailable": "Сейчас недоступно.",
     "empty": "Предложений услуг пока нет. Добавьте первую реальную услугу, которую вы предлагаете.",
     "addButton": "Добавить услугу",
+    "addPartnership": "Ищу партнёров",
     "form": {
       "titleLabel": "Название услуги",
       "titlePlaceholder": "напр. Внутренняя покраска",

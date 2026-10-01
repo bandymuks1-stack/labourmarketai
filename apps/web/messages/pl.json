@@ -6449,6 +6449,8 @@
     "discoverEmpty": "Nie ma jeszcze aktywnych usług do wyświetlenia.",
     "request": "Wyślij zapytanie",
     "requested": "Wysłano zapytanie",
+    "partnershipBadge": "Szuka partnerów",
+    "partnershipRequest": "Zaproponuj partnerstwo",
     "requestMessagePlaceholder": "Napisz usługodawcy, czego potrzebujesz (opcjonalnie)",
     "remoteBadge": "Zdalnie",
     "outgoingHeading": "Moje zapytania",
@@ -6582,6 +6584,7 @@
     "notAvailable": "Chwilowo niedostępne.",
     "empty": "Brak jeszcze ofert usług. Dodaj pierwszą rzeczywistą usługę, którą oferujesz.",
     "addButton": "Dodaj usługę",
+    "addPartnership": "Szukam partnerów",
     "form": {
       "titleLabel": "Nazwa usługi",
       "titlePlaceholder": "np. Malowanie wnętrz",

@@ -22,6 +22,7 @@ import {
   PLAYER_IDENTITY_FALLBACK_SURFACE,
 } from "@/lib/identity/player-identity";
 import { buildPlayerCardMinimum } from "@/lib/identity/player-card-minimum";
+import { PARTNERSHIP_CATEGORY } from "@/lib/services/service-offerings-shared";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { EmptyState } from "./empty-state";
@@ -42,6 +43,9 @@ export type MarketplaceLabels = {
   discoverEmpty: string;
   request: string;
   requested: string;
+  /** Badge + request label for a "looking for partners" offering. */
+  partnershipBadge: string;
+  partnershipRequest: string;
   /** Placeholder of the optional first message sent WITH a request. */
   requestMessagePlaceholder: string;
   remoteBadge: string;
@@ -436,7 +440,7 @@ export function MarketplaceLoopSection({
                     <p className="mt-0.5 line-clamp-2 text-xs text-text-muted">{o.description}</p>
                   )}
                   <p className="mt-1 text-xs text-text-muted">
-                    {[o.categorySlug, o.locationCountry, o.remote ? labels.remoteBadge : null, o.rateText]
+                    {[o.categorySlug === PARTNERSHIP_CATEGORY ? labels.partnershipBadge : o.categorySlug, o.locationCountry, o.remote ? labels.remoteBadge : null, o.rateText]
                       .filter(Boolean)
                       .join(" · ")}
                   </p>
@@ -486,7 +490,7 @@ export function MarketplaceLoopSection({
                     }}
                     className="inline-flex shrink-0 items-center gap-1 rounded-md border border-brand-blue/40 px-2 py-1 text-xs text-brand-blue disabled:opacity-50"
                   >
-                    <Send className="h-3 w-3" /> {labels.request}
+                    <Send className="h-3 w-3" /> {o.categorySlug === PARTNERSHIP_CATEGORY ? labels.partnershipRequest : labels.request}
                   </button>
                 )}
               </li>
