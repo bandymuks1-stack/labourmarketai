@@ -2241,7 +2241,7 @@
     "external": {
       "sectionTitle": "Offentlige jobannoncer",
       "sectionNote": "Annoncer fra officielle offentlige arbejdsformidlinger. De udgives af arbejdsgiveren ved kilden — labourmarket.ai viser dem, så du kan finde dem; ansøgning sker via den originale annonce.",
-      "shownOfTotal": "top {shown} af {total}",
+      "shownOfTotal": "viser {shown} af {total}",
       "bandBest": "Passer bedst",
       "bandPossible": "Muligvis passende",
       "bandExplore": "Øvrige annoncer",

@@ -2241,7 +2241,7 @@
     "external": {
       "sectionTitle": "Avalikud töökuulutused",
       "sectionNote": "Kuulutused ametlikest avalikest tööturuasutustest. Neid avaldab tööandja allikas — labourmarket.ai näitab neid, et te need leiaksite; kandideerimine käib originaalkuulutuse kaudu.",
-      "shownOfTotal": "parimad {shown} / {total}",
+      "shownOfTotal": "näitan {shown} / {total}",
       "bandBest": "Kõige sobivamad",
       "bandPossible": "Võimalikud sobivused",
       "bandExplore": "Muud kuulutused",

@@ -2241,7 +2241,7 @@
     "external": {
       "sectionTitle": "Publiski darba sludinājumi",
       "sectionNote": "Sludinājumi no oficiālajiem valsts nodarbinātības dienestiem. Tos avotā publicē darba devējs — labourmarket.ai tos rāda, lai jūs tos atrastu; pieteikšanās notiek caur oriģinālo sludinājumu.",
-      "shownOfTotal": "labākās {shown} no {total}",
+      "shownOfTotal": "rāda {shown} no {total}",
       "bandBest": "Vispiemērotākie",
       "bandPossible": "Iespējami piemēroti",
       "bandExplore": "Citi sludinājumi",
