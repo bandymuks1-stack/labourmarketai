@@ -75,8 +75,8 @@
 --      that slug; 0 document_files rows of a CSV / XLSX type (0 rows in all).
 --   3. the live bucket row: public false, 5 MB, the five-type list; the live
 --      CHECK document_files_mime_type_check: the same five-type list.
---   4. the rolled-back DO block docs/design/historical-timesheet-m2-m3-dryrun.sql
---      (it embeds the M3 body below byte-for-byte) — executed by the lead.
+--   4. a rolled-back DO block dry run of the M3 body (the earlier combined M2+M3
+--      dry run was removed with M2) — to be written before any apply.
 --
 -- ROLLBACK: supabase/rollbacks/20260930160000_historical_timesheet_m3_source_preservation.down.sql
 -- REFUSES while any org_import_source document or any CSV / XLSX document_files
