@@ -688,6 +688,14 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     de: "Öffne ein Gespräch mit Jonas",
     pl: "Napisz do Jonasa",
   },
+  "new-jobs": {
+    lt: "Kokių naujų darbų man atsirado?",
+    en: "Any new jobs for me?",
+    ru: "Какие новые вакансии появились?",
+    nl: "Welke nieuwe vacatures zijn er?",
+    de: "Gibt es neue Jobs für mich?",
+    pl: "Jakie nowe oferty pracy się pojawiły?",
+  },
   "product-help": {
     lt: "Kaip pridėti žmogų?",
     en: "How do I add a person?",

@@ -132,7 +132,8 @@ describe("the intent registry is the enumerable routing contract", () => {
     // verslui" was answered as a job search; a business-side route intent.
     // 90 -> 91: product-help — how-to / where-is questions answered in words with the door.
     // 91 -> 92: open-conversation - 'parašyk Jonui' opens the ONE conversation.
-    expect(entries.length).toBe(92);
+    // 92 -> 93: new-jobs - the new ads over the one job-alert matching.
+    expect(entries.length).toBe(93);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 

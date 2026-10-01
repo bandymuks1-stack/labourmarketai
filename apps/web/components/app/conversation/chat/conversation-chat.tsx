@@ -105,6 +105,7 @@ import { worklogDraftFromEvidence } from "@/lib/conversation/evidence-to-worklog
 import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
 import type { ConversationIntent } from "@/lib/conversation/intent-router";
 import { helpChipsFor, readHelpTopic } from "@/lib/conversation/product-help";
+import { loadNewJobsForChat } from "@/lib/conversation/new-jobs";
 import { readAvailabilityDay } from "@/lib/conversation/availability-day";
 import { findConversationPeople, openConversationWith } from "@/lib/communication/chat-open-conversation";
 import type { ProjectReadinessChatResult, ReadinessMissingCode } from "@/lib/conversation/project-readiness-contract";
@@ -6981,6 +6982,53 @@ export function ConversationChat({
         // in plain words WITH the way to do it (chips to the existing surfaces).
         // The topic is read from the same sources the router rule is built from.
         openConversation: () => startOpenConversation(text),
+        // "Kokių naujų darbų man atsirado?" - the person's own preferences over
+        // the ONE job-alert matching (same as the notification bell). A company
+        // workspace has no such act; a failed read is never "no new jobs".
+        newJobs: () => {
+          if (identity === "company" || Boolean(auth?.activeOrganizationId || auth?.activeOrgName)) {
+            const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+            assistant(
+              t("findWorkInCompanyContext"),
+              personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+            );
+            return;
+          }
+          setTyping(true);
+          loadNewJobsForChat()
+            .then((res) => {
+              setTyping(false);
+              if (res.kind === "ok") {
+                assistant(
+                  [
+                    t("newJobsIntro", { count: String(res.jobs.length) }),
+                    ...res.jobs.map(
+                      (j) => `• ${[j.title, j.country, j.salary].filter(Boolean).join(" · ")}`,
+                    ),
+                  ].join("\n"),
+                  [
+                    ...res.jobs.map((j) => ({ id: `link:/jobs/${j.id}`, label: j.title.slice(0, 40) })),
+                    { id: "link:/dashboard/opportunities", label: t("newJobsAll") },
+                  ],
+                );
+              } else if (res.kind === "empty") {
+                assistant(t("newJobsNone"), [{ id: "link:/dashboard/opportunities", label: t("newJobsAll") }]);
+              } else if (res.kind === "incomplete") {
+                assistant(
+                  t(res.missing.includes("profession") ? "newJobsNeedProfession" : "newJobsNeedCountry"),
+                  [{ id: "f:worker.save-preferences", label: labels.chipPrefs }],
+                );
+              } else if (res.kind === "no-worker") {
+                assistant(t("newJobsNoProfile"), [{ id: "profile", label: labels.chipProfile }]);
+              } else {
+                assistant(t("newJobsUnavailable"));
+              }
+            })
+            .catch(() => {
+              setTyping(false);
+              assistant(t("newJobsUnavailable"));
+            });
+        },
         productHelp: () => {
           const topic = readHelpTopic(text);
           if (!topic) {
