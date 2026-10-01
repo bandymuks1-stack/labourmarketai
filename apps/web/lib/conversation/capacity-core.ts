@@ -52,6 +52,8 @@ export async function whoIsAvailableCore(
   companyId: string,
   caller: { readonly supabase: SupabaseClient; readonly userId: string } | null,
   preRead?: CapacityPreRead,
+  /** ONE named day (YYYY-MM-DD) instead of the default window — "kas laisvas pirmadienį?". */
+  onDay?: string | null,
 ): Promise<CapacityChatResult> {
   try {
     const [roster, availability, t] = await Promise.all([
@@ -76,7 +78,9 @@ export async function whoIsAvailableCore(
 
     const today = new Date();
     const end = new Date(today.getTime() + (CAPACITY_WINDOW_DAYS - 1) * 86_400_000);
-    const window = { startDate: isoDay(today), endDate: isoDay(end) };
+    const window = onDay
+      ? { startDate: onDay, endDate: onDay }
+      : { startDate: isoDay(today), endDate: isoDay(end) };
     const absencesKnown = availability.status === "ok";
     const unavailability = availability.status === "ok" ? availability.unavailability : [];
 
