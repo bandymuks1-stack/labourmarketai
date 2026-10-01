@@ -7030,7 +7030,31 @@
         "error": "Nie udało się zapisać odpowiedzi. Nic nie zostało zmienione."
       }
     },
-    "addableUnavailable": "Nie udało się wczytać listy powiązanych pracowników — dodawanie nie jest teraz możliwe."
+    "addableUnavailable": "Nie udało się wczytać listy powiązanych pracowników — dodawanie nie jest teraz możliwe.",
+    "assign": {
+      "heading": "Przypisz cały zespół do projektu",
+      "intro": "Każdy z {count} członków jest przypisywany osobno, a wynik widać dla każdej osoby.",
+      "projectLabel": "Projekt",
+      "projectPlaceholder": "Wybierz projekt",
+      "submit": "Przypisz zespół",
+      "assigning": "Przypisywanie…",
+      "noProjects": "Nie masz otwartych projektów, do których można przypisać zespół.",
+      "summary": "Przypisano {written} z {total}.",
+      "member": {
+        "assigned": "Przypisano",
+        "calendar_unknown": "Przypisano · terminów nie potwierdzono",
+        "calendar_conflict": "Przypisano · w tych dniach już zajęty",
+        "refused": "Nie przypisano · nie możesz przypisać tej osoby",
+        "error": "Nie przypisano · coś poszło nie tak"
+      },
+      "outcome": {
+        "not_authed": "Zaloguj się ponownie.",
+        "no_such_team": "Tego zespołu nie możesz przypisać.",
+        "empty_team": "Ten zespół nie ma jeszcze członków.",
+        "needs_migration": "Chwilowo niedostępne.",
+        "unavailable": "Nie udało się przypisać zespołu. Nic nie zmieniono."
+      }
+    }
   },
   "teamEnquiries": {
     "enquireButton": "Zapytaj ten zespół o pracę",

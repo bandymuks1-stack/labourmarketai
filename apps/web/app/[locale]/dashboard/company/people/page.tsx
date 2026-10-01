@@ -17,6 +17,7 @@ import {
 } from "@/lib/company/company-workers";
 import { getOrgMembersData } from "@/lib/operations/org-members";
 import { getTeamBrigadesData } from "@/lib/company/team-brigades";
+import { listManagedProjects } from "@/lib/projects/projects";
 import { getWorkerReadiness } from "@/lib/company/worker-readiness";
 import { getManagerEvidence } from "@/lib/operations/manager-evidence";
 import {
@@ -124,13 +125,14 @@ export default async function CompanyPeoplePage({
     ? await readOrganizationCapabilities(capabilityOrgId)
     : [];
 
-  const [rWorkers, rInvitations, orgMembers, teamBrigades, managerEvidence] =
+  const [rWorkers, rInvitations, orgMembers, teamBrigades, managerEvidence, managedProjects] =
     await Promise.all([
       listActiveCompanyWorkers(companyRow.id),
       canManageInvitations ? listCompanyWorkerInvitations(companyRow.id) : null,
       getOrgMembersData("company", companyRow.id),
       getTeamBrigadesData(),
       getManagerEvidence(),
+      listManagedProjects(),
     ]);
   const workersResult = rWorkers ?? ({ kind: "ok", rows: [] } as const);
   const invitationsResult = rInvitations ?? ({ kind: "ok", rows: [] } as const);
@@ -323,6 +325,9 @@ export default async function CompanyPeoplePage({
           invitationsApplied={teamBrigades.invitationsApplied}
           detailsApplied={teamBrigades.detailsApplied}
           enquiriesApplied={teamBrigades.enquiriesApplied}
+          projects={managedProjects
+            .filter((p) => p.status !== "completed")
+            .map((p) => ({ id: p.id, title: p.title }))}
         />
       ) : (
         <TeamRosterEmptyState variant={isStaffingAgency ? "agency" : "company"} />

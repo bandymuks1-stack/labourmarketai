@@ -7030,7 +7030,31 @@
         "error": "Het antwoord kon niet worden opgeslagen. Er is niets gewijzigd."
       }
     },
-    "addableUnavailable": "De lijst met gekoppelde werknemers kon niet worden geladen — toevoegen is nu niet mogelijk."
+    "addableUnavailable": "De lijst met gekoppelde werknemers kon niet worden geladen — toevoegen is nu niet mogelijk.",
+    "assign": {
+      "heading": "Het hele team aan een project toewijzen",
+      "intro": "Elk van de {count} leden wordt apart toegewezen en u ziet het resultaat per persoon.",
+      "projectLabel": "Project voor het team",
+      "projectPlaceholder": "Kies een project",
+      "submit": "Team toewijzen",
+      "assigning": "Bezig met toewijzen…",
+      "noProjects": "U hebt geen open projecten om het team aan toe te wijzen.",
+      "summary": "{written} van {total} toegewezen.",
+      "member": {
+        "assigned": "Toegewezen",
+        "calendar_unknown": "Toegewezen · data niet bevestigd",
+        "calendar_conflict": "Toegewezen · op deze dagen al bezet",
+        "refused": "Niet toegewezen · u mag deze persoon niet toewijzen",
+        "error": "Niet toegewezen · er ging iets mis"
+      },
+      "outcome": {
+        "not_authed": "Meld u opnieuw aan.",
+        "no_such_team": "Dit team kunt u niet toewijzen.",
+        "empty_team": "Dit team heeft nog geen leden.",
+        "needs_migration": "Momenteel niet beschikbaar.",
+        "unavailable": "Het team kon niet worden toegewezen. Er is niets gewijzigd."
+      }
+    }
   },
   "teamEnquiries": {
     "enquireButton": "Deze ploeg een aanvraag sturen",
