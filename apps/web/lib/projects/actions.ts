@@ -255,6 +255,32 @@ async function freeColleagues(
   }
 }
 
+/**
+ * AUDIT of the human decision on a collision (kept / undone / swapped). One
+ * append to the existing `audit_logs` through a narrow SECURITY DEFINER writer.
+ * Best-effort by design: the decision itself already happened, so a missing
+ * function (not yet applied) or a failed write must never undo or fail it.
+ */
+export async function recordAssignmentDecisionAction(
+  projectId: string,
+  workerProfileId: string,
+  decision: "kept" | "undone" | "swapped",
+): Promise<void> {
+  try {
+    const supabase = await createClient();
+    const { error } = await asAny(supabase).rpc("record_assignment_decision", {
+      p_project_id: projectId,
+      p_worker_profile_id: workerProfileId,
+      p_decision: decision,
+    });
+    if (error && !migMissing(error.code)) {
+      console.error("[projects] decision audit failed:", error.message);
+    }
+  } catch (error) {
+    console.error("[projects] decision audit failed:", error);
+  }
+}
+
 export async function endAssignmentAction(
   projectId: string,
   workerProfileId: string,

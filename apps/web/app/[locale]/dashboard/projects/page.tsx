@@ -258,6 +258,7 @@ export default async function ProjectsPage({
     reservationAlternativesTitle: t("assign.reservation.alternativesTitle"),
     reservationSwap: t("assign.reservation.swap"),
     reservationUndo: t("assign.reservation.undo"),
+    reservationKeep: t("assign.reservation.keep"),
     reservationDecided: t("assign.reservation.decided"),
     reservationSource: {
       project: t("assign.reservation.source.project"),

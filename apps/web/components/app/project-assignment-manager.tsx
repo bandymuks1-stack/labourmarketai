@@ -8,6 +8,7 @@ import {
   createProjectAction,
   assignWorkerToProjectAction,
   endAssignmentAction,
+  recordAssignmentDecisionAction,
   type ProjectActionResult,
 } from "@/lib/projects/actions";
 import type { ManagedProject, ProjectAssignment } from "@/lib/projects/projects";
@@ -82,6 +83,7 @@ export interface ProjectManagerLabels {
   reservationAlternativesTitle: string;
   reservationSwap: string;
   reservationUndo: string;
+  reservationKeep: string;
   reservationDecided: string;
 }
 
@@ -138,6 +140,7 @@ function ReservationNotice({
   busy = false,
   onSwap,
   onUndo,
+  onKeep,
 }: {
   verdict: ReservationVerdict;
   labels: ProjectManagerLabels;
@@ -146,6 +149,7 @@ function ReservationNotice({
   busy?: boolean;
   onSwap?: (profileId: string) => void;
   onUndo?: () => void;
+  onKeep?: () => void;
 }) {
   if (verdict.state === "clear") return null;
   if (verdict.state === "unknown") {
@@ -197,17 +201,30 @@ function ReservationNotice({
           </ul>
         </div>
       ) : null}
-      {onUndo ? (
-        <button
-          type="button"
-          disabled={busy}
-          onClick={onUndo}
-          data-testid="assign-reservation-undo"
-          className="min-h-8 w-fit rounded-md border border-ink-500 px-2.5 py-1 text-xs font-semibold text-text-secondary hover:border-brand-orange"
-        >
-          {labels.reservationUndo}
-        </button>
-      ) : null}
+      <div className="flex flex-wrap gap-2">
+        {onKeep ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={onKeep}
+            data-testid="assign-reservation-keep"
+            className="min-h-8 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-semibold text-text-secondary hover:border-brand-blue"
+          >
+            {labels.reservationKeep}
+          </button>
+        ) : null}
+        {onUndo ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={onUndo}
+            data-testid="assign-reservation-undo"
+            className="min-h-8 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-semibold text-text-secondary hover:border-brand-orange"
+          >
+            {labels.reservationUndo}
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -246,7 +263,18 @@ export function ProjectAssignmentManager({
     if (!a) return;
     startDeciding(async () => {
       const r = await endAssignmentAction(a.projectId, a.workerProfileId);
-      if (r.ok) setDecision({ for: assignState });
+      if (r.ok) {
+        await recordAssignmentDecisionAction(a.projectId, a.workerProfileId, "undone");
+        setDecision({ for: assignState });
+      }
+    });
+  };
+  const keepAssignment = () => {
+    const a = assignState?.ok ? assignState.assigned : undefined;
+    if (!a) return;
+    startDeciding(async () => {
+      await recordAssignmentDecisionAction(a.projectId, a.workerProfileId, "kept");
+      setDecision({ for: assignState });
     });
   };
   const swapAssignment = (profileId: string) => {
@@ -259,7 +287,10 @@ export function ProjectAssignmentManager({
       fd.set("project_id", a.projectId);
       fd.set("worker_profile_id", profileId);
       const r = await assignWorkerToProjectAction(null, fd);
-      if (r.ok) setDecision({ for: assignState });
+      if (r.ok) {
+        await recordAssignmentDecisionAction(a.projectId, a.workerProfileId, "swapped");
+        setDecision({ for: assignState });
+      }
     });
   };
   const [ended, setEnded] = useState<Set<string>>(new Set());
@@ -360,6 +391,7 @@ export function ProjectAssignmentManager({
               busy={deciding}
               onSwap={swapAssignment}
               onUndo={undoAssignment}
+              onKeep={keepAssignment}
             />
           ) : null}
         </form>

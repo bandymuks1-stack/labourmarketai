@@ -6027,6 +6027,7 @@
         "alternativesTitle": "Free on these dates",
         "swap": "Assign instead",
         "undo": "Undo assignment",
+        "keep": "Keep",
         "decided": "Done",
         "unknown": "We could not confirm these dates are free. That is not the same as free.",
         "source": {
