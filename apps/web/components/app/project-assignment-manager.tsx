@@ -87,6 +87,20 @@ export interface ProjectManagerLabels {
   reservationDecided: string;
 }
 
+/** The collision notice's own labels — shared by the single and the team
+ *  assignment surfaces so the conflict flow reads the same in both. */
+export type ReservationLabels = Pick<
+  ProjectManagerLabels,
+  | "reservationCollidesTitle"
+  | "reservationNotBlocking"
+  | "reservationUnknown"
+  | "reservationSource"
+  | "reservationAlternativesTitle"
+  | "reservationSwap"
+  | "reservationUndo"
+  | "reservationKeep"
+>;
+
 type ProjectWithAssignments = ManagedProject & {
   assignments: ProjectAssignment[];
 };
@@ -133,7 +147,7 @@ function resultError(
  * An absence carries no label by construction — the employer read never asks
  * for the reason, and nothing here invents one.
  */
-function ReservationNotice({
+export function ReservationNotice({
   verdict,
   labels,
   alternatives = [],
@@ -143,7 +157,7 @@ function ReservationNotice({
   onKeep,
 }: {
   verdict: ReservationVerdict;
-  labels: ProjectManagerLabels;
+  labels: ReservationLabels;
   /** Colleagues CONFIRMED free on the same dates (server-verified). */
   alternatives?: { profileId: string; name: string }[];
   busy?: boolean;

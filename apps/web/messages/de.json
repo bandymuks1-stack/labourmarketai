@@ -7098,7 +7098,31 @@
         "error": "Die Antwort konnte nicht gespeichert werden. Es wurde nichts geändert."
       }
     },
-    "addableUnavailable": "Die Liste der verknüpften Arbeitskräfte konnte nicht geladen werden — Hinzufügen ist derzeit nicht möglich."
+    "addableUnavailable": "Die Liste der verknüpften Arbeitskräfte konnte nicht geladen werden — Hinzufügen ist derzeit nicht möglich.",
+    "assign": {
+      "heading": "Das ganze Team einem Projekt zuweisen",
+      "intro": "Jedes der {count} Mitglieder wird einzeln zugewiesen, und Sie sehen das Ergebnis für jede Person.",
+      "projectLabel": "Projekt",
+      "projectPlaceholder": "Projekt wählen",
+      "submit": "Team zuweisen",
+      "assigning": "Wird zugewiesen…",
+      "noProjects": "Sie haben keine offenen Projekte, dem Sie das Team zuweisen könnten.",
+      "summary": "{written} von {total} zugewiesen.",
+      "member": {
+        "assigned": "Zugewiesen",
+        "calendar_unknown": "Zugewiesen · Termine nicht bestätigt",
+        "calendar_conflict": "Zugewiesen · an diesen Tagen schon belegt",
+        "refused": "Nicht zugewiesen · Sie dürfen diese Person nicht zuweisen",
+        "error": "Nicht zugewiesen · etwas ist schiefgelaufen"
+      },
+      "outcome": {
+        "not_authed": "Bitte erneut anmelden.",
+        "no_such_team": "Dieses Team können Sie nicht zuweisen.",
+        "empty_team": "Dieses Team hat noch keine Mitglieder.",
+        "needs_migration": "Derzeit nicht verfügbar.",
+        "unavailable": "Das Team konnte nicht zugewiesen werden. Es wurde nichts geändert."
+      }
+    }
   },
   "teamEnquiries": {
     "enquireButton": "Dieser Kolonne eine Anfrage senden",

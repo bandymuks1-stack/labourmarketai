@@ -7098,7 +7098,31 @@
         "error": "Atsakymo išsaugoti nepavyko. Niekas nebuvo pakeista."
       }
     },
-    "addableUnavailable": "Susietų darbuotojų sąrašo nepavyko nuskaityti — pridėti kol kas negalima."
+    "addableUnavailable": "Susietų darbuotojų sąrašo nepavyko nuskaityti — pridėti kol kas negalima.",
+    "assign": {
+      "heading": "Priskirti visą komandą projektui",
+      "intro": "Kiekvienas iš {count} narių priskiriamas atskirai, o rezultatą matote kiekvienam žmogui.",
+      "projectLabel": "Projektas",
+      "projectPlaceholder": "Pasirinkite projektą",
+      "submit": "Priskirti komandą",
+      "assigning": "Priskiriama…",
+      "noProjects": "Neturite atvirų projektų, kuriems galėtumėte priskirti komandą.",
+      "summary": "Priskirta {written} iš {total}.",
+      "member": {
+        "assigned": "Priskirta",
+        "calendar_unknown": "Priskirta · datų nepavyko patvirtinti",
+        "calendar_conflict": "Priskirta · šiomis dienomis jau užimtas",
+        "refused": "Nepriskirta · šio žmogaus priskirti negalite",
+        "error": "Nepriskirta · nepavyko"
+      },
+      "outcome": {
+        "not_authed": "Prisijunkite iš naujo.",
+        "no_such_team": "Šios komandos priskirti negalite.",
+        "empty_team": "Komandoje dar nėra narių.",
+        "needs_migration": "Kol kas neprieinama.",
+        "unavailable": "Nepavyko priskirti komandos. Nieko nepakeista."
+      }
+    }
   },
   "teamEnquiries": {
     "enquireButton": "Pateikti užklausą šiai komandai",

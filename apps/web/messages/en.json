@@ -7098,7 +7098,31 @@
         "error": "Could not save the answer. Nothing was changed."
       }
     },
-    "addableUnavailable": "The linked-worker list could not be loaded — adding is not possible right now."
+    "addableUnavailable": "The linked-worker list could not be loaded — adding is not possible right now.",
+    "assign": {
+      "heading": "Assign the whole team to a project",
+      "intro": "Each of the {count} members is assigned one by one, and you see the result for every person.",
+      "projectLabel": "Project",
+      "projectPlaceholder": "Choose a project",
+      "submit": "Assign the team",
+      "assigning": "Assigning…",
+      "noProjects": "You have no open projects to assign the team to.",
+      "summary": "{written} of {total} assigned.",
+      "member": {
+        "assigned": "Assigned",
+        "calendar_unknown": "Assigned · dates not confirmed",
+        "calendar_conflict": "Assigned · already busy on these dates",
+        "refused": "Not assigned · you cannot assign this person",
+        "error": "Not assigned · something went wrong"
+      },
+      "outcome": {
+        "not_authed": "Sign in again to continue.",
+        "no_such_team": "This team is not yours to assign.",
+        "empty_team": "This team has no members yet.",
+        "needs_migration": "Not available right now.",
+        "unavailable": "Could not assign the team. Nothing was changed."
+      }
+    }
   },
   "teamEnquiries": {
     "enquireButton": "Ask this team about work",
