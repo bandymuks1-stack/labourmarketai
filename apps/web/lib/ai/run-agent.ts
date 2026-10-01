@@ -348,6 +348,7 @@ export async function runAiAgentCore<T = unknown>(
     model: d.modelAlias ? modelIdForAlias(d.modelAlias, modelProvider) : undefined,
     modelAlias: d.modelAlias ?? undefined,
     preferredProvider: d.preferredProvider ?? undefined,
+    sourceLanguage: opts.language,
     mock: opts.mock,
   });
   const request = requestForDecision(decision);

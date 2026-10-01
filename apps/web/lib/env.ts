@@ -110,6 +110,13 @@ const schema = z.object({
   // it is never a primary AI_PROVIDER value.
   AI_DEEPL_ENABLED: z.enum(["true", "false"]).default("false"),
   DEEPL_API_KEY: z.string().optional(),
+  AI_LIBRETRANSLATE_ENABLED: z.enum(["true", "false"]).default("false"),
+  AI_LIBRETRANSLATE_SELF_HOSTED: z.enum(["true", "false"]).default("false"),
+  LIBRETRANSLATE_URL: z.string().optional(),
+  LIBRETRANSLATE_API_KEY: z.string().optional(),
+  AI_CLOUDFLARE_ENABLED: z.enum(["true", "false"]).default("false"),
+  CLOUDFLARE_ACCOUNT_ID: z.string().optional(),
+  CLOUDFLARE_API_TOKEN: z.string().optional(),
   // ── Local OpenAI-compatible runtime (free_local; OFF by default) ───────────
   // The ONE provider that needs no key: it authenticates by network location.
   // Its proof of configuration is instead a VALIDATED base URL plus an explicit
@@ -202,6 +209,13 @@ const parsed = schema.safeParse({
   XAI_API_KEY: process.env.XAI_API_KEY,
   AI_DEEPL_ENABLED: process.env.AI_DEEPL_ENABLED,
   DEEPL_API_KEY: process.env.DEEPL_API_KEY,
+  AI_LIBRETRANSLATE_ENABLED: process.env.AI_LIBRETRANSLATE_ENABLED,
+  AI_LIBRETRANSLATE_SELF_HOSTED: process.env.AI_LIBRETRANSLATE_SELF_HOSTED,
+  LIBRETRANSLATE_URL: process.env.LIBRETRANSLATE_URL,
+  LIBRETRANSLATE_API_KEY: process.env.LIBRETRANSLATE_API_KEY,
+  AI_CLOUDFLARE_ENABLED: process.env.AI_CLOUDFLARE_ENABLED,
+  CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID,
+  CLOUDFLARE_API_TOKEN: process.env.CLOUDFLARE_API_TOKEN,
   AI_LOCAL_ENABLED: process.env.AI_LOCAL_ENABLED,
   AI_LOCAL_BASE_URL: process.env.AI_LOCAL_BASE_URL,
   AI_LOCAL_MODEL: process.env.AI_LOCAL_MODEL,
