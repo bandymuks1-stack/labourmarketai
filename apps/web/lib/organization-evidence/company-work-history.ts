@@ -33,6 +33,8 @@ export interface PlaceScope {
   readonly hasProject: boolean;
   /** A street/city address is stored on the work object. */
   readonly hasAddress: boolean;
+  /** That address as text ("street number, city"), or null. */
+  readonly addressText: string | null;
 }
 
 export interface PlaceGroup {
@@ -121,7 +123,11 @@ export function buildCompanyWorkHistory(
       kind,
       name,
       objectId,
-      scope: { hasProject: !!obj?.projectId, hasAddress: !!(obj?.addressLine || obj?.city) },
+      scope: {
+        hasProject: !!obj?.projectId,
+        hasAddress: !!(obj?.addressLine || obj?.city),
+        addressText: obj ? [obj.addressLine, obj.city].filter(Boolean).join(", ") || null : null,
+      },
       records: [...recs].sort((a, b) =>
         (b.activityDate ?? b.periodStart ?? "").localeCompare(a.activityDate ?? a.periodStart ?? ""),
       ),

@@ -22,6 +22,7 @@ import {
   type StoreRow,
 } from "./evidence-store";
 import { chainHash, recordFingerprint } from "./fingerprint";
+import { splitAddress } from "./address-split";
 import {
   deriveImportSessionStatus,
   type ImportSessionEvent,
@@ -2112,6 +2113,15 @@ export interface CommitPlanOptions {
   readonly createObjects: boolean;
   /** `relationship_kind` for people the plan creates (`other` when absent). */
   readonly relationshipKind?: string | null;
+  /**
+   * The human declared that the source does not establish WHICH company
+   * performed this work (two companies billed the same customer, no per-person
+   * contract or payroll). Every record this commit writes then carries
+   * `derived.performingCompany = { state: "not_established" }`, so no surface
+   * has to infer a performer from where the record happens to be stored. It
+   * changes no authority, role or evidence state; it is a stated absence.
+   */
+  readonly performerNotEstablished?: boolean;
 }
 
 /**
@@ -2228,14 +2238,17 @@ async function applyPlan(
               // inside the RPC `create_work_object_v1`, behind the store). It
               // answers a status, not an id, so the register is re-read and
               // matched — the same way a human's "add" is read back.
+              // The label is an ADDRESS only when it is unmistakably one
+              // (`<street> <number>[, <city>]`); otherwise the columns stay null.
+              const addr = splitAddress(seg.name);
               const rpc = await store.createWorkObject({
                 p_organization_id: session.organizationId,
                 p_name: tidy(seg.name).slice(0, 160),
                 p_project_id: null,
                 p_country: null,
                 p_region: null,
-                p_city: null,
-                p_address_line: null,
+                p_city: addr?.city ?? null,
+                p_address_line: addr?.addressLine ?? null,
                 p_latitude: null,
                 p_longitude: null,
               });
@@ -2377,6 +2390,7 @@ export async function commitImport(
     importedAt: new Date().toISOString(),
     userId: store.userId,
     evidenceState: opts?.evidenceState ?? "ORGANIZATION_REPORTED",
+    performerNotEstablished: planOpts.performerNotEstablished === true,
   });
 
   const ins = await store.insertRecords(payload);
@@ -2465,6 +2479,12 @@ export async function commitImport(
 /** Committing marks in flight at once — bounded, like every batch here. */
 const COMMIT_MARK_CONCURRENCY = 20;
 
+/** The stated absence (see `CommitPlanOptions.performerNotEstablished`). */
+export const PERFORMER_NOT_ESTABLISHED = {
+  state: "not_established",
+  method: "declared-at-import:v1",
+} as const;
+
 export interface CommitRowsInput {
   readonly sessionId: string;
   readonly session: {
@@ -2485,6 +2505,8 @@ export interface CommitRowsInput {
   /** The human the records name as supplier and importer. */
   readonly userId: string;
   readonly evidenceState: ReportedEvidenceState;
+  /** See `CommitPlanOptions.performerNotEstablished`. */
+  readonly performerNotEstablished?: boolean;
 }
 
 /**
@@ -2517,6 +2539,7 @@ export function buildCommitRows(input: CommitRowsInput): {
     // 2026-09-23): a start alone is not a period, and is never written as a
     // one-day span — such a row stays a dated fact with unknown duration.
     const derived = { ...((r.derived as Record<string, unknown> | null) ?? {}) };
+    if (input.performerNotEstablished) derived.performingCompany = PERFORMER_NOT_ESTABLISHED;
     const ts = readTimeSemantics(derived);
     const daily = countsAsDailyHours(ts);
     const period = ts && ts.value === "period_aggregate" && ts.periodStart && ts.periodEnd ? ts : null;
@@ -2573,7 +2596,9 @@ export function buildCommitRows(input: CommitRowsInput): {
       organization_person_id: (r.organization_person_id as string | null) ?? null,
       work_object_id: (r.work_object_id as string | null) ?? null,
       record_fingerprint: r.record_fingerprint as string,
-      derived: (r.derived as Record<string, unknown> | null) ?? {},
+      derived: input.performerNotEstablished
+        ? { ...((r.derived as Record<string, unknown> | null) ?? {}), performingCompany: PERFORMER_NOT_ESTABLISHED }
+        : ((r.derived as Record<string, unknown> | null) ?? {}),
       duplicate_state: "new",
       duplicate_of_record_id: null,
       problem: null,
