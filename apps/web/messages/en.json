@@ -13525,6 +13525,7 @@
       },
       "findWorkInCompanyContext": "A job search is your own act — I don't run it inside the company space. Switch to your personal space and ask again.",
       "findWorkInCompanyWhy": "A person looks for work, not a company — I answer from your personal space.",
+      "personalOnlyInCompany": "That is a personal action — I do not run it in a company workspace. Switch to your personal space and continue there.",
       "journalAskWhatYouDid": "What did you do today? Write it in the “What you did” field in your own words — e.g. “installed windows at the Kaunas site from 8 to 17”. The request itself is not saved to the journal.",
       "alsoWorkLog": "I also understood that you worked today — check it and save it to your work journal:",
       "serviceNeedHint": "That is a job to be done — I will show you who offers that service.",
@@ -13535,6 +13536,23 @@
       "chipPartnersServices": "Service providers",
       "chipPartnersListings": "Marketplace listings",
       "chipPartnersRelations": "Clients and partners",
+      "productHelp": {
+        "projectUse": "A project is where you keep the work, the people and the deadlines. Open a project, add tasks and people, and the work done shows up right there.",
+        "addPerson": "You add a person by inviting them: enter their contact and they confirm in their own account. Invitations and your team are in the team section.",
+        "hours": "Hours are kept in the hours section — there you see days, the week and the timesheet.",
+        "offerService": "You offer a service in the services section: describe it, and other businesses and people can see it.",
+        "warning": "A warning appears when something could get in the way of the work — for example a document is about to expire or data is missing. You will see every notice and its reason in the notices section.",
+        "forecast": "A forecast is a calculation from the hours already recorded and the work already planned. It is a guide, not a promise, and it changes with the data. You will find the plan and the numbers in planning.",
+        "scheduleWorker": "You schedule a worker in planning: pick the day and the project, and assign the person in the same place.",
+        "doneWork": "You see finished work where it was recorded — in the work journal or the hours section: entries, hours and confirmations.",
+        "chips": {
+          "chipHelpProjects": "Open projects",
+          "chipHelpPeople": "Team and invitations",
+          "chipHelpPlanning": "Open planning",
+          "chipHelpServices": "My services",
+          "chipHelpJournal": "Work journal"
+        }
+      },
       "interestInboxAmbiguous": "That can mean two things — which one do you want?",
       "chipInterestOnMyNeeds": "Interest in my needs",
       "chipMyOwnInterest": "My own interest",

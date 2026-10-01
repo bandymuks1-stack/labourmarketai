@@ -13525,6 +13525,7 @@
       },
       "findWorkInCompanyContext": "Werk zoeken is je eigen handeling — in de bedrijfsruimte voer ik die niet uit. Schakel over naar je persoonlijke ruimte en vraag het opnieuw.",
       "findWorkInCompanyWhy": "Een persoon zoekt werk, geen bedrijf — ik antwoord vanuit je persoonlijke ruimte.",
+      "personalOnlyInCompany": "Dat is een persoonlijke actie — in een bedrijfsomgeving voer ik die niet uit. Schakel over naar je persoonlijke ruimte en ga daar verder.",
       "journalAskWhatYouDid": "Wat heb je vandaag gedaan? Schrijf het in het veld „Wat je deed“ in je eigen woorden — bijv. „ramen gemonteerd op de locatie Kaunas van 8 tot 17“. Het verzoek zelf wordt niet in het dagboek opgeslagen.",
       "alsoWorkLog": "Ik begreep ook dat je vandaag hebt gewerkt — controleer het en sla het op in je werkjournaal:",
       "serviceNeedHint": "Dat is een klus — ik laat je zien wie die dienst aanbiedt.",
@@ -13535,6 +13536,23 @@
       "chipPartnersServices": "Dienstverleners",
       "chipPartnersListings": "Marktplaats-advertenties",
       "chipPartnersRelations": "Klanten en partners",
+      "productHelp": {
+        "projectUse": "Een project is de plek voor werk, mensen en deadlines. Open een project, voeg taken en mensen toe, en het uitgevoerde werk verschijnt daar meteen.",
+        "addPerson": "Je voegt iemand toe met een uitnodiging: vul het contact in en die persoon bevestigt in het eigen account. Uitnodigingen en je team vind je bij team.",
+        "hours": "Uren staan in het urenoverzicht — daar zie je dagen, de week en het urenstaat.",
+        "offerService": "Je biedt een dienst aan bij diensten: beschrijf hem, en andere bedrijven en mensen kunnen hem zien.",
+        "warning": "Een waarschuwing verschijnt wanneer iets het werk kan hinderen — bijvoorbeeld een document dat verloopt of ontbrekende gegevens. Alle meldingen en hun reden zie je bij meldingen.",
+        "forecast": "Een prognose is een berekening op basis van de al geregistreerde uren en het geplande werk. Het is een richtlijn, geen belofte, en verandert met de gegevens. Het plan en de cijfers vind je bij planning.",
+        "scheduleWorker": "Je plant een medewerker in bij planning: kies de dag en het project en wijs de persoon op dezelfde plek toe.",
+        "doneWork": "Uitgevoerd werk zie je waar het is vastgelegd — in het werkjournaal of het urenoverzicht: registraties, uren en bevestigingen.",
+        "chips": {
+          "chipHelpProjects": "Projecten openen",
+          "chipHelpPeople": "Team en uitnodigingen",
+          "chipHelpPlanning": "Planning openen",
+          "chipHelpServices": "Mijn diensten",
+          "chipHelpJournal": "Werkjournaal"
+        }
+      },
       "interestInboxAmbiguous": "Dat kan twee dingen betekenen — wat wil je zien?",
       "chipInterestOnMyNeeds": "Interesse in mijn aanvragen",
       "chipMyOwnInterest": "Mijn eigen interesse",

@@ -3947,6 +3947,7 @@
       },
       "findWorkInCompanyContext": "Å søke jobb er din egen handling — i bedriftsområdet kjører jeg det ikke. Bytt til ditt personlige område og spør igjen.",
       "findWorkInCompanyWhy": "En person søker jobb, ikke en bedrift — jeg svarer fra ditt personlige område.",
+      "personalOnlyInCompany": "Det er en personlig handling — i en virksomhetsplass utfører jeg den ikke. Bytt til ditt personlige rom og fortsett der.",
       "journalAskWhatYouDid": "Hva gjorde du i dag? Skriv det i feltet «Hva du gjorde» med egne ord — f.eks. «monterte vinduer på byggeplassen i Kaunas fra 8 til 17». Selve forespørselen lagres ikke i dagboken.",
       "serviceNeedHint": "Det er en jobb som skal gjøres — jeg viser deg hvem som tilbyr den tjenesten.",
       "chipServiceRequests": "Finn en tjeneste",
@@ -3956,6 +3957,23 @@
       "chipPartnersServices": "Tjenesteleverandører",
       "chipPartnersListings": "Markedsplassens annonser",
       "chipPartnersRelations": "Kunder og partnere",
+      "productHelp": {
+        "projectUse": "Et prosjekt er stedet for arbeid, folk og frister. Åpne et prosjekt, legg til oppgaver og personer, så vises det utførte arbeidet der.",
+        "addPerson": "Du legger til en person med en invitasjon: skriv inn kontakten, så bekrefter personen i sin egen konto. Invitasjoner og teamet ditt finner du under team.",
+        "hours": "Timer ligger i timeseksjonen — der ser du dager, uken og timelisten.",
+        "offerService": "Du tilbyr en tjeneste under tjenester: beskriv den, så kan andre virksomheter og personer se den.",
+        "warning": "En advarsel vises når noe kan hindre arbeidet — for eksempel et dokument som utløper eller manglende data. Alle varsler og årsakene ser du under varsler.",
+        "forecast": "En prognose er en beregning ut fra timene som allerede er registrert og arbeidet som er planlagt. Den er en pekepinn, ikke et løfte, og endres med dataene. Planen og tallene finner du under planlegging.",
+        "scheduleWorker": "Du planlegger en ansatt under planlegging: velg dag og prosjekt, og tildel personen på samme sted.",
+        "doneWork": "Utført arbeid ser du der det er registrert — i arbeidsjournalen eller timeseksjonen: registreringer, timer og bekreftelser.",
+        "chips": {
+          "chipHelpProjects": "Åpne prosjekter",
+          "chipHelpPeople": "Team og invitasjoner",
+          "chipHelpPlanning": "Åpne planlegging",
+          "chipHelpServices": "Mine tjenester",
+          "chipHelpJournal": "Arbeidsjournal"
+        }
+      },
       "interestInboxAmbiguous": "Det kan bety to ting — hva vil du se?",
       "chipInterestOnMyNeeds": "Interesse for mine forespørsler",
       "chipMyOwnInterest": "Min egen interesse",

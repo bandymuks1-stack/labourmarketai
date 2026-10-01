@@ -13525,6 +13525,7 @@
       },
       "findWorkInCompanyContext": "Darbo paieška yra tavo asmeninis veiksmas — įmonės erdvėje jos nevykdau. Persijunk į asmeninę erdvę ir paklausk dar kartą.",
       "findWorkInCompanyWhy": "Darbo ieško žmogus, ne įmonė — atsakau iš tavo asmeninės erdvės.",
+      "personalOnlyInCompany": "Tai tavo asmeninis veiksmas — įmonės erdvėje jo nevykdau. Persijunk į asmeninę erdvę ir tęsk ten.",
       "journalAskWhatYouDid": "Ką šiandien dirbai? Įrašyk į lauką „Ką dirbai“ savais žodžiais — pvz. „montavau langus objekte Kaune nuo 8 iki 17“. Pati užklausa į žurnalą neįrašoma.",
       "alsoWorkLog": "Taip pat supratau, kad šiandien dirbai — patikrink ir išsaugok darbo žurnale:",
       "serviceNeedHint": "Tai darbas, kurį reikia atlikti — parodysiu, kas siūlo tokias paslaugas.",
@@ -13535,6 +13536,23 @@
       "chipPartnersServices": "Paslaugų teikėjai",
       "chipPartnersListings": "Rinkos skelbimai",
       "chipPartnersRelations": "Klientai ir partneriai",
+      "productHelp": {
+        "projectUse": "Projektas — tai vieta, kur laikai darbus, žmones ir terminus. Atidaryk projektą, pridėk užduotis ir žmones, o atliktą darbą matysi čia pat.",
+        "addPerson": "Žmogų pridedi kvietimu: įrašai jo kontaktą, o jis patvirtina savo paskyroje. Kvietimus ir komandą rasi komandos skiltyje.",
+        "hours": "Valandos saugomos valandų skiltyje — ten matai dienas, savaitę ir tabelį.",
+        "offerService": "Paslaugą pasiūlai paslaugų skiltyje: aprašai ją, ir ją pamato kiti verslai bei žmonės.",
+        "warning": "Perspėjimas atsiranda, kai kas nors gali sutrukdyti darbui — pavyzdžiui, baigiasi dokumentas ar trūksta duomenų. Visus pranešimus ir jų priežastis matysi pranešimų skiltyje.",
+        "forecast": "Prognozė — tai apskaičiavimas iš jau užfiksuotų valandų ir suplanuotų darbų. Tai ne pažadas, o orientyras, kuris keičiasi kartu su duomenimis. Planą ir skaičius rasi planavime.",
+        "scheduleWorker": "Darbuotoją suplanuoji planavime: pasirink dieną ir projektą, o žmogų priskirk toje pačioje vietoje.",
+        "doneWork": "Atliktą darbą matai ten, kur jis užfiksuotas — darbo žurnale arba valandų skiltyje: įrašai, valandos ir patvirtinimai.",
+        "chips": {
+          "chipHelpProjects": "Atidaryti projektus",
+          "chipHelpPeople": "Komanda ir kvietimai",
+          "chipHelpPlanning": "Atidaryti planavimą",
+          "chipHelpServices": "Mano paslaugos",
+          "chipHelpJournal": "Darbo žurnalas"
+        }
+      },
       "interestInboxAmbiguous": "Tai gali reikšti du dalykus — ką nori pamatyti?",
       "chipInterestOnMyNeeds": "Kas susidomėjo mano poreikiais",
       "chipMyOwnInterest": "Mano susidomėjimai",

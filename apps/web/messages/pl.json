@@ -13525,6 +13525,7 @@
       },
       "findWorkInCompanyContext": "Szukanie pracy to Twoje własne działanie — w przestrzeni firmy go nie uruchamiam. Przełącz się na przestrzeń osobistą i zapytaj ponownie.",
       "findWorkInCompanyWhy": "Pracy szuka człowiek, nie firma — odpowiadam z Twojej przestrzeni osobistej.",
+      "personalOnlyInCompany": "To działanie osobiste — w przestrzeni firmy go nie wykonuję. Przełącz się na przestrzeń osobistą i kontynuuj tam.",
       "journalAskWhatYouDid": "Co dziś robiłeś? Wpisz w polu „Co robiłeś” własnymi słowami — np. „montowałem okna na budowie w Kownie od 8 do 17”. Sama prośba nie jest zapisywana do dziennika.",
       "alsoWorkLog": "Zrozumiałem też, że dziś pracowałeś — sprawdź i zapisz w dzienniku pracy:",
       "serviceNeedHint": "To zadanie do wykonania — pokażę, kto oferuje taką usługę.",
@@ -13535,6 +13536,23 @@
       "chipPartnersServices": "Usługodawcy",
       "chipPartnersListings": "Ogłoszenia rynku",
       "chipPartnersRelations": "Klienci i partnerzy",
+      "productHelp": {
+        "projectUse": "Projekt to miejsce na pracę, ludzi i terminy. Otwórz projekt, dodaj zadania i osoby, a wykonana praca pojawi się od razu tam.",
+        "addPerson": "Osobę dodajesz zaproszeniem: wpisz jej kontakt, a ona potwierdza w swoim koncie. Zaproszenia i zespół znajdziesz w sekcji zespołu.",
+        "hours": "Godziny są w sekcji godzin — tam widzisz dni, tydzień i ewidencję.",
+        "offerService": "Usługę oferujesz w sekcji usług: opisz ją, a inne firmy i osoby będą mogły ją zobaczyć.",
+        "warning": "Ostrzeżenie pojawia się, gdy coś może utrudnić pracę — na przykład kończy się ważność dokumentu lub brakuje danych. Wszystkie powiadomienia i ich przyczyny zobaczysz w sekcji powiadomień.",
+        "forecast": "Prognoza to obliczenie na podstawie już zapisanych godzin i zaplanowanej pracy. To wskazówka, nie obietnica, i zmienia się wraz z danymi. Plan i liczby znajdziesz w planowaniu.",
+        "scheduleWorker": "Pracownika planujesz w planowaniu: wybierz dzień i projekt, a osobę przypisz w tym samym miejscu.",
+        "doneWork": "Wykonaną pracę widzisz tam, gdzie została zapisana — w dzienniku pracy lub w sekcji godzin: wpisy, godziny i potwierdzenia.",
+        "chips": {
+          "chipHelpProjects": "Otwórz projekty",
+          "chipHelpPeople": "Zespół i zaproszenia",
+          "chipHelpPlanning": "Otwórz planowanie",
+          "chipHelpServices": "Moje usługi",
+          "chipHelpJournal": "Dziennik pracy"
+        }
+      },
       "interestInboxAmbiguous": "To może znaczyć dwie rzeczy — co chcesz zobaczyć?",
       "chipInterestOnMyNeeds": "Zainteresowanie moimi zapytaniami",
       "chipMyOwnInterest": "Moje zgłoszenia",
