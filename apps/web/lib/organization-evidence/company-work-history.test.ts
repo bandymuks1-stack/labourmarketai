@@ -86,8 +86,8 @@ describe("buildCompanyWorkHistory", () => {
       [rec({ id: "1", workObjectId: "o1" }), rec({ id: "2", workObjectId: "o2" })],
       objects,
     );
-    expect(h.places.find((p) => p.key === "o:o1")!.scope).toEqual({ hasProject: false, hasAddress: false });
-    expect(h.places.find((p) => p.key === "o:o2")!.scope).toEqual({ hasProject: true, hasAddress: true });
+    expect(h.places.find((p) => p.key === "o:o1")!.scope).toEqual({ hasProject: false, hasAddress: false, addressText: null });
+    expect(h.places.find((p) => p.key === "o:o2")!.scope).toEqual({ hasProject: true, hasAddress: true, addressText: "Street 1, Town" });
   });
 
   it("never counts a withdrawn record", () => {

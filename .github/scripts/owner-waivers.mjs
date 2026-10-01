@@ -584,6 +584,13 @@ export const SCOPED_OWNER_WAIVERS = [
       //         sitemap already declares (one helper). Metadata still reads
       //         only the anonymous projection.
       1991, 1993,
+      // OWNER APPROVAL 2026-10-01, verbatim: "Patvirtinu #2045 įtraukimą į abu
+      // /jobs owner-waiver sąrašus."
+      // #2045 — a typed word that is exactly one catalogue profession in the
+      //         reader's language redirects to the SAME profession filter
+      //         (no second search); the search box takes the full row on
+      //         phones. No new route, projection, auth or schema change.
+      2045,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.

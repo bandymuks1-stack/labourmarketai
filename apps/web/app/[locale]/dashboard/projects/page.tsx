@@ -34,6 +34,7 @@ import { OrganizationDoorsServer } from "@/components/app/organization/organizat
 import { ManagerScopeNotice } from "@/components/app/organization/manager-scope-notice";
 import { getCompanyProjectContext } from "@/lib/company/project-context";
 import { MapPin } from "lucide-react";
+import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
 import { type Role } from "@/lib/auth/actions";
 
 export const dynamic = "force-dynamic";
@@ -210,7 +211,13 @@ export default async function ProjectsPage({
   const withAssignments = await Promise.all(
     activeProjects.map(async (p) => ({
       ...p,
-      assignments: await listProjectAssignments(p.id),
+      assignments: await Promise.all(
+        (await listProjectAssignments(p.id)).map(async (a) => ({
+          ...a,
+          // THE one photo rule (D1): the database decides; null = initials.
+          avatarUrl: a.workerId ? await getAvatarForVisibleWorker(a.workerId) : null,
+        })),
+      ),
     })),
   );
 
@@ -251,6 +258,7 @@ export default async function ProjectsPage({
     reservationAlternativesTitle: t("assign.reservation.alternativesTitle"),
     reservationSwap: t("assign.reservation.swap"),
     reservationUndo: t("assign.reservation.undo"),
+    reservationKeep: t("assign.reservation.keep"),
     reservationDecided: t("assign.reservation.decided"),
     reservationSource: {
       project: t("assign.reservation.source.project"),

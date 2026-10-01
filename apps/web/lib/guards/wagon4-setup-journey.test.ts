@@ -73,7 +73,7 @@ describe("Wagon 4 — the guide exists and a fresh worker can reach it in one cl
         0,
       ),
     );
-    expect(fresh).toMatchObject({ kind: "action", dim: "work", href: "/dashboard/profile" });
+    expect(fresh).toMatchObject({ kind: "action", dim: "work", href: "/dashboard/profile#profile-edit" });
   });
 
   it("the other identities keep their own first screens", () => {

@@ -45,6 +45,17 @@ export interface LinkedCompanyWorker {
    *  the owner provisions the bridge (migration 0032 RPC) or the read RPC is
    *  applied. The journal-review toggle stays disabled until this is true. */
   readonly engagementContextLinked: boolean;
+  /** Identity-card facts (2026-10-01) - the worker's OWN stated availability
+   *  and country, read through the same RLS-scoped `workers` join. Null when
+   *  not stated; never inferred. */
+  readonly availabilityStatus: string | null;
+  readonly availableFrom: string | null;
+  readonly locationCountry: string | null;
+  /** Titles of the projects this worker is ACTIVELY assigned to, read under
+   *  the caller's RLS (can_manage_project). Empty when none or unreadable -
+   *  the card only renders the line when there is at least one title, so an
+   *  unreadable read is never presented as "unassigned". */
+  readonly currentProjects: readonly string[];
 }
 
 export interface CompanyWorkerInvitation {
@@ -87,7 +98,8 @@ export async function listActiveCompanyWorkers(
   caller?: { readonly supabase: SupabaseClient },
 ): Promise<CompanyWorkersListResult> {
   const supabase = caller?.supabase ?? (await createClient());
-  const WORKER_JOIN = "workers(profile_id, display_name, profiles(email))";
+  const WORKER_JOIN =
+    "workers(profile_id, display_name, availability_status, available_from, current_location_country, profiles(email))";
   const BASE_COLS = `worker_id, status, created_at, ${WORKER_JOIN}`;
   const BRIDGE_COLS = `worker_id, status, created_at, operations_role, operations_title, journal_review_enabled, ${WORKER_JOIN}`;
   const run = (cols: string) =>
@@ -117,6 +129,11 @@ export async function listActiveCompanyWorkers(
     "p_company_id",
     companyId,
   );
+  const projectsByWorker = await readActiveProjectTitles(
+    supabase,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (data ?? []).map((r: any) => r.worker_id as string),
+  );
   const rows: LinkedCompanyWorker[] = (data ?? []).map(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (r: any) => ({
@@ -131,9 +148,42 @@ export async function listActiveCompanyWorkers(
       operationsTitle: (r.operations_title as string | null) ?? null,
       journalReviewEnabled: r.journal_review_enabled === true,
       engagementContextLinked: linkedWorkerIds.has(r.worker_id as string),
+      availabilityStatus: (r.workers?.availability_status as string | null) ?? null,
+      availableFrom: (r.workers?.available_from as string | null) ?? null,
+      locationCountry: (r.workers?.current_location_country as string | null) ?? null,
+      currentProjects: projectsByWorker.get(r.worker_id as string) ?? [],
     }),
   );
   return { kind: "ok", rows };
+}
+
+/**
+ * Active project titles per worker, for the team identity card. One bounded
+ * read under the caller's RLS; any error degrades to "no titles" (the card
+ * then simply omits the line - it never claims the person is unassigned).
+ */
+async function readActiveProjectTitles(
+  supabase: SupabaseClient,
+  workerIds: readonly string[],
+): Promise<ReadonlyMap<string, readonly string[]>> {
+  const out = new Map<string, string[]>();
+  if (workerIds.length === 0) return out;
+  const res = await asAny(supabase)
+    .from("project_worker_assignments")
+    .select("worker_id, projects(title)")
+    .in("worker_id", [...workerIds])
+    .eq("status", "active")
+    .limit(500);
+  if (res.error || !Array.isArray(res.data)) return out;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  for (const r of res.data as any[]) {
+    const title = typeof r.projects?.title === "string" ? r.projects.title.trim() : "";
+    if (!title) continue;
+    const list = out.get(r.worker_id as string) ?? [];
+    if (!list.includes(title)) list.push(title);
+    out.set(r.worker_id as string, list);
+  }
+  return out;
 }
 
 /**

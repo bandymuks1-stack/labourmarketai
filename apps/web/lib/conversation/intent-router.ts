@@ -91,6 +91,8 @@ export type ConversationIntent =
   | "find-partners"
   /** "Kaip pridėti žmogų?" / "Kur mano valandos?" — HOW to use the product, answered in words with the door that does it (product-help-topics.ts). */
   | "product-help"
+  /** "Parašyk Jonui" / "atidaryk pokalbį su Jonu" — open the ONE conversation with a named person (chat-open-conversation). */
+  | "open-conversation"
   | "context" // "ką tu apie mane žinai?"
   /**
    * "Ką galiu padaryti šioje paskyroje?" — WHAT CAN I ACHIEVE FROM HERE.
@@ -294,8 +296,17 @@ type IntentRule = { intent: ConversationIntent; patterns: Pattern[] };
  * the `u` flag), so short stems like `cv`/`job` stay properly bounded across
  * every launch language.
  */
+// A COMPACT letter/number class over the scripts the product speaks (Latin
+// incl. extended + additional, Greek, Cyrillic, Georgian, digits). It replaced
+// `[\p{L}\p{N}]` inside the boundary because V8 expands the property classes
+// into hundreds of ranges, eight times per boundary, across ~700 patterns: the
+// first sentence of a process cost ~2.8 s to compile and now costs ~90 ms
+// (router-boundary-cost.test.ts). Do not put `\p{...}` back in the boundary.
+const WORD_CLASS =
+  "[0-9A-Za-z\\u00C0-\\u024F\\u0370-\\u03FF\\u0400-\\u052F\\u10A0-\\u10FF\\u1C90-\\u1CBF\\u1E00-\\u1EFF]";
+
 export const UNICODE_WORD_BOUNDARY =
-  "(?:(?<![\\p{L}\\p{N}])(?=[\\p{L}\\p{N}])|(?<=[\\p{L}\\p{N}])(?![\\p{L}\\p{N}]))";
+  "(?:(?<!" + WORD_CLASS + ")(?=" + WORD_CLASS + ")|(?<=" + WORD_CLASS + ")(?!" + WORD_CLASS + "))";
 
 const UB = UNICODE_WORD_BOUNDARY;
 
@@ -3226,6 +3237,26 @@ const RULES: IntentRule[] = [
       p("\\bvertimą\\b", 2),
       p("(į|to|на)\\s+(olandų|nyderland|dutch|nederlands|немецк|anglų|english)", 1),
       p("(auf|ins|naar(\\s+het)?)\\s+(deutsch|englisch|niederländisch|nederlands|engels|duits|litouws)", 1),
+    ],
+  },
+  {
+    // OPEN THE CONVERSATION WITH A NAMED PERSON (owner 2026-10-01). The ONE
+    // conversation system is the Messages page; the chat only resolves WHO and
+    // opens it (lib/communication/chat-open-conversation.ts) — it sends nothing.
+    // Every pattern requires a person-like token after the verb, and the
+    // `parašyk` form refuses the targets `write-employer` owns ("šiai įmonei",
+    // "darbdaviui", "man") and the things one writes that are not a person
+    // ("laišką", "CV", "ataskaitą"), so that route keeps its sentences.
+    intent: "open-conversation",
+    patterns: [
+      p("\\b(?:parasyk|parasykite|rasyk)\\s+(?:(?:jam|jai|zinute|zinutes)\\s+)?(?!siai\\b|sitam\\b|siam\\b|tam\\b|tai\\b|visiems\\b|imonei|imonej|darbdav|man\\b|kam\\b|laisk|cv\\b|ataskait|santrauk|pranesim|aprasym|tekst|atsakym|pasiulym|skelbim|zinut)[^\\s]{3,}", 9),
+      p("(?:pokalb\\w*|pasikalb\\w*)\\s+su\\s+[^\\s]{3,}", 12),
+      p("\\bsusisiek\\s+su\\s+(?!siuo\\b|sia\\b|siai\\b|imone)[^\\s]{3,}", 12),
+      p("\\b(?:message|chat\\s+with|talk\\s+to|open\\s+(?:a\\s+)?(?:conversation|chat)\\s+with)\\s+(?!the\\b|this\\b|my\\b|them\\b|an?\\b|company\\b|employer\\b|us\\b|me\\b|support\\b)[^\\s]{2,}", 10),
+      p("(?:напиши|написать|свяжись\\s+с|открой\\s+(?:чат|диалог)\\s+с)\\s+(?!этой\\b|этому\\b|компании|работодател)[^\\s]{3,}", 10),
+      p("\\b(?:schreib|schreibe|kontaktiere|offne\\s+(?:ein\\s+)?(?:gesprach|chat)\\s+mit)\\s+(?!der\\b|dieser\\b|dem\\b|mir\\b|uns\\b)[^\\s]{3,}", 10),
+      p("\\b(?:open\\s+een\\s+(?:gesprek|chat)\\s+met|chat\\s+met|stuur)\\s+(?!de\\b|dit\\b|mij\\b|ons\\b)[^\\s]{3,}", 10),
+      p("\\b(?:napisz\\s+do|skontaktuj\\s+sie\\s+z|otworz\\s+(?:rozmowe|czat)\\s+z)\\s+(?!tej\\b|tego\\b|mnie\\b)[^\\s]{3,}", 10),
     ],
   },
   {

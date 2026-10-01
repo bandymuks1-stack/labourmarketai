@@ -158,7 +158,7 @@
       "pending": "Czeka na przegląd",
       "confirmed": "Potwierdzone"
     },
-    "projectNote": "Wpisy będzie można powiązać z projektem — model danych jest gotowy, ale żaden wpis nie jest jeszcze powiązany i nic nie wypełnia się automatycznie. Warstwa projektów / budów / klientów jest wdrażana osobno.",
+    "projectNote": "Wpisy można powiązać z projektem. Nic nie wypełnia się automatycznie.",
     "reviewClarity": {
       "lead": "Twój przegląd zamienia samodzielnie zadeklarowany wpis pracownika w potwierdzony dowód. Może to zrobić tylko kierownik, właściciel lub kierownik po stronie klienta — każde potwierdzenie to realna ludzka decyzja.",
       "actionsTitle": "Co robi każda z akcji",

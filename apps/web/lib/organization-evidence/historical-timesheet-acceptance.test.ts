@@ -1,3 +1,4 @@
+import { splitAddress } from "./address-split";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { EVIDENCE_IMPORT_CAPABILITIES } from "@/lib/capabilities/evidence-import-capabilities";
@@ -251,13 +252,16 @@ describe("T6 totals are never distributed", () => {
 });
 
 describe("T7 address variants → one object", () => {
-  it("[pin → PR-5] objects created by the import carry no address, no city and no project today", () => {
+  it("objects created by the import carry an address ONLY when the label is unmistakably one (address pass-through); never a project", () => {
     expect(run.db.tables.objects.length).toBeGreaterThan(0);
     for (const o of run.db.tables.objects) {
-      expect(o.address_line).toBeNull();
-      expect(o.city).toBeNull();
+      const expected = splitAddress(o.name as string);
+      expect(o.address_line ?? null).toBe(expected?.addressLine ?? null);
+      expect(o.city ?? null).toBe(expected?.city ?? null);
       expect(o.project_id).toBeNull();
     }
+    // at least one fixture object really is address-shaped, so the pass-through is exercised
+    expect(run.db.tables.objects.some((o) => o.address_line !== null)).toBe(true);
   });
   it.todo("[PR-5] O1 / O1b / O2 / O4 with address-split:v1; a different house number is never merged; 4 objects in FX");
 });

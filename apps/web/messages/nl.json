@@ -88,7 +88,7 @@
     "panelTitle": "Openbaar bedrijfsprofiel",
     "panelIntro": "Publiceer een openbare pagina voor uw bedrijf — te delen via labourmarket.ai/business/uw-naam. Standaard uit.",
     "viewPublic": "Openbare pagina bekijken",
-    "notAvailable": "Nog niet beschikbaar.",
+    "notAvailable": "Momenteel niet beschikbaar.",
     "saved": "Opgeslagen.",
     "enableLabel": "Mijn bedrijfsprofiel openbaar maken",
     "enableHint": "Indien aan, worden uw identiteit, openbare contactgegevens, actieve diensten en actieve advertenties op een openbare pagina getoond. Privégegevens worden nooit getoond.",
@@ -118,7 +118,7 @@
     "title": "Marktplaats-advertenties",
     "myTitle": "Mijn advertenties",
     "intro": "Plaats een werkmiddel dat u aanbiedt of zoekt. Alleen actieve advertenties zijn zichtbaar voor anderen.",
-    "notAvailable": "Nog niet beschikbaar.",
+    "notAvailable": "Momenteel niet beschikbaar.",
     "empty": "Nog geen advertenties. Voeg uw eerste werkmiddel toe.",
     "addButton": "Advertentie toevoegen",
     "browseTitle": "Actieve advertenties bekijken",
@@ -1807,7 +1807,9 @@
         "unknown": "Te weinig gegevens om te vergelijken"
       },
       "opportunity": "{count, plural, =1 {Tot 1 persoon is vrij vanaf {date}} other {Tot # personen zijn vrij vanaf {date}}}",
-      "opportunityCta": "Zoek werk"
+      "opportunityCta": "Zoek werk",
+      "interest": "{count, plural, =1 {1 persoon toonde interesse in uw vraag} other {# personen toonden interesse in uw vraag}}",
+      "interestCta": "Bekijk wie"
     },
     "attention": {
       "heading": "Heeft u nodig",
@@ -2140,7 +2142,7 @@
       },
       "workersBlocker": {
         "title": "Er is iets misgegaan",
-        "subtitle": "Het bedrijfspad is tijdelijk geblokkeerd op de DB-laag. Echte werknemerskoppeling + uitnodigingen werken al aan de uitzendbureaukant.",
+        "subtitle": "Momenteel niet beschikbaar.",
         "statusLabel": "Er is iets misgegaan",
         "statusBody": "Beheer van bedrijfswerknemers wordt nog voorbereid en wordt later ingeschakeld.",
         "nextStep": "Zelfaanmelding voor werknemers blijft altijd open."
@@ -2252,6 +2254,12 @@
         "statusInvited": "Uitnodiging aangemaakt (er wordt geen e-mail verstuurd). De genodigde ziet de uitnodiging na het inloggen met dit e-mailadres.",
         "statusAlreadyPending": "Er bestaat al een openstaande uitnodiging voor dit e-mailadres vanuit jouw bedrijf.",
         "statusAlreadyLinked": "Deze werknemer is al aan jouw bedrijf gekoppeld.",
+        "statusWordActive": "Actief",
+        "statusWordPending": "Uitgenodigd",
+        "statusWordAccepted": "Geaccepteerd",
+        "statusWordCancelled": "Geannuleerd",
+        "statusWordExpired": "Verlopen",
+        "statusWordEnded": "Beëindigd",
         "statusNotOwner": "Actie geweigerd: je bent niet de eigenaar van het bedrijf.",
         "statusInvalidEmail": "Ongeldig e-mailadres.",
         "statusError": "Er is iets misgegaan. Probeer het opnieuw.",
@@ -2261,7 +2269,14 @@
         "columnEmail": "E-mail",
         "columnStatus": "Status",
         "columnInvitedAt": "Datum",
-        "openProfile": "Profiel bekijken"
+        "openProfile": "Profiel bekijken",
+        "identity": {
+          "availability": {
+            "available": "Beschikbaar",
+            "busy": "Bezet",
+            "unavailable": "Niet beschikbaar"
+          }
+        }
       },
       "scoutingBridge": {
         "title": "Vind werknemers voor deze personeelsbehoefte",
@@ -3473,11 +3488,11 @@
     "retry": "Probeer opnieuw",
     "viewProfile": "Profiel bekijken",
     "importPrompt": "Heb je een cv-bestand? Een cv helpt je ervaring uit te leggen.",
-    "importComingSoon": "Vaardigheden uit een cv lezen is nog niet actief.",
+    "importComingSoon": "Momenteel niet beschikbaar.",
     "importAddManually": "Voeg je vaardigheden handmatig toe of via journaalvermeldingen.",
     "importNotSaved": "Geselecteerd: {file}. Het bestand wordt nog niet geüpload of opgeslagen.",
     "customPrompt": "Kun je je vaardigheid niet vinden?",
-    "customComingSoon": "vrije invoer nog niet actief",
+    "customComingSoon": "Momenteel niet beschikbaar.",
     "textFirst": {
       "title": "Vertel ons wat je doet",
       "helper": "Schrijf in je eigen woorden of upload een cv. We stellen vaardigheden, werkrichtingen, rollen en cv-vermeldingen voor — maar jij selecteert elke suggestie. Niets wordt opgeslagen zonder jouw selectie.",
@@ -4723,6 +4738,7 @@
         "event_demand_interest_reviewed": "Een bedrijf heeft je interesse als bekeken gemarkeerd",
         "event_weekly_digest": "Je wekelijkse samenvatting van werk en kansen staat klaar",
         "event_saved_search_match": "Een opgeslagen zoekopdracht heeft nieuwe resultaten",
+        "event_job_alert": "Er is een nieuwe baan die bij je zoekopdracht past",
         "event_invitation_accepted": "Iemand heeft je uitnodiging aangenomen",
         "event_weekly_digest_profile_completion": "Om je passende banen te tonen, bevestig welk werk je doet",
         "event_weekly_digest_journal": "Het weekoverzicht van je werkjournaal is klaar"
@@ -6020,6 +6036,7 @@
         "alternativesTitle": "Vrij in deze periode",
         "swap": "In plaats daarvan toewijzen",
         "undo": "Toewijzing ongedaan maken",
+        "keep": "Behouden",
         "decided": "Klaar",
         "unknown": "We konden niet bevestigen dat deze dagen vrij zijn. Dat is niet hetzelfde als vrij.",
         "source": {
@@ -6434,11 +6451,14 @@
   "marketplace": {
     "pageTitle": "Diensten ontdekken en aanvragen",
     "pageLead": "Vind actieve diensten die mensen aanbieden, stuur een aanvraag en volg de status — één plek voor de hele uitwisseling.",
-    "notAvailable": "Nog niet beschikbaar.",
+    "notAvailable": "Momenteel niet beschikbaar.",
     "discoverHeading": "Actieve diensten",
     "discoverEmpty": "Nog geen actieve diensten om te tonen.",
     "request": "Aanvragen",
     "requested": "Aangevraagd",
+    "partnershipBadge": "Zoekt partners",
+    "partnershipRequest": "Partnerschap aanbieden",
+    "requestMessagePlaceholder": "Vertel de aanbieder wat je nodig hebt (optioneel)",
     "remoteBadge": "Op afstand",
     "outgoingHeading": "Mijn aanvragen",
     "outgoingEmpty": "Je hebt nog geen dienst aangevraagd.",
@@ -6526,7 +6546,7 @@
     "pageLead": "Suggesties op basis van echte werkactiviteit, bewaard zodat een persoon ze kan beoordelen. Niets hier wordt op zichzelf als bewezen behandeld.",
     "title": "Beoordelingswachtrij",
     "lead": "Signalen worden suggesties, en een persoon beslist. Leren beslist nooit iets op zichzelf.",
-    "notAvailable": "Nog niet beschikbaar.",
+    "notAvailable": "Momenteel niet beschikbaar.",
     "empty": "Nog niets om te beoordelen.",
     "kind": {
       "confirm_skill": "Suggestie voor vaardigheidserkenning",
@@ -6571,6 +6591,7 @@
     "notAvailable": "Momenteel niet beschikbaar.",
     "empty": "Nog geen dienstenaanbod. Voeg de eerste echte dienst toe die je aanbiedt.",
     "addButton": "Dienst toevoegen",
+    "addPartnership": "Partners zoeken",
     "form": {
       "titleLabel": "Diensttitel",
       "titlePlaceholder": "bijv. Binnenschilderwerk",
@@ -7657,7 +7678,7 @@
     "eyebrow": "MIJN DOCUMENTEN",
     "title": "Mijn documenten",
     "subtitle": "Wat je hebt, wat ontbreekt en de volgende stap — per land.",
-    "preparing": "Documentgereedheid wordt voorbereid — het gaat live zodra de documentopslaglaag is beoordeeld en ingeschakeld. Hier is nog niets actief.",
+    "preparing": "Momenteel niet beschikbaar.",
     "reports": {
       "title": "Rapporten & exports",
       "intro": "Stel een printklaar rapport samen uit je eigen data. PDF werkt via de print-/opslaanfunctie van je browser; Excel en Word zijn nog niet beschikbaar.",
@@ -7714,6 +7735,7 @@
     "country": {
       "title": "Wat ontbreekt voor een land",
       "help": "Kies een bestemmingsland om te zien welke documenten het vraagt.",
+      "mine": "Jouw voorkeurslanden staan vooraan.",
       "unknown": "De lijst met vereisten voor {country} is nog niet samengesteld — we tonen liever niets dan te gokken.",
       "next": "Volgende stap: regel — {doc}.",
       "ok": "Alle samengestelde vereisten voor {country} zijn gedekt."
@@ -7741,7 +7763,7 @@
     "consent": {
       "title": "Wat mijn uitzendbureau mag zien",
       "explainer": "Als je dit inschakelt, ziet JOUW uitzendbureau alleen aantallen per categorie van je documentgereedheid (geldig / verloopt binnenkort / vraagt aandacht). Het ziet nooit documentinhoud, bestanden, notities of typen. Standaard staat het uit; je kunt het altijd weer uitschakelen.",
-      "needsGate": "De toestemmingslaag is in voorbereiding — die wordt actief nadat de door de eigenaar vrij te geven wijziging is toegepast.",
+      "needsGate": "Momenteel niet beschikbaar.",
       "onLabel": "Aggregaten delen: AAN",
       "offLabel": "Aggregaten delen: UIT",
       "onHint": "Je uitzendbureau ziet alleen aantallen. Tik om uit te schakelen.",
@@ -8313,7 +8335,7 @@
     "demand": {
       "title": "Open vraag",
       "humanNote": "\"Wij kunnen aanbieden\" is jouw voorstel op een aanvraag — de definitieve match wordt altijd door een persoon aan de platformkant vastgelegd.",
-      "needsGate": "Zichtbaarheid van open vraag voor uitzendbureaus is in voorbereiding — dit wordt actief nadat de door de eigenaar vrij te geven wijziging is toegepast.",
+      "needsGate": "Momenteel niet beschikbaar.",
       "empty": "Op dit moment geen open aanvragen.",
       "noRole": "Rol niet gespecificeerd",
       "teamSize": "{n} mensen",
@@ -8370,7 +8392,7 @@
     "needsSetup": "Laden is niet gelukt. Probeer het opnieuw.",
     "noCandidates": "Nog geen passende werknemers voor deze personeelsbehoefte. Matches verschijnen naarmate werknemers journaal-onderbouwde vaardigheden toevoegen — kijk later terug of verbreed de behoefte.",
     "namePlaceholder": "Werknemer",
-    "skillFit": "{pct}% — {matched}/{total} vereiste vaardigheden, {confirmed} door manager bevestigd",
+    "skillFit": "{matched}/{total} vereiste vaardigheden, {confirmed} door manager bevestigd",
     "evidence": "Bewijs — bevestigd: {confirmed} · journaal: {journal} · zelf opgegeven: {self}",
     "shortlistError": "Opslaan is niet gelukt. Probeer opnieuw.",
     "footnote": "Matches worden deterministisch berekend, alleen voor deze personeelsbehoefte. Geen globale rating, geen nepkandidaten.",
@@ -8439,7 +8461,8 @@
       "opened": "Gesprek geopend — stuur de werknemer een bericht.",
       "view": "Gesprek openen",
       "error": "Kon het gesprek niet openen. Probeer het opnieuw.",
-      "limitReached": "Daglimiet voor nieuwe gesprekken bereikt. Probeer het morgen opnieuw."
+      "limitReached": "Daglimiet voor nieuwe gesprekken bereikt. Probeer het morgen opnieuw.",
+      "shortlistFirst": "Zet de persoon eerst op je shortlist, daarna kun je een gesprek aanvragen."
     },
     "how": {
       "title": "Hoe matching werkt",
@@ -8498,7 +8521,7 @@
       "markContacted": "Contact opnemen in het platform",
       "internalNote": "“Beoordeeld” is een interne registratie. “Contact” opent een gesprek binnen het platform; er wordt niets buiten het platform verstuurd.",
       "error": "Kon niet opslaan. Probeer het opnieuw.",
-      "notAvailable": "Bevestiging is nog niet ingeschakeld."
+      "notAvailable": "Momenteel niet beschikbaar."
     },
     "lifecycle": {
       "confirm": "Herkende vaardigheden bevestigen",
@@ -8534,7 +8557,7 @@
       "granted": "De werker heeft het delen van contactgegevens goedgekeurd.",
       "declined": "De werker heeft het vorige verzoek afgewezen.",
       "expired": "Het vorige verzoek is verlopen.",
-      "unavailable": "Contactverzoeken zijn voorbereid maar nog niet ingeschakeld.",
+      "unavailable": "Momenteel niet beschikbaar.",
       "rateLimited": "Verzoeklimiet bereikt (10 open, 30 per dag). Probeer het later opnieuw.",
       "noOrganization": "Maak eerst de organisatie van uw bedrijf aan.",
       "fieldsNote": "Vraagt de werker om naam, telefoon en e-mail te delen. De werker beslist — zonder goedkeuring wordt niets getoond.",
@@ -8601,6 +8624,14 @@
         "accepted": "Aanvaard",
         "closed": "Gesloten"
       }
+    },
+    "identity": {
+      "why": "Waarom deze persoon relevant is",
+      "skills": "Relevante vaardigheden en waarop ze rusten",
+      "readiness": "Beschikbaarheid, gereedheid en documenten",
+      "openTo": "Ook open voor: {countries}",
+      "skillCount": "{matched} van {total} vereiste vaardigheden",
+      "nameHidden": "Naam en contactgegevens verschijnen pas wanneer de persoon dat toestaat."
     }
   },
   "planBoundary": {
@@ -9492,7 +9523,7 @@
     "external": {
       "sectionTitle": "Openbare vacatures",
       "sectionNote": "Advertenties van officiële publieke arbeidsbureaus. Ze worden door de werkgever bij de bron gepubliceerd — labourmarket.ai toont ze zodat u ze kunt vinden; solliciteren gaat via de originele advertentie.",
-      "shownOfTotal": "top {shown} van {total}",
+      "shownOfTotal": "{shown} van {total} getoond",
       "bandBest": "Past het best",
       "bandPossible": "Mogelijk passend",
       "bandExplore": "Overige advertenties",
@@ -9644,6 +9675,14 @@
         "LOOKING_FOR_WORK": "Op zoek naar werk",
         "LOOKING_FOR_PROJECTS": "Op zoek naar projecten"
       }
+    },
+    "jobAlerts": {
+      "title": "Meldingen over nieuwe banen",
+      "ready": "Zodra er een nieuwe echte baan verschijnt die past bij je beroep en de gekozen landen, zie je die in je meldingen. Een baan zonder vermeld loon wordt nooit verborgen vanwege het loon.",
+      "missing": "Om meldingen over nieuwe banen te krijgen, geef aan:",
+      "profession": "welk werk je doet",
+      "country": "in welke landen je wilt werken",
+      "cta": "Mijn voorkeuren invullen"
     }
   },
   "workerIntake": {
@@ -9805,7 +9844,7 @@
     "expYears": "jr",
     "none": "—",
     "empty": "Geen kandidaten voldoen aan deze filters.",
-    "needsMigration": "De tabellen met het werknemersaanbod zijn nog niet beschikbaar.",
+    "needsMigration": "Momenteel niet beschikbaar.",
     "error": "Kon de kandidatenpool niet laden.",
     "colPermission": "Toestemming werknemer",
     "permissionGranted": "Zichtbaarheid verleend",
@@ -10607,7 +10646,7 @@
       "reconfirmed": "Dank u — bevestigd.",
       "withdrawDeclaration": "Vertegenwoordig mij niet meer",
       "withdrawnDeclarationNote": "U wordt niet langer vertegenwoordigd buiten LabourMarket.ai.",
-      "needsMigration": "Deze functie is nog niet beschikbaar.",
+      "needsMigration": "Momenteel niet beschikbaar.",
       "errorGeneric": "Er ging iets mis. Er is niets gewijzigd.",
       "errorUnknownIntent": "Kies uw huidige situatie.",
       "errorAvailableFromRequired": "Geef de datum waarop u kunt beginnen.",
@@ -10899,6 +10938,18 @@
       "partial": "{count} daarvan konden niet volledig worden geteld — iets echts heeft geen datums, dus het getal hierboven is een ondergrens.",
       "unknown": "{count} konden helemaal niet worden gelezen. Dat is niet hetzelfde als vrij.",
       "denominatorNote": "Geteld in kalenderdagen. We leggen geen contracturen vast, dus dit is geen fte-cijfer."
+    },
+    "rosterTimeline": {
+      "byPerson": "Mensen",
+      "byProject": "Projecten",
+      "prev": "Eerder",
+      "next": "Daarna",
+      "today": "Vandaag",
+      "dateLabel": "Vanaf datum",
+      "go": "Ga",
+      "away": "Afwezig",
+      "outside": "{count} meer buiten deze periode",
+      "nothing": "Niets geregistreerd in deze periode"
     },
     "committedWhere": {
       "title": "Wie is waar ingezet",
@@ -11487,7 +11538,7 @@
     "saving": "Opslaan…",
     "saved": "Voorkeuren opgeslagen.",
     "error": "Opslaan mislukt. Probeer het opnieuw.",
-    "needsMigration": "Dit onderdeel is nog niet ingeschakeld — er is niets opgeslagen.",
+    "needsMigration": "Momenteel niet beschikbaar. Er is niets opgeslagen.",
     "v2": {
       "title": "Extra werkvoorkeuren",
       "hint": "Dezelfde regel geldt — alles wat op “Niet opgegeven” blijft staan, blijft niet opgegeven.",
@@ -11502,7 +11553,7 @@
       "licenceCategories": "Rijbewijscategorieën",
       "ownVehicle": "Ik heb een eigen voertuig",
       "ownTools": "Ik heb eigen gereedschap",
-      "notEnabled": "Deze extra voorkeuren zijn nog niet ingeschakeld — hier wordt voorlopig niets opgeslagen.",
+      "notEnabled": "Momenteel niet beschikbaar.",
       "notSaved": "Opgeslagen, behalve de extra voorkeuren — dat onderdeel is nog niet ingeschakeld."
     }
   },
@@ -11517,7 +11568,7 @@
     "adding": "Toevoegen…",
     "remove": "Verwijderen",
     "empty": "Nog geen talen toegevoegd.",
-    "notEnabled": "Dit onderdeel is nog niet ingeschakeld — er is niets opgeslagen.",
+    "notEnabled": "Momenteel niet beschikbaar. Er is niets opgeslagen.",
     "error": "Opslaan is mislukt. Probeer het opnieuw.",
     "invalid": "Kies een taal en een niveau."
   },
@@ -11540,7 +11591,7 @@
     "importNote": "Automatisch importeren vanaf deze sites wordt niet aangeboden. Upload een geëxporteerd cv-bestand in de profieleditor om uw gegevens over te nemen.",
     "importLink": "Profieleditor openen",
     "empty": "Nog geen externe profielen gekoppeld.",
-    "notEnabled": "Dit onderdeel is nog niet ingeschakeld — er is niets opgeslagen.",
+    "notEnabled": "Momenteel niet beschikbaar. Er is niets opgeslagen.",
     "error": "Opslaan is mislukt. Probeer het opnieuw.",
     "invalid": "Voer een volledige https://-link in en kies een site.",
     "platformNames": {
@@ -12082,7 +12133,7 @@
       "cancel": "Annuleren",
       "remove": "Verwijderen",
       "empty": "Nog geen opleidingsitems.",
-      "notEnabled": "Dit onderdeel is voorbereid maar nog niet ingeschakeld.",
+      "notEnabled": "Momenteel niet beschikbaar.",
       "error": "Opslaan mislukt. Probeer opnieuw.",
       "invalid": "Ongeldige waarde.",
       "limit": "Limiet bereikt.",
@@ -12116,7 +12167,7 @@
       "cancel": "Annuleren",
       "remove": "Verwijderen",
       "empty": "Nog geen prestaties.",
-      "notEnabled": "Dit onderdeel is voorbereid maar nog niet ingeschakeld.",
+      "notEnabled": "Momenteel niet beschikbaar.",
       "error": "Opslaan mislukt. Probeer opnieuw.",
       "invalid": "Ongeldige waarde.",
       "limit": "Limiet bereikt.",
@@ -12152,7 +12203,7 @@
     "discardedLabel": "Verwijderd",
     "replace": "Vervangen",
     "conflict": "Er is al een andere waarde opgeslagen: {value}",
-    "needsMigration": "Dit onderdeel is voorbereid maar nog niet ingeschakeld — het item is niet opgeslagen.",
+    "needsMigration": "Momenteel niet beschikbaar. Er is niets opgeslagen.",
     "error": "Opslaan mislukt. Probeer opnieuw.",
     "invalid": "Ongeldige waarde.",
     "aiHint": "AI-suggestie — controleer vóór het opslaan",
@@ -13568,6 +13619,11 @@
       "findWorkInCompanyContext": "Werk zoeken is je eigen handeling — in de bedrijfsruimte voer ik die niet uit. Schakel over naar je persoonlijke ruimte en vraag het opnieuw.",
       "findWorkInCompanyWhy": "Een persoon zoekt werk, geen bedrijf — ik antwoord vanuit je persoonlijke ruimte.",
       "personalOnlyInCompany": "Dat is een persoonlijke actie — in een bedrijfsomgeving voer ik die niet uit. Schakel over naar je persoonlijke ruimte en ga daar verder.",
+      "openConversationOpening": "Ik open het gesprek met {name}.",
+      "openConversationNone": "Die persoon heb ik niet gevonden onder je gesprekspartners of in je team. Je berichten staan bij berichten.",
+      "openConversationWhich": "Welke persoon bedoel je?",
+      "openConversationNoPermission": "Ik kan geen gesprek met {name} openen — daarvoor heb je geen toestemming.",
+      "openConversationFailed": "Het gesprek kon niet worden geopend. Probeer het opnieuw of open je berichten.",
       "journalAskWhatYouDid": "Wat heb je vandaag gedaan? Schrijf het in het veld „Wat je deed“ in je eigen woorden — bijv. „ramen gemonteerd op de locatie Kaunas van 8 tot 17“. Het verzoek zelf wordt niet in het dagboek opgeslagen.",
       "alsoWorkLog": "Ik begreep ook dat je vandaag hebt gewerkt — controleer het en sla het op in je werkjournaal:",
       "serviceNeedHint": "Dat is een klus — ik laat je zien wie die dienst aanbiedt.",
@@ -13898,7 +13954,7 @@
       "moveToLine": "• “{to}”: mensen {before} → {after}; de gereedheidslijst daar begint op 0/{total}.",
       "moveCountryLine": "• Het land verandert: {from} → {to} — andere documenteisen.",
       "moveNoDatesLine": "• “{to}” heeft geen datums — afwezigheden kunnen niet worden gecontroleerd.",
-      "moveAvailabilityUnknownLine": "• Afwezigheden onbekend — het verlofmodel antwoordt hier niet.",
+      "moveAvailabilityUnknownLine": "• Afwezigheden onbekend.",
       "moveAvailabilityLine": "• Binnen {start}–{end} heeft hij {count} afwezigheidsregistraties.",
       "moveAvailabilityFreeLine": "• Geen afwezigheden binnen de datums van “{to}”.",
       "moveOnlyConfirmLine": "Er is nog niets veranderd — alleen uw bevestiging verandert iets.",
@@ -17910,6 +17966,18 @@
     "whoWorked": "Wie hier werkte",
     "timeline": "Wat er is gedaan",
     "back": "Terug naar geschiedenis",
-    "placeMissing": "Deze plaats staat niet in de geïmporteerde geschiedenis van de actieve werkruimte."
+    "placeMissing": "Deze plaats staat niet in de geïmporteerde geschiedenis van de actieve werkruimte.",
+    "attributedNote": "Bevat {count, plural, one {# registratie} other {# registraties}} uit de administratie van een andere organisatie, hier toegewezen als uitvoerend bedrijf.",
+    "attribution": {
+      "title": "Wie heeft dit werk uitgevoerd?",
+      "intro": "Werk in de administratie van deze organisatie kan worden toegewezen aan een andere organisatie van u als uitvoerend bedrijf. Er wordt niets verplaatst of gekopieerd: de registraties blijven staan en de andere organisatie kan ze lezen.",
+      "performedBy": "Uitgevoerd door",
+      "note": "Notitie (optioneel), bijvoorbeeld het genoemde aandeel uren",
+      "button": "Toewijzen",
+      "progress": "{attributed} van {total} toegewezen aan {name}",
+      "done": "{count} registraties toegewezen; {skipped} waren al toegewezen.",
+      "refused": "Dit kon niet worden opgeslagen. Er is niets gewijzigd.",
+      "person": "{hours} u, {count, plural, one {# registratie} other {# registraties}}"
+    }
   }
 }

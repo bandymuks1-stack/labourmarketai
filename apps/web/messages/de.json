@@ -88,7 +88,7 @@
     "panelTitle": "Öffentliches Unternehmensprofil",
     "panelIntro": "Veröffentlichen Sie eine öffentliche Seite für Ihr Unternehmen — teilbar unter labourmarket.ai/business/ihr-name. Standardmäßig aus.",
     "viewPublic": "Öffentliche Seite ansehen",
-    "notAvailable": "Noch nicht verfügbar.",
+    "notAvailable": "Derzeit nicht verfügbar.",
     "saved": "Gespeichert.",
     "enableLabel": "Mein Unternehmensprofil öffentlich machen",
     "enableHint": "Wenn aktiviert, werden Ihre Identität, öffentliche Kontakte, aktive Leistungen und aktive Anzeigen auf einer öffentlichen Seite angezeigt. Private Daten werden nie angezeigt.",
@@ -118,7 +118,7 @@
     "title": "Marktplatz-Anzeigen",
     "myTitle": "Meine Anzeigen",
     "intro": "Bieten oder suchen Sie eine Arbeitsressource. Nur aktive Anzeigen sind für andere sichtbar.",
-    "notAvailable": "Noch nicht verfügbar.",
+    "notAvailable": "Derzeit nicht verfügbar.",
     "empty": "Noch keine Anzeigen. Fügen Sie Ihre erste Arbeitsressource hinzu.",
     "addButton": "Anzeige hinzufügen",
     "browseTitle": "Aktive Anzeigen durchsuchen",
@@ -1807,7 +1807,9 @@
         "unknown": "Zu wenig Angaben zum Vergleich"
       },
       "opportunity": "{count, plural, =1 {Bis zu 1 Person ist ab {date} frei} other {Bis zu # Personen sind ab {date} frei}}",
-      "opportunityCta": "Arbeit suchen"
+      "opportunityCta": "Arbeit suchen",
+      "interest": "{count, plural, =1 {1 Person hat Interesse an Ihrem Bedarf gezeigt} other {# Personen haben Interesse an Ihrem Bedarf gezeigt}}",
+      "interestCta": "Ansehen"
     },
     "attention": {
       "heading": "Braucht Sie",
@@ -2140,7 +2142,7 @@
       },
       "workersBlocker": {
         "title": "Etwas ist schiefgelaufen",
-        "subtitle": "Der Unternehmenspfad ist auf DB-Ebene vorübergehend blockiert. Echte Arbeitskräfte-Verknüpfung + Einladungen funktionieren bereits auf der Agenturseite.",
+        "subtitle": "Derzeit nicht verfügbar.",
         "statusLabel": "Etwas ist schiefgelaufen",
         "statusBody": "Die Verwaltung der Unternehmens-Arbeitskräfte wird noch vorbereitet und später aktiviert.",
         "nextStep": "Die Selbstregistrierung für Arbeitskräfte bleibt jederzeit offen."
@@ -2252,6 +2254,12 @@
         "statusInvited": "Einladung erstellt (sie wird nicht per E-Mail versendet). Die eingeladene Person sieht sie nach der Anmeldung mit dieser E-Mail-Adresse.",
         "statusAlreadyPending": "Für diese E-Mail-Adresse existiert bereits eine ausstehende Einladung von Ihrem Unternehmen.",
         "statusAlreadyLinked": "Diese Arbeitskraft ist bereits mit Ihrem Unternehmen verknüpft.",
+        "statusWordActive": "Aktiv",
+        "statusWordPending": "Eingeladen",
+        "statusWordAccepted": "Angenommen",
+        "statusWordCancelled": "Storniert",
+        "statusWordExpired": "Abgelaufen",
+        "statusWordEnded": "Beendet",
         "statusNotOwner": "Aktion abgelehnt: Sie sind nicht der Inhaber des Unternehmens.",
         "statusInvalidEmail": "Ungültige E-Mail-Adresse.",
         "statusError": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
@@ -2261,7 +2269,14 @@
         "columnEmail": "E-Mail",
         "columnStatus": "Status",
         "columnInvitedAt": "Datum",
-        "openProfile": "Profil ansehen"
+        "openProfile": "Profil ansehen",
+        "identity": {
+          "availability": {
+            "available": "Verfügbar",
+            "busy": "Ausgelastet",
+            "unavailable": "Nicht verfügbar"
+          }
+        }
       },
       "scoutingBridge": {
         "title": "Arbeitskräfte für diesen Bedarf finden",
@@ -3473,11 +3488,11 @@
     "retry": "Erneut versuchen",
     "viewProfile": "Profil ansehen",
     "importPrompt": "Haben Sie eine Lebenslauf-Datei? Ein Lebenslauf hilft, Ihre Erfahrung zu erklären.",
-    "importComingSoon": "Das Auslesen von Fähigkeiten aus einem Lebenslauf ist noch nicht aktiv.",
+    "importComingSoon": "Derzeit nicht verfügbar.",
     "importAddManually": "Fügen Sie Ihre Fähigkeiten manuell oder über Journaleinträge hinzu.",
     "importNotSaved": "Ausgewählt: {file}. Die Datei wird noch nicht hochgeladen oder gespeichert.",
     "customPrompt": "Sie finden Ihre Fähigkeit nicht?",
-    "customComingSoon": "Freie Eingabe noch nicht aktiv",
+    "customComingSoon": "Derzeit nicht verfügbar.",
     "textFirst": {
       "title": "Erzählen Sie uns, was Sie tun",
       "helper": "Schreiben Sie in eigenen Worten oder laden Sie einen Lebenslauf hoch. Wir schlagen Fähigkeiten, Arbeitsrichtungen, Rollen und Lebenslauf-Einträge vor — aber Sie wählen jeden Vorschlag aus. Ohne Ihre Auswahl wird nichts gespeichert.",
@@ -4723,6 +4738,7 @@
         "event_demand_interest_reviewed": "Ein Unternehmen hat Ihr Interesse als geprüft markiert",
         "event_weekly_digest": "Deine wöchentliche Übersicht zu Arbeit und Chancen ist bereit",
         "event_saved_search_match": "Eine gespeicherte Suche hat neue Ergebnisse",
+        "event_job_alert": "Eine neue Stelle passt zu Ihrer Suche",
         "event_invitation_accepted": "Jemand hat Ihre Einladung angenommen",
         "event_weekly_digest_profile_completion": "Damit wir dir passende Jobs zeigen können, bestätige, welche Arbeit du machst",
         "event_weekly_digest_journal": "Die Wochenübersicht deines Arbeitsjournals ist fertig"
@@ -6020,6 +6036,7 @@
         "alternativesTitle": "In diesem Zeitraum frei",
         "swap": "Stattdessen zuweisen",
         "undo": "Zuweisung rückgängig",
+        "keep": "Beibehalten",
         "decided": "Erledigt",
         "unknown": "Wir konnten nicht bestätigen, dass diese Tage frei sind. Das ist nicht dasselbe wie frei.",
         "source": {
@@ -6434,11 +6451,14 @@
   "marketplace": {
     "pageTitle": "Dienstleistungen entdecken & anfragen",
     "pageLead": "Finden Sie aktive Dienstleistungen, die Menschen anbieten, senden Sie eine Anfrage und verfolgen Sie deren Status — ein Ort für den gesamten Austausch.",
-    "notAvailable": "Noch nicht verfügbar.",
+    "notAvailable": "Derzeit nicht verfügbar.",
     "discoverHeading": "Aktive Dienstleistungen",
     "discoverEmpty": "Noch keine aktiven Dienstleistungen vorhanden.",
     "request": "Anfragen",
     "requested": "Angefragt",
+    "partnershipBadge": "Sucht Partner",
+    "partnershipRequest": "Partnerschaft anbieten",
+    "requestMessagePlaceholder": "Schreibe dem Anbieter, was du brauchst (optional)",
     "remoteBadge": "Remote",
     "outgoingHeading": "Meine Anfragen",
     "outgoingEmpty": "Sie haben noch keine Dienstleistung angefragt.",
@@ -6526,7 +6546,7 @@
     "pageLead": "Vorschläge aus echter Arbeitsaktivität, die zur Überprüfung durch eine Person aufbewahrt werden. Nichts hier gilt für sich allein als bewiesen.",
     "title": "Überprüfungswarteschlange",
     "lead": "Signale werden zu Vorschlägen, und eine Person entscheidet. Lernen entscheidet niemals etwas von selbst.",
-    "notAvailable": "Noch nicht verfügbar.",
+    "notAvailable": "Derzeit nicht verfügbar.",
     "empty": "Noch nichts zu überprüfen.",
     "kind": {
       "confirm_skill": "Vorschlag zur Anerkennung einer Fähigkeit",
@@ -6571,6 +6591,7 @@
     "notAvailable": "Derzeit nicht verfügbar.",
     "empty": "Noch keine Dienstleistungsangebote. Fügen Sie die erste echte Dienstleistung hinzu, die Sie anbieten.",
     "addButton": "Dienstleistung hinzufügen",
+    "addPartnership": "Partner suchen",
     "form": {
       "titleLabel": "Titel der Dienstleistung",
       "titlePlaceholder": "z. B. Innenanstrich",
@@ -7657,7 +7678,7 @@
     "eyebrow": "MEINE DOKUMENTE",
     "title": "Meine Dokumente",
     "subtitle": "Was Sie haben, was fehlt und der nächste Schritt — pro Land.",
-    "preparing": "Die Dokumentenbereitschaft wird vorbereitet — sie geht live, sobald die Dokumentenspeicherschicht geprüft und aktiviert ist. Hier ist noch nichts aktiv.",
+    "preparing": "Derzeit nicht verfügbar.",
     "reports": {
       "title": "Berichte & Exporte",
       "intro": "Erstellen Sie einen druckfertigen Bericht aus Ihren eigenen Daten. PDF funktioniert über die Druck-/Speicherfunktion Ihres Browsers; Excel und Word sind noch nicht verfügbar.",
@@ -7714,6 +7735,7 @@
     "country": {
       "title": "Was für ein Land fehlt",
       "help": "Wählen Sie ein Zielland, um zu sehen, welche Dokumente dort verlangt werden.",
+      "mine": "Ihre Wunschländer stehen zuerst.",
       "unknown": "Die Anforderungsliste für {country} wurde noch nicht kuratiert — wir zeigen lieber nichts an, statt zu raten.",
       "next": "Nächster Schritt: kümmern Sie sich um — {doc}.",
       "ok": "Alle kuratierten Anforderungen für {country} sind abgedeckt."
@@ -7741,7 +7763,7 @@
     "consent": {
       "title": "Was meine Agentur sehen darf",
       "explainer": "Wenn du dies einschaltest, sieht DEINE Agentur nur Zählwerte deiner Dokumentenbereitschaft auf Kategorienebene (gültig / bald ablaufend / Aufmerksamkeit nötig). Sie sieht niemals Dokumenteninhalte, Dateien, Notizen oder Typen. Standard ist aus; du kannst jederzeit ausschalten.",
-      "needsGate": "Die Zustimmungsschicht ist in Vorbereitung — sie wird aktiv, sobald die freigabepflichtige Änderung angewendet ist.",
+      "needsGate": "Derzeit nicht verfügbar.",
       "onLabel": "Aggregate werden geteilt: AN",
       "offLabel": "Aggregate werden geteilt: AUS",
       "onHint": "Deine Agentur sieht nur Zahlen. Tippe zum Ausschalten.",
@@ -8313,7 +8335,7 @@
     "demand": {
       "title": "Offene Nachfrage",
       "humanNote": "„Wir können anbieten“ ist dein Vorschlag zu einer Anfrage — den endgültigen Match hält immer ein Mensch auf der Plattformseite fest.",
-      "needsGate": "Die Sichtbarkeit offener Nachfrage für Agenturen ist in Vorbereitung — sie wird aktiv, sobald die freigabepflichtige Änderung angewendet ist.",
+      "needsGate": "Derzeit nicht verfügbar.",
       "empty": "Derzeit keine offenen Anfragen.",
       "noRole": "Rolle nicht angegeben",
       "teamSize": "{n} Pers.",
@@ -8370,7 +8392,7 @@
     "needsSetup": "Scouting ist in dieser Umgebung noch nicht verfügbar.",
     "noCandidates": "Noch keine passenden Arbeitskräfte für diesen Bedarf.",
     "namePlaceholder": "Arbeitskraft",
-    "skillFit": "{pct}% — {matched}/{total} benötigte Fähigkeiten, {confirmed} vom Manager bestätigt",
+    "skillFit": "{matched}/{total} benötigte Fähigkeiten, {confirmed} vom Manager bestätigt",
     "evidence": "Nachweise — bestätigt: {confirmed} · Journal: {journal} · selbst angegeben: {self}",
     "shortlistError": "Konnte nicht gespeichert werden. Bitte erneut versuchen.",
     "footnote": "Matches werden deterministisch nur für diesen Bedarf berechnet. Keine globale Bewertung, keine erfundenen Kandidaten.",
@@ -8439,7 +8461,8 @@
       "opened": "Unterhaltung geöffnet — schreiben Sie der Arbeitskraft eine Nachricht.",
       "view": "Unterhaltung öffnen",
       "error": "Die Unterhaltung konnte nicht geöffnet werden. Bitte versuchen Sie es erneut.",
-      "limitReached": "Tageslimit für neue Unterhaltungen erreicht. Versuchen Sie es morgen erneut."
+      "limitReached": "Tageslimit für neue Unterhaltungen erreicht. Versuchen Sie es morgen erneut.",
+      "shortlistFirst": "Setzen Sie die Person zuerst auf Ihre Shortlist, dann können Sie ein Gespräch anfragen."
     },
     "how": {
       "title": "So funktioniert das Matching",
@@ -8498,7 +8521,7 @@
       "markContacted": "In der Plattform kontaktieren",
       "internalNote": "„Geprüft“ ist ein interner Vermerk. „Kontaktieren“ öffnet eine Unterhaltung innerhalb der Plattform; nichts wird außerhalb der Plattform versendet.",
       "error": "Konnte nicht gespeichert werden. Versuchen Sie es erneut.",
-      "notAvailable": "Die Bestätigung ist noch nicht aktiviert."
+      "notAvailable": "Derzeit nicht verfügbar."
     },
     "lifecycle": {
       "confirm": "Erkannte Fähigkeiten bestätigen",
@@ -8534,7 +8557,7 @@
       "granted": "Die Arbeitskraft hat die Weitergabe der Kontaktdaten genehmigt.",
       "declined": "Die Arbeitskraft hat die vorherige Anfrage abgelehnt.",
       "expired": "Die vorherige Anfrage ist abgelaufen.",
-      "unavailable": "Kontaktanfragen sind vorbereitet, aber noch nicht aktiviert.",
+      "unavailable": "Derzeit nicht verfügbar.",
       "rateLimited": "Anfragelimit erreicht (10 offen, 30 pro Tag). Versuchen Sie es später erneut.",
       "noOrganization": "Legen Sie zuerst die Organisation Ihres Unternehmens an.",
       "fieldsNote": "Bittet die Arbeitskraft, Name, Telefon und E-Mail zu teilen. Die Arbeitskraft entscheidet — ohne Zustimmung wird nichts angezeigt.",
@@ -8601,6 +8624,14 @@
         "accepted": "Angenommen",
         "closed": "Geschlossen"
       }
+    },
+    "identity": {
+      "why": "Warum diese Person relevant ist",
+      "skills": "Relevante Fähigkeiten und worauf sie beruhen",
+      "readiness": "Verfügbarkeit, Bereitschaft und Dokumente",
+      "openTo": "Auch offen für: {countries}",
+      "skillCount": "{matched} von {total} geforderten Fähigkeiten",
+      "nameHidden": "Name und Kontaktdaten erscheinen erst, wenn die Person sie freigibt."
     }
   },
   "planBoundary": {
@@ -9492,7 +9523,7 @@
     "external": {
       "sectionTitle": "Öffentliche Stellenanzeigen",
       "sectionNote": "Anzeigen öffentlicher Arbeitsverwaltungen. Sie werden vom Arbeitgeber an der Quelle veröffentlicht — labourmarket.ai listet sie zum Finden, die Bewerbung läuft über die Originalanzeige.",
-      "shownOfTotal": "Top {shown} von {total}",
+      "shownOfTotal": "{shown} von {total} angezeigt",
       "bandBest": "Passt am besten",
       "bandPossible": "Möglicherweise passend",
       "bandExplore": "Weitere Anzeigen",
@@ -9644,6 +9675,14 @@
         "LOOKING_FOR_WORK": "Auf Arbeitssuche",
         "LOOKING_FOR_PROJECTS": "Auf Projektsuche"
       }
+    },
+    "jobAlerts": {
+      "title": "Meldungen zu neuen Stellen",
+      "ready": "Sobald eine neue echte Stelle erscheint, die zu Ihrem Beruf und den gewählten Ländern passt, sehen Sie sie in Ihren Benachrichtigungen. Eine Stelle ohne Gehaltsangabe wird nie wegen des Gehalts ausgeblendet.",
+      "missing": "Für Meldungen zu neuen Stellen geben Sie bitte an:",
+      "profession": "welche Arbeit Sie machen",
+      "country": "in welchen Ländern Sie arbeiten möchten",
+      "cta": "Meine Angaben ausfüllen"
     }
   },
   "workerIntake": {
@@ -9805,7 +9844,7 @@
     "expYears": "J.",
     "none": "—",
     "empty": "Keine Kandidaten entsprechen diesen Filtern.",
-    "needsMigration": "Die Tabellen zum Arbeitskraft-Angebot sind noch nicht verfügbar.",
+    "needsMigration": "Derzeit nicht verfügbar.",
     "error": "Der Kandidatenpool konnte nicht geladen werden.",
     "colPermission": "Erlaubnis der Arbeitskraft",
     "permissionGranted": "Sichtbarkeit erteilt",
@@ -10607,7 +10646,7 @@
       "reconfirmed": "Danke — bestätigt.",
       "withdrawDeclaration": "Mich nicht mehr vertreten",
       "withdrawnDeclarationNote": "Sie werden außerhalb von LabourMarket.ai nicht mehr vertreten.",
-      "needsMigration": "Diese Funktion ist noch nicht verfügbar.",
+      "needsMigration": "Derzeit nicht verfügbar.",
       "errorGeneric": "Etwas ist schiefgelaufen. Es wurde nichts geändert.",
       "errorUnknownIntent": "Bitte wählen Sie Ihre aktuelle Situation.",
       "errorAvailableFromRequired": "Bitte geben Sie das Datum an, ab dem Sie anfangen können.",
@@ -10899,6 +10938,18 @@
       "partial": "{count} davon konnten nicht vollständig gezählt werden — etwas Reales hat keine Daten, die Zahl oben ist also eine Untergrenze.",
       "unknown": "{count} konnten gar nicht gelesen werden. Das ist nicht dasselbe wie frei.",
       "denominatorNote": "Gezählt in Kalendertagen. Vertragsstunden werden nicht erfasst, dies ist also keine VZÄ-Kennzahl."
+    },
+    "rosterTimeline": {
+      "byPerson": "Personen",
+      "byProject": "Projekte",
+      "prev": "Früher",
+      "next": "Später",
+      "today": "Heute",
+      "dateLabel": "Ab Datum",
+      "go": "Los",
+      "away": "Abwesend",
+      "outside": "{count} weitere außerhalb dieses Zeitraums",
+      "nothing": "Keine Einträge in diesem Zeitraum"
     },
     "committedWhere": {
       "title": "Wer ist wo gebunden",
@@ -11487,7 +11538,7 @@
     "saving": "Wird gespeichert…",
     "saved": "Präferenzen gespeichert.",
     "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
-    "needsMigration": "Dieser Bereich ist noch nicht freigeschaltet — es wurde nichts gespeichert.",
+    "needsMigration": "Derzeit nicht verfügbar. Nichts wurde gespeichert.",
     "v2": {
       "title": "Weitere Arbeitspräferenzen",
       "hint": "Es gilt dieselbe Regel — alles, was auf „Nicht angegeben“ bleibt, bleibt nicht angegeben.",
@@ -11502,7 +11553,7 @@
       "licenceCategories": "Führerscheinklassen",
       "ownVehicle": "Ich habe ein eigenes Fahrzeug",
       "ownTools": "Ich habe eigenes Werkzeug",
-      "notEnabled": "Diese zusätzlichen Präferenzen sind noch nicht freigeschaltet — hier wird vorerst nichts gespeichert.",
+      "notEnabled": "Derzeit nicht verfügbar.",
       "notSaved": "Gespeichert, außer den zusätzlichen Präferenzen — dieser Teil ist noch nicht freigeschaltet."
     }
   },
@@ -11517,7 +11568,7 @@
     "adding": "Wird hinzugefügt…",
     "remove": "Entfernen",
     "empty": "Noch keine Sprachen hinzugefügt.",
-    "notEnabled": "Dieser Bereich ist noch nicht freigeschaltet — es wurde nichts gespeichert.",
+    "notEnabled": "Derzeit nicht verfügbar. Nichts wurde gespeichert.",
     "error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
     "invalid": "Wählen Sie eine Sprache und ein Niveau."
   },
@@ -11540,7 +11591,7 @@
     "importNote": "Ein automatischer Import von diesen Seiten wird nicht angeboten. Um Ihre Daten zu übernehmen, laden Sie im Profil-Editor eine exportierte Lebenslauf-Datei hoch.",
     "importLink": "Profil-Editor öffnen",
     "empty": "Noch keine externen Profile verknüpft.",
-    "notEnabled": "Dieser Bereich ist noch nicht freigeschaltet — es wurde nichts gespeichert.",
+    "notEnabled": "Derzeit nicht verfügbar. Nichts wurde gespeichert.",
     "error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
     "invalid": "Geben Sie einen vollständigen https://-Link ein und wählen Sie eine Seite.",
     "platformNames": {
@@ -12082,7 +12133,7 @@
       "cancel": "Abbrechen",
       "remove": "Entfernen",
       "empty": "Noch keine Ausbildungseinträge.",
-      "notEnabled": "Dieser Bereich ist vorbereitet, aber noch nicht aktiviert.",
+      "notEnabled": "Derzeit nicht verfügbar.",
       "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
       "invalid": "Ungültiger Wert.",
       "limit": "Limit erreicht.",
@@ -12116,7 +12167,7 @@
       "cancel": "Abbrechen",
       "remove": "Entfernen",
       "empty": "Noch keine Erfolge.",
-      "notEnabled": "Dieser Bereich ist vorbereitet, aber noch nicht aktiviert.",
+      "notEnabled": "Derzeit nicht verfügbar.",
       "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
       "invalid": "Ungültiger Wert.",
       "limit": "Limit erreicht.",
@@ -12152,7 +12203,7 @@
     "discardedLabel": "Verworfen",
     "replace": "Ersetzen",
     "conflict": "Ein anderer Wert ist bereits gespeichert: {value}",
-    "needsMigration": "Dieser Bereich ist vorbereitet, aber noch nicht aktiviert — der Eintrag wurde nicht gespeichert.",
+    "needsMigration": "Derzeit nicht verfügbar. Nichts wurde gespeichert.",
     "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
     "invalid": "Ungültiger Wert.",
     "aiHint": "KI-Vorschlag — vor dem Speichern prüfen",
@@ -13568,6 +13619,11 @@
       "findWorkInCompanyContext": "Die Jobsuche ist deine eigene Sache — im Unternehmensbereich führe ich sie nicht aus. Wechsle in deinen persönlichen Bereich und frag noch einmal.",
       "findWorkInCompanyWhy": "Arbeit sucht ein Mensch, kein Unternehmen — ich antworte aus deinem persönlichen Bereich.",
       "personalOnlyInCompany": "Das ist eine persönliche Aktion — im Unternehmensbereich führe ich sie nicht aus. Wechsle in deinen persönlichen Bereich und mach dort weiter.",
+      "openConversationOpening": "Ich öffne das Gespräch mit {name}.",
+      "openConversationNone": "Diese Person habe ich unter deinen Gesprächspartnern und in deinem Team nicht gefunden. Deine Nachrichten findest du im Nachrichtenbereich.",
+      "openConversationWhich": "Welche Person meinst du?",
+      "openConversationNoPermission": "Ein Gespräch mit {name} kann ich nicht öffnen — dafür fehlt dir die Berechtigung.",
+      "openConversationFailed": "Das Gespräch konnte nicht geöffnet werden. Versuche es erneut oder öffne deine Nachrichten.",
       "journalAskWhatYouDid": "Was hast du heute gearbeitet? Schreib es in das Feld „Was du gearbeitet hast“ in deinen Worten — z. B. „Fenster auf der Baustelle Kaunas von 8 bis 17 montiert“. Die Anfrage selbst wird nicht ins Tagebuch gespeichert.",
       "alsoWorkLog": "Ich habe auch verstanden, dass du heute gearbeitet hast — prüfe es und speichere es im Arbeitsjournal:",
       "serviceNeedHint": "Das ist eine Aufgabe, die erledigt werden muss — ich zeige dir, wer diese Leistung anbietet.",
@@ -13898,7 +13954,7 @@
       "moveToLine": "• „{to}“: Personen {before} → {after}; die Bereitschaftsliste dort beginnt bei 0/{total}.",
       "moveCountryLine": "• Das Land wechselt: {from} → {to} — andere Dokumentanforderungen.",
       "moveNoDatesLine": "• „{to}“ hat keine Daten — Abwesenheiten können nicht geprüft werden.",
-      "moveAvailabilityUnknownLine": "• Abwesenheiten unbekannt — das Urlaubsmodell antwortet hier nicht.",
+      "moveAvailabilityUnknownLine": "• Abwesenheiten unbekannt.",
       "moveAvailabilityLine": "• Im Fenster {start}–{end} hat er {count} Abwesenheitseinträge.",
       "moveAvailabilityFreeLine": "• Keine Abwesenheiten in den Daten von „{to}“.",
       "moveOnlyConfirmLine": "Noch ist nichts geändert — erst Ihre Bestätigung ändert etwas.",
@@ -17910,6 +17966,18 @@
     "whoWorked": "Wer hier gearbeitet hat",
     "timeline": "Was getan wurde",
     "back": "Zurück zur Historie",
-    "placeMissing": "Dieser Ort ist nicht in der importierten Historie des aktiven Arbeitsbereichs."
+    "placeMissing": "Dieser Ort ist nicht in der importierten Historie des aktiven Arbeitsbereichs.",
+    "attributedNote": "Enthält {count, plural, one {# Eintrag} other {# Einträge}}, die in den Büchern einer anderen Organisation liegen und hier als ausführendes Unternehmen zugeordnet sind.",
+    "attribution": {
+      "title": "Wer hat diese Arbeit ausgeführt?",
+      "intro": "Arbeit, die in den Büchern dieser Organisation liegt, kann einer anderen Ihrer Organisationen als ausführendem Unternehmen zugeordnet werden. Nichts wird verschoben oder kopiert: die Einträge bleiben, die andere Organisation kann sie lesen.",
+      "performedBy": "Ausgeführt von",
+      "note": "Notiz (optional), zum Beispiel der genannte Stundenanteil",
+      "button": "Zuordnen",
+      "progress": "{attributed} von {total} zugeordnet: {name}",
+      "done": "{count} Einträge zugeordnet; {skipped} waren bereits zugeordnet.",
+      "refused": "Das konnte nicht gespeichert werden. Nichts wurde geändert.",
+      "person": "{hours} Std., {count, plural, one {# Eintrag} other {# Einträge}}"
+    }
   }
 }

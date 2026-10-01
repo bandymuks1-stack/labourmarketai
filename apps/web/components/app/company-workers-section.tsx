@@ -17,6 +17,12 @@ import type {
   LinkedCompanyWorker,
 } from "@/lib/company/company-workers";
 import { MessageButton } from "@/components/app/message-button";
+import {
+  IdentityDisclosure,
+  PersonIdentityCard,
+  type IdentityMeta,
+} from "@/components/app/identity/person-identity-card";
+import { personMonogram } from "@/lib/visual/avatar-monogram";
 import { RosterLinkEndControl } from "@/components/app/roster-link-end";
 import { computeEmploymentJournalContext } from "@/lib/operations/employment-journal-context";
 import {
@@ -57,6 +63,12 @@ export interface CompanyWorkersSectionLabels {
   readonly statusInvited: string;
   readonly statusAlreadyPending: string;
   readonly statusAlreadyLinked: string;
+  readonly statusWordActive: string;
+  readonly statusWordPending: string;
+  readonly statusWordAccepted: string;
+  readonly statusWordCancelled: string;
+  readonly statusWordExpired: string;
+  readonly statusWordEnded: string;
   readonly statusNotOwner: string;
   readonly statusInvalidEmail: string;
   readonly statusError: string;
@@ -74,6 +86,8 @@ export interface CompanyWorkersSectionLabels {
   readonly coordinationBody: string;
   readonly coordinationNextAction: string;
   readonly operations: OpsCellLabels;
+  /** Identity-card copy: the worker's own stated availability, by status. */
+  readonly identity: { readonly availability: Record<string, string> };
 }
 
 export interface OpsCellLabels {
@@ -90,6 +104,27 @@ export interface OpsCellLabels {
   readonly assign: OperationsRoleControlLabels;
 }
 
+/** Human word for a stored link/invitation status; an unknown value falls back to the stored word. */
+function statusWord(labels: CompanyWorkersSectionLabels, status: string): string {
+  switch (status) {
+    case "active":
+      return labels.statusWordActive;
+    case "pending":
+      return labels.statusWordPending;
+    case "accepted":
+      return labels.statusWordAccepted;
+    case "cancelled":
+      return labels.statusWordCancelled;
+    case "expired":
+      return labels.statusWordExpired;
+    case "ended":
+    case "inactive":
+      return labels.statusWordEnded;
+    default:
+      return status;
+  }
+}
+
 /** Subtle left status rail per review capability (Step 9, visual only). */
 const REVIEW_RAIL: Record<string, string> = {
   can_review: "border-l-2 border-l-state-success/60",
@@ -101,6 +136,7 @@ export function CompanyWorkersSection({
   workersResult,
   invitationsResult,
   labels,
+  avatarByWorker,
   roleCoordinationEnabled,
   canAssignRoles = false,
   reviewElsewhere,
@@ -109,6 +145,9 @@ export function CompanyWorkersSection({
   readonly workersResult: ListState<LinkedCompanyWorker>;
   readonly invitationsResult: ListState<CompanyWorkerInvitation>;
   readonly labels: CompanyWorkersSectionLabels;
+  /** Signed photo URL per workerId, resolved by the page through the one
+   *  photo rule; absent / null = initials. */
+  readonly avatarByWorker?: Record<string, string | null>;
   /** From the operations role-capability map — false today (foreman /
    *  manager coordination is not enabled). When false, show the honest
    *  not-enabled note instead of pretending coordination works. */
@@ -218,6 +257,32 @@ export function CompanyWorkersSection({
                     ? labels.operations.notAssigned
                     : (labels.operations.roleLabels[ctx.operationsRole] ??
                       labels.operations.notAssigned);
+                const personName = w.displayName?.trim() || w.email || "\u2014";
+                const availabilityText = w.availabilityStatus
+                  ? (labels.identity.availability[w.availabilityStatus] ?? null)
+                  : null;
+                const meta: IdentityMeta[] = [];
+                if (w.locationCountry) {
+                  meta.push({ key: "loc", kind: "location", label: w.locationCountry });
+                }
+                if (availabilityText) {
+                  meta.push({
+                    key: "avail",
+                    kind: "availability",
+                    label: w.availableFrom
+                      ? `${availabilityText} \u00b7 ${w.availableFrom.slice(0, 10)}`
+                      : availabilityText,
+                    live: w.availabilityStatus === "available",
+                  });
+                }
+                if (w.currentProjects.length > 0) {
+                  meta.push({
+                    key: "project",
+                    kind: "assignment",
+                    label: w.currentProjects.join(" \u00b7 "),
+                  });
+                }
+                const roleText = w.operationsTitle?.trim() ? w.operationsTitle : roleLabel;
                 return (
                   <li
                     key={w.workerId}
@@ -225,61 +290,76 @@ export function CompanyWorkersSection({
                     data-testid={`company-worker-row-${w.workerId}`}
                     data-review-capability={ctx.reviewCapability}
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      {/* F2: every permitted member row opens the real person
-                          page (fail-closed by can_view_worker RLS there). */}
-                      <Link
-                        href={`/dashboard/people/${w.workerId}`}
-                        className="group inline-flex min-w-0 items-center gap-1.5 text-sm font-medium text-text-primary hover:text-brand-blue"
-                        data-testid={`company-worker-open-${w.workerId}`}
+                    {/* ONE identity, team depth (owner 2026-10-01): the same
+                        PersonIdentityCard the employer reads an application
+                        with. Layer 1 = who, role, place, availability, current
+                        assignment; the operations controls open as a layer. */}
+                    <PersonIdentityCard
+                      variant="team-member"
+                      testid={`company-worker-identity-${w.workerId}`}
+                      name={personName}
+                      initials={personMonogram(personName)}
+                      avatarUrl={avatarByWorker?.[w.workerId] ?? null}
+                      nameHref={`/dashboard/people/${w.workerId}`}
+                      professions={roleText ? [roleText] : []}
+                      meta={meta}
+                      status={
+                        <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
+                          {statusWord(labels, w.status ?? "active")}
+                        </span>
+                      }
+                      actions={
+                        <div className="flex flex-wrap gap-2">
+                          <Link
+                            href={`/dashboard/people/${w.workerId}`}
+                            className="w-fit rounded-md border border-ink-500 px-2.5 py-1 text-xs font-medium text-text-secondary hover:border-brand-blue hover:text-text-primary"
+                            data-testid={`company-worker-open-${w.workerId}`}
+                          >
+                            {labels.openProfile}
+                          </Link>
+                          <MessageButton profileId={w.profileId} labelKey="messageWorker" />
+                          {/* R-9: the owner ends the relationship through the one
+                              gated write (the RPC re-derives ownership). */}
+                          {canAssignRoles && w.companyId ? (
+                            <RosterLinkEndControl
+                              kind="company"
+                              orgLegacyId={w.companyId}
+                              workerId={w.workerId}
+                              side="owner"
+                            />
+                          ) : null}
+                        </div>
+                      }
+                    >
+                      <IdentityDisclosure
+                        id="operations"
+                        title={labels.operations.columnHeading}
+                        summary={
+                          ctx.reviewCapability === "can_review"
+                            ? labels.operations.reviewEnabled
+                            : labels.operations.reviewNotEnabled
+                        }
                       >
-                        <span className="break-all">{w.email ?? "—"}</span>
-                        <ChevronRight
-                          className="h-3.5 w-3.5 shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-brand-blue"
-                          aria-hidden
-                        />
-                      </Link>
-                      <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">{w.status ?? "active"}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Link
-                        href={`/dashboard/people/${w.workerId}`}
-                        className="w-fit rounded-md border border-ink-500 px-2.5 py-1 text-xs font-medium text-text-secondary hover:border-brand-blue hover:text-text-primary"
-                      >
-                        {labels.openProfile}
-                      </Link>
-                      <MessageButton profileId={w.profileId} labelKey="messageWorker" />
-                      {/* R-9: the owner ends the relationship through the one
-                          gated write (the RPC re-derives ownership). */}
-                      {canAssignRoles && w.companyId ? (
-                        <RosterLinkEndControl
-                          kind="company"
-                          orgLegacyId={w.companyId}
-                          workerId={w.workerId}
-                          side="owner"
-                        />
-                      ) : null}
-                    </div>
-                    <div className="flex flex-col gap-1 text-xs text-text-secondary">
-                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.operations.columnHeading}</span>
-                        <span>
-                          {w.operationsTitle?.trim()
-                            ? w.operationsTitle
-                            : roleLabel}
-                          <span className="ml-1 text-meta text-text-muted">
-                            ·{" "}
-                            {ctx.reviewCapability === "can_review"
-                              ? labels.operations.reviewEnabled
-                              : labels.operations.reviewNotEnabled}
+                        <div className="flex flex-col gap-1 text-xs text-text-secondary">
+                          <span>
+                            {roleText}
+                            <span className="ml-1 text-meta text-text-muted">
+                              {"\u00b7 "}
+                              {ctx.reviewCapability === "can_review"
+                                ? labels.operations.reviewEnabled
+                                : labels.operations.reviewNotEnabled}
+                            </span>
                           </span>
-                        </span>
-                        <span
-                          className="text-meta text-text-muted"
-                          data-testid={`company-worker-next-action-${w.workerId}`}
-                        >
-                          {labels.operations.nextActionLabels[ctx.nextAction] ??
-                            ""}
-                        </span>
+                          <span
+                            className="text-meta text-text-muted"
+                            data-testid={`company-worker-next-action-${w.workerId}`}
+                          >
+                            {labels.operations.nextActionLabels[ctx.nextAction] ?? ""}
+                          </span>
+                          {w.email ? (
+                            <span className="break-all text-meta text-text-muted">{w.email}</span>
+                          ) : null}
+                        </div>
                         {canAssignRoles ? (
                           <WorkerOperationsRoleForm
                             workerId={w.workerId}
@@ -288,9 +368,7 @@ export function CompanyWorkersSection({
                             journalReviewEnabled={w.journalReviewEnabled}
                             engagementContextLinked={w.engagementContextLinked}
                             action={assignCompanyWorkerRoleAction}
-                            provisionAction={
-                              provisionCompanyWorkerEngagementContextAction
-                            }
+                            provisionAction={provisionCompanyWorkerEngagementContextAction}
                             setReviewAction={setCompanyWorkerJournalReviewAction}
                             reviewElsewhere={reviewElsewhere}
                             labels={{
@@ -299,10 +377,11 @@ export function CompanyWorkersSection({
                             }}
                           />
                         ) : null}
-                    </div>
-                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                      {labels.columnInvitedAt}: {w.createdAt.slice(0, 10)}
-                    </span>
+                        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                          {labels.columnInvitedAt}: {w.createdAt.slice(0, 10)}
+                        </span>
+                      </IdentityDisclosure>
+                    </PersonIdentityCard>
                   </li>
                 );
               })}
@@ -429,7 +508,7 @@ export function CompanyWorkersSection({
                   >
                     <div className="flex items-start justify-between gap-2">
                       <span className="break-all text-sm text-text-primary">{inv.invitedEmail}</span>
-                      <span className="shrink-0 rounded-full border border-state-warning/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning">{inv.status}</span>
+                      <span className="shrink-0 rounded-full border border-state-warning/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning">{statusWord(labels, inv.status)}</span>
                     </div>
                     <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {labels.columnInvitedAt}: {inv.createdAt.slice(0, 10)}

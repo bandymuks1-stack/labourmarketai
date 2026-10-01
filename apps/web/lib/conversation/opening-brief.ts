@@ -19,6 +19,8 @@ import {
   groupMissingDocumentsByType,
 } from "@/lib/conversation/documents-gap";
 import { getUnreadConversationCount } from "@/lib/communication/unread";
+import { getUnreadConversationIdsForOrganization } from "@/lib/communication/organization-scope";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
 import { loadOwnRecentConfirmations } from "@/lib/journal/own-recent-confirmations";
 import { getOwnWorkerId } from "@/lib/projects/worker-project-access";
@@ -529,9 +531,17 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
   }
 
   // 4 ── unread human messages ─────────────────────────────────────────────
+  // SCOPED TO THE COMPANY (owner 2026-10-01): a person's private threads are
+  // not their company's inbox. Only the unread conversations that belong to
+  // the organization acted for are counted; with no resolvable company there
+  // is nothing to count, never the person's whole inbox.
   try {
     if (lines.length < MAX_LINES) {
-      const unread = await getUnreadConversationCount();
+      const ctx = await resolveEmployerCompanyContext();
+      const unread =
+        ctx.kind === "ok"
+          ? (await getUnreadConversationIdsForOrganization(ctx.companyId)).size
+          : 0;
       if (unread > 0) {
         lines.push(t("briefUnreadMessages", { count: unread }));
         addChip("link:/dashboard/communication", t("navMessages"));

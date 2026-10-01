@@ -390,6 +390,7 @@
         "event_demand_interest_reviewed": "Ett företag har markerat ditt intresse som granskat",
         "event_weekly_digest": "Din veckoöversikt över arbete och möjligheter är klar",
         "event_saved_search_match": "En sparad sökning har nya resultat",
+        "event_job_alert": "Det finns ett nytt jobb som passar det du söker",
         "event_weekly_digest_profile_completion": "För att visa dig passande jobb, bekräfta vilket arbete du utför",
         "event_weekly_digest_journal": "Veckans sammanfattning av din arbetsjournal är klar"
       },
@@ -1143,10 +1144,10 @@
     "primaryBadge": "[EN] Primary",
     "directionAdded": "[EN] Direction added",
     "coreBadge": "[EN] Core",
-    "customComingSoon": "[EN] coming soon",
+    "customComingSoon": "Inte tillgängligt just nu.",
     "customPrompt": "[EN] Can't find your skill?",
     "empty": "[EN] No skills yet for this profession",
-    "importComingSoon": "[EN] CV import will be enabled in M2.",
+    "importComingSoon": "Inte tillgängligt just nu.",
     "importNotSaved": "[EN] Selected: {file}. The file isn't uploaded or stored yet.",
     "importPrompt": "[EN] Have an old CV? Upload PDF or DOCX",
     "loading": "[EN] Loading...",
@@ -1664,7 +1665,7 @@
     "eyebrow": "[EN] MY DOCUMENTS",
     "title": "[EN] My documents",
     "subtitle": "[EN] What you have, what is missing, and the next step — per country.",
-    "preparing": "[EN] Document readiness is being prepared — it goes live once the document storage layer is reviewed and enabled. Nothing here is active yet.",
+    "preparing": "Inte tillgängligt just nu.",
     "disclaimer": "[EN] Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
     "needsMigration": "Inte tillgängligt just nu.",
     "noWorker": "[EN] Create your worker profile first — documents attach to it.",
@@ -1685,6 +1686,7 @@
     "country": {
       "title": "[EN] What is missing for a country",
       "help": "[EN] Pick a destination country to see which documents it asks for.",
+      "mine": "[EN] Your preferred countries come first.",
       "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
       "next": "[EN] Next step: take care of — {doc}.",
       "ok": "[EN] All curated requirements for {country} are covered."
@@ -1712,7 +1714,7 @@
     "consent": {
       "title": "[EN] What my agency may see",
       "explainer": "[EN] If you switch this on, YOUR agency sees only category-level counts of your document readiness (valid / expiring / needs attention). It never sees document contents, files, notes or types. Default is off; you can switch it off any time.",
-      "needsGate": "[EN] The consent layer is in preparation — it activates after the owner-gated change is applied.",
+      "needsGate": "Inte tillgängligt just nu.",
       "onLabel": "[EN] Sharing aggregates: ON",
       "offLabel": "[EN] Sharing aggregates: OFF",
       "onHint": "[EN] Your agency sees counts only. Tap to switch off.",
@@ -2041,7 +2043,7 @@
     "demand": {
       "title": "[EN] Open demand",
       "humanNote": "[EN] \"We can offer\" is your proposal on a request — the final match is always recorded by a person on the platform side.",
-      "needsGate": "[EN] Open-demand visibility for agencies is in preparation — it activates after the owner-gated change is applied.",
+      "needsGate": "Inte tillgängligt just nu.",
       "empty": "[EN] No open requests right now.",
       "noRole": "[EN] Role not specified",
       "teamSize": "[EN] {n} people",
@@ -2241,7 +2243,7 @@
     "external": {
       "sectionTitle": "Offentliga jobbannonser",
       "sectionNote": "Annonser från officiella offentliga arbetsförmedlingar. De publiceras av arbetsgivaren vid källan — labourmarket.ai visar dem så att du kan hitta dem; ansökan sker via originalannonsen.",
-      "shownOfTotal": "topp {shown} av {total}",
+      "shownOfTotal": "visar {shown} av {total}",
       "bandBest": "Passar bäst",
       "bandPossible": "Möjligen passande",
       "bandExplore": "Övriga annonser",
@@ -2298,6 +2300,14 @@
         "LOOKING_FOR_WORK": "Söker arbete",
         "LOOKING_FOR_PROJECTS": "Söker projekt"
       }
+    },
+    "jobAlerts": {
+      "title": "Aviseringar om nya jobb",
+      "ready": "När ett nytt riktigt jobb dyker upp som passar ditt yrke och de länder du valt visas det i dina aviseringar. Ett jobb utan angiven lön döljs aldrig på grund av lönen.",
+      "missing": "För att få aviseringar om nya jobb, ange:",
+      "profession": "vilket arbete du gör",
+      "country": "vilka länder du vill arbeta i",
+      "cta": "Fyll i mina önskemål"
     }
   },
   "scouting": {
@@ -2324,7 +2334,7 @@
     "needsSetup": "[EN] Scouting is not available yet on this environment.",
     "noCandidates": "[EN] No matching workers yet for this need.",
     "namePlaceholder": "[EN] Worker",
-    "skillFit": "[EN] {pct}% — {matched}/{total} required skills, {confirmed} manager-confirmed",
+    "skillFit": "[EN] {matched}/{total} required skills, {confirmed} manager-confirmed",
     "evidence": "[EN] Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
     "shortlistError": "[EN] Could not save. Try again.",
     "footnote": "[EN] Matches are computed deterministically for this need only. No global rating, no fake candidates.",
@@ -2382,7 +2392,7 @@
       "markContacted": "[EN] Mark contacted",
       "internalNote": "[EN] Internal record only — nothing is sent to the worker or outside the platform.",
       "error": "[EN] Could not save. Try again.",
-      "notAvailable": "[EN] Acknowledgement is not enabled yet."
+      "notAvailable": "Inte tillgängligt just nu."
     },
     "lifecycle": {
       "confirm": "[EN] Confirm recognized skills",
@@ -2408,6 +2418,14 @@
     "agencyPresent": {
       "note": "Your client shared this need with you. You present candidates to the client from your own roster.",
       "link": "Present a candidate"
+    },
+    "identity": {
+      "why": "Varför den här personen är relevant",
+      "skills": "Relevanta färdigheter och vad de vilar på",
+      "readiness": "Tillgänglighet, beredskap och dokument",
+      "openTo": "Även öppen för: {countries}",
+      "skillCount": "{matched} av {total} efterfrågade färdigheter",
+      "nameHidden": "Namn och kontaktuppgifter visas först när personen tillåter det."
     }
   },
   "waze": {
@@ -2637,7 +2655,7 @@
     "saving": "[EN] Saving…",
     "saved": "[EN] Preferences saved.",
     "error": "[EN] Saving failed. Please try again.",
-    "needsMigration": "[EN] This section is not enabled yet — nothing was saved.",
+    "needsMigration": "Inte tillgängligt just nu. Inget sparades.",
     "v2": {
       "title": "[EN] More work preferences",
       "hint": "[EN] Same rule as above — anything left as “Not stated” stays not stated.",
@@ -2652,7 +2670,7 @@
       "licenceCategories": "[EN] Driving licence categories",
       "ownVehicle": "[EN] Has own vehicle",
       "ownTools": "[EN] Has own tools",
-      "notEnabled": "[EN] These extra preferences are not enabled yet — nothing here is saved for now.",
+      "notEnabled": "Inte tillgängligt just nu.",
       "notSaved": "[EN] Saved, except the extra preferences — that part is not enabled yet."
     }
   },
@@ -2667,7 +2685,7 @@
     "adding": "[EN] Adding…",
     "remove": "[EN] Remove",
     "empty": "[EN] No languages added yet.",
-    "notEnabled": "[EN] This section is not enabled yet — nothing was saved.",
+    "notEnabled": "Inte tillgängligt just nu. Inget sparades.",
     "error": "[EN] Saving failed. Please try again.",
     "invalid": "[EN] Choose a language and a level."
   },
@@ -2690,7 +2708,7 @@
     "importNote": "[EN] Automatic import from these sites is not offered. To bring your data in, upload an exported CV file in the profile editor.",
     "importLink": "[EN] Open the profile editor",
     "empty": "[EN] No external profiles linked yet.",
-    "notEnabled": "[EN] This section is not enabled yet — nothing was saved.",
+    "notEnabled": "Inte tillgängligt just nu. Inget sparades.",
     "error": "[EN] Saving failed. Please try again.",
     "invalid": "[EN] Enter a full https:// link and choose a site.",
     "platformNames": {
@@ -3948,6 +3966,11 @@
       "findWorkInCompanyContext": "Att söka jobb är din egen handling — i företagsutrymmet kör jag den inte. Byt till ditt personliga utrymme och fråga igen.",
       "findWorkInCompanyWhy": "En person söker jobb, inte ett företag — jag svarar från ditt personliga utrymme.",
       "personalOnlyInCompany": "Det är en personlig åtgärd — i ett företagsutrymme utför jag den inte. Byt till ditt personliga utrymme och fortsätt där.",
+      "openConversationOpening": "Öppnar samtalet med {name}.",
+      "openConversationNone": "Jag hittade inte den personen bland dina samtal eller i ditt team. Dina meddelanden finns under meddelanden.",
+      "openConversationWhich": "Vilken person menar du?",
+      "openConversationNoPermission": "Jag kan inte öppna ett samtal med {name} — du har inte behörighet.",
+      "openConversationFailed": "Samtalet kunde inte öppnas. Försök igen eller öppna dina meddelanden.",
       "journalAskWhatYouDid": "Vad gjorde du i dag? Skriv det i fältet ”Vad du gjorde” med egna ord — t.ex. ”monterade fönster på bygget i Kaunas från 8 till 17”. Själva begäran sparas inte i dagboken.",
       "serviceNeedHint": "Det är ett jobb som ska göras — jag visar vem som erbjuder den tjänsten.",
       "chipServiceRequests": "Hitta en tjänst",
@@ -4179,7 +4202,7 @@
       "moveToLine": "• “{to}”: personer {before} → {after}; beredskapslistan där börjar på 0/{total}.",
       "moveCountryLine": "• Landet byts: {from} → {to} — andra dokumentkrav.",
       "moveNoDatesLine": "• “{to}” saknar datum — frånvaro kan inte kontrolleras.",
-      "moveAvailabilityUnknownLine": "• Frånvaro okänd — ledighetsmodellen svarar inte här.",
+      "moveAvailabilityUnknownLine": "• Frånvaro okänd.",
       "moveAvailabilityLine": "• Inom {start}–{end} har han {count} frånvaroposter.",
       "moveAvailabilityFreeLine": "• Ingen frånvaro inom datumen för “{to}”.",
       "moveOnlyConfirmLine": "Inget har ändrats ännu — bara din bekräftelse ändrar något.",
@@ -6601,7 +6624,9 @@
         "unknown": "För lite information för att jämföra"
       },
       "opportunity": "{count, plural, =1 {Upp till 1 person är ledig från {date}} other {Upp till # personer är lediga från {date}}}",
-      "opportunityCta": "Hitta arbete"
+      "opportunityCta": "Hitta arbete",
+      "interest": "{count, plural, =1 {1 person har visat intresse för era behov} other {# personer har visat intresse för era behov}}",
+      "interestCta": "Se vem"
     },
     "attention": {
       "heading": "Behöver dig",
@@ -6820,6 +6845,18 @@
     "whoWorked": "Vem som arbetade här",
     "timeline": "Vad som gjordes",
     "back": "Tillbaka till historiken",
-    "placeMissing": "Den här platsen finns inte i den importerade historiken för den aktiva arbetsytan."
+    "placeMissing": "Den här platsen finns inte i den importerade historiken för den aktiva arbetsytan.",
+    "attributedNote": "Omfattar {count, plural, one {# post} other {# poster}} som ligger i en annan organisations böcker och är tillskrivna här som det utförande företaget.",
+    "attribution": {
+      "title": "Vem utförde det här arbetet?",
+      "intro": "Arbete i den här organisationens böcker kan tillskrivas en annan av dina organisationer som utförande företag. Inget flyttas eller kopieras: posterna finns kvar och den andra organisationen kan läsa dem.",
+      "performedBy": "Utfört av",
+      "note": "Anteckning (valfri), till exempel den angivna andelen timmar",
+      "button": "Tillskriv",
+      "progress": "{attributed} av {total} tillskrivna {name}",
+      "done": "{count} poster tillskrivna; {skipped} var redan tillskrivna.",
+      "refused": "Det gick inte att spara. Inget ändrades.",
+      "person": "{hours} h, {count, plural, one {# post} other {# poster}}"
+    }
   }
 }

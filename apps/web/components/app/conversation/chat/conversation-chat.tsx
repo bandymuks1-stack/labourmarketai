@@ -105,6 +105,8 @@ import { worklogDraftFromEvidence } from "@/lib/conversation/evidence-to-worklog
 import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
 import type { ConversationIntent } from "@/lib/conversation/intent-router";
 import { helpChipsFor, readHelpTopic } from "@/lib/conversation/product-help";
+import { readAvailabilityDay } from "@/lib/conversation/availability-day";
+import { findConversationPeople, openConversationWith } from "@/lib/communication/chat-open-conversation";
 import type { ProjectReadinessChatResult, ReadinessMissingCode } from "@/lib/conversation/project-readiness-contract";
 import { PROJECT_RISK_CHIP_LIMIT, type ProjectRiskRow } from "@/lib/conversation/project-risk-contract";
 import type { WorkTaskStatus } from "@/lib/tasks/task-model";
@@ -2345,6 +2347,81 @@ export function ConversationChat({
     );
   }, [assistant, auth?.activeWorkspaceId, auth?.workspaces, identity, labels.chipCreateOrganization, showPartnerDoors, t, workspaceLabelOf]);
 
+  /**
+   * "PARAŠYK JONUI" / "ATIDARYK POKALBĮ SU JONU" (owner 2026-10-01). The chat
+   * owns NO message logic: it asks the conversation system WHO the person
+   * means (their existing counterparts and their own team, nobody else), and
+   * once exactly one is chosen it opens the ONE conversation — the same
+   * thread the Messages page shows — and navigates there. Nothing is sent from
+   * here; the person writes in the conversation's own composer.
+   */
+  const openConversationTarget = useCallback(
+    (target: { conversationId?: string; profileId?: string; label: string }) => {
+      setTyping(true);
+      openConversationWith({
+        locale,
+        conversationId: target.conversationId ?? null,
+        profileId: target.profileId ?? null,
+      })
+        .then((res) => {
+          setTyping(false);
+          if (res.ok) {
+            assistant(t("openConversationOpening", { name: target.label }));
+            // `href` carries the locale; the localized router adds its own.
+            router.push(res.href.replace(/^\/[a-z]{2}(?=\/)/, "") as "/dashboard");
+            return;
+          }
+          assistant(
+            res.reason === "no_permission"
+              ? t("openConversationNoPermission", { name: target.label })
+              : t("openConversationFailed"),
+          );
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(t("openConversationFailed"));
+        });
+    },
+    [assistant, locale, router, t],
+  );
+
+  const startOpenConversation = useCallback(
+    (sentence: string) => {
+      setTyping(true);
+      findConversationPeople(sentence)
+        .then((res) => {
+          setTyping(false);
+          if (res.status === "none") {
+            assistant(t("openConversationNone"), [
+              { id: "link:/dashboard/communication", label: t("navMessages") },
+            ]);
+            return;
+          }
+          if (res.status === "one") {
+            const p = res.person;
+            openConversationTarget(
+              p.kind === "conversation"
+                ? { conversationId: p.conversationId, label: p.label }
+                : { profileId: p.profileId, label: p.label },
+            );
+            return;
+          }
+          assistant(
+            t("openConversationWhich"),
+            res.people.map((p) => ({
+              id: p.kind === "conversation" ? `oc:c:${p.conversationId}` : `oc:p:${p.profileId}`,
+              label: p.label,
+            })),
+          );
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(t("openConversationFailed"));
+        });
+    },
+    [assistant, openConversationTarget, t],
+  );
+
   const startSwitchContext = useCallback(
     (text: string) => {
       const workspaces = auth?.workspaces ?? [];
@@ -4583,14 +4660,17 @@ export function ConversationChat({
       });
   }, [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips]);
 
-  const startWhoAvailable = useCallback(() => {
+  const startWhoAvailable = useCallback((sentence = "") => {
     if (identity !== "company") {
       if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
       else assistant(fallbackText, starterChips);
       return;
     }
     setTyping(true);
-    loadWhoIsAvailableForChat()
+    // The day the sentence named ("pirmadienį", "rytoj", an ISO date) narrows the
+    // ONE availability read to that day; no day named keeps the default window.
+    const day = readAvailabilityDay(sentence, todayIso());
+    loadWhoIsAvailableForChat(undefined, day)
       .then((res) => {
         setTyping(false);
         if (res.kind === "empty") {
@@ -4626,7 +4706,11 @@ export function ConversationChat({
             ? `• ${r.label} — ${labels.capacityCommittedToUntil.replace("{what}", r.committedTo).replace("{date}", until)}`
             : `• ${r.label} — ${labels.capacityCommittedUntil.replace("{date}", until)}`;
         });
-        const head = labels.capacityIntro.replace("{from}", res.from).replace("{to}", res.to).replace("{count}", String(res.rosterTotal));
+        const head = labels.capacityIntro
+          .replace("{from} – {to}", res.from === res.to ? res.from : "{from} – {to}")
+          .replace("{from}", res.from)
+          .replace("{to}", res.to)
+          .replace("{count}", String(res.rosterTotal));
         // An input that did not answer is named. Production carried ZERO
         // absence rows and three real commitments, so "everybody is free" was
         // once produced entirely from signals nobody had checked.
@@ -5354,6 +5438,13 @@ export function ConversationChat({
               user(chip.label);
               performContextSwitch(target);
             }
+          } else if (chip.id.startsWith("oc:")) {
+            // "Which Jonas?" — the chip carries an id and nothing else; the
+            // conversation system re-checks access before anything opens.
+            const [, kind, id] = chip.id.split(":");
+            user(chip.label);
+            if (id && kind === "c") openConversationTarget({ conversationId: id, label: chip.label });
+            else if (id && kind === "p") openConversationTarget({ profileId: id, label: chip.label });
           } else if (chip.id.startsWith("wsp:")) {
             // Business-partner request from the personal space: switch to the
             // company the person picked, then continue the SAME request.
@@ -5541,7 +5632,7 @@ export function ConversationChat({
           }
       }
     },
-    [identity, t, labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, renderOfferCards, locale, starterChips,runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startAddDocument, startInvitations, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm, startCapabilities],
+    [identity, t, labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, renderOfferCards, locale, starterChips,runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startAddDocument, startInvitations, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, openConversationTarget, runAgencyRead, openProposeForm, startCapabilities],
   );
   handleChipRef.current = handleChip;
 
@@ -6235,7 +6326,13 @@ export function ConversationChat({
           // door to the personal space (the same membership-validated `ws:`
           // switch the context chips run) — rendered through the workflow
           // contract, so the WHY is stated like every other answer.
-          if (identity === "company") {
+          // THE ACTIVE WORKSPACE decides, not only the acting role (production
+          // walk 2026-10-01): a worker standing in an ORGANIZATION workspace has
+          // the person identity but an organization result context, and the
+          // search ran and drew a card beside "Šis rezultatas nepasiekiamas
+          // dabartiniame kontekste" — the result registry offers the job matches
+          // in the personal context only. Same one-line answer + door instead.
+          if (identity === "company" || Boolean(auth?.activeOrganizationId || auth?.activeOrgName)) {
             const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
             return {
               kind: "answer" as const,
@@ -6883,6 +6980,7 @@ export function ConversationChat({
         // "Kaip pridėti žmogų?" / "Kur mano valandos?" - HOW to use the product,
         // in plain words WITH the way to do it (chips to the existing surfaces).
         // The topic is read from the same sources the router rule is built from.
+        openConversation: () => startOpenConversation(text),
         productHelp: () => {
           const topic = readHelpTopic(text);
           if (!topic) {
@@ -7131,7 +7229,7 @@ export function ConversationChat({
         clientBridge: () => startClientBridge(),
         addDocument: () => startAddDocument(text),
         addTask: () => startCreateTask(text),
-        whoAvailable: () => startWhoAvailable(),
+        whoAvailable: () => startWhoAvailable(text),
         stageStatus: () => startStageStatus(text),
         taskStatus: () => startTaskStatus(text),
         projectRisk: () => startProjectRisk(),
@@ -7364,7 +7462,7 @@ export function ConversationChat({
           askToClarify(t("answerFailed"));
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startFindPartners, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startFindPartners, startOpenConversation, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
   );
 
   /**

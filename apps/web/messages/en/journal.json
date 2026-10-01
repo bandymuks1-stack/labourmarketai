@@ -158,7 +158,7 @@
       "pending": "Waiting for review",
       "confirmed": "Confirmed"
     },
-    "projectNote": "Entries can be linked to a project — the data model is ready, but no entry is linked yet and nothing is filled automatically. The projects / sites / client layer is filled in a separate slice.",
+    "projectNote": "Entries can be linked to a project. Nothing is filled automatically.",
     "reviewClarity": {
       "lead": "Your review turns a worker's self-declared entry into confirmed evidence. Only a manager, owner, or client manager can do it — every confirmation is a real human decision.",
       "actionsTitle": "What each action does",

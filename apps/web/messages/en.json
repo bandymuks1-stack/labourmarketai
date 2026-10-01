@@ -88,7 +88,7 @@
     "panelTitle": "Public business profile",
     "panelIntro": "Publish a public page for your business — shareable at labourmarket.ai/business/your-name. Off by default.",
     "viewPublic": "View public page",
-    "notAvailable": "Not available yet.",
+    "notAvailable": "Not available right now.",
     "saved": "Saved.",
     "enableLabel": "Make my business profile public",
     "enableHint": "When on, your identity, public contact, active services and active listings are shown on a public page. Private data is never shown.",
@@ -118,7 +118,7 @@
     "title": "Marketplace listings",
     "myTitle": "My listings",
     "intro": "List a work resource you offer or are looking for. Only active listings are visible to others.",
-    "notAvailable": "Not available yet.",
+    "notAvailable": "Not available right now.",
     "empty": "No listings yet. Add your first work resource.",
     "addButton": "Add listing",
     "browseTitle": "Browse active listings",
@@ -1807,7 +1807,9 @@
         "unknown": "Not enough detail to compare"
       },
       "opportunity": "{count, plural, =1 {Up to 1 person is free from {date}} other {Up to # people are free from {date}}}",
-      "opportunityCta": "Look for work"
+      "opportunityCta": "Look for work",
+      "interest": "{count, plural, =1 {1 person showed interest in your needs} other {# people showed interest in your needs}}",
+      "interestCta": "See who"
     },
     "attention": {
       "heading": "Needs you",
@@ -2140,7 +2142,7 @@
       },
       "workersBlocker": {
         "title": "Something went wrong",
-        "subtitle": "The company path is temporarily blocked at the DB layer. Real worker linking + invitations already work on the agency side.",
+        "subtitle": "Not available right now.",
         "statusLabel": "Something went wrong",
         "statusBody": "Company worker management is still being prepared and will be enabled later.",
         "nextStep": "Self-entry for workers stays open at all times."
@@ -2252,6 +2254,12 @@
         "statusInvited": "Invitation created (it is not emailed). The invitee sees it after signing in with this email.",
         "statusAlreadyPending": "A pending invitation already exists for this email from your company.",
         "statusAlreadyLinked": "This worker is already linked to your company.",
+        "statusWordActive": "Active",
+        "statusWordPending": "Invited",
+        "statusWordAccepted": "Accepted",
+        "statusWordCancelled": "Cancelled",
+        "statusWordExpired": "Expired",
+        "statusWordEnded": "Ended",
         "statusNotOwner": "Action rejected: you are not the company owner.",
         "statusInvalidEmail": "Invalid email address.",
         "statusError": "Something went wrong. Please try again.",
@@ -2261,7 +2269,14 @@
         "columnEmail": "Email",
         "columnStatus": "Status",
         "columnInvitedAt": "Date",
-        "openProfile": "View profile"
+        "openProfile": "View profile",
+        "identity": {
+          "availability": {
+            "available": "Available",
+            "busy": "Busy",
+            "unavailable": "Unavailable"
+          }
+        }
       },
       "scoutingBridge": {
         "title": "Find workers for this need",
@@ -3473,11 +3488,11 @@
     "retry": "Try again",
     "viewProfile": "View profile",
     "importPrompt": "Have a CV file? A CV helps explain your experience.",
-    "importComingSoon": "Reading skills from a CV is not active yet.",
+    "importComingSoon": "Not available right now.",
     "importAddManually": "Add your skills manually or through journal entries.",
     "importNotSaved": "Selected: {file}. The file isn't uploaded or stored yet.",
     "customPrompt": "Can't find your skill?",
-    "customComingSoon": "free entry not active yet",
+    "customComingSoon": "Not available right now.",
     "textFirst": {
       "title": "Tell us what you do",
       "helper": "Write in your own words or upload a CV. We'll suggest skills, work directions, roles and CV entries — but you select every suggestion. Nothing is saved without your selection.",
@@ -4723,6 +4738,7 @@
         "event_demand_interest_reviewed": "A company marked your interest as reviewed",
         "event_weekly_digest": "Your weekly work and opportunities summary is ready",
         "event_saved_search_match": "A search you saved has new results",
+        "event_job_alert": "A new job fits what you are looking for",
         "event_invitation_accepted": "Somebody accepted your invitation",
         "event_weekly_digest_profile_completion": "To see jobs that fit you, confirm what work you do",
         "event_weekly_digest_journal": "Your week’s work journal summary is ready"
@@ -6020,6 +6036,7 @@
         "alternativesTitle": "Free on these dates",
         "swap": "Assign instead",
         "undo": "Undo assignment",
+        "keep": "Keep",
         "decided": "Done",
         "unknown": "We could not confirm these dates are free. That is not the same as free.",
         "source": {
@@ -6434,11 +6451,14 @@
   "marketplace": {
     "pageTitle": "Discover & request services",
     "pageLead": "Find active services people offer, send a request, and track its status — one place for the whole exchange.",
-    "notAvailable": "Not available yet.",
+    "notAvailable": "Not available right now.",
     "discoverHeading": "Active services",
     "discoverEmpty": "No active services to show yet.",
     "request": "Request",
     "requested": "Requested",
+    "partnershipBadge": "Looking for partners",
+    "partnershipRequest": "Offer to partner",
+    "requestMessagePlaceholder": "Tell the provider what you need (optional)",
     "remoteBadge": "Remote",
     "outgoingHeading": "My requests",
     "outgoingEmpty": "You haven't requested any service yet.",
@@ -6526,7 +6546,7 @@
     "pageLead": "Suggestions drawn from real work activity, kept for a person to review. Nothing here is treated as proven on its own.",
     "title": "Review queue",
     "lead": "Signals become suggestions, and a person decides. Learning never settles anything by itself.",
-    "notAvailable": "Not available yet.",
+    "notAvailable": "Not available right now.",
     "empty": "Nothing to review yet.",
     "kind": {
       "confirm_skill": "Skill recognition suggestion",
@@ -6571,6 +6591,7 @@
     "notAvailable": "Not available right now.",
     "empty": "No service offerings yet. Add the first real service you offer.",
     "addButton": "Add a service",
+    "addPartnership": "Look for partners",
     "form": {
       "titleLabel": "Service title",
       "titlePlaceholder": "e.g. Interior painting",
@@ -7657,7 +7678,7 @@
     "eyebrow": "MY DOCUMENTS",
     "title": "My documents",
     "subtitle": "What you have, what is missing, and the next step — per country.",
-    "preparing": "Document readiness is being prepared — it goes live once the document storage layer is reviewed and enabled. Nothing here is active yet.",
+    "preparing": "Not available right now.",
     "reports": {
       "title": "Reports & exports",
       "intro": "Build a print-ready report from your own data. PDF works through your browser's print/save; Excel and Word are not available yet.",
@@ -7714,6 +7735,7 @@
     "country": {
       "title": "What is missing for a country",
       "help": "Pick a destination country to see which documents it asks for.",
+      "mine": "Your preferred countries come first.",
       "unknown": "The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
       "next": "Next step: take care of — {doc}.",
       "ok": "All curated requirements for {country} are covered."
@@ -7741,7 +7763,7 @@
     "consent": {
       "title": "What my agency may see",
       "explainer": "If you switch this on, YOUR agency sees only category-level counts of your document readiness (valid / expiring / needs attention). It never sees document contents, files, notes or types. Default is off; you can switch it off any time.",
-      "needsGate": "The consent layer is in preparation — it activates after the owner-gated change is applied.",
+      "needsGate": "Not available right now.",
       "onLabel": "Sharing aggregates: ON",
       "offLabel": "Sharing aggregates: OFF",
       "onHint": "Your agency sees counts only. Tap to switch off.",
@@ -8313,7 +8335,7 @@
     "demand": {
       "title": "Open demand",
       "humanNote": "\"We can offer\" is your proposal on a request — the final match is always recorded by a person on the platform side.",
-      "needsGate": "Open-demand visibility for agencies is in preparation — it activates after the owner-gated change is applied.",
+      "needsGate": "Not available right now.",
       "empty": "No open requests right now.",
       "noRole": "Role not specified",
       "teamSize": "{n} people",
@@ -8370,7 +8392,7 @@
     "needsSetup": "Couldn’t load. Please try again.",
     "noCandidates": "No matching workers yet for this need. Matches appear as workers add journal-backed skills — check back later or broaden the need.",
     "namePlaceholder": "Worker",
-    "skillFit": "{pct}% — {matched}/{total} required skills, {confirmed} manager-confirmed",
+    "skillFit": "{matched}/{total} required skills, {confirmed} manager-confirmed",
     "evidence": "Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
     "shortlistError": "Could not save. Try again.",
     "footnote": "Matches are computed deterministically for this need only. No global rating, no fake candidates.",
@@ -8439,7 +8461,8 @@
       "opened": "Conversation open — write the worker a message.",
       "view": "Open conversation",
       "error": "Couldn't open the conversation. Please try again.",
-      "limitReached": "Daily limit for new conversations reached. Try again tomorrow."
+      "limitReached": "Daily limit for new conversations reached. Try again tomorrow.",
+      "shortlistFirst": "Add the worker to your shortlist first, then you can request to communicate."
     },
     "how": {
       "title": "How matching works",
@@ -8498,7 +8521,7 @@
       "markContacted": "Contact in the platform",
       "internalNote": "“Reviewed” is an internal record. “Contact” opens an in-platform conversation; nothing is sent outside the platform.",
       "error": "Could not save. Try again.",
-      "notAvailable": "Acknowledgement is not enabled yet."
+      "notAvailable": "Not available right now."
     },
     "lifecycle": {
       "confirm": "Confirm recognized skills",
@@ -8534,7 +8557,7 @@
       "granted": "The worker approved sharing contact details.",
       "declined": "The worker declined the previous request.",
       "expired": "The previous request expired.",
-      "unavailable": "Contact requests are prepared but not enabled yet.",
+      "unavailable": "Not available right now.",
       "rateLimited": "Request limit reached (10 open, 30 per day). Try again later.",
       "noOrganization": "Create your company organization first.",
       "fieldsNote": "Asks the worker to share their name, phone and email. The worker decides — nothing is shown without their approval.",
@@ -8601,6 +8624,14 @@
         "accepted": "Accepted",
         "closed": "Closed"
       }
+    },
+    "identity": {
+      "why": "Why this person is relevant",
+      "skills": "Relevant skills and what they rest on",
+      "readiness": "Availability, readiness and documents",
+      "openTo": "Also open to: {countries}",
+      "skillCount": "{matched} of {total} required skills",
+      "nameHidden": "Name and contact details appear only when the person allows them."
     }
   },
   "planBoundary": {
@@ -9492,7 +9523,7 @@
     "external": {
       "sectionTitle": "Public job advertisements",
       "sectionNote": "Advertisements from official public employment services. They are published by the employer at the source — labourmarket.ai lists them so you can find them, and applying happens through the original advertisement.",
-      "shownOfTotal": "top {shown} of {total}",
+      "shownOfTotal": "showing {shown} of {total}",
       "bandBest": "Best fits",
       "bandPossible": "Possible fits",
       "bandExplore": "Explore",
@@ -9644,6 +9675,14 @@
         "LOOKING_FOR_WORK": "Looking for work",
         "LOOKING_FOR_PROJECTS": "Looking for projects"
       }
+    },
+    "jobAlerts": {
+      "title": "New-job alerts",
+      "ready": "When a new real job appears that fits your profession and the countries you chose, it shows up in your notifications. A job that states no pay is never hidden because of pay.",
+      "missing": "To get new-job alerts, tell us:",
+      "profession": "what work you do",
+      "country": "which countries you want to work in",
+      "cta": "Fill in my preferences"
     }
   },
   "workerIntake": {
@@ -9805,7 +9844,7 @@
     "expYears": "yrs",
     "none": "—",
     "empty": "No candidates match these filters.",
-    "needsMigration": "The worker supply tables are not available yet.",
+    "needsMigration": "Not available right now.",
     "error": "Could not load the candidate pool.",
     "colPermission": "Worker permission",
     "permissionGranted": "Visibility granted",
@@ -10607,7 +10646,7 @@
       "reconfirmed": "Thank you — confirmed.",
       "withdrawDeclaration": "Stop representing me",
       "withdrawnDeclarationNote": "You are no longer represented outside LabourMarket.ai.",
-      "needsMigration": "This control is not available yet.",
+      "needsMigration": "Not available right now.",
       "errorGeneric": "Something went wrong. Nothing was changed.",
       "errorUnknownIntent": "Please choose your current situation.",
       "errorAvailableFromRequired": "Please give the date you can start.",
@@ -10899,6 +10938,18 @@
       "partial": "{count} of them could not be counted in full — something real has no dates, so the figure above is a floor.",
       "unknown": "{count} could not be read at all. That is not the same as free.",
       "denominatorNote": "Counted in calendar days. We do not record contracted hours, so this is not an FTE figure."
+    },
+    "rosterTimeline": {
+      "byPerson": "People",
+      "byProject": "Projects",
+      "prev": "Earlier",
+      "next": "Later",
+      "today": "Today",
+      "dateLabel": "From date",
+      "go": "Go",
+      "away": "Away",
+      "outside": "{count} more outside this period",
+      "nothing": "Nothing on record in this period"
     },
     "committedWhere": {
       "title": "Who is committed where",
@@ -11487,7 +11538,7 @@
     "saving": "Saving…",
     "saved": "Preferences saved.",
     "error": "Saving failed. Please try again.",
-    "needsMigration": "This section is not enabled yet — nothing was saved.",
+    "needsMigration": "Not available right now. Nothing was saved.",
     "v2": {
       "title": "More work preferences",
       "hint": "Same rule as above — anything left as “Not stated” stays not stated.",
@@ -11502,7 +11553,7 @@
       "licenceCategories": "Driving licence categories",
       "ownVehicle": "I have my own vehicle",
       "ownTools": "I have my own tools",
-      "notEnabled": "These extra preferences are not enabled yet — nothing here is saved for now.",
+      "notEnabled": "Not available right now.",
       "notSaved": "Saved, except the extra preferences — that part is not enabled yet."
     }
   },
@@ -11517,7 +11568,7 @@
     "adding": "Adding…",
     "remove": "Remove",
     "empty": "No languages added yet.",
-    "notEnabled": "This section is not enabled yet — nothing was saved.",
+    "notEnabled": "Not available right now. Nothing was saved.",
     "error": "Saving failed. Please try again.",
     "invalid": "Choose a language and a level."
   },
@@ -11540,7 +11591,7 @@
     "importNote": "Automatic import from these sites is not offered. To bring your data in, upload an exported CV file in the profile editor.",
     "importLink": "Open the profile editor",
     "empty": "No external profiles linked yet.",
-    "notEnabled": "This section is not enabled yet — nothing was saved.",
+    "notEnabled": "Not available right now. Nothing was saved.",
     "error": "Saving failed. Please try again.",
     "invalid": "Enter a full https:// link and choose a site.",
     "platformNames": {
@@ -12082,7 +12133,7 @@
       "cancel": "Cancel",
       "remove": "Remove",
       "empty": "No education entries yet.",
-      "notEnabled": "This section is prepared but not enabled yet.",
+      "notEnabled": "Not available right now.",
       "error": "Could not save. Try again.",
       "invalid": "Invalid value.",
       "limit": "Entry limit reached.",
@@ -12116,7 +12167,7 @@
       "cancel": "Cancel",
       "remove": "Remove",
       "empty": "No achievements yet.",
-      "notEnabled": "This section is prepared but not enabled yet.",
+      "notEnabled": "Not available right now.",
       "error": "Could not save. Try again.",
       "invalid": "Invalid value.",
       "limit": "Entry limit reached.",
@@ -12152,7 +12203,7 @@
     "discardedLabel": "Discarded",
     "replace": "Replace",
     "conflict": "A different value is already saved: {value}",
-    "needsMigration": "This section is prepared but not enabled yet — the entry was not saved.",
+    "needsMigration": "Not available right now. Nothing was saved.",
     "error": "Could not save. Try again.",
     "invalid": "Invalid value.",
     "aiHint": "AI suggestion — review before saving",
@@ -13568,6 +13619,11 @@
       "findWorkInCompanyContext": "A job search is your own act — I don't run it inside the company space. Switch to your personal space and ask again.",
       "findWorkInCompanyWhy": "A person looks for work, not a company — I answer from your personal space.",
       "personalOnlyInCompany": "That is a personal action — I do not run it in a company workspace. Switch to your personal space and continue there.",
+      "openConversationOpening": "Opening the conversation with {name}.",
+      "openConversationNone": "I did not find that person among your conversations or your team. Your messages are in the messages section.",
+      "openConversationWhich": "Which person do you mean?",
+      "openConversationNoPermission": "I cannot open a conversation with {name} — you do not have permission for that.",
+      "openConversationFailed": "The conversation could not be opened. Try again or open your messages.",
       "journalAskWhatYouDid": "What did you do today? Write it in the “What you did” field in your own words — e.g. “installed windows at the Kaunas site from 8 to 17”. The request itself is not saved to the journal.",
       "alsoWorkLog": "I also understood that you worked today — check it and save it to your work journal:",
       "serviceNeedHint": "That is a job to be done — I will show you who offers that service.",
@@ -13898,7 +13954,7 @@
       "moveToLine": "• “{to}”: people {before} → {after}; the readiness checklist there starts at 0/{total}.",
       "moveCountryLine": "• The country changes: {from} → {to} — document requirements differ.",
       "moveNoDatesLine": "• “{to}” has no dates — absences cannot be checked.",
-      "moveAvailabilityUnknownLine": "• Absences unknown — the leave model does not answer here.",
+      "moveAvailabilityUnknownLine": "• Absences unknown.",
       "moveAvailabilityLine": "• Inside {start}–{end} they have {count} absence records.",
       "moveAvailabilityFreeLine": "• No absences inside “{to}”'s dates.",
       "moveOnlyConfirmLine": "Nothing has changed yet — only your confirmation will.",
@@ -17910,6 +17966,18 @@
     "whoWorked": "Who worked here",
     "timeline": "What was done",
     "back": "Back to history",
-    "placeMissing": "This place is not in the imported history of the active workspace."
+    "placeMissing": "This place is not in the imported history of the active workspace.",
+    "attributedNote": "Includes {count, plural, one {# record} other {# records}} kept in another organization's books and attributed here as the performing company.",
+    "attribution": {
+      "title": "Who performed this work?",
+      "intro": "Work stored in this organization's books can be attributed to another organization of yours as the performing company. Nothing is moved or copied: the records stay as they are and the other organization can read them.",
+      "performedBy": "Performed by",
+      "note": "Note (optional), for example the stated share of hours",
+      "button": "Attribute",
+      "progress": "{attributed} of {total} attributed to {name}",
+      "done": "Attributed {count} records; {skipped} were already attributed.",
+      "refused": "This could not be saved. Nothing was changed.",
+      "person": "{hours} h, {count, plural, one {# record} other {# records}}"
+    }
   }
 }

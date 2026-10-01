@@ -113,8 +113,17 @@ export async function renderNotificationEmail(input: {
   const manageLine =
     readString(messages, ["auth", "notifications", "email", "manage"]) ?? "";
 
+  // JOB ALERT first layer: the position and, only when the ad stated it, its
+  // pay — public-ad facts from the stored row, no matching reasoning.
+  const jobLine = input.metadata?.title
+    ? input.metadata.salary
+      ? `${input.metadata.title} — ${input.metadata.salary}`
+      : input.metadata.title
+    : null;
+
   const text = [
     subject,
+    ...(jobLine ? ["", jobLine] : []),
     "",
     openLine ? `${openLine} ${deepLink}` : deepLink,
     "",
