@@ -1,5 +1,5 @@
 -- @human-gate-approved
--- 20261001120000_public_vacancy_board_no_parallel_v1
+-- 20261001180000_public_vacancy_board_no_parallel_v1
 --
 -- RED by the migration-safety gate (ALTER FUNCTION on SECURITY DEFINER
 -- functions). Config-only: no body, signature, grant, RLS or data change.
@@ -19,7 +19,7 @@
 --     baker        88 ms cold  (parallel: 26-230 ms)
 --   A 20-row ordered read has nothing to parallelise.
 --
--- Rollback: supabase/rollbacks/20261001120000_public_vacancy_board_no_parallel_v1.down.sql
+-- Rollback: supabase/rollbacks/20261001180000_public_vacancy_board_no_parallel_v1.down.sql
 
 alter function public.search_public_vacancy_previews_v1(text, text, integer, integer)
   set max_parallel_workers_per_gather = 0;
@@ -28,4 +28,4 @@ alter function public.count_public_vacancies_v1()
   set max_parallel_workers_per_gather = 0;
 
 -- ROLLBACK
--- see supabase/rollbacks/20261001120000_public_vacancy_board_no_parallel_v1.down.sql
+-- see supabase/rollbacks/20261001180000_public_vacancy_board_no_parallel_v1.down.sql

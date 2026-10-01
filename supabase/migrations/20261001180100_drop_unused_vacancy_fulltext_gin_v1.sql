@@ -1,5 +1,5 @@
 -- @human-gate-approved
--- 20261001120100_drop_unused_vacancy_fulltext_gin_v1
+-- 20261001180100_drop_unused_vacancy_fulltext_gin_v1
 --
 -- RED (owner-gated since #1421): drops an index. A derived structure, fully
 -- recreatable (rollback file), no row or column touched.
@@ -32,4 +32,4 @@ end $$;
 drop index if exists public.public_vacancies_fulltext_idx;
 
 -- ROLLBACK
--- see supabase/rollbacks/20261001120100_drop_unused_vacancy_fulltext_gin_v1.down.sql
+-- see supabase/rollbacks/20261001180100_drop_unused_vacancy_fulltext_gin_v1.down.sql

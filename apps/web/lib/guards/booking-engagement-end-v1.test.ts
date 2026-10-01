@@ -1515,9 +1515,11 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260930133500_worker_avatar_path_for_relations_v1.sql",
       // owner 2026-10-01 (#2041 APPROVED): the human decision on a staffing collision is audited.
       "20261001100000_assignment_decision_audit_v1.sql",
+      // stream N (owner approval PENDING): service_role SELECT for the job-alert sweep.
+      "20261001120000_job_alert_sweep_service_role_select.sql",
       // owner 2026-10-01 (#2065 APPROVED in chat): board reads without parallel workers; drop the unused 129 MB GIN.
-      "20261001120000_public_vacancy_board_no_parallel_v1.sql",
-      "20261001120100_drop_unused_vacancy_fulltext_gin_v1.sql",
+      "20261001180000_public_vacancy_board_no_parallel_v1.sql",
+      "20261001180100_drop_unused_vacancy_fulltext_gin_v1.sql",
 ]);
   });
 
