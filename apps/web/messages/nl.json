@@ -2142,7 +2142,7 @@
       },
       "workersBlocker": {
         "title": "Er is iets misgegaan",
-        "subtitle": "Het bedrijfspad is tijdelijk geblokkeerd op de DB-laag. Echte werknemerskoppeling + uitnodigingen werken al aan de uitzendbureaukant.",
+        "subtitle": "Momenteel niet beschikbaar.",
         "statusLabel": "Er is iets misgegaan",
         "statusBody": "Beheer van bedrijfswerknemers wordt nog voorbereid en wordt later ingeschakeld.",
         "nextStep": "Zelfaanmelding voor werknemers blijft altijd open."
@@ -7671,7 +7671,7 @@
     "eyebrow": "MIJN DOCUMENTEN",
     "title": "Mijn documenten",
     "subtitle": "Wat je hebt, wat ontbreekt en de volgende stap — per land.",
-    "preparing": "Documentgereedheid wordt voorbereid — het gaat live zodra de documentopslaglaag is beoordeeld en ingeschakeld. Hier is nog niets actief.",
+    "preparing": "Momenteel niet beschikbaar.",
     "reports": {
       "title": "Rapporten & exports",
       "intro": "Stel een printklaar rapport samen uit je eigen data. PDF werkt via de print-/opslaanfunctie van je browser; Excel en Word zijn nog niet beschikbaar.",
@@ -13936,7 +13936,7 @@
       "moveToLine": "• “{to}”: mensen {before} → {after}; de gereedheidslijst daar begint op 0/{total}.",
       "moveCountryLine": "• Het land verandert: {from} → {to} — andere documenteisen.",
       "moveNoDatesLine": "• “{to}” heeft geen datums — afwezigheden kunnen niet worden gecontroleerd.",
-      "moveAvailabilityUnknownLine": "• Afwezigheden onbekend — het verlofmodel antwoordt hier niet.",
+      "moveAvailabilityUnknownLine": "• Afwezigheden onbekend.",
       "moveAvailabilityLine": "• Binnen {start}–{end} heeft hij {count} afwezigheidsregistraties.",
       "moveAvailabilityFreeLine": "• Geen afwezigheden binnen de datums van “{to}”.",
       "moveOnlyConfirmLine": "Er is nog niets veranderd — alleen uw bevestiging verandert iets.",

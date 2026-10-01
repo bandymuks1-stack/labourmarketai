@@ -158,7 +158,7 @@
       "pending": "Wacht op beoordeling",
       "confirmed": "Bevestigd"
     },
-    "projectNote": "Items kunnen aan een project worden gekoppeld — het datamodel is gereed, maar er is nog geen item gekoppeld en er wordt niets automatisch ingevuld. De laag met projecten / locaties / klanten wordt in een aparte stap gevuld.",
+    "projectNote": "Items kunnen aan een project worden gekoppeld. Er wordt niets automatisch ingevuld.",
     "reviewClarity": {
       "lead": "Jouw beoordeling maakt van een zelf opgegeven item van een werknemer bevestigd bewijs. Alleen een manager, eigenaar of klantmanager kan dat doen — elke bevestiging is een echte menselijke beslissing.",
       "actionsTitle": "Wat elke actie doet",

@@ -2142,7 +2142,7 @@
       },
       "workersBlocker": {
         "title": "Etwas ist schiefgelaufen",
-        "subtitle": "Der Unternehmenspfad ist auf DB-Ebene vorübergehend blockiert. Echte Arbeitskräfte-Verknüpfung + Einladungen funktionieren bereits auf der Agenturseite.",
+        "subtitle": "Derzeit nicht verfügbar.",
         "statusLabel": "Etwas ist schiefgelaufen",
         "statusBody": "Die Verwaltung der Unternehmens-Arbeitskräfte wird noch vorbereitet und später aktiviert.",
         "nextStep": "Die Selbstregistrierung für Arbeitskräfte bleibt jederzeit offen."
@@ -7671,7 +7671,7 @@
     "eyebrow": "MEINE DOKUMENTE",
     "title": "Meine Dokumente",
     "subtitle": "Was Sie haben, was fehlt und der nächste Schritt — pro Land.",
-    "preparing": "Die Dokumentenbereitschaft wird vorbereitet — sie geht live, sobald die Dokumentenspeicherschicht geprüft und aktiviert ist. Hier ist noch nichts aktiv.",
+    "preparing": "Derzeit nicht verfügbar.",
     "reports": {
       "title": "Berichte & Exporte",
       "intro": "Erstellen Sie einen druckfertigen Bericht aus Ihren eigenen Daten. PDF funktioniert über die Druck-/Speicherfunktion Ihres Browsers; Excel und Word sind noch nicht verfügbar.",
@@ -13936,7 +13936,7 @@
       "moveToLine": "• „{to}“: Personen {before} → {after}; die Bereitschaftsliste dort beginnt bei 0/{total}.",
       "moveCountryLine": "• Das Land wechselt: {from} → {to} — andere Dokumentanforderungen.",
       "moveNoDatesLine": "• „{to}“ hat keine Daten — Abwesenheiten können nicht geprüft werden.",
-      "moveAvailabilityUnknownLine": "• Abwesenheiten unbekannt — das Urlaubsmodell antwortet hier nicht.",
+      "moveAvailabilityUnknownLine": "• Abwesenheiten unbekannt.",
       "moveAvailabilityLine": "• Im Fenster {start}–{end} hat er {count} Abwesenheitseinträge.",
       "moveAvailabilityFreeLine": "• Keine Abwesenheiten in den Daten von „{to}“.",
       "moveOnlyConfirmLine": "Noch ist nichts geändert — erst Ihre Bestätigung ändert etwas.",

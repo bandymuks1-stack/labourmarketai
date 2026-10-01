@@ -2142,7 +2142,7 @@
       },
       "workersBlocker": {
         "title": "Coś poszło nie tak",
-        "subtitle": "Ścieżka firmowa jest tymczasowo zablokowana na poziomie bazy danych. Rzeczywiste łączenie pracowników i zaproszenia już działają po stronie agencji.",
+        "subtitle": "Chwilowo niedostępne.",
         "statusLabel": "Coś poszło nie tak",
         "statusBody": "Zarządzanie pracownikami firmy jest wciąż przygotowywane i zostanie włączone później.",
         "nextStep": "Samodzielna rejestracja pracowników pozostaje zawsze dostępna."
@@ -7671,7 +7671,7 @@
     "eyebrow": "MOJE DOKUMENTY",
     "title": "Moje dokumenty",
     "subtitle": "Co masz, czego brakuje i jaki jest następny krok — dla każdego kraju.",
-    "preparing": "Gotowość dokumentów jest przygotowywana — zostanie uruchomiona, gdy warstwa przechowywania dokumentów zostanie sprawdzona i włączona. Nic tutaj nie jest jeszcze aktywne.",
+    "preparing": "Chwilowo niedostępne.",
     "reports": {
       "title": "Raporty i eksporty",
       "intro": "Zbuduj gotowy do druku raport na podstawie własnych danych. PDF działa przez funkcję drukowania/zapisu w przeglądarce; Excel i Word nie są jeszcze dostępne.",
@@ -13936,7 +13936,7 @@
       "moveToLine": "• „{to}”: osób {before} → {after}; lista gotowości tam zacznie się od 0/{total}.",
       "moveCountryLine": "• Zmienia się kraj: {from} → {to} — inne wymagania dokumentowe.",
       "moveNoDatesLine": "• „{to}” nie ma dat — nieobecności nie można sprawdzić.",
-      "moveAvailabilityUnknownLine": "• Nieobecności nieznane — model urlopów tu nie odpowiada.",
+      "moveAvailabilityUnknownLine": "• Nieobecności nieznane.",
       "moveAvailabilityLine": "• W oknie {start}–{end} ma {count} wpisów nieobecności.",
       "moveAvailabilityFreeLine": "• Brak nieobecności w datach „{to}”.",
       "moveOnlyConfirmLine": "Na razie nic się nie zmieniło — zmieni dopiero potwierdzenie.",
