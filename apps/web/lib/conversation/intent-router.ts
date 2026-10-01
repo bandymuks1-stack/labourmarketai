@@ -32,6 +32,7 @@ import {
   SEEK_VERB_SOURCE,
 } from "@/lib/structuring/role-label";
 import { PRESENT_ACTIVITY_VERB_SOURCE } from "@/lib/structuring/value-statement";
+import { HELP_TOPICS } from "./product-help-topics";
 
 export type ConversationIntent =
   | "log-work" // "šiandien dirbau nuo 8 iki 17" — record a work-journal entry
@@ -88,6 +89,8 @@ export type ConversationIntent =
    * marketplace surfaces that already exist.
    */
   | "find-partners"
+  /** "Kaip pridėti žmogų?" / "Kur mano valandos?" — HOW to use the product, answered in words with the door that does it (product-help-topics.ts). */
+  | "product-help"
   | "context" // "ką tu apie mane žinai?"
   /**
    * "Ką galiu padaryti šioje paskyroje?" — WHAT CAN I ACHIEVE FROM HERE.
@@ -1335,7 +1338,7 @@ const RULES: IntentRule[] = [
     // and not the others.
     intent: "capabilities",
     patterns: [
-      p("(ką|kas)\\s+(aš\\s+)?galiu\\s+(čia\\s+|šioje\\s+|šitoje\\s+|dabar\\s+)?[^.]{0,24}(padaryti|daryti|nuveikti)", 6),
+      p("(ką|kas)\\s+(aš\\s+|čia\\s+)?galiu\\s+(čia\\s+|šioje\\s+|šitoje\\s+|dabar\\s+)?[^.]{0,24}(padaryti|daryti|nuveikti)", 6),
       p("(ką|kas)\\s+(čia|šioje\\s+paskyroje|šioje\\s+sistemoje)\\s+galima\\s+(pa)?daryti", 6),
       p("kam\\s+skirta\\s+(ši|šita)\\s+(paskyra|sistema|platforma)", 4),
       // ── AND THE SAME QUESTION ASKED ABOUT THE ORGANIZATION (E, 2026-09-10).
@@ -2852,10 +2855,28 @@ const RULES: IntentRule[] = [
           "\\bfinde\\w*|\\bfinden\\b|\\bsuche\\w*|\\bbrauche\\w*|\\bzoek\\w*|\\bvind\\w*|" +
           "\\bszukam\\b|\\bszukamy\\b|\\bznajdz\\w*|\\bznalezc\\b|\\bpotrzebuj\\w*|\\bchce\\w*|\\bchcemy\\b|\\bmochte\\w*|\\bwollen\\b|\\bwil\\b|\\bwillen\\b)" +
           "\\s+(?:(?!darb|job|work|работ|vakans|arbeit|stelle|werk|baan|prac)[^\\s]+\\s+){0,3}?" +
-          "(?:[^\\s]{0,14}partner[^\\s]*|[^\\s]{0,14}партнер[^\\s]*)",
+          "(?:[^\\s]{0,14}partner[^\\s]*|[^\\s]{0,14}партнер[^\\s]*|" +
+          // THE OTHER BUSINESSES A COMPANY WORKS WITH (owner 2026-10-01):
+          // suppliers, subcontractors and service providers are the same
+          // business-side market question as a partner, never a hire and never
+          // a job.
+          "tiekej[^\\s]*|supplier[^\\s]*|subrangov[^\\s]*|subcontractor[^\\s]*|paslaug[^\\s]*\\s+teikej[^\\s]*|" +
+          "service\\s+provider[^\\s]*|lieferant[^\\s]*|subunternehmer[^\\s]*|leverancier[^\\s]*|onderaannemer[^\\s]*|" +
+          "поставщик[^\\s]*|подрядчик[^\\s]*|dostawc[^\\s]*|podwykonawc[^\\s]*|uslugodawc[^\\s]*)",
         15,
       ),
     ],
+  },
+  {
+    // PRODUCT HELP (owner 2026-10-01): "how do I / where is / what does this
+    // mean" about the product itself. The patterns come from the SAME data the
+    // chat handler reads the topic back from (`product-help-topics.ts`), so the
+    // router and the answer cannot disagree. Weight 16 sits above every rule
+    // these sentences used to fall into by accident ("Kaip suplanuoti
+    // darbuotoją" scored 4 on need-workers, "Kaip naudotis šiuo projektu" 3 on
+    // projects, "Kaip pasiūlyti paslaugą" 6 on offer-value).
+    intent: "product-help",
+    patterns: HELP_TOPICS.flatMap((topic) => topic.sources.map((src) => p(src, 16))),
   },
   {
     intent: "find-work",

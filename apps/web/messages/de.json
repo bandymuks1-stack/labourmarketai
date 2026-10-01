@@ -13525,6 +13525,7 @@
       },
       "findWorkInCompanyContext": "Die Jobsuche ist deine eigene Sache — im Unternehmensbereich führe ich sie nicht aus. Wechsle in deinen persönlichen Bereich und frag noch einmal.",
       "findWorkInCompanyWhy": "Arbeit sucht ein Mensch, kein Unternehmen — ich antworte aus deinem persönlichen Bereich.",
+      "personalOnlyInCompany": "Das ist eine persönliche Aktion — im Unternehmensbereich führe ich sie nicht aus. Wechsle in deinen persönlichen Bereich und mach dort weiter.",
       "journalAskWhatYouDid": "Was hast du heute gearbeitet? Schreib es in das Feld „Was du gearbeitet hast“ in deinen Worten — z. B. „Fenster auf der Baustelle Kaunas von 8 bis 17 montiert“. Die Anfrage selbst wird nicht ins Tagebuch gespeichert.",
       "alsoWorkLog": "Ich habe auch verstanden, dass du heute gearbeitet hast — prüfe es und speichere es im Arbeitsjournal:",
       "serviceNeedHint": "Das ist eine Aufgabe, die erledigt werden muss — ich zeige dir, wer diese Leistung anbietet.",
@@ -13535,6 +13536,23 @@
       "chipPartnersServices": "Dienstleister",
       "chipPartnersListings": "Marktplatz-Anzeigen",
       "chipPartnersRelations": "Kunden und Partner",
+      "productHelp": {
+        "projectUse": "Ein Projekt ist der Ort für Arbeit, Menschen und Termine. Öffne ein Projekt, füge Aufgaben und Personen hinzu, und die erledigte Arbeit erscheint genau dort.",
+        "addPerson": "Eine Person fügst du per Einladung hinzu: Gib ihren Kontakt ein, und sie bestätigt in ihrem eigenen Konto. Einladungen und Team findest du im Teambereich.",
+        "hours": "Stunden stehen im Stundenbereich — dort siehst du Tage, die Woche und den Stundenzettel.",
+        "offerService": "Eine Leistung bietest du im Leistungsbereich an: Beschreibe sie, dann können andere Unternehmen und Personen sie sehen.",
+        "warning": "Eine Warnung erscheint, wenn etwas die Arbeit behindern könnte — zum Beispiel läuft ein Dokument ab oder es fehlen Daten. Alle Meldungen und ihre Gründe siehst du im Meldungsbereich.",
+        "forecast": "Eine Prognose ist eine Berechnung aus den bereits erfassten Stunden und der geplanten Arbeit. Sie ist ein Richtwert, kein Versprechen, und ändert sich mit den Daten. Plan und Zahlen findest du in der Planung.",
+        "scheduleWorker": "Eine Person planst du in der Planung ein: Wähle Tag und Projekt und weise die Person am selben Ort zu.",
+        "doneWork": "Erledigte Arbeit siehst du dort, wo sie erfasst wurde — im Arbeitsjournal oder im Stundenbereich: Einträge, Stunden und Bestätigungen.",
+        "chips": {
+          "chipHelpProjects": "Projekte öffnen",
+          "chipHelpPeople": "Team und Einladungen",
+          "chipHelpPlanning": "Planung öffnen",
+          "chipHelpServices": "Meine Leistungen",
+          "chipHelpJournal": "Arbeitsjournal"
+        }
+      },
       "interestInboxAmbiguous": "Das kann zweierlei heißen — was möchtest du sehen?",
       "chipInterestOnMyNeeds": "Interesse an meinen Anfragen",
       "chipMyOwnInterest": "Mein eigenes Interesse",

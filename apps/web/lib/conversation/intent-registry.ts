@@ -97,6 +97,7 @@ export type IntentHandlerId =
   | "needWorkers"
   | "needService"
   | "findPartners"
+  | "productHelp"
   | "offerValue"
   | "companyOverview"
   | "createOrganization"
@@ -246,6 +247,10 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // surfaces that already exist (and, from the personal space, asks which
   // company the person means) — it writes nothing and builds no second
   // marketplace.
+  // "Kaip pridėti žmogų?" / "Kur mano valandos?" - HOW to use the product,
+  // answered in words with the chip to the surface that does it. Reads the
+  // topic from the sentence; writes nothing.
+  "product-help": { domain: "context", access: "read", handler: "productHelp", ownTyping: false },
   "find-partners": { domain: "company", access: "route", handler: "findPartners", ownTyping: false },
   // V9/V10: reads the statement, runs channel discovery, renders honest
   // options — state only, nothing persisted.

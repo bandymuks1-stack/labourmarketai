@@ -3947,6 +3947,7 @@
       },
       "findWorkInCompanyContext": "Darba meklēšana ir tava paša darbība — uzņēmuma telpā es to neveicu. Pārslēdzies uz personīgo telpu un pajautā vēlreiz.",
       "findWorkInCompanyWhy": "Darbu meklē cilvēks, ne uzņēmums — atbildu no tavas personīgās telpas.",
+      "personalOnlyInCompany": "Šī ir personiska darbība — uzņēmuma telpā es to neveicu. Pārslēdzies uz personisko telpu un turpini tur.",
       "journalAskWhatYouDid": "Ko tu šodien darīji? Ieraksti laukā „Ko darīji“ saviem vārdiem — piem. „montēju logus Kauņas objektā no 8 līdz 17“. Pats pieprasījums žurnālā netiek saglabāts.",
       "serviceNeedHint": "Tas ir darbs, kas jāpaveic — parādīšu, kas piedāvā šādu pakalpojumu.",
       "chipServiceRequests": "Atrast pakalpojumu",
@@ -3956,6 +3957,23 @@
       "chipPartnersServices": "Pakalpojumu sniedzēji",
       "chipPartnersListings": "Tirgus sludinājumi",
       "chipPartnersRelations": "Klienti un partneri",
+      "productHelp": {
+        "projectUse": "Projekts ir vieta darbam, cilvēkiem un termiņiem. Atver projektu, pievieno uzdevumus un cilvēkus, un paveiktais darbs parādās turpat.",
+        "addPerson": "Cilvēku pievieno ar uzaicinājumu: ieraksti viņa kontaktu, un viņš apstiprina savā kontā. Uzaicinājumus un komandu atradīsi komandas sadaļā.",
+        "hours": "Stundas glabājas stundu sadaļā — tur redzi dienas, nedēļu un darba laika lapu.",
+        "offerService": "Pakalpojumu piedāvā pakalpojumu sadaļā: apraksti to, un citi uzņēmumi un cilvēki to redz.",
+        "warning": "Brīdinājums parādās, kad kaut kas var traucēt darbu — piemēram, beidzas dokumenta derīgums vai trūkst datu. Visus paziņojumus un to iemeslus redzēsi paziņojumu sadaļā.",
+        "forecast": "Prognoze ir aprēķins no jau reģistrētajām stundām un plānotā darba. Tā ir norāde, nevis solījums, un mainās līdz ar datiem. Plānu un skaitļus atradīsi plānošanā.",
+        "scheduleWorker": "Darbinieku ieplāno plānošanā: izvēlies dienu un projektu un piešķir cilvēku tajā pašā vietā.",
+        "doneWork": "Paveikto darbu redzi tur, kur tas reģistrēts — darba žurnālā vai stundu sadaļā: ieraksti, stundas un apstiprinājumi.",
+        "chips": {
+          "chipHelpProjects": "Atvērt projektus",
+          "chipHelpPeople": "Komanda un uzaicinājumi",
+          "chipHelpPlanning": "Atvērt plānošanu",
+          "chipHelpServices": "Mani pakalpojumi",
+          "chipHelpJournal": "Darba žurnāls"
+        }
+      },
       "interestInboxAmbiguous": "Tas var nozīmēt divas lietas — ko vēlies redzēt?",
       "chipInterestOnMyNeeds": "Interese par maniem pieprasījumiem",
       "chipMyOwnInterest": "Manas intereses",

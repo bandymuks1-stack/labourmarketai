@@ -3947,6 +3947,7 @@
       },
       "findWorkInCompanyContext": "Tööotsing on sinu enda tegevus — ettevõtte ruumis ma seda ei käivita. Lülitu oma isiklikku ruumi ja küsi uuesti.",
       "findWorkInCompanyWhy": "Tööd otsib inimene, mitte ettevõte — vastan sinu isiklikust ruumist.",
+      "personalOnlyInCompany": "See on isiklik tegevus — ettevõtte ruumis ma seda ei tee. Lülitu isiklikku ruumi ja jätka seal.",
       "journalAskWhatYouDid": "Mida sa täna tegid? Kirjuta see väljale „Mida tegid“ oma sõnadega — nt „paigaldasin aknaid Kaunase objektil 8–17“. Palvet ennast päevikusse ei salvestata.",
       "serviceNeedHint": "See on töö, mis tuleb ära teha — näitan, kes sellist teenust pakub.",
       "chipServiceRequests": "Leia teenus",
@@ -3956,6 +3957,23 @@
       "chipPartnersServices": "Teenuse pakkujad",
       "chipPartnersListings": "Turu kuulutused",
       "chipPartnersRelations": "Kliendid ja partnerid",
+      "productHelp": {
+        "projectUse": "Projekt on koht töö, inimeste ja tähtaegade jaoks. Ava projekt, lisa ülesandeid ja inimesi ning tehtud töö ilmub kohe sinna.",
+        "addPerson": "Inimese lisad kutsega: sisesta tema kontakt ja ta kinnitab oma kontol. Kutsed ja meeskond on meeskonna jaotises.",
+        "hours": "Tunnid on tundide jaotises — seal näed päevi, nädalat ja töölehte.",
+        "offerService": "Teenust pakud teenuste jaotises: kirjelda seda ja teised ettevõtted ning inimesed näevad seda.",
+        "warning": "Hoiatus ilmub, kui miski võib tööd takistada — näiteks dokument aegub või andmed puuduvad. Kõik teated ja nende põhjused näed teadete jaotises.",
+        "forecast": "Prognoos on arvutus juba registreeritud tundide ja planeeritud töö põhjal. See on suunis, mitte lubadus, ja muutub andmetega. Plaani ja numbrid leiad planeerimisest.",
+        "scheduleWorker": "Töötaja planeerid planeerimises: vali päev ja projekt ning määra inimene samas kohas.",
+        "doneWork": "Tehtud tööd näed seal, kuhu see on kirja pandud — tööpäevikus või tundide jaotises: kirjed, tunnid ja kinnitused.",
+        "chips": {
+          "chipHelpProjects": "Ava projektid",
+          "chipHelpPeople": "Meeskond ja kutsed",
+          "chipHelpPlanning": "Ava planeerimine",
+          "chipHelpServices": "Minu teenused",
+          "chipHelpJournal": "Tööpäevik"
+        }
+      },
       "interestInboxAmbiguous": "See võib tähendada kahte asja — mida soovid näha?",
       "chipInterestOnMyNeeds": "Huvi minu päringute vastu",
       "chipMyOwnInterest": "Minu enda huvi",
