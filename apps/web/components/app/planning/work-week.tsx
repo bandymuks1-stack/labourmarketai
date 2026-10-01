@@ -45,6 +45,8 @@ const PLAN_TONE: Record<PlanningSourceType, string> = {
   invitation: "border-brand-purple/40 bg-brand-purple/[0.06] text-brand-purple",
   absence: "border-state-amber/50 bg-state-amber/[0.08] text-state-amber",
   trip: "border-brand-cyan/40 bg-brand-cyan/[0.05] text-brand-cyan",
+  // CAL-8: planned work — dashed, a forecast and never a fact.
+  plan: "border-dashed border-brand-blue/50 bg-brand-blue/[0.05] text-brand-blue",
 };
 
 export async function WorkWeek({

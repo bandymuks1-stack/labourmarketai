@@ -133,6 +133,10 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   // ── Availability, time and the market ─────────────────────────────────
   { table: "worker_absences", key: "worker_id" },
   { table: "business_trips", key: "profile_id" },
+  // CAL-8: the windows an organization planned for THIS person — they may read
+  // their own (RLS), so the export carries them. Not yet on production; a
+  // relation the database lacks is reported empty, not unread.
+  { table: "work_plan_entries", key: "worker_id" },
   { table: "booking_requests", key: "worker_id" },
   { table: "worker_saved_opportunities", key: "worker_id" },
   // DEM-8: the QUESTION a person saved, not just the answer they bookmarked.

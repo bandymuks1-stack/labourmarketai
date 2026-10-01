@@ -40,6 +40,10 @@ export const PLANNING_SOURCE_TYPES = [
   // person's own plan did not draw it, so the one view that should have shown
   // "you are in Rotterdam that week" was the one that did not.
   "trip",
+  // CAL-8 (2026-10-01): the organization's one-off PLAN for its own people —
+  // a planned work window for one worker (work_plan_entries). A FORECAST,
+  // never a fact: the work journal stays the fact.
+  "plan",
 ] as const;
 export type PlanningSourceType = (typeof PLANNING_SOURCE_TYPES)[number];
 
@@ -236,6 +240,10 @@ export function hrefForSource(
       // advance and its expenses live ONLY on the finance surface under that
       // surface's own permissions. The calendar draws the DAYS, not the money.
       return "/dashboard/finance";
+    case "plan":
+      // The plan list lives on the workforce planning zone; the projector
+      // overrides this with the dated day-view link.
+      return `/dashboard/company/planning#work-plan-${sourceId}`;
   }
 }
 
@@ -276,6 +284,8 @@ export function statusKeyForSource(
       // Reuses the trips section's own lifecycle copy — no second vocabulary
       // for the same six states.
       return `trips.status.${status}`;
+    case "plan":
+      return `planning.planStatus.${status}`;
   }
 }
 
@@ -405,6 +415,13 @@ export function isConflictEligible(item: PlanningItem): boolean {
     // plan and the calendar should say so. Only the statuses that put the
     // person there count — `PLANNED_TRIP_STATUSES` decides, not this branch.
     return (PLANNED_TRIP_STATUSES as readonly string[]).includes(item.status);
+  }
+  if (item.sourceType === "plan") {
+    // CAL-8: only the caller's OWN planned window is on the caller's axis. A
+    // manager also sees windows planned for OTHER people; comparing those with
+    // the manager's own commitments would invent a clash no record proves —
+    // the roster collision flow (checkWorkerReservation) answers that.
+    return item.status === "planned" && item.roleContext === "assigned";
   }
   return false;
 }

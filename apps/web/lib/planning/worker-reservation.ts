@@ -54,7 +54,7 @@ export interface WorkerReservationInput {
  *  ONE read, so when that read fails ALL THREE are unknown, and saying so is
  *  the point. Missing one from this list would let an unread source be
  *  reported as an absence of commitments. */
-const COMMITMENT_SOURCES: readonly ReservationSource[] = ["project", "booking", "trip"];
+const COMMITMENT_SOURCES: readonly ReservationSource[] = ["project", "booking", "trip", "plan"];
 
 export async function checkWorkerReservation(
   input: WorkerReservationInput,

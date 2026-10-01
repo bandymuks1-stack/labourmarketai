@@ -42,7 +42,7 @@ import { effectiveEndDay, rangesOverlapInclusive } from "@/lib/planning/planning
  *  `trip` joined on 2026-09-14: an approved business trip is a person working
  *  somewhere else, which is a commitment, and it was the one dated commitment
  *  the employer side did not count. */
-export const RESERVATION_SOURCES = ["project", "booking", "trip", "absence"] as const;
+export const RESERVATION_SOURCES = ["project", "booking", "trip", "plan", "absence"] as const;
 export type ReservationSource = (typeof RESERVATION_SOURCES)[number];
 
 /** A commitment that already holds part of this person's calendar. */

@@ -99,6 +99,8 @@ const SOURCE_TONE: Record<PlanningSourceType, string> = {
   // 2026-09-14: an approved trip is the person being somewhere else, so it
   // reads as a place, not as an absence — its own tone, not the amber one.
   trip: "border-brand-cyan/40 text-brand-cyan",
+  // CAL-8: a planned work window — a FORECAST in the plan family's own tone.
+  plan: "border-brand-blue/40 text-brand-blue",
 };
 
 /** Canonical href — omits defaults so the clean URL stays canonical. */

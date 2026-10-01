@@ -6043,7 +6043,8 @@
           "project": "Projecttoewijzing",
           "booking": "Boeking",
           "trip": "Dienstreis",
-          "absence": "Niet beschikbaar"
+          "absence": "Niet beschikbaar",
+          "plan": "Gepland werk"
         }
       }
     },
@@ -10691,7 +10692,8 @@
       "finance": "Financiën",
       "invitation": "Uitnodiging",
       "absence": "Verlof",
-      "stage": "Fasen"
+      "stage": "Fasen",
+      "plan": "Gepland werk"
     },
     "sourceNotes": {
       "taskError": "Taken konden nu niet worden geladen. De rest van de planning blijft gewoon zichtbaar.",
@@ -10735,7 +10737,8 @@
       "finance": "Financieel record",
       "invitation": "Uitnodiging",
       "absence": "Verlof / afwezigheid",
-      "stage": "Projectfase"
+      "stage": "Projectfase",
+      "plan": "Gepland werk"
     },
     "projectStatus": {
       "draft": "Concept",
@@ -10829,6 +10832,10 @@
       "dayNoWork": "Op deze dag is geen werk vastgelegd.",
       "dayFuture": "Deze dag is nog niet gekomen.",
       "recordOnDay": "Werk vastleggen voor deze dag"
+    },
+    "planStatus": {
+      "planned": "Gepland",
+      "cancelled": "Geannuleerd"
     }
   },
   "workforcePlanning": {
@@ -10956,7 +10963,8 @@
       "kind": {
         "project": "projectopdracht",
         "booking": "boeking",
-        "trip": "dienstreis"
+        "trip": "dienstreis",
+        "plan": "gepland werk"
       },
       "untitled": "zonder titel",
       "openEnded": "vanaf {start}, geen einddatum vastgelegd",
@@ -17984,6 +17992,41 @@
       "done": "{count} registraties toegewezen; {skipped} waren al toegewezen.",
       "refused": "Dit kon niet worden opgeslagen. Er is niets gewijzigd.",
       "person": "{hours} u, {count, plural, one {# registratie} other {# registraties}}"
+    }
+  },
+  "workPlan": {
+    "title": "Gepland werk",
+    "intro": "Plan wie waar en wanneer werkt. De kalender toont het als plan; wat werkelijk gebeurde, staat in het werkjournaal.",
+    "worker": "Werknemer",
+    "project": "Project (optioneel)",
+    "workObject": "Object / locatie (optioneel)",
+    "startDate": "Van",
+    "endDate": "Tot",
+    "startTime": "Starttijd (optioneel)",
+    "endTime": "Eindtijd (optioneel)",
+    "note": "Notitie (optioneel)",
+    "none": "Geen",
+    "submit": "Werk plannen",
+    "pending": "Plannen…",
+    "cancel": "Plan annuleren",
+    "cancelPending": "Annuleren…",
+    "empty": "Voor deze periode is nog niets gepland.",
+    "noWorkers": "Nog geen werknemers op je lijst. Nodig eerst mensen uit en plan dan hun werk.",
+    "unavailable": "Plannen is hier nog niet beschikbaar.",
+    "listTitle": "Geplande periodes",
+    "overlap": "Overlapt met goedgekeurd verlof",
+    "outcome": {
+      "planned": "Werk gepland.",
+      "cancelled": "Plan geannuleerd.",
+      "invalid": "Controleer de datums en velden en probeer opnieuw.",
+      "not_allowed": "Je kunt niet plannen voor deze organisatie.",
+      "worker_not_in_scope": "Die werknemer staat niet op de lijst van deze organisatie.",
+      "project_not_in_organization": "Dat project hoort bij een andere organisatie.",
+      "work_object_not_in_organization": "Dat object hoort bij een andere organisatie.",
+      "unavailable": "Plannen is hier nog niet beschikbaar.",
+      "error": "Er ging iets mis. Probeer opnieuw.",
+      "planned_collides": "Gepland, maar deze persoon heeft op sommige van deze dagen al iets. U beslist; annuleer het plan hieronder als het niet klopt.",
+      "planned_unknown": "Gepland, maar we konden niet bevestigen dat deze dagen vrij zijn. Dat is niet hetzelfde als vrij."
     }
   }
 }

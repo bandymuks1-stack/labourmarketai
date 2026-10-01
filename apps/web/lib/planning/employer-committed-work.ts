@@ -52,7 +52,7 @@ export interface WorkerCommitment {
    *  an APPROVED business trip is a person working somewhere else, which is a
    *  commitment by any reading, and it was the one dated commitment nothing
    *  on the employer side counted. */
-  readonly kind: "project" | "booking" | "trip";
+  readonly kind: "project" | "booking" | "trip" | "plan";
   /** The source row, so a caller can link to the real object. */
   readonly sourceId: string;
   /** Real title from the source; null renders an i18n noun, never invented
@@ -244,8 +244,47 @@ export async function getEmployerWorkerCommitments(
     tripRows = (tripsRes.data ?? []) as TripRow[];
   }
 
+  // PLANNED WORK WINDOWS (CAL-8, `work_plan_entries`). The organization's own
+  // one-off plan for its own people: a commitment somebody with authority made,
+  // so it holds the person's days exactly like an accepted booking does.
+  //
+  // NO NEW AUTHORITY: `work_plan_entries_select` admits the planning
+  // organization's managers and the planned worker — a manager reads the
+  // windows of the organizations they manage and nobody else's.
+  //
+  // WHEN THE STORE IS NOT PROVISIONED the table simply does not exist, so no
+  // window can exist either: that is a true "nothing planned", not an unread
+  // source, and it must not turn every capacity answer into "needs-migration".
+  // Any OTHER failure is a real failed read and is reported as `unavailable` —
+  // UNKNOWN is never read as zero.
+  const planRes = await asAny(supabase)
+    .from("work_plan_entries")
+    .select("id, worker_id, start_date, end_date")
+    .in("worker_id", ids)
+    .eq("status", "planned")
+    .limit(READ_LIMIT);
+  let planRows: Record<string, unknown>[] = [];
+  if (planRes.error) {
+    if (!MISSING_OBJECT_CODES.has(planRes.error.code ?? "")) {
+      return { status: "unavailable" };
+    }
+  } else {
+    planRows = (planRes.data ?? []) as Record<string, unknown>[];
+  }
+
   const commitments: WorkerCommitment[] = [];
   const undatedProjects: UndatedProjectCommitment[] = [];
+  for (const p of planRows) {
+    commitments.push({
+      workerId: p.worker_id as string,
+      kind: "plan",
+      sourceId: p.id as string,
+      // The window is the fact; a note is free text and is not read.
+      label: null,
+      startDate: (p.start_date as string | null) ?? null,
+      endDate: (p.end_date as string | null) ?? null,
+    });
+  }
   for (const t of tripRows) {
     const workerId = workerByProfile.get(t.profile_id);
     if (!workerId) continue;

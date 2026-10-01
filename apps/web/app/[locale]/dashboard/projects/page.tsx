@@ -264,6 +264,7 @@ export default async function ProjectsPage({
       project: t("assign.reservation.source.project"),
       booking: t("assign.reservation.source.booking"),
       trip: t("assign.reservation.source.trip"),
+      plan: t("assign.reservation.source.plan"),
       absence: t("assign.reservation.source.absence"),
     },
   };

@@ -7,6 +7,7 @@ import { listMyBookings } from "@/lib/booking/booking-actions";
 import { callerCompanyId } from "@/lib/projects/projects";
 import { listMyTasks } from "@/lib/tasks/tasks";
 import { isOpen } from "@/lib/tasks/task-model";
+import { readWorkPlanItems } from "@/lib/planning/work-plan";
 import { listMyFinanceRecords } from "@/lib/finance/finance";
 import {
   listInvitationsForMe,
@@ -99,6 +100,9 @@ export interface PlanningSources {
   /** Time Engine W2: the caller's own leave/absence bands (W7 model). */
   readonly absence: PlanningSourceState;
   readonly trip: PlanningSourceState;
+  /** CAL-8: planned work windows (work_plan_entries) — a FORECAST. "unavailable"
+   *  while the store is not provisioned; that is not a failed read. */
+  readonly plan: PlanningSourceState;
   /** Time Engine W2: dated stages of visible projects (W6 model). */
   readonly stage: PlanningSourceState;
 }
@@ -1062,6 +1066,7 @@ export async function getPlanning(
     invitation,
     absence,
     trip,
+    plan,
   ] = await Promise.all([
       readBookingItems(),
       managedPromise,
@@ -1073,6 +1078,7 @@ export async function getPlanning(
       readInvitationItems(),
       readAbsenceItems(),
       readTripItems(user.id),
+      readWorkPlanItems(rangeStart, rangeEnd),
     ]);
 
   // Merge project directions — assigned (personal commitment) wins on id
@@ -1106,6 +1112,7 @@ export async function getPlanning(
       ...invitation.items,
       ...absence.items,
       ...trip.items,
+      ...plan.items,
     ],
     sources: {
       booking: booking.state,
@@ -1117,6 +1124,7 @@ export async function getPlanning(
       absence: absence.state,
       stage: stage.state,
       trip: trip.state,
+      plan: plan.state,
     },
     journalConfirmedIds: journal.confirmedIds ?? null,
   };

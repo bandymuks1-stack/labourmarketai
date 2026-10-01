@@ -6043,7 +6043,8 @@
           "project": "Projekt",
           "booking": "Buchung",
           "trip": "Dienstreise",
-          "absence": "Nicht verfügbar"
+          "absence": "Nicht verfügbar",
+          "plan": "Geplante Arbeit"
         }
       }
     },
@@ -10691,7 +10692,8 @@
       "finance": "Finanzen",
       "invitation": "Einladung",
       "absence": "Urlaub",
-      "stage": "Phasen"
+      "stage": "Phasen",
+      "plan": "Geplante Arbeit"
     },
     "sourceNotes": {
       "taskError": "Aufgaben konnten gerade nicht geladen werden. Der Rest des Plans wird normal angezeigt.",
@@ -10735,7 +10737,8 @@
       "finance": "Finanzeintrag",
       "invitation": "Einladung",
       "absence": "Urlaub / Abwesenheit",
-      "stage": "Projektphase"
+      "stage": "Projektphase",
+      "plan": "Geplante Arbeit"
     },
     "projectStatus": {
       "draft": "Entwurf",
@@ -10829,6 +10832,10 @@
       "dayNoWork": "An diesem Tag wurde keine Arbeit erfasst.",
       "dayFuture": "Dieser Tag ist noch nicht gekommen.",
       "recordOnDay": "Arbeit für diesen Tag erfassen"
+    },
+    "planStatus": {
+      "planned": "Geplant",
+      "cancelled": "Storniert"
     }
   },
   "workforcePlanning": {
@@ -10956,7 +10963,8 @@
       "kind": {
         "project": "Projekt",
         "booking": "Buchung",
-        "trip": "Dienstreise"
+        "trip": "Dienstreise",
+        "plan": "geplante Arbeit"
       },
       "untitled": "ohne Titel",
       "openEnded": "ab {start}, kein Enddatum erfasst",
@@ -17984,6 +17992,41 @@
       "done": "{count} Einträge zugeordnet; {skipped} waren bereits zugeordnet.",
       "refused": "Das konnte nicht gespeichert werden. Nichts wurde geändert.",
       "person": "{hours} Std., {count, plural, one {# Eintrag} other {# Einträge}}"
+    }
+  },
+  "workPlan": {
+    "title": "Geplante Arbeit",
+    "intro": "Plane, wer wo und wann arbeitet. Der Kalender zeigt es als Plan; was tatsächlich geschah, bleibt im Arbeitsjournal.",
+    "worker": "Mitarbeiter",
+    "project": "Projekt (optional)",
+    "workObject": "Objekt / Standort (optional)",
+    "startDate": "Von",
+    "endDate": "Bis",
+    "startTime": "Beginn (optional)",
+    "endTime": "Ende (optional)",
+    "note": "Notiz (optional)",
+    "none": "Keine",
+    "submit": "Arbeit planen",
+    "pending": "Wird geplant…",
+    "cancel": "Plan stornieren",
+    "cancelPending": "Wird storniert…",
+    "empty": "Für diesen Zeitraum ist noch nichts geplant.",
+    "noWorkers": "Noch keine Mitarbeiter auf deiner Liste. Lade zuerst Personen ein und plane dann ihre Arbeit.",
+    "unavailable": "Planung ist hier noch nicht verfügbar.",
+    "listTitle": "Geplante Zeiträume",
+    "overlap": "Überschneidet sich mit genehmigtem Urlaub",
+    "outcome": {
+      "planned": "Arbeit geplant.",
+      "cancelled": "Plan storniert.",
+      "invalid": "Prüfe Daten und Felder und versuch es erneut.",
+      "not_allowed": "Du kannst für diese Organisation nicht planen.",
+      "worker_not_in_scope": "Diese Person steht nicht auf der Liste dieser Organisation.",
+      "project_not_in_organization": "Dieses Projekt gehört zu einer anderen Organisation.",
+      "work_object_not_in_organization": "Dieses Objekt gehört zu einer anderen Organisation.",
+      "unavailable": "Planung ist hier noch nicht verfügbar.",
+      "error": "Etwas ist schiefgelaufen. Versuch es erneut.",
+      "planned_collides": "Geplant, aber diese Person ist an einigen dieser Tage bereits eingeplant. Sie entscheiden; stornieren Sie den Plan unten, falls er nicht passt.",
+      "planned_unknown": "Geplant, aber wir konnten nicht bestätigen, dass diese Tage frei sind. Das ist nicht dasselbe wie frei."
     }
   }
 }

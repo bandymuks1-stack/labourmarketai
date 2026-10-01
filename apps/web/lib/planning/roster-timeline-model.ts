@@ -15,7 +15,7 @@ import { rangesOverlapInclusive } from "@/lib/planning/planning-model";
  * move a bar to another day.
  */
 
-export type TimelineKind = "project" | "booking" | "trip" | "absence";
+export type TimelineKind = "project" | "booking" | "trip" | "plan" | "absence";
 
 export interface TimelineBar {
   readonly key: string;
