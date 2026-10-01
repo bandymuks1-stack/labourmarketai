@@ -77,6 +77,17 @@ export type ConversationIntent =
   | "candidates" // "parodyk kandidatus" / "my candidates" — demand review
   | "find-workers" // "surask darbuotojų" — scouting, NOT demand intake
   | "need-service" // "reikia, kad kas nors sutaisytų stogą" — a JOB done, not a job
+  /**
+   * "Noriu rasti partnerių savo verslui" / "find business partners" — the
+   * speaker seeks other BUSINESSES to work with. Measured on production
+   * (owner 2026-10-01): the sentence scored 0, fell to the model proposer,
+   * and was answered as a JOB SEARCH ("Radau 5…", "Man tinkantys darbai") —
+   * the meaning of the request silently changed. A partner is neither a
+   * worker to hire (`need-workers`) nor a job to take (`find-work`); it is a
+   * business-side market question, answered in the company context over the
+   * marketplace surfaces that already exist.
+   */
+  | "find-partners"
   | "context" // "ką tu apie mane žinai?"
   /**
    * "Ką galiu padaryti šioje paskyroje?" — WHAT CAN I ACHIEVE FROM HERE.
@@ -2821,6 +2832,28 @@ const RULES: IntentRule[] = [
       p(
         `(?:${SEEK_VERB_SOURCE})\\s+(?:[^\\s]+\\s+){0,3}?(?:paslaug|remont|valym|dazym|korepetitor|услуг|ремонт|уборк|\\bservices?\\b|\\bcleaning\\b|\\brepair)`,
         13,
+      ),
+    ],
+  },
+  {
+    // FIND BUSINESS PARTNERS (owner 2026-10-01). Direction rule, not a
+    // deny-list: a seek verb (any launch language) bound, within three
+    // words, to the PARTNER noun. The words between may never be a WORK noun
+    // — "ieškau darbo pas partnerius" is a job search that names a partner,
+    // and `find-work` keeps it. Weight 15 sits above the 6 that
+    // `need-workers` scores by accident on the genitive "partnerių"
+    // (…-erių is an occupation suffix) and above find-work's 14.
+    intent: "find-partners",
+    patterns: [
+      p(
+        "(?:\\bras(?:ti|k|iu|ime)\\b|\\bsurast\\w*|\\bsurask\\w*|\\bieskau\\b|\\bieskome\\b|\\bieskok\\w*|\\bieskoti\\b|\\bnoriu\\b|\\bnorime\\b|\\breikia\\b|\\bpadek\\w*\\s+rasti|" +
+          "\\bfind\\b|\\bsearch\\b|\\blook(?:ing)?\\s+for\\b|\\bseek(?:ing)?\\b|\\bneed\\b|\\bwant\\b|\\bget\\b|" +
+          "найти|найди|найду|ищу|ищем|искать|нужны|нужен|хочу|хотим|" +
+          "\\bfinde\\w*|\\bfinden\\b|\\bsuche\\w*|\\bbrauche\\w*|\\bzoek\\w*|\\bvind\\w*|" +
+          "\\bszukam\\b|\\bszukamy\\b|\\bznajdz\\w*|\\bznalezc\\b|\\bpotrzebuj\\w*|\\bchce\\w*|\\bchcemy\\b|\\bmochte\\w*|\\bwollen\\b|\\bwil\\b|\\bwillen\\b)" +
+          "\\s+(?:(?!darb|job|work|работ|vakans|arbeit|stelle|werk|baan|prac)[^\\s]+\\s+){0,3}?" +
+          "(?:[^\\s]{0,14}partner[^\\s]*|[^\\s]{0,14}партнер[^\\s]*)",
+        15,
       ),
     ],
   },

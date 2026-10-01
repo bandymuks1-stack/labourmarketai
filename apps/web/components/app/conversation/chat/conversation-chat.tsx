@@ -2241,7 +2241,7 @@ export function ConversationChat({
    * re-validates.
    */
   const performContextSwitch = useCallback(
-    (workspace: WorkspaceInfo) => {
+    (workspace: WorkspaceInfo, onSwitched?: () => void) => {
       // The chip's own label: an unnamed organization says so, never "".
       const displayName =
         workspace.kind === "personal" ? t("switchContextPersonal") : workspaceLabelOf(workspace);
@@ -2261,6 +2261,10 @@ export function ConversationChat({
               ? t("switchContextDone", { name: displayName })
               : t("switchContextFailed"),
           );
+          // THE SAME TASK CONTINUES (owner 2026-10-01): a request that needed
+          // another context is picked up where it stopped, in the context
+          // the person just chose — never dropped after the switch.
+          if (accepted && onSwitched) onSwitched();
         })
         .catch(() => {
           setTyping(false);
@@ -2269,6 +2273,50 @@ export function ConversationChat({
     },
     [assistant, auth, t, workspaceLabelOf],
   );
+
+  /**
+   * FIND BUSINESS PARTNERS (owner 2026-10-01) — what the company context
+   * offers. The marketplace is ONE existing capability: service offerings
+   * and requests, work-resource listings, and the relationship door. This
+   * hands over those doors and builds nothing of its own.
+   */
+  const showPartnerDoors = useCallback(() => {
+    assistant(t("findPartnersDoors"), [
+      { id: "link:/dashboard/service-requests", label: t("chipPartnersServices") },
+      { id: "link:/dashboard/listings", label: t("chipPartnersListings") },
+      { id: "link:/dashboard/company/partners", label: t("chipPartnersRelations") },
+    ]);
+  }, [assistant, t]);
+
+  /**
+   * "Noriu rasti partnerių savo verslui" — a BUSINESS request, never a job
+   * search. In a company context the marketplace doors open; from the
+   * personal space the chat asks WHICH company (membership-validated `wsp:`
+   * chips, the same switch the `ws:` chips run) and then continues the same
+   * request there. The meaning of the sentence is never changed.
+   */
+  const startFindPartners = useCallback(() => {
+    const workspaces = auth?.workspaces ?? [];
+    const active = workspaces.find((w) => w.id === auth?.activeWorkspaceId);
+    if (identity === "company" || active?.kind === "organization") {
+      showPartnerDoors();
+      return;
+    }
+    const organizations = workspaces.filter(
+      (w) => w.kind === "organization" && w.name.trim() !== "",
+    );
+    if (organizations.length === 0) {
+      assistant(t("findPartnersNoCompany"), [
+        { id: "link:/dashboard/start/company", label: labels.chipCreateOrganization },
+        { id: "link:/dashboard/service-requests", label: t("chipPartnersServices") },
+      ]);
+      return;
+    }
+    assistant(
+      t("findPartnersPickCompany"),
+      organizations.map((w) => ({ id: `wsp:${w.id}`, label: workspaceLabelOf(w) })),
+    );
+  }, [assistant, auth?.activeWorkspaceId, auth?.workspaces, identity, labels.chipCreateOrganization, showPartnerDoors, t, workspaceLabelOf]);
 
   const startSwitchContext = useCallback(
     (text: string) => {
@@ -5256,6 +5304,16 @@ export function ConversationChat({
               user(chip.label);
               performContextSwitch(target);
             }
+          } else if (chip.id.startsWith("wsp:")) {
+            // Business-partner request from the personal space: switch to the
+            // company the person picked, then continue the SAME request.
+            const target = (auth?.workspaces ?? []).find(
+              (w) => w.id === chip.id.slice(4),
+            );
+            if (target) {
+              user(chip.label);
+              performContextSwitch(target, showPartnerDoors);
+            }
           } else if (chip.id.startsWith("stage:")) {
             // `stage:<projectId>:<stageId>:<status>` — the person picked which
             // real stage the sentence meant; the RPC re-checks the project.
@@ -5433,7 +5491,7 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, renderOfferCards, locale, starterChips,runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startAddDocument, startInvitations, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm, startCapabilities],
+    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, renderOfferCards, locale, starterChips,runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startAddDocument, startInvitations, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, showPartnerDoors, runAgencyRead, openProposeForm, startCapabilities],
   );
   handleChipRef.current = handleChip;
 
@@ -6763,6 +6821,10 @@ export function ConversationChat({
               label: labels.chipServiceRequests,
             },
           ]),
+        // "Noriu rasti partnerių savo verslui" — a business-side request:
+        // company context → the marketplace doors; personal context → which
+        // company, then the same doors. Never the job search.
+        findPartners: () => startFindPartners(),
         // V9/V10: read the statement, run channel DISCOVERY, render the
         // honest options (renderValueStatement — shared with the
         // correction path so both render identically).
@@ -7229,7 +7291,7 @@ export function ConversationChat({
           askToClarify(t("answerFailed"));
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startFindPartners, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
   );
 
   /**
