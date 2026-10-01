@@ -76,7 +76,7 @@ export async function CompanyWorkHistory({ locale }: { locale: string }) {
     );
   }
 
-  const { history, organizationName, elsewhere } = load;
+  const { history, organizationName, elsewhere, attributedCount } = load;
 
   if (history.totalRecords === 0) {
     return (
@@ -118,6 +118,11 @@ export async function CompanyWorkHistory({ locale }: { locale: string }) {
         </h2>
         <p className="text-sm text-text-secondary">{t("subtitle", { name: organizationName })}</p>
         <Provenance t={t} name={organizationName} />
+        {attributedCount > 0 ? (
+          <p className="text-meta leading-relaxed text-text-muted" data-testid="company-work-history-attributed">
+            {t("attributedNote", { count: attributedCount })}
+          </p>
+        ) : null}
       </header>
 
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">

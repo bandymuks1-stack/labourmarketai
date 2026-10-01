@@ -48,9 +48,13 @@ export interface TranslatableMessage {
   readonly id: string;
   readonly body: string;
   readonly original_language?: string | null;
+  /** Who wrote it. A viewer is never shown a rendering of their OWN words —
+   *  they know what they wrote, and translating it spends a provider call for
+   *  nothing (owner order 2026-10-01: never translate what is not needed). */
+  readonly author_id?: string | null;
 }
 
-const MAX_PER_READ = 40;
+const MAX_PER_READ = 12;
 const RATE = { limit: 120, windowMs: 60 * 60 * 1000 } as const;
 const CACHE_MAX = 2000;
 const AI_LOCALES = new Set(["en", "lt", "ru"]);
@@ -97,24 +101,73 @@ function translationContext(target: string, source: string | null | undefined): 
   return `work message between colleagues — translate it${from} into ${name(target)}; keep the meaning exact`;
 }
 
-/** One message → one runtime call, or the cache. Never throws. */
-async function translateOne(
+/**
+ * In-flight de-duplication: two renders (a double page load, a refocus refresh,
+ * two tabs of the same viewer) that ask for the same message in the same
+ * language at the same moment share ONE provider call. In-memory only — a
+ * translation is a rendering, never stored.
+ */
+const inFlight = new Map<string, Promise<TranslateResult>>();
+
+/**
+ * Do not hammer a provider that said no. Measured in production 2026-10-01: a
+ * thread re-render (focus refresh, second tab, page reload) re-asked for every
+ * foreign message, each failure was retried, and the burst itself kept the
+ * provider's quota exhausted: 42 of 58 calls in three minutes were 429s.
+ *   - a QUOTA answer (429 / RESOURCE_EXHAUSTED) opens a short instance-wide
+ *     cooldown during which no new provider call is made (originals show, the
+ *     next render after the cooldown tries again);
+ *   - any other failure is remembered per message for a few seconds.
+ * In-memory only; nothing is stored.
+ */
+const QUOTA_COOLDOWN_MS = 60_000;
+const FAILURE_MEMO_MS = 20_000;
+let quotaCooldownUntil = 0;
+const failedUntil = new Map<string, number>();
+
+export function isQuotaRefusal(detail: string | undefined): boolean {
+  return /\b429\b|RESOURCE_EXHAUSTED|quota/i.test(detail ?? "");
+}
+
+/** One message → one runtime call, or the cache, or the call already in flight. Never throws. */
+function translateOne(
   m: TranslatableMessage,
   viewerLocale: string,
 ): Promise<TranslateResult> {
   const key = cacheKey(m, viewerLocale);
   const cached = cache.get(key);
-  if (cached) return { ok: true, value: cached };
+  if (cached) return Promise.resolve({ ok: true, value: cached });
+  const pending = inFlight.get(key);
+  if (pending) return pending;
+  const now = Date.now();
+  if (now < quotaCooldownUntil || (failedUntil.get(key) ?? 0) > now) {
+    return Promise.resolve({ ok: false, reason: "failed" });
+  }
+  const run = translateWithRetry(m, viewerLocale, key).finally(() => {
+    inFlight.delete(key);
+  });
+  inFlight.set(key, run);
+  return run;
+}
+
+async function translateWithRetry(
+  m: TranslatableMessage,
+  viewerLocale: string,
+  key: string,
+): Promise<TranslateResult> {
   const first = await translateOnce(m, viewerLocale, key);
   if (first.ok || first.reason !== "transient") {
+    if (!first.ok && first.reason === "failed") failedUntil.set(key, Date.now() + FAILURE_MEMO_MS);
     return first.ok ? first : { ok: false, reason: first.reason };
   }
   // The provider said "busy" (HTTP 503 UNAVAILABLE / 429) — measured
   // 2026-09-28: Gemini answered "high demand" in 0.7–2.6 s. ONE short retry;
   // a timeout is not retried here (the runtime already retried it once).
   await new Promise((resolve) => setTimeout(resolve, TRANSIENT_RETRY_DELAY_MS));
+  if (Date.now() < quotaCooldownUntil) return { ok: false, reason: "failed" };
   const second = await translateOnce(m, viewerLocale, key);
   if (second.ok) return second;
+  failedUntil.set(key, Date.now() + FAILURE_MEMO_MS);
   return { ok: false, reason: second.reason === "transient" ? "failed" : second.reason };
 }
 
@@ -160,6 +213,10 @@ async function translateOnce(
       // The provider was asked and could not answer (busy, timed out,
       // off-shape). That is a FAILURE, not a refusal: it must not stop the
       // rest of the thread the way a closed gate does.
+      if (outcome.reason === "provider_error" && isQuotaRefusal(outcome.detail)) {
+        quotaCooldownUntil = Date.now() + QUOTA_COOLDOWN_MS;
+        return { ok: false, reason: "failed" };
+      }
       return isTransientProviderRefusal(outcome.reason, outcome.detail)
         ? { ok: false, reason: "transient" }
         : { ok: false, reason: "failed" };
@@ -206,14 +263,21 @@ export async function resolveViewerTexts(
       unavailable,
     });
 
-  const candidates = messages.filter((m) =>
-    needsTranslation({ body: m.body, originalLanguage: m.original_language ?? null, viewerLocale }),
+  const candidates = messages.filter(
+    (m) =>
+      m.author_id !== viewerId &&
+      needsTranslation({ body: m.body, originalLanguage: m.original_language ?? null, viewerLocale }),
   );
   // Newest first: the tail of the thread is what the reader is looking at.
   const chosen = candidates.slice(-MAX_PER_READ);
   const chosenIds = new Set(chosen.map((m) => m.id));
 
   for (const m of messages) {
+    // The viewer's own words are shown as written — no badge, no call.
+    if (m.author_id === viewerId) {
+      out.set(m.id, resolveViewerText({ body: m.body, originalLanguage: viewerLocale, viewerLocale }));
+      continue;
+    }
     // Same-language and unknown-language messages resolve to their own
     // state; a foreign message beyond the per-read bound is honestly
     // "not attempted".
@@ -257,4 +321,7 @@ export async function resolveViewerTexts(
 /** Test seam: forget every cached rendering. */
 export function __clearTranslationCache(): void {
   cache.clear();
+  inFlight.clear();
+  failedUntil.clear();
+  quotaCooldownUntil = 0;
 }

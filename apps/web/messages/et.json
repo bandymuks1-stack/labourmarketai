@@ -390,6 +390,7 @@
         "event_demand_interest_reviewed": "Ettevõte märkis teie huvi läbivaadatuks",
         "event_weekly_digest": "Sinu nädala töö ja võimaluste kokkuvõte on valmis",
         "event_saved_search_match": "Salvestatud otsingul on uusi tulemusi",
+        "event_job_alert": "Ilmus uus töökoht, mis sobib sinu soovidega",
         "event_weekly_digest_profile_completion": "Sobivate tööde näitamiseks kinnita, millist tööd sa teed",
         "event_weekly_digest_journal": "Sinu nädala tööpäeviku kokkuvõte on valmis"
       },
@@ -1143,10 +1144,10 @@
     "primaryBadge": "[EN] Primary",
     "directionAdded": "[EN] Direction added",
     "coreBadge": "[EN] Core",
-    "customComingSoon": "[EN] coming soon",
+    "customComingSoon": "Praegu pole saadaval.",
     "customPrompt": "[EN] Can't find your skill?",
     "empty": "[EN] No skills yet for this profession",
-    "importComingSoon": "[EN] CV import will be enabled in M2.",
+    "importComingSoon": "Praegu pole saadaval.",
     "importNotSaved": "[EN] Selected: {file}. The file isn't uploaded or stored yet.",
     "importPrompt": "[EN] Have an old CV? Upload PDF or DOCX",
     "loading": "[EN] Loading...",
@@ -1664,7 +1665,7 @@
     "eyebrow": "[EN] MY DOCUMENTS",
     "title": "[EN] My documents",
     "subtitle": "[EN] What you have, what is missing, and the next step — per country.",
-    "preparing": "[EN] Document readiness is being prepared — it goes live once the document storage layer is reviewed and enabled. Nothing here is active yet.",
+    "preparing": "Praegu pole saadaval.",
     "disclaimer": "[EN] Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
     "needsMigration": "Praegu pole saadaval.",
     "noWorker": "[EN] Create your worker profile first — documents attach to it.",
@@ -1712,7 +1713,7 @@
     "consent": {
       "title": "[EN] What my agency may see",
       "explainer": "[EN] If you switch this on, YOUR agency sees only category-level counts of your document readiness (valid / expiring / needs attention). It never sees document contents, files, notes or types. Default is off; you can switch it off any time.",
-      "needsGate": "[EN] The consent layer is in preparation — it activates after the owner-gated change is applied.",
+      "needsGate": "Praegu pole saadaval.",
       "onLabel": "[EN] Sharing aggregates: ON",
       "offLabel": "[EN] Sharing aggregates: OFF",
       "onHint": "[EN] Your agency sees counts only. Tap to switch off.",
@@ -2041,7 +2042,7 @@
     "demand": {
       "title": "[EN] Open demand",
       "humanNote": "[EN] \"We can offer\" is your proposal on a request — the final match is always recorded by a person on the platform side.",
-      "needsGate": "[EN] Open-demand visibility for agencies is in preparation — it activates after the owner-gated change is applied.",
+      "needsGate": "Praegu pole saadaval.",
       "empty": "[EN] No open requests right now.",
       "noRole": "[EN] Role not specified",
       "teamSize": "[EN] {n} people",
@@ -2241,7 +2242,7 @@
     "external": {
       "sectionTitle": "Avalikud töökuulutused",
       "sectionNote": "Kuulutused ametlikest avalikest tööturuasutustest. Neid avaldab tööandja allikas — labourmarket.ai näitab neid, et te need leiaksite; kandideerimine käib originaalkuulutuse kaudu.",
-      "shownOfTotal": "parimad {shown} / {total}",
+      "shownOfTotal": "näitan {shown} / {total}",
       "bandBest": "Kõige sobivamad",
       "bandPossible": "Võimalikud sobivused",
       "bandExplore": "Muud kuulutused",
@@ -2298,6 +2299,14 @@
         "LOOKING_FOR_WORK": "Otsin tööd",
         "LOOKING_FOR_PROJECTS": "Otsin projekte"
       }
+    },
+    "jobAlerts": {
+      "title": "Teavitused uute töökohtade kohta",
+      "ready": "Kui ilmub uus päris töökoht, mis sobib sinu ametiga ja valitud riikidega, näed seda oma teavitustes. Töökohta, mille palka pole märgitud, ei peideta kunagi palga tõttu.",
+      "missing": "Uute töökohtade teavituste saamiseks märgi:",
+      "profession": "mis tööd sa teed",
+      "country": "millistes riikides tahad töötada",
+      "cta": "Täida minu eelistused"
     }
   },
   "scouting": {
@@ -2382,7 +2391,7 @@
       "markContacted": "[EN] Mark contacted",
       "internalNote": "[EN] Internal record only — nothing is sent to the worker or outside the platform.",
       "error": "[EN] Could not save. Try again.",
-      "notAvailable": "[EN] Acknowledgement is not enabled yet."
+      "notAvailable": "Praegu pole saadaval."
     },
     "lifecycle": {
       "confirm": "[EN] Confirm recognized skills",
@@ -2646,7 +2655,7 @@
     "saving": "[EN] Saving…",
     "saved": "[EN] Preferences saved.",
     "error": "[EN] Saving failed. Please try again.",
-    "needsMigration": "[EN] This section is not enabled yet — nothing was saved.",
+    "needsMigration": "Praegu pole saadaval. Midagi ei salvestatud.",
     "v2": {
       "title": "[EN] More work preferences",
       "hint": "[EN] Same rule as above — anything left as “Not stated” stays not stated.",
@@ -2661,7 +2670,7 @@
       "licenceCategories": "[EN] Driving licence categories",
       "ownVehicle": "[EN] Has own vehicle",
       "ownTools": "[EN] Has own tools",
-      "notEnabled": "[EN] These extra preferences are not enabled yet — nothing here is saved for now.",
+      "notEnabled": "Praegu pole saadaval.",
       "notSaved": "[EN] Saved, except the extra preferences — that part is not enabled yet."
     }
   },
@@ -2676,7 +2685,7 @@
     "adding": "[EN] Adding…",
     "remove": "[EN] Remove",
     "empty": "[EN] No languages added yet.",
-    "notEnabled": "[EN] This section is not enabled yet — nothing was saved.",
+    "notEnabled": "Praegu pole saadaval. Midagi ei salvestatud.",
     "error": "[EN] Saving failed. Please try again.",
     "invalid": "[EN] Choose a language and a level."
   },
@@ -2699,7 +2708,7 @@
     "importNote": "[EN] Automatic import from these sites is not offered. To bring your data in, upload an exported CV file in the profile editor.",
     "importLink": "[EN] Open the profile editor",
     "empty": "[EN] No external profiles linked yet.",
-    "notEnabled": "[EN] This section is not enabled yet — nothing was saved.",
+    "notEnabled": "Praegu pole saadaval. Midagi ei salvestatud.",
     "error": "[EN] Saving failed. Please try again.",
     "invalid": "[EN] Enter a full https:// link and choose a site.",
     "platformNames": {
@@ -3957,6 +3966,11 @@
       "findWorkInCompanyContext": "Tööotsing on sinu enda tegevus — ettevõtte ruumis ma seda ei käivita. Lülitu oma isiklikku ruumi ja küsi uuesti.",
       "findWorkInCompanyWhy": "Tööd otsib inimene, mitte ettevõte — vastan sinu isiklikust ruumist.",
       "personalOnlyInCompany": "See on isiklik tegevus — ettevõtte ruumis ma seda ei tee. Lülitu isiklikku ruumi ja jätka seal.",
+      "openConversationOpening": "Avan vestluse inimesega {name}.",
+      "openConversationNone": "Ma ei leidnud seda inimest sinu vestluspartnerite ega meeskonna hulgast. Sõnumid on sõnumite jaotises.",
+      "openConversationWhich": "Millist inimest sa mõtled?",
+      "openConversationNoPermission": "Ma ei saa avada vestlust inimesega {name} — selleks pole sul luba.",
+      "openConversationFailed": "Vestlust ei õnnestunud avada. Proovi uuesti või ava sõnumid.",
       "journalAskWhatYouDid": "Mida sa täna tegid? Kirjuta see väljale „Mida tegid“ oma sõnadega — nt „paigaldasin aknaid Kaunase objektil 8–17“. Palvet ennast päevikusse ei salvestata.",
       "serviceNeedHint": "See on töö, mis tuleb ära teha — näitan, kes sellist teenust pakub.",
       "chipServiceRequests": "Leia teenus",
@@ -4188,7 +4202,7 @@
       "moveToLine": "• „{to}“: inimesi {before} → {after}; valmisoleku loend seal algab 0/{total}.",
       "moveCountryLine": "• Riik muutub: {from} → {to} — dokumendinõuded on teised.",
       "moveNoDatesLine": "• Projektil „{to}“ pole kuupäevi — puudumisi ei saa kontrollida.",
-      "moveAvailabilityUnknownLine": "• Puudumised teadmata — puhkusemudel siin ei vasta.",
+      "moveAvailabilityUnknownLine": "• Puudumised teadmata.",
       "moveAvailabilityLine": "• Vahemikus {start}–{end} on tal {count} puudumise kirjet.",
       "moveAvailabilityFreeLine": "• Projekti „{to}“ kuupäevades puudumisi pole.",
       "moveOnlyConfirmLine": "Midagi pole veel muudetud — muudab ainult teie kinnitus.",
@@ -6609,7 +6623,9 @@
         "unknown": "Võrdlemiseks pole piisavalt infot"
       },
       "opportunity": "{count, plural, =1 {Kuni 1 inimene on vaba alates {date}} other {Kuni # inimest on vabad alates {date}}}",
-      "opportunityCta": "Otsi tööd"
+      "opportunityCta": "Otsi tööd",
+      "interest": "{count, plural, =1 {1 inimene tundis huvi teie vajaduste vastu} other {# inimest tundsid huvi teie vajaduste vastu}}",
+      "interestCta": "Vaata kes"
     },
     "attention": {
       "heading": "Vajab teid",
@@ -6828,6 +6844,7 @@
     "whoWorked": "Kes siin töötas",
     "timeline": "Mida tehti",
     "back": "Tagasi ajaloo juurde",
-    "placeMissing": "Seda kohta pole aktiivse tööruumi imporditud ajaloos."
+    "placeMissing": "Seda kohta pole aktiivse tööruumi imporditud ajaloos.",
+    "attributedNote": "Sisaldab {count, plural, one {# kirjet} other {# kirjet}}, mis on talletatud teise organisatsiooni raamatupidamises ja omistatud siia töö teinud ettevõttele."
   }
 }

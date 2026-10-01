@@ -63,6 +63,38 @@ describe("resolveViewerTexts", () => {
     expect(runAiAgent).toHaveBeenCalledTimes(1);
   });
 
+  it("the viewer's own words are never sent to a provider and carry no badge", async () => {
+    runAiAgent.mockResolvedValue({ status: "needs_review", reason: "route_blocked" });
+    const mine = { ...lt, id: "own", author_id: "viewer-9" };
+    const out = await resolveViewerTexts([mine], "en", "viewer-9");
+    expect(runAiAgent).not.toHaveBeenCalled();
+    expect(out.get("own")).toMatchObject({ kind: "original", text: lt.body, languageBadge: null });
+  });
+
+  it("two simultaneous renders of the same message share ONE provider call (in-flight de-duplication)", async () => {
+    let release: (v: unknown) => void = () => {};
+    runAiAgent.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          release = resolve;
+        }),
+    );
+    const first = resolveViewerTexts([lt], "en", "viewer-10");
+    const second = resolveViewerTexts([lt], "en", "viewer-11");
+    await new Promise((r) => setTimeout(r, 0));
+    release({
+      status: "suggestion",
+      agent: "translation_copy",
+      provider: "libretranslate",
+      model: "m",
+      value: { data: { localized_copy: "Tomorrow we start at 7.", plain_language_version: null, wording_warnings: [] } },
+    });
+    const [a, b] = await Promise.all([first, second]);
+    expect(runAiAgent).toHaveBeenCalledTimes(1);
+    expect(a.get("m1")?.kind).toBe("translated");
+    expect(b.get("m1")?.kind).toBe("translated");
+  });
+
   it("an echo of the original is not a translation", async () => {
     runAiAgent.mockResolvedValue({
       status: "suggestion",
@@ -119,8 +151,29 @@ describe("RED-2 — safe fallback and authority, with the gate open", () => {
     });
     const out = await resolveViewerTexts([ka], "lt", "viewer-9");
     expect(out.get("m2")).toMatchObject({ kind: "original", text: ka.body, languageBadge: "ka" });
+    // Not cached as a rendering, but a failure is remembered for a few seconds
+    // so a re-render does not re-ask the provider at once (no hammering)...
     await resolveViewerTexts([ka], "lt", "viewer-9");
-    expect(runAiAgent).toHaveBeenCalledTimes(2); // not cached: a real answer may still arrive
+    expect(runAiAgent).toHaveBeenCalledTimes(1);
+    // ...and once the memo is gone a real answer may still arrive.
+    __clearTranslationCache();
+    await resolveViewerTexts([ka], "lt", "viewer-9");
+    expect(runAiAgent).toHaveBeenCalledTimes(2);
+  });
+
+  it("a quota answer (429) opens a cooldown: no further provider calls until it ends, originals show", async () => {
+    runAiAgent.mockResolvedValue({
+      status: "needs_review",
+      reason: "provider_error",
+      detail: "gemini http 429 RESOURCE_EXHAUSTED quota",
+    });
+    const msgs = [lt, ka].map((m, i) => ({ ...m, id: `q${i}` }));
+    const out = await resolveViewerTexts(msgs, "en", "viewer-q");
+    expect(runAiAgent).toHaveBeenCalledTimes(2); // the first batch (concurrency 4) was already out
+    expect(out.get("q0")?.kind).toBe("original");
+    const again = await resolveViewerTexts([{ ...lt, id: "q9", body: "Kitas tekstas." }], "en", "viewer-q");
+    expect(runAiAgent).toHaveBeenCalledTimes(2); // cooldown: nothing new was asked
+    expect(again.get("q9")?.kind).toBe("original");
   });
 
   it("8. the original is never rewritten: a rendering carries the untouched body beside it", async () => {

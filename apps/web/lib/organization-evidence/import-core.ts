@@ -2903,10 +2903,119 @@ export async function attestSessionRecords(
   return { kind: "ok", attested: res.data.length, skipped };
 }
 
+// ── performing-company attribution ──────────────────────────────────────────
+
+/** Roles a performing company can be named in (the party role vocabulary). */
+export const PERFORMING_PARTY_ROLES = ["employer", "subcontractor", "agency", "other"] as const;
+export type PerformingPartyRole = (typeof PERFORMING_PARTY_ROLES)[number];
+
+/**
+ * NAME THE COMPANY THAT PERFORMED RECORDS THAT ARE STORED IN ANOTHER
+ * ORGANIZATION'S BOOKS — additively, never by moving or copying them.
+ *
+ * Evidence records are append-only and hash-chained, and their organization
+ * is part of their identity: a record imported while the caller acted in
+ * organization A stays in A. When the work was really performed by company B,
+ * the existing party table already says so: one `organization_evidence_parties`
+ * row per record, `party_organization_id = B`, in a role such as `employer`.
+ * The existing read policies then do the rest: B's managers can READ those
+ * records (the records SELECT policy admits a managed party organization), and
+ * nothing else changes. The record, its fingerprint and hash, its events and
+ * its attestations are untouched, and `employer` is not a role that may
+ * independently verify, so no verification authority is granted.
+ *
+ * Authority is the caller's own RLS session: the insert policy admits only a
+ * manager of the RECORD's organization, and a party organization may not be
+ * named on a record whose project has a keyed customer (restrictive P6). The
+ * rows are append-only (no UPDATE, no DELETE grant): the product cannot undo
+ * this; a database administrator can delete exactly the rows this wrote
+ * (identified by `created_by` and the party organization).
+ *
+ * IDEMPOTENT: a record that already names this organization in this role is
+ * skipped, so a re-run writes nothing. A record that already lives in the
+ * performing organization is skipped (a company is not its own party).
+ */
+export async function attributeRecordsToPerformingOrganization(
+  caller: EvidenceCaller,
+  input: {
+    readonly recordIds: readonly string[];
+    readonly performingOrganizationId: string;
+    readonly role?: PerformingPartyRole;
+    /** Free text kept on the party row (at most 200 characters), e.g. the stated share. */
+    readonly label?: string | null;
+  },
+): Promise<EvidenceImportResult<{ attributed: number; skipped: number }>> {
+  const store = storeOf(caller);
+  const role: PerformingPartyRole = input.role ?? "employer";
+  if (!(PERFORMING_PARTY_ROLES as readonly string[]).includes(role)) {
+    return { kind: "invalid", problems: [`party role must be one of ${PERFORMING_PARTY_ROLES.join(", ")}`] };
+  }
+  const label = input.label?.trim() ? input.label.trim() : null;
+  if (label && label.length > 200) return { kind: "invalid", problems: ["label is at most 200 characters"] };
+  const ids = [...new Set(input.recordIds)];
+  if (ids.length === 0) return { kind: "ok", attributed: 0, skipped: 0 };
+
+  const orgs = await store.readRecordOrganizations(ids);
+  if (orgs.error) return classify(orgs.error);
+  const visible = new Map(orgs.data.map((r) => [r.id, r.organization_id]));
+  if (visible.size === 0) return { kind: "invalid", problems: ["none of the records is visible to the caller"] };
+
+  const existing = await store.readParties([...visible.keys()]);
+  if (existing.error) return classify(existing.error);
+  const already = new Set(
+    existing.data
+      .filter((p) => p.party_organization_id === input.performingOrganizationId && p.party_role === role)
+      .map((p) => p.record_id as string),
+  );
+
+  const rows: StoreRow[] = [];
+  for (const [id, orgId] of visible) {
+    if (orgId === input.performingOrganizationId || already.has(id)) continue;
+    rows.push({
+      organization_id: orgId,
+      record_id: id,
+      party_role: role,
+      party_organization_id: input.performingOrganizationId,
+      party_label: label,
+      created_by: store.userId,
+    });
+  }
+  const skipped = ids.length - rows.length;
+  if (rows.length === 0) return { kind: "ok", attributed: 0, skipped };
+  const res = await store.insertParties(rows);
+  if (res.error) {
+    if (res.error.code === "42501") return { kind: "not-authorized", reason: "not-authorized" };
+    return classify(res.error);
+  }
+  return { kind: "ok", attributed: res.data.length, skipped };
+}
+
+/** The records (any organization's books) that name this organization as a party. */
+export async function listRecordIdsAttributedTo(
+  caller: EvidenceCaller,
+  organizationId: string,
+): Promise<EvidenceImportResult<{ recordIds: readonly string[] }>> {
+  const store = storeOf(caller);
+  const res = await store.readRecordIdsNamingOrganization(organizationId);
+  if (res.error) return classify(res.error);
+  return { kind: "ok", recordIds: res.data };
+}
+
 // ── read-back ───────────────────────────────────────────────────────────────
+
+export interface EvidenceRecordPartyView {
+  readonly role: string;
+  /** The organization named (a performing company, a customer), when linked. */
+  readonly organizationId: string | null;
+  readonly label: string | null;
+}
 
 export interface EvidenceRecordView {
   readonly id: string;
+  /** The organization whose books hold the record. */
+  readonly organizationId: string;
+  /** Parties recorded on it (performing company, customer label, and so on). */
+  readonly parties: readonly EvidenceRecordPartyView[];
   readonly personId: string;
   readonly personName: string | null;
   readonly activityKind: string;
@@ -2981,6 +3090,8 @@ export async function listEvidenceRecords(
      *  ACTIVE workspace passes it so another organization's work never lands in
      *  it. A narrowing only — RLS still decides what is visible. */
     readonly organizationId?: string | null;
+    /** Exactly these records (e.g. the ones attributed to an organization). */
+    readonly recordIds?: readonly string[] | null;
     readonly limit?: number;
   } = {},
 ): Promise<EvidenceImportResult<{ records: readonly EvidenceRecordView[] }>> {
@@ -2996,12 +3107,16 @@ export async function listEvidenceRecords(
   let q = db(caller.supabase)
     .from("organization_evidence_records")
     .select(
-      "id, organization_person_id, activity_kind, activity_date, period_start, period_end, hours, original_text, original_language, context_label, work_object_id, supplier_role, source_kind, source_filename, imported_at, imported_by_profile_id, evidence_state, source_fact, derived, organization_people(display_name, linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at)",
+      "id, organization_person_id, activity_kind, activity_date, period_start, period_end, hours, original_text, original_language, context_label, work_object_id, supplier_role, source_kind, source_filename, imported_at, imported_by_profile_id, evidence_state, source_fact, derived, organization_id, organization_people(display_name, linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at), organization_evidence_parties!organization_evidence_parties_record_fk(party_role, party_organization_id, party_label)",
     )
     .order("activity_date", { ascending: false })
     .limit(Math.min(Math.max(filter.limit ?? 200, 1), 1000));
   if (filter.sessionId) q = q.eq("session_id", filter.sessionId);
   if (filter.organizationId) q = q.eq("organization_id", filter.organizationId);
+  if (filter.recordIds) {
+    if (filter.recordIds.length === 0) return { kind: "ok", records: [] };
+    q = q.in("id", filter.recordIds as string[]);
+  }
   if (filter.organizationPersonId) {
     q = q.eq("organization_person_id", filter.organizationPersonId);
   }
@@ -3039,6 +3154,12 @@ export async function listEvidenceRecords(
     );
     return {
       id: r.id as string,
+      organizationId: (r.organization_id as string) ?? "",
+      parties: ((r.organization_evidence_parties as Record<string, unknown>[] | null) ?? []).map((p) => ({
+        role: p.party_role as string,
+        organizationId: (p.party_organization_id as string | null) ?? null,
+        label: (p.party_label as string | null) ?? null,
+      })),
       personId: r.organization_person_id as string,
       personName: person?.display_name ?? null,
       activityKind: (r.activity_kind as string) ?? "work",

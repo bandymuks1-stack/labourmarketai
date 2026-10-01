@@ -390,6 +390,7 @@
         "event_demand_interest_reviewed": "Uzņēmums atzīmēja jūsu interesi kā izskatītu",
         "event_weekly_digest": "Tavs nedēļas darba un iespēju kopsavilkums ir gatavs",
         "event_saved_search_match": "Saglabātajā meklējumā ir jauni rezultāti",
+        "event_job_alert": "Parādījies jauns darbs, kas atbilst taviem kritērijiem",
         "event_weekly_digest_profile_completion": "Lai parādītu tev piemērotus darbus, apstiprini, kādu darbu tu dari",
         "event_weekly_digest_journal": "Sagatavots tavas nedēļas darba žurnāla pārskats"
       },
@@ -1143,10 +1144,10 @@
     "primaryBadge": "[EN] Primary",
     "directionAdded": "[EN] Direction added",
     "coreBadge": "[EN] Core",
-    "customComingSoon": "[EN] coming soon",
+    "customComingSoon": "Pašlaik nav pieejams.",
     "customPrompt": "[EN] Can't find your skill?",
     "empty": "[EN] No skills yet for this profession",
-    "importComingSoon": "[EN] CV import will be enabled in M2.",
+    "importComingSoon": "Pašlaik nav pieejams.",
     "importNotSaved": "[EN] Selected: {file}. The file isn't uploaded or stored yet.",
     "importPrompt": "[EN] Have an old CV? Upload PDF or DOCX",
     "loading": "[EN] Loading...",
@@ -1664,7 +1665,7 @@
     "eyebrow": "[EN] MY DOCUMENTS",
     "title": "[EN] My documents",
     "subtitle": "[EN] What you have, what is missing, and the next step — per country.",
-    "preparing": "[EN] Document readiness is being prepared — it goes live once the document storage layer is reviewed and enabled. Nothing here is active yet.",
+    "preparing": "Pašlaik nav pieejams.",
     "disclaimer": "[EN] Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
     "needsMigration": "Pašlaik nav pieejams.",
     "noWorker": "[EN] Create your worker profile first — documents attach to it.",
@@ -1712,7 +1713,7 @@
     "consent": {
       "title": "[EN] What my agency may see",
       "explainer": "[EN] If you switch this on, YOUR agency sees only category-level counts of your document readiness (valid / expiring / needs attention). It never sees document contents, files, notes or types. Default is off; you can switch it off any time.",
-      "needsGate": "[EN] The consent layer is in preparation — it activates after the owner-gated change is applied.",
+      "needsGate": "Pašlaik nav pieejams.",
       "onLabel": "[EN] Sharing aggregates: ON",
       "offLabel": "[EN] Sharing aggregates: OFF",
       "onHint": "[EN] Your agency sees counts only. Tap to switch off.",
@@ -2041,7 +2042,7 @@
     "demand": {
       "title": "[EN] Open demand",
       "humanNote": "[EN] \"We can offer\" is your proposal on a request — the final match is always recorded by a person on the platform side.",
-      "needsGate": "[EN] Open-demand visibility for agencies is in preparation — it activates after the owner-gated change is applied.",
+      "needsGate": "Pašlaik nav pieejams.",
       "empty": "[EN] No open requests right now.",
       "noRole": "[EN] Role not specified",
       "teamSize": "[EN] {n} people",
@@ -2241,7 +2242,7 @@
     "external": {
       "sectionTitle": "Publiski darba sludinājumi",
       "sectionNote": "Sludinājumi no oficiālajiem valsts nodarbinātības dienestiem. Tos avotā publicē darba devējs — labourmarket.ai tos rāda, lai jūs tos atrastu; pieteikšanās notiek caur oriģinālo sludinājumu.",
-      "shownOfTotal": "labākās {shown} no {total}",
+      "shownOfTotal": "rāda {shown} no {total}",
       "bandBest": "Vispiemērotākie",
       "bandPossible": "Iespējami piemēroti",
       "bandExplore": "Citi sludinājumi",
@@ -2298,6 +2299,14 @@
         "LOOKING_FOR_WORK": "Meklēju darbu",
         "LOOKING_FOR_PROJECTS": "Meklēju projektus"
       }
+    },
+    "jobAlerts": {
+      "title": "Paziņojumi par jauniem darbiem",
+      "ready": "Kad parādās jauns īsts darbs, kas atbilst tavai profesijai un izvēlētajām valstīm, tas parādās tavos paziņojumos. Darbs bez norādīta atalgojuma atalgojuma dēļ nekad netiek slēpts.",
+      "missing": "Lai saņemtu paziņojumus par jauniem darbiem, norādi:",
+      "profession": "kādu darbu tu dari",
+      "country": "kurās valstīs vēlies strādāt",
+      "cta": "Aizpildīt manas vēlmes"
     }
   },
   "scouting": {
@@ -2382,7 +2391,7 @@
       "markContacted": "[EN] Mark contacted",
       "internalNote": "[EN] Internal record only — nothing is sent to the worker or outside the platform.",
       "error": "[EN] Could not save. Try again.",
-      "notAvailable": "[EN] Acknowledgement is not enabled yet."
+      "notAvailable": "Pašlaik nav pieejams."
     },
     "lifecycle": {
       "confirm": "[EN] Confirm recognized skills",
@@ -2646,7 +2655,7 @@
     "saving": "[EN] Saving…",
     "saved": "[EN] Preferences saved.",
     "error": "[EN] Saving failed. Please try again.",
-    "needsMigration": "[EN] This section is not enabled yet — nothing was saved.",
+    "needsMigration": "Pašlaik nav pieejams. Nekas netika saglabāts.",
     "v2": {
       "title": "[EN] More work preferences",
       "hint": "[EN] Same rule as above — anything left as “Not stated” stays not stated.",
@@ -2661,7 +2670,7 @@
       "licenceCategories": "[EN] Driving licence categories",
       "ownVehicle": "[EN] Has own vehicle",
       "ownTools": "[EN] Has own tools",
-      "notEnabled": "[EN] These extra preferences are not enabled yet — nothing here is saved for now.",
+      "notEnabled": "Pašlaik nav pieejams.",
       "notSaved": "[EN] Saved, except the extra preferences — that part is not enabled yet."
     }
   },
@@ -2676,7 +2685,7 @@
     "adding": "[EN] Adding…",
     "remove": "[EN] Remove",
     "empty": "[EN] No languages added yet.",
-    "notEnabled": "[EN] This section is not enabled yet — nothing was saved.",
+    "notEnabled": "Pašlaik nav pieejams. Nekas netika saglabāts.",
     "error": "[EN] Saving failed. Please try again.",
     "invalid": "[EN] Choose a language and a level."
   },
@@ -2699,7 +2708,7 @@
     "importNote": "[EN] Automatic import from these sites is not offered. To bring your data in, upload an exported CV file in the profile editor.",
     "importLink": "[EN] Open the profile editor",
     "empty": "[EN] No external profiles linked yet.",
-    "notEnabled": "[EN] This section is not enabled yet — nothing was saved.",
+    "notEnabled": "Pašlaik nav pieejams. Nekas netika saglabāts.",
     "error": "[EN] Saving failed. Please try again.",
     "invalid": "[EN] Enter a full https:// link and choose a site.",
     "platformNames": {
@@ -3957,6 +3966,11 @@
       "findWorkInCompanyContext": "Darba meklēšana ir tava paša darbība — uzņēmuma telpā es to neveicu. Pārslēdzies uz personīgo telpu un pajautā vēlreiz.",
       "findWorkInCompanyWhy": "Darbu meklē cilvēks, ne uzņēmums — atbildu no tavas personīgās telpas.",
       "personalOnlyInCompany": "Šī ir personiska darbība — uzņēmuma telpā es to neveicu. Pārslēdzies uz personisko telpu un turpini tur.",
+      "openConversationOpening": "Atveru sarunu ar {name}.",
+      "openConversationNone": "Es neatradu šo cilvēku starp taviem sarunu biedriem vai komandā. Ziņas atradīsi ziņu sadaļā.",
+      "openConversationWhich": "Kuru cilvēku tu domā?",
+      "openConversationNoPermission": "Nevaru atvērt sarunu ar {name} — tev nav atļaujas.",
+      "openConversationFailed": "Sarunu neizdevās atvērt. Mēģini vēlreiz vai atver ziņas.",
       "journalAskWhatYouDid": "Ko tu šodien darīji? Ieraksti laukā „Ko darīji“ saviem vārdiem — piem. „montēju logus Kauņas objektā no 8 līdz 17“. Pats pieprasījums žurnālā netiek saglabāts.",
       "serviceNeedHint": "Tas ir darbs, kas jāpaveic — parādīšu, kas piedāvā šādu pakalpojumu.",
       "chipServiceRequests": "Atrast pakalpojumu",
@@ -4188,7 +4202,7 @@
       "moveToLine": "• „{to}“: cilvēku {before} → {after}; gatavības saraksts tur sāksies no 0/{total}.",
       "moveCountryLine": "• Mainās valsts: {from} → {to} — citas dokumentu prasības.",
       "moveNoDatesLine": "• „{to}“ nav datumu — prombūtnes nevar pārbaudīt.",
-      "moveAvailabilityUnknownLine": "• Prombūtnes nav zināmas — atvaļinājumu modelis šeit neatbild.",
+      "moveAvailabilityUnknownLine": "• Prombūtnes nav zināmas.",
       "moveAvailabilityLine": "• Laikā {start}–{end} viņam ir {count} prombūtnes ieraksti.",
       "moveAvailabilityFreeLine": "• „{to}“ datumos prombūtņu nav.",
       "moveOnlyConfirmLine": "Pagaidām nekas nav mainīts — mainīs tikai jūsu apstiprinājums.",
@@ -6609,7 +6623,9 @@
         "unknown": "Salīdzināšanai nepietiek informācijas"
       },
       "opportunity": "{count, plural, one {Līdz # cilvēkam ir brīvs no {date}} other {Līdz # cilvēkiem ir brīvi no {date}}}",
-      "opportunityCta": "Meklēt darbu"
+      "opportunityCta": "Meklēt darbu",
+      "interest": "{count, plural, one {# cilvēks izrādīja interesi par jūsu vajadzībām} other {# cilvēki izrādīja interesi par jūsu vajadzībām}}",
+      "interestCta": "Skatīt, kas"
     },
     "attention": {
       "heading": "Vajadzīgs jūs",
@@ -6828,6 +6844,7 @@
     "whoWorked": "Kas šeit strādāja",
     "timeline": "Kas darīts",
     "back": "Atpakaļ uz vēsturi",
-    "placeMissing": "Šīs vietas nav aktīvās darbvietas importētajā vēsturē."
+    "placeMissing": "Šīs vietas nav aktīvās darbvietas importētajā vēsturē.",
+    "attributedNote": "Ietver {count, plural, zero {# ierakstu} one {# ierakstu} other {# ierakstus}}, kas glabājas citas organizācijas uzskaitē un šeit piešķirti kā darbu veikušajam uzņēmumam."
   }
 }
