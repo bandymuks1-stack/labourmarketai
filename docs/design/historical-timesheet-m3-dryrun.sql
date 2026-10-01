@@ -1,92 +1,13 @@
--- ============================================================================
--- 20260930160000_historical_timesheet_m3_source_preservation
--- Historical timesheet import PR-4 = migration M3 of
--- docs/design/historical-timesheet-import-v3.md: §9.3 (schema for source
--- preservation), §14 row M3 and §15 row PR-4. Owner rule F (§1): preserve the
--- source and authorise the import — the original timesheet file is kept
--- through the EXISTING document engine, and P5 (M1, applied) admits the
--- source_preserved marker only when an ACTIVE, CLASSIFIED org_import_source
--- document holds the session's bytes.
---
--- CLASS: RED under .github/scripts/migration-safety.mjs — exactly why:
---   • CREATE OR REPLACE of an EXISTING SECURITY DEFINER function,
---     public.register_document_file_v1(text,uuid,text,text,text,bigint,text).
---     It hard-codes its own MIME list and returns 'unsupported_type' for CSV
---     and XLSX, so widening only the CHECK and the bucket would leave every
---     timesheet unpreservable (design §9.3, review finding HIGH #1). The body
---     is reproduced from PRODUCTION (pg_get_functiondef read 2026-09-24,
---     md5(prosrc) 23ee05137f9e6529fdf989cdbf2ca717, 4,287 bytes) with ONLY
---     the MIME list widened; production's stored body is the repo body of
---     20260817140000_document_file_layer_v1.sql minus its two comment lines,
---     so the PRODUCTION body is the one reproduced here and restored by the
---     rollback. SECURITY DEFINER and SET search_path = public are kept.
---     Flagged as `security-definer-function`.
---   • UPDATE of the ONE storage.buckets row 'document-files' (allowed_mime_types
---     gains the two types; file_size_limit and public are untouched). The
---     bucket refuses CSV and XLSX at the storage layer, and only an UPDATE of
---     that row changes it. Flagged as `data-dml`.
---   • REVOKE / GRANT on the function, re-asserted UNCHANGED for determinism
---     (CREATE OR REPLACE keeps privileges; production ACL is
---     authenticated=EXECUTE only). Flagged as `grant-or-revoke`.
---   • the seed INSERT of the document type slug is additive (on conflict do
---     nothing) and the CHECK widening is the drop + re-add idiom with the
---     FULL old list plus the two new values — both GREEN by shape.
---   • the human gate is the control: this PR is a DRAFT with the label
---     needs-human-gate; the owner approves the exact SQL, the definer body
---     diff and the RLS/grant list in the PR body, and the lead applies it
---     through Supabase MCP apply_migration (never db push).
--- @human-gate-approved: TIER owner-gated — findings acknowledged:
---   security-definer-function (CREATE OR REPLACE of the existing definer
---   register_document_file_v1, body byte-identical to production except the
---   MIME list), grant-or-revoke (privileges re-asserted unchanged), data-dml
---   (the one-row storage.buckets UPDATE; the definer body's own supersede
---   UPDATE is unchanged from production). The annotation lets the static gate
---   pass CI; it is an acknowledgement, not an approval — the owner approves in
---   the PR (design §15 row PR-4).
---
--- WHAT IT DOES (design §9.3, in order):
---   M3a  document_types gains the slug org_import_source (category
---        organization) — the ONE type slug for a preserved timesheet source.
---   M3b  document_files.mime_type CHECK widened: the five existing types plus
---        application/vnd.openxmlformats-officedocument.spreadsheetml.sheet and
---        text/csv (same constraint name; runs only while text/csv is absent).
---   M3c  storage.buckets 'document-files'.allowed_mime_types: the same list.
---   M3d  index document_files_sha256_idx (content_sha256) — P5 joins sessions
---        to files on the hash.
---   M3e  register_document_file_v1: the production body with ONLY the MIME
---        list widened; privileges re-asserted unchanged.
---   M3f  a post-apply assertion block: the slug row, the CHECK, the bucket and
---        the function definition all carry both new types, or the transaction
---        aborts.
---   • idempotent: a re-run is a no-op (on conflict, guarded CHECK widening,
---     an UPDATE to the same value, IF NOT EXISTS, CREATE OR REPLACE).
---   • the database admits CSV and XLSX for ANY document type, because the body
---     must stay byte-identical and cannot branch on the type; the app admits
---     them only for org_import_source (design §9.2, residual §19).
---
--- DEPENDS ON: M1 (20260924100000, ledger 20260924021637, APPLIED) for P5 and
--- evidence_import_sessions.source_bytes_sha256.
---
--- CHECKS (all read-only on production 2026-09-24, results in the PR body):
---   1. md5(prosrc) of the live register_document_file_v1 = 23ee05137f9e6529fdf989cdbf2ca717
---      (the body this file and its rollback reproduce). The dry run ASSERTS it
---      before applying (PREMERGE_CHECK_M3_BODY_FAILED otherwise).
---   2. 0 org_documents of type org_import_source; 0 document_types rows with
---      that slug; 0 document_files rows of a CSV / XLSX type (0 rows in all).
---   3. the live bucket row: public false, 5 MB, the five-type list; the live
---      CHECK document_files_mime_type_check: the same five-type list.
---   4. the rolled-back dry run docs/design/historical-timesheet-m3-dryrun.sql
---      (it embeds the M3 body below byte-for-byte) — executed 2026-10-01: DRYRUN_OK.
---
--- ROLLBACK: supabase/rollbacks/20260930160000_historical_timesheet_m3_source_preservation.down.sql
--- REFUSES while any org_import_source document or any CSV / XLSX document_files
--- row exists; otherwise restores the function body byte-for-byte to production
--- (the five-type list), restores the CHECK and the bucket array, drops the
--- index and deletes the unused slug.
--- ============================================================================
-
+-- ROLLED-BACK PRODUCTION DRY RUN of the M3 source-preservation migration
+-- (supabase/migrations/20260930160000_historical_timesheet_m3_source_preservation.sql).
+-- Executed read-write inside ONE transaction that always aborts: the M3 body below is
+-- byte-for-byte the migration's body, followed by a block that reports the resulting
+-- function hash, definer flag, search_path, ACL and bucket facts and then RAISES, so
+-- nothing is ever committed. Expected message:
+--   DRYRUN_OK body_md5=e4954bc052bffb031d511d5c599649f6 secdef=true config={search_path=public}
+--   acl=authenticated:EXECUTE,postgres:EXECUTE bucket_size=5242880 bucket_public=false
+-- Production before: register_document_file_v1 md5(prosrc)=23ee05137f9e6529fdf989cdbf2ca717.
 begin;
-
 -- M3 BODY BEGIN
 -- ── M3a ── the ONE type slug for a preserved timesheet source ──────────────
 insert into public.document_types (slug, category) values ('org_import_source','organization')
@@ -278,10 +199,14 @@ begin
   end if;
 end $hist_m_three_verify$;
 -- M3 BODY END
-
-commit;
-
--- ROLLBACK (down): supabase/rollbacks/20260930160000_historical_timesheet_m3_source_preservation.down.sql
--- Refuses while any org_import_source document or CSV / XLSX file row exists;
--- otherwise restores the production function body (md5 23ee05137f9e6529fdf989cdbf2ca717),
--- the five-type CHECK and bucket list, drops the index and deletes the slug.
+do $dry$
+declare r text;
+begin
+  select 'DRYRUN_OK body_md5=' || md5(prosrc) || ' secdef=' || prosecdef || ' config=' || coalesce(proconfig::text,'') ||
+         ' acl=' || (select string_agg(grantee||':'||privilege_type,',' order by grantee) from information_schema.routine_privileges where routine_name='register_document_file_v1' and routine_schema='public') ||
+         ' bucket_size=' || (select file_size_limit from storage.buckets where id='document-files') ||
+         ' bucket_public=' || (select public from storage.buckets where id='document-files')
+    into r from pg_proc where proname='register_document_file_v1' and pronamespace='public'::regnamespace;
+  raise exception '%', r;
+end $dry$;
+rollback;
