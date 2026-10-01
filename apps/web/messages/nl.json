@@ -944,32 +944,6 @@
     "compass": "Leerkompas",
     "moreDestinations": "Meer bestemmingen"
   },
-  "mapLayers": {
-    "title": "Kaartlagen",
-    "intro": "De kaart wordt de belangrijkste visuele marktlaag. Hieronder zie je wat nu zichtbaar is en welke lagen in voorbereiding zijn.",
-    "visibleNow": "Nu zichtbaar",
-    "futureLayers": "Toekomstige lagen",
-    "futureBadge": "In voorbereiding",
-    "personSignal": "Mijn persoonssignaal",
-    "companyLayer": "Bedrijfslaag",
-    "companyIncomplete": "locatie nog niet toegevoegd",
-    "personIncomplete": "Voeg je locatie toe om op de marktkaart te verschijnen",
-    "needsLayer": "Mijn behoeften",
-    "notOnMapYet": "nog niet op de kaart",
-    "items": {
-      "workers": "Werknemers",
-      "selfSignal": "Je locatiesignaal",
-      "companies": "Bedrijven",
-      "teams": "Ploegen / brigades",
-      "opportunities": "Kansen",
-      "workNeeds": "Werkbehoeften",
-      "services": "Diensten",
-      "rentals": "Verhuur / huisvesting",
-      "shops": "Winkels / aanbiedingen",
-      "availability": "Beschikbaarheid / kalender",
-      "trust": "Vertrouwen / gereedheid"
-    }
-  },
   "profileAvatar": {
     "upload": "Foto uploaden",
     "change": "Foto wijzigen",
@@ -1085,59 +1059,15 @@
       "lead": "Open behoeften uit de echte vraag op dit platform — waar nu om werk wordt gevraagd."
     },
     "vacancyVolume": {
-      "title": "Volume openbare vacatures",
-      "scope": "{count} geïmporteerde openbare vacatures voor {profession}. Huidige brondekking: {countries}.",
-      "window": "Stadsvolumes worden geteld over de nieuwste {window} advertenties, niet over het hele bestand."
-    },
-    "entities": {
-      "title": "Drie dingen op de kaart",
-      "intro": "De kaart toont drie verschillende dingen: mensen, werkgebieden van bedrijven en projectlocaties. Elk volgt zijn eigen zichtbaarheidsregel en ziet er anders uit.",
-      "neverMixedNote": "De drie worden nooit samengevoegd tot één markertype.",
-      "contactNote": "Contact verloopt altijd via de LabourMarket.ai-werkstroom — de kaart toont nooit telefoonnummers of e-mailadressen.",
-      "person": {
-        "name": "Mensen",
-        "legend": "Aantal mensen per gebied (gevuld vierkant)",
-        "countLabel": "{count}",
-        "smallSample": "<5",
-        "empty": "Nog geen aantallen om te tonen. Mensen verschijnen hier alleen als aantallen per gebied zodra genoeg mensen in een gebied toestemming hebben gegeven (een exact aantal pas vanaf 5).",
-        "visibilityNote": "Mensen worden alleen getoond als aantallen per gebied — nooit als een individueel punt, naam of contact. Gebieden met minder dan 5 zichtbare mensen tonen \"<5\"."
-      },
-      "company": {
-        "name": "Bedrijfsterritoria",
-        "legend": "Contour van werkgebied (gestippelde ring) — nooit een punt",
-        "kinds": {
-          "headquarters": "Hoofdkantoor",
-          "operating": "Werkgebied",
-          "desired_market": "Gewenste markt",
-          "demand_anchor": "Geverifieerde behoeftelocatie"
-        },
-        "storeInactive": "Momenteel niet beschikbaar.",
-        "readError": "Bedrijfsterritoria konden nu niet worden geladen.",
-        "empty": "Nog geen bedrijfsterritoria. Voeg de werklocaties van uw bedrijf toe in de bedrijfswerkruimte.",
-        "visibilityNote": "Bedrijfsterritoria worden getekend als omlijnde gebieden op basis van door het bedrijf ingevoerde geografie — nooit als markers die op personen lijken."
-      },
-      "project": {
-        "name": "Projectlocaties",
-        "legend": "Projectmarker (ruit)",
-        "confirmedTag": "locatie bevestigd",
-        "unconfirmedTag": "gebiedsniveau",
-        "empty": "Nog geen projectlocaties. Projecten met een locatie verschijnen hier uit uw projectenlijst.",
-        "visibilityNote": "Een project toont pas een exact stadspunt nadat de locatie uitdrukkelijk is bevestigd; anders blijft het op gebiedsniveau."
-      }
+      "scope": "{count} geïmporteerde openbare vacatures voor {profession}. Huidige brondekking: {countries}."
     },
     "backToActions": "Actiecentrum",
     "pageTitle": "Kaart",
-    "pageLead": "Jij en de markt op één kaart.",
     "advanced": "Mijn locaties & marktlagen",
     "connections": {
-      "title": "De operationele laag is verbonden met",
-      "intro": "De kaart laat zien waar dingen zijn — beheer ze op deze onderdelen.",
       "marketplace": "Marktplaats",
-      "marketplaceNote": "Diensten en aanvragen",
       "opportunities": "Kansen",
-      "opportunitiesNote": "Werk dat past",
-      "bookings": "Planning & boekingen",
-      "bookingsNote": "Gepland werk en opdrachten"
+      "bookings": "Planning & boekingen"
     },
     "companyContext": {
       "title": "Bedrijfscontext",
@@ -1388,34 +1318,29 @@
       "accommodationNote": "Huisvestingslocaties zijn nog geen aparte datalaag — ze verschijnen als echte signalen zodra die laag is toegevoegd."
     },
     "world": {
-      "title": "Wereldbeeld",
-      "lead": "Waar vraag, mensen en projecten zich bevinden in het deel van de kaart dat u bekijkt. Verschuif of zoom de kaart — de cijfers volgen.",
       "layersLabel": "Kaartlagen",
       "layers": {
         "demand": "Vraag",
         "supply": "Mensen",
-        "projects": "Projecten"
+        "projects": "Projecten",
+        "jobs": "Vacatures",
+        "territory": "Bedrijfsgebied"
       },
       "counts": {
         "inView": "In beeld: {places} plaatsen, {objects} objecten",
         "overflow": "Niet getekend: nog {places} plaatsen ({objects} objecten) — zoom in om ze te zien",
         "unplaced": "Zonder bekende plaats: {count}",
         "withheld": "Kleine groepen niet getoond: {count} (minder dan 5 mensen)",
-        "truncated": "Meer dan {limit} records in beeld — de cijfers zijn een ondergrens",
-        "cap": "Er worden maximaal {cap} plaatsen tegelijk getekend"
+        "truncated": "Meer dan {limit} records in beeld — de cijfers zijn een ondergrens"
       },
       "loading": "Bijwerken…",
-      "provenance": {
-        "fact": "Feit",
-        "factHint": "de plaats staat in het record",
-        "derived": "Afgeleid",
-        "derivedHint": "positie op landniveau — de exacte plaats is niet vermeld"
-      },
       "state": {
         "empty": {
           "demand": "Geen open behoeften in dit deel van de kaart.",
           "supply": "Geen groepen mensen om te tonen in dit deel van de kaart.",
-          "projects": "Geen van uw projecten ligt in dit deel van de kaart."
+          "projects": "Geen van uw projecten ligt in dit deel van de kaart.",
+          "jobs": "In dit deel van de kaart zijn geen vacatures.",
+          "territory": "In dit deel van de kaart is geen bedrijfsgebied."
         },
         "error": "Deze laag kon nu niet worden gelezen. Er wordt niets getoond in plaats van een gok.",
         "noPlaces": "Geen bekende plaatsen in dit deel van de kaart. Verschuif de kaart naar een land of stad.",
@@ -1432,12 +1357,6 @@
         "selected": "geselecteerd",
         "more": "+{count} meer"
       },
-      "scale": {
-        "label": "Schaal: {scale}",
-        "country": "landen",
-        "place": "plaatsen"
-      },
-      "placeLinkHint": "Een plaats kiezen brengt je naar de kansenlijst van die plaats.",
       "precision": {
         "city": "Stad",
         "country": "Alleen land"
@@ -9898,10 +9817,6 @@
     "statusInvalid": "Vul de velden voor werknemer en behoefte volledig in."
   },
   "marketMapBase": {
-    "title": "Jouw plek op de marktkaart",
-    "subtitle": "We gebruiken deze locatie en straal voor je signalen op de kaart.",
-    "panelTitle": "Locatiegebied",
-    "panelEmpty": "Nog geen locatie gekozen",
     "mapTapHint": "Tik op de kaart om je locatie te markeren",
     "precisionDevice": "Exacte apparaatlocatie",
     "precisionCity": "Geselecteerde stad",
@@ -9920,7 +9835,6 @@
     "geoInsecure": "Locatiebepaling is op deze pagina niet mogelijk. Kies handmatig een stad.",
     "geoRetry": "Opnieuw proberen",
     "manualToggle": "Stel locatie handmatig in",
-    "manualHint": "Als je geen locatietoegang wilt toestaan, kies dan handmatig een stad of regio.",
     "countryLabel": "Land",
     "regionLabel": "Stad of regio",
     "regionPlaceholder": "bijv. Vilnius",
@@ -9928,16 +9842,11 @@
     "addressPlaceholder": "bijv. wijk of bouwplaats",
     "errorCountry": "Kies een land.",
     "save": "Sla locatie op",
-    "selectedTitle": "Geselecteerde locatie",
     "sourceAuto": "Huidige locatie",
     "sourceManual": "Handmatig ingesteld",
-    "usableNote": "We gebruiken deze locatie en een straal van {km} km voor je marktsignalen.",
-    "savedLocally": "Locatie opgeslagen op dit apparaat.",
     "updateButton": "Werk locatie bij",
     "editButton": "Wijzig locatie",
     "resetButton": "Verwijder locatie",
-    "emptyBody": "Je hebt nog geen locatie gekozen. Gebruik de knop hierboven of stel er handmatig een in.",
-    "radiusHelp": "De straal is het zoekgebied rond je gekozen punt: {km} km betekent werk en vraag tot {km} km vanaf dat punt.",
     "previewTitle": "Nieuwe plek gekozen — nog niet opgeslagen",
     "previewKeepNote": "Je vorige locatie blijft staan tot je op Opslaan drukt.",
     "previewSave": "Locatie opslaan",

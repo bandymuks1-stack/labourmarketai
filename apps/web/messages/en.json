@@ -944,32 +944,6 @@
     "compass": "Learning Compass",
     "moreDestinations": "More destinations"
   },
-  "mapLayers": {
-    "title": "Map layers",
-    "intro": "The map is becoming the main visual market layer. Below is what's visible now and which layers are preparing.",
-    "visibleNow": "Visible now",
-    "futureLayers": "Future layers",
-    "futureBadge": "Preparing",
-    "personSignal": "My person signal",
-    "companyLayer": "Company layer",
-    "companyIncomplete": "location not added yet",
-    "personIncomplete": "Add your location to appear on the market map",
-    "needsLayer": "My needs",
-    "notOnMapYet": "not on map yet",
-    "items": {
-      "workers": "Workers",
-      "selfSignal": "Your location signal",
-      "companies": "Companies",
-      "teams": "Teams / brigades",
-      "opportunities": "Opportunities",
-      "workNeeds": "Work needs",
-      "services": "Services",
-      "rentals": "Rentals / housing",
-      "shops": "Shops / offers",
-      "availability": "Availability / calendar",
-      "trust": "Trust / readiness"
-    }
-  },
   "profileAvatar": {
     "upload": "Upload photo",
     "change": "Change photo",
@@ -1085,59 +1059,15 @@
       "lead": "Open needs from this platform's real demand — where work is being asked for right now."
     },
     "vacancyVolume": {
-      "title": "Public vacancy volume",
-      "scope": "{count} imported public job advertisements for {profession}. Current source coverage: {countries}.",
-      "window": "City volumes are tallied over the newest {window} advertisements, not the whole pool."
-    },
-    "entities": {
-      "title": "Three things on the map",
-      "intro": "The map shows three different things: people, company operating territories and project locations. Each follows its own visibility rule and looks different.",
-      "neverMixedNote": "The three are never merged into one marker type.",
-      "contactNote": "Contact always happens through the LabourMarket.ai workflow — the map never shows phone numbers or email addresses.",
-      "person": {
-        "name": "People",
-        "legend": "People count by area (filled square)",
-        "countLabel": "{count}",
-        "smallSample": "<5",
-        "empty": "No people counts to show yet. People appear here only as area counts once enough people in an area have given consent (an exact count only from 5).",
-        "visibilityNote": "People are shown only as area counts — never as an individual point, name or contact. Areas with fewer than 5 visible people show \"<5\"."
-      },
-      "company": {
-        "name": "Company territories",
-        "legend": "Operating territory outline (dashed ring) — never a point",
-        "kinds": {
-          "headquarters": "Headquarters",
-          "operating": "Operating area",
-          "desired_market": "Desired market",
-          "demand_anchor": "Verified need location"
-        },
-        "storeInactive": "Not available right now.",
-        "readError": "Could not load company territories right now.",
-        "empty": "No company territories yet. Add your company's operating locations in the company workspace.",
-        "visibilityNote": "Company territories are drawn as outlined areas from company-entered geography — never as person-like markers."
-      },
-      "project": {
-        "name": "Project locations",
-        "legend": "Project marker (diamond)",
-        "confirmedTag": "location confirmed",
-        "unconfirmedTag": "area level",
-        "empty": "No project locations yet. Projects with a location appear here from your project list.",
-        "visibilityNote": "A project shows an exact city point only after its location is explicitly confirmed; otherwise it stays at area level."
-      }
+      "scope": "{count} imported public job advertisements for {profession}. Current source coverage: {countries}."
     },
     "backToActions": "Action center",
     "pageTitle": "Map",
-    "pageLead": "You and the market on one map.",
     "advanced": "My locations & market layers",
     "connections": {
-      "title": "The operating layer connects to",
-      "intro": "The map shows where things are — manage them on these surfaces.",
       "marketplace": "Marketplace",
-      "marketplaceNote": "Services and requests",
       "opportunities": "Opportunities",
-      "opportunitiesNote": "Work that fits",
-      "bookings": "Plan & bookings",
-      "bookingsNote": "Scheduled work and assignments"
+      "bookings": "Plan & bookings"
     },
     "companyContext": {
       "title": "Company context",
@@ -1388,34 +1318,29 @@
       "accommodationNote": "Accommodation locations are not a separate data layer yet — they appear as real signals once that layer is added."
     },
     "world": {
-      "title": "World view",
-      "lead": "Where demand, people and projects are in the part of the map you are looking at. Move or zoom the map — the numbers follow.",
       "layersLabel": "Map layers",
       "layers": {
         "demand": "Demand",
         "supply": "People",
-        "projects": "Projects"
+        "projects": "Projects",
+        "jobs": "Open positions",
+        "territory": "Company territory"
       },
       "counts": {
         "inView": "In view: {places} places, {objects} objects",
         "overflow": "Not drawn: {places} more places ({objects} objects) — zoom in to see them",
         "unplaced": "Without a known place: {count}",
         "withheld": "Small groups withheld: {count} (fewer than 5 people)",
-        "truncated": "More than {limit} records in view — the counts are a lower bound",
-        "cap": "At most {cap} places are drawn at once"
+        "truncated": "More than {limit} records in view — the counts are a lower bound"
       },
       "loading": "Updating…",
-      "provenance": {
-        "fact": "Fact",
-        "factHint": "the place is stated in the record",
-        "derived": "Derived",
-        "derivedHint": "country-level position — the exact place is not stated"
-      },
       "state": {
         "empty": {
           "demand": "No open needs in this part of the map.",
           "supply": "No people groups to show in this part of the map.",
-          "projects": "None of your projects are in this part of the map."
+          "projects": "None of your projects are in this part of the map.",
+          "jobs": "No open positions in this part of the map.",
+          "territory": "No company territory in this part of the map."
         },
         "error": "This layer could not be read right now. Nothing is shown rather than a guess.",
         "noPlaces": "No known places in this part of the map. Move the map to a country or a city.",
@@ -1432,12 +1357,6 @@
         "selected": "selected",
         "more": "+{count} more"
       },
-      "scale": {
-        "label": "Scale: {scale}",
-        "country": "countries",
-        "place": "places"
-      },
-      "placeLinkHint": "Selecting a place takes you to that place's list of opportunities.",
       "precision": {
         "city": "City",
         "country": "Country only"
@@ -9898,10 +9817,6 @@
     "statusInvalid": "Please complete the worker and need fields."
   },
   "marketMapBase": {
-    "title": "Your place on the market map",
-    "subtitle": "We use this location and radius for your signals on the map.",
-    "panelTitle": "Location area",
-    "panelEmpty": "No location chosen yet",
     "mapTapHint": "Tap the map to mark your location",
     "precisionDevice": "Exact device location",
     "precisionCity": "Selected city",
@@ -9920,7 +9835,6 @@
     "geoInsecure": "Location detection isn''t possible on this page. Choose a city manually.",
     "geoRetry": "Try again",
     "manualToggle": "Set location manually",
-    "manualHint": "If you don''t want to allow location access, choose a city or region manually.",
     "countryLabel": "Country",
     "regionLabel": "City or region",
     "regionPlaceholder": "e.g. Vilnius",
@@ -9928,16 +9842,11 @@
     "addressPlaceholder": "e.g. district or site",
     "errorCountry": "Choose a country.",
     "save": "Save location",
-    "selectedTitle": "Selected location",
     "sourceAuto": "Current location",
     "sourceManual": "Set manually",
-    "usableNote": "We''ll use this location and a {km} km radius for your market signals.",
-    "savedLocally": "Location saved on this device.",
     "updateButton": "Update location",
     "editButton": "Change location",
     "resetButton": "Remove location",
-    "emptyBody": "You haven''t chosen a location yet. Use the button above or set one manually.",
-    "radiusHelp": "The radius is the search area around your chosen point: {km} km means work and demand up to {km} km from that point.",
     "previewTitle": "New spot picked — not saved yet",
     "previewKeepNote": "Your previous location stays until you press Save.",
     "previewSave": "Save location",

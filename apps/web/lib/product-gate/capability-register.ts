@@ -1366,7 +1366,7 @@ const MAP_INTELLIGENCE: readonly CapabilityRow[] = [
     anchors: ["lib/market-map"],
     coreModule: "lib/market-map/signal-model.ts",
     surfaces: ["app/[locale]/dashboard"],
-    note: "Owner-scoped only; the cross-user aggregate is deliberately absent.",
+    note: "Owner-scoped only; the cross-user aggregate is deliberately absent. ONE canonical map on /dashboard/market-map (2026-10-01): location + radius are its controls, vacancies/territory/people/projects its layers; the HUMAN_UI_PROVEN evidence predates this merge and is NOT re-earned until production screenshots at 390/1280/1440 exist.",
   },
   {
     id: "GEO-2",
