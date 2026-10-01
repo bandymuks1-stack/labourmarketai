@@ -13423,6 +13423,7 @@
       "briefOverdue": "{count} Aufgaben sind über ihrem Fälligkeitstag.",
       "briefLogToday": "Du arbeitest heute und es ist noch nichts eingetragen.",
       "briefEmployerJournalReviews": "{count, plural, one {# Arbeitseintrag wartet} other {# Arbeitseinträge warten}} auf Ihre Prüfung.",
+      "briefEmployerLearningReview": "Wartet auf Prüfung: {count}",
       "briefAgencyOffersAwaiting": "{count, plural, one {# Vorschlag wartet} other {# Vorschläge warten}} auf die Entscheidung des Kunden.",
       "briefAgencySharedWithoutOffer": "{count, plural, one {# Kundenbedarf hat} other {# Kundenbedarfe haben}} noch keinen Vorschlag von Ihnen.",
       "briefAgencyNeedReopened": "{count, plural, one {# Kundenbedarf braucht} other {# Kundenbedarfe brauchen}} wieder eine Arbeitskraft: Die vorherige Person hat nicht angefangen oder der Einsatz ist beendet.",

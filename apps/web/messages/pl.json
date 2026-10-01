@@ -13423,6 +13423,7 @@
       "briefOverdue": "{count} zadań ma przekroczony termin.",
       "briefLogToday": "Dziś pracujesz, a nic jeszcze nie zapisano.",
       "briefEmployerJournalReviews": "{count, plural, one {# wpis pracy czeka} few {# wpisy pracy czekają} many {# wpisów pracy czeka} other {# wpisu pracy czeka}} na Twoją weryfikację.",
+      "briefEmployerLearningReview": "Czeka na weryfikację: {count}",
       "briefAgencyOffersAwaiting": "{count, plural, one {# oferta czeka} few {# oferty czekają} many {# ofert czeka} other {# oferty czekają}} na decyzję klienta.",
       "briefAgencySharedWithoutOffer": "{count, plural, one {# potrzeba klienta nie ma} few {# potrzeby klienta nie mają} many {# potrzeb klienta nie ma} other {# potrzeby klienta nie mają}} jeszcze Twojej oferty.",
       "briefAgencyNeedReopened": "{count, plural, one {# potrzeba klienta znów wymaga} few {# potrzeby klientów znów wymagają} other {# potrzeb klientów znów wymaga}} pracownika: poprzedni kandydat nie rozpoczął pracy lub zatrudnienie się zakończyło.",

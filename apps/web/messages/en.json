@@ -13423,6 +13423,7 @@
       "briefOverdue": "{count} tasks are past their due day.",
       "briefLogToday": "You are working today and nothing is logged yet.",
       "briefEmployerJournalReviews": "{count, plural, one {# work entry awaits} other {# work entries await}} your review.",
+      "briefEmployerLearningReview": "Awaiting review: {count}",
       "briefAgencyOffersAwaiting": "{count, plural, one {# offer is} other {# offers are}} awaiting the client's decision.",
       "briefAgencySharedWithoutOffer": "{count, plural, one {# client need has} other {# client needs have}} no offer from you yet.",
       "briefAgencyNeedReopened": "{count, plural, one {# client need needs} other {# client needs need}} a worker again: the previous candidate did not start or the placement ended.",

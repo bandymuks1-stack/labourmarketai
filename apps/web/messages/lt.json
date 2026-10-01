@@ -13423,6 +13423,7 @@
       "briefOverdue": "{count} užduotys jau pradelstos.",
       "briefLogToday": "Šiandien dirbi, o nieko dar neužrašyta.",
       "briefEmployerJournalReviews": "{count, plural, one {# darbo įrašas laukia} few {# darbo įrašai laukia} other {# darbo įrašų laukia}} jūsų peržiūros.",
+      "briefEmployerLearningReview": "Laukia peržiūros: {count}",
       "briefAgencyOffersAwaiting": "{count, plural, one {# pasiūlymas laukia} few {# pasiūlymai laukia} other {# pasiūlymų laukia}} kliento sprendimo.",
       "briefAgencySharedWithoutOffer": "{count, plural, one {# kliento poreikis} few {# klientų poreikiai} other {# klientų poreikių}} dar be jūsų pasiūlymo.",
       "briefAgencyNeedReopened": "{count, plural, one {# kliento poreikis vėl laukia} few {# klientų poreikiai vėl laukia} other {# klientų poreikių vėl laukia}} darbuotojo: ankstesnis kandidatas atsisakė arba darbas baigėsi.",
