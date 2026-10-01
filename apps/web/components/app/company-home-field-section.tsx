@@ -402,6 +402,15 @@ export async function CompanyHomeFieldSection({
               <p className="font-mono text-meta text-text-muted">
                 {day(field.capacity.from) ?? field.capacity.from} – {day(field.capacity.to) ?? field.capacity.to}
               </p>
+              {field.capacity.counts ? (
+                <p className="text-sm text-text-primary" data-testid="company-home-capacity-summary">
+                  {t("capacity.summary", {
+                    free: field.capacity.counts.free,
+                    committed: field.capacity.counts.committed,
+                    away: field.capacity.counts.unavailable,
+                  })}
+                </p>
+              ) : null}
               <ul className="flex flex-col gap-1">
                 {field.capacity.rows.map((w) => (
                   <li
@@ -416,6 +425,22 @@ export async function CompanyHomeFieldSection({
                           <CheckCircle2 className="h-3 w-3 text-state-success" aria-hidden />
                           {t("capacity.free")}
                         </>
+                      ) : w.state === "committed" ? (
+                        <>
+                          <Play className="h-3 w-3 text-brand-cyan" aria-hidden />
+                          {[
+                            w.committedTo
+                              ? t("capacity.onWork", { project: w.committedTo })
+                              : t("capacity.booked"),
+                            w.undated
+                              ? t("capacity.undated")
+                              : w.unavailableUntil
+                                ? t("capacity.until", { date: day(w.unavailableUntil) ?? w.unavailableUntil })
+                                : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </>
                       ) : (
                         <>
                           <CalendarClock className="h-3 w-3 text-text-muted" aria-hidden />
@@ -428,6 +453,33 @@ export async function CompanyHomeFieldSection({
                   </li>
                 ))}
               </ul>
+              {field.capacity.outlook ? (
+                <div className="flex flex-col gap-1" data-testid="company-home-outlook">
+                  <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+                    {t("capacity.outlookHeading")}
+                  </p>
+                  <ol className="grid grid-cols-4 gap-1">
+                    {field.capacity.outlook.map((w) => (
+                      <li
+                        key={w.from}
+                        className={`flex flex-col items-center rounded-control bg-ink-900/40 px-1 py-1.5 ${w.free === 0 ? TONE_EDGE.risk : TONE_EDGE.quiet}`}
+                        aria-label={t("capacity.outlookWeek", {
+                          date: day(w.from) ?? w.from,
+                          free: w.free,
+                          total: field.capacity.kind === "ok" ? field.capacity.rosterTotal : 0,
+                        })}
+                        data-testid="company-home-outlook-week"
+                      >
+                        <span className="font-mono text-base font-semibold tabular-nums text-text-primary">
+                          {w.free}
+                        </span>
+                        <span className="text-meta text-text-muted">{day(w.from) ?? w.from}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  <p className="text-meta italic text-text-muted">{t("capacity.outlookNote")}</p>
+                </div>
+              ) : null}
               {!field.capacity.absencesKnown ? (
                 <p className="text-meta text-text-muted">{t("capacity.absencesUnknown")}</p>
               ) : null}
