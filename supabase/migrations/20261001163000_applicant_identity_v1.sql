@@ -3,7 +3,7 @@
 -- Apply ONLY via Supabase MCP apply_migration after explicit owner approval.
 -- Never `db push`.
 --
--- 20261001120000 - applicant_identity_v1 (an application submitted TO an
+-- 20261001163000 - applicant_identity_v1 (an application submitted TO an
 -- employer shows the applicant's name and photo to THAT employer, only).
 --
 -- PROBLEM. The employer who receives a worker's application (a
@@ -41,7 +41,7 @@
 -- THIS employer sees name + photo. The express-interest control must say so
 -- (copy shipped in the same PR, scouting.identity / opportunities copy).
 --
--- Rollback: supabase/rollbacks/20261001120000_applicant_identity_v1.down.sql
+-- Rollback: supabase/rollbacks/20261001163000_applicant_identity_v1.down.sql
 --
 -- @human-gate-approved - TIER: owner-gated (SECURITY DEFINER function +
 -- EXECUTE grant = RED-class). The annotation downgrades the CI finding only;
