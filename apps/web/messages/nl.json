@@ -9444,7 +9444,8 @@
       "reviewed": "Het bedrijf heeft je interesse bekeken",
       "contacted": "Bedrijf markeerde: contact opgenomen",
       "contactEmployer": "Werkgever een bericht sturen",
-      "contactError": "Gesprek kon niet worden geopend. Probeer het opnieuw."
+      "contactError": "Gesprek kon niet worden geopend. Probeer het opnieuw.",
+      "identityConsent": "Als je reageert, ziet de werkgever van deze baan je naam en profielfoto."
     },
     "companyVerified": "Geverifieerd bedrijf",
     "structured": {

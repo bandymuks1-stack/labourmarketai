@@ -9444,7 +9444,8 @@
       "reviewed": "Das Unternehmen hat Ihr Interesse geprüft",
       "contacted": "Vom Unternehmen markiert: kontaktiert",
       "contactEmployer": "Arbeitgeber anschreiben",
-      "contactError": "Gespräch konnte nicht geöffnet werden. Bitte erneut versuchen."
+      "contactError": "Gespräch konnte nicht geöffnet werden. Bitte erneut versuchen.",
+      "identityConsent": "Wenn du dich bewirbst, sieht der Arbeitgeber dieser Stelle deinen Namen und dein Profilfoto."
     },
     "companyVerified": "Verifiziertes Unternehmen",
     "structured": {

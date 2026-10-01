@@ -9444,7 +9444,8 @@
       "reviewed": "Įmonė peržiūrėjo jūsų susidomėjimą",
       "contacted": "Įmonė pažymėjo: susisiekta",
       "contactEmployer": "Parašyti darbdaviui",
-      "contactError": "Nepavyko atidaryti pokalbio. Bandykite dar kartą."
+      "contactError": "Nepavyko atidaryti pokalbio. Bandykite dar kartą.",
+      "identityConsent": "Pateikus paraišką, šio darbo / poreikio darbdavys matys jūsų vardą ir profilio nuotrauką."
     },
     "companyVerified": "Patikrinta įmonė",
     "structured": {

@@ -9444,7 +9444,8 @@
       "reviewed": "Firma rozpatrzyła Twoje zainteresowanie",
       "contacted": "Firma oznaczyła: skontaktowano się",
       "contactEmployer": "Napisz do pracodawcy",
-      "contactError": "Nie udało się otworzyć rozmowy. Spróbuj ponownie."
+      "contactError": "Nie udało się otworzyć rozmowy. Spróbuj ponownie.",
+      "identityConsent": "Po wysłaniu zgłoszenia pracodawca tej oferty zobaczy Twoje imię i zdjęcie profilowe."
     },
     "companyVerified": "Zweryfikowana firma",
     "structured": {
