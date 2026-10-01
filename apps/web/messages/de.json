@@ -1778,7 +1778,18 @@
       "openNeed": "Bedarf öffnen",
       "gapsRow": "{count, plural, =1 {1 Person auf {project} hat fehlende Dokumente} other {# Personen auf {project} haben fehlende Dokumente}}",
       "gapsCta": "Dokumente prüfen",
-      "needsCta": "Bedarf beschreiben"
+      "needsCta": "Bedarf beschreiben",
+      "noOneFrom": "Ab {date} ist niemand frei",
+      "unclear": "{count, plural, =1 {1 Person hat Arbeit ohne Termine — freie Zeit kann geringer sein} other {# Personen haben Arbeit ohne Termine — freie Zeit kann geringer sein}}",
+      "fit": {
+        "fits": "Freie Personen reichen aus",
+        "from": "Freie Personen reichen ab {date}",
+        "short": "{count, plural, =1 {1 Person fehlt} other {# Personen fehlen}}",
+        "some": "Freie Personen reichen nur in einigen Wochen",
+        "unknown": "Zu wenig Angaben zum Vergleich"
+      },
+      "opportunity": "{count, plural, =1 {Bis zu 1 Person ist ab {date} frei} other {Bis zu # Personen sind ab {date} frei}}",
+      "opportunityCta": "Arbeit suchen"
     },
     "attention": {
       "heading": "Braucht Sie",
@@ -13904,6 +13915,7 @@
       },
       "capacityCommittedUntil": "bereits verplant bis {date}",
       "capacityCommittedToUntil": "auf {what} bis {date}",
+      "capacityCommittedUndated": "auf {what}, ohne Termine",
       "capacityCommitmentsUnknown": "Buchungen und Projektzuweisungen konnten nicht gelesen werden, daher kann jemand, der als frei angezeigt wird, bereits verplant sein.",
       "workspaceUnnamedCompany": "Unternehmen ohne Namen",
       "workspaceUnnamedAgency": "Agentur ohne Namen",

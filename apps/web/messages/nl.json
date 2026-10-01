@@ -1778,7 +1778,18 @@
       "openNeed": "Behoefte openen",
       "gapsRow": "{count, plural, =1 {1 persoon op {project} mist documenten} other {# mensen op {project} missen documenten}}",
       "gapsCta": "Documenten controleren",
-      "needsCta": "Een behoefte beschrijven"
+      "needsCta": "Een behoefte beschrijven",
+      "noOneFrom": "Vanaf {date} is niemand vrij",
+      "unclear": "{count, plural, =1 {1 persoon heeft werk zonder data — vrije tijd kan lager zijn} other {# personen hebben werk zonder data — vrije tijd kan lager zijn}}",
+      "fit": {
+        "fits": "Je vrije mensen dekken het",
+        "from": "Vrije mensen dekken het vanaf {date}",
+        "short": "{count, plural, =1 {1 persoon tekort} other {# personen tekort}}",
+        "some": "Vrije mensen dekken het maar enkele weken",
+        "unknown": "Te weinig gegevens om te vergelijken"
+      },
+      "opportunity": "{count, plural, =1 {Tot 1 persoon is vrij vanaf {date}} other {Tot # personen zijn vrij vanaf {date}}}",
+      "opportunityCta": "Zoek werk"
     },
     "attention": {
       "heading": "Heeft u nodig",
@@ -13904,6 +13915,7 @@
       },
       "capacityCommittedUntil": "al toegezegd tot {date}",
       "capacityCommittedToUntil": "op {what} tot {date}",
+      "capacityCommittedUndated": "op {what}, geen data ingesteld",
       "capacityCommitmentsUnknown": "Boekingen en projecttoewijzingen konden niet worden gelezen, dus wie als vrij wordt getoond kan al toegezegd zijn.",
       "workspaceUnnamedCompany": "Bedrijf zonder naam",
       "workspaceUnnamedAgency": "Bureau zonder naam",
