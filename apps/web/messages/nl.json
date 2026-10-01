@@ -4497,7 +4497,7 @@
             "none": "Niet ingesteld"
           },
           "availableFromLabel": "Kan beginnen vanaf",
-          "locationLabel": "Land waar ik ben (code, bijv. LT)",
+          "locationLabel": "Land waar ik ben",
           "locationHint": "LT",
           "preferredLabel": "Landen waarin ik zou willen werken",
           "preferredHint": "LT, DE, NL",
