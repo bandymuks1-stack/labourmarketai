@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
-import { PersonPresence } from "@/components/app/work-world/primitives";
+import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
+import { personMonogram } from "@/lib/visual/avatar-monogram";
 import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/server";
 import type { DomainCaller } from "@/lib/domain/caller";
@@ -206,16 +207,18 @@ export async function OrganizationRosterSection({
               {/* A person reads as a presence, not a bare string (work-world
                   PersonPresence). The relationship is their role beside them;
                   an unknown slug renders as itself — a gap to see, not hide. */}
-              <PersonPresence
+              <PersonIdentityCard
+                variant="roster-person"
+                density="compact"
+                testid={`roster-identity-${p.id}`}
                 name={p.displayName}
-                role={
+                initials={personMonogram(p.displayName)}
+                professions={
                   p.relationshipKind
-                    ? tRel.has(p.relationshipKind)
-                      ? tRel(p.relationshipKind)
-                      : p.relationshipKind
-                    : null
+                    ? [tRel.has(p.relationshipKind) ? tRel(p.relationshipKind) : p.relationshipKind]
+                    : []
                 }
-                size={34}
+                meta={[]}
               />
               {p.externalRef ? (
                 <span className="font-mono text-meta text-text-muted">{p.externalRef}</span>

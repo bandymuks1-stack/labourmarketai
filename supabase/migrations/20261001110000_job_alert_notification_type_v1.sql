@@ -1,4 +1,4 @@
--- 20261001090000 — notification_events v9: the JOB ALERT type (stream N).
+-- 20261001110000 — notification_events v9: the JOB ALERT type (stream N).
 --
 -- WHY: a registered worker who said what work they want (profession, preferred
 -- countries, salary expectation — their existing work card) is told about a
@@ -8,7 +8,7 @@
 --
 -- STRICT SUPERSET: every row valid before is valid after. NO data change, NO
 -- RLS change, NO grant.
--- ROLLBACK: supabase/rollbacks/20261001090000_job_alert_notification_type_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20261001110000_job_alert_notification_type_v1.down.sql
 --   (refuses while any job_alert / public_vacancy row exists).
 -- POST-APPLY: select conname, pg_get_constraintdef(oid) from pg_constraint
 --   where conname in ('notification_events_type_check','notification_events_entity_type_check');

@@ -680,6 +680,22 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     de: "Jemand, der das Dach repariert",
     pl: "Potrzebuję kogoś do naprawy dachu",
   },
+  "open-conversation": {
+    lt: "Atidaryk pokalbį su Jonu",
+    en: "Open a conversation with Jonas",
+    ru: "Открой чат с Йонасом",
+    nl: "Open een gesprek met Jonas",
+    de: "Öffne ein Gespräch mit Jonas",
+    pl: "Napisz do Jonasa",
+  },
+  "product-help": {
+    lt: "Kaip pridėti žmogų?",
+    en: "How do I add a person?",
+    ru: "Как добавить человека?",
+    nl: "Hoe voeg ik een persoon toe?",
+    de: "Wie füge ich eine Person hinzu?",
+    pl: "Jak dodać osobę?",
+  },
   "find-partners": {
     lt: "Noriu rasti partnerių savo verslui",
     en: "I want to find business partners",

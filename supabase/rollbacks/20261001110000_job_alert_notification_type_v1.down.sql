@@ -1,4 +1,4 @@
--- Rollback of 20261001090000 (job alert notification type). Refuses while
+-- Rollback of 20261001110000 (job alert notification type). Refuses while
 -- job_alert rows exist: deleting a person's notifications is not a rollback step.
 begin;
 do $$

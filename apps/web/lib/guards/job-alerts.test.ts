@@ -21,14 +21,14 @@ describe("job alerts ride the EXISTING notification store", () => {
     expect(NOTIFICATION_EVENT_TYPES).toContain("job_alert");
     expect(NOTIFICATION_ENTITY_HREF.public_vacancy).toBe("/jobs");
     const mig = read(
-      path.join(repo, "supabase/migrations/20261001090000_job_alert_notification_type_v1.sql"),
+      path.join(repo, "supabase/migrations/20261001110000_job_alert_notification_type_v1.sql"),
     );
     expect(mig).toMatch(/'job_alert'/);
     expect(mig).toMatch(/'public_vacancy'/);
     expect(mig).not.toMatch(/create table/i);
     expect(
       existsSync(
-        path.join(repo, "supabase/rollbacks/20261001090000_job_alert_notification_type_v1.down.sql"),
+        path.join(repo, "supabase/rollbacks/20261001110000_job_alert_notification_type_v1.down.sql"),
       ),
     ).toBe(true);
   });

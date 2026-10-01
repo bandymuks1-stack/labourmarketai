@@ -601,8 +601,12 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // the job-page hreflang fix." Bounded — not general authority.
     expect(jobs.pullRequests).toEqual([
       1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809, 1810, 1838, 1837, 1890,
-      1892, 1991, 1993,
+      1892, 1991, 1993, 2045,
     ]);
+    // #2045 (2026-10-01) on the owner's verbatim approval: "Patvirtinu #2045
+    // įtraukimą į abu /jobs owner-waiver sąrašus." A typed catalogue profession
+    // word redirects to the existing profession filter. Bounded; axiom, codes,
+    // surfaces, expiry and subset rule byte-unchanged.
     expect(jobs.owner).toMatch(/2026-08-18/);
     expect(jobs.resolvedBy).toMatch(/gate-learns-public-acquisition-route-category/);
     expect(jobs.expiresAt).toBe("2026-12-31");

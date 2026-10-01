@@ -120,6 +120,9 @@ describe("getOrCreateDirectConversation callers in lib/ are a closed, grant-type
         ...GATED_CALLERS.map(([rel]) => rel),
         ...GRANT_ONLY_CALLERS.map(([rel]) => rel),
         GENERIC_CALLER,
+        // The chat door (owner P0 messaging 2026-10-01): same generic open,
+        // no grant, no source stamp; the server resolves the states.
+        "lib/communication/chat-open-conversation.ts",
       ].sort(),
     );
   });
@@ -173,13 +176,15 @@ describe("getOrCreateDirectConversation callers in lib/ are a closed, grant-type
     expect(src).not.toMatch(/sourceHint|source_type|source_id/);
     // It calls with exactly (profileId, locale) — the default-closed
     // server-side permission resolution inside the definition applies.
-    expect(src).toMatch(/getOrCreateDirectConversation\(profileId, locale\)/);
+    expect(src).toMatch(
+      /getOrCreateDirectConversation\(\s*profileId,\s*locale,\s*null,\s*undefined,\s*null,\s*projectId,?\s*\)/,
+    );
   });
 
   it("the definition itself stays default-closed (no_permission fails the open)", () => {
     const src = read(DEFINITION);
     expect(src).toMatch(/isContactPermitted\(grantedPermission\)/);
-    expect(src).toMatch(/resolveContactPermission\(otherProfileId\)/);
+    expect(src).toMatch(/resolveContactPermission\(otherProfileId(, \{ projectId: projectId \?\? null \})?\)/);
     expect(src).toMatch(/code: "no_permission"/);
   });
 });

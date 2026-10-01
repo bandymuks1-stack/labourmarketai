@@ -146,8 +146,12 @@ describe("3 · one identity system (shared monogram, no local copies)", () => {
   });
 
   it("chips reuse the Player Card fallback-tile tokens (no bespoke card look)", () => {
-    expect(manager).toMatch(/bg-ink-700/);
-    expect(manager).toMatch(/text-text-primary/);
+    // 2026-10-01: the chip IS the shared PersonIdentityCard (compact), which
+    // carries the canonical fallback-tile tokens — one identity, not a copy.
+    expect(manager).toContain("PersonIdentityCard");
+    expect(manager).toContain('variant="assignment"');
+    const card = read("components/app/identity/person-identity-card.tsx");
+    expect(card).toContain("PLAYER_IDENTITY_FALLBACK_SURFACE");
   });
 });
 

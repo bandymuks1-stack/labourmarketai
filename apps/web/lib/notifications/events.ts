@@ -109,7 +109,7 @@ export type NotificationEventType =
   // which would turn a 30-person crew into 30 bells for the same fact. The
   // href is the network page, where the sent list already shows who joined.
   | "invitation_accepted"
-  // v9 (20261001090000, stream N): a REAL, ACTIVE job that fits what the
+  // v9 (20261001110000, stream N): a REAL, ACTIVE job that fits what the
   // worker themselves said they want (profession + preferred countries +
   // salary expectation, from their existing work card). Recipient is the
   // worker. entity_id is a deterministic uuid of this ad IN THIS REVISION

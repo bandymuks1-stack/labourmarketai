@@ -42,6 +42,8 @@ export type MarketplaceLabels = {
   discoverEmpty: string;
   request: string;
   requested: string;
+  /** Placeholder of the optional first message sent WITH a request. */
+  requestMessagePlaceholder: string;
   remoteBadge: string;
   outgoingHeading: string;
   outgoingEmpty: string;
@@ -272,6 +274,9 @@ export function MarketplaceLoopSection({
   const [error, setError] = useState<string | null>(null);
   // Optional provider note per incoming request (sent with accept/decline).
   const [noteById, setNoteById] = useState<Record<string, string>>({});
+  // Optional first message per discovered offering, sent WITH the request —
+  // the existing request/accept model carries it; the provider sees it first.
+  const [draftById, setDraftById] = useState<Record<string, string>>({});
 
   // Next step for an ACCEPTED request — opens (or reopens) the buyer↔provider
   // conversation; the granting fact is re-verified server-side by the action.
@@ -435,6 +440,20 @@ export function MarketplaceLoopSection({
                       .filter(Boolean)
                       .join(" · ")}
                   </p>
+                  {!openRequestOfferingIds.has(o.id) && (
+                    <textarea
+                      rows={2}
+                      maxLength={2000}
+                      value={draftById[o.id] ?? ""}
+                      onChange={(e) =>
+                        setDraftById((d) => ({ ...d, [o.id]: e.target.value }))
+                      }
+                      placeholder={labels.requestMessagePlaceholder}
+                      aria-label={labels.requestMessagePlaceholder}
+                      data-testid="marketplace-offer-message"
+                      className="mt-2 w-full rounded-md border border-ink-500 bg-ink-900/40 px-2 py-1.5 text-xs text-text-primary placeholder:text-text-muted"
+                    />
+                  )}
                 </div>
                 {openRequestOfferingIds.has(o.id) ? (
                   <span
@@ -452,7 +471,7 @@ export function MarketplaceLoopSection({
                         surface: "marketplace",
                       });
                       run(
-                        () => requestServiceOffering(o.id),
+                        () => requestServiceOffering(o.id, draftById[o.id] ?? null),
                         () =>
                           trackFunnel(FUNNEL_EVENTS.serviceRequestSent, {
                             surface: "marketplace",
