@@ -7735,6 +7735,7 @@
     "country": {
       "title": "Czego brakuje dla danego kraju",
       "help": "Wybierz kraj docelowy, aby zobaczyć, jakich dokumentów wymaga.",
+      "mine": "Najpierw kraje, w których chcesz pracować.",
       "unknown": "Lista wymagań dla kraju {country} nie została jeszcze opracowana — nie pokazujemy niczego zamiast zgadywać.",
       "next": "Następny krok: zajmij się — {doc}.",
       "ok": "Wszystkie opracowane wymagania dla kraju {country} są spełnione."
@@ -17972,6 +17973,17 @@
     "timeline": "Co zrobiono",
     "back": "Wróć do historii",
     "placeMissing": "Tego miejsca nie ma w zaimportowanej historii aktywnej przestrzeni roboczej.",
-    "attributedNote": "Zawiera {count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}} przechowywanych w księgach innej organizacji i przypisanych tutaj jako firmie wykonującej pracę."
+    "attributedNote": "Zawiera {count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}} przechowywanych w księgach innej organizacji i przypisanych tutaj jako firmie wykonującej pracę.",
+    "attribution": {
+      "title": "Kto wykonał tę pracę?",
+      "intro": "Pracę zapisaną w księgach tej organizacji można przypisać innej Twojej organizacji jako firmie wykonującej. Nic nie jest przenoszone ani kopiowane: wpisy pozostają, a druga organizacja może je czytać.",
+      "performedBy": "Wykonała",
+      "note": "Notatka (opcjonalnie), na przykład podany udział godzin",
+      "button": "Przypisz",
+      "progress": "{attributed} z {total} przypisano: {name}",
+      "done": "Przypisano wpisów: {count}; już przypisanych: {skipped}.",
+      "refused": "Nie udało się zapisać. Nic nie zmieniono.",
+      "person": "{hours} godz., {count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}"
+    }
   }
 }

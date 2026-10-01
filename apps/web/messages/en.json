@@ -7735,6 +7735,7 @@
     "country": {
       "title": "What is missing for a country",
       "help": "Pick a destination country to see which documents it asks for.",
+      "mine": "Your preferred countries come first.",
       "unknown": "The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
       "next": "Next step: take care of — {doc}.",
       "ok": "All curated requirements for {country} are covered."
@@ -17972,6 +17973,17 @@
     "timeline": "What was done",
     "back": "Back to history",
     "placeMissing": "This place is not in the imported history of the active workspace.",
-    "attributedNote": "Includes {count, plural, one {# record} other {# records}} kept in another organization's books and attributed here as the performing company."
+    "attributedNote": "Includes {count, plural, one {# record} other {# records}} kept in another organization's books and attributed here as the performing company.",
+    "attribution": {
+      "title": "Who performed this work?",
+      "intro": "Work stored in this organization's books can be attributed to another organization of yours as the performing company. Nothing is moved or copied: the records stay as they are and the other organization can read them.",
+      "performedBy": "Performed by",
+      "note": "Note (optional), for example the stated share of hours",
+      "button": "Attribute",
+      "progress": "{attributed} of {total} attributed to {name}",
+      "done": "Attributed {count} records; {skipped} were already attributed.",
+      "refused": "This could not be saved. Nothing was changed.",
+      "person": "{hours} h, {count, plural, one {# record} other {# records}}"
+    }
   }
 }

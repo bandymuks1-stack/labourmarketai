@@ -121,7 +121,7 @@ describe("exactly one next action, in human-path priority", () => {
   it("empty → work first", () => {
     const d = deriveWorkCardState(EMPTY, NOW);
     expect(d.next.dim).toBe("work");
-    expect(d.next.href).toBe("/dashboard/profile");
+    expect(d.next.href).toBe("/dashboard/profile#profile-edit");
     expect(d.next.whyKey).toBe("why.work");
   });
 

@@ -1686,6 +1686,7 @@
     "country": {
       "title": "[EN] What is missing for a country",
       "help": "[EN] Pick a destination country to see which documents it asks for.",
+      "mine": "[EN] Your preferred countries come first.",
       "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
       "next": "[EN] Next step: take care of — {doc}.",
       "ok": "[EN] All curated requirements for {country} are covered."
@@ -6851,6 +6852,17 @@
     "timeline": "Kas darīts",
     "back": "Atpakaļ uz vēsturi",
     "placeMissing": "Šīs vietas nav aktīvās darbvietas importētajā vēsturē.",
-    "attributedNote": "Ietver {count, plural, zero {# ierakstu} one {# ierakstu} other {# ierakstus}}, kas glabājas citas organizācijas uzskaitē un šeit piešķirti kā darbu veikušajam uzņēmumam."
+    "attributedNote": "Ietver {count, plural, zero {# ierakstu} one {# ierakstu} other {# ierakstus}}, kas glabājas citas organizācijas uzskaitē un šeit piešķirti kā darbu veikušajam uzņēmumam.",
+    "attribution": {
+      "title": "Kas veica šo darbu?",
+      "intro": "Šīs organizācijas uzskaitē esošo darbu var piešķirt citai jūsu organizācijai kā darbu veikušajam uzņēmumam. Nekas netiek pārvietots vai kopēts: ieraksti paliek, un otra organizācija tos var lasīt.",
+      "performedBy": "Veica",
+      "note": "Piezīme (neobligāta), piemēram, norādītā stundu daļa",
+      "button": "Piešķirt",
+      "progress": "{attributed} no {total} piešķirti: {name}",
+      "done": "Piešķirti ieraksti: {count}; jau bija piešķirti: {skipped}.",
+      "refused": "Neizdevās saglabāt. Nekas nav mainīts.",
+      "person": "{hours} h, {count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}"
+    }
   }
 }

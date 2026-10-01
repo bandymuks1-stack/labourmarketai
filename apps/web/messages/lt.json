@@ -7735,6 +7735,7 @@
     "country": {
       "title": "Ko trūksta į šalį",
       "help": "Pasirink paskirties šalį ir matysi, kokių dokumentų ji prašo.",
+      "mine": "Pirmiausia — šalys, kuriose nori dirbti.",
       "unknown": "Šalies {country} reikalavimų sąrašas dar nesuvestas — nerodome nieko, vietoj spėliojimo.",
       "next": "Kitas žingsnis: pasirūpink — {doc}.",
       "ok": "Visi suvesti {country} reikalavimai padengti."
@@ -17972,6 +17973,17 @@
     "timeline": "Kas daryta",
     "back": "Atgal į istoriją",
     "placeMissing": "Šios vietos nėra aktyvios darbo erdvės importuotoje istorijoje.",
-    "attributedNote": "Įskaitant {count, plural, one {# įrašą} few {# įrašus} other {# įrašų}}, saugomus kitos organizacijos knygose ir čia priskirtus kaip darbą atlikusiai įmonei."
+    "attributedNote": "Įskaitant {count, plural, one {# įrašą} few {# įrašus} other {# įrašų}}, saugomus kitos organizacijos knygose ir čia priskirtus kaip darbą atlikusiai įmonei.",
+    "attribution": {
+      "title": "Kas atliko šį darbą?",
+      "intro": "Šios organizacijos knygose saugomą darbą galima priskirti kitai jūsų organizacijai kaip darbą atlikusiai įmonei. Nieko neperkeliama ir nekopijuojama: įrašai lieka kaip yra, o kita organizacija gali juos skaityti.",
+      "performedBy": "Atliko",
+      "note": "Pastaba (neprivaloma), pvz. nurodyta valandų dalis",
+      "button": "Priskirti",
+      "progress": "{attributed} iš {total} priskirta: {name}",
+      "done": "Priskirta įrašų: {count}; jau buvo priskirta: {skipped}.",
+      "refused": "Nepavyko išsaugoti. Nieko nepakeista.",
+      "person": "{hours} val., {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}"
+    }
   }
 }

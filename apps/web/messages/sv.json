@@ -1686,6 +1686,7 @@
     "country": {
       "title": "[EN] What is missing for a country",
       "help": "[EN] Pick a destination country to see which documents it asks for.",
+      "mine": "[EN] Your preferred countries come first.",
       "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
       "next": "[EN] Next step: take care of — {doc}.",
       "ok": "[EN] All curated requirements for {country} are covered."
@@ -6851,6 +6852,17 @@
     "timeline": "Vad som gjordes",
     "back": "Tillbaka till historiken",
     "placeMissing": "Den här platsen finns inte i den importerade historiken för den aktiva arbetsytan.",
-    "attributedNote": "Omfattar {count, plural, one {# post} other {# poster}} som ligger i en annan organisations böcker och är tillskrivna här som det utförande företaget."
+    "attributedNote": "Omfattar {count, plural, one {# post} other {# poster}} som ligger i en annan organisations böcker och är tillskrivna här som det utförande företaget.",
+    "attribution": {
+      "title": "Vem utförde det här arbetet?",
+      "intro": "Arbete i den här organisationens böcker kan tillskrivas en annan av dina organisationer som utförande företag. Inget flyttas eller kopieras: posterna finns kvar och den andra organisationen kan läsa dem.",
+      "performedBy": "Utfört av",
+      "note": "Anteckning (valfri), till exempel den angivna andelen timmar",
+      "button": "Tillskriv",
+      "progress": "{attributed} av {total} tillskrivna {name}",
+      "done": "{count} poster tillskrivna; {skipped} var redan tillskrivna.",
+      "refused": "Det gick inte att spara. Inget ändrades.",
+      "person": "{hours} h, {count, plural, one {# post} other {# poster}}"
+    }
   }
 }
