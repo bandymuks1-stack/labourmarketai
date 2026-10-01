@@ -158,7 +158,7 @@
       "pending": "Laukia peržiūros",
       "confirmed": "Patvirtinta"
     },
-    "projectNote": "Įrašai gali būti susieti su projektu — duomenų modelis paruoštas, bet kol kas nė vienas įrašas nesusietas ir niekas neužpildoma automatiškai. Projektų, objektų ir užsakovų sluoksnis pildomas atskirame pjūvyje.",
+    "projectNote": "Įrašai gali būti susieti su projektu. Niekas neužpildoma automatiškai.",
     "reviewClarity": {
       "lead": "Jūsų peržiūra paverčia darbuotojo nurodytą įrašą patvirtintu įrodymu. Tai gali tik vadovas, savininkas ar kliento vadovas — kiekvienas patvirtinimas yra realus žmogaus sprendimas.",
       "actionsTitle": "Ką daro kiekvienas veiksmas",

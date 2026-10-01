@@ -2140,7 +2140,7 @@
       },
       "workersBlocker": {
         "title": "Nepavyko",
-        "subtitle": "Įmonės kelias laikinai blokuotas DB lygmenyje. Realus darbuotojų pridėjimas / pakvietimas jau veikia agentūros pusėje.",
+        "subtitle": "Šiuo metu nepasiekiama.",
         "statusLabel": "Nepavyko",
         "statusBody": "Įmonės darbuotojų valdymas dar ruošiamas ir bus įjungtas vėliau.",
         "nextStep": "Savaiminis užsiregistravimas darbuotojams lieka atviras visada."
@@ -7666,7 +7666,7 @@
     "eyebrow": "MANO DOKUMENTAI",
     "title": "Mano dokumentai",
     "subtitle": "Ką turi, ko trūksta ir koks kitas žingsnis — pagal šalį.",
-    "preparing": "Dokumentų parengtis ruošiama — funkcija įsijungs, kai dokumentų saugojimo sluoksnis bus peržiūrėtas ir įjungtas. Kol kas čia niekas neaktyvu.",
+    "preparing": "Šiuo metu nepasiekiama.",
     "reports": {
       "title": "Ataskaitos ir eksportas",
       "intro": "Sukurk spausdinimui paruoštą ataskaitą iš savo duomenų. PDF veikia per naršyklės spausdinimą / išsaugojimą; Excel ir Word dar negalimi.",
@@ -13931,7 +13931,7 @@
       "moveToLine": "• „{to}“: žmonių {before} → {after}; pasirengimo sąrašas ten prasidės nuo 0/{total}.",
       "moveCountryLine": "• Šalis keičiasi: {from} → {to} — dokumentų reikalavimai kitokie.",
       "moveNoDatesLine": "• „{to}“ neturi datų — nebuvimų sutikrinti negaliu.",
-      "moveAvailabilityUnknownLine": "• Nebuvimai nežinomi — nebuvimų modelis šioje aplinkoje neatsako.",
+      "moveAvailabilityUnknownLine": "• Nebuvimai nežinomi.",
       "moveAvailabilityLine": "• {start}–{end} lange jis turi {count} nebuvimo įrašų.",
       "moveAvailabilityFreeLine": "• „{to}“ datose nebuvimų neužfiksuota.",
       "moveOnlyConfirmLine": "Kol kas niekas nepakeista — pakeis tik patvirtinimas.",
