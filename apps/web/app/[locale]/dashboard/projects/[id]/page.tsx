@@ -23,6 +23,7 @@ import {
   formatProjectPlace,
 } from "@/lib/projects/location";
 import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
+import { MessageButton } from "@/components/app/message-button";
 import { CountUp } from "@/components/app/today/count-up";
 import { ProjectWorkGallery } from "@/components/app/project-work-gallery";
 import { type Role } from "@/lib/auth/actions";
@@ -357,6 +358,14 @@ export default async function ProjectStadiumPage({
                     ? t("lastActivity", { date: w.lastActivity.slice(0, 10) })
                     : t("noActivity")}
                 </p>
+                {/* WRITE — the person on the project opens the ONE conversation
+                    (the §8.1 gate reads the caller's own authority over this
+                    project; nothing is sent until the manager writes). */}
+                <MessageButton
+                  profileId={w.workerProfileId}
+                  projectId={id}
+                  labelKey="messageWorker"
+                />
               </li>
             ))}
           </ul>
