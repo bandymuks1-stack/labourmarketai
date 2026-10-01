@@ -9508,7 +9508,7 @@
     "external": {
       "sectionTitle": "Vieši darbo skelbimai",
       "sectionNote": "Skelbimai iš oficialių valstybinių užimtumo tarnybų. Juos skelbia darbdavys šaltinyje — labourmarket.ai juos rodo, kad rastumėte, o kandidatuojama per originalų skelbimą.",
-      "shownOfTotal": "geriausi {shown} iš {total}",
+      "shownOfTotal": "rodoma {shown} iš {total}",
       "bandBest": "Geriausiai tinkantys",
       "bandPossible": "Galimai tinkantys",
       "bandExplore": "Kiti skelbimai",

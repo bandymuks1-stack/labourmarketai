@@ -2241,7 +2241,7 @@
     "external": {
       "sectionTitle": "Offentliga jobbannonser",
       "sectionNote": "Annonser från officiella offentliga arbetsförmedlingar. De publiceras av arbetsgivaren vid källan — labourmarket.ai visar dem så att du kan hitta dem; ansökan sker via originalannonsen.",
-      "shownOfTotal": "topp {shown} av {total}",
+      "shownOfTotal": "visar {shown} av {total}",
       "bandBest": "Passar bäst",
       "bandPossible": "Möjligen passande",
       "bandExplore": "Övriga annonser",

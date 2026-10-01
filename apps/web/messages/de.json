@@ -9508,7 +9508,7 @@
     "external": {
       "sectionTitle": "Öffentliche Stellenanzeigen",
       "sectionNote": "Anzeigen öffentlicher Arbeitsverwaltungen. Sie werden vom Arbeitgeber an der Quelle veröffentlicht — labourmarket.ai listet sie zum Finden, die Bewerbung läuft über die Originalanzeige.",
-      "shownOfTotal": "Top {shown} von {total}",
+      "shownOfTotal": "{shown} von {total} angezeigt",
       "bandBest": "Passt am besten",
       "bandPossible": "Möglicherweise passend",
       "bandExplore": "Weitere Anzeigen",

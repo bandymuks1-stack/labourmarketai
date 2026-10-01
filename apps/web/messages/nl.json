@@ -9508,7 +9508,7 @@
     "external": {
       "sectionTitle": "Openbare vacatures",
       "sectionNote": "Advertenties van officiële publieke arbeidsbureaus. Ze worden door de werkgever bij de bron gepubliceerd — labourmarket.ai toont ze zodat u ze kunt vinden; solliciteren gaat via de originele advertentie.",
-      "shownOfTotal": "top {shown} van {total}",
+      "shownOfTotal": "{shown} van {total} getoond",
       "bandBest": "Past het best",
       "bandPossible": "Mogelijk passend",
       "bandExplore": "Overige advertenties",

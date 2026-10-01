@@ -2241,7 +2241,7 @@
     "external": {
       "sectionTitle": "Offentlige stillingsannonser",
       "sectionNote": "Annonser fra offisielle offentlige arbeidsformidlinger. De publiseres av arbeidsgiveren ved kilden — labourmarket.ai viser dem så du kan finne dem; søknad skjer via originalannonsen.",
-      "shownOfTotal": "topp {shown} av {total}",
+      "shownOfTotal": "viser {shown} av {total}",
       "bandBest": "Passer best",
       "bandPossible": "Mulig passende",
       "bandExplore": "Øvrige annonser",
