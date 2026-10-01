@@ -108,7 +108,15 @@ export type NotificationEventType =
   // and a campaign link notifies once per invitation — not once per seat,
   // which would turn a 30-person crew into 30 bells for the same fact. The
   // href is the network page, where the sent list already shows who joined.
-  | "invitation_accepted";
+  | "invitation_accepted"
+  // v9 (20261001110000, stream N): a REAL, ACTIVE job that fits what the
+  // worker themselves said they want (profession + preferred countries +
+  // salary expectation, from their existing work card). Recipient is the
+  // worker. entity_id is a deterministic uuid of this ad IN THIS REVISION
+  // (`job_alert:<vacancy id>:<content hash>`), so with UNIQUE (recipient,
+  // dedupe_key) the same unchanged job is never announced twice. metadata
+  // carries only PUBLIC ad facts (title, country, stated EUR pay, vacancy id).
+  | "job_alert";
 
 export type NotificationEntityType =
   | "booking_request"
@@ -136,7 +144,9 @@ export type NotificationEntityType =
   // criteria recomputes the answer live.
   | "saved_search"
   // v8: the canonical invitation row, seen from the inviter's side.
-  | "invitation";
+  | "invitation"
+  // v9: one public vacancy — resolves to its own page, /jobs/<vacancyId>.
+  | "public_vacancy";
 
 /**
  * The canonical RUNTIME list of the code-side event types — the union above,
@@ -169,6 +179,7 @@ export const NOTIFICATION_EVENT_TYPES = [
   "weekly_digest",
   "saved_search_match",
   "invitation_accepted",
+  "job_alert",
 ] as const satisfies readonly NotificationEventType[];
 
 /** Compile-time exhaustiveness: a union member missing from the runtime list
@@ -241,7 +252,13 @@ export const NOTIFICATION_ENTITY_HREF: Record<NotificationEntityType, string> = 
   // v8: the sent-invitations list on the network page is where an inviter
   // already sees each invitation's state (opened / joined / accepted).
   invitation: "/dashboard/network",
+  // v9: the bare route is a fallback only — `notificationEventHref` resolves a
+  // job alert to the SPECIFIC ad (`/jobs/<vacancyId>`) from its metadata.
+  public_vacancy: "/jobs",
 };
+
+const VACANCY_ID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** The canonical surface for a stored event, or undefined for an unknown
  *  entity type — an unmapped type renders as a plain row rather than a link
@@ -262,6 +279,15 @@ export function notificationEventHref(
   // loop (acquisition loop P0, 2026-09-20).
   if (entityType === "weekly_digest" && metadata?.focus === "journal") {
     return "/dashboard/journal";
+  }
+  // A job alert opens THE JOB it is about, not a list: the click lands on the
+  // real ad, where the worker can read it and take the next action.
+  if (
+    entityType === "public_vacancy" &&
+    typeof metadata?.vacancyId === "string" &&
+    VACANCY_ID_RE.test(metadata.vacancyId)
+  ) {
+    return `/jobs/${metadata.vacancyId}`;
   }
   return NOTIFICATION_ENTITY_HREF[entityType as NotificationEntityType];
 }
@@ -287,7 +313,17 @@ export function notificationRenderedType(
 
 /** The ONLY metadata keys an event may carry — safe render hints, never
  *  free-form text. Widening this list is a reviewable act. */
-const SAFE_METADATA_KEYS = ["country", "roleSlug", "startDate", "focus"] as const;
+const SAFE_METADATA_KEYS = [
+  "country",
+  "roleSlug",
+  "startDate",
+  "focus",
+  // v9 job alert: PUBLIC ad facts only — the ad's own headline, its stated EUR
+  // pay (absent when unknown) and its id. Never a worker fact, never a score.
+  "title",
+  "salary",
+  "vacancyId",
+] as const;
 
 /**
  * `focus` — what a WEEKLY DIGEST row may truthfully claim (2026-09-17).

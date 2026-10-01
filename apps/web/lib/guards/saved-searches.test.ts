@@ -142,7 +142,8 @@ describe("one notification path, not a second one", () => {
 
   it("the emitter uses the ONE audited deliver path and the shared exactly-once id", () => {
     const emitters = read("lib/notifications/event-emitters.ts");
-    const block = emitters.slice(emitters.indexOf("export async function emitSavedSearchMatchNotification"));
+    const start = emitters.indexOf("export async function emitSavedSearchMatchNotification");
+    const block = emitters.slice(start, emitters.indexOf("/**", start + 10));
     expect(block).toMatch(/await deliver\(admin, \{/);
     expect(block).toMatch(/deterministicEntityId\(/);
     // POINTER-ONLY, like the digest: no count is persisted.

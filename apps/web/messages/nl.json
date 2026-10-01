@@ -4738,6 +4738,7 @@
         "event_demand_interest_reviewed": "Een bedrijf heeft je interesse als bekeken gemarkeerd",
         "event_weekly_digest": "Je wekelijkse samenvatting van werk en kansen staat klaar",
         "event_saved_search_match": "Een opgeslagen zoekopdracht heeft nieuwe resultaten",
+        "event_job_alert": "Er is een nieuwe baan die bij je zoekopdracht past",
         "event_invitation_accepted": "Iemand heeft je uitnodiging aangenomen",
         "event_weekly_digest_profile_completion": "Om je passende banen te tonen, bevestig welk werk je doet",
         "event_weekly_digest_journal": "Het weekoverzicht van je werkjournaal is klaar"
@@ -9672,6 +9673,14 @@
         "LOOKING_FOR_WORK": "Op zoek naar werk",
         "LOOKING_FOR_PROJECTS": "Op zoek naar projecten"
       }
+    },
+    "jobAlerts": {
+      "title": "Meldingen over nieuwe banen",
+      "ready": "Zodra er een nieuwe echte baan verschijnt die past bij je beroep en de gekozen landen, zie je die in je meldingen. Een baan zonder vermeld loon wordt nooit verborgen vanwege het loon.",
+      "missing": "Om meldingen over nieuwe banen te krijgen, geef aan:",
+      "profession": "welk werk je doet",
+      "country": "in welke landen je wilt werken",
+      "cta": "Mijn voorkeuren invullen"
     }
   },
   "workerIntake": {

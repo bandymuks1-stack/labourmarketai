@@ -390,6 +390,7 @@
         "event_demand_interest_reviewed": "Uzņēmums atzīmēja jūsu interesi kā izskatītu",
         "event_weekly_digest": "Tavs nedēļas darba un iespēju kopsavilkums ir gatavs",
         "event_saved_search_match": "Saglabātajā meklējumā ir jauni rezultāti",
+        "event_job_alert": "Parādījies jauns darbs, kas atbilst taviem kritērijiem",
         "event_weekly_digest_profile_completion": "Lai parādītu tev piemērotus darbus, apstiprini, kādu darbu tu dari",
         "event_weekly_digest_journal": "Sagatavots tavas nedēļas darba žurnāla pārskats"
       },
@@ -2298,6 +2299,14 @@
         "LOOKING_FOR_WORK": "Meklēju darbu",
         "LOOKING_FOR_PROJECTS": "Meklēju projektus"
       }
+    },
+    "jobAlerts": {
+      "title": "Paziņojumi par jauniem darbiem",
+      "ready": "Kad parādās jauns īsts darbs, kas atbilst tavai profesijai un izvēlētajām valstīm, tas parādās tavos paziņojumos. Darbs bez norādīta atalgojuma atalgojuma dēļ nekad netiek slēpts.",
+      "missing": "Lai saņemtu paziņojumus par jauniem darbiem, norādi:",
+      "profession": "kādu darbu tu dari",
+      "country": "kurās valstīs vēlies strādāt",
+      "cta": "Aizpildīt manas vēlmes"
     }
   },
   "scouting": {

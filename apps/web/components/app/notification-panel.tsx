@@ -263,6 +263,22 @@ function NotificationsBody({
                     </span>
                   )}
                 </span>
+                {/* JOB ALERT first layer (stream N): the position and, only when
+                    the ad stated it, its EUR pay. Public-ad facts from the
+                    stored row; no matching reasoning in the main text. */}
+                {typeof n.payload?.title === "string" && n.payload.title && (
+                  <span
+                    data-testid={`notification-job-${n.id}`}
+                    className="pl-6 text-sm font-medium text-text-primary"
+                  >
+                    {n.payload.title}
+                    {typeof n.payload.salary === "string" && n.payload.salary && (
+                      <span className="ml-2 font-normal text-text-secondary tabular-nums">
+                        {n.payload.salary}
+                      </span>
+                    )}
+                  </span>
+                )}
                 {(when || country) && (
                   <span
                     data-testid={`notification-context-${n.id}`}

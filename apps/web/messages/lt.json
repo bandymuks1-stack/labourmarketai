@@ -4738,6 +4738,7 @@
         "event_demand_interest_reviewed": "Įmonė pažymėjo jūsų susidomėjimą kaip peržiūrėtą",
         "event_weekly_digest": "Paruošta tavo savaitės darbo ir galimybių apžvalga",
         "event_saved_search_match": "Tavo išsaugotoje paieškoje yra naujų rezultatų",
+        "event_job_alert": "Atsirado naujas darbas pagal tavo paieškos kriterijus",
         "event_invitation_accepted": "Kažkas priėmė jūsų kvietimą",
         "event_weekly_digest_profile_completion": "Norint pamatyti tau tinkamus darbus, patvirtink, kokį darbą dirbi",
         "event_weekly_digest_journal": "Paruošta tavo savaitės darbo žurnalo apžvalga"
@@ -9672,6 +9673,14 @@
         "LOOKING_FOR_WORK": "Ieškau darbo",
         "LOOKING_FOR_PROJECTS": "Ieškau projektų"
       }
+    },
+    "jobAlerts": {
+      "title": "Pranešimai apie naujus darbus",
+      "ready": "Kai atsiranda naujas tikras darbas, tinkantis tavo profesijai ir pasirinktoms šalims, jis pasirodo tavo pranešimuose. Darbas, kuriame atlyginimas nenurodytas, dėl atlyginimo niekada neatmetamas.",
+      "missing": "Kad gautum pranešimus apie naujus darbus, nurodyk:",
+      "profession": "kokį darbą dirbi",
+      "country": "kuriose šalyse nori dirbti",
+      "cta": "Užpildyti pageidavimus"
     }
   },
   "workerIntake": {

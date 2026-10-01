@@ -390,6 +390,7 @@
         "event_demand_interest_reviewed": "Ettevõte märkis teie huvi läbivaadatuks",
         "event_weekly_digest": "Sinu nädala töö ja võimaluste kokkuvõte on valmis",
         "event_saved_search_match": "Salvestatud otsingul on uusi tulemusi",
+        "event_job_alert": "Ilmus uus töökoht, mis sobib sinu soovidega",
         "event_weekly_digest_profile_completion": "Sobivate tööde näitamiseks kinnita, millist tööd sa teed",
         "event_weekly_digest_journal": "Sinu nädala tööpäeviku kokkuvõte on valmis"
       },
@@ -2298,6 +2299,14 @@
         "LOOKING_FOR_WORK": "Otsin tööd",
         "LOOKING_FOR_PROJECTS": "Otsin projekte"
       }
+    },
+    "jobAlerts": {
+      "title": "Teavitused uute töökohtade kohta",
+      "ready": "Kui ilmub uus päris töökoht, mis sobib sinu ametiga ja valitud riikidega, näed seda oma teavitustes. Töökohta, mille palka pole märgitud, ei peideta kunagi palga tõttu.",
+      "missing": "Uute töökohtade teavituste saamiseks märgi:",
+      "profession": "mis tööd sa teed",
+      "country": "millistes riikides tahad töötada",
+      "cta": "Täida minu eelistused"
     }
   },
   "scouting": {
