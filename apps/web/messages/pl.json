@@ -1,4 +1,22 @@
 {
+  "companyModel": {
+    "title": "Zarządzanie firmą",
+    "primary": "Opublikuj potrzebę",
+    "need": "Czego potrzebujemy",
+    "offer": "Co oferujemy",
+    "market": "Rynek",
+    "people": "Ludzie i zespół",
+    "projects": "Projekty i obiekty",
+    "messages": "Wiadomości",
+    "more": "Więcej",
+    "clients": "Klienci i dostawcy",
+    "candidates": "Kandydaci",
+    "calendar": "Kalendarz",
+    "capacity": "Zdolności",
+    "work": "Praca i godziny",
+    "results": "Wyniki",
+    "history": "Historia"
+  },
   "publicDemand": {
     "title": "Aktualny popyt na rynku",
     "subtitleAgency": "O co pyta teraz rynek publiczny — ta sama pula, którą Twoi kandydaci widzą na tablicy.",
@@ -106,7 +124,6 @@
     "browseTitle": "Przeglądaj aktywne ogłoszenia",
     "browseIntro": "Zasoby robocze obecnie oferowane w sieci.",
     "browseEmpty": "Brak jeszcze aktywnych ogłoszeń do pokazania.",
-    "enquire": "Zapytaj",
     "linkToServices": "Szukasz usług profesjonalnych? Otwórz Usługi",
     "formKindLabel": "Typ",
     "formCategoryLabel": "Kategoria",
@@ -6398,6 +6415,7 @@
     "discoverEmpty": "Nie ma jeszcze aktywnych usług do wyświetlenia.",
     "request": "Wyślij zapytanie",
     "requested": "Wysłano zapytanie",
+    "enquire": "Napisz do usługodawcy",
     "remoteBadge": "Zdalnie",
     "outgoingHeading": "Moje zapytania",
     "outgoingEmpty": "Nie wysłałeś jeszcze zapytania o żadną usługę.",

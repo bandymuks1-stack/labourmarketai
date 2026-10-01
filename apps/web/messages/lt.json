@@ -1,4 +1,22 @@
 {
+  "companyModel": {
+    "title": "Įmonės valdymas",
+    "primary": "Paskelbti poreikį",
+    "need": "Ko mums reikia",
+    "offer": "Ką siūlome",
+    "market": "Rinka",
+    "people": "Žmonės ir komanda",
+    "projects": "Projektai ir objektai",
+    "messages": "Žinutės",
+    "more": "Daugiau",
+    "clients": "Klientai ir tiekėjai",
+    "candidates": "Kandidatai",
+    "calendar": "Kalendorius",
+    "capacity": "Pajėgumai",
+    "work": "Darbas ir valandos",
+    "results": "Rezultatai",
+    "history": "Istorija"
+  },
   "publicDemand": {
     "title": "Gyva rinkos paklausa",
     "subtitleAgency": "Ko vieša rinka prašo dabar — tas pats fondas, kurį jūsų kandidatai mato lentoje.",
@@ -106,7 +124,6 @@
     "browseTitle": "Naršyti aktyvius skelbimus",
     "browseIntro": "Šiuo metu tinkle siūlomi darbo ištekliai.",
     "browseEmpty": "Aktyvių skelbimų dar nėra.",
-    "enquire": "Užklausti",
     "linkToServices": "Ieškote profesinių paslaugų? Atverti Paslaugas",
     "formKindLabel": "Tipas",
     "formCategoryLabel": "Kategorija",
@@ -6398,6 +6415,7 @@
     "discoverEmpty": "Kol kas nėra rodomų aktyvių paslaugų.",
     "request": "Pateikti užklausą",
     "requested": "Užklausa pateikta",
+    "enquire": "Rašyti teikėjui",
     "remoteBadge": "Nuotoliu",
     "outgoingHeading": "Mano užklausos",
     "outgoingEmpty": "Dar nepateikei nė vienos užklausos.",

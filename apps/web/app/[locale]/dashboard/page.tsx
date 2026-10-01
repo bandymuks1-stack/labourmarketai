@@ -57,6 +57,7 @@ import {
   type DurablePointerKind,
 } from "@/lib/auth/dashboard-role-decision";
 import { TodayScreen } from "@/components/app/today/today-screen";
+import { CompanyModelScreen } from "@/components/app/organization/company-model-screen";
 import { conversationOpeningContext } from "@/lib/today/today-route";
 import { AccessRefusalNotice } from "@/components/app/access-refusal-notice";
 import {
@@ -407,7 +408,13 @@ export default async function DashboardHomePage({
         // ŠIANDIEN — server-rendered, streamed section by section inside the
         // chat's own opening composition (the worker's "now" above the
         // greeting and the composer). One home, one conversation.
-        openingContext={workerToday ? <TodayScreen locale={locale as ActiveLocale} /> : null}
+        openingContext={
+          workerToday ? (
+            <TodayScreen locale={locale as ActiveLocale} />
+          ) : activeOrgWorkspace && identity === "company" ? (
+            <CompanyModelScreen />
+          ) : null
+        }
         countryLabels={countryLabels}
         educationWorkspace={educationWorkspace}
         agencyWorkspace={agencyWorkspace}

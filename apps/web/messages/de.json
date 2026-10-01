@@ -1,4 +1,22 @@
 {
+  "companyModel": {
+    "title": "Unternehmensführung",
+    "primary": "Bedarf veröffentlichen",
+    "need": "Was wir brauchen",
+    "offer": "Was wir anbieten",
+    "market": "Marktplatz",
+    "people": "Personen & Team",
+    "projects": "Projekte & Objekte",
+    "messages": "Nachrichten",
+    "more": "Mehr",
+    "clients": "Kunden & Lieferanten",
+    "candidates": "Kandidaten",
+    "calendar": "Kalender",
+    "capacity": "Kapazität",
+    "work": "Arbeit & Stunden",
+    "results": "Ergebnisse",
+    "history": "Verlauf"
+  },
   "publicDemand": {
     "title": "Aktuelle Marktnachfrage",
     "subtitleAgency": "Was der öffentliche Markt gerade verlangt — derselbe Pool, den Ihre Kandidaten auf der Übersicht sehen.",
@@ -106,7 +124,6 @@
     "browseTitle": "Aktive Anzeigen durchsuchen",
     "browseIntro": "Derzeit im Netzwerk angebotene Arbeitsressourcen.",
     "browseEmpty": "Noch keine aktiven Anzeigen.",
-    "enquire": "Anfragen",
     "linkToServices": "Suchen Sie professionelle Dienstleistungen? Dienste öffnen",
     "formKindLabel": "Art",
     "formCategoryLabel": "Kategorie",
@@ -6398,6 +6415,7 @@
     "discoverEmpty": "Noch keine aktiven Dienstleistungen vorhanden.",
     "request": "Anfragen",
     "requested": "Angefragt",
+    "enquire": "Anbieter fragen",
     "remoteBadge": "Remote",
     "outgoingHeading": "Meine Anfragen",
     "outgoingEmpty": "Sie haben noch keine Dienstleistung angefragt.",
