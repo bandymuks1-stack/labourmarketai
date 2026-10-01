@@ -6613,7 +6613,9 @@
         "unknown": "For lite informasjon til å sammenligne"
       },
       "opportunity": "{count, plural, =1 {Opptil 1 person er ledig fra {date}} other {Opptil # personer er ledige fra {date}}}",
-      "opportunityCta": "Finn arbeid"
+      "opportunityCta": "Finn arbeid",
+      "interest": "{count, plural, =1 {1 person har vist interesse for behovene deres} other {# personer har vist interesse for behovene deres}}",
+      "interestCta": "Se hvem"
     },
     "attention": {
       "heading": "Trenger deg",

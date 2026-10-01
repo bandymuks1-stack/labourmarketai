@@ -1807,7 +1807,9 @@
         "unknown": "Te weinig gegevens om te vergelijken"
       },
       "opportunity": "{count, plural, =1 {Tot 1 persoon is vrij vanaf {date}} other {Tot # personen zijn vrij vanaf {date}}}",
-      "opportunityCta": "Zoek werk"
+      "opportunityCta": "Zoek werk",
+      "interest": "{count, plural, =1 {1 persoon toonde interesse in uw vraag} other {# personen toonden interesse in uw vraag}}",
+      "interestCta": "Bekijk wie"
     },
     "attention": {
       "heading": "Heeft u nodig",

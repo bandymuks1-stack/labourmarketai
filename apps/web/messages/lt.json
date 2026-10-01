@@ -1807,7 +1807,9 @@
         "unknown": "Per mažai informacijos palyginti"
       },
       "opportunity": "{count, plural, one {Iki # žmogaus laisvas nuo {date}} few {Iki # žmonių laisvi nuo {date}} other {Iki # žmonių laisvi nuo {date}}}",
-      "opportunityCta": "Ieškoti darbo"
+      "opportunityCta": "Ieškoti darbo",
+      "interest": "{count, plural, one {# žmogus pareiškė susidomėjimą jūsų poreikiais} few {# žmonės pareiškė susidomėjimą jūsų poreikiais} other {# žmonių pareiškė susidomėjimą jūsų poreikiais}}",
+      "interestCta": "Žiūrėti kas"
     },
     "attention": {
       "heading": "Reikia jūsų",

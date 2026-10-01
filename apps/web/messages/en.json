@@ -1807,7 +1807,9 @@
         "unknown": "Not enough detail to compare"
       },
       "opportunity": "{count, plural, =1 {Up to 1 person is free from {date}} other {Up to # people are free from {date}}}",
-      "opportunityCta": "Look for work"
+      "opportunityCta": "Look for work",
+      "interest": "{count, plural, =1 {1 person showed interest in your needs} other {# people showed interest in your needs}}",
+      "interestCta": "See who"
     },
     "attention": {
       "heading": "Needs you",

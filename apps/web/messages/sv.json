@@ -6613,7 +6613,9 @@
         "unknown": "För lite information för att jämföra"
       },
       "opportunity": "{count, plural, =1 {Upp till 1 person är ledig från {date}} other {Upp till # personer är lediga från {date}}}",
-      "opportunityCta": "Hitta arbete"
+      "opportunityCta": "Hitta arbete",
+      "interest": "{count, plural, =1 {1 person har visat intresse för era behov} other {# personer har visat intresse för era behov}}",
+      "interestCta": "Se vem"
     },
     "attention": {
       "heading": "Behöver dig",

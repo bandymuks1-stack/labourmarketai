@@ -6613,7 +6613,9 @@
         "unknown": "Salīdzināšanai nepietiek informācijas"
       },
       "opportunity": "{count, plural, one {Līdz # cilvēkam ir brīvs no {date}} other {Līdz # cilvēkiem ir brīvi no {date}}}",
-      "opportunityCta": "Meklēt darbu"
+      "opportunityCta": "Meklēt darbu",
+      "interest": "{count, plural, one {# cilvēks izrādīja interesi par jūsu vajadzībām} other {# cilvēki izrādīja interesi par jūsu vajadzībām}}",
+      "interestCta": "Skatīt, kas"
     },
     "attention": {
       "heading": "Vajadzīgs jūs",

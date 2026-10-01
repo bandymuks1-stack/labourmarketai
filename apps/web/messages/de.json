@@ -1807,7 +1807,9 @@
         "unknown": "Zu wenig Angaben zum Vergleich"
       },
       "opportunity": "{count, plural, =1 {Bis zu 1 Person ist ab {date} frei} other {Bis zu # Personen sind ab {date} frei}}",
-      "opportunityCta": "Arbeit suchen"
+      "opportunityCta": "Arbeit suchen",
+      "interest": "{count, plural, =1 {1 Person hat Interesse an Ihrem Bedarf gezeigt} other {# Personen haben Interesse an Ihrem Bedarf gezeigt}}",
+      "interestCta": "Ansehen"
     },
     "attention": {
       "heading": "Braucht Sie",

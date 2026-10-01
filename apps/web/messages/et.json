@@ -6613,7 +6613,9 @@
         "unknown": "Võrdlemiseks pole piisavalt infot"
       },
       "opportunity": "{count, plural, =1 {Kuni 1 inimene on vaba alates {date}} other {Kuni # inimest on vabad alates {date}}}",
-      "opportunityCta": "Otsi tööd"
+      "opportunityCta": "Otsi tööd",
+      "interest": "{count, plural, =1 {1 inimene tundis huvi teie vajaduste vastu} other {# inimest tundsid huvi teie vajaduste vastu}}",
+      "interestCta": "Vaata kes"
     },
     "attention": {
       "heading": "Vajab teid",
