@@ -93,6 +93,12 @@ export function isShortlistedForContact(status: string | null | undefined): bool
  *     other side's consenting person) and passed as a grant exactly like
  *     allowed_accepted_booking. Never resolved from generic facts here —
  *     see evaluateAgencyConnectionContact below for the pure decision.
+ *   - allowed_team — the two profiles are on the SAME team: both hold an ACTIVE
+ *     membership of, or an ACTIVE engagement in, one organization (owner P0
+ *     2026-10-01: team member ↔ team member, and the people on a project the
+ *     caller manages). Verified under the CALLER'S OWN RLS reads only — a
+ *     colleague the database does not let the caller see is simply not a
+ *     team fact (default-closed). Never a contact channel: an in-app thread.
  *   - allowed_admin — the caller carries the real admin signal (support /
  *     matching workbench paths; admin participation is already RLS-visible).
  *   - no_permission — the default. No relationship → no contact.
@@ -110,6 +116,7 @@ export type ContactPermissionState =
   | "allowed_accepted_booking"
   | "allowed_marketplace_enquiry"
   | "allowed_agency_connection"
+  | "allowed_team"
   | "allowed_admin"
   | "no_permission";
 
@@ -123,6 +130,7 @@ export const CONTACT_PERMISSION_STATES: readonly ContactPermissionState[] = [
   "allowed_accepted_booking",
   "allowed_marketplace_enquiry",
   "allowed_agency_connection",
+  "allowed_team",
   "allowed_admin",
   "no_permission",
 ];
@@ -136,6 +144,8 @@ export interface ContactPermissionFacts {
   readonly scoutingAllowed: boolean;
   /** The caller carries the real admin signal (deriveIsAdmin). */
   readonly isAdmin: boolean;
+  /** Both profiles are active on one organization's team (RLS-verified). */
+  readonly sharesTeam?: boolean;
 }
 
 /**
@@ -149,6 +159,7 @@ export function evaluateContactPermission(
   if (facts.sharesConversation) return "allowed_existing_conversation";
   if (facts.hasEngagement) return "allowed_engagement";
   if (facts.scoutingAllowed) return "allowed_scouting_shortlist";
+  if (facts.sharesTeam) return "allowed_team";
   if (facts.isAdmin) return "allowed_admin";
   return "no_permission";
 }
