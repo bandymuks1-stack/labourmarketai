@@ -292,7 +292,8 @@
         "journal": "Min CV",
         "search": "[EN] Search",
         "advanced": "Avansert styring",
-        "playerCard": "Min profesjonelle profil"
+        "playerCard": "Min profesjonelle profil",
+        "companyProfile": "Bedriftsprofil"
       },
       "moreSection": {
         "title": "Detaljert oversikt",
@@ -1665,7 +1666,7 @@
     "subtitle": "[EN] What you have, what is missing, and the next step — per country.",
     "preparing": "[EN] Document readiness is being prepared — it goes live once the document storage layer is reviewed and enabled. Nothing here is active yet.",
     "disclaimer": "[EN] Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
-    "needsMigration": "[EN] The documents storage layer is not enabled in this environment yet.",
+    "needsMigration": "Ikke tilgjengelig akkurat nå.",
     "noWorker": "[EN] Create your worker profile first — documents attach to it.",
     "error": "[EN] Could not load your documents.",
     "empty": "[EN] No documents recorded yet. Start with your CV and ID document.",
@@ -2685,7 +2686,7 @@
     "visibility": "[EN] Visibility",
     "visibilityPrivate": "[EN] Private",
     "visibilityEmployers": "[EN] Employers",
-    "visibilityNote": "[EN] Employer viewing is not switched on yet — your visibility choice is saved and will apply once it is.",
+    "visibilityNote": "Ikke tilgjengelig akkurat nå.",
     "importNote": "[EN] Automatic import from these sites is not offered. To bring your data in, upload an exported CV file in the profile editor.",
     "importLink": "[EN] Open the profile editor",
     "empty": "[EN] No external profiles linked yet.",
@@ -3946,9 +3947,33 @@
       },
       "findWorkInCompanyContext": "Å søke jobb er din egen handling — i bedriftsområdet kjører jeg det ikke. Bytt til ditt personlige område og spør igjen.",
       "findWorkInCompanyWhy": "En person søker jobb, ikke en bedrift — jeg svarer fra ditt personlige område.",
+      "personalOnlyInCompany": "Det er en personlig handling — i en virksomhetsplass utfører jeg den ikke. Bytt til ditt personlige rom og fortsett der.",
       "journalAskWhatYouDid": "Hva gjorde du i dag? Skriv det i feltet «Hva du gjorde» med egne ord — f.eks. «monterte vinduer på byggeplassen i Kaunas fra 8 til 17». Selve forespørselen lagres ikke i dagboken.",
       "serviceNeedHint": "Det er en jobb som skal gjøres — jeg viser deg hvem som tilbyr den tjenesten.",
       "chipServiceRequests": "Finn en tjeneste",
+      "findPartnersDoors": "Dette er et søk etter forretningspartnere, ikke etter jobb. Det går via den eksisterende markedsplassen — velg hvor du vil starte.",
+      "findPartnersPickCompany": "Forretningspartnere søkes på vegne av en virksomhet. Hvilken virksomhet mener du?",
+      "findPartnersNoCompany": "Forretningspartnere søkes på vegne av en virksomhet, og det finnes ingen virksomhetsprofil ennå. Opprett en, eller se tjenestemarkedet.",
+      "chipPartnersServices": "Tjenesteleverandører",
+      "chipPartnersListings": "Markedsplassens annonser",
+      "chipPartnersRelations": "Kunder og partnere",
+      "productHelp": {
+        "projectUse": "Et prosjekt er stedet for arbeid, folk og frister. Åpne et prosjekt, legg til oppgaver og personer, så vises det utførte arbeidet der.",
+        "addPerson": "Du legger til en person med en invitasjon: skriv inn kontakten, så bekrefter personen i sin egen konto. Invitasjoner og teamet ditt finner du under team.",
+        "hours": "Timer ligger i timeseksjonen — der ser du dager, uken og timelisten.",
+        "offerService": "Du tilbyr en tjeneste under tjenester: beskriv den, så kan andre virksomheter og personer se den.",
+        "warning": "En advarsel vises når noe kan hindre arbeidet — for eksempel et dokument som utløper eller manglende data. Alle varsler og årsakene ser du under varsler.",
+        "forecast": "En prognose er en beregning ut fra timene som allerede er registrert og arbeidet som er planlagt. Den er en pekepinn, ikke et løfte, og endres med dataene. Planen og tallene finner du under planlegging.",
+        "scheduleWorker": "Du planlegger en ansatt under planlegging: velg dag og prosjekt, og tildel personen på samme sted.",
+        "doneWork": "Utført arbeid ser du der det er registrert — i arbeidsjournalen eller timeseksjonen: registreringer, timer og bekreftelser.",
+        "chips": {
+          "chipHelpProjects": "Åpne prosjekter",
+          "chipHelpPeople": "Team og invitasjoner",
+          "chipHelpPlanning": "Åpne planlegging",
+          "chipHelpServices": "Mine tjenester",
+          "chipHelpJournal": "Arbeidsjournal"
+        }
+      },
       "interestInboxAmbiguous": "Det kan bety to ting — hva vil du se?",
       "chipInterestOnMyNeeds": "Interesse for mine forespørsler",
       "chipMyOwnInterest": "Min egen interesse",
@@ -4055,7 +4080,7 @@
       "capacityIntro": "Team {from} – {to} ({count} personer):",
       "capacityFree": "ledig",
       "capacityBusyUntil": "utilgjengelig til {date}",
-      "capacityAbsencesUnknown": "Fraværsdata er ikke tilgjengelige i dette miljøet — bare listen vises.",
+      "capacityAbsencesUnknown": "Ikke tilgjengelig akkurat nå.",
       "capacityEmpty": "Ingen er i teamet ennå — inviter folk.",
       "capacityUnavailable": "Teamets tilgjengelighet kunne ikke leses nå.",
       "chipAddTask": "Legg til oppgave",
@@ -4128,9 +4153,9 @@
       "confirmChip": "Bekreft: {name} · {date}",
       "confirmDone": "Bekreftet: {name} — bekreftede ferdigheter: {count}.",
       "confirmNone": "Ingen arbeidsposter venter.",
-      "confirmNotEnabled": "Arbeidsgjennomgang er ikke slått på ennå for: {names}. Slå den på, så vises postene deres her.",
+      "confirmNotEnabled": "Ikke tilgjengelig akkurat nå.",
       "confirmEnableChip": "Slå på gjennomgang: {name}",
-      "confirmEnabled": "Gjennomgang slått på: {name} — arbeidspostene venter på din bekreftelse.",
+      "confirmEnabled": "Ikke tilgjengelig akkurat nå.",
       "confirmFailed": "Bekreftelsen kunne ikke gjøres.",
       "confirmUnavailable": "Bekreftelser kunne ikke leses akkurat nå.",
       "chipOpenInbox": "Åpne bekreftelsesinnboksen",
@@ -4242,7 +4267,7 @@
       "introOne": "[EN] I found 1 suitable option:",
       "emptyState": "[EN] I didn't find any active openings matching your criteria right now. I have no alerts yet, so I won't promise to notify you — ask me again later, or add more to your profile so more needs match.",
       "blockedNoWorker": "[EN] To search for work, enable the worker role in account settings.",
-      "blockedNoAccess": "[EN] The opportunities list isn't enabled in this environment yet. When it is, I'll show real needs.",
+      "blockedNoAccess": "Ikke tilgjengelig akkurat nå.",
       "fitStrong": "[EN] Strong fit",
       "fitPossible": "[EN] Possible fit",
       "fitWeak": "[EN] Weak fit",
@@ -4339,7 +4364,7 @@
       },
       "engagementsError": "Arbeidsforholdene kunne ikke lastes.",
       "engagementsBlocked": "Arbeidsforholdene kan ikke leses nå. Det er ikke det samme som å ikke ha noen.",
-      "engagementsNeedsMigration": "Arbeidsforhold er ennå ikke tilgjengelige i dette miljøet.",
+      "engagementsNeedsMigration": "Ikke tilgjengelig akkurat nå.",
       "engagementsEmptyCompany": "Denne organisasjonen har ingen registrerte arbeidsforhold.",
       "engagementsEmptyWorker": "Du har ingen registrerte arbeidsforhold.",
       "engagementsUnavailable": "Dette arbeidsforholdet er ikke tilgjengelig for deg.",
@@ -4672,7 +4697,7 @@
         "radius": "avstand"
       },
       "whyFiltered": "[EN] You said: {words}. I narrowed the search to that.",
-      "whyUnfiltered": "[EN] I searched your whole board — you did not narrow it.",
+      "whyUnfiltered": "Ingen ekstra filtre — jeg viser alt som er synlig for deg.",
       "whyFromYourBoard": "[EN] From the demands that are visible to you right now.",
       "whyNoWorker": "[EN] This needs a worker profile, and there is none on this account yet.",
       "whyNoAccess": "[EN] Open demands are not available to your account yet.",
@@ -4831,7 +4856,7 @@
     "page": {
       "title": "[EN] Experiences",
       "lead": "[EN] Subjective experiences from real, completed work interactions. An experience is one person's account — not a fact about anyone's professional ability.",
-      "unavailableTitle": "[EN] Experiences are not available in this environment yet.",
+      "unavailableTitle": "Ikke tilgjengelig akkurat nå.",
       "unavailableBody": "[EN] Nothing was saved. You can keep working as usual.",
       "aboutMe": "[EN] About me",
       "aboutMeEmpty": "[EN] No published experiences about you yet.",
@@ -4846,7 +4871,7 @@
       "caution": "[EN] More negative than positive experiences — worth looking closer before deciding.",
       "meaning": "[EN] These are subjective accounts of real interactions. They are not a rating, not a score, and not a platform verdict.",
       "notEnough": "[EN] Not enough published experiences yet.",
-      "unavailable": "[EN] Experience counts are not available in this environment yet."
+      "unavailable": "Ikke tilgjengelig akkurat nå."
     },
     "sentiment": {
       "positive": "[EN] Positive experience",
@@ -4871,7 +4896,7 @@
       "rejected": "[EN] Rejected",
       "title": "[EN] Experience moderation",
       "lead": "[EN] Every experience passes moderation before it is published. Each decision needs a reason and is recorded in the audit trail.",
-      "unavailable": "[EN] The experience domain is not available in this environment.",
+      "unavailable": "Ikke tilgjengelig akkurat nå.",
       "queueTitle": "[EN] Awaiting moderation",
       "queueEmpty": "[EN] Nothing is waiting for moderation.",
       "disputeQueueTitle": "[EN] Disputes",
@@ -4888,7 +4913,7 @@
         "removed": "[EN] Remove from public view"
       },
       "errors": {
-        "needs_migration": "[EN] Experiences are not available in this environment yet. Nothing was saved.",
+        "needs_migration": "Ikke tilgjengelig akkurat nå. Ingenting ble lagret.",
         "not_authenticated": "[EN] Please sign in first.",
         "not_eligible": "[EN] You can only describe an interaction you actually took part in and that is finished.",
         "duplicate_for_interaction": "[EN] You have already submitted an experience for this interaction.",
@@ -4918,7 +4943,7 @@
       "sending": "[EN] Opening…",
       "openedNote": "[EN] Dispute opened. The experience stays published until a moderator decides.",
       "errors": {
-        "needs_migration": "[EN] Experiences are not available in this environment yet. Nothing was saved.",
+        "needs_migration": "Ikke tilgjengelig akkurat nå. Ingenting ble lagret.",
         "not_authenticated": "[EN] Please sign in first.",
         "not_eligible": "[EN] You can only describe an interaction you actually took part in and that is finished.",
         "duplicate_for_interaction": "[EN] You have already submitted an experience for this interaction.",
@@ -4942,7 +4967,7 @@
       "sending": "[EN] Sending…",
       "submitted": "[EN] Reply submitted. It becomes visible once moderation is finished.",
       "errors": {
-        "needs_migration": "[EN] Experiences are not available in this environment yet. Nothing was saved.",
+        "needs_migration": "Ikke tilgjengelig akkurat nå. Ingenting ble lagret.",
         "not_authenticated": "[EN] Please sign in first.",
         "not_eligible": "[EN] You can only describe an interaction you actually took part in and that is finished.",
         "duplicate_for_interaction": "[EN] You have already submitted an experience for this interaction.",
@@ -4976,7 +5001,7 @@
       "submitted": "[EN] Experience submitted.",
       "awaitingModeration": "[EN] It is waiting for moderation and is not published yet.",
       "errors": {
-        "needs_migration": "[EN] Experiences are not available in this environment yet. Nothing was saved.",
+        "needs_migration": "Ikke tilgjengelig akkurat nå. Ingenting ble lagret.",
         "not_authenticated": "[EN] Please sign in first.",
         "not_eligible": "[EN] You can only describe an interaction you actually took part in and that is finished.",
         "duplicate_for_interaction": "[EN] You have already submitted an experience for this interaction.",
@@ -5115,7 +5140,7 @@
   "approvals": {
     "title": "Godkjenninger",
     "intro": "Godkjenningsforespørsler i organisasjonene dine: send inn en forespørsel, avgjør det som venter på deg, og følg hver runde.",
-    "unavailable": "Godkjenninger er ikke slått på i dette miljøet ennå. Ingenting går tapt — dette området åpner når godkjenningslageret er gjennomgått og tatt i bruk.",
+    "unavailable": "Ikke tilgjengelig akkurat nå.",
     "honestNote": "Beslutninger blir inne i produktet. Ingenting sendes med e-post eller andre kanaler — oppdateringer vises på denne siden og i varselklokken.",
     "loadError": "Deler av godkjenningsdataene kunne ikke lastes akkurat nå. Det du ser er ekte, men kan være ufullstendig.",
     "inbox": {
@@ -5254,7 +5279,7 @@
       "not_pending": "Denne forespørselen er ikke lenger åpen.",
       "invalid": "Sjekk de angitte verdiene og prøv igjen.",
       "invalid_delegate": "Den kollegaen ble ikke funnet i denne organisasjonen.",
-      "needs_migration": "Godkjenninger er ikke slått på i dette miljøet ennå. Ingenting ble lagret.",
+      "needs_migration": "Ikke tilgjengelig akkurat nå. Ingenting ble lagret.",
       "not_authorized": "Du har ikke lov til å gjøre dette.",
       "not_found": "Forespørselen ble ikke funnet.",
       "limit_reached": "Grensen for åpne elementer er nådd. Lukk noe først.",
@@ -5270,7 +5295,7 @@
     "tpl": {
       "title": "Maloppsett",
       "intro": "Bestem hvem som godkjenner hva i hver av organisasjonene dine. Alt du endrer her gjelder bare nye forespørsler.",
-      "unavailable": "Maloppsettet er forberedt, men ennå ikke slått på i dette miljøet.",
+      "unavailable": "Ikke tilgjengelig akkurat nå.",
       "runningImmuneNote": "Å publisere en ny versjon påvirker bare forespørsler som starter etterpå. En forespørsel som allerede er i gang beholder rundene og personene den startet med.",
       "templateCount": "Maler: {count}",
       "installTitle": "Installer standardsettet",
@@ -5386,7 +5411,7 @@
       "path_mismatch": "[EN] The upload could not be verified — nothing was saved. Please try again.",
       "file_too_large": "[EN] The file is larger than 5 MB — nothing was saved.",
       "unsupported_type": "[EN] This file type is not supported — use PDF, Word or a photo.",
-      "needs_migration": "[EN] File upload is not enabled in this environment yet — nothing was saved.",
+      "needs_migration": "Ikke tilgjengelig akkurat nå. Ingenting ble lagret.",
       "error": "[EN] Something went wrong — nothing was saved.",
       "updated": "[EN] The change was saved.",
       "submitted": "[EN] The document was sent for approval.",
@@ -5401,7 +5426,7 @@
     "title": "[EN] Company document register",
     "intro": "[EN] Documents of {org}: policies, procedures, instructions and correspondence, with versions and read confirmations.",
     "unavailable": "[EN] The document register could not be loaded right now.",
-    "preparing": "[EN] The document register is prepared but not enabled in this environment yet.",
+    "preparing": "Ikke tilgjengelig akkurat nå.",
     "error": "[EN] The document register could not be loaded — try again later.",
     "empty": "[EN] No documents registered yet.",
     "scopeNote": "[EN] This register holds the organization's own documents. Workers' personal documents stay in their own hands and are never shown here.",
@@ -5505,7 +5530,7 @@
   "timesheets": {
     "title": "Timelister",
     "intro": "Timedokumenter per periode, avledet fra arbeidsjournalen din. Timer rettes alltid i journalen; en timeliste er en fastfrosset kopi som sendes til godkjenning.",
-    "needsMigration": "Timelister er ennå ikke aktivert i dette miljøet.",
+    "needsMigration": "Ikke tilgjengelig akkurat nå.",
     "readError": "Deler av timelistedataene kunne ikke lastes akkurat nå.",
     "noLines": "Ingen registrerte timer i denne perioden ennå. Noter arbeidet ditt i journalen og oppdater.",
     "linesTitle": "Linjer ({count})",
@@ -5583,7 +5608,7 @@
       "no_approvers": "Fant ingen godkjennere for denne organisasjonens mal.",
       "not_published": "Godkjenningsmalen er ennå ikke publisert.",
       "invalid": "Forespørselen var ugyldig.",
-      "needs_migration": "Timelister er ennå ikke aktivert i dette miljøet.",
+      "needs_migration": "Ikke tilgjengelig akkurat nå.",
       "not_authorized": "Du har ikke lov til dette.",
       "not_found": "Timeliste ikke funnet.",
       "limit_reached": "For mange åpne timelister — send inn eller rydd opp i de eksisterende først.",
@@ -5594,7 +5619,7 @@
   "requests": {
     "title": "Forespørsler",
     "intro": "Be arbeidsgiveren din om noe og følg med på hva som skjer. Hver forespørsel følger godkjenningsløpet bedriften din har satt opp.",
-    "unavailable": "Forespørsler er ikke slått på i dette miljøet ennå. Ingenting går tapt — delen åpner når oppdateringen er gjennomgått og installert.",
+    "unavailable": "Ikke tilgjengelig akkurat nå.",
     "honestNote": "En forespørsel avgjøres av ekte mennesker i bedriften din. Ingenting godkjennes automatisk, og ingenting forlater produktet.",
     "notice": {
       "created": "Forespørsel sendt. De rette personene er bedt om å vurdere den.",
@@ -5607,7 +5632,7 @@
       "not_published": "Godkjenningsløpet for forespørsler er ikke klart ennå.",
       "not_pending": "Denne forespørselen venter ikke lenger — nedenfor ser du gjeldende tilstand.",
       "invalid": "Sjekk opplysningene og prøv igjen.",
-      "needs_migration": "Ikke tilgjengelig ennå — oppdateringen er ikke installert i dette miljøet.",
+      "needs_migration": "Ikke tilgjengelig akkurat nå.",
       "not_authorized": "Det har du ikke lov til.",
       "not_found": "Ikke funnet.",
       "limit_reached": "For mange åpne forespørsler. Vent først på avgjørelser om de eksisterende.",
@@ -5719,7 +5744,7 @@
     "relationshipNote": "Kontraktlisten ovenfor er det tidligere personlige kommersielle registeret og fungerer uendret. Nye avtaler hører hjemme her.",
     "unavailable": "Avtaleregisteret kan ikke vises akkurat nå.",
     "needsOrgWorkspace": "Avtaleregisteret fungerer i et organisasjonsarbeidsområde. Bytt til organisasjonen din.",
-    "preparing": "Avtaleregisteret er forberedt, men ennå ikke aktivert i dette miljøet.",
+    "preparing": "Ikke tilgjengelig akkurat nå.",
     "error": "Avtaleregisteret kunne ikke leses.",
     "empty": "Ingen avtaler registrert ennå.",
     "emptyFiltered": "Ingen avtaler samsvarer med disse filtrene.",
@@ -5822,14 +5847,14 @@
       "not_found": "Registrering ikke funnet.",
       "not_allowed": "Bare organisasjonens eier eller administrator kan gjøre dette.",
       "limit_reached": "Registergrensen er nådd.",
-      "needs_migration": "Avtaleregisteret er ennå ikke aktivert i dette miljøet.",
+      "needs_migration": "Ikke tilgjengelig akkurat nå.",
       "error": "Noe gikk galt. Ingenting ble lagret."
     }
   },
   "lifecycle": {
     "title": "Ansettelsens livssyklus",
     "intro": "Onboarding, prøvetid, endringer, offboarding og avslutning for organisasjonens ansettelser — med sjekklister og full historikk.",
-    "unavailable": "Ansettelsens livssyklus er ennå ikke slått på i dette miljøet. Ingenting går tapt — området åpner når lageret er gjennomgått og tatt i bruk.",
+    "unavailable": "Ikke tilgjengelig akkurat nå.",
     "honestNote": "Alt her blir i produktet. Å merke et trinn som utført registrerer bare hvem som bekreftet hva og når — ingenting sendes noe sted.",
     "loadError": "Noen data kunne ikke lastes akkurat nå. Det du ser er ekte, men kan være ufullstendig.",
     "stage": {
@@ -5960,7 +5985,7 @@
       "last_owner": "Den siste eierens ansettelse kan ikke avsluttes — utnevn en annen eier først.",
       "limit_reached": "Grensen for denne organisasjonen er nådd.",
       "invalid": "Ugyldig inndata.",
-      "needs_migration": "Denne funksjonen er ennå ikke slått på i dette miljøet.",
+      "needs_migration": "Ikke tilgjengelig akkurat nå.",
       "not_authorized": "Du har ikke tilgang til dette.",
       "not_found": "Posten er ikke tilgjengelig.",
       "error": "Mislyktes — prøv igjen."
@@ -6001,7 +6026,7 @@
   "procurement": {
     "title": "Innkjøp",
     "intro": "Be om materialer eller tjenester, noter leverandørtilbud, og registrer hva som ble valgt. Ingenting her kontakter en leverandør eller bestiller noe — det er din registrering.",
-    "needsMigration": "Innkjøpsforespørsler er ennå ikke aktivert i dette miljøet.",
+    "needsMigration": "Ikke tilgjengelig akkurat nå.",
     "readError": "Innkjøpsforespørsler kunne ikke lastes. Prøv igjen.",
     "empty": "Ingen innkjøpsforespørsler ennå.",
     "noOffers": "Ingen leverandørtilbud notert ennå.",
@@ -6060,7 +6085,7 @@
       "unlinked": "Fakturakoblingen fjernet.",
       "cancelled": "Innkjøpsforespørsel avbrutt.",
       "invalid": "Sjekk de angitte opplysningene.",
-      "needs_migration": "Innkjøpsforespørsler er ennå ikke aktivert i dette miljøet.",
+      "needs_migration": "Ikke tilgjengelig akkurat nå.",
       "not_authorized": "Det kan du ikke gjøre for denne forespørselen.",
       "not_found": "Denne innkjøpsforespørselen ble ikke funnet.",
       "not_editable": "I denne tilstanden er det trinnet ikke mulig.",
@@ -6079,7 +6104,7 @@
   "trips": {
     "title": "Tjenestereiser",
     "intro": "Be om en reise, få den godkjent, og hold kostnadene samlet. Ingenting her booker reiser eller betaler ut penger — det er din registrering.",
-    "needsMigration": "Tjenestereiser er ennå ikke aktivert i dette miljøet.",
+    "needsMigration": "Ikke tilgjengelig akkurat nå.",
     "readError": "Tjenestereiser kunne ikke lastes. Prøv igjen.",
     "empty": "Ingen tjenestereiser ennå.",
     "orgHeading": "Reiser for personer du leder",
@@ -6132,7 +6157,7 @@
       "unlinked": "Post fjernet fra reisen.",
       "invalid": "Sjekk de angitte opplysningene.",
       "invalid_dates": "Sjekk reisedatoene.",
-      "needs_migration": "Tjenestereiser er ennå ikke aktivert i dette miljøet.",
+      "needs_migration": "Ikke tilgjengelig akkurat nå.",
       "not_authorized": "Det kan du ikke gjøre for denne reisen.",
       "not_found": "Denne reisen ble ikke funnet.",
       "not_editable": "I denne tilstanden er det trinnet ikke mulig.",
@@ -6149,7 +6174,7 @@
     "title": "[EN] Training and certificates",
     "intro": "[EN] Courses your organization asks people to complete, and the certificates that follow.",
     "evidenceNote": "[EN] A certificate here shows that a course was finished. It does not say how well someone works — that stays your work entries and your manager's confirmations.",
-    "notAvailable": "[EN] Training is not switched on in this workspace yet.",
+    "notAvailable": "Ikke tilgjengelig akkurat nå.",
     "status": {
       "assigned": "[EN] To do",
       "completed": "[EN] Done",
@@ -6211,7 +6236,7 @@
       "invalid_file": "[EN] That file is not in your organization.",
       "invalid_skill": "[EN] That skill was not found.",
       "invalid_state": "[EN] That cannot be done at this step.",
-      "needs_migration": "[EN] Training is not switched on in this workspace yet.",
+      "needs_migration": "Ikke tilgjengelig akkurat nå.",
       "not_authorized": "[EN] You do not have the rights for this.",
       "not_found": "[EN] Not found.",
       "limit_reached": "[EN] There is too much here already.",
@@ -6222,7 +6247,7 @@
     "title": "[EN] Development conversations",
     "intro": "[EN] A recorded conversation between two named people about work and what comes next.",
     "noScoreNote": "[EN] There is no rating, no score and no ranking here — by design. Everything below is either a recorded fact, a link to real work, or one person's own words, clearly labelled.",
-    "notAvailable": "[EN] Development conversations are not switched on in this workspace yet.",
+    "notAvailable": "Ikke tilgjengelig akkurat nå.",
     "empty": "[EN] No conversation involves you yet.",
     "cycles": {
       "heading": "[EN] Periods",
@@ -6288,7 +6313,7 @@
       "invalid_subject": "[EN] That person is not in your organization.",
       "invalid_reviewer": "[EN] That person cannot be the reviewer.",
       "invalid_reference": "[EN] That link does not point at real work of this person.",
-      "needs_migration": "[EN] Development conversations are not switched on in this workspace yet.",
+      "needs_migration": "Ikke tilgjengelig akkurat nå.",
       "not_authorized": "[EN] You do not have the rights for this.",
       "not_found": "[EN] Not found.",
       "limit_reached": "[EN] There is too much here already.",
@@ -6299,7 +6324,7 @@
     "title": "[EN] Management decisions",
     "intro": "[EN] What was put to the management team, what was decided, who is responsible and by when.",
     "engineNote": "[EN] The vote happens in the approvals list above: a template that needs every approver is a unanimous vote, one that needs any approver is decided by the first answer. Nothing here counts votes.",
-    "notAvailable": "[EN] Management decisions are not switched on in this workspace yet.",
+    "notAvailable": "Ikke tilgjengelig akkurat nå.",
     "empty": "[EN] No decisions recorded yet.",
     "form": {
       "title": "[EN] Question",
@@ -6352,7 +6377,7 @@
       "invalid_document": "[EN] That document is not in your organization.",
       "invalid_task": "[EN] That task is not yours.",
       "invalid_responsible": "[EN] That person is not in your organization.",
-      "needs_migration": "[EN] Management decisions are not switched on in this workspace yet.",
+      "needs_migration": "Ikke tilgjengelig akkurat nå.",
       "not_authorized": "[EN] You do not have the rights for this.",
       "not_found": "[EN] Not found.",
       "limit_reached": "[EN] There is too much here already.",
@@ -6482,7 +6507,7 @@
         "duplicatesFound": "Identiske eksisterende registreringer: {count}. Ingenting ble skrevet — huk av bekreftelsen for å skrive dem likevel.",
         "noRows": "Ingen rader å skrive.",
         "tooManyRows": "For mange rader for én import — del opp filen.",
-        "needsMigration": "Denne funksjonen er ennå ikke aktivert i denne databasen.",
+        "needsMigration": "Ikke tilgjengelig akkurat nå.",
         "notAuthorized": "Du kan ikke registrere disse timene.",
         "generic": "Behandlingen mislyktes. Prøv igjen."
       }
@@ -6532,6 +6557,14 @@
       "free": "ledig",
       "away": "borte",
       "awayUntil": "borte til {date}",
+      "summary": "{free} ledige · {committed} i arbeid · {away} borte",
+      "onWork": "på {project}",
+      "booked": "booket",
+      "until": "til {date}",
+      "undated": "uten datoer",
+      "outlookHeading": "Ledige folk, neste 4 uker",
+      "outlookWeek": "Fra {date}: {free} av {total} ledige",
+      "outlookNote": "Ut fra registrerte bookinger og fravær — et anslag, ikke et løfte.",
       "absencesUnknown": "Fravær registreres ikke ennå — ledig betyr at ingen har sagt noe annet.",
       "more": "{count, plural, =1 {1 person til på planleggingssiden} other {# personer til på planleggingssiden}}",
       "assign": "Sett på et prosjekt",
@@ -6557,7 +6590,18 @@
       "openNeed": "Åpne behovet",
       "gapsRow": "{count, plural, =1 {1 person på {project} mangler dokumenter} other {# personer på {project} mangler dokumenter}}",
       "gapsCta": "Sjekk dokumenter",
-      "needsCta": "Beskriv et behov"
+      "needsCta": "Beskriv et behov",
+      "noOneFrom": "Ingen er ledig fra {date}",
+      "unclear": "{count, plural, =1 {1 person har arbeid uten datoer — ledig tid kan være mindre} other {# personer har arbeid uten datoer — ledig tid kan være mindre}}",
+      "fit": {
+        "fits": "Ledige folk dekker det",
+        "from": "Ledige folk dekker det fra {date}",
+        "short": "{count, plural, =1 {Mangler 1 person} other {Mangler # personer}}",
+        "some": "Ledige folk dekker det bare noen uker",
+        "unknown": "For lite informasjon til å sammenligne"
+      },
+      "opportunity": "{count, plural, =1 {Opptil 1 person er ledig fra {date}} other {Opptil # personer er ledige fra {date}}}",
+      "opportunityCta": "Finn arbeid"
     },
     "attention": {
       "heading": "Trenger deg",
@@ -6651,7 +6695,7 @@
       "invalid_role": "Ugyldig rolle.",
       "last_owner": "Den siste eieren kan ikke trekke seg — aktiver først en annen eier.",
       "no_workspace": "Velg først et organisasjonsarbeidsområde.",
-      "needs_migration": "Denne muligheten er ikke slått på i dette miljøet ennå.",
+      "needs_migration": "Ikke tilgjengelig akkurat nå.",
       "invalid": "Ugyldige data.",
       "error": "Noe gikk galt — prøv igjen."
     },
@@ -6738,5 +6782,44 @@
       "confirmed": "Confirmed and shared",
       "failed": "Could not confirm."
     }
+  },
+  "companyWorkHistory": {
+    "title": "Importert arbeidshistorikk for virksomheten",
+    "subtitle": "Hva {name} har registrert fra egne gamle timelister: hvor arbeidet var, når, hvem som jobbet, hva som ble gjort og hvor lenge.",
+    "badge": "Importert virksomhetshistorikk",
+    "provenance": "Hentet fra {name}s egen timeliste. Personene brukte ikke LabourMarket.ai den gangen, og opplysningene er ikke uavhengig verifisert.",
+    "unavailable": "Den importerte arbeidshistorikken kunne ikke leses akkurat nå. Det betyr ikke at det ikke finnes noen.",
+    "empty": "{name} har ingen importert arbeidshistorikk registrert.",
+    "elsewhere": "{name} har {count, plural, one {# importert post} other {# importerte poster}} om tidligere arbeid. Bytt til det arbeidsområdet for å se dem.",
+    "stats": {
+      "places": "Steder",
+      "people": "Personer",
+      "hours": "Registrerte timer",
+      "period": "Periode"
+    },
+    "place": "Sted",
+    "noPlaceName": "Ingen sted oppgitt",
+    "open": "Åpne",
+    "people": "{count, plural, one {# person} other {# personer}}",
+    "entries": "{count, plural, one {# post} other {# poster}}",
+    "hoursShare": "{hours} t på dette stedet, sammenlignet med det travleste stedet",
+    "noPlace": "{count, plural, one {# post} other {# poster}} ({hours} t) oppgir ikke sted i kilden.",
+    "periodAside": "Av dette er {hours} t periodesummer oppgitt for et tidsrom, holdt adskilt fra enkeltdager.",
+    "scope": {
+      "title": "Hva denne importen inneholder",
+      "carried": "Kilden inneholder: hvem som jobbet, hvilken dag, hvor mange timer, hva som ble gjort og stedet slik det er skrevet.",
+      "missing": "Ikke i kilden: kunden, adressen og prosjektet. De vises som ikke i kilden og fylles aldri ut."
+    },
+    "facts": {
+      "customer": "Kunde",
+      "address": "Adresse",
+      "project": "Prosjekt",
+      "notInSource": "Ikke i kilden",
+      "linked": "Koblet"
+    },
+    "whoWorked": "Hvem som jobbet her",
+    "timeline": "Hva som ble gjort",
+    "back": "Tilbake til historikk",
+    "placeMissing": "Dette stedet finnes ikke i den importerte historikken for det aktive arbeidsområdet."
   }
 }

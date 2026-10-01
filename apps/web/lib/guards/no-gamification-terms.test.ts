@@ -75,6 +75,7 @@ const BANNED = new RegExp(
     "speelveld",
     "competitie",
     // PL
+    "karta zawodnika",
     "karta gracza",
     "karty gracza",
     "boisko",
@@ -148,8 +149,10 @@ describe("no game or sports vocabulary in any public locale catalogue", () => {
       "Spielerkarte",
       "Arbeitsmarkt-Liga",
       "spelerskaart",
-      "karta gracza",
+      "karta zawodnika",
+    "karta gracza",
       "Spillerkort",
+      "Karta zawodnika (karta pracy)",
     ]) {
       expect(BANNED.test(bad), bad).toBe(true);
     }
@@ -164,5 +167,49 @@ describe("no game or sports vocabulary in any public locale catalogue", () => {
     ]) {
       expect(BANNED.test(fine), fine).toBe(false);
     }
+  });
+});
+
+/**
+ * Copy that is NOT in a message catalogue: the command finder labels and
+ * synonyms are user-visible in every locale and live in a TS registry, so the
+ * catalogue scan above cannot see them.
+ */
+describe("no game or sports vocabulary in the command finder registry", () => {
+  it("labels and synonyms carry no banned term", async () => {
+    const { COMMAND_REGISTRY } = await import("@/lib/navigation/command-registry");
+    const offenders: string[] = [];
+    for (const e of COMMAND_REGISTRY) {
+      const texts = [
+        ...Object.values(e.labels),
+        ...Object.values(e.synonyms).flat(),
+      ];
+      for (const t of texts) if (BANNED.test(t)) offenders.push(`${e.id}: ${t}`);
+    }
+    expect(offenders, offenders.join(", ")).toEqual([]);
+  });
+});
+
+/**
+ * Internal-mechanics leaks: user-facing copy must not explain deployment
+ * internals ("not enabled in this environment", "the update is not applied",
+ * "this database"). Say what the person can do, not how the system is
+ * deployed. Operator namespaces are exempt, and `assist` carries the pinned
+ * honest AI-state copy (assist-centre.test.ts).
+ */
+describe("no deployment-internals wording in user-facing English copy", () => {
+  const EXEMPT =
+    /^(admin|agentOs|intelligence|vacancySources|evidenceImport|talentPreview|crmPipeline|projectOps|salesIntake|assist)$/;
+  it("en.json user namespaces carry no environment/migration wording", () => {
+    const en = JSON.parse(readFileSync(join(MESSAGES, "en.json"), "utf8"));
+    const re = /in this environment|(not|isn.t) applied|this database|reviewed and applied|switched on/i;
+    const offenders: string[] = [];
+    for (const [path, value] of strings(en)) {
+      if (EXEMPT.test(path.split(".")[0])) continue;
+      // Honest AI-state lines are pinned by llm-proposal-reasons.test.ts.
+      if (/aiNotConfigured$|companyWorkHistory\.provenance$/.test(path)) continue;
+      if (re.test(value)) offenders.push(`${path}: ${value.slice(0, 80)}`);
+    }
+    expect(offenders, offenders.join(", ")).toEqual([]);
   });
 });

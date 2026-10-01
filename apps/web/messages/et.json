@@ -292,7 +292,8 @@
         "journal": "Minu CV",
         "search": "[EN] Search",
         "advanced": "Täpsem haldus",
-        "playerCard": "Minu ametiprofiil"
+        "playerCard": "Minu ametiprofiil",
+        "companyProfile": "Ettevõtte profiil"
       },
       "moreSection": {
         "title": "Üksikasjalik ülevaade",
@@ -1665,7 +1666,7 @@
     "subtitle": "[EN] What you have, what is missing, and the next step — per country.",
     "preparing": "[EN] Document readiness is being prepared — it goes live once the document storage layer is reviewed and enabled. Nothing here is active yet.",
     "disclaimer": "[EN] Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
-    "needsMigration": "[EN] The documents storage layer is not enabled in this environment yet.",
+    "needsMigration": "Praegu pole saadaval.",
     "noWorker": "[EN] Create your worker profile first — documents attach to it.",
     "error": "[EN] Could not load your documents.",
     "empty": "[EN] No documents recorded yet. Start with your CV and ID document.",
@@ -2685,7 +2686,7 @@
     "visibility": "[EN] Visibility",
     "visibilityPrivate": "[EN] Private",
     "visibilityEmployers": "[EN] Employers",
-    "visibilityNote": "[EN] Employer viewing is not switched on yet — your visibility choice is saved and will apply once it is.",
+    "visibilityNote": "Praegu pole saadaval.",
     "importNote": "[EN] Automatic import from these sites is not offered. To bring your data in, upload an exported CV file in the profile editor.",
     "importLink": "[EN] Open the profile editor",
     "empty": "[EN] No external profiles linked yet.",
@@ -3946,9 +3947,33 @@
       },
       "findWorkInCompanyContext": "Tööotsing on sinu enda tegevus — ettevõtte ruumis ma seda ei käivita. Lülitu oma isiklikku ruumi ja küsi uuesti.",
       "findWorkInCompanyWhy": "Tööd otsib inimene, mitte ettevõte — vastan sinu isiklikust ruumist.",
+      "personalOnlyInCompany": "See on isiklik tegevus — ettevõtte ruumis ma seda ei tee. Lülitu isiklikku ruumi ja jätka seal.",
       "journalAskWhatYouDid": "Mida sa täna tegid? Kirjuta see väljale „Mida tegid“ oma sõnadega — nt „paigaldasin aknaid Kaunase objektil 8–17“. Palvet ennast päevikusse ei salvestata.",
       "serviceNeedHint": "See on töö, mis tuleb ära teha — näitan, kes sellist teenust pakub.",
       "chipServiceRequests": "Leia teenus",
+      "findPartnersDoors": "See on äripartnerite otsing, mitte töö otsimine. See toimub olemasoleval turul — vali, kust alustada.",
+      "findPartnersPickCompany": "Äripartnereid otsitakse ettevõtte nimel. Millist ettevõtet sa mõtled?",
+      "findPartnersNoCompany": "Äripartnereid otsitakse ettevõtte nimel ja ettevõtte profiili veel pole. Loo see või vaata teenuste turgu.",
+      "chipPartnersServices": "Teenuse pakkujad",
+      "chipPartnersListings": "Turu kuulutused",
+      "chipPartnersRelations": "Kliendid ja partnerid",
+      "productHelp": {
+        "projectUse": "Projekt on koht töö, inimeste ja tähtaegade jaoks. Ava projekt, lisa ülesandeid ja inimesi ning tehtud töö ilmub kohe sinna.",
+        "addPerson": "Inimese lisad kutsega: sisesta tema kontakt ja ta kinnitab oma kontol. Kutsed ja meeskond on meeskonna jaotises.",
+        "hours": "Tunnid on tundide jaotises — seal näed päevi, nädalat ja töölehte.",
+        "offerService": "Teenust pakud teenuste jaotises: kirjelda seda ja teised ettevõtted ning inimesed näevad seda.",
+        "warning": "Hoiatus ilmub, kui miski võib tööd takistada — näiteks dokument aegub või andmed puuduvad. Kõik teated ja nende põhjused näed teadete jaotises.",
+        "forecast": "Prognoos on arvutus juba registreeritud tundide ja planeeritud töö põhjal. See on suunis, mitte lubadus, ja muutub andmetega. Plaani ja numbrid leiad planeerimisest.",
+        "scheduleWorker": "Töötaja planeerid planeerimises: vali päev ja projekt ning määra inimene samas kohas.",
+        "doneWork": "Tehtud tööd näed seal, kuhu see on kirja pandud — tööpäevikus või tundide jaotises: kirjed, tunnid ja kinnitused.",
+        "chips": {
+          "chipHelpProjects": "Ava projektid",
+          "chipHelpPeople": "Meeskond ja kutsed",
+          "chipHelpPlanning": "Ava planeerimine",
+          "chipHelpServices": "Minu teenused",
+          "chipHelpJournal": "Tööpäevik"
+        }
+      },
       "interestInboxAmbiguous": "See võib tähendada kahte asja — mida soovid näha?",
       "chipInterestOnMyNeeds": "Huvi minu päringute vastu",
       "chipMyOwnInterest": "Minu enda huvi",
@@ -4055,7 +4080,7 @@
       "capacityIntro": "Meeskond {from} – {to} ({count} inimest):",
       "capacityFree": "vaba",
       "capacityBusyUntil": "hõivatud kuni {date}",
-      "capacityAbsencesUnknown": "Puudumiste andmed pole selles keskkonnas saadaval — kuvatakse ainult nimekiri.",
+      "capacityAbsencesUnknown": "Praegu pole saadaval.",
       "capacityEmpty": "Meeskonnas pole veel kedagi — kutsuge inimesi.",
       "capacityUnavailable": "Meeskonna saadavust ei õnnestunud praegu lugeda.",
       "chipAddTask": "Lisa ülesanne",
@@ -4128,9 +4153,9 @@
       "confirmChip": "Kinnita: {name} · {date}",
       "confirmDone": "Kinnitatud: {name} — kinnitatud oskusi: {count}.",
       "confirmNone": "Ootel töökandeid pole.",
-      "confirmNotEnabled": "Tööde ülevaatus pole veel sisse lülitatud: {names}. Lülitage sisse ja nende kanded ilmuvad siia.",
+      "confirmNotEnabled": "Praegu pole saadaval.",
       "confirmEnableChip": "Lülita ülevaatus sisse: {name}",
-      "confirmEnabled": "Ülevaatus sees: {name} — töökanded ootavad teie kinnitust.",
+      "confirmEnabled": "Praegu pole saadaval.",
       "confirmFailed": "Kinnitamine ebaõnnestus.",
       "confirmUnavailable": "Kinnitusi ei õnnestunud praegu lugeda.",
       "chipOpenInbox": "Ava kinnituste postkast",
@@ -4242,7 +4267,7 @@
       "introOne": "[EN] I found 1 suitable option:",
       "emptyState": "[EN] I didn't find any active openings matching your criteria right now. I have no alerts yet, so I won't promise to notify you — ask me again later, or add more to your profile so more needs match.",
       "blockedNoWorker": "[EN] To search for work, enable the worker role in account settings.",
-      "blockedNoAccess": "[EN] The opportunities list isn't enabled in this environment yet. When it is, I'll show real needs.",
+      "blockedNoAccess": "Praegu pole saadaval.",
       "fitStrong": "[EN] Strong fit",
       "fitPossible": "[EN] Possible fit",
       "fitWeak": "[EN] Weak fit",
@@ -4339,7 +4364,7 @@
       },
       "engagementsError": "Töösuhteid ei õnnestunud laadida.",
       "engagementsBlocked": "Töösuhteid ei saa praegu lugeda. See ei tähenda, et neid poleks.",
-      "engagementsNeedsMigration": "Töösuhted ei ole selles keskkonnas veel saadaval.",
+      "engagementsNeedsMigration": "Praegu pole saadaval.",
       "engagementsEmptyCompany": "Sellel organisatsioonil ei ole registreeritud töösuhteid.",
       "engagementsEmptyWorker": "Sul ei ole registreeritud töösuhteid.",
       "engagementsUnavailable": "See töösuhe ei ole sulle saadaval.",
@@ -4672,7 +4697,7 @@
         "radius": "kaugus"
       },
       "whyFiltered": "[EN] You said: {words}. I narrowed the search to that.",
-      "whyUnfiltered": "[EN] I searched your whole board — you did not narrow it.",
+      "whyUnfiltered": "Lisafiltreid pole — näitan kõike, mis sulle nähtav on.",
       "whyFromYourBoard": "[EN] From the demands that are visible to you right now.",
       "whyNoWorker": "[EN] This needs a worker profile, and there is none on this account yet.",
       "whyNoAccess": "[EN] Open demands are not available to your account yet.",
@@ -4831,7 +4856,7 @@
     "page": {
       "title": "[EN] Experiences",
       "lead": "[EN] Subjective experiences from real, completed work interactions. An experience is one person's account — not a fact about anyone's professional ability.",
-      "unavailableTitle": "[EN] Experiences are not available in this environment yet.",
+      "unavailableTitle": "Praegu pole saadaval.",
       "unavailableBody": "[EN] Nothing was saved. You can keep working as usual.",
       "aboutMe": "[EN] About me",
       "aboutMeEmpty": "[EN] No published experiences about you yet.",
@@ -4846,7 +4871,7 @@
       "caution": "[EN] More negative than positive experiences — worth looking closer before deciding.",
       "meaning": "[EN] These are subjective accounts of real interactions. They are not a rating, not a score, and not a platform verdict.",
       "notEnough": "[EN] Not enough published experiences yet.",
-      "unavailable": "[EN] Experience counts are not available in this environment yet."
+      "unavailable": "Praegu pole saadaval."
     },
     "sentiment": {
       "positive": "[EN] Positive experience",
@@ -4871,7 +4896,7 @@
       "rejected": "[EN] Rejected",
       "title": "[EN] Experience moderation",
       "lead": "[EN] Every experience passes moderation before it is published. Each decision needs a reason and is recorded in the audit trail.",
-      "unavailable": "[EN] The experience domain is not available in this environment.",
+      "unavailable": "Praegu pole saadaval.",
       "queueTitle": "[EN] Awaiting moderation",
       "queueEmpty": "[EN] Nothing is waiting for moderation.",
       "disputeQueueTitle": "[EN] Disputes",
@@ -4888,7 +4913,7 @@
         "removed": "[EN] Remove from public view"
       },
       "errors": {
-        "needs_migration": "[EN] Experiences are not available in this environment yet. Nothing was saved.",
+        "needs_migration": "Praegu pole saadaval. Midagi ei salvestatud.",
         "not_authenticated": "[EN] Please sign in first.",
         "not_eligible": "[EN] You can only describe an interaction you actually took part in and that is finished.",
         "duplicate_for_interaction": "[EN] You have already submitted an experience for this interaction.",
@@ -4918,7 +4943,7 @@
       "sending": "[EN] Opening…",
       "openedNote": "[EN] Dispute opened. The experience stays published until a moderator decides.",
       "errors": {
-        "needs_migration": "[EN] Experiences are not available in this environment yet. Nothing was saved.",
+        "needs_migration": "Praegu pole saadaval. Midagi ei salvestatud.",
         "not_authenticated": "[EN] Please sign in first.",
         "not_eligible": "[EN] You can only describe an interaction you actually took part in and that is finished.",
         "duplicate_for_interaction": "[EN] You have already submitted an experience for this interaction.",
@@ -4942,7 +4967,7 @@
       "sending": "[EN] Sending…",
       "submitted": "[EN] Reply submitted. It becomes visible once moderation is finished.",
       "errors": {
-        "needs_migration": "[EN] Experiences are not available in this environment yet. Nothing was saved.",
+        "needs_migration": "Praegu pole saadaval. Midagi ei salvestatud.",
         "not_authenticated": "[EN] Please sign in first.",
         "not_eligible": "[EN] You can only describe an interaction you actually took part in and that is finished.",
         "duplicate_for_interaction": "[EN] You have already submitted an experience for this interaction.",
@@ -4976,7 +5001,7 @@
       "submitted": "[EN] Experience submitted.",
       "awaitingModeration": "[EN] It is waiting for moderation and is not published yet.",
       "errors": {
-        "needs_migration": "[EN] Experiences are not available in this environment yet. Nothing was saved.",
+        "needs_migration": "Praegu pole saadaval. Midagi ei salvestatud.",
         "not_authenticated": "[EN] Please sign in first.",
         "not_eligible": "[EN] You can only describe an interaction you actually took part in and that is finished.",
         "duplicate_for_interaction": "[EN] You have already submitted an experience for this interaction.",
@@ -5115,7 +5140,7 @@
   "approvals": {
     "title": "Kinnitused",
     "intro": "Kinnitustaotlused teie organisatsioonides: esitage taotlus, otsustage teid ootavad asjad ja jälgige iga etappi.",
-    "unavailable": "Kinnitused pole selles keskkonnas veel sisse lülitatud. Midagi ei lähe kaotsi — see ala avaneb, kui kinnituste hoidla on üle vaadatud ja rakendatud.",
+    "unavailable": "Praegu pole saadaval.",
     "honestNote": "Otsused jäävad toote sisse. Midagi ei saadeta e-postiga ega mujale — uuendused on näha sellel lehel ja teavituste kellas.",
     "loadError": "Osa kinnituste andmeid ei õnnestunud praegu laadida. See, mida näete, on tõsi, kuid võib olla puudulik.",
     "inbox": {
@@ -5254,7 +5279,7 @@
       "not_pending": "See taotlus pole enam avatud.",
       "invalid": "Kontrollige sisestatud väärtusi ja proovige uuesti.",
       "invalid_delegate": "Sellist kolleegi selles organisatsioonis ei leitud.",
-      "needs_migration": "Kinnitused pole selles keskkonnas veel sisse lülitatud. Midagi ei salvestatud.",
+      "needs_migration": "Praegu pole saadaval. Midagi ei salvestatud.",
       "not_authorized": "Teil pole lubatud seda teha.",
       "not_found": "Taotlust ei leitud.",
       "limit_reached": "Avatud kirjete limiit on täis. Lõpetage esmalt midagi.",
@@ -5270,7 +5295,7 @@
     "tpl": {
       "title": "Mallide seadistus",
       "intro": "Määrake, kes mida igas teie organisatsioonis kinnitab. Kõik siin tehtud muudatused kehtivad ainult uutele taotlustele.",
-      "unavailable": "Mallide seadistus on ette valmistatud, kuid selles keskkonnas veel sisse lülitamata.",
+      "unavailable": "Praegu pole saadaval.",
       "runningImmuneNote": "Uue versiooni avaldamine mõjutab ainult pärast seda alustatud taotlusi. Juba käimasolev taotlus säilitab etapid ja inimesed, kellega see algas.",
       "templateCount": "Malle: {count}",
       "installTitle": "Paigalda vaikekomplekt",
@@ -5386,7 +5411,7 @@
       "path_mismatch": "[EN] The upload could not be verified — nothing was saved. Please try again.",
       "file_too_large": "[EN] The file is larger than 5 MB — nothing was saved.",
       "unsupported_type": "[EN] This file type is not supported — use PDF, Word or a photo.",
-      "needs_migration": "[EN] File upload is not enabled in this environment yet — nothing was saved.",
+      "needs_migration": "Praegu pole saadaval. Midagi ei salvestatud.",
       "error": "[EN] Something went wrong — nothing was saved.",
       "updated": "[EN] The change was saved.",
       "submitted": "[EN] The document was sent for approval.",
@@ -5401,7 +5426,7 @@
     "title": "[EN] Company document register",
     "intro": "[EN] Documents of {org}: policies, procedures, instructions and correspondence, with versions and read confirmations.",
     "unavailable": "[EN] The document register could not be loaded right now.",
-    "preparing": "[EN] The document register is prepared but not enabled in this environment yet.",
+    "preparing": "Praegu pole saadaval.",
     "error": "[EN] The document register could not be loaded — try again later.",
     "empty": "[EN] No documents registered yet.",
     "scopeNote": "[EN] This register holds the organization's own documents. Workers' personal documents stay in their own hands and are never shown here.",
@@ -5505,7 +5530,7 @@
   "timesheets": {
     "title": "[EN] Timesheets",
     "intro": "[EN] Period hour documents derived from your Work Journal. Hours are always edited in the journal; a timesheet is a frozen copy sent for approval.",
-    "needsMigration": "[EN] Timesheets are not enabled in this environment yet.",
+    "needsMigration": "Praegu pole saadaval.",
     "readError": "[EN] Some timesheet data could not be loaded right now.",
     "noLines": "[EN] No recorded hours in this period yet. Log your work in the journal, then refresh.",
     "linesTitle": "[EN] Lines ({count})",
@@ -5583,7 +5608,7 @@
       "no_approvers": "[EN] No approvers could be found for this organization's template.",
       "not_published": "[EN] The approval template is not published yet.",
       "invalid": "[EN] The request was invalid.",
-      "needs_migration": "[EN] Timesheets are not enabled in this environment yet.",
+      "needs_migration": "Praegu pole saadaval.",
       "not_authorized": "[EN] You are not allowed to do this.",
       "not_found": "[EN] Timesheet not found.",
       "limit_reached": "[EN] Too many open timesheets — submit or remove existing ones first.",
@@ -5594,7 +5619,7 @@
   "requests": {
     "title": "Taotlused",
     "intro": "Paluge tööandjalt midagi ja jälgige, mis edasi saab. Iga taotlus läbib teie ettevõtte seatud kinnitusraja.",
-    "unavailable": "Taotlused pole selles keskkonnas veel sisse lülitatud. Midagi ei lähe kaduma — jaotis avaneb, kui uuendus on üle vaadatud ja paigaldatud.",
+    "unavailable": "Praegu pole saadaval.",
     "honestNote": "Taotluse üle otsustavad päris inimesed teie ettevõttes. Midagi ei kinnitata automaatselt ja miski ei lahku tootest.",
     "notice": {
       "created": "Taotlus esitatud. Õigetel inimestel paluti see üle vaadata.",
@@ -5607,7 +5632,7 @@
       "not_published": "Taotluste kinnitusrada pole veel valmis.",
       "not_pending": "See taotlus ei oota enam — allpool on selle praegune seis.",
       "invalid": "Kontrollige andmeid ja proovige uuesti.",
-      "needs_migration": "Pole veel saadaval — taotluste uuendus pole selles keskkonnas paigaldatud.",
+      "needs_migration": "Praegu pole saadaval.",
       "not_authorized": "Teil pole selleks luba.",
       "not_found": "Ei leitud.",
       "limit_reached": "Liiga palju avatud taotlusi. Oodake kõigepealt olemasolevate otsuseid.",
@@ -5719,7 +5744,7 @@
     "relationshipNote": "Ülal olev lepingute loend on varasem isiklik äriregister ja töötab muutumatult edasi. Uued lepingud kuuluvad siia.",
     "unavailable": "Lepinguregistrit ei saa praegu kuvada.",
     "needsOrgWorkspace": "Lepinguregister töötab organisatsiooni tööruumis. Lülituge oma organisatsioonile.",
-    "preparing": "Lepinguregister on ette valmistatud, kuid selles keskkonnas veel sisse lülitamata.",
+    "preparing": "Praegu pole saadaval.",
     "error": "Lepinguregistrit ei õnnestunud lugeda.",
     "empty": "Lepinguid pole veel registreeritud.",
     "emptyFiltered": "Ükski leping ei vasta neile filtritele.",
@@ -5822,14 +5847,14 @@
       "not_found": "Kirjet ei leitud.",
       "not_allowed": "Seda saab teha ainult organisatsiooni omanik või administraator.",
       "limit_reached": "Registri limiit on täis.",
-      "needs_migration": "Lepinguregister pole selles keskkonnas veel sisse lülitatud.",
+      "needs_migration": "Praegu pole saadaval.",
       "error": "Midagi läks valesti. Midagi ei salvestatud."
     }
   },
   "lifecycle": {
     "title": "Töösuhte elukaar",
     "intro": "Sisseelamine, katseaeg, muudatused, lahkumine ja lõpetamine selle organisatsiooni töökirjete jaoks — kontrollnimekirjade ja täieliku ajalooga.",
-    "unavailable": "Töösuhte elukaar pole selles keskkonnas veel sisse lülitatud. Midagi pole kadunud — see ala avaneb, kui hoidla on üle vaadatud ja kasutusele võetud.",
+    "unavailable": "Praegu pole saadaval.",
     "honestNote": "Kõik siin jääb toote sisse. Sammu tehtuks märkimine salvestab vaid, kes, mida ja millal kinnitas — kuhugi midagi ei saadeta.",
     "loadError": "Osa elukaare andmeid ei õnnestunud praegu laadida. Nähtav on ehtne, kuid võib olla puudulik.",
     "stage": {
@@ -5960,7 +5985,7 @@
       "last_owner": "Viimase omaniku kirjet ei saa lõpetada — määrake enne teine omanik.",
       "limit_reached": "Selle organisatsiooni limiit on täis.",
       "invalid": "Vigased andmed.",
-      "needs_migration": "See võimalus pole selles keskkonnas veel sisse lülitatud.",
+      "needs_migration": "Praegu pole saadaval.",
       "not_authorized": "Teil pole selleks toiminguks õigust.",
       "not_found": "Kirje pole saadaval.",
       "error": "Ebaõnnestus — proovige uuesti."
@@ -6001,7 +6026,7 @@
   "procurement": {
     "title": "Ostud",
     "intro": "Küsige materjale või teenuseid, märkige üles tarnijate pakkumised ja pange kirja, mis valiti. Miski siin ei võta tarnijaga ühendust ega telli midagi — see on teie arvestus.",
-    "needsMigration": "Ostutaotlused pole selles keskkonnas veel lubatud.",
+    "needsMigration": "Praegu pole saadaval.",
     "readError": "Ostutaotlusi ei õnnestunud laadida. Proovige uuesti.",
     "empty": "Ostutaotlusi veel pole.",
     "noOffers": "Tarnijate pakkumisi pole veel kirja pandud.",
@@ -6060,7 +6085,7 @@
       "unlinked": "Arve seos eemaldatud.",
       "cancelled": "Ostutaotlus tühistatud.",
       "invalid": "Kontrollige sisestatud andmeid.",
-      "needs_migration": "Ostutaotlused pole selles keskkonnas veel lubatud.",
+      "needs_migration": "Praegu pole saadaval.",
       "not_authorized": "Te ei saa seda selle taotluse puhul teha.",
       "not_found": "Seda ostutaotlust ei leitud.",
       "not_editable": "Selles olekus pole see samm võimalik.",
@@ -6079,7 +6104,7 @@
   "trips": {
     "title": "Lähetused",
     "intro": "Taotlege lähetust, saage kinnitus ja hoidke selle kulud koos. Miski siin ei broneeri reise ega maksa raha välja — see on teie arvestus.",
-    "needsMigration": "Lähetused pole selles keskkonnas veel lubatud.",
+    "needsMigration": "Praegu pole saadaval.",
     "readError": "Lähetusi ei õnnestunud laadida. Proovige uuesti.",
     "empty": "Lähetusi veel pole.",
     "orgHeading": "Teie juhitavate inimeste lähetused",
@@ -6132,7 +6157,7 @@
       "unlinked": "Kirje eemaldati lähetuselt.",
       "invalid": "Kontrollige sisestatud andmeid.",
       "invalid_dates": "Kontrollige lähetuse kuupäevi.",
-      "needs_migration": "Lähetused pole selles keskkonnas veel lubatud.",
+      "needs_migration": "Praegu pole saadaval.",
       "not_authorized": "Te ei saa seda selle lähetuse puhul teha.",
       "not_found": "Seda lähetust ei leitud.",
       "not_editable": "Selles olekus pole see samm võimalik.",
@@ -6149,7 +6174,7 @@
     "title": "[EN] Training and certificates",
     "intro": "[EN] Courses your organization asks people to complete, and the certificates that follow.",
     "evidenceNote": "[EN] A certificate here shows that a course was finished. It does not say how well someone works — that stays your work entries and your manager's confirmations.",
-    "notAvailable": "[EN] Training is not switched on in this workspace yet.",
+    "notAvailable": "Praegu pole saadaval.",
     "status": {
       "assigned": "[EN] To do",
       "completed": "[EN] Done",
@@ -6211,7 +6236,7 @@
       "invalid_file": "[EN] That file is not in your organization.",
       "invalid_skill": "[EN] That skill was not found.",
       "invalid_state": "[EN] That cannot be done at this step.",
-      "needs_migration": "[EN] Training is not switched on in this workspace yet.",
+      "needs_migration": "Praegu pole saadaval.",
       "not_authorized": "[EN] You do not have the rights for this.",
       "not_found": "[EN] Not found.",
       "limit_reached": "[EN] There is too much here already.",
@@ -6222,7 +6247,7 @@
     "title": "[EN] Development conversations",
     "intro": "[EN] A recorded conversation between two named people about work and what comes next.",
     "noScoreNote": "[EN] There is no rating, no score and no ranking here — by design. Everything below is either a recorded fact, a link to real work, or one person's own words, clearly labelled.",
-    "notAvailable": "[EN] Development conversations are not switched on in this workspace yet.",
+    "notAvailable": "Praegu pole saadaval.",
     "empty": "[EN] No conversation involves you yet.",
     "cycles": {
       "heading": "[EN] Periods",
@@ -6288,7 +6313,7 @@
       "invalid_subject": "[EN] That person is not in your organization.",
       "invalid_reviewer": "[EN] That person cannot be the reviewer.",
       "invalid_reference": "[EN] That link does not point at real work of this person.",
-      "needs_migration": "[EN] Development conversations are not switched on in this workspace yet.",
+      "needs_migration": "Praegu pole saadaval.",
       "not_authorized": "[EN] You do not have the rights for this.",
       "not_found": "[EN] Not found.",
       "limit_reached": "[EN] There is too much here already.",
@@ -6299,7 +6324,7 @@
     "title": "[EN] Management decisions",
     "intro": "[EN] What was put to the management team, what was decided, who is responsible and by when.",
     "engineNote": "[EN] The vote happens in the approvals list above: a template that needs every approver is a unanimous vote, one that needs any approver is decided by the first answer. Nothing here counts votes.",
-    "notAvailable": "[EN] Management decisions are not switched on in this workspace yet.",
+    "notAvailable": "Praegu pole saadaval.",
     "empty": "[EN] No decisions recorded yet.",
     "form": {
       "title": "[EN] Question",
@@ -6352,7 +6377,7 @@
       "invalid_document": "[EN] That document is not in your organization.",
       "invalid_task": "[EN] That task is not yours.",
       "invalid_responsible": "[EN] That person is not in your organization.",
-      "needs_migration": "[EN] Management decisions are not switched on in this workspace yet.",
+      "needs_migration": "Praegu pole saadaval.",
       "not_authorized": "[EN] You do not have the rights for this.",
       "not_found": "[EN] Not found.",
       "limit_reached": "[EN] There is too much here already.",
@@ -6482,7 +6507,7 @@
         "duplicatesFound": "Identseid olemasolevaid kirjeid: {count}. Midagi ei kirjutatud — märkige kinnitus, et need siiski kirjutada.",
         "noRows": "Pole ridu, mida kirjutada.",
         "tooManyRows": "Ühe impordi jaoks liiga palju ridu — jagage fail osadeks.",
-        "needsMigration": "See funktsioon pole selles andmebaasis veel lubatud.",
+        "needsMigration": "Praegu pole saadaval.",
         "notAuthorized": "Te ei tohi neid tunde kirjutada.",
         "generic": "Töötlemine ebaõnnestus. Proovige uuesti."
       }
@@ -6532,6 +6557,14 @@
       "free": "vaba",
       "away": "eemal",
       "awayUntil": "eemal kuni {date}",
+      "summary": "{free} vaba · {committed} tööl · {away} eemal",
+      "onWork": "projektil {project}",
+      "booked": "broneeritud",
+      "until": "kuni {date}",
+      "undated": "kuupäevad puuduvad",
+      "outlookHeading": "Vabad inimesed, järgmised 4 nädalat",
+      "outlookWeek": "Alates {date}: {free} / {total} vaba",
+      "outlookNote": "Registreeritud broneeringute ja puhkuste põhjal — hinnang, mitte lubadus.",
       "absencesUnknown": "Puudumisi veel ei salvestata — vaba tähendab, et keegi pole teisiti öelnud.",
       "more": "{count, plural, =1 {veel 1 inimene planeerimislehel} other {veel # inimest planeerimislehel}}",
       "assign": "Määra projekti",
@@ -6557,7 +6590,18 @@
       "openNeed": "Ava vajadus",
       "gapsRow": "{count, plural, =1 {1 inimesel projektis {project} puuduvad dokumendid} other {# inimesel projektis {project} puuduvad dokumendid}}",
       "gapsCta": "Kontrolli dokumente",
-      "needsCta": "Kirjelda vajadust"
+      "needsCta": "Kirjelda vajadust",
+      "noOneFrom": "Alates {date} pole kedagi vaba",
+      "unclear": "{count, plural, =1 {1 inimesel on töö ilma kuupäevadeta — vaba aega võib olla vähem} other {# inimesel on töö ilma kuupäevadeta — vaba aega võib olla vähem}}",
+      "fit": {
+        "fits": "Vabadest inimestest piisab",
+        "from": "Vabadest inimestest piisab alates {date}",
+        "short": "{count, plural, =1 {Puudu 1 inimene} other {Puudu # inimest}}",
+        "some": "Vabadest inimestest piisab vaid mõnel nädalal",
+        "unknown": "Võrdlemiseks pole piisavalt infot"
+      },
+      "opportunity": "{count, plural, =1 {Kuni 1 inimene on vaba alates {date}} other {Kuni # inimest on vabad alates {date}}}",
+      "opportunityCta": "Otsi tööd"
     },
     "attention": {
       "heading": "Vajab teid",
@@ -6651,7 +6695,7 @@
       "invalid_role": "Sobimatu roll.",
       "last_owner": "Viimane omanik ei saa taanduda — aktiveeri enne teine omanik.",
       "no_workspace": "Vali kõigepealt organisatsiooni tööruum.",
-      "needs_migration": "See võimalus pole selles keskkonnas veel sisse lülitatud.",
+      "needs_migration": "Praegu pole saadaval.",
       "invalid": "Sobimatud andmed.",
       "error": "Ei õnnestunud — proovi uuesti."
     },
@@ -6738,5 +6782,44 @@
       "confirmed": "Confirmed and shared",
       "failed": "Could not confirm."
     }
+  },
+  "companyWorkHistory": {
+    "title": "Ettevõtte imporditud töö ajalugu",
+    "subtitle": "Mida {name} on oma varasematest töölehtedest talletanud: kus töö toimus, millal, kes töötas, mida tehti ja kui kaua.",
+    "badge": "Imporditud ettevõtte ajalugu",
+    "provenance": "Võetud ettevõtte {name} enda töölehelt. Inimesed ei kasutanud tollal LabourMarket.ai-d ja andmeid ei ole sõltumatult kontrollitud.",
+    "unavailable": "Imporditud töö ajalugu ei õnnestunud praegu lugeda. See ei tähenda, et seda poleks.",
+    "empty": "Ettevõttel {name} pole imporditud töö ajalugu salvestatud.",
+    "elsewhere": "{name} sisaldab {count, plural, one {# imporditud kirje} other {# imporditud kirjet}} varasema töö kohta. Vaatamiseks lülitu sellesse tööruumi.",
+    "stats": {
+      "places": "Kohad",
+      "people": "Inimesed",
+      "hours": "Salvestatud tunnid",
+      "period": "Periood"
+    },
+    "place": "Koht",
+    "noPlaceName": "Kohta pole märgitud",
+    "open": "Ava",
+    "people": "{count, plural, one {# inimene} other {# inimest}}",
+    "entries": "{count, plural, one {# kirje} other {# kirjet}}",
+    "hoursShare": "{hours} h sellel kohal, võrreldes kõige tihedama kohaga",
+    "noPlace": "{count, plural, one {# kirje} other {# kirjet}} ({hours} h) ei nimeta allikas kohta.",
+    "periodAside": "Sellest {hours} h on perioodi kogusummad, mis on antud ajavahemikule ja hoitud eraldi üksikutest päevadest.",
+    "scope": {
+      "title": "Mida see import sisaldab",
+      "carried": "Allikas sisaldab: kes töötas, mis päeval, mitu tundi, mida tehti ja koht nii, nagu see on kirjutatud.",
+      "missing": "Allikas puudub: klient, aadress ja projekt. Neid näidatakse allikas puuduvatena ning neid ei täideta kunagi."
+    },
+    "facts": {
+      "customer": "Klient",
+      "address": "Aadress",
+      "project": "Projekt",
+      "notInSource": "Allikas puudub",
+      "linked": "Seotud"
+    },
+    "whoWorked": "Kes siin töötas",
+    "timeline": "Mida tehti",
+    "back": "Tagasi ajaloo juurde",
+    "placeMissing": "Seda kohta pole aktiivse tööruumi imporditud ajaloos."
   }
 }

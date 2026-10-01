@@ -1,4 +1,22 @@
 {
+  "companyModel": {
+    "title": "Bedrijfsbeheer",
+    "primary": "Behoefte publiceren",
+    "need": "Wat we nodig hebben",
+    "offer": "Wat we aanbieden",
+    "market": "Marktplaats",
+    "people": "Mensen & team",
+    "projects": "Projecten & objecten",
+    "messages": "Berichten",
+    "more": "Meer",
+    "clients": "Klanten & leveranciers",
+    "candidates": "Kandidaten",
+    "calendar": "Agenda",
+    "capacity": "Capaciteit",
+    "work": "Werk & uren",
+    "results": "Resultaten",
+    "history": "Geschiedenis"
+  },
   "publicDemand": {
     "title": "Actuele marktvraag",
     "subtitleAgency": "Wat de publieke markt nu vraagt — dezelfde pool die je kandidaten op het bord zien.",
@@ -205,7 +223,7 @@
     "outcome": {
       "saved": "Opgeslagen.",
       "reported": "Gebrek gemeld.",
-      "needs_migration": "Nog niet beschikbaar — de opleverupdate is niet toegepast.",
+      "needs_migration": "Momenteel niet beschikbaar.",
       "invalid": "Controleer de gegevens.",
       "auth": "Log opnieuw in.",
       "not_authorized": "U kunt alleen gebreken van uw eigen projecten beheren.",
@@ -254,7 +272,7 @@
     },
     "outcome": {
       "saved": "Opgeslagen.",
-      "needs_migration": "Nog niet beschikbaar — de commerciële update is niet toegepast.",
+      "needs_migration": "Momenteel niet beschikbaar.",
       "invalid": "Controleer de gegevens.",
       "auth": "Log opnieuw in.",
       "not_authorized": "U kunt alleen uw eigen records beheren.",
@@ -321,7 +339,7 @@
     "outcome": {
       "saved": "Opgeslagen.",
       "acknowledged": "Bevestigd.",
-      "needs_migration": "Nog niet beschikbaar — de middelen-update is niet toegepast.",
+      "needs_migration": "Momenteel niet beschikbaar.",
       "invalid": "Controleer de gegevens.",
       "auth": "Log opnieuw in.",
       "not_authorized": "Je mag dit niet doen.",
@@ -379,7 +397,7 @@
     "outcome": {
       "saved": "Opgeslagen.",
       "deleted": "Verwijderd.",
-      "needs_migration": "Nog niet beschikbaar — de economie-update is niet toegepast.",
+      "needs_migration": "Momenteel niet beschikbaar.",
       "invalid": "Voer een geldig bedrag in.",
       "auth": "Log opnieuw in.",
       "not_authorized": "U kunt alleen budgetten van uw eigen projecten beheren.",
@@ -394,7 +412,7 @@
       "noneToday": "Geen van uw medewerkers heeft vandaag een goedgekeurde afwezigheid.",
       "noneWeek": "Geen goedgekeurde afwezigheden in de komende 7 dagen.",
       "coverage": "Op basis van goedgekeurde afwezigheden van {count} beheerde medewerkers. Redenen blijven privé.",
-      "unavailable": "Het afwezigheidsschema is hier nog niet ingeschakeld."
+      "unavailable": "Momenteel niet beschikbaar."
     },
     "types": {
       "annual_leave": "Jaarlijks verlof",
@@ -414,7 +432,7 @@
       "cancelled": "Aanvraag geannuleerd.",
       "approved": "Goedgekeurd.",
       "rejected": "Afgewezen.",
-      "needs_migration": "Nog niet beschikbaar — de personeelsupdate is niet toegepast.",
+      "needs_migration": "Momenteel niet beschikbaar.",
       "invalid": "Controleer de data en gegevens.",
       "auth": "Log opnieuw in.",
       "not_authorized": "Je mag dit niet doen.",
@@ -476,7 +494,7 @@
     "laneWork": "{n} werk",
     "lanesTitle": "Fasen",
     "moreInList": "+{n} meer in de lijst",
-    "lanesUnavailable": "Fasen zijn nog niet beschikbaar — de projectoperaties-update is niet toegepast.",
+    "lanesUnavailable": "Momenteel niet beschikbaar.",
     "lanesEmpty": "Nog geen fasen. Voeg de eerste fase toe in de fasensectie hieronder.",
     "unplacedWork": "{n} open werk zonder fasedatum — zie de takensectie hieronder.",
     "peopleTitle": "Op het project",
@@ -500,7 +518,7 @@
       "emptyRoster": "Uw lijst heeft nog geen actieve mensen.",
       "unavailable": "De lijst kon nu niet worden gelezen.",
       "why": "Waarom deze: op uw lijst en zonder goedgekeurde afwezigheid tussen {from} en {to}.",
-      "absencesUnknown": "Afwezigheden staan nog niet aan, dus niets zegt het tegendeel.",
+      "absencesUnknown": "Momenteel niet beschikbaar.",
       "more": "+{n} vrije mensen buiten dit beeld.",
       "alreadyOn": "kan komen — heeft in deze periode al werk",
       "alreadyOnNamed": "kan komen — zit al op {what}"
@@ -513,7 +531,7 @@
     },
     "saved": "Opgeslagen — opnieuw gelezen uit het record.",
     "errors": {
-      "needs_migration": "Nog niet beschikbaar — de update is niet toegepast.",
+      "needs_migration": "Momenteel niet beschikbaar.",
       "not_authorized": "U kunt dit project niet wijzigen.",
       "invalid": "Die wijziging is hier niet toegestaan.",
       "error": "Er ging iets mis. Probeer het opnieuw."
@@ -585,7 +603,7 @@
       "added": "Fase toegevoegd.",
       "updated": "Fase bijgewerkt.",
       "deleted": "Fase verwijderd.",
-      "needs_migration": "Nog niet beschikbaar — de projectoperaties-update is niet toegepast.",
+      "needs_migration": "Momenteel niet beschikbaar.",
       "invalid": "Controleer de gegevens en probeer opnieuw.",
       "auth": "Log opnieuw in.",
       "not_authorized": "U kunt alleen fasen van uw eigen projecten beheren.",
@@ -664,7 +682,7 @@
     "intro": "Cijfers geteld uit je eigen records, met de rekenbasis vermeld onder elke sectie, en de exports die al bestaan.",
     "honestyNote": "Alleen tellingen over je eigen gegevens — geen benchmarks, geen scores, geen prognoses.",
     "state": {
-      "needsMigration": "Deze cijfers zijn in deze omgeving nog niet ingeschakeld. Er wordt geen getal getoond in plaats van echte gegevens.",
+      "needsMigration": "Momenteel niet beschikbaar.",
       "unavailable": "Deze cijfers kunnen nu niet gelezen worden. Er wordt niets geschat in hun plaats."
     },
     "basis": {
@@ -798,7 +816,7 @@
       "collapse": "Gedetailleerd rapport verbergen",
       "ledger": {
         "measured": "Eigen registraties van uw organisatie in dit venster: {hours} u over {workers, plural, one {# persoon} other {# personen}} — apart gehouden, nooit bij het logboek opgeteld.",
-        "none": "Deze database bevat geen uurregistraties van de organisatie.",
+        "none": "Momenteel niet beschikbaar.",
         "unknown": "De registraties van de organisatie konden niet worden gelezen — dat is geen nul uur.",
         "truncated": "Berust op de eerste {count} registraties."
       }
@@ -963,7 +981,7 @@
     "uploadFailed": "De foto kon niet worden geüpload. Probeer het opnieuw.",
     "invalidFile": "De foto moet JPG, PNG of WebP zijn.",
     "tooLarge": "De foto is te groot. Probeer een andere.",
-    "notReady": "Foto-upload is in deze omgeving nog niet beschikbaar.",
+    "notReady": "Momenteel niet beschikbaar.",
     "alt": "Profielfoto",
     "hint": "JPG, PNG of WebP, tot 5 MB. De foto is alleen zichtbaar voor jou."
   },
@@ -1093,7 +1111,7 @@
           "desired_market": "Gewenste markt",
           "demand_anchor": "Geverifieerde behoeftelocatie"
         },
-        "storeInactive": "De opslag voor bedrijfsterritoria is in deze omgeving nog niet geactiveerd — activering is een beslissing van de eigenaar.",
+        "storeInactive": "Momenteel niet beschikbaar.",
         "readError": "Bedrijfsterritoria konden nu niet worden geladen.",
         "empty": "Nog geen bedrijfsterritoria. Voeg de werklocaties van uw bedrijf toe in de bedrijfswerkruimte.",
         "visibilityNote": "Bedrijfsterritoria worden getekend als omlijnde gebieden op basis van door het bedrijf ingevoerde geografie — nooit als markers die op personen lijken."
@@ -1745,6 +1763,14 @@
       "free": "vrij",
       "away": "afwezig",
       "awayUntil": "afwezig tot {date}",
+      "summary": "{free} vrij · {committed} aan het werk · {away} afwezig",
+      "onWork": "op {project}",
+      "booked": "geboekt",
+      "until": "tot {date}",
+      "undated": "geen data ingesteld",
+      "outlookHeading": "Vrije mensen, komende 4 weken",
+      "outlookWeek": "Vanaf {date}: {free} van {total} vrij",
+      "outlookNote": "Op basis van geregistreerde boekingen en verlof — een schatting, geen belofte.",
       "absencesUnknown": "Afwezigheden worden nog niet vastgelegd — vrij betekent dat niemand iets anders heeft gezegd.",
       "more": "{count, plural, =1 {nog 1 persoon op de planningspagina} other {nog # mensen op de planningspagina}}",
       "assign": "Op een project zetten",
@@ -1770,7 +1796,18 @@
       "openNeed": "Behoefte openen",
       "gapsRow": "{count, plural, =1 {1 persoon op {project} mist documenten} other {# mensen op {project} missen documenten}}",
       "gapsCta": "Documenten controleren",
-      "needsCta": "Een behoefte beschrijven"
+      "needsCta": "Een behoefte beschrijven",
+      "noOneFrom": "Vanaf {date} is niemand vrij",
+      "unclear": "{count, plural, =1 {1 persoon heeft werk zonder data — vrije tijd kan lager zijn} other {# personen hebben werk zonder data — vrije tijd kan lager zijn}}",
+      "fit": {
+        "fits": "Je vrije mensen dekken het",
+        "from": "Vrije mensen dekken het vanaf {date}",
+        "short": "{count, plural, =1 {1 persoon tekort} other {# personen tekort}}",
+        "some": "Vrije mensen dekken het maar enkele weken",
+        "unknown": "Te weinig gegevens om te vergelijken"
+      },
+      "opportunity": "{count, plural, =1 {Tot 1 persoon is vrij vanaf {date}} other {Tot # personen zijn vrij vanaf {date}}}",
+      "opportunityCta": "Zoek werk"
     },
     "attention": {
       "heading": "Heeft u nodig",
@@ -4489,6 +4526,7 @@
         "planning": "Kalender",
         "network": "Netwerk",
         "playerCard": "Mijn professionele profiel",
+        "companyProfile": "Bedrijfsprofiel",
         "adminPlatform": "Platformbeheer"
       },
       "roleNotice": {
@@ -5385,7 +5423,7 @@
       "submit": "Dien verwijderingsverzoek in",
       "submitted": "Verzoek ingediend",
       "submittedBody": "Een persoon beoordeelt het en neemt contact met je op via het e-mailadres van je account.",
-      "unavailable": "Verwijderingsverzoeken worden nog niet aangenomen — deze functie staat nog niet aan. Je kunt wel nu al een kopie van je gegevens downloaden.",
+      "unavailable": "Momenteel niet beschikbaar.",
       "tooManyOpen": "Je hebt te veel openstaande verzoeken — wacht tot ze zijn beoordeeld.",
       "error": "Er is iets misgegaan. Probeer het opnieuw."
     },
@@ -5565,8 +5603,8 @@
         {
           "heading": "Standaard gesloten",
           "items": [
-            "Tabellen met gebruikersgegevens worden beschermd door toegangsregels in de database zelf. Als geen regel expliciet toegang verleent, zijn de gegevens niet zichtbaar — zelfs niet voor andere ingelogde gebruikers.",
-            "Deze regels werken op databaseniveau, niet alleen in de interface, en worden gedekt door geautomatiseerde tests."
+            "Momenteel niet beschikbaar.",
+            "Momenteel niet beschikbaar."
           ]
         },
         {
@@ -5610,7 +5648,7 @@
         {
           "heading": "Infrastructuurleveranciers (subverwerkers)",
           "items": [
-            "Supabase — database, gebruikersaanmelding en bestandsopslag. Gegevens worden gehost in de Europese Unie (regio eu-west-1).",
+            "Momenteel niet beschikbaar.",
             "Vercel — hosting van de applicatie en levering van inhoud.",
             "GitHub — opslag van de broncode. Er worden daar geen gebruikersgegevens bewaard.",
             "Er is momenteel geen e-mailleverancier, AI-leverancier, vertaalleverancier of betalingsleverancier actief. Wordt er een geactiveerd, dan wordt eerst deze lijst bijgewerkt."
@@ -5670,7 +5708,7 @@
         {
           "heading": "Als iets er niet goed uitziet",
           "items": [
-            "De toegangsregels in de database zijn de bron van waarheid, en deze pagina volgt ze. Als iets hier niet overeenkomt met wat je ziet, neem dan contact met ons op — een persoon zal het beoordelen."
+            "Momenteel niet beschikbaar."
           ]
         }
       ],
@@ -5979,6 +6017,10 @@
       "reservation": {
         "collidesTitle": "Op deze dagen al vastgelegd",
         "notBlocking": "Dit blokkeert de toewijzing niet — jij beslist.",
+        "alternativesTitle": "Vrij in deze periode",
+        "swap": "In plaats daarvan toewijzen",
+        "undo": "Toewijzing ongedaan maken",
+        "decided": "Klaar",
         "unknown": "We konden niet bevestigen dat deze dagen vrij zijn. Dat is niet hetzelfde als vrij.",
         "source": {
           "project": "Projecttoewijzing",
@@ -6470,7 +6512,13 @@
       "map": "Kaart",
       "mapNote": "Waar het werk en de diensten zijn",
       "diary": "Werkjournaal",
-      "diaryNote": "Afgerond werk wordt als feit vastgelegd"
+      "diaryNote": "Afgerond werk wordt als feit vastgelegd",
+      "scouting": "Kandidaten",
+      "scoutingNote": "Vind de juiste mensen voor je behoefte",
+      "listings": "Advertenties",
+      "listingsNote": "Ruimtes, uitrusting, voertuigen – aanbieden of zoeken",
+      "needs": "Vraag & aanbod",
+      "needsNote": "Publiceer wat je nodig hebt of kunt bieden"
     }
   },
   "learning": {
@@ -6520,7 +6568,7 @@
     "pageLead": "Zet de echte diensten die je aanbiedt op een rij en beheer je eigen aanbod.",
     "title": "Jouw dienstenaanbod",
     "intro": "Echte diensten die je aanbiedt. Activeer er een om die vindbaar te maken voor ingelogde leden; concepten en gepauzeerde diensten blijven privé voor jou.",
-    "notAvailable": "Dienstenaanbod is in deze omgeving nog niet ingeschakeld.",
+    "notAvailable": "Momenteel niet beschikbaar.",
     "empty": "Nog geen dienstenaanbod. Voeg de eerste echte dienst toe die je aanbiedt.",
     "addButton": "Dienst toevoegen",
     "form": {
@@ -6613,7 +6661,7 @@
         "errorTooLarge": "Bestand is te groot (tot 10 MB).",
         "errorBadType": "Dit bestandstype wordt niet ondersteund. Toegestaan: JPG, PNG, WebP, PDF, TXT.",
         "errorTooMany": "Maximaal 5 bijlagen per bericht.",
-        "errorNeedsSetup": "Bijlagen zijn in deze omgeving nog niet ingeschakeld.",
+        "errorNeedsSetup": "Momenteel niet beschikbaar.",
         "blockedWhileUploading": "Wacht tot de bijlagen zijn geüpload.",
         "blockedFailed": "Verwijder de mislukte bijlage of upload deze opnieuw.",
         "partialFailure": "Het bericht is verzonden, maar sommige bijlagen konden niet worden toegevoegd. Probeer ze opnieuw te verzenden."
@@ -6749,7 +6797,7 @@
     "sentTitle": "Verzoek geregistreerd",
     "sentBody": "Een persoon beoordeelt het en neemt via het platform contact op. Er wordt niet automatisch een specialist toegewezen — je hoort na de beoordeling wat de volgende stappen zijn.",
     "errorGeneric": "Registreren is niet gelukt. Probeer het opnieuw.",
-    "notReady": "Hulpverzoeken zijn in deze omgeving nog niet ingeschakeld.",
+    "notReady": "Momenteel niet beschikbaar.",
     "tooManyOpen": "Je hebt te veel openstaande hulpverzoeken — wacht tot de bestaande verzoeken zijn beoordeeld.",
     "noteTooLong": "De beschrijving is te lang (max. 500 tekens).",
     "internalNote": "Interne registratie — er worden geen e-mails of berichten naar wie dan ook verzonden.",
@@ -6839,7 +6887,7 @@
     "title": "Opvolgwachtrij",
     "intro": "Interne vervolgacties voor het operatorteam: wat opgevolgd moet worden, voor wie, en de huidige status. Alleen echte vastgelegde taken.",
     "honestNote": "Alleen intern. Het aanmaken of afronden van een taak verzendt niets naar wie dan ook — geen e-mail, geen sms, geen berichten. Dit is het eigen geheugen van het team voor vervolgacties.",
-    "preApply": "De opvolgwachtrij is in deze omgeving nog niet beschikbaar. Er wordt niets getoond omdat er niets is vastgelegd.",
+    "preApply": "Momenteel niet beschikbaar.",
     "queueHeading": "Open",
     "queueEmpty": "Geen openstaande opvolgtaken. Zodra het team een vervolgactie vastlegt, verschijnt die hier.",
     "resolvedHeading": "Recent afgerond",
@@ -6870,7 +6918,7 @@
     "outcome": {
       "created": "Taak vastgelegd. Er is niets naar wie dan ook verzonden.",
       "updated": "Taak bijgewerkt.",
-      "needsMigration": "De opvolgopslag is in deze omgeving nog niet beschikbaar.",
+      "needsMigration": "Momenteel niet beschikbaar.",
       "notAuthorized": "Alleen operators kunnen opvolgtaken beheren.",
       "limitReached": "De limiet voor openstaande taken is bereikt — rond eerst bestaande taken af.",
       "notFound": "Deze taak bestaat niet meer.",
@@ -6885,7 +6933,7 @@
     "responsibleHeading": "Verantwoordelijk",
     "responsibleEmpty": "Nog geen actieve werknemerstoewijzingen — wijs hierboven werknemers toe om vast te leggen wie verantwoordelijk is.",
     "checklistNote": "Documenten en gereedheid worden bijgehouden in de checklist per werknemer hierboven — het paspoort dupliceert die niet. Fotobijlagen worden nog niet ondersteund.",
-    "preApply": "Het opleveringsverslag is in deze omgeving nog niet beschikbaar. Er wordt niets getoond omdat er niets is vastgelegd.",
+    "preApply": "Momenteel niet beschikbaar.",
     "statusHeading": "Verklaarde fase",
     "statusNone": "Nog geen fase verklaard.",
     "statusDisclaimer": "Verklaard door de projectmanager. “Oplevering verklaard” betekent dat de manager heeft verklaard dat de oplevering heeft plaatsgevonden — het platform verifieert dit niet.",
@@ -6912,7 +6960,7 @@
     },
     "outcome": {
       "added": "Vermelding vastgelegd.",
-      "needsMigration": "Het opleveringsverslag is in deze omgeving nog niet beschikbaar.",
+      "needsMigration": "Momenteel niet beschikbaar.",
       "notAuthorized": "Alleen een manager van dit project kan paspoortvermeldingen toevoegen.",
       "limitReached": "Het paspoort van dit project heeft de vermeldingslimiet bereikt.",
       "invalid": "De vermelding is ongeldig — controleer het type, de fase en de tekst.",
@@ -6943,11 +6991,11 @@
       "invalidName": "De naam moet 2–80 tekens lang zijn.",
       "notAllowed": "Alleen een organisatie-eigenaar kan een brigade aanmaken.",
       "limitReached": "Brigadelimiet bereikt (20).",
-      "needsMigration": "Het brigademodel is in deze omgeving nog niet ingeschakeld.",
+      "needsMigration": "Momenteel niet beschikbaar.",
       "error": "De brigade kon niet worden aangemaakt. Er is niets opgeslagen."
     },
     "consentNote": "Het lidmaatschap begint pas nadat de werknemer de uitnodiging zelf heeft geaccepteerd — we voegen niemand stilzwijgend toe.",
-    "inviteNotEnabled": "Ploeguitnodigingen zijn in deze omgeving nog niet ingeschakeld, dus leden kunnen hier niet worden uitgenodigd.",
+    "inviteNotEnabled": "Momenteel niet beschikbaar.",
     "invitePendingOption": "{name} (uitnodiging verstuurd)",
     "provenance": {
       "invited": "toegetreden na eigen acceptatie",
@@ -6961,7 +7009,7 @@
       "rateLimited": "Uitnodigingslimiet voorlopig bereikt. Probeer het later opnieuw.",
       "notAuthorized": "Alleen de brigade-eigenaar kan uitnodigingen versturen.",
       "noEmail": "Deze werknemer heeft geen bruikbaar e-mailadres, dus de uitnodiging kan niet worden aangemaakt.",
-      "needsMigration": "Uitnodigingen zijn in deze omgeving nog niet ingeschakeld.",
+      "needsMigration": "Momenteel niet beschikbaar.",
       "error": "De uitnodiging kon niet worden verstuurd. Er is niets gewijzigd."
     },
     "details": {
@@ -6974,7 +7022,7 @@
       "noteLabel": "Notitie (alleen zichtbaar voor je managers)",
       "save": "Gegevens opslaan",
       "saving": "Opslaan…",
-      "notEnabled": "Ploeggegevens zijn voorbereid, maar in deze omgeving nog niet ingeschakeld.",
+      "notEnabled": "Momenteel niet beschikbaar.",
       "status": {
         "availableNow": "Nu beschikbaar",
         "availableFrom": "Beschikbaar vanaf een datum",
@@ -7008,7 +7056,7 @@
     "enquiries": {
       "heading": "Aanvragen voor deze ploeg ({count} open)",
       "empty": "Nog geen aanvragen. Zodra een werkgever naar deze ploeg vraagt, zie je dat hier.",
-      "notEnabled": "Ploegaanvragen zijn voorbereid, maar in deze omgeving nog niet ingeschakeld.",
+      "notEnabled": "Momenteel niet beschikbaar.",
       "accept": "Accepteren",
       "decline": "Afwijzen",
       "unknownProposer": "Onbekende afzender",
@@ -7041,7 +7089,7 @@
     "submit": "Aanvraag versturen",
     "sending": "Versturen…",
     "cancel": "Annuleren",
-    "notEnabled": "Ploegaanvragen zijn voorbereid, maar in deze omgeving nog niet ingeschakeld.",
+    "notEnabled": "Momenteel niet beschikbaar.",
     "outcome": {
       "created": "Aanvraag verstuurd. Het antwoord van de ploeg zie je onder Mijn netwerk.",
       "duplicateOpen": "Je hebt al een openstaande aanvraag voor deze ploeg.",
@@ -7622,7 +7670,7 @@
       "formatStatus": "PDF: beschikbaar · CSV: beschikbaar · Excel / Word: in voorbereiding"
     },
     "disclaimer": "Statussen zijn gebaseerd op openbaar vermelde vereisten en je eigen invoer. De uiteindelijke conformiteit wordt gecontroleerd door de autoriteiten of een advocaat — dit is geen juridische garantie.",
-    "needsMigration": "De documentopslaglaag is in deze omgeving nog niet ingeschakeld.",
+    "needsMigration": "Momenteel niet beschikbaar.",
     "guidance": {
       "title": "Documentrichtlijnen per land (concept)",
       "intro": "Informatieve richtlijnen over documenten die nodig kunnen zijn. Geen juridisch advies.",
@@ -7761,14 +7809,14 @@
       "submit": "Ter verificatie versturen",
       "sent": "Ter verificatie verstuurd",
       "notReady": "Alleen een document met status gereed kan ter verificatie worden verstuurd.",
-      "unavailable": "Verificatie is in deze omgeving niet beschikbaar.",
+      "unavailable": "Momenteel niet beschikbaar.",
       "error": "Versturen mislukt — probeer het opnieuw."
     },
     "workProof": {
       "title": "Werkbewijs & exports",
       "journalTitle": "Bewijs uit het werkdagboek",
       "journalCounts": "Notities: {entries} · Foto's: {photos}",
-      "countsUnavailable": "Aantallen zijn in deze omgeving niet beschikbaar.",
+      "countsUnavailable": "Momenteel niet beschikbaar.",
       "galleryNote": "Foto's staan in uw dagboeknotities; projectgalerijen vindt u op de pagina van elk project."
     },
     "uploadNote": "Bestanden uploaden kan nog niet. U registreert wat u hebt en tot wanneer het geldig is — de bestanden zelf blijven bij u.",
@@ -7781,8 +7829,8 @@
       "expiringLabel": "Verloopt binnenkort",
       "attentionLabel": "Aandacht nodig",
       "consentNote": "Alleen aantallen — nooit documentinhoud. Een werknemer zonder toestemming verschijnt simpelweg niet.",
-      "noConsented": "Geen totalen op basis van toestemming — geen poolwerknemer heeft delen ingeschakeld, of uw organisatie beheert geen uitzendpool.",
-      "unavailable": "Totalen op basis van toestemming zijn in deze omgeving niet beschikbaar. Documenten zijn van de werknemers.",
+      "noConsented": "Momenteel niet beschikbaar.",
+      "unavailable": "Momenteel niet beschikbaar.",
       "projectAxisLink": "Gereedheidschecklists per project",
       "projectAxisNote": "De gereedheid van werknemers per project staat op de operationele pagina van elk project."
     },
@@ -7858,7 +7906,7 @@
       "path_mismatch": "De upload kon niet worden geverifieerd — er is niets opgeslagen. Probeer opnieuw.",
       "file_too_large": "Het bestand is groter dan 5 MB — er is niets opgeslagen.",
       "unsupported_type": "Dit bestandstype wordt niet ondersteund — gebruik PDF, Word of een foto.",
-      "needs_migration": "Bestandsupload is in deze omgeving nog niet ingeschakeld — er is niets opgeslagen.",
+      "needs_migration": "Momenteel niet beschikbaar. Er is niets opgeslagen.",
       "error": "Er is iets misgegaan — er is niets opgeslagen.",
       "updated": "De wijziging is opgeslagen.",
       "submitted": "Het document is ter goedkeuring gestuurd.",
@@ -7873,7 +7921,7 @@
     "title": "Documentenregister van het bedrijf",
     "intro": "Documenten van {org}: beleid, procedures, instructies en correspondentie, met versies en leesbevestigingen.",
     "unavailable": "Het documentenregister kan nu niet worden geladen.",
-    "preparing": "Het documentenregister is voorbereid maar in deze omgeving nog niet ingeschakeld.",
+    "preparing": "Momenteel niet beschikbaar.",
     "error": "Het documentenregister kon niet worden geladen — probeer het later opnieuw.",
     "empty": "Nog geen documenten geregistreerd.",
     "scopeNote": "Dit register bevat de documenten van de organisatie zelf. Persoonlijke documenten van werknemers blijven in hun eigen handen en worden hier nooit getoond.",
@@ -8523,7 +8571,7 @@
     "availableSupply": {
       "title": "Beschikbare arbeidskracht",
       "intro": "Ploegen en specialisten die bureaus en bedrijven als beschikbaar hebben opgegeven. U ziet de vorm van de capaciteit en waar die is — niet wie die aanbiedt.",
-      "notEnabled": "In deze omgeving nog niet ingeschakeld. Dat is een feit over de uitrol, geen uitspraak over de markt.",
+      "notEnabled": "Momenteel niet beschikbaar.",
       "readFailed": "De lijst met beschikbare arbeidskracht kon niet worden gelezen. Dit is een systeemprobleem, geen lege markt.",
       "empty": "Niemand heeft beschikbare arbeidskracht opgegeven die u nu kunt zien.",
       "unstatedRole": "Soort werk niet opgegeven",
@@ -8593,7 +8641,7 @@
       "freeTitle": "Vandaag gratis",
       "free": "Alles wat je op dit moment in het product kunt gebruiken is gratis — de pilot draait zonder betalingen en niets vraagt om een kaart.",
       "paidTitle": "Voorbereide betaalde plannen",
-      "paid": "De betaalde plannen hieronder zijn voorbereide afbakeningen: ze beschrijven wat bij de plannen Werknemer Plus, Bedrijf en Uitzendbureau zal horen zodra betalingen later worden ingeschakeld.",
+      "paid": "Momenteel niet beschikbaar.",
       "preparedTitle": "Voorbereid, niet koopbaar",
       "prepared": "Er is geen betaalpagina en er kan niets worden gekocht. Pilottoegang tot de omvang van betaalde plannen wordt handmatig door het team verleend."
     },
@@ -8831,7 +8879,7 @@
   },
   "adminLmc": {
     "title": "LMC-grootboek",
-    "intro": "Intern platformtegoed (1 LMC = 1 EUR intern tegoed). Live databasestand: schakelaars, uitstaande verplichting en tester-creditering. Alle commerciële schakelaars staan UIT; inschakelen is een besluit van de eigenaar.",
+    "intro": "Momenteel niet beschikbaar.",
     "unavailable": "Het grootboek kon met deze sessie niet worden gelezen — een mislukte leesactie, geen leeg grootboek.",
     "on": "Aan",
     "off": "Uit",
@@ -8858,7 +8906,7 @@
       "submitting": "Crediteren…",
       "granted": "Gecrediteerd",
       "replay": "Met deze sleutel is al eerder gecrediteerd — er is niets dubbel gecrediteerd",
-      "disabledHint": "Promotionele crediteringen staan in de database UIT — het grootboek zal deze creditering weigeren. Inschakelen is een besluit via het eigenaarskanaal.",
+      "disabledHint": "Momenteel niet beschikbaar.",
       "reasons": {
         "grants_disabled": "Geweigerd: promotionele crediteringen staan uit",
         "not_admin": "Geweigerd: admin-identiteit vereist",
@@ -8899,7 +8947,7 @@
     },
     "subs": {
       "title": "Abonnementen",
-      "unavailable": "Facturatietabellen nog niet toegepast (PR2 in behandeling).",
+      "unavailable": "Momenteel niet beschikbaar.",
       "empty": "Nog geen abonnementen.",
       "manual": "handmatige override"
     },
@@ -9540,8 +9588,7 @@
       "mapTitle": "Waar het werk is",
       "skipToList": "Naar de lijst",
       "placeLink": "Toon de kansen in dit land",
-      "sourcesIncomplete": "Sommige vacaturebronnen zijn tijdelijk niet beschikbaar, dus deze lijst kan onvolledig zijn.",
-      "youTitle": "Dit bent u — hiermee zoeken we waar u heen kunt"
+      "sourcesIncomplete": "Sommige vacaturebronnen zijn tijdelijk niet beschikbaar, dus deze lijst kan onvolledig zijn."
     },
     "savedSearches": {
       "title": "Opgeslagen zoekopdrachten",
@@ -9560,7 +9607,7 @@
         "invalid": "Controleer de naam en de filters.",
         "limit": "Je hebt de limiet bereikt.",
         "auth": "Log opnieuw in.",
-        "feature-absent": "Nog niet beschikbaar — de update voor opgeslagen zoekopdrachten is niet toegepast.",
+        "feature-absent": "Momenteel niet beschikbaar.",
         "error": "Er ging iets mis. Probeer opnieuw."
       }
     },
@@ -10120,7 +10167,6 @@
     "eyebrow": "Over het platform",
     "title": "Wat is LabourMarket.ai",
     "lede": "LabourMarket.ai is een besturingsplatform voor de arbeidsmarkt. Het verbindt mensen, werkgevers, bureaus, teams, projecten, opleidingen en arbeidsmarktdiensten rond echt werk — niet alleen een zoektocht naar vacatures.",
-    "statusNote": "Deze pagina legt uit hoe het systeem werkt, niet wat de uitrolstatus is. Wat u vandaag kunt gebruiken, ziet u in uw account; wat nog een richting is, staat als richting aangegeven.",
     "hero": {
       "lead": "De professionele waarde van een persoon mag niet verdwijnen telkens wanneer die van werkgever wisselt. Echt werk kan blijvende professionele geschiedenis worden: wat de persoon deed, waar, wanneer, hoe lang, in welke rol, met welke vaardigheden en welk bewijs en welke bevestiging dat ondersteunt.",
       "leadOrg": "Voor organisaties bouwt datzelfde echte werk het overzicht op van wat het bedrijf werkelijk heeft gedaan: projecten, teams, uitgevoerd werk, uren, competenties en bewijs.",
@@ -10343,7 +10389,6 @@
       "heading": "Wat het platform niet doet",
       "points": [
         "Het markeert zelf nooit iets als bevestigd — een bevestigde status komt altijd van een echt persoon.",
-        "Betalingen via het platform zijn nog niet actief; er is geen afrekening.",
         "Het geeft geen juridisch advies. Documentbegeleiding is alleen informatief.",
         "Het beoordeelt mensen niet met punten of rangschikkingen."
       ]
@@ -10879,7 +10924,7 @@
     "intro": "Uw werklijst: wat wacht, wat loopt en wat vastzit.",
     "honestNote": "Alleen een interne lijst — een taak aanmaken verstuurt niets naar wie dan ook.",
     "notAuthed": "Log in om uw taken te zien.",
-    "unavailable": "Taken staan nog niet aan. Zodra dat gebeurt, verschijnen uw taken hier.",
+    "unavailable": "Momenteel niet beschikbaar.",
     "loadError": "Taken konden niet worden geladen. Probeer de pagina te vernieuwen.",
     "myEmpty": "Geen open taken — maak er hierboven een aan.",
     "views": {
@@ -10944,7 +10989,7 @@
       "created": "Taak aangemaakt.",
       "updated": "Taak bijgewerkt.",
       "invalid": "Controleer de velden — de titel moet 3–160 tekens zijn.",
-      "needs_migration": "Taken staan nog niet aan — de wijziging is niet opgeslagen.",
+      "needs_migration": "Momenteel niet beschikbaar. Er is niets opgeslagen.",
       "not_authorized": "U mag deze actie niet uitvoeren.",
       "not_found": "Taak niet gevonden.",
       "limit_reached": "Limiet voor open taken bereikt — rond eerst oudere taken af of annuleer ze.",
@@ -11002,7 +11047,7 @@
       "title": "Bewijs",
       "intro": "Werkjournaal-records die aan deze taak zijn gekoppeld. Koppelen wijzigt een record nooit — het geeft alleen aan welke taak het aantoont.",
       "empty": "Er is nog geen werkjournaal-record aan deze taak gekoppeld.",
-      "unavailable": "Bewijs koppelen is nog niet ingeschakeld.",
+      "unavailable": "Momenteel niet beschikbaar.",
       "summary": "{total} gekoppeld · {confirmed} door leidinggevende bevestigd",
       "confirmed": "Door leidinggevende bevestigd",
       "unconfirmed": "Niet bevestigd",
@@ -11113,7 +11158,7 @@
     "intro": "Handmatige registratie van verstuurde facturen, ontvangen facturen en uitgaven — met echte totalen en afgeleide vervallen-markeringen.",
     "scopeNote": "Alleen handmatige registraties — dit is geen software voor boekhouding, belasting, loon, bank of betalingen. Een registratie verplaatst geen geld en neemt met niemand contact op.",
     "notAuthed": "Log in om je financiële registraties te zien.",
-    "unavailable": "Financiën staat nog niet aan. Zodra dat gebeurt, verschijnen je registraties hier.",
+    "unavailable": "Momenteel niet beschikbaar.",
     "loadError": "Registraties konden niet worden geladen. Vernieuw de pagina.",
     "empty": "Nog geen financiële registraties — voeg hierboven de eerste toe.",
     "emptyFiltered": "Geen registraties voldoen aan de gekozen filters.",
@@ -11189,7 +11234,7 @@
       "created": "Registratie toegevoegd.",
       "updated": "Registratie bijgewerkt.",
       "invalid": "Controleer de velden — titel 3–160 tekens, tegenpartij 2–160, bedrag zoals 123.45.",
-      "needs_migration": "Financiën staat nog niet aan — de wijziging is niet opgeslagen.",
+      "needs_migration": "Momenteel niet beschikbaar. Er is niets opgeslagen.",
       "not_authorized": "Dat mag je niet doen.",
       "not_found": "Registratie niet gevonden.",
       "limit_reached": "Registratielimiet bereikt — deze handmatige lijst is begrensd.",
@@ -11491,7 +11536,7 @@
     "visibility": "Zichtbaarheid",
     "visibilityPrivate": "Privé",
     "visibilityEmployers": "Werkgevers",
-    "visibilityNote": "Weergave voor werkgevers is nog niet ingeschakeld — uw keuze wordt opgeslagen en gaat gelden zodra dit actief is.",
+    "visibilityNote": "Momenteel niet beschikbaar.",
     "importNote": "Automatisch importeren vanaf deze sites wordt niet aangeboden. Upload een geëxporteerd cv-bestand in de profieleditor om uw gegevens over te nemen.",
     "importLink": "Profieleditor openen",
     "empty": "Nog geen externe profielen gekoppeld.",
@@ -11515,7 +11560,7 @@
     "eyebrow": "NETWERK",
     "title": "Netwerk",
     "intro": "Uw bedrijven, teams, partners en uitnodigingen. Nodig een persoon of bedrijf direct vanaf hier uit.",
-    "notEnabled": "Uitnodigingen zijn in deze omgeving nog niet ingeschakeld.",
+    "notEnabled": "Momenteel niet beschikbaar.",
     "incoming": {
       "title": "Uitnodigingen voor u",
       "from": "Uitgenodigd door {name}",
@@ -11546,7 +11591,8 @@
         "team": "Team",
         "other": "Organisatie"
       },
-      "visibilityReason": "Alleen mensen die vindbaar willen zijn of een echte werkrelatie met u hebben, worden getoond."
+      "visibilityReason": "Alleen mensen die vindbaar willen zijn of een echte werkrelatie met u hebben, worden getoond.",
+      "noContactYet": "Berichten kan pas na een uitnodiging of samenwerking. Nodig uit — of vraag een van hun diensten aan."
     },
     "sent": {
       "title": "Mijn verzonden uitnodigingen",
@@ -11642,7 +11688,7 @@
       "messageLabel": "Persoonlijk bericht",
       "send": "Uitnodiging versturen",
       "sending": "Wordt verzonden…",
-      "notEnabled": "Uitnodigingen zijn in deze omgeving nog niet ingeschakeld.",
+      "notEnabled": "Momenteel niet beschikbaar.",
       "notAuthed": "Log in om uitnodigingen te versturen.",
       "linkModeNote": "E-mailverzending is nog niet geactiveerd — deel de uitnodigingslink direct.",
       "invalidEmails": "Ongeldige adressen",
@@ -11689,7 +11735,7 @@
     },
     "invitePage": {
       "eyebrow": "UITNODIGING",
-      "notEnabled": "Uitnodigingen zijn in deze omgeving nog niet ingeschakeld.",
+      "notEnabled": "Momenteel niet beschikbaar.",
       "loadError": "De uitnodiging kon nu niet worden geladen. Probeer het opnieuw.",
       "invalidTitle": "Uitnodiging niet gevonden",
       "invalidBody": "De link is ongeldig of werkt niet meer. Vraag om een nieuwe uitnodiging.",
@@ -11719,7 +11765,7 @@
         "exhausted": "Alle plaatsen van deze uitnodiging zijn bezet. Vraag een nieuwe link."
       },
       "notices": {
-        "not_enabled": "Uitnodigingen zijn in deze omgeving nog niet ingeschakeld.",
+        "not_enabled": "Momenteel niet beschikbaar.",
         "already_accepted": "Al geaccepteerd.",
         "expired": "Deze uitnodiging is verlopen.",
         "revoked": "Deze uitnodiging is ingetrokken.",
@@ -11778,7 +11824,7 @@
       "cancel": "Annuleren",
       "correctionPlaceholder": "Jouw formulering",
       "failed": {
-        "not_enabled": "Beoordelen is in deze omgeving nog niet ingeschakeld.",
+        "not_enabled": "Momenteel niet beschikbaar.",
         "error": "Je antwoord kon niet worden opgeslagen. Probeer het opnieuw."
       },
       "boundary": "Bevestigen maakt hier geen vaardigheid of vak aan. Voeg wat waar is zelf aan je profiel toe:",
@@ -11868,7 +11914,7 @@
     "title": "Klanten",
     "subtitle": "Voor wie u personeel levert — klantbehoeften worden gekoppeld aan uw aanvragen en kandidaat-scouting.",
     "gatedHeading": "Voorbereid — wacht op activering door de eigenaar",
-    "gatedBody": "Klantrecords zijn klaar maar staan nog niet aan.",
+    "gatedBody": "Momenteel niet beschikbaar.",
     "notLinkable": "Aanvragen kunnen nog niet aan klanten worden gekoppeld.",
     "clientsEmpty": "Nog geen klanten. Voeg hieronder de eerste toe.",
     "demandsHeading": "Uw aanvragen",
@@ -11901,7 +11947,7 @@
     "title": "Klantbedrijven",
     "subtitle": "Verbind met een echt klantbedrijf, zie alleen de gedeelde aanvragen en bied een van uw actieve rosterwerknemers aan.",
     "gatedHeading": "Voorbereid — activering door eigenaar in afwachting",
-    "gatedBody": "De klantbrug is klaar maar nog niet ingeschakeld.",
+    "gatedBody": "Momenteel niet beschikbaar.",
     "connectionsHeading": "Verbindingen",
     "inviteEmailLabel": "E-mail van klant",
     "inviteButton": "Klant uitnodigen",
@@ -11953,7 +11999,7 @@
     "title": "Uitzendbureaus",
     "subtitle": "Accepteer een uitzendbureau waarmee u wilt werken, deel specifieke aanvragen en beoordeel de voorgestelde kandidaten op uw eigen scoutingpagina.",
     "gatedHeading": "Voorbereid — activering door eigenaar in afwachting",
-    "gatedBody": "De bureaubrug is klaar maar nog niet ingeschakeld.",
+    "gatedBody": "Momenteel niet beschikbaar.",
     "invitesHeading": "Verbindingsuitnodigingen",
     "noInvites": "Geen openstaande uitnodigingen.",
     "acceptButton": "Accepteren",
@@ -13521,10 +13567,34 @@
       },
       "findWorkInCompanyContext": "Werk zoeken is je eigen handeling — in de bedrijfsruimte voer ik die niet uit. Schakel over naar je persoonlijke ruimte en vraag het opnieuw.",
       "findWorkInCompanyWhy": "Een persoon zoekt werk, geen bedrijf — ik antwoord vanuit je persoonlijke ruimte.",
+      "personalOnlyInCompany": "Dat is een persoonlijke actie — in een bedrijfsomgeving voer ik die niet uit. Schakel over naar je persoonlijke ruimte en ga daar verder.",
       "journalAskWhatYouDid": "Wat heb je vandaag gedaan? Schrijf het in het veld „Wat je deed“ in je eigen woorden — bijv. „ramen gemonteerd op de locatie Kaunas van 8 tot 17“. Het verzoek zelf wordt niet in het dagboek opgeslagen.",
       "alsoWorkLog": "Ik begreep ook dat je vandaag hebt gewerkt — controleer het en sla het op in je werkjournaal:",
       "serviceNeedHint": "Dat is een klus — ik laat je zien wie die dienst aanbiedt.",
       "chipServiceRequests": "Een dienst zoeken",
+      "findPartnersDoors": "Dit is een zoektocht naar zakelijke partners, geen baan zoeken. Hij loopt via de bestaande marktplaats — kies waar je begint.",
+      "findPartnersPickCompany": "Zakelijke partners worden gezocht namens een bedrijf. Welk bedrijf bedoel je?",
+      "findPartnersNoCompany": "Zakelijke partners worden gezocht namens een bedrijf, en er is nog geen bedrijfsprofiel. Maak er een aan of bekijk de dienstenmarkt.",
+      "chipPartnersServices": "Dienstverleners",
+      "chipPartnersListings": "Marktplaats-advertenties",
+      "chipPartnersRelations": "Klanten en partners",
+      "productHelp": {
+        "projectUse": "Een project is de plek voor werk, mensen en deadlines. Open een project, voeg taken en mensen toe, en het uitgevoerde werk verschijnt daar meteen.",
+        "addPerson": "Je voegt iemand toe met een uitnodiging: vul het contact in en die persoon bevestigt in het eigen account. Uitnodigingen en je team vind je bij team.",
+        "hours": "Uren staan in het urenoverzicht — daar zie je dagen, de week en het urenstaat.",
+        "offerService": "Je biedt een dienst aan bij diensten: beschrijf hem, en andere bedrijven en mensen kunnen hem zien.",
+        "warning": "Een waarschuwing verschijnt wanneer iets het werk kan hinderen — bijvoorbeeld een document dat verloopt of ontbrekende gegevens. Alle meldingen en hun reden zie je bij meldingen.",
+        "forecast": "Een prognose is een berekening op basis van de al geregistreerde uren en het geplande werk. Het is een richtlijn, geen belofte, en verandert met de gegevens. Het plan en de cijfers vind je bij planning.",
+        "scheduleWorker": "Je plant een medewerker in bij planning: kies de dag en het project en wijs de persoon op dezelfde plek toe.",
+        "doneWork": "Uitgevoerd werk zie je waar het is vastgelegd — in het werkjournaal of het urenoverzicht: registraties, uren en bevestigingen.",
+        "chips": {
+          "chipHelpProjects": "Projecten openen",
+          "chipHelpPeople": "Team en uitnodigingen",
+          "chipHelpPlanning": "Planning openen",
+          "chipHelpServices": "Mijn diensten",
+          "chipHelpJournal": "Werkjournaal"
+        }
+      },
       "interestInboxAmbiguous": "Dat kan twee dingen betekenen — wat wil je zien?",
       "chipInterestOnMyNeeds": "Interesse in mijn aanvragen",
       "chipMyOwnInterest": "Mijn eigen interesse",
@@ -13724,7 +13794,7 @@
       "capacityIntro": "Team {from} – {to} ({count} mensen):",
       "capacityFree": "beschikbaar",
       "capacityBusyUntil": "niet beschikbaar tot {date}",
-      "capacityAbsencesUnknown": "Verlofgegevens zijn in deze omgeving niet beschikbaar — alleen de lijst wordt getoond.",
+      "capacityAbsencesUnknown": "Momenteel niet beschikbaar.",
       "capacityEmpty": "Er is nog niemand in het team — nodig mensen uit.",
       "capacityUnavailable": "De beschikbaarheid van het team kon nu niet worden gelezen.",
       "chipAddTask": "Taak toevoegen",
@@ -13800,9 +13870,9 @@
       "confirmChip": "Bevestigen: {name} · {date}",
       "confirmDone": "Bevestigd: {name} — bevestigde vaardigheden: {count}.",
       "confirmNone": "Er wachten geen werkitems.",
-      "confirmNotEnabled": "Werkbeoordeling staat nog niet aan voor: {names}. Zet het aan en hun items verschijnen hier.",
+      "confirmNotEnabled": "Momenteel niet beschikbaar.",
       "confirmEnableChip": "Beoordeling aanzetten: {name}",
-      "confirmEnabled": "Beoordeling aan: {name} — de werkitems wachten op uw bevestiging.",
+      "confirmEnabled": "Momenteel niet beschikbaar.",
       "confirmFailed": "De bevestiging kon niet worden gedaan.",
       "confirmUnavailable": "Bevestigingen konden nu niet worden gelezen.",
       "chipOpenInbox": "Bevestigingsinbox openen",
@@ -13864,6 +13934,7 @@
       },
       "capacityCommittedUntil": "al toegezegd tot {date}",
       "capacityCommittedToUntil": "op {what} tot {date}",
+      "capacityCommittedUndated": "op {what}, geen data ingesteld",
       "capacityCommitmentsUnknown": "Boekingen en projecttoewijzingen konden niet worden gelezen, dus wie als vrij wordt getoond kan al toegezegd zijn.",
       "workspaceUnnamedCompany": "Bedrijf zonder naam",
       "workspaceUnnamedAgency": "Bureau zonder naam",
@@ -13947,7 +14018,7 @@
     "findWork": {
       "emptyState": "Op dit moment vond ik geen actieve vacatures die aan je criteria voldoen. Er zijn nog geen meldingen, dus dat beloof ik niet — vraag het later opnieuw of vul je profiel aan zodat meer behoeften passen.",
       "blockedNoWorker": "Om werk te zoeken, schakel de werknemersrol in bij accountinstellingen.",
-      "blockedNoAccess": "De vacaturelijst is nog niet ingeschakeld in deze omgeving. Zodra dat zo is, toon ik echte behoeften.",
+      "blockedNoAccess": "Momenteel niet beschikbaar.",
       "fitStrong": "Sterke match",
       "fitPossible": "Mogelijke match",
       "fitWeak": "Zwakke match",
@@ -14164,13 +14235,13 @@
       },
       "candidatesError": "We konden de kandidaten niet lezen.",
       "candidatesNoCompany": "Je handelt nu niet namens een bedrijf, dus er zijn hier geen bedrijfsbehoeften om voor te werven.",
-      "candidatesBlocked": "Dit is in deze omgeving nu niet beschikbaar.",
+      "candidatesBlocked": "Momenteel niet beschikbaar.",
       "candidatesNoDemands": "Je bedrijf heeft nog geen behoefte beschreven.",
       "candidatesPickDemand": "Voor welke behoefte werf je?",
       "candidatesUnstructuredBadge": "niet gestructureerd",
       "candidatesBackToDemands": "Terug naar behoeften",
       "candidatesNotFound": "Die behoefte is niet gevonden, of hij is niet van jou.",
-      "candidatesNeedsMigration": "De kandidatenbron is in deze omgeving niet beschikbaar.",
+      "candidatesNeedsMigration": "Momenteel niet beschikbaar.",
       "candidatesNotStructured": "Uit deze behoefte valt nog niets af te leiden, dus er is niets om mee te vergelijken. Dat is niet hetzelfde als dat niemand past.",
       "candidatesRetrievalCapped": "Er waren meer mensen bereikbaar dan we deze keer konden bekijken, dus deze lijst is niet het hele aanbod.",
       "candidatesEmpty": "Op dit moment past niemand in het zichtbare aanbod bij deze behoefte.",
@@ -14224,7 +14295,7 @@
       "bookingNote": "Notitie",
       "projectError": "We konden het project niet lezen.",
       "projectNoCompany": "Je handelt nu niet namens een bedrijf, dus er zijn hier geen bedrijfsprojecten.",
-      "projectBlocked": "Dit is in deze omgeving nu niet beschikbaar.",
+      "projectBlocked": "Momenteel niet beschikbaar.",
       "projectEmpty": "Er is nog geen project.",
       "projectPick": "Welk project?",
       "projectBackToList": "Terug naar projecten",
@@ -14251,7 +14322,7 @@
       "pulseNextNoWork": "Volgende: nog geen werk vastgelegd — zodra mensen werk vastleggen verschijnt het hier en op hun cv.",
       "projectStages": "Fasen",
       "projectStagesEmpty": "Voor dit project zijn nog geen fasen ingevoerd.",
-      "projectStagesUnavailable": "Fasen kunnen in deze omgeving niet gelezen worden, dus tonen we geen lege lijst alsof er geen zijn.",
+      "projectStagesUnavailable": "Momenteel niet beschikbaar.",
       "projectStageMarkDone": "Markeer als afgerond",
       "projectAssignWorker": "Een medewerker toewijzen",
       "projectOpenOperations": "Open projectbeheer",
@@ -14272,14 +14343,14 @@
       "projectAlreadyInState": "Het project heeft die status al. Er is niets gewijzigd.",
       "projectInvalidTransition": "Deze statuswijziging kan niet worden uitgevoerd.",
       "projectNotAuthorized": "Je kunt de status van dit project niet wijzigen.",
-      "projectNeedsMigration": "Statuswijzigingen van projecten zijn in deze omgeving nog niet beschikbaar.",
+      "projectNeedsMigration": "Momenteel niet beschikbaar.",
       "projectConflict": "Het project is gewijzigd terwijl je ernaar keek. Open het opnieuw.",
       "engagements": {
         "title": "Werkrelaties"
       },
       "engagementsError": "De werkrelaties konden niet worden geladen.",
       "engagementsBlocked": "De werkrelaties kunnen nu niet worden gelezen. Dat is niet hetzelfde als er geen hebben.",
-      "engagementsNeedsMigration": "Werkrelaties zijn in deze omgeving nog niet beschikbaar.",
+      "engagementsNeedsMigration": "Momenteel niet beschikbaar.",
       "engagementsEmptyCompany": "Deze organisatie heeft geen vastgelegde werkrelaties.",
       "engagementsEmptyWorker": "Je hebt geen vastgelegde werkrelaties.",
       "engagementsUnavailable": "Deze werkrelatie is niet voor jou beschikbaar.",
@@ -14728,7 +14799,7 @@
         "radius": "afstand"
       },
       "whyFiltered": "Je zei: {words}. Daarop heb ik de zoekopdracht versmald.",
-      "whyUnfiltered": "Ik heb je hele lijst doorzocht — je hebt niets versmald.",
+      "whyUnfiltered": "Geen extra filters — ik toon alles wat voor jou zichtbaar is.",
       "whyFromYourBoard": "Uit de aanvragen die nu voor jou zichtbaar zijn.",
       "whyNoWorker": "Hiervoor is een werknemersprofiel nodig, en dat is er nog niet.",
       "whyNoAccess": "Open aanvragen zijn nog niet beschikbaar voor je account.",
@@ -14978,7 +15049,7 @@
     "page": {
       "title": "Ervaringen",
       "lead": "Subjectieve ervaringen uit echte, afgeronde werkinteracties. Een ervaring is het verhaal van één persoon — geen feit over iemands vakbekwaamheid.",
-      "unavailableTitle": "Ervaringen zijn nog niet beschikbaar in deze omgeving.",
+      "unavailableTitle": "Momenteel niet beschikbaar.",
       "unavailableBody": "Er is niets opgeslagen. Je kunt gewoon verder werken.",
       "aboutMe": "Over mij",
       "aboutMeEmpty": "Nog geen gepubliceerde ervaringen over jou.",
@@ -14993,7 +15064,7 @@
       "caution": "Meer negatieve dan positieve ervaringen — het loont om beter te kijken voordat je beslist.",
       "meaning": "Dit zijn subjectieve verslagen van echte interacties. Geen beoordeling, geen score en geen oordeel van het platform.",
       "notEnough": "Nog niet genoeg gepubliceerde ervaringen.",
-      "unavailable": "Ervaringstellingen zijn nog niet beschikbaar in deze omgeving."
+      "unavailable": "Momenteel niet beschikbaar."
     },
     "sentiment": {
       "positive": "Positieve ervaring",
@@ -15018,7 +15089,7 @@
       "rejected": "Afgewezen",
       "title": "Ervaringsmoderatie",
       "lead": "Elke ervaring gaat vóór publicatie door moderatie. Elk besluit vereist een reden en wordt vastgelegd in het auditspoor.",
-      "unavailable": "Het ervaringsdomein is niet beschikbaar in deze omgeving.",
+      "unavailable": "Momenteel niet beschikbaar.",
       "queueTitle": "Wacht op moderatie",
       "queueEmpty": "Er wacht niets op moderatie.",
       "disputeQueueTitle": "Geschillen",
@@ -15035,7 +15106,7 @@
         "removed": "Uit publieke weergave halen"
       },
       "errors": {
-        "needs_migration": "Ervaringen zijn nog niet beschikbaar in deze omgeving. Er is niets opgeslagen.",
+        "needs_migration": "Momenteel niet beschikbaar. Er is niets opgeslagen.",
         "not_authenticated": "Log eerst in.",
         "not_eligible": "Je kunt alleen een interactie beschrijven waaraan je echt hebt deelgenomen en die is afgerond.",
         "duplicate_for_interaction": "Je hebt voor deze interactie al een ervaring ingediend.",
@@ -15065,7 +15136,7 @@
       "sending": "Bezig…",
       "openedNote": "Geschil geopend. De ervaring blijft gepubliceerd tot een moderator beslist.",
       "errors": {
-        "needs_migration": "Ervaringen zijn nog niet beschikbaar in deze omgeving. Er is niets opgeslagen.",
+        "needs_migration": "Momenteel niet beschikbaar. Er is niets opgeslagen.",
         "not_authenticated": "Log eerst in.",
         "not_eligible": "Je kunt alleen een interactie beschrijven waaraan je echt hebt deelgenomen en die is afgerond.",
         "duplicate_for_interaction": "Je hebt voor deze interactie al een ervaring ingediend.",
@@ -15089,7 +15160,7 @@
       "sending": "Bezig…",
       "submitted": "Reactie ingediend. Ze wordt zichtbaar na moderatie.",
       "errors": {
-        "needs_migration": "Ervaringen zijn nog niet beschikbaar in deze omgeving. Er is niets opgeslagen.",
+        "needs_migration": "Momenteel niet beschikbaar. Er is niets opgeslagen.",
         "not_authenticated": "Log eerst in.",
         "not_eligible": "Je kunt alleen een interactie beschrijven waaraan je echt hebt deelgenomen en die is afgerond.",
         "duplicate_for_interaction": "Je hebt voor deze interactie al een ervaring ingediend.",
@@ -15123,7 +15194,7 @@
       "submitted": "Ervaring ingediend.",
       "awaitingModeration": "Ze wacht op moderatie en is nog niet gepubliceerd.",
       "errors": {
-        "needs_migration": "Ervaringen zijn nog niet beschikbaar in deze omgeving. Er is niets opgeslagen.",
+        "needs_migration": "Momenteel niet beschikbaar. Er is niets opgeslagen.",
         "not_authenticated": "Log eerst in.",
         "not_eligible": "Je kunt alleen een interactie beschrijven waaraan je echt hebt deelgenomen en die is afgerond.",
         "duplicate_for_interaction": "Je hebt voor deze interactie al een ervaring ingediend.",
@@ -15274,7 +15345,7 @@
   "approvals": {
     "title": "Goedkeuringen",
     "intro": "Goedkeuringsverzoeken binnen uw organisaties: dien een verzoek in, beslis over wat op u wacht en volg elke ronde.",
-    "unavailable": "Goedkeuringen zijn in deze omgeving nog niet ingeschakeld. Er gaat niets verloren — dit gedeelte opent zodra de opslag voor goedkeuringen is beoordeeld en toegepast.",
+    "unavailable": "Momenteel niet beschikbaar.",
     "honestNote": "Beslissingen blijven binnen het product. Er wordt niets gemaild of verzonden — mensen zien updates op deze pagina en in de meldingenbel.",
     "loadError": "Een deel van de goedkeuringsgegevens kon nu niet worden geladen. Wat u ziet is echt, maar mogelijk onvolledig.",
     "inbox": {
@@ -15413,7 +15484,7 @@
       "not_pending": "Dit verzoek is niet meer open.",
       "invalid": "Controleer de ingevoerde waarden en probeer het opnieuw.",
       "invalid_delegate": "Die collega is in deze organisatie niet gevonden.",
-      "needs_migration": "Goedkeuringen zijn in deze omgeving nog niet ingeschakeld. Er is niets opgeslagen.",
+      "needs_migration": "Momenteel niet beschikbaar. Er is niets opgeslagen.",
       "not_authorized": "U mag dit niet doen.",
       "not_found": "Dit verzoek is niet gevonden.",
       "limit_reached": "De limiet voor open items is bereikt. Sluit eerst iets af.",
@@ -15429,7 +15500,7 @@
     "tpl": {
       "title": "Sjablooninstellingen",
       "intro": "Bepaal wie wat goedkeurt in elk van uw organisaties. Wat u hier wijzigt geldt alleen voor nieuwe verzoeken.",
-      "unavailable": "De sjablooninstellingen zijn voorbereid maar in deze omgeving nog niet ingeschakeld.",
+      "unavailable": "Momenteel niet beschikbaar.",
       "runningImmuneNote": "Een nieuwe versie publiceren verandert alleen verzoeken die daarna beginnen. Een verzoek dat al loopt behoudt de rondes en de mensen waarmee het begon.",
       "templateCount": "Sjablonen: {count}",
       "installTitle": "De standaardset installeren",
@@ -15487,7 +15558,7 @@
   "timesheets": {
     "title": "Urenstaten",
     "intro": "Urendocumenten per periode, afgeleid uit uw werkjournaal. Uren worden altijd in het journaal bewerkt; een urenstaat is een bevroren kopie die ter goedkeuring wordt ingediend.",
-    "needsMigration": "Urenstaten zijn in deze omgeving nog niet ingeschakeld.",
+    "needsMigration": "Momenteel niet beschikbaar.",
     "readError": "Een deel van de urenstaatgegevens kon nu niet worden geladen.",
     "noLines": "Nog geen geregistreerde uren in deze periode. Noteer uw werk in het journaal en vernieuw.",
     "linesTitle": "Regels ({count})",
@@ -15565,7 +15636,7 @@
       "no_approvers": "Er konden geen goedkeurders worden gevonden voor het sjabloon van deze organisatie.",
       "not_published": "Het goedkeuringssjabloon is nog niet gepubliceerd.",
       "invalid": "Het verzoek was ongeldig.",
-      "needs_migration": "Urenstaten zijn in deze omgeving nog niet ingeschakeld.",
+      "needs_migration": "Momenteel niet beschikbaar.",
       "not_authorized": "U mag dit niet doen.",
       "not_found": "Urenstaat niet gevonden.",
       "limit_reached": "Te veel open urenstaten — dien eerst bestaande in of ruim ze op.",
@@ -15595,7 +15666,7 @@
     "archivedBadge": "Gearchiveerd",
     "empty": "Nog geen objecten. Voeg de plekken toe waar jullie werk gebeurt.",
     "gatedHeading": "Voorbereid — wacht op activering",
-    "gatedBody": "Objecten zijn klaar maar nog niet ingeschakeld. Inschakelen is een besluit van de eigenaar.",
+    "gatedBody": "Momenteel niet beschikbaar.",
     "errorLabel": "Opslaan is niet gelukt. Probeer het opnieuw.",
     "notAuthorizedLabel": "Alleen managers kunnen objecten wijzigen.",
     "savedLabel": "Opgeslagen."
@@ -15603,7 +15674,7 @@
   "requests": {
     "title": "Verzoeken",
     "intro": "Vraag je werkgever iets en volg wat er daarna gebeurt. Elk verzoek volgt de goedkeuringsroute die je bedrijf heeft ingesteld.",
-    "unavailable": "Verzoeken zijn in deze omgeving nog niet ingeschakeld. Er gaat niets verloren — dit onderdeel opent zodra de verzoeken-update is beoordeeld en geïnstalleerd.",
+    "unavailable": "Momenteel niet beschikbaar.",
     "honestNote": "Een verzoek wordt beslist door echte mensen in je bedrijf. Niets wordt automatisch goedgekeurd en niets verlaat dit product.",
     "notice": {
       "created": "Verzoek ingediend. De juiste mensen is gevraagd het te beoordelen.",
@@ -15616,7 +15687,7 @@
       "not_published": "De goedkeuringsroute voor verzoeken is nog niet klaar.",
       "not_pending": "Dit verzoek wacht niet meer — hieronder zie je de huidige stand.",
       "invalid": "Controleer de gegevens en probeer opnieuw.",
-      "needs_migration": "Nog niet beschikbaar — de verzoeken-update is hier niet geïnstalleerd.",
+      "needs_migration": "Momenteel niet beschikbaar.",
       "not_authorized": "Dat mag je niet doen.",
       "not_found": "Niet gevonden.",
       "limit_reached": "Te veel open verzoeken. Wacht eerst op beslissingen over de bestaande.",
@@ -15716,7 +15787,7 @@
     "relationshipNote": "De contractenlijst hierboven is het eerdere persoonlijke commerciële register en blijft ongewijzigd werken. Nieuwe overeenkomsten horen hier.",
     "unavailable": "Het overeenkomstenregister kan nu niet worden getoond.",
     "needsOrgWorkspace": "Het overeenkomstenregister werkt in een organisatiewerkruimte. Schakel over naar uw organisatie.",
-    "preparing": "Het overeenkomstenregister is voorbereid maar in deze omgeving nog niet ingeschakeld.",
+    "preparing": "Momenteel niet beschikbaar.",
     "error": "Het overeenkomstenregister kon niet worden gelezen.",
     "empty": "Nog geen overeenkomsten geregistreerd.",
     "emptyFiltered": "Geen overeenkomsten voldoen aan deze filters.",
@@ -15819,14 +15890,14 @@
       "not_found": "Registratie niet gevonden.",
       "not_allowed": "Alleen de eigenaar of beheerder van de organisatie kan dit doen.",
       "limit_reached": "De registerlimiet is bereikt.",
-      "needs_migration": "Het overeenkomstenregister is in deze omgeving nog niet ingeschakeld.",
+      "needs_migration": "Momenteel niet beschikbaar.",
       "error": "Er ging iets mis. Er is niets opgeslagen."
     }
   },
   "lifecycle": {
     "title": "Levensloop van het dienstverband",
     "intro": "Onboarding, proeftijd, wijzigingen, offboarding en beëindiging voor de arbeidsrecords van deze organisatie — met checklists en volledige geschiedenis.",
-    "unavailable": "De levensloop van het dienstverband is in deze omgeving nog niet ingeschakeld. Er gaat niets verloren — dit onderdeel opent zodra de opslag is beoordeeld en toegepast.",
+    "unavailable": "Momenteel niet beschikbaar.",
     "honestNote": "Alles hier blijft binnen het product. Een stap afvinken legt alleen vast wie wat wanneer bevestigde — er wordt niets verstuurd.",
     "loadError": "Een deel van de gegevens kon nu niet worden geladen. Wat u ziet is echt, maar kan onvolledig zijn.",
     "stage": {
@@ -15957,7 +16028,7 @@
       "last_owner": "Het record van de laatste eigenaar kan niet worden beëindigd — benoem eerst een andere eigenaar.",
       "limit_reached": "De limiet voor deze organisatie is bereikt.",
       "invalid": "Ongeldige invoer.",
-      "needs_migration": "Deze mogelijkheid is in deze omgeving nog niet ingeschakeld.",
+      "needs_migration": "Momenteel niet beschikbaar.",
       "not_authorized": "U bent hiervoor niet bevoegd.",
       "not_found": "Record niet beschikbaar.",
       "error": "Mislukt — probeer het opnieuw."
@@ -15966,7 +16037,7 @@
   "procurement": {
     "title": "Inkoop",
     "intro": "Vraag materialen of diensten aan, noteer leveranciersoffertes en leg vast wat er gekozen is. Niets hier neemt contact op met een leverancier of bestelt iets — het is uw administratie.",
-    "needsMigration": "Inkoopaanvragen zijn in deze omgeving nog niet ingeschakeld.",
+    "needsMigration": "Momenteel niet beschikbaar.",
     "readError": "Inkoopaanvragen konden niet worden geladen. Probeer het opnieuw.",
     "empty": "Nog geen inkoopaanvragen.",
     "noOffers": "Nog geen leveranciersoffertes genoteerd.",
@@ -16025,7 +16096,7 @@
       "unlinked": "Factuurkoppeling verwijderd.",
       "cancelled": "Inkoopaanvraag geannuleerd.",
       "invalid": "Controleer de ingevoerde gegevens.",
-      "needs_migration": "Inkoopaanvragen zijn in deze omgeving nog niet ingeschakeld.",
+      "needs_migration": "Momenteel niet beschikbaar.",
       "not_authorized": "Dat kunt u voor deze aanvraag niet doen.",
       "not_found": "Deze inkoopaanvraag is niet gevonden.",
       "not_editable": "In deze status is die stap niet mogelijk.",
@@ -16044,7 +16115,7 @@
   "trips": {
     "title": "Dienstreizen",
     "intro": "Vraag een reis aan, laat hem goedkeuren en houd de kosten bij elkaar. Niets hier boekt reizen of betaalt geld uit — het is uw administratie.",
-    "needsMigration": "Dienstreizen zijn in deze omgeving nog niet ingeschakeld.",
+    "needsMigration": "Momenteel niet beschikbaar.",
     "readError": "Dienstreizen konden niet worden geladen. Probeer het opnieuw.",
     "empty": "Nog geen dienstreizen.",
     "orgHeading": "Reizen van mensen die u beheert",
@@ -16097,7 +16168,7 @@
       "unlinked": "Regel verwijderd van de reis.",
       "invalid": "Controleer de ingevoerde gegevens.",
       "invalid_dates": "Controleer de reisdata.",
-      "needs_migration": "Dienstreizen zijn in deze omgeving nog niet ingeschakeld.",
+      "needs_migration": "Momenteel niet beschikbaar.",
       "not_authorized": "Dat kunt u voor deze reis niet doen.",
       "not_found": "Deze reis is niet gevonden.",
       "not_editable": "In deze status is die stap niet mogelijk.",
@@ -16114,7 +16185,7 @@
     "title": "Trainingen en certificaten",
     "intro": "Cursussen die je organisatie mensen vraagt af te ronden, en de certificaten die daarop volgen.",
     "evidenceNote": "Een certificaat laat zien dat een cursus is afgerond. Het zegt niet hoe goed iemand werkt — dat blijft bij je werknotities en de bevestigingen van je leidinggevende.",
-    "notAvailable": "Trainingen zijn in deze werkruimte nog niet aangezet.",
+    "notAvailable": "Momenteel niet beschikbaar.",
     "status": {
       "assigned": "Te doen",
       "completed": "Klaar",
@@ -16176,7 +16247,7 @@
       "invalid_file": "Dat bestand hoort niet bij je organisatie.",
       "invalid_skill": "Die vaardigheid is niet gevonden.",
       "invalid_state": "Dat kan in deze stap niet.",
-      "needs_migration": "Trainingen zijn in deze werkruimte nog niet aangezet.",
+      "needs_migration": "Momenteel niet beschikbaar.",
       "not_authorized": "Je hebt hier geen rechten voor.",
       "not_found": "Niet gevonden.",
       "limit_reached": "Er staat hier al te veel.",
@@ -16187,7 +16258,7 @@
     "title": "Ontwikkelgesprekken",
     "intro": "Een vastgelegd gesprek tussen twee met naam genoemde mensen over het werk en over wat er nu komt.",
     "noScoreNote": "Er is hier geen cijfer, geen score en geen ranglijst — met opzet. Alles hieronder is een vastgelegd feit, een verwijzing naar echt werk, of de eigen woorden van één persoon, duidelijk als zodanig gemarkeerd.",
-    "notAvailable": "Ontwikkelgesprekken zijn in deze werkruimte nog niet aangezet.",
+    "notAvailable": "Momenteel niet beschikbaar.",
     "empty": "Er is nog geen gesprek waar jij bij hoort.",
     "cycles": {
       "heading": "Periodes",
@@ -16253,7 +16324,7 @@
       "invalid_subject": "Die persoon hoort niet bij je organisatie.",
       "invalid_reviewer": "Die persoon kan het gesprek niet voeren.",
       "invalid_reference": "Die verwijzing wijst niet naar echt werk van deze persoon.",
-      "needs_migration": "Ontwikkelgesprekken zijn in deze werkruimte nog niet aangezet.",
+      "needs_migration": "Momenteel niet beschikbaar.",
       "not_authorized": "Je hebt hier geen rechten voor.",
       "not_found": "Niet gevonden.",
       "limit_reached": "Er staat hier al te veel.",
@@ -16264,7 +16335,7 @@
     "title": "Managementbesluiten",
     "intro": "Wat aan het management is voorgelegd, wat er is besloten, wie verantwoordelijk is en vóór wanneer.",
     "engineNote": "De stemming gebeurt in de goedkeuringenlijst hierboven: een sjabloon dat iedere goedkeurder nodig heeft is een unanieme stemming, een sjabloon waarbij één goedkeurder volstaat wordt beslist door het eerste antwoord. Hier worden geen stemmen geteld.",
-    "notAvailable": "Managementbesluiten zijn in deze werkruimte nog niet aangezet.",
+    "notAvailable": "Momenteel niet beschikbaar.",
     "empty": "Nog geen besluiten vastgelegd.",
     "form": {
       "title": "Vraag",
@@ -16317,7 +16388,7 @@
       "invalid_document": "Dat document hoort niet bij je organisatie.",
       "invalid_task": "Die taak is niet van jou.",
       "invalid_responsible": "Die persoon hoort niet bij je organisatie.",
-      "needs_migration": "Managementbesluiten zijn in deze werkruimte nog niet aangezet.",
+      "needs_migration": "Momenteel niet beschikbaar.",
       "not_authorized": "Je hebt hier geen rechten voor.",
       "not_found": "Niet gevonden.",
       "limit_reached": "Er staat hier al te veel.",
@@ -16466,7 +16537,7 @@
       "generic": "Opslaan mislukt. Probeer het opnieuw."
     },
     "states": {
-      "needsMigration": "Deze functie is nog niet ingeschakeld op deze database.",
+      "needsMigration": "Momenteel niet beschikbaar.",
       "noCompany": "Schakel over naar een bedrijfswerkruimte.",
       "noObjects": "Er zijn nog geen locaties om de uren van vandaag aan te koppelen.",
       "error": "Kon deze dag niet laden."
@@ -16536,7 +16607,7 @@
         "duplicatesFound": "Identieke bestaande registraties: {count}. Er is niets geschreven — vink de bevestiging aan om ze toch te schrijven.",
         "noRows": "Geen rijen om te schrijven.",
         "tooManyRows": "Te veel rijen voor één import — splits het bestand.",
-        "needsMigration": "Deze functie is nog niet ingeschakeld in deze database.",
+        "needsMigration": "Momenteel niet beschikbaar.",
         "notAuthorized": "U mag deze uren niet registreren.",
         "generic": "Verwerken mislukt. Probeer het opnieuw."
       }
@@ -17196,7 +17267,7 @@
       "notAMember": "U bent geen lid van die organisatie.",
       "chooseOrganization": "U beheert meer dan één organisatie. Kies namens welke u handelt.",
       "notAuthorized": "U hebt in deze organisatie geen rol die haar mensen mag zien.",
-      "needsMigration": "De personenopslag is in deze omgeving nog niet ingeschakeld.",
+      "needsMigration": "Momenteel niet beschikbaar.",
       "unavailable": "De lijst met mensen kon niet worden gelezen. Dat is iets anders dan een lege lijst — probeer het zo meteen opnieuw."
     },
     "offer": {
@@ -17220,7 +17291,7 @@
     "detected": "{count} mensen gevonden in {file}",
     "duplicates": "{count} komen dubbel voor in het bestand",
     "errFailed": "Dat is niet gelukt en er is niets opgeslagen. Probeer het zo nog eens.",
-    "errNeedsMigration": "Die relatie is in deze omgeving nog niet beschikbaar.",
+    "errNeedsMigration": "Momenteel niet beschikbaar.",
     "errNoName": "Geen enkele kolom in dit bestand zegt wie de mensen zijn. Voeg een kop toe zoals “Naam” en probeer opnieuw.",
     "errNotAuthorized": "Je kunt geen mensen toevoegen voor deze organisatie.",
     "errNothing": "Uit dat bestand kon niets worden gelezen.",
@@ -17337,6 +17408,7 @@
     "needs": "Behoeften",
     "calendar": "Kalender",
     "partners": "Klanten en partners",
+    "market": "Marktplaats",
     "education": "Opleiding",
     "history": "Geschiedenis",
     "settings": "Instellingen",
@@ -17448,7 +17520,7 @@
       "invalid_role": "Ongeldige rol.",
       "last_owner": "De laatste eigenaar kan niet terugtreden — activeer eerst een andere eigenaar.",
       "no_workspace": "Kies eerst een organisatiewerkruimte.",
-      "needs_migration": "Deze mogelijkheid is in deze omgeving nog niet ingeschakeld.",
+      "needs_migration": "Momenteel niet beschikbaar.",
       "invalid": "Ongeldige invoer.",
       "error": "Er ging iets mis — probeer het opnieuw."
     },
@@ -17502,7 +17574,7 @@
     "cancel": "Annuleren",
     "doneSelf": "U hebt dit team verlaten.",
     "doneOwner": "Van de lijst verwijderd.",
-    "needsMigration": "Een teamlink beëindigen is in deze omgeving nog niet ingeschakeld.",
+    "needsMigration": "Momenteel niet beschikbaar.",
     "notFound": "Deze link bestaat niet meer of u mag hem niet beëindigen.",
     "failed": "De link kon niet worden beëindigd. Probeer het opnieuw.",
     "readFailed": "Uw teams konden nu niet worden gelezen. Dit betekent niet dat u er geen hebt."
@@ -17800,5 +17872,44 @@
         }
       }
     }
+  },
+  "companyWorkHistory": {
+    "title": "Geïmporteerde werkgeschiedenis van het bedrijf",
+    "subtitle": "Wat {name} heeft vastgelegd uit de eigen oude urenstaten: waar het werk was, wanneer, wie er werkte, wat er is gedaan en hoe lang.",
+    "badge": "Geïmporteerde bedrijfsgeschiedenis",
+    "provenance": "Afkomstig uit de eigen urenstaat van {name}. De mensen gebruikten LabourMarket.ai toen niet, en dit is niet onafhankelijk geverifieerd.",
+    "unavailable": "De geïmporteerde werkgeschiedenis kon nu niet worden gelezen. Dat betekent niet dat er geen is.",
+    "empty": "{name} heeft geen geïmporteerde werkgeschiedenis vastgelegd.",
+    "elsewhere": "{name} bevat {count, plural, one {# geïmporteerd record} other {# geïmporteerde records}} van eerder werk. Schakel naar die werkruimte om het te zien.",
+    "stats": {
+      "places": "Plaatsen",
+      "people": "Mensen",
+      "hours": "Vastgelegde uren",
+      "period": "Periode"
+    },
+    "place": "Plaats",
+    "noPlaceName": "Geen plaats opgegeven",
+    "open": "Openen",
+    "people": "{count, plural, one {# persoon} other {# mensen}}",
+    "entries": "{count, plural, one {# regel} other {# regels}}",
+    "hoursShare": "{hours} u op deze plaats, vergeleken met de drukste plaats",
+    "noPlace": "{count, plural, one {# regel} other {# regels}} ({hours} u) in de bron noemen geen plaats.",
+    "periodAside": "Hiervan zijn {hours} u periodetotalen voor een tijdspanne, apart gehouden van losse dagen.",
+    "scope": {
+      "title": "Wat deze import bevat",
+      "carried": "De bron bevat: wie er werkte, op welke dag, hoeveel uur, wat er is gedaan en de plaats zoals geschreven.",
+      "missing": "Niet in de bron: de klant, het adres en het project. Ze worden getoond als niet in de bron en nooit aangevuld."
+    },
+    "facts": {
+      "customer": "Klant",
+      "address": "Adres",
+      "project": "Project (opdracht)",
+      "notInSource": "Niet in de bron",
+      "linked": "Gekoppeld"
+    },
+    "whoWorked": "Wie hier werkte",
+    "timeline": "Wat er is gedaan",
+    "back": "Terug naar geschiedenis",
+    "placeMissing": "Deze plaats staat niet in de geïmporteerde geschiedenis van de actieve werkruimte."
   }
 }

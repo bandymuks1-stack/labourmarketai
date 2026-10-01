@@ -213,3 +213,66 @@ export function attentionChipHref(chipId: string): string | null {
       return null;
   }
 }
+
+/* ── capacity x needs (DERIVED, SEP-1) ─────────────────────────────────────
+ * Pure readings of the capacity outlook the home already holds. Nothing is
+ * stored; change a booking, an assignment or an absence and these move with
+ * it. UNKNOWN is never zero (SEP-7): no outlook or no team size says
+ * "unknown", not "fits" and not "short". */
+
+export interface OutlookLike {
+  readonly from: string;
+  readonly free: number;
+  readonly unclear: number;
+}
+
+export type NeedFit =
+  | { readonly kind: "unknown" }
+  | { readonly kind: "fits" }
+  | { readonly kind: "from"; readonly date: string }
+  | { readonly kind: "some" }
+  | { readonly kind: "short"; readonly short: number };
+
+/** Can the people on record as free cover this need's team size? */
+export function deriveNeedFit(
+  teamSize: number | null,
+  outlook: readonly OutlookLike[] | null | undefined,
+): NeedFit {
+  if (!outlook || outlook.length === 0 || teamSize === null || !(teamSize > 0)) {
+    return { kind: "unknown" };
+  }
+  if (outlook.every((w) => w.free >= teamSize)) return { kind: "fits" };
+  const firstIdx = outlook.findIndex((w) => w.free >= teamSize);
+  if (firstIdx >= 0) {
+    // "from" only when EVERY later window covers it too; a dip afterwards is
+    // "some weeks", not a promise.
+    return outlook.slice(firstIdx).every((w) => w.free >= teamSize)
+      ? { kind: "from", date: outlook[firstIdx].from }
+      : { kind: "some" };
+  }
+  return { kind: "short", short: teamSize - Math.max(...outlook.map((w) => w.free)) };
+}
+
+export interface OutlookGaps {
+  /** First window with nobody on record as free, or null. */
+  readonly firstEmptyWeek: string | null;
+  /** The most people on record as free in any single window. */
+  readonly peakFree: number;
+  readonly peakFreeFrom: string | null;
+  /** People whose only record is an undated assignment (window unknown). */
+  readonly unclear: number;
+}
+
+export function deriveOutlookGaps(
+  outlook: readonly OutlookLike[] | null | undefined,
+): OutlookGaps | null {
+  if (!outlook || outlook.length === 0) return null;
+  const empty = outlook.find((w) => w.free === 0);
+  const peak = outlook.reduce((a, w) => (w.free > a.free ? w : a), outlook[0]);
+  return {
+    firstEmptyWeek: empty ? empty.from : null,
+    peakFree: peak.free,
+    peakFreeFrom: peak.free > 0 ? peak.from : null,
+    unclear: Math.max(...outlook.map((w) => w.unclear)),
+  };
+}

@@ -26,6 +26,8 @@ import {
   SentInvitationList,
 } from "@/components/app/invitation-list";
 import { MessageButton } from "@/components/app/message-button";
+import { resolveContactPermission } from "@/lib/communication/contact-permission";
+import { isContactPermitted } from "@/lib/communication/communication-eligibility";
 import {
   MyTeamEnquiriesList,
   TeamEnquiryButton,
@@ -376,6 +378,24 @@ export default async function NetworkPage({
           }))
       : [];
   const search = q ? await searchPeopleAndCompanies(q) : null;
+  // WHICH discovered people may actually be messaged (§8.1, default-closed):
+  // the same resolver the open-conversation action uses, so the button is
+  // drawn only where pressing it can succeed.
+  const contactable = new Set<string>();
+  if (search) {
+    await Promise.all(
+      search.people.map(async (p) => {
+        if (!p.profileId) return;
+        try {
+          if (isContactPermitted(await resolveContactPermission(p.profileId))) {
+            contactable.add(p.profileId);
+          }
+        } catch {
+          /* unknown → not contactable (default-closed) */
+        }
+      }),
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6" data-testid="network-page">
@@ -477,10 +497,26 @@ export default async function NetworkPage({
                         <span className="ml-auto">
                           {/* Contact goes through the existing permission-
                               gated message flow — never a raw channel. */}
-                          <MessageButton
-                            profileId={p.profileId}
-                            labelKey="messageWorker"
-                          />
+                          {p.profileId && contactable.has(p.profileId) ? (
+                            <MessageButton
+                              profileId={p.profileId}
+                              labelKey="messageWorker"
+                            />
+                          ) : (
+                            // WAS A DEAD END (walked 2026-10-01): the button
+                            // was drawn for every discovered person, but
+                            // opening a thread needs a recorded relationship
+                            // (§8.1) — so for anyone without one it bounced
+                            // to the inbox with "cannot open". Say so, and
+                            // point at the two real ways in.
+                            <Link
+                              href={inviteHref}
+                              className="max-w-xs text-meta leading-snug text-text-muted underline-offset-2 hover:text-brand-blue hover:underline"
+                              data-testid={`network-person-no-contact-${p.workerId}`}
+                            >
+                              {t("search.noContactYet")}
+                            </Link>
+                          )}
                         </span>
                       </li>
                     ))}

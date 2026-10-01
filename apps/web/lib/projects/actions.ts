@@ -9,7 +9,11 @@ import { callerCompanyId } from "./projects";
 import { insertProjectForCompany } from "@/lib/projects/create-project-core";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
-import { checkWorkerReservation } from "@/lib/planning/worker-reservation";
+import {
+  checkWorkerReservation,
+  findWorkersFreeInWindow,
+} from "@/lib/planning/worker-reservation";
+import { listManagedWorkers } from "@/lib/instructions/instructions";
 import type { ReservationVerdict } from "@/lib/workforce/commitment-reservation";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
@@ -46,6 +50,13 @@ export type ProjectActionResult =
        * discovering the clash later on a calendar they were not looking at.
        */
       reservation?: ReservationVerdict;
+      /** The assignment this call just wrote — so the screen can offer the
+       *  human decision (keep / undo / swap) without guessing which row. */
+      assigned?: { projectId: string; workerProfileId: string };
+      /** Present only when the verdict collides: colleagues CONFIRMED free on
+       *  the same dates (never an unknown) — the alternatives step of the
+       *  conflict flow. Names are the roster's own display names. */
+      alternatives?: { profileId: string; name: string }[];
     }
   | {
       ok: false;
@@ -147,7 +158,11 @@ export async function assignWorkerToProjectAction(
     metadata: { surface: "projects", role_context: "company" },
   });
   const reservation = await reservationAfterAssign(supabase, projectId, workerProfileId);
-  return reservation ? { ok: true, reservation } : { ok: true };
+  const assigned = { projectId, workerProfileId };
+  if (!reservation) return { ok: true, assigned };
+  return reservation.alternatives.length > 0
+    ? { ok: true, assigned, reservation: reservation.verdict, alternatives: reservation.alternatives }
+    : { ok: true, assigned, reservation: reservation.verdict };
 }
 
 /**
@@ -167,24 +182,76 @@ async function reservationAfterAssign(
   supabase: SupabaseClient,
   projectId: string,
   workerProfileId: string,
-): Promise<ReservationVerdict | null> {
+): Promise<{
+  verdict: ReservationVerdict;
+  alternatives: { profileId: string; name: string }[];
+} | null> {
   try {
     const [{ data: worker }, { data: project }] = await Promise.all([
       asAny(supabase).from("workers").select("id").eq("profile_id", workerProfileId).maybeSingle(),
       asAny(supabase).from("projects").select("start_date, end_date").eq("id", projectId).maybeSingle(),
     ]);
     if (!worker?.id) return null;
-    return await checkWorkerReservation({
+    const window = {
+      startDate: (project?.start_date as string | null) ?? null,
+      endDate: (project?.end_date as string | null) ?? null,
+    };
+    const verdict = await checkWorkerReservation({
       workerId: worker.id as string,
-      window: {
-        startDate: (project?.start_date as string | null) ?? null,
-        endDate: (project?.end_date as string | null) ?? null,
-      },
+      window,
       exclude: [projectId],
     });
+    if (verdict.state !== "collides") return { verdict, alternatives: [] };
+    return {
+      verdict,
+      alternatives: await freeColleagues(supabase, workerProfileId, projectId, window),
+    };
   } catch (error) {
     console.error("[projects] reservation check failed:", error);
     return null;
+  }
+}
+
+/**
+ * ALTERNATIVES — roster colleagues confirmed free across the same dates.
+ * Never throws and never blocks: any failure is simply "no alternatives
+ * listed", which is what the product said before this step existed.
+ */
+async function freeColleagues(
+  supabase: SupabaseClient,
+  assignedProfileId: string,
+  projectId: string,
+  window: { startDate: string | null; endDate: string | null },
+): Promise<{ profileId: string; name: string }[]> {
+  try {
+    const roster = (await listManagedWorkers()).filter((w) => w.profileId !== assignedProfileId);
+    if (roster.length === 0) return [];
+    const { data: rows } = await asAny(supabase)
+      .from("workers")
+      .select("id, profile_id")
+      .in(
+        "profile_id",
+        roster.map((w) => w.profileId),
+      );
+    const idByProfile = new Map<string, string>(
+      ((rows ?? []) as { id: string; profile_id: string }[]).map((r) => [r.profile_id, r.id]),
+    );
+    const free = new Set(
+      await findWorkersFreeInWindow({
+        workerIds: [...idByProfile.values()],
+        window,
+        exclude: [projectId],
+      }),
+    );
+    return roster
+      .filter((w) => {
+        const id = idByProfile.get(w.profileId);
+        return id ? free.has(id) : false;
+      })
+      .slice(0, 5);
+  } catch (error) {
+    console.error("[projects] free colleagues failed:", error);
+    return [];
   }
 }
 

@@ -185,25 +185,25 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
   },
   {
     id: "player_card",
-    // Canonical Player Card home is the profile (the old /dashboard/player-card
+    // Canonical professional-card home is the profile (the old /dashboard/player-card
     // route is a REDIRECT_STUB — we link the real destination directly).
     route: "/dashboard/profile",
     audience: "worker",
     labels: {
-      en: "Player Card (work card)",
-      lt: "Žaidėjo kortelė (darbo kortelė)",
-      ru: "Карточка игрока (рабочая карточка)",
-      nl: "Spelerskaart (werkkaart)",
-      de: "Spielerkarte (Arbeitskarte)",
-      pl: "Karta zawodnika (karta pracy)",
+      en: "Professional profile (work card)",
+      lt: "Profesinė kortelė (darbo kortelė)",
+      ru: "Профессиональная карточка (рабочая карточка)",
+      nl: "Professionele kaart (werkkaart)",
+      de: "Berufskarte (Arbeitskarte)",
+      pl: "Karta zawodowa (karta pracy)",
     },
     synonyms: {
-      en: ["player card", "work card", "card"],
-      lt: ["kortelė", "žaidėjo kortelė", "darbo kortelė"],
-      ru: ["карточка", "карта игрока", "рабочая карточка"],
-      nl: ["spelerskaart", "werkkaart", "kaart"],
-      de: ["spielerkarte", "arbeitskarte", "karte"],
-      pl: ["karta zawodnika", "karta pracy", "karta"],
+      en: ["professional profile", "work card", "card"],
+      lt: ["kortelė", "profesinė kortelė", "darbo kortelė"],
+      ru: ["карточка", "профессиональная карточка", "рабочая карточка"],
+      nl: ["professionele kaart", "werkkaart", "kaart"],
+      de: ["berufskarte", "arbeitskarte", "karte"],
+      pl: ["karta zawodowa", "karta pracy", "karta"],
     },
   },
   {

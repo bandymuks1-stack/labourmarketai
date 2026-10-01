@@ -104,6 +104,7 @@ import { evidenceFromSuggestions } from "@/lib/conversation/evidence-goal";
 import { worklogDraftFromEvidence } from "@/lib/conversation/evidence-to-worklog";
 import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
 import type { ConversationIntent } from "@/lib/conversation/intent-router";
+import { helpChipsFor, readHelpTopic } from "@/lib/conversation/product-help";
 import type { ProjectReadinessChatResult, ReadinessMissingCode } from "@/lib/conversation/project-readiness-contract";
 import { PROJECT_RISK_CHIP_LIMIT, type ProjectRiskRow } from "@/lib/conversation/project-risk-contract";
 import type { WorkTaskStatus } from "@/lib/tasks/task-model";
@@ -559,6 +560,7 @@ export type ChatLabels = {
   capacityBusyUntil: string;
   capacityCommittedUntil: string;
   capacityCommittedToUntil: string;
+  capacityCommittedUndated: string;
   capacityAbsencesUnknown: string;
   capacityCommitmentsUnknown: string;
   capacityEmpty: string;
@@ -779,6 +781,9 @@ function daysUntil(iso: string): number {
  * landing hand-off itself and needs the person's own credentials; recorded,
  * not closed here.
  */
+/** Session-storage slot carrying the sentence that needed another workspace. */
+const CONTINUE_AFTER_SWITCH_KEY = "lm.chat.continueAfterSwitch";
+
 function referrerIsOurOwnDoor(): boolean {
   try {
     const ref = document.referrer;
@@ -2241,13 +2246,30 @@ export function ConversationChat({
    * re-validates.
    */
   const performContextSwitch = useCallback(
-    (workspace: WorkspaceInfo) => {
+    (workspace: WorkspaceInfo, continueSentence?: string) => {
       // The chip's own label: an unnamed organization says so, never "".
       const displayName =
         workspace.kind === "personal" ? t("switchContextPersonal") : workspaceLabelOf(workspace);
       if (auth?.activeWorkspaceId === workspace.id) {
         assistant(t("switchContextAlready", { name: displayName }));
         return;
+      }
+      // THE SAME TASK CONTINUES ACROSS THE SWITCH (owner 2026-10-01). The
+      // dashboard keys this chat on the active workspace, so a switch REMOUNTS
+      // it: anything said after `switchWorkspace` resolves would be printed
+      // into an instance that is about to disappear. The sentence that needed
+      // the other context is therefore handed to the NEW instance through
+      // session storage (one-shot, short-lived, bound to the target workspace)
+      // and re-run there through the one router.
+      if (continueSentence) {
+        try {
+          window.sessionStorage.setItem(
+            CONTINUE_AFTER_SWITCH_KEY,
+            JSON.stringify({ ws: workspace.id, say: continueSentence.slice(0, 500), at: Date.now() }),
+          );
+        } catch {
+          /* storage unavailable: the switch still happens, only the resume is lost */
+        }
       }
       setTyping(true);
       (auth
@@ -2261,6 +2283,13 @@ export function ConversationChat({
               ? t("switchContextDone", { name: displayName })
               : t("switchContextFailed"),
           );
+          if (!accepted && continueSentence) {
+            try {
+              window.sessionStorage.removeItem(CONTINUE_AFTER_SWITCH_KEY);
+            } catch {
+              /* nothing to clean */
+            }
+          }
         })
         .catch(() => {
           setTyping(false);
@@ -2269,6 +2298,52 @@ export function ConversationChat({
     },
     [assistant, auth, t, workspaceLabelOf],
   );
+
+  /**
+   * FIND BUSINESS PARTNERS (owner 2026-10-01) — what the company context
+   * offers. The marketplace is ONE existing capability: service offerings
+   * and requests, work-resource listings, and the relationship door. This
+   * hands over those doors and builds nothing of its own.
+   */
+  const pendingPartnersSentenceRef = useRef("");
+  const showPartnerDoors = useCallback(() => {
+    assistant(t("findPartnersDoors"), [
+      { id: "link:/dashboard/service-requests", label: t("chipPartnersServices") },
+      { id: "link:/dashboard/listings", label: t("chipPartnersListings") },
+      { id: "link:/dashboard/company/partners", label: t("chipPartnersRelations") },
+    ]);
+  }, [assistant, t]);
+
+  /**
+   * "Noriu rasti partnerių savo verslui" — a BUSINESS request, never a job
+   * search. In a company context the marketplace doors open; from the
+   * personal space the chat asks WHICH company (membership-validated `wsp:`
+   * chips, the same switch the `ws:` chips run) and then continues the same
+   * request there. The meaning of the sentence is never changed.
+   */
+  const startFindPartners = useCallback((sentence: string) => {
+    pendingPartnersSentenceRef.current = sentence;
+    const workspaces = auth?.workspaces ?? [];
+    const active = workspaces.find((w) => w.id === auth?.activeWorkspaceId);
+    if (identity === "company" || active?.kind === "organization") {
+      showPartnerDoors();
+      return;
+    }
+    const organizations = workspaces.filter(
+      (w) => w.kind === "organization" && w.name.trim() !== "",
+    );
+    if (organizations.length === 0) {
+      assistant(t("findPartnersNoCompany"), [
+        { id: "link:/dashboard/start/company", label: labels.chipCreateOrganization },
+        { id: "link:/dashboard/service-requests", label: t("chipPartnersServices") },
+      ]);
+      return;
+    }
+    assistant(
+      t("findPartnersPickCompany"),
+      organizations.map((w) => ({ id: `wsp:${w.id}`, label: workspaceLabelOf(w) })),
+    );
+  }, [assistant, auth?.activeWorkspaceId, auth?.workspaces, identity, labels.chipCreateOrganization, showPartnerDoors, t, workspaceLabelOf]);
 
   const startSwitchContext = useCallback(
     (text: string) => {
@@ -4536,6 +4611,15 @@ export function ConversationChat({
           if (r.state === "unavailable") {
             return `• ${r.label} — ${labels.capacityBusyUntil.replace("{date}", until)}`;
           }
+          // An assignment nobody dated: the work is named, the END is not
+          // invented (SEP-7) — `until` would otherwise fall back to the
+          // window's last day and read as a fact.
+          if (r.undated) {
+            const undatedText = r.committedTo
+              ? labels.capacityCommittedUndated.replace("{what}", r.committedTo)
+              : labels.capacityCommittedUndated.replace(/^[^,]*,\s*/, "");
+            return `• ${r.label} — ${undatedText}`;
+          }
           // A real title when the source carries one, the plain phrasing when
           // it does not — never an invented name for the work.
           return r.committedTo
@@ -5017,6 +5101,20 @@ export function ConversationChat({
     (chip: ChoiceChip) => {
       if (runPinChip(chip.id)) return;
       noteUsage(chip.id, chip.label);
+      // PERSONAL ACTS ARE NOT COMPANY ACTS (owner 2026-10-01). The CV, the
+      // personal profile and the person's own work log belong to the PERSON;
+      // in a company workspace the chip says so and offers the personal space
+      // (the same membership-validated `ws:` switch) instead of running the
+      // person's flow on the company's behalf. Same rule the job search has.
+      if (identity === "company" && (chip.id === "logwork" || chip.id === "cv" || chip.id === "profile")) {
+        const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+        user(chip.label);
+        assistant(
+          t("personalOnlyInCompany"),
+          personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+        );
+        return;
+      }
       // An answer to "what is this file for?" (per-question ids, never a
       // pinnable ref, so noteUsage above records nothing for it).
       if (chip.id.startsWith("attach-file:")) {
@@ -5256,6 +5354,16 @@ export function ConversationChat({
               user(chip.label);
               performContextSwitch(target);
             }
+          } else if (chip.id.startsWith("wsp:")) {
+            // Business-partner request from the personal space: switch to the
+            // company the person picked, then continue the SAME request.
+            const target = (auth?.workspaces ?? []).find(
+              (w) => w.id === chip.id.slice(4),
+            );
+            if (target) {
+              user(chip.label);
+              performContextSwitch(target, pendingPartnersSentenceRef.current || undefined);
+            }
           } else if (chip.id.startsWith("stage:")) {
             // `stage:<projectId>:<stageId>:<status>` — the person picked which
             // real stage the sentence meant; the RPC re-checks the project.
@@ -5433,7 +5541,7 @@ export function ConversationChat({
           }
       }
     },
-    [labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, renderOfferCards, locale, starterChips,runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startAddDocument, startInvitations, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm, startCapabilities],
+    [identity, t, labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, renderOfferCards, locale, starterChips,runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startAddDocument, startInvitations, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, runAgencyRead, openProposeForm, startCapabilities],
   );
   handleChipRef.current = handleChip;
 
@@ -6768,6 +6876,33 @@ export function ConversationChat({
         // correction path so both render identically).
         offerValue: () =>
           renderValueStatement(structureValueStatement(text), text),
+        // "Noriu rasti partnerių savo verslui" — a business-side request:
+        // company context → the marketplace doors; personal context → which
+        // company, then the same doors. Never the job search.
+        findPartners: () => startFindPartners(text),
+        // "Kaip pridėti žmogų?" / "Kur mano valandos?" - HOW to use the product,
+        // in plain words WITH the way to do it (chips to the existing surfaces).
+        // The topic is read from the same sources the router rule is built from.
+        productHelp: () => {
+          const topic = readHelpTopic(text);
+          if (!topic) {
+            startCapabilities();
+            return;
+          }
+          const labelOf = (key: string): string =>
+            key === "workHoursChip"
+              ? labels.workHoursChip
+              : key === "activityChip"
+                ? labels.activityChip
+                : t(`productHelp.chips.${key}` as never);
+          assistant(
+            t(`productHelp.${topic.id}` as never),
+            helpChipsFor(topic, identity === "company" ? "company" : "person").map((c) => ({
+              id: `link:${c.target}`,
+              label: labelOf(c.label),
+            })),
+          );
+        },
         // Honest blocked/hint answers explain themselves; repeating the same
         // four-item menu under every one of them taught users to ignore the
         // chips entirely. The menu stays where it is a menu: the greeting
@@ -7229,7 +7364,7 @@ export function ConversationChat({
           askToClarify(t("answerFailed"));
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startFindPartners, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
   );
 
   /**
@@ -7250,6 +7385,39 @@ export function ConversationChat({
    * proposer call; then the sentence is PREFILLED in the composer for the
    * person to send — never silently dropped.
    */
+  const resumeConsumedRef = useRef(false);
+  // The workspace THIS instance was mounted for: only a chat born in the target
+  // workspace may resume the hand-off — the outgoing instance can observe the
+  // new id for a moment before it unmounts and must not answer into itself.
+  const mountedWorkspaceRef = useRef<string | null>(auth?.activeWorkspaceId ?? null);
+  useEffect(() => {
+    if (resumeConsumedRef.current) return;
+    if (!auth?.profile || !auth.activeWorkspaceId) return;
+    let raw: string | null = null;
+    try {
+      raw = window.sessionStorage.getItem(CONTINUE_AFTER_SWITCH_KEY);
+    } catch {
+      raw = null;
+    }
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw) as { ws?: unknown; say?: unknown; at?: unknown };
+      if (parsed.ws !== mountedWorkspaceRef.current || parsed.ws !== auth.activeWorkspaceId) return;
+      resumeConsumedRef.current = true;
+      window.sessionStorage.removeItem(CONTINUE_AFTER_SWITCH_KEY);
+      if (
+        typeof parsed.say === "string" &&
+        parsed.say &&
+        typeof parsed.at === "number" &&
+        Date.now() - parsed.at < 120_000
+      ) {
+        handleSend(parsed.say);
+      }
+    } catch {
+      /* a malformed or stale hand-off is dropped, never replayed */
+    }
+  }, [auth?.profile, auth?.activeWorkspaceId, handleSend]);
+
   const sayConsumedRef = useRef(false);
   useEffect(() => {
     if (sayConsumedRef.current) return;

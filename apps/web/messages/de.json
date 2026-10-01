@@ -1,4 +1,22 @@
 {
+  "companyModel": {
+    "title": "Unternehmensführung",
+    "primary": "Bedarf veröffentlichen",
+    "need": "Was wir brauchen",
+    "offer": "Was wir anbieten",
+    "market": "Marktplatz",
+    "people": "Personen & Team",
+    "projects": "Projekte & Objekte",
+    "messages": "Nachrichten",
+    "more": "Mehr",
+    "clients": "Kunden & Lieferanten",
+    "candidates": "Kandidaten",
+    "calendar": "Kalender",
+    "capacity": "Kapazität",
+    "work": "Arbeit & Stunden",
+    "results": "Ergebnisse",
+    "history": "Verlauf"
+  },
   "publicDemand": {
     "title": "Aktuelle Marktnachfrage",
     "subtitleAgency": "Was der öffentliche Markt gerade verlangt — derselbe Pool, den Ihre Kandidaten auf der Übersicht sehen.",
@@ -205,7 +223,7 @@
     "outcome": {
       "saved": "Gespeichert.",
       "reported": "Mangel gemeldet.",
-      "needs_migration": "Noch nicht verfügbar — das Übergabe-Update ist nicht angewendet.",
+      "needs_migration": "Derzeit nicht verfügbar.",
       "invalid": "Bitte prüfen Sie die Angaben.",
       "auth": "Bitte erneut anmelden.",
       "not_authorized": "Sie können nur Mängel Ihrer eigenen Projekte verwalten.",
@@ -254,7 +272,7 @@
     },
     "outcome": {
       "saved": "Gespeichert.",
-      "needs_migration": "Noch nicht verfügbar — das kommerzielle Update ist nicht angewendet.",
+      "needs_migration": "Derzeit nicht verfügbar.",
       "invalid": "Bitte prüfen Sie die Angaben.",
       "auth": "Bitte erneut anmelden.",
       "not_authorized": "Sie können nur Ihre eigenen Datensätze verwalten.",
@@ -321,7 +339,7 @@
     "outcome": {
       "saved": "Gespeichert.",
       "acknowledged": "Bestätigt.",
-      "needs_migration": "Noch nicht verfügbar — das Betriebsmittel-Update ist nicht angewendet.",
+      "needs_migration": "Derzeit nicht verfügbar.",
       "invalid": "Bitte prüfen Sie die Angaben.",
       "auth": "Bitte erneut anmelden.",
       "not_authorized": "Sie dürfen das nicht tun.",
@@ -379,7 +397,7 @@
     "outcome": {
       "saved": "Gespeichert.",
       "deleted": "Entfernt.",
-      "needs_migration": "Noch nicht verfügbar — das Wirtschaftlichkeits-Update ist nicht angewendet.",
+      "needs_migration": "Derzeit nicht verfügbar.",
       "invalid": "Bitte geben Sie einen gültigen Betrag ein.",
       "auth": "Bitte erneut anmelden.",
       "not_authorized": "Sie können nur Budgets Ihrer eigenen Projekte verwalten.",
@@ -394,7 +412,7 @@
       "noneToday": "Keiner Ihrer Mitarbeitenden hat heute eine genehmigte Abwesenheit.",
       "noneWeek": "Keine genehmigten Abwesenheiten in den nächsten 7 Tagen.",
       "coverage": "Basierend auf genehmigten Abwesenheiten von {count} verwalteten Mitarbeitenden. Gründe bleiben privat.",
-      "unavailable": "Der Abwesenheitsplan ist hier noch nicht aktiviert."
+      "unavailable": "Derzeit nicht verfügbar."
     },
     "types": {
       "annual_leave": "Jahresurlaub",
@@ -414,7 +432,7 @@
       "cancelled": "Antrag storniert.",
       "approved": "Genehmigt.",
       "rejected": "Abgelehnt.",
-      "needs_migration": "Noch nicht verfügbar — das Personal-Update ist nicht angewendet.",
+      "needs_migration": "Derzeit nicht verfügbar.",
       "invalid": "Bitte prüfen Sie Daten und Angaben.",
       "auth": "Bitte erneut anmelden.",
       "not_authorized": "Sie dürfen das nicht tun.",
@@ -476,7 +494,7 @@
     "laneWork": "{n} Arbeiten",
     "lanesTitle": "Phasen",
     "moreInList": "+{n} weitere in der Liste",
-    "lanesUnavailable": "Phasen sind noch nicht verfügbar — das Projektbetriebs-Update ist nicht angewendet.",
+    "lanesUnavailable": "Derzeit nicht verfügbar.",
     "lanesEmpty": "Noch keine Phasen. Fügen Sie die erste Phase im Phasenbereich unten hinzu.",
     "unplacedWork": "{n} offene Arbeiten ohne Phasendatum — siehe Aufgabenbereich unten.",
     "peopleTitle": "Im Projekt",
@@ -500,7 +518,7 @@
       "emptyRoster": "Ihre Liste hat noch keine aktiven Personen.",
       "unavailable": "Die Liste konnte gerade nicht gelesen werden.",
       "why": "Warum diese: in Ihrer Liste und ohne genehmigte Abwesenheit zwischen {from} und {to}.",
-      "absencesUnknown": "Abwesenheiten sind noch nicht aktiviert, daher spricht nichts dagegen.",
+      "absencesUnknown": "Derzeit nicht verfügbar.",
       "more": "+{n} weitere freie Personen außerhalb dieser Ansicht.",
       "alreadyOn": "kann kommen — hat in diesem Zeitraum bereits Arbeit",
       "alreadyOnNamed": "kann kommen — ist bereits auf {what}"
@@ -513,7 +531,7 @@
     },
     "saved": "Gespeichert — aus dem Datensatz neu gelesen.",
     "errors": {
-      "needs_migration": "Noch nicht verfügbar — das Update ist nicht angewendet.",
+      "needs_migration": "Derzeit nicht verfügbar.",
       "not_authorized": "Sie können dieses Projekt nicht ändern.",
       "invalid": "Diese Änderung ist hier nicht erlaubt.",
       "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
@@ -585,7 +603,7 @@
       "added": "Phase hinzugefügt.",
       "updated": "Phase aktualisiert.",
       "deleted": "Phase entfernt.",
-      "needs_migration": "Noch nicht verfügbar — das Projektoperations-Update ist nicht angewendet.",
+      "needs_migration": "Derzeit nicht verfügbar.",
       "invalid": "Bitte prüfen Sie die Angaben und versuchen Sie es erneut.",
       "auth": "Bitte erneut anmelden.",
       "not_authorized": "Sie können nur Phasen Ihrer eigenen Projekte verwalten.",
@@ -664,7 +682,7 @@
     "intro": "Kennzahlen, gezählt aus Ihren eigenen Einträgen, mit der Berechnungsgrundlage unter jedem Abschnitt, und die bereits vorhandenen Exporte.",
     "honestyNote": "Nur Zählungen über Ihre eigenen Daten — keine Benchmarks, keine Scores, keine Prognosen.",
     "state": {
-      "needsMigration": "Diese Kennzahlen sind in dieser Umgebung noch nicht aktiviert. Anstelle echter Daten wird keine Zahl angezeigt.",
+      "needsMigration": "Derzeit nicht verfügbar.",
       "unavailable": "Diese Kennzahlen können gerade nicht gelesen werden. An ihrer Stelle wird nichts geschätzt."
     },
     "basis": {
@@ -798,7 +816,7 @@
       "collapse": "Detailbericht ausblenden",
       "ledger": {
         "measured": "Eigene Aufzeichnungen Ihrer Organisation in diesem Zeitraum: {hours} Std. bei {workers, plural, one {# Person} other {# Personen}} — getrennt geführt, nie zum Journal addiert.",
-        "none": "Diese Datenbank enthält keine Stundenaufzeichnungen der Organisation.",
+        "none": "Derzeit nicht verfügbar.",
         "unknown": "Die Aufzeichnungen der Organisation konnten nicht gelesen werden — das sind nicht null Stunden.",
         "truncated": "Beruht auf den ersten {count} Aufzeichnungen."
       }
@@ -963,7 +981,7 @@
     "uploadFailed": "Das Foto konnte nicht hochgeladen werden. Bitte versuchen Sie es erneut.",
     "invalidFile": "Das Foto muss im Format JPG, PNG oder WebP sein.",
     "tooLarge": "Das Foto ist zu groß. Versuchen Sie ein anderes.",
-    "notReady": "Der Foto-Upload ist in dieser Umgebung noch nicht verfügbar.",
+    "notReady": "Derzeit nicht verfügbar.",
     "alt": "Profilfoto",
     "hint": "JPG, PNG oder WebP, bis zu 5 MB. Das Foto ist nur für Sie sichtbar."
   },
@@ -1093,7 +1111,7 @@
           "desired_market": "Wunschmarkt",
           "demand_anchor": "Verifizierter Bedarfsstandort"
         },
-        "storeInactive": "Der Speicher für Unternehmensgebiete ist in dieser Umgebung noch nicht aktiviert — die Aktivierung ist eine Entscheidung des Eigentümers.",
+        "storeInactive": "Derzeit nicht verfügbar.",
         "readError": "Unternehmensgebiete konnten gerade nicht geladen werden.",
         "empty": "Noch keine Unternehmensgebiete. Fügen Sie die Tätigkeitsorte Ihres Unternehmens im Unternehmensbereich hinzu.",
         "visibilityNote": "Unternehmensgebiete werden als umrandete Flächen aus der vom Unternehmen eingegebenen Geografie gezeichnet — nie als personenähnliche Marker."
@@ -1745,6 +1763,14 @@
       "free": "frei",
       "away": "abwesend",
       "awayUntil": "abwesend bis {date}",
+      "summary": "{free} frei · {committed} im Einsatz · {away} abwesend",
+      "onWork": "auf {project}",
+      "booked": "gebucht",
+      "until": "bis {date}",
+      "undated": "ohne Termine",
+      "outlookHeading": "Freie Personen, nächste 4 Wochen",
+      "outlookWeek": "Ab {date}: {free} von {total} frei",
+      "outlookNote": "Nach erfassten Buchungen und Abwesenheiten — eine Schätzung, kein Versprechen.",
       "absencesUnknown": "Abwesenheiten werden noch nicht erfasst — frei heißt, niemand hat etwas anderes gesagt.",
       "more": "{count, plural, =1 {1 weitere Person auf der Planungsseite} other {# weitere Personen auf der Planungsseite}}",
       "assign": "Einem Projekt zuweisen",
@@ -1770,7 +1796,18 @@
       "openNeed": "Bedarf öffnen",
       "gapsRow": "{count, plural, =1 {1 Person auf {project} hat fehlende Dokumente} other {# Personen auf {project} haben fehlende Dokumente}}",
       "gapsCta": "Dokumente prüfen",
-      "needsCta": "Bedarf beschreiben"
+      "needsCta": "Bedarf beschreiben",
+      "noOneFrom": "Ab {date} ist niemand frei",
+      "unclear": "{count, plural, =1 {1 Person hat Arbeit ohne Termine — freie Zeit kann geringer sein} other {# Personen haben Arbeit ohne Termine — freie Zeit kann geringer sein}}",
+      "fit": {
+        "fits": "Freie Personen reichen aus",
+        "from": "Freie Personen reichen ab {date}",
+        "short": "{count, plural, =1 {1 Person fehlt} other {# Personen fehlen}}",
+        "some": "Freie Personen reichen nur in einigen Wochen",
+        "unknown": "Zu wenig Angaben zum Vergleich"
+      },
+      "opportunity": "{count, plural, =1 {Bis zu 1 Person ist ab {date} frei} other {Bis zu # Personen sind ab {date} frei}}",
+      "opportunityCta": "Arbeit suchen"
     },
     "attention": {
       "heading": "Braucht Sie",
@@ -4489,6 +4526,7 @@
         "planning": "Kalender",
         "network": "Netzwerk",
         "playerCard": "Mein Berufsprofil",
+        "companyProfile": "Firmenprofil",
         "adminPlatform": "Plattform-Administration"
       },
       "roleNotice": {
@@ -5385,7 +5423,7 @@
       "submit": "Löschantrag stellen",
       "submitted": "Antrag gestellt",
       "submittedBody": "Ein Mensch wird ihn prüfen und Sie über Ihre Konto-E-Mail-Adresse kontaktieren.",
-      "unavailable": "Löschanträge werden noch nicht angenommen — diese Funktion ist nicht eingeschaltet. Ihre Datenkopie können Sie schon jetzt herunterladen.",
+      "unavailable": "Derzeit nicht verfügbar.",
       "tooManyOpen": "Sie haben zu viele offene Anträge — warten Sie, bis sie geprüft wurden.",
       "error": "Etwas ist schiefgelaufen. Versuchen Sie es erneut."
     },
@@ -5565,8 +5603,8 @@
         {
           "heading": "Standardmäßig geschlossen",
           "items": [
-            "Benutzerdatentabellen sind durch Zugriffsregeln in der Datenbank selbst geschützt. Wenn keine Regel den Zugriff ausdrücklich gewährt, sind die Daten nicht sichtbar — auch nicht für andere angemeldete Benutzer.",
-            "Diese Regeln wirken auf Datenbankebene, nicht nur in der Oberfläche, und sind durch automatisierte Tests abgedeckt."
+            "Derzeit nicht verfügbar.",
+            "Derzeit nicht verfügbar."
           ]
         },
         {
@@ -5610,7 +5648,7 @@
         {
           "heading": "Infrastrukturanbieter (Unterauftragsverarbeiter)",
           "items": [
-            "Supabase — Datenbank, Nutzeranmeldung und Dateispeicher. Die Daten werden in der Europäischen Union gehostet (Region eu-west-1).",
+            "Derzeit nicht verfügbar.",
             "Vercel — Hosting der Anwendung und Auslieferung der Inhalte.",
             "GitHub — Speicherung des Quellcodes. Nutzerdaten werden dort nicht gespeichert.",
             "Derzeit ist kein E-Mail-Anbieter, kein KI-Anbieter, kein Übersetzungsanbieter und kein Zahlungsanbieter aktiv. Wird einer aktiviert, wird zuerst diese Liste aktualisiert."
@@ -5670,7 +5708,7 @@
         {
           "heading": "Wenn etwas falsch aussieht",
           "items": [
-            "Die Zugriffsregeln in der Datenbank sind die maßgebliche Quelle, und diese Seite folgt ihnen. Wenn etwas hier nicht mit dem übereinstimmt, was Sie sehen, kontaktieren Sie uns — ein Mensch wird es prüfen."
+            "Derzeit nicht verfügbar."
           ]
         }
       ],
@@ -5979,6 +6017,10 @@
       "reservation": {
         "collidesTitle": "An diesen Tagen bereits verplant",
         "notBlocking": "Das blockiert die Zuweisung nicht — Sie entscheiden.",
+        "alternativesTitle": "In diesem Zeitraum frei",
+        "swap": "Stattdessen zuweisen",
+        "undo": "Zuweisung rückgängig",
+        "decided": "Erledigt",
         "unknown": "Wir konnten nicht bestätigen, dass diese Tage frei sind. Das ist nicht dasselbe wie frei.",
         "source": {
           "project": "Projekt",
@@ -6470,7 +6512,13 @@
       "map": "Karte",
       "mapNote": "Wo sich Arbeit und Dienstleistungen befinden",
       "diary": "Arbeitsjournal",
-      "diaryNote": "Abgeschlossene Arbeit wird als Fakt erfasst"
+      "diaryNote": "Abgeschlossene Arbeit wird als Fakt erfasst",
+      "scouting": "Kandidaten",
+      "scoutingNote": "Finde passende Personen für deinen Bedarf",
+      "listings": "Inserate",
+      "listingsNote": "Räume, Geräte, Fahrzeuge – anbieten oder suchen",
+      "needs": "Bedarf & Angebot",
+      "needsNote": "Veröffentliche, was du brauchst oder anbieten kannst"
     }
   },
   "learning": {
@@ -6520,7 +6568,7 @@
     "pageLead": "Listen Sie die echten Dienstleistungen auf, die Sie anbieten, und verwalten Sie Ihre eigenen Angebote.",
     "title": "Ihre Dienstleistungsangebote",
     "intro": "Echte Dienstleistungen, die Sie anbieten. Aktivieren Sie eine, damit angemeldete Mitglieder sie finden können; Entwürfe und pausierte Dienstleistungen bleiben nur für Sie sichtbar.",
-    "notAvailable": "Dienstleistungsangebote sind in dieser Umgebung noch nicht aktiviert.",
+    "notAvailable": "Derzeit nicht verfügbar.",
     "empty": "Noch keine Dienstleistungsangebote. Fügen Sie die erste echte Dienstleistung hinzu, die Sie anbieten.",
     "addButton": "Dienstleistung hinzufügen",
     "form": {
@@ -6613,7 +6661,7 @@
         "errorTooLarge": "Datei ist zu groß (bis 10 MB).",
         "errorBadType": "Dieser Dateityp wird nicht unterstützt. Erlaubt: JPG, PNG, WebP, PDF, TXT.",
         "errorTooMany": "Höchstens 5 Anhänge pro Nachricht.",
-        "errorNeedsSetup": "Anhänge sind in dieser Umgebung noch nicht aktiviert.",
+        "errorNeedsSetup": "Derzeit nicht verfügbar.",
         "blockedWhileUploading": "Warten Sie, bis die Anhänge hochgeladen sind.",
         "blockedFailed": "Entfernen Sie den fehlgeschlagenen Anhang oder laden Sie ihn erneut hoch.",
         "partialFailure": "Die Nachricht wurde gesendet, aber einige Anhänge konnten nicht angehängt werden. Versuchen Sie, sie erneut zu senden."
@@ -6749,7 +6797,7 @@
     "sentTitle": "Anfrage registriert",
     "sentBody": "Eine Person wird sie prüfen und sich über die Plattform melden. Es wird keine Fachkraft automatisch zugewiesen — Sie erfahren die nächsten Schritte nach der Prüfung.",
     "errorGeneric": "Registrierung nicht möglich. Bitte versuchen Sie es erneut.",
-    "notReady": "Hilfeanfragen sind in dieser Umgebung noch nicht aktiviert.",
+    "notReady": "Derzeit nicht verfügbar.",
     "tooManyOpen": "Sie haben zu viele offene Hilfeanfragen — bitte warten Sie, bis die bestehenden geprüft wurden.",
     "noteTooLong": "Die Beschreibung ist zu lang (max. 500 Zeichen).",
     "internalNote": "Interner Eintrag — es werden keine E-Mails oder Nachrichten an irgendjemanden gesendet.",
@@ -6839,7 +6887,7 @@
     "title": "Folgeaufgaben-Warteschlange",
     "intro": "Interne nächste Schritte für das Betreiberteam: was nachverfolgt werden soll, für wen und in welchem Zustand. Nur echte erfasste Aufgaben.",
     "honestNote": "Nur intern. Das Erstellen oder Erledigen einer Aufgabe sendet nichts an irgendjemanden — keine E-Mail, keine SMS, keine Nachrichten. Dies ist das eigene Gedächtnis des Teams für nächste Schritte.",
-    "preApply": "Die Folgeaufgaben-Warteschlange ist in dieser Umgebung noch nicht verfügbar. Es wird nichts angezeigt, weil nichts erfasst ist.",
+    "preApply": "Derzeit nicht verfügbar.",
     "queueHeading": "Offen",
     "queueEmpty": "Keine offenen Folgeaufgaben. Wenn das Team einen nächsten Schritt erfasst, erscheint er hier.",
     "resolvedHeading": "Kürzlich erledigt",
@@ -6870,7 +6918,7 @@
     "outcome": {
       "created": "Aufgabe erfasst. Es wurde nichts an irgendjemanden gesendet.",
       "updated": "Aufgabe aktualisiert.",
-      "needsMigration": "Der Follow-up-Speicher ist in dieser Umgebung noch nicht verfügbar.",
+      "needsMigration": "Derzeit nicht verfügbar.",
       "notAuthorized": "Nur Operatoren können Follow-up-Aufgaben verwalten.",
       "limitReached": "Das Limit offener Aufgaben ist erreicht — lösen Sie zuerst bestehende Aufgaben.",
       "notFound": "Diese Aufgabe existiert nicht mehr.",
@@ -6885,7 +6933,7 @@
     "responsibleHeading": "Verantwortlich",
     "responsibleEmpty": "Noch keine aktiven Zuweisungen von Arbeitskräften — weisen Sie oben Arbeitskräfte zu, um festzuhalten, wer verantwortlich ist.",
     "checklistNote": "Dokumente und Bereitschaft werden in der Checkliste pro Arbeitskraft oben erfasst — der Pass dupliziert sie nicht. Fotoanhänge werden noch nicht unterstützt.",
-    "preApply": "Die Übergabeaufzeichnung ist in dieser Umgebung noch nicht verfügbar. Es wird nichts angezeigt, weil nichts erfasst ist.",
+    "preApply": "Derzeit nicht verfügbar.",
     "statusHeading": "Erklärte Phase",
     "statusNone": "Noch keine Phase erklärt.",
     "statusDisclaimer": "Vom Projektmanager erklärt. „Übergabe erklärt“ bedeutet, dass der Manager angegeben hat, dass die Übergabe stattgefunden hat — die Plattform überprüft dies nicht.",
@@ -6912,7 +6960,7 @@
     },
     "outcome": {
       "added": "Eintrag erfasst.",
-      "needsMigration": "Die Übergabeaufzeichnung ist in dieser Umgebung noch nicht verfügbar.",
+      "needsMigration": "Derzeit nicht verfügbar.",
       "notAuthorized": "Nur ein Manager dieses Projekts kann Passeinträge hinzufügen.",
       "limitReached": "Der Pass dieses Projekts hat sein Eintragslimit erreicht.",
       "invalid": "Der Eintrag ist ungültig — prüfen Sie Typ, Phase und Text.",
@@ -6943,11 +6991,11 @@
       "invalidName": "Der Name muss 2–80 Zeichen lang sein.",
       "notAllowed": "Nur ein Organisationsinhaber kann eine Kolonne erstellen.",
       "limitReached": "Kolonnenlimit erreicht (20).",
-      "needsMigration": "Das Kolonnenmodell ist in dieser Umgebung noch nicht aktiviert.",
+      "needsMigration": "Derzeit nicht verfügbar.",
       "error": "Die Kolonne konnte nicht erstellt werden. Es wurde nichts gespeichert."
     },
     "consentNote": "Die Mitgliedschaft beginnt erst, wenn die Arbeitskraft die Einladung selbst annimmt — niemand wird stillschweigend hinzugefügt.",
-    "inviteNotEnabled": "Kolonnen-Einladungen sind in dieser Umgebung noch nicht aktiviert, daher können hier keine Mitglieder eingeladen werden.",
+    "inviteNotEnabled": "Derzeit nicht verfügbar.",
     "invitePendingOption": "{name} (Einladung gesendet)",
     "provenance": {
       "invited": "beigetreten durch eigene Annahme",
@@ -6961,7 +7009,7 @@
       "rateLimited": "Einladungslimit vorerst erreicht. Versuchen Sie es später erneut.",
       "notAuthorized": "Nur der Kolonneninhaber kann Einladungen senden.",
       "noEmail": "Diese Arbeitskraft hat keine nutzbare E-Mail-Adresse, daher kann die Einladung nicht erstellt werden.",
-      "needsMigration": "Einladungen sind in dieser Umgebung noch nicht aktiviert.",
+      "needsMigration": "Derzeit nicht verfügbar.",
       "error": "Die Einladung konnte nicht gesendet werden. Es wurde nichts geändert."
     },
     "details": {
@@ -6974,7 +7022,7 @@
       "noteLabel": "Notiz (nur für Ihre Manager sichtbar)",
       "save": "Daten speichern",
       "saving": "Wird gespeichert…",
-      "notEnabled": "Kolonnendaten sind vorbereitet, aber in dieser Umgebung noch nicht aktiviert.",
+      "notEnabled": "Derzeit nicht verfügbar.",
       "status": {
         "availableNow": "Jetzt verfügbar",
         "availableFrom": "Verfügbar ab einem Datum",
@@ -7008,7 +7056,7 @@
     "enquiries": {
       "heading": "Anfragen an diese Kolonne ({count} offen)",
       "empty": "Noch keine Anfragen. Sobald ein Arbeitgeber nach dieser Kolonne fragt, erscheint es hier.",
-      "notEnabled": "Kolonnen-Anfragen sind vorbereitet, aber in dieser Umgebung noch nicht aktiviert.",
+      "notEnabled": "Derzeit nicht verfügbar.",
       "accept": "Annehmen",
       "decline": "Ablehnen",
       "unknownProposer": "Unbekannter Absender",
@@ -7041,7 +7089,7 @@
     "submit": "Anfrage senden",
     "sending": "Wird gesendet…",
     "cancel": "Abbrechen",
-    "notEnabled": "Kolonnen-Anfragen sind vorbereitet, aber in dieser Umgebung noch nicht aktiviert.",
+    "notEnabled": "Derzeit nicht verfügbar.",
     "outcome": {
       "created": "Anfrage gesendet. Die Antwort der Kolonne sehen Sie unter Mein Netzwerk.",
       "duplicateOpen": "Sie haben bereits eine offene Anfrage an diese Kolonne.",
@@ -7622,7 +7670,7 @@
       "formatStatus": "PDF: verfügbar · CSV: verfügbar · Excel / Word: in Vorbereitung"
     },
     "disclaimer": "Die Status basieren auf öffentlich aufgeführten Anforderungen und Ihren eigenen Angaben. Die endgültige Konformität wird von den Behörden oder einem Anwalt geprüft — dies ist keine rechtliche Garantie.",
-    "needsMigration": "Die Dokumentenspeicherschicht ist in dieser Umgebung noch nicht aktiviert.",
+    "needsMigration": "Derzeit nicht verfügbar.",
     "guidance": {
       "title": "Dokumentenleitfaden nach Land (Entwurf)",
       "intro": "Informative Hinweise zu Dokumenten, die benötigt werden könnten. Keine Rechtsberatung.",
@@ -7761,14 +7809,14 @@
       "submit": "Zur Prüfung senden",
       "sent": "Zur Prüfung gesendet",
       "notReady": "Nur ein als bereit markiertes Dokument kann zur Prüfung gesendet werden.",
-      "unavailable": "Die Prüfung ist in dieser Umgebung nicht verfügbar.",
+      "unavailable": "Derzeit nicht verfügbar.",
       "error": "Senden fehlgeschlagen — bitte erneut versuchen."
     },
     "workProof": {
       "title": "Arbeitsnachweis & Exporte",
       "journalTitle": "Nachweise aus dem Arbeitsjournal",
       "journalCounts": "Einträge: {entries} · Fotos: {photos}",
-      "countsUnavailable": "Zahlen sind in dieser Umgebung nicht verfügbar.",
+      "countsUnavailable": "Derzeit nicht verfügbar.",
       "galleryNote": "Fotos liegen in Ihren Journaleinträgen; Projektgalerien finden Sie auf der Seite jedes Projekts."
     },
     "uploadNote": "Datei-Upload ist noch nicht verfügbar. Sie erfassen, was Sie haben und wie lange es gültig ist — die Dateien selbst bleiben bei Ihnen.",
@@ -7781,8 +7829,8 @@
       "expiringLabel": "Läuft bald ab",
       "attentionLabel": "Braucht Aufmerksamkeit",
       "consentNote": "Nur Zahlen — niemals Dokumentinhalte. Eine Arbeitskraft ohne Einwilligung erscheint schlicht nicht.",
-      "noConsented": "Keine einwilligungsbasierten Summen — keine Pool-Arbeitskraft hat das Teilen aktiviert, oder Ihre Organisation verwaltet keinen Agenturpool.",
-      "unavailable": "Einwilligungsbasierte Dokumentsummen sind in dieser Umgebung nicht verfügbar. Dokumente gehören den Arbeitskräften.",
+      "noConsented": "Derzeit nicht verfügbar.",
+      "unavailable": "Derzeit nicht verfügbar.",
       "projectAxisLink": "Bereitschafts-Checklisten je Projekt",
       "projectAxisNote": "Die Bereitschaft der Arbeitskräfte je Projekt steht auf der Betriebsseite jedes Projekts."
     },
@@ -7858,7 +7906,7 @@
       "path_mismatch": "Der Upload konnte nicht überprüft werden — nichts wurde gespeichert. Bitte erneut versuchen.",
       "file_too_large": "Die Datei ist größer als 5 MB — nichts wurde gespeichert.",
       "unsupported_type": "Dieser Dateityp wird nicht unterstützt — verwenden Sie PDF, Word oder ein Foto.",
-      "needs_migration": "Der Datei-Upload ist in dieser Umgebung noch nicht aktiviert — nichts wurde gespeichert.",
+      "needs_migration": "Derzeit nicht verfügbar. Nichts wurde gespeichert.",
       "error": "Etwas ist schiefgelaufen — nichts wurde gespeichert.",
       "updated": "Die Änderung wurde gespeichert.",
       "submitted": "Das Dokument wurde zur Freigabe gesendet.",
@@ -7873,7 +7921,7 @@
     "title": "Dokumentenregister des Unternehmens",
     "intro": "Dokumente von {org}: Richtlinien, Verfahren, Anweisungen und Korrespondenz, mit Versionen und Lesebestätigungen.",
     "unavailable": "Das Dokumentenregister kann gerade nicht geladen werden.",
-    "preparing": "Das Dokumentenregister ist vorbereitet, aber in dieser Umgebung noch nicht aktiviert.",
+    "preparing": "Derzeit nicht verfügbar.",
     "error": "Das Dokumentenregister konnte nicht geladen werden — bitte später erneut versuchen.",
     "empty": "Noch keine Dokumente registriert.",
     "scopeNote": "Dieses Register enthält die Dokumente der Organisation selbst. Persönliche Dokumente der Beschäftigten bleiben in deren Händen und werden hier nie angezeigt.",
@@ -8523,7 +8571,7 @@
     "availableSupply": {
       "title": "Verfügbare Arbeitskräfte",
       "intro": "Kolonnen und Fachkräfte, die Agenturen und Unternehmen als verfügbar gemeldet haben. Sie sehen die Art der Kapazität und wo sie ist — nicht, wer sie anbietet.",
-      "notEnabled": "In dieser Umgebung noch nicht eingeschaltet. Das ist eine Tatsache über die Installation, keine Aussage über den Markt.",
+      "notEnabled": "Derzeit nicht verfügbar.",
       "readFailed": "Die Liste verfügbarer Arbeitskräfte konnte nicht gelesen werden. Das ist ein Systemproblem, kein leerer Markt.",
       "empty": "Bisher hat niemand verfügbare Arbeitskräfte gemeldet, die Sie sehen können.",
       "unstatedRole": "Art der Arbeit nicht angegeben",
@@ -8593,7 +8641,7 @@
       "freeTitle": "Heute kostenlos",
       "free": "Alles, was Sie im Produkt derzeit nutzen können, ist kostenlos — der Pilot läuft ohne Zahlungen, und nichts fragt nach einer Karte.",
       "paidTitle": "Vorbereitete bezahlte Pläne",
-      "paid": "Die bezahlten Pläne unten sind vorbereitete Plangrenzen: Sie beschreiben, was später zu den Plänen Worker Plus, Company und Agency gehören wird, sobald Zahlungen aktiviert werden.",
+      "paid": "Derzeit nicht verfügbar.",
       "preparedTitle": "Vorbereitet, nicht kaufbar",
       "prepared": "Es gibt keine Zahlungsseite, und es kann nichts gekauft werden. Pilotzugang zum Umfang der bezahlten Pläne wird manuell vom Team gewährt."
     },
@@ -8831,7 +8879,7 @@
   },
   "adminLmc": {
     "title": "LMC-Hauptbuch",
-    "intro": "Internes Plattformguthaben (1 LMC = 1 EUR internes Guthaben). Live-Datenbankstand: Schalter, ausstehende Verpflichtung und Tester-Gutschrift. Alle kommerziellen Schalter sind AUS; das Einschalten ist eine Entscheidung des Eigentümers.",
+    "intro": "Derzeit nicht verfügbar.",
     "unavailable": "Das Hauptbuch konnte mit dieser Sitzung nicht gelesen werden — ein fehlgeschlagener Lesevorgang, kein leeres Hauptbuch.",
     "on": "An",
     "off": "Aus",
@@ -8858,7 +8906,7 @@
       "submitting": "Wird gutgeschrieben…",
       "granted": "Gutgeschrieben",
       "replay": "Mit diesem Schlüssel wurde bereits gutgeschrieben — nichts wurde doppelt gutgeschrieben",
-      "disabledHint": "Promo-Gutschriften sind in der Datenbank AUS — das Hauptbuch wird diese Gutschrift ablehnen. Das Einschalten ist eine Entscheidung im Eigentümerkanal.",
+      "disabledHint": "Derzeit nicht verfügbar.",
       "reasons": {
         "grants_disabled": "Abgelehnt: Promo-Gutschriften sind deaktiviert",
         "not_admin": "Abgelehnt: Admin-Identität erforderlich",
@@ -8899,7 +8947,7 @@
     },
     "subs": {
       "title": "Abonnements",
-      "unavailable": "Abrechnungstabellen noch nicht angewendet (PR2 ausstehend).",
+      "unavailable": "Derzeit nicht verfügbar.",
       "empty": "Noch keine Abonnements.",
       "manual": "manuelle Übersteuerung"
     },
@@ -9540,8 +9588,7 @@
       "mapTitle": "Wo die Arbeit ist",
       "skipToList": "Zur Liste",
       "placeLink": "Möglichkeiten in diesem Land zeigen",
-      "sourcesIncomplete": "Einige Stellenquellen sind derzeit nicht verfügbar, daher ist diese Liste möglicherweise unvollständig.",
-      "youTitle": "Das sind Sie — danach suchen wir, wohin Sie gehen können"
+      "sourcesIncomplete": "Einige Stellenquellen sind derzeit nicht verfügbar, daher ist diese Liste möglicherweise unvollständig."
     },
     "savedSearches": {
       "title": "Gespeicherte Suchen",
@@ -9560,7 +9607,7 @@
         "invalid": "Bitte Name und Filter prüfen.",
         "limit": "Das Limit ist erreicht.",
         "auth": "Bitte erneut anmelden.",
-        "feature-absent": "Noch nicht verfügbar — das Update für gespeicherte Suchen ist nicht angewendet.",
+        "feature-absent": "Derzeit nicht verfügbar.",
         "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
       }
     },
@@ -10120,7 +10167,6 @@
     "eyebrow": "Über die Plattform",
     "title": "Was ist LabourMarket.ai",
     "lede": "LabourMarket.ai ist eine Betriebsplattform für den Arbeitsmarkt. Sie verbindet Menschen, Arbeitgeber, Agenturen, Teams, Projekte, Weiterbildung und Arbeitsmarktdienste rund um echte Arbeit — nicht nur die Stellensuche.",
-    "statusNote": "Diese Seite erklärt die Logik des Systems, nicht den Einführungsstand. Was Sie heute nutzen können, sehen Sie in Ihrem Konto; was noch eine Richtung ist, ist als Richtung gekennzeichnet.",
     "hero": {
       "lead": "Der berufliche Wert eines Menschen sollte nicht jedes Mal verschwinden, wenn er den Arbeitgeber wechselt. Echte Arbeit kann zu dauerhafter beruflicher Geschichte werden: was die Person getan hat, wo, wann, wie lange, in welcher Rolle, mit welchen Fähigkeiten und welche Nachweise und Bestätigungen das stützen.",
       "leadOrg": "Für Organisationen baut dieselbe echte Arbeit die Historie dessen auf, was das Unternehmen tatsächlich geleistet hat: Projekte, Teams, ausgeführte Arbeiten, Stunden, Kompetenzen und Nachweise.",
@@ -10343,7 +10389,6 @@
       "heading": "Was die Plattform nicht tut",
       "points": [
         "Sie markiert selbst nie etwas als bestätigt — ein bestätigter Zustand kommt immer von einer echten Person.",
-        "Zahlungen über die Plattform sind noch nicht aktiv; es gibt keine Abrechnung.",
         "Sie gibt keine Rechtsberatung. Dokumenthinweise dienen nur der Information.",
         "Sie bewertet Menschen nicht mit Punkten oder Rankings."
       ]
@@ -10879,7 +10924,7 @@
     "intro": "Ihre Arbeitsliste: was wartet, was läuft und was feststeckt.",
     "honestNote": "Nur eine interne Liste — das Anlegen einer Aufgabe versendet keine Nachricht an irgendjemanden.",
     "notAuthed": "Melden Sie sich an, um Ihre Aufgaben zu sehen.",
-    "unavailable": "Aufgaben sind noch nicht freigeschaltet. Sobald sie es sind, erscheinen Ihre Aufgaben hier.",
+    "unavailable": "Derzeit nicht verfügbar.",
     "loadError": "Aufgaben konnten nicht geladen werden. Bitte laden Sie die Seite neu.",
     "myEmpty": "Keine offenen Aufgaben — legen Sie oben eine an.",
     "views": {
@@ -10944,7 +10989,7 @@
       "created": "Aufgabe angelegt.",
       "updated": "Aufgabe aktualisiert.",
       "invalid": "Bitte prüfen Sie die Felder — der Titel muss 3–160 Zeichen lang sein.",
-      "needs_migration": "Aufgaben sind noch nicht freigeschaltet — die Änderung wurde nicht gespeichert.",
+      "needs_migration": "Derzeit nicht verfügbar. Nichts wurde gespeichert.",
       "not_authorized": "Sie dürfen diese Aktion nicht ausführen.",
       "not_found": "Aufgabe nicht gefunden.",
       "limit_reached": "Limit offener Aufgaben erreicht — schließen Sie zuerst ältere Aufgaben ab oder brechen Sie sie ab.",
@@ -11002,7 +11047,7 @@
       "title": "Nachweise",
       "intro": "Arbeitsjournal-Einträge, die mit dieser Aufgabe verknüpft sind. Das Verknüpfen ändert einen Eintrag nie — es zeigt nur, welche Aufgabe er belegt.",
       "empty": "Mit dieser Aufgabe ist noch kein Arbeitsjournal-Eintrag verknüpft.",
-      "unavailable": "Die Nachweis-Verknüpfung ist noch nicht aktiviert.",
+      "unavailable": "Derzeit nicht verfügbar.",
       "summary": "{total} verknüpft · {confirmed} von der Führungskraft bestätigt",
       "confirmed": "Von der Führungskraft bestätigt",
       "unconfirmed": "Nicht bestätigt",
@@ -11113,7 +11158,7 @@
     "intro": "Manuelle Erfassung ausgestellter Rechnungen, erhaltener Rechnungen und Ausgaben — mit echten Summen und abgeleiteten Überfälligkeits-Markierungen.",
     "scopeNote": "Nur manuelle Einträge — dies ist keine Software für Buchhaltung, Steuern, Lohn, Bank oder Zahlungen. Ein Eintrag bewegt kein Geld und kontaktiert niemanden.",
     "notAuthed": "Melden Sie sich an, um Ihre Finanzeinträge zu sehen.",
-    "unavailable": "Finanzen sind noch nicht freigeschaltet. Sobald sie es sind, erscheinen Ihre Einträge hier.",
+    "unavailable": "Derzeit nicht verfügbar.",
     "loadError": "Einträge konnten nicht geladen werden. Aktualisieren Sie die Seite.",
     "empty": "Noch keine Finanzeinträge — fügen Sie oben den ersten hinzu.",
     "emptyFiltered": "Keine Einträge entsprechen den gewählten Filtern.",
@@ -11189,7 +11234,7 @@
       "created": "Eintrag hinzugefügt.",
       "updated": "Eintrag aktualisiert.",
       "invalid": "Prüfen Sie die Felder — Titel 3–160 Zeichen, Gegenpartei 2–160, Betrag wie 123.45.",
-      "needs_migration": "Finanzen sind noch nicht freigeschaltet — die Änderung wurde nicht gespeichert.",
+      "needs_migration": "Derzeit nicht verfügbar. Nichts wurde gespeichert.",
       "not_authorized": "Das dürfen Sie nicht.",
       "not_found": "Eintrag nicht gefunden.",
       "limit_reached": "Eintragslimit erreicht — diese manuelle Liste ist begrenzt.",
@@ -11491,7 +11536,7 @@
     "visibility": "Sichtbarkeit",
     "visibilityPrivate": "Privat",
     "visibilityEmployers": "Arbeitgeber",
-    "visibilityNote": "Die Arbeitgeber-Ansicht ist noch nicht freigeschaltet — Ihre Auswahl wird gespeichert und gilt, sobald sie aktiv ist.",
+    "visibilityNote": "Derzeit nicht verfügbar.",
     "importNote": "Ein automatischer Import von diesen Seiten wird nicht angeboten. Um Ihre Daten zu übernehmen, laden Sie im Profil-Editor eine exportierte Lebenslauf-Datei hoch.",
     "importLink": "Profil-Editor öffnen",
     "empty": "Noch keine externen Profile verknüpft.",
@@ -11515,7 +11560,7 @@
     "eyebrow": "NETZWERK",
     "title": "Netzwerk",
     "intro": "Ihre Unternehmen, Teams, Partner und Einladungen. Laden Sie eine Person oder ein Unternehmen direkt von hier ein.",
-    "notEnabled": "Einladungen sind in dieser Umgebung noch nicht aktiviert.",
+    "notEnabled": "Derzeit nicht verfügbar.",
     "incoming": {
       "title": "Einladungen für Sie",
       "from": "Eingeladen von {name}",
@@ -11546,7 +11591,8 @@
         "team": "Team",
         "other": "Organisation"
       },
-      "visibilityReason": "Angezeigt werden nur Personen, die auffindbar sein möchten oder eine echte Arbeitsbeziehung zu Ihnen haben."
+      "visibilityReason": "Angezeigt werden nur Personen, die auffindbar sein möchten oder eine echte Arbeitsbeziehung zu Ihnen haben.",
+      "noContactYet": "Nachrichten sind erst nach einer Einladung oder gemeinsamer Arbeit möglich. Lade ein — oder frage eine Dienstleistung an."
     },
     "sent": {
       "title": "Meine gesendeten Einladungen",
@@ -11642,7 +11688,7 @@
       "messageLabel": "Persönliche Nachricht",
       "send": "Einladung senden",
       "sending": "Wird gesendet…",
-      "notEnabled": "Einladungen sind in dieser Umgebung noch nicht aktiviert.",
+      "notEnabled": "Derzeit nicht verfügbar.",
       "notAuthed": "Melden Sie sich an, um Einladungen zu senden.",
       "linkModeNote": "E-Mail-Versand ist noch nicht aktiviert — teilen Sie den Einladungslink direkt.",
       "invalidEmails": "Ungültige Adressen",
@@ -11689,7 +11735,7 @@
     },
     "invitePage": {
       "eyebrow": "EINLADUNG",
-      "notEnabled": "Einladungen sind in dieser Umgebung noch nicht aktiviert.",
+      "notEnabled": "Derzeit nicht verfügbar.",
       "loadError": "Die Einladung konnte gerade nicht geladen werden. Bitte erneut versuchen.",
       "invalidTitle": "Einladung nicht gefunden",
       "invalidBody": "Der Link ist ungültig oder funktioniert nicht mehr. Bitten Sie um eine neue Einladung.",
@@ -11719,7 +11765,7 @@
         "exhausted": "Alle Plätze dieser Einladung sind belegt. Bitten Sie um einen neuen Link."
       },
       "notices": {
-        "not_enabled": "Einladungen sind in dieser Umgebung noch nicht aktiviert.",
+        "not_enabled": "Derzeit nicht verfügbar.",
         "already_accepted": "Bereits angenommen.",
         "expired": "Diese Einladung ist abgelaufen.",
         "revoked": "Diese Einladung wurde widerrufen.",
@@ -11778,7 +11824,7 @@
       "cancel": "Abbrechen",
       "correctionPlaceholder": "Ihre Formulierung",
       "failed": {
-        "not_enabled": "Die Prüfung ist in dieser Umgebung noch nicht aktiviert.",
+        "not_enabled": "Derzeit nicht verfügbar.",
         "error": "Ihre Antwort konnte nicht gespeichert werden. Bitte erneut versuchen."
       },
       "boundary": "Eine Bestätigung hier erzeugt keine Fähigkeit und kein Gewerk. Fügen Sie Zutreffendes Ihrem Profil selbst hinzu:",
@@ -11868,7 +11914,7 @@
     "title": "Kunden",
     "subtitle": "Für wen Sie Personal stellen — Kundenbedarfe werden mit Ihren Anfragen und dem Kandidaten-Scouting verknüpft.",
     "gatedHeading": "Vorbereitet — wartet auf Aktivierung durch den Inhaber",
-    "gatedBody": "Kundendatensätze sind bereit, aber noch nicht freigeschaltet.",
+    "gatedBody": "Derzeit nicht verfügbar.",
     "notLinkable": "Anfragen können noch nicht mit Kunden verknüpft werden.",
     "clientsEmpty": "Noch keine Kunden. Fügen Sie unten den ersten hinzu.",
     "demandsHeading": "Ihre Anfragen",
@@ -11901,7 +11947,7 @@
     "title": "Kundenunternehmen",
     "subtitle": "Verbinden Sie sich mit einem echten Kundenunternehmen, sehen Sie nur die geteilten Anfragen und bieten Sie einen Ihrer aktiven Roster-Mitarbeiter an.",
     "gatedHeading": "Vorbereitet — Aktivierung durch Eigentümer ausstehend",
-    "gatedBody": "Die Kundenbrücke ist bereit, aber noch nicht aktiviert.",
+    "gatedBody": "Derzeit nicht verfügbar.",
     "connectionsHeading": "Verbindungen",
     "inviteEmailLabel": "Kunden-E-Mail",
     "inviteButton": "Kunden einladen",
@@ -11953,7 +11999,7 @@
     "title": "Personalagenturen",
     "subtitle": "Akzeptieren Sie eine Personalagentur, mit der Sie arbeiten möchten, teilen Sie bestimmte Anfragen und prüfen Sie die vorgeschlagenen Kandidaten auf Ihrer eigenen Scouting-Seite.",
     "gatedHeading": "Vorbereitet — Aktivierung durch Eigentümer ausstehend",
-    "gatedBody": "Die Agenturbrücke ist bereit, aber noch nicht aktiviert.",
+    "gatedBody": "Derzeit nicht verfügbar.",
     "invitesHeading": "Verbindungseinladungen",
     "noInvites": "Keine ausstehenden Einladungen.",
     "acceptButton": "Annehmen",
@@ -13521,10 +13567,34 @@
       },
       "findWorkInCompanyContext": "Die Jobsuche ist deine eigene Sache — im Unternehmensbereich führe ich sie nicht aus. Wechsle in deinen persönlichen Bereich und frag noch einmal.",
       "findWorkInCompanyWhy": "Arbeit sucht ein Mensch, kein Unternehmen — ich antworte aus deinem persönlichen Bereich.",
+      "personalOnlyInCompany": "Das ist eine persönliche Aktion — im Unternehmensbereich führe ich sie nicht aus. Wechsle in deinen persönlichen Bereich und mach dort weiter.",
       "journalAskWhatYouDid": "Was hast du heute gearbeitet? Schreib es in das Feld „Was du gearbeitet hast“ in deinen Worten — z. B. „Fenster auf der Baustelle Kaunas von 8 bis 17 montiert“. Die Anfrage selbst wird nicht ins Tagebuch gespeichert.",
       "alsoWorkLog": "Ich habe auch verstanden, dass du heute gearbeitet hast — prüfe es und speichere es im Arbeitsjournal:",
       "serviceNeedHint": "Das ist eine Aufgabe, die erledigt werden muss — ich zeige dir, wer diese Leistung anbietet.",
       "chipServiceRequests": "Leistung finden",
+      "findPartnersDoors": "Das ist eine Suche nach Geschäftspartnern, keine Jobsuche. Sie läuft über den bestehenden Marktplatz — wähle, wo du anfängst.",
+      "findPartnersPickCompany": "Geschäftspartner werden im Namen eines Unternehmens gesucht. Welches Unternehmen meinst du?",
+      "findPartnersNoCompany": "Geschäftspartner werden im Namen eines Unternehmens gesucht, und es gibt noch kein Unternehmensprofil. Lege eines an oder durchsuche den Leistungsmarkt.",
+      "chipPartnersServices": "Dienstleister",
+      "chipPartnersListings": "Marktplatz-Anzeigen",
+      "chipPartnersRelations": "Kunden und Partner",
+      "productHelp": {
+        "projectUse": "Ein Projekt ist der Ort für Arbeit, Menschen und Termine. Öffne ein Projekt, füge Aufgaben und Personen hinzu, und die erledigte Arbeit erscheint genau dort.",
+        "addPerson": "Eine Person fügst du per Einladung hinzu: Gib ihren Kontakt ein, und sie bestätigt in ihrem eigenen Konto. Einladungen und Team findest du im Teambereich.",
+        "hours": "Stunden stehen im Stundenbereich — dort siehst du Tage, die Woche und den Stundenzettel.",
+        "offerService": "Eine Leistung bietest du im Leistungsbereich an: Beschreibe sie, dann können andere Unternehmen und Personen sie sehen.",
+        "warning": "Eine Warnung erscheint, wenn etwas die Arbeit behindern könnte — zum Beispiel läuft ein Dokument ab oder es fehlen Daten. Alle Meldungen und ihre Gründe siehst du im Meldungsbereich.",
+        "forecast": "Eine Prognose ist eine Berechnung aus den bereits erfassten Stunden und der geplanten Arbeit. Sie ist ein Richtwert, kein Versprechen, und ändert sich mit den Daten. Plan und Zahlen findest du in der Planung.",
+        "scheduleWorker": "Eine Person planst du in der Planung ein: Wähle Tag und Projekt und weise die Person am selben Ort zu.",
+        "doneWork": "Erledigte Arbeit siehst du dort, wo sie erfasst wurde — im Arbeitsjournal oder im Stundenbereich: Einträge, Stunden und Bestätigungen.",
+        "chips": {
+          "chipHelpProjects": "Projekte öffnen",
+          "chipHelpPeople": "Team und Einladungen",
+          "chipHelpPlanning": "Planung öffnen",
+          "chipHelpServices": "Meine Leistungen",
+          "chipHelpJournal": "Arbeitsjournal"
+        }
+      },
       "interestInboxAmbiguous": "Das kann zweierlei heißen — was möchtest du sehen?",
       "chipInterestOnMyNeeds": "Interesse an meinen Anfragen",
       "chipMyOwnInterest": "Mein eigenes Interesse",
@@ -13724,7 +13794,7 @@
       "capacityIntro": "Team {from} – {to} ({count} Personen):",
       "capacityFree": "frei",
       "capacityBusyUntil": "nicht verfügbar bis {date}",
-      "capacityAbsencesUnknown": "Abwesenheitsdaten sind in dieser Umgebung nicht verfügbar — nur die Liste wird gezeigt.",
+      "capacityAbsencesUnknown": "Derzeit nicht verfügbar.",
       "capacityEmpty": "Noch niemand im Team — laden Sie Leute ein.",
       "capacityUnavailable": "Die Verfügbarkeit des Teams konnte gerade nicht gelesen werden.",
       "chipAddTask": "Aufgabe hinzufügen",
@@ -13800,9 +13870,9 @@
       "confirmChip": "Bestätigen: {name} · {date}",
       "confirmDone": "Bestätigt: {name} — bestätigte Fähigkeiten: {count}.",
       "confirmNone": "Keine Arbeitseinträge warten.",
-      "confirmNotEnabled": "Die Arbeitsprüfung ist noch nicht eingeschaltet für: {names}. Einschalten — dann erscheinen die Einträge hier.",
+      "confirmNotEnabled": "Derzeit nicht verfügbar.",
       "confirmEnableChip": "Prüfung einschalten: {name}",
-      "confirmEnabled": "Prüfung eingeschaltet: {name} — die Arbeitseinträge warten auf Ihre Bestätigung.",
+      "confirmEnabled": "Derzeit nicht verfügbar.",
       "confirmFailed": "Die Bestätigung konnte nicht erfolgen.",
       "confirmUnavailable": "Bestätigungen konnten gerade nicht gelesen werden.",
       "chipOpenInbox": "Bestätigungs-Eingang öffnen",
@@ -13864,6 +13934,7 @@
       },
       "capacityCommittedUntil": "bereits verplant bis {date}",
       "capacityCommittedToUntil": "auf {what} bis {date}",
+      "capacityCommittedUndated": "auf {what}, ohne Termine",
       "capacityCommitmentsUnknown": "Buchungen und Projektzuweisungen konnten nicht gelesen werden, daher kann jemand, der als frei angezeigt wird, bereits verplant sein.",
       "workspaceUnnamedCompany": "Unternehmen ohne Namen",
       "workspaceUnnamedAgency": "Agentur ohne Namen",
@@ -13947,7 +14018,7 @@
     "findWork": {
       "emptyState": "Momentan habe ich keine aktiven Angebote gefunden, die zu deinen Kriterien passen. Es gibt noch keine Benachrichtigungen, deshalb verspreche ich keine — frag später noch einmal oder ergänze dein Profil, damit mehr Bedarfe passen.",
       "blockedNoWorker": "Um Arbeit zu suchen, aktiviere die Arbeitnehmerrolle in den Kontoeinstellungen.",
-      "blockedNoAccess": "Die Angebotsliste ist in dieser Umgebung noch nicht aktiviert. Sobald sie es ist, zeige ich echte Bedarfe.",
+      "blockedNoAccess": "Derzeit nicht verfügbar.",
       "fitStrong": "Starke Übereinstimmung",
       "fitPossible": "Mögliche Übereinstimmung",
       "fitWeak": "Schwache Übereinstimmung",
@@ -14164,13 +14235,13 @@
       },
       "candidatesError": "Die Kandidaten konnten nicht gelesen werden.",
       "candidatesNoCompany": "Du handelst gerade nicht für ein Unternehmen, deshalb gibt es hier keine Unternehmensbedarfe, für die gesucht wird.",
-      "candidatesBlocked": "In dieser Umgebung ist das derzeit nicht verfügbar.",
+      "candidatesBlocked": "Derzeit nicht verfügbar.",
       "candidatesNoDemands": "Dein Unternehmen hat noch keinen Bedarf beschrieben.",
       "candidatesPickDemand": "Für welchen Bedarf suchst du Leute?",
       "candidatesUnstructuredBadge": "nicht strukturiert",
       "candidatesBackToDemands": "Zurück zu den Bedarfen",
       "candidatesNotFound": "Dieser Bedarf wurde nicht gefunden oder gehört nicht dir.",
-      "candidatesNeedsMigration": "Die Kandidatenquelle ist in dieser Umgebung nicht verfügbar.",
+      "candidatesNeedsMigration": "Derzeit nicht verfügbar.",
       "candidatesNotStructured": "Aus diesem Bedarf lässt sich noch nichts ableiten, es gibt also nichts zum Abgleichen. Das ist nicht dasselbe wie „niemand passt“.",
       "candidatesRetrievalCapped": "Es waren mehr Menschen erreichbar, als wir diesmal ansehen konnten — diese Liste ist also nicht das gesamte Angebot.",
       "candidatesEmpty": "Im sichtbaren Angebot passt derzeit niemand zu diesem Bedarf.",
@@ -14224,7 +14295,7 @@
       "bookingNote": "Notiz",
       "projectError": "Das Projekt konnte nicht gelesen werden.",
       "projectNoCompany": "Du handelst gerade nicht für ein Unternehmen, deshalb gibt es hier keine Unternehmensprojekte.",
-      "projectBlocked": "In dieser Umgebung ist das derzeit nicht verfügbar.",
+      "projectBlocked": "Derzeit nicht verfügbar.",
       "projectEmpty": "Es gibt noch kein Projekt.",
       "projectPick": "Welches Projekt?",
       "projectBackToList": "Zurück zu den Projekten",
@@ -14251,7 +14322,7 @@
       "pulseNextNoWork": "Als Nächstes: noch keine Arbeit erfasst — sobald Leute Arbeit erfassen, erscheint sie hier und im Lebenslauf.",
       "projectStages": "Phasen",
       "projectStagesEmpty": "Für dieses Projekt wurden noch keine Phasen erfasst.",
-      "projectStagesUnavailable": "Phasen können in dieser Umgebung nicht gelesen werden — deshalb zeigen wir keine leere Liste, als gäbe es keine.",
+      "projectStagesUnavailable": "Derzeit nicht verfügbar.",
       "projectStageMarkDone": "Als erledigt markieren",
       "projectAssignWorker": "Mitarbeiter zuweisen",
       "projectOpenOperations": "Projektsteuerung öffnen",
@@ -14272,14 +14343,14 @@
       "projectAlreadyInState": "Das Projekt ist bereits in diesem Zustand. Es wurde nichts geändert.",
       "projectInvalidTransition": "Diese Statusänderung ist nicht möglich.",
       "projectNotAuthorized": "Du kannst den Status dieses Projekts nicht ändern.",
-      "projectNeedsMigration": "Statusänderungen an Projekten sind in dieser Umgebung noch nicht verfügbar.",
+      "projectNeedsMigration": "Derzeit nicht verfügbar.",
       "projectConflict": "Das Projekt hat sich geändert, während du es angesehen hast. Öffne es erneut.",
       "engagements": {
         "title": "Arbeitsbeziehungen"
       },
       "engagementsError": "Die Arbeitsbeziehungen konnten nicht geladen werden.",
       "engagementsBlocked": "Die Arbeitsbeziehungen können gerade nicht gelesen werden. Das ist nicht dasselbe wie keine zu haben.",
-      "engagementsNeedsMigration": "Arbeitsbeziehungen sind in dieser Umgebung noch nicht verfügbar.",
+      "engagementsNeedsMigration": "Derzeit nicht verfügbar.",
       "engagementsEmptyCompany": "Für diese Organisation sind keine Arbeitsbeziehungen erfasst.",
       "engagementsEmptyWorker": "Für dich sind keine Arbeitsbeziehungen erfasst.",
       "engagementsUnavailable": "Diese Arbeitsbeziehung ist für dich nicht verfügbar.",
@@ -14728,7 +14799,7 @@
         "radius": "Entfernung"
       },
       "whyFiltered": "Du hast gesagt: {words}. Danach habe ich die Suche eingegrenzt.",
-      "whyUnfiltered": "Ich habe deine ganze Liste durchsucht — du hast nichts eingegrenzt.",
+      "whyUnfiltered": "Keine zusätzlichen Filter — ich zeige alles, was für dich sichtbar ist.",
       "whyFromYourBoard": "Aus den Anfragen, die dir gerade sichtbar sind.",
       "whyNoWorker": "Dafür braucht es ein Arbeitnehmerprofil, und dieses Konto hat noch keines.",
       "whyNoAccess": "Offene Anfragen sind für dein Konto noch nicht verfügbar.",
@@ -14978,7 +15049,7 @@
     "page": {
       "title": "Erfahrungen",
       "lead": "Subjektive Erfahrungen aus echten, abgeschlossenen Arbeitsinteraktionen. Eine Erfahrung ist die Schilderung einer Person — keine Tatsache über die fachliche Fähigkeit eines anderen.",
-      "unavailableTitle": "Erfahrungen sind in dieser Umgebung noch nicht verfügbar.",
+      "unavailableTitle": "Derzeit nicht verfügbar.",
       "unavailableBody": "Es wurde nichts gespeichert. Du kannst wie gewohnt weiterarbeiten.",
       "aboutMe": "Über mich",
       "aboutMeEmpty": "Noch keine veröffentlichten Erfahrungen über dich.",
@@ -14993,7 +15064,7 @@
       "caution": "Mehr negative als positive Erfahrungen — genauer hinsehen, bevor du entscheidest.",
       "meaning": "Das sind subjektive Schilderungen echter Interaktionen. Keine Bewertung, keine Punktzahl und kein Urteil der Plattform.",
       "notEnough": "Noch nicht genug veröffentlichte Erfahrungen.",
-      "unavailable": "Erfahrungszählungen sind in dieser Umgebung noch nicht verfügbar."
+      "unavailable": "Derzeit nicht verfügbar."
     },
     "sentiment": {
       "positive": "Positive Erfahrung",
@@ -15018,7 +15089,7 @@
       "rejected": "Abgelehnt",
       "title": "Erfahrungsmoderation",
       "lead": "Jede Erfahrung durchläuft vor der Veröffentlichung die Moderation. Jede Entscheidung braucht eine Begründung und wird im Audit-Protokoll festgehalten.",
-      "unavailable": "Der Erfahrungsbereich ist in dieser Umgebung nicht verfügbar.",
+      "unavailable": "Derzeit nicht verfügbar.",
       "queueTitle": "Wartet auf Moderation",
       "queueEmpty": "Nichts wartet auf Moderation.",
       "disputeQueueTitle": "Streitfälle",
@@ -15035,7 +15106,7 @@
         "removed": "Aus der öffentlichen Ansicht nehmen"
       },
       "errors": {
-        "needs_migration": "Erfahrungen sind in dieser Umgebung noch nicht verfügbar. Es wurde nichts gespeichert.",
+        "needs_migration": "Derzeit nicht verfügbar. Nichts wurde gespeichert.",
         "not_authenticated": "Bitte melde dich zuerst an.",
         "not_eligible": "Du kannst nur eine Interaktion beschreiben, an der du wirklich beteiligt warst und die abgeschlossen ist.",
         "duplicate_for_interaction": "Für diese Interaktion hast du bereits eine Erfahrung eingereicht.",
@@ -15065,7 +15136,7 @@
       "sending": "Wird eröffnet…",
       "openedNote": "Streitfall eröffnet. Die Erfahrung bleibt veröffentlicht, bis ein Moderator entscheidet.",
       "errors": {
-        "needs_migration": "Erfahrungen sind in dieser Umgebung noch nicht verfügbar. Es wurde nichts gespeichert.",
+        "needs_migration": "Derzeit nicht verfügbar. Nichts wurde gespeichert.",
         "not_authenticated": "Bitte melde dich zuerst an.",
         "not_eligible": "Du kannst nur eine Interaktion beschreiben, an der du wirklich beteiligt warst und die abgeschlossen ist.",
         "duplicate_for_interaction": "Für diese Interaktion hast du bereits eine Erfahrung eingereicht.",
@@ -15089,7 +15160,7 @@
       "sending": "Wird gesendet…",
       "submitted": "Antwort eingereicht. Sie wird nach der Moderation sichtbar.",
       "errors": {
-        "needs_migration": "Erfahrungen sind in dieser Umgebung noch nicht verfügbar. Es wurde nichts gespeichert.",
+        "needs_migration": "Derzeit nicht verfügbar. Nichts wurde gespeichert.",
         "not_authenticated": "Bitte melde dich zuerst an.",
         "not_eligible": "Du kannst nur eine Interaktion beschreiben, an der du wirklich beteiligt warst und die abgeschlossen ist.",
         "duplicate_for_interaction": "Für diese Interaktion hast du bereits eine Erfahrung eingereicht.",
@@ -15123,7 +15194,7 @@
       "submitted": "Erfahrung eingereicht.",
       "awaitingModeration": "Sie wartet auf die Moderation und ist noch nicht veröffentlicht.",
       "errors": {
-        "needs_migration": "Erfahrungen sind in dieser Umgebung noch nicht verfügbar. Es wurde nichts gespeichert.",
+        "needs_migration": "Derzeit nicht verfügbar. Nichts wurde gespeichert.",
         "not_authenticated": "Bitte melde dich zuerst an.",
         "not_eligible": "Du kannst nur eine Interaktion beschreiben, an der du wirklich beteiligt warst und die abgeschlossen ist.",
         "duplicate_for_interaction": "Für diese Interaktion hast du bereits eine Erfahrung eingereicht.",
@@ -15274,7 +15345,7 @@
   "approvals": {
     "title": "Freigaben",
     "intro": "Freigabeanfragen in Ihren Organisationen: Anfrage stellen, über Wartendes entscheiden und jede Runde verfolgen.",
-    "unavailable": "Freigaben sind in dieser Umgebung noch nicht aktiviert. Nichts geht verloren — dieser Bereich öffnet sich, sobald der Freigabespeicher geprüft und eingespielt ist.",
+    "unavailable": "Derzeit nicht verfügbar.",
     "honestNote": "Entscheidungen bleiben im Produkt. Nichts wird per E-Mail oder anderweitig versendet — Aktualisierungen erscheinen auf dieser Seite und in der Benachrichtigungsglocke.",
     "loadError": "Ein Teil der Freigabedaten konnte gerade nicht geladen werden. Was Sie sehen, ist echt, kann aber unvollständig sein.",
     "inbox": {
@@ -15413,7 +15484,7 @@
       "not_pending": "Diese Anfrage ist nicht mehr offen.",
       "invalid": "Bitte prüfen Sie die eingegebenen Werte und versuchen Sie es erneut.",
       "invalid_delegate": "Dieser Kollege wurde in dieser Organisation nicht gefunden.",
-      "needs_migration": "Freigaben sind in dieser Umgebung noch nicht aktiviert. Nichts wurde gespeichert.",
+      "needs_migration": "Derzeit nicht verfügbar. Nichts wurde gespeichert.",
       "not_authorized": "Das dürfen Sie nicht tun.",
       "not_found": "Diese Anfrage wurde nicht gefunden.",
       "limit_reached": "Das Limit offener Einträge ist erreicht. Schließen Sie zuerst etwas ab.",
@@ -15429,7 +15500,7 @@
     "tpl": {
       "title": "Vorlagenkonfiguration",
       "intro": "Legen Sie fest, wer was in jeder Ihrer Organisationen genehmigt. Änderungen hier gelten nur für neue Anträge.",
-      "unavailable": "Die Vorlagenkonfiguration ist vorbereitet, in dieser Umgebung aber noch nicht aktiviert.",
+      "unavailable": "Derzeit nicht verfügbar.",
       "runningImmuneNote": "Das Veröffentlichen einer neuen Version wirkt nur auf danach begonnene Anträge. Ein bereits laufender Antrag behält die Runden und die Personen, mit denen er begonnen hat.",
       "templateCount": "Vorlagen: {count}",
       "installTitle": "Standardsatz installieren",
@@ -15487,7 +15558,7 @@
   "timesheets": {
     "title": "Stundenzettel",
     "intro": "Stundendokumente pro Zeitraum, abgeleitet aus Ihrem Arbeitsjournal. Stunden werden immer im Journal bearbeitet; ein Stundenzettel ist eine eingefrorene Kopie, die zur Freigabe eingereicht wird.",
-    "needsMigration": "Stundenzettel sind in dieser Umgebung noch nicht aktiviert.",
+    "needsMigration": "Derzeit nicht verfügbar.",
     "readError": "Ein Teil der Stundenzettel-Daten konnte gerade nicht geladen werden.",
     "noLines": "In diesem Zeitraum sind noch keine Stunden erfasst. Tragen Sie Ihre Arbeit ins Journal ein und aktualisieren Sie.",
     "linesTitle": "Zeilen ({count})",
@@ -15565,7 +15636,7 @@
       "no_approvers": "Für die Vorlage dieser Organisation konnten keine Freigebenden gefunden werden.",
       "not_published": "Die Freigabevorlage ist noch nicht veröffentlicht.",
       "invalid": "Die Anfrage war ungültig.",
-      "needs_migration": "Stundenzettel sind in dieser Umgebung noch nicht aktiviert.",
+      "needs_migration": "Derzeit nicht verfügbar.",
       "not_authorized": "Das dürfen Sie nicht.",
       "not_found": "Stundenzettel nicht gefunden.",
       "limit_reached": "Zu viele offene Stundenzettel — reichen Sie bestehende zuerst ein oder räumen Sie sie auf.",
@@ -15595,7 +15666,7 @@
     "archivedBadge": "Archiviert",
     "empty": "Noch keine Objekte. Fügen Sie die Orte hinzu, an denen Ihre Arbeit stattfindet.",
     "gatedHeading": "Vorbereitet — wartet auf Aktivierung",
-    "gatedBody": "Objekte sind bereit, aber noch nicht freigeschaltet. Die Freischaltung ist eine Entscheidung des Inhabers.",
+    "gatedBody": "Derzeit nicht verfügbar.",
     "errorLabel": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
     "notAuthorizedLabel": "Nur Führungskräfte können Objekte ändern.",
     "savedLabel": "Gespeichert."
@@ -15603,7 +15674,7 @@
   "requests": {
     "title": "Anträge",
     "intro": "Bitten Sie Ihren Arbeitgeber um etwas und verfolgen Sie, was danach passiert. Jeder Antrag durchläuft den Freigabeweg, den Ihr Unternehmen eingerichtet hat.",
-    "unavailable": "Anträge sind in dieser Umgebung noch nicht eingeschaltet. Nichts geht verloren — dieser Bereich öffnet sich, sobald das Antrags-Update geprüft und eingespielt ist.",
+    "unavailable": "Derzeit nicht verfügbar.",
     "honestNote": "Über einen Antrag entscheiden echte Menschen in Ihrem Unternehmen. Nichts wird automatisch genehmigt, und nichts verlässt dieses Produkt.",
     "notice": {
       "created": "Antrag eingereicht. Die zuständigen Personen wurden um Prüfung gebeten.",
@@ -15616,7 +15687,7 @@
       "not_published": "Der Freigabeweg für Anträge ist noch nicht bereit.",
       "not_pending": "Dieser Antrag wartet nicht mehr — unten sehen Sie seinen aktuellen Stand.",
       "invalid": "Bitte prüfen Sie die Angaben und versuchen Sie es erneut.",
-      "needs_migration": "Noch nicht verfügbar — das Antrags-Update ist hier nicht eingespielt.",
+      "needs_migration": "Derzeit nicht verfügbar.",
       "not_authorized": "Das dürfen Sie nicht.",
       "not_found": "Nicht gefunden.",
       "limit_reached": "Zu viele offene Anträge. Warten Sie zuerst auf Entscheidungen zu den bestehenden.",
@@ -15716,7 +15787,7 @@
     "relationshipNote": "Die Vertragsliste oben ist das frühere persönliche kommerzielle Register und funktioniert unverändert weiter. Neue Vereinbarungen gehören hierher.",
     "unavailable": "Das Vertragsregister kann gerade nicht angezeigt werden.",
     "needsOrgWorkspace": "Das Vertragsregister funktioniert im Organisations-Arbeitsbereich. Wechseln Sie zu Ihrer Organisation.",
-    "preparing": "Das Vertragsregister ist vorbereitet, in dieser Umgebung aber noch nicht aktiviert.",
+    "preparing": "Derzeit nicht verfügbar.",
     "error": "Das Vertragsregister konnte nicht gelesen werden.",
     "empty": "Noch keine Vereinbarungen registriert.",
     "emptyFiltered": "Keine Vereinbarungen entsprechen diesen Filtern.",
@@ -15819,14 +15890,14 @@
       "not_found": "Eintrag nicht gefunden.",
       "not_allowed": "Das kann nur der Eigentümer oder Administrator der Organisation tun.",
       "limit_reached": "Das Registerlimit wurde erreicht.",
-      "needs_migration": "Das Vertragsregister ist in dieser Umgebung noch nicht aktiviert.",
+      "needs_migration": "Derzeit nicht verfügbar.",
       "error": "Etwas ist schiefgelaufen. Es wurde nichts gespeichert."
     }
   },
   "lifecycle": {
     "title": "Lebenszyklus des Arbeitsverhältnisses",
     "intro": "Onboarding, Probezeit, Änderungen, Offboarding und Beendigung für die Beschäftigungsdaten dieser Organisation — mit Checklisten und vollständiger Historie.",
-    "unavailable": "Der Beschäftigungs-Lebenszyklus ist in dieser Umgebung noch nicht aktiviert. Nichts geht verloren — dieser Bereich öffnet sich, sobald der Speicher geprüft und eingespielt ist.",
+    "unavailable": "Derzeit nicht verfügbar.",
     "honestNote": "Alles hier bleibt im Produkt. Das Abhaken eines Schritts hält nur fest, wer was wann bestätigt hat — nichts wird irgendwohin gesendet.",
     "loadError": "Ein Teil der Daten konnte gerade nicht geladen werden. Was Sie sehen, ist echt, kann aber unvollständig sein.",
     "stage": {
@@ -15957,7 +16028,7 @@
       "last_owner": "Der Eintrag des letzten Inhabers kann nicht beendet werden — ernennen Sie zuerst einen anderen Inhaber.",
       "limit_reached": "Das Limit dieser Organisation ist erreicht.",
       "invalid": "Ungültige Eingabe.",
-      "needs_migration": "Diese Funktion ist in dieser Umgebung noch nicht aktiviert.",
+      "needs_migration": "Derzeit nicht verfügbar.",
       "not_authorized": "Sie sind dazu nicht berechtigt.",
       "not_found": "Eintrag nicht verfügbar.",
       "error": "Fehlgeschlagen — bitte erneut versuchen."
@@ -15966,7 +16037,7 @@
   "procurement": {
     "title": "Einkäufe",
     "intro": "Fragen Sie Material oder Leistungen an, notieren Sie Lieferantenangebote und halten Sie fest, was gewählt wurde. Nichts hier kontaktiert einen Lieferanten oder bestellt etwas — es ist Ihre Aufzeichnung.",
-    "needsMigration": "Einkaufsanfragen sind in dieser Umgebung noch nicht aktiviert.",
+    "needsMigration": "Derzeit nicht verfügbar.",
     "readError": "Einkaufsanfragen konnten nicht geladen werden. Bitte erneut versuchen.",
     "empty": "Noch keine Einkaufsanfragen.",
     "noOffers": "Noch keine Lieferantenangebote notiert.",
@@ -16025,7 +16096,7 @@
       "unlinked": "Rechnungsverknüpfung entfernt.",
       "cancelled": "Einkaufsanfrage storniert.",
       "invalid": "Bitte die eingegebenen Angaben prüfen.",
-      "needs_migration": "Einkaufsanfragen sind in dieser Umgebung noch nicht aktiviert.",
+      "needs_migration": "Derzeit nicht verfügbar.",
       "not_authorized": "Das können Sie für diese Anfrage nicht tun.",
       "not_found": "Diese Einkaufsanfrage wurde nicht gefunden.",
       "not_editable": "In diesem Zustand ist dieser Schritt nicht möglich.",
@@ -16044,7 +16115,7 @@
   "trips": {
     "title": "Dienstreisen",
     "intro": "Beantragen Sie eine Reise, lassen Sie sie freigeben und halten Sie ihre Kosten zusammen. Nichts hier bucht Reisen oder zahlt Geld aus — es ist Ihre Aufzeichnung.",
-    "needsMigration": "Dienstreisen sind in dieser Umgebung noch nicht aktiviert.",
+    "needsMigration": "Derzeit nicht verfügbar.",
     "readError": "Dienstreisen konnten nicht geladen werden. Bitte erneut versuchen.",
     "empty": "Noch keine Dienstreisen.",
     "orgHeading": "Reisen der von Ihnen betreuten Personen",
@@ -16097,7 +16168,7 @@
       "unlinked": "Eintrag von der Reise entfernt.",
       "invalid": "Bitte die eingegebenen Angaben prüfen.",
       "invalid_dates": "Bitte die Reisedaten prüfen.",
-      "needs_migration": "Dienstreisen sind in dieser Umgebung noch nicht aktiviert.",
+      "needs_migration": "Derzeit nicht verfügbar.",
       "not_authorized": "Das können Sie für diese Reise nicht tun.",
       "not_found": "Diese Reise wurde nicht gefunden.",
       "not_editable": "In diesem Zustand ist dieser Schritt nicht möglich.",
@@ -16114,7 +16185,7 @@
     "title": "Schulungen und Zertifikate",
     "intro": "Kurse, die deine Organisation abschließen lässt, und die Zertifikate danach.",
     "evidenceNote": "Ein Zertifikat zeigt, dass ein Kurs abgeschlossen wurde. Es sagt nicht, wie gut jemand arbeitet — das bleibt bei deinen Arbeitseinträgen und den Bestätigungen deiner Führungskraft.",
-    "notAvailable": "Schulungen sind in diesem Arbeitsbereich noch nicht eingeschaltet.",
+    "notAvailable": "Derzeit nicht verfügbar.",
     "status": {
       "assigned": "Zu erledigen",
       "completed": "Erledigt",
@@ -16176,7 +16247,7 @@
       "invalid_file": "Diese Datei gehört nicht zu deiner Organisation.",
       "invalid_skill": "Diese Fähigkeit wurde nicht gefunden.",
       "invalid_state": "Das ist in diesem Schritt nicht möglich.",
-      "needs_migration": "Schulungen sind in diesem Arbeitsbereich noch nicht eingeschaltet.",
+      "needs_migration": "Derzeit nicht verfügbar.",
       "not_authorized": "Dafür fehlen dir die Rechte.",
       "not_found": "Nicht gefunden.",
       "limit_reached": "Hier steht bereits zu viel.",
@@ -16187,7 +16258,7 @@
     "title": "Entwicklungsgespräche",
     "intro": "Ein festgehaltenes Gespräch zwischen zwei namentlich genannten Personen über die Arbeit und darüber, was als Nächstes kommt.",
     "noScoreNote": "Hier gibt es keine Note, keinen Punktwert und keine Rangliste — mit Absicht. Alles unten ist entweder ein festgehaltener Fakt, ein Verweis auf echte Arbeit oder die eigenen Worte einer Person, klar als solche gekennzeichnet.",
-    "notAvailable": "Entwicklungsgespräche sind in diesem Arbeitsbereich noch nicht eingeschaltet.",
+    "notAvailable": "Derzeit nicht verfügbar.",
     "empty": "Es gibt noch kein Gespräch, das dich betrifft.",
     "cycles": {
       "heading": "Zeiträume",
@@ -16253,7 +16324,7 @@
       "invalid_subject": "Diese Person gehört nicht zu deiner Organisation.",
       "invalid_reviewer": "Diese Person kann das Gespräch nicht führen.",
       "invalid_reference": "Dieser Verweis zeigt nicht auf echte Arbeit dieser Person.",
-      "needs_migration": "Entwicklungsgespräche sind in diesem Arbeitsbereich noch nicht eingeschaltet.",
+      "needs_migration": "Derzeit nicht verfügbar.",
       "not_authorized": "Dafür fehlen dir die Rechte.",
       "not_found": "Nicht gefunden.",
       "limit_reached": "Hier steht bereits zu viel.",
@@ -16264,7 +16335,7 @@
     "title": "Managemententscheidungen",
     "intro": "Was der Geschäftsleitung vorgelegt wurde, was entschieden wurde, wer verantwortlich ist und bis wann.",
     "engineNote": "Abgestimmt wird in der Freigabeliste oben: eine Vorlage, die jede freigebende Person braucht, ist eine einstimmige Abstimmung; eine, der eine beliebige Person genügt, entscheidet die erste Antwort. Hier werden keine Stimmen gezählt.",
-    "notAvailable": "Managemententscheidungen sind in diesem Arbeitsbereich noch nicht eingeschaltet.",
+    "notAvailable": "Derzeit nicht verfügbar.",
     "empty": "Noch keine Entscheidungen festgehalten.",
     "form": {
       "title": "Frage",
@@ -16317,7 +16388,7 @@
       "invalid_document": "Dieses Dokument gehört nicht zu deiner Organisation.",
       "invalid_task": "Diese Aufgabe gehört nicht dir.",
       "invalid_responsible": "Diese Person gehört nicht zu deiner Organisation.",
-      "needs_migration": "Managemententscheidungen sind in diesem Arbeitsbereich noch nicht eingeschaltet.",
+      "needs_migration": "Derzeit nicht verfügbar.",
       "not_authorized": "Dafür fehlen dir die Rechte.",
       "not_found": "Nicht gefunden.",
       "limit_reached": "Hier steht bereits zu viel.",
@@ -16466,7 +16537,7 @@
       "generic": "Speichern fehlgeschlagen. Bitte erneut versuchen."
     },
     "states": {
-      "needsMigration": "Diese Funktion ist in dieser Datenbank noch nicht aktiviert.",
+      "needsMigration": "Derzeit nicht verfügbar.",
       "noCompany": "Wechseln Sie in einen Unternehmens-Arbeitsbereich.",
       "noObjects": "Es gibt noch keine Objekte, denen die heutigen Stunden zugeordnet werden können.",
       "error": "Der Tag konnte nicht geladen werden."
@@ -16536,7 +16607,7 @@
         "duplicatesFound": "Identische vorhandene Einträge: {count}. Nichts wurde geschrieben — setzen Sie das Häkchen, um sie trotzdem zu schreiben.",
         "noRows": "Keine Zeilen zum Schreiben.",
         "tooManyRows": "Zu viele Zeilen für einen Import — teilen Sie die Datei.",
-        "needsMigration": "Diese Funktion ist in dieser Datenbank noch nicht aktiviert.",
+        "needsMigration": "Derzeit nicht verfügbar.",
         "notAuthorized": "Sie dürfen diese Stunden nicht erfassen.",
         "generic": "Verarbeitung fehlgeschlagen. Bitte erneut versuchen."
       }
@@ -17196,7 +17267,7 @@
       "notAMember": "Sie sind kein Mitglied dieser Organisation.",
       "chooseOrganization": "Sie verwalten mehr als eine Organisation. Wählen Sie, für welche Sie handeln.",
       "notAuthorized": "Sie haben in dieser Organisation keine Rolle, die ihre Personen sehen darf.",
-      "needsMigration": "Der Personenspeicher ist in dieser Umgebung noch nicht aktiviert.",
+      "needsMigration": "Derzeit nicht verfügbar.",
       "unavailable": "Die Personenliste konnte nicht gelesen werden. Das ist nicht dasselbe wie eine leere Liste — versuchen Sie es gleich erneut."
     },
     "offer": {
@@ -17220,7 +17291,7 @@
     "detected": "{count} Personen in {file} gefunden",
     "duplicates": "{count} kommen in der Datei doppelt vor",
     "errFailed": "Das hat nicht geklappt, und es wurde nichts gespeichert. Bitte gleich noch einmal versuchen.",
-    "errNeedsMigration": "Diese Beziehung ist in dieser Umgebung noch nicht verfügbar.",
+    "errNeedsMigration": "Derzeit nicht verfügbar.",
     "errNoName": "Keine Spalte dieser Datei sagt, wer die Personen sind. Fügen Sie eine Überschrift wie „Name“ hinzu und hängen Sie sie erneut an.",
     "errNotAuthorized": "Sie können für diese Organisation keine Personen hinzufügen.",
     "errNothing": "Aus dieser Datei konnte nichts gelesen werden.",
@@ -17337,6 +17408,7 @@
     "needs": "Bedarf",
     "calendar": "Kalender",
     "partners": "Kunden & Partner",
+    "market": "Marktplatz",
     "education": "Ausbildung",
     "history": "Verlauf",
     "settings": "Einstellungen",
@@ -17448,7 +17520,7 @@
       "invalid_role": "Ungültige Rolle.",
       "last_owner": "Der letzte Inhaber kann nicht zurücktreten — aktivieren Sie zuerst einen weiteren Inhaber.",
       "no_workspace": "Wählen Sie zuerst einen Organisationsbereich.",
-      "needs_migration": "Diese Funktion ist in dieser Umgebung noch nicht aktiviert.",
+      "needs_migration": "Derzeit nicht verfügbar.",
       "invalid": "Ungültige Eingabe.",
       "error": "Etwas ist fehlgeschlagen — bitte erneut versuchen."
     },
@@ -17502,7 +17574,7 @@
     "cancel": "Abbrechen",
     "doneSelf": "Sie haben dieses Team verlassen.",
     "doneOwner": "Aus der Liste entfernt.",
-    "needsMigration": "Das Beenden einer Teamverbindung ist in dieser Umgebung noch nicht aktiviert.",
+    "needsMigration": "Derzeit nicht verfügbar.",
     "notFound": "Diese Verbindung existiert nicht mehr oder Sie dürfen sie nicht beenden.",
     "failed": "Die Verbindung konnte nicht beendet werden. Versuchen Sie es erneut.",
     "readFailed": "Ihre Teams konnten gerade nicht gelesen werden. Das heißt nicht, dass Sie keine haben."
@@ -17800,5 +17872,44 @@
         }
       }
     }
+  },
+  "companyWorkHistory": {
+    "title": "Importierte Arbeitshistorie des Unternehmens",
+    "subtitle": "Was {name} aus den eigenen früheren Stundenzetteln festgehalten hat: wo gearbeitet wurde, wann, wer dort gearbeitet hat, was getan wurde und wie lange.",
+    "badge": "Importierte Unternehmenshistorie",
+    "provenance": "Aus den eigenen Stundenzetteln von {name}. Die Personen haben LabourMarket.ai damals nicht genutzt, und die Angaben sind nicht unabhängig geprüft.",
+    "unavailable": "Die importierte Arbeitshistorie konnte gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
+    "empty": "{name} hat keine importierte Arbeitshistorie hinterlegt.",
+    "elsewhere": "{name} enthält {count, plural, one {# importierten Eintrag} other {# importierte Einträge}} früherer Arbeit. Wechseln Sie in diesen Arbeitsbereich, um sie zu sehen.",
+    "stats": {
+      "places": "Orte",
+      "people": "Personen",
+      "hours": "Erfasste Stunden",
+      "period": "Zeitraum"
+    },
+    "place": "Ort",
+    "noPlaceName": "Kein Ort angegeben",
+    "open": "Öffnen",
+    "people": "{count, plural, one {# Person} other {# Personen}}",
+    "entries": "{count, plural, one {# Eintrag} other {# Einträge}}",
+    "hoursShare": "{hours} Std. an diesem Ort, im Vergleich zum meistbearbeiteten Ort",
+    "noPlace": "{count, plural, one {# Eintrag} other {# Einträge}} ({hours} Std.) nennen in der Quelle keinen Ort.",
+    "periodAside": "Davon sind {hours} Std. Zeitraumsummen für eine Spanne, getrennt von einzelnen Tagen.",
+    "scope": {
+      "title": "Was dieser Import enthält",
+      "carried": "Die Quelle enthält: wer gearbeitet hat, an welchem Tag, wie viele Stunden, was getan wurde und den Ort wie geschrieben.",
+      "missing": "Nicht in der Quelle: Kunde, Straßenadresse und Projekt. Sie werden als nicht in der Quelle angezeigt und nie ergänzt."
+    },
+    "facts": {
+      "customer": "Kunde",
+      "address": "Adresse",
+      "project": "Projekt",
+      "notInSource": "Nicht in der Quelle",
+      "linked": "Verknüpft"
+    },
+    "whoWorked": "Wer hier gearbeitet hat",
+    "timeline": "Was getan wurde",
+    "back": "Zurück zur Historie",
+    "placeMissing": "Dieser Ort ist nicht in der importierten Historie des aktiven Arbeitsbereichs."
   }
 }

@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { getEmployerOwnerProfileId } from "./employer-resolution";
+import { callerSharesTeamWith, managesProjectOf } from "./direct-conversation-core";
 import {
   evaluateContactPermission,
   type ContactPermissionState,
@@ -57,6 +58,10 @@ export async function resolveContactPermission(
     /** Caller already proved the two profiles share an unrevoked direct
      *  conversation (e.g. the get-or-create dedupe hit). */
     sharesConversation?: boolean;
+    /** The project the caller opened the contact from: when the caller
+     *  MANAGES it (the database's own `can_manage_project`) and the other
+     *  profile is ACTIVELY assigned to it, that is a real engagement. */
+    projectId?: string | null;
   },
 ): Promise<ContactPermissionState> {
   if (!otherProfileId) return "no_permission";
@@ -66,18 +71,25 @@ export async function resolveContactPermission(
   } = await supabase.auth.getUser();
   if (!user || otherProfileId === user.id) return "no_permission";
 
-  const [employerOwnerProfileId, employsWorker, isAdmin] = await Promise.all([
-    getEmployerOwnerProfileId(),
-    callerCompanyEmploysProfile(supabase, user.id, otherProfileId),
-    callerIsAdmin(supabase, user.id),
-  ]);
+  const caller = { supabase, userId: user.id };
+  const [employerOwnerProfileId, employsWorker, isAdmin, sharesTeam, onManagedProject] =
+    await Promise.all([
+      getEmployerOwnerProfileId(),
+      callerCompanyEmploysProfile(supabase, user.id, otherProfileId),
+      callerIsAdmin(supabase, user.id),
+      callerSharesTeamWith(caller, otherProfileId),
+      opts?.projectId
+        ? managesProjectOf(caller, opts.projectId, otherProfileId)
+        : Promise.resolve(false),
+    ]);
 
   return evaluateContactPermission({
     sharesConversation: opts?.sharesConversation === true,
     hasEngagement:
-      employerOwnerProfileId === otherProfileId || employsWorker,
+      employerOwnerProfileId === otherProfileId || employsWorker || onManagedProject,
     scoutingAllowed: false, // Step 4A resolves this in its own gated action.
     isAdmin,
+    sharesTeam,
   });
 }
 

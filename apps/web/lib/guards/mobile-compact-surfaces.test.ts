@@ -125,12 +125,13 @@ describe("GALIMYBĖS — a compact row first, the detail on selection", () => {
   });
 
   it("the two mandatory disclosures survive the compaction", () => {
-    // pay that was never stated is said so on the ROW, not inside the detail
+    // owner order 2026-10-01: the card face shows pay only when it is KNOWN —
+    // no "pay not stated" filler line on the row.
     const row = page.slice(
       page.indexOf('<Card compact variant="interactive"'),
       page.indexOf("<OpportunityDetailsDisclosure"),
     );
-    expect(row).toMatch(/data-testid="opportunity-pay-not-stated"/);
+    expect(row).not.toMatch(/data-testid="opportunity-pay-not-stated"/);
     // a talent pool must always announce itself at card level
     const chips = read("components/app/opportunity-structured-detail.tsx");
     const essenceBlock = chips.slice(chips.indexOf("const ESSENCE_CHIP_KEYS"));
