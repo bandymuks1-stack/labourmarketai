@@ -194,6 +194,25 @@ async function readExisting(
   return { row, safetyAvailable: false, error: null };
 }
 
+/**
+ * READ-ONLY peek at the local row for a provider subscription id — recovery
+ * uses it to tell "applied" from "nothing to do" and "already current".
+ * Never writes.
+ */
+export async function readSubscriptionState(
+  providerSubscriptionId: string,
+): Promise<
+  | { status: "found"; row: { status: string; ownerId: string | null; planKey: string | null } }
+  | { status: "none" }
+  | { status: "needs-migration" }
+  | { status: "error" }
+> {
+  const { row, error } = await readExisting(admin(), providerSubscriptionId);
+  if (error) return error.code === RELATION_ABSENT ? { status: "needs-migration" } : { status: "error" };
+  if (!row) return { status: "none" };
+  return { status: "found", row: { status: row.status, ownerId: row.owner_id, planKey: row.plan_key } };
+}
+
 /** Read-then-merge upsert of a subscription (keeps owner/plan if a later event omits them). */
 export async function upsertSubscription(u: SubscriptionUpsert): Promise<StoreResult> {
   const sb = admin();
