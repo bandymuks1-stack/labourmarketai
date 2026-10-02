@@ -18088,5 +18088,23 @@
       "body": "Każda praca, którą zapiszesz, ją uzupełnia. Zabierz ją na następną okazję.",
       "cta": "Zobacz, dokąd możesz pójść"
     }
+  },
+  "workContext": {
+    "title": "Twoja praca w jednym miejscu",
+    "nodes": {
+      "current": "Pracuje teraz",
+      "records": "Wpisy",
+      "manager": "Wpis kierownika",
+      "history": "Historia",
+      "skills": "Umiejętności",
+      "next": "Dalej"
+    },
+    "facts": {
+      "records": "{count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}",
+      "manager": "{count, plural, one {# wpis kierownika} few {# wpisy kierownika} many {# wpisów kierownika} other {# wpisu kierownika}}",
+      "history": "{count, plural, one {# praca} few {# prace} many {# prac} other {# pracy}}",
+      "skills": "{count, plural, one {# umiejętność oparta na Twoich wpisach} few {# umiejętności oparte na Twoich wpisach} many {# umiejętności opartych na Twoich wpisach} other {# umiejętności opartej na Twoich wpisach}}",
+      "next": "Dokąd możesz przejść"
+    }
   }
 }

@@ -7032,5 +7032,23 @@
       "body": "Katrs darbs, ko ierakstāt, to papildina. Ņemiet to līdzi uz nākamo iespēju.",
       "cta": "Skatīt, kurp varat doties"
     }
+  },
+  "workContext": {
+    "title": "Jūsu darbs vienuviet",
+    "nodes": {
+      "current": "Strādā tagad",
+      "records": "Ieraksti",
+      "manager": "Vadītāja ieraksts",
+      "history": "Vēsture",
+      "skills": "Prasmes",
+      "next": "Tālāk"
+    },
+    "facts": {
+      "records": "{count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}",
+      "manager": "{count, plural, zero {# vadītāja ierakstu} one {# vadītāja ieraksts} other {# vadītāja ieraksti}}",
+      "history": "{count, plural, zero {# darbu} one {# darbs} other {# darbi}}",
+      "skills": "{count, plural, zero {# jūsu ierakstos balstītu prasmju} one {# jūsu ierakstos balstīta prasme} other {# jūsu ierakstos balstītas prasmes}}",
+      "next": "Kur varat doties"
+    }
   }
 }

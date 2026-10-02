@@ -18088,5 +18088,23 @@
       "body": "Elke klus die u vastlegt, vult haar aan. Neem haar mee naar de volgende kans.",
       "cta": "Bekijk waar u naartoe kunt"
     }
+  },
+  "workContext": {
+    "title": "Jouw werk in één overzicht",
+    "nodes": {
+      "current": "Nu aan het werk",
+      "records": "Registraties",
+      "manager": "Registratie van de leidinggevende",
+      "history": "Geschiedenis",
+      "skills": "Vaardigheden",
+      "next": "Volgende"
+    },
+    "facts": {
+      "records": "{count, plural, one {# registratie} other {# registraties}}",
+      "manager": "{count, plural, one {# registratie van de leidinggevende} other {# registraties van de leidinggevende}}",
+      "history": "{count, plural, one {# baan} other {# banen}}",
+      "skills": "{count, plural, one {# vaardigheid gebaseerd op jouw registraties} other {# vaardigheden gebaseerd op jouw registraties}}",
+      "next": "Waar je heen kunt"
+    }
   }
 }

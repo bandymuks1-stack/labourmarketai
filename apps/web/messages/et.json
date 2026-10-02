@@ -7032,5 +7032,23 @@
       "body": "Iga töö, mille kirja paned, täiendab seda. Vii see järgmise võimaluseni kaasa.",
       "cta": "Vaata, kuhu saad edasi minna"
     }
+  },
+  "workContext": {
+    "title": "Sinu töö ühes vaates",
+    "nodes": {
+      "current": "Töötab praegu",
+      "records": "Kirjed",
+      "manager": "Juhi kirje",
+      "history": "Ajalugu",
+      "skills": "Oskused",
+      "next": "Edasi"
+    },
+    "facts": {
+      "records": "{count, plural, one {# kirje} other {# kirjet}}",
+      "manager": "{count, plural, one {# juhi kirje} other {# juhi kirjet}}",
+      "history": "{count, plural, one {# töö} other {# tööd}}",
+      "skills": "{count, plural, one {# sinu kirjetel põhinev oskus} other {# sinu kirjetel põhinevat oskust}}",
+      "next": "Kuhu saad edasi minna"
+    }
   }
 }

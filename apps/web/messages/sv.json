@@ -7032,5 +7032,23 @@
       "body": "Varje jobb du registrerar bygger på den. Ta den med till nästa möjlighet.",
       "cta": "Se vart du kan gå"
     }
+  },
+  "workContext": {
+    "title": "Ditt arbete på ett ställe",
+    "nodes": {
+      "current": "Arbetar nu",
+      "records": "Registreringar",
+      "manager": "Chefens registrering",
+      "history": "Historik",
+      "skills": "Färdigheter",
+      "next": "Nästa"
+    },
+    "facts": {
+      "records": "{count, plural, one {# registrering} other {# registreringar}}",
+      "manager": "{count, plural, one {# registrering från chefen} other {# registreringar från chefen}}",
+      "history": "{count, plural, one {# jobb} other {# jobb}}",
+      "skills": "{count, plural, one {# färdighet baserad på dina registreringar} other {# färdigheter baserade på dina registreringar}}",
+      "next": "Vart du kan gå"
+    }
   }
 }
