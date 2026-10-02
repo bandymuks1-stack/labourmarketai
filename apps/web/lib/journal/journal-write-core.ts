@@ -21,6 +21,10 @@ import {
   parseModuleFields,
 } from "@/lib/journal/journal-module-fields";
 import { readOwnOccupationPathForUser } from "@/lib/journal/journal-occupation-path";
+import {
+  parseProjectChoice,
+  rpcProjectParams,
+} from "@/lib/journal/project-attribution";
 
 /**
  * JOURNAL WRITE CORE — the ONE transport-neutral implementation of the
@@ -92,7 +96,10 @@ export type JournalSaveErrorCode =
    *  relationship does not compose (or the engagement is not the caller's).
    *  Refused, never silently dropped: the composition decides which fields
    *  an entry may carry, not the request. */
-  | "module_field_invalid";
+  | "module_field_invalid"
+  /** Explicit `project_id` the worker is not actively assigned to (or that
+   *  sits in another organization). Refused by the RPC, never re-pointed. */
+  | "project_not_assignable";
 
 export type ParsedFragmentInput = {
   rawPhrase: string;
@@ -453,6 +460,12 @@ export async function createJournalEntryCore(
     String(formData.get("rejected_slugs_json") ?? ""),
   );
   const quantity = quantityRaw === "" ? null : Number(quantityRaw);
+  // Which project the hours belong to. Absent → the DB auto-link rule; "none"
+  // → a deliberate non-project entry; a uuid → validated server-side against
+  // the worker's active assignment and the entry's own organization.
+  const projectChoice = parseProjectChoice(
+    String(formData.get("project_id") ?? ""),
+  );
 
   if (!engagementId) {
     return {
@@ -653,6 +666,7 @@ export async function createJournalEntryCore(
     p_hash_self: hashSelf,
     p_visibility_scope: "closed",
     p_metrics: metrics,
+    ...rpcProjectParams(projectChoice),
   };
   // The generated supabase-js types are built from the schema cache and
   // don't include `create_journal_entry_full` until 0017 is applied AND the
@@ -676,6 +690,13 @@ export async function createJournalEntryCore(
       (/PGRST202/i.test(rpcErr.code ?? "") ||
         /create_journal_entry_full/i.test(rpcErr.message ?? "") ||
         rpcErr.message?.includes("function") === true);
+    if (/project_not_assignable/.test(rpcErr?.message ?? "")) {
+      return {
+        ok: false,
+        code: "project_not_assignable",
+        message: t("projectNotAssignable"),
+      };
+    }
     if (!isMissingRpc) {
       console.error("[journal] rpc save failed:", rpcErr?.message);
       return {

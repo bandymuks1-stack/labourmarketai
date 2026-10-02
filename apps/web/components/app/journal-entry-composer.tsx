@@ -86,6 +86,13 @@ import {
   type ModuleFieldValues,
 } from "@/lib/journal/journal-module-fields";
 
+import {
+  PROJECT_FIELD_NONE,
+  projectChoiceIsSatisfied,
+  projectPromptFor,
+  type AssignedProject,
+} from "@/lib/journal/project-attribution";
+
 export type JournalEngagement = {
   id: string;
   label: string;
@@ -95,6 +102,10 @@ export type JournalEngagement = {
    *  editors compose for an entry logged against it (owner §12). Optional
    *  so older callers keep working; absent → no module fields. */
   relationshipSlug?: string;
+  /** The projects the worker is ACTIVELY assigned to in THIS context's
+   *  organization. Two or more → the composer must ask which; one → the
+   *  database attributes it; none → a non-project entry, nothing to ask. */
+  projects?: AssignedProject[];
 };
 
 /** How the entry's engagement context was decided — see
@@ -409,6 +420,21 @@ export function JournalEntryComposer({
   const [engagementId, setEngagementId] = useState<string>(
     editingEntry?.engagementContextId ?? primaryId,
   );
+  // WHICH PROJECT the hours belong to. Only a NEW record asks (an edit keeps
+  // the entry's own project — the supersede RPC copies it). With two or more
+  // active projects in the chosen context nothing is preselected: the
+  // database never guesses between them (handoff 2026-10-02 §7).
+  const [projectChoice, setProjectChoice] = useState<string>("");
+  const contextProjects: AssignedProject[] = editingEntry
+    ? []
+    : (engagements.find((e) => e.id === engagementId)?.projects ?? []);
+  const projectPrompt = projectPromptFor(contextProjects);
+  // A choice made for another context's projects never carries over.
+  const projectChoiceValid =
+    projectChoice === PROJECT_FIELD_NONE ||
+    contextProjects.some((p) => p.id === projectChoice)
+      ? projectChoice
+      : "";
   // Owner §12 — archetype module fields for the selected engagement's
   // relationship, preloaded on edit so they are re-sent, not lost.
   const [moduleFields, setModuleFields] = useState<ModuleFieldValues>(
@@ -910,6 +936,13 @@ export function JournalEntryComposer({
       setError(t("engagementAmbiguous"));
       return;
     }
+    // Two or more active projects: the hours must say which project they are
+    // for (or that they are not project work) — otherwise they would be saved
+    // against no project at all.
+    if (!projectChoiceIsSatisfied(contextProjects, projectChoiceValid)) {
+      setError(t("projectAmbiguous"));
+      return;
+    }
     // Saving now would discard hours the worker actually wrote. Say so and
     // stop; `confirmAllPending` (the existing control) is one tap away, and
     // discarding deliberately is also a real answer.
@@ -926,6 +959,7 @@ export function JournalEntryComposer({
       const fd = new FormData();
       fd.set("locale", locale);
       fd.set("engagement_context_id", engagementId);
+      if (projectPrompt === "ask") fd.set("project_id", projectChoiceValid);
       fd.set("notes", text);
       fd.set("work_date", workDate);
       if (siteStatus === "confirmed" && siteName.trim())
@@ -2127,6 +2161,38 @@ export function JournalEntryComposer({
             </p>
           ) : null}
         </label>
+
+        {projectPrompt === "ask" ? (
+          <label className="flex flex-col gap-1.5">
+            <Label>{t("project")}</Label>
+            <DarkListbox
+              value={projectChoiceValid}
+              onChange={setProjectChoice}
+              options={[
+                { value: "", label: t("projectChoose") },
+                ...contextProjects.map((p) => ({ value: p.id, label: p.label })),
+                { value: PROJECT_FIELD_NONE, label: t("projectNone") },
+              ]}
+              ariaLabel={t("project")}
+              testId="journal-project-switcher"
+            />
+            {projectChoiceValid === "" ? (
+              <p
+                className="text-meta leading-relaxed text-state-warning"
+                data-testid="journal-project-must-choose"
+              >
+                {t("projectAmbiguous")}
+              </p>
+            ) : null}
+          </label>
+        ) : projectPrompt === "auto" ? (
+          <p
+            className="text-meta leading-relaxed text-text-muted"
+            data-testid="journal-project-auto"
+          >
+            {t("projectAuto", { name: contextProjects[0]?.label ?? "" })}
+          </p>
+        ) : null}
 
         {/* Owner §12 — the module fields the entry's OCCUPATION (the named
             direction, else the worker's primary profession, through its
