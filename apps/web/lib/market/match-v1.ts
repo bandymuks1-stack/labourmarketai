@@ -413,11 +413,11 @@ export function compareMatches(a: MatchResultV1, b: MatchResultV1): number {
   // Accumulated confirmed WORK breaks ties only INSIDE the same status and
   // coverage — it never reorders by coverage, and missing counts read as 0
   // without penalising eligibility (a tiebreak, not a score).
-  const ra = a.evidence.matchedRepeatedConfirmed ?? 0;
-  const rb = b.evidence.matchedRepeatedConfirmed ?? 0;
+  const ra = a.evidence?.matchedRepeatedConfirmed ?? 0;
+  const rb = b.evidence?.matchedRepeatedConfirmed ?? 0;
   if (rb !== ra) return rb - ra;
-  const wa = a.evidence.matchedConfirmedWork ?? 0;
-  const wb = b.evidence.matchedConfirmedWork ?? 0;
+  const wa = a.evidence?.matchedConfirmedWork ?? 0;
+  const wb = b.evidence?.matchedConfirmedWork ?? 0;
   if (wb !== wa) return wb - wa;
   const AV: Record<MatchAvailability, number> = { available: 3, busy: 2, unknown: 1, unavailable: 0 };
   return AV[b.availability] - AV[a.availability];
