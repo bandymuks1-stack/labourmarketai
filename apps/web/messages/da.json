@@ -6879,84 +6879,84 @@
     }
   },
   "workLifecycle": {
-    "title": "[EN] What happens to the work you do",
-    "titleCompany": "[EN] What happens to the work you run",
-    "example": "[EN] Example — not a real person or real data",
-    "hint": "[EN] Select a step. Every step opens the real place in your workspace.",
-    "open": "[EN] Open in your workspace",
-    "list": "[EN] Work lifecycle steps",
+    "title": "Hvad der sker med det arbejde, du udfører",
+    "titleCompany": "Hvad der sker med det arbejde, du driver",
+    "example": "Eksempel — ikke en rigtig person eller rigtige data",
+    "hint": "Vælg et trin. Hvert trin åbner det rigtige sted i dit arbejdsområde.",
+    "open": "Åbn i dit arbejdsområde",
+    "list": "Trin i arbejdets forløb",
     "workers": {
       "person": {
-        "label": "[EN] You",
-        "fact": "[EN] Cook · professional identity",
-        "detail": "[EN] One professional identity that is yours — not tied to a single employer."
+        "label": "Dig",
+        "fact": "Kok — professionel identitet",
+        "detail": "Én professionel identitet, der er din — ikke knyttet til én arbejdsgiver."
       },
       "team": {
-        "label": "[EN] Team",
-        "fact": "[EN] Kitchen team",
-        "detail": "[EN] You join a real team, with the people you work with and who leads it."
+        "label": "Hold",
+        "fact": "Køkkenhold",
+        "detail": "Du bliver en del af et rigtigt hold, med dem du arbejder sammen med og den, der leder det."
       },
       "project": {
-        "label": "[EN] Project",
-        "fact": "[EN] Autumn menu launch",
-        "detail": "[EN] Work belongs to a project, so it has a place, a purpose and a time."
+        "label": "Projekt",
+        "fact": "Lancering af efterårsmenu",
+        "detail": "Arbejdet hører til et projekt, så det har et sted, et formål og en tid."
       },
       "work": {
-        "label": "[EN] Work",
-        "fact": "[EN] Evening service · 8 h",
-        "detail": "[EN] What you did, when and for how long — recorded as it happens."
+        "label": "Arbejde",
+        "fact": "Aftenservice — 8 t",
+        "detail": "Hvad du lavede, hvornår og i hvor lang tid — registreret, mens det sker."
       },
       "evidence": {
-        "label": "[EN] Evidence",
-        "fact": "[EN] Photo + journal entry",
-        "detail": "[EN] Completed work becomes evidence instead of disappearing."
+        "label": "Dokumentation",
+        "fact": "Foto + journalpost",
+        "detail": "Udført arbejde bliver til dokumentation i stedet for at forsvinde."
       },
       "confirmation": {
-        "label": "[EN] Confirmed",
-        "fact": "[EN] Confirmed by manager",
-        "detail": "[EN] A manager confirms it. Nothing is called verified without that."
+        "label": "Bekræftet",
+        "fact": "Bekræftet af leder",
+        "detail": "En leder bekræfter det. Intet kaldes verificeret uden det."
       },
       "history": {
-        "label": "[EN] History",
-        "fact": "[EN] Added to your history",
-        "detail": "[EN] Confirmed work builds your professional history — it stays with you for the next job."
+        "label": "Historik",
+        "fact": "Tilføjet til din historik",
+        "detail": "Bekræftet arbejde opbygger din professionelle historik — den følger dig til næste job."
       }
     },
     "companies": {
       "need": {
-        "label": "[EN] Need",
-        "fact": "[EN] 4 cooks, from Monday",
-        "detail": "[EN] You state the real need once: who, where and from when."
+        "label": "Behov",
+        "fact": "4 kokke, fra mandag",
+        "detail": "Du angiver det reelle behov én gang: hvem, hvor og fra hvornår."
       },
       "people": {
-        "label": "[EN] People",
-        "fact": "[EN] Professionals who fit",
-        "detail": "[EN] Professionals whose real work history fits the need — with what is verified and what is not yet."
+        "label": "Personer",
+        "fact": "Professionelle, der passer",
+        "detail": "Professionelle, hvis faktiske arbejdshistorik passer til behovet — med det, der er verificeret, og det, der endnu ikke er."
       },
       "team": {
-        "label": "[EN] Team",
-        "fact": "[EN] Kitchen team",
-        "detail": "[EN] People become a team with a lead, shifts and a place to work."
+        "label": "Hold",
+        "fact": "Køkkenhold",
+        "detail": "Personer bliver til et hold med en leder, vagter og et sted at arbejde."
       },
       "project": {
-        "label": "[EN] Project",
-        "fact": "[EN] Autumn menu launch",
-        "detail": "[EN] Teams are organised around the project they deliver."
+        "label": "Projekt",
+        "fact": "Lancering af efterårsmenu",
+        "detail": "Holdene organiseres omkring det projekt, de leverer."
       },
       "work": {
-        "label": "[EN] Work",
-        "fact": "[EN] Evening service · 8 h",
-        "detail": "[EN] Work is recorded where it happens, not rebuilt afterwards."
+        "label": "Arbejde",
+        "fact": "Aftenservice — 8 t",
+        "detail": "Arbejdet registreres der, hvor det sker, og rekonstrueres ikke bagefter."
       },
       "confirmation": {
-        "label": "[EN] Confirmed",
-        "fact": "[EN] Awaiting your confirmation",
-        "detail": "[EN] You see what still needs confirming and what is already done."
+        "label": "Bekræftet",
+        "fact": "Afventer din bekræftelse",
+        "detail": "Du kan se, hvad der stadig mangler at blive bekræftet, og hvad der allerede er gjort."
       },
       "report": {
-        "label": "[EN] Report",
-        "fact": "[EN] Report from real work",
-        "detail": "[EN] Reports come from confirmed work — nobody retypes them."
+        "label": "Rapport",
+        "fact": "Rapport fra reelt arbejde",
+        "detail": "Rapporter bygger på bekræftet arbejde — ingen skriver dem om."
       }
     }
   }

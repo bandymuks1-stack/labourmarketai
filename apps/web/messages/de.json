@@ -17935,84 +17935,84 @@
     }
   },
   "workLifecycle": {
-    "title": "[EN] What happens to the work you do",
-    "titleCompany": "[EN] What happens to the work you run",
-    "example": "[EN] Example — not a real person or real data",
-    "hint": "[EN] Select a step. Every step opens the real place in your workspace.",
-    "open": "[EN] Open in your workspace",
-    "list": "[EN] Work lifecycle steps",
+    "title": "Was mit Ihrer Arbeit passiert",
+    "titleCompany": "Was mit der Arbeit passiert, die Sie leiten",
+    "example": "Beispiel — keine echte Person und keine echten Daten",
+    "hint": "Wählen Sie einen Schritt. Jeder Schritt öffnet den echten Ort in Ihrem Arbeitsbereich.",
+    "open": "In Ihrem Arbeitsbereich öffnen",
+    "list": "Schritte im Arbeitsverlauf",
     "workers": {
       "person": {
-        "label": "[EN] You",
-        "fact": "[EN] Cook · professional identity",
-        "detail": "[EN] One professional identity that is yours — not tied to a single employer."
+        "label": "Sie",
+        "fact": "Koch — berufliche Identität",
+        "detail": "Eine berufliche Identität, die Ihnen gehört — nicht an einen einzelnen Arbeitgeber gebunden."
       },
       "team": {
-        "label": "[EN] Team",
-        "fact": "[EN] Kitchen team",
-        "detail": "[EN] You join a real team, with the people you work with and who leads it."
+        "label": "Team",
+        "fact": "Küchenteam",
+        "detail": "Sie schließen sich einem echten Team an — mit den Menschen, mit denen Sie arbeiten, und wer es leitet."
       },
       "project": {
-        "label": "[EN] Project",
-        "fact": "[EN] Autumn menu launch",
-        "detail": "[EN] Work belongs to a project, so it has a place, a purpose and a time."
+        "label": "Projekt",
+        "fact": "Start der Herbstkarte",
+        "detail": "Arbeit gehört zu einem Projekt und hat damit einen Ort, einen Zweck und eine Zeit."
       },
       "work": {
-        "label": "[EN] Work",
-        "fact": "[EN] Evening service · 8 h",
-        "detail": "[EN] What you did, when and for how long — recorded as it happens."
+        "label": "Arbeit",
+        "fact": "Abendservice — 8 Std.",
+        "detail": "Was Sie getan haben, wann und wie lange — erfasst, während es passiert."
       },
       "evidence": {
-        "label": "[EN] Evidence",
-        "fact": "[EN] Photo + journal entry",
-        "detail": "[EN] Completed work becomes evidence instead of disappearing."
+        "label": "Nachweis",
+        "fact": "Foto + Journaleintrag",
+        "detail": "Erledigte Arbeit wird zum Nachweis, statt zu verschwinden."
       },
       "confirmation": {
-        "label": "[EN] Confirmed",
-        "fact": "[EN] Confirmed by manager",
-        "detail": "[EN] A manager confirms it. Nothing is called verified without that."
+        "label": "Bestätigt",
+        "fact": "Von der Leitung bestätigt",
+        "detail": "Eine Führungskraft bestätigt es. Ohne das gilt nichts als verifiziert."
       },
       "history": {
-        "label": "[EN] History",
-        "fact": "[EN] Added to your history",
-        "detail": "[EN] Confirmed work builds your professional history — it stays with you for the next job."
+        "label": "Verlauf",
+        "fact": "Zu Ihrem Verlauf hinzugefügt",
+        "detail": "Bestätigte Arbeit bildet Ihren beruflichen Verlauf — er bleibt bei Ihnen für den nächsten Job."
       }
     },
     "companies": {
       "need": {
-        "label": "[EN] Need",
-        "fact": "[EN] 4 cooks, from Monday",
-        "detail": "[EN] You state the real need once: who, where and from when."
+        "label": "Bedarf",
+        "fact": "4 Köche, ab Montag",
+        "detail": "Sie nennen den echten Bedarf einmal: wer, wo und ab wann."
       },
       "people": {
-        "label": "[EN] People",
-        "fact": "[EN] Professionals who fit",
-        "detail": "[EN] Professionals whose real work history fits the need — with what is verified and what is not yet."
+        "label": "Personen",
+        "fact": "Passende Fachkräfte",
+        "detail": "Fachkräfte, deren echter Arbeitsverlauf zum Bedarf passt — mit dem, was verifiziert ist und was noch nicht."
       },
       "team": {
-        "label": "[EN] Team",
-        "fact": "[EN] Kitchen team",
-        "detail": "[EN] People become a team with a lead, shifts and a place to work."
+        "label": "Team",
+        "fact": "Küchenteam",
+        "detail": "Aus Personen wird ein Team mit Leitung, Schichten und einem Arbeitsplatz."
       },
       "project": {
-        "label": "[EN] Project",
-        "fact": "[EN] Autumn menu launch",
-        "detail": "[EN] Teams are organised around the project they deliver."
+        "label": "Projekt",
+        "fact": "Start der Herbstkarte",
+        "detail": "Teams sind um das Projekt organisiert, das sie liefern."
       },
       "work": {
-        "label": "[EN] Work",
-        "fact": "[EN] Evening service · 8 h",
-        "detail": "[EN] Work is recorded where it happens, not rebuilt afterwards."
+        "label": "Arbeit",
+        "fact": "Abendservice — 8 Std.",
+        "detail": "Arbeit wird dort erfasst, wo sie passiert, und nicht nachträglich rekonstruiert."
       },
       "confirmation": {
-        "label": "[EN] Confirmed",
-        "fact": "[EN] Awaiting your confirmation",
-        "detail": "[EN] You see what still needs confirming and what is already done."
+        "label": "Bestätigt",
+        "fact": "Wartet auf Ihre Bestätigung",
+        "detail": "Sie sehen, was noch bestätigt werden muss und was schon erledigt ist."
       },
       "report": {
-        "label": "[EN] Report",
-        "fact": "[EN] Report from real work",
-        "detail": "[EN] Reports come from confirmed work — nobody retypes them."
+        "label": "Bericht",
+        "fact": "Bericht aus echter Arbeit",
+        "detail": "Berichte entstehen aus bestätigter Arbeit — niemand tippt sie neu ab."
       }
     }
   }

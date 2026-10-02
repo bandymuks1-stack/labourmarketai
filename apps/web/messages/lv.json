@@ -6879,84 +6879,84 @@
     }
   },
   "workLifecycle": {
-    "title": "[EN] What happens to the work you do",
-    "titleCompany": "[EN] What happens to the work you run",
-    "example": "[EN] Example — not a real person or real data",
-    "hint": "[EN] Select a step. Every step opens the real place in your workspace.",
-    "open": "[EN] Open in your workspace",
-    "list": "[EN] Work lifecycle steps",
+    "title": "Kas notiek ar jūsu paveikto darbu",
+    "titleCompany": "Kas notiek ar jūsu vadīto darbu",
+    "example": "Piemērs — nav īsts cilvēks un nav īsti dati",
+    "hint": "Izvēlieties soli. Katrs solis atver īstu vietu jūsu darba telpā.",
+    "open": "Atvērt darba telpā",
+    "list": "Darba dzīves cikla soļi",
     "workers": {
       "person": {
-        "label": "[EN] You",
-        "fact": "[EN] Cook · professional identity",
-        "detail": "[EN] One professional identity that is yours — not tied to a single employer."
+        "label": "Jūs",
+        "fact": "Pavārs — profesionālā identitāte",
+        "detail": "Viena profesionālā identitāte, kas pieder jums — nav piesaistīta vienam darba devējam."
       },
       "team": {
-        "label": "[EN] Team",
-        "fact": "[EN] Kitchen team",
-        "detail": "[EN] You join a real team, with the people you work with and who leads it."
+        "label": "Komanda",
+        "fact": "Virtuves komanda",
+        "detail": "Jūs pievienojaties īstai komandai — redzat, ar ko strādājat un kas to vada."
       },
       "project": {
-        "label": "[EN] Project",
-        "fact": "[EN] Autumn menu launch",
-        "detail": "[EN] Work belongs to a project, so it has a place, a purpose and a time."
+        "label": "Projekts",
+        "fact": "Rudens ēdienkartes ieviešana",
+        "detail": "Darbs pieder projektam, tāpēc tam ir vieta, mērķis un laiks."
       },
       "work": {
-        "label": "[EN] Work",
-        "fact": "[EN] Evening service · 8 h",
-        "detail": "[EN] What you did, when and for how long — recorded as it happens."
+        "label": "Darbs",
+        "fact": "Vakara pakalpojums — 8 st.",
+        "detail": "Ko jūs darījāt, kad un cik ilgi — fiksēts tad, kad tas notiek."
       },
       "evidence": {
-        "label": "[EN] Evidence",
-        "fact": "[EN] Photo + journal entry",
-        "detail": "[EN] Completed work becomes evidence instead of disappearing."
+        "label": "Pierādījums",
+        "fact": "Foto + žurnāla ieraksts",
+        "detail": "Paveiktais darbs kļūst par pierādījumu, nevis pazūd."
       },
       "confirmation": {
-        "label": "[EN] Confirmed",
-        "fact": "[EN] Confirmed by manager",
-        "detail": "[EN] A manager confirms it. Nothing is called verified without that."
+        "label": "Apstiprināts",
+        "fact": "Apstiprināja vadītājs",
+        "detail": "Vadītājs to apstiprina. Bez tā nekas netiek saukts par pārbaudītu."
       },
       "history": {
-        "label": "[EN] History",
-        "fact": "[EN] Added to your history",
-        "detail": "[EN] Confirmed work builds your professional history — it stays with you for the next job."
+        "label": "Vēsture",
+        "fact": "Pievienots jūsu vēsturei",
+        "detail": "Apstiprinātais darbs veido jūsu profesionālo vēsturi — tā paliek pie jums nākamajam darbam."
       }
     },
     "companies": {
       "need": {
-        "label": "[EN] Need",
-        "fact": "[EN] 4 cooks, from Monday",
-        "detail": "[EN] You state the real need once: who, where and from when."
+        "label": "Vajadzība",
+        "fact": "4 pavāri no pirmdienas",
+        "detail": "Īsto vajadzību norādāt vienreiz: kas, kur un no kura laika."
       },
       "people": {
-        "label": "[EN] People",
-        "fact": "[EN] Professionals who fit",
-        "detail": "[EN] Professionals whose real work history fits the need — with what is verified and what is not yet."
+        "label": "Cilvēki",
+        "fact": "Piemēroti profesionāļi",
+        "detail": "Profesionāļi, kuru īstā darba vēsture atbilst vajadzībai — ar to, kas ir pārbaudīts un kas vēl nav."
       },
       "team": {
-        "label": "[EN] Team",
-        "fact": "[EN] Kitchen team",
-        "detail": "[EN] People become a team with a lead, shifts and a place to work."
+        "label": "Komanda",
+        "fact": "Virtuves komanda",
+        "detail": "Cilvēki kļūst par komandu ar vadītāju, maiņām un darba vietu."
       },
       "project": {
-        "label": "[EN] Project",
-        "fact": "[EN] Autumn menu launch",
-        "detail": "[EN] Teams are organised around the project they deliver."
+        "label": "Projekts",
+        "fact": "Rudens ēdienkartes ieviešana",
+        "detail": "Komandas tiek organizētas ap projektu, ko tās īsteno."
       },
       "work": {
-        "label": "[EN] Work",
-        "fact": "[EN] Evening service · 8 h",
-        "detail": "[EN] Work is recorded where it happens, not rebuilt afterwards."
+        "label": "Darbs",
+        "fact": "Vakara pakalpojums — 8 st.",
+        "detail": "Darbs tiek fiksēts tur, kur tas notiek, nevis atjaunots vēlāk."
       },
       "confirmation": {
-        "label": "[EN] Confirmed",
-        "fact": "[EN] Awaiting your confirmation",
-        "detail": "[EN] You see what still needs confirming and what is already done."
+        "label": "Apstiprināts",
+        "fact": "Gaida jūsu apstiprinājumu",
+        "detail": "Redzat, kas vēl jāapstiprina un kas jau ir izdarīts."
       },
       "report": {
-        "label": "[EN] Report",
-        "fact": "[EN] Report from real work",
-        "detail": "[EN] Reports come from confirmed work — nobody retypes them."
+        "label": "Atskaite",
+        "fact": "Atskaite no īstā darba",
+        "detail": "Atskaites veidojas no apstiprinātā darba — neviens tās nepārraksta."
       }
     }
   }
