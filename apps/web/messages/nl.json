@@ -17934,6 +17934,88 @@
       "person": "{hours} u, {count, plural, one {# registratie} other {# registraties}}"
     }
   },
+  "workLifecycle": {
+    "title": "Wat er met jouw werk gebeurt",
+    "titleCompany": "Wat er met het werk gebeurt dat je aanstuurt",
+    "example": "Voorbeeld — geen echt persoon en geen echte gegevens",
+    "hint": "Kies een stap. Elke stap opent de echte plek in je werkruimte.",
+    "open": "Openen in je werkruimte",
+    "list": "Stappen in de levenscyclus van werk",
+    "workers": {
+      "person": {
+        "label": "Jij",
+        "fact": "Kok — professionele identiteit",
+        "detail": "Eén professionele identiteit die van jou is — niet gebonden aan één werkgever."
+      },
+      "team": {
+        "label": "Je team",
+        "fact": "Keukenteam",
+        "detail": "Je sluit je aan bij een echt team, met de mensen met wie je werkt en wie het leidt."
+      },
+      "project": {
+        "label": "Het project",
+        "fact": "Lancering herfstmenu",
+        "detail": "Werk hoort bij een project, dus het heeft een plek, een doel en een tijd."
+      },
+      "work": {
+        "label": "Werk",
+        "fact": "Avonddienst — 8 u",
+        "detail": "Wat je deed, wanneer en hoelang — vastgelegd terwijl het gebeurt."
+      },
+      "evidence": {
+        "label": "Bewijs",
+        "fact": "Foto + journaalitem",
+        "detail": "Afgerond werk wordt bewijs in plaats van te verdwijnen."
+      },
+      "confirmation": {
+        "label": "Bevestigd",
+        "fact": "Bevestigd door manager",
+        "detail": "Een manager bevestigt het. Zonder dat wordt niets geverifieerd genoemd."
+      },
+      "history": {
+        "label": "Geschiedenis",
+        "fact": "Toegevoegd aan je geschiedenis",
+        "detail": "Bevestigd werk bouwt je professionele geschiedenis op — die blijft bij jou voor de volgende baan."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Vraag",
+        "fact": "4 koks, vanaf maandag",
+        "detail": "Je geeft de echte vraag één keer aan: wie, waar en vanaf wanneer."
+      },
+      "people": {
+        "label": "Mensen",
+        "fact": "Professionals die passen",
+        "detail": "Professionals van wie de echte werkgeschiedenis bij de vraag past — met wat geverifieerd is en wat nog niet."
+      },
+      "team": {
+        "label": "Je team",
+        "fact": "Keukenteam",
+        "detail": "Mensen worden een team met een leider, diensten en een werkplek."
+      },
+      "project": {
+        "label": "Het project",
+        "fact": "Lancering herfstmenu",
+        "detail": "Teams zijn georganiseerd rond het project dat ze opleveren."
+      },
+      "work": {
+        "label": "Werk",
+        "fact": "Avonddienst — 8 u",
+        "detail": "Werk wordt vastgelegd waar het gebeurt, niet achteraf gereconstrueerd."
+      },
+      "confirmation": {
+        "label": "Bevestigd",
+        "fact": "Wacht op jouw bevestiging",
+        "detail": "Je ziet wat nog bevestigd moet worden en wat al klaar is."
+      },
+      "report": {
+        "label": "Rapport",
+        "fact": "Rapport uit echt werk",
+        "detail": "Rapporten komen uit bevestigd werk — niemand typt ze opnieuw over."
+      }
+    }
+  },
   "twoSides": {
     "title": "Aannemen is het begin, niet het einde.",
     "professional": "Vakkracht",

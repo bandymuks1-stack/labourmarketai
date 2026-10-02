@@ -6878,6 +6878,88 @@
       "person": "{hours} h, {count, plural, one {# post} other {# poster}}"
     }
   },
+  "workLifecycle": {
+    "title": "Vad som händer med arbetet du utför",
+    "titleCompany": "Vad som händer med arbetet du driver",
+    "example": "Exempel — inte en riktig person eller riktiga data",
+    "hint": "Välj ett steg. Varje steg öppnar den verkliga platsen i din arbetsyta.",
+    "open": "Öppna i din arbetsyta",
+    "list": "Steg i arbetets livscykel",
+    "workers": {
+      "person": {
+        "label": "Du",
+        "fact": "Kock — professionell identitet",
+        "detail": "En professionell identitet som är din — inte knuten till en enda arbetsgivare."
+      },
+      "team": {
+        "label": "Lag",
+        "fact": "Kökslag",
+        "detail": "Du går med i ett riktigt lag, med dem du arbetar med och den som leder det."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Lansering av höstmenyn",
+        "detail": "Arbete hör till ett projekt, så det har en plats, ett syfte och en tid."
+      },
+      "work": {
+        "label": "Arbete",
+        "fact": "Kvällsservice — 8 tim",
+        "detail": "Vad du gjorde, när och hur länge — registrerat medan det sker."
+      },
+      "evidence": {
+        "label": "Underlag",
+        "fact": "Foto + journalpost",
+        "detail": "Utfört arbete blir underlag i stället för att försvinna."
+      },
+      "confirmation": {
+        "label": "Bekräftat",
+        "fact": "Bekräftat av chef",
+        "detail": "En chef bekräftar det. Inget kallas verifierat utan det."
+      },
+      "history": {
+        "label": "Historik",
+        "fact": "Tillagt i din historik",
+        "detail": "Bekräftat arbete bygger din professionella historik — den stannar hos dig till nästa jobb."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Behov",
+        "fact": "4 kockar, från måndag",
+        "detail": "Du anger det verkliga behovet en gång: vem, var och från när."
+      },
+      "people": {
+        "label": "Personer",
+        "fact": "Professionella som passar",
+        "detail": "Professionella vars verkliga arbetshistorik passar behovet — med det som är verifierat och det som inte är det ännu."
+      },
+      "team": {
+        "label": "Lag",
+        "fact": "Kökslag",
+        "detail": "Personer blir ett lag med en ledare, pass och en plats att arbeta på."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Lansering av höstmenyn",
+        "detail": "Lag organiseras kring det projekt de levererar."
+      },
+      "work": {
+        "label": "Arbete",
+        "fact": "Kvällsservice — 8 tim",
+        "detail": "Arbete registreras där det sker, inte rekonstrueras efteråt."
+      },
+      "confirmation": {
+        "label": "Bekräftat",
+        "fact": "Väntar på din bekräftelse",
+        "detail": "Du ser vad som fortfarande ska bekräftas och vad som redan är klart."
+      },
+      "report": {
+        "label": "Rapport",
+        "fact": "Rapport från verkligt arbete",
+        "detail": "Rapporter bygger på bekräftat arbete — ingen skriver om dem."
+      }
+    }
+  },
   "twoSides": {
     "title": "Anställning är början, inte slutet.",
     "professional": "Yrkesperson",

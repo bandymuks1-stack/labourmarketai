@@ -17934,6 +17934,88 @@
       "person": "{hours} godz., {count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}"
     }
   },
+  "workLifecycle": {
+    "title": "Co dzieje się z Twoją pracą",
+    "titleCompany": "Co dzieje się z pracą, którą prowadzisz",
+    "example": "Przykład — to nie jest prawdziwa osoba ani prawdziwe dane",
+    "hint": "Wybierz krok. Każdy krok otwiera prawdziwe miejsce w Twojej przestrzeni roboczej.",
+    "open": "Otwórz w przestrzeni roboczej",
+    "list": "Etapy cyklu życia pracy",
+    "workers": {
+      "person": {
+        "label": "Ty",
+        "fact": "Kucharz — tożsamość zawodowa",
+        "detail": "Jedna tożsamość zawodowa, która należy do Ciebie — niezwiązana z jednym pracodawcą."
+      },
+      "team": {
+        "label": "Zespół",
+        "fact": "Zespół kuchni",
+        "detail": "Dołączasz do prawdziwego zespołu — wiesz, z kim pracujesz i kto nim kieruje."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Start jesiennego menu",
+        "detail": "Praca należy do projektu, więc ma miejsce, cel i czas."
+      },
+      "work": {
+        "label": "Praca",
+        "fact": "Zmiana wieczorna — 8 godz.",
+        "detail": "Co zrobiono, kiedy i jak długo — zapisane na bieżąco."
+      },
+      "evidence": {
+        "label": "Dowód",
+        "fact": "Zdjęcie + wpis w dzienniku",
+        "detail": "Wykonana praca staje się dowodem, zamiast znikać."
+      },
+      "confirmation": {
+        "label": "Potwierdzone",
+        "fact": "Potwierdzone przez kierownika",
+        "detail": "Potwierdza to kierownik. Bez tego nic nie jest uznane za zweryfikowane."
+      },
+      "history": {
+        "label": "Historia",
+        "fact": "Dodano do Twojej historii",
+        "detail": "Potwierdzona praca buduje Twoją historię zawodową — zostaje z Tobą przy kolejnej pracy."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Zapotrzebowanie",
+        "fact": "4 kucharzy, od poniedziałku",
+        "detail": "Prawdziwe zapotrzebowanie podajesz raz: kto, gdzie i od kiedy."
+      },
+      "people": {
+        "label": "Ludzie",
+        "fact": "Pasujący profesjonaliści",
+        "detail": "Profesjonaliści, których prawdziwa historia pracy pasuje do zapotrzebowania — z tym, co zweryfikowane, a co jeszcze nie."
+      },
+      "team": {
+        "label": "Zespół",
+        "fact": "Zespół kuchni",
+        "detail": "Ludzie stają się zespołem z liderem, zmianami i miejscem pracy."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Start jesiennego menu",
+        "detail": "Zespoły są zorganizowane wokół projektu, który realizują."
+      },
+      "work": {
+        "label": "Praca",
+        "fact": "Zmiana wieczorna — 8 godz.",
+        "detail": "Praca jest zapisywana tam, gdzie się dzieje, a nie odtwarzana później."
+      },
+      "confirmation": {
+        "label": "Potwierdzone",
+        "fact": "Czeka na Twoje potwierdzenie",
+        "detail": "Widzisz, co jeszcze wymaga potwierdzenia, a co jest już gotowe."
+      },
+      "report": {
+        "label": "Raport",
+        "fact": "Raport z prawdziwej pracy",
+        "detail": "Raporty powstają z potwierdzonej pracy — nikt ich nie przepisuje."
+      }
+    }
+  },
   "twoSides": {
     "title": "Zatrudnienie to początek, nie koniec.",
     "professional": "Fachowiec",

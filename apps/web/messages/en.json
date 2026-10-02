@@ -17934,6 +17934,88 @@
       "person": "{hours} h, {count, plural, one {# record} other {# records}}"
     }
   },
+  "workLifecycle": {
+    "title": "What happens to the work you do",
+    "titleCompany": "What happens to the work you run",
+    "example": "Example — not a real person or real data",
+    "hint": "Select a step. Every step opens the real place in your workspace.",
+    "open": "Open in your workspace",
+    "list": "Work lifecycle steps",
+    "workers": {
+      "person": {
+        "label": "You",
+        "fact": "Cook · professional identity",
+        "detail": "One professional identity that is yours — not tied to a single employer."
+      },
+      "team": {
+        "label": "Team",
+        "fact": "Kitchen team",
+        "detail": "You join a real team, with the people you work with and who leads it."
+      },
+      "project": {
+        "label": "Project",
+        "fact": "Autumn menu launch",
+        "detail": "Work belongs to a project, so it has a place, a purpose and a time."
+      },
+      "work": {
+        "label": "Work",
+        "fact": "Evening service · 8 h",
+        "detail": "What you did, when and for how long — recorded as it happens."
+      },
+      "evidence": {
+        "label": "Evidence",
+        "fact": "Photo + journal entry",
+        "detail": "Completed work becomes evidence instead of disappearing."
+      },
+      "confirmation": {
+        "label": "Confirmed",
+        "fact": "Confirmed by manager",
+        "detail": "A manager confirms it. Nothing is called verified without that."
+      },
+      "history": {
+        "label": "History",
+        "fact": "Added to your history",
+        "detail": "Confirmed work builds your professional history — it stays with you for the next job."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Need",
+        "fact": "4 cooks, from Monday",
+        "detail": "You state the real need once: who, where and from when."
+      },
+      "people": {
+        "label": "People",
+        "fact": "Professionals who fit",
+        "detail": "Professionals whose real work history fits the need — with what is verified and what is not yet."
+      },
+      "team": {
+        "label": "Team",
+        "fact": "Kitchen team",
+        "detail": "People become a team with a lead, shifts and a place to work."
+      },
+      "project": {
+        "label": "Project",
+        "fact": "Autumn menu launch",
+        "detail": "Teams are organised around the project they deliver."
+      },
+      "work": {
+        "label": "Work",
+        "fact": "Evening service · 8 h",
+        "detail": "Work is recorded where it happens, not rebuilt afterwards."
+      },
+      "confirmation": {
+        "label": "Confirmed",
+        "fact": "Awaiting your confirmation",
+        "detail": "You see what still needs confirming and what is already done."
+      },
+      "report": {
+        "label": "Report",
+        "fact": "Report from real work",
+        "detail": "Reports come from confirmed work — nobody retypes them."
+      }
+    }
+  },
   "twoSides": {
     "title": "Hiring is the start, not the end.",
     "professional": "Professional",

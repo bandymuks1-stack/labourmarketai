@@ -6878,6 +6878,88 @@
       "person": "{hours} h, {count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}"
     }
   },
+  "workLifecycle": {
+    "title": "Kas notiek ar jūsu paveikto darbu",
+    "titleCompany": "Kas notiek ar jūsu vadīto darbu",
+    "example": "Piemērs — nav īsts cilvēks un nav īsti dati",
+    "hint": "Izvēlieties soli. Katrs solis atver īstu vietu jūsu darba telpā.",
+    "open": "Atvērt darba telpā",
+    "list": "Darba dzīves cikla soļi",
+    "workers": {
+      "person": {
+        "label": "Jūs",
+        "fact": "Pavārs — profesionālā identitāte",
+        "detail": "Viena profesionālā identitāte, kas pieder jums — nav piesaistīta vienam darba devējam."
+      },
+      "team": {
+        "label": "Komanda",
+        "fact": "Virtuves komanda",
+        "detail": "Jūs pievienojaties īstai komandai — redzat, ar ko strādājat un kas to vada."
+      },
+      "project": {
+        "label": "Projekts",
+        "fact": "Rudens ēdienkartes ieviešana",
+        "detail": "Darbs pieder projektam, tāpēc tam ir vieta, mērķis un laiks."
+      },
+      "work": {
+        "label": "Darbs",
+        "fact": "Vakara pakalpojums — 8 st.",
+        "detail": "Ko jūs darījāt, kad un cik ilgi — fiksēts tad, kad tas notiek."
+      },
+      "evidence": {
+        "label": "Pierādījums",
+        "fact": "Foto + žurnāla ieraksts",
+        "detail": "Paveiktais darbs kļūst par pierādījumu, nevis pazūd."
+      },
+      "confirmation": {
+        "label": "Apstiprināts",
+        "fact": "Apstiprināja vadītājs",
+        "detail": "Vadītājs to apstiprina. Bez tā nekas netiek saukts par pārbaudītu."
+      },
+      "history": {
+        "label": "Vēsture",
+        "fact": "Pievienots jūsu vēsturei",
+        "detail": "Apstiprinātais darbs veido jūsu profesionālo vēsturi — tā paliek pie jums nākamajam darbam."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Vajadzība",
+        "fact": "4 pavāri no pirmdienas",
+        "detail": "Īsto vajadzību norādāt vienreiz: kas, kur un no kura laika."
+      },
+      "people": {
+        "label": "Cilvēki",
+        "fact": "Piemēroti profesionāļi",
+        "detail": "Profesionāļi, kuru īstā darba vēsture atbilst vajadzībai — ar to, kas ir pārbaudīts un kas vēl nav."
+      },
+      "team": {
+        "label": "Komanda",
+        "fact": "Virtuves komanda",
+        "detail": "Cilvēki kļūst par komandu ar vadītāju, maiņām un darba vietu."
+      },
+      "project": {
+        "label": "Projekts",
+        "fact": "Rudens ēdienkartes ieviešana",
+        "detail": "Komandas tiek organizētas ap projektu, ko tās īsteno."
+      },
+      "work": {
+        "label": "Darbs",
+        "fact": "Vakara pakalpojums — 8 st.",
+        "detail": "Darbs tiek fiksēts tur, kur tas notiek, nevis atjaunots vēlāk."
+      },
+      "confirmation": {
+        "label": "Apstiprināts",
+        "fact": "Gaida jūsu apstiprinājumu",
+        "detail": "Redzat, kas vēl jāapstiprina un kas jau ir izdarīts."
+      },
+      "report": {
+        "label": "Atskaite",
+        "fact": "Atskaite no īstā darba",
+        "detail": "Atskaites veidojas no apstiprinātā darba — neviens tās nepārraksta."
+      }
+    }
+  },
   "twoSides": {
     "title": "Pieņemšana darbā ir sākums, nevis beigas.",
     "professional": "Profesionālis",

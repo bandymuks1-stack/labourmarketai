@@ -6878,6 +6878,88 @@
       "person": "{hours} h, {count, plural, one {# kirje} other {# kirjet}}"
     }
   },
+  "workLifecycle": {
+    "title": "Mis saab sinu tehtud tööst",
+    "titleCompany": "Mis saab teie juhitud tööst",
+    "example": "Näide — mitte päris inimene ega päris andmed",
+    "hint": "Valige samm. Iga samm avab päris koha teie töökeskkonnas.",
+    "open": "Ava töökeskkonnas",
+    "list": "Töö elutsükli sammud",
+    "workers": {
+      "person": {
+        "label": "Sina",
+        "fact": "Kokk — professionaalne identiteet",
+        "detail": "Üks professionaalne identiteet, mis on sinu oma — mitte seotud ühe tööandjaga."
+      },
+      "team": {
+        "label": "Meeskond",
+        "fact": "Köögimeeskond",
+        "detail": "Liitud päris meeskonnaga — näed, kellega koos töötad ja kes seda juhib."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Sügismenüü lansseerimine",
+        "detail": "Töö kuulub projekti, seega on sellel koht, eesmärk ja aeg."
+      },
+      "work": {
+        "label": "Töö",
+        "fact": "Õhtune teenindus — 8 t",
+        "detail": "Mida tegid, millal ja kui kaua — kirja pandud siis, kui see toimub."
+      },
+      "evidence": {
+        "label": "Tõendid",
+        "fact": "Foto + päeviku kanne",
+        "detail": "Tehtud töö muutub tõendiks, mitte ei kao ära."
+      },
+      "confirmation": {
+        "label": "Kinnitatud",
+        "fact": "Kinnitas juht",
+        "detail": "Juht kinnitab selle. Ilma selleta ei nimetata midagi kontrollituks."
+      },
+      "history": {
+        "label": "Ajalugu",
+        "fact": "Lisatud sinu ajalukku",
+        "detail": "Kinnitatud töö loob sinu professionaalse ajaloo — see jääb sinuga ka järgmisele tööle kaasa."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Vajadus",
+        "fact": "4 kokka alates esmaspäevast",
+        "detail": "Nimetate päris vajaduse ühe korra: kes, kus ja alates millal."
+      },
+      "people": {
+        "label": "Inimesed",
+        "fact": "Sobivad spetsialistid",
+        "detail": "Spetsialistid, kelle tegelik töölugu vajadusega sobib — koos sellega, mis on kinnitatud ja mis veel mitte."
+      },
+      "team": {
+        "label": "Meeskond",
+        "fact": "Köögimeeskond",
+        "detail": "Inimestest saab meeskond, kellel on juht, vahetused ja töökoht."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Sügismenüü lansseerimine",
+        "detail": "Meeskonnad korraldatakse selle projekti ümber, mida nad täidavad."
+      },
+      "work": {
+        "label": "Töö",
+        "fact": "Õhtune teenindus — 8 t",
+        "detail": "Töö pannakse kirja seal, kus see toimub, mitte ei taastata hiljem."
+      },
+      "confirmation": {
+        "label": "Kinnitatud",
+        "fact": "Ootab teie kinnitust",
+        "detail": "Näete, mis vajab veel kinnitamist ja mis on juba tehtud."
+      },
+      "report": {
+        "label": "Aruanne",
+        "fact": "Aruanne päris tööst",
+        "detail": "Aruanded tulevad kinnitatud tööst — keegi ei trüki neid uuesti."
+      }
+    }
+  },
   "twoSides": {
     "title": "Tööle võtmine on algus, mitte lõpp.",
     "professional": "Tööline",

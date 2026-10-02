@@ -17934,6 +17934,88 @@
       "person": "{hours} val., {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}"
     }
   },
+  "workLifecycle": {
+    "title": "Kas nutinka su jūsų darbu",
+    "titleCompany": "Kas nutinka su jūsų vykdomu darbu",
+    "example": "Pavyzdys — ne tikras žmogus ir ne tikri duomenys",
+    "hint": "Pasirinkite žingsnį. Kiekvienas atveria tikrą vietą jūsų darbo erdvėje.",
+    "open": "Atidaryti darbo erdvėje",
+    "list": "Darbo gyvavimo ciklo žingsniai",
+    "workers": {
+      "person": {
+        "label": "Jūs",
+        "fact": "Virėja · profesinė tapatybė",
+        "detail": "Viena profesinė tapatybė, kuri priklauso jums — ne vienam darbdaviui."
+      },
+      "team": {
+        "label": "Komanda",
+        "fact": "Virtuvės komanda",
+        "detail": "Prisijungiate prie tikros komandos — matote, su kuo dirbate ir kas ją vadovauja."
+      },
+      "project": {
+        "label": "Projektas",
+        "fact": "Rudens meniu pristatymas",
+        "detail": "Darbas priklauso projektui, todėl turi vietą, tikslą ir laiką."
+      },
+      "work": {
+        "label": "Darbas",
+        "fact": "Vakaro pamaina · 8 val.",
+        "detail": "Ką padarėte, kada ir kiek laiko — užfiksuota tada, kai vyksta."
+      },
+      "evidence": {
+        "label": "Įrodymas",
+        "fact": "Nuotrauka + žurnalo įrašas",
+        "detail": "Atliktas darbas tampa įrodymu, o ne dingsta."
+      },
+      "confirmation": {
+        "label": "Patvirtinta",
+        "fact": "Patvirtino vadovas",
+        "detail": "Vadovas patvirtina. Be to niekas nevadinama patvirtinta."
+      },
+      "history": {
+        "label": "Istorija",
+        "fact": "Įtraukta į jūsų istoriją",
+        "detail": "Patvirtintas darbas kuria jūsų profesinę istoriją — ji lieka su jumis kitam darbui."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Poreikis",
+        "fact": "4 virėjai nuo pirmadienio",
+        "detail": "Tikrą poreikį nurodote vieną kartą: kas, kur ir nuo kada."
+      },
+      "people": {
+        "label": "Žmonės",
+        "fact": "Tinkami profesionalai",
+        "detail": "Profesionalai, kurių tikra darbo istorija tinka poreikiui — matote, kas patvirtinta, o kas dar ne."
+      },
+      "team": {
+        "label": "Komanda",
+        "fact": "Virtuvės komanda",
+        "detail": "Žmonės tampa komanda su vadovu, pamainomis ir darbo vieta."
+      },
+      "project": {
+        "label": "Projektas",
+        "fact": "Rudens meniu pristatymas",
+        "detail": "Komandos organizuojamos aplink projektą, kurį vykdo."
+      },
+      "work": {
+        "label": "Darbas",
+        "fact": "Vakaro pamaina · 8 val.",
+        "detail": "Darbas fiksuojamas ten, kur vyksta, o ne atkuriamas vėliau."
+      },
+      "confirmation": {
+        "label": "Patvirtinta",
+        "fact": "Laukia jūsų patvirtinimo",
+        "detail": "Matote, ką dar reikia patvirtinti ir kas jau atlikta."
+      },
+      "report": {
+        "label": "Ataskaita",
+        "fact": "Ataskaita iš tikro darbo",
+        "detail": "Ataskaitos gaunamos iš patvirtinto darbo — niekas jų nerašo iš naujo."
+      }
+    }
+  },
   "twoSides": {
     "title": "Įdarbinimas yra pradžia, o ne pabaiga.",
     "professional": "Profesionalas",
