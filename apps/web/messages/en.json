@@ -18228,7 +18228,7 @@
       },
       "need": {
         "title": "Say what you need. See who fits.",
-        "body": "Describe the work, how many people and from when. See people whose work history fits that need, shown against the job, never as one universal score.",
+        "body": "Describe the work, how many people and from when. See people whose work history fits that need, shown against the job itself, never as a single rating.",
         "needLabel": "Your need",
         "needTitle": "Line cook · 2 people",
         "needMeta": "From 20 October · Vilnius",
