@@ -398,7 +398,9 @@ describe("7. index exposes destination + contact action; public surface is a sep
     expect(d).not.toMatch(/\b(grant|revoke)\b/i);
   });
 
-  it("a project NEED is refused by the policy hook (it stays in the projects domain)", () => {
-    expect(ddlOf(V2_MIGRATION)).toMatch(/p_domain = 'project_work' and p_direction <> 'offer'/);
+  it("project_work is allowed as offer AND need (M is discoverable); only service_need is need-only", () => {
+    const d = ddlOf(V2_MIGRATION);
+    expect(d).not.toMatch(/p_domain = 'project_work'/);
+    expect(d).toMatch(/p_domain = 'service_need' and p_direction <> 'need'/);
   });
 });

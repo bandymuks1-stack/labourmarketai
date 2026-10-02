@@ -94,9 +94,6 @@ export function deriveDirection(kind: string | null | undefined): MarketDirectio
  *  live on `service_offerings`. Mirrors `market_publish_policy_v1`. */
 export function allowedKindsForDomain(domain: ListingDomain | null): readonly ListingKind[] {
   if (domain === "service_need") return ["wanted"];
-  // Project / contract NEEDS live in the projects domain; a contractor may
-  // OFFER project capability as a listing.
-  if (domain === "project_work") return ["sale"];
   return ["sale", "rental", "wanted"];
 }
 
@@ -122,8 +119,6 @@ export const DEMAND_DOMAIN_NOT_INDEXED = "demand domain — not in the marketpla
 /** Worker supply (people/roster/availability) keeps its own visibility and
  *  contact-permission rules; it is not a listing. */
 export const WORKERS_DOMAIN_NOT_INDEXED = "workers domain — not in the marketplace index";
-/** Project / contract needs live in projects / proposals / contracts. */
-export const PROJECTS_DOMAIN_NOT_INDEXED = "projects domain — not in the marketplace index";
 
 /** What a person can DO with an index row — derived from the source, never stored. */
 export type MarketContactAction = "enquire" | "request_service";

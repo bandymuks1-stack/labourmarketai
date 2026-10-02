@@ -32,10 +32,11 @@
 --
 -- listing_kind stays sale|rental|wanted. Direction is DERIVED (wanted -> need,
 -- sale/rental -> offer). No use case needed a fourth kind: a contractor's
--- project capability is an `offer` (sale) of subject project_work. A client's
--- project / contract NEED stays in the projects domain (projects / proposals /
--- contracts) and is NOT a marketplace listing: the policy hook refuses
--- `project_work` as a need.
+-- project capability is an `offer` (sale) of subject project_work, and a
+-- client's project / contract opportunity is a `wanted` listing of subject
+-- project_work (direction need). Both are discoverable ads; the optional
+-- project_id is validated by can_manage_project. Execution and agreement stay
+-- in projects / proposals / agreements — no new engine.
 --
 -- The public-surface expiry predicate on get_public_business_listings_v1 (anon
 -- reachable) is deliberately NOT in this file: it ships as the separate
@@ -213,12 +214,6 @@ begin
   -- A free-standing SERVICE NEED is a need by definition; offers of services
   -- live on service_offerings.
   if p_domain = 'service_need' and p_direction <> 'need' then
-    return query select false, 'direction_not_allowed'::text;
-    return;
-  end if;
-  -- Project / contract NEEDS live in the projects domain, not in listings;
-  -- a contractor may still OFFER project capability.
-  if p_domain = 'project_work' and p_direction <> 'offer' then
     return query select false, 'direction_not_allowed'::text;
     return;
   end if;

@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import {
   ALL_SUBJECTS,
   DEMAND_DOMAIN_NOT_INDEXED,
-  PROJECTS_DOMAIN_NOT_INDEXED,
   WORKERS_DOMAIN_NOT_INDEXED,
   contactActionFor,
   destinationPathFor,
@@ -54,7 +53,7 @@ const USE_CASES: readonly Fixture[] = [
   { id: "J", useCase: "company sells goods", actor: "company", direction: "offer", listing: { kind: "sale", subject: "goods_other" }, domain: "goods", discoverableVia: "marketplace_listings" },
   { id: "K", useCase: "company needs goods", actor: "company", direction: "need", listing: { kind: "wanted", subject: "goods_other" }, domain: "goods", discoverableVia: "marketplace_listings" },
   { id: "L", useCase: "contractor offers project capability", actor: "company", direction: "offer", listing: { kind: "sale", subject: "project_work" }, domain: "project_work", discoverableVia: "marketplace_listings" },
-  { id: "M", useCase: "client publishes project / contract need", actor: "company", direction: "need", listing: null, domain: null, discoverableVia: PROJECTS_DOMAIN_NOT_INDEXED },
+  { id: "M", useCase: "client publishes project / contract need", actor: "company", direction: "need", listing: { kind: "wanted", subject: "project_work" }, domain: "project_work", discoverableVia: "marketplace_listings" },
 ];
 
 describe("13 use cases map to (actor, direction, domain, discovery)", () => {
@@ -84,22 +83,21 @@ describe("13 use cases map to (actor, direction, domain, discovery)", () => {
         expect(u.discoverableVia).toBe("service_offerings");
         expect(u.direction).toBe("offer");
       } else {
-        // A / B / M stay in their existing domains (workers / demand / projects)
-        expect([
-          WORKERS_DOMAIN_NOT_INDEXED,
-          DEMAND_DOMAIN_NOT_INDEXED,
-          PROJECTS_DOMAIN_NOT_INDEXED,
-        ]).toContain(u.discoverableVia);
+        // only A (worker supply) and B (employer demand / hiring) stay outside
+        expect([WORKERS_DOMAIN_NOT_INDEXED, DEMAND_DOMAIN_NOT_INDEXED]).toContain(u.discoverableVia);
         expect(u.domain).toBeNull();
       }
     });
   }
 
-  it("A, B, M are NOT in the index, each in its own domain", () => {
+  it("only A and B are outside the index; M is a wanted project_work listing", () => {
     const via = Object.fromEntries(USE_CASES.map((u) => [u.id, u.discoverableVia]));
     expect(via.A).toBe(WORKERS_DOMAIN_NOT_INDEXED);
     expect(via.B).toBe(DEMAND_DOMAIN_NOT_INDEXED);
-    expect(via.M).toBe(PROJECTS_DOMAIN_NOT_INDEXED);
+    expect(via.M).toBe("marketplace_listings");
+    const m = USE_CASES.find((x) => x.id === "M")!;
+    expect(deriveDirection(m.listing!.kind)).toBe("need");
+    expect(domainOfSubject(m.listing!.subject)).toBe("project_work");
   });
 
   it("E and F are discoverable as a WANTED listing with a service_need subject", () => {
@@ -144,9 +142,9 @@ describe("registry mirror", () => {
       "work_resource", "goods", "service_need", "personal", "project_work",
     ]);
   });
-  it("a project need is not a listing; project capability is an offer", () => {
-    expect(allowedKindsForDomain("project_work")).toEqual(["sale"]);
-    expect(isKindAllowedForSubject("wanted", "project_work")).toBe(false);
+  it("project_work is valid as an offer (L) AND a need (M)", () => {
+    expect(allowedKindsForDomain("project_work")).toEqual(["sale", "rental", "wanted"]);
+    expect(isKindAllowedForSubject("wanted", "project_work")).toBe(true);
     expect(isKindAllowedForSubject("sale", "project_work")).toBe(true);
   });
   it("destination + contact action are derived from the source (existing routes only)", () => {
