@@ -781,6 +781,7 @@
       }
     },
     "journalWindow": {
+      "reviewNotEnabled": "{count, plural, one {# registratie is} other {# registraties zijn}} vastgelegd waar werkbevestiging niet is ingeschakeld - ze wachten niet op beoordeling.",
       "title": "Werkjournaalrapport",
       "intro": "Werktijd en vastgelegde registraties per lid over een vast kalendervenster – uit de eigen gegevens van deze organisatie. Alleen uren, aantallen en datums – geen tekst van registraties, geen beoordeling.",
       "windowLabel": "Rapportvenster",

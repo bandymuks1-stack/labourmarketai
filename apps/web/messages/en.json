@@ -781,6 +781,7 @@
       }
     },
     "journalWindow": {
+      "reviewNotEnabled": "{count, plural, one {# entry is} other {# entries are}} recorded where the organization has not turned on work confirmation - not awaiting review.",
       "title": "Work journal report",
       "intro": "Work time and recorded entries per member over a fixed calendar window, from this organisation's own records. Hours, counts and dates only — no entry text, no rating.",
       "windowLabel": "Report window",

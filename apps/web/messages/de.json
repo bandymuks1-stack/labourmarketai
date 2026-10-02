@@ -781,6 +781,7 @@
       }
     },
     "journalWindow": {
+      "reviewNotEnabled": "{count, plural, one {# Eintrag wurde} other {# Einträge wurden}} dort erfasst, wo die Arbeitsbestätigung nicht eingeschaltet ist – sie warten nicht auf Prüfung.",
       "title": "Arbeitsjournal-Bericht",
       "intro": "Arbeitszeit und erfasste Einträge je Mitglied über ein festes Kalenderfenster – aus den eigenen Aufzeichnungen dieser Organisation. Nur Stunden, Zahlen und Daten – kein Eintragstext, keine Bewertung.",
       "windowLabel": "Berichtszeitfenster",
