@@ -5,7 +5,7 @@ import { ExploreSteps } from "@/components/marketing/public/explore-steps";
 import { PublicCtaEnd, PublicFaq } from "@/components/marketing/public/public-sections";
 import { WorkerHistoryMoment, WorkerOutcome } from "@/components/marketing/public/product-moments";
 import { WorkersWorldHero } from "@/components/marketing/public/world-heroes";
-import { WorkRecordTransitionSection } from "@/components/marketing/public/work-record-transition-section";
+import { CinematicStorySection } from "@/components/marketing/public/cinematic-story-section";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
 
 export async function generateMetadata({
@@ -22,8 +22,8 @@ export async function generateMetadata({
  * world as the homepage and the product after login.
  *
  * A professional fills the first screen with today, the record and the
- * confirmation beside him; then the same kind of person moves through the
- * system on a photographic stage (work, proof, review, history, next), then the
+ * confirmation beside him; then one continuous cinematic story follows the same person through the
+ * system (find, talk, join a project, work, record, confirm, history, next), then the
  * living history, the outcome, straight answers, and the one action again.
  * Every claim is traced in docs/public/PUBLIC_SLICE_TRUTH_TABLE_2026-10-02.md.
  */
@@ -39,7 +39,7 @@ export default async function ForWorkersPage({
   return (
     <>
       <WorkersWorldHero />
-      <WorkRecordTransitionSection />
+      <CinematicStorySection audience="workers" />
       <WorkerHistoryMoment />
       <WorkerOutcome />
       <ExploreSteps audience="workers" />

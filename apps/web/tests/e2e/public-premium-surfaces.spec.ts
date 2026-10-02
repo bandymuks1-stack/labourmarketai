@@ -33,10 +33,10 @@ const VIEWPORTS = [
 
 const SURFACES = [
   // Premium convergence 2026-10-02: the signature visual of the two acquisition
-  // pages is the work -> history transition; the lifecycle graph lives in the
+  // pages is the cinematic story (one stage, one set of entities); the lifecycle graph lives in the
   // folded "explore every step" section and is exercised below.
-  { path: "/en/for-workers", testid: "work-record-transition" },
-  { path: "/en/for-companies", testid: "work-record-transition" },
+  { path: "/en/for-workers", testid: "cinematic-story" },
+  { path: "/en/for-companies", testid: "cinematic-story" },
   { path: "/en", testid: "two-sides-lifecycle" },
 ] as const;
 

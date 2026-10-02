@@ -2,7 +2,7 @@
   "files": {
     "app/[locale]/page.tsx": "29818d172da3311417844a7ac066c8dfd3e72aa873829c4ec1e2e0da8067ecfb",
     "lib/market/live-market-landing.ts": "2953b2835101594604e8d0273e4c6becd3be6fb9c0427a2a3f1c3608c065d99a",
-    "app/[locale]/focus-landing/focus-landing.tsx": "a2b02a392ed3aa2bef0141235c477a24ee88845f18fcd016cecaf1285c716138",
+    "app/[locale]/focus-landing/focus-landing.tsx": "a8b30f5b353730820382cf0704d377018178fabc6945a20ee76de979c7940e0b",
     "components/marketing/public-entry.tsx": "e01d1a84ef97d923bed451e702f106ceba20b24b3e70145b28d035f0e198145e",
     "lib/marketing/public-entry.ts": "51848fe4a89f9d1cc8d8563c28660cc13b8b989cfdf0163473dbe989ffd61b85",
     "components/marketing/product-chain-band.tsx": "7c783b5307ad308396157d91bbe9002f889728a603c07a8072df52f492d78024",

@@ -113,6 +113,50 @@ export const PUBLIC_IMAGERY = {
     photoClass: "portrait",
     focusX: 50,
   },
+  /** A foreman briefing his crew with a tablet: the manager / team scenes of the cinematic story. */
+  foremanLarge: {
+    src: "/hero/tomas/06-foreman-1920.webp",
+    width: 1920,
+    height: 1288,
+    status: "sample_fixture",
+    altKey: "tomasAlt",
+    captionKey: "tomasCaption",
+    photoClass: "brand",
+    focusX: 50,
+  },
+  /** The scaffolder in his workshop: the professional-history scene. */
+  toolLarge: {
+    src: "/hero/tomas/01-tool-1920.webp",
+    width: 1920,
+    height: 1288,
+    status: "sample_fixture",
+    altKey: "tomasAlt",
+    captionKey: "tomasCaption",
+    photoClass: "brand",
+    focusX: 46,
+  },
+  /** A head chef briefing the kitchen: the manager / team scenes of the hospitality story. */
+  chefLarge: {
+    src: "/hero/rasa/06-head-chef-1920.webp",
+    width: 1920,
+    height: 1288,
+    status: "sample_fixture",
+    altKey: "rasaAlt",
+    captionKey: "rasaCaption",
+    photoClass: "brand",
+    focusX: 50,
+  },
+  /** The cook on her way home beside her car: the "what comes next" scene of the hospitality story. */
+  carLarge: {
+    src: "/hero/rasa/03-car-1920.webp",
+    width: 1920,
+    height: 1288,
+    status: "sample_fixture",
+    altKey: "rasaAlt",
+    captionKey: "rasaCaption",
+    photoClass: "brand",
+    focusX: 46,
+  },
   /** A cook at the pass — the hospitality example (not construction-only). */
   kitchen: {
     src: "/hero/rasa/02-kitchen-lt-960.webp",

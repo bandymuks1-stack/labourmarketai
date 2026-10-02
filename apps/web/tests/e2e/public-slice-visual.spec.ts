@@ -36,10 +36,10 @@ const WIDTHS = [
 
 const TARGETS = [
   { path: "/en/for-workers", testid: "public-hero-workers", file: "workers-hero" },
-  { path: "/en/for-workers", testid: "work-record-transition", file: "workers-transition" },
+  { path: "/en/for-workers", testid: "cinematic-story", file: "workers-story" },
   { path: "/en/for-companies", testid: "public-hero-companies", file: "companies-hero" },
-  { path: "/en/for-companies", testid: "work-record-transition", file: "companies-transition" },
-  { path: "/en", testid: "work-record-transition", file: "home-transition" },
+  { path: "/en/for-companies", testid: "cinematic-story", file: "companies-story" },
+  { path: "/en", testid: "cinematic-story", file: "home-story" },
   { path: "/en", testid: "home-sides", file: "home-sides" },
 ] as const;
 

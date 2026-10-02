@@ -14,7 +14,7 @@ import { PlayerCardShowcase } from "@/components/marketing/player-card-showcase"
 import { ProductChainBand } from "@/components/marketing/product-chain-band";
 import { HomeSides } from "@/components/marketing/public/home-sides";
 import { HomeWorldHero } from "@/components/marketing/public/world-heroes";
-import { WorkRecordTransitionSection } from "@/components/marketing/public/work-record-transition-section";
+import { CinematicStorySection } from "@/components/marketing/public/cinematic-story-section";
 import { TrustBand } from "@/components/marketing/trust-band";
 import { StartingContextsBand } from "@/components/marketing/starting-contexts-band";
 import { LandingClosingBand } from "@/components/marketing/landing-primary-actions";
@@ -34,6 +34,11 @@ import { resolveActiveLocale } from "@/lib/seo/metadata";
  * embedded in the scene (<HomeWorldHero>). Then the working sentence entry, the
  * signature transition (one shift becomes professional history while the
  * company gains context), the two doors, and the real market below.
+ *
+ * 2026-10-02 (owner, premium design programme): the signature transition became
+ * the CINEMATIC STORY (components/marketing/public/cinematic-story.tsx) — one
+ * continuous scroll-driven story over one persistent set of entities (person,
+ * company, team, work -> record -> history -> next) instead of a replayed strip.
  *
  * Supersedes the living-worker carousel hero, the entry journey story and the
  * six-step two-sides strip as the FIRST impression; those components still
@@ -92,8 +97,16 @@ export async function FocusLanding({
                 }
               />
             </section>
+          </div>
 
-            <WorkRecordTransitionSection embedded />
+          {/* THE CINEMATIC STORY: full-bleed, one stage, one set of entities. The
+              camera, focus and relationships change as the page scrolls; the
+              scenes run from a person to a company and back to the next chapter. */}
+          <div>
+            <CinematicStorySection audience="home" />
+          </div>
+
+          <div className="mx-auto max-w-container px-6 pb-14 sm:px-12">
             <HomeSides />
 
             <MarketProofBand market={market} locale={locale} />

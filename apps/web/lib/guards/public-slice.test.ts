@@ -39,7 +39,7 @@ describe("imagery registry — nothing public is shipped unlabelled", () => {
 
   it("every component that renders a sample_fixture photograph shows the Example label", () => {
     const hero = read("components/marketing/public/world-heroes.tsx");
-    const transition = read("components/marketing/public/work-record-transition.tsx");
+    const transition = read("components/marketing/public/cinematic-story.tsx");
     const moments = read("components/marketing/public/product-moments.tsx");
     expect(hero).toMatch(/SamplePill/);
     expect(transition).toMatch(/copy\.sample/);
@@ -107,10 +107,10 @@ describe("page composition", () => {
   const w = read("app/[locale]/(marketing)/for-workers/page.tsx");
   const c = read("app/[locale]/(marketing)/for-companies/page.tsx");
 
-  it("each acquisition page has one hero, the shared transition and a closing CTA to the same route as its hero", () => {
+  it("each acquisition page has one hero, the cinematic story and a closing CTA to the same route as its hero", () => {
     for (const [name, src] of [["workers", w], ["companies", c]] as const) {
       expect((src.match(/<(Workers|Companies)WorldHero/g) ?? []).length, name).toBe(1);
-      expect(src, name).toMatch(/<WorkRecordTransitionSection/);
+      expect(src, name).toMatch(/<CinematicStorySection/);
       expect(src, name).toMatch(/<PublicCtaEnd/);
     }
     const heroes = read("components/marketing/public/world-heroes.tsx");
@@ -120,17 +120,17 @@ describe("page composition", () => {
     expect(c).toMatch(/href="\/company-need"/);
   });
 
-  it("the homepage mounts the transition and the two-door fork", () => {
+  it("the homepage mounts the cinematic story and the two-door fork", () => {
     const home = read("app/[locale]/focus-landing/focus-landing.tsx");
     expect(home).toMatch(/<HomeWorldHero/);
-    expect(home).toMatch(/<WorkRecordTransitionSection embedded/);
+    expect(home).toMatch(/<CinematicStorySection audience="home"/);
     expect(home).toMatch(/<HomeSides/);
   });
 
-  it("the transition never loops and honours reduced motion", () => {
-    const t = read("components/marketing/public/work-record-transition.tsx");
+  it("the cinematic story never loops and honours reduced motion", () => {
+    const t = read("components/marketing/public/cinematic-story.tsx");
     expect(t).toMatch(/prefers-reduced-motion: reduce/);
-    expect(t).toMatch(/played\.current/);
+    expect(t).toMatch(/new IntersectionObserver/);
     expect(t).not.toMatch(/setInterval/);
     expect(t).toMatch(/motion-reduce:/);
   });

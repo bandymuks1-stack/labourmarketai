@@ -1101,3 +1101,66 @@ a {
 @media (prefers-reduced-motion: reduce) {
   .world-in, .world-line { animation: none; }
 }
+
+/* ---------------------------------------------------------------------------
+   CINEMATIC STORY (public acquisition pages) — one stage, one set of entities.
+   The camera, focus, composition and relationships change with scroll; nothing
+   is swapped like a slide. Transforms and opacity only (compositor).
+   Reduced motion: no pinning, no transitions, the complete composition.
+   --------------------------------------------------------------------------- */
+/* The global `html, body { overflow-x: hidden }` makes <body> a scroll container, which stops any
+   `position: sticky` descendant from pinning to the viewport. On pages that carry the story, clip
+   instead of hiding: same horizontal containment, no scroll container, the stage pins. */
+html:has(.cine-track), html:has(.cine-track) body { overflow-x: clip; overflow-y: visible; }
+.cine-track { --cine-h: clamp(620px, 100svh, 1100px); --beat: 64svh; }
+@media (min-width: 1024px) { .cine-track { --beat: 70svh; } }
+.cine-pin { position: sticky; top: 0; height: var(--cine-h); overflow: hidden; }
+.cine-stage { position: absolute; inset: 0; container-type: size; }
+.cine-beats { position: relative; margin-top: calc(-1 * var(--cine-h)); pointer-events: none; list-style: none; padding: 0; }
+.cine-beat { height: var(--beat); }
+.cine-beat:last-child { height: calc(var(--beat) * 1.7); }
+.cine-par { transform: translate3d(0, calc((var(--p, 0) - 0.5) * -3%), 0); will-change: transform; }
+.cine-bd { opacity: 0; transition: opacity 1100ms ease, transform 1700ms cubic-bezier(0.32, 0.72, 0, 1); will-change: transform, opacity; }
+.cine-bd[data-on="true"] { opacity: 1; }
+.cine-shade {
+  background:
+    linear-gradient(180deg, rgb(var(--c-ink-900) / 0.55), transparent 22%, transparent 40%, rgb(var(--c-ink-900) / 0.94) 100%);
+}
+@media (min-width: 1024px) {
+  .cine-shade {
+    background:
+      linear-gradient(90deg, rgb(var(--c-ink-900) / 0.86), rgb(var(--c-ink-900) / 0.4) 40%, transparent 62%),
+      linear-gradient(180deg, rgb(var(--c-ink-900) / 0.5), transparent 24%, transparent 60%, rgb(var(--c-ink-900) / 0.9));
+  }
+}
+.cine-ent {
+  position: absolute; left: 0; top: 0; width: var(--wm, min(70cqw, 280px));
+  transform: translate3d(calc(var(--mx) * 1cqw - 50%), calc(var(--my) * 1cqh - 50%), 0);
+  translate: 0 14px; opacity: 0; pointer-events: none;
+  transition: transform 1100ms cubic-bezier(0.32, 0.72, 0, 1), translate 800ms ease, opacity 700ms ease;
+  will-change: transform, opacity;
+}
+.cine-ent[data-on="true"] { translate: 0 0; opacity: 1; }
+@media (max-width: 1023.98px) { .cine-ent[data-mhide="true"] { opacity: 0; } }
+@media (min-width: 1024px) {
+  .cine-ent { width: var(--wd, clamp(230px, 22cqw, 330px)); transform: translate3d(calc(var(--dx) * 1cqw - 50%), calc(var(--dy) * 1cqh - 50%), 0); }
+}
+.cine-stage:not([data-ready]) .cine-bd, .cine-stage:not([data-ready]) .cine-ent { transition: none; }
+@keyframes cine-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.cine-rise { animation: cine-rise 700ms cubic-bezier(0.32, 0.72, 0, 1) both; animation-delay: calc(var(--i, 0) * 380ms + 350ms); }
+.cine-swap { animation: cine-rise 600ms cubic-bezier(0.32, 0.72, 0, 1) both; }
+.cine-cap { animation: cine-rise 800ms cubic-bezier(0.32, 0.72, 0, 1) both; animation-delay: 250ms; }
+@keyframes cine-wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+.cine-wipe { animation: cine-wipe 900ms cubic-bezier(0.32, 0.72, 0, 1) both; animation-delay: calc(var(--i, 0) * 380ms + 500ms); }
+@keyframes cine-draw { from { stroke-dashoffset: 1; opacity: 0.2; } to { stroke-dashoffset: 0; opacity: 1; } }
+.cine-draw { animation: cine-draw 1000ms ease-out both; animation-delay: 550ms; }
+@keyframes cine-fade { from { opacity: 0; } to { opacity: 1; } }
+.cine-fade { animation: cine-fade 900ms ease-out both; animation-delay: 650ms; }
+@media (prefers-reduced-motion: reduce) {
+  .cine-pin { position: relative; }
+  .cine-beats { margin-top: 0; pointer-events: auto; }
+  .cine-beat, .cine-beat:last-child { height: auto; }
+  .cine-par { transform: none; will-change: auto; }
+  .cine-bd, .cine-ent { transition: none; will-change: auto; }
+  .cine-rise, .cine-swap, .cine-cap, .cine-wipe, .cine-draw, .cine-fade { animation: none; }
+}

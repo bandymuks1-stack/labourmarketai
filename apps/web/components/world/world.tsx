@@ -102,6 +102,15 @@ export function WorldScene({
 
 type Pos = { left?: string; right?: string; top?: string; bottom?: string };
 
+/** The depth tiers as classes — shared by `WorldPane` and the cinematic story's entities. */
+export const PANE_TIER = {
+  focus:
+    "bg-ink-900/60 shadow-[0_1px_0_rgb(255_255_255/0.2)_inset,0_0_0_1px_rgb(255_255_255/0.12),0_40px_90px_-30px_rgb(0_0_0/0.8)] backdrop-blur-2xl",
+  context:
+    "bg-ink-900/45 shadow-[0_1px_0_rgb(255_255_255/0.14)_inset,0_0_0_1px_rgb(255_255_255/0.08),0_30px_70px_-34px_rgb(0_0_0/0.7)] backdrop-blur-xl",
+  quiet: "bg-ink-900/30 shadow-[0_0_0_1px_rgb(255_255_255/0.06)] backdrop-blur-md",
+} as const;
+
 /** A pane. `tier` encodes depth: focus > context > quiet. */
 export function WorldPane({
   pos,
@@ -135,11 +144,7 @@ export function WorldPane({
       style={style}
       className={cn(
         "world-in mb-3 rounded-[1.75rem] px-5 py-4 lg:absolute lg:mb-0 lg:left-[var(--l)] lg:right-[var(--r)] lg:top-[var(--t)] lg:bottom-[var(--b)] lg:w-[var(--w)]",
-        tier === "focus" &&
-          "bg-ink-900/60 shadow-[0_1px_0_rgb(255_255_255/0.2)_inset,0_0_0_1px_rgb(255_255_255/0.12),0_40px_90px_-30px_rgb(0_0_0/0.8)] backdrop-blur-2xl",
-        tier === "context" &&
-          "bg-ink-900/45 shadow-[0_1px_0_rgb(255_255_255/0.14)_inset,0_0_0_1px_rgb(255_255_255/0.08),0_30px_70px_-34px_rgb(0_0_0/0.7)] backdrop-blur-xl",
-        tier === "quiet" && "bg-ink-900/30 shadow-[0_0_0_1px_rgb(255_255_255/0.06)] backdrop-blur-md",
+        PANE_TIER[tier],
         className,
       )}
     >

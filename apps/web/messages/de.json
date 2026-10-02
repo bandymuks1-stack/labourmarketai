@@ -18133,6 +18133,110 @@
       "next": "Wohin du gehen kannst"
     }
   },
+  "publicCinema": {
+    "title": "Folgen Sie einer Person und einem Unternehmen durch die Arbeit.",
+    "sub": "Dieselben Menschen, dasselbe Projekt und derselbe Eintrag, von der ersten Suche bis zum nächsten Kapitel. Scrollen Sie, und die Kamera bewegt sich.",
+    "skip": "Geschichte überspringen",
+    "railLabel": "Kapitel der Geschichte",
+    "privacy": "Privat, bis die Sichtbarkeit eingeschaltet wird.",
+    "chapters": [
+      "Arbeit finden",
+      "Menschen finden",
+      "Arbeit steuern",
+      "Nachweis behalten",
+      "Weitergehen"
+    ],
+    "scenes": [
+      {
+        "title": "Ein Mensch mit echter Arbeit im Rücken.",
+        "body": "{name}, {trade}. Das Profil beginnt bei dem, was die Person wirklich tut."
+      },
+      {
+        "title": "Bedarf und Menschen treffen sich offen.",
+        "body": "Ein Unternehmen sagt, was es braucht. Eine Fachkraft sieht es neben der Arbeit, die sie wirklich leistet, nie als einzelne Bewertung."
+      },
+      {
+        "title": "Sie sprechen in ihrer eigenen Sprache.",
+        "body": "Jeder schreibt in der eigenen Sprache. Nachrichten lassen sich in Ihrer lesen, das Original bleibt daneben erhalten."
+      },
+      {
+        "title": "Die Menschen kommen aufs Projekt.",
+        "body": "Wer zusammenarbeitet, wird einem Projekt zugeordnet, damit alle dieselbe Arbeit sehen."
+      },
+      {
+        "title": "Anweisung, Arbeit, Stunden, Foto.",
+        "body": "Eine klare Anweisung, die geleistete Arbeit, die Zeit dafür und ein Foto: einmal festgehalten."
+      },
+      {
+        "title": "Aus dem Tag wird ein Eintrag.",
+        "body": "Er beginnt als eigener Eintrag der Person. Nichts gilt schon als bestätigt."
+      },
+      {
+        "title": "Eine Führungskraft bestätigt ihn.",
+        "body": "Die Führungskraft sieht, was erfasst wurde, und bestätigt es oder schickt es mit einer Notiz zurück."
+      },
+      {
+        "title": "Bestätigte Arbeit baut den Werdegang auf.",
+        "body": "Bestätigte Arbeit wird Teil des beruflichen Werdegangs. Unbestätigte Arbeit bleibt als eigener Eintrag sichtbar und ist so gekennzeichnet."
+      },
+      {
+        "title": "Dann kommt das Nächste.",
+        "body": "Die Person gibt an, ab wann sie verfügbar ist. Das Unternehmen schreibt den nächsten Bedarf aus und plant voraus. Beide starten bei dem, was wirklich geschah."
+      }
+    ],
+    "labels": {
+      "person": "Mensch",
+      "need": "Bedarf",
+      "company": "Unternehmen",
+      "project": "Projekt",
+      "team": "Arbeitsteam",
+      "instruction": "Anweisung",
+      "work": "Arbeit",
+      "hours": "Stunden",
+      "photo": "Foto",
+      "record": "Eintrag",
+      "manager": "Führungskraft",
+      "history": "Beruflicher Werdegang",
+      "next": "Als Nächstes, kein Werdegang"
+    },
+    "chain": {
+      "project": "Projekt",
+      "people": "Personen darauf",
+      "need": "Nächster Bedarf",
+      "plan": "Planung"
+    },
+    "kinds": [
+      "Stelle",
+      "Dienstleistung",
+      "Anzeige"
+    ],
+    "kindsNote": "Jobs, Dienstleistungen und Anzeigen finden am selben Ort statt.",
+    "translateTag": "In Ihrer Sprache angezeigt · Original bleibt erhalten",
+    "teamMeta": "3 Personen in diesem Projekt",
+    "plan": "Die nächsten Wochen im Kalender planen",
+    "addedBy": "Ergänzt von {name}",
+    "nextMeta": "So gibt es {name} an",
+    "hours": "8 Std.",
+    "msgOut": "Ja, ich kann am 20. anfangen.",
+    "construction": {
+      "trade": "Gerüstbauer",
+      "needTitle": "Fassadengerüst · 3 Personen",
+      "managerRole": "Bauleiter",
+      "msgIn": "Können Sie am 20. Oktober an der Nordfassade anfangen?",
+      "instruction": "Nordfassade, Ebene 3, Ostfeld: Anker alle 1,5 m.",
+      "photoAlt": "Das Gerüst an der Nordfassade",
+      "hNowT": "{project} · Gerüstbauer",
+      "hNowM": "Nordfassade · seit September",
+      "hRecentT": "Altstadtsanierung · Gerüstbauer",
+      "nextNeed": "Fassadengerüstbauer ab 20. Oktober"
+    },
+    "hospitality": {
+      "trade": "Köchin",
+      "managerRole": "Küchenchefin",
+      "msgIn": "Können Sie am 20. Oktober mit der Herbstkarte beginnen?",
+      "instruction": "Herbstkarte: die neue Vorspeise anrichten wie auf der Karte."
+    }
+  },
   "publicSlice": {
     "sample": "Beispiel",
     "states": {

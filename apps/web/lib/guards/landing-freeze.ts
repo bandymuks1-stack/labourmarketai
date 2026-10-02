@@ -711,6 +711,17 @@ export const FROZEN_LANDING_FILES = [
   // the NON-frozen `publicSlice` namespace). The regeneration touched EXACTLY TWO
   // hashes — living-worker-hero.tsx and focus-landing.tsx — and ZERO namespace
   // hashes. Traced claims: docs/public/PUBLIC_SLICE_TRUTH_TABLE_2026-10-02.md.
+  // 2026-10-02 (owner directive, PREMIUM DESIGN PROGRAMME — cinematic landing):
+  // the replayed five-stage "signature transition" mounted by focus-landing.tsx
+  // became the CINEMATIC STORY (components/marketing/public/cinematic-story*.tsx):
+  // one full-bleed, scroll-driven stage over one persistent set of entities
+  // (person, company, team, work -> record -> history -> next). focus-landing.tsx
+  // now closes the padded container after the working entry, mounts
+  // <CinematicStorySection audience="home"> full-bleed, and reopens it for the
+  // two doors and everything below (unchanged, same order). The regeneration
+  // touched EXACTLY ONE hash — focus-landing.tsx — and ZERO namespace hashes
+  // (copy lives in the NON-frozen `publicCinema` namespace). The ordering of the
+  // landing's parts is still pinned by landing-one-arm / cinematic-story tests.
   "components/marketing/living-worker-hero.tsx",
   "lib/marketing/living-worker-hero.ts",
 ] as const;

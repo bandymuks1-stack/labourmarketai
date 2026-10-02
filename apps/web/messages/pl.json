@@ -18133,6 +18133,110 @@
       "next": "Dokąd możesz przejść"
     }
   },
+  "publicCinema": {
+    "title": "Prześledź jedną osobę i jedną firmę przez całą pracę.",
+    "sub": "Ci sami ludzie, ten sam projekt i ten sam zapis: od pierwszego szukania do następnego rozdziału. Przewijaj, a kamera będzie się przesuwać.",
+    "skip": "Pomiń historię",
+    "railLabel": "Rozdziały historii",
+    "privacy": "Prywatny, dopóki nie włączysz widoczności.",
+    "chapters": [
+      "Znajdź pracę",
+      "Znajdź ludzi",
+      "Prowadź pracę",
+      "Zachowaj zapis",
+      "Idź dalej"
+    ],
+    "scenes": [
+      {
+        "title": "Człowiek z prawdziwą pracą za sobą.",
+        "body": "{name}, {trade}. Profil zaczyna się od tego, co ta osoba naprawdę robi."
+      },
+      {
+        "title": "Potrzeby i ludzie spotykają się otwarcie.",
+        "body": "Firma mówi, czego potrzebuje. Specjalista widzi to obok pracy, którą naprawdę wykonuje, nigdy jako jedną ocenę."
+      },
+      {
+        "title": "Rozmawiają we własnym języku.",
+        "body": "Każdy pisze w swoim języku. Wiadomości można czytać w Twoim, a oryginał zostaje obok."
+      },
+      {
+        "title": "Ludzie trafiają do projektu.",
+        "body": "Osoby pracujące razem są przypisane do projektu, więc wszyscy widzą tę samą pracę."
+      },
+      {
+        "title": "Polecenie, praca, godziny, zdjęcie.",
+        "body": "Jasne polecenie, wykonana praca, czas, który zajęła, i zdjęcie: zapisane raz."
+      },
+      {
+        "title": "Z dnia robi się zapis.",
+        "body": "Zaczyna się jako własny zapis osoby. Nic nie jest jeszcze nazwane potwierdzonym."
+      },
+      {
+        "title": "Kierownik to potwierdza.",
+        "body": "Kierownik widzi, co zapisano, i potwierdza to albo odsyła z notatką."
+      },
+      {
+        "title": "Potwierdzona praca buduje historię.",
+        "body": "Potwierdzona praca trafia do historii zawodowej. Praca, której nikt nie potwierdził, pozostaje widoczna jako własny zapis i jest tak oznaczona."
+      },
+      {
+        "title": "A potem to, co dalej.",
+        "body": "Osoba podaje, od kiedy jest dostępna. Firma publikuje kolejną potrzebę i planuje z wyprzedzeniem. Oboje zaczynają od tego, co naprawdę się wydarzyło."
+      }
+    ],
+    "labels": {
+      "person": "Osoba",
+      "need": "Potrzeba",
+      "company": "Firma",
+      "project": "Projekt",
+      "team": "Zespół",
+      "instruction": "Polecenie",
+      "work": "Praca",
+      "hours": "Godziny",
+      "photo": "Zdjęcie",
+      "record": "Zapis",
+      "manager": "Kierownik",
+      "history": "Historia zawodowa",
+      "next": "Dalej, nie historia"
+    },
+    "chain": {
+      "project": "Projekt",
+      "people": "Ludzie w nim",
+      "need": "Następna potrzeba",
+      "plan": "Planowanie"
+    },
+    "kinds": [
+      "Praca",
+      "Usługa",
+      "Ogłoszenie"
+    ],
+    "kindsNote": "Prace, usługi i ogłoszenia są w jednym miejscu.",
+    "translateTag": "Pokazano w Twoim języku · oryginał zachowany",
+    "teamMeta": "3 osoby w tym projekcie",
+    "plan": "Planuj kolejne tygodnie w kalendarzu",
+    "addedBy": "Dodane przez {name}",
+    "nextMeta": "Tak podaje {name}",
+    "hours": "8 godz.",
+    "msgOut": "Tak, mogę zacząć 20.",
+    "construction": {
+      "trade": "monter rusztowań",
+      "needTitle": "Rusztowania elewacyjne · 3 osoby",
+      "managerRole": "Brygadzista",
+      "msgIn": "Czy możesz zacząć na północnej elewacji 20 października?",
+      "instruction": "Elewacja północna, poziom 3, sekcja wschodnia: kotwy co 1,5 m.",
+      "photoAlt": "Rusztowanie na północnej elewacji",
+      "hNowT": "{project} · Monter rusztowań",
+      "hNowM": "Elewacja północna · od września",
+      "hRecentT": "Remont Starego Miasta · Monter rusztowań",
+      "nextNeed": "Monterzy rusztowań elewacyjnych od 20 października"
+    },
+    "hospitality": {
+      "trade": "kucharka",
+      "managerRole": "Szefowa kuchni",
+      "msgIn": "Czy możesz zacząć jesienne menu 20 października?",
+      "instruction": "Jesienne menu: nową przystawkę podaj jak na karcie."
+    }
+  },
   "publicSlice": {
     "sample": "Przykład",
     "states": {

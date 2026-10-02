@@ -18133,6 +18133,110 @@
       "next": "Waar je heen kunt"
     }
   },
+  "publicCinema": {
+    "title": "Volg één persoon en één bedrijf door het werk heen.",
+    "sub": "Dezelfde mensen, hetzelfde project en hetzelfde dossier, van de eerste zoektocht tot het volgende hoofdstuk. Scrol en de camera beweegt mee.",
+    "skip": "Verhaal overslaan",
+    "railLabel": "Hoofdstukken van het verhaal",
+    "privacy": "Privé, tot zichtbaarheid wordt ingeschakeld.",
+    "chapters": [
+      "Werk vinden",
+      "Mensen vinden",
+      "Werk uitvoeren",
+      "Het dossier bewaren",
+      "Verder gaan"
+    ],
+    "scenes": [
+      {
+        "title": "Een mens met echt werk achter zich.",
+        "body": "{name}, {trade}. Het profiel begint bij wat de persoon werkelijk doet."
+      },
+      {
+        "title": "Vraag en mensen ontmoeten elkaar openlijk.",
+        "body": "Een bedrijf zegt wat het nodig heeft. Een vakman ziet dat naast het werk dat echt wordt gedaan, nooit als één score."
+      },
+      {
+        "title": "Ze praten in hun eigen taal.",
+        "body": "Iedereen schrijft in de eigen taal. Berichten zijn te lezen in de uwe, met het origineel ernaast."
+      },
+      {
+        "title": "De mensen komen op het project.",
+        "body": "Wie samenwerkt, wordt aan een project gekoppeld, zodat iedereen hetzelfde werk ziet."
+      },
+      {
+        "title": "Opdracht, werk, uren, foto.",
+        "body": "Een duidelijke opdracht, het uitgevoerde werk, de tijd die het kostte en een foto: één keer vastgelegd."
+      },
+      {
+        "title": "De dag wordt een registratie.",
+        "body": "Eerst is het de eigen registratie van de persoon. Niets heet al bevestigd."
+      },
+      {
+        "title": "Een leidinggevende bevestigt het.",
+        "body": "De leidinggevende ziet wat is vastgelegd en bevestigt het, of stuurt het met een notitie terug."
+      },
+      {
+        "title": "Bevestigd werk bouwt de loopbaan.",
+        "body": "Bevestigd werk komt in de beroepsgeschiedenis. Werk dat niemand bevestigde, blijft zichtbaar als eigen registratie en is zo gemarkeerd."
+      },
+      {
+        "title": "En daarna: wat volgt.",
+        "body": "De persoon geeft aan wanneer die beschikbaar is. Het bedrijf plaatst de volgende vraag en plant vooruit. Beiden beginnen bij wat echt gebeurde."
+      }
+    ],
+    "labels": {
+      "person": "Persoon",
+      "need": "Vraag",
+      "company": "Bedrijf",
+      "project": "Het project",
+      "team": "Werkteam",
+      "instruction": "Opdracht",
+      "work": "Werk",
+      "hours": "Uren",
+      "photo": "Foto",
+      "record": "Registratie",
+      "manager": "Leidinggevende",
+      "history": "Beroepsgeschiedenis",
+      "next": "Volgende, geen geschiedenis"
+    },
+    "chain": {
+      "project": "Het project",
+      "people": "Mensen erop",
+      "need": "Volgende vraag",
+      "plan": "Inplannen"
+    },
+    "kinds": [
+      "Baan",
+      "Dienst",
+      "Advertentie"
+    ],
+    "kindsNote": "Banen, diensten en advertenties staan op dezelfde plek.",
+    "translateTag": "Getoond in uw taal · origineel bewaard",
+    "teamMeta": "3 mensen op dit project",
+    "plan": "Plan de komende weken in de agenda",
+    "addedBy": "Toegevoegd door {name}",
+    "nextMeta": "Zoals {name} het opgeeft",
+    "hours": "8 uur",
+    "msgOut": "Ja, ik kan op de 20e beginnen.",
+    "construction": {
+      "trade": "steigerbouwer",
+      "needTitle": "Gevelsteiger · 3 personen",
+      "managerRole": "Voorman",
+      "msgIn": "Kunt u op 20 oktober beginnen aan de noordgevel?",
+      "instruction": "Noordgevel, niveau 3, oostvak: ankers om de 1,5 m.",
+      "photoAlt": "De steiger aan de noordgevel",
+      "hNowT": "{project} · Steigerbouwer",
+      "hNowM": "Noordgevel · sinds september",
+      "hRecentT": "Renovatie oude stad · Steigerbouwer",
+      "nextNeed": "Gevelsteigerbouwers vanaf 20 oktober"
+    },
+    "hospitality": {
+      "trade": "kok",
+      "managerRole": "Chef-kok",
+      "msgIn": "Kunt u op 20 oktober beginnen met het herfstmenu?",
+      "instruction": "Herfstmenu: dien het nieuwe voorgerecht op zoals op de kaart."
+    }
+  },
   "publicSlice": {
     "sample": "Voorbeeld",
     "states": {

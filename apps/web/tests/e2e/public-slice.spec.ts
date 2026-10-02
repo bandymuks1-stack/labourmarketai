@@ -10,9 +10,9 @@ import { expect, test, type Page } from "@playwright/test";
  *   2. no horizontal overflow at 375 / 768 / 1280 / 1920, in the five locales
  *      the layout must survive (EN LT DE PL RU);
  *   3. axe (WCAG 2 A/AA) reports no serious/critical violation;
- *   4. the signature transition is tested IN MOTION: it plays once, it is
- *      operable with the keyboard/mouse, it causes no layout shift, it ends in
- *      the complete state, and under reduced motion it is already complete;
+ *   4. the cinematic story is tested IN MOTION: the stage pins, the scene follows
+ *      the scroll, the chapter rail is keyboard-operable, there is no layout
+ *      shift, and under reduced motion the complete composition is static;
  *   5. exactly one primary conversion route per page.
  *
  * Run against a running app:
@@ -108,14 +108,38 @@ test.describe("one primary conversion route per acquisition page", () => {
   });
 });
 
-test.describe("signature transition — in motion", () => {
-  const T = '[data-testid="work-record-transition"]';
+test.describe("cinematic story — in motion", () => {
+  const T = '[data-testid="cinematic-story"]';
+  const sceneOf = (page: Page) => page.locator(T).getAttribute("data-scene").then(Number);
+  async function toBeat(page: Page, i: number) {
+    await page.evaluate((i) => {
+      const b = document.querySelector(`.cine-beat[data-beat="${i}"]`)!;
+      const r = b.getBoundingClientRect();
+      window.scrollTo(0, window.scrollY + r.top + Math.min(r.height, innerHeight) / 2 - innerHeight / 2 + 4);
+    }, i);
+  }
 
-  test("normal motion: plays once to the complete state, with no layout shift", async ({ page }) => {
+  test("normal motion: the stage pins and the scene follows the scroll, forward and back", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("/en/for-workers", { waitUntil: "load" });
     await settle(page);
-    // Collect layout-shift entries from now on.
+    await toBeat(page, 0);
+    await expect.poll(() => sceneOf(page)).toBe(0);
+    // the pinned stage stays at the top of the viewport while scenes advance
+    for (const i of [2, 5, 8]) {
+      await toBeat(page, i);
+      await expect.poll(() => sceneOf(page), { timeout: 5_000 }).toBe(i);
+      const top = await page.locator(".cine-pin").evaluate((e) => Math.round(e.getBoundingClientRect().top));
+      expect(top, `stage pinned @scene ${i}`).toBe(0);
+    }
+    await toBeat(page, 3);
+    await expect.poll(() => sceneOf(page), { timeout: 5_000 }).toBe(3);
+  });
+
+  test("no layout shift while the whole story is scrolled", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/en/for-workers", { waitUntil: "load" });
+    await settle(page);
     await page.evaluate(() => {
       (window as unknown as { __cls: number }).__cls = 0;
       new PerformanceObserver((list) => {
@@ -124,57 +148,50 @@ test.describe("signature transition — in motion", () => {
         }
       }).observe({ type: "layout-shift", buffered: false });
     });
-    const t = page.locator(T);
-    await t.scrollIntoViewIfNeeded();
-    // It restarts at stage 1 when it comes into view, then walks to 5.
-    await expect(t).toHaveAttribute("data-stage", "1", { timeout: 5_000 });
-    await expect(t).toHaveAttribute("data-stage", "5", { timeout: 20_000 });
-    // And it never loops: still 5 a moment later.
-    await page.waitForTimeout(3_000);
-    await expect(t).toHaveAttribute("data-stage", "5");
+    for (let i = 0; i < 9; i++) {
+      await toBeat(page, i);
+      await page.waitForTimeout(400);
+    }
     const cls = await page.evaluate(() => (window as unknown as { __cls: number }).__cls);
-    expect(cls, "layout shift during playback").toBeLessThan(0.02);
+    expect(cls, "layout shift during the story").toBeLessThan(0.02);
   });
 
-  test("interaction: every stage is a button, selection is exposed, the caption follows", async ({ page }) => {
+  test("interaction: the chapter rail is real buttons and scrolls the story there", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("/en/for-companies", { waitUntil: "load" });
-    const t = page.locator(T);
-    await t.scrollIntoViewIfNeeded();
-    const nav = t.getByRole("group");
-    const third = nav.getByRole("button").nth(2);
-    await third.click();
-    await expect(third).toHaveAttribute("aria-pressed", "true");
-    await expect(t).toHaveAttribute("data-stage", "3");
-    await expect(t.locator("[aria-live='polite']")).toContainText(/manager/i);
-    // Choosing a stage stops autoplay: it must stay put.
-    await page.waitForTimeout(3_500);
-    await expect(t).toHaveAttribute("data-stage", "3");
-    // Keyboard: focus a stage button and activate it with Enter.
-    await nav.getByRole("button").nth(0).focus();
+    await settle(page);
+    await toBeat(page, 0);
+    const rail = page.getByRole("navigation", { name: /chapters/i });
+    const keep = rail.getByRole("button", { name: /keep the record/i });
+    await keep.focus();
     await page.keyboard.press("Enter");
-    await expect(t).toHaveAttribute("data-stage", "1");
+    await expect.poll(() => sceneOf(page), { timeout: 8_000 }).toBe(5);
+    await expect(keep).toHaveAttribute("aria-current", "step");
+    await expect(page.locator(T).locator("ol.cine-beats li")).toHaveCount(9);
   });
 
-  test("reduced motion: the complete story is present immediately and nothing animates", async ({ page }) => {
+  test("reduced motion: unpinned, the complete composition and every scene's words in the open", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/en/for-workers", { waitUntil: "load" });
     await settle(page);
     const t = page.locator(T);
     await t.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(1_000);
-    await expect(t).toHaveAttribute("data-stage", "5");
-    await expect(t.getByRole("button", { name: /replay|play again/i })).toBeHidden();
+    await expect(t).toHaveAttribute("data-scene", "9");
+    expect(await page.locator(".cine-pin").evaluate((e) => getComputedStyle(e).position)).toBe("relative");
+    await expect(t.locator("ol.cine-beats li h3").first()).toBeVisible();
+    await expect(t.getByRole("navigation", { name: /chapters/i })).toBeHidden();
   });
 
-  test("mobile: playing at 375px does not overflow or shift", async ({ page }) => {
+  test("mobile: the story at 375px does not overflow", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/en/for-workers", { waitUntil: "load" });
     await settle(page);
-    const t = page.locator(T);
-    await t.scrollIntoViewIfNeeded();
-    await expect(t).toHaveAttribute("data-stage", "5", { timeout: 20_000 });
-    const over = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
-    expect(over).toBeLessThanOrEqual(0);
+    for (const i of [1, 4, 7, 8]) {
+      await toBeat(page, i);
+      await page.waitForTimeout(300);
+      const over = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+      expect(over).toBeLessThanOrEqual(0);
+    }
   });
 });
 

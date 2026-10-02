@@ -18133,6 +18133,110 @@
       "next": "Where you can go"
     }
   },
+  "publicCinema": {
+    "title": "Follow one person and one company through the work.",
+    "sub": "The same people, the same project and the same record, from the first search to the next chapter. Scroll to move the camera.",
+    "skip": "Skip the story",
+    "railLabel": "Chapters of the story",
+    "privacy": "Private until visibility is switched on.",
+    "chapters": [
+      "Find work",
+      "Find people",
+      "Run the work",
+      "Keep the record",
+      "Move forward"
+    ],
+    "scenes": [
+      {
+        "title": "A person with real work behind them.",
+        "body": "{name}, {trade}. The profile starts from what the person really does."
+      },
+      {
+        "title": "Needs and people meet in the open.",
+        "body": "A company says what it needs. A professional sees it next to the work they really do, never as one score."
+      },
+      {
+        "title": "They talk in their own language.",
+        "body": "Each person writes in their own language. Messages can be read in yours, with the original kept beside them."
+      },
+      {
+        "title": "The people go on the project.",
+        "body": "The people who work together are put on a project, so everyone sees the same work."
+      },
+      {
+        "title": "Instruction, work, hours, photo.",
+        "body": "A clear instruction, the work done, the time it took and a photo, written down once."
+      },
+      {
+        "title": "The day becomes a record.",
+        "body": "It starts as the person’s own record. Nothing is called confirmed yet."
+      },
+      {
+        "title": "A manager confirms it.",
+        "body": "The manager sees what was recorded and confirms it, or sends it back with a note."
+      },
+      {
+        "title": "Confirmed work builds the history.",
+        "body": "Confirmed work joins the professional history. Work nobody has confirmed stays visible as the person’s own record, marked as such."
+      },
+      {
+        "title": "Then, what comes next.",
+        "body": "The person states when they are available. The company posts its next need and plans ahead. Both start from what really happened."
+      }
+    ],
+    "labels": {
+      "person": "Person",
+      "need": "Need",
+      "company": "Company",
+      "project": "Project",
+      "team": "Team",
+      "instruction": "Instruction",
+      "work": "Work",
+      "hours": "Hours",
+      "photo": "Photo",
+      "record": "Record",
+      "manager": "Manager",
+      "history": "Professional history",
+      "next": "Next, not history"
+    },
+    "chain": {
+      "project": "Project",
+      "people": "People on it",
+      "need": "Next need",
+      "plan": "Planning"
+    },
+    "kinds": [
+      "Job",
+      "Service",
+      "Listing"
+    ],
+    "kindsNote": "Jobs, services and listings live in the same place.",
+    "translateTag": "Shown in your language · original kept",
+    "teamMeta": "3 people on this project",
+    "plan": "Plan the weeks ahead in the calendar",
+    "addedBy": "Added by {name}",
+    "nextMeta": "As {name} states it",
+    "hours": "8 h",
+    "msgOut": "Yes, I can start on the 20th.",
+    "construction": {
+      "trade": "scaffolder",
+      "needTitle": "Facade scaffolding · 3 people",
+      "managerRole": "Foreman",
+      "msgIn": "Can you start on the north facade on 20 October?",
+      "instruction": "North facade, level 3, east bay: anchors every 1.5 m.",
+      "photoAlt": "The scaffold on the north facade",
+      "hNowT": "{project} · Scaffolder",
+      "hNowM": "North facade · since September",
+      "hRecentT": "Old Town Renovation · Scaffolder",
+      "nextNeed": "Facade scaffolders from 20 October"
+    },
+    "hospitality": {
+      "trade": "cook",
+      "managerRole": "Head chef",
+      "msgIn": "Can you start the autumn menu on 20 October?",
+      "instruction": "Autumn menu: plate the new starter as shown on the card."
+    }
+  },
   "publicSlice": {
     "sample": "Example",
     "states": {

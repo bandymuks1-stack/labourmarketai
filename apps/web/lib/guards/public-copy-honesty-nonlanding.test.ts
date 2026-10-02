@@ -188,7 +188,7 @@ describe("demo previews on /for-* pages carry the always-visible Example frame",
     // The world heroes label their scene with <SamplePill label={ts("sample")}>.
     const hero = read("components/marketing/public/world-heroes.tsx");
     expect((hero.match(/badge=\{<SamplePill label=\{ts\("sample"\)\} \/>\}/g) ?? []).length).toBe(3);
-    const tr = read("components/marketing/public/work-record-transition.tsx");
+    const tr = read("components/marketing/public/cinematic-story.tsx");
     expect((tr.match(/copy\.sample/g) ?? []).length).toBeGreaterThanOrEqual(1);
   });
 

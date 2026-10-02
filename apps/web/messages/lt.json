@@ -18133,6 +18133,110 @@
       "next": "Kur galite eiti"
     }
   },
+  "publicCinema": {
+    "title": "Sekite vieną žmogų ir vieną įmonę per visą darbą.",
+    "sub": "Tie patys žmonės, tas pats projektas ir tas pats įrašas: nuo pirmos paieškos iki kito etapo. Slinkite, ir kamera judės.",
+    "skip": "Praleisti istoriją",
+    "railLabel": "Istorijos skyriai",
+    "privacy": "Privatu, kol neįjungiamas matomumas.",
+    "chapters": [
+      "Rasti darbą",
+      "Rasti žmones",
+      "Vykdyti darbą",
+      "Išsaugoti įrašą",
+      "Eiti toliau"
+    ],
+    "scenes": [
+      {
+        "title": "Žmogus su tikru darbu už nugaros.",
+        "body": "{name} — {trade}. Profilis prasideda nuo to, ką žmogus iš tikrųjų daro."
+      },
+      {
+        "title": "Poreikis ir žmogus susitinka atvirai.",
+        "body": "Įmonė pasako, ko jai reikia. Specialistas tai mato šalia darbo, kurį iš tikrųjų atlieka, o ne kaip vieną įvertį."
+      },
+      {
+        "title": "Jie kalbasi savo kalba.",
+        "body": "Kiekvienas rašo savo kalba. Žinutes galima skaityti jūsų kalba, o originalas lieka šalia."
+      },
+      {
+        "title": "Žmonės įtraukiami į projektą.",
+        "body": "Kartu dirbantys žmonės priskiriami projektui, todėl visi mato tą patį darbą."
+      },
+      {
+        "title": "Nurodymas, darbas, valandos, nuotrauka.",
+        "body": "Aiškus nurodymas, atliktas darbas, jam skirtas laikas ir nuotrauka: užrašyta vieną kartą."
+      },
+      {
+        "title": "Diena tampa įrašu.",
+        "body": "Iš pradžių tai paties žmogaus įrašas. Niekas dar nevadinama patvirtintu."
+      },
+      {
+        "title": "Vadovas jį patvirtina.",
+        "body": "Vadovas mato, kas užfiksuota, ir patvirtina arba grąžina su pastaba."
+      },
+      {
+        "title": "Patvirtintas darbas kuria istoriją.",
+        "body": "Patvirtintas darbas patenka į profesinę istoriją. Niekieno nepatvirtintas darbas lieka matomas kaip paties žmogaus įrašas ir taip pažymėtas."
+      },
+      {
+        "title": "O toliau — kitas etapas.",
+        "body": "Žmogus nurodo, kada gali pradėti. Įmonė skelbia kitą poreikį ir planuoja į priekį. Abu pradeda nuo to, kas iš tikrųjų įvyko."
+      }
+    ],
+    "labels": {
+      "person": "Žmogus",
+      "need": "Poreikis",
+      "company": "Įmonė",
+      "project": "Projektas",
+      "team": "Komanda",
+      "instruction": "Nurodymas",
+      "work": "Darbas",
+      "hours": "Valandos",
+      "photo": "Nuotrauka",
+      "record": "Įrašas",
+      "manager": "Vadovas",
+      "history": "Profesinė istorija",
+      "next": "Toliau, ne istorija"
+    },
+    "chain": {
+      "project": "Projektas",
+      "people": "Žmonės projekte",
+      "need": "Kitas poreikis",
+      "plan": "Planavimas"
+    },
+    "kinds": [
+      "Darbas",
+      "Paslauga",
+      "Skelbimas"
+    ],
+    "kindsNote": "Darbai, paslaugos ir skelbimai yra toje pačioje vietoje.",
+    "translateTag": "Rodoma jūsų kalba · originalas išsaugotas",
+    "teamMeta": "3 žmonės šiame projekte",
+    "plan": "Planuokite artimiausias savaites kalendoriuje",
+    "addedBy": "Pridėjo {name}",
+    "nextMeta": "Kaip nurodo {name}",
+    "hours": "8 val.",
+    "msgOut": "Taip, galiu pradėti 20 d.",
+    "construction": {
+      "trade": "pastolių montuotojas",
+      "needTitle": "Fasado pastoliai · 3 žmonės",
+      "managerRole": "Meistras",
+      "msgIn": "Ar galite pradėti šiaurinio fasado darbus spalio 20 d.?",
+      "instruction": "Šiaurinis fasadas, 3 aukštas, rytinė dalis: inkarai kas 1,5 m.",
+      "photoAlt": "Pastoliai šiauriniame fasade",
+      "hNowT": "{project} · Pastolių montuotojas",
+      "hNowM": "Šiaurinis fasadas · nuo rugsėjo",
+      "hRecentT": "Senamiesčio renovacija · Pastolių montuotojas",
+      "nextNeed": "Fasado pastolių montuotojai nuo spalio 20 d."
+    },
+    "hospitality": {
+      "trade": "virėja",
+      "managerRole": "Šefas",
+      "msgIn": "Ar galite pradėti rudens meniu spalio 20 d.?",
+      "instruction": "Rudens meniu: naują užkandį išdėliokite, kaip nurodyta kortelėje."
+    }
+  },
   "publicSlice": {
     "sample": "Pavyzdys",
     "states": {
