@@ -10720,6 +10720,9 @@
       "count": "{count, plural, =0 {geen items} one {# item} other {# items}}"
     },
     "emptyFiltered": "Geen items van dit type.",
+    "filterActive": "Alleen getoond: {type}. In deze periode in totaal: {total}, getoond: {shown}.",
+    "filterNote": "Journaaluren en -markeringen in de kalender worden altijd getoond – het filter verandert dat niet.",
+    "filterClear": "Alles tonen",
     "emptyActions": {
       "bookings": "Boeking voorstellen",
       "tasks": "Taak aanmaken",

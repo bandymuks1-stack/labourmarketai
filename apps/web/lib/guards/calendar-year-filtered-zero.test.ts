@@ -20,4 +20,12 @@ describe("the year overview never says 'no records' where a filter merely hides 
   it("an unfiltered zero keeps the plain count line", () => {
     expect(YEAR).toMatch(/t\("year\.count", \{ count: m\.count \}\)/);
   });
+
+  it("an active filter is announced with both counts and a way out", () => {
+    expect(PAGE).toMatch(/data-testid="planning-filter-active"/);
+    expect(PAGE).toMatch(/t\("filterActive", \{/);
+    expect(PAGE).toMatch(/itemsInRange\(result\.items\)/);
+    expect(PAGE).toMatch(/itemsInRange\(visibleItems\)/);
+    expect(PAGE).toMatch(/data-testid="planning-filter-clear"/);
+  });
 });
