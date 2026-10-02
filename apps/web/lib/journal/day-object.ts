@@ -63,8 +63,13 @@ export interface DayObject {
   readonly confirmedCount: number;
   /** Entries the author confirmed alone — legitimate, never shown as green. */
   readonly selfConfirmedCount: number;
-  /** Entries still nobody has decided. */
+  /** Entries SUBMITTED for manager confirmation that nobody has decided yet
+   *  (the organisation switched review on). Only these are really "waiting". */
   readonly waitingCount: number;
+  /** Entries recorded in an organisation whose manager has NOT switched
+   *  confirmation on (or whose reviewer is not identified): nobody will ever
+   *  review them as things stand, so they are not "waiting". */
+  readonly recordedOnlyCount: number;
   /** Entries a reviewer sent back or disputed. */
   readonly contestedCount: number;
   readonly confirmations: readonly DayObjectConfirmation[];
@@ -82,6 +87,7 @@ export function buildDayObject(entries: readonly DayObjectEntryInput[]): DayObje
   let confirmedCount = 0;
   let selfConfirmedCount = 0;
   let waitingCount = 0;
+  let recordedOnlyCount = 0;
   let contestedCount = 0;
   let confirmedMinutes = 0;
   let totalMinutes = 0;
@@ -107,8 +113,16 @@ export function buildDayObject(entries: readonly DayObjectEntryInput[]): DayObje
       case "disputed":
         contestedCount += 1;
         break;
-      default:
+      case "verification_pending":
         waitingCount += 1;
+        break;
+      case "verifier_available":
+      case "verifier_not_identified":
+        recordedOnlyCount += 1;
+        break;
+      default:
+        // self_reported / not_applicable: no one is expected to confirm it.
+        break;
     }
 
     for (const d of e.decisions) {
@@ -140,6 +154,7 @@ export function buildDayObject(entries: readonly DayObjectEntryInput[]): DayObje
     confirmedCount,
     selfConfirmedCount,
     waitingCount,
+    recordedOnlyCount,
     contestedCount,
     confirmations,
     skills: [...skillById.values()],

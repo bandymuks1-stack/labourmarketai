@@ -1915,6 +1915,10 @@ export default async function JournalPage({
                               <EvidenceDecisionTimeline
                                 createdAt={e.created_at}
                                 events={timeline}
+                                awaiting={
+                                  verification.state !== "verifier_available" &&
+                                  verification.state !== "verifier_not_identified"
+                                }
                               />
                             </>
                           }

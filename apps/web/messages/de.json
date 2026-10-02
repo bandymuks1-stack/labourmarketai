@@ -2231,7 +2231,8 @@
         "title": "Wartet auf deine Entscheidung",
         "review": "Journaleinträge zur Prüfung",
         "invitations": "Ausstehende Einladungen an Arbeitskräfte",
-        "claims": "Öffentliche Anfragen, die du übernehmen kannst"
+        "claims": "Öffentliche Anfragen, die du übernehmen kannst",
+        "reviewOff": "Mitarbeitende mit erfasster Arbeit, deren Bestätigung ausgeschaltet ist"
       }
     },
     "agency": {
@@ -8352,7 +8353,7 @@
     "pickDemand": "Bedarf wählen",
     "noDemands": "Du hast noch keine Bedarfe. Erstelle zuerst einen Bedarf und strukturiere dann die benötigten Fähigkeiten.",
     "noDemandsCta": "Bedarf erstellen",
-    "unstructuredTag": "nicht strukturiert",
+    "unstructuredTag": "Anforderungen nicht bestätigt",
     "notStructured": "Dieser Bedarf hat noch keine strukturierten Fähigkeiten, daher kann kein Match berechnet werden. Strukturiere zuerst die benötigten Fähigkeiten.",
     "needsSetup": "Scouting ist in dieser Umgebung noch nicht verfügbar.",
     "noCandidates": "Noch keine passenden Arbeitskräfte für diesen Bedarf.",
@@ -8551,13 +8552,15 @@
       "cancel": "Abbrechen"
     },
     "verdict": {
-      "eligible": "Erfüllt die genannten Anforderungen",
+      "eligible": "Erfüllt die Pflichtanforderungen (Fähigkeiten werden separat bewertet)",
       "blocked": "Erfüllt eine genannte Anforderung nicht",
       "evidence": {
         "confirmed": "Nachweis: vom Manager bestätigt",
         "mixed": "Nachweis: teilweise bestätigt",
         "unverified": "Nachweis: nur selbst angegeben"
-      }
+      },
+      "noCriteria": "Keine Pflichtanforderungen angegeben",
+      "insufficient": "Zu wenig Daten, um die Anforderungen zu prüfen"
     },
     "editNeedCta": "Bedarf anpassen oder hinzufügen",
     "availableSupply": {
@@ -8590,7 +8593,7 @@
         "shortlist": "Vorausgewählt",
         "contact": "Im Kontakt",
         "offer": "Angeboten",
-        "accepted": "Angenommen",
+        "accepted": "Mit den Terminen einverstanden",
         "closed": "Geschlossen"
       }
     },
@@ -8600,7 +8603,8 @@
       "readiness": "Verfügbarkeit, Bereitschaft und Dokumente",
       "openTo": "Auch offen für: {countries}",
       "skillCount": "{matched} von {total} geforderten Fähigkeiten",
-      "nameHidden": "Name und Kontaktdaten erscheinen erst, wenn die Person sie freigibt."
+      "nameHidden": "Name und Kontaktdaten erscheinen erst, wenn die Person sie freigibt.",
+      "skillUnknown": "Keine Fähigkeiten angegeben · benötigt: {total}"
     }
   },
   "planBoundary": {
@@ -11907,7 +11911,7 @@
       "contacted": "Kontaktiert",
       "interview": "Im Gespräch",
       "offer": "Angebot",
-      "accepted": "Angenommen",
+      "accepted": "Mit den Terminen einverstanden",
       "rejected": "Abgelehnt"
     },
     "action": {
@@ -11917,7 +11921,8 @@
       "continueConversation": "Gespräch fortsetzen",
       "viewOffer": "Antwort auf das Angebot verfolgen",
       "planWork": "Angenommenes Angebot ansehen",
-      "reviewOthers": "Weitere Kandidaten prüfen"
+      "reviewOthers": "Weitere Kandidaten prüfen",
+      "assignToProject": "Einem Projekt zuweisen"
     }
   },
   "agencyClients": {
@@ -13129,7 +13134,7 @@
       "offerTitle": "Stellenangebot",
       "confirmAcceptTitle": "Dieses Angebot annehmen?",
       "confirmAcceptBody": "Die Annahme bestätigt dein Engagement beim Arbeitgeber — ein fester Schritt, kein Entwurf.",
-      "confirmAcceptDisclosure": "Mit der Annahme sieht dieses Unternehmen — und nur dieses — deine Profilkarte: Name, Fähigkeiten, Berufe, Sprachen und Verfügbarkeit. Deine Kontaktdaten bleiben privat, kein anderes Unternehmen erhält Zugriff, und du wirst dadurch nicht in die Arbeitgebersuche aufgenommen. Der Zugriff gilt, solange das Engagement aktiv ist — du kannst es jederzeit beenden.",
+      "confirmAcceptDisclosure": "Mit der Annahme stimmst du den in dieser Buchung genannten Terminen zu. Das ist kein Arbeitsvertrag und bedeutet nicht, dass du bereits eingestellt bist – ein konkretes Projekt oder einen Einsatzort legt das Unternehmen separat fest. Mit der Annahme sieht dieses Unternehmen — und nur dieses — deine Profilkarte: Name, Fähigkeiten, Berufe, Sprachen und Verfügbarkeit. Deine Kontaktdaten bleiben privat, kein anderes Unternehmen erhält Zugriff, und du wirst dadurch nicht in die Arbeitgebersuche aufgenommen. Der Zugriff gilt, solange das Engagement aktiv ist — du kannst es jederzeit beenden.",
       "confirmDeclineTitle": "Dieses Angebot ablehnen?",
       "confirmCta": "Ja, bestätigen",
       "cancelCta": "Abbrechen",
@@ -14262,7 +14267,7 @@
       "candidatesBlocked": "Derzeit nicht verfügbar.",
       "candidatesNoDemands": "Dein Unternehmen hat noch keinen Bedarf beschrieben.",
       "candidatesPickDemand": "Für welchen Bedarf suchst du Leute?",
-      "candidatesUnstructuredBadge": "nicht strukturiert",
+      "candidatesUnstructuredBadge": "Anforderungen nicht bestätigt",
       "candidatesBackToDemands": "Zurück zu den Bedarfen",
       "candidatesNotFound": "Dieser Bedarf wurde nicht gefunden oder gehört nicht dir.",
       "candidatesNeedsMigration": "Derzeit nicht verfügbar.",
