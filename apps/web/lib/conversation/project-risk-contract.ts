@@ -43,6 +43,10 @@ export interface ProjectRiskRow {
   readonly stages?: readonly ProjectStageRow[] | null;
   readonly stageTotal?: number | null;
   readonly peopleNames?: readonly string[];
+  /** Parallel to `peopleNames`: the roster worker id, or null when the row
+   *  carries none. Lets a server composer resolve the person's own consented
+   *  portrait; never displayed. */
+  readonly peopleIds?: readonly (string | null)[];
 }
 
 export type ProjectRiskChatResult =

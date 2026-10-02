@@ -57,6 +57,8 @@ export interface HomeProjectRow {
   readonly status: ProjectRiskRow["status"];
   readonly people: number;
   readonly peopleNames: readonly string[];
+  /** Parallel to `peopleNames` (worker id or null) — portraits only. */
+  readonly peopleIds: readonly (string | null)[];
   readonly timeline: StageTimeline;
   readonly riskKnown: boolean;
   readonly risk: readonly RiskSignal[];
@@ -97,20 +99,28 @@ async function loadProjectRows(): Promise<HomeProjectsResult> {
       // risk row already carries) and drops only the names.
       const carried = carriedStages(r);
       const names = carriedPeopleNames(r);
-      const [stages, peopleNames] = await Promise.all([
+      const [stages, people] = await Promise.all([
         carried !== undefined
           ? Promise.resolve<readonly TimelineStage[] | null>(carried)
           : listProjectStages(r.projectId)
               .then((d): readonly TimelineStage[] | null => (d.applied ? d.stages : null))
               .catch((): null => null),
         names !== undefined
-          ? Promise.resolve<readonly string[]>(names)
+          ? Promise.resolve({
+              names,
+              ids: names.map((_, i): string | null => r.peopleIds?.[i] ?? null),
+            })
           : listProjectAssignments(r.projectId)
-              .then((a): readonly string[] =>
-                a.slice(0, COMPANY_HOME_PEOPLE_CHIP_LIMIT).map((x) => x.name),
-              )
-              .catch((): readonly string[] => []),
+              .then((a) => {
+                const head = a.slice(0, COMPANY_HOME_PEOPLE_CHIP_LIMIT);
+                return {
+                  names: head.map((x) => x.name),
+                  ids: head.map((x): string | null => x.workerId ?? null),
+                };
+              })
+              .catch(() => ({ names: [] as readonly string[], ids: [] as readonly (string | null)[] })),
       ]);
+      const peopleNames = people.names;
       const timeline = deriveStageTimeline(stages);
       const unpacked = unpackRiskSignals(r);
       return {
@@ -119,6 +129,7 @@ async function loadProjectRows(): Promise<HomeProjectsResult> {
         status: r.status,
         people: r.people,
         peopleNames,
+        peopleIds: people.ids,
         timeline,
         riskKnown: unpacked.known,
         risk: unpacked.signals,

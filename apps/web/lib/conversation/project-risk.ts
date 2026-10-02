@@ -59,6 +59,7 @@ export async function loadProjectRiskForChat(): Promise<ProjectRiskChatResult> {
         stages: pr.stages,
         stageTotal: pr.stageTotal,
         peopleNames: pr.assignments.map((a) => a.name),
+        peopleIds: pr.assignments.map((a) => a.workerId ?? null),
       });
     });
     rows.sort((a, b) => b.signals - a.signals || a.title.localeCompare(b.title));

@@ -30,6 +30,7 @@ import { countWorkersWithUnconfirmableWork } from "@/lib/operations/org-members"
 import { loadCompanyHomeField } from "@/lib/company/company-home-field";
 import { CompanyHomeFieldSection } from "@/components/app/company-home-field-section";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
+import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
 
 // The employer demand kinds the home field's "what we are missing" reads —
 // a dual-role user's buyer service requests stay in the buyer room.
@@ -155,6 +156,28 @@ export default async function CompanyDashboardPage({
       : Promise.resolve(null),
     companyRow ? loadCompanyHomeField({ roster: rosterRead }) : null,
   ] as const);
+
+  // The people on this screen, with their own consented portraits (the
+  // database decides per person; anything else stays initials). Bounded: the
+  // capacity rows and the per-project chips the field already carries.
+  const portraitIds = new Set<string>();
+  if (rHomeField) {
+    if (rHomeField.capacity.kind === "ok") {
+      for (const w of rHomeField.capacity.rows) portraitIds.add(w.workerId);
+    }
+    if (rHomeField.projects.kind === "ok") {
+      for (const pr of rHomeField.projects.rows) {
+        for (const id of pr.peopleIds) if (id) portraitIds.add(id);
+      }
+    }
+  }
+  const avatarByWorker: Record<string, string | null> = Object.fromEntries(
+    await Promise.all(
+      [...portraitIds].map(
+        async (id) => [id, await getAvatarForVisibleWorker(id).catch(() => null)] as const,
+      ),
+    ),
+  );
 
   const pendingCount =
     rInvitations && rInvitations.kind === "ok"
@@ -307,6 +330,7 @@ export default async function CompanyDashboardPage({
           locale={locale}
           capabilities={declaredCapabilities}
           field={rHomeField}
+          avatars={avatarByWorker}
           needs={
             demandReadback.kind === "ok"
               ? {

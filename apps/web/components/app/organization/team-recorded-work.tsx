@@ -2,6 +2,8 @@ import { getTranslations } from "next-intl/server";
 import { NotebookPen } from "lucide-react";
 
 import { Card } from "@/components/ui/Card";
+import { PersonPortrait } from "@/components/app/identity/person-portrait";
+import { personMonogram } from "@/lib/visual/avatar-monogram";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
@@ -92,7 +94,10 @@ export async function loadTeamRecordedWork(
 export async function TeamRecordedWork({
   members,
   locale,
+  avatars = {},
 }: {
+  /** Consented portraits by worker id; missing = initials. */
+  readonly avatars?: Readonly<Record<string, string | null>>;
   readonly members: readonly TeamRecordedWorkMember[];
   readonly locale: string;
 }) {
@@ -160,6 +165,7 @@ export async function TeamRecordedWork({
               t={t}
               tIntel={tIntel}
               skillName={skillName}
+              avatarUrl={avatars[m.workerId] ?? null}
             />
           </li>
         ))}
@@ -180,7 +186,9 @@ function MemberRow({
   t,
   tIntel,
   skillName,
+  avatarUrl,
 }: {
+  avatarUrl: string | null;
   m: TeamMemberWorkSummary;
   locale: string;
   periodLabel: string;
@@ -193,6 +201,8 @@ function MemberRow({
   return (
     <Card compact className="flex flex-col gap-1.5">
       <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="flex min-w-0 items-center gap-3">
+        <PersonPortrait name={m.name} avatarUrl={avatarUrl} initials={personMonogram(m.name)} width="40px" />
         <Link
           href={`/dashboard/people/${m.workerId}#work-intelligence`}
           className="inline-flex min-h-11 items-center text-sm font-medium text-text-primary hover:text-brand-blue"
@@ -200,6 +210,7 @@ function MemberRow({
         >
           {m.name}
         </Link>
+        </span>
         <span
           className="text-meta text-text-secondary"
           data-testid={`team-recorded-work-journal-${m.workerId}`}
