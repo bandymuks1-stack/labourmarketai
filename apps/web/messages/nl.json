@@ -8133,6 +8133,7 @@
     },
     "claimFromJournal": "uit het werkjournaal",
     "recordedHours": "Vastgelegd werk: {hours} u uit het werkjournaal, waarvan {confirmed} u bevestigd.",
+    "confirmedWorkFact": "Bevestigd door werk: {entries, plural, one {# registratie} other {# registraties}} over {days, plural, one {# werkdag} other {# werkdagen}}",
     "recordedHoursNone": "Nog geen journaalregistraties met een duur — uren naast vaardigheden komen uit je eigen registraties.",
     "skillHours": "{hours} u",
     "skillHoursOwn": "{hours} u, uw eigen registratie",
@@ -8351,6 +8352,8 @@
     "namePlaceholder": "Werknemer",
     "skillFit": "{matched}/{total} vereiste vaardigheden, {confirmed} door manager bevestigd",
     "evidence": "Bewijs — bevestigd: {confirmed} · journaal: {journal} · zelf opgegeven: {self}",
+    "confirmedWork": "Bevestigd door werk: {work} van {matched} passende vaardigheden (herhaaldelijk: {repeated})",
+    "evidenceNone": "Niet bevestigd",
     "shortlistError": "Opslaan is niet gelukt. Probeer opnieuw.",
     "footnote": "Matches worden deterministisch berekend, alleen voor deze personeelsbehoefte. Geen globale rating, geen nepkandidaten.",
     "status": {

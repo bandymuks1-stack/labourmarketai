@@ -1280,6 +1280,22 @@ export default async function CompanyScoutingPage({
                     self: c.match.evidence.matchedSelfDeclared,
                   })}
                 </p>
+                {/* CONFIRMED WORK - a manager confirmed real entries that show a
+                    matched skill. A FACT, never a score: shown only when it
+                    exists; absence is silence, not a "0". Not a skill
+                    certification (that is the "confirmed" count above). */}
+                {(c.match.evidence.matchedConfirmedWork ?? 0) > 0 && fit ? (
+                  <p
+                    className="font-mono text-meta text-text-muted"
+                    data-testid={`scout-confirmed-work-${c.workerId}`}
+                  >
+                    {t("confirmedWork", {
+                      work: c.match.evidence.matchedConfirmedWork ?? 0,
+                      matched: fit.matchedTotal,
+                      repeated: c.match.evidence.matchedRepeatedConfirmed ?? 0,
+                    })}
+                  </p>
+                ) : null}
 
                   </IdentityDisclosure>
                   <IdentityDisclosure id="readiness" title={t("identity.readiness")}>
@@ -1340,7 +1356,9 @@ export default async function CompanyScoutingPage({
                     <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {t("fields.evidence")}
                     </dt>
-                    <dd className="truncate text-xs text-text-primary">{p.evidenceCount}</dd>
+                    <dd className="truncate text-xs text-text-primary">
+                      {p.evidenceCount > 0 ? p.evidenceCount : t("evidenceNone")}
+                    </dd>
                   </div>
                 </dl>
 

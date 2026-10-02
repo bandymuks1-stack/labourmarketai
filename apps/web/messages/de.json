@@ -8133,6 +8133,7 @@
     },
     "claimFromJournal": "aus dem Arbeitsjournal",
     "recordedHours": "Erfasste Arbeit: {hours} Std. aus dem Arbeitsjournal, davon {confirmed} Std. bestätigt.",
+    "confirmedWorkFact": "Durch Arbeit bestätigt: {entries, plural, one {# Eintrag} other {# Einträge}} an {days, plural, one {# Arbeitstag} other {# Arbeitstagen}}",
     "recordedHoursNone": "Noch keine Journaleinträge mit Dauer — Stunden neben Fähigkeiten stammen aus Ihren eigenen Einträgen.",
     "skillHours": "{hours} Std.",
     "skillHoursOwn": "{hours} Std., Ihr eigener Eintrag",
@@ -8351,6 +8352,8 @@
     "namePlaceholder": "Arbeitskraft",
     "skillFit": "{matched}/{total} benötigte Fähigkeiten, {confirmed} vom Manager bestätigt",
     "evidence": "Nachweise — bestätigt: {confirmed} · Journal: {journal} · selbst angegeben: {self}",
+    "confirmedWork": "Durch Arbeit bestätigt: {work} von {matched} passenden Fähigkeiten (wiederholt: {repeated})",
+    "evidenceNone": "Nicht bestätigt",
     "shortlistError": "Konnte nicht gespeichert werden. Bitte erneut versuchen.",
     "footnote": "Matches werden deterministisch nur für diesen Bedarf berechnet. Keine globale Bewertung, keine erfundenen Kandidaten.",
     "status": {

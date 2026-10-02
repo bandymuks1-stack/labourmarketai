@@ -8133,6 +8133,7 @@
     },
     "claimFromJournal": "z dziennika pracy",
     "recordedHours": "Zarejestrowana praca: {hours} h z dziennika pracy, w tym {confirmed} h potwierdzonych.",
+    "confirmedWorkFact": "Potwierdzone pracą: {entries, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}} z {days, plural, one {# dnia roboczego} other {# dni roboczych}}",
     "recordedHoursNone": "Brak jeszcze wpisów w dzienniku z czasem trwania — godziny przy umiejętnościach pochodzą z Twoich własnych wpisów.",
     "skillHours": "{hours} h",
     "skillHoursOwn": "{hours} h, Twój własny zapis",
@@ -8351,6 +8352,8 @@
     "namePlaceholder": "Pracownik",
     "skillFit": "{matched}/{total} wymaganych umiejętności, {confirmed} potwierdzonych przez kierownika",
     "evidence": "Dowody — potwierdzone: {confirmed} · dziennik: {journal} · zadeklarowane samodzielnie: {self}",
+    "confirmedWork": "Potwierdzone pracą: {work} z {matched} dopasowanych umiejętności (powtarza się: {repeated})",
+    "evidenceNone": "Niepotwierdzone",
     "shortlistError": "Nie udało się zapisać. Spróbuj ponownie.",
     "footnote": "Dopasowania są obliczane deterministycznie wyłącznie dla tej potrzeby. Bez globalnej oceny, bez fałszywych kandydatów.",
     "status": {

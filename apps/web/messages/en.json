@@ -8133,6 +8133,7 @@
     },
     "claimFromJournal": "from work journal",
     "recordedHours": "Recorded work: {hours} h from the work journal, {confirmed} h of it confirmed.",
+    "confirmedWorkFact": "Confirmed by work: {entries, plural, one {# entry} other {# entries}} over {days, plural, one {# work day} other {# work days}}",
     "recordedHoursNone": "No journal entries with a duration yet — hours next to skills come from your own entries.",
     "skillHours": "{hours} h",
     "skillHoursOwn": "{hours} h, your own record",
@@ -8351,6 +8352,8 @@
     "namePlaceholder": "Worker",
     "skillFit": "{matched}/{total} required skills, {confirmed} manager-confirmed",
     "evidence": "Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
+    "confirmedWork": "Confirmed in real work: {work} of {matched} matched skills (repeated: {repeated})",
+    "evidenceNone": "Not confirmed",
     "shortlistError": "Could not save. Try again.",
     "footnote": "Matches are computed deterministically for this need only. No global rating, no fake candidates.",
     "status": {
