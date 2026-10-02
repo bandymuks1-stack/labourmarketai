@@ -590,7 +590,7 @@
     "ganttDue": "Fällig",
     "ganttNoWindow": "Noch keine Termine erfasst – Phasen und Aufgaben ohne Termine stehen unten.",
     "ganttColActivity": "Aktivität",
-    "ganttColStatus": "Status",
+    "ganttColStatus": "Stand",
     "ganttColResponsible": "Verantwortlich",
     "ganttColTime": "Zeit",
     "ganttNoStageGroup": "Keiner Phase zugeordnet",

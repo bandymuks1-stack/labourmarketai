@@ -590,7 +590,7 @@
     "ganttDue": "Termin",
     "ganttNoWindow": "Nie zapisano jeszcze dat – etapy i zadania bez dat są wymienione poniżej.",
     "ganttColActivity": "Działanie",
-    "ganttColStatus": "Status",
+    "ganttColStatus": "Stan",
     "ganttColResponsible": "Odpowiedzialny",
     "ganttColTime": "Czas",
     "ganttNoStageGroup": "Nieprzypisane do etapu",

@@ -590,7 +590,7 @@
     "ganttDue": "Deadline",
     "ganttNoWindow": "Nog geen data vastgelegd – fasen en taken zonder data staan hieronder.",
     "ganttColActivity": "Activiteit",
-    "ganttColStatus": "Status",
+    "ganttColStatus": "Stand",
     "ganttColResponsible": "Verantwoordelijke",
     "ganttColTime": "Tijd",
     "ganttNoStageGroup": "Niet aan een fase toegewezen",
