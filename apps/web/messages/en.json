@@ -5972,6 +5972,7 @@
       "notAuthorized": "You can only assign workers from your team to your own projects.",
       "noWorkers": "You don't have any assignable workers on your team yet.",
       "fromRoster": "Assign a worker to this object",
+      "rosterOwnerOnly": "Roster workers can be assigned to projects by the organization's owner or admin. You can still assign people who have an accepted booking.",
       "rosterGroup": "Team members",
       "engagementGroup": "Accepted-proposal candidates",
       "reservation": {
