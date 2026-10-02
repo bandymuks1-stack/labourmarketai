@@ -26,3 +26,20 @@ describe("the compass recommendation action", () => {
     expect(block).toMatch(/\/dashboard\/profile#profile-edit/);
   });
 });
+
+describe("compass data sources are labelled and linked distinctly", () => {
+  it("the cohort imported-jobs count links to the public /jobs board via importedJobsHref", () => {
+    expect(SECTION).toMatch(/importedJobsHref\(c\.targetProfessionSlug\)/);
+    expect(SECTION).toMatch(/data-testid=\{`compass-cohort-jobs-/);
+  });
+  it("'What fits you now' states it is platform requests; copy exists in every active locale", () => {
+    expect(SECTION).toMatch(/compass-fits-source/);
+    for (const l of ["en", "lt", "de", "nl", "pl", "ru"]) {
+      const lc = JSON.parse(readFileSync(join(ROOT, `messages/${l}.json`), "utf8")).learningCompass;
+      for (const k of ["cohortDemand", "cohortDemandOpen", "fitsSource", "openBoard"]) {
+        expect(typeof lc[k], `${l}.${k}`).toBe("string");
+      }
+      expect(JSON.stringify(lc)).not.toMatch(/demo/i);
+    }
+  });
+});

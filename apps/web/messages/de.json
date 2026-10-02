@@ -46,7 +46,7 @@
     "fitsNone": "Noch keine passende Chance — die Übersicht füllt sich, sobald Ihre Fähigkeiten und Verfügbarkeit bekannt sind.",
     "fitStrong": "starke Übereinstimmung",
     "fitPossible": "mögliche Übereinstimmung",
-    "openBoard": "Chancen öffnen",
+    "openBoard": "Plattform-Anfragen öffnen",
     "missing": "Was Ihnen fehlt",
     "missingFromOpportunities": "Von den Chancen oben verlangt, noch nicht in Ihren Aufzeichnungen:",
     "missingFromProfession": "Üblich für Ihre Richtung, noch nicht in Ihren Aufzeichnungen:",
@@ -76,8 +76,10 @@
     "cohortLine": "{program} · Gruppe {cohort}",
     "cohortAt": "an {institution}",
     "cohortDirection": "Richtung: {profession}",
-    "cohortDemand": "{count} offene Stellen für diese Richtung heute (importierte Marktdaten)",
+    "cohortDemand": "{count} offene importierte öffentliche Stellen für diese Richtung heute",
     "cohortDemandUnknown": "Nachfrage für diese Richtung noch nicht gemessen",
+    "cohortDemandOpen": "Diese Stellen ansehen",
+    "fitsSource": "Passende Plattform-Anfragen auf LabourMarket.ai",
     "missingFromProgram": "Üblich für die Richtung Ihres Studiengangs, noch nicht in Ihren Aufzeichnungen:"
   },
   "businessProfile": {

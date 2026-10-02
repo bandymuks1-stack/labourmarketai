@@ -46,7 +46,7 @@
     "fitsNone": "Nog geen passende kans — het bord vult zich naarmate je vaardigheden en beschikbaarheid bekend worden.",
     "fitStrong": "sterke match",
     "fitPossible": "mogelijke match",
-    "openBoard": "Kansen openen",
+    "openBoard": "Platformverzoeken openen",
     "missing": "Wat je mist",
     "missingFromOpportunities": "Gevraagd door de kansen hierboven, nog niet in je gegevens:",
     "missingFromProfession": "Gebruikelijk voor je richting, nog niet in je gegevens:",
@@ -76,8 +76,10 @@
     "cohortLine": "{program} · groep {cohort}",
     "cohortAt": "bij {institution}",
     "cohortDirection": "Richting: {profession}",
-    "cohortDemand": "{count} open vacatures voor deze richting vandaag (geïmporteerde marktdata)",
+    "cohortDemand": "{count} open geïmporteerde openbare vacatures voor deze richting vandaag",
     "cohortDemandUnknown": "Vraag voor deze richting nog niet gemeten",
+    "cohortDemandOpen": "Bekijk deze vacatures",
+    "fitsSource": "Passende platformverzoeken op LabourMarket.ai",
     "missingFromProgram": "Gebruikelijk voor de richting van je opleiding, nog niet in je gegevens:"
   },
   "businessProfile": {

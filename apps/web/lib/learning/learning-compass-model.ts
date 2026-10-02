@@ -191,6 +191,17 @@ export type CompassRecommendationAction =
   | { readonly kind: "journal" }
   | { readonly kind: "profile" };
 
+/**
+ * Where the cohort's "imported public jobs" count is browsable: the public
+ * /jobs board, filtered by the same profession slug the count came from
+ * (`count_public_vacancies_by_profession_v1` and /jobs both read the imported
+ * public vacancy pool). Deliberately NOT /dashboard/opportunities, which lists
+ * platform requests — a different dataset.
+ */
+export function importedJobsHref(professionSlug: string): string {
+  return `/jobs?profession=${encodeURIComponent(professionSlug)}`;
+}
+
 export function recommendationNextAction(
   r: Pick<CompassRecommendation, "basis" | "sources">,
 ): CompassRecommendationAction {

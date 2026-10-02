@@ -46,7 +46,7 @@
     "fitsNone": "Brak jeszcze pasującej możliwości — tablica wypełnia się w miarę poznawania Twoich umiejętności i dostępności.",
     "fitStrong": "silne dopasowanie",
     "fitPossible": "możliwe dopasowanie",
-    "openBoard": "Otwarte możliwości",
+    "openBoard": "Otwórz zapytania platformy",
     "missing": "Czego Ci brakuje",
     "missingFromOpportunities": "Wymagane przez powyższe możliwości, jeszcze nieobecne w Twoich zapisach:",
     "missingFromProfession": "Typowe dla Twojego kierunku, jeszcze nieobecne w Twoich zapisach:",
@@ -76,8 +76,10 @@
     "cohortLine": "{program} · rocznik {cohort}",
     "cohortAt": "w {institution}",
     "cohortDirection": "Kierunek: {profession}",
-    "cohortDemand": "{count} otwartych ofert pracy dla tego kierunku dzisiaj (zaimportowane dane rynkowe)",
+    "cohortDemand": "{count} otwartych zaimportowanych publicznych ofert dla tego kierunku dzisiaj",
     "cohortDemandUnknown": "Popyt na ten kierunek nie jest jeszcze mierzony",
+    "cohortDemandOpen": "Zobacz te oferty",
+    "fitsSource": "Dopasowane zapytania platformy opublikowane w LabourMarket.ai",
     "missingFromProgram": "Typowe dla kierunku Twojego programu, jeszcze nieobecne w Twoich zapisach:"
   },
   "businessProfile": {

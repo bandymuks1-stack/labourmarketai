@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/lib/i18n/navigation";
 import {
+  importedJobsHref,
   recommendationNextAction,
   type CompassNextStep,
   type LearningCompass,
@@ -104,6 +105,15 @@ export async function LearningCompassSection({
                           {c.demandCount === null ? t("cohortDemandUnknown") : t("cohortDemand", { count: c.demandCount })}
                         </span>
                       ) : null}
+                      {c.targetProfessionSlug && c.demandCount !== null && c.demandCount > 0 ? (
+                        <Link
+                          href={importedJobsHref(c.targetProfessionSlug) as "/jobs"}
+                          className="w-fit text-brand-blue hover:underline"
+                          data-testid={`compass-cohort-jobs-${c.cohortId}`}
+                        >
+                          {t("cohortDemandOpen")} →
+                        </Link>
+                      ) : null}
                     </li>
                   ))}
                 </ul>
@@ -139,6 +149,7 @@ export async function LearningCompassSection({
 
         <div className="flex flex-col gap-1" data-testid="compass-fits">
           <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("fits")}</h3>
+          <p className="text-meta text-text-muted" data-testid="compass-fits-source">{t("fitsSource")}</p>
           {fitsNow.length === 0 ? (
             <p className="text-xs leading-relaxed text-text-muted">{t("fitsNone")}</p>
           ) : (
