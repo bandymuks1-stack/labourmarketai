@@ -5025,7 +5025,8 @@
     "how": "Jak to działa",
     "menuOpen": "Menu",
     "menuClose": "Zamknij menu",
-    "market": "Rynek"
+    "market": "Rynek",
+    "openWorkspace": "Moja przestrzeń"
   },
   "livingMarketReview": {
     "tagline": "Żywy rynek pracy Europy",
@@ -8342,7 +8343,7 @@
     "pickDemand": "Wybierz potrzebę",
     "noDemands": "Nie masz jeszcze żadnych potrzeb. Utwórz potrzebę z panelu — po przeglądzie zespół ustrukturyzuje jej wymagane umiejętności.",
     "noDemandsCta": "Utwórz potrzebę",
-    "unstructuredTag": "niestrukturyzowana",
+    "unstructuredTag": "wymagania niepotwierdzone",
     "notStructured": "Wymagane umiejętności tej potrzeby nie są jeszcze ustrukturyzowane, więc nie można obliczyć dopasowania. Nowe potrzeby są przeglądane i strukturyzowane przez administratorów — nie musisz nic robić.",
     "needsSetup": "Nie udało się wczytać. Spróbuj ponownie.",
     "noCandidates": "Brak jeszcze pasujących pracowników dla tej potrzeby. Dopasowania pojawiają się, gdy pracownicy dodają umiejętności potwierdzone dziennikiem — sprawdź później lub rozszerz potrzebę.",
@@ -14248,7 +14249,7 @@
       "candidatesBlocked": "Chwilowo niedostępne.",
       "candidatesNoDemands": "Twoja firma nie opisała jeszcze potrzeby.",
       "candidatesPickDemand": "Do której potrzeby rekrutujesz?",
-      "candidatesUnstructuredBadge": "niesustrukturyzowane",
+      "candidatesUnstructuredBadge": "wymagania niepotwierdzone",
       "candidatesBackToDemands": "Powrót do potrzeb",
       "candidatesNotFound": "Ta potrzeba nie została znaleziona albo nie jest Twoja.",
       "candidatesNeedsMigration": "Chwilowo niedostępne.",

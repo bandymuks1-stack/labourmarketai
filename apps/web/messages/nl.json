@@ -5025,7 +5025,8 @@
     "how": "Hoe het werkt",
     "menuOpen": "Menu",
     "menuClose": "Menu sluiten",
-    "market": "De markt"
+    "market": "De markt",
+    "openWorkspace": "Mijn werkruimte"
   },
   "livingMarketReview": {
     "tagline": "De levende arbeidsmarkt van Europa",
@@ -8342,7 +8343,7 @@
     "pickDemand": "Kies een personeelsbehoefte",
     "noDemands": "Je hebt nog geen personeelsbehoeften. Maak een personeelsbehoefte aan vanaf je dashboard — na beoordeling structureert het team de vereiste vaardigheden.",
     "noDemandsCta": "Personeelsbehoefte aanmaken",
-    "unstructuredTag": "niet gestructureerd",
+    "unstructuredTag": "vereisten niet bevestigd",
     "notStructured": "De vereiste vaardigheden van deze personeelsbehoefte zijn nog niet gestructureerd, dus er kan geen match worden berekend. Nieuwe personeelsbehoeften worden door de beheerders beoordeeld en gestructureerd — je hoeft niets te doen.",
     "needsSetup": "Laden is niet gelukt. Probeer het opnieuw.",
     "noCandidates": "Nog geen passende werknemers voor deze personeelsbehoefte. Matches verschijnen naarmate werknemers journaal-onderbouwde vaardigheden toevoegen — kijk later terug of verbreed de behoefte.",
@@ -14248,7 +14249,7 @@
       "candidatesBlocked": "Momenteel niet beschikbaar.",
       "candidatesNoDemands": "Je bedrijf heeft nog geen behoefte beschreven.",
       "candidatesPickDemand": "Voor welke behoefte werf je?",
-      "candidatesUnstructuredBadge": "niet gestructureerd",
+      "candidatesUnstructuredBadge": "vereisten niet bevestigd",
       "candidatesBackToDemands": "Terug naar behoeften",
       "candidatesNotFound": "Die behoefte is niet gevonden, of hij is niet van jou.",
       "candidatesNeedsMigration": "Momenteel niet beschikbaar.",

@@ -5025,7 +5025,8 @@
     "how": "Kaip veikia",
     "menuOpen": "Meniu",
     "menuClose": "Uždaryti meniu",
-    "market": "Rinka"
+    "market": "Rinka",
+    "openWorkspace": "Mano erdvė"
   },
   "livingMarketReview": {
     "tagline": "Gyvoji Europos darbo rinka",
@@ -8342,7 +8343,7 @@
     "pickDemand": "Pasirink poreikį",
     "noDemands": "Kol kas neturite poreikių. Sukurkite poreikį skydelyje — po peržiūros komanda sustruktūruos reikalingus gebėjimus.",
     "noDemandsCta": "Sukurti poreikį",
-    "unstructuredTag": "nestruktūruotas",
+    "unstructuredTag": "reikalavimai nepatvirtinti",
     "notStructured": "Šio poreikio reikalingi gebėjimai dar nesustruktūruoti, todėl atitiktis neskaičiuojama. Naujus poreikius peržiūri ir struktūruoja administratoriai — jums nieko daryti nereikia.",
     "needsSetup": "Nepavyko įkelti. Bandykite dar kartą.",
     "noCandidates": "Šiam poreikiui kol kas nėra tinkamų darbuotojų. Atitikmenų atsiras darbuotojams pildant žurnalu pagrįstus gebėjimus — užsukite vėliau arba praplėskite poreikį.",
@@ -14248,7 +14249,7 @@
       "candidatesBlocked": "Šiuo metu nepasiekiama.",
       "candidatesNoDemands": "Jūsų įmonė dar neaprašė poreikio.",
       "candidatesPickDemand": "Kuriam poreikiui ieškote žmonių?",
-      "candidatesUnstructuredBadge": "nestruktūruotas",
+      "candidatesUnstructuredBadge": "reikalavimai nepatvirtinti",
       "candidatesBackToDemands": "Atgal į poreikius",
       "candidatesNotFound": "Toks poreikis nerastas arba jis ne jūsų.",
       "candidatesNeedsMigration": "Šiuo metu nepasiekiama.",
