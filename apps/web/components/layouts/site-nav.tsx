@@ -2,6 +2,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
+import { NavAuthCtas } from "@/components/layouts/nav-auth-ctas";
 import { MobileNavMenu } from "@/components/layouts/mobile-nav-menu";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { ThemeToggleIcon } from "@/components/ui/theme-toggle-icon";
@@ -78,6 +79,9 @@ function visibleLinks(): readonly NavLink[] {
 
 export async function SiteNav() {
   const t = await getTranslations("nav");
+  // "My space" already exists as the dashboard's own tab label; reusing it keeps
+  // the frozen `nav` namespace untouched.
+  const tSpace = await getTranslations("auth.dashboard.tabs");
   const locale = await getLocale();
   const links = visibleLinks();
 
@@ -85,20 +89,32 @@ export async function SiteNav() {
   // header from `sm` up, inside the disclosure below it. Sharing the fragment
   // is what keeps the two mounts from drifting into different destinations.
   const authCtas = (
-    <>
-      <AuthCtaLink
-        relPath={`/${locale}/auth/login`}
-        className="flex min-h-11 items-center text-sm text-text-secondary transition-colors hover:text-text-primary sm:min-h-0"
-      >
-        {t("login")}
-      </AuthCtaLink>
-      <AuthCtaLink
-        relPath={`/${locale}/auth/signup`}
-        className={buttonLinkClassName("primary", "sm")}
-      >
-        {t("startNow")}
-      </AuthCtaLink>
-    </>
+    <NavAuthCtas
+      guest={
+        <>
+          <AuthCtaLink
+            relPath={`/${locale}/auth/login`}
+            className="flex min-h-11 items-center text-sm text-text-secondary transition-colors hover:text-text-primary sm:min-h-0"
+          >
+            {t("login")}
+          </AuthCtaLink>
+          <AuthCtaLink
+            relPath={`/${locale}/auth/signup`}
+            className={buttonLinkClassName("primary", "sm")}
+          >
+            {t("startNow")}
+          </AuthCtaLink>
+        </>
+      }
+      member={
+        <AuthCtaLink
+          relPath={`/${locale}/dashboard`}
+          className={buttonLinkClassName("primary", "sm")}
+        >
+          {tSpace("overview")}
+        </AuthCtaLink>
+      }
+    />
   );
 
   return (

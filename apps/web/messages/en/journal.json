@@ -100,7 +100,8 @@
       "approved": "Reviewed",
       "changes_requested": "Changes requested",
       "rejected": "Returned",
-      "reasonLabel": "Reason"
+      "reasonLabel": "Reason",
+      "notEnabled": "Recorded — your manager has not switched on confirmation, so nobody is reviewing this entry; until then it stays what you stated"
     },
     "delete": "Delete entry",
     "deleting": "Deleting...",
@@ -944,6 +945,8 @@
     "photoClose": "Close photo",
     "photoPrev": "Previous photo",
     "photoNext": "Next photo",
-    "photoCounter": "{index} / {total}"
+    "photoCounter": "{index} / {total}",
+    "recordedOnly": "{count, plural, one {# recorded — confirmation not switched on} other {# recorded — confirmation not switched on}}",
+    "confirmationNotEnabled": "Your manager has not switched on confirmation — nobody is reviewing these entries."
   }
 }

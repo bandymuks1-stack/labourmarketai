@@ -2224,7 +2224,8 @@
         "title": "Waiting for your decision",
         "review": "Journal entries to review",
         "invitations": "Pending worker invitations",
-        "claims": "Public need submissions you can claim"
+        "claims": "Public need submissions you can claim",
+        "reviewOff": "Workers with recorded work whose confirmation is switched off"
       }
     },
     "agency": {
@@ -4748,7 +4749,7 @@
           "desc": "Roles that fit your trade, rate and location find you."
         },
         {
-          "title": "Work, earn, level up",
+          "title": "Work, earn, build your record",
           "desc": "Completed work strengthens your records and readiness."
         }
       ]
@@ -7585,6 +7586,8 @@
     "skillsUnavailable": "Could not be read right now.",
     "verifiedUnavailable": "Skills with a manager record could not be read right now.",
     "identity": {
+      "noRecords": "No work records yet",
+      "noManagerRecord": "No manager's record yet",
       "currentWork": "Working now",
       "recorded": "h recorded",
       "confirmed": "h with a manager's record",
@@ -8342,7 +8345,7 @@
     "pickDemand": "Pick a need",
     "noDemands": "You have no needs yet. Create a need from your dashboard — after review, the team structures its required skills.",
     "noDemandsCta": "Create a need",
-    "unstructuredTag": "not structured",
+    "unstructuredTag": "requirements not confirmed",
     "notStructured": "This need's required skills aren't structured yet, so no match can be computed. New needs are reviewed and structured by the administrators — no action is needed from you.",
     "needsSetup": "Couldn’t load. Please try again.",
     "noCandidates": "No matching workers yet for this need. Matches appear as workers add journal-backed skills — check back later or broaden the need.",
@@ -8537,13 +8540,15 @@
       "cancel": "Cancel"
     },
     "verdict": {
-      "eligible": "Meets the stated requirements",
+      "eligible": "Meets the mandatory requirements (skills are rated separately)",
       "blocked": "Does not meet a stated requirement",
       "evidence": {
         "confirmed": "Evidence: manager-confirmed",
         "mixed": "Evidence: partly confirmed",
         "unverified": "Evidence: self-declared only"
-      }
+      },
+      "noCriteria": "No mandatory requirements stated",
+      "insufficient": "Not enough data to check requirements"
     },
     "editNeedCta": "Adjust or add a need",
     "availableSupply": {
@@ -8576,7 +8581,7 @@
         "shortlist": "Shortlisted",
         "contact": "In contact",
         "offer": "Offered",
-        "accepted": "Accepted",
+        "accepted": "Agreed to the dates",
         "closed": "Closed"
       }
     },
@@ -8586,7 +8591,8 @@
       "readiness": "Availability, readiness and documents",
       "openTo": "Also open to: {countries}",
       "skillCount": "{matched} of {total} required skills",
-      "nameHidden": "Name and contact details appear only when the person allows them."
+      "nameHidden": "Name and contact details appear only when the person allows them.",
+      "skillUnknown": "No skills stated · needs {total}"
     }
   },
   "planBoundary": {
@@ -11893,7 +11899,7 @@
       "contacted": "Contacted",
       "interview": "In conversation",
       "offer": "Offer",
-      "accepted": "Accepted",
+      "accepted": "Agreed to the dates",
       "rejected": "Rejected"
     },
     "action": {
@@ -11903,7 +11909,8 @@
       "continueConversation": "Continue the conversation",
       "viewOffer": "Track the booking response",
       "planWork": "Review the accepted booking",
-      "reviewOthers": "Review other candidates"
+      "reviewOthers": "Review other candidates",
+      "assignToProject": "Assign to a project"
     }
   },
   "agencyClients": {
@@ -13115,7 +13122,7 @@
       "offerTitle": "Job offer",
       "confirmAcceptTitle": "Accept this offer?",
       "confirmAcceptBody": "Accepting confirms your engagement with the employer — it is a firm step, not a draft.",
-      "confirmAcceptDisclosure": "Accepting lets this company — and only this company — see your profile card: your name, skills, professions, languages and availability. Your contact details stay private, no other employer gains access, and this does not add you to employer search. The access lasts while the engagement is active, and you can end it at any time.",
+      "confirmAcceptDisclosure": "By accepting you agree to the dates shown in this booking. This is not an employment contract and does not mean you have been hired — a specific project or site is set separately by the company. Accepting lets this company — and only this company — see your profile card: your name, skills, professions, languages and availability. Your contact details stay private, no other employer gains access, and this does not add you to employer search. The access lasts while the engagement is active, and you can end it at any time.",
       "confirmDeclineTitle": "Decline this offer?",
       "confirmCta": "Yes, confirm",
       "cancelCta": "Cancel",
@@ -14248,7 +14255,7 @@
       "candidatesBlocked": "Not available right now.",
       "candidatesNoDemands": "Your company has not described a need yet.",
       "candidatesPickDemand": "Which need are you hiring for?",
-      "candidatesUnstructuredBadge": "not structured",
+      "candidatesUnstructuredBadge": "requirements not confirmed",
       "candidatesBackToDemands": "Back to needs",
       "candidatesNotFound": "That need was not found, or it is not yours.",
       "candidatesNeedsMigration": "Not available right now.",
@@ -17933,6 +17940,177 @@
       "done": "Attributed {count} records; {skipped} were already attributed.",
       "refused": "This could not be saved. Nothing was changed.",
       "person": "{hours} h, {count, plural, one {# record} other {# records}}"
+    }
+  },
+  "workLifecycle": {
+    "pending": "Not yet",
+    "title": "What happens to the work you do",
+    "titleCompany": "What happens to the work you run",
+    "example": "Example — not a real person or real data",
+    "hint": "Select a step. Every step opens the real place in your workspace.",
+    "open": "Open in your workspace",
+    "list": "Work lifecycle steps",
+    "workers": {
+      "person": {
+        "label": "You",
+        "fact": "Cook · professional identity",
+        "detail": "One professional identity that is yours — not tied to a single employer."
+      },
+      "team": {
+        "label": "Team",
+        "fact": "Kitchen team",
+        "detail": "You join a real team, with the people you work with and who leads it."
+      },
+      "project": {
+        "label": "Project",
+        "fact": "Autumn menu launch",
+        "detail": "Work belongs to a project, so it has a place, a purpose and a time."
+      },
+      "work": {
+        "label": "Work",
+        "fact": "Evening service · 8 h",
+        "detail": "What you did, when and for how long — recorded as it happens."
+      },
+      "evidence": {
+        "label": "Evidence",
+        "fact": "Photo + journal entry",
+        "detail": "Completed work becomes evidence instead of disappearing."
+      },
+      "confirmation": {
+        "label": "Confirmed",
+        "fact": "Confirmed by manager",
+        "detail": "A manager confirms it. Nothing is called verified without that."
+      },
+      "history": {
+        "label": "History",
+        "fact": "Added to your history",
+        "detail": "Confirmed work builds your professional history — it stays with you for the next job."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Need",
+        "fact": "4 cooks, from Monday",
+        "detail": "You state the real need once: who, where and from when."
+      },
+      "people": {
+        "label": "People",
+        "fact": "Professionals who fit",
+        "detail": "Professionals whose real work history fits the need — with what is verified and what is not yet."
+      },
+      "team": {
+        "label": "Team",
+        "fact": "Kitchen team",
+        "detail": "People become a team with a lead, shifts and a place to work."
+      },
+      "project": {
+        "label": "Project",
+        "fact": "Autumn menu launch",
+        "detail": "Teams are organised around the project they deliver."
+      },
+      "work": {
+        "label": "Work",
+        "fact": "Evening service · 8 h",
+        "detail": "Work is recorded where it happens, not rebuilt afterwards."
+      },
+      "confirmation": {
+        "label": "Confirmed",
+        "fact": "Awaiting your confirmation",
+        "detail": "You see what still needs confirming and what is already done."
+      },
+      "report": {
+        "label": "Report",
+        "fact": "Report from real work",
+        "detail": "Reports come from confirmed work — nobody retypes them."
+      }
+    }
+  },
+  "twoSides": {
+    "title": "Hiring is the start, not the end.",
+    "professional": "Professional",
+    "company": "Company",
+    "steps": {
+      "find": {
+        "label": "Find",
+        "worker": "Finds work that fits what they really did",
+        "company": "Finds people whose real work fits the need"
+      },
+      "connect": {
+        "label": "Connect",
+        "worker": "Talks in their own language",
+        "company": "Hires through a real conversation"
+      },
+      "work": {
+        "label": "Work",
+        "worker": "Records the work as it happens",
+        "company": "Runs the work with its people"
+      },
+      "verify": {
+        "label": "Verify",
+        "worker": "A manager confirms it",
+        "company": "Confirms what was really done"
+      },
+      "grow": {
+        "label": "Grow",
+        "worker": "Confirmed work becomes their history",
+        "company": "Reports come from confirmed work"
+      },
+      "continue": {
+        "label": "Continue",
+        "worker": "Takes that history to the next job",
+        "company": "Plans the next project with people it knows"
+      }
+    }
+  },
+  "evidenceChain": {
+    "label": "Record status",
+    "own": "By you",
+    "nodes": {
+      "recorded": "Recorded",
+      "photo": "Photo",
+      "manager": "Manager's record",
+      "history": "In your history"
+    },
+    "status": {
+      "done": "Done",
+      "waiting": "Waiting",
+      "absent": "Not yet",
+      "attention": "Needs you",
+      "unknown": "Unknown"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Living CV",
+    "title": "Your work, becoming your history",
+    "now": "Now",
+    "noRecords": "No work records yet",
+    "legend": {
+      "managerRecord": "Manager's record",
+      "recorded": "Recorded by you"
+    },
+    "skillsTitle": "What your work shows",
+    "next": {
+      "title": "Your history goes with you",
+      "body": "Every job you record adds to it. Take it to the next opportunity.",
+      "cta": "See where you can go"
+    }
+  },
+  "workContext": {
+    "title": "Your work, in one view",
+    "nodes": {
+      "current": "Working now",
+      "records": "Records",
+      "manager": "Manager's record",
+      "history": "History",
+      "skills": "Skills",
+      "next": "Next"
+    },
+    "facts": {
+      "records": "{count, plural, one {# record} other {# records}}",
+      "manager": "{count, plural, one {# manager's record} other {# manager's records}}",
+      "history": "{count, plural, one {# job} other {# jobs}}",
+      "skills": "{count, plural, one {# skill backed by your records} other {# skills backed by your records}}",
+      "next": "Where you can go"
     }
   }
 }

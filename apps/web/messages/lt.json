@@ -2224,7 +2224,8 @@
         "title": "Laukia jūsų sprendimo",
         "review": "Žurnalo įrašai peržiūrai",
         "invitations": "Laukiantys kvietimai darbuotojams",
-        "claims": "Viešos užklausos, kurias galite perimti"
+        "claims": "Viešos užklausos, kurias galite perimti",
+        "reviewOff": "Dirbantys darbuotojai, kurių darbo patvirtinimas neįjungtas"
       }
     },
     "agency": {
@@ -7585,6 +7586,8 @@
     "skillsUnavailable": "Šiuo metu nepavyko nuskaityti.",
     "verifiedUnavailable": "Įgūdžių su vadovo įrašu šiuo metu nepavyko nuskaityti.",
     "identity": {
+      "noRecords": "Dar nėra darbo įrašų",
+      "noManagerRecord": "Dar nėra vadovo įrašo",
       "currentWork": "Dirba dabar",
       "recorded": "val. užfiksuota",
       "confirmed": "val. su vadovo įrašu",
@@ -8342,7 +8345,7 @@
     "pickDemand": "Pasirink poreikį",
     "noDemands": "Kol kas neturite poreikių. Sukurkite poreikį skydelyje — po peržiūros komanda sustruktūruos reikalingus gebėjimus.",
     "noDemandsCta": "Sukurti poreikį",
-    "unstructuredTag": "nestruktūruotas",
+    "unstructuredTag": "reikalavimai nepatvirtinti",
     "notStructured": "Šio poreikio reikalingi gebėjimai dar nesustruktūruoti, todėl atitiktis neskaičiuojama. Naujus poreikius peržiūri ir struktūruoja administratoriai — jums nieko daryti nereikia.",
     "needsSetup": "Nepavyko įkelti. Bandykite dar kartą.",
     "noCandidates": "Šiam poreikiui kol kas nėra tinkamų darbuotojų. Atitikmenų atsiras darbuotojams pildant žurnalu pagrįstus gebėjimus — užsukite vėliau arba praplėskite poreikį.",
@@ -8537,13 +8540,15 @@
       "cancel": "Atšaukti"
     },
     "verdict": {
-      "eligible": "Atitinka nurodytus reikalavimus",
+      "eligible": "Atitinka privalomus reikalavimus (įgūdžiai vertinami atskirai)",
       "blocked": "Neatitinka nurodyto reikalavimo",
       "evidence": {
         "confirmed": "Įrodymai: patvirtinta vadovo",
         "mixed": "Įrodymai: iš dalies patvirtinta",
         "unverified": "Įrodymai: tik paties deklaruota"
-      }
+      },
+      "noCriteria": "Privalomų reikalavimų nenurodyta",
+      "insufficient": "Per mažai duomenų reikalavimams patikrinti"
     },
     "editNeedCta": "Patikslinti arba pridėti poreikį",
     "availableSupply": {
@@ -8576,7 +8581,7 @@
         "shortlist": "Atrinkti",
         "contact": "Susisiekta",
         "offer": "Pasiūlyta",
-        "accepted": "Priėmė",
+        "accepted": "Sutiko su datomis",
         "closed": "Uždaryta"
       }
     },
@@ -8586,7 +8591,8 @@
       "readiness": "Prieinamumas, pasirengimas ir dokumentai",
       "openTo": "Taip pat atviras: {countries}",
       "skillCount": "{matched} iš {total} reikalaujamų įgūdžių",
-      "nameHidden": "Vardas ir kontaktai rodomi tik tada, kai žmogus tai leidžia."
+      "nameHidden": "Vardas ir kontaktai rodomi tik tada, kai žmogus tai leidžia.",
+      "skillUnknown": "Įgūdžių nenurodyta · reikia {total}"
     }
   },
   "planBoundary": {
@@ -11893,7 +11899,7 @@
       "contacted": "Susisiekta",
       "interview": "Pokalbis",
       "offer": "Pasiūlymas",
-      "accepted": "Priimtas",
+      "accepted": "Sutiko su datomis",
       "rejected": "Atmestas"
     },
     "action": {
@@ -11903,7 +11909,8 @@
       "continueConversation": "Tęsti pokalbį",
       "viewOffer": "Sekti pasiūlymo atsakymą",
       "planWork": "Peržiūrėti priimtą pasiūlymą",
-      "reviewOthers": "Peržiūrėti kitus kandidatus"
+      "reviewOthers": "Peržiūrėti kitus kandidatus",
+      "assignToProject": "Priskirti projektui"
     }
   },
   "agencyClients": {
@@ -13115,7 +13122,7 @@
       "offerTitle": "Darbo pasiūlymas",
       "confirmAcceptTitle": "Priimti šį pasiūlymą?",
       "confirmAcceptBody": "Priėmimas patvirtina įsipareigojimą darbdaviui — tai tvirtas žingsnis, ne juodraštis.",
-      "confirmAcceptDisclosure": "Priėmus ši įmonė — ir tik ši įmonė — matys tavo profilio kortelę: vardą, įgūdžius, profesijas, kalbas ir pasiekiamumą. Kontaktai lieka privačias, kitos įmonės prieigos negauna, ir tai neįtraukia tavęs į darbdavių paiešką. Prieiga galioja, kol darbo santykis aktyvus — bet kada gali jį baigti.",
+      "confirmAcceptDisclosure": "Priimdamas sutinki su šioje rezervacijoje nurodytomis datomis. Tai ne darbo sutartis ir nereiškia, kad jau esi įdarbintas — konkretų projektą ar objektą įmonė nustato atskirai. Priėmus ši įmonė — ir tik ši įmonė — matys tavo profilio kortelę: vardą, įgūdžius, profesijas, kalbas ir pasiekiamumą. Kontaktai lieka privačias, kitos įmonės prieigos negauna, ir tai neįtraukia tavęs į darbdavių paiešką. Prieiga galioja, kol darbo santykis aktyvus — bet kada gali jį baigti.",
       "confirmDeclineTitle": "Atmesti šį pasiūlymą?",
       "confirmCta": "Taip, patvirtinti",
       "cancelCta": "Atšaukti",
@@ -14248,7 +14255,7 @@
       "candidatesBlocked": "Šiuo metu nepasiekiama.",
       "candidatesNoDemands": "Jūsų įmonė dar neaprašė poreikio.",
       "candidatesPickDemand": "Kuriam poreikiui ieškote žmonių?",
-      "candidatesUnstructuredBadge": "nestruktūruotas",
+      "candidatesUnstructuredBadge": "reikalavimai nepatvirtinti",
       "candidatesBackToDemands": "Atgal į poreikius",
       "candidatesNotFound": "Toks poreikis nerastas arba jis ne jūsų.",
       "candidatesNeedsMigration": "Šiuo metu nepasiekiama.",
@@ -17933,6 +17940,177 @@
       "done": "Priskirta įrašų: {count}; jau buvo priskirta: {skipped}.",
       "refused": "Nepavyko išsaugoti. Nieko nepakeista.",
       "person": "{hours} val., {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}"
+    }
+  },
+  "workLifecycle": {
+    "pending": "Dar ne",
+    "title": "Kas nutinka su jūsų darbu",
+    "titleCompany": "Kas nutinka su jūsų vykdomu darbu",
+    "example": "Pavyzdys — ne tikras žmogus ir ne tikri duomenys",
+    "hint": "Pasirinkite žingsnį. Kiekvienas atveria tikrą vietą jūsų darbo erdvėje.",
+    "open": "Atidaryti darbo erdvėje",
+    "list": "Darbo gyvavimo ciklo žingsniai",
+    "workers": {
+      "person": {
+        "label": "Jūs",
+        "fact": "Virėja · profesinė tapatybė",
+        "detail": "Viena profesinė tapatybė, kuri priklauso jums — ne vienam darbdaviui."
+      },
+      "team": {
+        "label": "Komanda",
+        "fact": "Virtuvės komanda",
+        "detail": "Prisijungiate prie tikros komandos — matote, su kuo dirbate ir kas ją vadovauja."
+      },
+      "project": {
+        "label": "Projektas",
+        "fact": "Rudens meniu pristatymas",
+        "detail": "Darbas priklauso projektui, todėl turi vietą, tikslą ir laiką."
+      },
+      "work": {
+        "label": "Darbas",
+        "fact": "Vakaro pamaina · 8 val.",
+        "detail": "Ką padarėte, kada ir kiek laiko — užfiksuota tada, kai vyksta."
+      },
+      "evidence": {
+        "label": "Įrodymas",
+        "fact": "Nuotrauka + žurnalo įrašas",
+        "detail": "Atliktas darbas tampa įrodymu, o ne dingsta."
+      },
+      "confirmation": {
+        "label": "Patvirtinta",
+        "fact": "Patvirtino vadovas",
+        "detail": "Vadovas patvirtina. Be to niekas nevadinama patvirtinta."
+      },
+      "history": {
+        "label": "Istorija",
+        "fact": "Įtraukta į jūsų istoriją",
+        "detail": "Patvirtintas darbas kuria jūsų profesinę istoriją — ji lieka su jumis kitam darbui."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Poreikis",
+        "fact": "4 virėjai nuo pirmadienio",
+        "detail": "Tikrą poreikį nurodote vieną kartą: kas, kur ir nuo kada."
+      },
+      "people": {
+        "label": "Žmonės",
+        "fact": "Tinkami profesionalai",
+        "detail": "Profesionalai, kurių tikra darbo istorija tinka poreikiui — matote, kas patvirtinta, o kas dar ne."
+      },
+      "team": {
+        "label": "Komanda",
+        "fact": "Virtuvės komanda",
+        "detail": "Žmonės tampa komanda su vadovu, pamainomis ir darbo vieta."
+      },
+      "project": {
+        "label": "Projektas",
+        "fact": "Rudens meniu pristatymas",
+        "detail": "Komandos organizuojamos aplink projektą, kurį vykdo."
+      },
+      "work": {
+        "label": "Darbas",
+        "fact": "Vakaro pamaina · 8 val.",
+        "detail": "Darbas fiksuojamas ten, kur vyksta, o ne atkuriamas vėliau."
+      },
+      "confirmation": {
+        "label": "Patvirtinta",
+        "fact": "Laukia jūsų patvirtinimo",
+        "detail": "Matote, ką dar reikia patvirtinti ir kas jau atlikta."
+      },
+      "report": {
+        "label": "Ataskaita",
+        "fact": "Ataskaita iš tikro darbo",
+        "detail": "Ataskaitos gaunamos iš patvirtinto darbo — niekas jų nerašo iš naujo."
+      }
+    }
+  },
+  "twoSides": {
+    "title": "Įdarbinimas yra pradžia, o ne pabaiga.",
+    "professional": "Profesionalas",
+    "company": "Įmonė",
+    "steps": {
+      "find": {
+        "label": "Rasti",
+        "worker": "Randa darbą, atitinkantį tai, ką iš tikrųjų darė",
+        "company": "Randa žmones, kurių tikras darbas atitinka poreikį"
+      },
+      "connect": {
+        "label": "Susisiekti",
+        "worker": "Kalbasi savo kalba",
+        "company": "Samdo per tikrą pokalbį"
+      },
+      "work": {
+        "label": "Dirbti",
+        "worker": "Fiksuoja darbą, kai jis vyksta",
+        "company": "Vykdo darbą su savo žmonėmis"
+      },
+      "verify": {
+        "label": "Patvirtinti",
+        "worker": "Vadovas patvirtina",
+        "company": "Patvirtina, kas iš tikrųjų padaryta"
+      },
+      "grow": {
+        "label": "Augti",
+        "worker": "Patvirtintas darbas tampa jo istorija",
+        "company": "Ataskaitos gaunamos iš patvirtinto darbo"
+      },
+      "continue": {
+        "label": "Tęsti",
+        "worker": "Su ta istorija eina į kitą darbą",
+        "company": "Planuoja kitą projektą su pažįstamais žmonėmis"
+      }
+    }
+  },
+  "evidenceChain": {
+    "label": "Įrašo būsena",
+    "own": "Jūsų",
+    "nodes": {
+      "recorded": "Užfiksuota",
+      "photo": "Nuotrauka",
+      "manager": "Vadovo įrašas",
+      "history": "Jūsų istorijoje"
+    },
+    "status": {
+      "done": "Yra",
+      "waiting": "Laukia",
+      "absent": "Dar ne",
+      "attention": "Reikia jūsų",
+      "unknown": "Nežinoma"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Gyvas CV",
+    "title": "Jūsų darbas tampa jūsų istorija",
+    "now": "Dabar",
+    "noRecords": "Dar nėra darbo įrašų",
+    "legend": {
+      "managerRecord": "Vadovo įrašas",
+      "recorded": "Jūsų užfiksuota"
+    },
+    "skillsTitle": "Ką rodo jūsų darbas",
+    "next": {
+      "title": "Jūsų istorija keliauja su jumis",
+      "body": "Kiekvienas užfiksuotas darbas ją papildo. Pasiimkite ją į kitą galimybę.",
+      "cta": "Pažiūrėti, kur galite eiti"
+    }
+  },
+  "workContext": {
+    "title": "Jūsų darbas vienoje vietoje",
+    "nodes": {
+      "current": "Dirba dabar",
+      "records": "Įrašai",
+      "manager": "Vadovo įrašas",
+      "history": "Istorija",
+      "skills": "Gebėjimai",
+      "next": "Toliau"
+    },
+    "facts": {
+      "records": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
+      "manager": "{count, plural, one {# vadovo įrašas} few {# vadovo įrašai} other {# vadovo įrašų}}",
+      "history": "{count, plural, one {# darbas} few {# darbai} other {# darbų}}",
+      "skills": "{count, plural, one {# jūsų įrašais pagrįstas gebėjimas} few {# jūsų įrašais pagrįsti gebėjimai} other {# jūsų įrašais pagrįstų gebėjimų}}",
+      "next": "Kur galite eiti"
     }
   }
 }

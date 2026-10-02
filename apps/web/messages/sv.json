@@ -1272,7 +1272,7 @@
         },
         {
           "desc": "[EN] Completed work strengthens your proof and readiness.",
-          "title": "[EN] Work, earn, level up"
+          "title": "[EN] Work, earn, build your record"
         }
       ]
     },
@@ -2420,6 +2420,8 @@
       "link": "Present a candidate"
     },
     "identity": {
+      "noRecords": "Inga arbetsregistreringar ännu",
+      "noManagerRecord": "Ännu ingen registrering från chefen",
       "why": "Varför den här personen är relevant",
       "skills": "Relevanta färdigheter och vad de vilar på",
       "readiness": "Tillgänglighet, beredskap och dokument",
@@ -6876,6 +6878,177 @@
       "done": "{count} poster tillskrivna; {skipped} var redan tillskrivna.",
       "refused": "Det gick inte att spara. Inget ändrades.",
       "person": "{hours} h, {count, plural, one {# post} other {# poster}}"
+    }
+  },
+  "workLifecycle": {
+    "pending": "Ännu inte",
+    "title": "Vad som händer med arbetet du utför",
+    "titleCompany": "Vad som händer med arbetet du driver",
+    "example": "Exempel — inte en riktig person eller riktiga data",
+    "hint": "Välj ett steg. Varje steg öppnar den verkliga platsen i din arbetsyta.",
+    "open": "Öppna i din arbetsyta",
+    "list": "Steg i arbetets livscykel",
+    "workers": {
+      "person": {
+        "label": "Du",
+        "fact": "Kock — professionell identitet",
+        "detail": "En professionell identitet som är din — inte knuten till en enda arbetsgivare."
+      },
+      "team": {
+        "label": "Lag",
+        "fact": "Kökslag",
+        "detail": "Du går med i ett riktigt lag, med dem du arbetar med och den som leder det."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Lansering av höstmenyn",
+        "detail": "Arbete hör till ett projekt, så det har en plats, ett syfte och en tid."
+      },
+      "work": {
+        "label": "Arbete",
+        "fact": "Kvällsservice — 8 tim",
+        "detail": "Vad du gjorde, när och hur länge — registrerat medan det sker."
+      },
+      "evidence": {
+        "label": "Underlag",
+        "fact": "Foto + journalpost",
+        "detail": "Utfört arbete blir underlag i stället för att försvinna."
+      },
+      "confirmation": {
+        "label": "Bekräftat",
+        "fact": "Bekräftat av chef",
+        "detail": "En chef bekräftar det. Inget kallas verifierat utan det."
+      },
+      "history": {
+        "label": "Historik",
+        "fact": "Tillagt i din historik",
+        "detail": "Bekräftat arbete bygger din professionella historik — den stannar hos dig till nästa jobb."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Behov",
+        "fact": "4 kockar, från måndag",
+        "detail": "Du anger det verkliga behovet en gång: vem, var och från när."
+      },
+      "people": {
+        "label": "Personer",
+        "fact": "Professionella som passar",
+        "detail": "Professionella vars verkliga arbetshistorik passar behovet — med det som är verifierat och det som inte är det ännu."
+      },
+      "team": {
+        "label": "Lag",
+        "fact": "Kökslag",
+        "detail": "Personer blir ett lag med en ledare, pass och en plats att arbeta på."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Lansering av höstmenyn",
+        "detail": "Lag organiseras kring det projekt de levererar."
+      },
+      "work": {
+        "label": "Arbete",
+        "fact": "Kvällsservice — 8 tim",
+        "detail": "Arbete registreras där det sker, inte rekonstrueras efteråt."
+      },
+      "confirmation": {
+        "label": "Bekräftat",
+        "fact": "Väntar på din bekräftelse",
+        "detail": "Du ser vad som fortfarande ska bekräftas och vad som redan är klart."
+      },
+      "report": {
+        "label": "Rapport",
+        "fact": "Rapport från verkligt arbete",
+        "detail": "Rapporter bygger på bekräftat arbete — ingen skriver om dem."
+      }
+    }
+  },
+  "twoSides": {
+    "title": "Anställning är början, inte slutet.",
+    "professional": "Yrkesperson",
+    "company": "Företag",
+    "steps": {
+      "find": {
+        "label": "Hitta",
+        "worker": "Hittar arbete som passar det de faktiskt gjort",
+        "company": "Hittar personer vars verkliga arbete passar behovet"
+      },
+      "connect": {
+        "label": "Koppla",
+        "worker": "Pratar på sitt eget språk",
+        "company": "Anställer genom ett riktigt samtal"
+      },
+      "work": {
+        "label": "Arbeta",
+        "worker": "Registrerar arbetet medan det pågår",
+        "company": "Driver arbetet tillsammans med sina medarbetare"
+      },
+      "verify": {
+        "label": "Bekräfta",
+        "worker": "En chef bekräftar det",
+        "company": "Bekräftar vad som faktiskt gjordes"
+      },
+      "grow": {
+        "label": "Växa",
+        "worker": "Bekräftat arbete blir deras historik",
+        "company": "Rapporter bygger på bekräftat arbete"
+      },
+      "continue": {
+        "label": "Fortsätt",
+        "worker": "Tar historiken med till nästa jobb",
+        "company": "Planerar nästa projekt med personer de känner"
+      }
+    }
+  },
+  "evidenceChain": {
+    "label": "Postens status",
+    "own": "Av dig",
+    "nodes": {
+      "recorded": "Registrerad",
+      "photo": "Foto",
+      "manager": "Chefens post",
+      "history": "I din historik"
+    },
+    "status": {
+      "done": "Klar",
+      "waiting": "Väntar",
+      "absent": "Inte än",
+      "attention": "Behöver dig",
+      "unknown": "Okänd"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Levande CV",
+    "title": "Ditt arbete blir din historia",
+    "now": "Nu",
+    "noRecords": "Inga arbetsposter ännu",
+    "legend": {
+      "managerRecord": "Chefens registrering",
+      "recorded": "Registrerat av dig"
+    },
+    "skillsTitle": "Vad ditt arbete visar",
+    "next": {
+      "title": "Din historia följer med dig",
+      "body": "Varje jobb du registrerar bygger på den. Ta den med till nästa möjlighet.",
+      "cta": "Se vart du kan gå"
+    }
+  },
+  "workContext": {
+    "title": "Ditt arbete på ett ställe",
+    "nodes": {
+      "current": "Arbetar nu",
+      "records": "Registreringar",
+      "manager": "Chefens registrering",
+      "history": "Historik",
+      "skills": "Färdigheter",
+      "next": "Nästa"
+    },
+    "facts": {
+      "records": "{count, plural, one {# registrering} other {# registreringar}}",
+      "manager": "{count, plural, one {# registrering från chefen} other {# registreringar från chefen}}",
+      "history": "{count, plural, one {# jobb} other {# jobb}}",
+      "skills": "{count, plural, one {# färdighet baserad på dina registreringar} other {# färdigheter baserade på dina registreringar}}",
+      "next": "Vart du kan gå"
     }
   }
 }

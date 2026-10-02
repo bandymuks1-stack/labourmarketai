@@ -63,7 +63,7 @@ describe("map marker avatar fallback matches the Player Card tokens", () => {
     // Player Card, 2026-09-29) and renders the SAME shared fallback surface
     // (PLAYER_IDENTITY_FALLBACK_SURFACE = bg-ink-700 text-text-primary).
     expect(playerCard).toMatch(/<IdentityStage/);
-    const stage = readFileSync(join(ROOT, "components/app/player-card/identity-stage.tsx"), "utf8");
+    const stage = readFileSync(join(ROOT, "components/app/identity/person-portrait.tsx"), "utf8");
     expect(stage).toMatch(/PLAYER_IDENTITY_FALLBACK_SURFACE/);
     expect(read("lib/identity/player-identity.ts")).toMatch(/PLAYER_IDENTITY_FALLBACK_SURFACE = "bg-ink-700 text-text-primary"/);
     // No hard-coded hex for the fallback avatar fill (old cyan OR the interim

@@ -2224,7 +2224,8 @@
         "title": "Wartet auf deine Entscheidung",
         "review": "Journaleinträge zur Prüfung",
         "invitations": "Ausstehende Einladungen an Arbeitskräfte",
-        "claims": "Öffentliche Anfragen, die du übernehmen kannst"
+        "claims": "Öffentliche Anfragen, die du übernehmen kannst",
+        "reviewOff": "Mitarbeitende mit erfasster Arbeit, deren Bestätigung ausgeschaltet ist"
       }
     },
     "agency": {
@@ -7585,6 +7586,8 @@
     "skillsUnavailable": "Konnte gerade nicht gelesen werden.",
     "verifiedUnavailable": "Fähigkeiten mit Eintrag einer Führungskraft konnten gerade nicht gelesen werden.",
     "identity": {
+      "noRecords": "Noch keine Arbeitseinträge",
+      "noManagerRecord": "Noch kein Eintrag der Führungskraft",
       "currentWork": "Arbeitet derzeit",
       "recorded": "Std. erfasst",
       "confirmed": "Std. mit Eintrag der Leitung",
@@ -8342,7 +8345,7 @@
     "pickDemand": "Bedarf wählen",
     "noDemands": "Du hast noch keine Bedarfe. Erstelle zuerst einen Bedarf und strukturiere dann die benötigten Fähigkeiten.",
     "noDemandsCta": "Bedarf erstellen",
-    "unstructuredTag": "nicht strukturiert",
+    "unstructuredTag": "Anforderungen nicht bestätigt",
     "notStructured": "Dieser Bedarf hat noch keine strukturierten Fähigkeiten, daher kann kein Match berechnet werden. Strukturiere zuerst die benötigten Fähigkeiten.",
     "needsSetup": "Scouting ist in dieser Umgebung noch nicht verfügbar.",
     "noCandidates": "Noch keine passenden Arbeitskräfte für diesen Bedarf.",
@@ -8537,13 +8540,15 @@
       "cancel": "Abbrechen"
     },
     "verdict": {
-      "eligible": "Erfüllt die genannten Anforderungen",
+      "eligible": "Erfüllt die Pflichtanforderungen (Fähigkeiten werden separat bewertet)",
       "blocked": "Erfüllt eine genannte Anforderung nicht",
       "evidence": {
         "confirmed": "Nachweis: vom Manager bestätigt",
         "mixed": "Nachweis: teilweise bestätigt",
         "unverified": "Nachweis: nur selbst angegeben"
-      }
+      },
+      "noCriteria": "Keine Pflichtanforderungen angegeben",
+      "insufficient": "Zu wenig Daten, um die Anforderungen zu prüfen"
     },
     "editNeedCta": "Bedarf anpassen oder hinzufügen",
     "availableSupply": {
@@ -8576,7 +8581,7 @@
         "shortlist": "Vorausgewählt",
         "contact": "Im Kontakt",
         "offer": "Angeboten",
-        "accepted": "Angenommen",
+        "accepted": "Mit den Terminen einverstanden",
         "closed": "Geschlossen"
       }
     },
@@ -8586,7 +8591,8 @@
       "readiness": "Verfügbarkeit, Bereitschaft und Dokumente",
       "openTo": "Auch offen für: {countries}",
       "skillCount": "{matched} von {total} geforderten Fähigkeiten",
-      "nameHidden": "Name und Kontaktdaten erscheinen erst, wenn die Person sie freigibt."
+      "nameHidden": "Name und Kontaktdaten erscheinen erst, wenn die Person sie freigibt.",
+      "skillUnknown": "Keine Fähigkeiten angegeben · benötigt: {total}"
     }
   },
   "planBoundary": {
@@ -11893,7 +11899,7 @@
       "contacted": "Kontaktiert",
       "interview": "Im Gespräch",
       "offer": "Angebot",
-      "accepted": "Angenommen",
+      "accepted": "Mit den Terminen einverstanden",
       "rejected": "Abgelehnt"
     },
     "action": {
@@ -11903,7 +11909,8 @@
       "continueConversation": "Gespräch fortsetzen",
       "viewOffer": "Antwort auf das Angebot verfolgen",
       "planWork": "Angenommenes Angebot ansehen",
-      "reviewOthers": "Weitere Kandidaten prüfen"
+      "reviewOthers": "Weitere Kandidaten prüfen",
+      "assignToProject": "Einem Projekt zuweisen"
     }
   },
   "agencyClients": {
@@ -13115,7 +13122,7 @@
       "offerTitle": "Stellenangebot",
       "confirmAcceptTitle": "Dieses Angebot annehmen?",
       "confirmAcceptBody": "Die Annahme bestätigt dein Engagement beim Arbeitgeber — ein fester Schritt, kein Entwurf.",
-      "confirmAcceptDisclosure": "Mit der Annahme sieht dieses Unternehmen — und nur dieses — deine Profilkarte: Name, Fähigkeiten, Berufe, Sprachen und Verfügbarkeit. Deine Kontaktdaten bleiben privat, kein anderes Unternehmen erhält Zugriff, und du wirst dadurch nicht in die Arbeitgebersuche aufgenommen. Der Zugriff gilt, solange das Engagement aktiv ist — du kannst es jederzeit beenden.",
+      "confirmAcceptDisclosure": "Mit der Annahme stimmst du den in dieser Buchung genannten Terminen zu. Das ist kein Arbeitsvertrag und bedeutet nicht, dass du bereits eingestellt bist – ein konkretes Projekt oder einen Einsatzort legt das Unternehmen separat fest. Mit der Annahme sieht dieses Unternehmen — und nur dieses — deine Profilkarte: Name, Fähigkeiten, Berufe, Sprachen und Verfügbarkeit. Deine Kontaktdaten bleiben privat, kein anderes Unternehmen erhält Zugriff, und du wirst dadurch nicht in die Arbeitgebersuche aufgenommen. Der Zugriff gilt, solange das Engagement aktiv ist — du kannst es jederzeit beenden.",
       "confirmDeclineTitle": "Dieses Angebot ablehnen?",
       "confirmCta": "Ja, bestätigen",
       "cancelCta": "Abbrechen",
@@ -14248,7 +14255,7 @@
       "candidatesBlocked": "Derzeit nicht verfügbar.",
       "candidatesNoDemands": "Dein Unternehmen hat noch keinen Bedarf beschrieben.",
       "candidatesPickDemand": "Für welchen Bedarf suchst du Leute?",
-      "candidatesUnstructuredBadge": "nicht strukturiert",
+      "candidatesUnstructuredBadge": "Anforderungen nicht bestätigt",
       "candidatesBackToDemands": "Zurück zu den Bedarfen",
       "candidatesNotFound": "Dieser Bedarf wurde nicht gefunden oder gehört nicht dir.",
       "candidatesNeedsMigration": "Derzeit nicht verfügbar.",
@@ -17933,6 +17940,177 @@
       "done": "{count} Einträge zugeordnet; {skipped} waren bereits zugeordnet.",
       "refused": "Das konnte nicht gespeichert werden. Nichts wurde geändert.",
       "person": "{hours} Std., {count, plural, one {# Eintrag} other {# Einträge}}"
+    }
+  },
+  "workLifecycle": {
+    "pending": "Noch nicht",
+    "title": "Was mit Ihrer Arbeit passiert",
+    "titleCompany": "Was mit der Arbeit passiert, die Sie leiten",
+    "example": "Beispiel — keine echte Person und keine echten Daten",
+    "hint": "Wählen Sie einen Schritt. Jeder Schritt öffnet den echten Ort in Ihrem Arbeitsbereich.",
+    "open": "In Ihrem Arbeitsbereich öffnen",
+    "list": "Schritte im Arbeitsverlauf",
+    "workers": {
+      "person": {
+        "label": "Sie",
+        "fact": "Koch — berufliche Identität",
+        "detail": "Eine berufliche Identität, die Ihnen gehört — nicht an einen einzelnen Arbeitgeber gebunden."
+      },
+      "team": {
+        "label": "Ihr Team",
+        "fact": "Küchenteam",
+        "detail": "Sie schließen sich einem echten Team an — mit den Menschen, mit denen Sie arbeiten, und wer es leitet."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Start der Herbstkarte",
+        "detail": "Arbeit gehört zu einem Projekt und hat damit einen Ort, einen Zweck und eine Zeit."
+      },
+      "work": {
+        "label": "Arbeit",
+        "fact": "Abendservice — 8 Std.",
+        "detail": "Was Sie getan haben, wann und wie lange — erfasst, während es passiert."
+      },
+      "evidence": {
+        "label": "Nachweis",
+        "fact": "Foto + Journaleintrag",
+        "detail": "Erledigte Arbeit wird zum Nachweis, statt zu verschwinden."
+      },
+      "confirmation": {
+        "label": "Bestätigt",
+        "fact": "Von der Leitung bestätigt",
+        "detail": "Eine Führungskraft bestätigt es. Ohne das gilt nichts als verifiziert."
+      },
+      "history": {
+        "label": "Verlauf",
+        "fact": "Zu Ihrem Verlauf hinzugefügt",
+        "detail": "Bestätigte Arbeit bildet Ihren beruflichen Verlauf — er bleibt bei Ihnen für den nächsten Job."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Bedarf",
+        "fact": "4 Köche, ab Montag",
+        "detail": "Sie nennen den echten Bedarf einmal: wer, wo und ab wann."
+      },
+      "people": {
+        "label": "Personen",
+        "fact": "Passende Fachkräfte",
+        "detail": "Fachkräfte, deren echter Arbeitsverlauf zum Bedarf passt — mit dem, was verifiziert ist und was noch nicht."
+      },
+      "team": {
+        "label": "Ihr Team",
+        "fact": "Küchenteam",
+        "detail": "Aus Personen wird ein Team mit Leitung, Schichten und einem Arbeitsplatz."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Start der Herbstkarte",
+        "detail": "Teams sind um das Projekt organisiert, das sie liefern."
+      },
+      "work": {
+        "label": "Arbeit",
+        "fact": "Abendservice — 8 Std.",
+        "detail": "Arbeit wird dort erfasst, wo sie passiert, und nicht nachträglich rekonstruiert."
+      },
+      "confirmation": {
+        "label": "Bestätigt",
+        "fact": "Wartet auf Ihre Bestätigung",
+        "detail": "Sie sehen, was noch bestätigt werden muss und was schon erledigt ist."
+      },
+      "report": {
+        "label": "Bericht",
+        "fact": "Bericht aus echter Arbeit",
+        "detail": "Berichte entstehen aus bestätigter Arbeit — niemand tippt sie neu ab."
+      }
+    }
+  },
+  "twoSides": {
+    "title": "Einstellung ist der Anfang, nicht das Ende.",
+    "professional": "Fachkraft",
+    "company": "Unternehmen",
+    "steps": {
+      "find": {
+        "label": "Finden",
+        "worker": "Findet Arbeit, die zu dem passt, was sie wirklich geleistet haben",
+        "company": "Findet Menschen, deren tatsächliche Arbeit zum Bedarf passt"
+      },
+      "connect": {
+        "label": "Verbinden",
+        "worker": "Spricht in der eigenen Sprache",
+        "company": "Stellt über ein echtes Gespräch ein"
+      },
+      "work": {
+        "label": "Arbeiten",
+        "worker": "Hält die Arbeit fest, während sie passiert",
+        "company": "Führt die Arbeit gemeinsam mit den eigenen Leuten aus"
+      },
+      "verify": {
+        "label": "Bestätigen",
+        "worker": "Eine Führungskraft bestätigt sie",
+        "company": "Bestätigt, was wirklich getan wurde"
+      },
+      "grow": {
+        "label": "Wachsen",
+        "worker": "Bestätigte Arbeit wird zur eigenen Historie",
+        "company": "Berichte entstehen aus bestätigter Arbeit"
+      },
+      "continue": {
+        "label": "Weitermachen",
+        "worker": "Nimmt diese Historie in den nächsten Job mit",
+        "company": "Plant das nächste Projekt mit Menschen, die man kennt"
+      }
+    }
+  },
+  "evidenceChain": {
+    "label": "Eintragsstatus",
+    "own": "Von Ihnen",
+    "nodes": {
+      "recorded": "Erfasst",
+      "photo": "Foto",
+      "manager": "Eintrag der Leitung",
+      "history": "In Ihrem Verlauf"
+    },
+    "status": {
+      "done": "Da",
+      "waiting": "Wartet",
+      "absent": "Noch nicht",
+      "attention": "Brauchen Sie",
+      "unknown": "Unbekannt"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Lebender Lebenslauf",
+    "title": "Ihre Arbeit wird zu Ihrer Geschichte",
+    "now": "Jetzt",
+    "noRecords": "Noch keine Arbeitseinträge",
+    "legend": {
+      "managerRecord": "Eintrag der Führungskraft",
+      "recorded": "Von Ihnen erfasst"
+    },
+    "skillsTitle": "Was Ihre Arbeit zeigt",
+    "next": {
+      "title": "Ihre Geschichte geht mit Ihnen",
+      "body": "Jede Arbeit, die Sie festhalten, ergänzt sie. Nehmen Sie sie mit zur nächsten Gelegenheit.",
+      "cta": "Sehen, wohin Sie gehen können"
+    }
+  },
+  "workContext": {
+    "title": "Deine Arbeit auf einen Blick",
+    "nodes": {
+      "current": "Aktuell im Einsatz",
+      "records": "Einträge",
+      "manager": "Eintrag der Führungskraft",
+      "history": "Verlauf",
+      "skills": "Fähigkeiten",
+      "next": "Weiter"
+    },
+    "facts": {
+      "records": "{count, plural, one {# Eintrag} other {# Einträge}}",
+      "manager": "{count, plural, one {# Eintrag der Führungskraft} other {# Einträge der Führungskraft}}",
+      "history": "{count, plural, one {# Job} other {# Jobs}}",
+      "skills": "{count, plural, one {# Fähigkeit, gestützt auf deine Einträge} other {# Fähigkeiten, gestützt auf deine Einträge}}",
+      "next": "Wohin du gehen kannst"
     }
   }
 }

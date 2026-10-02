@@ -38,9 +38,13 @@ const SUPPORTED_ROLES = ["manager", "owner", "external_manager"] as const;
 export async function EvidenceDecisionTimeline({
   createdAt,
   events,
+  awaiting,
 }: {
   createdAt: string;
   events: readonly ReviewTimelineEvent[];
+  /** False when the organisation has not switched confirmation on: the entry
+   *  is NOT in anyone's queue, so "waiting for a human" would be untrue. */
+  awaiting?: boolean;
 }) {
   const t = await getTranslations("journal");
   const tTier = await getTranslations("evidenceTier");
@@ -62,7 +66,14 @@ export async function EvidenceDecisionTimeline({
         </span>
       </li>
 
-      {events.length === 0 ? (
+      {events.length === 0 && awaiting === false ? (
+        <li className="flex items-start gap-2" data-step="not-enabled">
+          <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${DOT.waiting}`} aria-hidden />
+          <span className="text-meta leading-tight text-text-muted">
+            {t("entry.timeline.notEnabled")}
+          </span>
+        </li>
+      ) : events.length === 0 ? (
         /* No human decision yet — honestly "waiting", never auto-confirmed. */
         <li className="flex items-start gap-2" data-step="waiting">
           <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${DOT.waiting}`} aria-hidden />
