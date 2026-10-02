@@ -7856,7 +7856,8 @@
       "refusedType": "Dit bestandstype kan niet als tekst worden gelezen.",
       "empty": "Geen leesbare tekst gevonden in dit document.",
       "failed": "Het document kon niet worden gelezen.",
-      "noEngagement": "Je hebt eerst een werkcontext nodig — open het dashboard om er een aan te maken."
+      "noEngagement": "Je hebt eerst een werkcontext nodig — open het dashboard om er een aan te maken.",
+      "workDateHint": "Het document vermeldt niet op welke dag dit werk is gedaan. Kies zelf de datum — er wordt niets voor je ingevuld."
     },
     "currentVersion": "Versie {n}",
     "download": "Downloaden",

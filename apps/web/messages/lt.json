@@ -7856,7 +7856,8 @@
       "refusedType": "Šio tipo failo neįmanoma perskaityti kaip teksto.",
       "empty": "Šiame dokumente skaitomo teksto nerasta.",
       "failed": "Dokumento perskaityti nepavyko.",
-      "noEngagement": "Pirmiausia reikia darbo konteksto — atsidaryk skydelį ir jį susikurk."
+      "noEngagement": "Pirmiausia reikia darbo konteksto — atsidaryk skydelį ir jį susikurk.",
+      "workDateHint": "Dokumente nenurodyta, kurią dieną darbas atliktas. Pasirinkite datą patys — nieko už jus neįrašome."
     },
     "currentVersion": "Versija {n}",
     "download": "Atsisiųsti",

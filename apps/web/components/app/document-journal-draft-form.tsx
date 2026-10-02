@@ -36,7 +36,37 @@ export type DocumentJournalDraftFormLabels = {
   saved: string;
   savedLink: string;
   error: string;
+  /** Says the document does not state the work day — the worker chooses it. */
+  workDateHint: string;
 };
+
+function todayLocalIso(): string {
+  const d = new Date();
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+/**
+ * After a successful save, drop `?draftFrom` so a reload cannot re-open the
+ * draft and save the same text again. `history.replaceState` (Next syncs it
+ * with the router) rather than `router.replace`: the latter would re-render
+ * the server page without the draft section and remove the confirmation the
+ * worker is reading.
+ */
+function clearDraftFromUrl(): void {
+  try {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("draftFrom")) return;
+    url.searchParams.delete("draftFrom");
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${url.pathname}${url.search}${url.hash}`,
+    );
+  } catch {
+    /* URL cleanup is best-effort; the save already succeeded. */
+  }
+}
 
 export function DocumentJournalDraftForm({
   locale,
@@ -105,7 +135,9 @@ export function DocumentJournalDraftForm({
         if (projectPrompt === "ask") fd.set("project_id", projectChoiceValid);
         startTransition(async () => {
           try {
-            setResult(await createJournalEntry(fd));
+            const saved = await createJournalEntry(fd);
+            setResult(saved);
+            if (saved.ok) clearDraftFromUrl();
           } catch {
             setResult({
               ok: false,
@@ -132,6 +164,19 @@ export function DocumentJournalDraftForm({
           className="w-full rounded-md border border-ink-500 bg-ink-800/40 p-2 text-sm text-text-primary"
           data-testid="doc-journal-draft-notes"
         />
+      </label>
+      <label className="flex flex-col gap-1 text-sm text-text-secondary">
+        {tJournal("date")}
+        <input
+          type="date"
+          name="work_date"
+          required
+          defaultValue=""
+          max={todayLocalIso()}
+          className="w-full max-w-xs rounded-md border border-ink-500 bg-ink-800/40 p-2 text-sm text-text-primary"
+          data-testid="doc-journal-draft-work-date"
+        />
+        <span className="text-xs text-text-muted">{labels.workDateHint}</span>
       </label>
       <label className="flex flex-col gap-1 text-sm text-text-secondary">
         {labels.engagementLabel}

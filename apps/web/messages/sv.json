@@ -5404,7 +5404,8 @@
       "refusedType": "Den här filtypen kan inte läsas som text.",
       "empty": "Ingen läsbar text hittades i dokumentet.",
       "failed": "Dokumentet kunde inte läsas.",
-      "noEngagement": "Du behöver först en arbetskontext — öppna panelen och skapa en."
+      "noEngagement": "Du behöver först en arbetskontext — öppna panelen och skapa en.",
+      "workDateHint": "Dokumentet anger inte vilken dag arbetet utfördes. Välj datumet själv — inget fylls i åt dig."
     },
     "currentVersion": "[EN] Version {n}",
     "download": "[EN] Download",

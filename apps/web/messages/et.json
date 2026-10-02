@@ -5404,7 +5404,8 @@
       "refusedType": "Seda failitüüpi ei saa tekstina lugeda.",
       "empty": "Sellest dokumendist ei leitud loetavat teksti.",
       "failed": "Dokumenti ei õnnestunud lugeda.",
-      "noEngagement": "Kõigepealt on vaja töökonteksti — ava töölaud ja loo see."
+      "noEngagement": "Kõigepealt on vaja töökonteksti — ava töölaud ja loo see.",
+      "workDateHint": "Dokument ei ütle, mis päeval töö tehti. Valige kuupäev ise — midagi ei täideta teie eest."
     },
     "currentVersion": "[EN] Version {n}",
     "download": "[EN] Download",

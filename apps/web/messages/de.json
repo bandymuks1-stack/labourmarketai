@@ -7856,7 +7856,8 @@
       "refusedType": "Dieser Dateityp kann nicht als Text gelesen werden.",
       "empty": "In diesem Dokument wurde kein lesbarer Text gefunden.",
       "failed": "Das Dokument konnte nicht gelesen werden.",
-      "noEngagement": "Du brauchst zuerst einen Arbeitskontext — öffne das Dashboard und richte einen ein."
+      "noEngagement": "Du brauchst zuerst einen Arbeitskontext — öffne das Dashboard und richte einen ein.",
+      "workDateHint": "Das Dokument nennt nicht, an welchem Tag die Arbeit erledigt wurde. Wähle das Datum selbst — es wird nichts für dich eingetragen."
     },
     "currentVersion": "Version {n}",
     "download": "Herunterladen",

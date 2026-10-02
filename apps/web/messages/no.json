@@ -5404,7 +5404,8 @@
       "refusedType": "Denne filtypen kan ikke leses som tekst.",
       "empty": "Fant ingen lesbar tekst i dette dokumentet.",
       "failed": "Dokumentet kunne ikke leses.",
-      "noEngagement": "Du trenger først en arbeidskontekst — åpne dashbordet og opprett en."
+      "noEngagement": "Du trenger først en arbeidskontekst — åpne dashbordet og opprett en.",
+      "workDateHint": "Dokumentet oppgir ikke hvilken dag arbeidet ble utført. Velg datoen selv — ingenting fylles ut for deg."
     },
     "currentVersion": "[EN] Version {n}",
     "download": "[EN] Download",
