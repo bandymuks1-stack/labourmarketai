@@ -7002,5 +7002,56 @@
         "company": "Plāno nākamo projektu ar cilvēkiem, ko pazīst"
       }
     }
+  },
+  "evidenceChain": {
+    "label": "Ieraksta statuss",
+    "own": "Jūsu",
+    "nodes": {
+      "recorded": "Reģistrēts",
+      "photo": "Foto",
+      "manager": "Vadītāja ieraksts",
+      "history": "Jūsu vēsturē"
+    },
+    "status": {
+      "done": "Ir",
+      "waiting": "Gaida",
+      "absent": "Vēl nē",
+      "attention": "Vajag jūs",
+      "unknown": "Nav zināms"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Dzīvais CV",
+    "title": "Jūsu darbs kļūst par jūsu stāstu",
+    "now": "Tagad",
+    "noRecords": "Darba ierakstu vēl nav",
+    "legend": {
+      "managerRecord": "Vadītāja ieraksts",
+      "recorded": "Jūsu veiktais ieraksts"
+    },
+    "skillsTitle": "Ko rāda jūsu darbs",
+    "next": {
+      "title": "Jūsu stāsts ceļo kopā ar jums",
+      "body": "Katrs darbs, ko ierakstāt, to papildina. Ņemiet to līdzi uz nākamo iespēju.",
+      "cta": "Skatīt, kurp varat doties"
+    }
+  },
+  "workContext": {
+    "title": "Jūsu darbs vienuviet",
+    "nodes": {
+      "current": "Strādā tagad",
+      "records": "Ieraksti",
+      "manager": "Vadītāja ieraksts",
+      "history": "Vēsture",
+      "skills": "Prasmes",
+      "next": "Tālāk"
+    },
+    "facts": {
+      "records": "{count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}",
+      "manager": "{count, plural, zero {# vadītāja ierakstu} one {# vadītāja ieraksts} other {# vadītāja ieraksti}}",
+      "history": "{count, plural, zero {# darbu} one {# darbs} other {# darbi}}",
+      "skills": "{count, plural, zero {# jūsu ierakstos balstītu prasmju} one {# jūsu ierakstos balstīta prasme} other {# jūsu ierakstos balstītas prasmes}}",
+      "next": "Kur varat doties"
+    }
   }
 }

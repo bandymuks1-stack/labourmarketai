@@ -18067,5 +18067,56 @@
         "company": "Plant das nächste Projekt mit Menschen, die man kennt"
       }
     }
+  },
+  "evidenceChain": {
+    "label": "Eintragsstatus",
+    "own": "Von Ihnen",
+    "nodes": {
+      "recorded": "Erfasst",
+      "photo": "Foto",
+      "manager": "Eintrag der Leitung",
+      "history": "In Ihrem Verlauf"
+    },
+    "status": {
+      "done": "Da",
+      "waiting": "Wartet",
+      "absent": "Noch nicht",
+      "attention": "Brauchen Sie",
+      "unknown": "Unbekannt"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Lebender Lebenslauf",
+    "title": "Ihre Arbeit wird zu Ihrer Geschichte",
+    "now": "Jetzt",
+    "noRecords": "Noch keine Arbeitseinträge",
+    "legend": {
+      "managerRecord": "Eintrag der Führungskraft",
+      "recorded": "Von Ihnen erfasst"
+    },
+    "skillsTitle": "Was Ihre Arbeit zeigt",
+    "next": {
+      "title": "Ihre Geschichte geht mit Ihnen",
+      "body": "Jede Arbeit, die Sie festhalten, ergänzt sie. Nehmen Sie sie mit zur nächsten Gelegenheit.",
+      "cta": "Sehen, wohin Sie gehen können"
+    }
+  },
+  "workContext": {
+    "title": "Deine Arbeit auf einen Blick",
+    "nodes": {
+      "current": "Aktuell im Einsatz",
+      "records": "Einträge",
+      "manager": "Eintrag der Führungskraft",
+      "history": "Verlauf",
+      "skills": "Fähigkeiten",
+      "next": "Weiter"
+    },
+    "facts": {
+      "records": "{count, plural, one {# Eintrag} other {# Einträge}}",
+      "manager": "{count, plural, one {# Eintrag der Führungskraft} other {# Einträge der Führungskraft}}",
+      "history": "{count, plural, one {# Job} other {# Jobs}}",
+      "skills": "{count, plural, one {# Fähigkeit, gestützt auf deine Einträge} other {# Fähigkeiten, gestützt auf deine Einträge}}",
+      "next": "Wohin du gehen kannst"
+    }
   }
 }

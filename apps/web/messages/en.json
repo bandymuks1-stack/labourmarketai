@@ -18067,5 +18067,56 @@
         "company": "Plans the next project with people it knows"
       }
     }
+  },
+  "evidenceChain": {
+    "label": "Record status",
+    "own": "By you",
+    "nodes": {
+      "recorded": "Recorded",
+      "photo": "Photo",
+      "manager": "Manager's record",
+      "history": "In your history"
+    },
+    "status": {
+      "done": "Done",
+      "waiting": "Waiting",
+      "absent": "Not yet",
+      "attention": "Needs you",
+      "unknown": "Unknown"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Living CV",
+    "title": "Your work, becoming your history",
+    "now": "Now",
+    "noRecords": "No work records yet",
+    "legend": {
+      "managerRecord": "Manager's record",
+      "recorded": "Recorded by you"
+    },
+    "skillsTitle": "What your work shows",
+    "next": {
+      "title": "Your history goes with you",
+      "body": "Every job you record adds to it. Take it to the next opportunity.",
+      "cta": "See where you can go"
+    }
+  },
+  "workContext": {
+    "title": "Your work, in one view",
+    "nodes": {
+      "current": "Working now",
+      "records": "Records",
+      "manager": "Manager's record",
+      "history": "History",
+      "skills": "Skills",
+      "next": "Next"
+    },
+    "facts": {
+      "records": "{count, plural, one {# record} other {# records}}",
+      "manager": "{count, plural, one {# manager's record} other {# manager's records}}",
+      "history": "{count, plural, one {# job} other {# jobs}}",
+      "skills": "{count, plural, one {# skill backed by your records} other {# skills backed by your records}}",
+      "next": "Where you can go"
+    }
   }
 }

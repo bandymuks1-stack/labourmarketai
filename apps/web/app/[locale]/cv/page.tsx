@@ -23,6 +23,8 @@ import {
 } from "@/lib/cv-export/tailored";
 import { formatUtcDate } from "@/lib/time/display";
 import { EuFormatCv } from "@/components/app/cv/eu-format-cv";
+import { LivingCvStory, type LivingCvStoryData } from "@/components/app/cv/living-cv-story";
+import { playerInitials } from "@/lib/identity/player-identity";
 import {
   buildEuFormatCv,
   resolveEuFormatDocument,
@@ -97,6 +99,7 @@ export default async function VerifiedCvPage({
   const tRel = await getTranslations("relationshipTypes");
   const tTier = await getTranslations("evidenceTier");
   const tQuick = await getTranslations("quickNav");
+  const tStory = await getTranslations("livingCvStory");
   const fmtHours = (h: number) =>
     new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(h);
   const tRole = await getTranslations("auth.signup.role");
@@ -520,6 +523,47 @@ export default async function VerifiedCvPage({
       );
     });
 
+  // LIVING CV STORY (screen-only overview): the SAME rows the register below
+  // prints, re-read as a history that grows from work — relative work volume,
+  // capability by what stands behind it, and where it goes next.
+  const skillLabel = (slug: string) => (tSkill.has(slug as never) ? tSkill(slug as never) : slug);
+  const storyData: LivingCvStoryData = {
+    name: cv.personName ?? t("nameNotProvided"),
+    initials: playerInitials(cv.personName ?? ""),
+    professions: cv.professionSlugs.map((p) => p.label ?? p.slug).filter((x): x is string => Boolean(x)),
+    engagements: cv.workHistory.map((e, i) => {
+      const start = formatUtcDate(e.startedAt, locale);
+      const end = formatUtcDate(e.endedAt, locale);
+      const period = start && end ? `${start} – ${end}` : start ? `${start} – ${t("present")}` : (end ?? "");
+      const org =
+        e.orgName ??
+        (tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship);
+      const rec = e.recorded && e.recorded.entries > 0 ? e.recorded : null;
+      return {
+        id: e.id ?? `eng-${i}`,
+        organization: org,
+        title: e.orgName ? (e.title ?? null) : null,
+        period,
+        current: !e.endedAt,
+        recorded: rec ? { hours: rec.hours, confirmedHours: rec.confirmedHours } : null,
+        recordedText: rec
+          ? rec.confirmedHours > 0
+            ? t("history.recordedConfirmed", {
+                hours: fmtNum.format(roundHours(rec.hours)),
+                confirmed: fmtNum.format(roundHours(rec.confirmedHours)),
+                count: rec.entries,
+              })
+            : t("history.recorded", { hours: fmtNum.format(roundHours(rec.hours)), count: rec.entries })
+          : null,
+      };
+    }),
+    skills: {
+      confirmed: cv.tiers.confirmed.map(skillLabel),
+      evidence: cv.tiers.evidence.map(skillLabel),
+      declared: cv.tiers.declared.map(skillLabel),
+    },
+  };
+
   return (
     <div className="cv-doc min-h-screen bg-ink-900 px-6 py-8 text-text-primary print:p-0">
       <div className={`mx-auto flex max-w-3xl flex-col ${pageGap}`}>
@@ -620,6 +664,27 @@ export default async function VerifiedCvPage({
         ) : (
           <>
         {/* Player-card style header — identity + honest counters. */}
+        {template !== "eu" && cv.workHistory.length > 0 ? (
+          <LivingCvStory
+            data={storyData}
+            labels={{
+              eyebrow: tStory("eyebrow"),
+              title: tStory("title"),
+              now: tStory("now"),
+              noRecords: tStory("noRecords"),
+              legend: { managerRecord: tStory("legend.managerRecord"), recorded: tStory("legend.recorded") },
+              skillsTitle: tStory("skillsTitle"),
+              tiers: { confirmed: t("tiers.confirmed"), evidence: t("tiers.evidence"), declared: t("tiers.declared") },
+              next: {
+                title: tStory("next.title"),
+                body: tStory("next.body"),
+                cta: tStory("next.cta"),
+                href: `/${locale}/dashboard/opportunities`,
+              },
+            }}
+          />
+        ) : null}
+
         <header className={`rounded-xl border-2 border-ink-500 ${compact ? "p-4" : "p-6"}`}>
           <p className="font-mono text-meta uppercase tracking-widest text-text-muted">
             {t("pageTitle")}

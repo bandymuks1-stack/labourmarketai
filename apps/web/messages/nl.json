@@ -18067,5 +18067,56 @@
         "company": "Plant het volgende project met mensen die ze kennen"
       }
     }
+  },
+  "evidenceChain": {
+    "label": "Status vermelding",
+    "own": "Door jou",
+    "nodes": {
+      "recorded": "Vastgelegd",
+      "photo": "Foto",
+      "manager": "Managersvermelding",
+      "history": "In je historie"
+    },
+    "status": {
+      "done": "Klaar",
+      "waiting": "Wacht",
+      "absent": "Nog niet",
+      "attention": "Jij bent aan zet",
+      "unknown": "Onbekend"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Levend cv",
+    "title": "Uw werk wordt uw geschiedenis",
+    "now": "Nu",
+    "noRecords": "Nog geen werkregistraties",
+    "legend": {
+      "managerRecord": "Vermelding van de manager",
+      "recorded": "Door u vastgelegd"
+    },
+    "skillsTitle": "Wat uw werk laat zien",
+    "next": {
+      "title": "Uw geschiedenis gaat met u mee",
+      "body": "Elke klus die u vastlegt, vult haar aan. Neem haar mee naar de volgende kans.",
+      "cta": "Bekijk waar u naartoe kunt"
+    }
+  },
+  "workContext": {
+    "title": "Jouw werk in één overzicht",
+    "nodes": {
+      "current": "Nu aan het werk",
+      "records": "Registraties",
+      "manager": "Registratie van de leidinggevende",
+      "history": "Geschiedenis",
+      "skills": "Vaardigheden",
+      "next": "Volgende"
+    },
+    "facts": {
+      "records": "{count, plural, one {# registratie} other {# registraties}}",
+      "manager": "{count, plural, one {# registratie van de leidinggevende} other {# registraties van de leidinggevende}}",
+      "history": "{count, plural, one {# baan} other {# banen}}",
+      "skills": "{count, plural, one {# vaardigheid gebaseerd op jouw registraties} other {# vaardigheden gebaseerd op jouw registraties}}",
+      "next": "Waar je heen kunt"
+    }
   }
 }
