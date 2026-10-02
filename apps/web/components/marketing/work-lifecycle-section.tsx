@@ -10,7 +10,7 @@ import { WorkLifecycleGraph, type LifecycleStage } from "./work-lifecycle-graph"
  */
 const WORKER: ReadonlyArray<Pick<LifecycleStage, "key" | "icon" | "href" | "tone">> = [
   { key: "person", icon: "person", href: "/dashboard/profile" },
-  { key: "team", icon: "team", href: "/dashboard/people" },
+  { key: "team", icon: "team", href: "/dashboard/network" },
   { key: "project", icon: "project", href: "/dashboard/projects" },
   { key: "work", icon: "work", href: "/dashboard/journal" },
   { key: "evidence", icon: "evidence", href: "/dashboard/journal", tone: "evidence" },
@@ -21,7 +21,7 @@ const WORKER: ReadonlyArray<Pick<LifecycleStage, "key" | "icon" | "href" | "tone
 const COMPANY: ReadonlyArray<Pick<LifecycleStage, "key" | "icon" | "href" | "tone">> = [
   { key: "need", icon: "need", href: "/company-need" },
   { key: "people", icon: "people", href: "/dashboard/talent" },
-  { key: "team", icon: "team", href: "/dashboard/people" },
+  { key: "team", icon: "team", href: "/dashboard/company/people" },
   { key: "project", icon: "project", href: "/dashboard/projects" },
   { key: "work", icon: "work", href: "/dashboard/journal" },
   { key: "confirmation", icon: "confirmation", href: "/dashboard/journal", tone: "confirmed" },
