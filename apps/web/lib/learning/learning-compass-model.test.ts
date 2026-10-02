@@ -4,6 +4,7 @@ import type { EvidenceTier } from "@/lib/evidence/evidence-tier";
 import { skillsForProfession } from "@/lib/taxonomy/profession-skills";
 
 import {
+  importedJobsHref,
   recommendationNextAction,
   buildLearningCompass,
   deriveStudyingAt,
@@ -354,5 +355,13 @@ describe("every recommendation leads to a real next action (LEARNING_TO_NEXT_OPP
   it("a demand with no role still has a real door (the board), and never a request id as text", () => {
     const c = buildLearningCompass({ ...base, skills: [], opportunities: [opp({ roleSlug: null, missingSkillSlugs: ["grouting"] })] });
     expect(recommendationNextAction(c.recommendations[0]!)).toEqual({ kind: "opportunities", professionSlug: null });
+  });
+});
+
+describe("importedJobsHref (cohort demand count click-through)", () => {
+  it("targets the public /jobs board filtered by the profession, never the platform-request board", () => {
+    expect(importedJobsHref("welder")).toBe("/jobs?profession=welder");
+    expect(importedJobsHref("a b")).toBe("/jobs?profession=a%20b");
+    expect(importedJobsHref("welder")).not.toMatch(/dashboard/);
   });
 });

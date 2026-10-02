@@ -46,7 +46,7 @@
     "fitsNone": "Tinkamų galimybių dar nėra — lenta pildosi, kai tampa žinomi jūsų įgūdžiai ir prieinamumas.",
     "fitStrong": "stiprus atitikimas",
     "fitPossible": "galimas atitikimas",
-    "openBoard": "Atidaryti galimybes",
+    "openBoard": "Atidaryti platformos užklausas",
     "missing": "Ko jums trūksta",
     "missingFromOpportunities": "Ko prašo aukščiau rodomos galimybės, o jūsų įrašuose dar nėra:",
     "missingFromProfession": "Įprasta jūsų krypčiai, jūsų įrašuose dar nėra:",
@@ -76,8 +76,10 @@
     "cohortLine": "{program} · grupė {cohort}",
     "cohortAt": "{institution}",
     "cohortDirection": "Kryptis: {profession}",
-    "cohortDemand": "{count} atviros darbo vietos šiai krypčiai šiandien (importuoti rinkos duomenys)",
+    "cohortDemand": "{count} atvirų importuotų viešų skelbimų šiai krypčiai šiandien",
     "cohortDemandUnknown": "Šios krypties paklausa dar neišmatuota",
+    "cohortDemandOpen": "Žiūrėti šiuos skelbimus",
+    "fitsSource": "Tinkamos platformos užklausos, paskelbtos LabourMarket.ai",
     "missingFromProgram": "Įprasta jūsų programos krypčiai, jūsų įrašuose dar nėra:"
   },
   "businessProfile": {

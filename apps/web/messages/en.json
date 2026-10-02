@@ -46,7 +46,7 @@
     "fitsNone": "No fitting opportunity yet — the board fills as your skills and availability become known.",
     "fitStrong": "strong fit",
     "fitPossible": "possible fit",
-    "openBoard": "Open opportunities",
+    "openBoard": "Open platform requests",
     "missing": "What you are missing",
     "missingFromOpportunities": "Asked for by the opportunities above, not yet in your records:",
     "missingFromProfession": "Usual for your direction, not yet in your records:",
@@ -76,8 +76,10 @@
     "cohortLine": "{program} · cohort {cohort}",
     "cohortAt": "at {institution}",
     "cohortDirection": "Direction: {profession}",
-    "cohortDemand": "{count} open vacancies for this direction today (imported market data)",
+    "cohortDemand": "{count} open imported public jobs for this direction today",
     "cohortDemandUnknown": "Demand for this direction not measured yet",
+    "cohortDemandOpen": "See these jobs",
+    "fitsSource": "Matched platform requests posted on LabourMarket.ai",
     "missingFromProgram": "Usual for your programme's direction, not yet in your records:"
   },
   "businessProfile": {
