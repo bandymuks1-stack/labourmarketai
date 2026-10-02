@@ -2523,3 +2523,24 @@ Status: DB-level PRODUCTION-PROVEN. UI NOT PROVEN — pending the owner granting
 the permission to a member in Settings and that member inviting from the
 People page and the invite panel in a real session.
 
+
+## 20261002102903 — journal_explicit_project_attribution_v1 (#2103)
+
+JOURNAL_PROJECT_ATTRIBUTION_AMBIGUOUS. Additive 12-arg overload of
+`create_journal_entry_full` (explicit `p_project_id` + `p_project_explicit`;
+validated: active assignment AND the entry's own organization, else 42501
+`project_not_assignable`); the 10-arg function keeps signature, grants and
+behaviour as a wrapper. SECURITY INVOKER, search_path pinned, EXECUTE for
+authenticated only. No DROP, no backfill.
+
+Owner approval: 2026-10-02 handoff §7, restated in chat the same day. Applied via
+Supabase MCP `apply_migration` to project `gorgitwvdzxbnaxhrsrw` (version
+20261002102903) from the reviewed file (sha256 of the file at apply time
+`e98e62118d0e101995e27e1e2efdcfa7aee63ba3c8f94f4a7c15f50405c85443`, minus the begin/commit wrapper). Read-back: both overloads present,
+invoker, `search_path=public`, ACL authenticated+postgres only. Before the apply
+the same SQL was exercised in a rolled-back transaction (6 cases incl. foreign
+and ended assignment rejections).
+
+Status: DB APPLIED + READ-BACK. App half in #2103 (not merged). End-to-end
+(worker with 2 active projects -> picker -> save -> project hours -> owner
+confirmation) NOT PROVEN.

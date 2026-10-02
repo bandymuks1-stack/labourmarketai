@@ -1520,6 +1520,7 @@ describe("the migration set is exactly what this slice declared", () => {
       // owner 2026-10-01 (#2065 APPROVED in chat): board reads without parallel workers; drop the unused 129 MB GIN.
       "20261001180000_public_vacancy_board_no_parallel_v1.sql",
       "20261001180100_drop_unused_vacancy_fulltext_gin_v1.sql",
+      "20261002120000_journal_explicit_project_attribution_v1.sql",
 ]);
   });
 
