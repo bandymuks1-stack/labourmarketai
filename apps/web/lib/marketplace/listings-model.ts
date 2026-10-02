@@ -84,6 +84,11 @@ export interface MarketplaceDiscoveryRow {
   readonly unit: string | null;
   readonly expiresAt: string | null;
   readonly createdAt: string;
+  readonly updatedAt: string;
+  /** Canonical destination (existing routes only), derived in the view. */
+  readonly destinationPath: string;
+  /** What the person can do: enquire (listings) | request_service (offerings). */
+  readonly contactAction: "enquire" | "request_service";
   /** True when the caller owns this row (so the UI hides "enquire"). */
   readonly isMine: boolean;
 }

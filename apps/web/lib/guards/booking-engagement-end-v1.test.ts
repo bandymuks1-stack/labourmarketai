@@ -1523,6 +1523,7 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261002120000_journal_explicit_project_attribution_v1.sql",
       // universal marketplace (draft RED PR, owner approval PENDING): marker only so CI reaches the human gate; NOT applied.
       "20261002170000_marketplace_index_v1.sql",
+      "20261002170100_marketplace_public_business_expiry_v1.sql",
 ]);
   });
 

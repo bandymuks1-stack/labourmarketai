@@ -22,6 +22,8 @@ import {
   type MarketplaceListingRow,
 } from "@/lib/marketplace/listings-model";
 import {
+  contactActionFor,
+  destinationPathFor,
   deriveDirection,
   isKindAllowedForSubject,
   isRegisteredSubject,
@@ -115,7 +117,7 @@ const LEGACY_COLS =
 const EXTENDED_COLS = `${LEGACY_COLS}, price_amount, currency, quantity, unit, expires_at`;
 
 const INDEX_COLS =
-  "source_table, source_id, owner_id, organization_id, domain, subject, direction, title, description, location_country, location_label, price_text, price_amount, currency, quantity, unit, expires_at, created_at";
+  "source_table, source_id, owner_id, organization_id, domain, subject, direction, title, description, location_country, location_label, price_text, price_amount, currency, quantity, unit, expires_at, created_at, updated_at, destination_path, contact_action";
 
 /** The caller's OWN listings (every status), newest first. */
 export async function listMyMarketplaceListings(): Promise<MarketplaceListingListResult> {
@@ -211,6 +213,9 @@ export async function discoverMarketplaceListings(filters?: {
         unit: r.unit ?? null,
         expiresAt: r.expires_at ?? null,
         createdAt: r.created_at,
+        updatedAt: r.updated_at,
+        destinationPath: r.destination_path,
+        contactAction: r.contact_action,
         isMine: r.owner_id === user.id,
       }),
     );
@@ -266,6 +271,9 @@ export async function discoverMarketplaceListings(filters?: {
         unit: null,
         expiresAt: null,
         createdAt: m.createdAt,
+        updatedAt: m.updatedAt,
+        destinationPath: destinationPathFor("marketplace_listings", m.id),
+        contactAction: contactActionFor("marketplace_listings"),
         isMine: m.ownerId === user.id,
       };
     },

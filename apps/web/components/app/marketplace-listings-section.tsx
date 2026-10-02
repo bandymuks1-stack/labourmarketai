@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   Plus,
@@ -145,6 +145,16 @@ export function MarketplaceListingsSection({
   const [legalAck, setLegalAck] = useState(false);
   const [ackFor, setAckFor] = useState<string | null>(null);
   const [domainTab, setDomainTab] = useState<string>("all");
+  // Canonical destination of a listing: /dashboard/listings?focus=<id>. There is
+  // no per-listing route, so the section anchors and highlights that row.
+  const focusId = useSearchParams().get("focus");
+  useEffect(() => {
+    if (!focusId) return;
+    setDomainTab("all");
+    const el = document.getElementById(`listing-${focusId}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [focusId]);
+  const focusCls = (id: string) => (focusId === id ? " ring-2 ring-brand-blue" : "");
 
   const inputCls =
     "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
@@ -542,7 +552,8 @@ export function MarketplaceListingsSection({
             {myRows.map((row) => (
               <li
                 key={row.id}
-                className="flex flex-col gap-2 rounded-lg border border-ink-500 bg-surface-1 p-3"
+                id={`listing-${row.id}`}
+                className={`flex flex-col gap-2 rounded-lg border border-ink-500 bg-surface-1 p-3${focusCls(row.id)}`}
               >
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
@@ -711,7 +722,10 @@ export function MarketplaceListingsSection({
             {shownRows.map((row) => (
               <li
                 key={`${row.sourceTable}:${row.id}`}
-                className="flex flex-col gap-2 rounded-lg border border-ink-500 bg-surface-1 p-3"
+                id={row.sourceTable === "marketplace_listings" ? `listing-${row.id}` : undefined}
+                className={`flex flex-col gap-2 rounded-lg border border-ink-500 bg-surface-1 p-3${
+                  row.sourceTable === "marketplace_listings" ? focusCls(row.id) : ""
+                }`}
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-medium text-text-primary">{row.title}</span>
@@ -734,7 +748,7 @@ export function MarketplaceListingsSection({
                 {row.description && (
                   <p className="line-clamp-3 text-sm text-text-secondary">{row.description}</p>
                 )}
-                {row.sourceTable === "marketplace_listings" ? (
+                {row.contactAction === "enquire" ? (
                   <form action={enquireAboutListingAction} className="mt-1">
                     <input type="hidden" name="listingId" value={row.id} />
                     <input type="hidden" name="locale" value={locale} />
@@ -748,7 +762,7 @@ export function MarketplaceListingsSection({
                   </form>
                 ) : (
                   <Link
-                    href={"/dashboard/services" as "/dashboard"}
+                    href={row.destinationPath as "/dashboard"}
                     className="mt-1 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-sm text-text-secondary transition-colors hover:border-brand-blue"
                   >
                     {t("openInServices")}

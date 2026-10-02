@@ -32,8 +32,15 @@
 --
 -- listing_kind stays sale|rental|wanted. Direction is DERIVED (wanted -> need,
 -- sale/rental -> offer). No use case needed a fourth kind: a contractor's
--- project capability is an `offer` of subject project_work; a client's project
--- need is `wanted` + project_work.
+-- project capability is an `offer` (sale) of subject project_work. A client's
+-- project / contract NEED stays in the projects domain (projects / proposals /
+-- contracts) and is NOT a marketplace listing: the policy hook refuses
+-- `project_work` as a need.
+--
+-- The public-surface expiry predicate on get_public_business_listings_v1 (anon
+-- reachable) is deliberately NOT in this file: it ships as the separate
+-- migration 20261002170100_marketplace_public_business_expiry_v1.sql so the
+-- gate can review the public surface independently.
 --
 -- ROLLBACK: supabase/rollbacks/20261002170000_marketplace_index_v1.down.sql
 -- (guarded: refuses if any new column holds data or any new subject is in use).
@@ -206,6 +213,12 @@ begin
   -- A free-standing SERVICE NEED is a need by definition; offers of services
   -- live on service_offerings.
   if p_domain = 'service_need' and p_direction <> 'need' then
+    return query select false, 'direction_not_allowed'::text;
+    return;
+  end if;
+  -- Project / contract NEEDS live in the projects domain, not in listings;
+  -- a contractor may still OFFER project capability.
+  if p_domain = 'project_work' and p_direction <> 'offer' then
     return query select false, 'direction_not_allowed'::text;
     return;
   end if;
@@ -422,30 +435,8 @@ create trigger marketplace_listings_publish_guard_trg
   before insert or update of status, category, listing_kind on public.marketplace_listings
   for each row execute function public.marketplace_listings_publish_guard();
 
--- 9. Public business page: an expired listing must not stay on the anon-reachable
---    profile. Same signature, same body, plus the expiry predicate (ACL kept).
-create or replace function public.get_public_business_listings_v1(p_org_id uuid)
-returns table (
-  id uuid,
-  listing_kind text,
-  category text,
-  title text,
-  description text,
-  location_country text,
-  location_label text,
-  price_text text
-) language sql security definer set search_path = public stable as $$
-  select m.id, m.listing_kind, m.category, m.title, m.description,
-         m.location_country, m.location_label, m.price_text
-  from public.marketplace_listings m
-  join public.organizations o on o.id = m.organization_id
-  where o.id = p_org_id
-    and o.public_profile_enabled = true
-    and m.status = 'active'
-    and (m.expires_at is null or m.expires_at > now())
-  order by m.updated_at desc
-  limit 50;
-$$;
+-- 9. (moved) The anon-reachable get_public_business_listings_v1 expiry predicate
+--    ships in 20261002170100_marketplace_public_business_expiry_v1.sql.
 
 -- 10. ONE discovery view. Each branch rides its OWN table's RLS
 --     (security_invoker). Demand (customer_requests) and public_vacancies are
@@ -478,7 +469,12 @@ select
   m.status::text                                  as status,
   m.created_at                                    as created_at,
   m.updated_at                                    as updated_at,
-  'platform'::text                                as provenance
+  'platform'::text                                as provenance,
+  -- DERIVED expressions only (no stored duplicate data). Only routes that
+  -- exist today: listings have no per-item route, so the destination is the
+  -- listings surface with an anchor/highlight param.
+  ('/dashboard/listings?focus=' || m.id::text)    as destination_path,
+  'enquire'::text                                 as contact_action
 from public.marketplace_listings m
 left join public.market_subject_types r on r.subject = m.category
 where m.status = 'active'
@@ -505,7 +501,11 @@ select
   s.status::text,
   s.created_at,
   s.updated_at,
-  'platform'::text
+  'platform'::text,
+  -- No per-offering route exists today (offerings render inline on the
+  -- services surface and on people/[workerId] and business pages).
+  '/dashboard/services'::text,
+  'request_service'::text
 from public.service_offerings s
 where s.status = 'active'
   and (s.expires_at is null or s.expires_at > now());

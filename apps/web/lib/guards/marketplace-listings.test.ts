@@ -362,3 +362,43 @@ describe("6. universal marketplace migration (20261002170000) — Option C contr
     expect(srv).toMatch(/needs-migration/);
   });
 });
+
+describe("7. index exposes destination + contact action; public surface is a separate migration", () => {
+  const PUBLIC_MIGRATION = join(
+    REPO,
+    "supabase",
+    "migrations",
+    "20261002170100_marketplace_public_business_expiry_v1.sql",
+  );
+  const PUBLIC_ROLLBACK = join(
+    REPO,
+    "supabase",
+    "rollbacks",
+    "20261002170100_marketplace_public_business_expiry_v1.down.sql",
+  );
+
+  it("view derives destination_path and contact_action (no stored duplicate data)", () => {
+    const d = ddlOf(V2_MIGRATION);
+    expect(d).toContain("'/dashboard/listings?focus=' || m.id::text");
+    expect(d).toMatch(/as destination_path/);
+    expect(d).toMatch(/'enquire'::text\s+as contact_action/);
+    expect(d).toContain("'/dashboard/services'::text");
+    expect(d).toContain("'request_service'::text");
+    expect(d).not.toMatch(/add column[^;]*destination_path/i);
+  });
+
+  it("the anon-reachable function change is NOT in the index migration", () => {
+    expect(ddlOf(V2_MIGRATION)).not.toMatch(/get_public_business_listings_v1/);
+    expect(existsSync(PUBLIC_MIGRATION)).toBe(true);
+    expect(existsSync(PUBLIC_ROLLBACK)).toBe(true);
+    const d = ddlOf(PUBLIC_MIGRATION);
+    expect(d).toMatch(/create or replace function public\.get_public_business_listings_v1\(p_org_id uuid\)/);
+    expect(d).toMatch(/m\.expires_at is null or m\.expires_at > now\(\)/);
+    // ACL is preserved by create-or-replace: the file must not touch grants.
+    expect(d).not.toMatch(/\b(grant|revoke)\b/i);
+  });
+
+  it("a project NEED is refused by the policy hook (it stays in the projects domain)", () => {
+    expect(ddlOf(V2_MIGRATION)).toMatch(/p_domain = 'project_work' and p_direction <> 'offer'/);
+  });
+});
