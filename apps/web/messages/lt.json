@@ -4688,6 +4688,11 @@
         "event_weekly_digest": "Paruošta tavo savaitės darbo ir galimybių apžvalga",
         "event_saved_search_match": "Tavo išsaugotoje paieškoje yra naujų rezultatų",
         "event_job_alert": "Atsirado naujas darbas pagal tavo paieškos kriterijus",
+        "event_message_received": "Gavote naują žinutę",
+        "event_journal_review_decided": "Jūsų darbo žurnalo įrašas peržiūrėtas",
+        "event_journal_review_decided_approved": "Jūsų darbo žurnalo įrašas patvirtintas",
+        "event_journal_review_decided_rejected": "Jūsų darbo žurnalo įrašas atmestas",
+        "event_journal_review_decided_changes_requested": "Paprašyta pakeisti jūsų darbo žurnalo įrašą",
         "event_invitation_accepted": "Kažkas priėmė jūsų kvietimą",
         "event_weekly_digest_profile_completion": "Norint pamatyti tau tinkamus darbus, patvirtink, kokį darbą dirbi",
         "event_weekly_digest_journal": "Paruošta tavo savaitės darbo žurnalo apžvalga"

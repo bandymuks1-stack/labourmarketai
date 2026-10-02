@@ -4688,6 +4688,11 @@
         "event_weekly_digest": "Ваш еженедельный обзор работы и возможностей готов",
         "event_saved_search_match": "В сохранённом поиске есть новые результаты",
         "event_job_alert": "Появилась новая работа, подходящая под ваш запрос",
+        "event_message_received": "У вас новое сообщение",
+        "event_journal_review_decided": "Запись в вашем журнале проверена",
+        "event_journal_review_decided_approved": "Запись в вашем журнале подтверждена",
+        "event_journal_review_decided_rejected": "Запись в вашем журнале отклонена",
+        "event_journal_review_decided_changes_requested": "По записи в вашем журнале запрошены изменения",
         "event_invitation_accepted": "Кто-то принял ваше приглашение",
         "event_weekly_digest_profile_completion": "Чтобы показать подходящие вакансии, подтвердите, какую работу вы выполняете",
         "event_weekly_digest_journal": "Готов обзор вашего рабочего журнала за неделю"

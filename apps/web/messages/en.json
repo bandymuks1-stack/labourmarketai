@@ -4688,6 +4688,11 @@
         "event_weekly_digest": "Your weekly work and opportunities summary is ready",
         "event_saved_search_match": "A search you saved has new results",
         "event_job_alert": "A new job fits what you are looking for",
+        "event_message_received": "You have a new message",
+        "event_journal_review_decided": "Your journal entry was reviewed",
+        "event_journal_review_decided_approved": "Your journal entry was confirmed",
+        "event_journal_review_decided_rejected": "Your journal entry was rejected",
+        "event_journal_review_decided_changes_requested": "Changes were requested on your journal entry",
         "event_invitation_accepted": "Somebody accepted your invitation",
         "event_weekly_digest_profile_completion": "To see jobs that fit you, confirm what work you do",
         "event_weekly_digest_journal": "Your week’s work journal summary is ready"

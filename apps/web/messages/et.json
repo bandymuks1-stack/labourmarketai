@@ -394,6 +394,11 @@
         "event_weekly_digest": "Sinu nädala töö ja võimaluste kokkuvõte on valmis",
         "event_saved_search_match": "Salvestatud otsingul on uusi tulemusi",
         "event_job_alert": "Ilmus uus töökoht, mis sobib sinu soovidega",
+        "event_message_received": "Sul on uus sõnum",
+        "event_journal_review_decided": "Sinu töölogi kanne on üle vaadatud",
+        "event_journal_review_decided_approved": "Sinu töölogi kanne on kinnitatud",
+        "event_journal_review_decided_rejected": "Sinu töölogi kanne lükati tagasi",
+        "event_journal_review_decided_changes_requested": "Sinu töölogi kande kohta on küsitud muudatusi",
         "event_weekly_digest_profile_completion": "Sobivate tööde näitamiseks kinnita, millist tööd sa teed",
         "event_weekly_digest_journal": "Sinu nädala tööpäeviku kokkuvõte on valmis"
       },

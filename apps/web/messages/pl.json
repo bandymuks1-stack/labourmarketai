@@ -4688,6 +4688,11 @@
         "event_weekly_digest": "Twoje tygodniowe podsumowanie pracy i możliwości jest gotowe",
         "event_saved_search_match": "Zapisane wyszukiwanie ma nowe wyniki",
         "event_job_alert": "Pojawiła się nowa oferta pasująca do Twoich kryteriów",
+        "event_message_received": "Masz nową wiadomość",
+        "event_journal_review_decided": "Twój wpis w dzienniku został sprawdzony",
+        "event_journal_review_decided_approved": "Twój wpis w dzienniku został potwierdzony",
+        "event_journal_review_decided_rejected": "Twój wpis w dzienniku został odrzucony",
+        "event_journal_review_decided_changes_requested": "Poproszono o zmiany w Twoim wpisie w dzienniku",
         "event_invitation_accepted": "Ktoś przyjął Twoje zaproszenie",
         "event_weekly_digest_profile_completion": "Aby pokazać pasujące oferty, potwierdź, jaką pracę wykonujesz",
         "event_weekly_digest_journal": "Podsumowanie Twojego dziennika pracy z tego tygodnia jest gotowe"
