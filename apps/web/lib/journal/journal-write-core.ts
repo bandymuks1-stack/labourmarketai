@@ -23,8 +23,11 @@ import {
 import { readOwnOccupationPathForUser } from "@/lib/journal/journal-occupation-path";
 import {
   parseProjectChoice,
+  projectPromptFor,
   rpcProjectParams,
+  type AssignedProject,
 } from "@/lib/journal/project-attribution";
+import { readActiveProjectsByOrg } from "@/lib/journal/project-attribution-read";
 
 /**
  * JOURNAL WRITE CORE — the ONE transport-neutral implementation of the
@@ -71,7 +74,14 @@ export type CreateJournalEntryResult =
        *  the save itself is unaffected either way. */
       dayCheck?: WorkDayCheck | null;
     }
-  | { ok: false; code: JournalSaveErrorCode; message: string };
+  | {
+      ok: false;
+      code: JournalSaveErrorCode;
+      message: string;
+      /** Set with `project_required`: the projects the caller must choose
+       *  between (or answer "not project work"). */
+      projects?: AssignedProject[];
+    };
 
 export type JournalSaveErrorCode =
   | "not_authenticated"
@@ -99,7 +109,11 @@ export type JournalSaveErrorCode =
   | "module_field_invalid"
   /** Explicit `project_id` the worker is not actively assigned to (or that
    *  sits in another organization). Refused by the RPC, never re-pointed. */
-  | "project_not_assignable";
+  | "project_not_assignable"
+  /** The worker has 2+ active projects in this entry's organization and the
+   *  request named none. Every entry path shares this rule: the hours are
+   *  never silently saved against no project (handoff 2026-10-02 §2). */
+  | "project_required";
 
 export type ParsedFragmentInput = {
   rawPhrase: string;
@@ -655,6 +669,31 @@ export async function createJournalEntryCore(
   // transaction (see 0017). Any failure rolls back the entry, so the worker
   // never lands in the half-saved "ghost entry" state where the row exists
   // but its interpretation does not.
+  // THE ONE ATTRIBUTION RULE for every entry path (composer, work-log flow,
+  // document draft, MCP). A request that names no project while the worker
+  // has two or more ACTIVE projects in this entry's organization is not
+  // saved: the caller must ask which (or "not project work"). One project is
+  // auto-attributed by the database, none asks nothing.
+  if (projectChoice.kind === "absent") {
+    const { data: ctxOrg } = await supabase
+      .from("engagement_contexts")
+      .select("organization_id")
+      .eq("id", engagementId)
+      .maybeSingle();
+    if (ctxOrg?.organization_id) {
+      const byOrg = await readActiveProjectsByOrg(supabase, worker.id);
+      const projects = byOrg.get(ctxOrg.organization_id) ?? [];
+      if (projectPromptFor(projects) === "ask") {
+        return {
+          ok: false,
+          code: "project_required",
+          message: t("projectAmbiguous"),
+          projects,
+        };
+      }
+    }
+  }
+
   const rpcParams = {
     p_worker_id: worker.id,
     p_engagement_context_id: engagementId,

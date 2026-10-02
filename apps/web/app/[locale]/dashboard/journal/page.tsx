@@ -7,7 +7,7 @@ import {
   JournalEntryComposer,
   type JournalEngagement,
 } from "@/components/app/journal-entry-composer";
-import { groupProjectsByOrganization } from "@/lib/journal/project-attribution";
+import { readActiveProjectsByOrg } from "@/lib/journal/project-attribution-read";
 import { JournalEntryRow } from "@/components/app/journal-entry-row";
 import {
   EvidenceState,
@@ -610,7 +610,7 @@ export default async function JournalPage({
     linkRead,
     entriesRead,
     organizationLedger,
-    { data: assignmentRows },
+    projectsByOrg,
   ] = await Promise.all([
       readOwnOccupationPath(supabase, worker.id),
       supabase
@@ -633,22 +633,8 @@ export default async function JournalPage({
       // The projects this worker is ACTIVELY assigned to (RLS: their own
       // rows). The composer needs them to ask "which project?" when there
       // are two or more — the DB never guesses between them.
-      supabase
-        .from("project_worker_assignments")
-        .select("project_id, projects(id, title, organization_id)")
-        .eq("worker_id", worker.id)
-        .eq("status", "active"),
+      readActiveProjectsByOrg(supabase, worker.id),
     ]);
-  const projectsByOrg = groupProjectsByOrganization(
-    (assignmentRows ?? []).map((r) => ({
-      project_id: r.project_id as string,
-      projects: (r.projects ?? null) as {
-        id: string;
-        title: string | null;
-        organization_id: string | null;
-      } | null,
-    })),
-  );
   const composerEngagements: JournalEngagement[] = engagements.map((e, i) => {
     const orgId = ecOrdered[i]?.organization_id ?? null;
     return { ...e, projects: orgId ? (projectsByOrg.get(orgId) ?? []) : [] };
