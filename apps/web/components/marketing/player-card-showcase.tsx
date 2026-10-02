@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { ConstellationBg } from "@/components/decor/constellation-bg";
 import { WorkerPlayerCard } from "@/components/app/worker-player-card";
 import { buildPlayerCardLabels } from "@/lib/player-card/labels";
-import { buildSampleWorkerPlayerCard } from "@/lib/player-card/sample-card";
+import { buildSampleAllTime, buildSampleWorkerPlayerCard } from "@/lib/player-card/sample-card";
 
 /**
  * "The Player Card" — the landing shows THE REAL CARD (owner audit §3.7 +
@@ -30,7 +30,7 @@ export async function PlayerCardShowcase() {
     sampleOrganization: t("sample.organization"),
     now,
   });
-  const labels = await buildPlayerCardLabels(sampleCard);
+  const labels = await buildPlayerCardLabels(sampleCard, { allTime: buildSampleAllTime(now) });
 
   return (
     <section className="relative mt-16 overflow-hidden">
