@@ -20,7 +20,7 @@ import { epistemicForBar, type ProjectInTime } from "@/lib/planning/time-lens";
  */
 
 const door =
-  "inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+  "inline-flex min-h-[44px] items-center rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
 const doorPrimary = `${door} border-brand-blue/50 text-brand-blue hover:bg-brand-blue/10`;
 const doorQuiet = `${door} border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary`;
 
@@ -89,12 +89,12 @@ export async function PersonFocus({
                 {pid ? (
                   <Link
                     href={ctx(`/dashboard/projects/${pid}`, b.startDate > today ? b.startDate : today) as "/dashboard"}
-                    className="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 py-2 hover:text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+                    className="flex min-h-[44px] flex-wrap items-center gap-x-3 gap-y-1 py-2 hover:text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
                   >
                     {body}
                   </Link>
                 ) : (
-                  <div className="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 py-2">{body}</div>
+                  <div className="flex min-h-[44px] flex-wrap items-center gap-x-3 gap-y-1 py-2">{body}</div>
                 )}
               </li>
             );
@@ -167,7 +167,7 @@ export async function ProjectFocus({
       {project.stages.length > 0 ? (
         <ul className="flex flex-col divide-y divide-ink-600/70 border-y border-ink-600/70">
           {project.stages.map((s) => (
-            <li key={s.id} className="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 py-2">
+            <li key={s.id} className="flex min-h-[44px] flex-wrap items-center gap-x-3 gap-y-1 py-2">
               <EpistemicMark state={s.state} label={t(`state.${s.state}`)} />
               <span className="min-w-0 flex-1 truncate text-sm text-text-primary">{s.label ?? t("projects.stage")}</span>
               <span className="shrink-0 tabular-nums text-support text-text-muted">
@@ -191,7 +191,7 @@ export async function ProjectFocus({
               <li key={p.workerId}>
                 <Link
                   href={personHref(p.workerId) as "/dashboard"}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-full border border-ink-500 py-1 pl-1 pr-3 text-sm text-text-primary transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-ink-500 py-1 pl-1 pr-3 text-sm text-text-primary transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
                 >
                   <PersonPortrait name={p.name ?? t("people.unnamed")} avatarUrl={avatars[p.workerId] ?? null} initials={playerInitials(p.name ?? "?")} width="32px" shape="round" />
                   <span>{p.name ?? t("people.unnamed")}</span>

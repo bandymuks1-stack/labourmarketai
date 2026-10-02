@@ -10747,6 +10747,7 @@
       "needsTitle": "Offener Bedarf ohne Projekt",
       "needsUndated": "Angegebener Bedarf ohne Datum: {count}",
       "gaps": "Übergaben sowie Fristen für Dokumente oder Zertifikate sind in den Planungsdaten noch nicht enthalten, daher wird dafür nichts gezeichnet.",
+      "unplacedTitle": "Projekte ohne erfasste Daten, Phasen oder Zuordnungen: {count}. Aufgelistet, nicht gezeichnet.",
       "withoutDates": "Projekte ohne Datum: {count}. Sie haben keinen Platz auf der Achse.",
       "none": "Für dieses Fenster sind keine Projekte oder offenen Bedarfe erfasst.",
       "unknown": "Projekte und Phasen konnten gerade nicht gelesen werden. Das ist unbekannt, nicht leer."

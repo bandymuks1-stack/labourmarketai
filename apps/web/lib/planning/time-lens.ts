@@ -368,21 +368,26 @@ export function buildProjectsInTime(input: {
   const needs: OpenNeedLane[] = [];
   let undatedNeeds = 0;
   for (const e of input.entries) {
-    const missing = Math.max(0, e.requiredHeadcount - e.coveredHeadcount);
+    // Only a headcount a PERSON stated (typed, or confirmed after a suggestion)
+    // is a need. A system-suggested default of "1" is a suggestion, not demand:
+    // drawing it as OPEN NEED would invent a gap on every project.
+    const stated = e.userEnteredHeadcount ?? e.confirmedHeadcount;
+    const required = stated !== null && stated > 0 ? e.requiredHeadcount : 0;
+    const missing = Math.max(0, required - e.coveredHeadcount);
     if (e.id.startsWith("project:")) {
       const pid = e.id.slice("project:".length);
       const r = rows.get(pid);
       if (!r) continue;
       r.need =
-        e.requiredHeadcount <= 0
+        required <= 0
           ? { kind: "notProvided" }
           : missing > 0
-            ? { kind: "open", missing, required: e.requiredHeadcount, covered: e.coveredHeadcount }
-            : { kind: "covered", required: e.requiredHeadcount };
+            ? { kind: "open", missing, required, covered: e.coveredHeadcount }
+            : { kind: "covered", required };
       continue;
     }
     // Demand-sourced: a stated need with no project row of its own.
-    if (e.requiredHeadcount <= 0 || missing === 0) continue;
+    if (required <= 0 || missing === 0) continue;
     if (!e.startDate) {
       undatedNeeds += 1;
       continue;
@@ -393,7 +398,7 @@ export function buildProjectsInTime(input: {
       label: e.title,
       href: e.href,
       missing,
-      required: e.requiredHeadcount,
+      required,
       startDate: e.startDate,
       endDate: end,
       band: from && to ? clip(e.startDate, end, from, to, days) : null,

@@ -30,7 +30,7 @@ import { cn } from "@/lib/utils";
  */
 
 const chip =
-  "inline-flex min-h-11 items-center rounded-md border px-3 text-support transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue border-ink-500 text-text-secondary hover:border-brand-blue";
+  "inline-flex min-h-[44px] items-center rounded-md border px-3 text-support transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue border-ink-500 text-text-secondary hover:border-brand-blue";
 
 export async function ProjectsInTime({
   model,
@@ -67,6 +67,10 @@ export async function ProjectsInTime({
   const range = (s: string | null, e: string | null) =>
     !s ? t("projects.noDates") : !e || e === s ? (tickFmt(s) ?? s) : `${tickFmt(s) ?? s} – ${tickFmt(e) ?? e}`;
   const globalPeak = Math.max(1, ...model.projects.map((p) => p.peakStaffing));
+  // A project with a span, a dated stage or an assignment has a place on the
+  // axis. One with none of them is NOT PROVIDED: listed compactly, not drawn.
+  const placed = model.projects.filter((p) => p.band !== null || p.stages.length > 0 || p.staffed.length > 0);
+  const unplaced = model.projects.filter((p) => !placed.includes(p));
   const hasAnything = model.projects.length > 0 || model.needs.length > 0;
 
   return (
@@ -101,7 +105,7 @@ export async function ProjectsInTime({
       ) : null}
 
       {/* ───────── DESKTOP: lanes ───────── */}
-      {model.projects.length > 0 ? (
+      {placed.length > 0 ? (
         <div className="hidden sm:block" data-testid="wit-projects-axis">
           <div className="grid grid-cols-[14rem_minmax(0,1fr)] border-t border-ink-600">
             <div />
@@ -112,7 +116,7 @@ export async function ProjectsInTime({
                 </span>
               ))}
             </div>
-            {model.projects.map((p) => (
+            {placed.map((p) => (
               <ProjectLane
                 key={p.projectId}
                 p={p}
@@ -131,7 +135,7 @@ export async function ProjectsInTime({
 
       {/* ───────── MOBILE: project cards ───────── */}
       <ul className="flex flex-col gap-3 sm:hidden" data-testid="wit-projects-cards">
-        {model.projects.map((p) => {
+        {placed.map((p) => {
           const nowStage = p.stages.find((s) => s.startDate <= today && today <= s.endDate) ?? null;
           const nextStage = p.stages.find((s) => s.startDate > today) ?? null;
           return (
@@ -141,7 +145,7 @@ export async function ProjectsInTime({
                 aria-current={p.projectId === focusProjectId ? "true" : undefined}
                 data-testid={`wit-project-card-${p.projectId}`}
                 className={cn(
-                  "flex min-h-11 flex-col gap-3 rounded-xl border bg-ink-800/30 p-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue",
+                  "flex min-h-[44px] flex-col gap-3 rounded-xl border bg-ink-800/30 p-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue",
                   p.projectId === focusProjectId ? "border-brand-blue/60" : "border-ink-600 hover:border-brand-blue/50",
                 )}
               >
@@ -173,6 +177,28 @@ export async function ProjectsInTime({
         })}
       </ul>
 
+      {unplaced.length > 0 ? (
+        <div className="flex flex-col gap-2 border-t border-ink-600/70 pt-4" data-testid="wit-unplaced">
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-text-primary">
+            <EpistemicMark state="notProvided" label={t("state.notProvided")} />
+            {t("projects.unplacedTitle", { count: unplaced.length })}
+          </h3>
+          <ul className="flex flex-wrap gap-2">
+            {unplaced.map((p) => (
+              <li key={p.projectId}>
+                <Link
+                  href={hrefs.project(p.projectId) as "/dashboard"}
+                  data-testid={`wit-unplaced-${p.projectId}`}
+                  className="inline-flex min-h-[44px] items-center rounded-full border border-dashed border-ink-500 px-4 text-sm text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+                >
+                  {p.label ?? t("projects.untitled")}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
       {/* ───────── OPEN NEEDS WITHOUT A PROJECT ───────── */}
       {model.needs.length > 0 || model.undatedNeeds > 0 ? (
         <div className="flex flex-col gap-3 border-t border-ink-600/70 pt-4" data-testid="wit-needs">
@@ -200,9 +226,6 @@ export async function ProjectsInTime({
           <EpistemicMark state="notProvided" label={t("state.notProvided")} className="mt-0.5" />
           <span>{t("projects.gaps")}</span>
         </p>
-        {model.projectsWithoutDates > 0 ? (
-          <p className="text-text-muted">{t("projects.withoutDates", { count: model.projectsWithoutDates })}</p>
-        ) : null}
       </div>
       <Legend t={t} />
     </section>
@@ -267,7 +290,7 @@ function NeedRow({
     </>
   );
   const cls =
-    "flex min-h-11 flex-wrap items-center gap-x-4 gap-y-1 rounded-md border border-dashed border-state-warning/50 px-3 py-2";
+    "flex min-h-[44px] flex-wrap items-center gap-x-4 gap-y-1 rounded-md border border-dashed border-state-warning/50 px-3 py-2";
   return (
     <li data-testid={`wit-need-row-${n.id}`}>
       {n.href ? (
@@ -307,7 +330,7 @@ function ProjectLane({
           href={href as "/dashboard"}
           aria-current={selected ? "true" : undefined}
           data-testid={`wit-project-${p.projectId}`}
-          className="flex min-h-11 items-center rounded-lg text-sm font-semibold text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+          className="flex min-h-[44px] items-center rounded-lg text-sm font-semibold text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
         >
           <span className="min-w-0 break-words">{p.label ?? t("projects.untitled")}</span>
         </Link>

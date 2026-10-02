@@ -10747,6 +10747,7 @@
       "needsTitle": "Open needs without a project",
       "needsUndated": "Stated needs without dates: {count}",
       "gaps": "Handovers and document or certificate deadlines are not in the planning data yet, so nothing is drawn for them.",
+      "unplacedTitle": "Projects with no dates, stages or assignments on record: {count}. Listed, not drawn.",
       "withoutDates": "Projects without dates: {count}. They have no place on the axis.",
       "none": "No projects or open needs on record for this window.",
       "unknown": "Projects and stages could not be read right now. That is unknown, not empty."

@@ -58,7 +58,7 @@ export async function MyTimeNow({
   const nextIndex = strip.findIndex((d) => d.isToday);
 
   const door =
-    "inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+    "inline-flex min-h-[44px] items-center rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
 
   return (
     <section className="flex flex-col gap-6" aria-labelledby="wit-me-title" data-testid="wit-me">
@@ -86,7 +86,7 @@ export async function MyTimeNow({
                 <li key={it.id}>
                   <Link
                     href={it.href as "/dashboard"}
-                    className="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 py-2 transition-colors hover:text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+                    className="flex min-h-[44px] flex-wrap items-center gap-x-3 gap-y-1 py-2 transition-colors hover:text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
                   >
                     <EpistemicMark state={state(it)} label={t(`state.${state(it)}`)} />
                     <span className="min-w-0 flex-1 truncate text-sm font-semibold text-text-primary">{itemLabel(it)}</span>
@@ -246,7 +246,7 @@ export async function MyTimeNow({
                   href={dayHref(d.day) as "/dashboard"}
                   aria-current={d.isToday ? "date" : undefined}
                   data-testid={`wit-lane-${d.day}`}
-                  className="flex min-h-11 items-stretch gap-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+                  className="flex min-h-[44px] items-stretch gap-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
                 >
                   <span className="flex w-10 shrink-0 flex-col items-center">
                     <span className="text-meta text-text-muted">{narrowFmt(d.day)}</span>

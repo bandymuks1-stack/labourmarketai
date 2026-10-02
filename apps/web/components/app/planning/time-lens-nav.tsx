@@ -35,7 +35,7 @@ export async function TimeLensNav({
               aria-current={active === l ? "page" : undefined}
               data-testid={`wit-lens-${l}`}
               className={cn(
-                "inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue",
+                "inline-flex min-h-[44px] items-center rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue",
                 active === l
                   ? "border-brand-blue bg-brand-blue/10 text-brand-blue"
                   : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary",

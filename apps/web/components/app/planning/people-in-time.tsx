@@ -101,7 +101,7 @@ export async function PeopleInTime({
     s === e ? (tickFmt(s) ?? s) : `${tickFmt(s) ?? s} – ${tickFmt(e) ?? e}`;
 
   const chip =
-    "inline-flex min-h-11 items-center rounded-md border px-3 text-support transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+    "inline-flex min-h-[44px] items-center rounded-md border px-3 text-support transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
 
   return (
     <section className="flex flex-col gap-5" aria-labelledby="wit-people-title" data-testid="wit-people">
@@ -208,7 +208,7 @@ export async function PeopleInTime({
                 aria-current={p.workerId === focusWorkerId ? "true" : undefined}
                 data-testid={`wit-person-card-${p.workerId}`}
                 className={cn(
-                  "flex min-h-11 flex-col gap-3 rounded-xl border bg-ink-800/30 p-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue",
+                  "flex min-h-[44px] flex-col gap-3 rounded-xl border bg-ink-800/30 p-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue",
                   p.workerId === focusWorkerId ? "border-brand-blue/60" : "border-ink-600 hover:border-brand-blue/50",
                 )}
               >
@@ -325,7 +325,7 @@ function PersonLane({
           href={href as "/dashboard"}
           aria-current={selected ? "true" : undefined}
           data-testid={`wit-person-${person.workerId}`}
-          className="flex min-h-11 min-w-0 items-center gap-3 rounded-lg pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+          className="flex min-h-[44px] min-w-0 items-center gap-3 rounded-lg pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
         >
           <PersonPortrait name={name} avatarUrl={avatarUrl} initials={playerInitials(person.name ?? "?")} width="36px" lit={selected} />
           <span className="min-w-0 truncate text-sm font-semibold text-text-primary">{name}</span>

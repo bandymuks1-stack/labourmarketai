@@ -10747,6 +10747,7 @@
       "needsTitle": "Otwarte potrzeby bez projektu",
       "needsUndated": "Zgłoszone potrzeby bez dat: {count}",
       "gaps": "Przekazania oraz terminy dokumentów lub certyfikatów nie są jeszcze w danych planowania, więc nic dla nich nie rysujemy.",
+      "unplacedTitle": "Projekty bez zapisanych dat, etapów ani przydziałów: {count}. Wymienione, nie rysowane.",
       "withoutDates": "Projekty bez dat: {count}. Nie mają miejsca na osi.",
       "none": "Brak zapisanych projektów ani otwartych potrzeb w tym oknie.",
       "unknown": "Nie udało się teraz odczytać projektów i etapów. To nieznane, a nie puste."

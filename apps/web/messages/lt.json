@@ -10747,6 +10747,7 @@
       "needsTitle": "Atviri poreikiai be projekto",
       "needsUndated": "Nurodytų poreikių be datų: {count}",
       "gaps": "Perdavimų ir dokumentų ar sertifikatų terminų planavimo duomenyse dar nėra, todėl jiems nieko nepiešiame.",
+      "unplacedTitle": "Projektai be datų, etapų ar priskyrimų įrašų: {count}. Išvardyti, bet nepiešiami.",
       "withoutDates": "Projektų be datų: {count}. Ašyje jiems vietos nėra.",
       "none": "Šiam langui projektų ar atvirų poreikių įrašų nėra.",
       "unknown": "Projektų ir etapų dabar nepavyko perskaityti. Tai nežinoma, o ne tuščia."

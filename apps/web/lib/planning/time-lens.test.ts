@@ -180,12 +180,17 @@ describe("projects in time", () => {
   });
 
   it("a stated headcount that is not covered is an OPEN NEED with the real gap", () => {
-    const m = buildProjectsInTime({ items, timeline, entries: [zoneEntry({ id: "project:pr1", requiredHeadcount: 4, coveredHeadcount: 1 })], today: "2026-10-06" });
+    const m = buildProjectsInTime({ items, timeline, entries: [zoneEntry({ id: "project:pr1", requiredHeadcount: 4, coveredHeadcount: 1, userEnteredHeadcount: 4 })], today: "2026-10-06" });
     expect(m.projects[0].need).toEqual({ kind: "open", missing: 3, required: 4, covered: 1 });
   });
 
+  it("a system-suggested headcount nobody stated is NOT a need", () => {
+    const m = buildProjectsInTime({ items, timeline, entries: [zoneEntry({ id: "project:pr1", requiredHeadcount: 1, coveredHeadcount: 0, systemSuggestedHeadcount: 1 })], today: "2026-10-06" });
+    expect(m.projects[0].need.kind).toBe("notProvided");
+  });
+
   it("a covered need says covered", () => {
-    const m = buildProjectsInTime({ items, timeline, entries: [zoneEntry({ id: "project:pr1", requiredHeadcount: 2, coveredHeadcount: 2 })], today: "2026-10-06" });
+    const m = buildProjectsInTime({ items, timeline, entries: [zoneEntry({ id: "project:pr1", requiredHeadcount: 2, coveredHeadcount: 2, userEnteredHeadcount: 2 })], today: "2026-10-06" });
     expect(m.projects[0].need).toEqual({ kind: "covered", required: 2 });
   });
 
@@ -194,9 +199,9 @@ describe("projects in time", () => {
       items,
       timeline,
       entries: [
-        zoneEntry({ id: "demand:d1", source: "demand" as PlanningZoneEntry["source"], title: "Bricklayers", startDate: "2026-10-14", endDate: "2026-10-18", requiredHeadcount: 3, coveredHeadcount: 1 }),
-        zoneEntry({ id: "demand:d2", source: "demand" as PlanningZoneEntry["source"], title: "Painters", requiredHeadcount: 2, coveredHeadcount: 0 }),
-        zoneEntry({ id: "demand:d3", source: "demand" as PlanningZoneEntry["source"], title: "Done", startDate: "2026-10-14", requiredHeadcount: 1, coveredHeadcount: 1 }),
+        zoneEntry({ id: "demand:d1", source: "demand" as PlanningZoneEntry["source"], title: "Bricklayers", startDate: "2026-10-14", endDate: "2026-10-18", requiredHeadcount: 3, coveredHeadcount: 1, userEnteredHeadcount: 3 }),
+        zoneEntry({ id: "demand:d2", source: "demand" as PlanningZoneEntry["source"], title: "Painters", requiredHeadcount: 2, coveredHeadcount: 0, userEnteredHeadcount: 2 }),
+        zoneEntry({ id: "demand:d3", source: "demand" as PlanningZoneEntry["source"], title: "Done", startDate: "2026-10-14", requiredHeadcount: 1, coveredHeadcount: 1, userEnteredHeadcount: 1 }),
       ],
       today: "2026-10-06",
     });
