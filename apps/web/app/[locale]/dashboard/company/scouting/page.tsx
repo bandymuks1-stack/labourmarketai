@@ -1352,6 +1352,16 @@ export default async function CompanyScoutingPage({
                       {p.rate.minEur != null ? t("rateFrom", { min: p.rate.minEur }) : t("noRate")}
                     </dd>
                   </div>
+                  {p.experienceYears != null && p.experienceYears > 0 ? (
+                    <div className="min-w-0" data-testid={`scout-experience-${c.workerId}`}>
+                      <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
+                        {t("fields.experience")}
+                      </dt>
+                      <dd className="truncate text-xs text-text-primary">
+                        {t("experienceYearsValue", { years: p.experienceYears })}
+                      </dd>
+                    </div>
+                  ) : null}
                   <div className="min-w-0">
                     <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {t("fields.evidence")}

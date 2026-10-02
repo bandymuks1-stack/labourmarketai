@@ -8361,6 +8361,7 @@
     "evidence": "Nachweise — bestätigt: {confirmed} · Journal: {journal} · selbst angegeben: {self}",
     "confirmedWork": "Durch Arbeit bestätigt: {work} von {matched} passenden Fähigkeiten (wiederholt: {repeated})",
     "evidenceNone": "Nicht bestätigt",
+    "experienceYearsValue": "{years, plural, one {# Jahr} other {# Jahre}}",
     "shortlistError": "Konnte nicht gespeichert werden. Bitte erneut versuchen.",
     "footnote": "Matches werden deterministisch nur für diesen Bedarf berechnet. Keine globale Bewertung, keine erfundenen Kandidaten.",
     "status": {
@@ -8408,6 +8409,7 @@
       "location": "Standort",
       "availability": "Verfügbarkeit",
       "rate": "Satz",
+      "experience": "Erfahrung (angegeben)",
       "evidence": "Fähigkeitsnachweis"
     },
     "availabilityValue": {

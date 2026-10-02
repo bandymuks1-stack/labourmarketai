@@ -8361,6 +8361,7 @@
     "evidence": "Bewijs — bevestigd: {confirmed} · journaal: {journal} · zelf opgegeven: {self}",
     "confirmedWork": "Bevestigd door werk: {work} van {matched} passende vaardigheden (herhaaldelijk: {repeated})",
     "evidenceNone": "Niet bevestigd",
+    "experienceYearsValue": "{years, plural, one {# jaar} other {# jaar}}",
     "shortlistError": "Opslaan is niet gelukt. Probeer opnieuw.",
     "footnote": "Matches worden deterministisch berekend, alleen voor deze personeelsbehoefte. Geen globale rating, geen nepkandidaten.",
     "status": {
@@ -8408,6 +8409,7 @@
       "location": "Locatie",
       "availability": "Beschikbaarheid",
       "rate": "Tarief",
+      "experience": "Ervaring (opgegeven)",
       "evidence": "Vaardigheidsbewijs"
     },
     "availabilityValue": {

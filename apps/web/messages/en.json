@@ -8361,6 +8361,7 @@
     "evidence": "Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
     "confirmedWork": "Confirmed in real work: {work} of {matched} matched skills (repeated: {repeated})",
     "evidenceNone": "Not confirmed",
+    "experienceYearsValue": "{years, plural, one {# year} other {# years}}",
     "shortlistError": "Could not save. Try again.",
     "footnote": "Matches are computed deterministically for this need only. No global rating, no fake candidates.",
     "status": {
@@ -8408,6 +8409,7 @@
       "location": "Location",
       "availability": "Availability",
       "rate": "Rate",
+      "experience": "Experience (stated)",
       "evidence": "Skill evidence"
     },
     "availabilityValue": {

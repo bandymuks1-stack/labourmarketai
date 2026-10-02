@@ -8361,6 +8361,7 @@
     "evidence": "Įrodymai — patvirtinti: {confirmed} · žurnalas: {journal} · savideklaruoti: {self}",
     "confirmedWork": "Darbu patvirtinta: {work} iš {matched} atitinkančių įgūdžių (pasikartoja: {repeated})",
     "evidenceNone": "Nepatvirtinta",
+    "experienceYearsValue": "{years, plural, one {# metai} few {# metai} other {# metų}}",
     "shortlistError": "Nepavyko išsaugoti. Bandyk dar kartą.",
     "footnote": "Atitiktis skaičiuojama deterministiškai tik šiam poreikiui. Jokio bendro reitingo, jokių išgalvotų kandidatų.",
     "status": {
@@ -8408,6 +8409,7 @@
       "location": "Vieta",
       "availability": "Prieinamumas",
       "rate": "Įkainis",
+      "experience": "Patirtis (nurodyta)",
       "evidence": "Įgūdžių įrodymai"
     },
     "availabilityValue": {

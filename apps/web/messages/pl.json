@@ -8361,6 +8361,7 @@
     "evidence": "Dowody — potwierdzone: {confirmed} · dziennik: {journal} · zadeklarowane samodzielnie: {self}",
     "confirmedWork": "Potwierdzone pracą: {work} z {matched} dopasowanych umiejętności (powtarza się: {repeated})",
     "evidenceNone": "Niepotwierdzone",
+    "experienceYearsValue": "{years, plural, one {# rok} few {# lata} many {# lat} other {# roku}}",
     "shortlistError": "Nie udało się zapisać. Spróbuj ponownie.",
     "footnote": "Dopasowania są obliczane deterministycznie wyłącznie dla tej potrzeby. Bez globalnej oceny, bez fałszywych kandydatów.",
     "status": {
@@ -8408,6 +8409,7 @@
       "location": "Lokalizacja",
       "availability": "Dostępność",
       "rate": "Stawka",
+      "experience": "Doświadczenie (podane)",
       "evidence": "Dowody umiejętności"
     },
     "availabilityValue": {
