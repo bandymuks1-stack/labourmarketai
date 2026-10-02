@@ -79,6 +79,9 @@ function visibleLinks(): readonly NavLink[] {
 
 export async function SiteNav() {
   const t = await getTranslations("nav");
+  // "My space" already exists as the dashboard's own tab label; reusing it keeps
+  // the frozen `nav` namespace untouched.
+  const tSpace = await getTranslations("auth.dashboard.tabs");
   const locale = await getLocale();
   const links = visibleLinks();
 
@@ -108,7 +111,7 @@ export async function SiteNav() {
           relPath={`/${locale}/dashboard`}
           className={buttonLinkClassName("primary", "sm")}
         >
-          {t("openWorkspace")}
+          {tSpace("overview")}
         </AuthCtaLink>
       }
     />
