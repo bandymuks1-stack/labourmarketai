@@ -96,6 +96,8 @@ export interface SessionRecordWithEvents {
   readonly organization_id: string;
   readonly supplier_role: string;
   readonly evidence_state: string;
+  /** The roster person the record is about (null when none). */
+  readonly organization_person_id?: string | null;
   /** The subject's linked profile, so a self-attestation stays visible. */
   readonly subject_profile_id: string | null;
   readonly events: readonly {
@@ -175,6 +177,8 @@ export interface EvidenceStore {
     sessionId: string,
     page: { readonly offset: number; readonly limit: number },
   ): Promise<StoreResult<readonly SessionRecordWithEvents[]>>;
+  /** One record's lifecycle rows, newest first, bounded (read-only). */
+  listRecordEvents(recordId: string): Promise<StoreResult<readonly StoreRow[]>>;
   /** Append-only lifecycle rows; returns the ids written. */
   insertRecordEvents(rows: readonly StoreRow[]): Promise<StoreResult<readonly { readonly id: string }[]>>;
 
@@ -409,7 +413,7 @@ export function supabaseEvidenceStore(caller: DomainCaller): EvidenceStore {
       const res = await db()
         .from("organization_evidence_records")
         .select(
-          "id, organization_id, supplier_role, evidence_state, organization_people(linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at)",
+          "id, organization_id, supplier_role, evidence_state, organization_person_id, organization_people(linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at)",
         )
         .eq("session_id", sessionId)
         .order("id", { ascending: true })
@@ -420,6 +424,7 @@ export function supabaseEvidenceStore(caller: DomainCaller): EvidenceStore {
         organization_id: r.organization_id as string,
         supplier_role: (r.supplier_role as string) ?? "other",
         evidence_state: (r.evidence_state as string) ?? "ORGANIZATION_REPORTED",
+        organization_person_id: (r.organization_person_id as string | null) ?? null,
         subject_profile_id:
           ((r.organization_people as { linked_profile_id?: string | null } | null)?.linked_profile_id ?? null),
         events: ((r.organization_evidence_events as StoreRow[] | null) ?? []).map((e) => ({
@@ -430,6 +435,17 @@ export function supabaseEvidenceStore(caller: DomainCaller): EvidenceStore {
         })),
       }));
       return { data: rows, error: null };
+    },
+
+    async listRecordEvents(recordId) {
+      const res = await db()
+        .from("organization_evidence_events")
+        .select("id, event_type, actor_role, actor_profile_id, created_at")
+        .eq("record_id", recordId)
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (res.error) return fail(res.error);
+      return { data: (res.data ?? []) as StoreRow[], error: null };
     },
 
     async insertRecordEvents(rows) {

@@ -2693,17 +2693,26 @@ function standingOf(r: SessionRecordWithEvents) {
  *
  * It deletes and updates nothing: every write is an append.
  */
-async function lifecycleSweep(
-  caller: EvidenceCaller,
+interface SweepPlan {
+  readonly organizationId: string;
+  /** The records that would gain the event, in stable (id) order. */
+  readonly pending: readonly SessionRecordWithEvents[];
+  /** True when the session's own latest lifecycle event is `rolled_back`. */
+  readonly sessionWithdrawn: boolean;
+  /** The session is already in the requested state AND no record needs the event. */
+  readonly nothingToDo: boolean;
+}
+
+/** THE pending computation of the batch lifecycle - shared by the sweep that
+ *  writes and by the read-only preview an agent confirms against, so what is
+ *  shown and what is written can never be computed two ways. Reads only. */
+async function planLifecycleSweep(
+  store: EvidenceStore,
   sessionId: string,
   eventType: "withdrawn" | "reinstated",
-  note?: string | null,
-): Promise<EvidenceImportResult<LifecycleResult>> {
-  const store = storeOf(caller);
+): Promise<EvidenceImportResult<{ plan: SweepPlan }>> {
   const session = await loadSession(store, sessionId);
   if (!session.ok) return session.failure;
-  const importEvent = eventType === "withdrawn" ? "rolled_back" : "reinstated";
-
   const records = await readSessionRecords(store, sessionId);
   if (!records.ok) return records.failure;
   const pending = records.value.filter((r) =>
@@ -2717,13 +2726,68 @@ async function lifecycleSweep(
   const latest = trail.data.find((e) => e.event_type === "rolled_back" || e.event_type === "reinstated");
   const sessionWithdrawn = latest?.event_type === "rolled_back";
   const alreadyThere = eventType === "withdrawn" ? sessionWithdrawn : !sessionWithdrawn;
-  if (pending.length === 0 && alreadyThere) {
+  return {
+    kind: "ok",
+    plan: {
+      organizationId: session.organizationId,
+      pending,
+      sessionWithdrawn,
+      nothingToDo: pending.length === 0 && alreadyThere,
+    },
+  };
+}
+
+/**
+ * READ-ONLY preview of withdrawing one import session: exactly the records the
+ * sweep would write a `withdrawn` event for. Writes nothing. The fingerprint
+ * parts (`pendingRecordIds`, `sessionWithdrawn`) are what a draft binds its
+ * one-time token to, so a change between preview and confirm voids the token.
+ */
+export async function previewWithdrawal(
+  caller: EvidenceCaller,
+  sessionId: string,
+): Promise<
+  EvidenceImportResult<{
+    organizationId: string;
+    pendingRecordIds: readonly string[];
+    peopleAffected: number;
+    sessionWithdrawn: boolean;
+    nothingToDo: boolean;
+  }>
+> {
+  const planned = await planLifecycleSweep(storeOf(caller), sessionId, "withdrawn");
+  if (planned.kind !== "ok") return planned;
+  const { plan } = planned;
+  const people = new Set(plan.pending.map((r) => r.organization_person_id).filter((x): x is string => !!x));
+  return {
+    kind: "ok",
+    organizationId: plan.organizationId,
+    pendingRecordIds: plan.pending.map((r) => r.id).sort(),
+    peopleAffected: people.size,
+    sessionWithdrawn: plan.sessionWithdrawn,
+    nothingToDo: plan.nothingToDo,
+  };
+}
+
+async function lifecycleSweep(
+  caller: EvidenceCaller,
+  sessionId: string,
+  eventType: "withdrawn" | "reinstated",
+  note?: string | null,
+): Promise<EvidenceImportResult<LifecycleResult>> {
+  const store = storeOf(caller);
+  const importEvent = eventType === "withdrawn" ? "rolled_back" : "reinstated";
+  const planned = await planLifecycleSweep(store, sessionId, eventType);
+  if (planned.kind !== "ok") return planned;
+  const { organizationId, pending, nothingToDo } = planned.plan;
+  if (nothingToDo) {
     return {
       kind: "ok",
       affected: 0,
       outcome: eventType === "withdrawn" ? "already_withdrawn" : "already_reinstated",
     };
   }
+  const session = { organizationId };
 
   let affected = 0;
   if (pending.length > 0) {
@@ -2776,6 +2840,55 @@ export const ATTESTATION_ROLES = [
 ] as const;
 
 /**
+ * READ-ONLY preview of an attestation: validates the role against the
+ * record's supplier role (the same rule `attestRecord` enforces) and reports
+ * the record's CURRENT attestation trail so a draft can bind its one-time
+ * token to it. Writes nothing.
+ */
+export async function previewAttestation(
+  caller: EvidenceCaller,
+  input: {
+    readonly recordId: string;
+    readonly actorRole?: (typeof ATTESTATION_ROLES)[number] | null;
+  },
+): Promise<
+  EvidenceImportResult<{
+    organizationId: string;
+    supplierRole: string;
+    /** Count of `attested` events on the record, from any actor. */
+    attestedEventCount: number;
+    /** Id of the newest `attested` event, or null. */
+    latestAttestedEventId: string | null;
+    /** The caller already attested this record. */
+    attestedByCaller: boolean;
+    /** The record's latest lifecycle event is a withdrawal. */
+    withdrawn: boolean;
+  }>
+> {
+  const store = storeOf(caller);
+  const rec = await store.readRecord(input.recordId);
+  if (rec.error) return classify(rec.error);
+  if (!rec.data) return { kind: "not-found" };
+  const supplierRole = (rec.data.supplier_role as string | null) ?? "other";
+  if (input.actorRole && input.actorRole !== supplierRole) {
+    return { kind: "invalid", problems: [`attestation role must be the record's supplier role (${supplierRole})`] };
+  }
+  const events = await store.listRecordEvents(input.recordId);
+  if (events.error) return classify(events.error);
+  const attested = events.data.filter((e) => e.event_type === "attested");
+  const lifecycle = events.data.find((e) => e.event_type === "withdrawn" || e.event_type === "reinstated");
+  return {
+    kind: "ok",
+    organizationId: rec.data.organization_id as string,
+    supplierRole,
+    attestedEventCount: attested.length,
+    latestAttestedEventId: (attested[0]?.id as string | undefined) ?? null,
+    attestedByCaller: attested.some((e) => e.actor_profile_id === store.userId),
+    withdrawn: lifecycle?.event_type === "withdrawn",
+  };
+}
+
+/**
  * The organization attesting a record it supplied.
  *
  * Attesting one's OWN work is ALLOWED (owner decision 3): a sole trader
@@ -2809,21 +2922,22 @@ export async function attestRecord(
   },
 ): Promise<EvidenceImportResult<{ eventId: string }>> {
   const store = storeOf(caller);
-  const rec = await store.readRecord(input.recordId);
-  if (rec.error) return classify(rec.error);
-  if (!rec.data) return { kind: "not-found" };
-  const supplierRole = (rec.data.supplier_role as string | null) ?? "other";
-  if (input.actorRole && input.actorRole !== supplierRole) {
-    return { kind: "invalid", problems: [`attestation role must be the record's supplier role (${supplierRole})`] };
+  const prior = await previewAttestation(caller, input);
+  if (prior.kind !== "ok") return prior;
+  const supplierRole = prior.supplierRole;
+  // One actor stands behind a record ONCE. A repeat adds no standing, only
+  // noise in an append-only ledger (and a replayed confirm must never mint a
+  // second event) - refused by name, not written.
+  if (prior.attestedByCaller) {
+    return { kind: "invalid", problems: ["this record is already attested by this actor"] };
   }
-
   const res = await store.insertRecordEvents([
     {
-      organization_id: rec.data.organization_id as string,
+      organization_id: prior.organizationId,
       record_id: input.recordId,
       event_type: "attested",
       actor_role: supplierRole,
-      actor_organization_id: rec.data.organization_id as string,
+      actor_organization_id: prior.organizationId,
       actor_profile_id: store.userId,
       note: input.note ?? null,
     },
