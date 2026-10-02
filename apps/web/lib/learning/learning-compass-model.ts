@@ -18,12 +18,16 @@
  */
 
 import type { OpportunityType } from "@/lib/demand/structured-demand-v2";
-import type { EvidenceTier } from "@/lib/evidence/evidence-tier";
+import type { ConfirmedWorkTier, EvidenceTier } from "@/lib/evidence/evidence-tier";
 import { skillsForProfession } from "@/lib/taxonomy/profession-skills";
 
 export interface CompassSkill {
   readonly slug: string;
   readonly evidence: EvidenceTier;
+  /** Manager-confirmed REAL WORK that shows this skill (entry-level, not a
+   *  skill certification). Absent = not known; it only ever affects the
+   *  "weak evidence" recommendation, never a missing-skill gap. */
+  readonly confirmedWork?: ConfirmedWorkTier;
 }
 
 export interface CompassEducation {
@@ -90,6 +94,40 @@ export interface CompassInput {
 
 export type CompassMissingSource = "opportunities" | "profession" | "program";
 
+/**
+ * WHY a skill is recommended — every recommendation names one real reason and
+ * carries its provenance. Nothing here is "you lack a skill, go learn it":
+ *
+ *   demand_missing        a real opportunity asks for it and the person has
+ *                         no such skill on record;
+ *   demand_weak_evidence  a real opportunity asks for it and the person only
+ *                         SELF-DECLARED it, with no confirmed work behind it;
+ *   profession_gap       the person's own target profession's registry lists
+ *                         it and it is not on record.
+ *
+ * Derived, never stored (no table, no writer): the manager review queue
+ * (`learning_review_queue`) is a different workflow and is not used here.
+ */
+export type CompassRecommendationBasis =
+  | "demand_missing"
+  | "demand_weak_evidence"
+  | "profession_gap";
+
+export interface CompassRecommendationSource {
+  readonly requestId: string;
+  readonly roleSlug: string | null;
+  readonly companyName: string | null;
+}
+
+export interface CompassRecommendation {
+  readonly skillSlug: string;
+  readonly basis: CompassRecommendationBasis;
+  /** The real demand(s) behind it (demand_* bases); empty for profession_gap. */
+  readonly sources: readonly CompassRecommendationSource[];
+  /** The target profession behind a profession_gap; null otherwise. */
+  readonly professionSlug: string | null;
+}
+
 export interface CompassMissingSkill {
   readonly slug: string;
   /** How many of the shown opportunities ask for it (0 when source=profession). */
@@ -130,11 +168,78 @@ export interface LearningCompass {
     readonly source: CompassMissingSource | null;
     readonly skills: readonly CompassMissingSkill[];
   };
+  /** Derived recommendations, each with its basis and provenance. */
+  readonly recommendations: readonly CompassRecommendation[];
   readonly nextSteps: readonly CompassNextStep[];
 }
 
 const MAX_FITS = 3;
 const MAX_MISSING = 5;
+const MAX_RECOMMENDATIONS = 6;
+const MAX_SOURCES_PER_RECOMMENDATION = 3;
+
+/**
+ * Derive the recommendations (pure). Order: real missing skills first (the
+ * most asked-for first), then weak-evidence skills, then target-profession
+ * gaps. Confirmed work can weaken or remove a WEAK-EVIDENCE recommendation,
+ * but it can never remove a missing-skill gap: that is decided only by
+ * whether the skill is on the person's record at all.
+ */
+export function deriveCompassRecommendations(input: {
+  readonly professionSlug: string | null;
+  readonly skills: readonly CompassSkill[];
+  readonly opportunities: readonly CompassOpportunity[];
+}): CompassRecommendation[] {
+  const own = new Map(input.skills.map((s) => [s.slug, s]));
+  const missing = new Map<string, CompassRecommendationSource[]>();
+  const weak = new Map<string, CompassRecommendationSource[]>();
+  const push = (m: Map<string, CompassRecommendationSource[]>, slug: string, o: CompassOpportunity) => {
+    const list = m.get(slug) ?? [];
+    if (list.some((x) => x.requestId === o.requestId)) return;
+    list.push({ requestId: o.requestId, roleSlug: o.roleSlug, companyName: o.companyName });
+    m.set(slug, list);
+  };
+  for (const o of input.opportunities) {
+    // Too little data on the demand side is not a reason to recommend anything.
+    if (o.status === "insufficient_data") continue;
+    for (const slug of o.missingSkillSlugs) {
+      if (!own.has(slug)) push(missing, slug, o);
+    }
+    for (const slug of o.matchedSkillSlugs) {
+      const s = own.get(slug);
+      if (!s) continue;
+      const selfOnly = s.evidence === "self_declared";
+      const hasConfirmedWork = (s.confirmedWork ?? "none") !== "none";
+      if (selfOnly && !hasConfirmedWork) push(weak, slug, o);
+    }
+  }
+  const byCountThenSlug = (a: [string, unknown[]], b: [string, unknown[]]) =>
+    b[1].length - a[1].length || a[0].localeCompare(b[0]);
+  const out: CompassRecommendation[] = [];
+  for (const [slug, sources] of [...missing.entries()].sort(byCountThenSlug)) {
+    out.push({
+      skillSlug: slug,
+      basis: "demand_missing",
+      sources: sources.slice(0, MAX_SOURCES_PER_RECOMMENDATION),
+      professionSlug: null,
+    });
+  }
+  for (const [slug, sources] of [...weak.entries()].sort(byCountThenSlug)) {
+    out.push({
+      skillSlug: slug,
+      basis: "demand_weak_evidence",
+      sources: sources.slice(0, MAX_SOURCES_PER_RECOMMENDATION),
+      professionSlug: null,
+    });
+  }
+  if (input.professionSlug) {
+    for (const slug of skillsForProfession(input.professionSlug)) {
+      if (own.has(slug) || missing.has(slug)) continue;
+      out.push({ skillSlug: slug, basis: "profession_gap", sources: [], professionSlug: input.professionSlug });
+    }
+  }
+  return out.slice(0, MAX_RECOMMENDATIONS);
+}
 
 function tierIs(tier: EvidenceTier, ...names: string[]): boolean {
   return names.includes(String(tier));
@@ -249,6 +354,11 @@ export function buildLearningCompass(input: CompassInput): LearningCompass {
     },
     fitsNow,
     missing: { source: missingSource, skills: missing },
+    recommendations: deriveCompassRecommendations({
+      professionSlug: input.professionSlug,
+      skills: input.skills,
+      opportunities: input.opportunities,
+    }),
     nextSteps: next,
   };
 }
