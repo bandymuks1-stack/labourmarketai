@@ -8539,13 +8539,15 @@
       "cancel": "Anuluj"
     },
     "verdict": {
-      "eligible": "Spełnia podane wymagania",
+      "eligible": "Spełnia wymagania obowiązkowe (umiejętności oceniane osobno)",
       "blocked": "Nie spełnia podanego wymagania",
       "evidence": {
         "confirmed": "Dowody: potwierdzone przez menedżera",
         "mixed": "Dowody: częściowo potwierdzone",
         "unverified": "Dowody: tylko samodzielnie zadeklarowane"
-      }
+      },
+      "noCriteria": "Nie podano wymagań obowiązkowych",
+      "insufficient": "Za mało danych, aby sprawdzić wymagania"
     },
     "editNeedCta": "Dostosuj lub dodaj potrzebę",
     "availableSupply": {
@@ -8578,7 +8580,7 @@
         "shortlist": "Wybrani",
         "contact": "W kontakcie",
         "offer": "Zaproponowano",
-        "accepted": "Przyjęli",
+        "accepted": "Zgodzili się na terminy",
         "closed": "Zamknięte"
       }
     },
@@ -8588,7 +8590,8 @@
       "readiness": "Dostępność, gotowość i dokumenty",
       "openTo": "Otwarta także na: {countries}",
       "skillCount": "{matched} z {total} wymaganych umiejętności",
-      "nameHidden": "Imię i dane kontaktowe pojawiają się dopiero, gdy osoba na to pozwoli."
+      "nameHidden": "Imię i dane kontaktowe pojawiają się dopiero, gdy osoba na to pozwoli.",
+      "skillUnknown": "Nie podano umiejętności · potrzeba: {total}"
     }
   },
   "planBoundary": {
@@ -11895,7 +11898,7 @@
       "contacted": "Skontaktowano się",
       "interview": "W rozmowie",
       "offer": "Oferta",
-      "accepted": "Zaakceptowano",
+      "accepted": "Zgodził się na terminy",
       "rejected": "Odrzucono"
     },
     "action": {
@@ -11905,7 +11908,8 @@
       "continueConversation": "Kontynuuj rozmowę",
       "viewOffer": "Śledź odpowiedź na rezerwację",
       "planWork": "Przejrzyj zaakceptowaną rezerwację",
-      "reviewOthers": "Przejrzyj innych kandydatów"
+      "reviewOthers": "Przejrzyj innych kandydatów",
+      "assignToProject": "Przypisz do projektu"
     }
   },
   "agencyClients": {
@@ -13117,7 +13121,7 @@
       "offerTitle": "Oferta pracy",
       "confirmAcceptTitle": "Zaakceptować tę ofertę?",
       "confirmAcceptBody": "Zaakceptowanie potwierdza Twoje zaangażowanie wobec pracodawcy — to zdecydowany krok, nie wersja robocza.",
-      "confirmAcceptDisclosure": "Po zaakceptowaniu ta firma — i tylko ona — zobaczy Twoją kartę profilu: imię, umiejętności, zawody, języki i dostępność. Twoje dane kontaktowe pozostają prywatne, żaden inny pracodawca nie uzyskuje dostępu, a to nie dodaje Cię do wyszukiwania dla pracodawców. Dostęp trwa, dopóki zaangażowanie jest aktywne, i możesz go zakończyć w dowolnym momencie.",
+      "confirmAcceptDisclosure": "Akceptując, zgadzasz się na terminy podane w tej rezerwacji. To nie jest umowa o pracę i nie oznacza, że jesteś już zatrudniony — konkretny projekt lub miejsce firma ustala osobno. Po zaakceptowaniu ta firma — i tylko ona — zobaczy Twoją kartę profilu: imię, umiejętności, zawody, języki i dostępność. Twoje dane kontaktowe pozostają prywatne, żaden inny pracodawca nie uzyskuje dostępu, a to nie dodaje Cię do wyszukiwania dla pracodawców. Dostęp trwa, dopóki zaangażowanie jest aktywne, i możesz go zakończyć w dowolnym momencie.",
       "confirmDeclineTitle": "Odrzucić tę ofertę?",
       "confirmCta": "Tak, potwierdź",
       "cancelCta": "Anuluj",

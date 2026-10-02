@@ -8539,13 +8539,15 @@
       "cancel": "Atšaukti"
     },
     "verdict": {
-      "eligible": "Atitinka nurodytus reikalavimus",
+      "eligible": "Atitinka privalomus reikalavimus (įgūdžiai vertinami atskirai)",
       "blocked": "Neatitinka nurodyto reikalavimo",
       "evidence": {
         "confirmed": "Įrodymai: patvirtinta vadovo",
         "mixed": "Įrodymai: iš dalies patvirtinta",
         "unverified": "Įrodymai: tik paties deklaruota"
-      }
+      },
+      "noCriteria": "Privalomų reikalavimų nenurodyta",
+      "insufficient": "Per mažai duomenų reikalavimams patikrinti"
     },
     "editNeedCta": "Patikslinti arba pridėti poreikį",
     "availableSupply": {
@@ -8578,7 +8580,7 @@
         "shortlist": "Atrinkti",
         "contact": "Susisiekta",
         "offer": "Pasiūlyta",
-        "accepted": "Priėmė",
+        "accepted": "Sutiko su datomis",
         "closed": "Uždaryta"
       }
     },
@@ -8588,7 +8590,8 @@
       "readiness": "Prieinamumas, pasirengimas ir dokumentai",
       "openTo": "Taip pat atviras: {countries}",
       "skillCount": "{matched} iš {total} reikalaujamų įgūdžių",
-      "nameHidden": "Vardas ir kontaktai rodomi tik tada, kai žmogus tai leidžia."
+      "nameHidden": "Vardas ir kontaktai rodomi tik tada, kai žmogus tai leidžia.",
+      "skillUnknown": "Įgūdžių nenurodyta · reikia {total}"
     }
   },
   "planBoundary": {
@@ -11895,7 +11898,7 @@
       "contacted": "Susisiekta",
       "interview": "Pokalbis",
       "offer": "Pasiūlymas",
-      "accepted": "Priimtas",
+      "accepted": "Sutiko su datomis",
       "rejected": "Atmestas"
     },
     "action": {
@@ -11905,7 +11908,8 @@
       "continueConversation": "Tęsti pokalbį",
       "viewOffer": "Sekti pasiūlymo atsakymą",
       "planWork": "Peržiūrėti priimtą pasiūlymą",
-      "reviewOthers": "Peržiūrėti kitus kandidatus"
+      "reviewOthers": "Peržiūrėti kitus kandidatus",
+      "assignToProject": "Priskirti projektui"
     }
   },
   "agencyClients": {
@@ -13117,7 +13121,7 @@
       "offerTitle": "Darbo pasiūlymas",
       "confirmAcceptTitle": "Priimti šį pasiūlymą?",
       "confirmAcceptBody": "Priėmimas patvirtina įsipareigojimą darbdaviui — tai tvirtas žingsnis, ne juodraštis.",
-      "confirmAcceptDisclosure": "Priėmus ši įmonė — ir tik ši įmonė — matys tavo profilio kortelę: vardą, įgūdžius, profesijas, kalbas ir pasiekiamumą. Kontaktai lieka privačias, kitos įmonės prieigos negauna, ir tai neįtraukia tavęs į darbdavių paiešką. Prieiga galioja, kol darbo santykis aktyvus — bet kada gali jį baigti.",
+      "confirmAcceptDisclosure": "Priimdamas sutinki su šioje rezervacijoje nurodytomis datomis. Tai ne darbo sutartis ir nereiškia, kad jau esi įdarbintas — konkretų projektą ar objektą įmonė nustato atskirai. Priėmus ši įmonė — ir tik ši įmonė — matys tavo profilio kortelę: vardą, įgūdžius, profesijas, kalbas ir pasiekiamumą. Kontaktai lieka privačias, kitos įmonės prieigos negauna, ir tai neįtraukia tavęs į darbdavių paiešką. Prieiga galioja, kol darbo santykis aktyvus — bet kada gali jį baigti.",
       "confirmDeclineTitle": "Atmesti šį pasiūlymą?",
       "confirmCta": "Taip, patvirtinti",
       "cancelCta": "Atšaukti",
