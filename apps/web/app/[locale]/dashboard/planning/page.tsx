@@ -871,7 +871,14 @@ export default async function PlanningPage({
                 {monthOnlyFmt(`${m.month}-01`)}
               </span>
               <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                {t("year.count", { count: m.count })}
+                {/* Under a source filter the count is the filtered one, but the
+                    month view still draws the journal's hours and marks from
+                    the full model. A bare "no records" here contradicted the
+                    month the tile opens (owner walk 2026-10-01): a zero under
+                    a filter says WHICH records are absent. */}
+                {m.count === 0 && sourceFilter
+                  ? t("emptyFiltered")
+                  : t("year.count", { count: m.count })}
               </span>
             </Link>
           ))}
