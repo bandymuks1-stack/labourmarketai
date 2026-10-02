@@ -4473,12 +4473,12 @@
       },
       "tabs": {
         "overview": "Moja przestrzeń",
+        "discover": "Odkrywaj",
         "marketplace": "Rynek usług",
         "marketMap": "Mapa",
         "profile": "Profil",
         "journal": "Moje CV",
         "communication": "Wiadomości",
-        "discover": "Odkrywaj",
         "search": "Szukaj",
         "account": "Ustawienia",
         "admin": "Administracja",
@@ -18384,6 +18384,105 @@
       "companies": {
         "projectDone": "5 z 9 wpisów potwierdzonych w tym tygodniu",
         "teamMeta": "3 osoby w tym projekcie"
+      }
+    }
+  },
+  "discover": {
+    "eyebrow": "Odkrywaj",
+    "title": "Znajdź, czego potrzebujesz. Zaoferuj, co masz.",
+    "lead": "Ludzie i firmy oferują oraz szukają tu pracy, ludzi, usług i zasobów do pracy. Widzisz tylko to, z czego może korzystać Twoja rola.",
+    "honesty": "Każda karta poniżej prowadzi do prawdziwej sekcji. Nic na tej stronie nie jest przykładowym ogłoszeniem.",
+    "feature": {
+      "label": "Odkrywaj",
+      "description": "Znajdź pracę, ludzi, usługi i zasoby do pracy - albo zaoferuj własne."
+    },
+    "side": {
+      "seek": "Szukasz",
+      "offer": "Oferujesz",
+      "both": "Szukaj lub oferuj"
+    },
+    "status": {
+      "early": "Dopiero otwarte",
+      "earlyNote": "Sekcje oznaczone „Dopiero otwarte” są gotowe i działają, ale mają jeszcze niewiele wpisów - możesz być wśród pierwszych."
+    },
+    "groups": {
+      "around": {
+        "title": "W pobliżu",
+        "lead": "Zobacz rynek na mapie albo własnymi słowami powiedz, co oferujesz lub czego potrzebujesz."
+      },
+      "work": {
+        "title": "Praca",
+        "lead": "Otwarte stanowiska i sygnały, które za nimi stoją."
+      },
+      "people": {
+        "title": "Ludzie i firmy",
+        "lead": "Znajdź ludzi do potrzeby, zgłoś swoją potrzebę i dbaj o relacje."
+      },
+      "offers": {
+        "title": "Usługi i zasoby do pracy",
+        "lead": "Zaoferuj usługę lub zleć ją, dodaj narzędzia, pojazdy, lokale i sprzęt do pracy."
+      },
+      "grow": {
+        "title": "Rozwój",
+        "lead": "Zamień to, co znajdujesz i robisz, w umiejętności i szkolenia."
+      }
+    },
+    "entries": {
+      "map": {
+        "title": "Mapa rynku",
+        "desc": "Potrzeby, ludzie i projekty na jednej mapie. Pojawiają się tylko miejsca z prawdziwymi danymi."
+      },
+      "recognize": {
+        "title": "Powiedz, co oferujesz lub czego potrzebujesz",
+        "desc": "Opisz to własnymi słowami i przejdź we właściwe miejsce. Nic nie jest zapisywane, dopóki nie wybierzesz."
+      },
+      "opportunities": {
+        "title": "Okazje dla Ciebie",
+        "desc": "Otwarte stanowiska dopasowane do Twojego zapisu pracy, z zapisanymi wyszukiwaniami."
+      },
+      "jobs": {
+        "title": "Publiczna tablica ofert",
+        "desc": "Przeglądaj opublikowane oferty bez logowania."
+      },
+      "intelligence": {
+        "title": "Sygnały rynku",
+        "desc": "Sygnały płac i popytu z Twoich własnych danych, ze wskazanymi źródłami."
+      },
+      "scouting": {
+        "title": "Znajdź ludzi",
+        "desc": "Wybierz zanonimizowanych kandydatów do swoich potrzeb i prowadź ich przez proces."
+      },
+      "needs": {
+        "title": "Potrzeby kadrowe",
+        "desc": "Opisz, kogo potrzebujesz - jedyne miejsce, w którym zapisywany jest Twój popyt."
+      },
+      "candidates": {
+        "title": "Szkice kandydatów",
+        "desc": "Prywatne notatki o osobach, które możesz włączyć. Szkic nie jest kontem."
+      },
+      "buyer": {
+        "title": "Zleć pracę lub usługi",
+        "desc": "Skonfiguruj się jako klient i opisz, co trzeba zrobić."
+      },
+      "network": {
+        "title": "Sieć",
+        "desc": "Szukaj ludzi i firm, wysyłaj zaproszenia, dbaj o relacje."
+      },
+      "services": {
+        "title": "Zaoferuj usługę",
+        "desc": "Opublikuj, co Ty lub Twoja firma możecie zrobić dla innych."
+      },
+      "service_requests": {
+        "title": "Znajdź i zleć usługi",
+        "desc": "Przeglądaj aktywne usługi i wyślij zapytanie albo odpowiadaj na zapytania do swoich usług."
+      },
+      "listings": {
+        "title": "Zasoby do pracy",
+        "desc": "Narzędzia, sprzęt, pojazdy, lokale i zakwaterowanie na sprzedaż, wynajem lub poszukiwane - tylko do pracy."
+      },
+      "education": {
+        "title": "Programy szkoleniowe",
+        "desc": "Uczący się, programy i kohorty dla Twojej organizacji szkoleniowej."
       }
     }
   }

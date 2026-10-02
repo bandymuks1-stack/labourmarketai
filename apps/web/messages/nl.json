@@ -4473,12 +4473,12 @@
       },
       "tabs": {
         "overview": "Mijn ruimte",
+        "discover": "Ontdekken",
         "marketplace": "Marktplaats",
         "marketMap": "Kaart",
         "profile": "Profiel",
         "journal": "Werkjournaal",
         "communication": "Berichten",
-        "discover": "Ontdekken",
         "search": "Zoeken",
         "account": "Instellingen",
         "admin": "Admin",
@@ -18384,6 +18384,105 @@
       "companies": {
         "projectDone": "5 van 9 registraties deze week bevestigd",
         "teamMeta": "3 personen in dit project"
+      }
+    }
+  },
+  "discover": {
+    "eyebrow": "Ontdekken",
+    "title": "Vind wat u nodig heeft. Bied aan wat u heeft.",
+    "lead": "Hier bieden mensen en bedrijven werk, mensen, diensten en werkmiddelen aan of zoeken ze die. U ziet alleen wat uw rol kan gebruiken.",
+    "honesty": "Elke kaart hieronder is een deur naar een echt onderdeel. Niets op deze pagina is een voorbeeldadvertentie.",
+    "feature": {
+      "label": "Ontdekken",
+      "description": "Vind werk, mensen, diensten en werkmiddelen - of bied zelf iets aan."
+    },
+    "side": {
+      "seek": "U zoekt",
+      "offer": "U biedt aan",
+      "both": "Zoeken of aanbieden"
+    },
+    "status": {
+      "early": "Net geopend",
+      "earlyNote": "Onderdelen met „Net geopend” zijn af en werken, maar hebben nog weinig items - u kunt een van de eersten zijn."
+    },
+    "groups": {
+      "around": {
+        "title": "In uw buurt",
+        "lead": "Zie de markt op de kaart of zeg in eigen woorden wat u aanbiedt of nodig heeft."
+      },
+      "work": {
+        "title": "Werk",
+        "lead": "Open functies en de signalen erachter."
+      },
+      "people": {
+        "title": "Mensen en bedrijven",
+        "lead": "Vind mensen voor een behoefte, meld uw behoefte en onderhoud uw relaties."
+      },
+      "offers": {
+        "title": "Diensten en werkmiddelen",
+        "lead": "Bied een dienst aan of vraag er een aan, plaats gereedschap, voertuigen, ruimtes en uitrusting voor werk."
+      },
+      "grow": {
+        "title": "Groeien",
+        "lead": "Maak van wat u vindt en doet vaardigheden en opleiding."
+      }
+    },
+    "entries": {
+      "map": {
+        "title": "Marktkaart",
+        "desc": "Behoeften, mensen en projecten op één kaart. Alleen plaatsen met echte gegevens verschijnen."
+      },
+      "recognize": {
+        "title": "Zeg wat u aanbiedt of nodig heeft",
+        "desc": "Beschrijf het in eigen woorden en ga naar de juiste plek. Er wordt niets opgeslagen voordat u kiest."
+      },
+      "opportunities": {
+        "title": "Kansen voor u",
+        "desc": "Open functies passend bij uw werkverleden, met opgeslagen zoekopdrachten."
+      },
+      "jobs": {
+        "title": "Openbaar vacaturebord",
+        "desc": "Blader zonder inloggen door gepubliceerde vacatures."
+      },
+      "intelligence": {
+        "title": "Marktsignalen",
+        "desc": "Loon- en vraagsignalen uit uw eigen gegevens, met bronvermelding."
+      },
+      "scouting": {
+        "title": "Mensen vinden",
+        "desc": "Maak een shortlist van geanonimiseerde kandidaten voor uw behoeften en volg ze door het proces."
+      },
+      "needs": {
+        "title": "Personeelsbehoefte",
+        "desc": "Beschrijf wie u nodig heeft - de enige plek waar uw vraag wordt vastgelegd."
+      },
+      "candidates": {
+        "title": "Kandidaatconcepten",
+        "desc": "Privénotities over mensen die u kunt inschakelen. Een concept is geen account."
+      },
+      "buyer": {
+        "title": "Werk of diensten aanvragen",
+        "desc": "Stel u in als klant en beschrijf wat gedaan moet worden."
+      },
+      "network": {
+        "title": "Netwerk",
+        "desc": "Zoek mensen en bedrijven, verstuur uitnodigingen, onderhoud relaties."
+      },
+      "services": {
+        "title": "Een dienst aanbieden",
+        "desc": "Publiceer wat u of uw bedrijf voor anderen kan doen."
+      },
+      "service_requests": {
+        "title": "Diensten vinden en aanvragen",
+        "desc": "Blader door actieve diensten en stuur een aanvraag, of beantwoord aanvragen voor uw diensten."
+      },
+      "listings": {
+        "title": "Werkmiddelen",
+        "desc": "Gereedschap, uitrusting, voertuigen, ruimtes en huisvesting te koop, te huur of gevraagd - alleen voor werk."
+      },
+      "education": {
+        "title": "Opleidingsprogramma's",
+        "desc": "Cursisten, programma's en groepen voor uw opleidingsorganisatie."
       }
     }
   }

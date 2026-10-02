@@ -4473,12 +4473,12 @@
       },
       "tabs": {
         "overview": "My space",
+        "discover": "Discover",
         "marketplace": "Marketplace",
         "marketMap": "Map",
         "profile": "Profile",
         "journal": "Work journal",
         "communication": "Messages",
-        "discover": "Discover",
         "search": "Search",
         "account": "Settings",
         "admin": "Admin",
@@ -18384,6 +18384,105 @@
       "companies": {
         "projectDone": "5 of 9 records confirmed this week",
         "teamMeta": "3 people on this project"
+      }
+    }
+  },
+  "discover": {
+    "eyebrow": "Discover",
+    "title": "Find what you need. Offer what you have.",
+    "lead": "People and businesses offer and look for work, people, services and work resources here. You see only what your role can use.",
+    "honesty": "Every card below is a door to a real section. Nothing on this page is a sample listing.",
+    "feature": {
+      "label": "Discover",
+      "description": "Find work, people, services and work resources - or offer your own."
+    },
+    "side": {
+      "seek": "You look for",
+      "offer": "You offer",
+      "both": "Look or offer"
+    },
+    "status": {
+      "early": "Just opened",
+      "earlyNote": "Sections marked \"Just opened\" are complete and working, but few entries exist yet - you may be among the first."
+    },
+    "groups": {
+      "around": {
+        "title": "Around you",
+        "lead": "See the market on a map, or say in your own words what you offer or need."
+      },
+      "work": {
+        "title": "Work",
+        "lead": "Open roles to take, and the signals behind them."
+      },
+      "people": {
+        "title": "People and companies",
+        "lead": "Find people for a need, post what you need, and keep your relationships."
+      },
+      "offers": {
+        "title": "Services and work resources",
+        "lead": "Offer a service, request one, or list tools, vehicles, premises and equipment for work."
+      },
+      "grow": {
+        "title": "Grow",
+        "lead": "Turn what you find and do into skills and training."
+      }
+    },
+    "entries": {
+      "map": {
+        "title": "Market map",
+        "desc": "Needs, people and projects on one map. Only places with real data appear."
+      },
+      "recognize": {
+        "title": "Say what you offer or need",
+        "desc": "Describe it in your own words and continue to the right place. Nothing is saved until you choose."
+      },
+      "opportunities": {
+        "title": "Opportunities for you",
+        "desc": "Open roles matched to your work record, with saved searches."
+      },
+      "jobs": {
+        "title": "Public job board",
+        "desc": "Browse published vacancies without signing in."
+      },
+      "intelligence": {
+        "title": "Market signals",
+        "desc": "Pay and demand signals from your own data, with sources shown."
+      },
+      "scouting": {
+        "title": "Find people",
+        "desc": "Shortlist anonymised candidates for your needs and follow them through the pipeline."
+      },
+      "needs": {
+        "title": "Workforce needs",
+        "desc": "Describe the people you need - the one place your demand is recorded."
+      },
+      "candidates": {
+        "title": "Candidate drafts",
+        "desc": "Private notes on people you may bring in. A draft is not an account."
+      },
+      "buyer": {
+        "title": "Request work or services",
+        "desc": "Set up as a customer and describe what you need done."
+      },
+      "network": {
+        "title": "Network",
+        "desc": "Search people and companies, send invitations, keep relationships."
+      },
+      "services": {
+        "title": "Offer a service",
+        "desc": "Publish what you or your business can do for others."
+      },
+      "service_requests": {
+        "title": "Find and request services",
+        "desc": "Browse active services and send a request, or answer requests to yours."
+      },
+      "listings": {
+        "title": "Work resources",
+        "desc": "Tools, equipment, vehicles, premises and accommodation for sale, rent or wanted - for work use only."
+      },
+      "education": {
+        "title": "Training programmes",
+        "desc": "Learners, programmes and cohorts for your training organisation."
       }
     }
   }

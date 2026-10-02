@@ -25,6 +25,7 @@ import {
  *  framework-agnostic. */
 export type NavIconKey =
   | "home"
+  | "compass"
   | "store"
   | "map"
   | "idCard"
@@ -53,9 +54,16 @@ const TAB_META: Partial<Record<FeatureKey, TabMeta>> = {
     tabLabelKey: "auth.dashboard.tabs.overview",
     iconKey: "home",
   },
-  // Žemėlapis — the map is its own PRIMARY product surface (map-first
-  // correction). The tab goes directly to the real map at /dashboard/market-map
-  // (the market_map feature's route), not the marketplace hub.
+  // Atrask / Discover - the role-aware destination for everything people and
+  // businesses OFFER or SEEK (work, people, services, work resources, places).
+  // It replaces the former map tab: the map is still one tap away as the
+  // spatial lens inside Discover (and stays a command-finder starter).
+  discover: {
+    tabLabelKey: "auth.dashboard.tabs.discover",
+    iconKey: "compass",
+  },
+  // Žemėlapis - no longer a tab (a lens of Discover); the meta stays so the
+  // feature can be promoted again without a component edit.
   market_map: {
     tabLabelKey: "auth.dashboard.tabs.marketMap",
     iconKey: "map",
@@ -129,7 +137,7 @@ export const VISIBLE_PRIMARY_NAV_ITEMS: readonly NavItem[] =
  * THE ONE CORE WORK LOOP (rebuild W5). Both shells render the SAME core
  * destinations, in the SAME order, from THIS single source:
  *
- *   chat (overview) → journal → calendar → messages
+ *   chat (overview) → discover → journal → calendar → messages
  *
  * This supersedes the UX 2.0 "single persistent owner" split
  * (SIMPLE_SHELL_OWNED_NAV_IDS): giving each destination exactly one owning
@@ -141,6 +149,7 @@ export const VISIBLE_PRIMARY_NAV_ITEMS: readonly NavItem[] =
  */
 export const CORE_NAV_IDS: readonly FeatureKey[] = [
   "overview",
+  "discover",
   "journal_text_first",
   "planning",
   "communication",
