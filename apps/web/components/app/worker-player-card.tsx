@@ -157,9 +157,10 @@ export interface PlayerCardLabels {
   readiness: {
     label: string;
     hint: string;
-    levelReady: string;
-    levelBuilding: string;
-    levelStart: string;
+    /** "Profile steps: {met} of {total} done" — template, filled by the card. */
+    ringAria: string;
+    stepDone: string;
+    stepOpen: string;
     /** "{met}/{total} signals met" with values interpolated by the caller-free
      *  component — stored as a template the component fills. */
     signalsTemplate: string;
@@ -280,12 +281,6 @@ export function WorkerPlayerCard({
   const confirmed = card.workCardConfirmed;
   // Honest readiness signals (real met/total), drives the status ring + line.
   const readiness = deriveWorkerReadiness(card);
-  const levelLabel =
-    readiness.level === "ready"
-      ? labels.readiness.levelReady
-      : readiness.level === "building"
-        ? labels.readiness.levelBuilding
-        : labels.readiness.levelStart;
   const missing = missingReadinessPillars(readiness);
   // Identity tile (avatar + name + initials) sourced through the ONE minimum
   // Player Card contract, so the fallback rules are identical to every other
@@ -350,23 +345,35 @@ export function WorkerPlayerCard({
               {readiness.met}/{readiness.total} {labels.readiness.signalsTemplate}
             </span>
           </span>
-          {missing.length > 0 ? (
-            <span className="flex flex-wrap items-center gap-1.5 text-meta leading-relaxed text-text-secondary">
-              <span className="text-text-muted">{labels.readiness.nextLabel}</span>
-              {missing.map((k) => (
-                <span
-                  key={k}
-                  className="inline-flex items-center rounded-sm border border-ink-500 px-1.5 py-0.5 text-meta text-text-secondary"
-                >
-                  {labels.readiness.pillars[k]}
+          {/* The checklist behind the count: every step is NAMED and its
+              state is said in words (not colour alone), so "6/6" is never an
+              unexplained number. */}
+          <ul className="flex flex-wrap gap-1.5" data-testid="player-card-readiness-steps">
+            {readiness.pillars.map((p) => (
+              <li
+                key={p.key}
+                data-met={p.met ? "true" : "false"}
+                className={cn(
+                  "inline-flex min-h-7 items-center gap-1.5 rounded-sm border px-2 py-0.5 text-meta",
+                  p.met
+                    ? "border-ink-500 bg-ink-800 text-text-primary"
+                    : "border-dashed border-ink-500 text-text-secondary",
+                )}
+              >
+                <span aria-hidden className="font-mono">{p.met ? "✓" : "○"}</span>
+                {labels.readiness.pillars[p.key]}
+                <span className="sr-only">
+                  {" "}
+                  {p.met ? labels.readiness.stepDone : labels.readiness.stepOpen}
                 </span>
-              ))}
-            </span>
-          ) : (
+              </li>
+            ))}
+          </ul>
+          {missing.length === 0 ? (
             <span className="text-meta leading-relaxed text-text-secondary">
               {labels.readiness.hint}
             </span>
-          )}
+          ) : null}
         </div>
     </>
   );
@@ -773,7 +780,10 @@ export function WorkerPlayerCard({
             met={readiness.met}
             total={readiness.total}
             level={readiness.level}
-            levelLabel={levelLabel}
+            caption={labels.readiness.label}
+            ariaLabel={labels.readiness.ringAria
+              .replace("{met}", String(readiness.met))
+              .replace("{total}", String(readiness.total))}
             size="sm"
           />
         }

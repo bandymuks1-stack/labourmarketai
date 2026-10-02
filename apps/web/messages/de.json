@@ -1478,10 +1478,8 @@
   },
   "profileState": {
     "readiness": {
-      "label": "Profil-Bereitschaft",
-      "ready": "Bereit",
-      "building": "Wird noch ausgefüllt",
-      "start": "Gerade begonnen"
+      "label": "Profilschritte",
+      "summary": "Profilschritte: {done} von {total} erledigt"
     },
     "freshness": {
       "label": "Aktualität",
@@ -7515,11 +7513,8 @@
       }
     },
     "readiness": {
-      "label": "Bereitschaft",
+      "label": "Profilschritte",
       "hint": "Alles bereit.",
-      "levelReady": "Bereit",
-      "levelBuilding": "Im Aufbau",
-      "levelStart": "Am Anfang",
       "signalsTemplate": "Schritte erledigt",
       "nextLabel": "Als Nächstes:",
       "pillars": {
@@ -7529,7 +7524,10 @@
         "journal": "Arbeitsjournal",
         "evidence": "Einträge",
         "workCard": "Arbeitskarte"
-      }
+      },
+      "ringAria": "Profilschritte: {met} von {total} erledigt",
+      "stepDone": "erledigt",
+      "stepOpen": "offen"
     },
     "verifiedTitle": "Vom Manager bestätigte Fähigkeiten",
     "verifiedEmpty": "Noch keine. Sie entstehen aus Ihren Arbeitseinträgen.",
@@ -18105,15 +18103,27 @@
     "noRecords": "Noch keine Arbeitseinträge",
     "legend": {
       "managerRecord": "Eintrag der Führungskraft",
-      "recorded": "Von Ihnen erfasst"
+      "recorded": "Von Ihnen erfasst",
+      "declared": "Von Ihnen angegeben",
+      "declaredHint": "Ihre eigenen Worte. Noch von niemandem geprüft.",
+      "recordedHint": "Stunden und Einträge aus Ihrem Arbeitsjournal.",
+      "managerRecordHint": "Eine verantwortliche Führungskraft oder der Arbeitgeber hat es bestätigt."
     },
     "skillsTitle": "Was Ihre Arbeit zeigt",
     "next": {
       "title": "Ihre Geschichte geht mit Ihnen",
       "body": "Jede Arbeit, die Sie festhalten, ergänzt sie. Nehmen Sie sie mit zur nächsten Gelegenheit.",
       "cta": "Sehen, wohin Sie gehen können",
-      "label": "Als Nächstes, nicht Verlauf"
-    }
+      "label": "Als Nächstes, nicht Verlauf",
+      "notRecord": "nicht Teil Ihres Nachweises"
+    },
+    "promise": {
+      "mine": "Das ist Ihre berufliche Geschichte.",
+      "grows": "Sie wächst jedes Mal, wenn Sie arbeiten.",
+      "follows": "Der Nachweis kann Sie zur nächsten Gelegenheit begleiten."
+    },
+    "keyTitle": "So lesen Sie jede Zeile",
+    "historyTitle": "Arbeitsverlauf"
   },
   "workContext": {
     "title": "Deine Arbeit auf einen Blick",
@@ -18386,5 +18396,50 @@
         "teamMeta": "3 Personen in diesem Projekt"
       }
     }
+  },
+  "journalContinuity": {
+    "title": "Von der Anweisung zu Ihrer Geschichte",
+    "intro": "Jeder Eintrag ist Teil einer Kette. Öffnen Sie einen Schritt, um weiterzumachen.",
+    "instruction": {
+      "label": "Anweisung",
+      "unit": "geplante Arbeit"
+    },
+    "work": {
+      "label": "Geleistete Arbeit",
+      "unit": "Einträge"
+    },
+    "time": {
+      "label": "Zeit",
+      "unit": "erfasst"
+    },
+    "evidence": {
+      "label": "Nachweise",
+      "unit": "mit Fotos"
+    },
+    "review": {
+      "label": "Prüfung",
+      "unit": "wartet"
+    },
+    "confirmed": {
+      "label": "Bestätigt",
+      "unit": "von Führungskraft",
+      "returned": "{count} zurück"
+    },
+    "project": {
+      "label": "Projekt",
+      "unit": "sein Verlauf"
+    },
+    "history": {
+      "label": "Ihre Geschichte",
+      "unit": "lebendiger Lebenslauf"
+    }
+  },
+  "projectContinuity": {
+    "title": "Dieses Projekt geht weiter in",
+    "people": "Personen",
+    "calendar": "Kalender",
+    "journal": "Arbeitsjournal",
+    "review": "Prüfung",
+    "history": "Firmengeschichte"
   }
 }

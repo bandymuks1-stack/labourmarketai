@@ -1478,10 +1478,8 @@
   },
   "profileState": {
     "readiness": {
-      "label": "Gotowość profilu",
-      "ready": "Gotowy",
-      "building": "Jeszcze uzupełniany",
-      "start": "Dopiero rozpoczęty"
+      "label": "Kroki profilu",
+      "summary": "Kroki profilu: wykonano {done} z {total}"
     },
     "freshness": {
       "label": "Aktualność",
@@ -7515,11 +7513,8 @@
       }
     },
     "readiness": {
-      "label": "Gotowość",
+      "label": "Kroki profilu",
       "hint": "Wszystko gotowe.",
-      "levelReady": "Gotowe",
-      "levelBuilding": "W budowie",
-      "levelStart": "Na początku",
       "signalsTemplate": "wykonanych kroków",
       "nextLabel": "Dalej:",
       "pillars": {
@@ -7529,7 +7524,10 @@
         "journal": "Dziennik pracy",
         "evidence": "Wpisy",
         "workCard": "Karta pracy"
-      }
+      },
+      "ringAria": "Kroki profilu: wykonano {met} z {total}",
+      "stepDone": "zrobione",
+      "stepOpen": "do zrobienia"
     },
     "verifiedTitle": "Umiejętności potwierdzone przez kierownika",
     "verifiedEmpty": "Jeszcze żadnych. Powstają na podstawie Twoich wpisów pracy.",
@@ -18105,15 +18103,27 @@
     "noRecords": "Brak jeszcze wpisów o pracy",
     "legend": {
       "managerRecord": "Wpis przełożonego",
-      "recorded": "Wpisane przez Ciebie"
+      "recorded": "Wpisane przez Ciebie",
+      "declared": "Podane przez Ciebie",
+      "declaredHint": "Twoje własne słowa. Nikt jeszcze tego nie sprawdził.",
+      "recordedHint": "Godziny i wpisy z Twojego dziennika pracy.",
+      "managerRecordHint": "Odpowiedzialny kierownik lub pracodawca to potwierdził."
     },
     "skillsTitle": "Co pokazuje Twoja praca",
     "next": {
       "title": "Twoja historia idzie z Tobą",
       "body": "Każda praca, którą zapiszesz, ją uzupełnia. Zabierz ją na następną okazję.",
       "cta": "Zobacz, dokąd możesz pójść",
-      "label": "Dalej, nie historia"
-    }
+      "label": "Dalej, nie historia",
+      "notRecord": "nie jest częścią Twojego zapisu"
+    },
+    "promise": {
+      "mine": "To Twoja historia zawodowa.",
+      "grows": "Rośnie za każdym razem, gdy pracujesz.",
+      "follows": "Zapis może pójść z Tobą do kolejnej okazji."
+    },
+    "keyTitle": "Jak czytać każdy wiersz",
+    "historyTitle": "Historia pracy"
   },
   "workContext": {
     "title": "Twoja praca w jednym miejscu",
@@ -18386,5 +18396,50 @@
         "teamMeta": "3 osoby w tym projekcie"
       }
     }
+  },
+  "journalContinuity": {
+    "title": "Od polecenia do Twojej historii",
+    "intro": "Każdy wpis jest częścią łańcucha. Otwórz dowolny krok, by kontynuować.",
+    "instruction": {
+      "label": "Polecenie",
+      "unit": "zaplanowana praca"
+    },
+    "work": {
+      "label": "Wykonana praca",
+      "unit": "wpisy"
+    },
+    "time": {
+      "label": "Czas",
+      "unit": "zapisany"
+    },
+    "evidence": {
+      "label": "Dowody",
+      "unit": "ze zdjęciami"
+    },
+    "review": {
+      "label": "Przegląd",
+      "unit": "oczekuje"
+    },
+    "confirmed": {
+      "label": "Potwierdzone",
+      "unit": "przez kierownika",
+      "returned": "{count} zwrócone"
+    },
+    "project": {
+      "label": "Projekt",
+      "unit": "jego historia"
+    },
+    "history": {
+      "label": "Twoja historia",
+      "unit": "żywe CV"
+    }
+  },
+  "projectContinuity": {
+    "title": "Ten projekt toczy się dalej w",
+    "people": "Ludzie",
+    "calendar": "Kalendarz",
+    "journal": "Dziennik pracy",
+    "review": "Przegląd",
+    "history": "Historia firmy"
   }
 }

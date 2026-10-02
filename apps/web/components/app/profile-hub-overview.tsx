@@ -456,36 +456,16 @@ export async function ProfileHubOverview({
                 className="text-sm text-text-secondary"
                 data-testid="profile-hub-status"
               >
-                <span
-                  data-status={readiness.level}
-                  className={
-                    readiness.level === "ready"
-                      ? "font-medium text-state-success"
-                      : "font-medium text-text-primary"
-                  }
-                >
-                  {tState(`readiness.${readiness.level}`)}
+                {/* What "6 of 6" counts, said out loud: the same six NAMED
+                    profile steps as the player card (profession, availability,
+                    skills, journal entry, backed record, work card). No
+                    judgement word ("Ready") — a count of named things. */}
+                <span data-status={readiness.level} className="font-medium text-text-primary">
+                  {tState("readiness.summary", {
+                    done: readiness.met,
+                    total: readiness.total,
+                  })}
                 </span>
-                {" · "}
-                {/* ONE READINESS, ONE DENOMINATOR (§8, 2026-09-27).
-                    This read `{ done: doneCount, total: steps.length }` — a
-                    fraction over the 5 actionable STEPS — and it was wrong twice.
-                    Against ITSELF: this component separately lists the two
-                    `STEPLESS_PILLARS` (journal, evidence) as missing, so the
-                    progress number excluded two things the same screen was
-                    telling the person they still had to do. And against the REST
-                    OF THE PRODUCT: the player card renders `readiness.met`/
-                    `readiness.total` over all 6 pillars, so a person moving
-                    between the hub and their card met two different
-                    denominators — "0 iš 5" here and "0/6" there — for one
-                    underlying fact, with nothing explaining the difference.
-                    The canonical readiness is `deriveWorkerReadiness`, so it is
-                    the denominator everywhere. The 5 steps are unchanged and
-                    still the ACTIONABLE list; only the count is canonical now. */}
-                {tStep("progress", {
-                  done: readiness.met,
-                  total: readiness.total,
-                })}
                 {" · "}
                 <span data-testid="profile-hub-freshness">{freshness}</span>
               </p>
