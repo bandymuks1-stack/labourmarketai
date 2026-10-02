@@ -5,6 +5,7 @@ import {
   deriveSkillEvidence,
 } from "@/lib/player-card/evidence-visuals";
 import { deriveProvenance } from "@/lib/evidence/provenance";
+import type { WorkPeriodTotals } from "@/lib/journal/work-intelligence";
 
 /**
  * THE one public sample Player Card (S3 player-card honesty).
@@ -133,5 +134,27 @@ export function buildSampleWorkerPlayerCard(opts: {
       journalEntries: 23,
       skill: { verified: true, source: "work_journal" },
     }),
+  };
+}
+
+/**
+ * The sample persona's all-time totals for the identity fact strip. Explainable,
+ * not a rating: the 23 sample journal entries (see SAMPLE_MONTHLY_ENTRIES) at a
+ * standard 8 h day, 12 of them on days a manager approved. The caller keeps its
+ * visible "example, not a real person" line.
+ */
+export function buildSampleAllTime(now: Date): WorkPeriodTotals {
+  return {
+    key: "all",
+    startIso: null,
+    endIso: now.toISOString(),
+    hours: 23 * 8,
+    dayUnits: 0,
+    confirmedHours: 12 * 8,
+    confirmedDayUnits: 0,
+    entries: 23,
+    entriesWithoutDuration: 0,
+    entriesDayInferred: 0,
+    daysWorked: 23,
   };
 }

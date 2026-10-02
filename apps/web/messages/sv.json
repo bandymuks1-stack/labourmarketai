@@ -2420,6 +2420,8 @@
       "link": "Present a candidate"
     },
     "identity": {
+      "noRecords": "Inga arbetsregistreringar ännu",
+      "noManagerRecord": "Ännu ingen registrering från chefen",
       "why": "Varför den här personen är relevant",
       "skills": "Relevanta färdigheter och vad de vilar på",
       "readiness": "Tillgänglighet, beredskap och dokument",

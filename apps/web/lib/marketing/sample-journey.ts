@@ -3,7 +3,7 @@ import "server-only";
 import { getTranslations } from "next-intl/server";
 
 import { buildPlayerCardLabels } from "@/lib/player-card/labels";
-import { buildSampleWorkerPlayerCard } from "@/lib/player-card/sample-card";
+import { buildSampleAllTime, buildSampleWorkerPlayerCard } from "@/lib/player-card/sample-card";
 import type { SkillEvidenceLabels } from "@/components/app/player-card/skill-evidence-chart";
 import type { WorkerPlayerCard } from "@/lib/player-card/player-card";
 import type { CalendarResultWeek } from "@/lib/planning/calendar-result";
@@ -68,7 +68,7 @@ export async function buildSampleJourney(now: Date = new Date()): Promise<Sample
     sampleOrganization: tCards("sample.organization"),
     now,
   });
-  const labels = await buildPlayerCardLabels(card);
+  const labels = await buildPlayerCardLabels(card, { allTime: buildSampleAllTime(now) });
   const name = card.displayName ?? tCards("sample.name");
   const initials = name
     .split(/\s+/)
