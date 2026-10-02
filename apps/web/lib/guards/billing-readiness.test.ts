@@ -157,7 +157,7 @@ describe("webhook rejects live events", () => {
     expect(src).toMatch(/live_event_rejected/);
     // rejection happens BEFORE any subscription write
     expect(src.indexOf("live_event_rejected")).toBeLessThan(
-      src.indexOf("upsertSubscription("),
+      src.indexOf("applyRawSubscriptionObject("),
     );
   });
 });
