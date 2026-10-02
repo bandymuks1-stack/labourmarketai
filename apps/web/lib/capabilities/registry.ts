@@ -3,12 +3,10 @@ import "server-only";
 import { z } from "zod";
 import { getTranslations } from "next-intl/server";
 
-import { createJournalEntryCore } from "@/lib/journal/journal-write-core";
 import {
-  projectPromptFor,
-  type AssignedProject,
-} from "@/lib/journal/project-attribution";
-import { readActiveProjectsByOrg } from "@/lib/journal/project-attribution-read";
+  createJournalEntryCore,
+  projectsToChooseFrom,
+} from "@/lib/journal/journal-write-core";
 import { journalChainFingerprint } from "@/lib/journal/journal-chain-fingerprint";
 import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 import { fd } from "@/lib/conversation/executor-contract";
@@ -434,30 +432,6 @@ function normalizedDraftForHash(draft: {
   };
 }
 
-/** The ONE attribution rule (lib/journal/project-attribution) applied at the
- *  draft step: when the worker has 2+ ACTIVE projects in this entry's
- *  organization and the draft names none, the human must choose first. */
-async function projectsToChooseFrom(
-  caller: CapabilityCaller,
-  engagementContextId: string,
-): Promise<AssignedProject[] | null> {
-  const { data: worker } = await caller.supabase
-    .from("workers")
-    .select("id")
-    .eq("profile_id", caller.userId)
-    .maybeSingle();
-  if (!worker) return null;
-  const { data: ctx } = await caller.supabase
-    .from("engagement_contexts")
-    .select("organization_id")
-    .eq("id", engagementContextId)
-    .maybeSingle();
-  if (!ctx?.organization_id) return null;
-  const byOrg = await readActiveProjectsByOrg(caller.supabase, worker.id);
-  const projects = byOrg.get(ctx.organization_id) ?? [];
-  return projectPromptFor(projects) === "ask" ? projects : null;
-}
-
 /**
  * WHICH ENGAGEMENT CONTEXT — capability edition (§18 of the chat-first
  * audit: a user must never need an internal UUID to get value).
@@ -674,7 +648,7 @@ const journalCreateDraft: CapabilityDescriptor = {
       };
     }
     if (!draft.projectId) {
-      const choices = await projectsToChooseFrom(caller, engagement.id);
+      const choices = await projectsToChooseFrom(caller.supabase, caller.userId, engagement.id);
       if (choices) {
         // NOTHING preselected, NO token minted — same shape as the
         // engagement choice. "none" answers "not project work".

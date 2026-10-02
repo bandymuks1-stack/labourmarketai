@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createHash } from "node:crypto";
 import type { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
@@ -408,6 +409,31 @@ export async function legacyTwoStepSave(
     };
   }
   return { ok: true, entryId: entry.id };
+}
+
+/** The ONE attribution rule applied before a token/save: when the worker has
+ *  2+ ACTIVE projects in this entry's organization the human must choose
+ *  first. `null` = nothing to ask. */
+export async function projectsToChooseFrom(
+  supabase: SupabaseClient,
+  userId: string,
+  engagementContextId: string,
+): Promise<AssignedProject[] | null> {
+  const { data: worker } = await supabase
+    .from("workers")
+    .select("id")
+    .eq("profile_id", userId)
+    .maybeSingle();
+  if (!worker) return null;
+  const { data: ctx } = await supabase
+    .from("engagement_contexts")
+    .select("organization_id")
+    .eq("id", engagementContextId)
+    .maybeSingle();
+  if (!ctx?.organization_id) return null;
+  const byOrg = await readActiveProjectsByOrg(supabase, worker.id);
+  const projects = byOrg.get(ctx.organization_id) ?? [];
+  return projectPromptFor(projects) === "ask" ? projects : null;
 }
 
 /**

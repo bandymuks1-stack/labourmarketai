@@ -27,6 +27,7 @@ const coreWrite = vi.fn(async () => ({
 }));
 vi.mock("@/lib/journal/journal-write-core", () => ({
   createJournalEntryCore: (...args: unknown[]) => coreWrite(...(args as [])),
+  projectsToChooseFrom: async () => null,
 }));
 
 vi.mock("next-intl/server", () => ({

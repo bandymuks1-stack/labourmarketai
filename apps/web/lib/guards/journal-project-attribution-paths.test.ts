@@ -53,7 +53,7 @@ describe("journal project attribution — every creation path", () => {
 
   it("the MCP draft asks before minting a token, and confirm threads the choice + surfaces choices", () => {
     const reg = read("lib/capabilities/registry.ts");
-    expect(reg).toMatch(/projectsToChooseFrom\(caller, engagement\.id\)/);
+    expect(reg).toMatch(/projectsToChooseFrom\(\s*caller\.supabase, caller\.userId, engagement\.id\)/);
     expect(reg).toMatch(/status: "project_required"/);
     expect(reg).toMatch(/project_id: draft\.projectId \?\? ""/);
     expect(reg).toMatch(/result\.code === "project_required" && result\.projects/);
