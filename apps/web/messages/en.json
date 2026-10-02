@@ -18,7 +18,7 @@
     "history": "History"
   },
   "publicDemand": {
-    "title": "Live market demand",
+    "title": "Current market demand",
     "subtitleAgency": "What the public market asks for right now — the same pool your candidates see on the board.",
     "subtitleInstitution": "What the public market asks for right now — the directions your learners are heading into.",
     "active": "{count} live vacancies",
@@ -827,7 +827,7 @@
     "subtitle": "Describe it in your own words. We turn it into a clear card, show what is missing, and point to the next step.",
     "prep": "This is a preparation step before you search or send a request. The more you answer, the better the result — and the fewer bad matches.",
     "readinessLabel": {
-      "match_ready": "Ready",
+      "match_ready": "Ready to look for matches",
       "improving": "Getting clearer",
       "needs_basics": "Needs the basics"
     },
@@ -1240,7 +1240,7 @@
       "noData": "No data yet"
     },
     "layersTitle": "Signal layers",
-    "layerActive": "active",
+    "layerActive": "shown",
     "layerNextStage": "next stage",
     "nextStageTitle": "Next stage",
     "nextStageNote": "These layers come in later stages — only from real signals, never invented points.",
@@ -2191,9 +2191,9 @@
         "openProfile": "View profile",
         "identity": {
           "availability": {
-            "available": "Available",
-            "busy": "Busy",
-            "unavailable": "Unavailable"
+            "available": "Self-reported: available",
+            "busy": "Self-reported: busy",
+            "unavailable": "Self-reported: unavailable"
           }
         },
         "team": {
@@ -3467,7 +3467,7 @@
     "addLaterHint": "You'll be able to add more roles later — they appear in the catalogue once they're ready.",
     "status": {
       "active": "Active",
-      "preparing": "Preparing",
+      "preparing": "Coming soon",
       "start": "Start",
       "partial": "Partial"
     },
@@ -3522,8 +3522,8 @@
     "lede": "One person. Many roles over time. A CV born from real work and real records, not self-written claims. The first choice is an entry point, not a cage.",
     "honesty": "Note: below is the whole system map. Some surfaces are live today; the rest are openly labelled \"Preparing\". We never say something works when it doesn't.",
     "sections": {
-      "today": "Live today",
-      "preparing": "Preparing",
+      "today": "Available now",
+      "preparing": "Coming soon",
       "workflow": "How a person's path moves through the system",
       "roles": "Role evolution (without lock-in)",
       "activities": "Activity landscape",
@@ -3540,10 +3540,10 @@
     },
     "controlRoom": {
       "todayLabel": "Active today",
-      "preparingLabel": "Preparing",
+      "preparingLabel": "Coming soon",
       "blockedLabel": "Blocked",
       "nonWorkerLabel": "Company / agency / customer spaces",
-      "nonWorkerStatus": "Preparing",
+      "nonWorkerStatus": "Coming soon",
       "fakeClaimsLabel": "Fake AI / fake matching / fake reputation",
       "fakeClaimsStatus": "Never used"
     },
@@ -3580,7 +3580,7 @@
   },
   "features": {
     "preparing_generic_reason": "This option will be enabled later.",
-    "preparing_badge": "Preparing",
+    "preparing_badge": "Coming soon",
     "overview": {
       "label": "Overview",
       "description": "Main view with the starting steps, suggestions and opportunities."
@@ -6584,7 +6584,7 @@
     "scope": {
       "support": "Support channel",
       "unknown": "Context not specified",
-      "demand": "About work — the subject is the related work's title"
+      "demand": "About a job"
     },
     "unread": "New",
     "kind": {
@@ -8660,8 +8660,8 @@
       "manage_pilots": "Pilot management"
     },
     "enforcement": {
-      "free_surface": "In the product today",
-      "server_gate": "In the product today, entitlement-checked",
+      "free_surface": "Available today",
+      "server_gate": "Available today, depending on your permissions",
       "declared_boundary_only": "Prepared — starts only with billing",
       "admin_rbac": "Internal, admin only"
     }
@@ -11916,7 +11916,7 @@
   "agencyClients": {
     "title": "Clients",
     "subtitle": "Who you staff for — each client's needs link to your demands and candidate scouting.",
-    "gatedHeading": "Prepared — owner activation pending",
+    "gatedHeading": "Not available yet — coming later",
     "gatedBody": "Not available right now.",
     "notLinkable": "Demands cannot be linked to clients yet.",
     "clientsEmpty": "No clients yet. Add your first client below.",
@@ -11949,7 +11949,7 @@
   "agencyBridge": {
     "title": "Client companies",
     "subtitle": "Connect with a real client company, see only the requests they share, and offer one of your active roster workers.",
-    "gatedHeading": "Prepared — owner activation pending",
+    "gatedHeading": "Not available yet — coming later",
     "gatedBody": "Not available right now.",
     "connectionsHeading": "Connections",
     "inviteEmailLabel": "Client email",
@@ -12001,7 +12001,7 @@
   "clientBridge": {
     "title": "Staffing agencies",
     "subtitle": "Accept a staffing agency you want to work with, share specific requests, and review the candidates they propose on your own scouting page.",
-    "gatedHeading": "Prepared — owner activation pending",
+    "gatedHeading": "Not available yet — coming later",
     "gatedBody": "Not available right now.",
     "invitesHeading": "Connection invites",
     "noInvites": "No pending invites.",
@@ -12169,7 +12169,7 @@
     },
     "imageOcr": {
       "label": "CV photo / image (JPG, PNG)",
-      "note": "In preparation — image recognition is not available yet. Upload a PDF/DOCX or paste the text."
+      "note": "Reading from photos is not available yet — upload a PDF/DOCX or paste the text."
     }
   },
   "companySwitcher": {
@@ -15682,7 +15682,7 @@
     "archivedHeading": "Archived objects",
     "archivedBadge": "Archived",
     "empty": "No objects yet. Add the sites where your work happens.",
-    "gatedHeading": "Prepared — awaiting activation",
+    "gatedHeading": "Not available yet — coming later",
     "gatedBody": "Not available right now.",
     "errorLabel": "Could not save. Try again.",
     "notAuthorizedLabel": "Only managers can change objects.",
@@ -16555,7 +16555,7 @@
     },
     "states": {
       "needsMigration": "Not available right now.",
-      "noCompany": "Switch to a company workspace.",
+      "noCompany": "This area is for a company workspace. Record your own hours in the Work Journal.",
       "noObjects": "There are no sites yet to record today's hours against.",
       "error": "Could not load this day."
     },
@@ -16702,7 +16702,7 @@
       "notAMember": "That organization is not one of yours. Choose one of these:",
       "chooseOrganization": "You belong to more than one organization. Choose which one is supplying this evidence:",
       "notAuthorized": "Your role in this organization does not include importing evidence. An owner, administrator or manager can do it.",
-      "needsMigration": "The evidence store is not switched on in this environment yet. The database change is prepared and waiting for the owner's approval; nothing was written.",
+      "needsMigration": "The evidence store is not switched on in this environment yet; nothing was written.",
       "unavailable": "The evidence store could not be read. This is a system problem, not an empty organization."
     },
     "form": {

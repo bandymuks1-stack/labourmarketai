@@ -18,7 +18,7 @@
     "history": "Istorija"
   },
   "publicDemand": {
-    "title": "Gyva rinkos paklausa",
+    "title": "Dabartinė rinkos paklausa",
     "subtitleAgency": "Ko vieša rinka prašo dabar — tas pats fondas, kurį jūsų kandidatai mato lentoje.",
     "subtitleInstitution": "Ko vieša rinka prašo dabar — kryptys, į kurias eina jūsų besimokantieji.",
     "active": "{count} aktyvių darbo vietų",
@@ -53,7 +53,7 @@
     "askedBy": "{count} galimybės",
     "missingNone": "Pagal rodomas galimybes nieko netrūksta.",
     "next": "Ką daryti toliau",
-    "step_choose_direction": "Pasirinkite darbo kryptį — be jos atranka neveikia.",
+    "step_choose_direction": "Pasirinkite darbo kryptį — be jos negalime parinkti pasiūlymų.",
     "step_declare_skills": "Pridėkite įgūdžius, kuriuos jau turite (arba įkelkite CV).",
     "step_add_current_education": "Nurodykite, kur mokotės.",
     "step_log_first_entry": "Įrašykite pirmą praktikos ar mokymosi įrašą Darbo žurnale.",
@@ -827,7 +827,7 @@
     "subtitle": "Aprašykite savais žodžiais. Paversime tai aiškia kortele, parodysime, ko trūksta, ir nurodysime kitą žingsnį.",
     "prep": "Tai pasirengimo žingsnis prieš paiešką ar užklausą. Kuo daugiau atsakysite, tuo geresnis rezultatas ir mažiau netinkamų pasiūlymų.",
     "readinessLabel": {
-      "match_ready": "Paruošta",
+      "match_ready": "Galima ieškoti atitikmenų",
       "improving": "Aiškėja",
       "needs_basics": "Trūksta pagrindų"
     },
@@ -1240,7 +1240,7 @@
       "noData": "Kol kas nėra duomenų"
     },
     "layersTitle": "Signalų sluoksniai",
-    "layerActive": "veikia",
+    "layerActive": "rodoma",
     "layerNextStage": "kitas etapas",
     "nextStageTitle": "Kitas etapas",
     "nextStageNote": "Šie sluoksniai bus jungiami vėlesniuose etapuose — tik su realiais signalais, be sugalvotų taškų.",
@@ -1423,7 +1423,7 @@
     "lead": "Štai ką apie tave jau žinome.",
     "explainer": "Pagal tai darbdavys sprendžia, kokiam darbui tinki.",
     "notVerified": "Šią informaciją pateikei tu. Gali ją papildyti vėliau.",
-    "doneDisclosure": "Kas jau paruošta",
+    "doneDisclosure": "Kas jau padaryta",
     "askWorkspace": "Paklausti darbo erdvėje",
     "state": {
       "done": "Atlikta",
@@ -1468,7 +1468,7 @@
   "profileState": {
     "readiness": {
       "label": "Profilio parengtis",
-      "ready": "Paruoštas",
+      "ready": "Užpildytas",
       "building": "Dar pildomas",
       "start": "Tik pradėtas"
     },
@@ -2191,9 +2191,9 @@
         "openProfile": "Peržiūrėti profilį",
         "identity": {
           "availability": {
-            "available": "Laisvas",
-            "busy": "Užimtas",
-            "unavailable": "Neprieinamas"
+            "available": "Pats nurodė: laisvas",
+            "busy": "Pats nurodė: užimtas",
+            "unavailable": "Pats nurodė: neprieinamas"
           }
         },
         "team": {
@@ -3467,7 +3467,7 @@
     "addLaterHint": "Vėliau galėsite pridėti daugiau vaidmenų — kataloge jie pasirodys, kai bus paruošti.",
     "status": {
       "active": "Aktyvu",
-      "preparing": "Ruošiama",
+      "preparing": "Netrukus",
       "start": "Pradėti",
       "partial": "Dalinis"
     },
@@ -3522,8 +3522,8 @@
     "lede": "Vienas asmuo. Daug vaidmenų laikui bėgant. CV gimsta iš realių darbų ir įrašų, ne iš savadarbio teksto. Pirmas pasirinkimas yra įėjimo taškas, ne narvas.",
     "honesty": "Pastaba: žemiau matote visą sistemos žemėlapį. Vieni paviršiai šiandien jau veikia, kiti aiškiai pažymėti kaip „Ruošiama“. Niekada nesakome, kad veikia tai, ko dar nėra.",
     "sections": {
-      "today": "Šiandien veikia",
-      "preparing": "Ruošiama",
+      "today": "Galima naudoti jau dabar",
+      "preparing": "Netrukus",
       "workflow": "Kaip žmogaus kelias eina per sistemą",
       "roles": "Vaidmenų vystymasis (be užrakto)",
       "activities": "Veiklų landšaftas",
@@ -3540,10 +3540,10 @@
     },
     "controlRoom": {
       "todayLabel": "Šiandien aktyvu",
-      "preparingLabel": "Ruošiama",
+      "preparingLabel": "Netrukus",
       "blockedLabel": "Užblokuota",
       "nonWorkerLabel": "Įmonės / agentūros / pirkėjo erdvės",
-      "nonWorkerStatus": "Ruošiama",
+      "nonWorkerStatus": "Netrukus",
       "fakeClaimsLabel": "Netikras dirbtinis intelektas / netikras atitikimas / netikra reputacija",
       "fakeClaimsStatus": "Niekada nenaudojama"
     },
@@ -3580,7 +3580,7 @@
   },
   "features": {
     "preparing_generic_reason": "Ši galimybė bus įjungta vėliau.",
-    "preparing_badge": "Ruošiama",
+    "preparing_badge": "Netrukus",
     "overview": {
       "label": "Apžvalga",
       "description": "Pagrindinis langas su pradžia, pasiūlymais ir galimybėmis."
@@ -6584,7 +6584,7 @@
     "scope": {
       "support": "Pagalbos kanalas",
       "unknown": "Kontekstas nepatikslintas",
-      "demand": "Dėl darbo — tema yra susijusio darbo pavadinimas"
+      "demand": "Dėl darbo"
     },
     "unread": "Naujas",
     "kind": {
@@ -7327,7 +7327,7 @@
     "outcomeNoInvitation": "Pakvietimas nerastas.",
     "outcomeNoWorker": "Jūsų darbuotojo profilis dar neparuoštas.",
     "outcomeError": "Nepavyko priimti. Bandykite dar kartą.",
-    "outcomeNeedsMigration": "Dar neparuošta."
+    "outcomeNeedsMigration": "Šios funkcijos dar neįjungėme."
   },
   "journal": {
     "cvBridge": "{confirmed} iš {total} įrašų patvirtinta — patvirtintas darbas matomas jūsų CV.",
@@ -8660,8 +8660,8 @@
       "manage_pilots": "Pilotų valdymas"
     },
     "enforcement": {
-      "free_surface": "Veikia produkte šiandien",
-      "server_gate": "Veikia produkte šiandien, su teisių patikra",
+      "free_surface": "Prieinama šiandien",
+      "server_gate": "Prieinama šiandien, pagal jūsų teises",
       "declared_boundary_only": "Paruošta — įsijungs tik su apmokestinimu",
       "admin_rbac": "Vidinė, tik administratoriui"
     }
@@ -11141,7 +11141,7 @@
         "live": "Aktyvi"
       },
       "reason": {
-        "ok": "DI ryšys paruoštas.",
+        "ok": "Padėjėjas pasiekiamas.",
         "mode_disabled": "DI tiekėjas nepasirinktas — DI pagal nutylėjimą išjungtas.",
         "unknown_provider": "Nurodytas DI tiekėjas neatpažintas, todėl DI lieka išjungtas.",
         "missing_api_key": "DI tiekėjo raktas nepridėtas, todėl DI lieka išjungtas."
@@ -11916,7 +11916,7 @@
   "agencyClients": {
     "title": "Klientai",
     "subtitle": "Kam parūpinate darbuotojus — kliento poreikiai susiejami su jūsų užklausomis ir kandidatų paieška.",
-    "gatedHeading": "Paruošta — laukia savininko aktyvavimo",
+    "gatedHeading": "Dar neprieinama — bus įjungta vėliau",
     "gatedBody": "Šiuo metu nepasiekiama.",
     "notLinkable": "Užklausų kol kas negalima susieti su klientais.",
     "clientsEmpty": "Klientų dar nėra. Pridėkite pirmą klientą žemiau.",
@@ -11949,7 +11949,7 @@
   "agencyBridge": {
     "title": "Klientų įmonės",
     "subtitle": "Prisijunkite prie realios kliento įmonės, matykite tik jos pasidalintus poreikius ir pasiūlykite vieną iš savo aktyvių darbuotojų.",
-    "gatedHeading": "Paruošta — laukiama savininko aktyvavimo",
+    "gatedHeading": "Dar neprieinama — bus įjungta vėliau",
     "gatedBody": "Šiuo metu nepasiekiama.",
     "connectionsHeading": "Ryšiai",
     "inviteEmailLabel": "Kliento el. paštas",
@@ -12001,7 +12001,7 @@
   "clientBridge": {
     "title": "Personalo agentūros",
     "subtitle": "Priimkite personalo agentūrą, su kuria norite dirbti, pasidalinkite konkrečiais poreikiais ir peržiūrėkite jos pasiūlytus kandidatus savo žvalgybos puslapyje.",
-    "gatedHeading": "Paruošta — laukiama savininko aktyvavimo",
+    "gatedHeading": "Dar neprieinama — bus įjungta vėliau",
     "gatedBody": "Šiuo metu nepasiekiama.",
     "invitesHeading": "Ryšio kvietimai",
     "noInvites": "Laukiančių kvietimų nėra.",
@@ -12169,7 +12169,7 @@
     },
     "imageOcr": {
       "label": "CV nuotrauka / paveikslėlis (JPG, PNG)",
-      "note": "RUOŠIAMA — nuotraukų atpažinimas dar neveikia. Įkelkite PDF/DOCX arba įklijuokite tekstą."
+      "note": "Nuotraukų skaitymo dar nėra — įkelkite PDF/DOCX arba įklijuokite tekstą."
     }
   },
   "companySwitcher": {
@@ -14839,7 +14839,7 @@
       "unsupportedDimension": "Pagal {dimension} filtruoti dar negaliu.",
       "noSuchValue": "Supratau „{asked}“, bet ten dabar tau nieko nematoma.",
       "noSuchValueWithAlternatives": "Supratau „{asked}“, bet ten dabar tau nieko nematoma. Matoma: {available}.",
-      "internshipChooseDirection": "Pirmiausia pasirink darbo kryptį — be jos praktikos atranka neveikia.",
+      "internshipChooseDirection": "Pirmiausia pasirink darbo kryptį — be jos negalime parinkti praktikos pasiūlymų.",
       "internshipAskInstitution": "Paklausk savo įstaigos ({institution}): ji mato programos paklausą rinkoje ir gali pakviesti darbdavį paskelbti praktikos vietą.",
       "internshipCompass": "Kompasas rodo, kas tau tinka dabar ir ko trūksta.",
       "chipChooseDirection": "Pasirinkti kryptį",
@@ -15682,7 +15682,7 @@
     "archivedHeading": "Archyvuoti objektai",
     "archivedBadge": "Archyvuota",
     "empty": "Objektų dar nėra. Pridėkite vietas, kuriose vyksta jūsų darbai.",
-    "gatedHeading": "Paruošta — laukiama įjungimo",
+    "gatedHeading": "Dar neprieinama — bus įjungta vėliau",
     "gatedBody": "Šiuo metu nepasiekiama.",
     "errorLabel": "Nepavyko išsaugoti. Bandykite dar kartą.",
     "notAuthorizedLabel": "Objektus keisti gali tik vadovai.",
@@ -16461,7 +16461,7 @@
     "offRateLimited": "Ką tik to prašėte kelis kartus. Pabandykite po kelių minučių.",
     "offFactsUnavailable": "Šiuo metu nepavyko nuskaityti rinkos skaičių, todėl nėra ko paaiškinti.",
     "offMarketTooSmall": "Mažiau nei {min} atvirų skelbimų – per mažai, kad paaiškinimas duotų daugiau nei aukščiau esantys skaičiai.",
-    "offAiUnavailable": "Paaiškinimo paslauga šiuo metu neveikia. Aukščiau esantiems skaičiams tai neturi įtakos."
+    "offAiUnavailable": "Paaiškinimo šiuo metu parodyti nepavyko. Aukščiau esantiems skaičiams tai neturi įtakos."
   },
   "organizationCapabilities": {
     "title": "Ką veikia jūsų organizacija?",
@@ -16555,7 +16555,7 @@
     },
     "states": {
       "needsMigration": "Šiuo metu nepasiekiama.",
-      "noCompany": "Pasirinkite įmonės darbo sritį.",
+      "noCompany": "Ši sritis skirta įmonės darbo erdvei. Savo valandas įrašykite Darbo žurnale.",
       "noObjects": "Šiai dienai dar nėra objektų, prie kurių priskirti valandas.",
       "error": "Nepavyko įkelti dienos duomenų."
     },
@@ -16702,7 +16702,7 @@
       "notAMember": "Ši organizacija nėra jūsų. Pasirinkite vieną iš šių:",
       "chooseOrganization": "Priklausote daugiau nei vienai organizacijai. Pasirinkite, kuri teikia šiuos įrodymus:",
       "notAuthorized": "Jūsų vaidmuo šioje organizacijoje neapima įrodymų importo. Tai gali padaryti savininkas, administratorius arba vadovas.",
-      "needsMigration": "Šioje aplinkoje įrodymų saugykla dar neįjungta. Duomenų bazės pakeitimas paruoštas ir laukia savininko patvirtinimo; nieko neįrašyta.",
+      "needsMigration": "Šioje aplinkoje įrodymų saugyklos dar neįjungėme; nieko neįrašyta.",
       "unavailable": "Nepavyko perskaityti įrodymų saugyklos. Tai sistemos problema, o ne tuščia organizacija."
     },
     "form": {
