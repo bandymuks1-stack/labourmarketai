@@ -6999,5 +6999,38 @@
         "company": "Planeerib järgmise projekti tuttavate inimestega"
       }
     }
+  },
+  "evidenceChain": {
+    "label": "Kande olek",
+    "own": "Teie tehtud",
+    "nodes": {
+      "recorded": "Registreeritud",
+      "photo": "Foto",
+      "manager": "Juhataja kanne",
+      "history": "Teie ajaloos"
+    },
+    "status": {
+      "done": "Olemas",
+      "waiting": "Ootel",
+      "absent": "Veel mitte",
+      "attention": "Vajab teid",
+      "unknown": "Teadmata"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Elav CV",
+    "title": "Sinu töö saab sinu looks",
+    "now": "Praegu",
+    "noRecords": "Töökandeid veel pole",
+    "legend": {
+      "managerRecord": "Juhi kanne",
+      "recorded": "Sinu tehtud kanne"
+    },
+    "skillsTitle": "Mida sinu töö näitab",
+    "next": {
+      "title": "Sinu lugu käib sinuga kaasas",
+      "body": "Iga töö, mille kirja paned, täiendab seda. Vii see järgmise võimaluseni kaasa.",
+      "cta": "Vaata, kuhu saad edasi minna"
+    }
   }
 }

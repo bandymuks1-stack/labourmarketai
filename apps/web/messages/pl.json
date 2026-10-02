@@ -18055,5 +18055,38 @@
         "company": "Planuje kolejny projekt z ludźmi, których zna"
       }
     }
+  },
+  "evidenceChain": {
+    "label": "Status wpisu",
+    "own": "Twoje",
+    "nodes": {
+      "recorded": "Zapisano",
+      "photo": "Zdjęcie",
+      "manager": "Zapis kierownika",
+      "history": "W Twojej historii"
+    },
+    "status": {
+      "done": "Jest",
+      "waiting": "Czeka",
+      "absent": "Jeszcze nie",
+      "attention": "Czeka na Ciebie",
+      "unknown": "Nieznany"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Żywe CV",
+    "title": "Twoja praca staje się Twoją historią",
+    "now": "Teraz",
+    "noRecords": "Brak jeszcze wpisów o pracy",
+    "legend": {
+      "managerRecord": "Wpis przełożonego",
+      "recorded": "Wpisane przez Ciebie"
+    },
+    "skillsTitle": "Co pokazuje Twoja praca",
+    "next": {
+      "title": "Twoja historia idzie z Tobą",
+      "body": "Każda praca, którą zapiszesz, ją uzupełnia. Zabierz ją na następną okazję.",
+      "cta": "Zobacz, dokąd możesz pójść"
+    }
   }
 }

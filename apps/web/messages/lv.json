@@ -6999,5 +6999,38 @@
         "company": "Plāno nākamo projektu ar cilvēkiem, ko pazīst"
       }
     }
+  },
+  "evidenceChain": {
+    "label": "Ieraksta statuss",
+    "own": "Jūsu",
+    "nodes": {
+      "recorded": "Reģistrēts",
+      "photo": "Foto",
+      "manager": "Vadītāja ieraksts",
+      "history": "Jūsu vēsturē"
+    },
+    "status": {
+      "done": "Ir",
+      "waiting": "Gaida",
+      "absent": "Vēl nē",
+      "attention": "Vajag jūs",
+      "unknown": "Nav zināms"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Dzīvais CV",
+    "title": "Jūsu darbs kļūst par jūsu stāstu",
+    "now": "Tagad",
+    "noRecords": "Darba ierakstu vēl nav",
+    "legend": {
+      "managerRecord": "Vadītāja ieraksts",
+      "recorded": "Jūsu veiktais ieraksts"
+    },
+    "skillsTitle": "Ko rāda jūsu darbs",
+    "next": {
+      "title": "Jūsu stāsts ceļo kopā ar jums",
+      "body": "Katrs darbs, ko ierakstāt, to papildina. Ņemiet to līdzi uz nākamo iespēju.",
+      "cta": "Skatīt, kurp varat doties"
+    }
   }
 }
