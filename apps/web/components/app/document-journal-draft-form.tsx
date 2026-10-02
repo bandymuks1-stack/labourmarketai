@@ -20,6 +20,13 @@ import {
   type CreateJournalEntryResult,
 } from "@/lib/journal/actions";
 import type { WorkLogEngagement } from "@/lib/conversation/worklog-engagements";
+import { useTranslations } from "next-intl";
+import {
+  PROJECT_FIELD_NONE,
+  projectChoiceIsSatisfied,
+  projectPromptFor,
+  type AssignedProject,
+} from "@/lib/journal/project-attribution";
 
 export type DocumentJournalDraftFormLabels = {
   notesLabel: string;
@@ -49,6 +56,17 @@ export function DocumentJournalDraftForm({
   const formRef = useRef<HTMLFormElement>(null);
   const [pending, startTransition] = useTransition();
   const [result, setResult] = useState<CreateJournalEntryResult | null>(null);
+  const tJournal = useTranslations("journal");
+  // Attribution is part of the draft: a document-derived entry is not saved as
+  // work evidence until the project question (2+ active projects) is answered.
+  const [engagementId, setEngagementId] = useState<string>(defaultEngagementId ?? "");
+  const [projectChoice, setProjectChoice] = useState<string>("");
+  const contextProjects: AssignedProject[] =
+    engagements.find((e) => e.id === engagementId)?.projects ?? [];
+  const projectPrompt = projectPromptFor(contextProjects);
+  const projectChoiceValid = projectChoiceIsSatisfied(contextProjects, projectChoice)
+    ? projectChoice
+    : "";
 
   if (result?.ok) {
     return (
@@ -75,7 +93,16 @@ export function DocumentJournalDraftForm({
       onSubmit={(e) => {
         e.preventDefault();
         if (!formRef.current || pending) return;
+        if (!projectChoiceIsSatisfied(contextProjects, projectChoiceValid)) {
+          setResult({
+            ok: false,
+            code: "project_required",
+            message: tJournal("projectAmbiguous"),
+          });
+          return;
+        }
         const fd = new FormData(formRef.current);
+        if (projectPrompt === "ask") fd.set("project_id", projectChoiceValid);
         startTransition(async () => {
           try {
             setResult(await createJournalEntry(fd));
@@ -112,6 +139,7 @@ export function DocumentJournalDraftForm({
           name="engagement_context_id"
           required
           defaultValue={defaultEngagementId ?? ""}
+          onChange={(e) => setEngagementId(e.target.value)}
           className="w-full max-w-md rounded-md border border-ink-500 bg-ink-800/40 p-2 text-sm text-text-primary"
           data-testid="doc-journal-draft-engagement"
         >
@@ -123,6 +151,25 @@ export function DocumentJournalDraftForm({
           ))}
         </select>
       </label>
+      {projectPrompt === "ask" ? (
+        <label className="flex flex-col gap-1 text-sm text-text-secondary">
+          {tJournal("project")}
+          <select
+            value={projectChoiceValid}
+            onChange={(e) => setProjectChoice(e.target.value)}
+            className="w-full max-w-md rounded-md border border-ink-500 bg-ink-800/40 p-2 text-sm text-text-primary"
+            data-testid="doc-journal-draft-project"
+          >
+            <option value="">{tJournal("projectChoose")}</option>
+            {contextProjects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.label}
+              </option>
+            ))}
+            <option value={PROJECT_FIELD_NONE}>{tJournal("projectNone")}</option>
+          </select>
+        </label>
+      ) : null}
       {result && !result.ok ? (
         <p
           role="alert"

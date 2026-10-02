@@ -30,6 +30,11 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Välj engagemang…",
   "engagementAmbiguous": "Det här arbetet kan höra till mer än ett engagemang. Välj vilket innan du sparar.",
+  "project": "Projekt",
+  "projectChoose": "Välj projekt…",
+  "projectNone": "Inte projektarbete",
+  "projectAmbiguous": "Du är tilldelad flera projekt. Välj innan du sparar vilket projekt dessa timmar hör till (eller markera dem som inte projektarbete).",
+  "projectAuto": "Projekt: {name}",
   "unconfirmedTimeBlocked": "{count} registrerade varaktigheter väntar fortfarande på granskning och skulle inte sparas. Behåll eller ta bort dem först.",
   "entry": {
     "status": {
@@ -243,6 +248,7 @@
     "sessionExpired": "Din session har gått ut. Logga in igen.",
     "noWorkerProfile": "Ingen arbetarprofil hittades. Öppna kontoinställningarna och aktivera arbetarrollen.",
     "engagementRequired": "Välj det arbetssammanhang (organisation eller projekt) som denna post tillhör.",
+    "projectNotAssignable": "Det valda projektet är inte tilldelat dig eller tillhör en annan organisation. Välj ett projekt i listan.",
     "notesRequired": "Beskriv vad du arbetade med — fritexten är kärnan i posten.",
     "quantityInvalid": "Mängden måste vara ett icke-negativt tal.",
     "unitSlugUnknown": "Den här enheten känns ännu inte igen: {units}. Välj en annan enhet eller försök igen senare.",

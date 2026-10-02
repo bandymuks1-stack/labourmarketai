@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createHash } from "node:crypto";
 import type { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
@@ -21,6 +22,13 @@ import {
   parseModuleFields,
 } from "@/lib/journal/journal-module-fields";
 import { readOwnOccupationPathForUser } from "@/lib/journal/journal-occupation-path";
+import {
+  parseProjectChoice,
+  projectPromptFor,
+  rpcProjectParams,
+  type AssignedProject,
+} from "@/lib/journal/project-attribution";
+import { readActiveProjectsByOrg } from "@/lib/journal/project-attribution-read";
 
 /**
  * JOURNAL WRITE CORE — the ONE transport-neutral implementation of the
@@ -67,7 +75,14 @@ export type CreateJournalEntryResult =
        *  the save itself is unaffected either way. */
       dayCheck?: WorkDayCheck | null;
     }
-  | { ok: false; code: JournalSaveErrorCode; message: string };
+  | {
+      ok: false;
+      code: JournalSaveErrorCode;
+      message: string;
+      /** Set with `project_required`: the projects the caller must choose
+       *  between (or answer "not project work"). */
+      projects?: AssignedProject[];
+    };
 
 export type JournalSaveErrorCode =
   | "not_authenticated"
@@ -92,7 +107,14 @@ export type JournalSaveErrorCode =
    *  relationship does not compose (or the engagement is not the caller's).
    *  Refused, never silently dropped: the composition decides which fields
    *  an entry may carry, not the request. */
-  | "module_field_invalid";
+  | "module_field_invalid"
+  /** Explicit `project_id` the worker is not actively assigned to (or that
+   *  sits in another organization). Refused by the RPC, never re-pointed. */
+  | "project_not_assignable"
+  /** The worker has 2+ active projects in this entry's organization and the
+   *  request named none. Every entry path shares this rule: the hours are
+   *  never silently saved against no project (handoff 2026-10-02 §2). */
+  | "project_required";
 
 export type ParsedFragmentInput = {
   rawPhrase: string;
@@ -389,6 +411,31 @@ export async function legacyTwoStepSave(
   return { ok: true, entryId: entry.id };
 }
 
+/** The ONE attribution rule applied before a token/save: when the worker has
+ *  2+ ACTIVE projects in this entry's organization the human must choose
+ *  first. `null` = nothing to ask. */
+export async function projectsToChooseFrom(
+  supabase: SupabaseClient,
+  userId: string,
+  engagementContextId: string,
+): Promise<AssignedProject[] | null> {
+  const { data: worker } = await supabase
+    .from("workers")
+    .select("id")
+    .eq("profile_id", userId)
+    .maybeSingle();
+  if (!worker) return null;
+  const { data: ctx } = await supabase
+    .from("engagement_contexts")
+    .select("organization_id")
+    .eq("id", engagementContextId)
+    .maybeSingle();
+  if (!ctx?.organization_id) return null;
+  const byOrg = await readActiveProjectsByOrg(supabase, worker.id);
+  const projects = byOrg.get(ctx.organization_id) ?? [];
+  return projectPromptFor(projects) === "ask" ? projects : null;
+}
+
 /**
  * Persist a reviewed work-journal entry (M1) as `deps.userId`. Append-only
  * (§3): composes `original_text` (the worker's own words — never silently
@@ -453,6 +500,12 @@ export async function createJournalEntryCore(
     String(formData.get("rejected_slugs_json") ?? ""),
   );
   const quantity = quantityRaw === "" ? null : Number(quantityRaw);
+  // Which project the hours belong to. Absent → the DB auto-link rule; "none"
+  // → a deliberate non-project entry; a uuid → validated server-side against
+  // the worker's active assignment and the entry's own organization.
+  const projectChoice = parseProjectChoice(
+    String(formData.get("project_id") ?? ""),
+  );
 
   if (!engagementId) {
     return {
@@ -642,6 +695,31 @@ export async function createJournalEntryCore(
   // transaction (see 0017). Any failure rolls back the entry, so the worker
   // never lands in the half-saved "ghost entry" state where the row exists
   // but its interpretation does not.
+  // THE ONE ATTRIBUTION RULE for every entry path (composer, work-log flow,
+  // document draft, MCP). A request that names no project while the worker
+  // has two or more ACTIVE projects in this entry's organization is not
+  // saved: the caller must ask which (or "not project work"). One project is
+  // auto-attributed by the database, none asks nothing.
+  if (projectChoice.kind === "absent") {
+    const { data: ctxOrg } = await supabase
+      .from("engagement_contexts")
+      .select("organization_id")
+      .eq("id", engagementId)
+      .maybeSingle();
+    if (ctxOrg?.organization_id) {
+      const byOrg = await readActiveProjectsByOrg(supabase, worker.id);
+      const projects = byOrg.get(ctxOrg.organization_id) ?? [];
+      if (projectPromptFor(projects) === "ask") {
+        return {
+          ok: false,
+          code: "project_required",
+          message: t("projectAmbiguous"),
+          projects,
+        };
+      }
+    }
+  }
+
   const rpcParams = {
     p_worker_id: worker.id,
     p_engagement_context_id: engagementId,
@@ -653,6 +731,7 @@ export async function createJournalEntryCore(
     p_hash_self: hashSelf,
     p_visibility_scope: "closed",
     p_metrics: metrics,
+    ...rpcProjectParams(projectChoice),
   };
   // The generated supabase-js types are built from the schema cache and
   // don't include `create_journal_entry_full` until 0017 is applied AND the
@@ -676,6 +755,13 @@ export async function createJournalEntryCore(
       (/PGRST202/i.test(rpcErr.code ?? "") ||
         /create_journal_entry_full/i.test(rpcErr.message ?? "") ||
         rpcErr.message?.includes("function") === true);
+    if (/project_not_assignable/.test(rpcErr?.message ?? "")) {
+      return {
+        ok: false,
+        code: "project_not_assignable",
+        message: t("projectNotAssignable"),
+      };
+    }
     if (!isMissingRpc) {
       console.error("[journal] rpc save failed:", rpcErr?.message);
       return {

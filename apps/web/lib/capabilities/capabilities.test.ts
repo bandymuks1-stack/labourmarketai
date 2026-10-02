@@ -27,6 +27,7 @@ const coreWrite = vi.fn(async () => ({
 }));
 vi.mock("@/lib/journal/journal-write-core", () => ({
   createJournalEntryCore: (...args: unknown[]) => coreWrite(...(args as [])),
+  projectsToChooseFrom: async () => null,
 }));
 
 vi.mock("next-intl/server", () => ({
@@ -962,6 +963,7 @@ describe("journal draft → confirm", () => {
         siteName: "Vilnius A1",
         notes: DRAFT.notes,
         engagementContextId: DRAFT.engagementContextId,
+        projectId: null,
         // The named context — the human sees WHERE the entry lands before
         // confirming.
         engagementLabel: "Dev Statyba",
@@ -1164,6 +1166,7 @@ describe("journal draft → confirm", () => {
       notes: DRAFT.notes,
       work_date: DRAFT.workDate,
       site_name: DRAFT.siteName,
+      project_id: "",
       ...intakeWorkTimeFields(DRAFT.notes, DRAFT.workDate),
     });
     const fragments = JSON.parse(String(formData.get("fragments_json")));
