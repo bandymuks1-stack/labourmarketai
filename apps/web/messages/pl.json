@@ -781,6 +781,7 @@
       }
     },
     "journalWindow": {
+      "reviewNotEnabled": "{count, plural, one {# wpis zapisano} few {# wpisy zapisano} many {# wpisów zapisano} other {# wpisu zapisano}} tam, gdzie potwierdzanie pracy nie jest włączone — nie czekają na przegląd.",
       "title": "Raport dziennika pracy",
       "intro": "Czas pracy i zarejestrowane wpisy dla każdego członka w ustalonym oknie kalendarzowym, na podstawie własnych danych tej organizacji. Tylko godziny, liczby i daty — bez treści wpisów, bez ocen.",
       "windowLabel": "Okres raportu",

@@ -781,6 +781,7 @@
       }
     },
     "journalWindow": {
+      "reviewNotEnabled": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}} užfiksuota kontekstuose, kuriuose darbo patvirtinimas neįjungtas – jie nelaukia peržiūros.",
       "title": "Darbo žurnalo ataskaita",
       "intro": "Darbo laikas ir užfiksuoti įrašai pagal narį per pasirinktą kalendorinį langą – iš šios organizacijos įrašų. Tik valandos, skaičiai ir datos – be įrašų teksto, be vertinimų.",
       "windowLabel": "Ataskaitos langas",
