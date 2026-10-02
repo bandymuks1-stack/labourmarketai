@@ -501,7 +501,7 @@ begin
   -- manager of the linked project.
   if not (
     t.created_by = uid
-    or t.assignee_profile_id = uid
+    or t.assignee_profile_id is not distinct from uid  -- null-safe: a NULL assignee must not make `not (...)` NULL
     or public.is_admin()
     or (t.project_id is not null and public.can_manage_project(t.project_id))
   ) then
@@ -723,7 +723,7 @@ begin
    where wt.id = v_task;
   if not found or not (
     t.created_by = uid
-    or t.assignee_profile_id = uid
+    or t.assignee_profile_id is not distinct from uid  -- null-safe: a NULL assignee must not make `not (...)` NULL
     or public.is_admin()
     or (t.project_id is not null and public.can_manage_project(t.project_id))
   ) then

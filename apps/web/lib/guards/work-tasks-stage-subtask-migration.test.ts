@@ -134,7 +134,7 @@ describe("RPCs — same names, optional params, authority kept, grants unchanged
     const update = UP_CODE.slice(UP_CODE.indexOf("function public.update_work_task_v2("));
     for (const kept of [
       "t.created_by = uid",
-      "t.assignee_profile_id = uid",
+      "t.assignee_profile_id is not distinct from uid",
       "public.is_admin()",
       "public.can_manage_project(t.project_id)",
     ]) {
