@@ -73,6 +73,10 @@ import { Link } from "@/lib/i18n/navigation";
 // records below (owner IA: Mano CV = marketplace identity + work records).
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { WorkerPlayerCard } from "@/components/app/worker-player-card";
+import {
+  JournalContinuity,
+  type ContinuityStation,
+} from "@/components/app/journal/journal-continuity";
 import { isPlayerCardMode } from "@/lib/player-card/card-modes";
 import { WorkerReadinessPanel } from "@/components/app/worker-readiness-panel";
 import { getWorkerPlayerCard } from "@/lib/player-card/player-card";
@@ -237,6 +241,7 @@ export default async function JournalPage({
   // key per canonical state and per next action; the page never spells the
   // words itself.
   const tVerify = await getTranslations("journal.verification");
+  const tCont = await getTranslations("journalContinuity");
   const chainLabels = await buildEvidenceChainLabels();
   // The COLLAPSED card row is now the only thing naming the card on this page,
   // so it names it the way every other entry point does. `quickNav.identity`
@@ -1250,6 +1255,32 @@ export default async function JournalPage({
           </p>
         ) : null}
       </header>
+
+      {/* CONTINUITY — this record is the middle of a chain, not a feed:
+          instruction -> work -> time -> evidence -> review -> confirmation
+          -> project history -> professional history. Figures come from the
+          rows already loaded above; a figure that could not be read is "—",
+          never 0 (SEP-7). Doors carry no number. */}
+      {(() => {
+        const awaiting = evidenceStatuses.filter((s) => s === "submitted").length;
+        const returned = evidenceStatuses.filter((s) => s === "changes_requested").length;
+        const withPhotos = entryPhotoCounts
+          ? (entries ?? []).filter((e) => (entryPhotoCounts.get(e.id) ?? 0) > 0).length
+          : null;
+        const hours = workIntelligence ? Math.round(workIntelligence.totalHours * 10) / 10 : null;
+        const planDay = selectedDate ?? todayIsoKey;
+        const stations: ContinuityStation[] = [
+          { key: "instruction", kind: "door", value: null, active: false, href: `/dashboard/planning?view=day&date=${planDay}`, label: tCont("instruction.label"), unit: tCont("instruction.unit") },
+          { key: "work", kind: "measured", value: entries ? String(totalEntryCount) : null, active: totalEntryCount > 0, href: "/dashboard/journal#journal-entries", label: tCont("work.label"), unit: tCont("work.unit") },
+          { key: "time", kind: "measured", value: hours === null ? null : `${hours} h`, active: (hours ?? 0) > 0, href: `${WORK_IN_NUMBERS_HREF}?period=${workIntelligence?.focus ?? periodKey}`, label: tCont("time.label"), unit: tCont("time.unit") },
+          { key: "evidence", kind: "measured", value: withPhotos === null ? null : String(withPhotos), active: (withPhotos ?? 0) > 0, href: "/dashboard/journal#journal-entries", label: tCont("evidence.label"), unit: tCont("evidence.unit") },
+          { key: "review", kind: "measured", value: entries ? String(awaiting) : null, active: awaiting > 0, href: "/dashboard/journal#journal-entries", label: tCont("review.label"), unit: tCont("review.unit") },
+          { key: "confirmed", kind: "measured", value: entries ? String(confirmedEntryCount) : null, active: confirmedEntryCount > 0, attention: returned > 0 ? tCont("confirmed.returned", { count: returned }) : null, href: "/dashboard/journal#journal-entries", label: tCont("confirmed.label"), unit: tCont("confirmed.unit") },
+          { key: "project", kind: "door", value: null, active: false, href: "/dashboard/projects", label: tCont("project.label"), unit: tCont("project.unit") },
+          { key: "history", kind: "door", value: null, active: false, href: "/cv", label: tCont("history.label"), unit: tCont("history.unit") },
+        ];
+        return <JournalContinuity title={tCont("title")} intro={tCont("intro")} stations={stations} />;
+      })()}
 
 {/* The page-local quick-nav strip is gone (target worker IA 2026-09-13
           §4: a second nav strip is card soup) — three first-level blocks
