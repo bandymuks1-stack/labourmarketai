@@ -10727,6 +10727,9 @@
       "count": "{count, plural, =0 {nėra įrašų} one {# įrašas} few {# įrašai} other {# įrašų}}"
     },
     "emptyFiltered": "Šio tipo įrašų nėra.",
+    "filterActive": "Rodomi tik įrašai: {type}. Šiame laikotarpyje iš viso: {total}, rodoma: {shown}.",
+    "filterNote": "Žurnalo valandos ir žymos kalendoriuje rodomos visada — filtras jų nekeičia.",
+    "filterClear": "Rodyti visus",
     "emptyActions": {
       "bookings": "Pasiūlyti rezervaciją",
       "tasks": "Sukurti užduotį",

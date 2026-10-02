@@ -10727,6 +10727,9 @@
       "count": "{count, plural, =0 {keine Einträge} one {# Eintrag} other {# Einträge}}"
     },
     "emptyFiltered": "Keine Einträge dieses Typs.",
+    "filterActive": "Nur angezeigt: {type}. In diesem Zeitraum insgesamt: {total}, angezeigt: {shown}.",
+    "filterNote": "Journalstunden und -markierungen im Kalender werden immer angezeigt – der Filter ändert daran nichts.",
+    "filterClear": "Alle anzeigen",
     "emptyActions": {
       "bookings": "Buchung vorschlagen",
       "tasks": "Aufgabe erstellen",

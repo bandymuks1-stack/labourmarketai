@@ -10727,6 +10727,9 @@
       "count": "{count, plural, =0 {brak pozycji} one {# pozycja} few {# pozycje} many {# pozycji} other {# pozycji}}"
     },
     "emptyFiltered": "Brak pozycji tego typu.",
+    "filterActive": "Pokazano tylko: {type}. W tym okresie łącznie: {total}, pokazano: {shown}.",
+    "filterNote": "Godziny i oznaczenia dziennika w kalendarzu są zawsze widoczne – filtr ich nie zmienia.",
+    "filterClear": "Pokaż wszystkie",
     "emptyActions": {
       "bookings": "Zaproponuj rezerwację",
       "tasks": "Utwórz zadanie",
