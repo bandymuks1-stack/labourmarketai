@@ -34,6 +34,7 @@ export function JournalEntryRow({
   editSlot,
   standing = "UNKNOWN",
   standingSolid = false,
+  chainSlot,
 }: {
   entryId: string;
   canDelete: boolean;
@@ -45,6 +46,10 @@ export function JournalEntryRow({
   standing?: EvidenceStanding;
   /** Solid node = a real decision row exists behind the entry. */
   standingSolid?: boolean;
+  /** The entry's EvidenceChain (recorded -> photo -> manager's record -> in
+   *  your history), built by the page from the same verification state that
+   *  drives `standing`. Shown between the entry and its status zone. */
+  chainSlot?: React.ReactNode;
   /** Edit-in-place control (journal compact UX v1): the page passes the
    *  drawer-based edit launcher here so editing opens in a compact drawer
    *  over the list — no navigation, scroll/day position preserved. Absent →
@@ -179,6 +184,11 @@ export function JournalEntryRow({
           candidates={skillLinks.candidates}
         />
       )}
+      {chainSlot ? (
+        <div className="border-t border-border/40 pt-3" data-testid={`journal-entry-chain-${entryId}`}>
+          {chainSlot}
+        </div>
+      ) : null}
       {/* Status zone — secondary, below the signals. */}
       {statusSlot && (
         <div

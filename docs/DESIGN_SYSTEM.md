@@ -27,3 +27,16 @@
 
 ## Visual QA
 Playwright (`apps/web/playwright.config.ts`) at 375 / 768 / 1280 / 1920; add `toHaveScreenshot` + `@axe-core/playwright` per the research note. Proof wording: layout emulation ≠ mobile device proof.
+
+## Shared product pieces (added by the premium completion program)
+| Piece | What it is | Where |
+|---|---|---|
+| `PersonPortrait` | the ONE 4:5 portrait / monogram used by every identity surface | `components/app/identity/person-portrait.tsx` |
+| `PersonIdentityCard` | the persistent person at list depth (compact / full + disclosure layers) | `components/app/identity/person-identity-card.tsx` |
+| `EvidenceChain` | how far a record has got: recorded → photo → manager's record → in your history; state by ring shape + glyph + word | `components/app/work-world/evidence-chain.tsx`, `lib/evidence/evidence-chain.ts` |
+| `WorkContextMap` (L2) | the authenticated person's work life as one flow path, derived from the one `WorkerPlayerCard` | `components/app/work-world/work-context-map.tsx`, `lib/player-card/work-context.ts` |
+| `LivingCvStory` | professional history that emerges from work (screen view on `/cv`) | `components/app/cv/living-cv-story.tsx` |
+| Truthful fixtures | `SampleCardState` (confirmed / recorded / empty) with a guard that fixtures agree with the data model | `lib/player-card/sample-card.ts` |
+
+See `docs/design/live-work-graph-and-org-model.md` (levels, org model, data gaps, calendar verdict) and
+`docs/design/localization-status.md` (AUTHORED / AGENT_TRANSLATED / NATIVE_REVIEWED).

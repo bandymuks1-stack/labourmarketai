@@ -5,6 +5,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { deriveProfileNextAction } from "@/lib/dashboard/next-action";
 import { skillEvidenceStatus } from "@/lib/profile/skill-evidence";
 import { getWorkerPlayerCard } from "@/lib/player-card/player-card";
+import { WorkContextSection } from "@/components/app/work-world/work-context-section";
 import { getProfileOpportunitySignal } from "@/lib/player-card/opportunity-signal";
 import { countTodayJournalEntries } from "@/lib/player-card/today-activity";
 import {
@@ -664,6 +665,11 @@ export async function ProfileHubOverview({
           className="flex flex-col gap-5 rounded-md border border-border-subtle px-3 py-4"
           data-testid="profile-hub-work-world"
         >
+            {/* LIVE WORK GRAPH, LEVEL 2 — the person at the centre; the same card
+                data (no second source) as one path from working now to what is
+                next. Every node opens the surface that owns its facts. */}
+            <WorkContextSection card={playerCard} name={personName} avatarUrl={avatarUrl} />
+
             {/* today's activity — absorbed from ProfileStateStrip */}
             <p
               className="text-sm text-text-secondary"

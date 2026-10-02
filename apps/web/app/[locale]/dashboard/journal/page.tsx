@@ -9,6 +9,9 @@ import {
 } from "@/components/app/journal-entry-composer";
 import { readActiveProjectsByOrg } from "@/lib/journal/project-attribution-read";
 import { JournalEntryRow } from "@/components/app/journal-entry-row";
+import { EvidenceChain } from "@/components/app/work-world/evidence-chain";
+import { deriveEvidenceChain } from "@/lib/evidence/evidence-chain";
+import { buildEvidenceChainLabels } from "@/lib/evidence/evidence-chain-labels";
 import {
   EvidenceState,
   PlaceTimeStamp,
@@ -233,6 +236,7 @@ export default async function JournalPage({
   // key per canonical state and per next action; the page never spells the
   // words itself.
   const tVerify = await getTranslations("journal.verification");
+  const chainLabels = await buildEvidenceChainLabels();
   // The COLLAPSED card row is now the only thing naming the card on this page,
   // so it names it the way every other entry point does. `quickNav.identity`
   // stays shared with the profile hub's own `#profile-identity` anchor — one
@@ -1092,6 +1096,14 @@ export default async function JournalPage({
   // never disagree with the diary beneath them. Unreadable entries or links
   // → the section is withheld rather than rendered as zero hours (SEP-7).
   const todayIso = new Date().toISOString().slice(0, 10);
+  // ONE bounded photo-count read over the live entries — shared by the work
+  // intelligence (evidence strength) and each row's EvidenceChain below.
+  const entryPhotoCounts = entries
+    ? await readPhotoCountsByEntry(
+        supabase,
+        entries.map((e) => e.id),
+      )
+    : null;
   const workIntelligence =
     entries && skillLinksReady
       ? assembleWorkIntelligence({
@@ -1110,10 +1122,7 @@ export default async function JournalPage({
             : undefined,
           // Evidence strength needs to know which entries carry photos —
           // one bounded read over the live ids already in hand.
-          photoCountByEntry: await readPhotoCountsByEntry(
-            supabase,
-            entries.map((e) => e.id),
-          ),
+          photoCountByEntry: entryPhotoCounts ?? new Map<string, number>(),
           organizationRecords,
           organizationPeriodRecords,
         })
@@ -1874,6 +1883,19 @@ export default async function JournalPage({
                             verification.state,
                           )}
                           standingSolid={spineNodeSolid(verification.state)}
+                          chainSlot={
+                            <EvidenceChain
+                              size="full"
+                              labels={chainLabels}
+                              chain={deriveEvidenceChain({
+                                verification: verification.state,
+                                photoCount: entryPhotoCounts
+                                  ? (entryPhotoCounts.get(e.id) ?? 0)
+                                  : null,
+                              })}
+                              testId={`journal-entry-evidence-chain-${e.id}`}
+                            />
+                          }
                           editSlot={
                             rowEditingEntry ? (
                               <JournalEntryEditLauncher

@@ -189,41 +189,52 @@ export function IdentityStage({
           {children}
 
           {facts.length > 0 ? (
-            <dl
-              className="mt-auto grid grid-cols-3 gap-2 border-t border-ink-600/70 pt-3 sm:gap-4"
-              data-testid="identity-stage-facts"
-            >
-              {facts.map((f) =>
-                f.value === null ? (
-                  <div
-                    key={f.testid}
-                    className={cn("flex min-w-0 items-center", facts.length === 1 ? "col-span-3" : "col-span-1")}
-                    data-testid={f.testid}
-                    data-absent="true"
-                  >
-                    <dt className="sr-only">{f.label}</dt>
-                    <dd className="inline-flex min-h-8 items-center gap-1.5 rounded-md border border-dashed border-ink-500 px-2 py-1 font-mono text-[0.625rem] uppercase tracking-label text-text-muted sm:text-meta">
-                      <CircleDashed className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
-                      {f.label}
-                    </dd>
-                  </div>
-                ) : (
-                  <div key={f.testid} className="flex min-w-0 flex-col gap-0.5" data-testid={f.testid}>
-                    <dt className="order-2 min-w-0 break-words font-mono text-[0.625rem] uppercase tracking-label text-text-muted sm:text-meta">
-                      {f.label}
-                    </dt>
-                    <dd
-                      className={cn(
-                        "order-1 font-display text-2xl font-bold leading-none tracking-tightest tabular-nums sm:text-3xl",
-                        FACT_TONE[f.tone],
-                      )}
-                    >
-                      {f.value}
-                    </dd>
-                  </div>
-                ),
-              )}
-            </dl>
+            <div className="mt-auto flex flex-col gap-3 border-t border-ink-600/70 pt-3" data-testid="identity-stage-facts">
+              {/* Figures keep their grid; ABSENT states (not provided / not yet
+                  confirmed / no records) get their own row so they can wrap
+                  freely and can never collide with a number (phone, 2026-10-02). */}
+              {facts.some((f) => f.value !== null) ? (
+                <dl
+                  className="grid gap-2 sm:gap-4"
+                  style={{ gridTemplateColumns: `repeat(${Math.min(3, facts.filter((f) => f.value !== null).length)}, minmax(0, 1fr))` }}
+                >
+                  {facts
+                    .filter((f) => f.value !== null)
+                    .map((f) => (
+                      <div key={f.testid} className="flex min-w-0 flex-col gap-0.5" data-testid={f.testid}>
+                        <dt className="order-2 min-w-0 break-words font-mono text-[0.625rem] uppercase tracking-label text-text-muted sm:text-meta">
+                          {f.label}
+                        </dt>
+                        <dd
+                          className={cn(
+                            "order-1 font-display text-2xl font-bold leading-none tracking-tightest tabular-nums sm:text-3xl",
+                            FACT_TONE[f.tone],
+                          )}
+                        >
+                          {f.value}
+                        </dd>
+                      </div>
+                    ))}
+                </dl>
+              ) : null}
+              {facts.some((f) => f.value === null) ? (
+                <ul className="flex flex-wrap gap-2" data-testid="identity-stage-absent">
+                  {facts
+                    .filter((f) => f.value === null)
+                    .map((f) => (
+                      <li
+                        key={f.testid}
+                        data-testid={f.testid}
+                        data-absent="true"
+                        className="inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-md border border-dashed border-ink-500 px-2 py-1 font-mono text-[0.625rem] uppercase tracking-label text-text-secondary sm:text-meta"
+                      >
+                        <CircleDashed className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
+                        <span className="min-w-0 break-words">{f.label}</span>
+                      </li>
+                    ))}
+                </ul>
+              ) : null}
+            </div>
           ) : null}
         </div>
       </div>
