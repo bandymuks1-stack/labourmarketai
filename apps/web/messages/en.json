@@ -2191,9 +2191,9 @@
         "openProfile": "View profile",
         "identity": {
           "availability": {
-            "available": "Available",
-            "busy": "Busy",
-            "unavailable": "Unavailable"
+            "available": "Self-reported: available",
+            "busy": "Self-reported: busy",
+            "unavailable": "Self-reported: unavailable"
           }
         },
         "team": {
@@ -6583,7 +6583,7 @@
     "scope": {
       "support": "Support channel",
       "unknown": "Context not specified",
-      "demand": "About work — the subject is the related work's title"
+      "demand": "About a job"
     },
     "unread": "New",
     "kind": {
@@ -16548,9 +16548,10 @@
     },
     "states": {
       "needsMigration": "Not available right now.",
-      "noCompany": "Switch to a company workspace.",
+      "noCompany": "This area is for a company workspace. Record your own hours in the Work Journal.",
       "noObjects": "There are no sites yet to record today's hours against.",
-      "error": "Could not load this day."
+      "error": "Could not load this day.",
+      "noCompanyJournalLink": "Open the Work Journal"
     },
     "import": {
       "entryLink": "Import hours from a spreadsheet (.xlsx)",

@@ -2191,9 +2191,9 @@
         "openProfile": "Peržiūrėti profilį",
         "identity": {
           "availability": {
-            "available": "Laisvas",
-            "busy": "Užimtas",
-            "unavailable": "Neprieinamas"
+            "available": "Pats nurodė: laisvas",
+            "busy": "Pats nurodė: užimtas",
+            "unavailable": "Pats nurodė: neprieinamas"
           }
         },
         "team": {
@@ -6583,7 +6583,7 @@
     "scope": {
       "support": "Pagalbos kanalas",
       "unknown": "Kontekstas nepatikslintas",
-      "demand": "Dėl darbo — tema yra susijusio darbo pavadinimas"
+      "demand": "Dėl darbo"
     },
     "unread": "Naujas",
     "kind": {
@@ -16548,9 +16548,10 @@
     },
     "states": {
       "needsMigration": "Šiuo metu nepasiekiama.",
-      "noCompany": "Pasirinkite įmonės darbo sritį.",
+      "noCompany": "Ši sritis skirta įmonės darbo erdvei. Savo valandas įrašykite Darbo žurnale.",
       "noObjects": "Šiai dienai dar nėra objektų, prie kurių priskirti valandas.",
-      "error": "Nepavyko įkelti dienos duomenų."
+      "error": "Nepavyko įkelti dienos duomenų.",
+      "noCompanyJournalLink": "Atidaryti Darbo žurnalą"
     },
     "import": {
       "entryLink": "Importuoti valandas iš skaičiuoklės (.xlsx)",
