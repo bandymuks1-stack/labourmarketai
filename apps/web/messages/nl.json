@@ -2224,7 +2224,8 @@
         "title": "Wacht op je beslissing",
         "review": "Journaalvermeldingen om te beoordelen",
         "invitations": "Openstaande uitnodigingen voor werknemers",
-        "claims": "Openbare aanvragen die je kunt overnemen"
+        "claims": "Openbare aanvragen die je kunt overnemen",
+        "reviewOff": "Werknemers met vastgelegd werk waarvan bevestiging uitstaat"
       }
     },
     "agency": {
@@ -7585,6 +7586,8 @@
     "skillsUnavailable": "Kon nu niet worden gelezen.",
     "verifiedUnavailable": "Vaardigheden met een record van een leidinggevende konden nu niet worden gelezen.",
     "identity": {
+      "noRecords": "Nog geen werkregistraties",
+      "noManagerRecord": "Nog geen registratie van de leidinggevende",
       "currentWork": "Werkt nu",
       "recorded": "u vastgelegd",
       "confirmed": "u met registratie van leidinggevende",
@@ -8342,7 +8345,7 @@
     "pickDemand": "Kies een personeelsbehoefte",
     "noDemands": "Je hebt nog geen personeelsbehoeften. Maak een personeelsbehoefte aan vanaf je dashboard — na beoordeling structureert het team de vereiste vaardigheden.",
     "noDemandsCta": "Personeelsbehoefte aanmaken",
-    "unstructuredTag": "niet gestructureerd",
+    "unstructuredTag": "vereisten niet bevestigd",
     "notStructured": "De vereiste vaardigheden van deze personeelsbehoefte zijn nog niet gestructureerd, dus er kan geen match worden berekend. Nieuwe personeelsbehoeften worden door de beheerders beoordeeld en gestructureerd — je hoeft niets te doen.",
     "needsSetup": "Laden is niet gelukt. Probeer het opnieuw.",
     "noCandidates": "Nog geen passende werknemers voor deze personeelsbehoefte. Matches verschijnen naarmate werknemers journaal-onderbouwde vaardigheden toevoegen — kijk later terug of verbreed de behoefte.",
@@ -8537,13 +8540,15 @@
       "cancel": "Annuleren"
     },
     "verdict": {
-      "eligible": "Voldoet aan de gestelde eisen",
+      "eligible": "Voldoet aan de verplichte eisen (vaardigheden worden apart beoordeeld)",
       "blocked": "Voldoet niet aan een gestelde eis",
       "evidence": {
         "confirmed": "Bewijs: door manager bevestigd",
         "mixed": "Bewijs: deels bevestigd",
         "unverified": "Bewijs: alleen zelf opgegeven"
-      }
+      },
+      "noCriteria": "Geen verplichte eisen opgegeven",
+      "insufficient": "Te weinig gegevens om de eisen te controleren"
     },
     "editNeedCta": "Behoefte aanpassen of toevoegen",
     "availableSupply": {
@@ -8576,7 +8581,7 @@
         "shortlist": "Geselecteerd",
         "contact": "Gesproken",
         "offer": "Aangeboden",
-        "accepted": "Aanvaard",
+        "accepted": "Akkoord met de data",
         "closed": "Gesloten"
       }
     },
@@ -8586,7 +8591,8 @@
       "readiness": "Beschikbaarheid, gereedheid en documenten",
       "openTo": "Ook open voor: {countries}",
       "skillCount": "{matched} van {total} vereiste vaardigheden",
-      "nameHidden": "Naam en contactgegevens verschijnen pas wanneer de persoon dat toestaat."
+      "nameHidden": "Naam en contactgegevens verschijnen pas wanneer de persoon dat toestaat.",
+      "skillUnknown": "Geen vaardigheden opgegeven · nodig: {total}"
     }
   },
   "planBoundary": {
@@ -11896,7 +11902,7 @@
       "contacted": "Gecontacteerd",
       "interview": "In gesprek",
       "offer": "Aanbod",
-      "accepted": "Geaccepteerd",
+      "accepted": "Akkoord met de data",
       "rejected": "Afgewezen"
     },
     "action": {
@@ -11906,7 +11912,8 @@
       "continueConversation": "Gesprek voortzetten",
       "viewOffer": "Reactie op het aanbod volgen",
       "planWork": "Geaccepteerd aanbod bekijken",
-      "reviewOthers": "Andere kandidaten beoordelen"
+      "reviewOthers": "Andere kandidaten beoordelen",
+      "assignToProject": "Aan een project toewijzen"
     }
   },
   "agencyClients": {
@@ -13118,7 +13125,7 @@
       "offerTitle": "Vacature-aanbod",
       "confirmAcceptTitle": "Dit aanbod accepteren?",
       "confirmAcceptBody": "Accepteren bevestigt je opdracht bij de werkgever — een vaste stap, geen concept.",
-      "confirmAcceptDisclosure": "Door te accepteren ziet dit bedrijf — en alleen dit bedrijf — je profielkaart: naam, vaardigheden, beroepen, talen en beschikbaarheid. Je contactgegevens blijven privé, geen ander bedrijf krijgt toegang, en je wordt hierdoor niet opgenomen in het werkgeverszoeken. De toegang geldt zolang de opdracht actief is — je kunt die op elk moment beïindigen.",
+      "confirmAcceptDisclosure": "Door te accepteren ga je akkoord met de data in deze boeking. Dit is geen arbeidsovereenkomst en betekent niet dat je al in dienst bent — een specifiek project of locatie wordt apart door het bedrijf bepaald. Door te accepteren ziet dit bedrijf — en alleen dit bedrijf — je profielkaart: naam, vaardigheden, beroepen, talen en beschikbaarheid. Je contactgegevens blijven privé, geen ander bedrijf krijgt toegang, en je wordt hierdoor niet opgenomen in het werkgeverszoeken. De toegang geldt zolang de opdracht actief is — je kunt die op elk moment beïindigen.",
       "confirmDeclineTitle": "Dit aanbod weigeren?",
       "confirmCta": "Ja, bevestigen",
       "cancelCta": "Annuleren",
@@ -14251,7 +14258,7 @@
       "candidatesBlocked": "Momenteel niet beschikbaar.",
       "candidatesNoDemands": "Je bedrijf heeft nog geen behoefte beschreven.",
       "candidatesPickDemand": "Voor welke behoefte werf je?",
-      "candidatesUnstructuredBadge": "niet gestructureerd",
+      "candidatesUnstructuredBadge": "vereisten niet bevestigd",
       "candidatesBackToDemands": "Terug naar behoeften",
       "candidatesNotFound": "Die behoefte is niet gevonden, of hij is niet van jou.",
       "candidatesNeedsMigration": "Momenteel niet beschikbaar.",
@@ -17935,6 +17942,177 @@
       "done": "{count} registraties toegewezen; {skipped} waren al toegewezen.",
       "refused": "Dit kon niet worden opgeslagen. Er is niets gewijzigd.",
       "person": "{hours} u, {count, plural, one {# registratie} other {# registraties}}"
+    }
+  },
+  "workLifecycle": {
+    "pending": "Nog niet",
+    "title": "Wat er met jouw werk gebeurt",
+    "titleCompany": "Wat er met het werk gebeurt dat je aanstuurt",
+    "example": "Voorbeeld — geen echt persoon en geen echte gegevens",
+    "hint": "Kies een stap. Elke stap opent de echte plek in je werkruimte.",
+    "open": "Openen in je werkruimte",
+    "list": "Stappen in de levenscyclus van werk",
+    "workers": {
+      "person": {
+        "label": "Jij",
+        "fact": "Kok — professionele identiteit",
+        "detail": "Eén professionele identiteit die van jou is — niet gebonden aan één werkgever."
+      },
+      "team": {
+        "label": "Je team",
+        "fact": "Keukenteam",
+        "detail": "Je sluit je aan bij een echt team, met de mensen met wie je werkt en wie het leidt."
+      },
+      "project": {
+        "label": "Het project",
+        "fact": "Lancering herfstmenu",
+        "detail": "Werk hoort bij een project, dus het heeft een plek, een doel en een tijd."
+      },
+      "work": {
+        "label": "Werk",
+        "fact": "Avonddienst — 8 u",
+        "detail": "Wat je deed, wanneer en hoelang — vastgelegd terwijl het gebeurt."
+      },
+      "evidence": {
+        "label": "Bewijs",
+        "fact": "Foto + journaalitem",
+        "detail": "Afgerond werk wordt bewijs in plaats van te verdwijnen."
+      },
+      "confirmation": {
+        "label": "Bevestigd",
+        "fact": "Bevestigd door manager",
+        "detail": "Een manager bevestigt het. Zonder dat wordt niets geverifieerd genoemd."
+      },
+      "history": {
+        "label": "Geschiedenis",
+        "fact": "Toegevoegd aan je geschiedenis",
+        "detail": "Bevestigd werk bouwt je professionele geschiedenis op — die blijft bij jou voor de volgende baan."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Vraag",
+        "fact": "4 koks, vanaf maandag",
+        "detail": "Je geeft de echte vraag één keer aan: wie, waar en vanaf wanneer."
+      },
+      "people": {
+        "label": "Mensen",
+        "fact": "Professionals die passen",
+        "detail": "Professionals van wie de echte werkgeschiedenis bij de vraag past — met wat geverifieerd is en wat nog niet."
+      },
+      "team": {
+        "label": "Je team",
+        "fact": "Keukenteam",
+        "detail": "Mensen worden een team met een leider, diensten en een werkplek."
+      },
+      "project": {
+        "label": "Het project",
+        "fact": "Lancering herfstmenu",
+        "detail": "Teams zijn georganiseerd rond het project dat ze opleveren."
+      },
+      "work": {
+        "label": "Werk",
+        "fact": "Avonddienst — 8 u",
+        "detail": "Werk wordt vastgelegd waar het gebeurt, niet achteraf gereconstrueerd."
+      },
+      "confirmation": {
+        "label": "Bevestigd",
+        "fact": "Wacht op jouw bevestiging",
+        "detail": "Je ziet wat nog bevestigd moet worden en wat al klaar is."
+      },
+      "report": {
+        "label": "Rapport",
+        "fact": "Rapport uit echt werk",
+        "detail": "Rapporten komen uit bevestigd werk — niemand typt ze opnieuw over."
+      }
+    }
+  },
+  "twoSides": {
+    "title": "Aannemen is het begin, niet het einde.",
+    "professional": "Vakkracht",
+    "company": "Bedrijf",
+    "steps": {
+      "find": {
+        "label": "Vinden",
+        "worker": "Vindt werk dat past bij wat ze echt hebben gedaan",
+        "company": "Vindt mensen wier echte werk past bij de behoefte"
+      },
+      "connect": {
+        "label": "Verbinden",
+        "worker": "Praat in de eigen taal",
+        "company": "Neemt aan via een echt gesprek"
+      },
+      "work": {
+        "label": "Werken",
+        "worker": "Legt het werk vast terwijl het gebeurt",
+        "company": "Voert het werk uit met de eigen mensen"
+      },
+      "verify": {
+        "label": "Bevestigen",
+        "worker": "Een leidinggevende bevestigt het",
+        "company": "Bevestigt wat er echt is gedaan"
+      },
+      "grow": {
+        "label": "Groeien",
+        "worker": "Bevestigd werk wordt hun geschiedenis",
+        "company": "Rapporten komen voort uit bevestigd werk"
+      },
+      "continue": {
+        "label": "Doorgaan",
+        "worker": "Neemt die geschiedenis mee naar de volgende baan",
+        "company": "Plant het volgende project met mensen die ze kennen"
+      }
+    }
+  },
+  "evidenceChain": {
+    "label": "Status vermelding",
+    "own": "Door jou",
+    "nodes": {
+      "recorded": "Vastgelegd",
+      "photo": "Foto",
+      "manager": "Managersvermelding",
+      "history": "In je historie"
+    },
+    "status": {
+      "done": "Klaar",
+      "waiting": "Wacht",
+      "absent": "Nog niet",
+      "attention": "Jij bent aan zet",
+      "unknown": "Onbekend"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Levend cv",
+    "title": "Uw werk wordt uw geschiedenis",
+    "now": "Nu",
+    "noRecords": "Nog geen werkregistraties",
+    "legend": {
+      "managerRecord": "Vermelding van de manager",
+      "recorded": "Door u vastgelegd"
+    },
+    "skillsTitle": "Wat uw werk laat zien",
+    "next": {
+      "title": "Uw geschiedenis gaat met u mee",
+      "body": "Elke klus die u vastlegt, vult haar aan. Neem haar mee naar de volgende kans.",
+      "cta": "Bekijk waar u naartoe kunt"
+    }
+  },
+  "workContext": {
+    "title": "Jouw werk in één overzicht",
+    "nodes": {
+      "current": "Nu aan het werk",
+      "records": "Registraties",
+      "manager": "Registratie van de leidinggevende",
+      "history": "Geschiedenis",
+      "skills": "Vaardigheden",
+      "next": "Volgende"
+    },
+    "facts": {
+      "records": "{count, plural, one {# registratie} other {# registraties}}",
+      "manager": "{count, plural, one {# registratie van de leidinggevende} other {# registraties van de leidinggevende}}",
+      "history": "{count, plural, one {# baan} other {# banen}}",
+      "skills": "{count, plural, one {# vaardigheid gebaseerd op jouw registraties} other {# vaardigheden gebaseerd op jouw registraties}}",
+      "next": "Waar je heen kunt"
     }
   }
 }

@@ -851,10 +851,15 @@ export default async function CompanyScoutingPage({
                           className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
                           data-testid={`scout-skill-count-${c.workerId}`}
                         >
-                          {t("identity.skillCount", {
-                            matched: fit.matchedTotal,
-                            total: fit.needTotal,
-                          })}
+                          {/* "0 of 2" asserts a measured miss. When the person
+                              has stated no skills at all the engine says
+                              `insufficient_data` — an UNKNOWN, not a zero. */}
+                          {c.match.status === "insufficient_data"
+                            ? t("identity.skillUnknown", { total: fit.needTotal })
+                            : t("identity.skillCount", {
+                                matched: fit.matchedTotal,
+                                total: fit.needTotal,
+                              })}
                         </span>
                       ) : null}
                 {/* P4-B (2026-08-09): the verdict the employer could never
@@ -872,9 +877,27 @@ export default async function CompanyScoutingPage({
                   data-testid={`scout-verdict-${c.workerId}`}
                   data-eligible={c.match.eligible}
                 >
-                  {c.match.eligible ? (
+                  {/* THREE STATES, from fields the engine already returns.
+                      `eligible` is a hard-criteria verdict only (skills never
+                      feed it) and is TRUE when no hard criterion failed —
+                      including when none was stated or the facts are unknown.
+                      Rendering that as a green "meets requirements" next to
+                      "0 of 2 skills" / "not enough data" was a false claim.
+                        confirmed met   → matchedHard non-empty, nothing blocking
+                        confirmed not   → blocked
+                        unknown         → nothing checked, or insufficient data */}
+                  {c.match.eligible && c.match.status !== "insufficient_data" && c.match.matchedHard.length > 0 ? (
                     <span className="rounded-md border border-state-success/40 bg-state-success/10 px-2 py-0.5 text-meta font-medium text-state-success">
                       {t("verdict.eligible")}
+                    </span>
+                  ) : c.match.eligible ? (
+                    <span
+                      className="rounded-md border border-ink-500 px-2 py-0.5 text-meta font-medium text-text-secondary"
+                      data-testid={`scout-verdict-unchecked-${c.workerId}`}
+                    >
+                      {c.match.status === "insufficient_data"
+                        ? t("verdict.insufficient")
+                        : t("verdict.noCriteria")}
                     </span>
                   ) : (
                     <span className="rounded-md border border-state-danger/40 bg-state-danger/10 px-2 py-0.5 text-meta font-medium text-state-danger">

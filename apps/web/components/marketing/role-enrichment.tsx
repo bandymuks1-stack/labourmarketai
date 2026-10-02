@@ -27,6 +27,7 @@ export async function RoleEnrichment({
   ctaSource,
   ctaKind,
   ctaNext,
+  afterPreview,
 }: {
   root: "workers" | "companies" | "agencies";
   previewKey: "profile" | "demand" | "pool";
@@ -37,6 +38,9 @@ export async function RoleEnrichment({
    *  carries through `?next=`, so a page that promises ONE thing does not
    *  drop the visitor on the generic dashboard. Omitted = the default. */
   ctaNext?: string;
+  /** Optional block rendered right after the preview section (e.g. a page
+   *  that wants its benefit cards BELOW the visual proof, not above it). */
+  afterPreview?: React.ReactNode;
 }) {
   const t = await getTranslations(root);
   const sh = await getTranslations("shared");
@@ -80,6 +84,8 @@ export async function RoleEnrichment({
           </ul>
         </div>
       </section>
+
+      {afterPreview}
 
       {/* (b) journey */}
       <section className="relative mx-auto max-w-container px-6 pt-20 sm:px-12">

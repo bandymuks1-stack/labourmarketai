@@ -100,7 +100,8 @@
       "approved": "Überprüft",
       "changes_requested": "Änderungen angefordert",
       "rejected": "Zurückgegeben",
-      "reasonLabel": "Grund"
+      "reasonLabel": "Grund",
+      "notEnabled": "Erfasst – Ihre Führungskraft hat die Bestätigung noch nicht aktiviert, daher prüft niemand diesen Eintrag; bis dahin bleibt es Ihre eigene Angabe"
     },
     "delete": "Eintrag löschen",
     "deleting": "Wird gelöscht...",
@@ -944,6 +945,8 @@
     "photoClose": "Foto schließen",
     "photoPrev": "Vorheriges Foto",
     "photoNext": "Nächstes Foto",
-    "photoCounter": "{index} / {total}"
+    "photoCounter": "{index} / {total}",
+    "recordedOnly": "{count, plural, one {# erfasst — Bestätigung nicht aktiviert} other {# erfasst — Bestätigung nicht aktiviert}}",
+    "confirmationNotEnabled": "Ihre Führungskraft hat die Bestätigung noch nicht aktiviert – niemand prüft diese Einträge."
   }
 }

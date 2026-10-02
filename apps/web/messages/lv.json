@@ -1272,7 +1272,7 @@
         },
         {
           "desc": "[EN] Completed work strengthens your proof and readiness.",
-          "title": "[EN] Work, earn, level up"
+          "title": "[EN] Work, earn, build your record"
         }
       ]
     },
@@ -2420,6 +2420,8 @@
       "link": "Present a candidate"
     },
     "identity": {
+      "noRecords": "Darba ierakstu vēl nav",
+      "noManagerRecord": "Vadītāja ieraksta vēl nav",
       "why": "Kāpēc šī persona ir piemērota",
       "skills": "Atbilstošās prasmes un uz ko tās balstās",
       "readiness": "Pieejamība, gatavība un dokumenti",
@@ -6876,6 +6878,177 @@
       "done": "Piešķirti ieraksti: {count}; jau bija piešķirti: {skipped}.",
       "refused": "Neizdevās saglabāt. Nekas nav mainīts.",
       "person": "{hours} h, {count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}"
+    }
+  },
+  "workLifecycle": {
+    "pending": "Vēl nav",
+    "title": "Kas notiek ar jūsu paveikto darbu",
+    "titleCompany": "Kas notiek ar jūsu vadīto darbu",
+    "example": "Piemērs — nav īsts cilvēks un nav īsti dati",
+    "hint": "Izvēlieties soli. Katrs solis atver īstu vietu jūsu darba telpā.",
+    "open": "Atvērt darba telpā",
+    "list": "Darba dzīves cikla soļi",
+    "workers": {
+      "person": {
+        "label": "Jūs",
+        "fact": "Pavārs — profesionālā identitāte",
+        "detail": "Viena profesionālā identitāte, kas pieder jums — nav piesaistīta vienam darba devējam."
+      },
+      "team": {
+        "label": "Komanda",
+        "fact": "Virtuves komanda",
+        "detail": "Jūs pievienojaties īstai komandai — redzat, ar ko strādājat un kas to vada."
+      },
+      "project": {
+        "label": "Projekts",
+        "fact": "Rudens ēdienkartes ieviešana",
+        "detail": "Darbs pieder projektam, tāpēc tam ir vieta, mērķis un laiks."
+      },
+      "work": {
+        "label": "Darbs",
+        "fact": "Vakara pakalpojums — 8 st.",
+        "detail": "Ko jūs darījāt, kad un cik ilgi — fiksēts tad, kad tas notiek."
+      },
+      "evidence": {
+        "label": "Pierādījums",
+        "fact": "Foto + žurnāla ieraksts",
+        "detail": "Paveiktais darbs kļūst par pierādījumu, nevis pazūd."
+      },
+      "confirmation": {
+        "label": "Apstiprināts",
+        "fact": "Apstiprināja vadītājs",
+        "detail": "Vadītājs to apstiprina. Bez tā nekas netiek saukts par pārbaudītu."
+      },
+      "history": {
+        "label": "Vēsture",
+        "fact": "Pievienots jūsu vēsturei",
+        "detail": "Apstiprinātais darbs veido jūsu profesionālo vēsturi — tā paliek pie jums nākamajam darbam."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Vajadzība",
+        "fact": "4 pavāri no pirmdienas",
+        "detail": "Īsto vajadzību norādāt vienreiz: kas, kur un no kura laika."
+      },
+      "people": {
+        "label": "Cilvēki",
+        "fact": "Piemēroti profesionāļi",
+        "detail": "Profesionāļi, kuru īstā darba vēsture atbilst vajadzībai — ar to, kas ir pārbaudīts un kas vēl nav."
+      },
+      "team": {
+        "label": "Komanda",
+        "fact": "Virtuves komanda",
+        "detail": "Cilvēki kļūst par komandu ar vadītāju, maiņām un darba vietu."
+      },
+      "project": {
+        "label": "Projekts",
+        "fact": "Rudens ēdienkartes ieviešana",
+        "detail": "Komandas tiek organizētas ap projektu, ko tās īsteno."
+      },
+      "work": {
+        "label": "Darbs",
+        "fact": "Vakara pakalpojums — 8 st.",
+        "detail": "Darbs tiek fiksēts tur, kur tas notiek, nevis atjaunots vēlāk."
+      },
+      "confirmation": {
+        "label": "Apstiprināts",
+        "fact": "Gaida jūsu apstiprinājumu",
+        "detail": "Redzat, kas vēl jāapstiprina un kas jau ir izdarīts."
+      },
+      "report": {
+        "label": "Atskaite",
+        "fact": "Atskaite no īstā darba",
+        "detail": "Atskaites veidojas no apstiprinātā darba — neviens tās nepārraksta."
+      }
+    }
+  },
+  "twoSides": {
+    "title": "Pieņemšana darbā ir sākums, nevis beigas.",
+    "professional": "Profesionālis",
+    "company": "Uzņēmums",
+    "steps": {
+      "find": {
+        "label": "Atrast",
+        "worker": "Atrod darbu, kas atbilst tam, ko viņi patiesi darījuši",
+        "company": "Atrod cilvēkus, kuru īstais darbs atbilst vajadzībai"
+      },
+      "connect": {
+        "label": "Sazināties",
+        "worker": "Runā savā valodā",
+        "company": "Pieņem darbā ar īstu sarunu"
+      },
+      "work": {
+        "label": "Strādāt",
+        "worker": "Fiksē darbu, kamēr tas notiek",
+        "company": "Veic darbu kopā ar savējiem"
+      },
+      "verify": {
+        "label": "Apstiprināt",
+        "worker": "Vadītājs to apstiprina",
+        "company": "Apstiprina, kas patiesībā paveikts"
+      },
+      "grow": {
+        "label": "Augt",
+        "worker": "Apstiprinātais darbs kļūst par viņu vēsturi",
+        "company": "Pārskati veidojas no apstiprināta darba"
+      },
+      "continue": {
+        "label": "Turpināt",
+        "worker": "Ņem šo vēsturi līdzi uz nākamo darbu",
+        "company": "Plāno nākamo projektu ar cilvēkiem, ko pazīst"
+      }
+    }
+  },
+  "evidenceChain": {
+    "label": "Ieraksta statuss",
+    "own": "Jūsu",
+    "nodes": {
+      "recorded": "Reģistrēts",
+      "photo": "Foto",
+      "manager": "Vadītāja ieraksts",
+      "history": "Jūsu vēsturē"
+    },
+    "status": {
+      "done": "Ir",
+      "waiting": "Gaida",
+      "absent": "Vēl nē",
+      "attention": "Vajag jūs",
+      "unknown": "Nav zināms"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Dzīvais CV",
+    "title": "Jūsu darbs kļūst par jūsu stāstu",
+    "now": "Tagad",
+    "noRecords": "Darba ierakstu vēl nav",
+    "legend": {
+      "managerRecord": "Vadītāja ieraksts",
+      "recorded": "Jūsu veiktais ieraksts"
+    },
+    "skillsTitle": "Ko rāda jūsu darbs",
+    "next": {
+      "title": "Jūsu stāsts ceļo kopā ar jums",
+      "body": "Katrs darbs, ko ierakstāt, to papildina. Ņemiet to līdzi uz nākamo iespēju.",
+      "cta": "Skatīt, kurp varat doties"
+    }
+  },
+  "workContext": {
+    "title": "Jūsu darbs vienuviet",
+    "nodes": {
+      "current": "Strādā tagad",
+      "records": "Ieraksti",
+      "manager": "Vadītāja ieraksts",
+      "history": "Vēsture",
+      "skills": "Prasmes",
+      "next": "Tālāk"
+    },
+    "facts": {
+      "records": "{count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}",
+      "manager": "{count, plural, zero {# vadītāja ierakstu} one {# vadītāja ieraksts} other {# vadītāja ieraksti}}",
+      "history": "{count, plural, zero {# darbu} one {# darbs} other {# darbi}}",
+      "skills": "{count, plural, zero {# jūsu ierakstos balstītu prasmju} one {# jūsu ierakstos balstīta prasme} other {# jūsu ierakstos balstītas prasmes}}",
+      "next": "Kur varat doties"
     }
   }
 }

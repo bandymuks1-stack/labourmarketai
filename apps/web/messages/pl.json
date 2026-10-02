@@ -2224,7 +2224,8 @@
         "title": "Czeka na Twoją decyzję",
         "review": "Wpisy w dzienniku do przejrzenia",
         "invitations": "Oczekujące zaproszenia pracowników",
-        "claims": "Publiczne zgłoszenia zapotrzebowania, które możesz przejąć"
+        "claims": "Publiczne zgłoszenia zapotrzebowania, które możesz przejąć",
+        "reviewOff": "Pracownicy z zapisaną pracą, u których potwierdzanie jest wyłączone"
       }
     },
     "agency": {
@@ -7585,6 +7586,8 @@
     "skillsUnavailable": "Nie udało się teraz odczytać.",
     "verifiedUnavailable": "Nie udało się teraz odczytać umiejętności z wpisem kierownika.",
     "identity": {
+      "noRecords": "Brak jeszcze wpisów o pracy",
+      "noManagerRecord": "Brak jeszcze wpisu przełożonego",
       "currentWork": "Pracuje teraz",
       "recorded": "godz. zapisano",
       "confirmed": "godz. z wpisem przełożonego",
@@ -8342,7 +8345,7 @@
     "pickDemand": "Wybierz potrzebę",
     "noDemands": "Nie masz jeszcze żadnych potrzeb. Utwórz potrzebę z panelu — po przeglądzie zespół ustrukturyzuje jej wymagane umiejętności.",
     "noDemandsCta": "Utwórz potrzebę",
-    "unstructuredTag": "niestrukturyzowana",
+    "unstructuredTag": "wymagania niepotwierdzone",
     "notStructured": "Wymagane umiejętności tej potrzeby nie są jeszcze ustrukturyzowane, więc nie można obliczyć dopasowania. Nowe potrzeby są przeglądane i strukturyzowane przez administratorów — nie musisz nic robić.",
     "needsSetup": "Nie udało się wczytać. Spróbuj ponownie.",
     "noCandidates": "Brak jeszcze pasujących pracowników dla tej potrzeby. Dopasowania pojawiają się, gdy pracownicy dodają umiejętności potwierdzone dziennikiem — sprawdź później lub rozszerz potrzebę.",
@@ -8537,13 +8540,15 @@
       "cancel": "Anuluj"
     },
     "verdict": {
-      "eligible": "Spełnia podane wymagania",
+      "eligible": "Spełnia wymagania obowiązkowe (umiejętności oceniane osobno)",
       "blocked": "Nie spełnia podanego wymagania",
       "evidence": {
         "confirmed": "Dowody: potwierdzone przez menedżera",
         "mixed": "Dowody: częściowo potwierdzone",
         "unverified": "Dowody: tylko samodzielnie zadeklarowane"
-      }
+      },
+      "noCriteria": "Nie podano wymagań obowiązkowych",
+      "insufficient": "Za mało danych, aby sprawdzić wymagania"
     },
     "editNeedCta": "Dostosuj lub dodaj potrzebę",
     "availableSupply": {
@@ -8576,7 +8581,7 @@
         "shortlist": "Wybrani",
         "contact": "W kontakcie",
         "offer": "Zaproponowano",
-        "accepted": "Przyjęli",
+        "accepted": "Zgodzili się na terminy",
         "closed": "Zamknięte"
       }
     },
@@ -8586,7 +8591,8 @@
       "readiness": "Dostępność, gotowość i dokumenty",
       "openTo": "Otwarta także na: {countries}",
       "skillCount": "{matched} z {total} wymaganych umiejętności",
-      "nameHidden": "Imię i dane kontaktowe pojawiają się dopiero, gdy osoba na to pozwoli."
+      "nameHidden": "Imię i dane kontaktowe pojawiają się dopiero, gdy osoba na to pozwoli.",
+      "skillUnknown": "Nie podano umiejętności · potrzeba: {total}"
     }
   },
   "planBoundary": {
@@ -11896,7 +11902,7 @@
       "contacted": "Skontaktowano się",
       "interview": "W rozmowie",
       "offer": "Oferta",
-      "accepted": "Zaakceptowano",
+      "accepted": "Zgodził się na terminy",
       "rejected": "Odrzucono"
     },
     "action": {
@@ -11906,7 +11912,8 @@
       "continueConversation": "Kontynuuj rozmowę",
       "viewOffer": "Śledź odpowiedź na rezerwację",
       "planWork": "Przejrzyj zaakceptowaną rezerwację",
-      "reviewOthers": "Przejrzyj innych kandydatów"
+      "reviewOthers": "Przejrzyj innych kandydatów",
+      "assignToProject": "Przypisz do projektu"
     }
   },
   "agencyClients": {
@@ -13118,7 +13125,7 @@
       "offerTitle": "Oferta pracy",
       "confirmAcceptTitle": "Zaakceptować tę ofertę?",
       "confirmAcceptBody": "Zaakceptowanie potwierdza Twoje zaangażowanie wobec pracodawcy — to zdecydowany krok, nie wersja robocza.",
-      "confirmAcceptDisclosure": "Po zaakceptowaniu ta firma — i tylko ona — zobaczy Twoją kartę profilu: imię, umiejętności, zawody, języki i dostępność. Twoje dane kontaktowe pozostają prywatne, żaden inny pracodawca nie uzyskuje dostępu, a to nie dodaje Cię do wyszukiwania dla pracodawców. Dostęp trwa, dopóki zaangażowanie jest aktywne, i możesz go zakończyć w dowolnym momencie.",
+      "confirmAcceptDisclosure": "Akceptując, zgadzasz się na terminy podane w tej rezerwacji. To nie jest umowa o pracę i nie oznacza, że jesteś już zatrudniony — konkretny projekt lub miejsce firma ustala osobno. Po zaakceptowaniu ta firma — i tylko ona — zobaczy Twoją kartę profilu: imię, umiejętności, zawody, języki i dostępność. Twoje dane kontaktowe pozostają prywatne, żaden inny pracodawca nie uzyskuje dostępu, a to nie dodaje Cię do wyszukiwania dla pracodawców. Dostęp trwa, dopóki zaangażowanie jest aktywne, i możesz go zakończyć w dowolnym momencie.",
       "confirmDeclineTitle": "Odrzucić tę ofertę?",
       "confirmCta": "Tak, potwierdź",
       "cancelCta": "Anuluj",
@@ -14251,7 +14258,7 @@
       "candidatesBlocked": "Chwilowo niedostępne.",
       "candidatesNoDemands": "Twoja firma nie opisała jeszcze potrzeby.",
       "candidatesPickDemand": "Do której potrzeby rekrutujesz?",
-      "candidatesUnstructuredBadge": "niesustrukturyzowane",
+      "candidatesUnstructuredBadge": "wymagania niepotwierdzone",
       "candidatesBackToDemands": "Powrót do potrzeb",
       "candidatesNotFound": "Ta potrzeba nie została znaleziona albo nie jest Twoja.",
       "candidatesNeedsMigration": "Chwilowo niedostępne.",
@@ -17935,6 +17942,177 @@
       "done": "Przypisano wpisów: {count}; już przypisanych: {skipped}.",
       "refused": "Nie udało się zapisać. Nic nie zmieniono.",
       "person": "{hours} godz., {count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}"
+    }
+  },
+  "workLifecycle": {
+    "pending": "Jeszcze nie",
+    "title": "Co dzieje się z Twoją pracą",
+    "titleCompany": "Co dzieje się z pracą, którą prowadzisz",
+    "example": "Przykład — to nie jest prawdziwa osoba ani prawdziwe dane",
+    "hint": "Wybierz krok. Każdy krok otwiera prawdziwe miejsce w Twojej przestrzeni roboczej.",
+    "open": "Otwórz w przestrzeni roboczej",
+    "list": "Etapy cyklu życia pracy",
+    "workers": {
+      "person": {
+        "label": "Ty",
+        "fact": "Kucharz — tożsamość zawodowa",
+        "detail": "Jedna tożsamość zawodowa, która należy do Ciebie — niezwiązana z jednym pracodawcą."
+      },
+      "team": {
+        "label": "Zespół",
+        "fact": "Zespół kuchni",
+        "detail": "Dołączasz do prawdziwego zespołu — wiesz, z kim pracujesz i kto nim kieruje."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Start jesiennego menu",
+        "detail": "Praca należy do projektu, więc ma miejsce, cel i czas."
+      },
+      "work": {
+        "label": "Praca",
+        "fact": "Zmiana wieczorna — 8 godz.",
+        "detail": "Co zrobiono, kiedy i jak długo — zapisane na bieżąco."
+      },
+      "evidence": {
+        "label": "Dowód",
+        "fact": "Zdjęcie + wpis w dzienniku",
+        "detail": "Wykonana praca staje się dowodem, zamiast znikać."
+      },
+      "confirmation": {
+        "label": "Potwierdzone",
+        "fact": "Potwierdzone przez kierownika",
+        "detail": "Potwierdza to kierownik. Bez tego nic nie jest uznane za zweryfikowane."
+      },
+      "history": {
+        "label": "Historia",
+        "fact": "Dodano do Twojej historii",
+        "detail": "Potwierdzona praca buduje Twoją historię zawodową — zostaje z Tobą przy kolejnej pracy."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Zapotrzebowanie",
+        "fact": "4 kucharzy, od poniedziałku",
+        "detail": "Prawdziwe zapotrzebowanie podajesz raz: kto, gdzie i od kiedy."
+      },
+      "people": {
+        "label": "Ludzie",
+        "fact": "Pasujący profesjonaliści",
+        "detail": "Profesjonaliści, których prawdziwa historia pracy pasuje do zapotrzebowania — z tym, co zweryfikowane, a co jeszcze nie."
+      },
+      "team": {
+        "label": "Zespół",
+        "fact": "Zespół kuchni",
+        "detail": "Ludzie stają się zespołem z liderem, zmianami i miejscem pracy."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Start jesiennego menu",
+        "detail": "Zespoły są zorganizowane wokół projektu, który realizują."
+      },
+      "work": {
+        "label": "Praca",
+        "fact": "Zmiana wieczorna — 8 godz.",
+        "detail": "Praca jest zapisywana tam, gdzie się dzieje, a nie odtwarzana później."
+      },
+      "confirmation": {
+        "label": "Potwierdzone",
+        "fact": "Czeka na Twoje potwierdzenie",
+        "detail": "Widzisz, co jeszcze wymaga potwierdzenia, a co jest już gotowe."
+      },
+      "report": {
+        "label": "Raport",
+        "fact": "Raport z prawdziwej pracy",
+        "detail": "Raporty powstają z potwierdzonej pracy — nikt ich nie przepisuje."
+      }
+    }
+  },
+  "twoSides": {
+    "title": "Zatrudnienie to początek, nie koniec.",
+    "professional": "Fachowiec",
+    "company": "Firma",
+    "steps": {
+      "find": {
+        "label": "Znajdź",
+        "worker": "Znajduje pracę dopasowaną do tego, co naprawdę robił",
+        "company": "Znajduje ludzi, których faktyczna praca pasuje do potrzeby"
+      },
+      "connect": {
+        "label": "Połącz się",
+        "worker": "Rozmawia we własnym języku",
+        "company": "Zatrudnia przez prawdziwą rozmowę"
+      },
+      "work": {
+        "label": "Pracuj",
+        "worker": "Zapisuje pracę na bieżąco",
+        "company": "Prowadzi pracę ze swoimi ludźmi"
+      },
+      "verify": {
+        "label": "Potwierdź",
+        "worker": "Przełożony to potwierdza",
+        "company": "Potwierdza, co naprawdę zrobiono"
+      },
+      "grow": {
+        "label": "Rozwijaj się",
+        "worker": "Potwierdzona praca staje się jego historią",
+        "company": "Raporty powstają z potwierdzonej pracy"
+      },
+      "continue": {
+        "label": "Kontynuuj",
+        "worker": "Zabiera tę historię do następnej pracy",
+        "company": "Planuje kolejny projekt z ludźmi, których zna"
+      }
+    }
+  },
+  "evidenceChain": {
+    "label": "Status wpisu",
+    "own": "Twoje",
+    "nodes": {
+      "recorded": "Zapisano",
+      "photo": "Zdjęcie",
+      "manager": "Zapis kierownika",
+      "history": "W Twojej historii"
+    },
+    "status": {
+      "done": "Jest",
+      "waiting": "Czeka",
+      "absent": "Jeszcze nie",
+      "attention": "Czeka na Ciebie",
+      "unknown": "Nieznany"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Żywe CV",
+    "title": "Twoja praca staje się Twoją historią",
+    "now": "Teraz",
+    "noRecords": "Brak jeszcze wpisów o pracy",
+    "legend": {
+      "managerRecord": "Wpis przełożonego",
+      "recorded": "Wpisane przez Ciebie"
+    },
+    "skillsTitle": "Co pokazuje Twoja praca",
+    "next": {
+      "title": "Twoja historia idzie z Tobą",
+      "body": "Każda praca, którą zapiszesz, ją uzupełnia. Zabierz ją na następną okazję.",
+      "cta": "Zobacz, dokąd możesz pójść"
+    }
+  },
+  "workContext": {
+    "title": "Twoja praca w jednym miejscu",
+    "nodes": {
+      "current": "Pracuje teraz",
+      "records": "Wpisy",
+      "manager": "Wpis kierownika",
+      "history": "Historia",
+      "skills": "Umiejętności",
+      "next": "Dalej"
+    },
+    "facts": {
+      "records": "{count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}",
+      "manager": "{count, plural, one {# wpis kierownika} few {# wpisy kierownika} many {# wpisów kierownika} other {# wpisu kierownika}}",
+      "history": "{count, plural, one {# praca} few {# prace} many {# prac} other {# pracy}}",
+      "skills": "{count, plural, one {# umiejętność oparta na Twoich wpisach} few {# umiejętności oparte na Twoich wpisach} many {# umiejętności opartych na Twoich wpisach} other {# umiejętności opartej na Twoich wpisach}}",
+      "next": "Dokąd możesz przejść"
     }
   }
 }
