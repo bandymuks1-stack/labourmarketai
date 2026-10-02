@@ -11027,9 +11027,12 @@
       "limit_reached": "Pasiektas atvirų užduočių limitas — pirmiausia užbaikite ar atšaukite senesnes.",
       "error": "Nepavyko išsaugoti. Pabandykite dar kartą.",
       "cycle": "Taip susidarytų ratas — užduotis negali laukti pati savęs per kitas užduotis.",
+      "invalid_structure": "Šis etapas ar pagrindinė užduotis čia netinka (turi būti to paties projekto, be ciklų ir ne giliau nei trys lygiai).",
       "evidence_linked": "Įrodymas susietas su užduotimi.",
       "evidence_unlinked": "Susiejimas atšauktas. Pats įrašas nepakito.",
-      "approval_requested": "Išsiųsta tvirtinti."
+      "approval_requested": "Išsiųsta tvirtinti.",
+      "relink_required": "Prie šios užduoties jau pridėti žurnalo įrodymai, todėl jos etapo pakeisti negalima. Pirmiausia atsekite įrodymus, tada perkelkite užduotį.",
+      "evidence_mismatch": "Šis žurnalo įrašas priklauso kitam projektui ar organizacijai nei užduotis, todėl jo pridėti negalima."
     },
     "projectTasks": {
       "title": "Projekto užduotys",
@@ -11114,6 +11117,35 @@
         "withdrawn": "Atšaukta",
         "cancelled": "Nutraukta"
       }
+    },
+    "structure": {
+      "subtask": "Použduotis",
+      "stageLabel": "Etapas",
+      "stageNone": "Be etapo",
+      "parentLabel": "Pagrindinė užduotis",
+      "parentNone": "Be pagrindinės (aukščiausio lygio užduotis)",
+      "parentHint": "Použduotis seka savo pagrindinės užduoties etapą. Iki trijų lygių.",
+      "parentHidden": "Pagrindinė užduotis (jums nematoma)",
+      "createHint": "Norėdami užduotį priskirti etapui ar pagrindinei užduočiai, pirmiausia atidarykite projekto užduotis (projekto filtras).",
+      "filterLabel": "Filtruoti pagal etapą",
+      "filterAll": "Visi etapai",
+      "unstaged": "Be etapo",
+      "stageEmpty": "Šiame etape užduočių dar nėra.",
+      "stageStatus": {
+        "planned": "Planuojama",
+        "in_progress": "Vykdoma",
+        "blocked": "Užblokuota",
+        "done": "Atlikta",
+        "cancelled": "Atšaukta"
+      },
+      "suggest": {
+        "open_work_in_done_stage": "Etapas pažymėtas kaip atliktas, bet dar yra neužbaigtų užduočių. Apsvarstykite būseną: {status}. (Tik pasiūlymas - nieko automatiškai nekeičiama.)",
+        "all_done": "Visos šio etapo užduotys atliktos. Apsvarstykite etapo būseną: {status}. (Tik pasiūlymas.)",
+        "has_blocked": "Viena šio etapo užduotis užblokuota. Apsvarstykite etapo būseną: {status}. (Tik pasiūlymas.)",
+        "work_started": "Šio etapo darbai prasidėjo. Apsvarstykite būseną: {status}. (Tik pasiūlymas.)"
+      },
+      "attributionConflict": "Priskyrimo konfliktas: šis įrašas priklauso kitam projektui nei užduotis",
+      "evidenceRollup": "Įrodymai: {entries} įrašų įskaityta ({conflicts} konfliktų ir {ambiguous} keliom užduotims priskirtų įrašų neįskaityta)"
     }
   },
   "assist": {

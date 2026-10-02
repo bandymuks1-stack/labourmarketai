@@ -1521,6 +1521,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261001180000_public_vacancy_board_no_parallel_v1.sql",
       "20261001180100_drop_unused_vacancy_fulltext_gin_v1.sql",
       "20261002120000_journal_explicit_project_attribution_v1.sql",
+      // stage/subtask structure on work_tasks: RED draft, needs-human-gate.
+      "20261002150000_work_tasks_stage_and_subtask_v1.sql",
 ]);
   });
 

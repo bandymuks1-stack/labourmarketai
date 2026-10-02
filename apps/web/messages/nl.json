@@ -11027,9 +11027,12 @@
       "limit_reached": "Limiet voor open taken bereikt — rond eerst oudere taken af of annuleer ze.",
       "error": "Opslaan mislukt. Probeer het opnieuw.",
       "cycle": "Dat zou een lus maken — een taak kan niet via andere taken op zichzelf wachten.",
+      "invalid_structure": "Deze fase of bovenliggende taak is hier niet geldig (zelfde project, geen lussen, maximaal drie niveaus).",
       "evidence_linked": "Bewijs aan de taak gekoppeld.",
       "evidence_unlinked": "Koppeling ingetrokken. Het record zelf is ongewijzigd.",
-      "approval_requested": "Ter goedkeuring verstuurd."
+      "approval_requested": "Ter goedkeuring verstuurd.",
+      "relink_required": "Aan deze taak hangt al journaalbewijs, dus de fase kan niet veranderen. Ontkoppel eerst het bewijs en verplaats daarna de taak.",
+      "evidence_mismatch": "Dit journaalitem hoort bij een ander project of een andere organisatie dan de taak en kan niet worden gekoppeld."
     },
     "projectTasks": {
       "title": "Projecttaken",
@@ -11114,6 +11117,35 @@
         "withdrawn": "Ingetrokken",
         "cancelled": "Geannuleerd"
       }
+    },
+    "structure": {
+      "subtask": "Subtaak",
+      "stageLabel": "Fase",
+      "stageNone": "Geen fase",
+      "parentLabel": "Bovenliggende taak",
+      "parentNone": "Geen (taak op het hoogste niveau)",
+      "parentHint": "Een subtaak volgt de fase van de bovenliggende taak. Maximaal drie niveaus.",
+      "parentHidden": "Bovenliggende taak (niet zichtbaar voor u)",
+      "createHint": "Om een taak aan een fase of bovenliggende taak te koppelen, opent u eerst de taken van een project (projectfilter).",
+      "filterLabel": "Filteren op fase",
+      "filterAll": "Alle fasen",
+      "unstaged": "Geen fase",
+      "stageEmpty": "Nog geen taken in deze fase.",
+      "stageStatus": {
+        "planned": "Gepland",
+        "in_progress": "In uitvoering",
+        "blocked": "Geblokkeerd",
+        "done": "Klaar",
+        "cancelled": "Geannuleerd"
+      },
+      "suggest": {
+        "open_work_in_done_stage": "Deze fase is als klaar gemarkeerd, maar er staan nog taken open. Overweeg de status {status}. (Alleen een suggestie - er verandert niets automatisch.)",
+        "all_done": "Alle taken in deze fase zijn klaar. Overweeg de fasestatus {status}. (Alleen een suggestie.)",
+        "has_blocked": "Een taak in deze fase is geblokkeerd. Overweeg de fasestatus {status}. (Alleen een suggestie.)",
+        "work_started": "Het werk aan deze fase is begonnen. Overweeg de status {status}. (Alleen een suggestie.)"
+      },
+      "attributionConflict": "Toewijzingsconflict: dit item hoort bij een ander project dan de taak",
+      "evidenceRollup": "Bewijs: {entries} items geteld ({conflicts} conflicten en {ambiguous} items met meerdere taken niet geteld)"
     }
   },
   "assist": {

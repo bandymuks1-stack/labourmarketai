@@ -126,6 +126,11 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
   // sibling. Nothing else in the repo may (re)define the table or the RPCs.
   const D2 = "20260711210000_work_tasks_v1";
   const TRAIN_D = "20260817151000_work_tasks_v2_collaboration";
+  // Stage / subtask structure (20261002150000): the third and last pair that
+  // may touch work_tasks — adds stage_id / parent_task_id and re-issues the two
+  // v2 RPCs with optional parameters. Pinned in
+  // work-tasks-stage-subtask-migration.test.ts.
+  const STAGE_SUBTASK = "20261002150000_work_tasks_stage_and_subtask_v1";
   // Train G (employee lifecycle) is a sanctioned READER, not a definer: its
   // onboarding item link-verification SELECTs from work_tasks (assignee +
   // status='done') and never creates/alters/drops the table or touches the
@@ -193,7 +198,7 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
       const abs = join(REPO, "supabase", dir);
       if (!existsSync(abs)) continue;
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
-        if (f.startsWith(D2) || f.startsWith(TRAIN_D)) continue;
+        if (f.startsWith(D2) || f.startsWith(TRAIN_D) || f.startsWith(STAGE_SUBTASK)) continue;
         const src = readFileSync(join(abs, f), "utf8");
         if (CONSUMERS.some((c) => f.startsWith(c))) {
           // A consumer may reference the table, and NOTHING more.

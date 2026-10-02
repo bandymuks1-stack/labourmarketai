@@ -114,6 +114,45 @@ export async function updateStageStatusAction(input: {
   return { ok: true };
 }
 
+/**
+ * Name (or clear) the party responsible for a stage —
+ * set_project_stage_responsible_v1 (20261002150000). The RPC re-checks
+ * can_manage_project and that the engagement is ACTIVE in the project's own
+ * organization. Absent RPC (42883 / PGRST202) → needs_migration, never a crash.
+ */
+export async function setStageResponsibleAction(input: {
+  stageId: string;
+  /** engagement_contexts.id, or empty/null to clear. */
+  engagementId?: string | null;
+}): Promise<StageActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, code: "auth" };
+
+  const stageId = input.stageId?.trim();
+  const engagementId = (input.engagementId ?? "").trim();
+  const UUID =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!stageId || !UUID.test(stageId)) return { ok: false, code: "invalid" };
+  if (engagementId && !UUID.test(engagementId)) return { ok: false, code: "invalid" };
+
+  const { error } = await asAny(supabase).rpc("set_project_stage_responsible_v1", {
+    p_stage_id: stageId,
+    p_engagement_id: engagementId || null,
+  });
+  if (error) {
+    if (error.code === "PGRST202") return { ok: false, code: "needs_migration" };
+    if ((error.message ?? "").toLowerCase().includes("does not belong")) {
+      return { ok: false, code: "invalid" };
+    }
+    return mapError(error);
+  }
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
 export async function deleteStageAction(input: {
   stageId: string;
 }): Promise<StageActionResult> {
