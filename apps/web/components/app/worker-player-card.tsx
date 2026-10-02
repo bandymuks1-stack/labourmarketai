@@ -25,7 +25,6 @@ import { deriveWorkHistoryTimeline } from "@/lib/player-card/evidence-visuals";
 import {
   deriveWorkerReadiness,
   missingReadinessPillars,
-  type ReadinessLevel,
 } from "@/lib/player-card/readiness";
 import { buildPlayerCardMinimum } from "@/lib/identity/player-card-minimum";
 import { ProvenanceEdge, ProvenanceLine } from "@/components/app/provenance/provenance-edge";
