@@ -8140,7 +8140,7 @@
     },
     "claimFromJournal": "from work journal",
     "recordedHours": "Recorded work: {hours} h from the work journal, {confirmed} h of it confirmed.",
-    "confirmedWorkFact": "Confirmed by work: {entries, plural, one {# entry} other {# entries}} over {days, plural, one {# work day} other {# work days}}",
+    "confirmedWorkFact": "Work journal entries confirmed by others: {entries, plural, one {# entry} other {# entries}} over {days, plural, one {# work day} other {# work days}}",
     "recordedHoursNone": "No journal entries with a duration yet — hours next to skills come from your own entries.",
     "skillHours": "{hours} h",
     "skillHoursOwn": "{hours} h, your own record",

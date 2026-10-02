@@ -8140,7 +8140,7 @@
     },
     "claimFromJournal": "uit het werkjournaal",
     "recordedHours": "Vastgelegd werk: {hours} u uit het werkjournaal, waarvan {confirmed} u bevestigd.",
-    "confirmedWorkFact": "Bevestigd door werk: {entries, plural, one {# registratie} other {# registraties}} over {days, plural, one {# werkdag} other {# werkdagen}}",
+    "confirmedWorkFact": "Door anderen bevestigde werkjournaal-registraties: {entries, plural, one {# registratie} other {# registraties}} over {days, plural, one {# werkdag} other {# werkdagen}}",
     "recordedHoursNone": "Nog geen journaalregistraties met een duur — uren naast vaardigheden komen uit je eigen registraties.",
     "skillHours": "{hours} u",
     "skillHoursOwn": "{hours} u, uw eigen registratie",

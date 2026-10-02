@@ -8140,7 +8140,7 @@
     },
     "claimFromJournal": "z dziennika pracy",
     "recordedHours": "Zarejestrowana praca: {hours} h z dziennika pracy, w tym {confirmed} h potwierdzonych.",
-    "confirmedWorkFact": "Potwierdzone pracą: {entries, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}} z {days, plural, one {# dnia roboczego} other {# dni roboczych}}",
+    "confirmedWorkFact": "Wpisy dziennika pracy potwierdzone przez innych: {entries, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}} z {days, plural, one {# dnia roboczego} other {# dni roboczych}}",
     "recordedHoursNone": "Brak jeszcze wpisów w dzienniku z czasem trwania — godziny przy umiejętnościach pochodzą z Twoich własnych wpisów.",
     "skillHours": "{hours} h",
     "skillHoursOwn": "{hours} h, Twój własny zapis",

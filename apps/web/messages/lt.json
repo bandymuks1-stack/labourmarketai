@@ -8140,7 +8140,7 @@
     },
     "claimFromJournal": "iš darbo įrašo",
     "recordedHours": "Užfiksuota darbo: {hours} val. iš darbo žurnalo, iš jų patvirtinta {confirmed} val.",
-    "confirmedWorkFact": "Darbu patvirtinta: {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}} per {days, plural, one {# darbo dieną} few {# darbo dienas} other {# darbo dienų}}",
+    "confirmedWorkFact": "Kitų patvirtinti darbo žurnalo įrašai: {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}} per {days, plural, one {# darbo dieną} few {# darbo dienas} other {# darbo dienų}}",
     "recordedHoursNone": "Darbo žurnale dar nėra įrašų su trukme — valandos prie įgūdžių atsiras iš jūsų įrašų.",
     "skillHours": "{hours} val.",
     "skillHoursOwn": "{hours} val., jūsų pačių įrašas",

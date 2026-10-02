@@ -8140,7 +8140,7 @@
     },
     "claimFromJournal": "из рабочей записи",
     "recordedHours": "Записанная работа: {hours} ч из рабочего журнала, из них подтверждено {confirmed} ч.",
-    "confirmedWorkFact": "Подтверждено работой: {entries, plural, one {# запись} few {# записи} many {# записей} other {# записи}} за {days, plural, one {# рабочий день} few {# рабочих дня} many {# рабочих дней} other {# рабочего дня}}",
+    "confirmedWorkFact": "Записи рабочего журнала, подтверждённые другими: {entries, plural, one {# запись} few {# записи} many {# записей} other {# записи}} за {days, plural, one {# рабочий день} few {# рабочих дня} many {# рабочих дней} other {# рабочего дня}}",
     "recordedHoursNone": "В журнале пока нет записей с длительностью — часы рядом с навыками появятся из ваших записей.",
     "skillHours": "{hours} ч",
     "skillHoursOwn": "{hours} ч, ваша собственная запись",
