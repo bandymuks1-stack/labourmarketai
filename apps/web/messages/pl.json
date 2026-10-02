@@ -17933,5 +17933,42 @@
       "refused": "Nie udało się zapisać. Nic nie zmieniono.",
       "person": "{hours} godz., {count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}"
     }
+  },
+  "twoSides": {
+    "title": "Zatrudnienie to początek, nie koniec.",
+    "professional": "Fachowiec",
+    "company": "Firma",
+    "steps": {
+      "find": {
+        "label": "Znajdź",
+        "worker": "Znajduje pracę dopasowaną do tego, co naprawdę robił",
+        "company": "Znajduje ludzi, których faktyczna praca pasuje do potrzeby"
+      },
+      "connect": {
+        "label": "Połącz się",
+        "worker": "Rozmawia we własnym języku",
+        "company": "Zatrudnia przez prawdziwą rozmowę"
+      },
+      "work": {
+        "label": "Pracuj",
+        "worker": "Zapisuje pracę na bieżąco",
+        "company": "Prowadzi pracę ze swoimi ludźmi"
+      },
+      "verify": {
+        "label": "Potwierdź",
+        "worker": "Przełożony to potwierdza",
+        "company": "Potwierdza, co naprawdę zrobiono"
+      },
+      "grow": {
+        "label": "Rozwijaj się",
+        "worker": "Potwierdzona praca staje się jego historią",
+        "company": "Raporty powstają z potwierdzonej pracy"
+      },
+      "continue": {
+        "label": "Kontynuuj",
+        "worker": "Zabiera tę historię do następnej pracy",
+        "company": "Planuje kolejny projekt z ludźmi, których zna"
+      }
+    }
   }
 }

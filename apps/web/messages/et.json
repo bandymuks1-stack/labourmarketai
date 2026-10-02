@@ -6877,5 +6877,42 @@
       "refused": "Salvestamine ebaõnnestus. Midagi ei muudetud.",
       "person": "{hours} h, {count, plural, one {# kirje} other {# kirjet}}"
     }
+  },
+  "twoSides": {
+    "title": "Tööle võtmine on algus, mitte lõpp.",
+    "professional": "Tööline",
+    "company": "Ettevõte",
+    "steps": {
+      "find": {
+        "label": "Leia",
+        "worker": "Leiab töö, mis sobib sellega, mida nad päriselt tegid",
+        "company": "Leiab inimesi, kelle tegelik töö vastab vajadusele"
+      },
+      "connect": {
+        "label": "Ühenda",
+        "worker": "Räägib oma keeles",
+        "company": "Võtab tööle päris vestluse kaudu"
+      },
+      "work": {
+        "label": "Tööta",
+        "worker": "Salvestab töö siis, kui see toimub",
+        "company": "Teeb tööd koos oma inimestega"
+      },
+      "verify": {
+        "label": "Kinnita",
+        "worker": "Juht kinnitab selle",
+        "company": "Kinnitab, mis päriselt tehti"
+      },
+      "grow": {
+        "label": "Kasva",
+        "worker": "Kinnitatud töö saab nende ajalooks",
+        "company": "Aruanded tulevad kinnitatud tööst"
+      },
+      "continue": {
+        "label": "Jätka",
+        "worker": "Viib selle ajaloo järgmisele tööle kaasa",
+        "company": "Planeerib järgmise projekti tuttavate inimestega"
+      }
+    }
   }
 }

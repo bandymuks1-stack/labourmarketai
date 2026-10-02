@@ -6877,5 +6877,42 @@
       "refused": "Neizdevās saglabāt. Nekas nav mainīts.",
       "person": "{hours} h, {count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}"
     }
+  },
+  "twoSides": {
+    "title": "Pieņemšana darbā ir sākums, nevis beigas.",
+    "professional": "Profesionālis",
+    "company": "Uzņēmums",
+    "steps": {
+      "find": {
+        "label": "Atrast",
+        "worker": "Atrod darbu, kas atbilst tam, ko viņi patiesi darījuši",
+        "company": "Atrod cilvēkus, kuru īstais darbs atbilst vajadzībai"
+      },
+      "connect": {
+        "label": "Sazināties",
+        "worker": "Runā savā valodā",
+        "company": "Pieņem darbā ar īstu sarunu"
+      },
+      "work": {
+        "label": "Strādāt",
+        "worker": "Fiksē darbu, kamēr tas notiek",
+        "company": "Veic darbu kopā ar savējiem"
+      },
+      "verify": {
+        "label": "Apstiprināt",
+        "worker": "Vadītājs to apstiprina",
+        "company": "Apstiprina, kas patiesībā paveikts"
+      },
+      "grow": {
+        "label": "Augt",
+        "worker": "Apstiprinātais darbs kļūst par viņu vēsturi",
+        "company": "Pārskati veidojas no apstiprināta darba"
+      },
+      "continue": {
+        "label": "Turpināt",
+        "worker": "Ņem šo vēsturi līdzi uz nākamo darbu",
+        "company": "Plāno nākamo projektu ar cilvēkiem, ko pazīst"
+      }
+    }
   }
 }

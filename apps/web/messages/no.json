@@ -6877,5 +6877,42 @@
       "refused": "Dette kunne ikke lagres. Ingenting er endret.",
       "person": "{hours} t, {count, plural, one {# post} other {# poster}}"
     }
+  },
+  "twoSides": {
+    "title": "Ansettelse er starten, ikke slutten.",
+    "professional": "Fagperson",
+    "company": "Bedrift",
+    "steps": {
+      "find": {
+        "label": "Finn",
+        "worker": "Finner arbeid som passer med det de faktisk har gjort",
+        "company": "Finner folk hvis faktiske arbeid passer behovet"
+      },
+      "connect": {
+        "label": "Koble",
+        "worker": "Snakker på sitt eget språk",
+        "company": "Ansetter gjennom en ekte samtale"
+      },
+      "work": {
+        "label": "Jobb",
+        "worker": "Registrerer arbeidet mens det skjer",
+        "company": "Driver arbeidet sammen med folkene sine"
+      },
+      "verify": {
+        "label": "Bekreft",
+        "worker": "En leder bekrefter det",
+        "company": "Bekrefter hva som faktisk ble gjort"
+      },
+      "grow": {
+        "label": "Vokse",
+        "worker": "Bekreftet arbeid blir historikken deres",
+        "company": "Rapporter bygger på bekreftet arbeid"
+      },
+      "continue": {
+        "label": "Fortsett",
+        "worker": "Tar historikken med til neste jobb",
+        "company": "Planlegger neste prosjekt med folk de kjenner"
+      }
+    }
   }
 }

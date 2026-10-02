@@ -6877,5 +6877,42 @@
       "refused": "Dette kunne ikke gemmes. Intet er ændret.",
       "person": "{hours} t, {count, plural, one {# post} other {# poster}}"
     }
+  },
+  "twoSides": {
+    "title": "Ansættelse er begyndelsen, ikke enden.",
+    "professional": "Fagperson",
+    "company": "Virksomhed",
+    "steps": {
+      "find": {
+        "label": "Find",
+        "worker": "Finder arbejde, der passer til det, de rent faktisk har lavet",
+        "company": "Finder folk, hvis faktiske arbejde passer til behovet"
+      },
+      "connect": {
+        "label": "Forbind",
+        "worker": "Taler på deres eget sprog",
+        "company": "Ansætter gennem en ægte samtale"
+      },
+      "work": {
+        "label": "Arbejd",
+        "worker": "Registrerer arbejdet, mens det sker",
+        "company": "Driver arbejdet sammen med sine folk"
+      },
+      "verify": {
+        "label": "Bekræft",
+        "worker": "En leder bekræfter det",
+        "company": "Bekræfter, hvad der rent faktisk blev udført"
+      },
+      "grow": {
+        "label": "Vokse",
+        "worker": "Bekræftet arbejde bliver deres historik",
+        "company": "Rapporter bygger på bekræftet arbejde"
+      },
+      "continue": {
+        "label": "Fortsæt",
+        "worker": "Tager historikken med til næste job",
+        "company": "Planlægger næste projekt med folk, de kender"
+      }
+    }
   }
 }
