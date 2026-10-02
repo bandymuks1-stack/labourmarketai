@@ -65,13 +65,13 @@ describe("the fact strip", () => {
   it("nothing recorded / not read → ONE absent state in words, never three zeros", () => {
     for (const allTime of [totals({}), null]) {
       const f = buildIdentityFacts({ allTime, truncated: false, locale: "en", t });
-      expect(f.map((x) => [x.value, x.label])).toEqual([[null, "noEvidence"]]);
+      expect(f.map((x) => [x.value, x.label])).toEqual([[null, "noRecords"]]);
     }
   });
 
-  it("recorded but nothing confirmed yet → 'not yet confirmed', never '0 confirmed'", () => {
+  it("recorded but nothing confirmed yet → 'no manager record yet', never '0 confirmed'", () => {
     const f = buildIdentityFacts({ allTime: totals({ hours: 8, daysWorked: 1 }), truncated: false, locale: "en", t });
-    expect(f.find((x) => x.testid === "player-card-fact-confirmed")).toMatchObject({ value: null, label: "notYetConfirmed" });
+    expect(f.find((x) => x.testid === "player-card-fact-confirmed")).toMatchObject({ value: null, label: "noManagerRecord" });
     expect(f.map((x) => x.value)).not.toContain("0");
   });
 });

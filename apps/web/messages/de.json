@@ -7585,8 +7585,8 @@
     "skillsUnavailable": "Konnte gerade nicht gelesen werden.",
     "verifiedUnavailable": "Fähigkeiten mit Eintrag einer Führungskraft konnten gerade nicht gelesen werden.",
     "identity": {
-      "noEvidence": "Noch keine erfassten Nachweise",
-      "notYetConfirmed": "Noch nicht bestätigt",
+      "noRecords": "Noch keine Arbeitseinträge",
+      "noManagerRecord": "Noch kein Eintrag der Führungskraft",
       "currentWork": "Arbeitet derzeit",
       "recorded": "Std. erfasst",
       "confirmed": "Std. mit Eintrag der Leitung",

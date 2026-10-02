@@ -22,7 +22,7 @@ export function buildIdentityFacts({
   readonly locale: string;
   /** Translator bound to the `playerCard.identity` namespace. */
   readonly t: (
-    key: "recorded" | "confirmed" | "days" | "noEvidence" | "notYetConfirmed",
+    key: "recorded" | "confirmed" | "days" | "noRecords" | "noManagerRecord",
     values?: { count: number },
   ) => string;
 }): IdentityFact[] {
@@ -30,7 +30,7 @@ export function buildIdentityFacts({
   // absent state — never three zeros, and never a silent gap that makes the
   // person look empty.
   if (!allTime || (allTime.hours <= 0 && allTime.daysWorked <= 0)) {
-    return [{ value: null, label: t("noEvidence"), tone: "neutral", testid: "player-card-fact-none" }];
+    return [{ value: null, label: t("noRecords"), tone: "neutral", testid: "player-card-fact-none" }];
   }
   const n = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
   const atLeast = truncated ? "≥ " : "";
@@ -52,7 +52,7 @@ export function buildIdentityFacts({
         }
       : {
           value: null,
-          label: t("notYetConfirmed"),
+          label: t("noManagerRecord"),
           tone: "neutral",
           testid: "player-card-fact-confirmed",
         },

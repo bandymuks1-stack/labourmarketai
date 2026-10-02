@@ -2420,8 +2420,8 @@
       "link": "Present a candidate"
     },
     "identity": {
-      "noEvidence": "Pagaidām nav reģistrētu pierādījumu",
-      "notYetConfirmed": "Vēl nav apstiprināts",
+      "noRecords": "Darba ierakstu vēl nav",
+      "noManagerRecord": "Vadītāja ieraksta vēl nav",
       "why": "Kāpēc šī persona ir piemērota",
       "skills": "Atbilstošās prasmes un uz ko tās balstās",
       "readiness": "Pieejamība, gatavība un dokumenti",

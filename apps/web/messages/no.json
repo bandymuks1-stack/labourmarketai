@@ -2420,8 +2420,8 @@
       "link": "Present a candidate"
     },
     "identity": {
-      "noEvidence": "Ingen registrerte bevis ennå",
-      "notYetConfirmed": "Ikke bekreftet ennå",
+      "noRecords": "Ingen arbeidsregistreringer ennå",
+      "noManagerRecord": "Ingen registrering fra lederen ennå",
       "why": "Hvorfor denne personen er relevant",
       "skills": "Relevante ferdigheter og hva de bygger på",
       "readiness": "Tilgjengelighet, beredskap og dokumenter",

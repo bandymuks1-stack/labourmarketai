@@ -7585,8 +7585,8 @@
     "skillsUnavailable": "Nie udało się teraz odczytać.",
     "verifiedUnavailable": "Nie udało się teraz odczytać umiejętności z wpisem kierownika.",
     "identity": {
-      "noEvidence": "Brak zapisanych dowodów",
-      "notYetConfirmed": "Jeszcze niepotwierdzone",
+      "noRecords": "Brak jeszcze wpisów o pracy",
+      "noManagerRecord": "Brak jeszcze wpisu przełożonego",
       "currentWork": "Pracuje teraz",
       "recorded": "godz. zapisano",
       "confirmed": "godz. z wpisem przełożonego",
