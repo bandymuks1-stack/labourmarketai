@@ -16561,7 +16561,8 @@
       "needsMigration": "Chwilowo niedostępne.",
       "noCompany": "Przełącz się na przestrzeń roboczą firmy.",
       "noObjects": "Nie ma jeszcze budów, na które można zapisać dzisiejsze godziny.",
-      "error": "Nie udało się wczytać tego dnia."
+      "error": "Nie udało się wczytać tego dnia.",
+      "noCompanyJournalLink": "Otwórz dziennik pracy"
     },
     "import": {
       "entryLink": "Importuj godziny z arkusza (.xlsx)",

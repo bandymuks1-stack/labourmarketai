@@ -16561,7 +16561,8 @@
       "needsMigration": "Momenteel niet beschikbaar.",
       "noCompany": "Schakel over naar een bedrijfswerkruimte.",
       "noObjects": "Er zijn nog geen locaties om de uren van vandaag aan te koppelen.",
-      "error": "Kon deze dag niet laden."
+      "error": "Kon deze dag niet laden.",
+      "noCompanyJournalLink": "Open het werklogboek"
     },
     "import": {
       "entryLink": "Uren importeren uit een spreadsheet (.xlsx)",
