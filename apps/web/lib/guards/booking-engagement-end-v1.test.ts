@@ -1521,6 +1521,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261001180000_public_vacancy_board_no_parallel_v1.sql",
       "20261001180100_drop_unused_vacancy_fulltext_gin_v1.sql",
       "20261002120000_journal_explicit_project_attribution_v1.sql",
+      // universal marketplace (draft RED PR, owner approval PENDING): marker only so CI reaches the human gate; NOT applied.
+      "20261002170000_marketplace_index_v1.sql",
 ]);
   });
 
