@@ -173,6 +173,37 @@ export interface LearningCompass {
   readonly nextSteps: readonly CompassNextStep[];
 }
 
+/**
+ * WHAT THE PERSON CAN DO ABOUT A RECOMMENDATION — navigation to a real surface,
+ * never an automatic act. No apply, no contact, no skill or evidence is created
+ * from here; the person does that where it already lives.
+ *
+ *   demand_missing        → the opportunity board, narrowed to the role that
+ *                           asked (the board shows only what this person may
+ *                           see, so a demand that is no longer visible simply
+ *                           is not there — no broken door);
+ *   demand_weak_evidence  → the work journal: the way to back a declared skill
+ *                           with real work. NOT "apply to the opportunity";
+ *   profession_gap        → the profile, where skills and direction are edited.
+ */
+export type CompassRecommendationAction =
+  | { readonly kind: "opportunities"; readonly professionSlug: string | null }
+  | { readonly kind: "journal" }
+  | { readonly kind: "profile" };
+
+export function recommendationNextAction(
+  r: Pick<CompassRecommendation, "basis" | "sources">,
+): CompassRecommendationAction {
+  switch (r.basis) {
+    case "demand_missing":
+      return { kind: "opportunities", professionSlug: r.sources[0]?.roleSlug ?? null };
+    case "demand_weak_evidence":
+      return { kind: "journal" };
+    case "profession_gap":
+      return { kind: "profile" };
+  }
+}
+
 const MAX_FITS = 3;
 const MAX_MISSING = 5;
 const MAX_RECOMMENDATIONS = 6;
