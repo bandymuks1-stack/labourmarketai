@@ -42,6 +42,7 @@ for (const s of SURFACES) {
     test(`${s.path} @${v.name}: signature visual, no overflow, axe`, async ({ page }, testInfo) => {
       await page.setViewportSize({ width: v.width, height: v.height });
       await page.goto(s.path, { waitUntil: "load" });
+      await page.waitForLoadState("networkidle"); // streamed Suspense chunks settle
       const visual = page.getByTestId(s.testid);
       await expect(visual).toBeVisible({ timeout: 30_000 });
       await visual.scrollIntoViewIfNeeded();
@@ -65,3 +66,59 @@ for (const s of SURFACES) {
     });
   }
 }
+
+/**
+ * THE LIFECYCLE GRAPH — behaviour, not just presence (premium completion §18):
+ * keyboard operation, selected state, visible focus, non-colour state, and
+ * reduced motion.
+ */
+test.describe("lifecycle graph accessibility", () => {
+  // `page.emulateMedia` (not `test.use`): the fixture option did not take effect
+  // in this setup, which silently left animations running.
+  test.beforeEach(async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+  });
+
+  test("reduced motion: no auto-play — the whole record is present immediately", async ({ page }) => {
+    await page.goto("/en/for-workers", { waitUntil: "load" });
+    const record = page.getByTestId("work-lifecycle-workers-record");
+    await expect(record).toBeVisible({ timeout: 30_000 });
+    // Every row is filled at once; nothing is left to a timer.
+    await expect(record.locator('li[data-state="filled"]')).toHaveCount(7);
+    await expect(record.locator('li[data-state="pending"]')).toHaveCount(0);
+  });
+
+  test("keyboard: stages are buttons, Enter selects, selection is exposed (aria-pressed) and focus is visible", async ({ page }) => {
+    await page.goto("/en/for-workers", { waitUntil: "load" });
+    const work = page.getByTestId("work-lifecycle-workers-stage-work");
+    await expect(work).toBeVisible({ timeout: 30_000 });
+    await page.keyboard.press("Tab"); // enter the page via keyboard so :focus-visible applies
+    await work.focus();
+    await page.keyboard.press("Enter");
+    await expect(work).toHaveAttribute("aria-pressed", "true");
+    // Selecting WORK re-shapes the record: later stages become dashed "not yet".
+    const record = page.getByTestId("work-lifecycle-workers-record");
+    await expect(record.locator('li[data-state="pending"]')).toHaveCount(3);
+    // Focus is visibly indicated (ring/outline), not left to the UA default alone.
+    const ring = await work.evaluate((el) => {
+      const s = getComputedStyle(el);
+      return s.outlineStyle !== "none" || s.boxShadow !== "none";
+    });
+    expect(ring, "visible focus indicator").toBe(true);
+  });
+
+  test("state is never colour alone: pending rows carry words and a dashed shape", async ({ page }) => {
+    await page.goto("/en/for-workers", { waitUntil: "load" });
+    await page.getByTestId("work-lifecycle-workers-stage-project").click();
+    const pending = page.getByTestId("work-lifecycle-workers-record").locator('li[data-state="pending"]').first();
+    await expect(pending).toContainText(/not yet/i);
+    await expect(pending.locator(".border-dashed")).toHaveCount(1);
+  });
+
+  test("the stages are an ordered list with a name, in lifecycle order", async ({ page }) => {
+    await page.goto("/en/for-workers", { waitUntil: "load" });
+    const list = page.getByTestId("work-lifecycle-workers-stages");
+    await expect(list).toHaveAttribute("aria-label", /.+/);
+    await expect(list.locator("button")).toHaveCount(7);
+  });
+});

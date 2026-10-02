@@ -9,7 +9,7 @@ import { expect, test } from "@playwright/test";
  * widths (phone 375, desktop 1280) — deliberately a small, meaningful set, not
  * a brittle matrix.
  *
- * DETERMINISM. `reducedMotion: "reduce"` freezes the lifecycle graph at its
+ * DETERMINISM. emulated `reducedMotion: "reduce"` freezes the lifecycle graph at its
  * complete state and removes the travelling marker, so nothing time-dependent
  * is captured. Only the component element is shot (no hero carousel, no market
  * numbers, no dates).
@@ -25,7 +25,11 @@ import { expect, test } from "@playwright/test";
  * expected/actual/diff images before accepting a new baseline.
  */
 test.skip(!process.env.VISUAL_REGRESSION, "visual regression is opt-in (VISUAL_REGRESSION=1)");
-test.use({ reducedMotion: "reduce" });
+test.beforeEach(async ({ page }) => {
+  // page.emulateMedia is reliable; the `test.use({ reducedMotion })` fixture option
+  // did not take effect here and left the graph mid-animation.
+  await page.emulateMedia({ reducedMotion: "reduce" });
+});
 
 const WIDTHS = [
   { name: "375", width: 375, height: 812 },
@@ -43,6 +47,9 @@ for (const s of SIGNATURES) {
     test(`${s.file} @${v.name} matches its baseline`, async ({ page }) => {
       await page.setViewportSize({ width: v.width, height: v.height });
       await page.goto(s.path, { waitUntil: "load" });
+      // The page streams in Suspense chunks; let it settle so the element we
+      // measure is the final one (otherwise it can be swapped under us).
+      await page.waitForLoadState("networkidle");
       const el = page.getByTestId(s.testid);
       await expect(el).toBeVisible({ timeout: 30_000 });
       await el.scrollIntoViewIfNeeded();
