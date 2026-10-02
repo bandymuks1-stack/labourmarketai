@@ -1,5 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
+import { playerInitials } from "@/lib/identity/player-identity";
+
 import { WorkLifecycleGraph, type LifecycleStage } from "./work-lifecycle-graph";
 
 /**
@@ -15,7 +17,7 @@ const WORKER: ReadonlyArray<Pick<LifecycleStage, "key" | "icon" | "href" | "tone
   { key: "work", icon: "work", href: "/dashboard/journal" },
   { key: "evidence", icon: "evidence", href: "/dashboard/journal", tone: "evidence" },
   { key: "confirmation", icon: "confirmation", href: "/dashboard/journal", tone: "confirmed" },
-  { key: "history", icon: "history", href: "/dashboard/profile?card=history" },
+  { key: "history", icon: "history", href: "/dashboard/profile?card=history", tone: "history" },
 ];
 
 const COMPANY: ReadonlyArray<Pick<LifecycleStage, "key" | "icon" | "href" | "tone">> = [
@@ -25,11 +27,12 @@ const COMPANY: ReadonlyArray<Pick<LifecycleStage, "key" | "icon" | "href" | "ton
   { key: "project", icon: "project", href: "/dashboard/projects" },
   { key: "work", icon: "work", href: "/dashboard/journal" },
   { key: "confirmation", icon: "confirmation", href: "/dashboard/journal", tone: "confirmed" },
-  { key: "report", icon: "report", href: "/dashboard/reports" },
+  { key: "report", icon: "report", href: "/dashboard/reports", tone: "history" },
 ];
 
 export async function WorkLifecycleSection({ audience }: { audience: "workers" | "companies" }) {
   const t = await getTranslations("workLifecycle");
+  const tCards = await getTranslations("playercards");
   const defs = audience === "workers" ? WORKER : COMPANY;
   const stages: LifecycleStage[] = defs.map((d) => ({
     ...d,
@@ -37,6 +40,11 @@ export async function WorkLifecycleSection({ audience }: { audience: "workers" |
     fact: t(`${audience}.${d.key}.fact`),
     detail: t(`${audience}.${d.key}.detail`),
   }));
+  const personName = tCards("sample.name");
+  const subject =
+    audience === "workers"
+      ? { kind: "person" as const, name: personName, initials: playerInitials(personName) }
+      : { kind: "company" as const, name: tCards("sample.organization"), initials: "" };
   return (
     <WorkLifecycleGraph
       title={audience === "workers" ? t("title") : t("titleCompany")}
@@ -44,6 +52,8 @@ export async function WorkLifecycleSection({ audience }: { audience: "workers" |
       exampleNote={t("example")}
       openLabel={t("open")}
       listLabel={t("list")}
+      pendingLabel={t("pending")}
+      subject={subject}
       stages={stages}
       testId={`work-lifecycle-${audience}`}
     />

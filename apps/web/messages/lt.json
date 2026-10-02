@@ -17937,6 +17937,7 @@
     }
   },
   "workLifecycle": {
+    "pending": "Dar ne",
     "title": "Kas nutinka su jūsų darbu",
     "titleCompany": "Kas nutinka su jūsų vykdomu darbu",
     "example": "Pavyzdys — ne tikras žmogus ir ne tikri duomenys",

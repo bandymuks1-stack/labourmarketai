@@ -6881,6 +6881,7 @@
     }
   },
   "workLifecycle": {
+    "pending": "Vēl nav",
     "title": "Kas notiek ar jūsu paveikto darbu",
     "titleCompany": "Kas notiek ar jūsu vadīto darbu",
     "example": "Piemērs — nav īsts cilvēks un nav īsti dati",

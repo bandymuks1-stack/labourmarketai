@@ -17937,6 +17937,7 @@
     }
   },
   "workLifecycle": {
+    "pending": "Not yet",
     "title": "What happens to the work you do",
     "titleCompany": "What happens to the work you run",
     "example": "Example — not a real person or real data",
