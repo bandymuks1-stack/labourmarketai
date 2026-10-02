@@ -684,6 +684,45 @@ a {
   animation: rhythm-grow-x var(--motion-slow) var(--motion-ease-out) both;
 }
 
+/* WORK IN TIME (/dashboard/planning perspectives) — subtle, compositor-only
+   motion: bars grow in from their start, the capacity band rises, and the
+   now-line breathes. Every one of them is disabled under reduced motion. */
+@keyframes wit-grow-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes wit-now {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+.wit-grow-y {
+  transform-origin: bottom;
+  animation: wit-grow-y var(--motion-slow) var(--motion-ease-out) both;
+}
+.wit-bar {
+  transform-origin: left;
+  animation: rhythm-grow-x var(--motion-slow) var(--motion-ease-out) both;
+}
+.wit-now {
+  animation: wit-now 3.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wit-grow-y,
+  .wit-bar,
+  .wit-now {
+    animation: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .live-dot,
   [data-decor],

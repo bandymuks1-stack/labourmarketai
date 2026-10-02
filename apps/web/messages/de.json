@@ -10642,6 +10642,128 @@
       }
     }
   },
+  "workInTime": {
+    "notAuthed": "Melden Sie sich an, um Ihre Zeit zu sehen.",
+    "lens": {
+      "label": "Perspektive",
+      "me": "Meine Zeit",
+      "people": "Menschen in der Zeit",
+      "projects": "Projekte in der Zeit",
+      "hint": {
+        "me": "Ihre eigenen Tage: was Sie bindet, was Sie erfasst haben, was als Nächstes kommt.",
+        "people": "Ihr Team auf einer Zeitachse: Einsätze, Abwesenheiten, Überschneidungen und was erfasst ist.",
+        "projects": "Projekte auf einer Zeitachse: Phasen, Besetzung über die Zeit und offener Bedarf."
+      },
+      "notManager": "Menschen und Projekte in der Zeit öffnen sich, wenn Sie für eine Organisation handeln, die ein Team oder ein Projekt leitet. Ihre eigenen Tage finden Sie unter Meine Zeit."
+    },
+    "state": {
+      "known": "Bekannt",
+      "planned": "Geplant",
+      "recorded": "Erfasst",
+      "confirmed": "Bestätigt",
+      "openNeed": "Offener Bedarf",
+      "notProvided": "Nicht angegeben",
+      "unknown": "Unbekannt"
+    },
+    "legend": {
+      "title": "Wie sicher ist das?",
+      "rule": "Unbekannt ist nicht null. Nicht gemeldet heißt nicht abwesend. Kein Eintrag heißt nicht keine Arbeit."
+    },
+    "window": {
+      "label": "Zeitfenster",
+      "prev": "Vorherige vier Wochen",
+      "next": "Nächste vier Wochen",
+      "today": "Heute"
+    },
+    "me": {
+      "title": "Meine Zeit",
+      "today": "Heute",
+      "nothingToday": "Für heute ist nichts erfasst. Das heißt nicht, dass es keine Arbeit gab.",
+      "moreToday": "+{count} weitere heute",
+      "recordedTimed": "{duration} erfasst (Einträge: {count})",
+      "recordedUntimed": "Ohne Dauer erfasst (Einträge: {count})",
+      "notRecordedYet": "Für heute ist noch keine Arbeit erfasst.",
+      "recordToday": "Arbeit von heute erfassen",
+      "openJournalDay": "Heute im Journal öffnen",
+      "next": "Als Nächstes",
+      "nextIn": "{count, plural, =0 {heute} =1 {morgen} other {in {count} T.}}",
+      "nothingNext": "Es steht nichts Datiertes an.",
+      "undated": "Ohne Datum: {count}. Sie sind keinem Tag zugeordnet.",
+      "stripTitle": "Die Tage rund um jetzt",
+      "stripRule": "Gold ist geplant, Cyan ist erfasst, Bernstein ist abwesend.",
+      "stripPlanned": "geplant: {count}",
+      "stripRecorded": "erfasste Einträge: {count}",
+      "stripNoRecord": "nichts erfasst",
+      "stripAway": "abwesend",
+      "legendPlanned": "Geplant",
+      "legendRecorded": "Erfasst, nach Dauer",
+      "legendUntimed": "Erfasst, ohne Dauer",
+      "legendAway": "Abwesend",
+      "calendarHeading": "Kalender",
+      "unknown": "Ihre Zeit konnte gerade nicht gelesen werden. Das ist unbekannt, nicht leer."
+    },
+    "roster": {
+      "unknown": "Die Teamliste konnte gerade nicht gelesen werden. Das ist unbekannt, nicht leer."
+    },
+    "people": {
+      "title": "Menschen in der Zeit",
+      "intro": "Alle aus Ihrem Team auf einer Achse. Eine leere Strecke heißt: nichts erfasst. Sie heißt nicht, dass die Person frei ist.",
+      "capacity": "Team pro Tag",
+      "capacitySummary": "Team von {total}. Die meisten gebunden an einem Tag: {peak}, am {date}.",
+      "capacityDay": "{date}: gebunden {committed}, abwesend {away}, nichts erfasst {noRecord}",
+      "away": "Abwesend",
+      "overlap": "Überschneidung",
+      "unnamed": "Teammitglied",
+      "now": "Jetzt",
+      "next": "Danach",
+      "noRecord": "Nichts erfasst",
+      "noRecordWindow": "In diesem Fenster nichts erfasst",
+      "noRecordUnknownLeave": "Nichts erfasst. Abwesenheiten konnten nicht gelesen werden.",
+      "outside": "außerhalb des Fensters: {count}",
+      "kind": {
+        "project": "Projekt",
+        "booking": "Buchung",
+        "trip": "Reise",
+        "absence": "Abwesend"
+      },
+      "absenceUnknown": "Genehmigte Abwesenheiten konnten gerade nicht gelesen werden. Abwesenheit ist hier unbekannt, nicht nicht vorhanden.",
+      "withoutRecord": "Personen im Team ohne Eintrag in diesem Fenster: {count}. Sie werden nicht als Zeilen gezeichnet und nicht als frei gezählt.",
+      "none": "In Ihrem Team ist noch niemand."
+    },
+    "projects": {
+      "title": "Projekte in der Zeit",
+      "intro": "Jedes Projekt: seine Spanne, seine Phasen und wie viele Personen an jedem Tag zugeordnet sind.",
+      "untitled": "Projekt ohne Titel",
+      "stage": "Phase",
+      "noDates": "Keine Daten angegeben",
+      "noStages": "Keine datierten Phasen angegeben",
+      "noStageNow": "Heute keine Phase",
+      "noStageNext": "Keine spätere Phase erfasst",
+      "noStaffingRecord": "In diesem Fenster ist keine Zuordnung erfasst",
+      "needOpen": "{missing} von {required} noch offen",
+      "needCovered": "{required} benötigt, gedeckt",
+      "needNotProvided": "Personenzahl nicht angegeben",
+      "staffed": "Zugeordnet: {count}",
+      "needsTitle": "Offener Bedarf ohne Projekt",
+      "needsUndated": "Angegebener Bedarf ohne Datum: {count}",
+      "gaps": "Übergaben sowie Fristen für Dokumente oder Zertifikate sind in den Planungsdaten noch nicht enthalten, daher wird dafür nichts gezeichnet.",
+      "withoutDates": "Projekte ohne Datum: {count}. Sie haben keinen Platz auf der Achse.",
+      "none": "Für dieses Fenster sind keine Projekte oder offenen Bedarfe erfasst.",
+      "unknown": "Projekte und Phasen konnten gerade nicht gelesen werden. Das ist unbekannt, nicht leer."
+    },
+    "focus": {
+      "selected": "Ausgewählt",
+      "close": "Schließen",
+      "person": "{name} in der Zeit",
+      "project": "{name} in der Zeit",
+      "nothingOnRecord": "Für diese Person ist in diesem Fenster nichts erfasst.",
+      "openPerson": "Person öffnen",
+      "openTeam": "Team öffnen",
+      "openConversations": "Gespräche",
+      "openProject": "Projekt öffnen",
+      "openWork": "Arbeit öffnen"
+    }
+  },
   "planning": {
     "eyebrow": "KALENDER",
     "title": "Kalender",

@@ -10642,6 +10642,128 @@
       }
     }
   },
+  "workInTime": {
+    "notAuthed": "Sign in to see your time.",
+    "lens": {
+      "label": "Perspective",
+      "me": "My time",
+      "people": "People in time",
+      "projects": "Projects in time",
+      "hint": {
+        "me": "Your own days: what binds you, what you recorded, what comes next.",
+        "people": "Your team on one time axis: assignments, leave, overlaps and what is on record.",
+        "projects": "Projects on one time axis: stages, staffing over time and open needs."
+      },
+      "notManager": "People and projects in time open when you act for an organization that manages a team or a project. Your own days are in My time."
+    },
+    "state": {
+      "known": "Known",
+      "planned": "Planned",
+      "recorded": "Recorded",
+      "confirmed": "Confirmed",
+      "openNeed": "Open need",
+      "notProvided": "Not provided",
+      "unknown": "Unknown"
+    },
+    "legend": {
+      "title": "How sure is this?",
+      "rule": "Unknown is not zero. Not reported is not absent. No record is not no work."
+    },
+    "window": {
+      "label": "Time window",
+      "prev": "Previous four weeks",
+      "next": "Next four weeks",
+      "today": "Today"
+    },
+    "me": {
+      "title": "My time",
+      "today": "Today",
+      "nothingToday": "Nothing on record for today. That is not the same as no work.",
+      "moreToday": "+{count} more today",
+      "recordedTimed": "{duration} recorded (entries: {count})",
+      "recordedUntimed": "Recorded without a duration (entries: {count})",
+      "notRecordedYet": "No work recorded for today yet.",
+      "recordToday": "Record work for today",
+      "openJournalDay": "Open today in the journal",
+      "next": "Next",
+      "nextIn": "{count, plural, =0 {today} =1 {tomorrow} other {in {count} d}}",
+      "nothingNext": "Nothing dated is coming up.",
+      "undated": "Without a date: {count}. They are not placed on any day.",
+      "stripTitle": "The days around now",
+      "stripRule": "Gold is planned, cyan is recorded, amber is away.",
+      "stripPlanned": "planned: {count}",
+      "stripRecorded": "recorded entries: {count}",
+      "stripNoRecord": "nothing on record",
+      "stripAway": "away",
+      "legendPlanned": "Planned",
+      "legendRecorded": "Recorded, by length",
+      "legendUntimed": "Recorded, no length",
+      "legendAway": "Away",
+      "calendarHeading": "Calendar",
+      "unknown": "Your time could not be read right now. That is unknown, not empty."
+    },
+    "roster": {
+      "unknown": "The roster could not be read right now. That is unknown, not empty."
+    },
+    "people": {
+      "title": "People in time",
+      "intro": "Everyone on your roster on one axis. An empty stretch means nothing on record. It does not mean the person is free.",
+      "capacity": "Roster per day",
+      "capacitySummary": "Roster of {total}. Most committed on one day: {peak}, on {date}.",
+      "capacityDay": "{date}: committed {committed}, away {away}, nothing on record {noRecord}",
+      "away": "Away",
+      "overlap": "Overlap",
+      "unnamed": "Person",
+      "now": "Now",
+      "next": "Next",
+      "noRecord": "Nothing on record",
+      "noRecordWindow": "Nothing on record in this window",
+      "noRecordUnknownLeave": "Nothing on record. Leave could not be read.",
+      "outside": "outside the window: {count}",
+      "kind": {
+        "project": "Project",
+        "booking": "Booking",
+        "trip": "Trip",
+        "absence": "Away"
+      },
+      "absenceUnknown": "Approved leave could not be read right now. Absence is unknown here, not absent.",
+      "withoutRecord": "People on the roster with nothing on record in this window: {count}. Not drawn as lanes, and not counted as free.",
+      "none": "There is nobody on your roster yet."
+    },
+    "projects": {
+      "title": "Projects in time",
+      "intro": "Each project: its own span, its stages, and how many people are assigned on each day.",
+      "untitled": "Untitled project",
+      "stage": "Stage",
+      "noDates": "No dates provided",
+      "noStages": "No dated stages provided",
+      "noStageNow": "No stage today",
+      "noStageNext": "No later stage on record",
+      "noStaffingRecord": "No assignment on record in this window",
+      "needOpen": "{missing} of {required} still open",
+      "needCovered": "{required} needed, covered",
+      "needNotProvided": "Headcount not provided",
+      "staffed": "Assigned: {count}",
+      "needsTitle": "Open needs without a project",
+      "needsUndated": "Stated needs without dates: {count}",
+      "gaps": "Handovers and document or certificate deadlines are not in the planning data yet, so nothing is drawn for them.",
+      "withoutDates": "Projects without dates: {count}. They have no place on the axis.",
+      "none": "No projects or open needs on record for this window.",
+      "unknown": "Projects and stages could not be read right now. That is unknown, not empty."
+    },
+    "focus": {
+      "selected": "Selected",
+      "close": "Close",
+      "person": "{name} in time",
+      "project": "{name} in time",
+      "nothingOnRecord": "Nothing on record for this person in this window.",
+      "openPerson": "Open person",
+      "openTeam": "Open team",
+      "openConversations": "Conversations",
+      "openProject": "Open project",
+      "openWork": "Open work"
+    }
+  },
   "planning": {
     "eyebrow": "CALENDAR",
     "title": "Calendar",

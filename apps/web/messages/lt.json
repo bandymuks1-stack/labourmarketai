@@ -10642,6 +10642,128 @@
       }
     }
   },
+  "workInTime": {
+    "notAuthed": "Prisijunkite, kad matytumėte savo laiką.",
+    "lens": {
+      "label": "Požiūris",
+      "me": "Mano laikas",
+      "people": "Žmonės laike",
+      "projects": "Projektai laike",
+      "hint": {
+        "me": "Jūsų dienos: kas jus riša, ką užfiksavote, kas toliau.",
+        "people": "Jūsų komanda vienoje laiko ašyje: priskyrimai, atostogos, persidengimai ir tai, kas užfiksuota.",
+        "projects": "Projektai vienoje laiko ašyje: etapai, žmonių priskyrimas laike ir atviri poreikiai."
+      },
+      "notManager": "Žmonės ir projektai laike atsiveria, kai veikiate organizacijos, kuri valdo komandą ar projektą, vardu. Savo dienas rasite skiltyje Mano laikas."
+    },
+    "state": {
+      "known": "Žinoma",
+      "planned": "Planuota",
+      "recorded": "Užfiksuota",
+      "confirmed": "Patvirtinta",
+      "openNeed": "Atviras poreikis",
+      "notProvided": "Nepateikta",
+      "unknown": "Nežinoma"
+    },
+    "legend": {
+      "title": "Kiek tuo galima pasitikėti?",
+      "rule": "Nežinoma nereiškia nulio. Nepranešta nereiškia, kad nebuvo. Nėra įrašo nereiškia, kad nebuvo darbo."
+    },
+    "window": {
+      "label": "Laiko langas",
+      "prev": "Ankstesnės keturios savaitės",
+      "next": "Kitos keturios savaitės",
+      "today": "Šiandien"
+    },
+    "me": {
+      "title": "Mano laikas",
+      "today": "Šiandien",
+      "nothingToday": "Šiandienai įrašų nėra. Tai nereiškia, kad darbo nebuvo.",
+      "moreToday": "+{count} šiandien",
+      "recordedTimed": "Užfiksuota {duration} (įrašų: {count})",
+      "recordedUntimed": "Užfiksuota be trukmės (įrašų: {count})",
+      "notRecordedYet": "Šiandienos darbas dar neužfiksuotas.",
+      "recordToday": "Užfiksuoti šiandienos darbą",
+      "openJournalDay": "Atidaryti šiandieną žurnale",
+      "next": "Toliau",
+      "nextIn": "{count, plural, =0 {šiandien} =1 {rytoj} other {po {count} d.}}",
+      "nothingNext": "Artėjančių datuotų įrašų nėra.",
+      "undated": "Be datos: {count}. Jie nepriskirti jokiai dienai.",
+      "stripTitle": "Dienos aplink dabar",
+      "stripRule": "Auksinė – planuota, žydra – užfiksuota, gintarinė – nebūsite.",
+      "stripPlanned": "planuota: {count}",
+      "stripRecorded": "užfiksuotų įrašų: {count}",
+      "stripNoRecord": "įrašų nėra",
+      "stripAway": "nebūsite",
+      "legendPlanned": "Planuota",
+      "legendRecorded": "Užfiksuota, pagal trukmę",
+      "legendUntimed": "Užfiksuota, be trukmės",
+      "legendAway": "Nebūsite",
+      "calendarHeading": "Kalendorius",
+      "unknown": "Jūsų laiko dabar nepavyko perskaityti. Tai nežinoma, o ne tuščia."
+    },
+    "roster": {
+      "unknown": "Komandos sąrašo dabar nepavyko perskaityti. Tai nežinoma, o ne tuščia."
+    },
+    "people": {
+      "title": "Žmonės laike",
+      "intro": "Visi jūsų komandos žmonės vienoje ašyje. Tuščias tarpas reiškia, kad įrašų nėra. Tai nereiškia, kad žmogus laisvas.",
+      "capacity": "Komanda pagal dieną",
+      "capacitySummary": "Komandoje {total}. Daugiausia užimtų vieną dieną: {peak}, {date}.",
+      "capacityDay": "{date}: užimta {committed}, nebūsite {away}, įrašų nėra {noRecord}",
+      "away": "Nebūna",
+      "overlap": "Persidengia",
+      "unnamed": "Žmogus",
+      "now": "Dabar",
+      "next": "Toliau",
+      "noRecord": "Įrašų nėra",
+      "noRecordWindow": "Šiame lange įrašų nėra",
+      "noRecordUnknownLeave": "Įrašų nėra. Atostogų perskaityti nepavyko.",
+      "outside": "už lango ribų: {count}",
+      "kind": {
+        "project": "Projektas",
+        "booking": "Užsakymas",
+        "trip": "Kelionė",
+        "absence": "Nebūna"
+      },
+      "absenceUnknown": "Patvirtintų atostogų dabar nepavyko perskaityti. Nebuvimas čia nežinomas, o ne neegzistuoja.",
+      "withoutRecord": "Komandos žmonių, kurių šiame lange įrašų nėra: {count}. Jie nerodomi juostomis ir nelaikomi laisvais.",
+      "none": "Jūsų komandoje dar nėra žmonių."
+    },
+    "projects": {
+      "title": "Projektai laike",
+      "intro": "Kiekvienas projektas: jo laikotarpis, etapai ir kiek žmonių priskirta kiekvieną dieną.",
+      "untitled": "Projektas be pavadinimo",
+      "stage": "Etapas",
+      "noDates": "Datos nepateiktos",
+      "noStages": "Datuotų etapų nepateikta",
+      "noStageNow": "Šiandien etapo nėra",
+      "noStageNext": "Vėlesnio etapo įrašų nėra",
+      "noStaffingRecord": "Šiame lange priskyrimų įrašų nėra",
+      "needOpen": "Dar atvira {missing} iš {required}",
+      "needCovered": "Reikia {required}, padengta",
+      "needNotProvided": "Žmonių skaičius nepateiktas",
+      "staffed": "Priskirta: {count}",
+      "needsTitle": "Atviri poreikiai be projekto",
+      "needsUndated": "Nurodytų poreikių be datų: {count}",
+      "gaps": "Perdavimų ir dokumentų ar sertifikatų terminų planavimo duomenyse dar nėra, todėl jiems nieko nepiešiame.",
+      "withoutDates": "Projektų be datų: {count}. Ašyje jiems vietos nėra.",
+      "none": "Šiam langui projektų ar atvirų poreikių įrašų nėra.",
+      "unknown": "Projektų ir etapų dabar nepavyko perskaityti. Tai nežinoma, o ne tuščia."
+    },
+    "focus": {
+      "selected": "Pasirinkta",
+      "close": "Uždaryti",
+      "person": "{name} laike",
+      "project": "{name} laike",
+      "nothingOnRecord": "Šiame lange šiam žmogui įrašų nėra.",
+      "openPerson": "Atidaryti žmogų",
+      "openTeam": "Atidaryti komandą",
+      "openConversations": "Pokalbiai",
+      "openProject": "Atidaryti projektą",
+      "openWork": "Atidaryti darbą"
+    }
+  },
   "planning": {
     "eyebrow": "KALENDORIUS",
     "title": "Kalendorius",
