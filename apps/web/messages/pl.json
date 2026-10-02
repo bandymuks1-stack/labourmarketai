@@ -4337,7 +4337,10 @@
             }
           },
           "errorOpenNeedLimitUpgrade": "Plan bezpłatny tej organizacji pozwala na 1 aktywną pozycję. Zamknij jedną lub aktywuj plan Organizacja (99 €/mies., do 10) na koncie organizacji.",
-          "errorOpenNeedLimitIndividual": "Ta organizacja osiągnęła limit 10 aktywnych pozycji planu Organizacja. Nic nie pobrano ani nie zmieniono. Powyżej 10 skontaktuj się z nami w sprawie planu indywidualnego."
+          "errorOpenNeedLimitIndividual": "Ta organizacja osiągnęła limit 10 aktywnych pozycji planu Organizacja. Nic nie pobrano ani nie zmieniono. Powyżej 10 skontaktuj się z nami w sprawie planu indywidualnego.",
+          "openNeedUsage": "Aktywne pozycje: wykorzystano {used} z {limit} · pozostało {remaining}",
+          "openNeedUsageUpgradeCta": "Aktywuj plan Organizacja",
+          "openNeedUsageIndividual": "Osiągnięto limit planu Organizacja. Dla większej liczby pozycji skontaktuj się z nami w sprawie planu indywidualnego."
         }
       },
       "greeting": "Witaj ponownie, {name}",
