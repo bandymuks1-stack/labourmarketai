@@ -4339,7 +4339,10 @@
             }
           },
           "errorOpenNeedLimitUpgrade": "Šios organizacijos nemokamas planas leidžia 1 aktyvią poziciją. Uždarykite vieną arba aktyvuokite planą „Organizacija“ (99 €/mėn., iki 10) organizacijos paskyroje.",
-          "errorOpenNeedLimitIndividual": "Ši organizacija pasiekė plano „Organizacija“ ribą — 10 aktyvių pozicijų. Niekas nenuskaičiuota ir nepakeista. Daugiau nei 10 — susisiekite dėl individualaus plano."
+          "errorOpenNeedLimitIndividual": "Ši organizacija pasiekė plano „Organizacija“ ribą — 10 aktyvių pozicijų. Niekas nenuskaičiuota ir nepakeista. Daugiau nei 10 — susisiekite dėl individualaus plano.",
+          "openNeedUsage": "Aktyvios pozicijos: panaudota {used} iš {limit} · liko {remaining}",
+          "openNeedUsageUpgradeCta": "Aktyvuoti planą „Organizacija“",
+          "openNeedUsageIndividual": "Pasiekėte plano „Organizacija“ ribą. Daugiau pozicijų — susisiekite dėl individualaus plano."
         }
       },
       "greeting": "Sveiki, {name}",

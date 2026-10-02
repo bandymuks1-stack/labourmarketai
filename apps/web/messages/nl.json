@@ -4339,7 +4339,10 @@
             }
           },
           "errorOpenNeedLimitUpgrade": "Het gratis plan van deze organisatie staat 1 actieve positie toe. Sluit er een, of activeer het plan Organisatie (€99/maand, tot 10) in uw organisatieaccount.",
-          "errorOpenNeedLimitIndividual": "Deze organisatie heeft de 10 actieve posities van het plan Organisatie bereikt. Er is niets afgeschreven of gewijzigd. Voor meer dan 10: neem contact op voor een individueel plan."
+          "errorOpenNeedLimitIndividual": "Deze organisatie heeft de 10 actieve posities van het plan Organisatie bereikt. Er is niets afgeschreven of gewijzigd. Voor meer dan 10: neem contact op voor een individueel plan.",
+          "openNeedUsage": "Actieve posities: {used} van {limit} gebruikt · {remaining} over",
+          "openNeedUsageUpgradeCta": "Plan Organisatie activeren",
+          "openNeedUsageIndividual": "U hebt de limiet van het plan Organisatie bereikt. Voor meer posities: neem contact op voor een individueel plan."
         }
       },
       "greeting": "Welkom terug, {name}",

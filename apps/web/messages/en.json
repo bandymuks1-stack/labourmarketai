@@ -4339,7 +4339,10 @@
             }
           },
           "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
-          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
+          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
+          "openNeedUsage": "Active positions: {used} of {limit} used · {remaining} remaining",
+          "openNeedUsageUpgradeCta": "Activate the Organization plan",
+          "openNeedUsageIndividual": "You have reached the Organization plan limit. For more than the included positions, contact us for an individual plan."
         }
       },
       "greeting": "Welcome back, {name}",
