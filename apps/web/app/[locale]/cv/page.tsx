@@ -676,7 +676,17 @@ export default async function VerifiedCvPage({
               title: tStory("title"),
               now: tStory("now"),
               noRecords: tStory("noRecords"),
-              legend: { managerRecord: tStory("legend.managerRecord"), recorded: tStory("legend.recorded") },
+              legend: {
+                declared: tStory("legend.declared"),
+                declaredHint: tStory("legend.declaredHint"),
+                recorded: tStory("legend.recorded"),
+                recordedHint: tStory("legend.recordedHint"),
+                managerRecord: tStory("legend.managerRecord"),
+                managerRecordHint: tStory("legend.managerRecordHint"),
+              },
+              promise: { mine: tStory("promise.mine"), grows: tStory("promise.grows"), follows: tStory("promise.follows") },
+              keyTitle: tStory("keyTitle"),
+              historyTitle: tStory("historyTitle"),
               skillsTitle: tStory("skillsTitle"),
               tiers: { confirmed: t("tiers.confirmed"), evidence: t("tiers.evidence"), declared: t("tiers.declared") },
               next: {
@@ -684,6 +694,7 @@ export default async function VerifiedCvPage({
                 title: tStory("next.title"),
                 body: tStory("next.body"),
                 cta: tStory("next.cta"),
+                notRecord: tStory("next.notRecord"),
                 href: `/${locale}/dashboard/opportunities`,
               },
             }}
