@@ -165,11 +165,6 @@ export default async function CompanyDashboardPage({
     if (rHomeField.capacity.kind === "ok") {
       for (const w of rHomeField.capacity.rows) portraitIds.add(w.workerId);
     }
-    if (rHomeField.projects.kind === "ok") {
-      for (const pr of rHomeField.projects.rows) {
-        for (const id of pr.peopleIds) if (id) portraitIds.add(id);
-      }
-    }
   }
   const avatarByWorker: Record<string, string | null> = Object.fromEntries(
     await Promise.all(

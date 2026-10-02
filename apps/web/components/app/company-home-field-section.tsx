@@ -261,7 +261,7 @@ export async function CompanyHomeFieldSection({
                           >
                             <PersonPortrait
                               name={n}
-                              avatarUrl={(p.peopleIds[i] && avatars[p.peopleIds[i] as string]) || null}
+                              avatarUrl={null}
                               initials={personMonogram(n)}
                               width="24px"
                               shape="round"
