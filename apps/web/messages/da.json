@@ -6999,5 +6999,56 @@
         "company": "Planlægger næste projekt med folk, de kender"
       }
     }
+  },
+  "evidenceChain": {
+    "label": "Indførslens status",
+    "own": "Af dig",
+    "nodes": {
+      "recorded": "Registreret",
+      "photo": "Foto",
+      "manager": "Lederens indførsel",
+      "history": "I din historik"
+    },
+    "status": {
+      "done": "Klar",
+      "waiting": "Venter",
+      "absent": "Ikke endnu",
+      "attention": "Kræver dig",
+      "unknown": "Ukendt"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Levende CV",
+    "title": "Dit arbejde bliver til din historie",
+    "now": "Nu",
+    "noRecords": "Ingen arbejdsregistreringer endnu",
+    "legend": {
+      "managerRecord": "Lederens registrering",
+      "recorded": "Registreret af dig"
+    },
+    "skillsTitle": "Hvad dit arbejde viser",
+    "next": {
+      "title": "Din historie følger dig",
+      "body": "Hvert job, du registrerer, føjer til den. Tag den med til den næste mulighed.",
+      "cta": "Se, hvor du kan komme hen"
+    }
+  },
+  "workContext": {
+    "title": "Dit arbejde på ét sted",
+    "nodes": {
+      "current": "Arbejder nu",
+      "records": "Registreringer",
+      "manager": "Lederens registrering",
+      "history": "Historik",
+      "skills": "Færdigheder",
+      "next": "Næste"
+    },
+    "facts": {
+      "records": "{count, plural, one {# registrering} other {# registreringer}}",
+      "manager": "{count, plural, one {# registrering fra lederen} other {# registreringer fra lederen}}",
+      "history": "{count, plural, one {# job} other {# jobs}}",
+      "skills": "{count, plural, one {# færdighed baseret på dine registreringer} other {# færdigheder baseret på dine registreringer}}",
+      "next": "Hvor du kan gå hen"
+    }
   }
 }

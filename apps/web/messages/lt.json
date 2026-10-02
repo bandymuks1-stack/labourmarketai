@@ -18055,5 +18055,56 @@
         "company": "Planuoja kitą projektą su pažįstamais žmonėmis"
       }
     }
+  },
+  "evidenceChain": {
+    "label": "Įrašo būsena",
+    "own": "Jūsų",
+    "nodes": {
+      "recorded": "Užfiksuota",
+      "photo": "Nuotrauka",
+      "manager": "Vadovo įrašas",
+      "history": "Jūsų istorijoje"
+    },
+    "status": {
+      "done": "Yra",
+      "waiting": "Laukia",
+      "absent": "Dar ne",
+      "attention": "Reikia jūsų",
+      "unknown": "Nežinoma"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Gyvas CV",
+    "title": "Jūsų darbas tampa jūsų istorija",
+    "now": "Dabar",
+    "noRecords": "Dar nėra darbo įrašų",
+    "legend": {
+      "managerRecord": "Vadovo įrašas",
+      "recorded": "Jūsų užfiksuota"
+    },
+    "skillsTitle": "Ką rodo jūsų darbas",
+    "next": {
+      "title": "Jūsų istorija keliauja su jumis",
+      "body": "Kiekvienas užfiksuotas darbas ją papildo. Pasiimkite ją į kitą galimybę.",
+      "cta": "Pažiūrėti, kur galite eiti"
+    }
+  },
+  "workContext": {
+    "title": "Jūsų darbas vienoje vietoje",
+    "nodes": {
+      "current": "Dirba dabar",
+      "records": "Įrašai",
+      "manager": "Vadovo įrašas",
+      "history": "Istorija",
+      "skills": "Gebėjimai",
+      "next": "Toliau"
+    },
+    "facts": {
+      "records": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
+      "manager": "{count, plural, one {# vadovo įrašas} few {# vadovo įrašai} other {# vadovo įrašų}}",
+      "history": "{count, plural, one {# darbas} few {# darbai} other {# darbų}}",
+      "skills": "{count, plural, one {# jūsų įrašais pagrįstas gebėjimas} few {# jūsų įrašais pagrįsti gebėjimai} other {# jūsų įrašais pagrįstų gebėjimų}}",
+      "next": "Kur galite eiti"
+    }
   }
 }

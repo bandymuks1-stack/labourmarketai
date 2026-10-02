@@ -261,41 +261,46 @@ export function WorkLifecycleGraph({
                   )}
                   data-state={filled ? "filled" : "pending"}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-start gap-3">
                     <Icon
-                      className={cn("h-4 w-4 shrink-0", filled ? TONE_TEXT[s.tone ?? "neutral"] : "text-text-muted")}
+                      className={cn("mt-1 h-4 w-4 shrink-0", filled ? TONE_TEXT[s.tone ?? "neutral"] : "text-text-muted")}
                       strokeWidth={1.75}
                       aria-hidden
                     />
-                    <span className="w-24 shrink-0 font-mono text-meta uppercase tracking-label text-text-secondary sm:w-28">
-                      {s.label}
-                    </span>
-                    <AnimatePresence mode="wait" initial={false}>
-                      {filled ? (
-                        <motion.span
-                          key="fact"
-                          initial={reduce ? false : { opacity: 0, x: -6 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: reduce ? 0 : 0.35, ease: [0.16, 1, 0.3, 1] }}
-                          className={cn(
-                            "min-w-0 text-sm [overflow-wrap:anywhere]",
-                            isCurrent ? "font-semibold text-text-primary" : "text-text-secondary",
-                          )}
-                        >
-                          {s.fact}
-                        </motion.span>
-                      ) : (
-                        <motion.span
-                          key="pending"
-                          initial={false}
-                          animate={{ opacity: 1 }}
-                          className="inline-flex min-h-6 items-center gap-1.5 rounded-md border border-dashed border-ink-500 px-2 font-mono text-meta uppercase tracking-label text-text-secondary"
-                        >
-                          <CircleDashed className="h-3 w-3" strokeWidth={1.75} aria-hidden />
-                          {pendingLabel}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
+                    {/* Label ABOVE the fact on narrow screens: long uppercase labels
+                        (RU "ДОКАЗАТЕЛЬСТВО", DE "BESTÄTIGEN") must never collide with
+                        the fact or force mid-word breaks; side-by-side from sm up. */}
+                    <div className="flex min-w-0 flex-1 flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3">
+                      <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-secondary sm:w-32">
+                        {s.label}
+                      </span>
+                      <AnimatePresence mode="wait" initial={false}>
+                        {filled ? (
+                          <motion.span
+                            key="fact"
+                            initial={reduce ? false : { opacity: 0, x: -6 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: reduce ? 0 : 0.35, ease: [0.16, 1, 0.3, 1] }}
+                            className={cn(
+                              "min-w-0 text-sm [overflow-wrap:break-word]",
+                              isCurrent ? "font-semibold text-text-primary" : "text-text-secondary",
+                            )}
+                          >
+                            {s.fact}
+                          </motion.span>
+                        ) : (
+                          <motion.span
+                            key="pending"
+                            initial={false}
+                            animate={{ opacity: 1 }}
+                            className="inline-flex min-h-6 w-fit items-center gap-1.5 rounded-md border border-dashed border-ink-500 px-2 font-mono text-meta uppercase tracking-label text-text-secondary"
+                          >
+                            <CircleDashed className="h-3 w-3" strokeWidth={1.75} aria-hidden />
+                            {pendingLabel}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
                   {isCurrent ? (
                     <div className="mt-2 flex flex-col gap-2 pl-7 sm:flex-row sm:items-center sm:justify-between">

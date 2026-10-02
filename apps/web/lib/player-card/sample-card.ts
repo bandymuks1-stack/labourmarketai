@@ -56,12 +56,63 @@ function sampleEntryTimestamps(now: Date): string[] {
 /** Build the fixed, honest sample card. The display strings a locale owns
  *  (persona name, organization) come in resolved — the caller reads them from
  *  the `playercards` namespace so the copy stays in the i18n catalogs. */
+/**
+ * The data states a card can truthfully be in. Fixtures are part of design
+ * proof: a screenshot must never communicate a state the real data model would
+ * reject, so each state below is internally consistent — the provenance is
+ * DERIVED (not typed in) from the same rows the other fields describe.
+ *
+ *  - `confirmed`: recorded work AND manager confirmations (the public sample).
+ *  - `recorded`:  recorded work, NO confirmation yet.
+ *  - `empty`:     nothing recorded at all (a person who has just started).
+ */
+export type SampleCardState = "confirmed" | "recorded" | "empty";
+
 export function buildSampleWorkerPlayerCard(opts: {
   sampleName: string;
   sampleOrganization: string;
   now: Date;
+  state?: SampleCardState;
 }): WorkerPlayerCard {
   const { sampleName, sampleOrganization, now } = opts;
+  const state = opts.state ?? "confirmed";
+  const base = buildConfirmedSample(sampleName, sampleOrganization, now);
+  if (state === "confirmed") return base;
+  if (state === "recorded") {
+    return {
+      ...base,
+      workCardConfirmed: false,
+      verifiedSkills: [],
+      managerConfirmations: 0,
+      provenance: deriveProvenance({
+        journalEntries: base.evidenceEntries,
+        skill: { verified: false, source: "work_journal" },
+      }),
+    };
+  }
+  return {
+    ...base,
+    journalSupportedSkills: 0,
+    candidateSkills: 0,
+    evidenceEntries: 0,
+    workCardConfirmed: false,
+    verifiedSkills: [],
+    managerConfirmations: 0,
+    latestEvidenceAt: null,
+    workHistory: [],
+    evidenceTimeline: deriveEvidenceTimeline([], now, EVIDENCE_TIMELINE_MONTHS),
+    skillEvidence: deriveSkillEvidence(
+      [],
+      [
+        { slug: "cooking", verified: false, source: "self" },
+        { slug: "kitchen-help", verified: false, source: "self" },
+      ],
+    ),
+    provenance: deriveProvenance({ journalEntries: 0 }),
+  };
+}
+
+function buildConfirmedSample(sampleName: string, sampleOrganization: string, now: Date): WorkerPlayerCard {
   return {
     displayName: sampleName,
     skillsDeclared: 9,
@@ -140,17 +191,21 @@ export function buildSampleWorkerPlayerCard(opts: {
 /**
  * The sample persona's all-time totals for the identity fact strip. Explainable,
  * not a rating: the 23 sample journal entries (see SAMPLE_MONTHLY_ENTRIES) at a
- * standard 8 h day, 12 of them on days a manager approved. The caller keeps its
+ * standard 8 h day, 7 of them on days a manager approved. The caller keeps its
  * visible "example, not a real person" line.
  */
-export function buildSampleAllTime(now: Date): WorkPeriodTotals {
+export function buildSampleAllTime(now: Date, state: SampleCardState = "confirmed"): WorkPeriodTotals | null {
+  if (state === "empty") return null;
   return {
     key: "all",
     startIso: null,
     endIso: now.toISOString(),
     hours: 23 * 8,
     dayUnits: 0,
-    confirmedHours: 12 * 8,
+    // Consistent with the card's `managerConfirmations: 7`: seven approved
+    // eight-hour days. (It was 12 days once — a fixture that disagreed with
+    // the card it sat on.)
+    confirmedHours: state === "confirmed" ? 7 * 8 : 0,
     confirmedDayUnits: 0,
     entries: 23,
     entriesWithoutDuration: 0,
