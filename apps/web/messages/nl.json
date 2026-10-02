@@ -17935,6 +17935,7 @@
     }
   },
   "workLifecycle": {
+    "pending": "Nog niet",
     "title": "Wat er met jouw werk gebeurt",
     "titleCompany": "Wat er met het werk gebeurt dat je aanstuurt",
     "example": "Voorbeeld — geen echt persoon en geen echte gegevens",

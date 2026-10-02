@@ -6879,6 +6879,7 @@
     }
   },
   "workLifecycle": {
+    "pending": "Ikke ennå",
     "title": "Hva som skjer med arbeidet du gjør",
     "titleCompany": "Hva som skjer med arbeidet du driver",
     "example": "Eksempel — ikke en ekte person eller ekte data",

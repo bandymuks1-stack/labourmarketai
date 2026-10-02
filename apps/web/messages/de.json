@@ -17935,6 +17935,7 @@
     }
   },
   "workLifecycle": {
+    "pending": "Noch nicht",
     "title": "Was mit Ihrer Arbeit passiert",
     "titleCompany": "Was mit der Arbeit passiert, die Sie leiten",
     "example": "Beispiel — keine echte Person und keine echten Daten",

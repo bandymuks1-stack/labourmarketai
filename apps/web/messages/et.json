@@ -6879,6 +6879,7 @@
     }
   },
   "workLifecycle": {
+    "pending": "Veel mitte",
     "title": "Mis saab sinu tehtud tööst",
     "titleCompany": "Mis saab teie juhitud tööst",
     "example": "Näide — mitte päris inimene ega päris andmed",
