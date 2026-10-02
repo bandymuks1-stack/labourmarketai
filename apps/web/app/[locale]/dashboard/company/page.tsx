@@ -26,6 +26,7 @@ import {
 } from "@/lib/company/company-workers";
 import { getTeamBrigadesData } from "@/lib/company/team-brigades";
 import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
+import { countWorkersWithUnconfirmableWork } from "@/lib/operations/org-members";
 import { loadCompanyHomeField } from "@/lib/company/company-home-field";
 import { CompanyHomeFieldSection } from "@/components/app/company-home-field-section";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
@@ -139,6 +140,7 @@ export default async function CompanyDashboardPage({
     rInvitations,
     teamBrigades,
     reviewPendingCount,
+    reviewOffWorkers,
     rHomeField,
   ] = await Promise.all([
     listOwnCustomerRequests(EMPLOYER_DEMAND_KINDS),
@@ -148,6 +150,9 @@ export default async function CompanyDashboardPage({
     companyRow ? listCompanyWorkerInvitations(companyRow.id) : null,
     companyRow ? getTeamBrigadesData() : Promise.resolve({ applied: false } as const),
     companyRow ? countReviewablePendingEntries() : Promise.resolve(0),
+    companyRow && capabilityOrgId
+      ? countWorkersWithUnconfirmableWork(capabilityOrgId)
+      : Promise.resolve(null),
     companyRow ? loadCompanyHomeField({ roster: rosterRead }) : null,
   ] as const);
 
@@ -158,6 +163,13 @@ export default async function CompanyDashboardPage({
 
   const decisionEntries = [
     { key: "review", count: reviewPendingCount, href: `/${locale}/dashboard/inbox` },
+    // Recorded work nobody can confirm yet (review switched off). Unknown (a
+    // failed read) is not shown as 0 and not shown as a number — it is absent.
+    {
+      key: "reviewOff",
+      count: reviewOffWorkers ?? 0,
+      href: `/${locale}/dashboard/company/people#org-members`,
+    },
     {
       key: "invitations",
       count: pendingCount,

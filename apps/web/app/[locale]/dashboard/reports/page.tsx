@@ -969,6 +969,16 @@ function JournalWindowDetail({
                   </tr>
                 </tfoot>
               </table>
+              {report.totals.reviewNotEnabled > 0 ? (
+                <p
+                  className="mt-2 text-meta text-text-muted"
+                  data-testid="journal-window-review-not-enabled"
+                >
+                  {t("journalWindow.reviewNotEnabled", {
+                    count: report.totals.reviewNotEnabled,
+                  })}
+                </p>
+              ) : null}
             </div>
           )}
 

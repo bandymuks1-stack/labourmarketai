@@ -78,6 +78,11 @@
   "engagement": "Context",
   "engagementChoose": "Choose the engagement…",
   "engagementAmbiguous": "This work could belong to more than one engagement. Choose which one before saving.",
+  "project": "Project",
+  "projectChoose": "Choose the project…",
+  "projectNone": "Not project work",
+  "projectAmbiguous": "You are assigned to more than one project. Choose which project these hours belong to before saving (or mark them as not project work).",
+  "projectAuto": "Project: {name}",
   "unconfirmedTimeBlocked": "{count, plural, one {# logged duration still awaits your review and would not be saved.} other {# logged durations still await your review and would not be saved.}} Keep or remove them first.",
   "entry": {
     "reviewedBy": "Reviewed by",
@@ -100,7 +105,8 @@
       "approved": "Reviewed",
       "changes_requested": "Changes requested",
       "rejected": "Returned",
-      "reasonLabel": "Reason"
+      "reasonLabel": "Reason",
+      "notEnabled": "Recorded — your manager has not switched on confirmation, so nobody is reviewing this entry; until then it stays what you stated"
     },
     "delete": "Delete entry",
     "deleting": "Deleting...",
@@ -609,6 +615,7 @@
     "sessionExpired": "Your session has expired. Please sign in again.",
     "noWorkerProfile": "Worker profile not found. Open your account settings and enable the worker role.",
     "engagementRequired": "Choose the work context (organization or project) this entry belongs to.",
+    "projectNotAssignable": "The chosen project is not assigned to you or belongs to another organization. Pick a project from the list.",
     "notesRequired": "Describe what you worked on — the free text is the core of the entry.",
     "quantityInvalid": "Quantity must be a non-negative number.",
     "unitSlugUnknown": "This unit is not recognised yet: {units}. Choose another unit or try again later.",
@@ -944,6 +951,8 @@
     "photoClose": "Close photo",
     "photoPrev": "Previous photo",
     "photoNext": "Next photo",
-    "photoCounter": "{index} / {total}"
+    "photoCounter": "{index} / {total}",
+    "recordedOnly": "{count, plural, one {# recorded — confirmation not switched on} other {# recorded — confirmation not switched on}}",
+    "confirmationNotEnabled": "Your manager has not switched on confirmation — nobody is reviewing these entries."
   }
 }

@@ -176,6 +176,12 @@ export async function JournalDayObject({
                 label={t("waiting", { count: day.waitingCount })}
               />
             ) : null}
+            {day.recordedOnlyCount > 0 ? (
+              <EvidenceState
+                state="SELF_REPORTED"
+                label={t("recordedOnly", { count: day.recordedOnlyCount })}
+              />
+            ) : null}
             {day.contestedCount > 0 ? (
               <EvidenceState
                 state="DISPUTED"
@@ -201,7 +207,13 @@ export async function JournalDayObject({
               })}
             </ul>
           ) : day.confirmedCount === 0 && day.selfConfirmedCount === 0 ? (
-            <p className="text-sm text-text-muted">{t("confirmedNone")}</p>
+            day.waitingCount > 0 ? (
+              <p className="text-sm text-text-muted">{t("confirmedNone")}</p>
+            ) : day.recordedOnlyCount > 0 ? (
+              <p className="text-sm text-text-muted" data-testid="journal-day-confirmation-not-enabled">
+                {t("confirmationNotEnabled")}
+              </p>
+            ) : null
           ) : null}
         </li>
 

@@ -248,6 +248,7 @@ export const WORKER_EXECUTORS: {
         notes: input.notes,
         work_date: input.workDate,
         site_name: input.siteName ?? "",
+        project_id: input.projectId ?? "",
         ...intakeWorkTimeFields(input.notes, input.workDate),
       }),
     );

@@ -78,6 +78,11 @@
   "engagement": "Context",
   "engagementChoose": "Kies de betrekking…",
   "engagementAmbiguous": "Dit werk kan bij meer dan één betrekking horen. Kies vóór het opslaan bij welke.",
+  "project": "Project",
+  "projectChoose": "Kies het project…",
+  "projectNone": "Geen projectwerk",
+  "projectAmbiguous": "Je bent aan meerdere projecten toegewezen. Kies vóór het opslaan bij welk project deze uren horen (of markeer ze als geen projectwerk).",
+  "projectAuto": "Project: {name}",
   "unconfirmedTimeBlocked": "{count, plural, one {# geregistreerde duur wacht nog op je beoordeling en zou niet worden opgeslagen.} other {# geregistreerde duren wachten nog op je beoordeling en zouden niet worden opgeslagen.}} Behoud of verwijder ze eerst.",
   "entry": {
     "reviewedBy": "Beoordeeld door",
@@ -100,7 +105,8 @@
       "approved": "Beoordeeld",
       "changes_requested": "Wijzigingen gevraagd",
       "rejected": "Teruggestuurd",
-      "reasonLabel": "Reden"
+      "reasonLabel": "Reden",
+      "notEnabled": "Vastgelegd — je leidinggevende heeft bevestiging nog niet ingeschakeld, dus niemand beoordeelt deze registratie; tot dan blijft het jouw eigen opgave"
     },
     "delete": "Item verwijderen",
     "deleting": "Verwijderen...",
@@ -609,6 +615,7 @@
     "sessionExpired": "Je sessie is verlopen. Log opnieuw in.",
     "noWorkerProfile": "Werknemersprofiel niet gevonden. Open je accountinstellingen en activeer de werknemersrol.",
     "engagementRequired": "Kies de werkcontext (organisatie of project) waar deze registratie bij hoort.",
+    "projectNotAssignable": "Het gekozen project is niet aan jou toegewezen of hoort bij een andere organisatie. Kies een project uit de lijst.",
     "notesRequired": "Beschrijf wat je hebt gedaan — de vrije tekst vormt de kern van deze registratie.",
     "quantityInvalid": "De hoeveelheid moet een niet-negatief getal zijn.",
     "unitSlugUnknown": "Deze eenheid wordt nog niet herkend: {units}. Kies een andere eenheid of probeer het later opnieuw.",
@@ -944,6 +951,8 @@
     "photoClose": "Foto sluiten",
     "photoPrev": "Vorige foto",
     "photoNext": "Volgende foto",
-    "photoCounter": "{index} / {total}"
+    "photoCounter": "{index} / {total}",
+    "recordedOnly": "{count, plural, one {# vastgelegd — bevestiging niet ingeschakeld} other {# vastgelegd — bevestiging niet ingeschakeld}}",
+    "confirmationNotEnabled": "Je leidinggevende heeft bevestiging nog niet ingeschakeld — niemand beoordeelt deze registraties."
   }
 }

@@ -14,6 +14,8 @@ import {
 import { composeDistinctEngagementLabels } from "@/lib/journal/engagement-label";
 import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
+import type { AssignedProject } from "@/lib/journal/project-attribution";
+import { readActiveProjectsByOrg } from "@/lib/journal/project-attribution-read";
 
 /**
  * Read the worker's WRITABLE engagement contexts for the conversation work-log
@@ -40,6 +42,9 @@ export type WorkLogEngagement = {
   /** The organization's own name (null = the personal context) — what a
    *  sentence that names its employer is matched against. */
   orgName?: string | null;
+  /** The projects the worker is ACTIVELY assigned to in this context's
+   *  organization (2+ → the flow must ask which; see project-attribution). */
+  projects?: AssignedProject[];
 };
 
 export type WorkLogEngagementsResult =
@@ -184,6 +189,10 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
 
   if (engagements.length === 0) return { kind: "no-context" };
 
+  // The active projects per organization — one bounded read, so the flow can
+  // ask "which project?" instead of the hours landing against none.
+  const projectsByOrg = await readActiveProjectsByOrg(supabase, worker.id);
+
   // Context Intelligence (rebuild phase 3): the ACTIVE WORKSPACE resolves the
   // default context — the engagement belonging to the active workspace's org
   // sorts FIRST (then is_primary, preserved by the stable sort), so the flow
@@ -263,7 +272,13 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
 
   return {
     kind: "ok",
-    engagements: ordered.map(({ id, label, isPrimary, orgName }) => ({ id, label, isPrimary, orgName })),
+    engagements: ordered.map(({ id, label, isPrimary, orgName, organizationId }) => ({
+      id,
+      label,
+      isPrimary,
+      orgName,
+      projects: organizationId ? (projectsByOrg.get(organizationId) ?? []) : [],
+    })),
     resolution,
     endedOrgNames,
   };

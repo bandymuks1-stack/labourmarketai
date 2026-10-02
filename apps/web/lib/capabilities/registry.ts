@@ -3,7 +3,10 @@ import "server-only";
 import { z } from "zod";
 import { getTranslations } from "next-intl/server";
 
-import { createJournalEntryCore } from "@/lib/journal/journal-write-core";
+import {
+  createJournalEntryCore,
+  projectsToChooseFrom,
+} from "@/lib/journal/journal-write-core";
 import { journalChainFingerprint } from "@/lib/journal/journal-chain-fingerprint";
 import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 import { fd } from "@/lib/conversation/executor-contract";
@@ -416,12 +419,16 @@ function normalizedDraftForHash(draft: {
   notes: string;
   workDate: string;
   siteName?: string | null;
+  projectId?: string | null;
 }): Record<string, unknown> {
   return {
     engagementContextId: draft.engagementContextId,
     notes: draft.notes,
     workDate: draft.workDate,
     siteName: draft.siteName ?? null,
+    // The project the hours belong to ("none" = deliberately not project
+    // work) is part of what the human confirmed, so it is part of the hash.
+    projectId: draft.projectId ?? null,
   };
 }
 
@@ -640,6 +647,21 @@ const journalCreateDraft: CapabilityDescriptor = {
         },
       };
     }
+    if (!draft.projectId) {
+      const choices = await projectsToChooseFrom(caller.supabase, caller.userId, engagement.id);
+      if (choices) {
+        // NOTHING preselected, NO token minted — same shape as the
+        // engagement choice. "none" answers "not project work".
+        return {
+          ok: true,
+          data: {
+            status: "project_required",
+            options: choices.map((p) => ({ projectId: p.id, label: p.label })),
+            note: 'This worker has more than one active project here. Ask the user which project these hours belong to (or "not project work", projectId "none"), then draft again with projectId.',
+          },
+        };
+      }
+    }
     const state = await journalChainFingerprint(caller);
     if (!state.ok) return state.result;
     const resolved = {
@@ -647,6 +669,7 @@ const journalCreateDraft: CapabilityDescriptor = {
       notes: draft.notes,
       workDate: draft.workDate,
       siteName: draft.siteName ?? null,
+      projectId: draft.projectId ?? null,
     };
     const token = mintCapabilityConfirmation({
       actionId: "journal.confirm",
@@ -662,6 +685,7 @@ const journalCreateDraft: CapabilityDescriptor = {
           siteName: resolved.siteName,
           notes: resolved.notes,
           engagementContextId: resolved.engagementContextId,
+          projectId: resolved.projectId,
           // The RESOLVED context, named — the human must SEE which context
           // the entry will land in before confirming (preselect-and-show,
           // never silently assign).
@@ -735,12 +759,24 @@ const journalConfirm: CapabilityDescriptor = {
         notes: draft.notes,
         work_date: draft.workDate,
         site_name: draft.siteName ?? "",
+        project_id: draft.projectId ?? "",
         // The stated time becomes time on the record — the same derivation
         // the conversation executor applies (issue #1689).
         ...intakeWorkTimeFields(draft.notes, draft.workDate),
       }),
     );
     if (!result.ok) {
+      if (result.code === "project_required" && result.projects) {
+        // The write core is the net: surface the choices, never a bare error.
+        return {
+          ok: true,
+          data: {
+            status: "project_required",
+            options: result.projects.map((p) => ({ projectId: p.id, label: p.label })),
+            note: "Nothing was saved. Ask the user which project, then draft again with projectId.",
+          },
+        };
+      }
       return { ok: false, code: result.code, message: result.message };
     }
     return {

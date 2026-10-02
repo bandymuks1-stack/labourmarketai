@@ -40,7 +40,7 @@ export async function LearningCompassSection({
   const professionLabel = (slug: string) =>
     tProf.has(slug as never) ? tProf(slug as never) : slug.replace(/-/g, " ");
 
-  const { becoming, evidence, fitsNow, missing, nextSteps } = compass;
+  const { becoming, evidence, fitsNow, missing, nextSteps, recommendations } = compass;
 
   return (
     <Card compact>
@@ -194,6 +194,38 @@ export async function LearningCompassSection({
             </>
           )}
         </div>
+
+        {recommendations.length > 0 ? (
+          <div className="flex flex-col gap-1" data-testid="compass-recommendations">
+            <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("recTitle")}</h3>
+            <ul className="flex flex-col gap-1.5 text-xs">
+              {recommendations.map((r) => {
+                const first = r.sources[0];
+                const role = first?.roleSlug ? professionLabel(first.roleSlug) : null;
+                return (
+                  <li
+                    key={`${r.basis}:${r.skillSlug}`}
+                    className="rounded-md border border-ink-500 px-2 py-1.5"
+                    data-testid="compass-recommendation"
+                    data-basis={r.basis}
+                  >
+                    <span className="font-medium text-text-primary">{skillLabel(r.skillSlug)}</span>
+                    <span className="block leading-relaxed text-text-secondary">
+                      {r.basis === "profession_gap"
+                        ? t("recWhyProfession", {
+                            profession: r.professionSlug ? professionLabel(r.professionSlug) : "",
+                          })
+                        : r.basis === "demand_weak_evidence"
+                          ? t(role ? "recWhyWeakRole" : "recWhyWeak", { role: role ?? "" })
+                          : t(role ? "recWhyMissingRole" : "recWhyMissing", { role: role ?? "" })}
+                      {r.sources.length > 1 ? ` ${t("recMoreRequests", { count: r.sources.length - 1 })}` : ""}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ) : null}
 
         <div className="flex flex-col gap-1" data-testid="compass-next">
           <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("next")}</h3>

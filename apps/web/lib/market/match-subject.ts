@@ -1,4 +1,5 @@
 import "server-only";
+import { readConfirmedWorkBySkill } from "@/lib/evidence/confirmed-work-read";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { excludeSyntheticFixtures } from "@/lib/qa/synthetic-fixture";
@@ -350,7 +351,7 @@ export async function buildSupplyCandidates(
   // null — an honest "not stated", exactly like the gated stores above. The
   // superadmin matching workbench, which is where a human actually weighs a
   // learner's placement today, reads the real rows.
-  const [skillsRes, profsRes, prefsRes, langsRes, practiceRes] = await Promise.all([
+  const [skillsRes, profsRes, prefsRes, langsRes, practiceRes, confirmedWork] = await Promise.all([
     asAny(supabase)
       .from("worker_skills")
       .select("worker_id, source, verified, skills ( slug, esco_uri )")
@@ -391,6 +392,16 @@ export async function buildSupplyCandidates(
             (r: { data: unknown; error: unknown }) => (r.error ? { data: null } : r),
             () => ({ data: null }),
           ),
+    // CONFIRMED WORK per skill (handoff 2026-10-02 §5): ONE batched read for
+    // the whole pool, under the caller's RLS. null/empty = not known — the
+    // matcher reads that as "no evidence", never as a penalty.
+    readConfirmedWorkBySkill(
+      supabase,
+      rows.map((w) => ({
+        id: w.id as string,
+        profileId: (w.profile_id as string | null) ?? null,
+      })),
+    ),
   ]);
 
   // WHY THESE TWO ARE CHECKED AND THE OTHERS ARE NOT. `prefsRes`, `langsRes`
@@ -494,7 +505,17 @@ export async function buildSupplyCandidates(
         (w.updated_at as string | null) ?? (w.created_at as string | null),
       ),
       subject: {
-        skills: [...skillMap.entries()].map(([uri, evidence]) => ({ uri, evidence })),
+        skills: [...skillMap.entries()].map(([uri, evidence]) => {
+          const work = confirmedWork?.get(w.id as string)?.get(uri);
+          return work
+            ? {
+                uri,
+                evidence,
+                confirmedWorkEntries: work.confirmedWorkEntries,
+                confirmedDays: work.confirmedDays,
+              }
+            : { uri, evidence };
+        }),
         professionSlug: professionByWorker.get(w.id as string) ?? null,
         country: (w.current_location_country as string | null) ?? null,
         preferredCountries: (w.preferred_countries as string[] | null) ?? [],

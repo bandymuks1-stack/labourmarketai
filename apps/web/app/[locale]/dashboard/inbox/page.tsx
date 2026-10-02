@@ -75,7 +75,7 @@ export default async function InboxPage({
     const { data: rows, error: rowsError } = await supabase
       .from("journal_entries")
       .select(
-        `id, original_text, created_at, worker_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), workers!inner(${WORKER_NAME_FIELDS})`,
+        `id, original_text, created_at, worker_id, engagement_contexts(organization_id), journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), workers!inner(${WORKER_NAME_FIELDS})`,
       )
       .in("id", reviewableIds)
       .order("created_at", { ascending: true });
@@ -84,6 +84,23 @@ export default async function InboxPage({
     if (rowsError) loadFailed = true;
 
     const unconfirmed = rowsError ? [] : (rows ?? []);
+
+    // WHO CAN ACTUALLY DECIDE. Seeing the queue is `manages_organization()`;
+    // deciding needs an ACTIVE manager/owner/external_manager engagement in the
+    // entry's organization (the RPC's own `no_reviewer_engagement` rule). A
+    // manager without it used to be shown live "Approve" buttons that refused
+    // on click. The read below mirrors that predicate so the card can say so up
+    // front; the RPC stays the authority, and a failed read leaves the buttons
+    // (never hides an action on a guess).
+    const { data: engRows, error: engError } = await supabase
+      .from("engagement_contexts")
+      .select("organization_id")
+      .eq("profile_id", user.id)
+      .eq("status", "active")
+      .in("relationship_slug", ["manager", "owner", "external_manager"]);
+    const reviewerOrgs = new Set(
+      (engRows ?? []).map((e) => e.organization_id).filter(Boolean) as string[],
+    );
 
     // Batch the workers' declared skills WITH ids + verified state — the manager
     // picks which of these the entry proves, to confirm/verify them.
@@ -110,7 +127,17 @@ export default async function InboxPage({
 
     pending = unconfirmed.map((r) => {
       const workerName = resolveWorkerName(r.workers as WorkerNameRow);
-      const metrics = (r.journal_entry_metrics ?? []).map((m) => {
+      // The reviewer sees only metrics that have a human label. The parser's
+      // provenance rows (work_date, parsed_fragment, fragment_*, pipeline_
+      // version …) stay in the database but are never shown as raw slugs — the
+      // work date is carried separately and rendered as the entry's date.
+      const workDate =
+        (r.journal_entry_metrics ?? []).find(
+          (m) => m.metric_slug === "work_date" && /^\d{4}-\d{2}-\d{2}$/.test(m.value_text ?? ""),
+        )?.value_text ?? null;
+      const metrics = (r.journal_entry_metrics ?? [])
+        .filter((m) => FIELD_LABEL_SLUGS.has(m.metric_slug))
+        .map((m) => {
         const label = FIELD_LABEL_SLUGS.has(m.metric_slug)
           ? tField(`field.${m.metric_slug}`)
           : m.metric_slug;
@@ -140,6 +167,13 @@ export default async function InboxPage({
         originalText: r.original_text,
         workerName,
         createdAt: r.created_at,
+        workDate,
+        canApprove: engError
+          ? true
+          : reviewerOrgs.has(
+              ((r as unknown as { engagement_contexts?: { organization_id?: string | null } | null })
+                .engagement_contexts?.organization_id ?? "") as string,
+            ),
         metrics,
         skills: r.worker_id ? (skillsByWorker.get(r.worker_id) ?? []) : [],
         recognized,
