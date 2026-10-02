@@ -54,9 +54,9 @@ export default async function ForWorkersPage({
         ctaLabel={t("cta")}
         ctaSource="workers_hero"
       />
-      <BenefitCards items={benefits} />
       <RoleEnrichment
         root="workers"
+        afterPreview={<BenefitCards items={benefits} />}
         previewKey="profile"
         preview={
           <ExamplePreviewFrame>
