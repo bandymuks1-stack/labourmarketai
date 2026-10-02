@@ -39,7 +39,7 @@ describe("stage evidence roll-up — derived, never guessed", () => {
     const r = deriveStageEvidenceRollup(tasks, {
       t3: [{ entryId: "e9", entryProjectId: "p" }],
     });
-    expect(r).toEqual({});
+    expect(r.s1).toEqual({ entries: 0, conflicts: 0, ambiguous: 0 });
   });
 });
 
