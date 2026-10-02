@@ -45,6 +45,17 @@ import { WorkWeek } from "@/components/app/planning/work-week";
 import { WorkDay } from "@/components/app/planning/work-day";
 import { buildWorkRhythm, compactHours } from "@/lib/planning/work-rhythm";
 import { createUtcFormatter } from "@/lib/time/display";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
+import { shiftDay } from "@/lib/planning/roster-timeline-model";
+import {
+  buildMyNowNext,
+  isTimeLens,
+  parseTimeFocus,
+  type TimeLens,
+} from "@/lib/planning/time-lens";
+import { TimeLensNav } from "@/components/app/planning/time-lens-nav";
+import { MyTimeNow } from "@/components/app/planning/my-time-now";
+import { ManagerLens } from "@/components/app/planning/manager-lens";
 
 /**
  * THE canonical calendar (core-network area C) — one planning surface over
@@ -128,6 +139,10 @@ export default async function PlanningPage({
     view?: string;
     date?: string;
     ts?: string;
+    /** Work in Time perspective: me (default) | people | projects. */
+    lens?: string;
+    /** A selection that survives navigation: person:<id> | project:<id>. */
+    focus?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -138,6 +153,8 @@ export default async function PlanningPage({
     view: rawView,
     date: rawDate,
     ts: rawTs,
+    lens: rawLens,
+    focus: rawFocus,
   } = await searchParams;
   const tsNotice: TimesheetNotice | null =
     rawTs && isTimesheetNotice(rawTs) ? rawTs : null;
@@ -147,6 +164,17 @@ export default async function PlanningPage({
   // date, little else). The agenda stays one tap away.
   const view: PlanningView = isPlanningView(rawView) ? rawView : "month";
   const today = new Date().toISOString().slice(0, 10);
+
+  // WORK IN TIME — three perspectives on one canonical route. MY TIME is the
+  // default and is everything this page was; PEOPLE IN TIME and PROJECTS IN
+  // TIME exist for someone who manages a team or a project (the workspace the
+  // person is acting in decides, exactly as the company planning zone does).
+  const requestedLens: TimeLens = isTimeLens(rawLens) ? rawLens : "me";
+  const employerContext = await resolveEmployerCompanyContext();
+  const isManager = employerContext.kind === "ok";
+  const lenses: readonly TimeLens[] = isManager ? ["me", "people", "projects"] : ["me"];
+  const lens: TimeLens = isManager ? requestedLens : "me";
+  const lensDenied = requestedLens !== "me" && !isManager;
   const anchor = parseIsoDay(rawDate) ?? today;
   const range = visibleRange(view, anchor);
 
@@ -154,6 +182,27 @@ export default async function PlanningPage({
   // Un-namespaced translator for the source-native status keys the items
   // carry (bookings.status.*, tasks.status.*, planning.*Status.*).
   const tAll = await getTranslations();
+  const tWit = await getTranslations("workInTime");
+
+  if (lens !== "me") {
+    return (
+      <div className="flex flex-col gap-6" data-testid="planning-page" data-lens={lens}>
+        <header>
+          <h1 className="font-display text-title font-bold tracking-tightest text-text-primary">
+            {t("title")}
+          </h1>
+        </header>
+        <TimeLensNav active={lens} date={parseIsoDay(rawDate) ?? today} today={today} lenses={lenses} />
+        <ManagerLens
+          lens={lens}
+          locale={locale}
+          today={today}
+          rawDate={rawDate}
+          focus={parseTimeFocus(rawFocus)}
+        />
+      </div>
+    );
+  }
 
   // Workload strip (week + agenda views): planned committed DAYS vs recorded
   // journal HOURS per Monday-started week — two facts in their own units,
@@ -167,9 +216,16 @@ export default async function PlanningPage({
   // `view` alone. So they travel together instead of one after the other, and
   // the strip is still not fetched at all on the views that do not show it.
   const showWorkload = view === "week" || view === "agenda";
-  const [result, workloadActuals] = await Promise.all([
+  // MY TIME's "now / next / days around" needs today and what follows it, which
+  // the visible period may not include (a navigated month, a past year). Read
+  // it separately only then — the common case reuses the one read above.
+  const heroStart = shiftDay(today, -2);
+  const heroEnd = shiftDay(today, 45);
+  const heroInRange = range.start <= heroStart && range.end >= heroEnd;
+  const [result, workloadActuals, heroExtra] = await Promise.all([
     getPlanning({ rangeStart: range.start, rangeEnd: range.end }),
     showWorkload ? getMyJournalWorkHours(range.start, range.end) : null,
+    heroInRange ? null : getPlanning({ rangeStart: heroStart, rangeEnd: heroEnd }),
   ]);
   const workloadWeeks =
     result.status === "ok" && workloadActuals?.status === "ok"
@@ -525,6 +581,23 @@ export default async function PlanningPage({
       return it.startDate && end && rangesOverlapInclusive(it.startDate, end, range.start, range.end);
     }).length;
 
+  // MY TIME hero — now, next and the days around them, from the hero read.
+  const heroResult = heroInRange ? result : heroExtra;
+  const heroItems = heroResult && heroResult.status === "ok" ? heroResult.items : null;
+  const heroConfirmed = heroResult && heroResult.status === "ok" ? heroResult.journalConfirmedIds : null;
+  const heroConflictIds = heroItems ? conflictItemIds(detectConflicts(heroItems)) : conflictIds;
+  const heroStrip = heroItems
+    ? buildWorkRhythm({
+        days: [...new Array(14).keys()].map((i) => {
+          const day = shiftDay(today, i - 2);
+          return { day, items: itemsForDay(heroItems, day) };
+        }),
+        todayIso: today,
+        confirmedIds: heroConfirmed,
+        conflictIds: heroConflictIds,
+      }).days
+    : null;
+
   const hasAnything = agenda
     ? agenda.days.length > 0 || agenda.later.length > 0 || agenda.undated.length > 0
     : visibleItems.length > 0;
@@ -533,7 +606,41 @@ export default async function PlanningPage({
     <div className="flex flex-col gap-6" data-testid="planning-page">
       {header}
 
+      <TimeLensNav active={lens} date={anchor} today={today} lenses={lenses} />
+      {lensDenied ? (
+        <p
+          role="status"
+          className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-sm text-text-secondary"
+          data-testid="wit-lens-denied"
+        >
+          {tWit("lens.notManager")}
+        </p>
+      ) : null}
+
+      {heroItems && heroStrip ? (
+        <MyTimeNow
+          nowNext={buildMyNowNext(heroItems, today)}
+          strip={heroStrip}
+          confirmedIds={heroConfirmed}
+          today={today}
+          locale={locale}
+          dayHref={(day: string) =>
+            planningHref({ view: "day", date: day, source: null, today })
+          }
+        />
+      ) : (
+        <p
+          role="status"
+          className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-sm text-text-secondary"
+          data-testid="wit-me-unknown"
+        >
+          {tWit("me.unknown")}
+        </p>
+      )}
+
       <SourceNotes sources={result.sources} t={t} />
+
+      <h2 className="-mb-3 text-sm font-semibold text-text-primary">{tWit("me.calendarHeading")}</h2>
 
       {/* View switcher — plain searchParams links, keyboard accessible. */}
       <nav
