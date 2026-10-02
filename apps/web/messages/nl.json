@@ -8539,13 +8539,15 @@
       "cancel": "Annuleren"
     },
     "verdict": {
-      "eligible": "Voldoet aan de gestelde eisen",
+      "eligible": "Voldoet aan de verplichte eisen (vaardigheden worden apart beoordeeld)",
       "blocked": "Voldoet niet aan een gestelde eis",
       "evidence": {
         "confirmed": "Bewijs: door manager bevestigd",
         "mixed": "Bewijs: deels bevestigd",
         "unverified": "Bewijs: alleen zelf opgegeven"
-      }
+      },
+      "noCriteria": "Geen verplichte eisen opgegeven",
+      "insufficient": "Te weinig gegevens om de eisen te controleren"
     },
     "editNeedCta": "Behoefte aanpassen of toevoegen",
     "availableSupply": {
@@ -8578,7 +8580,7 @@
         "shortlist": "Geselecteerd",
         "contact": "Gesproken",
         "offer": "Aangeboden",
-        "accepted": "Aanvaard",
+        "accepted": "Akkoord met de data",
         "closed": "Gesloten"
       }
     },
@@ -8588,7 +8590,8 @@
       "readiness": "Beschikbaarheid, gereedheid en documenten",
       "openTo": "Ook open voor: {countries}",
       "skillCount": "{matched} van {total} vereiste vaardigheden",
-      "nameHidden": "Naam en contactgegevens verschijnen pas wanneer de persoon dat toestaat."
+      "nameHidden": "Naam en contactgegevens verschijnen pas wanneer de persoon dat toestaat.",
+      "skillUnknown": "Geen vaardigheden opgegeven · nodig: {total}"
     }
   },
   "planBoundary": {
@@ -11895,7 +11898,7 @@
       "contacted": "Gecontacteerd",
       "interview": "In gesprek",
       "offer": "Aanbod",
-      "accepted": "Geaccepteerd",
+      "accepted": "Akkoord met de data",
       "rejected": "Afgewezen"
     },
     "action": {
@@ -11905,7 +11908,8 @@
       "continueConversation": "Gesprek voortzetten",
       "viewOffer": "Reactie op het aanbod volgen",
       "planWork": "Geaccepteerd aanbod bekijken",
-      "reviewOthers": "Andere kandidaten beoordelen"
+      "reviewOthers": "Andere kandidaten beoordelen",
+      "assignToProject": "Aan een project toewijzen"
     }
   },
   "agencyClients": {

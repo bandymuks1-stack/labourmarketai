@@ -8539,13 +8539,15 @@
       "cancel": "Abbrechen"
     },
     "verdict": {
-      "eligible": "Erfüllt die genannten Anforderungen",
+      "eligible": "Erfüllt die Pflichtanforderungen (Fähigkeiten werden separat bewertet)",
       "blocked": "Erfüllt eine genannte Anforderung nicht",
       "evidence": {
         "confirmed": "Nachweis: vom Manager bestätigt",
         "mixed": "Nachweis: teilweise bestätigt",
         "unverified": "Nachweis: nur selbst angegeben"
-      }
+      },
+      "noCriteria": "Keine Pflichtanforderungen angegeben",
+      "insufficient": "Zu wenig Daten, um die Anforderungen zu prüfen"
     },
     "editNeedCta": "Bedarf anpassen oder hinzufügen",
     "availableSupply": {
@@ -8578,7 +8580,7 @@
         "shortlist": "Vorausgewählt",
         "contact": "Im Kontakt",
         "offer": "Angeboten",
-        "accepted": "Angenommen",
+        "accepted": "Mit den Terminen einverstanden",
         "closed": "Geschlossen"
       }
     },
@@ -8588,7 +8590,8 @@
       "readiness": "Verfügbarkeit, Bereitschaft und Dokumente",
       "openTo": "Auch offen für: {countries}",
       "skillCount": "{matched} von {total} geforderten Fähigkeiten",
-      "nameHidden": "Name und Kontaktdaten erscheinen erst, wenn die Person sie freigibt."
+      "nameHidden": "Name und Kontaktdaten erscheinen erst, wenn die Person sie freigibt.",
+      "skillUnknown": "Keine Fähigkeiten angegeben · benötigt: {total}"
     }
   },
   "planBoundary": {
@@ -11895,7 +11898,7 @@
       "contacted": "Kontaktiert",
       "interview": "Im Gespräch",
       "offer": "Angebot",
-      "accepted": "Angenommen",
+      "accepted": "Mit den Terminen einverstanden",
       "rejected": "Abgelehnt"
     },
     "action": {
@@ -11905,7 +11908,8 @@
       "continueConversation": "Gespräch fortsetzen",
       "viewOffer": "Antwort auf das Angebot verfolgen",
       "planWork": "Angenommenes Angebot ansehen",
-      "reviewOthers": "Weitere Kandidaten prüfen"
+      "reviewOthers": "Weitere Kandidaten prüfen",
+      "assignToProject": "Einem Projekt zuweisen"
     }
   },
   "agencyClients": {

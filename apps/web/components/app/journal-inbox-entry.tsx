@@ -19,6 +19,12 @@ export type InboxEntry = {
   originalText: string;
   workerName: string;
   createdAt: string;
+  /** The day the work was done (YYYY-MM-DD), when the worker stated one. */
+  workDate?: string | null;
+  /** False when the viewer can see this entry but holds no reviewer engagement
+   *  in its organization — the actions are replaced by the reason. The server
+   *  RPC remains the authority; this only avoids offering a refused action. */
+  canApprove?: boolean;
   metrics: { label: string; value: string }[];
   skills: InboxSkill[];
   /** Deterministic work items recognized from the entry text (display only),
@@ -169,7 +175,8 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
     (confirmState?.ok === false && isBlocked(confirmState.code)) ||
     (reviewState?.ok === false && isBlocked(reviewState.code));
   // Whether the reviewer may still act (drives every action surface below).
-  const canAct = !done && !permissionBlocked;
+  const noApproveRight = entry.canApprove === false;
+  const canAct = !done && !permissionBlocked && !noApproveRight;
 
   return (
     <li className="card-border flex flex-col gap-3 p-4" data-testid={`inbox-entry-${entry.id}`}>
@@ -179,7 +186,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
             {entry.workerName}
           </p>
           <p className="mt-0.5 text-meta text-text-muted">
-            {formatUtcDate(entry.createdAt, locale)}
+            {formatUtcDate(entry.workDate ?? entry.createdAt, locale)}
           </p>
         </div>
       </div>
@@ -447,6 +454,16 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
             </Button>
           </div>
         </form>
+      ) : null}
+
+      {noApproveRight && !resultMessage ? (
+        <p
+          className="rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-xs text-state-warning"
+          role="status"
+          data-testid={`journal-review-no-right-${entry.id}`}
+        >
+          {t("inbox.result.noReviewerEngagement")}
+        </p>
       ) : null}
 
       {resultMessage ? (
