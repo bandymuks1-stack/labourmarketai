@@ -6877,5 +6877,87 @@
       "refused": "Dette kunne ikke lagres. Ingenting er endret.",
       "person": "{hours} t, {count, plural, one {# post} other {# poster}}"
     }
+  },
+  "workLifecycle": {
+    "title": "[EN] What happens to the work you do",
+    "titleCompany": "[EN] What happens to the work you run",
+    "example": "[EN] Example — not a real person or real data",
+    "hint": "[EN] Select a step. Every step opens the real place in your workspace.",
+    "open": "[EN] Open in your workspace",
+    "list": "[EN] Work lifecycle steps",
+    "workers": {
+      "person": {
+        "label": "[EN] You",
+        "fact": "[EN] Cook · professional identity",
+        "detail": "[EN] One professional identity that is yours — not tied to a single employer."
+      },
+      "team": {
+        "label": "[EN] Team",
+        "fact": "[EN] Kitchen team",
+        "detail": "[EN] You join a real team, with the people you work with and who leads it."
+      },
+      "project": {
+        "label": "[EN] Project",
+        "fact": "[EN] Autumn menu launch",
+        "detail": "[EN] Work belongs to a project, so it has a place, a purpose and a time."
+      },
+      "work": {
+        "label": "[EN] Work",
+        "fact": "[EN] Evening service · 8 h",
+        "detail": "[EN] What you did, when and for how long — recorded as it happens."
+      },
+      "evidence": {
+        "label": "[EN] Evidence",
+        "fact": "[EN] Photo + journal entry",
+        "detail": "[EN] Completed work becomes evidence instead of disappearing."
+      },
+      "confirmation": {
+        "label": "[EN] Confirmed",
+        "fact": "[EN] Confirmed by manager",
+        "detail": "[EN] A manager confirms it. Nothing is called verified without that."
+      },
+      "history": {
+        "label": "[EN] History",
+        "fact": "[EN] Added to your history",
+        "detail": "[EN] Confirmed work builds your professional history — it stays with you for the next job."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "[EN] Need",
+        "fact": "[EN] 4 cooks, from Monday",
+        "detail": "[EN] You state the real need once: who, where and from when."
+      },
+      "people": {
+        "label": "[EN] People",
+        "fact": "[EN] Professionals who fit",
+        "detail": "[EN] Professionals whose real work history fits the need — with what is verified and what is not yet."
+      },
+      "team": {
+        "label": "[EN] Team",
+        "fact": "[EN] Kitchen team",
+        "detail": "[EN] People become a team with a lead, shifts and a place to work."
+      },
+      "project": {
+        "label": "[EN] Project",
+        "fact": "[EN] Autumn menu launch",
+        "detail": "[EN] Teams are organised around the project they deliver."
+      },
+      "work": {
+        "label": "[EN] Work",
+        "fact": "[EN] Evening service · 8 h",
+        "detail": "[EN] Work is recorded where it happens, not rebuilt afterwards."
+      },
+      "confirmation": {
+        "label": "[EN] Confirmed",
+        "fact": "[EN] Awaiting your confirmation",
+        "detail": "[EN] You see what still needs confirming and what is already done."
+      },
+      "report": {
+        "label": "[EN] Report",
+        "fact": "[EN] Report from real work",
+        "detail": "[EN] Reports come from confirmed work — nobody retypes them."
+      }
+    }
   }
 }
