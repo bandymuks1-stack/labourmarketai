@@ -115,6 +115,16 @@ export default async function CompanyPeoplePage({
       isCreator: employerCtx.isCreator,
       invitationDelegate: employerCtx.invitationDelegate,
     }).canManageInvitations;
+  // Operational roles are an owner/admin write (`assign_company_worker_role`
+  // is `owns_company`; the action refuses anyone else). A manager used to be
+  // shown the form and answered "could not save" - the button is not offered
+  // to someone the database will refuse.
+  const canAssignRoles =
+    employerCtx.kind === "ok" &&
+    projectOrganizationAuthority({
+      role: employerCtx.role,
+      isCreator: employerCtx.isCreator,
+    }).canGovern;
 
   const orgContext = await getActiveOrganizationContext();
   const capabilityOrgId =
@@ -276,7 +286,7 @@ export default async function CompanyPeoplePage({
           avatarByWorker={avatarByWorker}
           professionsByWorker={professionsByWorker}
           roleCoordinationEnabled={isOperationsRoleEnabled("foreman")}
-          canAssignRoles
+          canAssignRoles={canAssignRoles}
           canManageInvitations={canManageInvitations}
           team={teamView}
           reviewElsewhere={
