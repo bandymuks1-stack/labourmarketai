@@ -113,6 +113,9 @@ export const PRIMARY_ROUTES: readonly PrimaryRoute[] = [
   // Core-network area B: "Mano tinklas" is a dashboard module (grid card +
   // command entry) - my organizations, relationships, people/company search
   // and the canonical invite action.
+  // Discover (owner decision 2026-10-02): the role-aware destination for
+  // everything people and businesses offer or seek; links only, owns no data.
+  { id: "discover", urlPattern: "/dashboard/market", sourceFile: "app/[locale]/dashboard/market/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "network", urlPattern: "/dashboard/network", sourceFile: "app/[locale]/dashboard/network/page.tsx", requiresAuth: true, kind: "role-flow" },
   { id: "opportunities", urlPattern: "/dashboard/opportunities", sourceFile: "app/[locale]/dashboard/opportunities/page.tsx", requiresAuth: true, kind: "role-flow" },
   // Control room PR I: operational finance records is a dashboard module
