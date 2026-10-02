@@ -214,7 +214,11 @@ describe("T2 records, staging statuses and the chain", () => {
 
 describe("T3 customer-ordered work without an order document", () => {
   it.todo("[PR-5] 3 historical projects (PR1, PR3, PR2) and 3 keyed customer rows are created");
-  it.todo("[PR-4] project_ordered_work has no order-detail or money column (information_schema count 0; 42703 on order_reference)");
+  // PR-4 delivered the storage: the static half (the M2 file declares no order-detail
+  // or money column) is pinned by lib/guards/historical-timesheet-m2-m3-migration.test.ts;
+  // the database half is the 'T3 project_ordered_work has NO order-detail or money
+  // column' check of docs/design/historical-timesheet-m2-m3-dryrun.sql (lead run).
+  it.todo("[PR-4 → lead run] project_ordered_work has no order-detail or money column (information_schema count 0; 42703 on order_reference)");
   it.todo("[PR-6] 6 ordered-work steps exist with evidence_basis organization_timesheet");
   it.todo("[PR-7] every step's view model carries ORDER_DETAILS_NOT_ON_RECORD verbatim; views print 'Order details: not on record'");
 });
@@ -463,6 +467,13 @@ describe("T14 authorization contracts (Layer D)", () => {
   // production by the LEAD (never by automation); vitest has no database, so
   // the static half is pinned by lib/guards/historical-timesheet-m1-migration.test.ts.
   it.todo("[PR-3 → lead run] the dry run answers DRYRUN_RESULT ok:true, failed:0 against production (A18/A20 arrive with M2, A27–A29 and the source_preserved positive control with M3)");
+  // PR-4 delivered the second Layer D script as docs/design/historical-timesheet-m2-m3-dryrun.sql:
+  // ONE rolled-back DO block that applies M2 + M3, asserts M1 is applied and the live
+  // definer body is the one M3 reproduces, and runs A18, A20, A27, A28a/b, A29, the
+  // source_preserved positive controls (csv and xlsx), A12, A13, A19 on steps and the
+  // M2 read / insert paths for the owner, manager, external manager, an unrelated user,
+  // a foreign owner and anon. Static half: lib/guards/historical-timesheet-m2-m3-migration.test.ts.
+  it.todo("[PR-4 → lead run] the M2/M3 dry run answers DRYRUN_RESULT ok:true, failed:0 against production after the owner approves the RED packet");
 });
 
 // ── T15 ──────────────────────────────────────────────────────────────────────

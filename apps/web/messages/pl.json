@@ -7910,7 +7910,8 @@
       "org_correspondence_incoming": "Korespondencja przychodząca",
       "org_correspondence_outgoing": "Korespondencja wychodząca",
       "org_internal": "Dokument wewnętrzny",
-      "org_agreement_attachment": "Załącznik do umowy"
+      "org_agreement_attachment": "Załącznik do umowy",
+      "org_import_source": "Źródło importu (oryginalny plik ewidencji czasu pracy)"
     },
     "status": {
       "active": "Aktywny",

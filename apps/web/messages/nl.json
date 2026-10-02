@@ -7910,7 +7910,8 @@
       "org_correspondence_incoming": "Inkomende correspondentie",
       "org_correspondence_outgoing": "Uitgaande correspondentie",
       "org_internal": "Intern document",
-      "org_agreement_attachment": "Bijlage bij overeenkomst"
+      "org_agreement_attachment": "Bijlage bij overeenkomst",
+      "org_import_source": "Importbron (origineel urenstaatbestand)"
     },
     "status": {
       "active": "Actief",
