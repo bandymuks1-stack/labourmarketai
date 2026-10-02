@@ -51,6 +51,15 @@ describe("journal project attribution — every creation path", () => {
     expect(read("lib/conversation/worker-executors.ts")).toMatch(/project_id: input\.projectId \?\? ""/);
   });
 
+  it("the MCP draft asks before minting a token, and confirm threads the choice + surfaces choices", () => {
+    const reg = read("lib/capabilities/registry.ts");
+    expect(reg).toMatch(/projectsToChooseFrom\(caller, engagement\.id\)/);
+    expect(reg).toMatch(/status: "project_required"/);
+    expect(reg).toMatch(/project_id: draft\.projectId \?\? ""/);
+    expect(reg).toMatch(/result\.code === "project_required" && result\.projects/);
+    expect(reg).toMatch(/projectId: draft\.projectId \?\? null/);
+  });
+
   it("the engagement lister and the journal page read projects through the ONE reader", () => {
     expect(read("lib/conversation/worklog-engagements.ts")).toMatch(/readActiveProjectsByOrg/);
     expect(read("app/[locale]/dashboard/journal/page.tsx")).toMatch(/readActiveProjectsByOrg/);

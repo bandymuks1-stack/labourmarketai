@@ -4,6 +4,11 @@ import { z } from "zod";
 import { getTranslations } from "next-intl/server";
 
 import { createJournalEntryCore } from "@/lib/journal/journal-write-core";
+import {
+  projectPromptFor,
+  type AssignedProject,
+} from "@/lib/journal/project-attribution";
+import { readActiveProjectsByOrg } from "@/lib/journal/project-attribution-read";
 import { journalChainFingerprint } from "@/lib/journal/journal-chain-fingerprint";
 import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 import { fd } from "@/lib/conversation/executor-contract";
@@ -416,13 +421,41 @@ function normalizedDraftForHash(draft: {
   notes: string;
   workDate: string;
   siteName?: string | null;
+  projectId?: string | null;
 }): Record<string, unknown> {
   return {
     engagementContextId: draft.engagementContextId,
     notes: draft.notes,
     workDate: draft.workDate,
     siteName: draft.siteName ?? null,
+    // The project the hours belong to ("none" = deliberately not project
+    // work) is part of what the human confirmed, so it is part of the hash.
+    projectId: draft.projectId ?? null,
   };
+}
+
+/** The ONE attribution rule (lib/journal/project-attribution) applied at the
+ *  draft step: when the worker has 2+ ACTIVE projects in this entry's
+ *  organization and the draft names none, the human must choose first. */
+async function projectsToChooseFrom(
+  caller: CapabilityCaller,
+  engagementContextId: string,
+): Promise<AssignedProject[] | null> {
+  const { data: worker } = await caller.supabase
+    .from("workers")
+    .select("id")
+    .eq("profile_id", caller.userId)
+    .maybeSingle();
+  if (!worker) return null;
+  const { data: ctx } = await caller.supabase
+    .from("engagement_contexts")
+    .select("organization_id")
+    .eq("id", engagementContextId)
+    .maybeSingle();
+  if (!ctx?.organization_id) return null;
+  const byOrg = await readActiveProjectsByOrg(caller.supabase, worker.id);
+  const projects = byOrg.get(ctx.organization_id) ?? [];
+  return projectPromptFor(projects) === "ask" ? projects : null;
 }
 
 /**
@@ -640,6 +673,21 @@ const journalCreateDraft: CapabilityDescriptor = {
         },
       };
     }
+    if (!draft.projectId) {
+      const choices = await projectsToChooseFrom(caller, engagement.id);
+      if (choices) {
+        // NOTHING preselected, NO token minted — same shape as the
+        // engagement choice. "none" answers "not project work".
+        return {
+          ok: true,
+          data: {
+            status: "project_required",
+            options: choices.map((p) => ({ projectId: p.id, label: p.label })),
+            note: 'This worker has more than one active project here. Ask the user which project these hours belong to (or "not project work", projectId "none"), then draft again with projectId.',
+          },
+        };
+      }
+    }
     const state = await journalChainFingerprint(caller);
     if (!state.ok) return state.result;
     const resolved = {
@@ -647,6 +695,7 @@ const journalCreateDraft: CapabilityDescriptor = {
       notes: draft.notes,
       workDate: draft.workDate,
       siteName: draft.siteName ?? null,
+      projectId: draft.projectId ?? null,
     };
     const token = mintCapabilityConfirmation({
       actionId: "journal.confirm",
@@ -662,6 +711,7 @@ const journalCreateDraft: CapabilityDescriptor = {
           siteName: resolved.siteName,
           notes: resolved.notes,
           engagementContextId: resolved.engagementContextId,
+          projectId: resolved.projectId,
           // The RESOLVED context, named — the human must SEE which context
           // the entry will land in before confirming (preselect-and-show,
           // never silently assign).
@@ -735,12 +785,24 @@ const journalConfirm: CapabilityDescriptor = {
         notes: draft.notes,
         work_date: draft.workDate,
         site_name: draft.siteName ?? "",
+        project_id: draft.projectId ?? "",
         // The stated time becomes time on the record — the same derivation
         // the conversation executor applies (issue #1689).
         ...intakeWorkTimeFields(draft.notes, draft.workDate),
       }),
     );
     if (!result.ok) {
+      if (result.code === "project_required" && result.projects) {
+        // The write core is the net: surface the choices, never a bare error.
+        return {
+          ok: true,
+          data: {
+            status: "project_required",
+            options: result.projects.map((p) => ({ projectId: p.id, label: p.label })),
+            note: "Nothing was saved. Ask the user which project, then draft again with projectId.",
+          },
+        };
+      }
       return { ok: false, code: result.code, message: result.message };
     }
     return {
