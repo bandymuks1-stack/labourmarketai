@@ -2224,7 +2224,8 @@
         "title": "Wartet auf deine Entscheidung",
         "review": "Journaleinträge zur Prüfung",
         "invitations": "Ausstehende Einladungen an Arbeitskräfte",
-        "claims": "Öffentliche Anfragen, die du übernehmen kannst"
+        "claims": "Öffentliche Anfragen, die du übernehmen kannst",
+        "reviewOff": "Mitarbeitende mit erfasster Arbeit, deren Bestätigung ausgeschaltet ist"
       }
     },
     "agency": {

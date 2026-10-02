@@ -2224,7 +2224,8 @@
         "title": "Waiting for your decision",
         "review": "Journal entries to review",
         "invitations": "Pending worker invitations",
-        "claims": "Public need submissions you can claim"
+        "claims": "Public need submissions you can claim",
+        "reviewOff": "Workers with recorded work whose confirmation is switched off"
       }
     },
     "agency": {
