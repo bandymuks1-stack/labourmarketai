@@ -17,7 +17,7 @@ const PAGE = readFileSync(
 
 describe("people page: operational roles are offered only to who may assign them", () => {
   it("the page derives canAssignRoles from governance, never a constant", () => {
-    expect(PAGE).toMatch(/const canAssignRoles = orgAuthority\?\.canGovern === true;/);
+    expect(PAGE).toMatch(/const canAssignRoles =\s*employerCtx\.kind === "ok" &&\s*projectOrganizationAuthority\(\{\s*role: employerCtx\.role,\s*isCreator: employerCtx\.isCreator,\s*\}\)\.canGovern;/);
     expect(PAGE).toMatch(/canAssignRoles=\{canAssignRoles\}/);
     expect(PAGE).not.toMatch(/^\s*canAssignRoles\s*$/m);
   });

@@ -108,20 +108,23 @@ export default async function CompanyPeoplePage({
   // job title. Without it the invitations are not read at all — the database
   // would answer zero rows, which is not "nobody is invited" — and the page
   // says who handles them instead.
-  const orgAuthority =
-    employerCtx.kind === "ok"
-      ? projectOrganizationAuthority({
-          role: employerCtx.role,
-          isCreator: employerCtx.isCreator,
-          invitationDelegate: employerCtx.invitationDelegate,
-        })
-      : null;
-  const canManageInvitations = orgAuthority?.canManageInvitations === true;
+  const canManageInvitations =
+    employerCtx.kind === "ok" &&
+    projectOrganizationAuthority({
+      role: employerCtx.role,
+      isCreator: employerCtx.isCreator,
+      invitationDelegate: employerCtx.invitationDelegate,
+    }).canManageInvitations;
   // Operational roles are an owner/admin write (`assign_company_worker_role`
   // is `owns_company`; the action refuses anyone else). A manager used to be
   // shown the form and answered "could not save" - the button is not offered
   // to someone the database will refuse.
-  const canAssignRoles = orgAuthority?.canGovern === true;
+  const canAssignRoles =
+    employerCtx.kind === "ok" &&
+    projectOrganizationAuthority({
+      role: employerCtx.role,
+      isCreator: employerCtx.isCreator,
+    }).canGovern;
 
   const orgContext = await getActiveOrganizationContext();
   const capabilityOrgId =
