@@ -7585,6 +7585,8 @@
     "skillsUnavailable": "Could not be read right now.",
     "verifiedUnavailable": "Skills with a manager record could not be read right now.",
     "identity": {
+      "noEvidence": "No recorded evidence yet",
+      "notYetConfirmed": "Not yet confirmed",
       "currentWork": "Working now",
       "recorded": "h recorded",
       "confirmed": "h with a manager's record",

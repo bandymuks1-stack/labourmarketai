@@ -2420,6 +2420,8 @@
       "link": "Present a candidate"
     },
     "identity": {
+      "noEvidence": "Inga registrerade bevis ännu",
+      "notYetConfirmed": "Ännu inte bekräftat",
       "why": "Varför den här personen är relevant",
       "skills": "Relevanta färdigheter och vad de vilar på",
       "readiness": "Tillgänglighet, beredskap och dokument",

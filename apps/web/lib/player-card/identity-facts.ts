@@ -21,9 +21,17 @@ export function buildIdentityFacts({
   readonly truncated: boolean;
   readonly locale: string;
   /** Translator bound to the `playerCard.identity` namespace. */
-  readonly t: (key: "recorded" | "confirmed" | "days", values?: { count: number }) => string;
+  readonly t: (
+    key: "recorded" | "confirmed" | "days" | "noEvidence" | "notYetConfirmed",
+    values?: { count: number },
+  ) => string;
 }): IdentityFact[] {
-  if (!allTime || (allTime.hours <= 0 && allTime.daysWorked <= 0)) return [];
+  // UNKNOWN is not zero (SEP-7): nothing recorded is said in words as an
+  // absent state — never three zeros, and never a silent gap that makes the
+  // person look empty.
+  if (!allTime || (allTime.hours <= 0 && allTime.daysWorked <= 0)) {
+    return [{ value: null, label: t("noEvidence"), tone: "neutral", testid: "player-card-fact-none" }];
+  }
   const n = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
   const atLeast = truncated ? "≥ " : "";
   return [
@@ -33,12 +41,21 @@ export function buildIdentityFacts({
       tone: "evidence",
       testid: "player-card-fact-recorded",
     },
-    {
-      value: atLeast + n.format(allTime.confirmedHours),
-      label: t("confirmed"),
-      tone: allTime.confirmedHours > 0 ? "confirmed" : "neutral",
-      testid: "player-card-fact-confirmed",
-    },
+    // Recorded but not yet confirmed is a PENDING state, not "0 confirmed"
+    // (which reads as a failed verification).
+    allTime.confirmedHours > 0
+      ? {
+          value: atLeast + n.format(allTime.confirmedHours),
+          label: t("confirmed"),
+          tone: "confirmed",
+          testid: "player-card-fact-confirmed",
+        }
+      : {
+          value: null,
+          label: t("notYetConfirmed"),
+          tone: "neutral",
+          testid: "player-card-fact-confirmed",
+        },
     {
       value: atLeast + n.format(allTime.daysWorked),
       label: t("days", { count: allTime.daysWorked }),

@@ -7585,6 +7585,8 @@
     "skillsUnavailable": "Kon nu niet worden gelezen.",
     "verifiedUnavailable": "Vaardigheden met een record van een leidinggevende konden nu niet worden gelezen.",
     "identity": {
+      "noEvidence": "Nog geen vastgelegd bewijs",
+      "notYetConfirmed": "Nog niet bevestigd",
       "currentWork": "Werkt nu",
       "recorded": "u vastgelegd",
       "confirmed": "u met registratie van leidinggevende",

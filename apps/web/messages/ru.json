@@ -7585,6 +7585,8 @@
     "skillsUnavailable": "Сейчас не удалось прочитать.",
     "verifiedUnavailable": "Сейчас не удалось прочитать навыки с записью руководителя.",
     "identity": {
+      "noEvidence": "Записей о работе пока нет",
+      "notYetConfirmed": "Пока не подтверждено",
       "currentWork": "Работает сейчас",
       "recorded": "ч записано",
       "confirmed": "ч с записью руководителя",

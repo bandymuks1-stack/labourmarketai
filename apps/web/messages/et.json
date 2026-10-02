@@ -2420,6 +2420,8 @@
       "link": "Present a candidate"
     },
     "identity": {
+      "noEvidence": "Registreeritud tõendeid pole veel",
+      "notYetConfirmed": "Veel kinnitamata",
       "why": "Miks see inimene sobib",
       "skills": "Asjakohased oskused ja millel need põhinevad",
       "readiness": "Saadavus, valmisolek ja dokumendid",
