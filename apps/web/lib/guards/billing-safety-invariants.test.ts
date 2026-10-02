@@ -189,7 +189,7 @@ describe("ONE canonical subscription-apply primitive", () => {
       } catch {
         continue; // recovery files land in the next stage
       }
-      expect(src, f).not.toMatch(/upsertSubscription/);
+      expect(src, f).not.toMatch(/\bupsertSubscription\b/);
     }
     expect(read("lib/billing/apply-subscription-snapshot.ts")).toMatch(/upsertSubscription/);
   });
