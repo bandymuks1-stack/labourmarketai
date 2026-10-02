@@ -2224,7 +2224,8 @@
         "title": "Laukia jūsų sprendimo",
         "review": "Žurnalo įrašai peržiūrai",
         "invitations": "Laukiantys kvietimai darbuotojams",
-        "claims": "Viešos užklausos, kurias galite perimti"
+        "claims": "Viešos užklausos, kurias galite perimti",
+        "reviewOff": "Dirbantys darbuotojai, kurių darbo patvirtinimas neįjungtas"
       }
     },
     "agency": {

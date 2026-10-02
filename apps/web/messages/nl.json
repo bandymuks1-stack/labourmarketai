@@ -2224,7 +2224,8 @@
         "title": "Wacht op je beslissing",
         "review": "Journaalvermeldingen om te beoordelen",
         "invitations": "Openstaande uitnodigingen voor werknemers",
-        "claims": "Openbare aanvragen die je kunt overnemen"
+        "claims": "Openbare aanvragen die je kunt overnemen",
+        "reviewOff": "Werknemers met vastgelegd werk waarvan bevestiging uitstaat"
       }
     },
     "agency": {

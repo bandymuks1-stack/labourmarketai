@@ -2224,7 +2224,8 @@
         "title": "Czeka na Twoją decyzję",
         "review": "Wpisy w dzienniku do przejrzenia",
         "invitations": "Oczekujące zaproszenia pracowników",
-        "claims": "Publiczne zgłoszenia zapotrzebowania, które możesz przejąć"
+        "claims": "Publiczne zgłoszenia zapotrzebowania, które możesz przejąć",
+        "reviewOff": "Pracownicy z zapisaną pracą, u których potwierdzanie jest wyłączone"
       }
     },
     "agency": {
