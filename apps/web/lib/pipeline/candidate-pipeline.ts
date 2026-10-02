@@ -161,7 +161,7 @@ export function nextActionForStage(
   // the person on a project — the assign picker lives on the projects page and
   // lists exactly the workers with an accepted booking. Offering the bookings
   // list here left acceptance looking terminal.
-  const projects = `/${ctx.locale}/dashboard/projects`;
+  const projects = `/${ctx.locale}/dashboard/projects#assign-worker`;
   switch (stage) {
     case "new":
       return { key: "candidatePipeline.action.review", href: scouting };

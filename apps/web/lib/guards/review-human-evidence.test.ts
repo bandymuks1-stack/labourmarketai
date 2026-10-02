@@ -49,7 +49,7 @@ describe("scouting never turns 'nothing checked / no data' into a green match", 
 describe("an accepted booking leads somewhere", () => {
   it("the next step is the project assign picker, not the bookings list", () => {
     const a = nextActionForStage("accepted", { locale: "lt", requestId: "r" } as never);
-    expect(a.href).toBe("/lt/dashboard/projects");
+    expect(a.href).toBe("/lt/dashboard/projects#assign-worker");
     expect(a.key).toBe("candidatePipeline.action.assignToProject");
   });
 });
