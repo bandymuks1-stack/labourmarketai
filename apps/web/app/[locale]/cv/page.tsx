@@ -987,6 +987,22 @@ export default async function VerifiedCvPage({
                 : t("recordedHoursNone")}
             </p>
           )}
+          {/* Real work a manager confirmed, as a FACT (entries over distinct
+              work days). Shown only when it exists — never a "0", never a
+              score, and not a skill certification. */}
+          {cv.confirmedWorkTotals !== null && cv.confirmedWorkTotals.entries > 0 && (
+            <p
+              className="text-meta text-text-muted"
+              data-testid="cv-confirmed-work"
+              data-entries={cv.confirmedWorkTotals.entries}
+              data-days={cv.confirmedWorkTotals.days}
+            >
+              {t("confirmedWorkFact", {
+                entries: cv.confirmedWorkTotals.entries,
+                days: cv.confirmedWorkTotals.days,
+              })}
+            </p>
+          )}
           {/* The organization's own hour records (owner §19) — the second
               ledger, named beside the journal figure and added to nothing:
               an hour record proves attendance, not a skill. Shown only when
