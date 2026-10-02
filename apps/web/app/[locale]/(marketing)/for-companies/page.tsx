@@ -2,13 +2,9 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { ExploreSteps } from "@/components/marketing/public/explore-steps";
-import { PublicHero } from "@/components/marketing/public/public-hero";
 import { PublicCtaEnd, PublicFaq } from "@/components/marketing/public/public-sections";
-import {
-  CompanyAttentionMoment,
-  CompanyNeedMoment,
-  CompanyProjectMoment,
-} from "@/components/marketing/public/product-moments";
+import { CompanyNeedMoment } from "@/components/marketing/public/product-moments";
+import { CompaniesWorldHero } from "@/components/marketing/public/world-heroes";
 import { WorkRecordTransitionSection } from "@/components/marketing/public/work-record-transition-section";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
 
@@ -22,14 +18,14 @@ export async function generateMetadata({
 }
 
 /**
- * /for-companies — the canonical COMPANY acquisition destination.
+ * /for-companies — the canonical COMPANY acquisition destination, in the same
+ * world as the homepage and the product after login.
  *
- * One promise (find the people you need), one differentiator (then run the work
- * in the same place), one action (post what you need — the canonical demand
- * entry, never a second intake path). Proof moments, in the order a company
- * lives it: need → people → project → the signature transition → what needs
- * you and the next need. "Build a whole team" and capacity planning are NOT
- * claimed: the product does not support them yet (see the truth table).
+ * A real workplace and its people fill the first screen: what needs the owner,
+ * the project, the team. Then the same record travels from work to history while
+ * the company gains context; then how a need meets a person. "Build a whole
+ * team" and capacity planning are NOT claimed: the product does not support
+ * them yet (see the truth table). The one action is the canonical demand entry.
  */
 export default async function ForCompaniesPage({
   params,
@@ -39,34 +35,12 @@ export default async function ForCompaniesPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("publicSlice.companies");
-  const ts = await getTranslations("publicSlice");
-  const ti = await getTranslations("publicSlice.imagery");
-  const tt = await getTranslations("publicSlice.transition");
 
   return (
     <>
-      <PublicHero
-        audience="companies"
-        title={t("hero.title")}
-        accent={t("hero.accent")}
-        sub={t("hero.sub")}
-        note={t("hero.note")}
-        primary={{ label: t("hero.cta"), href: "/company-need", id: "companies_hero" }}
-        secondary={{ label: t("hero.secondary"), href: "/pricing", id: "companies_hero_pricing" }}
-        main="kitchen"
-        aside="site"
-        floating={{ text: tt("co.waiting"), state: "waiting" }}
-        copy={{
-          sample: ts("sample"),
-          mainAlt: ti("rasaAlt"),
-          mainCaption: ti("rasaCaption"),
-          asideAlt: ti("tomasAlt"),
-        }}
-      />
-      <CompanyNeedMoment />
-      <CompanyProjectMoment />
+      <CompaniesWorldHero />
       <WorkRecordTransitionSection />
-      <CompanyAttentionMoment />
+      <CompanyNeedMoment />
       <ExploreSteps audience="companies" />
       <PublicFaq audience="companies" />
       <PublicCtaEnd

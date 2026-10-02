@@ -18108,7 +18108,8 @@
     "next": {
       "title": "Uw geschiedenis gaat met u mee",
       "body": "Elke klus die u vastlegt, vult haar aan. Neem haar mee naar de volgende kans.",
-      "cta": "Bekijk waar u naartoe kunt"
+      "cta": "Bekijk waar u naartoe kunt",
+      "label": "Volgende stap, geen geschiedenis"
     }
   },
   "workContext": {
@@ -18141,7 +18142,9 @@
       "tomasAlt": "Een steigerbouwer werkt op een gevelsteiger in een straat in de oude stad",
       "rasaAlt": "Een kok bij de pass in een restaurantkeuken",
       "tomasCaption": "Tomas K. · Steigerbouwer",
-      "rasaCaption": "Rasa J. · Kok"
+      "rasaCaption": "Rasa J. · Kok",
+      "vanAlt": "Een steigerbouwer naast zijn bestelbus op een bouwplaats",
+      "ownerAlt": "Een restauranteigenaar met twee collega’s aan tafel"
     },
     "workers": {
       "hero": {
@@ -18343,6 +18346,42 @@
     },
     "explore": {
       "summary": "Bekijk elke stap en open hem in uw werkruimte"
+    },
+    "world": {
+      "labels": {
+        "person": "Persoon",
+        "team": "Het team",
+        "project": "Het project",
+        "work": "Werk van vandaag",
+        "today": "Vandaag",
+        "record": "Uw registratie",
+        "needs": "Heeft u nodig",
+        "kitchen": "Keukenteam"
+      },
+      "home": {
+        "title": "Eén wereld van werk.",
+        "sub": "Echte mensen, echte bedrijven en het werk daartussen, op één plek.",
+        "primary": "Ik zoek werk",
+        "secondary": "Ik neem mensen aan",
+        "personRole": "Steigerbouwer · Vilnius",
+        "crew": "Noordteam",
+        "projectMeta": "Noordgevel · niveau 3 tot 4",
+        "workTitle": "Niveau 3, oostvak",
+        "workMeta": "8 u · ankers om de 1,5 m",
+        "doneTitle": "Toegevoegd aan zijn geschiedenis",
+        "doneMeta": "Bevestigd door een leidinggevende · 1 foto"
+      },
+      "workers": {
+        "taskMeta": "Oplevering 14:00",
+        "recordTitle": "Niveau 3, oostvak",
+        "recordMeta": "8 u · 1 foto",
+        "doneTitle": "Nu in uw geschiedenis",
+        "taskTitle": "Noordgevel"
+      },
+      "companies": {
+        "projectDone": "5 van 9 registraties deze week bevestigd",
+        "teamMeta": "3 personen in dit project"
+      }
     }
   }
 }

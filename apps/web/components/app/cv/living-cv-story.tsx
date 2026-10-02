@@ -40,6 +40,8 @@ export interface LivingCvEngagement {
 export interface LivingCvStoryData {
   readonly name: string;
   readonly initials: string;
+  /** The person's OWN consented photo (profiles.avatar_url, signed), or null. */
+  readonly avatarUrl?: string | null;
   readonly professions: readonly string[];
   readonly engagements: readonly LivingCvEngagement[];
   readonly skills: {
@@ -57,7 +59,7 @@ export interface LivingCvStoryLabels {
   readonly legend: { readonly managerRecord: string; readonly recorded: string };
   readonly skillsTitle: string;
   readonly tiers: { readonly confirmed: string; readonly evidence: string; readonly declared: string };
-  readonly next: { readonly title: string; readonly body: string; readonly cta: string; readonly href: string };
+  readonly next: { readonly label: string; readonly title: string; readonly body: string; readonly cta: string; readonly href: string };
 }
 
 export function LivingCvStory({
@@ -71,20 +73,37 @@ export function LivingCvStory({
   return (
     <section
       aria-label={labels.title}
-      className="rounded-2xl border border-ink-600 bg-surface-1/60 p-5 print:hidden sm:p-8"
+      className="relative isolate overflow-hidden rounded-3xl bg-surface-1/60 p-5 shadow-[0_0_0_1px_rgb(var(--c-ink-600)/0.7),0_30px_70px_-40px_rgb(0_0_0/0.7)] print:hidden sm:p-8"
       data-testid="living-cv-story"
     >
-      <div className="flex items-center gap-4">
-        <PersonPortrait name={data.name} avatarUrl={null} initials={data.initials} width="64px" />
-        <div className="min-w-0">
-          <p className="font-mono text-meta uppercase tracking-label text-text-secondary">{labels.eyebrow}</p>
-          <h2 className="font-display text-xl font-bold tracking-tightest text-text-primary sm:text-3xl">
-            {labels.title}
-          </h2>
+      {/* The person's light: the same warm lit edge as the identity stage. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(70%_60%_at_10%_0%,rgb(var(--c-brand-blue)/0.12),transparent_66%)]"
+      />
+      <div className="flex items-center gap-4 sm:gap-6">
+        <span className="rounded-2xl shadow-[0_0_0_2px_rgb(var(--c-brand-blue)/0.55),0_0_40px_rgb(var(--c-brand-blue)/0.2)]">
+          <PersonPortrait
+            name={data.name}
+            avatarUrl={data.avatarUrl ?? null}
+            initials={data.initials}
+            width="clamp(80px, 24vw, 128px)"
+            className="rounded-2xl"
+          />
+        </span>
+        <div className="min-w-0 [overflow-wrap:anywhere]">
+          <p className="text-support font-medium text-text-muted">{labels.eyebrow}</p>
+          <p className="font-display text-2xl font-bold leading-tight tracking-tightest text-text-primary sm:text-4xl">
+            {data.name}
+          </p>
+          {data.professions.length > 0 ? (
+            <p className="mt-1 text-support text-text-secondary">{data.professions.join(" · ")}</p>
+          ) : null}
+          <h2 className="mt-2 text-support font-medium text-text-secondary">{labels.title}</h2>
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 text-meta text-text-secondary" aria-hidden>
+      <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-1 text-support text-text-secondary" aria-hidden>
         <span className="inline-flex items-center gap-1.5">
           <span className="h-2 w-6 rounded-full bg-trust-accent" /> {labels.legend.managerRecord}
         </span>
@@ -113,8 +132,8 @@ export function LivingCvStory({
                   {e.organization}
                   {e.title ? <span className="font-normal text-text-secondary"> · {e.title}</span> : null}
                 </p>
-                <p className="font-mono text-meta uppercase tracking-label text-text-secondary">
-                  {e.current ? <span className="mr-2 text-brand-blue">{labels.now}</span> : null}
+                <p className="text-support text-text-secondary">
+                  {e.current ? <span className="mr-2 font-semibold text-brand-blue">{labels.now}</span> : null}
                   {e.period}
                 </p>
               </div>
@@ -126,10 +145,23 @@ export function LivingCvStory({
                       <div className="h-full rounded-full bg-trust-accent" style={{ width: `${confirmedShare}%` }} />
                     </div>
                   </div>
-                  {e.recordedText ? <p className="mt-1 text-sm text-text-secondary">{e.recordedText}</p> : null}
+                  <p className="mt-1 flex flex-wrap items-center gap-x-2 text-sm text-text-secondary">
+                    {rec.confirmedHours > 0 ? (
+                      <span className="inline-flex items-center gap-1 font-medium text-trust-accent">
+                        <BadgeCheck className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+                        {labels.legend.managerRecord}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 font-medium text-brand-cyan">
+                        <span aria-hidden className="h-2.5 w-2.5 rounded-full border-2 border-brand-cyan" />
+                        {labels.legend.recorded}
+                      </span>
+                    )}
+                    {e.recordedText ? <span>{e.recordedText}</span> : null}
+                  </p>
                 </div>
               ) : (
-                <p className="mt-2 inline-flex min-h-6 items-center gap-1.5 rounded-md border border-dashed border-ink-500 px-2 font-mono text-meta uppercase tracking-label text-text-secondary">
+                <p className="mt-2 inline-flex min-h-6 items-center gap-1.5 rounded-md border border-dotted border-ink-500 px-2 text-support text-text-secondary">
                   <CircleDashed className="h-3 w-3" strokeWidth={1.75} aria-hidden />
                   {labels.noRecords}
                 </p>
@@ -141,7 +173,7 @@ export function LivingCvStory({
 
       {/* CAPABILITY — what the work shows, tiered by what stands behind it. */}
       <div className="mt-8" data-testid="living-cv-skills">
-        <h3 className="font-mono text-meta uppercase tracking-label text-text-secondary">{labels.skillsTitle}</h3>
+        <h3 className="text-support font-medium text-text-secondary">{labels.skillsTitle}</h3>
         <div className="mt-3 flex flex-col gap-3">
           <SkillTier
             label={labels.tiers.confirmed}
@@ -168,10 +200,14 @@ export function LivingCvStory({
       </div>
 
       {/* NEXT — the history goes with the person. */}
-      <div className="mt-8 flex flex-col gap-3 rounded-xl border border-dashed border-ink-500 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div
+        className="mt-8 flex flex-col gap-3 rounded-2xl border border-dashed border-ink-500 p-4 sm:flex-row sm:items-center sm:justify-between"
+        data-testid="living-cv-next"
+      >
         <div className="flex items-start gap-3">
           <Compass className="mt-0.5 h-5 w-5 shrink-0 text-brand-blue" strokeWidth={1.75} aria-hidden />
           <div>
+            <p className="text-support font-medium text-brand-blue">{labels.next.label}</p>
             <p className="font-semibold text-text-primary">{labels.next.title}</p>
             <p className="text-sm text-text-secondary">{labels.next.body}</p>
           </div>

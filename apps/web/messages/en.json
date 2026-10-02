@@ -18108,7 +18108,8 @@
     "next": {
       "title": "Your history goes with you",
       "body": "Every job you record adds to it. Take it to the next opportunity.",
-      "cta": "See where you can go"
+      "cta": "See where you can go",
+      "label": "Next, not history"
     }
   },
   "workContext": {
@@ -18141,7 +18142,9 @@
       "tomasAlt": "A scaffolder working on a facade scaffold in an old town street",
       "rasaAlt": "A cook at the pass in a restaurant kitchen",
       "tomasCaption": "Tomas K. · Scaffolder",
-      "rasaCaption": "Rasa J. · Cook"
+      "rasaCaption": "Rasa J. · Cook",
+      "vanAlt": "A scaffolder beside his van at a building site",
+      "ownerAlt": "A restaurant owner with two colleagues at the table"
     },
     "workers": {
       "hero": {
@@ -18343,6 +18346,42 @@
     },
     "explore": {
       "summary": "Explore every step and open it in your workspace"
+    },
+    "world": {
+      "labels": {
+        "person": "Person",
+        "team": "Team",
+        "project": "Project",
+        "work": "Work today",
+        "today": "Today",
+        "record": "Your record",
+        "needs": "Needs you",
+        "kitchen": "Kitchen team"
+      },
+      "home": {
+        "title": "One world of work.",
+        "sub": "Real people, real companies and the work between them, kept in one place.",
+        "primary": "I’m looking for work",
+        "secondary": "I’m hiring",
+        "personRole": "Scaffolder · Vilnius",
+        "crew": "North crew",
+        "projectMeta": "North facade · level 3 to 4",
+        "workTitle": "Level 3, east bay",
+        "workMeta": "8 h · anchors every 1.5 m",
+        "doneTitle": "Added to his history",
+        "doneMeta": "Confirmed by a manager · 1 photo kept"
+      },
+      "workers": {
+        "taskMeta": "Gate check 14:00",
+        "recordTitle": "Level 3, east bay",
+        "recordMeta": "8 h · 1 photo",
+        "doneTitle": "Now in your history",
+        "taskTitle": "North facade"
+      },
+      "companies": {
+        "projectDone": "5 of 9 records confirmed this week",
+        "teamMeta": "3 people on this project"
+      }
     }
   }
 }

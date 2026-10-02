@@ -17,9 +17,12 @@ const card = read("components/app/worker-player-card.tsx");
 const ring = read("components/app/readiness-ring.tsx");
 
 describe("Player Card reuses the shared premium scouting visual language", () => {
-  it("uses the shared card chrome tokens (card-border + glow)", () => {
-    expect(card).toMatch(/card-border/);
-    expect(card).toMatch(/bg-card-glow/);
+  it("uses the shared premium card surface (ink-800, large radius, ring shadow; no cyan level border)", () => {
+    // Owner direction 2026-10-02 (premium Player Card): the card chrome moved from
+    // `card-border + bg-card-glow` with a cyan readiness top-border to one calm
+    // surface; the PERSON (identity stage) carries the lit gold edge instead.
+    expect(card).toMatch(/rounded-\[2rem\] bg-ink-800/);
+    expect(card).not.toMatch(/border-brand-cyan\/40/);
     // Dead-UI repair (owner smoke 2026-07-05): the SECTION is not clickable,
     // so it must NOT carry a hover lift — hover affordance moved to the real
     // links inside it (stat tiles). Pinned by clickability-actionability.

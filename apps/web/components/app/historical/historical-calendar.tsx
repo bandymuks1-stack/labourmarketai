@@ -254,7 +254,7 @@ export function HistoricalCalendar({
               aria-pressed={view === "calendar" && scale === s}
               data-testid={`historical-calendar-scale-${s}`}
               className={cn(
-                "inline-flex min-h-11 items-center rounded-full px-3 font-mono text-meta uppercase tracking-label transition-colors duration-fast",
+                "inline-flex min-h-11 items-center rounded-full px-3 text-support transition-colors duration-fast",
                 view === "calendar" && scale === s
                   ? "bg-brand-blue/20 text-text-primary"
                   : "text-text-secondary hover:text-text-primary",
@@ -269,7 +269,7 @@ export function HistoricalCalendar({
             aria-pressed={view === "table"}
             data-testid="historical-calendar-view-table"
             className={cn(
-              "inline-flex min-h-11 items-center gap-1 rounded-full px-3 font-mono text-meta uppercase tracking-label transition-colors duration-fast",
+              "inline-flex min-h-11 items-center gap-1 rounded-full px-3 text-support transition-colors duration-fast",
               view === "table"
                 ? "bg-brand-blue/20 text-text-primary"
                 : "text-text-secondary hover:text-text-primary",
@@ -301,7 +301,7 @@ export function HistoricalCalendar({
               <span
                 key={iso}
                 aria-hidden
-                className="bg-ink-900 py-1.5 text-center font-mono text-meta uppercase tracking-label text-text-muted"
+                className="bg-ink-900 py-1.5 text-center text-support font-medium text-text-muted"
               >
                 {fmt.weekday(iso)}
               </span>
@@ -326,7 +326,7 @@ export function HistoricalCalendar({
                     data-testid="historical-calendar-day"
                     data-day={cell.iso}
                     data-state="outside"
-                    className="min-h-16 bg-ink-900 p-1.5 font-mono text-meta text-text-muted/30"
+                    className="min-h-16 bg-ink-900 p-1.5 text-meta text-text-muted/30"
                   >
                     {cell.dayOfMonth}
                   </span>
@@ -371,7 +371,7 @@ export function HistoricalCalendar({
                       {cell.dayOfMonth}
                     </span>
                     {worked && (
-                      <span className="flex items-center gap-1 font-mono text-meta tabular-nums text-text-secondary">
+                      <span className="flex items-center gap-1 text-meta tabular-nums text-text-secondary">
                         {cell.weekConflict && (
                           <SemanticIcon
                             concept="warning"
@@ -416,7 +416,7 @@ export function HistoricalCalendar({
                           );
                         })}
                         {cell.people.length > shownPeople.length && (
-                          <span className="font-mono text-meta text-text-muted">
+                          <span className="text-meta text-text-muted">
                             +{cell.people.length - shownPeople.length}
                           </span>
                         )}
@@ -466,7 +466,7 @@ export function HistoricalCalendar({
                               <span className="min-w-0 flex-1 truncate text-meta font-semibold text-text-primary">
                                 {p.label}
                               </span>
-                              <span className="font-mono text-meta tabular-nums text-text-secondary">
+                              <span className="text-meta tabular-nums text-text-secondary">
                                 {p.hours !== null
                                   ? `${fmt.hours(p.hours)} h`
                                   : "?"}
@@ -496,7 +496,7 @@ export function HistoricalCalendar({
                         );
                       })}
                       {cell.people.length > shownPeople.length && (
-                        <span className="font-mono text-meta text-text-muted">
+                        <span className="text-meta text-text-muted">
                           +{cell.people.length - shownPeople.length}{" "}
                           {labels.people}
                         </span>
@@ -507,7 +507,7 @@ export function HistoricalCalendar({
               );
             })}
           </div>
-          <p className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-meta text-text-muted">
+          <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-meta text-text-muted">
             <span className="inline-flex items-center gap-1.5">
               <span
                 aria-hidden
@@ -570,7 +570,7 @@ export function HistoricalCalendar({
             return (
             <li
               key={`${a.label}:${a.recordedOn}:${i}`}
-              className="inline-flex flex-wrap items-center gap-2 rounded-2xl border border-state-amber/40 py-1 pl-1 pr-3 font-mono text-meta tabular-nums text-text-secondary"
+              className="inline-flex flex-wrap items-center gap-2 rounded-2xl border border-state-amber/40 py-1 pl-1 pr-3 text-meta tabular-nums text-text-secondary"
               data-testid="evidence-calendar-aggregate"
               data-open={a.open ? "true" : "false"}
               data-provenance={provenance ?? "unknown"}
@@ -657,18 +657,18 @@ function WeekTable({
       <table className="w-full border-collapse text-meta">
         <thead>
           <tr className="border-b border-ink-500 text-left">
-            <th className="px-2 py-1 font-mono uppercase tracking-label text-text-muted">
+            <th className="px-2 py-1 text-text-muted">
               {labels.weekShort}
             </th>
             {calendar.people.map((p) => (
               <th
                 key={p}
-                className="px-2 py-1 font-mono uppercase tracking-label text-text-muted"
+                className="px-2 py-1 text-text-muted"
               >
                 {p}
               </th>
             ))}
-            <th className="px-2 py-1 text-right font-mono uppercase tracking-label text-text-muted">
+            <th className="px-2 py-1 text-right text-text-muted">
               {labels.sum}
             </th>
           </tr>
@@ -796,7 +796,7 @@ export function HistoricalDayReality({
           {fmt.day(iso)}
         </h3>
         {day && (
-          <span className="flex items-center gap-3 font-mono text-meta tabular-nums text-text-secondary">
+          <span className="flex items-center gap-3 text-meta tabular-nums text-text-secondary">
             <span className="inline-flex items-center gap-1">
               <SemanticIcon
                 concept="historical"
@@ -813,7 +813,7 @@ export function HistoricalDayReality({
         )}
       </header>
       {!day ? (
-        <p className="text-support text-text-muted">{labels.noWork}</p>
+        <p className="text-support font-medium text-text-muted">{labels.noWork}</p>
       ) : (
         <ul className="flex flex-col gap-3" data-testid="historical-day-places">
           {day.places.map((pl, i) => (
@@ -842,7 +842,7 @@ export function HistoricalDayReality({
                 <span className="min-w-0 flex-1 truncate text-support font-semibold text-text-primary">
                   {pl.name}
                 </span>
-                <span className="font-mono text-meta tabular-nums text-text-muted">
+                <span className="text-meta tabular-nums text-text-muted">
                   {pl.people.length} {labels.people}
                 </span>
               </button>
@@ -870,10 +870,10 @@ export function HistoricalDayReality({
                         warning={p.weekConflict}
                         title={`${p.label} · ${p.hours !== null ? `${fmt.hours(p.hours)} h` : `? ${labels.hoursUnknown}`}`}
                       />
-                      <span className="flex-1 truncate text-support text-text-primary">
+                      <span className="flex-1 truncate text-support font-medium text-text-primary">
                         {p.label}
                       </span>
-                      <span className="flex items-center gap-1 font-mono text-support tabular-nums text-text-primary">
+                      <span className="flex items-center gap-1 text-support tabular-nums text-text-primary">
                         {p.weekConflict && (
                           <SemanticIcon
                             concept="warning"
@@ -915,7 +915,7 @@ export function HistoricalDayReality({
                     className="h-3.5 w-3.5"
                   />
                 </span>
-                <span className="flex-1 truncate text-support text-text-secondary">
+                <span className="flex-1 truncate text-support font-medium text-text-secondary">
                   {labels.unplaced}
                 </span>
               </span>
@@ -938,10 +938,10 @@ export function HistoricalDayReality({
                         lit={personFilter === p.label}
                         title={`${p.label} · ${p.hours !== null ? `${fmt.hours(p.hours)} h` : "?"}`}
                       />
-                      <span className="flex-1 truncate text-support text-text-primary">
+                      <span className="flex-1 truncate text-support font-medium text-text-primary">
                         {p.label}
                       </span>
-                      <span className="font-mono text-support tabular-nums text-text-primary">
+                      <span className="text-support tabular-nums text-text-primary">
                         {p.hours !== null ? `${fmt.hours(p.hours)} h` : "?"}
                       </span>
                     </button>

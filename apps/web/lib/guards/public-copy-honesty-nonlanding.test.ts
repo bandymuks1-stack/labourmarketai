@@ -185,10 +185,11 @@ describe("demo previews on /for-* pages carry the always-visible Example frame",
     for (const c of moments.match(/<MomentCard\b[^>]*>/g) ?? []) {
       expect(c, c).toMatch(/sampleLabel=/);
     }
-    const hero = read("components/marketing/public/public-hero.tsx");
-    expect(hero).toMatch(/copy\.sample/);
+    // The world heroes label their scene with <SamplePill label={ts("sample")}>.
+    const hero = read("components/marketing/public/world-heroes.tsx");
+    expect((hero.match(/badge=\{<SamplePill label=\{ts\("sample"\)\} \/>\}/g) ?? []).length).toBe(3);
     const tr = read("components/marketing/public/work-record-transition.tsx");
-    expect((tr.match(/copy\.sample/g) ?? []).length).toBeGreaterThanOrEqual(2);
+    expect((tr.match(/copy\.sample/g) ?? []).length).toBeGreaterThanOrEqual(1);
   });
 
   it("the frame renders chip + note without hover/tooltip", () => {

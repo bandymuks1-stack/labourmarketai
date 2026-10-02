@@ -35,6 +35,7 @@ export function JournalEntryRow({
   standing = "UNKNOWN",
   standingSolid = false,
   chainSlot,
+  photoSlot,
 }: {
   entryId: string;
   canDelete: boolean;
@@ -50,6 +51,10 @@ export function JournalEntryRow({
    *  your history), built by the page from the same verification state that
    *  drives `standing`. Shown between the entry and its status zone. */
   chainSlot?: React.ReactNode;
+  /** The person's OWN record photo(s) for this entry, when they exist — the
+   *  evidence visual of the card. Absent -> nothing is drawn (no stock image,
+   *  no placeholder); the chain's photo node already says "not yet". */
+  photoSlot?: React.ReactNode;
   /** Edit-in-place control (journal compact UX v1): the page passes the
    *  drawer-based edit launcher here so editing opens in a compact drawer
    *  over the list — no navigation, scroll/day position preserved. Absent →
@@ -173,6 +178,9 @@ export function JournalEntryRow({
     <div className="card-border flex flex-col gap-3 p-4" data-testid={`journal-entry-card-${entryId}`}>
       {/* Sections: entry text + "Sistema suprato" come from `children`. */}
       {children}
+      {photoSlot ? (
+        <div data-testid={`journal-entry-photos-${entryId}`}>{photoSlot}</div>
+      ) : null}
       {/* Linked skill signals + collapsed "Ankstesni ryšiai" (its own block). */}
       {skillLinks && (
         <JournalEntrySkillLinks
@@ -185,18 +193,24 @@ export function JournalEntryRow({
         />
       )}
       {chainSlot ? (
-        <div className="border-t border-border/40 pt-3" data-testid={`journal-entry-chain-${entryId}`}>
+        <div className="rounded-xl bg-ink-800/40 px-3 py-2.5" data-testid={`journal-entry-chain-${entryId}`}>
           {chainSlot}
         </div>
       ) : null}
       {/* Status zone — secondary, below the signals. */}
+      {/* Progressive disclosure: the chain above already says how far this
+          record has got; the dated decision history is one tap deeper. */}
       {statusSlot && (
-        <div
-          className="flex flex-col gap-1 border-t border-border/40 pt-2"
+        <details
+          className="group"
           data-testid={`journal-entry-status-${entryId}`}
         >
+          <summary className="flex min-h-11 w-fit cursor-pointer list-none items-center gap-2 text-support font-medium text-text-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue [&::-webkit-details-marker]:hidden">
+            <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
+            {t("entry.timeline.title")}
+          </summary>
           {statusSlot}
-        </div>
+        </details>
       )}
       {/* Actions — the entry card holds interactive children (skill-link +
           delete buttons), so the whole card can't be one link. Instead the
@@ -229,7 +243,7 @@ export function JournalEntryRow({
               />
             </>
           ) : (
-            <span className="inline-flex min-h-[2.75rem] items-center font-mono text-meta uppercase tracking-label text-text-muted">
+            <span className="inline-flex min-h-[2.75rem] items-center text-meta text-text-muted">
               {t("entry.deleteBlocked")}
             </span>
           )}

@@ -23,6 +23,7 @@ import {
 } from "@/lib/cv-export/tailored";
 import { formatUtcDate } from "@/lib/time/display";
 import { EuFormatCv } from "@/components/app/cv/eu-format-cv";
+import { getOwnAvatar } from "@/lib/profile/avatar";
 import { LivingCvStory, type LivingCvStoryData } from "@/components/app/cv/living-cv-story";
 import { playerInitials } from "@/lib/identity/player-identity";
 import {
@@ -117,6 +118,8 @@ export default async function VerifiedCvPage({
   }
 
   const generatedAt = formatUtcDate(new Date(), locale) ?? "";
+  // The person's OWN consented photo leads the Living CV; none → initials.
+  const ownAvatar = result.ok ? await getOwnAvatar() : { path: null, signedUrl: null };
 
   if (!result.ok) {
     // Honest worker-only gate: the Verified CV is built from the worker's
@@ -439,7 +442,7 @@ export default async function VerifiedCvPage({
             {range ? ` · ${range}` : ""}
           </span>
           <span
-            className="mt-0.5 font-mono text-[0.625rem] uppercase tracking-label text-text-muted"
+            className="mt-0.5 text-support font-medium text-text-muted"
             data-testid="cv-history-standing"
           >
             {t(`history.chain.${standing}`)}
@@ -530,6 +533,7 @@ export default async function VerifiedCvPage({
   const storyData: LivingCvStoryData = {
     name: cv.personName ?? t("nameNotProvided"),
     initials: playerInitials(cv.personName ?? ""),
+    avatarUrl: ownAvatar.signedUrl,
     professions: cv.professionSlugs.map((p) => p.label ?? p.slug).filter((x): x is string => Boolean(x)),
     engagements: cv.workHistory.map((e, i) => {
       const start = formatUtcDate(e.startedAt, locale);
@@ -676,6 +680,7 @@ export default async function VerifiedCvPage({
               skillsTitle: tStory("skillsTitle"),
               tiers: { confirmed: t("tiers.confirmed"), evidence: t("tiers.evidence"), declared: t("tiers.declared") },
               next: {
+                label: tStory("next.label"),
                 title: tStory("next.title"),
                 body: tStory("next.body"),
                 cta: tStory("next.cta"),
@@ -686,7 +691,7 @@ export default async function VerifiedCvPage({
         ) : null}
 
         <header className={`rounded-xl border-2 border-ink-500 ${compact ? "p-4" : "p-6"}`}>
-          <p className="font-mono text-meta uppercase tracking-widest text-text-muted">
+          <p className="text-support font-medium text-text-muted">
             {t("pageTitle")}
           </p>
           <h1 className={`mt-1 font-display font-bold tracking-tight ${compact ? "text-2xl" : "text-3xl"}`}>
@@ -719,7 +724,7 @@ export default async function VerifiedCvPage({
               highlight may never appear without its basis). */}
           {tailoredOk ? (
             <div className="mt-2 flex flex-col gap-0.5" data-testid="cv-tailored-basis">
-              <p className="font-mono text-meta uppercase tracking-widest text-text-muted">
+              <p className="text-support font-medium text-text-muted">
                 {t("tailored.badge")}
                 {tailoredOk.roleText
                   ? ` — ${t("tailored.forNeed", { role: tailoredOk.roleText })}`

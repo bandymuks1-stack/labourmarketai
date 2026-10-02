@@ -317,7 +317,7 @@ export function PlaceMark({
       />
       <span className="truncate">{name}</span>
       {figure ? (
-        <span className="ml-auto shrink-0 pl-1 font-mono tabular-nums text-text-secondary">
+        <span className="ml-auto shrink-0 pl-1 tabular-nums text-text-secondary">
           {figure}
         </span>
       ) : null}
@@ -338,7 +338,7 @@ export function UnknownToken({
   return (
     <span
       className={cn(
-        "inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-dashed border-text-muted/70 px-1 font-mono text-meta leading-none text-text-muted",
+        "inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-dashed border-text-muted/70 px-1 text-meta leading-none text-text-muted",
         className,
       )}
       data-unknown={what}

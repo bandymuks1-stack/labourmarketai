@@ -18108,7 +18108,8 @@
     "next": {
       "title": "Ihre Geschichte geht mit Ihnen",
       "body": "Jede Arbeit, die Sie festhalten, ergänzt sie. Nehmen Sie sie mit zur nächsten Gelegenheit.",
-      "cta": "Sehen, wohin Sie gehen können"
+      "cta": "Sehen, wohin Sie gehen können",
+      "label": "Als Nächstes, nicht Verlauf"
     }
   },
   "workContext": {
@@ -18141,7 +18142,9 @@
       "tomasAlt": "Ein Gerüstbauer arbeitet auf einem Fassadengerüst in einer Altstadtgasse",
       "rasaAlt": "Eine Köchin am Pass in einer Restaurantküche",
       "tomasCaption": "Tomas K. · Gerüstbauer",
-      "rasaCaption": "Rasa J. · Köchin"
+      "rasaCaption": "Rasa J. · Köchin",
+      "vanAlt": "Ein Gerüstbauer neben seinem Transporter auf einer Baustelle",
+      "ownerAlt": "Eine Restaurantinhaberin mit zwei Kollegen am Tisch"
     },
     "workers": {
       "hero": {
@@ -18343,6 +18346,42 @@
     },
     "explore": {
       "summary": "Jeden Schritt ansehen und in Ihrem Arbeitsbereich öffnen"
+    },
+    "world": {
+      "labels": {
+        "person": "Die Person",
+        "team": "Das Team",
+        "project": "Projekt",
+        "work": "Heutige Arbeit",
+        "today": "Heute",
+        "record": "Ihr Eintrag",
+        "needs": "Braucht Sie",
+        "kitchen": "Küchenteam"
+      },
+      "home": {
+        "title": "Eine Welt der Arbeit.",
+        "sub": "Echte Menschen, echte Unternehmen und die Arbeit dazwischen, an einem Ort.",
+        "primary": "Ich suche Arbeit",
+        "secondary": "Ich stelle ein",
+        "personRole": "Gerüstbauer · Vilnius",
+        "crew": "Nordteam",
+        "projectMeta": "Nordfassade · Ebene 3 bis 4",
+        "workTitle": "Ebene 3, Ostfeld",
+        "workMeta": "8 Std. · Anker alle 1,5 m",
+        "doneTitle": "In seine Geschichte aufgenommen",
+        "doneMeta": "Von einer Führungskraft bestätigt · 1 Foto"
+      },
+      "workers": {
+        "taskMeta": "Abnahme 14:00",
+        "recordTitle": "Ebene 3, Ostfeld",
+        "recordMeta": "8 Std. · 1 Foto",
+        "doneTitle": "Jetzt in Ihrer Geschichte",
+        "taskTitle": "Nordfassade"
+      },
+      "companies": {
+        "projectDone": "5 von 9 Einträgen diese Woche bestätigt",
+        "teamMeta": "3 Personen in diesem Projekt"
+      }
     }
   }
 }

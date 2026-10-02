@@ -18108,7 +18108,8 @@
     "next": {
       "title": "Jūsų istorija keliauja su jumis",
       "body": "Kiekvienas užfiksuotas darbas ją papildo. Pasiimkite ją į kitą galimybę.",
-      "cta": "Pažiūrėti, kur galite eiti"
+      "cta": "Pažiūrėti, kur galite eiti",
+      "label": "Toliau, ne istorija"
     }
   },
   "workContext": {
@@ -18141,7 +18142,9 @@
       "tomasAlt": "Pastolių montuotojas dirba ant fasado pastolių senamiesčio gatvėje",
       "rasaAlt": "Virėja prie išdavimo linijos restorano virtuvėje",
       "tomasCaption": "Tomas K. · Pastolių montuotojas",
-      "rasaCaption": "Rasa J. · Virėja"
+      "rasaCaption": "Rasa J. · Virėja",
+      "vanAlt": "Pastolių montuotojas šalia furgono statybvietėje",
+      "ownerAlt": "Restorano savininkė su dviem kolegomis prie stalo"
     },
     "workers": {
       "hero": {
@@ -18343,6 +18346,42 @@
     },
     "explore": {
       "summary": "Peržiūrėkite kiekvieną žingsnį ir atverkite jį savo darbo erdvėje"
+    },
+    "world": {
+      "labels": {
+        "person": "Žmogus",
+        "team": "Komanda",
+        "project": "Projektas",
+        "work": "Šiandienos darbas",
+        "today": "Šiandien",
+        "record": "Jūsų įrašas",
+        "needs": "Laukia jūsų",
+        "kitchen": "Virtuvės komanda"
+      },
+      "home": {
+        "title": "Vienas darbo pasaulis.",
+        "sub": "Tikri žmonės, tikros įmonės ir darbas tarp jų, vienoje vietoje.",
+        "primary": "Ieškau darbo",
+        "secondary": "Samdau žmones",
+        "personRole": "Pastolių montuotojas · Vilnius",
+        "crew": "Šiaurės brigada",
+        "projectMeta": "Šiaurinis fasadas · 3–4 aukštas",
+        "workTitle": "3 aukštas, rytinė dalis",
+        "workMeta": "8 val. · inkarai kas 1,5 m",
+        "doneTitle": "Įtraukta į jo istoriją",
+        "doneMeta": "Vadovo patvirtinta · 1 nuotrauka"
+      },
+      "workers": {
+        "taskMeta": "Patikra 14:00",
+        "recordTitle": "3 aukštas, rytinė dalis",
+        "recordMeta": "8 val. · 1 nuotrauka",
+        "doneTitle": "Dabar jūsų istorijoje",
+        "taskTitle": "Šiaurinis fasadas"
+      },
+      "companies": {
+        "projectDone": "5 iš 9 įrašų patvirtinta šią savaitę",
+        "teamMeta": "3 žmonės šiame projekte"
+      }
     }
   }
 }

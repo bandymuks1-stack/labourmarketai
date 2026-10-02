@@ -1457,12 +1457,12 @@ export function JournalEntryComposer({
                         className="flex flex-col gap-1.5"
                         data-testid="journal-group-recognized"
                       >
-                        <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
+                        <span className="text-support font-medium text-text-secondary">
                           {t("groupRecognized")}
                         </span>
                         {detectedSlugs.length > 0 && (
                           <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                            <span className="text-support font-medium text-text-muted">
                               {t("resultDetected")}
                             </span>
                             {detectedSlugs.map((slug) => (
@@ -1478,7 +1478,7 @@ export function JournalEntryComposer({
                         )}
                         {savedPipeline.addedSkills.length > 0 && (
                           <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                            <span className="text-support font-medium text-text-muted">
                               {t("resultAutoAdded")}
                             </span>
                             {savedPipeline.addedSkills.map((s) => (
@@ -1500,7 +1500,7 @@ export function JournalEntryComposer({
                         className="flex flex-col gap-1.5"
                         data-testid="journal-group-choice"
                       >
-                        <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
+                        <span className="text-support font-medium text-text-secondary">
                           {t("groupChoice")}
                         </span>
                         <span className="sr-only">{t("resultNeedsConfirm")}</span>
@@ -1606,7 +1606,7 @@ export function JournalEntryComposer({
                         className="flex flex-col gap-1.5"
                         data-testid="journal-group-claims"
                       >
-                        <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
+                        <span className="text-support font-medium text-text-secondary">
                           {t("groupClaims")}
                         </span>
                         {claimCandidates.map((c) => {
@@ -1643,7 +1643,7 @@ export function JournalEntryComposer({
                         className="flex flex-col gap-1.5"
                         data-testid="journal-group-unresolved"
                       >
-                        <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
+                        <span className="text-support font-medium text-text-secondary">
                           {t("groupUnresolved")}
                         </span>
                         <p className="text-meta leading-relaxed text-text-muted">
@@ -1788,7 +1788,7 @@ export function JournalEntryComposer({
                         className="flex flex-col gap-1"
                         data-testid="journal-group-rejected"
                       >
-                        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                        <span className="text-support font-medium text-text-muted">
                           {t("resultRejected")}
                         </span>
                         {savedPipeline.rejected.map((r) => (
@@ -1885,14 +1885,14 @@ export function JournalEntryComposer({
                 type="button"
                 onClick={onCancelEdit}
                 data-testid="journal-edit-cancel"
-                className="font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
+                className="text-support font-medium text-brand-blue hover:underline"
               >
                 {t("editEntryCancel")}
               </button>
             ) : (
               <a
                 href={`/${locale}/dashboard/journal`}
-                className="font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
+                className="text-support font-medium text-brand-blue hover:underline"
               >
                 {t("editEntryCancel")}
               </a>
@@ -2215,7 +2215,7 @@ export function JournalEntryComposer({
         {(mode !== "photo" || editingEntry) && photoField}
 
         <details className="rounded-md border border-ink-600 bg-ink-800/40 p-3 text-xs text-text-secondary">
-          <summary className="cursor-pointer select-none font-mono text-meta uppercase tracking-label text-text-muted">
+          <summary className="cursor-pointer select-none text-support font-medium text-text-muted">
             {t("examplesTitle")}
           </summary>
           <ul className="mt-2 flex flex-col gap-1.5 leading-relaxed">

@@ -83,7 +83,7 @@ test.describe("mobile first screen: image, promise, one action — in every loca
       expect(box!.y + box!.height, "headline fully inside the first screen").toBeLessThanOrEqual(812);
       const cta =
         p.path === ""
-          ? page.locator('main [data-surface="landing_hero"] a').first()
+          ? page.locator('[data-testid="world-hero-home"] a[data-cta-id]').first()
           : p.path === "/for-workers"
             ? page.locator('[data-testid="public-hero-workers"] a[data-cta-id]').first()
             : page.locator('[data-testid="public-hero-companies"] a[data-cta-id]').first();

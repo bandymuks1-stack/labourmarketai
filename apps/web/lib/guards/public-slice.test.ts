@@ -38,10 +38,10 @@ describe("imagery registry — nothing public is shipped unlabelled", () => {
   });
 
   it("every component that renders a sample_fixture photograph shows the Example label", () => {
-    const hero = read("components/marketing/public/public-hero.tsx");
+    const hero = read("components/marketing/public/world-heroes.tsx");
     const transition = read("components/marketing/public/work-record-transition.tsx");
     const moments = read("components/marketing/public/product-moments.tsx");
-    expect(hero).toMatch(/copy\.sample/);
+    expect(hero).toMatch(/SamplePill/);
     expect(transition).toMatch(/copy\.sample/);
     // product-moments shows the kitchen photo only inside a MomentCard (always labelled).
     expect(moments).toMatch(/sampleLabel=/);
@@ -109,16 +109,20 @@ describe("page composition", () => {
 
   it("each acquisition page has one hero, the shared transition and a closing CTA to the same route as its hero", () => {
     for (const [name, src] of [["workers", w], ["companies", c]] as const) {
-      expect((src.match(/<PublicHero/g) ?? []).length, name).toBe(1);
+      expect((src.match(/<(Workers|Companies)WorldHero/g) ?? []).length, name).toBe(1);
       expect(src, name).toMatch(/<WorkRecordTransitionSection/);
       expect(src, name).toMatch(/<PublicCtaEnd/);
     }
-    expect(w).toMatch(/href: "\/auth\/signup"[\s\S]*href="\/auth\/signup"/);
-    expect(c).toMatch(/href: "\/company-need"[\s\S]*href="\/company-need"/);
+    const heroes = read("components/marketing/public/world-heroes.tsx");
+    expect(heroes).toMatch(/href="\/auth\/signup" ctaId="workers_hero"/);
+    expect(w).toMatch(/href="\/auth\/signup"/);
+    expect(heroes).toMatch(/href="\/company-need" ctaId="companies_hero"/);
+    expect(c).toMatch(/href="\/company-need"/);
   });
 
   it("the homepage mounts the transition and the two-door fork", () => {
     const home = read("app/[locale]/focus-landing/focus-landing.tsx");
+    expect(home).toMatch(/<HomeWorldHero/);
     expect(home).toMatch(/<WorkRecordTransitionSection embedded/);
     expect(home).toMatch(/<HomeSides/);
   });

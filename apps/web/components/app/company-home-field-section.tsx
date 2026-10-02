@@ -154,7 +154,7 @@ export async function CompanyHomeFieldSection({
     >
       {/* ── capabilities strip: what the organisation does, all at once ── */}
       <header className="flex flex-col gap-2">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="text-support font-medium text-brand-orange">
           {t("eyebrow")}
         </p>
         <h2
@@ -208,12 +208,6 @@ export async function CompanyHomeFieldSection({
         {field.projects.kind === "ok" ? (
           <ol className="flex flex-col gap-2">
             {field.projects.rows.map((p) => {
-              const nowTone: Tone =
-                p.timeline.now.kind === "in_progress"
-                  ? "now"
-                  : p.timeline.now.kind === "blocked"
-                    ? "risk"
-                    : "quiet";
               const riskTone: Tone = !p.riskKnown ? "quiet" : p.risk.length > 0 ? "risk" : "ok";
               const summary = [
                 p.title,
@@ -245,7 +239,7 @@ export async function CompanyHomeFieldSection({
                         >
                           {p.title}
                         </Link>
-                        <span className="rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
+                        <span className="rounded-full border border-ink-500 px-2 py-0.5 text-support font-medium text-text-secondary">
                           {statusLabel(p.status)}
                         </span>
                       </div>
@@ -293,8 +287,8 @@ export async function CompanyHomeFieldSection({
                     </div>
 
                     {/* NOW — a fact from stage status */}
-                    <div className={`flex min-w-0 flex-col gap-1 rounded-control bg-ink-900/40 px-3 py-2 ${TONE_EDGE[nowTone]}`}>
-                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                    <div className={`flex min-w-0 flex-col gap-1 rounded-control px-3 py-2`}>
+                      <span className="text-support font-medium text-text-muted">
                         {t("projects.now")}
                       </span>
                       {p.timeline.now.kind === "in_progress" ? (
@@ -315,15 +309,15 @@ export async function CompanyHomeFieldSection({
                         <span className="text-sm text-text-muted">{t("projects.nowNone")}</span>
                       )}
                       {p.timeline.total > 0 ? (
-                        <span className="font-mono text-meta text-text-muted tabular-nums">
+                        <span className="text-meta text-text-muted tabular-nums">
                           {t("projects.stagesDone", { done: p.timeline.done, total: p.timeline.total })}
                         </span>
                       ) : null}
                     </div>
 
                     {/* NEXT — derived from the stage order, said so */}
-                    <div className={`flex min-w-0 flex-col gap-1 rounded-control bg-ink-900/40 px-3 py-2 ${TONE_EDGE.next}`}>
-                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                    <div className={`flex min-w-0 flex-col gap-1 rounded-control border border-dashed border-ink-600 px-3 py-2`}>
+                      <span className="text-support font-medium text-text-muted">
                         {t("projects.next")}
                       </span>
                       {p.timeline.next.kind === "derived" ? (
@@ -349,8 +343,9 @@ export async function CompanyHomeFieldSection({
                     </div>
 
                     {/* RISK — the chat's project-risk facts, organisation context only */}
-                    <div className={`flex min-w-0 flex-col gap-1 rounded-control bg-ink-900/40 px-3 py-2 ${TONE_EDGE[riskTone]}`}>
-                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                    <div className={`flex min-w-0 flex-col gap-1 rounded-control px-3 py-2 ${riskTone === "risk" ? "bg-state-amber/10" : ""}`}>
+                      <span className="inline-flex items-center gap-1 text-support font-medium text-text-muted">
+                        {riskTone === "risk" ? <AlertTriangle className="h-3.5 w-3.5 text-state-amber" aria-hidden /> : null}
                         {t("projects.risk")}
                       </span>
                       {!p.riskKnown ? (
@@ -407,7 +402,7 @@ export async function CompanyHomeFieldSection({
           </h3>
           {field.capacity.kind === "ok" ? (
             <>
-              <p className="font-mono text-meta text-text-muted">
+              <p className="text-meta text-text-muted">
                 {day(field.capacity.from) ?? field.capacity.from} – {day(field.capacity.to) ?? field.capacity.to}
               </p>
               {field.capacity.counts ? (
@@ -472,7 +467,7 @@ export async function CompanyHomeFieldSection({
               </ul>
               {field.capacity.outlook ? (
                 <div className="flex flex-col gap-1" data-testid="company-home-outlook">
-                  <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+                  <p className="text-support font-medium text-text-muted">
                     {t("capacity.outlookHeading")}
                   </p>
                   <ol className="grid grid-cols-4 gap-1">
@@ -487,7 +482,7 @@ export async function CompanyHomeFieldSection({
                         })}
                         data-testid="company-home-outlook-week"
                       >
-                        <span className="font-mono text-base font-semibold tabular-nums text-text-primary">
+                        <span className="text-base font-semibold tabular-nums text-text-primary">
                           {w.free}
                         </span>
                         <span className="text-meta text-text-muted">{day(w.from) ?? w.from}</span>
@@ -564,7 +559,7 @@ export async function CompanyHomeFieldSection({
                   data-testid="company-home-need"
                 >
                   <span className="min-w-0 break-words text-sm text-text-primary">{n.title}</span>
-                  <span className="font-mono text-meta text-text-muted">
+                  <span className="text-meta text-text-muted">
                     {[
                       n.teamSize ? t("missing.people", { count: n.teamSize }) : null,
                       n.startPeriod ? t("missing.from", { period: n.startPeriod }) : null,

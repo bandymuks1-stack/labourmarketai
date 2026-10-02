@@ -84,7 +84,7 @@ export const dynamic = "force-dynamic";
  * rather than on something recoverable.
  */
 const CHIP_BASE =
-  "inline-flex min-h-[2.75rem] items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+  "inline-flex min-h-[2.75rem] items-center rounded-md border px-3 py-1.5 text-support transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
 const CHIP_ACTIVE = "border-brand-blue text-brand-blue";
 const CHIP_IDLE = "border-ink-500 text-text-secondary hover:border-brand-blue";
 
@@ -294,7 +294,7 @@ export default async function PlanningPage({
         >
           <span className="flex flex-wrap items-center gap-2">
             <span
-              className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${SOURCE_TONE[item.sourceType]}`}
+              className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-support ${SOURCE_TONE[item.sourceType]}`}
             >
               {t(`source.${item.sourceType}`)}
             </span>
@@ -312,7 +312,7 @@ export default async function PlanningPage({
             />
             {conflict ? (
               <span
-                className="inline-flex items-center rounded-full border border-state-danger/50 bg-state-danger/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-danger"
+                className="inline-flex items-center rounded-full border border-state-danger/50 bg-state-danger/10 px-2 py-0.5 text-support font-medium text-state-danger"
                 data-testid={`planning-conflict-${item.id}`}
               >
                 {t("conflict.flag")}
@@ -347,7 +347,7 @@ export default async function PlanningPage({
               })}
             </span>
           ) : null}
-          <span className="flex flex-wrap items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
+          <span className="flex flex-wrap items-center gap-2 text-support font-medium text-text-muted">
             {item.startDate ? (
               <span>
                 {fmtShort(item.startDate)}
@@ -681,7 +681,7 @@ export default async function PlanningPage({
           aria-label={t("workload.title")}
           data-testid="planning-workload"
         >
-          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          <span className="text-support font-medium text-text-muted">
             {t("workload.title")}
           </span>
           <ul className="flex flex-col gap-1">
@@ -691,7 +691,7 @@ export default async function PlanningPage({
                 className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-ink-600 bg-ink-800/20 px-3 py-2 text-xs text-text-secondary"
                 data-testid={`planning-workload-${w.weekStart}`}
               >
-                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                <span className="text-support font-medium text-text-muted">
                   {fmtShort(w.weekStart)} – {fmtShort(w.weekEnd)}
                 </span>
                 <span data-testid={`planning-workload-planned-${w.weekStart}`}>
@@ -713,7 +713,7 @@ export default async function PlanningPage({
             {monthGrid.weeks[0]?.map((cell) => (
               <span
                 key={`hdr-${cell.day}`}
-                className="text-center font-mono text-meta uppercase tracking-label text-text-muted"
+                className="text-center text-support font-medium text-text-muted"
               >
                 {stripFmt(cell.day)}
               </span>
@@ -756,7 +756,7 @@ export default async function PlanningPage({
                             stands in for the day's work. */}
                         {planCount > 0 ? (
                           <span
-                            className={`mr-3 hidden h-4 min-w-4 items-center justify-center rounded-full px-1 text-[0.625rem] font-bold leading-none tabular-nums sm:inline-flex ${
+                            className={`mr-3 hidden h-4 min-w-4 items-center justify-center rounded-full px-1 text-meta font-bold leading-none tabular-nums sm:inline-flex ${
                               cell.hasConflict
                                 ? "bg-state-danger/15 text-state-danger"
                                 : "bg-brand-blue/15 text-brand-blue"
@@ -773,11 +773,11 @@ export default async function PlanningPage({
                           grammar, the calendar the owner remembers. */}
                       {r && r.recordedMinutes > 0 ? (
                         <span
-                          className="mt-auto self-start font-mono text-base font-semibold leading-none tabular-nums text-brand-cyan sm:text-lg"
+                          className="mt-auto self-start text-base font-semibold leading-none tabular-nums text-brand-cyan sm:text-lg"
                           data-testid={`planning-month-hours-${cell.day}`}
                         >
                           {compactHours(r.recordedMinutes, locale)}
-                          <span className="ml-0.5 hidden text-[0.625rem] font-normal text-text-muted sm:inline">
+                          <span className="ml-0.5 hidden text-meta font-normal text-text-muted sm:inline">
                             {t("rhythm.hoursUnit")}
                           </span>
                         </span>
@@ -911,7 +911,7 @@ export default async function PlanningPage({
               <span className="text-sm font-semibold capitalize text-text-primary">
                 {monthOnlyFmt(`${m.month}-01`)}
               </span>
-              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+              <span className="text-support font-medium text-text-muted">
                 {/* Under a source filter the count is the filtered one, but the
                     month view still draws the journal's hours and marks from
                     the full model. A bare "no records" here contradicted the
@@ -935,7 +935,7 @@ export default async function PlanningPage({
             aria-label={t("week.label")}
             data-testid="planning-week-strip"
           >
-            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+            <span className="text-support font-medium text-text-muted">
               {t("week.label")}
             </span>
             <div className="grid grid-cols-7 gap-1">
@@ -950,7 +950,7 @@ export default async function PlanningPage({
                       : "border-ink-600 bg-ink-800/20"
                   }`}
                 >
-                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                  <span className="text-support font-medium text-text-muted">
                     {stripFmt(d.day)}
                   </span>
                   <span className="text-sm font-semibold tabular-nums text-text-primary">
@@ -992,7 +992,7 @@ export default async function PlanningPage({
             <section className="flex flex-col gap-4" data-testid="planning-agenda">
               {agenda.days.map((group) => (
                 <div key={group.day} className="flex flex-col gap-2">
-                  <h2 className="flex flex-wrap items-center gap-2 font-mono text-meta uppercase tracking-label text-text-secondary">
+                  <h2 className="flex flex-wrap items-center gap-2 text-support font-medium text-text-secondary">
                     {fmtDay(group.day)}
                     {group.isToday ? (
                       <span className="inline-flex items-center rounded-full border border-brand-blue/50 bg-brand-blue/10 px-2 py-0.5 text-meta text-brand-blue">
@@ -1009,7 +1009,7 @@ export default async function PlanningPage({
 
               {agenda.later.length > 0 ? (
                 <div className="flex flex-col gap-2">
-                  <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
+                  <h2 className="text-support font-medium text-text-secondary">
                     {t("later.title")}
                   </h2>
                   <ItemList items={agenda.later} testid="planning-later" />
@@ -1018,7 +1018,7 @@ export default async function PlanningPage({
 
               {agenda.undated.length > 0 ? (
                 <div className="flex flex-col gap-2">
-                  <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
+                  <h2 className="text-support font-medium text-text-secondary">
                     {t("undated.title")}
                   </h2>
                   <ItemList items={agenda.undated} testid="planning-undated" />

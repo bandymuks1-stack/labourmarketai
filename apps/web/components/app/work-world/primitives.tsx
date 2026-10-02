@@ -97,7 +97,7 @@ export function EvidenceState({
       data-testid="ww-evidence-state"
       data-state={state}
       data-variant={variant}
-      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 font-mono text-meta font-semibold uppercase tracking-label ${VARIANT_CLASS[variant]} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-meta font-medium ${VARIANT_CLASS[variant]} ${className}`}
     >
       <EvidenceDot state={state} />
       {label}
@@ -227,7 +227,7 @@ export function PeriodBand({
         <span className="font-mono text-sm font-semibold text-brand-cyan" data-testid="ww-period-total">
           {totalLabel}
         </span>
-        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+        <span className="text-meta tabular-nums text-text-muted">
           {months[0].month} → {months[months.length - 1].month}
         </span>
       </div>
@@ -247,7 +247,7 @@ export function PeriodBand({
           </div>
         ))}
       </div>
-      <span className="font-mono text-meta uppercase tracking-label text-text-muted">{derivedLabel}</span>
+      <span className="text-meta text-text-muted">{derivedLabel}</span>
     </div>
   );
 }
@@ -295,7 +295,7 @@ export function TimeReality({
     <span
       data-testid="ww-time-reality"
       data-kind={kind}
-      className={`inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 font-mono text-meta font-semibold uppercase tracking-label ${REALITY_CLASS[kind]} ${className}`}
+      className={`inline-flex shrink-0 items-center rounded-full border px-2.5 py-0.5 text-meta font-medium ${REALITY_CLASS[kind]} ${className}`}
     >
       {label}
     </span>
@@ -332,7 +332,7 @@ export function PlacePrecision({
     <span
       data-testid="ww-place-precision"
       data-kind={kind}
-      className={`inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 font-mono text-meta font-semibold uppercase tracking-label ${PRECISION_CLASS[kind]} ${className}`}
+      className={`inline-flex shrink-0 items-center rounded-full border px-2.5 py-0.5 text-meta font-medium ${PRECISION_CLASS[kind]} ${className}`}
     >
       {label}
     </span>

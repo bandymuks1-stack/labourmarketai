@@ -123,13 +123,17 @@ describe("the landing has one arm", () => {
         `import { ${original} } from "@/components/marketing/`,
       );
     }
+    // 2026-10-02 (owner, CURRENT x Q): the hero is <HomeWorldHero> — one primary
+    // and one secondary action of its own (pinned in landing-tells-the-whole-
+    // product); <LandingPrimaryActions> is no longer mounted in the hero.
     expect(focus).toContain(
-      'import { LandingPrimaryActions, LandingClosingBand } from "@/components/marketing/landing-primary-actions"',
+      'import { LandingClosingBand } from "@/components/marketing/landing-primary-actions"',
     );
+    expect(focus).toContain('import { HomeWorldHero } from "@/components/marketing/public/world-heroes"');
     // Code only — the file's own history may NAME the retired hero in prose.
     expect(code(focus)).not.toContain("HeroLiveDemo");
     const order = [
-      "LandingPrimaryActions",
+      "HomeWorldHero",
       "PublicEntry",
       "MarketProofBand",
       "LandingOpenJobsBand",
@@ -142,7 +146,7 @@ describe("the landing has one arm", () => {
     expect(order.every((i) => i > 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     // The next step is in the hero, BEFORE the entry — not inside it.
-    expect(code(focus).match(/<LandingPrimaryActions[\s/>]/g) ?? []).toHaveLength(1);
+    expect(code(focus).match(/<HomeWorldHero[\s/>]/g) ?? []).toHaveLength(1);
     // Its chrome is the (marketing) layout's, reproduced — not approximated.
     expect(focus).toContain("<AmbientGlow />");
     expect(focus).toContain("<SiteNav />");

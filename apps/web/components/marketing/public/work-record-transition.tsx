@@ -4,6 +4,15 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { TrackedCta } from "@/components/app/tracked-cta";
+import {
+  PaneLabel,
+  PaneMeta,
+  PaneValue,
+  PersonRing,
+  WorldLines,
+  WorldNode,
+  WorldPane,
+} from "@/components/world/world";
 import { cn } from "@/lib/utils";
 
 import { PUBLIC_IMAGERY } from "./public-imagery";
@@ -46,21 +55,25 @@ export type TransitionCopy = {
 };
 
 const LAST = 5;
-const STEP_MS = 2400;
+const STEP_MS = 2600;
 
 /**
- * THE SIGNATURE TRANSITION — one shift becomes professional history while the
- * company gains operational context. It teaches the product; it is not
+ * THE SIGNATURE TRANSITION, on a photographic stage — one shift becomes
+ * professional history while the company gains operational context. The same
+ * person stays at the centre of the world; the panes around her appear in the
+ * order the work travels (work → proof → review → history → next) and the
+ * leader lines show what connects to what. It teaches the product; it is not
  * decoration.
  *
  * MOTION RULES
  *  - plays ONCE when first scrolled into view, never loops;
- *  - reduced motion (and no-JS / SSR) show the COMPLETE final state, so the
- *    static page is already the whole story;
- *  - every stage is also a real button and the caption is a live region, so
- *    the sequence is operable and readable without watching it;
- *  - ZERO layout shift: every element is always in the layout and only
- *    opacity / transform change; pane heights never depend on the stage.
+ *  - reduced motion (and no-JS / SSR) show the COMPLETE final state;
+ *  - every stage is a real button and the caption is a live region;
+ *  - ZERO layout shift: every pane is always in the layout; only opacity and
+ *    transform change. Below `lg` the panes read as a stacked chain, the
+ *    stages not reached yet dimmed rather than hidden.
+ * The photograph is a labelled sample; it is NEVER the evidence — the evidence
+ * is the record's own photo inside its pane.
  */
 export function WorkRecordTransition({
   copy,
@@ -121,7 +134,8 @@ export function WorkRecordTransition({
 
   const s = copy.stages;
   const caption = s[stage - 1]?.caption ?? "";
-  const kitchen = PUBLIC_IMAGERY.kitchen;
+  const stageImg = PUBLIC_IMAGERY.kitchenLarge;
+  const evidence = PUBLIC_IMAGERY.kitchen;
   const proState =
     stage >= 3
       ? ({ state: "confirmed", label: copy.states.confirmed } as const)
@@ -133,10 +147,11 @@ export function WorkRecordTransition({
       ? ({ state: "confirmed", label: copy.co.done } as const)
       : ({ state: "waiting", label: copy.co.waiting } as const);
 
-  const fade = (on: boolean) =>
+  /** desktop: hidden until reached; phone: dimmed until reached. */
+  const reach = (n: number) =>
     cn(
       "transition-[opacity,transform] duration-700 ease-out motion-reduce:transition-none",
-      on ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0",
+      stage >= n ? "translate-y-0 opacity-100" : "translate-y-2 opacity-40 lg:opacity-0",
     );
 
   return (
@@ -164,9 +179,7 @@ export function WorkRecordTransition({
             onClick={() => choose(i + 1)}
             className={cn(
               "min-h-11 rounded-full px-4 text-support font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue",
-              stage === i + 1
-                ? "bg-brand-blue text-text-on-brand"
-                : "bg-ink-700 text-text-secondary hover:text-text-primary",
+              stage === i + 1 ? "bg-brand-blue text-text-on-brand" : "bg-ink-700 text-text-secondary hover:text-text-primary",
             )}
           >
             <span aria-hidden className="mr-1.5 opacity-70">
@@ -191,85 +204,93 @@ export function WorkRecordTransition({
         {caption}
       </p>
 
-      <div className="mt-6 grid gap-5 lg:grid-cols-[1.25fr_1fr]">
-        {/* the professional */}
-        <div className="relative min-h-[27rem] overflow-hidden rounded-3xl bg-ink-800 p-6 sm:p-8">
-          <div className="flex items-center justify-between gap-3">
+      <div className="scope-dark relative isolate mt-6 overflow-hidden rounded-3xl bg-ink-900 lg:h-[760px]">
+        <Image
+          src={stageImg.src}
+          alt=""
+          width={stageImg.width}
+          height={stageImg.height}
+          sizes="(min-width:1280px) 1280px, 100vw"
+          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-60 lg:opacity-80"
+          style={{ objectPosition: "47% 40%" }}
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgb(var(--c-ink-900)/0.6),rgb(var(--c-ink-900)/0.35)_30%,rgb(var(--c-ink-900)/0.85))]"
+        />
+        <span className="absolute left-5 top-5 z-20 rounded-full bg-ink-900/60 px-3 py-1 text-basis text-text-secondary backdrop-blur">
+          {copy.sample}
+        </span>
+
+        <div className="relative px-4 pb-4 pt-16 lg:static lg:p-0">
+          <WorldLines
+            paths={[
+              { d: "M30 21 C 38 22 43 31 47 41", tone: "gold", show: stage >= 1 },
+              { d: "M30 62 C 38 60 43 50 47 42", show: stage >= 2 },
+              { d: "M73 21 C 64 24 54 33 48.5 40", tone: "success", show: stage >= 3 },
+              { d: "M73 49 C 64 47 55 44 49 41.5", show: stage >= 4 },
+              { d: "M50 86 C 49 72 48 58 47.6 44", tone: "dashed", show: stage >= 5 },
+            ]}
+          />
+          <WorldNode x="47%" y="41%" show />
+          <WorldNode x="48.5%" y="40%" tone="success" show={stage >= 3} />
+
+          <WorldPane pos={{ left: "4%", top: "9%" }} w="clamp(260px,26vw,370px)" tier={stage >= 3 ? "context" : "focus"} className="lg:[animation:none]">
             <div className="flex items-center gap-3">
-              <span
-                role="img"
-                aria-label={copy.pro.name}
-                className="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-ink-600 to-ink-700 font-display text-base font-semibold text-brand-blue"
-              >
-                {copy.pro.initials}
-              </span>
+              <PersonRing src={PUBLIC_IMAGERY.rasaPortrait.src} name={copy.pro.name} initials={copy.pro.initials} size={46} objectPosition="50% 22%" zoom={1.15} focus />
               <div>
                 <p className="font-display text-card-title font-semibold text-text-primary">{copy.pro.name}</p>
-                <p className="text-support text-text-secondary">{copy.pro.role}</p>
+                <PaneMeta>{copy.pro.role}</PaneMeta>
               </div>
             </div>
-            <span className="rounded-full bg-ink-900/60 px-3 py-1 text-basis text-text-muted">{copy.sample}</span>
-          </div>
+            <PaneValue>{copy.pro.recordTitle}</PaneValue>
+            <PaneMeta>{copy.pro.recordText}</PaneMeta>
+          </WorldPane>
 
-          <div
-            className={cn(
-              "mt-6 rounded-2xl bg-ink-700 p-5 transition-[box-shadow,opacity] duration-700 motion-reduce:transition-none",
-              stage >= 3 && "shadow-[inset_0_0_0_1.5px_rgb(var(--c-brand-blue)/0.5)]",
-              stage >= 4 && "opacity-70",
-            )}
-          >
-            <p className="font-display text-card-title font-semibold text-text-primary">{copy.pro.recordTitle}</p>
-            <p className="mt-1 text-body text-text-secondary">{copy.pro.recordText}</p>
-            <div className={cn("mt-4 overflow-hidden rounded-xl", fade(stage >= 2))}>
-              <Image
-                src={kitchen.src}
-                alt={copy.pro.photoAlt}
-                width={kitchen.width}
-                height={kitchen.height}
-                sizes="(min-width:1024px) 420px, 90vw"
-                className="h-28 w-full object-cover sm:h-32"
-              />
-            </div>
-            <div className="mt-4">
+          <WorldPane pos={{ left: "4%", top: "52%" }} w="clamp(260px,26vw,370px)" className={cn("lg:[animation:none]", reach(2))}>
+            <div className="flex items-center gap-3">
+              <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-xl">
+                <Image src={evidence.src} alt={copy.pro.photoAlt} fill sizes="80px" className="object-cover" />
+              </div>
               <StateMark state={proState.state} label={proState.label} />
             </div>
-          </div>
+          </WorldPane>
 
-          <div className={cn("mt-5 border-l-2 border-brand-blue/60 pl-4", fade(stage >= 4))}>
-            <p className="text-support text-text-muted">{copy.pro.historyLabel}</p>
-            <p className="font-display text-card-title font-semibold text-text-primary">{copy.pro.historyTitle}</p>
-            <p className="text-support text-text-secondary">{copy.pro.historyMeta}</p>
-          </div>
+          <WorldPane pos={{ right: "4%", top: "9%" }} w="clamp(240px,23vw,330px)" tier="focus" className={cn("lg:[animation:none]", reach(3))}>
+            <StateMark state="confirmed" label={copy.states.confirmed} />
+          </WorldPane>
 
-          <div className={cn("mt-4 border-l-2 border-dashed border-ink-500 pl-4", fade(stage >= 5))}>
-            <p className="text-support text-text-muted">{copy.pro.nextLabel}</p>
-            <p className="text-support text-text-secondary">{copy.pro.nextMeta}</p>
-          </div>
-        </div>
+          <WorldPane pos={{ right: "4%", top: "37%" }} w="clamp(240px,23vw,330px)" className={cn("lg:[animation:none]", reach(4))}>
+            <PaneLabel>{copy.pro.historyLabel}</PaneLabel>
+            <PaneValue>{copy.pro.historyTitle}</PaneValue>
+            <PaneMeta>{copy.pro.historyMeta}</PaneMeta>
+          </WorldPane>
 
-        {/* the company */}
-        <div className="relative min-h-[18rem] rounded-3xl bg-ink-800 p-6 sm:p-8 lg:min-h-[27rem]">
-          <div className="flex items-center justify-between gap-3">
-            <p className="font-display text-card-title font-semibold text-text-primary">{copy.co.name}</p>
-            <span className="rounded-full bg-ink-900/60 px-3 py-1 text-basis text-text-muted">{copy.sample}</span>
-          </div>
-          <p className="mt-1 text-support text-text-secondary">{copy.co.project}</p>
-          <div className="mt-6 rounded-2xl bg-ink-700 p-5">
-            <StateMark state={coState.state} label={coState.label} />
-          </div>
-          <div className={cn("mt-6", fade(stage >= 5))}>
-            <p className="text-support text-text-muted">{copy.co.nextLabel}</p>
-            <p className="font-display text-card-title font-semibold text-text-primary">{copy.co.nextNeed}</p>
-            <TrackedCta
-              href="/company-need"
-              ctaId="transition_next_need"
-              audience="companies"
-              tabIndex={stage >= 5 ? 0 : -1}
-              className="mt-3 inline-flex min-h-11 items-center text-support font-medium text-brand-blue underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
-            >
-              {copy.co.nextCta} →
-            </TrackedCta>
-          </div>
+          <WorldPane pos={{ left: "36%", bottom: "6%" }} w="clamp(250px,25vw,350px)" tier="quiet" className={cn("lg:[animation:none] lg:ring-1 lg:ring-dashed", reach(5))}>
+            <PaneLabel>{copy.pro.nextLabel}</PaneLabel>
+            <PaneMeta>{copy.pro.nextMeta}</PaneMeta>
+          </WorldPane>
+
+          <WorldPane pos={{ right: "4%", bottom: "6%" }} w="clamp(250px,24vw,340px)" className="lg:[animation:none]">
+            <PaneValue>{copy.co.name}</PaneValue>
+            <PaneMeta>{copy.co.project}</PaneMeta>
+            <div className="mt-2">
+              <StateMark state={coState.state} label={coState.label} />
+            </div>
+            <div className={cn("mt-3", reach(5))}>
+              <PaneLabel>{copy.co.nextLabel}</PaneLabel>
+              <p className="font-display text-card-title font-semibold text-text-primary">{copy.co.nextNeed}</p>
+              <TrackedCta
+                href="/company-need"
+                ctaId="transition_next_need"
+                audience="companies"
+                tabIndex={stage >= 5 ? 0 : -1}
+                className="mt-1 inline-flex min-h-11 items-center text-support font-medium text-brand-blue underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+              >
+                {copy.co.nextCta} →
+              </TrackedCta>
+            </div>
+          </WorldPane>
         </div>
       </div>
     </section>

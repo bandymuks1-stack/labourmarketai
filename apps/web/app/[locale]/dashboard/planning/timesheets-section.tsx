@@ -85,7 +85,7 @@ export async function TimesheetsSection({
 
   const header = (
     <div className="flex flex-col gap-1">
-      <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
+      <h2 className="text-support font-medium text-text-secondary">
         {t("title")}
       </h2>
       <p className="text-xs text-text-muted">{t("intro")}</p>
@@ -151,9 +151,9 @@ export async function TimesheetsSection({
             key={line.lineKey}
             className="flex flex-wrap items-center gap-2 text-xs text-text-secondary"
           >
-            <span className="font-mono text-meta text-text-muted">{line.day}</span>
+            <span className="text-meta text-text-muted">{line.day}</span>
             <span className="min-w-0 break-words">{line.title}</span>
-            <span className="font-mono tabular-nums">
+            <span className="tabular-nums">
               {line.value} {t(`unit.${line.unit}`)}
             </span>
             {line.projectTitle ? (
@@ -225,7 +225,7 @@ export async function TimesheetsSection({
 
       {/* ── My documents (worker side) ─────────────────────────────────── */}
       <div className="flex flex-col gap-3">
-        <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
+        <h3 className="text-support font-medium text-text-muted">
           {t("mine.title")}
         </h3>
         <p className="text-xs text-text-muted">{t("mine.derivedNote")}</p>
@@ -300,7 +300,7 @@ export async function TimesheetsSection({
                       {fmt(sheet.periodStart)} – {fmt(sheet.periodEnd)}
                     </span>
                     <span
-                      className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[sheet.status]}`}
+                      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-support ${STATUS_TONE[sheet.status]}`}
                       data-testid={`timesheet-status-${sheet.id}`}
                     >
                       {t(`status.${sheet.status}`)}
@@ -384,7 +384,7 @@ export async function TimesheetsSection({
       {/* ── Documents of workers I manage (org side) ───────────────────── */}
       {overview.org.length > 0 || overview.orgOptions.some((o) => !templateFor(o.organizationId)?.published) ? (
         <div className="flex flex-col gap-3">
-          <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
+          <h3 className="text-support font-medium text-text-muted">
             {t("org.title")}
           </h3>
           <p className="text-xs text-text-muted">{t("org.decideNote")}</p>
@@ -463,7 +463,7 @@ export async function TimesheetsSection({
                         {fmt(sheet.periodStart)} – {fmt(sheet.periodEnd)}
                       </span>
                       <span
-                        className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[sheet.status]}`}
+                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-support ${STATUS_TONE[sheet.status]}`}
                       >
                         {t(`status.${sheet.status}`)}
                       </span>

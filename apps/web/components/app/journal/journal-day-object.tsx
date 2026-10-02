@@ -44,7 +44,16 @@ export async function JournalDayObject({
   const hiddenPhotos = Math.max(0, photoTotal - shownPhotos.length);
 
   const stepLabel =
-    "flex items-center gap-2 font-mono text-meta font-semibold uppercase tracking-label text-text-muted before:inline-block before:h-[7px] before:w-[7px] before:shrink-0 before:rotate-45 before:rounded-[2px] before:bg-brand-cyan/70";
+    "flex items-center gap-2 text-support font-medium text-text-muted before:inline-block before:h-[7px] before:w-[7px] before:shrink-0 before:rotate-45 before:rounded-[2px] before:bg-brand-cyan/70";
+
+  // The day reads as ONE chain: what I did (facts, no boxes) -> what proves it
+  // -> who stood behind it -> what it added to my history. The three chain
+  // steps are the weighted objects; a line joins them from lg.
+  const FACT = "flex flex-col gap-1.5";
+  const STEP =
+    "relative flex flex-col gap-2 rounded-2xl border border-ink-600/70 bg-ink-900/50 p-4";
+  const JOIN =
+    "lg:after:absolute lg:after:-right-6 lg:after:top-8 lg:after:h-px lg:after:w-6 lg:after:bg-brand-cyan/50 lg:after:content-['']";
 
   return (
     <section
@@ -60,7 +69,7 @@ export async function JournalDayObject({
 
       <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
         <div className="flex min-w-0 flex-col gap-1">
-          <p className="font-mono text-meta font-semibold uppercase tracking-label text-text-muted">{t("title")}</p>
+          <p className="text-support font-medium text-text-muted">{t("title")}</p>
           <h2 className="font-display text-2xl font-bold leading-tight tracking-tightest text-text-primary sm:text-3xl">
             {formatUtcDate(iso, locale)}
           </h2>
@@ -76,9 +85,9 @@ export async function JournalDayObject({
         </p>
       </header>
 
-      <ol className="mt-5 grid list-none gap-3 border-t border-ink-600/70 pt-5 sm:grid-cols-2 lg:grid-cols-3">
+      <ol className="mt-5 grid list-none gap-x-3 gap-y-5 border-t border-ink-600/70 pt-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-12">
         {/* 1 · WHERE */}
-        <li className="flex flex-col gap-2 rounded-xl border border-ink-600/70 bg-ink-900/40 p-3.5" data-testid="journal-day-object-where">
+        <li className={FACT} data-testid="journal-day-object-where">
           <p className={stepLabel}>{t("where")}</p>
           {day.places.length > 0 ? (
             <p className="break-words text-base font-medium text-text-primary">
@@ -90,7 +99,7 @@ export async function JournalDayObject({
         </li>
 
         {/* 2 · WHAT */}
-        <li className="flex flex-col gap-2 rounded-xl border border-ink-600/70 bg-ink-900/40 p-3.5" data-testid="journal-day-object-what">
+        <li className={FACT} data-testid="journal-day-object-what">
           <p className={stepLabel}>{t("what")}</p>
           {day.activities.length > 0 ? (
             <p className="break-words text-base text-text-primary">
@@ -102,7 +111,7 @@ export async function JournalDayObject({
         </li>
 
         {/* 3 · HOW LONG */}
-        <li className="flex flex-col gap-2 rounded-xl border border-ink-600/70 bg-ink-900/40 p-3.5" data-testid="journal-day-object-time-step">
+        <li className={FACT} data-testid="journal-day-object-time-step">
           <p className={stepLabel}>{t("howLong")}</p>
           <p className="text-base text-text-primary">
             {day.totalMinutes > 0 ? dur(day.totalMinutes) : t("timeNone")}
@@ -115,7 +124,7 @@ export async function JournalDayObject({
         </li>
 
         {/* 4 · WHAT PROVES IT — the person's own photos, nothing generated */}
-        <li className="flex flex-col gap-2 rounded-xl border border-ink-600/70 bg-ink-900/40 p-3.5" data-testid="journal-day-object-evidence">
+        <li className={`${STEP} ${JOIN}`} data-testid="journal-day-object-evidence">
           <p className={stepLabel}>{t("evidence")}</p>
           {photos.status === "unavailable" && day.photoCount === 0 ? (
             <p className="text-sm text-text-muted">{t("photosUnavailable")}</p>
@@ -155,7 +164,7 @@ export async function JournalDayObject({
         </li>
 
         {/* 5 · WHO CONFIRMED IT */}
-        <li className="flex flex-col gap-2 rounded-xl border border-ink-600/70 bg-ink-900/40 p-3.5" data-testid="journal-day-object-confirmation">
+        <li className={`${STEP} ${JOIN}`} data-testid="journal-day-object-confirmation">
           <p className={stepLabel}>{t("confirmed")}</p>
           <div className="flex flex-wrap gap-2">
             {day.confirmedCount > 0 ? (
@@ -218,7 +227,7 @@ export async function JournalDayObject({
         </li>
 
         {/* 6 · WHAT IT ADDED TO MY PROFESSIONAL HISTORY */}
-        <li className="flex flex-col gap-2 rounded-xl border border-ink-600/70 bg-ink-900/40 p-3.5" data-testid="journal-day-object-added">
+        <li className={STEP} data-testid="journal-day-object-added">
           <p className={stepLabel}>{t("added")}</p>
           {day.skills.length > 0 ? (
             <ul className="flex list-none flex-wrap gap-2" data-testid="journal-day-object-skills">

@@ -18108,7 +18108,8 @@
     "next": {
       "title": "Twoja historia idzie z Tobą",
       "body": "Każda praca, którą zapiszesz, ją uzupełnia. Zabierz ją na następną okazję.",
-      "cta": "Zobacz, dokąd możesz pójść"
+      "cta": "Zobacz, dokąd możesz pójść",
+      "label": "Dalej, nie historia"
     }
   },
   "workContext": {
@@ -18141,7 +18142,9 @@
       "tomasAlt": "Monter rusztowań pracuje na rusztowaniu fasadowym przy ulicy starego miasta",
       "rasaAlt": "Kucharka przy podaniu w kuchni restauracji",
       "tomasCaption": "Tomas K. · Monter rusztowań",
-      "rasaCaption": "Rasa J. · Kucharka"
+      "rasaCaption": "Rasa J. · Kucharka",
+      "vanAlt": "Monter rusztowań obok swojego busa na budowie",
+      "ownerAlt": "Właścicielka restauracji z dwoma współpracownikami przy stole"
     },
     "workers": {
       "hero": {
@@ -18343,6 +18346,42 @@
     },
     "explore": {
       "summary": "Zobacz każdy krok i otwórz go w swojej przestrzeni roboczej"
+    },
+    "world": {
+      "labels": {
+        "person": "Osoba",
+        "team": "Zespół",
+        "project": "Projekt",
+        "work": "Dzisiejsza praca",
+        "today": "Dziś",
+        "record": "Twój wpis",
+        "needs": "Czeka na Ciebie",
+        "kitchen": "Zespół kuchni"
+      },
+      "home": {
+        "title": "Jeden świat pracy.",
+        "sub": "Prawdziwi ludzie, prawdziwe firmy i praca między nimi, w jednym miejscu.",
+        "primary": "Szukam pracy",
+        "secondary": "Zatrudniam",
+        "personRole": "Monter rusztowań · Wilno",
+        "crew": "Ekipa północna",
+        "projectMeta": "Elewacja północna · poziom 3 do 4",
+        "workTitle": "Poziom 3, część wschodnia",
+        "workMeta": "8 godz. · kotwy co 1,5 m",
+        "doneTitle": "Dodane do jego historii",
+        "doneMeta": "Potwierdzone przez przełożonego · 1 zdjęcie"
+      },
+      "workers": {
+        "taskMeta": "Odbiór 14:00",
+        "recordTitle": "Poziom 3, część wschodnia",
+        "recordMeta": "8 godz. · 1 zdjęcie",
+        "doneTitle": "Teraz w Twojej historii",
+        "taskTitle": "Elewacja północna"
+      },
+      "companies": {
+        "projectDone": "5 z 9 wpisów potwierdzonych w tym tygodniu",
+        "teamMeta": "3 osoby w tym projekcie"
+      }
     }
   }
 }

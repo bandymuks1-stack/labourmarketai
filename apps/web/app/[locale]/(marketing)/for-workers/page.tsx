@@ -2,13 +2,9 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { ExploreSteps } from "@/components/marketing/public/explore-steps";
-import { PublicHero } from "@/components/marketing/public/public-hero";
 import { PublicCtaEnd, PublicFaq } from "@/components/marketing/public/public-sections";
-import {
-  WorkerDayMoment,
-  WorkerHistoryMoment,
-  WorkerOutcome,
-} from "@/components/marketing/public/product-moments";
+import { WorkerHistoryMoment, WorkerOutcome } from "@/components/marketing/public/product-moments";
+import { WorkersWorldHero } from "@/components/marketing/public/world-heroes";
 import { WorkRecordTransitionSection } from "@/components/marketing/public/work-record-transition-section";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
 
@@ -22,13 +18,13 @@ export async function generateMetadata({
 }
 
 /**
- * /for-workers — the canonical WORKER acquisition destination.
+ * /for-workers — the canonical WORKER acquisition destination, in the same
+ * world as the homepage and the product after login.
  *
- * One promise (find work), one differentiator (keep what you build through real
- * work), one action (create the free profile). The page proves it with focused
- * product moments in the order the worker lives it:
- *   hero → today and the record → the signature transition → the professional
- *   history → the outcome → straight answers → the same action again.
+ * A professional fills the first screen with today, the record and the
+ * confirmation beside him; then the same kind of person moves through the
+ * system on a photographic stage (work, proof, review, history, next), then the
+ * living history, the outcome, straight answers, and the one action again.
  * Every claim is traced in docs/public/PUBLIC_SLICE_TRUTH_TABLE_2026-10-02.md.
  */
 export default async function ForWorkersPage({
@@ -39,29 +35,10 @@ export default async function ForWorkersPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("publicSlice.workers");
-  const ts = await getTranslations("publicSlice");
-  const ti = await getTranslations("publicSlice.imagery");
 
   return (
     <>
-      <PublicHero
-        audience="workers"
-        title={t("hero.title")}
-        accent={t("hero.accent")}
-        sub={t("hero.sub")}
-        note={t("hero.note")}
-        primary={{ label: t("hero.cta"), href: "/auth/signup", id: "workers_hero" }}
-        secondary={{ label: t("hero.secondary"), href: "/jobs", id: "workers_hero_jobs" }}
-        main="site"
-        aside="kitchen"
-        copy={{
-          sample: ts("sample"),
-          mainAlt: ti("tomasAlt"),
-          mainCaption: ti("tomasCaption"),
-          asideAlt: ti("rasaAlt"),
-        }}
-      />
-      <WorkerDayMoment />
+      <WorkersWorldHero />
       <WorkRecordTransitionSection />
       <WorkerHistoryMoment />
       <WorkerOutcome />

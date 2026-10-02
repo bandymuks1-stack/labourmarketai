@@ -19,6 +19,7 @@ import {
 } from "@/lib/projects/operations-actions";
 import { PrintButton } from "@/components/app/print-button";
 import { playerInitials } from "@/lib/identity/player-identity";
+import { PersonPortrait } from "@/components/app/identity/person-portrait";
 
 /**
  * Project worker operations board (slices pilot-ops-launch-v1 +
@@ -191,7 +192,7 @@ function Counter({
       >
         {value}
       </span>
-      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+      <span className="text-meta font-medium text-text-muted">
         {label}
       </span>
       {hint ? (
@@ -255,7 +256,7 @@ function StatusEditor({
 
   return (
     <div className="flex flex-col gap-1 print:hidden" data-testid="ops-status-editor">
-      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+      <span className="text-meta font-medium text-text-muted">
         {labels.statusTitle}
       </span>
       <div className="flex flex-wrap items-center gap-2">
@@ -357,7 +358,7 @@ function ChecklistEditor({
   return (
     <div className="flex flex-col gap-2" data-testid="ops-checklist">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+        <span className="text-meta font-medium text-text-muted">
           {labels.checklist.title}
         </span>
         <span className="flex flex-wrap gap-2 text-meta text-text-secondary">
@@ -451,11 +452,15 @@ function WorkerCard({
   labels,
   locale,
   projectId,
+  avatarUrl,
 }: {
   worker: WorkerOps;
   labels: OperationsBoardLabels;
   locale: string;
   projectId: string;
+  /** The person's own photo, only when the database released one to this
+   *  viewer (lib/profile/avatar.ts). Absent -> the monogram, never a stand-in. */
+  avatarUrl?: string | null;
 }) {
   const missingLabel = (code: string) =>
     code === "name"
@@ -477,22 +482,23 @@ function WorkerCard({
     >
       <header className="flex flex-wrap items-center justify-between gap-2">
         <span className="flex min-w-0 items-center gap-2.5">
-          <span
-            aria-hidden
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-ink-700 font-display text-xs font-bold text-text-primary ${
-              worker.confirmedSkills > 0 ? "border-trust-accent/50" : "border-ink-500"
-            }`}
-          >
-            {initials}
-          </span>
-          <h3 className="truncate font-display text-base font-semibold tracking-tightest text-text-primary">
+          {/* Persistent person: the SAME 4:5 portrait as the roster, the card
+              and the journal (photo only when released, else the monogram). */}
+          <PersonPortrait
+            name={worker.name}
+            avatarUrl={avatarUrl ?? null}
+            initials={initials}
+            width="44px"
+            className={worker.confirmedSkills > 0 ? "ring-1 ring-trust-accent/50" : undefined}
+          />
+          <h3 className="truncate font-display text-lg font-semibold tracking-tightest text-text-primary">
             {worker.name}
           </h3>
         </span>
         <div className="flex flex-wrap items-center gap-1.5">
           {worker.operationalStatus ? (
             <span
-              className={`rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${
+              className={`rounded-full border px-2 py-0.5 text-meta font-medium ${
                 worker.operationalStatus === "ready"
                   ? "border-state-success/40 text-state-success"
                   : "border-ink-600 text-text-secondary"
@@ -503,7 +509,7 @@ function WorkerCard({
             </span>
           ) : null}
           <span
-            className={`rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${
+            className={`rounded-full border px-2 py-0.5 text-meta font-medium ${
               worker.ready
                 ? "border-state-success/40 text-state-success"
                 : "border-ink-600 text-text-secondary"
@@ -538,7 +544,7 @@ function WorkerCard({
 
       {worker.missing.length > 0 ? (
         <div className="flex flex-col gap-1">
-          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          <span className="text-meta font-medium text-text-muted">
             {labels.missingTitle}
           </span>
           <div className="flex flex-wrap gap-1.5">
@@ -582,12 +588,15 @@ export function ProjectOperationsBoard({
   locale,
   csvHref,
   projectId,
+  avatars,
 }: {
   ops: ProjectOperations;
   labels: OperationsBoardLabels;
   locale: string;
   csvHref: string;
   projectId: string;
+  /** workerId -> released photo URL (absent / null = monogram). */
+  avatars?: Readonly<Record<string, string | null>>;
 }) {
   const { project, workers, counters } = ops;
   const location = [project.city, project.country].filter(Boolean).join(", ");
@@ -648,7 +657,7 @@ export function ProjectOperationsBoard({
   return (
     <div className="flex flex-col gap-6" data-testid="project-operations-board">
       <header className="flex flex-col gap-1">
-        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+        <span className="text-meta font-medium text-text-muted">
           {labels.eyebrow}
         </span>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -669,7 +678,7 @@ export function ProjectOperationsBoard({
       </header>
 
       <section className="flex flex-col gap-3">
-        <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
+        <h2 className="text-meta font-medium text-text-muted">
           {labels.countersTitle}
         </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -742,7 +751,7 @@ export function ProjectOperationsBoard({
       </section>
 
       <section className="flex flex-col gap-2 print:hidden">
-        <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
+        <h2 className="text-meta font-medium text-text-muted">
           {labels.actionsTitle}
         </h2>
         <div className="flex flex-wrap items-center gap-3">
@@ -779,7 +788,7 @@ export function ProjectOperationsBoard({
       </section>
 
       <section className="flex flex-col gap-2 print:hidden" data-testid="ops-filters">
-        <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
+        <h2 className="text-meta font-medium text-text-muted">
           {labels.filters.title}
         </h2>
         <div className="flex flex-wrap items-center gap-2">
@@ -808,8 +817,9 @@ export function ProjectOperationsBoard({
       </section>
 
       <section id="ops-workers-section" className="flex flex-col gap-3 scroll-mt-4">
-        <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
+        <h2 className="font-display text-xl font-semibold tracking-tightest text-text-primary">
           {labels.workersTitle}
+          <span className="ml-2 text-support font-normal text-text-muted tabular-nums">{filtered.length}</span>
         </h2>
         {workers.length === 0 ? (
           <div className="card-border flex flex-col items-start gap-3 p-4" data-testid="ops-no-workers">
@@ -851,16 +861,18 @@ export function ProjectOperationsBoard({
                 labels={labels}
                 locale={locale}
                 projectId={projectId}
+                avatarUrl={avatars?.[w.workerId] ?? null}
               />
             ))}
           </div>
         )}
       </section>
 
-      <section className="flex flex-col gap-2" data-testid="ops-honesty-notes">
-        <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
+      <details className="group flex flex-col gap-2" data-testid="ops-honesty-notes">
+        <summary className="flex min-h-11 w-fit cursor-pointer list-none items-center gap-2 text-meta font-medium text-text-muted hover:text-text-primary">
+          <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
           {labels.notesTitle}
-        </h2>
+        </summary>
         <ul className="flex flex-col gap-1 text-meta leading-relaxed text-text-muted">
           <li>{labels.readinessHonestyNote}</li>
           <li>{labels.statusHelper}</li>
@@ -868,7 +880,7 @@ export function ProjectOperationsBoard({
           <li>{labels.documentsNote}</li>
           <li>{labels.candidateSkillNote}</li>
         </ul>
-      </section>
+      </details>
     </div>
   );
 }
