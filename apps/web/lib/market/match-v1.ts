@@ -74,7 +74,7 @@ export type {
  *  module — re-exported here so every existing import keeps working. */
 export type { EvidenceTier } from "@/lib/evidence/evidence-tier";
 export { sourceToEvidence } from "@/lib/evidence/evidence-tier";
-import type { EvidenceTier } from "@/lib/evidence/evidence-tier";
+import { deriveConfirmedWorkTier, type EvidenceTier } from "@/lib/evidence/evidence-tier";
 
 /**
  * EVIDENCE CONFIDENCE — the answer to "how sure are we the matched skills are
@@ -100,6 +100,11 @@ export interface MatchSubjectSkill {
   readonly uri: string;
   /** Evidence tier from worker_skills.source (NEVER inferred). */
   readonly evidence: EvidenceTier;
+  /** Manager-confirmed REAL WORK entries that mention this skill, and the
+   *  distinct days they span (see lib/evidence/evidence-tier.ts). Optional:
+   *  absent means "not known", never "zero" — and it never lowers a match. */
+  readonly confirmedWorkEntries?: number;
+  readonly confirmedDays?: number;
 }
 
 /** The company need, as much as the structured payload + demand row carry.
@@ -344,6 +349,11 @@ export interface MatchResultV1 {
     readonly matchedManagerConfirmed: number;
     readonly matchedJournalSupported: number;
     readonly matchedSelfDeclared: number;
+    /** Matched skills with >= 1 manager-confirmed work entry (entry-level
+     *  confirmation — NOT a skill certification). Counts, never a percentage. */
+    readonly matchedConfirmedWork?: number;
+    /** Matched skills whose confirmed work repeats across entries and days. */
+    readonly matchedRepeatedConfirmed?: number;
   };
   /**
    * Verification truth over the MATCHED skills, separate from `status` by
@@ -400,6 +410,15 @@ export function compareMatches(a: MatchResultV1, b: MatchResultV1): number {
   const ca = a.skillFit?.matchedConfirmed ?? 0;
   const cb = b.skillFit?.matchedConfirmed ?? 0;
   if (cb !== ca) return cb - ca;
+  // Accumulated confirmed WORK breaks ties only INSIDE the same status and
+  // coverage — it never reorders by coverage, and missing counts read as 0
+  // without penalising eligibility (a tiebreak, not a score).
+  const ra = a.evidence.matchedRepeatedConfirmed ?? 0;
+  const rb = b.evidence.matchedRepeatedConfirmed ?? 0;
+  if (rb !== ra) return rb - ra;
+  const wa = a.evidence.matchedConfirmedWork ?? 0;
+  const wb = b.evidence.matchedConfirmedWork ?? 0;
+  if (wb !== wa) return wb - wa;
   const AV: Record<MatchAvailability, number> = { available: 3, busy: 2, unknown: 1, unavailable: 0 };
   return AV[b.availability] - AV[a.availability];
 }
@@ -512,13 +531,22 @@ export function matchWorkerToNeed(
 
   // ── Evidence breakdown over the MATCHED skills. ──
   const tierByUri = new Map<string, EvidenceTier>();
-  for (const s of subject.skills) tierByUri.set(s.uri, s.evidence);
+  const workByUri = new Map<string, ReturnType<typeof deriveConfirmedWorkTier>>();
+  for (const s of subject.skills) {
+    tierByUri.set(s.uri, s.evidence);
+    workByUri.set(s.uri, deriveConfirmedWorkTier(s));
+  }
+  let matchedConfirmedWork = 0;
+  let matchedRepeatedConfirmed = 0;
 
   let matchedManagerConfirmed = 0;
   let matchedJournalSupported = 0;
   let matchedSelfDeclared = 0;
   for (const uri of skillFit.matchedUris) {
     const tier = tierByUri.get(uri) ?? "self_declared";
+    const work = workByUri.get(uri) ?? "none";
+    if (work !== "none") matchedConfirmedWork += 1;
+    if (work === "repeated_confirmed") matchedRepeatedConfirmed += 1;
     if (tier === "manager_confirmed") matchedManagerConfirmed += 1;
     else if (tier === "work_journal") matchedJournalSupported += 1;
     else matchedSelfDeclared += 1;
@@ -1530,7 +1558,13 @@ export function matchWorkerToNeed(
   return {
     status,
     skillFit,
-    evidence: { matchedManagerConfirmed, matchedJournalSupported, matchedSelfDeclared },
+    evidence: {
+      matchedManagerConfirmed,
+      matchedJournalSupported,
+      matchedSelfDeclared,
+      matchedConfirmedWork,
+      matchedRepeatedConfirmed,
+    },
     evidenceConfidence,
     reasons,
     gaps,
