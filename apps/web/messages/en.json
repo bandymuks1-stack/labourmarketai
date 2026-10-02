@@ -18017,5 +18017,42 @@
         "detail": "Reports come from confirmed work — nobody retypes them."
       }
     }
+  },
+  "twoSides": {
+    "title": "Hiring is the start, not the end.",
+    "professional": "Professional",
+    "company": "Company",
+    "steps": {
+      "find": {
+        "label": "Find",
+        "worker": "Finds work that fits what they really did",
+        "company": "Finds people whose real work fits the need"
+      },
+      "connect": {
+        "label": "Connect",
+        "worker": "Talks in their own language",
+        "company": "Hires through a real conversation"
+      },
+      "work": {
+        "label": "Work",
+        "worker": "Records the work as it happens",
+        "company": "Runs the work with its people"
+      },
+      "verify": {
+        "label": "Verify",
+        "worker": "A manager confirms it",
+        "company": "Confirms what was really done"
+      },
+      "grow": {
+        "label": "Grow",
+        "worker": "Confirmed work becomes their history",
+        "company": "Reports come from confirmed work"
+      },
+      "continue": {
+        "label": "Continue",
+        "worker": "Takes that history to the next job",
+        "company": "Plans the next project with people it knows"
+      }
+    }
   }
 }

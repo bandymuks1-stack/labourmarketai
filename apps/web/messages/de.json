@@ -18017,5 +18017,42 @@
         "detail": "Berichte entstehen aus bestätigter Arbeit — niemand tippt sie neu ab."
       }
     }
+  },
+  "twoSides": {
+    "title": "Einstellung ist der Anfang, nicht das Ende.",
+    "professional": "Fachkraft",
+    "company": "Unternehmen",
+    "steps": {
+      "find": {
+        "label": "Finden",
+        "worker": "Findet Arbeit, die zu dem passt, was sie wirklich geleistet haben",
+        "company": "Findet Menschen, deren tatsächliche Arbeit zum Bedarf passt"
+      },
+      "connect": {
+        "label": "Verbinden",
+        "worker": "Spricht in der eigenen Sprache",
+        "company": "Stellt über ein echtes Gespräch ein"
+      },
+      "work": {
+        "label": "Arbeiten",
+        "worker": "Hält die Arbeit fest, während sie passiert",
+        "company": "Führt die Arbeit gemeinsam mit den eigenen Leuten aus"
+      },
+      "verify": {
+        "label": "Bestätigen",
+        "worker": "Eine Führungskraft bestätigt sie",
+        "company": "Bestätigt, was wirklich getan wurde"
+      },
+      "grow": {
+        "label": "Wachsen",
+        "worker": "Bestätigte Arbeit wird zur eigenen Historie",
+        "company": "Berichte entstehen aus bestätigter Arbeit"
+      },
+      "continue": {
+        "label": "Weitermachen",
+        "worker": "Nimmt diese Historie in den nächsten Job mit",
+        "company": "Plant das nächste Projekt mit Menschen, die man kennt"
+      }
+    }
   }
 }

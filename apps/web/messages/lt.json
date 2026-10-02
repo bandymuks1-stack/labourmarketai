@@ -18017,5 +18017,42 @@
         "detail": "Ataskaitos gaunamos iš patvirtinto darbo — niekas jų nerašo iš naujo."
       }
     }
+  },
+  "twoSides": {
+    "title": "Įdarbinimas yra pradžia, o ne pabaiga.",
+    "professional": "Profesionalas",
+    "company": "Įmonė",
+    "steps": {
+      "find": {
+        "label": "Rasti",
+        "worker": "Randa darbą, atitinkantį tai, ką iš tikrųjų darė",
+        "company": "Randa žmones, kurių tikras darbas atitinka poreikį"
+      },
+      "connect": {
+        "label": "Susisiekti",
+        "worker": "Kalbasi savo kalba",
+        "company": "Samdo per tikrą pokalbį"
+      },
+      "work": {
+        "label": "Dirbti",
+        "worker": "Fiksuoja darbą, kai jis vyksta",
+        "company": "Vykdo darbą su savo žmonėmis"
+      },
+      "verify": {
+        "label": "Patvirtinti",
+        "worker": "Vadovas patvirtina",
+        "company": "Patvirtina, kas iš tikrųjų padaryta"
+      },
+      "grow": {
+        "label": "Augti",
+        "worker": "Patvirtintas darbas tampa jo istorija",
+        "company": "Ataskaitos gaunamos iš patvirtinto darbo"
+      },
+      "continue": {
+        "label": "Tęsti",
+        "worker": "Su ta istorija eina į kitą darbą",
+        "company": "Planuoja kitą projektą su pažįstamais žmonėmis"
+      }
+    }
   }
 }

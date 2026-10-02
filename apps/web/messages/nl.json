@@ -18017,5 +18017,42 @@
         "detail": "Rapporten komen uit bevestigd werk — niemand typt ze opnieuw over."
       }
     }
+  },
+  "twoSides": {
+    "title": "Aannemen is het begin, niet het einde.",
+    "professional": "Vakkracht",
+    "company": "Bedrijf",
+    "steps": {
+      "find": {
+        "label": "Vinden",
+        "worker": "Vindt werk dat past bij wat ze echt hebben gedaan",
+        "company": "Vindt mensen wier echte werk past bij de behoefte"
+      },
+      "connect": {
+        "label": "Verbinden",
+        "worker": "Praat in de eigen taal",
+        "company": "Neemt aan via een echt gesprek"
+      },
+      "work": {
+        "label": "Werken",
+        "worker": "Legt het werk vast terwijl het gebeurt",
+        "company": "Voert het werk uit met de eigen mensen"
+      },
+      "verify": {
+        "label": "Bevestigen",
+        "worker": "Een leidinggevende bevestigt het",
+        "company": "Bevestigt wat er echt is gedaan"
+      },
+      "grow": {
+        "label": "Groeien",
+        "worker": "Bevestigd werk wordt hun geschiedenis",
+        "company": "Rapporten komen voort uit bevestigd werk"
+      },
+      "continue": {
+        "label": "Doorgaan",
+        "worker": "Neemt die geschiedenis mee naar de volgende baan",
+        "company": "Plant het volgende project met mensen die ze kennen"
+      }
+    }
   }
 }
