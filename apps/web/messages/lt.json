@@ -7585,6 +7585,8 @@
     "skillsUnavailable": "Šiuo metu nepavyko nuskaityti.",
     "verifiedUnavailable": "Įgūdžių su vadovo įrašu šiuo metu nepavyko nuskaityti.",
     "identity": {
+      "noRecords": "Dar nėra darbo įrašų",
+      "noManagerRecord": "Dar nėra vadovo įrašo",
       "currentWork": "Dirba dabar",
       "recorded": "val. užfiksuota",
       "confirmed": "val. su vadovo įrašu",
