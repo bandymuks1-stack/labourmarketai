@@ -2,7 +2,11 @@ import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/lib/i18n/navigation";
-import type { CompassNextStep, LearningCompass } from "@/lib/learning/learning-compass-model";
+import {
+  recommendationNextAction,
+  type CompassNextStep,
+  type LearningCompass,
+} from "@/lib/learning/learning-compass-model";
 
 /** Where each next step is actually done — in-page anchors on the profile
  *  (the compass renders there) or the one canonical route. */
@@ -220,6 +224,34 @@ export async function LearningCompassSection({
                           : t(role ? "recWhyMissingRole" : "recWhyMissing", { role: role ?? "" })}
                       {r.sources.length > 1 ? ` ${t("recMoreRequests", { count: r.sources.length - 1 })}` : ""}
                     </span>
+                    {(() => {
+                      const action = recommendationNextAction(r);
+                      return (
+                        <Link
+                          href={
+                            (action.kind === "opportunities"
+                              ? action.professionSlug
+                                ? `/dashboard/opportunities?profession=${encodeURIComponent(action.professionSlug)}`
+                                : "/dashboard/opportunities"
+                              : action.kind === "journal"
+                                ? "/dashboard/journal"
+                                : "/dashboard/profile#profile-edit") as "/dashboard/profile"
+                          }
+                          className="mt-1 inline-block text-brand-blue hover:underline"
+                          data-testid="compass-recommendation-action"
+                          data-action={action.kind}
+                        >
+                          {t(
+                            action.kind === "opportunities"
+                              ? "recActionOpportunity"
+                              : action.kind === "journal"
+                                ? "recActionJournal"
+                                : "recActionProfile",
+                          )}{" "}
+                          →
+                        </Link>
+                      );
+                    })()}
                   </li>
                 );
               })}

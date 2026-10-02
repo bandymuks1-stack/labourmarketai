@@ -73,7 +73,10 @@ import {
   trackFunnel,
 } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
-import { reviewUnconfirmedWorkTime } from "@/lib/journal/unconfirmed-work-time";
+import {
+  reviewUnconfirmedWorkTime,
+  statedDurationCount,
+} from "@/lib/journal/unconfirmed-work-time";
 import { cn } from "@/lib/utils";
 import { Link } from "@/lib/i18n/navigation";
 import type { WorkDayCheck } from "@/lib/journal/work-time-plausibility";
@@ -942,6 +945,19 @@ export function JournalEntryComposer({
     if (!projectChoiceIsSatisfied(contextProjects, projectChoiceValid)) {
       setError(t("projectAmbiguous"));
       return;
+    }
+    // A quick save from the text alone never parsed it: a stated duration
+    // ("dirbau 2 valandas") would be recorded with no time at all. Chat and
+    // quick-record show the parse and let the worker confirm it; the full form
+    // does the same by opening the existing review step first (doctrine §7 —
+    // never confirmed for them).
+    if (stage === "compose" && !editingEntry) {
+      const stated = statedDurationCount(extractJournalSuggestions(text));
+      if (stated > 0) {
+        analyse(text);
+        setError(t("unconfirmedTimeBlocked", { count: stated }));
+        return;
+      }
     }
     // Saving now would discard hours the worker actually wrote. Say so and
     // stop; `confirmAllPending` (the existing control) is one tap away, and
