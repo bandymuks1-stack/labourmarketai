@@ -17933,5 +17933,87 @@
       "refused": "Das konnte nicht gespeichert werden. Nichts wurde geändert.",
       "person": "{hours} Std., {count, plural, one {# Eintrag} other {# Einträge}}"
     }
+  },
+  "workLifecycle": {
+    "title": "Was mit Ihrer Arbeit passiert",
+    "titleCompany": "Was mit der Arbeit passiert, die Sie leiten",
+    "example": "Beispiel — keine echte Person und keine echten Daten",
+    "hint": "Wählen Sie einen Schritt. Jeder Schritt öffnet den echten Ort in Ihrem Arbeitsbereich.",
+    "open": "In Ihrem Arbeitsbereich öffnen",
+    "list": "Schritte im Arbeitsverlauf",
+    "workers": {
+      "person": {
+        "label": "Sie",
+        "fact": "Koch — berufliche Identität",
+        "detail": "Eine berufliche Identität, die Ihnen gehört — nicht an einen einzelnen Arbeitgeber gebunden."
+      },
+      "team": {
+        "label": "Ihr Team",
+        "fact": "Küchenteam",
+        "detail": "Sie schließen sich einem echten Team an — mit den Menschen, mit denen Sie arbeiten, und wer es leitet."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Start der Herbstkarte",
+        "detail": "Arbeit gehört zu einem Projekt und hat damit einen Ort, einen Zweck und eine Zeit."
+      },
+      "work": {
+        "label": "Arbeit",
+        "fact": "Abendservice — 8 Std.",
+        "detail": "Was Sie getan haben, wann und wie lange — erfasst, während es passiert."
+      },
+      "evidence": {
+        "label": "Nachweis",
+        "fact": "Foto + Journaleintrag",
+        "detail": "Erledigte Arbeit wird zum Nachweis, statt zu verschwinden."
+      },
+      "confirmation": {
+        "label": "Bestätigt",
+        "fact": "Von der Leitung bestätigt",
+        "detail": "Eine Führungskraft bestätigt es. Ohne das gilt nichts als verifiziert."
+      },
+      "history": {
+        "label": "Verlauf",
+        "fact": "Zu Ihrem Verlauf hinzugefügt",
+        "detail": "Bestätigte Arbeit bildet Ihren beruflichen Verlauf — er bleibt bei Ihnen für den nächsten Job."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Bedarf",
+        "fact": "4 Köche, ab Montag",
+        "detail": "Sie nennen den echten Bedarf einmal: wer, wo und ab wann."
+      },
+      "people": {
+        "label": "Personen",
+        "fact": "Passende Fachkräfte",
+        "detail": "Fachkräfte, deren echter Arbeitsverlauf zum Bedarf passt — mit dem, was verifiziert ist und was noch nicht."
+      },
+      "team": {
+        "label": "Ihr Team",
+        "fact": "Küchenteam",
+        "detail": "Aus Personen wird ein Team mit Leitung, Schichten und einem Arbeitsplatz."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Start der Herbstkarte",
+        "detail": "Teams sind um das Projekt organisiert, das sie liefern."
+      },
+      "work": {
+        "label": "Arbeit",
+        "fact": "Abendservice — 8 Std.",
+        "detail": "Arbeit wird dort erfasst, wo sie passiert, und nicht nachträglich rekonstruiert."
+      },
+      "confirmation": {
+        "label": "Bestätigt",
+        "fact": "Wartet auf Ihre Bestätigung",
+        "detail": "Sie sehen, was noch bestätigt werden muss und was schon erledigt ist."
+      },
+      "report": {
+        "label": "Bericht",
+        "fact": "Bericht aus echter Arbeit",
+        "detail": "Berichte entstehen aus bestätigter Arbeit — niemand tippt sie neu ab."
+      }
+    }
   }
 }

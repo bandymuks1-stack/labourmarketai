@@ -6877,5 +6877,87 @@
       "refused": "Dette kunne ikke gemmes. Intet er ændret.",
       "person": "{hours} t, {count, plural, one {# post} other {# poster}}"
     }
+  },
+  "workLifecycle": {
+    "title": "Hvad der sker med det arbejde, du udfører",
+    "titleCompany": "Hvad der sker med det arbejde, du driver",
+    "example": "Eksempel — ikke en rigtig person eller rigtige data",
+    "hint": "Vælg et trin. Hvert trin åbner det rigtige sted i dit arbejdsområde.",
+    "open": "Åbn i dit arbejdsområde",
+    "list": "Trin i arbejdets forløb",
+    "workers": {
+      "person": {
+        "label": "Dig",
+        "fact": "Kok — professionel identitet",
+        "detail": "Én professionel identitet, der er din — ikke knyttet til én arbejdsgiver."
+      },
+      "team": {
+        "label": "Hold",
+        "fact": "Køkkenhold",
+        "detail": "Du bliver en del af et rigtigt hold, med dem du arbejder sammen med og den, der leder det."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Lancering af efterårsmenu",
+        "detail": "Arbejdet hører til et projekt, så det har et sted, et formål og en tid."
+      },
+      "work": {
+        "label": "Arbejde",
+        "fact": "Aftenservice — 8 t",
+        "detail": "Hvad du lavede, hvornår og i hvor lang tid — registreret, mens det sker."
+      },
+      "evidence": {
+        "label": "Dokumentation",
+        "fact": "Foto + journalpost",
+        "detail": "Udført arbejde bliver til dokumentation i stedet for at forsvinde."
+      },
+      "confirmation": {
+        "label": "Bekræftet",
+        "fact": "Bekræftet af leder",
+        "detail": "En leder bekræfter det. Intet kaldes verificeret uden det."
+      },
+      "history": {
+        "label": "Historik",
+        "fact": "Tilføjet til din historik",
+        "detail": "Bekræftet arbejde opbygger din professionelle historik — den følger dig til næste job."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Behov",
+        "fact": "4 kokke, fra mandag",
+        "detail": "Du angiver det reelle behov én gang: hvem, hvor og fra hvornår."
+      },
+      "people": {
+        "label": "Personer",
+        "fact": "Professionelle, der passer",
+        "detail": "Professionelle, hvis faktiske arbejdshistorik passer til behovet — med det, der er verificeret, og det, der endnu ikke er."
+      },
+      "team": {
+        "label": "Hold",
+        "fact": "Køkkenhold",
+        "detail": "Personer bliver til et hold med en leder, vagter og et sted at arbejde."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Lancering af efterårsmenu",
+        "detail": "Holdene organiseres omkring det projekt, de leverer."
+      },
+      "work": {
+        "label": "Arbejde",
+        "fact": "Aftenservice — 8 t",
+        "detail": "Arbejdet registreres der, hvor det sker, og rekonstrueres ikke bagefter."
+      },
+      "confirmation": {
+        "label": "Bekræftet",
+        "fact": "Afventer din bekræftelse",
+        "detail": "Du kan se, hvad der stadig mangler at blive bekræftet, og hvad der allerede er gjort."
+      },
+      "report": {
+        "label": "Rapport",
+        "fact": "Rapport fra reelt arbejde",
+        "detail": "Rapporter bygger på bekræftet arbejde — ingen skriver dem om."
+      }
+    }
   }
 }

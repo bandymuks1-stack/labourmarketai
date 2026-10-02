@@ -6877,5 +6877,87 @@
       "refused": "Dette kunne ikke lagres. Ingenting er endret.",
       "person": "{hours} t, {count, plural, one {# post} other {# poster}}"
     }
+  },
+  "workLifecycle": {
+    "title": "Hva som skjer med arbeidet du gjør",
+    "titleCompany": "Hva som skjer med arbeidet du driver",
+    "example": "Eksempel — ikke en ekte person eller ekte data",
+    "hint": "Velg et trinn. Hvert trinn åpner det virkelige stedet i arbeidsområdet ditt.",
+    "open": "Åpne i arbeidsområdet ditt",
+    "list": "Trinn i arbeidets livssyklus",
+    "workers": {
+      "person": {
+        "label": "Du",
+        "fact": "Kokk — profesjonell identitet",
+        "detail": "Én profesjonell identitet som er din — ikke knyttet til én arbeidsgiver."
+      },
+      "team": {
+        "label": "Lag",
+        "fact": "Kjøkkenlag",
+        "detail": "Du blir med i et ekte lag, med menneskene du jobber sammen med og hvem som leder det."
+      },
+      "project": {
+        "label": "Prosjekt",
+        "fact": "Lansering av høstmeny",
+        "detail": "Arbeid hører til et prosjekt, så det har et sted, et formål og en tid."
+      },
+      "work": {
+        "label": "Arbeid",
+        "fact": "Kveldsservering — 8 t",
+        "detail": "Hva du gjorde, når og hvor lenge — registrert mens det skjer."
+      },
+      "evidence": {
+        "label": "Dokumentasjon",
+        "fact": "Bilde + journalpost",
+        "detail": "Utført arbeid blir dokumentasjon i stedet for å forsvinne."
+      },
+      "confirmation": {
+        "label": "Bekreftet",
+        "fact": "Bekreftet av leder",
+        "detail": "En leder bekrefter det. Ingenting kalles verifisert uten det."
+      },
+      "history": {
+        "label": "Historikk",
+        "fact": "Lagt til i historikken din",
+        "detail": "Bekreftet arbeid bygger din profesjonelle historikk — den blir hos deg til neste jobb."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Behov",
+        "fact": "4 kokker, fra mandag",
+        "detail": "Du oppgir det reelle behovet én gang: hvem, hvor og fra når."
+      },
+      "people": {
+        "label": "Personer",
+        "fact": "Profesjonelle som passer",
+        "detail": "Profesjonelle med en faktisk arbeidshistorikk som passer behovet — med det som er verifisert og det som ikke er det ennå."
+      },
+      "team": {
+        "label": "Lag",
+        "fact": "Kjøkkenlag",
+        "detail": "Personer blir et lag med en leder, skift og et sted å jobbe."
+      },
+      "project": {
+        "label": "Prosjekt",
+        "fact": "Lansering av høstmeny",
+        "detail": "Lag organiseres rundt prosjektet de leverer."
+      },
+      "work": {
+        "label": "Arbeid",
+        "fact": "Kveldsservering — 8 t",
+        "detail": "Arbeid registreres der det skjer, ikke rekonstruert i etterkant."
+      },
+      "confirmation": {
+        "label": "Bekreftet",
+        "fact": "Venter på din bekreftelse",
+        "detail": "Du ser hva som fortsatt må bekreftes og hva som allerede er gjort."
+      },
+      "report": {
+        "label": "Rapport",
+        "fact": "Rapport fra reelt arbeid",
+        "detail": "Rapporter bygger på bekreftet arbeid — ingen skriver dem på nytt."
+      }
+    }
   }
 }
