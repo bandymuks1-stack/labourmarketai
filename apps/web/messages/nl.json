@@ -11045,7 +11045,13 @@
       "label": "Toewijzen aan",
       "save": "Toewijzen"
     },
+    "advisory": {
+      "blockersOpen": "Status bijgewerkt. Let op: {n} van de taken waarvan deze afhangt zijn nog open. Er is niets geblokkeerd.",
+      "reservationLead": "Toegewezen. Agendacontrole voor de deadlinedag (alleen een waarschuwing):"
+    },
     "dependencies": {
+      "startedBeforeBlocker": "Gestart of afgerond voordat wat ervan afhangt klaar is ({n} nog open). Alleen een waarschuwing.",
+      "dueBeforeBlocker": "Deadline vóór een taak waarvan deze afhangt. Alleen een waarschuwing.",
       "waitingOn": "Wacht op {n}",
       "blockedBy": "Hangt af van",
       "hidden": "een taak die je niet kunt zien",
@@ -11071,6 +11077,8 @@
       }
     },
     "evidence": {
+      "by": "Door {name}",
+      "hours": "{hours} u geregistreerd",
       "title": "Bewijs",
       "intro": "Werkjournaal-records die aan deze taak zijn gekoppeld. Koppelen wijzigt een record nooit — het geeft alleen aan welke taak het aantoont.",
       "empty": "Er is nog geen werkjournaal-record aan deze taak gekoppeld.",

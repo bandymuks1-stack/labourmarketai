@@ -21,9 +21,11 @@ import {
   WORK_TASK_PRIORITIES,
   WORK_TASK_TITLE_MAX,
   WORK_TASK_TITLE_MIN,
+  deriveDependencyConflict,
   isBlockingStatus,
   isOpen,
   isOverdue,
+  isTaskReservationAdvisory,
   type WorkTask,
   type WorkTaskStatus,
 } from "@/lib/tasks/task-model";
@@ -39,8 +41,14 @@ import {
 } from "@/lib/journal/task-evidence";
 import {
   deriveEvidenceSummary,
+  evidenceHoursLabelValue,
   evidencePreview,
 } from "@/lib/journal/task-evidence-model";
+import { checkTaskAssignmentReservation } from "@/lib/tasks/task-reservation";
+import {
+  ReservationNotice,
+  type ReservationLabels,
+} from "@/components/app/project-assignment-manager";
 import {
   linkTaskEvidenceAction,
   unlinkTaskEvidenceAction,
@@ -160,6 +168,10 @@ export default async function TasksPage({
     project?: string;
     closed?: string;
     notice?: string;
+    advisory?: string;
+    n?: string;
+    reservation?: string;
+    rtask?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -173,12 +185,40 @@ export default async function TasksPage({
   const notice = sp.notice && NOTICES.has(sp.notice) ? sp.notice : null;
 
   const t = await getTranslations("tasks");
+  const tRes = await getTranslations("projects.assign.reservation");
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   const meId = user?.id ?? null;
+
+  // ADVISORY notes carried by a successful write's redirect (SEP-2 — they
+  // inform, they never block). Codes and a count only; any detail is
+  // re-derived here under the viewer's own session.
+  const blockersOpenAdvisory =
+    sp.advisory === "blockers_open" && /^\d{1,2}$/.test(sp.n ?? "")
+      ? Number(sp.n)
+      : 0;
+  const reservationAdvisory =
+    isTaskReservationAdvisory(sp.reservation) && sp.rtask && UUID_RX.test(sp.rtask)
+      ? await checkTaskAssignmentReservation(supabase, sp.rtask)
+      : null;
+  const reservationLabels: ReservationLabels = {
+    reservationCollidesTitle: tRes("collidesTitle"),
+    reservationNotBlocking: tRes("notBlocking"),
+    reservationUnknown: tRes("unknown"),
+    reservationAlternativesTitle: tRes("alternativesTitle"),
+    reservationSwap: tRes("swap"),
+    reservationUndo: tRes("undo"),
+    reservationKeep: tRes("keep"),
+    reservationSource: {
+      project: tRes("source.project"),
+      booking: tRes("source.booking"),
+      trip: tRes("source.trip"),
+      absence: tRes("source.absence"),
+    },
+  };
 
   const [myResult, projectResult, allManagedProjects, objectsRead, employerCtx] =
     await Promise.all([
@@ -346,8 +386,28 @@ export default async function TasksPage({
                       ? t("evidence.confirmed")
                       : t("evidence.unconfirmed")}
                   </span>
+                  {item.confirmedAt ? (
+                    <>
+                      {" "}
+                      {dateFmt(item.confirmedAt)}
+                    </>
+                  ) : null}
                   {" · "}
                   {dateFmt(item.entryCreatedAt)}
+                  {item.authorName ? (
+                    <>
+                      {" · "}
+                      {t("evidence.by", { name: item.authorName })}
+                    </>
+                  ) : null}
+                  {evidenceHoursLabelValue(item.entryHours) ? (
+                    <>
+                      {" · "}
+                      {t("evidence.hours", {
+                        hours: evidenceHoursLabelValue(item.entryHours) ?? "",
+                      })}
+                    </>
+                  ) : null}
                   {item.photoCount > 0 ? (
                     <>
                       {" · "}
@@ -362,7 +422,7 @@ export default async function TasksPage({
                   <input type="hidden" name="linkId" value={item.linkId} />
                   <button
                     type="submit"
-                    className="text-text-muted underline decoration-dotted underline-offset-2 hover:text-state-danger"
+                    className="inline-flex min-h-11 items-center text-text-muted underline decoration-dotted underline-offset-2 hover:text-state-danger"
                     data-testid={`task-evidence-unlink-${item.linkId}`}
                   >
                     {t("evidence.unlink")}
@@ -518,6 +578,7 @@ export default async function TasksPage({
     const overdue = isOpen(task.status) && isOverdue(task.dueAt, now);
     const blockers = collaboration.blockersByTask[task.id] ?? [];
     const openBlockers = blockers.filter((b) => isBlockingStatus(b.status));
+    const dependencyConflict = deriveDependencyConflict(task, blockers);
     const events = collaboration.eventsByTask[task.id] ?? [];
     const objectName = task.objectId
       ? (objectNameById.get(task.objectId) ?? null)
@@ -622,6 +683,26 @@ export default async function TasksPage({
             </Link>
           ) : null}
         </div>
+
+        {/* ADVISORY dependency conflicts (SEP-2 — never blocks): derived from
+            the blocker rows the caller can actually read. */}
+        {dependencyConflict.hasConflict ? (
+          <ul
+            className="flex flex-col gap-1 rounded-md border border-state-warning/50 bg-state-warning/10 px-2 py-1.5 text-xs text-text-primary"
+            data-testid={`task-dependency-conflict-${task.id}`}
+          >
+            {dependencyConflict.startedBeforeBlockers ? (
+              <li className="break-words">
+                {t("dependencies.startedBeforeBlocker", {
+                  n: dependencyConflict.openBlockers,
+                })}
+              </li>
+            ) : null}
+            {dependencyConflict.dueBeforeBlockerDue ? (
+              <li className="break-words">{t("dependencies.dueBeforeBlocker")}</li>
+            ) : null}
+          </ul>
+        ) : null}
 
         {/* Dependencies — real edges from task_dependencies; a blocker RLS
             hides renders as an honest "not visible" line, never invented. */}
@@ -998,6 +1079,26 @@ export default async function TasksPage({
         >
           {t(`notice.${notice}`)}
         </p>
+      ) : null}
+
+      {blockersOpenAdvisory > 0 ? (
+        <p
+          role="status"
+          className="rounded-md border border-state-warning/50 bg-state-warning/10 px-3 py-2 text-sm text-text-primary"
+          data-testid="tasks-advisory-blockers-open"
+        >
+          {t("advisory.blockersOpen", { n: blockersOpenAdvisory })}
+        </p>
+      ) : null}
+
+      {reservationAdvisory && reservationAdvisory.state !== "clear" ? (
+        <div className="flex flex-col gap-1" data-testid="tasks-advisory-reservation">
+          <p className="text-xs text-text-muted">{t("advisory.reservationLead")}</p>
+          <ReservationNotice
+            verdict={reservationAdvisory}
+            labels={reservationLabels}
+          />
+        </div>
       ) : null}
 
       {/* Internal-only honesty note — a task contacts nobody. */}
