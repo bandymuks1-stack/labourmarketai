@@ -391,6 +391,11 @@
         "event_weekly_digest": "Din ukentlige oversikt over arbeid og muligheter er klar",
         "event_saved_search_match": "Et lagret søk har nye resultater",
         "event_job_alert": "Det er en ny jobb som passer til det du ser etter",
+        "event_message_received": "Du har en ny melding",
+        "event_journal_review_decided": "Journalinnlegget ditt er gjennomgått",
+        "event_journal_review_decided_approved": "Journalinnlegget ditt er bekreftet",
+        "event_journal_review_decided_rejected": "Journalinnlegget ditt er avvist",
+        "event_journal_review_decided_changes_requested": "Det er bedt om endringer i journalinnlegget ditt",
         "event_weekly_digest_profile_completion": "For å vise deg passende jobber, bekreft hvilket arbeid du gjør",
         "event_weekly_digest_journal": "Ukens oversikt over arbeidsjournalen din er klar"
       },

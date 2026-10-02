@@ -4683,6 +4683,11 @@
         "event_weekly_digest": "Je wekelijkse samenvatting van werk en kansen staat klaar",
         "event_saved_search_match": "Een opgeslagen zoekopdracht heeft nieuwe resultaten",
         "event_job_alert": "Er is een nieuwe baan die bij je zoekopdracht past",
+        "event_message_received": "Je hebt een nieuw bericht",
+        "event_journal_review_decided": "Je journaalitem is beoordeeld",
+        "event_journal_review_decided_approved": "Je journaalitem is bevestigd",
+        "event_journal_review_decided_rejected": "Je journaalitem is afgewezen",
+        "event_journal_review_decided_changes_requested": "Er zijn wijzigingen gevraagd voor je journaalitem",
         "event_invitation_accepted": "Iemand heeft je uitnodiging aangenomen",
         "event_weekly_digest_profile_completion": "Om je passende banen te tonen, bevestig welk werk je doet",
         "event_weekly_digest_journal": "Het weekoverzicht van je werkjournaal is klaar"
