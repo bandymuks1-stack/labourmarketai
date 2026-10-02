@@ -7867,7 +7867,8 @@
       "refusedType": "Tego typu pliku nie można odczytać jako tekstu.",
       "empty": "W tym dokumencie nie znaleziono czytelnego tekstu.",
       "failed": "Nie udało się odczytać dokumentu.",
-      "noEngagement": "Najpierw potrzebujesz kontekstu pracy — otwórz panel i go utwórz."
+      "noEngagement": "Najpierw potrzebujesz kontekstu pracy — otwórz panel i go utwórz.",
+      "workDateHint": "Dokument nie podaje, którego dnia wykonano pracę. Wybierz datę samodzielnie — nic nie jest wypełniane za Ciebie."
     },
     "currentVersion": "Wersja {n}",
     "download": "Pobierz",

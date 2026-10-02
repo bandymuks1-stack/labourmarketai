@@ -29,6 +29,7 @@ import {
   type AssignedProject,
 } from "@/lib/journal/project-attribution";
 import { readActiveProjectsByOrg } from "@/lib/journal/project-attribution-read";
+import { checkWorkDate } from "@/lib/journal/work-date";
 
 /**
  * JOURNAL WRITE CORE — the ONE transport-neutral implementation of the
@@ -95,6 +96,11 @@ export type JournalSaveErrorCode =
    *  document the caller can read — a provenance claim that cannot be
    *  verified is refused, never silently dropped and never stored. */
   | "source_document_invalid"
+  /** The work date is explicit, never invented: a document-drafted entry
+   *  cannot be saved without one, a malformed one is refused, and a document
+   *  import cannot claim work that has not happened yet. */
+  | "work_date_required"
+  | "work_date_invalid"
   | "entry_insert_failed"
   | "metrics_insert_failed"
   /** P1-B — the target entry was already superseded (stale tab/deep link);
@@ -526,6 +532,23 @@ export async function createJournalEntryCore(
       ok: false,
       code: "quantity_invalid",
       message: t("quantityInvalid"),
+    };
+  }
+  const workDateCheck = checkWorkDate(workDate, {
+    requireDate: sourceDocumentFileId !== "",
+    rejectFuture: sourceDocumentFileId !== "",
+  });
+  if (workDateCheck) {
+    return {
+      ok: false,
+      code: workDateCheck.code,
+      message: t(
+        workDateCheck.code === "work_date_required"
+          ? "workDateRequired"
+          : workDateCheck.reason === "future"
+            ? "workDateFuture"
+            : "workDateInvalid",
+      ),
     };
   }
 

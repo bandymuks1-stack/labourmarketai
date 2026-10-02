@@ -5412,7 +5412,8 @@
       "refusedType": "Denne filtype kan ikke læses som tekst.",
       "empty": "Ingen læsbar tekst fundet i dette dokument.",
       "failed": "Dokumentet kunne ikke læses.",
-      "noEngagement": "Du skal først have en arbejdskontekst — åbn dashboardet og opret en."
+      "noEngagement": "Du skal først have en arbejdskontekst — åbn dashboardet og opret en.",
+      "workDateHint": "Dokumentet oplyser ikke, hvilken dag arbejdet blev udført. Vælg datoen selv — intet udfyldes for dig."
     },
     "currentVersion": "Version {n}",
     "download": "Download",

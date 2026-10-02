@@ -5412,7 +5412,8 @@
       "refusedType": "Šī tipa failu nevar nolasīt kā tekstu.",
       "empty": "Šajā dokumentā nav atrasts lasāms teksts.",
       "failed": "Dokumentu neizdevās nolasīt.",
-      "noEngagement": "Vispirms vajadzīgs darba konteksts — atver paneli un izveido to."
+      "noEngagement": "Vispirms vajadzīgs darba konteksts — atver paneli un izveido to.",
+      "workDateHint": "Dokumentā nav norādīts, kurā dienā darbs paveikts. Izvēlieties datumu pats — nekas netiek aizpildīts jūsu vietā."
     },
     "currentVersion": "[EN] Version {n}",
     "download": "[EN] Download",

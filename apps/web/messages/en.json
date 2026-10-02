@@ -7867,7 +7867,8 @@
       "refusedType": "This file type cannot be read as text.",
       "empty": "No readable text was found in this document.",
       "failed": "The document could not be read.",
-      "noEngagement": "You need a work context first — open the dashboard to set one up."
+      "noEngagement": "You need a work context first — open the dashboard to set one up.",
+      "workDateHint": "The document does not say which day this work was done. Choose the date yourself — nothing is filled in for you."
     },
     "currentVersion": "Version {n}",
     "download": "Download",
