@@ -356,7 +356,16 @@ export async function OPTIONS() {
 /** No SSE stream: this server is deliberately stateless (single-response). */
 export async function GET() {
   return NextResponse.json(
-    { ok: false, message: "This MCP endpoint is POST-only (stateless streamable HTTP)." },
+    {
+      ok: false,
+      message: "This MCP endpoint is POST-only (stateless streamable HTTP).",
+      // The published toolset as a version — the same value `initialize`
+      // reports as serverInfo.version. Public on purpose: it derives only from
+      // the static tool descriptions every authorized client is shown, so a
+      // release can be verified without a credential.
+      toolsetVersion: toolsetVersion(),
+      toolCount: toolDefs().length,
+    },
     { status: 405, headers: { ...CORS_HEADERS, Allow: "POST, OPTIONS" } },
   );
 }
