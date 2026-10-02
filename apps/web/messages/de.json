@@ -16550,8 +16550,7 @@
       "needsMigration": "Derzeit nicht verfügbar.",
       "noCompany": "Wechseln Sie in einen Unternehmens-Arbeitsbereich.",
       "noObjects": "Es gibt noch keine Objekte, denen die heutigen Stunden zugeordnet werden können.",
-      "error": "Der Tag konnte nicht geladen werden.",
-      "noCompanyJournalLink": "Arbeitsjournal öffnen"
+      "error": "Der Tag konnte nicht geladen werden."
     },
     "import": {
       "entryLink": "Stunden aus einer Tabelle importieren (.xlsx)",

@@ -16550,8 +16550,7 @@
       "needsMigration": "Šiuo metu nepasiekiama.",
       "noCompany": "Ši sritis skirta įmonės darbo erdvei. Savo valandas įrašykite Darbo žurnale.",
       "noObjects": "Šiai dienai dar nėra objektų, prie kurių priskirti valandas.",
-      "error": "Nepavyko įkelti dienos duomenų.",
-      "noCompanyJournalLink": "Atidaryti Darbo žurnalą"
+      "error": "Nepavyko įkelti dienos duomenų."
     },
     "import": {
       "entryLink": "Importuoti valandas iš skaičiuoklės (.xlsx)",
