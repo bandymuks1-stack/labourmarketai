@@ -161,11 +161,34 @@ describe("demo previews on /for-* pages carry the always-visible Example frame",
     "app/[locale]/(marketing)/for-agencies/page.tsx",
   ];
 
-  it("every fabricated preview is wrapped in ExamplePreviewFrame", () => {
+  it("every fabricated preview is wrapped in ExamplePreviewFrame (or the public-slice proof primitives)", () => {
+    // /for-workers and /for-companies were rebuilt 2026-10-02 around the
+    // public-slice product moments; their equivalent of the Example frame is
+    // `MomentCard` (always renders `sampleLabel`), the transition's sample
+    // badges and the hero's sample pill — pinned in the next test.
+    const SLICE = new Set([
+      "app/[locale]/(marketing)/for-workers/page.tsx",
+      "app/[locale]/(marketing)/for-companies/page.tsx",
+    ]);
     for (const rel of PAGES) {
       const src = read(rel);
+      if (SLICE.has(rel)) {
+        expect(src, rel).toMatch(/components\/marketing\/public\//);
+        continue;
+      }
       expect(src, rel).toMatch(/<ExamplePreviewFrame>/);
     }
+  });
+
+  it("the public-slice proof primitives always show the Example label", () => {
+    const moments = read("components/marketing/public/product-moments.tsx");
+    for (const c of moments.match(/<MomentCard\b[^>]*>/g) ?? []) {
+      expect(c, c).toMatch(/sampleLabel=/);
+    }
+    const hero = read("components/marketing/public/public-hero.tsx");
+    expect(hero).toMatch(/copy\.sample/);
+    const tr = read("components/marketing/public/work-record-transition.tsx");
+    expect((tr.match(/copy\.sample/g) ?? []).length).toBeGreaterThanOrEqual(2);
   });
 
   it("the frame renders chip + note without hover/tooltip", () => {

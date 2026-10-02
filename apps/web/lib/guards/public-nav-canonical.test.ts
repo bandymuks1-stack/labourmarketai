@@ -169,7 +169,12 @@ describe("canonical demand funnel — action CTAs route to /company-need only", 
 
   it("for-companies hero CTA routes into /company-need (educational page, canonical action)", () => {
     const page = read("app/[locale]/(marketing)/for-companies/page.tsx");
-    expect(page).toContain('ctaKind="companyNeed"');
+    // Premium convergence 2026-10-02: the hero is now <PublicHero> and its
+    // primary action points straight at the canonical demand entry; the page's
+    // closing CTA does too. No second intake path.
+    expect(page).toMatch(/primary=\{\{[^}]*href:\s*"\/company-need"/);
+    expect(page).toMatch(/PublicCtaEnd[\s\S]*href="\/company-need"/);
+    expect(page).not.toMatch(/\/auth\/signup/);
   });
 
   it("PageHero supports the companyNeed CTA kind and links the canonical route", () => {

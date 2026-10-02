@@ -13,6 +13,8 @@ import { MarketProofBand } from "@/components/marketing/market-proof-band";
 import { PlayerCardShowcase } from "@/components/marketing/player-card-showcase";
 import { ProductChainBand } from "@/components/marketing/product-chain-band";
 import { TwoSidesSection } from "@/components/marketing/two-sides-section";
+import { HomeSides } from "@/components/marketing/public/home-sides";
+import { WorkRecordTransitionSection } from "@/components/marketing/public/work-record-transition-section";
 import { TrustBand } from "@/components/marketing/trust-band";
 import { StartingContextsBand } from "@/components/marketing/starting-contexts-band";
 /* `PublicMarketMapBand` is deliberately NOT imported: the band is withdrawn
@@ -246,6 +248,14 @@ export async function FocusLanding({
                 shared by professionals and companies — placed directly under
                 the entry, before the market proof. Presentation only. */}
             <TwoSidesSection />
+
+            {/* PREMIUM CONVERGENCE (owner directive 2026-10-02): after the two
+                sides connect, the product CONTINUES — one shift becomes
+                professional history while the company gains context — and the
+                page then forks into the two canonical acquisition pages.
+                Presentation only; copy under `publicSlice`. */}
+            <WorkRecordTransitionSection embedded />
+            <HomeSides />
 
             <MarketProofBand market={market} locale={locale} />
 

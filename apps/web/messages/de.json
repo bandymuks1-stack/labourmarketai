@@ -18106,5 +18106,221 @@
       "skills": "{count, plural, one {# Fähigkeit, gestützt auf deine Einträge} other {# Fähigkeiten, gestützt auf deine Einträge}}",
       "next": "Wohin du gehen kannst"
     }
+  },
+  "publicSlice": {
+    "sample": "Beispiel",
+    "states": {
+      "own": "Ihr eigener Eintrag",
+      "waiting": "Wartet auf die Prüfung durch eine Führungskraft",
+      "confirmed": "Von einer Führungskraft bestätigt",
+      "unknown": "Noch nicht erfasst"
+    },
+    "imagery": {
+      "tomasAlt": "Ein Gerüstbauer arbeitet auf einem Fassadengerüst in einer Altstadtgasse",
+      "rasaAlt": "Eine Köchin am Pass in einer Restaurantküche",
+      "tomasCaption": "Tomas K. · Gerüstbauer",
+      "rasaCaption": "Rasa J. · Köchin"
+    },
+    "workers": {
+      "hero": {
+        "title": "Finden Sie Arbeit.",
+        "accent": "Behalten Sie, was Sie aufbauen.",
+        "sub": "Finden Sie einen Job, der zu dem passt, was Sie wirklich tun. Sobald Sie anfangen, sind Ihr Tag, Ihr Team und Ihre Nachrichten an einem Ort. Die Arbeit, die Sie erfassen, wird zu Ihrer beruflichen Geschichte.",
+        "cta": "Kostenloses Profil erstellen",
+        "secondary": "Offene Stellen ansehen",
+        "note": "Für Personen kostenlos. Bezahlte Pläne gibt es nur für Organisationen."
+      },
+      "day": {
+        "title": "Wissen, was heute ansteht.",
+        "body": "Sie sehen zuerst die Arbeit, an der Sie sind, Ihr Team und Ihre Nachrichten. Dann halten Sie in wenigen Zeilen fest, was Sie getan haben, mit Foto und Zeit.",
+        "todayLabel": "Heute",
+        "task": "Abendservice",
+        "taskDetail": "Start der Herbstkarte · Küchenteam",
+        "message": "Küchenchef: Die neuen Gerichte gehen heute Abend raus.",
+        "primary": "Heutige Arbeit erfassen",
+        "secondary": "Dem Team schreiben",
+        "recordLabel": "Ihr Eintrag",
+        "recordText": "Den Pass für die neue Herbstkarte geleitet. Zwei Gerichte zurückgegangen und neu gemacht.",
+        "time": "8 Std.",
+        "photo": "1 Foto",
+        "sent": "An Ihre Führungskraft gesendet"
+      },
+      "history": {
+        "title": "Bestätigte Arbeit baut Ihre Geschichte auf.",
+        "body": "Arbeit, die Ihre Führungskraft bestätigt, wird Teil Ihrer beruflichen Geschichte. Arbeit, die noch niemand bestätigt hat, bleibt als Ihr eigener Eintrag sichtbar und klar gekennzeichnet. Wofür Sie verfügbar sind, steht getrennt davon, als das, was als Nächstes kommt.",
+        "now": "Jetzt",
+        "recent": "Zuletzt",
+        "earlier": "Früher",
+        "next": "Als Nächstes, nicht Geschichte",
+        "nowTitle": "Restaurant Ąžuolas · Köchin",
+        "nowMeta": "Start der Herbstkarte · seit September",
+        "nowState": "Von einer Führungskraft bestätigt",
+        "recentTitle": "Café Hafen · Commis de Cuisine",
+        "recentMeta": "2023–2024",
+        "recentState": "Ihr eigener Eintrag · nicht bestätigt",
+        "earlierTitle": "Von Rasa ergänzt",
+        "earlierMeta": "2019–2022",
+        "earlierState": "Noch nicht erfasst",
+        "nextTitle": "Verfügbar ab 20. Oktober",
+        "nextMeta": "Wie Rasa es angibt",
+        "nextState": "Noch kein Angebot"
+      },
+      "outcome": {
+        "title": "Ihre Arbeit verschwindet nicht, wenn der Job endet.",
+        "body": "Der nächste Arbeitgeber trifft eine Person mit echten Einträgen, nicht nur mit einem Lebenslauf. Ihr Profil bleibt privat, bis Sie die Sichtbarkeit einschalten."
+      },
+      "faq": {
+        "title": "Bevor Sie sich anmelden",
+        "items": [
+          {
+            "q": "Kostet es etwas?",
+            "a": "Nein. LabourMarket.ai ist für Personen kostenlos. Bezahlte Pläne gibt es nur für Organisationen."
+          },
+          {
+            "q": "Wer kann mein Profil sehen?",
+            "a": "Niemand findet Sie, bis Sie die Sichtbarkeit einschalten. Dann sehen Unternehmen eine kurze berufliche Zusammenfassung. Lebenslauf und Kontaktdaten werden nur weitergegeben, wenn Sie bestätigen. Das Unternehmen, für das Sie arbeiten, sieht die für es erfasste Arbeit."
+          },
+          {
+            "q": "Was, wenn meine Führungskraft meine Arbeit nicht bestätigt?",
+            "a": "Sie bleibt Ihr eigener Eintrag, klar als nicht bestätigt gekennzeichnet. Sie behalten ihn in jedem Fall."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Beginnen Sie mit Ihrem eigenen",
+        "accent": "Berufsprofil.",
+        "button": "Kostenloses Profil erstellen"
+      }
+    },
+    "companies": {
+      "hero": {
+        "title": "Finden Sie die Leute, die Sie brauchen.",
+        "accent": "Und führen Sie die Arbeit.",
+        "sub": "Sagen Sie, was Sie brauchen. Lernen Sie Menschen kennen, deren echte Arbeit passt. Setzen Sie sie auf ein Projekt, sehen Sie die erfasste Arbeit, bestätigen Sie sie und schreiben Sie den nächsten Bedarf aus.",
+        "cta": "Bedarf einstellen",
+        "secondary": "Preise ansehen",
+        "note": "Einen Bedarf einzustellen ist kostenlos."
+      },
+      "need": {
+        "title": "Sagen Sie, was Sie brauchen. Sehen Sie, wer passt.",
+        "body": "Beschreiben Sie die Arbeit, wie viele Personen und ab wann. Sie sehen Menschen, deren Arbeitsgeschichte zu diesem Bedarf passt, gemessen an der konkreten Aufgabe, nie als eine allgemeine Bewertung.",
+        "needLabel": "Ihr Bedarf",
+        "needTitle": "Commis de Cuisine · 2 Personen",
+        "needMeta": "Ab 20. Oktober · Vilnius",
+        "personRole": "Köchin",
+        "personMeta": "Verfügbar ab 20. Oktober, wie sie es angibt",
+        "personState": "Bestätigte Arbeit im Restaurant Ąžuolas"
+      },
+      "project": {
+        "title": "Setzen Sie Ihre Leute auf die Arbeit.",
+        "body": "Fügen Sie die Menschen, mit denen Sie arbeiten, einem Projekt hinzu. Jeden Tag halten sie fest, was getan wurde. Sie sehen, welche Einträge auf Sie warten, und bestätigen sie oder geben sie zur Änderung zurück.",
+        "label": "Projekt",
+        "name": "Start der Herbstkarte",
+        "people": "Küchenteam · 3 Personen",
+        "waiting": "1 Eintrag wartet auf Ihre Prüfung",
+        "confirmed": "2 Einträge diese Woche bestätigt"
+      },
+      "attention": {
+        "title": "Sehen Sie, was Sie braucht. Planen Sie, was kommt.",
+        "body": "Einträge, die auf Prüfung warten, und Ihre ausgestellten Bedarfe stehen an einem Ort. So beginnt die nächste Einstellungsentscheidung bei dem, was wirklich passiert.",
+        "label": "Braucht Sie",
+        "items": [
+          {
+            "text": "1 Eintrag wartet auf Ihre Prüfung",
+            "state": "wait"
+          },
+          {
+            "text": "Commis de Cuisine ab 20. Oktober: offener Bedarf",
+            "state": "wait"
+          },
+          {
+            "text": "Patisserie: kein Eintrag seit Donnerstag",
+            "state": "unk"
+          }
+        ]
+      },
+      "faq": {
+        "title": "Bevor Sie starten",
+        "items": [
+          {
+            "q": "Was kostet es?",
+            "a": "Eine aktive Position pro Organisation ist kostenlos. Weitere Positionen brauchen den Organisationsplan, der auf der Preisseite steht. Einen Bedarf einzustellen ist kostenlos."
+          },
+          {
+            "q": "Kann ich die von meinen Leuten erfasste Arbeit bestätigen?",
+            "a": "Ja. Eine Führungskraft oder Inhaberin der Organisation kann einen Eintrag bestätigen, zur Änderung zurückgeben oder ablehnen, sobald die Prüfung für die Organisation eingeschaltet ist."
+          },
+          {
+            "q": "Was sehe ich von einer Person, bevor ich Kontakt aufnehme?",
+            "a": "Eine kurze berufliche Zusammenfassung: Name, Berufe, Erfahrung, Verfügbarkeit und Fähigkeiten. Nur von Personen, die die Sichtbarkeit eingeschaltet haben. Lebenslauf und Kontaktdaten werden nur weitergegeben, wenn sie bestätigen."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Beginnen Sie mit den Leuten,",
+        "accent": "die Sie brauchen.",
+        "button": "Bedarf einstellen"
+      }
+    },
+    "transition": {
+      "title": "Ein Arbeitstag, vom Eintrag bis zur Geschichte.",
+      "sub": "Folgen Sie einer Schicht. Eintrag, Nachweis und Prüfung passieren je einmal, und beide Seiten sehen das Ergebnis.",
+      "stageNav": "Stufe wählen",
+      "replay": "Nochmal abspielen",
+      "stages": {
+        "work": {
+          "label": "Arbeit",
+          "caption": "Rasa leitet den Abendservice."
+        },
+        "proof": {
+          "label": "Nachweis",
+          "caption": "Sie hält fest, was sie getan hat, und fügt ein Foto hinzu."
+        },
+        "review": {
+          "label": "Prüfung",
+          "caption": "Ihre Führungskraft bestätigt es."
+        },
+        "history": {
+          "label": "Geschichte",
+          "caption": "Es wird Teil ihrer beruflichen Geschichte."
+        },
+        "next": {
+          "label": "Weiter",
+          "caption": "Das Unternehmen sieht den Fortschritt. Beide können planen, was kommt."
+        }
+      },
+      "pro": {
+        "role": "Köchin",
+        "recordTitle": "Abendservice · 8 Std.",
+        "recordText": "Den Pass für die neue Herbstkarte geleitet.",
+        "photoAlt": "Der Pass in der Küche vor dem Service",
+        "historyLabel": "In ihrer beruflichen Geschichte",
+        "historyTitle": "Restaurant Ąžuolas · Köchin",
+        "historyMeta": "Start der Herbstkarte",
+        "nextLabel": "Als Nächstes, nicht Geschichte",
+        "nextMeta": "Verfügbar ab 20. Oktober, wie sie es angibt"
+      },
+      "co": {
+        "project": "Start der Herbstkarte",
+        "waiting": "1 Eintrag wartet auf Prüfung",
+        "done": "Eintrag bestätigt",
+        "nextLabel": "Was als Nächstes kommt",
+        "nextNeed": "Commis de Cuisine ab 20. Oktober",
+        "nextCta": "Nächsten Bedarf einstellen"
+      }
+    },
+    "home": {
+      "title": "Wählen Sie Ihre Seite.",
+      "sub": "Derselbe Ort, derselbe Eintrag. Was Sie als Nächstes tun, hängt davon ab, wo Sie stehen.",
+      "workerTitle": "Ich suche Arbeit",
+      "workerBody": "Finden Sie passende Arbeit und behalten Sie den Nachweis dessen, was Sie tun.",
+      "workerCta": "Für Fachkräfte",
+      "companyTitle": "Ich stelle Leute ein",
+      "companyBody": "Finden Sie die Leute, die Sie brauchen, und führen Sie die Arbeit mit ihnen.",
+      "companyCta": "Für Unternehmen"
+    },
+    "explore": {
+      "summary": "Jeden Schritt ansehen und in Ihrem Arbeitsbereich öffnen"
+    }
   }
 }

@@ -1,8 +1,16 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+
+import { ExploreSteps } from "@/components/marketing/public/explore-steps";
+import { PublicHero } from "@/components/marketing/public/public-hero";
+import { PublicCtaEnd, PublicFaq } from "@/components/marketing/public/public-sections";
+import {
+  WorkerDayMoment,
+  WorkerHistoryMoment,
+  WorkerOutcome,
+} from "@/components/marketing/public/product-moments";
+import { WorkRecordTransitionSection } from "@/components/marketing/public/work-record-transition-section";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
-import { WorkLifecycleSection } from "@/components/marketing/work-lifecycle-section";
-import { BenefitCards } from "@/components/marketing/benefit-cards";
 
 export async function generateMetadata({
   params,
@@ -12,13 +20,17 @@ export async function generateMetadata({
   const { locale } = await params;
   return buildPageMetadataFor("workers", locale, "/for-workers");
 }
-import { PageHero } from "@/components/marketing/page-hero";
-import { RoleEnrichment } from "@/components/marketing/role-enrichment";
-import { ExamplePreviewFrame } from "@/components/marketing/example-preview-frame";
-import { WorkerPlayerCard } from "@/components/app/worker-player-card";
-import { buildPlayerCardLabels } from "@/lib/player-card/labels";
-import { buildSampleAllTime, buildSampleWorkerPlayerCard } from "@/lib/player-card/sample-card";
 
+/**
+ * /for-workers — the canonical WORKER acquisition destination.
+ *
+ * One promise (find work), one differentiator (keep what you build through real
+ * work), one action (create the free profile). The page proves it with focused
+ * product moments in the order the worker lives it:
+ *   hero → today and the record → the signature transition → the professional
+ *   history → the outcome → straight answers → the same action again.
+ * Every claim is traced in docs/public/PUBLIC_SLICE_TRUTH_TABLE_2026-10-02.md.
+ */
 export default async function ForWorkersPage({
   params,
 }: {
@@ -26,59 +38,42 @@ export default async function ForWorkersPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations("pages.workers");
-  const benefits = t.raw("benefits") as { title: string; body: string }[];
-
-  /**
-   * S3 player-card honesty: the public worker page shows THE REAL CARD — the
-   * SAME canonical `WorkerPlayerCard` the product renders in the journal and
-   * the profile, fed by the ONE shared sample persona the landing showcase
-   * uses. The retired FUT-style concept card (OVR ring, gold/silver/bronze
-   * tiers, 0–99 stat bars) may never come back to a public surface.
-   */
-  const tCards = await getTranslations("playercards");
-  const now = new Date();
-  const sampleCard = buildSampleWorkerPlayerCard({
-    sampleName: tCards("sample.name"),
-    sampleOrganization: tCards("sample.organization"),
-    now,
-  });
-  const cardLabels = await buildPlayerCardLabels(sampleCard, { allTime: buildSampleAllTime(now) });
+  const t = await getTranslations("publicSlice.workers");
+  const ts = await getTranslations("publicSlice");
+  const ti = await getTranslations("publicSlice.imagery");
 
   return (
     <>
-      <PageHero
-        eyebrow={t("eyebrow")}
-        title={t("title")}
-        accent={t("titleAccent")}
-        subcopy={t("subcopy")}
-        ctaKind="signup"
-        ctaLabel={t("cta")}
-        ctaSource="workers_hero"
+      <PublicHero
+        audience="workers"
+        title={t("hero.title")}
+        accent={t("hero.accent")}
+        sub={t("hero.sub")}
+        note={t("hero.note")}
+        primary={{ label: t("hero.cta"), href: "/auth/signup", id: "workers_hero" }}
+        secondary={{ label: t("hero.secondary"), href: "/jobs", id: "workers_hero_jobs" }}
+        main="site"
+        aside="kitchen"
+        copy={{
+          sample: ts("sample"),
+          mainAlt: ti("tomasAlt"),
+          mainCaption: ti("tomasCaption"),
+          asideAlt: ti("rasaAlt"),
+        }}
       />
-      <WorkLifecycleSection audience="workers" />
-      <RoleEnrichment
-        root="workers"
-        afterPreview={<BenefitCards items={benefits} />}
-        previewKey="profile"
-        preview={
-          <ExamplePreviewFrame>
-            <div
-              className="w-full max-w-2xl text-left"
-              data-testid="playercards-canonical-card"
-            >
-              <WorkerPlayerCard
-                card={sampleCard}
-                labels={cardLabels}
-                thermometer={null}
-                avatarUrl={null}
-                sample
-              />
-            </div>
-          </ExamplePreviewFrame>
-        }
-        ctaSource="workers_cta"
-        ctaKind="signup"
+      <WorkerDayMoment />
+      <WorkRecordTransitionSection />
+      <WorkerHistoryMoment />
+      <WorkerOutcome />
+      <ExploreSteps audience="workers" />
+      <PublicFaq audience="workers" />
+      <PublicCtaEnd
+        title={t("cta.title")}
+        accent={t("cta.accent")}
+        label={t("cta.button")}
+        href="/auth/signup"
+        ctaId="workers_cta"
+        audience="workers"
       />
     </>
   );

@@ -700,6 +700,17 @@ export const FROZEN_LANDING_FILES = [
   // recomposed with safe space above the head (media), and a head-safety
   // rule in the camera so holding the face never pushes a head out of frame.
   // The regeneration touched EXACTLY ONE hash — living-worker-hero.tsx.
+  // 2026-10-02 (owner directive, PREMIUM CONVERGENCE — public acquisition slice):
+  // on a phone the living hero stage was 78svh, which pushed the headline and
+  // the primary action below the first screen at 375x812. The stage is now 38svh
+  // below the `sm` breakpoint (62svh from `sm`, desktop unchanged) so portrait,
+  // headline, value and the one action are all in the first screen. And, after
+  // the two-sides lifecycle, focus-landing.tsx mounts the signature transition
+  // (work -> proof -> review -> history, company progress) and the two-door fork
+  // into /for-workers and /for-companies (components/marketing/public/*, copy under
+  // the NON-frozen `publicSlice` namespace). The regeneration touched EXACTLY TWO
+  // hashes — living-worker-hero.tsx and focus-landing.tsx — and ZERO namespace
+  // hashes. Traced claims: docs/public/PUBLIC_SLICE_TRUTH_TABLE_2026-10-02.md.
   "components/marketing/living-worker-hero.tsx",
   "lib/marketing/living-worker-hero.ts",
 ] as const;
