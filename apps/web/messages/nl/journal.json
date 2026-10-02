@@ -105,7 +105,8 @@
       "approved": "Beoordeeld",
       "changes_requested": "Wijzigingen gevraagd",
       "rejected": "Teruggestuurd",
-      "reasonLabel": "Reden"
+      "reasonLabel": "Reden",
+      "notEnabled": "Vastgelegd — je leidinggevende heeft bevestiging nog niet ingeschakeld, dus niemand beoordeelt deze registratie; tot dan blijft het jouw eigen opgave"
     },
     "delete": "Item verwijderen",
     "deleting": "Verwijderen...",
@@ -950,6 +951,8 @@
     "photoClose": "Foto sluiten",
     "photoPrev": "Vorige foto",
     "photoNext": "Volgende foto",
-    "photoCounter": "{index} / {total}"
+    "photoCounter": "{index} / {total}",
+    "recordedOnly": "{count, plural, one {# vastgelegd — bevestiging niet ingeschakeld} other {# vastgelegd — bevestiging niet ingeschakeld}}",
+    "confirmationNotEnabled": "Je leidinggevende heeft bevestiging nog niet ingeschakeld — niemand beoordeelt deze registraties."
   }
 }

@@ -52,6 +52,13 @@
     "missingFromProfession": "Üblich für Ihre Richtung, noch nicht in Ihren Aufzeichnungen:",
     "askedBy": "{count} Chancen",
     "missingNone": "Für die gezeigten Chancen fehlt nichts.",
+    "recTitle": "Lohnt sich zu stärken",
+    "recWhyProfession": "Gehört zu den Fähigkeiten Ihrer gewählten Richtung „{profession}“ und fehlt noch in Ihren Aufzeichnungen.",
+    "recWhyMissingRole": "Ein echter Bedarf („{role}“) verlangt sie, und sie fehlt noch in Ihren Aufzeichnungen.",
+    "recWhyMissing": "Ein echter Bedarf verlangt sie, und sie fehlt noch in Ihren Aufzeichnungen.",
+    "recWhyWeakRole": "Ein Bedarf („{role}“) verlangt sie, und Sie haben sie nur angegeben – noch nicht durch Arbeit bestätigt.",
+    "recWhyWeak": "Ein Bedarf verlangt sie, und Sie haben sie nur angegeben – noch nicht durch Arbeit bestätigt.",
+    "recMoreRequests": "+{count} weitere.",
     "next": "Was als Nächstes zu tun ist",
     "step_choose_direction": "Wählen Sie Ihre Arbeitsrichtung — das Matching braucht sie.",
     "step_declare_skills": "Fügen Sie die Fähigkeiten hinzu, die Sie schon haben (oder importieren Sie Ihren Lebenslauf).",
@@ -781,6 +788,7 @@
       }
     },
     "journalWindow": {
+      "reviewNotEnabled": "{count, plural, one {# Eintrag wurde} other {# Einträge wurden}} dort erfasst, wo die Arbeitsbestätigung nicht eingeschaltet ist – sie warten nicht auf Prüfung.",
       "title": "Arbeitsjournal-Bericht",
       "intro": "Arbeitszeit und erfasste Einträge je Mitglied über ein festes Kalenderfenster – aus den eigenen Aufzeichnungen dieser Organisation. Nur Stunden, Zahlen und Daten – kein Eintragstext, keine Bewertung.",
       "windowLabel": "Berichtszeitfenster",
@@ -2224,7 +2232,8 @@
         "title": "Wartet auf deine Entscheidung",
         "review": "Journaleinträge zur Prüfung",
         "invitations": "Ausstehende Einladungen an Arbeitskräfte",
-        "claims": "Öffentliche Anfragen, die du übernehmen kannst"
+        "claims": "Öffentliche Anfragen, die du übernehmen kannst",
+        "reviewOff": "Mitarbeitende mit erfasster Arbeit, deren Bestätigung ausgeschaltet ist"
       }
     },
     "agency": {
@@ -8133,6 +8142,7 @@
     },
     "claimFromJournal": "aus dem Arbeitsjournal",
     "recordedHours": "Erfasste Arbeit: {hours} Std. aus dem Arbeitsjournal, davon {confirmed} Std. bestätigt.",
+    "confirmedWorkFact": "Von anderen bestätigte Arbeitsjournal-Einträge: {entries, plural, one {# Eintrag} other {# Einträge}} an {days, plural, one {# Arbeitstag} other {# Arbeitstagen}}",
     "recordedHoursNone": "Noch keine Journaleinträge mit Dauer — Stunden neben Fähigkeiten stammen aus Ihren eigenen Einträgen.",
     "skillHours": "{hours} Std.",
     "skillHoursOwn": "{hours} Std., Ihr eigener Eintrag",
@@ -8344,13 +8354,16 @@
     "pickDemand": "Bedarf wählen",
     "noDemands": "Du hast noch keine Bedarfe. Erstelle zuerst einen Bedarf und strukturiere dann die benötigten Fähigkeiten.",
     "noDemandsCta": "Bedarf erstellen",
-    "unstructuredTag": "nicht strukturiert",
+    "unstructuredTag": "Anforderungen nicht bestätigt",
     "notStructured": "Dieser Bedarf hat noch keine strukturierten Fähigkeiten, daher kann kein Match berechnet werden. Strukturiere zuerst die benötigten Fähigkeiten.",
     "needsSetup": "Scouting ist in dieser Umgebung noch nicht verfügbar.",
     "noCandidates": "Noch keine passenden Arbeitskräfte für diesen Bedarf.",
     "namePlaceholder": "Arbeitskraft",
     "skillFit": "{matched}/{total} benötigte Fähigkeiten, {confirmed} vom Manager bestätigt",
     "evidence": "Nachweise — bestätigt: {confirmed} · Journal: {journal} · selbst angegeben: {self}",
+    "confirmedWork": "Durch Arbeit bestätigt: {work} von {matched} passenden Fähigkeiten (wiederholt: {repeated})",
+    "evidenceNone": "Nicht bestätigt",
+    "experienceYearsValue": "{years, plural, one {# Jahr} other {# Jahre}}",
     "shortlistError": "Konnte nicht gespeichert werden. Bitte erneut versuchen.",
     "footnote": "Matches werden deterministisch nur für diesen Bedarf berechnet. Keine globale Bewertung, keine erfundenen Kandidaten.",
     "status": {
@@ -8398,6 +8411,7 @@
       "location": "Standort",
       "availability": "Verfügbarkeit",
       "rate": "Satz",
+      "experience": "Erfahrung (angegeben)",
       "evidence": "Fähigkeitsnachweis"
     },
     "availabilityValue": {
@@ -8539,13 +8553,15 @@
       "cancel": "Abbrechen"
     },
     "verdict": {
-      "eligible": "Erfüllt die genannten Anforderungen",
+      "eligible": "Erfüllt die Pflichtanforderungen (Fähigkeiten werden separat bewertet)",
       "blocked": "Erfüllt eine genannte Anforderung nicht",
       "evidence": {
         "confirmed": "Nachweis: vom Manager bestätigt",
         "mixed": "Nachweis: teilweise bestätigt",
         "unverified": "Nachweis: nur selbst angegeben"
-      }
+      },
+      "noCriteria": "Keine Pflichtanforderungen angegeben",
+      "insufficient": "Zu wenig Daten, um die Anforderungen zu prüfen"
     },
     "editNeedCta": "Bedarf anpassen oder hinzufügen",
     "availableSupply": {
@@ -8578,7 +8594,7 @@
         "shortlist": "Vorausgewählt",
         "contact": "Im Kontakt",
         "offer": "Angeboten",
-        "accepted": "Angenommen",
+        "accepted": "Mit den Terminen einverstanden",
         "closed": "Geschlossen"
       }
     },
@@ -8588,7 +8604,8 @@
       "readiness": "Verfügbarkeit, Bereitschaft und Dokumente",
       "openTo": "Auch offen für: {countries}",
       "skillCount": "{matched} von {total} geforderten Fähigkeiten",
-      "nameHidden": "Name und Kontaktdaten erscheinen erst, wenn die Person sie freigibt."
+      "nameHidden": "Name und Kontaktdaten erscheinen erst, wenn die Person sie freigibt.",
+      "skillUnknown": "Keine Fähigkeiten angegeben · benötigt: {total}"
     }
   },
   "planBoundary": {
@@ -10722,6 +10739,9 @@
       "count": "{count, plural, =0 {keine Einträge} one {# Eintrag} other {# Einträge}}"
     },
     "emptyFiltered": "Keine Einträge dieses Typs.",
+    "filterActive": "Nur angezeigt: {type}. In diesem Zeitraum insgesamt: {total}, angezeigt: {shown}.",
+    "filterNote": "Journalstunden und -markierungen im Kalender werden immer angezeigt – der Filter ändert daran nichts.",
+    "filterClear": "Alle anzeigen",
     "emptyActions": {
       "bookings": "Buchung vorschlagen",
       "tasks": "Aufgabe erstellen",
@@ -11895,7 +11915,7 @@
       "contacted": "Kontaktiert",
       "interview": "Im Gespräch",
       "offer": "Angebot",
-      "accepted": "Angenommen",
+      "accepted": "Mit den Terminen einverstanden",
       "rejected": "Abgelehnt"
     },
     "action": {
@@ -11905,7 +11925,8 @@
       "continueConversation": "Gespräch fortsetzen",
       "viewOffer": "Antwort auf das Angebot verfolgen",
       "planWork": "Angenommenes Angebot ansehen",
-      "reviewOthers": "Weitere Kandidaten prüfen"
+      "reviewOthers": "Weitere Kandidaten prüfen",
+      "assignToProject": "Einem Projekt zuweisen"
     }
   },
   "agencyClients": {
@@ -13117,7 +13138,7 @@
       "offerTitle": "Stellenangebot",
       "confirmAcceptTitle": "Dieses Angebot annehmen?",
       "confirmAcceptBody": "Die Annahme bestätigt dein Engagement beim Arbeitgeber — ein fester Schritt, kein Entwurf.",
-      "confirmAcceptDisclosure": "Mit der Annahme sieht dieses Unternehmen — und nur dieses — deine Profilkarte: Name, Fähigkeiten, Berufe, Sprachen und Verfügbarkeit. Deine Kontaktdaten bleiben privat, kein anderes Unternehmen erhält Zugriff, und du wirst dadurch nicht in die Arbeitgebersuche aufgenommen. Der Zugriff gilt, solange das Engagement aktiv ist — du kannst es jederzeit beenden.",
+      "confirmAcceptDisclosure": "Mit der Annahme stimmst du den in dieser Buchung genannten Terminen zu. Das ist kein Arbeitsvertrag und bedeutet nicht, dass du bereits eingestellt bist – ein konkretes Projekt oder einen Einsatzort legt das Unternehmen separat fest. Mit der Annahme sieht dieses Unternehmen — und nur dieses — deine Profilkarte: Name, Fähigkeiten, Berufe, Sprachen und Verfügbarkeit. Deine Kontaktdaten bleiben privat, kein anderes Unternehmen erhält Zugriff, und du wirst dadurch nicht in die Arbeitgebersuche aufgenommen. Der Zugriff gilt, solange das Engagement aktiv ist — du kannst es jederzeit beenden.",
       "confirmDeclineTitle": "Dieses Angebot ablehnen?",
       "confirmCta": "Ja, bestätigen",
       "cancelCta": "Abbrechen",
@@ -14250,7 +14271,7 @@
       "candidatesBlocked": "Derzeit nicht verfügbar.",
       "candidatesNoDemands": "Dein Unternehmen hat noch keinen Bedarf beschrieben.",
       "candidatesPickDemand": "Für welchen Bedarf suchst du Leute?",
-      "candidatesUnstructuredBadge": "nicht strukturiert",
+      "candidatesUnstructuredBadge": "Anforderungen nicht bestätigt",
       "candidatesBackToDemands": "Zurück zu den Bedarfen",
       "candidatesNotFound": "Dieser Bedarf wurde nicht gefunden oder gehört nicht dir.",
       "candidatesNeedsMigration": "Derzeit nicht verfügbar.",
@@ -16552,7 +16573,8 @@
       "needsMigration": "Derzeit nicht verfügbar.",
       "noCompany": "Wechseln Sie in einen Unternehmens-Arbeitsbereich.",
       "noObjects": "Es gibt noch keine Objekte, denen die heutigen Stunden zugeordnet werden können.",
-      "error": "Der Tag konnte nicht geladen werden."
+      "error": "Der Tag konnte nicht geladen werden.",
+      "noCompanyJournalLink": "Arbeitsjournal öffnen"
     },
     "import": {
       "entryLink": "Stunden aus einer Tabelle importieren (.xlsx)",

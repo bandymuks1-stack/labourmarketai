@@ -105,7 +105,8 @@
       "approved": "Peržiūrėta",
       "changes_requested": "Paprašyta pataisymų",
       "rejected": "Grąžinta",
-      "reasonLabel": "Priežastis"
+      "reasonLabel": "Priežastis",
+      "notEnabled": "Užfiksuota — vadovas dar neįjungė patvirtinimo, todėl niekas šio įrašo neperžiūri; iki tol tai lieka jūsų nurodytas įrašas"
     },
     "delete": "Pašalinti įrašą",
     "deleting": "Šalinama...",
@@ -950,6 +951,8 @@
     "photoClose": "Uždaryti nuotrauką",
     "photoPrev": "Ankstesnė nuotrauka",
     "photoNext": "Kita nuotrauka",
-    "photoCounter": "{index} / {total}"
+    "photoCounter": "{index} / {total}",
+    "recordedOnly": "{count, plural, one {# užfiksuotas — patvirtinimas neįjungtas} other {# užfiksuoti — patvirtinimas neįjungtas}}",
+    "confirmationNotEnabled": "Vadovas dar neįjungė patvirtinimo — niekas šių įrašų neperžiūri."
   }
 }

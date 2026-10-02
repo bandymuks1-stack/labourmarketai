@@ -236,7 +236,7 @@ describe("company/account i18n keys (lt/en/ru/nl/de)", () => {
       expect(m.companySwitcher?.heading, `${locale} companySwitcher.heading`).toBeTypeOf("string");
       expect(m.companySwitcher?.note, `${locale} companySwitcher.note`).toBeTypeOf("string");
       const d = m.roleDashboards?.company?.decisions;
-      for (const key of ["title", "review", "invitations", "claims"]) {
+      for (const key of ["title", "review", "reviewOff", "invitations", "claims"]) {
         expect(d?.[key], `${locale} decisions.${key}`).toBeTypeOf("string");
         expect(d?.[key]).not.toMatch(/^\[EN\]/);
       }

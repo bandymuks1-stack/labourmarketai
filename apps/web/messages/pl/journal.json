@@ -105,7 +105,8 @@
       "approved": "Zweryfikowano",
       "changes_requested": "Poproszono o zmiany",
       "rejected": "Zwrócono",
-      "reasonLabel": "Powód"
+      "reasonLabel": "Powód",
+      "notEnabled": "Zapisano — przełożony nie włączył jeszcze potwierdzania, więc nikt nie sprawdza tego wpisu; do tego czasu pozostaje Twoim własnym stwierdzeniem"
     },
     "delete": "Usuń wpis",
     "deleting": "Usuwanie...",
@@ -950,6 +951,8 @@
     "photoClose": "Zamknij zdjęcie",
     "photoPrev": "Poprzednie zdjęcie",
     "photoNext": "Następne zdjęcie",
-    "photoCounter": "{index} / {total}"
+    "photoCounter": "{index} / {total}",
+    "recordedOnly": "{count, plural, one {# zapisany — potwierdzanie nieaktywne} few {# zapisane — potwierdzanie nieaktywne} many {# zapisanych — potwierdzanie nieaktywne} other {# zapisanych — potwierdzanie nieaktywne}}",
+    "confirmationNotEnabled": "Przełożony nie włączył jeszcze potwierdzania — nikt nie sprawdza tych wpisów."
   }
 }

@@ -2336,6 +2336,9 @@
     "namePlaceholder": "[EN] Worker",
     "skillFit": "[EN] {matched}/{total} required skills, {confirmed} manager-confirmed",
     "evidence": "[EN] Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
+    "confirmedWork": "Tööga kinnitatud: {work} / {matched} sobivast oskusest (kordub: {repeated})",
+    "evidenceNone": "Kinnitamata",
+    "experienceYearsValue": "{years, plural, one {# aasta} other {# aastat}}",
     "shortlistError": "[EN] Could not save. Try again.",
     "footnote": "[EN] Matches are computed deterministically for this need only. No global rating, no fake candidates.",
     "status": {

@@ -30,6 +30,7 @@ function emptyCv(): VerifiedCvData {
     skillPractice: null,
     journalCoverage: null,
     confirmedHoursBySkill: null,
+    confirmedWorkTotals: null,
     recordedHoursTotal: null,
     recordedHoursConfirmed: null,
     organizationRecordedHours: null,

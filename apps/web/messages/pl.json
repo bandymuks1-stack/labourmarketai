@@ -52,6 +52,13 @@
     "missingFromProfession": "Typowe dla Twojego kierunku, jeszcze nieobecne w Twoich zapisach:",
     "askedBy": "{count} możliwości",
     "missingNone": "Niczego nie brakuje względem pokazanych możliwości.",
+    "recTitle": "Warto wzmocnić",
+    "recWhyProfession": "Należy do umiejętności wybranego przez Ciebie kierunku „{profession}” i nie ma jej jeszcze w Twoich zapisach.",
+    "recWhyMissingRole": "Wymaga jej realna potrzeba („{role}”), a nie ma jej jeszcze w Twoich zapisach.",
+    "recWhyMissing": "Wymaga jej realna potrzeba, a nie ma jej jeszcze w Twoich zapisach.",
+    "recWhyWeakRole": "Potrzeba („{role}”) jej wymaga, a Ty tylko ją zadeklarowałeś — jeszcze niepotwierdzona pracą.",
+    "recWhyWeak": "Potrzeba jej wymaga, a Ty tylko ją zadeklarowałeś — jeszcze niepotwierdzona pracą.",
+    "recMoreRequests": "Jeszcze +{count}.",
     "next": "Co zrobić dalej",
     "step_choose_direction": "Wybierz swój kierunek zawodowy — dopasowanie go potrzebuje.",
     "step_declare_skills": "Dodaj umiejętności, które już posiadasz (lub zaimportuj CV).",
@@ -781,6 +788,7 @@
       }
     },
     "journalWindow": {
+      "reviewNotEnabled": "{count, plural, one {# wpis zapisano} few {# wpisy zapisano} many {# wpisów zapisano} other {# wpisu zapisano}} tam, gdzie potwierdzanie pracy nie jest włączone — nie czekają na przegląd.",
       "title": "Raport dziennika pracy",
       "intro": "Czas pracy i zarejestrowane wpisy dla każdego członka w ustalonym oknie kalendarzowym, na podstawie własnych danych tej organizacji. Tylko godziny, liczby i daty — bez treści wpisów, bez ocen.",
       "windowLabel": "Okres raportu",
@@ -2224,7 +2232,8 @@
         "title": "Czeka na Twoją decyzję",
         "review": "Wpisy w dzienniku do przejrzenia",
         "invitations": "Oczekujące zaproszenia pracowników",
-        "claims": "Publiczne zgłoszenia zapotrzebowania, które możesz przejąć"
+        "claims": "Publiczne zgłoszenia zapotrzebowania, które możesz przejąć",
+        "reviewOff": "Pracownicy z zapisaną pracą, u których potwierdzanie jest wyłączone"
       }
     },
     "agency": {
@@ -8133,6 +8142,7 @@
     },
     "claimFromJournal": "z dziennika pracy",
     "recordedHours": "Zarejestrowana praca: {hours} h z dziennika pracy, w tym {confirmed} h potwierdzonych.",
+    "confirmedWorkFact": "Wpisy dziennika pracy potwierdzone przez innych: {entries, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}} z {days, plural, one {# dnia roboczego} other {# dni roboczych}}",
     "recordedHoursNone": "Brak jeszcze wpisów w dzienniku z czasem trwania — godziny przy umiejętnościach pochodzą z Twoich własnych wpisów.",
     "skillHours": "{hours} h",
     "skillHoursOwn": "{hours} h, Twój własny zapis",
@@ -8344,13 +8354,16 @@
     "pickDemand": "Wybierz potrzebę",
     "noDemands": "Nie masz jeszcze żadnych potrzeb. Utwórz potrzebę z panelu — po przeglądzie zespół ustrukturyzuje jej wymagane umiejętności.",
     "noDemandsCta": "Utwórz potrzebę",
-    "unstructuredTag": "niestrukturyzowana",
+    "unstructuredTag": "wymagania niepotwierdzone",
     "notStructured": "Wymagane umiejętności tej potrzeby nie są jeszcze ustrukturyzowane, więc nie można obliczyć dopasowania. Nowe potrzeby są przeglądane i strukturyzowane przez administratorów — nie musisz nic robić.",
     "needsSetup": "Nie udało się wczytać. Spróbuj ponownie.",
     "noCandidates": "Brak jeszcze pasujących pracowników dla tej potrzeby. Dopasowania pojawiają się, gdy pracownicy dodają umiejętności potwierdzone dziennikiem — sprawdź później lub rozszerz potrzebę.",
     "namePlaceholder": "Pracownik",
     "skillFit": "{matched}/{total} wymaganych umiejętności, {confirmed} potwierdzonych przez kierownika",
     "evidence": "Dowody — potwierdzone: {confirmed} · dziennik: {journal} · zadeklarowane samodzielnie: {self}",
+    "confirmedWork": "Potwierdzone pracą: {work} z {matched} dopasowanych umiejętności (powtarza się: {repeated})",
+    "evidenceNone": "Niepotwierdzone",
+    "experienceYearsValue": "{years, plural, one {# rok} few {# lata} many {# lat} other {# roku}}",
     "shortlistError": "Nie udało się zapisać. Spróbuj ponownie.",
     "footnote": "Dopasowania są obliczane deterministycznie wyłącznie dla tej potrzeby. Bez globalnej oceny, bez fałszywych kandydatów.",
     "status": {
@@ -8398,6 +8411,7 @@
       "location": "Lokalizacja",
       "availability": "Dostępność",
       "rate": "Stawka",
+      "experience": "Doświadczenie (podane)",
       "evidence": "Dowody umiejętności"
     },
     "availabilityValue": {
@@ -8539,13 +8553,15 @@
       "cancel": "Anuluj"
     },
     "verdict": {
-      "eligible": "Spełnia podane wymagania",
+      "eligible": "Spełnia wymagania obowiązkowe (umiejętności oceniane osobno)",
       "blocked": "Nie spełnia podanego wymagania",
       "evidence": {
         "confirmed": "Dowody: potwierdzone przez menedżera",
         "mixed": "Dowody: częściowo potwierdzone",
         "unverified": "Dowody: tylko samodzielnie zadeklarowane"
-      }
+      },
+      "noCriteria": "Nie podano wymagań obowiązkowych",
+      "insufficient": "Za mało danych, aby sprawdzić wymagania"
     },
     "editNeedCta": "Dostosuj lub dodaj potrzebę",
     "availableSupply": {
@@ -8578,7 +8594,7 @@
         "shortlist": "Wybrani",
         "contact": "W kontakcie",
         "offer": "Zaproponowano",
-        "accepted": "Przyjęli",
+        "accepted": "Zgodzili się na terminy",
         "closed": "Zamknięte"
       }
     },
@@ -8588,7 +8604,8 @@
       "readiness": "Dostępność, gotowość i dokumenty",
       "openTo": "Otwarta także na: {countries}",
       "skillCount": "{matched} z {total} wymaganych umiejętności",
-      "nameHidden": "Imię i dane kontaktowe pojawiają się dopiero, gdy osoba na to pozwoli."
+      "nameHidden": "Imię i dane kontaktowe pojawiają się dopiero, gdy osoba na to pozwoli.",
+      "skillUnknown": "Nie podano umiejętności · potrzeba: {total}"
     }
   },
   "planBoundary": {
@@ -10722,6 +10739,9 @@
       "count": "{count, plural, =0 {brak pozycji} one {# pozycja} few {# pozycje} many {# pozycji} other {# pozycji}}"
     },
     "emptyFiltered": "Brak pozycji tego typu.",
+    "filterActive": "Pokazano tylko: {type}. W tym okresie łącznie: {total}, pokazano: {shown}.",
+    "filterNote": "Godziny i oznaczenia dziennika w kalendarzu są zawsze widoczne – filtr ich nie zmienia.",
+    "filterClear": "Pokaż wszystkie",
     "emptyActions": {
       "bookings": "Zaproponuj rezerwację",
       "tasks": "Utwórz zadanie",
@@ -11895,7 +11915,7 @@
       "contacted": "Skontaktowano się",
       "interview": "W rozmowie",
       "offer": "Oferta",
-      "accepted": "Zaakceptowano",
+      "accepted": "Zgodził się na terminy",
       "rejected": "Odrzucono"
     },
     "action": {
@@ -11905,7 +11925,8 @@
       "continueConversation": "Kontynuuj rozmowę",
       "viewOffer": "Śledź odpowiedź na rezerwację",
       "planWork": "Przejrzyj zaakceptowaną rezerwację",
-      "reviewOthers": "Przejrzyj innych kandydatów"
+      "reviewOthers": "Przejrzyj innych kandydatów",
+      "assignToProject": "Przypisz do projektu"
     }
   },
   "agencyClients": {
@@ -13117,7 +13138,7 @@
       "offerTitle": "Oferta pracy",
       "confirmAcceptTitle": "Zaakceptować tę ofertę?",
       "confirmAcceptBody": "Zaakceptowanie potwierdza Twoje zaangażowanie wobec pracodawcy — to zdecydowany krok, nie wersja robocza.",
-      "confirmAcceptDisclosure": "Po zaakceptowaniu ta firma — i tylko ona — zobaczy Twoją kartę profilu: imię, umiejętności, zawody, języki i dostępność. Twoje dane kontaktowe pozostają prywatne, żaden inny pracodawca nie uzyskuje dostępu, a to nie dodaje Cię do wyszukiwania dla pracodawców. Dostęp trwa, dopóki zaangażowanie jest aktywne, i możesz go zakończyć w dowolnym momencie.",
+      "confirmAcceptDisclosure": "Akceptując, zgadzasz się na terminy podane w tej rezerwacji. To nie jest umowa o pracę i nie oznacza, że jesteś już zatrudniony — konkretny projekt lub miejsce firma ustala osobno. Po zaakceptowaniu ta firma — i tylko ona — zobaczy Twoją kartę profilu: imię, umiejętności, zawody, języki i dostępność. Twoje dane kontaktowe pozostają prywatne, żaden inny pracodawca nie uzyskuje dostępu, a to nie dodaje Cię do wyszukiwania dla pracodawców. Dostęp trwa, dopóki zaangażowanie jest aktywne, i możesz go zakończyć w dowolnym momencie.",
       "confirmDeclineTitle": "Odrzucić tę ofertę?",
       "confirmCta": "Tak, potwierdź",
       "cancelCta": "Anuluj",
@@ -14250,7 +14271,7 @@
       "candidatesBlocked": "Chwilowo niedostępne.",
       "candidatesNoDemands": "Twoja firma nie opisała jeszcze potrzeby.",
       "candidatesPickDemand": "Do której potrzeby rekrutujesz?",
-      "candidatesUnstructuredBadge": "niesustrukturyzowane",
+      "candidatesUnstructuredBadge": "wymagania niepotwierdzone",
       "candidatesBackToDemands": "Powrót do potrzeb",
       "candidatesNotFound": "Ta potrzeba nie została znaleziona albo nie jest Twoja.",
       "candidatesNeedsMigration": "Chwilowo niedostępne.",
@@ -16552,7 +16573,8 @@
       "needsMigration": "Chwilowo niedostępne.",
       "noCompany": "Przełącz się na przestrzeń roboczą firmy.",
       "noObjects": "Nie ma jeszcze budów, na które można zapisać dzisiejsze godziny.",
-      "error": "Nie udało się wczytać tego dnia."
+      "error": "Nie udało się wczytać tego dnia.",
+      "noCompanyJournalLink": "Otwórz dziennik pracy"
     },
     "import": {
       "entryLink": "Importuj godziny z arkusza (.xlsx)",

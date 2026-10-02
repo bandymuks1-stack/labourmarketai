@@ -18,7 +18,7 @@
     "history": "History"
   },
   "publicDemand": {
-    "title": "Live market demand",
+    "title": "Current market demand",
     "subtitleAgency": "What the public market asks for right now — the same pool your candidates see on the board.",
     "subtitleInstitution": "What the public market asks for right now — the directions your learners are heading into.",
     "active": "{count} live vacancies",
@@ -52,6 +52,13 @@
     "missingFromProfession": "Usual for your direction, not yet in your records:",
     "askedBy": "{count} opportunities",
     "missingNone": "Nothing missing against the opportunities shown.",
+    "recTitle": "Worth strengthening",
+    "recWhyProfession": "Part of the skills for your chosen direction \"{profession}\", and not yet in your records.",
+    "recWhyMissingRole": "A real need (\"{role}\") asks for it and it is not in your records yet.",
+    "recWhyMissing": "A real need asks for it and it is not in your records yet.",
+    "recWhyWeakRole": "A need (\"{role}\") asks for it and you have only declared it - no confirmed work behind it yet.",
+    "recWhyWeak": "A need asks for it and you have only declared it - no confirmed work behind it yet.",
+    "recMoreRequests": "+{count} more.",
     "next": "What to do next",
     "step_choose_direction": "Choose your work direction — matching needs it.",
     "step_declare_skills": "Add the skills you already have (or import your CV).",
@@ -781,6 +788,7 @@
       }
     },
     "journalWindow": {
+      "reviewNotEnabled": "{count, plural, one {# entry is} other {# entries are}} recorded where the organization has not turned on work confirmation - not awaiting review.",
       "title": "Work journal report",
       "intro": "Work time and recorded entries per member over a fixed calendar window, from this organisation's own records. Hours, counts and dates only — no entry text, no rating.",
       "windowLabel": "Report window",
@@ -827,7 +835,7 @@
     "subtitle": "Describe it in your own words. We turn it into a clear card, show what is missing, and point to the next step.",
     "prep": "This is a preparation step before you search or send a request. The more you answer, the better the result — and the fewer bad matches.",
     "readinessLabel": {
-      "match_ready": "Ready",
+      "match_ready": "Ready to look for matches",
       "improving": "Getting clearer",
       "needs_basics": "Needs the basics"
     },
@@ -1240,7 +1248,7 @@
       "noData": "No data yet"
     },
     "layersTitle": "Signal layers",
-    "layerActive": "active",
+    "layerActive": "shown",
     "layerNextStage": "next stage",
     "nextStageTitle": "Next stage",
     "nextStageNote": "These layers come in later stages — only from real signals, never invented points.",
@@ -2191,9 +2199,9 @@
         "openProfile": "View profile",
         "identity": {
           "availability": {
-            "available": "Available",
-            "busy": "Busy",
-            "unavailable": "Unavailable"
+            "available": "Self-reported: available",
+            "busy": "Self-reported: busy",
+            "unavailable": "Self-reported: unavailable"
           }
         },
         "team": {
@@ -2224,7 +2232,8 @@
         "title": "Waiting for your decision",
         "review": "Journal entries to review",
         "invitations": "Pending worker invitations",
-        "claims": "Public need submissions you can claim"
+        "claims": "Public need submissions you can claim",
+        "reviewOff": "Workers with recorded work whose confirmation is switched off"
       }
     },
     "agency": {
@@ -3466,7 +3475,7 @@
     "addLaterHint": "You'll be able to add more roles later — they appear in the catalogue once they're ready.",
     "status": {
       "active": "Active",
-      "preparing": "Preparing",
+      "preparing": "Coming soon",
       "start": "Start",
       "partial": "Partial"
     },
@@ -3521,8 +3530,8 @@
     "lede": "One person. Many roles over time. A CV born from real work and real records, not self-written claims. The first choice is an entry point, not a cage.",
     "honesty": "Note: below is the whole system map. Some surfaces are live today; the rest are openly labelled \"Preparing\". We never say something works when it doesn't.",
     "sections": {
-      "today": "Live today",
-      "preparing": "Preparing",
+      "today": "Available now",
+      "preparing": "Coming soon",
       "workflow": "How a person's path moves through the system",
       "roles": "Role evolution (without lock-in)",
       "activities": "Activity landscape",
@@ -3539,10 +3548,10 @@
     },
     "controlRoom": {
       "todayLabel": "Active today",
-      "preparingLabel": "Preparing",
+      "preparingLabel": "Coming soon",
       "blockedLabel": "Blocked",
       "nonWorkerLabel": "Company / agency / customer spaces",
-      "nonWorkerStatus": "Preparing",
+      "nonWorkerStatus": "Coming soon",
       "fakeClaimsLabel": "Fake AI / fake matching / fake reputation",
       "fakeClaimsStatus": "Never used"
     },
@@ -3579,7 +3588,7 @@
   },
   "features": {
     "preparing_generic_reason": "This option will be enabled later.",
-    "preparing_badge": "Preparing",
+    "preparing_badge": "Coming soon",
     "overview": {
       "label": "Overview",
       "description": "Main view with the starting steps, suggestions and opportunities."
@@ -6583,7 +6592,7 @@
     "scope": {
       "support": "Support channel",
       "unknown": "Context not specified",
-      "demand": "About work — the subject is the related work's title"
+      "demand": "About a job"
     },
     "unread": "New",
     "kind": {
@@ -8133,6 +8142,7 @@
     },
     "claimFromJournal": "from work journal",
     "recordedHours": "Recorded work: {hours} h from the work journal, {confirmed} h of it confirmed.",
+    "confirmedWorkFact": "Work journal entries confirmed by others: {entries, plural, one {# entry} other {# entries}} over {days, plural, one {# work day} other {# work days}}",
     "recordedHoursNone": "No journal entries with a duration yet — hours next to skills come from your own entries.",
     "skillHours": "{hours} h",
     "skillHoursOwn": "{hours} h, your own record",
@@ -8344,13 +8354,16 @@
     "pickDemand": "Pick a need",
     "noDemands": "You have no needs yet. Create a need from your dashboard — after review, the team structures its required skills.",
     "noDemandsCta": "Create a need",
-    "unstructuredTag": "not structured",
+    "unstructuredTag": "requirements not confirmed",
     "notStructured": "This need's required skills aren't structured yet, so no match can be computed. New needs are reviewed and structured by the administrators — no action is needed from you.",
     "needsSetup": "Couldn’t load. Please try again.",
     "noCandidates": "No matching workers yet for this need. Matches appear as workers add journal-backed skills — check back later or broaden the need.",
     "namePlaceholder": "Worker",
     "skillFit": "{matched}/{total} required skills, {confirmed} manager-confirmed",
     "evidence": "Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
+    "confirmedWork": "Confirmed in real work: {work} of {matched} matched skills (repeated: {repeated})",
+    "evidenceNone": "Not confirmed",
+    "experienceYearsValue": "{years, plural, one {# year} other {# years}}",
     "shortlistError": "Could not save. Try again.",
     "footnote": "Matches are computed deterministically for this need only. No global rating, no fake candidates.",
     "status": {
@@ -8398,6 +8411,7 @@
       "location": "Location",
       "availability": "Availability",
       "rate": "Rate",
+      "experience": "Experience (stated)",
       "evidence": "Skill evidence"
     },
     "availabilityValue": {
@@ -8539,13 +8553,15 @@
       "cancel": "Cancel"
     },
     "verdict": {
-      "eligible": "Meets the stated requirements",
+      "eligible": "Meets the mandatory requirements (skills are rated separately)",
       "blocked": "Does not meet a stated requirement",
       "evidence": {
         "confirmed": "Evidence: manager-confirmed",
         "mixed": "Evidence: partly confirmed",
         "unverified": "Evidence: self-declared only"
-      }
+      },
+      "noCriteria": "No mandatory requirements stated",
+      "insufficient": "Not enough data to check requirements"
     },
     "editNeedCta": "Adjust or add a need",
     "availableSupply": {
@@ -8578,7 +8594,7 @@
         "shortlist": "Shortlisted",
         "contact": "In contact",
         "offer": "Offered",
-        "accepted": "Accepted",
+        "accepted": "Agreed to the dates",
         "closed": "Closed"
       }
     },
@@ -8588,7 +8604,8 @@
       "readiness": "Availability, readiness and documents",
       "openTo": "Also open to: {countries}",
       "skillCount": "{matched} of {total} required skills",
-      "nameHidden": "Name and contact details appear only when the person allows them."
+      "nameHidden": "Name and contact details appear only when the person allows them.",
+      "skillUnknown": "No skills stated · needs {total}"
     }
   },
   "planBoundary": {
@@ -8656,8 +8673,8 @@
       "manage_pilots": "Pilot management"
     },
     "enforcement": {
-      "free_surface": "In the product today",
-      "server_gate": "In the product today, entitlement-checked",
+      "free_surface": "Available today",
+      "server_gate": "Available today, depending on your permissions",
       "declared_boundary_only": "Prepared — starts only with billing",
       "admin_rbac": "Internal, admin only"
     }
@@ -10722,6 +10739,9 @@
       "count": "{count, plural, =0 {no items} one {# item} other {# items}}"
     },
     "emptyFiltered": "No items of this type.",
+    "filterActive": "Showing only: {type}. In this period: {total} in all, {shown} shown.",
+    "filterNote": "Journal hours and marks on the calendar are always shown — the filter does not change them.",
+    "filterClear": "Show all",
     "emptyActions": {
       "bookings": "Propose a booking",
       "tasks": "Create a task",
@@ -11895,7 +11915,7 @@
       "contacted": "Contacted",
       "interview": "In conversation",
       "offer": "Offer",
-      "accepted": "Accepted",
+      "accepted": "Agreed to the dates",
       "rejected": "Rejected"
     },
     "action": {
@@ -11905,13 +11925,14 @@
       "continueConversation": "Continue the conversation",
       "viewOffer": "Track the booking response",
       "planWork": "Review the accepted booking",
-      "reviewOthers": "Review other candidates"
+      "reviewOthers": "Review other candidates",
+      "assignToProject": "Assign to a project"
     }
   },
   "agencyClients": {
     "title": "Clients",
     "subtitle": "Who you staff for — each client's needs link to your demands and candidate scouting.",
-    "gatedHeading": "Prepared — owner activation pending",
+    "gatedHeading": "Not available yet — coming later",
     "gatedBody": "Not available right now.",
     "notLinkable": "Demands cannot be linked to clients yet.",
     "clientsEmpty": "No clients yet. Add your first client below.",
@@ -11944,7 +11965,7 @@
   "agencyBridge": {
     "title": "Client companies",
     "subtitle": "Connect with a real client company, see only the requests they share, and offer one of your active roster workers.",
-    "gatedHeading": "Prepared — owner activation pending",
+    "gatedHeading": "Not available yet — coming later",
     "gatedBody": "Not available right now.",
     "connectionsHeading": "Connections",
     "inviteEmailLabel": "Client email",
@@ -11996,7 +12017,7 @@
   "clientBridge": {
     "title": "Staffing agencies",
     "subtitle": "Accept a staffing agency you want to work with, share specific requests, and review the candidates they propose on your own scouting page.",
-    "gatedHeading": "Prepared — owner activation pending",
+    "gatedHeading": "Not available yet — coming later",
     "gatedBody": "Not available right now.",
     "invitesHeading": "Connection invites",
     "noInvites": "No pending invites.",
@@ -12164,7 +12185,7 @@
     },
     "imageOcr": {
       "label": "CV photo / image (JPG, PNG)",
-      "note": "In preparation — image recognition is not available yet. Upload a PDF/DOCX or paste the text."
+      "note": "Reading from photos is not available yet — upload a PDF/DOCX or paste the text."
     }
   },
   "companySwitcher": {
@@ -13117,7 +13138,7 @@
       "offerTitle": "Job offer",
       "confirmAcceptTitle": "Accept this offer?",
       "confirmAcceptBody": "Accepting confirms your engagement with the employer — it is a firm step, not a draft.",
-      "confirmAcceptDisclosure": "Accepting lets this company — and only this company — see your profile card: your name, skills, professions, languages and availability. Your contact details stay private, no other employer gains access, and this does not add you to employer search. The access lasts while the engagement is active, and you can end it at any time.",
+      "confirmAcceptDisclosure": "By accepting you agree to the dates shown in this booking. This is not an employment contract and does not mean you have been hired — a specific project or site is set separately by the company. Accepting lets this company — and only this company — see your profile card: your name, skills, professions, languages and availability. Your contact details stay private, no other employer gains access, and this does not add you to employer search. The access lasts while the engagement is active, and you can end it at any time.",
       "confirmDeclineTitle": "Decline this offer?",
       "confirmCta": "Yes, confirm",
       "cancelCta": "Cancel",
@@ -14250,7 +14271,7 @@
       "candidatesBlocked": "Not available right now.",
       "candidatesNoDemands": "Your company has not described a need yet.",
       "candidatesPickDemand": "Which need are you hiring for?",
-      "candidatesUnstructuredBadge": "not structured",
+      "candidatesUnstructuredBadge": "requirements not confirmed",
       "candidatesBackToDemands": "Back to needs",
       "candidatesNotFound": "That need was not found, or it is not yours.",
       "candidatesNeedsMigration": "Not available right now.",
@@ -15677,7 +15698,7 @@
     "archivedHeading": "Archived objects",
     "archivedBadge": "Archived",
     "empty": "No objects yet. Add the sites where your work happens.",
-    "gatedHeading": "Prepared — awaiting activation",
+    "gatedHeading": "Not available yet — coming later",
     "gatedBody": "Not available right now.",
     "errorLabel": "Could not save. Try again.",
     "notAuthorizedLabel": "Only managers can change objects.",
@@ -16550,9 +16571,10 @@
     },
     "states": {
       "needsMigration": "Not available right now.",
-      "noCompany": "Switch to a company workspace.",
+      "noCompany": "This area is for a company workspace. Record your own hours in the Work Journal.",
       "noObjects": "There are no sites yet to record today's hours against.",
-      "error": "Could not load this day."
+      "error": "Could not load this day.",
+      "noCompanyJournalLink": "Open the Work Journal"
     },
     "import": {
       "entryLink": "Import hours from a spreadsheet (.xlsx)",
@@ -16697,7 +16719,7 @@
       "notAMember": "That organization is not one of yours. Choose one of these:",
       "chooseOrganization": "You belong to more than one organization. Choose which one is supplying this evidence:",
       "notAuthorized": "Your role in this organization does not include importing evidence. An owner, administrator or manager can do it.",
-      "needsMigration": "The evidence store is not switched on in this environment yet. The database change is prepared and waiting for the owner's approval; nothing was written.",
+      "needsMigration": "The evidence store is not switched on in this environment yet; nothing was written.",
       "unavailable": "The evidence store could not be read. This is a system problem, not an empty organization."
     },
     "form": {
