@@ -1525,6 +1525,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261002141500_work_task_authz_null_safe_v1.sql",
       // 2026-10-03: EVID-6 policy narrowing (experience_responses_select resolves the reply moderation status) — marker is the human-gate acknowledgement; draft + needs-human-gate, NOT applied.
       "20261002143000_experience_responses_select_reply_status_v1.sql",
+      // 2026-10-03: #1815/ARCH-4 disclosure-authority forward fix (list_agency_offered_candidates_for_request_v2 regains the connection/share gate) — marker is the human-gate acknowledgement.
+      "20261003100000_list_agency_offered_candidates_v2_connection_gate_v1.sql",
 ]);
   });
 
