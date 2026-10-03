@@ -5991,7 +5991,8 @@
       "notAuthorized": "Je kunt alleen werknemers uit je eigen ploeg toewijzen aan je eigen projecten.",
       "noWorkers": "Je hebt nog geen toewijsbare werknemers in je ploeg.",
       "fromRoster": "Een werknemer aan dit object toewijzen",
-      "rosterOwnerOnly": "Teamleden worden door de eigenaar of beheerder van de organisatie aan projecten toegewezen. Mensen met een geaccepteerde boeking kunt u nog steeds toewijzen.",
+      "rosterOwnerOnly": "Teamleden worden door de eigenaar of beheerder van de organisatie of door een manager van het project aan projecten toegewezen. Mensen met een geaccepteerde boeking kunt u nog steeds toewijzen.",
+      "rosterOtherOrg": "Teamleden kunnen alleen aan projecten van uw eigen organisatie worden toegewezen. Dit project hoort bij een andere organisatie.",
       "rosterGroup": "Teamleden",
       "engagementGroup": "Kandidaten met geaccepteerd voorstel",
       "reservation": {

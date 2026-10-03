@@ -5991,7 +5991,8 @@
       "notAuthorized": "Galite priskirti tik savo komandos darbuotojus savo projektams.",
       "noWorkers": "Kol kas neturite priskirtinų darbuotojų komandoje.",
       "fromRoster": "Priskirti darbuotoją šiam objektui",
-      "rosterOwnerOnly": "Komandos darbuotojus prie projektų priskiria organizacijos savininkas arba administratorius. Galite priskirti žmones, kurių rezervacija jau priimta.",
+      "rosterOwnerOnly": "Komandos darbuotojus prie projektų priskiria organizacijos savininkas, administratorius arba projekto vadovas. Galite priskirti žmones, kurių rezervacija jau priimta.",
+      "rosterOtherOrg": "Komandos narius galima priskirti tik savo organizacijos projektams. Šis projektas priklauso kitai organizacijai.",
       "rosterGroup": "Komandos nariai",
       "engagementGroup": "Priimto pasiūlymo kandidatai",
       "reservation": {

@@ -5991,7 +5991,8 @@
       "notAuthorized": "Możesz przypisywać do swoich projektów tylko pracowników ze swojego zespołu.",
       "noWorkers": "Nie masz jeszcze żadnych pracowników w zespole, których można przypisać.",
       "fromRoster": "Przypisz pracownika do tego obiektu",
-      "rosterOwnerOnly": "Członków zespołu do projektów przypisuje właściciel lub administrator organizacji. Nadal możesz przypisać osoby z zaakceptowaną rezerwacją.",
+      "rosterOwnerOnly": "Członków zespołu do projektów przypisuje właściciel lub administrator organizacji albo kierownik projektu. Nadal możesz przypisać osoby z zaakceptowaną rezerwacją.",
+      "rosterOtherOrg": "Członków zespołu można przypisywać tylko do projektów własnej organizacji. Ten projekt należy do innej organizacji.",
       "rosterGroup": "Członkowie zespołu",
       "engagementGroup": "Kandydaci z zaakceptowaną propozycją",
       "reservation": {

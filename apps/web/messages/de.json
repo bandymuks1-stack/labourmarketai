@@ -5991,7 +5991,8 @@
       "notAuthorized": "Sie können nur Arbeitskräfte aus Ihrem Team Ihren eigenen Projekten zuweisen.",
       "noWorkers": "Sie haben noch keine zuweisbaren Arbeitskräfte in Ihrem Team.",
       "fromRoster": "Eine Arbeitskraft diesem Objekt zuweisen",
-      "rosterOwnerOnly": "Teammitglieder werden von der Inhaberin bzw. dem Inhaber oder einer Administration der Organisation Projekten zugewiesen. Personen mit angenommener Buchung können Sie weiterhin zuweisen.",
+      "rosterOwnerOnly": "Teammitglieder werden von der Inhaberin bzw. dem Inhaber, einer Administration der Organisation oder einer Projektleitung Projekten zugewiesen. Personen mit angenommener Buchung können Sie weiterhin zuweisen.",
+      "rosterOtherOrg": "Teammitglieder können nur Projekten Ihrer eigenen Organisation zugewiesen werden. Dieses Projekt gehört zu einer anderen Organisation.",
       "rosterGroup": "Teammitglieder",
       "engagementGroup": "Kandidaten mit angenommenem Angebot",
       "reservation": {
