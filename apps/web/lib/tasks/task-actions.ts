@@ -8,7 +8,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { emitWorkTaskAssignedNotification } from "@/lib/notifications/event-emitters";
-import { createWorkTaskCore } from "@/lib/tasks/create-task-core";
+import { createWorkTaskCore, isStructureOutcome } from "@/lib/tasks/create-task-core";
 import { setWorkTaskStatusCore, type SetWorkTaskStatusCoreResult } from "@/lib/tasks/set-task-status-core";
 import { checkTaskAssignmentReservation } from "@/lib/tasks/task-reservation";
 import { getTaskCollaboration, readWorkTaskAssignmentFacts } from "@/lib/tasks/tasks";
@@ -78,6 +78,8 @@ type Notice =
   | "not_found"
   | "limit_reached"
   | "cycle"
+  | "invalid_structure"
+  | "relink_required"
   | "error";
 
 /** Rebuild the tasks-page URL from VALIDATED parts only (never raw input). */
@@ -144,6 +146,10 @@ function noticeForOutcome(outcome: string, okNotice: Notice): Notice {
     return "limit_reached";
   }
   if (outcome === "cycle") return "cycle";
+  if (isStructureOutcome(outcome)) return "invalid_structure";
+  // The task (or a subtask) has live journal evidence: re-staging it would
+  // silently move that evidence to another stage — unlink/relink first.
+  if (outcome === "evidence_linked") return "relink_required";
   return "invalid";
 }
 
@@ -175,6 +181,8 @@ export async function createWorkTaskAction(formData: FormData): Promise<void> {
     dueDate: String(formData.get("dueDate") ?? ""),
     projectId: String(formData.get("projectId") ?? ""),
     objectId: String(formData.get("objectId") ?? ""),
+    stageId: String(formData.get("stageId") ?? ""),
+    parentTaskId: String(formData.get("parentTaskId") ?? ""),
     assigneeProfileId: String(formData.get("assigneeProfileId") ?? ""),
     assignSelf: formData.get("assignSelf") === "on",
   });
@@ -266,6 +274,17 @@ export async function updateWorkTaskAction(formData: FormData): Promise<void> {
   const objectId = String(formData.get("objectId") ?? "").trim();
   if (objectId && !UUID_RX.test(objectId)) finish(ctx, "invalid");
 
+  // Stage / parent are posted only when the edit form rendered them (the
+  // structure columns are readable). Present → sent ('' clears, uuid sets);
+  // absent → NOT sent, so the RPC leaves the structure untouched and the
+  // call keeps the exact pre-migration argument set.
+  const hasStage = formData.has("stageId");
+  const hasParent = formData.has("parentTaskId");
+  const stageId = String(formData.get("stageId") ?? "").trim();
+  const parentTaskId = String(formData.get("parentTaskId") ?? "").trim();
+  if (stageId && !UUID_RX.test(stageId)) finish(ctx, "invalid");
+  if (parentTaskId && !UUID_RX.test(parentTaskId)) finish(ctx, "invalid");
+
   const { data, error } = await asAny(supabase).rpc("update_work_task_v2", {
     p_task_id: taskId,
     p_title: title,
@@ -273,9 +292,13 @@ export async function updateWorkTaskAction(formData: FormData): Promise<void> {
     p_priority: priority,
     p_due_date: dueDate,
     p_object_id: objectId,
+    // A subtask INHERITS its parent's stage: when a parent is chosen the
+    // stage field is not sent (the RPC would otherwise compare it).
+    ...(hasStage && !parentTaskId ? { p_stage_id: stageId } : {}),
+    ...(hasParent ? { p_parent_task_id: parentTaskId } : {}),
   });
   if (error && isMigrationMissingCode(error.code)) {
-    if (objectId) finish(ctx, "needs_migration");
+    if (objectId || hasStage || hasParent) finish(ctx, "needs_migration");
     const v1 = await asAny(supabase).rpc("update_work_task_v1", {
       p_task_id: taskId,
       p_title: title,

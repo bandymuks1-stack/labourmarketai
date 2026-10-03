@@ -44,12 +44,27 @@ export async function getProjectsProgress(
   } = await supabase.auth.getUser();
   if (!user) return {};
 
-  const [tasksRes, stagesRes] = await Promise.all([
-    asAny(supabase)
+  // Hierarchy-aware select; while the stage/subtask migration is unapplied the
+  // column is absent (42703) and we fall back to the flat v1 select — progress
+  // then counts flat exactly as before (nothing errors, nothing is hidden).
+  const readTasks = async () => {
+    const withTree = await asAny(supabase)
       .from("work_tasks")
-      .select("project_id, status")
+      .select("id, project_id, status, parent_task_id")
       .in("project_id", ids)
-      .limit(READ_LIMIT),
+      .limit(READ_LIMIT);
+    if (withTree.error && withTree.error.code === "42703") {
+      return asAny(supabase)
+        .from("work_tasks")
+        .select("project_id, status")
+        .in("project_id", ids)
+        .limit(READ_LIMIT);
+    }
+    return withTree;
+  };
+
+  const [tasksRes, stagesRes] = await Promise.all([
+    readTasks(),
     asAny(supabase)
       .from("project_stages")
       .select("project_id, status")
@@ -58,7 +73,8 @@ export async function getProjectsProgress(
   ]);
 
   type SlimRow = { project_id: string | null; status: string };
-  const taskRows: SlimRow[] = tasksRes.error ? [] : ((tasksRes.data ?? []) as SlimRow[]);
+  type TaskRow = SlimRow & { id?: string; parent_task_id?: string | null };
+  const taskRows: TaskRow[] = tasksRes.error ? [] : ((tasksRes.data ?? []) as TaskRow[]);
   const stageRows: SlimRow[] = stagesRes.error
     ? []
     : ((stagesRes.data ?? []) as SlimRow[]);
@@ -66,7 +82,13 @@ export async function getProjectsProgress(
   const out: Record<string, ProjectProgress> = {};
   for (const id of ids) {
     out[id] = deriveProjectProgress(
-      taskRows.filter((r) => r.project_id === id).map((r) => r.status),
+      taskRows
+        .filter((r) => r.project_id === id)
+        .map((r) => ({
+          id: r.id,
+          parentTaskId: r.parent_task_id ?? null,
+          status: r.status,
+        })),
       stageRows.filter((r) => r.project_id === id).map((r) => r.status),
     );
   }

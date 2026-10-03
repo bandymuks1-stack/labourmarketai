@@ -636,6 +636,21 @@
       "unavailable": "Nie udało się teraz odczytać porównania z wcześniejszym czasem trwania.",
       "suggest": "Porównywalne etapy trwały {days} dni ({observations} obserwacji) — to zakończyłoby się {date}.",
       "suggestApply": "Użyj tej daty"
+    },
+    "responsible": {
+      "label": "Odpowiedzialny",
+      "none": "Brak odpowiedzialnego",
+      "unreadable": "Wskazano (nazwa nieczytelna)",
+      "noOptions": "W tej organizacji nie ma jeszcze aktywnych osób do wyboru.",
+      "saving": "Zapisywanie…",
+      "saved": "Zaktualizowano osobę odpowiedzialną.",
+      "outcome": {
+        "needs_migration": "Wskazanie osoby odpowiedzialnej nie jest jeszcze dostępne — zadziała po wdrożeniu aktualizacji.",
+        "not_authorized": "Nie możesz zmienić osoby odpowiedzialnej za ten etap.",
+        "invalid": "Ta osoba nie może tu być odpowiedzialna (musi być aktywna w tej organizacji).",
+        "auth": "Zaloguj się ponownie.",
+        "error": "Nie udało się zapisać. Spróbuj ponownie."
+      }
     }
   },
   "activityCentre": {
@@ -11052,9 +11067,12 @@
       "limit_reached": "Osiągnięto limit otwartych zadań — najpierw ukończ lub anuluj starsze zadania.",
       "error": "Zapis nie powiódł się. Spróbuj ponownie.",
       "cycle": "To utworzyłoby pętlę — zadanie nie może czekać samo na siebie poprzez inne zadania.",
+      "invalid_structure": "Ten etap lub zadanie nadrzędne jest tu nieprawidłowe (ten sam projekt, bez pętli, maksymalnie trzy poziomy).",
       "evidence_linked": "Dowód dołączony do zadania.",
       "evidence_unlinked": "Załącznik wycofany. Sam zapis pozostaje niezmieniony.",
-      "approval_requested": "Wysłano do zatwierdzenia."
+      "approval_requested": "Wysłano do zatwierdzenia.",
+      "relink_required": "Do tego zadania dołączono już dowody z dziennika, więc nie można zmienić jego etapu. Najpierw odłącz dowody, potem przenieś zadanie.",
+      "evidence_mismatch": "Ten wpis dziennika należy do innego projektu lub organizacji niż zadanie, więc nie można go dołączyć."
     },
     "projectTasks": {
       "title": "Zadania projektu",
@@ -11147,6 +11165,35 @@
         "withdrawn": "Wycofane",
         "cancelled": "Anulowane"
       }
+    },
+    "structure": {
+      "subtask": "Podzadanie",
+      "stageLabel": "Etap",
+      "stageNone": "Bez etapu",
+      "parentLabel": "Zadanie nadrzędne",
+      "parentNone": "Brak (zadanie najwyższego poziomu)",
+      "parentHint": "Podzadanie podąża za etapem zadania nadrzędnego. Do trzech poziomów.",
+      "parentHidden": "Zadanie nadrzędne (niewidoczne dla Ciebie)",
+      "createHint": "Aby przypisać zadanie do etapu lub zadania nadrzędnego, najpierw otwórz zadania projektu (filtr projektu).",
+      "filterLabel": "Filtruj według etapu",
+      "filterAll": "Wszystkie etapy",
+      "unstaged": "Bez etapu",
+      "stageEmpty": "W tym etapie nie ma jeszcze zadań.",
+      "stageStatus": {
+        "planned": "Zaplanowany",
+        "in_progress": "W toku",
+        "blocked": "Zablokowany",
+        "done": "Zakończony",
+        "cancelled": "Anulowany"
+      },
+      "suggest": {
+        "open_work_in_done_stage": "Ten etap jest oznaczony jako zakończony, ale część zadań wciąż jest otwarta. Rozważ status: {status}. (Tylko sugestia - nic nie zmienia się automatycznie.)",
+        "all_done": "Wszystkie zadania tego etapu są zakończone. Rozważ status etapu: {status}. (Tylko sugestia.)",
+        "has_blocked": "Jedno z zadań tego etapu jest zablokowane. Rozważ status etapu: {status}. (Tylko sugestia.)",
+        "work_started": "Prace nad tym etapem się rozpoczęły. Rozważ status: {status}. (Tylko sugestia.)"
+      },
+      "attributionConflict": "Konflikt przypisania: ten wpis należy do innego projektu niż zadanie",
+      "evidenceRollup": "Dowody: policzono {entries} wpisów (nie policzono {conflicts} konfliktów i {ambiguous} wpisów powiązanych z wieloma zadaniami)"
     }
   },
   "assist": {

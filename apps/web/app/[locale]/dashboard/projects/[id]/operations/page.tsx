@@ -33,6 +33,11 @@ import { getLearnedStageDurations } from "@/lib/projects/learned-stage-duration"
 import { ProjectStageGantt } from "@/components/app/project-stage-gantt";
 import { ProjectEconomicsPanel } from "@/components/app/project-economics-panel";
 import { listProjectStages } from "@/lib/projects/stages";
+import { listOrgEmployeeEngagements } from "@/lib/company/org-employee-engagements";
+import {
+  buildResponsibleOptions,
+  responsibleNameMap,
+} from "@/lib/projects/stage-responsible";
 import { buildActivityTimeline } from "@/lib/projects/stage-gantt";
 import { getTaskCollaboration } from "@/lib/tasks/tasks";
 import { getProjectEconomics } from "@/lib/economics/economics";
@@ -193,6 +198,16 @@ export default async function ProjectOperationsPage({
   const orgMembersRead = projectOrgId
     ? await listOrganizationMembers(projectOrgId)
     : null;
+  // Stage responsible picker: ONLY engagements ACTIVE in this project's own
+  // organization (the eligibility set_project_stage_responsible_v1 enforces),
+  // read through the existing readable-name resolver. null = unreadable.
+  const stageEngagementsRead = projectOrgId
+    ? await listOrgEmployeeEngagements(projectOrgId)
+    : null;
+  const stageResponsibleOptions =
+    stageEngagementsRead && stageEngagementsRead.kind === "ok"
+      ? buildResponsibleOptions(stageEngagementsRead.rows)
+      : null;
   const responsibleOptions =
     orgMembersRead && orgMembersRead.kind === "ok"
       ? orgMembersRead.members
@@ -230,6 +245,7 @@ export default async function ProjectOperationsPage({
     stages: stages.applied ? stages.stages : [],
     tasks: timelineTasks,
     waitingOnByTask,
+    stageResponsibleNames: responsibleNameMap(stageResponsibleOptions ?? []),
     blockersByTask: timelineCollab.blockersByTask,
     meProfileId: user.id,
     people: ops.workers.map((w) => ({
@@ -661,7 +677,13 @@ export default async function ProjectOperationsPage({
             project spine. Managers add stages, set real status and planned
             dates; no fabricated progress. Honest "not yet available" state
             while the owner-gated migration is unapplied. */}
-      <ProjectStagesPanel projectId={id} data={stages} learned={learnedStageDurations} />
+      <ProjectStagesPanel
+        projectId={id}
+        data={stages}
+        learned={learnedStageDurations}
+        canManage={manageFacts !== null}
+        responsibleOptions={stageResponsibleOptions}
+      />
 
       {/* Gantt projection over the SAME stage truth (no stored events) — bars
             from real planned/actual dates, today marker, overdue highlight,

@@ -636,6 +636,21 @@
       "unavailable": "Der Vergleich mit früheren Dauern konnte gerade nicht gelesen werden.",
       "suggest": "Vergleichbare Phasen dauerten {days} Tage ({observations} beobachtet) — das würde am {date} enden.",
       "suggestApply": "Dieses Datum übernehmen"
+    },
+    "responsible": {
+      "label": "Verantwortlich",
+      "none": "Keine verantwortliche Person",
+      "unreadable": "Benannt (Name nicht lesbar)",
+      "noOptions": "In dieser Organisation gibt es noch keine aktiven Personen zur Auswahl.",
+      "saving": "Wird gespeichert…",
+      "saved": "Verantwortliche Person aktualisiert.",
+      "outcome": {
+        "needs_migration": "Die Benennung einer verantwortlichen Person ist noch nicht verfügbar — sie funktioniert nach dem Update.",
+        "not_authorized": "Sie dürfen die verantwortliche Person dieser Phase nicht ändern.",
+        "invalid": "Diese Person kann hier nicht verantwortlich sein (sie muss in dieser Organisation aktiv sein).",
+        "auth": "Bitte melden Sie sich erneut an.",
+        "error": "Speichern nicht möglich. Bitte erneut versuchen."
+      }
     }
   },
   "activityCentre": {
@@ -11052,9 +11067,12 @@
       "limit_reached": "Limit offener Aufgaben erreicht — schließen Sie zuerst ältere Aufgaben ab oder brechen Sie sie ab.",
       "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
       "cycle": "Das würde eine Schleife erzeugen — eine Aufgabe kann nicht über andere Aufgaben auf sich selbst warten.",
+      "invalid_structure": "Diese Phase oder übergeordnete Aufgabe ist hier nicht gültig (gleiches Projekt, keine Schleifen, höchstens drei Ebenen).",
       "evidence_linked": "Nachweis mit der Aufgabe verknüpft.",
       "evidence_unlinked": "Verknüpfung zurückgezogen. Der Eintrag selbst bleibt unverändert.",
-      "approval_requested": "Zur Freigabe gesendet."
+      "approval_requested": "Zur Freigabe gesendet.",
+      "relink_required": "An dieser Aufgabe hängen bereits Journalnachweise, daher kann ihre Phase nicht geändert werden. Lösen Sie zuerst die Nachweise, dann verschieben Sie die Aufgabe.",
+      "evidence_mismatch": "Dieser Journaleintrag gehört zu einem anderen Projekt oder einer anderen Organisation als die Aufgabe und kann nicht angehängt werden."
     },
     "projectTasks": {
       "title": "Projektaufgaben",
@@ -11147,6 +11165,35 @@
         "withdrawn": "Zurückgezogen",
         "cancelled": "Storniert"
       }
+    },
+    "structure": {
+      "subtask": "Teilaufgabe",
+      "stageLabel": "Phase",
+      "stageNone": "Keine Phase",
+      "parentLabel": "Übergeordnete Aufgabe",
+      "parentNone": "Keine (Aufgabe auf oberster Ebene)",
+      "parentHint": "Eine Teilaufgabe folgt der Phase ihrer übergeordneten Aufgabe. Bis zu drei Ebenen.",
+      "parentHidden": "Übergeordnete Aufgabe (für Sie nicht sichtbar)",
+      "createHint": "Um eine Aufgabe einer Phase oder einer übergeordneten Aufgabe zuzuordnen, öffnen Sie zuerst die Aufgaben eines Projekts (Projektfilter).",
+      "filterLabel": "Nach Phase filtern",
+      "filterAll": "Alle Phasen",
+      "unstaged": "Keine Phase",
+      "stageEmpty": "In dieser Phase gibt es noch keine Aufgaben.",
+      "stageStatus": {
+        "planned": "Geplant",
+        "in_progress": "In Arbeit",
+        "blocked": "Blockiert",
+        "done": "Erledigt",
+        "cancelled": "Abgebrochen"
+      },
+      "suggest": {
+        "open_work_in_done_stage": "Diese Phase ist als erledigt markiert, es sind aber noch Aufgaben offen. Erwägen Sie den Status {status}. (Nur ein Vorschlag - nichts ändert sich automatisch.)",
+        "all_done": "Alle Aufgaben dieser Phase sind erledigt. Erwägen Sie den Phasenstatus {status}. (Nur ein Vorschlag.)",
+        "has_blocked": "Eine Aufgabe dieser Phase ist blockiert. Erwägen Sie den Phasenstatus {status}. (Nur ein Vorschlag.)",
+        "work_started": "Die Arbeit an dieser Phase hat begonnen. Erwägen Sie den Status {status}. (Nur ein Vorschlag.)"
+      },
+      "attributionConflict": "Zuordnungskonflikt: Dieser Eintrag gehört zu einem anderen Projekt als die Aufgabe",
+      "evidenceRollup": "Nachweise: {entries} Einträge gezählt ({conflicts} Konflikte und {ambiguous} Einträge mit mehreren Aufgaben nicht gezählt)"
     }
   },
   "assist": {

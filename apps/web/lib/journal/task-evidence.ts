@@ -60,6 +60,7 @@ type LinkRow = {
   journal_entries: {
     id: string;
     worker_id: string;
+    project_id?: string | null;
     original_text: string;
     original_language: string;
     created_at: string;
@@ -72,7 +73,7 @@ type LinkRow = {
 
 const LINK_SELECT =
   "id, entry_id, linked_at, linked_by, " +
-  "journal_entries!inner(id, worker_id, original_text, original_language, created_at, " +
+  "journal_entries!inner(id, worker_id, project_id, original_text, original_language, created_at, " +
   `journal_entry_photos(id), journal_entry_confirmations(created_at), ` +
   `${JOURNAL_ENTRY_METRICS_EMBED}, workers(${WORKER_NAME_FIELDS}))`;
 
@@ -100,6 +101,7 @@ function toItem(row: LinkRow): TaskEvidenceItem | null {
     confirmedAt,
     entryHours: entryHoursOf(e),
     authorName: authorNameOf(e.workers),
+    entryProjectId: e.project_id ?? null,
   };
 }
 
@@ -246,20 +248,31 @@ export async function listWorkerLinkableEntries(): Promise<
     .maybeSingle();
   if (!worker?.id) return [];
 
-  const res = await asAny(supabase)
-    .from("journal_entries")
-    .select("id, original_text, created_at, journal_entry_photos(id)")
-    .eq("worker_id", worker.id)
-    .is("deleted_at", null)
-    .is("superseded_by", null)
-    .order("created_at", { ascending: false })
-    .limit(LINKABLE_ENTRY_LIMIT);
+  const runEntries = (columns: string) =>
+    asAny(supabase)
+      .from("journal_entries")
+      .select(columns)
+      .eq("worker_id", worker.id)
+      .is("deleted_at", null)
+      .is("superseded_by", null)
+      .order("created_at", { ascending: false })
+      .limit(LINKABLE_ENTRY_LIMIT);
+  // Project + organization let the picker mirror the server's consistency
+  // check; if the embed is unavailable fall back to the original columns.
+  let res = await runEntries(
+    "id, original_text, created_at, project_id, engagement_contexts(organization_id), journal_entry_photos(id)",
+  );
+  if (res.error) {
+    res = await runEntries("id, original_text, created_at, journal_entry_photos(id)");
+  }
   if (res.error) return [];
 
   type EntryRow = {
     id: string;
     original_text: string;
     created_at: string;
+    project_id?: string | null;
+    engagement_contexts?: { organization_id: string | null } | { organization_id: string | null }[] | null;
     journal_entry_photos: { id: string }[] | null;
   };
 
@@ -270,5 +283,9 @@ export async function listWorkerLinkableEntries(): Promise<
     photoCount: (e.journal_entry_photos ?? []).length,
     // Resolved by the caller against the evidence batch it already holds.
     alreadyLinked: false,
+    projectId: e.project_id ?? null,
+    organizationId: Array.isArray(e.engagement_contexts)
+      ? (e.engagement_contexts[0]?.organization_id ?? null)
+      : (e.engagement_contexts?.organization_id ?? null),
   }));
 }

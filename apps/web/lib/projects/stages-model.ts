@@ -25,6 +25,11 @@ export interface ProjectStage {
   readonly actualEnd: string | null;
   readonly blockedReason: string | null;
   readonly completionCriteria: string | null;
+  /** Tie-break for the derived WBS numbering (stage_order, created_at, id). */
+  readonly createdAt?: string | null;
+  /** engagement_contexts.id of the responsible party (set via
+   *  set_project_stage_responsible_v1); null = nobody named. */
+  readonly responsibleEngagementId?: string | null;
 }
 
 export type ProjectStagesData =

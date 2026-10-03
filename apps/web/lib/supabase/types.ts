@@ -11733,8 +11733,10 @@ export type Database = {
           p_description: string
           p_due_date: string
           p_object_id: string
+          p_parent_task_id?: string
           p_priority: string
           p_project_id: string
+          p_stage_id?: string
           p_title: string
         }
         Returns: string
@@ -13410,7 +13412,9 @@ export type Database = {
           p_description: string
           p_due_date: string
           p_object_id: string
+          p_parent_task_id?: string
           p_priority: string
+          p_stage_id?: string
           p_task_id: string
           p_title: string
         }
