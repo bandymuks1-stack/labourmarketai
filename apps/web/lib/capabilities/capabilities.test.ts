@@ -204,7 +204,7 @@ describe("the registry itself", () => {
       // Market companies in as DISCOVERED organizations (2026-09-30, #2000).
       "company.ingest.preview",
       "company.ingest.confirm",
-      // Organization evidence import (2026-09-07) — one flow, eleven steps,
+      // Organization evidence import (2026-09-07) — one flow, thirteen steps (attest and withdraw are draft→confirm pairs),
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product
       // decision, so a new one must be added HERE, deliberately, to pass.
@@ -219,8 +219,10 @@ describe("the registry itself", () => {
       "evidence.import.resolve_time_semantics",
       "evidence.import.commit",
       "evidence.records.list",
-      "evidence.record.attest",
-      "evidence.import.withdraw",
+      "evidence.record.attest_draft",
+      "evidence.record.attest_confirm",
+      "evidence.import.withdraw_draft",
+      "evidence.import.withdraw_confirm",
       // Organization PEOPLE ingestion (2026-09-10) — the roster half of that
       // same architecture, over `lib/organization-people/ingest-service.ts`,
       // which the web import panel calls too. Look, answer, commit: the
@@ -286,7 +288,7 @@ describe("the registry itself", () => {
       // Market companies in as DISCOVERED organizations (2026-09-30, #2000).
       "company.ingest.preview",
       "company.ingest.confirm",
-      // Organization evidence import (2026-09-07) — one flow, eleven steps,
+      // Organization evidence import (2026-09-07) — one flow, thirteen steps (attest and withdraw are draft→confirm pairs),
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product
       // decision, so a new one must be added HERE, deliberately, to pass.
@@ -301,8 +303,10 @@ describe("the registry itself", () => {
       "evidence.import.resolve_time_semantics",
       "evidence.import.commit",
       "evidence.records.list",
-      "evidence.record.attest",
-      "evidence.import.withdraw",
+      "evidence.record.attest_draft",
+      "evidence.record.attest_confirm",
+      "evidence.import.withdraw_draft",
+      "evidence.import.withdraw_confirm",
       // Organization PEOPLE ingestion (2026-09-10) — the roster half of that
       // same architecture, over `lib/organization-people/ingest-service.ts`,
       // which the web import panel calls too. Look, answer, commit: the

@@ -394,6 +394,11 @@
         "event_weekly_digest": "Sinu nädala töö ja võimaluste kokkuvõte on valmis",
         "event_saved_search_match": "Salvestatud otsingul on uusi tulemusi",
         "event_job_alert": "Ilmus uus töökoht, mis sobib sinu soovidega",
+        "event_message_received": "Sul on uus sõnum",
+        "event_journal_review_decided": "Sinu töölogi kanne on üle vaadatud",
+        "event_journal_review_decided_approved": "Sinu töölogi kanne on kinnitatud",
+        "event_journal_review_decided_rejected": "Sinu töölogi kanne lükati tagasi",
+        "event_journal_review_decided_changes_requested": "Sinu töölogi kande kohta on küsitud muudatusi",
         "event_weekly_digest_profile_completion": "Sobivate tööde näitamiseks kinnita, millist tööd sa teed",
         "event_weekly_digest_journal": "Sinu nädala tööpäeviku kokkuvõte on valmis"
       },
@@ -5407,7 +5412,8 @@
       "refusedType": "Seda failitüüpi ei saa tekstina lugeda.",
       "empty": "Sellest dokumendist ei leitud loetavat teksti.",
       "failed": "Dokumenti ei õnnestunud lugeda.",
-      "noEngagement": "Kõigepealt on vaja töökonteksti — ava töölaud ja loo see."
+      "noEngagement": "Kõigepealt on vaja töökonteksti — ava töölaud ja loo see.",
+      "workDateHint": "Dokument ei ütle, mis päeval töö tehti. Valige kuupäev ise — midagi ei täideta teie eest."
     },
     "currentVersion": "[EN] Version {n}",
     "download": "[EN] Download",

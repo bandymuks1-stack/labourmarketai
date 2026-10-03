@@ -394,6 +394,11 @@
         "event_weekly_digest": "Tavs nedēļas darba un iespēju kopsavilkums ir gatavs",
         "event_saved_search_match": "Saglabātajā meklējumā ir jauni rezultāti",
         "event_job_alert": "Parādījies jauns darbs, kas atbilst taviem kritērijiem",
+        "event_message_received": "Tev ir jauna ziņa",
+        "event_journal_review_decided": "Tavs darba žurnāla ieraksts ir pārskatīts",
+        "event_journal_review_decided_approved": "Tavs darba žurnāla ieraksts ir apstiprināts",
+        "event_journal_review_decided_rejected": "Tavs darba žurnāla ieraksts ir noraidīts",
+        "event_journal_review_decided_changes_requested": "Tavā darba žurnāla ierakstā pieprasītas izmaiņas",
         "event_weekly_digest_profile_completion": "Lai parādītu tev piemērotus darbus, apstiprini, kādu darbu tu dari",
         "event_weekly_digest_journal": "Sagatavots tavas nedēļas darba žurnāla pārskats"
       },
@@ -5407,7 +5412,8 @@
       "refusedType": "Šī tipa failu nevar nolasīt kā tekstu.",
       "empty": "Šajā dokumentā nav atrasts lasāms teksts.",
       "failed": "Dokumentu neizdevās nolasīt.",
-      "noEngagement": "Vispirms vajadzīgs darba konteksts — atver paneli un izveido to."
+      "noEngagement": "Vispirms vajadzīgs darba konteksts — atver paneli un izveido to.",
+      "workDateHint": "Dokumentā nav norādīts, kurā dienā darbs paveikts. Izvēlieties datumu pats — nekas netiek aizpildīts jūsu vietā."
     },
     "currentVersion": "[EN] Version {n}",
     "download": "[EN] Download",

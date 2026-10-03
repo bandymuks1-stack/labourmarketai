@@ -1753,10 +1753,11 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   // Real market companies in as DISCOVERED organizations (owner NULL) —
   // the marketplace_company_ingest capability only; import is never a claim.
   ...COMPANY_INGEST_CAPABILITIES,
-  // Organization evidence import — the ELEVEN capabilities that give an
+  // Organization evidence import — the FIFTEEN capabilities (thirteen steps;
+  // attest and withdraw are each a draft→confirm pair) that give an
   // authorized assistant the same historical-import flow the web UI performs,
   // over the same domain core (`lib/organization-evidence/import-core.ts`).
-  // Declared as a group because they are one flow, not eleven unrelated
+  // Declared as a group because they are one flow, not fifteen unrelated
   // actions; each descriptor is still reviewed individually in its own file.
   ...EVIDENCE_IMPORT_CAPABILITIES,
   // Organization people ingestion — the roster half of the same architecture.

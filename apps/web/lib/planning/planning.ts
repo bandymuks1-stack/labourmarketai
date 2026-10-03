@@ -630,7 +630,7 @@ async function readTaskItems(): Promise<{
       endDate: null,
       status: task.status,
       statusKey: statusKeyForSource("task", task.status),
-      href: hrefForSource("task", task.id),
+      href: hrefForSource("task", task.id, task.projectId),
       roleContext: "mine",
       // A due-dated task carries its real clock time when one was set.
       ...planningMeta({ startTime: clockTime(task.dueAt) }),

@@ -63,6 +63,7 @@ import { listVisibleActiveObjects } from "@/lib/objects/objects";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { listOrganizationMembers } from "@/lib/company/memberships";
 import { createUtcFormatter } from "@/lib/time/display";
+import { taskAnchorId } from "@/lib/projects/stage-gantt";
 
 /**
  * Work tasks (control room PR D, capability gap map §3) — the role-aware
@@ -172,6 +173,8 @@ export default async function TasksPage({
     n?: string;
     reservation?: string;
     rtask?: string;
+    /** Deep link from the project timeline / planning: highlight this task. */
+    task?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -182,6 +185,7 @@ export default async function TasksPage({
   const projectFilter =
     sp.project && UUID_RX.test(sp.project) ? sp.project : null;
   const showClosed = sp.closed === "1";
+  const highlightTaskId = sp.task && UUID_RX.test(sp.task) ? sp.task : null;
   const notice = sp.notice && NOTICES.has(sp.notice) ? sp.notice : null;
 
   const t = await getTranslations("tasks");
@@ -610,7 +614,12 @@ export default async function TasksPage({
 
     return (
       <li
-        className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/30 p-3"
+        id={taskAnchorId(task.id)}
+        className={`flex scroll-mt-24 flex-col gap-2 rounded-md border bg-ink-800/30 p-3 target:border-brand-blue target:ring-1 target:ring-brand-blue ${
+          highlightTaskId === task.id
+            ? "border-brand-blue ring-1 ring-brand-blue"
+            : "border-ink-500"
+        }`}
         data-testid={`task-card-${task.id}`}
       >
         <div className="flex flex-wrap items-start justify-between gap-2">
