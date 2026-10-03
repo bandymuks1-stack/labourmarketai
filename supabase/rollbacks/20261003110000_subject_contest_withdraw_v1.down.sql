@@ -40,14 +40,19 @@ drop trigger if exists organization_evidence_events_dispute_state_guard
   on public.organization_evidence_events;
 drop function if exists public.organization_evidence_dispute_state_guard();
 
+-- Live prod lineage: the canonical name is _chk (20260924100000 step M1h) and
+-- the set includes source_preserved. Never recreate the stale _check name.
 alter table public.organization_evidence_events
   drop constraint if exists organization_evidence_events_event_type_check;
 alter table public.organization_evidence_events
-  add constraint organization_evidence_events_event_type_check
+  drop constraint if exists organization_evidence_events_event_type_chk;
+alter table public.organization_evidence_events
+  add constraint organization_evidence_events_event_type_chk
   check (event_type in (
     'attested','attestation_withdrawn',
     'independently_verified','verification_withdrawn',
-    'withdrawn','reinstated','disputed','corrected'));
+    'withdrawn','reinstated','disputed','corrected',
+    'source_preserved'));
 
 create unique index if not exists organization_evidence_events_one_dispute_per_actor
   on public.organization_evidence_events (record_id, actor_profile_id)

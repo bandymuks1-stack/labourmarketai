@@ -25,6 +25,9 @@ PSQL="psql -h $HOST -p $PORT -U postgres -d $DB"
 LIVE="$REPO/supabase/migrations/20260915180000_subject_contest_and_clash_receipt.sql"
 MIG="$REPO/supabase/migrations/20261003110000_subject_contest_withdraw_v1.sql"
 DOWN="$REPO/supabase/rollbacks/20261003110000_subject_contest_withdraw_v1.down.sql"
+HIST="$REPO/supabase/migrations/20260924100000_historical_timesheet_m1.sql"
+FIX="$REPO/supabase/migrations/20261003140000_subject_contest_withdraw_constraint_reconcile_v1.sql"
+FIXDOWN="$REPO/supabase/rollbacks/20261003140000_subject_contest_withdraw_constraint_reconcile_v1.down.sql"
 
 SUBJECT='11111111-1111-1111-1111-111111111111'
 OUTSIDER='22222222-2222-2222-2222-222222222222'
@@ -75,6 +78,12 @@ $PSQL -q -v ON_ERROR_STOP=1 -f "$HERE/subject-contest-and-clash-receipt.prelude.
 $PSQL -q -v ON_ERROR_STOP=1 -f "$HERE/subject-contest-and-clash-receipt.seed.sql"    >/dev/null || { echo SEED FAILED; exit 1; }
 $PSQL -q -v ON_ERROR_STOP=1 -f "$LIVE" >/dev/null 2>&1 || { echo "LIVE MIGRATION FAILED"; exit 1; }
 echo "  harness + live 20260915180000 applied"
+TMPM1H="${TMPDIR:-/tmp}/m1h.$.sql"
+# Replay the REAL M1h constraint block of 20260924100000 (prod lineage: _chk, + source_preserved).
+sed -n "/^-- ── M1h ──/,/^-- ── M1i ──/p" "$HIST" | sed '$d' > "$TMPM1H"
+$PSQL -q -v ON_ERROR_STOP=1 -f "$TMPM1H" >/dev/null 2>&1 || { echo "M1h REPLAY FAILED"; exit 1; }
+rm -f "$TMPM1H"
+echo "  20260924100000 M1h replayed (prod lineage)"
 
 echo; echo "== BEFORE (what production holds today) ======================="
 out=$(q "select count(*) from pg_proc where proname='withdraw_organization_evidence_dispute_v1';")
@@ -90,11 +99,41 @@ echo; echo "-- applying the migration VERBATIM ------------------------------"
 mig=$($PSQL -v ON_ERROR_STOP=1 -f "$MIG" 2>&1) || { echo "MIGRATION FAILED:"; echo "$mig"; exit 1; }
 echo "  applied"
 
+echo; echo "== DEFECT REPRODUCTION (20261003110000 alone on the real lineage) ="
+out=$(q "select count(*) from pg_constraint where conrelid='public.organization_evidence_events'::regclass and conname like 'organization_evidence_events_event_type_ch%';")
+check "D1 the defect state has TWO event_type CHECKs" contains "2" "$out"
+as_user "$SUBJECT" "$DISPUTE" >/dev/null
+out=$(as_user "$SUBJECT" "$WD")
+check "D2 withdraw RPC fails closed (23514) under the intersection" contains "violates check constraint" "$out"
+echo "-- applying the reconcile fix VERBATIM --------------------------"
+fx=$($PSQL -v ON_ERROR_STOP=1 -f "$FIX" 2>&1) || { echo "FIX FAILED:"; echo "$fx"; exit 1; }
+echo "  applied"
+
 echo; echo "== SCHEMA ====================================================="
-out=$(q "select pg_get_constraintdef(oid) from pg_constraint where conname='organization_evidence_events_event_type_check';")
+out=$(q "select pg_get_constraintdef(oid) from pg_constraint where conname='organization_evidence_events_event_type_chk';")
 check "S1 event set gains dispute_withdrawn" contains "dispute_withdrawn" "$out"
 check "S1b ...and keeps disputed" contains "'disputed'" "$out"
 check "S1c ...and keeps corrected" contains "'corrected'" "$out"
+check "S1d ...and keeps source_preserved" contains "source_preserved" "$out"
+out=$(q "select count(*) from pg_constraint where conrelid='public.organization_evidence_events'::regclass and contype='c' and pg_get_constraintdef(oid) like '%dispute_withdrawn%' or pg_get_constraintdef(oid) like '%source_preserved%';")
+check "S1e exactly ONE event_type CHECK remains" contains "1" "$(q "select count(*) from pg_constraint where conrelid='public.organization_evidence_events'::regclass and conname like 'organization_evidence_events_event_type_ch%';")"
+out=$(q "select string_agg(conname,',') from pg_constraint where conrelid='public.organization_evidence_events'::regclass and conname like 'organization_evidence_events_event_type_ch%';")
+check "S1f ...and it is the canonical _chk" contains "event_type_chk" "$out"
+for t in attested attestation_withdrawn withdrawn reinstated disputed corrected source_preserved; do
+  role="null"; [ "$t" = attested ] && role="'employer'"
+  out=$(q "insert into public.organization_evidence_events (organization_id, record_id, event_type, actor_role, actor_profile_id) values ('$ORG','$REC2','$t',$role,'$ORGMGR');")
+  check "S1g type $t still insertable (postgres/owner path)" absent "ERROR" "$out"
+done
+out=$(q "insert into public.organization_evidence_events (organization_id, record_id, event_type, actor_role, actor_organization_id, actor_profile_id) values ('$ORG','$REC2','independently_verified','verifier','$ORG','$ORGMGR');")
+check "S1h independently_verified still insertable" absent "ERROR" "$out"
+out=$(q "insert into public.organization_evidence_events (organization_id, record_id, event_type, actor_role, actor_profile_id) values ('$ORG','$REC2','verification_withdrawn',null,'$ORGMGR');")
+check "S1i verification_withdrawn still insertable" absent "ERROR" "$out"
+out=$(q "insert into public.organization_evidence_events (organization_id, record_id, event_type, actor_profile_id) values ('$ORG','$REC2','bogus','$ORGMGR');")
+check "S1j an unlisted type is still refused" contains "violates check" "$out"
+q "delete from public.organization_evidence_events where record_id='$REC2';" >/dev/null
+q "delete from public.organization_evidence_events where record_id='$REC1';" >/dev/null
+# restore the standing contest the BEFORE section left (state the N/W blocks assume)
+as_user "$SUBJECT" "$DISPUTE" >/dev/null
 out=$(q "select count(*) from pg_indexes where indexname='organization_evidence_events_one_dispute_per_actor';")
 check "S2 one-contest-ever index replaced" contains "0" "$out"
 out=$(q "select count(*) from pg_trigger where tgname='organization_evidence_events_dispute_state_guard' and not tgisinternal;")
@@ -212,10 +251,25 @@ out=$(q "select count(*) from pg_indexes where indexname='organization_evidence_
 check "R4 one-dispute index restored" contains "1" "$out"
 out=$(q "select count(*) from pg_proc where proname in ('withdraw_organization_evidence_dispute_v1','organization_evidence_dispute_state_guard');")
 check "R5 both functions gone" contains "0" "$out"
-out=$(q "select pg_get_constraintdef(oid) from pg_constraint where conname='organization_evidence_events_event_type_check';")
-check "R6 event set restored" absent "dispute_withdrawn" "$out"
+out=$(q "select string_agg(conname||':'||pg_get_constraintdef(oid),' | ') from pg_constraint where conrelid='public.organization_evidence_events'::regclass and conname like 'organization_evidence_events_event_type_ch%';")
+check "R6 rollback leaves ONLY _chk, without dispute_withdrawn, with source_preserved" absent "dispute_withdrawn" "$out"
+check "R6b ...only the canonical name" absent "event_type_check" "$out"
+check "R6c ...source_preserved kept" contains "source_preserved" "$out"
 mig=$($PSQL -v ON_ERROR_STOP=1 -f "$MIG" 2>&1) && r=ok || r=fail
 check "R7 migration re-applies cleanly after rollback" contains "ok" "$r"
+$PSQL -q -v ON_ERROR_STOP=1 -f "$FIX" >/dev/null 2>&1 && r=ok || r=fail
+check "R8 fix re-applies (idempotent)" contains "ok" "$r"
+$PSQL -q -v ON_ERROR_STOP=1 -f "$FIX" >/dev/null 2>&1 && r=ok || r=fail
+check "R9 fix applied twice in a row is a no-op" contains "ok" "$r"
+as_user "$SUBJECT" "$DISPUTE" >/dev/null
+out=$(as_user "$SUBJECT" "$WD")
+check "R10 withdraw works after the full chain" contains "\"withdrawn\": true" "$out"
+q "delete from public.organization_evidence_events where event_type='dispute_withdrawn';" >/dev/null
+out=$($PSQL -tA -v ON_ERROR_STOP=0 -f "$FIXDOWN" 2>&1)
+check "R11 fix rollback applies with no withdrawals" absent "ERROR" "$out"
+out=$(q "select string_agg(conname,',') from pg_constraint where conrelid='public.organization_evidence_events'::regclass and conname like 'organization_evidence_events_event_type_ch%';")
+check "R12 fix rollback = pre-#2138 prod state (only _chk)" contains "event_type_chk" "$out"
+check "R12b ...no stale _check" absent "event_type_check" "$out"
 
 echo
 echo "=============================================================="
