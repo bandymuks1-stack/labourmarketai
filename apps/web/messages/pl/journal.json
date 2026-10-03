@@ -78,6 +78,11 @@
   "engagement": "Kontekst",
   "engagementChoose": "Wybierz zaangażowanie…",
   "engagementAmbiguous": "Ta praca może należeć do więcej niż jednego zaangażowania. Wybierz, do którego, przed zapisaniem.",
+  "project": "Projekt",
+  "projectChoose": "Wybierz projekt…",
+  "projectNone": "To nie praca projektowa",
+  "projectAmbiguous": "Jesteś przypisany do kilku projektów. Przed zapisaniem wybierz, do którego projektu należą te godziny (lub zaznacz, że to nie praca projektowa).",
+  "projectAuto": "Projekt: {name}",
   "unconfirmedTimeBlocked": "{count} zarejestrowanych czasów wciąż czeka na Twój przegląd i nie zostałoby zapisanych. Najpierw zachowaj je lub usuń.",
   "entry": {
     "reviewedBy": "Zweryfikowane przez",
@@ -100,7 +105,8 @@
       "approved": "Zweryfikowano",
       "changes_requested": "Poproszono o zmiany",
       "rejected": "Zwrócono",
-      "reasonLabel": "Powód"
+      "reasonLabel": "Powód",
+      "notEnabled": "Zapisano — przełożony nie włączył jeszcze potwierdzania, więc nikt nie sprawdza tego wpisu; do tego czasu pozostaje Twoim własnym stwierdzeniem"
     },
     "delete": "Usuń wpis",
     "deleting": "Usuwanie...",
@@ -609,7 +615,11 @@
     "sessionExpired": "Sesja wygasła. Zaloguj się ponownie.",
     "noWorkerProfile": "Nie znaleziono profilu pracownika. Otwórz ustawienia konta i włącz rolę pracownika.",
     "engagementRequired": "Wybierz kontekst pracy (organizację lub projekt), do którego należy ten wpis.",
+    "projectNotAssignable": "Wybrany projekt nie jest Ci przypisany lub należy do innej organizacji. Wybierz projekt z listy.",
     "notesRequired": "Opisz, co robiłeś — wolny tekst jest podstawą tego wpisu.",
+    "workDateRequired": "Wybierz dzień, w którym wykonano tę pracę.",
+    "workDateInvalid": "Data pracy nie jest prawidłową datą.",
+    "workDateFuture": "Data pracy nie może być w przyszłości.",
     "quantityInvalid": "Ilość musi być liczbą nieujemną.",
     "unitSlugUnknown": "Ta jednostka nie jest jeszcze rozpoznawana: {units}. Wybierz inną jednostkę lub spróbuj ponownie później.",
     "sourceDocumentInvalid": "Wskazany dokument źródłowy nie został znaleziony wśród Twoich dokumentów.",
@@ -944,6 +954,8 @@
     "photoClose": "Zamknij zdjęcie",
     "photoPrev": "Poprzednie zdjęcie",
     "photoNext": "Następne zdjęcie",
-    "photoCounter": "{index} / {total}"
+    "photoCounter": "{index} / {total}",
+    "recordedOnly": "{count, plural, one {# zapisany — potwierdzanie nieaktywne} few {# zapisane — potwierdzanie nieaktywne} many {# zapisanych — potwierdzanie nieaktywne} other {# zapisanych — potwierdzanie nieaktywne}}",
+    "confirmationNotEnabled": "Przełożony nie włączył jeszcze potwierdzania — nikt nie sprawdza tych wpisów."
   }
 }

@@ -85,7 +85,23 @@ export interface ProjectManagerLabels {
   reservationUndo: string;
   reservationKeep: string;
   reservationDecided: string;
+  /** Shown when the caller may not assign ROSTER workers (SQL: owner/admin). */
+  rosterOwnerOnly?: string;
 }
+
+/** The collision notice's own labels — shared by the single and the team
+ *  assignment surfaces so the conflict flow reads the same in both. */
+export type ReservationLabels = Pick<
+  ProjectManagerLabels,
+  | "reservationCollidesTitle"
+  | "reservationNotBlocking"
+  | "reservationUnknown"
+  | "reservationSource"
+  | "reservationAlternativesTitle"
+  | "reservationSwap"
+  | "reservationUndo"
+  | "reservationKeep"
+>;
 
 type ProjectWithAssignments = ManagedProject & {
   assignments: ProjectAssignment[];
@@ -133,7 +149,7 @@ function resultError(
  * An absence carries no label by construction — the employer read never asks
  * for the reason, and nothing here invents one.
  */
-function ReservationNotice({
+export function ReservationNotice({
   verdict,
   labels,
   alternatives = [],
@@ -143,7 +159,7 @@ function ReservationNotice({
   onKeep,
 }: {
   verdict: ReservationVerdict;
-  labels: ProjectManagerLabels;
+  labels: ReservationLabels;
   /** Colleagues CONFIRMED free on the same dates (server-verified). */
   alternatives?: { profileId: string; name: string }[];
   busy?: boolean;
@@ -231,8 +247,9 @@ function ReservationNotice({
 
 export function ProjectAssignmentManager({
   projects,
-  workers,
+  workers: rosterWorkers,
   engagementWorkers = [],
+  rosterAssignable = true,
   labels,
 }: {
   projects: ProjectWithAssignments[];
@@ -242,8 +259,12 @@ export function ProjectAssignmentManager({
    *  is never conflated with an accepted-proposal candidate. Empty until the
    *  owner applies migration 20260723120000 (honest degradation). */
   engagementWorkers?: EngagementWorker[];
+  /** False for a role the database refuses roster assignment (manager):
+   *  roster workers are withheld so the form never offers a refused action. */
+  rosterAssignable?: boolean;
   labels: ProjectManagerLabels;
 }) {
+  const workers = rosterAssignable ? rosterWorkers : [];
   const [createState, createAction, creating] = useActionState<
     ProjectActionResult | null,
     FormData
@@ -327,12 +348,19 @@ export function ProjectAssignmentManager({
           {labels.noProjects}
         </p>
       ) : workers.length === 0 && engagementWorkers.length === 0 ? (
-        <p className="card-border p-4 text-sm text-text-secondary">{labels.noWorkers}</p>
+        <p className="card-border p-4 text-sm text-text-secondary" data-testid={rosterAssignable ? undefined : "assign-roster-owner-only"}>
+          {!rosterAssignable && labels.rosterOwnerOnly ? labels.rosterOwnerOnly : labels.noWorkers}
+        </p>
       ) : (
         <form id="assign-worker" action={assignAction} className="card-border flex flex-col gap-3 p-5" data-testid="project-assign">
           <p className="font-display text-base font-semibold text-text-primary">
             {labels.assignTitle}
           </p>
+          {!rosterAssignable && labels.rosterOwnerOnly ? (
+            <p className="text-xs text-text-secondary" data-testid="assign-roster-owner-only">
+              {labels.rosterOwnerOnly}
+            </p>
+          ) : null}
           <label className="flex flex-col gap-1 text-xs">
             <span className="font-mono uppercase tracking-label text-text-muted">{labels.projectLabel}</span>
             <select name="project_id" defaultValue="" required className={field}>

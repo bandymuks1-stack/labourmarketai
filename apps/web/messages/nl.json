@@ -46,12 +46,22 @@
     "fitsNone": "Nog geen passende kans — het bord vult zich naarmate je vaardigheden en beschikbaarheid bekend worden.",
     "fitStrong": "sterke match",
     "fitPossible": "mogelijke match",
-    "openBoard": "Kansen openen",
+    "openBoard": "Platformverzoeken openen",
     "missing": "Wat je mist",
     "missingFromOpportunities": "Gevraagd door de kansen hierboven, nog niet in je gegevens:",
     "missingFromProfession": "Gebruikelijk voor je richting, nog niet in je gegevens:",
     "askedBy": "{count} kansen",
     "missingNone": "Niets ontbreekt voor de getoonde kansen.",
+    "recTitle": "Waard om te versterken",
+    "recWhyProfession": "Hoort bij de vaardigheden van je gekozen richting \"{profession}\" en staat nog niet in je gegevens.",
+    "recWhyMissingRole": "Een echte behoefte (\"{role}\") vraagt ernaar en het staat nog niet in je gegevens.",
+    "recWhyMissing": "Een echte behoefte vraagt ernaar en het staat nog niet in je gegevens.",
+    "recWhyWeakRole": "Een behoefte (\"{role}\") vraagt ernaar en je hebt het alleen opgegeven - nog niet door werk bevestigd.",
+    "recWhyWeak": "Een behoefte vraagt ernaar en je hebt het alleen opgegeven - nog niet door werk bevestigd.",
+    "recMoreRequests": "+{count} meer.",
+    "recActionOpportunity": "Kansen bekijken",
+    "recActionJournal": "Werkjournaal-registraties toevoegen",
+    "recActionProfile": "Vaardigheden in je profiel aanvullen",
     "next": "Wat nu te doen",
     "step_choose_direction": "Kies je werkrichting — matching heeft die nodig.",
     "step_declare_skills": "Voeg de vaardigheden toe die je al hebt (of importeer je cv).",
@@ -66,8 +76,10 @@
     "cohortLine": "{program} · groep {cohort}",
     "cohortAt": "bij {institution}",
     "cohortDirection": "Richting: {profession}",
-    "cohortDemand": "{count} open vacatures voor deze richting vandaag (geïmporteerde marktdata)",
+    "cohortDemand": "{count} open geïmporteerde openbare vacatures voor deze richting vandaag",
     "cohortDemandUnknown": "Vraag voor deze richting nog niet gemeten",
+    "cohortDemandOpen": "Bekijk deze vacatures",
+    "fitsSource": "Passende platformverzoeken op LabourMarket.ai",
     "missingFromProgram": "Gebruikelijk voor de richting van je opleiding, nog niet in je gegevens:"
   },
   "businessProfile": {
@@ -574,6 +586,14 @@
     "ganttEmpty": "Voeg geplande data toe aan uw fasen om de tijdlijn te zien.",
     "ganttToday": "Vandaag",
     "ganttOverdue": "Te laat",
+    "ganttNoDates": "Geen data",
+    "ganttDue": "Deadline",
+    "ganttNoWindow": "Nog geen data vastgelegd – fasen en taken zonder data staan hieronder.",
+    "ganttColActivity": "Activiteit",
+    "ganttColStatus": "Stand",
+    "ganttColResponsible": "Verantwoordelijke",
+    "ganttColTime": "Tijd",
+    "ganttNoStageGroup": "Niet aan een fase toegewezen",
     "title": "Projectfasen",
     "intro": "Opeenvolgende fasen van dit project — voeg een fase toe, stel de echte status en geplande data in.",
     "honestNote": "Voortgang toont alleen de echte status en data die u invoert — geen automatisch of verzonnen percentage.",
@@ -781,6 +801,7 @@
       }
     },
     "journalWindow": {
+      "reviewNotEnabled": "{count, plural, one {# registratie is} other {# registraties zijn}} vastgelegd waar werkbevestiging niet is ingeschakeld - ze wachten niet op beoordeling.",
       "title": "Werkjournaalrapport",
       "intro": "Werktijd en vastgelegde registraties per lid over een vast kalendervenster – uit de eigen gegevens van deze organisatie. Alleen uren, aantallen en datums – geen tekst van registraties, geen beoordeling.",
       "windowLabel": "Rapportvenster",
@@ -944,32 +965,6 @@
     "compass": "Leerkompas",
     "moreDestinations": "Meer bestemmingen"
   },
-  "mapLayers": {
-    "title": "Kaartlagen",
-    "intro": "De kaart wordt de belangrijkste visuele marktlaag. Hieronder zie je wat nu zichtbaar is en welke lagen in voorbereiding zijn.",
-    "visibleNow": "Nu zichtbaar",
-    "futureLayers": "Toekomstige lagen",
-    "futureBadge": "In voorbereiding",
-    "personSignal": "Mijn persoonssignaal",
-    "companyLayer": "Bedrijfslaag",
-    "companyIncomplete": "locatie nog niet toegevoegd",
-    "personIncomplete": "Voeg je locatie toe om op de marktkaart te verschijnen",
-    "needsLayer": "Mijn behoeften",
-    "notOnMapYet": "nog niet op de kaart",
-    "items": {
-      "workers": "Werknemers",
-      "selfSignal": "Je locatiesignaal",
-      "companies": "Bedrijven",
-      "teams": "Ploegen / brigades",
-      "opportunities": "Kansen",
-      "workNeeds": "Werkbehoeften",
-      "services": "Diensten",
-      "rentals": "Verhuur / huisvesting",
-      "shops": "Winkels / aanbiedingen",
-      "availability": "Beschikbaarheid / kalender",
-      "trust": "Vertrouwen / gereedheid"
-    }
-  },
   "profileAvatar": {
     "upload": "Foto uploaden",
     "change": "Foto wijzigen",
@@ -1085,59 +1080,15 @@
       "lead": "Open behoeften uit de echte vraag op dit platform — waar nu om werk wordt gevraagd."
     },
     "vacancyVolume": {
-      "title": "Volume openbare vacatures",
-      "scope": "{count} geïmporteerde openbare vacatures voor {profession}. Huidige brondekking: {countries}.",
-      "window": "Stadsvolumes worden geteld over de nieuwste {window} advertenties, niet over het hele bestand."
-    },
-    "entities": {
-      "title": "Drie dingen op de kaart",
-      "intro": "De kaart toont drie verschillende dingen: mensen, werkgebieden van bedrijven en projectlocaties. Elk volgt zijn eigen zichtbaarheidsregel en ziet er anders uit.",
-      "neverMixedNote": "De drie worden nooit samengevoegd tot één markertype.",
-      "contactNote": "Contact verloopt altijd via de LabourMarket.ai-werkstroom — de kaart toont nooit telefoonnummers of e-mailadressen.",
-      "person": {
-        "name": "Mensen",
-        "legend": "Aantal mensen per gebied (gevuld vierkant)",
-        "countLabel": "{count}",
-        "smallSample": "<5",
-        "empty": "Nog geen aantallen om te tonen. Mensen verschijnen hier alleen als aantallen per gebied zodra genoeg mensen in een gebied toestemming hebben gegeven (een exact aantal pas vanaf 5).",
-        "visibilityNote": "Mensen worden alleen getoond als aantallen per gebied — nooit als een individueel punt, naam of contact. Gebieden met minder dan 5 zichtbare mensen tonen \"<5\"."
-      },
-      "company": {
-        "name": "Bedrijfsterritoria",
-        "legend": "Contour van werkgebied (gestippelde ring) — nooit een punt",
-        "kinds": {
-          "headquarters": "Hoofdkantoor",
-          "operating": "Werkgebied",
-          "desired_market": "Gewenste markt",
-          "demand_anchor": "Geverifieerde behoeftelocatie"
-        },
-        "storeInactive": "Momenteel niet beschikbaar.",
-        "readError": "Bedrijfsterritoria konden nu niet worden geladen.",
-        "empty": "Nog geen bedrijfsterritoria. Voeg de werklocaties van uw bedrijf toe in de bedrijfswerkruimte.",
-        "visibilityNote": "Bedrijfsterritoria worden getekend als omlijnde gebieden op basis van door het bedrijf ingevoerde geografie — nooit als markers die op personen lijken."
-      },
-      "project": {
-        "name": "Projectlocaties",
-        "legend": "Projectmarker (ruit)",
-        "confirmedTag": "locatie bevestigd",
-        "unconfirmedTag": "gebiedsniveau",
-        "empty": "Nog geen projectlocaties. Projecten met een locatie verschijnen hier uit uw projectenlijst.",
-        "visibilityNote": "Een project toont pas een exact stadspunt nadat de locatie uitdrukkelijk is bevestigd; anders blijft het op gebiedsniveau."
-      }
+      "scope": "{count} geïmporteerde openbare vacatures voor {profession}. Huidige brondekking: {countries}."
     },
     "backToActions": "Actiecentrum",
     "pageTitle": "Kaart",
-    "pageLead": "Jij en de markt op één kaart.",
     "advanced": "Mijn locaties & marktlagen",
     "connections": {
-      "title": "De operationele laag is verbonden met",
-      "intro": "De kaart laat zien waar dingen zijn — beheer ze op deze onderdelen.",
       "marketplace": "Marktplaats",
-      "marketplaceNote": "Diensten en aanvragen",
       "opportunities": "Kansen",
-      "opportunitiesNote": "Werk dat past",
-      "bookings": "Planning & boekingen",
-      "bookingsNote": "Gepland werk en opdrachten"
+      "bookings": "Planning & boekingen"
     },
     "companyContext": {
       "title": "Bedrijfscontext",
@@ -1388,34 +1339,29 @@
       "accommodationNote": "Huisvestingslocaties zijn nog geen aparte datalaag — ze verschijnen als echte signalen zodra die laag is toegevoegd."
     },
     "world": {
-      "title": "Wereldbeeld",
-      "lead": "Waar vraag, mensen en projecten zich bevinden in het deel van de kaart dat u bekijkt. Verschuif of zoom de kaart — de cijfers volgen.",
       "layersLabel": "Kaartlagen",
       "layers": {
         "demand": "Vraag",
         "supply": "Mensen",
-        "projects": "Projecten"
+        "projects": "Projecten",
+        "jobs": "Vacatures",
+        "territory": "Bedrijfsgebied"
       },
       "counts": {
         "inView": "In beeld: {places} plaatsen, {objects} objecten",
         "overflow": "Niet getekend: nog {places} plaatsen ({objects} objecten) — zoom in om ze te zien",
         "unplaced": "Zonder bekende plaats: {count}",
         "withheld": "Kleine groepen niet getoond: {count} (minder dan 5 mensen)",
-        "truncated": "Meer dan {limit} records in beeld — de cijfers zijn een ondergrens",
-        "cap": "Er worden maximaal {cap} plaatsen tegelijk getekend"
+        "truncated": "Meer dan {limit} records in beeld — de cijfers zijn een ondergrens"
       },
       "loading": "Bijwerken…",
-      "provenance": {
-        "fact": "Feit",
-        "factHint": "de plaats staat in het record",
-        "derived": "Afgeleid",
-        "derivedHint": "positie op landniveau — de exacte plaats is niet vermeld"
-      },
       "state": {
         "empty": {
           "demand": "Geen open behoeften in dit deel van de kaart.",
           "supply": "Geen groepen mensen om te tonen in dit deel van de kaart.",
-          "projects": "Geen van uw projecten ligt in dit deel van de kaart."
+          "projects": "Geen van uw projecten ligt in dit deel van de kaart.",
+          "jobs": "In dit deel van de kaart zijn geen vacatures.",
+          "territory": "In dit deel van de kaart is geen bedrijfsgebied."
         },
         "error": "Deze laag kon nu niet worden gelezen. Er wordt niets getoond in plaats van een gok.",
         "noPlaces": "Geen bekende plaatsen in dit deel van de kaart. Verschuif de kaart naar een land of stad.",
@@ -1432,12 +1378,6 @@
         "selected": "geselecteerd",
         "more": "+{count} meer"
       },
-      "scale": {
-        "label": "Schaal: {scale}",
-        "country": "landen",
-        "place": "plaatsen"
-      },
-      "placeLinkHint": "Een plaats kiezen brengt je naar de kansenlijst van die plaats.",
       "precision": {
         "city": "Stad",
         "country": "Alleen land"
@@ -2149,14 +2089,14 @@
       },
       "workers": {
         "title": "Bedrijfswerknemers",
-        "subtitle": "Koppel je bedrijf aan echte werknemers. Zelfaanmelding blijft open: een persoon kan zich zelf aanmelden en later worden gekoppeld. Uitnodigingen per e-mail zijn een extra kanaal, niet het enige.",
+        "subtitle": "Wie met je werkt en wie vrij is.",
         "activeWorkersHeading": "Gekoppelde werknemers",
         "noWorkersHeading": "Nog geen gekoppelde werknemers",
-        "noWorkersBody": "Nodig uit per e-mail, of wacht tot een werknemer zich zelf aanmeldt en wordt gekoppeld.",
+        "noWorkersBody": "Nodig de eerste persoon uit per e-mail.",
         "inviteHeading": "Nodig een werknemer uit per e-mail",
         "inviteDescription": "Er wordt geen account automatisch aangemaakt — de uitgenodigde persoon registreert zich zelf of logt in. Echt e-mails versturen is nog niet geactiveerd.",
         "operations": {
-          "columnHeading": "Operationele rol / beoordeling",
+          "columnHeading": "Rol en logboek",
           "setupNote": "Operationele rollen zijn nog niet toegewezen. Werkjournaalbeoordeling wordt pas ingeschakeld na veilige configuratie.",
           "nextActionLabels": {
             "assign_role": "Volgende: wijs een operationele rol toe (configuratie vereist)",
@@ -2276,6 +2216,19 @@
             "busy": "Bezet",
             "unavailable": "Niet beschikbaar"
           }
+        },
+        "team": {
+          "free": "Vrij",
+          "working": "Aan het werk",
+          "away": "Afwezig",
+          "countFree": "Vrij",
+          "countWorking": "Aan het werk",
+          "countAway": "Afwezig",
+          "workingOn": "Werkt aan: {project}",
+          "until": "tot {date}",
+          "awayUntil": "Afwezig tot {date}",
+          "assign": "Toewijzen aan project",
+          "openCalendar": "Agenda openen"
         }
       },
       "scoutingBridge": {
@@ -2292,7 +2245,8 @@
         "title": "Wacht op je beslissing",
         "review": "Journaalvermeldingen om te beoordelen",
         "invitations": "Openstaande uitnodigingen voor werknemers",
-        "claims": "Openbare aanvragen die je kunt overnemen"
+        "claims": "Openbare aanvragen die je kunt overnemen",
+        "reviewOff": "Werknemers met vastgelegd werk waarvan bevestiging uitstaat"
       }
     },
     "agency": {
@@ -4393,7 +4347,10 @@
             }
           },
           "errorOpenNeedLimitUpgrade": "Het gratis plan van deze organisatie staat 1 actieve positie toe. Sluit er een, of activeer het plan Organisatie (€99/maand, tot 10) in uw organisatieaccount.",
-          "errorOpenNeedLimitIndividual": "Deze organisatie heeft de 10 actieve posities van het plan Organisatie bereikt. Er is niets afgeschreven of gewijzigd. Voor meer dan 10: neem contact op voor een individueel plan."
+          "errorOpenNeedLimitIndividual": "Deze organisatie heeft de 10 actieve posities van het plan Organisatie bereikt. Er is niets afgeschreven of gewijzigd. Voor meer dan 10: neem contact op voor een individueel plan.",
+          "openNeedUsage": "Actieve posities: {used} van {limit} gebruikt · {remaining} over",
+          "openNeedUsageUpgradeCta": "Plan Organisatie activeren",
+          "openNeedUsageIndividual": "U hebt de limiet van het plan Organisatie bereikt. Voor meer posities: neem contact op voor een individueel plan."
         }
       },
       "greeting": "Welkom terug, {name}",
@@ -4739,6 +4696,11 @@
         "event_weekly_digest": "Je wekelijkse samenvatting van werk en kansen staat klaar",
         "event_saved_search_match": "Een opgeslagen zoekopdracht heeft nieuwe resultaten",
         "event_job_alert": "Er is een nieuwe baan die bij je zoekopdracht past",
+        "event_message_received": "Je hebt een nieuw bericht",
+        "event_journal_review_decided": "Je journaalitem is beoordeeld",
+        "event_journal_review_decided_approved": "Je journaalitem is bevestigd",
+        "event_journal_review_decided_rejected": "Je journaalitem is afgewezen",
+        "event_journal_review_decided_changes_requested": "Er zijn wijzigingen gevraagd voor je journaalitem",
         "event_invitation_accepted": "Iemand heeft je uitnodiging aangenomen",
         "event_weekly_digest_profile_completion": "Om je passende banen te tonen, bevestig welk werk je doet",
         "event_weekly_digest_journal": "Het weekoverzicht van je werkjournaal is klaar"
@@ -6028,6 +5990,7 @@
       "notAuthorized": "Je kunt alleen werknemers uit je eigen ploeg toewijzen aan je eigen projecten.",
       "noWorkers": "Je hebt nog geen toewijsbare werknemers in je ploeg.",
       "fromRoster": "Een werknemer aan dit object toewijzen",
+      "rosterOwnerOnly": "Teamleden worden door de eigenaar of beheerder van de organisatie aan projecten toegewezen. Mensen met een geaccepteerde boeking kunt u nog steeds toewijzen.",
       "rosterGroup": "Teamleden",
       "engagementGroup": "Kandidaten met geaccepteerd voorstel",
       "reservation": {
@@ -7098,7 +7061,31 @@
         "error": "Het antwoord kon niet worden opgeslagen. Er is niets gewijzigd."
       }
     },
-    "addableUnavailable": "De lijst met gekoppelde werknemers kon niet worden geladen — toevoegen is nu niet mogelijk."
+    "addableUnavailable": "De lijst met gekoppelde werknemers kon niet worden geladen — toevoegen is nu niet mogelijk.",
+    "assign": {
+      "heading": "Het hele team aan een project toewijzen",
+      "intro": "Elk van de {count} leden wordt apart toegewezen en u ziet het resultaat per persoon.",
+      "projectLabel": "Project voor het team",
+      "projectPlaceholder": "Kies een project",
+      "submit": "Team toewijzen",
+      "assigning": "Bezig met toewijzen…",
+      "noProjects": "U hebt geen open projecten om het team aan toe te wijzen.",
+      "summary": "{written} van {total} toegewezen.",
+      "member": {
+        "assigned": "Toegewezen",
+        "calendar_unknown": "Toegewezen · data niet bevestigd",
+        "calendar_conflict": "Toegewezen · op deze dagen al bezet",
+        "refused": "Niet toegewezen · u mag deze persoon niet toewijzen",
+        "error": "Niet toegewezen · er ging iets mis"
+      },
+      "outcome": {
+        "not_authed": "Meld u opnieuw aan.",
+        "no_such_team": "Dit team kunt u niet toewijzen.",
+        "empty_team": "Dit team heeft nog geen leden.",
+        "needs_migration": "Momenteel niet beschikbaar.",
+        "unavailable": "Het team kon niet worden toegewezen. Er is niets gewijzigd."
+      }
+    }
   },
   "teamEnquiries": {
     "enquireButton": "Deze ploeg een aanvraag sturen",
@@ -7629,6 +7616,8 @@
     "skillsUnavailable": "Kon nu niet worden gelezen.",
     "verifiedUnavailable": "Vaardigheden met een record van een leidinggevende konden nu niet worden gelezen.",
     "identity": {
+      "noRecords": "Nog geen werkregistraties",
+      "noManagerRecord": "Nog geen registratie van de leidinggevende",
       "currentWork": "Werkt nu",
       "recorded": "u vastgelegd",
       "confirmed": "u met registratie van leidinggevende",
@@ -7886,7 +7875,8 @@
       "refusedType": "Dit bestandstype kan niet als tekst worden gelezen.",
       "empty": "Geen leesbare tekst gevonden in dit document.",
       "failed": "Het document kon niet worden gelezen.",
-      "noEngagement": "Je hebt eerst een werkcontext nodig — open het dashboard om er een aan te maken."
+      "noEngagement": "Je hebt eerst een werkcontext nodig — open het dashboard om er een aan te maken.",
+      "workDateHint": "Het document vermeldt niet op welke dag dit werk is gedaan. Kies zelf de datum — er wordt niets voor je ingevuld."
     },
     "currentVersion": "Versie {n}",
     "download": "Downloaden",
@@ -8175,6 +8165,7 @@
     },
     "claimFromJournal": "uit het werkjournaal",
     "recordedHours": "Vastgelegd werk: {hours} u uit het werkjournaal, waarvan {confirmed} u bevestigd.",
+    "confirmedWorkFact": "Door anderen bevestigde werkjournaal-registraties: {entries, plural, one {# registratie} other {# registraties}} over {days, plural, one {# werkdag} other {# werkdagen}}",
     "recordedHoursNone": "Nog geen journaalregistraties met een duur — uren naast vaardigheden komen uit je eigen registraties.",
     "skillHours": "{hours} u",
     "skillHoursOwn": "{hours} u, uw eigen registratie",
@@ -8386,13 +8377,16 @@
     "pickDemand": "Kies een personeelsbehoefte",
     "noDemands": "Je hebt nog geen personeelsbehoeften. Maak een personeelsbehoefte aan vanaf je dashboard — na beoordeling structureert het team de vereiste vaardigheden.",
     "noDemandsCta": "Personeelsbehoefte aanmaken",
-    "unstructuredTag": "niet gestructureerd",
+    "unstructuredTag": "vereisten niet bevestigd",
     "notStructured": "De vereiste vaardigheden van deze personeelsbehoefte zijn nog niet gestructureerd, dus er kan geen match worden berekend. Nieuwe personeelsbehoeften worden door de beheerders beoordeeld en gestructureerd — je hoeft niets te doen.",
     "needsSetup": "Laden is niet gelukt. Probeer het opnieuw.",
     "noCandidates": "Nog geen passende werknemers voor deze personeelsbehoefte. Matches verschijnen naarmate werknemers journaal-onderbouwde vaardigheden toevoegen — kijk later terug of verbreed de behoefte.",
     "namePlaceholder": "Werknemer",
     "skillFit": "{matched}/{total} vereiste vaardigheden, {confirmed} door manager bevestigd",
     "evidence": "Bewijs — bevestigd: {confirmed} · journaal: {journal} · zelf opgegeven: {self}",
+    "confirmedWork": "Bevestigd door werk: {work} van {matched} passende vaardigheden (herhaaldelijk: {repeated})",
+    "evidenceNone": "Niet bevestigd",
+    "experienceYearsValue": "{years, plural, one {# jaar} other {# jaar}}",
     "shortlistError": "Opslaan is niet gelukt. Probeer opnieuw.",
     "footnote": "Matches worden deterministisch berekend, alleen voor deze personeelsbehoefte. Geen globale rating, geen nepkandidaten.",
     "status": {
@@ -8440,6 +8434,7 @@
       "location": "Locatie",
       "availability": "Beschikbaarheid",
       "rate": "Tarief",
+      "experience": "Ervaring (opgegeven)",
       "evidence": "Vaardigheidsbewijs"
     },
     "availabilityValue": {
@@ -8581,13 +8576,15 @@
       "cancel": "Annuleren"
     },
     "verdict": {
-      "eligible": "Voldoet aan de gestelde eisen",
+      "eligible": "Voldoet aan de verplichte eisen (vaardigheden worden apart beoordeeld)",
       "blocked": "Voldoet niet aan een gestelde eis",
       "evidence": {
         "confirmed": "Bewijs: door manager bevestigd",
         "mixed": "Bewijs: deels bevestigd",
         "unverified": "Bewijs: alleen zelf opgegeven"
-      }
+      },
+      "noCriteria": "Geen verplichte eisen opgegeven",
+      "insufficient": "Te weinig gegevens om de eisen te controleren"
     },
     "editNeedCta": "Behoefte aanpassen of toevoegen",
     "availableSupply": {
@@ -8620,7 +8617,7 @@
         "shortlist": "Geselecteerd",
         "contact": "Gesproken",
         "offer": "Aangeboden",
-        "accepted": "Aanvaard",
+        "accepted": "Akkoord met de data",
         "closed": "Gesloten"
       }
     },
@@ -8630,7 +8627,8 @@
       "readiness": "Beschikbaarheid, gereedheid en documenten",
       "openTo": "Ook open voor: {countries}",
       "skillCount": "{matched} van {total} vereiste vaardigheden",
-      "nameHidden": "Naam en contactgegevens verschijnen pas wanneer de persoon dat toestaat."
+      "nameHidden": "Naam en contactgegevens verschijnen pas wanneer de persoon dat toestaat.",
+      "skillUnknown": "Geen vaardigheden opgegeven · nodig: {total}"
     }
   },
   "planBoundary": {
@@ -9898,10 +9896,6 @@
     "statusInvalid": "Vul de velden voor werknemer en behoefte volledig in."
   },
   "marketMapBase": {
-    "title": "Jouw plek op de marktkaart",
-    "subtitle": "We gebruiken deze locatie en straal voor je signalen op de kaart.",
-    "panelTitle": "Locatiegebied",
-    "panelEmpty": "Nog geen locatie gekozen",
     "mapTapHint": "Tik op de kaart om je locatie te markeren",
     "precisionDevice": "Exacte apparaatlocatie",
     "precisionCity": "Geselecteerde stad",
@@ -9920,7 +9914,6 @@
     "geoInsecure": "Locatiebepaling is op deze pagina niet mogelijk. Kies handmatig een stad.",
     "geoRetry": "Opnieuw proberen",
     "manualToggle": "Stel locatie handmatig in",
-    "manualHint": "Als je geen locatietoegang wilt toestaan, kies dan handmatig een stad of regio.",
     "countryLabel": "Land",
     "regionLabel": "Stad of regio",
     "regionPlaceholder": "bijv. Vilnius",
@@ -9928,16 +9921,11 @@
     "addressPlaceholder": "bijv. wijk of bouwplaats",
     "errorCountry": "Kies een land.",
     "save": "Sla locatie op",
-    "selectedTitle": "Geselecteerde locatie",
     "sourceAuto": "Huidige locatie",
     "sourceManual": "Handmatig ingesteld",
-    "usableNote": "We gebruiken deze locatie en een straal van {km} km voor je marktsignalen.",
-    "savedLocally": "Locatie opgeslagen op dit apparaat.",
     "updateButton": "Werk locatie bij",
     "editButton": "Wijzig locatie",
     "resetButton": "Verwijder locatie",
-    "emptyBody": "Je hebt nog geen locatie gekozen. Gebruik de knop hierboven of stel er handmatig een in.",
-    "radiusHelp": "De straal is het zoekgebied rond je gekozen punt: {km} km betekent werk en vraag tot {km} km vanaf dat punt.",
     "previewTitle": "Nieuwe plek gekozen — nog niet opgeslagen",
     "previewKeepNote": "Je vorige locatie blijft staan tot je op Opslaan drukt.",
     "previewSave": "Locatie opslaan",
@@ -10774,6 +10762,9 @@
       "count": "{count, plural, =0 {geen items} one {# item} other {# items}}"
     },
     "emptyFiltered": "Geen items van dit type.",
+    "filterActive": "Alleen getoond: {type}. In deze periode in totaal: {total}, getoond: {shown}.",
+    "filterNote": "Journaaluren en -markeringen in de kalender worden altijd getoond – het filter verandert dat niet.",
+    "filterClear": "Alles tonen",
     "emptyActions": {
       "bookings": "Boeking voorstellen",
       "tasks": "Taak aanmaken",
@@ -11068,7 +11059,13 @@
       "label": "Toewijzen aan",
       "save": "Toewijzen"
     },
+    "advisory": {
+      "blockersOpen": "Status bijgewerkt. Let op: {n} van de taken waarvan deze afhangt zijn nog open. Er is niets geblokkeerd.",
+      "reservationLead": "Toegewezen. Agendacontrole voor de deadlinedag (alleen een waarschuwing):"
+    },
     "dependencies": {
+      "startedBeforeBlocker": "Gestart of afgerond voordat wat ervan afhangt klaar is ({n} nog open). Alleen een waarschuwing.",
+      "dueBeforeBlocker": "Deadline vóór een taak waarvan deze afhangt. Alleen een waarschuwing.",
       "waitingOn": "Wacht op {n}",
       "blockedBy": "Hangt af van",
       "hidden": "een taak die je niet kunt zien",
@@ -11094,6 +11091,8 @@
       }
     },
     "evidence": {
+      "by": "Door {name}",
+      "hours": "{hours} u geregistreerd",
       "title": "Bewijs",
       "intro": "Werkjournaal-records die aan deze taak zijn gekoppeld. Koppelen wijzigt een record nooit — het geeft alleen aan welke taak het aantoont.",
       "empty": "Er is nog geen werkjournaal-record aan deze taak gekoppeld.",
@@ -11947,7 +11946,7 @@
       "contacted": "Gecontacteerd",
       "interview": "In gesprek",
       "offer": "Aanbod",
-      "accepted": "Geaccepteerd",
+      "accepted": "Akkoord met de data",
       "rejected": "Afgewezen"
     },
     "action": {
@@ -11957,7 +11956,8 @@
       "continueConversation": "Gesprek voortzetten",
       "viewOffer": "Reactie op het aanbod volgen",
       "planWork": "Geaccepteerd aanbod bekijken",
-      "reviewOthers": "Andere kandidaten beoordelen"
+      "reviewOthers": "Andere kandidaten beoordelen",
+      "assignToProject": "Aan een project toewijzen"
     }
   },
   "agencyClients": {
@@ -13169,7 +13169,7 @@
       "offerTitle": "Vacature-aanbod",
       "confirmAcceptTitle": "Dit aanbod accepteren?",
       "confirmAcceptBody": "Accepteren bevestigt je opdracht bij de werkgever — een vaste stap, geen concept.",
-      "confirmAcceptDisclosure": "Door te accepteren ziet dit bedrijf — en alleen dit bedrijf — je profielkaart: naam, vaardigheden, beroepen, talen en beschikbaarheid. Je contactgegevens blijven privé, geen ander bedrijf krijgt toegang, en je wordt hierdoor niet opgenomen in het werkgeverszoeken. De toegang geldt zolang de opdracht actief is — je kunt die op elk moment beïindigen.",
+      "confirmAcceptDisclosure": "Door te accepteren ga je akkoord met de data in deze boeking. Dit is geen arbeidsovereenkomst en betekent niet dat je al in dienst bent — een specifiek project of locatie wordt apart door het bedrijf bepaald. Door te accepteren ziet dit bedrijf — en alleen dit bedrijf — je profielkaart: naam, vaardigheden, beroepen, talen en beschikbaarheid. Je contactgegevens blijven privé, geen ander bedrijf krijgt toegang, en je wordt hierdoor niet opgenomen in het werkgeverszoeken. De toegang geldt zolang de opdracht actief is — je kunt die op elk moment beïindigen.",
       "confirmDeclineTitle": "Dit aanbod weigeren?",
       "confirmCta": "Ja, bevestigen",
       "cancelCta": "Annuleren",
@@ -13423,6 +13423,7 @@
       "briefOverdue": "{count} taken zijn over hun einddatum heen.",
       "briefLogToday": "Je werkt vandaag en er is nog niets vastgelegd.",
       "briefEmployerJournalReviews": "{count, plural, one {# werkregistratie wacht} other {# werkregistraties wachten}} op uw beoordeling.",
+      "briefEmployerLearningReview": "Wacht op beoordeling: {count}",
       "briefAgencyOffersAwaiting": "{count, plural, one {# voorstel wacht} other {# voorstellen wachten}} op de beslissing van de klant.",
       "briefAgencySharedWithoutOffer": "{count, plural, one {# klantbehoefte heeft} other {# klantbehoeften hebben}} nog geen voorstel van u.",
       "briefAgencyNeedReopened": "{count, plural, one {# klantbehoefte heeft} other {# klantbehoeften hebben}} opnieuw een werknemer nodig: de vorige kandidaat is niet begonnen of de plaatsing is beëindigd.",
@@ -13437,6 +13438,7 @@
       "briefEmployerPendingAbsences": "{count, plural, one {# afwezigheidsverzoek wacht} other {# afwezigheidsverzoeken wachten}} op uw besluit.",
       "briefEmployerAbsentToday": "{count, plural, one {# van uw medewerkers is} other {# van uw medewerkers zijn}} vandaag afwezig.",
       "chipEmployerInbox": "Beoordelingsrij",
+      "chipEmployerLearningReview": "Suggesties beoordelen",
       "chipEmployerAbsences": "Afwezigheden",
       "briefUnreadMessages": "Je hebt {count, plural, one {# ongelezen bericht} other {# ongelezen berichten}}.",
       "briefProfileGap": "Je profiel mist nog: {step}.",
@@ -14300,7 +14302,7 @@
       "candidatesBlocked": "Momenteel niet beschikbaar.",
       "candidatesNoDemands": "Je bedrijf heeft nog geen behoefte beschreven.",
       "candidatesPickDemand": "Voor welke behoefte werf je?",
-      "candidatesUnstructuredBadge": "niet gestructureerd",
+      "candidatesUnstructuredBadge": "vereisten niet bevestigd",
       "candidatesBackToDemands": "Terug naar behoeften",
       "candidatesNotFound": "Die behoefte is niet gevonden, of hij is niet van jou.",
       "candidatesNeedsMigration": "Momenteel niet beschikbaar.",
@@ -16602,7 +16604,8 @@
       "needsMigration": "Momenteel niet beschikbaar.",
       "noCompany": "Schakel over naar een bedrijfswerkruimte.",
       "noObjects": "Er zijn nog geen locaties om de uren van vandaag aan te koppelen.",
-      "error": "Kon deze dag niet laden."
+      "error": "Kon deze dag niet laden.",
+      "noCompanyJournalLink": "Open het werklogboek"
     },
     "import": {
       "entryLink": "Uren importeren uit een spreadsheet (.xlsx)",
@@ -17984,6 +17987,177 @@
       "done": "{count} registraties toegewezen; {skipped} waren al toegewezen.",
       "refused": "Dit kon niet worden opgeslagen. Er is niets gewijzigd.",
       "person": "{hours} u, {count, plural, one {# registratie} other {# registraties}}"
+    }
+  },
+  "workLifecycle": {
+    "pending": "Nog niet",
+    "title": "Wat er met jouw werk gebeurt",
+    "titleCompany": "Wat er met het werk gebeurt dat je aanstuurt",
+    "example": "Voorbeeld — geen echt persoon en geen echte gegevens",
+    "hint": "Kies een stap. Elke stap opent de echte plek in je werkruimte.",
+    "open": "Openen in je werkruimte",
+    "list": "Stappen in de levenscyclus van werk",
+    "workers": {
+      "person": {
+        "label": "Jij",
+        "fact": "Kok — professionele identiteit",
+        "detail": "Eén professionele identiteit die van jou is — niet gebonden aan één werkgever."
+      },
+      "team": {
+        "label": "Je team",
+        "fact": "Keukenteam",
+        "detail": "Je sluit je aan bij een echt team, met de mensen met wie je werkt en wie het leidt."
+      },
+      "project": {
+        "label": "Het project",
+        "fact": "Lancering herfstmenu",
+        "detail": "Werk hoort bij een project, dus het heeft een plek, een doel en een tijd."
+      },
+      "work": {
+        "label": "Werk",
+        "fact": "Avonddienst — 8 u",
+        "detail": "Wat je deed, wanneer en hoelang — vastgelegd terwijl het gebeurt."
+      },
+      "evidence": {
+        "label": "Bewijs",
+        "fact": "Foto + journaalitem",
+        "detail": "Afgerond werk wordt bewijs in plaats van te verdwijnen."
+      },
+      "confirmation": {
+        "label": "Bevestigd",
+        "fact": "Bevestigd door manager",
+        "detail": "Een manager bevestigt het. Zonder dat wordt niets geverifieerd genoemd."
+      },
+      "history": {
+        "label": "Geschiedenis",
+        "fact": "Toegevoegd aan je geschiedenis",
+        "detail": "Bevestigd werk bouwt je professionele geschiedenis op — die blijft bij jou voor de volgende baan."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Vraag",
+        "fact": "4 koks, vanaf maandag",
+        "detail": "Je geeft de echte vraag één keer aan: wie, waar en vanaf wanneer."
+      },
+      "people": {
+        "label": "Mensen",
+        "fact": "Professionals die passen",
+        "detail": "Professionals van wie de echte werkgeschiedenis bij de vraag past — met wat geverifieerd is en wat nog niet."
+      },
+      "team": {
+        "label": "Je team",
+        "fact": "Keukenteam",
+        "detail": "Mensen worden een team met een leider, diensten en een werkplek."
+      },
+      "project": {
+        "label": "Het project",
+        "fact": "Lancering herfstmenu",
+        "detail": "Teams zijn georganiseerd rond het project dat ze opleveren."
+      },
+      "work": {
+        "label": "Werk",
+        "fact": "Avonddienst — 8 u",
+        "detail": "Werk wordt vastgelegd waar het gebeurt, niet achteraf gereconstrueerd."
+      },
+      "confirmation": {
+        "label": "Bevestigd",
+        "fact": "Wacht op jouw bevestiging",
+        "detail": "Je ziet wat nog bevestigd moet worden en wat al klaar is."
+      },
+      "report": {
+        "label": "Rapport",
+        "fact": "Rapport uit echt werk",
+        "detail": "Rapporten komen uit bevestigd werk — niemand typt ze opnieuw over."
+      }
+    }
+  },
+  "twoSides": {
+    "title": "Aannemen is het begin, niet het einde.",
+    "professional": "Vakkracht",
+    "company": "Bedrijf",
+    "steps": {
+      "find": {
+        "label": "Vinden",
+        "worker": "Vindt werk dat past bij wat ze echt hebben gedaan",
+        "company": "Vindt mensen wier echte werk past bij de behoefte"
+      },
+      "connect": {
+        "label": "Verbinden",
+        "worker": "Praat in de eigen taal",
+        "company": "Neemt aan via een echt gesprek"
+      },
+      "work": {
+        "label": "Werken",
+        "worker": "Legt het werk vast terwijl het gebeurt",
+        "company": "Voert het werk uit met de eigen mensen"
+      },
+      "verify": {
+        "label": "Bevestigen",
+        "worker": "Een leidinggevende bevestigt het",
+        "company": "Bevestigt wat er echt is gedaan"
+      },
+      "grow": {
+        "label": "Groeien",
+        "worker": "Bevestigd werk wordt hun geschiedenis",
+        "company": "Rapporten komen voort uit bevestigd werk"
+      },
+      "continue": {
+        "label": "Doorgaan",
+        "worker": "Neemt die geschiedenis mee naar de volgende baan",
+        "company": "Plant het volgende project met mensen die ze kennen"
+      }
+    }
+  },
+  "evidenceChain": {
+    "label": "Status vermelding",
+    "own": "Door jou",
+    "nodes": {
+      "recorded": "Vastgelegd",
+      "photo": "Foto",
+      "manager": "Managersvermelding",
+      "history": "In je historie"
+    },
+    "status": {
+      "done": "Klaar",
+      "waiting": "Wacht",
+      "absent": "Nog niet",
+      "attention": "Jij bent aan zet",
+      "unknown": "Onbekend"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Levend cv",
+    "title": "Uw werk wordt uw geschiedenis",
+    "now": "Nu",
+    "noRecords": "Nog geen werkregistraties",
+    "legend": {
+      "managerRecord": "Vermelding van de manager",
+      "recorded": "Door u vastgelegd"
+    },
+    "skillsTitle": "Wat uw werk laat zien",
+    "next": {
+      "title": "Uw geschiedenis gaat met u mee",
+      "body": "Elke klus die u vastlegt, vult haar aan. Neem haar mee naar de volgende kans.",
+      "cta": "Bekijk waar u naartoe kunt"
+    }
+  },
+  "workContext": {
+    "title": "Jouw werk in één overzicht",
+    "nodes": {
+      "current": "Nu aan het werk",
+      "records": "Registraties",
+      "manager": "Registratie van de leidinggevende",
+      "history": "Geschiedenis",
+      "skills": "Vaardigheden",
+      "next": "Volgende"
+    },
+    "facts": {
+      "records": "{count, plural, one {# registratie} other {# registraties}}",
+      "manager": "{count, plural, one {# registratie van de leidinggevende} other {# registraties van de leidinggevende}}",
+      "history": "{count, plural, one {# baan} other {# banen}}",
+      "skills": "{count, plural, one {# vaardigheid gebaseerd op jouw registraties} other {# vaardigheden gebaseerd op jouw registraties}}",
+      "next": "Waar je heen kunt"
     }
   }
 }

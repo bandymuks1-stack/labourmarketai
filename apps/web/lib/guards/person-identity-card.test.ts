@@ -34,8 +34,13 @@ describe("PersonIdentityCard — one identity, different depth", () => {
   });
 
   it("reuses the shared identity vocabulary, not a bespoke look", () => {
-    expect(CARD).toContain("PLAYER_IDENTITY_FALLBACK_SURFACE");
-    expect(CARD).toContain("PLAYER_IDENTITY_AVATAR_BORDER");
+    // The card renders the ONE shared portrait (identity/person-portrait.tsx),
+    // which owns the canonical fallback surface + border — so the person has the
+    // same 4:5 shape and monogram on every surface.
+    const PORTRAIT = read("components/app/identity/person-portrait.tsx");
+    expect(CARD).toContain("<PersonPortrait");
+    expect(PORTRAIT).toContain("PLAYER_IDENTITY_FALLBACK_SURFACE");
+    expect(PORTRAIT).toContain("PLAYER_IDENTITY_AVATAR_BORDER");
   });
 
   it("carries no score, percentage, stars or game vocabulary", () => {

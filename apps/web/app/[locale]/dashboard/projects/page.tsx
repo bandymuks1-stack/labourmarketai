@@ -17,7 +17,11 @@ import { ProjectMap } from "@/components/app/arena/project-map";
 import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 import { listWorkerProjects } from "@/lib/projects/worker-project-access";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
-import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
+import {
+  projectOrganizationAuthority,
+  workspaceOpensCompanySpace,
+} from "@/lib/company/organization-authority";
+import { getSessionIsAdmin } from "@/lib/auth/session-admin-signal";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getOrgWorkObjects } from "@/lib/objects/objects";
 import { listManagedProjects } from "@/lib/projects/projects";
@@ -153,6 +157,13 @@ export default async function ProjectsPage({
   // (resolved above, before the branch) scopes them, and a manager without
   // a company workspace simply sees the projects surface as before.
   const ownCompanyId = employerCtx?.kind === "ok" ? employerCtx.companyId : null;
+  // `assign_worker_to_project` admits roster workers only for owner/admin
+  // (owns_company) or a platform admin; a manager is refused (42501). The
+  // form mirrors that so it never offers an action the database rejects.
+  const rosterAssignable =
+    employerCtx?.kind !== "ok" ||
+    projectOrganizationAuthority({ role: employerCtx.role }).canGovern ||
+    (await getSessionIsAdmin());
   const [
     allProjects,
     workers,
@@ -249,6 +260,7 @@ export default async function ProjectsPage({
     end: t("end"),
     sending: t("sending"),
     assignFromRoster: t("assign.fromRoster"),
+    rosterOwnerOnly: t("assign.rosterOwnerOnly"),
     openBoard: t("map.openArena"),
     rosterGroupLabel: t("assign.rosterGroup"),
     engagementGroupLabel: t("assign.engagementGroup"),
@@ -400,6 +412,7 @@ export default async function ProjectsPage({
           projects={withAssignments}
           workers={workers}
           engagementWorkers={[...engagementResult.workers]}
+          rosterAssignable={rosterAssignable}
           labels={labels}
         />
       </section>

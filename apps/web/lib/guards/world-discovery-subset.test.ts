@@ -110,7 +110,10 @@ describe("2 · one cap constant, read everywhere", () => {
   it("clustering defaults its cap to the constant; the component prints the constant, not a literal", () => {
     expect(read(MODEL)).toMatch(/options\.cap \?\? WORLD_OBJECT_CAP/);
     const comp = read(COMPONENT);
-    expect(comp).toMatch(/WORLD_OBJECT_CAP/);
+    // The visible "at most N places drawn" sentence (`counts.cap`) was removed
+    // from the human UI by the one-canonical-map change (limits text); the cap
+    // itself is unchanged and still read from the one constant. What stays
+    // pinned is that no consumer hard-codes the literal.
     expect(comp).not.toMatch(/cap:\s*60\b/);
   });
   it("every DB leg carries the country predicate and a LIMIT bound to WORLD_ROW_LIMIT", () => {
@@ -213,17 +216,18 @@ describe("4 · strings in all five routed locales", () => {
 
   it("en defines the subset's vocabulary", () => {
     for (const k of [
-      "title",
       "layers.demand",
       "layers.supply",
       "layers.projects",
+      // data layers of the SAME map (public vacancies, company territory)
+      "layers.jobs",
+      "layers.territory",
       "counts.inView",
       "counts.overflow",
       "counts.truncated",
-      "counts.cap",
-      "provenance.fact",
-      "provenance.derived",
       "state.empty.demand",
+      "state.empty.jobs",
+      "state.empty.territory",
       "state.error",
       "state.noPlaces",
       "list.title",

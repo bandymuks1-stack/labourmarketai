@@ -4,6 +4,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { terminalStaleFromError } from "@/lib/learning/learning-shared";
+import { notifyJournalReviewDecisions } from "@/lib/journal/review-notification";
 
 /**
  * Canonical membership + verified-proof actions for the keystone
@@ -156,7 +157,7 @@ export async function confirmEntryAndVerifySkills(
 ): Promise<MembershipResult & { verified?: number }> {
   if (skillIds.length === 0) return { ok: false, code: "no_skills" };
   const supabase = await createClient();
-  await requireUser(supabase);
+  const actorId = await requireUser(supabase);
   const { data, error } = await rpc(supabase, "confirm_entry_and_verify_skills", {
     p_entry_id: entryId,
     p_skill_ids: skillIds,
@@ -174,6 +175,11 @@ export async function confirmEntryAndVerifySkills(
   }
   const code = String(data ?? "");
   if (code.startsWith("verified:")) {
+    // DURABLE NOTIFICATION (journal_review_decided): the entry is confirmed -
+    // tell the worker. Awaited, never throws, never fails the confirm.
+    await notifyJournalReviewDecisions(supabase, actorId, [
+      { entryId, decision: "approved" },
+    ]);
     revalidatePath(`/${locale}/dashboard/inbox`);
     revalidatePath(`/${locale}/dashboard/journal`);
     revalidatePath(`/${locale}/dashboard/profile`);

@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { validateOperationsRoleAssignment } from "@/lib/operations/assign-operations-role";
+import type { ProfessionEntry } from "@/lib/worker/self-declared-profession";
 import type { SetJournalReviewOutcome } from "@/lib/operations/journal-review-actions";
 
 /**
@@ -56,6 +57,12 @@ export interface LinkedCompanyWorker {
    *  the card only renders the line when there is at least one title, so an
    *  unreadable read is never presented as "unassigned". */
   readonly currentProjects: readonly string[];
+  /** What the person DOES, from the ONE canonical profession store
+   *  (`worker_professions`: a registry slug, or their own words), primary
+   *  first. Read under the caller's RLS (`can_view_worker`, the same gate as
+   *  the `workers` join above). Empty when none is declared or the read did not
+   *  answer - never inferred from the role, skills or anything else. */
+  readonly professions: readonly ProfessionEntry[];
 }
 
 export interface CompanyWorkerInvitation {
@@ -134,6 +141,11 @@ export async function listActiveCompanyWorkers(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (data ?? []).map((r: any) => r.worker_id as string),
   );
+  const professionsByWorker = await readWorkerProfessions(
+    supabase,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (data ?? []).map((r: any) => r.worker_id as string),
+  );
   const rows: LinkedCompanyWorker[] = (data ?? []).map(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (r: any) => ({
@@ -152,9 +164,44 @@ export async function listActiveCompanyWorkers(
       availableFrom: (r.workers?.available_from as string | null) ?? null,
       locationCountry: (r.workers?.current_location_country as string | null) ?? null,
       currentProjects: projectsByWorker.get(r.worker_id as string) ?? [],
+      professions: professionsByWorker.get(r.worker_id as string) ?? [],
     }),
   );
   return { kind: "ok", rows };
+}
+
+/**
+ * Professions per worker, from the canonical `worker_professions` store (the
+ * same select `readWorkerProfessionRows` issues for the signed-in worker, here
+ * for the roster). Primary first. One bounded read under the caller's RLS -
+ * a company sees exactly the rows `can_view_worker` already grants it for the
+ * `workers` row it is reading. Any error degrades to "none declared"; the card
+ * then falls back to the role, and never states a profession it did not read.
+ */
+async function readWorkerProfessions(
+  supabase: SupabaseClient,
+  workerIds: readonly string[],
+): Promise<ReadonlyMap<string, readonly ProfessionEntry[]>> {
+  const out = new Map<string, ProfessionEntry[]>();
+  if (workerIds.length === 0) return out;
+  const res = await asAny(supabase)
+    .from("worker_professions")
+    .select("worker_id, is_primary, label, professions(slug)")
+    .in("worker_id", [...workerIds])
+    .order("is_primary", { ascending: false })
+    .limit(500);
+  if (res.error || !Array.isArray(res.data)) return out;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  for (const r of res.data as any[]) {
+    const prof = Array.isArray(r.professions) ? r.professions[0] : r.professions;
+    const slug = typeof prof?.slug === "string" ? prof.slug : null;
+    const label = typeof r.label === "string" && r.label.trim() ? r.label : null;
+    if (!slug && !label) continue;
+    const list = out.get(r.worker_id as string) ?? [];
+    list.push({ slug, label });
+    out.set(r.worker_id as string, list);
+  }
+  return out;
 }
 
 /**

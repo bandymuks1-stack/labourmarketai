@@ -1,6 +1,47 @@
--- Rollback 20261001170000: assign_worker_to_project exactly as production had it
--- (read back 2026-10-01): no manager branch. Assignments a manager already made
--- stay (they record real staffing).
+-- ============================================================================
+-- 20261002142000 — a manager may assign a roster worker to a project they MANAGE.
+--
+-- RED by rule (redefines a SECURITY DEFINER function — a permission change).
+-- OWNER DECISION 2026-10-01 (binding): "a manager with the right may assign a
+-- worker to a project they MANAGE; do not extend rights beyond the manager's
+-- managed projects; do not widen the shared predicate."
+-- @human-gate-approved
+-- Apply only via Supabase MCP apply_migration.
+--
+-- WHY. The app's capability matrix gives managers manage-roster and
+-- manage-projects, and `can_manage_project` already admits a manager of the
+-- project's organization. But `assign_worker_to_project` also required
+-- `caller_manages_worker_by_roster`, which is owner/admin only, so the assign
+-- form was offered to managers and then always refused (production walk
+-- 2026-10-01).
+--
+-- WHAT CHANGES — exactly one thing, inside this one function: a third way for
+-- the authorization to be true:
+--     the caller manages THIS project's organization (manages_organization),
+--     the project has an organization, AND the worker is an ACTIVE member of
+--     the roster of the company that OWNS THIS project.
+-- Evaluated inline. No new function, no change to `caller_manages_worker_by_roster`
+-- or `caller_manages_worker`, so NO read exposure changes anywhere: a manager
+-- gains no visibility of any roster worker's availability, commitments or
+-- profile. Everything else in the function is byte-identical to production
+-- (read back 2026-10-01).
+--
+-- FAIL-CLOSED: the whole authorization is wrapped `not coalesce((...), false)` (same
+-- hardening as 20261002141500): authorized only when PROVEN true; NULL denies.
+-- Every operand is already a non-NULL boolean (exists()/is_admin()/helpers), so
+-- this changes no outcome today; it keeps a future helper edit from opening the gate.
+--
+-- WHAT DOES NOT CHANGE
+--   * owner/admin and the booking-engagement path: untouched.
+--   * a manager of org A cannot assign onto a project of org B (the branch is
+--     keyed to the project's own organization and company).
+--   * a manager cannot assign someone who is not on that project's company
+--     roster (engagement-only candidates stay behind the owner gate).
+--   * ending an assignment already required only can_manage_project.
+--
+-- ROLLBACK: supabase/rollbacks/20261002142000_manager_assigns_roster_worker_on_managed_project_v1.down.sql
+-- ============================================================================
+
 create or replace function public.assign_worker_to_project(p_project_id text, p_worker_profile_id text)
  returns uuid
  language plpgsql
@@ -28,12 +69,25 @@ begin
   if w_id is null then
     raise exception 'No such worker' using errcode = 'P0002';
   end if;
-  if not (
+  if not coalesce((
     (public.can_manage_project(pid)
       and (public.caller_manages_worker_by_roster(w_id)
            or public.caller_has_booking_engagement_for_project(w_id, pid)))
+    -- MANAGER OF THIS PROJECT'S ORGANIZATION staffing from THIS company's
+    -- roster (owner decision 2026-10-01). Inline and narrow on purpose.
+    or exists (
+      select 1
+        from public.projects mp
+        join public.company_workers mcw
+          on mcw.company_id = mp.company_id
+         and mcw.worker_id = w_id
+         and mcw.status = 'active'
+       where mp.id = pid
+         and mp.organization_id is not null
+         and public.manages_organization(mp.organization_id)
+    )
     or public.is_admin()
-  ) then
+  ), false) then
     raise exception 'Not authorized to assign this worker to this project'
       using errcode = '42501';
   end if;

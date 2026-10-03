@@ -180,6 +180,37 @@ export async function readWorkTaskAssignmentFacts(
   }
 }
 
+/**
+ * The three facts the assignment reservation check needs — assignee, due
+ * timestamp, owning project — read under the caller's own session. Lives here
+ * because this module is the ONE RLS-scoped work_tasks reader. Null on any
+ * failure (the caller then reports "not applicable", never "clear").
+ */
+export async function readWorkTaskReservationFacts(
+  supabase: SupabaseClient,
+  taskId: string,
+): Promise<{
+  assigneeProfileId: string | null;
+  dueAt: string | null;
+  projectId: string | null;
+} | null> {
+  try {
+    const { data } = await asAny(supabase)
+      .from("work_tasks")
+      .select("assignee_profile_id, due_at, project_id")
+      .eq("id", taskId)
+      .maybeSingle();
+    if (!data) return null;
+    return {
+      assigneeProfileId: (data.assignee_profile_id as string | null) ?? null,
+      dueAt: (data.due_at as string | null) ?? null,
+      projectId: (data.project_id as string | null) ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 /** Tasks where I am the assignee OR the creator — the "my tasks" view. */
 export async function listMyTasks(): Promise<MyTasksResult> {
   const supabase = await createClient();
@@ -313,18 +344,30 @@ export async function getTaskCollaboration(
     0,
     WORK_TASK_READ_LIMIT,
   );
-  const blockerMeta = new Map<string, { title: string; status: WorkTask["status"] }>();
+  const blockerMeta = new Map<
+    string,
+    { title: string; status: WorkTask["status"]; dueAt: string | null }
+  >();
   if (blockerIds.length > 0) {
     const blockersRes = await asAny(supabase)
       .from("work_tasks")
-      .select("id, title, status")
+      .select("id, title, status, due_at")
       .in("id", blockerIds)
       .limit(WORK_TASK_READ_LIMIT);
     if (!blockersRes.error) {
-      type SlimRow = { id: string; title: string; status: string };
+      type SlimRow = {
+        id: string;
+        title: string;
+        status: string;
+        due_at: string | null;
+      };
       for (const r of (blockersRes.data ?? []) as SlimRow[]) {
         if (isValidWorkTaskStatus(r.status)) {
-          blockerMeta.set(r.id, { title: r.title, status: r.status });
+          blockerMeta.set(r.id, {
+            title: r.title,
+            status: r.status,
+            dueAt: r.due_at ?? null,
+          });
         }
       }
     }
@@ -337,6 +380,7 @@ export async function getTaskCollaboration(
       blockerTaskId: d.blocker_task_id,
       title: meta?.title ?? null,
       status: meta?.status ?? null,
+      dueAt: meta?.dueAt ?? null,
     });
   }
 
