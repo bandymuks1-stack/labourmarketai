@@ -4,6 +4,8 @@ Date 2026-10-03. Base origin/main 5933d507e. Scope: docs + one detection guard. 
 
 Owner rule: 1 LMC = EUR 1. Four separate concepts: LMC (internal credit) / PLAN (what an organization subscribes to) / ENTITLEMENT (what a plan lets you do) / PAYMENT RAIL (Stripe). None stands in for another.
 
+> POINTER (2026-10-03): the three-catalogue reconciliation table, the one-catalogue recommendation, the #895 assessment, the EUR 99 Stripe verification status and the edge-by-edge LMC path are in `COMMERCIAL_CATALOGUE_RECONCILIATION.md`. The section 4 row "PLAN + ENTITLEMENT catalogue" below is superseded by it: code `PRE_PAYMENT_PLANS` is NOT yet owner-approved as canonical.
+
 Prod reads (SELECT only, project gorgitwvdzxbnaxhrsrw, 2026-10-03): `public.plans` = free 0 active; business 99 active (named Organization / Organizacija); agency NULL inactive; enterprise NULL inactive. `lmc_settings` = 7 keys, all enabled=false. Ledger counts from the 2026-10-03 audit (LMC_BILLING_MODEL): 0 accounts, 0 transactions, 0 lots, 0 consumptions, 0 billing_subscriptions.
 
 ## 1. CURRENT
