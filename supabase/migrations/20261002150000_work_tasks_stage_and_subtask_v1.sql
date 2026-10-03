@@ -76,6 +76,16 @@
 -- RLS: NO policy is created, altered or dropped. work_tasks keeps `wt_select`
 -- and no write policy; project_stages keeps `project_stages_select`.
 --
+-- ORDER / NULL-SAFETY: sorts AFTER 20261002141500_work_task_authz_null_safe_v1
+-- (security forward-fix). Every re-issued body below is built on the CURRENT
+-- (post-fix) live body and keeps `if not coalesce((<authorized>), false) then
+-- deny`; the new restructuring guard uses the same shape. Applying this
+-- migration can therefore never restore a NULL-unsafe body, and neither can
+-- its rollback (it restores the 20261002141500 bodies). The 6-arg
+-- update_work_task_v2 (re-issued by the security fix) is DROPPED here together
+-- with its ACL; the 8-arg replacement gets revoke public/anon + grant
+-- authenticated. link_journal_entry_to_task_v1 keeps its signature and ACL.
+--
 -- ROLLBACK: supabase/rollbacks/20261002150000_work_tasks_stage_and_subtask_v1.down.sql
 -- REFUSES while any task holds a stage or parent (forward-fix instead);
 -- otherwise it restores the two original RPCs verbatim and removes the rest.
@@ -499,12 +509,14 @@ begin
   end if;
   -- The v1 edit-authority set, unchanged: creator / assignee / admin /
   -- manager of the linked project.
-  if not (
+  -- NULL-SAFE (20261002141500): assignee_profile_id is nullable; the guard
+  -- grants only when proven TRUE, so NULL denies.
+  if not coalesce((
     t.created_by = uid
     or t.assignee_profile_id = uid
     or public.is_admin()
     or (t.project_id is not null and public.can_manage_project(t.project_id))
-  ) then
+  ), false) then
     return 'not_found';
   end if;
 
@@ -537,11 +549,11 @@ begin
   v_new_stage  := t.stage_id;
   v_new_parent := t.parent_task_id;
   if p_stage_id is not null or p_parent_task_id is not null then
-    if not (
+    if not coalesce((
       public.is_admin()
       or (t.project_id is not null and public.can_manage_project(t.project_id))
       or (t.project_id is null and t.created_by = uid)
-    ) then
+    ), false) then
       return 'not_allowed';
     end if;
 
@@ -721,12 +733,13 @@ begin
     into t
     from public.work_tasks wt
    where wt.id = v_task;
-  if not found or not (
+  -- NULL-SAFE (20261002141500) guard kept: NULL assignee/creator never admits.
+  if not found or not coalesce((
     t.created_by = uid
     or t.assignee_profile_id = uid
     or public.is_admin()
     or (t.project_id is not null and public.can_manage_project(t.project_id))
-  ) then
+  ), false) then
     return 'not_found';
   end if;
 

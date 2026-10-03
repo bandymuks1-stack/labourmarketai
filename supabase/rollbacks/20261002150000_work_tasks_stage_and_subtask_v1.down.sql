@@ -6,8 +6,11 @@
 --
 -- With zero such rows it restores the prior state exactly:
 --   * drops the NEW 9-arg create_work_task_v2 and 8-arg update_work_task_v2
---     and RE-CREATES the two ORIGINAL signatures verbatim (from
---     20260817151000_work_tasks_v2_collaboration.sql) with their original grants;
+--     and RE-CREATES the old signatures with their original grants:
+--     create_work_task_v2(7) verbatim from 20260817151000, and
+--     update_work_task_v2(6) + link_journal_entry_to_task_v1 verbatim from
+--     20261002141500 (the NULL-SAFE live bodies — rollback can never restore a
+--     NULL-unsafe body);
 --   * drops set_project_stage_responsible_v1, the structure helper, the
 --     integrity trigger + its function, the two indexes and the two columns.
 -- project_stages.responsible_engagement_id is a PRE-EXISTING column
@@ -43,7 +46,7 @@ drop index if exists public.wt_stage_idx;
 alter table public.work_tasks drop column if exists parent_task_id;
 alter table public.work_tasks drop column if exists stage_id;
 
--- ── Original create_work_task_v2 (verbatim, 20260817151000 §5) ─────────────
+-- ── create_work_task_v2 (7 args) — verbatim, 20260817151000 §5 (NOT touched by 20261002141500) ──
 create or replace function public.create_work_task_v2(
   p_title               text,
   p_description         text,
@@ -161,7 +164,7 @@ revoke all on function public.create_work_task_v2(text, text, text, text, text, 
 revoke all on function public.create_work_task_v2(text, text, text, text, text, text, text) from anon;
 grant execute on function public.create_work_task_v2(text, text, text, text, text, text, text) to authenticated;
 
--- ── Original update_work_task_v2 (verbatim, 20260817151000 §7) ─────────────
+-- ── update_work_task_v2 (6 args) — the CURRENT live body = 20261002141500 (NULL-safe), NEVER the pre-fix v2 body ──
 create or replace function public.update_work_task_v2(
   p_task_id     text,
   p_title       text,
@@ -216,14 +219,12 @@ begin
   if not found then
     return 'not_found';
   end if;
-  -- The v1 edit-authority set, unchanged: creator / assignee / admin /
-  -- manager of the linked project.
-  if not (
+  if not coalesce((
     t.created_by = uid
     or t.assignee_profile_id = uid
     or public.is_admin()
     or (t.project_id is not null and public.can_manage_project(t.project_id))
-  ) then
+  ), false) then
     return 'not_found';
   end if;
 
@@ -265,9 +266,7 @@ revoke all on function public.update_work_task_v2(text, text, text, text, text, 
 revoke all on function public.update_work_task_v2(text, text, text, text, text, text) from anon;
 grant execute on function public.update_work_task_v2(text, text, text, text, text, text) to authenticated;
 
--- ── Original link_journal_entry_to_task_v1 (verbatim, 20260819190000 §4) ───
--- (same signature, so create-or-replace puts the v1 body back; grants
--- re-asserted as in the original.)
+-- ── link_journal_entry_to_task_v1 — the CURRENT live body = 20261002141500 (NULL-safe), NEVER the 20260819190000 body ──
 create or replace function public.link_journal_entry_to_task_v1(
   p_entry_id text,
   p_task_id  text
@@ -291,7 +290,6 @@ begin
     return 'invalid';
   end if;
 
-  -- The ENTRY must be visible to the caller.
   select je.id, je.worker_id, je.engagement_context_id, je.deleted_at, je.superseded_by
     into e
     from public.journal_entries je
@@ -299,26 +297,23 @@ begin
   if not found or not public.can_read_journal_entry_v1(v_entry) then
     return 'not_found';
   end if;
-  -- Withdrawn evidence cannot be presented as proof of work.
   if e.deleted_at is not null or e.superseded_by is not null then
     return 'entry_not_current';
   end if;
 
-  -- The TASK must be visible to the caller (the v1 wt_select predicate).
   select wt.id, wt.project_id, wt.created_by, wt.assignee_profile_id, wt.status
     into t
     from public.work_tasks wt
    where wt.id = v_task;
-  if not found or not (
+  if not found or not coalesce((
     t.created_by = uid
     or t.assignee_profile_id = uid
     or public.is_admin()
     or (t.project_id is not null and public.can_manage_project(t.project_id))
-  ) then
+  ), false) then
     return 'not_found';
   end if;
 
-  -- Bounded: a task collects a readable evidence list, not a dump.
   select count(*) into v_active
     from public.journal_entry_tasks jet
    where jet.task_id = v_task and jet.unlinked_at is null;
@@ -338,7 +333,6 @@ begin
   on conflict do nothing;
 
   if not found then
-    -- Already linked — idempotent, not an error.
     return 'already_linked';
   end if;
 

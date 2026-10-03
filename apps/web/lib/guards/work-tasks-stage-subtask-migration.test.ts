@@ -178,8 +178,9 @@ describe("RPCs — same names, optional params, authority kept, grants unchanged
 });
 
 describe("journal link attribution consistency (link_journal_entry_to_task_v1)", () => {
+  // The CURRENT live body is the NULL-safe one from 20261002141500.
   const LINK_V1 = readFileSync(
-    join(REPO, "supabase", "migrations", "20260819190000_journal_task_evidence_link_v1.sql"),
+    join(REPO, "supabase", "migrations", "20261002141500_work_task_authz_null_safe_v1.sql"),
     "utf8",
   );
   const fnBody = (src: string) => {
@@ -272,10 +273,44 @@ describe("rollback — refuses to destroy structure, restores v2 verbatim", () =
       const end = src.indexOf("to authenticated;", start) + "to authenticated;".length;
       return src.slice(start, end).replace(/\r\n/g, "\n");
     };
-    for (const fn of ["create_work_task_v2", "update_work_task_v2"]) {
-      const original = extract(V2, fn);
+    // create_work_task_v2 was not touched by the security fix → the v2 original;
+    // update_work_task_v2(6) was re-issued NULL-safe by 20261002141500 → THAT body.
+    const SEC = readFileSync(
+      join(REPO, "supabase", "migrations", "20261002141500_work_task_authz_null_safe_v1.sql"),
+      "utf8",
+    );
+    for (const [fn, src] of [
+      ["create_work_task_v2", V2],
+      ["update_work_task_v2", SEC],
+    ] as const) {
+      const original = extract(src, fn);
       expect(original.length).toBeGreaterThan(500);
       expect(extract(DOWN, fn)).toBe(original);
     }
+  });
+
+  it("the rollback can never restore a NULL-unsafe body", () => {
+    for (const fn of ["update_work_task_v2", "link_journal_entry_to_task_v1"]) {
+      const a = DOWN.indexOf(`create or replace function public.${fn}(`);
+      const b = DOWN.indexOf("to authenticated;", a);
+      expect(DOWN.slice(a, b)).toMatch(/if (not found or )?not coalesce\(\(/);
+    }
+  });
+});
+
+describe("NULL-safe authorization (20261002141500) is preserved by every re-issued function", () => {
+  it("every negated guard comparing to uid uses the coalesce shape", () => {
+    for (const fn of ["update_work_task_v2", "link_journal_entry_to_task_v1"]) {
+      const a = UP_CODE.indexOf(`create or replace function public.${fn}(`);
+      const body = UP_CODE.slice(a, UP_CODE.indexOf("to authenticated;", a));
+      expect(body).toMatch(/not coalesce\(\(\s*t\.created_by = uid\s*or t\.assignee_profile_id = uid/);
+      expect(body).not.toMatch(/\bnot \(\s*t\.created_by = uid/);
+    }
+    // restructuring guard too
+    expect(UP_CODE).toMatch(/not coalesce\(\(\s*public\.is_admin\(\)\s*or \(t\.project_id is not null and public\.can_manage_project\(t\.project_id\)\)\s*or \(t\.project_id is null and t\.created_by = uid\)/);
+  });
+
+  it("sorts after the security migration", () => {
+    expect(NAME > "20261002141500_work_task_authz_null_safe_v1").toBe(true);
   });
 });

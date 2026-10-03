@@ -586,6 +586,14 @@
     "ganttEmpty": "Dodaj planowane daty do swoich etapów, aby zobaczyć oś czasu.",
     "ganttToday": "Dzisiaj",
     "ganttOverdue": "Zaległe",
+    "ganttNoDates": "Brak dat",
+    "ganttDue": "Termin",
+    "ganttNoWindow": "Nie zapisano jeszcze dat – etapy i zadania bez dat są wymienione poniżej.",
+    "ganttColActivity": "Działanie",
+    "ganttColStatus": "Stan",
+    "ganttColResponsible": "Odpowiedzialny",
+    "ganttColTime": "Czas",
+    "ganttNoStageGroup": "Nieprzypisane do etapu",
     "title": "Etapy projektu",
     "intro": "Uporządkowane fazy tego projektu — dodaj etap, ustaw jego rzeczywisty status i planowane daty.",
     "honestNote": "Postęp odzwierciedla wyłącznie rzeczywisty status i daty, które zapisujesz — bez automatycznego ani wymyślonego procentu ukończenia.",
@@ -7867,7 +7875,8 @@
       "refusedType": "Tego typu pliku nie można odczytać jako tekstu.",
       "empty": "W tym dokumencie nie znaleziono czytelnego tekstu.",
       "failed": "Nie udało się odczytać dokumentu.",
-      "noEngagement": "Najpierw potrzebujesz kontekstu pracy — otwórz panel i go utwórz."
+      "noEngagement": "Najpierw potrzebujesz kontekstu pracy — otwórz panel i go utwórz.",
+      "workDateHint": "Dokument nie podaje, którego dnia wykonano pracę. Wybierz datę samodzielnie — nic nie jest wypełniane za Ciebie."
     },
     "currentVersion": "Wersja {n}",
     "download": "Pobierz",
@@ -11053,7 +11062,13 @@
       "label": "Przypisz do",
       "save": "Przypisz"
     },
+    "advisory": {
+      "blockersOpen": "Status zaktualizowany. Uwaga: otwartych zadań, od których zależy: {n}. Nic nie zostało zablokowane.",
+      "reservationLead": "Przypisano. Sprawdzenie kalendarza na dzień terminu (tylko ostrzeżenie):"
+    },
     "dependencies": {
+      "startedBeforeBlocker": "Rozpoczęte lub zakończone, zanim skończyło się to, od czego zależy (nadal otwartych: {n}). Tylko ostrzeżenie.",
+      "dueBeforeBlocker": "Termin wcześniejszy niż zadania, od którego zależy. Tylko ostrzeżenie.",
       "waitingOn": "Czeka na {n}",
       "blockedBy": "Zależy od",
       "hidden": "zadanie, którego nie widzisz",
@@ -11079,6 +11094,8 @@
       }
     },
     "evidence": {
+      "by": "Autor: {name}",
+      "hours": "Zarejestrowano: {hours} godz.",
       "title": "Dowody",
       "intro": "Wpisy z Dziennika pracy dołączone do tego zadania. Dołączenie nigdy nie zmienia wpisu — jedynie wskazuje, jakie zadanie potwierdza.",
       "empty": "Jeszcze żaden wpis z Dziennika pracy nie jest dołączony do tego zadania.",

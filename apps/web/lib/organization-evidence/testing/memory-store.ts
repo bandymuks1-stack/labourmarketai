@@ -366,6 +366,7 @@ function memoryStore(db: MemoryEvidenceDb, actor: MemoryActor): EvidenceStore {
           organization_id: r.organization_id as string,
           supplier_role: r.supplier_role as string,
           evidence_state: r.evidence_state as string,
+          organization_person_id: (r.organization_person_id as string | null) ?? null,
           subject_profile_id:
             (t.people.find((p) => p.id === r.organization_person_id)?.linked_profile_id as string | null) ?? null,
           events: t.recordEvents
@@ -378,6 +379,15 @@ function memoryStore(db: MemoryEvidenceDb, actor: MemoryActor): EvidenceStore {
             })),
         }));
       return ok(rows);
+    },
+
+    async listRecordEvents(recordId) {
+      return ok(
+        t.recordEvents
+          .filter((e) => e.record_id === recordId)
+          .map((e) => clone(e))
+          .reverse(),
+      );
     },
 
     async insertRecordEvents(rows) {

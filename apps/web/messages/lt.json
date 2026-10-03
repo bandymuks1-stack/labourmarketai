@@ -586,6 +586,14 @@
     "ganttEmpty": "Pridėkite etapams planuojamas datas, kad matytumėte laiko juostą.",
     "ganttToday": "Šiandien",
     "ganttOverdue": "Vėluoja",
+    "ganttNoDates": "Be datų",
+    "ganttDue": "Terminas",
+    "ganttNoWindow": "Datų dar nėra – etapai ir užduotys be datų išvardyti žemiau.",
+    "ganttColActivity": "Veikla",
+    "ganttColStatus": "Būsena",
+    "ganttColResponsible": "Atsakingas",
+    "ganttColTime": "Laikas",
+    "ganttNoStageGroup": "Nepriskirta etapui",
     "title": "Projekto etapai",
     "intro": "Nuoseklūs šio projekto etapai — pridėkite etapą, nustatykite realią būseną ir planuojamas datas.",
     "honestNote": "Pažanga rodo tik jūsų įvestą realią būseną ir datas — jokių automatinių ar išgalvotų procentų.",
@@ -7867,7 +7875,8 @@
       "refusedType": "Šio tipo failo neįmanoma perskaityti kaip teksto.",
       "empty": "Šiame dokumente skaitomo teksto nerasta.",
       "failed": "Dokumento perskaityti nepavyko.",
-      "noEngagement": "Pirmiausia reikia darbo konteksto — atsidaryk skydelį ir jį susikurk."
+      "noEngagement": "Pirmiausia reikia darbo konteksto — atsidaryk skydelį ir jį susikurk.",
+      "workDateHint": "Dokumente nenurodyta, kurią dieną darbas atliktas. Pasirinkite datą patys — nieko už jus neįrašome."
     },
     "currentVersion": "Versija {n}",
     "download": "Atsisiųsti",
@@ -11053,7 +11062,13 @@
       "label": "Priskirti",
       "save": "Priskirti"
     },
+    "advisory": {
+      "blockersOpen": "Būsena atnaujinta. Dėmesio: dar atvirų užduočių, nuo kurių ji priklauso: {n}. Nieko neblokuota.",
+      "reservationLead": "Priskirta. Kalendoriaus patikra užduoties termino dienai (tik perspėjimas):"
+    },
     "dependencies": {
+      "startedBeforeBlocker": "Pradėta ar atlikta anksčiau, nei baigta tai, nuo ko ji priklauso (dar atvirų: {n}). Tik perspėjimas.",
+      "dueBeforeBlocker": "Terminas anksčiau nei užduoties, nuo kurios ji priklauso. Tik perspėjimas.",
       "waitingOn": "Laukia {n}",
       "blockedBy": "Priklauso nuo",
       "hidden": "užduotis, kurios nematote",
@@ -11079,6 +11094,8 @@
       }
     },
     "evidence": {
+      "by": "Autorius: {name}",
+      "hours": "Užfiksuota: {hours} val.",
       "title": "Įrodymai",
       "intro": "Darbo dienoraščio įrašai, susieti su šia užduotimi. Susiejimas nekeičia įrašo — jis tik nurodo, kurią užduotį įrašas įrodo.",
       "empty": "Su šia užduotimi dar nesusietas nė vienas Darbo dienoraščio įrašas.",

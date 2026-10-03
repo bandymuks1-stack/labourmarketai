@@ -6,7 +6,11 @@ import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
-import { STAGE_STATUSES } from "@/lib/projects/stages-model";
+import {
+  STAGE_STATUSES,
+  actualDateParams,
+  localIsoDay,
+} from "@/lib/projects/stages-model";
 
 /**
  * Project stages write actions (Wagon 6 slice 1).
@@ -88,6 +92,8 @@ export async function updateStageStatusAction(input: {
   stageId: string;
   status: string;
   blockedReason?: string;
+  /** Viewer's LOCAL date "YYYY-MM-DD" (server falls back to its own). */
+  today?: string;
 }): Promise<StageActionResult> {
   const supabase = await createClient();
   const {
@@ -104,10 +110,33 @@ export async function updateStageStatusAction(input: {
     return { ok: false, code: "invalid" };
   }
 
+  // Record REAL actual dates on the transition. The RPC coalesces, so we read
+  // the stored values first and only send a date into an empty slot.
+  let dates: { p_actual_start: string | null; p_actual_end: string | null } = {
+    p_actual_start: null,
+    p_actual_end: null,
+  };
+  if (status === "in_progress" || status === "done") {
+    const { data: row } = await asAny(supabase)
+      .from("project_stages")
+      .select("actual_start, actual_end")
+      .eq("id", stageId)
+      .maybeSingle();
+    const today = /^\d{4}-\d{2}-\d{2}$/.test(input.today ?? "")
+      ? (input.today as string)
+      : localIsoDay();
+    dates = actualDateParams(
+      status,
+      { actualStart: row?.actual_start ?? null, actualEnd: row?.actual_end ?? null },
+      today,
+    );
+  }
+
   const { error } = await asAny(supabase).rpc("update_project_stage_v1", {
     p_stage_id: stageId,
     p_status: status,
     p_blocked_reason: (input.blockedReason ?? "").trim().slice(0, 500) || null,
+    ...dates,
   });
   if (error) return mapError(error);
   revalidatePath("/", "layout");

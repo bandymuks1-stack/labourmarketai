@@ -586,6 +586,14 @@
     "ganttEmpty": "Voeg geplande data toe aan uw fasen om de tijdlijn te zien.",
     "ganttToday": "Vandaag",
     "ganttOverdue": "Te laat",
+    "ganttNoDates": "Geen data",
+    "ganttDue": "Deadline",
+    "ganttNoWindow": "Nog geen data vastgelegd – fasen en taken zonder data staan hieronder.",
+    "ganttColActivity": "Activiteit",
+    "ganttColStatus": "Stand",
+    "ganttColResponsible": "Verantwoordelijke",
+    "ganttColTime": "Tijd",
+    "ganttNoStageGroup": "Niet aan een fase toegewezen",
     "title": "Projectfasen",
     "intro": "Opeenvolgende fasen van dit project — voeg een fase toe, stel de echte status en geplande data in.",
     "honestNote": "Voortgang toont alleen de echte status en data die u invoert — geen automatisch of verzonnen percentage.",
@@ -7867,7 +7875,8 @@
       "refusedType": "Dit bestandstype kan niet als tekst worden gelezen.",
       "empty": "Geen leesbare tekst gevonden in dit document.",
       "failed": "Het document kon niet worden gelezen.",
-      "noEngagement": "Je hebt eerst een werkcontext nodig — open het dashboard om er een aan te maken."
+      "noEngagement": "Je hebt eerst een werkcontext nodig — open het dashboard om er een aan te maken.",
+      "workDateHint": "Het document vermeldt niet op welke dag dit werk is gedaan. Kies zelf de datum — er wordt niets voor je ingevuld."
     },
     "currentVersion": "Versie {n}",
     "download": "Downloaden",
@@ -11053,7 +11062,13 @@
       "label": "Toewijzen aan",
       "save": "Toewijzen"
     },
+    "advisory": {
+      "blockersOpen": "Status bijgewerkt. Let op: {n} van de taken waarvan deze afhangt zijn nog open. Er is niets geblokkeerd.",
+      "reservationLead": "Toegewezen. Agendacontrole voor de deadlinedag (alleen een waarschuwing):"
+    },
     "dependencies": {
+      "startedBeforeBlocker": "Gestart of afgerond voordat wat ervan afhangt klaar is ({n} nog open). Alleen een waarschuwing.",
+      "dueBeforeBlocker": "Deadline vóór een taak waarvan deze afhangt. Alleen een waarschuwing.",
       "waitingOn": "Wacht op {n}",
       "blockedBy": "Hangt af van",
       "hidden": "een taak die je niet kunt zien",
@@ -11079,6 +11094,8 @@
       }
     },
     "evidence": {
+      "by": "Door {name}",
+      "hours": "{hours} u geregistreerd",
       "title": "Bewijs",
       "intro": "Werkjournaal-records die aan deze taak zijn gekoppeld. Koppelen wijzigt een record nooit — het geeft alleen aan welke taak het aantoont.",
       "empty": "Er is nog geen werkjournaal-record aan deze taak gekoppeld.",

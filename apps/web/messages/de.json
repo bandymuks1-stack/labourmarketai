@@ -586,6 +586,14 @@
     "ganttEmpty": "Fügen Sie Ihren Phasen geplante Termine hinzu, um die Zeitleiste zu sehen.",
     "ganttToday": "Heute",
     "ganttOverdue": "Überfällig",
+    "ganttNoDates": "Ohne Termine",
+    "ganttDue": "Fällig",
+    "ganttNoWindow": "Noch keine Termine erfasst – Phasen und Aufgaben ohne Termine stehen unten.",
+    "ganttColActivity": "Aktivität",
+    "ganttColStatus": "Stand",
+    "ganttColResponsible": "Verantwortlich",
+    "ganttColTime": "Zeit",
+    "ganttNoStageGroup": "Keiner Phase zugeordnet",
     "title": "Projektphasen",
     "intro": "Aufeinanderfolgende Phasen dieses Projekts — fügen Sie eine Phase hinzu, legen Sie den echten Status und geplante Termine fest.",
     "honestNote": "Der Fortschritt zeigt nur den von Ihnen erfassten echten Status und Termine — keine automatischen oder erfundenen Prozentwerte.",
@@ -7867,7 +7875,8 @@
       "refusedType": "Dieser Dateityp kann nicht als Text gelesen werden.",
       "empty": "In diesem Dokument wurde kein lesbarer Text gefunden.",
       "failed": "Das Dokument konnte nicht gelesen werden.",
-      "noEngagement": "Du brauchst zuerst einen Arbeitskontext — öffne das Dashboard und richte einen ein."
+      "noEngagement": "Du brauchst zuerst einen Arbeitskontext — öffne das Dashboard und richte einen ein.",
+      "workDateHint": "Das Dokument nennt nicht, an welchem Tag die Arbeit erledigt wurde. Wähle das Datum selbst — es wird nichts für dich eingetragen."
     },
     "currentVersion": "Version {n}",
     "download": "Herunterladen",
@@ -11053,7 +11062,13 @@
       "label": "Zuweisen an",
       "save": "Zuweisen"
     },
+    "advisory": {
+      "blockersOpen": "Status aktualisiert. Hinweis: {n} der Aufgaben, von denen sie abhängt, sind noch offen. Nichts wurde blockiert.",
+      "reservationLead": "Zugewiesen. Kalenderprüfung für den Fälligkeitstag (nur ein Hinweis):"
+    },
     "dependencies": {
+      "startedBeforeBlocker": "Begonnen oder erledigt, bevor das, wovon sie abhängt, fertig ist ({n} noch offen). Nur ein Hinweis.",
+      "dueBeforeBlocker": "Fällig vor einer Aufgabe, von der sie abhängt. Nur ein Hinweis.",
       "waitingOn": "Wartet auf {n}",
       "blockedBy": "Hängt ab von",
       "hidden": "eine Aufgabe, die Sie nicht sehen können",
@@ -11079,6 +11094,8 @@
       }
     },
     "evidence": {
+      "by": "Von {name}",
+      "hours": "{hours} Std. erfasst",
       "title": "Nachweise",
       "intro": "Arbeitsjournal-Einträge, die mit dieser Aufgabe verknüpft sind. Das Verknüpfen ändert einen Eintrag nie — es zeigt nur, welche Aufgabe er belegt.",
       "empty": "Mit dieser Aufgabe ist noch kein Arbeitsjournal-Eintrag verknüpft.",
