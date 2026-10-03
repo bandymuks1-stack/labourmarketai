@@ -520,7 +520,7 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     anchors: ["lib/product-gate/organization-roles.ts"],
     coreModule: "lib/product-gate/organization-roles.ts",
     surfaces: ["app/[locale]/dashboard/company"],
-    note: "`organization_roles` is live, and `companies.company_type='staffing_agency'` still hard-gates seven agency features.",
+    note: "`organization_roles` is live. ORG-2: agency is a capability (type OR workforce role, `company_acts_as_agency` / `actsAsAgency`); the remaining legacy gates move to it in the ORG-2 app and SQL slices.",
     ownerDecision:
       "Migrate the seven gates to organization_roles, or keep the industry lock deliberately (§6.3 item 5).",
   },
