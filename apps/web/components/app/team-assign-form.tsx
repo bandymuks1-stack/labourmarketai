@@ -55,6 +55,7 @@ export function TeamAssignForm({
       booking: tRes("source.booking"),
       trip: tRes("source.trip"),
       absence: tRes("source.absence"),
+      plan: tRes("source.plan"),
     },
   };
 
