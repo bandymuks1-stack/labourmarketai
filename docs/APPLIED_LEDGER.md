@@ -2495,6 +2495,7 @@ Status: DB-level PRODUCTION-PROVEN. UI NOT PROVEN — the app chain is next.
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.
+- **PR #1806 `supabase/migrations/20260919200000_notification_events_v9_journal_confirmed.sql` - MUST NEVER BE APPLIED (closed SUPERSEDED 2026-10-03).** Superseded by #2116 (`message_journal_review_notification_types_v1`, ledger 20261002184321): `journal_review_decided` (decision=approved) delivers the behaviour on all three review paths. This draft's v9 CHECK lists (23 event types / 12 entity types) omit `job_alert`, `message_received`, `journal_review_decided`, `public_vacancy` and `conversation`, so applying it would fail on existing rows or narrow the live constraint. Applied history is untouched.
 
 ### `invitation_management_delegation_v1` — RED (per-person invitation delegation; definer functions, one ALTER POLICY, grant/revoke) — APPLIED 2026-09-24, ledger `20260924120147`
 
@@ -2544,3 +2545,121 @@ and ended assignment rejections).
 Status: DB APPLIED + READ-BACK. App half in #2103 (not merged). End-to-end
 (worker with 2 active projects -> picker -> save -> project hours -> owner
 confirmation) NOT PROVEN.
+
+## 20261002184321 - message_journal_review_notification_types_v1 (#2116)
+
+Repo file `20261002140000_message_journal_review_notification_types_v1.sql`. Widens the two CHECK
+constraints on `notification_events` (`event_type` +`message_received`, +`journal_review_decided`;
+`entity_type` +`conversation`, +`journal_entry`) by drop and re-add; strict superset, no data, RLS or
+grant change. Before the apply the production constraint lists were read back and matched the migration's
+base sets exactly (23 event types, 14 entity types), so the re-add narrowed nothing. Applied 2026-10-02 via
+Supabase MCP `apply_migration` to project `gorgitwvdzxbnaxhrsrw` (version 20261002184321). Read-back: both
+constraints contain the new values and are validated.
+
+Status: DB APPLIED + READ-BACK; emitters deployed with #2116. End-to-end (message sent -> durable
+`message_received` -> recipient -> read/unread; journal decision -> `journal_review_decided`) NOT PROVEN
+(PRODUCTION_E2E_BLOCKED_QA_IDENTITY).
+
+## 20261003071338 - work_task_authz_null_safe_v1 (#2128) - P0 SECURITY, APPLIED 2026-10-03
+
+Repo file `20261002141500_work_task_authz_null_safe_v1.sql` (sha256 of the LF file on main at e30915a47:
+`5959a6b2d329dd633c63a0ceb0f243a3d18abcede71fbdd174b474e1b8a4545e`, applied minus the begin/commit
+wrapper). Root cause: authorization guards of the shape `if not (A or <nullable col> = uid or ...)` evaluate
+to NULL when the column is NULL, `IF NULL` does not deny, and an outsider passes. Fix: every such guard is
+`if not coalesce((<same predicate>), false) then deny` - authorization succeeds only when explicitly TRUE.
+Eight SECURITY DEFINER functions re-issued with unchanged signatures and grants:
+`update_work_task_v2(6)`, `set_work_task_status_v2`, `link_journal_entry_to_task_v1`,
+`unlink_journal_entry_from_task_v1`, `add_work_task_dependency_v1` (blocker check),
+`start_workflow_instance_v1` (all LIVE-exploitable on unassigned / NULL-keyed rows), and
+`create_invitation_v1` / `create_invitation_v2` org branch (LATENT: needed an organization with a NULL
+`owner_profile_id`; 0 of 21 at apply time). Not vulnerable: `create_invitation_v2` demand branch,
+`remove_work_task_dependency_v1`, `reopen_work_task_v1`, `assign_work_task_v1`.
+
+Owner approval: chat 2026-10-03 (conditional on green CI; CI was green). Exposure at apply time: 3 work_tasks
+(all unassigned), 0 events/links/dependencies by non-creator/assignee/manager actors - no evidence of
+exploitation. Read-back after apply (md5 of `prosrc` / length): update_work_task_v2
+`499f020726deb9370c25edbe70437152`/2643, set_work_task_status_v2 `a7911a78f50e6f527622d07ec90061a0`/1352,
+link_journal_entry_to_task_v1 `f1725edb679f346166ae1586acdcfa62`/1985, add_work_task_dependency_v1
+`f679a9eb723cc2892740714a1e7fdbcb`/3157, unlink_journal_entry_from_task_v1
+`20592dd1c01b05ef01d3361d30ccf65d`/1535, start_workflow_instance_v1 `c0ec9f2584fb2eba27a3b2c610f73c61`/5462,
+create_invitation_v1 `1a2d9550e182108487e8c707eac850a5`/6387, create_invitation_v2
+`84d3d1e7500150a0a3fdda2564a34a73`/8121 - all equal to the values computed from the reviewed file. ACL unchanged
+on all eight: `{postgres=X/postgres,authenticated=X/postgres}`, SECURITY DEFINER, `search_path=public`;
+anon/PUBLIC have no EXECUTE; one overload each. Scratch-Postgres 16 proof (not production): 109 passed, 0
+failed, including before-fix exploit reproduction, after-fix refusal, authorized paths unchanged, rollback and
+re-apply. No exploit was run on production. Regression guard:
+`apps/web/lib/guards/null-safe-authorization-guards.test.ts`.
+
+Status: P0_FIXED_PRODUCTION (CI green, merged, applied, read-back and ACL match, Vercel deployment success).
+Ordering consequence: #2123 re-issues `update_work_task_v2` (8-arg) and `link_journal_entry_to_task_v1` and
+MUST carry the same NULL-safe guard form; #2079 is independent.
+
+## apply_migration version reconciliation (repo file timestamp <-> production ledger version)
+
+`apply_migration` assigns its own version at apply time, so the production ledger version differs from the
+repo file's timestamp. Matched by migration name, read from `supabase_migrations.schema_migrations` on
+2026-10-03 (entries from 2026-09-15 onward; 53 entries). Documentation only - nothing here is replayed.
+
+| Repo file timestamp | Production ledger version | Name |
+|---|---|---|
+| `20260914210000` | `20260915042406` | external_profiles_v1 |
+| `20260915180000` | `20260915185038` | subject_contest_and_clash_receipt |
+| `20260917120000` | `20260917080303` | universal_invitation_referral_network_v1 |
+| `20260917130000` | `20260917091045` | invitation_preview_demand_column_fix_v1 |
+| `20260917140000` | `20260917112002` | widen_original_language_uk_ka |
+| `20260917160000` | `20260917145229` | vacancy_interest_commercial_handoff_v1 |
+| `20260917170000` | `20260917155456` | commercial_handoff_requeue_on_reexpress_v1 |
+| `20260918070000` | `20260918070510` | roster_link_subject_consent_guard_v1 |
+| `20260919100000` | `20260919104526` | roster_writes_rpc_only_v1 |
+| `20260919120000` | `20260919143247` | add_org_member_requires_consented_roster_v1 |
+| `20260919130000` | `20260919145731` | update_project_facts_v1 |
+| `20260919150000` | `20260919151920` | end_roster_link_v1 |
+| `20260919140000` | `20260919153945` | usage_cost_trigger_search_path_v1 |
+| `20260919190000` | `20260920051619` | 20260919190000_demand_lifecycle_colleague_v1 |
+| `20260919210000` | `20260920052103` | 20260919210000_relationship_journal_reviewable_v1 |
+| `20260920173000` | `20260920185851` | 20260920173000_privacy_consent_locale_pl_hash_repin_v1 |
+| `20260922120000` | `20260922070548` | countries_all_iso_v1 |
+| `20260922140000` | `20260922091458` | privacy_consent_rpc_locale_pl_v1 |
+| `20260922130000` | `20260922095848` | company_need_intake_country_registry_v1 |
+| `20260922150000` | `20260922102211` | public_vacancy_translations_v1 |
+| `20260923114500` | `20260923142823` | nonstop_org_consolidation_v1 |
+| `20260924100000` | `20260924021637` | historical_timesheet_m1 |
+| `20260924120000` | `20260924083740` | companies_contact_minimization_v2 |
+| `20260924130000` | `20260924092646` | set_company_description_v1 |
+| `20260924140000` | `20260924092836` | manager_projects_roster_rls_v1 |
+| `20260924150000` | `20260924120147` | invitation_management_delegation_v1 |
+| `20260927053000` | `20260927060325` | worker_self_declared_profession_v1 |
+| `20260927063000` | `20260927062927` | worker_self_declared_profession_language_v1 |
+| `20260928140000` | `20260928170332` | booking_accepted_not_rewritten_v1 |
+| `20260928180000` | `20260928174954` | agency_capability_one_rule_v1 |
+| `20260928181000` | `20260928175006` | booking_reopen_lifecycle_edges_v1 |
+| `20260928190000` | `20260928181421` | agency_delegated_demand_and_placement_v1 |
+| (no standalone file - see note) | `20260928182413` | agency_drafted_needs_output_column_v1 |
+| `20260928200000` | `20260928183552` | booking_reaccept_restores_engagement_v1 |
+| `20260928210000` | `20260928185542` | agency_placement_booking_role_v1 |
+| `20260928220000` | `20260928195132` | placement_opens_client_collaboration_v1 |
+| `20260928230000` | `20260928202514` | placement_end_closes_client_collaboration_v1 |
+| `20260929090000` | `20260929055920` | historical_organization_names_v1 |
+| `20260930090000` | `20260930073055` | external_action_receipts_v1 |
+| `20260930100000` | `20260930083109` | account_classifications_v1 |
+| `20260930110000` | `20260930093158` | discovered_organizations_v1 |
+| `20260930120000` | `20260930101028` | project_duplicate_marker_v1 |
+| `20260930133500` | `20260930133928` | worker_avatar_path_for_relations_v1 |
+| `20261001090000` | `20261001065328` | public_vacancy_search_indexes_v1 |
+| `20261001100000` | `20261001072621` | assignment_decision_audit_v1 |
+| `20261001110000` | `20261001073331` | job_alert_notification_type_v1 |
+| `20261001120000` | `20261001084610` | job_alert_sweep_service_role_select |
+| `20261001180000` | `20261001085606` | public_vacancy_board_no_parallel_v1 |
+| `20261001180100` | `20261001085611` | drop_unused_vacancy_fulltext_gin_v1 |
+| `20261001200000` | `20261001091852` | public_vacancy_profession_published_idx_v1 |
+| `20261002120000` | `20261002102903` | journal_explicit_project_attribution_v1 |
+| `20261002140000` | `20261002184321` | message_journal_review_notification_types_v1 |
+| `20261002141500` | `20261003071338` | work_task_authz_null_safe_v1 |
+
+Note on `agency_drafted_needs_output_column_v1` (ledger 20260928182413): applied as a standalone statement
+sequence (`drop function if exists public.list_agency_drafted_needs_v1(); create function ...` - `create or
+replace` cannot change a function's OUT columns), with `revoke all ... from public, anon` and `grant execute
+... to authenticated`. No standalone file ever existed in git history; the final definition is carried by
+`20260928190000_agency_delegated_demand_and_placement_v1.sql` (same signature and return columns). Recorded
+here so the ledger entry is not an unexplained apply.
+
