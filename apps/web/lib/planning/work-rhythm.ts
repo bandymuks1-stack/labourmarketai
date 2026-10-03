@@ -114,6 +114,7 @@ const PLAN_SOURCES: ReadonlySet<PlanningSourceType> = new Set([
   "stage",
   "absence",
   "trip",
+  "plan",
   "task",
   "invitation",
   "finance",

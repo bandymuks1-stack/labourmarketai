@@ -403,6 +403,8 @@ describe("5. real sources only — nothing that does not exist is simulated", ()
       "absence",
       "stage",
       "trip",
+      // CAL-8: the organization's planned work windows (work_plan_entries).
+      "plan",
     ]);
   });
 

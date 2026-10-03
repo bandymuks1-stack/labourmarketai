@@ -6028,7 +6028,8 @@
           "project": "Projekt",
           "booking": "Rezerwacja",
           "trip": "Podróż służbowa",
-          "absence": "Niedostępny"
+          "absence": "Niedostępny",
+          "plan": "Zaplanowana praca"
         }
       }
     },
@@ -10710,7 +10711,8 @@
       "finance": "Finanse",
       "invitation": "Zaproszenie",
       "absence": "Urlop",
-      "stage": "Etapy"
+      "stage": "Etapy",
+      "plan": "Zaplanowana praca"
     },
     "sourceNotes": {
       "taskError": "Nie udało się teraz wczytać zadań. Reszta planu nie jest tym dotknięta.",
@@ -10754,7 +10756,8 @@
       "finance": "Zapis finansowy",
       "invitation": "Zaproszenie",
       "absence": "Urlop / nieobecność",
-      "stage": "Etap projektu"
+      "stage": "Etap projektu",
+      "plan": "Zaplanowana praca"
     },
     "projectStatus": {
       "draft": "Szkic",
@@ -10851,6 +10854,10 @@
       "dayNoWork": "W tym dniu nie zapisano pracy.",
       "dayFuture": "Ten dzień jeszcze nie nadszedł.",
       "recordOnDay": "Zapisz pracę na ten dzień"
+    },
+    "planStatus": {
+      "planned": "Zaplanowane",
+      "cancelled": "Anulowane"
     }
   },
   "workforcePlanning": {
@@ -10978,7 +10985,8 @@
       "kind": {
         "project": "projekt",
         "booking": "rezerwacja",
-        "trip": "podróż służbowa"
+        "trip": "podróż służbowa",
+        "plan": "zaplanowana praca"
       },
       "untitled": "bez nazwy",
       "openEnded": "od {start}, brak zarejestrowanej daty zakończenia",
@@ -18056,6 +18064,41 @@
       "done": "Przypisano wpisów: {count}; już przypisanych: {skipped}.",
       "refused": "Nie udało się zapisać. Nic nie zmieniono.",
       "person": "{hours} godz., {count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}"
+    }
+  },
+  "workPlan": {
+    "title": "Zaplanowana praca",
+    "intro": "Zaplanuj, kto, gdzie i kiedy pracuje. Kalendarz pokazuje to jako plan; to, co faktycznie się wydarzyło, zostaje w dzienniku pracy.",
+    "worker": "Pracownik",
+    "project": "Projekt (opcjonalnie)",
+    "workObject": "Obiekt / miejsce (opcjonalnie)",
+    "startDate": "Od",
+    "endDate": "Do",
+    "startTime": "Początek (opcjonalnie)",
+    "endTime": "Koniec (opcjonalnie)",
+    "note": "Notatka (opcjonalnie)",
+    "none": "Brak",
+    "submit": "Zaplanuj pracę",
+    "pending": "Planowanie…",
+    "cancel": "Anuluj plan",
+    "cancelPending": "Anulowanie…",
+    "empty": "Na ten okres nic jeszcze nie zaplanowano.",
+    "noWorkers": "Na Twojej liście nie ma jeszcze pracowników. Najpierw zaproś osoby, potem planuj ich pracę.",
+    "unavailable": "Planowanie nie jest tu jeszcze dostępne.",
+    "listTitle": "Zaplanowane okresy",
+    "overlap": "Pokrywa się z zatwierdzonym urlopem",
+    "outcome": {
+      "planned": "Praca zaplanowana.",
+      "cancelled": "Plan anulowany.",
+      "invalid": "Sprawdź daty i pola i spróbuj ponownie.",
+      "not_allowed": "Nie możesz planować dla tej organizacji.",
+      "worker_not_in_scope": "Ten pracownik nie jest na liście tej organizacji.",
+      "project_not_in_organization": "Ten projekt należy do innej organizacji.",
+      "work_object_not_in_organization": "Ten obiekt należy do innej organizacji.",
+      "unavailable": "Planowanie nie jest tu jeszcze dostępne.",
+      "error": "Coś poszło nie tak. Spróbuj ponownie.",
+      "planned_collides": "Zaplanowano, ale ta osoba ma już zajęcia w niektóre z tych dni. Decydujesz Ty; jeśli plan jest zły, anuluj go poniżej.",
+      "planned_unknown": "Zaplanowano, ale nie udało się potwierdzić, że te dni są wolne. To nie to samo co wolne."
     }
   },
   "workLifecycle": {

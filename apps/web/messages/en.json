@@ -6028,7 +6028,8 @@
           "project": "Project",
           "booking": "Booking",
           "trip": "Business trip",
-          "absence": "Unavailable"
+          "absence": "Unavailable",
+          "plan": "Planned work"
         }
       }
     },
@@ -10710,7 +10711,8 @@
       "finance": "Finance",
       "invitation": "Invitation",
       "absence": "Leave",
-      "stage": "Stages"
+      "stage": "Stages",
+      "plan": "Planned work"
     },
     "sourceNotes": {
       "taskError": "Tasks could not be loaded right now. The rest of the plan is unaffected.",
@@ -10754,7 +10756,8 @@
       "finance": "Finance record",
       "invitation": "Invitation",
       "absence": "Leave / absence",
-      "stage": "Project stage"
+      "stage": "Project stage",
+      "plan": "Planned work"
     },
     "projectStatus": {
       "draft": "Draft",
@@ -10851,6 +10854,10 @@
       "dayNoWork": "No work recorded on this day.",
       "dayFuture": "This day has not come yet.",
       "recordOnDay": "Record work on this day"
+    },
+    "planStatus": {
+      "planned": "Planned",
+      "cancelled": "Cancelled"
     }
   },
   "workforcePlanning": {
@@ -10978,7 +10985,8 @@
       "kind": {
         "project": "project",
         "booking": "booking",
-        "trip": "business trip"
+        "trip": "business trip",
+        "plan": "planned work"
       },
       "untitled": "untitled",
       "openEnded": "from {start}, no end date recorded",
@@ -18056,6 +18064,41 @@
       "done": "Attributed {count} records; {skipped} were already attributed.",
       "refused": "This could not be saved. Nothing was changed.",
       "person": "{hours} h, {count, plural, one {# record} other {# records}}"
+    }
+  },
+  "workPlan": {
+    "title": "Planned work",
+    "intro": "Plan who works where and when. The calendar shows it as a plan; what actually happened stays in the work journal.",
+    "worker": "Worker",
+    "project": "Project (optional)",
+    "workObject": "Object / site (optional)",
+    "startDate": "From",
+    "endDate": "To",
+    "startTime": "Start time (optional)",
+    "endTime": "End time (optional)",
+    "note": "Note (optional)",
+    "none": "None",
+    "submit": "Plan work",
+    "pending": "Planning…",
+    "cancel": "Cancel plan",
+    "cancelPending": "Cancelling…",
+    "empty": "Nothing planned for this period yet.",
+    "noWorkers": "No workers on your roster yet. Invite people first, then plan their work.",
+    "unavailable": "Planning is not available here yet.",
+    "listTitle": "Planned windows",
+    "overlap": "Overlaps approved leave",
+    "outcome": {
+      "planned": "Work planned.",
+      "cancelled": "Plan cancelled.",
+      "invalid": "Check the dates and fields and try again.",
+      "not_allowed": "You cannot plan for this organization.",
+      "worker_not_in_scope": "That worker is not on this organization's roster.",
+      "project_not_in_organization": "That project belongs to another organization.",
+      "work_object_not_in_organization": "That object belongs to another organization.",
+      "unavailable": "Planning is not available here yet.",
+      "error": "Something went wrong. Try again.",
+      "planned_collides": "Planned, but this person already holds time on some of these days. You decide; cancel the plan below if it is not right.",
+      "planned_unknown": "Planned, but we could not confirm these days are free. That is not the same as free."
     }
   },
   "workLifecycle": {

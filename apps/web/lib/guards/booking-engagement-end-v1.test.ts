@@ -1520,6 +1520,10 @@ describe("the migration set is exactly what this slice declared", () => {
       // owner 2026-10-01 (#2065 APPROVED in chat): board reads without parallel workers; drop the unused 129 MB GIN.
       "20261001180000_public_vacancy_board_no_parallel_v1.sql",
       "20261001180100_drop_unused_vacancy_fulltext_gin_v1.sql",
+      // CAL-8 (2026-10-01): one-off planned work windows for an organization's own people
+      // (revives draft #1426); RED by rule (SECURITY DEFINER commands + grants + trigger),
+      // draft + needs-human-gate, NOT applied.
+      "20261001220000_work_plan_entries_v2.sql",
       "20261002120000_journal_explicit_project_attribution_v1.sql",
       // 2026-10-03: SECURITY forward-fix (NULL-safe authorization guards, auth-core) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261002141500_work_task_authz_null_safe_v1.sql",

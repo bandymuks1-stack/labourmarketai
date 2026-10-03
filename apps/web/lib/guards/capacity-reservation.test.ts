@@ -92,7 +92,7 @@ describe("no new data path, no new authority — the reuse proof", () => {
     expect(read("lib/planning/planning-model.ts")).toMatch(
       /export const PLANNED_TRIP_STATUSES = \["approved", "completed"\] as const;/,
     );
-    expect(read(MODEL)).toMatch(/"project", "booking", "trip", "absence"/);
+    expect(read(MODEL)).toMatch(/"project", "booking", "trip", "plan", "absence"/);
   });
 
   it("a trip's PURPOSE is never read, only its destination", () => {
@@ -111,7 +111,7 @@ describe("no new data path, no new authority — the reuse proof", () => {
     // absence of trips (SEP-7).
     for (const rel of [READER, "lib/planning/roster-utilisation.ts"]) {
       expect(code(read(rel)), rel).toMatch(
-        /COMMITMENT_SOURCES: readonly ReservationSource\[\] = \["project", "booking", "trip"\]/,
+        /COMMITMENT_SOURCES: readonly ReservationSource\[\] = \["project", "booking", "trip", "plan"\]/,
       );
     }
   });
