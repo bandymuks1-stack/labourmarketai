@@ -64,6 +64,7 @@ async function post(init?: RequestInit, url = "http://localhost/api/billing/refr
 }
 
 beforeEach(() => {
+  vi.stubEnv("BILLING_RECOVERY_ENABLED", "true");
   vi.clearAllMocks();
   __resetRateLimitsForTest();
   vi.spyOn(console, "info").mockImplementation(() => {});

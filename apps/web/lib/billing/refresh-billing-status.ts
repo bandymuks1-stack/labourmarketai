@@ -1,6 +1,7 @@
 import "server-only";
 
 import { getBillingConfig } from "@/lib/billing/config";
+import { isBillingRecoveryEnabled } from "@/lib/billing/recovery-flag";
 import { resolveBillingSubject } from "@/lib/billing/billing-subject";
 import { findBillingCustomer } from "@/lib/billing/customer-store";
 import { findScopedSubscription, hasRecentUserRefreshForSubject } from "@/lib/billing/subscription-store";
@@ -56,7 +57,7 @@ export type RefreshBillingStatus = "updated" | "already_current" | "not_found" |
  */
 export type RefreshResponse =
   | { readonly http: 200; readonly body: { readonly ok: true; readonly status: RefreshBillingStatus } }
-  | { readonly http: 401 | 403 | 429 | 500; readonly body: { readonly ok: false; readonly status: "try_later" } };
+  | { readonly http: 401 | 403 | 429 | 500 | 503; readonly body: { readonly ok: false; readonly status: "try_later" } };
 
 /** Instance-local best-effort throttle (NOT a security boundary): 5 per 10 minutes per person. */
 export const REFRESH_LIMIT = { limit: 5, windowMs: 10 * 60 * 1000 } as const;
@@ -92,6 +93,14 @@ export async function refreshMyBillingStatus(opts: { readonly nowMs?: number } =
   }
   if (!ctx.billingAuthority) {
     return { http: 403, body: { ok: false, status: "try_later" } };
+  }
+
+  // OPTION B: reconciliation is a live write, so it sits behind the same server-side
+  // capability flag as the scheduled sweep (default OFF). Checked after authentication
+  // and billing authority, before any limiter, store or Stripe access. The answer is the
+  // same coarse word as every other refusal: no configuration name ever reaches the browser.
+  if (!isBillingRecoveryEnabled()) {
+    return { http: 503, body: { ok: false, status: "try_later" } };
   }
 
   const decision = rateLimit({

@@ -31,6 +31,7 @@ const reconcile = vi.mocked(reconcileSubscription);
 const ORG = { subject: { type: "organization" as const, id: "org_1" }, payerProfileId: "user_1", billingAuthority: true, role: "owner" as const };
 
 beforeEach(() => {
+  vi.stubEnv("BILLING_RECOVERY_ENABLED", "true");
   vi.clearAllMocks();
   __resetRateLimitsForTest();
   cfg.state = "stripe_live";
@@ -52,6 +53,25 @@ describe("authority", () => {
     subject.mockResolvedValue({ ...ORG, billingAuthority: false } as never);
     expect(await refreshMyBillingStatus()).toMatchObject({ http: 403 });
     expect(reconcile).not.toHaveBeenCalled();
+  });
+});
+
+describe("OPTION B - recovery capability flag", () => {
+  it("flag unset: an authorized user gets a coarse 503 try_later and nothing is read or written", async () => {
+    vi.stubEnv("BILLING_RECOVERY_ENABLED", "");
+    const r = await refreshMyBillingStatus();
+    expect(r).toEqual({ http: 503, body: { ok: false, status: "try_later" } });
+    expect(JSON.stringify(r)).not.toMatch(/RECOVERY|ENABLED|sub_|cus_/);
+    expect(reconcile).not.toHaveBeenCalled();
+    expect(scoped).not.toHaveBeenCalled();
+    expect(recentRefresh).not.toHaveBeenCalled();
+  });
+  it("authentication and authority are still checked first when the flag is off", async () => {
+    vi.stubEnv("BILLING_RECOVERY_ENABLED", "");
+    subject.mockResolvedValue({ subject: null, payerProfileId: null, billingAuthority: false, role: null } as never);
+    expect(await refreshMyBillingStatus()).toMatchObject({ http: 401 });
+    subject.mockResolvedValue({ ...ORG, billingAuthority: false } as never);
+    expect(await refreshMyBillingStatus()).toMatchObject({ http: 403 });
   });
 });
 
