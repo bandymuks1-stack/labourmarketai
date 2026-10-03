@@ -1523,6 +1523,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261002120000_journal_explicit_project_attribution_v1.sql",
       // 2026-10-03: SECURITY forward-fix (NULL-safe authorization guards, auth-core) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261002141500_work_task_authz_null_safe_v1.sql",
+      // 2026-10-03: EVID-6 policy narrowing (experience_responses_select resolves the reply moderation status) — marker is the human-gate acknowledgement; draft + needs-human-gate, NOT applied.
+      "20261002143000_experience_responses_select_reply_status_v1.sql",
 ]);
   });
 
