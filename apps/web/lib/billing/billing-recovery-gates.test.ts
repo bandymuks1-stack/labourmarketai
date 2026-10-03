@@ -173,7 +173,7 @@ describe("GATE 2 - the ROUTE is not the schedule switch; CRON_SECRET + billing s
     "flag value %j -> enabled=%s",
     async (v, on) => {
       const { isBillingRecoveryEnabled } = await import("@/lib/billing/recovery-flag");
-      expect(isBillingRecoveryEnabled({ BILLING_RECOVERY_ENABLED: v } as NodeJS.ProcessEnv)).toBe(on);
+      expect(isBillingRecoveryEnabled({ BILLING_RECOVERY_ENABLED: v } as unknown as NodeJS.ProcessEnv)).toBe(on);
     },
   );
 
