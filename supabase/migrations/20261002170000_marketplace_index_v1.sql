@@ -120,6 +120,7 @@ alter table public.marketplace_listings
     check (status in ('draft','active','paused','closed'));
 
 alter table public.marketplace_listings drop constraint if exists marketplace_listings_category_check;
+alter table public.marketplace_listings drop constraint if exists marketplace_listings_category_fmt;
 alter table public.marketplace_listings
   add constraint marketplace_listings_category_fmt
     check (category ~ '^[a-z][a-z0-9_]{1,40}$');
