@@ -6,15 +6,16 @@ const cfg = vi.hoisted(() => ({ state: "stripe_live" as string, testMode: false 
 vi.mock("@/lib/billing/config", () => ({ getBillingConfig: () => cfg }));
 vi.mock("@/lib/billing/billing-subject", () => ({ resolveBillingSubject: vi.fn() }));
 vi.mock("@/lib/billing/customer-store", () => ({ findBillingCustomer: vi.fn() }));
-vi.mock("@/lib/billing/subscription-store", () => ({ findScopedSubscription: vi.fn() }));
-vi.mock("@/lib/billing/reconcile-subscription", () => ({ reconcileSubscription: vi.fn() }));
+vi.mock("@/lib/billing/subscription-store", () => ({ findScopedSubscription: vi.fn(), hasRecentUserRefreshForSubject: vi.fn() }));
+vi.mock("@/lib/billing/reconcile-subscription", () => ({ RECONCILE_EVENT_TYPE: "reconcile.subscription", reconcileSubscription: vi.fn() }));
 
 import { resolveBillingSubject } from "@/lib/billing/billing-subject";
 import { findBillingCustomer } from "@/lib/billing/customer-store";
-import { findScopedSubscription } from "@/lib/billing/subscription-store";
+import { findScopedSubscription, hasRecentUserRefreshForSubject } from "@/lib/billing/subscription-store";
 import { reconcileSubscription } from "@/lib/billing/reconcile-subscription";
 import { __resetRateLimitsForTest } from "@/lib/security/rate-limit";
 import {
+  REFRESH_COOLDOWN_MS,
   REFRESH_LIMIT,
   refreshMyBillingStatus,
   refreshStatusFromResult,
@@ -24,6 +25,7 @@ import { POST } from "@/app/api/billing/refresh/route";
 const subject = vi.mocked(resolveBillingSubject);
 const customer = vi.mocked(findBillingCustomer);
 const scoped = vi.mocked(findScopedSubscription);
+const recentRefresh = vi.mocked(hasRecentUserRefreshForSubject);
 const reconcile = vi.mocked(reconcileSubscription);
 
 const ORG = { subject: { type: "organization" as const, id: "org_1" }, payerProfileId: "user_1", billingAuthority: true, role: "owner" as const };
@@ -36,6 +38,7 @@ beforeEach(() => {
   subject.mockResolvedValue(ORG as never);
   scoped.mockResolvedValue({ status: "found", row: { providerSubscriptionId: "sub_1", status: "incomplete", testMode: false } });
   customer.mockResolvedValue({ status: "found", customerId: "cus_1" });
+  recentRefresh.mockResolvedValue(false);
   reconcile.mockResolvedValue({ outcome: "applied", changed: true, providerSubscriptionId: "sub_1" });
 });
 
@@ -117,6 +120,26 @@ describe("rate limit", () => {
   it("the window frees up", async () => {
     for (let i = 0; i < REFRESH_LIMIT.limit; i++) await refreshMyBillingStatus({ nowMs: 1 });
     expect((await refreshMyBillingStatus({ nowMs: 1 + REFRESH_LIMIT.windowMs + 1 })).http).toBe(200);
+  });
+});
+
+describe("durable per-workspace cooldown (existing audit rows, no migration)", () => {
+  it("a recent refresh attempt for THIS workspace -> 429 try_later, Stripe not read", async () => {
+    recentRefresh.mockResolvedValue(true);
+    expect(await refreshMyBillingStatus({ nowMs: 10_000_000 })).toEqual({ http: 429, body: { ok: false, status: "try_later" } });
+    expect(reconcile).not.toHaveBeenCalled();
+    expect(recentRefresh).toHaveBeenCalledWith({
+      subject: "organization:org_1",
+      sinceIso: new Date(10_000_000 - REFRESH_COOLDOWN_MS).toISOString(),
+      reconcileEventType: "reconcile.subscription",
+    });
+  });
+  it("no recent attempt -> proceeds", async () => {
+    expect((await refreshMyBillingStatus()).http).toBe(200);
+  });
+  it("the in-memory limiter still applies on top (defense in depth)", async () => {
+    for (let i = 0; i < REFRESH_LIMIT.limit; i++) await refreshMyBillingStatus({ nowMs: 5 });
+    expect((await refreshMyBillingStatus({ nowMs: 5 })).http).toBe(429);
   });
 });
 

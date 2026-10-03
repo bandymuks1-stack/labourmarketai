@@ -13,7 +13,13 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST() {
-  const res = await refreshMyBillingStatus();
+  let res: Awaited<ReturnType<typeof refreshMyBillingStatus>>;
+  try {
+    res = await refreshMyBillingStatus();
+  } catch {
+    // Never leak an exception message (it could carry provider ids).
+    res = { http: 500, body: { ok: false, status: "try_later" } };
+  }
   return NextResponse.json(res.body, {
     status: res.http,
     headers: { "Cache-Control": "no-store" },

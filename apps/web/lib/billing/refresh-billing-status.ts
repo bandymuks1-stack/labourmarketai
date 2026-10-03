@@ -3,10 +3,11 @@ import "server-only";
 import { getBillingConfig } from "@/lib/billing/config";
 import { resolveBillingSubject } from "@/lib/billing/billing-subject";
 import { findBillingCustomer } from "@/lib/billing/customer-store";
-import { findScopedSubscription } from "@/lib/billing/subscription-store";
+import { findScopedSubscription, hasRecentUserRefreshForSubject } from "@/lib/billing/subscription-store";
 import { ORGANIZATION_PLAN_KEY } from "@/lib/billing/plans";
 import {
   reconcileSubscription,
+  RECONCILE_EVENT_TYPE,
   type ReconcileResult,
 } from "@/lib/billing/reconcile-subscription";
 import { rateLimit } from "@/lib/security/rate-limit";
@@ -30,6 +31,18 @@ import { rateLimit } from "@/lib/security/rate-limit";
  *   - it only READS Stripe; it cannot create, change, cancel or refund anything;
  *   - the answer is one of FOUR words. No ids, no provider reasons, no
  *     secrets ever leave the server.
+ *
+ * WHAT THE LIMITS ARE (honest):
+ *   - the in-memory limiter below is INSTANCE-LOCAL, BEST-EFFORT throttling
+ *     (serverless / multi-instance: each instance counts on its own). It is NOT
+ *     a security boundary and must never be described as one;
+ *   - a DURABLE per-workspace cooldown (REFRESH_COOLDOWN_MS) is read from the
+ *     audit rows the adapter already writes to payment_webhook_events - existing
+ *     columns, no migration, shared across instances, fail-open on read error;
+ *   - the REAL boundaries are: authentication, the server-resolved workspace,
+ *     billingAuthority, the signed-metadata subject match, the canonical
+ *     idempotent apply, the recovery cooldown, and Stripe-side truth (this door
+ *     can only observe Stripe, never change it).
  * The page is not told what the plan is: it re-reads the subscription row after
  * a refresh, like any request. The checkout-return flag stays a redirect, never
  * authority.
@@ -37,12 +50,19 @@ import { rateLimit } from "@/lib/security/rate-limit";
 
 export type RefreshBillingStatus = "updated" | "already_current" | "not_found" | "try_later";
 
+/**
+ * EVERY body - success or refusal - carries exactly one of the four words. The
+ * HTTP code (401 / 403 / 429) says why a refusal happened; the body never does.
+ */
 export type RefreshResponse =
   | { readonly http: 200; readonly body: { readonly ok: true; readonly status: RefreshBillingStatus } }
-  | { readonly http: 401 | 403 | 429; readonly body: { readonly ok: false; readonly status: "try_later" | "forbidden" | "unauthenticated" } };
+  | { readonly http: 401 | 403 | 429 | 500; readonly body: { readonly ok: false; readonly status: "try_later" } };
 
-/** Per person: 5 refreshes per 10 minutes (per server instance - see rate-limit.ts honesty note). */
+/** Instance-local best-effort throttle (NOT a security boundary): 5 per 10 minutes per person. */
 export const REFRESH_LIMIT = { limit: 5, windowMs: 10 * 60 * 1000 } as const;
+
+/** Durable per-workspace cooldown between refreshes (read from the audit table). */
+export const REFRESH_COOLDOWN_MS = 2 * 60 * 1000;
 
 /** Pure mapping from the adapter's outcome to the only words a browser sees. */
 export function refreshStatusFromResult(r: ReconcileResult): RefreshBillingStatus {
@@ -68,10 +88,10 @@ export function refreshStatusFromResult(r: ReconcileResult): RefreshBillingStatu
 export async function refreshMyBillingStatus(opts: { readonly nowMs?: number } = {}): Promise<RefreshResponse> {
   const ctx = await resolveBillingSubject();
   if (!ctx.subject || !ctx.payerProfileId) {
-    return { http: 401, body: { ok: false, status: "unauthenticated" } };
+    return { http: 401, body: { ok: false, status: "try_later" } };
   }
   if (!ctx.billingAuthority) {
-    return { http: 403, body: { ok: false, status: "forbidden" } };
+    return { http: 403, body: { ok: false, status: "try_later" } };
   }
 
   const decision = rateLimit({
@@ -89,6 +109,14 @@ export async function refreshMyBillingStatus(opts: { readonly nowMs?: number } =
     return { http: 200, body: { ok: true, status: "try_later" } };
   }
   const subject = ctx.subject;
+
+  // Durable, cross-instance cooldown for THIS workspace (existing audit rows).
+  const recent = await hasRecentUserRefreshForSubject({
+    subject: `${subject.type}:${subject.id}`,
+    sinceIso: new Date((opts.nowMs ?? Date.now()) - REFRESH_COOLDOWN_MS).toISOString(),
+    reconcileEventType: RECONCILE_EVENT_TYPE,
+  });
+  if (recent) return { http: 429, body: { ok: false, status: "try_later" } };
   const expectSubject =
     subject.type === "organization"
       ? ({ type: "organization", id: subject.id } as const)

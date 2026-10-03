@@ -168,7 +168,16 @@ async function reconcileOne(
     eventType: RECONCILE_EVENT_TYPE,
     testMode,
     eventCreated: stamp,
-    payload: { id: auditId, type: RECONCILE_EVENT_TYPE, created: stamp, source: evidenceId, subscription_id: subscriptionId },
+    payload: {
+      id: auditId,
+      type: RECONCILE_EVENT_TYPE,
+      created: stamp,
+      source: evidenceId,
+      subscription_id: subscriptionId,
+      // Non-secret workspace key (`organization:<id>` | `profile:<id>`): lets the
+      // user-refresh door read a DURABLE per-workspace cooldown from this table.
+      ...(input.expectSubject ? { subject: `${input.expectSubject.type}:${input.expectSubject.id}` } : {}),
+    },
   });
   if (recorded === "duplicate-processed") return { outcome: "noop", reason: "duplicate_run", providerSubscriptionId: subscriptionId };
   if (recorded === "needs-migration") return { outcome: "needs_migration", providerSubscriptionId: subscriptionId };
