@@ -25,6 +25,7 @@ const ok = (over: Partial<{ ids: string[]; recentlyReconciled: string[]; unproce
   ({ ok: true as const, ids: [], recentlyReconciled: [], unprocessedEvents: { total: 0, withSubscriptionRef: 0 }, ...over });
 
 beforeEach(() => {
+  vi.stubEnv("BILLING_RECOVERY_ENABLED", "true");
   vi.clearAllMocks();
   vi.spyOn(console, "info").mockImplementation(() => {});
   cfg.state = "stripe_test";

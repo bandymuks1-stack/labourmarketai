@@ -10,13 +10,30 @@ const req = (auth?: string) =>
 
 describe("GET /api/cron/billing-recovery", () => {
   const prev = process.env.CRON_SECRET;
+  const prevFlag = process.env.BILLING_RECOVERY_ENABLED;
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.CRON_SECRET = "s3cret-for-test";
+    process.env.BILLING_RECOVERY_ENABLED = "true";
   });
   afterEach(() => {
     if (prev === undefined) delete process.env.CRON_SECRET;
     else process.env.CRON_SECRET = prev;
+    if (prevFlag === undefined) delete process.env.BILLING_RECOVERY_ENABLED;
+    else process.env.BILLING_RECOVERY_ENABLED = prevFlag;
+  });
+
+  it("OPTION B: a valid CRON_SECRET with the recovery flag unset is refused and runs nothing", async () => {
+    delete process.env.BILLING_RECOVERY_ENABLED;
+    const res = await GET(req("Bearer s3cret-for-test"));
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ ok: false, reason: "recovery_disabled" });
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it("auth is still checked first: wrong secret with the flag on is 401", async () => {
+    expect((await GET(req("Bearer nope"))).status).toBe(401);
+    expect(run).not.toHaveBeenCalled();
   });
 
   it("fails closed while CRON_SECRET is unset", async () => {
