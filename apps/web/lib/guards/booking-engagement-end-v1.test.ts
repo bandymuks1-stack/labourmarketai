@@ -1535,6 +1535,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-03: PER-12 subject-safe export projection (new SECURITY DEFINER read fn) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261003120000_privacy_export_import_lines_subject_v1.sql",
       "20261003140000_subject_contest_withdraw_constraint_reconcile_v1.sql",
+      // 2026-10-03: J-TIME-FREEDOM override receipt (new append-only table + SECURITY DEFINER writer) - marker is the human-gate acknowledgement; draft + needs-human-gate, NOT applied.
+      "20261003150000_commitment_override_receipts_v1.sql",
 ]);
   });
 
