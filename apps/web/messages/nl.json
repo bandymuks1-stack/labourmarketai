@@ -634,6 +634,15 @@
     "ganttEmpty": "Voeg geplande data toe aan uw fasen om de tijdlijn te zien.",
     "ganttToday": "Vandaag",
     "ganttOverdue": "Te laat",
+    "ganttNoDates": "Geen data",
+    "ganttDue": "Deadline",
+    "ganttNoWindow": "Nog geen data vastgelegd – fasen en taken zonder data staan hieronder.",
+    "ganttColActivity": "Activiteit",
+    "ganttColStatus": "Stand",
+    "ganttColResponsible": "Verantwoordelijke",
+    "ganttColTime": "Tijd",
+    "ganttBlocks": "Blokkeert",
+    "ganttNoStageGroup": "Niet aan een fase toegewezen",
     "title": "Projectfasen",
     "intro": "Opeenvolgende fasen van dit project — voeg een fase toe, stel de echte status en geplande data in.",
     "honestNote": "Voortgang toont alleen de echte status en data die u invoert — geen automatisch of verzonnen percentage.",
@@ -675,6 +684,21 @@
       "unavailable": "Vergelijking met eerdere doorlooptijden kon nu niet worden gelezen.",
       "suggest": "Vergelijkbare fasen duurden {days} dagen ({observations} waargenomen) — dat zou eindigen op {date}.",
       "suggestApply": "Deze datum gebruiken"
+    },
+    "responsible": {
+      "label": "Verantwoordelijke",
+      "none": "Geen verantwoordelijke",
+      "unreadable": "Aangewezen (naam niet leesbaar)",
+      "noOptions": "Er zijn in deze organisatie nog geen actieve mensen om uit te kiezen.",
+      "saving": "Opslaan…",
+      "saved": "Verantwoordelijke bijgewerkt.",
+      "outcome": {
+        "needs_migration": "Een verantwoordelijke aanwijzen is nog niet beschikbaar — het werkt zodra de update is toegepast.",
+        "not_authorized": "U mag de verantwoordelijke van deze fase niet wijzigen.",
+        "invalid": "Deze persoon kan hier niet verantwoordelijk zijn (moet actief zijn in deze organisatie).",
+        "auth": "Meld u opnieuw aan.",
+        "error": "Opslaan mislukt. Probeer het opnieuw."
+      }
     }
   },
   "activityCentre": {
@@ -6030,10 +6054,16 @@
       "notAuthorized": "Je kunt alleen werknemers uit je eigen ploeg toewijzen aan je eigen projecten.",
       "noWorkers": "Je hebt nog geen toewijsbare werknemers in je ploeg.",
       "fromRoster": "Een werknemer aan dit object toewijzen",
-      "rosterOwnerOnly": "Teamleden worden door de eigenaar of beheerder van de organisatie aan projecten toegewezen. Mensen met een geaccepteerde boeking kunt u nog steeds toewijzen.",
+      "rosterOwnerOnly": "Teamleden worden door de eigenaar of beheerder van de organisatie of door een manager van het project aan projecten toegewezen. Mensen met een geaccepteerde boeking kunt u nog steeds toewijzen.",
+      "rosterOtherOrg": "Teamleden kunnen alleen aan projecten van uw eigen organisatie worden toegewezen. Dit project hoort bij een andere organisatie.",
       "rosterGroup": "Teamleden",
       "engagementGroup": "Kandidaten met geaccepteerd voorstel",
       "reservation": {
+        "precheckChecking": "Agenda wordt gecontroleerd…",
+        "precheckCollidesTitle": "Op deze dagen al ingepland — voordat je toewijst",
+        "precheckChoose": "Kies deze in plaats daarvan",
+        "precheckAssignAnyway": "Toch toewijzen",
+        "precheckAdvisory": "Alleen een waarschuwing: zojuist gecontroleerd en niet opnieuw gecontroleerd bij het opslaan. Er is nog niets toegewezen.",
         "collidesTitle": "Op deze dagen al vastgelegd",
         "notBlocking": "Dit blokkeert de toewijzing niet — jij beslist.",
         "alternativesTitle": "Vrij in deze periode",
@@ -10500,6 +10530,15 @@
       "error": "Het factureringsportaal kon niet worden geopend",
       "hint": "Opent het portaal van de betaalprovider om op te zeggen of de betaalmethode te wijzigen. Alleen testmodus — geen echte afschrijvingen."
     },
+    "refresh": {
+      "cta": "Factureringsstatus vernieuwen",
+      "working": "Controleren…",
+      "updated": "Je factureringsstatus is bijgewerkt vanuit de betaalprovider.",
+      "alreadyCurrent": "Je factureringsstatus is al up-to-date.",
+      "notFound": "De betaalprovider heeft voor deze werkruimte nog geen abonnement. Als je net hebt betaald, wacht dan even een minuut en probeer het opnieuw.",
+      "tryLater": "Controleren lukt nu niet. Er is niets gewijzigd - probeer het over een paar minuten opnieuw.",
+      "hint": "Vraagt de betaalprovider één keer op voor deze werkruimte. Alleen lezen - er wordt niets afgeschreven of gewijzigd."
+    },
     "subscribe": {
       "title": "Plan Organisatie",
       "cta": "Plan Organisatie activeren (tot 10 actieve posities)",
@@ -11076,9 +11115,12 @@
       "limit_reached": "Limiet voor open taken bereikt — rond eerst oudere taken af of annuleer ze.",
       "error": "Opslaan mislukt. Probeer het opnieuw.",
       "cycle": "Dat zou een lus maken — een taak kan niet via andere taken op zichzelf wachten.",
+      "invalid_structure": "Deze fase of bovenliggende taak is hier niet geldig (zelfde project, geen lussen, maximaal drie niveaus).",
       "evidence_linked": "Bewijs aan de taak gekoppeld.",
       "evidence_unlinked": "Koppeling ingetrokken. Het record zelf is ongewijzigd.",
-      "approval_requested": "Ter goedkeuring verstuurd."
+      "approval_requested": "Ter goedkeuring verstuurd.",
+      "relink_required": "Aan deze taak hangt al journaalbewijs, dus de fase kan niet veranderen. Ontkoppel eerst het bewijs en verplaats daarna de taak.",
+      "evidence_mismatch": "Dit journaalitem hoort bij een ander project of een andere organisatie dan de taak en kan niet worden gekoppeld."
     },
     "projectTasks": {
       "title": "Projecttaken",
@@ -11099,7 +11141,13 @@
       "label": "Toewijzen aan",
       "save": "Toewijzen"
     },
+    "advisory": {
+      "blockersOpen": "Status bijgewerkt. Let op: {n} van de taken waarvan deze afhangt zijn nog open. Er is niets geblokkeerd.",
+      "reservationLead": "Toegewezen. Agendacontrole voor de deadlinedag (alleen een waarschuwing):"
+    },
     "dependencies": {
+      "startedBeforeBlocker": "Gestart of afgerond voordat wat ervan afhangt klaar is ({n} nog open). Alleen een waarschuwing.",
+      "dueBeforeBlocker": "Deadline vóór een taak waarvan deze afhangt. Alleen een waarschuwing.",
       "waitingOn": "Wacht op {n}",
       "blockedBy": "Hangt af van",
       "hidden": "een taak die je niet kunt zien",
@@ -11125,6 +11173,8 @@
       }
     },
     "evidence": {
+      "by": "Door {name}",
+      "hours": "{hours} u geregistreerd",
       "title": "Bewijs",
       "intro": "Werkjournaal-records die aan deze taak zijn gekoppeld. Koppelen wijzigt een record nooit — het geeft alleen aan welke taak het aantoont.",
       "empty": "Er is nog geen werkjournaal-record aan deze taak gekoppeld.",
@@ -11163,6 +11213,35 @@
         "withdrawn": "Ingetrokken",
         "cancelled": "Geannuleerd"
       }
+    },
+    "structure": {
+      "subtask": "Subtaak",
+      "stageLabel": "Fase",
+      "stageNone": "Geen fase",
+      "parentLabel": "Bovenliggende taak",
+      "parentNone": "Geen (taak op het hoogste niveau)",
+      "parentHint": "Een subtaak volgt de fase van de bovenliggende taak. Maximaal drie niveaus.",
+      "parentHidden": "Bovenliggende taak (niet zichtbaar voor u)",
+      "createHint": "Om een taak aan een fase of bovenliggende taak te koppelen, opent u eerst de taken van een project (projectfilter).",
+      "filterLabel": "Filteren op fase",
+      "filterAll": "Alle fasen",
+      "unstaged": "Geen fase",
+      "stageEmpty": "Nog geen taken in deze fase.",
+      "stageStatus": {
+        "planned": "Gepland",
+        "in_progress": "In uitvoering",
+        "blocked": "Geblokkeerd",
+        "done": "Klaar",
+        "cancelled": "Geannuleerd"
+      },
+      "suggest": {
+        "open_work_in_done_stage": "Deze fase is als klaar gemarkeerd, maar er staan nog taken open. Overweeg de status {status}. (Alleen een suggestie - er verandert niets automatisch.)",
+        "all_done": "Alle taken in deze fase zijn klaar. Overweeg de fasestatus {status}. (Alleen een suggestie.)",
+        "has_blocked": "Een taak in deze fase is geblokkeerd. Overweeg de fasestatus {status}. (Alleen een suggestie.)",
+        "work_started": "Het werk aan deze fase is begonnen. Overweeg de status {status}. (Alleen een suggestie.)"
+      },
+      "attributionConflict": "Toewijzingsconflict: dit item hoort bij een ander project dan de taak",
+      "evidenceRollup": "Bewijs: {entries} items geteld ({conflicts} conflicten en {ambiguous} items met meerdere taken niet geteld)"
     }
   },
   "assist": {
@@ -16947,6 +17026,12 @@
       "disputeAlready": "U had dit record al betwist. Uw bezwaar is vastgelegd.",
       "disputeNotAllowed": "Alleen de persoon over wie dit record gaat kan het betwisten, en pas na een bevestigde koppeling.",
       "disputeFailed": "Het bezwaar kon niet worden vastgelegd. Probeer het opnieuw.",
+      "disputeWithdraw": "Mijn bezwaar intrekken",
+      "disputeWithdrawHint": "Door in te trekken vervalt uw bezwaar. Een vermelding ervan blijft vastgelegd: ze toont dat u bezwaar maakte en het daarna introk. U kunt later opnieuw bezwaar maken.",
+      "disputeWithdrawn": "Uw bezwaar is ingetrokken. Een vermelding ervan blijft vastgelegd en u kunt opnieuw bezwaar maken.",
+      "disputeNotStanding": "U hebt geen lopend bezwaar tegen dit record, dus er is niets veranderd.",
+      "disputeWithdrawnHistory": "U maakte bezwaar tegen dit record en trok het later in. Beide zijn vastgelegd.",
+      "disputeWithdrawFailed": "Het bezwaar kon niet worden ingetrokken. Probeer het opnieuw.",
       "monthlyShare": "Afgeleide gelijke maandverdeling · geen brondagen",
       "attestAll": "Alle {count} records bevestigen",
       "attestAllHint": "De organisatie staat achter elk nog niet bevestigd record uit deze bron ({count}). Eén bevestigingsgebeurtenis per record, met rol en notitie; uren, bronfeiten en records veranderen niet. Dit is geen onafhankelijke verificatie.",

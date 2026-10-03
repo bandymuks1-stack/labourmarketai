@@ -7,7 +7,8 @@ import { CompanyActionNextActions } from "@/components/app/company-action-next-a
 import { listProjectAssignments } from "@/lib/projects/projects";
 import { listProjectMap } from "@/lib/projects/map";
 import { getProjectsProgress } from "@/lib/projects/progress";
-import { listManagedWorkers } from "@/lib/instructions/instructions";
+import { listManagedWorkers, listCompanyRosterWorkers } from "@/lib/instructions/instructions";
+import { rosterAssignScope, rosterProjectIdsFor } from "@/lib/projects/assignment-authority";
 import { listBookingEngagementWorkers } from "@/lib/projects/booking-engagement-workers";
 import {
   ProjectAssignmentManager,
@@ -157,13 +158,23 @@ export default async function ProjectsPage({
   // (resolved above, before the branch) scopes them, and a manager without
   // a company workspace simply sees the projects surface as before.
   const ownCompanyId = employerCtx?.kind === "ok" ? employerCtx.companyId : null;
-  // `assign_worker_to_project` admits roster workers only for owner/admin
-  // (owns_company) or a platform admin; a manager is refused (42501). The
-  // form mirrors that so it never offers an action the database rejects.
-  const rosterAssignable =
-    employerCtx?.kind !== "ok" ||
-    projectOrganizationAuthority({ role: employerCtx.role }).canGovern ||
-    (await getSessionIsAdmin());
+  // `assign_worker_to_project` (migration 20261002142000) admits a roster
+  // worker for owner/admin or a platform admin, AND for a manager of the
+  // project's organization when the worker is on the ACTIVE roster of the
+  // company that owns the project. The form offers exactly that and nothing
+  // wider; the database still decides every write.
+  const isPlatformAdmin = await getSessionIsAdmin();
+  const assignScope = rosterAssignScope({
+    governs:
+      employerCtx?.kind === "ok" &&
+      projectOrganizationAuthority({ role: employerCtx.role }).canGovern,
+    isPlatformAdmin,
+    canOperate:
+      employerCtx?.kind === "ok" &&
+      projectOrganizationAuthority({ role: employerCtx.role }).canOperate,
+    hasCompanyContext: employerCtx?.kind === "ok",
+  });
+  const rosterAssignable = assignScope !== "none";
   const [
     allProjects,
     workers,
@@ -176,7 +187,9 @@ export default async function ProjectsPage({
     companyGalleryLabels,
   ] = await Promise.all([
     listProjectMap(),
-    listManagedWorkers(),
+    assignScope === "own-company-roster" && ownCompanyId
+      ? listCompanyRosterWorkers(ownCompanyId)
+      : listManagedWorkers(),
     // Accepted-booking engagement candidates (bridge v1) — a SEPARATE list,
     // never merged into the roster read; empty + honest until the owner
     // applies migration 20260723120000.
@@ -261,6 +274,7 @@ export default async function ProjectsPage({
     sending: t("sending"),
     assignFromRoster: t("assign.fromRoster"),
     rosterOwnerOnly: t("assign.rosterOwnerOnly"),
+    rosterOtherOrg: t("assign.rosterOtherOrg"),
     openBoard: t("map.openArena"),
     rosterGroupLabel: t("assign.rosterGroup"),
     engagementGroupLabel: t("assign.engagementGroup"),
@@ -272,6 +286,11 @@ export default async function ProjectsPage({
     reservationUndo: t("assign.reservation.undo"),
     reservationKeep: t("assign.reservation.keep"),
     reservationDecided: t("assign.reservation.decided"),
+    precheckChecking: t("assign.reservation.precheckChecking"),
+    precheckCollidesTitle: t("assign.reservation.precheckCollidesTitle"),
+    precheckChoose: t("assign.reservation.precheckChoose"),
+    precheckAssignAnyway: t("assign.reservation.precheckAssignAnyway"),
+    precheckAdvisory: t("assign.reservation.precheckAdvisory"),
     reservationSource: {
       project: t("assign.reservation.source.project"),
       booking: t("assign.reservation.source.booking"),
@@ -413,6 +432,11 @@ export default async function ProjectsPage({
           workers={workers}
           engagementWorkers={[...engagementResult.workers]}
           rosterAssignable={rosterAssignable}
+          rosterProjectIds={rosterProjectIdsFor(
+            assignScope,
+            withAssignments,
+            employerCtx?.kind === "ok" ? employerCtx.organizationId : null,
+          )}
           labels={labels}
         />
       </section>

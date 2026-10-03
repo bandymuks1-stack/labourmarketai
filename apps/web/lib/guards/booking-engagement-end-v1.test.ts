@@ -1521,9 +1521,23 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261001180000_public_vacancy_board_no_parallel_v1.sql",
       "20261001180100_drop_unused_vacancy_fulltext_gin_v1.sql",
       "20261002120000_journal_explicit_project_attribution_v1.sql",
+      // 2026-10-03: SECURITY forward-fix (NULL-safe authorization guards, auth-core) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      "20261002141500_work_task_authz_null_safe_v1.sql",
+      // owner 2026-10-01: a manager staffs a project they manage from that project company roster.
+      "20261002142000_manager_assigns_roster_worker_on_managed_project_v1.sql",
+      // 2026-10-03: EVID-6 policy narrowing (experience_responses_select resolves the reply moderation status) — marker is the human-gate acknowledgement; draft + needs-human-gate, NOT applied.
+      "20261002143000_experience_responses_select_reply_status_v1.sql",
+      // stage/subtask structure on work_tasks: RED draft, needs-human-gate.
+      "20261002150000_work_tasks_stage_and_subtask_v1.sql",
       // universal marketplace (draft RED PR, owner approval PENDING): marker only so CI reaches the human gate; NOT applied.
       "20261002170000_marketplace_index_v1.sql",
       "20261002170100_marketplace_public_business_expiry_v1.sql",
+      // 2026-10-03: #1815/ARCH-4 disclosure-authority forward fix (list_agency_offered_candidates_for_request_v2 regains the connection/share gate) — marker is the human-gate acknowledgement.
+      "20261003100000_list_agency_offered_candidates_v2_connection_gate_v1.sql",
+      "20261003110000_subject_contest_withdraw_v1.sql",
+      // 2026-10-03: PER-12 subject-safe export projection (new SECURITY DEFINER read fn) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      "20261003120000_privacy_export_import_lines_subject_v1.sql",
+      "20261003140000_subject_contest_withdraw_constraint_reconcile_v1.sql",
 ]);
   });
 

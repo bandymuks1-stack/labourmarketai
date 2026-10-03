@@ -634,6 +634,15 @@
     "ganttEmpty": "Pridėkite etapams planuojamas datas, kad matytumėte laiko juostą.",
     "ganttToday": "Šiandien",
     "ganttOverdue": "Vėluoja",
+    "ganttNoDates": "Be datų",
+    "ganttDue": "Terminas",
+    "ganttNoWindow": "Datų dar nėra – etapai ir užduotys be datų išvardyti žemiau.",
+    "ganttColActivity": "Veikla",
+    "ganttColStatus": "Būsena",
+    "ganttColResponsible": "Atsakingas",
+    "ganttColTime": "Laikas",
+    "ganttBlocks": "Blokuoja",
+    "ganttNoStageGroup": "Nepriskirta etapui",
     "title": "Projekto etapai",
     "intro": "Nuoseklūs šio projekto etapai — pridėkite etapą, nustatykite realią būseną ir planuojamas datas.",
     "honestNote": "Pažanga rodo tik jūsų įvestą realią būseną ir datas — jokių automatinių ar išgalvotų procentų.",
@@ -675,6 +684,21 @@
       "unavailable": "Šiuo metu nepavyko perskaityti ankstesnių trukmių.",
       "suggest": "Panašūs etapai truko {days} d. (stebėta {observations}) — tai baigtųsi {date}.",
       "suggestApply": "Naudoti šią datą"
+    },
+    "responsible": {
+      "label": "Atsakingas",
+      "none": "Atsakingo nėra",
+      "unreadable": "Priskirta (vardas nematomas)",
+      "noOptions": "Šioje organizacijoje dar nėra aktyvių žmonių, iš kurių galima rinktis.",
+      "saving": "Saugoma…",
+      "saved": "Atsakingas atnaujintas.",
+      "outcome": {
+        "needs_migration": "Atsakingo priskyrimas dar nepasiekiamas — veiks pritaikius atnaujinimą.",
+        "not_authorized": "Neturite teisės keisti šio etapo atsakingo.",
+        "invalid": "Šis asmuo čia negali būti atsakingas (jis turi būti aktyvus šioje organizacijoje).",
+        "auth": "Prisijunkite iš naujo.",
+        "error": "Nepavyko išsaugoti. Bandykite dar kartą."
+      }
     }
   },
   "activityCentre": {
@@ -6030,10 +6054,16 @@
       "notAuthorized": "Galite priskirti tik savo komandos darbuotojus savo projektams.",
       "noWorkers": "Kol kas neturite priskirtinų darbuotojų komandoje.",
       "fromRoster": "Priskirti darbuotoją šiam objektui",
-      "rosterOwnerOnly": "Komandos darbuotojus prie projektų priskiria organizacijos savininkas arba administratorius. Galite priskirti žmones, kurių rezervacija jau priimta.",
+      "rosterOwnerOnly": "Komandos darbuotojus prie projektų priskiria organizacijos savininkas, administratorius arba projekto vadovas. Galite priskirti žmones, kurių rezervacija jau priimta.",
+      "rosterOtherOrg": "Komandos narius galima priskirti tik savo organizacijos projektams. Šis projektas priklauso kitai organizacijai.",
       "rosterGroup": "Komandos nariai",
       "engagementGroup": "Priimto pasiūlymo kandidatai",
       "reservation": {
+        "precheckChecking": "Tikrinamas kalendorius…",
+        "precheckCollidesTitle": "Šiomis dienomis jau įsipareigota — prieš priskiriant",
+        "precheckChoose": "Rinktis šį",
+        "precheckAssignAnyway": "Vis tiek priskirti",
+        "precheckAdvisory": "Tik perspėjimas: patikrinta ką tik ir nepatikrinama iš naujo išsaugant. Kol kas nieko nepriskirta.",
         "collidesTitle": "Šiomis dienomis jau turi įsipareigojimų",
         "notBlocking": "Tai neužkerta kelio priskyrimui — sprendimas jūsų.",
         "alternativesTitle": "Laisvi šiomis dienomis",
@@ -10500,6 +10530,15 @@
       "error": "Nepavyko atidaryti mokėjimų portalo",
       "hint": "Atidaro mokėjimų teikėjo portalą, kuriame galima atšaukti prenumeratą ar pakeisti mokėjimo priemonę. Tik testavimo režimas — jokių tikrų mokesčių."
     },
+    "refresh": {
+      "cta": "Atnaujinti mokėjimų būseną",
+      "working": "Tikrinama…",
+      "updated": "Jūsų mokėjimų būsena atnaujinta pagal mokėjimų tiekėją.",
+      "alreadyCurrent": "Jūsų mokėjimų būsena jau atnaujinta.",
+      "notFound": "Mokėjimų tiekėjas šiai darbo erdvei dar neturi prenumeratos. Jei ką tik sumokėjote, palaukite minutę ir bandykite dar kartą.",
+      "tryLater": "Dabar patikrinti nepavyko. Niekas nebuvo pakeista - bandykite dar kartą po keleto minučių.",
+      "hint": "Vieną kartą pasitikrina mokėjimų tiekėją šiai darbo erdvei. Tik skaito - niekas nenuskaičiuojama ir nekeičiama."
+    },
     "subscribe": {
       "title": "Planas „Organizacija“",
       "cta": "Aktyvuoti planą „Organizacija“ (iki 10 aktyvių pozicijų)",
@@ -11076,9 +11115,12 @@
       "limit_reached": "Pasiektas atvirų užduočių limitas — pirmiausia užbaikite ar atšaukite senesnes.",
       "error": "Nepavyko išsaugoti. Pabandykite dar kartą.",
       "cycle": "Taip susidarytų ratas — užduotis negali laukti pati savęs per kitas užduotis.",
+      "invalid_structure": "Šis etapas ar pagrindinė užduotis čia netinka (turi būti to paties projekto, be ciklų ir ne giliau nei trys lygiai).",
       "evidence_linked": "Įrodymas susietas su užduotimi.",
       "evidence_unlinked": "Susiejimas atšauktas. Pats įrašas nepakito.",
-      "approval_requested": "Išsiųsta tvirtinti."
+      "approval_requested": "Išsiųsta tvirtinti.",
+      "relink_required": "Prie šios užduoties jau pridėti žurnalo įrodymai, todėl jos etapo pakeisti negalima. Pirmiausia atsekite įrodymus, tada perkelkite užduotį.",
+      "evidence_mismatch": "Šis žurnalo įrašas priklauso kitam projektui ar organizacijai nei užduotis, todėl jo pridėti negalima."
     },
     "projectTasks": {
       "title": "Projekto užduotys",
@@ -11099,7 +11141,13 @@
       "label": "Priskirti",
       "save": "Priskirti"
     },
+    "advisory": {
+      "blockersOpen": "Būsena atnaujinta. Dėmesio: dar atvirų užduočių, nuo kurių ji priklauso: {n}. Nieko neblokuota.",
+      "reservationLead": "Priskirta. Kalendoriaus patikra užduoties termino dienai (tik perspėjimas):"
+    },
     "dependencies": {
+      "startedBeforeBlocker": "Pradėta ar atlikta anksčiau, nei baigta tai, nuo ko ji priklauso (dar atvirų: {n}). Tik perspėjimas.",
+      "dueBeforeBlocker": "Terminas anksčiau nei užduoties, nuo kurios ji priklauso. Tik perspėjimas.",
       "waitingOn": "Laukia {n}",
       "blockedBy": "Priklauso nuo",
       "hidden": "užduotis, kurios nematote",
@@ -11125,6 +11173,8 @@
       }
     },
     "evidence": {
+      "by": "Autorius: {name}",
+      "hours": "Užfiksuota: {hours} val.",
       "title": "Įrodymai",
       "intro": "Darbo dienoraščio įrašai, susieti su šia užduotimi. Susiejimas nekeičia įrašo — jis tik nurodo, kurią užduotį įrašas įrodo.",
       "empty": "Su šia užduotimi dar nesusietas nė vienas Darbo dienoraščio įrašas.",
@@ -11163,6 +11213,35 @@
         "withdrawn": "Atšaukta",
         "cancelled": "Nutraukta"
       }
+    },
+    "structure": {
+      "subtask": "Použduotis",
+      "stageLabel": "Etapas",
+      "stageNone": "Be etapo",
+      "parentLabel": "Pagrindinė užduotis",
+      "parentNone": "Be pagrindinės (aukščiausio lygio užduotis)",
+      "parentHint": "Použduotis seka savo pagrindinės užduoties etapą. Iki trijų lygių.",
+      "parentHidden": "Pagrindinė užduotis (jums nematoma)",
+      "createHint": "Norėdami užduotį priskirti etapui ar pagrindinei užduočiai, pirmiausia atidarykite projekto užduotis (projekto filtras).",
+      "filterLabel": "Filtruoti pagal etapą",
+      "filterAll": "Visi etapai",
+      "unstaged": "Be etapo",
+      "stageEmpty": "Šiame etape užduočių dar nėra.",
+      "stageStatus": {
+        "planned": "Planuojama",
+        "in_progress": "Vykdoma",
+        "blocked": "Užblokuota",
+        "done": "Atlikta",
+        "cancelled": "Atšaukta"
+      },
+      "suggest": {
+        "open_work_in_done_stage": "Etapas pažymėtas kaip atliktas, bet dar yra neužbaigtų užduočių. Apsvarstykite būseną: {status}. (Tik pasiūlymas - nieko automatiškai nekeičiama.)",
+        "all_done": "Visos šio etapo užduotys atliktos. Apsvarstykite etapo būseną: {status}. (Tik pasiūlymas.)",
+        "has_blocked": "Viena šio etapo užduotis užblokuota. Apsvarstykite etapo būseną: {status}. (Tik pasiūlymas.)",
+        "work_started": "Šio etapo darbai prasidėjo. Apsvarstykite būseną: {status}. (Tik pasiūlymas.)"
+      },
+      "attributionConflict": "Priskyrimo konfliktas: šis įrašas priklauso kitam projektui nei užduotis",
+      "evidenceRollup": "Įrodymai: {entries} įrašų įskaityta ({conflicts} konfliktų ir {ambiguous} keliom užduotims priskirtų įrašų neįskaityta)"
     }
   },
   "assist": {
@@ -16947,6 +17026,12 @@
       "disputeAlready": "Šį įrašą jau buvote užginčiję. Jūsų prieštaravimas užfiksuotas.",
       "disputeNotAllowed": "Užginčyti gali tik asmuo, apie kurį įrašas, ir tik patvirtinus sąsają su sąrašu.",
       "disputeFailed": "Nepavyko užfiksuoti prieštaravimo. Bandykite dar kartą.",
+      "disputeWithdraw": "Atšaukti mano prieštaravimą",
+      "disputeWithdrawHint": "Atšaukus prieštaravimas nebegalioja. Jo įrašas lieka: matyti, kad prieštaravote ir vėliau atšaukėte. Vėliau galite prieštarauti iš naujo.",
+      "disputeWithdrawn": "Jūsų prieštaravimas atšauktas. Jo įrašas lieka, o prieštarauti galite iš naujo.",
+      "disputeNotStanding": "Šiam įrašui neturite galiojančio prieštaravimo, todėl niekas nepasikeitė.",
+      "disputeWithdrawnHistory": "Šiam įrašui prieštaravote, o vėliau prieštaravimą atšaukėte. Abu veiksmai užfiksuoti.",
+      "disputeWithdrawFailed": "Nepavyko atšaukti prieštaravimo. Bandykite dar kartą.",
       "monthlyShare": "Išvestinis lygus mėnesio paskirstymas · ne šaltinio dienos",
       "attestAll": "Patvirtinti visus {count} įrašus",
       "attestAllHint": "Organizacija patvirtina visus dar nepatvirtintus šio šaltinio įrašus ({count}). Kiekvienam įrašui įrašomas atskiras patvirtinimo įvykis su vaidmeniu ir pastaba; valandos, šaltinio faktai ir įrašai nekeičiami. Tai nėra nepriklausomas patikrinimas.",

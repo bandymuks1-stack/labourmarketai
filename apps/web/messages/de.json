@@ -634,6 +634,15 @@
     "ganttEmpty": "Fügen Sie Ihren Phasen geplante Termine hinzu, um die Zeitleiste zu sehen.",
     "ganttToday": "Heute",
     "ganttOverdue": "Überfällig",
+    "ganttNoDates": "Ohne Termine",
+    "ganttDue": "Fällig",
+    "ganttNoWindow": "Noch keine Termine erfasst – Phasen und Aufgaben ohne Termine stehen unten.",
+    "ganttColActivity": "Aktivität",
+    "ganttColStatus": "Stand",
+    "ganttColResponsible": "Verantwortlich",
+    "ganttColTime": "Zeit",
+    "ganttBlocks": "Blockiert",
+    "ganttNoStageGroup": "Keiner Phase zugeordnet",
     "title": "Projektphasen",
     "intro": "Aufeinanderfolgende Phasen dieses Projekts — fügen Sie eine Phase hinzu, legen Sie den echten Status und geplante Termine fest.",
     "honestNote": "Der Fortschritt zeigt nur den von Ihnen erfassten echten Status und Termine — keine automatischen oder erfundenen Prozentwerte.",
@@ -675,6 +684,21 @@
       "unavailable": "Der Vergleich mit früheren Dauern konnte gerade nicht gelesen werden.",
       "suggest": "Vergleichbare Phasen dauerten {days} Tage ({observations} beobachtet) — das würde am {date} enden.",
       "suggestApply": "Dieses Datum übernehmen"
+    },
+    "responsible": {
+      "label": "Verantwortlich",
+      "none": "Keine verantwortliche Person",
+      "unreadable": "Benannt (Name nicht lesbar)",
+      "noOptions": "In dieser Organisation gibt es noch keine aktiven Personen zur Auswahl.",
+      "saving": "Wird gespeichert…",
+      "saved": "Verantwortliche Person aktualisiert.",
+      "outcome": {
+        "needs_migration": "Die Benennung einer verantwortlichen Person ist noch nicht verfügbar — sie funktioniert nach dem Update.",
+        "not_authorized": "Sie dürfen die verantwortliche Person dieser Phase nicht ändern.",
+        "invalid": "Diese Person kann hier nicht verantwortlich sein (sie muss in dieser Organisation aktiv sein).",
+        "auth": "Bitte melden Sie sich erneut an.",
+        "error": "Speichern nicht möglich. Bitte erneut versuchen."
+      }
     }
   },
   "activityCentre": {
@@ -6030,10 +6054,16 @@
       "notAuthorized": "Sie können nur Arbeitskräfte aus Ihrem Team Ihren eigenen Projekten zuweisen.",
       "noWorkers": "Sie haben noch keine zuweisbaren Arbeitskräfte in Ihrem Team.",
       "fromRoster": "Eine Arbeitskraft diesem Objekt zuweisen",
-      "rosterOwnerOnly": "Teammitglieder werden von der Inhaberin bzw. dem Inhaber oder einer Administration der Organisation Projekten zugewiesen. Personen mit angenommener Buchung können Sie weiterhin zuweisen.",
+      "rosterOwnerOnly": "Teammitglieder werden von der Inhaberin bzw. dem Inhaber, einer Administration der Organisation oder einer Projektleitung Projekten zugewiesen. Personen mit angenommener Buchung können Sie weiterhin zuweisen.",
+      "rosterOtherOrg": "Teammitglieder können nur Projekten Ihrer eigenen Organisation zugewiesen werden. Dieses Projekt gehört zu einer anderen Organisation.",
       "rosterGroup": "Teammitglieder",
       "engagementGroup": "Kandidaten mit angenommenem Angebot",
       "reservation": {
+        "precheckChecking": "Kalender wird geprüft…",
+        "precheckCollidesTitle": "An diesen Tagen bereits gebunden — vor der Zuweisung",
+        "precheckChoose": "Stattdessen wählen",
+        "precheckAssignAnyway": "Trotzdem zuweisen",
+        "precheckAdvisory": "Nur ein Hinweis: gerade geprüft und beim Speichern nicht erneut geprüft. Es wurde noch nichts zugewiesen.",
         "collidesTitle": "An diesen Tagen bereits verplant",
         "notBlocking": "Das blockiert die Zuweisung nicht — Sie entscheiden.",
         "alternativesTitle": "In diesem Zeitraum frei",
@@ -10500,6 +10530,15 @@
       "error": "Das Abrechnungsportal konnte nicht geöffnet werden",
       "hint": "Öffnet das Portal des Zahlungsanbieters zum Kündigen oder Ändern der Zahlungsmethode. Nur Testmodus — keine echten Abbuchungen."
     },
+    "refresh": {
+      "cta": "Abrechnungsstatus aktualisieren",
+      "working": "Wird geprüft…",
+      "updated": "Dein Abrechnungsstatus wurde beim Zahlungsanbieter aktualisiert.",
+      "alreadyCurrent": "Dein Abrechnungsstatus ist bereits aktuell.",
+      "notFound": "Der Zahlungsanbieter hat für diesen Arbeitsbereich noch kein Abonnement. Wenn du gerade bezahlt hast, warte eine Minute und versuche es erneut.",
+      "tryLater": "Im Moment nicht prüfbar. Es wurde nichts geändert - bitte versuche es in ein paar Minuten erneut.",
+      "hint": "Fragt den Zahlungsanbieter einmal für diesen Arbeitsbereich ab. Nur lesend - nichts wird abgebucht oder geändert."
+    },
     "subscribe": {
       "title": "Plan „Organisation“",
       "cta": "Plan „Organisation“ aktivieren (bis zu 10 aktive Positionen)",
@@ -11076,9 +11115,12 @@
       "limit_reached": "Limit offener Aufgaben erreicht — schließen Sie zuerst ältere Aufgaben ab oder brechen Sie sie ab.",
       "error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
       "cycle": "Das würde eine Schleife erzeugen — eine Aufgabe kann nicht über andere Aufgaben auf sich selbst warten.",
+      "invalid_structure": "Diese Phase oder übergeordnete Aufgabe ist hier nicht gültig (gleiches Projekt, keine Schleifen, höchstens drei Ebenen).",
       "evidence_linked": "Nachweis mit der Aufgabe verknüpft.",
       "evidence_unlinked": "Verknüpfung zurückgezogen. Der Eintrag selbst bleibt unverändert.",
-      "approval_requested": "Zur Freigabe gesendet."
+      "approval_requested": "Zur Freigabe gesendet.",
+      "relink_required": "An dieser Aufgabe hängen bereits Journalnachweise, daher kann ihre Phase nicht geändert werden. Lösen Sie zuerst die Nachweise, dann verschieben Sie die Aufgabe.",
+      "evidence_mismatch": "Dieser Journaleintrag gehört zu einem anderen Projekt oder einer anderen Organisation als die Aufgabe und kann nicht angehängt werden."
     },
     "projectTasks": {
       "title": "Projektaufgaben",
@@ -11099,7 +11141,13 @@
       "label": "Zuweisen an",
       "save": "Zuweisen"
     },
+    "advisory": {
+      "blockersOpen": "Status aktualisiert. Hinweis: {n} der Aufgaben, von denen sie abhängt, sind noch offen. Nichts wurde blockiert.",
+      "reservationLead": "Zugewiesen. Kalenderprüfung für den Fälligkeitstag (nur ein Hinweis):"
+    },
     "dependencies": {
+      "startedBeforeBlocker": "Begonnen oder erledigt, bevor das, wovon sie abhängt, fertig ist ({n} noch offen). Nur ein Hinweis.",
+      "dueBeforeBlocker": "Fällig vor einer Aufgabe, von der sie abhängt. Nur ein Hinweis.",
       "waitingOn": "Wartet auf {n}",
       "blockedBy": "Hängt ab von",
       "hidden": "eine Aufgabe, die Sie nicht sehen können",
@@ -11125,6 +11173,8 @@
       }
     },
     "evidence": {
+      "by": "Von {name}",
+      "hours": "{hours} Std. erfasst",
       "title": "Nachweise",
       "intro": "Arbeitsjournal-Einträge, die mit dieser Aufgabe verknüpft sind. Das Verknüpfen ändert einen Eintrag nie — es zeigt nur, welche Aufgabe er belegt.",
       "empty": "Mit dieser Aufgabe ist noch kein Arbeitsjournal-Eintrag verknüpft.",
@@ -11163,6 +11213,35 @@
         "withdrawn": "Zurückgezogen",
         "cancelled": "Storniert"
       }
+    },
+    "structure": {
+      "subtask": "Teilaufgabe",
+      "stageLabel": "Phase",
+      "stageNone": "Keine Phase",
+      "parentLabel": "Übergeordnete Aufgabe",
+      "parentNone": "Keine (Aufgabe auf oberster Ebene)",
+      "parentHint": "Eine Teilaufgabe folgt der Phase ihrer übergeordneten Aufgabe. Bis zu drei Ebenen.",
+      "parentHidden": "Übergeordnete Aufgabe (für Sie nicht sichtbar)",
+      "createHint": "Um eine Aufgabe einer Phase oder einer übergeordneten Aufgabe zuzuordnen, öffnen Sie zuerst die Aufgaben eines Projekts (Projektfilter).",
+      "filterLabel": "Nach Phase filtern",
+      "filterAll": "Alle Phasen",
+      "unstaged": "Keine Phase",
+      "stageEmpty": "In dieser Phase gibt es noch keine Aufgaben.",
+      "stageStatus": {
+        "planned": "Geplant",
+        "in_progress": "In Arbeit",
+        "blocked": "Blockiert",
+        "done": "Erledigt",
+        "cancelled": "Abgebrochen"
+      },
+      "suggest": {
+        "open_work_in_done_stage": "Diese Phase ist als erledigt markiert, es sind aber noch Aufgaben offen. Erwägen Sie den Status {status}. (Nur ein Vorschlag - nichts ändert sich automatisch.)",
+        "all_done": "Alle Aufgaben dieser Phase sind erledigt. Erwägen Sie den Phasenstatus {status}. (Nur ein Vorschlag.)",
+        "has_blocked": "Eine Aufgabe dieser Phase ist blockiert. Erwägen Sie den Phasenstatus {status}. (Nur ein Vorschlag.)",
+        "work_started": "Die Arbeit an dieser Phase hat begonnen. Erwägen Sie den Status {status}. (Nur ein Vorschlag.)"
+      },
+      "attributionConflict": "Zuordnungskonflikt: Dieser Eintrag gehört zu einem anderen Projekt als die Aufgabe",
+      "evidenceRollup": "Nachweise: {entries} Einträge gezählt ({conflicts} Konflikte und {ambiguous} Einträge mit mehreren Aufgaben nicht gezählt)"
     }
   },
   "assist": {
@@ -16947,6 +17026,12 @@
       "disputeAlready": "Sie hatten diesen Eintrag bereits bestritten. Ihr Widerspruch ist dokumentiert.",
       "disputeNotAllowed": "Nur die Person, um die es in diesem Eintrag geht, kann ihn bestreiten — und erst nach bestätigter Zuordnung.",
       "disputeFailed": "Der Widerspruch konnte nicht festgehalten werden. Bitte erneut versuchen.",
+      "disputeWithdraw": "Meinen Widerspruch zurückziehen",
+      "disputeWithdrawHint": "Mit dem Zurückziehen endet Ihr Widerspruch. Ein Vermerk darüber bleibt dokumentiert: Er zeigt, dass Sie widersprochen und dann zurückgezogen haben. Sie können später erneut widersprechen.",
+      "disputeWithdrawn": "Ihr Widerspruch ist zurückgezogen. Ein Vermerk darüber bleibt dokumentiert, und Sie können erneut widersprechen.",
+      "disputeNotStanding": "Zu diesem Eintrag besteht kein Widerspruch von Ihnen, daher hat sich nichts geändert.",
+      "disputeWithdrawnHistory": "Sie haben diesem Eintrag widersprochen und den Widerspruch später zurückgezogen. Beides ist dokumentiert.",
+      "disputeWithdrawFailed": "Der Widerspruch konnte nicht zurückgezogen werden. Bitte erneut versuchen.",
       "monthlyShare": "Abgeleitete gleichmäßige Monatsverteilung · keine Quelltage",
       "attestAll": "Alle {count} Einträge bestätigen",
       "attestAllHint": "Die Organisation steht hinter jedem noch nicht bestätigten Eintrag aus dieser Quelle ({count}). Ein Bestätigungsereignis je Eintrag, mit Rolle und Notiz; Stunden, Quellfakten und Einträge bleiben unverändert. Keine unabhängige Prüfung.",

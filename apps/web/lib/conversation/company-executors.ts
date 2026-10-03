@@ -403,7 +403,7 @@ export const COMPANY_EXECUTORS: {
     }
     if (r.kind === "needs_migration") return { ok: false, code: "needs_migration" };
     if (r.kind === "not_authorized") return { ok: false, code: "not_authorized" };
-    if (r.kind === "invalid" || r.kind === "not_found" || r.kind === "limit_reached" || r.kind === "cycle") return { ok: false, code: "invalid" };
+    if (r.kind === "invalid" || r.kind === "not_found" || r.kind === "limit_reached" || r.kind === "cycle" || r.kind === "invalid_structure") return { ok: false, code: "invalid" };
     return { ok: false, code: "error" };
   },
 
