@@ -1,0 +1,56 @@
+# Billing recovery cadence: bounded sweep that reads Stripe for subscriptions
+# awaiting provider sync (checkout completed, subscription event never landed) and
+# applies them through the SAME canonical primitive as the webhook. It never
+# creates, changes, cancels or refunds a payment.
+#
+# Why GitHub Actions and not vercel.json: the Vercel Hobby plan already holds the
+# maximum number of crons; the job-alerts and supply cadences do the same.
+#
+# INERT BY DEFAULT: no-ops until the repo variable BILLING_RECOVERY_SCHEDULE_ENABLED=true
+# and the secret CRON_SECRET are set in the GitHub console (never committed).
+# Two independent switches: this schedule variable AND the server env BILLING_RECOVERY_ENABLED=true
+# (default OFF; a valid CRON_SECRET alone never permits recovery writes).
+# Kill switch: unset the variable. The endpoint returns 503 + a reason code while
+# billing is inactive or the billing tables are absent.
+name: billing-recovery-cadence
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: billing-recovery-cadence
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Gate
+        id: gate
+        env:
+          ENABLED: ${{ vars.BILLING_RECOVERY_SCHEDULE_ENABLED }}
+          HAS_SECRET: ${{ secrets.CRON_SECRET != '' }}
+        run: |
+          if [ "$ENABLED" != "true" ] || [ "$HAS_SECRET" != "true" ]; then
+            echo "gated=true" >> "$GITHUB_OUTPUT"
+            echo "Inert: BILLING_RECOVERY_SCHEDULE_ENABLED / CRON_SECRET not configured (designed no-op)."
+          else
+            echo "gated=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Run the recovery sweep
+        if: steps.gate.outputs.gated == 'false'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          code=$(curl -sS -o body.json -w "%{http_code}" -H "Authorization: Bearer $CRON_SECRET" https://labourmarket.ai/api/cron/billing-recovery)
+          echo "status=$code"
+          cat body.json
+          # Server capability flag OFF (BILLING_RECOVERY_ENABLED unset) is a designed no-op, not a red run.
+          if [ "$code" = "503" ] && grep -q "\"recovery_disabled\"" body.json; then echo "Server recovery flag OFF (designed no-op)"; exit 0; fi
+          [ "$code" = "200" ]
