@@ -440,8 +440,8 @@ create trigger marketplace_listings_publish_guard_trg
 create or replace view public.market_index_v1
 with (security_invoker = true) as
 select
-  'marketplace_listings'::text                    as source_table,
-  m.id                                            as source_id,
+  'marketplace_listings'::text                    as origin_table,
+  m.id                                            as origin_id,
   m.owner_id                                      as owner_id,
   m.organization_id                               as organization_id,
   coalesce(r.domain, 'other')::text               as domain,

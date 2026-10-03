@@ -112,12 +112,9 @@ function formatAmount(amount: number, currency: string | null, locale: string): 
   }
 }
 
-function formatDate(iso: string, locale: string): string {
-  try {
-    return new Date(iso).toLocaleDateString(locale);
-  } catch {
-    return iso.slice(0, 10);
-  }
+function formatDate(iso: string): string {
+  // Locale-independent ISO date (no toLocaleDateString hydration risk).
+  return iso.slice(0, 10);
 }
 
 export function MarketplaceListingsSection({
@@ -578,7 +575,7 @@ export function MarketplaceListingsSection({
                           ? ` · ${row.priceText}`
                           : ""}
                       {row.quantity != null ? ` · ${row.quantity}${row.unit ? ` ${row.unit}` : ""}` : ""}
-                      {row.expiresAt ? ` · ${t("expiresOn", { date: formatDate(row.expiresAt, locale) })}` : ""}
+                      {row.expiresAt ? ` · ${t("expiresOn", { date: formatDate(row.expiresAt) })}` : ""}
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-1">
@@ -743,7 +740,7 @@ export function MarketplaceListingsSection({
                       ? ` · ${row.priceText}`
                       : ""}
                   {row.quantity != null ? ` · ${row.quantity}${row.unit ? ` ${row.unit}` : ""}` : ""}
-                  {row.expiresAt ? ` · ${t("expiresOn", { date: formatDate(row.expiresAt, locale) })}` : ""}
+                  {row.expiresAt ? ` · ${t("expiresOn", { date: formatDate(row.expiresAt) })}` : ""}
                 </p>
                 {row.description && (
                   <p className="line-clamp-3 text-sm text-text-secondary">{row.description}</p>

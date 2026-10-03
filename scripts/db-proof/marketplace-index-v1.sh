@@ -62,29 +62,29 @@ echo "== write RPCs v2"
 NEW=$(as authenticated $U1 "select create_marketplace_listing_v2('sale','goods_handmade','Handmade bench',null,'LT','Vilnius','200 EUR',null,null,200,'eur',1,'pcs',now()+interval '30 days')")
 if [ ${#NEW} -eq 36 ]; then ok "create v2 goods listing"; else bad "create v2" "$NEW"; fi
 as authenticated $U1 "select set_marketplace_listing_status_v2('$NEW','active')" >/dev/null
-chk "currency upper-cased, direction/domain derived" "EUR|offer|goods" "$($PSQL -c "select currency||'|'||direction||'|'||domain from market_index_v1 where source_id='$NEW'")"
+chk "currency upper-cased, direction/domain derived" "EUR|offer|goods" "$($PSQL -c "select currency||'|'||direction||'|'||domain from market_index_v1 where origin_id='$NEW'")"
 chk "price w/o currency refused" "ERROR: currency required" "$(as authenticated $U1 "select create_marketplace_listing_v2('sale','goods_other','Jam jars',null,null,null,null,null,null,5)")"
 chk "unknown category refused" "ERROR: invalid category" "$(as authenticated $U1 "select create_marketplace_listing_v2('sale','weapons','Something here')")"
 chk "past expiry refused" "ERROR: expires_at must be in the future" "$(as authenticated $U1 "select create_marketplace_listing_v2('sale','goods_other','Jam jars',null,null,null,null,null,null,null,null,null,null,now()-interval '1 day')")"
 chk "foreign org refused" "ERROR: not authorized for organization" "$(as authenticated $U2 "select create_marketplace_listing_v2('sale','goods_other','Jam jars',null,null,null,null,'$ORG')")"
 PW=$(as authenticated $U1 "select create_marketplace_listing_v2('wanted','project_work','Need roofing crew',null,null,null,null,'$ORG','$PRJ')")
 chk "project need by manager ok" "36" "${#PW}"
-chk "project need is direction need / domain project_work" "need|project_work" "$($PSQL -c "update marketplace_listings set status='active' where id='$PW'" >/dev/null; $PSQL -c "select direction||'|'||domain from market_index_v1 where source_id='$PW'")"
+chk "project need is direction need / domain project_work" "need|project_work" "$($PSQL -c "update marketplace_listings set status='active' where id='$PW'" >/dev/null; $PSQL -c "select direction||'|'||domain from market_index_v1 where origin_id='$PW'")"
 chk "non-owner cannot update" "ERROR: not authorized" "$(as authenticated $U2 "select update_marketplace_listing_v2('$NEW','Hacked title','goods_other','sale')")"
 as authenticated $U1 "select set_marketplace_listing_status_v2('$NEW','paused')" >/dev/null
-chk "paused leaves index" "0" "$($PSQL -c "select count(*) from market_index_v1 where source_id='$NEW'")"
+chk "paused leaves index" "0" "$($PSQL -c "select count(*) from market_index_v1 where origin_id='$NEW'")"
 $PSQL -c "update market_subject_types set active=false where subject='goods_handmade'" >/dev/null
 chk "backstop: v1 set_status cannot bypass hook" "ERROR: invalid category" "$(as authenticated $U1 "select set_marketplace_listing_status_v1('$NEW','active')")"
 $PSQL -c "update market_subject_types set active=true where subject='goods_handmade'" >/dev/null
 
 echo "== expiry"
 $PSQL -c "update marketplace_listings set status='active', expires_at=now()-interval '1 minute', organization_id='$ORG' where id='$NEW'" >/dev/null 2>&1
-chk "expired excluded from index" "0" "$($PSQL -c "select count(*) from market_index_v1 where source_id='$NEW'")"
+chk "expired excluded from index" "0" "$($PSQL -c "select count(*) from market_index_v1 where origin_id='$NEW'")"
 chk "owner still reads own expired row" "1" "$(as authenticated $U1 "select count(*) from marketplace_listings where id='$NEW'")"
 chk "other user cannot read expired row" "0" "$(as authenticated $U2 "select count(*) from marketplace_listings where id='$NEW'")"
 chk "anon public business fn hides expired (shows 2 non-expired active)" "2" "$(as anon $U2 "select count(*) from get_public_business_listings_v1('$ORG')")"
 $PSQL -c "update service_offerings set expires_at=now()-interval '1 day'" >/dev/null
-chk "expired service offering excluded" "0" "$($PSQL -c "select count(*) from market_index_v1 where source_table='service_offerings'")"
+chk "expired service offering excluded" "0" "$($PSQL -c "select count(*) from market_index_v1 where origin_table='service_offerings'")"
 
 echo "== rollback"
 chk "rollback guarded when data present" "1" "$($PSQL -f "$LFD/20261002170000_marketplace_index_v1.down.sql" 2>&1 | grep -c 'rollback refused')"

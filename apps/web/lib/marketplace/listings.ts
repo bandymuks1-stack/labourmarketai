@@ -117,7 +117,7 @@ const LEGACY_COLS =
 const EXTENDED_COLS = `${LEGACY_COLS}, price_amount, currency, quantity, unit, expires_at`;
 
 const INDEX_COLS =
-  "source_table, source_id, owner_id, organization_id, domain, subject, direction, title, description, location_country, location_label, price_text, price_amount, currency, quantity, unit, expires_at, created_at, updated_at, destination_path, contact_action";
+  "origin_table, origin_id, owner_id, organization_id, domain, subject, direction, title, description, location_country, location_label, price_text, price_amount, currency, quantity, unit, expires_at, created_at, updated_at, destination_path, contact_action";
 
 /** The caller's OWN listings (every status), newest first. */
 export async function listMyMarketplaceListings(): Promise<MarketplaceListingListResult> {
@@ -195,8 +195,8 @@ export async function discoverMarketplaceListings(filters?: {
     const rows: MarketplaceDiscoveryRow[] = (data ?? []).map(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (r: any) => ({
-        sourceTable: r.source_table,
-        id: r.source_id,
+        sourceTable: r.origin_table,
+        id: r.origin_id,
         ownerId: r.owner_id,
         organizationId: r.organization_id ?? null,
         domain: r.domain,
