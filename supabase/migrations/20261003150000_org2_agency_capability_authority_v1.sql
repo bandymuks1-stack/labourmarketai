@@ -134,6 +134,9 @@ begin
 end
 $$;
 
+revoke all on function public.list_open_demand_for_agencies() from public, anon;
+grant execute on function public.list_open_demand_for_agencies() to authenticated;
+
 -- R2 -------------------------------------------------------------------------
 create or replace function public.mark_agency_can_offer(p_request_id uuid, p_note text default null)
 returns text
@@ -202,6 +205,9 @@ begin
 
   return 'marked';
 end $$;
+
+revoke all on function public.mark_agency_can_offer(uuid, text) from public, anon;
+grant execute on function public.mark_agency_can_offer(uuid, text) to authenticated;
 
 -- R3 -------------------------------------------------------------------------
 drop policy if exists job_demands_select on public.job_demands;
