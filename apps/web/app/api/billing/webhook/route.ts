@@ -5,8 +5,6 @@ import { getBillingConfig } from "@/lib/billing/config";
 import {
   isHandledEventType,
   isRecordOnlyEventType,
-  parseSubscriptionObject,
-  parseCheckoutSessionObject,
   parseInvoiceObject,
   summarizeRecordedEvent,
   assertTestEvent,
@@ -16,9 +14,12 @@ import {
   recordWebhookEvent,
   markWebhookProcessed,
   markWebhookFailed,
-  upsertSubscription,
   applyInvoicePayment,
 } from "@/lib/billing/subscription-store";
+import {
+  applyCheckoutLink,
+  applyRawSubscriptionObject,
+} from "@/lib/billing/apply-subscription-snapshot";
 import {
   completeCheckoutOperationBySession,
   expireCheckoutOperationBySession,
@@ -116,33 +117,19 @@ export async function POST(req: Request) {
   let result: string = "ok";
   try {
     if (event.type === "checkout.session.completed") {
-      const link = parseCheckoutSessionObject(event.object, event.testMode);
-      if (link) {
-        result = await upsertSubscription({
-          providerSubscriptionId: link.providerSubscriptionId,
-          providerCustomerId: link.providerCustomerId,
-          ownerId: link.ownerId,
-          planKey: link.planKey,
-          organizationId: link.organizationId,
-          status: "incomplete",
-          currentPeriodStart: null,
-          currentPeriodEnd: null,
-          cancelAtPeriodEnd: false,
-          testMode: link.testMode,
-          // Billing safety v1: a LINK event knows ids, not state — on an
-          // existing row it fills linkage and keeps the status a real
-          // subscription event already set (never active → incomplete).
-          transitionKind: "link",
-          eventId: event.id,
-          eventCreated: created,
-        });
+      const linked = await applyCheckoutLink(event.object, {
+        testMode: event.testMode,
+        evidence: { id: event.id, created },
+      });
+      if (linked) {
+        result = linked.result;
         // Bookkeeping: the server-side checkout operation behind this session
         // is complete. Best-effort — the operation's window closes it anyway.
         const sessionId = typeof event.object.id === "string" ? event.object.id : null;
         if (sessionId && (result === "ok" || result === "stale-event")) {
           await completeCheckoutOperationBySession({
             sessionId,
-            providerSubscriptionId: link.providerSubscriptionId,
+            providerSubscriptionId: linked.providerSubscriptionId,
           });
         }
       }
@@ -151,14 +138,12 @@ export async function POST(req: Request) {
       const sessionId = typeof event.object.id === "string" ? event.object.id : null;
       if (sessionId) await expireCheckoutOperationBySession(sessionId);
     } else if (event.type.startsWith("customer.subscription.")) {
-      const sub = parseSubscriptionObject(event.object, event.testMode, { id: event.id, created });
-      if (sub) {
-        if (event.type === "customer.subscription.deleted") {
-          result = await upsertSubscription({ ...sub, status: "cancelled" });
-        } else {
-          result = await upsertSubscription(sub);
-        }
-      }
+      const applied = await applyRawSubscriptionObject(event.object, {
+        testMode: event.testMode,
+        evidence: { id: event.id, created },
+        deleted: event.type === "customer.subscription.deleted",
+      });
+      if (applied !== null) result = applied;
     } else if (
       event.type === "invoice.paid" ||
       event.type === "invoice.payment_succeeded" ||

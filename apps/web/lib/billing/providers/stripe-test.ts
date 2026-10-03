@@ -15,6 +15,7 @@ import type {
   CreateCustomerInput,
   CreateCustomerResult,
   ListSubscriptionsResult,
+  RetrieveRawSubscriptionResult,
   PortalSessionInput,
   PortalSessionResult,
   ProviderSubscriptionView,
@@ -62,6 +63,14 @@ function reasonFrom(e: unknown): string {
 /** Stripe's "no such object" — a read that finds nothing is an ANSWER, not an error. */
 function isResourceMissing(e: unknown): boolean {
   return Boolean(e && typeof e === "object" && (e as { code?: unknown }).code === "resource_missing");
+}
+
+/** 429 / 5xx / connection-level failures are transient; everything else is not. */
+function isTransient(e: unknown): boolean {
+  if (!e || typeof e !== "object") return false;
+  const o = e as { statusCode?: unknown; type?: unknown };
+  if (typeof o.statusCode === "number") return o.statusCode === 429 || o.statusCode >= 500;
+  return o.type === "StripeConnectionError" || o.type === "StripeAPIError" || o.type === "StripeRateLimitError";
 }
 
 /** Normalize a Stripe subscription object into the provider-neutral read view. */
@@ -213,6 +222,22 @@ export function createStripeProvider(): BillingProvider {
       } catch (e) {
         if (isResourceMissing(e)) return { ok: true, subscription: null };
         return { ok: false, reason: reasonFrom(e) };
+      }
+    },
+
+    async retrieveSubscriptionRaw(
+      providerSubscriptionId: string,
+    ): Promise<RetrieveRawSubscriptionResult> {
+      try {
+        const sub = await client().subscriptions.retrieve(providerSubscriptionId);
+        return {
+          ok: true,
+          object: sub as unknown as Record<string, unknown>,
+          livemode: sub.livemode === true,
+        };
+      } catch (e) {
+        if (isResourceMissing(e)) return { ok: true, object: null };
+        return { ok: false, reason: reasonFrom(e), retryable: isTransient(e) };
       }
     },
 
