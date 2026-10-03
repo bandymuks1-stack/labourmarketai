@@ -96,12 +96,76 @@ export type TaskEvidenceItem = {
    * = not readable by this viewer, so it is omitted — never an id, never "—".
    */
   readonly authorName: string | null;
+  /** The entry's own project (journal_entries.project_id), when known. */
+  readonly entryProjectId?: string | null;
 };
 
 /** The hour figure to show, or null to show nothing (honest degradation). */
 export function evidenceHoursLabelValue(hours: number | null): string | null {
   if (hours === null || !Number.isFinite(hours) || hours <= 0) return null;
   return String(Math.round(hours * 100) / 100);
+}
+
+
+/**
+ * ATTRIBUTION CONFLICT (legacy rows): the entry's project differs from its
+ * linked task's project. Such a link predates the project-consistency check
+ * in link_journal_entry_to_task_v1 (20261002150000). It is NEVER rewritten
+ * and NEVER allocated to a stage/object; it is flagged so a person can
+ * unlink or relink it. An entry with no project of its own is not a conflict.
+ */
+export function hasAttributionConflict(
+  item: Pick<TaskEvidenceItem, "entryProjectId">,
+  taskProjectId: string | null,
+): boolean {
+  const p = item.entryProjectId ?? null;
+  return p !== null && p !== taskProjectId;
+}
+
+export type StageEvidenceRollup = {
+  /** Distinct entries safely attributable to this stage. */
+  readonly entries: number;
+  /** Excluded: project differs from the linked task's project. */
+  readonly conflicts: number;
+  /** Excluded: linked to more than one task, so the stage is not unique. */
+  readonly ambiguous: number;
+};
+
+/**
+ * Per-stage evidence roll-up, DERIVED through the live task link (an entry
+ * has no stage of its own). Counts an entry for a stage ONLY when it has
+ * exactly one live task link in the supplied batch and no attribution
+ * conflict; everything else is reported as excluded, never guessed.
+ * Entries with no task link do not appear here at all: they are
+ * "project-level, unstaged" by definition. Limitation: uniqueness is judged
+ * over the supplied (RLS-visible, bounded) batch.
+ */
+export function deriveStageEvidenceRollup(
+  tasks: readonly { id: string; projectId: string | null; stageId: string | null }[],
+  itemsByTask: Readonly<Record<string, readonly Pick<TaskEvidenceItem, "entryId" | "entryProjectId">[]>>,
+): Readonly<Record<string, StageEvidenceRollup>> {
+  const linksPerEntry = new Map<string, number>();
+  for (const t of tasks) {
+    for (const i of itemsByTask[t.id] ?? []) {
+      linksPerEntry.set(i.entryId, (linksPerEntry.get(i.entryId) ?? 0) + 1);
+    }
+  }
+  const acc = new Map<string, { ok: Set<string>; conf: Set<string>; amb: Set<string> }>();
+  for (const t of tasks) {
+    if (!t.stageId) continue;
+    const slot = acc.get(t.stageId) ?? { ok: new Set(), conf: new Set(), amb: new Set() };
+    acc.set(t.stageId, slot);
+    for (const i of itemsByTask[t.id] ?? []) {
+      if (hasAttributionConflict(i, t.projectId)) slot.conf.add(i.entryId);
+      else if ((linksPerEntry.get(i.entryId) ?? 0) !== 1) slot.amb.add(i.entryId);
+      else slot.ok.add(i.entryId);
+    }
+  }
+  const out: Record<string, StageEvidenceRollup> = {};
+  for (const [stage, s] of acc) {
+    out[stage] = { entries: s.ok.size, conflicts: s.conf.size, ambiguous: s.amb.size };
+  }
+  return out;
 }
 
 /** What a task's evidence adds up to. Counts only — never a score (§19a). */
@@ -152,7 +216,36 @@ export type LinkableEntry = {
   readonly photoCount: number;
   /** True when this entry is ALREADY live-linked to the task in question. */
   readonly alreadyLinked: boolean;
+  /** The entry's own project (null = none recorded). */
+  readonly projectId?: string | null;
+  /** The entry's engagement-context organization, when known. */
+  readonly organizationId?: string | null;
 };
+
+/**
+ * Which of the worker's entries may be offered for a task: mirrors the
+ * server-side refusals of link_journal_entry_to_task_v1 (project and
+ * organization consistency) so the picker never offers what the RPC would
+ * refuse. Entries with no project are offered for project tasks (the RPC then
+ * checks the worker's ACTIVE assignment); an entry that belongs to a project
+ * is offered only for that project's tasks. Advisory — the RPC decides.
+ */
+export function isLinkableForTask(
+  entry: Pick<LinkableEntry, "projectId" | "organizationId">,
+  task: { readonly projectId: string | null; readonly organizationId: string | null },
+): boolean {
+  const ep = entry.projectId ?? null;
+  if (ep !== null && ep !== task.projectId) return false;
+  if (
+    task.projectId !== null &&
+    task.organizationId !== null &&
+    entry.organizationId != null &&
+    entry.organizationId !== task.organizationId
+  ) {
+    return false;
+  }
+  return true;
+}
 
 /**
  * Read results — the tasks-page discriminant style. "needs-migration" is a

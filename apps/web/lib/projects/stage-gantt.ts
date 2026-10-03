@@ -189,7 +189,8 @@ export interface TimelineRow {
   readonly overdue: boolean;
   /** open blocker count ("waiting on N"); 0 for stages */
   readonly waitingOn: number;
-  /** Tasks only. Stages have no responsible person in the data model. */
+  /** Tasks: the assignee. Stages: the responsible engagement's readable name
+   *  (null = nobody named, or not readable → the dash). */
   readonly responsible: TimelineResponsible | null;
   readonly href: string;
   readonly anchorId: string;
@@ -254,7 +255,18 @@ function resolveResponsible(
   return { kind: "member" };
 }
 
+function stageResponsible(
+  engagementId: string | null | undefined,
+  names: ReadonlyMap<string, string> | undefined,
+): TimelineResponsible | null {
+  if (!engagementId) return null;
+  const name = names?.get(engagementId);
+  return name ? { kind: "named", name, href: null } : null;
+}
+
 export function buildActivityTimeline(input: {
+  /** engagement_contexts.id → readable name (see lib/projects/stage-responsible). */
+  stageResponsibleNames?: ReadonlyMap<string, string>;
   projectId: string;
   stages: readonly ProjectStage[];
   tasks: readonly TimelineTaskInput[];
@@ -395,7 +407,10 @@ export function buildActivityTimeline(input: {
       end: s.actualEnd ?? s.plannedEnd ?? s.actualStart ?? s.plannedStart ?? "",
       overdue: dated && today !== null && sp !== null && sp.end < today && !DONE_STATES.has(s.status),
       waitingOn: 0,
-      responsible: null,
+      // The stage's responsible engagement → readable name (plain text; no
+      // person route exists for an engagement). Unreadable/unset → null, which
+      // renders the dash — never a guess.
+      responsible: stageResponsible(s.responsibleEngagementId, input.stageResponsibleNames),
       href: stageTimelineHref(input.projectId, s.id),
       anchorId: stageAnchorId(s.id),
       blockedBy: [],

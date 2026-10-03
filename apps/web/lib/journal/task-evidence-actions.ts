@@ -56,6 +56,7 @@ type Notice =
   | "not_authorized"
   | "not_found"
   | "limit_reached"
+  | "evidence_mismatch"
   | "error";
 
 type FormContext = {
@@ -92,6 +93,11 @@ function noticeForRpcError(error: { code?: string }): Notice {
 
 /** Map the RPC's outcome word onto the page's notice vocabulary. */
 function noticeForOutcome(outcome: string, ok: Notice): Notice {
+  // Attribution consistency (20261002150000): the entry belongs to another
+  // project / organization than the task. Never silently re-pointed.
+  if (outcome === "project_mismatch" || outcome === "organization_mismatch") {
+    return "evidence_mismatch";
+  }
   if (!isLinkResultCode(outcome)) return "error";
   switch (outcome) {
     // `already_linked` / `already_unlinked` are idempotent successes: the

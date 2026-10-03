@@ -67,6 +67,11 @@ export type WorkTask = {
   /** Optional object/site linkage (train D — work_objects; null until the
    *  v2 collaboration migration is applied, never fabricated). */
   readonly objectId: string | null;
+  /** Optional stage pointer (project_stages.id; null = unstaged, or the
+   *  stage/subtask migration is not applied yet — never fabricated). */
+  readonly stageId: string | null;
+  /** Optional parent task (subtask hierarchy; null = a top-level task). */
+  readonly parentTaskId: string | null;
   readonly title: string;
   readonly description: string | null;
   readonly status: WorkTaskStatus;
@@ -144,6 +149,9 @@ export type MyTasksResult =
       readonly status: "ok";
       readonly tasks: readonly WorkTask[];
       readonly error: string | null;
+      /** True only when the stage/subtask columns were actually readable.
+       *  False/absent → the structure UI (stage / parent selects, WBS) is hidden. */
+      readonly structure?: boolean;
     };
 
 export type TaskAttentionCounts = {

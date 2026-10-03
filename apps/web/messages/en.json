@@ -636,6 +636,21 @@
       "unavailable": "Past-duration comparison could not be read just now.",
       "suggest": "Comparable stages took {days} days ({observations} observed) — that would end {date}.",
       "suggestApply": "Use this date"
+    },
+    "responsible": {
+      "label": "Responsible",
+      "none": "No responsible",
+      "unreadable": "Named (name not readable)",
+      "noOptions": "No active people in this organization to choose from yet.",
+      "saving": "Saving…",
+      "saved": "Responsible updated.",
+      "outcome": {
+        "needs_migration": "Naming a responsible is not available yet — it will work once the update is applied.",
+        "not_authorized": "You are not allowed to change the responsible for this stage.",
+        "invalid": "That person cannot be responsible here (they must be active in this organization).",
+        "auth": "Please sign in again.",
+        "error": "Could not save. Please try again."
+      }
     }
   },
   "activityCentre": {
@@ -11052,9 +11067,12 @@
       "limit_reached": "Open-task limit reached — finish or cancel older tasks first.",
       "error": "Saving failed. Please try again.",
       "cycle": "That would create a loop — a task can't wait on itself through other tasks.",
+      "invalid_structure": "That stage or parent task is not valid here (it must belong to the same project, avoid loops, and stay within three levels).",
       "evidence_linked": "Evidence attached to the task.",
       "evidence_unlinked": "Attachment withdrawn. The record itself is unchanged.",
-      "approval_requested": "Sent for approval."
+      "approval_requested": "Sent for approval.",
+      "relink_required": "This task already has journal evidence attached, so its stage cannot change. Unlink the evidence first, then move the task.",
+      "evidence_mismatch": "That journal entry belongs to a different project or organization than this task, so it cannot be attached."
     },
     "projectTasks": {
       "title": "Project tasks",
@@ -11147,6 +11165,35 @@
         "withdrawn": "Withdrawn",
         "cancelled": "Cancelled"
       }
+    },
+    "structure": {
+      "subtask": "Subtask",
+      "stageLabel": "Stage",
+      "stageNone": "No stage",
+      "parentLabel": "Parent task",
+      "parentNone": "No parent (top-level task)",
+      "parentHint": "A subtask follows its parent's stage. Up to three levels.",
+      "parentHidden": "Parent task (not visible to you)",
+      "createHint": "To place a task in a stage or under a parent, open a project's tasks first (project filter).",
+      "filterLabel": "Filter by stage",
+      "filterAll": "All stages",
+      "unstaged": "No stage",
+      "stageEmpty": "No tasks in this stage yet.",
+      "stageStatus": {
+        "planned": "Planned",
+        "in_progress": "In progress",
+        "blocked": "Blocked",
+        "done": "Done",
+        "cancelled": "Cancelled"
+      },
+      "suggest": {
+        "open_work_in_done_stage": "This stage is marked done, but tasks are still open. Consider setting it to {status}. (Suggestion only - nothing changes automatically.)",
+        "all_done": "All tasks in this stage are done. Consider setting the stage to {status}. (Suggestion only.)",
+        "has_blocked": "A task in this stage is blocked. Consider setting the stage to {status}. (Suggestion only.)",
+        "work_started": "Work has started on this stage. Consider setting it to {status}. (Suggestion only.)"
+      },
+      "attributionConflict": "Attribution conflict: this entry belongs to a different project than the task",
+      "evidenceRollup": "Evidence: {entries} entries counted ({conflicts} conflicts and {ambiguous} multi-task entries not counted)"
     }
   },
   "assist": {
