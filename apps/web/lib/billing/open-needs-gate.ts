@@ -2,7 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { getEffectiveEntitlements, hasFeature } from "@/lib/billing/effective-entitlements";
+import { getEffectiveEntitlements } from "@/lib/billing/effective-entitlements";
 import { entitlementAllows } from "@/lib/billing/entitlements-v1";
 import { limitFor } from "@/lib/billing/entitlements";
 import { FREE_ORGANIZATION_PLAN_KEY, OPEN_NEEDS_CONTACT_THRESHOLD, getPlan } from "@/lib/billing/plans";
@@ -116,10 +116,16 @@ export async function gateOpenNeeds(
   organizationId: string,
   profileId: string,
 ): Promise<OpenNeedsGate> {
-  const ctx = await getEffectiveEntitlements();
+  // The entitlement subject is THIS gate's own subject — the caller's client,
+  // profile and the organization its employer gate proved — never the cookie
+  // session, which a bearer (MCP) request does not carry. For a web caller the
+  // two are the same user and workspace; for an assistant caller the cookie
+  // read saw NO user and judged the organization against the anonymous person
+  // plan, refusing every create/reopen while billing is live (2026-09-30).
+  const ctx = await getEffectiveEntitlements({ supabase, userId: profileId, organizationId });
   const plan = getPlan(ctx.effectivePlanKey);
-  // The plan boundary itself — the SAME server seam every gated feature uses.
-  const included = (await hasFeature("company_create_needs")) && entitlementAllows(ctx, "company_create_needs");
+  // The plan boundary itself — the SAME predicate `hasFeature` applies.
+  const included = entitlementAllows(ctx, "company_create_needs");
   const limit = plan ? limitFor(plan, "company_create_needs") : null;
   if (ctx.enforced && !included) {
     return { allowed: false, reason: "over_open_need_limit", limit: limit ?? 0, used: 0, next: nextStep(ctx.effectivePlanKey), planKey: ctx.effectivePlanKey };
