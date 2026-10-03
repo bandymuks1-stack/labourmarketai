@@ -63,6 +63,7 @@ vi.mock("@/lib/billing/effective-entitlements", () => ({
 vi.mock("@/lib/billing/customer-store", () => ({
   findBillingCustomer: vi.fn(async () => ({ status: "absent" })),
 }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: () => {} }) }));
 vi.mock("@/lib/billing/billing-subject", () => ({
   resolveBillingSubject: vi.fn(async () => state.subject),
 }));
@@ -150,5 +151,52 @@ describe("the success notice follows the adapter mode", () => {
     const html = await render("test_success");
     expect(html).toContain("No real money moved");
     expect(html).toContain("Test mode");
+  });
+});
+
+describe("refresh billing status control", () => {
+  const REFRESH = 'data-testid="billing-refresh-button"';
+
+  it("shown while syncing (paid return, no row yet) for a person with billing authority", async () => {
+    const html = await render("success");
+    expect(html).toContain(REFRESH);
+    expect(html).not.toContain("MISSING:");
+    // the Order button stays withheld: the control never re-opens ordering
+    expect(html).not.toContain('data-testid="account-billing-order"');
+  });
+
+  it("shown for a still-incomplete row", async () => {
+    state.ent = { ...state.ent, source: "free", subscriptionStatus: "incomplete" };
+    expect(await render(null)).toContain(REFRESH);
+  });
+
+  it("absent without billing authority, even while syncing", async () => {
+    state.subject = { ...state.subject, billingAuthority: false };
+    expect(await render("success")).not.toContain(REFRESH);
+  });
+
+  it("absent in the calm baseline (no flag, no row) and for an active subscription: the flag is only a redirect", async () => {
+    expect(await render(null)).not.toContain(REFRESH);
+    state.ent = { ...state.ent, source: "subscription", subscriptionStatus: "active", effectivePlanKey: "company_pilot", active: true };
+    expect(await render("success")).not.toContain(REFRESH);
+  });
+
+  it("absent while billing is disabled", async () => {
+    state.config = { state: "disabled", reason: "payments_disabled", testMode: false, paymentsEnabled: false, mode: "off" };
+    expect(await render("success")).not.toContain(REFRESH);
+  });
+
+  it("renders real copy in every active locale (no raw key, no [EN] shell)", async () => {
+    for (const loc of activeLocales) {
+      state.locale = loc;
+      const html = await render("success");
+      const refresh = (catalog(loc).accountBilling as { refresh: Record<string, string> }).refresh;
+      for (const k of ["cta", "working", "updated", "alreadyCurrent", "notFound", "tryLater", "hint"]) {
+        expect(refresh[k], `${loc}.${k}`).toBeTruthy();
+        expect(refresh[k], `${loc}.${k}`).not.toMatch(/^\[EN\]/);
+      }
+      expect(html, loc).toContain(refresh.cta.replace(/&/g, "&amp;"));
+      expect(html, loc).not.toContain("MISSING:");
+    }
   });
 });

@@ -99,7 +99,10 @@ describe("§13 no entitlement transfer on workspace switch", () => {
     expect(personalBranch).not.toMatch(/createAdminClient/);
     expect(personalBranch).toMatch(/\.eq\("owner_id", user\.id\)/);
     // the subject id is the server resolution, never a request value
-    expect(ent).toMatch(/const billing = await resolveBillingSubject\(\)/);
+    // (or, for an explicit bearer caller, the organization ITS OWN employer
+    // gate proved — `caller.organizationId`, never a request value)
+    expect(ent).toMatch(/: \(await resolveBillingSubject\(\)\)\.subject/);
+    expect(ent).toMatch(/\{ type: "organization", id: caller\.organizationId \}/);
     expect(ent).not.toMatch(/searchParams|formData|request\.json|cookies\(/);
     // a missing service key degrades to the user client instead of throwing
     expect(orgBranch).toMatch(/catch \{[\s\S]*?reader = supabase;/);

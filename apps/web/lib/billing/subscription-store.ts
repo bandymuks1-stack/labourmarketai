@@ -194,6 +194,25 @@ async function readExisting(
   return { row, safetyAvailable: false, error: null };
 }
 
+/**
+ * READ-ONLY peek at the local row for a provider subscription id — recovery
+ * uses it to tell "applied" from "nothing to do" and "already current".
+ * Never writes.
+ */
+export async function readSubscriptionState(
+  providerSubscriptionId: string,
+): Promise<
+  | { status: "found"; row: { status: string; ownerId: string | null; planKey: string | null } }
+  | { status: "none" }
+  | { status: "needs-migration" }
+  | { status: "error" }
+> {
+  const { row, error } = await readExisting(admin(), providerSubscriptionId);
+  if (error) return error.code === RELATION_ABSENT ? { status: "needs-migration" } : { status: "error" };
+  if (!row) return { status: "none" };
+  return { status: "found", row: { status: row.status, ownerId: row.owner_id, planKey: row.plan_key } };
+}
+
 /** Read-then-merge upsert of a subscription (keeps owner/plan if a later event omits them). */
 export async function upsertSubscription(u: SubscriptionUpsert): Promise<StoreResult> {
   const sb = admin();
@@ -475,4 +494,124 @@ export async function applyProviderReconciledStatus(input: {
   if (!error) return "ok";
   if (error.code === RELATION_ABSENT) return "needs-migration";
   return "error";
+}
+
+// ─── Recovery reads (scheduled billing recovery) ────────────────────────────
+
+export type RecoveryCandidateRead =
+  | {
+      ok: true;
+      /** Oldest-first provider subscription ids awaiting sync (over-fetched). */
+      ids: string[];
+      /** Subscription ids with a reconcile audit row inside the cooldown window. */
+      recentlyReconciled: string[];
+      /** Webhook events received but never finished (observability only). */
+      /**
+       * Webhook events received but never finished (observability only):
+       * `total` scanned (bounded at 500), `withSubscriptionRef` = those whose
+       * lean payload carries `payload.refs.subscription` (a deterministic
+       * mapping the sweep MAY use once ingestion writes it), the rest are
+       * UNMAPPABLE and are only counted, never guessed.
+       */
+      unprocessedEvents: { total: number; withSubscriptionRef: number } | null;
+    }
+  | { ok: false; reason: "needs_migration" | "store_error" };
+
+/**
+ * READ-ONLY candidate query for the recovery sweep: local rows still
+ * `incomplete` / `none` (link-only) in the adapter's MODE, never `manual_*`
+ * pilot rows, untouched since `staleBeforeIso`, oldest first, bounded by
+ * `fetchLimit`; plus the subscriptions already reconciled since
+ * `cooldownFromIso` (audit rows carry `subscription_id`).
+ */
+export async function readRecoveryCandidates(input: {
+  testMode: boolean;
+  staleBeforeIso: string;
+  cooldownFromIso: string;
+  fetchLimit: number;
+  reconcileEventType: string;
+}): Promise<RecoveryCandidateRead> {
+  const sb = admin();
+  const { data: rows, error } = await sb
+    .from("billing_subscriptions")
+    .select("provider_subscription_id, updated_at")
+    .eq("provider", "stripe")
+    .eq("test_mode", input.testMode)
+    .in("status", ["incomplete", "none"])
+    .not("provider_subscription_id", "is", null)
+    .not("provider_subscription_id", "like", "manual%")
+    .lt("updated_at", input.staleBeforeIso)
+    .order("updated_at", { ascending: true })
+    .limit(input.fetchLimit);
+  if (error) {
+    return { ok: false, reason: error.code === RELATION_ABSENT || error.code === UNDEFINED_COLUMN ? "needs_migration" : "store_error" };
+  }
+  const ids = ((rows as Array<{ provider_subscription_id: string | null }> | null) ?? [])
+    .map((r) => r.provider_subscription_id)
+    .filter((v): v is string => typeof v === "string" && v.startsWith("sub_"));
+
+  const { data: audits, error: auditErr } = await sb
+    .from("payment_webhook_events")
+    .select("payload")
+    .eq("event_type", input.reconcileEventType)
+    .gte("created_at", input.cooldownFromIso)
+    .limit(500);
+  if (auditErr) {
+    return { ok: false, reason: auditErr.code === RELATION_ABSENT ? "needs_migration" : "store_error" };
+  }
+  const recentlyReconciled: string[] = [];
+  for (const a of (audits as Array<{ payload: Record<string, unknown> | null }> | null) ?? []) {
+    const id = a.payload?.subscription_id;
+    if (typeof id === "string") recentlyReconciled.push(id);
+  }
+
+  let unprocessedEvents: { total: number; withSubscriptionRef: number } | null = null;
+  const { data: open, error: openErr } = await sb
+    .from("payment_webhook_events")
+    .select("payload")
+    .eq("processed", false)
+    .neq("event_type", input.reconcileEventType)
+    .lt("created_at", input.staleBeforeIso)
+    .limit(500);
+  if (!openErr && Array.isArray(open)) {
+    let withRef = 0;
+    for (const e of open as Array<{ payload: Record<string, unknown> | null }>) {
+      const refs = e.payload?.refs as Record<string, unknown> | undefined;
+      if (typeof refs?.subscription === "string" && refs.subscription.startsWith("sub_")) withRef += 1;
+    }
+    unprocessedEvents = { total: open.length, withSubscriptionRef: withRef };
+  }
+
+  return { ok: true, ids, recentlyReconciled, unprocessedEvents };
+}
+
+/**
+ * DURABLE per-workspace cooldown for the user-refresh door, read from the
+ * audit rows the recovery adapter already writes (payment_webhook_events,
+ * event_type `reconcile.subscription`, event_id `reconcile:user_refresh:...`,
+ * payload.subject = `<type>:<id>`). No new table, column or migration: it uses
+ * existing columns and survives across serverless instances. READ-ONLY.
+ * Fails OPEN (false) on any store error - the cooldown is a throttle, not a
+ * boundary, and an unreadable table must not lock the owner out of their own
+ * billing status (the in-memory limiter still applies).
+ */
+export async function hasRecentUserRefreshForSubject(input: {
+  subject: string;
+  sinceIso: string;
+  reconcileEventType: string;
+}): Promise<boolean> {
+  try {
+    const { data, error } = await admin()
+      .from("payment_webhook_events")
+      .select("event_id")
+      .eq("event_type", input.reconcileEventType)
+      .like("event_id", "reconcile:user_refresh:%")
+      .eq("payload->>subject", input.subject)
+      .gte("created_at", input.sinceIso)
+      .limit(1);
+    if (error) return false;
+    return Array.isArray(data) && data.length > 0;
+  } catch {
+    return false;
+  }
 }
