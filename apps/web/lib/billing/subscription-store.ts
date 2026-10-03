@@ -495,3 +495,77 @@ export async function applyProviderReconciledStatus(input: {
   if (error.code === RELATION_ABSENT) return "needs-migration";
   return "error";
 }
+
+// ─── Recovery reads (scheduled billing recovery) ────────────────────────────
+
+export type RecoveryCandidateRead =
+  | {
+      ok: true;
+      /** Oldest-first provider subscription ids awaiting sync (over-fetched). */
+      ids: string[];
+      /** Subscription ids with a reconcile audit row inside the cooldown window. */
+      recentlyReconciled: string[];
+      /** Webhook events received but never finished (observability only). */
+      unprocessedWebhookEvents: number | null;
+    }
+  | { ok: false; reason: "needs_migration" | "store_error" };
+
+/**
+ * READ-ONLY candidate query for the recovery sweep: local rows still
+ * `incomplete` / `none` (link-only) in the adapter's MODE, never `manual_*`
+ * pilot rows, untouched since `staleBeforeIso`, oldest first, bounded by
+ * `fetchLimit`; plus the subscriptions already reconciled since
+ * `cooldownFromIso` (audit rows carry `subscription_id`).
+ */
+export async function readRecoveryCandidates(input: {
+  testMode: boolean;
+  staleBeforeIso: string;
+  cooldownFromIso: string;
+  fetchLimit: number;
+  reconcileEventType: string;
+}): Promise<RecoveryCandidateRead> {
+  const sb = admin();
+  const { data: rows, error } = await sb
+    .from("billing_subscriptions")
+    .select("provider_subscription_id, updated_at")
+    .eq("provider", "stripe")
+    .eq("test_mode", input.testMode)
+    .in("status", ["incomplete", "none"])
+    .not("provider_subscription_id", "is", null)
+    .not("provider_subscription_id", "like", "manual%")
+    .lt("updated_at", input.staleBeforeIso)
+    .order("updated_at", { ascending: true })
+    .limit(input.fetchLimit);
+  if (error) {
+    return { ok: false, reason: error.code === RELATION_ABSENT || error.code === UNDEFINED_COLUMN ? "needs_migration" : "store_error" };
+  }
+  const ids = ((rows as Array<{ provider_subscription_id: string | null }> | null) ?? [])
+    .map((r) => r.provider_subscription_id)
+    .filter((v): v is string => typeof v === "string" && v.startsWith("sub_"));
+
+  const { data: audits, error: auditErr } = await sb
+    .from("payment_webhook_events")
+    .select("payload")
+    .eq("event_type", input.reconcileEventType)
+    .gte("created_at", input.cooldownFromIso)
+    .limit(500);
+  if (auditErr) {
+    return { ok: false, reason: auditErr.code === RELATION_ABSENT ? "needs_migration" : "store_error" };
+  }
+  const recentlyReconciled: string[] = [];
+  for (const a of (audits as Array<{ payload: Record<string, unknown> | null }> | null) ?? []) {
+    const id = a.payload?.subscription_id;
+    if (typeof id === "string") recentlyReconciled.push(id);
+  }
+
+  let unprocessedWebhookEvents: number | null = null;
+  const { count, error: cntErr } = await sb
+    .from("payment_webhook_events")
+    .select("id", { count: "exact", head: true })
+    .eq("processed", false)
+    .neq("event_type", input.reconcileEventType)
+    .lt("created_at", input.staleBeforeIso);
+  if (!cntErr && typeof count === "number") unprocessedWebhookEvents = count;
+
+  return { ok: true, ids, recentlyReconciled, unprocessedWebhookEvents };
+}

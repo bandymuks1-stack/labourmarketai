@@ -1,7 +1,7 @@
 import "server-only";
 
-import { createAdminClient } from "@/lib/supabase/admin";
 import { getBillingConfig } from "@/lib/billing/config";
+import { readRecoveryCandidates } from "@/lib/billing/subscription-store";
 import {
   RECONCILE_EVENT_TYPE,
   reconcileSubscription,
@@ -38,14 +38,6 @@ export const STALE_AFTER_MS = 10 * 60 * 1000;
 export const COOLDOWN_MS = 30 * 60 * 1000;
 /** Hard wall-clock budget so a slow provider cannot run the function to its limit. */
 export const RUN_BUDGET_MS = 45_000;
-
-const RELATION_ABSENT = "42P01";
-const UNDEFINED_COLUMN = "42703";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function admin(): any {
-  return createAdminClient();
-}
 
 export type RecoveryRun =
   | { readonly kind: "unavailable"; readonly reason: "billing_inactive" | "needs_migration" | "store_error" }
@@ -85,56 +77,20 @@ export async function selectRecoveryCandidates(input: {
 }): Promise<CandidateSelection> {
   const limit = Math.max(1, Math.min(input.limit ?? RECOVERY_BATCH, RECOVERY_BATCH));
   const now = (input.now ?? Date.now)();
-  const staleBefore = new Date(now - STALE_AFTER_MS).toISOString();
-  const cooldownFrom = new Date(now - COOLDOWN_MS).toISOString();
-  const sb = admin();
-
-  // Over-fetch so the cooldown filter cannot empty the batch, still bounded.
-  const { data: rows, error } = await sb
-    .from("billing_subscriptions")
-    .select("provider_subscription_id, updated_at")
-    .eq("provider", "stripe")
-    .eq("test_mode", input.testMode)
-    .in("status", ["incomplete", "none"])
-    .not("provider_subscription_id", "is", null)
-    .not("provider_subscription_id", "like", "manual\\_%")
-    .lt("updated_at", staleBefore)
-    .order("updated_at", { ascending: true })
-    .limit(limit * 4);
-  if (error) {
-    return { ok: false, reason: error.code === RELATION_ABSENT || error.code === UNDEFINED_COLUMN ? "needs_migration" : "store_error" };
-  }
-  const ordered = (rows as Array<{ provider_subscription_id: string | null }> | null ?? [])
-    .map((r) => r.provider_subscription_id)
-    .filter((v): v is string => typeof v === "string" && v.startsWith("sub_"));
-
-  // Recently reconciled subscriptions (audit rows carry subscription_id).
-  const recent = new Set<string>();
-  const { data: audits, error: auditErr } = await sb
-    .from("payment_webhook_events")
-    .select("payload")
-    .eq("event_type", RECONCILE_EVENT_TYPE)
-    .gte("created_at", cooldownFrom)
-    .limit(500);
-  if (auditErr) {
-    return { ok: false, reason: auditErr.code === RELATION_ABSENT ? "needs_migration" : "store_error" };
-  }
-  for (const a of (audits as Array<{ payload: Record<string, unknown> | null }> | null) ?? []) {
-    const id = a.payload?.subscription_id;
-    if (typeof id === "string") recent.add(id);
-  }
-
-  // Observability only: events received but never finished.
-  let unprocessed: number | null = null;
-  const { count, error: cntErr } = await sb
-    .from("payment_webhook_events")
-    .select("id", { count: "exact", head: true })
-    .eq("processed", false)
-    .neq("event_type", RECONCILE_EVENT_TYPE)
-    .lt("created_at", staleBefore);
-  if (!cntErr && typeof count === "number") unprocessed = count;
-
-  return { ok: true, ids: pickBatch(ordered, recent, limit), unprocessedWebhookEvents: unprocessed };
+  // Over-fetch so the cooldown filter cannot empty the batch; still bounded.
+  const read = await readRecoveryCandidates({
+    testMode: input.testMode,
+    staleBeforeIso: new Date(now - STALE_AFTER_MS).toISOString(),
+    cooldownFromIso: new Date(now - COOLDOWN_MS).toISOString(),
+    fetchLimit: limit * 4,
+    reconcileEventType: RECONCILE_EVENT_TYPE,
+  });
+  if (!read.ok) return read;
+  return {
+    ok: true,
+    ids: pickBatch(read.ids, new Set(read.recentlyReconciled), limit),
+    unprocessedWebhookEvents: read.unprocessedWebhookEvents,
+  };
 }
 
 export async function runBillingRecovery(

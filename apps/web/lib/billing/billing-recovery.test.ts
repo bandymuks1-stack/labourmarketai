@@ -2,61 +2,27 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const cfg = vi.hoisted(() => ({ state: "stripe_test" as string }));
 vi.mock("@/lib/billing/config", () => ({ getBillingConfig: () => cfg }));
-vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: vi.fn() }));
+vi.mock("@/lib/billing/subscription-store", () => ({ readRecoveryCandidates: vi.fn() }));
 vi.mock("@/lib/billing/reconcile-subscription", () => ({
   RECONCILE_EVENT_TYPE: "reconcile.subscription",
   reconcileSubscription: vi.fn(),
 }));
 
-import { createAdminClient } from "@/lib/supabase/admin";
+import { readRecoveryCandidates } from "@/lib/billing/subscription-store";
 import {
+  COOLDOWN_MS,
   pickBatch,
-  runBillingRecovery,
-  selectRecoveryCandidates,
   RECOVERY_BATCH,
+  runBillingRecovery,
   RUN_BUDGET_MS,
+  selectRecoveryCandidates,
+  STALE_AFTER_MS,
 } from "@/lib/billing/billing-recovery";
 
-interface Fake {
-  subs: Array<{ provider_subscription_id: string | null; updated_at: string }> | { error: { code: string } };
-  audits?: Array<{ payload: Record<string, unknown> }>;
-  unprocessed?: number;
-}
-
-function installAdmin(f: Fake) {
-  const filters: Array<[string, string, unknown]> = [];
-  let limitSeen = -1;
-  vi.mocked(createAdminClient).mockReturnValue({
-    from(table: string) {
-      const q: Record<string, unknown> = {};
-      const chain = () => q;
-      for (const m of ["select", "eq", "neq", "in", "not", "lt", "gte", "order"]) {
-        q[m] = (...a: unknown[]) => {
-          filters.push([table, m, a]);
-          return chain();
-        };
-      }
-      q.limit = (n: number) => {
-        if (table === "billing_subscriptions") limitSeen = n;
-        const done =
-          table === "billing_subscriptions"
-            ? "error" in f.subs
-              ? { data: null, error: f.subs.error }
-              : { data: f.subs, error: null }
-            : { data: f.audits ?? [], error: null };
-        return Promise.resolve(done);
-      };
-      // count query (head) is awaited directly after .lt()
-      q.then = (res: (v: unknown) => unknown) => res({ count: f.unprocessed ?? 0, error: null });
-      return q;
-    },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any);
-  return { filters, limit: () => limitSeen };
-}
-
-const old = new Date(0).toISOString();
-const subs = (n: number) => Array.from({ length: n }, (_, i) => ({ provider_subscription_id: `sub_${i}`, updated_at: old }));
+const read = vi.mocked(readRecoveryCandidates);
+const ids = (n: number) => Array.from({ length: n }, (_, i) => `sub_${i}`);
+const ok = (over: Partial<{ ids: string[]; recentlyReconciled: string[]; unprocessedWebhookEvents: number | null }> = {}) =>
+  ({ ok: true as const, ids: [], recentlyReconciled: [], unprocessedWebhookEvents: 0, ...over });
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -66,53 +32,56 @@ beforeEach(() => {
 
 describe("pickBatch", () => {
   it("bounds, preserves oldest-first order, skips cooled-down subscriptions", () => {
-    const ids = ["a", "b", "c", "d"];
-    expect(pickBatch(ids, new Set(["b"]), 2)).toEqual(["a", "c"]);
+    expect(pickBatch(["a", "b", "c", "d"], new Set(["b"]), 2)).toEqual(["a", "c"]);
   });
 });
 
 describe("selectRecoveryCandidates", () => {
-  it("restricts to adapter mode, incomplete/none rows, no manual_ rows, oldest first, over-fetching a bounded window", async () => {
-    const h = installAdmin({ subs: subs(3) });
-    const r = await selectRecoveryCandidates({ testMode: true, now: () => 10_000_000 });
+  it("asks the store for the adapter's mode, the stale + cooldown windows and a bounded over-fetch", async () => {
+    read.mockResolvedValue(ok({ ids: ids(3) }));
+    const r = await selectRecoveryCandidates({ testMode: true, now: () => 10_000_000_000 });
     expect(r).toMatchObject({ ok: true, ids: ["sub_0", "sub_1", "sub_2"] });
-    const f = h.filters.filter(([t]) => t === "billing_subscriptions").map(([, m, a]) => [m, a] as const);
-    expect(JSON.stringify(f)).toContain('"test_mode",true');
-    expect(JSON.stringify(f)).toContain('"incomplete","none"');
-    expect(JSON.stringify(f)).toContain("manual");
-    expect(JSON.stringify(f)).toContain('"updated_at",{"ascending":true}');
-    expect(h.limit()).toBe(RECOVERY_BATCH * 4);
+    expect(read).toHaveBeenCalledWith({
+      testMode: true,
+      staleBeforeIso: new Date(10_000_000_000 - STALE_AFTER_MS).toISOString(),
+      cooldownFromIso: new Date(10_000_000_000 - COOLDOWN_MS).toISOString(),
+      fetchLimit: RECOVERY_BATCH * 4,
+      reconcileEventType: "reconcile.subscription",
+    });
   });
 
   it("never returns more than the batch, even if asked for more", async () => {
-    installAdmin({ subs: subs(100) });
+    read.mockResolvedValue(ok({ ids: ids(100) }));
     const r = await selectRecoveryCandidates({ testMode: false, limit: 500 });
     expect(r.ok && r.ids.length).toBe(RECOVERY_BATCH);
   });
 
-  it("skips subscriptions reconciled within the cooldown (no starvation by a stuck row)", async () => {
-    installAdmin({ subs: subs(3), audits: [{ payload: { subscription_id: "sub_0" } }] });
+  it("skips subscriptions reconciled within the cooldown (a stuck row cannot starve the queue)", async () => {
+    read.mockResolvedValue(ok({ ids: ids(3), recentlyReconciled: ["sub_0"] }));
     const r = await selectRecoveryCandidates({ testMode: true });
     expect(r.ok && r.ids).toEqual(["sub_1", "sub_2"]);
   });
 
-  it("table absent -> needs_migration; other error -> store_error", async () => {
-    installAdmin({ subs: { error: { code: "42P01" } } });
+  it("store failures pass through as a reason, never a throw", async () => {
+    read.mockResolvedValue({ ok: false, reason: "needs_migration" });
     expect(await selectRecoveryCandidates({ testMode: true })).toEqual({ ok: false, reason: "needs_migration" });
-    installAdmin({ subs: { error: { code: "XX000" } } });
-    expect(await selectRecoveryCandidates({ testMode: true })).toEqual({ ok: false, reason: "store_error" });
   });
 });
 
 describe("runBillingRecovery", () => {
-  it("inactive billing -> unavailable, nothing selected", async () => {
+  it("inactive billing -> unavailable, nothing read", async () => {
     cfg.state = "disabled";
     expect(await runBillingRecovery()).toEqual({ kind: "unavailable", reason: "billing_inactive" });
-    expect(createAdminClient).not.toHaveBeenCalled();
+    expect(read).not.toHaveBeenCalled();
+  });
+
+  it("candidate read failure -> unavailable with the reason", async () => {
+    read.mockResolvedValue({ ok: false, reason: "store_error" });
+    expect(await runBillingRecovery()).toEqual({ kind: "unavailable", reason: "store_error" });
   });
 
   it("one subscription's failure (throw) does not corrupt or abort the batch", async () => {
-    installAdmin({ subs: subs(3), unprocessed: 2 });
+    read.mockResolvedValue(ok({ ids: ids(3), unprocessedWebhookEvents: 2 }));
     const reconcile = vi
       .fn()
       .mockResolvedValueOnce({ outcome: "applied" })
@@ -130,20 +99,27 @@ describe("runBillingRecovery", () => {
   });
 
   it("stops at the wall-clock budget and reports what it skipped", async () => {
-    installAdmin({ subs: subs(3) });
+    read.mockResolvedValue(ok({ ids: ids(3) }));
     let t = 0;
-    const now = () => t;
     const reconcile = vi.fn(async () => {
       t += RUN_BUDGET_MS + 1;
       return { outcome: "applied" as const };
     });
-    const r = await runBillingRecovery({ reconcile, now });
+    const r = await runBillingRecovery({ reconcile, now: () => t });
     expect(r).toMatchObject({ processed: 1, skippedBudget: 2 });
   });
 
-  it("response never carries subscription ids", async () => {
-    installAdmin({ subs: subs(1) });
+  it("the run report never carries subscription ids", async () => {
+    read.mockResolvedValue(ok({ ids: ids(1) }));
     const r = await runBillingRecovery({ reconcile: async () => ({ outcome: "applied", providerSubscriptionId: "sub_0" }) });
     expect(JSON.stringify(r)).not.toContain("sub_");
+  });
+
+  it("rerunning on the same state is safe: the sweep itself writes nothing, only reconcile does (idempotent)", async () => {
+    read.mockResolvedValue(ok({ ids: ids(2) }));
+    const reconcile = vi.fn(async () => ({ outcome: "noop" as const }));
+    await runBillingRecovery({ reconcile });
+    await runBillingRecovery({ reconcile });
+    expect(reconcile).toHaveBeenCalledTimes(4);
   });
 });
