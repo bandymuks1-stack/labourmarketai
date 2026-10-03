@@ -105,6 +105,76 @@ function Flags({ row }: { row: TimelineRow }) {
   );
 }
 
+/**
+ * Real dependency edges as an inline sub-line (the robust form — no drawn
+ * connectors to drift out of step with the rows): "Depends on <task>" and
+ * "Blocks <task>", each a link to the real task row when that task is on this
+ * timeline, plain text otherwise. An unreadable other task is "a task you
+ * can't see", never a fabricated title. A violated dependency is marked
+ * (advisory — it never blocks anything).
+ */
+function Dependencies({ row }: { row: TimelineRow }) {
+  const t = useTranslations("projectStages");
+  const tTasks = useTranslations("tasks");
+  const conflict = row.dependencyConflict;
+  if (row.blockedBy.length === 0 && row.blocks.length === 0 && !conflict) return null;
+  const refLabel = (title: string | null) => title ?? tTasks("dependencies.hidden");
+  const Ref = ({ r }: { r: TimelineRow["blockedBy"][number] }) =>
+    r.href ? (
+      <Link
+        href={r.href as "/dashboard"}
+        className="inline-flex min-h-11 items-center text-brand-blue hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+        data-testid="project-gantt-dependency-link"
+      >
+        <span className="break-words">{refLabel(r.title)}</span>
+      </Link>
+    ) : (
+      <span className="inline-flex min-h-11 items-center break-words text-text-secondary">
+        {refLabel(r.title)}
+      </span>
+    );
+  return (
+    <div
+      className="flex min-w-0 flex-col text-meta text-text-muted"
+      data-testid="project-gantt-dependencies"
+    >
+      {row.blockedBy.length > 0 && (
+        <span className="flex flex-wrap items-center gap-x-2" data-testid="project-gantt-blocked-by">
+          <span>{tTasks("dependencies.blockedBy")}:</span>
+          {row.blockedBy.map((r) => (
+            <span key={r.taskId} className="inline-flex items-center gap-1">
+              <Ref r={r} />
+              {r.status ? (
+                <span className={r.open ? "text-state-warning" : "text-state-success"}>
+                  ({tTasks(`status.${r.status}` as "status.todo")})
+                </span>
+              ) : null}
+            </span>
+          ))}
+        </span>
+      )}
+      {row.blocks.length > 0 && (
+        <span className="flex flex-wrap items-center gap-x-2" data-testid="project-gantt-blocks">
+          <span>{t("ganttBlocks")}:</span>
+          {row.blocks.map((r) => (
+            <Ref key={r.taskId} r={r} />
+          ))}
+        </span>
+      )}
+      {conflict?.startedBeforeBlockers && (
+        <span className="text-state-warning" data-testid="project-gantt-dependency-violated">
+          {tTasks("dependencies.startedBeforeBlocker", { n: conflict.openBlockers })}
+        </span>
+      )}
+      {conflict?.dueBeforeBlockerDue && (
+        <span className="text-state-warning" data-testid="project-gantt-dependency-violated">
+          {tTasks("dependencies.dueBeforeBlocker")}
+        </span>
+      )}
+    </div>
+  );
+}
+
 function DesktopRow({
   row,
   todayPct,
@@ -169,6 +239,7 @@ function DesktopRow({
           <TimeText row={row} />
           <Flags row={row} />
         </span>
+        <Dependencies row={row} />
       </div>
     </div>
   );
@@ -202,6 +273,9 @@ function MobileRow({ row }: { row: TimelineRow }) {
         <TimeText row={row} />
         <Flags row={row} />
       </span>
+      <div className="pb-2">
+        <Dependencies row={row} />
+      </div>
     </li>
   );
 }
