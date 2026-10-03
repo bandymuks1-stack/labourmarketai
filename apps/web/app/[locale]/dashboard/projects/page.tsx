@@ -272,6 +272,11 @@ export default async function ProjectsPage({
     reservationUndo: t("assign.reservation.undo"),
     reservationKeep: t("assign.reservation.keep"),
     reservationDecided: t("assign.reservation.decided"),
+    precheckChecking: t("assign.reservation.precheckChecking"),
+    precheckCollidesTitle: t("assign.reservation.precheckCollidesTitle"),
+    precheckChoose: t("assign.reservation.precheckChoose"),
+    precheckAssignAnyway: t("assign.reservation.precheckAssignAnyway"),
+    precheckAdvisory: t("assign.reservation.precheckAdvisory"),
     reservationSource: {
       project: t("assign.reservation.source.project"),
       booking: t("assign.reservation.source.booking"),

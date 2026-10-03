@@ -7,6 +7,11 @@
  */
 
 import type { ProjectStage, StageStatus } from "@/lib/projects/stages-model";
+import {
+  deriveDependencyConflict,
+  isBlockingStatus,
+  type TaskBlocker,
+} from "@/lib/tasks/task-model";
 
 export interface GanttBar {
   readonly id: string;
@@ -147,6 +152,30 @@ export type TimelineResponsible =
   | { readonly kind: "named"; readonly name: string; readonly href: string | null }
   | { readonly kind: "member" };
 
+/**
+ * One end of a REAL dependency edge (task_dependencies, blocker → blocked).
+ * `title`/`status` are null when the other task is not readable by the
+ * viewer — that is "unknown", never a made-up name. `href` is set only when
+ * the other task is itself a row of this timeline (so the link lands on a row
+ * that exists); otherwise it stays plain text.
+ */
+export interface TimelineDependencyRef {
+  readonly taskId: string;
+  readonly title: string | null;
+  readonly status: TimelineTaskStatus | null;
+  readonly href: string | null;
+  /** The other task is readable and still open. */
+  readonly open: boolean;
+}
+
+/** An ADVISORY violation (SEP-2) — derived with the same pure function the
+ *  tasks page uses, so the two surfaces cannot disagree. */
+export interface TimelineDependencyConflict {
+  readonly startedBeforeBlockers: boolean;
+  readonly dueBeforeBlockerDue: boolean;
+  readonly openBlockers: number;
+}
+
 export interface TimelineRow {
   readonly kind: "stage" | "task";
   readonly id: string;
@@ -164,6 +193,12 @@ export interface TimelineRow {
   readonly responsible: TimelineResponsible | null;
   readonly href: string;
   readonly anchorId: string;
+  /** Tasks only: what this task depends on (empty for stages). */
+  readonly blockedBy: readonly TimelineDependencyRef[];
+  /** Tasks only: visible timeline tasks that depend on this one. Derived from
+   *  the edges the viewer can read — never invented. */
+  readonly blocks: readonly TimelineDependencyRef[];
+  readonly dependencyConflict: TimelineDependencyConflict | null;
 }
 
 export interface TimelineStageRow extends TimelineRow {
@@ -225,6 +260,8 @@ export function buildActivityTimeline(input: {
   tasks: readonly TimelineTaskInput[];
   /** open blocker count per task id */
   waitingOnByTask: Readonly<Record<string, number>>;
+  /** Real dependency edges per BLOCKED task (the getTaskCollaboration shape). */
+  blockersByTask?: Readonly<Record<string, readonly TaskBlocker[]>>;
   meProfileId: string | null;
   people: readonly TimelinePerson[];
   memberNameByProfileId: ReadonlyMap<string, string>;
@@ -256,7 +293,31 @@ export function buildActivityTimeline(input: {
   const dayToIso = (day: number): string =>
     new Date(day * 86_400_000).toISOString().slice(0, 10);
 
+  const inTimeline = new Map(input.tasks.map((t) => [t.id, t] as const));
+  const blockersByTask = input.blockersByTask ?? {};
+  // Reverse side: only edges whose BLOCKED task we could read, restricted to
+  // blockers that are rows of this timeline.
+  const blocksByTask = new Map<string, TimelineDependencyRef[]>();
+  for (const [blockedId, blockers] of Object.entries(blockersByTask)) {
+    const blocked = inTimeline.get(blockedId);
+    if (!blocked) continue;
+    for (const b of blockers) {
+      if (!inTimeline.has(b.blockerTaskId)) continue;
+      const list = blocksByTask.get(b.blockerTaskId) ?? [];
+      list.push({
+        taskId: blocked.id,
+        title: blocked.title,
+        status: blocked.status,
+        href: taskTimelineHref(input.projectId, blocked.id),
+        open: !TASK_CLOSED.has(blocked.status),
+      });
+      blocksByTask.set(b.blockerTaskId, list);
+    }
+  }
+
   const taskRow = (t: TimelineTaskInput): TimelineRow => {
+    const edges = blockersByTask[t.id] ?? [];
+    const conflict = deriveDependencyConflict({ status: t.status, dueAt: t.dueAt }, edges);
     const due = taskDue.get(t.id) ?? null;
     const dated = due !== null && hasWindow;
     return {
@@ -281,6 +342,23 @@ export function buildActivityTimeline(input: {
       ),
       href: taskTimelineHref(input.projectId, t.id),
       anchorId: taskAnchorId(t.id),
+      blockedBy: edges.map((b) => ({
+        taskId: b.blockerTaskId,
+        title: b.title,
+        status: b.status,
+        href: inTimeline.has(b.blockerTaskId)
+          ? taskTimelineHref(input.projectId, b.blockerTaskId)
+          : null,
+        open: isBlockingStatus(b.status),
+      })),
+      blocks: blocksByTask.get(t.id) ?? [],
+      dependencyConflict: conflict.hasConflict
+        ? {
+            startedBeforeBlockers: conflict.startedBeforeBlockers,
+            dueBeforeBlockerDue: conflict.dueBeforeBlockerDue,
+            openBlockers: conflict.openBlockers,
+          }
+        : null,
     };
   };
 
@@ -320,6 +398,9 @@ export function buildActivityTimeline(input: {
       responsible: null,
       href: stageTimelineHref(input.projectId, s.id),
       anchorId: stageAnchorId(s.id),
+      blockedBy: [],
+      blocks: [],
+      dependencyConflict: null,
       tasks: tasksByStage.get(s.id) ?? [],
     };
   });

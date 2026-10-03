@@ -1525,6 +1525,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261002141500_work_task_authz_null_safe_v1.sql",
       // owner 2026-10-01: a manager staffs a project they manage from that project company roster.
       "20261002142000_manager_assigns_roster_worker_on_managed_project_v1.sql",
+      // 2026-10-03: EVID-6 policy narrowing (experience_responses_select resolves the reply moderation status) — marker is the human-gate acknowledgement; draft + needs-human-gate, NOT applied.
+      "20261002143000_experience_responses_select_reply_status_v1.sql",
 ]);
   });
 

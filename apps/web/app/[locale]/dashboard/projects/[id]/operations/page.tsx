@@ -230,6 +230,7 @@ export default async function ProjectOperationsPage({
     stages: stages.applied ? stages.stages : [],
     tasks: timelineTasks,
     waitingOnByTask,
+    blockersByTask: timelineCollab.blockersByTask,
     meProfileId: user.id,
     people: ops.workers.map((w) => ({
       profileId: w.workerProfileId,
