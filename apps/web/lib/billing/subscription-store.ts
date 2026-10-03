@@ -506,7 +506,14 @@ export type RecoveryCandidateRead =
       /** Subscription ids with a reconcile audit row inside the cooldown window. */
       recentlyReconciled: string[];
       /** Webhook events received but never finished (observability only). */
-      unprocessedWebhookEvents: number | null;
+      /**
+       * Webhook events received but never finished (observability only):
+       * `total` scanned (bounded at 500), `withSubscriptionRef` = those whose
+       * lean payload carries `payload.refs.subscription` (a deterministic
+       * mapping the sweep MAY use once ingestion writes it), the rest are
+       * UNMAPPABLE and are only counted, never guessed.
+       */
+      unprocessedEvents: { total: number; withSubscriptionRef: number } | null;
     }
   | { ok: false; reason: "needs_migration" | "store_error" };
 
@@ -558,14 +565,22 @@ export async function readRecoveryCandidates(input: {
     if (typeof id === "string") recentlyReconciled.push(id);
   }
 
-  let unprocessedWebhookEvents: number | null = null;
-  const { count, error: cntErr } = await sb
+  let unprocessedEvents: { total: number; withSubscriptionRef: number } | null = null;
+  const { data: open, error: openErr } = await sb
     .from("payment_webhook_events")
-    .select("id", { count: "exact", head: true })
+    .select("payload")
     .eq("processed", false)
     .neq("event_type", input.reconcileEventType)
-    .lt("created_at", input.staleBeforeIso);
-  if (!cntErr && typeof count === "number") unprocessedWebhookEvents = count;
+    .lt("created_at", input.staleBeforeIso)
+    .limit(500);
+  if (!openErr && Array.isArray(open)) {
+    let withRef = 0;
+    for (const e of open as Array<{ payload: Record<string, unknown> | null }>) {
+      const refs = e.payload?.refs as Record<string, unknown> | undefined;
+      if (typeof refs?.subscription === "string" && refs.subscription.startsWith("sub_")) withRef += 1;
+    }
+    unprocessedEvents = { total: open.length, withSubscriptionRef: withRef };
+  }
 
-  return { ok: true, ids, recentlyReconciled, unprocessedWebhookEvents };
+  return { ok: true, ids, recentlyReconciled, unprocessedEvents };
 }

@@ -48,7 +48,9 @@ describe("GET /api/cron/billing-recovery", () => {
       processed: 2,
       skippedBudget: 0,
       counts: { applied: 2 },
-      unprocessedWebhookEvents: 0,
+      recoverableSubscriptionStateDrift: 2,
+      unmappableUnprocessedWebhookEvents: 0,
+      unmappableRepaired: 0,
     });
     const res = await GET(req("Bearer s3cret-for-test"));
     expect(res.status).toBe(200);
