@@ -2560,6 +2560,40 @@ Status: DB APPLIED + READ-BACK; emitters deployed with #2116. End-to-end (messag
 `message_received` -> recipient -> read/unread; journal decision -> `journal_review_decided`) NOT PROVEN
 (PRODUCTION_E2E_BLOCKED_QA_IDENTITY).
 
+## 20261003090939 - experience_responses_select_reply_status_v1 (#2131) - EVID-6, APPLIED 2026-10-03
+
+Repo file `20261002143000_experience_responses_select_reply_status_v1.sql` (squash-merged as 5933d507e, reviewed head
+52988d06 unchanged, required checks green). One `ALTER POLICY experience_responses_select ... USING`: the record
+author's branch additionally requires the REPLY's own `moderation_status = 'published'` (it previously bound to the
+record's status). Strictly narrowing; reply-author and admin branches unchanged; name, command and roles untouched.
+Owner approval: chat 2026-10-03. Exposure before: 1 reply (`submitted`) under a published record.
+Read-back: ledger row present; `pg_policies` shows the new expression, `check=NULL`, RLS enabled. Rolled-back JWT
+proof (same transaction, reply status cycled): record author sees the reply only when the reply is `published` (0 for
+submitted / in_moderation / rejected); reply author 1 in every state; stranger 0; NULL uid 0; anon denied by grant.
+Row state unchanged afterwards. Status: PASS_REAL_PRODUCTION at RPC/data level (no browser walk). Rollback file
+documents that it reintroduces the defect.
+
+## 20261003095641 - list_agency_offered_candidates_v2_connection_gate_v1 (#2135, successor of #1815) - APPLIED 2026-10-03
+
+Repo file `20261003100000_list_agency_offered_candidates_v2_connection_gate_v1.sql` (squash-merged as fccb3a3d5; the
+migration is byte-identical to the reviewed head 901a7e15, the only later change being test-only count guards).
+`CREATE OR REPLACE` of `list_agency_offered_candidates_for_request_v2`, identical signature/return/SECURITY DEFINER/
+STABLE/search_path/ACL; adds the v1 gate (`connection.status='active'` and `share.status='active'`). Revoke/unshare
+removes future read access; accepted/declined offers leave this read while the authorizing connection/share is inactive
+and remain stored. Old #1815 was NOT merged.
+Owner approval: chat 2026-10-03. Read-back: ledger row, definition contains both predicates, SECURITY DEFINER, STABLE,
+search_path=public, ACL postgres+authenticated. Rolled-back JWT proof on real prod rows (request with 2 offers):
+active conn+share owner=2; connection revoked owner=0; share unshared owner=0; re-activated owner=2; wrong client 0;
+stranger 0; NULL uid 0; anon denied. Connection/share statuses, 4 offers and 163 audit rows unchanged afterwards.
+Status: PASS_REAL_PRODUCTION at RPC/data level (no browser walk).
+
+## Correction 2026-10-03 - #1436 invitation binding IS applied
+
+`docs/consolidation/PR_TABLE.md` called `20260902230000_accept_invitation_binds_org_membership_v1` unapplied. It is applied
+(ledger `20260908143925 accept_invitation_binds_org_membership_v1`). Only the optional backfill was never run: 2 historical
+`company_workers` rows (accepted 2026-09-04 / 2026-09-05, before the fix) have no employee engagement in their org.
+Owner decision pending: additive backfill (engagement_contexts + audit row, no membership), 2 rows.
+
 ## 20261003071338 - work_task_authz_null_safe_v1 (#2128) - P0 SECURITY, APPLIED 2026-10-03
 
 Repo file `20261002141500_work_task_authz_null_safe_v1.sql` (sha256 of the LF file on main at e30915a47:
@@ -2655,6 +2689,8 @@ repo file's timestamp. Matched by migration name, read from `supabase_migrations
 | `20261002120000` | `20261002102903` | journal_explicit_project_attribution_v1 |
 | `20261002140000` | `20261002184321` | message_journal_review_notification_types_v1 |
 | `20261002141500` | `20261003071338` | work_task_authz_null_safe_v1 |
+| `20261002143000` | `20261003090939` | experience_responses_select_reply_status_v1 |
+| `20261003100000` | `20261003095641` | list_agency_offered_candidates_v2_connection_gate_v1 |
 
 Note on `agency_drafted_needs_output_column_v1` (ledger 20260928182413): applied as a standalone statement
 sequence (`drop function if exists public.list_agency_drafted_needs_v1(); create function ...` - `create or
