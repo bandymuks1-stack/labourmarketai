@@ -126,7 +126,7 @@ create or replace function public.commitment_override_receipts_immutable_v1()
 returns trigger
 language plpgsql
 set search_path to 'public'
-as $function$
+as $$
 begin
   -- pg_trigger_depth() > 1 means this DML was fired by a referential action
   -- (the ON DELETE CASCADE / SET NULL of an owning row), never by a caller.
@@ -142,7 +142,7 @@ begin
   raise exception 'commitment_override_receipts is append-only (% refused)', tg_op
     using errcode = '42501';
 end
-$function$;
+$$;
 
 drop trigger if exists commitment_override_receipts_immutable on public.commitment_override_receipts;
 create trigger commitment_override_receipts_immutable
@@ -153,12 +153,12 @@ create or replace function public.commitment_override_receipts_no_truncate_v1()
 returns trigger
 language plpgsql
 set search_path to 'public'
-as $function$
+as $$
 begin
   raise exception 'commitment_override_receipts is append-only (TRUNCATE refused)'
     using errcode = '42501';
 end
-$function$;
+$$;
 
 drop trigger if exists commitment_override_receipts_no_truncate on public.commitment_override_receipts;
 create trigger commitment_override_receipts_no_truncate
@@ -193,7 +193,7 @@ returns uuid
 language plpgsql
 security definer
 set search_path to 'public'
-as $function$
+as $$
 declare
   v_uid     uuid := auth.uid();
   v_worker  uuid;
@@ -311,7 +311,7 @@ begin
   end if;
   return v_id;
 end
-$function$;
+$$;
 
 revoke all on function public.record_commitment_override_v1(uuid, uuid, jsonb, text) from public, anon;
 grant execute on function public.record_commitment_override_v1(uuid, uuid, jsonb, text) to authenticated;
