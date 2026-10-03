@@ -1,0 +1,122 @@
+{
+  "values": {
+    "PAYMENTS_ENABLED": false,
+    "FREE_ORGANIZATION_PLAN_KEY": "free_organization",
+    "ORGANIZATION_PLAN_KEY": "company_pilot",
+    "OPEN_NEEDS_CONTACT_THRESHOLD": 10,
+    "DEFERRED_PLAN_KEYS": [
+      "worker_plus",
+      "agency_pilot"
+    ],
+    "PRE_PAYMENT_PLANS": [
+      {
+        "slug": "free_worker",
+        "audience": "worker",
+        "accessState": "free",
+        "cta": "use",
+        "labelKey": "free_worker",
+        "entitlements": {
+          "worker_profile": true,
+          "worker_journal": true,
+          "worker_basic_skills": true,
+          "readiness_checklist_countries": 1,
+          "vacancy_translations": false
+        }
+      },
+      {
+        "slug": "worker_plus",
+        "audience": "worker",
+        "accessState": "payment_not_enabled",
+        "cta": "contact",
+        "labelKey": "worker_plus",
+        "launch": "deferred",
+        "entitlements": {
+          "worker_profile": true,
+          "worker_journal": true,
+          "worker_basic_skills": true,
+          "expanded_cv": true,
+          "readiness_checklist_countries": 10,
+          "document_expiry_reminders": true,
+          "vacancy_translations": false,
+          "priority_visibility": false
+        }
+      },
+      {
+        "slug": "free_organization",
+        "audience": "company",
+        "accessState": "free",
+        "cta": "use",
+        "labelKey": "free_organization",
+        "entitlements": {
+          "company_create_needs": 1,
+          "vacancy_translations": false,
+          "candidate_readiness_summaries": true,
+          "booking_requests": true,
+          "communication": true,
+          "team_matching": true,
+          "agency_multi_company": true,
+          "worker_pool": true,
+          "doc_readiness_tracking": true,
+          "booking_pipeline": true
+        }
+      },
+      {
+        "slug": "company_pilot",
+        "audience": "company",
+        "accessState": "payment_not_enabled",
+        "cta": "request_pilot_access",
+        "labelKey": "company_pilot",
+        "launch": "sellable",
+        "entitlements": {
+          "company_create_needs": 10,
+          "vacancy_translations": false,
+          "candidate_readiness_summaries": true,
+          "booking_requests": true,
+          "communication": true,
+          "team_matching": true,
+          "agency_multi_company": true,
+          "worker_pool": true,
+          "doc_readiness_tracking": true,
+          "booking_pipeline": true
+        }
+      },
+      {
+        "slug": "agency_pilot",
+        "audience": "agency",
+        "accessState": "payment_not_enabled",
+        "cta": "contact",
+        "labelKey": "agency_pilot",
+        "launch": "deferred",
+        "entitlements": {
+          "agency_multi_company": true,
+          "worker_pool": true,
+          "doc_readiness_tracking": true,
+          "booking_pipeline": true,
+          "company_create_needs": 25,
+          "vacancy_translations": false,
+          "candidate_readiness_summaries": true,
+          "booking_requests": true,
+          "communication": true
+        }
+      },
+      {
+        "slug": "admin_internal",
+        "audience": "admin",
+        "accessState": "internal",
+        "cta": "use",
+        "labelKey": "admin_internal",
+        "entitlements": {
+          "verify_documents": true,
+          "vacancy_translations": false,
+          "manage_country_rules": true,
+          "manage_pilots": true
+        }
+      }
+    ]
+  },
+  "functions": [
+    "defaultPlanFor",
+    "getPlan",
+    "isSellablePlan"
+  ]
+}

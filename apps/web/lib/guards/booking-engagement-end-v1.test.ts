@@ -1531,6 +1531,7 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261002150000_work_tasks_stage_and_subtask_v1.sql",
       // 2026-10-03: #1815/ARCH-4 disclosure-authority forward fix (list_agency_offered_candidates_for_request_v2 regains the connection/share gate) — marker is the human-gate acknowledgement.
       "20261003100000_list_agency_offered_candidates_v2_connection_gate_v1.sql",
+      "20261003110000_subject_contest_withdraw_v1.sql",
 ]);
   });
 
