@@ -137,6 +137,44 @@ describe("migration: a narrow, additive, reversible write path", () => {
   });
 });
 
+describe("constraint reconcile (forward-fix): one canonical event_type CHECK", () => {
+  const fx = read("supabase/migrations/20261003140000_subject_contest_withdraw_constraint_reconcile_v1.sql");
+  const fxBody = fx
+    .split("\n")
+    .filter((l) => !l.trimStart().startsWith("--"))
+    .join("\n");
+  const fxDown = read("supabase/rollbacks/20261003140000_subject_contest_withdraw_constraint_reconcile_v1.down.sql");
+  const oldDown = down;
+
+  it("drops BOTH lineage names and adds exactly one, named _chk (the live name)", () => {
+    expect(fx.startsWith("-- @human-gate-approved")).toBe(true);
+    expect(fxBody).toMatch(/drop constraint if exists organization_evidence_events_event_type_check;/);
+    expect(fxBody).toMatch(/drop constraint if exists organization_evidence_events_event_type_chk;/);
+    expect(fxBody.match(/add constraint/g)?.length).toBe(1);
+    expect(fxBody).toMatch(/add constraint organization_evidence_events_event_type_chk/);
+  });
+
+  it("holds the UNION: every prior value, dispute_withdrawn and source_preserved", () => {
+    for (const v of ["attested","attestation_withdrawn","independently_verified","verification_withdrawn","withdrawn","reinstated","disputed","dispute_withdrawn","corrected","source_preserved"]) {
+      expect(fxBody).toContain("'" + v + "'");
+    }
+  });
+
+  it("the fix rollback restores the pre-#2138 state and refuses with withdrawals", () => {
+    expect(fxDown).toMatch(/raise exception/i);
+    expect(fxDown).toContain("source_preserved");
+    expect(fxDown).not.toContain("dispute_withdrawn',");
+    expect(fxDown).toMatch(/add constraint organization_evidence_events_event_type_chk/);
+    expect(fxDown).not.toMatch(/add constraint organization_evidence_events_event_type_check/);
+  });
+
+  it("the original rollback never recreates the stale _check lineage", () => {
+    expect(oldDown).not.toMatch(/add constraint organization_evidence_events_event_type_check/);
+    expect(oldDown).toMatch(/add constraint organization_evidence_events_event_type_chk/);
+    expect(oldDown).toContain("source_preserved");
+  });
+});
+
 describe("derived state: latest wins PER ACTOR, history is never erased", () => {
   it("a withdrawn contest stops standing but the contest event remains", () => {
     const events = [

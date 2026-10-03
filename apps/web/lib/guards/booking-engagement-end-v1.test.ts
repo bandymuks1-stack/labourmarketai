@@ -1532,6 +1532,7 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261003110000_subject_contest_withdraw_v1.sql",
       // 2026-10-03: PER-12 subject-safe export projection (new SECURITY DEFINER read fn) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261003120000_privacy_export_import_lines_subject_v1.sql",
+      "20261003140000_subject_contest_withdraw_constraint_reconcile_v1.sql",
 ]);
   });
 
