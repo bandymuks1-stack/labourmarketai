@@ -60,7 +60,7 @@ export interface AttentionLabels {
 }
 
 const TILE = cn("flex shrink-0 items-center justify-center rounded-full font-display font-semibold", PLAYER_IDENTITY_AVATAR_BORDER, PLAYER_IDENTITY_FALLBACK_SURFACE);
-const TOKEN = "inline-flex items-center gap-1 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label";
+const TOKEN = "inline-flex items-center gap-1 rounded-full border border-ink-500 px-2 py-0.5 text-support";
 
 export function HistoricalAttention({
   issues,
@@ -103,7 +103,7 @@ export function HistoricalAttention({
 
   const why = (kind: string) => (
     <details className="rounded-md border border-ink-600">
-      <summary className="flex min-h-11 cursor-pointer items-center gap-2 px-3 font-mono text-meta uppercase tracking-label text-text-muted">
+      <summary className="flex min-h-11 cursor-pointer items-center gap-2 px-3 text-support font-medium text-text-muted">
         <SemanticIcon concept="unknown" label={labels.whyLabel} className="h-3.5 w-3.5" />
         {labels.whyLabel}
       </summary>
@@ -113,7 +113,7 @@ export function HistoricalAttention({
 
   return (
     <section className="flex flex-col gap-4" data-testid="historical-attention" data-blocking={blocking.length} data-informational={informational.length}>
-      {blocking.length === 0 && informational.length === 0 && <p className="text-support text-text-muted">{labels.none}</p>}
+      {blocking.length === 0 && informational.length === 0 && <p className="text-support font-medium text-text-muted">{labels.none}</p>}
 
       {blocking.length > 0 && (
         <ul className="flex flex-col gap-3" aria-label={labels.decisions}>
@@ -136,7 +136,7 @@ export function HistoricalAttention({
                         </span>
                         <span className="font-display text-card-title font-bold tabular-nums text-state-amber">{labels.sum} {fmt.hours(r.sourceHours)} h</span>
                         {r.recordedOn && (
-                          <span className="inline-flex items-center gap-1 font-mono text-meta tabular-nums text-text-secondary">
+                          <span className="inline-flex items-center gap-1 text-meta tabular-nums text-text-secondary">
                             <SemanticIcon concept="calendar" label={labels.period} className="h-3 w-3" />
                             {fmt.day(r.recordedOn)}
                           </span>
@@ -168,7 +168,7 @@ export function HistoricalAttention({
                       )}
                       {(r.text || r.context || r.periodWords) && (
                         <details>
-                          <summary className="flex min-h-11 cursor-pointer items-center gap-1 font-mono text-meta uppercase tracking-label text-text-muted">
+                          <summary className="flex min-h-11 cursor-pointer items-center gap-1 text-support font-medium text-text-muted">
                             <SemanticIcon concept="source" label={labels.source} className="h-3 w-3" />
                             {labels.source}
                           </summary>
@@ -209,12 +209,12 @@ export function HistoricalAttention({
 
       {informational.length > 0 && (
         <div className="flex flex-col gap-2" data-testid="evidence-issues-informational">
-          <span className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.observations}</span>
+          <span className="text-support font-medium text-text-muted">{labels.observations}</span>
           <ul className="flex flex-col gap-2">
             {informational.map((i) => (
               <li key={`${i.kind}:${i.key ?? ""}`} data-testid="evidence-issue" data-kind={i.kind} data-blocking="false" data-count={i.count}>
                 <details className="rounded-md border border-ink-600">
-                  <summary className="flex min-h-11 cursor-pointer items-center gap-2 px-3 text-support text-text-secondary">
+                  <summary className="flex min-h-11 cursor-pointer items-center gap-2 px-3 text-support font-medium text-text-secondary">
                     <SemanticIcon concept={i.kind === "allocation_inconsistent" || i.kind === "conflicts" || i.kind === "week_conflicts" || i.kind === "time_conflicts_source" ? "warning" : "unknown"} label={labels.observations} className="h-4 w-4 text-text-muted" />
                     <span className="flex-1">{labels.issue(i.kind, { count: i.count, label: i.label ?? "" })}</span>
                   </summary>

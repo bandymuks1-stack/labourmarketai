@@ -30,10 +30,10 @@ const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 const SERVED = ["lt", "en", "ru"] as const;
 
 describe("primary nav is the six action-first doors, nothing more", () => {
-  it("ids are exactly overview / market_map / journal_text_first / communication / planning / network (production UX repair v2 F14/F15)", () => {
+  it("ids are exactly overview / discover / journal_text_first / communication / planning / network (production UX repair v2 F14/F15)", () => {
     expect(VISIBLE_PRIMARY_NAV_ITEMS.map((i) => i.id)).toEqual([
       "overview",
-      "market_map",
+      "discover",
       "journal_text_first",
       "communication",
       "planning",

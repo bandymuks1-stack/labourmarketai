@@ -1488,10 +1488,8 @@
   },
   "profileState": {
     "readiness": {
-      "label": "Profil-Bereitschaft",
-      "ready": "Bereit",
-      "building": "Wird noch ausgefüllt",
-      "start": "Gerade begonnen"
+      "label": "Profilschritte",
+      "summary": "Profilschritte: {done} von {total} erledigt"
     },
     "freshness": {
       "label": "Aktualität",
@@ -4486,12 +4484,12 @@
       },
       "tabs": {
         "overview": "Mein Bereich",
+        "discover": "Entdecken",
         "marketplace": "Marktplatz",
         "marketMap": "Karte",
         "profile": "Profil",
         "journal": "Arbeitsjournal",
         "communication": "Nachrichten",
-        "discover": "Entdecken",
         "search": "Suche",
         "account": "Einstellungen",
         "admin": "Admin",
@@ -7534,11 +7532,8 @@
       }
     },
     "readiness": {
-      "label": "Bereitschaft",
+      "label": "Profilschritte",
       "hint": "Alles bereit.",
-      "levelReady": "Bereit",
-      "levelBuilding": "Im Aufbau",
-      "levelStart": "Am Anfang",
       "signalsTemplate": "Schritte erledigt",
       "nextLabel": "Als Nächstes:",
       "pillars": {
@@ -7548,7 +7543,10 @@
         "journal": "Arbeitsjournal",
         "evidence": "Einträge",
         "workCard": "Arbeitskarte"
-      }
+      },
+      "ringAria": "Profilschritte: {met} von {total} erledigt",
+      "stepDone": "erledigt",
+      "stepOpen": "offen"
     },
     "verifiedTitle": "Vom Manager bestätigte Fähigkeiten",
     "verifiedEmpty": "Noch keine. Sie entstehen aus Ihren Arbeitseinträgen.",
@@ -10660,6 +10658,129 @@
         "unknown": "Es konnte nicht geprüft werden, ob Unternehmen Ihr Profil sehen können. Das heißt nicht, dass die Sichtbarkeit aus ist — öffnen Sie Ihre Datenschutzeinstellungen.",
         "noWorker": "Die Sichtbarkeit für Arbeitgeber gilt für ein Arbeitnehmerprofil, und dieses Konto hat noch keines."
       }
+    }
+  },
+  "workInTime": {
+    "notAuthed": "Melden Sie sich an, um Ihre Zeit zu sehen.",
+    "lens": {
+      "label": "Perspektive",
+      "me": "Meine Zeit",
+      "people": "Menschen in der Zeit",
+      "projects": "Projekte in der Zeit",
+      "hint": {
+        "me": "Ihre eigenen Tage: was Sie bindet, was Sie erfasst haben, was als Nächstes kommt.",
+        "people": "Ihr Team auf einer Zeitachse: Einsätze, Abwesenheiten, Überschneidungen und was erfasst ist.",
+        "projects": "Projekte auf einer Zeitachse: Phasen, Besetzung über die Zeit und offener Bedarf."
+      },
+      "notManager": "Menschen und Projekte in der Zeit öffnen sich, wenn Sie für eine Organisation handeln, die ein Team oder ein Projekt leitet. Ihre eigenen Tage finden Sie unter Meine Zeit."
+    },
+    "state": {
+      "known": "Bekannt",
+      "planned": "Geplant",
+      "recorded": "Erfasst",
+      "confirmed": "Bestätigt",
+      "openNeed": "Offener Bedarf",
+      "notProvided": "Nicht angegeben",
+      "unknown": "Unbekannt"
+    },
+    "legend": {
+      "title": "Wie sicher ist das?",
+      "rule": "Unbekannt ist nicht null. Nicht gemeldet heißt nicht abwesend. Kein Eintrag heißt nicht keine Arbeit."
+    },
+    "window": {
+      "label": "Zeitfenster",
+      "prev": "Vorherige vier Wochen",
+      "next": "Nächste vier Wochen",
+      "today": "Heute"
+    },
+    "me": {
+      "title": "Meine Zeit",
+      "today": "Heute",
+      "nothingToday": "Für heute ist nichts erfasst. Das heißt nicht, dass es keine Arbeit gab.",
+      "moreToday": "+{count} weitere heute",
+      "recordedTimed": "{duration} erfasst (Einträge: {count})",
+      "recordedUntimed": "Ohne Dauer erfasst (Einträge: {count})",
+      "notRecordedYet": "Für heute ist noch keine Arbeit erfasst.",
+      "recordToday": "Arbeit von heute erfassen",
+      "openJournalDay": "Heute im Journal öffnen",
+      "next": "Als Nächstes",
+      "nextIn": "{count, plural, =0 {heute} =1 {morgen} other {in {count} T.}}",
+      "nothingNext": "Es steht nichts Datiertes an.",
+      "undated": "Ohne Datum: {count}. Sie sind keinem Tag zugeordnet.",
+      "stripTitle": "Die Tage rund um jetzt",
+      "stripRule": "Gold ist geplant, Cyan ist erfasst, Bernstein ist abwesend.",
+      "stripPlanned": "geplant: {count}",
+      "stripRecorded": "erfasste Einträge: {count}",
+      "stripNoRecord": "nichts erfasst",
+      "stripAway": "abwesend",
+      "legendPlanned": "Geplant",
+      "legendRecorded": "Erfasst, nach Dauer",
+      "legendUntimed": "Erfasst, ohne Dauer",
+      "legendAway": "Abwesend",
+      "calendarHeading": "Kalender",
+      "unknown": "Ihre Zeit konnte gerade nicht gelesen werden. Das ist unbekannt, nicht leer."
+    },
+    "roster": {
+      "unknown": "Die Teamliste konnte gerade nicht gelesen werden. Das ist unbekannt, nicht leer."
+    },
+    "people": {
+      "title": "Menschen in der Zeit",
+      "intro": "Alle aus Ihrem Team auf einer Achse. Eine leere Strecke heißt: nichts erfasst. Sie heißt nicht, dass die Person frei ist.",
+      "capacity": "Team pro Tag",
+      "capacitySummary": "Team von {total}. Die meisten gebunden an einem Tag: {peak}, am {date}.",
+      "capacityDay": "{date}: gebunden {committed}, abwesend {away}, nichts erfasst {noRecord}",
+      "away": "Abwesend",
+      "overlap": "Überschneidung",
+      "unnamed": "Teammitglied",
+      "now": "Jetzt",
+      "next": "Danach",
+      "noRecord": "Nichts erfasst",
+      "noRecordWindow": "In diesem Fenster nichts erfasst",
+      "noRecordUnknownLeave": "Nichts erfasst. Abwesenheiten konnten nicht gelesen werden.",
+      "outside": "außerhalb des Fensters: {count}",
+      "kind": {
+        "project": "Projekt",
+        "booking": "Buchung",
+        "trip": "Reise",
+        "absence": "Abwesend"
+      },
+      "absenceUnknown": "Genehmigte Abwesenheiten konnten gerade nicht gelesen werden. Abwesenheit ist hier unbekannt, nicht nicht vorhanden.",
+      "withoutRecord": "Personen im Team ohne Eintrag in diesem Fenster: {count}. Sie werden nicht als Zeilen gezeichnet und nicht als frei gezählt.",
+      "none": "In Ihrem Team ist noch niemand."
+    },
+    "projects": {
+      "title": "Projekte in der Zeit",
+      "intro": "Jedes Projekt: seine Spanne, seine Phasen und wie viele Personen an jedem Tag zugeordnet sind.",
+      "untitled": "Projekt ohne Titel",
+      "stage": "Phase",
+      "noDates": "Keine Daten angegeben",
+      "noStages": "Keine datierten Phasen angegeben",
+      "noStageNow": "Heute keine Phase",
+      "noStageNext": "Keine spätere Phase erfasst",
+      "noStaffingRecord": "In diesem Fenster ist keine Zuordnung erfasst",
+      "needOpen": "{missing} von {required} noch offen",
+      "needCovered": "{required} benötigt, gedeckt",
+      "needNotProvided": "Personenzahl nicht angegeben",
+      "staffed": "Zugeordnet: {count}",
+      "needsTitle": "Offener Bedarf ohne Projekt",
+      "needsUndated": "Angegebener Bedarf ohne Datum: {count}",
+      "gaps": "Übergaben sowie Fristen für Dokumente oder Zertifikate sind in den Planungsdaten noch nicht enthalten, daher wird dafür nichts gezeichnet.",
+      "unplacedTitle": "Projekte ohne erfasste Daten, Phasen oder Zuordnungen: {count}. Aufgelistet, nicht gezeichnet.",
+      "withoutDates": "Projekte ohne Datum: {count}. Sie haben keinen Platz auf der Achse.",
+      "none": "Für dieses Fenster sind keine Projekte oder offenen Bedarfe erfasst.",
+      "unknown": "Projekte und Phasen konnten gerade nicht gelesen werden. Das ist unbekannt, nicht leer."
+    },
+    "focus": {
+      "selected": "Ausgewählt",
+      "close": "Schließen",
+      "person": "{name} in der Zeit",
+      "project": "{name} in der Zeit",
+      "nothingOnRecord": "Für diese Person ist in diesem Fenster nichts erfasst.",
+      "openPerson": "Person öffnen",
+      "openTeam": "Team öffnen",
+      "openConversations": "Gespräche",
+      "openProject": "Projekt öffnen",
+      "openWork": "Arbeit öffnen"
     }
   },
   "planning": {
@@ -18125,14 +18246,27 @@
     "noRecords": "Noch keine Arbeitseinträge",
     "legend": {
       "managerRecord": "Eintrag der Führungskraft",
-      "recorded": "Von Ihnen erfasst"
+      "recorded": "Von Ihnen erfasst",
+      "declared": "Von Ihnen angegeben",
+      "declaredHint": "Ihre eigenen Worte. Noch von niemandem geprüft.",
+      "recordedHint": "Stunden und Einträge aus Ihrem Arbeitsjournal.",
+      "managerRecordHint": "Eine verantwortliche Führungskraft oder der Arbeitgeber hat es bestätigt."
     },
     "skillsTitle": "Was Ihre Arbeit zeigt",
     "next": {
       "title": "Ihre Geschichte geht mit Ihnen",
       "body": "Jede Arbeit, die Sie festhalten, ergänzt sie. Nehmen Sie sie mit zur nächsten Gelegenheit.",
-      "cta": "Sehen, wohin Sie gehen können"
-    }
+      "cta": "Sehen, wohin Sie gehen können",
+      "label": "Als Nächstes, nicht Verlauf",
+      "notRecord": "nicht Teil Ihres Nachweises"
+    },
+    "promise": {
+      "mine": "Das ist Ihre berufliche Geschichte.",
+      "grows": "Sie wächst jedes Mal, wenn Sie arbeiten.",
+      "follows": "Der Nachweis kann Sie zur nächsten Gelegenheit begleiten."
+    },
+    "keyTitle": "So lesen Sie jede Zeile",
+    "historyTitle": "Arbeitsverlauf"
   },
   "workContext": {
     "title": "Deine Arbeit auf einen Blick",
@@ -18150,6 +18284,508 @@
       "history": "{count, plural, one {# Job} other {# Jobs}}",
       "skills": "{count, plural, one {# Fähigkeit, gestützt auf deine Einträge} other {# Fähigkeiten, gestützt auf deine Einträge}}",
       "next": "Wohin du gehen kannst"
+    }
+  },
+  "publicCinema": {
+    "title": "Folgen Sie einer Person und einem Unternehmen durch die Arbeit.",
+    "sub": "Dieselben Menschen, dasselbe Projekt und derselbe Eintrag, von der ersten Suche bis zum nächsten Kapitel. Scrollen Sie, und die Kamera bewegt sich.",
+    "skip": "Geschichte überspringen",
+    "railLabel": "Kapitel der Geschichte",
+    "privacy": "Privat, bis die Sichtbarkeit eingeschaltet wird.",
+    "chapters": [
+      "Arbeit finden",
+      "Menschen finden",
+      "Arbeit steuern",
+      "Nachweis behalten",
+      "Weitergehen"
+    ],
+    "scenes": [
+      {
+        "title": "Ein Mensch mit echter Arbeit im Rücken.",
+        "body": "{name}, {trade}. Das Profil beginnt bei dem, was die Person wirklich tut."
+      },
+      {
+        "title": "Bedarf und Menschen treffen sich offen.",
+        "body": "Ein Unternehmen sagt, was es braucht. Eine Fachkraft sieht es neben der Arbeit, die sie wirklich leistet, nie als einzelne Bewertung."
+      },
+      {
+        "title": "Sie sprechen in ihrer eigenen Sprache.",
+        "body": "Jeder schreibt in der eigenen Sprache. Nachrichten lassen sich in Ihrer lesen, das Original bleibt daneben erhalten."
+      },
+      {
+        "title": "Die Menschen kommen aufs Projekt.",
+        "body": "Wer zusammenarbeitet, wird einem Projekt zugeordnet, damit alle dieselbe Arbeit sehen."
+      },
+      {
+        "title": "Anweisung, Arbeit, Stunden, Foto.",
+        "body": "Eine klare Anweisung, die geleistete Arbeit, die Zeit dafür und ein Foto: einmal festgehalten."
+      },
+      {
+        "title": "Aus dem Tag wird ein Eintrag.",
+        "body": "Er beginnt als eigener Eintrag der Person. Nichts gilt schon als bestätigt."
+      },
+      {
+        "title": "Eine Führungskraft bestätigt ihn.",
+        "body": "Die Führungskraft sieht, was erfasst wurde, und bestätigt es oder schickt es mit einer Notiz zurück."
+      },
+      {
+        "title": "Bestätigte Arbeit baut den Werdegang auf.",
+        "body": "Bestätigte Arbeit wird Teil des beruflichen Werdegangs. Unbestätigte Arbeit bleibt als eigener Eintrag sichtbar und ist so gekennzeichnet."
+      },
+      {
+        "title": "Dann kommt das Nächste.",
+        "body": "Die Person gibt an, ab wann sie verfügbar ist. Das Unternehmen schreibt den nächsten Bedarf aus und plant voraus. Beide starten bei dem, was wirklich geschah."
+      }
+    ],
+    "labels": {
+      "person": "Mensch",
+      "need": "Bedarf",
+      "company": "Unternehmen",
+      "project": "Projekt",
+      "team": "Arbeitsteam",
+      "instruction": "Anweisung",
+      "work": "Arbeit",
+      "hours": "Stunden",
+      "photo": "Foto",
+      "record": "Eintrag",
+      "manager": "Führungskraft",
+      "history": "Beruflicher Werdegang",
+      "next": "Als Nächstes, kein Werdegang"
+    },
+    "chain": {
+      "project": "Projekt",
+      "people": "Personen darauf",
+      "need": "Nächster Bedarf",
+      "plan": "Planung"
+    },
+    "kinds": [
+      "Stelle",
+      "Dienstleistung",
+      "Anzeige"
+    ],
+    "kindsNote": "Jobs, Dienstleistungen und Anzeigen finden am selben Ort statt.",
+    "translateTag": "In Ihrer Sprache angezeigt · Original bleibt erhalten",
+    "teamMeta": "3 Personen in diesem Projekt",
+    "plan": "Die nächsten Wochen im Kalender planen",
+    "addedBy": "Ergänzt von {name}",
+    "nextMeta": "So gibt es {name} an",
+    "hours": "8 Std.",
+    "msgOut": "Ja, ich kann am 20. anfangen.",
+    "construction": {
+      "trade": "Gerüstbauer",
+      "needTitle": "Fassadengerüst · 3 Personen",
+      "managerRole": "Bauleiter",
+      "msgIn": "Können Sie am 20. Oktober an der Nordfassade anfangen?",
+      "instruction": "Nordfassade, Ebene 3, Ostfeld: Anker alle 1,5 m.",
+      "photoAlt": "Das Gerüst an der Nordfassade",
+      "hNowT": "{project} · Gerüstbauer",
+      "hNowM": "Nordfassade · seit September",
+      "hRecentT": "Altstadtsanierung · Gerüstbauer",
+      "nextNeed": "Fassadengerüstbauer ab 20. Oktober"
+    },
+    "hospitality": {
+      "trade": "Köchin",
+      "managerRole": "Küchenchefin",
+      "msgIn": "Können Sie am 20. Oktober mit der Herbstkarte beginnen?",
+      "instruction": "Herbstkarte: die neue Vorspeise anrichten wie auf der Karte."
+    }
+  },
+  "publicSlice": {
+    "sample": "Beispiel",
+    "states": {
+      "own": "Ihr eigener Eintrag",
+      "waiting": "Wartet auf die Prüfung durch eine Führungskraft",
+      "confirmed": "Von einer Führungskraft bestätigt",
+      "unknown": "Noch nicht erfasst"
+    },
+    "imagery": {
+      "tomasAlt": "Ein Gerüstbauer arbeitet auf einem Fassadengerüst in einer Altstadtgasse",
+      "rasaAlt": "Eine Köchin am Pass in einer Restaurantküche",
+      "tomasCaption": "Tomas K. · Gerüstbauer",
+      "rasaCaption": "Rasa J. · Köchin",
+      "vanAlt": "Ein Gerüstbauer neben seinem Transporter auf einer Baustelle",
+      "ownerAlt": "Eine Restaurantinhaberin mit zwei Kollegen am Tisch"
+    },
+    "workers": {
+      "hero": {
+        "title": "Finden Sie Arbeit.",
+        "accent": "Behalten Sie, was Sie aufbauen.",
+        "sub": "Finden Sie einen Job, der zu dem passt, was Sie wirklich tun. Sobald Sie anfangen, sind Ihr Tag, Ihr Team und Ihre Nachrichten an einem Ort. Die Arbeit, die Sie erfassen, wird zu Ihrer beruflichen Geschichte.",
+        "cta": "Kostenloses Profil erstellen",
+        "secondary": "Offene Stellen ansehen",
+        "note": "Für Personen kostenlos. Bezahlte Pläne gibt es nur für Organisationen."
+      },
+      "day": {
+        "title": "Wissen, was heute ansteht.",
+        "body": "Sie sehen zuerst die Arbeit, an der Sie sind, Ihr Team und Ihre Nachrichten. Dann halten Sie in wenigen Zeilen fest, was Sie getan haben, mit Foto und Zeit.",
+        "todayLabel": "Heute",
+        "task": "Abendservice",
+        "taskDetail": "Start der Herbstkarte · Küchenteam",
+        "message": "Küchenchef: Die neuen Gerichte gehen heute Abend raus.",
+        "primary": "Heutige Arbeit erfassen",
+        "secondary": "Dem Team schreiben",
+        "recordLabel": "Ihr Eintrag",
+        "recordText": "Den Pass für die neue Herbstkarte geleitet. Zwei Gerichte zurückgegangen und neu gemacht.",
+        "time": "8 Std.",
+        "photo": "1 Foto",
+        "sent": "An Ihre Führungskraft gesendet"
+      },
+      "history": {
+        "title": "Bestätigte Arbeit baut Ihre Geschichte auf.",
+        "body": "Arbeit, die Ihre Führungskraft bestätigt, wird Teil Ihrer beruflichen Geschichte. Arbeit, die noch niemand bestätigt hat, bleibt als Ihr eigener Eintrag sichtbar und klar gekennzeichnet. Wofür Sie verfügbar sind, steht getrennt davon, als das, was als Nächstes kommt.",
+        "now": "Jetzt",
+        "recent": "Zuletzt",
+        "earlier": "Früher",
+        "next": "Als Nächstes, nicht Geschichte",
+        "nowTitle": "Restaurant Ąžuolas · Köchin",
+        "nowMeta": "Start der Herbstkarte · seit September",
+        "nowState": "Von einer Führungskraft bestätigt",
+        "recentTitle": "Café Hafen · Commis de Cuisine",
+        "recentMeta": "2023–2024",
+        "recentState": "Ihr eigener Eintrag · nicht bestätigt",
+        "earlierTitle": "Von Rasa ergänzt",
+        "earlierMeta": "2019–2022",
+        "earlierState": "Noch nicht erfasst",
+        "nextTitle": "Verfügbar ab 20. Oktober",
+        "nextMeta": "Wie Rasa es angibt",
+        "nextState": "Noch kein Angebot"
+      },
+      "outcome": {
+        "title": "Ihre Arbeit verschwindet nicht, wenn der Job endet.",
+        "body": "Der nächste Arbeitgeber trifft eine Person mit echten Einträgen, nicht nur mit einem Lebenslauf. Ihr Profil bleibt privat, bis Sie die Sichtbarkeit einschalten."
+      },
+      "faq": {
+        "title": "Bevor Sie sich anmelden",
+        "items": [
+          {
+            "q": "Kostet es etwas?",
+            "a": "Nein. LabourMarket.ai ist für Personen kostenlos. Bezahlte Pläne gibt es nur für Organisationen."
+          },
+          {
+            "q": "Wer kann mein Profil sehen?",
+            "a": "Niemand findet Sie, bis Sie die Sichtbarkeit einschalten. Dann sehen Unternehmen eine kurze berufliche Zusammenfassung. Lebenslauf und Kontaktdaten werden nur weitergegeben, wenn Sie bestätigen. Das Unternehmen, für das Sie arbeiten, sieht die für es erfasste Arbeit."
+          },
+          {
+            "q": "Was, wenn meine Führungskraft meine Arbeit nicht bestätigt?",
+            "a": "Sie bleibt Ihr eigener Eintrag, klar als nicht bestätigt gekennzeichnet. Sie behalten ihn in jedem Fall."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Beginnen Sie mit Ihrem eigenen",
+        "accent": "Berufsprofil.",
+        "button": "Kostenloses Profil erstellen"
+      }
+    },
+    "companies": {
+      "hero": {
+        "title": "Finden Sie die Leute, die Sie brauchen.",
+        "accent": "Und führen Sie die Arbeit.",
+        "sub": "Sagen Sie, was Sie brauchen. Lernen Sie Menschen kennen, deren echte Arbeit passt. Setzen Sie sie auf ein Projekt, sehen Sie die erfasste Arbeit, bestätigen Sie sie und schreiben Sie den nächsten Bedarf aus.",
+        "cta": "Bedarf einstellen",
+        "secondary": "Preise ansehen",
+        "note": "Einen Bedarf einzustellen ist kostenlos."
+      },
+      "need": {
+        "title": "Sagen Sie, was Sie brauchen. Sehen Sie, wer passt.",
+        "body": "Beschreiben Sie die Arbeit, wie viele Personen und ab wann. Sie sehen Menschen, deren Arbeitsgeschichte zu diesem Bedarf passt, gemessen an der konkreten Aufgabe, nie als eine allgemeine Bewertung.",
+        "needLabel": "Ihr Bedarf",
+        "needTitle": "Commis de Cuisine · 2 Personen",
+        "needMeta": "Ab 20. Oktober · Vilnius",
+        "personRole": "Köchin",
+        "personMeta": "Verfügbar ab 20. Oktober, wie sie es angibt",
+        "personState": "Bestätigte Arbeit im Restaurant Ąžuolas"
+      },
+      "project": {
+        "title": "Setzen Sie Ihre Leute auf die Arbeit.",
+        "body": "Fügen Sie die Menschen, mit denen Sie arbeiten, einem Projekt hinzu. Jeden Tag halten sie fest, was getan wurde. Sie sehen, welche Einträge auf Sie warten, und bestätigen sie oder geben sie zur Änderung zurück.",
+        "label": "Projekt",
+        "name": "Start der Herbstkarte",
+        "people": "Küchenteam · 3 Personen",
+        "waiting": "1 Eintrag wartet auf Ihre Prüfung",
+        "confirmed": "2 Einträge diese Woche bestätigt"
+      },
+      "attention": {
+        "title": "Sehen Sie, was Sie braucht. Planen Sie, was kommt.",
+        "body": "Einträge, die auf Prüfung warten, und Ihre ausgestellten Bedarfe stehen an einem Ort. So beginnt die nächste Einstellungsentscheidung bei dem, was wirklich passiert.",
+        "label": "Braucht Sie",
+        "items": [
+          {
+            "text": "1 Eintrag wartet auf Ihre Prüfung",
+            "state": "wait"
+          },
+          {
+            "text": "Commis de Cuisine ab 20. Oktober: offener Bedarf",
+            "state": "wait"
+          },
+          {
+            "text": "Patisserie: kein Eintrag seit Donnerstag",
+            "state": "unk"
+          }
+        ]
+      },
+      "faq": {
+        "title": "Bevor Sie starten",
+        "items": [
+          {
+            "q": "Was kostet es?",
+            "a": "Eine aktive Position pro Organisation ist kostenlos. Weitere Positionen brauchen den Organisationsplan, der auf der Preisseite steht. Einen Bedarf einzustellen ist kostenlos."
+          },
+          {
+            "q": "Kann ich die von meinen Leuten erfasste Arbeit bestätigen?",
+            "a": "Ja. Eine Führungskraft oder Inhaberin der Organisation kann einen Eintrag bestätigen, zur Änderung zurückgeben oder ablehnen, sobald die Prüfung für die Organisation eingeschaltet ist."
+          },
+          {
+            "q": "Was sehe ich von einer Person, bevor ich Kontakt aufnehme?",
+            "a": "Eine kurze berufliche Zusammenfassung: Name, Berufe, Erfahrung, Verfügbarkeit und Fähigkeiten. Nur von Personen, die die Sichtbarkeit eingeschaltet haben. Lebenslauf und Kontaktdaten werden nur weitergegeben, wenn sie bestätigen."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Beginnen Sie mit den Leuten,",
+        "accent": "die Sie brauchen.",
+        "button": "Bedarf einstellen"
+      }
+    },
+    "transition": {
+      "title": "Ein Arbeitstag, vom Eintrag bis zur Geschichte.",
+      "sub": "Folgen Sie einer Schicht. Eintrag, Nachweis und Prüfung passieren je einmal, und beide Seiten sehen das Ergebnis.",
+      "stageNav": "Stufe wählen",
+      "replay": "Nochmal abspielen",
+      "stages": {
+        "work": {
+          "label": "Arbeit",
+          "caption": "Rasa leitet den Abendservice."
+        },
+        "proof": {
+          "label": "Nachweis",
+          "caption": "Sie hält fest, was sie getan hat, und fügt ein Foto hinzu."
+        },
+        "review": {
+          "label": "Prüfung",
+          "caption": "Ihre Führungskraft bestätigt es."
+        },
+        "history": {
+          "label": "Geschichte",
+          "caption": "Es wird Teil ihrer beruflichen Geschichte."
+        },
+        "next": {
+          "label": "Weiter",
+          "caption": "Das Unternehmen sieht den Fortschritt. Beide können planen, was kommt."
+        }
+      },
+      "pro": {
+        "role": "Köchin",
+        "recordTitle": "Abendservice · 8 Std.",
+        "recordText": "Den Pass für die neue Herbstkarte geleitet.",
+        "photoAlt": "Der Pass in der Küche vor dem Service",
+        "historyLabel": "In ihrer beruflichen Geschichte",
+        "historyTitle": "Restaurant Ąžuolas · Köchin",
+        "historyMeta": "Start der Herbstkarte",
+        "nextLabel": "Als Nächstes, nicht Geschichte",
+        "nextMeta": "Verfügbar ab 20. Oktober, wie sie es angibt"
+      },
+      "co": {
+        "project": "Start der Herbstkarte",
+        "waiting": "1 Eintrag wartet auf Prüfung",
+        "done": "Eintrag bestätigt",
+        "nextLabel": "Was als Nächstes kommt",
+        "nextNeed": "Commis de Cuisine ab 20. Oktober",
+        "nextCta": "Nächsten Bedarf einstellen"
+      }
+    },
+    "home": {
+      "title": "Wählen Sie Ihre Seite.",
+      "sub": "Derselbe Ort, derselbe Eintrag. Was Sie als Nächstes tun, hängt davon ab, wo Sie stehen.",
+      "workerTitle": "Ich suche Arbeit",
+      "workerBody": "Finden Sie passende Arbeit und behalten Sie den Nachweis dessen, was Sie tun.",
+      "workerCta": "Für Fachkräfte",
+      "companyTitle": "Ich stelle Leute ein",
+      "companyBody": "Finden Sie die Leute, die Sie brauchen, und führen Sie die Arbeit mit ihnen.",
+      "companyCta": "Für Unternehmen"
+    },
+    "explore": {
+      "summary": "Jeden Schritt ansehen und in Ihrem Arbeitsbereich öffnen"
+    },
+    "world": {
+      "labels": {
+        "person": "Die Person",
+        "team": "Das Team",
+        "project": "Projekt",
+        "work": "Heutige Arbeit",
+        "today": "Heute",
+        "record": "Ihr Eintrag",
+        "needs": "Braucht Sie",
+        "kitchen": "Küchenteam"
+      },
+      "home": {
+        "title": "Eine Welt der Arbeit.",
+        "sub": "Echte Menschen, echte Unternehmen und die Arbeit dazwischen, an einem Ort.",
+        "primary": "Ich suche Arbeit",
+        "secondary": "Ich stelle ein",
+        "personRole": "Gerüstbauer · Vilnius",
+        "crew": "Nordteam",
+        "projectMeta": "Nordfassade · Ebene 3 bis 4",
+        "workTitle": "Ebene 3, Ostfeld",
+        "workMeta": "8 Std. · Anker alle 1,5 m",
+        "doneTitle": "In seine Geschichte aufgenommen",
+        "doneMeta": "Von einer Führungskraft bestätigt · 1 Foto"
+      },
+      "workers": {
+        "taskMeta": "Abnahme 14:00",
+        "recordTitle": "Ebene 3, Ostfeld",
+        "recordMeta": "8 Std. · 1 Foto",
+        "doneTitle": "Jetzt in Ihrer Geschichte",
+        "taskTitle": "Nordfassade"
+      },
+      "companies": {
+        "projectDone": "5 von 9 Einträgen diese Woche bestätigt",
+        "teamMeta": "3 Personen in diesem Projekt"
+      }
+    }
+  },
+  "journalContinuity": {
+    "title": "Von der Anweisung zu Ihrer Geschichte",
+    "intro": "Jeder Eintrag ist Teil einer Kette. Öffnen Sie einen Schritt, um weiterzumachen.",
+    "instruction": {
+      "label": "Anweisung",
+      "unit": "geplante Arbeit"
+    },
+    "work": {
+      "label": "Geleistete Arbeit",
+      "unit": "Einträge"
+    },
+    "time": {
+      "label": "Zeit",
+      "unit": "erfasst"
+    },
+    "evidence": {
+      "label": "Nachweise",
+      "unit": "mit Fotos"
+    },
+    "review": {
+      "label": "Prüfung",
+      "unit": "wartet"
+    },
+    "confirmed": {
+      "label": "Bestätigt",
+      "unit": "von Führungskraft",
+      "returned": "{count} zurück"
+    },
+    "project": {
+      "label": "Projekt",
+      "unit": "sein Verlauf"
+    },
+    "history": {
+      "label": "Ihre Geschichte",
+      "unit": "lebendiger Lebenslauf"
+    }
+  },
+  "projectContinuity": {
+    "title": "Dieses Projekt geht weiter in",
+    "people": "Personen",
+    "calendar": "Kalender",
+    "journal": "Arbeitsjournal",
+    "review": "Prüfung",
+    "history": "Firmengeschichte"
+  },
+  "discover": {
+    "eyebrow": "Entdecken",
+    "title": "Finden, was Sie brauchen. Anbieten, was Sie haben.",
+    "lead": "Hier bieten Menschen und Unternehmen Arbeit, Personen, Dienstleistungen und Arbeitsmittel an oder suchen sie. Sie sehen nur, was Ihre Rolle nutzen kann.",
+    "honesty": "Jede Karte unten führt zu einem echten Bereich. Nichts auf dieser Seite ist eine Beispielanzeige.",
+    "feature": {
+      "label": "Entdecken",
+      "description": "Arbeit, Personen, Dienstleistungen und Arbeitsmittel finden - oder Eigenes anbieten."
+    },
+    "side": {
+      "seek": "Sie suchen",
+      "offer": "Sie bieten an",
+      "both": "Suchen oder anbieten"
+    },
+    "status": {
+      "early": "Neu geöffnet",
+      "earlyNote": "Bereiche mit „Neu geöffnet“ sind fertig und funktionieren, haben aber noch wenige Einträge - Sie sind vielleicht unter den Ersten."
+    },
+    "groups": {
+      "around": {
+        "title": "In Ihrer Nähe",
+        "lead": "Den Markt auf der Karte sehen oder in eigenen Worten sagen, was Sie anbieten oder brauchen."
+      },
+      "work": {
+        "title": "Arbeit",
+        "lead": "Offene Stellen und die Signale dahinter."
+      },
+      "people": {
+        "title": "Personen und Unternehmen",
+        "lead": "Personen für einen Bedarf finden, Bedarf erfassen und Beziehungen pflegen."
+      },
+      "offers": {
+        "title": "Dienstleistungen und Arbeitsmittel",
+        "lead": "Eine Dienstleistung anbieten oder anfragen, Werkzeuge, Fahrzeuge, Räume und Ausrüstung für die Arbeit einstellen."
+      },
+      "grow": {
+        "title": "Wachsen",
+        "lead": "Aus dem, was Sie finden und tun, Fähigkeiten und Weiterbildung machen."
+      }
+    },
+    "entries": {
+      "map": {
+        "title": "Marktkarte",
+        "desc": "Bedarf, Personen und Projekte auf einer Karte. Nur Orte mit echten Daten erscheinen."
+      },
+      "recognize": {
+        "title": "Sagen, was Sie anbieten oder brauchen",
+        "desc": "In eigenen Worten beschreiben und zum passenden Ort weitergehen. Nichts wird gespeichert, bevor Sie es wählen."
+      },
+      "opportunities": {
+        "title": "Chancen für Sie",
+        "desc": "Offene Stellen passend zu Ihrem Arbeitsnachweis, mit gespeicherten Suchen."
+      },
+      "jobs": {
+        "title": "Öffentliche Jobbörse",
+        "desc": "Veröffentlichte Stellen ohne Anmeldung durchsuchen."
+      },
+      "intelligence": {
+        "title": "Marktsignale",
+        "desc": "Lohn- und Nachfragesignale aus Ihren eigenen Daten, mit Quellenangabe."
+      },
+      "scouting": {
+        "title": "Personen finden",
+        "desc": "Anonymisierte Kandidaten für Ihren Bedarf vormerken und durch den Ablauf begleiten."
+      },
+      "needs": {
+        "title": "Personalbedarf",
+        "desc": "Beschreiben Sie, wen Sie brauchen - der eine Ort, an dem Ihre Nachfrage erfasst wird."
+      },
+      "candidates": {
+        "title": "Kandidatenentwürfe",
+        "desc": "Private Notizen zu Personen, die Sie einbinden könnten. Ein Entwurf ist kein Konto."
+      },
+      "buyer": {
+        "title": "Arbeit oder Leistungen anfragen",
+        "desc": "Als Kunde einrichten und beschreiben, was erledigt werden soll."
+      },
+      "network": {
+        "title": "Netzwerk",
+        "desc": "Personen und Unternehmen suchen, Einladungen senden, Beziehungen pflegen."
+      },
+      "services": {
+        "title": "Dienstleistung anbieten",
+        "desc": "Veröffentlichen, was Sie oder Ihr Unternehmen für andere tun können."
+      },
+      "service_requests": {
+        "title": "Dienstleistungen finden und anfragen",
+        "desc": "Aktive Angebote durchsuchen und anfragen oder Anfragen an Ihre Angebote beantworten."
+      },
+      "listings": {
+        "title": "Arbeitsmittel",
+        "desc": "Werkzeuge, Ausrüstung, Fahrzeuge, Räume und Unterkünfte zum Verkauf, zur Miete oder gesucht - nur für die Arbeit."
+      },
+      "education": {
+        "title": "Weiterbildungsprogramme",
+        "desc": "Lernende, Programme und Kohorten für Ihre Bildungsorganisation."
+      }
     }
   }
 }

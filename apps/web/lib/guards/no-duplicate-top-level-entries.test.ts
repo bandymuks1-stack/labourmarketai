@@ -27,10 +27,10 @@ const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 
 describe("the global primary nav is the compact, non-duplicated set", () => {
-  it("primary nav = exactly overview / market_map / journal_text_first / communication / planning / network (production UX repair v2 F14/F15)", () => {
+  it("primary nav = exactly overview / discover / journal_text_first / communication / planning / network (production UX repair v2 F14/F15)", () => {
     expect(VISIBLE_PRIMARY_NAV_ITEMS.map((i) => i.id)).toEqual([
       "overview",
-      "market_map",
+      "discover",
       "journal_text_first",
       "communication",
       "planning",
@@ -81,8 +81,8 @@ describe("one canonical market map (no separate/competing map products)", () => 
     expect(page).not.toMatch(/<MarketMapBase\b/);
   });
 
-  it("/dashboard/marketplace redirects to the one map (not a competing surface)", () => {
-    expect(isCanonicallyRedirected("/dashboard/marketplace", "/dashboard/market-map")).toBe(true);
+  it("/dashboard/marketplace redirects to Discover, which links the one map (not a competing surface)", () => {
+    expect(isCanonicallyRedirected("/dashboard/marketplace", "/dashboard/market")).toBe(true);
   });
 });
 

@@ -110,7 +110,7 @@ export async function DerivedPeriodEvidence({
     >
       <div className="flex flex-wrap items-center gap-2">
         <TimeReality kind="derived" label={t("chip")} />
-        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+        <span className="text-support font-medium text-text-muted">
           {t("title")}
         </span>
       </div>
@@ -129,7 +129,7 @@ export async function DerivedPeriodEvidence({
               <span className="text-text-secondary">{b.text}</span>
             </p>
             <p
-              className="font-mono text-sm font-semibold tabular-nums text-brand-cyan"
+              className="text-sm font-semibold tabular-nums text-brand-cyan"
               data-testid={`planning-derived-share-${b.id}`}
             >
               {t("thisMonth", { hours: b.share.hours.toFixed(2) })}

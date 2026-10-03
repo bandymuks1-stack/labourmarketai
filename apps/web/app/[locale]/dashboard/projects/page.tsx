@@ -312,7 +312,7 @@ export default async function ProjectsPage({
           {t("model.note")}{" "}
           <Link
             href="/about#evidence"
-            className="whitespace-nowrap text-brand-blue hover:underline"
+            className="whitespace-nowrap text-brand-blue underline underline-offset-4"
           >
             {t("model.link")} →
           </Link>

@@ -516,7 +516,7 @@ export function HistoricalWorkspace({
           data-testid="evidence-understood"
         >
           <div className="flex flex-col gap-0.5">
-            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+            <span className="text-support font-medium text-text-muted">
               {t("state.period")}
             </span>
             <span className="inline-flex items-center gap-2 font-display text-title font-semibold tracking-tightest text-text-primary">
@@ -625,7 +625,7 @@ export function HistoricalWorkspace({
                 />
                 <span aria-hidden>{modeLabel(m.id)}</span>
                 {badge !== null && (
-                  <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-orange px-1 font-mono text-meta font-bold leading-none text-ink-900">
+                  <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-orange px-1 text-meta font-bold leading-none text-ink-900">
                     {badge}
                   </span>
                 )}
@@ -648,7 +648,7 @@ export function HistoricalWorkspace({
           <button
             type="button"
             onClick={openSource}
-            className="ml-auto inline-flex min-h-11 shrink-0 items-center gap-1.5 px-2 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary"
+            className="ml-auto inline-flex min-h-11 shrink-0 items-center gap-1.5 px-2 text-support font-medium text-text-secondary hover:text-text-primary"
             data-testid="evidence-source-link"
           >
             <SemanticIcon
@@ -671,7 +671,7 @@ export function HistoricalWorkspace({
               <button
                 type="button"
                 onClick={() => setWeek("all")}
-                className="inline-flex min-h-11 items-center gap-1 rounded-full bg-brand-blue/10 px-2.5 font-mono text-meta uppercase tracking-label text-text-primary ring-1 ring-brand-blue/50"
+                className="inline-flex min-h-11 items-center gap-1 rounded-full bg-brand-blue/10 px-2.5 text-support font-medium text-text-primary ring-1 ring-brand-blue/50"
                 data-testid="historical-selection-week"
               >
                 <SemanticIcon
@@ -687,7 +687,7 @@ export function HistoricalWorkspace({
               <button
                 type="button"
                 onClick={() => setDay(null)}
-                className="inline-flex min-h-11 items-center gap-1 rounded-full bg-brand-blue/10 px-2.5 font-mono text-meta text-text-primary ring-1 ring-brand-blue/50"
+                className="inline-flex min-h-11 items-center gap-1 rounded-full bg-brand-blue/10 px-2.5 text-meta text-text-primary ring-1 ring-brand-blue/50"
                 data-testid="historical-selection-day"
               >
                 <SemanticIcon
@@ -703,7 +703,7 @@ export function HistoricalWorkspace({
               <button
                 type="button"
                 onClick={() => focusPerson(null)}
-                className="inline-flex min-h-11 items-center gap-1 rounded-full bg-brand-blue/10 px-2.5 font-mono text-meta text-text-primary ring-1 ring-brand-blue/50"
+                className="inline-flex min-h-11 items-center gap-1 rounded-full bg-brand-blue/10 px-2.5 text-meta text-text-primary ring-1 ring-brand-blue/50"
                 data-testid="historical-selection-person"
               >
                 <SemanticIcon
@@ -719,7 +719,7 @@ export function HistoricalWorkspace({
               <button
                 type="button"
                 onClick={() => focusObject(null)}
-                className="inline-flex min-h-11 items-center gap-1 rounded-full bg-brand-blue/10 px-2.5 font-mono text-meta text-text-primary ring-1 ring-brand-blue/50"
+                className="inline-flex min-h-11 items-center gap-1 rounded-full bg-brand-blue/10 px-2.5 text-meta text-text-primary ring-1 ring-brand-blue/50"
                 data-testid="historical-selection-object"
               >
                 <SemanticIcon
@@ -805,7 +805,7 @@ export function HistoricalWorkspace({
                         key="pick"
                         className={cn(
                           RISE,
-                          "flex min-h-40 items-center justify-center text-center text-support text-text-muted",
+                          "flex min-h-40 items-center justify-center text-center text-support font-medium text-text-muted",
                         )}
                       >
                         {t("people.pick")}
@@ -999,7 +999,7 @@ export function HistoricalWorkspace({
             <button
               type="button"
               onClick={() => setMode("attention")}
-              className="mx-auto flex w-full max-w-7xl items-center gap-1.5 text-left font-mono text-meta text-brand-orange"
+              className="mx-auto flex w-full max-w-7xl items-center gap-1.5 text-left text-meta text-brand-orange"
               data-testid="evidence-confirm-blocked"
             >
               <SemanticIcon
@@ -1077,7 +1077,7 @@ function Stat({
       </span>
       <span
         aria-hidden
-        className="font-mono text-meta uppercase tracking-label text-text-muted"
+        className="text-support font-medium text-text-muted"
       >
         {label}
       </span>

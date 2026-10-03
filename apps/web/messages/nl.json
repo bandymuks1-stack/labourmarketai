@@ -1488,10 +1488,8 @@
   },
   "profileState": {
     "readiness": {
-      "label": "Profielgereedheid",
-      "ready": "Klaar",
-      "building": "Nog in opbouw",
-      "start": "Net begonnen"
+      "label": "Profielstappen",
+      "summary": "Profielstappen: {done} van {total} gedaan"
     },
     "freshness": {
       "label": "Actueel",
@@ -4486,12 +4484,12 @@
       },
       "tabs": {
         "overview": "Mijn ruimte",
+        "discover": "Ontdekken",
         "marketplace": "Marktplaats",
         "marketMap": "Kaart",
         "profile": "Profiel",
         "journal": "Werkjournaal",
         "communication": "Berichten",
-        "discover": "Ontdekken",
         "search": "Zoeken",
         "account": "Instellingen",
         "admin": "Admin",
@@ -7534,11 +7532,8 @@
       }
     },
     "readiness": {
-      "label": "Gereedheid",
+      "label": "Profielstappen",
       "hint": "Alles klaar.",
-      "levelReady": "Klaar",
-      "levelBuilding": "In opbouw",
-      "levelStart": "Net gestart",
       "signalsTemplate": "stappen voltooid",
       "nextLabel": "Volgende:",
       "pillars": {
@@ -7548,7 +7543,10 @@
         "journal": "Werkjournaal",
         "evidence": "Registraties",
         "workCard": "Werkkaart"
-      }
+      },
+      "ringAria": "Profielstappen: {met} van {total} gedaan",
+      "stepDone": "gedaan",
+      "stepOpen": "nog te doen"
     },
     "verifiedTitle": "Door manager bevestigde vaardigheden",
     "verifiedEmpty": "Nog geen. Ze worden opgebouwd uit je werkregistraties.",
@@ -10660,6 +10658,129 @@
         "unknown": "Kon niet controleren of bedrijven uw profiel kunnen zien. Dat betekent niet dat zichtbaarheid uit staat — open uw privacyinstellingen.",
         "noWorker": "Zichtbaarheid voor werkgevers geldt voor een werknemersprofiel, en dit account heeft er nog geen."
       }
+    }
+  },
+  "workInTime": {
+    "notAuthed": "Log in om je tijd te zien.",
+    "lens": {
+      "label": "Perspectief",
+      "me": "Mijn tijd",
+      "people": "Mensen in de tijd",
+      "projects": "Projecten in de tijd",
+      "hint": {
+        "me": "Je eigen dagen: wat je bindt, wat je hebt vastgelegd en wat er komt.",
+        "people": "Je team op één tijdlijn: inzet, afwezigheid, overlap en wat is vastgelegd.",
+        "projects": "Projecten op één tijdlijn: fasen, bezetting in de tijd en openstaande behoefte."
+      },
+      "notManager": "Mensen en projecten in de tijd gaan open wanneer je handelt namens een organisatie die een team of project beheert. Je eigen dagen staan onder Mijn tijd."
+    },
+    "state": {
+      "known": "Bekend",
+      "planned": "Gepland",
+      "recorded": "Vastgelegd",
+      "confirmed": "Bevestigd",
+      "openNeed": "Open behoefte",
+      "notProvided": "Niet opgegeven",
+      "unknown": "Onbekend"
+    },
+    "legend": {
+      "title": "Hoe zeker is dit?",
+      "rule": "Onbekend is niet nul. Niet gemeld is niet afwezig. Geen vastlegging is geen werk."
+    },
+    "window": {
+      "label": "Tijdvenster",
+      "prev": "Vorige vier weken",
+      "next": "Volgende vier weken",
+      "today": "Vandaag"
+    },
+    "me": {
+      "title": "Mijn tijd",
+      "today": "Vandaag",
+      "nothingToday": "Voor vandaag is niets vastgelegd. Dat betekent niet dat er geen werk was.",
+      "moreToday": "+{count} meer vandaag",
+      "recordedTimed": "{duration} vastgelegd (items: {count})",
+      "recordedUntimed": "Zonder duur vastgelegd (items: {count})",
+      "notRecordedYet": "Het werk van vandaag is nog niet vastgelegd.",
+      "recordToday": "Werk van vandaag vastleggen",
+      "openJournalDay": "Vandaag openen in het journaal",
+      "next": "Straks",
+      "nextIn": "{count, plural, =0 {vandaag} =1 {morgen} other {over {count} d}}",
+      "nothingNext": "Er komt niets met een datum aan.",
+      "undated": "Zonder datum: {count}. Ze staan op geen enkele dag.",
+      "stripTitle": "De dagen rond nu",
+      "stripRule": "Goud is gepland, cyaan is vastgelegd, amber is afwezig.",
+      "stripPlanned": "gepland: {count}",
+      "stripRecorded": "vastgelegde items: {count}",
+      "stripNoRecord": "niets vastgelegd",
+      "stripAway": "afwezig",
+      "legendPlanned": "Gepland",
+      "legendRecorded": "Vastgelegd, naar duur",
+      "legendUntimed": "Vastgelegd, zonder duur",
+      "legendAway": "Afwezig",
+      "calendarHeading": "Kalender",
+      "unknown": "Je tijd kon nu niet worden gelezen. Dat is onbekend, niet leeg."
+    },
+    "roster": {
+      "unknown": "De teamlijst kon nu niet worden gelezen. Dat is onbekend, niet leeg."
+    },
+    "people": {
+      "title": "Mensen in de tijd",
+      "intro": "Iedereen uit je team op één as. Een lege strook betekent: niets vastgelegd. Het betekent niet dat de persoon vrij is.",
+      "capacity": "Team per dag",
+      "capacitySummary": "Team van {total}. Meeste bezet op één dag: {peak}, op {date}.",
+      "capacityDay": "{date}: bezet {committed}, afwezig {away}, niets vastgelegd {noRecord}",
+      "away": "Afwezig",
+      "overlap": "Dubbel bezet",
+      "unnamed": "Persoon",
+      "now": "Nu",
+      "next": "Straks",
+      "noRecord": "Niets vastgelegd",
+      "noRecordWindow": "In dit venster niets vastgelegd",
+      "noRecordUnknownLeave": "Niets vastgelegd. Verlof kon niet worden gelezen.",
+      "outside": "buiten het venster: {count}",
+      "kind": {
+        "project": "Projectinzet",
+        "booking": "Boeking",
+        "trip": "Reis",
+        "absence": "Afwezig"
+      },
+      "absenceUnknown": "Goedgekeurd verlof kon nu niet worden gelezen. Afwezigheid is hier onbekend, niet afwezig.",
+      "withoutRecord": "Teamleden zonder vastlegging in dit venster: {count}. Ze worden niet als baan getekend en niet als vrij geteld.",
+      "none": "Er is nog niemand in je team."
+    },
+    "projects": {
+      "title": "Projecten in de tijd",
+      "intro": "Elk project: zijn looptijd, zijn fasen en hoeveel mensen er per dag zijn toegewezen.",
+      "untitled": "Project zonder titel",
+      "stage": "Fase",
+      "noDates": "Geen datums opgegeven",
+      "noStages": "Geen gedateerde fasen opgegeven",
+      "noStageNow": "Vandaag geen fase",
+      "noStageNext": "Geen latere fase vastgelegd",
+      "noStaffingRecord": "In dit venster is geen toewijzing vastgelegd",
+      "needOpen": "Nog {missing} van {required} open",
+      "needCovered": "{required} nodig, gedekt",
+      "needNotProvided": "Aantal personen niet opgegeven",
+      "staffed": "Toegewezen: {count}",
+      "needsTitle": "Open behoefte zonder project",
+      "needsUndated": "Opgegeven behoefte zonder datums: {count}",
+      "gaps": "Overdrachten en termijnen voor documenten of certificaten zitten nog niet in de planningsgegevens, dus daarvoor wordt niets getekend.",
+      "unplacedTitle": "Projecten zonder vastgelegde datums, fasen of toewijzingen: {count}. Opgesomd, niet getekend.",
+      "withoutDates": "Projecten zonder datums: {count}. Ze hebben geen plek op de as.",
+      "none": "Voor dit venster zijn geen projecten of open behoeften vastgelegd.",
+      "unknown": "Projecten en fasen konden nu niet worden gelezen. Dat is onbekend, niet leeg."
+    },
+    "focus": {
+      "selected": "Geselecteerd",
+      "close": "Sluiten",
+      "person": "{name} in de tijd",
+      "project": "{name} in de tijd",
+      "nothingOnRecord": "Voor deze persoon is in dit venster niets vastgelegd.",
+      "openPerson": "Persoon openen",
+      "openTeam": "Team openen",
+      "openConversations": "Gesprekken",
+      "openProject": "Project openen",
+      "openWork": "Werk openen"
     }
   },
   "planning": {
@@ -18125,14 +18246,27 @@
     "noRecords": "Nog geen werkregistraties",
     "legend": {
       "managerRecord": "Vermelding van de manager",
-      "recorded": "Door u vastgelegd"
+      "recorded": "Door u vastgelegd",
+      "declared": "Door u opgegeven",
+      "declaredHint": "Uw eigen woorden. Nog door niemand gecontroleerd.",
+      "recordedHint": "Uren en notities uit uw werkjournaal.",
+      "managerRecordHint": "Een verantwoordelijke leidinggevende of werkgever heeft het bevestigd."
     },
     "skillsTitle": "Wat uw werk laat zien",
     "next": {
       "title": "Uw geschiedenis gaat met u mee",
       "body": "Elke klus die u vastlegt, vult haar aan. Neem haar mee naar de volgende kans.",
-      "cta": "Bekijk waar u naartoe kunt"
-    }
+      "cta": "Bekijk waar u naartoe kunt",
+      "label": "Volgende stap, geen geschiedenis",
+      "notRecord": "geen deel van uw dossier"
+    },
+    "promise": {
+      "mine": "Dit is uw beroepsgeschiedenis.",
+      "grows": "Ze groeit elke keer dat u werkt.",
+      "follows": "Het dossier kan met u meegaan naar de volgende kans."
+    },
+    "keyTitle": "Hoe elke regel te lezen",
+    "historyTitle": "Werkgeschiedenis"
   },
   "workContext": {
     "title": "Jouw werk in één overzicht",
@@ -18150,6 +18284,508 @@
       "history": "{count, plural, one {# baan} other {# banen}}",
       "skills": "{count, plural, one {# vaardigheid gebaseerd op jouw registraties} other {# vaardigheden gebaseerd op jouw registraties}}",
       "next": "Waar je heen kunt"
+    }
+  },
+  "publicCinema": {
+    "title": "Volg één persoon en één bedrijf door het werk heen.",
+    "sub": "Dezelfde mensen, hetzelfde project en hetzelfde dossier, van de eerste zoektocht tot het volgende hoofdstuk. Scrol en de camera beweegt mee.",
+    "skip": "Verhaal overslaan",
+    "railLabel": "Hoofdstukken van het verhaal",
+    "privacy": "Privé, tot zichtbaarheid wordt ingeschakeld.",
+    "chapters": [
+      "Werk vinden",
+      "Mensen vinden",
+      "Werk uitvoeren",
+      "Het dossier bewaren",
+      "Verder gaan"
+    ],
+    "scenes": [
+      {
+        "title": "Een mens met echt werk achter zich.",
+        "body": "{name}, {trade}. Het profiel begint bij wat de persoon werkelijk doet."
+      },
+      {
+        "title": "Vraag en mensen ontmoeten elkaar openlijk.",
+        "body": "Een bedrijf zegt wat het nodig heeft. Een vakman ziet dat naast het werk dat echt wordt gedaan, nooit als één score."
+      },
+      {
+        "title": "Ze praten in hun eigen taal.",
+        "body": "Iedereen schrijft in de eigen taal. Berichten zijn te lezen in de uwe, met het origineel ernaast."
+      },
+      {
+        "title": "De mensen komen op het project.",
+        "body": "Wie samenwerkt, wordt aan een project gekoppeld, zodat iedereen hetzelfde werk ziet."
+      },
+      {
+        "title": "Opdracht, werk, uren, foto.",
+        "body": "Een duidelijke opdracht, het uitgevoerde werk, de tijd die het kostte en een foto: één keer vastgelegd."
+      },
+      {
+        "title": "De dag wordt een registratie.",
+        "body": "Eerst is het de eigen registratie van de persoon. Niets heet al bevestigd."
+      },
+      {
+        "title": "Een leidinggevende bevestigt het.",
+        "body": "De leidinggevende ziet wat is vastgelegd en bevestigt het, of stuurt het met een notitie terug."
+      },
+      {
+        "title": "Bevestigd werk bouwt de loopbaan.",
+        "body": "Bevestigd werk komt in de beroepsgeschiedenis. Werk dat niemand bevestigde, blijft zichtbaar als eigen registratie en is zo gemarkeerd."
+      },
+      {
+        "title": "En daarna: wat volgt.",
+        "body": "De persoon geeft aan wanneer die beschikbaar is. Het bedrijf plaatst de volgende vraag en plant vooruit. Beiden beginnen bij wat echt gebeurde."
+      }
+    ],
+    "labels": {
+      "person": "Persoon",
+      "need": "Vraag",
+      "company": "Bedrijf",
+      "project": "Het project",
+      "team": "Werkteam",
+      "instruction": "Opdracht",
+      "work": "Werk",
+      "hours": "Uren",
+      "photo": "Foto",
+      "record": "Registratie",
+      "manager": "Leidinggevende",
+      "history": "Beroepsgeschiedenis",
+      "next": "Volgende, geen geschiedenis"
+    },
+    "chain": {
+      "project": "Het project",
+      "people": "Mensen erop",
+      "need": "Volgende vraag",
+      "plan": "Inplannen"
+    },
+    "kinds": [
+      "Baan",
+      "Dienst",
+      "Advertentie"
+    ],
+    "kindsNote": "Banen, diensten en advertenties staan op dezelfde plek.",
+    "translateTag": "Getoond in uw taal · origineel bewaard",
+    "teamMeta": "3 mensen op dit project",
+    "plan": "Plan de komende weken in de agenda",
+    "addedBy": "Toegevoegd door {name}",
+    "nextMeta": "Zoals {name} het opgeeft",
+    "hours": "8 uur",
+    "msgOut": "Ja, ik kan op de 20e beginnen.",
+    "construction": {
+      "trade": "steigerbouwer",
+      "needTitle": "Gevelsteiger · 3 personen",
+      "managerRole": "Voorman",
+      "msgIn": "Kunt u op 20 oktober beginnen aan de noordgevel?",
+      "instruction": "Noordgevel, niveau 3, oostvak: ankers om de 1,5 m.",
+      "photoAlt": "De steiger aan de noordgevel",
+      "hNowT": "{project} · Steigerbouwer",
+      "hNowM": "Noordgevel · sinds september",
+      "hRecentT": "Renovatie oude stad · Steigerbouwer",
+      "nextNeed": "Gevelsteigerbouwers vanaf 20 oktober"
+    },
+    "hospitality": {
+      "trade": "kok",
+      "managerRole": "Chef-kok",
+      "msgIn": "Kunt u op 20 oktober beginnen met het herfstmenu?",
+      "instruction": "Herfstmenu: dien het nieuwe voorgerecht op zoals op de kaart."
+    }
+  },
+  "publicSlice": {
+    "sample": "Voorbeeld",
+    "states": {
+      "own": "Uw eigen registratie",
+      "waiting": "Wacht op beoordeling door een leidinggevende",
+      "confirmed": "Bevestigd door een leidinggevende",
+      "unknown": "Nog niet geregistreerd"
+    },
+    "imagery": {
+      "tomasAlt": "Een steigerbouwer werkt op een gevelsteiger in een straat in de oude stad",
+      "rasaAlt": "Een kok bij de pass in een restaurantkeuken",
+      "tomasCaption": "Tomas K. · Steigerbouwer",
+      "rasaCaption": "Rasa J. · Kok",
+      "vanAlt": "Een steigerbouwer naast zijn bestelbus op een bouwplaats",
+      "ownerAlt": "Een restauranteigenaar met twee collega’s aan tafel"
+    },
+    "workers": {
+      "hero": {
+        "title": "Vind werk.",
+        "accent": "Houd wat u opbouwt.",
+        "sub": "Vind een baan die past bij wat u echt doet. Zodra u begint, staan uw dag, uw team en uw berichten op één plek. Het werk dat u vastlegt wordt uw professionele geschiedenis.",
+        "cta": "Maak mijn gratis profiel",
+        "secondary": "Bekijk openstaande banen",
+        "note": "Gratis voor personen. Betaalde abonnementen bestaan alleen voor organisaties."
+      },
+      "day": {
+        "title": "Weet wat er vandaag gebeurt.",
+        "body": "U ziet eerst het werk waar u mee bezig bent, uw team en uw berichten. Daarna legt u in een paar regels vast wat u deed, met een foto en de tijd.",
+        "todayLabel": "Vandaag",
+        "task": "Avondservice",
+        "taskDetail": "Start van het herfstmenu · Keukenteam",
+        "message": "Chef: de nieuwe gerechten gaan vanavond live.",
+        "primary": "Werk van vandaag vastleggen",
+        "secondary": "Bericht aan het team",
+        "recordLabel": "Uw registratie",
+        "recordText": "De pass geleid voor het nieuwe herfstmenu. Twee gerechten teruggekomen en opnieuw gemaakt.",
+        "time": "8 u",
+        "photo": "1 foto",
+        "sent": "Verstuurd naar uw leidinggevende"
+      },
+      "history": {
+        "title": "Bevestigd werk bouwt uw geschiedenis.",
+        "body": "Werk dat uw leidinggevende bevestigt, wordt onderdeel van uw professionele geschiedenis. Werk dat nog niemand heeft bevestigd, blijft zichtbaar als uw eigen registratie, duidelijk gemarkeerd. Waarvoor u zich beschikbaar stelt, staat apart, als wat er daarna komt.",
+        "now": "Nu",
+        "recent": "Recent werk",
+        "earlier": "Eerder",
+        "next": "Daarna, geen geschiedenis",
+        "nowTitle": "Restaurant Ąžuolas · Kok",
+        "nowMeta": "Start van het herfstmenu · sinds september",
+        "nowState": "Bevestigd door een leidinggevende",
+        "recentTitle": "Café De Haven · Lijnkok",
+        "recentMeta": "2023–2024",
+        "recentState": "Uw eigen registratie · niet bevestigd",
+        "earlierTitle": "Toegevoegd door Rasa",
+        "earlierMeta": "2019–2022",
+        "earlierState": "Nog niet geregistreerd",
+        "nextTitle": "Beschikbaar vanaf 20 oktober",
+        "nextMeta": "Zoals Rasa het aangeeft",
+        "nextState": "Nog geen aanbod"
+      },
+      "outcome": {
+        "title": "Uw werk verdwijnt niet als de baan eindigt.",
+        "body": "De volgende werkgever ontmoet iemand met een echte werkgeschiedenis, niet alleen een cv. Uw profiel blijft privé tot u zichtbaarheid inschakelt."
+      },
+      "faq": {
+        "title": "Voordat u zich aanmeldt",
+        "items": [
+          {
+            "q": "Kost het iets?",
+            "a": "Nee. LabourMarket.ai is gratis voor personen. Betaalde abonnementen bestaan alleen voor organisaties."
+          },
+          {
+            "q": "Wie kan mijn profiel zien?",
+            "a": "Niemand vindt u totdat u zichtbaarheid inschakelt. Dan zien bedrijven een korte professionele samenvatting. Uw cv en contactgegevens worden alleen gedeeld wanneer u dat bevestigt. Het bedrijf waarvoor u werkt ziet het werk dat voor dat bedrijf is vastgelegd."
+          },
+          {
+            "q": "Wat als mijn leidinggevende mijn werk niet bevestigt?",
+            "a": "Het blijft uw eigen registratie, duidelijk gemarkeerd als niet bevestigd. U houdt het in elk geval."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Begin met uw eigen",
+        "accent": "professionele profiel.",
+        "button": "Maak mijn gratis profiel"
+      }
+    },
+    "companies": {
+      "hero": {
+        "title": "Vind de mensen die u nodig hebt.",
+        "accent": "Voer dan het werk uit.",
+        "sub": "Zeg wat u nodig hebt. Maak kennis met mensen van wie het echte werk past. Zet ze op een project, zie het werk dat ze vastleggen, bevestig het en plaats de volgende behoefte.",
+        "cta": "Plaats wat u nodig hebt",
+        "secondary": "Bekijk de prijzen",
+        "note": "Een behoefte plaatsen is gratis."
+      },
+      "need": {
+        "title": "Zeg wat u nodig hebt. Zie wie past.",
+        "body": "Beschrijf het werk, hoeveel mensen en vanaf wanneer. U ziet mensen van wie de werkgeschiedenis bij die behoefte past, afgezet tegen de concrete klus, nooit als één algemene score.",
+        "needLabel": "Uw behoefte",
+        "needTitle": "Lijnkok · 2 personen",
+        "needMeta": "Vanaf 20 oktober · Vilnius",
+        "personRole": "Kok",
+        "personMeta": "Beschikbaar vanaf 20 oktober, zoals zij het aangeeft",
+        "personState": "Bevestigd werk bij Restaurant Ąžuolas"
+      },
+      "project": {
+        "title": "Zet uw mensen aan het werk.",
+        "body": "Voeg de mensen met wie u werkt toe aan een project. Elke dag leggen ze vast wat er gedaan is. U ziet welke registraties op u wachten en bevestigt ze, of stuurt ze terug voor aanpassing.",
+        "label": "Lopend project",
+        "name": "Start van het herfstmenu",
+        "people": "Keukenteam · 3 personen",
+        "waiting": "1 registratie wacht op uw beoordeling",
+        "confirmed": "2 registraties deze week bevestigd"
+      },
+      "attention": {
+        "title": "Zie wat u nodig heeft. Plan wat er komt.",
+        "body": "Registraties die op beoordeling wachten en de behoeften die u hebt geplaatst staan op één plek, zodat de volgende aannamebeslissing begint bij wat er echt gebeurt.",
+        "label": "Heeft u nodig",
+        "items": [
+          {
+            "text": "1 registratie wacht op uw beoordeling",
+            "state": "wait"
+          },
+          {
+            "text": "Lijnkok vanaf 20 oktober: openstaande behoefte",
+            "state": "wait"
+          },
+          {
+            "text": "Patisserie: geen registratie sinds donderdag",
+            "state": "unk"
+          }
+        ]
+      },
+      "faq": {
+        "title": "Voordat u begint",
+        "items": [
+          {
+            "q": "Wat kost het?",
+            "a": "Eén actieve positie per organisatie is gratis. Meer posities vragen om het organisatieabonnement dat op de prijzenpagina staat. Een behoefte plaatsen is gratis."
+          },
+          {
+            "q": "Kan ik het werk bevestigen dat mijn mensen vastleggen?",
+            "a": "Ja. Een leidinggevende of eigenaar van de organisatie kan een registratie bevestigen, terugsturen voor aanpassing of afwijzen, als beoordeling voor de organisatie is ingeschakeld."
+          },
+          {
+            "q": "Wat zie ik van een persoon voordat ik contact opneem?",
+            "a": "Een korte professionele samenvatting: naam, beroepen, ervaring, beschikbaarheid en vaardigheden. Alleen van personen die zichtbaarheid hebben ingeschakeld. Cv en contactgegevens worden alleen gedeeld wanneer zij dat bevestigen."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Begin met de mensen",
+        "accent": "die u nodig hebt.",
+        "button": "Plaats wat u nodig hebt"
+      }
+    },
+    "transition": {
+      "title": "Eén werkdag, van registratie tot geschiedenis.",
+      "sub": "Volg één dienst. Registratie, bewijs en beoordeling gebeuren elk één keer, en beide kanten zien het resultaat.",
+      "stageNav": "Kies een stap",
+      "replay": "Opnieuw afspelen",
+      "stages": {
+        "work": {
+          "label": "Werk",
+          "caption": "Rasa leidt de avondservice."
+        },
+        "proof": {
+          "label": "Bewijs",
+          "caption": "Ze legt vast wat ze deed en voegt een foto toe."
+        },
+        "review": {
+          "label": "Beoordeling",
+          "caption": "Haar leidinggevende bevestigt het."
+        },
+        "history": {
+          "label": "Geschiedenis",
+          "caption": "Het wordt onderdeel van haar professionele geschiedenis."
+        },
+        "next": {
+          "label": "Daarna",
+          "caption": "Het bedrijf ziet de voortgang. Beiden kunnen plannen wat er komt."
+        }
+      },
+      "pro": {
+        "role": "Kok",
+        "recordTitle": "Avondservice · 8 u",
+        "recordText": "De pass geleid voor het nieuwe herfstmenu.",
+        "photoAlt": "De pass in de keuken voor de service",
+        "historyLabel": "In haar professionele geschiedenis",
+        "historyTitle": "Restaurant Ąžuolas · Kok",
+        "historyMeta": "Start van het herfstmenu",
+        "nextLabel": "Daarna, geen geschiedenis",
+        "nextMeta": "Beschikbaar vanaf 20 oktober, zoals zij het aangeeft"
+      },
+      "co": {
+        "project": "Start van het herfstmenu",
+        "waiting": "1 registratie wacht op beoordeling",
+        "done": "Registratie bevestigd",
+        "nextLabel": "Wat er daarna komt",
+        "nextNeed": "Lijnkok vanaf 20 oktober",
+        "nextCta": "Plaats de volgende behoefte"
+      }
+    },
+    "home": {
+      "title": "Kies uw kant.",
+      "sub": "Dezelfde plek, dezelfde registratie. Wat u daarna doet, hangt af van waar u staat.",
+      "workerTitle": "Ik zoek werk",
+      "workerBody": "Vind werk dat past en houd de registratie bij van wat u doet.",
+      "workerCta": "Voor professionals",
+      "companyTitle": "Ik neem mensen aan",
+      "companyBody": "Vind de mensen die u nodig hebt en voer samen het werk uit.",
+      "companyCta": "Voor bedrijven"
+    },
+    "explore": {
+      "summary": "Bekijk elke stap en open hem in uw werkruimte"
+    },
+    "world": {
+      "labels": {
+        "person": "Persoon",
+        "team": "Het team",
+        "project": "Het project",
+        "work": "Werk van vandaag",
+        "today": "Vandaag",
+        "record": "Uw registratie",
+        "needs": "Heeft u nodig",
+        "kitchen": "Keukenteam"
+      },
+      "home": {
+        "title": "Eén wereld van werk.",
+        "sub": "Echte mensen, echte bedrijven en het werk daartussen, op één plek.",
+        "primary": "Ik zoek werk",
+        "secondary": "Ik neem mensen aan",
+        "personRole": "Steigerbouwer · Vilnius",
+        "crew": "Noordteam",
+        "projectMeta": "Noordgevel · niveau 3 tot 4",
+        "workTitle": "Niveau 3, oostvak",
+        "workMeta": "8 u · ankers om de 1,5 m",
+        "doneTitle": "Toegevoegd aan zijn geschiedenis",
+        "doneMeta": "Bevestigd door een leidinggevende · 1 foto"
+      },
+      "workers": {
+        "taskMeta": "Oplevering 14:00",
+        "recordTitle": "Niveau 3, oostvak",
+        "recordMeta": "8 u · 1 foto",
+        "doneTitle": "Nu in uw geschiedenis",
+        "taskTitle": "Noordgevel"
+      },
+      "companies": {
+        "projectDone": "5 van 9 registraties deze week bevestigd",
+        "teamMeta": "3 personen in dit project"
+      }
+    }
+  },
+  "journalContinuity": {
+    "title": "Van opdracht tot uw geschiedenis",
+    "intro": "Elke notitie hoort bij een keten. Open een stap om verder te gaan.",
+    "instruction": {
+      "label": "Opdracht",
+      "unit": "geplande arbeid"
+    },
+    "work": {
+      "label": "Uitgevoerd werk",
+      "unit": "notities"
+    },
+    "time": {
+      "label": "Tijd",
+      "unit": "vastgelegd"
+    },
+    "evidence": {
+      "label": "Bewijs",
+      "unit": "met foto's"
+    },
+    "review": {
+      "label": "Beoordeling",
+      "unit": "wacht"
+    },
+    "confirmed": {
+      "label": "Bevestigd",
+      "unit": "door leidinggevende",
+      "returned": "{count} teruggestuurd"
+    },
+    "project": {
+      "label": "Project",
+      "unit": "het dossier"
+    },
+    "history": {
+      "label": "Uw geschiedenis",
+      "unit": "levend cv"
+    }
+  },
+  "projectContinuity": {
+    "title": "Dit project loopt door in",
+    "people": "Mensen",
+    "calendar": "Agenda",
+    "journal": "Werkjournaal",
+    "review": "Beoordeling",
+    "history": "Bedrijfsgeschiedenis"
+  },
+  "discover": {
+    "eyebrow": "Ontdekken",
+    "title": "Vind wat u nodig heeft. Bied aan wat u heeft.",
+    "lead": "Hier bieden mensen en bedrijven werk, mensen, diensten en werkmiddelen aan of zoeken ze die. U ziet alleen wat uw rol kan gebruiken.",
+    "honesty": "Elke kaart hieronder is een deur naar een echt onderdeel. Niets op deze pagina is een voorbeeldadvertentie.",
+    "feature": {
+      "label": "Ontdekken",
+      "description": "Vind werk, mensen, diensten en werkmiddelen - of bied zelf iets aan."
+    },
+    "side": {
+      "seek": "U zoekt",
+      "offer": "U biedt aan",
+      "both": "Zoeken of aanbieden"
+    },
+    "status": {
+      "early": "Net geopend",
+      "earlyNote": "Onderdelen met „Net geopend” zijn af en werken, maar hebben nog weinig items - u kunt een van de eersten zijn."
+    },
+    "groups": {
+      "around": {
+        "title": "In uw buurt",
+        "lead": "Zie de markt op de kaart of zeg in eigen woorden wat u aanbiedt of nodig heeft."
+      },
+      "work": {
+        "title": "Werk",
+        "lead": "Open functies en de signalen erachter."
+      },
+      "people": {
+        "title": "Mensen en bedrijven",
+        "lead": "Vind mensen voor een behoefte, meld uw behoefte en onderhoud uw relaties."
+      },
+      "offers": {
+        "title": "Diensten en werkmiddelen",
+        "lead": "Bied een dienst aan of vraag er een aan, plaats gereedschap, voertuigen, ruimtes en uitrusting voor werk."
+      },
+      "grow": {
+        "title": "Groeien",
+        "lead": "Maak van wat u vindt en doet vaardigheden en opleiding."
+      }
+    },
+    "entries": {
+      "map": {
+        "title": "Marktkaart",
+        "desc": "Behoeften, mensen en projecten op één kaart. Alleen plaatsen met echte gegevens verschijnen."
+      },
+      "recognize": {
+        "title": "Zeg wat u aanbiedt of nodig heeft",
+        "desc": "Beschrijf het in eigen woorden en ga naar de juiste plek. Er wordt niets opgeslagen voordat u kiest."
+      },
+      "opportunities": {
+        "title": "Kansen voor u",
+        "desc": "Open functies passend bij uw werkverleden, met opgeslagen zoekopdrachten."
+      },
+      "jobs": {
+        "title": "Openbaar vacaturebord",
+        "desc": "Blader zonder inloggen door gepubliceerde vacatures."
+      },
+      "intelligence": {
+        "title": "Marktsignalen",
+        "desc": "Loon- en vraagsignalen uit uw eigen gegevens, met bronvermelding."
+      },
+      "scouting": {
+        "title": "Mensen vinden",
+        "desc": "Maak een shortlist van geanonimiseerde kandidaten voor uw behoeften en volg ze door het proces."
+      },
+      "needs": {
+        "title": "Personeelsbehoefte",
+        "desc": "Beschrijf wie u nodig heeft - de enige plek waar uw vraag wordt vastgelegd."
+      },
+      "candidates": {
+        "title": "Kandidaatconcepten",
+        "desc": "Privénotities over mensen die u kunt inschakelen. Een concept is geen account."
+      },
+      "buyer": {
+        "title": "Werk of diensten aanvragen",
+        "desc": "Stel u in als klant en beschrijf wat gedaan moet worden."
+      },
+      "network": {
+        "title": "Netwerk",
+        "desc": "Zoek mensen en bedrijven, verstuur uitnodigingen, onderhoud relaties."
+      },
+      "services": {
+        "title": "Een dienst aanbieden",
+        "desc": "Publiceer wat u of uw bedrijf voor anderen kan doen."
+      },
+      "service_requests": {
+        "title": "Diensten vinden en aanvragen",
+        "desc": "Blader door actieve diensten en stuur een aanvraag, of beantwoord aanvragen voor uw diensten."
+      },
+      "listings": {
+        "title": "Werkmiddelen",
+        "desc": "Gereedschap, uitrusting, voertuigen, ruimtes en huisvesting te koop, te huur of gevraagd - alleen voor werk."
+      },
+      "education": {
+        "title": "Opleidingsprogramma's",
+        "desc": "Cursisten, programma's en groepen voor uw opleidingsorganisatie."
+      }
     }
   }
 }

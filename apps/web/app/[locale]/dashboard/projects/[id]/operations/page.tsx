@@ -46,6 +46,7 @@ import {
   setProjectResponsibleAction,
 } from "@/lib/projects/project-admin-actions";
 import { getProjectsProgress } from "@/lib/projects/progress";
+import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
 import { ProjectField } from "@/components/app/project-field";
 import { buildProjectField } from "@/lib/projects/field-model";
 import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
@@ -382,6 +383,13 @@ export default async function ProjectOperationsPage({
   const taskList = tasks.status === "ok" ? tasks.tasks : [];
   const openTasks = openProjectTasks(taskList);
   const openTaskCount = openProjectTasks(taskList, taskList.length).length;
+  // People are people: each assigned worker's own photo, only where the
+  // database releases it to this viewer (an active project assignment).
+  const avatars = Object.fromEntries(
+    await Promise.all(
+      ops.workers.map(async (w) => [w.workerId, await getAvatarForVisibleWorker(w.workerId)] as const),
+    ),
+  );
   const readiness = deriveProjectReadinessRatio(ops.workers);
   const hoursFmt = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
   const now = new Date();
@@ -773,6 +781,7 @@ export default async function ProjectOperationsPage({
           labels={labels}
           locale={locale}
           projectId={id}
+          avatars={avatars}
           csvHref={`/${locale}/dashboard/projects/${id}/operations/report`}
         />
       </div>

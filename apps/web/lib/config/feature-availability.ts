@@ -23,6 +23,7 @@ export type FeatureAvailability = "active" | "preparing" | "hidden";
 export type FeatureKey =
   // Active surfaces backing the first working beta.
   | "overview"
+  | "discover"
   | "marketplace_hub"
   | "market_map"
   | "profile_text_first"
@@ -80,6 +81,22 @@ export const FEATURES: readonly FeatureConfig[] = [
     safeToShowInPrimaryNav: true,
   },
   {
+    // DISCOVER - the owner-approved broader world (2026-10-02): people and
+    // businesses OFFER or SEEK work, services, work resources and
+    // opportunities. It is a role-aware DESTINATION that links to the real
+    // sections (map, opportunities, scouting, services, listings ...); it
+    // owns no data of its own. The map is its spatial lens, not its parent.
+    // Route is /dashboard/market (NOT /dashboard/discover: that path belonged
+    // to the removed job-matching browse, pinned absent by
+    // matching-ui-neutralized.test.ts).
+    key: "discover",
+    availability: "active",
+    labelKey: "discover.feature.label",
+    descriptionKey: "discover.feature.description",
+    primaryRoute: "/dashboard/market",
+    safeToShowInPrimaryNav: true,
+  },
+  {
     // Marketplace hub — SECONDARY, no longer a nav tab (map-first correction).
     // The map is the primary product surface; /dashboard/marketplace now
     // redirects to /dashboard/market-map. The route/feature stays active so the
@@ -93,7 +110,7 @@ export const FEATURES: readonly FeatureConfig[] = [
     // Rebuild W5: point at the REAL surface — /dashboard/marketplace is a
     // REDIRECT_STUB to the market map; a catalogue route must never hop
     // through a stub.
-    primaryRoute: "/dashboard/market-map",
+    primaryRoute: "/dashboard/market",
     safeToShowInPrimaryNav: false,
   },
   {
@@ -108,7 +125,7 @@ export const FEATURES: readonly FeatureConfig[] = [
     labelKey: "features.market_map.label",
     descriptionKey: "features.market_map.description",
     primaryRoute: "/dashboard/market-map",
-    safeToShowInPrimaryNav: true,
+    safeToShowInPrimaryNav: false,
   },
   {
     // Profile (person/account identity). Active and reachable, but demoted out

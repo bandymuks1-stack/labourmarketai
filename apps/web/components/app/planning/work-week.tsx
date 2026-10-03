@@ -93,7 +93,7 @@ export async function WorkWeek({
       >
         <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
           <div className="flex flex-col gap-1">
-            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+            <span className="text-support font-medium text-text-muted">
               {t("rhythm.label")}
             </span>
             <span
@@ -110,7 +110,7 @@ export async function WorkWeek({
           </div>
           {rhythm.blocks > 0 && rhythm.confirmedBlocks > 0 ? (
             <span
-              className="inline-flex items-center gap-2 rounded-full border border-trust-accent/40 bg-trust-accent/[0.06] px-3 py-1.5 font-mono text-meta uppercase tracking-label text-trust-accent"
+              className="inline-flex items-center gap-2 rounded-full border border-trust-accent/40 bg-trust-accent/[0.06] px-3 py-1.5 text-support font-medium text-trust-accent"
               data-testid="planning-rhythm-confirmed"
             >
               <span aria-hidden className="size-1.5 rounded-full bg-trust-accent" />
@@ -131,7 +131,7 @@ export async function WorkWeek({
             const pct = d.recordedMinutes > 0 ? Math.max(6, (d.recordedMinutes / scale) * 100) : 0;
             return (
               <div key={d.day} className="flex flex-col items-center gap-1.5">
-                <span className="h-4 font-mono text-[0.625rem] tabular-nums text-text-secondary">
+                <span className="h-4 text-meta tabular-nums text-text-secondary">
                   {d.recordedMinutes > 0 ? compactHours(d.recordedMinutes, locale) : ""}
                 </span>
                 <div className="relative flex h-20 w-full items-end justify-center rounded-md bg-ink-800/40 sm:h-24">
@@ -150,7 +150,7 @@ export async function WorkWeek({
                   ) : null}
                 </div>
                 <span
-                  className={`font-mono text-[0.625rem] uppercase tracking-label ${
+                  className={`text-support ${
                     d.isToday ? "text-brand-blue" : "text-text-muted"
                   }`}
                 >
@@ -230,7 +230,7 @@ function DayColumn({
           className="flex flex-col rounded-md outline-none transition-colors hover:text-brand-blue focus-visible:ring-2 focus-visible:ring-brand-blue lg:flex-row lg:items-baseline lg:gap-2"
         >
           <span
-            className={`font-mono text-meta uppercase tracking-label ${
+            className={`text-support ${
               d.isToday ? "text-brand-blue" : "text-text-muted"
             }`}
           >
@@ -249,7 +249,7 @@ function DayColumn({
             href={`/dashboard/journal?date=${d.day}#journal-entries` as "/dashboard"}
             aria-label={`${t("rhythm.openJournal")}: ${dayLong}, ${dur(d.recordedMinutes)}`}
             data-testid={`planning-week-open-journal-${d.day}`}
-            className="rounded-md font-mono text-sm font-semibold tabular-nums text-brand-cyan outline-none transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-brand-blue"
+            className="rounded-md text-sm font-semibold tabular-nums text-brand-cyan outline-none transition-colors hover:text-text-primary focus-visible:ring-2 focus-visible:ring-brand-blue"
           >
             {compactHours(d.recordedMinutes, locale)}
             <span className="ml-0.5 text-meta font-normal text-text-muted">{t("rhythm.hoursUnit")}</span>
@@ -297,7 +297,7 @@ function PlanBand({
         continuesAfter ? "rounded-r-none border-r-0" : "rounded-r-md"
       } ${p.conflict ? "ring-1 ring-inset ring-state-danger/60" : ""}`}
     >
-      <span className="flex items-center gap-1.5 font-mono text-[0.625rem] uppercase tracking-label">
+      <span className="flex items-center gap-1.5 text-support">
         {t(`source.${p.sourceType}`)}
         {p.startTime ? <span className="text-text-muted">{p.startTime}</span> : null}
         {p.conflict ? (
@@ -315,7 +315,7 @@ function PlanBand({
         </span>
       ) : null}
       {continuesAfter && !continuesBefore && p.endDate ? (
-        <span className="font-mono text-[0.625rem] text-text-muted">→ {fmtShort(p.endDate)}</span>
+        <span className="text-meta text-text-muted">→ {fmtShort(p.endDate)}</span>
       ) : null}
     </Link>
   );
@@ -352,7 +352,7 @@ function WorkBlock({
         className={`absolute inset-y-0 left-0 w-1 ${b.confirmed ? "bg-trust-accent" : "bg-brand-cyan/70"}`}
       />
       {where.length > 0 ? (
-        <span className="truncate font-mono text-[0.625rem] font-semibold uppercase tracking-label text-text-secondary">
+        <span className="truncate text-support font-semibold text-text-secondary">
           {where.join(" · ")}
         </span>
       ) : null}
@@ -367,18 +367,18 @@ function WorkBlock({
               style={{ width: `${pct}%`, animationDelay: `${120 + index * 60}ms` }}
             />
           </span>
-          <span className="shrink-0 font-mono text-meta font-semibold tabular-nums text-text-primary">
+          <span className="shrink-0 text-meta font-semibold tabular-nums text-text-primary">
             {dur(b.minutes)}
           </span>
         </span>
       ) : b.dayUnits ? (
-        <span className="font-mono text-meta tabular-nums text-text-secondary">
+        <span className="text-meta tabular-nums text-text-secondary">
           {b.dayUnits} {t("meta.unit.days")}
         </span>
       ) : null}
       {b.confirmed ? (
         <span
-          className="inline-flex items-center gap-1 self-start font-mono text-[0.625rem] font-semibold uppercase tracking-label text-trust-accent"
+          className="inline-flex items-center gap-1 self-start text-support font-semibold text-trust-accent"
           data-testid={`planning-week-confirmed-${b.id}`}
         >
           <span aria-hidden>✓</span>

@@ -269,7 +269,7 @@ export function CompanyWorkersSection({
           className="rounded-md border border-state-warning bg-state-warning/10 p-3"
           data-testid="company-workers-migration-blocker"
         >
-          <p className="font-mono text-meta uppercase tracking-label text-state-warning">
+          <p className="text-meta font-medium text-state-warning">
             {labels.migrationBlockerHeading}
           </p>
           <p className="mt-1 text-xs text-text-secondary">
@@ -478,7 +478,7 @@ export function CompanyWorkersSection({
                             }}
                           />
                         ) : null}
-                        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                        <span className="text-meta font-medium text-text-muted">
                           {labels.columnInvitedAt}: {w.createdAt.slice(0, 10)}
                         </span>
                       </IdentityDisclosure>
@@ -505,7 +505,7 @@ export function CompanyWorkersSection({
           className="rounded-md border border-ink-700 bg-surface-1 p-3"
           data-testid="company-workers-coordination-note"
         >
-          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+          <p className="text-meta font-medium text-text-muted">
             {labels.coordinationHeading}
           </p>
           <p className="mt-1 text-xs text-text-secondary">
@@ -609,9 +609,9 @@ export function CompanyWorkersSection({
                   >
                     <div className="flex items-start justify-between gap-2">
                       <span className="break-all text-sm text-text-primary">{inv.invitedEmail}</span>
-                      <span className="shrink-0 rounded-full border border-state-warning/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning">{statusWord(labels, inv.status)}</span>
+                      <span className="shrink-0 rounded-full border border-state-warning/40 px-2 py-0.5 text-meta font-medium text-state-warning">{statusWord(labels, inv.status)}</span>
                     </div>
-                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                    <span className="text-meta font-medium text-text-muted">
                       {labels.columnInvitedAt}: {inv.createdAt.slice(0, 10)}
                     </span>
                   </li>

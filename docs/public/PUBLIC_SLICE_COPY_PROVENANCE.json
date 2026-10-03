@@ -1,0 +1,14 @@
+{
+  "namespace": "publicSlice",
+  "recorded": "2026-10-02",
+  "note": "Status per locale for the public acquisition slice copy. AUTHORED = written by the maintainer for this slice; AGENT_TRANSLATED = machine/agent translated, NOT native-reviewed. No locale here is NATIVE_REVIEWED. Location moved out of apps/web/messages because guards scan every JSON file there.",
+  "locales": {
+    "en": "AUTHORED",
+    "lt": "AGENT_TRANSLATED",
+    "de": "AGENT_TRANSLATED",
+    "pl": "AGENT_TRANSLATED",
+    "ru": "AGENT_TRANSLATED",
+    "nl": "AGENT_TRANSLATED"
+  },
+  "otherLocales": "Not provided: lv, et, da, no, sv, fi fall back to en. nl uses the formal register (u) while the existing nl catalog is informal (je): register to be confirmed in native review."
+}

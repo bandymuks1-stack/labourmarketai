@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
-import { Card } from "@/components/ui/Card";
+import { PersonPortrait } from "@/components/app/identity/person-portrait";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { Link } from "@/lib/i18n/navigation";
@@ -9,6 +9,8 @@ import { deriveTodayNext, deriveTodayState } from "@/lib/today/today-model";
 import { TODAY_STATIONS } from "@/lib/today/today-route";
 import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import { loadTodayHead, loadTodayWorkIntelligence } from "@/lib/today/today-server";
+import { getOwnAvatar } from "@/lib/profile/avatar";
+import { personMonogram } from "@/lib/visual/avatar-monogram";
 
 import { TodayOpportunitySection } from "./today-opportunity-section";
 import { TodayProjectsSection } from "./today-projects-section";
@@ -65,11 +67,14 @@ function TodayScreenPending() {
     <div
       aria-hidden
       data-testid="today-screen-pending"
-      className="mx-auto flex w-full max-w-2xl flex-col gap-2"
+      className="mx-auto flex w-full max-w-2xl items-center gap-4 rounded-3xl border border-ink-600/60 bg-ink-800/60 p-5 sm:p-6"
     >
-      <span className="h-3 w-24 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
-      <span className="h-8 w-56 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
-      <span className="h-4 w-40 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
+      <span className="aspect-[4/5] w-[clamp(4.5rem,20vw,6rem)] shrink-0 animate-pulse rounded-xl bg-ink-700 motion-reduce:animate-none" />
+      <span className="flex flex-1 flex-col gap-2">
+        <span className="h-3 w-24 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
+        <span className="h-8 w-56 max-w-full animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
+        <span className="h-4 w-40 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
+      </span>
     </div>
   );
 }
@@ -83,11 +88,13 @@ export function TodayScreen({ locale }: { locale: ActiveLocale }) {
 }
 
 async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
-  const [t, tCard, tProf, head] = await Promise.all([
+  const [t, tCard, tProf, head, avatar] = await Promise.all([
     getTranslations("todayScreen.home"),
     getTranslations("auth.dashboard.workCard"),
     getTranslations("professions"),
     loadTodayHead(),
+    // The person's OWN consented photo — initials when there is none.
+    getOwnAvatar().catch(() => ({ path: null, signedUrl: null })),
   ]);
   const next = deriveTodayNext(head.workCard);
   // The first profession this person holds that can be named — a registry one
@@ -108,56 +115,74 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
       data-testid="today-screen"
       className="mx-auto flex w-full max-w-2xl flex-col gap-8"
     >
-      {/* 1 · HEADER — who, what they do, where today stands. */}
-      <header data-testid="today-header" className="flex flex-col gap-2">
-        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {t("eyebrow")}
-        </p>
-        <h1 className="font-display text-title font-bold tracking-tightest text-text-primary sm:text-title-lg">
-          {head.displayName ?? t("headerNoName")}
-        </h1>
-        <p className="text-support text-text-secondary" data-testid="today-profession">
-          {professionLabel ?? t("professionUnknown")}
-        </p>
-        <Suspense fallback={<Reading label={t("reading")} />}>
-          <TodayStateLine locale={locale} />
-        </Suspense>
+      {/* 1 · HEADER — ME: the person leads (their own photo or initials, the
+          same portrait as everywhere), then who they are, what they do and
+          where today stands. */}
+      <header
+        data-testid="today-header"
+        className="relative isolate flex items-center gap-4 overflow-hidden rounded-3xl border border-ink-600/60 bg-gradient-to-br from-ink-800 to-ink-900 p-5 shadow-card sm:gap-5 sm:p-6"
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -left-10 -top-10 -z-10 h-56 w-56 rounded-full bg-brand-blue/10 blur-3xl"
+        />
+        <PersonPortrait
+          name={head.displayName ?? t("headerNoName")}
+          avatarUrl={avatar.signedUrl}
+          initials={personMonogram(head.displayName)}
+          width="clamp(4.5rem, 20vw, 6rem)"
+          lit
+        />
+        <div className="flex min-w-0 flex-col gap-1.5">
+          <p className="text-support font-medium text-brand-blue">{t("eyebrow")}</p>
+          <h1 className="font-display text-title font-bold tracking-tightest text-text-primary sm:text-title-lg">
+            {head.displayName ?? t("headerNoName")}
+          </h1>
+          <p className="text-support text-text-secondary" data-testid="today-profession">
+            {professionLabel ?? t("professionUnknown")}
+          </p>
+          <Suspense fallback={<Reading label={t("reading")} />}>
+            <TodayStateLine locale={locale} />
+          </Suspense>
+        </div>
       </header>
 
-      {/* 2 · THE ONE PRIMARY ACTION. */}
-      <section aria-labelledby="today-next-title" data-testid="today-next">
-        <Card compact>
-          <div className="flex flex-col gap-3">
-            <h2
-              id="today-next-title"
-              className="font-mono text-meta uppercase tracking-label text-text-muted"
-            >
-              {t("next.title")}
-            </h2>
-            {next.kind === "action" ? (
-              <>
-                <p className="text-body text-text-primary">{tCard(`next.${next.dim}`)}</p>
-                <p className="text-support text-text-secondary">{tCard(next.whyKey)}</p>
-                {next.stale && (
-                  <p className="text-support text-text-secondary" data-testid="today-next-stale">
-                    {tCard("stale.body")}
-                  </p>
-                )}
-                <Link
-                  href={next.href as "/dashboard"}
-                  data-testid="today-next-cta"
-                  className={`${buttonLinkClassName("primary")} self-start`}
-                >
-                  {tCard(`next.${next.dim}`)}
-                </Link>
-              </>
-            ) : (
-              <p className="text-support text-text-secondary" data-testid="today-next-unknown">
-                {t("next.unknown")}
+      {/* 2 · NEXT — the ONE primary action, the highest-depth object after
+          the person: a gold-lit edge, one button, everything else a link. */}
+      <section
+        aria-labelledby="today-next-title"
+        data-testid="today-next"
+        className="rounded-3xl border border-brand-blue/30 bg-ink-800 p-5 shadow-card sm:p-6"
+      >
+        <div className="flex flex-col gap-3">
+          <h2 id="today-next-title" className="text-support font-medium text-brand-blue">
+            {t("next.title")}
+          </h2>
+          {next.kind === "action" ? (
+            <>
+              <p className="font-display text-xl font-semibold leading-snug tracking-tightest text-text-primary">
+                {tCard(`next.${next.dim}`)}
               </p>
-            )}
-          </div>
-        </Card>
+              <p className="text-support text-text-secondary">{tCard(next.whyKey)}</p>
+              {next.stale && (
+                <p className="text-support text-text-secondary" data-testid="today-next-stale">
+                  {tCard("stale.body")}
+                </p>
+              )}
+              <Link
+                href={next.href as "/dashboard"}
+                data-testid="today-next-cta"
+                className={`${buttonLinkClassName("primary")} self-start`}
+              >
+                {tCard(`next.${next.dim}`)}
+              </Link>
+            </>
+          ) : (
+            <p className="text-support text-text-secondary" data-testid="today-next-unknown">
+              {t("next.unknown")}
+            </p>
+          )}
+        </div>
       </section>
 
       {/* 3 · TODAY'S WORK · OPEN ITEMS · ONE GROWTH SENTENCE — one journal
@@ -183,9 +208,7 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
         data-testid="today-stations"
         className="flex flex-col gap-1 border-t border-ink-600 pt-6"
       >
-        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {t("stations.title")}
-        </p>
+        <p className="text-support font-medium text-text-secondary">{t("stations.title")}</p>
         <ul className="flex flex-wrap gap-x-5 gap-y-0">
           {TODAY_STATIONS.map((s) => (
             <li key={s.id}>

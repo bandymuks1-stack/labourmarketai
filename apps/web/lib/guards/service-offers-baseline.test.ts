@@ -46,8 +46,12 @@ describe("Guard: cinematic baseline is preserved (no visual rebuild)", () => {
     // 2026-09-30 the baseline was the LIVE scene; the owner removed that
     // arm, and the baseline is the landing that remains.)
     const page = landingTreeSource(APP_ROOT, 2);
+    // 2026-10-02 (owner, CURRENT x Q): the cinematic first screen is now
+    // <HomeWorldHero> (a real professional in a real working context with the
+    // person, team, project, work, record and history embedded in the scene);
+    // the living-worker carousel it superseded is kept in the repo, unmounted.
     for (const sym of [
-      "LivingWorkerHero",
+      "HomeWorldHero",
       "MarketProofBand",
       "LandingOpenJobsBand",
       "PlayerCardShowcase",

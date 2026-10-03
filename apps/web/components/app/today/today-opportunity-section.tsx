@@ -58,11 +58,11 @@ export async function TodayOpportunitySection() {
       data-testid="today-opportunity"
       data-state={o.kind}
       data-discovery-only={o.kind === "bands" && o.discoveryOnly ? "true" : undefined}
-      className="flex flex-col gap-2"
+      className="flex flex-col gap-2 px-1"
     >
       <h2
         id="today-opportunity-title"
-        className="font-mono text-meta uppercase tracking-label text-text-muted"
+        className="text-support font-medium text-text-secondary"
       >
         {o.kind === "bands" && o.discoveryOnly
           ? tResults("opportunities.titleDiscovery")

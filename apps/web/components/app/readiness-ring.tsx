@@ -16,18 +16,18 @@ import type { ReadinessLevel } from "@/lib/player-card/readiness";
 
 const SIZES = { sm: 56, md: 80, lg: 120 } as const;
 
-/** Readiness level → premium brand tokens. Deliberately NOT gold: gold is the
- *  reserved trust-accent (real confirmation) per DESIGN_SOUL §1, and readiness
- *  is a signal count, not a confirmation. The gauge SHAPE matches the landing
- *  OVR ring; the palette stays honest. */
+/** Readiness level → brand tokens. Gold here is the brand progress accent,
+ *  NOT a confirmation: confirmation is the verification green (owner-ratified
+ *  2026-09-22) and never appears on this ring. Readiness is a count of real
+ *  steps done. The arc is thin and calm; the figure is display type. */
 const LEVEL_STROKE: Record<ReadinessLevel, string> = {
-  ready: "stroke-brand-cyan",
-  building: "stroke-brand-blue",
+  ready: "stroke-brand-blue",
+  building: "stroke-text-secondary",
   start: "stroke-ink-500",
 };
 const LEVEL_TEXT: Record<ReadinessLevel, string> = {
-  ready: "text-brand-cyan",
-  building: "text-brand-blue",
+  ready: "text-brand-blue",
+  building: "text-text-secondary",
   start: "text-text-muted",
 };
 
@@ -35,14 +35,19 @@ export function ReadinessRing({
   met,
   total,
   level,
-  levelLabel,
+  caption,
+  ariaLabel,
   size = "md",
 }: {
   met: number;
   total: number;
   level: ReadinessLevel;
-  /** Localized level word (e.g. "Pasiruošęs"), resolved by the caller. */
-  levelLabel: string;
+  /** What the count counts, in words ("Profile steps"). A bare "6/6" with a
+   *  judgement word ("Ready") beside it was an unexplained score; the caption
+   *  names the thing counted and the caller lists the steps beside it. */
+  caption: string;
+  /** Full accessible name: "Profile steps: 6 of 6 done". */
+  ariaLabel: string;
   size?: keyof typeof SIZES;
 }) {
   const ref = useRef<SVGSVGElement>(null);
@@ -52,7 +57,7 @@ export function ReadinessRing({
   const animateIn = mounted && !reduce;
 
   const px = SIZES[size];
-  const stroke = Math.max(4, Math.round(px / 11));
+  const stroke = Math.max(3, Math.round(px / 16));
   const r = (px - stroke) / 2;
   const cx = px / 2;
   const C = 2 * Math.PI * r;
@@ -67,7 +72,7 @@ export function ReadinessRing({
         height={px}
         viewBox={`0 0 ${px} ${px}`}
         role="img"
-        aria-label={`Readiness: ${met} of ${total} signals met`}
+        aria-label={ariaLabel}
       >
         <circle
           cx={cx}
@@ -96,7 +101,7 @@ export function ReadinessRing({
           y={cx}
           textAnchor="middle"
           dominantBaseline="central"
-          className="fill-text-primary font-mono font-bold"
+          className="fill-text-primary font-display font-bold tabular-nums"
           style={{ fontSize: Math.round(px * 0.3) }}
         >
           {met}/{total}
@@ -104,11 +109,11 @@ export function ReadinessRing({
       </svg>
       <span
         className={cn(
-          "font-mono text-meta font-semibold uppercase tracking-label",
+          "text-support font-semibold",
           LEVEL_TEXT[level],
         )}
       >
-        {levelLabel}
+        {caption}
       </span>
     </div>
   );

@@ -121,7 +121,7 @@ const SECURITY_HEADERS = [
  */
 const W1_CANONICAL_REDIRECTS = [
   { source: "/:locale/dashboard/assistant", destination: "/:locale/dashboard", permanent: true },
-  { source: "/:locale/dashboard/marketplace", destination: "/:locale/dashboard/market-map", permanent: true },
+  { source: "/:locale/dashboard/marketplace", destination: "/:locale/dashboard/market", permanent: true },
   { source: "/:locale/dashboard/player-card", destination: "/:locale/dashboard/journal", permanent: true },
   { source: "/:locale/dashboard/agency", destination: "/:locale/dashboard/company", permanent: true },
   { source: "/:locale/dashboard/agency/pool", destination: "/:locale/dashboard/company#company-team", permanent: true },

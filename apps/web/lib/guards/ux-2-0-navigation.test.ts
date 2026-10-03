@@ -100,9 +100,10 @@ describe("ONE core work loop, rendered identically by BOTH shells (rebuild W5)",
   // The owner-directed fix: one shared core list (chat → journal → calendar
   // → messages) from ONE source, rendered by both shells.
 
-  it("the core is exactly chat → journal → calendar → messages, in order", () => {
+  it("the core is exactly chat → discover → journal → calendar → messages, in order (Discover joined 2026-10-02: the offer/seek world must not hide behind the command search)", () => {
     expect([...CORE_NAV_IDS]).toEqual([
       "overview",
+      "discover",
       "journal_text_first",
       "planning",
       "communication",
@@ -183,7 +184,9 @@ describe("ONE core work loop, rendered identically by BOTH shells (rebuild W5)",
   it("the Advanced navbars START with the same core, then the module extras", () => {
     const advanced = getAdvancedNavItems().map((i) => i.id);
     expect(advanced.slice(0, CORE_NAV_IDS.length)).toEqual([...CORE_NAV_IDS]);
-    expect(advanced).toContain("market_map");
+    // The map is the spatial lens INSIDE Discover (2026-10-02), no longer a tab.
+    expect(advanced).toContain("discover");
+    expect(advanced).not.toContain("market_map");
     expect(advanced).toContain("network");
     // Both Advanced surfaces derive from the same list.
     expect(dashboardTabs).toMatch(/getAdvancedNavItems\(\)/);

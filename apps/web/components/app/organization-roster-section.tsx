@@ -221,10 +221,10 @@ export async function OrganizationRosterSection({
                 meta={[]}
               />
               {p.externalRef ? (
-                <span className="font-mono text-meta text-text-muted">{p.externalRef}</span>
+                <span className="text-meta text-text-muted">{p.externalRef}</span>
               ) : null}
               <span
-                className="text-meta uppercase tracking-wide text-text-muted"
+                className="text-meta text-text-muted"
                 data-link-state={linkStateKey(p.linkState)}
               >
                 {t(`linkState.${linkStateKey(p.linkState)}` as never)}
