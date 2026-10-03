@@ -19,6 +19,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 type Result = { data: unknown; error: unknown };
 
 const tables = new Map<string, Result>();
+const rpcCalls: string[] = [];
+const rpcResults = new Map<string, Result>();
 /** Every `.in(column, ids)` the exporter issued, in order. */
 const calls: { table: string; column: string; ids: string[] }[] = [];
 /** Rows a table returns per call number, to exercise paging (default: none). */
@@ -65,6 +67,10 @@ vi.mock("@/lib/supabase/server", () => ({
       getUser: async () => ({ data: { user: { id: "user-1" } } }),
     },
     from: (table: string) => builderFor(table),
+    rpc: async (fn: string) => {
+      rpcCalls.push(fn);
+      return rpcResults.get(fn) ?? ok([]);
+    },
     storage: {
       from: () => ({
         createSignedUrls: async (paths: string[]) => {
@@ -81,6 +87,8 @@ import { EXPORTED_RELATIONS } from "@/lib/privacy/personal-relations";
 
 beforeEach(() => {
   tables.clear();
+  rpcCalls.length = 0;
+  rpcResults.clear();
   calls.length = 0;
   pages.clear();
   pageCursor.clear();
@@ -273,12 +281,21 @@ describe("PER-12 chained child relations", () => {
     tables.set("evidence_import_rows", ok([]));
     const b = await bundle();
     expect(b.data.organization_evidence_competency_signals).toHaveLength(1);
-    const call = calls.find((c) => c.table === "evidence_import_rows");
-    expect(call).toEqual({
-      table: "evidence_import_rows",
-      column: "organization_person_id",
-      ids: ["op1"],
+    // evidence_import_rows is read ONLY through the subject-safe RPC, never
+    // by a table select (its table policy is not widened).
+    expect(calls.find((c) => c.table === "evidence_import_rows")).toBeUndefined();
+    expect(rpcCalls).toContain("privacy_export_evidence_import_rows_v1");
+  });
+
+  it("an unapplied evidence-import RPC is reported unavailable, not empty", async () => {
+    tables.set("organization_people", ok([{ id: "op1" }]));
+    rpcResults.set("privacy_export_evidence_import_rows_v1", {
+      data: null,
+      error: { code: "PGRST202", message: "function not found" },
     });
+    const b = await bundle();
+    expect(b.data.evidence_import_rows).toEqual([]);
+    expect(b.unavailable).toContain("evidence_import_rows");
   });
 });
 
@@ -345,7 +362,7 @@ describe("PER-12 redaction", () => {
 describe("PER-12 honesty about what RLS may hide", () => {
   it("lists policy-limited relations in relationNotes, never silently empty", async () => {
     const b = await bundle();
-    expect(b.relationNotes.evidence_import_rows).toMatch(/NEEDS POLICY/);
+    expect(b.relationNotes.evidence_import_rows).toMatch(/subject-safe function/);
     expect(b.relationNotes.agreement_events).toMatch(/NEEDS POLICY/);
     expect(b.relationNotes.agreement_amendments).toMatch(/NEEDS POLICY/);
     for (const key of Object.keys(b.relationNotes)) {

@@ -159,6 +159,11 @@ async function readOne(
 ): Promise<{ data: Row[] | null; error: RelationError }> {
   const column = rel.column ?? rel.key;
   try {
+    if (rel.rpc) {
+      // Subject derived from auth.uid() inside the function; no ids sent.
+      const res = await db.rpc(rel.rpc);
+      return { data: res.data ?? null, error: res.error ?? null };
+    }
     if (!chunked) {
       const res = await db.from(rel.table).select("*").in(column, ids);
       return { data: res.data ?? null, error: res.error ?? null };
@@ -215,7 +220,9 @@ async function readRelations(
     // answer and naming it "unavailable" would invent a doubt. Every OTHER
     // error is a read that should have worked and did not: that is the case
     // `unavailable` exists for.
-    if (res.error && !isRelationAbsent(res.error)) unavailable.push(table);
+    // An RPC-backed relation whose FUNCTION is missing is NOT "no rows": the
+    // table exists and may hold rows about the person, so it is unavailable.
+    if (res.error && (relations[i].rpc || !isRelationAbsent(res.error))) unavailable.push(table);
   });
   return { data, unavailable };
 }

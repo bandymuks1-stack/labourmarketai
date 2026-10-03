@@ -64,27 +64,56 @@ rows for a test person = the rows of that person's parents (e.g. all
 | lmc_lots / lmc_lot_consumptions | lmc_accounts.account_id | - | 0 | account owner: OK |
 | projects (as `projects_responsible`) | profile_id via responsible_profile_id | created_by, owner_id | 0 non-null | existing projects RLS (owner/manager/assigned worker) |
 
-## Needs RED policy (no service-role read added)
+## Remaining gap, classified (RED items are UNAPPLIED)
 
-Read as the subject these come back empty although rows may exist; the bundle
-says so in `relationNotes`.
+### CURRENT LIVE EXPORT GAP
 
-* `evidence_import_rows` (158 rows). Policy `evidence_import_rows_select` admits
-  only `manages_organization(organization_id)`. The export reads it filtered by
-  the person's own `organization_person_id`, so it stays empty until a policy
-  exists. Minimal policy (RED, owner channel), additive:
-  `create policy evidence_import_rows_select_subject on public.evidence_import_rows
-  for select to authenticated using (exists (select 1 from public.organization_people op
-  where op.id = evidence_import_rows.organization_person_id
-  and op.linked_profile_id = auth.uid() and op.link_state = 'linked'));`
-  Rows are per-person lines, so a subject sees only their own line; a column-safe
-  view is preferable if `source_fact` of a row can carry other people.
-* `agreement_events`, `agreement_amendments`. `can_view_agreement_v1` admits org
-  owner/admin and the responsible person, not the worker. Minimal policy: extend
-  the predicate (or add a sibling policy) with
-  `exists (select 1 from agreements a join workers w on w.id = a.worker_id
-  where a.id = agreement_id and w.profile_id = auth.uid())`. Event
-  `before_state/after_state` are already omitted in the export.
+* `evidence_import_rows` (158 prod rows). Table policy admits only
+  `manages_organization(organization_id) OR is_admin()`, so a subject reading
+  the table gets nothing. Direct RLS is NOT widened: `source_fact`,
+  `fact_fields`, `derived` and `customer_*` can describe other people and the
+  organization's customers.
+  Fix drafted in this PR as an UNAPPLIED migration
+  `20261003120000_privacy_export_evidence_import_rows_v1.sql`
+  (`-- @human-gate-approved`, RED: new SECURITY DEFINER fn) with rollback
+  `supabase/rollbacks/20261003120000_..._v1.down.sql`. The function takes no
+  argument, derives the subject from `auth.uid()` via the linked
+  `organization_people` row and returns only that person's lines, with a
+  column allowlist (no source_fact / fact_fields / derived / customer_* /
+  matching internals). The export already calls it (`rpc` field on the
+  register entry). Until applied the relation is listed under `unavailable`
+  (never silently empty). Residual: `activity_text` and `person_label` are the
+  person's own line as the organization wrote it; owner to confirm that is
+  acceptable to deliver.
+
+### FUTURE CONTRACT GAP (no live harm today)
+
+* `agreement_events`, `agreement_amendments`: 0 rows in prod (agreements 0,
+  events 0, amendments 0). Both policies are exactly
+  `can_view_agreement_v1(agreement_id)`, which admits org owner/admin,
+  `agreements.responsible_profile_id` and admin; not the worker
+  (`agreements.worker_id` -> `workers.profile_id`).
+  Blast radius of `can_view_agreement_v1` (pg_policies + function bodies,
+  2026-10-03): exactly those two SELECT policies, plus the function
+  `sync_agreement_approval_v1`. Therefore DO NOT widen the function (it would
+  also change the sync function). Narrowest option, TEXT ONLY, not applied,
+  apply only when the first agreement row is about to exist:
+
+      create policy agreement_events_select_subject on public.agreement_events
+        for select to authenticated using (exists (
+          select 1 from public.agreements a join public.workers w on w.id = a.worker_id
+          where a.id = agreement_events.agreement_id and w.profile_id = auth.uid()));
+      -- same shape for agreement_amendments_select_subject
+
+  The export already omits `before_state/after_state` and redacts actors.
+  The bundle carries a NEEDS POLICY note until then.
+
+### RED APPLY ITEMS (owner channel, nothing applied)
+
+1. `20261003120000_privacy_export_evidence_import_rows_v1.sql` (SECURITY DEFINER fn + grants).
+2. agreement subject-read sibling policies (text above), deferred until agreements exist.
+
+QA proof remains BLOCKED_QA_IDENTITY. Nothing here is PASS_REAL_PRODUCTION.
 
 ## Deliberately not exported
 
@@ -112,4 +141,4 @@ After deploy, as a QA person with journal entries and a booking: download
 `/dashboard/privacy/export`, check `version` = 3, `unavailable` empty, row counts
 of each relation above equal the SQL count of children of that person's parents,
 `actor_id` null on foreign actors, `relationNotes` present for the three
-policy-limited relations, `storage_manifest` links resolve.
+policy-limited relations (evidence_import_rows reads via the RPC once applied), `storage_manifest` links resolve.

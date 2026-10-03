@@ -120,6 +120,15 @@ export type ExportedRelation = {
    * does not admit them. The relation is still listed, never silently empty.
    */
   readonly rlsNote?: string;
+  /**
+   * Read through this SECURITY DEFINER function instead of the table, because
+   * the table's select policy must not be widened (rows can carry other
+   * people). The function takes no person argument: it derives the subject
+   * from auth.uid(), so a caller can only ever obtain their own rows. While
+   * the function is not applied the relation is reported `unavailable`
+   * (never silently empty).
+   */
+  readonly rpc?: string;
 };
 
 /**
@@ -461,13 +470,17 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
     parent: "organization_evidence_records",
     column: "record_id",
   },
-  // Filtered by the person's OWN organization_person_id, so even a manager
-  // who is also a subject only ever receives rows about themselves.
+  // Read through `privacy_export_evidence_import_rows_v1()` (UNAPPLIED, RED:
+  // see docs/security/PER-12-export-child-relations.md). It returns ONLY the
+  // requesting person's own staged rows, without source_fact / fact_fields /
+  // derived / customer_* / matching internals, which can describe other people
+  // or the supplying organization's customers. Table RLS stays unchanged.
   {
     table: "evidence_import_rows",
     key: "organization_person_id",
+    rpc: "privacy_export_evidence_import_rows_v1",
     rlsNote:
-      "NEEDS POLICY: evidence_import_rows_select admits only the supplying organization's managers, so staged import rows about you (the source line, your name as written, the activity text) are invisible to you under your own permissions and this list can be empty although rows exist. Ask us and we will answer through a route that can redact other people's rows.",
+      "Staged import lines about you are read through a dedicated subject-safe function that returns only your own lines and leaves out the raw source line and other people's details. Until that function is applied in production this relation is listed as unavailable; ask us and we will answer through a route that can redact other people's rows.",
   },
   // A project that names the person as its responsible person. The project
   // itself is the organization's record; the person is exported only because
