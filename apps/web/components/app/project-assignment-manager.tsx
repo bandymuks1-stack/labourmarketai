@@ -22,6 +22,7 @@ import type {
 } from "@/lib/workforce/commitment-reservation";
 import { playerInitials } from "@/lib/identity/player-identity";
 import { Link } from "@/lib/i18n/navigation";
+import { offersRosterWorker } from "@/lib/projects/assignment-authority";
 import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
@@ -89,6 +90,10 @@ export interface ProjectManagerLabels {
   reservationDecided: string;
   /** Shown when the caller may not assign ROSTER workers (SQL: owner/admin). */
   rosterOwnerOnly?: string;
+  /** Shown when the selected project belongs to ANOTHER organization than the
+   *  manager acts for: roster workers are not offered there (the database
+   *  admits a manager only on their own project's company roster). */
+  rosterOtherOrg?: string;
   /** Pre-save conflict check (advisory). Optional so callers that do not
    *  pass them simply get no pre-check. */
   precheckChecking?: string;
@@ -259,6 +264,7 @@ export function ProjectAssignmentManager({
   workers: rosterWorkers,
   engagementWorkers = [],
   rosterAssignable = true,
+  rosterProjectIds = null,
   labels,
 }: {
   projects: ProjectWithAssignments[];
@@ -271,9 +277,18 @@ export function ProjectAssignmentManager({
   /** False for a role the database refuses roster assignment (manager):
    *  roster workers are withheld so the form never offers a refused action. */
   rosterAssignable?: boolean;
+  /** Projects on which ROSTER workers may be offered (a manager: only the
+   *  projects of the organization they act for). null = no restriction; the
+   *  database still decides every write. */
+  rosterProjectIds?: readonly string[] | null;
   labels: ProjectManagerLabels;
 }) {
+  const [selProject, setSelProject] = useState("");
+  const rosterOfferedHere = offersRosterWorker(rosterProjectIds, selProject);
   const workers = rosterAssignable ? rosterWorkers : [];
+  // The roster options shown for the SELECTED project (a manager sees none
+  // on another organization's project).
+  const rosterHere = rosterOfferedHere ? workers : [];
   const [createState, createAction, creating] = useActionState<
     ProjectActionResult | null,
     FormData
@@ -329,7 +344,6 @@ export function ProjectAssignmentManager({
   // durable receipt and a server-side transactional re-check are a later RED
   // PR that depends on #2079), and the final write is NOT re-checked against
   // this verdict. A failed pre-check shows nothing and never blocks the form.
-  const [selProject, setSelProject] = useState("");
   const [selWorker, setSelWorker] = useState("");
   const [pre, setPre] = useState<{ key: string; result: AssignmentPrecheckResult } | null>(null);
   const [checking, startChecking] = useTransition();
@@ -360,7 +374,7 @@ export function ProjectAssignmentManager({
         }
       : null;
   const [ended, setEnded] = useState<Set<string>>(new Set());
-  const onTeam = new Set(workers.map((w) => w.profileId));
+  const onTeam = new Set(rosterHere.map((w) => w.profileId));
   const engagementOnly = engagementWorkers.filter((w) => !onTeam.has(w.workerProfileId));
 
   return (
@@ -412,8 +426,16 @@ export function ProjectAssignmentManager({
               name="project_id"
               value={selProject}
               onChange={(e) => {
-                setSelProject(e.target.value);
-                runPrecheck(e.target.value, selWorker);
+                const nextProject = e.target.value;
+                setSelProject(nextProject);
+                // A roster worker is not offered on another organization's
+                // project: drop the pick instead of submitting a refusal.
+                const stillOffered =
+                  offersRosterWorker(rosterProjectIds, nextProject) ||
+                  engagementWorkers.some((w) => w.workerProfileId === selWorker);
+                const nextWorker = stillOffered ? selWorker : "";
+                if (!stillOffered) setSelWorker("");
+                runPrecheck(nextProject, nextWorker);
               }}
               required
               className={field}
@@ -424,6 +446,11 @@ export function ProjectAssignmentManager({
               ))}
             </select>
           </label>
+          {rosterAssignable && !rosterOfferedHere && labels.rosterOtherOrg ? (
+            <p className="text-xs text-text-secondary" data-testid="assign-roster-other-org">
+              {labels.rosterOtherOrg}
+            </p>
+          ) : null}
           <label className="flex flex-col gap-1 text-xs">
             <span className="font-mono uppercase tracking-label text-text-muted">{labels.workerLabel}</span>
             <select
@@ -438,9 +465,9 @@ export function ProjectAssignmentManager({
               data-testid="assign-worker-select"
             >
               <option value="" disabled>{labels.workerPlaceholder}</option>
-              {workers.length > 0 && (
+              {rosterHere.length > 0 && (
                 <optgroup label={labels.rosterGroupLabel} data-testid="assign-roster-group">
-                  {workers.map((w) => (
+                  {rosterHere.map((w) => (
                     <option key={w.profileId} value={w.profileId}>{w.name}</option>
                   ))}
                 </optgroup>
