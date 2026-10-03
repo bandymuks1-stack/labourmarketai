@@ -133,3 +133,24 @@ describe("DB plans <-> approved figures (read from the repo, never from prod)", 
     expect(slugs).toEqual(Object.values(MAPPING).map((x) => x.dbSlug));
   });
 });
+
+describe("canonical typed catalogue (lib/commercial/plan-catalogue.ts) <-> pinned mapping", () => {
+  it("catalogue dbSlug / stripeSlot (plan-key slot id; env names live only in prices.ts) agree with MAPPING and the deferred slots, key for key", async () => {
+    const { PLAN_CATALOGUE, RETIRED_DB_ROWS } = await import("@/lib/commercial/plan-catalogue");
+    for (const [k, m] of Object.entries(MAPPING)) {
+      const e = PLAN_CATALOGUE.find((p) => p.slug === k)!;
+      expect(e.commercial.dbSlug, k).toBe(m.dbSlug);
+      expect(e.commercial.stripeSlot, k).toBe(m.stripeEnv ? k : null);
+    }
+    for (const [k, slot] of Object.entries(DEFERRED_STRIPE_SLOTS)) {
+      const e = PLAN_CATALOGUE.find((p) => p.slug === k)!;
+      expect(e.commercial.stripeSlot, `${k} (${slot})`).toBe(k);
+      expect(e.commercial.dbSlug, k).toBeNull();
+    }
+    expect(RETIRED_DB_ROWS.map((r) => r.dbSlug).sort()).toEqual([...RETIRED_DB_SLUGS].sort());
+  });
+
+  it("the catalogue carries no EUR figure either (it references the DB row, it never copies the number)", () => {
+    expect(/\b\d{2,}\s*(€|EUR)|(€|EUR)\s*\d{2,}|price_eur_monthly:\s*\d|cents/i.test(stripComments(read(join(WEB, "lib/commercial/plan-catalogue.ts"))))).toBe(false);
+  });
+});

@@ -105,3 +105,43 @@ Classes: LAUNCH REQUIRED = needed for the free + EUR 99 subscription launch; PAI
 LAUNCH REQUIRED items in the commercial area that are NOT LMC edges: (1) Stripe EUR 99 price and tax verification (section 4); (2) MCP entitlement subject fix #2010 (B1); (3) a catalogue-level DB figure = Stripe figure check; (4) billing-recovery Option B and webhook refs P1 per `LMC_BILLING_MODEL.md`. None touches LMC.
 
 Net: with LMC deferred and every flag false, no LMC edge is LAUNCH REQUIRED; eight edges or sub-edges are PAID-LAUNCH REQUIRED (1, 1b flag activation, 5, 6, 6b, 7, 8, 8b when lots exist); three are POST-LAUNCH (1b wiring, 1c, 9). Do NOT enable LMC.
+
+## 6. Owner ratification and implementation status (2026-10-03, same PR)
+
+Owner ratified: ONE TYPED CANONICAL COMMERCIAL CATALOGUE -> entitlement resolver -> DB/display adapter -> Stripe/payment adapter -> future mobile payment adapter. `PRE_PAYMENT_PLANS` semantics are absorbed and preserved, not treated as a sufficient schema. Sections 2 and 3 above are the reasoning; this section records what was built, additively, with no behaviour change and no migration.
+
+Implemented in this PR:
+- `apps/web/lib/commercial/plan-catalogue.ts`: typed catalogue, a superset of PPP (identical boundary fields) plus a `commercial` block: `price` (a `source: db` REFERENCE to `plans.business` / `plans.free`, never the number), `currency` / `interval` / `taxBasis` (decided for the organization plan per the owner gate, `not_applicable` for free/internal, `open` for deferred), `annual` (open, deferred), `dbSlug`, `stripeSlot`, `lmc` (open questions only), `individualAbove`. Retired DB rows `agency` / `enterprise` are carried as `RETIRED_DB_ROWS` (never active, never priced).
+- `apps/web/lib/commercial/plan-adapters.ts`: `DbDisplayAdapter`, `StripePaymentAdapter` (one slot per plan key; only `company_pilot` sellable) and a documented, empty `MobilePaymentAdapter` seam with its five-point contract. Nothing imports the adapters yet.
+- `apps/web/lib/billing/plans.ts`: `PRE_PAYMENT_PLANS` is now `PLAN_CATALOGUE.map(toBoundary)`; types are re-exported; the guard-pinned literal constants stay in place. `entitlements-v1.ts` is untouched and remains the shared resolver.
+- `apps/web/lib/commercial/plan-catalogue.test.ts` plus a pre-change snapshot (`__fixtures__/pre-payment-plans.snapshot.json`): every `plans.ts` export is byte-equal, the function set is unchanged, live limits (organization 10, free 1, agency 25 deferred) are preserved, the code carries no figure, no `launch_offer_99`, all LMC flags false.
+- `plan-catalogue-consistency.test.ts` extended: the catalogue's DB slugs, Stripe slots and retired rows must equal the pinned mapping.
+
+Unchanged by design: openDemands stays 10; no price change; no paid activation; no Stripe price inferred from the DB; the Stripe EUR 99 stays EXTERNAL_CONFIGURATION_NOT_VERIFIED; every LMC flag stays OFF.
+
+## 7. Two readiness gates
+
+CORE_FREE_LAUNCH_READY: the free person plan, the free organization plan and the EUR 99 organization subscription run with LMC fully OFF. LMC must be invisible as a commercial feature, not half-on.
+
+PAID_LMC_LAUNCH_READY: LMC may be sold, granted or spent. Strictly later; owner-activated; not implied by the first gate.
+
+Every missing LMC edge, reclassified under the owner's three classes (this supersedes the two-class column in section 5):
+
+| Edge / gap | Class |
+|---|---|
+| All 7 LMC flags false in DB and TS; user balance renders an honest disabled state; Stripe/LMC separation guard green; no price or claim of LMC in public copy | FREE-LAUNCH REQUIRED (satisfied today, must stay satisfied; this PR adds a test that the flags are false) |
+| Top-up funding path (payment event -> `lmc_record_purchase_v1`, route, denominations, VAT) | PAID-LAUNCH REQUIRED |
+| Owner-class activation path for `live_payments_enabled` / `stripe_lmc_topups_enabled` | PAID-LAUNCH REQUIRED |
+| Action-to-LMC cost map (MDD-09) | PAID-LAUNCH REQUIRED |
+| Single server-side spend caller with deterministic idempotency key | PAID-LAUNCH REQUIRED |
+| Reservation / hold for async or failable actions | PAID-LAUNCH REQUIRED (POST-LAUNCH if every priced action is synchronous) |
+| Entitlement interaction (spend-to-entitlement mapping, plan unchanged by LMC) | PAID-LAUNCH REQUIRED |
+| Reversal / refund (Stripe refund and chargeback -> `lmc_reverse_v1`; `lmc_compensate_spend_v1` call site; LMC refund policy) | PAID-LAUNCH REQUIRED |
+| Expiry semantics and scheduler (`lmc_expire_lots_v1`) | PAID-LAUNCH REQUIRED once promo or admin lots exist |
+| Audit / history (per-action trace attributable to action, actor and payment) | PAID-LAUNCH REQUIRED; statement and export POST-LAUNCH |
+| Idempotency across payment, spend and reversal paths | PAID-LAUNCH REQUIRED (primitives PROVEN in the ledger; callers do not exist) |
+| Web / MCP / app-ready contract (one typed contract consumed by web, MCP and mobile) | PAID-LAUNCH REQUIRED |
+| Canonical catalogue (this PR) and verified payment adapter (read-only Stripe Price check; EUR 99 verification) | PAID-LAUNCH REQUIRED (catalogue now built; payment adapter verification still OPEN) |
+| Promo and referral wiring; plan-included monthly LMC; per-plan top-up discount | POST-LAUNCH |
+
+PAID-LAUNCH minimum list (all required before PAID_LMC_LAUNCH_READY): canonical catalogue; verified payment adapter; top-up funding path; action-cost map; single spend caller; entitlement interaction; reversal/refund; expiry semantics/scheduler; audit/history; idempotency; Web/MCP/app-ready contract. Keep all LMC flags OFF until every item is done and the owner activates them.
