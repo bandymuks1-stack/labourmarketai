@@ -1478,10 +1478,8 @@
   },
   "profileState": {
     "readiness": {
-      "label": "Profile readiness",
-      "ready": "Ready",
-      "building": "Still filling up",
-      "start": "Just started"
+      "label": "Profile steps",
+      "summary": "Profile steps: {done} of {total} done"
     },
     "freshness": {
       "label": "Up to date",
@@ -7515,11 +7513,8 @@
       }
     },
     "readiness": {
-      "label": "Readiness",
+      "label": "Profile steps",
       "hint": "All set.",
-      "levelReady": "Ready",
-      "levelBuilding": "Building",
-      "levelStart": "Getting started",
       "signalsTemplate": "steps done",
       "nextLabel": "Next:",
       "pillars": {
@@ -7529,7 +7524,10 @@
         "journal": "Work journal",
         "evidence": "Records",
         "workCard": "Work card"
-      }
+      },
+      "ringAria": "Profile steps: {met} of {total} done",
+      "stepDone": "done",
+      "stepOpen": "to do"
     },
     "verifiedTitle": "Manager-confirmed skills",
     "verifiedEmpty": "None yet. They build from your work records.",
@@ -18105,15 +18103,27 @@
     "noRecords": "No work records yet",
     "legend": {
       "managerRecord": "Manager's record",
-      "recorded": "Recorded by you"
+      "recorded": "Recorded by you",
+      "declared": "Stated by you",
+      "declaredHint": "Your own words. Not checked by anyone yet.",
+      "recordedHint": "Hours and entries from your work journal.",
+      "managerRecordHint": "A manager or employer responsible for the work confirmed it."
     },
     "skillsTitle": "What your work shows",
     "next": {
       "title": "Your history goes with you",
       "body": "Every job you record adds to it. Take it to the next opportunity.",
       "cta": "See where you can go",
-      "label": "Next, not history"
-    }
+      "label": "Next, not history",
+      "notRecord": "not part of your record"
+    },
+    "promise": {
+      "mine": "This is your professional history.",
+      "grows": "It grows every time you work.",
+      "follows": "The record can follow you to the next opportunity."
+    },
+    "keyTitle": "How to read each line",
+    "historyTitle": "Work history"
   },
   "workContext": {
     "title": "Your work, in one view",
@@ -18490,5 +18500,50 @@
         "teamMeta": "3 people on this project"
       }
     }
+  },
+  "journalContinuity": {
+    "title": "From instruction to your history",
+    "intro": "Each record sits in a chain. Open any step to continue it.",
+    "instruction": {
+      "label": "Instruction",
+      "unit": "planned work"
+    },
+    "work": {
+      "label": "Work done",
+      "unit": "entries"
+    },
+    "time": {
+      "label": "Time",
+      "unit": "recorded"
+    },
+    "evidence": {
+      "label": "Evidence",
+      "unit": "with photos"
+    },
+    "review": {
+      "label": "Review",
+      "unit": "waiting"
+    },
+    "confirmed": {
+      "label": "Confirmed",
+      "unit": "by a manager",
+      "returned": "{count} returned"
+    },
+    "project": {
+      "label": "Project",
+      "unit": "its record"
+    },
+    "history": {
+      "label": "Your history",
+      "unit": "living CV"
+    }
+  },
+  "projectContinuity": {
+    "title": "This project continues in",
+    "people": "People",
+    "calendar": "Calendar",
+    "journal": "Work journal",
+    "review": "Review",
+    "history": "Company history"
   }
 }

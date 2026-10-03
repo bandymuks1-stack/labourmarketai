@@ -1478,10 +1478,8 @@
   },
   "profileState": {
     "readiness": {
-      "label": "Profilio parengtis",
-      "ready": "Užpildytas",
-      "building": "Dar pildomas",
-      "start": "Tik pradėtas"
+      "label": "Profilio žingsniai",
+      "summary": "Profilio žingsniai: atlikta {done} iš {total}"
     },
     "freshness": {
       "label": "Aktualumas",
@@ -7515,11 +7513,8 @@
       }
     },
     "readiness": {
-      "label": "Pasirengimas",
+      "label": "Profilio žingsniai",
       "hint": "Viskas paruošta.",
-      "levelReady": "Pasiruošęs",
-      "levelBuilding": "Formuojasi",
-      "levelStart": "Pradžia",
       "signalsTemplate": "žingsnių atlikta",
       "nextLabel": "Toliau:",
       "pillars": {
@@ -7529,7 +7524,10 @@
         "journal": "Darbo žurnalas",
         "evidence": "Įrašai",
         "workCard": "Darbo kortelė"
-      }
+      },
+      "ringAria": "Profilio žingsniai: atlikta {met} iš {total}",
+      "stepDone": "atlikta",
+      "stepOpen": "neatlikta"
     },
     "verifiedTitle": "Vadovo patvirtinti įgūdžiai",
     "verifiedEmpty": "Tokių įgūdžių dar nėra. Jie atsiranda iš jūsų darbo įrašų.",
@@ -18105,15 +18103,27 @@
     "noRecords": "Dar nėra darbo įrašų",
     "legend": {
       "managerRecord": "Vadovo įrašas",
-      "recorded": "Jūsų užfiksuota"
+      "recorded": "Jūsų užfiksuota",
+      "declared": "Nurodyta jūsų",
+      "declaredHint": "Jūsų žodžiai. Dar niekas netikrino.",
+      "recordedHint": "Valandos ir įrašai iš jūsų darbo žurnalo.",
+      "managerRecordHint": "Už darbą atsakingas vadovas ar darbdavys tai patvirtino."
     },
     "skillsTitle": "Ką rodo jūsų darbas",
     "next": {
       "title": "Jūsų istorija keliauja su jumis",
       "body": "Kiekvienas užfiksuotas darbas ją papildo. Pasiimkite ją į kitą galimybę.",
       "cta": "Pažiūrėti, kur galite eiti",
-      "label": "Toliau, ne istorija"
-    }
+      "label": "Toliau, ne istorija",
+      "notRecord": "nėra jūsų įrašo dalis"
+    },
+    "promise": {
+      "mine": "Tai jūsų profesinė istorija.",
+      "grows": "Ji auga kaskart, kai dirbate.",
+      "follows": "Įrašas gali sekti paskui jus į kitą galimybę."
+    },
+    "keyTitle": "Kaip skaityti kiekvieną eilutę",
+    "historyTitle": "Darbo istorija"
   },
   "workContext": {
     "title": "Jūsų darbas vienoje vietoje",
@@ -18490,5 +18500,50 @@
         "teamMeta": "3 žmonės šiame projekte"
       }
     }
+  },
+  "journalContinuity": {
+    "title": "Nuo nurodymo iki jūsų istorijos",
+    "intro": "Kiekvienas įrašas yra grandinės dalis. Atidarykite bet kurį žingsnį ir tęskite.",
+    "instruction": {
+      "label": "Nurodymas",
+      "unit": "planuotas darbas"
+    },
+    "work": {
+      "label": "Atliktas darbas",
+      "unit": "įrašai"
+    },
+    "time": {
+      "label": "Laikas",
+      "unit": "užfiksuota"
+    },
+    "evidence": {
+      "label": "Įrodymai",
+      "unit": "su nuotraukomis"
+    },
+    "review": {
+      "label": "Peržiūra",
+      "unit": "laukia"
+    },
+    "confirmed": {
+      "label": "Patvirtinta",
+      "unit": "vadovo",
+      "returned": "{count} grąžinta"
+    },
+    "project": {
+      "label": "Projektas",
+      "unit": "jo istorija"
+    },
+    "history": {
+      "label": "Jūsų istorija",
+      "unit": "gyvas CV"
+    }
+  },
+  "projectContinuity": {
+    "title": "Šis projektas tęsiasi",
+    "people": "Žmonės",
+    "calendar": "Kalendorius",
+    "journal": "Darbo žurnalas",
+    "review": "Peržiūra",
+    "history": "Įmonės istorija"
   }
 }

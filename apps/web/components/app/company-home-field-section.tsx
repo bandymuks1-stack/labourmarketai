@@ -15,6 +15,7 @@ import {
 
 import { Link } from "@/lib/i18n/navigation";
 import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
+import { PersonPortrait } from "@/components/app/identity/person-portrait";
 import { personMonogram } from "@/lib/visual/avatar-monogram";
 import { createUtcFormatter } from "@/lib/time/display";
 import { CAPABILITY_CHOICES } from "@/lib/organizations/capability-choices";
@@ -76,7 +77,11 @@ export async function CompanyHomeFieldSection({
   field,
   needs,
   partners,
+  avatars = {},
 }: {
+  /** Consented portraits by worker id (the database decides per person via
+   *  `getAvatarForVisibleWorker`); a missing entry renders the initials. */
+  readonly avatars?: Readonly<Record<string, string | null>>;
   readonly locale: string;
   readonly capabilities: readonly string[];
   readonly field: CompanyHomeField;
@@ -251,8 +256,16 @@ export async function CompanyHomeFieldSection({
                         {p.peopleNames.map((n, i) => (
                           <span
                             key={`${p.projectId}-${i}`}
-                            className="rounded-full bg-ink-700 px-2 py-0.5 text-meta text-text-primary"
+                            className="inline-flex items-center gap-1.5 rounded-full bg-ink-700 py-0.5 pl-0.5 pr-2 text-meta text-text-primary"
+                            data-testid="company-home-project-person"
                           >
+                            <PersonPortrait
+                              name={n}
+                              avatarUrl={null}
+                              initials={personMonogram(n)}
+                              width="24px"
+                              shape="round"
+                            />
                             {n}
                           </span>
                         ))}
@@ -451,6 +464,7 @@ export async function CompanyHomeFieldSection({
                         testid={`company-home-capacity-identity-${w.workerId}`}
                         name={w.label}
                         initials={personMonogram(w.label)}
+                        avatarUrl={avatars[w.workerId] ?? null}
                         professions={[]}
                         meta={[
                           {

@@ -298,6 +298,7 @@ export default async function CompanyPeoplePage({
             per row as this manager, bounded to the rows above. */}
         <TeamRecordedWork
           locale={locale}
+          avatars={avatarByWorker}
           members={activeWorkerRows.map((w) => ({
             workerId: w.workerId,
             displayName: w.displayName,

@@ -19,7 +19,7 @@ const SIZES = { sm: 56, md: 80, lg: 120 } as const;
 /** Readiness level → brand tokens. Gold here is the brand progress accent,
  *  NOT a confirmation: confirmation is the verification green (owner-ratified
  *  2026-09-22) and never appears on this ring. Readiness is a count of real
- *  signals met. The arc is thin and calm; the figure is display type. */
+ *  steps done. The arc is thin and calm; the figure is display type. */
 const LEVEL_STROKE: Record<ReadinessLevel, string> = {
   ready: "stroke-brand-blue",
   building: "stroke-text-secondary",
@@ -35,14 +35,19 @@ export function ReadinessRing({
   met,
   total,
   level,
-  levelLabel,
+  caption,
+  ariaLabel,
   size = "md",
 }: {
   met: number;
   total: number;
   level: ReadinessLevel;
-  /** Localized level word (e.g. "Pasiruošęs"), resolved by the caller. */
-  levelLabel: string;
+  /** What the count counts, in words ("Profile steps"). A bare "6/6" with a
+   *  judgement word ("Ready") beside it was an unexplained score; the caption
+   *  names the thing counted and the caller lists the steps beside it. */
+  caption: string;
+  /** Full accessible name: "Profile steps: 6 of 6 done". */
+  ariaLabel: string;
   size?: keyof typeof SIZES;
 }) {
   const ref = useRef<SVGSVGElement>(null);
@@ -67,7 +72,7 @@ export function ReadinessRing({
         height={px}
         viewBox={`0 0 ${px} ${px}`}
         role="img"
-        aria-label={`Readiness: ${met} of ${total} signals met`}
+        aria-label={ariaLabel}
       >
         <circle
           cx={cx}
@@ -108,7 +113,7 @@ export function ReadinessRing({
           LEVEL_TEXT[level],
         )}
       >
-        {levelLabel}
+        {caption}
       </span>
     </div>
   );

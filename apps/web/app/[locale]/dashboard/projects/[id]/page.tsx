@@ -28,6 +28,8 @@ import { CountUp } from "@/components/app/today/count-up";
 import { ProjectWorkGallery } from "@/components/app/project-work-gallery";
 import { type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
+import { PersonPortrait } from "@/components/app/identity/person-portrait";
+import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
 
 export const dynamic = "force-dynamic";
 
@@ -119,6 +121,16 @@ export default async function ProjectStadiumPage({
           ? tLoc("statusUnverified")
           : tLoc("statusTextOnly");
 
+  // People are people: each assigned worker's own consented photo, only where
+  // the database releases it to this viewer (an active project assignment).
+  const avatars: Record<string, string | null> = Object.fromEntries(
+    await Promise.all(
+      ops.workers.map(
+        async (w) => [w.workerId, await getAvatarForVisibleWorker(w.workerId).catch(() => null)] as const,
+      ),
+    ),
+  );
+  const tCont = await getTranslations("projectContinuity");
   const initialsOf = (name: string) => {
     const parts = name.trim().split(/\s+/).slice(0, 2);
     return parts.map((p) => p[0]?.toUpperCase() ?? "").join("") || "•";
@@ -201,6 +213,37 @@ export default async function ProjectStadiumPage({
         >
           {t("openOps")} →
         </Link>
+
+        {/* WHERE THIS PROJECT CONTINUES — the chain around it, each a real
+            destination: people, the calendar, the journal that records the
+            work, the review of that work, the organization's history. */}
+        <nav
+          aria-label={tCont("title")}
+          className="flex flex-wrap items-center gap-x-1 gap-y-1 text-sm"
+          data-testid="project-continuity"
+        >
+          <span className="mr-1 font-mono text-meta uppercase tracking-label text-text-muted">{tCont("title")}</span>
+          {(
+            [
+              ["people", "/dashboard/company/people"],
+              ["calendar", "/dashboard/planning"],
+              ["journal", "/dashboard/journal"],
+              ["review", "/dashboard/inbox"],
+              ["history", "/dashboard/company/history"],
+            ] as const
+          ).map(([k, href], i) => (
+            <span key={k} className="inline-flex items-center gap-1">
+              {i > 0 ? <span aria-hidden className="text-text-muted">→</span> : null}
+              <Link
+                href={`/${locale}${href}`}
+                data-testid={`project-continuity-${k}`}
+                className="inline-flex min-h-11 items-center rounded-md px-2 text-brand-blue hover:bg-brand-blue/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+              >
+                {tCont(k)}
+              </Link>
+            </span>
+          ))}
+        </nav>
 
         {/* THE FORMATION — who is on this project, by work area: the real
             count per primary profession as one band, each segment a door
@@ -299,17 +342,13 @@ export default async function ProjectStadiumPage({
                   className="group flex items-center gap-3"
                   data-testid={`stadium-player-open-${w.workerId}`}
                 >
-                  <span
-                    aria-hidden
-                    className={cn(
-                      "flex h-16 w-14 shrink-0 items-center justify-center rounded-xl border bg-ink-700 font-display text-lg font-bold text-text-primary",
-                      w.confirmedSkills > 0
-                        ? "border-trust-accent/50"
-                        : "border-ink-500",
-                    )}
-                  >
-                    {initialsOf(w.name)}
-                  </span>
+                  <PersonPortrait
+                    name={w.name}
+                    avatarUrl={avatars[w.workerId] ?? null}
+                    initials={initialsOf(w.name)}
+                    width="64px"
+                    className={cn(w.confirmedSkills > 0 && "ring-1 ring-trust-accent/60")}
+                  />
                   <div className="min-w-0">
                     <p className="font-display text-lg font-semibold leading-tight tracking-tightest text-text-primary group-hover:text-brand-blue">
                       {w.name}

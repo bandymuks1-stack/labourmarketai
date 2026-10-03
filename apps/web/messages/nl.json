@@ -1478,10 +1478,8 @@
   },
   "profileState": {
     "readiness": {
-      "label": "Profielgereedheid",
-      "ready": "Klaar",
-      "building": "Nog in opbouw",
-      "start": "Net begonnen"
+      "label": "Profielstappen",
+      "summary": "Profielstappen: {done} van {total} gedaan"
     },
     "freshness": {
       "label": "Actueel",
@@ -7515,11 +7513,8 @@
       }
     },
     "readiness": {
-      "label": "Gereedheid",
+      "label": "Profielstappen",
       "hint": "Alles klaar.",
-      "levelReady": "Klaar",
-      "levelBuilding": "In opbouw",
-      "levelStart": "Net gestart",
       "signalsTemplate": "stappen voltooid",
       "nextLabel": "Volgende:",
       "pillars": {
@@ -7529,7 +7524,10 @@
         "journal": "Werkjournaal",
         "evidence": "Registraties",
         "workCard": "Werkkaart"
-      }
+      },
+      "ringAria": "Profielstappen: {met} van {total} gedaan",
+      "stepDone": "gedaan",
+      "stepOpen": "nog te doen"
     },
     "verifiedTitle": "Door manager bevestigde vaardigheden",
     "verifiedEmpty": "Nog geen. Ze worden opgebouwd uit je werkregistraties.",
@@ -18105,15 +18103,27 @@
     "noRecords": "Nog geen werkregistraties",
     "legend": {
       "managerRecord": "Vermelding van de manager",
-      "recorded": "Door u vastgelegd"
+      "recorded": "Door u vastgelegd",
+      "declared": "Door u opgegeven",
+      "declaredHint": "Uw eigen woorden. Nog door niemand gecontroleerd.",
+      "recordedHint": "Uren en notities uit uw werkjournaal.",
+      "managerRecordHint": "Een verantwoordelijke leidinggevende of werkgever heeft het bevestigd."
     },
     "skillsTitle": "Wat uw werk laat zien",
     "next": {
       "title": "Uw geschiedenis gaat met u mee",
       "body": "Elke klus die u vastlegt, vult haar aan. Neem haar mee naar de volgende kans.",
       "cta": "Bekijk waar u naartoe kunt",
-      "label": "Volgende stap, geen geschiedenis"
-    }
+      "label": "Volgende stap, geen geschiedenis",
+      "notRecord": "geen deel van uw dossier"
+    },
+    "promise": {
+      "mine": "Dit is uw beroepsgeschiedenis.",
+      "grows": "Ze groeit elke keer dat u werkt.",
+      "follows": "Het dossier kan met u meegaan naar de volgende kans."
+    },
+    "keyTitle": "Hoe elke regel te lezen",
+    "historyTitle": "Werkgeschiedenis"
   },
   "workContext": {
     "title": "Jouw werk in één overzicht",
@@ -18490,5 +18500,50 @@
         "teamMeta": "3 personen in dit project"
       }
     }
+  },
+  "journalContinuity": {
+    "title": "Van opdracht tot uw geschiedenis",
+    "intro": "Elke notitie hoort bij een keten. Open een stap om verder te gaan.",
+    "instruction": {
+      "label": "Opdracht",
+      "unit": "geplande arbeid"
+    },
+    "work": {
+      "label": "Uitgevoerd werk",
+      "unit": "notities"
+    },
+    "time": {
+      "label": "Tijd",
+      "unit": "vastgelegd"
+    },
+    "evidence": {
+      "label": "Bewijs",
+      "unit": "met foto's"
+    },
+    "review": {
+      "label": "Beoordeling",
+      "unit": "wacht"
+    },
+    "confirmed": {
+      "label": "Bevestigd",
+      "unit": "door leidinggevende",
+      "returned": "{count} teruggestuurd"
+    },
+    "project": {
+      "label": "Project",
+      "unit": "het dossier"
+    },
+    "history": {
+      "label": "Uw geschiedenis",
+      "unit": "levend cv"
+    }
+  },
+  "projectContinuity": {
+    "title": "Dit project loopt door in",
+    "people": "Mensen",
+    "calendar": "Agenda",
+    "journal": "Werkjournaal",
+    "review": "Beoordeling",
+    "history": "Bedrijfsgeschiedenis"
   }
 }
