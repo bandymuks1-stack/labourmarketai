@@ -139,11 +139,20 @@ describe("§11 singleton-fallback ratchet", () => {
   });
 
   it("the market map resolves its company from the active workspace", () => {
+    // The page no longer names the company itself (the company layer row was
+    // removed with the layers legend). The company's territory layer comes from
+    // the owner-scoped spatial composer, whose company source resolves the
+    // ACTIVE workspace — never the `companies.profile_id` singleton.
     const map = read(
       join(WEB, "app", "[locale]", "dashboard", "market-map", "page.tsx"),
     );
-    expect(map).toMatch(/resolveEmployerCompanyContext/);
     expect(map).not.toMatch(/getOwnCompany/);
+    expect(map).toMatch(/getOwnSpatialCollections/);
+    const objects = read(join(WEB, "lib", "objects", "objects.ts"));
+    expect(objects).toMatch(/resolveEmployerCompanyContext/);
+    expect(read(join(WEB, "lib", "market-map", "spatial-read.ts"))).toMatch(
+      /getCompanyTerritoryFromObjects/,
+    );
   });
 
   it("getOwnCompany callers may only SHRINK (ratchet)", () => {

@@ -41,14 +41,16 @@ describe("Guard: cinematic baseline is preserved (no visual rebuild)", () => {
   });
 
   it("the landing page still renders the cinematic baseline components", () => {
-    // The canonical page delegates through the V1 server assembler; depth 2
-    // reaches the command surface without turning this into a whole-repo grep.
+    // The canonical page mounts the one landing; depth 2 reaches its visual
+    // baseline without turning this into a whole-repo grep. (Until
+    // 2026-09-30 the baseline was the LIVE scene; the owner removed that
+    // arm, and the baseline is the landing that remains.)
     const page = landingTreeSource(APP_ROOT, 2);
     for (const sym of [
-      "LiveMarketCommand",
-      "world-desktop.webp",
-      'data-layer="conceptual-sector-activity"',
-      "styles.entryBand",
+      "LivingWorkerHero",
+      "MarketProofBand",
+      "LandingOpenJobsBand",
+      "PlayerCardShowcase",
     ]) {
       expect(page, `landing must keep the cinematic baseline marker ${sym}`).toContain(
         sym,

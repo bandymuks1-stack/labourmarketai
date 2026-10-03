@@ -96,7 +96,7 @@ describe("the surface: rendered on company planning, labelled in every routed lo
     // The overlap wears the calendar's own conflict token, never a new one.
     expect(page).toMatch(/c\.conflict \? \(\s*<TimeReality\s+kind="conflict"/);
     expect(page).toContain('data-testid="roster-commitments-conflict-note"');
-    expect((page.match(/\{utilisationSection\}\s*\n\s*\{commitmentsSection\}/g) ?? []).length).toBe(2);
+    expect((page.match(/\{utilisationSection\}\s*\n\s*\{timelineSection\}\s*\n\s*\{commitmentsSection\}/g) ?? []).length).toBe(2);
     // The read is the existing authorized commitment read — no new table.
     const read = readFileSync(join(WEB, "lib", "planning", "roster-commitments.ts"), "utf8");
     expect(read).toContain("getEmployerWorkerCommitments(ids, { supabase })");

@@ -82,7 +82,7 @@ export async function findExistingDirectConversation(
 /** Project engagement: the caller manages THIS project and the recipient is
  *  actively assigned to it. Both facts are read under the caller's own RLS
  *  and the database's own `can_manage_project`. */
-async function managesProjectOf(
+export async function managesProjectOf(
   caller: CommunicationCaller,
   projectId: string,
   otherProfileId: string,
@@ -99,6 +99,60 @@ async function managesProjectOf(
     .eq("workers.profile_id", otherProfileId)
     .limit(1);
   return (data ?? []).length > 0;
+}
+
+/**
+ * TEAM: the caller and the other profile are on ONE team — both hold an ACTIVE
+ * governance membership (company_memberships) of, or an ACTIVE engagement
+ * (engagement_contexts) in, the same organization. Every read is the CALLER'S
+ * OWN RLS read, so the database decides what is visible: a member sees the
+ * members of the organizations they belong to; a manager sees the engaged
+ * people of the organizations they manage; anyone else sees nothing and the
+ * answer is false (default-closed). No service role, no new policy.
+ */
+export async function callerSharesTeamWith(
+  caller: CommunicationCaller,
+  otherProfileId: string,
+): Promise<boolean> {
+  if (!otherProfileId || otherProfileId === caller.userId) return false;
+  const db = asAny(caller.supabase);
+  const [mem, eng] = await Promise.all([
+    db
+      .from("company_memberships")
+      .select("organization_id")
+      .eq("profile_id", caller.userId)
+      .eq("status", "active"),
+    db
+      .from("engagement_contexts")
+      .select("organization_id")
+      .eq("profile_id", caller.userId)
+      .eq("status", "active"),
+  ]);
+  const myOrgs = [
+    ...new Set(
+      [...((mem.data ?? []) as { organization_id: string | null }[]), ...((eng.data ?? []) as { organization_id: string | null }[])]
+        .map((r) => r.organization_id)
+        .filter((v): v is string => typeof v === "string"),
+    ),
+  ];
+  if (myOrgs.length === 0) return false;
+  const [theirMem, theirEng] = await Promise.all([
+    db
+      .from("company_memberships")
+      .select("organization_id")
+      .eq("profile_id", otherProfileId)
+      .eq("status", "active")
+      .in("organization_id", myOrgs)
+      .limit(1),
+    db
+      .from("engagement_contexts")
+      .select("organization_id")
+      .eq("profile_id", otherProfileId)
+      .eq("status", "active")
+      .in("organization_id", myOrgs)
+      .limit(1),
+  ]);
+  return (theirMem.data ?? []).length > 0 || (theirEng.data ?? []).length > 0;
 }
 
 async function callerIsAdmin(caller: CommunicationCaller): Promise<boolean> {
@@ -124,8 +178,9 @@ export async function planDirectContact(
   if (!otherProfileId || otherProfileId === caller.userId) return { kind: "refused", permission: "no_permission" };
   const existing = await findExistingDirectConversation(caller.supabase, caller.userId, otherProfileId);
   if (existing) return { kind: "existing", conversationId: existing, permission: "allowed_existing_conversation" };
-  const [projectEngagement, isAdmin] = await Promise.all([
+  const [projectEngagement, sharesTeam, isAdmin] = await Promise.all([
     opts.projectId ? managesProjectOf(caller, opts.projectId, otherProfileId) : Promise.resolve(false),
+    callerSharesTeamWith(caller, otherProfileId),
     callerIsAdmin(caller),
   ]);
   const permission = evaluateContactPermission({
@@ -133,6 +188,7 @@ export async function planDirectContact(
     hasEngagement: projectEngagement,
     scoutingAllowed: false,
     isAdmin,
+    sharesTeam,
   });
   return isContactPermitted(permission) ? { kind: "new", permission } : { kind: "refused", permission: "no_permission" };
 }

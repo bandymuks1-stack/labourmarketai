@@ -48,7 +48,13 @@ describe("§5.2 the card really carries data visualizations", () => {
     ]) {
       expect(CARD, `card must render ${marker}`).toContain(marker);
     }
-    expect(CARD).toContain('data-testid="player-card-visualizations"');
+    // Since 2026-09-30 the charts live in the lens that answers their
+    // question (work over time → WORK/EVIDENCE, skill strength → SKILLS,
+    // the history band → HISTORY) instead of one always-open chart block.
+    const flat = CARD.replace(/\s+/g, "");
+    expect(flat).toContain("{secEvidenceChart}");
+    expect(flat).toContain("{secSkillChart}");
+    expect(flat).toContain("{secE}");
   });
 
   it("each chart draws geometry — not another list of sentences", () => {

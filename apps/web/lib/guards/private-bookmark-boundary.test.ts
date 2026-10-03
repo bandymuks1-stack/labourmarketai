@@ -221,7 +221,7 @@ describe("the save control cannot become an application", () => {
     // Rendered inside the existing saved section, never as its own section.
     const savedSection = page.slice(
       page.indexOf('data-testid="opportunities-saved"'),
-      page.indexOf('data-testid="opportunities-filters"'),
+      page.indexOf('data-testid="opportunities-saved-stale"'),
     );
     expect(savedSection.length).toBeGreaterThan(200);
     expect(savedSection).toContain("opportunities-saved-vacancies");

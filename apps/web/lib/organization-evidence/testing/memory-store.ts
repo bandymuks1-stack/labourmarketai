@@ -58,6 +58,7 @@ interface Tables {
   objects: StoreRow[];
   records: StoreRow[];
   recordEvents: StoreRow[];
+  parties: StoreRow[];
   signals: StoreRow[];
 }
 
@@ -86,6 +87,7 @@ export class MemoryEvidenceDb {
     objects: [],
     records: [],
     recordEvents: [],
+    parties: [],
     signals: [],
   };
   /** Writes the design forbids that the orchestration nevertheless tried. */
@@ -364,6 +366,7 @@ function memoryStore(db: MemoryEvidenceDb, actor: MemoryActor): EvidenceStore {
           organization_id: r.organization_id as string,
           supplier_role: r.supplier_role as string,
           evidence_state: r.evidence_state as string,
+          organization_person_id: (r.organization_person_id as string | null) ?? null,
           subject_profile_id:
             (t.people.find((p) => p.id === r.organization_person_id)?.linked_profile_id as string | null) ?? null,
           events: t.recordEvents
@@ -378,11 +381,50 @@ function memoryStore(db: MemoryEvidenceDb, actor: MemoryActor): EvidenceStore {
       return ok(rows);
     },
 
+    async listRecordEvents(recordId) {
+      return ok(
+        t.recordEvents
+          .filter((e) => e.record_id === recordId)
+          .map((e) => clone(e))
+          .reverse(),
+      );
+    },
+
     async insertRecordEvents(rows) {
       const written: { id: string }[] = [];
       for (const r of rows) {
         const id = db.nextId();
         t.recordEvents.push({ ...clone(r), id, created_at: db.now() });
+        written.push({ id });
+      }
+      return ok(written);
+    },
+
+    async readRecordOrganizations(recordIds) {
+      return ok(
+        t.records
+          .filter((r) => recordIds.includes(r.id as string))
+          .map((r) => ({ id: r.id as string, organization_id: r.organization_id as string })),
+      );
+    },
+
+    async readParties(recordIds) {
+      return ok(t.parties.filter((p) => recordIds.includes(p.record_id as string)).map(clone));
+    },
+
+    async readRecordIdsNamingOrganization(partyOrganizationId) {
+      return ok([
+        ...new Set(
+          t.parties.filter((p) => p.party_organization_id === partyOrganizationId).map((p) => p.record_id as string),
+        ),
+      ]);
+    },
+
+    async insertParties(rows) {
+      const written: { id: string }[] = [];
+      for (const r of rows) {
+        const id = db.nextId();
+        t.parties.push({ ...clone(r), id, created_at: db.now() });
         written.push({ id });
       }
       return ok(written);

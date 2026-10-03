@@ -57,7 +57,10 @@ describe("§8.1 permission states — enumerated, no silent drift", () => {
     // allowed_agency_connection added 2026-09-24 (an ACTIVE agency ↔ client
     // connection opens the conversation between the two consenting
     // companies' people) — deliberate, reviewed extensions, each verified
-    // server-side by its gated action (service-request-conversation.ts /
+    // allowed_team added 2026-10-01 (owner P0 messaging: team member ↔ team
+    // member — both ACTIVE on one organization, verified under the caller's
+    // own RLS reads; the one generic state a real team relationship mints) —
+    // each verified server-side by its gated action (service-request-conversation.ts /
     // contact-interested-worker.ts / booking-conversation.ts /
     // agency/bridge-conversation.ts).
     expect([...CONTACT_PERMISSION_STATES].sort()).toEqual(
@@ -71,6 +74,7 @@ describe("§8.1 permission states — enumerated, no silent drift", () => {
         "allowed_accepted_booking",
         "allowed_marketplace_enquiry",
         "allowed_agency_connection",
+        "allowed_team",
         "no_permission",
       ].sort(),
     );
@@ -148,7 +152,11 @@ describe("no contact without permission — the create path is gated", () => {
 
   it("the generic open action passes NO grant (server resolves the states)", () => {
     const src = stripTs(read(OPEN_ACTION));
-    expect(src).toMatch(/getOrCreateDirectConversation\(profileId, locale\)/);
+    // The only extra argument is the project the contact was opened from — a
+    // verified engagement FACT the server resolves, never a grant.
+    expect(src).toMatch(
+      /getOrCreateDirectConversation\(\s*profileId,\s*locale,\s*null,\s*undefined,\s*null,\s*projectId,?\s*\)/,
+    );
     expect(src).not.toMatch(/allowed_/);
     // Denial lands on the existing honest notice — never a silent success.
     expect(src).toMatch(/notice=cannot_open/);
@@ -183,6 +191,9 @@ describe("no contact without permission — the create path is gated", () => {
       "lib/booking/booking-conversation.ts",
       // Audit PR5 — demand-interest grant ("contacted" opens the real
       // thread), verified server-side before the conversation opens.
+      // Owner P0 messaging (2026-10-01) — THE chat door: opens the thread with
+      // NO grant (the §8.1 states resolve server-side) and returns its route.
+      "lib/communication/chat-open-conversation.ts",
       "lib/communication/contact-interested-worker.ts",
       "lib/communication/open-conversation-action.ts",
       "lib/communication/request-worker-conversation.ts",

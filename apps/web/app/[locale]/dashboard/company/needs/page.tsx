@@ -14,6 +14,7 @@ import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
 import { listClaimablePublicIntakes } from "@/lib/company/claim-public-intake";
 import { listPendingInterestCountsForCompany } from "@/lib/opportunities/interest";
 import { readDemandReadbackLabels } from "@/lib/company/company-section-labels";
+import { readOpenNeedsUsage } from "@/lib/billing/open-needs-usage-read";
 import { DemandRequestButton } from "@/components/app/demand-request-button";
 import { DemandRequestsReadback } from "@/components/app/demand-requests-readback";
 import { ClaimPublicIntakeCard } from "@/components/app/claim-public-intake-card";
@@ -95,12 +96,13 @@ export default async function CompanyNeedsPage({
     ? await readOrganizationCapabilities(capabilityOrgId)
     : [];
 
-  const [demandReadback, claimableIntakes, rPendingInterest, readbackLabels] =
+  const [demandReadback, claimableIntakes, rPendingInterest, readbackLabels, openNeedsUsage] =
     await Promise.all([
       listOwnCustomerRequests(EMPLOYER_DEMAND_KINDS),
       listClaimablePublicIntakes(),
       listPendingInterestCountsForCompany(),
       readDemandReadbackLabels(),
+      readOpenNeedsUsage(),
     ]);
 
   // WHO IS WAITING — one localized line per demand that has hands raised.
@@ -171,6 +173,7 @@ export default async function CompanyNeedsPage({
             intent={demandIntent}
             stepTitles={[tFlow("company.c1"), tFlow("company.c2"), tFlow("company.c3")]}
             repeatRequestId={repeatRequestId}
+            usage={openNeedsUsage}
           />
           {/* HONEST VISIBILITY (2026-09-22): `list_open_demand_for_workers`
               shows a need to workers ONLY when companies.verification_status

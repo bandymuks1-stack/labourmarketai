@@ -19,6 +19,8 @@ import {
   groupMissingDocumentsByType,
 } from "@/lib/conversation/documents-gap";
 import { getUnreadConversationCount } from "@/lib/communication/unread";
+import { getUnreadConversationIdsForOrganization } from "@/lib/communication/organization-scope";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
 import { loadOwnRecentConfirmations } from "@/lib/journal/own-recent-confirmations";
 import { getOwnWorkerId } from "@/lib/projects/worker-project-access";
@@ -498,6 +500,32 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
     /* no line — a failed read never invents a queue */
   }
 
+  // 1a ── learning suggestions awaiting review (EDU-5) ─────────────────────
+  // A worker accepted a recognised skill on an entry of THIS organisation
+  // (review enabled). The one producer turns that observation into a pending
+  // suggestion under the manager's own RLS; the line states only the count of
+  // pending ones and appears only when there is one, with the one door to
+  // the review page (owner: no count without a door, no door without a count).
+  try {
+    if (lines.length < MAX_LINES) {
+      const { createClient } = await import("@/lib/supabase/server");
+      const { produceReviewQueueFromSignals, countPendingReviewQueue } = await import(
+        "@/lib/learning/signal-queue-producer"
+      );
+      const sb = await createClient();
+      await produceReviewQueueFromSignals(sb);
+      const waiting = await countPendingReviewQueue(sb);
+      if (waiting > 0) {
+        lines.push(t("briefEmployerLearningReview", { count: waiting }));
+        // The door exists ONLY in this N>0 state, so it is never empty
+        // navigation: the review page then has real items to show.
+        addChip("link:/dashboard/learning", t("chipEmployerLearningReview"));
+      }
+    }
+  } catch {
+    /* no line — a failed read never invents a queue */
+  }
+
   // 2 ── absence requests awaiting decision ────────────────────────────────
   try {
     const { getManagerPendingAbsences } = await import("@/lib/leave/absences");
@@ -529,9 +557,17 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
   }
 
   // 4 ── unread human messages ─────────────────────────────────────────────
+  // SCOPED TO THE COMPANY (owner 2026-10-01): a person's private threads are
+  // not their company's inbox. Only the unread conversations that belong to
+  // the organization acted for are counted; with no resolvable company there
+  // is nothing to count, never the person's whole inbox.
   try {
     if (lines.length < MAX_LINES) {
-      const unread = await getUnreadConversationCount();
+      const ctx = await resolveEmployerCompanyContext();
+      const unread =
+        ctx.kind === "ok"
+          ? (await getUnreadConversationIdsForOrganization(ctx.companyId)).size
+          : 0;
       if (unread > 0) {
         lines.push(t("briefUnreadMessages", { count: unread }));
         addChip("link:/dashboard/communication", t("navMessages"));

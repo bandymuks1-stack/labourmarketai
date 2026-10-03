@@ -322,3 +322,35 @@ describe("inWorkWindow — membership is decided by the work day", () => {
     expect(inWorkWindow(row("b", "a", "2026-01-01T00:00:00.000Z", workDay("2026-09-04")), week)).toBe(false);
   });
 });
+
+describe("review OFF is not awaiting review (handoff 2026-10-02 §8)", () => {
+  const row = (id: string, ctx: string) =>
+    ({
+      id,
+      worker_id: "w1",
+      created_at: "2026-09-30T08:00:00Z",
+      engagement_context_id: ctx,
+      workers: { display_name: "Test", profiles: null },
+      journal_entry_confirmations: [],
+      journal_entry_metrics: [],
+    }) as never;
+
+  it("a decision-less entry in a review-off context is counted as reviewNotEnabled, not awaiting", () => {
+    const { totals, workers } = rollUpJournalWindow([row("a", "off"), row("b", "on")], {
+      workTime: false,
+      todayIso: "2026-09-30",
+      reviewOffContextIds: new Set(["off"]),
+    });
+    expect(totals.awaitingReview).toBe(1);
+    expect(totals.reviewNotEnabled).toBe(1);
+    expect(totals.entries).toBe(2);
+    expect(workers[0].awaitingReview).toBe(1);
+    expect(workers[0].reviewNotEnabled).toBe(1);
+  });
+
+  it("without review-off knowledge the previous behaviour holds (awaiting)", () => {
+    const { totals } = rollUpJournalWindow([row("a", "off")], { workTime: false, todayIso: "2026-09-30" });
+    expect(totals.awaitingReview).toBe(1);
+    expect(totals.reviewNotEnabled).toBe(0);
+  });
+});

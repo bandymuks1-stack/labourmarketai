@@ -61,7 +61,10 @@ describe("market map is exposed in the primary nav + opportunities", () => {
     // to non-admins, so this link is the worker's real way to the full map and
     // it has to stay ABOVE the first collapsed disclosure.
     const fullMapLink = opportunities.indexOf('data-testid="opportunities-map-full-link"');
-    const firstDetails = opportunities.indexOf("<details");
+    // The Filters disclosure now sits INSIDE the compact controls bar beside the
+    // map door (owner order 2026-10-01); the map door must precede the first
+    // disclosure of secondary content.
+    const firstDetails = opportunities.indexOf('data-testid="opportunities-market-situation"');
     expect(fullMapLink, "top-level full-map link").toBeGreaterThan(-1);
     expect(firstDetails, "a collapsed disclosure exists further down").toBeGreaterThan(-1);
     expect(fullMapLink).toBeLessThan(firstDetails);

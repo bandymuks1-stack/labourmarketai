@@ -4,6 +4,7 @@ import { loadProjectRiskForChat } from "@/lib/conversation/project-risk";
 import type { ProjectRiskRow } from "@/lib/conversation/project-risk-contract";
 import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
 import type { CapacityChatResult } from "@/lib/conversation/capacity-contract";
+import { getOrgDemandRollup } from "@/lib/company/org-demand-rollup";
 import { loadEmployerOpeningBrief, type OpeningBrief } from "@/lib/conversation/opening-brief";
 import { listProjectStages } from "@/lib/projects/stages";
 import { listProjectAssignments } from "@/lib/projects/projects";
@@ -71,6 +72,14 @@ export interface CompanyHomeField {
   readonly projects: HomeProjectsResult;
   readonly capacity: CapacityChatResult;
   readonly attention: OpeningBrief | { readonly kind: "unavailable" };
+  /**
+   * Where OPPORTUNITY appears from the company's side, from the ONE existing
+   * company-scoped demand read (`getOrgDemandRollup`, the reports door's
+   * source): people who showed interest in the company's own needs and have
+   * not been looked at. A FACT counted from real rows. `unknown` when the read
+   * did not answer — never a calm zero (SEP-7).
+   */
+  readonly interest: { readonly kind: "ok"; readonly waiting: number } | { readonly kind: "unknown" };
 }
 
 async function loadProjectRows(): Promise<HomeProjectsResult> {
@@ -132,13 +141,18 @@ export interface CompanyHomeFieldInput {
 export async function loadCompanyHomeField(
   input: CompanyHomeFieldInput = {},
 ): Promise<CompanyHomeField> {
-  const [projects, capacity, attention] = await Promise.all([
+  const [projects, capacity, attention, rollup] = await Promise.all([
     loadProjectRows().catch((): HomeProjectsResult => ({ kind: "error" })),
     loadWhoIsAvailableForChat(input.roster ? { roster: input.roster } : undefined).catch(
       (): CapacityChatResult => ({ kind: "error" }),
     ),
     // HONESTY (QA Q-2): a failed brief read is "unavailable", never "all clear".
     loadEmployerOpeningBrief().catch((): { kind: "unavailable" } => ({ kind: "unavailable" })),
+    getOrgDemandRollup().catch((): { kind: "unavailable" } => ({ kind: "unavailable" })),
   ]);
-  return { projects, capacity, attention };
+  const interest: CompanyHomeField["interest"] =
+    rollup.kind === "ok" && rollup.interest.state === "ok"
+      ? { kind: "ok", waiting: rollup.interest.byStatus.interested ?? 0 }
+      : { kind: "unknown" };
+  return { projects, capacity, attention, interest };
 }

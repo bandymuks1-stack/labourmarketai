@@ -1,6 +1,24 @@
 {
+  "companyModel": {
+    "title": "Company management",
+    "primary": "Publish a need",
+    "need": "What we need",
+    "offer": "What we offer",
+    "market": "Marketplace",
+    "people": "People & team",
+    "projects": "Projects & objects",
+    "messages": "Messages",
+    "more": "More",
+    "clients": "Clients & suppliers",
+    "candidates": "Candidates",
+    "calendar": "Calendar",
+    "capacity": "Capacity",
+    "work": "Work & hours",
+    "results": "Results",
+    "history": "History"
+  },
   "publicDemand": {
-    "title": "Live market demand",
+    "title": "Current market demand",
     "subtitleAgency": "What the public market asks for right now — the same pool your candidates see on the board.",
     "subtitleInstitution": "What the public market asks for right now — the directions your learners are heading into.",
     "active": "{count} live vacancies",
@@ -28,12 +46,22 @@
     "fitsNone": "No fitting opportunity yet — the board fills as your skills and availability become known.",
     "fitStrong": "strong fit",
     "fitPossible": "possible fit",
-    "openBoard": "Open opportunities",
+    "openBoard": "Open platform requests",
     "missing": "What you are missing",
     "missingFromOpportunities": "Asked for by the opportunities above, not yet in your records:",
     "missingFromProfession": "Usual for your direction, not yet in your records:",
     "askedBy": "{count} opportunities",
     "missingNone": "Nothing missing against the opportunities shown.",
+    "recTitle": "Worth strengthening",
+    "recWhyProfession": "Part of the skills for your chosen direction \"{profession}\", and not yet in your records.",
+    "recWhyMissingRole": "A real need (\"{role}\") asks for it and it is not in your records yet.",
+    "recWhyMissing": "A real need asks for it and it is not in your records yet.",
+    "recWhyWeakRole": "A need (\"{role}\") asks for it and you have only declared it - no confirmed work behind it yet.",
+    "recWhyWeak": "A need asks for it and you have only declared it - no confirmed work behind it yet.",
+    "recMoreRequests": "+{count} more.",
+    "recActionOpportunity": "View opportunities",
+    "recActionJournal": "Add work journal entries",
+    "recActionProfile": "Complete your skills in the profile",
     "next": "What to do next",
     "step_choose_direction": "Choose your work direction — matching needs it.",
     "step_declare_skills": "Add the skills you already have (or import your CV).",
@@ -48,8 +76,10 @@
     "cohortLine": "{program} · cohort {cohort}",
     "cohortAt": "at {institution}",
     "cohortDirection": "Direction: {profession}",
-    "cohortDemand": "{count} open vacancies for this direction today (imported market data)",
+    "cohortDemand": "{count} open imported public jobs for this direction today",
     "cohortDemandUnknown": "Demand for this direction not measured yet",
+    "cohortDemandOpen": "See these jobs",
+    "fitsSource": "Matched platform requests posted on LabourMarket.ai",
     "missingFromProgram": "Usual for your programme's direction, not yet in your records:"
   },
   "businessProfile": {
@@ -70,7 +100,7 @@
     "panelTitle": "Public business profile",
     "panelIntro": "Publish a public page for your business — shareable at labourmarket.ai/business/your-name. Off by default.",
     "viewPublic": "View public page",
-    "notAvailable": "Not available yet.",
+    "notAvailable": "Not available right now.",
     "saved": "Saved.",
     "enableLabel": "Make my business profile public",
     "enableHint": "When on, your identity, public contact, active services and active listings are shown on a public page. Private data is never shown.",
@@ -100,7 +130,7 @@
     "title": "Marketplace listings",
     "myTitle": "My listings",
     "intro": "List a work resource you offer or are looking for. Only active listings are visible to others.",
-    "notAvailable": "Not available yet.",
+    "notAvailable": "Not available right now.",
     "empty": "No listings yet. Add your first work resource.",
     "addButton": "Add listing",
     "browseTitle": "Browse active listings",
@@ -205,7 +235,7 @@
     "outcome": {
       "saved": "Saved.",
       "reported": "Defect reported.",
-      "needs_migration": "Not available yet — the delivery update is not applied.",
+      "needs_migration": "Not available right now.",
       "invalid": "Please check the details.",
       "auth": "Please sign in again.",
       "not_authorized": "You can only manage defects on your own projects.",
@@ -254,7 +284,7 @@
     },
     "outcome": {
       "saved": "Saved.",
-      "needs_migration": "Not available yet — the commercial update is not applied.",
+      "needs_migration": "Not available right now.",
       "invalid": "Please check the details.",
       "auth": "Please sign in again.",
       "not_authorized": "You can only manage your own records.",
@@ -321,7 +351,7 @@
     "outcome": {
       "saved": "Saved.",
       "acknowledged": "Acknowledged.",
-      "needs_migration": "Not available yet — the assets update is not applied.",
+      "needs_migration": "Not available right now.",
       "invalid": "Please check the details.",
       "auth": "Please sign in again.",
       "not_authorized": "You are not allowed to do that.",
@@ -379,7 +409,7 @@
     "outcome": {
       "saved": "Saved.",
       "deleted": "Removed.",
-      "needs_migration": "Not available yet — the economics update is not applied.",
+      "needs_migration": "Not available right now.",
       "invalid": "Please enter a valid amount.",
       "auth": "Please sign in again.",
       "not_authorized": "You can only manage budgets for your own projects.",
@@ -394,7 +424,7 @@
       "noneToday": "Nobody you manage has an approved absence today.",
       "noneWeek": "No approved absences in the next 7 days.",
       "coverage": "Based on approved absences of {count} managed workers. Reasons stay private.",
-      "unavailable": "The absence schedule is not switched on here yet."
+      "unavailable": "Not available right now."
     },
     "types": {
       "annual_leave": "Annual leave",
@@ -414,7 +444,7 @@
       "cancelled": "Request cancelled.",
       "approved": "Approved.",
       "rejected": "Rejected.",
-      "needs_migration": "Not available yet — the workforce update is not applied.",
+      "needs_migration": "Not available right now.",
       "invalid": "Please check the dates and details.",
       "auth": "Please sign in again.",
       "not_authorized": "You are not allowed to do that.",
@@ -476,7 +506,7 @@
     "laneWork": "{n} work",
     "lanesTitle": "Stages",
     "moreInList": "+{n} more in the list",
-    "lanesUnavailable": "Stages are not available yet — the project-operations update is not applied.",
+    "lanesUnavailable": "Not available right now.",
     "lanesEmpty": "No stages yet. Add the first stage in the stages section below.",
     "unplacedWork": "{n} open work without a stage date — see the tasks section below.",
     "peopleTitle": "On the project",
@@ -500,7 +530,7 @@
       "emptyRoster": "Your roster has no active people yet.",
       "unavailable": "The roster could not be read right now.",
       "why": "Why these: on your roster and no approved absence between {from} and {to}.",
-      "absencesUnknown": "Absences are not switched on yet, so nothing says otherwise.",
+      "absencesUnknown": "Not available right now.",
       "more": "+{n} more free people beyond this view.",
       "alreadyOn": "can come — already has work in this period",
       "alreadyOnNamed": "can come — already on {what}"
@@ -513,7 +543,7 @@
     },
     "saved": "Saved — re-read from the record.",
     "errors": {
-      "needs_migration": "Not available yet — the update is not applied.",
+      "needs_migration": "Not available right now.",
       "not_authorized": "You cannot change this project.",
       "invalid": "That change is not allowed here.",
       "error": "Something went wrong. Please try again."
@@ -556,6 +586,15 @@
     "ganttEmpty": "Add planned dates to your stages to see the timeline.",
     "ganttToday": "Today",
     "ganttOverdue": "Overdue",
+    "ganttNoDates": "No dates",
+    "ganttDue": "Due",
+    "ganttNoWindow": "No dates recorded yet — stages and tasks without dates are listed below.",
+    "ganttColActivity": "Activity",
+    "ganttColStatus": "Status",
+    "ganttColResponsible": "Responsible",
+    "ganttColTime": "Time",
+    "ganttBlocks": "Blocks",
+    "ganttNoStageGroup": "Not assigned to a stage",
     "title": "Project stages",
     "intro": "Ordered phases of this project — add a stage, set its real status and planned dates.",
     "honestNote": "Progress reflects only the real status and dates you record — no automatic or fabricated completion percentage.",
@@ -585,7 +624,7 @@
       "added": "Stage added.",
       "updated": "Stage updated.",
       "deleted": "Stage removed.",
-      "needs_migration": "Not available yet — the project-operations update is not applied.",
+      "needs_migration": "Not available right now.",
       "invalid": "Please check the details and try again.",
       "auth": "Please sign in again.",
       "not_authorized": "You can only manage stages for your own projects.",
@@ -664,7 +703,7 @@
     "intro": "Figures counted from your own records, with the calculation basis stated under each section, and the exports that already exist.",
     "honestyNote": "Counts over your own data only — no benchmarks, no scores, no projections.",
     "state": {
-      "needsMigration": "These figures are not enabled in this environment yet. No number is shown instead of real data.",
+      "needsMigration": "Not available right now.",
       "unavailable": "These figures cannot be read right now. Nothing is estimated in their place."
     },
     "basis": {
@@ -763,6 +802,7 @@
       }
     },
     "journalWindow": {
+      "reviewNotEnabled": "{count, plural, one {# entry is} other {# entries are}} recorded where the organization has not turned on work confirmation - not awaiting review.",
       "title": "Work journal report",
       "intro": "Work time and recorded entries per member over a fixed calendar window, from this organisation's own records. Hours, counts and dates only — no entry text, no rating.",
       "windowLabel": "Report window",
@@ -798,7 +838,7 @@
       "collapse": "Hide the detailed report",
       "ledger": {
         "measured": "Your organization's own records in this window: {hours} h across {workers, plural, one {# person} other {# people}} — kept apart, never added to the journal.",
-        "none": "This database holds no organization hour records.",
+        "none": "Not available right now.",
         "unknown": "The organization's records could not be read — that is not zero hours.",
         "truncated": "Rests on the first {count} records."
       }
@@ -809,7 +849,7 @@
     "subtitle": "Describe it in your own words. We turn it into a clear card, show what is missing, and point to the next step.",
     "prep": "This is a preparation step before you search or send a request. The more you answer, the better the result — and the fewer bad matches.",
     "readinessLabel": {
-      "match_ready": "Ready",
+      "match_ready": "Ready to look for matches",
       "improving": "Getting clearer",
       "needs_basics": "Needs the basics"
     },
@@ -878,7 +918,7 @@
       "create_project": "Continue to your project",
       "request_more_info": "Ask for the missing details",
       "review_matches": "Review the best options",
-      "complete_player_card": "Complete your Player Card",
+      "complete_player_card": "Complete your professional profile",
       "add_work_proof": "Add work proof",
       "search_opportunities": "Continue to work search",
       "continue_to_demand": "Continue to your hiring request",
@@ -912,7 +952,7 @@
   "quickNav": {
     "ariaLabel": "Quick page navigation",
     "top": "Top",
-    "identity": "Card",
+    "identity": "Profile",
     "records": "Records",
     "skills": "Skills",
     "offers": "Offers",
@@ -926,32 +966,6 @@
     "compass": "Learning Compass",
     "moreDestinations": "More destinations"
   },
-  "mapLayers": {
-    "title": "Map layers",
-    "intro": "The map is becoming the main visual market layer. Below is what's visible now and which layers are preparing.",
-    "visibleNow": "Visible now",
-    "futureLayers": "Future layers",
-    "futureBadge": "Preparing",
-    "personSignal": "My person signal",
-    "companyLayer": "Company layer",
-    "companyIncomplete": "location not added yet",
-    "personIncomplete": "Add your location to appear on the market map",
-    "needsLayer": "My needs",
-    "notOnMapYet": "not on map yet",
-    "items": {
-      "workers": "Workers",
-      "selfSignal": "Your location signal",
-      "companies": "Companies",
-      "teams": "Teams / brigades",
-      "opportunities": "Opportunities",
-      "workNeeds": "Work needs",
-      "services": "Services",
-      "rentals": "Rentals / housing",
-      "shops": "Shops / offers",
-      "availability": "Availability / calendar",
-      "trust": "Trust / readiness"
-    }
-  },
   "profileAvatar": {
     "upload": "Upload photo",
     "change": "Change photo",
@@ -963,7 +977,7 @@
     "uploadFailed": "Couldn''t upload the photo. Please try again.",
     "invalidFile": "The photo must be JPG, PNG or WebP.",
     "tooLarge": "The photo is too large. Try another one.",
-    "notReady": "Photo upload isn''t available in this environment yet.",
+    "notReady": "Not available right now.",
     "alt": "Profile photo",
     "hint": "JPG, PNG or WebP, up to 5 MB. The photo is shown only to you."
   },
@@ -1067,59 +1081,15 @@
       "lead": "Open needs from this platform's real demand — where work is being asked for right now."
     },
     "vacancyVolume": {
-      "title": "Public vacancy volume",
-      "scope": "{count} imported public job advertisements for {profession}. Current source coverage: {countries}.",
-      "window": "City volumes are tallied over the newest {window} advertisements, not the whole pool."
-    },
-    "entities": {
-      "title": "Three things on the map",
-      "intro": "The map shows three different things: people, company operating territories and project locations. Each follows its own visibility rule and looks different.",
-      "neverMixedNote": "The three are never merged into one marker type.",
-      "contactNote": "Contact always happens through the LabourMarket.ai workflow — the map never shows phone numbers or email addresses.",
-      "person": {
-        "name": "People",
-        "legend": "People count by area (filled square)",
-        "countLabel": "{count}",
-        "smallSample": "<5",
-        "empty": "No people counts to show yet. People appear here only as area counts once enough people in an area have given consent (an exact count only from 5).",
-        "visibilityNote": "People are shown only as area counts — never as an individual point, name or contact. Areas with fewer than 5 visible people show \"<5\"."
-      },
-      "company": {
-        "name": "Company territories",
-        "legend": "Operating territory outline (dashed ring) — never a point",
-        "kinds": {
-          "headquarters": "Headquarters",
-          "operating": "Operating area",
-          "desired_market": "Desired market",
-          "demand_anchor": "Verified need location"
-        },
-        "storeInactive": "The company territory store is not yet activated in this environment — activation is an owner decision.",
-        "readError": "Could not load company territories right now.",
-        "empty": "No company territories yet. Add your company's operating locations in the company workspace.",
-        "visibilityNote": "Company territories are drawn as outlined areas from company-entered geography — never as person-like markers."
-      },
-      "project": {
-        "name": "Project locations",
-        "legend": "Project marker (diamond)",
-        "confirmedTag": "location confirmed",
-        "unconfirmedTag": "area level",
-        "empty": "No project locations yet. Projects with a location appear here from your project list.",
-        "visibilityNote": "A project shows an exact city point only after its location is explicitly confirmed; otherwise it stays at area level."
-      }
+      "scope": "{count} imported public job advertisements for {profession}. Current source coverage: {countries}."
     },
     "backToActions": "Action center",
     "pageTitle": "Map",
-    "pageLead": "You and the market on one map.",
     "advanced": "My locations & market layers",
     "connections": {
-      "title": "The operating layer connects to",
-      "intro": "The map shows where things are — manage them on these surfaces.",
       "marketplace": "Marketplace",
-      "marketplaceNote": "Services and requests",
       "opportunities": "Opportunities",
-      "opportunitiesNote": "Work that fits",
-      "bookings": "Plan & bookings",
-      "bookingsNote": "Scheduled work and assignments"
+      "bookings": "Plan & bookings"
     },
     "companyContext": {
       "title": "Company context",
@@ -1292,7 +1262,7 @@
       "noData": "No data yet"
     },
     "layersTitle": "Signal layers",
-    "layerActive": "active",
+    "layerActive": "shown",
     "layerNextStage": "next stage",
     "nextStageTitle": "Next stage",
     "nextStageNote": "These layers come in later stages — only from real signals, never invented points.",
@@ -1370,34 +1340,29 @@
       "accommodationNote": "Accommodation locations are not a separate data layer yet — they appear as real signals once that layer is added."
     },
     "world": {
-      "title": "World view",
-      "lead": "Where demand, people and projects are in the part of the map you are looking at. Move or zoom the map — the numbers follow.",
       "layersLabel": "Map layers",
       "layers": {
         "demand": "Demand",
         "supply": "People",
-        "projects": "Projects"
+        "projects": "Projects",
+        "jobs": "Open positions",
+        "territory": "Company territory"
       },
       "counts": {
         "inView": "In view: {places} places, {objects} objects",
         "overflow": "Not drawn: {places} more places ({objects} objects) — zoom in to see them",
         "unplaced": "Without a known place: {count}",
         "withheld": "Small groups withheld: {count} (fewer than 5 people)",
-        "truncated": "More than {limit} records in view — the counts are a lower bound",
-        "cap": "At most {cap} places are drawn at once"
+        "truncated": "More than {limit} records in view — the counts are a lower bound"
       },
       "loading": "Updating…",
-      "provenance": {
-        "fact": "Fact",
-        "factHint": "the place is stated in the record",
-        "derived": "Derived",
-        "derivedHint": "country-level position — the exact place is not stated"
-      },
       "state": {
         "empty": {
           "demand": "No open needs in this part of the map.",
           "supply": "No people groups to show in this part of the map.",
-          "projects": "None of your projects are in this part of the map."
+          "projects": "None of your projects are in this part of the map.",
+          "jobs": "No open positions in this part of the map.",
+          "territory": "No company territory in this part of the map."
         },
         "error": "This layer could not be read right now. Nothing is shown rather than a guess.",
         "noPlaces": "No known places in this part of the map. Move the map to a country or a city.",
@@ -1414,12 +1379,6 @@
         "selected": "selected",
         "more": "+{count} more"
       },
-      "scale": {
-        "label": "Scale: {scale}",
-        "country": "countries",
-        "place": "places"
-      },
-      "placeLinkHint": "Selecting a place takes you to that place's list of opportunities.",
       "precision": {
         "city": "City",
         "country": "Country only"
@@ -1745,6 +1704,14 @@
       "free": "free",
       "away": "away",
       "awayUntil": "away until {date}",
+      "summary": "{free} free · {committed} on work · {away} away",
+      "onWork": "on {project}",
+      "booked": "booked",
+      "until": "until {date}",
+      "undated": "no dates set",
+      "outlookHeading": "Free people, next 4 weeks",
+      "outlookWeek": "From {date}: {free} of {total} free",
+      "outlookNote": "From bookings and leave on record — an estimate, not a promise.",
       "absencesUnknown": "Absences are not recorded yet — free means nobody has said otherwise.",
       "more": "{count, plural, =1 {1 more person on the planning page} other {# more people on the planning page}}",
       "assign": "Put on a project",
@@ -1770,7 +1737,20 @@
       "openNeed": "Open the need",
       "gapsRow": "{count, plural, =1 {1 person on {project} has missing documents} other {# people on {project} have missing documents}}",
       "gapsCta": "Check documents",
-      "needsCta": "Describe a need"
+      "needsCta": "Describe a need",
+      "noOneFrom": "No one is free from {date}",
+      "unclear": "{count, plural, =1 {1 person has work with no dates — free time may be lower} other {# people have work with no dates — free time may be lower}}",
+      "fit": {
+        "fits": "Your free people cover it",
+        "from": "Free people cover it from {date}",
+        "short": "{count, plural, =1 {Short by 1 person} other {Short by # people}}",
+        "some": "Free people cover only some weeks",
+        "unknown": "Not enough detail to compare"
+      },
+      "opportunity": "{count, plural, =1 {Up to 1 person is free from {date}} other {Up to # people are free from {date}}}",
+      "opportunityCta": "Look for work",
+      "interest": "{count, plural, =1 {1 person showed interest in your needs} other {# people showed interest in your needs}}",
+      "interestCta": "See who"
     },
     "attention": {
       "heading": "Needs you",
@@ -2103,21 +2083,21 @@
       },
       "workersBlocker": {
         "title": "Something went wrong",
-        "subtitle": "The company path is temporarily blocked at the DB layer. Real worker linking + invitations already work on the agency side.",
+        "subtitle": "Not available right now.",
         "statusLabel": "Something went wrong",
         "statusBody": "Company worker management is still being prepared and will be enabled later.",
         "nextStep": "Self-entry for workers stays open at all times."
       },
       "workers": {
         "title": "Company workers",
-        "subtitle": "Link your company with real workers. Self-entry stays open: a person can sign up on their own and be linked later. Invitations by email are an additional channel, not the only one.",
+        "subtitle": "Who works with you, and who is free.",
         "activeWorkersHeading": "Linked workers",
         "noWorkersHeading": "No linked workers yet",
-        "noWorkersBody": "Invite by email, or wait for a worker to sign up on their own and be linked.",
+        "noWorkersBody": "Invite the first person by email.",
         "inviteHeading": "Invite a worker by email",
         "inviteDescription": "No account is created automatically — the invited person registers or signs in themselves. Real email sending is not activated yet.",
         "operations": {
-          "columnHeading": "Operations role / review",
+          "columnHeading": "Role and journal",
           "setupNote": "Operational roles are not assigned yet. Work journal review will be enabled only after safe setup.",
           "nextActionLabels": {
             "assign_role": "Next: assign an operations role (setup required)",
@@ -2215,6 +2195,12 @@
         "statusInvited": "Invitation created (it is not emailed). The invitee sees it after signing in with this email.",
         "statusAlreadyPending": "A pending invitation already exists for this email from your company.",
         "statusAlreadyLinked": "This worker is already linked to your company.",
+        "statusWordActive": "Active",
+        "statusWordPending": "Invited",
+        "statusWordAccepted": "Accepted",
+        "statusWordCancelled": "Cancelled",
+        "statusWordExpired": "Expired",
+        "statusWordEnded": "Ended",
         "statusNotOwner": "Action rejected: you are not the company owner.",
         "statusInvalidEmail": "Invalid email address.",
         "statusError": "Something went wrong. Please try again.",
@@ -2224,7 +2210,27 @@
         "columnEmail": "Email",
         "columnStatus": "Status",
         "columnInvitedAt": "Date",
-        "openProfile": "View profile"
+        "openProfile": "View profile",
+        "identity": {
+          "availability": {
+            "available": "Self-reported: available",
+            "busy": "Self-reported: busy",
+            "unavailable": "Self-reported: unavailable"
+          }
+        },
+        "team": {
+          "free": "Free",
+          "working": "Working",
+          "away": "Away",
+          "countFree": "Free",
+          "countWorking": "Working",
+          "countAway": "Away",
+          "workingOn": "Working: {project}",
+          "until": "until {date}",
+          "awayUntil": "Away until {date}",
+          "assign": "Assign to a project",
+          "openCalendar": "Open calendar"
+        }
       },
       "scoutingBridge": {
         "title": "Find workers for this need",
@@ -2240,7 +2246,8 @@
         "title": "Waiting for your decision",
         "review": "Journal entries to review",
         "invitations": "Pending worker invitations",
-        "claims": "Public need submissions you can claim"
+        "claims": "Public need submissions you can claim",
+        "reviewOff": "Workers with recorded work whose confirmation is switched off"
       }
     },
     "agency": {
@@ -2822,7 +2829,7 @@
       "companyVerification": "Company verification",
       "matching": "Matching workbench",
       "market": "Market situation",
-      "league": "Country league",
+      "league": "Country labour market",
       "readiness": "Readiness center",
       "billing": "Billing (test)",
       "permissionMatrix": "Permission matrix (who sees what)"
@@ -3216,12 +3223,12 @@
       }
     },
     "league": {
-      "eyebrow": "Country league",
-      "title": "Labour market league",
+      "eyebrow": "Country labour market",
+      "title": "Labour market by country",
       "subtitle": "Profession tables per country — real teams, availability and the market signal.",
       "methodNote": "A market-signal value renders ONLY where an admin entered a sourced market average AND the declared-expectation sample is at least 2 people. Everywhere else the cell says \"insufficient market data\" — the table never assesses a person.",
       "back": "Back to admin hub",
-      "empty": "No league data yet — tables appear by themselves once workers set their professions.",
+      "empty": "No data yet — tables appear by themselves once workers set their professions.",
       "unknownCountry": "Country not set",
       "cellCount": "{n, plural, one {# profession} other {# professions}}",
       "availableNow": "available now",
@@ -3254,7 +3261,7 @@
       "items": {
         "public_market_entry": "Public market entry",
         "user_identity": "User identity system",
-        "worker_profile_player_card": "Worker profile / player card",
+        "worker_profile_player_card": "Worker professional profile",
         "skill_intelligence": "Skill intelligence",
         "work_journal": "Work journal / real work records",
         "company_demand": "Company / demand system",
@@ -3436,11 +3443,11 @@
     "retry": "Try again",
     "viewProfile": "View profile",
     "importPrompt": "Have a CV file? A CV helps explain your experience.",
-    "importComingSoon": "Reading skills from a CV is not active yet.",
+    "importComingSoon": "Not available right now.",
     "importAddManually": "Add your skills manually or through journal entries.",
     "importNotSaved": "Selected: {file}. The file isn't uploaded or stored yet.",
     "customPrompt": "Can't find your skill?",
-    "customComingSoon": "free entry not active yet",
+    "customComingSoon": "Not available right now.",
     "textFirst": {
       "title": "Tell us what you do",
       "helper": "Write in your own words or upload a CV. We'll suggest skills, work directions, roles and CV entries — but you select every suggestion. Nothing is saved without your selection.",
@@ -3482,7 +3489,7 @@
     "addLaterHint": "You'll be able to add more roles later — they appear in the catalogue once they're ready.",
     "status": {
       "active": "Active",
-      "preparing": "Preparing",
+      "preparing": "Coming soon",
       "start": "Start",
       "partial": "Partial"
     },
@@ -3537,8 +3544,8 @@
     "lede": "One person. Many roles over time. A CV born from real work and real records, not self-written claims. The first choice is an entry point, not a cage.",
     "honesty": "Note: below is the whole system map. Some surfaces are live today; the rest are openly labelled \"Preparing\". We never say something works when it doesn't.",
     "sections": {
-      "today": "Live today",
-      "preparing": "Preparing",
+      "today": "Available now",
+      "preparing": "Coming soon",
       "workflow": "How a person's path moves through the system",
       "roles": "Role evolution (without lock-in)",
       "activities": "Activity landscape",
@@ -3555,10 +3562,10 @@
     },
     "controlRoom": {
       "todayLabel": "Active today",
-      "preparingLabel": "Preparing",
+      "preparingLabel": "Coming soon",
       "blockedLabel": "Blocked",
       "nonWorkerLabel": "Company / agency / customer spaces",
-      "nonWorkerStatus": "Preparing",
+      "nonWorkerStatus": "Coming soon",
       "fakeClaimsLabel": "Fake AI / fake matching / fake reputation",
       "fakeClaimsStatus": "Never used"
     },
@@ -3595,7 +3602,7 @@
   },
   "features": {
     "preparing_generic_reason": "This option will be enabled later.",
-    "preparing_badge": "Preparing",
+    "preparing_badge": "Coming soon",
     "overview": {
       "label": "Overview",
       "description": "Main view with the starting steps, suggestions and opportunities."
@@ -4341,7 +4348,10 @@
             }
           },
           "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
-          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
+          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
+          "openNeedUsage": "Active positions: {used} of {limit} used · {remaining} remaining",
+          "openNeedUsageUpgradeCta": "Activate the Organization plan",
+          "openNeedUsageIndividual": "You have reached the Organization plan limit. For more than the included positions, contact us for an individual plan."
         }
       },
       "greeting": "Welcome back, {name}",
@@ -4445,7 +4455,7 @@
             "none": "Not set"
           },
           "availableFromLabel": "Can start from",
-          "locationLabel": "Country I'm in (code, e.g. LT)",
+          "locationLabel": "Country I'm in",
           "locationHint": "LT",
           "preferredLabel": "Countries I'd like to work in",
           "preferredHint": "LT, DE, NL",
@@ -4488,7 +4498,8 @@
         "admin": "Admin",
         "planning": "Calendar",
         "network": "Network",
-        "playerCard": "My card",
+        "playerCard": "My professional profile",
+        "companyProfile": "Company profile",
         "adminPlatform": "Platform administration"
       },
       "roleNotice": {
@@ -4609,7 +4620,7 @@
         "body_meanwhile": "In the meantime — you can browse the platform via the \"Discover\" tab (view only)."
       },
       "menuLinks": {
-        "playerCard": "My card",
+        "playerCard": "My professional profile",
         "projects": "Projects",
         "instructions": "Instructions",
         "bookings": "Bookings",
@@ -4685,6 +4696,12 @@
         "event_demand_interest_reviewed": "A company marked your interest as reviewed",
         "event_weekly_digest": "Your weekly work and opportunities summary is ready",
         "event_saved_search_match": "A search you saved has new results",
+        "event_job_alert": "A new job fits what you are looking for",
+        "event_message_received": "You have a new message",
+        "event_journal_review_decided": "Your journal entry was reviewed",
+        "event_journal_review_decided_approved": "Your journal entry was confirmed",
+        "event_journal_review_decided_rejected": "Your journal entry was rejected",
+        "event_journal_review_decided_changes_requested": "Changes were requested on your journal entry",
         "event_invitation_accepted": "Somebody accepted your invitation",
         "event_weekly_digest_profile_completion": "To see jobs that fit you, confirm what work you do",
         "event_weekly_digest_journal": "Your week’s work journal summary is ready"
@@ -4762,7 +4779,7 @@
           "desc": "Roles that fit your trade, rate and location find you."
         },
         {
-          "title": "Work, earn, level up",
+          "title": "Work, earn, build your record",
           "desc": "Completed work strengthens your records and readiness."
         }
       ]
@@ -5385,7 +5402,7 @@
       "submit": "File deletion request",
       "submitted": "Request filed",
       "submittedBody": "A person will review it and contact you at your account email.",
-      "unavailable": "Deletion requests are not being accepted yet — this feature is not switched on. You can download your data copy right now.",
+      "unavailable": "Not available right now.",
       "tooManyOpen": "You have too many open requests — wait until they are reviewed.",
       "error": "Something went wrong. Try again."
     },
@@ -5565,8 +5582,8 @@
         {
           "heading": "Closed by default",
           "items": [
-            "User data tables are protected by access rules inside the database itself. If no rule explicitly grants access, the data is not visible — even to other signed-in users.",
-            "These rules work at the database layer, not only in the interface, and are covered by automated tests."
+            "Not available right now.",
+            "Not available right now."
           ]
         },
         {
@@ -5610,7 +5627,7 @@
         {
           "heading": "Infrastructure providers (subprocessors)",
           "items": [
-            "Supabase — database, user sign-in and file storage. Data is hosted in the European Union (eu-west-1 region).",
+            "Not available right now.",
             "Vercel — application hosting and content delivery.",
             "GitHub — source code hosting. No user data is stored there.",
             "No email provider, no AI provider, no translation provider and no payment provider is currently active. If one is activated, this list is updated first."
@@ -5670,7 +5687,7 @@
         {
           "heading": "If something looks wrong",
           "items": [
-            "The access rules in the database are the source of truth, and this page follows them. If something here does not match what you see, contact us — a person will review it."
+            "Not available right now."
           ]
         }
       ],
@@ -5974,11 +5991,22 @@
       "notAuthorized": "You can only assign workers from your team to your own projects.",
       "noWorkers": "You don't have any assignable workers on your team yet.",
       "fromRoster": "Assign a worker to this object",
+      "rosterOwnerOnly": "Roster workers can be assigned to projects by the organization's owner or admin. You can still assign people who have an accepted booking.",
       "rosterGroup": "Team members",
       "engagementGroup": "Accepted-proposal candidates",
       "reservation": {
+        "precheckChecking": "Checking the calendar…",
+        "precheckCollidesTitle": "Already committed on these dates — before you assign",
+        "precheckChoose": "Choose instead",
+        "precheckAssignAnyway": "Assign anyway",
+        "precheckAdvisory": "Advisory: checked just now, and not re-checked when you save. Nothing has been assigned yet.",
         "collidesTitle": "Already committed on these dates",
         "notBlocking": "This does not block the assignment — you decide what is right.",
+        "alternativesTitle": "Free on these dates",
+        "swap": "Assign instead",
+        "undo": "Undo assignment",
+        "keep": "Keep",
+        "decided": "Done",
         "unknown": "We could not confirm these dates are free. That is not the same as free.",
         "source": {
           "project": "Project",
@@ -5989,7 +6017,7 @@
       }
     },
     "model": {
-      "note": "This board follows the platform's operating model: worker player cards are assigned to objects (projects), and you manage the assignments.",
+      "note": "This board follows the platform's operating model: workers' professional profiles are assigned to objects (projects), and you manage the assignments.",
       "link": "How this model works"
     },
     "map": {
@@ -6131,7 +6159,7 @@
       "missingDeclaredSkills": "Declared skills",
       "missingEvidence": "Work evidence",
       "followUpChip": "No activity — follow up",
-      "playerCardLink": "Player card",
+      "playerCardLink": "Profile",
       "instructionLink": "Instructions",
       "skillClarifyLink": "Skill clarification"
     },
@@ -6139,7 +6167,7 @@
     "notes": {
       "readiness": "\"Ready\" means only that the fields checked here are present (name, at least one declared skill, at least one work-evidence entry). It is not a verification, a document approval, or an AI judgement.",
       "documents": "Documents are not tracked yet — no document is shown as approved or verified anywhere on this board.",
-      "candidateSkill": "Candidate skill clarifications are private to each worker; they are shown on the worker's own player card, not here."
+      "candidateSkill": "Candidate skill clarifications are private to each worker; they are shown on the worker's own professional profile, not here."
     },
     "report": {
       "title": "Operational status report"
@@ -6392,11 +6420,14 @@
   "marketplace": {
     "pageTitle": "Discover & request services",
     "pageLead": "Find active services people offer, send a request, and track its status — one place for the whole exchange.",
-    "notAvailable": "Not available yet.",
+    "notAvailable": "Not available right now.",
     "discoverHeading": "Active services",
     "discoverEmpty": "No active services to show yet.",
     "request": "Request",
     "requested": "Requested",
+    "partnershipBadge": "Looking for partners",
+    "partnershipRequest": "Offer to partner",
+    "requestMessagePlaceholder": "Tell the provider what you need (optional)",
     "remoteBadge": "Remote",
     "outgoingHeading": "My requests",
     "outgoingEmpty": "You haven't requested any service yet.",
@@ -6470,7 +6501,13 @@
       "map": "Map",
       "mapNote": "Where the work and services are",
       "diary": "Work diary",
-      "diaryNote": "Completed work is recorded as fact"
+      "diaryNote": "Completed work is recorded as fact",
+      "scouting": "Candidates",
+      "scoutingNote": "Find the right people for your needs",
+      "listings": "Listings",
+      "listingsNote": "Premises, equipment, vehicles — offer or look",
+      "needs": "Needs & offers",
+      "needsNote": "Publish what you need or what you can offer"
     }
   },
   "learning": {
@@ -6478,7 +6515,7 @@
     "pageLead": "Suggestions drawn from real work activity, kept for a person to review. Nothing here is treated as proven on its own.",
     "title": "Review queue",
     "lead": "Signals become suggestions, and a person decides. Learning never settles anything by itself.",
-    "notAvailable": "Not available yet.",
+    "notAvailable": "Not available right now.",
     "empty": "Nothing to review yet.",
     "kind": {
       "confirm_skill": "Skill recognition suggestion",
@@ -6520,9 +6557,10 @@
     "pageLead": "List the real services you offer and manage your own offerings.",
     "title": "Your service offerings",
     "intro": "Real services you offer. Activate one to make it findable by signed-in members; drafts and paused services stay private to you.",
-    "notAvailable": "Service offerings are not enabled in this environment yet.",
+    "notAvailable": "Not available right now.",
     "empty": "No service offerings yet. Add the first real service you offer.",
     "addButton": "Add a service",
+    "addPartnership": "Look for partners",
     "form": {
       "titleLabel": "Service title",
       "titlePlaceholder": "e.g. Interior painting",
@@ -6582,7 +6620,7 @@
     "scope": {
       "support": "Support channel",
       "unknown": "Context not specified",
-      "demand": "About work — the subject is the related work's title"
+      "demand": "About a job"
     },
     "unread": "New",
     "kind": {
@@ -6613,7 +6651,7 @@
         "errorTooLarge": "File is too large (up to 10 MB).",
         "errorBadType": "This file type isn't supported. Allowed: JPG, PNG, WebP, PDF, TXT.",
         "errorTooMany": "At most 5 attachments per message.",
-        "errorNeedsSetup": "Attachments aren't enabled in this environment yet.",
+        "errorNeedsSetup": "Not available right now.",
         "blockedWhileUploading": "Wait until the attachments finish uploading.",
         "blockedFailed": "Remove or re-upload the failed attachment.",
         "partialFailure": "The message was sent, but some attachments couldn't be attached. Try sending them again."
@@ -6749,7 +6787,7 @@
     "sentTitle": "Request registered",
     "sentBody": "A person will review it and reach out through the platform. No specialist is assigned automatically — you will hear about next steps after the review.",
     "errorGeneric": "Could not register. Please try again.",
-    "notReady": "Help requests are not enabled in this environment yet.",
+    "notReady": "Not available right now.",
     "tooManyOpen": "You have too many open help requests — please wait until the existing ones are reviewed.",
     "noteTooLong": "The description is too long (max 500 characters).",
     "internalNote": "Internal record — no emails or messages are sent to anyone.",
@@ -6839,7 +6877,7 @@
     "title": "Follow-up queue",
     "intro": "Internal next actions for the operator team: what to follow up on, for whom, and its current state. Real recorded tasks only.",
     "honestNote": "Internal only. Creating or resolving a task sends nothing to anyone — no email, no SMS, no messages. This is the team's own memory of next actions.",
-    "preApply": "The follow-up queue is not available yet in this environment. Nothing is shown because nothing is recorded.",
+    "preApply": "Not available right now.",
     "queueHeading": "Open",
     "queueEmpty": "No open follow-up tasks. When the team records a next action, it appears here.",
     "resolvedHeading": "Recently resolved",
@@ -6870,7 +6908,7 @@
     "outcome": {
       "created": "Task recorded. Nothing was sent to anyone.",
       "updated": "Task updated.",
-      "needsMigration": "The follow-up storage is not available yet in this environment.",
+      "needsMigration": "Not available right now.",
       "notAuthorized": "Only operators can manage follow-up tasks.",
       "limitReached": "The open-task limit is reached — resolve existing tasks first.",
       "notFound": "This task no longer exists.",
@@ -6885,7 +6923,7 @@
     "responsibleHeading": "Responsible",
     "responsibleEmpty": "No active worker assignments yet — assign workers above to record who is responsible.",
     "checklistNote": "Documents and readiness are tracked in the per-worker checklist above — the passport does not duplicate it. Photo attachments are not supported yet.",
-    "preApply": "The handover record is not available yet in this environment. Nothing is shown because nothing is recorded.",
+    "preApply": "Not available right now.",
     "statusHeading": "Declared stage",
     "statusNone": "No stage declared yet.",
     "statusDisclaimer": "Declared by the project manager. “Handover declared” means the manager stated the handover happened — the platform does not verify it.",
@@ -6912,7 +6950,7 @@
     },
     "outcome": {
       "added": "Entry recorded.",
-      "needsMigration": "The handover record is not available yet in this environment.",
+      "needsMigration": "Not available right now.",
       "notAuthorized": "Only a manager of this project can add passport entries.",
       "limitReached": "This project's passport reached its entry limit.",
       "invalid": "The entry is invalid — check the type, stage and text.",
@@ -6943,11 +6981,11 @@
       "invalidName": "Name must be 2–80 characters.",
       "notAllowed": "Only an organization owner can create a brigade.",
       "limitReached": "Brigade limit reached (20).",
-      "needsMigration": "The brigade model is not enabled in this environment yet.",
+      "needsMigration": "Not available right now.",
       "error": "Could not create the brigade. Nothing was saved."
     },
     "consentNote": "Membership starts only after the worker accepts the invitation themselves — we never add anyone silently.",
-    "inviteNotEnabled": "Team invitations are not enabled in this environment yet, so members cannot be invited from here.",
+    "inviteNotEnabled": "Not available right now.",
     "invitePendingOption": "{name} (invitation sent)",
     "provenance": {
       "invited": "joined by own acceptance",
@@ -6961,7 +6999,7 @@
       "rateLimited": "Invitation limit reached for now. Try again later.",
       "notAuthorized": "Only the brigade owner can send invitations.",
       "noEmail": "This worker has no usable email address on file, so the invitation cannot be created.",
-      "needsMigration": "Invitations are not enabled in this environment yet.",
+      "needsMigration": "Not available right now.",
       "error": "Could not send the invitation. Nothing was changed."
     },
     "details": {
@@ -6974,7 +7012,7 @@
       "noteLabel": "Note (visible to your managers only)",
       "save": "Save details",
       "saving": "Saving…",
-      "notEnabled": "Team details are prepared but not enabled in this environment yet.",
+      "notEnabled": "Not available right now.",
       "status": {
         "availableNow": "Available now",
         "availableFrom": "Available from a date",
@@ -7008,7 +7046,7 @@
     "enquiries": {
       "heading": "Enquiries to this team ({count} open)",
       "empty": "No enquiries yet. When an employer asks about this team, it appears here.",
-      "notEnabled": "Team enquiries are prepared but not enabled in this environment yet.",
+      "notEnabled": "Not available right now.",
       "accept": "Accept",
       "decline": "Decline",
       "unknownProposer": "Unknown sender",
@@ -7029,7 +7067,31 @@
         "error": "Could not save the answer. Nothing was changed."
       }
     },
-    "addableUnavailable": "The linked-worker list could not be loaded — adding is not possible right now."
+    "addableUnavailable": "The linked-worker list could not be loaded — adding is not possible right now.",
+    "assign": {
+      "heading": "Assign the whole team to a project",
+      "intro": "Each of the {count} members is assigned one by one, and you see the result for every person.",
+      "projectLabel": "Project",
+      "projectPlaceholder": "Choose a project",
+      "submit": "Assign the team",
+      "assigning": "Assigning…",
+      "noProjects": "You have no open projects to assign the team to.",
+      "summary": "{written} of {total} assigned.",
+      "member": {
+        "assigned": "Assigned",
+        "calendar_unknown": "Assigned · dates not confirmed",
+        "calendar_conflict": "Assigned · already busy on these dates",
+        "refused": "Not assigned · you cannot assign this person",
+        "error": "Not assigned · something went wrong"
+      },
+      "outcome": {
+        "not_authed": "Sign in again to continue.",
+        "no_such_team": "This team is not yours to assign.",
+        "empty_team": "This team has no members yet.",
+        "needs_migration": "Not available right now.",
+        "unavailable": "Could not assign the team. Nothing was changed."
+      }
+    }
   },
   "teamEnquiries": {
     "enquireButton": "Ask this team about work",
@@ -7041,7 +7103,7 @@
     "submit": "Send enquiry",
     "sending": "Sending…",
     "cancel": "Cancel",
-    "notEnabled": "Team enquiries are prepared but not enabled in this environment yet.",
+    "notEnabled": "Not available right now.",
     "outcome": {
       "created": "Enquiry sent. You will see the team's answer under My network.",
       "duplicateOpen": "You already have an open enquiry to this team.",
@@ -7430,9 +7492,9 @@
     ]
   },
   "playerCard": {
-    "pageTitle": "My card",
+    "pageTitle": "My professional profile",
     "pageIntro": "A summary of your work profile — visible only to you.",
-    "title": "Worker card",
+    "title": "Professional profile",
     "subtitle": "An overview of your profile. The numbers are real — nothing added.",
     "skillsLabel": "Skills",
     "skillsHint": "Skills you listed (not reviewed yet).",
@@ -7560,6 +7622,8 @@
     "skillsUnavailable": "Could not be read right now.",
     "verifiedUnavailable": "Skills with a manager record could not be read right now.",
     "identity": {
+      "noRecords": "No work records yet",
+      "noManagerRecord": "No manager's record yet",
       "currentWork": "Working now",
       "recorded": "h recorded",
       "confirmed": "h with a manager's record",
@@ -7609,7 +7673,7 @@
     "eyebrow": "MY DOCUMENTS",
     "title": "My documents",
     "subtitle": "What you have, what is missing, and the next step — per country.",
-    "preparing": "Document readiness is being prepared — it goes live once the document storage layer is reviewed and enabled. Nothing here is active yet.",
+    "preparing": "Not available right now.",
     "reports": {
       "title": "Reports & exports",
       "intro": "Build a print-ready report from your own data. PDF works through your browser's print/save; Excel and Word are not available yet.",
@@ -7622,7 +7686,7 @@
       "formatStatus": "PDF: available · CSV: available · Excel / Word: preparing"
     },
     "disclaimer": "Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
-    "needsMigration": "The documents storage layer is not enabled in this environment yet.",
+    "needsMigration": "Not available right now.",
     "guidance": {
       "title": "Document guidance by country (draft)",
       "intro": "Informational guidance about documents that may be needed. Not legal advice.",
@@ -7666,6 +7730,7 @@
     "country": {
       "title": "What is missing for a country",
       "help": "Pick a destination country to see which documents it asks for.",
+      "mine": "Your preferred countries come first.",
       "unknown": "The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
       "next": "Next step: take care of — {doc}.",
       "ok": "All curated requirements for {country} are covered."
@@ -7693,7 +7758,7 @@
     "consent": {
       "title": "What my agency may see",
       "explainer": "If you switch this on, YOUR agency sees only category-level counts of your document readiness (valid / expiring / needs attention). It never sees document contents, files, notes or types. Default is off; you can switch it off any time.",
-      "needsGate": "The consent layer is in preparation — it activates after the owner-gated change is applied.",
+      "needsGate": "Not available right now.",
       "onLabel": "Sharing aggregates: ON",
       "offLabel": "Sharing aggregates: OFF",
       "onHint": "Your agency sees counts only. Tap to switch off.",
@@ -7761,14 +7826,14 @@
       "submit": "Send for verification",
       "sent": "Sent for verification",
       "notReady": "Only a document marked ready can be sent for verification.",
-      "unavailable": "Verification is not available in this environment.",
+      "unavailable": "Not available right now.",
       "error": "Could not send — please try again."
     },
     "workProof": {
       "title": "Work proof & exports",
       "journalTitle": "Work journal evidence",
       "journalCounts": "Entries: {entries} · Photos: {photos}",
-      "countsUnavailable": "Counts are not available in this environment.",
+      "countsUnavailable": "Not available right now.",
       "galleryNote": "Photos live inside your journal entries; project photo galleries are on each project's page."
     },
     "uploadNote": "File upload is not available yet. You record what you have and until when it is valid — the files themselves stay with you.",
@@ -7781,8 +7846,8 @@
       "expiringLabel": "Expiring soon",
       "attentionLabel": "Needs attention",
       "consentNote": "Counts only — never document contents. A worker who has not consented simply does not appear.",
-      "noConsented": "No consent-based document aggregates to show — no pool worker has switched on sharing, or your organisation does not manage an agency pool.",
-      "unavailable": "Consent-based document aggregates are not available in this environment. Workers own their documents.",
+      "noConsented": "Not available right now.",
+      "unavailable": "Not available right now.",
       "projectAxisLink": "Project readiness checklists",
       "projectAxisNote": "Per-project worker readiness lives on each project's operations page."
     },
@@ -7816,7 +7881,8 @@
       "refusedType": "This file type cannot be read as text.",
       "empty": "No readable text was found in this document.",
       "failed": "The document could not be read.",
-      "noEngagement": "You need a work context first — open the dashboard to set one up."
+      "noEngagement": "You need a work context first — open the dashboard to set one up.",
+      "workDateHint": "The document does not say which day this work was done. Choose the date yourself — nothing is filled in for you."
     },
     "currentVersion": "Version {n}",
     "download": "Download",
@@ -7858,7 +7924,7 @@
       "path_mismatch": "The upload could not be verified — nothing was saved. Please try again.",
       "file_too_large": "The file is larger than 5 MB — nothing was saved.",
       "unsupported_type": "This file type is not supported — use PDF, Word or a photo.",
-      "needs_migration": "File upload is not enabled in this environment yet — nothing was saved.",
+      "needs_migration": "Not available right now. Nothing was saved.",
       "error": "Something went wrong — nothing was saved.",
       "updated": "The change was saved.",
       "submitted": "The document was sent for approval.",
@@ -7873,7 +7939,7 @@
     "title": "Company document register",
     "intro": "Documents of {org}: policies, procedures, instructions and correspondence, with versions and read confirmations.",
     "unavailable": "The document register could not be loaded right now.",
-    "preparing": "The document register is prepared but not enabled in this environment yet.",
+    "preparing": "Not available right now.",
     "error": "The document register could not be loaded — try again later.",
     "empty": "No documents registered yet.",
     "scopeNote": "This register holds the organization's own documents. Workers' personal documents stay in their own hands and are never shown here.",
@@ -8105,6 +8171,7 @@
     },
     "claimFromJournal": "from work journal",
     "recordedHours": "Recorded work: {hours} h from the work journal, {confirmed} h of it confirmed.",
+    "confirmedWorkFact": "Work journal entries confirmed by others: {entries, plural, one {# entry} other {# entries}} over {days, plural, one {# work day} other {# work days}}",
     "recordedHoursNone": "No journal entries with a duration yet — hours next to skills come from your own entries.",
     "skillHours": "{hours} h",
     "skillHoursOwn": "{hours} h, your own record",
@@ -8158,7 +8225,7 @@
       "sections": {
         "action": "Today's action",
         "overview": "Week & growth",
-        "playerCard": "Player card"
+        "playerCard": "Professional profile"
       }
     },
     "home": {
@@ -8264,7 +8331,7 @@
     "demand": {
       "title": "Open demand",
       "humanNote": "\"We can offer\" is your proposal on a request — the final match is always recorded by a person on the platform side.",
-      "needsGate": "Open-demand visibility for agencies is in preparation — it activates after the owner-gated change is applied.",
+      "needsGate": "Not available right now.",
       "empty": "No open requests right now.",
       "noRole": "Role not specified",
       "teamSize": "{n} people",
@@ -8316,13 +8383,16 @@
     "pickDemand": "Pick a need",
     "noDemands": "You have no needs yet. Create a need from your dashboard — after review, the team structures its required skills.",
     "noDemandsCta": "Create a need",
-    "unstructuredTag": "not structured",
+    "unstructuredTag": "requirements not confirmed",
     "notStructured": "This need's required skills aren't structured yet, so no match can be computed. New needs are reviewed and structured by the administrators — no action is needed from you.",
     "needsSetup": "Couldn’t load. Please try again.",
     "noCandidates": "No matching workers yet for this need. Matches appear as workers add journal-backed skills — check back later or broaden the need.",
     "namePlaceholder": "Worker",
-    "skillFit": "{pct}% — {matched}/{total} required skills, {confirmed} manager-confirmed",
+    "skillFit": "{matched}/{total} required skills, {confirmed} manager-confirmed",
     "evidence": "Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
+    "confirmedWork": "Confirmed in real work: {work} of {matched} matched skills (repeated: {repeated})",
+    "evidenceNone": "Not confirmed",
+    "experienceYearsValue": "{years, plural, one {# year} other {# years}}",
     "shortlistError": "Could not save. Try again.",
     "footnote": "Matches are computed deterministically for this need only. No global rating, no fake candidates.",
     "status": {
@@ -8370,6 +8440,7 @@
       "location": "Location",
       "availability": "Availability",
       "rate": "Rate",
+      "experience": "Experience (stated)",
       "evidence": "Skill evidence"
     },
     "availabilityValue": {
@@ -8390,7 +8461,8 @@
       "opened": "Conversation open — write the worker a message.",
       "view": "Open conversation",
       "error": "Couldn't open the conversation. Please try again.",
-      "limitReached": "Daily limit for new conversations reached. Try again tomorrow."
+      "limitReached": "Daily limit for new conversations reached. Try again tomorrow.",
+      "shortlistFirst": "Add the worker to your shortlist first, then you can request to communicate."
     },
     "how": {
       "title": "How matching works",
@@ -8449,7 +8521,7 @@
       "markContacted": "Contact in the platform",
       "internalNote": "“Reviewed” is an internal record. “Contact” opens an in-platform conversation; nothing is sent outside the platform.",
       "error": "Could not save. Try again.",
-      "notAvailable": "Acknowledgement is not enabled yet."
+      "notAvailable": "Not available right now."
     },
     "lifecycle": {
       "confirm": "Confirm recognized skills",
@@ -8485,7 +8557,7 @@
       "granted": "The worker approved sharing contact details.",
       "declined": "The worker declined the previous request.",
       "expired": "The previous request expired.",
-      "unavailable": "Contact requests are prepared but not enabled yet.",
+      "unavailable": "Not available right now.",
       "rateLimited": "Request limit reached (10 open, 30 per day). Try again later.",
       "noOrganization": "Create your company organization first.",
       "fieldsNote": "Asks the worker to share their name, phone and email. The worker decides — nothing is shown without their approval.",
@@ -8510,19 +8582,21 @@
       "cancel": "Cancel"
     },
     "verdict": {
-      "eligible": "Meets the stated requirements",
+      "eligible": "Meets the mandatory requirements (skills are rated separately)",
       "blocked": "Does not meet a stated requirement",
       "evidence": {
         "confirmed": "Evidence: manager-confirmed",
         "mixed": "Evidence: partly confirmed",
         "unverified": "Evidence: self-declared only"
-      }
+      },
+      "noCriteria": "No mandatory requirements stated",
+      "insufficient": "Not enough data to check requirements"
     },
     "editNeedCta": "Adjust or add a need",
     "availableSupply": {
       "title": "Available workforce",
       "intro": "Crews and specialists that agencies and companies have declared as available. You see the shape of the capacity and where it is — not who is offering it.",
-      "notEnabled": "Not switched on in this environment yet. This is a deployment fact, not a statement about the market.",
+      "notEnabled": "Not available right now.",
       "readFailed": "The available-workforce list could not be read. This is a system problem, not an empty market.",
       "empty": "Nobody has declared available workforce that you can see right now.",
       "unstatedRole": "Work type not stated",
@@ -8549,9 +8623,18 @@
         "shortlist": "Shortlisted",
         "contact": "In contact",
         "offer": "Offered",
-        "accepted": "Accepted",
+        "accepted": "Agreed to the dates",
         "closed": "Closed"
       }
+    },
+    "identity": {
+      "why": "Why this person is relevant",
+      "skills": "Relevant skills and what they rest on",
+      "readiness": "Availability, readiness and documents",
+      "openTo": "Also open to: {countries}",
+      "skillCount": "{matched} of {total} required skills",
+      "nameHidden": "Name and contact details appear only when the person allows them.",
+      "skillUnknown": "No skills stated · needs {total}"
     }
   },
   "planBoundary": {
@@ -8592,7 +8675,7 @@
       "freeTitle": "Free today",
       "free": "Everything you can currently use in the product is free — the pilot runs without payments and nothing asks for a card.",
       "paidTitle": "Prepared paid plans",
-      "paid": "The paid plans below are prepared boundaries: they describe what will belong to the Worker Plus, Company and Agency plans once payments are switched on later.",
+      "paid": "Not available right now.",
       "preparedTitle": "Prepared, not purchasable",
       "prepared": "There is no payment page and nothing can be bought. Pilot access to paid-plan scope is granted manually by the team."
     },
@@ -8619,8 +8702,8 @@
       "manage_pilots": "Pilot management"
     },
     "enforcement": {
-      "free_surface": "In the product today",
-      "server_gate": "In the product today, entitlement-checked",
+      "free_surface": "Available today",
+      "server_gate": "Available today, depending on your permissions",
       "declared_boundary_only": "Prepared — starts only with billing",
       "admin_rbac": "Internal, admin only"
     }
@@ -8830,7 +8913,7 @@
   },
   "adminLmc": {
     "title": "LMC ledger",
-    "intro": "Internal platform credit (1 LMC = 1 EUR of internal credit). Live database state: kill-switches, outstanding liability and the tester grant. All commercial switches ship OFF; flipping one is an owner decision.",
+    "intro": "Not available right now.",
     "unavailable": "The ledger could not be read with this session — this is a failed read, not an empty ledger.",
     "on": "On",
     "off": "Off",
@@ -8857,7 +8940,7 @@
       "submitting": "Crediting…",
       "granted": "Credited",
       "replay": "Already credited earlier with this key — nothing was credited twice",
-      "disabledHint": "Promotional grants are switched OFF in the database — the ledger will refuse this grant. Enabling the switch is an owner-channel decision.",
+      "disabledHint": "Not available right now.",
       "reasons": {
         "grants_disabled": "Refused: promotional grants are disabled",
         "not_admin": "Refused: admin identity required",
@@ -8898,7 +8981,7 @@
     },
     "subs": {
       "title": "Subscriptions",
-      "unavailable": "Billing tables not applied yet (PR2 pending).",
+      "unavailable": "Not available right now.",
       "empty": "No subscriptions yet.",
       "manual": "manual override"
     },
@@ -9443,7 +9526,7 @@
     "external": {
       "sectionTitle": "Public job advertisements",
       "sectionNote": "Advertisements from official public employment services. They are published by the employer at the source — labourmarket.ai lists them so you can find them, and applying happens through the original advertisement.",
-      "shownOfTotal": "top {shown} of {total}",
+      "shownOfTotal": "showing {shown} of {total}",
       "bandBest": "Best fits",
       "bandPossible": "Possible fits",
       "bandExplore": "Explore",
@@ -9539,8 +9622,7 @@
       "mapTitle": "Where the work is",
       "skipToList": "To the list",
       "placeLink": "Show this country's opportunities",
-      "sourcesIncomplete": "Some opportunity sources are temporarily unavailable, so this list may be incomplete.",
-      "youTitle": "This is you — what we look for where you can go next"
+      "sourcesIncomplete": "Some opportunity sources are temporarily unavailable, so this list may be incomplete."
     },
     "savedSearches": {
       "title": "Saved searches",
@@ -9559,7 +9641,7 @@
         "invalid": "Please check the name and the filters.",
         "limit": "You have reached the saved-search limit.",
         "auth": "Please sign in again.",
-        "feature-absent": "Not available yet — the saved-search update is not applied.",
+        "feature-absent": "Not available right now.",
         "error": "Something went wrong. Please try again."
       }
     },
@@ -9596,6 +9678,14 @@
         "LOOKING_FOR_WORK": "Looking for work",
         "LOOKING_FOR_PROJECTS": "Looking for projects"
       }
+    },
+    "jobAlerts": {
+      "title": "New-job alerts",
+      "ready": "When a new real job appears that fits your profession and the countries you chose, it shows up in your notifications. A job that states no pay is never hidden because of pay.",
+      "missing": "To get new-job alerts, tell us:",
+      "profession": "what work you do",
+      "country": "which countries you want to work in",
+      "cta": "Fill in my preferences"
     }
   },
   "workerIntake": {
@@ -9757,7 +9847,7 @@
     "expYears": "yrs",
     "none": "—",
     "empty": "No candidates match these filters.",
-    "needsMigration": "The worker supply tables are not available yet.",
+    "needsMigration": "Not available right now.",
     "error": "Could not load the candidate pool.",
     "colPermission": "Worker permission",
     "permissionGranted": "Visibility granted",
@@ -9812,10 +9902,6 @@
     "statusInvalid": "Please complete the worker and need fields."
   },
   "marketMapBase": {
-    "title": "Your place on the market map",
-    "subtitle": "We use this location and radius for your signals on the map.",
-    "panelTitle": "Location area",
-    "panelEmpty": "No location chosen yet",
     "mapTapHint": "Tap the map to mark your location",
     "precisionDevice": "Exact device location",
     "precisionCity": "Selected city",
@@ -9834,7 +9920,6 @@
     "geoInsecure": "Location detection isn''t possible on this page. Choose a city manually.",
     "geoRetry": "Try again",
     "manualToggle": "Set location manually",
-    "manualHint": "If you don''t want to allow location access, choose a city or region manually.",
     "countryLabel": "Country",
     "regionLabel": "City or region",
     "regionPlaceholder": "e.g. Vilnius",
@@ -9842,16 +9927,11 @@
     "addressPlaceholder": "e.g. district or site",
     "errorCountry": "Choose a country.",
     "save": "Save location",
-    "selectedTitle": "Selected location",
     "sourceAuto": "Current location",
     "sourceManual": "Set manually",
-    "usableNote": "We''ll use this location and a {km} km radius for your market signals.",
-    "savedLocally": "Location saved on this device.",
     "updateButton": "Update location",
     "editButton": "Change location",
     "resetButton": "Remove location",
-    "emptyBody": "You haven''t chosen a location yet. Use the button above or set one manually.",
-    "radiusHelp": "The radius is the search area around your chosen point: {km} km means work and demand up to {km} km from that point.",
     "previewTitle": "New spot picked — not saved yet",
     "previewKeepNote": "Your previous location stays until you press Save.",
     "previewSave": "Save location",
@@ -10114,82 +10194,245 @@
   },
   "about": {
     "metaTitle": "What is LabourMarket.ai",
-    "metaDescription": "A plain-language explanation of LabourMarket.ai: how workers build a real profile from real work, how companies describe needs and find teams, and how the platform stays honest.",
+    "metaDescription": "LabourMarket.ai is a labour-market operating platform: real work becomes professional history, evidence and a living CV for a person, and a work history and capability record for an organisation.",
     "navLabel": "About LabourMarket.ai",
     "eyebrow": "About the platform",
-    "title": "What LabourMarket.ai is and how it works",
-    "lede": "LabourMarket.ai is a labour-market platform where workers, companies and teams show real skills, see real needs and organise real work — locally and across Europe.",
-    "honesty": "Everything described on this page exists in the product today. Features still being prepared are named as such, and payments are not active yet.",
+    "title": "What is LabourMarket.ai",
+    "lede": "LabourMarket.ai is a labour-market operating platform. It connects people, employers, agencies, teams, projects, training and labour-market services around real work — not just a job search.",
+    "hero": {
+      "lead": "A person's professional value should not disappear every time they change employer. Real work can become lasting professional history: what the person did, where, when, for how long, in what role, with which skills, and what evidence and confirmation supports it.",
+      "leadOrg": "For organisations, the same real work builds the record of what the company has actually done: projects, teams, work performed, hours, competencies and evidence.",
+      "railPeopleLabel": "For a person",
+      "railPeople": [
+        "People",
+        "Opportunities",
+        "Real work",
+        "Evidence",
+        "Professional growth"
+      ],
+      "railCompaniesLabel": "For a company",
+      "railCompanies": [
+        "Companies",
+        "People",
+        "Projects",
+        "Verified work",
+        "Organisational capability"
+      ],
+      "accumulate": "Every real period of work adds to the history — it does not end when the employer changes.",
+      "railAria": "How people and companies grow from real work"
+    },
+    "lifecycle": {
+      "label": "The whole professional-work lifecycle",
+      "steps": [
+        "Opportunity",
+        "Employment / cooperation",
+        "Real work",
+        "Work Journal",
+        "Projects and tasks",
+        "Working time",
+        "Work evidence",
+        "Confirmations",
+        "Skills and competencies",
+        "Living CV — a living professional CV",
+        "New opportunities",
+        "Teams",
+        "Company capability",
+        "Labour-market services"
+      ],
+      "note": "This explains the system; it is not its boundary. Other parts of the labour market extend the chain."
+    },
     "loops": [
       {
-        "heading": "For workers",
+        "id": "people",
+        "heading": "For people",
+        "lead": "A professional profile is not a card or a score. It is a real person's experience, work history and evidence.",
+        "flow": [
+          "Find opportunities",
+          "Present professional experience",
+          "Work",
+          "Record the work actually done",
+          "Preserve evidence",
+          "Receive confirmations where applicable",
+          "Build professional history — Living CV",
+          "Use accumulated experience for future opportunities"
+        ],
+        "pointsLabel": "What a professional profile represents",
         "points": [
-          "You create your profile — your player card — with your skills and experience.",
-          "You keep a work journal: short entries about the work you actually did.",
-          "The platform reads your journal text and suggests skills it recognises. Recognition is rule-based, it can miss things, and nothing is added to your profile without your confirmation.",
-          "Your profile shows honestly how each skill is supported: entered by you, supported by journal entries, or confirmed by people you actually worked with."
+          "experience and work history;",
+          "skills and competencies;",
+          "qualifications and certificates, where recorded;",
+          "completed work, hours, projects and objects;",
+          "evidence and confirmations;",
+          "availability and professional preferences, where applicable."
         ]
       },
       {
-        "heading": "For companies",
+        "id": "employers",
+        "heading": "For employers",
+        "lead": "An employer's value is not only posting vacancies. What matters is keeping the knowledge of who worked, what they did, where, when, for how long, what was completed, what evidence exists and what capability the organisation has built.",
+        "flow": [
+          "Need",
+          "People",
+          "Team",
+          "Project / object",
+          "Work",
+          "Hours and progress",
+          "Evidence",
+          "Confirmation",
+          "The company's history of work actually done",
+          "Future workforce planning (a direction)"
+        ],
+        "pointsLabel": "What the organisation keeps",
         "points": [
-          "You describe your need: what work, where and when.",
-          "You see the market map and honest market signals instead of promises.",
-          "You can scout for workers: profiles appear anonymised, and contact happens only with permission.",
-          "Projects, teams and bookings keep the work organised in one place."
+          "who worked, and in what role;",
+          "what work was done, where and when;",
+          "how many hours and what progress;",
+          "what evidence and confirmations exist;",
+          "what capabilities the team has really built."
         ]
       },
       {
-        "heading": "For teams and communication",
+        "id": "network",
+        "heading": "For agencies and other labour-market participants",
+        "lead": "LabourMarket.ai is not only a worker-and-employer system. Other legitimate participants have a place in the same labour-market network.",
+        "flow": [],
+        "participants": [
+          "Recruitment and selection agencies",
+          "Staffing companies",
+          "Contractors and subcontractors",
+          "Training providers",
+          "Schools and vocational institutions",
+          "Independent professionals",
+          "Labour-market service providers",
+          "Other legitimate labour-market participants"
+        ],
+        "pointsLabel": "Their place in the same network",
         "points": [
-          "Teams and brigades are managed inside the company workspace.",
-          "Work instructions can be written in your own language — the original text is always kept, and nothing pretends to be translated when it is not.",
-          "Messaging is closed by default: only the participants of a conversation can see it."
+          "they work with the same real work records, not separate files;",
+          "roles and responsibility stay clearly separate: who published, who worked, who confirmed."
         ]
       }
     ],
+    "evidence": {
+      "heading": "Real work becomes professional evidence",
+      "lead": "One work event is one record. It can feed several views, but it is never copied and never created from nothing.",
+      "chainLabel": "The evidence chain",
+      "chain": [
+        "Person",
+        "Date / period",
+        "Hours",
+        "Project / object",
+        "Work performed",
+        "Skills and competencies",
+        "Source / evidence",
+        "Confirmation",
+        "Professional history — Living CV"
+      ],
+      "projectionsLabel": "The same record — several views",
+      "projections": [
+        "The person's professional history",
+        "Team history",
+        "Project history",
+        "Company capability history"
+      ],
+      "note": "One work event can feed several views. Evidence is never duplicated or fabricated."
+    },
+    "afterHire": {
+      "heading": "Why use it after you have found the job?",
+      "lead": "A conventional job board delivers most of its value before hiring. LabourMarket.ai should become more useful once real work begins.",
+      "boardLabel": "A conventional job board",
+      "boardPoints": [
+        "Value is highest while searching.",
+        "After hiring, the history stays in separate systems.",
+        "A new employer starts from zero."
+      ],
+      "platformPoints": [
+        "Every real period of work adds to professional history.",
+        "Evidence, competencies and the Living CV grow.",
+        "Team and company work history grows with it.",
+        "Accumulated experience becomes context for new opportunities."
+      ],
+      "stages": [
+        "Search",
+        "Hiring",
+        "Work",
+        "Later opportunities"
+      ],
+      "schematicNote": "Schematic — not a measurement.",
+      "conclusion": "Value does not end when a hiring decision is made — it grows every day work is done."
+    },
+    "trust": {
+      "heading": "Trust: fact ≠ derived ≠ confirmed",
+      "lead": "The original evidence and its source are preserved. What the source stated is always kept apart from what the system derived and from what a person or organisation confirmed. An AI interpretation is never treated as a fact.",
+      "tiers": [
+        {
+          "term": "Fact",
+          "meaning": "What the source itself stated: a date, hours, a description of the work.",
+          "example": "For example, “8 h, 2025-03-12” in the source table."
+        },
+        {
+          "term": "Derived",
+          "meaning": "An interpretation by the system or by rules. Always marked as derived and never becomes a fact.",
+          "example": "For example, a skill recognised from the text of a work description."
+        },
+        {
+          "term": "Confirmed",
+          "meaning": "Confirmation by a person or an organisation. Kept apart from what the person reported about themselves.",
+          "example": "For example, a manager confirmed the period of work."
+        }
+      ],
+      "noLabel": "What is not here",
+      "no": [
+        "No star ratings.",
+        "No points.",
+        "No worker leaderboards.",
+        "No artificial ranking of a person's worth."
+      ]
+    },
+    "privacy": {
+      "heading": "Privacy",
+      "lead": "Professional evidence can be detailed privately. Public discovery does not expose what must be protected.",
+      "privateLabel": "Detailed only in private",
+      "private": [
+        "Full work records and evidence.",
+        "The Work Journal.",
+        "Project and object details."
+      ],
+      "publicNotLabel": "Public search does not expose",
+      "publicNot": [
+        "private contacts;",
+        "confidential clients;",
+        "private Work Journal information;",
+        "restricted personal information;",
+        "confidential project information."
+      ],
+      "control": "People and organisations keep appropriate control over what is public."
+    },
+    "europe": {
+      "heading": "The European labour market",
+      "body": "LabourMarket.ai is built for Europe first and can extend worldwide. It is not one country's job board: the aim is to connect labour-market participants across countries, professions and sectors.",
+      "points": [
+        "A multilingual interface; the original text is always kept.",
+        "Country-specific document and requirement guidance.",
+        "Public job-ad sources are connected country by country — only once the source's terms are confirmed."
+      ]
+    },
     "notYet": {
       "heading": "What the platform does not do",
       "points": [
-        "It does not mark anyone as confirmed by itself — a confirmed status always comes from a real person.",
-        "Payments do not run through the platform yet, and there is no checkout.",
-        "It does not give legal advice. Document guidance is informational only."
+        "It never marks anything as confirmed itself — a confirmed state always comes from a real person.",
+        "It does not give legal advice. Document guidance is for information only.",
+        "It does not rate people with points or rankings."
       ]
-    },
-    "sportsModel": {
-      "heading": "The operating model: player cards, teams and objects",
-      "intro": "The product borrows sports vocabulary because it makes work organisation visible. It is an operating model, not a game — every layer below is a real product surface.",
-      "rows": [
-        {
-          "term": "Player card",
-          "meaning": "A worker's capability card: real skills, real work evidence, and confirmations that always come from real people."
-        },
-        {
-          "term": "Team / brigade",
-          "meaning": "A real work unit inside a company — created and managed in the company workspace."
-        },
-        {
-          "term": "Object / project",
-          "meaning": "The field of play: the place where work actually happens and where workers are assigned."
-        },
-        {
-          "term": "Owner / operator",
-          "meaning": "The person who manages assignments: who works on which object, and when an assignment ends."
-        },
-        {
-          "term": "Divisions / leagues",
-          "meaning": "Optional grouping and status layers for markets and professions — the platform uses them to group, never to rank."
-        }
-      ],
-      "noRanking": "No rankings and no scores: nothing in this model rates people or orders them against each other. You see grouping and honest capability signals only."
     },
     "data": {
       "heading": "Your data",
-      "body": "Access to data is closed by default and explained in plain language on the pages below."
+      "body": "Access to data is closed by default and explained in plain words on the pages below."
     },
     "links": {
       "workers": "For workers",
-      "companies": "For companies"
+      "companies": "For companies",
+      "agencies": "For agencies"
     }
   },
   "accountBilling": {
@@ -10396,7 +10639,7 @@
       "reconfirmed": "Thank you — confirmed.",
       "withdrawDeclaration": "Stop representing me",
       "withdrawnDeclarationNote": "You are no longer represented outside LabourMarket.ai.",
-      "needsMigration": "This control is not available yet.",
+      "needsMigration": "Not available right now.",
       "errorGeneric": "Something went wrong. Nothing was changed.",
       "errorUnknownIntent": "Please choose your current situation.",
       "errorAvailableFromRequired": "Please give the date you can start.",
@@ -10525,6 +10768,9 @@
       "count": "{count, plural, =0 {no items} one {# item} other {# items}}"
     },
     "emptyFiltered": "No items of this type.",
+    "filterActive": "Showing only: {type}. In this period: {total} in all, {shown} shown.",
+    "filterNote": "Journal hours and marks on the calendar are always shown — the filter does not change them.",
+    "filterClear": "Show all",
     "emptyActions": {
       "bookings": "Propose a booking",
       "tasks": "Create a task",
@@ -10689,6 +10935,18 @@
       "unknown": "{count} could not be read at all. That is not the same as free.",
       "denominatorNote": "Counted in calendar days. We do not record contracted hours, so this is not an FTE figure."
     },
+    "rosterTimeline": {
+      "byPerson": "People",
+      "byProject": "Projects",
+      "prev": "Earlier",
+      "next": "Later",
+      "today": "Today",
+      "dateLabel": "From date",
+      "go": "Go",
+      "away": "Away",
+      "outside": "{count} more outside this period",
+      "nothing": "Nothing on record in this period"
+    },
     "committedWhere": {
       "title": "Who is committed where",
       "intro": "Each person's dated commitments — project assignments, accepted bookings and approved business trips — from the same records the calendar and the capacity answer use. Nothing here is inferred.",
@@ -10713,7 +10971,7 @@
     "intro": "Your work list: what's waiting, in progress and stuck.",
     "honestNote": "Internal list only — creating a task sends nothing to anyone.",
     "notAuthed": "Sign in to see your tasks.",
-    "unavailable": "Tasks are not switched on yet. Once they are, your tasks will appear here.",
+    "unavailable": "Not available right now.",
     "loadError": "Tasks could not be loaded. Try refreshing the page.",
     "myEmpty": "No open tasks — create one above.",
     "views": {
@@ -10778,7 +11036,7 @@
       "created": "Task created.",
       "updated": "Task updated.",
       "invalid": "Check the fields — the title must be 3–160 characters.",
-      "needs_migration": "Tasks are not switched on yet — the change was not saved.",
+      "needs_migration": "Not available right now. Nothing was saved.",
       "not_authorized": "You are not allowed to do that.",
       "not_found": "Task not found.",
       "limit_reached": "Open-task limit reached — finish or cancel older tasks first.",
@@ -10807,7 +11065,13 @@
       "label": "Assign to",
       "save": "Assign"
     },
+    "advisory": {
+      "blockersOpen": "Status updated. Heads-up: {n} of the tasks it depends on are still open. Nothing was blocked.",
+      "reservationLead": "Assigned. Calendar check for the task's due day (advisory only):"
+    },
     "dependencies": {
+      "startedBeforeBlocker": "In progress or done before what it depends on is finished ({n} still open). Advisory only.",
+      "dueBeforeBlocker": "Due before a task it depends on is due. Advisory only.",
       "waitingOn": "Waiting on {n}",
       "blockedBy": "Depends on",
       "hidden": "a task you can't see",
@@ -10833,10 +11097,12 @@
       }
     },
     "evidence": {
+      "by": "By {name}",
+      "hours": "{hours} h recorded",
       "title": "Evidence",
       "intro": "Work Journal records attached to this task. Attaching never changes a record — it only says which task it proves.",
       "empty": "No Work Journal record is attached to this task yet.",
-      "unavailable": "Evidence attachment is not switched on yet.",
+      "unavailable": "Not available right now.",
       "summary": "{total} attached · {confirmed} manager-confirmed",
       "confirmed": "Manager-confirmed",
       "unconfirmed": "Not confirmed",
@@ -10947,7 +11213,7 @@
     "intro": "Manual record of invoices issued, invoices received and expenses — with real totals and derived overdue flags.",
     "scopeNote": "Manual records only — this is not bookkeeping, tax, payroll, banking or payment processing software. Recording an entry moves no money and contacts nobody.",
     "notAuthed": "Sign in to see your finance records.",
-    "unavailable": "Finance is not switched on yet. Once it is, your records will appear here.",
+    "unavailable": "Not available right now.",
     "loadError": "Records could not be loaded. Try refreshing the page.",
     "empty": "No finance records yet — add the first one above.",
     "emptyFiltered": "No records match the selected filters.",
@@ -11023,7 +11289,7 @@
       "created": "Record added.",
       "updated": "Record updated.",
       "invalid": "Check the fields — title 3–160 characters, counterparty 2–160, amount like 123.45.",
-      "needs_migration": "Finance is not switched on yet — the change was not saved.",
+      "needs_migration": "Not available right now. Nothing was saved.",
       "not_authorized": "You are not allowed to do that.",
       "not_found": "Record not found.",
       "limit_reached": "Record limit reached — this manual list is capped.",
@@ -11276,7 +11542,7 @@
     "saving": "Saving…",
     "saved": "Preferences saved.",
     "error": "Saving failed. Please try again.",
-    "needsMigration": "This section is not enabled yet — nothing was saved.",
+    "needsMigration": "Not available right now. Nothing was saved.",
     "v2": {
       "title": "More work preferences",
       "hint": "Same rule as above — anything left as “Not stated” stays not stated.",
@@ -11291,7 +11557,7 @@
       "licenceCategories": "Driving licence categories",
       "ownVehicle": "I have my own vehicle",
       "ownTools": "I have my own tools",
-      "notEnabled": "These extra preferences are not enabled yet — nothing here is saved for now.",
+      "notEnabled": "Not available right now.",
       "notSaved": "Saved, except the extra preferences — that part is not enabled yet."
     }
   },
@@ -11306,7 +11572,7 @@
     "adding": "Adding…",
     "remove": "Remove",
     "empty": "No languages added yet.",
-    "notEnabled": "This section is not enabled yet — nothing was saved.",
+    "notEnabled": "Not available right now. Nothing was saved.",
     "error": "Saving failed. Please try again.",
     "invalid": "Choose a language and a level."
   },
@@ -11325,11 +11591,11 @@
     "visibility": "Visibility",
     "visibilityPrivate": "Private",
     "visibilityEmployers": "Employers",
-    "visibilityNote": "Employer viewing is not switched on yet — your visibility choice is saved and will apply once it is.",
+    "visibilityNote": "Not available right now.",
     "importNote": "Automatic import from these sites is not offered. To bring your data in, upload an exported CV file in the profile editor.",
     "importLink": "Open the profile editor",
     "empty": "No external profiles linked yet.",
-    "notEnabled": "This section is not enabled yet — nothing was saved.",
+    "notEnabled": "Not available right now. Nothing was saved.",
     "error": "Saving failed. Please try again.",
     "invalid": "Enter a full https:// link and choose a site.",
     "platformNames": {
@@ -11349,7 +11615,7 @@
     "eyebrow": "NETWORK",
     "title": "Network",
     "intro": "Your companies, teams, partners and invitations. Invite a person or a company right from here.",
-    "notEnabled": "Invitations are not enabled in this environment yet.",
+    "notEnabled": "Not available right now.",
     "incoming": {
       "title": "Invitations for you",
       "from": "Invited by {name}",
@@ -11380,7 +11646,8 @@
         "team": "Team",
         "other": "Organization"
       },
-      "visibilityReason": "Only people who consented to be discoverable, or who have a real work relationship with you, are shown."
+      "visibilityReason": "Only people who consented to be discoverable, or who have a real work relationship with you, are shown.",
+      "noContactYet": "Messaging opens only after an invitation or shared work. Invite them — or request one of their services."
     },
     "sent": {
       "title": "My sent invitations",
@@ -11476,7 +11743,7 @@
       "messageLabel": "Personal message",
       "send": "Send invitation",
       "sending": "Sending…",
-      "notEnabled": "Invitations are not enabled in this environment yet.",
+      "notEnabled": "Not available right now.",
       "notAuthed": "Sign in to send invitations.",
       "linkModeNote": "Email sending is not activated yet — share the invite link directly.",
       "invalidEmails": "Invalid addresses",
@@ -11523,7 +11790,7 @@
     },
     "invitePage": {
       "eyebrow": "INVITATION",
-      "notEnabled": "Invitations are not enabled in this environment yet.",
+      "notEnabled": "Not available right now.",
       "loadError": "The invitation could not be loaded right now. Please try again.",
       "invalidTitle": "Invitation not found",
       "invalidBody": "The link is invalid or no longer works. Ask for a new invitation.",
@@ -11553,7 +11820,7 @@
         "exhausted": "All places on this invitation are taken. Ask for a new link."
       },
       "notices": {
-        "not_enabled": "Invitations are not enabled in this environment yet.",
+        "not_enabled": "Not available right now.",
         "already_accepted": "Already accepted.",
         "expired": "This invitation has expired.",
         "revoked": "This invitation was revoked.",
@@ -11612,7 +11879,7 @@
       "cancel": "Cancel",
       "correctionPlaceholder": "Your wording",
       "failed": {
-        "not_enabled": "Review is not enabled in this environment yet.",
+        "not_enabled": "Not available right now.",
         "error": "Could not save your answer. Please try again."
       },
       "boundary": "Confirming a line here does not create a skill or a profession. Add what is true to your profile yourself:",
@@ -11685,7 +11952,7 @@
       "contacted": "Contacted",
       "interview": "In conversation",
       "offer": "Offer",
-      "accepted": "Accepted",
+      "accepted": "Agreed to the dates",
       "rejected": "Rejected"
     },
     "action": {
@@ -11695,14 +11962,15 @@
       "continueConversation": "Continue the conversation",
       "viewOffer": "Track the booking response",
       "planWork": "Review the accepted booking",
-      "reviewOthers": "Review other candidates"
+      "reviewOthers": "Review other candidates",
+      "assignToProject": "Assign to a project"
     }
   },
   "agencyClients": {
     "title": "Clients",
     "subtitle": "Who you staff for — each client's needs link to your demands and candidate scouting.",
-    "gatedHeading": "Prepared — owner activation pending",
-    "gatedBody": "Client records are ready but not switched on yet.",
+    "gatedHeading": "Not available yet — coming later",
+    "gatedBody": "Not available right now.",
     "notLinkable": "Demands cannot be linked to clients yet.",
     "clientsEmpty": "No clients yet. Add your first client below.",
     "demandsHeading": "Your demands",
@@ -11734,8 +12002,8 @@
   "agencyBridge": {
     "title": "Client companies",
     "subtitle": "Connect with a real client company, see only the requests they share, and offer one of your active roster workers.",
-    "gatedHeading": "Prepared — owner activation pending",
-    "gatedBody": "The client bridge is ready but not switched on yet.",
+    "gatedHeading": "Not available yet — coming later",
+    "gatedBody": "Not available right now.",
     "connectionsHeading": "Connections",
     "inviteEmailLabel": "Client email",
     "inviteButton": "Invite client",
@@ -11786,8 +12054,8 @@
   "clientBridge": {
     "title": "Staffing agencies",
     "subtitle": "Accept a staffing agency you want to work with, share specific requests, and review the candidates they propose on your own scouting page.",
-    "gatedHeading": "Prepared — owner activation pending",
-    "gatedBody": "The agency bridge is ready but not switched on yet.",
+    "gatedHeading": "Not available yet — coming later",
+    "gatedBody": "Not available right now.",
     "invitesHeading": "Connection invites",
     "noInvites": "No pending invites.",
     "acceptButton": "Accept",
@@ -11870,7 +12138,7 @@
       "cancel": "Cancel",
       "remove": "Remove",
       "empty": "No education entries yet.",
-      "notEnabled": "This section is prepared but not enabled yet.",
+      "notEnabled": "Not available right now.",
       "error": "Could not save. Try again.",
       "invalid": "Invalid value.",
       "limit": "Entry limit reached.",
@@ -11904,7 +12172,7 @@
       "cancel": "Cancel",
       "remove": "Remove",
       "empty": "No achievements yet.",
-      "notEnabled": "This section is prepared but not enabled yet.",
+      "notEnabled": "Not available right now.",
       "error": "Could not save. Try again.",
       "invalid": "Invalid value.",
       "limit": "Entry limit reached.",
@@ -11940,7 +12208,7 @@
     "discardedLabel": "Discarded",
     "replace": "Replace",
     "conflict": "A different value is already saved: {value}",
-    "needsMigration": "This section is prepared but not enabled yet — the entry was not saved.",
+    "needsMigration": "Not available right now. Nothing was saved.",
     "error": "Could not save. Try again.",
     "invalid": "Invalid value.",
     "aiHint": "AI suggestion — review before saving",
@@ -11954,7 +12222,7 @@
     },
     "imageOcr": {
       "label": "CV photo / image (JPG, PNG)",
-      "note": "In preparation — image recognition is not available yet. Upload a PDF/DOCX or paste the text."
+      "note": "Reading from photos is not available yet — upload a PDF/DOCX or paste the text."
     }
   },
   "companySwitcher": {
@@ -12132,7 +12400,7 @@
         "statGovLt": "Official statistics; attribution required; activation awaits owner confirmation.",
         "eurostat": "Official EU statistics; attribution required; activation awaits owner confirmation.",
         "arbetsformedlingen": "Active source. Usage terms confirmed: a free public data source (CC0). Attribution is shown with every advertisement, and each advertisement links back to the original posting.",
-        "nav": "Proposed source. NAV's API terms permit republication with ongoing duties: a withdrawn advertisement must be removed immediately, an updated one refreshed immediately, and the apply link must lead to the original posting. Accepting the terms and obtaining a token require owner action — nothing is fetched today.",
+        "nav": "Active source. NAV's API terms are accepted and production access is granted. Ongoing duties are applied: a withdrawn advertisement is removed immediately, an updated one is refreshed promptly, and the apply link leads to the original posting.",
         "cvbankas": "Proposal only — usage permission unconfirmed; never blended with internal figures.",
         "eures": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today.",
         "uztLt": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today."
@@ -12907,7 +13175,7 @@
       "offerTitle": "Job offer",
       "confirmAcceptTitle": "Accept this offer?",
       "confirmAcceptBody": "Accepting confirms your engagement with the employer — it is a firm step, not a draft.",
-      "confirmAcceptDisclosure": "Accepting lets this company — and only this company — see your profile card: your name, skills, professions, languages and availability. Your contact details stay private, no other employer gains access, and this does not add you to employer search. The access lasts while the engagement is active, and you can end it at any time.",
+      "confirmAcceptDisclosure": "By accepting you agree to the dates shown in this booking. This is not an employment contract and does not mean you have been hired — a specific project or site is set separately by the company. Accepting lets this company — and only this company — see your profile card: your name, skills, professions, languages and availability. Your contact details stay private, no other employer gains access, and this does not add you to employer search. The access lasts while the engagement is active, and you can end it at any time.",
       "confirmDeclineTitle": "Decline this offer?",
       "confirmCta": "Yes, confirm",
       "cancelCta": "Cancel",
@@ -13096,8 +13364,8 @@
       "chipPrefs": "Preferences",
       "offersEmpty": "You have no offers yet. Once your profile is ready, employers can send you offers and they'll appear right here.",
       "searchAskCriteria": "To search well, let's first pin down your criteria — where, when and on what terms you want to work. Fill this in below and I'll search right away.",
-      "playerCardAfterLog": "Here's your card after that entry — your work record just got stronger.",
-      "playerCardBlocked": "This account has no worker card yet. Log your first work or upload a CV — the card grows from real records.",
+      "playerCardAfterLog": "Here's your professional profile after that entry — your work record just got stronger.",
+      "playerCardBlocked": "This account has no professional profile yet. Log your first work or upload a CV — the profile grows from real records.",
       "fallback": "I can help you with your CV, your profile, and job offers. What would you like to do?",
       "userCv": "I'll upload my CV",
       "userProfile": "Show my profile",
@@ -13161,6 +13429,7 @@
       "briefOverdue": "{count} tasks are past their due day.",
       "briefLogToday": "You are working today and nothing is logged yet.",
       "briefEmployerJournalReviews": "{count, plural, one {# work entry awaits} other {# work entries await}} your review.",
+      "briefEmployerLearningReview": "Awaiting review: {count}",
       "briefAgencyOffersAwaiting": "{count, plural, one {# offer is} other {# offers are}} awaiting the client's decision.",
       "briefAgencySharedWithoutOffer": "{count, plural, one {# client need has} other {# client needs have}} no offer from you yet.",
       "briefAgencyNeedReopened": "{count, plural, one {# client need needs} other {# client needs need}} a worker again: the previous candidate did not start or the placement ended.",
@@ -13175,10 +13444,11 @@
       "briefEmployerPendingAbsences": "{count, plural, one {# absence request awaits} other {# absence requests await}} your decision.",
       "briefEmployerAbsentToday": "{count, plural, one {# of your workers is} other {# of your workers are}} absent today.",
       "chipEmployerInbox": "Review queue",
+      "chipEmployerLearningReview": "Review suggestions",
       "chipEmployerAbsences": "Absences",
       "briefUnreadMessages": "You have {count, plural, one {# unread message} other {# unread messages}}.",
       "briefProfileGap": "Your profile is still missing: {step}.",
-      "playerCardOpened": "Your card is open in the panel — real data from your own records.",
+      "playerCardOpened": "Your professional profile is open in the panel — real data from your own records.",
       "attachChoice": "What is this file for?",
       "chipAttachPhoto": "My work photo",
       "chipAttachCv": "My résumé (CV)",
@@ -13355,10 +13625,46 @@
       },
       "findWorkInCompanyContext": "A job search is your own act — I don't run it inside the company space. Switch to your personal space and ask again.",
       "findWorkInCompanyWhy": "A person looks for work, not a company — I answer from your personal space.",
+      "personalOnlyInCompany": "That is a personal action — I do not run it in a company workspace. Switch to your personal space and continue there.",
+      "newJobsIntro": "New postings that fit your preferences: {count}.",
+      "newJobsAll": "All opportunities",
+      "newJobsNone": "No new postings fitting your preferences appeared in the last few days. You will find every opportunity on the opportunities page.",
+      "newJobsNeedProfession": "To show new jobs, tell me which profession you are looking for.",
+      "newJobsNeedCountry": "To show new jobs, tell me which countries you want to work in.",
+      "newJobsNoProfile": "To show new jobs I first need your profile.",
+      "newJobsUnavailable": "I could not check for new jobs right now. Please try again later.",
+      "openConversationOpening": "Opening the conversation with {name}.",
+      "openConversationNone": "I did not find that person among your conversations or your team. Your messages are in the messages section.",
+      "openConversationWhich": "Which person do you mean?",
+      "openConversationNoPermission": "I cannot open a conversation with {name} — you do not have permission for that.",
+      "openConversationFailed": "The conversation could not be opened. Try again or open your messages.",
       "journalAskWhatYouDid": "What did you do today? Write it in the “What you did” field in your own words — e.g. “installed windows at the Kaunas site from 8 to 17”. The request itself is not saved to the journal.",
       "alsoWorkLog": "I also understood that you worked today — check it and save it to your work journal:",
       "serviceNeedHint": "That is a job to be done — I will show you who offers that service.",
       "chipServiceRequests": "Find a service",
+      "findPartnersDoors": "This is a business-partner search, not a job search. It runs over the existing marketplace — pick where to start.",
+      "findPartnersPickCompany": "Business partners are searched for on behalf of a company. Which company do you mean?",
+      "findPartnersNoCompany": "Business partners are searched for on behalf of a company, and there is no company profile yet. Create one, or browse the services marketplace.",
+      "chipPartnersServices": "Service providers",
+      "chipPartnersListings": "Marketplace listings",
+      "chipPartnersRelations": "Clients and partners",
+      "productHelp": {
+        "projectUse": "A project is where you keep the work, the people and the deadlines. Open a project, add tasks and people, and the work done shows up right there.",
+        "addPerson": "You add a person by inviting them: enter their contact and they confirm in their own account. Invitations and your team are in the team section.",
+        "hours": "Hours are kept in the hours section — there you see days, the week and the timesheet.",
+        "offerService": "You offer a service in the services section: describe it, and other businesses and people can see it.",
+        "warning": "A warning appears when something could get in the way of the work — for example a document is about to expire or data is missing. You will see every notice and its reason in the notices section.",
+        "forecast": "A forecast is a calculation from the hours already recorded and the work already planned. It is a guide, not a promise, and it changes with the data. You will find the plan and the numbers in planning.",
+        "scheduleWorker": "You schedule a worker in planning: pick the day and the project, and assign the person in the same place.",
+        "doneWork": "You see finished work where it was recorded — in the work journal or the hours section: entries, hours and confirmations.",
+        "chips": {
+          "chipHelpProjects": "Open projects",
+          "chipHelpPeople": "Team and invitations",
+          "chipHelpPlanning": "Open planning",
+          "chipHelpServices": "My services",
+          "chipHelpJournal": "Work journal"
+        }
+      },
       "interestInboxAmbiguous": "That can mean two things — which one do you want?",
       "chipInterestOnMyNeeds": "Interest in my needs",
       "chipMyOwnInterest": "My own interest",
@@ -13558,7 +13864,7 @@
       "capacityIntro": "Team {from} – {to} ({count} people):",
       "capacityFree": "free",
       "capacityBusyUntil": "unavailable until {date}",
-      "capacityAbsencesUnknown": "Absence data is not available in this environment — only the roster is shown.",
+      "capacityAbsencesUnknown": "Not available right now.",
       "capacityEmpty": "Nobody is on the team yet — invite people.",
       "capacityUnavailable": "The team's availability could not be read right now.",
       "chipAddTask": "Add a task",
@@ -13628,15 +13934,15 @@
       "briefInstructions": "Instructions waiting: {count}.",
       "chipInstructions": "Instructions",
       "briefWorkConfirmed": "A manager confirmed {count, plural, one {# of your work entries} other {# of your work entries}} in the last 7 days — skills verified: {skills}.",
-      "chipMyCard": "My card",
+      "chipMyCard": "My professional profile",
       "confirmIntro": "Awaiting your confirmation: {count} entries.",
       "confirmLine": "• {name} · {date} — {text} (+{skills} skills)",
       "confirmChip": "Confirm: {name} · {date}",
       "confirmDone": "Confirmed: {name} — skills verified: {count}.",
       "confirmNone": "No work entries are waiting.",
-      "confirmNotEnabled": "Work review is not switched on yet for: {names}. Switch it on and their entries appear here.",
+      "confirmNotEnabled": "Not available right now.",
       "confirmEnableChip": "Switch on review: {name}",
-      "confirmEnabled": "Review switched on: {name} — their work entries now await your confirmation.",
+      "confirmEnabled": "Not available right now.",
       "confirmFailed": "The confirmation could not be made.",
       "confirmUnavailable": "Confirmations could not be read right now.",
       "chipOpenInbox": "Open the confirmation inbox",
@@ -13662,7 +13968,7 @@
       "moveToLine": "• “{to}”: people {before} → {after}; the readiness checklist there starts at 0/{total}.",
       "moveCountryLine": "• The country changes: {from} → {to} — document requirements differ.",
       "moveNoDatesLine": "• “{to}” has no dates — absences cannot be checked.",
-      "moveAvailabilityUnknownLine": "• Absences unknown — the leave model does not answer here.",
+      "moveAvailabilityUnknownLine": "• Absences unknown.",
       "moveAvailabilityLine": "• Inside {start}–{end} they have {count} absence records.",
       "moveAvailabilityFreeLine": "• No absences inside “{to}”'s dates.",
       "moveOnlyConfirmLine": "Nothing has changed yet — only your confirmation will.",
@@ -13698,6 +14004,7 @@
       },
       "capacityCommittedUntil": "already committed until {date}",
       "capacityCommittedToUntil": "on {what} until {date}",
+      "capacityCommittedUndated": "on {what}, dates not set",
       "capacityCommitmentsUnknown": "Bookings and project assignments could not be read, so someone shown as free may already be committed.",
       "workspaceUnnamedCompany": "Company without a name",
       "workspaceUnnamedAgency": "Agency without a name",
@@ -13781,7 +14088,7 @@
     "findWork": {
       "emptyState": "I didn't find any active openings matching your criteria right now. I have no alerts yet, so I won't promise to notify you — ask me again later, or add more to your profile so more needs match.",
       "blockedNoWorker": "To search for work, enable the worker role in account settings.",
-      "blockedNoAccess": "The opportunities list isn't enabled in this environment yet. When it is, I'll show real needs.",
+      "blockedNoAccess": "Not available right now.",
       "fitStrong": "Strong fit",
       "fitPossible": "Possible fit",
       "fitWeak": "Weak fit",
@@ -13870,7 +14177,7 @@
     },
     "results": {
       "playerCard": {
-        "title": "Worker card"
+        "title": "Professional profile"
       },
       "journal": {
         "title": "Work journal"
@@ -13982,7 +14289,7 @@
       "opportunitiesPartial": "The “new” markers could not be read this time — the rows are real, novelty is not shown.",
       "opportunitiesMore": "{n} more in the full list.",
       "retry": "Try again",
-      "playerCardError": "We could not read your card.",
+      "playerCardError": "We could not read your professional profile.",
       "calendarError": "We could not read the calendar.",
       "calendarBlocked": "The calendar could not be read — please sign in again.",
       "calendarEmpty": "Nothing is planned for the next {days} days.",
@@ -13998,13 +14305,13 @@
       },
       "candidatesError": "We could not read the candidates.",
       "candidatesNoCompany": "You are not acting for a company right now, so there are no company needs to hire for here.",
-      "candidatesBlocked": "This is not available in this environment right now.",
+      "candidatesBlocked": "Not available right now.",
       "candidatesNoDemands": "Your company has not described a need yet.",
       "candidatesPickDemand": "Which need are you hiring for?",
-      "candidatesUnstructuredBadge": "not structured",
+      "candidatesUnstructuredBadge": "requirements not confirmed",
       "candidatesBackToDemands": "Back to needs",
       "candidatesNotFound": "That need was not found, or it is not yours.",
-      "candidatesNeedsMigration": "The candidate source is not available in this environment.",
+      "candidatesNeedsMigration": "Not available right now.",
       "candidatesNotStructured": "Nothing can be derived from this need yet, so there is nothing to match against. That is not the same as nobody matching.",
       "candidatesRetrievalCapped": "More people were reachable than we could look at this time, so this list is not the whole supply.",
       "candidatesEmpty": "Nobody in the visible supply matches this need right now.",
@@ -14058,7 +14365,7 @@
       "bookingNote": "Note",
       "projectError": "We could not read the project.",
       "projectNoCompany": "You are not acting for a company right now, so there are no company projects here.",
-      "projectBlocked": "This is not available in this environment right now.",
+      "projectBlocked": "Not available right now.",
       "projectEmpty": "There is no project yet.",
       "projectPick": "Which project?",
       "projectBackToList": "Back to projects",
@@ -14085,7 +14392,7 @@
       "pulseNextNoWork": "Next: no work logged yet — when people log work it appears here and on their CV.",
       "projectStages": "Stages",
       "projectStagesEmpty": "No stages have been entered for this project.",
-      "projectStagesUnavailable": "Stages cannot be read in this environment, so we are not showing an empty list as if there were none.",
+      "projectStagesUnavailable": "Not available right now.",
       "projectStageMarkDone": "Mark done",
       "projectAssignWorker": "Assign a worker",
       "projectOpenOperations": "Open project management",
@@ -14106,14 +14413,14 @@
       "projectAlreadyInState": "The project is already in that state. Nothing was changed.",
       "projectInvalidTransition": "This status change cannot be made.",
       "projectNotAuthorized": "You cannot change this project's status.",
-      "projectNeedsMigration": "Project status changes are not available in this environment yet.",
+      "projectNeedsMigration": "Not available right now.",
       "projectConflict": "The project changed while you were looking at it. Open it again.",
       "engagements": {
         "title": "Engagements"
       },
       "engagementsError": "The engagements could not be loaded.",
       "engagementsBlocked": "The engagements cannot be read right now. This is not the same as having none.",
-      "engagementsNeedsMigration": "Engagements are not available in this environment yet.",
+      "engagementsNeedsMigration": "Not available right now.",
       "engagementsEmptyCompany": "This organisation has no work relationships recorded.",
       "engagementsEmptyWorker": "You have no work relationships recorded.",
       "engagementsUnavailable": "This engagement is not available to you.",
@@ -14562,7 +14869,7 @@
         "radius": "distance"
       },
       "whyFiltered": "You said: {words}. I narrowed the search to that.",
-      "whyUnfiltered": "I searched your whole board — you did not narrow it.",
+      "whyUnfiltered": "No extra filters — showing everything visible to you.",
       "whyFromYourBoard": "From the demands that are visible to you right now.",
       "whyNoWorker": "This needs a worker profile, and there is none on this account yet.",
       "whyNoAccess": "Open demands are not available to your account yet.",
@@ -14812,7 +15119,7 @@
     "page": {
       "title": "Experiences",
       "lead": "Subjective experiences from real, completed work interactions. An experience is one person's account — not a fact about anyone's professional ability.",
-      "unavailableTitle": "Experiences are not available in this environment yet.",
+      "unavailableTitle": "Not available right now.",
       "unavailableBody": "Nothing was saved. You can keep working as usual.",
       "aboutMe": "About me",
       "aboutMeEmpty": "No published experiences about you yet.",
@@ -14827,7 +15134,7 @@
       "caution": "More negative than positive experiences — worth looking closer before deciding.",
       "meaning": "These are subjective accounts of real interactions. They are not a rating, not a score, and not a platform verdict.",
       "notEnough": "Not enough published experiences yet.",
-      "unavailable": "Experience counts are not available in this environment yet."
+      "unavailable": "Not available right now."
     },
     "sentiment": {
       "positive": "Positive experience",
@@ -14852,7 +15159,7 @@
       "rejected": "Rejected",
       "title": "Experience moderation",
       "lead": "Every experience passes moderation before it is published. Each decision needs a reason and is recorded in the audit trail.",
-      "unavailable": "The experience domain is not available in this environment.",
+      "unavailable": "Not available right now.",
       "queueTitle": "Awaiting moderation",
       "queueEmpty": "Nothing is waiting for moderation.",
       "disputeQueueTitle": "Disputes",
@@ -14869,7 +15176,7 @@
         "removed": "Remove from public view"
       },
       "errors": {
-        "needs_migration": "Experiences are not available in this environment yet. Nothing was saved.",
+        "needs_migration": "Not available right now. Nothing was saved.",
         "not_authenticated": "Please sign in first.",
         "not_eligible": "You can only describe an interaction you actually took part in and that is finished.",
         "duplicate_for_interaction": "You have already submitted an experience for this interaction.",
@@ -14899,7 +15206,7 @@
       "sending": "Opening…",
       "openedNote": "Dispute opened. The experience stays published until a moderator decides.",
       "errors": {
-        "needs_migration": "Experiences are not available in this environment yet. Nothing was saved.",
+        "needs_migration": "Not available right now. Nothing was saved.",
         "not_authenticated": "Please sign in first.",
         "not_eligible": "You can only describe an interaction you actually took part in and that is finished.",
         "duplicate_for_interaction": "You have already submitted an experience for this interaction.",
@@ -14923,7 +15230,7 @@
       "sending": "Sending…",
       "submitted": "Reply submitted. It becomes visible once moderation is finished.",
       "errors": {
-        "needs_migration": "Experiences are not available in this environment yet. Nothing was saved.",
+        "needs_migration": "Not available right now. Nothing was saved.",
         "not_authenticated": "Please sign in first.",
         "not_eligible": "You can only describe an interaction you actually took part in and that is finished.",
         "duplicate_for_interaction": "You have already submitted an experience for this interaction.",
@@ -14957,7 +15264,7 @@
       "submitted": "Experience submitted.",
       "awaitingModeration": "It is waiting for moderation and is not published yet.",
       "errors": {
-        "needs_migration": "Experiences are not available in this environment yet. Nothing was saved.",
+        "needs_migration": "Not available right now. Nothing was saved.",
         "not_authenticated": "Please sign in first.",
         "not_eligible": "You can only describe an interaction you actually took part in and that is finished.",
         "duplicate_for_interaction": "You have already submitted an experience for this interaction.",
@@ -15108,7 +15415,7 @@
   "approvals": {
     "title": "Approvals",
     "intro": "Approval requests inside your organizations: file a request, decide what waits on you, and follow every round.",
-    "unavailable": "Approvals are not enabled in this environment yet. Nothing is lost — this area opens once the approvals storage is reviewed and applied.",
+    "unavailable": "Not available right now.",
     "honestNote": "Decisions here stay inside the product. Nothing is emailed or sent anywhere — people see updates on this page and in the notification bell.",
     "loadError": "Some approvals data could not be loaded right now. What you see is real but may be incomplete.",
     "inbox": {
@@ -15247,7 +15554,7 @@
       "not_pending": "This request is no longer open.",
       "invalid": "Please check the entered values and try again.",
       "invalid_delegate": "That colleague could not be found in this organization.",
-      "needs_migration": "Approvals are not enabled in this environment yet. Nothing was saved.",
+      "needs_migration": "Not available right now. Nothing was saved.",
       "not_authorized": "You are not allowed to do this.",
       "not_found": "This request was not found.",
       "limit_reached": "The open-items limit was reached. Close something first.",
@@ -15263,7 +15570,7 @@
     "tpl": {
       "title": "Template configuration",
       "intro": "Decide who approves what in each of your organizations. Anything you change here applies to new requests only.",
-      "unavailable": "Template configuration is prepared but not enabled in this environment yet.",
+      "unavailable": "Not available right now.",
       "runningImmuneNote": "Publishing a new version changes only requests started afterwards. A request already under way keeps the rounds and the people it started with.",
       "templateCount": "Templates: {count}",
       "installTitle": "Install the default set",
@@ -15321,7 +15628,7 @@
   "timesheets": {
     "title": "Timesheets",
     "intro": "Period hour documents derived from your Work Journal. Hours are always edited in the journal; a timesheet is a frozen copy sent for approval.",
-    "needsMigration": "Timesheets are not enabled in this environment yet.",
+    "needsMigration": "Not available right now.",
     "readError": "Some timesheet data could not be loaded right now.",
     "noLines": "No recorded hours in this period yet. Log your work in the journal, then refresh.",
     "linesTitle": "Lines ({count})",
@@ -15399,7 +15706,7 @@
       "no_approvers": "No approvers could be found for this organization's template.",
       "not_published": "The approval template is not published yet.",
       "invalid": "The request was invalid.",
-      "needs_migration": "Timesheets are not enabled in this environment yet.",
+      "needs_migration": "Not available right now.",
       "not_authorized": "You are not allowed to do this.",
       "not_found": "Timesheet not found.",
       "limit_reached": "Too many open timesheets — submit or remove existing ones first.",
@@ -15428,8 +15735,8 @@
     "archivedHeading": "Archived objects",
     "archivedBadge": "Archived",
     "empty": "No objects yet. Add the sites where your work happens.",
-    "gatedHeading": "Prepared — awaiting activation",
-    "gatedBody": "Objects are ready but not switched on yet. Switching them on is an owner decision.",
+    "gatedHeading": "Not available yet — coming later",
+    "gatedBody": "Not available right now.",
     "errorLabel": "Could not save. Try again.",
     "notAuthorizedLabel": "Only managers can change objects.",
     "savedLabel": "Saved."
@@ -15437,7 +15744,7 @@
   "requests": {
     "title": "Requests",
     "intro": "Ask your employer for something and follow what happens next. Each request goes to the approval flow your company set up.",
-    "unavailable": "Requests are not switched on in this environment yet. Nothing is lost — this section opens once the requests update is reviewed and applied.",
+    "unavailable": "Not available right now.",
     "honestNote": "A request is decided by real people in your company. Nothing is approved automatically, and nothing is sent outside this product.",
     "notice": {
       "created": "Request submitted. The right people have been asked to review it.",
@@ -15450,7 +15757,7 @@
       "not_published": "The approval flow for requests is not ready yet.",
       "not_pending": "This request is no longer waiting — the list below shows its current state.",
       "invalid": "Please check the details and try again.",
-      "needs_migration": "Not available yet — the requests update is not applied in this environment.",
+      "needs_migration": "Not available right now.",
       "not_authorized": "You are not allowed to do that.",
       "not_found": "Not found.",
       "limit_reached": "Too many open requests. Wait for a decision on the existing ones first.",
@@ -15550,7 +15857,7 @@
     "relationshipNote": "The contracts list above is the earlier personal commercial register and keeps working unchanged. New agreements belong here.",
     "unavailable": "The agreement register cannot be shown right now.",
     "needsOrgWorkspace": "The agreement register works in an organization workspace. Switch to your organization to use it.",
-    "preparing": "The agreement register is prepared but not enabled in this environment yet.",
+    "preparing": "Not available right now.",
     "error": "The agreement register could not be read.",
     "empty": "No agreements recorded yet.",
     "emptyFiltered": "No agreements match these filters.",
@@ -15653,14 +15960,14 @@
       "not_found": "Record not found.",
       "not_allowed": "Only the organization's owner or admin can do this.",
       "limit_reached": "The register limit was reached.",
-      "needs_migration": "The agreement register is not enabled in this environment yet.",
+      "needs_migration": "Not available right now.",
       "error": "Something went wrong. Nothing was saved."
     }
   },
   "lifecycle": {
     "title": "Employment lifecycle",
     "intro": "Onboarding, probation, changes, offboarding and endings for this organization's employment records — with checklists and a full history.",
-    "unavailable": "The employment lifecycle is not enabled in this environment yet. Nothing is lost — this area opens once the lifecycle storage is reviewed and applied.",
+    "unavailable": "Not available right now.",
     "honestNote": "Everything here stays inside the product. Marking a step done only records who confirmed what and when — nothing is sent anywhere.",
     "loadError": "Some lifecycle data could not be loaded right now. What you see is real but may be incomplete.",
     "stage": {
@@ -15791,7 +16098,7 @@
       "last_owner": "The last owner's record cannot be ended — appoint another owner first.",
       "limit_reached": "The limit for this organization is reached.",
       "invalid": "Invalid input.",
-      "needs_migration": "This capability is not enabled in this environment yet.",
+      "needs_migration": "Not available right now.",
       "not_authorized": "You are not authorized for this.",
       "not_found": "Record not available.",
       "error": "Something failed — try again."
@@ -15800,7 +16107,7 @@
   "procurement": {
     "title": "Purchases",
     "intro": "Ask for materials or services, note supplier offers, and record what was chosen. Nothing here contacts a supplier or orders anything — it is your record.",
-    "needsMigration": "Purchase requests are not enabled in this environment yet.",
+    "needsMigration": "Not available right now.",
     "readError": "Purchase requests could not be loaded. Please try again.",
     "empty": "No purchase requests yet.",
     "noOffers": "No supplier offers noted yet.",
@@ -15859,7 +16166,7 @@
       "unlinked": "Invoice unlinked.",
       "cancelled": "Purchase request cancelled.",
       "invalid": "Please check the entered details.",
-      "needs_migration": "Purchase requests are not enabled in this environment yet.",
+      "needs_migration": "Not available right now.",
       "not_authorized": "You cannot do that for this request.",
       "not_found": "This purchase request was not found.",
       "not_editable": "This request is in a state where that step is not possible.",
@@ -15878,7 +16185,7 @@
   "trips": {
     "title": "Business trips",
     "intro": "Request a trip, get it approved, and keep its costs together. Nothing here books travel or pays money out — it is your record.",
-    "needsMigration": "Business trips are not enabled in this environment yet.",
+    "needsMigration": "Not available right now.",
     "readError": "Business trips could not be loaded. Please try again.",
     "empty": "No business trips yet.",
     "orgHeading": "Trips of people you manage",
@@ -15931,7 +16238,7 @@
       "unlinked": "Record removed from the trip.",
       "invalid": "Please check the entered details.",
       "invalid_dates": "Please check the trip dates.",
-      "needs_migration": "Business trips are not enabled in this environment yet.",
+      "needs_migration": "Not available right now.",
       "not_authorized": "You cannot do that for this trip.",
       "not_found": "This trip was not found.",
       "not_editable": "This trip is in a state where that step is not possible.",
@@ -15948,7 +16255,7 @@
     "title": "Training and certificates",
     "intro": "Courses your organization asks people to complete, and the certificates that follow.",
     "evidenceNote": "A certificate here shows that a course was finished. It does not say how well someone works — that stays your work entries and your manager's confirmations.",
-    "notAvailable": "Training is not switched on in this workspace yet.",
+    "notAvailable": "Not available right now.",
     "status": {
       "assigned": "To do",
       "completed": "Done",
@@ -16010,7 +16317,7 @@
       "invalid_file": "That file is not in your organization.",
       "invalid_skill": "That skill was not found.",
       "invalid_state": "That cannot be done at this step.",
-      "needs_migration": "Training is not switched on in this workspace yet.",
+      "needs_migration": "Not available right now.",
       "not_authorized": "You do not have the rights for this.",
       "not_found": "Not found.",
       "limit_reached": "There is too much here already.",
@@ -16021,7 +16328,7 @@
     "title": "Development conversations",
     "intro": "A recorded conversation between two named people about work and what comes next.",
     "noScoreNote": "There is no rating, no score and no ranking here — by design. Everything below is either a recorded fact, a link to real work, or one person's own words, clearly labelled.",
-    "notAvailable": "Development conversations are not switched on in this workspace yet.",
+    "notAvailable": "Not available right now.",
     "empty": "No conversation involves you yet.",
     "cycles": {
       "heading": "Periods",
@@ -16087,7 +16394,7 @@
       "invalid_subject": "That person is not in your organization.",
       "invalid_reviewer": "That person cannot be the reviewer.",
       "invalid_reference": "That link does not point at real work of this person.",
-      "needs_migration": "Development conversations are not switched on in this workspace yet.",
+      "needs_migration": "Not available right now.",
       "not_authorized": "You do not have the rights for this.",
       "not_found": "Not found.",
       "limit_reached": "There is too much here already.",
@@ -16098,7 +16405,7 @@
     "title": "Management decisions",
     "intro": "What was put to the management team, what was decided, who is responsible and by when.",
     "engineNote": "The vote happens in the approvals list above: a template that needs every approver is a unanimous vote, one that needs any approver is decided by the first answer. Nothing here counts votes.",
-    "notAvailable": "Management decisions are not switched on in this workspace yet.",
+    "notAvailable": "Not available right now.",
     "empty": "No decisions recorded yet.",
     "form": {
       "title": "Question",
@@ -16151,7 +16458,7 @@
       "invalid_document": "That document is not in your organization.",
       "invalid_task": "That task is not yours.",
       "invalid_responsible": "That person is not in your organization.",
-      "needs_migration": "Management decisions are not switched on in this workspace yet.",
+      "needs_migration": "Not available right now.",
       "not_authorized": "You do not have the rights for this.",
       "not_found": "Not found.",
       "limit_reached": "There is too much here already.",
@@ -16169,7 +16476,7 @@
     "badge": "Preview / Owner review · sample data only",
     "workers": {
       "title": "Worker cards",
-      "description": "Premium player-card-style worker tiles. Geometric monogram fallback — never synthesises a face.",
+      "description": "Polished worker profile tiles. Geometric monogram fallback — never synthesises a face.",
       "listLabel": "Sample worker cards"
     },
     "jobs": {
@@ -16300,10 +16607,11 @@
       "generic": "Could not save. Please try again."
     },
     "states": {
-      "needsMigration": "This feature is not enabled on this database yet.",
-      "noCompany": "Switch to a company workspace.",
+      "needsMigration": "Not available right now.",
+      "noCompany": "This area is for a company workspace. Record your own hours in the Work Journal.",
       "noObjects": "There are no sites yet to record today's hours against.",
-      "error": "Could not load this day."
+      "error": "Could not load this day.",
+      "noCompanyJournalLink": "Open the Work Journal"
     },
     "import": {
       "entryLink": "Import hours from a spreadsheet (.xlsx)",
@@ -16370,7 +16678,7 @@
         "duplicatesFound": "Identical existing entries: {count}. Nothing was written — tick the override to write them anyway.",
         "noRows": "No rows to write.",
         "tooManyRows": "Too many rows for one import — split the file.",
-        "needsMigration": "This feature is not enabled on this database yet.",
+        "needsMigration": "Not available right now.",
         "notAuthorized": "You may not record these hours.",
         "generic": "Could not process. Please try again."
       }
@@ -16448,7 +16756,7 @@
       "notAMember": "That organization is not one of yours. Choose one of these:",
       "chooseOrganization": "You belong to more than one organization. Choose which one is supplying this evidence:",
       "notAuthorized": "Your role in this organization does not include importing evidence. An owner, administrator or manager can do it.",
-      "needsMigration": "The evidence store is not switched on in this environment yet. The database change is prepared and waiting for the owner's approval; nothing was written.",
+      "needsMigration": "The evidence store is not switched on in this environment yet; nothing was written.",
       "unavailable": "The evidence store could not be read. This is a system problem, not an empty organization."
     },
     "form": {
@@ -17030,7 +17338,7 @@
       "notAMember": "You are not a member of that organisation.",
       "chooseOrganization": "You manage more than one organisation. Choose which one you are acting for.",
       "notAuthorized": "You do not have a role in this organisation that may see its people.",
-      "needsMigration": "The people store is not enabled in this environment yet.",
+      "needsMigration": "Not available right now.",
       "unavailable": "The people list could not be read. This is not the same as an empty roster — try again shortly."
     },
     "offer": {
@@ -17054,7 +17362,7 @@
     "detected": "{count} people found in {file}",
     "duplicates": "{count} repeated in the file",
     "errFailed": "That did not go through, and nothing was saved. Try again in a moment.",
-    "errNeedsMigration": "That relationship is not available in this environment yet.",
+    "errNeedsMigration": "Not available right now.",
     "errNoName": "No column in this file says who the people are. Add a header like “Name” and attach it again.",
     "errNotAuthorized": "You are not able to add people for this organisation.",
     "errNothing": "Nothing could be read from that file.",
@@ -17171,6 +17479,7 @@
     "needs": "Needs",
     "calendar": "Calendar",
     "partners": "Clients & partners",
+    "market": "Marketplace",
     "education": "Learning",
     "history": "History",
     "settings": "Settings",
@@ -17282,7 +17591,7 @@
       "invalid_role": "Invalid role.",
       "last_owner": "The last owner cannot step down — activate another owner first.",
       "no_workspace": "Select an organization workspace first.",
-      "needs_migration": "This capability is not enabled in this environment yet.",
+      "needs_migration": "Not available right now.",
       "invalid": "Invalid input.",
       "error": "Something failed — try again."
     },
@@ -17336,7 +17645,7 @@
     "cancel": "Cancel",
     "doneSelf": "You left this team.",
     "doneOwner": "Removed from the roster.",
-    "needsMigration": "Ending a roster link isn't switched on in this environment yet.",
+    "needsMigration": "Not available right now.",
     "notFound": "This link no longer exists or you may not end it.",
     "failed": "Could not end the link. Try again.",
     "readFailed": "Your teams could not be read right now. This is not a claim that you are on none."
@@ -17516,7 +17825,7 @@
     "play": "Play",
     "next": "Next moment",
     "previous": "Previous moment",
-    "cardLabel": "Professional card",
+    "cardLabel": "Professional profile",
     "cardNote": "A real work history that travels with the person.",
     "cardSections": {
       "work": "Real work",
@@ -17633,6 +17942,228 @@
           }
         }
       }
+    }
+  },
+  "companyWorkHistory": {
+    "title": "Imported company work history",
+    "subtitle": "What {name} has on record from its own past timesheets: where the work was, when, who worked there, what was done and for how long.",
+    "badge": "Imported company history",
+    "provenance": "Taken from {name}'s own timesheet. The people did not use LabourMarket.ai when this work was done, and it is not independently verified.",
+    "unavailable": "The imported work history could not be read right now. That does not mean there is none.",
+    "empty": "{name} has no imported work history on record.",
+    "elsewhere": "{name} holds {count, plural, one {# imported record} other {# imported records}} of past work. Switch to that workspace to see it.",
+    "stats": {
+      "places": "Places",
+      "people": "People",
+      "hours": "Hours on record",
+      "period": "Period"
+    },
+    "place": "Place",
+    "noPlaceName": "No place stated",
+    "open": "Open",
+    "people": "{count, plural, one {# person} other {# people}}",
+    "entries": "{count, plural, one {# entry} other {# entries}}",
+    "hoursShare": "{hours} h on this place, compared with the busiest place",
+    "noPlace": "{count, plural, one {# entry} other {# entries}} ({hours} h) in the source name no place.",
+    "periodAside": "Of this, {hours} h are period totals stated for a span, kept apart from single days.",
+    "scope": {
+      "title": "What this import carries",
+      "carried": "Carried by the source: who worked, on which day, how many hours, what was done and the place as written.",
+      "missing": "Not in the source: the customer, the street address and the project. They are shown as not in the source and are never filled in."
+    },
+    "facts": {
+      "customer": "Customer",
+      "address": "Address",
+      "project": "Project",
+      "notInSource": "Not in the source",
+      "linked": "Linked"
+    },
+    "whoWorked": "Who worked here",
+    "timeline": "What was done",
+    "back": "Back to history",
+    "placeMissing": "This place is not in the imported history of the active workspace.",
+    "attributedNote": "Includes {count, plural, one {# record} other {# records}} kept in another organization's books and attributed here as the performing company.",
+    "attribution": {
+      "title": "Who performed this work?",
+      "intro": "Work stored in this organization's books can be attributed to another organization of yours as the performing company. Nothing is moved or copied: the records stay as they are and the other organization can read them.",
+      "performedBy": "Performed by",
+      "note": "Note (optional), for example the stated share of hours",
+      "button": "Attribute",
+      "progress": "{attributed} of {total} attributed to {name}",
+      "done": "Attributed {count} records; {skipped} were already attributed.",
+      "refused": "This could not be saved. Nothing was changed.",
+      "person": "{hours} h, {count, plural, one {# record} other {# records}}"
+    }
+  },
+  "workLifecycle": {
+    "pending": "Not yet",
+    "title": "What happens to the work you do",
+    "titleCompany": "What happens to the work you run",
+    "example": "Example — not a real person or real data",
+    "hint": "Select a step. Every step opens the real place in your workspace.",
+    "open": "Open in your workspace",
+    "list": "Work lifecycle steps",
+    "workers": {
+      "person": {
+        "label": "You",
+        "fact": "Cook · professional identity",
+        "detail": "One professional identity that is yours — not tied to a single employer."
+      },
+      "team": {
+        "label": "Team",
+        "fact": "Kitchen team",
+        "detail": "You join a real team, with the people you work with and who leads it."
+      },
+      "project": {
+        "label": "Project",
+        "fact": "Autumn menu launch",
+        "detail": "Work belongs to a project, so it has a place, a purpose and a time."
+      },
+      "work": {
+        "label": "Work",
+        "fact": "Evening service · 8 h",
+        "detail": "What you did, when and for how long — recorded as it happens."
+      },
+      "evidence": {
+        "label": "Evidence",
+        "fact": "Photo + journal entry",
+        "detail": "Completed work becomes evidence instead of disappearing."
+      },
+      "confirmation": {
+        "label": "Confirmed",
+        "fact": "Confirmed by manager",
+        "detail": "A manager confirms it. Nothing is called verified without that."
+      },
+      "history": {
+        "label": "History",
+        "fact": "Added to your history",
+        "detail": "Confirmed work builds your professional history — it stays with you for the next job."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Need",
+        "fact": "4 cooks, from Monday",
+        "detail": "You state the real need once: who, where and from when."
+      },
+      "people": {
+        "label": "People",
+        "fact": "Professionals who fit",
+        "detail": "Professionals whose real work history fits the need — with what is verified and what is not yet."
+      },
+      "team": {
+        "label": "Team",
+        "fact": "Kitchen team",
+        "detail": "People become a team with a lead, shifts and a place to work."
+      },
+      "project": {
+        "label": "Project",
+        "fact": "Autumn menu launch",
+        "detail": "Teams are organised around the project they deliver."
+      },
+      "work": {
+        "label": "Work",
+        "fact": "Evening service · 8 h",
+        "detail": "Work is recorded where it happens, not rebuilt afterwards."
+      },
+      "confirmation": {
+        "label": "Confirmed",
+        "fact": "Awaiting your confirmation",
+        "detail": "You see what still needs confirming and what is already done."
+      },
+      "report": {
+        "label": "Report",
+        "fact": "Report from real work",
+        "detail": "Reports come from confirmed work — nobody retypes them."
+      }
+    }
+  },
+  "twoSides": {
+    "title": "Hiring is the start, not the end.",
+    "professional": "Professional",
+    "company": "Company",
+    "steps": {
+      "find": {
+        "label": "Find",
+        "worker": "Finds work that fits what they really did",
+        "company": "Finds people whose real work fits the need"
+      },
+      "connect": {
+        "label": "Connect",
+        "worker": "Talks in their own language",
+        "company": "Hires through a real conversation"
+      },
+      "work": {
+        "label": "Work",
+        "worker": "Records the work as it happens",
+        "company": "Runs the work with its people"
+      },
+      "verify": {
+        "label": "Verify",
+        "worker": "A manager confirms it",
+        "company": "Confirms what was really done"
+      },
+      "grow": {
+        "label": "Grow",
+        "worker": "Confirmed work becomes their history",
+        "company": "Reports come from confirmed work"
+      },
+      "continue": {
+        "label": "Continue",
+        "worker": "Takes that history to the next job",
+        "company": "Plans the next project with people it knows"
+      }
+    }
+  },
+  "evidenceChain": {
+    "label": "Record status",
+    "own": "By you",
+    "nodes": {
+      "recorded": "Recorded",
+      "photo": "Photo",
+      "manager": "Manager's record",
+      "history": "In your history"
+    },
+    "status": {
+      "done": "Done",
+      "waiting": "Waiting",
+      "absent": "Not yet",
+      "attention": "Needs you",
+      "unknown": "Unknown"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Living CV",
+    "title": "Your work, becoming your history",
+    "now": "Now",
+    "noRecords": "No work records yet",
+    "legend": {
+      "managerRecord": "Manager's record",
+      "recorded": "Recorded by you"
+    },
+    "skillsTitle": "What your work shows",
+    "next": {
+      "title": "Your history goes with you",
+      "body": "Every job you record adds to it. Take it to the next opportunity.",
+      "cta": "See where you can go"
+    }
+  },
+  "workContext": {
+    "title": "Your work, in one view",
+    "nodes": {
+      "current": "Working now",
+      "records": "Records",
+      "manager": "Manager's record",
+      "history": "History",
+      "skills": "Skills",
+      "next": "Next"
+    },
+    "facts": {
+      "records": "{count, plural, one {# record} other {# records}}",
+      "manager": "{count, plural, one {# manager's record} other {# manager's records}}",
+      "history": "{count, plural, one {# job} other {# jobs}}",
+      "skills": "{count, plural, one {# skill backed by your records} other {# skills backed by your records}}",
+      "next": "Where you can go"
     }
   }
 }

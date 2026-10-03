@@ -626,18 +626,23 @@ export const FROZEN_LANDING_FILES = [
   // Owner decision 2026-08-20: the living European labour-market command is
   // the production V1. Freeze the actual root composition, its shared server
   // assembler, cinematic client, styling and governed public-data reader.
+  // Owner decision 2026-09-30: the LIVE arm — its route (live-market-page,
+  // live-market-command + its stylesheet), the mode contract
+  // (landing-experience.ts) and the FOCUS switcher (+ its stylesheet) — was
+  // REMOVED from the landing, so those files left this frozen set with it.
+  // The shared market reader stays frozen: the landing bands still read it.
+  // The regeneration dropped exactly those six file hashes and moved one —
+  // focus-landing.tsx (the switcher's import and mount removed) — and ZERO
+  // namespace hashes: no copy moved. (page.tsx and the "/" surface-registry
+  // entry still describe two arms in prose; they are covered by the
+  // public-acquisition-route-landing-v1 owner waiver and are updated only
+  // when that waiver is extended by the owner.)
   "app/[locale]/page.tsx",
-  "app/[locale]/live-market-review/live-market-page.tsx",
-  "app/[locale]/live-market-review/live-market-command.tsx",
-  "app/[locale]/live-market-review/live-market-command.module.css",
   "lib/market/live-market-landing.ts",
-  "lib/telemetry/landing-experience.ts",
   // Owner approval 2026-08-22: FOCUS is the RESTORED previous production
-  // landing, so its composition, its switcher and the original components
-  // it renders are part of the landing render tree again.
+  // landing, so its composition and the original components it renders are
+  // part of the landing render tree again.
   "app/[locale]/focus-landing/focus-landing.tsx",
-  "app/[locale]/focus-landing/landing-mode-switcher.tsx",
-  "app/[locale]/focus-landing/landing-mode-switcher.module.css",
   // Frozen design contract 2026-09-05, P1: the public entry (component + the
   // pure read-only hook into the conversation router) replaces the scripted
   // hero scenario at the top of the render tree.
@@ -690,6 +695,10 @@ export const FROZEN_LANDING_FILES = [
   // 2026-09-30 (owner review 3, final polish): a pose change is a motion cut
   // (one body on screen, never a dissolve), and the Player Card became one
   // identity object — the person closed, the identity unfolding when open.
+  // The regeneration touched EXACTLY ONE hash — living-worker-hero.tsx.
+  // 2026-09-30 (owner visual direction: heads were cut): tight source frames
+  // recomposed with safe space above the head (media), and a head-safety
+  // rule in the camera so holding the face never pushes a head out of frame.
   // The regeneration touched EXACTLY ONE hash — living-worker-hero.tsx.
   "components/marketing/living-worker-hero.tsx",
   "lib/marketing/living-worker-hero.ts",

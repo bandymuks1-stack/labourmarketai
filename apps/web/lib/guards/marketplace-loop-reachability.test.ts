@@ -63,7 +63,7 @@ describe("the door: the loop hangs off a primary nav tab that really exists", ()
     // collapsed disclosure, because the primary nav tabs are invisible to
     // non-admins (the R-11 point in the comment above).
     const fullMapLink = page.indexOf('data-testid="opportunities-map-full-link"');
-    const firstDetails = page.indexOf("<details");
+    const firstDetails = page.indexOf('data-testid="opportunities-market-situation"');
     expect(fullMapLink).toBeGreaterThan(-1);
     expect(fullMapLink).toBeLessThan(firstDetails);
     expect(page).toMatch(/href=\{`\/\$\{locale\}\/dashboard\/market-map`\}/);

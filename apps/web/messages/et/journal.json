@@ -30,6 +30,11 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Valige seotus…",
   "engagementAmbiguous": "See töö võib kuuluda rohkem kui ühe seotuse alla. Valige enne salvestamist, millise.",
+  "project": "Projekt",
+  "projectChoose": "Valige projekt…",
+  "projectNone": "Pole projektitöö",
+  "projectAmbiguous": "Teid on määratud mitmele projektile. Enne salvestamist valige, millisele projektile need tunnid kuuluvad (või märkige, et see pole projektitöö).",
+  "projectAuto": "Projekt: {name}",
   "unconfirmedTimeBlocked": "{count} registreeritud kestust ootab veel ülevaatamist ega salvestuks. Jätke need alles või eemaldage.",
   "entry": {
     "status": {
@@ -243,7 +248,11 @@
     "sessionExpired": "Seanss on aegunud. Palun logige uuesti sisse.",
     "noWorkerProfile": "Töötaja profiili ei leitud. Avage konto seaded ja lülitage töötaja roll sisse.",
     "engagementRequired": "Valige töökontekst (organisatsioon või projekt), kuhu see sissekanne kuulub.",
+    "projectNotAssignable": "Valitud projekt pole teile määratud või kuulub teisele organisatsioonile. Valige projekt nimekirjast.",
     "notesRequired": "Kirjeldage, mida tegite — vaba tekst on sissekande alus.",
+    "workDateRequired": "Valige päev, mil see töö tehti.",
+    "workDateInvalid": "Töö kuupäev ei ole kehtiv kuupäev.",
+    "workDateFuture": "Töö kuupäev ei tohi olla tulevikus.",
     "quantityInvalid": "Kogus peab olema mittenegatiivne arv.",
     "unitSlugUnknown": "Seda ühikut ei tunta veel ära: {units}. Valige teine ühik või proovige hiljem uuesti.",
     "sourceDocumentInvalid": "Viidatud lähtedokumenti sinu dokumentide hulgast ei leitud.",

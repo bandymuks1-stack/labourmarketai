@@ -1,0 +1,120 @@
+# Norway supply cadence (NAV / Arbeidsplassen.no `pam-stilling-feed`).
+#
+# SEPARATE from sweden-supply-cadence.yml on purpose: that workflow hard-codes
+# the Swedish provider, so nothing there can ever call NAV. NAV has
+# its own cadence (the feed is a two-level, path-cursor feed of ~1,500
+# changes/day), its own gate, its own concurrency group and its own failure
+# surface, so a Norway failure never hides behind a Sweden green check and
+# vice versa.
+#
+# INERT BY DEFAULT. This workflow no-ops until BOTH are configured in the
+# GitHub console (never by committing a value):
+#   secrets:   SUPABASE_SERVICE_ROLE_KEY, NEXT_PUBLIC_SUPABASE_URL,
+#              VACANCY_SOURCE_NAV_API_TOKEN   (NAV's private production token)
+#   variables: VACANCY_SOURCE_NAV_ENABLED=true
+#              VACANCY_SCHEDULE_ENABLED=true  (shared kill switch, as Sweden)
+#
+# It invokes EXACTLY the canonical operator runner: the same cursor discipline,
+# bounded pages per session, lifecycle withdrawals (INACTIVE / 404 / 410 ->
+# is_active=false: NAV's terms require immediate removal), chunked writes and
+# failure semantics. The cursor is the feed's own continuation token, so each
+# run resumes where the last stopped; the first runs walk the bounded cold-start
+# window forward, later runs poll the head. contactList is never read.
+# Kill switch: unset/false VACANCY_SCHEDULE_ENABLED or VACANCY_SOURCE_NAV_ENABLED.
+name: nav-supply-cadence
+
+on:
+  schedule:
+    # Every 10 minutes. NAV documents ~2 minute polling as the intended
+    # rhythm; GitHub's scheduler is best-effort and drops sub-5-minute
+    # crons, and the removal duty is "promptly", so 10 minutes is the
+    # smallest interval this platform honours reliably.
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "dry_run = fetch + parse + validate, NO write (bounded); persist = write"
+        type: choice
+        options:
+          - dry_run
+          - persist
+        default: dry_run
+
+concurrency:
+  group: nav-supply-cadence
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Kill switch / configuration gate
+        id: gate
+        env:
+          SCHEDULE_ENABLED: ${{ vars.VACANCY_SCHEDULE_ENABLED }}
+          PROVIDER_ENABLED: ${{ vars.VACANCY_SOURCE_NAV_ENABLED }}
+          HAS_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
+          HAS_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL != '' }}
+          HAS_TOKEN: ${{ secrets.VACANCY_SOURCE_NAV_API_TOKEN != '' }}
+        run: |
+          if [ "$SCHEDULE_ENABLED" != "true" ] || [ "$PROVIDER_ENABLED" != "true" ] || [ "$HAS_KEY" != "true" ] || [ "$HAS_URL" != "true" ] || [ "$HAS_TOKEN" != "true" ]; then
+            echo "configuration_gated=true" >> "$GITHUB_OUTPUT"
+            echo "Inert: NAV schedule/provider variables or secrets not configured. This is the designed no-op state."
+          else
+            echo "configuration_gated=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        if: steps.gate.outputs.configuration_gated == 'false'
+
+      - uses: pnpm/action-setup@v6
+        if: steps.gate.outputs.configuration_gated == 'false'
+
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.configuration_gated == 'false'
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        if: steps.gate.outputs.configuration_gated == 'false'
+        run: pnpm install --frozen-lockfile
+
+      - name: Bounded NAV stream session (canonical operator runner)
+        if: steps.gate.outputs.configuration_gated == 'false'
+        working-directory: apps/web
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          VACANCY_SOURCE_NAV_ENABLED: "true"
+          VACANCY_SOURCE_NAV_API_TOKEN: ${{ secrets.VACANCY_SOURCE_NAV_API_TOKEN }}
+          # Schedule events carry no inputs: empty falls back to persist, the
+          # cadence's purpose. A manual run defaults to dry_run.
+          IMPORT_MODE: ${{ inputs.mode || 'persist' }}
+        run: |
+          # pipefail is load-bearing: without it the pipeline's status is
+          # tee's (always 0) and a runner crash shows a green check.
+          set -o pipefail
+          if [ "$IMPORT_MODE" = "persist" ]; then
+            pnpm tsx --conditions=react-server scripts/vacancy-operator-run.ts \
+              --provider nav --channel stream --mode persist \
+              --apply --i-understand-this-writes-production | tee run-accounting.json
+          else
+            pnpm tsx --conditions=react-server scripts/vacancy-operator-run.ts \
+              --provider nav --channel stream --mode dry_run | tee run-accounting.json
+          fi
+
+      - name: Upload accounting artifact
+        # always(): a red run is exactly when the accounting matters most. The
+        # accounting never contains the token (guard-pinned: the runner and the
+        # importer log/event types cannot carry one).
+        if: always() && steps.gate.outputs.configuration_gated == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nav-run-accounting-${{ github.run_id }}
+          path: apps/web/run-accounting.json
+          retention-days: 30

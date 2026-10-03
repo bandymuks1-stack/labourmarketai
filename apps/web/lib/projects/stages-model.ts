@@ -34,3 +34,33 @@ export type ProjectStagesData =
 export function isStageStatus(v: unknown): v is StageStatus {
   return typeof v === "string" && (STAGE_STATUSES as readonly string[]).includes(v);
 }
+
+const ISO_DAY_RX = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Local calendar date "YYYY-MM-DD" (NOT toISOString — that is UTC and would
+ *  stamp tomorrow/yesterday near midnight). */
+export function localIsoDay(d: Date = new Date()): string {
+  const p = (n: number) => (n < 10 ? `0${n}` : `${n}`);
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+/**
+ * Which ACTUAL dates a status change should record. update_project_stage_v1
+ * does `coalesce(p_actual_*, actual_*)`, so passing a date would OVERWRITE an
+ * existing one — therefore a date is returned only when the stored value is
+ * empty. Moving to in_progress records the start, to done records the end.
+ * Reopening (any other status) returns nothing and the RPC's coalesce never
+ * clears a stored date, so nothing is erased silently.
+ */
+export function actualDateParams(
+  status: string,
+  existing: { actualStart: string | null; actualEnd: string | null },
+  today: string,
+): { p_actual_start: string | null; p_actual_end: string | null } {
+  const day = ISO_DAY_RX.test(today) ? today : null;
+  return {
+    p_actual_start:
+      status === "in_progress" && !existing.actualStart && day ? day : null,
+    p_actual_end: status === "done" && !existing.actualEnd && day ? day : null,
+  };
+}

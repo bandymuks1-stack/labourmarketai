@@ -5,7 +5,10 @@ import {
   getSpineCounts,
 } from "@/lib/notifications/spine";
 import { buildSpineNotifications } from "@/lib/notifications/spine-signals";
-import { maybeEmitWeeklyDigestInBackground } from "@/lib/notifications/event-emitters";
+import {
+  maybeEmitJobAlertsInBackground,
+  maybeEmitWeeklyDigestInBackground,
+} from "@/lib/notifications/event-emitters";
 import { SpineHydrator } from "@/components/app/spine-hydrator";
 import type { Notification } from "@/lib/auth/context";
 
@@ -45,6 +48,10 @@ export async function SpineStream({ activeRole }: { activeRole: Role | null }) {
   // exactly-once. Write-path emitters are awaited instead; see the
   // READ-TIME DETACHED notes in lib/notifications/event-emitters.ts.
   maybeEmitWeeklyDigestInBackground(durable);
+  // Job alerts (stream N): real active jobs that fit the worker's own stated
+  // profession + countries + salary, exactly-once per job revision. Detached
+  // for the same reason as the digest above.
+  maybeEmitJobAlertsInBackground();
   // Durable rows render under the SAME bell — one attention surface, two
   // honest row kinds. They clear by marking read (`durable: true`), and they
   // ALSO carry the surface their entity lives on (`href`), so "your absence

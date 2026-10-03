@@ -1511,6 +1511,22 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260930110000_discovered_organizations_v1.sql",
       // owner 2026-09-30: PASVINTINIAI duplicate marked, nothing deleted.
       "20260930120000_project_duplicate_marker_v1.sql",
+      // owner 2026-09-30 (D1 #2015 APPROVED): a worker photo for real work relationships.
+      "20260930133500_worker_avatar_path_for_relations_v1.sql",
+      // owner 2026-10-01 (#2041 APPROVED): the human decision on a staffing collision is audited.
+      "20261001100000_assignment_decision_audit_v1.sql",
+      // stream N (owner approval PENDING): service_role SELECT for the job-alert sweep.
+      "20261001120000_job_alert_sweep_service_role_select.sql",
+      // owner 2026-10-01 (#2065 APPROVED in chat): board reads without parallel workers; drop the unused 129 MB GIN.
+      "20261001180000_public_vacancy_board_no_parallel_v1.sql",
+      "20261001180100_drop_unused_vacancy_fulltext_gin_v1.sql",
+      "20261002120000_journal_explicit_project_attribution_v1.sql",
+      // 2026-10-03: SECURITY forward-fix (NULL-safe authorization guards, auth-core) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      "20261002141500_work_task_authz_null_safe_v1.sql",
+      // 2026-10-03: EVID-6 policy narrowing (experience_responses_select resolves the reply moderation status) — marker is the human-gate acknowledgement; draft + needs-human-gate, NOT applied.
+      "20261002143000_experience_responses_select_reply_status_v1.sql",
+      // 2026-10-03: #1815/ARCH-4 disclosure-authority forward fix (list_agency_offered_candidates_for_request_v2 regains the connection/share gate) — marker is the human-gate acknowledgement.
+      "20261003100000_list_agency_offered_candidates_v2_connection_gate_v1.sql",
 ]);
   });
 

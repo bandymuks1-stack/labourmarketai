@@ -221,6 +221,55 @@ async function locate(file) {
   throw new Error(`could not locate the person in ${file}`);
 }
 
+// --recompose persona:key[,persona:key…]: the SAME photograph — same person,
+// pose, clothes, place, light and moment — with the camera a step further
+// back, so there is safe space above the head and around the whole figure on
+// every screen (owner 2026-09-30: the camera may never fix a tight source by
+// cropping the person harder). The moment keeps its file names; the previous
+// raw is kept beside it as <key>.before.png. Run --focus after.
+const RECOMPOSE = (arg("recompose") ?? "")
+  .split(",")
+  .filter(Boolean)
+  .map((s) => {
+    const [persona, key] = s.split(":");
+    return { persona, key };
+  });
+if (RECOMPOSE.length > 0) {
+  for (const { persona: id, key } of RECOMPOSE) {
+    const stages = manifest.personas[id]?.stages ?? [];
+    const at = stages.findIndex((s) => s.key === key);
+    const rawFile = join(RAW, `${id}-${key}.png`);
+    const before = readIf(rawFile);
+    if (at < 0 || !before) throw new Error(`recompose ${id}:${key}: stage or raw missing`);
+    process.stdout.write(`  recompose ${id} ${key} … `);
+    const raw = await generate([
+      {
+        text:
+          `${KEEP}\n\nRecompose THIS photograph as a clearly wider shot of the very same moment — about a quarter more ` +
+          `of the scene on every side, as if the camera stepped back: the person noticeably smaller in the frame, nothing ` +
+          `else different — the same person, pose, gesture, clothing, tools, place, background, light and colour, and ` +
+          `EVERY other person already in the photograph stays, in the same place. Leave clear empty space ABOVE the head ` +
+          `(at least one sixth of the frame height, hair and any helmet fully inside with room to spare) and around the ` +
+          `whole figure; the person stays in the central third. Extend the existing scene naturally where the wider view ` +
+          `reveals more of it.\n\n${LOOK}`,
+      },
+      asPart(before),
+    ]);
+    writeFileSync(join(RAW, `${id}-${key}.before.png`), before);
+    writeFileSync(rawFile, raw);
+    const stem = stages[at].stem;
+    const dir = join(PUBLIC, id);
+    for (const w of [1920, 960]) {
+      await sharp(raw).resize({ width: w }).webp({ quality: w > 1000 ? 80 : 76 }).toFile(join(dir, `${stem}-${w}.webp`));
+    }
+    const { width, height } = await sharp(raw).metadata();
+    stages[at] = { ...stages[at], width, height };
+    writeFileSync(MANIFEST, JSON.stringify(manifest, null, 2) + "\n");
+    console.log("ok");
+  }
+  process.exit(0);
+}
+
 if (BRIDGES.length > 0) {
   for (const { persona: id, from, to } of BRIDGES) {
     const stages = manifest.personas[id]?.stages ?? [];

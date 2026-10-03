@@ -1,3 +1,4 @@
+import { readOwnConfirmedWorkTotals } from "@/lib/evidence/confirmed-work-read";
 import "server-only";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
 import { orgDisplayName } from "@/lib/company/org-display";
@@ -253,6 +254,13 @@ export type VerifiedCvData = {
    * `recordedHoursBySkill`; `null` exactly when that map is null.
    */
   confirmedHoursBySkill: Record<string, number> | null;
+  /**
+   * Real work a manager confirmed, as FACTS: how many live entries were
+   * independently confirmed and across how many distinct work days. Not a
+   * score and not a skill certification. `null` = unreadable (never a zero);
+   * `{entries: 0}` = readable and none.
+   */
+  confirmedWorkTotals: { entries: number; days: number } | null;
   /** All-time recorded hours (every entry once), or null when unreadable. */
   recordedHoursTotal: number | null;
   /** Of the total, hours a manager/client confirmed. */
@@ -432,6 +440,13 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
     (projectNamesRes.data ?? []).map((p) => [p.id, p.name?.trim() || null] as const),
   );
   // The journal's per-context figures (canonical reader; null = unreadable).
+  // Real work a manager independently confirmed, as facts (entries + distinct
+  // work days). One bounded read as the worker; null = unreadable, not zero.
+  const confirmedWorkTotals = await readOwnConfirmedWorkTotals(
+    supabase,
+    workerId,
+    user.id,
+  );
   const recordedByContext = workIntelligence
     ? new Map(
         workIntelligence.contexts
@@ -820,6 +835,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
             truncated: workIntelligence.coverage.truncated,
           }
         : null,
+      confirmedWorkTotals,
       recordedHoursTotal: workIntelligence ? workIntelligence.totalHours : null,
       recordedHoursConfirmed: workIntelligence
         ? (workIntelligence.periods.find((p) => p.key === "all")?.confirmedHours ?? null)

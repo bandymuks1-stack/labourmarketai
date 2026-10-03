@@ -13,7 +13,9 @@ import { describe, expect, it } from "vitest";
  *   1. the example chips under the sentence field were CUT with an ellipsis
  *      ("Reikia darbuo…", "Turime laisvų …", "Užrašyti atlikt…");
  *   2. the fixed LIVE/FOCUS control (144×54px) covered the counter line at
- *      the fold, a chip of the lower sample job card, and the footer;
+ *      the fold, a chip of the lower sample job card, and the footer — the
+ *      control was later removed with the LIVE arm (owner decision
+ *      2026-09-30), so the pin is now that nothing of it is mounted;
  *   3. two sample job cards were pixel-identical for two different vacancies
  *      — pinned by fixtures in lib/market/live-market-landing.test.ts, and
  *      only its wiring is checked here.
@@ -61,16 +63,6 @@ function cuttingClassIn(className: string): string | null {
     if (CUTTING_UTILITIES.some((cut) => utility.startsWith(cut))) return token;
   }
   return null;
-}
-
-/** The `.modeSwitcher` declaration block inside the phone media query. */
-function phoneRuleOf(css: string): string | null {
-  const q = css.indexOf("@media (max-width: 640px)");
-  if (q < 0) return null;
-  const block = css.slice(q);
-  const sel = block.indexOf(".modeSwitcher");
-  if (sel < 0) return null;
-  return block.slice(sel, block.indexOf("}", sel) + 1);
 }
 
 describe("1. the example chips wrap — the label is never cut", () => {
@@ -188,57 +180,17 @@ describe("1. the example chips wrap — the label is never cut", () => {
   });
 });
 
-describe("2. on a phone the LIVE/FOCUS control is in the flow, never over the page", () => {
-  const css = read("app/[locale]/focus-landing/landing-mode-switcher.module.css");
+describe("2. nothing floats over the landing on a phone — the LIVE/FOCUS control is gone", () => {
   const focus = code(read("app/[locale]/focus-landing/focus-landing.tsx"));
 
-  it("below `sm` the control leaves the viewport corner and takes its place in the page", () => {
-    const rule = phoneRuleOf(css);
-    expect(rule, "no .modeSwitcher rule under @media (max-width: 640px)").toBeTypeOf("string");
-    expect(rule).toMatch(/position:\s*static/);
-    expect(rule).not.toMatch(/position:\s*fixed/);
-    // Right-aligned in the flow, with room above it.
-    expect(rule).toMatch(/margin:[^;]*\bauto\b/);
+  it("the landing mounts no mode switcher and imports none", () => {
+    expect(focus).not.toContain("LandingModeSwitcher");
+    expect(focus).not.toContain("landing-mode-switcher");
   });
 
-  it("from `sm` up it is docked exactly as before, and clear of the device's safe area", () => {
-    const base = css.slice(css.indexOf(".modeSwitcher {"));
-    const docked = base.slice(0, base.indexOf("}"));
-    expect(docked).toMatch(/position:\s*fixed/);
-    expect(docked).toMatch(/z-index:\s*60/);
-    expect(docked).toMatch(/bottom:\s*calc\([^;]*env\(safe-area-inset-bottom/);
-  });
-
-  it("NEGATIVE CONTROL — the pre-2026-09-24 phone rule (a 600px corner offset) fails", () => {
-    const old = ".modeSwitcher { position: fixed; bottom: 10px; }\n@media (max-width: 600px) { .modeSwitcher { right: 10px; bottom: 10px; } }";
-    expect(phoneRuleOf(old)).toBeNull();
-    // …and a 640px rule that merely moves the offsets still fails.
-    const offsetsOnly = "@media (max-width: 640px) { .modeSwitcher { right: 10px; bottom: 10px; } }";
-    expect(phoneRuleOf(offsetsOnly)).not.toMatch(/position:\s*static/);
-  });
-
-  it("the page mounts the control at the END of the landing body — after the closing band, inside <main>, before the footer", () => {
-    const mount = focus.indexOf("<LandingModeSwitcher />");
-    expect(mount).toBeGreaterThan(0);
-    expect(mount).toBeGreaterThan(focus.indexOf("<LandingClosingBand"));
-    expect(mount).toBeLessThan(focus.indexOf("</main>"));
-    expect(mount).toBeLessThan(focus.indexOf("<SiteFooter />"));
-    // Once: the control is not duplicated for the phone.
-    expect(focus.match(/<LandingModeSwitcher \/>/g)).toHaveLength(1);
-  });
-
-  it("NEGATIVE CONTROL — the pre-2026-09-24 mount (after the footer) fails the placement check", () => {
-    const old = "<main>\n<LandingClosingBand locale={locale} />\n</main>\n<SiteFooter />\n<LandingModeSwitcher />";
-    expect(old.indexOf("<LandingModeSwitcher />")).toBeGreaterThan(old.indexOf("</main>"));
-  });
-
-  it("its behaviour did not move: one explicit writer, a reload, the same name", () => {
-    const switcher = read("app/[locale]/focus-landing/landing-mode-switcher.tsx");
-    expect(switcher).toContain('if (next === "focus") return;');
-    expect(switcher).toContain("persistLandingMode(next)");
-    expect(switcher).toContain("window.location.reload()");
-    expect(switcher).toContain('aria-label="LIVE / FOCUS"');
-    expect(switcher).toContain('data-testid="landing-mode-switcher"');
+  it("NEGATIVE CONTROL — the 2026-09-24 mount fails the check", () => {
+    const old = "<LandingClosingBand locale={locale} />\n<LandingModeSwitcher />";
+    expect(old).toContain("LandingModeSwitcher");
   });
 });
 

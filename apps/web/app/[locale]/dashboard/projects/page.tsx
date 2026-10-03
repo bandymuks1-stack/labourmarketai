@@ -17,7 +17,11 @@ import { ProjectMap } from "@/components/app/arena/project-map";
 import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 import { listWorkerProjects } from "@/lib/projects/worker-project-access";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
-import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
+import {
+  projectOrganizationAuthority,
+  workspaceOpensCompanySpace,
+} from "@/lib/company/organization-authority";
+import { getSessionIsAdmin } from "@/lib/auth/session-admin-signal";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getOrgWorkObjects } from "@/lib/objects/objects";
 import { listManagedProjects } from "@/lib/projects/projects";
@@ -34,6 +38,7 @@ import { OrganizationDoorsServer } from "@/components/app/organization/organizat
 import { ManagerScopeNotice } from "@/components/app/organization/manager-scope-notice";
 import { getCompanyProjectContext } from "@/lib/company/project-context";
 import { MapPin } from "lucide-react";
+import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
 import { type Role } from "@/lib/auth/actions";
 
 export const dynamic = "force-dynamic";
@@ -152,6 +157,13 @@ export default async function ProjectsPage({
   // (resolved above, before the branch) scopes them, and a manager without
   // a company workspace simply sees the projects surface as before.
   const ownCompanyId = employerCtx?.kind === "ok" ? employerCtx.companyId : null;
+  // `assign_worker_to_project` admits roster workers only for owner/admin
+  // (owns_company) or a platform admin; a manager is refused (42501). The
+  // form mirrors that so it never offers an action the database rejects.
+  const rosterAssignable =
+    employerCtx?.kind !== "ok" ||
+    projectOrganizationAuthority({ role: employerCtx.role }).canGovern ||
+    (await getSessionIsAdmin());
   const [
     allProjects,
     workers,
@@ -210,7 +222,13 @@ export default async function ProjectsPage({
   const withAssignments = await Promise.all(
     activeProjects.map(async (p) => ({
       ...p,
-      assignments: await listProjectAssignments(p.id),
+      assignments: await Promise.all(
+        (await listProjectAssignments(p.id)).map(async (a) => ({
+          ...a,
+          // THE one photo rule (D1): the database decides; null = initials.
+          avatarUrl: a.workerId ? await getAvatarForVisibleWorker(a.workerId) : null,
+        })),
+      ),
     })),
   );
 
@@ -242,12 +260,23 @@ export default async function ProjectsPage({
     end: t("end"),
     sending: t("sending"),
     assignFromRoster: t("assign.fromRoster"),
+    rosterOwnerOnly: t("assign.rosterOwnerOnly"),
     openBoard: t("map.openArena"),
     rosterGroupLabel: t("assign.rosterGroup"),
     engagementGroupLabel: t("assign.engagementGroup"),
     reservationCollidesTitle: t("assign.reservation.collidesTitle"),
     reservationNotBlocking: t("assign.reservation.notBlocking"),
     reservationUnknown: t("assign.reservation.unknown"),
+    reservationAlternativesTitle: t("assign.reservation.alternativesTitle"),
+    reservationSwap: t("assign.reservation.swap"),
+    reservationUndo: t("assign.reservation.undo"),
+    reservationKeep: t("assign.reservation.keep"),
+    reservationDecided: t("assign.reservation.decided"),
+    precheckChecking: t("assign.reservation.precheckChecking"),
+    precheckCollidesTitle: t("assign.reservation.precheckCollidesTitle"),
+    precheckChoose: t("assign.reservation.precheckChoose"),
+    precheckAssignAnyway: t("assign.reservation.precheckAssignAnyway"),
+    precheckAdvisory: t("assign.reservation.precheckAdvisory"),
     reservationSource: {
       project: t("assign.reservation.source.project"),
       booking: t("assign.reservation.source.booking"),
@@ -280,14 +309,14 @@ export default async function ProjectsPage({
           {t("intro")}
         </p>
         {/* WAGON 6 — compact operating-model explainer: one honest line +
-            a link to the full /about#sports-model section. No game layer. */}
+            a link to the /about#evidence explanation. No game layer. */}
         <p
           className="mt-1 max-w-prose rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
           data-testid="projects-model-note"
         >
           {t("model.note")}{" "}
           <Link
-            href="/about#sports-model"
+            href="/about#evidence"
             className="whitespace-nowrap text-brand-blue hover:underline"
           >
             {t("model.link")} →
@@ -388,6 +417,7 @@ export default async function ProjectsPage({
           projects={withAssignments}
           workers={workers}
           engagementWorkers={[...engagementResult.workers]}
+          rosterAssignable={rosterAssignable}
           labels={labels}
         />
       </section>

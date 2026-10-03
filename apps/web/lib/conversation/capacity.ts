@@ -41,11 +41,23 @@ import type {
  * every row passes the same shape checks — nothing here reads more than the
  * zero-argument call could.
  */
+function validDay(day: string | null | undefined): string | null {
+  if (typeof day !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(day)) return null;
+  const t = Date.parse(`${day}T00:00:00.000Z`);
+  if (Number.isNaN(t) || new Date(t).toISOString().slice(0, 10) !== day) return null;
+  const startOfToday = Date.parse(`${new Date().toISOString().slice(0, 10)}T00:00:00.000Z`);
+  return t >= startOfToday && t <= startOfToday + 120 * 86_400_000 ? day : null;
+}
+
 export async function loadWhoIsAvailableForChat(
   preRead?: CapacityPreRead,
+  /** A day the sentence named (YYYY-MM-DD). Validated here: this is a server
+   *  action, so the argument is client-controllable — only a real calendar day
+   *  from today to 120 days ahead is accepted, anything else is ignored. */
+  onDay?: string | null,
 ): Promise<CapacityChatResult> {
   const company = await requireEmployerCompany();
   if (!company.ok) return { kind: "no-company" };
-  return whoIsAvailableCore(company.companyId, null, preRead);
+  return whoIsAvailableCore(company.companyId, null, preRead, validDay(onDay));
 }
 
