@@ -8,6 +8,8 @@
 #
 # INERT BY DEFAULT: no-ops until the repo variable BILLING_RECOVERY_SCHEDULE_ENABLED=true
 # and the secret CRON_SECRET are set in the GitHub console (never committed).
+# Two independent switches: this schedule variable AND the server env BILLING_RECOVERY_ENABLED=true
+# (default OFF; a valid CRON_SECRET alone never permits recovery writes).
 # Kill switch: unset the variable. The endpoint returns 503 + a reason code while
 # billing is inactive or the billing tables are absent.
 name: billing-recovery-cadence
@@ -49,4 +51,6 @@ jobs:
           code=$(curl -sS -o body.json -w "%{http_code}" -H "Authorization: Bearer $CRON_SECRET" https://labourmarket.ai/api/cron/billing-recovery)
           echo "status=$code"
           cat body.json
+          # Server capability flag OFF (BILLING_RECOVERY_ENABLED unset) is a designed no-op, not a red run.
+          if [ "$code" = "503" ] && grep -q "\"recovery_disabled\"" body.json; then echo "Server recovery flag OFF (designed no-op)"; exit 0; fi
           [ "$code" = "200" ]

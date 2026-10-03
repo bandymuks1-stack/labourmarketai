@@ -1,6 +1,7 @@
 import "server-only";
 
 import { getBillingConfig } from "@/lib/billing/config";
+import { isBillingRecoveryEnabled } from "@/lib/billing/recovery-flag";
 import { readRecoveryCandidates } from "@/lib/billing/subscription-store";
 import {
   RECONCILE_EVENT_TYPE,
@@ -47,7 +48,7 @@ export const COOLDOWN_MS = 30 * 60 * 1000;
 export const RUN_BUDGET_MS = 45_000;
 
 export type RecoveryRun =
-  | { readonly kind: "unavailable"; readonly reason: "billing_inactive" | "needs_migration" | "store_error" }
+  | { readonly kind: "unavailable"; readonly reason: "recovery_disabled" | "billing_inactive" | "needs_migration" | "store_error" }
   | {
       readonly kind: "ok";
       readonly mode: "test" | "live";
@@ -116,6 +117,9 @@ export async function runBillingRecovery(
     readonly reconcile?: (subscriptionId: string) => Promise<ReconcileResult>;
   } = {},
 ): Promise<RecoveryRun> {
+  // Defence in depth with the route: nothing below (config, store, Stripe) runs unless
+  // the server-side recovery capability is on.
+  if (!isBillingRecoveryEnabled()) return { kind: "unavailable", reason: "recovery_disabled" };
   const cfg = getBillingConfig();
   if (cfg.state !== "stripe_test" && cfg.state !== "stripe_live") {
     return { kind: "unavailable", reason: "billing_inactive" };

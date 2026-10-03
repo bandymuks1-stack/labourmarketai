@@ -1,12 +1,16 @@
 /**
  * GATE PROOF for scheduled billing recovery (#2126). No live Stripe, no DB.
  *
+ * THREE CONTROLS (Option B): CRON_SECRET = who may call; BILLING_RECOVERY_SCHEDULE_ENABLED
+ * (GitHub variable) = whether the workflow calls; BILLING_RECOVERY_ENABLED (server env,
+ * default OFF) = whether recovery may write at all. A valid secret alone is NOT enough.
+ *
  * WHICH LAYER IS THE SCHEDULE SWITCH?  The GitHub Actions workflow
  * (`BILLING_RECOVERY_SCHEDULE_ENABLED` repo variable + `CRON_SECRET` secret) is
  * the ONLY schedule switch: with the variable absent/false the workflow never
  * issues the request. The ROUTE is not a schedule switch - with a valid secret
- * it runs whenever it is called; its own gates are CRON_SECRET (fail closed) and
- * billing state (inactive -> 503). Both layers are pinned below.
+ * it runs only when BILLING_RECOVERY_ENABLED=true; its own gates are CRON_SECRET (fail closed),
+ * the recovery flag and billing state (inactive -> 503). Both layers are pinned below.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { readFileSync } from "node:fs";
@@ -69,7 +73,9 @@ function provider(active = true) {
 }
 
 const prevSecret = process.env.CRON_SECRET;
+const prevFlag = process.env.BILLING_RECOVERY_ENABLED;
 beforeEach(() => {
+  process.env.BILLING_RECOVERY_ENABLED = "true";
   vi.clearAllMocks();
   vi.spyOn(console, "info").mockImplementation(() => {});
   cfg.state = "stripe_test";
@@ -87,6 +93,8 @@ beforeEach(() => {
 afterEach(() => {
   if (prevSecret === undefined) delete process.env.CRON_SECRET;
   else process.env.CRON_SECRET = prevSecret;
+  if (prevFlag === undefined) delete process.env.BILLING_RECOVERY_ENABLED;
+  else process.env.BILLING_RECOVERY_ENABLED = prevFlag;
 });
 
 const call = (auth?: string) =>
@@ -146,6 +154,28 @@ describe("GATE 2 - the ROUTE is not the schedule switch; CRON_SECRET + billing s
     expect((await res.json()).reason).toBe(reason);
     nothingTouched();
   });
+
+  it("OPTION B: valid secret + flag unset -> 503 recovery_disabled, zero Stripe / store calls", async () => {
+    delete process.env.BILLING_RECOVERY_ENABLED;
+    const res = await call("Bearer a-long-enough-test-secret-value");
+    expect(res.status).toBe(503);
+    expect((await res.json()).reason).toBe("recovery_disabled");
+    nothingTouched();
+  });
+
+  it("OPTION B: runBillingRecovery itself refuses when the flag is off (defence in depth)", async () => {
+    delete process.env.BILLING_RECOVERY_ENABLED;
+    expect(await runBillingRecovery()).toEqual({ kind: "unavailable", reason: "recovery_disabled" });
+    nothingTouched();
+  });
+
+  it.each([["", false], ["1", false], ["TRUE", false], ["yes", false], [" false ", false], ["true", true], [" true ", true]])(
+    "flag value %j -> enabled=%s",
+    async (v, on) => {
+      const { isBillingRecoveryEnabled } = await import("@/lib/billing/recovery-flag");
+      expect(isBillingRecoveryEnabled({ BILLING_RECOVERY_ENABLED: v } as NodeJS.ProcessEnv)).toBe(on);
+    },
+  );
 
   it("billing inactive -> 503 billing_inactive, Stripe and DB untouched", async () => {
     cfg.state = "disabled";
