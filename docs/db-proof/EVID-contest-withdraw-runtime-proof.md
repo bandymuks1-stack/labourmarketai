@@ -5,7 +5,7 @@ Transcript of `scripts/db-proof/evidence-contest-withdraw-v1.sh` (harness faithf
 ```
 ==============================================================
  EVID contest / withdraw / re-contest runtime proof
- migration: 20261003110000_evidence_contest_withdraw_v1.sql
+ migration: 20261003110000_subject_contest_withdraw_v1.sql
 ==============================================================
 psql:C:/lmw-1646/scripts/db-proof/subject-contest-and-clash-receipt.prelude.sql:156: NOTICE:  policy "harness_people_select" for relation "public.organization_people" does not exist, skipping
 psql:C:/lmw-1646/scripts/db-proof/subject-contest-and-clash-receipt.prelude.sql:158: NOTICE:  policy "harness_parties_select" for relation "public.organization_evidence_parties" does not exist, skipping
