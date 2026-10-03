@@ -203,7 +203,8 @@
       "entrySuperseded": "Wpis został już zastąpiony nowszą wersją — ta karta nie jest już aktualna i zostanie usunięta z listy.",
       "entryDeleted": "Wpis został usunięty — ta karta nie jest już aktualna i zostanie usunięta z listy.",
       "staleTerminalHint": "Nic nie zostało zapisane. Jeśli pracownik zapisał nowszą wersję, pojawi się ona w skrzynce jako nowa karta.",
-      "noReviewerEngagement": "Widzisz ten wpis jako kierownik, ale potwierdzanie wymaga uprawnień do potwierdzania. Poproś właściciela organizacji o ich nadanie na stronie Ludzie."
+      "noReviewerEngagement": "Widzisz ten wpis jako kierownik, ale potwierdzanie wymaga uprawnień do potwierdzania. Poproś właściciela organizacji o ich nadanie na stronie Ludzie.",
+      "selfReviewNotAllowed": "Nie możesz potwierdzić własnej pracy. Wpis pozostaje zapisany jako własna deklaracja; potwierdzić musi inna upoważniona osoba."
     },
     "showOriginal": "Pokaż oryginał",
     "skills": "Umiejętności",

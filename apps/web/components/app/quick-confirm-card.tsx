@@ -125,6 +125,8 @@ export function QuickConfirmCard({
       // reviewer engagement on the People page.
       case "no_reviewer_engagement":
         return t("inbox.result.noReviewerEngagement");
+      case "self_review_not_allowed":
+        return t("inbox.result.selfReviewNotAllowed");
       case "skill_not_owned":
         return t("inbox.result.skillNotOwned");
       default:
