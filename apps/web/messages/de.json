@@ -4471,12 +4471,12 @@
       },
       "tabs": {
         "overview": "Mein Bereich",
+        "discover": "Entdecken",
         "marketplace": "Marktplatz",
         "marketMap": "Karte",
         "profile": "Profil",
         "journal": "Arbeitsjournal",
         "communication": "Nachrichten",
-        "discover": "Entdecken",
         "search": "Suche",
         "account": "Einstellungen",
         "admin": "Admin",
@@ -18545,5 +18545,104 @@
     "journal": "Arbeitsjournal",
     "review": "Prüfung",
     "history": "Firmengeschichte"
+  },
+  "discover": {
+    "eyebrow": "Entdecken",
+    "title": "Finden, was Sie brauchen. Anbieten, was Sie haben.",
+    "lead": "Hier bieten Menschen und Unternehmen Arbeit, Personen, Dienstleistungen und Arbeitsmittel an oder suchen sie. Sie sehen nur, was Ihre Rolle nutzen kann.",
+    "honesty": "Jede Karte unten führt zu einem echten Bereich. Nichts auf dieser Seite ist eine Beispielanzeige.",
+    "feature": {
+      "label": "Entdecken",
+      "description": "Arbeit, Personen, Dienstleistungen und Arbeitsmittel finden - oder Eigenes anbieten."
+    },
+    "side": {
+      "seek": "Sie suchen",
+      "offer": "Sie bieten an",
+      "both": "Suchen oder anbieten"
+    },
+    "status": {
+      "early": "Neu geöffnet",
+      "earlyNote": "Bereiche mit „Neu geöffnet“ sind fertig und funktionieren, haben aber noch wenige Einträge - Sie sind vielleicht unter den Ersten."
+    },
+    "groups": {
+      "around": {
+        "title": "In Ihrer Nähe",
+        "lead": "Den Markt auf der Karte sehen oder in eigenen Worten sagen, was Sie anbieten oder brauchen."
+      },
+      "work": {
+        "title": "Arbeit",
+        "lead": "Offene Stellen und die Signale dahinter."
+      },
+      "people": {
+        "title": "Personen und Unternehmen",
+        "lead": "Personen für einen Bedarf finden, Bedarf erfassen und Beziehungen pflegen."
+      },
+      "offers": {
+        "title": "Dienstleistungen und Arbeitsmittel",
+        "lead": "Eine Dienstleistung anbieten oder anfragen, Werkzeuge, Fahrzeuge, Räume und Ausrüstung für die Arbeit einstellen."
+      },
+      "grow": {
+        "title": "Wachsen",
+        "lead": "Aus dem, was Sie finden und tun, Fähigkeiten und Weiterbildung machen."
+      }
+    },
+    "entries": {
+      "map": {
+        "title": "Marktkarte",
+        "desc": "Bedarf, Personen und Projekte auf einer Karte. Nur Orte mit echten Daten erscheinen."
+      },
+      "recognize": {
+        "title": "Sagen, was Sie anbieten oder brauchen",
+        "desc": "In eigenen Worten beschreiben und zum passenden Ort weitergehen. Nichts wird gespeichert, bevor Sie es wählen."
+      },
+      "opportunities": {
+        "title": "Chancen für Sie",
+        "desc": "Offene Stellen passend zu Ihrem Arbeitsnachweis, mit gespeicherten Suchen."
+      },
+      "jobs": {
+        "title": "Öffentliche Jobbörse",
+        "desc": "Veröffentlichte Stellen ohne Anmeldung durchsuchen."
+      },
+      "intelligence": {
+        "title": "Marktsignale",
+        "desc": "Lohn- und Nachfragesignale aus Ihren eigenen Daten, mit Quellenangabe."
+      },
+      "scouting": {
+        "title": "Personen finden",
+        "desc": "Anonymisierte Kandidaten für Ihren Bedarf vormerken und durch den Ablauf begleiten."
+      },
+      "needs": {
+        "title": "Personalbedarf",
+        "desc": "Beschreiben Sie, wen Sie brauchen - der eine Ort, an dem Ihre Nachfrage erfasst wird."
+      },
+      "candidates": {
+        "title": "Kandidatenentwürfe",
+        "desc": "Private Notizen zu Personen, die Sie einbinden könnten. Ein Entwurf ist kein Konto."
+      },
+      "buyer": {
+        "title": "Arbeit oder Leistungen anfragen",
+        "desc": "Als Kunde einrichten und beschreiben, was erledigt werden soll."
+      },
+      "network": {
+        "title": "Netzwerk",
+        "desc": "Personen und Unternehmen suchen, Einladungen senden, Beziehungen pflegen."
+      },
+      "services": {
+        "title": "Dienstleistung anbieten",
+        "desc": "Veröffentlichen, was Sie oder Ihr Unternehmen für andere tun können."
+      },
+      "service_requests": {
+        "title": "Dienstleistungen finden und anfragen",
+        "desc": "Aktive Angebote durchsuchen und anfragen oder Anfragen an Ihre Angebote beantworten."
+      },
+      "listings": {
+        "title": "Arbeitsmittel",
+        "desc": "Werkzeuge, Ausrüstung, Fahrzeuge, Räume und Unterkünfte zum Verkauf, zur Miete oder gesucht - nur für die Arbeit."
+      },
+      "education": {
+        "title": "Weiterbildungsprogramme",
+        "desc": "Lernende, Programme und Kohorten für Ihre Bildungsorganisation."
+      }
+    }
   }
 }

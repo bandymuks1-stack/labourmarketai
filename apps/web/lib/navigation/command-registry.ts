@@ -1110,6 +1110,113 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
     },
   },
   {
+    // DISCOVER hub (owner decision 2026-10-02): the role-aware entry to every
+    // offer/seek branch. The map stays its own starter command below.
+    id: "discover",
+    route: "/dashboard/market",
+    audience: "public",
+    labels: {
+      en: "Discover (work, people, services, resources)",
+      lt: "Atrask (darbas, žmonės, paslaugos, ištekliai)",
+      ru: "Открывайте (работа, люди, услуги, ресурсы)",
+      nl: "Ontdekken (werk, mensen, diensten, middelen)",
+      de: "Entdecken (Arbeit, Personen, Dienste, Mittel)",
+      pl: "Odkrywaj (praca, ludzie, usługi, zasoby)",
+    },
+    synonyms: {
+      en: ["discover", "marketplace", "market", "find", "offer", "seek", "browse"],
+      lt: ["atrask", "rinka", "turgus", "ieškoti", "siūlyti", "paslaugos"],
+      ru: ["открывайте", "рынок", "маркетплейс", "искать", "предлагать"],
+      nl: ["ontdekken", "markt", "marktplaats", "zoeken", "aanbieden"],
+      de: ["entdecken", "markt", "marktplatz", "suchen", "anbieten"],
+      pl: ["odkrywaj", "rynek", "targ", "szukać", "oferować"],
+    },
+  },
+  {
+    id: "company_education",
+    route: "/dashboard/company/education",
+    audience: "company",
+    labels: {
+      en: "Training programmes (learners, cohorts)",
+      lt: "Mokymo programos (besimokantieji, srautai)",
+      ru: "Учебные программы (обучающиеся, потоки)",
+      nl: "Opleidingsprogramma's (cursisten, groepen)",
+      de: "Weiterbildungsprogramme (Lernende, Kohorten)",
+      pl: "Programy szkoleniowe (uczący się, kohorty)",
+    },
+    synonyms: {
+      en: ["education", "training provider", "learners", "cohort", "programme"],
+      lt: ["mokymai", "besimokantieji", "srautas", "programa"],
+      ru: ["образование", "обучающиеся", "поток", "программа"],
+      nl: ["opleiding", "cursisten", "groep", "programma"],
+      de: ["bildung", "lernende", "kohorte", "programm"],
+      pl: ["edukacja", "uczący się", "kohorta", "program"],
+    },
+  },
+  {
+    id: "hours",
+    route: "/dashboard/hours",
+    audience: "worker",
+    labels: {
+      en: "Work hours",
+      lt: "Darbo valandos",
+      ru: "Рабочие часы",
+      nl: "Werkuren",
+      de: "Arbeitsstunden",
+      pl: "Godziny pracy",
+    },
+    synonyms: {
+      en: ["hours", "work hours", "time", "timesheet total"],
+      lt: ["valandos", "darbo valandos", "laikas"],
+      ru: ["часы", "рабочие часы", "время"],
+      nl: ["uren", "werkuren", "tijd"],
+      de: ["stunden", "arbeitsstunden", "zeit"],
+      pl: ["godziny", "godziny pracy", "czas"],
+    },
+  },
+  {
+    id: "work_in_numbers",
+    route: "/dashboard/work-in-numbers",
+    audience: "worker",
+    labels: {
+      en: "Work in numbers",
+      lt: "Darbas skaičiais",
+      ru: "Работа в цифрах",
+      nl: "Werk in cijfers",
+      de: "Arbeit in Zahlen",
+      pl: "Praca w liczbach",
+    },
+    synonyms: {
+      en: ["numbers", "figures", "statistics", "work intelligence"],
+      lt: ["skaičiai", "statistika", "darbas skaičiais"],
+      ru: ["цифры", "статистика", "работа в цифрах"],
+      nl: ["cijfers", "statistieken", "werk in cijfers"],
+      de: ["zahlen", "statistik", "arbeit in zahlen"],
+      pl: ["liczby", "statystyki", "praca w liczbach"],
+    },
+  },
+  {
+    id: "instructions",
+    route: "/dashboard/instructions",
+    audience: "public",
+    labels: {
+      en: "Instructions (translated)",
+      lt: "Nurodymai (išversti)",
+      ru: "Инструкции (переведённые)",
+      nl: "Instructies (vertaald)",
+      de: "Anweisungen (übersetzt)",
+      pl: "Instrukcje (przetłumaczone)",
+    },
+    synonyms: {
+      en: ["instructions", "instruction", "manager message", "translated"],
+      lt: ["nurodymai", "nurodymas", "vadovo žinutė"],
+      ru: ["инструкции", "указания", "сообщение руководителя"],
+      nl: ["instructies", "instructie", "bericht van leidinggevende"],
+      de: ["anweisungen", "anweisung", "nachricht vom vorgesetzten"],
+      pl: ["instrukcje", "polecenia", "wiadomość od przełożonego"],
+    },
+  },
+  {
     // Unified activity centre (control room PR C) — every spine signal in
     // one place, with filters and honest read semantics. Route resolves
     // through the module registry so it can never drift from the grid card.

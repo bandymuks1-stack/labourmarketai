@@ -4471,12 +4471,12 @@
       },
       "tabs": {
         "overview": "Mano erdvė",
+        "discover": "Naršyti",
         "marketplace": "Prekyvietė",
         "marketMap": "Žemėlapis",
         "profile": "Profilis",
         "journal": "Darbo žurnalas",
         "communication": "Žinutės",
-        "discover": "Naršyti",
         "search": "Ieškoti",
         "account": "Nustatymai",
         "admin": "Administravimas",
@@ -18545,5 +18545,104 @@
     "journal": "Darbo žurnalas",
     "review": "Peržiūra",
     "history": "Įmonės istorija"
+  },
+  "discover": {
+    "eyebrow": "Atrask",
+    "title": "Raskite, ko reikia. Pasiūlykite, ką turite.",
+    "lead": "Čia žmonės ir įmonės siūlo bei ieško darbo, žmonių, paslaugų ir darbo išteklių. Matote tik tai, ką gali naudoti jūsų rolė.",
+    "honesty": "Kiekviena kortelė žemiau yra durys į realų skyrių. Nieko šiame puslapyje nėra pavyzdinis skelbimas.",
+    "feature": {
+      "label": "Atrask",
+      "description": "Raskite darbo, žmonių, paslaugų ir darbo išteklių - arba pasiūlykite savo."
+    },
+    "side": {
+      "seek": "Jūs ieškote",
+      "offer": "Jūs siūlote",
+      "both": "Ieškoti arba siūlyti"
+    },
+    "status": {
+      "early": "Ką tik atidaryta",
+      "earlyNote": "Skyriai su žyma „Ką tik atidaryta“ yra baigti ir veikia, bet įrašų dar nedaug - galite būti tarp pirmųjų."
+    },
+    "groups": {
+      "around": {
+        "title": "Šalia jūsų",
+        "lead": "Pamatykite rinką žemėlapyje arba savais žodžiais pasakykite, ką siūlote ar ko reikia."
+      },
+      "work": {
+        "title": "Darbas",
+        "lead": "Laisvos pozicijos ir signalai už jų."
+      },
+      "people": {
+        "title": "Žmonės ir įmonės",
+        "lead": "Raskite žmonių poreikiui, paskelbkite savo poreikį ir palaikykite ryšius."
+      },
+      "offers": {
+        "title": "Paslaugos ir darbo ištekliai",
+        "lead": "Siūlykite paslaugą, užsisakykite ją arba skelbkite įrankius, transportą, patalpas ir įrangą darbui."
+      },
+      "grow": {
+        "title": "Augimas",
+        "lead": "Paverskite tai, ką randate ir darote, įgūdžiais ir mokymusi."
+      }
+    },
+    "entries": {
+      "map": {
+        "title": "Rinkos žemėlapis",
+        "desc": "Poreikiai, žmonės ir projektai viename žemėlapyje. Rodomos tik vietos su tikrais duomenimis."
+      },
+      "recognize": {
+        "title": "Pasakykite, ką siūlote ar ko reikia",
+        "desc": "Aprašykite savais žodžiais ir pereikite į tinkamą vietą. Nieko neišsaugoma, kol nepasirinksite."
+      },
+      "opportunities": {
+        "title": "Galimybės jums",
+        "desc": "Laisvos pozicijos pagal jūsų darbo istoriją, su išsaugotomis paieškomis."
+      },
+      "jobs": {
+        "title": "Viešoji darbo skelbimų lenta",
+        "desc": "Naršykite paskelbtas laisvas vietas neprisijungę."
+      },
+      "intelligence": {
+        "title": "Rinkos signalai",
+        "desc": "Atlyginimo ir paklausos signalai iš jūsų pačių duomenų, nurodant šaltinius."
+      },
+      "scouting": {
+        "title": "Rasti žmonių",
+        "desc": "Atrinkite anonimizuotus kandidatus savo poreikiams ir sekite juos per procesą."
+      },
+      "needs": {
+        "title": "Darbuotojų poreikiai",
+        "desc": "Aprašykite, kokių žmonių reikia - tai vienintelė vieta, kur užfiksuojama jūsų paklausa."
+      },
+      "candidates": {
+        "title": "Kandidatų juodraščiai",
+        "desc": "Privačios pastabos apie žmones, kuriuos galite pasitelkti. Juodraštis nėra paskyra."
+      },
+      "buyer": {
+        "title": "Užsakyti darbą ar paslaugas",
+        "desc": "Nustatykite klientą ir aprašykite, ką reikia padaryti."
+      },
+      "network": {
+        "title": "Tinklas",
+        "desc": "Ieškokite žmonių ir įmonių, siųskite kvietimus, palaikykite ryšius."
+      },
+      "services": {
+        "title": "Siūlyti paslaugą",
+        "desc": "Paskelbkite, ką galite padaryti kitiems jūs ar jūsų įmonė."
+      },
+      "service_requests": {
+        "title": "Rasti ir užsisakyti paslaugas",
+        "desc": "Naršykite aktyvias paslaugas ir siųskite užklausą arba atsakykite į užklausas savo paslaugoms."
+      },
+      "listings": {
+        "title": "Darbo ištekliai",
+        "desc": "Įrankiai, įranga, transportas, patalpos ir apgyvendinimas parduodami, nuomojami ar ieškomi - tik darbo reikmėms."
+      },
+      "education": {
+        "title": "Mokymo programos",
+        "desc": "Besimokantieji, programos ir srautai jūsų mokymo organizacijai."
+      }
+    }
   }
 }

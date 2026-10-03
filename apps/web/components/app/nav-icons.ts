@@ -1,5 +1,6 @@
 import {
   CalendarDays,
+  Compass,
   Home,
   IdCard,
   MapPin,
@@ -30,6 +31,7 @@ import type { NavIconKey } from "@/lib/config/navigation";
  */
 export const NAV_ICONS: Record<NavIconKey, LucideIcon> = {
   home: Home,
+  compass: Compass,
   store: Store,
   map: MapPin,
   idCard: IdCard,
