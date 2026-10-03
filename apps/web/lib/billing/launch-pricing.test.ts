@@ -108,7 +108,10 @@ describe("one canonical path, honest surfaces (source pins)", () => {
     expect(D.indexOf("gateOpenNeeds(supabase, employer.organizationId, caller.userId)")).toBeLessThan(D.indexOf('.rpc('));
     expect(D).toMatch(/code: "over_open_need_limit", limit: needsGate\.limit, used: needsGate\.used, next: needsGate\.next/);
     const G = read("lib/billing/open-needs-gate.ts");
-    expect(G).toContain('hasFeature("company_create_needs")');
+    expect(G).toContain('entitlementAllows(ctx, "company_create_needs")');
+    // The entitlement subject is the gate's OWN caller, never the cookie
+    // session a bearer (MCP) request lacks (production defect 2026-09-30).
+    expect(G).toContain("getEffectiveEntitlements({ supabase, userId: profileId, organizationId })");
     expect(G).toMatch(/\.from\("customer_requests"\)/);
     expect(G).toMatch(/\.in\("status", \[\.\.\.ACTIVE_OPEN_NEED_STATUSES\]\)/);
     // A NEED IS A NEED. The ceiling is "open needs", so the count is scoped to
