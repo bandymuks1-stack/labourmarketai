@@ -2654,6 +2654,34 @@ subject; a trigger-bypass fixture for that was refused by the permission layer a
 BLOCKED_QA_IDENTITY. Status: the LIVE evidence_import_rows PER-12 gap is closed at RPC level; PER-12 overall stays PARTIAL (agreement_events and
 agreement_amendments are a FUTURE_CONTRACT_GAP, 0 rows).
 
+## 20261003144407 - work_tasks_stage_and_subtask_v1 (#2123) - APPLIED 2026-10-03
+
+Repo file `20261002150000_work_tasks_stage_and_subtask_v1.sql` (squash 1d8237860; byte-identical to the reviewed head 5faba5928 - only the
+count guards and a sorted allow-list entry changed afterwards). Applied as one statement set WITHOUT the file's comment lines (code identical).
+Adds `work_tasks.stage_id` (FK project_stages, on delete set null) and `parent_task_id` (self FK, no action) with partial indexes; trigger
+`trg_work_tasks_structure_guard` (SECURITY DEFINER guard fn; same-project stage/parent, no cycle, depth <= 3, no re-pointing a task's project
+while live Journal evidence is linked); internal `work_task_structure_check_v1`; `create_work_task_v2` (now 9-arg, old 7-arg dropped) and
+`update_work_task_v2` (now 8-arg, old 6-arg dropped) with optional stage/parent; new `set_project_stage_responsible_v1`;
+`link_journal_entry_to_task_v1` re-issued with project/organization consistency. Owner approval: chat 2026-10-03.
+Pre-apply production checks: every referenced column and helper present; production `create_work_task_v2` body identical to the repo
+pre-state after stripping comments and whitespace (2540 chars); production `update_work_task_v2` / `link_journal_entry_to_task_v1` md5 equal to the
+proof pre-state (the #2128 NULL-safe bodies); no existing stage_id/parent_task_id columns or colliding indexes/triggers; the old overloads were exactly
+the 7-arg and 6-arg signatures the migration drops.
+Read-back: ledger row; one overload of each function (9-arg create, 8-arg update; `old_overloads_left` = 0); ACLs authenticated on the five public
+functions and postgres only on the two internal ones; both columns and indexes; both triggers; the 3 existing tasks intact and unstructured.
+Rolled-back JWT proof on production: PROJECT -> STAGE -> TASK -> SUBTASK (owner creates staged task; subtasks L2/L3 inherit the stage; L4
+refused `depth_exceeded`); legacy 7-arg create and 6-arg update still work; cycle refused; cross-project parent refused; stage-responsible set by
+the owner, a foreign-organization engagement refused; ordinary worker create/update/set-responsible all refused; outsider, stranger refused
+(`not_found` / `not_allowed`); NULL uid and anon DENIED (42501); a pure non-admin manager creates a staged task on their own project and gets
+`not_allowed` on another organization's project; owner preserved; direct cycle update refused by the trigger (23514) and a parent with children
+cannot be deleted (23503); Journal -> task: a project entry links to a same-project task (`ok`, then `already_linked`). Post-rollback: 3 tasks, 0
+structured, no proof rows, audit count unchanged.
+NOT EXERCISED ON PRODUCTION (scratch-DB proof only): restage cascade to descendants and the `evidence_linked` refusal (no project has 2+ stages),
+a Journal entry of ANOTHER project being refused (no second project with entries), the pure-manager set-responsible on an existing stage. A first
+proof run showed a "manager" creating on another organization's project; that identity was a platform admin and owner of that organization (fixture
+error, not a defect), and was redone with a non-admin manager. Rollback semantics: scratch proof only, no destructive rollback on production.
+Status: PASS_REAL_PRODUCTION at schema/RPC/data level; UI is STATIC/RENDER_PROVEN only (not BROWSER_PROVEN).
+
 ## Correction 2026-10-03 - #1436 invitation binding IS applied
 
 `docs/consolidation/PR_TABLE.md` called `20260902230000_accept_invitation_binds_org_membership_v1` unapplied. It is applied
@@ -2762,6 +2790,7 @@ repo file's timestamp. Matched by migration name, read from `supabase_migrations
 | `20261003110000` | `20261003131904` | subject_contest_withdraw_v1 |
 | `20261003120000` | `20261003142847` | privacy_export_import_lines_subject_v1 |
 | `20261003140000` | `20261003141047` | subject_contest_withdraw_constraint_reconcile_v1 |
+| `20261002150000` | `20261003144407` | work_tasks_stage_and_subtask_v1 |
 
 Note on `agency_drafted_needs_output_column_v1` (ledger 20260928182413): applied as a standalone statement
 sequence (`drop function if exists public.list_agency_drafted_needs_v1(); create function ...` - `create or
