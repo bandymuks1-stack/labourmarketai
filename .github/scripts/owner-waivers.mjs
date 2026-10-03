@@ -591,6 +591,14 @@ export const SCOPED_OWNER_WAIVERS = [
       //         (no second search); the search box takes the full row on
       //         phones. No new route, projection, auth or schema change.
       2045,
+      // OWNER AUTHORISATION 2026-10-02 (task directive, verbatim intent): the
+      // `/jobs` INTRO_MEMBER change, "if its only purpose is to remove an
+      // already-proven dead end / misleading state"; not authority for broader
+      // marketing, landing or product-structure changes.
+      // #2101 — a SIGNED-IN worker was told "sign in to see the employer…";
+      //         the intro now says to open the vacancy. One string selection,
+      //         no route, projection, auth or schema change.
+      2101,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
@@ -862,7 +870,9 @@ export const SCOPED_OWNER_WAIVERS = [
      */
     scope:
       "The manager hour-allocation surface /dashboard/hours (M3, decision package docs/DECISIONS/0010-owner-migration-decision-package-2026-08-31.md Item 2)",
-    pullRequests: [1344],
+    // #2101 — OWNER AUTHORISATION 2026-10-02 (task directive): the `/hours`
+    // no-company state gets a link to the Work Journal; only that dead end.
+    pullRequests: [1344, 2101],
     // Deliberately empty — the waiver lives IN the branch whose CI must
     // honour it, so pinning the head SHA would change the head SHA.
     approvedHeadShas: [],

@@ -163,6 +163,10 @@ export const workerLogWorkSchema = z.object({
     .refine((v) => !isJournalMetaRequest(v), { message: "journal_meta_request" }),
   workDate: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/),
   siteName: z.string().trim().max(200).nullable().optional(),
+  /** Which project the hours belong to: a project uuid, or "none" for work
+   *  that is not project work. Absent → the database's own rule (one active
+   *  project auto-attributes; two or more are refused, see journal-write-core). */
+  projectId: z.union([uuid, z.literal("none")]).optional(),
 });
 
 /** Why the log-work write would refuse this evidence text, or `null`. */

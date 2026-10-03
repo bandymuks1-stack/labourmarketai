@@ -255,3 +255,50 @@ export async function getOrgMembersData(
 
   return { orgId, members, addable, viewerIsRegisteredOwner, governanceWithoutReviewer };
 }
+
+/**
+ * HOW MANY PEOPLE HAVE RECORDED WORK NOBODY CAN CONFIRM. Review is opt-in per
+ * engagement (`journal_review_enabled`); when it is off, a worker's entries are
+ * in no queue, so an owner who never opened the per-worker toggle had no way to
+ * learn that real work was being recorded. This counts distinct members with
+ * live entries in the last 30 days in the organization's reviewable engagements
+ * where review is OFF — the same read shape as the journal window report, under
+ * the caller's own RLS (an org manager). It does NOT enable anything and it is
+ * never called "awaiting review": nobody can act on those entries yet.
+ *
+ * Returns null on any read error — never a fabricated 0 (SEP-7).
+ */
+export async function countWorkersWithUnconfirmableWork(
+  orgId: string,
+  days = 30,
+): Promise<number | null> {
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: rtRows, error: rtError } = await (supabase as any)
+    .from("relationship_types")
+    .select("slug")
+    .eq("journal_reviewable", true);
+  const reviewable: string[] =
+    rtError || !rtRows ? ["employee"] : (rtRows as { slug: string }[]).map((r) => r.slug);
+  const { data: ecs, error: ecError } = await supabase
+    .from("engagement_contexts")
+    .select("id")
+    .eq("organization_id", orgId)
+    .eq("status", "active")
+    .eq("journal_review_enabled", false)
+    .in("relationship_slug", reviewable);
+  if (ecError) return null;
+  const ids = (ecs ?? []).map((e) => e.id as string);
+  if (ids.length === 0) return 0;
+  const since = new Date(Date.now() - days * 86_400_000).toISOString();
+  const { data: entries, error: entryError } = await supabase
+    .from("journal_entries")
+    .select("engagement_context_id")
+    .in("engagement_context_id", ids)
+    .is("superseded_by", null)
+    .is("deleted_at", null)
+    .gte("created_at", since)
+    .limit(1000);
+  if (entryError) return null;
+  return new Set((entries ?? []).map((e) => e.engagement_context_id as string)).size;
+}

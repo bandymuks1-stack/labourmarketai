@@ -208,6 +208,8 @@ export function planningMeta(
 export function hrefForSource(
   sourceType: PlanningSourceType,
   sourceId: string,
+  /** Task only: the task's project, so the tasks page opens project-scoped. */
+  projectId?: string | null,
 ): string {
   switch (sourceType) {
     case "booking":
@@ -215,7 +217,11 @@ export function hrefForSource(
     case "project":
       return `/dashboard/projects/${sourceId}`;
     case "task":
-      return "/dashboard/tasks";
+      // Deep link to THE task (the tasks page highlights + scrolls to
+      // `#task-<id>`), not the bare list.
+      return projectId
+        ? `/dashboard/tasks?project=${projectId}&task=${sourceId}#task-${sourceId}`
+        : `/dashboard/tasks?task=${sourceId}#task-${sourceId}`;
     case "journal":
       // The entry's own editor — the calendar never grows a duplicate
       // journal detail page; the source record stays canonical.

@@ -72,6 +72,19 @@ const INTRO: L = {
   pl: "Aktualne oferty pracy importowane z oficjalnych publicznych źródeł zatrudnienia. Zaloguj się, aby zobaczyć pracodawcę, lokalizację i sposób aplikowania.",
 };
 
+/** The intro for someone who is ALREADY signed in. The anonymous intro above
+ *  promises the employer, location and apply route "after you sign in" — said to
+ *  a signed-in worker it is a false instruction (the board never reads it as
+ *  such, but the sentence did). They get the same facts, one tap away. */
+const INTRO_MEMBER: L = {
+  en: "Live vacancies imported from official public employment sources. Open a vacancy to see the employer, the location and how to apply.",
+  lt: "Gyvos darbo vietos iš oficialių viešų užimtumo šaltinių. Atidaryk skelbimą — pamatysi darbdavį, vietovę ir kaip kandidatuoti.",
+  ru: "Актуальные вакансии из официальных публичных источников занятости. Откройте вакансию, чтобы увидеть работодателя, местоположение и способ подачи заявки.",
+  nl: "Actuele vacatures uit officiële openbare arbeidsbronnen. Open een vacature om de werkgever, de locatie en de sollicitatiewijze te zien.",
+  de: "Aktuelle Stellen aus offiziellen öffentlichen Arbeitsmarktquellen. Öffnen Sie eine Stelle, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
+  pl: "Aktualne oferty pracy importowane z oficjalnych publicznych źródeł zatrudnienia. Otwórz ofertę, aby zobaczyć pracodawcę, lokalizację i sposób aplikowania.",
+};
+
 /** The anonymous search matches the OCCUPATION label (the field the card
  *  shows), never the hidden raw title — matching a hidden field would let a
  *  visitor probe for employer or city names (owner directive 2026-08-24). */
@@ -405,7 +418,7 @@ export default async function JobsPage({
         {H1[active]}
       </h1>
       <p className="mt-3 max-w-2xl text-sm text-text-muted sm:text-base">
-        {INTRO[active]}
+        {(user ? INTRO_MEMBER : INTRO)[active]}
       </p>
 
       {/* A PLAIN GET FORM, no client JS. The board is the crawler-facing

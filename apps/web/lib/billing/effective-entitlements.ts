@@ -3,7 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isSuperadmin } from "@/lib/auth/superadmin";
+import { isSuperadmin, isSuperadminFor } from "@/lib/auth/superadmin";
 import { getBillingConfig } from "@/lib/billing/config";
 import {
   resolveEntitlements,
@@ -12,7 +12,7 @@ import {
 } from "@/lib/billing/entitlements-v1";
 import type { FeatureKey, PlanAudience } from "@/lib/billing/plans";
 import type { SubStatus } from "@/lib/billing/webhook-core";
-import { resolveBillingSubject } from "@/lib/billing/billing-subject";
+import { resolveBillingSubject, type BillingSubject } from "@/lib/billing/billing-subject";
 
 /**
  * Effective entitlements (Stripe sprint PR5) — the server read path. Joins the
@@ -41,15 +41,31 @@ export interface EffectiveEntitlements extends EntitlementContext {
   readonly profileId: string | null;
 }
 
-export async function getEffectiveEntitlements(): Promise<EffectiveEntitlements> {
+/**
+ * An EXPLICIT caller (a bearer / agent transport such as the MCP door): its own
+ * RLS-scoped client, its verified user id and the organization ITS OWN employer
+ * gate resolved (`requireEmployerCompanyForCaller`). Such a request carries no
+ * cookie session, so without this the resolver saw NO user and judged an
+ * organization's action against the anonymous person plan (production defect
+ * measured 2026-09-30: every assistant demand create/reopen refused as
+ * over-limit while billing is live). Absent = the cookie session and the
+ * cookie workspace — every existing web call site, unchanged.
+ */
+export type EntitlementCaller = {
+  readonly supabase: SupabaseClient;
+  readonly userId: string;
+  readonly organizationId: string;
+};
+
+export async function getEffectiveEntitlements(caller?: EntitlementCaller): Promise<EffectiveEntitlements> {
   const config = getBillingConfig();
   // Enforcement is on under either active adapter state (test, or owner-armed live).
   const billingActive = config.state === "stripe_test" || config.state === "stripe_live";
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const supabase = caller?.supabase ?? (await createClient());
+  const user = caller
+    ? { id: caller.userId }
+    : (await supabase.auth.getUser()).data.user;
 
   if (!user) {
     const ctx = resolveEntitlements({
@@ -63,7 +79,7 @@ export async function getEffectiveEntitlements(): Promise<EffectiveEntitlements>
     return { ...ctx, profileId: null };
   }
 
-  const isAdmin = await isSuperadmin();
+  const isAdmin = caller ? await isSuperadminFor(supabase, user.id) : await isSuperadmin();
 
   const { data: roleRows } = await asAny(supabase)
     .from("profile_roles")
@@ -83,8 +99,11 @@ export async function getEffectiveEntitlements(): Promise<EffectiveEntitlements>
   // (→ free, which `entitlementAllows` keeps permissive while billing is
   // inactive) and the personal query falls back to the legacy owner-only
   // shape.
-  const billing = await resolveBillingSubject();
-  const subject = billing.subject;
+  // A caller's organization was proven by its own employer gate — the same
+  // proof `resolveBillingSubject` takes from the cookie workspace.
+  const subject: BillingSubject | null = caller
+    ? { type: "organization", id: caller.organizationId }
+    : (await resolveBillingSubject()).subject;
 
   // Real subscription + manual override (degrade if the billing tables are
   // not applied yet → null, i.e. free/permissive).

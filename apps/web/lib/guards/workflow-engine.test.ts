@@ -254,12 +254,37 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
      * rather than narrow it.
      */
     const COMMAND_REDEFINER = "20260820070000_workflow_work_task_definition_v1";
+    const SECURITY_FIX = "20261002141500_work_task_authz_null_safe_v1";
 
     for (const dir of ["migrations", "rollbacks"]) {
       const abs = join(REPO, "supabase", dir);
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
         if (f.startsWith(ENGINE) || f.startsWith(TYPES_V3)) continue;
         const src = readFileSync(join(abs, f), "utf8");
+        if (f.startsWith(SECURITY_FIX)) {
+          // 20261002141500 — SECURITY forward-fix (NULL-safe authorization). It may
+          // replace exactly ONE engine command (start_workflow_instance_v1, only its
+          // task-visibility guard), creates/drops no engine object and adds no trigger.
+          // Pinned in detail by null-safe-authorization-guards.test.ts.
+          for (const tbl of TABLES) {
+            expect(src, `${dir}/${f} must not create or drop ${tbl}`).not.toMatch(
+              new RegExp(`(create table[^(]*\\b${tbl}\\b|drop table[^;]*\\b${tbl}\\b)`, "i"),
+            );
+          }
+          for (const fn of [...COMMANDS, ...HELPERS]) {
+            if (fn === "start_workflow_instance_v1") continue;
+            expect(src, `${dir}/${f} may replace ONLY start_workflow_instance_v1, not ${fn}`).not.toMatch(
+              new RegExp(`create (or replace )?function[^(]*\\b${fn}\\b`, "i"),
+            );
+            expect(src, `${dir}/${f} must not drop ${fn}`).not.toMatch(
+              new RegExp(`drop function[^(]*\\b${fn}\\b`, "i"),
+            );
+          }
+          expect(src, `${dir}/${f} must not create a trigger on an engine table`).not.toMatch(
+            /create\s+trigger[^;]*\bon\s+public\.workflow_/i,
+          );
+          continue;
+        }
         if (f.startsWith(COMMAND_REDEFINER)) {
           for (const tbl of TABLES) {
             expect(

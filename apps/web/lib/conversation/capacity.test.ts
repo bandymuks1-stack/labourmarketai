@@ -53,6 +53,7 @@ function worker(
     availableFrom: null,
     locationCountry: null,
     currentProjects: [],
+    professions: [],
     ...overrides,
   };
 }

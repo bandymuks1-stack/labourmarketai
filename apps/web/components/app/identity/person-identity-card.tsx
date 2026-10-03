@@ -2,10 +2,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { MapPin, Compass, Briefcase, ChevronRight } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
-import {
-  PLAYER_IDENTITY_AVATAR_BORDER,
-  PLAYER_IDENTITY_FALLBACK_SURFACE,
-} from "@/lib/identity/player-identity";
+import { PersonPortrait } from "@/components/app/identity/person-portrait";
 import { cn } from "@/lib/utils";
 
 /**
@@ -101,46 +98,17 @@ export function PersonIdentityCard({
       {...dataAttrs}
     >
       <div className="flex items-start gap-3 sm:gap-4">
-        <div
-          className="identity-card-portrait relative shrink-0 overflow-hidden rounded-xl"
-          style={
-            density === "compact"
-              ? { width: 44, aspectRatio: "1 / 1" }
-              : { width: "clamp(64px, 20vw, 88px)", aspectRatio: "4 / 5" }
-          }
-        >
-          {avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={avatarUrl}
-              alt={name}
-              loading="lazy"
-              data-testid="identity-card-photo"
-              className={cn("h-full w-full rounded-xl object-cover", PLAYER_IDENTITY_AVATAR_BORDER)}
-            />
-          ) : (
-            <span
-              aria-hidden
-              data-testid="identity-card-monogram"
-              className={cn(
-                "flex h-full w-full items-center justify-center rounded-xl font-display font-bold tracking-tightest",
-                density === "compact" ? "text-sm" : "text-2xl sm:text-3xl",
-                PLAYER_IDENTITY_FALLBACK_SURFACE,
-                PLAYER_IDENTITY_AVATAR_BORDER,
-              )}
-            >
-              {initials}
-            </span>
-          )}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 rounded-b-xl bg-gradient-to-t from-ink-900/60 to-transparent"
-          />
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-ink-500/60"
-          />
-        </div>
+        {/* THE PERSISTENT PORTRAIT: the SAME 4:5 frame as IdentityStage at every
+            density — only its size changes (it used to be a 1:1 square when
+            compact, so the person changed shape between surfaces). */}
+        <PersonPortrait
+          name={name}
+          avatarUrl={avatarUrl}
+          initials={initials}
+          width={density === "compact" ? "40px" : "clamp(64px, 20vw, 88px)"}
+          testids={{ photo: "identity-card-photo", monogram: "identity-card-monogram" }}
+          className="identity-card-portrait"
+        />
 
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1.5">
@@ -163,8 +131,13 @@ export function PersonIdentityCard({
           </div>
 
           {professions.length > 0 ? (
-            <p className="text-sm text-text-secondary" data-testid="identity-card-professions">
-              <span className="font-semibold text-text-primary">{professions[0]}</span>
+            <p
+              className={cn("text-text-secondary", density === "compact" ? "text-xs" : "text-sm")}
+              data-testid="identity-card-professions"
+            >
+              <span className={cn(density === "compact" ? "font-normal" : "font-semibold text-text-primary")}>
+                {professions[0]}
+              </span>
               {professions.length > 1 ? (
                 <span className="text-text-muted"> · {professions.slice(1).join(" · ")}</span>
               ) : null}

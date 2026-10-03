@@ -20,7 +20,7 @@ import {
   deriveWorkerResources,
   openProjectTasks,
 } from "@/lib/projects/operations-centre-model";
-import { isOverdue } from "@/lib/tasks/task-model";
+import { isBlockingStatus, isOverdue } from "@/lib/tasks/task-model";
 import {
   ProjectOperationsBoard,
   type OperationsBoardLabels,
@@ -33,7 +33,13 @@ import { getLearnedStageDurations } from "@/lib/projects/learned-stage-duration"
 import { ProjectStageGantt } from "@/components/app/project-stage-gantt";
 import { ProjectEconomicsPanel } from "@/components/app/project-economics-panel";
 import { listProjectStages } from "@/lib/projects/stages";
-import { buildStageGantt, type StageGantt } from "@/lib/projects/stage-gantt";
+import { listOrgEmployeeEngagements } from "@/lib/company/org-employee-engagements";
+import {
+  buildResponsibleOptions,
+  responsibleNameMap,
+} from "@/lib/projects/stage-responsible";
+import { buildActivityTimeline } from "@/lib/projects/stage-gantt";
+import { getTaskCollaboration } from "@/lib/tasks/tasks";
 import { getProjectEconomics } from "@/lib/economics/economics";
 import { getProjectAssets } from "@/lib/assets/assets";
 import { ProjectDefectsPanel } from "@/components/app/project-defects-panel";
@@ -192,6 +198,16 @@ export default async function ProjectOperationsPage({
   const orgMembersRead = projectOrgId
     ? await listOrganizationMembers(projectOrgId)
     : null;
+  // Stage responsible picker: ONLY engagements ACTIVE in this project's own
+  // organization (the eligibility set_project_stage_responsible_v1 enforces),
+  // read through the existing readable-name resolver. null = unreadable.
+  const stageEngagementsRead = projectOrgId
+    ? await listOrgEmployeeEngagements(projectOrgId)
+    : null;
+  const stageResponsibleOptions =
+    stageEngagementsRead && stageEngagementsRead.kind === "ok"
+      ? buildResponsibleOptions(stageEngagementsRead.rows)
+      : null;
   const responsibleOptions =
     orgMembersRead && orgMembersRead.kind === "ok"
       ? orgMembersRead.members
@@ -214,9 +230,34 @@ export default async function ProjectOperationsPage({
           ? ["live", "completed"]
           : [];
 
-  const gantt: StageGantt = stages.applied
-    ? buildStageGantt(stages.stages, new Date().toISOString().slice(0, 10))
-    : { hasTimeline: false };
+  // Activity timeline: the real stages + this project's real tasks. Open
+  // blocker counts come from the SAME bounded collaboration read the tasks
+  // page uses; assignee names resolve from the project's workers first (those
+  // may be opened) and the org roster second (plain text, never a dead link).
+  const timelineTasks = tasks.status === "ok" ? tasks.tasks : [];
+  const timelineCollab = await getTaskCollaboration(timelineTasks.map((x) => x.id));
+  const waitingOnByTask: Record<string, number> = {};
+  for (const [taskId, blockers] of Object.entries(timelineCollab.blockersByTask)) {
+    waitingOnByTask[taskId] = blockers.filter((b) => isBlockingStatus(b.status)).length;
+  }
+  const timeline = buildActivityTimeline({
+    projectId: id,
+    stages: stages.applied ? stages.stages : [],
+    tasks: timelineTasks,
+    waitingOnByTask,
+    stageResponsibleNames: responsibleNameMap(stageResponsibleOptions ?? []),
+    blockersByTask: timelineCollab.blockersByTask,
+    meProfileId: user.id,
+    people: ops.workers.map((w) => ({
+      profileId: w.workerProfileId,
+      name: w.name,
+      workerId: w.workerId,
+    })),
+    memberNameByProfileId: new Map(
+      responsibleOptions.map((m) => [m.profileId, m.name] as const),
+    ),
+    todayIso: new Date().toISOString().slice(0, 10),
+  });
 
   // P4 — THE FIELD (frozen design §5, §1.5): a pure projection over the reads
   // above — stages as lanes in time, the people on the project as tokens,
@@ -636,12 +677,18 @@ export default async function ProjectOperationsPage({
             project spine. Managers add stages, set real status and planned
             dates; no fabricated progress. Honest "not yet available" state
             while the owner-gated migration is unapplied. */}
-      <ProjectStagesPanel projectId={id} data={stages} learned={learnedStageDurations} />
+      <ProjectStagesPanel
+        projectId={id}
+        data={stages}
+        learned={learnedStageDurations}
+        canManage={manageFacts !== null}
+        responsibleOptions={stageResponsibleOptions}
+      />
 
       {/* Gantt projection over the SAME stage truth (no stored events) — bars
             from real planned/actual dates, today marker, overdue highlight,
             mobile list fallback. */}
-      <ProjectStageGantt gantt={gantt} />
+      <ProjectStageGantt timeline={timeline} />
 
       {/* Wagon 8 — Project Economics: budget vs actual. Actual cost is read
             from the canonical finance_records ledger (no second cost ledger);

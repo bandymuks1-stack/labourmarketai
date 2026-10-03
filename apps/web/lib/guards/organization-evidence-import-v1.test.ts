@@ -336,8 +336,10 @@ describe("the capabilities are registered, honest and complete", () => {
       "evidence.import.resolve_time_semantics",
       "evidence.import.commit",
       "evidence.records.list",
-      "evidence.record.attest",
-      "evidence.import.withdraw",
+      "evidence.record.attest_draft",
+      "evidence.record.attest_confirm",
+      "evidence.import.withdraw_draft",
+      "evidence.import.withdraw_confirm",
     ]);
   });
 

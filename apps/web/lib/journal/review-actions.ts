@@ -11,6 +11,7 @@ import {
   terminalStaleFromError,
 } from "@/lib/learning/learning-shared";
 import { REVIEW_DECISIONS, type ReviewDecision } from "./review-status";
+import { notifyJournalReviewDecisions } from "./review-notification";
 
 /**
  * Manager review → evidence result (slice manager-review-evidence-result-v1).
@@ -126,6 +127,12 @@ export async function reviewJournalEntry(
       });
     }
   }
+
+  // DURABLE NOTIFICATION (journal_review_decided): tell the worker the
+  // outcome - all three decisions. The review is committed; this never fails it.
+  await notifyJournalReviewDecisions(supabase, user.id, [
+    { entryId, decision },
+  ]);
 
   revalidatePath(`/${locale}/dashboard/inbox`);
   revalidatePath(`/${locale}/dashboard/journal`);

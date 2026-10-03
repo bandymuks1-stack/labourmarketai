@@ -500,6 +500,32 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
     /* no line — a failed read never invents a queue */
   }
 
+  // 1a ── learning suggestions awaiting review (EDU-5) ─────────────────────
+  // A worker accepted a recognised skill on an entry of THIS organisation
+  // (review enabled). The one producer turns that observation into a pending
+  // suggestion under the manager's own RLS; the line states only the count of
+  // pending ones and appears only when there is one, with the one door to
+  // the review page (owner: no count without a door, no door without a count).
+  try {
+    if (lines.length < MAX_LINES) {
+      const { createClient } = await import("@/lib/supabase/server");
+      const { produceReviewQueueFromSignals, countPendingReviewQueue } = await import(
+        "@/lib/learning/signal-queue-producer"
+      );
+      const sb = await createClient();
+      await produceReviewQueueFromSignals(sb);
+      const waiting = await countPendingReviewQueue(sb);
+      if (waiting > 0) {
+        lines.push(t("briefEmployerLearningReview", { count: waiting }));
+        // The door exists ONLY in this N>0 state, so it is never empty
+        // navigation: the review page then has real items to show.
+        addChip("link:/dashboard/learning", t("chipEmployerLearningReview"));
+      }
+    }
+  } catch {
+    /* no line — a failed read never invents a queue */
+  }
+
   // 2 ── absence requests awaiting decision ────────────────────────────────
   try {
     const { getManagerPendingAbsences } = await import("@/lib/leave/absences");

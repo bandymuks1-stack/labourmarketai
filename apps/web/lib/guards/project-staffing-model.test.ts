@@ -151,7 +151,9 @@ describe("3 · one identity system (shared monogram, no local copies)", () => {
     expect(manager).toContain("PersonIdentityCard");
     expect(manager).toContain('variant="assignment"');
     const card = read("components/app/identity/person-identity-card.tsx");
-    expect(card).toContain("PLAYER_IDENTITY_FALLBACK_SURFACE");
+    expect(card).toContain("<PersonPortrait");
+    // ...and the shared portrait owns the canonical fallback-tile token.
+    expect(read("components/app/identity/person-portrait.tsx")).toContain("PLAYER_IDENTITY_FALLBACK_SURFACE");
   });
 });
 

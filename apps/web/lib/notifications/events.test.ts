@@ -258,6 +258,9 @@ describe("NOTIFICATION_EVENT_TYPES (runtime list)", () => {
     // v8 (universal invitation/referral network): the inviter learns that
     // somebody accepted.
     expect(NOTIFICATION_EVENT_TYPES).toContain("invitation_accepted");
-    expect(NOTIFICATION_EVENT_TYPES.length).toBe(23);
+    // v10: a new message in a thread, and a journal review decision.
+    expect(NOTIFICATION_EVENT_TYPES).toContain("message_received");
+    expect(NOTIFICATION_EVENT_TYPES).toContain("journal_review_decided");
+    expect(NOTIFICATION_EVENT_TYPES.length).toBe(25);
   });
 });

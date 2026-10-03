@@ -118,6 +118,7 @@ create trigger trg_work_plan_entries_updated_at
 alter table public.work_plan_entries enable row level security;
 
 -- Read: the planning organization's managers, and the planned worker.
+drop policy if exists work_plan_entries_select on public.work_plan_entries;
 create policy work_plan_entries_select on public.work_plan_entries
   for select to authenticated
   using (
@@ -194,10 +195,10 @@ begin
   if v_uid is null then
     raise exception 'not_authenticated' using errcode = '42501';
   end if;
-  if not public.manages_organization(p_organization_id) then
+  if not coalesce(public.manages_organization(p_organization_id), false) then
     raise exception 'not_allowed' using errcode = '42501';
   end if;
-  if not public.work_plan_worker_in_scope_v1(p_organization_id, p_worker_id) then
+  if not coalesce(public.work_plan_worker_in_scope_v1(p_organization_id, p_worker_id), false) then
     raise exception 'worker_not_in_scope' using errcode = '42501';
   end if;
   if p_project_id is not null and not exists (
@@ -246,7 +247,7 @@ begin
   if v_org is null then
     raise exception 'not_found' using errcode = 'P0002';
   end if;
-  if not public.manages_organization(v_org) then
+  if not coalesce(public.manages_organization(v_org), false) then
     raise exception 'not_allowed' using errcode = '42501';
   end if;
   update public.work_plan_entries

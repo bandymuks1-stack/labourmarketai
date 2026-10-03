@@ -10,11 +10,13 @@ import {
   visibleConflictPartners,
   hiddenConflictSources,
   detectConflicts,
+  effectiveEndDay,
   isPlanningSourceType,
   isPlanningView,
   itemsForDay,
   navAnchors,
   parseIsoDay,
+  rangesOverlapInclusive,
   visibleRange,
   PLANNING_SOURCE_TYPES,
   PLANNING_VIEWS,
@@ -516,6 +518,15 @@ export default async function PlanningPage({
     return `${dayIso.slice(0, 7)}-01`;
   }
 
+  // Dated items that touch the visible period — the one count the filter
+  // banner compares ("all" vs "shown"). Same inclusive overlap rule as the year
+  // tiles and the month cells.
+  const itemsInRange = (list: readonly PlanningItem[]): number =>
+    list.filter((it) => {
+      const end = effectiveEndDay(it);
+      return it.startDate && end && rangesOverlapInclusive(it.startDate, end, range.start, range.end);
+    }).length;
+
   const hasAnything = agenda
     ? agenda.days.length > 0 || agenda.later.length > 0 || agenda.undated.length > 0
     : visibleItems.length > 0;
@@ -634,6 +645,36 @@ export default async function PlanningPage({
         ))}
       </nav>
       )}
+
+      {/* An active type filter must be SAID, not only inferred from one
+          highlighted chip (owner walk 2026-10-01: the year read "no records"
+          under a filter nobody knew was on). Both counts are over the visible
+          period, so the gap between "all" and "shown" explains itself. */}
+      {sourceFilter ? (
+        <div
+          role="status"
+          data-testid="planning-filter-active"
+          className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 py-2 text-xs text-text-secondary"
+        >
+          <span>
+            {t("filterActive", {
+              type: t(`source.${sourceFilter}`),
+              total: itemsInRange(result.items),
+              shown: itemsInRange(visibleItems),
+            })}
+          </span>
+          {view === "month" || view === "week" || view === "day" ? (
+            <span className="text-text-muted">{t("filterNote")}</span>
+          ) : null}
+          <Link
+            href={planningHref({ view, date: anchor, source: null, today }) as "/dashboard"}
+            data-testid="planning-filter-clear"
+            className="font-medium text-brand-blue hover:underline"
+          >
+            {t("filterClear")}
+          </Link>
+        </div>
+      ) : null}
 
       {/* ---------------- WORKLOAD (week + agenda) ---------------- */}
       {showWorkload && workloadHasSignal(workloadWeeks) ? (
@@ -873,7 +914,14 @@ export default async function PlanningPage({
                 {monthOnlyFmt(`${m.month}-01`)}
               </span>
               <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                {t("year.count", { count: m.count })}
+                {/* Under a source filter the count is the filtered one, but the
+                    month view still draws the journal's hours and marks from
+                    the full model. A bare "no records" here contradicted the
+                    month the tile opens (owner walk 2026-10-01): a zero under
+                    a filter says WHICH records are absent. */}
+                {m.count === 0 && sourceFilter
+                  ? t("emptyFiltered")
+                  : t("year.count", { count: m.count })}
               </span>
             </Link>
           ))}

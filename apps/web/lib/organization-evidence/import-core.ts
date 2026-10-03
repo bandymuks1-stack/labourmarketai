@@ -7,6 +7,8 @@ import {
 } from "@/lib/timesheet-import/resolve-entities";
 import { orgDisplayName } from "@/lib/company/org-display";
 import {
+  anyStandingDispute,
+  contestWithdrawnBy,
   deriveEvidenceStanding,
   type ReportedEvidenceState,
   type RecordLifecycleEvent,
@@ -2693,17 +2695,26 @@ function standingOf(r: SessionRecordWithEvents) {
  *
  * It deletes and updates nothing: every write is an append.
  */
-async function lifecycleSweep(
-  caller: EvidenceCaller,
+interface SweepPlan {
+  readonly organizationId: string;
+  /** The records that would gain the event, in stable (id) order. */
+  readonly pending: readonly SessionRecordWithEvents[];
+  /** True when the session's own latest lifecycle event is `rolled_back`. */
+  readonly sessionWithdrawn: boolean;
+  /** The session is already in the requested state AND no record needs the event. */
+  readonly nothingToDo: boolean;
+}
+
+/** THE pending computation of the batch lifecycle - shared by the sweep that
+ *  writes and by the read-only preview an agent confirms against, so what is
+ *  shown and what is written can never be computed two ways. Reads only. */
+async function planLifecycleSweep(
+  store: EvidenceStore,
   sessionId: string,
   eventType: "withdrawn" | "reinstated",
-  note?: string | null,
-): Promise<EvidenceImportResult<LifecycleResult>> {
-  const store = storeOf(caller);
+): Promise<EvidenceImportResult<{ plan: SweepPlan }>> {
   const session = await loadSession(store, sessionId);
   if (!session.ok) return session.failure;
-  const importEvent = eventType === "withdrawn" ? "rolled_back" : "reinstated";
-
   const records = await readSessionRecords(store, sessionId);
   if (!records.ok) return records.failure;
   const pending = records.value.filter((r) =>
@@ -2717,13 +2728,68 @@ async function lifecycleSweep(
   const latest = trail.data.find((e) => e.event_type === "rolled_back" || e.event_type === "reinstated");
   const sessionWithdrawn = latest?.event_type === "rolled_back";
   const alreadyThere = eventType === "withdrawn" ? sessionWithdrawn : !sessionWithdrawn;
-  if (pending.length === 0 && alreadyThere) {
+  return {
+    kind: "ok",
+    plan: {
+      organizationId: session.organizationId,
+      pending,
+      sessionWithdrawn,
+      nothingToDo: pending.length === 0 && alreadyThere,
+    },
+  };
+}
+
+/**
+ * READ-ONLY preview of withdrawing one import session: exactly the records the
+ * sweep would write a `withdrawn` event for. Writes nothing. The fingerprint
+ * parts (`pendingRecordIds`, `sessionWithdrawn`) are what a draft binds its
+ * one-time token to, so a change between preview and confirm voids the token.
+ */
+export async function previewWithdrawal(
+  caller: EvidenceCaller,
+  sessionId: string,
+): Promise<
+  EvidenceImportResult<{
+    organizationId: string;
+    pendingRecordIds: readonly string[];
+    peopleAffected: number;
+    sessionWithdrawn: boolean;
+    nothingToDo: boolean;
+  }>
+> {
+  const planned = await planLifecycleSweep(storeOf(caller), sessionId, "withdrawn");
+  if (planned.kind !== "ok") return planned;
+  const { plan } = planned;
+  const people = new Set(plan.pending.map((r) => r.organization_person_id).filter((x): x is string => !!x));
+  return {
+    kind: "ok",
+    organizationId: plan.organizationId,
+    pendingRecordIds: plan.pending.map((r) => r.id).sort(),
+    peopleAffected: people.size,
+    sessionWithdrawn: plan.sessionWithdrawn,
+    nothingToDo: plan.nothingToDo,
+  };
+}
+
+async function lifecycleSweep(
+  caller: EvidenceCaller,
+  sessionId: string,
+  eventType: "withdrawn" | "reinstated",
+  note?: string | null,
+): Promise<EvidenceImportResult<LifecycleResult>> {
+  const store = storeOf(caller);
+  const importEvent = eventType === "withdrawn" ? "rolled_back" : "reinstated";
+  const planned = await planLifecycleSweep(store, sessionId, eventType);
+  if (planned.kind !== "ok") return planned;
+  const { organizationId, pending, nothingToDo } = planned.plan;
+  if (nothingToDo) {
     return {
       kind: "ok",
       affected: 0,
       outcome: eventType === "withdrawn" ? "already_withdrawn" : "already_reinstated",
     };
   }
+  const session = { organizationId };
 
   let affected = 0;
   if (pending.length > 0) {
@@ -2776,6 +2842,55 @@ export const ATTESTATION_ROLES = [
 ] as const;
 
 /**
+ * READ-ONLY preview of an attestation: validates the role against the
+ * record's supplier role (the same rule `attestRecord` enforces) and reports
+ * the record's CURRENT attestation trail so a draft can bind its one-time
+ * token to it. Writes nothing.
+ */
+export async function previewAttestation(
+  caller: EvidenceCaller,
+  input: {
+    readonly recordId: string;
+    readonly actorRole?: (typeof ATTESTATION_ROLES)[number] | null;
+  },
+): Promise<
+  EvidenceImportResult<{
+    organizationId: string;
+    supplierRole: string;
+    /** Count of `attested` events on the record, from any actor. */
+    attestedEventCount: number;
+    /** Id of the newest `attested` event, or null. */
+    latestAttestedEventId: string | null;
+    /** The caller already attested this record. */
+    attestedByCaller: boolean;
+    /** The record's latest lifecycle event is a withdrawal. */
+    withdrawn: boolean;
+  }>
+> {
+  const store = storeOf(caller);
+  const rec = await store.readRecord(input.recordId);
+  if (rec.error) return classify(rec.error);
+  if (!rec.data) return { kind: "not-found" };
+  const supplierRole = (rec.data.supplier_role as string | null) ?? "other";
+  if (input.actorRole && input.actorRole !== supplierRole) {
+    return { kind: "invalid", problems: [`attestation role must be the record's supplier role (${supplierRole})`] };
+  }
+  const events = await store.listRecordEvents(input.recordId);
+  if (events.error) return classify(events.error);
+  const attested = events.data.filter((e) => e.event_type === "attested");
+  const lifecycle = events.data.find((e) => e.event_type === "withdrawn" || e.event_type === "reinstated");
+  return {
+    kind: "ok",
+    organizationId: rec.data.organization_id as string,
+    supplierRole,
+    attestedEventCount: attested.length,
+    latestAttestedEventId: (attested[0]?.id as string | undefined) ?? null,
+    attestedByCaller: attested.some((e) => e.actor_profile_id === store.userId),
+    withdrawn: lifecycle?.event_type === "withdrawn",
+  };
+}
+
+/**
  * The organization attesting a record it supplied.
  *
  * Attesting one's OWN work is ALLOWED (owner decision 3): a sole trader
@@ -2809,21 +2924,22 @@ export async function attestRecord(
   },
 ): Promise<EvidenceImportResult<{ eventId: string }>> {
   const store = storeOf(caller);
-  const rec = await store.readRecord(input.recordId);
-  if (rec.error) return classify(rec.error);
-  if (!rec.data) return { kind: "not-found" };
-  const supplierRole = (rec.data.supplier_role as string | null) ?? "other";
-  if (input.actorRole && input.actorRole !== supplierRole) {
-    return { kind: "invalid", problems: [`attestation role must be the record's supplier role (${supplierRole})`] };
+  const prior = await previewAttestation(caller, input);
+  if (prior.kind !== "ok") return prior;
+  const supplierRole = prior.supplierRole;
+  // One actor stands behind a record ONCE. A repeat adds no standing, only
+  // noise in an append-only ledger (and a replayed confirm must never mint a
+  // second event) - refused by name, not written.
+  if (prior.attestedByCaller) {
+    return { kind: "invalid", problems: ["this record is already attested by this actor"] };
   }
-
   const res = await store.insertRecordEvents([
     {
-      organization_id: rec.data.organization_id as string,
+      organization_id: prior.organizationId,
       record_id: input.recordId,
       event_type: "attested",
       actor_role: supplierRole,
-      actor_organization_id: rec.data.organization_id as string,
+      actor_organization_id: prior.organizationId,
       actor_profile_id: store.userId,
       note: input.note ?? null,
     },
@@ -3048,7 +3164,8 @@ export interface EvidenceRecordView {
    *  separate event with its own policy and is never implied by an import. */
   readonly independentlyVerified: boolean;
   /**
-   * THIS VIEWER has already contested this record.
+   * THIS VIEWER's own contest of this record STANDS right now (their latest
+   * dispute-family event is `disputed`; a later `dispute_withdrawn` ends it).
    *
    * Distinct from `state === "DISPUTED"`, which says only that SOMEBODY with
    * standing contested it — an organisation manager can dispute too. A surface
@@ -3060,6 +3177,12 @@ export interface EvidenceRecordView {
    * organisation-side read is to claim no authorship at all.
    */
   readonly disputedByViewer: boolean;
+  /**
+   * THIS VIEWER contested this record and then withdrew the contest. The
+   * contest existed and is no longer standing - the history stays visible, the
+   * surface offers a fresh contest, and the earlier event is never erased.
+   */
+  readonly contestWithdrawnByViewer: boolean;
 }
 
 /**
@@ -3200,13 +3323,16 @@ export async function listEvidenceRecords(
           }
         : null,
       independentlyVerified: standing.independentlyVerified,
+      // Per-viewer, latest-wins: a withdrawn contest no longer stands, and
+      // someone else's contest is never the viewer's to withdraw.
       disputedByViewer:
         filter.viewerProfileId != null &&
-        events.some(
-          (e) =>
-            e.eventType === "disputed" &&
-            e.actorProfileId === filter.viewerProfileId,
+        anyStandingDispute(
+          events.filter((e) => e.actorProfileId === filter.viewerProfileId),
         ),
+      contestWithdrawnByViewer:
+        filter.viewerProfileId != null &&
+        contestWithdrawnBy(events, filter.viewerProfileId),
     } satisfies EvidenceRecordView;
   });
 
@@ -3489,5 +3615,47 @@ export async function respondToRosterLink(
   return {
     kind: "ok",
     linkState: input.decision === "accept" ? "linked" : "unlinked",
+  };
+}
+
+// ── the subject WITHDRAWS their contest ─────────────────────────────────────
+
+/**
+ * Take back the caller's own standing contest of a record.
+ *
+ * Appends a `dispute_withdrawn` event through
+ * `withdraw_organization_evidence_dispute_v1`; the earlier `disputed` event
+ * is never altered, so the fact that the contest existed stays on record. The
+ * RPC is the only door (no policy admits a subject to write this event type),
+ * it authorises exactly as the dispute policy does, and it is IDEMPOTENT:
+ * withdrawing with nothing standing appends nothing and answers
+ * `withdrawn: false`. SQLSTATE 42501 is the one refusal for "no such record",
+ * "not the subject", "not linked" and "not signed in" - a caller must not learn
+ * that a record exists from a different error.
+ */
+export async function withdrawEvidenceRecordDispute(
+  caller: DomainCaller,
+  input: { readonly recordId: string; readonly note?: string | null },
+): Promise<
+  EvidenceImportResult<{ readonly withdrawn: boolean; readonly standing: boolean }>
+> {
+  const note = (input.note ?? "").trim();
+  if (note.length > 1000) return { kind: "invalid", problems: ["note_too_long"] };
+  const res = await db(caller.supabase).rpc(
+    "withdraw_organization_evidence_dispute_v1",
+    { p_record_id: input.recordId, p_note: note === "" ? null : note },
+  );
+  if (res.error) {
+    if (res.error.code === "42501")
+      return { kind: "invalid", problems: ["not_subject"] };
+    if (res.error.code === "22001")
+      return { kind: "invalid", problems: ["note_too_long"] };
+    return classify(res.error);
+  }
+  const data = (res.data ?? {}) as { withdrawn?: boolean; standing?: boolean };
+  return {
+    kind: "ok",
+    withdrawn: data.withdrawn === true,
+    standing: data.standing === true,
   };
 }

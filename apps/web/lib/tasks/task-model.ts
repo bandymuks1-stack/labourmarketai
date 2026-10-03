@@ -67,6 +67,11 @@ export type WorkTask = {
   /** Optional object/site linkage (train D — work_objects; null until the
    *  v2 collaboration migration is applied, never fabricated). */
   readonly objectId: string | null;
+  /** Optional stage pointer (project_stages.id; null = unstaged, or the
+   *  stage/subtask migration is not applied yet — never fabricated). */
+  readonly stageId: string | null;
+  /** Optional parent task (subtask hierarchy; null = a top-level task). */
+  readonly parentTaskId: string | null;
   readonly title: string;
   readonly description: string | null;
   readonly status: WorkTaskStatus;
@@ -121,6 +126,9 @@ export type TaskBlocker = {
   /** Null when the blocker row is not visible to the caller (RLS). */
   readonly title: string | null;
   readonly status: WorkTaskStatus | null;
+  /** The blocker's own due timestamp when the caller may read it — null when
+   *  the row is hidden or has no due date. Never inferred. */
+  readonly dueAt: string | null;
 };
 
 /** Open blockers gate a task — done/cancelled blockers do not. */
@@ -141,6 +149,9 @@ export type MyTasksResult =
       readonly status: "ok";
       readonly tasks: readonly WorkTask[];
       readonly error: string | null;
+      /** True only when the stage/subtask columns were actually readable.
+       *  False/absent → the structure UI (stage / parent selects, WBS) is hidden. */
+      readonly structure?: boolean;
     };
 
 export type TaskAttentionCounts = {
@@ -172,7 +183,7 @@ export function isOpen(status: WorkTaskStatus): boolean {
 }
 
 /** UTC day of an ISO timestamp — "YYYY-MM-DD", or null when unparseable. */
-function utcDay(iso: string): string | null {
+export function utcDay(iso: string): string | null {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return null;
   return d.toISOString().slice(0, 10);
@@ -226,4 +237,71 @@ export function statusLabelKey(status: WorkTaskStatus): string {
 /** i18n leaf for a priority label. */
 export function priorityLabelKey(priority: WorkTaskPriority): string {
   return `tasks.priority.${priority}`;
+}
+
+/* ── Advisory conflicts (SEP-2: a warning never blocks a commitment) ─────── */
+
+/**
+ * What is inconsistent about a task relative to the tasks it depends on.
+ * ADVISORY ONLY: the status RPC does not enforce dependencies and this model
+ * has no way to express a refusal. Only blockers the caller can read count —
+ * a hidden blocker (status null) is not an open blocker, it is unknown, and
+ * is never reported as a conflict.
+ */
+export type DependencyConflict = {
+  /** Blockers that are still open. */
+  readonly openBlockers: number;
+  /** The task is in progress or done while a blocker is still open. */
+  readonly startedBeforeBlockers: boolean;
+  /** The task is due on an earlier day than an open blocker's due day. */
+  readonly dueBeforeBlockerDue: boolean;
+  readonly hasConflict: boolean;
+};
+
+export function deriveDependencyConflict(
+  task: Pick<WorkTask, "status" | "dueAt">,
+  blockers: readonly Pick<TaskBlocker, "status" | "dueAt">[],
+): DependencyConflict {
+  const open = blockers.filter((b) => isBlockingStatus(b.status));
+  const startedBeforeBlockers =
+    open.length > 0 && (task.status === "in_progress" || task.status === "done");
+  const taskDay = task.dueAt ? utcDay(task.dueAt) : null;
+  const dueBeforeBlockerDue =
+    isOpen(task.status) &&
+    taskDay !== null &&
+    open.some((b) => {
+      const blockerDay = b.dueAt ? utcDay(b.dueAt) : null;
+      return blockerDay !== null && taskDay < blockerDay;
+    });
+  return {
+    openBlockers: open.length,
+    startedBeforeBlockers,
+    dueBeforeBlockerDue,
+    hasConflict: startedBeforeBlockers || dueBeforeBlockerDue,
+  };
+}
+
+/**
+ * The advisory to put on the result of a status change: moving a task to
+ * in_progress or done while blockers are open. Returns null when there is
+ * nothing to say. The change has ALREADY happened by the time this is
+ * consulted — it informs, it never decides.
+ */
+export function statusChangeAdvisory(
+  nextStatus: WorkTaskStatus,
+  blockers: readonly Pick<TaskBlocker, "status">[],
+): { readonly kind: "blockers_open"; readonly openBlockers: number } | null {
+  if (nextStatus !== "in_progress" && nextStatus !== "done") return null;
+  const open = blockers.filter((b) => isBlockingStatus(b.status)).length;
+  return open > 0 ? { kind: "blockers_open", openBlockers: open } : null;
+}
+
+/** Only these reservation states are surfaced on the redirect — `clear` and
+ *  "not applicable" say nothing. `unknown` is NOT clear (SEP-7). */
+export type TaskReservationAdvisory = "collides" | "unknown";
+
+export function isTaskReservationAdvisory(
+  v: string | null | undefined,
+): v is TaskReservationAdvisory {
+  return v === "collides" || v === "unknown";
 }

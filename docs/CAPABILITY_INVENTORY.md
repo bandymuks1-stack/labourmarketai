@@ -518,7 +518,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | SKL-6 | ESCO taxonomy | 4 tables, 1,045,186 labels | IMPL | — | 2 | 0 of 161 platform skills carry an `esco_uri` — the bridge is inert |
 | SKL-7 | Documents / credential validity | `worker_documents`, `document_files` | IMPL | W (add only) | 1 | one download door, versioned, ack-bound |
 | SKL-8 | Country requirement matrix | `lib/country-readiness` (code), `country_document_requirements` (empty) | PARTIAL | — | 2 | no route of its own |
-| SKL-9 | **Qualification recognition / RPL / equivalence** | — | **MISSING** | — | 2 | nothing at any layer; keep in the architecture |
+| SKL-9 | **Qualification recognition / RPL / equivalence** | `lib/qualification/capability-standing`, `lib/skills/recognition-model` (pure); `competency_recognitions` (unapplied RED packet P-3, PR #1741) | **PARTIAL** (EXISTS pure + READ wired; **DISCONNECTED** at the write: no assessor act, 0 training providers) | — | 2 | corrected 2026-10-01 from MISSING; `hasRecognizedEquivalence` stays false until P-3 is applied and an assessor records one |
 | SKL-10 | Training & certification register | `training_programs`, `training_assignments` | IMPL (0 rows) | — | 2 | applied; writes nothing into the skill ladder, by decision |
 
 #### C. ORGANIZATION · WORKSPACE · AUTHORITY
@@ -621,7 +621,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 
 | ID | Capability | Canonical objects | Status | AI | P | Next action |
 |---|---|---|---|---|---|---|
-| GEO-1 | Market map / world view | `lib/market-map` | PARTIAL | — | 1 | owner-scoped only; cross-user aggregate deliberately absent |
+| GEO-1 | Market map / world view | `lib/market-map` | PARTIAL | — | 1 | owner-scoped only; cross-user aggregate deliberately absent. ONE canonical map (2026-10-01); prior human proof not re-earned until production screenshots at 390/1280/1440 exist |
 | GEO-2 | Personal location privacy | `preferred_locations`, `consented_login_location_signals` | PROD_DATA | — | — | **no coordinates for people, by schema construction** |
 | GEO-3 | Mobility / cross-border requirements | `lib/country-readiness` | PARTIAL | — | 2 | checklist only; no permit/posting workflow |
 | GEO-4 | Labour-market intelligence | `market_intelligence_observations` (76) | PARTIAL | — | 2 | exactly one path into an operational action |
@@ -635,7 +635,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | EDU-2 | Programmes / cohorts / members | `education_*` | PROD_DATA (1/1/0) | W | 1 | correction path applied 2026-09-08; zero cohort members in production |
 | EDU-3 | Learner outcomes | `institution_learner_outcomes` | IMPL | — | 2 | — |
 | EDU-4 | Learning compass (student path) | `lib/learning/learning-compass` | IMPL | — | 2 | — |
-| EDU-5 | Human-in-loop learning review | `learning_review_queue` | **ORPHAN** | — | 3 | `/dashboard/learning` has zero inbound links — VERIFIED, verdict unchanged; parked on F-N1 (owner). Claim now names its module + route so it is checkable |
+| EDU-5 | Human-in-loop learning review | `learning_review_queue` | **ORPHAN** | — | 3 | `/dashboard/learning` has zero inbound links — VERIFIED, verdict unchanged; parked on F-N1 (owner). Claim now names its module + route so it is checkable. 2026-10-01: signal→queue producer connected code-only (org derived from the entry, pending items only, manager brief count when >0); route still unlinked, policy OFF, 0 prod rows, TEST_PROVEN only |
 | EDU-6 | Institution reporting | `education_programs` + public vacancy counts | IMPL | — | 2 | CSV export built 2026-09-13; never downloaded by a human |
 
 #### L. PLATFORM · AI · GOVERNANCE

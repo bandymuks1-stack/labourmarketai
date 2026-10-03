@@ -4,6 +4,8 @@ import type { EvidenceTier } from "@/lib/evidence/evidence-tier";
 import { skillsForProfession } from "@/lib/taxonomy/profession-skills";
 
 import {
+  importedJobsHref,
+  recommendationNextAction,
   buildLearningCompass,
   deriveStudyingAt,
   isStudentPath,
@@ -211,5 +213,155 @@ describe("learning compass — pure model", () => {
       opportunities: [opp({ missingSkillSlugs: ["panel-wiring"] })],
     });
     expect(c.missing.skills.map((m) => m.slug)).not.toContain("panel-wiring");
+  });
+});
+
+describe("derived recommendations (handoff 2026-10-02 §10)", () => {
+  const opp = (over: Partial<CompassOpportunity>): CompassOpportunity => ({
+    requestId: "r1",
+    roleSlug: "tiler",
+    companyName: "Alfa",
+    country: "LT",
+    status: "strong",
+    matchedSkillSlugs: [],
+    missingSkillSlugs: [],
+    ...over,
+  });
+  const base = { professionSlug: null, journalEntryCount: 1, education: [], availabilityKnown: true } as const;
+
+  it("a skill a real demand asks for and the person lacks is demand_missing, with provenance", () => {
+    const c = buildLearningCompass({
+      ...base,
+      skills: [],
+      opportunities: [opp({ missingSkillSlugs: ["grouting"] })],
+    });
+    expect(c.recommendations).toEqual([
+      {
+        skillSlug: "grouting",
+        basis: "demand_missing",
+        sources: [{ requestId: "r1", roleSlug: "tiler", companyName: "Alfa" }],
+        professionSlug: null,
+      },
+    ]);
+  });
+
+  it("a self-declared skill a demand asks for is demand_weak_evidence", () => {
+    const c = buildLearningCompass({
+      ...base,
+      skills: [{ slug: "tiling", evidence: "self_declared" }],
+      opportunities: [opp({ matchedSkillSlugs: ["tiling"] })],
+    });
+    expect(c.recommendations.map((r) => [r.skillSlug, r.basis])).toEqual([["tiling", "demand_weak_evidence"]]);
+  });
+
+  it("confirmed work REMOVES the weak-evidence recommendation", () => {
+    const c = buildLearningCompass({
+      ...base,
+      skills: [{ slug: "tiling", evidence: "self_declared", confirmedWork: "confirmed_work" }],
+      opportunities: [opp({ matchedSkillSlugs: ["tiling"] })],
+    });
+    expect(c.recommendations).toEqual([]);
+  });
+
+  it("confirmed work on OTHER skills never removes a real missing-skill gap", () => {
+    const c = buildLearningCompass({
+      ...base,
+      skills: [{ slug: "tiling", evidence: "manager_confirmed", confirmedWork: "repeated_confirmed" }],
+      opportunities: [opp({ matchedSkillSlugs: ["tiling"], missingSkillSlugs: ["grouting"] })],
+    });
+    expect(c.recommendations.map((r) => [r.skillSlug, r.basis])).toEqual([["grouting", "demand_missing"]]);
+  });
+
+  it("insufficient demand data recommends nothing; no demand and no profession recommends nothing", () => {
+    expect(
+      buildLearningCompass({
+        ...base,
+        skills: [],
+        opportunities: [opp({ status: "insufficient_data", missingSkillSlugs: ["grouting"] })],
+      }).recommendations,
+    ).toEqual([]);
+    expect(buildLearningCompass({ ...base, skills: [], opportunities: [] }).recommendations).toEqual([]);
+  });
+
+  it("every recommendation carries a real reason (a demand source or a target profession)", () => {
+    const c = buildLearningCompass({
+      ...base,
+      professionSlug: "tiler",
+      skills: [{ slug: "tiling", evidence: "self_declared" }],
+      opportunities: [opp({ matchedSkillSlugs: ["tiling"], missingSkillSlugs: ["grouting"] })],
+    });
+    expect(c.recommendations.length).toBeGreaterThan(0);
+    for (const r of c.recommendations) {
+      expect(r.sources.length > 0 || r.professionSlug !== null).toBe(true);
+    }
+  });
+});
+
+describe("every recommendation leads to a real next action (LEARNING_TO_NEXT_OPPORTUNITY)", () => {
+  const opp = (over: Partial<CompassOpportunity>): CompassOpportunity => ({
+    requestId: "r1",
+    roleSlug: "tiler",
+    companyName: "Alfa",
+    country: "LT",
+    status: "possible",
+    opportunityType: "employment",
+    matchedSkillSlugs: [],
+    missingSkillSlugs: [],
+    ...over,
+  });
+  const base = { professionSlug: null, journalEntryCount: 1, education: [], availabilityKnown: true } as const;
+  const actionsOf = (c: ReturnType<typeof buildLearningCompass>) =>
+    c.recommendations.map((r) => [r.basis, recommendationNextAction(r).kind]);
+
+  it("demand_missing -> the opportunity board, narrowed to the role that asked", () => {
+    const c = buildLearningCompass({ ...base, skills: [], opportunities: [opp({ missingSkillSlugs: ["grouting"] })] });
+    expect(actionsOf(c)).toEqual([["demand_missing", "opportunities"]]);
+    expect(recommendationNextAction(c.recommendations[0]!)).toEqual({ kind: "opportunities", professionSlug: "tiler" });
+  });
+
+  it("demand_weak_evidence -> the work journal, never 'apply'", () => {
+    const c = buildLearningCompass({
+      ...base,
+      skills: [{ slug: "tiling", evidence: "self_declared" }],
+      opportunities: [opp({ matchedSkillSlugs: ["tiling"] })],
+    });
+    expect(actionsOf(c)).toEqual([["demand_weak_evidence", "journal"]]);
+  });
+
+  it("profession_gap -> the profile where skills are edited", () => {
+    const c = buildLearningCompass({ ...base, professionSlug: "tiler", skills: [], opportunities: [] });
+    expect(c.recommendations.length).toBeGreaterThan(0);
+    for (const r of c.recommendations) expect(recommendationNextAction(r)).toEqual({ kind: "profile" });
+  });
+
+  it("confirmed work removes the weak-evidence recommendation AND its journal action", () => {
+    const c = buildLearningCompass({
+      ...base,
+      skills: [{ slug: "tiling", evidence: "self_declared", confirmedWork: "confirmed_work" }],
+      opportunities: [opp({ matchedSkillSlugs: ["tiling"] })],
+    });
+    expect(actionsOf(c)).toEqual([]);
+  });
+
+  it("confirmed work does NOT remove a real missing skill - its opportunity action stays", () => {
+    const c = buildLearningCompass({
+      ...base,
+      skills: [{ slug: "tiling", evidence: "manager_confirmed", confirmedWork: "repeated_confirmed" }],
+      opportunities: [opp({ matchedSkillSlugs: ["tiling"], missingSkillSlugs: ["grouting"] })],
+    });
+    expect(actionsOf(c)).toEqual([["demand_missing", "opportunities"]]);
+  });
+
+  it("a demand with no role still has a real door (the board), and never a request id as text", () => {
+    const c = buildLearningCompass({ ...base, skills: [], opportunities: [opp({ roleSlug: null, missingSkillSlugs: ["grouting"] })] });
+    expect(recommendationNextAction(c.recommendations[0]!)).toEqual({ kind: "opportunities", professionSlug: null });
+  });
+});
+
+describe("importedJobsHref (cohort demand count click-through)", () => {
+  it("targets the public /jobs board filtered by the profession, never the platform-request board", () => {
+    expect(importedJobsHref("welder")).toBe("/jobs?profession=welder");
+    expect(importedJobsHref("a b")).toBe("/jobs?profession=a%20b");
+    expect(importedJobsHref("welder")).not.toMatch(/dashboard/);
   });
 });

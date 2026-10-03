@@ -357,6 +357,13 @@ export async function readWorkersLabels() {
         unavailable: tWorkers("identity.availability.unavailable"),
       },
     },
+    team: {
+      free: tWorkers("team.countFree"),
+      working: tWorkers("team.countWorking"),
+      away: tWorkers("team.countAway"),
+      assign: tWorkers("team.assign"),
+      openCalendar: tWorkers("team.openCalendar"),
+    },
     operations: {
       columnHeading: tWorkers("operations.columnHeading"),
       setupNote: tWorkers("operations.setupNote"),
