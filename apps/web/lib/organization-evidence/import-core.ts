@@ -7,6 +7,8 @@ import {
 } from "@/lib/timesheet-import/resolve-entities";
 import { orgDisplayName } from "@/lib/company/org-display";
 import {
+  anyStandingDispute,
+  contestWithdrawnBy,
   deriveEvidenceStanding,
   type ReportedEvidenceState,
   type RecordLifecycleEvent,
@@ -3162,7 +3164,8 @@ export interface EvidenceRecordView {
    *  separate event with its own policy and is never implied by an import. */
   readonly independentlyVerified: boolean;
   /**
-   * THIS VIEWER has already contested this record.
+   * THIS VIEWER's own contest of this record STANDS right now (their latest
+   * dispute-family event is `disputed`; a later `dispute_withdrawn` ends it).
    *
    * Distinct from `state === "DISPUTED"`, which says only that SOMEBODY with
    * standing contested it — an organisation manager can dispute too. A surface
@@ -3174,6 +3177,12 @@ export interface EvidenceRecordView {
    * organisation-side read is to claim no authorship at all.
    */
   readonly disputedByViewer: boolean;
+  /**
+   * THIS VIEWER contested this record and then withdrew the contest. The
+   * contest existed and is no longer standing - the history stays visible, the
+   * surface offers a fresh contest, and the earlier event is never erased.
+   */
+  readonly contestWithdrawnByViewer: boolean;
 }
 
 /**
@@ -3314,13 +3323,16 @@ export async function listEvidenceRecords(
           }
         : null,
       independentlyVerified: standing.independentlyVerified,
+      // Per-viewer, latest-wins: a withdrawn contest no longer stands, and
+      // someone else's contest is never the viewer's to withdraw.
       disputedByViewer:
         filter.viewerProfileId != null &&
-        events.some(
-          (e) =>
-            e.eventType === "disputed" &&
-            e.actorProfileId === filter.viewerProfileId,
+        anyStandingDispute(
+          events.filter((e) => e.actorProfileId === filter.viewerProfileId),
         ),
+      contestWithdrawnByViewer:
+        filter.viewerProfileId != null &&
+        contestWithdrawnBy(events, filter.viewerProfileId),
     } satisfies EvidenceRecordView;
   });
 
@@ -3603,5 +3615,47 @@ export async function respondToRosterLink(
   return {
     kind: "ok",
     linkState: input.decision === "accept" ? "linked" : "unlinked",
+  };
+}
+
+// ── the subject WITHDRAWS their contest ─────────────────────────────────────
+
+/**
+ * Take back the caller's own standing contest of a record.
+ *
+ * Appends a `dispute_withdrawn` event through
+ * `withdraw_organization_evidence_dispute_v1`; the earlier `disputed` event
+ * is never altered, so the fact that the contest existed stays on record. The
+ * RPC is the only door (no policy admits a subject to write this event type),
+ * it authorises exactly as the dispute policy does, and it is IDEMPOTENT:
+ * withdrawing with nothing standing appends nothing and answers
+ * `withdrawn: false`. SQLSTATE 42501 is the one refusal for "no such record",
+ * "not the subject", "not linked" and "not signed in" - a caller must not learn
+ * that a record exists from a different error.
+ */
+export async function withdrawEvidenceRecordDispute(
+  caller: DomainCaller,
+  input: { readonly recordId: string; readonly note?: string | null },
+): Promise<
+  EvidenceImportResult<{ readonly withdrawn: boolean; readonly standing: boolean }>
+> {
+  const note = (input.note ?? "").trim();
+  if (note.length > 1000) return { kind: "invalid", problems: ["note_too_long"] };
+  const res = await db(caller.supabase).rpc(
+    "withdraw_organization_evidence_dispute_v1",
+    { p_record_id: input.recordId, p_note: note === "" ? null : note },
+  );
+  if (res.error) {
+    if (res.error.code === "42501")
+      return { kind: "invalid", problems: ["not_subject"] };
+    if (res.error.code === "22001")
+      return { kind: "invalid", problems: ["note_too_long"] };
+    return classify(res.error);
+  }
+  const data = (res.data ?? {}) as { withdrawn?: boolean; standing?: boolean };
+  return {
+    kind: "ok",
+    withdrawn: data.withdrawn === true,
+    standing: data.standing === true,
   };
 }

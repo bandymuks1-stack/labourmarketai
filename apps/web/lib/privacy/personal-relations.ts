@@ -480,7 +480,7 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
     key: "organization_person_id",
     rpc: "privacy_export_evidence_import_rows_v1",
     rlsNote:
-      "Staged import lines about you are read through a dedicated subject-safe function that returns only your own lines and leaves out the raw source line and other people's details. Until that function is applied in production this relation is listed as unavailable; ask us and we will answer through a route that can redact other people's rows.",
+      "Staged import lines about you are read through a dedicated subject-safe function that returns only your own lines (dates, hours, kinds, status) and leaves out the raw source line, the free-text description, the project and customer labels, and other people's details. Until that function is applied in production this relation is listed as unavailable; ask us and we will answer through a route that can redact other people's rows.",
   },
   // A project that names the person as its responsible person. The project
   // itself is the organization's record; the person is exported only because

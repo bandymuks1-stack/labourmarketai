@@ -16,7 +16,11 @@
 -- row (organization_people.linked_profile_id, link_state = 'linked'). It
 -- returns only that person's lines and only these columns; it OMITS
 -- source_fact, fact_fields, derived, customer_label/code/key, session_id,
--- person_match_*, duplicate_*, record_fingerprint, problem, context_match_*.
+-- person_match_*, duplicate_*, record_fingerprint, problem, context_match_*,
+-- and (field provenance not proven subject-safe) activity_text and
+-- context_label. person_label is returned ONLY when it equals, case- and
+-- space-insensitively, the linked roster row's own display_name (i.e. it
+-- demonstrably names the requesting subject); otherwise it is null.
 -- Read-only (STABLE); no data is written. Authenticated only, never anon.
 --
 -- Rollback: supabase/rollbacks/20261003120000_privacy_export_import_lines_subject_v1.down.sql
@@ -33,15 +37,14 @@ as $$
     'organization_id', r.organization_id,
     'organization_person_id', r.organization_person_id,
     'row_index', r.row_index,
-    'person_label', r.person_label,
-    'context_label', r.context_label,
+    'person_label', case when lower(btrim(r.person_label)) = lower(btrim(op.display_name))
+                         then r.person_label end,
     'activity_kind', r.activity_kind,
     'outcome_kind', r.outcome_kind,
     'activity_date', r.activity_date,
     'period_start', r.period_start,
     'period_end', r.period_end,
     'hours', r.hours,
-    'activity_text', r.activity_text,
     'status', r.status,
     'row_origin', r.row_origin,
     'work_object_id', r.work_object_id,
@@ -49,13 +52,10 @@ as $$
     'created_at', r.created_at
   )
   from public.evidence_import_rows r
+  join public.organization_people op on op.id = r.organization_person_id
   where auth.uid() is not null
-    and r.organization_person_id in (
-      select op.id
-        from public.organization_people op
-       where op.linked_profile_id = auth.uid()
-         and op.link_state = 'linked'
-    )
+    and op.linked_profile_id = auth.uid()
+    and op.link_state = 'linked'
   order by r.created_at, r.id
 $$;
 

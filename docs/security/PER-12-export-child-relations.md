@@ -68,23 +68,47 @@ rows for a test person = the rows of that person's parents (e.g. all
 
 ### CURRENT LIVE EXPORT GAP
 
-* `evidence_import_rows` (158 prod rows). Table policy admits only
-  `manages_organization(organization_id) OR is_admin()`, so a subject reading
-  the table gets nothing. Direct RLS is NOT widened: `source_fact`,
-  `fact_fields`, `derived` and `customer_*` can describe other people and the
-  organization's customers.
-  Fix drafted in this PR as an UNAPPLIED migration
-  `20261003120000_privacy_export_import_lines_subject_v1.sql`
-  (`-- @human-gate-approved`, RED: new SECURITY DEFINER fn) with rollback
-  `supabase/rollbacks/20261003120000_privacy_export_import_lines_subject_v1.down.sql`. The function takes no
-  argument, derives the subject from `auth.uid()` via the linked
-  `organization_people` row and returns only that person's lines, with a
-  column allowlist (no source_fact / fact_fields / derived / customer_* /
-  matching internals). The export already calls it (`rpc` field on the
-  register entry). Until applied the relation is listed under `unavailable`
-  (never silently empty). Residual: `activity_text` and `person_label` are the
-  person's own line as the organization wrote it; owner to confirm that is
-  acceptable to deliver.
+* `evidence_import_rows` (158 prod rows, 1 session, 1 organization). Table
+  policy admits only `manages_organization(organization_id) OR is_admin()`, so
+  a subject reading the table gets nothing. Direct RLS is NOT widened.
+  Fix drafted as an UNAPPLIED RED migration
+  `supabase/migrations/20261003120000_privacy_export_import_lines_subject_v1.sql`
+  (`-- @human-gate-approved`, new SECURITY DEFINER fn
+  `privacy_export_evidence_import_rows_v1()`, rollback
+  `supabase/rollbacks/20261003120000_privacy_export_import_lines_subject_v1.down.sql`).
+  No argument; subject = `auth.uid()` via `organization_people.linked_profile_id`
+  with `link_state = 'linked'`; STABLE; ACL: revoked from public and anon,
+  granted to authenticated. Until applied the relation is `unavailable`.
+
+  Field provenance (writer: `insertSourceRows` in
+  `apps/web/lib/organization-evidence/import-core.ts` fills the verbatim
+  source columns from the organization's uploaded file; the commit/matching
+  SQL and `import-core` fill the interpreted columns; prod shapes measured
+  read-only 2026-10-03, aggregates only: all 158 rows `person_state=created`,
+  `person_match_method=plan_created`, `status=committed`, `row_origin` null,
+  0 with an e-mail-like or 7+ digit string in activity_text, 0 rows where
+  person_label differs from the linked roster display_name):
+
+  | Column | SOURCE | SUBJECT | Other person's identity? | Free-text PII? | EXPORT DECISION |
+  |---|---|---|---|---|---|
+  | id, row_index, created_at | platform | the row | no | no | RETURN |
+  | organization_id, organization_person_id | session / roster link | supplying org, the subject | no | no | RETURN (ids) |
+  | person_label | uploaded file, name as written (tidy) | the person the SOURCE row named | yes if the match was fuzzy or the roster row was reused | name | RETURN ONLY when equal (case/space-insensitive) to the linked roster `display_name`, else null |
+  | activity_text | uploaded file, work text cell | the work, free text | YES (co-workers, customers, sites named in prose) | YES | OMIT (not proven subject-safe) |
+  | context_label | uploaded file, project label | the organization's project | possibly a customer name | possible | OMIT (ids work_object_id/project_id returned instead) |
+  | activity_kind, outcome_kind | parsed / defaulted enums | the row | no | no | RETURN |
+  | activity_date, period_start, period_end, hours | parsed from file, numeric/date | the subject's work | no | no | RETURN |
+  | status, row_origin | pipeline state | the row | no | no | RETURN |
+  | work_object_id, project_id | matched by pipeline | org's object | no | no | RETURN (ids) |
+  | source_fact | verbatim source row (whole file line, all cells) | mixed | YES | YES | OMIT |
+  | fact_fields, derived | pipeline interpretation of source | mixed | possible | possible | OMIT |
+  | customer_label, customer_code, customer_key | file customer cells | the organization's customer | YES (a third party) | possible | OMIT |
+  | person_match_method / _confidence, context_*, duplicate_*, record_fingerprint, problem, person_state, session_id, education_* | pipeline internals | the pipeline | possible via problem text | problem is free text | OMIT |
+
+  What stays unavailable: the raw source line, the work description, the
+  project label and the customer cells. A subject who wants them asks us and
+  we answer through a reviewed route. Re-open the allowlist only with
+  per-field provenance proof.
 
 ### FUTURE CONTRACT GAP (no live harm today)
 
