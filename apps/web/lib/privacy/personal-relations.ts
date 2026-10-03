@@ -180,6 +180,17 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "agency_workers", key: "worker_id" },
   { table: "project_members", key: "profile_id" },
   { table: "project_worker_assignments", key: "worker_id" },
+  // J-TIME-FREEDOM: the receipt that a manager kept this person on a project
+  // knowing a clash with THEIR OWN calendar (kind + overlap dates, closed
+  // reason code; an absence never carries its reason). Theirs above all. The
+  // deciding manager is another person's id (redacted); the fingerprint is an
+  // internal idempotency hash, not data about the person.
+  {
+    table: "commitment_override_receipts",
+    key: "worker_id",
+    redactActors: ["decided_by"],
+    omitColumns: ["fingerprint"],
+  },
   { table: "project_worker_readiness_items", key: "worker_id" },
   { table: "project_worker_operational_statuses", key: "worker_id" },
   { table: "asset_assignments", key: "worker_id" },

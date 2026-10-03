@@ -6016,6 +6016,16 @@
         "precheckChoose": "Choose instead",
         "precheckAssignAnyway": "Assign anyway",
         "precheckAdvisory": "Advisory: checked just now, and not re-checked when you save. Nothing has been assigned yet.",
+        "reasonLabel": "Reason for keeping (optional)",
+        "reasonNone": "No reason given",
+        "keepFailed": "The override receipt could not be recorded. Nothing was saved - try again.",
+        "reason": {
+          "agreed_with_worker": "Agreed with the worker",
+          "agreed_with_client": "Agreed with the client",
+          "partial_overlap": "Overlap is only partial",
+          "urgent_need": "Urgent need",
+          "other": "Other"
+        },
         "collidesTitle": "Already committed on these dates",
         "notBlocking": "This does not block the assignment — you decide what is right.",
         "alternativesTitle": "Free on these dates",

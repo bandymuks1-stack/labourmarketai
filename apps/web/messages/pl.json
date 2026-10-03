@@ -6016,6 +6016,16 @@
         "precheckChoose": "Wybierz zamiast tego",
         "precheckAssignAnyway": "Przypisz mimo to",
         "precheckAdvisory": "Tylko ostrzeżenie: sprawdzone przed chwilą i niesprawdzane ponownie przy zapisie. Nic jeszcze nie zostało przypisane.",
+        "reasonLabel": "Powód pozostawienia (opcjonalnie)",
+        "reasonNone": "Nie podano powodu",
+        "keepFailed": "Nie udało się zapisać potwierdzenia wyjątku. Nic nie zapisano - spróbuj ponownie.",
+        "reason": {
+          "agreed_with_worker": "Uzgodnione z pracownikiem",
+          "agreed_with_client": "Uzgodnione ze zleceniodawcą",
+          "partial_overlap": "Nakładanie tylko częściowe",
+          "urgent_need": "Pilna potrzeba",
+          "other": "Inne"
+        },
         "collidesTitle": "Już zaangażowany w tych terminach",
         "notBlocking": "To nie blokuje przypisania — Ty decydujesz, co jest właściwe.",
         "alternativesTitle": "Wolni w tych dniach",
