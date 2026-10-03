@@ -193,6 +193,12 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
       const abs = join(REPO, "supabase", dir);
       if (!existsSync(abs)) continue;
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
+        // 20261002141500 — SECURITY forward-fix: re-issues the SAME existing task RPCs
+        // (update_work_task_v2, set_work_task_status_v2, add_work_task_dependency_v1,
+        // link/unlink_journal_entry_*, start_workflow_instance_v1) with ONLY the NULL-unsafe
+        // authorization guards made fail-closed. No table/column/policy/signature change;
+        // pinned separately by null-safe-authorization-guards.test.ts.
+        if (f.startsWith("20261002141500_work_task_authz_null_safe_v1")) continue;
         if (f.startsWith(D2) || f.startsWith(TRAIN_D)) continue;
         const src = readFileSync(join(abs, f), "utf8");
         if (CONSUMERS.some((c) => f.startsWith(c))) {
