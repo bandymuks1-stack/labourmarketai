@@ -13,6 +13,9 @@ import { deriveProjectProgress, type ProjectProgress } from "./progress-model";
  *   - project_stages (done vs planned/in_progress/blocked, cancelled
  *     excluded).
  *
+ * The percent is leaf-task based only; stages contribute a declared count
+ * when no task exists (see progress-model.ts). Truncated/failed reads omit it.
+ *
  * No stored "progress" number exists anywhere — the value can never drift
  * from the truth because it IS the truth, recomputed per render (the
  * capacity/derived-spine precedent). RLS scopes every read to what the
@@ -78,6 +81,13 @@ export async function getProjectsProgress(
   const stageRows: SlimRow[] = stagesRes.error
     ? []
     : ((stagesRes.data ?? []) as SlimRow[]);
+  // A failed or limit-hit read is UNKNOWN, not "nothing there": the limit
+  // applies to the whole query across every project, so hitting it means any
+  // project's rows may be missing. Never turn that into a percent.
+  const read = {
+    tasksComplete: !tasksRes.error && taskRows.length < READ_LIMIT,
+    stagesComplete: !stagesRes.error && stageRows.length < READ_LIMIT,
+  };
 
   const out: Record<string, ProjectProgress> = {};
   for (const id of ids) {
@@ -90,6 +100,7 @@ export async function getProjectsProgress(
           status: r.status,
         })),
       stageRows.filter((r) => r.project_id === id).map((r) => r.status),
+      read,
     );
   }
   return out;

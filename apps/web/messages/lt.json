@@ -6049,7 +6049,8 @@
         "paused": "Pristabdytas",
         "completed": "Užbaigtas"
       },
-      "progressNone": "Išmatuojamos pažangos dar nėra"
+      "progressNone": "Išmatuojamos pažangos dar nėra",
+      "progressStages": "{done} iš {total} etapų pažymėta kaip atlikta"
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# įrašas laukia tavo patvirtinimo} few {# įrašai laukia tavo patvirtinimo} other {# įrašų laukia tavo patvirtinimo}}",
@@ -6326,6 +6327,7 @@
       "title": "Projekto valdymas",
       "progressLabel": "Pažanga",
       "progressNone": "Išmatuojamos pažangos dar nėra",
+      "progressStages": "{done} iš {total} etapų pažymėta kaip atlikta",
       "responsibleLabel": "Atsakingas asmuo",
       "responsibleNone": "Nenurodyta",
       "responsibleSave": "Išsaugoti",
