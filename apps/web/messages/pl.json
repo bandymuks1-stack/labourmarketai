@@ -11059,7 +11059,13 @@
       "label": "Przypisz do",
       "save": "Przypisz"
     },
+    "advisory": {
+      "blockersOpen": "Status zaktualizowany. Uwaga: otwartych zadań, od których zależy: {n}. Nic nie zostało zablokowane.",
+      "reservationLead": "Przypisano. Sprawdzenie kalendarza na dzień terminu (tylko ostrzeżenie):"
+    },
     "dependencies": {
+      "startedBeforeBlocker": "Rozpoczęte lub zakończone, zanim skończyło się to, od czego zależy (nadal otwartych: {n}). Tylko ostrzeżenie.",
+      "dueBeforeBlocker": "Termin wcześniejszy niż zadania, od którego zależy. Tylko ostrzeżenie.",
       "waitingOn": "Czeka na {n}",
       "blockedBy": "Zależy od",
       "hidden": "zadanie, którego nie widzisz",
@@ -11085,6 +11091,8 @@
       }
     },
     "evidence": {
+      "by": "Autor: {name}",
+      "hours": "Zarejestrowano: {hours} godz.",
       "title": "Dowody",
       "intro": "Wpisy z Dziennika pracy dołączone do tego zadania. Dołączenie nigdy nie zmienia wpisu — jedynie wskazuje, jakie zadanie potwierdza.",
       "empty": "Jeszcze żaden wpis z Dziennika pracy nie jest dołączony do tego zadania.",
