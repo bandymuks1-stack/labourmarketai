@@ -2620,19 +2620,39 @@ Read-back: engagements 105 -> 107, audit 163 -> 165, memberships for the two pai
 JWT `belongs_to_organization` is now true (was false in a rolled-back dry run) and `is_active_org_member` stays false, i.e. exactly the
 state a forward-path acceptance produces; no governance seat granted. No other row changed.
 
-## 20261003131904 - subject_contest_withdraw_v1 (#2138) - APPLIED 2026-10-03, WITH A KNOWN CONSTRAINT DEFECT
+## 20261003131904 - subject_contest_withdraw_v1 (#2138) and 20261003141047 - subject_contest_withdraw_constraint_reconcile_v1 (#2140) - APPLIED 2026-10-03
 
-Repo file `20261003110000_subject_contest_withdraw_v1.sql` (squash-merged as 32ff363ec). Applied as reviewed: event_type CHECK
-widened (see defect), BEFORE INSERT trigger `organization_evidence_events_dispute_state_guard` (SECURITY DEFINER, advisory lock,
-23505 duplicate standing contest / 23514 withdrawal without a standing contest), old one-contest-ever unique index dropped, RPC
-`withdraw_organization_evidence_dispute_v1` (SECURITY DEFINER, search_path=public, ACL postgres+authenticated; guard fn ACL postgres only).
-Read-back OK: ledger row; trigger enabled; index gone; RPC/guard ACLs; 158 events intact (all attested, 0 dispute-family); policies unchanged.
-DEFECT FOUND BY THE PRODUCTION PROOF: production already carried `organization_evidence_events_event_type_chk` (from
-20260924100000_historical_timesheet_m1; allows source_preserved, not dispute_withdrawn). The migration dropped/added a differently named
-`..._event_type_check` (a stale lineage name absent from prod), so prod now has BOTH: `_chk` still blocks dispute_withdrawn (the RPC
-fails closed with 23514, nothing written) and the new `_check` lacks source_preserved (latent: no writer on main, 0 rows in prod,
-unmerged M3 #2029 would be blocked). Not a live break; fix-forward migration in preparation (single reconciled constraint, union set).
-Status: PARTIAL - NOT PASS_REAL_PRODUCTION until the withdraw path is proven after the fix.
+#2138 (squash 32ff363ec; file `20261003110000_subject_contest_withdraw_v1.sql`) applied as reviewed: BEFORE INSERT trigger
+`organization_evidence_events_dispute_state_guard` (SECURITY DEFINER; 23505 duplicate standing contest, 23514 withdrawal without a standing
+contest), old one-contest-ever unique index dropped, RPC `withdraw_organization_evidence_dispute_v1` (SECURITY DEFINER, search_path=public, ACL
+postgres+authenticated), event_type CHECK widened. DEFECT FOUND BY THE PRODUCTION PROOF: production already carried
+`organization_evidence_events_event_type_chk` (20260924100000_historical_timesheet_m1; allows source_preserved, not dispute_withdrawn); #2138
+added a differently named `..._event_type_check`, so two CHECKs applied together (the withdraw RPC failed closed with 23514 and source_preserved
+was newly refused; 0 such rows, no writer on main, nothing live broke). FIX-FORWARD #2140 (squash 4afe910aa; file
+`20261003140000_subject_contest_withdraw_constraint_reconcile_v1.sql`, applied 20261003141047): drops both names, adds ONE
+`organization_evidence_events_event_type_chk` with the union set (attested, attestation_withdrawn, independently_verified, verification_withdrawn,
+withdrawn, reinstated, disputed, dispute_withdrawn, corrected, source_preserved). No data rewrite, no policy change.
+Read-back: exactly one event_type set CHECK (`_chk`, validated, 10 values); the 158 events intact (all attested). Rolled-back JWT proof on production
+(fixture subject re-linked inside the transaction): contest OK; second standing contest 23505; manager, stranger, NULL uid and anon withdraw all
+DENIED (42501); subject withdraw appends one dispute_withdrawn; second withdraw idempotent (no new row); direct dispute_withdrawn insert DENIED (23514);
+UPDATE and DELETE DENIED; re-contest OK; history kept (2 disputed + 1 dispute_withdrawn); another actor's contest untouched; an unlisted type is
+refused. source_preserved is CHECK-compatible (inserted as postgres only) - writer/RLS authority for source_preserved is NOT claimed proven.
+Post-rollback: 158 events, 0 non-attested, trigger present. Status: PASS_REAL_PRODUCTION at RPC/data level (no browser walk).
+#1646 closed as superseded (canonical home recorded in its close comment).
+
+## 20261003142847 - privacy_export_import_lines_subject_v1 (#2132) - APPLIED 2026-10-03
+
+Repo file `20261003120000_privacy_export_import_lines_subject_v1.sql` (squash 16de402ed; migration byte-identical to the reviewed head). One new
+function `privacy_export_evidence_import_rows_v1()` (no argument, returns setof jsonb, SECURITY DEFINER, STABLE, search_path=public, ACL postgres +
+authenticated): subject = auth.uid() via the linked organization_people row; a column ALLOWLIST (no source_fact, fact_fields, derived, customer_*,
+activity_text, context_label, session_id, person_match_*, record_fingerprint, problem); person_label only when it equals the roster display name.
+No table, policy or grant changed. Read-back: ledger row; signature; none of the excluded columns appear in the body; evidence_import_rows policies
+unchanged; 158 rows intact. Proof on production (read-only): the one real linked subject gets 1 of 158 rows with exactly the 16 allowlisted keys and 0
+rows of other people; a stranger gets 0 rows via the RPC and 0 via a direct table select (RLS not widened); NULL uid 0; anon DENIED (42501); no
+caller-supplied-id signature exists. LIMIT: production has a single linked subject, so cross-subject isolation is shown by the data, not by a second
+subject; a trigger-bypass fixture for that was refused by the permission layer and not worked around. Authenticated end-to-end bundle download:
+BLOCKED_QA_IDENTITY. Status: the LIVE evidence_import_rows PER-12 gap is closed at RPC level; PER-12 overall stays PARTIAL (agreement_events and
+agreement_amendments are a FUTURE_CONTRACT_GAP, 0 rows).
 
 ## Correction 2026-10-03 - #1436 invitation binding IS applied
 
@@ -2740,6 +2760,8 @@ repo file's timestamp. Matched by migration name, read from `supabase_migrations
 | `20261003100000` | `20261003095641` | list_agency_offered_candidates_v2_connection_gate_v1 |
 | `20261002142000` | `20261003110012` | manager_assigns_roster_worker_on_managed_project_v1 |
 | `20261003110000` | `20261003131904` | subject_contest_withdraw_v1 |
+| `20261003120000` | `20261003142847` | privacy_export_import_lines_subject_v1 |
+| `20261003140000` | `20261003141047` | subject_contest_withdraw_constraint_reconcile_v1 |
 
 Note on `agency_drafted_needs_output_column_v1` (ledger 20260928182413): applied as a standalone statement
 sequence (`drop function if exists public.list_agency_drafted_needs_v1(); create function ...` - `create or
