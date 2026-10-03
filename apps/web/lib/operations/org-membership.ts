@@ -169,6 +169,9 @@ export async function confirmEntryAndVerifySkills(
   // the card actionable and inviting retries of an impossible action
   // (rev14, Codex P2). Surface the terminal outcome instead.
   if (error) {
+    if ((error.message ?? "").includes("self_review_not_allowed")) {
+      return { ok: false, code: "self_review_not_allowed" };
+    }
     const stale = terminalStaleFromError(error.message);
     if (stale) return { ok: false, code: stale };
     return { ok: false, code: "error", message: error.message };

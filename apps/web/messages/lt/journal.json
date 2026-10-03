@@ -203,7 +203,8 @@
       "entrySuperseded": "Įrašas jau buvo pakeistas naujesne versija — kortelė nebeaktuali ir bus pašalinta iš sąrašo.",
       "entryDeleted": "Įrašas buvo pašalintas — kortelė nebeaktuali ir bus pašalinta iš sąrašo.",
       "staleTerminalHint": "Niekas nebuvo įrašyta. Jei darbuotojas išsaugojo naujesnę versiją, ji atsiras gautuosiuose kaip nauja kortelė.",
-      "noReviewerEngagement": "Šį įrašą matote kaip vadovas, bet tvirtinimui reikia tvirtinimo teisės. Paprašykite organizacijos savininko ją suteikti Žmonių puslapyje."
+      "noReviewerEngagement": "Šį įrašą matote kaip vadovas, bet tvirtinimui reikia tvirtinimo teisės. Paprašykite organizacijos savininko ją suteikti Žmonių puslapyje.",
+      "selfReviewNotAllowed": "Savo paties darbo patvirtinti negalite. Įrašas lieka pažymėtas kaip paties deklaruotas; patvirtinti turi kitas įgaliotas asmuo."
     },
     "showOriginal": "Rodyti originalą",
     "skills": "Įgūdžiai",
