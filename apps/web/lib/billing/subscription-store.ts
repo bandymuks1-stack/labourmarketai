@@ -584,3 +584,34 @@ export async function readRecoveryCandidates(input: {
 
   return { ok: true, ids, recentlyReconciled, unprocessedEvents };
 }
+
+/**
+ * DURABLE per-workspace cooldown for the user-refresh door, read from the
+ * audit rows the recovery adapter already writes (payment_webhook_events,
+ * event_type `reconcile.subscription`, event_id `reconcile:user_refresh:...`,
+ * payload.subject = `<type>:<id>`). No new table, column or migration: it uses
+ * existing columns and survives across serverless instances. READ-ONLY.
+ * Fails OPEN (false) on any store error - the cooldown is a throttle, not a
+ * boundary, and an unreadable table must not lock the owner out of their own
+ * billing status (the in-memory limiter still applies).
+ */
+export async function hasRecentUserRefreshForSubject(input: {
+  subject: string;
+  sinceIso: string;
+  reconcileEventType: string;
+}): Promise<boolean> {
+  try {
+    const { data, error } = await admin()
+      .from("payment_webhook_events")
+      .select("event_id")
+      .eq("event_type", input.reconcileEventType)
+      .like("event_id", "reconcile:user_refresh:%")
+      .eq("payload->>subject", input.subject)
+      .gte("created_at", input.sinceIso)
+      .limit(1);
+    if (error) return false;
+    return Array.isArray(data) && data.length > 0;
+  } catch {
+    return false;
+  }
+}

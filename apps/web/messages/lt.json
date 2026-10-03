@@ -10466,6 +10466,15 @@
       "error": "Nepavyko atidaryti mokėjimų portalo",
       "hint": "Atidaro mokėjimų teikėjo portalą, kuriame galima atšaukti prenumeratą ar pakeisti mokėjimo priemonę. Tik testavimo režimas — jokių tikrų mokesčių."
     },
+    "refresh": {
+      "cta": "Atnaujinti mokėjimų būseną",
+      "working": "Tikrinama…",
+      "updated": "Jūsų mokėjimų būsena atnaujinta pagal mokėjimų tiekėją.",
+      "alreadyCurrent": "Jūsų mokėjimų būsena jau atnaujinta.",
+      "notFound": "Mokėjimų tiekėjas šiai darbo erdvei dar neturi prenumeratos. Jei ką tik sumokėjote, palaukite minutę ir bandykite dar kartą.",
+      "tryLater": "Dabar patikrinti nepavyko. Niekas nebuvo pakeista - bandykite dar kartą po keleto minučių.",
+      "hint": "Vieną kartą pasitikrina mokėjimų tiekėją šiai darbo erdvei. Tik skaito - niekas nenuskaičiuojama ir nekeičiama."
+    },
     "subscribe": {
       "title": "Planas „Organizacija“",
       "cta": "Aktyvuoti planą „Organizacija“ (iki 10 aktyvių pozicijų)",
