@@ -447,3 +447,20 @@ describe("the export grew, and can be seen to have grown", () => {
     }
   });
 });
+
+describe("PER-12: the evidence-import RPC is a minimum allowlisted projection", () => {
+  it("never returns source_fact / fact_fields / derived / customer_* / activity_text / context_label", () => {
+    const sql = readFileSync(
+      join(MIGRATIONS, "20261003120000_privacy_export_import_lines_subject_v1.sql"),
+      "utf8",
+    );
+    const body = sql.slice(sql.indexOf("jsonb_build_object"));
+    for (const col of ["source_fact", "fact_fields", "derived", "customer_", "activity_text", "context_label", "problem", "record_fingerprint"]) {
+      expect(body, col).not.toContain(`r.${col}`);
+    }
+    expect(body).toMatch(/lower\(btrim\(r\.person_label\)\) = lower\(btrim\(op\.display_name\)\)/);
+    expect(body).toMatch(/op\.linked_profile_id = auth\.uid\(\)/);
+    expect(sql).toMatch(/revoke all on function public\.privacy_export_evidence_import_rows_v1\(\) from anon/);
+    expect(sql).not.toMatch(/to anon|to public/i);
+  });
+});
