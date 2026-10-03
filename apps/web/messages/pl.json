@@ -586,6 +586,15 @@
     "ganttEmpty": "Dodaj planowane daty do swoich etapów, aby zobaczyć oś czasu.",
     "ganttToday": "Dzisiaj",
     "ganttOverdue": "Zaległe",
+    "ganttNoDates": "Brak dat",
+    "ganttDue": "Termin",
+    "ganttNoWindow": "Nie zapisano jeszcze dat – etapy i zadania bez dat są wymienione poniżej.",
+    "ganttColActivity": "Działanie",
+    "ganttColStatus": "Stan",
+    "ganttColResponsible": "Odpowiedzialny",
+    "ganttColTime": "Czas",
+    "ganttBlocks": "Blokuje",
+    "ganttNoStageGroup": "Nieprzypisane do etapu",
     "title": "Etapy projektu",
     "intro": "Uporządkowane fazy tego projektu — dodaj etap, ustaw jego rzeczywisty status i planowane daty.",
     "honestNote": "Postęp odzwierciedla wyłącznie rzeczywisty status i daty, które zapisujesz — bez automatycznego ani wymyślonego procentu ukończenia.",
@@ -5986,6 +5995,11 @@
       "rosterGroup": "Członkowie zespołu",
       "engagementGroup": "Kandydaci z zaakceptowaną propozycją",
       "reservation": {
+        "precheckChecking": "Sprawdzanie kalendarza…",
+        "precheckCollidesTitle": "W tych dniach już zajęty — przed przypisaniem",
+        "precheckChoose": "Wybierz zamiast tego",
+        "precheckAssignAnyway": "Przypisz mimo to",
+        "precheckAdvisory": "Tylko ostrzeżenie: sprawdzone przed chwilą i niesprawdzane ponownie przy zapisie. Nic jeszcze nie zostało przypisane.",
         "collidesTitle": "Już zaangażowany w tych terminach",
         "notBlocking": "To nie blokuje przypisania — Ty decydujesz, co jest właściwe.",
         "alternativesTitle": "Wolni w tych dniach",
@@ -11060,7 +11074,13 @@
       "label": "Przypisz do",
       "save": "Przypisz"
     },
+    "advisory": {
+      "blockersOpen": "Status zaktualizowany. Uwaga: otwartych zadań, od których zależy: {n}. Nic nie zostało zablokowane.",
+      "reservationLead": "Przypisano. Sprawdzenie kalendarza na dzień terminu (tylko ostrzeżenie):"
+    },
     "dependencies": {
+      "startedBeforeBlocker": "Rozpoczęte lub zakończone, zanim skończyło się to, od czego zależy (nadal otwartych: {n}). Tylko ostrzeżenie.",
+      "dueBeforeBlocker": "Termin wcześniejszy niż zadania, od którego zależy. Tylko ostrzeżenie.",
       "waitingOn": "Czeka na {n}",
       "blockedBy": "Zależy od",
       "hidden": "zadanie, którego nie widzisz",
@@ -11086,6 +11106,8 @@
       }
     },
     "evidence": {
+      "by": "Autor: {name}",
+      "hours": "Zarejestrowano: {hours} godz.",
       "title": "Dowody",
       "intro": "Wpisy z Dziennika pracy dołączone do tego zadania. Dołączenie nigdy nie zmienia wpisu — jedynie wskazuje, jakie zadanie potwierdza.",
       "empty": "Jeszcze żaden wpis z Dziennika pracy nie jest dołączony do tego zadania.",

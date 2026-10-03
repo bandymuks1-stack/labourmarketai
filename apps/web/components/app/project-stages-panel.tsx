@@ -12,6 +12,7 @@ import {
 } from "@/lib/projects/stages-actions";
 import {
   STAGE_STATUSES,
+  localIsoDay,
   type ProjectStage,
   type ProjectStagesData,
   type StageStatus,
@@ -19,6 +20,7 @@ import {
 import type { LearnedStageDurations } from "@/lib/projects/learned-stage-duration";
 import { durationKey, type LearnedDuration } from "@/lib/workforce/learned-duration";
 import { addDays } from "@/lib/planning/planning-model";
+import { stageAnchorId } from "@/lib/projects/stage-gantt";
 
 /**
  * Project stages panel (Wagon 6 — Project Operations Core, slice 1) on the
@@ -104,6 +106,7 @@ function StageRow({
         stageId: stage.id,
         status: next,
         blockedReason: next === "blocked" ? blockedReason.trim() : undefined,
+        today: localIsoDay(),
       });
       if (!res.ok) setStatus(stage.status); // no fake success — revert the badge
       onDone(res.ok ? t("outcome.updated") : t(`outcome.${res.code}`));
@@ -119,7 +122,8 @@ function StageRow({
 
   return (
     <li
-      className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+      id={stageAnchorId(stage.id)}
+      className="flex scroll-mt-24 flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-3 target:border-brand-blue target:ring-1 target:ring-brand-blue"
       data-testid="project-stage-row"
     >
       <div className="flex flex-wrap items-center gap-2">

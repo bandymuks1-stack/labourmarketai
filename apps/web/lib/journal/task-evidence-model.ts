@@ -83,7 +83,26 @@ export type TaskEvidenceItem = {
   readonly photoCount: number;
   /** Manager confirmation timestamp, or null when not confirmed. */
   readonly confirmedAt: string | null;
+  /**
+   * Hours recorded on the entry, from the CANONICAL work-time derivation
+   * (`deriveEntryWorkTime` over `journal_entry_metrics`). Null = the entry
+   * records no hour figure — NEVER 0, and never shown as 0 (a day-only or
+   * untimed entry is not "0 h").
+   */
+  readonly entryHours: number | null;
+  /**
+   * The author's name, ONLY when the viewer may read it (`workers.display_name`
+   * is gated by `can_view_worker`; the profile fallback by profile RLS). Null
+   * = not readable by this viewer, so it is omitted — never an id, never "—".
+   */
+  readonly authorName: string | null;
 };
+
+/** The hour figure to show, or null to show nothing (honest degradation). */
+export function evidenceHoursLabelValue(hours: number | null): string | null {
+  if (hours === null || !Number.isFinite(hours) || hours <= 0) return null;
+  return String(Math.round(hours * 100) / 100);
+}
 
 /** What a task's evidence adds up to. Counts only — never a score (§19a). */
 export type TaskEvidenceSummary = {
