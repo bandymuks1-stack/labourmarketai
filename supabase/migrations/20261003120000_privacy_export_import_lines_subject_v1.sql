@@ -19,7 +19,7 @@
 -- person_match_*, duplicate_*, record_fingerprint, problem, context_match_*.
 -- Read-only (STABLE); no data is written. Authenticated only, never anon.
 --
--- Rollback: supabase/rollbacks/20261003120000_privacy_export_evidence_import_rows_v1.down.sql
+-- Rollback: supabase/rollbacks/20261003120000_privacy_export_import_lines_subject_v1.down.sql
 
 create or replace function public.privacy_export_evidence_import_rows_v1()
 returns setof jsonb

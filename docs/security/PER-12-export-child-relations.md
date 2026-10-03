@@ -74,9 +74,9 @@ rows for a test person = the rows of that person's parents (e.g. all
   `fact_fields`, `derived` and `customer_*` can describe other people and the
   organization's customers.
   Fix drafted in this PR as an UNAPPLIED migration
-  `20261003120000_privacy_export_evidence_import_rows_v1.sql`
+  `20261003120000_privacy_export_import_lines_subject_v1.sql`
   (`-- @human-gate-approved`, RED: new SECURITY DEFINER fn) with rollback
-  `supabase/rollbacks/20261003120000_..._v1.down.sql`. The function takes no
+  `supabase/rollbacks/20261003120000_privacy_export_import_lines_subject_v1.down.sql`. The function takes no
   argument, derives the subject from `auth.uid()` via the linked
   `organization_people` row and returns only that person's lines, with a
   column allowlist (no source_fact / fact_fields / derived / customer_* /
@@ -110,7 +110,7 @@ rows for a test person = the rows of that person's parents (e.g. all
 
 ### RED APPLY ITEMS (owner channel, nothing applied)
 
-1. `20261003120000_privacy_export_evidence_import_rows_v1.sql` (SECURITY DEFINER fn + grants).
+1. `20261003120000_privacy_export_import_lines_subject_v1.sql` (SECURITY DEFINER fn + grants).
 2. agreement subject-read sibling policies (text above), deferred until agreements exist.
 
 QA proof remains BLOCKED_QA_IDENTITY. Nothing here is PASS_REAL_PRODUCTION.

@@ -449,7 +449,7 @@ describe("(h) external profiles are accounted for by the privacy surfaces", () =
     expect(exportData).toMatch(/data\[table\] = res\.error \? \[\] : redactRows\(res\.data \?\? \[\]/);
     // An unreadable relation is reported as UNAVAILABLE, never as an empty
     // list — "we hold none" and "we could not read it" are different claims.
-    expect(exportData).toMatch(/if \(res\.error && !isRelationAbsent\(res\.error\)\) unavailable\.push\(table\)/);
+    expect(exportData).toMatch(/if \(res\.error && \(relations\[i\]\.rpc \|\| !isRelationAbsent\(res\.error\)\)\) unavailable\.push\(table\)/);
   });
 
   it("the deletion plan counts the class and plans to delete it", () => {
