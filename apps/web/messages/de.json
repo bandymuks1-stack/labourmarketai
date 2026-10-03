@@ -635,6 +635,21 @@
       "unavailable": "Der Vergleich mit früheren Dauern konnte gerade nicht gelesen werden.",
       "suggest": "Vergleichbare Phasen dauerten {days} Tage ({observations} beobachtet) — das würde am {date} enden.",
       "suggestApply": "Dieses Datum übernehmen"
+    },
+    "responsible": {
+      "label": "Verantwortlich",
+      "none": "Keine verantwortliche Person",
+      "unreadable": "Benannt (Name nicht lesbar)",
+      "noOptions": "In dieser Organisation gibt es noch keine aktiven Personen zur Auswahl.",
+      "saving": "Wird gespeichert…",
+      "saved": "Verantwortliche Person aktualisiert.",
+      "outcome": {
+        "needs_migration": "Die Benennung einer verantwortlichen Person ist noch nicht verfügbar — sie funktioniert nach dem Update.",
+        "not_authorized": "Sie dürfen die verantwortliche Person dieser Phase nicht ändern.",
+        "invalid": "Diese Person kann hier nicht verantwortlich sein (sie muss in dieser Organisation aktiv sein).",
+        "auth": "Bitte melden Sie sich erneut an.",
+        "error": "Speichern nicht möglich. Bitte erneut versuchen."
+      }
     }
   },
   "activityCentre": {

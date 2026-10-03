@@ -9,7 +9,14 @@ import {
   addStageAction,
   updateStageStatusAction,
   deleteStageAction,
+  setStageResponsibleAction,
 } from "@/lib/projects/stages-actions";
+import {
+  responsibleDisplayName,
+  responsibleOutcomeKey,
+  type ResponsibleOption,
+  type ResponsibleOutcome,
+} from "@/lib/projects/stage-responsible";
 import {
   STAGE_STATUSES,
   localIsoDay,
@@ -84,14 +91,122 @@ function learnedFor(
   return learned.readings.find((r) => r.key === key) ?? null;
 }
 
+/**
+ * Who is responsible for this stage. Managers get a select of ONLY the
+ * engagements ACTIVE in the project's organization (+ "no responsible", which
+ * clears); everyone else sees the name as text. Honest states: saving, saved,
+ * not authorised, setter not applied yet (calm one-liner, control disabled) —
+ * never an error page and never a raw id.
+ */
+export function ResponsibleControl({
+  stage,
+  options,
+  canManage,
+  onDone,
+}: {
+  stage: ProjectStage;
+  options: readonly ResponsibleOption[] | null;
+  canManage: boolean;
+  onDone?: (msg: string) => void;
+}) {
+  const t = useTranslations("projectStages");
+  const [pending, startTransition] = useTransition();
+  const [value, setValue] = useState<string>(stage.responsibleEngagementId ?? "");
+  const [state, setState] = useState<ResponsibleOutcome | "saving" | null>(null);
+  const list = options ?? [];
+  const currentName = responsibleDisplayName(list, value || null);
+  const listed = value === "" || list.some((o) => o.engagementId === value);
+
+  function save(next: string) {
+    const prev = value;
+    setValue(next);
+    setState("saving");
+    startTransition(async () => {
+      const res = await setStageResponsibleAction({
+        stageId: stage.id,
+        engagementId: next || null,
+      });
+      const outcome = responsibleOutcomeKey(res);
+      if (outcome !== "saved") setValue(prev); // no fake success
+      setState(outcome);
+      if (outcome === "saved") onDone?.(t("responsible.saved"));
+    });
+  }
+
+  const text =
+    currentName ?? (value ? t("responsible.unreadable") : t("responsible.none"));
+
+  if (!canManage || options === null) {
+    return (
+      <p
+        className="min-w-0 break-words text-xs text-text-secondary"
+        data-testid="project-stage-responsible-readonly"
+      >
+        <span className="text-text-muted">{t("responsible.label")}: </span>
+        {text}
+      </p>
+    );
+  }
+
+  const blocked = state === "needs_migration";
+  return (
+    <div className="flex flex-col gap-1" data-testid="project-stage-responsible">
+      <div className="flex flex-wrap items-center gap-2">
+        <label
+          className="min-w-0 break-words text-meta text-text-secondary"
+          htmlFor={`stage-responsible-${stage.id}`}
+        >
+          {t("responsible.label")}
+        </label>
+        <select
+          id={`stage-responsible-${stage.id}`}
+          className="min-h-11 min-w-0 max-w-full rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary"
+          value={value}
+          disabled={pending || blocked}
+          onChange={(e) => save(e.target.value)}
+          data-testid="project-stage-responsible-select"
+        >
+          <option value="">{t("responsible.none")}</option>
+          {!listed ? <option value={value}>{t("responsible.unreadable")}</option> : null}
+          {list.map((o) => (
+            <option key={o.engagementId} value={o.engagementId}>
+              {o.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      {list.length === 0 ? (
+        <p className="break-words text-meta text-text-muted" data-testid="project-stage-responsible-empty">
+          {t("responsible.noOptions")}
+        </p>
+      ) : null}
+      {state ? (
+        <p
+          role="status"
+          className="break-words text-meta text-text-muted"
+          data-testid="project-stage-responsible-state"
+        >
+          {state === "saving"
+            ? t("responsible.saving")
+            : t(`responsible.outcome.${state}`)}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function StageRow({
   stage,
   learned,
   onDone,
+  responsibleOptions,
+  canManage,
 }: {
   stage: ProjectStage;
   learned: LearnedDuration | null;
   onDone: (msg: string) => void;
+  responsibleOptions: readonly ResponsibleOption[] | null;
+  canManage: boolean;
 }) {
   const t = useTranslations("projectStages");
   const [pending, startTransition] = useTransition();
@@ -177,6 +292,13 @@ function StageRow({
         </button>
       </div>
 
+      <ResponsibleControl
+        stage={stage}
+        options={responsibleOptions}
+        canManage={canManage}
+        onDone={onDone}
+      />
+
       {status === "blocked" && (
         <div className="flex flex-wrap items-center gap-2">
           <input
@@ -206,9 +328,17 @@ export function ProjectStagesPanel({
   projectId,
   data,
   learned,
+  canManage = false,
+  responsibleOptions = null,
 }: {
   projectId: string;
   data: ProjectStagesData;
+  /** Mirrors can_manage_project (the page's manage facts). Default false =
+   *  read-only text: a surface that has not wired it never shows the picker. */
+  canManage?: boolean;
+  /** Eligible engagements (active in the project's organization); null = not
+   *  readable → the responsible shows as text only. */
+  responsibleOptions?: readonly ResponsibleOption[] | null;
   /** CAL-10. Optional: a surface that has not wired the read yet simply
    *  shows no comparison, which asserts nothing either way. */
   learned?: LearnedStageDurations;
@@ -308,6 +438,8 @@ export function ProjectStagesPanel({
                   stage={s}
                   learned={learnedFor(learned, s.name)}
                   onDone={report}
+                  responsibleOptions={responsibleOptions}
+                  canManage={canManage}
                 />
               ))}
             </ul>

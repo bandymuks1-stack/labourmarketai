@@ -635,6 +635,21 @@
       "unavailable": "Vergelijking met eerdere doorlooptijden kon nu niet worden gelezen.",
       "suggest": "Vergelijkbare fasen duurden {days} dagen ({observations} waargenomen) — dat zou eindigen op {date}.",
       "suggestApply": "Deze datum gebruiken"
+    },
+    "responsible": {
+      "label": "Verantwoordelijke",
+      "none": "Geen verantwoordelijke",
+      "unreadable": "Aangewezen (naam niet leesbaar)",
+      "noOptions": "Er zijn in deze organisatie nog geen actieve mensen om uit te kiezen.",
+      "saving": "Opslaan…",
+      "saved": "Verantwoordelijke bijgewerkt.",
+      "outcome": {
+        "needs_migration": "Een verantwoordelijke aanwijzen is nog niet beschikbaar — het werkt zodra de update is toegepast.",
+        "not_authorized": "U mag de verantwoordelijke van deze fase niet wijzigen.",
+        "invalid": "Deze persoon kan hier niet verantwoordelijk zijn (moet actief zijn in deze organisatie).",
+        "auth": "Meld u opnieuw aan.",
+        "error": "Opslaan mislukt. Probeer het opnieuw."
+      }
     }
   },
   "activityCentre": {

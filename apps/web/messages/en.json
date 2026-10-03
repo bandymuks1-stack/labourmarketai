@@ -635,6 +635,21 @@
       "unavailable": "Past-duration comparison could not be read just now.",
       "suggest": "Comparable stages took {days} days ({observations} observed) — that would end {date}.",
       "suggestApply": "Use this date"
+    },
+    "responsible": {
+      "label": "Responsible",
+      "none": "No responsible",
+      "unreadable": "Named (name not readable)",
+      "noOptions": "No active people in this organization to choose from yet.",
+      "saving": "Saving…",
+      "saved": "Responsible updated.",
+      "outcome": {
+        "needs_migration": "Naming a responsible is not available yet — it will work once the update is applied.",
+        "not_authorized": "You are not allowed to change the responsible for this stage.",
+        "invalid": "That person cannot be responsible here (they must be active in this organization).",
+        "auth": "Please sign in again.",
+        "error": "Could not save. Please try again."
+      }
     }
   },
   "activityCentre": {

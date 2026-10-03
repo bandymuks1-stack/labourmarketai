@@ -635,6 +635,21 @@
       "unavailable": "Nie udało się teraz odczytać porównania z wcześniejszym czasem trwania.",
       "suggest": "Porównywalne etapy trwały {days} dni ({observations} obserwacji) — to zakończyłoby się {date}.",
       "suggestApply": "Użyj tej daty"
+    },
+    "responsible": {
+      "label": "Odpowiedzialny",
+      "none": "Brak odpowiedzialnego",
+      "unreadable": "Wskazano (nazwa nieczytelna)",
+      "noOptions": "W tej organizacji nie ma jeszcze aktywnych osób do wyboru.",
+      "saving": "Zapisywanie…",
+      "saved": "Zaktualizowano osobę odpowiedzialną.",
+      "outcome": {
+        "needs_migration": "Wskazanie osoby odpowiedzialnej nie jest jeszcze dostępne — zadziała po wdrożeniu aktualizacji.",
+        "not_authorized": "Nie możesz zmienić osoby odpowiedzialnej za ten etap.",
+        "invalid": "Ta osoba nie może tu być odpowiedzialna (musi być aktywna w tej organizacji).",
+        "auth": "Zaloguj się ponownie.",
+        "error": "Nie udało się zapisać. Spróbuj ponownie."
+      }
     }
   },
   "activityCentre": {

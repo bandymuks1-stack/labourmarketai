@@ -635,6 +635,21 @@
       "unavailable": "Šiuo metu nepavyko perskaityti ankstesnių trukmių.",
       "suggest": "Panašūs etapai truko {days} d. (stebėta {observations}) — tai baigtųsi {date}.",
       "suggestApply": "Naudoti šią datą"
+    },
+    "responsible": {
+      "label": "Atsakingas",
+      "none": "Atsakingo nėra",
+      "unreadable": "Priskirta (vardas nematomas)",
+      "noOptions": "Šioje organizacijoje dar nėra aktyvių žmonių, iš kurių galima rinktis.",
+      "saving": "Saugoma…",
+      "saved": "Atsakingas atnaujintas.",
+      "outcome": {
+        "needs_migration": "Atsakingo priskyrimas dar nepasiekiamas — veiks pritaikius atnaujinimą.",
+        "not_authorized": "Neturite teisės keisti šio etapo atsakingo.",
+        "invalid": "Šis asmuo čia negali būti atsakingas (jis turi būti aktyvus šioje organizacijoje).",
+        "auth": "Prisijunkite iš naujo.",
+        "error": "Nepavyko išsaugoti. Bandykite dar kartą."
+      }
     }
   },
   "activityCentre": {
