@@ -4,6 +4,7 @@ import { getBillingConfig } from "@/lib/billing/config";
 import { getEffectiveEntitlements } from "@/lib/billing/effective-entitlements";
 import { findBillingCustomer } from "@/lib/billing/customer-store";
 import { BillingPortalButton } from "@/components/app/billing-portal-button";
+import { RefreshBillingStatusButton } from "@/components/app/refresh-billing-status-button";
 import { TestCheckoutButton } from "@/components/marketing/test-checkout-button";
 import { resolveBillingSubject } from "@/lib/billing/billing-subject";
 import { ORGANIZATION_PLAN_KEY } from "@/lib/billing/plans";
@@ -97,6 +98,17 @@ export async function AccountBillingSection({
     !subscriptionBlocksCheckout(status) &&
     !syncing;
 
+  // "Refresh billing status": a calm optional control, shown ONLY while the page
+  // is waiting on the payment provider (redirect says paid but no row yet) or
+  // the row is still incomplete, and only for a person who may act on this
+  // workspace's billing. The click sends nothing; the server resolves everything
+  // and the page re-reads the row afterwards. The flag stays a redirect, never
+  // authority (P7).
+  const showRefresh =
+    billingOn &&
+    Boolean(subject?.billingAuthority) &&
+    (syncing || status === "incomplete");
+
   return (
     <Card compact>
       <section
@@ -167,6 +179,22 @@ export async function AccountBillingSection({
               ) : null}
             </>
           )}
+
+          {showRefresh ? (
+            <>
+              <RefreshBillingStatusButton
+                labels={{
+                  cta: t("refresh.cta"),
+                  working: t("refresh.working"),
+                  updated: t("refresh.updated"),
+                  alreadyCurrent: t("refresh.alreadyCurrent"),
+                  notFound: t("refresh.notFound"),
+                  tryLater: t("refresh.tryLater"),
+                }}
+              />
+              <p className="text-meta text-text-muted">{t("refresh.hint")}</p>
+            </>
+          ) : null}
 
           {portalAvailable ? (
             <>

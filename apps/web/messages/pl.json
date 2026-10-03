@@ -10466,6 +10466,15 @@
       "error": "Nie udało się otworzyć portalu rozliczeniowego",
       "hint": "Otwiera portal dostawcy płatności umożliwiający anulowanie lub aktualizację metody płatności. Tylko tryb testowy — bez rzeczywistych obciążeń."
     },
+    "refresh": {
+      "cta": "Odśwież status rozliczeń",
+      "working": "Sprawdzanie…",
+      "updated": "Status rozliczeń został zaktualizowany u dostawcy płatności.",
+      "alreadyCurrent": "Status rozliczeń jest już aktualny.",
+      "notFound": "Dostawca płatności nie ma jeszcze subskrypcji dla tej przestrzeni roboczej. Jeśli właśnie zapłaciłeś, poczekaj minutę i spróbuj ponownie.",
+      "tryLater": "Teraz nie można sprawdzić. Nic nie zostało zmienione - spróbuj ponownie za kilka minut.",
+      "hint": "Jednorazowo odpytuje dostawcę płatności dla tej przestrzeni roboczej. Tylko odczyt - nic nie jest pobierane ani zmieniane."
+    },
     "subscribe": {
       "title": "Plan Organizacja",
       "cta": "Aktywuj plan Organizacja (do 10 aktywnych stanowisk)",
