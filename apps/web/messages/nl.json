@@ -10640,6 +10640,129 @@
       }
     }
   },
+  "workInTime": {
+    "notAuthed": "Log in om je tijd te zien.",
+    "lens": {
+      "label": "Perspectief",
+      "me": "Mijn tijd",
+      "people": "Mensen in de tijd",
+      "projects": "Projecten in de tijd",
+      "hint": {
+        "me": "Je eigen dagen: wat je bindt, wat je hebt vastgelegd en wat er komt.",
+        "people": "Je team op één tijdlijn: inzet, afwezigheid, overlap en wat is vastgelegd.",
+        "projects": "Projecten op één tijdlijn: fasen, bezetting in de tijd en openstaande behoefte."
+      },
+      "notManager": "Mensen en projecten in de tijd gaan open wanneer je handelt namens een organisatie die een team of project beheert. Je eigen dagen staan onder Mijn tijd."
+    },
+    "state": {
+      "known": "Bekend",
+      "planned": "Gepland",
+      "recorded": "Vastgelegd",
+      "confirmed": "Bevestigd",
+      "openNeed": "Open behoefte",
+      "notProvided": "Niet opgegeven",
+      "unknown": "Onbekend"
+    },
+    "legend": {
+      "title": "Hoe zeker is dit?",
+      "rule": "Onbekend is niet nul. Niet gemeld is niet afwezig. Geen vastlegging is geen werk."
+    },
+    "window": {
+      "label": "Tijdvenster",
+      "prev": "Vorige vier weken",
+      "next": "Volgende vier weken",
+      "today": "Vandaag"
+    },
+    "me": {
+      "title": "Mijn tijd",
+      "today": "Vandaag",
+      "nothingToday": "Voor vandaag is niets vastgelegd. Dat betekent niet dat er geen werk was.",
+      "moreToday": "+{count} meer vandaag",
+      "recordedTimed": "{duration} vastgelegd (items: {count})",
+      "recordedUntimed": "Zonder duur vastgelegd (items: {count})",
+      "notRecordedYet": "Het werk van vandaag is nog niet vastgelegd.",
+      "recordToday": "Werk van vandaag vastleggen",
+      "openJournalDay": "Vandaag openen in het journaal",
+      "next": "Straks",
+      "nextIn": "{count, plural, =0 {vandaag} =1 {morgen} other {over {count} d}}",
+      "nothingNext": "Er komt niets met een datum aan.",
+      "undated": "Zonder datum: {count}. Ze staan op geen enkele dag.",
+      "stripTitle": "De dagen rond nu",
+      "stripRule": "Goud is gepland, cyaan is vastgelegd, amber is afwezig.",
+      "stripPlanned": "gepland: {count}",
+      "stripRecorded": "vastgelegde items: {count}",
+      "stripNoRecord": "niets vastgelegd",
+      "stripAway": "afwezig",
+      "legendPlanned": "Gepland",
+      "legendRecorded": "Vastgelegd, naar duur",
+      "legendUntimed": "Vastgelegd, zonder duur",
+      "legendAway": "Afwezig",
+      "calendarHeading": "Kalender",
+      "unknown": "Je tijd kon nu niet worden gelezen. Dat is onbekend, niet leeg."
+    },
+    "roster": {
+      "unknown": "De teamlijst kon nu niet worden gelezen. Dat is onbekend, niet leeg."
+    },
+    "people": {
+      "title": "Mensen in de tijd",
+      "intro": "Iedereen uit je team op één as. Een lege strook betekent: niets vastgelegd. Het betekent niet dat de persoon vrij is.",
+      "capacity": "Team per dag",
+      "capacitySummary": "Team van {total}. Meeste bezet op één dag: {peak}, op {date}.",
+      "capacityDay": "{date}: bezet {committed}, afwezig {away}, niets vastgelegd {noRecord}",
+      "away": "Afwezig",
+      "overlap": "Dubbel bezet",
+      "unnamed": "Persoon",
+      "now": "Nu",
+      "next": "Straks",
+      "noRecord": "Niets vastgelegd",
+      "noRecordWindow": "In dit venster niets vastgelegd",
+      "noRecordUnknownLeave": "Niets vastgelegd. Verlof kon niet worden gelezen.",
+      "outside": "buiten het venster: {count}",
+      "kind": {
+        "project": "Projectinzet",
+        "booking": "Boeking",
+        "trip": "Reis",
+        "absence": "Afwezig"
+      },
+      "absenceUnknown": "Goedgekeurd verlof kon nu niet worden gelezen. Afwezigheid is hier onbekend, niet afwezig.",
+      "withoutRecord": "Teamleden zonder vastlegging in dit venster: {count}. Ze worden niet als baan getekend en niet als vrij geteld.",
+      "none": "Er is nog niemand in je team."
+    },
+    "projects": {
+      "title": "Projecten in de tijd",
+      "intro": "Elk project: zijn looptijd, zijn fasen en hoeveel mensen er per dag zijn toegewezen.",
+      "untitled": "Project zonder titel",
+      "stage": "Fase",
+      "noDates": "Geen datums opgegeven",
+      "noStages": "Geen gedateerde fasen opgegeven",
+      "noStageNow": "Vandaag geen fase",
+      "noStageNext": "Geen latere fase vastgelegd",
+      "noStaffingRecord": "In dit venster is geen toewijzing vastgelegd",
+      "needOpen": "Nog {missing} van {required} open",
+      "needCovered": "{required} nodig, gedekt",
+      "needNotProvided": "Aantal personen niet opgegeven",
+      "staffed": "Toegewezen: {count}",
+      "needsTitle": "Open behoefte zonder project",
+      "needsUndated": "Opgegeven behoefte zonder datums: {count}",
+      "gaps": "Overdrachten en termijnen voor documenten of certificaten zitten nog niet in de planningsgegevens, dus daarvoor wordt niets getekend.",
+      "unplacedTitle": "Projecten zonder vastgelegde datums, fasen of toewijzingen: {count}. Opgesomd, niet getekend.",
+      "withoutDates": "Projecten zonder datums: {count}. Ze hebben geen plek op de as.",
+      "none": "Voor dit venster zijn geen projecten of open behoeften vastgelegd.",
+      "unknown": "Projecten en fasen konden nu niet worden gelezen. Dat is onbekend, niet leeg."
+    },
+    "focus": {
+      "selected": "Geselecteerd",
+      "close": "Sluiten",
+      "person": "{name} in de tijd",
+      "project": "{name} in de tijd",
+      "nothingOnRecord": "Voor deze persoon is in dit venster niets vastgelegd.",
+      "openPerson": "Persoon openen",
+      "openTeam": "Team openen",
+      "openConversations": "Gesprekken",
+      "openProject": "Project openen",
+      "openWork": "Werk openen"
+    }
+  },
   "planning": {
     "eyebrow": "KALENDER",
     "title": "Kalender",

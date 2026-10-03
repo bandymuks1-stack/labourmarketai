@@ -1,0 +1,174 @@
+{
+ "label": "after",
+ "actor": "agency",
+ "base": "http://127.0.0.1:3102",
+ "shots": [
+  {
+   "file": "after-agency-my-time-1440.png",
+   "path": "/en/dashboard/planning",
+   "finalUrl": "http://127.0.0.1:3102/en/dashboard/planning",
+   "status": 200,
+   "title": "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+   "lens": "me",
+   "h1": "Calendar",
+   "hScroll": false
+  },
+  {
+   "file": "after-agency-people-in-time-1440.png",
+   "path": "/en/dashboard/planning?lens=people",
+   "finalUrl": "http://127.0.0.1:3102/en/dashboard/planning?lens=people",
+   "status": 200,
+   "title": "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+   "lens": "me",
+   "h1": "Calendar",
+   "hScroll": false
+  },
+  {
+   "file": "after-agency-projects-in-time-1440.png",
+   "path": "/en/dashboard/planning?lens=projects",
+   "finalUrl": "http://127.0.0.1:3102/en/dashboard/planning?lens=projects",
+   "status": 200,
+   "title": "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+   "lens": "me",
+   "h1": "Calendar",
+   "hScroll": false
+  },
+  {
+   "file": "after-agency-people-focus-1440.png",
+   "path": "/en/dashboard/planning?lens=people&focus=person:1249b2b9-d246-431a-bc46-0e0acde4230e",
+   "finalUrl": "http://127.0.0.1:3102/en/dashboard/planning?lens=people&focus=person:1249b2b9-d246-431a-bc46-0e0acde4230e",
+   "status": 200,
+   "title": "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+   "lens": "me",
+   "h1": "Calendar",
+   "hScroll": false
+  },
+  {
+   "file": "after-agency-projects-focus-1440.png",
+   "path": "/en/dashboard/planning?lens=projects&focus=project:eeeeeeee-0000-0000-0000-000000000001",
+   "finalUrl": "http://127.0.0.1:3102/en/dashboard/planning?lens=projects&focus=project:eeeeeeee-0000-0000-0000-000000000001",
+   "status": 200,
+   "title": "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+   "lens": "me",
+   "h1": "Calendar",
+   "hScroll": false
+  },
+  {
+   "file": "after-agency-my-time-375.png",
+   "path": "/en/dashboard/planning",
+   "finalUrl": "http://127.0.0.1:3102/en/dashboard/planning",
+   "status": 200,
+   "title": "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+   "lens": "me",
+   "h1": "Calendar",
+   "hScroll": false
+  },
+  {
+   "file": "after-agency-people-in-time-375.png",
+   "path": "/en/dashboard/planning?lens=people",
+   "finalUrl": "http://127.0.0.1:3102/en/dashboard/planning?lens=people",
+   "status": 200,
+   "title": "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+   "lens": "me",
+   "h1": "Calendar",
+   "hScroll": false
+  },
+  {
+   "file": "after-agency-projects-in-time-375.png",
+   "path": "/en/dashboard/planning?lens=projects",
+   "finalUrl": "http://127.0.0.1:3102/en/dashboard/planning?lens=projects",
+   "status": 200,
+   "title": "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+   "lens": "me",
+   "h1": "Calendar",
+   "hScroll": false
+  },
+  {
+   "file": "after-agency-people-focus-375.png",
+   "path": "/en/dashboard/planning?lens=people&focus=person:1249b2b9-d246-431a-bc46-0e0acde4230e",
+   "finalUrl": "http://127.0.0.1:3102/en/dashboard/planning?lens=people&focus=person:1249b2b9-d246-431a-bc46-0e0acde4230e",
+   "status": 200,
+   "title": "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+   "lens": "me",
+   "h1": "Calendar",
+   "hScroll": false
+  },
+  {
+   "file": "after-agency-projects-focus-375.png",
+   "path": "/en/dashboard/planning?lens=projects&focus=project:eeeeeeee-0000-0000-0000-000000000001",
+   "finalUrl": "http://127.0.0.1:3102/en/dashboard/planning?lens=projects&focus=project:eeeeeeee-0000-0000-0000-000000000001",
+   "status": 200,
+   "title": "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+   "lens": "me",
+   "h1": "Calendar",
+   "hScroll": false
+  }
+ ],
+ "axe": {
+  "my-time": [],
+  "people-in-time": [],
+  "projects-in-time": [],
+  "people-focus": [],
+  "projects-focus": []
+ },
+ "notes": [
+  {
+   "name": "my-time",
+   "vp": "375",
+   "smallTargets": {
+    "roots": 35,
+    "bad": [
+     "wit-now-record|201x40",
+     "wit-now-journal|202x40",
+     "planning-view-agenda|77x40",
+     "planning-view-day|52x40",
+     "planning-view-week|63x40",
+     "planning-view-month|68x40",
+     "planning-view-year|56x40",
+     "planning-nav-prev|41x40",
+     "planning-nav-today|66x40",
+     "planning-nav-next|41x40",
+     "Go|45x40",
+     "planning-month-cell-2026-09-28|46x40",
+     "planning-month-cell-2026-09-29|46x40",
+     "planning-month-cell-2026-09-30|46x40",
+     "planning-month-cell-2026-10-01|46x40",
+     "planning-month-cell-2026-10-02|46x40",
+     "planning-month-cell-2026-10-03|46x40",
+     "planning-month-cell-2026-10-04|46x40",
+     "planning-month-cell-2026-10-05|46x40",
+     "planning-month-cell-2026-10-06|46x40",
+     "planning-month-cell-2026-10-07|46x40",
+     "planning-month-cell-2026-10-08|46x40",
+     "planning-month-cell-2026-10-09|46x40",
+     "planning-month-cell-2026-10-10|46x40",
+     "planning-month-cell-2026-10-11|46x40"
+    ]
+   }
+  },
+  {
+   "name": "people-in-time",
+   "vp": "375",
+   "smallTargets": {
+    "roots": 36,
+    "bad": [
+     "wit-now-record|201x40",
+     "wit-now-journal|202x40",
+     "planning-view-agenda|77x40",
+     "planning-view-day|52x40",
+     "planning-view-week|63x40",
+     "planning-view-month|68x40",
+     "planning-view-year|56x40",
+     "planning-nav-prev|41x40",
+     "planning-nav-today|66x40",
+     "planning-nav-next|41x40",
+     "Go|45x40",
+     "planning-month-cell-2026-09-28|46x40",
+     "planning-month-cell-2026-09-29|46x40",
+     "planning-month-cell-2026-09-30|46x40",
+     "planning-month-cell-2026-10-01|46x40",
+     "planning-month-cell-2026-10-02|46x40",
+     "planning-month-cell-2026-10-03|46x40",
+     "planning-month-cell-2026-10-04|46x40",
+     "planning-month-cell-2026-10-05|46x40",
+     "planning-mo
