@@ -586,6 +586,15 @@
     "ganttEmpty": "Add planned dates to your stages to see the timeline.",
     "ganttToday": "Today",
     "ganttOverdue": "Overdue",
+    "ganttNoDates": "No dates",
+    "ganttDue": "Due",
+    "ganttNoWindow": "No dates recorded yet — stages and tasks without dates are listed below.",
+    "ganttColActivity": "Activity",
+    "ganttColStatus": "Status",
+    "ganttColResponsible": "Responsible",
+    "ganttColTime": "Time",
+    "ganttBlocks": "Blocks",
+    "ganttNoStageGroup": "Not assigned to a stage",
     "title": "Project stages",
     "intro": "Ordered phases of this project — add a stage, set its real status and planned dates.",
     "honestNote": "Progress reflects only the real status and dates you record — no automatic or fabricated completion percentage.",
@@ -5986,6 +5995,11 @@
       "rosterGroup": "Team members",
       "engagementGroup": "Accepted-proposal candidates",
       "reservation": {
+        "precheckChecking": "Checking the calendar…",
+        "precheckCollidesTitle": "Already committed on these dates — before you assign",
+        "precheckChoose": "Choose instead",
+        "precheckAssignAnyway": "Assign anyway",
+        "precheckAdvisory": "Advisory: checked just now, and not re-checked when you save. Nothing has been assigned yet.",
         "collidesTitle": "Already committed on these dates",
         "notBlocking": "This does not block the assignment — you decide what is right.",
         "alternativesTitle": "Free on these dates",
@@ -11051,7 +11065,13 @@
       "label": "Assign to",
       "save": "Assign"
     },
+    "advisory": {
+      "blockersOpen": "Status updated. Heads-up: {n} of the tasks it depends on are still open. Nothing was blocked.",
+      "reservationLead": "Assigned. Calendar check for the task's due day (advisory only):"
+    },
     "dependencies": {
+      "startedBeforeBlocker": "In progress or done before what it depends on is finished ({n} still open). Advisory only.",
+      "dueBeforeBlocker": "Due before a task it depends on is due. Advisory only.",
       "waitingOn": "Waiting on {n}",
       "blockedBy": "Depends on",
       "hidden": "a task you can't see",
@@ -11077,6 +11097,8 @@
       }
     },
     "evidence": {
+      "by": "By {name}",
+      "hours": "{hours} h recorded",
       "title": "Evidence",
       "intro": "Work Journal records attached to this task. Attaching never changes a record — it only says which task it proves.",
       "empty": "No Work Journal record is attached to this task yet.",

@@ -586,6 +586,15 @@
     "ganttEmpty": "Pridėkite etapams planuojamas datas, kad matytumėte laiko juostą.",
     "ganttToday": "Šiandien",
     "ganttOverdue": "Vėluoja",
+    "ganttNoDates": "Be datų",
+    "ganttDue": "Terminas",
+    "ganttNoWindow": "Datų dar nėra – etapai ir užduotys be datų išvardyti žemiau.",
+    "ganttColActivity": "Veikla",
+    "ganttColStatus": "Būsena",
+    "ganttColResponsible": "Atsakingas",
+    "ganttColTime": "Laikas",
+    "ganttBlocks": "Blokuoja",
+    "ganttNoStageGroup": "Nepriskirta etapui",
     "title": "Projekto etapai",
     "intro": "Nuoseklūs šio projekto etapai — pridėkite etapą, nustatykite realią būseną ir planuojamas datas.",
     "honestNote": "Pažanga rodo tik jūsų įvestą realią būseną ir datas — jokių automatinių ar išgalvotų procentų.",
@@ -5986,6 +5995,11 @@
       "rosterGroup": "Komandos nariai",
       "engagementGroup": "Priimto pasiūlymo kandidatai",
       "reservation": {
+        "precheckChecking": "Tikrinamas kalendorius…",
+        "precheckCollidesTitle": "Šiomis dienomis jau įsipareigota — prieš priskiriant",
+        "precheckChoose": "Rinktis šį",
+        "precheckAssignAnyway": "Vis tiek priskirti",
+        "precheckAdvisory": "Tik perspėjimas: patikrinta ką tik ir nepatikrinama iš naujo išsaugant. Kol kas nieko nepriskirta.",
         "collidesTitle": "Šiomis dienomis jau turi įsipareigojimų",
         "notBlocking": "Tai neužkerta kelio priskyrimui — sprendimas jūsų.",
         "alternativesTitle": "Laisvi šiomis dienomis",
@@ -11051,7 +11065,13 @@
       "label": "Priskirti",
       "save": "Priskirti"
     },
+    "advisory": {
+      "blockersOpen": "Būsena atnaujinta. Dėmesio: dar atvirų užduočių, nuo kurių ji priklauso: {n}. Nieko neblokuota.",
+      "reservationLead": "Priskirta. Kalendoriaus patikra užduoties termino dienai (tik perspėjimas):"
+    },
     "dependencies": {
+      "startedBeforeBlocker": "Pradėta ar atlikta anksčiau, nei baigta tai, nuo ko ji priklauso (dar atvirų: {n}). Tik perspėjimas.",
+      "dueBeforeBlocker": "Terminas anksčiau nei užduoties, nuo kurios ji priklauso. Tik perspėjimas.",
       "waitingOn": "Laukia {n}",
       "blockedBy": "Priklauso nuo",
       "hidden": "užduotis, kurios nematote",
@@ -11077,6 +11097,8 @@
       }
     },
     "evidence": {
+      "by": "Autorius: {name}",
+      "hours": "Užfiksuota: {hours} val.",
       "title": "Įrodymai",
       "intro": "Darbo dienoraščio įrašai, susieti su šia užduotimi. Susiejimas nekeičia įrašo — jis tik nurodo, kurią užduotį įrašas įrodo.",
       "empty": "Su šia užduotimi dar nesusietas nė vienas Darbo dienoraščio įrašas.",
