@@ -2587,6 +2587,36 @@ active conn+share owner=2; connection revoked owner=0; share unshared owner=0; r
 stranger 0; NULL uid 0; anon denied. Connection/share statuses, 4 offers and 163 audit rows unchanged afterwards.
 Status: PASS_REAL_PRODUCTION at RPC/data level (no browser walk).
 
+## 20261003110012 - manager_assigns_roster_worker_on_managed_project_v1 (#2079) - APPLIED 2026-10-03
+
+Repo file `20261002142000_manager_assigns_roster_worker_on_managed_project_v1.sql` (squash-merged as 6ca35e7fd; byte-identical
+to the reviewed head 54235f91, later changes test-only count guards). `CREATE OR REPLACE assign_worker_to_project`: one added
+authorization arm - the caller manages THIS project's organization and the worker is an ACTIVE member of the roster of the
+company that owns the project - inside the existing fail-closed `not coalesce((...), false)`. Pre-image checked on production
+before apply (booking arm and placement block present, manager arm absent). Owner approval: chat 2026-10-03.
+Read-back: ledger row; SECURITY DEFINER, search_path=public, ACL postgres+authenticated; manager arm, booking arm, null-safe
+wrapper and placement block all present. Rolled-back JWT proof on real rows: manager + managed project + roster worker ALLOWED;
+manager + project of another organization DENIED (42501); manager + off-roster worker DENIED; ordinary worker DENIED; organization
+owner ALLOWED; anon DENIED; NULL uid DENIED. Assignments (8), audit rows (163) and engagements (105) unchanged afterwards.
+The booking-engagement arm and the admin arm are confirmed structurally in the live body, not exercised with a live fixture.
+Status: PASS_REAL_PRODUCTION at RPC/data level (no browser walk).
+
+## 2026-10-03 - billing stack merged, recovery stays OFF (no migration)
+
+#2122 (8d5510bd6), #2126 (d3af7ae73) and #2127 (a637c8137) merged in order, each re-read and green before merge. Option B: the
+server env `BILLING_RECOVERY_ENABLED` (default OFF, only the literal `true`) gates the cron route, `runBillingRecovery` and the
+self-service refresh write; a valid CRON_SECRET alone does not permit a write. Production read-back after the merges: 0
+`reconcile.subscription` audit rows, 0 webhook rows, 0 subscriptions, 0 LMC transactions, no LMC flag on. The env var was not
+set anywhere. Runtime proof of the 503 path needs the CRON_SECRET and was not attempted.
+
+## 2026-10-03 - company_workers two-row repair: PRECONDITIONS PROVEN, WRITE NOT PERFORMED
+
+Owner approved a targeted additive repair of the two historical pre-fix accepted rows. Proven read-only for each row: accepted
+invitation (accepted_at equals the roster row created_at), roster row active, no engagement and no membership of ANY status in the
+org, no other invitation, belongs_to_organization false before and true after in a rolled-back dry run, no governance seat granted.
+The production write was refused by the permission layer and was not retried or routed another way. Pending: the owner either
+runs the repair or explicitly authorizes it in the channel that can write.
+
 ## Correction 2026-10-03 - #1436 invitation binding IS applied
 
 `docs/consolidation/PR_TABLE.md` called `20260902230000_accept_invitation_binds_org_membership_v1` unapplied. It is applied
@@ -2691,6 +2721,7 @@ repo file's timestamp. Matched by migration name, read from `supabase_migrations
 | `20261002141500` | `20261003071338` | work_task_authz_null_safe_v1 |
 | `20261002143000` | `20261003090939` | experience_responses_select_reply_status_v1 |
 | `20261003100000` | `20261003095641` | list_agency_offered_candidates_v2_connection_gate_v1 |
+| `20261002142000` | `20261003110012` | manager_assigns_roster_worker_on_managed_project_v1 |
 
 Note on `agency_drafted_needs_output_column_v1` (ledger 20260928182413): applied as a standalone statement
 sequence (`drop function if exists public.list_agency_drafted_needs_v1(); create function ...` - `create or
