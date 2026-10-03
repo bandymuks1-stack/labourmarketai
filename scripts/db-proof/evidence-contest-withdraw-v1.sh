@@ -5,7 +5,7 @@
 # Reuses the production-faithful harness of the RED #4 proof
 # (subject-contest-and-clash-receipt.prelude/seed.sql), applies the LIVE
 # migration 20260915180000 first (so the starting point is what production
-# holds), then applies 20261003110000_evidence_contest_withdraw_v1.sql VERBATIM
+# holds), then applies 20261003110000_subject_contest_withdraw_v1.sql VERBATIM
 # and measures every case as the non-owner role `authenticated` / `anon`.
 #
 # Usage (scratch Postgres 16, no Docker):
@@ -23,8 +23,8 @@ DB="evwd"
 ADMIN="psql -h $HOST -p $PORT -U postgres -d postgres -tA -q"
 PSQL="psql -h $HOST -p $PORT -U postgres -d $DB"
 LIVE="$REPO/supabase/migrations/20260915180000_subject_contest_and_clash_receipt.sql"
-MIG="$REPO/supabase/migrations/20261003110000_evidence_contest_withdraw_v1.sql"
-DOWN="$REPO/supabase/rollbacks/20261003110000_evidence_contest_withdraw_v1.down.sql"
+MIG="$REPO/supabase/migrations/20261003110000_subject_contest_withdraw_v1.sql"
+DOWN="$REPO/supabase/rollbacks/20261003110000_subject_contest_withdraw_v1.down.sql"
 
 SUBJECT='11111111-1111-1111-1111-111111111111'
 OUTSIDER='22222222-2222-2222-2222-222222222222'

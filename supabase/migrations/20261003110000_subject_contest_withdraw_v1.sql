@@ -55,7 +55,7 @@
 -- existing object changes. The function returns one small jsonb about the
 -- caller's own standing, never rows or columns of any other table.
 --
--- Rollback: supabase/rollbacks/20261003110000_evidence_contest_withdraw_v1.down.sql
+-- Rollback: supabase/rollbacks/20261003110000_subject_contest_withdraw_v1.down.sql
 -- (refuses rather than failing halfway while 'dispute_withdrawn' rows or
 -- repeat-contest rows exist; never deletes a person's contest).
 

@@ -30,7 +30,7 @@ import {
 
 const ROOT = join(process.cwd(), "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
-const NAME = "20261003110000_evidence_contest_withdraw_v1";
+const NAME = "20261003110000_subject_contest_withdraw_v1";
 const sql = read(`supabase/migrations/${NAME}.sql`);
 const downPath = `supabase/rollbacks/${NAME}.down.sql`;
 const down = read(downPath);

@@ -1,4 +1,4 @@
--- Rollback for 20261003110000_evidence_contest_withdraw_v1.sql
+-- Rollback for 20261003110000_subject_contest_withdraw_v1.sql
 --
 -- A faithful inverse ONLY while (a) no 'dispute_withdrawn' row exists (the
 -- restored CHECK would reject it) and (b) no actor has more than one
