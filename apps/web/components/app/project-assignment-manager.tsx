@@ -11,6 +11,8 @@ import {
   recordAssignmentDecisionAction,
   type ProjectActionResult,
 } from "@/lib/projects/actions";
+import { checkAssignmentClashAction } from "@/lib/projects/assignment-precheck";
+import type { AssignmentPrecheckResult } from "@/lib/projects/assignment-precheck-core";
 import type { ManagedProject, ProjectAssignment } from "@/lib/projects/projects";
 import type { ManagedWorker } from "@/lib/instructions/instructions";
 import type { EngagementWorker } from "@/lib/projects/booking-engagement-workers";
@@ -87,6 +89,13 @@ export interface ProjectManagerLabels {
   reservationDecided: string;
   /** Shown when the caller may not assign ROSTER workers (SQL: owner/admin). */
   rosterOwnerOnly?: string;
+  /** Pre-save conflict check (advisory). Optional so callers that do not
+   *  pass them simply get no pre-check. */
+  precheckChecking?: string;
+  precheckCollidesTitle?: string;
+  precheckChoose?: string;
+  precheckAssignAnyway?: string;
+  precheckAdvisory?: string;
 }
 
 /** The collision notice's own labels — shared by the single and the team
@@ -208,7 +217,7 @@ export function ReservationNotice({
                   disabled={busy}
                   onClick={() => onSwap(a.profileId)}
                   data-testid="assign-reservation-swap"
-                  className="min-h-8 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-semibold text-text-secondary hover:border-brand-blue"
+                  className="min-h-11 sm:min-h-8 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-semibold text-text-secondary hover:border-brand-blue"
                 >
                   {labels.reservationSwap}
                 </button>
@@ -224,7 +233,7 @@ export function ReservationNotice({
             disabled={busy}
             onClick={onKeep}
             data-testid="assign-reservation-keep"
-            className="min-h-8 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-semibold text-text-secondary hover:border-brand-blue"
+            className="min-h-11 sm:min-h-8 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-semibold text-text-secondary hover:border-brand-blue"
           >
             {labels.reservationKeep}
           </button>
@@ -235,7 +244,7 @@ export function ReservationNotice({
             disabled={busy}
             onClick={onUndo}
             data-testid="assign-reservation-undo"
-            className="min-h-8 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-semibold text-text-secondary hover:border-brand-orange"
+            className="min-h-11 sm:min-h-8 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-semibold text-text-secondary hover:border-brand-orange"
           >
             {labels.reservationUndo}
           </button>
@@ -314,6 +323,42 @@ export function ProjectAssignmentManager({
       }
     });
   };
+  // PRE-SAVE conflict check — advisory only. The pre-check READS; nothing is
+  // committed when a person is selected. "Assign anyway" just submits the
+  // ordinary assign action: there is NO receipt of the override yet (the
+  // durable receipt and a server-side transactional re-check are a later RED
+  // PR that depends on #2079), and the final write is NOT re-checked against
+  // this verdict. A failed pre-check shows nothing and never blocks the form.
+  const [selProject, setSelProject] = useState("");
+  const [selWorker, setSelWorker] = useState("");
+  const [pre, setPre] = useState<{ key: string; result: AssignmentPrecheckResult } | null>(null);
+  const [checking, startChecking] = useTransition();
+  const precheckKey = `${selProject}:${selWorker}`;
+  const runPrecheck = (projectId: string, workerProfileId: string) => {
+    if (!projectId || !workerProfileId || !labels.precheckCollidesTitle) {
+      setPre(null);
+      return;
+    }
+    const key = `${projectId}:${workerProfileId}`;
+    startChecking(async () => {
+      try {
+        const result = await checkAssignmentClashAction({ projectId, workerProfileId });
+        setPre({ key, result });
+      } catch {
+        setPre(null);
+      }
+    });
+  };
+  const preResult = pre && pre.key === precheckKey && pre.result.ok ? pre.result : null;
+  const preLabels: ReservationLabels | null =
+    labels.precheckCollidesTitle && labels.precheckChoose && labels.precheckAssignAnyway
+      ? {
+          ...labels,
+          reservationCollidesTitle: labels.precheckCollidesTitle,
+          reservationSwap: labels.precheckChoose,
+          reservationKeep: labels.precheckAssignAnyway,
+        }
+      : null;
   const [ended, setEnded] = useState<Set<string>>(new Set());
   const onTeam = new Set(workers.map((w) => w.profileId));
   const engagementOnly = engagementWorkers.filter((w) => !onTeam.has(w.workerProfileId));
@@ -363,7 +408,16 @@ export function ProjectAssignmentManager({
           ) : null}
           <label className="flex flex-col gap-1 text-xs">
             <span className="font-mono uppercase tracking-label text-text-muted">{labels.projectLabel}</span>
-            <select name="project_id" defaultValue="" required className={field}>
+            <select
+              name="project_id"
+              value={selProject}
+              onChange={(e) => {
+                setSelProject(e.target.value);
+                runPrecheck(e.target.value, selWorker);
+              }}
+              required
+              className={field}
+            >
               <option value="" disabled>{labels.projectPlaceholder}</option>
               {projects.map((p) => (
                 <option key={p.id} value={p.id}>{p.title ?? p.id.slice(0, 8)}{p.city ? ` · ${p.city}` : ""}</option>
@@ -372,7 +426,17 @@ export function ProjectAssignmentManager({
           </label>
           <label className="flex flex-col gap-1 text-xs">
             <span className="font-mono uppercase tracking-label text-text-muted">{labels.workerLabel}</span>
-            <select name="worker_profile_id" defaultValue="" required className={field}>
+            <select
+              name="worker_profile_id"
+              value={selWorker}
+              onChange={(e) => {
+                setSelWorker(e.target.value);
+                runPrecheck(selProject, e.target.value);
+              }}
+              required
+              className={field}
+              data-testid="assign-worker-select"
+            >
               <option value="" disabled>{labels.workerPlaceholder}</option>
               {workers.length > 0 && (
                 <optgroup label={labels.rosterGroupLabel} data-testid="assign-roster-group">
@@ -398,8 +462,39 @@ export function ProjectAssignmentManager({
               )}
             </select>
           </label>
+          {checking && labels.precheckChecking ? (
+            <p className="text-xs text-text-muted" role="status" data-testid="assign-precheck-checking">
+              {labels.precheckChecking}
+            </p>
+          ) : null}
+          {!checking && preResult && preLabels && preResult.verdict.state !== "clear" ? (
+            <div className="flex flex-col gap-1" data-testid="assign-precheck">
+              <ReservationNotice
+                verdict={preResult.verdict}
+                labels={preLabels}
+                alternatives={[...preResult.alternatives]}
+                onSwap={(profileId) => {
+                  setSelWorker(profileId);
+                  runPrecheck(selProject, profileId);
+                }}
+                onKeep={
+                  preResult.verdict.state === "collides" && preResult.canOverride
+                    ? () => document.getElementById("assign-worker-submit")?.click()
+                    : undefined
+                }
+              />
+              {labels.precheckAdvisory ? (
+                <p className="text-meta text-text-muted">{labels.precheckAdvisory}</p>
+              ) : null}
+            </div>
+          ) : null}
           <div className="flex items-center gap-3">
-            <button type="submit" disabled={assigning} className={primary}>
+            <button
+              id="assign-worker-submit"
+              type="submit"
+              disabled={assigning}
+              className={primary}
+            >
               {assigning ? labels.sending : labels.assignSubmit}
             </button>
             {assignState?.ok && !decided && (
@@ -484,14 +579,14 @@ export function ProjectAssignmentManager({
             <a
               href="#assign-worker"
               data-testid="roster-assign-link"
-              className="inline-flex min-h-8 items-center font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
+              className="inline-flex min-h-11 sm:min-h-8 items-center font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
             >
               {labels.assignFromRoster} ↑
             </a>
             <Link
               href={`/dashboard/projects/${p.id}/operations`}
               data-testid="roster-operations-link"
-              className="inline-flex min-h-8 items-center font-mono text-meta uppercase tracking-label text-text-secondary hover:text-brand-blue hover:underline"
+              className="inline-flex min-h-11 sm:min-h-8 items-center font-mono text-meta uppercase tracking-label text-text-secondary hover:text-brand-blue hover:underline"
             >
               {labels.openBoard} →
             </Link>

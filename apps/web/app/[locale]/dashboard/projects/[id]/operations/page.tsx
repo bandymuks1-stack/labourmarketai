@@ -246,6 +246,7 @@ export default async function ProjectOperationsPage({
     tasks: timelineTasks,
     waitingOnByTask,
     stageResponsibleNames: responsibleNameMap(stageResponsibleOptions ?? []),
+    blockersByTask: timelineCollab.blockersByTask,
     meProfileId: user.id,
     people: ops.workers.map((w) => ({
       profileId: w.workerProfileId,

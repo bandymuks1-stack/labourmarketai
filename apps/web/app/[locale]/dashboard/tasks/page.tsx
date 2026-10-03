@@ -1230,6 +1230,11 @@ export default async function TasksPage({
   const myTasks = myResult.tasks;
   const openTasks = myTasks.filter((task) => isOpen(task.status));
   const closedTasks = myTasks.filter((task) => !isOpen(task.status));
+  // A deep link (?task=) that targets a FINISHED task reveals the closed
+  // group, otherwise the link would land on a page that does not show it.
+  const closedVisible =
+    showClosed ||
+    (highlightTaskId !== null && closedTasks.some((task) => task.id === highlightTaskId));
 
   /* PROJECT → STAGE → TASK → SUBTASK view of the project-filtered list.
      WBS numbers are DERIVED (lib/projects/wbs.ts), never stored, and only
@@ -1739,17 +1744,17 @@ export default async function TasksPage({
               href={
                 tasksHref({
                   project: projectFilter,
-                  closed: !showClosed,
+                  closed: !closedVisible,
                 }) as "/dashboard"
               }
               className="self-start text-xs text-brand-blue hover:underline"
               data-testid="tasks-closed-toggle"
             >
-              {showClosed
+              {closedVisible
                 ? t("closed.hide")
                 : `${t("closed.show")} (${closedTasks.length})`}
             </Link>
-            {showClosed ? (
+            {closedVisible ? (
               CLOSED_GROUPS.map((status) => {
                 const group = closedTasks.filter(
                   (task) => task.status === status,
@@ -1769,7 +1774,7 @@ export default async function TasksPage({
                 );
               })
             ) : null}
-            {showClosed && closedTasks.length === 0 ? (
+            {closedVisible && closedTasks.length === 0 ? (
               <p className="text-xs text-text-muted">{t("closed.empty")}</p>
             ) : null}
           </div>
