@@ -10452,6 +10452,15 @@
       "error": "Het factureringsportaal kon niet worden geopend",
       "hint": "Opent het portaal van de betaalprovider om op te zeggen of de betaalmethode te wijzigen. Alleen testmodus — geen echte afschrijvingen."
     },
+    "refresh": {
+      "cta": "Factureringsstatus vernieuwen",
+      "working": "Controleren…",
+      "updated": "Je factureringsstatus is bijgewerkt vanuit de betaalprovider.",
+      "alreadyCurrent": "Je factureringsstatus is al up-to-date.",
+      "notFound": "De betaalprovider heeft voor deze werkruimte nog geen abonnement. Als je net hebt betaald, wacht dan even een minuut en probeer het opnieuw.",
+      "tryLater": "Controleren lukt nu niet. Er is niets gewijzigd - probeer het over een paar minuten opnieuw.",
+      "hint": "Vraagt de betaalprovider één keer op voor deze werkruimte. Alleen lezen - er wordt niets afgeschreven of gewijzigd."
+    },
     "subscribe": {
       "title": "Plan Organisatie",
       "cta": "Plan Organisatie activeren (tot 10 actieve posities)",

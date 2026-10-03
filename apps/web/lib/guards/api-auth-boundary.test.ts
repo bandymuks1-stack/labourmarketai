@@ -62,6 +62,10 @@ const CLASSIFICATION: Record<
     class: "cookie-only",
     why: "Same reasoning as the portal, and test-mode only on top of it: it starts a Stripe Checkout a browser then completes.",
   },
+  "billing/refresh/route.ts": {
+    class: "cookie-only",
+    why: "Money surface, user self-service: 'refresh my billing status' for the person's CURRENT workspace. It takes no input (workspace, customer and subscription are resolved server-side from the cookie session), only READS the provider, and answers one status word - a non-browser caller has no product reason to poke it, and billing is where a mistake is least recoverable.",
+  },
   "billing/reconcile/route.ts": {
     class: "cookie-only",
     why: "Billing safety v1: the superadmin's READ-ONLY reconciliation report (local billing tables vs the provider's view). Operator surface for a browser session; it takes no input, writes nothing and never charges — a non-browser caller has no product reason to read an anomaly report.",

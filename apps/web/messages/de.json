@@ -10452,6 +10452,15 @@
       "error": "Das Abrechnungsportal konnte nicht geöffnet werden",
       "hint": "Öffnet das Portal des Zahlungsanbieters zum Kündigen oder Ändern der Zahlungsmethode. Nur Testmodus — keine echten Abbuchungen."
     },
+    "refresh": {
+      "cta": "Abrechnungsstatus aktualisieren",
+      "working": "Wird geprüft…",
+      "updated": "Dein Abrechnungsstatus wurde beim Zahlungsanbieter aktualisiert.",
+      "alreadyCurrent": "Dein Abrechnungsstatus ist bereits aktuell.",
+      "notFound": "Der Zahlungsanbieter hat für diesen Arbeitsbereich noch kein Abonnement. Wenn du gerade bezahlt hast, warte eine Minute und versuche es erneut.",
+      "tryLater": "Im Moment nicht prüfbar. Es wurde nichts geändert - bitte versuche es in ein paar Minuten erneut.",
+      "hint": "Fragt den Zahlungsanbieter einmal für diesen Arbeitsbereich ab. Nur lesend - nichts wird abgebucht oder geändert."
+    },
     "subscribe": {
       "title": "Plan „Organisation“",
       "cta": "Plan „Organisation“ aktivieren (bis zu 10 aktive Positionen)",

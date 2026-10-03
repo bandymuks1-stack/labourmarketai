@@ -10452,6 +10452,15 @@
       "error": "Could not open the billing portal",
       "hint": "Opens the payment provider's portal to cancel or update the payment method. Test mode only — no real charges."
     },
+    "refresh": {
+      "cta": "Refresh billing status",
+      "working": "Checking…",
+      "updated": "Your billing status was updated from the payment provider.",
+      "alreadyCurrent": "Your billing status is already up to date.",
+      "notFound": "The payment provider has no subscription for this workspace yet. If you just paid, give it a minute and try again.",
+      "tryLater": "Could not check right now. Nothing was changed - please try again in a few minutes.",
+      "hint": "Checks the payment provider once for this workspace. It only reads - nothing is charged or changed."
+    },
     "subscribe": {
       "title": "Organization plan",
       "cta": "Activate the Organization plan (up to 10 active positions)",
