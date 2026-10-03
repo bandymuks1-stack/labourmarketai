@@ -1,25 +1,14 @@
 # EVID contest -> withdraw -> re-contest: runtime proof (scratch PostgreSQL 16)
 
-Transcript of `scripts/db-proof/evidence-contest-withdraw-v1.sh` (harness faithful to production per RED-4-5 proof; live 20260915180000 applied first, then 20261003110000 verbatim). Nothing here touched production.
+Transcript of `scripts/db-proof/evidence-contest-withdraw-v1.sh`. It replays the REAL prod lineage for this table: the M1h constraint block of 20260924100000 (`_chk`, incl. source_preserved), then 20260915180000, then 20261003110000 (reproducing the two-CHECK defect: D1/D2), then the reconcile fix 20261003140000. The earlier 56-assertion transcript did NOT replay 20260924100000 and so missed that defect. Nothing here touched production.
 
 ```
 ==============================================================
  EVID contest / withdraw / re-contest runtime proof
  migration: 20261003110000_subject_contest_withdraw_v1.sql
 ==============================================================
-psql:C:/lmw-1646/scripts/db-proof/subject-contest-and-clash-receipt.prelude.sql:156: NOTICE:  policy "harness_people_select" for relation "public.organization_people" does not exist, skipping
-psql:C:/lmw-1646/scripts/db-proof/subject-contest-and-clash-receipt.prelude.sql:158: NOTICE:  policy "harness_parties_select" for relation "public.organization_evidence_parties" does not exist, skipping
-psql:C:/lmw-1646/scripts/db-proof/subject-contest-and-clash-receipt.prelude.sql:163: NOTICE:  policy "organization_evidence_records_insert" for relation "public.organization_evidence_records" does not exist, skipping
-psql:C:/lmw-1646/scripts/db-proof/subject-contest-and-clash-receipt.prelude.sql:168: NOTICE:  policy "organization_evidence_records_select" for relation "public.organization_evidence_records" does not exist, skipping
-psql:C:/lmw-1646/scripts/db-proof/subject-contest-and-clash-receipt.prelude.sql:181: NOTICE:  policy "organization_evidence_events_attest" for relation "public.organization_evidence_events" does not exist, skipping
-psql:C:/lmw-1646/scripts/db-proof/subject-contest-and-clash-receipt.prelude.sql:187: NOTICE:  policy "organization_evidence_events_verify" for relation "public.organization_evidence_events" does not exist, skipping
-psql:C:/lmw-1646/scripts/db-proof/subject-contest-and-clash-receipt.prelude.sql:202: NOTICE:  policy "organization_evidence_events_select" for relation "public.organization_evidence_events" does not exist, skipping
-psql:C:/lmw-1646/scripts/db-proof/subject-contest-and-clash-receipt.prelude.sql:283: NOTICE:  constraint "booking_request_events_clash_receipt" of relation "booking_request_events" does not exist, skipping
-psql:C:/lmw-1646/scripts/db-proof/subject-contest-and-clash-receipt.prelude.sql:285: NOTICE:  column "related_booking_request_id" of relation "booking_request_events" does not exist, skipping
-psql:C:/lmw-1646/scripts/db-proof/subject-contest-and-clash-receipt.prelude.sql:286: NOTICE:  function public.respond_booking_request_v4(uuid,text,text,text,pg_catalog.bool) does not exist, skipping
-psql:C:/lmw-1646/scripts/db-proof/subject-contest-and-clash-receipt.prelude.sql:287: NOTICE:  policy "organization_evidence_events_subject_dispute" for relation "public.organization_evidence_events" does not exist, skipping
-psql:C:/lmw-1646/scripts/db-proof/subject-contest-and-clash-receipt.prelude.sql:288: NOTICE:  index "organization_evidence_events_one_dispute_per_actor" does not exist, skipping
   harness + live 20260915180000 applied
+  20260924100000 M1h replayed (prod lineage)
 
 == BEFORE (what production holds today) =======================
   PASS  B1 withdraw function does not exist yet
@@ -30,10 +19,29 @@ psql:C:/lmw-1646/scripts/db-proof/subject-contest-and-clash-receipt.prelude.sql:
 -- applying the migration VERBATIM ------------------------------
   applied
 
+== DEFECT REPRODUCTION (20261003110000 alone on the real lineage) =
+  PASS  D1 the defect state has TWO event_type CHECKs
+  PASS  D2 withdraw RPC fails closed (23514) under the intersection
+-- applying the reconcile fix VERBATIM --------------------------
+  applied
+
 == SCHEMA =====================================================
   PASS  S1 event set gains dispute_withdrawn
   PASS  S1b ...and keeps disputed
   PASS  S1c ...and keeps corrected
+  PASS  S1d ...and keeps source_preserved
+  PASS  S1e exactly ONE event_type CHECK remains
+  PASS  S1f ...and it is the canonical _chk
+  PASS  S1g type attested still insertable (postgres/owner path)
+  PASS  S1g type attestation_withdrawn still insertable (postgres/owner path)
+  PASS  S1g type withdrawn still insertable (postgres/owner path)
+  PASS  S1g type reinstated still insertable (postgres/owner path)
+  PASS  S1g type disputed still insertable (postgres/owner path)
+  PASS  S1g type corrected still insertable (postgres/owner path)
+  PASS  S1g type source_preserved still insertable (postgres/owner path)
+  PASS  S1h independently_verified still insertable
+  PASS  S1i verification_withdrawn still insertable
+  PASS  S1j an unlisted type is still refused
   PASS  S2 one-contest-ever index replaced
   PASS  S3 state-guard trigger exists
   PASS  S4 subject-dispute policy untouched
@@ -91,10 +99,18 @@ psql:C:/lmw-1646/scripts/db-proof/subject-contest-and-clash-receipt.prelude.sql:
   PASS  R3 rollback applies once the history question is settled
   PASS  R4 one-dispute index restored
   PASS  R5 both functions gone
-  PASS  R6 event set restored
+  PASS  R6 rollback leaves ONLY _chk, without dispute_withdrawn, with source_preserved
+  PASS  R6b ...only the canonical name
+  PASS  R6c ...source_preserved kept
   PASS  R7 migration re-applies cleanly after rollback
+  PASS  R8 fix re-applies (idempotent)
+  PASS  R9 fix applied twice in a row is a no-op
+  PASS  R10 withdraw works after the full chain
+  PASS  R11 fix rollback applies with no withdrawals
+  PASS  R12 fix rollback = pre-#2138 prod state (only _chk)
+  PASS  R12b ...no stale _check
 
 ==============================================================
- RESULT: 56 passed, 0 failed
+ RESULT: 79 passed, 0 failed
 ==============================================================
 ```
