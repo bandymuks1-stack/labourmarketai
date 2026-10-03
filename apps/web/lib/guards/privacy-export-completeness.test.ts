@@ -4,6 +4,7 @@ import { join } from "node:path";
 
 import {
   ACTOR_ONLY_RELATIONS,
+  CHILD_TABLES_NOT_EXPORTED,
   EXPORTED_RELATIONS,
   NON_PRODUCT_RELATIONS,
   ROOT_RELATIONS,
@@ -110,6 +111,69 @@ function personKeyedTablesFromMigrations(): Map<string, PersonColumn[]> {
   return found;
 }
 
+/**
+ * PER-12 (2026-10-03): person columns added AFTER the create-table (`alter
+ * table public.x add column [if not exists] col uuid references
+ * public.profiles(id)`) were invisible to the sweep above: `projects` has
+ * carried `responsible_profile_id` since 20260817152000 and no guard knew.
+ * Parsed here with the same reference rule and merged into the sweep.
+ */
+function alterAddedPersonColumns(): Map<string, PersonColumn[]> {
+  const found = new Map<string, PersonColumn[]>();
+  const files = readdirSync(MIGRATIONS).filter((f) => f.endsWith(".sql")).sort();
+  const re =
+    /alter\s+table\s+(?:if\s+exists\s+)?(?:only\s+)?public\.([a-z0-9_]+)\s+add\s+column\s+(?:if\s+not\s+exists\s+)?([a-z0-9_]+)\s+uuid([^;,]*)/gi;
+  for (const f of files) {
+    const sql = readFileSync(join(MIGRATIONS, f), "utf8")
+      .split("\n")
+      .filter((l) => !/^\s*--/.test(l))
+      .join("\n");
+    re.lastIndex = 0;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(sql)) !== null) {
+      const [, table, name, rest] = m;
+      if (!/references\s+(?:public\.profiles|public\.workers|auth\.users)/i.test(rest)) continue;
+      const prev = found.get(table) ?? [];
+      if (!prev.some((c) => c.name === name)) prev.push({ name, actor: ACTOR_COLUMN.test(name) });
+      found.set(table, prev);
+    }
+  }
+  return found;
+}
+
+/** Every column of every table, and the parent tables each column points at. */
+function tableShapes(): Map<string, { columns: Set<string>; parents: Map<string, string> }> {
+  const out = new Map<string, { columns: Set<string>; parents: Map<string, string> }>();
+  const files = readdirSync(MIGRATIONS).filter((f) => f.endsWith(".sql")).sort();
+  for (const f of files) {
+    const sql = readFileSync(join(MIGRATIONS, f), "utf8");
+    const re =
+      /create\s+table\s+(?:if\s+not\s+exists\s+)?public\.([a-z0-9_]+)\s*\(([\s\S]*?)\n\s*\)\s*;/gi;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(sql)) !== null) {
+      const [, table, body] = m;
+      const shape = out.get(table) ?? { columns: new Set<string>(), parents: new Map<string, string>() };
+      for (const line of body.split("\n")) {
+        if (/^\s*--/.test(line)) continue;
+        const col = line.match(/^\s{1,4}([a-z0-9_]+)\s+[a-z]/i);
+        if (!col || /^(constraint|unique|primary|foreign|check|exclude)$/i.test(col[1])) continue;
+        shape.columns.add(col[1]);
+      }
+      // Single-column FKs (the `references` may sit on the next line) and
+      // composite `foreign key (a, b) references public.t (...)` constraints.
+      const single = /\b([a-z0-9_]+)\s+uuid\b[^,]*?references\s+public\.([a-z0-9_]+)/gi;
+      let fk: RegExpExecArray | null;
+      while ((fk = single.exec(body)) !== null) shape.parents.set(fk[1], fk[2]);
+      const composite = /foreign\s+key\s*\(([^)]*)\)\s*references\s+public\.([a-z0-9_]+)/gi;
+      while ((fk = composite.exec(body)) !== null) {
+        for (const c of fk[1].split(",")) shape.parents.set(c.trim(), fk[2]);
+      }
+      out.set(table, shape);
+    }
+  }
+  return out;
+}
+
 const SUBJECT_CLASSIFIED = new Set<string>([
   ...EXPORTED_RELATIONS.map((r) => r.table),
   ...WITHHELD_RELATIONS.map((r) => r.table),
@@ -118,8 +182,27 @@ const SUBJECT_CLASSIFIED = new Set<string>([
 ]);
 const CLASSIFIED = new Set<string>([...SUBJECT_CLASSIFIED, ...ACTOR_ONLY_RELATIONS]);
 
+/**
+ * Exported tables whose children can be ABOUT the person. `projects` and
+ * `organizations` are exported only because the person is named responsible
+ * for / owns one; their children (budgets, stages, facts, templates) are the
+ * organization's records, and exporting them would hand over the organization,
+ * not the person. They are therefore not parents for the child sweep.
+ */
+const ORGANIZATION_RECORD_PARENTS = new Set(["projects", "organizations"]);
+function personParentTables(): Set<string> {
+  return new Set(
+    EXPORTED_RELATIONS.map((r) => r.table).filter((t) => !ORGANIZATION_RECORD_PARENTS.has(t)),
+  );
+}
+
 describe("every person-keyed relation is classified", () => {
   const discovered = personKeyedTablesFromMigrations();
+  for (const [table, cols] of alterAddedPersonColumns()) {
+    const prev = discovered.get(table) ?? [];
+    for (const c of cols) if (!prev.some((x) => x.name === c.name)) prev.push(c);
+    discovered.set(table, prev);
+  }
 
   it("the migration sweep finds the schema at all", () => {
     // A broken regex would make every assertion below vacuously pass.
@@ -168,13 +251,13 @@ describe("every person-keyed relation is classified", () => {
     ).toEqual([]);
   });
 
+  const CHAINED_KEYS = ["organization_person_id", "organization_evidence_record_id", "parent_row"];
+
   it("every exported relation names a column that really exists on that table", () => {
     // A typo in `column` would make the exporter read nothing and report the
-    // relation as empty — exactly the lie this register exists to prevent.
+    // relation as empty: exactly the lie this register exists to prevent.
     const bad = EXPORTED_RELATIONS.filter((r) => {
-      if (r.key === "organization_person_id" || r.key === "organization_evidence_record_id") {
-        return false; // chained keys, checked below
-      }
+      if (CHAINED_KEYS.includes(r.key)) return false; // chained keys, checked below
       const cols = discovered.get(r.table)?.map((c) => c.name) ?? [];
       return !cols.includes(r.column ?? r.key);
     }).map((r) => `${r.table}.${r.column ?? r.key}`);
@@ -186,6 +269,7 @@ describe("every person-keyed relation is classified", () => {
       (r) => r.key === "organization_person_id" || r.key === "organization_evidence_record_id",
     );
     expect(chained.map((r) => r.table).sort()).toEqual([
+      "evidence_import_rows",
       "organization_evidence_events",
       "organization_evidence_records",
     ]);
@@ -195,6 +279,90 @@ describe("every person-keyed relation is classified", () => {
       .join("\n");
     expect(sql).toMatch(/organization_evidence_records[\s\S]*organization_person_id\s+uuid/);
     expect(sql).toMatch(/organization_evidence_events[\s\S]*record_id\s+uuid/);
+    expect(sql).toMatch(/evidence_import_rows[\s\S]*organization_person_id\s+uuid/);
+  });
+
+  it("PER-12: every parent_row child names a delivered parent and a real FK column", () => {
+    const shapes = tableShapes();
+    const byBundleKey = new Map(EXPORTED_RELATIONS.map((r) => [r.as ?? r.table, r]));
+    const children = EXPORTED_RELATIONS.filter((r) => r.key === "parent_row");
+    expect(children.length).toBeGreaterThanOrEqual(20);
+    const problems: string[] = [];
+    for (const c of children) {
+      const parent = c.parent ? byBundleKey.get(c.parent) : undefined;
+      if (!parent) {
+        problems.push(`${c.table}: parent bundle key ${c.parent} is not exported`);
+        continue;
+      }
+      const col = c.column;
+      const fk = col ? shapes.get(c.table)?.parents.get(col) : undefined;
+      if (fk !== parent.table) {
+        problems.push(`${c.table}.${col} references ${fk ?? "nothing"}, not ${parent.table}`);
+      }
+    }
+    expect(problems).toEqual([]);
+  });
+
+  it("PER-12: a redaction names columns that exist on that table", () => {
+    const shapes = tableShapes();
+    const bad: string[] = [];
+    for (const r of EXPORTED_RELATIONS) {
+      for (const col of [...(r.redactActors ?? []), ...(r.omitColumns ?? [])]) {
+        const cols = shapes.get(r.table)?.columns;
+        // `projects` was created in 0001 and widened by later alters; its
+        // created_by / owner_id entries are hedges, applied only if present.
+        if (cols && !cols.has(col) && r.table !== "projects") bad.push(`${r.table}.${col}`);
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
+  it("PER-12: no table whose rows hang off an exported row is silently unexported", () => {
+    // THE BLIND SPOT THIS CLOSES. The sweep finds person columns. A child
+    // table with only a parent id has none, and several with only an ACTOR
+    // column were parked as actor-only, so rows ABOUT the person (their
+    // booking's events, their journal entry's metrics) were neither exported
+    // nor named. Every table with an FK to an exported table's id must be
+    // exported, withheld, or reviewed with a reason in CHILD_TABLES_NOT_EXPORTED.
+    const shapes = tableShapes();
+    const exportedTables = personParentTables();
+    const reviewed = new Map(CHILD_TABLES_NOT_EXPORTED.map((c) => [c.table, c]));
+    const unaccounted: string[] = [];
+    for (const [table, shape] of shapes) {
+      if (SUBJECT_CLASSIFIED.has(table)) continue;
+      const parentsHit = [...shape.parents.values()].filter((p) => exportedTables.has(p));
+      if (parentsHit.length === 0) continue;
+      if (reviewed.has(table)) continue;
+      unaccounted.push(`${table} (child of ${[...new Set(parentsHit)].join(", ")})`);
+    }
+    expect(
+      unaccounted.sort(),
+      "these tables hang off an exported parent and are neither exported, withheld nor reviewed",
+    ).toEqual([]);
+  });
+
+  it("PER-12: nothing reviewed-as-not-exported is also exported, and every review gives a reason", () => {
+    const exported = new Set(EXPORTED_RELATIONS.map((r) => r.table));
+    const shapes = tableShapes();
+    for (const c of CHILD_TABLES_NOT_EXPORTED) {
+      expect(exported.has(c.table), `${c.table} is both exported and reviewed-away`).toBe(false);
+      expect(c.reason.length, `${c.table} needs a real reason`).toBeGreaterThan(20);
+      expect(shapes.has(c.table), `${c.table} is not a table in the migrations`).toBe(true);
+    }
+  });
+
+  it("PER-12: an actor-only table with a parent chain is not hiding rows about the person", () => {
+    const shapes = tableShapes();
+    const exportedTables = personParentTables();
+    const reviewed = new Set(CHILD_TABLES_NOT_EXPORTED.map((c) => c.table));
+    const hiding = ACTOR_ONLY_RELATIONS.filter((t) => {
+      const parents = [...(shapes.get(t)?.parents.values() ?? [])];
+      return parents.some((p) => exportedTables.has(p)) && !reviewed.has(t);
+    });
+    expect(
+      hiding,
+      "actor-only tables that hang off an exported parent must be exported (chained) or reviewed with a reason",
+    ).toEqual([]);
   });
 
   it("bundle keys are unique — two reads of one table never overwrite each other", () => {
@@ -209,8 +377,15 @@ describe("every person-keyed relation is classified", () => {
     // ROOT_RELATIONS are exempt: `profiles` is keyed by `id`, not by a person
     // column, so the sweep cannot see it by construction.
     const roots = new Set(ROOT_RELATIONS);
+    // Chained children carry no person column by design (PER-12): their
+    // existence and FK are verified by the parent_row test instead.
+    const chainedTables = new Set(
+      EXPORTED_RELATIONS.filter((r) =>
+        ["organization_person_id", "organization_evidence_record_id", "parent_row"].includes(r.key),
+      ).map((r) => r.table),
+    );
     const ghosts = [...CLASSIFIED]
-      .filter((t) => !discovered.has(t) && !roots.has(t))
+      .filter((t) => !discovered.has(t) && !roots.has(t) && !chainedTables.has(t))
       .sort();
     expect(
       ghosts,
@@ -267,6 +442,7 @@ describe("the export grew, and can be seen to have grown", () => {
         "worker_id",
         "organization_person_id",
         "organization_evidence_record_id",
+        "parent_row",
       ]).toContain(r.key);
     }
   });

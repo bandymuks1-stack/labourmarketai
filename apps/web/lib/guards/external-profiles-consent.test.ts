@@ -445,8 +445,8 @@ describe("(h) external profiles are accounted for by the privacy surfaces", () =
     expect(relations).toMatch(/\{ table: "worker_external_profiles", key: "worker_id" \}/);
     const exportData = read("lib/privacy/export-data.ts");
     expect(exportData).toMatch(/EXPORTED_RELATIONS\.filter\(\(r\) => r\.key === key\)/);
-    expect(exportData).toMatch(/\.from\(r\.table\)/);
-    expect(exportData).toMatch(/data\[table\] = res\.error \? \[\] : \(res\.data \?\? \[\]\)/);
+    expect(exportData).toMatch(/\.from\(rel\.table\)/);
+    expect(exportData).toMatch(/data\[table\] = res\.error \? \[\] : redactRows\(res\.data \?\? \[\]/);
     // An unreadable relation is reported as UNAVAILABLE, never as an empty
     // list — "we hold none" and "we could not read it" are different claims.
     expect(exportData).toMatch(/if \(res\.error && !isRelationAbsent\(res\.error\)\) unavailable\.push\(table\)/);
