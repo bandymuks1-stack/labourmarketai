@@ -1941,7 +1941,8 @@
         "paused": "Pausad",
         "completed": "Avslutad"
       },
-      "progressNone": "Inga mätbara framsteg ännu"
+      "progressNone": "Inga mätbara framsteg ännu",
+      "progressStages": "{done} av {total} faser markerade som klara"
     },
     "pulse": {
       "pendingTitle": "[EN] {n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
@@ -1997,6 +1998,7 @@
       "title": "Projektstyrning",
       "progressLabel": "Framsteg",
       "progressNone": "Inga mätbara framsteg ännu",
+      "progressStages": "{done} av {total} faser markerade som klara",
       "responsibleLabel": "Ansvarig person",
       "responsibleNone": "Inte angiven",
       "responsibleSave": "Spara",
