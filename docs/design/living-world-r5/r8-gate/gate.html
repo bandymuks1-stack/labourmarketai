@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LabourMarket.ai R8</title>
+<link rel="stylesheet" href="gate.css">
+</head>
+<body>
+<!--ARTIFACT-BODY-START-->
+<div id="app" data-screen="personal">
+
+  <!-- ── minimal chrome: one mark, one context, one person ── -->
+  <header id="chrome">
+    <span class="mark">LM</span>
+    <nav class="ctx">
+      <button class="ctx-it" data-ctx="personal">Mano erdvė</button>
+      <button class="ctx-it" data-ctx="org">Organizacija</button>
+    </nav>
+    <span class="me" id="meAva">J</span>
+  </header>
+
+  <!-- ══ A · PERSONAL ══ -->
+  <section class="screen" data-s="personal">
+    <div class="col">
+      <p class="date">Sekmadienis, rugpjūčio 16</p>
+      <h1 class="hello">Labas rytas, Jonai.</h1>
+      <p class="today">Šiandien dirbi <b>Terminale 3</b>, 07:00–15:30.</p>
+
+      <figure class="scene graded">
+        <img src="https://images.unsplash.com/photo-1586528116022-aeda1613c63d?q=62&w=1400&sat=-38&exp=-11&auto=format&fit=crop" alt="Terminalas 3">
+        <figcaption>Terminalas 3 · Göteborg</figcaption>
+      </figure>
+
+      <button class="quiet" data-go="journal">Vakar dienoraštyje — trys darbai <i>→</i></button>
+    </div>
+
+    <div class="ask">
+      <p class="ask-label">Kuo galiu padėti?</p>
+      <div class="input">
+        <input type="text" placeholder="Parašyk arba pasakyk…" aria-label="Pokalbis">
+        <span class="input-ics">
+          <button aria-label="Nuotrauka">⌾</button>
+          <button aria-label="Balsu">●</button>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ B · JOURNAL ══ -->
+  <section class="screen" data-s="journal">
+    <div class="col">
+      <div class="jr-top">
+        <button class="quiet back" data-go="personal">←</button>
+        <nav class="range">
+          <button class="range-it is-on">Diena</button>
+          <button class="range-it">Savaitė</button>
+          <button class="range-it">Mėnuo</button>
+        </nav>
+      </div>
+
+      <h1 class="day-h">Šiandien <span>rugpjūčio 16</span></h1>
+
+      <div class="mem">
+        <p class="when">08:10 · Terminalas 3</p>
+        <figure class="scene tall">
+          <img src="https://images.unsplash.com/photo-1741655262435-4890ab9918fa?q=62&w=1400&auto=format&fit=crop" alt="">
+        </figure>
+        <p class="what">18 palečių iš rytinio reiso — be pažeidimų.</p>
+      </div>
+
+      <div class="mem thin">
+        <p class="when">10:35</p>
+        <p class="what">27 siuntos patikrintos ir sutikrintos.</p>
+      </div>
+
+      <div class="mem">
+        <p class="when">13:20 · išvežimo zona</p>
+        <figure class="scene half">
+          <img src="https://images.unsplash.com/photo-1573207535342-8c0f9506112e?q=62&w=900&auto=format&fit=crop" alt="">
+        </figure>
+        <p class="what">Krova paruošta popietės reisams.</p>
+      </div>
+
+      <button class="quiet more" data-go="journal">Vakar — trys darbai <i>→</i></button>
+    </div>
+
+    <div class="ask">
+      <div class="input">
+        <input type="text" placeholder="Papasakok, ką nuveikei…" aria-label="Naujas įrašas">
+        <span class="input-ics">
+          <button aria-label="Nuotrauka">⌾</button>
+          <button aria-label="Balsu">●</button>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ C · ORGANIZATION ══ -->
+  <section class="screen" data-s="org">
+    <div class="col">
+      <h1 class="hello sm">Skandi Terminalas</h1>
+      <p class="today">Šiandien, rugpjūčio 16</p>
+
+      <div class="places">
+        <button class="place">
+          <img src="https://images.unsplash.com/photo-1586528116022-aeda1613c63d?q=62&w=700&sat=-30&exp=-7&auto=format&fit=crop" alt="">
+          <span class="place-t">
+            <b>Terminalas 3</b>
+            <i><em class="ok"></em>Krova vyksta sklandžiai.</i>
+          </span>
+        </button>
+
+        <button class="place is-attn">
+          <img src="https://images.unsplash.com/photo-1667306223315-a4f9532ef492?q=62&w=700&auto=format&fit=crop" alt="">
+          <span class="place-t">
+            <b>Terminalo plėtra</b>
+            <i>Rytoj <em class="warm">trūks dviejų žmonių</em>.</i>
+          </span>
+          <span class="place-act">Spręsti →</span>
+        </button>
+
+        <button class="place">
+          <img src="https://images.unsplash.com/photo-1764795850513-fa8a469a4600?q=62&w=700&auto=format&fit=crop" alt="">
+          <span class="place-t">
+            <b>Uosto punktas</b>
+            <i><em class="ok"></em>Ramu — dvi priėmimo pamainos.</i>
+          </span>
+        </button>
+      </div>
+
+      <div class="band">
+        <p class="band-l">Diena</p>
+        <div class="band-track">
+          <span class="blk" style="left:0%;width:56%">Krova</span>
+          <span class="blk soft" style="left:58%;width:18%">Patikra</span>
+          <span class="blk soft" style="left:78%;width:22%">Elektra</span>
+        </div>
+        <p class="band-h"><span>07:00</span><span>17:00</span></p>
+      </div>
+    </div>
+
+    <div class="ask">
+      <div class="input">
+        <input type="text" placeholder="Paklausk — „Kas vyksta rytoj?“" aria-label="Pokalbis">
+        <span class="input-ics">
+          <button aria-label="Balsu">●</button>
+        </span>
+      </div>
+    </div>
+  </section>
+
+</div>
+<!--ARTIFACT-BODY-END-->
+<script src="gate.js"></script>
+</body>
+</html>
