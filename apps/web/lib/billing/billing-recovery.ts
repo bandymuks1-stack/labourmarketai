@@ -28,9 +28,16 @@ import {
  * audit rows) is skipped, so one that Stripe legitimately still reports as
  * incomplete / unknown cannot starve the rest of the queue.
  *
- * Unprocessed webhook events are COUNTED for observability but not acted on:
- * the webhook's lean audit payload carries no subscription id, so an event
- * cannot be mapped back to a subscription without guessing.
+ * TWO CLASSES of drift, kept apart on purpose:
+ *   RECOVERABLE_SUBSCRIPTION_STATE_DRIFT - a local row awaits sync and carries a
+ *     Stripe subscription id (or its payer has a stored customer): recovery can
+ *     fetch Stripe's truth and apply it through the canonical primitive.
+ *   UNMAPPABLE_UNPROCESSED_WEBHOOK_EVENT - an unprocessed payment_webhook_events
+ *     row whose lean payload has no subscription reference. It is COUNTED ONLY
+ *     (`unmappableUnprocessedWebhookEvents`); recovery does NOT repair it
+ *     (`unmappableRepaired` is always 0) and never guesses a subscription.
+ * Proposed additive fix (not in this PR): ingestion stores payload.refs =
+ * { subscription, customer } so such events become mappable deterministically.
  */
 
 export const RECOVERY_BATCH = 25;
@@ -48,11 +55,20 @@ export type RecoveryRun =
       readonly processed: number;
       readonly skippedBudget: number;
       readonly counts: Readonly<Partial<Record<ReconcileOutcome, number>>>;
-      readonly unprocessedWebhookEvents: number | null;
+      /** RECOVERABLE_SUBSCRIPTION_STATE_DRIFT: awaiting-sync rows selected this run (Stripe truth fetchable). */
+      readonly recoverableSubscriptionStateDrift: number;
+      /**
+       * UNMAPPABLE_UNPROCESSED_WEBHOOK_EVENT: unprocessed audit rows whose lean
+       * payload has no subscription reference. COUNTED ONLY - recovery does NOT
+       * repair them and never guesses a subscription for them.
+       */
+      readonly unmappableUnprocessedWebhookEvents: number | null;
+      /** Always 0: stated explicitly so no reader assumes the unmappable count is repaired. */
+      readonly unmappableRepaired: 0;
     };
 
 export type CandidateSelection =
-  | { readonly ok: true; readonly ids: readonly string[]; readonly unprocessedWebhookEvents: number | null }
+  | { readonly ok: true; readonly ids: readonly string[]; readonly unprocessedEvents: { total: number; withSubscriptionRef: number } | null }
   | { readonly ok: false; readonly reason: "needs_migration" | "store_error" };
 
 /** Pure: apply the cooldown filter + the batch bound, preserving oldest-first order. */
@@ -89,7 +105,7 @@ export async function selectRecoveryCandidates(input: {
   return {
     ok: true,
     ids: pickBatch(read.ids, new Set(read.recentlyReconciled), limit),
-    unprocessedWebhookEvents: read.unprocessedWebhookEvents,
+    unprocessedEvents: read.unprocessedEvents,
   };
 }
 
@@ -140,7 +156,11 @@ export async function runBillingRecovery(
     processed,
     skippedBudget,
     counts,
-    unprocessedWebhookEvents: selection.unprocessedWebhookEvents,
+    recoverableSubscriptionStateDrift: selection.ids.length,
+    unmappableUnprocessedWebhookEvents: selection.unprocessedEvents
+      ? selection.unprocessedEvents.total - selection.unprocessedEvents.withSubscriptionRef
+      : null,
+    unmappableRepaired: 0,
   };
   console.info(JSON.stringify({ evt: "billing.recovery.run", ...run }));
   return run;

@@ -21,8 +21,8 @@ import {
 
 const read = vi.mocked(readRecoveryCandidates);
 const ids = (n: number) => Array.from({ length: n }, (_, i) => `sub_${i}`);
-const ok = (over: Partial<{ ids: string[]; recentlyReconciled: string[]; unprocessedWebhookEvents: number | null }> = {}) =>
-  ({ ok: true as const, ids: [], recentlyReconciled: [], unprocessedWebhookEvents: 0, ...over });
+const ok = (over: Partial<{ ids: string[]; recentlyReconciled: string[]; unprocessedEvents: { total: number; withSubscriptionRef: number } | null }> = {}) =>
+  ({ ok: true as const, ids: [], recentlyReconciled: [], unprocessedEvents: { total: 0, withSubscriptionRef: 0 }, ...over });
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -81,7 +81,7 @@ describe("runBillingRecovery", () => {
   });
 
   it("one subscription's failure (throw) does not corrupt or abort the batch", async () => {
-    read.mockResolvedValue(ok({ ids: ids(3), unprocessedWebhookEvents: 2 }));
+    read.mockResolvedValue(ok({ ids: ids(3), unprocessedEvents: { total: 5, withSubscriptionRef: 2 } }));
     const reconcile = vi
       .fn()
       .mockResolvedValueOnce({ outcome: "applied" })
@@ -94,7 +94,9 @@ describe("runBillingRecovery", () => {
       selected: 3,
       processed: 3,
       counts: { applied: 1, store_error: 1, stale: 1 },
-      unprocessedWebhookEvents: 2,
+      recoverableSubscriptionStateDrift: 3,
+      unmappableUnprocessedWebhookEvents: 3,
+      unmappableRepaired: 0,
     });
   });
 

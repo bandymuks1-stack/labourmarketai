@@ -8,7 +8,7 @@ import { readRecoveryCandidates } from "./subscription-store";
 interface Script {
   subs: { data?: unknown; error?: { code: string } | null };
   audits?: { data?: unknown; error?: { code: string } | null };
-  count?: number;
+  open?: { data?: unknown; error?: { code: string } | null };
 }
 
 function install(s: Script) {
@@ -16,18 +16,19 @@ function install(s: Script) {
   vi.mocked(createAdminClient).mockReturnValue({
     from(table: string) {
       const q: Record<string, unknown> = {};
+      let isOpen = false;
       for (const m of ["select", "eq", "neq", "in", "not", "lt", "gte", "order"]) {
         q[m] = (...a: unknown[]) => {
           log.push([table, m, a]);
+          if (m === "eq" && a[0] === "processed") isOpen = true;
           return q;
         };
       }
       q.limit = (...a: unknown[]) => {
         log.push([table, "limit", a]);
-        const r = table === "billing_subscriptions" ? s.subs : (s.audits ?? { data: [] });
+        const r = table === "billing_subscriptions" ? s.subs : isOpen ? (s.open ?? { data: [] }) : (s.audits ?? { data: [] });
         return Promise.resolve({ data: r.data ?? null, error: r.error ?? null });
       };
-      q.then = (res: (v: unknown) => unknown) => res({ count: s.count ?? 0, error: null });
       return q;
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,10 +51,10 @@ describe("readRecoveryCandidates", () => {
     const log = install({
       subs: { data: [{ provider_subscription_id: "sub_a" }, { provider_subscription_id: "manual_x" }, { provider_subscription_id: null }] },
       audits: { data: [{ payload: { subscription_id: "sub_a" } }, { payload: {} }] },
-      count: 3,
+      open: { data: [{ payload: { refs: { subscription: "sub_z" } } }, { payload: {} }, { payload: { refs: { customer: "cus_1" } } }] },
     });
     const r = await readRecoveryCandidates(input);
-    expect(r).toEqual({ ok: true, ids: ["sub_a"], recentlyReconciled: ["sub_a"], unprocessedWebhookEvents: 3 });
+    expect(r).toEqual({ ok: true, ids: ["sub_a"], recentlyReconciled: ["sub_a"], unprocessedEvents: { total: 3, withSubscriptionRef: 1 } });
     const sub = log.filter(([t]) => t === "billing_subscriptions");
     const flat = JSON.stringify(sub);
     expect(flat).toContain('"test_mode",true');
