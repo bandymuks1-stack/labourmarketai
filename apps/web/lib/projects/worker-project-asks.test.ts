@@ -274,6 +274,27 @@ describe("paper meets a FORMAL requirement only when a reviewer verified it (202
     expect(asks.get("p1")![0].capability?.formalRequirementMet).toBe(false);
   });
 
+  it("SKL-9: an assessor's current recognition makes the equivalence true; recorded work and an empty list never do", () => {
+    const row = {
+      id: "r1",
+      decision: "recognised" as const,
+      validFrom: null,
+      validUntil: null,
+      assessorOrganizationId: "inst",
+      requirementKind: "document_type" as const,
+      requirementKey: slug,
+      revokedAt: null,
+    };
+    const run = (recs: Parameters<typeof deriveWorkerProjectAsks>[4]) =>
+      deriveWorkerProjectAsks([item("p1", "qualification_or_skill_evidence")], [], NOW, EVIDENCE, recs).get("p1")![0]
+        .capability;
+    // Today's production: the relation is unapplied, the list is empty.
+    expect(run([])?.standing).toBe("demonstrated_capability");
+    expect(run(null)?.formalRequirementMet).toBe(false);
+    expect(run([{ ...row, revokedAt: "2026-09-01" }])?.formalRequirementMet).toBe(false);
+    expect(run([row])).toMatchObject({ standing: "recognized_equivalence", formalRequirementMet: true });
+  });
+
   it("the derivation reads the verification axis, not the worker's own status", () => {
     const src = read("lib/projects/worker-project-asks.ts");
     expect(src).toMatch(/hasValidCredential: own === "ready" && ownVerified/);
