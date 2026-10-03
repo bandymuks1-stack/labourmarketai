@@ -841,7 +841,7 @@ export default async function ProfilePage({
       />
       <header id="profile-top" className="scroll-mt-20">
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-          <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
+          <h1 className="font-display text-xl font-semibold tracking-tightest text-text-secondary sm:text-2xl">
             {t("pageTitle")}
           </h1>
           {/* systemic-ux-mobile-v1: action cluster never clips on 360px — it
@@ -892,7 +892,7 @@ export default async function ProfilePage({
             ) : null}
           </div>
           <details className="group" data-testid="profile-more-destinations">
-            <summary className="inline-flex min-h-11 cursor-pointer select-none list-none items-center font-mono text-meta uppercase tracking-label text-text-secondary transition-colors hover:text-text-primary [&::-webkit-details-marker]:hidden">
+            <summary className="inline-flex min-h-11 cursor-pointer select-none list-none items-center text-support font-medium text-text-secondary transition-colors hover:text-text-primary [&::-webkit-details-marker]:hidden">
               {tQuick("moreDestinations")}
               <span aria-hidden className="ml-1 transition-transform group-open:rotate-90">
                 ›
@@ -1031,10 +1031,10 @@ export default async function ProfilePage({
           <DetailsHashOpener targetId="organization-history" />
           <details
             id="organization-history"
-            className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40"
+            className="group scroll-mt-4 rounded-2xl border border-border-subtle/60 bg-surface-1/40"
             data-testid="organization-history-disclosure"
           >
-            <summary className="flex min-h-11 cursor-pointer list-none flex-col items-start justify-center gap-1 px-4 py-2 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
+            <summary className="flex min-h-11 cursor-pointer list-none flex-col items-start justify-center gap-1 px-4 py-2 text-support font-medium text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
               <span className="inline-flex items-center gap-2">
                 <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
                 {tEvidenceMine("title")}
@@ -1212,10 +1212,10 @@ export default async function ProfilePage({
       <DetailsHashOpener targetId="profile-edit" />
       <details
         id="profile-edit"
-        className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40"
+        className="group scroll-mt-4 rounded-2xl border border-border-subtle/60 bg-surface-1/40"
         data-testid="profile-edit-disclosure"
       >
-        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 text-support font-medium text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
           <span className="inline-flex items-center gap-2">
             <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
             {t("editDisclosure")}
@@ -1263,9 +1263,9 @@ export default async function ProfilePage({
       <DetailsHashOpener targetId="cv-details" />
       <details
         id="cv-details"
-        className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40"
+        className="group scroll-mt-4 rounded-2xl border border-border-subtle/60 bg-surface-1/40"
       >
-        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
+        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 text-support font-medium text-text-secondary hover:text-text-primary">
           <span className="inline-flex items-center gap-2">
             <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
             {tQuick("details")}
@@ -1503,14 +1503,14 @@ export default async function ProfilePage({
         <p
           role="status"
           data-testid="profile-record-read-unavailable"
-          className="rounded-md border border-border-subtle bg-surface-1/40 px-4 py-3 text-sm leading-relaxed text-text-secondary"
+          className="rounded-2xl border border-border-subtle/60 bg-surface-1/40 px-4 py-3 text-sm leading-relaxed text-text-secondary"
         >
           {t("profileReadUnavailable")}
         </p>
       ) : null}
       <DetailsHashOpener targetId="capabilities" />
-      <details id="capabilities" className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40">
-        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
+      <details id="capabilities" className="group scroll-mt-4 rounded-2xl border border-border-subtle/60 bg-surface-1/40">
+        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 text-support font-medium text-text-secondary hover:text-text-primary">
           <span className="inline-flex items-center gap-2">
             <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
             {tQuick("capabilities")}
@@ -1519,7 +1519,7 @@ export default async function ProfilePage({
         <div className="flex flex-col gap-3 px-4 pb-4">
           <Link
             href="/dashboard/journal"
-            className="inline-flex min-h-11 w-fit items-center font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
+            className="inline-flex min-h-11 w-fit items-center text-support font-medium text-brand-blue hover:underline"
             data-testid="profile-mano-cv-records-link"
           >
             {tQuick("fullRecordsInCv")} →
@@ -1559,10 +1559,10 @@ export default async function ProfilePage({
       <DetailsHashOpener targetId="profile-about" />
       <details
         id="profile-about"
-        className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40"
+        className="group scroll-mt-4 rounded-2xl border border-border-subtle/60 bg-surface-1/40"
         data-testid="profile-about-disclosure"
       >
-        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 text-support font-medium text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
           <span className="inline-flex items-center gap-2">
             <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
             {t("aboutDisclosure")}

@@ -39,10 +39,15 @@ export interface JournalPhotoViewerLabels {
 export function JournalPhotoViewer({
   photos,
   labels,
+  variant = "day",
 }: {
   photos: readonly JournalPhotoViewerPhoto[];
   labels: JournalPhotoViewerLabels;
+  /** `day`: the day object's grid (first photo leads, larger). `entry`: small
+   *  thumbnails on one record's card — the record's own photo as its visual. */
+  variant?: "day" | "entry";
 }) {
+  const entry = variant === "entry";
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -94,13 +99,19 @@ export function JournalPhotoViewer({
   return (
     <>
       <ul
-        className="grid list-none grid-cols-3 gap-2 sm:grid-cols-4"
-        data-testid="journal-day-object-photos"
+        className={
+          entry
+            ? "m-0 flex list-none flex-wrap gap-2 p-0"
+            : "grid list-none grid-cols-3 gap-2 sm:grid-cols-4"
+        }
+        data-testid={entry ? "journal-entry-photo-thumbs" : "journal-day-object-photos"}
       >
         {photos.map((p, i) => (
           <li
             key={p.photoId}
-            className="overflow-hidden rounded-lg border border-ink-600 bg-ink-800"
+            className={`overflow-hidden rounded-xl bg-ink-800 shadow-[0_0_0_1px_rgb(var(--c-brand-cyan)/0.25)] ${
+              entry ? "size-20 sm:size-24" : i === 0 && photos.length > 1 ? "col-span-2 row-span-2" : ""
+            }`}
           >
             {p.signedUrl ? (
               <button
@@ -108,13 +119,13 @@ export function JournalPhotoViewer({
                 onClick={() => setOpenIndex(i)}
                 aria-label={labels.open}
                 data-testid="journal-day-object-photo-open"
-                className="block w-full cursor-zoom-in focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-cyan"
+                className="block h-full w-full cursor-zoom-in focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-cyan"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={p.signedUrl}
                   alt={labels.photoAlt}
-                  className="aspect-square w-full object-cover"
+                  className="aspect-square h-full w-full object-cover"
                   loading="lazy"
                 />
               </button>
@@ -167,7 +178,7 @@ export function JournalPhotoViewer({
                     </button>
                   ) : null}
                   {openable.length > 1 ? (
-                    <span className="px-2 font-mono text-meta text-text-secondary tabular-nums">
+                    <span className="px-2 text-meta text-text-secondary tabular-nums">
                       {labels.counterTemplate
                         .replace("{index}", String(position))
                         .replace("{total}", String(openable.length))}

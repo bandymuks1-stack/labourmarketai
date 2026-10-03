@@ -129,14 +129,17 @@ export async function TodayWorkSection({ locale }: { locale: ActiveLocale }) {
         aria-labelledby="today-work-title"
         data-testid="today-work"
         data-state={work.kind}
-        className="flex flex-col gap-2"
+        className="flex flex-col gap-2 rounded-3xl border border-ink-600/60 bg-ink-800/70 p-5 sm:p-6"
       >
-        <h2 id="today-work-title" className="font-mono text-meta uppercase tracking-label text-text-muted">
+        <h2 id="today-work-title" className="text-support font-medium text-text-secondary">
           {t("work.title")}
         </h2>
         {work.kind === "known" ? (
           <>
-            <p className="text-body text-text-primary" data-testid="today-work-today">
+            <p
+              className="font-display text-xl font-semibold leading-snug tracking-tightest text-text-primary"
+              data-testid="today-work-today"
+            >
               {work.today.entries === 0
                 ? t("work.none")
                 : t("work.today", { hours: fmtHours(work.today.hours), entries: work.today.entries })}
@@ -173,20 +176,23 @@ export async function TodayWorkSection({ locale }: { locale: ActiveLocale }) {
           aria-labelledby="today-open-title"
           data-testid="today-open"
           data-attention-unknown={doorsUnknown.length > 0 ? doorsUnknown.join(" ") : undefined}
-          className="flex flex-col gap-2"
+          className="flex flex-col gap-1 rounded-3xl border border-ink-600/60 bg-ink-800/70 p-5 sm:p-6"
         >
-          <h2 id="today-open-title" className="font-mono text-meta uppercase tracking-label text-text-muted">
+          <h2 id="today-open-title" className="text-support font-medium text-text-secondary">
             {t("open.title")}
           </h2>
-          <ul className="flex flex-col">
+          <ul className="flex flex-col divide-y divide-ink-600/40">
             {open.items.map((item, i) => (
               <li key={item.kind === "check" ? item.check.key : `${item.kind}-${i}`}>
                 <Link
                   href={openItemHref(item) as "/dashboard"}
                   data-testid={`today-open-${item.kind}`}
-                  className="inline-flex min-h-11 items-center text-support text-text-primary underline-offset-4 hover:text-brand-blue hover:underline"
+                  className="group flex min-h-11 items-center gap-3 py-1 text-support text-text-primary hover:text-brand-blue"
                 >
-                  {openItemText(item)}
+                  {/* Gold = waiting on you; never a confirmation. */}
+                  <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-brand-blue" />
+                  <span className="min-w-0 flex-1">{openItemText(item)}</span>
+                  <span aria-hidden className="text-text-muted transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none">→</span>
                 </Link>
               </li>
             ))}
@@ -209,9 +215,9 @@ export async function TodayWorkSection({ locale }: { locale: ActiveLocale }) {
           aria-labelledby="today-growth-title"
           data-testid="today-growth"
           data-state={growthLine.kind}
-          className="flex flex-col gap-2"
+          className="flex flex-col gap-2 px-1"
         >
-          <h2 id="today-growth-title" className="font-mono text-meta uppercase tracking-label text-text-muted">
+          <h2 id="today-growth-title" className="text-support font-medium text-text-secondary">
             {t("growth.title")}
           </h2>
           {growthLine.kind === "direction" ? (

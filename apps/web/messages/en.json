@@ -18139,7 +18139,8 @@
     "next": {
       "title": "Your history goes with you",
       "body": "Every job you record adds to it. Take it to the next opportunity.",
-      "cta": "See where you can go"
+      "cta": "See where you can go",
+      "label": "Next, not history"
     }
   },
   "workContext": {
@@ -18158,6 +18159,260 @@
       "history": "{count, plural, one {# job} other {# jobs}}",
       "skills": "{count, plural, one {# skill backed by your records} other {# skills backed by your records}}",
       "next": "Where you can go"
+    }
+  },
+  "publicSlice": {
+    "sample": "Example",
+    "states": {
+      "own": "Your own record",
+      "waiting": "Waiting for a manager’s review",
+      "confirmed": "Confirmed by a manager",
+      "unknown": "Not recorded yet"
+    },
+    "imagery": {
+      "tomasAlt": "A scaffolder working on a facade scaffold in an old town street",
+      "rasaAlt": "A cook at the pass in a restaurant kitchen",
+      "tomasCaption": "Tomas K. · Scaffolder",
+      "rasaCaption": "Rasa J. · Cook",
+      "vanAlt": "A scaffolder beside his van at a building site",
+      "ownerAlt": "A restaurant owner with two colleagues at the table"
+    },
+    "workers": {
+      "hero": {
+        "title": "Find work.",
+        "accent": "Keep what you build.",
+        "sub": "Find a job that fits what you really do. Once you start, your day, your team and your messages are in one place. The work you record becomes your professional history.",
+        "cta": "Create my free profile",
+        "secondary": "See open jobs",
+        "note": "Free for people. Paid plans exist only for organisations."
+      },
+      "day": {
+        "title": "Know what happens today.",
+        "body": "See the work you are on, your team and your messages first. Then record what you did, in a few lines, with a photo and the time.",
+        "todayLabel": "Today",
+        "task": "Evening service",
+        "taskDetail": "Autumn menu launch · Kitchen team",
+        "message": "Chef: the new dishes go live tonight.",
+        "primary": "Record today’s work",
+        "secondary": "Message the team",
+        "recordLabel": "Your record",
+        "recordText": "Ran the pass for the new autumn menu. Two dishes sent back and fired again.",
+        "time": "8 h",
+        "photo": "1 photo",
+        "sent": "Sent to your manager"
+      },
+      "history": {
+        "title": "Confirmed work builds your history.",
+        "body": "Work your manager confirms joins your professional history. Work nobody has confirmed yet stays visible as your own record, clearly marked. What you say you are available for sits apart, as what comes next.",
+        "now": "Now",
+        "recent": "Recent work",
+        "earlier": "Earlier",
+        "next": "Next, not history",
+        "nowTitle": "Restaurant Ąžuolas · Cook",
+        "nowMeta": "Autumn menu launch · since September",
+        "nowState": "Confirmed by a manager",
+        "recentTitle": "Harbour Café · Line cook",
+        "recentMeta": "2023 – 2024",
+        "recentState": "Your own record · not confirmed",
+        "earlierTitle": "Added by Rasa",
+        "earlierMeta": "2019 – 2022",
+        "earlierState": "Not recorded yet",
+        "nextTitle": "Available from 20 October",
+        "nextMeta": "As Rasa states it",
+        "nextState": "No offer yet"
+      },
+      "outcome": {
+        "title": "Your work does not disappear when the job ends.",
+        "body": "The next employer meets a person with a real record, not only a CV. Your profile stays private until you switch visibility on."
+      },
+      "faq": {
+        "title": "Before you sign up",
+        "items": [
+          {
+            "q": "Does it cost anything?",
+            "a": "No. LabourMarket.ai is free for people. Paid plans exist only for organisations."
+          },
+          {
+            "q": "Who can see my profile?",
+            "a": "Nobody finds you until you switch visibility on. Then companies see a short professional summary. Your CV and contact details are shared only when you confirm. The company you work for sees the work logged for it."
+          },
+          {
+            "q": "What if my manager does not confirm my work?",
+            "a": "It stays your own record, clearly marked as not confirmed. You keep it either way."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Start with your own",
+        "accent": "professional profile.",
+        "button": "Create my free profile"
+      }
+    },
+    "companies": {
+      "hero": {
+        "title": "Find the people you need.",
+        "accent": "Then run the work.",
+        "sub": "Say what you need. Meet people whose real work fits. Put them on a project, see the work they record, confirm it, and post the next need.",
+        "cta": "Post what you need",
+        "secondary": "See pricing",
+        "note": "Posting what you need is free."
+      },
+      "need": {
+        "title": "Say what you need. See who fits.",
+        "body": "Describe the work, how many people and from when. See people whose work history fits that need, shown against the job itself, never as a single rating.",
+        "needLabel": "Your need",
+        "needTitle": "Line cook · 2 people",
+        "needMeta": "From 20 October · Vilnius",
+        "personRole": "Cook",
+        "personMeta": "Available from 20 October, as she states it",
+        "personState": "Confirmed work at Restaurant Ąžuolas"
+      },
+      "project": {
+        "title": "Put your people on the work.",
+        "body": "Add the people you work with to a project. Each day they record what was done. You see which records are waiting for you, then confirm them or send them back for changes.",
+        "label": "Project",
+        "name": "Autumn menu launch",
+        "people": "Kitchen team · 3 people",
+        "waiting": "1 record waiting for your review",
+        "confirmed": "2 records confirmed this week"
+      },
+      "attention": {
+        "title": "See what needs you. Plan what comes next.",
+        "body": "Records waiting for review and the needs you have posted stay in one place, so the next hiring decision starts from what is really happening.",
+        "label": "Needs you",
+        "items": [
+          {
+            "text": "1 record waiting for your review",
+            "state": "wait"
+          },
+          {
+            "text": "Line cook from 20 October: open need",
+            "state": "wait"
+          },
+          {
+            "text": "Pastry section: no record since Thursday",
+            "state": "unk"
+          }
+        ]
+      },
+      "faq": {
+        "title": "Before you start",
+        "items": [
+          {
+            "q": "How much does it cost?",
+            "a": "One active position per organisation is free. More positions need the organisation plan, shown on the pricing page. Posting what you need is free."
+          },
+          {
+            "q": "Can I confirm the work my people record?",
+            "a": "Yes. A manager or owner of the organisation can confirm a record, send it back for changes or decline it, when the organisation has review turned on."
+          },
+          {
+            "q": "What do I see of a person before I get in touch?",
+            "a": "A short professional summary: name, professions, experience, availability and skills. Only for people who switched visibility on. CV and contact details are shared only when they confirm."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Start with the people",
+        "accent": "you need.",
+        "button": "Post what you need"
+      }
+    },
+    "transition": {
+      "title": "One day of work, from record to history.",
+      "sub": "Follow one shift. The record, the proof and the review each happen once, and both sides see the result.",
+      "stageNav": "Choose a stage",
+      "replay": "Play again",
+      "stages": {
+        "work": {
+          "label": "Work",
+          "caption": "Rasa runs the evening service."
+        },
+        "proof": {
+          "label": "Proof",
+          "caption": "She records what she did and adds a photo."
+        },
+        "review": {
+          "label": "Review",
+          "caption": "Her manager confirms it."
+        },
+        "history": {
+          "label": "History",
+          "caption": "It joins her professional history."
+        },
+        "next": {
+          "label": "Next",
+          "caption": "The company sees the progress. Both can plan what comes next."
+        }
+      },
+      "pro": {
+        "role": "Cook",
+        "recordTitle": "Evening service · 8 h",
+        "recordText": "Ran the pass for the new autumn menu.",
+        "photoAlt": "The pass in the kitchen before service",
+        "historyLabel": "In her professional history",
+        "historyTitle": "Restaurant Ąžuolas · Cook",
+        "historyMeta": "Autumn menu launch",
+        "nextLabel": "Next, not history",
+        "nextMeta": "Available from 20 October, as she states it"
+      },
+      "co": {
+        "project": "Autumn menu launch",
+        "waiting": "1 record waiting for review",
+        "done": "Record confirmed",
+        "nextLabel": "What comes next",
+        "nextNeed": "Line cook from 20 October",
+        "nextCta": "Post the next need"
+      }
+    },
+    "home": {
+      "title": "Choose your side.",
+      "sub": "Same place, same record. What you do next depends on where you stand.",
+      "workerTitle": "I am looking for work",
+      "workerBody": "Find work that fits, then keep the record of what you do.",
+      "workerCta": "For professionals",
+      "companyTitle": "I am hiring people",
+      "companyBody": "Find the people you need, then run the work with them.",
+      "companyCta": "For companies"
+    },
+    "explore": {
+      "summary": "Explore every step and open it in your workspace"
+    },
+    "world": {
+      "labels": {
+        "person": "Person",
+        "team": "Team",
+        "project": "Project",
+        "work": "Work today",
+        "today": "Today",
+        "record": "Your record",
+        "needs": "Needs you",
+        "kitchen": "Kitchen team"
+      },
+      "home": {
+        "title": "One world of work.",
+        "sub": "Real people, real companies and the work between them, kept in one place.",
+        "primary": "I’m looking for work",
+        "secondary": "I’m hiring",
+        "personRole": "Scaffolder · Vilnius",
+        "crew": "North crew",
+        "projectMeta": "North facade · level 3 to 4",
+        "workTitle": "Level 3, east bay",
+        "workMeta": "8 h · anchors every 1.5 m",
+        "doneTitle": "Added to his history",
+        "doneMeta": "Confirmed by a manager · 1 photo kept"
+      },
+      "workers": {
+        "taskMeta": "Gate check 14:00",
+        "recordTitle": "Level 3, east bay",
+        "recordMeta": "8 h · 1 photo",
+        "doneTitle": "Now in your history",
+        "taskTitle": "North facade"
+      },
+      "companies": {
+        "projectDone": "5 of 9 records confirmed this week",
+        "teamMeta": "3 people on this project"
+      }
     }
   }
 }

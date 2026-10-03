@@ -498,7 +498,7 @@ export async function ProfileHubOverview({
       {/* ── WHAT IS MISSING ──────────────────────────────────────────────── */}
       {steps.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
+          <h3 className="text-support font-medium text-text-muted">
             {tLive("missingTitle")}
           </h3>
           {nothingMissing ? (
@@ -682,7 +682,7 @@ export async function ProfileHubOverview({
 
             {/* where the work happened — absorbed from LiveProfileSection */}
             <div>
-              <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
+              <h3 className="text-support font-medium text-text-muted">
                 {tLive("historyTitle")}
               </h3>
               {playerCard.unavailable.includes("workHistory") ? (
@@ -782,7 +782,7 @@ export async function ProfileHubOverview({
                 blended (F9). Absorbed from LiveProfileSection + the hub's own
                 evidence block, which stated the same fact twice. */}
             <div>
-              <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
+              <h3 className="text-support font-medium text-text-muted">
                 {tLive("evidenceTitle")}
               </h3>
               <p
@@ -835,7 +835,7 @@ export async function ProfileHubOverview({
             {/* the opportunity signal — absorbed from LiveProfileSection */}
             {signal && (
               <div>
-                <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
+                <h3 className="text-support font-medium text-text-muted">
                   {tLive("opportunityTitle")}
                 </h3>
                 {signal.matchingCount === null ? (
@@ -900,7 +900,7 @@ export async function ProfileHubOverview({
       {playerCard && (
         <details className="group rounded-md border border-border-subtle">
           <summary
-            className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+            className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3 text-support font-medium text-text-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
             data-testid="profile-hub-done-summary"
           >
             <span

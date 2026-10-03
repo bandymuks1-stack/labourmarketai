@@ -118,6 +118,7 @@ import { resolveWorkLogLabels } from "@/components/app/conversation/chat/labels"
 import { JournalQuickRecord } from "./quick-record";
 import { JournalCalendar } from "@/components/app/journal/journal-calendar";
 import { JournalDayObject } from "@/components/app/journal/journal-day-object";
+import { JournalPhotoViewer } from "@/components/app/journal/journal-photo-viewer";
 import { buildDayObject } from "@/lib/journal/day-object";
 import {
   readDayPhotoPreviews,
@@ -1174,6 +1175,36 @@ export default async function JournalPage({
       ])
     : [null, null];
 
+  // The person's OWN record photos, attributed to the record they belong to.
+  // Only drawn on the selected day and only when that day holds 2+ records —
+  // with one record the day object above already shows its photos, so a
+  // thumbnail row would repeat them. Real uploads only; no placeholder.
+  const tPhoto = await getTranslations("journal.dayObject");
+  const entryPhotoLabels = {
+    photoAlt: tPhoto("photoAlt"),
+    previewUnavailable: tPhoto("previewUnavailable"),
+    open: tPhoto("photoOpen"),
+    close: tPhoto("photoClose"),
+    prev: tPhoto("photoPrev"),
+    next: tPhoto("photoNext"),
+    counterTemplate: tPhoto.raw("photoCounter") as string,
+  };
+  const attributePhotos =
+    dayPhotos.status === "ok" && (selectedDayGroup?.entries.length ?? 0) > 1;
+  const photoSlotOf = (entryId: string) => {
+    if (!attributePhotos || dayPhotos.status !== "ok") return undefined;
+    const own = dayPhotos.photos.filter((p) => p.entryId === entryId);
+    if (own.length === 0) return undefined;
+    return (
+      <JournalPhotoViewer
+        key="entry-photos"
+        variant="entry"
+        photos={own.map((p) => ({ photoId: p.photoId, signedUrl: p.signedUrl }))}
+        labels={entryPhotoLabels}
+      />
+    );
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <TelemetryView
@@ -1256,7 +1287,7 @@ export default async function JournalPage({
           className="group order-4 rounded-md border border-border-subtle bg-surface-1/50 scroll-mt-20"
           data-testid="mano-cv-player-card-lead"
         >
-          <summary className="cursor-pointer list-none px-4 py-2.5 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
+          <summary className="cursor-pointer list-none px-4 py-2.5 text-support font-medium text-text-secondary hover:text-text-primary">
             <span className="inline-flex items-center gap-2">
               <span
                 aria-hidden
@@ -1421,7 +1452,7 @@ export default async function JournalPage({
             data-period={wi?.scope ?? periodKey}
           >
             <Card compact className="flex flex-col gap-3">
-              <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
+              <h2 className="font-display text-lg font-semibold tracking-tightest text-text-primary">
                 {tIntel("numbers.stationTitle")}
               </h2>
               <DominantLead
@@ -1468,7 +1499,7 @@ export default async function JournalPage({
             {t("listTitle")}
             {(entries ?? []).length > 0 && (
               <span
-                className="font-mono text-xs font-normal text-text-muted"
+                className="text-support font-normal tabular-nums text-text-muted"
                 data-testid="journal-entries-count"
               >
                 {(entries ?? []).length}
@@ -1720,7 +1751,7 @@ export default async function JournalPage({
                         ▸
                       </span>
                       <span className="flex min-w-0 flex-col">
-                        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                        <span className="text-support font-medium text-text-muted">
                           {group.isoKey === todayIsoKey
                             ? t("stream.today")
                             : group.isoKey === yesterdayIso
@@ -1735,7 +1766,7 @@ export default async function JournalPage({
                         </span>
                       </span>
                     </span>
-                    <span className="flex items-center gap-3 font-mono text-meta uppercase tracking-label text-text-muted">
+                    <span className="flex items-center gap-3 text-meta text-text-muted">
                       {totalLabel && (
                         <span
                           className="font-display text-xl font-bold normal-case tracking-tightest text-brand-cyan tabular-nums sm:text-2xl"
@@ -1883,6 +1914,7 @@ export default async function JournalPage({
                             verification.state,
                           )}
                           standingSolid={spineNodeSolid(verification.state)}
+                          photoSlot={photoSlotOf(e.id)}
                           chainSlot={
                             <EvidenceChain
                               size="full"
@@ -1965,7 +1997,7 @@ export default async function JournalPage({
                                 className="flex items-start justify-between gap-3"
                                 data-testid={`journal-entry-head-${e.id}`}
                               >
-                                <span className="min-w-0 break-words pt-1 font-mono text-meta font-semibold uppercase tracking-label text-text-secondary">
+                                <span className="min-w-0 break-words pt-1 text-support font-medium text-text-secondary">
                                   {where.join(" · ")}
                                 </span>
                                 {minutes > 0 ? (
@@ -2137,7 +2169,7 @@ export default async function JournalPage({
                           {hasUnderstood && (
                             <div className="flex flex-col gap-1 border-t border-border/40 pt-2">
                               <p
-                                className="font-mono text-meta uppercase tracking-label text-text-secondary"
+                                className="text-meta font-medium text-text-secondary"
                                 data-testid={`journal-entry-understood-${e.id}`}
                               >
                                 {t("entry.understoodLabel")}

@@ -403,26 +403,17 @@ describe("§22 the first screen says what this is, then offers one next step", (
     expect(countPrimary(`${html}${html}`)).toBe(2);
   });
 
-  it("the page mounts the pair once in the hero and once as the closing band", () => {
+  it("the page mounts ONE primary + ONE secondary action in the hero and the closing band at the end", () => {
     const focus = read("app/[locale]/focus-landing/focus-landing.tsx");
-    // Owner directive 2026-09-29 (living worker hero): the pair lives in ONE
-    // `promise` element that whichever hero is shown renders — the living
-    // worker hero over its photographs, or the entry hero without them. The
-    // rule is unchanged: mounted once, as `landing_hero`, before the entry.
-    const bodyStart = focus.lastIndexOf("<NextIntlClientProvider"); // the tag, not a comment naming it
-    const promise = focus.slice(focus.indexOf("const promise = ("), bodyStart);
-    expect(promise.match(/<LandingPrimaryActions\b/g) ?? []).toHaveLength(1);
-    expect(promise).toContain('surface="landing_hero"');
-    // the hero pair exists exactly once in the file; the closing band is its own component
-    expect(focus.match(/<LandingPrimaryActions\b/g) ?? []).toHaveLength(1);
-    const body = focus.slice(bodyStart);
-    // each hero branch renders the promise before the working entry
-    for (const branch of [body.indexOf("<LivingWorkerHero"), body.indexOf('<section className="grid gap-8 lg:grid-cols-2')]) {
-      expect(branch).toBeGreaterThan(-1);
-      const from = body.slice(branch);
-      expect(from.indexOf("{promise}")).toBeGreaterThan(-1);
-      expect(from.indexOf("{promise}")).toBeLessThan(from.indexOf("<PublicEntry"));
-    }
+    // Owner directive 2026-10-02 (CURRENT x Q): the hero is <HomeWorldHero>,
+    // which carries its own pair (a primary that leads to the worker page, one
+    // secondary route to the company page), before the working entry.
+    const hero = read("components/marketing/public/world-heroes.tsx");
+    const home = hero.slice(hero.indexOf("export async function HomeWorldHero"), hero.indexOf("/** /FOR-WORKERS"));
+    expect((home.match(/buttonLinkClassName\("primary"\)/g) ?? []).length).toBe(1);
+    expect((home.match(/<TrackedCta\b/g) ?? []).length).toBe(2);
+    expect(focus.indexOf("<HomeWorldHero")).toBeGreaterThan(-1);
+    expect(focus.indexOf("<HomeWorldHero")).toBeLessThan(focus.indexOf("<PublicEntry"));
     expect(focus.indexOf("<LandingClosingBand")).toBeGreaterThan(focus.indexOf("<TrustBand"));
     // And still no per-request read: the landing stays static.
     const code = focus.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");

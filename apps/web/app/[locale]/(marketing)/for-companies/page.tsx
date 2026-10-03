@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+
+import { ExploreSteps } from "@/components/marketing/public/explore-steps";
+import { PublicCtaEnd, PublicFaq } from "@/components/marketing/public/public-sections";
+import { CompanyNeedMoment } from "@/components/marketing/public/product-moments";
+import { CompaniesWorldHero } from "@/components/marketing/public/world-heroes";
+import { WorkRecordTransitionSection } from "@/components/marketing/public/work-record-transition-section";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
-import { WorkLifecycleSection } from "@/components/marketing/work-lifecycle-section";
-import { BenefitCards } from "@/components/marketing/benefit-cards";
 
 export async function generateMetadata({
   params,
@@ -12,11 +16,17 @@ export async function generateMetadata({
   const { locale } = await params;
   return buildPageMetadataFor("companies", locale, "/for-companies");
 }
-import { PageHero } from "@/components/marketing/page-hero";
-import { RoleEnrichment } from "@/components/marketing/role-enrichment";
-import { ExamplePreviewFrame } from "@/components/marketing/example-preview-frame";
-import { DemandPreviewCard } from "@/components/app/demand-preview-card";
 
+/**
+ * /for-companies — the canonical COMPANY acquisition destination, in the same
+ * world as the homepage and the product after login.
+ *
+ * A real workplace and its people fill the first screen: what needs the owner,
+ * the project, the team. Then the same record travels from work to history while
+ * the company gains context; then how a need meets a person. "Build a whole
+ * team" and capacity planning are NOT claimed: the product does not support
+ * them yet (see the truth table). The one action is the canonical demand entry.
+ */
 export default async function ForCompaniesPage({
   params,
 }: {
@@ -24,35 +34,22 @@ export default async function ForCompaniesPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations("pages.companies");
-  const benefits = t.raw("benefits") as { title: string; body: string }[];
+  const t = await getTranslations("publicSlice.companies");
 
   return (
     <>
-      {/* Educational page; the action CTA routes into the canonical demand
-          entry (/company-need), not a second competing intake path. */}
-      <PageHero
-        eyebrow={t("eyebrow")}
-        title={t("title")}
-        accent={t("titleAccent")}
-        subcopy={t("subcopy")}
-        ctaKind="companyNeed"
-        ctaLabel={t("cta")}
-        ctaSource="companies_hero"
-        ctaAudience="companies"
-      />
-      <WorkLifecycleSection audience="companies" />
-      <BenefitCards items={benefits} />
-      <RoleEnrichment
-        root="companies"
-        previewKey="demand"
-        preview={
-          <ExamplePreviewFrame>
-            <DemandPreviewCard id="demand.featured.1" />
-          </ExamplePreviewFrame>
-        }
-        ctaSource="companies_cta"
-        ctaKind="signup"
+      <CompaniesWorldHero />
+      <WorkRecordTransitionSection />
+      <CompanyNeedMoment />
+      <ExploreSteps audience="companies" />
+      <PublicFaq audience="companies" />
+      <PublicCtaEnd
+        title={t("cta.title")}
+        accent={t("cta.accent")}
+        label={t("cta.button")}
+        href="/company-need"
+        ctaId="companies_cta"
+        audience="companies"
       />
     </>
   );

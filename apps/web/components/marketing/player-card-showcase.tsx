@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { PUBLIC_IMAGERY } from "@/components/marketing/public/public-imagery";
 import { ConstellationBg } from "@/components/decor/constellation-bg";
 import { WorkerPlayerCard } from "@/components/app/worker-player-card";
 import { buildPlayerCardLabels } from "@/lib/player-card/labels";
@@ -70,7 +71,7 @@ export async function PlayerCardShowcase() {
             card={sampleCard}
             labels={labels}
             thermometer={null}
-            avatarUrl={null}
+            avatarUrl={PUBLIC_IMAGERY.rasaPortrait.src}
             sample
           />
         </div>
