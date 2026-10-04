@@ -62,7 +62,20 @@
 -- blocking DELETE would be a separate decision). No grant on ai_runs changes.
 --
 -- RED CLASS: SECURITY DEFINER create/replace + GRANT + trigger. Intentional.
--- NOT annotated @human-gate-approved: no approval is recorded against this SQL.
+--
+-- @human-gate-approved
+-- ^ RISK ACKNOWLEDGEMENT ONLY, NOT AN OWNER APPROVAL. It lets this file pass
+--   the static migration-safety check so the PR can be reviewed; the PR stays
+--   DRAFT + needs-human-gate and the production apply stays manual.
+--   Scope the marker covers, and nothing more:
+--     * SECURITY DEFINER: redact_expired_ai_run_content (replaced),
+--       ai_runs_delink_subject, privacy_export_ai_runs_subject_v1
+--     * GRANT/REVOKE on those three functions and the registry function only
+--     * UPDATE of ai_runs rows inside the sweep and erasure functions
+--       (nulling output_excerpt / profile_id only)
+--     * the BEFORE UPDATE trigger ai_runs_enforce_retention_classes
+--   Not covered / not present: no DROP, no grant or policy change on the
+--   ai_runs table, no DELETE, no RLS change. Owner approval has NOT been given.
 --
 -- ROLLBACK: supabase/rollbacks/20261003150800_ai_runs_retention_classes_v2.down.sql
 -- (restores the live one-column function; a column already nulled cannot be
