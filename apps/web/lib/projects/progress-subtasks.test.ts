@@ -17,7 +17,7 @@ describe("subtask counting rule (derived only)", () => {
     const p = deriveProjectProgress(["done", "todo", "cancelled"], ["done"]);
     expect(p.taskDone).toBe(1);
     expect(p.taskTotal).toBe(2);
-    expect(p.percent).toBe(67);
+    expect(p.percent).toBe(50); // 1 of 2 countable tasks; the stage is not counted in
   });
 
   it("a parent with open children is a container: not counted, never done by itself", () => {
@@ -58,14 +58,14 @@ describe("subtask counting rule (derived only)", () => {
     expect(c).toEqual({ done: 1, total: 1, doneParentsWithOpenChildren: 0 });
   });
 
-  it("feeds deriveProjectProgress: percent is over leaves + stages", () => {
+  it("feeds deriveProjectProgress: percent is over leaf tasks only", () => {
     const p = deriveProjectProgress(
       [t("p", "done"), t("a", "done", "p"), t("b", "todo", "p")],
       ["planned"],
     );
     expect(p.taskTotal).toBe(2);
     expect(p.taskDone).toBe(1);
-    expect(p.percent).toBe(33);
+    expect(p.percent).toBe(50); // stages are NOT in the percent
   });
 });
 
@@ -112,5 +112,37 @@ describe("suggestStageStatus — derived, read-only", () => {
         t("a", "todo", "p"),
       ]),
     ).toBeNull();
+  });
+});
+
+describe("leaf-derived percent (no double count, no fabrication)", () => {
+  it("a done stage does not lift the percent of its own open tasks", () => {
+    const p = deriveProjectProgress(["todo", "todo"], ["done"]);
+    expect(p.percent).toBe(0);
+    expect(p.basis).toBe("tasks");
+  });
+
+  it("no tasks + stages: NO percent, a declared count only", () => {
+    const p = deriveProjectProgress([], ["done", "planned", "cancelled"]);
+    expect(p).toMatchObject({ percent: null, basis: "stages", stageDone: 1, stageTotal: 2 });
+  });
+
+  it("nothing countable: omitted", () => {
+    expect(deriveProjectProgress(["cancelled"], ["cancelled"])).toMatchObject({
+      percent: null,
+      basis: "none",
+    });
+  });
+
+  it("an incomplete task read (failed/truncated) is unknown, even with stages", () => {
+    const p = deriveProjectProgress(["done"], ["done"], { tasksComplete: false });
+    expect(p).toMatchObject({ percent: null, basis: "none", taskTotal: 0, stageTotal: 0 });
+  });
+
+  it("an incomplete stage read never invents stage counts", () => {
+    const p = deriveProjectProgress([], ["done"], { stagesComplete: false });
+    expect(p.basis).toBe("none");
+    const q = deriveProjectProgress(["done", "todo"], ["done"], { stagesComplete: false });
+    expect(q.percent).toBe(50);
   });
 });

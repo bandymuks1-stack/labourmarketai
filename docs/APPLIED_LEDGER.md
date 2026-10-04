@@ -2560,6 +2560,135 @@ Status: DB APPLIED + READ-BACK; emitters deployed with #2116. End-to-end (messag
 `message_received` -> recipient -> read/unread; journal decision -> `journal_review_decided`) NOT PROVEN
 (PRODUCTION_E2E_BLOCKED_QA_IDENTITY).
 
+## 20261003090939 - experience_responses_select_reply_status_v1 (#2131) - EVID-6, APPLIED 2026-10-03
+
+Repo file `20261002143000_experience_responses_select_reply_status_v1.sql` (squash-merged as 5933d507e, reviewed head
+52988d06 unchanged, required checks green). One `ALTER POLICY experience_responses_select ... USING`: the record
+author's branch additionally requires the REPLY's own `moderation_status = 'published'` (it previously bound to the
+record's status). Strictly narrowing; reply-author and admin branches unchanged; name, command and roles untouched.
+Owner approval: chat 2026-10-03. Exposure before: 1 reply (`submitted`) under a published record.
+Read-back: ledger row present; `pg_policies` shows the new expression, `check=NULL`, RLS enabled. Rolled-back JWT
+proof (same transaction, reply status cycled): record author sees the reply only when the reply is `published` (0 for
+submitted / in_moderation / rejected); reply author 1 in every state; stranger 0; NULL uid 0; anon denied by grant.
+Row state unchanged afterwards. Status: PASS_REAL_PRODUCTION at RPC/data level (no browser walk). Rollback file
+documents that it reintroduces the defect.
+
+## 20261003095641 - list_agency_offered_candidates_v2_connection_gate_v1 (#2135, successor of #1815) - APPLIED 2026-10-03
+
+Repo file `20261003100000_list_agency_offered_candidates_v2_connection_gate_v1.sql` (squash-merged as fccb3a3d5; the
+migration is byte-identical to the reviewed head 901a7e15, the only later change being test-only count guards).
+`CREATE OR REPLACE` of `list_agency_offered_candidates_for_request_v2`, identical signature/return/SECURITY DEFINER/
+STABLE/search_path/ACL; adds the v1 gate (`connection.status='active'` and `share.status='active'`). Revoke/unshare
+removes future read access; accepted/declined offers leave this read while the authorizing connection/share is inactive
+and remain stored. Old #1815 was NOT merged.
+Owner approval: chat 2026-10-03. Read-back: ledger row, definition contains both predicates, SECURITY DEFINER, STABLE,
+search_path=public, ACL postgres+authenticated. Rolled-back JWT proof on real prod rows (request with 2 offers):
+active conn+share owner=2; connection revoked owner=0; share unshared owner=0; re-activated owner=2; wrong client 0;
+stranger 0; NULL uid 0; anon denied. Connection/share statuses, 4 offers and 163 audit rows unchanged afterwards.
+Status: PASS_REAL_PRODUCTION at RPC/data level (no browser walk).
+
+## 20261003110012 - manager_assigns_roster_worker_on_managed_project_v1 (#2079) - APPLIED 2026-10-03
+
+Repo file `20261002142000_manager_assigns_roster_worker_on_managed_project_v1.sql` (squash-merged as 6ca35e7fd; byte-identical
+to the reviewed head 54235f91, later changes test-only count guards). `CREATE OR REPLACE assign_worker_to_project`: one added
+authorization arm - the caller manages THIS project's organization and the worker is an ACTIVE member of the roster of the
+company that owns the project - inside the existing fail-closed `not coalesce((...), false)`. Pre-image checked on production
+before apply (booking arm and placement block present, manager arm absent). Owner approval: chat 2026-10-03.
+Read-back: ledger row; SECURITY DEFINER, search_path=public, ACL postgres+authenticated; manager arm, booking arm, null-safe
+wrapper and placement block all present. Rolled-back JWT proof on real rows: manager + managed project + roster worker ALLOWED;
+manager + project of another organization DENIED (42501); manager + off-roster worker DENIED; ordinary worker DENIED; organization
+owner ALLOWED; anon DENIED; NULL uid DENIED. Assignments (8), audit rows (163) and engagements (105) unchanged afterwards.
+The booking-engagement arm and the admin arm are confirmed structurally in the live body, not exercised with a live fixture.
+Status: PASS_REAL_PRODUCTION at RPC/data level (no browser walk).
+
+## 2026-10-03 - billing stack merged, recovery stays OFF (no migration)
+
+#2122 (8d5510bd6), #2126 (d3af7ae73) and #2127 (a637c8137) merged in order, each re-read and green before merge. Option B: the
+server env `BILLING_RECOVERY_ENABLED` (default OFF, only the literal `true`) gates the cron route, `runBillingRecovery` and the
+self-service refresh write; a valid CRON_SECRET alone does not permit a write. Production read-back after the merges: 0
+`reconcile.subscription` audit rows, 0 webhook rows, 0 subscriptions, 0 LMC transactions, no LMC flag on. The env var was not
+set anywhere. Runtime proof of the 503 path needs the CRON_SECRET and was not attempted.
+
+## 2026-10-03 - company_workers two-row repair: PERFORMED (data repair, no migration)
+
+Owner-approved targeted additive repair of the two historical pre-fix accepted rows (accepted 2026-09-04 / 2026-09-05, before
+ledger 20260908143925). Each row's preconditions were re-asserted INSIDE the writing statement (roster row active; org resolves via
+legacy_company_id; accepted invitation exists; NO engagement and NO membership of ANY status for that person+org); a failed
+precondition would have written nothing. Per row: one `engagement_contexts` (employee, active, is_primary=false, hash_self as in
+the forward-path function) and one `audit_logs` row (action `repair_company_worker_engagement`, actor null, result `org_bound_repair`).
+Read-back: engagements 105 -> 107, audit 163 -> 165, memberships for the two pairs 0, stranded rows remaining 0; under each worker's own
+JWT `belongs_to_organization` is now true (was false in a rolled-back dry run) and `is_active_org_member` stays false, i.e. exactly the
+state a forward-path acceptance produces; no governance seat granted. No other row changed.
+
+## 20261003131904 - subject_contest_withdraw_v1 (#2138) and 20261003141047 - subject_contest_withdraw_constraint_reconcile_v1 (#2140) - APPLIED 2026-10-03
+
+#2138 (squash 32ff363ec; file `20261003110000_subject_contest_withdraw_v1.sql`) applied as reviewed: BEFORE INSERT trigger
+`organization_evidence_events_dispute_state_guard` (SECURITY DEFINER; 23505 duplicate standing contest, 23514 withdrawal without a standing
+contest), old one-contest-ever unique index dropped, RPC `withdraw_organization_evidence_dispute_v1` (SECURITY DEFINER, search_path=public, ACL
+postgres+authenticated), event_type CHECK widened. DEFECT FOUND BY THE PRODUCTION PROOF: production already carried
+`organization_evidence_events_event_type_chk` (20260924100000_historical_timesheet_m1; allows source_preserved, not dispute_withdrawn); #2138
+added a differently named `..._event_type_check`, so two CHECKs applied together (the withdraw RPC failed closed with 23514 and source_preserved
+was newly refused; 0 such rows, no writer on main, nothing live broke). FIX-FORWARD #2140 (squash 4afe910aa; file
+`20261003140000_subject_contest_withdraw_constraint_reconcile_v1.sql`, applied 20261003141047): drops both names, adds ONE
+`organization_evidence_events_event_type_chk` with the union set (attested, attestation_withdrawn, independently_verified, verification_withdrawn,
+withdrawn, reinstated, disputed, dispute_withdrawn, corrected, source_preserved). No data rewrite, no policy change.
+Read-back: exactly one event_type set CHECK (`_chk`, validated, 10 values); the 158 events intact (all attested). Rolled-back JWT proof on production
+(fixture subject re-linked inside the transaction): contest OK; second standing contest 23505; manager, stranger, NULL uid and anon withdraw all
+DENIED (42501); subject withdraw appends one dispute_withdrawn; second withdraw idempotent (no new row); direct dispute_withdrawn insert DENIED (23514);
+UPDATE and DELETE DENIED; re-contest OK; history kept (2 disputed + 1 dispute_withdrawn); another actor's contest untouched; an unlisted type is
+refused. source_preserved is CHECK-compatible (inserted as postgres only) - writer/RLS authority for source_preserved is NOT claimed proven.
+Post-rollback: 158 events, 0 non-attested, trigger present. Status: PASS_REAL_PRODUCTION at RPC/data level (no browser walk).
+#1646 closed as superseded (canonical home recorded in its close comment).
+
+## 20261003142847 - privacy_export_import_lines_subject_v1 (#2132) - APPLIED 2026-10-03
+
+Repo file `20261003120000_privacy_export_import_lines_subject_v1.sql` (squash 16de402ed; migration byte-identical to the reviewed head). One new
+function `privacy_export_evidence_import_rows_v1()` (no argument, returns setof jsonb, SECURITY DEFINER, STABLE, search_path=public, ACL postgres +
+authenticated): subject = auth.uid() via the linked organization_people row; a column ALLOWLIST (no source_fact, fact_fields, derived, customer_*,
+activity_text, context_label, session_id, person_match_*, record_fingerprint, problem); person_label only when it equals the roster display name.
+No table, policy or grant changed. Read-back: ledger row; signature; none of the excluded columns appear in the body; evidence_import_rows policies
+unchanged; 158 rows intact. Proof on production (read-only): the one real linked subject gets 1 of 158 rows with exactly the 16 allowlisted keys and 0
+rows of other people; a stranger gets 0 rows via the RPC and 0 via a direct table select (RLS not widened); NULL uid 0; anon DENIED (42501); no
+caller-supplied-id signature exists. LIMIT: production has a single linked subject, so cross-subject isolation is shown by the data, not by a second
+subject; a trigger-bypass fixture for that was refused by the permission layer and not worked around. Authenticated end-to-end bundle download:
+BLOCKED_QA_IDENTITY. Status: the LIVE evidence_import_rows PER-12 gap is closed at RPC level; PER-12 overall stays PARTIAL (agreement_events and
+agreement_amendments are a FUTURE_CONTRACT_GAP, 0 rows).
+
+## 20261003144407 - work_tasks_stage_and_subtask_v1 (#2123) - APPLIED 2026-10-03
+
+Repo file `20261002150000_work_tasks_stage_and_subtask_v1.sql` (squash 1d8237860; byte-identical to the reviewed head 5faba5928 - only the
+count guards and a sorted allow-list entry changed afterwards). Applied as one statement set WITHOUT the file's comment lines (code identical).
+Adds `work_tasks.stage_id` (FK project_stages, on delete set null) and `parent_task_id` (self FK, no action) with partial indexes; trigger
+`trg_work_tasks_structure_guard` (SECURITY DEFINER guard fn; same-project stage/parent, no cycle, depth <= 3, no re-pointing a task's project
+while live Journal evidence is linked); internal `work_task_structure_check_v1`; `create_work_task_v2` (now 9-arg, old 7-arg dropped) and
+`update_work_task_v2` (now 8-arg, old 6-arg dropped) with optional stage/parent; new `set_project_stage_responsible_v1`;
+`link_journal_entry_to_task_v1` re-issued with project/organization consistency. Owner approval: chat 2026-10-03.
+Pre-apply production checks: every referenced column and helper present; production `create_work_task_v2` body identical to the repo
+pre-state after stripping comments and whitespace (2540 chars); production `update_work_task_v2` / `link_journal_entry_to_task_v1` md5 equal to the
+proof pre-state (the #2128 NULL-safe bodies); no existing stage_id/parent_task_id columns or colliding indexes/triggers; the old overloads were exactly
+the 7-arg and 6-arg signatures the migration drops.
+Read-back: ledger row; one overload of each function (9-arg create, 8-arg update; `old_overloads_left` = 0); ACLs authenticated on the five public
+functions and postgres only on the two internal ones; both columns and indexes; both triggers; the 3 existing tasks intact and unstructured.
+Rolled-back JWT proof on production: PROJECT -> STAGE -> TASK -> SUBTASK (owner creates staged task; subtasks L2/L3 inherit the stage; L4
+refused `depth_exceeded`); legacy 7-arg create and 6-arg update still work; cycle refused; cross-project parent refused; stage-responsible set by
+the owner, a foreign-organization engagement refused; ordinary worker create/update/set-responsible all refused; outsider, stranger refused
+(`not_found` / `not_allowed`); NULL uid and anon DENIED (42501); a pure non-admin manager creates a staged task on their own project and gets
+`not_allowed` on another organization's project; owner preserved; direct cycle update refused by the trigger (23514) and a parent with children
+cannot be deleted (23503); Journal -> task: a project entry links to a same-project task (`ok`, then `already_linked`). Post-rollback: 3 tasks, 0
+structured, no proof rows, audit count unchanged.
+NOT EXERCISED ON PRODUCTION (scratch-DB proof only): restage cascade to descendants and the `evidence_linked` refusal (no project has 2+ stages),
+a Journal entry of ANOTHER project being refused (no second project with entries), the pure-manager set-responsible on an existing stage. A first
+proof run showed a "manager" creating on another organization's project; that identity was a platform admin and owner of that organization (fixture
+error, not a defect), and was redone with a non-admin manager. Rollback semantics: scratch proof only, no destructive rollback on production.
+Status: PASS_REAL_PRODUCTION at schema/RPC/data level; UI is STATIC/RENDER_PROVEN only (not BROWSER_PROVEN).
+
+## Correction 2026-10-03 - #1436 invitation binding IS applied
+
+`docs/consolidation/PR_TABLE.md` called `20260902230000_accept_invitation_binds_org_membership_v1` unapplied. It is applied
+(ledger `20260908143925 accept_invitation_binds_org_membership_v1`). Only the optional backfill was never run: 2 historical
+`company_workers` rows (accepted 2026-09-04 / 2026-09-05, before the fix) have no employee engagement in their org.
+Owner decision pending: additive backfill (engagement_contexts + audit row, no membership), 2 rows.
+
 ## 20261003071338 - work_task_authz_null_safe_v1 (#2128) - P0 SECURITY, APPLIED 2026-10-03
 
 Repo file `20261002141500_work_task_authz_null_safe_v1.sql` (sha256 of the LF file on main at e30915a47:
@@ -2655,6 +2784,13 @@ repo file's timestamp. Matched by migration name, read from `supabase_migrations
 | `20261002120000` | `20261002102903` | journal_explicit_project_attribution_v1 |
 | `20261002140000` | `20261002184321` | message_journal_review_notification_types_v1 |
 | `20261002141500` | `20261003071338` | work_task_authz_null_safe_v1 |
+| `20261002143000` | `20261003090939` | experience_responses_select_reply_status_v1 |
+| `20261003100000` | `20261003095641` | list_agency_offered_candidates_v2_connection_gate_v1 |
+| `20261002142000` | `20261003110012` | manager_assigns_roster_worker_on_managed_project_v1 |
+| `20261003110000` | `20261003131904` | subject_contest_withdraw_v1 |
+| `20261003120000` | `20261003142847` | privacy_export_import_lines_subject_v1 |
+| `20261003140000` | `20261003141047` | subject_contest_withdraw_constraint_reconcile_v1 |
+| `20261002150000` | `20261003144407` | work_tasks_stage_and_subtask_v1 |
 
 Note on `agency_drafted_needs_output_column_v1` (ledger 20260928182413): applied as a standalone statement
 sequence (`drop function if exists public.list_agency_drafted_needs_v1(); create function ...` - `create or
