@@ -745,28 +745,28 @@ begin
 end $$;
 
 -- ===========================================================================
--- 10. ACLs: new commands -> authenticated only; helpers/resolver -> owner only
+-- 10. ACLs, one explicit statement per function (anon never reaches any of
+--     them; replaced functions keep the grants production already has, so the
+--     REVOKEs below are no-ops there). New commands -> authenticated only;
+--     helpers/resolver/guard -> owner only.
 -- ===========================================================================
-revoke all on function
-  public.register_work_counterparty_link_v1(uuid, uuid, text),
-  public.revoke_work_counterparty_link_v1(uuid),
-  public.submit_journal_entry_for_review_v1(uuid, uuid),
-  public.list_counterparty_review_queue_v1()
-  from public, anon;
-grant execute on function
-  public.register_work_counterparty_link_v1(uuid, uuid, text),
-  public.revoke_work_counterparty_link_v1(uuid),
-  public.submit_journal_entry_for_review_v1(uuid, uuid),
-  public.list_counterparty_review_queue_v1()
-  to authenticated;
-revoke all on function
-  public.profile_manages_organization_v1(uuid, uuid),
-  public.profiles_share_organization_v1(uuid, uuid),
-  public.profiles_co_manage_organization_v1(uuid, uuid),
-  public.profile_is_member_of_organization_v1(uuid, uuid),
-  public.work_counterparty_link_valid_v1(uuid),
-  public.journal_entry_review_authority_v1(uuid, uuid),
-  public.work_counterparty_append_only_v1()
-  from public, anon, authenticated;
+revoke all on function public.register_work_counterparty_link_v1(uuid, uuid, text) from public, anon;
+revoke all on function public.revoke_work_counterparty_link_v1(uuid) from public, anon;
+revoke all on function public.submit_journal_entry_for_review_v1(uuid, uuid) from public, anon;
+revoke all on function public.list_counterparty_review_queue_v1() from public, anon;
+revoke all on function public.review_journal_entry(uuid, text, text) from public, anon;
+revoke all on function public.reviewable_journal_entry_ids() from public, anon;
+grant execute on function public.register_work_counterparty_link_v1(uuid, uuid, text) to authenticated;
+grant execute on function public.revoke_work_counterparty_link_v1(uuid) to authenticated;
+grant execute on function public.submit_journal_entry_for_review_v1(uuid, uuid) to authenticated;
+grant execute on function public.list_counterparty_review_queue_v1() to authenticated;
+revoke all on function public.profile_manages_organization_v1(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.profiles_share_organization_v1(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.profiles_co_manage_organization_v1(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.profile_is_member_of_organization_v1(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.work_counterparty_link_valid_v1(uuid) from public, anon, authenticated;
+revoke all on function public.journal_entry_review_authority_v1(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.journal_entry_confirmations_guard() from public, anon, authenticated;
+revoke all on function public.work_counterparty_append_only_v1() from public, anon, authenticated;
 
 commit;
