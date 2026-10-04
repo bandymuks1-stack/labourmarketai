@@ -4,7 +4,7 @@ import { useId, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { ReservationNotice, type ReservationLabels } from "@/components/app/project-assignment-manager";
+import { TeamMemberKeepDecision } from "@/components/app/team-member-keep-decision";
 import { assignTeamToWorkAction, endTeamAssignmentAction } from "@/lib/projects/team-assignment-actions";
 import type { AssignableTask, AssignableTeam, TeamAssignResult } from "@/lib/projects/team-assignment";
 import {
@@ -56,22 +56,6 @@ export function ProjectTeamAssignments({
   const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
   const [notice, setNotice] = useState<Extract<TeamAssignResult, { status: "ok" }> | null>(null);
 
-  const labels: ReservationLabels = {
-    reservationCollidesTitle: tRes("collidesTitle"),
-    reservationNotBlocking: tRes("notBlocking"),
-    reservationUnknown: tRes("unknown"),
-    reservationAlternativesTitle: tRes("alternativesTitle"),
-    reservationSwap: tRes("swap"),
-    reservationUndo: tRes("undo"),
-    reservationKeep: tRes("keep"),
-    reservationSource: {
-      project: tRes("source.project"),
-      booking: tRes("source.booking"),
-      trip: tRes("source.trip"),
-      absence: tRes("source.absence"),
-      plan: tRes("source.plan"),
-    },
-  };
 
   const taskTitle = new Map(tasks.map((x) => [x.id, x.title]));
   const myTasks = tasks.filter((x) => x.projectId === projectId);
@@ -338,7 +322,7 @@ export function ProjectTeamAssignments({
           {attention.conflicts.map((m) => (
             <div key={m.profileId} className="flex flex-col gap-1">
               <p className="text-xs font-semibold text-text-primary">{m.name ?? t("unnamedMember")}</p>
-              <ReservationNotice verdict={m.verdict} labels={labels} />
+              <TeamMemberKeepDecision projectId={projectId} memberProfileId={m.profileId} verdict={m.verdict} />
             </div>
           ))}
           {attention.unknown.length > 0 ? (

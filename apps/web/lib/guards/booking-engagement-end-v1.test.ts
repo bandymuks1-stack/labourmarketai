@@ -1538,6 +1538,14 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-03: ORG-2 agency capability authority (RED, needs-human-gate, NOT applied): list_open_demand_for_agencies / mark_agency_can_offer / job_demands_select re-gated on owns_company + company_acts_as_agency.
       "20261003150000_org2_agency_capability_authority_v1.sql",
       // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150550_counterparty_link_assignment_kinds_review_doors_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150700_brigade_journal_context_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150900_commitment_override_receipt_brigade_basis_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003151100_staff_invitation_email_binding_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
       "20261003150100_commitment_override_receipts_v1.sql",
       // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
       "20261003150200_work_plan_entries_v2.sql",
