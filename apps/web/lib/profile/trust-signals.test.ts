@@ -35,6 +35,8 @@ function builderFor(table: string) {
     select: () => chain,
     eq: () => chain,
     in: () => chain,
+    // employer-only confirmation count (decision 0018) chains .or()
+    or: () => chain,
     // The journal read applies the shared live-entry rule, which chains two
     // `.is()` calls. This double is about the UNREAD-vs-ZERO semantics below,
     // so it just has to stay chainable; that the reader really asks for live
