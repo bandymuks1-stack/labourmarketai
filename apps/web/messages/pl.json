@@ -7161,31 +7161,7 @@
         "error": "Nie udało się zapisać odpowiedzi. Nic nie zostało zmienione."
       }
     },
-    "addableUnavailable": "Nie udało się wczytać listy powiązanych pracowników — dodawanie nie jest teraz możliwe.",
-    "assign": {
-      "heading": "Przypisz cały zespół do projektu",
-      "intro": "Każdy z {count} członków jest przypisywany osobno, a wynik widać dla każdej osoby.",
-      "projectLabel": "Projekt",
-      "projectPlaceholder": "Wybierz projekt",
-      "submit": "Przypisz zespół",
-      "assigning": "Przypisywanie…",
-      "noProjects": "Nie masz otwartych projektów, do których można przypisać zespół.",
-      "summary": "Przypisano {written} z {total}.",
-      "member": {
-        "assigned": "Przypisano",
-        "calendar_unknown": "Przypisano · terminów nie potwierdzono",
-        "calendar_conflict": "Przypisano · w tych dniach już zajęty",
-        "refused": "Nie przypisano · nie możesz przypisać tej osoby",
-        "error": "Nie przypisano · coś poszło nie tak"
-      },
-      "outcome": {
-        "not_authed": "Zaloguj się ponownie.",
-        "no_such_team": "Tego zespołu nie możesz przypisać.",
-        "empty_team": "Ten zespół nie ma jeszcze członków.",
-        "needs_migration": "Chwilowo niedostępne.",
-        "unavailable": "Nie udało się przypisać zespołu. Nic nie zmieniono."
-      }
-    }
+    "addableUnavailable": "Nie udało się wczytać listy powiązanych pracowników — dodawanie nie jest teraz możliwe."
   },
   "teamEnquiries": {
     "enquireButton": "Zapytaj ten zespół o pracę",
@@ -18347,6 +18323,70 @@
       "history": "{count, plural, one {# praca} few {# prace} many {# prac} other {# pracy}}",
       "skills": "{count, plural, one {# umiejętność oparta na Twoich wpisach} few {# umiejętności oparte na Twoich wpisach} many {# umiejętności opartych na Twoich wpisach} other {# umiejętności opartej na Twoich wpisach}}",
       "next": "Dokąd możesz przejść"
+    }
+  },
+  "teamAssignment": {
+    "title": "Zespoły w tym projekcie",
+    "intro": "Zespół jest przypisywany jako jedna całość. Członkowie pochodzą z członkostwa samego zespołu, więc osoby, które go opuściły, nie są liczone, a godziny i dziennik każdej osoby pozostają jej własne.",
+    "none": "Do tego projektu nie przypisano żadnego zespołu.",
+    "scope": {
+      "project": "Cały projekt",
+      "task": "Zadanie: {title}",
+      "object": "Miejsce pracy"
+    },
+    "membersNow": "Członkowie teraz: {count}",
+    "noMembers": "Brak aktywnych członków.",
+    "unnamedMember": "Członek zespołu",
+    "unnamedTeam": "Zespół",
+    "end": "Zakończ przypisanie",
+    "ending": "Kończenie…",
+    "replaceLabel": "Zastąp innym zespołem",
+    "replacePlaceholder": "Wybierz zespół",
+    "replaceSubmit": "Zastąp",
+    "assignTitle": "Przypisz zespół",
+    "teamLabel": "Zespół",
+    "teamPlaceholder": "Wybierz zespół",
+    "scopeLabel": "Nad czym pracuje zespół",
+    "scopeProjectOption": "Nad całym projektem",
+    "scopeTaskOption": "Nad jednym zadaniem",
+    "taskLabel": "Zadanie",
+    "taskPlaceholder": "Wybierz zadanie",
+    "noTeams": "Nie zarządzasz jeszcze żadnym zespołem. Utwórz go na stronie Ludzie.",
+    "noTasks": "Ten projekt nie ma otwartych zadań.",
+    "submit": "Przypisz zespół",
+    "assigning": "Przypisywanie…",
+    "outcome": {
+      "created": "Zespół przypisany.",
+      "already_assigned": "Ten zespół jest już tu przypisany. Nic się nie zmieniło.",
+      "replaced": "Zespół zastąpiony.",
+      "ended": "Przypisanie zakończone.",
+      "already_ended": "To przypisanie zostało już zakończone."
+    },
+    "refusal": {
+      "not_authorized": "Nie możesz przypisać tego zespołu do tego projektu.",
+      "not_authed": "Zaloguj się ponownie, aby kontynuować.",
+      "not_a_team": "To nie jest zespół.",
+      "team_has_no_members": "Ten zespół nie ma jeszcze aktywnych członków.",
+      "project_completed": "Ten projekt jest zakończony.",
+      "task_not_assignable": "Do tego zadania nie można przypisać zespołu (jest zamknięte lub należy do innego projektu).",
+      "object_not_assignable": "Do tego miejsca pracy nie można przypisać zespołu.",
+      "one_scope_only": "Wybierz zadanie albo miejsce pracy, nie oba naraz.",
+      "replace_target_not_active": "Przypisanie do zastąpienia nie jest już aktywne.",
+      "team_and_project_required": "Wybierz zespół i projekt.",
+      "needs_migration": "Niedostępne w tej chwili.",
+      "error": "Nie udało się tego zakończyć. Nic nie zostało zmienione."
+    },
+    "calendar": {
+      "conflictsTitle": "W tych dniach już zajęci",
+      "unknownTitle": "Nie potwierdzono wolnych terminów dla",
+      "advisory": "Wskazówka: przypisanie zapisano. Zakończ je powyżej, jeśli kolizja jest prawdziwa."
+    },
+    "form": {
+      "heading": "Przypisz cały zespół do projektu",
+      "intro": "Przypisz ten zespół ({count} osób) do projektu jako jedną całość.",
+      "projectLabel": "Projekt",
+      "projectPlaceholder": "Wybierz projekt",
+      "noProjects": "Nie masz otwartych projektów, do których można przypisać zespół."
     }
   }
 }

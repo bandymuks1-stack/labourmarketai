@@ -7161,31 +7161,7 @@
         "error": "Atsakymo išsaugoti nepavyko. Niekas nebuvo pakeista."
       }
     },
-    "addableUnavailable": "Susietų darbuotojų sąrašo nepavyko nuskaityti — pridėti kol kas negalima.",
-    "assign": {
-      "heading": "Priskirti visą komandą projektui",
-      "intro": "Kiekvienas iš {count} narių priskiriamas atskirai, o rezultatą matote kiekvienam žmogui.",
-      "projectLabel": "Projektas",
-      "projectPlaceholder": "Pasirinkite projektą",
-      "submit": "Priskirti komandą",
-      "assigning": "Priskiriama…",
-      "noProjects": "Neturite atvirų projektų, kuriems galėtumėte priskirti komandą.",
-      "summary": "Priskirta {written} iš {total}.",
-      "member": {
-        "assigned": "Priskirta",
-        "calendar_unknown": "Priskirta · datų nepavyko patvirtinti",
-        "calendar_conflict": "Priskirta · šiomis dienomis jau užimtas",
-        "refused": "Nepriskirta · šio žmogaus priskirti negalite",
-        "error": "Nepriskirta · nepavyko"
-      },
-      "outcome": {
-        "not_authed": "Prisijunkite iš naujo.",
-        "no_such_team": "Šios komandos priskirti negalite.",
-        "empty_team": "Komandoje dar nėra narių.",
-        "needs_migration": "Kol kas neprieinama.",
-        "unavailable": "Nepavyko priskirti komandos. Nieko nepakeista."
-      }
-    }
+    "addableUnavailable": "Susietų darbuotojų sąrašo nepavyko nuskaityti — pridėti kol kas negalima."
   },
   "teamEnquiries": {
     "enquireButton": "Pateikti užklausą šiai komandai",
@@ -18347,6 +18323,70 @@
       "history": "{count, plural, one {# darbas} few {# darbai} other {# darbų}}",
       "skills": "{count, plural, one {# jūsų įrašais pagrįstas gebėjimas} few {# jūsų įrašais pagrįsti gebėjimai} other {# jūsų įrašais pagrįstų gebėjimų}}",
       "next": "Kur galite eiti"
+    }
+  },
+  "teamAssignment": {
+    "title": "Komandos šiame projekte",
+    "intro": "Komanda skiriama kaip vienas vienetas. Nariai imami iš pačios komandos narystės, todėl komandą palikę žmonės neįskaičiuojami, o kiekvieno žmogaus valandos ir dienoraštis lieka jo paties.",
+    "none": "Šiam projektui komanda neskirta.",
+    "scope": {
+      "project": "Visas projektas",
+      "task": "Užduotis: {title}",
+      "object": "Darbo vieta"
+    },
+    "membersNow": "Dabar narių: {count}",
+    "noMembers": "Aktyvių narių nėra.",
+    "unnamedMember": "Komandos narys",
+    "unnamedTeam": "Komanda",
+    "end": "Baigti paskyrimą",
+    "ending": "Baigiama…",
+    "replaceLabel": "Pakeisti kita komanda",
+    "replacePlaceholder": "Pasirinkite komandą",
+    "replaceSubmit": "Pakeisti",
+    "assignTitle": "Paskirti komandą",
+    "teamLabel": "Komanda",
+    "teamPlaceholder": "Pasirinkite komandą",
+    "scopeLabel": "Ką komanda dirba",
+    "scopeProjectOption": "Visą projektą",
+    "scopeTaskOption": "Vieną užduotį",
+    "taskLabel": "Užduotis",
+    "taskPlaceholder": "Pasirinkite užduotį",
+    "noTeams": "Dar nevaldote nė vienos komandos. Sukurkite ją puslapyje „Žmonės“.",
+    "noTasks": "Šiame projekte atvirų užduočių nėra.",
+    "submit": "Paskirti komandą",
+    "assigning": "Skiriama…",
+    "outcome": {
+      "created": "Komanda paskirta.",
+      "already_assigned": "Ši komanda čia jau paskirta. Niekas nepasikeitė.",
+      "replaced": "Komanda pakeista.",
+      "ended": "Paskyrimas baigtas.",
+      "already_ended": "Šis paskyrimas jau buvo baigtas."
+    },
+    "refusal": {
+      "not_authorized": "Negalite paskirti šios komandos šiam projektui.",
+      "not_authed": "Prisijunkite iš naujo, kad tęstumėte.",
+      "not_a_team": "Tai nėra komanda.",
+      "team_has_no_members": "Šioje komandoje dar nėra aktyvių narių.",
+      "project_completed": "Šis projektas užbaigtas.",
+      "task_not_assignable": "Šiai užduočiai komandos paskirti negalima (ji uždaryta arba priklauso kitam projektui).",
+      "object_not_assignable": "Šiai darbo vietai komandos paskirti negalima.",
+      "one_scope_only": "Pasirinkite arba užduotį, arba darbo vietą, ne abi.",
+      "replace_target_not_active": "Keičiamas paskyrimas nebeaktyvus.",
+      "team_and_project_required": "Pasirinkite komandą ir projektą.",
+      "needs_migration": "Šiuo metu nepasiekiama.",
+      "error": "Nepavyko atlikti. Niekas nebuvo pakeista."
+    },
+    "calendar": {
+      "conflictsTitle": "Šiomis dienomis jau užimti",
+      "unknownTitle": "Nepavyko patvirtinti, kad šiomis dienomis laisvi:",
+      "advisory": "Patarimas: paskyrimas išsaugotas. Jei sutapimas tikras, baikite jį aukščiau."
+    },
+    "form": {
+      "heading": "Paskirti visą komandą projektui",
+      "intro": "Paskirkite šią {count} narių komandą projektui kaip vieną vienetą.",
+      "projectLabel": "Projektas",
+      "projectPlaceholder": "Pasirinkite projektą",
+      "noProjects": "Neturite atvirų projektų, kuriems galėtumėte paskirti komandą."
     }
   }
 }

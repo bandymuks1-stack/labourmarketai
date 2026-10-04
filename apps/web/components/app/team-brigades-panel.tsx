@@ -53,6 +53,7 @@ export function TeamBrigadesPanel({
   const router = useRouter();
   const expectedWorkspaceId = useDisplayedWorkspaceId();
   const t = useTranslations("teamBrigades");
+  const tAssign = useTranslations("teamAssignment");
   const tSkill = useTranslations("skillNames");
   const [pending, startTransition] = useTransition();
   const [name, setName] = useState("");
@@ -293,11 +294,11 @@ export function TeamBrigadesPanel({
               </div>
 
               {/* WRK-6 — assign the whole team to a project the caller manages:
-                  one existing per-person write per member, each member's own
-                  outcome shown. */}
+                  ONE relationship (a single stored row); its members
+                  resolve from the team itself. */}
               <details className="rounded-md border border-ink-600 bg-ink-800/30 p-3" data-testid="team-assign-section">
                 <summary className="cursor-pointer text-xs font-medium text-text-secondary">
-                  {t("assign.heading")}
+                  {tAssign("form.heading")}
                 </summary>
                 <div className="pt-3">
                   <TeamAssignForm teamId={team.id} memberCount={team.members.length} projects={projects} />

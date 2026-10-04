@@ -7161,31 +7161,7 @@
         "error": "Die Antwort konnte nicht gespeichert werden. Es wurde nichts geändert."
       }
     },
-    "addableUnavailable": "Die Liste der verknüpften Arbeitskräfte konnte nicht geladen werden — Hinzufügen ist derzeit nicht möglich.",
-    "assign": {
-      "heading": "Das ganze Team einem Projekt zuweisen",
-      "intro": "Jedes der {count} Mitglieder wird einzeln zugewiesen, und Sie sehen das Ergebnis für jede Person.",
-      "projectLabel": "Projekt",
-      "projectPlaceholder": "Projekt wählen",
-      "submit": "Team zuweisen",
-      "assigning": "Wird zugewiesen…",
-      "noProjects": "Sie haben keine offenen Projekte, dem Sie das Team zuweisen könnten.",
-      "summary": "{written} von {total} zugewiesen.",
-      "member": {
-        "assigned": "Zugewiesen",
-        "calendar_unknown": "Zugewiesen · Termine nicht bestätigt",
-        "calendar_conflict": "Zugewiesen · an diesen Tagen schon belegt",
-        "refused": "Nicht zugewiesen · Sie dürfen diese Person nicht zuweisen",
-        "error": "Nicht zugewiesen · etwas ist schiefgelaufen"
-      },
-      "outcome": {
-        "not_authed": "Bitte erneut anmelden.",
-        "no_such_team": "Dieses Team können Sie nicht zuweisen.",
-        "empty_team": "Dieses Team hat noch keine Mitglieder.",
-        "needs_migration": "Derzeit nicht verfügbar.",
-        "unavailable": "Das Team konnte nicht zugewiesen werden. Es wurde nichts geändert."
-      }
-    }
+    "addableUnavailable": "Die Liste der verknüpften Arbeitskräfte konnte nicht geladen werden — Hinzufügen ist derzeit nicht möglich."
   },
   "teamEnquiries": {
     "enquireButton": "Dieser Kolonne eine Anfrage senden",
@@ -18347,6 +18323,70 @@
       "history": "{count, plural, one {# Job} other {# Jobs}}",
       "skills": "{count, plural, one {# Fähigkeit, gestützt auf deine Einträge} other {# Fähigkeiten, gestützt auf deine Einträge}}",
       "next": "Wohin du gehen kannst"
+    }
+  },
+  "teamAssignment": {
+    "title": "Teams in diesem Projekt",
+    "intro": "Ein Team wird als eine Einheit zugewiesen. Die Mitglieder stammen aus der Mitgliedschaft des Teams selbst; wer das Team verlassen hat, wird nicht gezählt, und Stunden und Journal bleiben bei jeder Person.",
+    "none": "Diesem Projekt ist kein Team zugewiesen.",
+    "scope": {
+      "project": "Ganzes Projekt",
+      "task": "Aufgabe: {title}",
+      "object": "Arbeitsstätte"
+    },
+    "membersNow": "Mitglieder jetzt: {count}",
+    "noMembers": "Keine aktiven Mitglieder.",
+    "unnamedMember": "Teammitglied",
+    "unnamedTeam": "Kolonne",
+    "end": "Zuweisung beenden",
+    "ending": "Wird beendet…",
+    "replaceLabel": "Durch ein anderes Team ersetzen",
+    "replacePlaceholder": "Team wählen",
+    "replaceSubmit": "Ersetzen",
+    "assignTitle": "Team zuweisen",
+    "teamLabel": "Kolonne",
+    "teamPlaceholder": "Team wählen",
+    "scopeLabel": "Woran das Team arbeitet",
+    "scopeProjectOption": "Das ganze Projekt",
+    "scopeTaskOption": "Eine Aufgabe",
+    "taskLabel": "Aufgabe",
+    "taskPlaceholder": "Aufgabe wählen",
+    "noTeams": "Sie verwalten noch kein Team. Legen Sie eines auf der Seite „Personen“ an.",
+    "noTasks": "Dieses Projekt hat keine offenen Aufgaben.",
+    "submit": "Team zuweisen",
+    "assigning": "Wird zugewiesen…",
+    "outcome": {
+      "created": "Team zugewiesen.",
+      "already_assigned": "Dieses Team ist hier bereits zugewiesen. Nichts wurde geändert.",
+      "replaced": "Team ersetzt.",
+      "ended": "Zuweisung beendet.",
+      "already_ended": "Diese Zuweisung war bereits beendet."
+    },
+    "refusal": {
+      "not_authorized": "Sie dürfen dieses Team diesem Projekt nicht zuweisen.",
+      "not_authed": "Bitte melden Sie sich erneut an, um fortzufahren.",
+      "not_a_team": "Das ist kein Team.",
+      "team_has_no_members": "Dieses Team hat noch keine aktiven Mitglieder.",
+      "project_completed": "Dieses Projekt ist abgeschlossen.",
+      "task_not_assignable": "Dieser Aufgabe kann kein Team zugewiesen werden (geschlossen oder in einem anderen Projekt).",
+      "object_not_assignable": "Dieser Arbeitsstätte kann kein Team zugewiesen werden.",
+      "one_scope_only": "Wählen Sie entweder eine Aufgabe oder eine Arbeitsstätte, nicht beides.",
+      "replace_target_not_active": "Die zu ersetzende Zuweisung ist nicht mehr aktiv.",
+      "team_and_project_required": "Wählen Sie ein Team und ein Projekt.",
+      "needs_migration": "Derzeit nicht verfügbar.",
+      "error": "Das ließ sich nicht abschließen. Nichts wurde geändert."
+    },
+    "calendar": {
+      "conflictsTitle": "An diesen Tagen bereits gebunden",
+      "unknownTitle": "Verfügbarkeit an diesen Tagen nicht bestätigt für",
+      "advisory": "Hinweis: Die Zuweisung ist gespeichert. Beenden Sie sie oben, wenn die Überschneidung echt ist."
+    },
+    "form": {
+      "heading": "Das ganze Team einem Projekt zuweisen",
+      "intro": "Weisen Sie dieses Team mit {count} Mitgliedern einem Projekt als eine Einheit zu.",
+      "projectLabel": "Projekt",
+      "projectPlaceholder": "Projekt wählen",
+      "noProjects": "Sie haben keine offenen Projekte, denen Sie das Team zuweisen könnten."
     }
   }
 }
