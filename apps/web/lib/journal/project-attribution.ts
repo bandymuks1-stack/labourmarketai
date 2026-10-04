@@ -213,3 +213,22 @@ export function addClientProjects(
   for (const list of out.values()) list.sort((a, b) => a.label.localeCompare(b.label));
   return out;
 }
+
+/** projectId -> the person's OWN-workspace organisation ids through which they
+ *  reach that project as an INDEPENDENT provider (active person assignment on a
+ *  project of an organisation they are not a member of; a workspace is never
+ *  the project's own organisation). Same rule as addClientProjects. */
+export function independentOrganizationIdsByProject(
+  rows: readonly AssignmentRow[],
+  memberOrgIds: ReadonlySet<string>,
+  ownedOrgIds: readonly string[],
+): Map<string, string[]> {
+  const out = new Map<string, string[]>();
+  for (const r of rows) {
+    const p = r.projects;
+    if (!p?.organization_id || memberOrgIds.has(p.organization_id)) continue;
+    const orgs = ownedOrgIds.filter((o) => o !== p.organization_id);
+    if (orgs.length > 0) out.set(p.id, orgs);
+  }
+  return out;
+}

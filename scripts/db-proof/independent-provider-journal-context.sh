@@ -170,6 +170,24 @@ echo; echo "== PROOF E — evidence link + rollback"
 su "insert into public.work_tasks (id, project_id, title, created_by, assignee_profile_id, status) values ('7a5c0000-0000-0000-0000-0000000000c1','$PC','Client task','$CLR','$IND1','todo');" >/dev/null
 check "independent, assignee of a client task, links the entry to it" "ok" "$(as $IND1 "select public.link_journal_entry_to_task_v1('$E1a','7a5c0000-0000-0000-0000-0000000000c1');")"
 check "an unassigned independent cannot (no oracle)" "not_found" "$(as $IND2 "select public.link_journal_entry_to_task_v1('$E1a','7a5c0000-0000-0000-0000-0000000000c1');")"
+echo; echo "== PROOF F — own-WORKSPACE entry of a sole trader as task evidence (the picker case)"
+su "insert into public.work_tasks (id, project_id, title, created_by, assignee_profile_id, status) values
+  ('7a5c0000-0000-0000-0000-0000000000c2','$PC','Sole trader task','$CLR','$IND4','todo'),
+  ('7a5c0000-0000-0000-0000-0000000000c3','$PO','Task on a project IND4 is NOT assigned to','$OTR','$IND4','todo');" >/dev/null
+KC2=7a5c0000-0000-0000-0000-0000000000c2; KC3=7a5c0000-0000-0000-0000-0000000000c3
+check "own-workspace entry WITH the client project, task assignee: linkable" "ok" "$(as $IND4 "select public.link_journal_entry_to_task_v1('$E4','$KC2');")"
+R=$(mk $IND4 $W4 $C4W null true); E4n=$(printf '%s' "$R" | head -1)
+check "own-workspace entry with NO project is stored without project" "none" "$(projof $E4n)"
+check "own-workspace entry WITHOUT a project, active person assignment + task assignee: linkable" "ok" "$(as $IND4 "select public.link_journal_entry_to_task_v1('$E4n','$KC2');")"
+check "same own-workspace entry on a task of a project the sole trader is NOT assigned to: refused" "project_mismatch" "$(as $IND4 "select public.link_journal_entry_to_task_v1('$E4n','$KC3');")"
+check "own-workspace entry, task on the client project but the viewer is not the task assignee: refused (no oracle)" "not_found" "$(as $IND1 "select public.link_journal_entry_to_task_v1('$E4n','$KC2');")"
+check "an unassigned independent cannot link an own-workspace-style entry" "not_found" "$(as $IND2 "select public.link_journal_entry_to_task_v1('$E4n','$KC2');")"
+su "update public.project_worker_assignments set status='ended', ended_at=now() where worker_id='$W4' and project_id='$PC';" >/dev/null
+R=$(mk $IND4 $W4 $C4W null true); E4m=$(printf '%s' "$R" | head -1)
+check "after the person assignment ENDED, a new own-workspace entry (explicit project) is refused" "project_not_assignable" "$(mk $IND4 $W4 $C4W $PC true | grep -o project_not_assignable | head -1)"
+check "after it ended, linking a project-less own-workspace entry is refused" "project_mismatch" "$(as $IND4 "select public.link_journal_entry_to_task_v1('$E4m','$KC2');")"
+su "update public.project_worker_assignments set status='active', ended_at=null where worker_id='$W4' and project_id='$PC';" >/dev/null
+
 out="$($PSQL -v ON_ERROR_STOP=1 -f "$RB2" 2>&1 | tr -d '\r')"; rc=$?
 check "rollback 2 succeeds" "0" "$rc"
 check "the new function is gone" "0" "$(q "select count(*) from pg_proc where proname='independent_journal_context_v1';")"

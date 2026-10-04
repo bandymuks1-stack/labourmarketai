@@ -3,6 +3,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { readMyTeamWorkContexts } from "@/lib/projects/team-work-context";
+import { getOwnWorkerId } from "@/lib/projects/worker-project-access";
+import { readIndependentOrganizationsByProject } from "@/lib/journal/project-attribution-read";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -281,6 +283,14 @@ export default async function TasksPage({
     if (!list.includes(c.team_org_id)) list.push(c.team_org_id);
     teamOrgsByProject.set(c.project_id, list);
   }
+  // Own-workspace organizations through which the caller reaches a CLIENT's
+  // project as an independent provider (active person assignment): an entry
+  // journaled from that workspace is a legitimate evidence context too. The
+  // link RPC stays the final authority.
+  const ownWorkerId = await getOwnWorkerId();
+  const independentOrgsByProject = ownWorkerId
+    ? await readIndependentOrganizationsByProject(await createClient(), ownWorkerId)
+    : new Map<string, string[]>();
   const myOwnTaskIds = new Set(
     myResult.status === "ok" ? myResult.tasks.map((task) => task.id) : [],
   );
@@ -441,6 +451,9 @@ export default async function TasksPage({
           projectId: task.projectId,
           organizationId: evidenceTaskOrg,
           teamOrganizationIds: task.projectId ? (teamOrgsByProject.get(task.projectId) ?? []) : [],
+          independentOrganizationIds: task.projectId
+            ? (independentOrgsByProject.get(task.projectId) ?? [])
+            : [],
         }),
     );
 
