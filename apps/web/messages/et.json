@@ -6702,6 +6702,28 @@
       }
     }
   },
+  "historyContext": {
+    "project": "Projekt",
+    "place": "Objekt või tööpakett",
+    "client": "Tellija",
+    "otherParties": "Teised osapooled",
+    "capacity": "Roll",
+    "source": "Allikas",
+    "suppliedBy": "Esitas {name}",
+    "reconstructed": "Taastatud varasematest kirjetest",
+    "recordedAt": "Süsteemi kantud",
+    "proofTitle": "Mis seda toetab",
+    "proof": {
+      "SELF_DECLARED": "Isiku enda väide",
+      "EVIDENCE_SUPPORTED": "Toetatud organisatsiooni kirjega",
+      "EMPLOYER_CONFIRMED": "Tööandja kinnitatud",
+      "CLIENT_ACCEPTED": "Tellija vastu võetud",
+      "SUPERVISOR_CONFIRMED": "Objektijuhi kinnitatud",
+      "INDEPENDENTLY_VERIFIED": "Sõltumatult kontrollitud"
+    },
+    "attestedAs": "kinnitas rollis {role}",
+    "proofNote": "Iga rida on eraldi fakt. Esitanud organisatsiooni kinnitus ei ole tellija heakskiit ega tasu maksmine ning ükski neist ei ole sõltumatu kontroll, kui seda pole öeldud."
+  },
   "evidenceImport": {
     "records": {
       "periodDerivedHuman": "[EN] Period set at import (human choice) — the source stated no dates",

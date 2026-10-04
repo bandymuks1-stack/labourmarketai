@@ -55,6 +55,8 @@ import {
   type TimeSemanticsKind,
 } from "./time-semantics";
 import { committedFactFields } from "./record-fact-fields";
+import { readRecordHistoryContexts } from "./history-context-read";
+import type { HistoryContext } from "./professional-history-context";
 import {
   resolveEvidenceOrganization,
   type EvidenceOrgReason,
@@ -3143,6 +3145,16 @@ export interface EvidenceRecordView {
   readonly language: string;
   readonly contextLabel: string | null;
   readonly workObjectId: string | null;
+  /** The ordered work (project) the record belongs to; NULL = not identified. */
+  readonly projectId: string | null;
+  /** The roster relationship (employee, subcontractor, ...) of the person to
+   *  the supplying organisation. */
+  readonly relationshipKind: string | null;
+  /** The record's REPORTED (base) state, before any lifecycle event. */
+  readonly reportedState: string;
+  readonly supplierOrganizationId: string | null;
+  /** `parsed_file` / `agent_rows` / `typed` for historical timesheet rows. */
+  readonly rowOrigin: string | null;
   readonly supplierRole: string;
   readonly sourceKind: string;
   readonly sourceFilename: string | null;
@@ -3230,7 +3242,7 @@ export async function listEvidenceRecords(
   let q = db(caller.supabase)
     .from("organization_evidence_records")
     .select(
-      "id, organization_person_id, activity_kind, activity_date, period_start, period_end, hours, original_text, original_language, context_label, work_object_id, supplier_role, source_kind, source_filename, imported_at, imported_by_profile_id, evidence_state, source_fact, derived, organization_id, organization_people(display_name, linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at), organization_evidence_parties!organization_evidence_parties_record_fk(party_role, party_organization_id, party_label)",
+      "id, organization_person_id, activity_kind, activity_date, period_start, period_end, hours, original_text, original_language, context_label, work_object_id, project_id, supplied_by_organization_id, row_origin, supplier_role, source_kind, source_filename, imported_at, imported_by_profile_id, evidence_state, source_fact, derived, organization_id, organization_people(display_name, linked_profile_id, relationship_kind), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at), organization_evidence_parties!organization_evidence_parties_record_fk(party_role, party_organization_id, party_label)",
     )
     .order("activity_date", { ascending: false })
     .limit(Math.min(Math.max(filter.limit ?? 200, 1), 1000));
@@ -3266,6 +3278,7 @@ export async function listEvidenceRecords(
     const person = r.organization_people as {
       display_name?: string;
       linked_profile_id?: string | null;
+      relationship_kind?: string | null;
     } | null;
     // The subject's linked profile is what lets the derivation tell a
     // self-attestation from an independent one. Unlinked → no subject profile
@@ -3294,6 +3307,11 @@ export async function listEvidenceRecords(
       language: (r.original_language as string) ?? "",
       contextLabel: (r.context_label as string | null) ?? null,
       workObjectId: (r.work_object_id as string | null) ?? null,
+      projectId: (r.project_id as string | null) ?? null,
+      relationshipKind: person?.relationship_kind ?? null,
+      reportedState: (r.evidence_state as string) ?? "",
+      supplierOrganizationId: (r.supplied_by_organization_id as string | null) ?? null,
+      rowOrigin: (r.row_origin as string | null) ?? null,
       supplierRole: (r.supplier_role as string) ?? "other",
       sourceKind: (r.source_kind as string) ?? "",
       sourceFilename: (r.source_filename as string | null) ?? null,
@@ -3454,6 +3472,10 @@ export interface MyOrganizationEvidence {
   readonly links: readonly SubjectRosterLink[];
   /** The offers still awaiting this person's answer. */
   readonly pendingOffers: readonly SubjectRosterLink[];
+  /** The work behind each record (project, client, capacity, source, proof
+   *  facts), keyed by record id. Composed inside this one read so no caller
+   *  needs a further serial stage. Absent entries = nothing to show. */
+  readonly contexts: Readonly<Record<string, HistoryContext>>;
 }
 
 /**
@@ -3520,6 +3542,9 @@ export async function listMyOrganizationEvidence(
     records: recordsRes.records,
     links,
     pendingOffers: links.filter((l) => l.linkState === "link_proposed"),
+    contexts: Object.fromEntries(
+      await readRecordHistoryContexts(caller.supabase, recordsRes.records),
+    ),
   };
 }
 

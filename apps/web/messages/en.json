@@ -16876,6 +16876,28 @@
     "error": "The change could not be saved and was reverted. Please try again.",
     "unavailable": "Notification settings are not available right now."
   },
+  "historyContext": {
+    "project": "Project",
+    "place": "Site or work package",
+    "client": "Client",
+    "otherParties": "Others involved",
+    "capacity": "Capacity",
+    "source": "Source",
+    "suppliedBy": "Supplied by {name}",
+    "reconstructed": "Reconstructed from earlier records",
+    "recordedAt": "Recorded in the system",
+    "proofTitle": "What stands behind it",
+    "proof": {
+      "SELF_DECLARED": "Stated by the person",
+      "EVIDENCE_SUPPORTED": "Backed by an organisation's record",
+      "EMPLOYER_CONFIRMED": "Confirmed by the employer",
+      "CLIENT_ACCEPTED": "Accepted by the client",
+      "SUPERVISOR_CONFIRMED": "Confirmed by a supervisor",
+      "INDEPENDENTLY_VERIFIED": "Independently verified"
+    },
+    "attestedAs": "attested as {role}",
+    "proofNote": "Each line is a separate fact. An attestation by the supplying organisation is not acceptance by the client and not payment, and none of these is independent verification unless it says so."
+  },
   "evidenceImport": {
     "eyebrow": "Historical work evidence",
     "title": "Import work history",

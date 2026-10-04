@@ -16876,6 +16876,28 @@
     "error": "De wijziging kon niet worden opgeslagen en is teruggedraaid. Probeer het opnieuw.",
     "unavailable": "Meldingsinstellingen zijn momenteel niet beschikbaar."
   },
+  "historyContext": {
+    "project": "Werkproject",
+    "place": "Locatie of werkpakket",
+    "client": "Opdrachtgever",
+    "otherParties": "Andere betrokkenen",
+    "capacity": "Functie",
+    "source": "Bron",
+    "suppliedBy": "Aangeleverd door {name}",
+    "reconstructed": "Gereconstrueerd uit eerdere registraties",
+    "recordedAt": "In het systeem vastgelegd",
+    "proofTitle": "Wat eronder ligt",
+    "proof": {
+      "SELF_DECLARED": "Opgegeven door de persoon",
+      "EVIDENCE_SUPPORTED": "Ondersteund door een registratie van een organisatie",
+      "EMPLOYER_CONFIRMED": "Bevestigd door de werkgever",
+      "CLIENT_ACCEPTED": "Geaccepteerd door de opdrachtgever",
+      "SUPERVISOR_CONFIRMED": "Bevestigd door een leidinggevende",
+      "INDEPENDENTLY_VERIFIED": "Onafhankelijk geverifieerd"
+    },
+    "attestedAs": "bevestigd als {role}",
+    "proofNote": "Elke regel is een apart feit. Een bevestiging door de aanleverende organisatie is geen oplevering door de opdrachtgever en geen betaling, en geen daarvan is een onafhankelijke verificatie, tenzij het er staat."
+  },
   "evidenceImport": {
     "eyebrow": "Historisch werkbewijs",
     "title": "Werkgeschiedenis importeren",
