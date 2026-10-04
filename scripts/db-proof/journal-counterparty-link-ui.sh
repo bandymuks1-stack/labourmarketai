@@ -16,8 +16,8 @@ ADMIN="psql -h $HOST -p $PORT -U postgres -d postgres -tA -q"
 PSQL="psql -h $HOST -p $PORT -U postgres -d $DB"
 M1="$REPO/supabase/migrations/20261003150500_journal_counterparty_review_authority_v1.sql"
 M2="$REPO/supabase/migrations/20261003150550_counterparty_link_assignment_kinds_review_doors_v1.sql"
-M3="$REPO/supabase/migrations/20261003150560_batch_review_exceptions_employer_only_v1.sql"
-D3="$REPO/supabase/rollbacks/20261003150560_batch_review_exceptions_employer_only_v1.down.sql"
+M3="$REPO/supabase/migrations/20261003150555_batch_review_exceptions_employer_only_v1.sql"
+D3="$REPO/supabase/rollbacks/20261003150555_batch_review_exceptions_employer_only_v1.down.sql"
 D2="$REPO/supabase/rollbacks/20261003150550_counterparty_link_assignment_kinds_review_doors_v1.down.sql"
 
 FW=aaaaf000-0000-0000-0000-000000000f01

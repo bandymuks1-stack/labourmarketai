@@ -155,8 +155,8 @@ describe("readers that are SAFE as written (pinned so they stay safe)", () => {
 
 describe("SQL readers", () => {
   const mig = (n: string) => readFileSync(join(REPO, "supabase/migrations", n), "utf8");
-  it("batch_review_exceptions counts employer approvals only (20261003150560)", () => {
-    const m = mig("20261003150560_batch_review_exceptions_employer_only_v1.sql");
+  it("batch_review_exceptions counts employer approvals only (20261003150555)", () => {
+    const m = mig("20261003150555_batch_review_exceptions_employer_only_v1.sql");
     expect(m).toContain("coalesce(c.confirmation_scope #>> '{authority,basis}', 'employer') <> 'counterparty'");
     expect(m).toMatch(/revoke all on function public\.batch_review_exceptions\(uuid\[\]\) from public, anon/);
   });

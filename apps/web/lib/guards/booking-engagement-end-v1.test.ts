@@ -1540,7 +1540,7 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-04: EVID-2 slice 2 (counterparty link over person AND team assignments, review read doors, employer-only review set, additive photo storage SELECT) - marker is the human-gate acknowledgement; draft + needs-human-gate, NOT applied.
       "20261003150550_counterparty_link_assignment_kinds_review_doors_v1.sql",
       // 2026-10-04: decision 0018 sweep (batch_review_exceptions counts employer approvals only) - marker is the human-gate acknowledgement; draft + needs-human-gate, NOT applied.
-      "20261003150560_batch_review_exceptions_employer_only_v1.sql",
+      "20261003150555_batch_review_exceptions_employer_only_v1.sql",
 ]);
   });
 
