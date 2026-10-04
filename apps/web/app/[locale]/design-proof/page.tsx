@@ -4,6 +4,8 @@ import { setRequestLocale } from "next-intl/server";
 
 import { DesignProofView, type ProofView } from "@/components/app/signature/design-proof-views";
 import { WorldSequence } from "@/components/app/spatial/world-sequence";
+import { AvatarGallery } from "@/components/app/system/avatar-gallery";
+import { ProductProof, type ProofScreen } from "@/components/app/system/product-proof";
 
 /**
  * DESIGN PROOF — the three representative compositions of the premium product
@@ -16,21 +18,35 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const VIEWS: readonly (ProofView | "world")[] = ["world", "identity", "record", "match"];
+const VIEWS: readonly (ProofView | "world" | "avatars" | "product")[] = ["product", "avatars", "world", "identity", "record", "match"];
 
 export default async function DesignProofPage({
   params,
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ v?: string; p?: string; autoplay?: string }>;
+  searchParams: Promise<{ v?: string; p?: string; autoplay?: string; s?: string; team?: string; cv?: string; profile?: string; open?: string }>;
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { locale } = await params;
   setRequestLocale(locale);
-  const { v, p, autoplay } = await searchParams;
-  const view = (VIEWS as readonly string[]).includes(v ?? "") ? (v as ProofView | "world") : "world";
+  const { v, p, autoplay, s, team, cv, profile, open } = await searchParams;
+  const view = (VIEWS as readonly string[]).includes(v ?? "") ? (v as ProofView | "world" | "avatars" | "product") : "product";
   const fixedP = p !== undefined && Number.isFinite(Number(p)) ? Math.min(1, Math.max(0, Number(p))) : undefined;
+
+  if (view === "product") {
+    return (
+      <main className="min-h-screen bg-ink-900" data-testid="design-proof">
+        <ProductProof
+          initial={(s as ProofScreen | undefined) ?? "team"}
+          initialTeam={team === "full" ? "full" : "start"}
+          cv={cv ?? "tk"}
+          profile={profile ?? "is"}
+          chatOpen={open === "1"}
+        />
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-ink-900" data-testid="design-proof">
@@ -50,7 +66,7 @@ export default async function DesignProofPage({
           </a>
         ))}
       </nav>
-      {view === "world" ? <WorldSequence fixedP={fixedP} autoplay={autoplay !== "0"} /> : <DesignProofView view={view} />}
+      {view === "avatars" ? <AvatarGallery /> : view === "world" ? <WorldSequence fixedP={fixedP} autoplay={autoplay !== "0"} /> : <DesignProofView view={view} />}
     </main>
   );
 }
