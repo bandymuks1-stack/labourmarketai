@@ -642,3 +642,21 @@ begin
   );
 end $function$;
 
+-- ---------------------------------------------------------------------------
+-- ACL: stated explicitly (a local `db reset` rebuilds ACLs from migrations).
+-- This is the PRODUCTION ACL as read on 2026-10-04 -- a no-op there:
+--   RPC doors: postgres + authenticated.  apply_v2: postgres only (internal).
+-- Nothing is widened; nothing is granted to anon / public.
+-- ---------------------------------------------------------------------------
+revoke all on function public.accept_invitation_apply_v2(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.accept_invitation_v1(text) from public, anon;
+revoke all on function public.decline_invitation_v1(text) from public, anon;
+revoke all on function public.decline_invitation_v2(text) from public, anon;
+revoke all on function public.get_invitation_preview_v1(text) from public, anon;
+revoke all on function public.get_invitation_preview_v2(text) from public, anon;
+grant execute on function public.accept_invitation_v1(text) to authenticated;
+grant execute on function public.decline_invitation_v1(text) to authenticated;
+grant execute on function public.decline_invitation_v2(text) to authenticated;
+grant execute on function public.get_invitation_preview_v1(text) to authenticated;
+grant execute on function public.get_invitation_preview_v2(text) to authenticated;
+

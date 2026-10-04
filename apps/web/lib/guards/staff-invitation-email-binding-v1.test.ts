@@ -99,7 +99,16 @@ describe("migration: a narrow, reversible, in-place rebinding", () => {
 
   it("adds no table, policy, grant to anon/authenticated/public, or data rewrite", () => {
     expect(body).not.toMatch(/\bcreate table\b|\balter table\b|\bpolicy\b/i);
-    expect(body).not.toMatch(/\bgrant\b/i);
+    // The only grants restate the production ACL (authenticated on the RPC
+    // doors); nothing is ever granted to anon / public, and the internal
+    // apply_v2 stays unreachable from the API.
+    const grants = [...body.matchAll(/^grant .*$/gim)].map((m) => m[0]);
+    expect(grants.length).toBeGreaterThan(0);
+    for (const g of grants) expect(g).toMatch(/ to authenticated;$/);
+    expect(body).toContain(
+      "revoke all on function public.accept_invitation_apply_v2(uuid, uuid) from public, anon, authenticated;",
+    );
+    expect(body).not.toMatch(/grant execute on function public\.accept_invitation_apply_v2/i);
     expect(body).not.toMatch(/\bdelete from\b|\btruncate\b|\bdrop (table|column|policy)\b/i);
   });
 
