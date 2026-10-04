@@ -164,9 +164,17 @@ async function loginUi(browser: Browser, creds: { email: string; password: strin
 }
 
 /** What the person's three history surfaces say, read from the rendered DOM. */
+async function settle(page: Page, anchor?: string) {
+  // An "absent" assertion is only worth anything on a page that finished
+  // rendering: wait for a known anchor, then for the network to go quiet.
+  if (anchor) await expect(page.locator(anchor).first()).toBeVisible({ timeout: 120_000 });
+  await page.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => undefined);
+}
+
 async function readSurfaces(page: Page) {
   await page.goto("/lt/dashboard/profile", { waitUntil: "domcontentloaded" });
-  await expect(page.locator("main, body").first()).toBeVisible();
+  await expect(page.locator("h1, h2").first()).toBeVisible({ timeout: 120_000 });
+  await settle(page);
   const summary = page.getByTestId("organization-history-summary");
   const profileRecords = (await summary.count()) ? Number(await summary.first().getAttribute("data-records")) : 0;
   // The history disclosure is closed on arrival; open it so its cards are text.
@@ -177,11 +185,13 @@ async function readSurfaces(page: Page) {
   const profileText = await page.locator("body").innerText();
 
   await page.goto("/lt/dashboard/work-in-numbers?period=all", { waitUntil: "domcontentloaded" });
+  await settle(page, '[data-testid="work-in-numbers"]');
   const ledger = page.getByTestId("wi-org-records");
   const ledgerHours = (await ledger.count()) ? Number(await ledger.first().getAttribute("data-all-hours")) : null;
   const winText = await page.locator("body").innerText();
 
   await page.goto("/lt/cv", { waitUntil: "domcontentloaded" });
+  await settle(page, '[data-testid="cv-skills"]');
   const cvText = await page.locator("body").innerText();
   return { profileRecords, profileText, ledgerHours, winText, cvText };
 }
