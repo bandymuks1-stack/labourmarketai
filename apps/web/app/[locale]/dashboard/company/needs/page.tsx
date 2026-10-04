@@ -9,6 +9,7 @@ import {
   getActiveOrganizationContext,
   governedActiveOrganizationId,
 } from "@/lib/company/active-organization";
+import { actsAsAgency, resolveNeedsAudience } from "@/lib/company/agency-capability";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
 import { listClaimablePublicIntakes } from "@/lib/company/claim-public-intake";
@@ -44,12 +45,13 @@ export default async function CompanyNeedsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ repeat?: string }>;
+  searchParams?: Promise<{ repeat?: string; audience?: string }>;
 }) {
   const { locale } = await params;
   // "Repeat this need": the past request id is only a HINT for the wizard's
   // prefill; the server action re-checks ownership, kind and workspace.
-  const repeatRaw = (await searchParams)?.repeat ?? "";
+  const sp = await searchParams;
+  const repeatRaw = sp?.repeat ?? "";
   const repeatRequestId =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(repeatRaw)
       ? repeatRaw
@@ -83,10 +85,6 @@ export default async function CompanyNeedsPage({
       </div>
     );
   }
-  const isStaffingAgency = companyRow.companyType === "staffing_agency";
-  // SEP-4: an agency's page is about what it OFFERS; the wizard below runs
-  // with the `partner` intent (agency_offer) for exactly that reason.
-  const t = isStaffingAgency ? tNeedsAgency : tNeeds;
   const orgContext = await getActiveOrganizationContext();
   const capabilityOrgId =
     orgContext.organizations.find((o) => o.legacyCompanyId === companyRow.id)?.id ??
@@ -95,6 +93,19 @@ export default async function CompanyNeedsPage({
   const declaredCapabilities = capabilityOrgId
     ? await readOrganizationCapabilities(capabilityOrgId)
     : [];
+  // ORG-2: agency is a capability (type OR declared workforce role), not the
+  // company type alone. An organization that is BOTH agency and client chooses
+  // its audience; the choice only selects an already-allowed demand kind.
+  const { audience, canChoose } = resolveNeedsAudience({
+    companyType: companyRow.companyType,
+    capabilities: declaredCapabilities,
+    requested: sp?.audience,
+  });
+  const isStaffingAgency = audience === "offer";
+  const actsAgency = actsAsAgency(companyRow.companyType, declaredCapabilities);
+  // SEP-4: an agency's page is about what it OFFERS; the wizard below runs
+  // with the `partner` intent (agency_offer) for exactly that reason.
+  const t = isStaffingAgency ? tNeedsAgency : tNeeds;
 
   const [demandReadback, claimableIntakes, rPendingInterest, readbackLabels, openNeedsUsage] =
     await Promise.all([
@@ -169,6 +180,38 @@ export default async function CompanyNeedsPage({
               {tWow(`demand.${demandPilotKey}.body`)}
             </p>
           </div>
+          {canChoose ? (
+            <div
+              className="flex flex-wrap gap-2"
+              role="group"
+              data-testid="company-needs-audience-choice"
+            >
+              <Link
+                href="/dashboard/company/needs?audience=need#demand-intake"
+                aria-current={!isStaffingAgency ? "true" : undefined}
+                className={`rounded-md border px-3 py-1.5 text-sm ${
+                  !isStaffingAgency
+                    ? "border-brand-cyan/60 bg-brand-cyan/10 text-text-primary"
+                    : "border-border text-text-secondary"
+                }`}
+                data-testid="company-needs-audience-need"
+              >
+                {tWow("demand.hire.title")}
+              </Link>
+              <Link
+                href="/dashboard/company/needs?audience=offer#demand-intake"
+                aria-current={isStaffingAgency ? "true" : undefined}
+                className={`rounded-md border px-3 py-1.5 text-sm ${
+                  isStaffingAgency
+                    ? "border-brand-cyan/60 bg-brand-cyan/10 text-text-primary"
+                    : "border-border text-text-secondary"
+                }`}
+                data-testid="company-needs-audience-offer"
+              >
+                {tWow("demand.partner.title")}
+              </Link>
+            </div>
+          ) : null}
           <DemandRequestButton
             intent={demandIntent}
             stepTitles={[tFlow("company.c1"), tFlow("company.c2"), tFlow("company.c3")]}
@@ -234,8 +277,8 @@ export default async function CompanyNeedsPage({
       {/* Real market demand on the first session (never an empty
           marketplace): the public vacancy pool for staffing agencies and
           education institutions, with its provenance stated on the card. */}
-      {isStaffingAgency || declaredCapabilities.includes("training_provider") ? (
-        <PublicDemandSection audience={isStaffingAgency ? "agency" : "institution"} />
+      {actsAgency || declaredCapabilities.includes("training_provider") ? (
+        <PublicDemandSection audience={actsAgency ? "agency" : "institution"} />
       ) : null}
 
       <CompanyScoutingBridge />

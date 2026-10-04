@@ -1,3 +1,4 @@
+import { actsAsAgency } from "@/lib/company/agency-capability";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -103,7 +104,6 @@ export default async function CompanyPeoplePage({
       </div>
     );
   }
-  const isStaffingAgency = companyRow.companyType === "staffing_agency";
   // `manage-invitations` (owner direction 2026-09-24): owner/admin, never a
   // job title. Without it the invitations are not read at all — the database
   // would answer zero rows, which is not "nobody is invited" — and the page
@@ -134,6 +134,8 @@ export default async function CompanyPeoplePage({
   const declaredCapabilities = capabilityOrgId
     ? await readOrganizationCapabilities(capabilityOrgId)
     : [];
+  // ORG-2: the ONE agency rule (type OR declared workforce role).
+  const isStaffingAgency = actsAsAgency(companyRow.companyType, declaredCapabilities);
 
   const [rWorkers, rInvitations, orgMembers, teamBrigades, managerEvidence, managedProjects] =
     await Promise.all([
