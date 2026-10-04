@@ -6702,6 +6702,28 @@
       }
     }
   },
+  "historyContext": {
+    "project": "Projekts",
+    "place": "Objekts vai darbu pakete",
+    "client": "Pasūtītājs",
+    "otherParties": "Citi iesaistītie",
+    "capacity": "Statuss",
+    "source": "Avots",
+    "suppliedBy": "Iesniedza {name}",
+    "reconstructed": "Atjaunots no iepriekšējiem ierakstiem",
+    "recordedAt": "Ierakstīts sistēmā",
+    "proofTitle": "Kas to apliecina",
+    "proof": {
+      "SELF_DECLARED": "Norādījusi pati persona",
+      "EVIDENCE_SUPPORTED": "Pamatots ar organizācijas ierakstu",
+      "EMPLOYER_CONFIRMED": "Apstiprinājis darba devējs",
+      "CLIENT_ACCEPTED": "Pasūtītājs pieņēmis",
+      "SUPERVISOR_CONFIRMED": "Apstiprinājis darbu vadītājs",
+      "INDEPENDENTLY_VERIFIED": "Neatkarīgi pārbaudīts"
+    },
+    "attestedAs": "apliecināja kā {role}",
+    "proofNote": "Katra rinda ir atsevišķs fakts. Iesniegušās organizācijas apliecinājums nav pasūtītāja apstiprinājums un nav samaksa, un neviens no šiem faktiem nav neatkarīga pārbaude, ja tas nav norādīts."
+  },
   "evidenceImport": {
     "records": {
       "periodDerivedHuman": "[EN] Period set at import (human choice) — the source stated no dates",

@@ -16802,6 +16802,28 @@
     "error": "Die Änderung konnte nicht gespeichert werden und wurde zurückgesetzt. Bitte versuchen Sie es erneut.",
     "unavailable": "Benachrichtigungseinstellungen sind derzeit nicht verfügbar."
   },
+  "historyContext": {
+    "project": "Projekt",
+    "place": "Objekt oder Arbeitspaket",
+    "client": "Auftraggeber",
+    "otherParties": "Weitere Beteiligte",
+    "capacity": "Funktion",
+    "source": "Quelle",
+    "suppliedBy": "Geliefert von {name}",
+    "reconstructed": "Aus früheren Aufzeichnungen rekonstruiert",
+    "recordedAt": "Im System erfasst",
+    "proofTitle": "Was dahintersteht",
+    "proof": {
+      "SELF_DECLARED": "Von der Person angegeben",
+      "EVIDENCE_SUPPORTED": "Durch den Eintrag einer Organisation gestützt",
+      "EMPLOYER_CONFIRMED": "Vom Arbeitgeber bestätigt",
+      "CLIENT_ACCEPTED": "Vom Auftraggeber abgenommen",
+      "SUPERVISOR_CONFIRMED": "Von einer Aufsichtsperson bestätigt",
+      "INDEPENDENTLY_VERIFIED": "Unabhängig überprüft"
+    },
+    "attestedAs": "bestätigt als {role}",
+    "proofNote": "Jede Zeile ist eine eigene Tatsache. Eine Bestätigung der liefernden Organisation ist keine Abnahme durch den Auftraggeber und keine Zahlung, und keine davon ist eine unabhängige Überprüfung, sofern nicht ausdrücklich angegeben."
+  },
   "evidenceImport": {
     "eyebrow": "Historische Arbeitsnachweise",
     "title": "Arbeitsgeschichte importieren",

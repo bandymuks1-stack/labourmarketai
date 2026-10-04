@@ -16802,6 +16802,28 @@
     "error": "Nie udało się zapisać zmiany i została ona cofnięta. Spróbuj ponownie.",
     "unavailable": "Ustawienia powiadomień są teraz niedostępne."
   },
+  "historyContext": {
+    "project": "Projekt",
+    "place": "Obiekt lub pakiet prac",
+    "client": "Zleceniodawca",
+    "otherParties": "Inni uczestnicy",
+    "capacity": "Rola",
+    "source": "Źródło",
+    "suppliedBy": "Dostarczone przez {name}",
+    "reconstructed": "Odtworzone z wcześniejszych zapisów",
+    "recordedAt": "Zapisano w systemie",
+    "proofTitle": "Co za tym stoi",
+    "proof": {
+      "SELF_DECLARED": "Podane przez osobę",
+      "EVIDENCE_SUPPORTED": "Poparte zapisem organizacji",
+      "EMPLOYER_CONFIRMED": "Potwierdzone przez pracodawcę",
+      "CLIENT_ACCEPTED": "Odebrane przez zleceniodawcę",
+      "SUPERVISOR_CONFIRMED": "Potwierdzone przez przełożonego",
+      "INDEPENDENTLY_VERIFIED": "Zweryfikowane niezależnie"
+    },
+    "attestedAs": "poświadczone jako {role}",
+    "proofNote": "Każdy wiersz to osobny fakt. Poświadczenie organizacji dostarczającej dane nie jest odbiorem przez zleceniodawcę ani zapłatą, a żaden z tych faktów nie jest niezależną weryfikacją, chyba że tak napisano."
+  },
   "evidenceImport": {
     "eyebrow": "Historyczne dowody pracy",
     "title": "Import historii pracy",

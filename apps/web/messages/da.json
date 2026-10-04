@@ -6702,6 +6702,28 @@
       }
     }
   },
+  "historyContext": {
+    "project": "Projekt",
+    "place": "Sted eller arbejdspakke",
+    "client": "Bygherre / kunde",
+    "otherParties": "Andre involverede",
+    "capacity": "Rolle",
+    "source": "Kilde",
+    "suppliedBy": "Leveret af {name}",
+    "reconstructed": "Rekonstrueret fra tidligere registreringer",
+    "recordedAt": "Registreret i systemet",
+    "proofTitle": "Hvad der ligger bag",
+    "proof": {
+      "SELF_DECLARED": "Oplyst af personen",
+      "EVIDENCE_SUPPORTED": "Understøttet af en organisations registrering",
+      "EMPLOYER_CONFIRMED": "Bekræftet af arbejdsgiveren",
+      "CLIENT_ACCEPTED": "Godkendt af kunden",
+      "SUPERVISOR_CONFIRMED": "Bekræftet af en leder",
+      "INDEPENDENTLY_VERIFIED": "Uafhængigt verificeret"
+    },
+    "attestedAs": "bekræftet som {role}",
+    "proofNote": "Hver linje er et selvstændigt faktum. En bekræftelse fra den leverende organisation er ikke kundens godkendelse og ikke betaling, og ingen af dem er uafhængig verificering, medmindre det står der."
+  },
   "evidenceImport": {
     "records": {
       "periodDerivedHuman": "[EN] Period set at import (human choice) — the source stated no dates",
