@@ -8,6 +8,7 @@ import {
   type JournalEngagement,
 } from "@/components/app/journal-entry-composer";
 import { readActiveProjectsByOrg } from "@/lib/journal/project-attribution-read";
+import { projectsForContext } from "@/lib/journal/project-attribution";
 import { JournalEntryRow } from "@/components/app/journal-entry-row";
 import { EvidenceChain } from "@/components/app/work-world/evidence-chain";
 import { deriveEvidenceChain } from "@/lib/evidence/evidence-chain";
@@ -641,7 +642,7 @@ export default async function JournalPage({
     ]);
   const composerEngagements: JournalEngagement[] = engagements.map((e, i) => {
     const orgId = ecOrdered[i]?.organization_id ?? null;
-    return { ...e, projects: orgId ? (projectsByOrg.get(orgId) ?? []) : [] };
+    return { ...e, projects: projectsForContext(projectsByOrg, orgId) };
   });
   // The DAY records (what the calendar places and the day checks add) and
   // the PERIOD records (beside, never on a day) — one reading, split here.

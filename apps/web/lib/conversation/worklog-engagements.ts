@@ -14,7 +14,7 @@ import {
 import { composeDistinctEngagementLabels } from "@/lib/journal/engagement-label";
 import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
-import type { AssignedProject } from "@/lib/journal/project-attribution";
+import { projectsForContext, type AssignedProject } from "@/lib/journal/project-attribution";
 import { readActiveProjectsByOrg } from "@/lib/journal/project-attribution-read";
 
 /**
@@ -277,7 +277,7 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
       label,
       isPrimary,
       orgName,
-      projects: organizationId ? (projectsByOrg.get(organizationId) ?? []) : [],
+      projects: projectsForContext(projectsByOrg, organizationId),
     })),
     resolution,
     endedOrgNames,

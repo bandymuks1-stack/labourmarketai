@@ -130,6 +130,60 @@ describe("migration — the team resolver is wired into every precondition", () 
   });
 });
 
+describe("migration — an independent person with a PERSON assignment on a client's project", () => {
+  const sql = strip(readRepo(MIGRATION));
+  const fn = sql.match(/create or replace function public\.independent_journal_context_v1[\s\S]*?\$\$;/)?.[0] ?? "";
+
+  it("needs the ACTIVE person assignment, the person's OWN active context, and is NULL-safe", () => {
+    expect(fn).toMatch(/a\.status = 'active'/);
+    expect(fn).toMatch(/ec\.profile_id = w\.profile_id and ec\.status = 'active'/);
+    expect(fn).toMatch(/auth\.uid\(\) is not null/);
+    expect(fn).toMatch(/w\.profile_id = auth\.uid\(\) or public\.can_manage_project\(p_project\) or public\.is_admin\(\)/);
+    expect(fn).toMatch(/coalesce\(\(/);
+  });
+
+  it("the context is personal (organization NULL) or the person's own owned workspace, never the project's organisation", () => {
+    expect(fn).toMatch(/ec\.organization_id is null/);
+    expect(fn).toMatch(/ec\.organization_id <> pr\.organization_id/);
+    expect(fn).toMatch(/o\.relationship_slug = 'owner'/);
+  });
+
+  it("employer semantics are untouched: a member of the project's organisation is excluded", () => {
+    expect(fn).toMatch(/m\.organization_id = pr\.organization_id/);
+    expect(fn).toMatch(/cm\.organization_id = pr\.organization_id/);
+  });
+
+  it("is wired into explicit attribution, auto-link, the evidence link and the org check", () => {
+    const create = sql.match(/create or replace function public\.create_journal_entry_full[\s\S]*?\$function\$;/)?.[0] ?? "";
+    expect(create).toMatch(/independent_journal_context_v1\(p_worker_id, p_project_id, p_engagement_context_id\)/);
+    expect(create).toMatch(/independent_journal_context_v1\(p_worker_id, pwa\.project_id, p_engagement_context_id\)/);
+    const link = sql.match(/create or replace function public\.link_journal_entry_to_task_v1[\s\S]*?\$function\$;/)?.[0] ?? "";
+    expect((link.match(/independent_journal_context_v1\(e\.worker_id, t\.project_id, e\.engagement_context_id\)/g) ?? []).length).toBe(2);
+  });
+
+  it("closed to anon; does not depend on, edit or fan out into the #2143 objects", () => {
+    expect(sql).toMatch(/revoke all on function public\.independent_journal_context_v1\(uuid, uuid, uuid\) from public, anon/);
+    expect(sql).toMatch(/grant execute on function public\.independent_journal_context_v1\(uuid, uuid, uuid\) to authenticated/);
+    for (const other of ["work_counterparty_links", "journal_entry_review_authority_v1", "work_relationship_active_v1", "profile_is_member_of_organization_v1"]) {
+      expect(sql, other).not.toMatch(new RegExp(other));
+    }
+  });
+
+  it("the rollback drops it", () => {
+    expect(strip(readRepo(ROLLBACK))).toMatch(/drop function if exists public\.independent_journal_context_v1\(uuid, uuid, uuid\)/);
+  });
+
+  it("the picker keys exist in all 11 locales and the app reads personal-context projects", () => {
+    for (const l of ["en", "lt", "de", "nl", "pl", "ru", "sv", "no", "da", "lv", "et"]) {
+      const j = JSON.parse(read(`messages/${l}/journal.json`)) as Record<string, string>;
+      expect(j.projectClient, l).toMatch(/\{project\}/);
+      expect(j.projectClient.toLowerCase(), l).not.toMatch(/demo/);
+    }
+    expect(read("lib/journal/project-attribution-read.ts")).toMatch(/addClientProjects/);
+    expect(read("lib/journal/journal-write-core.ts")).toMatch(/projectsForContext/);
+  });
+});
+
 describe("rollback — restores the live bodies and drops only what was added", () => {
   const sql = strip(readRepo(ROLLBACK));
   it("restores the person-only bodies", () => {
@@ -171,7 +225,6 @@ describe("app — the team's project is offered, labelled 'via team', from one r
     ]) {
       const src = read(f);
       expect(src, f).toMatch(/projectDisplayLabel/);
-      expect(src, f).toMatch(/projectViaTeam/);
     }
   });
 

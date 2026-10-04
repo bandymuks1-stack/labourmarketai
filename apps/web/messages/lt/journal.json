@@ -84,6 +84,7 @@
   "projectAmbiguous": "Esate priskirti keliems projektams. Prieš išsaugant pasirinkite, kuriam projektui priklauso šios valandos (arba pažymėkite, kad tai ne projekto darbas).",
   "projectAuto": "Projektas: {name}",
   "projectViaTeam": "{project} (per komandą {team})",
+  "projectClient": "{project} (kliento projektas)",
   "unconfirmedTimeBlocked": "{count, plural, one {# užfiksuota trukmė dar laukia jūsų peržiūros ir nebūtų išsaugota.} few {# užfiksuotos trukmės dar laukia jūsų peržiūros ir nebūtų išsaugotos.} other {# užfiksuotų trukmių dar laukia jūsų peržiūros ir nebūtų išsaugotos.}} Pirma palikite arba pašalinkite.",
   "entry": {
     "reviewedBy": "Peržiūrėjo",

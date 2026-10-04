@@ -4,6 +4,7 @@ import {
   addTeamProjects,
   projectDisplayLabel,
   type AssignedProject,
+  type ProjectLabelKey,
 } from "@/lib/journal/project-attribution";
 import {
   teamProjectsFromRows,
@@ -91,7 +92,8 @@ describe("addTeamProjects — the picker's source", () => {
 });
 
 describe("projectDisplayLabel", () => {
-  const t = (v: { project: string; team: string }) => `${v.project} (via team ${v.team})`;
+  const t = (k: ProjectLabelKey, v: { project: string; team: string }) =>
+    k === "projectViaTeam" ? `${v.project} (via team ${v.team})` : `${v.project} (client project)`;
   it("labels team projects, leaves person projects alone", () => {
     expect(projectDisplayLabel({ id: "p", label: "Hall 7", viaTeam: "Brigade A" }, t)).toBe("Hall 7 (via team Brigade A)");
     expect(projectDisplayLabel({ id: "p", label: "Hall 7" }, t)).toBe("Hall 7");

@@ -84,6 +84,7 @@
   "projectAmbiguous": "You are assigned to more than one project. Choose which project these hours belong to before saving (or mark them as not project work).",
   "projectAuto": "Project: {name}",
   "projectViaTeam": "{project} (via team {team})",
+  "projectClient": "{project} (client project)",
   "unconfirmedTimeBlocked": "{count, plural, one {# logged duration still awaits your review and would not be saved.} other {# logged durations still await your review and would not be saved.}} Keep or remove them first.",
   "entry": {
     "reviewedBy": "Reviewed by",
