@@ -6059,7 +6059,8 @@
         "paused": "Pausiert",
         "completed": "Abgeschlossen"
       },
-      "progressNone": "Noch kein messbarer Fortschritt"
+      "progressNone": "Noch kein messbarer Fortschritt",
+      "progressStages": "{done} von {total} Phasen als erledigt markiert"
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# Eintrag wartet auf deine Bestätigung} other {# Einträge warten auf deine Bestätigung}}",
@@ -6336,6 +6337,7 @@
       "title": "Projektverwaltung",
       "progressLabel": "Fortschritt",
       "progressNone": "Noch kein messbarer Fortschritt",
+      "progressStages": "{done} von {total} Phasen als erledigt markiert",
       "responsibleLabel": "Verantwortliche Person",
       "responsibleNone": "Nicht festgelegt",
       "responsibleSave": "Speichern",

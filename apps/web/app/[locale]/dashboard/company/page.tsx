@@ -5,6 +5,7 @@ import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { Link } from "@/lib/i18n/navigation";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
+import { actsAsAgency } from "@/lib/company/agency-capability";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import {
   getAccessibleCompanyById,
@@ -115,7 +116,7 @@ export default async function CompanyDashboardPage({
     );
   }
   const companyRow = companyProfile.kind === "ok" ? companyProfile.row : null;
-  const isStaffingAgency = companyRow?.companyType === "staffing_agency";
+  const isStaffingAgencyType = companyRow?.companyType === "staffing_agency";
   const isCompanyOwner = !!companyRow;
 
   // WHAT DOES THIS ORGANIZATION DO? — answered against the `organizations`
@@ -128,6 +129,10 @@ export default async function CompanyDashboardPage({
   const declaredCapabilities = capabilityOrgId
     ? await readOrganizationCapabilities(capabilityOrgId)
     : [];
+  // ORG-2: "acts as an agency" is the ONE capability rule (type OR declared
+  // workforce role), never the company TYPE alone. A capability answer only —
+  // `listAgencyClients` is still fenced by owns_company + the RPC/RLS.
+  const isStaffingAgency = actsAsAgency(companyRow?.companyType, declaredCapabilities);
 
   // ONE parallel batch. The roster read is shared with the home field's
   // who-is-free answer (QA Q-3), so it is created once and both subscribe.
@@ -145,7 +150,7 @@ export default async function CompanyDashboardPage({
   ] = await Promise.all([
     listOwnCustomerRequests(EMPLOYER_DEMAND_KINDS),
     listClaimablePublicIntakes(),
-    isCompanyOwner && !isStaffingAgency ? listMyConnectionInvites() : null,
+    isCompanyOwner && !isStaffingAgencyType ? listMyConnectionInvites() : null,
     isStaffingAgency ? listAgencyClients() : null,
     companyRow ? listCompanyWorkerInvitations(companyRow.id) : null,
     companyRow ? getTeamBrigadesData() : Promise.resolve({ applied: false } as const),

@@ -31,3 +31,40 @@ export function actsAsAgency(
   if (companyType === "staffing_agency") return true;
   return AGENCY_CAPABILITY_ROLES.some((r) => capabilities.includes(r));
 }
+
+/**
+ * Does the organization ALSO act as a client (a buyer of people)? An agency by
+ * company type only is agency-only; any other type, or one that declared the
+ * `employer` role, is a client as well. Capability answer, never authority.
+ */
+export function actsAsClient(
+  companyType: string | null | undefined,
+  capabilities: readonly string[],
+): boolean {
+  return companyType !== "staffing_agency" || capabilities.includes("employer");
+}
+
+export type NeedsAudience = "need" | "offer";
+
+/**
+ * The /dashboard/company/needs audience (ORG-2). Not an agency -> "need".
+ * Agency-only -> "offer" (unchanged). BOTH agency and client (a construction
+ * company that also supplies people) -> the person CHOOSES; the default keeps
+ * what each organization saw before (type staffing_agency -> offer, any other
+ * type -> need). The choice only selects which already-allowed demand kind the
+ * wizard submits; it grants nothing.
+ */
+export function resolveNeedsAudience(input: {
+  companyType: string | null | undefined;
+  capabilities: readonly string[];
+  requested?: string | null;
+}): { audience: NeedsAudience; canChoose: boolean } {
+  const agency = actsAsAgency(input.companyType, input.capabilities);
+  if (!agency) return { audience: "need", canChoose: false };
+  const client = actsAsClient(input.companyType, input.capabilities);
+  if (!client) return { audience: "offer", canChoose: false };
+  const fallback: NeedsAudience = input.companyType === "staffing_agency" ? "offer" : "need";
+  const audience: NeedsAudience =
+    input.requested === "offer" || input.requested === "need" ? input.requested : fallback;
+  return { audience, canChoose: true };
+}

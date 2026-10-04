@@ -1,21 +1,35 @@
 /**
- * Pure project-progress derivation (train D) — no IO, shared by the server
+ * Pure project-progress derivation (train D) - no IO, shared by the server
  * read, the guard test and any surface that renders progress.
  *
- * Progress is DERIVED, never stored: done work over countable work, from
- * the project's tasks and stages. Cancelled items are excluded from both
- * sides (cancelled work is neither done nor pending — it stopped existing
- * as a commitment). A project with nothing countable has NO percent — the
- * UI says "no measurable progress yet" instead of faking 0% or 100%.
+ * Progress is DERIVED, never stored, and a PERCENT exists only where it is
+ * defensible:
+ *
+ *   basis "tasks"   at least one countable LEAF task (see the counting rule
+ *                   below): percent = done leaves / countable leaves. Stage
+ *                   statuses are NOT part of the percent - a stage status is a
+ *                   human declaration and its tasks are already counted, so
+ *                   mixing both double-counted the same work.
+ *   basis "stages"  no countable task, but stages exist: no percent. The UI
+ *                   shows only the declared count "x of N stages marked done".
+ *   basis "none"    nothing countable, or the read was incomplete (failed or
+ *                   truncated at the read limit): no percent, no count. An
+ *                   incomplete read is UNKNOWN, never 0% and never 100%.
+ *
+ * Equal weighting of leaf tasks is a counting convention, not a measure of
+ * effort; the UI therefore always shows the fraction next to the percent.
  */
+
+export type ProgressBasis = "tasks" | "stages" | "none";
 
 export type ProjectProgress = {
   readonly taskDone: number;
   readonly taskTotal: number;
   readonly stageDone: number;
   readonly stageTotal: number;
-  /** 0..100 over (tasks + stages), or null when nothing is countable. */
+  /** 0..100 over countable LEAF TASKS only, or null (see basis). */
   readonly percent: number | null;
+  readonly basis: ProgressBasis;
 };
 
 export const EMPTY_PROJECT_PROGRESS: ProjectProgress = {
@@ -24,6 +38,15 @@ export const EMPTY_PROJECT_PROGRESS: ProjectProgress = {
   stageDone: 0,
   stageTotal: 0,
   percent: null,
+  basis: "none",
+};
+
+/** What the caller knows about the completeness of each read. */
+export type ProgressReadState = {
+  /** false when the task read failed or hit the read limit. */
+  readonly tasksComplete?: boolean;
+  /** false when the stage read failed or hit the read limit. */
+  readonly stagesComplete?: boolean;
 };
 
 /** Statuses that count toward the denominator (cancelled excluded). */
@@ -115,24 +138,35 @@ export function countTaskTree(tasks: readonly ProgressTask[]): TaskTreeCounts {
 export function deriveProjectProgress(
   taskStatuses: readonly (string | ProgressTask)[],
   stageStatuses: readonly string[],
+  read: ProgressReadState = {},
 ): ProjectProgress {
+  // An incomplete task read makes EVERYTHING unknown: stage counts would
+  // otherwise be shown as if the project had no tasks.
+  if (read.tasksComplete === false) return EMPTY_PROJECT_PROGRESS;
   const { done: taskDone, total: taskTotal } = countTaskTree(
     taskStatuses.map((s) => (typeof s === "string" ? { status: s } : s)),
   );
   let stageDone = 0;
   let stageTotal = 0;
-  for (const s of stageStatuses) {
-    if (!COUNTABLE_STAGE.has(s)) continue;
-    stageTotal++;
-    if (s === "done") stageDone++;
+  if (read.stagesComplete !== false) {
+    for (const s of stageStatuses) {
+      if (!COUNTABLE_STAGE.has(s)) continue;
+      stageTotal++;
+      if (s === "done") stageDone++;
+    }
   }
-  const total = taskTotal + stageTotal;
-  const done = taskDone + stageDone;
-  return {
-    taskDone,
-    taskTotal,
-    stageDone,
-    stageTotal,
-    percent: total === 0 ? null : Math.round((done / total) * 100),
-  };
+  if (taskTotal > 0) {
+    return {
+      taskDone,
+      taskTotal,
+      stageDone,
+      stageTotal,
+      percent: Math.round((taskDone / taskTotal) * 100),
+      basis: "tasks",
+    };
+  }
+  if (stageTotal > 0) {
+    return { taskDone, taskTotal, stageDone, stageTotal, percent: null, basis: "stages" };
+  }
+  return EMPTY_PROJECT_PROGRESS;
 }
