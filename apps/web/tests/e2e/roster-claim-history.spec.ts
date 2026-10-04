@@ -574,7 +574,7 @@ test.describe("roster claim history - invite, offer, accept (PR #2147)", () => {
     stranger = await createAccount(STRANGER_EMAIL, `Stranger ${TAG}`);
     const page = await loginUi(browser, { email: STRANGER_EMAIL, password: PASSWORD });
     await page.goto(otherInviteLink.replace(/^https?:\/\/[^/]+/, ""), { waitUntil: "domcontentloaded" });
-    await expect(page.locator('[data-testid="invite-accept"], [data-testid="invite-addressed-to-other"]').first()).toBeVisible({ timeout: 60_000 });
+    await expect(page.locator('[data-testid="invite-accept"], [data-testid="invite-addressed-to-other"], [data-testid="invite-email-mismatch"]').first()).toBeVisible({ timeout: 60_000 });
     await page.screenshot({ path: testInfo.outputPath("6-stranger-on-someone-elses-link.png"), fullPage: true });
     // FINDING (documented, pre-existing, not widened by #2147): the invitation
     // primitive treats the token as the only capability. The "addressed to
@@ -582,6 +582,14 @@ test.describe("roster claim history - invite, offer, accept (PR #2147)", () => {
     // a join_as_employee invitation a stranger holding the link is offered
     // "accept". Record what the page does; the security claim below does not
     // depend on it: accepting an invitation is NOT a roster link.
+    // Integrated tree (#2155 staff-invitation-email-binding): the stranger gets
+    // the mismatch page and NO accept control; the invitation stays pending.
+    const strangerSeesMismatch = (await page.getByTestId("invite-email-mismatch").count()) > 0;
+    if (strangerSeesMismatch) {
+      await expect(page.getByTestId("invite-accept")).toHaveCount(0);
+      const still = await rows<{ status: string }>(`invitations?invited_email=eq.${encodeURIComponent(OTHER_EMAIL)}&select=status`);
+      expect(still[0].status).toBe("pending");
+    }
     const strangerSeesAccept = (await page.getByTestId("invite-accept").count()) > 0;
     testInfo.annotations.push({ type: "stranger-on-token", description: strangerSeesAccept ? "accept offered (token is the only capability)" : "addressed-to-other refusal" });
     if (strangerSeesAccept) {
