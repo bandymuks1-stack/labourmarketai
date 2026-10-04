@@ -4,18 +4,16 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
-import { emitJournalReviewDecisionNotification } from "@/lib/notifications/event-emitters";
 import {
-  DECISION_TO_RPC,
-  counterpartyNoteProblem,
-  decideRefusalKey,
-  isCounterpartyDecision,
+  decideCounterpartyCore,
+  submitEntryCore,
+  validateDecisionInput,
+} from "./counterparty-core";
+import {
   isPartyRole,
   isUuid,
-  parseQueueRows,
   registerOutcomeKey,
   revokeOutcomeKey,
-  submitOutcomeKey,
 } from "./counterparty-review-model";
 
 /**
@@ -143,17 +141,13 @@ export async function submitEntryForReview(
   const { supabase, user } = await sessionClient();
   if (!user) return { ok: false, code: "not_authorized" };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any).rpc("submit_journal_entry_for_review_v1", {
-    p_entry_id: entryId,
-    p_link_id: linkRaw === "" ? null : linkRaw,
+  // The ONE core shared with the chat / MCP capability.
+  const result = await submitEntryCore(supabase, {
+    entryId,
+    linkId: linkRaw === "" ? null : linkRaw,
   });
-  if (error) return failure(error);
-  const code = submitOutcomeKey(String(data));
   revalidatePath(`/${locale}/dashboard/journal`);
-  return code === "submitted" || code === "already_submitted"
-    ? { ok: true, code }
-    : { ok: false, code };
+  return result;
 }
 
 // ── C. the counterparty's queue ─────────────────────────────────────────────
@@ -162,65 +156,23 @@ export async function decideCounterpartyEntry(
   _prev: DecideActionState | null,
   formData: FormData,
 ): Promise<DecideActionState> {
-  const entryId = String(formData.get("entry_id") ?? "").trim();
-  const decisionRaw = String(formData.get("decision") ?? "").trim();
-  const note = String(formData.get("note") ?? "");
   const locale = localeOf(formData);
-  if (!isUuid(entryId)) return { ok: false, code: "error" };
-  if (!isCounterpartyDecision(decisionRaw)) return { ok: false, code: "invalid_decision" };
-  const problem = counterpartyNoteProblem(decisionRaw, note);
-  if (problem) return { ok: false, code: problem === "required" ? "note_required" : "note_too_long" };
+  const checked = validateDecisionInput({
+    entryId: String(formData.get("entry_id") ?? "").trim(),
+    decision: String(formData.get("decision") ?? "").trim(),
+    note: String(formData.get("note") ?? ""),
+  });
+  if (!checked.ok) return checked;
 
   const { supabase, user } = await sessionClient();
   if (!user) return { ok: false, code: "not_authorized" };
 
-  // Re-derive, never trust: the entry must be in THIS caller's counterparty
-  // queue (the same database authority the decision RPC will apply again).
-  // The queue row also gives the worker id for the notification - the browser
-  // never supplies it.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: queue, error: queueError } = await (supabase as any).rpc(
-    "list_counterparty_review_queue_v1",
-  );
-  if (queueError) return failure(queueError);
-  const row = parseQueueRows(queue).find((r) => r.entryId === entryId);
-  if (!row) return { ok: false, code: "review_authority_not_established" };
-
-  const rpcDecision = DECISION_TO_RPC[decisionRaw];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any).rpc("review_journal_entry", {
-    p_entry_id: entryId,
-    p_decision: rpcDecision,
-    p_note: note.trim() === "" ? null : note.trim(),
-  });
-  if (error) {
-    const msg = String(error.message ?? "");
-    if (msg.includes("review_authority_not_established")) {
-      return { ok: false, code: "review_authority_not_established" };
-    }
-    if (msg.includes("self_review_not_allowed")) return { ok: false, code: "self_review_not_allowed" };
-    if (msg.includes("entry_superseded")) return { ok: false, code: "entry_superseded" };
-    if (msg.includes("entry_deleted")) return { ok: false, code: "entry_deleted" };
-    return failure(error);
-  }
-  const outcome = String(data);
-  if (outcome !== rpcDecision) return { ok: false, code: decideRefusalKey(outcome) };
-
-  // Tell the worker (best effort; the decision is committed and can neither
-  // be undone nor failed by the notification). No skill effects here: a
-  // client acceptance is CLIENT_ACCEPTED, not a skill verification.
-  try {
-    await emitJournalReviewDecisionNotification({
-      entryId,
-      workerId: row.workerId,
-      actorProfileId: user.id,
-      decision: rpcDecision,
-    });
-  } catch {
-    // never fails the decision
-  }
+  // The ONE core shared with the chat / MCP capability: re-derives the
+  // caller's queue, calls review_journal_entry, notifies the worker.
+  const result = await decideCounterpartyCore(supabase, user.id, checked);
+  if (!result.ok) return result;
 
   revalidatePath(`/${locale}/dashboard/inbox/counterparty`);
   revalidatePath(`/${locale}/dashboard/journal`);
-  return { ok: true, decision: rpcDecision };
+  return result;
 }

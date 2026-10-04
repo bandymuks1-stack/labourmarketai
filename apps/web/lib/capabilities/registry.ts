@@ -1,5 +1,6 @@
 import "server-only";
 
+import { withoutCounterpartyRows } from "@/lib/journal/review-status";
 import { z } from "zod";
 import { getTranslations } from "next-intl/server";
 
@@ -36,6 +37,7 @@ import {
 } from "./confirmable";
 import { demandContextRefusal } from "./employer-context-refusal";
 import { EMPLOYER_OPERATIONS_CAPABILITIES } from "./employer-operations-capabilities";
+import { COUNTERPARTY_REVIEW_CAPABILITIES } from "./counterparty-review-capabilities";
 import { MARKETPLACE_CAPABILITIES } from "./marketplace-capabilities";
 import { MESSAGING_CAPABILITIES } from "./messaging-capabilities";
 import { COMPANY_INGEST_CAPABILITIES } from "./company-ingest-capabilities";
@@ -284,7 +286,9 @@ const journalList: CapabilityDescriptor = {
             valueNumeric: m.value_numeric,
             unitSlug: m.unit_slug,
           })),
-          confirmations: (e.journal_entry_confirmations ?? []).length,
+          // Employer-path decisions only (decision 0018): a client's acceptance
+          // is not an employer confirmation.
+          confirmations: withoutCounterpartyRows(e.journal_entry_confirmations).length,
         })),
       },
     };
@@ -1744,6 +1748,11 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   // they work, what waits for its review — over the SAME cores and RPCs the
   // web company surfaces call (`employer-operations-capabilities.ts`).
   ...EMPLOYER_OPERATIONS_CAPABILITIES,
+  // The counterparty of a worker's work (client / customer / contracting
+  // party): list, read and decide the entries submitted to it, and the
+  // worker's explicit submit - decision 0018, over the SAME core the web
+  // queue uses (`counterparty-review-capabilities.ts`).
+  ...COUNTERPARTY_REVIEW_CAPABILITIES,
   // The marketplace meeting point — candidate search and the shortlist over
   // the SAME scouting/shortlist cores the web page runs, plus the named
   // conditions that keep a person from being matchable or discoverable.

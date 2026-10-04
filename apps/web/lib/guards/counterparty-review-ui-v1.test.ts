@@ -18,7 +18,9 @@ const WEB = join(__dirname, "..", "..");
 const REPO = join(WEB, "..", "..");
 const read = (rel: string) => readFileSync(join(WEB, rel), "utf8");
 
-const ACTIONS = read("lib/journal/counterparty-actions.ts");
+// The write path = the server actions + the ONE shared core (also used by the
+// chat / MCP capability). Rules are asserted over both together.
+const ACTIONS = read("lib/journal/counterparty-actions.ts") + "\n" + read("lib/journal/counterparty-core.ts");
 const READERS = read("lib/journal/counterparty-review.ts");
 const MIG2 = readFileSync(
   join(REPO, "supabase/migrations/20261003150550_counterparty_link_assignment_kinds_review_doors_v1.sql"),
@@ -194,6 +196,54 @@ describe("i18n: every active locale carries the same counterparty tree", () => {
   it("no new string contains the banned wording", () => {
     for (const loc of LOCALES) {
       expect(JSON.stringify(tree(loc)), loc).not.toMatch(/\bdemo\b/i);
+    }
+  });
+});
+
+describe("the chat / MCP capability shares the web core (decision 0018)", () => {
+  const CAP = read("lib/capabilities/counterparty-review-capabilities.ts");
+  it("has no table access and no second implementation of the decision rules", () => {
+    expect(CAP).not.toMatch(/\.from\(\s*["'`]/);
+    expect(CAP).toContain("decideCounterpartyCore");
+    expect(CAP).toContain("submitEntryCore");
+    expect(CAP).not.toMatch(/rpc\(\s*"(review_journal_entry|submit_journal_entry_for_review_v1)"/);
+    expect(CAP).not.toMatch(/createAdminClient|service_role/);
+  });
+  it("the decision is a draft -> confirm pair and no schema takes an identity", () => {
+    expect(CAP).toContain("counterparty_review.decide_draft");
+    expect(CAP).toContain("counterparty_review.decide_confirm");
+    expect(CAP).toMatch(/\.strict\(\)/);
+    expect(CAP).not.toMatch(/z\.object\(\{[^}]*(userId|workerId|profileId|organizationId|confirmerId)/);
+  });
+  it("is registered with the other capabilities", () => {
+    expect(read("lib/capabilities/registry.ts")).toContain("...COUNTERPARTY_REVIEW_CAPABILITIES");
+  });
+});
+
+describe("PHOTO ACCESS: only the authorized representative of the SUBMITTED entry reads its photos", () => {
+  const PROOF = readFileSync(join(REPO, "scripts/db-proof/journal-counterparty-link-ui.sh"), "utf8");
+  const predicate = MIG2.slice(MIG2.indexOf("create or replace function public.counterparty_can_read_photo_v1"), MIG2.indexOf('drop policy if exists "journal-entry-photos counterparty select"'));
+  it("the predicate is the resolver, restricted to uploaded photos of SUBMITTED, live entries", () => {
+    expect(predicate).toContain("journal_entry_review_submissions");
+    expect(predicate).toContain("journal_entry_review_authority_v1(ph.entry_id, auth.uid())");
+    expect(predicate).toContain("= 'counterparty'");
+    expect(predicate).toContain("ph.upload_status = 'uploaded'");
+    expect(predicate).toContain("je.deleted_at is null");
+    expect(predicate).toContain("auth.uid() is not null");
+    expect(predicate).not.toMatch(/ph\.profile_id\s*=\s*auth\.uid/);
+  });
+  it("the scratch proof carries the negative cases the owner named", () => {
+    for (const needle of [
+      "another entry's link",
+      "second login",
+      "EMPLOYER manager",
+      "UNSUBMITTED entry's photo",
+      "NULL uid sees no photo",
+      "anon cannot even evaluate the predicate",
+      "REVOKED link closes the photo",
+      "ex-link representative",
+    ]) {
+      expect(PROOF, needle).toContain(needle);
     }
   });
 });

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { EMPLOYER_BASIS_OR_FILTER } from "@/lib/journal/review-status";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -383,7 +384,9 @@ async function ownConfirmationsCount(
       asAny(supabase)
         .from("journal_entry_confirmations")
         .select("id", { count: "exact", head: true })
-        .in("entry_id", ids),
+        .in("entry_id", ids)
+        // Manager confirmations only (decision 0018).
+        .or(EMPLOYER_BASIS_OR_FILTER),
     );
   } catch {
     return 0;

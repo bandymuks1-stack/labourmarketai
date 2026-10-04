@@ -26,3 +26,5 @@ grant select on storage.objects to authenticated;
 create function storage.foldername(n text) returns text[] language sql immutable as $$ select string_to_array(n, '/') $$;
 create policy "journal-entry-photos owner select" on storage.objects for select to authenticated
   using (bucket_id = 'journal-entry-photos' and (storage.foldername(name))[1] = auth.uid()::text);
+
+create table public.journal_entry_skills (journal_entry_id uuid not null, skill_id uuid not null);

@@ -186,6 +186,12 @@ describe("the registry itself", () => {
       "assignment.end_draft",
       "assignment.end_confirm",
       "journal.review_queue.get",
+      "counterparty_review.queue.get",
+      "counterparty_review.entry.get",
+      "counterparty_review.decide_draft",
+      "counterparty_review.decide_confirm",
+      "counterparty_review.submit_draft",
+      "counterparty_review.submit_confirm",
       // Marketplace (2026-09-30) — candidate search + shortlist over the SAME
       // scouting cores as the web page; the activation queue names facts.
       "candidate.search",
@@ -270,6 +276,12 @@ describe("the registry itself", () => {
       "assignment.end_draft",
       "assignment.end_confirm",
       "journal.review_queue.get",
+      "counterparty_review.queue.get",
+      "counterparty_review.entry.get",
+      "counterparty_review.decide_draft",
+      "counterparty_review.decide_confirm",
+      "counterparty_review.submit_draft",
+      "counterparty_review.submit_confirm",
       // Marketplace (2026-09-30) — candidate search + shortlist over the SAME
       // scouting cores as the web page; the activation queue names facts.
       "candidate.search",

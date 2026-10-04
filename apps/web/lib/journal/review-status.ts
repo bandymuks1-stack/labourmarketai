@@ -64,6 +64,24 @@ export function isCounterpartyScopeRow(row: ConfirmationRow): boolean {
   return scope?.authority?.basis === "counterparty";
 }
 
+/**
+ * PostgREST `.or()` filter that keeps EMPLOYER-path rows (no authority block,
+ * or any basis other than 'counterparty') in a COUNT/HEAD query. Needed
+ * because `.neq()` on a JSON path drops rows whose key is absent - every row
+ * written before the counterparty model. Decision 0018.
+ */
+export const EMPLOYER_BASIS_OR_FILTER =
+  "confirmation_scope->authority->>basis.is.null,confirmation_scope->authority->>basis.neq.counterparty";
+
+/** Rows that are NOT counterparty (client) decisions, structurally typed. */
+export function withoutCounterpartyRows<T extends { confirmation_scope?: unknown }>(
+  rows: readonly T[] | null | undefined,
+): T[] {
+  return (rows ?? []).filter(
+    (r) => !isCounterpartyScopeRow({ confirmation_scope: r.confirmation_scope }),
+  );
+}
+
 function employerRowsOnly(
   confirmations: readonly ConfirmationRow[] | null | undefined,
 ): readonly ConfirmationRow[] {

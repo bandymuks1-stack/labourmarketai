@@ -1564,7 +1564,7 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
       "A decision about specific submitted work needs the work itself in front of the person - text, hours, photos, history - and an explicit, auditable act. The conversation can open this context (the command finder resolves 'client review' here) but cannot replace looking at the evidence and pressing a deliberate, final Accept.",
     whyNotExistingComponent:
       "The manager inbox is an employer surface (reviewer authority inside the worker's own organization, skill verification) and its set is employer-only; a client has neither. The queue reuses the shared EmptyState and Button primitives and the one review RPC; only the destination is new.",
-    owner: "Product owner - EVID-2 redesign item 7 (counterparty review), PR #2143",
+    owner: "Product owner - decision 0018 (counterparty review authority)",
     ownsAction: null,
 
     worldElement: "work_journal",
@@ -1617,7 +1617,7 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
         "scripts/db-proof/journal-counterparty-link-ui.sh and journal-counterparty-authority.sh: scratch-PG proof that the subject cannot be their own counterparty",
       ],
       ownerRuling:
-        "Owner requirement, item 7 of the EVID-2 redesign (PR #2143 brief, 2026-10-04): the real transaction / project counterparty - not only employer semantics - must work in the product. Recorded for the owner's confirmation in the RED PR; no decision id was issued.",
+        "Owner decision 0018 (docs/DECISIONS/0018-counterparty-review-authority.md, owner-approved 2026-10-04): counterparty review authority derives from the real transaction / project relationship and the authorized counterparty representative, never implicitly from employer status; client acceptance is its own provenance-bearing signal.",
     },
   },
 
@@ -1634,7 +1634,7 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
       "The card is the evidence the decision is about. A decision is made looking at it; a chat message cannot present a photo grid and an append-only history next to a final, explicit Accept control.",
     whyNotExistingComponent:
       "The employer inbox card (journal-inbox-entry) carries skill verification and employer-only copy; reusing it would show a client skill-verification controls the database refuses and would label the result with employer wording. This card shares the same primitives and a different, narrower action set.",
-    owner: "Product owner - EVID-2 redesign item 7 (counterparty review), PR #2143",
+    owner: "Product owner - decision 0018 (counterparty review authority)",
     ownsAction: null,
 
     worldElement: "work_journal",
@@ -1687,7 +1687,7 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
         "scripts/db-proof/journal-counterparty-link-ui.sh and journal-counterparty-authority.sh: scratch-PG proof that the subject cannot be their own counterparty",
       ],
       ownerRuling:
-        "Owner requirement, item 7 of the EVID-2 redesign (PR #2143 brief, 2026-10-04): the real transaction / project counterparty - not only employer semantics - must work in the product. Recorded for the owner's confirmation in the RED PR; no decision id was issued.",
+        "Owner decision 0018 (docs/DECISIONS/0018-counterparty-review-authority.md, owner-approved 2026-10-04): counterparty review authority derives from the real transaction / project relationship and the authorized counterparty representative, never implicitly from employer status; client acceptance is its own provenance-bearing signal.",
     },
   },
 

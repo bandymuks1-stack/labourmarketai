@@ -20,6 +20,7 @@ import "server-only";
  * A failed journal read degrades to `available: false` (the deriver then
  * emits `journal_unavailable`) — a wrong count is worse than none.
  */
+import { withoutCounterpartyRows } from "@/lib/journal/review-status";
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
@@ -83,7 +84,7 @@ async function readOwnWeeklyJournalFacts(
     if (entries.length > 0) {
       const confRes = await asAny(supabase)
         .from("journal_entry_confirmations")
-        .select("entry_id")
+        .select("entry_id, confirmation_scope")
         .in(
           "entry_id",
           entries.map((e) => e.id),
@@ -92,7 +93,10 @@ async function readOwnWeeklyJournalFacts(
       // silently reporting every entry as unconfirmed.
       if (confRes.error) return unavailable;
       const confirmedIds = new Set(
-        ((confRes.data ?? []) as { entry_id: string | null }[])
+        // Employer confirmations only (decision 0018).
+        withoutCounterpartyRows(
+          (confRes.data ?? []) as { entry_id: string | null; confirmation_scope: unknown }[],
+        )
           .map((c) => c.entry_id)
           .filter((v): v is string => typeof v === "string"),
       );

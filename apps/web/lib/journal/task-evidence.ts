@@ -1,5 +1,6 @@
 import "server-only";
 
+import { withoutCounterpartyRows } from "@/lib/journal/review-status";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -65,7 +66,7 @@ type LinkRow = {
     original_language: string;
     created_at: string;
     journal_entry_photos: { id: string }[] | null;
-    journal_entry_confirmations: { created_at: string }[] | null;
+    journal_entry_confirmations: { created_at: string; confirmation_scope?: unknown }[] | null;
     journal_entry_metrics: WorkTimeMetricRow[] | null;
     workers: WorkerNameRow | WorkerNameRow[];
   } | null;
@@ -74,13 +75,15 @@ type LinkRow = {
 const LINK_SELECT =
   "id, entry_id, linked_at, linked_by, " +
   "journal_entries!inner(id, worker_id, project_id, original_text, original_language, created_at, " +
-  `journal_entry_photos(id), journal_entry_confirmations(created_at), ` +
+  `journal_entry_photos(id), journal_entry_confirmations(created_at, confirmation_scope), ` +
   `${JOURNAL_ENTRY_METRICS_EMBED}, workers(${WORKER_NAME_FIELDS}))`;
 
 function toItem(row: LinkRow): TaskEvidenceItem | null {
   const e = row.journal_entries;
   if (!e) return null;
-  const confirmations = e.journal_entry_confirmations ?? [];
+  // Employer-path rows only (decision 0018): a client acceptance is not the
+  // moment the work became manager-confirmed.
+  const confirmations = withoutCounterpartyRows(e.journal_entry_confirmations);
   // Earliest confirmation is the moment the work became manager-confirmed.
   const confirmedAt =
     confirmations.length > 0
