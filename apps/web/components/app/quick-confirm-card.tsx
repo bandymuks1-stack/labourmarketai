@@ -127,6 +127,10 @@ export function QuickConfirmCard({
         return t("inbox.result.noReviewerEngagement");
       case "self_review_not_allowed":
         return t("inbox.result.selfReviewNotAllowed");
+      case "review_authority_not_established":
+        return t("inbox.result.reviewAuthorityNotEstablished");
+      case "already_accepted":
+        return t("inbox.result.alreadyAccepted");
       case "skill_not_owned":
         return t("inbox.result.skillNotOwned");
       default:

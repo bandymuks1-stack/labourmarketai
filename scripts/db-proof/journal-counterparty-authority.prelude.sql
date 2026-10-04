@@ -1,11 +1,86 @@
--- ROLLBACK of 20261003150000_journal_confirmation_self_review_block_v1.
--- Restores the exact prior production bodies (read from pg_get_functiondef on
--- 2026-10-03). Forward-only history: no row is touched by either direction.
--- Re-opens the self-confirmation gap; use only if the forward fix misbehaves.
+-- ===========================================================================
+-- PROOF HARNESS for 20261003150500_journal_counterparty_review_authority_v1
+-- (EVID-2 redesign: confirmation authority derives from the work relationship).
+--
+-- NOT an invented schema. Helper functions, RLS policies, the confirmation
+-- CHECK/trigger, grants and the five functions the migration replaces are the
+-- PRODUCTION state read via pg_get_functiondef / pg_policies / pg_constraint /
+-- information_schema on 2026-10-03 (the five functions below are the prior
+-- bodies, identical to the rollback file; the proof checks them against
+-- production's own hashes). Only dependency tables are reduced to the columns
+-- the code touches.
+-- ===========================================================================
+create extension if not exists pgcrypto;
+do $$ begin
+  if not exists (select 1 from pg_roles where rolname='anon') then create role anon nologin; end if;
+  if not exists (select 1 from pg_roles where rolname='authenticated') then create role authenticated nologin; end if;
+  if not exists (select 1 from pg_roles where rolname='service_role') then create role service_role nologin bypassrls; end if;
+end $$;
+grant usage on schema public to anon, authenticated, service_role;
+create schema if not exists auth;
+create or replace function auth.uid() returns uuid language sql stable as $$
+  select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid; $$;
+grant usage on schema auth to anon, authenticated, service_role;
 
-begin;
+create table public.profiles (id uuid primary key, active_role text);
+create table public.profile_roles (profile_id uuid references public.profiles(id), role text);
+create table public.organizations (id uuid primary key);
+create table public.workers (id uuid primary key default gen_random_uuid(), profile_id uuid references public.profiles(id));
+create table public.engagement_contexts (
+  id uuid primary key default gen_random_uuid(),
+  profile_id uuid references public.profiles(id),
+  organization_id uuid references public.organizations(id),
+  status text, relationship_slug text,
+  journal_review_enabled boolean not null default false);
+create table public.company_memberships (profile_id uuid, organization_id uuid, status text, role text);
+create table public.audit_logs (id uuid primary key default gen_random_uuid(), actor_id uuid, action text, entity text,
+  entity_id uuid, payload jsonb, occurred_at timestamptz not null default now(), created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now());
+create table public.skills (id uuid primary key default gen_random_uuid(), slug text, is_active boolean default true);
+create table public.worker_skills (worker_id uuid not null references public.workers(id), skill_id uuid not null references public.skills(id),
+  verified boolean not null default false, verified_by uuid, verified_at timestamptz, source text default 'self_declared',
+  confidence_bin text, updated_at timestamptz default now(), primary key (worker_id, skill_id));
+create table public.journal_entries (
+  id uuid primary key default gen_random_uuid(),
+  worker_id uuid not null references public.workers(id),
+  engagement_context_id uuid not null references public.engagement_contexts(id),
+  entry_type_slug text not null default 'freeform', profession_id uuid,
+  original_text text not null, original_language char(2) not null default 'lt',
+  hash_prev text, hash_self text not null, visibility_scope text not null default 'closed',
+  superseded_by uuid, created_at timestamptz not null default now(), updated_at timestamptz not null default now(),
+  deleted_at timestamptz, correction_of uuid, project_id uuid);
+-- production columns/constraints of journal_entry_confirmations (pg_constraint / information_schema)
+create table public.journal_entry_confirmations (
+  id uuid primary key default gen_random_uuid(),
+  entry_id uuid not null references public.journal_entries(id) on delete cascade,
+  confirmer_id uuid not null references public.profiles(id),
+  confirmer_engagement_context_id uuid not null references public.engagement_contexts(id),
+  confirmer_role text not null,
+  confirmation_scope jsonb not null,
+  created_at timestamptz not null default now(),
+  constraint journal_entry_confirmations_confirmer_role_check
+    check (confirmer_role = any (array['manager','owner','external_manager'])));
+-- learning tables (reduced to the columns apply_learning_auto_confirmation touches)
+create table public.learning_signals (id uuid primary key default gen_random_uuid(), confidence_score int);
+create table public.learning_policy_settings (id uuid primary key default gen_random_uuid(), organization_id uuid, policy_kind text,
+  enabled boolean, scope jsonb, rule jsonb, enabled_by uuid);
+create table public.learning_review_queue (id uuid primary key default gen_random_uuid(), subject_worker_id uuid, subject_skill_id uuid,
+  organization_id uuid, journal_entry_id uuid, signal_id uuid, status text, suggestion_kind text, reviewed_by uuid,
+  reviewed_at timestamptz, review_note text, updated_at timestamptz, produced_confirmation_id uuid, policy_id uuid);
 
--- 1. The single choke point -------------------------------------------------
+-- helpers: VERBATIM from production
+create or replace function public.owns_worker(w uuid) returns boolean language sql stable security definer set search_path to 'public' as $$
+  select exists (select 1 from public.workers x where x.id = w and x.profile_id = auth.uid()) $$;
+create or replace function public.is_admin() returns boolean language sql stable security definer set search_path to 'public' as $$
+  select exists (select 1 from public.profiles where id = auth.uid() and active_role = 'admin')
+  or exists (select 1 from public.profile_roles where profile_id = auth.uid() and role = 'admin') $$;
+create or replace function public.manages_organization(org uuid) returns boolean language sql stable security definer set search_path to 'public' as $$
+  select exists (select 1 from public.engagement_contexts ec where ec.profile_id = auth.uid() and ec.organization_id = org
+       and ec.status = 'active' and ec.relationship_slug in ('manager','owner','external_manager'))
+  or exists (select 1 from public.company_memberships m where m.profile_id = auth.uid() and m.organization_id = org
+       and m.status = 'active' and m.role in ('owner','admin','manager','external_manager')) $$;
+
+-- the five functions replaced by the migration: PRIOR production bodies
 CREATE OR REPLACE FUNCTION public.journal_entry_confirmations_guard()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -348,4 +423,42 @@ begin
       and not exists (select 1 from public.journal_entry_confirmations c where c.entry_id = je.id);
 end $function$;
 
-commit;
+
+-- trigger, RLS policies, grants, ACLs: production
+create trigger journal_entry_confirmations_guard before insert on public.journal_entry_confirmations
+  for each row execute function journal_entry_confirmations_guard();
+alter table public.journal_entry_confirmations enable row level security;
+create policy journal_entry_confirmations_insert on public.journal_entry_confirmations for insert to public
+  with check ((confirmer_id = auth.uid()) AND (EXISTS ( SELECT 1
+   FROM (journal_entries je JOIN engagement_contexts ec ON ((ec.id = je.engagement_context_id)))
+  WHERE ((je.id = journal_entry_confirmations.entry_id) AND (je.superseded_by IS NULL) AND (je.deleted_at IS NULL) AND manages_organization(ec.organization_id)))));
+create policy journal_entry_confirmations_select on public.journal_entry_confirmations for select to public
+  using ((confirmer_id = auth.uid()) OR is_admin() OR (EXISTS ( SELECT 1 FROM journal_entries je
+     WHERE ((je.id = journal_entry_confirmations.entry_id) AND owns_worker(je.worker_id)))) OR (EXISTS ( SELECT 1
+   FROM (journal_entries je JOIN engagement_contexts ec ON ((ec.id = je.engagement_context_id)))
+  WHERE ((je.id = journal_entry_confirmations.entry_id) AND manages_organization(ec.organization_id)))));
+alter table public.journal_entries enable row level security;
+create policy journal_entries_select on public.journal_entries for select
+  using (owns_worker(worker_id) OR is_admin() OR (EXISTS ( SELECT 1 FROM engagement_contexts ec
+      WHERE ((ec.id = journal_entries.engagement_context_id) AND manages_organization(ec.organization_id)))));
+grant select, insert on public.journal_entry_confirmations to authenticated;
+grant select on public.journal_entries, public.engagement_contexts, public.workers, public.profiles,
+  public.company_memberships, public.organizations to authenticated;
+-- production ACLs: postgres + authenticated EXECUTE only (no PUBLIC); guard fn postgres only
+revoke all on function public.review_journal_entry(uuid,text,text), public.confirm_entry_and_verify_skills(uuid,uuid[],text),
+  public.apply_learning_auto_confirmation(uuid), public.reviewable_journal_entry_ids(),
+  public.journal_entry_confirmations_guard() from public, anon;
+grant execute on function public.review_journal_entry(uuid,text,text), public.confirm_entry_and_verify_skills(uuid,uuid[],text),
+  public.apply_learning_auto_confirmation(uuid), public.reviewable_journal_entry_ids() to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Dependency tables used by the counterparty slice (reduced to touched columns)
+-- ---------------------------------------------------------------------------
+create table public.projects (id uuid primary key default gen_random_uuid(),
+  organization_id uuid references public.organizations(id), company_id uuid);
+create table public.project_worker_assignments (id uuid primary key default gen_random_uuid(),
+  project_id uuid not null references public.projects(id), worker_id uuid not null references public.workers(id),
+  status text not null default 'active' check (status in ('active','ended')),
+  assigned_at timestamptz not null default now(), ended_at timestamptz,
+  unique (project_id, worker_id));
+grant select on public.projects, public.project_worker_assignments to authenticated;

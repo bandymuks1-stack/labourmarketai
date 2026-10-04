@@ -66,3 +66,47 @@ create policy journal_entries_insert on public.journal_entries for insert
   with check ((owns_worker(worker_id) AND (visibility_scope = 'closed'::text)));
 grant insert on public.journal_entries to authenticated;
 grant select on public.worker_skills to authenticated;
+
+-- ===========================================================================
+-- COUNTERPARTY SCENARIO (slice 1)
+-- FREE   f1... freelancer / sole trader: owner of own org F, logs work on a client project
+-- FREE2  f2... SECOND LOGIN controlled by FREE: manager of F, and ALSO manager of C (the shell)
+-- CREP   c1... authorized representative (manager) of client org C
+-- CREP2  c2... plain employee of C (no authority)
+-- DREP   d1... manager of an unrelated org D
+-- ===========================================================================
+insert into public.organizations (id) values
+  ('f0000000-0000-0000-0000-00000000000f'),   -- F  freelancer's own org
+  ('c0000000-0000-0000-0000-0000000000c0'),   -- C  client
+  ('d0000000-0000-0000-0000-0000000000d0');   -- D  unrelated
+insert into public.profiles (id, active_role) values
+  ('f1111111-1111-1111-1111-111111111111','worker'),
+  ('f2222222-2222-2222-2222-222222222222','company'),
+  ('c1111111-1111-1111-1111-111111111111','company'),
+  ('c2222222-2222-2222-2222-222222222222','company'),
+  ('d1111111-1111-1111-1111-111111111111','company');
+insert into public.workers (id, profile_id) values
+  ('aaaaf000-0000-0000-0000-000000000f01','f1111111-1111-1111-1111-111111111111');
+insert into public.engagement_contexts (id, profile_id, organization_id, status, relationship_slug, journal_review_enabled) values
+  ('ecf10000-0000-0000-0000-000000000001','f1111111-1111-1111-1111-111111111111','f0000000-0000-0000-0000-00000000000f','active','owner',false),
+  ('ecf20000-0000-0000-0000-000000000002','f2222222-2222-2222-2222-222222222222','f0000000-0000-0000-0000-00000000000f','active','manager',false),
+  ('ecf20000-0000-0000-0000-000000000003','f2222222-2222-2222-2222-222222222222','c0000000-0000-0000-0000-0000000000c0','active','manager',false),
+  ('ecc10000-0000-0000-0000-000000000001','c1111111-1111-1111-1111-111111111111','c0000000-0000-0000-0000-0000000000c0','active','manager',false),
+  ('ecc20000-0000-0000-0000-000000000002','c2222222-2222-2222-2222-222222222222','c0000000-0000-0000-0000-0000000000c0','active','employee',false),
+  ('ecd10000-0000-0000-0000-000000000001','d1111111-1111-1111-1111-111111111111','d0000000-0000-0000-0000-0000000000d0','active','manager',false);
+insert into public.projects (id, organization_id) values
+  ('90000000-0000-0000-0000-00000000000c','c0000000-0000-0000-0000-0000000000c0'),  -- owned by client C
+  ('90000000-0000-0000-0000-00000000000f','f0000000-0000-0000-0000-00000000000f'),  -- owned by freelancer's own org F
+  ('90000000-0000-0000-0000-0000000000a0','aaaaaaaa-0000-0000-0000-00000000000a');  -- org A project, worker NOT assigned
+insert into public.project_worker_assignments (project_id, worker_id, status) values
+  ('90000000-0000-0000-0000-00000000000c','aaaaf000-0000-0000-0000-000000000f01','active'),
+  ('90000000-0000-0000-0000-00000000000f','aaaaf000-0000-0000-0000-000000000f01','active');
+-- entries of the freelancer (logged in their OWN org context F; explicit project attribution)
+insert into public.journal_entries (id, worker_id, engagement_context_id, original_text, hash_self, project_id) values
+  ('f1000000-0000-0000-0000-000000000001','aaaaf000-0000-0000-0000-000000000f01','ecf10000-0000-0000-0000-000000000001','Installed fence section 1 for client.','hf1','90000000-0000-0000-0000-00000000000c'),
+  ('f1000000-0000-0000-0000-000000000002','aaaaf000-0000-0000-0000-000000000f01','ecf10000-0000-0000-0000-000000000001','Installed fence section 2 for client.','hf2','90000000-0000-0000-0000-00000000000c'),
+  ('f1000000-0000-0000-0000-000000000003','aaaaf000-0000-0000-0000-000000000f01','ecf10000-0000-0000-0000-000000000001','Fence section 3, first wording.','hf3','90000000-0000-0000-0000-00000000000c'),
+  ('f1000000-0000-0000-0000-000000000004','aaaaf000-0000-0000-0000-000000000f01','ecf10000-0000-0000-0000-000000000001','Unattributed work, no project.','hf4',null),
+  ('f1000000-0000-0000-0000-000000000005','aaaaf000-0000-0000-0000-000000000f01','ecf10000-0000-0000-0000-000000000001','Fence section 5 (revocation probe).','hf5','90000000-0000-0000-0000-00000000000c'),
+  ('f1000000-0000-0000-0000-000000000006','aaaaf000-0000-0000-0000-000000000f01','ecf10000-0000-0000-0000-000000000001','Fence section 6 (assignment-ended probe).','hf6','90000000-0000-0000-0000-00000000000c'),
+  ('f1000000-0000-0000-0000-000000000007','aaaaf000-0000-0000-0000-000000000f01','ecf10000-0000-0000-0000-000000000001','Own-project work (shell probe).','hf7','90000000-0000-0000-0000-00000000000f');

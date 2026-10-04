@@ -1535,8 +1535,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-03: PER-12 subject-safe export projection (new SECURITY DEFINER read fn) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261003120000_privacy_export_import_lines_subject_v1.sql",
       "20261003140000_subject_contest_withdraw_constraint_reconcile_v1.sql",
-      // 2026-10-03: EVID-2 self-review block (confirmation guard + review RPCs refuse the entry author as confirmer) - marker is the human-gate acknowledgement; draft + needs-human-gate, NOT applied.
-      "20261003150000_journal_confirmation_self_review_block_v1.sql",
+      // 2026-10-03: EVID-2 redesign (confirmation authority derives from the work relationship: counterparty links, submissions, guard + review RPCs) - marker is the human-gate acknowledgement; draft + needs-human-gate, NOT applied.
+      "20261003150500_journal_counterparty_review_authority_v1.sql",
 ]);
   });
 

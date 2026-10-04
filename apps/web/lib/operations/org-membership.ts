@@ -172,6 +172,9 @@ export async function confirmEntryAndVerifySkills(
     if ((error.message ?? "").includes("self_review_not_allowed")) {
       return { ok: false, code: "self_review_not_allowed" };
     }
+    if ((error.message ?? "").includes("review_authority_not_established")) {
+      return { ok: false, code: "review_authority_not_established" };
+    }
     const stale = terminalStaleFromError(error.message);
     if (stale) return { ok: false, code: stale };
     return { ok: false, code: "error", message: error.message };

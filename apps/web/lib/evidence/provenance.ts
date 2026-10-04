@@ -1,5 +1,9 @@
 import { deriveEvidenceTier } from "@/lib/evidence/evidence-tier";
 import {
+  deriveProofConcepts,
+  isCounterpartyRow,
+} from "@/lib/journal/confirmation-origin";
+import {
   deriveReviewResult,
   isSelfConfirmation,
   type ConfirmationRow,
@@ -97,6 +101,13 @@ export type Provenance =
        * it is not is independently confirmed, and the text equivalent says so.
        */
       readonly selfConfirmedOnly?: boolean;
+      /**
+       * True when the CLIENT / customer / contracting counterparty accepted the
+       * work (counterparty-basis row, journal_entry_confirmations). It is a
+       * different claim by a different party than EMPLOYER_CONFIRMED and never
+       * raises the class to it (EVID-2 redesign).
+       */
+      readonly clientAccepted?: boolean;
     }
   | {
       readonly class: "EMPLOYER_CONFIRMED";
@@ -147,7 +158,14 @@ export function deriveProvenance(input: ProvenanceInput): Provenance {
   const derivedFrom = cleanName(input.derivedFrom);
   if (derivedFrom) return { class: "SYSTEM_DERIVED", derivedFrom };
 
-  const allConfirmations = input.confirmations ?? [];
+  const everyConfirmation = input.confirmations ?? [];
+  // A counterparty (client) acceptance is NOT an employer confirmation: it must
+  // never reach the EMPLOYER_CONFIRMED class. It is carried separately below.
+  const allConfirmations = everyConfirmation.filter((r) => !isCounterpartyRow(r));
+  const clientAccepted = deriveProofConcepts({
+    confirmations: everyConfirmation.filter(isCounterpartyRow),
+    subjectProfileId: input.subjectProfileId,
+  }).includes("CLIENT_ACCEPTED");
   // THE INDEPENDENCE FILTER (owner P0, 2026-09-07). A row the SUBJECT wrote
   // about themselves is a real, permanent record — it is simply not somebody
   // else's confirmation, and only somebody else's may reach the gold class.
@@ -173,12 +191,19 @@ export function deriveProvenance(input: ProvenanceInput): Provenance {
 
   const journalEntries = Math.max(0, Math.floor(input.journalEntries ?? 0));
   const document = input.document ?? null;
-  if (journalEntries > 0 || tier === "work_journal" || document || selfConfirmedOnly) {
+  if (
+    journalEntries > 0 ||
+    tier === "work_journal" ||
+    document ||
+    selfConfirmedOnly ||
+    clientAccepted
+  ) {
     return {
       class: "EVIDENCE_SUPPORTED",
       journalEntries,
       validUntil: document?.validUntil ?? null,
       ...(selfConfirmedOnly ? { selfConfirmedOnly: true } : {}),
+      ...(clientAccepted ? { clientAccepted: true } : {}),
     };
   }
 
