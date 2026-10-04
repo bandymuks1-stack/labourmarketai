@@ -11885,6 +11885,7 @@
         "revoked": "Deze uitnodiging is ingetrokken.",
         "declined": "Uitnodiging afgewezen.",
         "no_worker_profile": "Maak eerst uw werkprofiel aan en accepteer daarna de uitnodiging.",
+        "email_mismatch": "Deze uitnodiging is gericht aan een ander e-mailadres.",
         "not_found": "Uitnodiging niet gevonden.",
         "error": "Er ging iets mis. Probeer het opnieuw.",
         "exhausted": "Alle plaatsen zijn bezet.",
@@ -11907,7 +11908,13 @@
       "agencyClient": "Een uitzendbureau nodigt je bedrijf uit om als klant samen te werken.",
       "agencyClientNext": "Na het accepteren verschijnt het verbindingsverzoek op de pagina Partners van je organisatie — bevestig het daar met je bedrijf. Tot dan wordt er niets gedeeld.",
       "addressedToOther": "Deze uitnodiging is gericht aan {email}. Je bent ingelogd met een ander adres, dus de verbinding kan niet vanuit dit account worden bevestigd — log in met het uitgenodigde adres en open deze link opnieuw.",
-      "switchAccount": "Uitloggen en van account wisselen"
+      "switchAccount": "Uitloggen en van account wisselen",
+      "emailMismatch": {
+        "title": "Deze uitnodiging is voor een ander e-mailadres",
+        "body": "Deze uitnodiging is verstuurd naar {email}. Je bent ingelogd met een ander adres, dus ze kan vanuit dit account niet worden getoond of beantwoord. Log in met het uitgenodigde adres en open deze link opnieuw.",
+        "bodyNoHint": "Deze uitnodiging is verstuurd naar een ander e-mailadres dan dat waarmee je bent ingelogd, dus ze kan vanuit dit account niet worden getoond of beantwoord. Log in met het uitgenodigde adres en open deze link opnieuw.",
+        "untouched": "Er is niets geaccepteerd of gewijzigd. De uitnodiging wacht nog steeds op de persoon aan wie ze is gestuurd."
+      }
     },
     "teamEnquiriesTitle": "Mijn aanvragen aan ploegen",
     "admin": {

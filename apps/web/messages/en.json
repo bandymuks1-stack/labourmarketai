@@ -11885,6 +11885,7 @@
         "revoked": "This invitation was revoked.",
         "declined": "Invitation declined.",
         "no_worker_profile": "Create your worker profile first, then accept the invitation.",
+        "email_mismatch": "This invitation is addressed to a different e-mail address.",
         "not_found": "Invitation not found.",
         "error": "Something went wrong. Please try again.",
         "exhausted": "All places are taken.",
@@ -11907,7 +11908,13 @@
       "agencyClient": "A staffing agency invites your company to work together as its client.",
       "agencyClientNext": "After you accept, the connection request appears on your organization's Partners page — confirm it there with your company. Nothing is shared until you do.",
       "addressedToOther": "This invitation was addressed to {email}. You are signed in with a different address, so the connection cannot be confirmed from this account — sign in with the invited address and open this link again.",
-      "switchAccount": "Sign out and switch account"
+      "switchAccount": "Sign out and switch account",
+      "emailMismatch": {
+        "title": "This invitation is for another e-mail address",
+        "body": "This invitation was sent to {email}. You are signed in with a different address, so it cannot be shown or answered from this account. Sign in with the invited address and open this link again.",
+        "bodyNoHint": "This invitation was sent to a different e-mail address than the one you are signed in with, so it cannot be shown or answered from this account. Sign in with the invited address and open this link again.",
+        "untouched": "Nothing was accepted or changed. The invitation is still waiting for the person it was sent to."
+      }
     },
     "teamEnquiriesTitle": "My enquiries to teams",
     "admin": {
