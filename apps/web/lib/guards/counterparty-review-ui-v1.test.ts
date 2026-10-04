@@ -139,7 +139,8 @@ describe("the second migration", () => {
   });
 
   it("keeps the employer review set employer-only", () => {
-    const body = MIG2.slice(MIG2.indexOf("CREATE OR REPLACE FUNCTION public.reviewable_journal_entry_ids"));
+    const start = MIG2.indexOf("CREATE OR REPLACE FUNCTION public.reviewable_journal_entry_ids");
+    const body = MIG2.slice(start, MIG2.indexOf("-- 5c.", start));
     expect(body).toContain("= 'employer'");
     expect(body).not.toContain("= 'counterparty'");
     expect(body).not.toContain("journal_entry_review_submissions");
