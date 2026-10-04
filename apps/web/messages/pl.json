@@ -222,12 +222,29 @@
       "personal": "Osobiste",
       "project_work": "Projekty i kontrakty",
       "service": "Oferowane usługi",
-      "other": "Inne"
+      "other": "Inne",
+      "job": "Oferty pracy",
+      "workforce": "Dostępni pracownicy"
     },
     "directions": {
       "offer": "Oferta",
       "need": "Poszukiwane",
       "other": "Inne"
+    },
+    "federationPartial": "Nie udało się teraz odczytać niektórych źródeł, więc ta lista może być niepełna.",
+    "allJobsLink": "Zobacz pełną tablicę ofert pracy",
+    "titleNotStated": "Brak tytułu",
+    "openInSource": "Otwórz w źródle",
+    "visibility": {
+      "public": "Publiczne",
+      "signed_in": "Zalogowani członkowie",
+      "organizations": "Tylko organizacje",
+      "workers": "Tylko pracownicy",
+      "own": "Twoje"
+    },
+    "provenance": {
+      "platform": "Na tej platformie",
+      "external_vacancy": "Publiczna oferta, źródło zewnętrzne"
     }
   },
   "quality": {

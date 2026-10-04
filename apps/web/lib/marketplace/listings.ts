@@ -32,6 +32,12 @@ import {
   LISTING_DOMAINS,
 } from "@/lib/marketplace/market-model";
 import { assessPublish } from "@/lib/marketplace/publish-policy";
+import { readFederatedMarketRows } from "@/lib/marketplace/federation";
+import {
+  filterByDirection,
+  isFederatedOnlyDomain,
+  mergeDiscoveryRows,
+} from "@/lib/marketplace/federation-model";
 
 /**
  * Marketplace listings — the universal marketplace's write + read module.
@@ -166,6 +172,43 @@ export async function discoverMarketplaceListings(filters?: {
   category?: string;
   listingKind?: string;
 }): Promise<MarketplaceDiscoveryResult> {
+  // FEDERATED discovery: the SQL index (listings + service offerings) is the
+  // base; vacancies / available workforce / project demand are composed from
+  // their own already-authorized readers (federation.ts) — copied nowhere.
+  const federatedOnly = isFederatedOnlyDomain(filters?.domain);
+  let base: MarketplaceDiscoveryResult;
+  if (federatedOnly) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    base = user ? { kind: "ok", rows: [], extended: true } : { kind: "not-authed" };
+  } else {
+    base = await discoverIndexRows(filters);
+  }
+  if (base.kind !== "ok") return base;
+  // A registered SUBJECT filter belongs to listings; federated rows carry none.
+  if (filters?.category) return base;
+  const outcome = await readFederatedMarketRows({ domain: filters?.domain ?? null });
+  const direction =
+    filters?.listingKind && isListingKind(filters.listingKind)
+      ? deriveDirection(filters.listingKind)
+      : null;
+  // Synthetic-fixture exclusion already happens inside the composed readers
+  // (supply + demand); the caller's own rows are never hidden from them.
+  const adapted = filterByDirection(outcome.rows, direction);
+  return {
+    ...base,
+    rows: mergeDiscoveryRows(base.rows, adapted),
+    unavailable: outcome.unavailable,
+  };
+}
+
+async function discoverIndexRows(filters?: {
+  domain?: string;
+  category?: string;
+  listingKind?: string;
+}): Promise<MarketplaceDiscoveryResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -217,6 +260,10 @@ export async function discoverMarketplaceListings(filters?: {
         destinationPath: r.destination_path,
         contactAction: r.contact_action,
         isMine: r.owner_id === user.id,
+        // Both view branches ride their own table's RLS for signed-in members.
+        visibility: "signed_in" as const,
+        provenance: "platform" as const,
+        publisherName: null,
       }),
     );
     return {
@@ -275,6 +322,9 @@ export async function discoverMarketplaceListings(filters?: {
         destinationPath: destinationPathFor("marketplace_listings", m.id),
         contactAction: contactActionFor("marketplace_listings"),
         isMine: m.ownerId === user.id,
+        visibility: "signed_in" as const,
+        provenance: "platform" as const,
+        publisherName: null,
       };
     },
   );

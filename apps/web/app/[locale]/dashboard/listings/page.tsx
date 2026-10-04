@@ -51,6 +51,7 @@ export default async function ListingsPage({
     mine.kind === "ok" && discovery.kind === "ok" && mine.extended && discovery.extended;
   const myRows = mine.kind === "ok" ? mine.rows : [];
   const discoveryRows = discovery.kind === "ok" ? discovery.rows : [];
+  const unavailable = discovery.kind === "ok" ? (discovery.unavailable ?? []) : [];
 
   return (
     <div className="flex flex-col gap-4" data-testid="listings-page">
@@ -66,6 +67,7 @@ export default async function ListingsPage({
         discoveryRows={discoveryRows}
         needsMigration={needsMigration}
         extended={extended}
+        unavailable={unavailable}
         locale={locale}
       />
 

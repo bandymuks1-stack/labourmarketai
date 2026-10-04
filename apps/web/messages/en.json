@@ -222,12 +222,29 @@
       "personal": "Personal",
       "project_work": "Projects & contracts",
       "service": "Services offered",
-      "other": "Other"
+      "other": "Other",
+      "job": "Jobs & vacancies",
+      "workforce": "Available workforce"
     },
     "directions": {
       "offer": "Offered",
       "need": "Needed",
       "other": "Other"
+    },
+    "federationPartial": "Some sources could not be read right now, so this list may be incomplete.",
+    "allJobsLink": "Browse the full jobs board",
+    "titleNotStated": "Title not stated",
+    "openInSource": "Open where it lives",
+    "visibility": {
+      "public": "Public",
+      "signed_in": "Signed-in members",
+      "organizations": "Organizations only",
+      "workers": "Workers only",
+      "own": "Yours"
+    },
+    "provenance": {
+      "platform": "On this platform",
+      "external_vacancy": "Public vacancy, external source"
     }
   },
   "quality": {

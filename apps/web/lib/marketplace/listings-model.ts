@@ -65,10 +65,29 @@ export interface MarketplaceListingRow {
 /** Discovery row — one row of `market_index_v1` (or, before the migration, an
  *  ACTIVE listing). Never exposes the owner's raw identity beyond the id needed
  *  server-side to open an enquiry; the client card shows listing facts only. */
+/** Who the CANONICAL SOURCE lets read the row (an adapter never widens it). */
+export type MarketVisibility =
+  | "public" // anon-boundary public projection (vacancies)
+  | "signed_in" // any signed-in member (listings, service offerings)
+  | "organizations" // callers who manage an organization (workforce supply)
+  | "workers" // callers the worker gate admits (verified-company demand)
+  | "own"; // the caller's own row
+
+/** Where the fact came from. */
+export type MarketProvenance = "platform" | "external_vacancy";
+
 export interface MarketplaceDiscoveryRow {
-  readonly sourceTable: "marketplace_listings" | "service_offerings";
+  /** ORIGIN: the canonical source table (never a copy). With `id` it is the
+   *  provenance key of the row. `public_vacancies` / `customer_requests` rows
+   *  arrive through the federation adapters (`federation-model.ts`). */
+  readonly sourceTable:
+    | "marketplace_listings"
+    | "service_offerings"
+    | "public_vacancies"
+    | "customer_requests";
   readonly id: string;
-  readonly ownerId: string;
+  /** Null when the source discloses no poster (vacancies, supply, demand). */
+  readonly ownerId: string | null;
   readonly organizationId: string | null;
   readonly domain: string;
   readonly subject: string | null;
@@ -87,10 +106,16 @@ export interface MarketplaceDiscoveryRow {
   readonly updatedAt: string;
   /** Canonical destination (existing routes only), derived in the view. */
   readonly destinationPath: string;
-  /** What the person can do: enquire (listings) | request_service (offerings). */
-  readonly contactAction: "enquire" | "request_service";
+  /** What the person can do: enquire (listings) | request_service (offerings)
+   *  | open_source (federated rows: the source surface owns the gate and the
+   *  contact path). */
+  readonly contactAction: "enquire" | "request_service" | "open_source";
   /** True when the caller owns this row (so the UI hides "enquire"). */
   readonly isMine: boolean;
+  readonly visibility: MarketVisibility;
+  readonly provenance: MarketProvenance;
+  /** Only a name the gated source reader already disclosed (verified company). */
+  readonly publisherName: string | null;
 }
 
 /** `extended` = the universal-marketplace migration is applied (new columns /
@@ -101,7 +126,13 @@ export type MarketplaceListingListResult =
   | { kind: "not-authed" };
 
 export type MarketplaceDiscoveryResult =
-  | { kind: "ok"; rows: MarketplaceDiscoveryRow[]; extended: boolean }
+  | {
+      kind: "ok";
+      rows: MarketplaceDiscoveryRow[];
+      extended: boolean;
+      /** Federated sources that could not be read — a failed read is never an empty source. */
+      unavailable?: readonly ("vacancies" | "workforce" | "demand")[];
+    }
   | { kind: "needs-migration" }
   | { kind: "not-authed" };
 
