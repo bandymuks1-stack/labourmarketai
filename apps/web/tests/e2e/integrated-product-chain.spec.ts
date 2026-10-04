@@ -164,9 +164,43 @@ async function settle(page: Page) {
   await page.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => undefined);
 }
 
+/** A manager works in the ORGANISATION workspace (the shell opens in "Personal space" until the person
+ *  switches - an explicit, durable choice). Runs for NEW and for CACHED pages: 1b logs the owner in
+ *  before the organisation exists, so a cached page would otherwise stay in the personal space. */
+const pickedOrg = new Set<string>();
+async function ensureOrgWorkspace(page: Page, key: string) {
+  const wsOrg = key === "own" || key === "rep2" ? (S.ORG as string | undefined) : undefined;
+  if (!wsOrg) return;
+  const chip = page.getByTestId("workspace-chip");
+  const pickKey = `${key}:${wsOrg}`;
+  // "Build Ltd" can be the single-organisation DEFAULT, not a stored choice: as soon as the owner
+  // owns a second organisation (a team) the default disappears and the shell fails closed to the
+  // personal space (M-P0-5). So the org workspace is picked EXPLICITLY once per person, even when
+  // the chip already shows it.
+  if (pickedOrg.has(pickKey) && /Build Ltd/.test(await chip.innerText().catch(() => ""))) return;
+  await page.goto("/en/dashboard", { waitUntil: "domcontentloaded" });
+  await settle(page);
+  await expect(chip).toBeVisible({ timeout: 120_000 });
+  // The first heavy dashboard render hydrates late in `next dev`: a click before hydration is a
+  // silent no-op. Retry the open-menu click until the option exists.
+  const opt = page.getByTestId(`workspace-option-${wsOrg}`);
+  for (let attempt = 0; attempt < 8 && !(await opt.isVisible()); attempt++) {
+    await page.waitForTimeout(2_000);
+    await chip.click().catch(() => undefined);
+    await opt.waitFor({ state: "visible", timeout: 10_000 }).catch(() => undefined);
+  }
+  if (await opt.isVisible()) await opt.click();
+  await expect(chip).toContainText(/Build Ltd/, { timeout: 60_000 });
+  await settle(page);
+  pickedOrg.add(pickKey);
+}
+
 async function loginUi(browser: Browser, key: string): Promise<Page> {
   const cached = pages.get(key);
-  if (cached && !cached.isClosed()) return cached;
+  if (cached && !cached.isClosed()) {
+    await ensureOrgWorkspace(cached, key);
+    return cached;
+  }
   const a = S.accounts?.[key] as Account;
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   ctxs.push(ctx);
@@ -179,25 +213,7 @@ async function loginUi(browser: Browser, key: string): Promise<Page> {
   await page.locator('input[type="password"]').fill(PASSWORD);
   await page.locator('button[type="submit"]').first().click();
   await page.waitForURL(/\/(dashboard|onboarding)/, { timeout: 240_000, waitUntil: "domcontentloaded" });
-  // A manager works in the ORGANISATION workspace (the shell opens in "Personal
-  // space" until the person switches - an explicit, durable choice).
-  const wsOrg = key === "own" || key === "rep2" ? (S.ORG as string | undefined) : undefined;
-  if (wsOrg) {
-    await page.goto("/en/dashboard", { waitUntil: "domcontentloaded" });
-    await settle(page);
-    const chip = page.getByTestId("workspace-chip");
-    await expect(chip).toBeVisible({ timeout: 120_000 });
-    if (!/Build Ltd/.test(await chip.innerText())) {
-      await chip.click();
-      const opt = page.getByTestId(`workspace-option-${wsOrg}`);
-      await opt.waitFor({ state: "visible", timeout: 30_000 }).catch(() => undefined);
-      if (await opt.count()) {
-        await opt.click();
-        await expect(chip).toContainText(/Build Ltd/, { timeout: 60_000 });
-        await settle(page);
-      }
-    }
-  }
+  await ensureOrgWorkspace(page, key);
   pages.set(key, page);
   return page;
 }
@@ -332,7 +348,9 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     expect(own.length + mem.length, "owner is linked to the organisation").toBeGreaterThan(0);
     rememberAccount("own", { id: au.id, email: mail, name: nm("own"), jwt: "", workerId: w[0]?.id ?? null });
     save({ ORG: org[0].id, CO_ID: co[0].id, ORG_NAME: orgName, ownEngagements: own, ownMemberships: mem });
-    pages.set("own", page);
+    // NOT cached: the long-lived signup/onboarding context made the FIRST team creation hang ("Creating..." forever,
+    // router.refresh never settled) in a full serial pass, while a fresh sign-in context (what every isolated run
+    // used) never did. Later steps sign the owner in afresh through loginUi.
   });
 
   // =========================================================================
@@ -491,9 +509,11 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     const m2 = await acct("m2");
     const pwa = await rows(`project_worker_assignments?project_id=eq.${S.PROJECT}&select=id,worker_id`);
     expect(pwa, "no project_worker_assignments fan-out").toEqual([]);
-    // the UI lists the resolved members
-    await expect(blk.getByTestId("project-team-members")).toContainText(m1.name);
-    await expect(blk.getByTestId("project-team-members")).toContainText(m2.name);
+    // the UI lists the resolved members (reload: the refresh after the action is slow under `next dev`)
+    await go(own, "/en/dashboard/projects", '[data-testid="project-team-members"]');
+    const blk2 = projectBlock(own);
+    await expect(blk2.getByTestId("project-team-members")).toContainText(m1.name, { timeout: 60_000 });
+    await expect(blk2.getByTestId("project-team-members")).toContainText(m2.name, { timeout: 60_000 });
     // audit trail
     const audit = await rows(`audit_logs?action=eq.team_assigned_v1&entity_id=eq.${ta[0].id}&select=id`);
     expect(audit).toHaveLength(1);
@@ -1568,8 +1588,11 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     await shot(page, "8a-work-in-numbers");
     const win = await page.locator("body").innerText();
     const winNorm = win.replace(/[\s  ]+/g, " ");
-    expect(winNorm).toContain("10 h"); // 5 h + the corrected 5 h; the corrected original is not counted twice
-    expect(winNorm).not.toContain("15 h");
+    // ONE 5 h job, later corrected (correction_of): the correction and its original are the same work,
+    // so it is 5 h - never 10 h (double count). (Earlier revisions of this spec asserted 10 h; the
+    // product, correctly, counts the job once.)
+    expect(winNorm).toMatch(/5 h · all time/);
+    expect(winNorm).not.toContain("10 h");
   });
 
   test("8b. LIVING CV (member via team): another member's native work shows with NO employer or client claim", async ({ browser }) => {
@@ -1681,11 +1704,11 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     // The owner's OWN listing is under "My listings", not in the browse list
     await expect(own.getByText(`QA${TAG} company-project-need`).first()).toBeVisible();
     expect(kindOf("company-project-need"), "own listing is not duplicated into discovery").toBeUndefined();
-    // Organisation capabilities are readable by MEMBERS only (organization_roles RLS), so a
-    // foreign viewer gets the honest 'other' ("Type not stated") for organisation-originated rows.
+    // #2151 (org_capabilities_for_visible_listings_v1): a FOREIGN viewer sees the publishing
+    // organisation's capability chip for ACTIVE listings (organization_roles RLS itself is unchanged).
     save({ OWN_VIEW: rowsOwn.map((r) => ({ kind: r.kind, t: r.text.slice(0, 80) })) });
-    expect(kindOf("institution-premises-offer")).toBe("other");
-    expect(kindOf("supplier-goods-offer")).toBe("other");
+    expect(kindOf("institution-premises-offer")).toBe("institution");
+    expect(kindOf("supplier-goods-offer")).toBe("supplier");
     const kinds = new Set(rowsOwn.map((r) => r.kind));
     expect(kinds.has("person") && kinds.has("service_provider") && kinds.has("agency")).toBe(true);
     await expect(own.getByTestId("market-actor-filter")).toBeVisible();
@@ -1807,5 +1830,402 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     expect(conf[0].confirmation_scope.action).toBe("confirm");
     expect(conf[0].confirmation_scope.authority?.basis ?? "employer").toBe("employer");
     expect(conf[0].confirmation_scope.provenance?.origin).toBe("NATIVE_PLATFORM_EMPLOYER_CONFIRMATION");
+  });
+
+  // =========================================================================
+  // STEP 9 - PERSON-BASIS COUNTERPARTY PATH FOR AN INDEPENDENT PROVIDER (#2143 + #2153 independent_journal_context)
+  // =========================================================================
+  test("9a. PERSON-BASIS SETUP + NEGATIVES: independent provider with a PERSON assignment on the client's project; unassigned / ended / other independent / self / employee / wrong-org / anon are all refused", async () => {
+    const rep2 = await acct("rep2");
+    const iw = await acct("iw");
+    const P3 = S.PROJECT3 as string;
+    expect(P3, "5f must have created the person-basis project").toBeTruthy();
+    for (const k of ["iu", "ie", "io"]) {
+      if (!S.accounts?.[k]) rememberAccount(k, await createAccount(k, "worker"));
+    }
+    const iu = await acct("iu"); // independent, NO assignment
+    const ie = await acct("ie"); // independent, assignment ENDED
+    const io = await acct("io"); // another independent, no assignment on P3
+    // NAMED SEED (service role, local): an assignment that is then ended
+    if (!S.IE_ASSIGNMENT) {
+      const a = await dbOk("POST", "project_worker_assignments", { project_id: P3, worker_id: ie.workerId, status: "active" });
+      const aid = ((await a.json()) as { id: string }[])[0].id;
+      await dbOk("PATCH", `project_worker_assignments?id=eq.${aid}`, { status: "ended" });
+      save({ IE_ASSIGNMENT: aid });
+    }
+    // the client's EMPLOYEE (accepted the invitation in 6a) also holds a person assignment (NAMED SEED)
+    const inv = await acct("inv");
+    if (!S.INV_P3_ASSIGNMENT) {
+      const a = await dbOk("POST", "project_worker_assignments", { project_id: P3, worker_id: inv.workerId, status: "active" });
+      save({ INV_P3_ASSIGNMENT: ((await a.json()) as { id: string }[])[0].id });
+    }
+
+    const personalCtx = async (a: Account) =>
+      (await rows<{ id: string }>(`engagement_contexts?profile_id=eq.${a.id}&status=eq.active&organization_id=is.null&select=id`))[0]?.id;
+    const write = async (a: Account, text: string) => {
+      const ctx = await personalCtx(a);
+      expect(ctx, `${a.email} has a personal engagement context`).toBeTruthy();
+      return rpcAs(a.jwt, "create_journal_entry_full", {
+        p_worker_id: a.workerId, p_engagement_context_id: ctx, p_entry_type_slug: "freeform", p_profession_id: null,
+        p_original_text: text, p_original_language: "en", p_hash_prev: null, p_hash_self: sha(text), p_visibility_scope: "closed",
+        p_metrics: [], p_project_id: P3, p_project_explicit: true,
+      });
+    };
+    const reg = (jwt: string | null, worker: string | null) => rpcAs(jwt, "register_work_counterparty_link_v1", { p_project_id: P3, p_worker_id: worker, p_party_role: "client" });
+
+    // (1) journal attribution to the client's project is refused for everyone without an ACTIVE person assignment / for members
+    const neg: Record<string, unknown> = {};
+    for (const [label, a] of [["unassigned", iu], ["ended", ie], ["other-independent", io], ["employee-of-client", inv]] as const) {
+      const r = await write(a, `QA${TAG} neg-journal ${label}`);
+      neg[label] = { status: r.status, body: r.json };
+      expect(r.status >= 400, `${label} must be refused on the client's project: ${JSON.stringify(r.json)}`).toBe(true);
+    }
+    expect(await rows(`journal_entries?original_text=ilike.${encodeURIComponent(`QA${TAG} neg-journal%`)}&select=id`)).toEqual([]);
+    // (2) registration of a link for them is refused (real rep JWT)
+    for (const [label, a] of [["unassigned", iu], ["ended", ie], ["other-independent", io]] as const) {
+      const r = await reg(rep2.jwt, a.workerId);
+      neg[`reg-${label}`] = r.json;
+      expect(JSON.stringify(r.json), `${label}: register -> no_work_relationship`).toMatch(/no_work_relationship/);
+    }
+    const regEmp = await reg(rep2.jwt, inv.workerId);
+    neg["reg-employee"] = regEmp.json;
+    expect(JSON.stringify(regEmp.json), "an employee of the client organisation is not an independent counterparty subject").toMatch(/counterparty_not_independent|subject_is_member|no_work_relationship|not_independent/);
+    // (3) the subject cannot register themself; wrong-org / stranger / another independent cannot; anon cannot
+    expect(JSON.stringify((await reg(iw.jwt, iw.workerId)).json)).toMatch(/not_authorized|subject_cannot/);
+    expect(JSON.stringify((await reg((await acct("cli")).jwt, iw.workerId)).json), "wrong-org rep").toMatch(/not_authorized/);
+    expect(JSON.stringify((await reg(io.jwt, iw.workerId)).json), "another independent").toMatch(/not_authorized/);
+    expect(JSON.stringify((await reg((await acct("str")).jwt, iw.workerId)).json), "stranger").toMatch(/not_authorized/);
+    expect((await reg(null, iw.workerId)).status, "anon").toBeGreaterThanOrEqual(400);
+    const nul = await reg(rep2.jwt, null);
+    expect(nul.status >= 400 || /invalid|required|not_found|no_work_relationship/.test(JSON.stringify(nul.json)), `NULL worker: ${JSON.stringify(nul)}`).toBe(true);
+    const links = await rows<{ worker_id: string }>(`work_counterparty_links?project_id=eq.${P3}&revoked_at=is.null&select=worker_id`);
+    expect(links.map((l) => l.worker_id), "only the real person assignment has a link").toEqual([iw.workerId]);
+    save({ PERSON_BASIS_NEGATIVES: neg });
+  });
+
+  test("9b. PERSON-BASIS JOURNAL (browser): the independent provider sees the client's project labelled 'client project' in a PERSONAL context, records work, submits EXPLICITLY", async ({ browser }) => {
+    const iw = await acct("iw");
+    const P3 = S.PROJECT3 as string;
+    const page = await loginUi(browser, "iw");
+    await go(page, "/en/dashboard/journal", "#journal-composer textarea");
+    const text = `QA${TAG} indep-job: laid 15 m2 of tiles for the client, worked 4 hours`;
+    if (!S.ENTRY_IW) {
+      await page.locator("#journal-composer textarea").fill(text);
+      await page.getByRole("button", { name: /Read it back/i }).click();
+      const auto = page.getByTestId("worklog-project-auto");
+      const pick = page.getByTestId("worklog-project");
+      await expect(auto.or(pick)).toBeVisible({ timeout: 60_000 });
+      if (await pick.count()) {
+        const opts = await pick.locator("option").allInnerTexts();
+        expect(opts.join("|")).toMatch(/client project/i);
+        await pick.selectOption({ label: opts.find((o) => /client project/i.test(o))! });
+      } else {
+        expect((await auto.innerText()).toLowerCase()).toContain("client project");
+      }
+      await shot(page, "9b-readback-client-project");
+      await page.getByTestId("worklog-save").click();
+      await page.getByTestId("worklog-confirm").click();
+      await expect.poll(async () => (await rows(`journal_entries?original_text=ilike.${encodeURIComponent(`QA${TAG} indep-job%`)}&select=id`)).length, { timeout: 90_000 }).toBe(1);
+      await settle(page);
+    }
+    const e = await rows<{ id: string; worker_id: string; project_id: string | null; engagement_context_id: string }>(
+      `journal_entries?original_text=ilike.${encodeURIComponent(`QA${TAG} indep-job%`)}&select=id,worker_id,project_id,engagement_context_id`,
+    );
+    expect(e).toHaveLength(1);
+    expect(e[0].worker_id).toBe(iw.workerId);
+    expect(e[0].project_id, "attributed to the CLIENT's project").toBe(P3);
+    const ec = await rows<{ organization_id: string | null }>(`engagement_contexts?id=eq.${e[0].engagement_context_id}&select=organization_id`);
+    expect(ec[0].organization_id, "personal / own workspace, no organisation").toBeNull();
+    // the PERSON assignment is the real basis: exactly one assignment row for the provider, no fan-out
+    const asg = await rows<{ project_id: string; status: string }>(`project_worker_assignments?worker_id=eq.${iw.workerId}&select=project_id,status`);
+    expect(asg).toEqual([{ project_id: P3, status: "active" }]);
+    save({ ENTRY_IW: e[0].id });
+    expect(await rows(`journal_entry_review_submissions?entry_id=eq.${e[0].id}&select=id`), "nothing auto-submitted").toEqual([]);
+    await go(page, "/en/dashboard/journal", `[data-testid="entry-review-${e[0].id}"]`);
+    const panel = page.getByTestId(`entry-review-${e[0].id}`);
+    await expect(panel).toHaveAttribute("data-phase", "ready_to_submit");
+    await page.getByTestId(`entry-review-submit-${e[0].id}`).click();
+    await expect(panel).toHaveAttribute("data-phase", "submitted", { timeout: 60_000 });
+    const sub = await rows<Record<string, any>>(`journal_entry_review_submissions?entry_id=eq.${e[0].id}&select=*`);
+    expect(sub).toHaveLength(1);
+    expect(sub[0]).toMatchObject({ submitted_by: iw.id, worker_id: iw.workerId });
+    const link = await rows<Record<string, any>>(`work_counterparty_links?project_id=eq.${P3}&worker_id=eq.${iw.workerId}&revoked_at=is.null&select=*`);
+    expect(link).toHaveLength(1);
+    expect(link[0]).toMatchObject({ counterparty_organization_id: S.ORG, party_role: "client", basis: "project_assignment" });
+    expect(sub[0].link_id).toBe(link[0].id);
+    await shot(page, "9b-submitted");
+  });
+
+  test("9c. PERSON-BASIS DECISIONS: only the client rep decides (negatives), correction needs a note, provider corrects (correction_of) + resubmits, rep accepts; accept is final", async ({ browser }) => {
+    const e1 = S.ENTRY_IW as string;
+    const iw = await acct("iw");
+    const rep2 = await acct("rep2");
+    for (const [label, jwt] of [
+      ["subject iw", iw.jwt], ["unassigned iu", (await acct("iu")).jwt], ["other independent io", (await acct("io")).jwt],
+      ["employee inv", (await acct("inv")).jwt], ["wrong-org cli", (await acct("cli")).jwt], ["stranger", (await acct("str")).jwt], ["anon", null],
+    ] as [string, string | null][]) {
+      const r = await rpcAs(jwt, "review_journal_entry", { p_entry_id: e1, p_decision: "approved", p_note: "forged" });
+      expect(refusedDecision(r), `${label} must be refused: ${JSON.stringify(r)}`).toBe(true);
+      const d = await rpcAs(jwt, "counterparty_review_entry_detail_v1", { p_entry_id: e1 });
+      expect(JSON.stringify(d.json ?? ""), `${label} must not read the detail`).not.toContain("indep-job");
+      const q = await rpcAs(jwt, "list_counterparty_review_queue_v1", {});
+      expect(JSON.stringify(q.json ?? "")).not.toContain(e1);
+    }
+    expect(await rows(`journal_entry_confirmations?entry_id=eq.${e1}&select=id`)).toEqual([]);
+
+    const rep = await loginUi(browser, "rep2");
+    await go(rep, "/en/dashboard/inbox/counterparty", `[data-testid="counterparty-card-${e1}"]`);
+    const card = rep.getByTestId(`counterparty-card-${e1}`);
+    if ((await rows(`journal_entry_confirmations?entry_id=eq.${e1}&select=id`)).length === 0) {
+      await expect(card).toHaveAttribute("data-bucket", "to_decide");
+      await expect(card).toContainText(`QA${TAG} indep-job`);
+      await shot(rep, "9c-queue");
+      await card.getByRole("radio", { name: /request a correction/i }).check();
+      const note = card.getByLabel(/note \(required\)/i);
+      await card.getByTestId(`counterparty-decide-${e1}`).click(); // empty note: nothing is sent
+      await expect(card.getByTestId(`counterparty-result-${e1}`)).toHaveCount(0);
+      await note.fill("Please state which rooms the 15 m2 were laid in.");
+      await card.getByTestId(`counterparty-decide-${e1}`).click();
+    }
+    await expect(rep.getByTestId(`counterparty-waiting-${e1}`)).toBeVisible({ timeout: 90_000 });
+    const c1 = await rows<Record<string, any>>(`journal_entry_confirmations?entry_id=eq.${e1}&select=*`);
+    expect(c1).toHaveLength(1);
+    expect(c1[0].confirmer_id).toBe(rep2.id);
+    expect(c1[0].confirmation_scope).toMatchObject({ action: "client_request_correction", decision: "changes_requested" });
+    expect(c1[0].confirmation_scope.authority.basis).toBe("counterparty");
+
+    const w = await loginUi(browser, "iw");
+    if ((await rows(`journal_entries?correction_of=eq.${e1}&select=id`)).length === 0) {
+      await go(w, "/en/dashboard/journal", `[data-testid="entry-review-${e1}"]`);
+      const panel = w.getByTestId(`entry-review-${e1}`);
+      await expect(panel).toHaveAttribute("data-phase", "correction_requested");
+      await expect(panel).toContainText("Please state which rooms");
+      await w.getByTestId(`journal-entry-edit-${e1}`).click();
+      const ed = w.getByTestId("journal-compact-text");
+      await expect(ed).toBeVisible({ timeout: 60_000 });
+      await ed.fill(`QA${TAG} indep-job: laid 15 m2 of tiles for the client in the kitchen and hall, worked 4 hours (corrected)`);
+      await w.getByRole("button", { name: /save/i }).last().click();
+      await expect(w.getByTestId("journal-compact-saved")).toBeVisible({ timeout: 60_000 });
+    }
+    const fixed = await rows<{ id: string; correction_of: string | null; project_id: string | null; worker_id: string }>(`journal_entries?correction_of=eq.${e1}&select=id,correction_of,project_id,worker_id`);
+    expect(fixed).toHaveLength(1);
+    expect(fixed[0]).toMatchObject({ project_id: S.PROJECT3, worker_id: iw.workerId });
+    save({ ENTRY_IW2: fixed[0].id });
+    await go(w, "/en/dashboard/journal", `[data-testid="entry-review-${fixed[0].id}"]`);
+    const p2 = w.getByTestId(`entry-review-${fixed[0].id}`);
+    await expect(p2).toHaveAttribute("data-phase", "ready_to_submit");
+    await p2.getByRole("button", { name: /resubmit|submit/i }).click();
+    await expect(p2).toHaveAttribute("data-phase", "submitted", { timeout: 60_000 });
+    const sub2 = await rows<Record<string, any>>(`journal_entry_review_submissions?entry_id=eq.${fixed[0].id}&select=*`);
+    expect(sub2).toHaveLength(1);
+    expect(sub2[0].resubmission_of_entry_id).toBe(e1);
+
+    const e2 = fixed[0].id;
+    await go(rep, "/en/dashboard/inbox/counterparty", `[data-testid="counterparty-card-${e2}"]`);
+    const card2 = rep.getByTestId(`counterparty-card-${e2}`);
+    if ((await card2.getAttribute("data-bucket")) === "to_decide") {
+      await expect(rep.getByTestId(`counterparty-resubmission-${e2}`)).toBeVisible();
+      await card2.getByRole("radio", { name: /accept the work/i }).check();
+      await card2.getByTestId(`counterparty-decide-${e2}`).click();
+    }
+    await expect(rep.getByTestId(`counterparty-final-${e2}`)).toBeVisible({ timeout: 90_000 });
+    await shot(rep, "9c-accepted");
+    const c2 = await rows<Record<string, any>>(`journal_entry_confirmations?entry_id=eq.${e2}&select=*`);
+    expect(c2).toHaveLength(1);
+    expect(c2[0].confirmer_id).toBe(rep2.id);
+    expect(c2[0].confirmation_scope).toMatchObject({ action: "client_accept", decision: "approved" });
+    expect(c2[0].confirmation_scope.authority.basis).toBe("counterparty");
+    expect(c2[0].confirmation_scope.provenance.origin).toBe("NATIVE_PLATFORM_CLIENT_CONFIRMATION");
+    expect(await rows(`journal_entry_confirmations?confirmation_scope->>action=eq.confirm&entry_id=in.(${e1},${e2})&select=id`)).toEqual([]);
+    const flip = await rpcAs(rep2.jwt, "review_journal_entry", { p_entry_id: e2, p_decision: "rejected", p_note: "too late" });
+    expect(flip.json === "rejected" && flip.status < 300).toBe(false);
+    expect(await rows(`journal_entry_confirmations?entry_id=eq.${e2}&select=id`)).toHaveLength(1);
+    await go(w, "/en/dashboard/journal", `[data-testid="entry-review-${e2}"]`);
+    await expect(w.getByTestId(`entry-review-${e2}`)).toHaveAttribute("data-phase", "accepted");
+    await shot(w, "9c-provider-accepted");
+  });
+
+  test("9d. PERSON-BASIS LIVING CV: the client's acceptance is its OWN fact - not an employer confirmation, not skill verification, not payment", async ({ browser }) => {
+    const iw = await acct("iw");
+    const page = await loginUi(browser, "iw");
+    await go(page, "/en/cv", '[data-testid="cv-skills"]');
+    const client = page.getByTestId("cv-client-accepted-work");
+    await expect(client).toBeVisible({ timeout: 60_000 });
+    expect(Number(await client.getAttribute("data-entries"))).toBeGreaterThanOrEqual(1);
+    await expect(page.getByTestId("cv-confirmed-work")).toHaveCount(0);
+    await shot(page, "9d-cv-independent");
+    expect(await rows(`worker_skills?worker_id=eq.${iw.workerId}&verification_status=eq.verified&select=id`).catch(() => [])).toEqual([]);
+    const ents = await rows<{ id: string; engagement_context_id: string }>(`journal_entries?worker_id=eq.${iw.workerId}&project_id=eq.${S.PROJECT3}&select=id,engagement_context_id`);
+    expect(ents.length).toBeGreaterThanOrEqual(1);
+    const acc = await rows<{ confirmation_scope: any }>(`journal_entry_confirmations?entry_id=in.(${ents.map((x) => x.id).join(",")})&select=confirmation_scope`);
+    expect(acc.filter((x) => x.confirmation_scope.action === "client_accept")).toHaveLength(1);
+    expect(acc.filter((x) => x.confirmation_scope.action === "confirm")).toHaveLength(0);
+    const ecs = await rows<{ organization_id: string | null }>(`engagement_contexts?id=in.(${ents.map((x) => x.engagement_context_id).join(",")})&select=organization_id`);
+    expect(ecs.every((c) => c.organization_id === null)).toBe(true);
+  });
+
+  test("9e. PERSON-BASIS MCP + PHOTO: the same rules through /api/mcp for the independent provider's entry; photo storage stays closed to everyone but the rep and the author", async () => {
+    const iw = await acct("iw");
+    const rep2 = await acct("rep2");
+    const txt = `QA${TAG} indep-mcp: grouted 6 m2, worked 2 hours`;
+    const ctx = (await rows<{ id: string }>(`engagement_contexts?profile_id=eq.${iw.id}&status=eq.active&organization_id=is.null&select=id`))[0].id;
+    const c = await rpcAs(iw.jwt, "create_journal_entry_full", {
+      p_worker_id: iw.workerId, p_engagement_context_id: ctx, p_entry_type_slug: "freeform", p_profession_id: null,
+      p_original_text: txt, p_original_language: "en", p_hash_prev: null, p_hash_self: sha(txt), p_visibility_scope: "closed",
+      p_metrics: [], p_project_id: S.PROJECT3, p_project_explicit: true,
+    });
+    expect(c.status, JSON.stringify(c.json)).toBeLessThan(300);
+    const eid = c.json as string;
+    expect(JSON.stringify((await rpcAs(iw.jwt, "submit_journal_entry_for_review_v1", { p_entry_id: eid })).json)).toMatch(/submitted/);
+    const path = `${iw.id}/${eid}/${randomBytes(4).toString("hex")}.png`;
+    const up = await fetch(`${SUPA_URL}/storage/v1/object/journal-entry-photos/${path}`, {
+      method: "POST", headers: { apikey: ANON, Authorization: `Bearer ${iw.jwt}`, "Content-Type": "image/png" }, body: new Uint8Array(PNG),
+    });
+    const upText = await up.text();
+    test.info().annotations.push({ type: "indep-photo-upload", description: `${up.status} ${upText.slice(0, 120)}` });
+    expect(up.ok, `author uploads through the real storage API: ${up.status} ${upText}`).toBe(true);
+    await dbOk("POST", "journal_entry_photos", { entry_id: eid, storage_path: path, upload_status: "uploaded", mime_type: "image/png", size_bytes: PNG.length });
+    const direct = async (jwt: string | null) => (await fetch(`${SUPA_URL}/storage/v1/object/authenticated/journal-entry-photos/${path}`, { headers: { apikey: ANON, Authorization: `Bearer ${jwt ?? ANON}` } })).ok;
+    expect(await direct(iw.jwt), "author").toBe(true);
+    expect(await direct(rep2.jwt), "client rep").toBe(true);
+    for (const [l, a] of [["unassigned", await acct("iu")], ["other independent", await acct("io")], ["wrong-org cli", await acct("cli")], ["stranger", await acct("str")]] as const) {
+      expect(await direct(a.jwt), `${l} must not open the person-basis photo`).toBe(false);
+    }
+    expect(await direct(null), "anon").toBe(false);
+
+    const q = await tool(rep2.jwt, "counterparty_review_queue_get", {});
+    expect(q.text).toContain(eid);
+    const g = await tool(rep2.jwt, "counterparty_review_entry_get", { entryId: eid });
+    expect(g.text).toContain("indep-mcp");
+    for (const a of [iw, await acct("iu"), await acct("io"), await acct("str")]) {
+      expect((await tool(a.jwt, "counterparty_review_queue_get", {})).text).not.toContain(eid);
+      expect((await tool(a.jwt, "counterparty_review_entry_get", { entryId: eid })).text).not.toContain("indep-mcp");
+      expect((await tool(a.jwt, "counterparty_review_decide_draft", { entryId: eid, decision: "accept" })).text).not.toContain("confirmationToken");
+    }
+    expect((await tool(null, "counterparty_review_queue_get", {})).status).toBe(401);
+    const draft = await tool(rep2.jwt, "counterparty_review_decide_draft", { entryId: eid, decision: "accept", note: "ok" });
+    const tok = /confirmationToken\\?"\s*:\s*\\?"([^"\\]+)/.exec(draft.text)?.[1];
+    expect(tok, draft.text.slice(0, 300)).toBeTruthy();
+    await tool(rep2.jwt, "counterparty_review_decide_confirm", { entryId: eid, decision: "accept", note: "ok", confirmationToken: tok });
+    const cc = await rows<{ confirmation_scope: any }>(`journal_entry_confirmations?entry_id=eq.${eid}&select=confirmation_scope`);
+    expect(cc).toHaveLength(1);
+    expect(cc[0].confirmation_scope).toMatchObject({ action: "client_accept" });
+    expect(cc[0].confirmation_scope.authority.basis).toBe("counterparty");
+  });
+
+  // =========================================================================
+  // STEP 10 - JOBS / VACANCIES WITH DATA, AND FOREIGN-VIEWER CAPABILITY CHIPS (#2124 / #2151)
+  // =========================================================================
+  test("10a. JOBS WITH DATA: imported vacancies appear under the Jobs tab with the visible occupation label only; title_raw never leaks; anon sees only the preview function", async ({ browser }) => {
+    const now = new Date().toISOString();
+    const occ = `QA${TAG} Welder vacancy`;
+    const secret = `QA${TAG}-SECRET-RAW-TITLE`;
+    const base = {
+      provider_key: "qa-local", channel: "snapshot", lifecycle: "published", description_raw: "", source_language: "en", country: "SE",
+      published_at: now, captured_at: now, attribution_code: "vacancySources.attribution.qa", transform_version: "qa-v1", request_ref: `qa-${TAG}`,
+      employment_form: "permanent", working_time: "full_time", positions: 2,
+    };
+    if (!S.VACANCIES) {
+      // NAMED SEED (local service role): same columns the import writes. active / expired / inactive.
+      const ins = await dbOk("POST", "public_vacancies", [
+        { ...base, external_id: `QA${TAG}-1`, content_hash: sha(`1${TAG}`), title_raw: secret, occupation_raw: occ, is_active: true },
+        { ...base, external_id: `QA${TAG}-2`, content_hash: sha(`2${TAG}`), title_raw: `${secret}-EXPIRED`, occupation_raw: `QA${TAG} Expired vacancy`, is_active: true, expires_at: "2020-01-01T00:00:00Z" },
+        { ...base, external_id: `QA${TAG}-3`, content_hash: sha(`3${TAG}`), title_raw: `${secret}-INACTIVE`, occupation_raw: `QA${TAG} Inactive vacancy`, is_active: false },
+      ]);
+      save({ VACANCIES: ((await ins.json()) as { id: string }[]).map((r) => r.id) });
+    }
+    const [vid] = S.VACANCIES as string[];
+    const anon = await rpcAs(null, "search_public_vacancy_previews_v1", { p_query: `QA${TAG}`, p_profession_slug: null, p_limit: 10, p_offset: 0 });
+    expect(anon.status).toBeLessThan(300);
+    const arr = anon.json as any[];
+    expect(arr.map((r) => r.occupation_raw)).toEqual([occ]);
+    expect(arr.every((r) => r.title_raw == null && r.attribution_code == null)).toBe(true);
+    expect(JSON.stringify(anon.json)).not.toContain(secret);
+    const anonTable = await fetch(`${SUPA_URL}/rest/v1/public_vacancies?id=eq.${vid}&select=title_raw`, { headers: { apikey: ANON, Authorization: `Bearer ${ANON}` } });
+    const anonTableJson: any = await anonTable.json().catch(() => null);
+    expect(anonTable.status >= 400 || (Array.isArray(anonTableJson) && anonTableJson.length === 0), `anon table read: ${anonTable.status} ${JSON.stringify(anonTableJson).slice(0, 100)}`).toBe(true);
+    const page = await loginUi(browser, "nm");
+    await go(page, "/en/dashboard/listings", '[data-testid="listings-page"]');
+    await page.getByRole("tab", { name: /Jobs & vacancies/i }).click();
+    await expect(page.getByText(occ).first()).toBeVisible({ timeout: 120_000 });
+    await shot(page, "10a-jobs-tab");
+    const body = await page.locator("body").innerText();
+    expect(body).not.toContain(secret);
+    expect(body).not.toContain(`QA${TAG} Expired vacancy`);
+    expect(body).not.toContain(`QA${TAG} Inactive vacancy`);
+    const jobRows = await listingRows(page);
+    expect(jobRows.find((r) => r.text.includes(occ))?.kind, "a vacancy states no poster: Type not stated").toBe("other");
+    expect(await page.content()).not.toContain(secret);
+  });
+
+  test("10b. CAPABILITY CHIPS FOR A FOREIGN VIEWER (#2151): institution / supplier / company / agency chips show; draft-only org stays 'Type not stated'; anon cannot call; organization_roles stays closed", async ({ browser }) => {
+    const L = S.LISTINGS as Record<string, string>;
+    const ag = await acct("ag");
+    const nm_ = await acct("nm");
+    if (!S.CHIP_LISTINGS) {
+      const mk = async (jwt: string, title: string, org: string) => {
+        const c = await rpcAs(jwt, "create_marketplace_listing_v2", { p_listing_kind: "sale", p_category: "goods_household", p_title: title, p_organization_id: org, p_project_id: null });
+        expect(c.status, JSON.stringify(c.json)).toBeLessThan(300);
+        return c.json as string;
+      };
+      const setStatus = async (jwt: string, id: string, status: string) => expect((await rpcAs(jwt, "set_marketplace_listing_status_v2", { p_id: id, p_status: status })).status).toBeLessThan(300);
+      const agencyActive = await mk(ag.jwt, `QA${TAG} agency-goods-offer`, S.AG_ORG);
+      await setStatus(ag.jwt, agencyActive, "active");
+      const q = await createAccount("quiet", "company", { company: `QA${TAG} Quiet Ltd` });
+      rememberAccount("quiet", q);
+      const qco = await rows<{ id: string }>(`companies?profile_id=eq.${q.id}&select=id`);
+      const QORG = (await rows<{ id: string }>(`organizations?legacy_company_id=eq.${qco[0].id}&select=id`))[0].id;
+      expect((await rpcAs(q.jwt, "add_organization_role_v1", { p_organization_id: QORG, p_role_slug: "supplier" })).status).toBeLessThan(300);
+      const draft = await mk(q.jwt, `QA${TAG} quiet-draft`, QORG);
+      const paused = await mk(q.jwt, `QA${TAG} quiet-paused`, QORG);
+      await setStatus(q.jwt, paused, "active");
+      await setStatus(q.jwt, paused, "paused");
+      const expired = await mk(q.jwt, `QA${TAG} quiet-expired`, QORG);
+      await setStatus(q.jwt, expired, "active");
+      await dbOk("PATCH", `marketplace_listings?id=eq.${expired}`, { expires_at: "2020-01-01T00:00:00Z" });
+      save({ CHIP_LISTINGS: { agencyActive, draft, paused, expired, QORG } });
+    }
+    const CL = S.CHIP_LISTINGS as Record<string, string>;
+    const fn = (jwt: string | null, ids: unknown) => rpcAs(jwt, "org_capabilities_for_visible_listings_v1", { p_listing_ids: ids });
+    const all = [L.institution, L.supplier, L.companyNeed, CL.agencyActive, CL.draft, CL.paused, CL.expired];
+    const r = await fn(nm_.jwt, all);
+    expect(r.status, JSON.stringify(r.json)).toBeLessThan(300);
+    const m = new Map<string, string[]>();
+    for (const x of r.json as any[]) m.set(x.listing_id, [...(m.get(x.listing_id) ?? []), x.role_slug]);
+    expect(m.get(L.institution)).toContain("training_provider");
+    expect(m.get(L.supplier)).toContain("supplier");
+    expect(m.get(L.companyNeed)).toEqual(expect.arrayContaining(["employer", "client"]));
+    expect(m.get(CL.agencyActive)).toContain("workforce_provider");
+    for (const k of ["draft", "paused", "expired"]) expect(m.has(CL[k]), `${k}-only org leaks no capability`).toBe(false);
+    for (const row of r.json as any[]) expect(Object.keys(row).sort()).toEqual(["listing_id", "role_slug"]);
+    const an = await fn(null, all);
+    expect(an.status, `anon is refused at the ACL: ${JSON.stringify(an.json).slice(0, 100)}`).toBeGreaterThanOrEqual(400);
+    const nul = await fn(nm_.jwt, null);
+    expect(nul.status < 300 ? (nul.json as any[]).length : 0).toBe(0);
+    for (const a of [nm_, await acct("cli"), await acct("sup")]) {
+      const d = await asUser(a.jwt, "GET", `organization_roles?organization_id=eq.${S.ORG}&select=role_slug`);
+      expect(Array.isArray(d.json) ? d.json.length : 0, `${a.email} must not read another org's roles directly`).toBe(0);
+    }
+    const anonRoles = await fetch(`${SUPA_URL}/rest/v1/organization_roles?select=role_slug`, { headers: { apikey: ANON, Authorization: `Bearer ${ANON}` } });
+    const anonRolesJson: any = await anonRoles.json().catch(() => null);
+    expect(anonRoles.status >= 400 || (Array.isArray(anonRolesJson) && anonRolesJson.length === 0)).toBe(true);
+
+    // BROWSER: the chips as three different foreign viewers
+    for (const [key, expects] of [
+      ["nm", { "institution-premises-offer": "institution", "supplier-goods-offer": "supplier", "agency-goods-offer": "agency", "company-project-need": "company", "quiet-draft": undefined, "quiet-paused": undefined, "quiet-expired": undefined }],
+      ["cli", { "supplier-goods-offer": "supplier", "agency-goods-offer": "agency", "company-project-need": "company" }],
+      ["sup", { "institution-premises-offer": "institution", "agency-goods-offer": "agency" }],
+    ] as [string, Record<string, string | undefined>][]) {
+      const page = await loginUi(browser, key);
+      await go(page, "/en/dashboard/listings", '[data-testid="listings-page"]');
+      await expect(page.getByText(`QA${TAG} person-handmade-offer`).or(page.getByText(`QA${TAG} agency-goods-offer`)).first()).toBeVisible({ timeout: 120_000 });
+      const rr = await listingRows(page);
+      for (const [needle, kind] of Object.entries(expects)) {
+        const row = rr.find((x) => x.text.includes(needle));
+        if (kind === undefined) expect(row, `${key}: ${needle} is not discoverable`).toBeUndefined();
+        else expect(row?.kind, `${key} sees ${needle} as ${kind}`).toBe(kind);
+      }
+      if (key === "nm") await shot(page, "10b-chips-foreign-viewer");
+    }
   });
 });
