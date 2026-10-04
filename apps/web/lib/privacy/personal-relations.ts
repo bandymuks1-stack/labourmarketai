@@ -551,6 +551,16 @@ export type WithheldRelation = {
  */
 export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
   {
+    table: "email_verifications_v1",
+    reason:
+      "proof that you control an email address (address, method, time) — held server-side as security evidence with no read path for your own session; whether your address is verified is shown to you in the product, and the evidence is available on request through the data-protection channel",
+  },
+  {
+    table: "email_verification_requests_v1",
+    reason:
+      "a pending request to prove an email address — short-lived security state with no read path for your own session",
+  },
+  {
     table: "conversation_participants",
     reason:
       "conversations and messages — they contain the other party's words, so they need a route that can separate them from yours",

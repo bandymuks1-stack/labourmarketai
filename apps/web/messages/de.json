@@ -7431,6 +7431,8 @@
     "outcomeLinked": "Verknüpft. Sie sind jetzt verbunden.",
     "outcomeAlreadyLinked": "Sie sind bereits verknüpft.",
     "outcomeNoInvitation": "Einladung nicht gefunden.",
+
+    "outcomeEmailUnverified": "Bestätigen Sie zuerst Ihre E-Mail (Seite Netzwerk) und nehmen Sie dann die Einladung an.",
     "outcomeNoWorker": "Ihr Arbeitskraft-Profil ist noch nicht bereit.",
     "outcomeError": "Konnte nicht angenommen werden. Bitte versuchen Sie es erneut.",
     "outcomeNeedsMigration": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut."
@@ -11748,7 +11750,20 @@
         "declined": "Einladung abgelehnt.",
         "no_worker_profile": "Erstellen Sie zuerst Ihr Arbeitsprofil und nehmen Sie die Einladung dann an.",
         "not_found": "Einladung nicht gefunden.",
-        "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+        "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+        "email_unverified": "Bestätigen Sie zuerst Ihre E-Mail und nehmen Sie dann die Einladung an."
+      },
+      "verify": {
+        "title": "Bestätigen Sie Ihre E-Mail, um daran gerichtete Einladungen zu sehen",
+        "body": "Einladungen, die an eine E-Mail-Adresse gerichtet sind, werden nur der Person gezeigt, die dieses Postfach öffnen kann. Alles andere in Ihrem Konto funktioniert wie bisher; das ist nur nötig, um diese Einladungen zu sehen oder anzunehmen.",
+        "send": "Einmal-Link senden",
+        "sending": "Wird gesendet…",
+        "sent": "Wir haben einen Einmal-Link an {email} gesendet. Öffnen Sie ihn auf diesem Gerät, um abzuschließen.",
+        "sentNoAddress": "Wir haben einen Einmal-Link an Ihre E-Mail-Adresse gesendet. Öffnen Sie ihn auf diesem Gerät, um abzuschließen.",
+        "rateLimited": "Ein Link wurde gerade gesendet. Bitte warten Sie eine Minute, bevor Sie einen neuen anfordern.",
+        "alreadyVerified": "Diese E-Mail-Adresse ist bereits bestätigt. Laden Sie die Seite neu.",
+        "failed": "Dieser Link hat Ihre E-Mail nicht bestätigt (möglicherweise veraltet oder anderswo geöffnet). Sie können einen neuen anfordern.",
+        "error": "Der Link konnte nicht gesendet werden. Bitte versuchen Sie es später erneut."
       }
     },
     "search": {

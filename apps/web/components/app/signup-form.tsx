@@ -37,9 +37,17 @@ const MIN_PASSWORD = 8;
 
 /** Signup form. Social OAuth (shared same-tab buttons) + email/password/
  *  confirm (`signUp`). Role is no longer picked here — it moves to
- *  /onboarding. Email confirmation is OFF (DI prereq), so signUp returns a
- *  live session; we route straight to /onboarding. Magic link was removed in
- *  M1.
+ *  /onboarding. Launch-stage registration is FRICTIONLESS (owner requirement
+ *  WORKER_REGISTRATION_FRICTION_REMOVAL): with Supabase "Confirm email" OFF,
+ *  signUp returns a live session and we route straight to /onboarding — no
+ *  email step, ever. That session proves nothing about the mailbox: the
+ *  SEPARATE verified-email state (migration 20261003151000) gates only
+ *  trust-sensitive actions, and is requested progressively where they happen
+ *  (see lib/auth/email-verification.ts). The `check_email` branch below stays as
+ *  a DEFENSIVE fallback for the period before the production setting is flipped
+ *  (docs/human-gates/worker-registration-friction-gate.md) and as the rollback
+ *  path; it is never reached once the session is live. Magic link was removed
+ *  in M1.
  *
  *  `linkedinEnabled` / `facebookEnabled` come from the SERVER page component
  *  (lib/auth/enabled-providers.ts). Default FALSE = fail-closed: a provider
@@ -75,7 +83,9 @@ export function SignupForm({
   const [errorKind, setErrorKind] = useState<"generic" | "alreadyRegistered">(
     "generic",
   );
-  // "Confirm email" is ON in production (2026-09-02). The check-your-email
+  // DEFENSIVE state only: it is reachable solely while Supabase still withholds
+  // the session ("Confirm email" ON — production from 2026-09-02 until the
+  // registration-friction flip). The check-your-email
   // state offers ONE way forward when the mail is slow or lost: a resend,
   // throttled to the auth server's own per-address limit so the button never
   // offers what the server would refuse.

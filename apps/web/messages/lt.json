@@ -7431,6 +7431,8 @@
     "outcomeLinked": "Sujungta. Dabar esate prijungti.",
     "outcomeAlreadyLinked": "Jau esate sujungti.",
     "outcomeNoInvitation": "Pakvietimas nerastas.",
+
+    "outcomeEmailUnverified": "Pirmiausia patvirtinkite el. paštą (puslapyje „Ryšiai“), tada priimkite pakvietimą.",
     "outcomeNoWorker": "Jūsų darbuotojo profilis dar neparuoštas.",
     "outcomeError": "Nepavyko priimti. Bandykite dar kartą.",
     "outcomeNeedsMigration": "Šios funkcijos dar neįjungėme."
@@ -11748,7 +11750,20 @@
         "declined": "Kvietimas atmestas.",
         "no_worker_profile": "Pirmiausia susikurkite darbuotojo profilį, tada priimkite kvietimą.",
         "not_found": "Kvietimas nerastas.",
-        "error": "Nepavyko. Bandykite dar kartą."
+        "error": "Nepavyko. Bandykite dar kartą.",
+        "email_unverified": "Pirmiausia patvirtinkite el. paštą, tada priimkite pakvietimą."
+      },
+      "verify": {
+        "title": "Patvirtinkite el. paštą, kad matytumėte jam skirtus pakvietimus",
+        "body": "Pakvietimai, adresuoti el. pašto adresui, rodomi tik tam, kas gali atidaryti tą pašto dėžutę. Visa kita jūsų paskyroje veikia kaip veikė; tai reikalinga tik šiems pakvietimams matyti ar priimti.",
+        "send": "Atsiųskite man vienkartinę nuorodą",
+        "sending": "Siunčiama…",
+        "sent": "Išsiuntėme vienkartinę nuorodą adresu {email}. Atidarykite ją šiame įrenginyje, kad užbaigtumėte.",
+        "sentNoAddress": "Išsiuntėme vienkartinę nuorodą jūsų el. pašto adresu. Atidarykite ją šiame įrenginyje, kad užbaigtumėte.",
+        "rateLimited": "Nuoroda išsiųsta prieš akimirką. Palaukite minutę, prieš prašydami kitos.",
+        "alreadyVerified": "Šis el. pašto adresas jau patvirtintas. Atnaujinkite puslapį.",
+        "failed": "Ši nuoroda nepatvirtino jūsų el. pašto (galbūt sena arba atidaryta kitur). Galite paprašyti naujos.",
+        "error": "Nepavyko išsiųsti nuorodos. Bandykite vėliau."
       }
     },
     "search": {
