@@ -205,7 +205,7 @@
     "actorFilterLabel": "Nach Anbieter bzw. Suchendem filtern",
     "actorKinds": {
       "all": "Alle",
-      "person": "Person",
+      "person": "Privatperson",
       "company": "Unternehmen",
       "institution": "Organisation oder Einrichtung",
       "agency": "Agentur",
@@ -17417,7 +17417,7 @@
         "decisions": "Entscheidungen"
       },
       "icon": {
-        "person": "Person",
+        "person": "Privatperson",
         "time": "Zeit",
         "evidence": "Nachweis",
         "warning": "braucht Aufmerksamkeit",
