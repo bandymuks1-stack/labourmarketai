@@ -17417,7 +17417,7 @@
       "label": "Invite this person to claim their history",
       "placeholder": "Their e-mail address",
       "invite": "Send invitation",
-      "sent": "Invitation sent. Once they join, offer the link here and they decide on their profile.",
+      "sent": "The invitation e-mail was handed to the mail service. Once they join, offer the link here and they decide on their profile.",
       "created": "Invitation created. Share this link with them:",
       "deliveryFailed": "The invitation was saved but the e-mail did not go out. Share this link with them:",
       "hint": "They need an account before their history can be offered to them. Nothing is attached until they accept.",
