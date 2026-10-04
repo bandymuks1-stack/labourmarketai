@@ -13,17 +13,28 @@ derived per row from a canonical fact and carries an `actorBasis`:
 |---|---|
 | `source_column` | a column of the origin row: `marketplace_listings.owner_id` (profile, no organisation) -> person; `service_offerings.provider_id` (profile) -> service_provider |
 | `source_kind` | the origin reader's own gate: `customer_requests.kind = agency_offer` -> agency; verified-company demand reader -> company |
-| `capability` | `organization_roles.role_slug`, read under the CALLER's RLS (members only): `training_provider` -> institution; `workforce_provider` / `talent_provider` / `recruitment_partner` -> agency; `supplier` / `logistics_provider` / `payroll_provider` / `verification_provider` -> supplier; `employer` / `client` / `contractor` / `subcontractor` / `project_operator` -> company |
-| `undisclosed` | the source does not state it -> `other` |
+| `capability` | `organization_roles.role_slug`, read cross-organisation through `org_capabilities_for_visible_listings_v1(listing_ids)` (migration `20261003151200`): `training_provider` -> institution; `workforce_provider` / `talent_provider` / `recruitment_partner` -> agency; `supplier` / `logistics_provider` / `payroll_provider` / `verification_provider` -> supplier; `employer` / `client` / `contractor` / `subcontractor` / `project_operator` -> company |
+| `undisclosed` | the source does not state it (or the function is not applied yet) -> `other` |
 
 Never read as authority: `companies.company_type`, `organizations.organization_type` (ORG-2:
 an agency is a capability, not an account type). Kind is shown; identity never is (agency
 supply and vacancies stay anonymous).
 
+## The capability function
+
+`org_capabilities_for_visible_listings_v1(p_listing_ids uuid[]) -> (listing_id, role_slug)`.
+SECURITY DEFINER, search_path pinned, authenticated only (no anon), max 200 ids. A listing id
+returns its owning organisation's capability slugs ONLY while that listing is `active` and not
+expired (the same predicate every signed-in member already reads through `market_index_v1`). No
+organisation id, name, member or contact is returned; an organisation with no published listing
+is not reachable; `organization_roles` RLS is unchanged. Proof:
+`scripts/db-proof/marketplace-org-capabilities-v1.sh`.
+
 ## Coverage today
 
-Legend: S = canonical source exists and the kind is derivable; C = only when the caller can read the
-organisation's roles (own / member organisation); - = no canonical source today (no row is faked).
+Legend: S = canonical source exists and the kind is derivable for any signed-in viewer; C = derivable
+only if the organisation holds that capability role AND has a published listing (otherwise `other`);
+- = no canonical source today (no row is faked).
 
 | actor | WORK offer | WORK need | SERVICE offer | SERVICE need | GOODS offer | GOODS need | PROJECT offer | PROJECT need |
 |---|---|---|---|---|---|---|---|---|
@@ -36,12 +47,13 @@ organisation's roles (own / member organisation); - = no canonical source today 
 
 ## Gaps (honest)
 
-1. Organisation listings of ANOTHER organisation render as `other`: `organization_roles` is RLS-scoped to
-   members, so a third party cannot read its capability. Fixing it needs a public-safe capability
-   projection (RED: new view / grant) - not done here, owner decision.
+1. An organisation listing whose organisation holds NO mapped capability role stays `other`
+   (declaring roles is the organisation's act; nothing is inferred from a type).
 2. `public_vacancies` states no poster, so a vacancy is `other`; employer vs agency is not knowable.
 3. `service_offerings` has no organisation column (`organization_id` deferred in #2124): an organisation
    offering services cannot be represented; every offering reads as an individual service provider.
 4. No row sources exist for: person offering work (by design), company/institution offering services
-   through a dedicated source, supplier needing goods, agency/service-provider need rows, any project/contract OFFER
-   (subcontractor capacity) - these cells stay `-`.
+   through a dedicated source, supplier needing goods, agency/service_provider need rows, any
+   project/contract OFFER (subcontractor capacity) - these cells stay `-`.
+5. The capability function is not yet applied to production (RED, owner-gated); until then foreign
+   organisation listings honestly show "type not stated".

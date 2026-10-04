@@ -145,24 +145,26 @@ export function actorKindForOrganisation(
  *    exists) -> an individual service provider.
  *  - marketplace_listings without `organization_id`: `owner_id` is a profile
  *    -> a person.
- *  - with `organization_id`: the organisation's capabilities decide; if the
- *    caller cannot read them (organization_roles is RLS-scoped to members)
- *    the kind stays `other`.
+ *  - with `organization_id`: the organisation's capabilities decide, as read
+ *    through `org_capabilities_for_visible_listings_v1` (keyed by this listing,
+ *    only for published listings); if none are returned the kind stays `other`.
  */
 export function indexRowActor(
   row: {
     sourceTable: string;
+    /** The LISTING id: capabilities are keyed by the listing the caller sees. */
+    id?: string;
     organizationId: string | null;
     domain: string;
     direction: "offer" | "need" | "other";
   },
-  capabilitiesByOrg?: ReadonlyMap<string, readonly string[]>,
+  capabilitiesByListing?: ReadonlyMap<string, readonly string[]>,
 ): { actorKind: ActorKind; actorBasis: ActorBasis } {
   if (row.sourceTable === "service_offerings") {
     return { actorKind: "service_provider", actorBasis: "source_column" };
   }
   if (!row.organizationId) return { actorKind: "person", actorBasis: "source_column" };
-  const caps = capabilitiesByOrg?.get(row.organizationId);
+  const caps = row.id ? capabilitiesByListing?.get(row.id) : undefined;
   if (!caps || caps.length === 0) return { actorKind: "other", actorBasis: "undisclosed" };
   const kind = actorKindForOrganisation(caps, row);
   return kind === "other"

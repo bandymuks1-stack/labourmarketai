@@ -24,13 +24,27 @@ describe("actor kind derivation", () => {
     expect(c).not.toMatch(/company_type|organization_type|staffing_agency/);
   });
 
-  it("agency comes from the capability roles; organisation kinds from organization_roles", () => {
+  it("agency comes from the capability roles; organisation kinds from the listing-keyed capability function", () => {
     expect(code(MODEL)).toContain("AGENCY_CAPABILITY_ROLES");
-    expect(code(LISTINGS)).toContain("organization_roles");
+    expect(code(LISTINGS)).toContain("org_capabilities_for_visible_listings_v1");
   });
 
-  it("the capability read selects role slugs only, never an identity", () => {
-    expect(code(LISTINGS)).toMatch(/\.select\("organization_id, role_slug"\)/);
+  it("the app never reads organization_roles directly (member-only table, RLS untouched)", () => {
+    expect(code(LISTINGS)).not.toMatch(/from\("organization_roles"\)/);
+  });
+
+  it("the capability function is narrow: listing-keyed, published rows only, slugs only, no anon", () => {
+    const sql = read(
+      join(WEB, "..", "..", "supabase", "migrations", "20261003151200_market_org_capabilities_for_visible_listings_v1.sql"),
+    ).replace(/^\s*--.*$/gm, "");
+    expect(sql).toMatch(/returns table \(listing_id uuid, role_slug text\)/);
+    expect(sql).toMatch(/m\.status = 'active'/);
+    expect(sql).toMatch(/expires_at is null or m\.expires_at > now\(\)/);
+    expect(sql).toMatch(/auth\.uid\(\) is not null/);
+    expect(sql).toMatch(/set search_path = public, pg_temp/);
+    expect(sql).toMatch(/revoke all on function public\.org_capabilities_for_visible_listings_v1\(uuid\[\]\) from anon/);
+    expect(sql).not.toMatch(/to anon/);
+    expect(sql).not.toMatch(/alter table|create policy|drop policy/i);
   });
 
   it("adapters never copy a poster identity into the row", () => {
