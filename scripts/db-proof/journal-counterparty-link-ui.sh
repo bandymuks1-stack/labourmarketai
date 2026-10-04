@@ -16,6 +16,8 @@ ADMIN="psql -h $HOST -p $PORT -U postgres -d postgres -tA -q"
 PSQL="psql -h $HOST -p $PORT -U postgres -d $DB"
 M1="$REPO/supabase/migrations/20261003150500_journal_counterparty_review_authority_v1.sql"
 M2="$REPO/supabase/migrations/20261003150550_counterparty_link_assignment_kinds_review_doors_v1.sql"
+M3="$REPO/supabase/migrations/20261003150560_batch_review_exceptions_employer_only_v1.sql"
+D3="$REPO/supabase/rollbacks/20261003150560_batch_review_exceptions_employer_only_v1.down.sql"
 D2="$REPO/supabase/rollbacks/20261003150550_counterparty_link_assignment_kinds_review_doors_v1.down.sql"
 
 FW=aaaaf000-0000-0000-0000-000000000f01
@@ -144,6 +146,35 @@ check "detail of an UNSUBMITTED entry is denied even for the right rep" absent "
 check "client rep requests a correction" contains "changes_requested" "$(as_user $CREP "$(REVIEW $TE1 changes_requested)")"
 check "  ...latest decision visible with note" contains "changes_requested" "$(as_user $TM1 "select public.entry_review_states_v1(array['$TE1']::uuid[])->'$TE1'->'latest'->>'decision';")"
 
+echo; echo "--- C2. PHOTO ACCESS: only the authorized representative of the SUBMITTED entry"
+ORG_D=d0000000-0000-0000-0000-0000000000d0
+PD=90000000-0000-0000-0000-0000000000d1
+TE2=7e100000-0000-0000-0000-000000000002
+TM1B=7e444444-4444-4444-4444-444444444444
+$PSQL -q -c "insert into public.profiles (id, active_role) values ('$TM1B','company');
+ insert into public.engagement_contexts (id, profile_id, organization_id, status, relationship_slug, created_at, started_at) values ('ec7e0044-0000-0000-0000-000000000044','$TM1B','7e000000-0000-0000-0000-0000000000f0','active','manager', now() - interval '30 days', current_date - 30);
+ insert into public.projects (id, organization_id, name) values ('$PD','$ORG_D','D project');
+ insert into public.project_worker_assignments (project_id, worker_id, status) values ('$PD','$TW1','active');
+ insert into public.journal_entries (id, worker_id, engagement_context_id, original_text, hash_self, project_id) values ('$TE2','$TW1','ec7e0011-0000-0000-0000-000000000011','Second entry on the D project.','ht2','$PD');
+ insert into public.journal_entry_photos (entry_id, profile_id, file_name, storage_path) values ('$TE2','$TM1','d-site.jpg','$TM1/d-site.jpg');
+ insert into storage.objects (bucket_id, name) values ('journal-entry-photos','$TM1/d-site.jpg');" >/dev/null
+check "D's representative registers from the SAME worker's assignment on D's own project" contains "registered" "$(as_user $DREP "$(REG $PD $TW1)")"
+check "the worker submits the D-project entry to D (and only that one)" contains "submitted" "$(as_user $TM1 "$(SUB $TE2)")"
+check "D's representative opens D's submitted photo" contains "d-site.jpg" "$(as_user $DREP "$PH")"
+check "  ...but NOT the photo of the entry submitted to C (another entry's link)" absent "paving.jpg" "$(as_user $DREP "$PH")"
+check "C's representative opens C's photo but NOT D's" absent "d-site.jpg" "$(as_user $CREP "$PH")"
+check "C's representative still opens C's photo" contains "paving.jpg" "$(as_user $CREP "$PH")"
+check "the subject's second login (manager of the subject's own org) opens neither" absent "jpg" "$(as_user $TM1B "$PH")"
+check "an EMPLOYER manager of an unrelated org (MGR) opens neither" absent "jpg" "$(as_user 22222222-2222-2222-2222-222222222222 "$PH")"
+check "an UNSUBMITTED entry's photo is closed to the would-be representative" absent "unsub.jpg" "$(as_user $CREP "$PH")"
+$PSQL -q -c "insert into public.journal_entries (id, worker_id, engagement_context_id, original_text, hash_self, project_id) values ('7e100000-0000-0000-0000-000000000003','$TW1','ec7e0011-0000-0000-0000-000000000011','Not submitted.','ht3','$PC');
+ insert into public.journal_entry_photos (entry_id, profile_id, file_name, storage_path) values ('7e100000-0000-0000-0000-000000000003','$TM1','unsub.jpg','$TM1/unsub.jpg');
+ insert into storage.objects (bucket_id, name) values ('journal-entry-photos','$TM1/unsub.jpg');" >/dev/null
+check "  ...(re-check after seeding the unsubmitted photo) the representative cannot open it" absent "unsub.jpg" "$(as_user $CREP "$PH")"
+check "  ...while the subject still can (owner policy)" contains "unsub.jpg" "$(as_user $TM1 "$PH")"
+check "NULL uid sees no photo" absent "jpg" "$(as_user '' "$PH")"
+check "anon cannot even evaluate the predicate" contains "permission denied" "$(as_role '' anon "select public.counterparty_can_read_photo_v1('$TM1/paving.jpg');")"
+
 echo; echo "--- D. team assignment ENDS -> authority stops (derived, not cached)"
 $PSQL -q -c "update public.team_assignments set status='ended', ended_at=now() where team_org_id='$TEAM' and project_id='$PC'" >/dev/null
 check "ended team assignment: client rep can no longer decide the team member's entry" contains "not_authorized" "$(as_user $CREP "$(REVIEW $TE1 approved)")"
@@ -151,6 +182,29 @@ check "ended team assignment: detail returns nothing" absent "Team member laid" 
 check "ended team assignment: the team member is no longer a candidate" absent "$TW1" "$(as_user $CREP "$(CAND $PC)")"
 $PSQL -q -c "insert into public.team_assignments (team_org_id, project_id) values ('$TEAM','$PC')" >/dev/null
 check "team assignment re-created -> authority returns" contains "approved" "$(as_user $CREP "$(REVIEW $TE1 approved)")"
+
+echo; echo "--- D1. REVOKED link closes the photo and the detail at once"
+LNK="$(q "select id from public.work_counterparty_links where worker_id='$TW1' and project_id='$PC' and revoked_at is null limit 1")"
+check "before revocation the representative still opens the photo" contains "paving.jpg" "$(as_user $CREP "$PH")"
+check "the representative revokes the link" contains "revoked" "$(as_user $CREP "select public.revoke_work_counterparty_link_v1('$LNK'::uuid);")"
+check "  ...the ex-link representative can no longer open the photo" absent "paving.jpg" "$(as_user $CREP "$PH")"
+check "  ...nor read the entry detail" absent "Team member laid" "$(as_user $CREP "select public.counterparty_review_entry_detail_v1('$TE1'::uuid)::text;")"
+check "  ...the subject still opens their own photo" contains "paving.jpg" "$(as_user $TM1 "$PH")"
+
+echo; echo "--- D2. batch_review_exceptions counts EMPLOYER approvals only (migration 3)"
+MGRU=22222222-2222-2222-2222-222222222222
+ENP=e9000000-0000-0000-0000-000000000001   # carries the three client acceptances
+ENP2=e9000000-0000-0000-0000-000000000002  # same worker, still awaiting employer review
+$PSQL -q -c "insert into public.journal_entries (id, worker_id, engagement_context_id, original_text, hash_self) values ('$ENP2','aaaa0000-0000-0000-0000-000000000009','ecec1111-0000-0000-0000-000000000001','Agency-managed worker, second entry.','h9b')" >/dev/null
+check "the second entry is in the employer review set (precondition)" contains "$ENP2" "$(as_user $MGRU "select id from public.reviewable_journal_entry_ids() id;")"
+$PSQL -q -v ON_ERROR_STOP=1 -f "$D3" >/dev/null 2>&1   # the rollback script carries the production body
+$PSQL -q -c "alter table public.journal_entry_confirmations disable trigger user" >/dev/null
+for i in 1 2 3; do $PSQL -q -c "insert into public.journal_entry_confirmations (entry_id, confirmer_id, confirmer_engagement_context_id, confirmer_role, confirmation_scope) values ('$ENP','$CREP','ecc10000-0000-0000-0000-000000000001','manager','{\"action\":\"client_accept\",\"decision\":\"approved\",\"authority\":{\"basis\":\"counterparty\"}}')" >/dev/null; done
+$PSQL -q -c "alter table public.journal_entry_confirmations enable trigger user" >/dev/null
+check "BEFORE migration 3 the defect is real: three client acceptances hide the few-confirmations flag" absent "worker_first_entries" "$(as_user $MGRU "select exception_slug from public.batch_review_exceptions(array['$ENP2']::uuid[]);")"
+$PSQL -q -v ON_ERROR_STOP=1 -f "$M3" >/dev/null 2>&1 && echo "  migration 3 applied"
+check "AFTER migration 3 the flag is back (client rows are not employer approvals)" contains "worker_first_entries" "$(as_user $MGRU "select exception_slug from public.batch_review_exceptions(array['$ENP2']::uuid[]);")"
+check "migration 3 keeps the ACL (anon cannot execute)" contains "permission denied" "$(as_role '' anon "select * from public.batch_review_exceptions(array['$ENP2']::uuid[]);")"
 
 echo; echo "--- E. rollback of migration 2 restores the migration-1 bodies"
 $PSQL -q -v ON_ERROR_STOP=1 -f "$D2" >/dev/null 2>"$HERE/.d2.err" && echo "  rollback applied" || { cat "$HERE/.d2.err"; echo ROLLBACK FAILED; }

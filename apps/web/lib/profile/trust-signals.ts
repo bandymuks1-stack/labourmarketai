@@ -1,5 +1,6 @@
 import "server-only";
 
+import { EMPLOYER_BASIS_OR_FILTER } from "@/lib/journal/review-status";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -74,7 +75,10 @@ export async function getOwnTrustSignals(
     const res = await asAny(supabase)
       .from("journal_entry_confirmations")
       .select("id", { count: "exact", head: true })
-      .in("entry_id", entryIds);
+      .in("entry_id", entryIds)
+      // Manager confirmations only (decision 0018): a client's acceptance is
+      // counted separately (CLIENT_ACCEPTED), never here.
+      .or(EMPLOYER_BASIS_OR_FILTER);
     confirmations = res.error ? null : (res.count ?? 0);
   }
 

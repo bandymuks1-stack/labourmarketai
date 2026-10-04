@@ -1,5 +1,6 @@
 import "server-only";
 
+import { isCounterpartyScopeRow } from "@/lib/journal/review-status";
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -90,7 +91,7 @@ export async function getOwnRecordedWorkEvidence(
   // includes the person confirming themselves.
   const confRes = await asAny(supabase)
     .from("journal_entry_confirmations")
-    .select("entry_id, confirmer_id")
+    .select("entry_id, confirmer_id, confirmation_scope")
     .in("entry_id", entryIds)
     .limit(ENTRY_READ_LIMIT);
   if (confRes.error) {
@@ -99,6 +100,9 @@ export async function getOwnRecordedWorkEvidence(
 
   const independent = new Set<string>();
   for (const row of (confRes.data ?? []) as Record<string, unknown>[]) {
+    // Another party's CLIENT acceptance is not an independent employer
+    // confirmation of the capability (decision 0018).
+    if (isCounterpartyScopeRow({ confirmation_scope: row.confirmation_scope })) continue;
     const confirmer = (row.confirmer_id as string | null) ?? null;
     // Absent confirmer id → the question cannot be answered FOR THAT ROW, and
     // the safe reading of an unanswerable independence question is "not
