@@ -203,7 +203,10 @@
       "entrySuperseded": "De registratie is al vervangen door een nieuwere versie — deze kaart is niet meer uitvoerbaar en wordt uit de lijst verwijderd.",
       "entryDeleted": "De registratie is verwijderd — deze kaart is niet meer uitvoerbaar en wordt uit de lijst verwijderd.",
       "staleTerminalHint": "Er is niets vastgelegd. Als de medewerker een nieuwere versie heeft opgeslagen, verschijnt die als nieuwe kaart in de inbox.",
-      "noReviewerEngagement": "U ziet dit item als manager, maar bevestigen vereist bevestigingsbevoegdheid. Vraag de eigenaar van de organisatie die te verlenen op de pagina Mensen."
+      "noReviewerEngagement": "U ziet dit item als manager, maar bevestigen vereist bevestigingsbevoegdheid. Vraag de eigenaar van de organisatie die te verlenen op de pagina Mensen.",
+      "selfReviewNotAllowed": "U kunt uw eigen werk niet bevestigen. Het item blijft als zelf opgegeven vastgelegd; bevestiging moet van een andere bevoegde persoon komen.",
+      "reviewAuthorityNotEstablished": "U bent niet de legitieme wederpartij voor dit werk en kunt het dus niet bevestigen. Bevestiging komt van de werkgever of van de klant aan wie het werk is voorgelegd.",
+      "alreadyAccepted": "Dit werk is al geaccepteerd. Een acceptatie is definitief."
     },
     "showOriginal": "Origineel tonen",
     "skills": "Vaardigheden",

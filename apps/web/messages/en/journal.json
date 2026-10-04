@@ -203,7 +203,10 @@
       "entrySuperseded": "The entry was already replaced by a newer version — this card is no longer actionable and will be removed from the list.",
       "entryDeleted": "The entry was deleted — this card is no longer actionable and will be removed from the list.",
       "staleTerminalHint": "Nothing was recorded. If the worker saved a newer version, it appears in the inbox as a new card.",
-      "noReviewerEngagement": "You can see this entry as a manager, but confirming needs confirmation authority. Ask the organization owner to grant it on the People page."
+      "noReviewerEngagement": "You can see this entry as a manager, but confirming needs confirmation authority. Ask the organization owner to grant it on the People page.",
+      "selfReviewNotAllowed": "You cannot confirm your own work. The entry stays recorded as self-declared; confirmation has to come from another authorized person.",
+      "reviewAuthorityNotEstablished": "You are not the legitimate counterparty for this work, so you cannot confirm it. Confirmation comes from the employer or from the client party the work was submitted to.",
+      "alreadyAccepted": "This work was already accepted. An acceptance is final."
     },
     "showOriginal": "Show original",
     "skills": "Skills",

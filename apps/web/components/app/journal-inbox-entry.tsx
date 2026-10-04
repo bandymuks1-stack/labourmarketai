@@ -105,6 +105,12 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
         // needs a reviewer engagement the owner grants — its own truth.
         case "no_reviewer_engagement":
           return { text: t("inbox.result.noReviewerEngagement"), ok: false };
+        case "self_review_not_allowed":
+          return { text: t("inbox.result.selfReviewNotAllowed"), ok: false };
+        case "review_authority_not_established":
+          return { text: t("inbox.result.reviewAuthorityNotEstablished"), ok: false };
+        case "already_accepted":
+          return { text: t("inbox.result.alreadyAccepted"), ok: false };
         case "skill_not_owned":
           return { text: t("inbox.result.skillNotOwned"), ok: false };
         case "no_skills":
@@ -136,6 +142,12 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
         // needs a reviewer engagement the owner grants — its own truth.
         case "no_reviewer_engagement":
           return { text: t("inbox.result.noReviewerEngagement"), ok: false };
+        case "self_review_not_allowed":
+          return { text: t("inbox.result.selfReviewNotAllowed"), ok: false };
+        case "review_authority_not_established":
+          return { text: t("inbox.result.reviewAuthorityNotEstablished"), ok: false };
+        case "already_accepted":
+          return { text: t("inbox.result.alreadyAccepted"), ok: false };
         case "needs_migration":
           return { text: t("inbox.result.needsMigration"), ok: false };
         default:
@@ -165,6 +177,9 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
   const blockedCodes = [
     "not_authorized",
     "no_reviewer_engagement",
+    "self_review_not_allowed",
+    "review_authority_not_established",
+    "already_accepted",
     "review_not_enabled",
     "entry_superseded",
     "entry_deleted",
