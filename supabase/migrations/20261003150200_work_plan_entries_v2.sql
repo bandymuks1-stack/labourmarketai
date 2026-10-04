@@ -1,5 +1,5 @@
 -- ============================================================================
--- 20261001220000 — work_plan_entries_v2
+-- 20261003150200 — work_plan_entries_v2
 --
 -- CAL-8 (2026-10-01) — revives draft PR #1426 (Train F1, 2026-09-02, never
 -- applied) re-based on current main. Re-verified against the live schema:
@@ -68,7 +68,7 @@
 --          agency_workers — the same three the roster reads). Direct table
 --          writes are revoked from authenticated.
 --
--- ROLLBACK: supabase/rollbacks/20261001220000_work_plan_entries_v2.down.sql
+-- ROLLBACK: supabase/rollbacks/20261003150200_work_plan_entries_v2.down.sql
 -- ============================================================================
 
 create table if not exists public.work_plan_entries (

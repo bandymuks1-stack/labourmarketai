@@ -9,8 +9,8 @@ set -uo pipefail
 export PGCLIENTENCODING=UTF8
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; REPO="$(cd "$HERE/../.." && pwd)"
 LFD="$(mktemp -d)"
-for f in "$REPO/supabase/migrations/20260817150000_work_objects_v1.sql" "$REPO/supabase/migrations/20261001220000_work_plan_entries_v2.sql" "$REPO/supabase/rollbacks/20261001220000_work_plan_entries_v2.down.sql"; do tr -d '\r' < "$f" > "$LFD/$(basename "$f")"; done
-MIG="$LFD/20261001220000_work_plan_entries_v2.sql"; DOWN="$LFD/20261001220000_work_plan_entries_v2.down.sql"
+for f in "$REPO/supabase/migrations/20260817150000_work_objects_v1.sql" "$REPO/supabase/migrations/20261003150200_work_plan_entries_v2.sql" "$REPO/supabase/rollbacks/20261003150200_work_plan_entries_v2.down.sql"; do tr -d '\r' < "$f" > "$LFD/$(basename "$f")"; done
+MIG="$LFD/20261003150200_work_plan_entries_v2.sql"; DOWN="$LFD/20261003150200_work_plan_entries_v2.down.sql"
 PGPROOF_HOST=${PGPROOF_HOST:-127.0.0.1}; PGPROOF_PORT=${PGPROOF_PORT:-54300}
 case "$PGPROOF_HOST" in 127.0.0.1|localhost|/*) ;; *) echo "refusing non-local host"; exit 2;; esac
 PSQL="psql -h $PGPROOF_HOST -p $PGPROOF_PORT -U postgres -d postgres -tA -q"

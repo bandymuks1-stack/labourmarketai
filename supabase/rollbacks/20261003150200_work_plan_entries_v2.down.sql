@@ -1,5 +1,5 @@
 -- ============================================================================
--- ROLLBACK for 20261001220000_work_plan_entries_v2
+-- ROLLBACK for 20261003150200_work_plan_entries_v2
 --
 -- Removes the plan primitive. Guarded: refuses while planned windows exist,
 -- because a rollback must not silently destroy what managers planned. Cancel

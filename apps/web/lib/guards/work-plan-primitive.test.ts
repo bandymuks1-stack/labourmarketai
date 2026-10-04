@@ -30,7 +30,7 @@ const readRepo = (rel: string) => readFileSync(resolve(repo, rel), "utf8");
 describe("Guard: work_plan_entries migration", () => {
   // Executable SQL only — the ROLLBACK block is a comment that names the
   // reversal (drop table …) and must not read as a destructive statement.
-  const sql = readRepo("supabase/migrations/20261001220000_work_plan_entries_v2.sql")
+  const sql = readRepo("supabase/migrations/20261003150200_work_plan_entries_v2.sql")
     .split(/\r?\n/)
     .filter((line) => !line.trimStart().startsWith("--"))
     .join("\n");
@@ -54,7 +54,7 @@ describe("Guard: work_plan_entries migration", () => {
   });
 
   it("ships a rollback that refuses while planned windows exist", () => {
-    const down = readRepo("supabase/rollbacks/20261001220000_work_plan_entries_v2.down.sql");
+    const down = readRepo("supabase/rollbacks/20261003150200_work_plan_entries_v2.down.sql");
     expect(down).toMatch(/rollback refused/);
     expect(down).toMatch(/drop table if exists public\.work_plan_entries/);
   });
@@ -99,7 +99,7 @@ describe("Guard: the calendar knows the plan source end to end", () => {
 
 describe("Guard: CAL-8 — planned work is a forecast on the one calendar, through the one collision rule", () => {
   it("the roster scope uses the real org bridge, not columns that do not exist", () => {
-    const sql = readRepo("supabase/migrations/20261001220000_work_plan_entries_v2.sql")
+    const sql = readRepo("supabase/migrations/20261003150200_work_plan_entries_v2.sql")
       .split(/\r?\n/)
       .filter((l) => !l.trimStart().startsWith("--"))
       .join("\n");
