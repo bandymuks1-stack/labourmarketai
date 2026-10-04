@@ -6038,7 +6038,8 @@
           "project": "Objektas",
           "booking": "Rezervacija",
           "trip": "Komandiruotė",
-          "absence": "Nepasiekiama"
+          "absence": "Nepasiekiama",
+          "plan": "Suplanuotas darbas"
         }
       }
     },
@@ -10722,7 +10723,8 @@
       "finance": "Finansai",
       "invitation": "Kvietimas",
       "absence": "Atostogos",
-      "stage": "Etapai"
+      "stage": "Etapai",
+      "plan": "Suplanuotas darbas"
     },
     "sourceNotes": {
       "taskError": "Užduočių šiuo metu nepavyko įkelti. Likusi plano dalis rodoma įprastai.",
@@ -10766,7 +10768,8 @@
       "finance": "Finansų įrašas",
       "invitation": "Kvietimas",
       "absence": "Atostogos / nedarbingumas",
-      "stage": "Projekto etapas"
+      "stage": "Projekto etapas",
+      "plan": "Suplanuotas darbas"
     },
     "projectStatus": {
       "draft": "Juodraštis",
@@ -10863,6 +10866,10 @@
       "dayNoWork": "Šią dieną darbas neužfiksuotas.",
       "dayFuture": "Ši diena dar neatėjo.",
       "recordOnDay": "Įrašyti darbą šiai dienai"
+    },
+    "planStatus": {
+      "planned": "Suplanuota",
+      "cancelled": "Atšaukta"
     }
   },
   "workforcePlanning": {
@@ -10990,7 +10997,8 @@
       "kind": {
         "project": "projektas",
         "booking": "užsakymas",
-        "trip": "komandiruotė"
+        "trip": "komandiruotė",
+        "plan": "suplanuotas darbas"
       },
       "untitled": "be pavadinimo",
       "openEnded": "nuo {start}, pabaigos data neįrašyta",
@@ -18068,6 +18076,41 @@
       "done": "Priskirta įrašų: {count}; jau buvo priskirta: {skipped}.",
       "refused": "Nepavyko išsaugoti. Nieko nepakeista.",
       "person": "{hours} val., {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}"
+    }
+  },
+  "workPlan": {
+    "title": "Suplanuotas darbas",
+    "intro": "Suplanuokite, kas, kur ir kada dirba. Kalendorius tai rodo kaip planą; kas iš tikrųjų įvyko, lieka darbo žurnale.",
+    "worker": "Darbuotojas",
+    "project": "Projektas (neprivaloma)",
+    "workObject": "Objektas (neprivaloma)",
+    "startDate": "Nuo",
+    "endDate": "Iki",
+    "startTime": "Pradžia (neprivaloma)",
+    "endTime": "Pabaiga (neprivaloma)",
+    "note": "Pastaba (neprivaloma)",
+    "none": "Nėra",
+    "submit": "Suplanuoti darbą",
+    "pending": "Planuojama…",
+    "cancel": "Atšaukti planą",
+    "cancelPending": "Atšaukiama…",
+    "empty": "Šiam laikotarpiui dar nieko nesuplanuota.",
+    "noWorkers": "Jūsų sąraše dar nėra darbuotojų. Pirmiausia pakvieskite žmones, tada planuokite jų darbą.",
+    "unavailable": "Planavimas čia dar nepasiekiamas.",
+    "listTitle": "Suplanuoti laikotarpiai",
+    "overlap": "Persidengia su patvirtintomis atostogomis",
+    "outcome": {
+      "planned": "Darbas suplanuotas.",
+      "cancelled": "Planas atšauktas.",
+      "invalid": "Patikrinkite datas ir laukus ir bandykite dar kartą.",
+      "not_allowed": "Negalite planuoti šiai organizacijai.",
+      "worker_not_in_scope": "Šis darbuotojas nėra šios organizacijos sąraše.",
+      "project_not_in_organization": "Šis projektas priklauso kitai organizacijai.",
+      "work_object_not_in_organization": "Šis objektas priklauso kitai organizacijai.",
+      "unavailable": "Planavimas čia dar nepasiekiamas.",
+      "error": "Kažkas nepavyko. Bandykite dar kartą.",
+      "planned_collides": "Suplanuota, bet šis žmogus jau turi darbų kai kuriomis iš šių dienų. Sprendžiate jūs; jei plano nereikia, atšaukite jį žemiau.",
+      "planned_unknown": "Suplanuota, bet nepavyko patvirtinti, ar tos dienos laisvos. Tai nereiškia, kad laisvos."
     }
   },
   "workLifecycle": {
