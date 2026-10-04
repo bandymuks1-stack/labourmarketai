@@ -8,7 +8,7 @@
 -- marker above is the risk acknowledgement the static gate reads, not an
 -- approval.
 --
--- 20261003150000 — a manager's explicit override of a known calendar clash
+-- 20261003150100 — a manager's explicit override of a known calendar clash
 -- leaves an IMMUTABLE, PRIVACY-MINIMAL receipt.  (J-TIME-FREEDOM step 5, CAL-7.)
 --
 -- ── WHAT EXISTS (read on production 2026-10-03, SELECT-only) ───────────────
@@ -71,7 +71,7 @@
 -- team fan-out table (a team assignment calls the same per-member writer), no
 -- change to assign_worker_to_project / record_assignment_decision.
 --
--- ROLLBACK: supabase/rollbacks/20261003150000_commitment_override_receipts_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20261003150100_commitment_override_receipts_v1.down.sql
 -- (guarded: refuses while any receipt exists - a receipt is evidence).
 
 do $$

@@ -1,4 +1,4 @@
--- Rollback 20261003150000: remove the override receipt writer and table.
+-- Rollback 20261003150100: remove the override receipt writer and table.
 -- GUARDED: refuses while any receipt exists - a receipt is evidence of a real
 -- decision and must never be dropped silently. Archive first, then re-run.
 do $$

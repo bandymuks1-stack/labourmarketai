@@ -19,7 +19,7 @@ const REPO = join(__dirname, "..", "..", "..", "..");
 const CR = String.fromCharCode(13);
 const read = (...p: string[]) =>
   readFileSync(join(REPO, ...p), "utf8").split(CR).join("");
-const NAME = "20261003150000_commitment_override_receipts_v1";
+const NAME = "20261003150100_commitment_override_receipts_v1";
 const UP = read("supabase", "migrations", `${NAME}.sql`);
 const DOWN = read("supabase", "rollbacks", `${NAME}.down.sql`);
 const ACTIONS = read("apps", "web", "lib", "projects", "actions.ts");

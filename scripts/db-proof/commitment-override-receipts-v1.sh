@@ -2,7 +2,7 @@
 # ============================================================================
 # commitment_override_receipts_v1 — REAL PostgreSQL 16 proof (throwaway container).
 #
-# Proves migration 20261003150000_commitment_override_receipts_v1 on a harness
+# Proves migration 20261003150100_commitment_override_receipts_v1 on a harness
 # whose helper functions (can_manage_project, owns_company, manages_organization,
 # owns_worker, is_admin) and project_worker_assignments (constraints, policies,
 # ACL) are the PRODUCTION definitions read 2026-10-03, with Supabase default
@@ -17,7 +17,7 @@ export MSYS_NO_PATHCONV=1
 CT=ovr-receipt-proof
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/../.." && pwd)"
-NAME=20261003150000_commitment_override_receipts_v1
+NAME=20261003150100_commitment_override_receipts_v1
 MIG="$REPO/supabase/migrations/$NAME.sql"
 DOWN="$REPO/supabase/rollbacks/$NAME.down.sql"
 
