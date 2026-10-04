@@ -35,6 +35,7 @@ import { assessPublish } from "@/lib/marketplace/publish-policy";
 import { readFederatedMarketRows } from "@/lib/marketplace/federation";
 import {
   filterByDirection,
+  indexRowActor,
   isFederatedOnlyDomain,
   mergeDiscoveryRows,
 } from "@/lib/marketplace/federation-model";
@@ -204,6 +205,37 @@ export async function discoverMarketplaceListings(filters?: {
   };
 }
 
+/**
+ * Fill the actor KIND of index rows. Persons / service providers come from the
+ * row itself; an organisation's kind comes from `organization_roles` read under
+ * the CALLER's RLS (members of the organisation only) — a capability the
+ * caller may not read stays `other`. Reads role slugs only, never identities;
+ * a failed read leaves `other` rather than a guess.
+ */
+async function attachActors(
+  supabase: SupabaseClient,
+  rows: MarketplaceDiscoveryRow[],
+): Promise<void> {
+  const orgIds = [...new Set(rows.map((r) => r.organizationId).filter((x): x is string => !!x))];
+  const caps = new Map<string, string[]>();
+  if (orgIds.length > 0) {
+    const { data, error } = await asAny(supabase)
+      .from("organization_roles")
+      .select("organization_id, role_slug")
+      .in("organization_id", orgIds);
+    if (!error) {
+      for (const r of (data ?? []) as { organization_id: string; role_slug: string }[]) {
+        const list = caps.get(r.organization_id) ?? [];
+        list.push(r.role_slug);
+        caps.set(r.organization_id, list);
+      }
+    }
+  }
+  for (let i = 0; i < rows.length; i++) {
+    rows[i] = { ...rows[i], ...indexRowActor(rows[i], caps) };
+  }
+}
+
 async function discoverIndexRows(filters?: {
   domain?: string;
   category?: string;
@@ -264,8 +296,11 @@ async function discoverIndexRows(filters?: {
         visibility: "signed_in" as const,
         provenance: "platform" as const,
         publisherName: null,
+        actorKind: "other" as const,
+        actorBasis: "undisclosed" as const,
       }),
     );
+    await attachActors(supabase, rows);
     return {
       kind: "ok",
       rows: hideQaMarked(rows, isQaViewer(user), (r) => [r.title, r.description]),
@@ -325,6 +360,12 @@ async function discoverIndexRows(filters?: {
         visibility: "signed_in" as const,
         provenance: "platform" as const,
         publisherName: null,
+        ...indexRowActor({
+          sourceTable: "marketplace_listings",
+          organizationId: m.organizationId,
+          domain: "work_resource",
+          direction: deriveDirection(m.listingKind),
+        }),
       };
     },
   );

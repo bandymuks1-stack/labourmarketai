@@ -202,6 +202,17 @@
     "formExpiryLabel": "Galioja iki",
     "formExpiryHint": "Neprivaloma. Suma, kiekis ir data yra aprašomieji — mokėjimai čia nevykdomi. Po šios datos skelbimas kitiems nebematomas.",
     "domainFilterLabel": "Filtruoti pagal sritį",
+    "actorFilterLabel": "Filtruoti pagal siūlytoją ar ieškotoją",
+    "actorKinds": {
+      "all": "Visi",
+      "person": "Asmuo",
+      "company": "Įmonė",
+      "institution": "Organizacija ar įstaiga",
+      "agency": "Agentūra",
+      "service_provider": "Savarankiškas paslaugų teikėjas",
+      "supplier": "Tiekėjas",
+      "other": "Tipas nenurodytas"
+    },
     "errorPrice": "Įveskite teisingą sumą ir 3 raidžių valiutos kodą (pvz. EUR).",
     "errorQuantity": "Kiekis turi būti skaičius, didesnis už nulį.",
     "errorExpiry": "Data turi būti ateityje.",

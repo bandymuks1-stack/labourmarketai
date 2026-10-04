@@ -202,6 +202,17 @@
     "formExpiryLabel": "Verfügbar bis",
     "formExpiryHint": "Optional. Betrag, Menge und Datum sind beschreibend — Zahlungen werden hier nicht abgewickelt. Nach dem Datum wird die Anzeige anderen nicht mehr angezeigt.",
     "domainFilterLabel": "Nach Bereich filtern",
+    "actorFilterLabel": "Nach Anbieter bzw. Suchendem filtern",
+    "actorKinds": {
+      "all": "Alle",
+      "person": "Person",
+      "company": "Unternehmen",
+      "institution": "Organisation oder Einrichtung",
+      "agency": "Agentur",
+      "service_provider": "Selbstständiger Dienstleister",
+      "supplier": "Lieferant",
+      "other": "Art nicht angegeben"
+    },
     "errorPrice": "Geben Sie einen gültigen Betrag mit einem dreistelligen Währungscode ein (z. B. EUR).",
     "errorQuantity": "Die Menge muss eine Zahl größer als null sein.",
     "errorExpiry": "Das Datum muss in der Zukunft liegen.",

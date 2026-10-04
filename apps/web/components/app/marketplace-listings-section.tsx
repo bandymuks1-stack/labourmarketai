@@ -24,6 +24,7 @@ import {
   enquireAboutListingAction,
 } from "@/lib/marketplace/listings";
 import {
+  ACTOR_KINDS,
   LISTING_CATEGORIES,
   LISTING_KINDS,
   type ListingKind,
@@ -145,6 +146,7 @@ export function MarketplaceListingsSection({
   const [legalAck, setLegalAck] = useState(false);
   const [ackFor, setAckFor] = useState<string | null>(null);
   const [domainTab, setDomainTab] = useState<string>("all");
+  const [actorTab, setActorTab] = useState<string>("all");
   // Canonical destination of a listing: /dashboard/listings?focus=<id>. There is
   // no per-listing route, so the section anchors and highlights that row.
   const focusId = useSearchParams().get("focus");
@@ -303,8 +305,13 @@ export function MarketplaceListingsSection({
   // `job` and `workforce` exist only through the federation adapters
   // (lib/marketplace/federation*.ts); `project_work` mixes listings + demand.
   const tabDomains = ["all", ...LISTING_DOMAINS, "service", "job", "workforce"] as const;
-  const shownRows =
+  const domainRows =
     domainTab === "all" ? otherRows : otherRows.filter((r) => r.domain === domainTab);
+  // Actor filter: only kinds that actually occur in the current rows, so no
+  // chip promises rows that do not exist.
+  const actorKindsPresent = ACTOR_KINDS.filter((k) => domainRows.some((r) => r.actorKind === k));
+  const shownRows =
+    actorTab === "all" ? domainRows : domainRows.filter((r) => r.actorKind === actorTab);
 
   function subjectLabel(subject: string | null, domain: string): string {
     if (subject && domainOfSubject(subject)) return t(`categories.${subject}`);
@@ -723,6 +730,31 @@ export function MarketplaceListingsSection({
           </div>
         )}
 
+        {extended && actorKindsPresent.length > 1 && (
+          <div
+            role="group"
+            aria-label={t("actorFilterLabel")}
+            data-testid="market-actor-filter"
+            className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
+          >
+            {(["all", ...actorKindsPresent] as const).map((k) => (
+              <button
+                key={k}
+                type="button"
+                aria-pressed={actorTab === k}
+                onClick={() => setActorTab(k)}
+                className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm transition-colors ${
+                  actorTab === k
+                    ? "border-brand-blue bg-brand-blue/10 text-text-primary"
+                    : "border-ink-500 text-text-secondary hover:border-brand-blue"
+                }`}
+              >
+                {t(`actorKinds.${k}`)}
+              </button>
+            ))}
+          </div>
+        )}
+
         {unavailable.length > 0 && (
           <p
             role="status"
@@ -764,6 +796,13 @@ export function MarketplaceListingsSection({
                   </span>
                   <span className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted">
                     {t(`directions.${row.direction}`)}
+                  </span>
+                  <span
+                    data-testid="market-row-actor"
+                    data-actor-kind={row.actorKind}
+                    className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
+                  >
+                    {t(`actorKinds.${row.actorKind}`)}
                   </span>
                   {row.sourceTable === "public_vacancies" || row.sourceTable === "customer_requests" ? (
                     <>

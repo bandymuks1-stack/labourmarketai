@@ -76,6 +76,30 @@ export type MarketVisibility =
 /** Where the fact came from. */
 export type MarketProvenance = "platform" | "external_vacancy";
 
+/**
+ * WHO is on the other side of the row (the ACTOR dimension of the universal
+ * model). A closed, extensible set: a new kind is one more member plus its
+ * mapping in `federation-model.ts`. `other` is the honest answer when the
+ * canonical source does not state the actor's kind — never a guess.
+ */
+export const ACTOR_KINDS = [
+  "person",
+  "company",
+  "institution",
+  "agency",
+  "service_provider",
+  "supplier",
+  "other",
+] as const;
+export type ActorKind = (typeof ACTOR_KINDS)[number];
+
+/** HOW the kind was derived (all deterministic, from canonical facts). */
+export type ActorBasis =
+  | "source_column" // a column of the origin row (owner_id / provider_id)
+  | "source_kind" // the origin reader's own gate (verified company, agency offer)
+  | "capability" // organization_roles, readable by the caller under RLS
+  | "undisclosed"; // the source does not state it
+
 export interface MarketplaceDiscoveryRow {
   /** ORIGIN: the canonical source table (never a copy). With `id` it is the
    *  provenance key of the row. `public_vacancies` / `customer_requests` rows
@@ -116,6 +140,9 @@ export interface MarketplaceDiscoveryRow {
   readonly provenance: MarketProvenance;
   /** Only a name the gated source reader already disclosed (verified company). */
   readonly publisherName: string | null;
+  /** Actor KIND only — never an identity. Derived per row, never stored. */
+  readonly actorKind: ActorKind;
+  readonly actorBasis: ActorBasis;
 }
 
 /** `extended` = the universal-marketplace migration is applied (new columns /

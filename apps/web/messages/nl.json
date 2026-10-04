@@ -202,6 +202,17 @@
     "formExpiryLabel": "Beschikbaar tot",
     "formExpiryHint": "Optioneel. Bedrag, hoeveelheid en datum zijn beschrijvend — er wordt hier geen betaling gedaan. Na de datum verschijnt de advertentie niet meer voor anderen.",
     "domainFilterLabel": "Filter op gebied",
+    "actorFilterLabel": "Filter op aanbieder of vrager",
+    "actorKinds": {
+      "all": "Alle",
+      "person": "Persoon",
+      "company": "Bedrijf",
+      "institution": "Organisatie of instelling",
+      "agency": "Bureau",
+      "service_provider": "Zelfstandige dienstverlener",
+      "supplier": "Leverancier",
+      "other": "Type niet vermeld"
+    },
     "errorPrice": "Voer een geldig bedrag in met een valutacode van 3 letters (bijv. EUR).",
     "errorQuantity": "De hoeveelheid moet een getal groter dan nul zijn.",
     "errorExpiry": "De datum moet in de toekomst liggen.",
