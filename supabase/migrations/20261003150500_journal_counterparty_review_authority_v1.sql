@@ -635,6 +635,12 @@ begin
       if v_last = p_decision then return p_decision; end if;
       if v_last = 'approved' then return 'already_accepted'; end if;
     end if;
+    -- A correction request and a dispute carry a reason: required HERE as well
+    -- as in the web / chat doors, so no caller can record a note-less one.
+    if p_decision in ('rejected','changes_requested')
+       and nullif(btrim(coalesce(p_note,'')), '') is null then
+      return 'note_required';
+    end if;
     v_action := case p_decision when 'approved' then 'client_accept'
                                 when 'rejected' then 'client_dispute'
                                 else 'client_request_correction' end;
