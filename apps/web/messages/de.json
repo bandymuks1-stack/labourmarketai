@@ -11973,6 +11973,7 @@
         "revoked": "Diese Einladung wurde widerrufen.",
         "declined": "Einladung abgelehnt.",
         "no_worker_profile": "Erstellen Sie zuerst Ihr Arbeitsprofil und nehmen Sie die Einladung dann an.",
+        "email_mismatch": "Diese Einladung ist an eine andere E-Mail-Adresse gerichtet.",
         "not_found": "Einladung nicht gefunden.",
         "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
         "exhausted": "Alle Plätze sind belegt.",
@@ -11995,7 +11996,13 @@
       "agencyClient": "Eine Personalagentur lädt Ihr Unternehmen ein, als Kunde zusammenzuarbeiten.",
       "agencyClientNext": "Nach dem Annehmen erscheint die Verbindungsanfrage auf der Partnerseite Ihrer Organisation — bestätigen Sie sie dort mit Ihrem Unternehmen. Bis dahin wird nichts geteilt.",
       "addressedToOther": "Diese Einladung ist an {email} gerichtet. Sie sind mit einer anderen Adresse angemeldet, daher kann die Verbindung aus diesem Konto nicht bestätigt werden — melden Sie sich mit der eingeladenen Adresse an und öffnen Sie diesen Link erneut.",
-      "switchAccount": "Abmelden und Konto wechseln"
+      "switchAccount": "Abmelden und Konto wechseln",
+      "emailMismatch": {
+        "title": "Diese Einladung gilt einer anderen E-Mail-Adresse",
+        "body": "Diese Einladung wurde an {email} gesendet. Sie sind mit einer anderen Adresse angemeldet, daher kann sie aus diesem Konto weder angezeigt noch beantwortet werden. Melden Sie sich mit der eingeladenen Adresse an und öffnen Sie diesen Link erneut.",
+        "bodyNoHint": "Diese Einladung wurde an eine andere E-Mail-Adresse gesendet als die, mit der Sie angemeldet sind, daher kann sie aus diesem Konto weder angezeigt noch beantwortet werden. Melden Sie sich mit der eingeladenen Adresse an und öffnen Sie diesen Link erneut.",
+        "untouched": "Es wurde nichts angenommen oder geändert. Die Einladung wartet weiterhin auf die Person, an die sie gesendet wurde."
+      }
     },
     "teamEnquiriesTitle": "Meine Anfragen an Kolonnen",
     "admin": {

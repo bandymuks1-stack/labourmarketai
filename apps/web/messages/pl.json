@@ -11973,6 +11973,7 @@
         "revoked": "To zaproszenie zostało cofnięte.",
         "declined": "Zaproszenie odrzucone.",
         "no_worker_profile": "Najpierw utwórz profil pracownika, a następnie zaakceptuj zaproszenie.",
+        "email_mismatch": "To zaproszenie jest zaadresowane do innego adresu e-mail.",
         "not_found": "Nie znaleziono zaproszenia.",
         "error": "Coś poszło nie tak. Spróbuj ponownie.",
         "exhausted": "Wszystkie miejsca są zajęte.",
@@ -11995,7 +11996,13 @@
       "agencyClient": "Agencja pracy zaprasza Twoją firmę do współpracy jako klienta.",
       "agencyClientNext": "Po zaakceptowaniu prośba o połączenie pojawi się na stronie Partnerzy Twojej organizacji — potwierdź ją tam w imieniu swojej firmy. Do tego czasu nic nie jest udostępniane.",
       "addressedToOther": "To zaproszenie zostało zaadresowane do {email}. Jesteś zalogowany(a) innym adresem, więc z tego konta nie można potwierdzić połączenia — zaloguj się zaproszonym adresem i otwórz ten link ponownie.",
-      "switchAccount": "Wyloguj się i zmień konto"
+      "switchAccount": "Wyloguj się i zmień konto",
+      "emailMismatch": {
+        "title": "To zaproszenie jest przeznaczone dla innego adresu e-mail",
+        "body": "To zaproszenie zostało wysłane na adres {email}. Jesteś zalogowany(a) innym adresem, więc z tego konta nie można go wyświetlić ani na nie odpowiedzieć. Zaloguj się zaproszonym adresem i otwórz ten link ponownie.",
+        "bodyNoHint": "To zaproszenie zostało wysłane na inny adres e-mail niż ten, którym jesteś zalogowany(a), więc z tego konta nie można go wyświetlić ani na nie odpowiedzieć. Zaloguj się zaproszonym adresem i otwórz ten link ponownie.",
+        "untouched": "Nic nie zostało przyjęte ani zmienione. Zaproszenie nadal czeka na osobę, do której je wysłano."
+      }
     },
     "teamEnquiriesTitle": "Moje zapytania do zespołów",
     "admin": {
