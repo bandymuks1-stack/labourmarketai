@@ -66,4 +66,11 @@ describe("picker mirrors the server refusals", () => {
       ),
     ).toBe(false);
   });
+  it("a team member's entry (context = the TEAM's organization) is offered for the team's project task", () => {
+    const task = { projectId: "pA", organizationId: "o1", teamOrganizationIds: ["teamX"] };
+    expect(isLinkableForTask({ projectId: "pA", organizationId: "teamX" }, task)).toBe(true);
+    // a team the viewer does not reach this project through stays refused
+    expect(isLinkableForTask({ projectId: "pA", organizationId: "teamY" }, task)).toBe(false);
+    expect(isLinkableForTask({ projectId: "pA", organizationId: "teamX" }, { projectId: "pA", organizationId: "o1" })).toBe(false);
+  });
 });

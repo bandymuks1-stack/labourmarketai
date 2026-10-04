@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { readMyTeamWorkContexts } from "@/lib/projects/team-work-context";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -270,6 +271,15 @@ export default async function TasksPage({
       listMyTeamTasks(),
     ]);
   const viaTeamByTask = teamTasksRead.viaTeamByTask;
+  // Team organizations through which the caller reaches each project (their own
+  // contexts, resolved by the database): a team member's journal entry carries
+  // the TEAM's organization, which is a legitimate evidence context for the task.
+  const teamOrgsByProject = new Map<string, string[]>();
+  for (const c of await readMyTeamWorkContexts(await createClient())) {
+    const list = teamOrgsByProject.get(c.project_id) ?? [];
+    if (!list.includes(c.team_org_id)) list.push(c.team_org_id);
+    teamOrgsByProject.set(c.project_id, list);
+  }
   const myOwnTaskIds = new Set(
     myResult.status === "ok" ? myResult.tasks.map((task) => task.id) : [],
   );
@@ -429,6 +439,7 @@ export default async function TasksPage({
         isLinkableForTask(e, {
           projectId: task.projectId,
           organizationId: evidenceTaskOrg,
+          teamOrganizationIds: task.projectId ? (teamOrgsByProject.get(task.projectId) ?? []) : [],
         }),
     );
 
