@@ -18211,6 +18211,14 @@
       "title": "Ihre Geschichte geht mit Ihnen",
       "body": "Jede Arbeit, die Sie festhalten, ergänzt sie. Nehmen Sie sie mit zur nächsten Gelegenheit.",
       "cta": "Sehen, wohin Sie gehen können"
+    },
+    "rail": {
+      "label": "Von der Arbeit zur Geschichte",
+      "work": "Arbeit",
+      "evidence": "Belege",
+      "confirmed": "Bestätigt",
+      "history": "Werdegang",
+      "next": "Weiter"
     }
   },
   "workContext": {

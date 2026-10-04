@@ -18211,6 +18211,14 @@
       "title": "Your history goes with you",
       "body": "Every job you record adds to it. Take it to the next opportunity.",
       "cta": "See where you can go"
+    },
+    "rail": {
+      "label": "From work to history",
+      "work": "Work",
+      "evidence": "Evidence",
+      "confirmed": "Confirmed",
+      "history": "History",
+      "next": "Next"
     }
   },
   "workContext": {

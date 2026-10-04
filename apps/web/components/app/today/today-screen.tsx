@@ -1,12 +1,15 @@
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
+import { PersonPortrait } from "@/components/app/identity/person-portrait";
 import { Card } from "@/components/ui/Card";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { Link } from "@/lib/i18n/navigation";
 import { deriveTodayNext, deriveTodayState } from "@/lib/today/today-model";
 import { TODAY_STATIONS } from "@/lib/today/today-route";
+import { playerInitials } from "@/lib/identity/player-identity";
+import { getOwnAvatar } from "@/lib/profile/avatar";
 import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import { loadTodayHead, loadTodayWorkIntelligence } from "@/lib/today/today-server";
 
@@ -83,11 +86,12 @@ export function TodayScreen({ locale }: { locale: ActiveLocale }) {
 }
 
 async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
-  const [t, tCard, tProf, head] = await Promise.all([
+  const [t, tCard, tProf, head, avatar] = await Promise.all([
     getTranslations("todayScreen.home"),
     getTranslations("auth.dashboard.workCard"),
     getTranslations("professions"),
     loadTodayHead(),
+    getOwnAvatar(),
   ]);
   const next = deriveTodayNext(head.workCard);
   // The first profession this person holds that can be named — a registry one
@@ -109,19 +113,25 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
       className="mx-auto flex w-full max-w-2xl flex-col gap-8"
     >
       {/* 1 · HEADER — who, what they do, where today stands. */}
-      <header data-testid="today-header" className="flex flex-col gap-2">
-        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {t("eyebrow")}
-        </p>
-        <h1 className="font-display text-title font-bold tracking-tightest text-text-primary sm:text-title-lg">
-          {head.displayName ?? t("headerNoName")}
-        </h1>
-        <p className="text-support text-text-secondary" data-testid="today-profession">
-          {professionLabel ?? t("professionUnknown")}
-        </p>
-        <Suspense fallback={<Reading label={t("reading")} />}>
-          <TodayStateLine locale={locale} />
-        </Suspense>
+      <header data-testid="today-header" className="flex items-center gap-4 sm:gap-5">
+        <PersonPortrait
+          name={head.displayName ?? t("headerNoName")}
+          avatarUrl={avatar.signedUrl}
+          initials={playerInitials(head.displayName ?? "")}
+          width="64px"
+        />
+        <div className="flex min-w-0 flex-col gap-1">
+          <p className="text-support font-medium text-brand-blue">{t("eyebrow")}</p>
+          <h1 className="font-display text-title font-bold tracking-tightest text-text-primary sm:text-title-lg">
+            {head.displayName ?? t("headerNoName")}
+          </h1>
+          <p className="text-support text-text-secondary" data-testid="today-profession">
+            {professionLabel ?? t("professionUnknown")}
+          </p>
+          <Suspense fallback={<Reading label={t("reading")} />}>
+            <TodayStateLine locale={locale} />
+          </Suspense>
+        </div>
       </header>
 
       {/* 2 · THE ONE PRIMARY ACTION. */}

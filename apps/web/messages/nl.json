@@ -18211,6 +18211,14 @@
       "title": "Uw geschiedenis gaat met u mee",
       "body": "Elke klus die u vastlegt, vult haar aan. Neem haar mee naar de volgende kans.",
       "cta": "Bekijk waar u naartoe kunt"
+    },
+    "rail": {
+      "label": "Van werk naar geschiedenis",
+      "work": "Werk",
+      "evidence": "Bewijs",
+      "confirmed": "Bevestigd",
+      "history": "Geschiedenis",
+      "next": "Volgende"
     }
   },
   "workContext": {

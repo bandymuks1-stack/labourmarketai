@@ -1035,3 +1035,25 @@ a {
 @media (prefers-reduced-motion: reduce) {
   .living-hero-rise, .lwh-sweep, .lwh-frag, .lwh-sheen, .lwh-dip { animation: none; }
 }
+
+/* ── THE PRODUCT LABEL GRAMMAR ───────────────────────────────────────────
+   Inside the signed-in product, labels are sentence case in the UI face — not
+   widely tracked mono capitals. Hundreds of labels carry
+   `font-mono uppercase tracking-label`; the capitals were the signature of
+   admin software (premium design pass §12: "more admin UI than a 2026 AI
+   product"). Scoping the change to `.lm-product` (the dashboard layout
+   wrapper) moves every one of them at once, leaves the public site and the
+   frozen landing untouched, and keeps mono for what is machine-precise —
+   numbers, ids and stamps, which are not uppercase labels. A string authored
+   in capitals stays in capitals. */
+.lm-product .uppercase {
+  text-transform: none;
+}
+.lm-product .tracking-label,
+.lm-product .tracking-widest {
+  letter-spacing: 0;
+}
+.lm-product .font-mono.uppercase {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-weight: 500;
+}

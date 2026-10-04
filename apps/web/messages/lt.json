@@ -18211,6 +18211,14 @@
       "title": "Jūsų istorija keliauja su jumis",
       "body": "Kiekvienas užfiksuotas darbas ją papildo. Pasiimkite ją į kitą galimybę.",
       "cta": "Pažiūrėti, kur galite eiti"
+    },
+    "rail": {
+      "label": "Nuo darbo iki istorijos",
+      "work": "Darbas",
+      "evidence": "Įrodymai",
+      "confirmed": "Patvirtinta",
+      "history": "Istorija",
+      "next": "Toliau"
     }
   },
   "workContext": {

@@ -18211,6 +18211,14 @@
       "title": "Twoja historia idzie z Tobą",
       "body": "Każda praca, którą zapiszesz, ją uzupełnia. Zabierz ją na następną okazję.",
       "cta": "Zobacz, dokąd możesz pójść"
+    },
+    "rail": {
+      "label": "Od pracy do historii",
+      "work": "Praca",
+      "evidence": "Dowody",
+      "confirmed": "Potwierdzone",
+      "history": "Historia",
+      "next": "Dalej"
     }
   },
   "workContext": {
