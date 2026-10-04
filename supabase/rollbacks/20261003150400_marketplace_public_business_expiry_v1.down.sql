@@ -1,6 +1,6 @@
--- Rollback of 20261002170100: restore the original get_public_business_listings_v1
+-- Rollback of 20261003150400: restore the original get_public_business_listings_v1
 -- body (no expiry predicate). Signature and ACL are unchanged either way.
--- Run this BEFORE rolling back 20261002170000 (which drops expires_at).
+-- Run this BEFORE rolling back 20261003150300 (which drops expires_at).
 
 begin;
 

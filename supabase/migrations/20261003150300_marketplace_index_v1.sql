@@ -40,10 +40,10 @@
 --
 -- The public-surface expiry predicate on get_public_business_listings_v1 (anon
 -- reachable) is deliberately NOT in this file: it ships as the separate
--- migration 20261002170100_marketplace_public_business_expiry_v1.sql so the
+-- migration 20261003150400_marketplace_public_business_expiry_v1.sql so the
 -- gate can review the public surface independently.
 --
--- ROLLBACK: supabase/rollbacks/20261002170000_marketplace_index_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20261003150300_marketplace_index_v1.down.sql
 -- (guarded: refuses if any new column holds data or any new subject is in use).
 -- ============================================================================
 
@@ -432,7 +432,7 @@ create trigger marketplace_listings_publish_guard_trg
   for each row execute function public.marketplace_listings_publish_guard();
 
 -- 9. (moved) The anon-reachable get_public_business_listings_v1 expiry predicate
---    ships in 20261002170100_marketplace_public_business_expiry_v1.sql.
+--    ships in 20261003150400_marketplace_public_business_expiry_v1.sql.
 
 -- 10. ONE discovery view. Each branch rides its OWN table's RLS
 --     (security_invoker). Demand (customer_requests) and public_vacancies are
@@ -536,4 +536,4 @@ revoke execute on function public.marketplace_listings_publish_guard() from auth
 
 commit;
 
--- ROLLBACK: see supabase/rollbacks/20261002170000_marketplace_index_v1.down.sql
+-- ROLLBACK: see supabase/rollbacks/20261003150300_marketplace_index_v1.down.sql

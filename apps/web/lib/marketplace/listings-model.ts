@@ -34,7 +34,7 @@ export const LISTING_CATEGORIES = [
 ] as const;
 export type ListingCategory = (typeof LISTING_CATEGORIES)[number];
 
-/** `paused` was added by the universal-marketplace migration (20261002170000). */
+/** `paused` was added by the universal-marketplace migration (20261003150300). */
 export const LISTING_STATUSES = ["draft", "active", "paused", "closed"] as const;
 export type ListingStatus = (typeof LISTING_STATUSES)[number];
 

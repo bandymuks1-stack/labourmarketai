@@ -29,12 +29,12 @@ rebuild_base() {
 U1=11111111-1111-1111-1111-111111111111; U2=22222222-2222-2222-2222-222222222222
 ORG=aaaaaaaa-0000-0000-0000-000000000001; PRJ=99999999-0000-0000-0000-000000000001
 
-echo "== baseline + 170000 + 170100"
+echo "== baseline + 150300 + 150400"
 rebuild_base
 FN_BEFORE=$($PSQL -c "select md5(pg_get_functiondef(oid)) from pg_proc where proname='create_marketplace_listing_v1'")
-$PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261002170000_marketplace_index_v1.sql" >/dev/null 2>"$LFD/err" || bad "apply 170000" "$(cat "$LFD/err")"
-chk "170000 idempotent re-run" "0" "$($PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261002170000_marketplace_index_v1.sql" 2>&1 | grep -ci error)"
-$PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261002170100_marketplace_public_business_expiry_v1.sql" >/dev/null 2>"$LFD/err" || bad "apply 170100" "$(cat "$LFD/err")"
+$PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261003150300_marketplace_index_v1.sql" >/dev/null 2>"$LFD/err" || bad "apply 150300" "$(cat "$LFD/err")"
+chk "150300 idempotent re-run" "0" "$($PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261003150300_marketplace_index_v1.sql" 2>&1 | grep -ci error)"
+$PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261003150400_marketplace_public_business_expiry_v1.sql" >/dev/null 2>"$LFD/err" || bad "apply 150400" "$(cat "$LFD/err")"
 chk "v1 create fn untouched" "$FN_BEFORE" "$($PSQL -c "select md5(pg_get_functiondef(oid)) from pg_proc where proname='create_marketplace_listing_v1'")"
 chk "existing rows survive (2 listings, 1 offering)" "2|1" "$($PSQL -c "select (select count(*) from marketplace_listings)||'|'||(select count(*) from service_offerings)")"
 chk "subject registry seeded (17)" "17" "$($PSQL -c "select count(*) from market_subject_types")"
@@ -87,13 +87,13 @@ $PSQL -c "update service_offerings set expires_at=now()-interval '1 day'" >/dev/
 chk "expired service offering excluded" "0" "$($PSQL -c "select count(*) from market_index_v1 where origin_table='service_offerings'")"
 
 echo "== rollback"
-chk "rollback guarded when data present" "1" "$($PSQL -f "$LFD/20261002170000_marketplace_index_v1.down.sql" 2>&1 | grep -c 'rollback refused')"
+chk "rollback guarded when data present" "1" "$($PSQL -f "$LFD/20261003150300_marketplace_index_v1.down.sql" 2>&1 | grep -c 'rollback refused')"
 rebuild_base
-$PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261002170000_marketplace_index_v1.sql" >/dev/null 2>&1
-$PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261002170100_marketplace_public_business_expiry_v1.sql" >/dev/null 2>&1
-$PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261002170100_marketplace_public_business_expiry_v1.down.sql" >/dev/null 2>"$LFD/err" || bad "down 170100" "$(cat "$LFD/err")"
-$PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261002170000_marketplace_index_v1.down.sql" >/dev/null 2>"$LFD/err" || bad "down 170000" "$(cat "$LFD/err")"
+$PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261003150300_marketplace_index_v1.sql" >/dev/null 2>&1
+$PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261003150400_marketplace_public_business_expiry_v1.sql" >/dev/null 2>&1
+$PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261003150400_marketplace_public_business_expiry_v1.down.sql" >/dev/null 2>"$LFD/err" || bad "down 150400" "$(cat "$LFD/err")"
+$PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261003150300_marketplace_index_v1.down.sql" >/dev/null 2>"$LFD/err" || bad "down 150300" "$(cat "$LFD/err")"
 chk "after rollback: view/registry gone, old CHECK back" "0|1" "$($PSQL -c "select (select count(*) from pg_class where relname in ('market_index_v1','market_subject_types'))||'|'||(select count(*) from pg_constraint where conname='marketplace_listings_category_check')")"
 chk "after rollback: rows intact" "2|1" "$($PSQL -c "select (select count(*) from marketplace_listings)||'|'||(select count(*) from service_offerings)")"
-if $PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261002170000_marketplace_index_v1.sql" >/dev/null 2>"$LFD/err"; then ok "re-apply after rollback"; else bad "re-apply" "$(cat "$LFD/err")"; fi
+if $PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261003150300_marketplace_index_v1.sql" >/dev/null 2>"$LFD/err"; then ok "re-apply after rollback"; else bad "re-apply" "$(cat "$LFD/err")"; fi
 if [ $FAIL -eq 0 ]; then echo "ALL PASS"; else echo "FAILURES"; exit 1; fi

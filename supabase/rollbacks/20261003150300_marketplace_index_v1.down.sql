@@ -1,4 +1,4 @@
--- Rollback of 20261002170000_marketplace_index_v1.sql
+-- Rollback of 20261003150300_marketplace_index_v1.sql
 --
 -- GUARDED: refuses while anything the migration made possible is in use, so a
 -- rollback can never silently destroy a person's data. Remove the offending
@@ -38,7 +38,7 @@ begin
     select 1 from pg_proc
     where proname = 'get_public_business_listings_v1' and prosrc like '%expires_at%'
   ) then
-    raise exception 'rollback refused: roll back 20261002170100 (public business expiry) first';
+    raise exception 'rollback refused: roll back 20261003150400 (public business expiry) first';
   end if;
 end $$;
 

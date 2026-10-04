@@ -19,7 +19,7 @@ import {
 
 /**
  * Marketplace guard — Wagon 13 slice 1 (work-resource listings) PLUS the
- * universal-marketplace contract (migration 20261002170000, Option C).
+ * universal-marketplace contract (migration 20261003150300, Option C).
  *
  * Pins the doctrine contract: reuse the existing domain tables
  * (marketplace_listings, service_offerings), ONE universal discovery view,
@@ -54,13 +54,13 @@ const V2_MIGRATION = join(
   REPO,
   "supabase",
   "migrations",
-  "20261002170000_marketplace_index_v1.sql",
+  "20261003150300_marketplace_index_v1.sql",
 );
 const V2_ROLLBACK = join(
   REPO,
   "supabase",
   "rollbacks",
-  "20261002170000_marketplace_index_v1.down.sql",
+  "20261003150300_marketplace_index_v1.down.sql",
 );
 /** Executable SQL only - comments may NAME a banned pattern. */
 const ddlOf = (p: string) =>
@@ -224,7 +224,7 @@ describe("5. copy resolves in every active locale", () => {
 });
 
 
-describe("6. universal marketplace migration (20261002170000) — Option C contract", () => {
+describe("6. universal marketplace migration (20261003150300) — Option C contract", () => {
   const sql = () => read(V2_MIGRATION);
   const ddl = () => ddlOf(V2_MIGRATION);
 
@@ -368,13 +368,13 @@ describe("7. index exposes destination + contact action; public surface is a sep
     REPO,
     "supabase",
     "migrations",
-    "20261002170100_marketplace_public_business_expiry_v1.sql",
+    "20261003150400_marketplace_public_business_expiry_v1.sql",
   );
   const PUBLIC_ROLLBACK = join(
     REPO,
     "supabase",
     "rollbacks",
-    "20261002170100_marketplace_public_business_expiry_v1.down.sql",
+    "20261003150400_marketplace_public_business_expiry_v1.down.sql",
   );
 
   it("view derives destination_path and contact_action (no stored duplicate data)", () => {

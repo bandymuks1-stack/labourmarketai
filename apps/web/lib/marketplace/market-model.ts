@@ -8,7 +8,7 @@
  * `market_publish_policy_v1` is the policy hook.
  *
  * What this file mirrors (and `lib/guards/marketplace-listings.test.ts` pins
- * against the migration `20261002170000_marketplace_index_v1.sql`):
+ * against the migration `20261003150300_marketplace_index_v1.sql`):
  *   - the registry (domain -> subjects),
  *   - the direction rule.
  *

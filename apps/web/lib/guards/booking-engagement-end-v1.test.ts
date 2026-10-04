@@ -1529,15 +1529,15 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261002143000_experience_responses_select_reply_status_v1.sql",
       // stage/subtask structure on work_tasks: RED draft, needs-human-gate.
       "20261002150000_work_tasks_stage_and_subtask_v1.sql",
-      // universal marketplace (draft RED PR, owner approval PENDING): marker only so CI reaches the human gate; NOT applied.
-      "20261002170000_marketplace_index_v1.sql",
-      "20261002170100_marketplace_public_business_expiry_v1.sql",
       // 2026-10-03: #1815/ARCH-4 disclosure-authority forward fix (list_agency_offered_candidates_for_request_v2 regains the connection/share gate) — marker is the human-gate acknowledgement.
       "20261003100000_list_agency_offered_candidates_v2_connection_gate_v1.sql",
       "20261003110000_subject_contest_withdraw_v1.sql",
       // 2026-10-03: PER-12 subject-safe export projection (new SECURITY DEFINER read fn) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261003120000_privacy_export_import_lines_subject_v1.sql",
       "20261003140000_subject_contest_withdraw_constraint_reconcile_v1.sql",
+      // universal marketplace (draft RED PR, owner approval PENDING): marker only so CI reaches the human gate; NOT applied.
+      "20261003150300_marketplace_index_v1.sql",
+      "20261003150400_marketplace_public_business_expiry_v1.sql",
 ]);
   });
 
