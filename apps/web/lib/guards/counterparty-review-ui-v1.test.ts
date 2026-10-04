@@ -260,3 +260,13 @@ describe("read doors use columns that exist (found by the integrated browser QA,
     expect(MIG2).toMatch(/o\.display_name/);
   });
 });
+
+describe("the note requirement is enforced by the database too (found by the integrated browser QA)", () => {
+  it("review_journal_entry returns note_required for a note-less dispute / correction request", () => {
+    const mig1 = readFileSync(
+      join(REPO, "supabase/migrations/20261003150500_journal_counterparty_review_authority_v1.sql"),
+      "utf8",
+    );
+    expect(mig1).toMatch(/p_decision in \('rejected','changes_requested'\)[\s\S]{0,160}return 'note_required'/);
+  });
+});
