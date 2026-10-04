@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 
 import { DesignProofView, type ProofView } from "@/components/app/signature/design-proof-views";
+import { WorldSequence } from "@/components/app/spatial/world-sequence";
 
 /**
  * DESIGN PROOF — the three representative compositions of the premium product
@@ -15,20 +16,21 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const VIEWS: readonly ProofView[] = ["identity", "record", "match"];
+const VIEWS: readonly (ProofView | "world")[] = ["world", "identity", "record", "match"];
 
 export default async function DesignProofPage({
   params,
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ v?: string }>;
+  searchParams: Promise<{ v?: string; p?: string; autoplay?: string }>;
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { locale } = await params;
   setRequestLocale(locale);
-  const { v } = await searchParams;
-  const view: ProofView = (VIEWS as readonly string[]).includes(v ?? "") ? (v as ProofView) : "identity";
+  const { v, p, autoplay } = await searchParams;
+  const view = (VIEWS as readonly string[]).includes(v ?? "") ? (v as ProofView | "world") : "world";
+  const fixedP = p !== undefined && Number.isFinite(Number(p)) ? Math.min(1, Math.max(0, Number(p))) : undefined;
 
   return (
     <main className="min-h-screen bg-ink-900" data-testid="design-proof">
@@ -48,7 +50,7 @@ export default async function DesignProofPage({
           </a>
         ))}
       </nav>
-      <DesignProofView view={view} />
+      {view === "world" ? <WorldSequence fixedP={fixedP} autoplay={autoplay !== "0"} /> : <DesignProofView view={view} />}
     </main>
   );
 }
