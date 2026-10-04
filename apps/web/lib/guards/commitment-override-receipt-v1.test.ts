@@ -32,7 +32,7 @@ const TEAM_KEEP = TEAM_KEEP_SRC.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/
 // #2149's team block does not exist before that PR is integrated.
 const TEAM_BLOCK_PATH = join(REPO, "apps", "web", "components", "app", "project-team-assignments.tsx");
 const TEAM_BLOCK = existsSync(TEAM_BLOCK_PATH) ? read("apps", "web", "components", "app", "project-team-assignments.tsx") : null;
-const NAME2 = "20261003150900_commitment_override_receipt_team_basis_v1";
+const NAME2 = "20261003150900_commitment_override_receipt_brigade_basis_v1";
 const UP2 = read("supabase", "migrations", `${NAME2}.sql`);
 const DOWN2 = read("supabase", "rollbacks", `${NAME2}.down.sql`);
 

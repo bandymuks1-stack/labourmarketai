@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================================
-# commitment_override_receipt_team_basis_v1 - REAL PostgreSQL proof (scratch cluster, no Docker).
+# commitment_override_receipt_brigade_basis_v1 - REAL PostgreSQL proof (scratch cluster, no Docker).
 #
 # Proves migration 20261003150900 on a prelude that contains BOTH 20261003150100 (#2146, the
 # receipt table + writer) and 20261003150600 (#2149, team_assignments / team_member_at_v1),
@@ -30,7 +30,7 @@ LFD="$(mktemp -d)"
 lf() { tr -d '\r' < "$1" > "$2"; }
 N1=20261003150100_commitment_override_receipts_v1
 N2=20261003150600_brigade_work_assignment_v1
-N3=20261003150900_commitment_override_receipt_team_basis_v1
+N3=20261003150900_commitment_override_receipt_brigade_basis_v1
 lf "$REPO/supabase/migrations/$N1.sql" "$LFD/m1.sql"
 lf "$REPO/supabase/migrations/$N3.sql" "$LFD/m3.sql"
 lf "$REPO/supabase/rollbacks/$N3.down.sql" "$LFD/d3.sql"
@@ -70,7 +70,7 @@ rec() { local reason="null"; [ -n "${5:-}" ] && reason="'$5'"
   as "$1" "select public.zz_try(\$q\$select public.record_commitment_override_v1('$2','$3','$4'::jsonb,$reason)\$q\$);"; }
 
 echo "=============================================================="
-echo " commitment_override_receipt_team_basis_v1 - PostgreSQL proof"
+echo " commitment_override_receipt_brigade_basis_v1 - PostgreSQL proof"
 echo "=============================================================="
 applyok "$LFD/m1.sql" || { echo "20261003150100 FAILED"; exit 1; }
 applyok "$LFD/m2.sql" || { echo "20261003150600 FAILED"; exit 1; }

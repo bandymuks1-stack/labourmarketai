@@ -45,7 +45,7 @@
 --     new grant, no new policy, nothing for anon.
 --
 -- NOT BUILT: no fan-out, no per-person assignment rows, no change to #2149.
--- ROLLBACK: supabase/rollbacks/20261003150900_commitment_override_receipt_team_basis_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20261003150900_commitment_override_receipt_brigade_basis_v1.down.sql
 -- (refuses while any team-basis receipt exists; restores the first function).
 
 do $$
