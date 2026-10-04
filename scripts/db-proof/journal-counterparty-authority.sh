@@ -220,6 +220,10 @@ check "no confirmation row exists yet" contains "0" "$(nconf $FE1)"
 check "DIRECT INSERT by CREP is denied (no counterparty basis claimed -> authority_basis_mismatch; RLS would also refuse)" contains "authority_basis_mismatch" "$(as_user $CREP "insert into public.journal_entry_confirmations (entry_id, confirmer_id, confirmer_engagement_context_id, confirmer_role, confirmation_scope) values ('$FE1','$CREP','ecc10000-0000-0000-0000-000000000001','manager','{\"decision\":\"approved\"}');")"
 check "DIRECT INSERT by the subject's org manager FREE2 (RLS passes) is refused by the guard" contains "review_authority_not_established" "$(as_user $FREE2 "insert into public.journal_entry_confirmations (entry_id, confirmer_id, confirmer_engagement_context_id, confirmer_role, confirmation_scope) values ('$FE1','$FREE2','ecf20000-0000-0000-0000-000000000002','manager','{\"decision\":\"approved\",\"authority\":{\"basis\":\"counterparty\"}}');")"
 check "counterparty cannot verify skills (employer-only function) -> not_authorized" contains "not_authorized" "$(as_user $CREP "$(CONF $FE1 $SK_WELD)")"
+check "NOTE-LESS dispute through the DIRECT RPC is refused (note_required)" contains "note_required" "$(as_user $CREP "select public.review_journal_entry('$FE1'::uuid,'rejected','');")"
+check "NOTE-LESS correction request through the direct RPC is refused" contains "note_required" "$(as_user $CREP "select public.review_journal_entry('$FE1'::uuid,'changes_requested',null);")"
+check "whitespace-only note is refused too" contains "note_required" "$(as_user $CREP "select public.review_journal_entry('$FE1'::uuid,'rejected','   ');")"
+check "  ...and no row was written by the refused calls" contains "0" "$(ncp $FE1)"
 check "CREP ACCEPTS FE1" contains "approved" "$(as_user $CREP "$(REVIEW $FE1 approved)")"
 check "  ...row: action client_accept (NOT confirm), basis counterparty, party org C, link + submission recorded" contains "client_accept|counterparty|$ORG_C|$LINK" "$(q "select (confirmation_scope->>'action')||'|'||(confirmation_scope#>>'{authority,basis}')||'|'||(confirmation_scope#>>'{authority,party_organization_id}')||'|'||(confirmation_scope#>>'{authority,link_id}') from public.journal_entry_confirmations where entry_id='$FE1'")"
 check "  ...provenance: client origin, recorded_by = confirmed_by = CREP, importer null, imported_at null, subject FREE" contains "NATIVE_PLATFORM_CLIENT_CONFIRMATION|$CREP|$CREP||||$FREE" "$(q "select (confirmation_scope#>>'{provenance,origin}')||'|'||(confirmation_scope#>>'{provenance,recorded_by}')||'|'||(confirmation_scope#>>'{provenance,confirmed_by_profile_id}')||'|'||coalesce(confirmation_scope#>>'{provenance,imported_by}','')||'|'||coalesce(confirmation_scope#>>'{provenance,imported_at}','')||'|'||coalesce(confirmation_scope#>>'{provenance,effective_event_time}','')||'|'||(confirmation_scope#>>'{provenance,subject_profile_id}') from public.journal_entry_confirmations where entry_id='$FE1'")"
@@ -237,9 +241,12 @@ check "CREP REQUESTS CORRECTION on FE3" contains "changes_requested" "$(as_user 
 check "  ...row action client_request_correction" contains "client_request_correction" "$(q "select confirmation_scope->>'action' from public.journal_entry_confirmations where entry_id='$FE3'")"
 FE3B=f1000000-0000-0000-0000-0000000000b3
 FE3_SNAP="$(q "select md5(string_agg(t::text,'|' order by id)) from public.journal_entry_confirmations t where entry_id='$FE3'")"
-# canonical correction (journal_atomic_supersede): NEW entry, correction_of -> old, old.superseded_by -> new
-$PSQL -q -c "insert into public.journal_entries (id, worker_id, engagement_context_id, original_text, hash_self, project_id, correction_of) values ('$FE3B','$FW','ecf10000-0000-0000-0000-000000000001','Fence section 3, corrected wording.','hf3b','$PC','$FE3'); update public.journal_entries set superseded_by='$FE3B' where id='$FE3';" >/dev/null
-check "the superseded (old) entry can no longer be decided" contains "entry_superseded" "$(as_user $CREP "$(REVIEW $FE3 approved)")"
+# REAL behaviour of the canonical correction of a CONFIRMED original: a NEW entry with
+# correction_of -> old; the original's superseded_by stays NULL (only an unconfirmed
+# original is marked superseded).
+$PSQL -q -c "insert into public.journal_entries (id, worker_id, engagement_context_id, original_text, hash_self, project_id, correction_of) values ('$FE3B','$FW','ecf10000-0000-0000-0000-000000000001','Fence section 3, corrected wording.','hf3b','$PC','$FE3');" >/dev/null
+check "the confirmed original keeps superseded_by NULL (linked only through correction_of)" contains "t" "$(q "select superseded_by is null from public.journal_entries where id='$FE3'")"
+check "the original stays in the counterparty queue showing its correction request (waiting for the worker)" contains "changes_requested" "$(as_user $CREP "select latest_decision from public.list_counterparty_review_queue_v1() where entry_id='$FE3';")"
 check "the corrected entry is NOT submitted implicitly" contains "0" "$(nsub $FE3B)"
 check "RESUBMIT: the corrected entry is submitted explicitly" contains "submitted" "$(as_user $FREE "$(SUB $FE3B)")"
 check "  ...submission records resubmission_of_entry_id = the original" contains "$FE3" "$(q "select resubmission_of_entry_id from public.journal_entry_review_submissions where entry_id='$FE3B'")"

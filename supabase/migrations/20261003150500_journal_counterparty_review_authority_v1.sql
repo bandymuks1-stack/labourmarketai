@@ -63,7 +63,7 @@
 --     confirmed-work counters that read action = 'confirm' never count a
 --     client acceptance as a manager confirmation: CLIENT_ACCEPTED stays a
 --     distinct proof concept. Correction = the canonical journal correction
---     (new entry, correction_of -> old, old.superseded_by; history immutable);
+--     (new entry, correction_of -> old; a CONFIRMED original keeps superseded_by NULL and is linked only through correction_of - journal_entry_supersede / journal_atomic_supersede set old.superseded_by only for an unconfirmed original; history immutable);
 --     resubmission = a new submission that records resubmission_of_entry_id;
 --     dispute withdrawal/resolution = a later 'approved' row by the same
 --     authorized party (append-only, latest wins, history kept); once

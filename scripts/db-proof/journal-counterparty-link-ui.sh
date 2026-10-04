@@ -76,6 +76,12 @@ LV1="$(fn_hash work_counterparty_link_valid_v1)"; RG1="$(fn_hash register_work_c
 $PSQL -q -v ON_ERROR_STOP=1 -f "$M2" >/dev/null 2>"$HERE/.m2.err" && echo "  migration 2 applied cleanly (no team relation present)" || { cat "$HERE/.m2.err"; echo M2 FAILED; exit 1; }
 $PSQL -q -v ON_ERROR_STOP=1 -f "$HERE/journal-counterparty-link-ui.seed2.sql" >/dev/null || { echo SEED2 FAILED; exit 1; }
 
+echo; echo "--- 0. the stubs carry only REAL production columns (regression: detail/state read o.name / pr.name)"
+check "organizations has no 'name' column in the proof schema" contains "0" "$(q "select count(*) from information_schema.columns where table_schema='public' and table_name='organizations' and column_name='name'")"
+check "projects has no 'name' column in the proof schema" contains "0" "$(q "select count(*) from information_schema.columns where table_schema='public' and table_name='projects' and column_name='name'")"
+check "the migration reads no non-existent column" absent "o.name" "$(cat "$M2")"
+check "  ...(projects)" absent "pr.name" "$(cat "$M2")"
+
 echo; echo "--- A. person assignment (no team relation exists on this database)"
 check "migration applies without the team lane: link_valid body changed" absent "$LV1" "$(fn_hash work_counterparty_link_valid_v1)"
 check "team-only worker is refused while no team relation exists" contains "no_work_relationship" "$(as_user $CREP "$(REG $PC $TW1)")"
@@ -140,6 +146,8 @@ check "  ...an unrelated worker (outsider TW3) cannot" absent "paving.jpg" "$(as
 check "  ...the subject still opens their own photo (existing owner policy)" contains "paving.jpg" "$(as_user $TM1 "$PH")"
 check "  ...NULL uid sees nothing" absent "paving.jpg" "$(as_user '' "$PH")"
 check "  ...anon cannot execute the predicate" contains "permission denied" "$(as_role '' anon "select public.counterparty_can_read_photo_v1('x');")"
+check "detail names the project by its REAL title column" contains "Fence project" "$D"
+check "state names the party by display_name" contains "Client C Ltd" "$S"
 check "detail denied for NULL uid" absent "Team member laid" "$(as_user '' "select public.counterparty_review_entry_detail_v1('$TE1'::uuid)::text;")"
 check "detail denied for anon" contains "permission denied" "$(as_role '' anon "select public.counterparty_review_entry_detail_v1('$TE1'::uuid);")"
 check "detail of an UNSUBMITTED entry is denied even for the right rep" absent "Installed fence section 2" "$(as_user $CREP "select public.counterparty_review_entry_detail_v1('f1000000-0000-0000-0000-000000000002'::uuid)::text;")"
@@ -153,7 +161,7 @@ TE2=7e100000-0000-0000-0000-000000000002
 TM1B=7e444444-4444-4444-4444-444444444444
 $PSQL -q -c "insert into public.profiles (id, active_role) values ('$TM1B','company');
  insert into public.engagement_contexts (id, profile_id, organization_id, status, relationship_slug, created_at, started_at) values ('ec7e0044-0000-0000-0000-000000000044','$TM1B','7e000000-0000-0000-0000-0000000000f0','active','manager', now() - interval '30 days', current_date - 30);
- insert into public.projects (id, organization_id, name) values ('$PD','$ORG_D','D project');
+ insert into public.projects (id, organization_id, title) values ('$PD','$ORG_D','D project');
  insert into public.project_worker_assignments (project_id, worker_id, status) values ('$PD','$TW1','active');
  insert into public.journal_entries (id, worker_id, engagement_context_id, original_text, hash_self, project_id) values ('$TE2','$TW1','ec7e0011-0000-0000-0000-000000000011','Second entry on the D project.','ht2','$PD');
  insert into public.journal_entry_photos (entry_id, profile_id, file_name, storage_path) values ('$TE2','$TM1','d-site.jpg','$TM1/d-site.jpg');
