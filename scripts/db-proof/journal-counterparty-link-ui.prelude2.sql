@@ -1,7 +1,9 @@
 -- Columns/tables the slice-2 read doors touch (reduced; production shapes).
-alter table public.organizations add column if not exists name text;
+-- REAL production columns only: organizations has display_name/legal_name (NO name), projects has title (NO name).
+alter table public.organizations add column if not exists display_name text;
+alter table public.organizations add column if not exists legal_name text;
 alter table public.workers add column if not exists display_name text;
-alter table public.projects add column if not exists name text;
+alter table public.projects add column if not exists title text;
 alter table public.engagement_contexts add column if not exists created_at timestamptz not null default now();
 alter table public.engagement_contexts add column if not exists started_at date;
 alter table public.engagement_contexts add column if not exists ended_at date;

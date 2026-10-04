@@ -1,8 +1,8 @@
-update public.organizations set name = 'Client C Ltd' where id = 'c0000000-0000-0000-0000-0000000000c0';
+update public.organizations set display_name = 'Client C Ltd' where id = 'c0000000-0000-0000-0000-0000000000c0';
 update public.workers set display_name = 'Free Lancer' where id = 'aaaaf000-0000-0000-0000-000000000f01';
-update public.projects set name = 'Fence project' where id = '90000000-0000-0000-0000-00000000000c';
+update public.projects set title = 'Fence project' where id = '90000000-0000-0000-0000-00000000000c';
 -- a TEAM (organization) with employees: TM1 (member), TM2 (membership ended), TM3 (not in the team)
-insert into public.organizations (id, name) values
+insert into public.organizations (id, display_name) values
   ('7e000000-0000-0000-0000-0000000000e0','Brigade B'),
   ('7e000000-0000-0000-0000-0000000000f0','Own org of team member');
 insert into public.profiles (id, active_role) values

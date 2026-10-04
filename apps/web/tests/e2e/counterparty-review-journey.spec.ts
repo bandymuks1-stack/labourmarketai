@@ -130,7 +130,12 @@ test.describe.serial("Counterparty journey: register -> submit -> correct -> res
     await expect(note).toHaveAttribute("required", "");
     await note.fill("Please state the area in square metres.");
     await card.locator('[data-testid^="counterparty-decide-"]').click();
-    await expect(card.locator('[data-testid^="counterparty-result-"]')).toContainText(/correction requested/i, { timeout: 20_000 });
+    // STABLE state, not the transient result line: after the decision the page
+    // re-renders and the card moves into the "waiting for the worker" bucket.
+    const after = page.locator('[data-testid^="counterparty-card-"]').filter({ hasText: E.COUNTERPARTY_ENTRY_TEXT! }).first();
+    await expect(after).toHaveAttribute("data-bucket", "waiting_for_worker", { timeout: 20_000 });
+    await expect(after.locator('[data-testid^="counterparty-waiting-"]')).toBeVisible();
+    await expect(after.locator('[data-testid^="counterparty-decide-"]')).toHaveCount(0);
     await ctx.close();
   });
 
@@ -157,7 +162,10 @@ test.describe.serial("Counterparty journey: register -> submit -> correct -> res
     await card.getByRole("radio", { name: /accept the work/i }).check();
     await expect(card.getByText(/cannot be undone/i)).toBeVisible();
     await card.locator('[data-testid^="counterparty-decide-"]').click();
-    await expect(card.locator('[data-testid^="counterparty-result-"]')).toContainText(/accepted/i, { timeout: 20_000 });
+    const accepted = rep.page.locator('[data-testid^="counterparty-card-"]').filter({ hasText: E.COUNTERPARTY_ENTRY_TEXT! }).first();
+    await expect(accepted).toHaveAttribute("data-bucket", "accepted", { timeout: 20_000 });
+    await expect(accepted.locator('[data-testid^="counterparty-final-"]')).toBeVisible();
+    await expect(accepted.locator('[data-testid^="counterparty-decide-"]')).toHaveCount(0);
     await rep.ctx.close();
 
     const w = await as(browser, E.COUNTERPARTY_WORKER_EMAIL!, E.COUNTERPARTY_WORKER_PASSWORD!);
