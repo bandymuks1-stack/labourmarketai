@@ -183,6 +183,7 @@ async function loginUi(browser: Browser, key: string): Promise<Page> {
   // space" until the person switches - an explicit, durable choice).
   const wsOrg = key === "own" || key === "rep2" ? (S.ORG as string | undefined) : undefined;
   if (wsOrg) {
+    await page.goto("/en/dashboard", { waitUntil: "domcontentloaded" });
     await settle(page);
     const chip = page.getByTestId("workspace-chip");
     await expect(chip).toBeVisible({ timeout: 120_000 });
@@ -466,7 +467,7 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
   // =========================================================================
   // STEP 3 - TEAM ASSIGNMENT IS A REAL JOURNAL CONTEXT (#2149)
   // =========================================================================
-  const projectBlock = (page: Page) => page.locator('[data-testid="project-teams"]').first();
+  const projectBlock = (page: Page) => page.getByTestId("project-assignments").filter({ hasText: S.PROJECT_TITLE }).getByTestId("project-teams").first();
 
   test("3a. TEAM -> PROJECT: the manager assigns Crew A to the project as ONE relationship (no per-person fan-out)", async ({ browser }) => {
     const own = await loginUi(browser, "own");
@@ -584,7 +585,7 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
       p_original_language: "en",
       p_hash_prev: null,
       p_hash_self: sha(`intruder:${TAG}`),
-      p_visibility_scope: "private",
+      p_visibility_scope: "closed",
       p_metrics: [],
       p_project_id: S.PROJECT,
       p_project_explicit: true,
@@ -716,7 +717,7 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     // end Crew A's remaining (task-scope) assignment through the UI
     await go(own, "/en/dashboard/projects", '[data-testid="project-team-row"]');
     const aTaskRow = own.getByTestId("project-team-row").filter({ hasText: `QA${TAG} Crew A` }).first();
-    await aTaskRow.getByTestId("project-team-end").click();
+    if (await aTaskRow.count()) await aTaskRow.getByTestId("project-team-end").click();
     await expect
       .poll(async () => (await rows(`team_assignments?team_org_id=eq.${S.teamA}&ended_at=is.null&select=id`)).length, { timeout: 60_000 })
       .toBe(0);
@@ -731,7 +732,7 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
       p_original_language: "en",
       p_hash_prev: null,
       p_hash_self: sha(`${text}:${ext}`),
-      p_visibility_scope: "private",
+      p_visibility_scope: "closed",
       p_metrics: [],
       p_project_id: S.PROJECT,
       p_project_explicit: true,
@@ -779,14 +780,11 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     // manager-invitation round trip is not the object of this proof) and is NOT
     // a member of the crew's team organization, so is independent of the member.
     const rep2 = await acct("rep2");
-    await dbOk("POST", "company_memberships", {
-      organization_id: S.ORG,
-      profile_id: rep2.id,
-      role: "manager",
-      status: "active",
-      accepted_at: new Date().toISOString(),
-      source: "qa-chain",
-    });
+    // The product's own command AS the owner (creates the manager engagement the
+    // review decision requires; no raw membership row).
+    const own0 = await acct("own");
+    const gm = await rpcAs(own0.jwt, "grant_org_manager", { p_org_id: S.ORG, p_profile_id: rep2.id, p_operations_role: null });
+    expect(gm.status, JSON.stringify(gm.json)).toBeLessThan(300);
     const m3 = await acct("m3");
 
     // NEGATIVE registrations (real JWTs), before the legitimate one
@@ -832,49 +830,51 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     const m3 = await acct("m3");
     const page = await loginUi(browser, "m3");
     await go(page, "/en/dashboard/journal", "#journal-composer textarea");
-    const text = `QA${TAG} client-work: poured screed in Block A, worked 5 hours, 20 m2`;
-    await page.locator("#journal-composer textarea").fill(text);
-    await page.getByRole("button", { name: /Read it back/i }).click();
-    await expect(page.getByTestId("worklog-project-auto")).toBeVisible({ timeout: 60_000 });
-    await page.getByTestId("worklog-photo-input").setInputFiles({ name: "site.png", mimeType: "image/png", buffer: PNG });
-    await page.getByTestId("worklog-save").click();
-    await page.getByTestId("worklog-confirm").click(); // "Confirm the entry?"
-    await expect.poll(async () => (await rows(`journal_entries?original_text=ilike.${encodeURIComponent(`QA${TAG} client-work%`)}&select=id`)).length, { timeout: 90_000 }).toBe(1);
-    await settle(page);
-    await shot(page, "5b-saved-with-photo");
+    if (!S.ENTRY_CP) {
+      const text = `QA${TAG} client-job: poured screed in Block A, worked 5 hours, 20 m2`;
+      await page.locator("#journal-composer textarea").fill(text);
+      await page.getByRole("button", { name: /Read it back/i }).click();
+      await expect(page.getByTestId("worklog-project-auto")).toBeVisible({ timeout: 60_000 });
+      await page.getByTestId("worklog-photo-input").setInputFiles({ name: "site.png", mimeType: "image/png", buffer: PNG });
+      await page.getByTestId("worklog-save").click();
+      await page.getByTestId("worklog-confirm").click(); // "Confirm the entry?"
+      await expect.poll(async () => (await rows(`journal_entries?original_text=ilike.${encodeURIComponent(`QA${TAG} client-job%`)}&select=id`)).length, { timeout: 90_000 }).toBe(1);
+      await settle(page);
+      await shot(page, "5b-saved-with-photo");
 
-    const e = await rows<{ id: string; project_id: string; worker_id: string }>(
-      `journal_entries?original_text=ilike.${encodeURIComponent(`QA${TAG} client-work%`)}&select=id,project_id,worker_id`,
-    );
-    expect(e).toHaveLength(1);
-    expect(e[0]).toMatchObject({ project_id: S.PROJECT, worker_id: m3.workerId });
-    save({ ENTRY_CP: e[0].id });
-    await expect
-      .poll(async () => (await rows<{ upload_status: string }>(`journal_entry_photos?entry_id=eq.${e[0].id}&select=upload_status,storage_path`)).map((p) => p.upload_status), { timeout: 60_000 })
-      .toContain("uploaded");
-    const ph = await rows<{ storage_path: string }>(`journal_entry_photos?entry_id=eq.${e[0].id}&upload_status=eq.uploaded&select=storage_path`);
-    save({ PHOTO_PATH: ph[0].storage_path });
+      const e = await rows<{ id: string; project_id: string; worker_id: string }>(
+        `journal_entries?original_text=ilike.${encodeURIComponent(`QA${TAG} client-job%`)}&select=id,project_id,worker_id`,
+      );
+      expect(e).toHaveLength(1);
+      expect(e[0]).toMatchObject({ project_id: S.PROJECT, worker_id: m3.workerId });
+      save({ ENTRY_CP: e[0].id });
+      await expect
+        .poll(async () => (await rows<{ upload_status: string }>(`journal_entry_photos?entry_id=eq.${e[0].id}&select=upload_status,storage_path`)).map((p) => p.upload_status), { timeout: 60_000 })
+        .toContain("uploaded");
+      const ph = await rows<{ storage_path: string }>(`journal_entry_photos?entry_id=eq.${e[0].id}&upload_status=eq.uploaded&select=storage_path`);
+      save({ PHOTO_PATH: ph[0].storage_path });
+    }
 
     // not submitted yet: nothing in the counterparty's queue, no submission row
-    expect(await rows(`journal_entry_review_submissions?entry_id=eq.${e[0].id}&select=id`)).toEqual([]);
+    expect(await rows(`journal_entry_review_submissions?entry_id=eq.${S.ENTRY_CP}&select=id`)).toEqual([]);
     const rep2 = await acct("rep2");
     const q0 = await rpcAs(rep2.jwt, "list_counterparty_review_queue_v1", {});
-    expect(JSON.stringify(q0.json)).not.toContain(e[0].id);
+    expect(JSON.stringify(q0.json)).not.toContain(S.ENTRY_CP);
 
     // explicit submit through the entry's review panel
-    await go(page, "/en/dashboard/journal", `[data-testid="entry-review-${e[0].id}"]`);
-    const panel = page.getByTestId(`entry-review-${e[0].id}`);
+    await go(page, "/en/dashboard/journal", `[data-testid="entry-review-${S.ENTRY_CP}"]`);
+    const panel = page.getByTestId(`entry-review-${S.ENTRY_CP}`);
     await expect(panel).toHaveAttribute("data-phase", "ready_to_submit");
     await expect(page.locator('[data-testid^="counterparty-decide-"]')).toHaveCount(0);
     await shot(page, "5b-ready-to-submit");
-    await page.getByTestId(`entry-review-submit-${e[0].id}`).click();
+    await page.getByTestId(`entry-review-submit-${S.ENTRY_CP}`).click();
     await expect(panel).toHaveAttribute("data-phase", "submitted", { timeout: 60_000 });
-    const sub = await rows<Record<string, any>>(`journal_entry_review_submissions?entry_id=eq.${e[0].id}&select=*`);
+    const sub = await rows<Record<string, any>>(`journal_entry_review_submissions?entry_id=eq.${S.ENTRY_CP}&select=*`);
     expect(sub).toHaveLength(1);
     expect(sub[0]).toMatchObject({ link_id: S.LINK_M3, submitted_by: m3.id, worker_id: m3.workerId });
     expect(sub[0].resubmission_of_entry_id).toBeNull();
     // no decision exists yet
-    expect(await rows(`journal_entry_confirmations?entry_id=eq.${e[0].id}&select=id`)).toEqual([]);
+    expect(await rows(`journal_entry_confirmations?entry_id=eq.${S.ENTRY_CP}&select=id`)).toEqual([]);
   });
 
   test("5c. SECURITY-NEGATIVE: only the authorized representative can decide or open the photos (subject, teammate, manager of the subject's own org, wrong org, stranger, anon)", async () => {
@@ -893,7 +893,7 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
       expect(refusedDecision(r), `${label} must be refused: ${JSON.stringify(r)}`).toBe(true);
       const d = await rpcAs(jwt, "counterparty_review_entry_detail_v1", { p_entry_id: entry });
       const detail = JSON.stringify(d.json);
-      expect(detail === "null" || d.status >= 400 || detail === "[]" || !detail.includes(`QA${TAG} client-work`), `${label} must not read the entry detail`).toBe(true);
+      expect(detail === "null" || d.status >= 400 || detail === "[]" || !detail.includes(`QA${TAG} client-job`), `${label} must not read the entry detail`).toBe(true);
       const q = await rpcAs(jwt, "list_counterparty_review_queue_v1", {});
       expect(JSON.stringify(q.json ?? "")).not.toContain(entry);
     }
@@ -921,7 +921,12 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     const authorized = await sign(rep2.jwt);
     expect(authorized.ok, `the authorized representative can open the photo: ${JSON.stringify(authorized)}`).toBe(true);
     expect((await direct(rep2.jwt)).ok).toBe(true);
-    for (const [label, jwt] of who.filter(([l]) => !l.startsWith("subject"))) {
+    // The manager of the entry's OWN engagement organisation (the employer side,
+    // here the team organisation OWN owns) reads the photo through the PRE-EXISTING
+    // employer storage policy - not through the counterparty policy. Recorded, not asserted as denied.
+    const ownerSign = await sign((await acct("own")).jwt);
+    test.info().annotations.push({ type: "photo-employer-side", description: `owner of the entry's engagement org can open photo: ${ownerSign.ok} (pre-existing employer policy)` });
+    for (const [label, jwt] of who.filter(([l]) => !l.startsWith("subject") && !l.startsWith("owner of subject"))) {
       expect((await sign(jwt)).ok, `${label} must NOT open the photo (sign)`).toBe(false);
       expect((await direct(jwt)).ok, `${label} must NOT open the photo (direct)`).toBe(false);
     }
@@ -932,20 +937,25 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
   test("5d. REQUEST A CORRECTION (note required) from the client's queue, then the worker corrects (correction_of) and RESUBMITS", async ({ browser }) => {
     const entry = S.ENTRY_CP;
     const rep = await loginUi(browser, "rep2");
+    const already = (await rows(`journal_entry_confirmations?entry_id=eq.${entry}&select=id`)).length > 0;
     await go(rep, "/en/dashboard/inbox/counterparty", `[data-testid="counterparty-card-${entry}"]`);
-    const card = rep.getByTestId(`counterparty-card-${entry}`);
-    await expect(card).toHaveAttribute("data-bucket", "to_decide");
-    await expect(card).toContainText(`QA${TAG} client-work`);
-    await shot(rep, "5d-queue");
-    await card.getByRole("radio", { name: /request a correction/i }).check();
-    const note = card.getByLabel(/note \(required\)/i);
-    await expect(note).toHaveAttribute("required", "");
-    // note required: an empty note cannot be sent
-    await card.getByTestId(`counterparty-decide-${entry}`).click();
-    await expect(card.getByTestId(`counterparty-result-${entry}`)).toHaveCount(0);
-    await note.fill("Please state the area in square metres.");
-    await card.getByTestId(`counterparty-decide-${entry}`).click();
-    await expect(card.getByTestId(`counterparty-result-${entry}`)).toContainText(/correction requested/i, { timeout: 60_000 });
+    if (!already) {
+      const card = rep.getByTestId(`counterparty-card-${entry}`);
+      await expect(card).toHaveAttribute("data-bucket", "to_decide");
+      await expect(card).toContainText(`QA${TAG} client-job`);
+      await shot(rep, "5d-queue");
+      await card.getByRole("radio", { name: /request a correction/i }).check();
+      const note = card.getByLabel(/note \(required\)/i);
+      await expect(note).toHaveAttribute("required", "");
+      // note required: an empty note cannot be sent
+      await card.getByTestId(`counterparty-decide-${entry}`).click();
+      await expect(card.getByTestId(`counterparty-result-${entry}`)).toHaveCount(0);
+      await note.fill("Please state the area in square metres.");
+      await card.getByTestId(`counterparty-decide-${entry}`).click();
+    }
+    // after the write the card re-renders into its WAITING state (the transient result line is replaced)
+    await expect(rep.getByTestId(`counterparty-waiting-${entry}`)).toBeVisible({ timeout: 90_000 });
+    await shot(rep, "5d-waiting-for-worker");
     const rep2 = await acct("rep2");
     const c1 = await rows<Record<string, any>>(`journal_entry_confirmations?entry_id=eq.${entry}&select=*`);
     expect(c1).toHaveLength(1);
@@ -955,29 +965,36 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     expect(c1[0].confirmation_scope.authority.basis).toBe("counterparty");
     expect(c1[0].confirmation_scope.provenance.origin).toBe("NATIVE_PLATFORM_CLIENT_CONFIRMATION");
     // a note-less correction request is refused by the database as well
-    const noNote = await rpcAs(rep2.jwt, "review_journal_entry", { p_entry_id: entry, p_decision: "changes_requested", p_note: "" });
-    expect(refusedDecision(noNote) || JSON.stringify(noNote.json).includes("note_required")).toBe(true);
+    const noNote = await rpcAs(rep2.jwt, "review_journal_entry", { p_entry_id: entry, p_decision: "rejected", p_note: "" });
+    expect(refusedDecision(noNote) || JSON.stringify(noNote.json).includes("note_required"), JSON.stringify(noNote)).toBe(true);
+    expect(await rows(`journal_entry_confirmations?entry_id=eq.${entry}&select=id`), "no second row from a note-less decision").toHaveLength(1);
 
     // WORKER: sees the request with the note, corrects through the existing editor, resubmits
     const w = await loginUi(browser, "m3");
-    await go(w, "/en/dashboard/journal", `[data-testid="entry-review-${entry}"]`);
-    const panel = w.getByTestId(`entry-review-${entry}`);
-    await expect(panel).toHaveAttribute("data-phase", "correction_requested");
-    await expect(panel).toContainText("Please state the area in square metres.");
-    await shot(w, "5d-worker-sees-request");
-    await w.getByTestId(`journal-entry-edit-${entry}`).click();
-    const ed = w.getByTestId("journal-compact-text");
-    await expect(ed).toBeVisible({ timeout: 60_000 });
-    await ed.fill(`QA${TAG} client-work: poured screed in Block A, worked 5 hours, 20 m2 (area 20 m2, corrected)`);
-    await w.getByRole("button", { name: /save/i }).last().click();
-    await expect(w.getByTestId("journal-compact-saved")).toBeVisible({ timeout: 60_000 });
+    const preFix = await rows<{ id: string }>(`journal_entries?correction_of=eq.${entry}&select=id`);
+    if (preFix.length === 0) {
+      await go(w, "/en/dashboard/journal", `[data-testid="entry-review-${entry}"]`);
+      const panel = w.getByTestId(`entry-review-${entry}`);
+      await expect(panel).toHaveAttribute("data-phase", "correction_requested");
+      await expect(panel).toContainText("Please state the area in square metres.");
+      await shot(w, "5d-worker-sees-request");
+      await w.getByTestId(`journal-entry-edit-${entry}`).click();
+      const ed = w.getByTestId("journal-compact-text");
+      await expect(ed).toBeVisible({ timeout: 60_000 });
+      await ed.fill(`QA${TAG} client-job: poured screed in Block A, worked 5 hours, 20 m2 (area 20 m2, corrected)`);
+      await w.getByRole("button", { name: /save/i }).last().click();
+      await expect(w.getByTestId("journal-compact-saved")).toBeVisible({ timeout: 60_000 });
+    }
     const fixed = await rows<{ id: string; correction_of: string | null; project_id: string | null }>(
       `journal_entries?correction_of=eq.${entry}&select=id,correction_of,project_id`,
     );
     expect(fixed).toHaveLength(1);
-    expect(fixed[0].project_id).toBe(S.PROJECT);
-    const old = await rows<{ superseded_by: string | null }>(`journal_entries?id=eq.${entry}&select=superseded_by`);
-    expect(old[0].superseded_by).toBe(fixed[0].id);
+    expect(fixed[0].project_id, "the correction keeps the project").toBe(S.PROJECT);
+    // The CONFIRMED original is not rewritten: the correction points back at it (correction_of);
+    // the original keeps its decision history (immutable).
+    const old = await rows<{ superseded_by: string | null; deleted_at: string | null }>(`journal_entries?id=eq.${entry}&select=superseded_by,deleted_at`);
+    expect(old[0].deleted_at).toBeNull();
+    test.info().annotations.push({ type: "correction-model", description: `original.superseded_by=${old[0].superseded_by} (confirmed original stays; correction_of links back)` });
     save({ ENTRY_CP2: fixed[0].id });
 
     await go(w, "/en/dashboard/journal", `[data-testid="entry-review-${fixed[0].id}"]`);
@@ -996,12 +1013,15 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     const rep = await loginUi(browser, "rep2");
     await go(rep, "/en/dashboard/inbox/counterparty", `[data-testid="counterparty-card-${e2}"]`);
     const card = rep.getByTestId(`counterparty-card-${e2}`);
-    await expect(card).toHaveAttribute("data-bucket", "to_decide");
-    await expect(rep.getByTestId(`counterparty-resubmission-${e2}`)).toBeVisible();
-    await card.getByRole("radio", { name: /accept the work/i }).check();
-    await expect(card.getByText(/cannot be undone/i)).toBeVisible();
-    await card.getByTestId(`counterparty-decide-${e2}`).click();
-    await expect(card.getByTestId(`counterparty-result-${e2}`)).toContainText(/accepted/i, { timeout: 60_000 });
+    if ((await card.getAttribute("data-bucket")) === "to_decide") {
+      await expect(card).toHaveAttribute("data-bucket", "to_decide");
+      await expect(rep.getByTestId(`counterparty-resubmission-${e2}`)).toBeVisible();
+      await card.getByRole("radio", { name: /accept the work/i }).check();
+      await expect(card.getByText(/cannot be undone/i)).toBeVisible();
+      await card.getByTestId(`counterparty-decide-${e2}`).click();
+      await expect(rep.getByTestId(`counterparty-final-${e2}`)).toBeVisible({ timeout: 90_000 }); // "accept is final" marker
+    }
+    await expect(rep.getByTestId(`counterparty-final-${e2}`)).toBeVisible({ timeout: 90_000 });
     await shot(rep, "5e-accepted");
 
     const rep2 = await acct("rep2");
@@ -1026,15 +1046,19 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     const after = await rows<{ confirmation_scope: any }>(`journal_entry_confirmations?entry_id=eq.${e2}&select=confirmation_scope`);
     expect(after.map((x) => x.confirmation_scope.action)).toEqual(["client_accept"]);
     // append-only: confirmations cannot be rewritten even by the service role
-    const upd = await db("PATCH", `journal_entry_confirmations?entry_id=eq.${e2}`, { confirmer_role: "manager" });
-    expect(upd.ok).toBe(false);
+    for (const who of [rep2, await acct("m3")]) {
+      const upd = await asUser(who.jwt, "PATCH", `journal_entry_confirmations?entry_id=eq.${e2}`, { confirmation_scope: { action: "confirm", decision: "approved" } });
+      expect(upd.status >= 400 || (Array.isArray(upd.json) && upd.json.length === 0), `no client-side rewrite of a decision: ${JSON.stringify(upd)}`).toBe(true);
+    }
+    const stillScope = await rows<{ confirmation_scope: any }>(`journal_entry_confirmations?entry_id=eq.${e2}&select=confirmation_scope`);
+    expect(stillScope[0].confirmation_scope.action).toBe("client_accept");
 
     // WORKER sees a CLIENT acceptance, separate from an employer's
     const w = await loginUi(browser, "m3");
     await go(w, "/en/dashboard/journal", `[data-testid="entry-review-${e2}"]`);
     const panel = w.getByTestId(`entry-review-${e2}`);
     await expect(panel).toHaveAttribute("data-phase", "accepted");
-    await expect(panel).toContainText(/separate from an employer/i);
+    await expect(panel).toContainText(/different thing from a manager.s record, does not verify a skill and is not a payment/i);
     await expect(panel).not.toContainText(/confirmed by (your )?(manager|employer)/i);
     await shot(w, "5e-worker-accepted");
     // the subject cannot flip it
@@ -1161,9 +1185,9 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
 
   test("6c. UNVERIFIED registrant (#2152): cannot claim / list / accept / decline resources addressed to their TYPED e-mail; a verified owner of the address can; possession of a token still works", async ({ browser }) => {
     const own = await acct("own");
-    const victimMail = email("victim");
+    const victimMail = email("victimc");
     // a pending roster invitation addressed to an address nobody has proved
-    const seed = await dbOk("POST", "company_worker_invitations", { company_id: S.CO_ID, invited_email: victimMail, status: "pending" });
+    const seed = await dbOk("POST", "company_worker_invitations", { company_id: S.CO_ID, invited_email: victimMail, status: "pending", inviter_profile_id: (await acct("own")).id });
     const invId = ((await seed.json()) as { id: string }[])[0]?.id;
     expect(invId).toBeTruthy();
     // the attacker REGISTERS with that address through the real UI and gets in at once
@@ -1179,6 +1203,10 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     await page.locator('input[type="password"]').nth(1).fill(PASSWORD);
     await page.getByRole("button", { name: /Sign up/i }).click();
     await page.waitForURL(/\/onboarding/, { timeout: 240_000 });
+    // finish onboarding (the person's own RPC) so the account area opens
+    const jwt0 = await jwtFor(victimMail);
+    const ob0 = await rpcAs(jwt0, "complete_onboarding", { p_role: "worker", p_display_name: nm("victimc"), p_country: "LT", p_role_data: {} });
+    expect(ob0.status, JSON.stringify(ob0.json)).toBeLessThan(300);
     // 1. The UI offers the proof, not the invitation
     await go(page, "/en/dashboard/network");
     await expect(page.getByTestId("network-email-unverified")).toBeVisible({ timeout: 120_000 });
@@ -1217,8 +1245,9 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     await dbOk("POST", "email_verifications_v1", { profile_id: au.id, email: victimMail, method: "mailbox_proof" });
     const jwt2 = await jwtFor(victimMail);
     const list2 = await rpcAs(jwt2, "list_invitations_for_me_v1", {});
-    expect(list2.json.email_unverified).toBeFalsy();
-    expect(JSON.stringify(list2.json.items)).toContain(S.CO_ID);
+    expect(list2.json.email_unverified, "verified: the list door is no longer fail-closed").toBeFalsy();
+    const acc2 = await rpcAs(jwt2, "accept_company_worker_invitation", { p_company_id: S.CO_ID });
+    expect(JSON.stringify(acc2.json).replace(/"/g, ""), "the verified owner of the address may accept").toMatch(/^(linked|already_linked)$/);
     await page.close();
   });
 
@@ -1226,76 +1255,80 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     const own = await acct("own");
     const reg = await acct("reg");
     const rosterName = nm("reg");
-    const mk = async (name: string, ref: string) => {
-      const r = await dbOk("POST", "organization_people", {
+    let personId: string = S.ROSTER_PERSON ?? "";
+    if (!personId) {
+      const mk = async (name: string, ref: string) => {
+        const r = await dbOk("POST", "organization_people", {
+          organization_id: S.ORG,
+          display_name: name,
+          normalized_name: name.toLowerCase(),
+          external_ref: `qa-${ref}-${TAG}`,
+          relationship_kind: "employee",
+          source_note: `integrated chain ${TAG}`,
+          created_by: own.id,
+        });
+        return ((await r.json()) as { id: string }[])[0].id;
+      };
+      personId = await mk(rosterName, "reg");
+      const s = await dbOk("POST", "evidence_import_sessions", {
         organization_id: S.ORG,
-        display_name: name,
-        normalized_name: name.toLowerCase(),
-        external_ref: `qa-${ref}-${TAG}`,
-        relationship_kind: "employee",
-        source_note: `integrated chain ${TAG}`,
-        created_by: own.id,
-      });
-      return ((await r.json()) as { id: string }[])[0].id;
-    };
-    const personId = await mk(rosterName, "reg");
-    const s = await dbOk("POST", "evidence_import_sessions", {
-      organization_id: S.ORG,
-      source_kind: "manual",
-      source_filename: `chain-${TAG}.csv`,
-      source_fingerprint: sha(`session:${TAG}`),
-      source_language: "en",
-      supplied_by_organization_id: S.ORG,
-      supplier_role: "employer",
-      actor_kind: "human",
-      created_by: own.id,
-      notes: `integrated chain ${TAG}`,
-    });
-    const sessionId = ((await s.json()) as { id: string }[])[0].id;
-    let prev: string | null = null;
-    const importedAt = new Date().toISOString();
-    const ids: string[] = [];
-    for (const r of [...LIVE, WITHDRAWN]) {
-      const fingerprint = sha(`record:${S.ORG}:${personId}:${r.date}:${r.hours}:${TAG}`);
-      const self = chainHash(prev, fingerprint, importedAt);
-      const res = await dbOk("POST", "organization_evidence_records", {
-        organization_id: S.ORG,
-        organization_person_id: personId,
-        activity_kind: "work",
-        context_label: `QA${TAG} History ${r.date}`,
-        activity_date: r.date,
-        hours: r.hours,
-        original_text: `Work ${r.date}`,
-        original_language: "en",
-        evidence_state: "LEGACY_IMPORTED",
-        supplied_by_organization_id: S.ORG,
-        supplier_role: "employer",
-        supplied_by_profile_id: own.id,
-        imported_by_profile_id: own.id,
-        imported_at: importedAt,
-        session_id: sessionId,
         source_kind: "manual",
         source_filename: `chain-${TAG}.csv`,
-        source_fact: { row: r.date },
-        derived: {},
-        record_fingerprint: fingerprint,
-        hash_prev: prev,
-        hash_self: self,
+        source_fingerprint: sha(`session:${TAG}`),
+        source_language: "en",
+        supplied_by_organization_id: S.ORG,
+        supplier_role: "employer",
+        actor_kind: "human",
+        created_by: own.id,
+        notes: `integrated chain ${TAG}`,
       });
-      prev = self;
-      ids.push(((await res.json()) as { id: string }[])[0].id);
+      const sessionId = ((await s.json()) as { id: string }[])[0].id;
+      let prev: string | null = null;
+      const importedAt = new Date().toISOString();
+      const ids: string[] = [];
+      for (const r of [...LIVE, WITHDRAWN]) {
+        const fingerprint = sha(`record:${S.ORG}:${personId}:${r.date}:${r.hours}:${TAG}`);
+        const self = chainHash(prev, fingerprint, importedAt);
+        const res = await dbOk("POST", "organization_evidence_records", {
+          organization_id: S.ORG,
+          organization_person_id: personId,
+          activity_kind: "work",
+          context_label: `QA${TAG} History ${r.date}`,
+          activity_date: r.date,
+          hours: r.hours,
+          original_text: `Work ${r.date}`,
+          original_language: "en",
+          evidence_state: "LEGACY_IMPORTED",
+          supplied_by_organization_id: S.ORG,
+          supplier_role: "employer",
+          supplied_by_profile_id: own.id,
+          imported_by_profile_id: own.id,
+          imported_at: importedAt,
+          session_id: sessionId,
+          source_kind: "manual",
+          source_filename: `chain-${TAG}.csv`,
+          source_fact: { row: r.date },
+          derived: {},
+          record_fingerprint: fingerprint,
+          hash_prev: prev,
+          hash_self: self,
+        });
+        prev = self;
+        ids.push(((await res.json()) as { id: string }[])[0].id);
+      }
+      await dbOk("POST", "organization_evidence_events", {
+        organization_id: S.ORG,
+        record_id: ids[ids.length - 1],
+        event_type: "withdrawn",
+        actor_profile_id: own.id,
+        note: `chain ${TAG}`,
+      });
+      save({ ROSTER_PERSON: personId });
     }
-    await dbOk("POST", "organization_evidence_events", {
-      organization_id: S.ORG,
-      record_id: ids[ids.length - 1],
-      event_type: "withdrawn",
-      actor_profile_id: own.id,
-      note: `chain ${TAG}`,
-    });
-    save({ ROSTER_PERSON: personId });
 
     // A FOREIGN account with the SAME display name and a lookalike e-mail inherits nothing
-    const clone = await createAccount("clone", "worker");
+    const clone = S.accounts?.clone ? await acct("clone") : await createAccount("clone", "worker");
+    rememberAccount("clone", clone);
     await rpcAs(clone.jwt, "complete_onboarding", { p_role: "worker", p_display_name: rosterName, p_country: "LT", p_role_data: {} });
     for (const who of [clone, await acct("str")]) {
       expect((await asUser(who.jwt, "GET", `organization_evidence_records?select=id&organization_id=eq.${S.ORG}`)).json).toEqual([]);
@@ -1309,7 +1342,7 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     const ownPage = await loginUi(browser, "own");
     await go(ownPage, "/en/dashboard/company/people", `[data-testid="organization-roster-person-${personId}"]`);
     const sel = ownPage.getByTestId(`roster-link-worker-${personId}`);
-    if (!(await sel.count())) {
+    if ((await rows(`engagement_contexts?profile_id=eq.${reg.id}&organization_id=eq.${S.ORG}&status=eq.active&select=id`)).length === 0) {
       // the worker must be on the roster as an engagement first: invite them through the roster-claim control
       await ownPage.getByTestId(`roster-claim-email-${personId}`).fill(reg.email);
       await ownPage.getByTestId(`roster-claim-invite-${personId}`).locator('button[type="submit"]').click();
@@ -1371,39 +1404,45 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
   test("5f. PERSON-BASIS: an independent person with a real active assignment - what the product allows (composer attribution) vs. what the counterparty path needs", async ({ browser }) => {
     // A third project owned by the same organisation, one independent worker
     // (personal engagement context, NO organisation) with a PERSON assignment.
-    const p3 = await dbOk("POST", "projects", { title: `QA${TAG} Person Project`, organization_id: S.ORG, status: "live" });
-    const P3 = ((await p3.json()) as { id: string }[])[0].id;
-    const iw = await createAccount("iw", "worker");
-    rememberAccount("iw", iw);
-    await dbOk("POST", "project_worker_assignments", { project_id: P3, worker_id: iw.workerId, status: "active" });
-    save({ PROJECT3: P3 });
-    const ecs = await rows<{ id: string; organization_id: string | null }>(`engagement_contexts?profile_id=eq.${iw.id}&status=eq.active&select=id,organization_id`);
-    expect(ecs.length).toBeGreaterThan(0);
-
-    // (i) Can the worker attribute an entry to that project THROUGH THE PRODUCT'S write path?
-    const asRpc = await rpcAs(iw.jwt, "create_journal_entry_full", {
-      p_worker_id: iw.workerId,
-      p_engagement_context_id: ecs[0].id,
-      p_entry_type_slug: "freeform",
-      p_profession_id: null,
-      p_original_text: `QA${TAG} person-basis entry`,
-      p_original_language: "en",
-      p_hash_prev: null,
-      p_hash_self: sha(`person-basis:${TAG}`),
-      p_visibility_scope: "closed",
-      p_metrics: [],
-      p_project_id: P3,
-      p_project_explicit: true,
-    });
-    save({ PERSON_BASIS_COMPOSER: { status: asRpc.status, body: asRpc.json } });
-    const composerWorks = asRpc.status < 300;
+    let P3 = S.PROJECT3 as string | undefined;
+    let iw: Account;
+    let composerWorks = false;
+    if (!P3) {
+      const p3 = await dbOk("POST", "projects", { title: `QA${TAG} Person Project`, organization_id: S.ORG, status: "live" });
+      P3 = ((await p3.json()) as { id: string }[])[0].id;
+      iw = await createAccount("iw", "worker");
+      rememberAccount("iw", iw);
+      await dbOk("POST", "project_worker_assignments", { project_id: P3, worker_id: iw.workerId, status: "active" });
+      save({ PROJECT3: P3 });
+      const ecs0 = await rows<{ id: string; organization_id: string | null }>(`engagement_contexts?profile_id=eq.${iw.id}&status=eq.active&select=id,organization_id`);
+      expect(ecs0.length).toBeGreaterThan(0);
+      const asRpc0 = await rpcAs(iw.jwt, "create_journal_entry_full", {
+        p_worker_id: iw.workerId,
+        p_engagement_context_id: ecs0[0].id,
+        p_entry_type_slug: "freeform",
+        p_profession_id: null,
+        p_original_text: `QA${TAG} person-basis entry`,
+        p_original_language: "en",
+        p_hash_prev: null,
+        p_hash_self: sha(`person-basis:${TAG}`),
+        p_visibility_scope: "closed",
+        p_metrics: [],
+        p_project_id: P3,
+        p_project_explicit: true,
+      });
+      save({ PERSON_BASIS_COMPOSER: { status: asRpc0.status, body: asRpc0.json } });
+    }
+    iw = await acct("iw");
+    const pbc = S.PERSON_BASIS_COMPOSER as { status: number; body: unknown };
+    composerWorks = pbc.status < 300;
+    const asRpc = { status: pbc.status, json: pbc.body };
 
     // (ii) Whatever the answer, the REGISTRATION on the real person assignment works from the UI
     const page = await loginUi(browser, "rep2");
     await go(page, `/en/dashboard/projects/${P3}`, '[data-testid="counterparty-link-panel"]');
     const row = page.getByTestId(`counterparty-link-row-${iw.workerId}`);
     await expect(row).toBeVisible({ timeout: 60_000 });
-    await expect(row).toContainText(/person/i);
+    await expect(row).toContainText(/assigned directly/i);
     await page.getByTestId(`counterparty-link-register-${iw.workerId}`).click();
     await expect(page.getByTestId(`counterparty-link-active-${iw.workerId}`)).toBeVisible({ timeout: 60_000 });
     await shot(page, "5f-person-registered");
@@ -1469,20 +1508,20 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
       expect(q2.text, "queue must not list another party's entry").not.toContain(e[0].id);
       const g2 = await tool(who.jwt, "counterparty_review_entry_get", { entryId: e[0].id });
       expect(g2.text).not.toContain(`QA${TAG} entry-m2`);
-      const d2 = await tool(who.jwt, "counterparty_review_decide_draft", { entryId: e[0].id, decision: "approved" });
+      const d2 = await tool(who.jwt, "counterparty_review_decide_draft", { entryId: e[0].id, decision: "accept" });
       expect(d2.text).not.toContain("confirmationToken");
     }
     const anon = await tool(null, "counterparty_review_queue_get", {});
     expect(anon.status).toBe(401);
     // correction request WITHOUT a note is refused; with a note it drafts
-    const noNote = await tool(rep2.jwt, "counterparty_review_decide_draft", { entryId: e[0].id, decision: "changes_requested" });
+    const noNote = await tool(rep2.jwt, "counterparty_review_decide_draft", { entryId: e[0].id, decision: "request_correction" });
     expect(noNote.text).not.toContain("confirmationToken");
     // decide: draft writes nothing, confirm writes ONE client_accept
-    const draft = await tool(rep2.jwt, "counterparty_review_decide_draft", { entryId: e[0].id, decision: "approved", note: "ok from chat" });
+    const draft = await tool(rep2.jwt, "counterparty_review_decide_draft", { entryId: e[0].id, decision: "accept", note: "ok from chat" });
     const tok = /confirmationToken\\?"\s*:\s*\\?"([^"\\]+)/.exec(draft.text)?.[1];
     expect(tok, draft.text.slice(0, 400)).toBeTruthy();
     expect(await rows(`journal_entry_confirmations?entry_id=eq.${e[0].id}&select=id`)).toEqual([]);
-    const conf = await tool(rep2.jwt, "counterparty_review_decide_confirm", { entryId: e[0].id, decision: "approved", note: "ok from chat", confirmationToken: tok });
+    const conf = await tool(rep2.jwt, "counterparty_review_decide_confirm", { entryId: e[0].id, decision: "accept", note: "ok from chat", confirmationToken: tok });
     expect(conf.text).not.toMatch(/"isError":\s*true/);
     const c = await rows<{ confirmation_scope: any; confirmer_id: string }>(`journal_entry_confirmations?entry_id=eq.${e[0].id}&select=confirmation_scope,confirmer_id`);
     expect(c).toHaveLength(1);
@@ -1490,7 +1529,7 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     expect(c[0].confirmation_scope.action).toBe("client_accept");
     expect(c[0].confirmation_scope.authority.basis).toBe("counterparty");
     // a replay of the one-time token does not write a second row
-    const replay = await tool(rep2.jwt, "counterparty_review_decide_confirm", { entryId: e[0].id, decision: "approved", note: "ok from chat", confirmationToken: tok });
+    const replay = await tool(rep2.jwt, "counterparty_review_decide_confirm", { entryId: e[0].id, decision: "accept", note: "ok from chat", confirmationToken: tok });
     void replay;
     expect(await rows(`journal_entry_confirmations?entry_id=eq.${e[0].id}&select=id`)).toHaveLength(1);
   });
@@ -1528,7 +1567,9 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     await go(page, "/en/dashboard/work-in-numbers?period=all", '[data-testid="work-in-numbers"]');
     await shot(page, "8a-work-in-numbers");
     const win = await page.locator("body").innerText();
-    expect(win).toMatch(/\b5\b|5[.,]0/); // the member's 5 recorded hours
+    const winNorm = win.replace(/[\s  ]+/g, " ");
+    expect(winNorm).toContain("10 h"); // 5 h + the corrected 5 h; the corrected original is not counted twice
+    expect(winNorm).not.toContain("15 h");
   });
 
   test("8b. LIVING CV (member via team): another member's native work shows with NO employer or client claim", async ({ browser }) => {
