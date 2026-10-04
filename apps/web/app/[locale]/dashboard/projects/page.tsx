@@ -38,6 +38,11 @@ import { CompanyGallerySection } from "@/components/app/company-gallery-section"
 import { OrganizationDoorsServer } from "@/components/app/organization/organization-doors-server";
 import { ManagerScopeNotice } from "@/components/app/organization/manager-scope-notice";
 import { getCompanyProjectContext } from "@/lib/company/project-context";
+import {
+  getAssignableTasks,
+  getAssignableTeams,
+  getProjectTeamAssignments,
+} from "@/lib/projects/team-assignment";
 import { MapPin } from "lucide-react";
 import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
 import { type Role } from "@/lib/auth/actions";
@@ -245,6 +250,24 @@ export default async function ProjectsPage({
     })),
   );
 
+  // WRK-6 — teams as ONE assignment per project, read from the one relation.
+  // An unprovisioned or unreadable relation hides the team control; it is never
+  // rendered as "no team assigned" (a failed read is not an empty list).
+  const activeIds = activeProjects.map((p) => p.id);
+  const [teamAssignmentsRead, assignableTeams, assignableTasks] = await Promise.all([
+    getProjectTeamAssignments(activeIds),
+    getAssignableTeams(),
+    getAssignableTasks(activeIds),
+  ]);
+  const teamWork =
+    teamAssignmentsRead.status === "ok"
+      ? {
+          byProject: Object.fromEntries(teamAssignmentsRead.byProject),
+          teams: assignableTeams,
+          tasks: assignableTasks,
+        }
+      : undefined;
+
   const labels: ProjectManagerLabels = {
     createTitle: t("create.title"),
     createNameLabel: t("create.nameLabel"),
@@ -438,6 +461,7 @@ export default async function ProjectsPage({
             employerCtx?.kind === "ok" ? employerCtx.organizationId : null,
           )}
           labels={labels}
+          teamWork={teamWork}
         />
       </section>
 

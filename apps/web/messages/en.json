@@ -7085,31 +7085,7 @@
         "error": "Could not save the answer. Nothing was changed."
       }
     },
-    "addableUnavailable": "The linked-worker list could not be loaded — adding is not possible right now.",
-    "assign": {
-      "heading": "Assign the whole team to a project",
-      "intro": "Each of the {count} members is assigned one by one, and you see the result for every person.",
-      "projectLabel": "Project",
-      "projectPlaceholder": "Choose a project",
-      "submit": "Assign the team",
-      "assigning": "Assigning…",
-      "noProjects": "You have no open projects to assign the team to.",
-      "summary": "{written} of {total} assigned.",
-      "member": {
-        "assigned": "Assigned",
-        "calendar_unknown": "Assigned · dates not confirmed",
-        "calendar_conflict": "Assigned · already busy on these dates",
-        "refused": "Not assigned · you cannot assign this person",
-        "error": "Not assigned · something went wrong"
-      },
-      "outcome": {
-        "not_authed": "Sign in again to continue.",
-        "no_such_team": "This team is not yours to assign.",
-        "empty_team": "This team has no members yet.",
-        "needs_migration": "Not available right now.",
-        "unavailable": "Could not assign the team. Nothing was changed."
-      }
-    }
+    "addableUnavailable": "The linked-worker list could not be loaded — adding is not possible right now."
   },
   "teamEnquiries": {
     "enquireButton": "Ask this team about work",
@@ -18229,6 +18205,69 @@
       "history": "{count, plural, one {# job} other {# jobs}}",
       "skills": "{count, plural, one {# skill backed by your records} other {# skills backed by your records}}",
       "next": "Where you can go"
+    }
+  },
+  "teamAssignment": {
+    "title": "Teams on this project",
+    "intro": "A team is assigned as one unit. Its members come from the team's own membership, so people who left the team are not counted, and each person's hours and journal stay their own.",
+    "none": "No team is assigned to this project.",
+    "scope": {
+      "project": "Whole project",
+      "task": "Task: {title}",
+      "object": "Work site"
+    },
+    "membersNow": "Members now: {count}",
+    "noMembers": "No active members.",
+    "unnamedMember": "Team member",
+    "unnamedTeam": "Team",
+    "end": "End assignment",
+    "ending": "Ending…",
+    "replaceLabel": "Replace with another team",
+    "replacePlaceholder": "Choose a team",
+    "replaceSubmit": "Replace",
+    "assignTitle": "Assign a team",
+    "teamLabel": "Team",
+    "teamPlaceholder": "Choose a team",
+    "scopeLabel": "What the team works on",
+    "scopeProjectOption": "The whole project",
+    "scopeTaskOption": "One task",
+    "taskLabel": "Task",
+    "taskPlaceholder": "Choose a task",
+    "noTeams": "You do not manage a team yet. Create one on the People page.",
+    "noTasks": "This project has no open tasks.",
+    "submit": "Assign team",
+    "assigning": "Assigning…",
+    "outcome": {
+      "created": "Team assigned.",
+      "already_assigned": "This team is already assigned here. Nothing changed.",
+      "replaced": "Team replaced.",
+      "ended": "Assignment ended.",
+      "already_ended": "This assignment had already ended."
+    },
+    "refusal": {
+      "not_authorized": "You cannot assign this team to this project.",
+      "not_authed": "Sign in again to continue.",
+      "not_a_team": "This is not a team.",
+      "team_has_no_members": "This team has no active members yet.",
+      "project_completed": "This project is completed.",
+      "task_not_assignable": "This task cannot take a team (it is closed or belongs to another project).",
+      "object_not_assignable": "This work site cannot take a team.",
+      "one_scope_only": "Choose either a task or a work site, not both.",
+      "replace_target_not_active": "The assignment to replace is no longer active.",
+      "team_and_project_required": "Choose a team and a project.",
+      "needs_migration": "Not available right now.",
+      "error": "Could not complete this. Nothing was changed."
+    },
+    "calendar": {
+      "conflictsTitle": "Already committed on these dates",
+      "unknownTitle": "Dates could not be confirmed free for",
+      "advisory": "Advisory: the assignment is saved. End it above if the clash is real."
+    },
+    "form": {
+      "intro": "Assign this team of {count} to a project as one unit.",
+      "projectLabel": "Project",
+      "projectPlaceholder": "Choose a project",
+      "noProjects": "You have no open projects to assign the team to."
     }
   }
 }
