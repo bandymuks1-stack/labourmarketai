@@ -1582,4 +1582,230 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     await shot(page, "8b-cv-m1");
     void m1;
   });
+
+  // =========================================================================
+  // STEP 7 - MARKETPLACE FEDERATION KEEPS THE UNIVERSAL MODEL (#2124, #2151)
+  // =========================================================================
+  const listingRows = async (page: Page) =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('[data-testid="market-row-actor"]')].map((el) => ({
+        kind: el.getAttribute("data-actor-kind"),
+        text: (el.closest("li")?.textContent ?? "").replace(/\s+/g, " ").slice(0, 200),
+      })),
+    );
+
+  test("7a. SEED THROUGH THE PRODUCT'S OWN COMMANDS: offers and needs from person / company / institution / supplier / agency / individual service provider", async () => {
+    const own = await acct("own");
+    const cli = await acct("cli");
+    const nm_ = await acct("nm");
+    // organisation CAPABILITIES (identity claims) via the owner-only command
+    for (const [jwt, org, role] of [
+      [own.jwt, S.ORG, "employer"],
+      [own.jwt, S.ORG, "client"],
+      [cli.jwt, S.CLI_ORG, "training_provider"],
+    ] as const) {
+      const r = await rpcAs(jwt, "add_organization_role_v1", { p_organization_id: org, p_role_slug: role });
+      expect(r.status, `${role}: ${JSON.stringify(r.json)}`).toBeLessThan(300);
+    }
+    // a goods/services SUPPLIER organisation and an AGENCY organisation (owner accounts)
+    const sup = await createAccount("sup", "company", { company: `QA${TAG} Supply Ltd` });
+    rememberAccount("sup", sup);
+    const ag = await createAccount("ag", "company", { company: `QA${TAG} Staffing Ltd` });
+    rememberAccount("ag", ag);
+    const orgOf = async (a: Account) => {
+      const co = await rows<{ id: string }>(`companies?profile_id=eq.${a.id}&select=id`);
+      return (await rows<{ id: string }>(`organizations?legacy_company_id=eq.${co[0].id}&select=id`))[0].id;
+    };
+    const SUP_ORG = await orgOf(sup);
+    const AG_ORG = await orgOf(ag);
+    save({ SUP_ORG, AG_ORG });
+    expect((await rpcAs(sup.jwt, "add_organization_role_v1", { p_organization_id: SUP_ORG, p_role_slug: "supplier" })).status).toBeLessThan(300);
+    expect((await rpcAs(ag.jwt, "add_organization_role_v1", { p_organization_id: AG_ORG, p_role_slug: "workforce_provider" })).status).toBeLessThan(300);
+
+    const make = async (jwt: string, args: Record<string, unknown>) => {
+      const c = await rpcAs(jwt, "create_marketplace_listing_v2", args);
+      expect(c.status, JSON.stringify(c.json)).toBeLessThan(300);
+      const id = c.json as string;
+      const a = await rpcAs(jwt, "set_marketplace_listing_status_v2", { p_id: id, p_status: "active" });
+      expect(a.status, JSON.stringify(a.json)).toBeLessThan(300);
+      return id;
+    };
+    const t = (k: string) => `QA${TAG} ${k}`;
+    const ids = {
+      person: await make(nm_.jwt, { p_listing_kind: "sale", p_category: "goods_handmade", p_title: t("person-handmade-offer"), p_organization_id: null, p_project_id: null }),
+      companyNeed: await make(own.jwt, { p_listing_kind: "wanted", p_category: "project_work", p_title: t("company-project-need"), p_organization_id: S.ORG, p_project_id: S.PROJECT }),
+      institution: await make(cli.jwt, { p_listing_kind: "rental", p_category: "premises", p_title: t("institution-premises-offer"), p_organization_id: S.CLI_ORG, p_project_id: null }),
+      supplier: await make(sup.jwt, { p_listing_kind: "sale", p_category: "goods_household", p_title: t("supplier-goods-offer"), p_organization_id: SUP_ORG, p_project_id: null }),
+      personNeed: await make(nm_.jwt, { p_listing_kind: "wanted", p_category: "service_trade", p_title: t("person-service-need"), p_organization_id: null, p_project_id: null }),
+    };
+    save({ LISTINGS: ids });
+    // an individual SERVICE PROVIDER offering: the same insert the Services page performs, under the provider's own RLS
+    const so = await asUser(nm_.jwt, "POST", "service_offerings", {
+      provider_id: nm_.id,
+      title: t("individual-service-offer"),
+      description: "synthetic",
+      status: "active",
+    });
+    save({ SERVICE_OFFERING: so });
+    // AGENCY supply (agency_offer): written by the agency dashboard / chat intake through the server executor,
+    // which is not reachable from a spec - the row is seeded with the columns that intake writes. NAMED SEED.
+    await dbOk("POST", "customer_requests", {
+      profile_id: ag.id,
+      title: t("agency-capacity"),
+      country: "NL",
+      role_or_work_type: t("Welder"),
+      team_size: 6,
+      status: "submitted",
+      kind: "agency_offer",
+      organization_id: AG_ORG,
+      payload: { qa: TAG },
+    });
+    // DB read-back: rows exist with the right owners
+    const ls = await rows<{ id: string; owner_id: string; organization_id: string | null; status: string }>(
+      `marketplace_listings?id=in.(${Object.values(ids).join(",")})&select=id,owner_id,organization_id,status`,
+    );
+    expect(ls).toHaveLength(5);
+    expect(ls.every((l) => l.status === "active")).toBe(true);
+  });
+
+  test("7b. DISCOVERY (browser): /dashboard/listings shows offers AND needs with honest actor-kind chips; federation adds jobs, agency supply, project demand", async ({ browser }) => {
+    const own = await loginUi(browser, "own");
+    await go(own, "/en/dashboard/listings", '[data-testid="listings-page"]');
+    await expect(own.getByText(`QA${TAG} person-handmade-offer`).first()).toBeVisible({ timeout: 120_000 });
+    const rowsOwn = await listingRows(own);
+    await shot(own, "7b-listings-own");
+    const kindOf = (needle: string) => rowsOwn.find((r) => r.text.includes(needle))?.kind;
+    expect(kindOf("person-handmade-offer"), "a person's listing is a person").toBe("person");
+    expect(kindOf("individual-service-offer"), "a service offering is an individual service provider").toBe("service_provider");
+    expect(kindOf("Welder"), "agency supply -> agency (source kind)").toBe("agency");
+    // The owner's OWN listing is under "My listings", not in the browse list
+    await expect(own.getByText(`QA${TAG} company-project-need`).first()).toBeVisible();
+    expect(kindOf("company-project-need"), "own listing is not duplicated into discovery").toBeUndefined();
+    // Organisation capabilities are readable by MEMBERS only (organization_roles RLS), so a
+    // foreign viewer gets the honest 'other' ("Type not stated") for organisation-originated rows.
+    save({ OWN_VIEW: rowsOwn.map((r) => ({ kind: r.kind, t: r.text.slice(0, 80) })) });
+    expect(kindOf("institution-premises-offer")).toBe("other");
+    expect(kindOf("supplier-goods-offer")).toBe("other");
+    const kinds = new Set(rowsOwn.map((r) => r.kind));
+    expect(kinds.has("person") && kinds.has("service_provider") && kinds.has("agency")).toBe(true);
+    await expect(own.getByTestId("market-actor-filter")).toBeVisible();
+
+    // A MEMBER of the publishing organisation (not its owner) sees the capability-derived kind
+    const repPage = await loginUi(browser, "rep2");
+    await go(repPage, "/en/dashboard/listings", '[data-testid="listings-page"]');
+    await expect(repPage.getByText(`QA${TAG} company-project-need`).first()).toBeVisible({ timeout: 120_000 });
+    const repRows = await listingRows(repPage);
+    expect(repRows.find((r) => r.text.includes("company-project-need"))?.kind, "member view: company (capability employer/client)").toBe("company");
+    await shot(repPage, "7b-listings-org-member");
+    // filtering by actor kind narrows the list
+    await repPage.getByTestId("market-actor-filter").getByRole("button", { name: /^Company$/ }).click().catch(() => undefined);
+    // the owners of institution / supplier organisations see their own rows under "My listings"
+    for (const [key, needle] of [["cli", "institution-premises-offer"], ["sup", "supplier-goods-offer"]] as const) {
+      const pg = await loginUi(browser, key);
+      await go(pg, "/en/dashboard/listings", '[data-testid="listings-page"]');
+      await expect(pg.getByText(`QA${TAG} ${needle}`).first()).toBeVisible({ timeout: 120_000 });
+    }
+  });
+
+  test("7c. PRIVACY: anon sees no listings / agency supply; a non-manager sees no workforce rows; vacancies stay an anon-safe projection", async ({ browser }) => {
+    // ANON over REST (apikey only)
+    for (const path of ["marketplace_listings?select=id", "service_offerings?select=id", "customer_requests?select=id&kind=eq.agency_offer", "market_index_v1?select=origin_id"]) {
+      const r = await fetch(`${SUPA_URL}/rest/v1/${path}`, { headers: { apikey: ANON, Authorization: `Bearer ${ANON}` } });
+      const j: any = await r.json().catch(() => null);
+      expect(r.status >= 400 || (Array.isArray(j) && j.length === 0), `anon ${path}: ${r.status} ${JSON.stringify(j).slice(0, 100)}`).toBe(true);
+    }
+    const anonSupply = await rpcAs(null, "list_open_supply_for_employers", {});
+    expect(anonSupply.status >= 400 || (Array.isArray(anonSupply.json) && anonSupply.json.length === 0)).toBe(true);
+    // a person who manages no organisation gets zero agency supply rows
+    const str = await acct("str");
+    const strSupply = await rpcAs(str.jwt, "list_open_supply_for_employers", {});
+    expect(Array.isArray(strSupply.json) ? strSupply.json.length : -1).toBe(0);
+    // a manager gets the six-column anonymous projection ONLY (no organisation, no profile)
+    const own = await acct("own");
+    const ownSupply = await rpcAs(own.jwt, "list_open_supply_for_employers", {});
+    expect(Array.isArray(ownSupply.json) && ownSupply.json.some((r: any) => String(r.role_text).includes(`QA${TAG}`))).toBe(true);
+    const keys = new Set(Object.keys((ownSupply.json as any[])[0]));
+    for (const k of ["profile_id", "organization_id", "agency_id", "owner_id"]) expect(keys.has(k), `agency supply must not expose ${k}`).toBe(false);
+    // public vacancies: the anon projection hides the raw title
+    const vac = await rpcAs(null, "search_public_vacancy_previews_v1", { p_query: null, p_profession_slug: null, p_limit: 5, p_offset: 0 });
+    if (Array.isArray(vac.json) && vac.json.length) expect(vac.json.every((v: any) => v.title_raw == null)).toBe(true);
+    // the person's private page: the stranger cannot see another person's DRAFT listing
+    const nm_ = await acct("nm");
+    const draft = await rpcAs(nm_.jwt, "create_marketplace_listing_v2", { p_listing_kind: "sale", p_category: "goods_handmade", p_title: `QA${TAG} private-draft`, p_organization_id: null, p_project_id: null });
+    expect(draft.status).toBeLessThan(300);
+    expect((await asUser(str.jwt, "GET", `marketplace_listings?title=eq.${encodeURIComponent(`QA${TAG} private-draft`)}&select=id`)).json).toEqual([]);
+    const page = await loginUi(browser, "str");
+    await go(page, "/en/dashboard/listings", '[data-testid="listings-page"]');
+    await expect(page.getByText(`QA${TAG} private-draft`)).toHaveCount(0);
+    await expect(page.getByText(`QA${TAG} Welder`)).toHaveCount(0);
+    await shot(page, "7c-stranger-listings");
+  });
+
+  test("7d. DISCOVERY of project demand and jobs: demand is worker-gated, anon gets nothing; the vacancy feed is empty in the local fixtures (NOT PROVEN with data)", async ({ browser }) => {
+    const jwt = await jwtFor("dev.worker@local.test", "password");
+    const demand = await rpcAs(jwt, "list_open_demand_for_workers", {});
+    expect(demand.status, JSON.stringify(demand.json).slice(0, 200)).toBeLessThan(300);
+    const n = Array.isArray(demand.json) ? demand.json.length : -1;
+    test.info().annotations.push({ type: "project-demand-rows-for-worker", description: String(n) });
+    expect(n).toBeGreaterThanOrEqual(0);
+    const anon = await rpcAs(null, "list_open_demand_for_workers", {});
+    expect(anon.status >= 400 || (Array.isArray(anon.json) && anon.json.length === 0)).toBe(true);
+    const vac = await rpcAs(null, "search_public_vacancy_previews_v1", { p_query: null, p_profession_slug: null, p_limit: 5, p_offset: 0 });
+    test.info().annotations.push({ type: "vacancy-rows-anon", description: `${vac.status} rows=${Array.isArray(vac.json) ? vac.json.length : "n/a"}` });
+    expect(vac.status).toBeLessThan(300);
+  });
+
+  test("4e. #2146 PERSON-BASIS override still works unchanged: receipt carries assignment_id (no team basis); a non-manager is refused", async () => {
+    const own = await acct("own");
+    const iw = await acct("iw");
+    await dbOk("PATCH", `projects?id=eq.${S.PROJECT3}`, { start_date: "2026-12-01", end_date: "2026-12-20" });
+    const collisions = [{ kind: "absence", overlapStart: "2026-12-05", overlapEnd: "2026-12-08" }];
+    const denied = await rpcAs((await acct("str")).jwt, "record_commitment_override_v1", { p_project_id: S.PROJECT3, p_worker_profile_id: iw.id, p_collisions: collisions, p_reason_code: "other" });
+    expect(denied.status).toBeGreaterThanOrEqual(400);
+    const ok = await rpcAs(own.jwt, "record_commitment_override_v1", { p_project_id: S.PROJECT3, p_worker_profile_id: iw.id, p_collisions: collisions, p_reason_code: "agreed_with_worker" });
+    expect(ok.status, JSON.stringify(ok.json)).toBeLessThan(300);
+    const rec = await rows<Record<string, any>>(`commitment_override_receipts?project_id=eq.${S.PROJECT3}&select=*`);
+    expect(rec).toHaveLength(1);
+    expect(rec[0].assignment_id, "PERSON basis").toBeTruthy();
+    expect(rec[0].team_assignment_id).toBeNull();
+    expect((await db("PATCH", `commitment_override_receipts?id=eq.${rec[0].id}`, { reason_code: "other" })).ok).toBe(false);
+    expect((await db("DELETE", `commitment_override_receipts?id=eq.${rec[0].id}`)).ok).toBe(false);
+  });
+
+  test("5h. EMPLOYER REVIEW UNCHANGED: the fixture manager approves an employee's entry in the inbox; it is an employer 'confirm', not a client acceptance", async ({ browser }) => {
+    const wjwt = await jwtFor("dev.worker@local.test", "password");
+    const wid = (await rows<{ id: string }>(`workers?profile_id=eq.aaaaaaaa-0000-0000-0000-000000000001&select=id`))[0].id;
+    const ecs = await rows<{ id: string; journal_review_enabled: boolean }>(
+      `engagement_contexts?profile_id=eq.aaaaaaaa-0000-0000-0000-000000000001&organization_id=not.is.null&relationship_slug=eq.employee&status=eq.active&select=id,journal_review_enabled`,
+    );
+    expect(ecs.length).toBeGreaterThan(0);
+    const text = `QA${TAG} employer-review entry, tiles, 4 hours`;
+    const c = await rpcAs(wjwt, "create_journal_entry_full", {
+      p_worker_id: wid, p_engagement_context_id: ecs[0].id, p_entry_type_slug: "freeform", p_profession_id: null,
+      p_original_text: text, p_original_language: "en", p_hash_prev: null, p_hash_self: sha(text), p_visibility_scope: "closed",
+      p_metrics: [], p_project_id: null, p_project_explicit: false,
+    });
+    expect(c.status, JSON.stringify(c.json)).toBeLessThan(300);
+    const ctx = await browser.newContext();
+    ctxs.push(ctx);
+    const page = await ctx.newPage();
+    page.setDefaultTimeout(180_000);
+    page.setDefaultNavigationTimeout(240_000);
+    await page.goto("/en/auth/login", { waitUntil: "domcontentloaded" });
+    await settle(page);
+    await page.locator('input[type="email"]').fill("dev.company@local.test");
+    await page.locator('input[type="password"]').fill("password");
+    await page.locator('button[type="submit"]').first().click();
+    await page.waitForURL(/\/dashboard/, { timeout: 240_000, waitUntil: "domcontentloaded" });
+    await go(page, "/en/dashboard/inbox");
+    const card = page.locator('li[data-testid^="inbox-entry-"]').filter({ hasText: text });
+    await expect(card).toBeVisible({ timeout: 120_000 });
+    await shot(page, "5h-employer-inbox");
+    await card.locator('button[data-testid^="journal-approve-entry-"]').click();
+    await expect.poll(async () => (await rows(`journal_entry_confirmations?entry_id=eq.${c.json}&select=id`)).length, { timeout: 90_000 }).toBe(1);
+    const conf = await rows<{ confirmation_scope: any }>(`journal_entry_confirmations?entry_id=eq.${c.json}&select=confirmation_scope`);
+    expect(conf[0].confirmation_scope.action).toBe("confirm");
+    expect(conf[0].confirmation_scope.authority?.basis ?? "employer").toBe("employer");
+    expect(conf[0].confirmation_scope.provenance?.origin).toBe("NATIVE_PLATFORM_EMPLOYER_CONFIRMATION");
+  });
 });

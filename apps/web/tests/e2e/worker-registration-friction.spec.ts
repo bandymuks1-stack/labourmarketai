@@ -56,15 +56,33 @@ test.describe("Registration friction removal — negative security journey", () 
     const email = `e2e.victim.${Date.now()}@local.test`;
 
     // Seed: a pending roster invitation addressed to an address nobody has proved.
+    // inviter_profile_id is NOT NULL: the company's own owner profile
+    const own = await request.get(`${URL_}/rest/v1/companies?id=eq.${COMPANY}&select=profile_id`, {
+      headers: { apikey: SERVICE!, Authorization: `Bearer ${SERVICE}` },
+    });
+    const inviter = ((await own.json()) as { profile_id: string }[])[0]?.profile_id;
+    expect(inviter, "company owner profile").toBeTruthy();
     const seed = await request.post(`${URL_}/rest/v1/company_worker_invitations`, {
       headers: { apikey: SERVICE!, Authorization: `Bearer ${SERVICE}`, "Content-Type": "application/json", Prefer: "return=representation" },
-      data: { company_id: COMPANY, invited_email: email, status: "pending" },
+      data: { company_id: COMPANY, invited_email: email, status: "pending", inviter_profile_id: inviter },
     });
     expect(seed.ok(), await seed.text()).toBeTruthy();
 
     // The attacker registers with that address — and enters at once (the lane's promise).
     await signUpThroughUi(page, email);
     await expect(page).toHaveURL(/\/onboarding/, { timeout: 30_000 });
+
+    // The registrant finishes onboarding (their own RPC) so the account area opens, as for any user.
+    const tok0 = await request.post(`${URL_}/auth/v1/token?grant_type=password`, {
+      headers: { apikey: ANON!, "Content-Type": "application/json" },
+      data: { email, password: PASSWORD },
+    });
+    const jwt0 = ((await tok0.json()) as { access_token: string }).access_token;
+    const ob = await request.post(`${URL_}/rest/v1/rpc/complete_onboarding`, {
+      headers: { apikey: ANON!, Authorization: `Bearer ${jwt0}`, "Content-Type": "application/json" },
+      data: { p_role: "worker", p_display_name: "E2E Victim", p_country: "LT", p_role_data: {} },
+    });
+    expect(ob.ok(), await ob.text()).toBeTruthy();
 
     // 1. The UI offers the proof instead of the invitation.
     await page.goto("/en/dashboard/network");
