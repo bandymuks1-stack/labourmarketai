@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { readMyTeamWorkContexts } from "@/lib/projects/team-work-context";
 import type { WorkTaskAssignedNotificationFacts } from "@/lib/notifications/event-emitters";
 
 /**
@@ -240,6 +241,60 @@ export async function listMyTasks(): Promise<MyTasksResult> {
     q.or(`assignee_profile_id.eq.${user.id},created_by.eq.${user.id}`),
   );
   return mapResult(res);
+}
+
+/**
+ * Tasks the caller can work on because a team they belong to is ACTIVELY
+ * assigned to the TASK, or to the WORK OBJECT the task sits in (20261003150700).
+ * A project-wide team assignment does not list every task of the project - the
+ * same as a person on the project roster, who is not the assignee of every
+ * task. Runs under the caller's own RLS (`wt_select` admits exactly these
+ * rows), so a member who left or an ended assignment simply reads nothing.
+ * `viaTeamByTask` carries the team name(s) for the visible "via team ..." label.
+ */
+export async function listMyTeamTasks(): Promise<{
+  tasks: readonly WorkTask[];
+  viaTeamByTask: Map<string, string>;
+}> {
+  const none = { tasks: [] as WorkTask[], viaTeamByTask: new Map<string, string>() };
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return none;
+
+  const contexts = await readMyTeamWorkContexts(supabase);
+  const taskIds = [
+    ...new Set(contexts.map((c) => c.task_id).filter((x): x is string => !!x)),
+  ].filter((x) => UUID_RX.test(x));
+  const objectIds = [
+    ...new Set(contexts.map((c) => c.work_object_id).filter((x): x is string => !!x)),
+  ].filter((x) => UUID_RX.test(x));
+  const parts = [
+    ...(taskIds.length ? [`id.in.(${taskIds.join(",")})`] : []),
+    ...(objectIds.length ? [`object_id.in.(${objectIds.join(",")})`] : []),
+  ];
+  if (parts.length === 0) return none;
+
+  const res = mapResult(await runTaskQuery(supabase, (q) => q.or(parts.join(","))));
+  if (res.status !== "ok") return none;
+
+  const namesFor = (taskId: string, objectId: string | null): string | null => {
+    const names = new Set<string>();
+    for (const c of contexts) {
+      if (c.task_id === taskId || (objectId && c.work_object_id === objectId)) {
+        const n = c.team_name?.trim();
+        if (n) names.add(n);
+      }
+    }
+    return names.size ? [...names].sort((a, b) => a.localeCompare(b)).join(", ") : null;
+  };
+  const viaTeamByTask = new Map<string, string>();
+  for (const task of res.tasks) {
+    const v = namesFor(task.id, task.objectId);
+    if (v) viaTeamByTask.set(task.id, v);
+  }
+  return { tasks: res.tasks, viaTeamByTask };
 }
 
 /** Tasks linked to one project. RLS scopes rows to the project's managers

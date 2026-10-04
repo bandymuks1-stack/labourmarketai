@@ -6066,6 +6066,7 @@
     "myProjectsEmpty": "You are not assigned to any project yet. When a company assigns you, the project will appear here.",
     "assignmentActive": "Active",
     "assignmentEnded": "Ended",
+    "viaTeam": "via team {team}",
     "untitledProject": "Untitled project",
     "archiveToggle": {
       "label": "Active or finished projects",
@@ -6318,6 +6319,7 @@
       "untitled": "Untitled project",
       "assignmentActive": "Active assignment",
       "assignmentEnded": "Assignment ended",
+      "viaTeam": "via team {team}",
       "projectRestricted": "Project details are not available to you right now. Your assignment stays visible.",
       "journalCta": "Write a journal entry",
       "chatCta": "Message",
@@ -11061,6 +11063,7 @@
       "link": "Tasks for this project"
     },
     "objectLabel": "Object",
+    "viaTeam": "via team {team}",
     "assignee": {
       "label": "Assigned to",
       "you": "you",

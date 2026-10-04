@@ -83,6 +83,7 @@
   "projectNone": "Geen projectwerk",
   "projectAmbiguous": "Je bent aan meerdere projecten toegewezen. Kies vóór het opslaan bij welk project deze uren horen (of markeer ze als geen projectwerk).",
   "projectAuto": "Project: {name}",
+  "projectViaTeam": "{project} (via ploeg {team})",
   "unconfirmedTimeBlocked": "{count, plural, one {# geregistreerde duur wacht nog op je beoordeling en zou niet worden opgeslagen.} other {# geregistreerde duren wachten nog op je beoordeling en zouden niet worden opgeslagen.}} Behoud of verwijder ze eerst.",
   "entry": {
     "reviewedBy": "Beoordeeld door",

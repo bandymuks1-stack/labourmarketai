@@ -35,6 +35,7 @@
   "projectNone": "Nav projekta darbs",
   "projectAmbiguous": "Jūs esat piešķirts vairākiem projektiem. Pirms saglabāšanas izvēlieties, kuram projektam pieder šīs stundas (vai atzīmējiet, ka tas nav projekta darbs).",
   "projectAuto": "Projekts: {name}",
+  "projectViaTeam": "{project} (caur komandu {team})",
   "unconfirmedTimeBlocked": "{count} reģistrētie ilgumi vēl gaida jūsu pārskatīšanu un netiktu saglabāti. Vispirms paturiet vai noņemiet tos.",
   "entry": {
     "status": {

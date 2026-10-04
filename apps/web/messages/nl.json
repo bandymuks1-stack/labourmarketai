@@ -6066,6 +6066,7 @@
     "myProjectsEmpty": "Je bent nog aan geen enkel project toegewezen. Zodra een bedrijf je toewijst, verschijnt het project hier.",
     "assignmentActive": "Actief",
     "assignmentEnded": "Beëindigd",
+    "viaTeam": "via ploeg {team}",
     "untitledProject": "Project zonder titel",
     "archiveToggle": {
       "label": "Actieve of afgeronde projecten",
@@ -6318,6 +6319,7 @@
       "untitled": "Project zonder titel",
       "assignmentActive": "Actieve toewijzing",
       "assignmentEnded": "Toewijzing beëindigd",
+      "viaTeam": "via ploeg {team}",
       "projectRestricted": "Projectdetails zijn momenteel niet voor je beschikbaar. Je toewijzing blijft zichtbaar.",
       "journalCta": "Journaalinvoer schrijven",
       "chatCta": "Bericht sturen",
@@ -11061,6 +11063,7 @@
       "link": "Taken voor dit project"
     },
     "objectLabel": "Object",
+    "viaTeam": "via ploeg {team}",
     "assignee": {
       "label": "Toegewezen aan",
       "you": "jou",

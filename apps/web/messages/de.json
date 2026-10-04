@@ -6066,6 +6066,7 @@
     "myProjectsEmpty": "Sie sind noch keinem Projekt zugewiesen. Sobald ein Unternehmen Sie zuweist, erscheint das Projekt hier.",
     "assignmentActive": "Aktiv",
     "assignmentEnded": "Beendet",
+    "viaTeam": "über Team {team}",
     "untitledProject": "Projekt ohne Titel",
     "archiveToggle": {
       "label": "Aktive oder abgeschlossene Projekte",
@@ -6318,6 +6319,7 @@
       "untitled": "Projekt ohne Titel",
       "assignmentActive": "Aktive Zuweisung",
       "assignmentEnded": "Zuweisung beendet",
+      "viaTeam": "über Team {team}",
       "projectRestricted": "Projektdetails sind für Sie derzeit nicht verfügbar. Ihre Zuweisung bleibt sichtbar.",
       "journalCta": "Journaleintrag schreiben",
       "chatCta": "Nachricht senden",
@@ -11061,6 +11063,7 @@
       "link": "Aufgaben zu diesem Projekt"
     },
     "objectLabel": "Objekt",
+    "viaTeam": "über Team {team}",
     "assignee": {
       "label": "Zugewiesen an",
       "you": "Sie",

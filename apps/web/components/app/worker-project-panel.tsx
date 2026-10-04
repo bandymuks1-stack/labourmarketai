@@ -66,6 +66,14 @@ export async function WorkerProjectPanel({
           >
             {active ? t("assignmentActive") : t("assignmentEnded")}
           </span>
+          {view.viaTeam ? (
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
+              data-testid="worker-project-via-team"
+            >
+              {t("viaTeam", { team: view.viaTeam })}
+            </span>
+          ) : null}
           {place ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
               <MapPin className="h-3 w-3" aria-hidden />

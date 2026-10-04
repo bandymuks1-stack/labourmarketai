@@ -6066,6 +6066,7 @@
     "myProjectsEmpty": "Kol kas nesate priskirtas jokiam projektui. Kai įmonė jus priskirs, projektą matysite čia.",
     "assignmentActive": "Aktyvus",
     "assignmentEnded": "Užbaigtas",
+    "viaTeam": "per komandą {team}",
     "untitledProject": "Projektas be pavadinimo",
     "archiveToggle": {
       "label": "Vykdomi arba užbaigti projektai",
@@ -6318,6 +6319,7 @@
       "untitled": "Projektas be pavadinimo",
       "assignmentActive": "Aktyvus priskyrimas",
       "assignmentEnded": "Priskyrimas užbaigtas",
+      "viaTeam": "per komandą {team}",
       "projectRestricted": "Projekto informacija šiuo metu jums nepasiekiama. Jūsų priskyrimas išlieka matomas.",
       "journalCta": "Pildyti darbo žurnalą",
       "chatCta": "Susisiekti",
@@ -11061,6 +11063,7 @@
       "link": "Šio projekto užduotys"
     },
     "objectLabel": "Objektas",
+    "viaTeam": "per komandą {team}",
     "assignee": {
       "label": "Priskirta",
       "you": "jums",

@@ -6066,6 +6066,7 @@
     "myProjectsEmpty": "Nie jesteś jeszcze przypisany do żadnego projektu. Gdy firma Cię przypisze, projekt pojawi się tutaj.",
     "assignmentActive": "Aktywne",
     "assignmentEnded": "Zakończone",
+    "viaTeam": "przez zespół {team}",
     "untitledProject": "Projekt bez nazwy",
     "archiveToggle": {
       "label": "Aktywne lub zakończone projekty",
@@ -6318,6 +6319,7 @@
       "untitled": "Projekt bez nazwy",
       "assignmentActive": "Aktywne przypisanie",
       "assignmentEnded": "Przypisanie zakończone",
+      "viaTeam": "przez zespół {team}",
       "projectRestricted": "Szczegóły projektu są obecnie niedostępne. Twoje przypisanie pozostaje widoczne.",
       "journalCta": "Dodaj wpis do dziennika",
       "chatCta": "Napisz wiadomość",
@@ -11061,6 +11063,7 @@
       "link": "Zadania dla tego projektu"
     },
     "objectLabel": "Obiekt",
+    "viaTeam": "przez zespół {team}",
     "assignee": {
       "label": "Przypisano do",
       "you": "Ty",
