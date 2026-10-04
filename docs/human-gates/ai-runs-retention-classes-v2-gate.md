@@ -1,5 +1,7 @@
 # HUMAN GATE — ai_runs retention classes v2
 
+> Corrected 2026-10-04: the ai_runs table IS applied in production (ai_runs_audit_v1 20260803061937, retention_redaction_v1 20260808162217 and 20260824114251, retention_schedule_v1 20260808180613; 355 rows). Only the v2 migration below is unapplied. The older #1266 text claiming 0 rows is superseded by this.
+
 State: `CODE_COMPLETE_PENDING_HUMAN_GATE` (RED: SECURITY DEFINER replace, GRANTs, trigger). NOT applied.
 
 Migration: `supabase/migrations/20261003150800_ai_runs_retention_classes_v2.sql`
