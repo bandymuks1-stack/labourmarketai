@@ -181,8 +181,12 @@ describe("inviter-side resolution and money-adjacent paths resolve only verified
       ["delegate_workflow_step_v1(text,text,text)", 1],
       ["membership_invite_v1(uuid,text,text)", 1],
     ] as const) {
-      const re = new RegExp(`patch_fn\\('public\\.${sig.replace(/[()]/g, "\\$&")}'::regprocedure[\\s\\S]*?,\\s*${n}, 'profile_id_by_verified_email_v1'\\)`);
-      expect(MIG, sig).toMatch(re);
+      // Plain string search (no regex built from input): the patch call names the
+      // signature; the call's expected-count + marker arguments end it.
+      const at = MIG.indexOf(`patch_fn('public.${sig}'::regprocedure`);
+      expect(at, sig).toBeGreaterThan(0);
+      const call = MIG.slice(at, MIG.indexOf(");", at));
+      expect(call.trimEnd().endsWith(`${n}, 'profile_id_by_verified_email_v1'`), sig).toBe(true);
     }
   });
   it("the two LMC paths use the verified predicate instead of email_confirmed_at", () => {
