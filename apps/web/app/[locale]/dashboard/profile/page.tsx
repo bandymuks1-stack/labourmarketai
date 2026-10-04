@@ -80,8 +80,6 @@ import {
 } from "@/lib/player-card/player-card-result";
 import { WorkCardEditor } from "@/components/app/work-card-editor";
 import { listMyOrganizationEvidence } from "@/lib/organization-evidence/import-core";
-import type { HistoryContext } from "@/lib/organization-evidence/professional-history-context";
-import { readRecordHistoryContexts } from "@/lib/organization-evidence/history-context-read";
 import { OrganizationHistorySkillSuggestionsSection } from "@/components/app/organization-history-skill-suggestions-section";
 import { listMyTeamLinks } from "@/lib/company/team-links";
 import { TeamLinkWithdrawals } from "@/components/app/roster-link-end";
@@ -835,13 +833,9 @@ export default async function ProfilePage({
         )
       : {};
   // The work behind each record (project, client, capacity, source, proof
-  // facts) - the ONE context reading the work model also uses. Names are
-  // looked up under the viewer's RLS; what does not resolve is simply not
-  // shown. A plain object so the client section can take it as a prop.
-  const historyContexts: Record<string, HistoryContext> =
-    myOrgEvidence.kind === "ok" && myOrgEvidence.records.length > 0
-      ? Object.fromEntries(await readRecordHistoryContexts(supabase, myOrgEvidence.records))
-      : {};
+  // facts) is composed INSIDE the evidence read already in the page's one
+  // batch (`listMyOrganizationEvidence`), so it adds no serial stage here.
+  const historyContexts = myOrgEvidence.kind === "ok" ? myOrgEvidence.contexts : {};
 
   return (
     <div className="flex flex-col gap-6">

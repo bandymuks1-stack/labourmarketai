@@ -55,6 +55,8 @@ import {
   type TimeSemanticsKind,
 } from "./time-semantics";
 import { committedFactFields } from "./record-fact-fields";
+import { readRecordHistoryContexts } from "./history-context-read";
+import type { HistoryContext } from "./professional-history-context";
 import {
   resolveEvidenceOrganization,
   type EvidenceOrgReason,
@@ -3470,6 +3472,10 @@ export interface MyOrganizationEvidence {
   readonly links: readonly SubjectRosterLink[];
   /** The offers still awaiting this person's answer. */
   readonly pendingOffers: readonly SubjectRosterLink[];
+  /** The work behind each record (project, client, capacity, source, proof
+   *  facts), keyed by record id. Composed inside this one read so no caller
+   *  needs a further serial stage. Absent entries = nothing to show. */
+  readonly contexts: Readonly<Record<string, HistoryContext>>;
 }
 
 /**
@@ -3536,6 +3542,9 @@ export async function listMyOrganizationEvidence(
     records: recordsRes.records,
     links,
     pendingOffers: links.filter((l) => l.linkState === "link_proposed"),
+    contexts: Object.fromEntries(
+      await readRecordHistoryContexts(caller.supabase, recordsRes.records),
+    ),
   };
 }
 
