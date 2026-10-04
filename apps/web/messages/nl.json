@@ -7379,6 +7379,8 @@
     "outcomeLinked": "Gekoppeld. Je bent nu verbonden.",
     "outcomeAlreadyLinked": "Je bent al gekoppeld.",
     "outcomeNoInvitation": "Uitnodiging niet gevonden.",
+
+    "outcomeEmailUnverified": "Bevestig eerst je e-mail (pagina Netwerk) en accepteer daarna de uitnodiging.",
     "outcomeNoWorker": "Je werknemersprofiel is nog niet gereed.",
     "outcomeError": "Accepteren is niet gelukt. Probeer het opnieuw.",
     "outcomeNeedsMigration": "De actie kon niet worden voltooid. Probeer het opnieuw."
@@ -11689,7 +11691,20 @@
         "declined": "Uitnodiging afgewezen.",
         "no_worker_profile": "Maak eerst uw werkprofiel aan en accepteer daarna de uitnodiging.",
         "not_found": "Uitnodiging niet gevonden.",
-        "error": "Er ging iets mis. Probeer het opnieuw."
+        "error": "Er ging iets mis. Probeer het opnieuw.",
+        "email_unverified": "Bevestig eerst je e-mail en accepteer daarna de uitnodiging."
+      },
+      "verify": {
+        "title": "Bevestig je e-mail om uitnodigingen te zien die ernaar zijn gestuurd",
+        "body": "Uitnodigingen die aan een e-mailadres zijn gericht, worden alleen getoond aan wie dat postvak kan openen. Al het andere in je account werkt zoals het werkte; dit is alleen nodig om deze uitnodigingen te zien of te accepteren.",
+        "send": "Stuur me een eenmalige link",
+        "sending": "Bezig met verzenden…",
+        "sent": "We hebben een eenmalige link naar {email} gestuurd. Open hem op dit apparaat om af te ronden.",
+        "sentNoAddress": "We hebben een eenmalige link naar je e-mailadres gestuurd. Open hem op dit apparaat om af te ronden.",
+        "rateLimited": "Er is zojuist een link verstuurd. Wacht een minuut voordat je een nieuwe aanvraagt.",
+        "alreadyVerified": "Dit e-mailadres is al bevestigd. Ververs de pagina.",
+        "failed": "Die link heeft je e-mail niet bevestigd (mogelijk is hij oud of elders geopend). Je kunt een nieuwe aanvragen.",
+        "error": "We konden de link niet versturen. Probeer het later opnieuw."
       }
     },
     "search": {

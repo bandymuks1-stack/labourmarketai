@@ -7379,6 +7379,8 @@
     "outcomeLinked": "Połączono. Jesteś teraz połączony.",
     "outcomeAlreadyLinked": "Jesteś już połączony.",
     "outcomeNoInvitation": "Nie znaleziono zaproszenia.",
+
+    "outcomeEmailUnverified": "Najpierw potwierdź e-mail (strona Sieć), a potem przyjmij zaproszenie.",
     "outcomeNoWorker": "Twój profil pracownika nie jest jeszcze gotowy.",
     "outcomeError": "Nie udało się zaakceptować. Spróbuj ponownie.",
     "outcomeNeedsMigration": "Nie udało się wykonać czynności. Spróbuj ponownie."
@@ -11689,7 +11691,20 @@
         "declined": "Zaproszenie odrzucone.",
         "no_worker_profile": "Najpierw utwórz profil pracownika, a następnie zaakceptuj zaproszenie.",
         "not_found": "Nie znaleziono zaproszenia.",
-        "error": "Coś poszło nie tak. Spróbuj ponownie."
+        "error": "Coś poszło nie tak. Spróbuj ponownie.",
+        "email_unverified": "Najpierw potwierdź e-mail, a potem przyjmij zaproszenie."
+      },
+      "verify": {
+        "title": "Potwierdź e-mail, aby zobaczyć zaproszenia wysłane na ten adres",
+        "body": "Zaproszenia zaadresowane na adres e-mail są pokazywane tylko osobie, która może otworzyć tę skrzynkę. Wszystko inne na koncie działa jak dotąd; potwierdzenie jest potrzebne tylko do zobaczenia lub przyjęcia tych zaproszeń.",
+        "send": "Wyślij mi jednorazowy link",
+        "sending": "Wysyłanie…",
+        "sent": "Wysłaliśmy jednorazowy link na {email}. Otwórz go na tym urządzeniu, aby dokończyć.",
+        "sentNoAddress": "Wysłaliśmy jednorazowy link na Twój adres e-mail. Otwórz go na tym urządzeniu, aby dokończyć.",
+        "rateLimited": "Link został wysłany chwilę temu. Poczekaj minutę, zanim poprosisz o kolejny.",
+        "alreadyVerified": "Ten adres e-mail jest już potwierdzony. Odśwież stronę.",
+        "failed": "Ten link nie potwierdził Twojego e-mail (może być stary lub otwarty gdzie indziej). Możesz poprosić o nowy.",
+        "error": "Nie udało się wysłać linku. Spróbuj ponownie później."
       }
     },
     "search": {

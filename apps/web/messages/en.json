@@ -7379,6 +7379,8 @@
     "outcomeLinked": "Linked. You are now connected.",
     "outcomeAlreadyLinked": "You are already linked.",
     "outcomeNoInvitation": "Invitation not found.",
+
+    "outcomeEmailUnverified": "Confirm your email first (Network page), then accept the invitation.",
     "outcomeNoWorker": "Your worker profile is not ready yet.",
     "outcomeError": "Could not accept. Please try again.",
     "outcomeNeedsMigration": "Couldn’t complete the action. Please try again."
@@ -11689,7 +11691,20 @@
         "declined": "Invitation declined.",
         "no_worker_profile": "Create your worker profile first, then accept the invitation.",
         "not_found": "Invitation not found.",
-        "error": "Something went wrong. Please try again."
+        "error": "Something went wrong. Please try again.",
+        "email_unverified": "Confirm your email first, then accept the invitation."
+      },
+      "verify": {
+        "title": "Verify your email to see invitations sent to it",
+        "body": "Invitations addressed to an email address are shown only to the person who can open that mailbox. Everything else in your account works as it is; this is only needed to see or accept these invitations.",
+        "send": "Send me a one-time link",
+        "sending": "Sending…",
+        "sent": "We sent a one-time link to {email}. Open it on this device to finish.",
+        "sentNoAddress": "We sent a one-time link to your email address. Open it on this device to finish.",
+        "rateLimited": "A link was sent a moment ago. Please wait a minute before asking for another.",
+        "alreadyVerified": "This email address is already verified. Refresh the page.",
+        "failed": "That link did not verify your email (it may be old or opened elsewhere). You can ask for a new one.",
+        "error": "We could not send the link. Please try again later."
       }
     },
     "search": {
