@@ -240,6 +240,13 @@ export function isLinkableForTask(
      *  the TEAM's organization as its context; the database accepts that
      *  (link_journal_entry_to_task_v1), so the picker must too. */
     readonly teamOrganizationIds?: readonly string[];
+    /** Own-workspace organizations through which the viewer reaches this
+     *  project AS AN INDEPENDENT PROVIDER (active person assignment on a
+     *  client's project; 20261003150700 independent_journal_context_v1). An
+     *  entry journaled from such a workspace is accepted by the database, so
+     *  the picker must offer it. Empty for any project the viewer is not
+     *  assigned to. */
+    readonly independentOrganizationIds?: readonly string[];
   },
 ): boolean {
   const ep = entry.projectId ?? null;
@@ -249,7 +256,8 @@ export function isLinkableForTask(
     task.organizationId !== null &&
     entry.organizationId != null &&
     entry.organizationId !== task.organizationId &&
-    !(task.teamOrganizationIds ?? []).includes(entry.organizationId)
+    !(task.teamOrganizationIds ?? []).includes(entry.organizationId) &&
+    !(task.independentOrganizationIds ?? []).includes(entry.organizationId)
   ) {
     return false;
   }
