@@ -8257,6 +8257,7 @@
     "claimFromJournal": "iš darbo įrašo",
     "recordedHours": "Užfiksuota darbo: {hours} val. iš darbo žurnalo, iš jų patvirtinta {confirmed} val.",
     "confirmedWorkFact": "Kitų patvirtinti darbo žurnalo įrašai: {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}} per {days, plural, one {# darbo dieną} few {# darbo dienas} other {# darbo dienų}}",
+    "clientAcceptedWorkFact": "{entries, plural, one {# darbo įrašas} few {# darbo įrašai} other {# darbo įrašų}}, kuriuos priėmė užsakovas. Užsakovo priėmimas nėra vadovo įrašas ir nėra mokėjimo įrašas.",
     "recordedHoursNone": "Darbo žurnale dar nėra įrašų su trukme — valandos prie įgūdžių atsiras iš jūsų įrašų.",
     "skillHours": "{hours} val.",
     "skillHoursOwn": "{hours} val., jūsų pačių įrašas",
@@ -15251,6 +15252,7 @@
     "evidenceDocument": "Dokumentas galioja iki {until} — dar nepatvirtinta",
     "evidenceEntriesAndDocument": "{count, plural, one {# darbo įrašas} few {# darbo įrašai} many {# darbo įrašo} other {# darbo įrašų}} ir dokumentas iki {until} — dar nepatvirtinta",
     "evidenceSelfConfirmed": "Patvirtinote patys — nepriklausomo patvirtinimo dar nėra",
+    "evidenceClientAccepted": "Užsakovo priimta — darbdavio nepatvirtinta",
     "employerConfirmed": "Patvirtino {org}, {date}",
     "employerConfirmedNoDate": "Patvirtino darbdavys",
     "systemDerived": "Išvesta iš: {source}"

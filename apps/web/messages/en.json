@@ -8257,6 +8257,7 @@
     "claimFromJournal": "from work journal",
     "recordedHours": "Recorded work: {hours} h from the work journal, {confirmed} h of it confirmed.",
     "confirmedWorkFact": "Work journal entries confirmed by others: {entries, plural, one {# entry} other {# entries}} over {days, plural, one {# work day} other {# work days}}",
+    "clientAcceptedWorkFact": "{entries, plural, one {# work entry} other {# work entries}} accepted by the client. A client's acceptance is not a manager's record of the work and is not a payment record.",
     "recordedHoursNone": "No journal entries with a duration yet — hours next to skills come from your own entries.",
     "skillHours": "{hours} h",
     "skillHoursOwn": "{hours} h, your own record",
@@ -15251,6 +15252,7 @@
     "evidenceDocument": "Document valid until {until} — not yet confirmed",
     "evidenceEntriesAndDocument": "{count, plural, one {# work entry} other {# work entries}} and a document valid until {until} — not yet confirmed",
     "evidenceSelfConfirmed": "You confirmed this yourself — not independently confirmed",
+    "evidenceClientAccepted": "Accepted by the client — not confirmed by an employer",
     "employerConfirmed": "Confirmed by {org}, {date}",
     "employerConfirmedNoDate": "Confirmed by an employer",
     "systemDerived": "Derived from: {source}"

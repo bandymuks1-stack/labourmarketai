@@ -235,6 +235,8 @@ export type ProvenanceTextKey =
   | "evidenceEntriesAndDocument"
   /** Approved — but only by the subject themselves. Says so out loud. */
   | "evidenceSelfConfirmed"
+  /** The client / customer accepted the work - not an employer confirmation. */
+  | "evidenceClientAccepted"
   | "employerConfirmed"
   | "employerConfirmedNoDate"
   | "systemDerived";
@@ -247,6 +249,7 @@ export function provenanceTextKey(p: Provenance): ProvenanceTextKey {
       // The self-confirmation fact outranks the counting variants: "you
       // approved this yourself" is the thing the reader must not miss.
       if (p.selfConfirmedOnly) return "evidenceSelfConfirmed";
+      if (p.clientAccepted) return "evidenceClientAccepted";
       if (p.validUntil && p.journalEntries > 0) return "evidenceEntriesAndDocument";
       if (p.validUntil) return "evidenceDocument";
       // Evidence exists (a work_journal-tier skill row, or a recorded document

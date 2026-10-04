@@ -8257,6 +8257,7 @@
     "claimFromJournal": "uit het werkjournaal",
     "recordedHours": "Vastgelegd werk: {hours} u uit het werkjournaal, waarvan {confirmed} u bevestigd.",
     "confirmedWorkFact": "Door anderen bevestigde werkjournaal-registraties: {entries, plural, one {# registratie} other {# registraties}} over {days, plural, one {# werkdag} other {# werkdagen}}",
+    "clientAcceptedWorkFact": "{entries, plural, one {# werkinvoer} other {# werkinvoeren}} geaccepteerd door de opdrachtgever. De acceptatie door een opdrachtgever is geen vastlegging door een manager en geen betalingsregistratie.",
     "recordedHoursNone": "Nog geen journaalregistraties met een duur — uren naast vaardigheden komen uit je eigen registraties.",
     "skillHours": "{hours} u",
     "skillHoursOwn": "{hours} u, uw eigen registratie",
@@ -15251,6 +15252,7 @@
     "evidenceDocument": "Document geldig tot {until} — nog niet bevestigd",
     "evidenceEntriesAndDocument": "{count, plural, one {# werkregistratie} other {# werkregistraties}} en een document geldig tot {until} — nog niet bevestigd",
     "evidenceSelfConfirmed": "Door uzelf bevestigd — nog niet onafhankelijk bevestigd",
+    "evidenceClientAccepted": "Geaccepteerd door de opdrachtgever — niet bevestigd door een werkgever",
     "employerConfirmed": "Bevestigd door {org}, {date}",
     "employerConfirmedNoDate": "Bevestigd door een werkgever",
     "systemDerived": "Afgeleid uit: {source}"
