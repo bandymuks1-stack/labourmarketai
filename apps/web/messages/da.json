@@ -1941,7 +1941,8 @@
         "paused": "På pause",
         "completed": "Afsluttet"
       },
-      "progressNone": "Ingen målbar fremgang endnu"
+      "progressNone": "Ingen målbar fremgang endnu",
+      "progressStages": "{done} af {total} faser markeret som færdige"
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# post venter på din bekræftelse} other {# poster venter på din bekræftelse}}",
@@ -1997,6 +1998,7 @@
       "title": "Projektstyring",
       "progressLabel": "Fremgang",
       "progressNone": "Ingen målbar fremgang endnu",
+      "progressStages": "{done} af {total} faser markeret som færdige",
       "responsibleLabel": "Ansvarlig person",
       "responsibleNone": "Ikke angivet",
       "responsibleSave": "Gem",

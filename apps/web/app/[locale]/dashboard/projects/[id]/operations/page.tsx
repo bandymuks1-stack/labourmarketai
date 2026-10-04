@@ -569,8 +569,15 @@ export default async function ProjectOperationsPage({
           {progress && progress.percent !== null ? (
             <span className={chipClass} data-testid="ops-manage-progress">
               {t("manage.progressLabel")}: {progress.percent}% (
-              {progress.taskDone + progress.stageDone}/
-              {progress.taskTotal + progress.stageTotal})
+              {progress.taskDone}/{progress.taskTotal})
+            </span>
+          ) : progress && progress.basis === "stages" ? (
+            <span className={chipClass} data-testid="ops-manage-progress-stages">
+              {t("manage.progressLabel")}:{" "}
+              {t("manage.progressStages", {
+                done: progress.stageDone,
+                total: progress.stageTotal,
+              })}
             </span>
           ) : (
             <span className={chipClass} data-testid="ops-manage-progress-none">

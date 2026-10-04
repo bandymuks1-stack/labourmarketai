@@ -1941,7 +1941,8 @@
         "paused": "Peatatud",
         "completed": "Lõpetatud"
       },
-      "progressNone": "Mõõdetavat edenemist veel pole"
+      "progressNone": "Mõõdetavat edenemist veel pole",
+      "progressStages": "{done} etapist {total}-st märgitud tehtuks"
     },
     "pulse": {
       "pendingTitle": "[EN] {n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
@@ -1997,6 +1998,7 @@
       "title": "Projekti haldus",
       "progressLabel": "Edenemine",
       "progressNone": "Mõõdetavat edenemist veel pole",
+      "progressStages": "{done} etapist {total}-st märgitud tehtuks",
       "responsibleLabel": "Vastutav isik",
       "responsibleNone": "Määramata",
       "responsibleSave": "Salvesta",

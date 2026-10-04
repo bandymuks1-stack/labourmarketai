@@ -158,9 +158,9 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "It assigns a whole team or brigade",
         capabilities: ["WRK-6"],
-        link: "NOT_BUILT",
+        link: "BROKEN",
         because:
-          "No team→project FK exists and zero team organizations exist. Brigade work is a first-class case in construction and agency supply; the step stays so the gap is a decision, not an oversight.",
+          "Corrected 2026-10-03: a whole team can be fanned out to a project through the per-person write (#2084, WRK-6 PARTIAL), but no team→project FK exists, so a brigade is not assigned as a UNIT, and zero team organizations exist. Brigade work is a first-class case in construction and agency supply; the step stays so the gap is a decision, not an oversight.",
       },
       {
         step: "It sees who is free and who is committed",

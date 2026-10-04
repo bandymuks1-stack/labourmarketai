@@ -211,6 +211,8 @@ CAPABILITY TRUTH — ${capabilities.length} registered
   BLOCKED               ${count("BLOCKED")}
   ARCHITECTURE_ONLY     ${count("ARCHITECTURE_ONLY")}
   MISSING               ${count("MISSING")}
+  RETIRED               ${count("RETIRED")}
+  (seven-state total: ${["BUILT_AND_USABLE","PARTIAL","BUILT_NOT_CONNECTED","BLOCKED","ARCHITECTURE_ONLY","MISSING","RETIRED"].reduce((n,s)=>n+count(s),0)} of ${capabilities.length})
 
   Human-UI-proven: ${capabilities.filter((c) => c.evidence === "HUMAN_UI_PROVEN").length}. Everything else is weaker evidence than a
   person using it. A green unit suite is TEST_PROVEN and nothing more.`);

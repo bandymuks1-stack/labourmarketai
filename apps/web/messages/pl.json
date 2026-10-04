@@ -6097,7 +6097,8 @@
         "paused": "Wstrzymany",
         "completed": "Zakończony"
       },
-      "progressNone": "Brak mierzalnych postępów"
+      "progressNone": "Brak mierzalnych postępów",
+      "progressStages": "{done} z {total} etapów oznaczono jako zakończone"
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# wpis czeka na Twoje potwierdzenie} few {# wpisy czekają na Twoje potwierdzenie} many {# wpisów czeka na Twoje potwierdzenie} other {# wpisu czeka na Twoje potwierdzenie}}",
@@ -6374,6 +6375,7 @@
       "title": "Zarządzanie projektem",
       "progressLabel": "Postęp",
       "progressNone": "Brak mierzalnych postępów",
+      "progressStages": "{done} z {total} etapów oznaczono jako zakończone",
       "responsibleLabel": "Osoba odpowiedzialna",
       "responsibleNone": "Nie wskazano",
       "responsibleSave": "Zapisz",

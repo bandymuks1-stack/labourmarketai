@@ -447,7 +447,9 @@ Three rules, each learned from a measured failure in this reconciliation:
    `organization_type='team'`; "roster" means the active `company_workers`
    list, never a schedule.
 
-### 6.1 PRODUCTION SNAPSHOT — 2026-09-07T03:46Z (current)
+### 6.1 PRODUCTION SNAPSHOT — 2026-09-07T03:46Z (HISTORICAL — superseded by the 2026-10-03 line below; the register in `capability-register.ts` is the live truth)
+
+**Re-measured 2026-10-03 (read-only, max ledger `20261003144407`):** `profiles` / `workers` 71 / 71 · `projects` 10 · `journal_entries` 97 · `ai_runs` 355 · `notification_events` 65 · `work_tasks` 3 · `education_cohort_members` 1 · `evidence_import_rows` 158 · `lmc_*` 5 base tables + 2 views · `team_details` 0. The table below is the 2026-09-07 snapshot and is kept for history, not as current counts.
 
 266 applied migrations (max `20260906202628`) · 190 tables · **RLS enabled on
 all 190**.
@@ -541,12 +543,12 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 
 | ID | Capability | Canonical objects | Status | AI | P | Next action |
 |---|---|---|---|---|---|---|
-| WRK-1 | Projects | `projects` | IMPL | W | 1 | `start_date`/`end_date` have no writer |
+| WRK-1 | Projects | `projects` | IMPL | W | 1 | corrected 2026-10-03: dates DO have a writer (`project-facts-form` -> `project-admin-actions` -> `update_project_facts_v1`); 2 of 10 projects carry a start_date |
 | WRK-2 | Objects / sites | `work_objects` | IMPL (1 row) | — | 1 | no route; a section of `/dashboard/company` |
 | WRK-3 | Stages | `project_stages` | IMPL | W | 2 | — |
-| WRK-4 | Tasks | `work_tasks` (+ `follow_up_tasks` duplicate) | IMPL (0 rows) | W | 2 | "reachable, functional and pointless" — its own migration says so |
+| WRK-4 | Tasks | `work_tasks` (+ `follow_up_tasks` duplicate) | IMPL (3 rows) | W | 2 | 2026-10-03: 3 rows; stage + subtask structure APPLIED (#2123, ledger 20261003144407), RPC-proven, UI not browser-proven |
 | WRK-5 | Worker→project assignment | `project_worker_assignments` | PROD_DATA (1 row) | W (strong) | 1 | no overlap constraint of any kind |
-| WRK-6 | **Team→project assignment** | — | **MISSING** | — | 1 | no FK exists anywhere |
+| WRK-6 | **Team→project assignment** | `project_worker_assignments` (fan-out), `team_details` (0 rows) | **PARTIAL** (corrected 2026-10-03, #2084) | — | 1 | whole team fans out through the per-person write; no unit-level assignment, no team FK; 0 teams in production |
 | WRK-7 | Readiness / operational status | `project_worker_readiness_items` | IMPL | W | 2 | — |
 | WRK-8 | Defects / corrections | `defects`, `defect_corrections` | IMPL (0 rows) | — | 3 | assignee read APPLIED 2026-09-14 (ledger `20260914195053`), proven per-row on prod; `defect_corrections` stays manager-only (owner 2b DEFER) |
 | WRK-9 | Handover passport | `project_handover_entries` (1 row) | IMPL | — | 3 | reachable on `/dashboard/projects/[id]/operations`; written once in prod — no nav tile of its own |
