@@ -21,14 +21,23 @@ NAME=20261003150100_commitment_override_receipts_v1
 MIG="$REPO/supabase/migrations/$NAME.sql"
 DOWN="$REPO/supabase/rollbacks/$NAME.down.sql"
 
+if [ -n "${PGPROOF_PORT:-}" ]; then
+  # Native scratch cluster (no Docker): PGPROOF_PORT=<free port> on 127.0.0.1. Resets schema public.
+  PGPROOF_HOST=${PGPROOF_HOST:-127.0.0.1}
+  case "$PGPROOF_HOST" in 127.0.0.1|localhost|/*) ;; *) echo "refusing non-local host $PGPROOF_HOST"; exit 2;; esac
+  export PGCLIENTENCODING=UTF8
+  PS() { psql -h "$PGPROOF_HOST" -p "$PGPROOF_PORT" -U postgres -d postgres -tA -q "$@" 2>&1 | tr -d '\r'; }
+  PS -c "drop schema if exists public cascade; create schema public; drop schema if exists auth cascade;" >/dev/null
+else
 docker rm -f "$CT" >/dev/null 2>&1
 docker run -d --name "$CT" -e POSTGRES_HOST_AUTH_METHOD=trust postgres:16 >/dev/null || { echo "no container"; exit 1; }
 trap 'docker rm -f "$CT" >/dev/null 2>&1' EXIT
 for i in $(seq 1 40); do docker exec "$CT" pg_isready -U postgres >/dev/null 2>&1 && break; sleep 1; done
 sleep 2
 PS() { docker exec -i "$CT" psql -U postgres -tA -q "$@" 2>&1 | tr -d '\r'; }
-PS -v ON_ERROR_STOP=1 -f - < "$HERE/commitment-override-receipts-v1.prelude.sql" >/dev/null || { echo PRELUDE FAILED; exit 1; }
-PS -v ON_ERROR_STOP=1 -f - < "$HERE/commitment-override-receipts-v1.seed.sql" >/dev/null || { echo SEED FAILED; exit 1; }
+fi
+PS -v ON_ERROR_STOP=1 -f - < <(tr -d '\r' < "$HERE/commitment-override-receipts-v1.prelude.sql") >/dev/null || { echo PRELUDE FAILED; exit 1; }
+PS -v ON_ERROR_STOP=1 -f - < <(tr -d '\r' < "$HERE/commitment-override-receipts-v1.seed.sql") >/dev/null || { echo SEED FAILED; exit 1; }
 PS -c "create function public.zz_try(q text) returns text language plpgsql as \$f\$ declare r text; begin execute q into r; return coalesce(r,'null'); exception when others then return 'E'||sqlstate; end \$f\$;" >/dev/null
 
 pass=0; fail=0
@@ -55,7 +64,7 @@ echo "=============================================================="
 
 echo "--- BEFORE the migration: the writer does not exist (production state)"
 check "BEFORE: no receipt table" "" "$(su "select to_regclass('public.commitment_override_receipts')")"
-OUT_APPLY=$(PS -v ON_ERROR_STOP=1 -f - < "$MIG" 2>&1)
+OUT_APPLY=$(PS -v ON_ERROR_STOP=1 -f - < <(tr -d '\r' < "$MIG") 2>&1)
 if echo "$OUT_APPLY" | grep -qiE 'ERROR|FATAL'; then echo "$OUT_APPLY" | head -5; echo "MIGRATION FAILED"; exit 1; fi
 echo "  migration applied verbatim"
 
@@ -156,7 +165,7 @@ check "S8 receipts for that assignment are capped at 50" 50 "$(su "select count(
 check "S8 the next one is refused loudly" E22023 "$(rec $MGR $PA2 $PW1 "[{\"kind\":\"trip\",\"sourceId\":\"$SID\",\"overlapStart\":\"2027-01-05\",\"overlapEnd\":\"2027-01-05\"}]" other)"
 
 echo "--- S9 lifecycle cascades (the only allowed removals) + rollback guard"
-check "S9 rollback REFUSES while receipts exist" t "$(PS -v ON_ERROR_STOP=1 -f - < "$DOWN" 2>&1 | grep -c 'refusing to drop evidence' | awk '{print ($1>0)?"t":"f"}')"
+check "S9 rollback REFUSES while receipts exist" t "$(PS -v ON_ERROR_STOP=1 -f - < <(tr -d '\r' < "$DOWN") 2>&1 | grep -c 'refusing to drop evidence' | awk '{print ($1>0)?"t":"f"}')"
 check "S9 table still present after the refused rollback" 1 "$(su "select count(*) from pg_class where oid='public.commitment_override_receipts'::regclass")"
 su "update public.projects set status='active' where false" >/dev/null
 SOME=$(su "select count(*) from public.commitment_override_receipts where project_id='$PA2'")
@@ -170,10 +179,10 @@ su "delete from public.workers where id='aaaa0001-0000-0000-0000-000000000001'" 
 check "S9 deleting the worker cascades the remaining receipts" 0 "$(su "select count(*) from public.commitment_override_receipts")"
 
 echo "--- S10 rollback (empty table) + re-apply idempotence"
-OUT_DOWN=$(PS -v ON_ERROR_STOP=1 -f - < "$DOWN" 2>&1)
+OUT_DOWN=$(PS -v ON_ERROR_STOP=1 -f - < <(tr -d '\r' < "$DOWN") 2>&1)
 check "S10 rollback applies when empty" "" "$(echo "$OUT_DOWN" | grep -i error)"
 check "S10 table, writer and trigger functions gone" "0|0" "$(su "select (select count(*) from pg_class where relname='commitment_override_receipts')||'|'||(select count(*) from pg_proc where proname in ('record_commitment_override_v1','commitment_override_receipts_immutable_v1','commitment_override_receipts_no_truncate_v1'))")"
-PS -v ON_ERROR_STOP=1 -f - < "$MIG" >/dev/null 2>&1; PS -v ON_ERROR_STOP=1 -f - < "$MIG" > /tmp/_ovr_reapply.txt 2>&1
+PS -v ON_ERROR_STOP=1 -f - < <(tr -d '\r' < "$MIG") >/dev/null 2>&1; PS -v ON_ERROR_STOP=1 -f - < <(tr -d '\r' < "$MIG") > /tmp/_ovr_reapply.txt 2>&1
 check "S10 re-applying the migration twice is clean" 0 "$(grep -ciE 'ERROR' /tmp/_ovr_reapply.txt)"
 rm -f /tmp/_ovr_reapply.txt
 

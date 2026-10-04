@@ -1537,6 +1537,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261003140000_subject_contest_withdraw_constraint_reconcile_v1.sql",
       // 2026-10-03: J-TIME-FREEDOM override receipt (new append-only table + SECURITY DEFINER writer) - marker is the human-gate acknowledgement; draft + needs-human-gate, NOT applied.
       "20261003150100_commitment_override_receipts_v1.sql",
+      // 2026-10-04: receipt team basis (extends the writer for members of an actively assigned team) - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      "20261003150900_commitment_override_receipt_team_basis_v1.sql",
 ]);
   });
 
