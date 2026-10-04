@@ -17412,6 +17412,25 @@
       "offer": "Offer link",
       "offered": "Link offered — the person decides on their profile",
       "error": "The link could not be offered"
+    },
+    "claim": {
+      "label": "Invite this person to claim their history",
+      "placeholder": "Their e-mail address",
+      "invite": "Send invitation",
+      "sent": "Invitation sent. Once they join, offer the link here and they decide on their profile.",
+      "created": "Invitation created. Share this link with them:",
+      "deliveryFailed": "The invitation was saved but the e-mail did not go out. Share this link with them:",
+      "hint": "They need an account before their history can be offered to them. Nothing is attached until they accept.",
+      "errors": {
+        "generic": "The invitation could not be sent",
+        "duplicate_pending": "An invitation to this address is already waiting",
+        "rate_limited": "Too many invitations just now. Try again shortly",
+        "limit_reached": "The invitation limit has been reached",
+        "not_authorized": "You may not invite people for this organisation",
+        "invalid_relationship": "This person's relationship cannot be offered by invitation",
+        "invalid_email": "Enter one valid e-mail address",
+        "needs_migration": "Not available right now"
+      }
     }
   },
   "peopleImport": {

@@ -17412,6 +17412,25 @@
       "offer": "Zaproponuj powiązanie",
       "offered": "Zaproponowano powiązanie — osoba decyduje w swoim profilu",
       "error": "Nie udało się zaproponować powiązania"
+    },
+    "claim": {
+      "label": "Zaproś tę osobę, by przejęła swoją historię",
+      "placeholder": "Jej adres e-mail",
+      "invite": "Wyślij zaproszenie",
+      "sent": "Zaproszenie wysłane. Gdy osoba dołączy, zaproponuj tutaj powiązanie; decyzję podejmie w swoim profilu.",
+      "created": "Zaproszenie utworzone. Przekaż jej ten link:",
+      "deliveryFailed": "Zaproszenie zapisano, ale e-mail nie został wysłany. Przekaż jej ten link:",
+      "hint": "Osoba musi mieć konto, zanim jej historia będzie mogła zostać zaproponowana. Nic nie jest przypisywane, dopóki nie zaakceptuje.",
+      "errors": {
+        "generic": "Nie udało się wysłać zaproszenia",
+        "duplicate_pending": "Zaproszenie na ten adres już czeka",
+        "rate_limited": "Zbyt wiele zaproszeń. Spróbuj za chwilę",
+        "limit_reached": "Osiągnięto limit zaproszeń",
+        "not_authorized": "Nie możesz zapraszać osób w imieniu tej organizacji",
+        "invalid_relationship": "Relacji tej osoby nie można zaproponować w zaproszeniu",
+        "invalid_email": "Podaj jeden prawidłowy adres e-mail",
+        "needs_migration": "Chwilowo niedostępne"
+      }
     }
   },
   "peopleImport": {
