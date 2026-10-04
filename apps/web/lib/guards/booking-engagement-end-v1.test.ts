@@ -1538,6 +1538,7 @@ describe("the migration set is exactly what this slice declared", () => {
       // universal marketplace (draft RED PR, owner approval PENDING): marker only so CI reaches the human gate; NOT applied.
       "20261003150300_marketplace_index_v1.sql",
       "20261003150400_marketplace_public_business_expiry_v1.sql",
+      "20261003151200_market_org_capabilities_for_visible_listings_v1.sql",
 ]);
   });
 

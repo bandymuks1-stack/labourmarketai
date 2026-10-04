@@ -102,13 +102,14 @@ describe("organisation actor kind via organization_roles capability (ORG-2)", ()
     expect(actorKindForOrganisation([], ctx("goods", "offer"))).toBe("other");
     const row = {
       sourceTable: "marketplace_listings",
+      id: "l1",
       organizationId: "o1",
       domain: "goods",
       direction: "offer" as const,
     };
     expect(indexRowActor(row)).toEqual({ actorKind: "other", actorBasis: "undisclosed" });
-    expect(indexRowActor(row, new Map([["o1", []]]))).toEqual({ actorKind: "other", actorBasis: "undisclosed" });
-    expect(indexRowActor(row, new Map([["o1", ["supplier"]]]))).toEqual({
+    expect(indexRowActor(row, new Map([["l1", []]]))).toEqual({ actorKind: "other", actorBasis: "undisclosed" });
+    expect(indexRowActor(row, new Map([["l1", ["supplier"]]]))).toEqual({
       actorKind: "supplier",
       actorBasis: "capability",
     });

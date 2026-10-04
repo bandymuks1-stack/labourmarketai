@@ -207,27 +207,31 @@ export async function discoverMarketplaceListings(filters?: {
 
 /**
  * Fill the actor KIND of index rows. Persons / service providers come from the
- * row itself; an organisation's kind comes from `organization_roles` read under
- * the CALLER's RLS (members of the organisation only) â€” a capability the
- * caller may not read stays `other`. Reads role slugs only, never identities;
- * a failed read leaves `other` rather than a guess.
+ * row itself; an organisation's kind comes from its capability slugs via
+ * `org_capabilities_for_visible_listings_v1` — keyed by the LISTING ids the
+ * caller already sees, so it works cross-organisation without widening the
+ * member-only `organization_roles` table and without exposing any
+ * organisation id, member or contact (slugs from a closed vocabulary only).
+ * A missing function (migration not applied) or a failed read leaves `other`,
+ * never a guess.
  */
 async function attachActors(
   supabase: SupabaseClient,
   rows: MarketplaceDiscoveryRow[],
 ): Promise<void> {
-  const orgIds = [...new Set(rows.map((r) => r.organizationId).filter((x): x is string => !!x))];
+  const listingIds = rows
+    .filter((r) => r.sourceTable === "marketplace_listings" && r.organizationId)
+    .map((r) => r.id);
   const caps = new Map<string, string[]>();
-  if (orgIds.length > 0) {
-    const { data, error } = await asAny(supabase)
-      .from("organization_roles")
-      .select("organization_id, role_slug")
-      .in("organization_id", orgIds);
+  if (listingIds.length > 0) {
+    const { data, error } = await asAny(supabase).rpc("org_capabilities_for_visible_listings_v1", {
+      p_listing_ids: listingIds,
+    });
     if (!error) {
-      for (const r of (data ?? []) as { organization_id: string; role_slug: string }[]) {
-        const list = caps.get(r.organization_id) ?? [];
+      for (const r of (data ?? []) as { listing_id: string; role_slug: string }[]) {
+        const list = caps.get(r.listing_id) ?? [];
         list.push(r.role_slug);
-        caps.set(r.organization_id, list);
+        caps.set(r.listing_id, list);
       }
     }
   }
