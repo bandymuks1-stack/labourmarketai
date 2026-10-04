@@ -1124,7 +1124,7 @@ export function WorkerWorkLogFlow({
             <option value="">{tCandidate("projectChoose")}</option>
             {contextProjects.map((p) => (
               <option key={p.id} value={p.id}>
-                {projectDisplayLabel(p, (v) => tCandidate("projectViaTeam", v))}
+                {projectDisplayLabel(p, (k, v) => tCandidate(k, v))}
               </option>
             ))}
             <option value={PROJECT_FIELD_NONE}>{tCandidate("projectNone")}</option>
@@ -1145,7 +1145,7 @@ export function WorkerWorkLogFlow({
         >
           {tCandidate("projectAuto", {
             name: contextProjects[0]
-              ? projectDisplayLabel(contextProjects[0], (v) => tCandidate("projectViaTeam", v))
+              ? projectDisplayLabel(contextProjects[0], (k, v) => tCandidate(k, v))
               : "",
           })}
         </p>

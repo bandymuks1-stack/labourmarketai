@@ -209,7 +209,7 @@ export function DocumentJournalDraftForm({
             <option value="">{tJournal("projectChoose")}</option>
             {contextProjects.map((p) => (
               <option key={p.id} value={p.id}>
-                {projectDisplayLabel(p, (v) => tJournal("projectViaTeam", v))}
+                {projectDisplayLabel(p, (k, v) => tJournal(k, v))}
               </option>
             ))}
             <option value={PROJECT_FIELD_NONE}>{tJournal("projectNone")}</option>

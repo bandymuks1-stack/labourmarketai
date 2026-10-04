@@ -2189,7 +2189,7 @@ export function JournalEntryComposer({
                 { value: "", label: t("projectChoose") },
                 ...contextProjects.map((p) => ({
                   value: p.id,
-                  label: projectDisplayLabel(p, (v) => t("projectViaTeam", v)),
+                  label: projectDisplayLabel(p, (k, v) => t(k, v)),
                 })),
                 { value: PROJECT_FIELD_NONE, label: t("projectNone") },
               ]}
@@ -2212,7 +2212,7 @@ export function JournalEntryComposer({
           >
             {t("projectAuto", {
               name: contextProjects[0]
-                ? projectDisplayLabel(contextProjects[0], (v) => t("projectViaTeam", v))
+                ? projectDisplayLabel(contextProjects[0], (k, v) => t(k, v))
                 : "",
             })}
           </p>

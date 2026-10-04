@@ -43,13 +43,21 @@
 --                     project roster, who is also not the assignee of every
 --                     task.
 --
--- WHAT IS ADDED (3 new functions)
+-- WHAT IS ADDED (3 new functions; the header counts 2 team functions + 1 independent)
 --   fn  team_work_context_v1(uuid, uuid, uuid, uuid, timestamptz)  authenticated
 --       boolean over team_assignments_for_work_v1 (the resolver) — same caller
 --       guard as the resolver (the person, a manager of the project, admin).
 --   fn  my_team_work_contexts_v1()                                 authenticated
 --       the caller's OWN current team contexts (project, team name, scope) — the
 --       worker's "my projects via team" reader. Self only.
+--   fn  independent_journal_context_v1(uuid, uuid, uuid)           authenticated
+--       an INDEPENDENT person (personal / own-workspace context) with an active
+--       PERSON assignment on a CLIENT organisation's project may journal against
+--       it; the entry organisation then differs from the client organisation, as
+--       the #2143 counterparty resolver (journal_entry_review_authority_v1)
+--       requires, so the client representative can review the work. Needs the
+--       active assignment; employees of the project's organisation keep the
+--       employer path; no resolver change is needed.
 --
 -- WHAT IS REPLACED (live production body + the minimal team branch)
 --   fn  create_journal_entry_full(12 args)   explicit project / auto-link
@@ -154,6 +162,65 @@ $$;
 revoke all on function public.my_team_work_contexts_v1() from public, anon;
 grant execute on function public.my_team_work_contexts_v1() to authenticated;
 
+-- ── 2b. independent_journal_context_v1 — a PERSON assignment on a CLIENT's project ─
+-- An independent person (freelancer / sole trader / individual provider) has a
+-- personal engagement context (organization_id NULL — the real shape of the 73
+-- personal 'employee' rows on production) or their OWN workspace (an active
+-- 'owner' engagement of an organization other than the project's). When such a
+-- person has an ACTIVE project_worker_assignments row on a project of a
+-- DIFFERENT organisation (the client), they may journal against it. The entry's
+-- organisation then differs from the client organisation — exactly what the
+-- counterparty resolver (journal_entry_review_authority_v1, #2143) requires, so
+-- the client representative can review it.
+--   * needs the active PERSON assignment (no assignment, ended assignment: false)
+--   * the context must be the person's OWN, active
+--   * a person who is an active member of the project's organisation is that
+--     organisation's employee: employer semantics apply, not this path
+--   * caller must be the person (or a manager of the project / admin)
+create or replace function public.independent_journal_context_v1(
+  p_worker uuid, p_project uuid, p_ec uuid
+) returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce((
+    select true
+      from public.workers w
+      join public.project_worker_assignments a
+        on a.worker_id = w.id and a.project_id = p_project and a.status = 'active'
+      join public.projects pr on pr.id = p_project
+      join public.engagement_contexts ec
+        on ec.id = p_ec and ec.profile_id = w.profile_id and ec.status = 'active'
+     where w.id = p_worker
+       and w.profile_id is not null
+       and auth.uid() is not null
+       and (w.profile_id = auth.uid() or public.can_manage_project(p_project) or public.is_admin())
+       and pr.organization_id is not null
+       and (
+            ec.organization_id is null
+         or (ec.organization_id <> pr.organization_id
+             and exists (select 1 from public.engagement_contexts o
+                          where o.profile_id = w.profile_id
+                            and o.organization_id = ec.organization_id
+                            and o.status = 'active'
+                            and o.relationship_slug = 'owner'))
+       )
+       and not exists (select 1 from public.engagement_contexts m
+                        where m.profile_id = w.profile_id
+                          and m.organization_id = pr.organization_id
+                          and m.status = 'active')
+       and not exists (select 1 from public.company_memberships cm
+                        where cm.profile_id = w.profile_id
+                          and cm.organization_id = pr.organization_id
+                          and cm.status = 'active')
+     limit 1
+  ), false);
+$$;
+revoke all on function public.independent_journal_context_v1(uuid, uuid, uuid) from public, anon;
+grant execute on function public.independent_journal_context_v1(uuid, uuid, uuid) to authenticated;
+
 -- ── 3. is_assigned_to_project — person roster OR active team context ────────
 create or replace function public.is_assigned_to_project(p_project_id uuid)
 returns boolean
@@ -224,6 +291,8 @@ begin
       ) and not coalesce(
         v_ec_org is not null
         and public.team_work_context_v1(v_profile, p_project_id, null, v_ec_org), false
+      ) and not coalesce(
+        public.independent_journal_context_v1(p_worker_id, p_project_id, p_engagement_context_id), false
       ) then
         raise exception 'project_not_assignable' using errcode = '42501';
       end if;
@@ -246,6 +315,14 @@ begin
          where v_profile is not null
            and v_ec_org is not null
            and (t.project_org_id = v_ec_org or t.team_org_id = v_ec_org)
+        union
+        -- an INDEPENDENT person (personal / own-workspace context) with an active
+        -- PERSON assignment on a client organisation's project
+        select pwa.project_id
+          from public.project_worker_assignments pwa
+         where pwa.worker_id = p_worker_id
+           and pwa.status = 'active'
+           and public.independent_journal_context_v1(p_worker_id, pwa.project_id, p_engagement_context_id)
       ) c;
     if v_project_count is distinct from 1 then
       v_project_id := null;
@@ -360,6 +437,8 @@ begin
          and pwa.status = 'active'
     ) and not coalesce(
       public.team_work_context_v1(v_author, t.project_id), false
+    ) and not coalesce(
+      public.independent_journal_context_v1(e.worker_id, t.project_id, e.engagement_context_id), false
     ) then
       return 'project_mismatch';
     end if;
@@ -374,6 +453,9 @@ begin
        and not coalesce(
          v_entry_org is not null
          and public.team_work_context_v1(v_author, t.project_id, null, v_entry_org), false
+       )
+       and not coalesce(
+         public.independent_journal_context_v1(e.worker_id, t.project_id, e.engagement_context_id), false
        ) then
       return 'organization_mismatch';
     end if;
