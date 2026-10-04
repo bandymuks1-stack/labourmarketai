@@ -122,6 +122,7 @@ export function MarketplaceListingsSection({
   discoveryRows,
   needsMigration,
   extended,
+  unavailable = [],
   locale,
 }: {
   myRows: MarketplaceListingRow[];
@@ -129,6 +130,8 @@ export function MarketplaceListingsSection({
   needsMigration: boolean;
   /** The universal-marketplace migration is applied. */
   extended: boolean;
+  /** Federated sources that could not be read (never rendered as empty). */
+  unavailable?: readonly ("vacancies" | "workforce" | "demand")[];
   locale: string;
 }) {
   const t = useTranslations("marketplaceListings");
@@ -297,13 +300,23 @@ export function MarketplaceListingsSection({
   }
 
   const otherRows = discoveryRows.filter((r) => !r.isMine);
-  const tabDomains = ["all", ...LISTING_DOMAINS, "service"] as const;
+  // `job` and `workforce` exist only through the federation adapters
+  // (lib/marketplace/federation*.ts); `project_work` mixes listings + demand.
+  const tabDomains = ["all", ...LISTING_DOMAINS, "service", "job", "workforce"] as const;
   const shownRows =
     domainTab === "all" ? otherRows : otherRows.filter((r) => r.domain === domainTab);
 
   function subjectLabel(subject: string | null, domain: string): string {
     if (subject && domainOfSubject(subject)) return t(`categories.${subject}`);
-    return t(`domains.${domain === "service" ? "service" : "other"}`);
+    if (
+      domain === "service" ||
+      domain === "job" ||
+      domain === "workforce" ||
+      (LISTING_DOMAINS as readonly string[]).includes(domain)
+    ) {
+      return t(`domains.${domain}`);
+    }
+    return t(`domains.other`);
   }
 
   return (
@@ -710,6 +723,27 @@ export function MarketplaceListingsSection({
           </div>
         )}
 
+        {unavailable.length > 0 && (
+          <p
+            role="status"
+            data-testid="federation-partial"
+            className="rounded-md border border-state-warning/40 bg-state-warning/5 p-3 text-sm text-text-secondary"
+          >
+            {t("federationPartial")}
+          </p>
+        )}
+
+        {extended && domainTab === "job" && (
+          <Link
+            href={"/jobs" as "/dashboard"}
+            data-testid="marketplace-all-jobs-link"
+            className="inline-flex min-h-11 w-fit items-center gap-1.5 text-sm font-medium text-brand-blue"
+          >
+            {t("allJobsLink")}
+            <ArrowRight aria-hidden className="h-4 w-4" />
+          </Link>
+        )}
+
         {shownRows.length === 0 ? (
           <p className="rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-muted">
             {t("browseEmpty")}
@@ -725,11 +759,32 @@ export function MarketplaceListingsSection({
                 }`}
               >
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium text-text-primary">{row.title}</span>
+                  <span className="font-medium text-text-primary">
+                    {row.title || t("titleNotStated")}
+                  </span>
                   <span className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted">
                     {t(`directions.${row.direction}`)}
                   </span>
+                  {row.sourceTable === "public_vacancies" || row.sourceTable === "customer_requests" ? (
+                    <>
+                      <span
+                        data-testid="market-row-visibility"
+                        className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
+                      >
+                        {t(`visibility.${row.visibility}`)}
+                      </span>
+                      <span
+                        data-testid="market-row-provenance"
+                        className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
+                      >
+                        {t(`provenance.${row.provenance}`)}
+                      </span>
+                    </>
+                  ) : null}
                 </div>
+                {row.publisherName && (
+                  <p className="text-xs text-text-secondary">{row.publisherName}</p>
+                )}
                 <p className="text-xs text-text-muted">
                   {subjectLabel(row.subject, row.domain)}
                   {row.locationLabel ? ` · ${row.locationLabel}` : ""}
@@ -762,7 +817,7 @@ export function MarketplaceListingsSection({
                     href={row.destinationPath as "/dashboard"}
                     className="mt-1 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-sm text-text-secondary transition-colors hover:border-brand-blue"
                   >
-                    {t("openInServices")}
+                    {row.contactAction === "open_source" ? t("openInSource") : t("openInServices")}
                     <ArrowRight aria-hidden className="h-4 w-4" />
                   </Link>
                 )}

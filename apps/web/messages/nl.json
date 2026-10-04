@@ -222,12 +222,29 @@
       "personal": "Persoonlijk",
       "project_work": "Projecten en contracten",
       "service": "Aangeboden diensten",
-      "other": "Overig"
+      "other": "Overig",
+      "job": "Banen & vacatures",
+      "workforce": "Beschikbare arbeidskrachten"
     },
     "directions": {
       "offer": "Aangeboden",
       "need": "Gezocht",
       "other": "Overig"
+    },
+    "federationPartial": "Sommige bronnen konden nu niet worden gelezen, dus deze lijst is mogelijk onvolledig.",
+    "allJobsLink": "Bekijk het volledige vacaturebord",
+    "titleNotStated": "Titel niet opgegeven",
+    "openInSource": "Openen waar het staat",
+    "visibility": {
+      "public": "Openbaar",
+      "signed_in": "Ingelogde leden",
+      "organizations": "Alleen organisaties",
+      "workers": "Alleen werknemers",
+      "own": "Van jou"
+    },
+    "provenance": {
+      "platform": "Op dit platform",
+      "external_vacancy": "Openbare vacature, externe bron"
     }
   },
   "quality": {

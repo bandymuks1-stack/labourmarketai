@@ -222,12 +222,29 @@
       "personal": "Persönlich",
       "project_work": "Projekte und Aufträge",
       "service": "Angebotene Dienstleistungen",
-      "other": "Sonstiges"
+      "other": "Sonstiges",
+      "job": "Stellen & Vakanzen",
+      "workforce": "Verfügbare Arbeitskräfte"
     },
     "directions": {
       "offer": "Angeboten",
       "need": "Gesucht",
       "other": "Sonstiges"
+    },
+    "federationPartial": "Einige Quellen konnten gerade nicht gelesen werden, daher ist diese Liste möglicherweise unvollständig.",
+    "allJobsLink": "Gesamte Jobbörse ansehen",
+    "titleNotStated": "Titel nicht angegeben",
+    "openInSource": "Am Ursprungsort öffnen",
+    "visibility": {
+      "public": "Öffentlich",
+      "signed_in": "Angemeldete Mitglieder",
+      "organizations": "Nur Organisationen",
+      "workers": "Nur Arbeitskräfte",
+      "own": "Ihr Eintrag"
+    },
+    "provenance": {
+      "platform": "Auf dieser Plattform",
+      "external_vacancy": "Öffentliche Vakanz, externe Quelle"
     }
   },
   "quality": {

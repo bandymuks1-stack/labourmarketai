@@ -222,12 +222,29 @@
       "personal": "Asmeniniai",
       "project_work": "Projektai ir sutartys",
       "service": "Siūlomos paslaugos",
-      "other": "Kita"
+      "other": "Kita",
+      "job": "Darbo skelbimai",
+      "workforce": "Prieinama darbo jėga"
     },
     "directions": {
       "offer": "Siūloma",
       "need": "Ieškoma",
       "other": "Kita"
+    },
+    "federationPartial": "Kai kurių šaltinių dabar nepavyko perskaityti, todėl sąrašas gali būti nepilnas.",
+    "allJobsLink": "Peržiūrėti visą darbo skelbimų lentą",
+    "titleNotStated": "Pavadinimas nenurodytas",
+    "openInSource": "Atidaryti šaltinyje",
+    "visibility": {
+      "public": "Vieša",
+      "signed_in": "Prisijungę nariai",
+      "organizations": "Tik organizacijos",
+      "workers": "Tik darbuotojai",
+      "own": "Jūsų"
+    },
+    "provenance": {
+      "platform": "Šioje platformoje",
+      "external_vacancy": "Viešas skelbimas, išorinis šaltinis"
     }
   },
   "quality": {
