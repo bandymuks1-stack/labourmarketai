@@ -6050,7 +6050,8 @@
         "paused": "Gepauzeerd",
         "completed": "Afgerond"
       },
-      "progressNone": "Nog geen meetbare voortgang"
+      "progressNone": "Nog geen meetbare voortgang",
+      "progressStages": "{done} van {total} fasen als klaar gemarkeerd"
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# vermelding wacht op je bevestiging} other {# vermeldingen wachten op je bevestiging}}",
@@ -6327,6 +6328,7 @@
       "title": "Projectbeheer",
       "progressLabel": "Voortgang",
       "progressNone": "Nog geen meetbare voortgang",
+      "progressStages": "{done} van {total} fasen als klaar gemarkeerd",
       "responsibleLabel": "Verantwoordelijke",
       "responsibleNone": "Niet ingesteld",
       "responsibleSave": "Opslaan",

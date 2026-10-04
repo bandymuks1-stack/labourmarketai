@@ -6050,7 +6050,8 @@
         "paused": "Paused",
         "completed": "Completed"
       },
-      "progressNone": "No measurable progress yet"
+      "progressNone": "No measurable progress yet",
+      "progressStages": "{done} of {total} stages marked done"
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
@@ -6327,6 +6328,7 @@
       "title": "Project management",
       "progressLabel": "Progress",
       "progressNone": "No measurable progress yet",
+      "progressStages": "{done} of {total} stages marked done",
       "responsibleLabel": "Responsible person",
       "responsibleNone": "Not set",
       "responsibleSave": "Save",

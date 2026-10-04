@@ -1941,7 +1941,8 @@
         "paused": "Apturēts",
         "completed": "Pabeigts"
       },
-      "progressNone": "Izmērāma progresa vēl nav"
+      "progressNone": "Izmērāma progresa vēl nav",
+      "progressStages": "{done} no {total} posmiem atzīmēti kā pabeigti"
     },
     "pulse": {
       "pendingTitle": "[EN] {n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
@@ -1997,6 +1998,7 @@
       "title": "Projekta pārvaldība",
       "progressLabel": "Progress",
       "progressNone": "Izmērāma progresa vēl nav",
+      "progressStages": "{done} no {total} posmiem atzīmēti kā pabeigti",
       "responsibleLabel": "Atbildīgā persona",
       "responsibleNone": "Nav norādīta",
       "responsibleSave": "Saglabāt",
