@@ -208,7 +208,7 @@ export async function discoverMarketplaceListings(filters?: {
 /**
  * Fill the actor KIND of index rows. Persons / service providers come from the
  * row itself; an organisation's kind comes from its capability slugs via
- * `org_capabilities_for_visible_listings_v1` — keyed by the LISTING ids the
+ * `org_capabilities_for_visible_listings_v1` â€” keyed by the LISTING ids the
  * caller already sees, so it works cross-organisation without widening the
  * member-only `organization_roles` table and without exposing any
  * organisation id, member or contact (slugs from a closed vocabulary only).
