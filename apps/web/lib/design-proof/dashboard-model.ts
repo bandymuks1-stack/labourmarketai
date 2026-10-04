@@ -103,10 +103,15 @@ export const DASHBOARDS: Record<CtxId, Dashboard> = {
       { id: "n2", entity: co("nordhaus"), text: "Upload the certificate you already hold. Employers filter on it.", action: "Upload", becomes: "added a work at height certificate" },
     ],
     motion: [{ entity: co("nordhaus"), state: "Your current job", progress: 0.2, next: "Next record due Friday", people: ["mt", "is"] }],
-    people: [{ entity: p("mt"), chip: "Crew lead · confirmed 6 h" }, { entity: p("is"), chip: "Site lead" }, { entity: p("tk"), chip: "Same trade" }],
+    people: [{ entity: p("mt"), chip: "Crew lead · confirmed 6 h" }, { entity: p("is"), chip: "Site lead · hires" }, { entity: p("tk"), chip: "Same trade · Bergen" }, { entity: p("ap"), chip: "Safety officer · can confirm" }],
     changes: [{ entity: p("mt"), text: "confirmed 6 h of scaffold erection", when: "2 d", level: "confirmed" }],
     threads: [{ entity: p("mt"), who: "Mari Tamm", text: "Well done on Friday — I will confirm it.", when: "1 d", unread: true }],
-    market: marketNeeds.slice(0, 2).map((m) => ({ ...m })),
+    market: [
+      { entity: pr("harbour"), eyebrow: "Project · Oslo", title: "Harbour Quarter fit-out", note: "3 scaffolder seats · from 10 Nov" },
+      { entity: co("tellingud"), eyebrow: "Hires apprentices", title: "Tallinna Tellingud OÜ", note: "Apprentice, 6 months" },
+      marketNeeds[3] as never,
+      { entity: co("nordhaus"), eyebrow: "Employer · Oslo", title: "Nordhaus Build AS", note: "Your current employer is hiring" },
+    ].map((m) => ({ ...m })),
     peopleHead: { eyebrow: "People around your work", title: "Who can *stand behind* it", sub: "Colleagues who can confirm what you recorded." },
     motionHead: { eyebrow: "Your work", title: "Where you *work now*", sub: "Each record you add builds your history." },
     marketHead: { eyebrow: "In the market", title: "Work that *fits* you", sub: "Matched on what you have shown, not what you have claimed." },
@@ -299,4 +304,32 @@ export function headlineFor(n: number): string {
   if (n === 0) return "You are *clear*.";
   const w = WORDS[n] ?? String(n);
   return n === 1 ? `${w} thing *needs you*.` : `${w} things *need you*.`;
+}
+
+
+/** What each state IS, said plainly: the stage's own title for the state. */
+export const STATE_TITLES = ["Waiting for you", "Running now", "Because of what happened", "Outside your walls"] as const;
+
+/**
+ * WHAT CHANGED IS CAUSAL. Each recent event is shown with what it caused:
+ *   joined a team        -> a role is filled      -> coverage changed
+ *   evidence confirmed   -> capability stronger   -> Living CV updated
+ *   agreement accepted   -> project activated     -> the team can start
+ *   work recorded        -> history grew          -> waits for confirmation
+ * derived from the event itself and the kind of thing it happened to.
+ */
+export function causalChain(tile: Tile): readonly [string, string, string] {
+  const e = tile.chips[2].text;
+  const k = tile.entity.kind;
+  const t = e.toLowerCase();
+  if (k === "person") {
+    if (/join|moved|placed|replaced/.test(t)) return [e, "Role filled", "Coverage changed"];
+    if (/confirm|renewed|done/.test(t)) return [e, "Capability stronger", "Living CV updated"];
+    if (/record/.test(t)) return [e, "History grew", "Waits for confirmation"];
+    return [e, "Plan updated", "Next step ready"];
+  }
+  if (k === "company") return [/sign|accept|agree/.test(t) ? "Agreement accepted" : e, "Project activated", "The team can start"];
+  if (k === "project") return [e, /ready|staffed|done/.test(t) ? "Project activated" : "Plan moved", "Seats opened"];
+  if (k === "team") return [e, "Seats filled", "Coverage changed"];
+  return [e, "Plan updated", "Next step ready"];
 }

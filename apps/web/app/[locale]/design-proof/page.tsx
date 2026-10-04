@@ -5,6 +5,7 @@ import { setRequestLocale } from "next-intl/server";
 import { DesignProofView, type ProofView } from "@/components/app/signature/design-proof-views";
 import { WorldSequence } from "@/components/app/spatial/world-sequence";
 import { AvatarGallery } from "@/components/app/system/avatar-gallery";
+import { StressTest } from "@/components/app/system/stress-test";
 import { ProductProof, type ProofScreen } from "@/components/app/system/product-proof";
 
 /**
@@ -18,20 +19,20 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const VIEWS: readonly (ProofView | "world" | "avatars" | "product")[] = ["product", "avatars", "world", "identity", "record", "match"];
+const VIEWS: readonly (ProofView | "world" | "avatars" | "product" | "stress")[] = ["product", "stress", "avatars", "world", "identity", "record", "match"];
 
 export default async function DesignProofPage({
   params,
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ dash?: string; v?: string; p?: string; autoplay?: string; s?: string; team?: string; cv?: string; profile?: string; open?: string }>;
+  searchParams: Promise<{ ptab?: string; dash?: string; v?: string; p?: string; autoplay?: string; s?: string; team?: string; cv?: string; profile?: string; open?: string }>;
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { locale } = await params;
   setRequestLocale(locale);
-  const { dash, v, p, autoplay, s, team, cv, profile, open } = await searchParams;
-  const view = (VIEWS as readonly string[]).includes(v ?? "") ? (v as ProofView | "world" | "avatars" | "product") : "product";
+  const { ptab, dash, v, p, autoplay, s, team, cv, profile, open } = await searchParams;
+  const view = (VIEWS as readonly string[]).includes(v ?? "") ? (v as ProofView | "world" | "avatars" | "product" | "stress") : "product";
   const fixedP = p !== undefined && Number.isFinite(Number(p)) ? Math.min(1, Math.max(0, Number(p))) : undefined;
 
   if (view === "product") {
@@ -44,6 +45,7 @@ export default async function DesignProofPage({
           cv={cv ?? "tk"}
           profile={profile ?? "is"}
           chatOpen={open === "1"}
+          ptab={(ptab as never) ?? "overview"}
         />
       </main>
     );
@@ -67,7 +69,7 @@ export default async function DesignProofPage({
           </a>
         ))}
       </nav>
-      {view === "avatars" ? <AvatarGallery /> : view === "world" ? <WorldSequence fixedP={fixedP} autoplay={autoplay !== "0"} /> : <DesignProofView view={view} />}
+      {view === "stress" ? <StressTest /> : view === "avatars" ? <AvatarGallery /> : view === "world" ? <WorldSequence fixedP={fixedP} autoplay={autoplay !== "0"} /> : <DesignProofView view={view} />}
     </main>
   );
 }

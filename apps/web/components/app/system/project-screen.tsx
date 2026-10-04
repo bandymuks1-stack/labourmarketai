@@ -15,7 +15,7 @@ import {
 import { conflictOf, coverageOf, membersOf, type Seats } from "@/lib/design-proof/team-model";
 
 import { CompanyMark, TeamStack } from "./identity";
-import { EntityPlate, EntityThumb } from "./entity";
+import { EntityCard, EntityPlate, EntityThumb } from "./entity";
 import { Accented, Avail, Btn, Eyebrow, RegionHead, Surface, Tabs } from "./ui";
 
 /**
@@ -53,10 +53,10 @@ const ACTIVITY = [
   { who: "is", text: "created the team", t: "2 d" },
 ];
 
-export function ProjectScreen({ seats, onOpenProfile, onOpenChat }: { readonly seats: Seats; readonly onOpenProfile: (id: string) => void; readonly onOpenChat: () => void }) {
+export function ProjectScreen({ seats, onOpenProfile, onOpenChat, initialTab = "overview" }: { readonly initialTab?: "overview" | "team" | "schedule"; readonly seats: Seats; readonly onOpenProfile: (id: string) => void; readonly onOpenChat: () => void }) {
   const project = PROJECTS[0]!;
   const client = COMPANIES.find((c) => c.id === project.client)!;
-  const [tab, setTab] = useState<"overview" | "team" | "schedule">("overview");
+  const [tab, setTab] = useState<"overview" | "team" | "schedule">(initialTab);
   const members = membersOf(seats).map((m) => ({ ...m, person: personById(m.personId) }));
   const cov = coverageOf(seats);
   const covered = cov.every((c) => c.status === "covered");
@@ -80,9 +80,9 @@ export function ProjectScreen({ seats, onOpenProfile, onOpenChat }: { readonly s
             </p>
           </div>
           <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-5">
-            <div className="flex items-center gap-4">
-              <TeamStack members={members.map((m) => m.person)} size={44} max={6} />
-              <p className="text-[0.98rem] text-text-secondary">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+              <TeamStack members={members.map((m) => m.person)} size={44} max={5} />
+              <p className="basis-full text-[0.98rem] text-text-secondary md:basis-auto">
                 <span className="font-display text-[1.5rem] font-semibold tabular-nums text-text-primary">{members.length}</span> people · {NEED.roles.length} roles ·{" "}
                 <span className={covered ? "text-text-primary" : "text-state-amber"}>{covered ? "every capability covered" : "gaps remain"}</span>
               </p>
@@ -99,7 +99,63 @@ export function ProjectScreen({ seats, onOpenProfile, onOpenChat }: { readonly s
       <div className="mx-auto max-w-[1380px] px-4 pb-32 pt-10 md:px-10">
         <Tabs value={tab} onChange={setTab} options={[{ id: "overview", label: "Overview" }, { id: "team", label: "Team", count: members.length }, { id: "schedule", label: "Schedule" }]} />
 
-        <div className="mt-12 grid gap-x-14 gap-y-14 lg:grid-cols-[1fr_22rem]">
+        {tab === "team" ? (
+          <div className="mt-12" data-testid="project-team-tab">
+            <RegionHead eyebrow={`${members.length} people · ${NEED.roles.length} roles`} title="The *team*" sub="Everyone on the project with what they bring to it." />
+            <ul className="mt-9 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+              {members.map(({ person: p, role }) => (
+                <li key={p.id}>
+                  <EntityCard entity={{ kind: "person", id: p.id }} aspect="4 / 5" as="button" onClick={() => onOpenProfile(p.id)}>
+                    <span className="mt-1.5 text-[0.82rem] text-text-secondary">{NEED.roles.find((r) => r.id === role)!.label} · {RESPONSIBILITY[role]}</span>
+                  </EntityCard>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {tab === "schedule" ? (
+          <div className="mt-12" data-testid="project-schedule-tab">
+            <RegionHead eyebrow="14 weeks · 10 Nov – 15 Feb" title="Who is *there*, when" sub="Weeks on site per person, and the milestones the project is working toward." />
+            <Surface className="mt-9 overflow-x-auto p-5 md:p-7">
+              <div className="min-w-[640px]">
+                <div className="grid grid-cols-[13rem_1fr] items-end gap-x-4 pb-3">
+                  <span />
+                  <div className="grid grid-cols-14 text-[0.72rem] text-text-muted" style={{ gridTemplateColumns: `repeat(${WEEKS}, minmax(0, 1fr))` }}>
+                    {Array.from({ length: WEEKS }).map((_, w) => <span key={w} className="text-center tabular-nums">{w + 1}</span>)}
+                  </div>
+                </div>
+                {members.map(({ person: p }) => (
+                  <div key={p.id} className="grid grid-cols-[13rem_1fr] items-center gap-x-4 border-t border-text-primary/10 py-3">
+                    <span className="flex items-center gap-3">
+                      <EntityThumb entity={{ kind: "person", id: p.id }} size={40} />
+                      <span className="truncate text-[0.92rem] font-medium">{p.anonymous ? "Anonymous" : p.name.split(" ")[0]}</span>
+                    </span>
+                    <div className="grid gap-[3px]" style={{ gridTemplateColumns: `repeat(${WEEKS}, minmax(0, 1fr))` }}>
+                      {weekCells(p).map((c, w) => (
+                        <span key={w} className={cn("h-5 rounded-[3px]", c === "on" && "bg-[rgb(235,200,95)]/75", c === "late" && "border border-dashed border-text-primary/40", c === "busy" && "bg-state-amber/70")} />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                <div className="grid grid-cols-[13rem_1fr] items-center gap-x-4 border-t border-text-primary/10 pt-4">
+                  <Eyebrow>Milestones</Eyebrow>
+                  <div className="relative h-8" style={{ display: "grid", gridTemplateColumns: `repeat(${WEEKS}, minmax(0, 1fr))` }}>
+                    {[{ w: 0, t: "Induction" }, { w: 3, t: "Plan sign-off" }, { w: 8, t: "Rough-in done" }, { w: 13, t: "Handover" }].map((m) => (
+                      <span key={m.t} className="relative" style={{ gridColumn: m.w + 1 }}>
+                        <span aria-hidden className="absolute left-1/2 top-0 h-3 w-3 -translate-x-1/2 rotate-45 rounded-[3px] bg-[rgb(235,200,95)]" />
+                        <span className="absolute left-1/2 top-4 -translate-x-1/2 whitespace-nowrap text-[0.72rem] text-text-secondary">{m.t}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Surface>
+            <p className="mt-4 text-[0.82rem] text-text-muted">Gold: on site · dashed: starts later · amber: busy on another project.</p>
+          </div>
+        ) : null}
+
+        <div className={cn("mt-12 grid gap-x-14 gap-y-14 lg:grid-cols-[1fr_22rem]", tab !== "overview" && "hidden")}>
           <section className="min-w-0" aria-label="Team">
             <RegionHead eyebrow="The team" title="Who is *responsible* for what" sub="Each person with their role, and the weeks they are actually on site." />
             {NEED.roles.map((r) => {

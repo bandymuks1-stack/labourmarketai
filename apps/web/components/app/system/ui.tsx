@@ -192,10 +192,10 @@ export function RegionHead({ eyebrow, title, sub, aside, size = "md", className 
     <header className={cn("flex flex-wrap items-end justify-between gap-x-8 gap-y-3", className)}>
       <div className="min-w-0">
         <Eyebrow>{eyebrow}</Eyebrow>
-        <h2 className={cn("mt-2.5 font-display font-semibold leading-[1.02] tracking-[-0.04em]", size === "lg" ? "text-[clamp(2.3rem,5vw,4rem)]" : "text-[clamp(1.75rem,3.2vw,2.6rem)]")}>
+        <h2 className={cn("mt-2.5 font-display font-semibold leading-[1.02] tracking-[-0.04em]", size === "lg" ? "text-[clamp(2.3rem,5vw,4rem)]" : "text-[clamp(1.55rem,2.6vw,2.15rem)]")}>
           <Accented text={title} />
         </h2>
-        {sub ? <p className="mt-3 max-w-[52ch] text-[1.02rem] leading-snug text-text-secondary">{sub}</p> : null}
+        {sub ? <p className="mt-2.5 max-w-[52ch] text-[0.95rem] leading-snug text-text-muted">{sub}</p> : null}
       </div>
       {aside ? <div className="flex items-center gap-2">{aside}</div> : null}
     </header>

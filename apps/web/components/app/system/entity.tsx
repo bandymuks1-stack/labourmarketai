@@ -104,7 +104,7 @@ export function EntityPlate({ entity, className }: { readonly entity: Entity; re
       return (
         <div className={base} data-plate="person-photo">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={p.photo.src.replace("-400", "-800")} alt="" loading="lazy" draggable={false} className="h-full w-full object-cover saturate-[0.9]" style={{ objectPosition: `${p.photo.face.x * 100}% ${p.photo.face.y * 100}%` }} />
+          <img src={p.photo.src.replace("-400", "-800")} alt="" loading="lazy" draggable={false} className="h-full w-full object-cover saturate-[0.9]" style={{ objectPosition: `${p.photo.face.x * 100}% ${Math.max(0, p.photo.face.y * 100 - 12)}%` }} />
         </div>
       );
     }
@@ -113,6 +113,7 @@ export function EntityPlate({ entity, className }: { readonly entity: Entity; re
       <div className={base} data-plate={p.anonymous ? "person-anonymous" : "person-fallback"} style={{ background: p.anonymous ? "linear-gradient(165deg,#17181a,#26282b)" : `linear-gradient(165deg,${a},${b})` }}>
         <div aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(90% 70% at 85% 8%, ${p.anonymous ? "rgba(245,241,232,0.10)" : glow}, transparent 70%)` }} />
         <BigFigure hatched={p.anonymous} id={p.id} />
+        {!p.anonymous ? <span aria-hidden className="absolute left-[8%] top-[6%] font-display text-[clamp(1.6rem,22cqw,4.4rem)] font-semibold leading-none tracking-[-0.05em] text-[rgba(245,241,232,0.16)]">{p.name.split(" ").slice(0, 2).map((w) => w[0]).join("")}</span> : null}
       </div>
     );
   }
@@ -247,9 +248,18 @@ export function EntityCard({
       <EntityPlate entity={entity} />
       <span aria-hidden className="absolute inset-0 bg-[linear-gradient(0deg,rgba(7,7,6,0.86)_0%,rgba(7,7,6,0.42)_38%,transparent_66%)]" />
       <span className="ec-text absolute inset-x-0 bottom-0 flex flex-col gap-1 p-[7%] pt-10">
-        <span className="sig-stamp !text-[0.68rem] !text-[rgba(235,200,95,0.95)]">{eyebrow ?? r.eyebrow}</span>
-        <span className="font-display text-[clamp(1.05rem,7.5cqw,1.7rem)] font-semibold leading-[1.05] tracking-[-0.03em] text-text-primary">{title ?? r.title}</span>
-        {r.sub ? <span className="text-[0.82rem] leading-tight text-text-secondary">{r.sub}</span> : null}
+        {entity.kind === "person" && !eyebrow ? (
+          <>
+            <span className="font-display text-[clamp(1.15rem,8.5cqw,1.85rem)] font-semibold leading-[1.02] tracking-[-0.035em] text-text-primary">{title ?? r.title}</span>
+            <span className="text-[clamp(0.85rem,5.2cqw,1rem)] font-medium leading-tight text-text-primary/85">{r.eyebrow}</span>
+          </>
+        ) : (
+          <>
+            <span className="sig-stamp !text-[0.68rem] !text-[rgba(235,200,95,0.95)]">{eyebrow ?? r.eyebrow}</span>
+            <span className="font-display text-[clamp(1.05rem,7.5cqw,1.7rem)] font-semibold leading-[1.05] tracking-[-0.03em] text-text-primary">{title ?? r.title}</span>
+          </>
+        )}
+        {r.sub ? <span className="text-[0.8rem] leading-tight text-text-muted">{r.sub}</span> : null}
         {children}
       </span>
     </Tag>

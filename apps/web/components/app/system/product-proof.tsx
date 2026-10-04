@@ -55,7 +55,9 @@ export function ProductProof({
   profile = "is",
   chatOpen = false,
   dash = "active",
+  ptab = "overview",
 }: {
+  readonly ptab?: "overview" | "team" | "schedule";
   readonly dash?: CtxId;
   readonly initial?: ProofScreen;
   readonly initialTeam?: "start" | "full";
@@ -103,7 +105,7 @@ export function ProductProof({
         </div>
       ) : null}
       {screen === "team" ? <TeamFormation seats={seats} setSeats={setSeats} onOpenProfile={openProfile} onConfirm={() => setConfirmed(true)} confirmed={confirmed} /> : null}
-      {screen === "project" ? <ProjectScreen seats={projectSeats} onOpenProfile={openProfile} onOpenChat={() => setScreen("chat")} /> : null}
+      {screen === "project" ? <ProjectScreen seats={projectSeats} onOpenProfile={openProfile} onOpenChat={() => setScreen("chat")} initialTab={ptab} /> : null}
       {screen === "chat" ? <ConversationScreen seats={projectSeats} initialOpen={chatOpen} /> : null}
       {screen === "market" ? <MarketScreen /> : null}
     </AppShell>

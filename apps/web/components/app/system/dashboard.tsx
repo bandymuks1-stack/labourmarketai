@@ -59,7 +59,7 @@ export function Dashboard({ ctx, onCtx }: { readonly ctx: CtxId; readonly onCtx:
   return (
     <div data-testid="dashboard" data-ctx={ctx} data-remaining={remaining.length}>
       {/* proof control: switch the context the dashboard is acting in */}
-      <div className="relative z-20 border-b border-text-primary/10 bg-ink-900/80 px-4 py-2.5 backdrop-blur md:px-8">
+      <div className="relative z-20 border-b border-text-primary/10 bg-ink-900/80 px-4 py-2.5 backdrop-blur md:fixed md:bottom-4 md:right-5 md:z-50 md:rounded-full md:border md:px-2 md:py-1.5 md:shadow-[0_12px_40px_rgba(0,0,0,0.5)]" data-proof-control>
         <Segmented
           label="Context"
           value={ctx}
@@ -97,8 +97,8 @@ export function Dashboard({ ctx, onCtx }: { readonly ctx: CtxId; readonly onCtx:
                   <div className="grid grid-cols-[auto_1fr] items-center gap-x-5 gap-y-4 border-t border-text-primary/10 px-5 py-5 first:border-t-0 md:grid-cols-[auto_1fr_auto] md:px-7">
                     <EntityThumb entity={a.entity} size={mobile ? 64 : 84} />
                     <div className="min-w-0">
-                      <p className="font-display text-[1.15rem] font-semibold leading-tight tracking-[-0.02em]">{resolve(a.entity).title}</p>
-                      <p className="mt-1.5 max-w-[60ch] text-[0.98rem] leading-snug text-text-secondary">{a.text}</p>
+                      <p className="flex flex-wrap items-baseline gap-x-3"><span className="font-display text-[1.15rem] font-semibold leading-tight tracking-[-0.02em]">{resolve(a.entity).title}</span><span className="text-[0.85rem] text-text-muted">{resolve(a.entity).eyebrow}</span></p>
+                      <p className="mt-1.5 max-w-[60ch] text-[0.95rem] leading-snug text-text-secondary">{a.text}</p>
                     </div>
                     <Btn kind={i === 0 ? "primary" : "secondary"} onClick={() => complete(a)} className="max-md:col-span-2 max-md:w-full" data-testid={`do-${a.id}`}>
                       {a.action} <ArrowUpRight className="h-4 w-4" aria-hidden />

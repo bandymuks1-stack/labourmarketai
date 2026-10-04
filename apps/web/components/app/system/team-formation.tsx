@@ -93,13 +93,22 @@ export function TeamFormation({
 
   const add = (p: Person) => {
     setMsg(null);
+    const follow = () =>
+      window.setTimeout(() => {
+        document.querySelector(`[data-seat="person"][data-person="${p.id}"]`)?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+        if (window.matchMedia("(max-width: 1279px)").matches) setTab("team");
+      }, 160);
     if (replacing) {
       setSeats(replaceSeat(seats, replacing.role, replacing.index, p.id));
       setReplacing(null);
+      follow();
       return;
     }
     const r = addPerson(seats, p.id);
-    if (r.result === "added") setSeats(r.seats);
+    if (r.result === "added") {
+      setSeats(r.seats);
+      follow();
+    }
     else if (r.result === "full") setMsg(`All ${roleOfPerson(p) ? NEED.roles.find((x) => x.id === roleOfPerson(p))!.label.toLowerCase() : "matching"} seats are taken. Replace someone, or open another seat.`);
     else if (r.result === "no-role") setMsg(`${p.name} does not fit any role this project asks for.`);
   };
@@ -164,7 +173,7 @@ export function TeamFormation({
               return (
                 <div key={r.id} data-role={r.id}>
                   <RegionHead eyebrow={`${held} of ${r.count} · ${r.caps.join(" · ")}`} title={`${r.label}${r.count > 1 ? "s" : ""}`} className="mb-6" />
-                  <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                  <ul className={cn("grid gap-4", r.count === 1 ? "grid-cols-1" : "grid-cols-2 sm:grid-cols-3")}>
                     <AnimatePresence initial={false} mode="popLayout">
                       {seats[r.id].map((s, i) => {
                         const key = `${r.id}-${i}-${s.kind}-${s.kind === "person" ? s.id : ""}`;
@@ -175,7 +184,7 @@ export function TeamFormation({
                           return (
                             <motion.li key={key} layout transition={spring} initial={{ opacity: 0.4, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.96 }} data-seat="person" data-person={p.id}>
                               <motion.div layoutId={`card-${p.id}`} transition={spring}>
-                                <EntityCard entity={{ kind: "person", id: p.id }} aspect="4 / 5" onClick={() => onOpenProfile(p.id)} as="button">
+                                <EntityCard entity={{ kind: "person", id: p.id }} aspect={r.count === 1 ? "5 / 2" : "4 / 5"} onClick={() => onOpenProfile(p.id)} as="button">
                                   <span className="mt-2 flex flex-col gap-1">
                                     {mine.map((c) => (
                                       <span key={c.label} className="inline-flex items-center gap-2 text-[0.82rem] text-text-secondary"><LevelMark level={c.level} />{c.label}</span>
@@ -184,8 +193,8 @@ export function TeamFormation({
                                   </span>
                                 </EntityCard>
                               </motion.div>
-                              <div className="mt-2 flex items-center justify-between gap-2 px-1">
-                                <Avail a={p.availability} className="text-[0.8rem]" />
+                              <div className="mt-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 px-1">
+                                <Avail a={p.availability} className="text-[0.8rem] max-md:basis-full" />
                                 <span className="flex">
                                   <Btn kind="ghost" size="sm" onClick={() => { setReplacing({ role: r.id, index: i }); setRoleFilter(r.id); setTab("people"); }}>Replace</Btn>
                                   <Btn kind="ghost" size="sm" onClick={() => setSeats(removeSeat(seats, r.id, i))} aria-label={`Remove ${p.name}`}><X className="h-4 w-4" aria-hidden /></Btn>
@@ -196,7 +205,7 @@ export function TeamFormation({
                         }
                         return (
                           <motion.li key={key} layout transition={spring} data-seat={s.kind} className="flex flex-col">
-                            <div className="relative flex aspect-[4/5] w-full flex-col items-center justify-center gap-3 rounded-[26px] border border-dashed border-text-primary/25 bg-[rgba(245,241,232,0.02)] px-4 text-center">
+                            <div className={cn("relative flex w-full flex-col items-center justify-center gap-3 rounded-[26px] border border-dashed border-text-primary/25 bg-[rgba(245,241,232,0.02)] px-4 text-center", r.count === 1 ? "aspect-[5/2]" : "aspect-[4/5]")}>
                               <span aria-hidden className="flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-text-primary/35 text-text-muted">
                                 {s.kind === "invited" ? <Mail className="h-5 w-5" strokeWidth={1.5} /> : <span className="text-[1.5rem] leading-none">+</span>}
                               </span>

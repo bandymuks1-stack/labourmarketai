@@ -48,7 +48,7 @@ export function LivingCv({ person, actions, embedded = false }: { readonly perso
       {/* THE IDENTITY MOMENT — who this is, before anything is listed */}
       {embedded ? null : (
         <section className="relative isolate overflow-hidden rounded-[32px] shadow-[inset_0_0_0_1px_rgba(245,241,232,0.10)]" data-testid="cv-identity">
-          <div className="absolute inset-0 [mask-image:linear-gradient(90deg,transparent_30%,black_58%)] max-md:[mask-image:none]"><EntityPlate entity={{ kind: "person", id: person.id }} className={person.photo && !person.anonymous ? "scale-[1.6] origin-[85%_30%] max-md:origin-[50%_20%] max-md:scale-[1.3]" : "md:left-[38%] max-md:bottom-[42%]"} /></div>
+          <div className="absolute inset-0 [mask-image:linear-gradient(90deg,transparent_30%,black_58%)] max-md:[mask-image:none]"><EntityPlate entity={{ kind: "person", id: person.id }} className={person.photo && !person.anonymous ? "md:left-[34%] max-md:bottom-[38%]" : "md:left-[38%] max-md:bottom-[42%]"} /></div>
           <div aria-hidden className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,7,6,0.97)_0%,rgba(7,7,6,0.8)_42%,rgba(7,7,6,0.15)_100%)] max-md:bg-[linear-gradient(0deg,rgba(7,7,6,0.97)_0%,rgba(7,7,6,0.7)_58%,rgba(7,7,6,0.05)_100%)]" />
           <div className="relative flex min-h-[420px] flex-col justify-end gap-6 p-6 pt-48 md:min-h-[480px] md:p-12 md:pt-24">
             <div>
