@@ -11,6 +11,8 @@ import {
 } from "@/components/app/evidence-status-strip";
 import { EmptyState } from "@/components/app/empty-state";
 import { createClient } from "@/lib/supabase/server";
+import { readCounterpartyQueue } from "@/lib/journal/counterparty-review";
+import { queueBucket } from "@/lib/journal/counterparty-review-model";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
 import {
   WORKER_NAME_FIELDS,
@@ -69,6 +71,16 @@ export default async function InboxPage({
       )
       .filter((v: unknown): v is string => typeof v === "string");
   }
+
+  // CLIENT REVIEW is its own surface (/dashboard/inbox/counterparty): entries
+  // submitted to this caller as a client / customer / contracting party are
+  // decided there (accept / request correction / dispute), never as an
+  // employer confirmation with skill verification. The employer set above is
+  // employer-only (20261003150550); this only counts what waits over there.
+  const counterpartyQueue = await readCounterpartyQueue(supabase);
+  const counterpartyToDecide = (counterpartyQueue ?? []).filter(
+    (r) => queueBucket(r) === "to_decide",
+  ).length;
 
   let pending: InboxEntry[] = [];
   if (!loadFailed && reviewableIds.length > 0) {
@@ -191,11 +203,20 @@ export default async function InboxPage({
     .select("confirmation_scope");
   let autoConfirmedCount = 0;
   if (Array.isArray(confRows)) {
-    const scopes = confRows.map(
-      (r) =>
-        (r as { confirmation_scope?: { action?: string; decision?: string } | null })
-          .confirmation_scope ?? null,
-    );
+    // Employer decisions only: a client's acceptance is a different claim
+    // (CLIENT_ACCEPTED) and is counted on the client review surface.
+    const scopes = confRows
+      .map(
+        (r) =>
+          (r as {
+            confirmation_scope?: {
+              action?: string;
+              decision?: string;
+              authority?: { basis?: string } | null;
+            } | null;
+          }).confirmation_scope ?? null,
+      )
+      .filter((s) => s?.authority?.basis !== "counterparty");
     confirmedCount = scopes.filter(
       (s) => s?.decision === "approved" || s?.action === "confirm" || s?.action === "auto_confirm",
     ).length;
@@ -264,6 +285,14 @@ export default async function InboxPage({
             data-testid="inbox-quick-link"
           >
             {t("inbox.quick.openQuick")}
+          </Link>
+          <Link
+            href="/dashboard/inbox/counterparty"
+            className="w-fit text-xs font-medium text-brand-blue hover:underline"
+            data-testid="inbox-counterparty-link"
+          >
+            {t("counterparty.queue.openLink")}
+            {counterpartyToDecide > 0 ? ` (${counterpartyToDecide})` : ""}
           </Link>
           <Link
             href="/dashboard/inbox/report"

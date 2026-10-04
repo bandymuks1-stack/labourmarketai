@@ -1,4 +1,4 @@
--- ROLLBACK of 20261003150550_counterparty_link_team_and_review_read_doors_v1.
+-- ROLLBACK of 20261003150550_counterparty_link_assignment_kinds_review_doors_v1.
 -- Restores the exact bodies of the two replaced functions from
 -- 20261003150500 and drops the functions this migration created. No data is touched.
 begin;
@@ -77,6 +77,47 @@ begin
 end $$;
 
 
+CREATE OR REPLACE FUNCTION public.reviewable_journal_entry_ids()
+ RETURNS SETOF uuid
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare uid uuid := auth.uid();
+begin
+  if uid is null then return; end if;
+  return query
+    -- EMPLOYER: as before, but never the actor's own entries, never entries
+    -- the actor has no authority over, and an entry whose ONLY confirmations
+    -- are the subject's own historical self-confirmations stays reviewable.
+    select je.id
+    from public.journal_entries je
+    join public.engagement_contexts ec on ec.id = je.engagement_context_id
+    left join public.workers w on w.id = je.worker_id
+    where ec.organization_id is not null
+      -- Stale rows are no longer reviewable (owner-hold v4 follow-through).
+      and je.superseded_by is null
+      and je.deleted_at is null
+      and coalesce(ec.journal_review_enabled, false) is true
+      and coalesce(w.profile_id <> uid, true)
+      and (public.journal_entry_review_authority_v1(je.id, uid) ->> 'basis') = 'employer'
+      and not exists (select 1 from public.journal_entry_confirmations c
+                       where c.entry_id = je.id
+                         and c.confirmer_id is distinct from w.profile_id)
+    union
+    -- COUNTERPARTY: submitted, not yet decided by the counterparty.
+    select s.entry_id
+    from public.journal_entry_review_submissions s
+    join public.journal_entries je on je.id = s.entry_id
+    where je.superseded_by is null and je.deleted_at is null
+      and (public.journal_entry_review_authority_v1(s.entry_id, uid) ->> 'basis') = 'counterparty'
+      and not exists (select 1 from public.journal_entry_confirmations c
+                       where c.entry_id = s.entry_id
+                         and c.confirmation_scope #>> '{authority,basis}' = 'counterparty');
+end $function$;
+
+drop policy if exists "journal-entry-photos counterparty select" on storage.objects;
+drop function if exists public.counterparty_can_read_photo_v1(text);
 drop function if exists public.entry_review_states_v1(uuid[]);
 drop function if exists public.counterparty_review_entry_detail_v1(uuid);
 drop function if exists public.list_counterparty_link_candidates_v1(uuid);

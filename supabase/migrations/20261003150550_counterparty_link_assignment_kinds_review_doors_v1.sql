@@ -40,11 +40,21 @@
 --     submit to (valid links only). Owner-scoped (owns_worker), nothing for
 --     everyone else.
 --
--- NOT DONE: no historical/reconstructed confirmation path; no change to the
--- guard trigger, the resolver, review_journal_entry; no storage policy (photo
--- previews are signed server-side by the app AFTER detail() proved authority).
+--  6. reviewable_journal_entry_ids() is employer-only again (the counterparty
+--     branch added by 20261003150500 is removed): every consumer of that set
+--     is an employer surface whose decision verifies skills. Client review has
+--     its own queue (list_counterparty_review_queue_v1).
 --
--- Rollback: supabase/rollbacks/20261003150550_counterparty_link_team_and_review_read_doors_v1.down.sql
+--  7. ONE additional storage SELECT policy on the private journal photo bucket
+--     (counterparty_can_read_photo_v1): the counterparty opens the photos of an
+--     entry submitted to it under its OWN session, so the app needs no
+--     service-role signer. Same resolver; closes on revocation.
+--
+-- NOT DONE: no historical/reconstructed confirmation path; no change to the
+-- guard trigger, the resolver, review_journal_entry; no change to any existing
+-- policy (the new storage policy is purely additive).
+--
+-- Rollback: supabase/rollbacks/20261003150550_counterparty_link_assignment_kinds_review_doors_v1.down.sql
 
 begin;
 
@@ -308,8 +318,81 @@ begin
   return v_out;
 end $$;
 
+-- 5b. The EMPLOYER review set is employer-only again ------------------------
+-- 20261003150500 also offered counterparty submissions through
+-- reviewable_journal_entry_ids(). Every consumer of that set (manager inbox,
+-- quick-confirm queue, confirm-pulse / dashboard counters, review report,
+-- conversation confirm-work, worker readiness) is an EMPLOYER surface whose
+-- only decision verifies skills (employer-only, refused for a counterparty).
+-- A client's acceptance is a different claim by a different party and has its
+-- own queue, list_counterparty_review_queue_v1 (journal.counterparty UI), so
+-- the employer set must neither list those entries nor count them.
+-- Same signature, same ACL (replaced in place); employer branch unchanged.
+CREATE OR REPLACE FUNCTION public.reviewable_journal_entry_ids()
+ RETURNS SETOF uuid
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare uid uuid := auth.uid();
+begin
+  if uid is null then return; end if;
+  return query
+    select je.id
+    from public.journal_entries je
+    join public.engagement_contexts ec on ec.id = je.engagement_context_id
+    left join public.workers w on w.id = je.worker_id
+    where ec.organization_id is not null
+      and je.superseded_by is null
+      and je.deleted_at is null
+      and coalesce(ec.journal_review_enabled, false) is true
+      and coalesce(w.profile_id <> uid, true)
+      and (public.journal_entry_review_authority_v1(je.id, uid) ->> 'basis') = 'employer'
+      and not exists (select 1 from public.journal_entry_confirmations c
+                       where c.entry_id = je.id
+                         and c.confirmer_id is distinct from w.profile_id);
+end $function$;
+
+-- 5c. The submitted entry's PHOTO FILES, under the counterparty's own session --
+-- The private bucket is owner-scoped, so a counterparty could not open the
+-- photos the subject attached. Instead of a service-role signer in the app,
+-- the bucket gets ONE additional SELECT policy whose predicate is the same
+-- resolver as everything else: an authenticated caller may read an object only
+-- when it is the 'uploaded' photo of an entry that was explicitly SUBMITTED to
+-- a party the caller represents (basis 'counterparty', link still valid).
+-- Revocation or an ended assignment closes it at the next request.
+create or replace function public.counterparty_can_read_photo_v1(p_object_name text)
+ returns boolean
+ language sql
+ stable security definer
+ set search_path to 'public'
+as $$
+  select auth.uid() is not null and coalesce(exists (
+    select 1
+      from public.journal_entry_photos ph
+      join public.journal_entry_review_submissions s on s.entry_id = ph.entry_id
+      join public.journal_entries je on je.id = ph.entry_id
+     where ph.storage_path = p_object_name
+       and ph.upload_status = 'uploaded'
+       and je.deleted_at is null
+       and (public.journal_entry_review_authority_v1(ph.entry_id, auth.uid()) ->> 'basis') = 'counterparty'
+  ), false);
+$$;
+
+drop policy if exists "journal-entry-photos counterparty select" on storage.objects;
+create policy "journal-entry-photos counterparty select" on storage.objects
+  for select to authenticated
+  using (bucket_id = 'journal-entry-photos' and public.counterparty_can_read_photo_v1(name));
+
 -- 6. ACLs, one explicit statement per function -------------------------------
 revoke all on function public.work_relationship_active_v1(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.work_counterparty_link_valid_v1(uuid) from public, anon, authenticated;
+revoke all on function public.register_work_counterparty_link_v1(uuid, uuid, text) from public, anon;
+grant execute on function public.register_work_counterparty_link_v1(uuid, uuid, text) to authenticated;
+revoke all on function public.reviewable_journal_entry_ids() from public, anon;
+grant execute on function public.reviewable_journal_entry_ids() to authenticated;
+revoke all on function public.counterparty_can_read_photo_v1(text) from public, anon;
+grant execute on function public.counterparty_can_read_photo_v1(text) to authenticated;
 revoke all on function public.list_counterparty_link_candidates_v1(uuid) from public, anon;
 revoke all on function public.counterparty_review_entry_detail_v1(uuid) from public, anon;
 revoke all on function public.entry_review_states_v1(uuid[]) from public, anon;

@@ -48,6 +48,28 @@ export function isReviewDecision(value: unknown): value is ReviewDecision {
   );
 }
 
+/**
+ * A COUNTERPARTY-basis row (client / customer / contracting party accepting,
+ * asking for a correction, disputing) is a different claim by a different
+ * party than the EMPLOYER review this module derives. It is never read as the
+ * employer's result: a client acceptance must not make an entry read as
+ * "confirmed by the manager" anywhere (verified CV, journal standing, counts).
+ * Counterparty rows are read through `lib/journal/confirmation-origin.ts`
+ * (CLIENT_ACCEPTED) and the counterparty review state, never here.
+ */
+export function isCounterpartyScopeRow(row: ConfirmationRow): boolean {
+  const scope = row.confirmation_scope as
+    | { authority?: { basis?: unknown } | null }
+    | null;
+  return scope?.authority?.basis === "counterparty";
+}
+
+function employerRowsOnly(
+  confirmations: readonly ConfirmationRow[] | null | undefined,
+): readonly ConfirmationRow[] {
+  return (confirmations ?? []).filter((r) => !isCounterpartyScopeRow(r));
+}
+
 /** Map the legacy confirmation_scope.action to a decision. */
 export function actionToDecision(action: unknown): ReviewDecision | null {
   switch (action) {
@@ -77,9 +99,10 @@ function rowDecision(row: ConfirmationRow): ReviewDecision | null {
  * no evidence yet. Rows with an unrecognised scope are ignored.
  */
 export function deriveReviewResult(
-  confirmations: readonly ConfirmationRow[] | null | undefined,
+  all: readonly ConfirmationRow[] | null | undefined,
 ): ReviewResult {
-  if (!confirmations || confirmations.length === 0) return "submitted";
+  const confirmations = employerRowsOnly(all);
+  if (confirmations.length === 0) return "submitted";
   const ordered = [...confirmations].sort((a, b) => {
     const ta = a.created_at ? Date.parse(a.created_at) : 0;
     const tb = b.created_at ? Date.parse(b.created_at) : 0;
@@ -166,9 +189,10 @@ export interface ReviewOrigin {
 }
 
 export function deriveReviewOrigin(
-  confirmations: readonly ConfirmationRow[] | null | undefined,
+  all: readonly ConfirmationRow[] | null | undefined,
 ): ReviewOrigin | null {
-  if (!confirmations || confirmations.length === 0) return null;
+  const confirmations = employerRowsOnly(all);
+  if (confirmations.length === 0) return null;
   const ordered = [...confirmations].sort((a, b) => {
     const ta = a.created_at ? Date.parse(a.created_at) : 0;
     const tb = b.created_at ? Date.parse(b.created_at) : 0;
@@ -224,9 +248,10 @@ function rowNote(row: ConfirmationRow): string | null {
  * UI shows "record created → waiting" from this emptiness, never a fake step.
  */
 export function deriveReviewTimeline(
-  confirmations: readonly ConfirmationRow[] | null | undefined,
+  all: readonly ConfirmationRow[] | null | undefined,
 ): ReviewTimelineEvent[] {
-  if (!confirmations || confirmations.length === 0) return [];
+  const confirmations = employerRowsOnly(all);
+  if (confirmations.length === 0) return [];
   const ordered = [...confirmations].sort((a, b) => {
     const ta = a.created_at ? Date.parse(a.created_at) : 0;
     const tb = b.created_at ? Date.parse(b.created_at) : 0;

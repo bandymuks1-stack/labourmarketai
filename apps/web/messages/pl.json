@@ -8190,6 +8190,7 @@
     "claimFromJournal": "z dziennika pracy",
     "recordedHours": "Zarejestrowana praca: {hours} h z dziennika pracy, w tym {confirmed} h potwierdzonych.",
     "confirmedWorkFact": "Wpisy dziennika pracy potwierdzone przez innych: {entries, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}} z {days, plural, one {# dnia roboczego} other {# dni roboczych}}",
+    "clientAcceptedWorkFact": "{entries, plural, one {# wpis pracy zaakceptowany} few {# wpisy pracy zaakceptowane} many {# wpisów pracy zaakceptowanych} other {# wpisu pracy zaakceptowanego}} przez zleceniodawcę. Odbiór przez zleceniodawcę nie jest wpisem przełożonego i nie jest zapisem płatności.",
     "recordedHoursNone": "Brak jeszcze wpisów w dzienniku z czasem trwania — godziny przy umiejętnościach pochodzą z Twoich własnych wpisów.",
     "skillHours": "{hours} h",
     "skillHoursOwn": "{hours} h, Twój własny zapis",
@@ -15156,6 +15157,7 @@
     "evidenceDocument": "Dokument ważny do {until} — jeszcze niepotwierdzone",
     "evidenceEntriesAndDocument": "{count, plural, one {# wpis pracy} few {# wpisy pracy} many {# wpisów pracy} other {# wpisu pracy}} oraz dokument ważny do {until} — jeszcze niepotwierdzone",
     "evidenceSelfConfirmed": "Potwierdziłeś to sam — niepotwierdzone niezależnie",
+    "evidenceClientAccepted": "Zaakceptowano przez zleceniodawcę — niepotwierdzone przez pracodawcę",
     "employerConfirmed": "Potwierdzone przez {org}, {date}",
     "employerConfirmedNoDate": "Potwierdzone przez pracodawcę",
     "systemDerived": "Wywnioskowane z: {source}"

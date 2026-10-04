@@ -24,3 +24,7 @@ insert into public.journal_entry_metrics (entry_id, metric_slug, value_numeric, 
   ('7e100000-0000-0000-0000-000000000001','area_done',40,'m2');
 insert into public.journal_entry_photos (entry_id, profile_id, file_name, storage_path) values
   ('7e100000-0000-0000-0000-000000000001','7e111111-1111-1111-1111-111111111111','paving.jpg','7e111111/paving.jpg');
+insert into storage.objects (bucket_id, name) values
+  ('journal-entry-photos','7e111111-1111-1111-1111-111111111111/paving.jpg'),
+  ('journal-entry-photos','7e111111-1111-1111-1111-111111111111/other.jpg');
+update public.journal_entry_photos set storage_path = '7e111111-1111-1111-1111-111111111111/paving.jpg' where file_name='paving.jpg';

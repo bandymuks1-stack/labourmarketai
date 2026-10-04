@@ -33,6 +33,7 @@ const EMPTY: VerifiedCvData = {
   journalCoverage: null,
   confirmedHoursBySkill: null,
   confirmedWorkTotals: null,
+  clientAcceptedEntries: null,
   recordedHoursTotal: null,
   recordedHoursConfirmed: null,
   organizationRecordedHours: null,
