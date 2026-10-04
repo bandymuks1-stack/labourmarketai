@@ -232,7 +232,15 @@ export type LinkableEntry = {
  */
 export function isLinkableForTask(
   entry: Pick<LinkableEntry, "projectId" | "organizationId">,
-  task: { readonly projectId: string | null; readonly organizationId: string | null },
+  task: {
+    readonly projectId: string | null;
+    readonly organizationId: string | null;
+    /** Organizations of teams the viewer reaches this project through (an
+     *  ACTIVELY assigned team, 20261003150700). A team member's entry carries
+     *  the TEAM's organization as its context; the database accepts that
+     *  (link_journal_entry_to_task_v1), so the picker must too. */
+    readonly teamOrganizationIds?: readonly string[];
+  },
 ): boolean {
   const ep = entry.projectId ?? null;
   if (ep !== null && ep !== task.projectId) return false;
@@ -240,7 +248,8 @@ export function isLinkableForTask(
     task.projectId !== null &&
     task.organizationId !== null &&
     entry.organizationId != null &&
-    entry.organizationId !== task.organizationId
+    entry.organizationId !== task.organizationId &&
+    !(task.teamOrganizationIds ?? []).includes(entry.organizationId)
   ) {
     return false;
   }
