@@ -247,3 +247,16 @@ describe("PHOTO ACCESS: only the authorized representative of the SUBMITTED entr
     }
   });
 });
+
+describe("read doors use columns that exist (found by the integrated browser QA, 2026-10-04)", () => {
+  // organizations has display_name / legal_name (no `name`); projects has title
+  // (no `name`). A wrong column makes entry_review_states_v1 and
+  // counterparty_review_entry_detail_v1 raise 42703 at runtime, so the worker
+  // never saw the "submit for review" panel and the client never saw the entry.
+  it("never reads o.name / pr.name", () => {
+    expect(MIG2).not.toMatch(/o\.name/);
+    expect(MIG2).not.toMatch(/pr\.name/);
+    expect(MIG2).toMatch(/pr\.title/);
+    expect(MIG2).toMatch(/o\.display_name/);
+  });
+});

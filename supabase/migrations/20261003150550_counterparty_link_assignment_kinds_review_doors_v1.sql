@@ -226,7 +226,7 @@ begin
       'entry_id', je.id,
       'subject_display_name', w.display_name,
       'project_id', je.project_id,
-      'project_name', pr.name,
+      'project_name', pr.title,
       'party_organization_id', v_auth ->> 'party_organization_id',
       'party_role', v_auth ->> 'party_role',
       'original_text', je.original_text,
@@ -291,7 +291,7 @@ begin
       'submission', (select jsonb_build_object(
             'link_id', s.link_id, 'submitted_at', s.submitted_at,
             'resubmission_of_entry_id', s.resubmission_of_entry_id,
-            'party_name', o.name, 'party_role', l.party_role)
+            'party_name', coalesce(nullif(btrim(o.display_name), ''), nullif(btrim(o.legal_name), '')), 'party_role', l.party_role)
           from public.journal_entry_review_submissions s
           join public.work_counterparty_links l on l.id = s.link_id
           left join public.organizations o on o.id = l.counterparty_organization_id
@@ -307,7 +307,7 @@ begin
                or exists (select 1 from public.journal_entry_review_submissions s2 where s2.entry_id = r.id)
           then '[]'::jsonb
           else coalesce((select jsonb_agg(jsonb_build_object(
-                   'link_id', l.id, 'party_name', o.name, 'party_role', l.party_role)
+                   'link_id', l.id, 'party_name', coalesce(nullif(btrim(o.display_name), ''), nullif(btrim(o.legal_name), '')), 'party_role', l.party_role)
                    order by l.established_at)
                  from public.work_counterparty_links l
                  left join public.organizations o on o.id = l.counterparty_organization_id
