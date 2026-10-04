@@ -189,6 +189,19 @@ declare
   v_logged     bigint;
   v_reason     text;
 begin
+  -- CLEAN-REPLAY GUARD (2026-10-04). This DATA STEP consolidates specific
+  -- production organizations by id and asserts the measured production state.
+  -- A database replayed from zero (`supabase db reset`, local and CI stacks)
+  -- has none of those rows, so the first PRECONDITION aborted the whole chain.
+  -- When the canonical organization does not exist at all this is not the
+  -- measured database: there is nothing to consolidate, so the step does
+  -- nothing. When it DOES exist every precondition below applies unchanged, so
+  -- a database that holds the canonical row but differs from the measured state
+  -- still aborts.
+  if not exists (select 1 from public.organizations o where o.id = c_canon) then
+    raise notice 'org_consolidation_v1: canonical organization % absent (clean replay) - nothing to consolidate, skipping', c_canon;
+    return;
+  end if;
   -- ── 0. IDEMPOTENCY ─────────────────────────────────────────────────────────
   -- The newest completion/rollback marker decides: applied and not rolled back
   -- = a no-op. A rolled-back run may be applied again (the pre-assertions then

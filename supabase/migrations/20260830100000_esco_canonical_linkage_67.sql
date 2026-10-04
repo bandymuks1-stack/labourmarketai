@@ -80,6 +80,23 @@ declare
   written integer := 0;
   wrote integer;
 begin
+  -- CLEAN-REPLAY GUARD (2026-10-04). The ESCO corpus (esco_skills /
+  -- esco_occupations) is bulk-loaded by scripts/esco/import-esco.mjs, never by a
+  -- migration, so a database replayed from zero (`supabase db reset`, local and
+  -- CI stacks) reaches this file with BOTH corpus tables empty. This file was
+  -- back-dated to 20260830 and merged after the chain was last replayed from
+  -- zero, so the first clean replay found it aborting on "not in the corpus".
+  -- With no corpus at all there is nothing to assert URIs against and nothing
+  -- to curate, so the file does nothing. The moment EITHER corpus table holds
+  -- rows (production, or any database the importer has run against) every rule
+  -- below applies unchanged: a URI missing from its own namespace corpus, a
+  -- missing source row, or a conflicting existing value still aborts. A
+  -- half-loaded corpus is NOT treated as empty.
+  if not exists (select 1 from public.esco_skills)
+     and not exists (select 1 from public.esco_occupations) then
+    raise notice 'esco-linkage-67: ESCO corpus is empty (clean replay) - nothing to link, skipping';
+    return;
+  end if;
   for r in
     select * from (values
     ('skill', 'bookkeeping', 'http://data.europa.eu/esco/skill/ecc18804-a466-40d9-98b4-fba5cd67dd4b'),
