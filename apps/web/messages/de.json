@@ -17486,6 +17486,25 @@
       "offer": "Verknüpfung anbieten",
       "offered": "Verknüpfung angeboten — die Person entscheidet in ihrem Profil",
       "error": "Die Verknüpfung konnte nicht angeboten werden"
+    },
+    "claim": {
+      "label": "Diese Person einladen, ihre Historie zu übernehmen",
+      "placeholder": "Ihre E-Mail-Adresse",
+      "invite": "Einladung senden",
+      "sent": "Einladung gesendet. Sobald die Person beigetreten ist, bieten Sie hier die Verknüpfung an; sie entscheidet in ihrem Profil.",
+      "created": "Einladung erstellt. Teilen Sie diesen Link mit der Person:",
+      "deliveryFailed": "Die Einladung wurde gespeichert, die E-Mail ging aber nicht raus. Teilen Sie diesen Link mit der Person:",
+      "hint": "Die Person braucht zuerst ein Konto, bevor ihr die Historie angeboten werden kann. Nichts wird verknüpft, bis sie zustimmt.",
+      "errors": {
+        "generic": "Die Einladung konnte nicht gesendet werden",
+        "duplicate_pending": "Für diese Adresse wartet bereits eine Einladung",
+        "rate_limited": "Zu viele Einladungen. Bitte gleich noch einmal versuchen",
+        "limit_reached": "Das Einladungslimit ist erreicht",
+        "not_authorized": "Sie dürfen für diese Organisation keine Personen einladen",
+        "invalid_relationship": "Die Beziehung dieser Person kann nicht per Einladung angeboten werden",
+        "invalid_email": "Geben Sie genau eine gültige E-Mail-Adresse ein",
+        "needs_migration": "Derzeit nicht verfügbar"
+      }
     }
   },
   "peopleImport": {

@@ -17486,6 +17486,25 @@
       "offer": "Pasiūlyti susiejimą",
       "offered": "Susiejimas pasiūlytas — žmogus sprendžia savo profilyje",
       "error": "Susiejimo pasiūlyti nepavyko"
+    },
+    "claim": {
+      "label": "Pakviesti šį žmogų perimti savo istoriją",
+      "placeholder": "Jų el. pašto adresas",
+      "invite": "Siųsti kvietimą",
+      "sent": "Kvietimas išsiųstas. Kai žmogus prisijungs, pasiūlykite susiejimą čia, o sprendimą jis priims savo profilyje.",
+      "created": "Kvietimas sukurtas. Pasidalykite šia nuoroda:",
+      "deliveryFailed": "Kvietimas išsaugotas, bet el. laiškas neišsiųstas. Pasidalykite šia nuoroda:",
+      "hint": "Kad istoriją būtų galima pasiūlyti, žmogus turi turėti paskyrą. Niekas nepriskiriama, kol jis nesutinka.",
+      "errors": {
+        "generic": "Kvietimo išsiųsti nepavyko",
+        "duplicate_pending": "Kvietimas šiuo adresu jau laukia atsakymo",
+        "rate_limited": "Per daug kvietimų. Pabandykite vėliau",
+        "limit_reached": "Pasiektas kvietimų limitas",
+        "not_authorized": "Neturite teisės kviesti žmonių šios organizacijos vardu",
+        "invalid_relationship": "Šio žmogaus ryšio negalima pasiūlyti kvietimu",
+        "invalid_email": "Įveskite vieną tinkamą el. pašto adresą",
+        "needs_migration": "Šiuo metu nepasiekiama"
+      }
     }
   },
   "peopleImport": {

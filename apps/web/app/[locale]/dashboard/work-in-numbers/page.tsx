@@ -293,6 +293,16 @@ export default async function WorkInNumbersPage({
         </>
       ) : null}
 
+      {/* A person with NO journal entries can still hold organization history
+          they confirmed as their own (the roster-claim path). Their ledger is
+          the one figure this station has for them, so it is not hidden behind
+          the journal: same component, same honest states ("none" renders
+          nothing, "unknown" says it could not be read), still beside and never
+          summed with anything. */}
+      {wi && period && answer.kind === "no_entries" ? (
+        <OrgLedger view={orgLedger(wi)} periodWord={scope} locale={locale} t={t} />
+      ) : null}
+
       <Link
         href="/dashboard/journal"
         className="inline-flex min-h-11 items-center self-start text-support font-medium text-brand-blue underline-offset-4 hover:underline"
