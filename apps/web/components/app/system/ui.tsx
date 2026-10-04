@@ -159,3 +159,61 @@ export function Section({ title, aside, children, className }: { readonly title:
     </section>
   );
 }
+
+// ───────────────────────── the grammar ─────────────────────────
+
+/** Gold eyebrow — the first line of every region: tracked, small, quiet. */
+export function Eyebrow({ children, className }: { readonly children: ReactNode; readonly className?: string }) {
+  return <span className={cn("sig-stamp !text-[0.7rem] !text-[rgba(235,200,95,0.95)]", className)}>{children}</span>;
+}
+
+/** "Where things *stand*." — exactly one accent word, set in the accent face. */
+export function Accented({ text, className }: { readonly text: string; readonly className?: string }) {
+  const parts = text.split("*");
+  return (
+    <span className={className}>
+      {parts.map((p, i) =>
+        i % 2 === 1 ? (
+          <em key={i} className="font-accent font-normal italic tracking-[-0.01em] text-[rgb(235,200,95)]">{p}</em>
+        ) : (
+          <span key={i}>{p}</span>
+        ),
+      )}
+    </span>
+  );
+}
+
+/**
+ * THE REGION HEAD — repeated at every region, which is the rhythm:
+ * eyebrow → headline with one accent word → one-line sub.
+ */
+export function RegionHead({ eyebrow, title, sub, aside, size = "md", className }: { readonly eyebrow: string; readonly title: string; readonly sub?: string; readonly aside?: ReactNode; readonly size?: "md" | "lg"; readonly className?: string }) {
+  return (
+    <header className={cn("flex flex-wrap items-end justify-between gap-x-8 gap-y-3", className)}>
+      <div className="min-w-0">
+        <Eyebrow>{eyebrow}</Eyebrow>
+        <h2 className={cn("mt-2.5 font-display font-semibold leading-[1.02] tracking-[-0.04em]", size === "lg" ? "text-[clamp(2.3rem,5vw,4rem)]" : "text-[clamp(1.75rem,3.2vw,2.6rem)]")}>
+          <Accented text={title} />
+        </h2>
+        {sub ? <p className="mt-3 max-w-[52ch] text-[1.02rem] leading-snug text-text-secondary">{sub}</p> : null}
+      </div>
+      {aside ? <div className="flex items-center gap-2">{aside}</div> : null}
+    </header>
+  );
+}
+
+/** The translucent surface: soft fill, 1 px hairline, large radius. */
+export function Surface({ children, className, selected = false, as: Tag = "div" }: { readonly children: ReactNode; readonly className?: string; readonly selected?: boolean; readonly as?: "div" | "section" | "li" }) {
+  return (
+    <Tag
+      data-selected={selected || undefined}
+      className={cn(
+        "rounded-[26px] bg-[rgba(245,241,232,0.035)] backdrop-blur-[2px] shadow-[inset_0_0_0_1px_rgba(245,241,232,0.10)]",
+        selected && "shadow-[inset_0_0_0_1.5px_rgba(212,175,55,0.65),0_0_44px_rgba(212,175,55,0.08)]",
+        className,
+      )}
+    >
+      {children}
+    </Tag>
+  );
+}

@@ -25,12 +25,12 @@ export default async function DesignProofPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ v?: string; p?: string; autoplay?: string; s?: string; team?: string; cv?: string; profile?: string; open?: string }>;
+  searchParams: Promise<{ dash?: string; v?: string; p?: string; autoplay?: string; s?: string; team?: string; cv?: string; profile?: string; open?: string }>;
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { locale } = await params;
   setRequestLocale(locale);
-  const { v, p, autoplay, s, team, cv, profile, open } = await searchParams;
+  const { dash, v, p, autoplay, s, team, cv, profile, open } = await searchParams;
   const view = (VIEWS as readonly string[]).includes(v ?? "") ? (v as ProofView | "world" | "avatars" | "product") : "product";
   const fixedP = p !== undefined && Number.isFinite(Number(p)) ? Math.min(1, Math.max(0, Number(p))) : undefined;
 
@@ -38,7 +38,8 @@ export default async function DesignProofPage({
     return (
       <main className="min-h-screen bg-ink-900" data-testid="design-proof">
         <ProductProof
-          initial={(s as ProofScreen | undefined) ?? "team"}
+          initial={(s as ProofScreen | undefined) ?? "dashboard"}
+          dash={(dash as never) ?? "active"}
           initialTeam={team === "full" ? "full" : "start"}
           cv={cv ?? "tk"}
           profile={profile ?? "is"}

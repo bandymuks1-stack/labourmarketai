@@ -25,6 +25,7 @@ import {
 } from "@/lib/design-proof/product-fixtures";
 
 import { CompanyMark, PersonAvatar, ProjectMark, TeamMark } from "./identity";
+import { Atmosphere } from "./atmosphere";
 import { Btn, Stamp } from "./ui";
 
 /**
@@ -72,8 +73,11 @@ export function AppShell({
   onOpenPerson,
   children,
   contextIndex = 0,
+  acting,
   notice,
 }: {
+  /** who the shell is acting as; overrides the built-in contexts */
+  readonly acting?: { readonly kind: "person" | "company"; readonly id: string; readonly name: string; readonly role: string };
   readonly active: NavId;
   readonly onNav: (id: NavId) => void;
   readonly onOpenPerson?: (id: string) => void;
@@ -100,7 +104,8 @@ export function AppShell({
     return () => document.removeEventListener("mousedown", on);
   }, []);
 
-  const current = CONTEXTS[ctx]!;
+  const current = acting ? { id: acting.id, kind: acting.role, name: acting.name } : CONTEXTS[ctx]!;
+  const currentMark = acting ? (acting.kind === "person" ? <PersonAvatar person={personById(acting.id)} size={32} /> : <CompanyMark company={companyById(acting.id)} size={32} />) : current.id === "me" ? <PersonAvatar person={personById("tk")} size={32} /> : <CompanyMark company={companyById(current.id === "company" ? "nordhaus" : "baltic")} size={32} />;
   const needle = q.trim().toLowerCase();
   const hits = needle
     ? {
@@ -112,8 +117,9 @@ export function AppShell({
 
   return (
     <div ref={root} className="relative flex min-h-[100svh] bg-ink-900 text-text-primary" data-testid="app-shell">
+      <Atmosphere />
       {/* rail */}
-      <nav aria-label="Primary" className="sticky top-0 hidden h-[100svh] w-[84px] shrink-0 flex-col items-center gap-1 border-r border-text-primary/10 py-5 md:flex">
+      <nav aria-label="Primary" className="sticky top-0 z-10 hidden h-[100svh] w-[84px] shrink-0 flex-col items-center gap-1 border-r border-text-primary/10 py-5 md:flex">
         <LMMark className="mb-5 text-text-primary" />
         {NAV.map((n) => {
           const Icon = n.icon;
@@ -140,7 +146,7 @@ export function AppShell({
         </div>
       </nav>
 
-      <div className="flex min-w-0 flex-1 flex-col pb-[76px] md:pb-0">
+      <div className="relative z-10 flex min-w-0 flex-1 flex-col pb-[76px] md:pb-0">
         {/* top bar */}
         <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-text-primary/10 bg-ink-900/85 px-4 backdrop-blur md:gap-5 md:px-8">
           {/* context */}
@@ -152,7 +158,7 @@ export function AppShell({
               aria-haspopup="menu"
               className="flex min-h-11 items-center gap-2.5 rounded-xl py-1 pr-2 text-left hover:bg-text-primary/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
             >
-              {current.id === "me" ? <PersonAvatar person={personById("tk")} size={32} /> : <CompanyMark company={companyById(current.id === "company" ? "nordhaus" : "baltic")} size={32} />}
+              {currentMark}
               <span className="max-md:hidden">
                 <span className="block text-[0.92rem] font-medium leading-tight">{current.name}</span>
                 <Stamp className="block leading-tight">{current.kind}</Stamp>

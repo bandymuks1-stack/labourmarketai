@@ -28,9 +28,8 @@ import {
   type Seats,
 } from "@/lib/design-proof/team-model";
 
-import { CompanyMark, PersonAvatar, ProjectMark } from "./identity";
-import { PageHeader } from "./shell";
-import { Avail, Btn, LevelMark, Segmented, Stamp } from "./ui";
+import { EntityCard, EntityPlate, EntityThumb } from "./entity";
+import { Accented, Avail, Btn, Eyebrow, LevelMark, RegionHead, Segmented } from "./ui";
 
 /**
  * TEAM FORMATION — a workforce tool, not a showpiece.
@@ -65,7 +64,7 @@ export function TeamFormation({
   const reduce = useReducedMotion();
   const project = PROJECTS[0]!;
   const client = COMPANIES.find((c) => c.id === project.client)!;
-  const [tab, setTab] = useState<"need" | "team" | "people">("team");
+  const [tab, setTab] = useState<"team" | "people">("team");
   const [roleFilter, setRoleFilter] = useState<"all" | RoleId>("all");
   const [replacing, setReplacing] = useState<{ role: RoleId; index: number } | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
@@ -107,116 +106,65 @@ export function TeamFormation({
 
   const spring = reduce ? { duration: 0 } : { type: "spring" as const, stiffness: 320, damping: 34, mass: 0.9 };
 
-  return (
-    <div className="mx-auto max-w-[1380px] px-4 pb-32 pt-6 md:px-8 md:pt-9" data-testid="team-formation" data-ready={ready}>
-      <PageHeader
-        lead={<ProjectMark project={project} size={60} />}
-        title={project.name}
-        meta={
-          <>
-            <span className="inline-flex items-center gap-2"><CompanyMark company={client} size={20} /> {client.name}</span>
-            <span>{project.place}</span>
-            <span>{project.from} – {project.to}</span>
-            <Stamp>{confirmed ? "Team confirmed" : ready ? "Team ready" : "Forming team"}</Stamp>
-          </>
-        }
-        actions={
-          <>
-            <Btn kind="secondary" size="sm">Save draft</Btn>
-            <Btn kind="primary" size="sm" disabled={!ready || confirmed} onClick={onConfirm} data-testid="confirm-team">
-              {confirmed ? "Confirmed" : "Confirm team"}
-            </Btn>
-          </>
-        }
-      />
+  const doneLine = confirmed ? "The team is confirmed and has been invited into the project." : ready ? "Every seat is held. Confirming invites the team into the project." : `${totals.filled} of ${totals.total} seats held · still needed: ${missingText}`;
+  const covered = coverage.filter((c) => c.status === "covered").length;
 
-      <Segmented
-        className="mt-6 xl:hidden"
-        label="Workspace"
-        value={tab}
-        onChange={setTab}
-        options={[
-          { id: "need", label: "Need" },
-          { id: "team", label: `Team ${totals.filled}/${totals.total}` },
-          { id: "people", label: "People" },
-        ]}
-      />
+  return (
+    <div className="mx-auto max-w-[1380px] px-4 pb-36 pt-6 md:px-10 md:pt-9" data-testid="team-formation" data-ready={ready}>
+      {/* the opening: the project this team is for, and the state of the team */}
+      <section className="relative isolate overflow-hidden rounded-[30px] shadow-[inset_0_0_0_1px_rgba(245,241,232,0.10)]">
+        <div className="absolute inset-0"><EntityPlate entity={{ kind: "project", id: project.id }} /></div>
+        <div aria-hidden className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,7,6,0.94)_0%,rgba(7,7,6,0.7)_46%,rgba(7,7,6,0.2)_100%)]" />
+        <div className="relative flex flex-col gap-8 p-6 pb-8 pt-16 md:flex-row md:items-end md:justify-between md:p-10">
+          <div className="min-w-0">
+            <Eyebrow>{client.name} · {project.place} · {project.from} – {project.to}</Eyebrow>
+            <h1 className="mt-3 font-display text-[clamp(2rem,4.6vw,3.8rem)] font-semibold leading-[1] tracking-[-0.045em]">
+              <Accented text={confirmed ? "The team is *confirmed*." : ready ? "The team is *ready*." : `${totals.filled} of ${totals.total} seats *held*.`} />
+            </h1>
+            <p className="mt-3 max-w-[48ch] text-[1.02rem] leading-snug text-text-secondary max-md:hidden">{doneLine}</p>
+          </div>
+          <div className="flex shrink-0 flex-wrap items-center gap-2.5 max-md:hidden">
+            <Btn kind="secondary" size="sm">Save draft</Btn>
+            <Btn kind="primary" disabled={!ready || confirmed} onClick={onConfirm} data-testid="confirm-team">{confirmed ? "Confirmed" : "Confirm team"}</Btn>
+          </div>
+        </div>
+      </section>
+
+      {/* what this team can do — the coverage strip, always visible */}
+      <section className="mt-9" aria-label="What this team can do">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <Eyebrow>What this team can do</Eyebrow>
+          <span className="text-[0.88rem] text-text-secondary"><span className="font-display text-[1.3rem] font-semibold tabular-nums text-text-primary">{covered}</span> of {coverage.length} capabilities covered</span>
+        </div>
+        <ul className="-mx-4 mt-4 flex gap-2.5 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 [&::-webkit-scrollbar]:hidden">
+          {coverage.map((c) => (
+            <li key={c.cap} data-status={c.status} className={cn("flex shrink-0 items-center gap-3 rounded-full py-2 pl-4 pr-3.5 shadow-[inset_0_0_0_1px_rgba(245,241,232,0.10)] transition-colors duration-500", c.status === "covered" ? "bg-[rgba(212,175,55,0.10)]" : c.status === "missing" ? "bg-[rgba(255,184,69,0.07)]" : "bg-[rgba(245,241,232,0.04)]")}>
+              <span className="text-[0.92rem] font-medium">{c.cap}</span>
+              <span className="flex gap-1">
+                {Array.from({ length: c.needed }).map((_, i) => (
+                  <span key={i} aria-hidden className={cn("h-1.5 w-4 rounded-full transition-colors duration-500", i < c.confirmed ? "bg-[rgb(235,200,95)]" : i < c.confirmed + c.recorded ? "bg-text-primary/45" : "border border-dashed border-text-primary/35")} />
+                ))}
+              </span>
+              <span className={cn("text-[0.76rem]", c.status === "missing" ? "text-state-amber" : "text-text-muted")}>
+                {c.status === "covered" ? "Covered" : c.status === "own-records" ? "Own records" : "Nobody"}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <Segmented className="mt-9 xl:hidden" label="Workspace" value={tab} onChange={setTab} options={[{ id: "team", label: `Team ${totals.filled}/${totals.total}` }, { id: "people", label: "People" }]} />
 
       <LayoutGroup>
-        <div className="mt-7 grid gap-x-12 gap-y-10 xl:grid-cols-[19rem_1fr_25rem]">
-          {/* THE NEED */}
-          <section className={cn("flex flex-col gap-9", tab === "need" ? "flex" : "max-xl:hidden")} aria-label="What the project needs">
-            <div>
-              <Stamp>Seats</Stamp>
-              <p className="mt-2 font-display text-[3rem] font-semibold leading-none tracking-[-0.04em] tabular-nums">
-                {totals.filled}
-                <span className="text-text-muted"> / {totals.total}</span>
-              </p>
-              <div className="mt-4 flex flex-col gap-2.5">
-                {NEED.roles.map((r) => (
-                  <div key={r.id} className="flex items-center gap-3">
-                    <span className="w-[6.2rem] shrink-0 text-meta text-text-secondary">{r.label}</span>
-                    <span className="flex gap-1">
-                      {seats[r.id].map((s, i) => (
-                        <span
-                          key={i}
-                          aria-hidden
-                          className={cn(
-                            "h-2 w-6 rounded-full transition-colors duration-500",
-                            s.kind === "person" ? "bg-text-primary" : s.kind === "invited" ? "bg-text-primary/35" : "border border-dashed border-text-primary/35",
-                          )}
-                        />
-                      ))}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              {missingText ? <p className="mt-4 text-support text-text-secondary">Still needed: {missingText}.</p> : <p className="mt-4 font-accent text-[1.8rem] italic leading-[1.05] text-text-primary">Every seat is held.</p>}
-            </div>
-
-            <div>
-              <Stamp>What this team can do</Stamp>
-              <ul className="mt-3 flex flex-col">
-                {coverage.map((c) => (
-                  <li key={c.cap} data-status={c.status} className="border-t border-text-primary/10 py-3 first:border-t-0">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <span className="text-[0.95rem] font-medium">{c.cap}</span>
-                      <span className={cn("text-meta", c.status === "missing" ? "text-state-amber" : c.status === "own-records" ? "text-text-secondary" : "text-text-muted")}>
-                        {c.status === "covered" ? "Covered" : c.status === "own-records" ? "Own records only" : "Nobody yet"}
-                      </span>
-                    </div>
-                    <div className="mt-2 flex gap-1.5">
-                      {Array.from({ length: c.needed }).map((_, i) => (
-                        <span
-                          key={i}
-                          aria-hidden
-                          className={cn(
-                            "h-1.5 flex-1 rounded-full transition-colors duration-500",
-                            i < c.confirmed ? "bg-text-primary" : i < c.confirmed + c.recorded ? "bg-text-primary/35" : "border border-dashed border-text-primary/30",
-                          )}
-                        />
-                      ))}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-3 text-meta text-text-muted">Solid: confirmed work · pale: the person’s own record · dashed: not yet covered.</p>
-            </div>
-          </section>
-
-          {/* THE TEAM */}
-          <section className={cn("flex min-w-0 flex-col gap-9", tab === "team" ? "flex" : "max-xl:hidden")} aria-label="The team">
+        <div className="mt-10 grid gap-x-12 gap-y-12 xl:grid-cols-[1fr_27rem]">
+          {/* THE TEAM — the primary object */}
+          <section className={cn("flex min-w-0 flex-col gap-12", tab === "team" ? "flex" : "max-xl:hidden")} aria-label="The team">
             {NEED.roles.map((r) => {
               const held = seats[r.id].filter((s) => s.kind === "person").length;
               return (
                 <div key={r.id} data-role={r.id}>
-                  <header className="flex items-baseline justify-between gap-4 border-b border-text-primary/10 pb-2.5">
-                    <h2 className="font-display text-[1.15rem] font-semibold tracking-[-0.02em]">{r.label}</h2>
-                    <span className="text-meta text-text-muted">
-                      <span className="tabular-nums text-text-secondary">{held} of {r.count}</span> · {r.caps.join(" · ")}
-                    </span>
-                  </header>
-                  <ul>
+                  <RegionHead eyebrow={`${held} of ${r.count} · ${r.caps.join(" · ")}`} title={`${r.label}${r.count > 1 ? "s" : ""}`} className="mb-6" />
+                  <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                     <AnimatePresence initial={false} mode="popLayout">
                       {seats[r.id].map((s, i) => {
                         const key = `${r.id}-${i}-${s.kind}-${s.kind === "person" ? s.id : ""}`;
@@ -225,55 +173,39 @@ export function TeamFormation({
                           const conflict = conflictOf(p);
                           const mine = p.caps.filter((c) => (r.caps as readonly string[]).includes(c.label));
                           return (
-                            <motion.li
-                              key={key}
-                              layout
-                              transition={spring}
-                              initial={{ backgroundColor: "rgba(212,175,55,0.16)" }}
-                              animate={{ backgroundColor: "rgba(212,175,55,0)" }}
-                              exit={{ opacity: 0 }}
-                              data-seat="person"
-                              data-person={p.id}
-                              className="grid grid-cols-[auto_1fr_auto] items-center gap-x-4 gap-y-1.5 border-b border-text-primary/10 px-1 py-4"
-                            >
-                              <motion.span layoutId={`av-${p.id}`} transition={spring} className="inline-flex">
-                                <PersonAvatar person={p} size={48} />
-                              </motion.span>
-                              <div className="min-w-0">
-                                <button type="button" onClick={() => onOpenProfile(p.id)} className="text-left text-[1rem] font-medium hover:underline">
-                                  {p.anonymous ? "Anonymous candidate" : p.name}
-                                </button>
-                                <p className="mt-0.5 flex flex-wrap items-center gap-x-4 gap-y-0.5 text-meta text-text-secondary">
-                                  {mine.length ? mine.map((c) => (
-                                    <span key={c.label} className="inline-flex items-center gap-1.5"><LevelMark level={c.level} />{c.label}</span>
-                                  )) : <span className="text-text-muted">Nothing shown for this role yet</span>}
-                                </p>
-                                {conflict ? (
-                                  <p className="mt-1.5 inline-flex items-center gap-1.5 text-meta text-state-amber">
-                                    <TriangleAlert className="h-3.5 w-3.5" aria-hidden /> {conflict.text}
-                                  </p>
-                                ) : null}
-                              </div>
-                              <div className="flex flex-col items-end gap-1.5">
-                                <Avail a={p.availability} className="text-meta max-sm:hidden" />
-                                <div className="flex gap-1">
+                            <motion.li key={key} layout transition={spring} initial={{ opacity: 0.4, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.96 }} data-seat="person" data-person={p.id}>
+                              <motion.div layoutId={`card-${p.id}`} transition={spring}>
+                                <EntityCard entity={{ kind: "person", id: p.id }} aspect="4 / 5" onClick={() => onOpenProfile(p.id)} as="button">
+                                  <span className="mt-2 flex flex-col gap-1">
+                                    {mine.map((c) => (
+                                      <span key={c.label} className="inline-flex items-center gap-2 text-[0.82rem] text-text-secondary"><LevelMark level={c.level} />{c.label}</span>
+                                    ))}
+                                    {conflict ? <span className="inline-flex items-center gap-1.5 text-[0.8rem] text-state-amber"><TriangleAlert className="h-3.5 w-3.5" aria-hidden />{conflict.text}</span> : null}
+                                  </span>
+                                </EntityCard>
+                              </motion.div>
+                              <div className="mt-2 flex items-center justify-between gap-2 px-1">
+                                <Avail a={p.availability} className="text-[0.8rem]" />
+                                <span className="flex">
                                   <Btn kind="ghost" size="sm" onClick={() => { setReplacing({ role: r.id, index: i }); setRoleFilter(r.id); setTab("people"); }}>Replace</Btn>
                                   <Btn kind="ghost" size="sm" onClick={() => setSeats(removeSeat(seats, r.id, i))} aria-label={`Remove ${p.name}`}><X className="h-4 w-4" aria-hidden /></Btn>
-                                </div>
+                                </span>
                               </div>
                             </motion.li>
                           );
                         }
                         return (
-                          <motion.li key={key} layout transition={spring} data-seat={s.kind} className="grid grid-cols-[auto_1fr_auto] items-center gap-x-4 border-b border-dashed border-text-primary/18 px-1 py-4">
-                            <span aria-hidden className="flex h-12 w-12 items-center justify-center rounded-[28%] border border-dashed border-text-primary/30 text-text-muted">
-                              {s.kind === "invited" ? <Mail className="h-4 w-4" strokeWidth={1.5} /> : <span className="text-[1.2rem] leading-none">+</span>}
-                            </span>
-                            <div>
-                              <p className="text-[0.98rem] font-medium text-text-secondary">{s.kind === "invited" ? "Invitation sent" : `${r.label} · seat ${i + 1} of ${r.count}`}</p>
-                              <p className="text-meta text-text-muted">{s.kind === "invited" ? "Waiting for an answer" : `Needs ${r.caps.join(" and ")}`}</p>
+                          <motion.li key={key} layout transition={spring} data-seat={s.kind} className="flex flex-col">
+                            <div className="relative flex aspect-[4/5] w-full flex-col items-center justify-center gap-3 rounded-[26px] border border-dashed border-text-primary/25 bg-[rgba(245,241,232,0.02)] px-4 text-center">
+                              <span aria-hidden className="flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-text-primary/35 text-text-muted">
+                                {s.kind === "invited" ? <Mail className="h-5 w-5" strokeWidth={1.5} /> : <span className="text-[1.5rem] leading-none">+</span>}
+                              </span>
+                              <span>
+                                <span className="block text-[1rem] font-medium text-text-secondary">{s.kind === "invited" ? "Invitation sent" : `${r.label}, seat ${i + 1} of ${r.count}`}</span>
+                                <span className="mt-1 block text-[0.8rem] text-text-muted">{s.kind === "invited" ? "Waiting for an answer" : `Needs ${r.caps.join(" and ")}`}</span>
+                              </span>
                             </div>
-                            <div className="flex gap-1">
+                            <div className="mt-2 flex justify-center gap-1.5">
                               {s.kind === "invited" ? (
                                 <Btn kind="ghost" size="sm" onClick={() => setSeats(removeSeat(seats, r.id, i))}>Cancel</Btn>
                               ) : (
@@ -293,54 +225,51 @@ export function TeamFormation({
             })}
           </section>
 
-          {/* THE PEOPLE */}
-          <section className={cn("flex min-w-0 flex-col gap-4 xl:border-l xl:border-text-primary/10 xl:pl-9", tab === "people" ? "flex" : "max-xl:hidden")} aria-label="Available people">
-            <header>
-              <h2 className="font-display text-[1.15rem] font-semibold tracking-[-0.02em]">{replacing ? `Replace ${(() => { const s = seats[replacing.role][replacing.index]; return s && s.kind === "person" ? personById(s.id).name.split(" ")[0] : "someone"; })()}` : "Available people"}</h2>
-              <p className="mt-1 text-meta text-text-muted">{candidates.length} not on the team · best fit first</p>
-            </header>
+          {/* THE PEOPLE — who could take a seat */}
+          <section className={cn("flex min-w-0 flex-col gap-5 xl:sticky xl:top-24 xl:max-h-[calc(100svh-7rem)] xl:self-start xl:overflow-y-auto", tab === "people" ? "flex" : "max-xl:hidden")} aria-label="Available people">
+            <RegionHead eyebrow={`${candidates.length} not on the team · best fit first`} title={replacing ? `Replace *${(() => { const st = seats[replacing.role][replacing.index]; return st && st.kind === "person" ? personById(st.id).name.split(" ")[0] : "someone"; })()}*` : "Available *people*"} />
             {replacing ? (
-              <div className="flex items-center justify-between rounded-xl border border-brand-blue/50 px-3.5 py-2.5 text-support">
+              <div className="flex items-center justify-between rounded-2xl border border-brand-blue/50 px-4 py-3 text-[0.95rem]">
                 <span>Choose the person who takes this seat.</span>
                 <Btn kind="ghost" size="sm" onClick={() => setReplacing(null)}>Cancel</Btn>
               </div>
             ) : null}
             <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Role">
               {ROLE_TABS.map((t) => (
-                <button key={t.id} type="button" role="tab" aria-selected={roleFilter === t.id} onClick={() => setRoleFilter(t.id as "all" | RoleId)} className={cn("rounded-full px-3 py-1.5 text-[0.85rem] transition-colors", roleFilter === t.id ? "bg-text-primary font-medium text-ink-900" : "text-text-secondary hover:text-text-primary")}>
+                <button key={t.id} type="button" role="tab" aria-selected={roleFilter === t.id} onClick={() => setRoleFilter(t.id as "all" | RoleId)} className={cn("min-h-9 rounded-full px-3.5 text-[0.88rem] transition-colors", roleFilter === t.id ? "bg-text-primary font-medium text-ink-900" : "text-text-secondary hover:text-text-primary")}>
                   {t.label}
                 </button>
               ))}
             </div>
-            {msg ? <p role="status" className="rounded-xl bg-state-amber/10 px-3.5 py-2.5 text-support text-state-amber">{msg}</p> : null}
-            <ul>
+            {msg ? <p role="status" className="rounded-2xl bg-state-amber/10 px-4 py-3 text-[0.92rem] text-state-amber">{msg}</p> : null}
+            <ul className="flex flex-col gap-3">
               <AnimatePresence initial={false} mode="popLayout">
                 {candidates.map((p) => {
                   const conflict = conflictOf(p);
                   const roleCaps = roleFilter === "all" ? p.caps.slice(0, 2) : p.caps.filter((c) => (NEED.roles.find((r) => r.id === roleFilter)!.caps as readonly string[]).includes(c.label));
                   return (
-                    <motion.li key={p.id} layout transition={spring} exit={{ opacity: 0, x: -16 }} data-candidate={p.id} className="grid grid-cols-[auto_1fr_auto] items-center gap-x-3.5 border-b border-text-primary/10 py-3.5">
-                      <motion.span layoutId={`av-${p.id}`} transition={spring} className="inline-flex">
-                        <PersonAvatar person={p} size={40} />
+                    <motion.li key={p.id} layout transition={spring} exit={{ opacity: 0, x: -16 }} data-candidate={p.id} className="grid grid-cols-[auto_1fr_auto] items-center gap-x-4 rounded-[22px] bg-[rgba(245,241,232,0.035)] p-3 pr-4 shadow-[inset_0_0_0_1px_rgba(245,241,232,0.08)]">
+                      <motion.span layoutId={`card-${p.id}`} transition={spring} className="inline-flex">
+                        <EntityThumb entity={{ kind: "person", id: p.id }} size={72} />
                       </motion.span>
                       <div className="min-w-0">
-                        <button type="button" onClick={() => onOpenProfile(p.id)} className="block max-w-full truncate text-left text-[0.95rem] font-medium hover:underline">
+                        <button type="button" onClick={() => onOpenProfile(p.id)} className="block max-w-full truncate text-left font-display text-[1.05rem] font-semibold tracking-[-0.02em] hover:underline">
                           {p.anonymous ? "Anonymous candidate" : p.name}
                         </button>
-                        <p className="truncate text-meta text-text-muted">{p.headline}</p>
-                        <p className="mt-1 flex flex-wrap items-center gap-x-3 text-meta text-text-secondary">
+                        <p className="truncate text-[0.82rem] text-text-muted">{p.headline}</p>
+                        <p className="mt-1.5 flex flex-wrap items-center gap-x-3 text-[0.8rem] text-text-secondary">
                           {roleCaps.map((c) => (
                             <span key={c.label} className="inline-flex items-center gap-1.5"><LevelMark level={c.level} />{c.label}</span>
                           ))}
                         </p>
-                        {conflict ? <p className="mt-1 inline-flex items-center gap-1.5 text-meta text-state-amber"><TriangleAlert className="h-3.5 w-3.5" aria-hidden />{conflict.kind === "busy" ? p.availability.note : conflict.text}</p> : <Avail a={p.availability} className="mt-1 text-meta" />}
+                        {conflict ? <p className="mt-1.5 inline-flex items-center gap-1.5 text-[0.8rem] text-state-amber"><TriangleAlert className="h-3.5 w-3.5" aria-hidden />{conflict.kind === "busy" ? p.availability.note : conflict.text}</p> : <Avail a={p.availability} className="mt-1.5 text-[0.8rem]" />}
                       </div>
                       <Btn kind={replacing ? "primary" : "secondary"} size="sm" onClick={() => add(p)}>{replacing ? "Choose" : "Add"}</Btn>
                     </motion.li>
                   );
                 })}
               </AnimatePresence>
-              {candidates.length === 0 ? <li className="py-10 text-center text-support text-text-muted">No one else fits this role. Invite someone new from an open seat.</li> : null}
+              {candidates.length === 0 ? <li className="py-10 text-center text-[0.95rem] text-text-muted">No one else fits this role. Invite someone new from an open seat.</li> : null}
             </ul>
           </section>
         </div>
@@ -349,9 +278,7 @@ export function TeamFormation({
       {/* the one decision */}
       <div className="fixed inset-x-0 bottom-[68px] z-20 border-t border-text-primary/10 bg-ink-900/92 px-4 py-3 backdrop-blur md:bottom-0 md:left-[84px] md:px-8">
         <div className="mx-auto flex max-w-[1380px] items-center gap-4">
-          <p className="min-w-0 flex-1 truncate text-support text-text-secondary">
-            {confirmed ? "The team is confirmed and has been invited into the project." : ready ? "Every seat is held. Confirming invites the team into the project." : `${totals.filled} of ${totals.total} seats held · still needed: ${missingText}`}
-          </p>
+          <p className="min-w-0 flex-1 truncate text-[0.95rem] text-text-secondary">{doneLine}</p>
           <Btn kind="primary" disabled={!ready || confirmed} onClick={onConfirm}>{confirmed ? "Confirmed" : "Confirm team"}</Btn>
         </div>
       </div>

@@ -14,9 +14,9 @@ import {
 } from "@/lib/design-proof/product-fixtures";
 import { conflictOf, coverageOf, membersOf, type Seats } from "@/lib/design-proof/team-model";
 
-import { CompanyMark, PersonAvatar, ProjectMark, TeamStack } from "./identity";
-import { PageHeader } from "./shell";
-import { Avail, Btn, Stamp, Tabs } from "./ui";
+import { CompanyMark, TeamStack } from "./identity";
+import { EntityPlate, EntityThumb } from "./entity";
+import { Accented, Avail, Btn, Eyebrow, RegionHead, Surface, Tabs } from "./ui";
 
 /**
  * PROJECT — the formed team, at work.
@@ -62,113 +62,118 @@ export function ProjectScreen({ seats, onOpenProfile, onOpenChat }: { readonly s
   const covered = cov.every((c) => c.status === "covered");
 
   return (
-    <div className="mx-auto max-w-[1280px] px-4 py-6 md:px-8 md:py-9" data-testid="project-screen">
-      <PageHeader
-        lead={<ProjectMark project={project} size={72} />}
-        title={project.name}
-        meta={
-          <>
-            <span className="inline-flex items-center gap-2"><CompanyMark company={client} size={20} /> {client.name}</span>
-            <span>{project.place}</span>
-            <span>{project.from} – {project.to}</span>
-            <Stamp>Active</Stamp>
-          </>
-        }
-        actions={
-          <>
-            <Btn kind="secondary" size="sm" onClick={onOpenChat}><MessageSquare className="h-4 w-4" aria-hidden /> Team thread</Btn>
-            <Btn kind="primary" size="sm"><Plus className="h-4 w-4" aria-hidden /> Add person</Btn>
-          </>
-        }
-      />
-
-      <Tabs className="mt-7" value={tab} onChange={setTab} options={[{ id: "overview", label: "Overview" }, { id: "team", label: "Team", count: members.length }, { id: "schedule", label: "Schedule" }]} />
-
-      <div className="mt-8 grid gap-x-14 gap-y-12 lg:grid-cols-[1fr_21rem]">
-        <section className="min-w-0" aria-label="Team">
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-            <TeamStack members={members.map((m) => m.person)} size={40} max={6} />
-            <p className="text-support text-text-secondary">
-              <span className="font-display text-[1.3rem] font-semibold tabular-nums text-text-primary">{members.length}</span> people · {NEED.roles.length} roles ·{" "}
-              <span className={covered ? "text-text-primary" : "text-state-amber"}>{covered ? "every required capability covered" : "some capabilities not yet covered"}</span>
+    <div data-testid="project-screen">
+      {/* THE CONTEXTUAL OPENING — where this is, who is in it, what state it is in */}
+      <section className="relative isolate mx-auto mt-6 max-w-[1380px] overflow-hidden rounded-[32px] shadow-[inset_0_0_0_1px_rgba(245,241,232,0.10)] max-md:mx-4 md:mx-10" data-testid="project-opening">
+        <div className="absolute inset-0"><EntityPlate entity={{ kind: "project", id: project.id }} /></div>
+        <div aria-hidden className="absolute inset-0 bg-[linear-gradient(0deg,rgba(7,7,6,0.96)_0%,rgba(7,7,6,0.55)_46%,rgba(7,7,6,0.1)_100%)]" />
+        <div className="relative flex min-h-[460px] flex-col justify-end gap-8 p-6 pt-40 md:min-h-[520px] md:p-12">
+          <div>
+            <Eyebrow className="inline-flex items-center gap-2"><span aria-hidden className="h-2 w-2 rounded-full bg-[rgb(52,211,153)]" />Active · week 1 of 16</Eyebrow>
+            <h1 className="mt-3 max-w-[16ch] font-display text-[clamp(2.6rem,7vw,5.8rem)] font-semibold leading-[0.95] tracking-[-0.05em]">
+              <Accented text="Harbour Quarter *fit-out*" />
+            </h1>
+            <p className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-[1.02rem] text-text-secondary">
+              <span className="inline-flex items-center gap-2"><CompanyMark company={client} size={24} /> {client.name}</span>
+              <span>{project.place}</span>
+              <span>{project.from} – {project.to}</span>
             </p>
           </div>
+          <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-5">
+            <div className="flex items-center gap-4">
+              <TeamStack members={members.map((m) => m.person)} size={44} max={6} />
+              <p className="text-[0.98rem] text-text-secondary">
+                <span className="font-display text-[1.5rem] font-semibold tabular-nums text-text-primary">{members.length}</span> people · {NEED.roles.length} roles ·{" "}
+                <span className={covered ? "text-text-primary" : "text-state-amber"}>{covered ? "every capability covered" : "gaps remain"}</span>
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2.5">
+              <Btn kind="secondary" onClick={onOpenChat}><MessageSquare className="h-4 w-4" aria-hidden /> Team thread</Btn>
+              <Btn kind="primary"><Plus className="h-4 w-4" aria-hidden /> Add person</Btn>
+            </div>
+          </div>
+        </div>
+      </section>
 
-          {NEED.roles.map((r) => {
-            const rows = members.filter((m) => m.role === r.id);
-            if (rows.length === 0) return null;
-            return (
-              <div key={r.id} className="mt-9">
-                <header className="flex items-baseline justify-between gap-4 border-b border-text-primary/10 pb-2.5">
-                  <h2 className="font-display text-[1.1rem] font-semibold tracking-[-0.02em]">{r.label}</h2>
-                  <span className="text-meta text-text-muted">{RESPONSIBILITY[r.id]}</span>
-                </header>
+      {/* THE OPERATING INTERFACE */}
+      <div className="mx-auto max-w-[1380px] px-4 pb-32 pt-10 md:px-10">
+        <Tabs value={tab} onChange={setTab} options={[{ id: "overview", label: "Overview" }, { id: "team", label: "Team", count: members.length }, { id: "schedule", label: "Schedule" }]} />
+
+        <div className="mt-12 grid gap-x-14 gap-y-14 lg:grid-cols-[1fr_22rem]">
+          <section className="min-w-0" aria-label="Team">
+            <RegionHead eyebrow="The team" title="Who is *responsible* for what" sub="Each person with their role, and the weeks they are actually on site." />
+            {NEED.roles.map((r) => {
+              const rows = members.filter((m) => m.role === r.id);
+              if (rows.length === 0) return null;
+              return (
+                <div key={r.id} className="mt-9">
+                  <p className="flex flex-wrap items-baseline justify-between gap-3 border-b border-text-primary/10 pb-2.5">
+                    <span className="font-display text-[1.15rem] font-semibold tracking-[-0.02em]">{r.label}</span>
+                    <span className="text-[0.85rem] text-text-muted">{RESPONSIBILITY[r.id]}</span>
+                  </p>
+                  <ul>
+                    {rows.map(({ person: p }) => {
+                      const cells = weekCells(p);
+                      return (
+                        <li key={p.id} data-person={p.id} className="grid grid-cols-[auto_1fr] items-center gap-x-5 gap-y-3 border-b border-text-primary/10 py-4 md:grid-cols-[auto_1fr_17rem]">
+                          <EntityThumb entity={{ kind: "person", id: p.id }} size={64} />
+                          <div className="min-w-0">
+                            <button type="button" onClick={() => onOpenProfile(p.id)} className="text-left font-display text-[1.1rem] font-semibold tracking-[-0.02em] hover:underline">
+                              {p.anonymous ? "Anonymous candidate" : p.name}
+                            </button>
+                            <p className="text-[0.88rem] text-text-muted">{p.headline}</p>
+                          </div>
+                          <div className="col-span-2 flex flex-col gap-1.5 md:col-span-1">
+                            <div className="flex gap-[3px]" role="img" aria-label="Weeks on the project">
+                              {cells.map((c, w) => (
+                                <span key={w} className={cn("h-2 flex-1 rounded-[2px]", c === "on" && "bg-[rgb(235,200,95)]/80", c === "late" && "border border-text-primary/35", c === "busy" && "bg-state-amber/70")} />
+                              ))}
+                            </div>
+                            <div className="flex items-center justify-between text-[0.8rem] text-text-muted">
+                              <Avail a={p.availability} className="text-[0.8rem]" />
+                              <span>weeks 1–{WEEKS}</span>
+                            </div>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              );
+            })}
+          </section>
+
+          <aside className="flex flex-col gap-12">
+            <section aria-label="Coming up">
+              <RegionHead eyebrow="Coming up" title="Next *three*" size="md" />
+              <Surface className="mt-6 overflow-hidden">
                 <ul>
-                  {rows.map(({ person: p }) => {
-                    const cells = weekCells(p);
-                    return (
-                      <li key={p.id} data-person={p.id} className="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2.5 border-b border-text-primary/10 py-4 md:grid-cols-[auto_1fr_17rem]">
-                        <PersonAvatar person={p} size={48} />
-                        <div className="min-w-0">
-                          <button type="button" onClick={() => onOpenProfile(p.id)} className="text-left text-[1rem] font-medium hover:underline">
-                            {p.anonymous ? "Anonymous candidate" : p.name}
-                          </button>
-                          <p className="text-meta text-text-muted">{p.headline}</p>
-                        </div>
-                        <div className="col-span-2 flex flex-col gap-1.5 md:col-span-1">
-                          <div className="flex gap-[3px]" role="img" aria-label="Weeks on the project">
-                            {cells.map((c, w) => (
-                              <span
-                                key={w}
-                                className={cn(
-                                  "h-2 flex-1 rounded-[2px]",
-                                  c === "on" && "bg-text-primary/60",
-                                  c === "late" && "border border-text-primary/35",
-                                  c === "busy" && "bg-state-amber/70",
-                                )}
-                              />
-                            ))}
-                          </div>
-                          <div className="flex items-center justify-between text-meta text-text-muted">
-                            <Avail a={p.availability} className="text-meta" />
-                            <span>weeks 1–{WEEKS}</span>
-                          </div>
-                        </div>
-                      </li>
-                    );
-                  })}
+                  {UPCOMING.map((u) => (
+                    <li key={u.what} className="border-t border-text-primary/10 px-5 py-4 first:border-t-0">
+                      <p className="text-[0.8rem] text-text-muted">{u.when}</p>
+                      <p className="mt-0.5 text-[1rem] font-medium">{u.what}</p>
+                      <TeamStack className="mt-2.5" members={u.who.map(personById)} size={28} />
+                    </li>
+                  ))}
                 </ul>
-              </div>
-            );
-          })}
-        </section>
-
-        <aside className="flex flex-col gap-10">
-          <section aria-label="Coming up">
-            <Stamp>Coming up</Stamp>
-            <ul className="mt-3 flex flex-col">
-              {UPCOMING.map((u) => (
-                <li key={u.what} className="border-t border-text-primary/10 py-3.5 first:border-t-0">
-                  <p className="text-meta text-text-muted">{u.when}</p>
-                  <p className="mt-0.5 text-[0.95rem] font-medium">{u.what}</p>
-                  <TeamStack className="mt-2" members={u.who.map(personById)} size={24} />
-                </li>
-              ))}
-            </ul>
-          </section>
-          <section aria-label="Activity">
-            <Stamp>Activity</Stamp>
-            <ul className="mt-3 flex flex-col">
-              {ACTIVITY.map((a) => (
-                <li key={a.text} className="flex items-center gap-3 border-t border-text-primary/10 py-3 first:border-t-0">
-                  <PersonAvatar person={personById(a.who)} size={28} />
-                  <span className="text-support text-text-secondary"><span className="text-text-primary">{personById(a.who).name.split(" ")[0]}</span> {a.text}</span>
-                  <Stamp className="ml-auto">{a.t}</Stamp>
-                </li>
-              ))}
-            </ul>
-          </section>
-        </aside>
+              </Surface>
+            </section>
+            <section aria-label="Activity">
+              <RegionHead eyebrow="Activity" title="What *happened*" size="md" />
+              <Surface className="mt-6 overflow-hidden">
+                <ul>
+                  {ACTIVITY.map((a) => (
+                    <li key={a.text} className="flex items-center gap-3 border-t border-text-primary/10 px-5 py-3.5 first:border-t-0">
+                      <EntityThumb entity={{ kind: "person", id: a.who }} size={36} />
+                      <span className="text-[0.92rem] text-text-secondary"><span className="text-text-primary">{personById(a.who).name.split(" ")[0]}</span> {a.text}</span>
+                      <span className="ml-auto text-[0.78rem] text-text-muted">{a.t}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Surface>
+            </section>
+          </aside>
+        </div>
       </div>
     </div>
   );

@@ -8,6 +8,8 @@ import { COMPANIES, PROJECTS, personById, type Person } from "@/lib/design-proof
 import { coverageOf, membersOf, seatTotals, type Seats } from "@/lib/design-proof/team-model";
 
 import { CompanyMark, PersonAvatar, ProjectMark, TeamMark, TeamStack } from "./identity";
+import { EntityPlate } from "./entity";
+import { Accented, Eyebrow } from "./ui";
 import { Btn, Stamp } from "./ui";
 
 /**
@@ -82,19 +84,19 @@ export function ConversationScreen({ seats, initialOpen = false }: { readonly se
 
   const pane = (
     <div className="flex h-full min-h-0 flex-col">
-      <header className="flex items-center gap-3.5 border-b border-text-primary/10 px-4 py-3 md:px-6">
-        <button type="button" onClick={() => setOpen(null)} aria-label="Back to conversations" className="-ml-1 flex h-10 w-10 items-center justify-center rounded-xl text-text-secondary hover:bg-text-primary/[0.06] md:hidden">
-          <ArrowLeft className="h-5 w-5" aria-hidden />
-        </button>
-        <TeamMark members={members} size={40} />
-        <div className="min-w-0 flex-1">
-          <h1 className="truncate font-display text-[1.1rem] font-semibold tracking-[-0.02em]">{thread.title}</h1>
-          <p className="flex items-center gap-2 truncate text-meta text-text-muted">
-            <ProjectMark project={project} size={16} wide={false} className="!rounded-[3px]" />
-            {project.name}
-          </p>
+      <header className="relative isolate overflow-hidden border-b border-text-primary/10" data-testid="thread-header">
+        <div className="absolute inset-0"><EntityPlate entity={{ kind: "project", id: project.id }} /></div>
+        <div aria-hidden className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,7,6,0.96)_0%,rgba(7,7,6,0.82)_55%,rgba(7,7,6,0.4)_100%)]" />
+        <div className="relative flex items-center gap-4 px-4 py-5 md:px-6">
+          <button type="button" onClick={() => setOpen(null)} aria-label="Back to conversations" className="-ml-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-text-secondary hover:bg-text-primary/[0.08] md:hidden">
+            <ArrowLeft className="h-5 w-5" aria-hidden />
+          </button>
+          <div className="min-w-0 flex-1">
+            <Eyebrow>{project.name} · {project.place}</Eyebrow>
+            <h1 className="mt-1.5 truncate font-display text-[clamp(1.5rem,2.6vw,2.2rem)] font-semibold leading-none tracking-[-0.04em]"><Accented text={"Harbour core *team*"} /></h1>
+          </div>
+          <TeamStack members={members} size={34} max={4} className="max-md:hidden" />
         </div>
-        <TeamStack members={members} size={28} max={4} className="max-md:hidden" />
       </header>
 
       {/* the context the conversation depends on */}

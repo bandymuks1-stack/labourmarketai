@@ -1147,3 +1147,31 @@ a {
     transition: none;
   }
 }
+
+/* The gear change: a thin strip of live facts between the current-state stage
+   and the operating area. Static under prefers-reduced-motion. */
+@keyframes lm-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+.lm-marquee {
+  animation: lm-marquee 46s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lm-marquee {
+    animation: none;
+  }
+}
+
+/* Entity cards in the current-state stage shrink to thumbnails: below 130 px
+   the name moves out into the chip beside them. */
+[data-compact="1"] .ec-text {
+  display: none;
+}
+[data-compact="0"] .chip-name {
+  display: none;
+}

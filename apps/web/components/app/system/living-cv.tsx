@@ -5,7 +5,8 @@ import type { Experience, Person } from "@/lib/design-proof/product-fixtures";
 import { COMPANIES } from "@/lib/design-proof/product-fixtures";
 
 import { CompanyMark, PersonAvatar } from "./identity";
-import { Avail, EvidenceBar, LevelMark, Section, Stamp } from "./ui";
+import { EntityPlate } from "./entity";
+import { Accented, Avail, EvidenceBar, Eyebrow, LevelMark, RegionHead, Stamp } from "./ui";
 
 /**
  * THE LIVING CV — a person's working life, as normal people read it.
@@ -40,23 +41,37 @@ export function LivingCv({ person, actions, embedded = false }: { readonly perso
   const thin = !person.anonymous && t.confirmed < 6;
   const anon = person.anonymous;
 
+  const first = (anon ? "Anonymous" : person.name.split(" ")[0]) ?? "";
+  const last = anon ? "candidate" : person.name.split(" ").slice(1).join(" ");
   return (
-    <article className="mx-auto grid max-w-[1180px] gap-x-14 gap-y-10 px-4 py-8 md:grid-cols-[17rem_1fr] md:px-8 md:py-12" data-testid="living-cv" data-person={person.id}>
-      {/* WHO */}
-      <aside className="flex flex-col gap-6 md:sticky md:top-24 md:self-start">
-        {embedded ? null : (
-          <div className="flex items-center gap-4 md:flex-col md:items-start md:gap-5">
-            <PersonAvatar person={person} size={108} className="max-md:!h-[84px] max-md:!w-[84px]" />
+    <article className="mx-auto max-w-[1280px] px-4 py-8 md:px-10 md:py-12" data-testid="living-cv" data-person={person.id}>
+      {/* THE IDENTITY MOMENT — who this is, before anything is listed */}
+      {embedded ? null : (
+        <section className="relative isolate overflow-hidden rounded-[32px] shadow-[inset_0_0_0_1px_rgba(245,241,232,0.10)]" data-testid="cv-identity">
+          <div className="absolute inset-0 [mask-image:linear-gradient(90deg,transparent_30%,black_58%)] max-md:[mask-image:none]"><EntityPlate entity={{ kind: "person", id: person.id }} className={person.photo && !person.anonymous ? "scale-[1.6] origin-[85%_30%] max-md:origin-[50%_20%] max-md:scale-[1.3]" : "md:left-[38%] max-md:bottom-[42%]"} /></div>
+          <div aria-hidden className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,7,6,0.97)_0%,rgba(7,7,6,0.8)_42%,rgba(7,7,6,0.15)_100%)] max-md:bg-[linear-gradient(0deg,rgba(7,7,6,0.97)_0%,rgba(7,7,6,0.7)_58%,rgba(7,7,6,0.05)_100%)]" />
+          <div className="relative flex min-h-[420px] flex-col justify-end gap-6 p-6 pt-48 md:min-h-[480px] md:p-12 md:pt-24">
             <div>
-              <h2 className="font-display text-[1.6rem] font-semibold leading-[1.05] tracking-[-0.03em]">{anon ? "Anonymous candidate" : person.name}</h2>
-              <p className="mt-1.5 text-support text-text-secondary">{person.headline}</p>
+              <Eyebrow>{person.role} · {person.location}</Eyebrow>
+              <h2 className="mt-3 font-display text-[clamp(2.6rem,7vw,5.6rem)] font-semibold leading-[0.94] tracking-[-0.05em]">
+                {first} <em className="font-accent font-normal italic tracking-[-0.01em] text-[rgb(235,200,95)]">{last}</em>
+              </h2>
+              <p className="mt-4 max-w-[46ch] text-[1.1rem] leading-snug text-text-secondary">{person.headline}</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+              <Avail a={person.availability} className="text-[1rem]" />
+              <span className="text-[0.95rem] text-text-secondary">{person.years} {person.years === 1 ? "year" : "years"} in the trade</span>
+              <span className="text-[0.95rem] text-text-secondary"><span className="font-display text-[1.25rem] font-semibold tabular-nums text-text-primary">{t.confirmed}</span> confirmed · <span className="font-display text-[1.25rem] font-semibold tabular-nums text-text-primary">{t.recorded}</span> recorded</span>
+              {actions ? <div className="flex flex-wrap gap-2 md:ml-auto">{actions}</div> : null}
             </div>
           </div>
-        )}
+        </section>
+      )}
 
+      <div className="mt-12 grid gap-x-16 gap-y-12 md:grid-cols-[16rem_1fr]">
+      <aside className="flex flex-col gap-6 md:sticky md:top-24 md:self-start">
         <dl className="grid grid-cols-[5.4rem_1fr] gap-x-3 gap-y-3 text-support">
-          <dt className="sig-stamp pt-0.5">Starts</dt>
-          <dd><Avail a={person.availability} /></dd>
+          {embedded ? (<><dt className="sig-stamp pt-0.5">Starts</dt><dd><Avail a={person.availability} /></dd></>) : null}
           <dt className="sig-stamp pt-0.5">Based</dt>
           <dd className="text-text-secondary">{person.location}</dd>
           {person.mobility ? (<><dt className="sig-stamp pt-0.5">Will work</dt><dd className="text-text-secondary">{person.mobility}</dd></>) : null}
@@ -66,7 +81,7 @@ export function LivingCv({ person, actions, embedded = false }: { readonly perso
           <dd className="text-text-secondary">{person.years} {person.years === 1 ? "year" : "years"}</dd>
         </dl>
 
-        <div className="flex flex-col gap-2">
+        <div className={cn2("flex flex-col gap-2", !embedded && "hidden")}>
           <Stamp>Backed by</Stamp>
           <p className="text-support text-text-secondary">
             <span className="font-display text-[1.35rem] font-semibold tabular-nums text-text-primary">{t.confirmed}</span> confirmed
@@ -74,7 +89,7 @@ export function LivingCv({ person, actions, embedded = false }: { readonly perso
             <span className="font-display text-[1.35rem] font-semibold tabular-nums text-text-primary">{t.recorded}</span> recorded
           </p>
         </div>
-        {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
+        {embedded && actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
       </aside>
 
       {/* WHAT, WHERE, QUALIFIED */}
@@ -91,7 +106,7 @@ export function LivingCv({ person, actions, embedded = false }: { readonly perso
         ) : null}
         {person.about ? <p className="max-w-[56ch] text-body text-text-secondary">{person.about}</p> : null}
 
-        <Section title="What they can do" aside={t.hours > 0 ? `${t.hours.toLocaleString("en")} h of recorded work` : undefined}>
+        <section className="flex flex-col gap-4"><RegionHead eyebrow={t.hours > 0 ? `${t.hours.toLocaleString("en")} h of recorded work` : "Capabilities"} title="What they *can do*" className="mb-3" />
           <ul className="flex flex-col">
             {shown.map((c) => (
               <li key={c.label} data-level={c.level} className="grid grid-cols-[1fr_auto] items-center gap-x-6 gap-y-1 border-t border-text-primary/10 py-3.5 first:border-t-0 sm:grid-cols-[1fr_5.5rem_9rem_4.5rem]">
@@ -108,10 +123,10 @@ export function LivingCv({ person, actions, embedded = false }: { readonly perso
             ))}
           </ul>
           {hiddenCaps > 0 ? <p className="text-support text-text-muted">+ {hiddenCaps} more</p> : null}
-        </Section>
+        </section>
 
         {person.experience.length > 0 ? (
-          <Section title="Where they have worked" aside={maxTeam > 0 ? `Led teams of up to ${maxTeam}` : undefined}>
+          <section className="flex flex-col gap-4"><RegionHead eyebrow={maxTeam > 0 ? `Led teams of up to ${maxTeam}` : "Experience"} title="Where they have *worked*" className="mb-3" />
             <ol className="flex flex-col">
               {person.experience.map((e) => {
                 const co = companyFor(e);
@@ -132,17 +147,15 @@ export function LivingCv({ person, actions, embedded = false }: { readonly perso
                 );
               })}
             </ol>
-          </Section>
+          </section>
         ) : anon ? (
-          <Section title="Where they have worked">
-            <p className="max-w-[48ch] text-support text-text-muted">Employers and projects stay hidden until this person chooses to share them.</p>
-          </Section>
+          <section className="flex flex-col gap-4"><RegionHead eyebrow="Experience" title="Where they have *worked*" className="mb-3" /><p className="max-w-[48ch] text-support text-text-muted">Employers and projects stay hidden until this person chooses to share them.</p></section>
         ) : null}
 
         {person.training.length + person.documents.length > 0 ? (
           <div className="grid gap-x-12 gap-y-10 md:grid-cols-2">
             {person.training.length > 0 ? (
-              <Section title="Training">
+              <section className="flex flex-col gap-4"><RegionHead eyebrow="Education" title="*Training*" size="md" className="mb-2" />
                 <ul className="flex flex-col">
                   {person.training.map((tr) => (
                     <li key={tr.label} className="flex items-start gap-3 border-t border-text-primary/10 py-3 first:border-t-0">
@@ -152,10 +165,10 @@ export function LivingCv({ person, actions, embedded = false }: { readonly perso
                     </li>
                   ))}
                 </ul>
-              </Section>
+              </section>
             ) : null}
             {person.documents.length > 0 ? (
-              <Section title="Documents">
+              <section className="flex flex-col gap-4"><RegionHead eyebrow="Qualifications" title="*Documents*" size="md" className="mb-2" />
                 <ul className="flex flex-col">
                   {person.documents.map((d) => (
                     <li key={d.label} className="flex items-start gap-3 border-t border-text-primary/10 py-3 first:border-t-0">
@@ -165,13 +178,13 @@ export function LivingCv({ person, actions, embedded = false }: { readonly perso
                     </li>
                   ))}
                 </ul>
-              </Section>
+              </section>
             ) : null}
           </div>
         ) : null}
 
         {thin ? (
-          <Section title="What would strengthen this CV">
+          <section className="flex flex-col gap-4"><RegionHead eyebrow="Next" title="What would *strengthen* this" className="mb-2" />
             <ul className="flex flex-col">
               {[
                 person.caps.some((c) => c.recorded > 0) ? "Ask a manager to confirm the records already written down" : "Record the next day of work",
@@ -184,8 +197,9 @@ export function LivingCv({ person, actions, embedded = false }: { readonly perso
                 </li>
               ))}
             </ul>
-          </Section>
+          </section>
         ) : null}
+      </div>
       </div>
     </article>
   );

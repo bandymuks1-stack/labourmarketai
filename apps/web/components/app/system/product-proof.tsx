@@ -6,6 +6,8 @@ import { PEOPLE, personById } from "@/lib/design-proof/product-fixtures";
 import { DEFAULT_TEAM, addPerson, membersOf, seatTotals, startingSeats, type Seats } from "@/lib/design-proof/team-model";
 
 import { ConversationScreen } from "./conversation";
+import { Dashboard } from "./dashboard";
+import { DASHBOARDS, type CtxId } from "@/lib/design-proof/dashboard-model";
 import { LivingCv } from "./living-cv";
 import { PeopleSearch } from "./search";
 import { ProfileScreen } from "./profile-screen";
@@ -25,9 +27,10 @@ import { Btn, Segmented } from "./ui";
  * State is shared the way it is in the product: the team formed in Team
  * formation is the team the Project and the Conversation show.
  */
-export type ProofScreen = "today" | "people" | "profile" | "cv" | "team" | "project" | "chat" | "market";
+export type ProofScreen = "dashboard" | "today" | "people" | "profile" | "cv" | "team" | "project" | "chat" | "market";
 
 const NAV_OF: Record<ProofScreen, NavId> = {
+  dashboard: "home",
   today: "home",
   people: "people",
   profile: "people",
@@ -51,7 +54,9 @@ export function ProductProof({
   cv = "tk",
   profile = "is",
   chatOpen = false,
+  dash = "active",
 }: {
+  readonly dash?: CtxId;
   readonly initial?: ProofScreen;
   readonly initialTeam?: "start" | "full";
   readonly cv?: string;
@@ -64,13 +69,14 @@ export function ProductProof({
   const [selected, setSelected] = useState<string | null>("is");
   const [profileId, setProfileId] = useState(profile);
   const [cvId, setCvId] = useState<string>(cv);
+  const [dashCtx, setDashCtx] = useState<CtxId>(dash);
 
   const openProfile = (id: string) => {
     setProfileId(id);
     setScreen("profile");
   };
   const nav = (n: NavId) =>
-    setScreen(n === "home" ? "today" : n === "people" ? "people" : n === "teams" ? "team" : n === "projects" ? "project" : n === "market" ? "market" : "chat");
+    setScreen(n === "home" ? "dashboard" : n === "people" ? "people" : n === "teams" ? "team" : n === "projects" ? "project" : n === "market" ? "market" : "chat");
   const totals = seatTotals(seats);
   const teamIds = membersOf(seats).map((m) => m.personId);
   const projectSeats = totals.open === 0 && totals.invited === 0 ? seats : DEFAULT_TEAM;
@@ -80,7 +86,11 @@ export function ProductProof({
   };
 
   return (
-    <AppShell active={NAV_OF[screen]} onNav={nav} onOpenPerson={openProfile} notice="Design proof · invented sample people, companies and figures">
+    <>
+    {/* the global body rule is overflow-x:hidden, which makes <body> a scroll container and silently disables position:sticky; clip does not */}
+    <style>{"html,body{overflow-x:clip !important}"}</style>
+    <AppShell active={NAV_OF[screen]} onNav={nav} onOpenPerson={openProfile} acting={screen === "dashboard" ? DASHBOARDS[dashCtx].actingAs : undefined} notice={screen === "dashboard" ? undefined : "Design proof · invented sample people, companies and figures"}>
+      {screen === "dashboard" ? <Dashboard ctx={dashCtx} onCtx={setDashCtx} /> : null}
       {screen === "today" ? <TodayScreen onOpenProject={() => setScreen("project")} onOpenTeam={() => setScreen("team")} onOpenChat={() => setScreen("chat")} /> : null}
       {screen === "people" ? <PeopleSearch selectedId={selected} onSelect={setSelected} onOpenProfile={openProfile} inTeam={teamIds} onAddToTeam={addToTeam} teamLabel="Add to Harbour team" /> : null}
       {screen === "profile" ? <ProfileScreen person={personById(profileId)} onBack={() => setScreen("people")} onAdd={addToTeam} inTeam={teamIds.includes(profileId)} /> : null}
@@ -97,6 +107,7 @@ export function ProductProof({
       {screen === "chat" ? <ConversationScreen seats={projectSeats} initialOpen={chatOpen} /> : null}
       {screen === "market" ? <MarketScreen /> : null}
     </AppShell>
+    </>
   );
 }
 

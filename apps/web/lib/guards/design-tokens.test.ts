@@ -70,6 +70,11 @@ describe("Guard: typography decision lock (DI, 2026-06-12)", () => {
     "components/app/signature/identity-presence.tsx",
     "components/app/signature/living-record.tsx",
     "components/app/signature/need-match.tsx",
+    // The product system's grammar: `Accented` (one accent word per headline) and
+    // the surfaces that use it. Accent-only; min ~28px; never body or controls.
+    "components/app/system/ui.tsx",
+    "components/app/system/living-cv.tsx",
+    "components/app/system/state-stage.tsx",
   ];
 
   const SCAN_ROOTS = ["app", "components", "content", "lib", "tokens"];
