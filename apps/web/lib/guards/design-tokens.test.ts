@@ -64,7 +64,13 @@ describe("Guard: typography decision lock (DI, 2026-06-12)", () => {
   // Serif as `--font-accent` in layout.tsx, declare the accent role in
   // tokens/typography.ts, and add the accent component file(s) here.
   const WIRING_FILES = ["tokens/typography.ts", "app/[locale]/layout.tsx"];
-  const ACCENT_ALLOWED: string[] = [];
+  // Editorial accent surfaces (the signature layer — a sentence that says what a
+  // person has proven or what is possible next). Accent-only, min ~28px.
+  const ACCENT_ALLOWED: string[] = [
+    "components/app/signature/identity-presence.tsx",
+    "components/app/signature/living-record.tsx",
+    "components/app/signature/need-match.tsx",
+  ];
 
   const SCAN_ROOTS = ["app", "components", "content", "lib", "tokens"];
   const SCAN_EXT = /\.(ts|tsx|css)$/;

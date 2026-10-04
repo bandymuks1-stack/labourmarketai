@@ -1057,3 +1057,93 @@ a {
   font-family: var(--font-sans), system-ui, sans-serif;
   font-weight: 500;
 }
+
+/* ── SIGNATURE MATERIALS ─────────────────────────────────────────────────
+   The product's premium layer (design proof, 2026-10-04). Three ideas:
+   · THE PLATE — real photographs of real work are the product's native
+     material. A plate bleeds into the ground (no frame, no card) and the
+     typography is set on it.
+   · THE STAMP — provenance, status and metadata are archival marginalia in a
+     small tracked mono, the way a film slate or a ledger is annotated. This is
+     the only place wide-tracked capitals survive, deliberately.
+   · THE STRAND — evidence is a line that thickens with accumulated work and
+     runs through every place the work is shown.
+   All of it honours prefers-reduced-motion. */
+.sig-stamp {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(var(--c-text-muted));
+  font-feature-settings: "tnum";
+}
+.sig-grain {
+  position: relative;
+}
+.sig-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.09;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+@keyframes sig-drift {
+  from {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.11) translate3d(-1.2%, -0.8%, 0);
+  }
+}
+.sig-drift {
+  animation: sig-drift 38s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes sig-settle {
+  0% {
+    box-shadow: 0 0 0 0 rgb(var(--c-state-success) / 0.55);
+  }
+  100% {
+    box-shadow: 0 0 0 28px rgb(var(--c-state-success) / 0);
+  }
+}
+.sig-settle {
+  animation: sig-settle 1.4s var(--motion-ease-out) both;
+}
+.sig-strand {
+  transition:
+    width 900ms var(--motion-ease-out),
+    opacity 400ms var(--motion-ease-out),
+    background-color 400ms var(--motion-ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sig-drift,
+  .sig-settle {
+    animation: none;
+  }
+  .sig-strand {
+    transition: none;
+  }
+}
+
+/* Need ↔ person: one row crosses the seam on a wide screen; on a phone the
+   three parts stack and the seam becomes a short vertical bridge. The seam
+   closes (--nm-seam → 0) when interest is expressed. */
+.nm-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 768px) {
+  .nm-row {
+    grid-template-columns: minmax(0, 1fr) var(--nm-seam, 8rem) minmax(0, 1fr);
+    transition: grid-template-columns 900ms var(--motion-ease-out);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nm-row {
+    transition: none;
+  }
+}

@@ -54,6 +54,7 @@ const preset = {
         display: [...typography.fontFamily.display],
         sans: [...typography.fontFamily.sans],
         mono: [...typography.fontFamily.mono],
+        accent: [...typography.fontFamily.accent],
       },
       letterSpacing: {
         tightest: typography.letterSpacing.tightest,

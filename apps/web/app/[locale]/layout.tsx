@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Inter, JetBrains_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import {
@@ -36,6 +36,16 @@ const display = Bricolage_Grotesque({
 const sans = Inter({
   subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
   variable: "--font-sans",
+});
+// ACCENT ONLY (typography lock): editorial moments — pull quotes, the sentence
+// that says what a person has proven or what is possible next. Min ~28px,
+// never body or UI text. Latin + latin-ext (LT diacritics); no Cyrillic face
+// exists, so RU falls through to the display stack. Wired as --font-accent.
+const accent = Instrument_Serif({
+  subsets: ["latin", "latin-ext"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-accent",
 });
 const mono = JetBrains_Mono({
   subsets: ["latin", "latin-ext", "cyrillic"],
@@ -130,7 +140,7 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`${display.variable} ${sans.variable} ${mono.variable}`}
+      className={`${display.variable} ${sans.variable} ${mono.variable} ${accent.variable}`}
       suppressHydrationWarning
     >
       <head>
