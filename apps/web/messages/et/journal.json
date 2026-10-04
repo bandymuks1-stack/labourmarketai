@@ -35,6 +35,7 @@
   "projectNone": "Pole projektitöö",
   "projectAmbiguous": "Teid on määratud mitmele projektile. Enne salvestamist valige, millisele projektile need tunnid kuuluvad (või märkige, et see pole projektitöö).",
   "projectAuto": "Projekt: {name}",
+  "projectViaTeam": "{project} (meeskonna {team} kaudu)",
   "unconfirmedTimeBlocked": "{count} registreeritud kestust ootab veel ülevaatamist ega salvestuks. Jätke need alles või eemaldage.",
   "entry": {
     "status": {

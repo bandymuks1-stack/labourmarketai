@@ -3,6 +3,11 @@ import "server-only";
 import { cache } from "react";
 
 import { createClient } from "@/lib/supabase/server";
+import { readMyTeamWorkContexts } from "@/lib/projects/team-work-context";
+import {
+  teamProjectsFromRows,
+  viaTeamLabel,
+} from "@/lib/projects/team-work-context-model";
 import { listMyDocuments } from "@/lib/documents/readiness";
 import { listWorkerInstructions } from "@/lib/instructions/instructions";
 import { deriveWorkerProjectAsks, type WorkerProjectAsk } from "@/lib/projects/worker-project-asks";
@@ -42,6 +47,10 @@ export interface WorkerAssignment {
 
 export interface WorkerProjectView {
   readonly assignment: WorkerAssignment;
+  /** Team name(s) when the caller reaches this project ONLY through an
+   *  actively assigned team (20261003150700) — "via team ...". Null/absent for
+   *  a person on the project roster. */
+  readonly viaTeam?: string | null;
   /** Null when the project row is not RLS-readable (e.g. no longer live). */
   readonly project: {
     readonly id: string;
@@ -62,6 +71,9 @@ export interface WorkerProjectListItem {
   readonly country: string | null;
   readonly assignmentStatus: "active" | "ended";
   readonly assignedAt: string;
+  /** Team name(s) when this project is reached ONLY through an actively
+   *  assigned team (20261003150700). Absent for a person assignment. */
+  readonly viaTeam?: string | null;
 }
 
 /** The caller's own profile id. Request-cached beside `getOwnWorkerId`, which
@@ -109,7 +121,14 @@ export async function getWorkerProjectView(
     .eq("project_id", projectId)
     .eq("worker_id", workerId)
     .maybeSingle();
-  if (!assignment) return null;
+  // No person assignment: the caller may still work here through a team that is
+  // ACTIVELY assigned (20261003150700). A person assignment always wins.
+  const teamProject = assignment
+    ? null
+    : teamProjectsFromRows(await readMyTeamWorkContexts(supabase)).find(
+        (t) => t.projectId === projectId,
+      ) ?? null;
+  if (!assignment && !teamProject) return null;
 
   const { data: project } = await supabase
     .from("projects")
@@ -118,12 +137,20 @@ export async function getWorkerProjectView(
     .maybeSingle();
 
   return {
-    assignment: {
-      assignmentId: assignment.id as string,
-      status: (assignment.status as "active" | "ended") ?? "active",
-      assignedAt: assignment.assigned_at as string,
-      endedAt: (assignment.ended_at as string | null) ?? null,
-    },
+    assignment: assignment
+      ? {
+          assignmentId: assignment.id as string,
+          status: (assignment.status as "active" | "ended") ?? "active",
+          assignedAt: assignment.assigned_at as string,
+          endedAt: (assignment.ended_at as string | null) ?? null,
+        }
+      : {
+          assignmentId: teamProject!.assignmentId,
+          status: "active" as const,
+          assignedAt: teamProject!.assignedAt ?? "",
+          endedAt: null,
+        },
+    viaTeam: teamProject ? viaTeamLabel(teamProject.teamNames) : null,
     project: project
       ? {
           id: project.id as string,
@@ -149,9 +176,15 @@ export async function listWorkerProjects(): Promise<WorkerProjectListItem[]> {
     .select("project_id, status, assigned_at")
     .eq("worker_id", workerId)
     .order("assigned_at", { ascending: false });
-  if (!assignments || assignments.length === 0) return [];
+  const own = assignments ?? [];
+  // Projects reached ONLY through an actively assigned team (20261003150700).
+  const ownIds = new Set(own.map((a) => a.project_id as string));
+  const teamOnly = teamProjectsFromRows(await readMyTeamWorkContexts(supabase)).filter(
+    (t) => !ownIds.has(t.projectId),
+  );
+  if (own.length === 0 && teamOnly.length === 0) return [];
 
-  const ids = assignments.map((a) => a.project_id as string);
+  const ids = [...own.map((a) => a.project_id as string), ...teamOnly.map((t) => t.projectId)];
   const { data: projects } = await supabase
     .from("projects")
     .select("id, title, status, city, country")
@@ -160,7 +193,7 @@ export async function listWorkerProjects(): Promise<WorkerProjectListItem[]> {
     (projects ?? []).map((p) => [p.id as string, p] as const),
   );
 
-  return assignments.map((a) => {
+  const fromPerson: WorkerProjectListItem[] = own.map((a) => {
     const p = byId.get(a.project_id as string);
     return {
       projectId: a.project_id as string,
@@ -172,6 +205,20 @@ export async function listWorkerProjects(): Promise<WorkerProjectListItem[]> {
       assignedAt: a.assigned_at as string,
     };
   });
+  const fromTeam: WorkerProjectListItem[] = teamOnly.map((t) => {
+    const p = byId.get(t.projectId);
+    return {
+      projectId: t.projectId,
+      title: (p?.title as string | null) ?? t.title,
+      status: (p?.status as string | null) ?? null,
+      city: (p?.city as string | null) ?? null,
+      country: (p?.country as string | null) ?? null,
+      assignmentStatus: "active" as const,
+      assignedAt: t.assignedAt ?? "",
+      viaTeam: viaTeamLabel(t.teamNames),
+    };
+  });
+  return [...fromPerson, ...fromTeam];
 }
 
 /**

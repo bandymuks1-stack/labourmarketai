@@ -147,6 +147,14 @@ export default async function ProjectsPage({
                       ? t("assignmentActive")
                       : t("assignmentEnded")}
                   </span>
+                  {p.viaTeam ? (
+                    <span
+                      className="font-mono text-meta uppercase tracking-label text-text-secondary"
+                      data-testid="worker-project-via-team"
+                    >
+                      {t("viaTeam", { team: p.viaTeam })}
+                    </span>
+                  ) : null}
                 </Link>
               </li>
             ))}

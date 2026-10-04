@@ -92,6 +92,7 @@ import {
 import {
   PROJECT_FIELD_NONE,
   projectChoiceIsSatisfied,
+  projectDisplayLabel,
   projectPromptFor,
   type AssignedProject,
 } from "@/lib/journal/project-attribution";
@@ -2186,7 +2187,10 @@ export function JournalEntryComposer({
               onChange={setProjectChoice}
               options={[
                 { value: "", label: t("projectChoose") },
-                ...contextProjects.map((p) => ({ value: p.id, label: p.label })),
+                ...contextProjects.map((p) => ({
+                  value: p.id,
+                  label: projectDisplayLabel(p, (v) => t("projectViaTeam", v)),
+                })),
                 { value: PROJECT_FIELD_NONE, label: t("projectNone") },
               ]}
               ariaLabel={t("project")}
@@ -2206,7 +2210,11 @@ export function JournalEntryComposer({
             className="text-meta leading-relaxed text-text-muted"
             data-testid="journal-project-auto"
           >
-            {t("projectAuto", { name: contextProjects[0]?.label ?? "" })}
+            {t("projectAuto", {
+              name: contextProjects[0]
+                ? projectDisplayLabel(contextProjects[0], (v) => t("projectViaTeam", v))
+                : "",
+            })}
           </p>
         ) : null}
 

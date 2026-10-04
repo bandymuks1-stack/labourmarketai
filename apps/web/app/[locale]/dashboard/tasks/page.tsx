@@ -33,6 +33,7 @@ import {
 import {
   getTaskCollaboration,
   listMyTasks,
+  listMyTeamTasks,
   listProjectTasks,
   type MyTasksResult,
 } from "@/lib/tasks/tasks";
@@ -249,7 +250,14 @@ export default async function TasksPage({
     },
   };
 
-  const [myResult, projectResult, allManagedProjects, objectsRead, employerCtx] =
+  const [
+    myResult,
+    projectResult,
+    allManagedProjects,
+    objectsRead,
+    employerCtx,
+    teamTasksRead,
+  ] =
     await Promise.all([
       listMyTasks(),
       projectFilter
@@ -258,7 +266,15 @@ export default async function TasksPage({
       listManagedProjects(),
       listVisibleActiveObjects(),
       resolveEmployerCompanyContext(),
+      // Tasks reached through a team that is ACTIVELY assigned to the task or
+      // its work object (20261003150700) - shown with a visible "via team" tag.
+      listMyTeamTasks(),
     ]);
+  const viaTeamByTask = teamTasksRead.viaTeamByTask;
+  const myOwnTaskIds = new Set(
+    myResult.status === "ok" ? myResult.tasks.map((task) => task.id) : [],
+  );
+  const teamOnlyTasks = teamTasksRead.tasks.filter((task) => !myOwnTaskIds.has(task.id));
 
   // Train D — archived filtering: completed projects accept no new tasks;
   // the pickers only offer active work.
@@ -295,6 +311,7 @@ export default async function TasksPage({
   const listedIds = [
     ...new Set([
       ...(myResult.status === "ok" ? myResult.tasks.map((t) => t.id) : []),
+      ...teamOnlyTasks.map((t) => t.id),
       ...(projectResult && projectResult.status === "ok"
         ? projectResult.tasks.map((t) => t.id)
         : []),
@@ -314,6 +331,7 @@ export default async function TasksPage({
     ...new Map(
       [
         ...(myResult.status === "ok" ? myResult.tasks : []),
+        ...teamOnlyTasks,
         ...(projectResult && projectResult.status === "ok"
           ? projectResult.tasks
           : []),
@@ -734,6 +752,14 @@ export default async function TasksPage({
               </span>
             ) : null}
             {task.title}
+            {viaTeamByTask.get(task.id) ? (
+              <span
+                className="ml-2 font-mono text-meta font-normal uppercase tracking-label text-text-muted"
+                data-testid={`task-via-team-${task.id}`}
+              >
+                {t("viaTeam", { team: viaTeamByTask.get(task.id) ?? "" })}
+              </span>
+            ) : null}
           </p>
           <span
             className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${priorityTone[task.priority]}`}
@@ -1228,7 +1254,7 @@ export default async function TasksPage({
     );
   }
 
-  const myTasks = myResult.tasks;
+  const myTasks = [...myResult.tasks, ...teamOnlyTasks];
   const openTasks = myTasks.filter((task) => isOpen(task.status));
   const closedTasks = myTasks.filter((task) => !isOpen(task.status));
   // A deep link (?task=) that targets a FINISHED task reveals the closed

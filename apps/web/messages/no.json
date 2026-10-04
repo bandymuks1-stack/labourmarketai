@@ -1958,6 +1958,7 @@
     "myProjectsEmpty": "Du er ennå ikke tildelt noe prosjekt. Når et selskap tildeler deg, vises prosjektet her.",
     "assignmentActive": "Aktiv",
     "assignmentEnded": "Avsluttet",
+    "viaTeam": "via team {team}",
     "untitledProject": "Prosjekt uten tittel",
     "archiveToggle": {
       "label": "Aktive eller fullførte prosjekter",
@@ -1989,6 +1990,7 @@
       "untitled": "Prosjekt uten tittel",
       "assignmentActive": "Aktiv tildeling",
       "assignmentEnded": "Tildeling avsluttet",
+      "viaTeam": "via team {team}",
       "projectRestricted": "Prosjektdetaljer er ikke tilgjengelige for deg nå. Tildelingen din forblir synlig.",
       "journalCta": "Skriv journalinnlegg",
       "chatCta": "Send melding",

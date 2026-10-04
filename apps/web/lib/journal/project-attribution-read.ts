@@ -1,5 +1,7 @@
 import type { createClient } from "@/lib/supabase/server";
+import { readMyTeamWorkContexts } from "@/lib/projects/team-work-context";
 import {
+  addTeamProjects,
   groupProjectsByOrganization,
   type AssignedProject,
 } from "@/lib/journal/project-attribution";
@@ -23,7 +25,7 @@ export async function readActiveProjectsByOrg(
     .select("project_id, projects(id, title, organization_id)")
     .eq("worker_id", workerId)
     .eq("status", "active");
-  return groupProjectsByOrganization(
+  const byOrg = groupProjectsByOrganization(
     (data ?? []).map((r) => ({
       project_id: r.project_id as string,
       projects: (r.projects ?? null) as {
@@ -33,4 +35,9 @@ export async function readActiveProjectsByOrg(
       } | null,
     })),
   );
+  // A team that is ACTIVELY assigned to a project is a context too
+  // (20261003150700): the caller's own team contexts, resolved in the database
+  // through team_member_at_v1 - never a copy into project_worker_assignments.
+  // A failed read adds nothing; the DB's own rule still decides the write.
+  return addTeamProjects(byOrg, await readMyTeamWorkContexts(supabase));
 }

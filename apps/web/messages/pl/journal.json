@@ -83,6 +83,7 @@
   "projectNone": "To nie praca projektowa",
   "projectAmbiguous": "Jesteś przypisany do kilku projektów. Przed zapisaniem wybierz, do którego projektu należą te godziny (lub zaznacz, że to nie praca projektowa).",
   "projectAuto": "Projekt: {name}",
+  "projectViaTeam": "{project} (przez zespół {team})",
   "unconfirmedTimeBlocked": "{count} zarejestrowanych czasów wciąż czeka na Twój przegląd i nie zostałoby zapisanych. Najpierw zachowaj je lub usuń.",
   "entry": {
     "reviewedBy": "Zweryfikowane przez",

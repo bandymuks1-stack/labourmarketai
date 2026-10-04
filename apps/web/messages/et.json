@@ -1958,6 +1958,7 @@
     "myProjectsEmpty": "Te pole veel ühelegi projektile määratud. Kui ettevõte teid määrab, ilmub projekt siia.",
     "assignmentActive": "Aktiivne",
     "assignmentEnded": "Lõppenud",
+    "viaTeam": "meeskonna {team} kaudu",
     "untitledProject": "Pealkirjata projekt",
     "archiveToggle": {
       "label": "Aktiivsed või lõpetatud projektid",
@@ -1989,6 +1990,7 @@
       "untitled": "Pealkirjata projekt",
       "assignmentActive": "Aktiivne määramine",
       "assignmentEnded": "Määramine lõppenud",
+      "viaTeam": "meeskonna {team} kaudu",
       "projectRestricted": "Projekti üksikasjad pole teile praegu kättesaadavad. Teie määramine jääb nähtavaks.",
       "journalCta": "Kirjuta päevikusse",
       "chatCta": "Saada sõnum",
