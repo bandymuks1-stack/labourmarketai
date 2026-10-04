@@ -6016,6 +6016,16 @@
         "precheckChoose": "Stattdessen wählen",
         "precheckAssignAnyway": "Trotzdem zuweisen",
         "precheckAdvisory": "Nur ein Hinweis: gerade geprüft und beim Speichern nicht erneut geprüft. Es wurde noch nichts zugewiesen.",
+        "reasonLabel": "Grund für das Beibehalten (optional)",
+        "reasonNone": "Kein Grund angegeben",
+        "keepFailed": "Der Ausnahmebeleg konnte nicht gespeichert werden. Nichts wurde gespeichert - bitte erneut versuchen.",
+        "reason": {
+          "agreed_with_worker": "Mit der Fachkraft abgestimmt",
+          "agreed_with_client": "Mit dem Auftraggeber abgestimmt",
+          "partial_overlap": "Überschneidung nur teilweise",
+          "urgent_need": "Dringender Bedarf",
+          "other": "Sonstiges"
+        },
         "collidesTitle": "An diesen Tagen bereits verplant",
         "notBlocking": "Das blockiert die Zuweisung nicht — Sie entscheiden.",
         "alternativesTitle": "In diesem Zeitraum frei",

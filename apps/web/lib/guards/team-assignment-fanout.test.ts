@@ -54,7 +54,9 @@ describe("the surface — reuses the conflict flow and the identity card", () =>
   const form = read("components/app/team-assign-form.tsx");
   it("shows the existing collision notice with keep / undo / swap and audits the decision", () => {
     expect(form).toMatch(/ReservationNotice/);
-    expect(form).toMatch(/recordAssignmentDecisionAction\(projectId, m\.profileId, "kept"\)/);
+    // keep = an explicit override: it goes through the fail-loud receipt action
+    // (which also appends the audit row); undo / swap keep the audit append.
+    expect(form).toMatch(/keepAssignmentAction\(projectId, m\.profileId/);
     expect(form).toMatch(/endAssignmentAction\(projectId, m\.profileId\)/);
     expect(form).toMatch(/recordAssignmentDecisionAction\(projectId, m\.profileId, what\)/);
   });

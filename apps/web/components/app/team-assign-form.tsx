@@ -5,13 +5,15 @@ import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/Button";
 import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
-import { ReservationNotice, type ReservationLabels } from "@/components/app/project-assignment-manager";
+import { ReservationNotice, type OverrideReasonLabels, type ReservationLabels } from "@/components/app/project-assignment-manager";
 import { playerInitials } from "@/lib/identity/player-identity";
 import {
   assignWorkerToProjectAction,
   endAssignmentAction,
+  keepAssignmentAction,
   recordAssignmentDecisionAction,
 } from "@/lib/projects/actions";
+import type { OverrideReasonCode } from "@/lib/projects/override-receipt-model";
 import { assignTeamToProjectAction } from "@/lib/projects/team-assignment-actions";
 import type { TeamAssignmentResult } from "@/lib/projects/team-assignment";
 import { summariseTeamAssignment, type TeamMemberResult } from "@/lib/projects/team-assignment-model";
@@ -41,6 +43,7 @@ export function TeamAssignForm({
   const [projectId, setProjectId] = useState("");
   const [result, setResult] = useState<TeamAssignmentResult | null>(null);
   const [decided, setDecided] = useState<ReadonlySet<string>>(new Set());
+  const [keepFailed, setKeepFailed] = useState<ReadonlySet<string>>(new Set());
 
   const labels: ReservationLabels = {
     reservationCollidesTitle: tRes("collidesTitle"),
@@ -58,6 +61,19 @@ export function TeamAssignForm({
     },
   };
 
+  const reasons: OverrideReasonLabels = {
+    label: tRes("reasonLabel"),
+    none: tRes("reasonNone"),
+    failed: tRes("keepFailed"),
+    options: {
+      agreed_with_worker: tRes("reason.agreed_with_worker"),
+      agreed_with_client: tRes("reason.agreed_with_client"),
+      partial_overlap: tRes("reason.partial_overlap"),
+      urgent_need: tRes("reason.urgent_need"),
+      other: tRes("reason.other"),
+    },
+  };
+
   function submit() {
     if (!projectId) return;
     setResult(null);
@@ -68,11 +84,23 @@ export function TeamAssignForm({
   }
 
   const markDecided = (profileId: string) => setDecided((s) => new Set(s).add(profileId));
-  const decide = (m: TeamMemberResult, what: "kept" | "undone" | "swapped", swapTo?: string) =>
+  const decide = (
+    m: TeamMemberResult,
+    what: "kept" | "undone" | "swapped",
+    swapTo?: string,
+    reasonCode?: OverrideReasonCode | null,
+  ) =>
     startDeciding(async () => {
       if (what === "kept") {
-        await recordAssignmentDecisionAction(projectId, m.profileId, "kept");
-        markDecided(m.profileId);
+        // FAIL-LOUD: each member's override is decided only when ITS receipt exists.
+        const r = await keepAssignmentAction(projectId, m.profileId, reasonCode ?? null);
+        setKeepFailed((s) => {
+          const next = new Set(s);
+          if (r.ok) next.delete(m.profileId);
+          else next.add(m.profileId);
+          return next;
+        });
+        if (r.ok) markDecided(m.profileId);
         return;
       }
       const ended = await endAssignmentAction(projectId, m.profileId);
@@ -173,7 +201,9 @@ export function TeamAssignForm({
                       busy={deciding}
                       onSwap={(to) => decide(m, "swapped", to)}
                       onUndo={() => decide(m, "undone")}
-                      onKeep={() => decide(m, "kept")}
+                      onKeep={(reasonCode) => decide(m, "kept", undefined, reasonCode)}
+                      reasons={reasons}
+                      keepFailed={keepFailed.has(m.profileId)}
                     />
                   )
                 ) : null}
