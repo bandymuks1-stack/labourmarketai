@@ -18219,14 +18219,14 @@
     "membersNow": "Leden nu: {count}",
     "noMembers": "Geen actieve leden.",
     "unnamedMember": "Teamlid",
-    "unnamedTeam": "Team",
+    "unnamedTeam": "Ploeg",
     "end": "Toewijzing beëindigen",
     "ending": "Bezig met beëindigen…",
     "replaceLabel": "Vervangen door een ander team",
     "replacePlaceholder": "Kies een team",
     "replaceSubmit": "Vervangen",
     "assignTitle": "Een team toewijzen",
-    "teamLabel": "Team",
+    "teamLabel": "Ploeg",
     "teamPlaceholder": "Kies een team",
     "scopeLabel": "Waaraan het team werkt",
     "scopeProjectOption": "Het hele project",
@@ -18264,8 +18264,9 @@
       "advisory": "Let op: de toewijzing is opgeslagen. Beëindig haar hierboven als de overlap echt is."
     },
     "form": {
+      "heading": "Het hele team aan een project toewijzen",
       "intro": "Wijs dit team van {count} leden als één geheel aan een project toe.",
-      "projectLabel": "Project",
+      "projectLabel": "Voor welk project",
       "projectPlaceholder": "Kies een project",
       "noProjects": "Je hebt geen openstaande projecten om het team aan toe te wijzen."
     }

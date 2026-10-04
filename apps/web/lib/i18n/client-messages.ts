@@ -135,6 +135,7 @@ export const CLIENT_MESSAGE_ROOTS = [
   "structuredDemand",
   "structuring",
   "tasks",
+  "teamAssignment",
   "teamBrigades",
   "teamEnquiries",
   "waitlist",

@@ -75,7 +75,7 @@
 --   * No auto-fan-out, no copy of members, no "team hours" total: hours and
 --     evidence stay per person.
 --
--- ROLLBACK: supabase/rollbacks/20261003150600_team_assignment_canonical_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20261003150600_brigade_work_assignment_v1.down.sql
 -- REFUSES while any team_assignments row exists (real history — forward-fix
 -- instead); with zero rows it drops everything above and nothing else.
 -- ============================================================================

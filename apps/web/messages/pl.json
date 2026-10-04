@@ -18264,6 +18264,7 @@
       "advisory": "Wskazówka: przypisanie zapisano. Zakończ je powyżej, jeśli kolizja jest prawdziwa."
     },
     "form": {
+      "heading": "Przypisz cały zespół do projektu",
       "intro": "Przypisz ten zespół ({count} osób) do projektu jako jedną całość.",
       "projectLabel": "Projekt",
       "projectPlaceholder": "Wybierz projekt",

@@ -27,8 +27,8 @@ const readRepo = (p: string) => readFileSync(join(REPO, p), "utf8");
 const strip = (s: string) =>
   s.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/^\s*\/\/[^\n]*/gm, " ").replace(/^\s*--[^\n]*/gm, " ");
 
-const MIGRATION = "supabase/migrations/20261003150600_team_assignment_canonical_v1.sql";
-const ROLLBACK = "supabase/rollbacks/20261003150600_team_assignment_canonical_v1.down.sql";
+const MIGRATION = "supabase/migrations/20261003150600_brigade_work_assignment_v1.sql";
+const ROLLBACK = "supabase/rollbacks/20261003150600_brigade_work_assignment_v1.down.sql";
 
 describe("migration — one relation, closed by default", () => {
   const sql = strip(readRepo(MIGRATION));

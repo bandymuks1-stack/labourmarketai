@@ -18264,6 +18264,7 @@
       "advisory": "Patarimas: paskyrimas išsaugotas. Jei sutapimas tikras, baikite jį aukščiau."
     },
     "form": {
+      "heading": "Paskirti visą komandą projektui",
       "intro": "Paskirkite šią {count} narių komandą projektui kaip vieną vienetą.",
       "projectLabel": "Projektas",
       "projectPlaceholder": "Pasirinkite projektą",

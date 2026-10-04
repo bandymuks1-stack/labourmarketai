@@ -18264,6 +18264,7 @@
       "advisory": "Advisory: the assignment is saved. End it above if the clash is real."
     },
     "form": {
+      "heading": "Assign the whole team to a project",
       "intro": "Assign this team of {count} to a project as one unit.",
       "projectLabel": "Project",
       "projectPlaceholder": "Choose a project",

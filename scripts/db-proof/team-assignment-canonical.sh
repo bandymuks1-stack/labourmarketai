@@ -2,7 +2,7 @@
 # ============================================================================
 # TEAM ASSIGNMENT CANONICAL v1 — REAL PostgreSQL proof (no Docker, no Supabase).
 #
-# Proves migration 20261003150600_team_assignment_canonical_v1 (and its
+# Proves migration 20261003150600_brigade_work_assignment_v1 (and its
 # rollback) on a THROWAWAY native PostgreSQL cluster. Real prior migrations
 # build work_objects / work_tasks; the rest of the platform (auth.uid(), roles,
 # organizations/projects/workers/engagement_contexts, helper predicates copied
@@ -24,12 +24,12 @@ export PGCLIENTENCODING=UTF8
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/../.." && pwd)"
 M="$REPO/supabase/migrations"
-MIGRATION="$M/20261003150600_team_assignment_canonical_v1.sql"
-ROLLBACK="$REPO/supabase/rollbacks/20261003150600_team_assignment_canonical_v1.down.sql"
+MIGRATION="$M/20261003150600_brigade_work_assignment_v1.sql"
+ROLLBACK="$REPO/supabase/rollbacks/20261003150600_brigade_work_assignment_v1.down.sql"
 LFD="$(mktemp -d)"
 for f in "$M"/*.sql; do tr -d '\r' < "$f" > "$LFD/$(basename "$f")"; done
 tr -d '\r' < "$ROLLBACK" > "$LFD/rollback.down.sql"
-M="$LFD"; MIGRATION="$LFD/20261003150600_team_assignment_canonical_v1.sql"; ROLLBACK="$LFD/rollback.down.sql"
+M="$LFD"; MIGRATION="$LFD/20261003150600_brigade_work_assignment_v1.sql"; ROLLBACK="$LFD/rollback.down.sql"
 
 PGPROOF_HOST=${PGPROOF_HOST:-127.0.0.1}
 PGPROOF_PORT=${PGPROOF_PORT:-54300}

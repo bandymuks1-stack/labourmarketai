@@ -1,4 +1,4 @@
--- ROLLBACK for 20261003150600_team_assignment_canonical_v1.sql
+-- ROLLBACK for 20261003150600_brigade_work_assignment_v1.sql
 --
 -- REFUSES while ANY team_assignments row exists: those rows are real
 -- assignment history (who was put on what, when, and when it ended). After
