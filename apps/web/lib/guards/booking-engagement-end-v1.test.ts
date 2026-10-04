@@ -1537,6 +1537,22 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261003140000_subject_contest_withdraw_constraint_reconcile_v1.sql",
       // 2026-10-03: ORG-2 agency capability authority (RED, needs-human-gate, NOT applied): list_open_demand_for_agencies / mark_agency_can_offer / job_demands_select re-gated on owns_company + company_acts_as_agency.
       "20261003150000_org2_agency_capability_authority_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150100_commitment_override_receipts_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150200_work_plan_entries_v2.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150300_marketplace_index_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150400_marketplace_public_business_expiry_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150500_journal_counterparty_review_authority_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150600_brigade_work_assignment_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150800_ai_runs_retention_classes_v2.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003151000_email_verified_boundary_v1.sql",
 ]);
   });
 
