@@ -31,7 +31,10 @@
  * Pure: no server-only, no Supabase client — every rule is unit-testable.
  */
 
+import { AGENCY_CAPABILITY_ROLES } from "@/lib/company/agency-capability";
 import type {
+  ActorBasis,
+  ActorKind,
   MarketplaceDiscoveryRow,
   MarketProvenance,
   MarketVisibility,
@@ -74,6 +77,105 @@ export const FEDERATED_DIRECTION = {
 export const VACANCY_SLICE_MIXED = 20;
 export const VACANCY_SLICE_JOB_TAB = 50;
 export const FEDERATION_ROW_CAP = 200;
+
+// ── ACTOR dimension ────────────────────────────────────────────────────────
+
+/**
+ * The four universal domain groups the model must never be narrowed below
+ * (work, service, goods, project/contract), mapped to the registry / adapter
+ * domains that realise them. Extensible: add a group, never remove one.
+ */
+export const UNIVERSAL_DOMAIN_GROUPS = {
+  work: ["work_resource", "job", "workforce", "personal"],
+  service: ["service", "service_need"],
+  goods: ["goods"],
+  project: ["project_work"],
+} as const;
+
+/**
+ * Organisation CAPABILITY -> actor kind. Source: `organization_roles.role_slug`
+ * (vocabulary `organization_role_types`), NEVER the legacy single-valued
+ * company / organization type (ORG-2: an agency is a capability, not an
+ * account type).
+ */
+const INSTITUTION_ROLES = ["training_provider"] as const;
+const SUPPLIER_ROLES = [
+  "supplier",
+  "logistics_provider",
+  "payroll_provider",
+  "verification_provider",
+] as const;
+const COMPANY_ROLES = [
+  "employer",
+  "client",
+  "contractor",
+  "subcontractor",
+  "project_operator",
+] as const;
+
+/**
+ * Actor kind of an ORGANISATION from the capabilities the caller can read.
+ * Deterministic and domain/direction aware: the same organisation is an
+ * `agency` when it offers workforce, a `supplier` when it offers goods, and a
+ * `company` when it posts a need. No readable capability -> `other` (honest).
+ */
+export function actorKindForOrganisation(
+  capabilities: readonly string[],
+  ctx: { domain: string; direction: "offer" | "need" | "other" },
+): ActorKind {
+  const has = (roles: readonly string[]) => roles.some((r) => capabilities.includes(r));
+  const candidates = {
+    institution: has(INSTITUTION_ROLES),
+    agency: has(AGENCY_CAPABILITY_ROLES),
+    supplier: has(SUPPLIER_ROLES),
+    company: has(COMPANY_ROLES),
+  };
+  let order: (keyof typeof candidates)[] = ["institution", "agency", "supplier", "company"];
+  if (ctx.direction === "need") order = ["institution", "company", "agency", "supplier"];
+  else if (ctx.domain === "workforce") order = ["agency", "institution", "supplier", "company"];
+  else if (ctx.domain === "goods" || ctx.domain === "service") {
+    order = ["supplier", "institution", "agency", "company"];
+  }
+  return order.find((k) => candidates[k]) ?? "other";
+}
+
+/**
+ * Actor of a row served by `market_index_v1`.
+ *  - service_offerings: `provider_id` is a profile (no organisation column
+ *    exists) -> an individual service provider.
+ *  - marketplace_listings without `organization_id`: `owner_id` is a profile
+ *    -> a person.
+ *  - with `organization_id`: the organisation's capabilities decide; if the
+ *    caller cannot read them (organization_roles is RLS-scoped to members)
+ *    the kind stays `other`.
+ */
+export function indexRowActor(
+  row: {
+    sourceTable: string;
+    organizationId: string | null;
+    domain: string;
+    direction: "offer" | "need" | "other";
+  },
+  capabilitiesByOrg?: ReadonlyMap<string, readonly string[]>,
+): { actorKind: ActorKind; actorBasis: ActorBasis } {
+  if (row.sourceTable === "service_offerings") {
+    return { actorKind: "service_provider", actorBasis: "source_column" };
+  }
+  if (!row.organizationId) return { actorKind: "person", actorBasis: "source_column" };
+  const caps = capabilitiesByOrg?.get(row.organizationId);
+  if (!caps || caps.length === 0) return { actorKind: "other", actorBasis: "undisclosed" };
+  const kind = actorKindForOrganisation(caps, row);
+  return kind === "other"
+    ? { actorKind: "other", actorBasis: "undisclosed" }
+    : { actorKind: kind, actorBasis: "capability" };
+}
+
+export function filterByActorKind(
+  rows: readonly MarketplaceDiscoveryRow[],
+  kind: ActorKind | null,
+): MarketplaceDiscoveryRow[] {
+  return kind ? rows.filter((r) => r.actorKind === kind) : [...rows];
+}
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -163,6 +265,11 @@ export function vacancyToRow(raw: VacancyPreviewRaw): MarketplaceDiscoveryRow | 
     visibility: "public",
     provenance: "external_vacancy",
     publisherName: null,
+    // `public_vacancies` is imported public market data; the anon-boundary
+    // projection states no poster, so it does not say whether an employer or
+    // an agency posted it. Not guessed.
+    actorKind: "other",
+    actorBasis: "undisclosed",
   };
 }
 
@@ -210,6 +317,12 @@ export function supplyToRow(raw: SupplyRowRaw): MarketplaceDiscoveryRow | null {
     visibility: "organizations",
     provenance: "platform",
     publisherName: null,
+    // `customer_requests.kind = 'agency_offer'` is only creatable by an
+    // organisation holding the agency CAPABILITY (workforce_provider /
+    // talent_provider / recruitment_partner), so the row itself is the
+    // capability act. The organisation stays undisclosed.
+    actorKind: "agency",
+    actorBasis: "source_kind",
   };
 }
 
@@ -267,6 +380,10 @@ export function demandToRow(raw: DemandRowRaw): MarketplaceDiscoveryRow | null {
     provenance: "platform",
     // Only the verified-company name the gated reader already disclosed.
     publisherName: text(raw.organizationName),
+    // Demand kinds (never agency_offer) disclosed by the verified-company
+    // gate. Without a disclosed company the poster kind is not stated.
+    actorKind: text(raw.organizationName) ? "company" : "other",
+    actorBasis: text(raw.organizationName) ? "source_kind" : "undisclosed",
   };
 }
 

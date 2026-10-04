@@ -202,6 +202,17 @@
     "formExpiryLabel": "Dostępne do",
     "formExpiryHint": "Opcjonalnie. Kwota, ilość i data mają charakter opisowy — płatności nie są tu realizowane. Po tej dacie ogłoszenie przestaje być widoczne dla innych.",
     "domainFilterLabel": "Filtruj według obszaru",
+    "actorFilterLabel": "Filtruj według oferującego lub poszukującego",
+    "actorKinds": {
+      "all": "Wszyscy",
+      "person": "Osoba",
+      "company": "Firma",
+      "institution": "Organizacja lub instytucja",
+      "agency": "Agencja",
+      "service_provider": "Samozatrudniony usługodawca",
+      "supplier": "Dostawca",
+      "other": "Typ nie podany"
+    },
     "errorPrice": "Podaj prawidłową kwotę i 3-literowy kod waluty (np. EUR).",
     "errorQuantity": "Ilość musi być liczbą większą od zera.",
     "errorExpiry": "Data musi być w przyszłości.",

@@ -202,6 +202,17 @@
     "formExpiryLabel": "Available until",
     "formExpiryHint": "Optional. Amount, quantity and date are descriptive — no payment is taken here. After the date the listing stops appearing to others.",
     "domainFilterLabel": "Filter by area",
+    "actorFilterLabel": "Filter by who offers or needs",
+    "actorKinds": {
+      "all": "All",
+      "person": "Person",
+      "company": "Company",
+      "institution": "Organisation or institution",
+      "agency": "Agency",
+      "service_provider": "Independent service provider",
+      "supplier": "Supplier",
+      "other": "Type not stated"
+    },
     "errorPrice": "Enter a valid amount together with a 3-letter currency (e.g. EUR).",
     "errorQuantity": "Quantity must be a number greater than zero.",
     "errorExpiry": "The date must be in the future.",
