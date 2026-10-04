@@ -47,6 +47,8 @@ export default async function ListingsPage({
   ]);
   const needsMigration =
     mine.kind === "needs-migration" || discovery.kind === "needs-migration";
+  const extended =
+    mine.kind === "ok" && discovery.kind === "ok" && mine.extended && discovery.extended;
   const myRows = mine.kind === "ok" ? mine.rows : [];
   const discoveryRows = discovery.kind === "ok" ? discovery.rows : [];
 
@@ -63,6 +65,7 @@ export default async function ListingsPage({
         myRows={myRows}
         discoveryRows={discoveryRows}
         needsMigration={needsMigration}
+        extended={extended}
         locale={locale}
       />
 
