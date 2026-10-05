@@ -24,6 +24,13 @@ describe("isLinkableForTask - independent provider", () => {
     expect(isLinkableForTask(entry, { ...task, independentOrganizationIds: [] })).toBe(false);
     expect(isLinkableForTask({ projectId: null, organizationId: WS }, task)).toBe(false);
   });
+  it("an own-workspace entry is hidden on a task whose organisation is UNREADABLE (not assigned to that project)", () => {
+    const blind = { projectId: "p-other", organizationId: null, independentOrganizationIds: [], ownWorkspaceOrganizationIds: [WS] };
+    expect(isLinkableForTask({ projectId: null, organizationId: WS }, blind)).toBe(false);
+    // personal (no organisation) entries stay offered, and the assigned project still offers it
+    expect(isLinkableForTask({ projectId: null, organizationId: null }, blind)).toBe(true);
+    expect(isLinkableForTask({ projectId: null, organizationId: WS }, { ...blind, projectId: PROJECT, independentOrganizationIds: [WS] })).toBe(true);
+  });
   it("another workspace (not the viewer's) stays hidden", () => {
     expect(isLinkableForTask({ projectId: null, organizationId: "someone-else" }, { ...task, independentOrganizationIds: [WS] })).toBe(false);
   });

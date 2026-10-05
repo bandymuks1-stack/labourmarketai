@@ -4,7 +4,10 @@ import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { readMyTeamWorkContexts } from "@/lib/projects/team-work-context";
 import { getOwnWorkerId } from "@/lib/projects/worker-project-access";
-import { readIndependentOrganizationsByProject } from "@/lib/journal/project-attribution-read";
+import {
+  readIndependentOrganizationsByProject,
+  readOwnedWorkspaceIds,
+} from "@/lib/journal/project-attribution-read";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -290,6 +293,9 @@ export default async function TasksPage({
   const independentOrgsByProject = ownWorkerId
     ? await readIndependentOrganizationsByProject(await createClient(), ownWorkerId)
     : new Map<string, string[]>();
+  const ownWorkspaceIds = ownWorkerId
+    ? await readOwnedWorkspaceIds(await createClient(), ownWorkerId)
+    : [];
   const myOwnTaskIds = new Set(
     myResult.status === "ok" ? myResult.tasks.map((task) => task.id) : [],
   );
@@ -453,6 +459,7 @@ export default async function TasksPage({
           independentOrganizationIds: task.projectId
             ? (independentOrgsByProject.get(task.projectId) ?? [])
             : [],
+          ownWorkspaceOrganizationIds: ownWorkspaceIds,
         }),
     );
 

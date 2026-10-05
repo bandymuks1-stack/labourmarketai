@@ -247,10 +247,27 @@ export function isLinkableForTask(
      *  the picker must offer it. Empty for any project the viewer is not
      *  assigned to. */
     readonly independentOrganizationIds?: readonly string[];
+    /** Workspaces the viewer OWNS (any project). An entry journaled from one of
+     *  them is a legitimate context for this task only through the rules above
+     *  (same organisation, a team, or an independent assignment on THIS
+     *  project). It must stay hidden even when the task's organisation is
+     *  unreadable to the viewer (a sole trader cannot read a project they are
+     *  not assigned to), where the organisation test below cannot decide. */
+    readonly ownWorkspaceOrganizationIds?: readonly string[];
   },
 ): boolean {
   const ep = entry.projectId ?? null;
   if (ep !== null && ep !== task.projectId) return false;
+  if (
+    task.projectId !== null &&
+    entry.organizationId != null &&
+    entry.organizationId !== task.organizationId &&
+    (task.ownWorkspaceOrganizationIds ?? []).includes(entry.organizationId) &&
+    !(task.teamOrganizationIds ?? []).includes(entry.organizationId) &&
+    !(task.independentOrganizationIds ?? []).includes(entry.organizationId)
+  ) {
+    return false;
+  }
   if (
     task.projectId !== null &&
     task.organizationId !== null &&

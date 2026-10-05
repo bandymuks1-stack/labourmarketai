@@ -113,3 +113,14 @@ export async function readIndependentOrganizationsByProject(
   if (!ownership) return new Map();
   return independentOrganizationIdsByProject(rows, ownership.memberOrgIds, ownership.owned);
 }
+
+/** Workspaces (organisations) the worker's person OWNS - used only to keep an
+ *  own-workspace entry out of a task picker for a project they are not
+ *  assigned to. A failed read yields none (the link RPC still decides). */
+export async function readOwnedWorkspaceIds(
+  supabase: ServerSupabase,
+  workerId: string,
+): Promise<string[]> {
+  const { ownership } = await readAssignmentsAndOwnership(supabase, workerId);
+  return ownership ? [...ownership.owned] : [];
+}
