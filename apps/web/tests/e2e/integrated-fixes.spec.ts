@@ -1476,6 +1476,20 @@ test.describe(`INTEGRATED FIXES (tag ${TAG})`, () => {
     const d3 = await rpcAs(mgr2, "review_journal_entry", { p_entry_id: E3, p_decision: "approved", p_note: "again" });
     expect((await rows(`journal_entry_confirmations?entry_id=eq.${E3}&select=id`)).length).toBe(conf.length);
     void d3;
+    // --- the EMPLOYER path: a double click on 'Confirm entry' (two parallel approvals by the same reviewer) is ONE 'confirm' row
+    const ins2 = await asUser(tm3Jwt, "POST", "journal_entries", entryBody(tm3.workerId!, ec, `QF${TAG} b13 fourth entry`, S.P2));
+    expect(ins2.status, ins2.text).toBe(201);
+    const E4 = ins2.json[0].id as string;
+    const [e1, e2] = await Promise.all([rpcAs(bo, "review_journal_entry", { p_entry_id: E4, p_decision: "approved", p_note: "ok" }), rpcAs(bo, "review_journal_entry", { p_entry_id: E4, p_decision: "approved", p_note: "ok" })]);
+    save({ B13_EMPLOYER_DECIDE: [e1.text, e2.text] });
+    const empRows = await rows<{ confirmation_scope: any }>(`journal_entry_confirmations?entry_id=eq.${E4}&select=confirmation_scope`);
+    expect(empRows.filter((c) => c.confirmation_scope?.action === "confirm"), `ONE employer confirm (${e1.text} | ${e2.text})`).toHaveLength(1);
+    // approve -> reject -> approve by the same reviewer stays possible (the no-op is only for repeating the LATEST decision)
+    const rej = await rpcAs(bo, "review_journal_entry", { p_entry_id: E4, p_decision: "rejected", p_note: "no" });
+    const reapp = await rpcAs(bo, "review_journal_entry", { p_entry_id: E4, p_decision: "approved", p_note: "yes" });
+    save({ B13_REJECT_REAPPROVE: [rej.text, reapp.text] });
+    expect(reapp.json, reapp.text).toBe("approved");
+    expect((await rows(`journal_entry_confirmations?entry_id=eq.${E4}&select=id`)).length).toBeGreaterThanOrEqual(2);
   });
 
   // =========================================================================
