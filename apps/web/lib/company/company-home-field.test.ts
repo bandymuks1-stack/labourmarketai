@@ -18,7 +18,7 @@ const h = vi.hoisted(() => ({
   listProjectAssignments: vi.fn(),
   loadProjectRiskForChat: vi.fn(),
   loadWhoIsAvailableForChat: vi.fn(),
-  loadEmployerOpeningBrief: vi.fn(),
+  loadEmployerOpeningBriefResult: vi.fn(),
   getOrgDemandRollup: vi.fn(),
 }));
 
@@ -26,7 +26,7 @@ vi.mock("@/lib/projects/stages", () => ({ listProjectStages: h.listProjectStages
 vi.mock("@/lib/projects/projects", () => ({ listProjectAssignedPeople: h.listProjectAssignments }));
 vi.mock("@/lib/conversation/project-risk", () => ({ loadProjectRiskForChat: h.loadProjectRiskForChat }));
 vi.mock("@/lib/conversation/capacity", () => ({ loadWhoIsAvailableForChat: h.loadWhoIsAvailableForChat }));
-vi.mock("@/lib/conversation/opening-brief", () => ({ loadEmployerOpeningBrief: h.loadEmployerOpeningBrief }));
+vi.mock("@/lib/conversation/opening-brief", () => ({ loadEmployerOpeningBriefResult: h.loadEmployerOpeningBriefResult }));
 
 vi.mock("@/lib/company/org-demand-rollup", () => ({ getOrgDemandRollup: h.getOrgDemandRollup }));
 
@@ -81,9 +81,9 @@ beforeEach(() => {
   h.listProjectAssignments.mockReset();
   h.loadProjectRiskForChat.mockReset();
   h.loadWhoIsAvailableForChat.mockReset();
-  h.loadEmployerOpeningBrief.mockReset();
+  h.loadEmployerOpeningBriefResult.mockReset();
   h.loadWhoIsAvailableForChat.mockResolvedValue({ kind: "empty" });
-  h.loadEmployerOpeningBrief.mockResolvedValue({ kind: "unavailable" });
+  h.loadEmployerOpeningBriefResult.mockResolvedValue({ kind: "unknown", unknown: ["unread"], unknownNote: "n" });
   h.listProjectStages.mockResolvedValue({ applied: true, stages: [], error: null });
   h.listProjectAssignments.mockResolvedValue([]);
 });
@@ -228,9 +228,39 @@ describe("opportunity from the one existing company-scoped demand read", () => {
   it("counts people waiting from real rows, and is unknown (not zero) when the read fails", async () => {
     h.loadProjectRiskForChat.mockResolvedValue({ kind: "empty" });
     h.loadWhoIsAvailableForChat.mockResolvedValue({ kind: "empty" });
-    h.loadEmployerOpeningBrief.mockResolvedValue({ kind: "none" });
+    h.loadEmployerOpeningBriefResult.mockResolvedValue({ kind: "none" });
     expect((await loadCompanyHomeField()).interest).toEqual({ kind: "ok", waiting: 2 });
     h.getOrgDemandRollup.mockRejectedValue(new Error("down"));
     expect((await loadCompanyHomeField()).interest).toEqual({ kind: "unknown" });
   });
 });
+
+describe("the 'needs you' attention keeps UNKNOWN apart from the all-clear", () => {
+  beforeEach(() => {
+    h.loadProjectRiskForChat.mockResolvedValue({ kind: "empty" });
+    h.loadWhoIsAvailableForChat.mockResolvedValue({ kind: "empty" });
+  });
+
+  it("an unknown brief (no line, a source unreadable) is unavailable - never none", async () => {
+    h.loadEmployerOpeningBriefResult.mockResolvedValue({
+      kind: "unknown",
+      unknown: ["unread"],
+      unknownNote: "n",
+    });
+    expect((await loadCompanyHomeField()).attention).toEqual({ kind: "unavailable" });
+  });
+
+  it("a successful empty brief is the only none; a brief keeps its lines and chips", async () => {
+    h.loadEmployerOpeningBriefResult.mockResolvedValue({ kind: "none" });
+    expect((await loadCompanyHomeField()).attention).toEqual({ kind: "none" });
+    h.loadEmployerOpeningBriefResult.mockResolvedValue({
+      kind: "brief",
+      lines: ["a"],
+      chips: [],
+      unknown: [],
+      unknownNote: null,
+    });
+    expect((await loadCompanyHomeField()).attention).toEqual({ kind: "brief", lines: ["a"], chips: [] });
+  });
+});
+

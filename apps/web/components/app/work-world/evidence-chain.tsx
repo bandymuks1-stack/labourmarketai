@@ -122,8 +122,8 @@ export function EvidenceChain({
               </span>
               <span
                 className={cn(
-                  "text-center font-mono text-[0.625rem] uppercase leading-tight tracking-label text-text-secondary",
-                  full ? "max-w-[5.5rem]" : "sr-only",
+                  "text-center text-meta leading-tight text-text-secondary",
+                  full ? "max-w-[6.5rem]" : "sr-only",
                 )}
               >
                 {labels.nodes[node.key]}

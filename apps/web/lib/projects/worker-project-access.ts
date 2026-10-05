@@ -3,7 +3,10 @@ import "server-only";
 import { cache } from "react";
 
 import { createClient } from "@/lib/supabase/server";
-import { readMyTeamWorkContexts } from "@/lib/projects/team-work-context";
+import {
+  readMyTeamWorkContexts,
+  readMyTeamWorkContextsResult,
+} from "@/lib/projects/team-work-context";
 import {
   teamProjectsFromRows,
   viaTeamLabel,
@@ -165,30 +168,44 @@ export async function getWorkerProjectView(
   };
 }
 
-/** All projects the caller is or was assigned to (own assignments only). */
-export async function listWorkerProjects(): Promise<WorkerProjectListItem[]> {
+/**
+ * All projects the caller is or was assigned to (own assignments only), with
+ * a FAILED read told apart from an EMPTY one (SEP-7: UNKNOWN ≠ ZERO). The
+ * home needs the difference: "could not read your projects" is not "you have
+ * none". `listWorkerProjects` below keeps its historical, lossy shape.
+ */
+export type WorkerProjectsResult =
+  | { readonly status: "ok"; readonly rows: WorkerProjectListItem[] }
+  | { readonly status: "unavailable" };
+
+export async function listWorkerProjectsResult(): Promise<WorkerProjectsResult> {
   const workerId = await getOwnWorkerId();
-  if (!workerId) return [];
+  if (!workerId) return { status: "ok", rows: [] };
 
   const supabase = await createClient();
-  const { data: assignments } = await supabase
+  const { data: assignments, error } = await supabase
     .from("project_worker_assignments")
     .select("project_id, status, assigned_at")
     .eq("worker_id", workerId)
     .order("assigned_at", { ascending: false });
+  if (error) return { status: "unavailable" };
   const own = assignments ?? [];
   // Projects reached ONLY through an actively assigned team (20261003150700).
+  // A FAILED team read is UNKNOWN, never a shorter list (SEP-7).
+  const teamRead = await readMyTeamWorkContextsResult(supabase);
+  if (teamRead.status === "unavailable") return { status: "unavailable" };
   const ownIds = new Set(own.map((a) => a.project_id as string));
-  const teamOnly = teamProjectsFromRows(await readMyTeamWorkContexts(supabase)).filter(
+  const teamOnly = teamProjectsFromRows(teamRead.rows).filter(
     (t) => !ownIds.has(t.projectId),
   );
-  if (own.length === 0 && teamOnly.length === 0) return [];
+  if (own.length === 0 && teamOnly.length === 0) return { status: "ok", rows: [] };
 
   const ids = [...own.map((a) => a.project_id as string), ...teamOnly.map((t) => t.projectId)];
-  const { data: projects } = await supabase
+  const { data: projects, error: projectsError } = await supabase
     .from("projects")
     .select("id, title, status, city, country")
     .in("id", ids);
+  if (projectsError) return { status: "unavailable" };
   const byId = new Map(
     (projects ?? []).map((p) => [p.id as string, p] as const),
   );
@@ -218,7 +235,15 @@ export async function listWorkerProjects(): Promise<WorkerProjectListItem[]> {
       viaTeam: viaTeamLabel(t.teamNames),
     };
   });
-  return [...fromPerson, ...fromTeam];
+  return { status: "ok", rows: [...fromPerson, ...fromTeam] };
+}
+
+/** All projects the caller is or was assigned to, directly or through an
+ *  actively assigned team. Lossy by design — use `listWorkerProjectsResult`
+ *  where a failed read must not look like "none". */
+export async function listWorkerProjects(): Promise<WorkerProjectListItem[]> {
+  const result = await listWorkerProjectsResult();
+  return result.status === "ok" ? result.rows : [];
 }
 
 /**

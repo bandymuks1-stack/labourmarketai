@@ -25,3 +25,24 @@ export async function readMyTeamWorkContexts(
     return [];
   }
 }
+
+export type TeamWorkContextsResult =
+  | { readonly status: "ok"; readonly rows: TeamWorkContextRow[] }
+  | { readonly status: "unavailable" };
+
+/**
+ * The same read with a FAILED read told apart from an EMPTY one (SEP-7:
+ * UNKNOWN is not ZERO). A caller that renders "you have no projects" must use
+ * this, so a failed team read never silently becomes a shorter list.
+ */
+export async function readMyTeamWorkContextsResult(
+  supabase: Pick<SupabaseClient, "rpc">,
+): Promise<TeamWorkContextsResult> {
+  try {
+    const { data, error } = await supabase.rpc("my_team_work_contexts_v1" as never);
+    if (error || !Array.isArray(data)) return { status: "unavailable" };
+    return { status: "ok", rows: data as TeamWorkContextRow[] };
+  } catch {
+    return { status: "unavailable" };
+  }
+}

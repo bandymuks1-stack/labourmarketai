@@ -142,8 +142,13 @@ describe("the interest notification is not a dead end", () => {
       reader.indexOf("export async function listPendingInterestCountsForCompany"),
     );
     // No throw, no error shape — the page keeps its previous selection rule.
-    expect(fn).toContain("return empty");
-    expect(fn).toContain("catch");
+    // Re-anchored: the historical reader DELEGATES to the Result reader and
+    // answers an empty map for every non-ok outcome; the Result reader names
+    // the absent table (`needs-migration`) and still never throws.
+    expect(fn).toContain("new Map()");
+    expect(fn).toContain("readPendingInterestCountsForCompany");
+    expect(reader).toContain('status: "needs-migration"');
+    expect(reader.slice(reader.indexOf("export async function readPendingInterestCountsForCompany"))).toContain("catch");
   });
 });
 

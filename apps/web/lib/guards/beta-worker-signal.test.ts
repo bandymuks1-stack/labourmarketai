@@ -97,9 +97,9 @@ describe("B1 — a booking proposal is announced, not left in a closed popover",
     pending: number | (() => never);
   }) {
     vi.doMock("@/lib/booking/booking-actions", () => ({
-      getPendingIncomingBookingCount: async () => {
+      readPendingIncomingBookingCount: async () => {
         if (typeof opts.pending === "function") return opts.pending();
-        return opts.pending;
+        return { status: "ok" as const, count: opts.pending };
       },
     }));
     // Every OTHER source contributes nothing, so any line we see is the
@@ -111,7 +111,7 @@ describe("B1 — a booking proposal is announced, not left in a closed popover",
       getPlanning: async () => ({ status: "unavailable", items: [] }),
     }));
     vi.doMock("@/lib/communication/unread", () => ({
-      getUnreadConversationCount: async () => 0,
+      getUnreadConversationIdsResult: async () => ({ status: "ok" as const, ids: new Set<string>() }),
     }));
     vi.doMock("@/lib/conversation/profile-summary", () => ({
       loadProfileSummaryForChat: async () => ({ kind: "unavailable" }),

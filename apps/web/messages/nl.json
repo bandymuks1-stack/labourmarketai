@@ -14042,6 +14042,8 @@
       "capacityAbsencesUnknown": "Momenteel niet beschikbaar.",
       "capacityEmpty": "Er is nog niemand in het team — nodig mensen uit.",
       "capacityUnavailable": "De beschikbaarheid van het team kon nu niet worden gelezen.",
+      "briefEmployerUnknown": "Ik kon zojuist niet alles op de lijst van uw bedrijf controleren. Dat betekent niet dat er niets wacht.",
+      "briefPersonUnknown": "Ik kon zojuist niet alles op uw lijst controleren. Dat betekent niet dat er niets wacht.",
       "chipAddTask": "Taak toevoegen",
       "workerProjectsIntro": "Uw projecten ({count} actief):",
       "workerProjectsEnded": "beëindigd",
@@ -18409,6 +18411,14 @@
       "title": "Uw geschiedenis gaat met u mee",
       "body": "Elke klus die u vastlegt, vult haar aan. Neem haar mee naar de volgende kans.",
       "cta": "Bekijk waar u naartoe kunt"
+    },
+    "rail": {
+      "label": "Van werk naar geschiedenis",
+      "work": "Werk",
+      "evidence": "Bewijs",
+      "confirmed": "Bevestigd",
+      "history": "Geschiedenis",
+      "next": "Volgende"
     }
   },
   "workContext": {
@@ -18491,6 +18501,56 @@
       "projectLabel": "Voor welk project",
       "projectPlaceholder": "Kies een project",
       "noProjects": "Je hebt geen openstaande projecten om het team aan toe te wijzen."
+    }
+  },
+  "homeStage": {
+    "regions": {
+      "waiting": {
+        "eyebrow": "Heeft u nodig",
+        "title": "Wat op u *wacht*",
+        "clear": "Er wacht niets op u.",
+        "unknown": "Wat op u wacht kon niet worden gelezen."
+      },
+      "running": {
+        "eyebrow": "In beweging",
+        "title": "Wat nu *loopt*",
+        "projectsUnknown": "Uw toegewezen projecten konden niet worden gelezen."
+      },
+      "because": {
+        "eyebrow": "Wat er veranderde",
+        "title": "Door wat er *gebeurde*",
+        "unknown": "Wat er veranderde kon niet worden gelezen.",
+        "also": "Ook",
+        "all": "Alle activiteit"
+      },
+      "outside": {
+        "eyebrow": "Buiten uw muren",
+        "title": "Wat er in de *markt* is"
+      }
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Een werkrelatie is begonnen",
+        "relationshipEnded": "Een werkrelatie is geëindigd",
+        "bookingAgreed": "De boeking is overeengekomen",
+        "bookingRefused": "De boeking is geweigerd",
+        "bookingWithdrawn": "De boeking is ingetrokken",
+        "absenceApproved": "De afwezigheid is goedgekeurd",
+        "absenceRefused": "De afwezigheid is geweigerd",
+        "decisionRecorded": "De beslissing is vastgelegd",
+        "acknowledgementRecorded": "De bevestiging van kennisname is vastgelegd",
+        "invitationAnswered": "Er is op de uitnodiging gereageerd"
+      },
+      "state": {
+        "engagementActive": "Dienstverband: actief",
+        "engagementClosed": "Dienstverband: beëindigd",
+        "bookingConfirmed": "Boeking: bevestigd",
+        "bookingClosed": "Boeking: gesloten",
+        "absenceDecided": "Afwezigheid: beslist",
+        "workflowClosed": "Goedkeuring: afgerond",
+        "documentAcknowledged": "Document: kennisgenomen",
+        "relationshipFormed": "Relatie: aangegaan"
+      }
     }
   }
 }

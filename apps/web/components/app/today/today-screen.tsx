@@ -1,18 +1,16 @@
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
-import { Card } from "@/components/ui/Card";
-import { buttonLinkClassName } from "@/components/ui/Button";
+import { PersonPortrait } from "@/components/app/identity/person-portrait";
+import { HomeBecause, HomeOutside, HomeRegionPending, HomeRunning, HomeWaiting } from "@/components/app/home/home-regions";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { Link } from "@/lib/i18n/navigation";
-import { deriveTodayNext, deriveTodayState } from "@/lib/today/today-model";
+import { deriveTodayState } from "@/lib/today/today-model";
 import { TODAY_STATIONS } from "@/lib/today/today-route";
+import { playerInitials } from "@/lib/identity/player-identity";
+import { getOwnAvatar } from "@/lib/profile/avatar";
 import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import { loadTodayHead, loadTodayWorkIntelligence } from "@/lib/today/today-server";
-
-import { TodayOpportunitySection } from "./today-opportunity-section";
-import { TodayProjectsSection } from "./today-projects-section";
-import { TodayWorkSection } from "./today-work-section";
 
 /**
  * ŠIANDIEN — the worker's OPENING CONTEXT inside the ONE conversation
@@ -27,17 +25,21 @@ import { TodayWorkSection } from "./today-work-section";
  *
  *   1. header      name · profession · today's state
  *                  (replaces the opening intro card for the worker)
- *   2. next        ONE primary action — the work-card engine's next
- *                  dimension with its own "why", nothing invented
- *   3. work        today · this week · what still needs a figure or a
- *                  look · one growth sentence  (streams: one journal read)
- *   4. world       one opportunity sentence with band counts  (streams)
- *                  — 3's growth sentence and 4 are ABSENT when they have
- *                  nothing to say ("Tuščia = tvarkinga", owner §20); a read
- *                  that failed is still named (`isTodayGrowthShown`,
- *                  `isTodayOpportunityShown` in the pure model)
- *   5. stations    the contextual workspaces, as text links, one tap —
+ *   2. WAITING     the work-card's ONE next action + what is waiting on the
+ *                  person (offers · invitations · unread · journal items)
+ *   3. RUNNING     recorded work · assigned projects · one growth sentence
+ *   4. BECAUSE     what happened and — only where the event's own fact IS a
+ *                  state change — event → consequence → state
+ *   5. OUTSIDE     the market: one opportunity sentence with band counts
+ *   6. stations    the contextual workspaces, as text links, one tap —
  *                  opportunities (the former PASAULIS tab) first
+ *
+ * Regions 2–5 are the FROZEN FOUR-STATE GRAMMAR (`components/app/home`,
+ * model `lib/home/home-state.ts`): each streams from its own loader; a
+ * growth sentence, an opportunity line and an empty "because" are ABSENT
+ * when they have nothing to say ("Tuščia = tvarkinga", owner §20); a read
+ * that failed is still named (`isTodayGrowthShown`,
+ * `isTodayOpportunityShown` in the pure model).
  *
  * There is no "ask" door any more: the composer IS the door, and the
  * conversation is the home (the former PAKLAUSK tab is retired).
@@ -46,8 +48,8 @@ import { TodayWorkSection } from "./today-work-section";
  * through the pure model (`lib/today/today-model.ts`); a reader that could
  * not answer is rendered as "could not read", never as zero (SEP-7).
  *
- * Progressive disclosure: three first-level items above the fold on a
- * 390 px viewport (header, the action, today's work); the rest below.
+ * Progressive disclosure: the header and the WAITING region lead; the rest
+ * streams below. The composer stays directly under it (sticky on a phone).
  * Secondary actions are text links, not buttons (IA §5.1). No quick-nav
  * strip — the one top bar, the station links and the conversation carry
  * navigation.
@@ -65,7 +67,7 @@ function TodayScreenPending() {
     <div
       aria-hidden
       data-testid="today-screen-pending"
-      className="mx-auto flex w-full max-w-2xl flex-col gap-2"
+      className="mx-auto flex w-full max-w-3xl flex-col gap-2"
     >
       <span className="h-3 w-24 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
       <span className="h-8 w-56 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
@@ -83,13 +85,12 @@ export function TodayScreen({ locale }: { locale: ActiveLocale }) {
 }
 
 async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
-  const [t, tCard, tProf, head] = await Promise.all([
+  const [t, tProf, head, avatar] = await Promise.all([
     getTranslations("todayScreen.home"),
-    getTranslations("auth.dashboard.workCard"),
     getTranslations("professions"),
     loadTodayHead(),
+    getOwnAvatar(),
   ]);
-  const next = deriveTodayNext(head.workCard);
   // The first profession this person holds that can be named — a registry one
   // through the catalogue, or their OWN WORDS exactly as typed. The registry
   // primary still leads when there is one; nothing here interprets the words.
@@ -106,78 +107,47 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
   return (
     <div
       data-testid="today-screen"
-      className="mx-auto flex w-full max-w-2xl flex-col gap-8"
+      className="mx-auto flex w-full max-w-3xl flex-col gap-8"
     >
       {/* 1 · HEADER — who, what they do, where today stands. */}
-      <header data-testid="today-header" className="flex flex-col gap-2">
-        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {t("eyebrow")}
-        </p>
-        <h1 className="font-display text-title font-bold tracking-tightest text-text-primary sm:text-title-lg">
-          {head.displayName ?? t("headerNoName")}
-        </h1>
-        <p className="text-support text-text-secondary" data-testid="today-profession">
-          {professionLabel ?? t("professionUnknown")}
-        </p>
-        <Suspense fallback={<Reading label={t("reading")} />}>
-          <TodayStateLine locale={locale} />
-        </Suspense>
+      <header data-testid="today-header" className="flex items-center gap-4 sm:gap-5">
+        <PersonPortrait
+          name={head.displayName ?? t("headerNoName")}
+          avatarUrl={avatar.signedUrl}
+          initials={playerInitials(head.displayName ?? "")}
+          width="64px"
+        />
+        <div className="flex min-w-0 flex-col gap-1">
+          <p className="text-support font-medium text-brand-blue">{t("eyebrow")}</p>
+          <h1 className="font-display text-title font-bold tracking-tightest text-text-primary sm:text-title-lg">
+            {head.displayName ?? t("headerNoName")}
+          </h1>
+          <p className="text-support text-text-secondary" data-testid="today-profession">
+            {professionLabel ?? t("professionUnknown")}
+          </p>
+          <Suspense fallback={<Reading label={t("reading")} />}>
+            <TodayStateLine locale={locale} />
+          </Suspense>
+        </div>
       </header>
 
-      {/* 2 · THE ONE PRIMARY ACTION. */}
-      <section aria-labelledby="today-next-title" data-testid="today-next">
-        <Card compact>
-          <div className="flex flex-col gap-3">
-            <h2
-              id="today-next-title"
-              className="font-mono text-meta uppercase tracking-label text-text-muted"
-            >
-              {t("next.title")}
-            </h2>
-            {next.kind === "action" ? (
-              <>
-                <p className="text-body text-text-primary">{tCard(`next.${next.dim}`)}</p>
-                <p className="text-support text-text-secondary">{tCard(next.whyKey)}</p>
-                {next.stale && (
-                  <p className="text-support text-text-secondary" data-testid="today-next-stale">
-                    {tCard("stale.body")}
-                  </p>
-                )}
-                <Link
-                  href={next.href as "/dashboard"}
-                  data-testid="today-next-cta"
-                  className={`${buttonLinkClassName("primary")} self-start`}
-                >
-                  {tCard(`next.${next.dim}`)}
-                </Link>
-              </>
-            ) : (
-              <p className="text-support text-text-secondary" data-testid="today-next-unknown">
-                {t("next.unknown")}
-              </p>
-            )}
-          </div>
-        </Card>
-      </section>
-
-      {/* 3 · TODAY'S WORK · OPEN ITEMS · ONE GROWTH SENTENCE — one journal
-          read, streamed so a slow journal never holds the header back. */}
-      <Suspense fallback={<Reading label={t("reading")} />}>
-        <TodayWorkSection locale={locale} />
+      {/* 2 · WAITING FOR YOU · 3 · RUNNING NOW · 4 · BECAUSE · 5 · OUTSIDE —
+          one loader each, so each region streams on its own and a slow
+          journal never holds the others back. */}
+      <Suspense fallback={<HomeRegionPending label={t("reading")} />}>
+        <HomeWaiting locale={locale} />
       </Suspense>
-
-      {/* 3b · WHERE I WORK — the assigned projects, one tap each. Absent
-          when there is none; streamed so it never holds the head back. */}
+      <Suspense fallback={<HomeRegionPending label={t("reading")} />}>
+        <HomeRunning locale={locale} />
+      </Suspense>
       <Suspense fallback={null}>
-        <TodayProjectsSection />
+        <HomeBecause locale={locale} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <HomeOutside />
       </Suspense>
 
-      {/* 4 · ONE OPPORTUNITY SENTENCE — the conversation result's own rows. */}
-      <Suspense fallback={<Reading label={t("reading")} />}>
-        <TodayOpportunitySection />
-      </Suspense>
-
-      {/* 5 · STATIONS — the contextual workspaces as text links, one tap. */}
+      {/* 6 · STATIONS — the contextual workspaces as text links, one tap. */}
       <nav
         aria-label={t("stations.title")}
         data-testid="today-stations"

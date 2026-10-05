@@ -115,13 +115,33 @@ export async function produceReviewQueueFromSignals(
 
 /** Pending suggestions the caller may see (RLS: their organisation's). */
 export async function countPendingReviewQueue(supabase: SupabaseClient): Promise<number> {
+  const r = await readPendingReviewQueue(supabase);
+  return r.status === "ok" ? r.count : 0;
+}
+
+/**
+ * The pending count with a FAILED read apart from "none pending" (SEP-7). An
+ * absent (owner-gated) table can hold no suggestion, so it is `ok` 0; any
+ * other failure is `unavailable`. `countPendingReviewQueue` keeps its lossy
+ * number for its callers by delegating.
+ */
+export type PendingReviewQueueResult =
+  | { status: "ok"; count: number }
+  | { status: "unavailable" };
+
+export async function readPendingReviewQueue(supabase: SupabaseClient): Promise<PendingReviewQueueResult> {
   try {
     const { count, error } = await asAny(supabase)
       .from("learning_review_queue")
       .select("id", { count: "exact", head: true })
       .eq("status", "pending");
-    return error ? 0 : (count ?? 0);
+    if (error) {
+      return error.code === "42P01" || error.code === "PGRST205"
+        ? { status: "ok", count: 0 }
+        : { status: "unavailable" };
+    }
+    return typeof count === "number" ? { status: "ok", count } : { status: "unavailable" };
   } catch {
-    return 0;
+    return { status: "unavailable" };
   }
 }

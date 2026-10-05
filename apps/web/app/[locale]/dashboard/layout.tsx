@@ -402,15 +402,20 @@ export default async function DashboardLayout({
         </Suspense>
         <SessionTelemetry />
         <AmbientGlow />
-        <DashboardChrome
-          nav={nav}
-          headerTitle={tChat("headerTitle")}
-          fullHeader={fullHeader}
-          fullBottomNav={<BottomNav />}
-          rexora={rexora}
-        >
-          {children}
-        </DashboardChrome>
+        {/* `lm-product` scopes the product label grammar (globals.css): labels
+            are sentence case inside the signed-in product. `contents` keeps
+            this wrapper out of layout entirely. */}
+        <div className="contents lm-product">
+          <DashboardChrome
+            nav={nav}
+            headerTitle={tChat("headerTitle")}
+            fullHeader={fullHeader}
+            fullBottomNav={<BottomNav />}
+            rexora={rexora}
+          >
+            {children}
+          </DashboardChrome>
+        </div>
         {/* v1 tester language-feedback widget — authenticated sessions only. */}
         <LanguageFeedbackWidget />
       </AuthProvider>

@@ -17,11 +17,8 @@ import {
   type OutgoingRequestRow,
   type RequestStatus,
 } from "@/lib/marketplace/service-requests-shared";
-import {
-  PLAYER_IDENTITY_AVATAR_BORDER,
-  PLAYER_IDENTITY_FALLBACK_SURFACE,
-} from "@/lib/identity/player-identity";
 import { buildPlayerCardMinimum } from "@/lib/identity/player-card-minimum";
+import { PersonAvatar } from "@/components/app/identity/identity-family";
 import { PARTNERSHIP_CATEGORY } from "@/lib/services/service-offerings-shared";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -619,12 +616,9 @@ export function MarketplaceLoopSection({
                     className="flex items-center gap-2"
                     data-testid="marketplace-incoming-requester"
                   >
-                    <span
-                      aria-hidden
-                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-meta font-semibold ${PLAYER_IDENTITY_AVATAR_BORDER} ${PLAYER_IDENTITY_FALLBACK_SURFACE}`}
-                    >
-                      {requester.initials}
-                    </span>
+                    {/* The requester is a PERSON: the one identity family, seeded
+                        by the request (the safe projection carries no person id). */}
+                    <PersonAvatar person={{ id: r.id, name: requester.displayName ?? "" }} size={28} />
                     <span className="min-w-0 truncate text-xs">
                       <span className="text-text-muted">{labels.requestedBy}: </span>
                       <span className="text-text-secondary">

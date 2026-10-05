@@ -58,10 +58,12 @@ describe("worker entry is ŠIANDIEN — a page, not the chat and not a card stac
     const model = read("lib/today/today-model.ts");
     expect(model).toMatch(/dim: card\.next\.dim/);
     expect(model).toMatch(/whyKey: card\.next\.whyKey/);
-    const screen = read(SCREEN);
-    expect(screen).toMatch(/deriveTodayNext\(/);
+    // The next action is derived by the pure model's `deriveTodayNext` in the
+    // WAITING loader (the four-region home), lifted from the same card.
+    expect(read("lib/home/home-server.ts")).toMatch(/deriveTodayNext\(/);
     // Exactly one primary CTA on the screen; everything else is a text link.
-    expect(screen.match(/buttonLinkClassName\("primary"\)/g)).toHaveLength(1);
+    const screenAll = read(SCREEN) + read("components/app/home/home-regions.tsx");
+    expect(screenAll.match(/buttonLinkClassName\("primary"\)/g)).toHaveLength(1);
   });
 
   it("no intro card, no quick-nav strip, no chat inside ŠIANDIEN", () => {

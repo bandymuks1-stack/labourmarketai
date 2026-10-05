@@ -50,17 +50,34 @@ export type QuickQueueEntry = {
   confirmScope: QuickConfirmScope;
 };
 
-export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
-  const supabase = await createClient();
+/**
+ * The queue with the FAILURE told apart from "nothing to review" (SEP-7).
+ *   ok               the gated set was read; `entries` is empty when nothing waits
+ *   needs-migration  the gating RPC is not applied — nothing can be reviewable yet
+ *   unavailable      the gating RPC or the entry read FAILED — NOT an empty queue
+ * `fetchQuickReviewQueue` keeps its historical shape and delegates.
+ */
+export type QuickReviewQueueResult =
+  | { status: "ok"; entries: QuickQueueEntry[] }
+  | { status: "needs-migration" }
+  | { status: "unavailable" };
 
-  // Gated reviewable set — degrades to an empty queue until applied (honest).
-  let reviewableIds: string[] = [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: idRows } = await (supabase as any).rpc(
-    "reviewable_journal_entry_ids",
-  );
-  if (Array.isArray(idRows)) {
-    reviewableIds = idRows
+type ReviewableIdsRead =
+  | { status: "ok"; ids: string[] }
+  | { status: "needs-migration" }
+  | { status: "unavailable" };
+
+async function readReviewableIds(supabase: Awaited<ReturnType<typeof createClient>>): Promise<ReviewableIdsRead> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: idRows, error } = await (supabase as any).rpc("reviewable_journal_entry_ids");
+    if (error) {
+      return error.code === "42883" || error.code === "PGRST202" || error.code === "42P01"
+        ? { status: "needs-migration" }
+        : { status: "unavailable" };
+    }
+    if (!Array.isArray(idRows)) return { status: "unavailable" };
+    const ids = idRows
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map((r: any) =>
         typeof r === "string"
@@ -68,7 +85,36 @@ export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
           : (r?.reviewable_journal_entry_ids ?? r?.id ?? null),
       )
       .filter((v: unknown): v is string => typeof v === "string");
+    return { status: "ok", ids };
+  } catch {
+    return { status: "unavailable" };
   }
+}
+
+export async function readQuickReviewQueueResult(): Promise<QuickReviewQueueResult> {
+  const supabase = await createClient();
+  const gate = await readReviewableIds(supabase);
+  if (gate.status !== "ok") return gate;
+  try {
+    return { status: "ok", entries: await queueFromIds(supabase, gate.ids) };
+  } catch {
+    return { status: "unavailable" };
+  }
+}
+
+export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
+  const supabase = await createClient();
+  // Gated reviewable set — degrades to an empty queue until applied (honest).
+  // Historical shape: an unreadable gate is also an empty queue here; the
+  // entry read below still THROWS. Honest callers use readQuickReviewQueueResult.
+  const gate = await readReviewableIds(supabase);
+  return gate.status === "ok" ? queueFromIds(supabase, gate.ids) : [];
+}
+
+async function queueFromIds(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  reviewableIds: string[],
+): Promise<QuickQueueEntry[]> {
   if (reviewableIds.length === 0) return [];
 
   const { data: rows, error: rowsError } = await supabase

@@ -70,6 +70,23 @@ export const colors = {
   // `border-ink-600 bg-ink-800/40`), so dark↔light stays a pure token swap
   // and no component needed editing. Guarded by
   // lib/guards/design-token-classes.test.ts.
+  // The identity family's tonal plates (see globals.css): `1a`..`6b` are the
+  // two gradient stops of each plate, `figure` the ink drawn on them.
+  identity: {
+    "1a": c("identity-1a"),
+    "1b": c("identity-1b"),
+    "2a": c("identity-2a"),
+    "2b": c("identity-2b"),
+    "3a": c("identity-3a"),
+    "3b": c("identity-3b"),
+    "4a": c("identity-4a"),
+    "4b": c("identity-4b"),
+    "5a": c("identity-5a"),
+    "5b": c("identity-5b"),
+    "6a": c("identity-6a"),
+    "6b": c("identity-6b"),
+    figure: c("identity-figure"),
+  },
   surface: {
     1: c("ink-800"), // primary raised card/panel on the ink-900 page (light: white card)
     2: c("ink-700"), // second-level raised layer / nested panel

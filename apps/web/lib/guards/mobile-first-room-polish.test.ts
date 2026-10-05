@@ -29,32 +29,42 @@ describe("ŠIANDIEN reads as one clear page on a phone (IA 2026-09-13 §5)", () 
   // actions as text links with the 44px floor, no arbitrary type sizes, no
   // hand-rolled card surface, and the worker's 3-tab bar at a tap height
   // the primitive already guarantees.
-  const files = readdirSync(join(root, "components", "app", "today")).filter((f) =>
-    f.startsWith("today-"),
-  );
+  // The screen is now the header (today/) plus the four-region home
+  // (components/app/home — frozen grammar). The same phone invariants apply
+  // to every file that draws it.
+  const files = [
+    ...readdirSync(join(root, "components", "app", "today"))
+      .filter((f) => f.startsWith("today-"))
+      .map((f) => `components/app/today/${f}`),
+    "components/app/home/home-regions.tsx",
+  ];
 
   it("exactly one primary CTA on the whole screen", () => {
-    const all = files.map((f) => read(`components/app/today/${f}`)).join("\n");
+    const all = files.map((f) => read(f)).join("\n");
     expect(all.match(/buttonLinkClassName\("primary"\)/g)).toHaveLength(1);
     expect(all).not.toMatch(/<Button\b/);
   });
 
   it("every secondary action is a link with the 44px floor", () => {
     for (const f of files) {
-      const src = read(`components/app/today/${f}`);
+      const src = read(f);
       const links = src.match(/<Link\b[\s\S]*?>/g) ?? [];
       for (const link of links) {
-        expect(link, `${f}: ${link.slice(0, 60)}`).toMatch(/min-h-11|buttonLinkClassName|pillLinkClassName/);
+        expect(link, `${f}: ${link.slice(0, 60)}`).toMatch(/min-h-11|buttonLinkClassName|pillLinkClassName|className=\{ROW_LINK\}|\$\{ROW_LINK\}/);
       }
     }
   });
 
   it("uses the type ladder and the Card primitive, never raw sizes or raw card-border", () => {
     for (const f of files) {
-      const src = read(`components/app/today/${f}`);
+      const src = read(f);
       expect(src, f).not.toMatch(/text-xs\b|text-sm\b|text-\[[0-9.]+(px|rem)\]/);
       expect(src, f).not.toMatch(/card-border/);
     }
+  });
+
+  it("the shared row-link constant carries the 44px floor the links above rely on", () => {
+    expect(read("components/app/home/home-regions.tsx")).toMatch(/const ROW_LINK = `\$\{ROW\} min-h-11 /);
   });
 
   it("the worker bar keeps the primitive's tap height", () => {

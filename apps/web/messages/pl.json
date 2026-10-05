@@ -14042,6 +14042,8 @@
       "capacityAbsencesUnknown": "Chwilowo niedostępne.",
       "capacityEmpty": "W zespole nie ma jeszcze nikogo — zaproś ludzi.",
       "capacityUnavailable": "Nie udało się teraz odczytać dostępności zespołu.",
+      "briefEmployerUnknown": "Nie udało się teraz sprawdzić wszystkiego na liście Twojej firmy. To nie znaczy, że nic nie czeka.",
+      "briefPersonUnknown": "Nie udało się teraz sprawdzić wszystkiego na Twojej liście. To nie znaczy, że nic nie czeka.",
       "chipAddTask": "Dodaj zadanie",
       "workerProjectsIntro": "Twoje projekty ({count} aktywne):",
       "workerProjectsEnded": "zakończone",
@@ -18409,6 +18411,14 @@
       "title": "Twoja historia idzie z Tobą",
       "body": "Każda praca, którą zapiszesz, ją uzupełnia. Zabierz ją na następną okazję.",
       "cta": "Zobacz, dokąd możesz pójść"
+    },
+    "rail": {
+      "label": "Od pracy do historii",
+      "work": "Praca",
+      "evidence": "Dowody",
+      "confirmed": "Potwierdzone",
+      "history": "Historia",
+      "next": "Dalej"
     }
   },
   "workContext": {
@@ -18491,6 +18501,56 @@
       "projectLabel": "Projekt",
       "projectPlaceholder": "Wybierz projekt",
       "noProjects": "Nie masz otwartych projektów, do których można przypisać zespół."
+    }
+  },
+  "homeStage": {
+    "regions": {
+      "waiting": {
+        "eyebrow": "Potrzebuje Cię",
+        "title": "Co *czeka* na Ciebie",
+        "clear": "Nic na Ciebie nie czeka.",
+        "unknown": "Nie udało się odczytać, co na Ciebie czeka."
+      },
+      "running": {
+        "eyebrow": "W toku",
+        "title": "Co *trwa* teraz",
+        "projectsUnknown": "Nie udało się odczytać przypisanych Ci projektów."
+      },
+      "because": {
+        "eyebrow": "Co się zmieniło",
+        "title": "Przez to, co się *wydarzyło*",
+        "unknown": "Nie udało się odczytać, co się zmieniło.",
+        "also": "Także",
+        "all": "Cała aktywność"
+      },
+      "outside": {
+        "eyebrow": "Poza Twoimi murami",
+        "title": "Co jest na *rynku*"
+      }
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Rozpoczęła się relacja zawodowa",
+        "relationshipEnded": "Relacja zawodowa się zakończyła",
+        "bookingAgreed": "Rezerwację uzgodniono",
+        "bookingRefused": "Rezerwację odrzucono",
+        "bookingWithdrawn": "Rezerwację wycofano",
+        "absenceApproved": "Nieobecność zatwierdzono",
+        "absenceRefused": "Nieobecność odrzucono",
+        "decisionRecorded": "Decyzję zapisano",
+        "acknowledgementRecorded": "Zapoznanie się zapisano",
+        "invitationAnswered": "Odpowiedziano na zaproszenie"
+      },
+      "state": {
+        "engagementActive": "Zatrudnienie: aktywne",
+        "engagementClosed": "Zatrudnienie: zakończone",
+        "bookingConfirmed": "Rezerwacja: potwierdzona",
+        "bookingClosed": "Rezerwacja: zamknięta",
+        "absenceDecided": "Nieobecność: rozstrzygnięta",
+        "workflowClosed": "Akceptacja: zamknięta",
+        "documentAcknowledged": "Dokument: zapoznano się",
+        "relationshipFormed": "Relacja: nawiązana"
+      }
     }
   }
 }

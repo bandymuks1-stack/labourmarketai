@@ -137,10 +137,12 @@ describe("3 · one identity system (shared monogram, no local copies)", () => {
   });
 
   it("ops-board worker cards use the SAME monogram (broken split(/s+/) copy stays dead)", () => {
+    // Re-anchored: the card renders the ONE identity family, whose monogram IS
+    // personMonogram (the rule playerInitials delegates to) - no local copy.
     expect(opsBoard).toMatch(
-      /import \{ playerInitials \} from "@\/lib\/identity\/player-identity"/,
+      /import \{ PersonAvatar \} from "@\/components\/app\/identity\/identity-family"/,
     );
-    expect(opsBoard).toMatch(/playerInitials\(worker\.name\)/);
+    expect(opsBoard).toMatch(/<PersonAvatar person=\{\{ id: worker\.workerId, name: worker\.name \}\}/);
     expect(opsBoard).not.toMatch(/\.split\(\/s\+\/\)/);
     expect(opsBoard).not.toMatch(/function initialsOf/);
   });

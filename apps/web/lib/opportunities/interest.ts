@@ -618,32 +618,58 @@ export async function listDemandInterestForCompany(
  * hand at all. An absent (owner-gated) table degrades to an EMPTY map, never
  * to an error: the page keeps its existing selection rule.
  */
-export async function listPendingInterestCountsForCompany(): Promise<
-  ReadonlyMap<string, number>
-> {
-  const empty: ReadonlyMap<string, number> = new Map();
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return empty;
+/**
+ * The pending-interest read with FOUR distinguishable outcomes (SEP-7:
+ * UNKNOWN ≠ ZERO). A surface that must not render a failure as "nobody is
+ * waiting" (the company home) uses this; `listPendingInterestCountsForCompany`
+ * keeps its historical, deliberately lossy shape for the pages that open on a
+ * demand by delegating to it.
+ *
+ *   ok                 a successful read; `counts` is EMPTY when nobody waits
+ *   no-company-context the caller has no employer workspace to read for
+ *   needs-migration    the (owner-gated) table is absent — no interest can
+ *                      exist yet, the same word the sibling readers use
+ *   unavailable        any other failure — NOT "no interest"
+ */
+export type PendingInterestCountsResult =
+  | { readonly status: "ok"; readonly counts: ReadonlyMap<string, number> }
+  | { readonly status: "no-company-context" }
+  | { readonly status: "needs-migration" }
+  | { readonly status: "unavailable" };
 
-  const employer = await requireEmployerCompany();
-  if (!employer.ok) return empty;
-
+export async function readPendingInterestCountsForCompany(): Promise<PendingInterestCountsResult> {
   try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { status: "unavailable" };
+
+    const employer = await requireEmployerCompany();
+    if (!employer.ok) return { status: "no-company-context" };
+
     const { data, error } = await asAny(supabase)
       .from("demand_interest_signals")
       .select("request_id, status")
       .eq("status", "interested");
-    if (error || !Array.isArray(data)) return empty;
+    if (error) {
+      return error.code === RELATION_NOT_FOUND ? { status: "needs-migration" } : { status: "unavailable" };
+    }
+    if (!Array.isArray(data)) return { status: "unavailable" };
     const counts = new Map<string, number>();
     for (const r of data as { request_id: string | null }[]) {
       if (!r.request_id) continue;
       counts.set(r.request_id, (counts.get(r.request_id) ?? 0) + 1);
     }
-    return counts;
+    return { status: "ok", counts };
   } catch {
-    return empty;
+    return { status: "unavailable" };
   }
+}
+
+export async function listPendingInterestCountsForCompany(): Promise<
+  ReadonlyMap<string, number>
+> {
+  const result = await readPendingInterestCountsForCompany();
+  return result.status === "ok" ? result.counts : new Map();
 }

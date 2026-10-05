@@ -18,10 +18,10 @@ import {
   DOCUMENT_GAP_LINE_CAP,
   groupMissingDocumentsByType,
 } from "@/lib/conversation/documents-gap";
-import { getUnreadConversationCount } from "@/lib/communication/unread";
-import { getUnreadConversationIdsForOrganization } from "@/lib/communication/organization-scope";
+import { getUnreadConversationIdsResult } from "@/lib/communication/unread";
+import { getUnreadConversationIdsForOrganizationResult } from "@/lib/communication/organization-scope";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
-import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
+import { readPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
 import { loadOwnRecentConfirmations } from "@/lib/journal/own-recent-confirmations";
 import { getOwnWorkerId } from "@/lib/projects/worker-project-access";
 
@@ -53,6 +53,68 @@ export type OpeningChip = { id: string; label: string };
 export type OpeningBrief =
   | { kind: "brief"; lines: string[]; chips: OpeningChip[] }
   | { kind: "none" };
+
+/** The person-brief sources whose read can fail independently (SEP-7). */
+export type PersonBriefSource =
+  | "bookings"
+  | "invitations"
+  | "documents"
+  | "opportunities"
+  | "calendar"
+  | "instructions"
+  | "confirmations"
+  | "unread"
+  | "learner"
+  | "profile";
+
+/** Same three outcomes as the employer brief: none / brief(+unknown) / unknown. */
+export type PersonOpeningBriefResult =
+  | {
+      kind: "brief";
+      lines: string[];
+      chips: OpeningChip[];
+      unknown: readonly PersonBriefSource[];
+      unknownNote: string | null;
+    }
+  | { kind: "none" }
+  | { kind: "unknown"; unknown: readonly PersonBriefSource[]; unknownNote: string };
+
+/**
+ * The employer sources whose read can fail independently. A failed source is
+ * NAMED here instead of vanishing: UNKNOWN is not ZERO (SEP-7).
+ */
+export type EmployerBriefSource =
+  | "workspace"
+  | "agency"
+  | "learners"
+  | "agency-offers"
+  | "interest"
+  | "bookings"
+  | "journal-reviews"
+  | "learning-review"
+  | "absences"
+  | "availability"
+  | "unread";
+
+/**
+ * The employer brief with the failure told apart from the all-clear.
+ *   brief    at least one line; `unknown` lists sources that could NOT be read
+ *            (the lines are true, the list is not necessarily complete)
+ *   none     EVERY source answered and none had anything — the only state in
+ *            which "nothing is waiting" may be said
+ *   unknown  no line, and at least one source could not be read — NOT "none"
+ */
+export type EmployerOpeningBriefResult =
+  | {
+      kind: "brief";
+      lines: string[];
+      chips: OpeningChip[];
+      unknown: readonly EmployerBriefSource[];
+      /** Set exactly when `unknown` is non-empty: the sentence that says so. */
+      unknownNote: string | null;
+    }
+  | { kind: "none" }
+  | { kind: "unknown"; unknown: readonly EmployerBriefSource[]; unknownNote: string };
 
 /**
  * The worker-brief rungs a caller may ask to leave out because the SAME
@@ -87,7 +149,16 @@ const MAX_LINES = 3;
 const MAX_CHIPS = 3;
 
 export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<OpeningBrief> {
+  // Historical shape, kept for its callers; the honest reader is the same body.
+  const result = await loadOpeningBriefResult(options);
+  return result.kind === "brief"
+    ? { kind: "brief", lines: result.lines, chips: result.chips }
+    : { kind: "none" };
+}
+
+export async function loadOpeningBriefResult(options?: OpeningBriefOptions): Promise<PersonOpeningBriefResult> {
   const t = await getTranslations("conversation.chat");
+  const unknown = new Set<PersonBriefSource>();
   // Omitting only ever REMOVES a line from the caller's own brief: every read
   // below is still the caller's own, so the list is never an authority.
   const omitted = omittedRungs(options);
@@ -114,14 +185,20 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
   // lib/guards/booking-visibility-honest.test.ts) — which is exactly why the
   // conversation has to carry the signal.
   try {
-    const pending = omitted.has("bookings") ? 0 : await getPendingIncomingBookingCount();
+    let pending = 0;
+    if (!omitted.has("bookings")) {
+      const read = await readPendingIncomingBookingCount();
+      if (read.status === "ok") pending = read.count;
+      else unknown.add("bookings");
+    }
     if (pending > 0) {
       const tBookings = await getTranslations("bookings");
       lines.push(`${tBookings("pendingLink")} — ${tBookings("pendingNote")}`);
       addChip("offers", t("chipOffers"));
     }
   } catch {
-    /* no line — a failed read never invents an offer */
+    /* no line — a failed read never invents an offer, and is never "none" */
+    unknown.add("bookings");
   }
 
   // 0a ── an invitation addressed to THIS person (owner contract §4D: someone
@@ -139,10 +216,13 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
         const first = inv.items[0];
         lines.push(t("briefInvitations", { count: inv.total, who: first.organizationName ?? first.inviterName ?? t("invitationSomeone") }));
         addChip("invitations", t("chipInvitations"));
+      } else if (inv.status === "error") {
+        unknown.add("invitations");
       }
     }
   } catch {
-    /* no line — a failed read never invents an invitation */
+    /* no line — a failed read never invents an invitation, and is never "none" */
+    unknown.add("invitations");
   }
 
   // 0b ── a document about to expire (owner contract 2026-09-04 §4D/§14).
@@ -159,8 +239,10 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
       lines.push(t("briefDocumentsExpiring", { count: docGap.gap.expiring.length }));
       addChip("documents-centre", t("documentsChip"));
     }
+    if (docGap.kind === "unavailable") unknown.add("documents");
   } catch {
-    /* no line — a failed read never invents a document gap */
+    /* no line — a failed read never invents a document gap, and is never "none" */
+    unknown.add("documents");
   }
 
   // 1 ── new matching opportunities ────────────────────────────────────────
@@ -193,7 +275,8 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
       }
     }
   } catch {
-    /* no line — never a fabricated one */
+    /* no line — never a fabricated one, and a failed read is never "none" */
+    unknown.add("opportunities");
   }
 
   // 2 ── calendar conflicts / overdue, and 3 ── unlogged work ──────────────
@@ -218,9 +301,13 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
         lines.push(t("briefLogToday"));
         addChip("logwork", t("chipLogWork"));
       }
+      const failedSource = Object.values(planning.sources).some(
+        (src) => (src as { status?: string }).status === "error",
+      );
+      if (failedSource) unknown.add("calendar");
     }
   } catch {
-    /* no line */
+    unknown.add("calendar");
   }
 
   // 3a ── work instructions waiting — a manager asked for something (e.g. a
@@ -235,7 +322,7 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
       }
     }
   } catch {
-    /* no line */
+    unknown.add("instructions");
   }
 
   // 3a' ── the employer CONFIRMED this person's work (owner contract §14 —
@@ -255,7 +342,8 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
       }
     }
   } catch {
-    /* no line — a failed read never invents a confirmation */
+    /* no line — a failed read never invents a confirmation, and is never "none" */
+    unknown.add("confirmations");
   }
 
   // 3b ── unread human messages (owner audit §4.4/§8: with the tab row gone,
@@ -263,14 +351,16 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
   // unread thread announces itself, with the one chip that opens it).
   try {
     if (lines.length < MAX_LINES && !omitted.has("unread")) {
-      const unread = await getUnreadConversationCount();
+      const unreadRead = await getUnreadConversationIdsResult();
+      if (unreadRead.status === "unavailable") unknown.add("unread");
+      const unread = unreadRead.status === "ok" ? unreadRead.ids.size : 0;
       if (unread > 0) {
         lines.push(t("briefUnreadMessages", { count: unread }));
         addChip("link:/dashboard/communication", t("navMessages"));
       }
     }
   } catch {
-    /* no line */
+    unknown.add("unread");
   }
 
   // 3b ── documents missing for the person's OWN stated countries. No
@@ -304,7 +394,7 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
       addChip("documents-centre", t("documentsChip"));
     }
   } catch {
-    /* no line */
+    unknown.add("documents");
   }
 
   // 4 ── the first missing profile step ────────────────────────────────────
@@ -330,7 +420,8 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
       }
     }
   } catch {
-    /* no line — a failed read never invents an enrolment */
+    /* no line — a failed read never invents an enrolment, and is never "none" */
+    unknown.add("learner");
   }
 
   try {
@@ -346,11 +437,22 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
       }
     }
   } catch {
-    /* no line */
+    unknown.add("profile");
   }
 
-  if (lines.length === 0) return { kind: "none" };
-  return { kind: "brief", lines: lines.slice(0, MAX_LINES), chips };
+  const unknownSources = [...unknown];
+  if (lines.length === 0) {
+    return unknownSources.length > 0
+      ? { kind: "unknown", unknown: unknownSources, unknownNote: t("briefPersonUnknown") }
+      : { kind: "none" };
+  }
+  return {
+    kind: "brief",
+    lines: lines.slice(0, MAX_LINES),
+    chips,
+    unknown: unknownSources,
+    unknownNote: unknownSources.length > 0 ? t("briefPersonUnknown") : null,
+  };
 }
 
 /**
@@ -375,7 +477,17 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
  * appear here — hiring is episodic; the daily loop is the product.
  */
 export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
+  // Historical shape, kept for its callers: a brief or `none`. The honest
+  // reader below is the same body; `unknown` collapses to `none` HERE only.
+  const result = await loadEmployerOpeningBriefResult();
+  return result.kind === "brief"
+    ? { kind: "brief", lines: result.lines, chips: result.chips }
+    : { kind: "none" };
+}
+
+export async function loadEmployerOpeningBriefResult(): Promise<EmployerOpeningBriefResult> {
   const t = await getTranslations("conversation.chat");
+  const unknown = new Set<EmployerBriefSource>();
 
   const lines: string[] = [];
   const chips: OpeningChip[] = [];
@@ -405,6 +517,8 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
         Promise.all([listAgencyOfferProgress(), listSharedRequestsForAgency()]),
         listAgencyPlacements(),
       ]);
+      // A failed placements read means "needs a replacement?" cannot be told.
+      if (placements.kind === "error") unknown.add("agency");
       if (progress.kind === "ok") {
         // A client's shared need whose accepted person did not start (the
         // worker declined) or whose placement ended is OPEN AGAIN: the client
@@ -431,7 +545,11 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
             lines.push(t("briefAgencySharedWithoutOffer", { count: withoutOffer }));
             addChip("agency:demand", t("chipClientDemand"));
           }
+        } else if (shared.kind === "error") {
+          unknown.add("agency");
         }
+      } else if (progress.kind === "error") {
+        unknown.add("agency");
       }
       const pendingClients = ws.signals.facts.clientConnectionsPending ?? 0;
       if (pendingClients > 0 && lines.length < MAX_LINES) {
@@ -444,6 +562,8 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
       if (learners.status === "ok" && learners.counts.pending > 0 && lines.length < MAX_LINES) {
         lines.push(t("briefEduLearnerInvitesPending", { count: learners.counts.pending }));
         addChip("link:/dashboard/network?relationship=student", t("chipInviteStudent"));
+      } else if (learners.status === "unavailable") {
+        unknown.add("learners");
       }
     }
     // Agency offers on the company's OWN demands still awaiting the client's
@@ -455,6 +575,8 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
       if (offers.kind === "ok" && offers.offers.length > 0) {
         lines.push(t("briefEmployerAgencyOffersWaiting", { count: offers.offers.length }));
         addChip("agency-offers", t("chipAgencyOffers"));
+      } else if (offers.kind === "error") {
+        unknown.add("agency-offers");
       }
     }
     // Candidates who raised a hand on the company's OWN demands and are
@@ -462,13 +584,18 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
     // the same read the candidates screen counts with). The chip is the
     // in-chat candidates answer, never a route out of the workspace.
     if (lines.length < MAX_LINES) {
-      const { listPendingInterestCountsForCompany } = await import("@/lib/opportunities/interest");
-      const pending = await listPendingInterestCountsForCompany();
-      let waiting = 0;
-      for (const n of pending.values()) waiting += n;
-      if (waiting > 0) {
-        lines.push(t("briefEmployerInterestWaiting", { count: waiting }));
-        addChip("candidates", t("chipInterestOnMyNeeds"));
+      const { readPendingInterestCountsForCompany } = await import("@/lib/opportunities/interest");
+      const pending = await readPendingInterestCountsForCompany();
+      if (pending.status === "ok") {
+        let waiting = 0;
+        for (const n of pending.counts.values()) waiting += n;
+        if (waiting > 0) {
+          lines.push(t("briefEmployerInterestWaiting", { count: waiting }));
+          addChip("candidates", t("chipInterestOnMyNeeds"));
+        }
+      } else if (pending.status === "unavailable") {
+        // no-company-context / needs-migration: nothing CAN be waiting — not a failure.
+        unknown.add("interest");
       }
     }
     // Workers who ANSWERED the company's own booking proposals — accepted or
@@ -477,27 +604,33 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
     // decline in the chat left the employer's next greeting silent. Same
     // read the bookings badge uses; the caller's own moves never count.
     if (lines.length < MAX_LINES) {
-      const { getBookingResponsesNewCount } = await import("@/lib/booking/booking-actions");
-      const answered = await getBookingResponsesNewCount({ fallbackDays: 14 });
-      if (answered > 0) {
-        lines.push(t("briefEmployerBookingResponses", { count: answered }));
+      const { readBookingResponsesNewCount } = await import("@/lib/booking/booking-actions");
+      const answered = await readBookingResponsesNewCount({ fallbackDays: 14 });
+      if (answered.status === "unavailable") {
+        unknown.add("bookings");
+      } else if (answered.count > 0) {
+        lines.push(t("briefEmployerBookingResponses", { count: answered.count }));
         addChip("link:/dashboard/bookings", t("chipEmployerBookings"));
       }
     }
   } catch {
-    /* no line — a failed read never invents attention */
+    /* no line — a failed read never invents attention, and is never "nothing" */
+    unknown.add("workspace");
   }
 
   // 1 ── work entries awaiting review ──────────────────────────────────────
   try {
-    const { fetchQuickReviewQueue } = await import("@/lib/journal/review-queue");
-    const queue = await fetchQuickReviewQueue();
-    if (queue.length > 0) {
-      lines.push(t("briefEmployerJournalReviews", { count: queue.length }));
+    const { readQuickReviewQueueResult } = await import("@/lib/journal/review-queue");
+    const queue = await readQuickReviewQueueResult();
+    if (queue.status === "unavailable") {
+      unknown.add("journal-reviews");
+    } else if (queue.status === "ok" && queue.entries.length > 0) {
+      lines.push(t("briefEmployerJournalReviews", { count: queue.entries.length }));
       addChip("link:/dashboard/inbox", t("chipEmployerInbox"));
     }
   } catch {
-    /* no line — a failed read never invents a queue */
+    /* no line — a failed read never invents a queue, and is never "nothing" */
+    unknown.add("journal-reviews");
   }
 
   // 1a ── learning suggestions awaiting review (EDU-5) ─────────────────────
@@ -509,12 +642,14 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
   try {
     if (lines.length < MAX_LINES) {
       const { createClient } = await import("@/lib/supabase/server");
-      const { produceReviewQueueFromSignals, countPendingReviewQueue } = await import(
+      const { produceReviewQueueFromSignals, readPendingReviewQueue } = await import(
         "@/lib/learning/signal-queue-producer"
       );
       const sb = await createClient();
       await produceReviewQueueFromSignals(sb);
-      const waiting = await countPendingReviewQueue(sb);
+      const pendingRead = await readPendingReviewQueue(sb);
+      if (pendingRead.status === "unavailable") unknown.add("learning-review");
+      const waiting = pendingRead.status === "ok" ? pendingRead.count : 0;
       if (waiting > 0) {
         lines.push(t("briefEmployerLearningReview", { count: waiting }));
         // The door exists ONLY in this N>0 state, so it is never empty
@@ -523,19 +658,22 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
       }
     }
   } catch {
-    /* no line — a failed read never invents a queue */
+    /* no line — a failed read never invents a queue, and is never "nothing" */
+    unknown.add("learning-review");
   }
 
   // 2 ── absence requests awaiting decision ────────────────────────────────
   try {
-    const { getManagerPendingAbsences } = await import("@/lib/leave/absences");
-    const pending = await getManagerPendingAbsences();
-    if (pending.applied && pending.pending.length > 0 && lines.length < MAX_LINES) {
+    const { readManagerPendingAbsences } = await import("@/lib/leave/absences");
+    const pending = await readManagerPendingAbsences();
+    if (pending.status === "unavailable") {
+      unknown.add("absences");
+    } else if (pending.status === "ok" && pending.pending.length > 0 && lines.length < MAX_LINES) {
       lines.push(t("briefEmployerPendingAbsences", { count: pending.pending.length }));
       addChip("link:/dashboard/absences", t("chipEmployerAbsences"));
     }
   } catch {
-    /* no line */
+    unknown.add("absences");
   }
 
   // 3 ── workers absent today ──────────────────────────────────────────────
@@ -551,9 +689,12 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
         lines.push(t("briefEmployerAbsentToday", { count: absent.length }));
         addChip("link:/dashboard/absences", t("chipEmployerAbsences"));
       }
+    } else if (availability.status === "error") {
+      // "unavailable" = the leave model is not applied yet: nobody CAN be absent.
+      unknown.add("availability");
     }
   } catch {
-    /* no line */
+    unknown.add("availability");
   }
 
   // 4 ── unread human messages ─────────────────────────────────────────────
@@ -564,19 +705,34 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
   try {
     if (lines.length < MAX_LINES) {
       const ctx = await resolveEmployerCompanyContext();
-      const unread =
-        ctx.kind === "ok"
-          ? (await getUnreadConversationIdsForOrganization(ctx.companyId)).size
-          : 0;
+      // No resolvable company → nothing to count (not a failure). A scope or
+      // unread read that FAILED is UNKNOWN, never "no unread".
+      let unread = 0;
+      if (ctx.kind === "ok") {
+        const scoped = await getUnreadConversationIdsForOrganizationResult(ctx.companyId);
+        if (scoped.status === "ok") unread = scoped.ids.size;
+        else unknown.add("unread");
+      }
       if (unread > 0) {
         lines.push(t("briefUnreadMessages", { count: unread }));
         addChip("link:/dashboard/communication", t("navMessages"));
       }
     }
   } catch {
-    /* no line */
+    unknown.add("unread");
   }
 
-  if (lines.length === 0) return { kind: "none" };
-  return { kind: "brief", lines: lines.slice(0, MAX_LINES), chips };
+  const unknownSources = [...unknown];
+  if (lines.length === 0) {
+    return unknownSources.length > 0
+      ? { kind: "unknown", unknown: unknownSources, unknownNote: t("briefEmployerUnknown") }
+      : { kind: "none" };
+  }
+  return {
+    kind: "brief",
+    lines: lines.slice(0, MAX_LINES),
+    chips,
+    unknown: unknownSources,
+    unknownNote: unknownSources.length > 0 ? t("briefEmployerUnknown") : null,
+  };
 }

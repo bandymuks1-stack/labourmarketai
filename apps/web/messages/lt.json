@@ -14042,6 +14042,8 @@
       "capacityAbsencesUnknown": "Šiuo metu nepasiekiama.",
       "capacityEmpty": "Komandoje kol kas nieko nėra — pakvieskite žmones.",
       "capacityUnavailable": "Komandos prieinamumo dabar nuskaityti nepavyko.",
+      "briefEmployerUnknown": "Šiuo metu negalėjau patikrinti visko jūsų įmonės sąraše. Tai nereiškia, kad nieko nelaukia.",
+      "briefPersonUnknown": "Šiuo metu negalėjau patikrinti visko jūsų sąraše. Tai nereiškia, kad nieko nelaukia.",
       "chipAddTask": "Pridėti užduotį",
       "workerProjectsIntro": "Jūsų projektai ({count} aktyv.):",
       "workerProjectsEnded": "baigta",
@@ -18409,6 +18411,14 @@
       "title": "Jūsų istorija keliauja su jumis",
       "body": "Kiekvienas užfiksuotas darbas ją papildo. Pasiimkite ją į kitą galimybę.",
       "cta": "Pažiūrėti, kur galite eiti"
+    },
+    "rail": {
+      "label": "Nuo darbo iki istorijos",
+      "work": "Darbas",
+      "evidence": "Įrodymai",
+      "confirmed": "Patvirtinta",
+      "history": "Istorija",
+      "next": "Toliau"
     }
   },
   "workContext": {
@@ -18491,6 +18501,56 @@
       "projectLabel": "Projektas",
       "projectPlaceholder": "Pasirinkite projektą",
       "noProjects": "Neturite atvirų projektų, kuriems galėtumėte paskirti komandą."
+    }
+  },
+  "homeStage": {
+    "regions": {
+      "waiting": {
+        "eyebrow": "Reikia jūsų",
+        "title": "Kas *laukia* jūsų",
+        "clear": "Nieko, kas lauktų jūsų.",
+        "unknown": "Nepavyko nuskaityti, kas laukia jūsų."
+      },
+      "running": {
+        "eyebrow": "Vyksta",
+        "title": "Kas dabar *vyksta*",
+        "projectsUnknown": "Nepavyko nuskaityti jums priskirtų projektų."
+      },
+      "because": {
+        "eyebrow": "Kas pasikeitė",
+        "title": "Dėl to, kas *įvyko*",
+        "unknown": "Nepavyko nuskaityti, kas pasikeitė.",
+        "also": "Taip pat",
+        "all": "Visa veikla"
+      },
+      "outside": {
+        "eyebrow": "Už jūsų sienų",
+        "title": "Kas yra *rinkoje*"
+      }
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Prasidėjo darbo santykis",
+        "relationshipEnded": "Darbo santykis baigėsi",
+        "bookingAgreed": "Rezervacija sutarta",
+        "bookingRefused": "Rezervacija atmesta",
+        "bookingWithdrawn": "Rezervacija atšaukta",
+        "absenceApproved": "Nebuvimas patvirtintas",
+        "absenceRefused": "Nebuvimas atmestas",
+        "decisionRecorded": "Sprendimas užfiksuotas",
+        "acknowledgementRecorded": "Susipažinimas užfiksuotas",
+        "invitationAnswered": "Į kvietimą atsakyta"
+      },
+      "state": {
+        "engagementActive": "Įdarbinimas: aktyvus",
+        "engagementClosed": "Įdarbinimas: baigtas",
+        "bookingConfirmed": "Rezervacija: patvirtinta",
+        "bookingClosed": "Rezervacija: uždaryta",
+        "absenceDecided": "Nebuvimas: išspręstas",
+        "workflowClosed": "Patvirtinimas: uždarytas",
+        "documentAcknowledged": "Dokumentas: susipažinta",
+        "relationshipFormed": "Santykis: užmegztas"
+      }
     }
   }
 }

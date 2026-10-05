@@ -24,7 +24,7 @@ describe("the employer opening brief", () => {
     // same — each identity to its OWN brief — and the employer call takes
     // no option at all.
     expect(chat).toMatch(
-      /identity === "person" \? loadOpeningBrief\(briefOptions\) : loadEmployerOpeningBrief\(\)/,
+      /identity === "person" \? loadOpeningBriefResult\(briefOptions\) : loadEmployerOpeningBriefResult\(\)/,
     );
     // The old silence gate must not come back.
     const opener = chat.slice(chat.indexOf("openedWithStateRef.current) return"));
@@ -33,11 +33,11 @@ describe("the employer opening brief", () => {
 
   it("leads with the daily loop, not recruitment", () => {
     const src = read("lib", "conversation", "opening-brief.ts");
-    const fn = src.slice(src.indexOf("export async function loadEmployerOpeningBrief"));
+    const fn = src.slice(src.indexOf("export async function loadEmployerOpeningBriefResult()"));
     // The manager's morning ladder, in order: reviews → absence decisions →
     // absent today → unread. Recruitment reads must NOT appear.
-    const reviews = fn.indexOf("fetchQuickReviewQueue");
-    const absences = fn.indexOf("getManagerPendingAbsences");
+    const reviews = fn.indexOf("readQuickReviewQueueResult");
+    const absences = fn.indexOf("readManagerPendingAbsences");
     const absentToday = fn.indexOf("absentOn");
     const unread = fn.indexOf("getUnreadConversationIdsForOrganization");
     expect(reviews).toBeGreaterThan(-1);
@@ -52,8 +52,8 @@ describe("the employer opening brief", () => {
     // through the pending-interest count, never a scouting run.
     expect(fn).not.toMatch(/scouting|create-demand|matches/i);
     expect(fn).not.toMatch(/runScouting|listCompanyDemands/);
-    const rungStart = fn.indexOf("listPendingInterestCountsForCompany");
-    const rungEnd = fn.indexOf("fetchQuickReviewQueue");
+    const rungStart = fn.indexOf("readPendingInterestCountsForCompany");
+    const rungEnd = fn.indexOf("readQuickReviewQueueResult");
     expect(rungStart).toBeGreaterThan(-1);
     const outsideRung = fn.slice(0, fn.lastIndexOf("// Candidates who raised a hand", rungStart)) + fn.slice(rungEnd);
     expect(outsideRung).not.toMatch(/candidate/i);
@@ -61,13 +61,18 @@ describe("the employer opening brief", () => {
 
   it("keeps the worker brief's honesty contract: caps and silent failure", () => {
     const src = read("lib", "conversation", "opening-brief.ts");
-    const fn = src.slice(src.indexOf("export async function loadEmployerOpeningBrief"));
+    const fn = src.slice(src.indexOf("export async function loadEmployerOpeningBriefResult()"));
     expect(fn).toContain("MAX_LINES");
     expect(fn).toContain("MAX_CHIPS");
-    expect(fn).toContain('return { kind: "none" }');
-    // Four reads, four independent try/catch — one failed read must not
-    // silence the others and must never invent a line.
-    expect((fn.match(/} catch \{/g) ?? []).length).toBeGreaterThanOrEqual(4);
+    // `none` is reserved for "every source answered and none had anything";
+    // a failed source makes it `unknown` (SEP-7) — both must stay expressible.
+    expect(fn).toContain('{ kind: "none" }');
+    expect(fn).toContain('kind: "unknown"');
+    // Independent try/catch per read — one failed read must not silence the
+    // others, must never invent a line, and must NAME itself as unknown.
+    const catches = fn.match(/} catch \{/g) ?? [];
+    expect(catches.length).toBeGreaterThanOrEqual(4);
+    expect((fn.match(/unknown\.add\(/g) ?? []).length).toBeGreaterThanOrEqual(catches.length);
   });
 
   it("the employer lines exist in every ROUTED locale", () => {

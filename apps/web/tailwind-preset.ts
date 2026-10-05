@@ -25,6 +25,7 @@ const preset = {
     extend: {
       colors: {
         ink: colors.ink,
+        identity: colors.identity,
         brand: colors.brand,
         state: colors.state,
         text: colors.text,
@@ -54,6 +55,7 @@ const preset = {
         display: [...typography.fontFamily.display],
         sans: [...typography.fontFamily.sans],
         mono: [...typography.fontFamily.mono],
+        accent: [...typography.fontFamily.accent],
       },
       letterSpacing: {
         tightest: typography.letterSpacing.tightest,

@@ -124,8 +124,8 @@ describe("the day object surface stays honest", () => {
 
   it("a self-confirmation is never drawn in the confirmation green", () => {
     const view = readFileSync(join(root, "components/app/journal/journal-day-object.tsx"), "utf8");
-    expect(view).toMatch(/state="SELF_ATTESTED"/);
-    expect(view).toMatch(/state="ORGANIZATION_ATTESTED"/);
+    expect(view).toMatch(/workStateOfStanding\("SELF_ATTESTED"\)/);
+    expect(view).toMatch(/workStateOfStanding\("ORGANIZATION_ATTESTED"\)/);
   });
 });
 

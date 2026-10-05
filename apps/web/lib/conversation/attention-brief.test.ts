@@ -12,7 +12,7 @@ import { join } from "node:path";
 
 const APP = join(__dirname, "..", "..");
 const SRC = readFileSync(join(__dirname, "opening-brief.ts"), "utf8");
-const FN = SRC.slice(SRC.indexOf("export async function loadEmployerOpeningBrief"));
+const FN = SRC.slice(SRC.indexOf("export async function loadEmployerOpeningBriefResult"));
 
 describe("the employer brief carries agency and institution attention", () => {
   it("reads the capability flags from the ONE starter-context read, then the canonical bridge / learner reads", () => {
@@ -42,7 +42,7 @@ describe("the employer brief carries agency and institution attention", () => {
   });
 
   it("the attention rungs sit BEFORE the operations ladder and inside their own try (a failed read invents nothing)", () => {
-    expect(FN.indexOf("loadCompanyStarterContext")).toBeLessThan(FN.indexOf("fetchQuickReviewQueue"));
+    expect(FN.indexOf("loadCompanyStarterContext")).toBeLessThan(FN.indexOf("readQuickReviewQueueResult"));
     const rung = FN.slice(FN.indexOf("// 0 ── ATTENTION"), FN.indexOf("// 1 ── work entries"));
     expect(rung).toMatch(/^\s*try \{/m);
     expect(rung).toMatch(/\} catch \{/);
@@ -50,10 +50,10 @@ describe("the employer brief carries agency and institution attention", () => {
   });
 
   it("the employer brief names the candidates still waiting for an answer, from the ONE pending-interest read, with the in-chat candidates chip", () => {
-    expect(FN).toMatch(/listPendingInterestCountsForCompany\(\)/);
+    expect(FN).toMatch(/readPendingInterestCountsForCompany\(\)/);
     expect(FN).toMatch(/briefEmployerInterestWaiting/);
     expect(FN).toMatch(/addChip\("candidates", t\("chipInterestOnMyNeeds"\)\)/);
-    expect(FN.indexOf("listPendingInterestCountsForCompany")).toBeLessThan(FN.indexOf("fetchQuickReviewQueue"));
+    expect(FN.indexOf("readPendingInterestCountsForCompany")).toBeLessThan(FN.indexOf("readQuickReviewQueueResult"));
   });
 
   it("the employer brief names agency offers awaiting the client's decision, from the SAME chat read, with the in-chat offers chip", () => {

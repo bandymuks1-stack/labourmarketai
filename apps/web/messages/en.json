@@ -14042,6 +14042,8 @@
       "capacityAbsencesUnknown": "Not available right now.",
       "capacityEmpty": "Nobody is on the team yet — invite people.",
       "capacityUnavailable": "The team's availability could not be read right now.",
+      "briefEmployerUnknown": "I could not check everything on your company's list just now. That is not the same as nothing waiting.",
+      "briefPersonUnknown": "I could not check everything on your list just now. That is not the same as nothing waiting.",
       "chipAddTask": "Add a task",
       "workerProjectsIntro": "Your projects ({count} active):",
       "workerProjectsEnded": "ended",
@@ -18409,6 +18411,14 @@
       "title": "Your history goes with you",
       "body": "Every job you record adds to it. Take it to the next opportunity.",
       "cta": "See where you can go"
+    },
+    "rail": {
+      "label": "From work to history",
+      "work": "Work",
+      "evidence": "Evidence",
+      "confirmed": "Confirmed",
+      "history": "History",
+      "next": "Next"
     }
   },
   "workContext": {
@@ -18491,6 +18501,56 @@
       "projectLabel": "Project",
       "projectPlaceholder": "Choose a project",
       "noProjects": "You have no open projects to assign the team to."
+    }
+  },
+  "homeStage": {
+    "regions": {
+      "waiting": {
+        "eyebrow": "Needs you",
+        "title": "What is *waiting* on you",
+        "clear": "Nothing is waiting on you.",
+        "unknown": "What is waiting on you could not be read."
+      },
+      "running": {
+        "eyebrow": "In motion",
+        "title": "What is *running* now",
+        "projectsUnknown": "Your assigned projects could not be read."
+      },
+      "because": {
+        "eyebrow": "What changed",
+        "title": "Because of what *happened*",
+        "unknown": "What changed could not be read.",
+        "also": "Also",
+        "all": "All activity"
+      },
+      "outside": {
+        "eyebrow": "Outside your walls",
+        "title": "What is in the *market*"
+      }
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "A working relationship started",
+        "relationshipEnded": "A working relationship ended",
+        "bookingAgreed": "The booking was agreed",
+        "bookingRefused": "The booking was refused",
+        "bookingWithdrawn": "The booking was withdrawn",
+        "absenceApproved": "The absence was approved",
+        "absenceRefused": "The absence was refused",
+        "decisionRecorded": "The decision was recorded",
+        "acknowledgementRecorded": "The acknowledgement was recorded",
+        "invitationAnswered": "The invitation was answered"
+      },
+      "state": {
+        "engagementActive": "Engagement: active",
+        "engagementClosed": "Engagement: closed",
+        "bookingConfirmed": "Booking: confirmed",
+        "bookingClosed": "Booking: closed",
+        "absenceDecided": "Absence: decided",
+        "workflowClosed": "Approval: closed",
+        "documentAcknowledged": "Document: acknowledged",
+        "relationshipFormed": "Relationship: formed"
+      }
     }
   }
 }

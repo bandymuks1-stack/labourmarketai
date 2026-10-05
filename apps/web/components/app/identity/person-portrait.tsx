@@ -1,3 +1,4 @@
+import { PersonFigure, plate } from "@/components/app/identity/identity-family";
 import {
   PLAYER_IDENTITY_AVATAR_BORDER,
   PLAYER_IDENTITY_FALLBACK_SURFACE,
@@ -26,6 +27,7 @@ export function PersonPortrait({
   width,
   working = false,
   testids,
+  identityKey,
   className,
 }: {
   readonly name: string;
@@ -35,8 +37,15 @@ export function PersonPortrait({
   readonly width: string;
   readonly working?: boolean;
   readonly testids?: { readonly photo: string; readonly monogram: string };
+  /** Stable id that picks the person's tonal plate; the name when absent. */
+  readonly identityKey?: string;
   readonly className?: string;
 }) {
+  const key = identityKey ?? name;
+  // Below ~40 px the engraved figure is detail the eye cannot read: the tile
+  // is the plate and the monogram only, exactly as in the identity family.
+  const px = /^(\d+(?:\.\d+)?)px$/.exec(width);
+  const showFigure = !px || Number(px[1]) >= 40;
   return (
     <span
       className={cn("identity-portrait relative inline-block shrink-0 overflow-hidden rounded-xl", className)}
@@ -57,13 +66,25 @@ export function PersonPortrait({
           aria-hidden
           data-testid={testids?.monogram}
           className={cn(
-            "flex h-full w-full items-center justify-center rounded-xl font-display font-bold tracking-tightest",
+            "relative flex h-full w-full items-center justify-center overflow-hidden rounded-xl font-display font-semibold tracking-tightest",
             PLAYER_IDENTITY_FALLBACK_SURFACE,
             PLAYER_IDENTITY_AVATAR_BORDER,
           )}
-          style={{ fontSize: `calc(${width} * 0.36)` }}
+          // The deliberate no-photo person: the identity family's tonal
+          // plate (theme tokens) over the canonical fallback surface, with
+          // the engraved figure. The base classes stay as the underlay.
+          style={{ background: plate(key), fontSize: `calc(${width} * ${showFigure ? 0.27 : 0.36})` }}
         >
-          {initials}
+          {showFigure ? <PersonFigure id={key} /> : null}
+          <span
+            className={cn(
+              "text-[rgb(var(--c-identity-figure)/0.88)]",
+              showFigure && "absolute inset-x-0 flex items-end justify-center leading-none",
+            )}
+            style={showFigure ? { top: "56%", bottom: "6%" } : undefined}
+          >
+            {initials}
+          </span>
         </span>
       )}
       <span

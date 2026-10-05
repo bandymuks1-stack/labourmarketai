@@ -88,9 +88,12 @@ describe("6. the worker's first screen is the conversation opening with ŠIANDIE
     expect(page).toMatch(/openingContext=\{workerToday \? <TodayScreen\b/);
     const screen = read("components", "app", "today", "today-screen.tsx");
     const header = screen.indexOf('data-testid="today-header"');
-    const next = screen.indexOf('data-testid="today-next"');
+    // The header comes first; the WAITING region (which holds the ONE next
+    // action, `today-next`) is mounted after it.
+    const waiting = screen.indexOf("<HomeWaiting");
     expect(header).toBeGreaterThan(-1);
-    expect(next).toBeGreaterThan(header);
+    expect(waiting).toBeGreaterThan(header);
+    expect(read("components", "app", "home", "home-regions.tsx")).toContain('data-testid="today-next"');
     // No welcome card, no first sentence of its own.
     expect(screen).not.toMatch(/PersonalWorkspaceIntro|openingBrief|starterChips/);
   });

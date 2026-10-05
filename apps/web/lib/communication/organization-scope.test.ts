@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
-vi.mock("./unread", () => ({ getUnreadConversationIds: vi.fn() }));
+vi.mock("./unread", () => ({ getUnreadConversationIds: vi.fn(), getUnreadConversationIdsResult: vi.fn() }));
 
 import { conversationBelongsToOrganization } from "./organization-scope";
 

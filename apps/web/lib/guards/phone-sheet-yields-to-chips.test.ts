@@ -31,7 +31,7 @@ describe("on a phone the bottom sheet yields to a question the thread just asked
     const chat = read("components/app/conversation/chat/conversation-chat.tsx");
     const opener = chat.slice(chat.indexOf("const openedWithStateRef = useRef(false);"));
     const block = opener.slice(0, opener.indexOf("/* the greeting stands on its own"));
-    expect(block).toMatch(/chips: brief\.chips,\s*\}\);[\s\S]*?if \(brief\.chips\.length > 0\) setChipsPostedAt\(Date\.now\(\)\);/);
+    expect(block).toMatch(/chips: brief\.kind === "unknown" \? \[\] : brief\.chips,\s*\}\);[\s\S]*?if \(brief\.kind === "brief" && brief\.chips\.length > 0\) setChipsPostedAt\(Date\.now\(\)\);/);
     // Negative control: a brief with NO chips asks nothing and must not stamp.
     expect(block).not.toMatch(/\n\s*setChipsPostedAt\(Date\.now\(\)\);/);
   });

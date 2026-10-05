@@ -676,6 +676,14 @@ export default async function VerifiedCvPage({
               legend: { managerRecord: tStory("legend.managerRecord"), recorded: tStory("legend.recorded") },
               skillsTitle: tStory("skillsTitle"),
               tiers: { confirmed: t("tiers.confirmed"), evidence: t("tiers.evidence"), declared: t("tiers.declared") },
+              rail: {
+                label: tStory("rail.label"),
+                work: tStory("rail.work"),
+                evidence: tStory("rail.evidence"),
+                confirmed: tStory("rail.confirmed"),
+                history: tStory("rail.history"),
+                next: tStory("rail.next"),
+              },
               next: {
                 title: tStory("next.title"),
                 body: tStory("next.body"),
