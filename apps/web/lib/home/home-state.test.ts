@@ -57,7 +57,10 @@ describe("home state — UNKNOWN is never ZERO", () => {
 
   it("waiting is unknown only when BOTH the next action and the doors failed", () => {
     expect(deriveWaiting({ kind: "unknown" }, { kind: "unknown" }).kind).toBe("unknown");
-    expect(deriveWaiting({ kind: "unknown" }, { kind: "known", items: [] })).toEqual({ kind: "known", items: [] });
+    // A failed next-action read next to a readable, empty door list is NOT
+    // "nothing waiting": the region stays known but flags the failed half.
+    expect(deriveWaiting({ kind: "unknown" }, { kind: "known", items: [] })).toEqual({ kind: "known", items: [], nextUnknown: true });
+    expect(deriveWaiting({ kind: "action", dim: "location", href: "/x", whyKey: "why.location", stale: false }, { kind: "unknown" })).toMatchObject({ kind: "known", nextUnknown: false });
     const half = deriveWaiting(
       { kind: "action", dim: "availability", href: "/x", whyKey: "why.availability", stale: false },
       { kind: "unknown" },

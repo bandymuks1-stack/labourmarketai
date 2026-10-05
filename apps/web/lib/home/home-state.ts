@@ -81,7 +81,13 @@ export type WaitingItem =
   | { readonly kind: "open"; readonly item: TodayOpenItem };
 
 export type WaitingRegion =
-  | { readonly kind: "known"; readonly items: readonly WaitingItem[] }
+  | {
+      readonly kind: "known";
+      readonly items: readonly WaitingItem[];
+      /** The work-card engine could not answer — the view must NAME that,
+       *  never let an empty list read as "nothing is waiting". */
+      readonly nextUnknown: boolean;
+    }
   | { readonly kind: "unknown" };
 
 export type HomeProject = {
@@ -195,7 +201,7 @@ export function deriveWaiting(next: TodayNext, open: TodayOpenItems): WaitingReg
   const items: WaitingItem[] = [];
   if (next.kind === "action") items.push({ kind: "next", next });
   if (open.kind === "known") for (const item of open.items) items.push({ kind: "open", item });
-  return { kind: "known", items };
+  return { kind: "known", items, nextUnknown: next.kind === "unknown" };
 }
 
 export function deriveRunning(

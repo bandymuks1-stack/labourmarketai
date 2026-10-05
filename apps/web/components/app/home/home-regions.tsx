@@ -246,7 +246,13 @@ export async function HomeWaitingView({
         </p>
       ) : null}
 
-      {!next && open.length === 0 && unknownDoors.length === 0 ? (
+      {region.nextUnknown ? (
+        <p className={NOTE} data-testid="today-next-unknown" role="status">
+          {t("next.unknown")}
+        </p>
+      ) : null}
+
+      {!next && open.length === 0 && unknownDoors.length === 0 && !region.nextUnknown ? (
         <p className={cn(NOTE, "flex items-center gap-3")} data-testid="home-waiting-clear">
           <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[rgba(52,211,153,0.16)] text-[rgb(110,231,183)]">
             <Check className="h-4 w-4" aria-hidden />
