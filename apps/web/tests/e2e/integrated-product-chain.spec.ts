@@ -33,6 +33,10 @@ import { db, dbOk, HAS_LOCAL_STACK, SUPA_SERVICE, SUPA_URL } from "./market-map-
 const HAS = HAS_LOCAL_STACK && !!process.env.SUPABASE_TEST_URL;
 const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 const PASSWORD = "Pw-chain-qa-1!";
+/** The composer stamps an entry with the PERSON's local calendar day while the work-in-numbers/CV reader treats any day
+ *  after the UTC "today" as future and leaves it out (a product gap for people east of UTC between local and UTC midnight,
+ *  recorded in the QA report). The run pins the browser zone to UTC so the proof does not depend on the clock hour. */
+const QA_TZ = "UTC";
 const TAG = process.env.CHAIN_TAG ?? randomBytes(3).toString("hex");
 const SHOTS = resolve(process.cwd(), "../../qa-shots");
 const STATE_FILE = resolve(process.cwd(), `../../qa-state/chain-${TAG}.json`);
@@ -130,6 +134,13 @@ async function createAccount(key: string, role: "worker" | "company", extra: { c
     email_confirm: true,
     user_metadata: { full_name: full, role, locale: "en" },
   });
+  if (res.status === 422 && /email_exists/.test(await res.clone().text())) {
+    // RE-RUN after a step failed before it could remember the account: reuse the already-created, already-onboarded user.
+    const users = ((await (await authAdmin("GET", "admin/users?per_page=1000")).json()) as { users: { id: string; email: string }[] }).users;
+    const id = users.find((u) => u.email === mail)!.id;
+    const w0 = await rows<{ id: string }>(`workers?profile_id=eq.${id}&select=id`);
+    return { id, email: mail, name: full, jwt: await jwtFor(mail), workerId: w0[0]?.id ?? null };
+  }
   if (!res.ok) throw new Error(`create user ${mail}: ${res.status} ${await res.text()}`);
   const id = ((await res.json()) as { id: string }).id;
   const jwt = await jwtFor(mail);
@@ -167,6 +178,25 @@ async function settle(page: Page) {
 /** A manager works in the ORGANISATION workspace (the shell opens in "Personal space" until the person
  *  switches - an explicit, durable choice). Runs for NEW and for CACHED pages: 1b logs the owner in
  *  before the organisation exists, so a cached page would otherwise stay in the personal space. */
+/** `next dev` restarts itself when it nears its memory threshold (observed every ~25 min of a full pass); a navigation
+ *  in flight then hangs or is refused. Retries navigation TIMEOUT / CONNECTION errors only - assertions are untouched. */
+function hardenGoto(page: Page) {
+  const orig = page.goto.bind(page);
+  (page as any).goto = async (url: string, opts?: Parameters<Page["goto"]>[1]) => {
+    let last: unknown;
+    for (let attempt = 0; attempt < 4; attempt++) {
+      try {
+        return await orig(url, { ...opts, timeout: attempt === 0 ? 150_000 : 240_000 });
+      } catch (e) {
+        last = e;
+        if (!/Timeout|ERR_CONNECTION_(REFUSED|RESET)/i.test(String(e))) throw e;
+        await new Promise((r) => setTimeout(r, 15_000)); // the dev server is restarting
+      }
+    }
+    throw last;
+  };
+}
+
 const pickedOrg = new Set<string>();
 async function ensureOrgWorkspace(page: Page, key: string) {
   const wsOrg = key === "own" || key === "rep2" ? (S.ORG as string | undefined) : undefined;
@@ -202,11 +232,13 @@ async function loginUi(browser: Browser, key: string): Promise<Page> {
     return cached;
   }
   const a = S.accounts?.[key] as Account;
-  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, timezoneId: QA_TZ });
   ctxs.push(ctx);
   const page = await ctx.newPage();
+  hardenGoto(page);
   page.setDefaultTimeout(120_000);
   page.setDefaultNavigationTimeout(240_000);
+  hardenGoto(page);
   await page.goto("/en/auth/login", { waitUntil: "domcontentloaded" });
   await settle(page);
   await page.locator('input[type="email"]').fill(a.email);
@@ -247,9 +279,10 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
   // =========================================================================
   test("1a. REGISTRATION: a worker signs up with e-mail + password only, gets a usable session at once, onboards with no e-mail step", async ({ browser }) => {
     const mail = email("reg");
-    const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, timezoneId: QA_TZ });
     ctxs.push(ctx);
     const page = await ctx.newPage();
+    hardenGoto(page);
     page.setDefaultTimeout(180_000);
     page.setDefaultNavigationTimeout(240_000);
     await page.goto("/en/auth/signup", { waitUntil: "domcontentloaded" });
@@ -298,9 +331,10 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
 
   test("1b. ORGANISATION: a company owner registers and creates the organisation through the product form", async ({ browser }) => {
     const mail = email("own");
-    const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, timezoneId: QA_TZ });
     ctxs.push(ctx);
     const page = await ctx.newPage();
+    hardenGoto(page);
     page.setDefaultTimeout(180_000);
     page.setDefaultNavigationTimeout(240_000);
     await page.goto("/en/auth/signup", { waitUntil: "domcontentloaded" });
@@ -1109,6 +1143,8 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     const own = await acct("own");
     const inv = await createAccount("inv", "worker");
     rememberAccount("inv", inv);
+    // re-run hygiene: a pending invitation left by an interrupted earlier attempt keeps its OLD token hash
+    await db("DELETE", `invitations?invited_email=eq.${encodeURIComponent(inv.email)}&status=eq.pending`);
     const { token, res } = await createInvitation(own.jwt, {
       p_invited_email: inv.email,
       p_invited_name: nm("inv"),
@@ -1211,9 +1247,10 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     const invId = ((await seed.json()) as { id: string }[])[0]?.id;
     expect(invId).toBeTruthy();
     // the attacker REGISTERS with that address through the real UI and gets in at once
-    const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, timezoneId: QA_TZ });
     ctxs.push(ctx);
     const page = await ctx.newPage();
+    hardenGoto(page);
     page.setDefaultTimeout(180_000);
     page.setDefaultNavigationTimeout(240_000);
     await page.goto("/en/auth/signup", { waitUntil: "domcontentloaded" });
@@ -1697,7 +1734,7 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     await expect(own.getByText(`QA${TAG} person-handmade-offer`).first()).toBeVisible({ timeout: 120_000 });
     const rowsOwn = await listingRows(own);
     await shot(own, "7b-listings-own");
-    const kindOf = (needle: string) => rowsOwn.find((r) => r.text.includes(needle))?.kind;
+    const kindOf = (needle: string) => rowsOwn.find((r) => r.text.includes(`QA${TAG} ${needle}`))?.kind; // THIS run's rows only (earlier tags stay in the local DB)
     expect(kindOf("person-handmade-offer"), "a person's listing is a person").toBe("person");
     expect(kindOf("individual-service-offer"), "a service offering is an individual service provider").toBe("service_provider");
     expect(kindOf("Welder"), "agency supply -> agency (source kind)").toBe("agency");
@@ -1718,7 +1755,7 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     await go(repPage, "/en/dashboard/listings", '[data-testid="listings-page"]');
     await expect(repPage.getByText(`QA${TAG} company-project-need`).first()).toBeVisible({ timeout: 120_000 });
     const repRows = await listingRows(repPage);
-    expect(repRows.find((r) => r.text.includes("company-project-need"))?.kind, "member view: company (capability employer/client)").toBe("company");
+    expect(repRows.find((r) => r.text.includes(`QA${TAG} company-project-need`))?.kind, "member view: company (capability employer/client)").toBe("company");
     await shot(repPage, "7b-listings-org-member");
     // filtering by actor kind narrows the list
     await repPage.getByTestId("market-actor-filter").getByRole("button", { name: /^Company$/ }).click().catch(() => undefined);
@@ -1809,9 +1846,10 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
       p_metrics: [], p_project_id: null, p_project_explicit: false,
     });
     expect(c.status, JSON.stringify(c.json)).toBeLessThan(300);
-    const ctx = await browser.newContext();
+    const ctx = await browser.newContext({ timezoneId: QA_TZ });
     ctxs.push(ctx);
     const page = await ctx.newPage();
+    hardenGoto(page);
     page.setDefaultTimeout(180_000);
     page.setDefaultNavigationTimeout(240_000);
     await page.goto("/en/auth/login", { waitUntil: "domcontentloaded" });
@@ -2084,7 +2122,7 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     const upText = await up.text();
     test.info().annotations.push({ type: "indep-photo-upload", description: `${up.status} ${upText.slice(0, 120)}` });
     expect(up.ok, `author uploads through the real storage API: ${up.status} ${upText}`).toBe(true);
-    await dbOk("POST", "journal_entry_photos", { entry_id: eid, storage_path: path, upload_status: "uploaded", mime_type: "image/png", size_bytes: PNG.length });
+    await dbOk("POST", "journal_entry_photos", { entry_id: eid, profile_id: iw.id, file_name: "site.png", storage_path: path, upload_status: "uploaded", mime_type: "image/png", file_size_bytes: PNG.length }); // NAMED SEED: the row the composer writes after the upload
     const direct = async (jwt: string | null) => (await fetch(`${SUPA_URL}/storage/v1/object/authenticated/journal-entry-photos/${path}`, { headers: { apikey: ANON, Authorization: `Bearer ${jwt ?? ANON}` } })).ok;
     expect(await direct(iw.jwt), "author").toBe(true);
     expect(await direct(rep2.jwt), "client rep").toBe(true);
@@ -2128,9 +2166,9 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     if (!S.VACANCIES) {
       // NAMED SEED (local service role): same columns the import writes. active / expired / inactive.
       const ins = await dbOk("POST", "public_vacancies", [
-        { ...base, external_id: `QA${TAG}-1`, content_hash: sha(`1${TAG}`), title_raw: secret, occupation_raw: occ, is_active: true },
+        { ...base, external_id: `QA${TAG}-1`, content_hash: sha(`1${TAG}`), title_raw: secret, occupation_raw: occ, is_active: true, expires_at: null },
         { ...base, external_id: `QA${TAG}-2`, content_hash: sha(`2${TAG}`), title_raw: `${secret}-EXPIRED`, occupation_raw: `QA${TAG} Expired vacancy`, is_active: true, expires_at: "2020-01-01T00:00:00Z" },
-        { ...base, external_id: `QA${TAG}-3`, content_hash: sha(`3${TAG}`), title_raw: `${secret}-INACTIVE`, occupation_raw: `QA${TAG} Inactive vacancy`, is_active: false },
+        { ...base, external_id: `QA${TAG}-3`, content_hash: sha(`3${TAG}`), title_raw: `${secret}-INACTIVE`, occupation_raw: `QA${TAG} Inactive vacancy`, is_active: false, expires_at: null },
       ]);
       save({ VACANCIES: ((await ins.json()) as { id: string }[]).map((r) => r.id) });
     }
@@ -2221,11 +2259,152 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
       await expect(page.getByText(`QA${TAG} person-handmade-offer`).or(page.getByText(`QA${TAG} agency-goods-offer`)).first()).toBeVisible({ timeout: 120_000 });
       const rr = await listingRows(page);
       for (const [needle, kind] of Object.entries(expects)) {
-        const row = rr.find((x) => x.text.includes(needle));
+        const row = rr.find((x) => x.text.includes(`QA${TAG} ${needle}`));
         if (kind === undefined) expect(row, `${key}: ${needle} is not discoverable`).toBeUndefined();
         else expect(row?.kind, `${key} sees ${needle} as ${kind}`).toBe(kind);
       }
       if (key === "nm") await shot(page, "10b-chips-foreign-viewer");
     }
+  });
+
+  // =========================================================================
+  // STEP 11 - OWN-WORKSPACE EVIDENCE PICKER FOR A SOLE TRADER (#2149 9e57bce91)
+  // =========================================================================
+  test("11a. SOLE TRADER EVIDENCE PICKER: own-workspace entries on a client project are OFFERED as task evidence while the PERSON assignment is active; never on a project they are not assigned to; refused after the assignment ends; an unassigned independent sees nothing", async ({ browser }) => {
+    const rep2 = await acct("rep2");
+    if (!S.accounts?.sole) {
+      // A sole trader is a PERSON (worker role) who also owns a workspace of their own. NAMED SEED (local service role):
+      // the own organisation row - the existing on_org_owner_engagement trigger provisions the active 'owner' engagement.
+      const acc = await createAccount("sole", "worker");
+      await dbOk("POST", "organizations", { owner_profile_id: acc.id, organization_type: "company", display_name: `QA${TAG} Sole Trader` });
+      rememberAccount("sole", acc);
+      save({ ST_SETUP: null, ST_E1: null, ST_E2: null }); // re-run hygiene: setup rows belong to the account they were made for
+    }
+    if (!S.accounts?.iu2) rememberAccount("iu2", await createAccount("iu2", "worker"));
+    const st = await acct("sole");
+    const iu2 = await acct("iu2"); // unassigned independent
+    const P3 = S.PROJECT3 as string;
+    const stCtxs = await rows<{ id: string; organization_id: string | null; relationship_slug: string }>(
+      `engagement_contexts?profile_id=eq.${st.id}&status=eq.active&select=id,organization_id,relationship_slug`,
+    );
+    const personalCtx = stCtxs.find((c) => c.organization_id === null);
+    const ownCtx = stCtxs.find((c) => c.organization_id !== null && c.relationship_slug === "owner");
+    expect(personalCtx, "personal context").toBeTruthy();
+    expect(ownCtx, "OWN workspace as an active owner engagement").toBeTruthy();
+    save({ ST_OWN_ORG: ownCtx!.organization_id });
+
+    if (!S.ST_SETUP) {
+      // NAMED SEEDS (local service role): the PERSON assignment on the client's project, a second client project the
+      // sole trader is NOT assigned to, and one client task on each with the sole trader as assignee.
+      const a = await dbOk("POST", "project_worker_assignments", { project_id: P3, worker_id: st.workerId, status: "active" });
+      const assignmentId = ((await a.json()) as { id: string }[])[0].id;
+      const p5 = await dbOk("POST", "projects", { title: `QA${TAG} Unassigned Client Project`, organization_id: S.ORG, status: "live" });
+      const P5 = ((await p5.json()) as { id: string }[])[0].id;
+      const mkTask = async (project: string, title: string) =>
+        ((await (await dbOk("POST", "work_tasks", { project_id: project, title, created_by: rep2.id, assignee_profile_id: st.id, status: "todo" })).json()) as { id: string }[])[0].id;
+      const T1 = await mkTask(P3, `QA${TAG} Client Task Assigned`);
+      const T2 = await mkTask(P5, `QA${TAG} Client Task Other Project`);
+      save({ ST_SETUP: { assignmentId, P5, T1, T2 } });
+    }
+    const { assignmentId, T1, T2 } = S.ST_SETUP as { assignmentId: string; T1: string; T2: string };
+
+    // ---- composer (browser): the project is offered as '<project> (client project)', own workspace picked as the context
+    const page = await loginUi(browser, "sole");
+    if (!S.ST_E1) {
+      await go(page, "/en/dashboard/journal", "#journal-composer textarea");
+      await page.locator("#journal-composer textarea").fill(`QA${TAG} st-own-ws: fitted 3 windows for the client, worked 3 hours`);
+      await page.getByRole("button", { name: /Read it back/i }).click();
+      const ctxSel = page.getByTestId("worklog-context");
+      await expect(ctxSel).toBeVisible({ timeout: 60_000 });
+      const opts = await ctxSel.locator("option").evaluateAll((os) => os.map((o) => ({ v: (o as HTMLOptionElement).value, t: o.textContent ?? "" })));
+      const ownOpt = opts.find((o) => o.v === ownCtx!.id);
+      expect(ownOpt, `the own workspace is selectable as the context: ${JSON.stringify(opts)}`).toBeTruthy();
+      await ctxSel.selectOption(ownCtx!.id);
+      const auto = page.getByTestId("worklog-project-auto");
+      const pick = page.getByTestId("worklog-project");
+      await expect(auto.or(pick)).toBeVisible({ timeout: 60_000 });
+      if (await pick.count()) {
+        const po = await pick.locator("option").allInnerTexts();
+        expect(po.join("|")).toMatch(/\(client project\)/i);
+        await pick.selectOption({ label: po.find((o) => /client project/i.test(o))! });
+      } else {
+        expect((await auto.innerText()).toLowerCase()).toContain("client project");
+      }
+      await shot(page, "11a-composer-own-workspace");
+      await page.getByTestId("worklog-save").click();
+      await page.getByTestId("worklog-confirm").click();
+      await expect.poll(async () => (await rows(`journal_entries?original_text=ilike.${encodeURIComponent(`QA${TAG} st-own-ws%`)}&select=id`)).length, { timeout: 90_000 }).toBe(1);
+      const e1 = (await rows<{ id: string; project_id: string | null; engagement_context_id: string }>(`journal_entries?original_text=ilike.${encodeURIComponent(`QA${TAG} st-own-ws%`)}&select=id,project_id,engagement_context_id`))[0];
+      expect(e1.project_id).toBe(P3);
+      expect(e1.engagement_context_id, "written from the OWN workspace context").toBe(ownCtx!.id);
+      save({ ST_E1: e1.id });
+      // second entry: same own workspace, explicitly 'not project work' (RPC as the person: the composer proof is above)
+      const txt = `QA${TAG} st-own-ws-nonproject: quoted a job, 1 hour`;
+      const c = await rpcAs(st.jwt, "create_journal_entry_full", {
+        p_worker_id: st.workerId, p_engagement_context_id: ownCtx!.id, p_entry_type_slug: "freeform", p_profession_id: null,
+        p_original_text: txt, p_original_language: "en", p_hash_prev: null, p_hash_self: sha(txt), p_visibility_scope: "closed",
+        p_metrics: [], p_project_id: null, p_project_explicit: true,
+      });
+      expect(c.status, JSON.stringify(c.json)).toBeLessThan(300);
+      save({ ST_E2: c.json });
+    }
+    const E1 = S.ST_E1 as string;
+    const E2 = S.ST_E2 as string;
+
+    // ---- picker (browser): both own-workspace entries are OFFERED on the client's task
+    await go(page, "/en/dashboard/tasks", `[data-testid="task-evidence-${T1}"]`);
+    const sel = page.getByTestId(`task-evidence-select-${T1}`);
+    const offered = await sel.locator("option").evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value));
+    expect(offered, "project entry offered").toContain(E1);
+    expect(offered, "'not project work' own-workspace entry offered").toContain(E2);
+    await shot(page, "11a-picker-offers-own-workspace");
+    // attach one: succeeds and shows in the evidence list; DB read-back
+    await sel.selectOption({ value: E1 });
+    await page.getByTestId(`task-evidence-link-${T1}`).click();
+    await expect.poll(async () => (await rows(`journal_entry_tasks?entry_id=eq.${E1}&task_id=eq.${T1}&unlinked_at=is.null&select=id`)).length, { timeout: 60_000 }).toBe(1);
+    const link = await rows<{ linked_by: string }>(`journal_entry_tasks?entry_id=eq.${E1}&task_id=eq.${T1}&select=linked_by`);
+    expect(link[0].linked_by).toBe(st.id);
+    await go(page, "/en/dashboard/tasks", `[data-testid="task-evidence-${T1}"]`);
+    await expect(page.locator(`[data-testid="task-evidence-${T1}"]`).first()).toContainText(/st-own-ws/, { timeout: 60_000 });
+    await shot(page, "11a-evidence-attached");
+
+    // ---- a task of a project they are NOT assigned to: neither entry is offered; the RPC refuses
+    const ev2 = page.locator(`[data-testid="task-evidence-${T2}"], [data-testid="task-evidence-unavailable-${T2}"]`).first();
+    if (await ev2.count()) {
+      const sel2 = page.getByTestId(`task-evidence-select-${T2}`);
+      if (await sel2.count()) {
+        const off2 = await sel2.locator("option").evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value));
+        expect(off2).not.toContain(E1);
+        expect(off2).not.toContain(E2);
+      }
+    }
+    const forced2 = await rpcAs(st.jwt, "link_journal_entry_to_task_v1", { p_entry_id: E1, p_task_id: T2 });
+    expect(forced2.json === "linked" || forced2.json === "already_linked", `entry of project A cannot be attached to a task of project B: ${JSON.stringify(forced2)}`).toBe(false);
+    const forced2b = await rpcAs(st.jwt, "link_journal_entry_to_task_v1", { p_entry_id: E2, p_task_id: T2 });
+    expect(forced2b.json === "linked" || forced2b.json === "already_linked", `non-project own-workspace entry on an unassigned project's task: ${JSON.stringify(forced2b)}`).toBe(false);
+    expect(await rows(`journal_entry_tasks?task_id=eq.${T2}&unlinked_at=is.null&select=id`)).toEqual([]);
+
+    // ---- an UNASSIGNED independent sees nothing offered and cannot attach to the sole trader's task
+    const forcedStranger = await rpcAs(iu2.jwt, "link_journal_entry_to_task_v1", { p_entry_id: E2, p_task_id: T1 });
+    expect(forcedStranger.json === "linked" || forcedStranger.json === "already_linked").toBe(false);
+    const iuPage = await loginUi(browser, "iu2");
+    await go(iuPage, "/en/dashboard/tasks");
+    await expect(iuPage.locator(`[data-testid="task-evidence-select-${T1}"]`)).toHaveCount(0);
+    expect(await iuPage.content()).not.toContain(`QA${TAG} st-own-ws`);
+
+    // ---- assignment ENDED: entries no longer offered; forcing the attach through the RPC is an honest refusal
+    await dbOk("PATCH", `project_worker_assignments?id=eq.${assignmentId}`, { status: "ended" });
+    await go(page, "/en/dashboard/tasks");
+    const sel3 = page.getByTestId(`task-evidence-select-${T1}`);
+    if (await sel3.count()) {
+      const off3 = await sel3.locator("option").evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value));
+      expect(off3, "after the assignment ends the own-workspace entry is no longer offered").not.toContain(E2);
+    }
+    await shot(page, "11a-after-assignment-ended");
+    const forced3 = await rpcAs(st.jwt, "link_journal_entry_to_task_v1", { p_entry_id: E2, p_task_id: T1 });
+    expect(forced3.json === "linked" || forced3.json === "already_linked", `ended assignment must refuse: ${JSON.stringify(forced3)}`).toBe(false);
+    expect(typeof forced3.json === "string" || forced3.status >= 400).toBe(true);
+    expect(await rows(`journal_entry_tasks?entry_id=eq.${E2}&unlinked_at=is.null&select=id`)).toEqual([]);
+    save({ ST_FORCED_AFTER_END: forced3.json });
   });
 });
