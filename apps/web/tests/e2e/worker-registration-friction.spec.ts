@@ -184,15 +184,14 @@ test.describe("Registration friction removal — progressive proof round trip (l
     // A password session alone proves nothing.
     expect(((await (await rpc("my_email_verification_v1", jwt)).json()) as { verified: boolean }).verified).toBe(false);
 
-    // Step 1: record the request, step 2: ask GoTrue to mail the one-time link
-    // (exactly what requestEmailVerificationAction does server-side).
-    const reqd = (await (await rpc("request_email_verification_v1", jwt)).json()) as { outcome: string };
-    expect(reqd.outcome).toBe("requested");
-    const otp = await request.post(`${URL_}/auth/v1/otp`, {
-      headers: { apikey: ANON!, "Content-Type": "application/json" },
-      data: { email, create_user: false },
-    });
-    expect(otp.ok(), await otp.text()).toBeTruthy();
+    // The REAL product path: the "send me a proof link" control on the network page runs
+    // requestEmailVerificationAction (records the request, then asks GoTrue - through the app's own PKCE client and
+    // its own emailRedirectTo - to mail the one-time link). A raw /auth/v1/otp call cannot prove the callback: it has
+    // no PKCE verifier and no app redirect, so GoTrue mails a link back to the stack's site_url instead.
+    // Needs the app origin in supabase/config.toml [auth].additional_redirect_urls (127.0.0.1:3100 is listed).
+    await page.goto("/en/dashboard/network");
+    await page.getByTestId("verify-email-send").click();
+    await expect(page.getByTestId("verify-email-sent")).toBeVisible({ timeout: 60_000 });
 
     const link = await findLink(request, email);
     expect(link, "proof mail with a one-time link arrived in the local inbox").toBeTruthy();
