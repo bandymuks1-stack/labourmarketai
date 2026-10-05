@@ -26,6 +26,13 @@ const confirmations = [
   conf("rej", "rejected", "manager"),
   conf("own", "approved", SUBJECT),
   conf("orig", "approved", "manager"),
+  // decision 0018: a CLIENT acceptance on an entry is a separate figure
+  {
+    entry_id: "rej",
+    confirmation_scope: { action: "client_accept", decision: "approved", authority: { basis: "counterparty" } },
+    created_at: "2026-09-10T14:00:00Z",
+    confirmer_id: "client-user",
+  },
 ];
 
 function builder(table: string) {
@@ -61,6 +68,7 @@ describe("weekly personal intelligence - confirmed count", () => {
     const active = res.intelligence.signals.find((s) => s.code === "journal_active");
     expect(active).toBeDefined();
     // 5 rows, the corrected original replaced by its correction -> 4 entries
+    // (the client_accept on 'rej' adds nothing - decision 0018)
     // pre-fix: 5 entries / 4 "confirmed" (any decision row, orig counted twice)
     expect(active).toMatchObject({ entries: 4, confirmed: 1 });
   });

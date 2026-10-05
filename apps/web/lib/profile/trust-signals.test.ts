@@ -129,6 +129,28 @@ describe("ONE definition of confirmed (F1/F2, counter-canonical)", () => {
   });
 });
 
+describe("decision 0018: a client acceptance is not a confirmed entry", () => {
+  it("trust-signals confirmations (profile, CV, reports hub) ignore client_accept rows", async () => {
+    const clientAccept = {
+      confirmation_scope: { action: "client_accept", decision: "approved", authority: { basis: "counterparty" } },
+      created_at: "2026-09-12T10:00:00Z",
+      confirmer_id: "client-user",
+    };
+    tables.set(
+      "journal_entries",
+      ok({
+        data: [
+          { id: "a", journal_entry_confirmations: [clientAccept] },
+          { id: "b", journal_entry_confirmations: [approved("m1"), clientAccept] },
+        ],
+      }),
+    );
+    const s = await getOwnTrustSignals("w1");
+    expect(s.journalEntries).toBe(2);
+    expect(s.managerConfirmations).toBe(1); // only the employer approval
+  });
+});
+
 describe("counts that failed are null, and only those", () => {
   it("a failed skills read does not say the person has no verified skills", async () => {
     tables.set("worker_skills", fails());

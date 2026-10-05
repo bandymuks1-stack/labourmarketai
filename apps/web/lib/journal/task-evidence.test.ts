@@ -179,6 +179,30 @@ describe("'manager-confirmed' on a task uses the ONE definition", () => {
   });
 });
 
+describe("decision 0018: client acceptance is not 'manager-confirmed'", () => {
+  it("a client_accept row leaves confirmedAt null; an employer approval beside it still counts", async () => {
+    const clientAccept = {
+      confirmation_scope: { action: "client_accept", decision: "approved", authority: { basis: "counterparty" } },
+      created_at: "2026-09-10T12:00:00Z",
+      confirmer_id: "client-user",
+    };
+    const onlyClient = entry("c1", { journal_entry_confirmations: [clientAccept] });
+    const both = entry("c2", {
+      journal_entry_confirmations: [
+        { confirmation_scope: { decision: "approved" }, created_at: "2026-09-10T13:00:00Z", confirmer_id: "m1" },
+        clientAccept,
+      ],
+    });
+    state.entries = [onlyClient, both];
+    state.links = [link("c1", { journal_entries: onlyClient }), link("c2", { journal_entries: both })];
+    const r = await getTaskEvidence(TASK);
+    if (r.status !== "ok") throw new Error("expected ok");
+    expect(r.summary.confirmed).toBe(1);
+    expect(r.items.find((i) => i.entryId === "c1")!.confirmedAt).toBeNull();
+    expect(r.items.find((i) => i.entryId === "c2")!.confirmedAt).toBe("2026-09-10T13:00:00Z");
+  });
+});
+
 describe("a failed read is not 'no evidence' (SEP-7)", () => {
   it("link read failure -> unreadable (single and batch)", async () => {
     state.linksError = true;

@@ -178,3 +178,68 @@ describe("F10 - rejected allocations are counted nowhere", () => {
     expect(countedHours([{ hours: 3 }])).toBe(3);
   });
 });
+
+/* ── decision 0018 reconciliation: a CLIENT acceptance is a separate figure ── */
+const clientAccept = (by: string): ConfirmationRow => ({
+  confirmation_scope: {
+    action: "client_accept",
+    decision: "approved",
+    authority: { basis: "counterparty" },
+  },
+  created_at: "2026-09-12T10:00:00Z",
+  confirmer_id: by,
+});
+
+describe("0018 - client acceptance never counts as a confirmed entry", () => {
+  it("isConfirmedEntry ignores counterparty-basis rows", () => {
+    expect(isConfirmedEntry([clientAccept("client-user")], SUBJECT)).toBe(false);
+    // an employer approval still counts, with a later client acceptance beside it
+    expect(
+      isConfirmedEntry([dec("approved", "manager"), clientAccept("client-user")], SUBJECT),
+    ).toBe(true);
+  });
+
+  it("countConfirmedEntries: a client_accept does not add an entry; an employer approval counts once per chain", () => {
+    const rows = [
+      { id: "client-only", journal_entry_confirmations: [clientAccept("c")] },
+      { id: "orig", journal_entry_confirmations: [dec("approved", "m1"), clientAccept("c")] },
+      { id: "fix", correction_of: "orig", journal_entry_confirmations: [dec("approved", "m1")] },
+    ];
+    expect(countConfirmedEntries(rows, SUBJECT)).toBe(1); // only "fix"
+  });
+
+  it("window report and work intelligence do not count client acceptance as confirmed", () => {
+    const wrow: JournalWindowEntryRow = {
+      id: "e1",
+      worker_id: "w1",
+      created_at: "2026-09-10T08:00:00Z",
+      engagement_context_id: "ctx",
+      workers: { display_name: "Person A", profiles: null },
+      subject: { profile_id: SUBJECT },
+      journal_entry_confirmations: [clientAccept("c")],
+      journal_entry_metrics: [],
+    };
+    const { totals } = rollUpJournalWindow([wrow], { workTime: false, todayIso: "2026-09-11" });
+    expect(totals.confirmed).toBe(0);
+
+    const wi = assembleWorkIntelligence({
+      entries: [
+        {
+          id: "e1",
+          original_text: "x",
+          created_at: "2026-09-10T08:00:00Z",
+          journal_entry_metrics: [
+            { metric_slug: "quantity", value_text: null, value_numeric: 8, unit_slug: "hours", source: "worker_input" },
+          ],
+          journal_entry_confirmations: [clientAccept("c")],
+        },
+      ],
+      linksByEntry: new Map<string, string[]>(),
+      provenanceByEntry: new Map(),
+      skillRows: [],
+      todayIso: "2026-09-11",
+      subjectProfileId: SUBJECT,
+    });
+    expect(wi.periods.find((p) => p.key === "all")?.confirmedHours).toBe(0);
+  });
+});
