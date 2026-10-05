@@ -121,6 +121,26 @@ export async function readOwnedWorkspaceIds(
   supabase: ServerSupabase,
   workerId: string,
 ): Promise<string[]> {
-  const { ownership } = await readAssignmentsAndOwnership(supabase, workerId);
-  return ownership ? [...ownership.owned] : [];
+  // Independent of the assignment rows on purpose: after an assignment ENDS there are no rows, and
+  // the own workspace must still be recognised as the viewer's own (and so hidden), not as unknown.
+  const { data: worker } = await supabase
+    .from("workers")
+    .select("profile_id")
+    .eq("id", workerId)
+    .maybeSingle();
+  const profileId = (worker?.profile_id as string | null) ?? null;
+  if (!profileId) return [];
+  const ecs = await supabase
+    .from("engagement_contexts")
+    .select("organization_id")
+    .eq("profile_id", profileId)
+    .eq("status", "active")
+    .eq("relationship_slug", "owner");
+  if (ecs.error) return [];
+  const owned: string[] = [];
+  for (const e of ecs.data ?? []) {
+    const org = e.organization_id as string | null;
+    if (org && !owned.includes(org)) owned.push(org);
+  }
+  return owned;
 }
