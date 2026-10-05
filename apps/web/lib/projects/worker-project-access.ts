@@ -138,40 +138,60 @@ export async function getWorkerProjectView(
   };
 }
 
-/** All projects the caller is or was assigned to (own assignments only). */
-export async function listWorkerProjects(): Promise<WorkerProjectListItem[]> {
+/**
+ * All projects the caller is or was assigned to (own assignments only), with
+ * a FAILED read told apart from an EMPTY one (SEP-7: UNKNOWN ≠ ZERO). The
+ * home needs the difference: "could not read your projects" is not "you have
+ * none". `listWorkerProjects` below keeps its historical, lossy shape.
+ */
+export type WorkerProjectsResult =
+  | { readonly status: "ok"; readonly rows: WorkerProjectListItem[] }
+  | { readonly status: "unavailable" };
+
+export async function listWorkerProjectsResult(): Promise<WorkerProjectsResult> {
   const workerId = await getOwnWorkerId();
-  if (!workerId) return [];
+  if (!workerId) return { status: "ok", rows: [] };
 
   const supabase = await createClient();
-  const { data: assignments } = await supabase
+  const { data: assignments, error } = await supabase
     .from("project_worker_assignments")
     .select("project_id, status, assigned_at")
     .eq("worker_id", workerId)
     .order("assigned_at", { ascending: false });
-  if (!assignments || assignments.length === 0) return [];
+  if (error) return { status: "unavailable" };
+  if (!assignments || assignments.length === 0) return { status: "ok", rows: [] };
 
   const ids = assignments.map((a) => a.project_id as string);
-  const { data: projects } = await supabase
+  const { data: projects, error: projectsError } = await supabase
     .from("projects")
     .select("id, title, status, city, country")
     .in("id", ids);
+  if (projectsError) return { status: "unavailable" };
   const byId = new Map(
     (projects ?? []).map((p) => [p.id as string, p] as const),
   );
 
-  return assignments.map((a) => {
-    const p = byId.get(a.project_id as string);
-    return {
-      projectId: a.project_id as string,
-      title: (p?.title as string | null) ?? null,
-      status: (p?.status as string | null) ?? null,
-      city: (p?.city as string | null) ?? null,
-      country: (p?.country as string | null) ?? null,
-      assignmentStatus: (a.status as "active" | "ended") ?? "active",
-      assignedAt: a.assigned_at as string,
-    };
-  });
+  return {
+    status: "ok",
+    rows: assignments.map((a) => {
+      const p = byId.get(a.project_id as string);
+      return {
+        projectId: a.project_id as string,
+        title: (p?.title as string | null) ?? null,
+        status: (p?.status as string | null) ?? null,
+        city: (p?.city as string | null) ?? null,
+        country: (p?.country as string | null) ?? null,
+        assignmentStatus: (a.status as "active" | "ended") ?? "active",
+        assignedAt: a.assigned_at as string,
+      };
+    }),
+  };
+}
+
+/** All projects the caller is or was assigned to (own assignments only). */
+export async function listWorkerProjects(): Promise<WorkerProjectListItem[]> {
+  const result = await listWorkerProjectsResult();
+  return result.status === "ok" ? result.rows : [];
 }
 
 /**
