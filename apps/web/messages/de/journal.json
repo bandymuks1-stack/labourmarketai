@@ -263,6 +263,8 @@
   "projectNone": "Keine Projektarbeit",
   "projectAmbiguous": "Sie sind mehreren Projekten zugeordnet. Wählen Sie vor dem Speichern, zu welchem Projekt diese Stunden gehören (oder markieren Sie sie als keine Projektarbeit).",
   "projectAuto": "Projekt: {name}",
+  "projectViaTeam": "{project} (über Team {team})",
+  "projectClient": "{project} (Kundenprojekt)",
   "unconfirmedTimeBlocked": "{count, plural, one {# erfasste Dauer wartet noch auf Ihre Durchsicht und würde nicht gespeichert.} other {# erfasste Dauern warten noch auf Ihre Durchsicht und würden nicht gespeichert.}} Behalten oder entfernen Sie sie zuerst.",
   "entry": {
     "reviewedBy": "Überprüft von",

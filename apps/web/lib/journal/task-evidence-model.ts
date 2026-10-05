@@ -232,15 +232,49 @@ export type LinkableEntry = {
  */
 export function isLinkableForTask(
   entry: Pick<LinkableEntry, "projectId" | "organizationId">,
-  task: { readonly projectId: string | null; readonly organizationId: string | null },
+  task: {
+    readonly projectId: string | null;
+    readonly organizationId: string | null;
+    /** Organizations of teams the viewer reaches this project through (an
+     *  ACTIVELY assigned team, 20261003150700). A team member's entry carries
+     *  the TEAM's organization as its context; the database accepts that
+     *  (link_journal_entry_to_task_v1), so the picker must too. */
+    readonly teamOrganizationIds?: readonly string[];
+    /** Own-workspace organizations through which the viewer reaches this
+     *  project AS AN INDEPENDENT PROVIDER (active person assignment on a
+     *  client's project; 20261003150700 independent_journal_context_v1). An
+     *  entry journaled from such a workspace is accepted by the database, so
+     *  the picker must offer it. Empty for any project the viewer is not
+     *  assigned to. */
+    readonly independentOrganizationIds?: readonly string[];
+    /** Workspaces the viewer OWNS (any project). An entry journaled from one of
+     *  them is a legitimate context for this task only through the rules above
+     *  (same organisation, a team, or an independent assignment on THIS
+     *  project). It must stay hidden even when the task's organisation is
+     *  unreadable to the viewer (a sole trader cannot read a project they are
+     *  not assigned to), where the organisation test below cannot decide. */
+    readonly ownWorkspaceOrganizationIds?: readonly string[];
+  },
 ): boolean {
   const ep = entry.projectId ?? null;
   if (ep !== null && ep !== task.projectId) return false;
   if (
     task.projectId !== null &&
+    entry.organizationId != null &&
+    entry.organizationId !== task.organizationId &&
+    (task.ownWorkspaceOrganizationIds ?? []).includes(entry.organizationId) &&
+    !(task.teamOrganizationIds ?? []).includes(entry.organizationId) &&
+    !(task.independentOrganizationIds ?? []).includes(entry.organizationId)
+  ) {
+    return false;
+  }
+  if (
+    task.projectId !== null &&
     task.organizationId !== null &&
     entry.organizationId != null &&
-    entry.organizationId !== task.organizationId
+    entry.organizationId !== task.organizationId &&
+    !(task.teamOrganizationIds ?? []).includes(entry.organizationId) &&
+    !(task.independentOrganizationIds ?? []).includes(entry.organizationId)
   ) {
     return false;
   }

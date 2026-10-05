@@ -1958,6 +1958,7 @@
     "myProjectsEmpty": "Du er endnu ikke tildelt noget projekt. Når en virksomhed tildeler dig, vises projektet her.",
     "assignmentActive": "Aktiv",
     "assignmentEnded": "Afsluttet",
+    "viaTeam": "via hold {team}",
     "untitledProject": "Projekt uden titel",
     "archiveToggle": {
       "label": "Aktive eller afsluttede projekter",
@@ -1970,6 +1971,7 @@
     "stadium": {
       "eyebrow": "Stadion",
       "fieldCount": "{n, plural, one {# person på banen} other {# personer på banen}}",
+      "fieldViaTeam": "{n} via hold",
       "todayCount": "{n, plural, one {# journalpost i dag — dagen er i bevægelse} other {# journalposter i dag — dagen er i bevægelse}}",
       "todayZero": "Ingen poster endnu i dag — dagen venter stadig på sin første post.",
       "fieldTitle": "Banen — hvem er på holdet i dag",
@@ -1989,6 +1991,7 @@
       "untitled": "Projekt uden titel",
       "assignmentActive": "Aktiv tildeling",
       "assignmentEnded": "Tildeling afsluttet",
+      "viaTeam": "via hold {team}",
       "projectRestricted": "Projektdetaljer er ikke tilgængelige for dig lige nu. Din tildeling forbliver synlig.",
       "journalCta": "Skriv journalindlæg",
       "chatCta": "Send besked",

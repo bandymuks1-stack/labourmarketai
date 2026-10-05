@@ -502,7 +502,7 @@ function normalizedProject(d: z.infer<typeof projectCreateFields>): Record<strin
 
 const projectFingerprint = (organizationId: string) => `project-create:${organizationId}`;
 
-function manageProjectsRefusal(): ExecResult {
+export function manageProjectsRefusal(): ExecResult {
   return {
     ok: false,
     code: "not_authorized",

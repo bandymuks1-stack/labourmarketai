@@ -35,6 +35,8 @@
   "projectNone": "Ikke projektarbejde",
   "projectAmbiguous": "Du er tilknyttet flere projekter. Vælg før du gemmer, hvilket projekt disse timer hører til (eller marker dem som ikke projektarbejde).",
   "projectAuto": "Projekt: {name}",
+  "projectViaTeam": "{project} (via hold {team})",
+  "projectClient": "{project} (kundeprojekt)",
   "unconfirmedTimeBlocked": "{count} registrerede varigheder afventer stadig gennemgang og ville ikke blive gemt. Behold eller fjern dem først.",
   "entry": {
     "status": {

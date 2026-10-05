@@ -7,7 +7,7 @@ import type { CapacityChatResult } from "@/lib/conversation/capacity-contract";
 import { getOrgDemandRollup } from "@/lib/company/org-demand-rollup";
 import { loadEmployerOpeningBrief, type OpeningBrief } from "@/lib/conversation/opening-brief";
 import { listProjectStages } from "@/lib/projects/stages";
-import { listProjectAssignments } from "@/lib/projects/projects";
+import { listProjectAssignedPeople } from "@/lib/projects/projects";
 import type { CompanyWorkersListResult } from "@/lib/company/company-workers";
 import {
   COMPANY_HOME_PEOPLE_CHIP_LIMIT,
@@ -105,7 +105,7 @@ async function loadProjectRows(): Promise<HomeProjectsResult> {
               .catch((): null => null),
         names !== undefined
           ? Promise.resolve<readonly string[]>(names)
-          : listProjectAssignments(r.projectId)
+          : listProjectAssignedPeople(r.projectId)
               .then((a): readonly string[] =>
                 a.slice(0, COMPANY_HOME_PEOPLE_CHIP_LIMIT).map((x) => x.name),
               )

@@ -1958,6 +1958,7 @@
     "myProjectsEmpty": "Jūs vēl neesat piesaistīts nevienam projektam. Kad uzņēmums jūs piesaistīs, projekts parādīsies šeit.",
     "assignmentActive": "Aktīvs",
     "assignmentEnded": "Pabeigts",
+    "viaTeam": "caur komandu {team}",
     "untitledProject": "Projekts bez nosaukuma",
     "archiveToggle": {
       "label": "Aktīvie vai pabeigtie projekti",
@@ -1970,6 +1971,7 @@
     "stadium": {
       "eyebrow": "[EN] Stadium",
       "fieldCount": "[EN] {n, plural, one {# person on the field} other {# people on the field}}",
+      "fieldViaTeam": "{n} caur komandu",
       "todayCount": "[EN] {n, plural, one {# journal entry today — the day is moving} other {# journal entries today — the day is moving}}",
       "todayZero": "[EN] No entries yet today — the day is still waiting for its first record.",
       "fieldTitle": "[EN] The field — who is on the team today",
@@ -1989,6 +1991,7 @@
       "untitled": "Projekts bez nosaukuma",
       "assignmentActive": "Aktīva piesaiste",
       "assignmentEnded": "Piesaiste pabeigta",
+      "viaTeam": "caur komandu {team}",
       "projectRestricted": "Projekta informācija jums šobrīd nav pieejama. Jūsu piesaiste paliek redzama.",
       "journalCta": "Rakstīt žurnāla ierakstu",
       "chatCta": "Sūtīt ziņu",

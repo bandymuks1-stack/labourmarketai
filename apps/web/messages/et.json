@@ -1958,6 +1958,7 @@
     "myProjectsEmpty": "Te pole veel ühelegi projektile määratud. Kui ettevõte teid määrab, ilmub projekt siia.",
     "assignmentActive": "Aktiivne",
     "assignmentEnded": "Lõppenud",
+    "viaTeam": "meeskonna {team} kaudu",
     "untitledProject": "Pealkirjata projekt",
     "archiveToggle": {
       "label": "Aktiivsed või lõpetatud projektid",
@@ -1970,6 +1971,7 @@
     "stadium": {
       "eyebrow": "[EN] Stadium",
       "fieldCount": "[EN] {n, plural, one {# person on the field} other {# people on the field}}",
+      "fieldViaTeam": "{n} meeskonna kaudu",
       "todayCount": "[EN] {n, plural, one {# journal entry today — the day is moving} other {# journal entries today — the day is moving}}",
       "todayZero": "[EN] No entries yet today — the day is still waiting for its first record.",
       "fieldTitle": "[EN] The field — who is on the team today",
@@ -1989,6 +1991,7 @@
       "untitled": "Pealkirjata projekt",
       "assignmentActive": "Aktiivne määramine",
       "assignmentEnded": "Määramine lõppenud",
+      "viaTeam": "meeskonna {team} kaudu",
       "projectRestricted": "Projekti üksikasjad pole teile praegu kättesaadavad. Teie määramine jääb nähtavaks.",
       "journalCta": "Kirjuta päevikusse",
       "chatCta": "Saada sõnum",

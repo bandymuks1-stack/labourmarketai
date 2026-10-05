@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { listMyBookings } from "@/lib/booking/booking-actions";
 import { callerCompanyId } from "@/lib/projects/projects";
+import { readMyTeamWorkContexts } from "@/lib/projects/team-work-context";
 import { listMyTasks } from "@/lib/tasks/tasks";
 import { isOpen } from "@/lib/tasks/task-model";
 import { listMyFinanceRecords } from "@/lib/finance/finance";
@@ -216,12 +217,16 @@ async function readAssignedProjectItems(): Promise<{
   if (assignRes.error) {
     return { state: { status: "error", count: 0 }, items: [], projectRefs: [] };
   }
+  // A project reached through a team that is ACTIVELY assigned is "assigned"
+  // for the planner too (20261003150700) - the same context the journal uses.
+  const teamRows = await readMyTeamWorkContexts(supabase);
   const ids = [
-    ...new Set(
-      ((assignRes.data ?? []) as { project_id: string }[]).map(
+    ...new Set([
+      ...((assignRes.data ?? []) as { project_id: string }[]).map(
         (a) => a.project_id,
       ),
-    ),
+      ...teamRows.map((r) => r.project_id),
+    ]),
   ];
   if (ids.length === 0) {
     return { state: { status: "ok", count: 0 }, items: [], projectRefs: [] };

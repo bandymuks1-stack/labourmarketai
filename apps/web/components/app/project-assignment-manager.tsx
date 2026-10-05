@@ -24,6 +24,9 @@ import { playerInitials } from "@/lib/identity/player-identity";
 import { Link } from "@/lib/i18n/navigation";
 import { offersRosterWorker } from "@/lib/projects/assignment-authority";
 import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
+import { ProjectTeamAssignments } from "@/components/app/project-team-assignments";
+import type { AssignableTask, AssignableTeam } from "@/lib/projects/team-assignment";
+import type { TeamAssignmentRow } from "@/lib/projects/team-assignment-model";
 
 /**
  * Manager DRAFT surface for F4 (living-arena skin, TASK 07 slice 2): create a
@@ -266,6 +269,7 @@ export function ProjectAssignmentManager({
   rosterAssignable = true,
   rosterProjectIds = null,
   labels,
+  teamWork,
 }: {
   projects: ProjectWithAssignments[];
   workers: ManagedWorker[];
@@ -282,6 +286,14 @@ export function ProjectAssignmentManager({
    *  database still decides every write. */
   rosterProjectIds?: readonly string[] | null;
   labels: ProjectManagerLabels;
+  /** WRK-6 — teams as ONE assignment on a project (or one of its tasks).
+   *  Absent = the surface offers persons only (older callers). `byProject` is
+   *  a plain object so it crosses the server/client boundary. */
+  teamWork?: {
+    byProject: Readonly<Record<string, readonly TeamAssignmentRow[]>>;
+    teams: readonly AssignableTeam[];
+    tasks: readonly AssignableTask[];
+  };
 }) {
   const [selProject, setSelProject] = useState("");
   const rosterOfferedHere = offersRosterWorker(rosterProjectIds, selProject);
@@ -599,6 +611,15 @@ export function ProjectAssignmentManager({
               })}
             </ul>
           )}
+          {/* A team is assigned as ONE relationship, beside the person list. */}
+          {teamWork ? (
+            <ProjectTeamAssignments
+              projectId={p.id}
+              assignments={teamWork.byProject[p.id] ?? []}
+              teams={teamWork.teams}
+              tasks={teamWork.tasks.filter((x) => x.projectId === p.id)}
+            />
+          ) : null}
           {/* Roster actions: the EXISTING gated writes/views only — jump to the
               assign form above, open the existing manager-gated operations
               board (the permitted per-worker capability view). */}

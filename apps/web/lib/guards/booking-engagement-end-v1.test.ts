@@ -1541,6 +1541,10 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261003150550_counterparty_link_assignment_kinds_review_doors_v1.sql",
       // 2026-10-04: decision 0018 sweep (batch_review_exceptions counts employer approvals only) - marker is the human-gate acknowledgement; draft + needs-human-gate, NOT applied.
       "20261003150555_batch_review_exceptions_employer_only_v1.sql",
+      // 2026-10-03: WRK-6 team/brigade assignment as ONE canonical relation (new table + SECURITY DEFINER RPCs) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      "20261003150600_brigade_work_assignment_v1.sql",
+      // 2026-10-04: WRK-6 follow-up — a team assignment becomes an active Journal/work context (replaces 4 live fns + 2 policies, SECURITY DEFINER) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      "20261003150700_brigade_journal_context_v1.sql",
 ]);
   });
 

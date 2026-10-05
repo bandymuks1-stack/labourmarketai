@@ -6072,6 +6072,7 @@
     "myProjectsEmpty": "Je bent nog aan geen enkel project toegewezen. Zodra een bedrijf je toewijst, verschijnt het project hier.",
     "assignmentActive": "Actief",
     "assignmentEnded": "Beëindigd",
+    "viaTeam": "via ploeg {team}",
     "untitledProject": "Project zonder titel",
     "archiveToggle": {
       "label": "Actieve of afgeronde projecten",
@@ -6148,6 +6149,7 @@
     "countersTitle": "Operaties",
     "counters": {
       "totalAssigned": "Toegewezen",
+      "viaTeam": "Via ploeg",
       "ready": "Klaar",
       "readyBasis": "Alleen gebaseerd op de velden die hier worden gecontroleerd.",
       "needsDeclaredSkills": "Geen opgegeven vaardigheden",
@@ -6289,6 +6291,7 @@
         "notReadyNote": "Een aparte projectthread wordt voorbereid. Start het gesprek voorlopig in je algemene inbox — de projectcontext staat hierboven."
       },
       "fieldCount": "{n, plural, one {# persoon op het veld} other {# personen op het veld}}",
+      "fieldViaTeam": "{n} via ploeg",
       "todayCount": "{n, plural, one {# journaalregistratie vandaag — de dag is in beweging} other {# journaalregistraties vandaag — de dag is in beweging}}",
       "todayZero": "Nog geen registraties vandaag — de dag wacht nog op zijn eerste registratie.",
       "fieldTitle": "Het veld — wie er vandaag in het team staat",
@@ -6324,6 +6327,7 @@
       "untitled": "Project zonder titel",
       "assignmentActive": "Actieve toewijzing",
       "assignmentEnded": "Toewijzing beëindigd",
+      "viaTeam": "via ploeg {team}",
       "projectRestricted": "Projectdetails zijn momenteel niet voor je beschikbaar. Je toewijzing blijft zichtbaar.",
       "journalCta": "Journaalinvoer schrijven",
       "chatCta": "Bericht sturen",
@@ -7091,31 +7095,7 @@
         "error": "Het antwoord kon niet worden opgeslagen. Er is niets gewijzigd."
       }
     },
-    "addableUnavailable": "De lijst met gekoppelde werknemers kon niet worden geladen — toevoegen is nu niet mogelijk.",
-    "assign": {
-      "heading": "Het hele team aan een project toewijzen",
-      "intro": "Elk van de {count} leden wordt apart toegewezen en u ziet het resultaat per persoon.",
-      "projectLabel": "Project voor het team",
-      "projectPlaceholder": "Kies een project",
-      "submit": "Team toewijzen",
-      "assigning": "Bezig met toewijzen…",
-      "noProjects": "U hebt geen open projecten om het team aan toe te wijzen.",
-      "summary": "{written} van {total} toegewezen.",
-      "member": {
-        "assigned": "Toegewezen",
-        "calendar_unknown": "Toegewezen · data niet bevestigd",
-        "calendar_conflict": "Toegewezen · op deze dagen al bezet",
-        "refused": "Niet toegewezen · u mag deze persoon niet toewijzen",
-        "error": "Niet toegewezen · er ging iets mis"
-      },
-      "outcome": {
-        "not_authed": "Meld u opnieuw aan.",
-        "no_such_team": "Dit team kunt u niet toewijzen.",
-        "empty_team": "Dit team heeft nog geen leden.",
-        "needs_migration": "Momenteel niet beschikbaar.",
-        "unavailable": "Het team kon niet worden toegewezen. Er is niets gewijzigd."
-      }
-    }
+    "addableUnavailable": "De lijst met gekoppelde werknemers kon niet worden geladen — toevoegen is nu niet mogelijk."
   },
   "teamEnquiries": {
     "enquireButton": "Deze ploeg een aanvraag sturen",
@@ -11093,6 +11073,7 @@
       "link": "Taken voor dit project"
     },
     "objectLabel": "Object",
+    "viaTeam": "via ploeg {team}",
     "assignee": {
       "label": "Toegewezen aan",
       "you": "jou",
@@ -18243,6 +18224,70 @@
       "history": "{count, plural, one {# baan} other {# banen}}",
       "skills": "{count, plural, one {# vaardigheid gebaseerd op jouw registraties} other {# vaardigheden gebaseerd op jouw registraties}}",
       "next": "Waar je heen kunt"
+    }
+  },
+  "teamAssignment": {
+    "title": "Teams in dit project",
+    "intro": "Een team wordt als één geheel toegewezen. De leden komen uit het lidmaatschap van het team zelf, dus wie het team heeft verlaten telt niet mee, en de uren en het logboek blijven van elke persoon zelf.",
+    "none": "Aan dit project is geen team toegewezen.",
+    "scope": {
+      "project": "Heel project",
+      "task": "Taak: {title}",
+      "object": "Werklocatie"
+    },
+    "membersNow": "Leden nu: {count}",
+    "noMembers": "Geen actieve leden.",
+    "unnamedMember": "Teamlid",
+    "unnamedTeam": "Ploeg",
+    "end": "Toewijzing beëindigen",
+    "ending": "Bezig met beëindigen…",
+    "replaceLabel": "Vervangen door een ander team",
+    "replacePlaceholder": "Kies een team",
+    "replaceSubmit": "Vervangen",
+    "assignTitle": "Een team toewijzen",
+    "teamLabel": "Ploeg",
+    "teamPlaceholder": "Kies een team",
+    "scopeLabel": "Waaraan het team werkt",
+    "scopeProjectOption": "Het hele project",
+    "scopeTaskOption": "Eén taak",
+    "taskLabel": "Taak",
+    "taskPlaceholder": "Kies een taak",
+    "noTeams": "Je beheert nog geen team. Maak er een aan op de pagina Mensen.",
+    "noTasks": "Dit project heeft geen openstaande taken.",
+    "submit": "Team toewijzen",
+    "assigning": "Bezig met toewijzen…",
+    "outcome": {
+      "created": "Team toegewezen.",
+      "already_assigned": "Dit team is hier al toegewezen. Er is niets gewijzigd.",
+      "replaced": "Team vervangen.",
+      "ended": "Toewijzing beëindigd.",
+      "already_ended": "Deze toewijzing was al beëindigd."
+    },
+    "refusal": {
+      "not_authorized": "Je mag dit team niet aan dit project toewijzen.",
+      "not_authed": "Log opnieuw in om verder te gaan.",
+      "not_a_team": "Dit is geen team.",
+      "team_has_no_members": "Dit team heeft nog geen actieve leden.",
+      "project_completed": "Dit project is afgerond.",
+      "task_not_assignable": "Aan deze taak kan geen team worden toegewezen (afgesloten of van een ander project).",
+      "object_not_assignable": "Aan deze werklocatie kan geen team worden toegewezen.",
+      "one_scope_only": "Kies een taak of een werklocatie, niet beide.",
+      "replace_target_not_active": "De toewijzing die vervangen moest worden is niet meer actief.",
+      "team_and_project_required": "Kies een team en een project.",
+      "needs_migration": "Nu niet beschikbaar.",
+      "error": "Dit lukte niet. Er is niets gewijzigd."
+    },
+    "calendar": {
+      "conflictsTitle": "Op deze dagen al ingepland",
+      "unknownTitle": "Beschikbaarheid op deze dagen niet bevestigd voor",
+      "advisory": "Let op: de toewijzing is opgeslagen. Beëindig haar hierboven als de overlap echt is."
+    },
+    "form": {
+      "heading": "Het hele team aan een project toewijzen",
+      "intro": "Wijs dit team van {count} leden als één geheel aan een project toe.",
+      "projectLabel": "Voor welk project",
+      "projectPlaceholder": "Kies een project",
+      "noProjects": "Je hebt geen openstaande projecten om het team aan toe te wijzen."
     }
   }
 }

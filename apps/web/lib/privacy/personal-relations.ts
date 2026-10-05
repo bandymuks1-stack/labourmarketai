@@ -665,6 +665,10 @@ export const ACTOR_ONLY_RELATIONS: readonly string[] = [
   "review_cycles",
   "review_evidence_links",
   "task_dependencies",
+  // WRK-6: a team bound to a project / task; the person columns are the
+  // manager who assigned or ended it. The members are the team's own
+  // engagements (exported on their own relation).
+  "team_assignments",
   "training_programs",
   "training_skill_links",
   "workflow_definition_versions",
@@ -733,6 +737,11 @@ export const CHILD_TABLES_NOT_EXPORTED: readonly ReviewedChild[] = [
     table: "organization_evidence_parties",
     reason:
       "the other organizations recorded as parties to an evidence record: third-party organization data, not data about you",
+  },
+  {
+    table: "team_assignments",
+    reason:
+      "an organization's assignment of one of its teams to a project or task: the organization's staffing record; the person appears on it only as the manager who assigned or ended it, and your own team membership is exported through your engagements",
   },
   {
     table: "task_dependencies",

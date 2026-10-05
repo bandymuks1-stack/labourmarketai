@@ -2,6 +2,12 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { readMyTeamWorkContexts } from "@/lib/projects/team-work-context";
+import { getOwnWorkerId } from "@/lib/projects/worker-project-access";
+import {
+  readIndependentOrganizationsByProject,
+  readOwnedWorkspaceIds,
+} from "@/lib/journal/project-attribution-read";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -33,6 +39,7 @@ import {
 import {
   getTaskCollaboration,
   listMyTasks,
+  listMyTeamTasks,
   listProjectTasks,
   type MyTasksResult,
 } from "@/lib/tasks/tasks";
@@ -248,7 +255,14 @@ export default async function TasksPage({
     },
   };
 
-  const [myResult, projectResult, allManagedProjects, objectsRead, employerCtx] =
+  const [
+    myResult,
+    projectResult,
+    allManagedProjects,
+    objectsRead,
+    employerCtx,
+    teamTasksRead,
+  ] =
     await Promise.all([
       listMyTasks(),
       projectFilter
@@ -257,7 +271,35 @@ export default async function TasksPage({
       listManagedProjects(),
       listVisibleActiveObjects(),
       resolveEmployerCompanyContext(),
+      // Tasks reached through a team that is ACTIVELY assigned to the task or
+      // its work object (20261003150700) - shown with a visible "via team" tag.
+      listMyTeamTasks(),
     ]);
+  const viaTeamByTask = teamTasksRead.viaTeamByTask;
+  // Team organizations through which the caller reaches each project (their own
+  // contexts, resolved by the database): a team member's journal entry carries
+  // the TEAM's organization, which is a legitimate evidence context for the task.
+  const teamOrgsByProject = new Map<string, string[]>();
+  for (const c of await readMyTeamWorkContexts(await createClient())) {
+    const list = teamOrgsByProject.get(c.project_id) ?? [];
+    if (!list.includes(c.team_org_id)) list.push(c.team_org_id);
+    teamOrgsByProject.set(c.project_id, list);
+  }
+  // Own-workspace organizations through which the caller reaches a CLIENT's
+  // project as an independent provider (active person assignment): an entry
+  // journaled from that workspace is a legitimate evidence context too. The
+  // link RPC stays the final authority.
+  const ownWorkerId = await getOwnWorkerId();
+  const independentOrgsByProject = ownWorkerId
+    ? await readIndependentOrganizationsByProject(await createClient(), ownWorkerId)
+    : new Map<string, string[]>();
+  const ownWorkspaceIds = ownWorkerId
+    ? await readOwnedWorkspaceIds(await createClient(), ownWorkerId)
+    : [];
+  const myOwnTaskIds = new Set(
+    myResult.status === "ok" ? myResult.tasks.map((task) => task.id) : [],
+  );
+  const teamOnlyTasks = teamTasksRead.tasks.filter((task) => !myOwnTaskIds.has(task.id));
 
   // Train D — archived filtering: completed projects accept no new tasks;
   // the pickers only offer active work.
@@ -294,6 +336,7 @@ export default async function TasksPage({
   const listedIds = [
     ...new Set([
       ...(myResult.status === "ok" ? myResult.tasks.map((t) => t.id) : []),
+      ...teamOnlyTasks.map((t) => t.id),
       ...(projectResult && projectResult.status === "ok"
         ? projectResult.tasks.map((t) => t.id)
         : []),
@@ -313,6 +356,7 @@ export default async function TasksPage({
     ...new Map(
       [
         ...(myResult.status === "ok" ? myResult.tasks : []),
+        ...teamOnlyTasks,
         ...(projectResult && projectResult.status === "ok"
           ? projectResult.tasks
           : []),
@@ -423,6 +467,11 @@ export default async function TasksPage({
         isLinkableForTask(e, {
           projectId: task.projectId,
           organizationId: evidenceTaskOrg,
+          teamOrganizationIds: task.projectId ? (teamOrgsByProject.get(task.projectId) ?? []) : [],
+          independentOrganizationIds: task.projectId
+            ? (independentOrgsByProject.get(task.projectId) ?? [])
+            : [],
+          ownWorkspaceOrganizationIds: ownWorkspaceIds,
         }),
     );
 
@@ -745,6 +794,14 @@ export default async function TasksPage({
               </span>
             ) : null}
             {task.title}
+            {viaTeamByTask.get(task.id) ? (
+              <span
+                className="ml-2 font-mono text-meta font-normal uppercase tracking-label text-text-muted"
+                data-testid={`task-via-team-${task.id}`}
+              >
+                {t("viaTeam", { team: viaTeamByTask.get(task.id) ?? "" })}
+              </span>
+            ) : null}
           </p>
           <span
             className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${priorityTone[task.priority]}`}
@@ -1239,7 +1296,7 @@ export default async function TasksPage({
     );
   }
 
-  const myTasks = myResult.tasks;
+  const myTasks = [...myResult.tasks, ...teamOnlyTasks];
   const openTasks = myTasks.filter((task) => isOpen(task.status));
   const closedTasks = myTasks.filter((task) => !isOpen(task.status));
   // A deep link (?task=) that targets a FINISHED task reveals the closed

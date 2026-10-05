@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getWorkerReadiness, type WorkerReadiness } from "@/lib/company/worker-readiness";
+import { mergeAssignedPeople, readTeamAssignedPeople } from "@/lib/projects/assigned-people";
 import {
   deriveOpsCounters,
   deriveWorkerOps,
@@ -250,7 +251,36 @@ export async function getProjectOperations(
     status: p.status ?? null,
   };
 
-  const assignments = await readActiveAssignments(asAny(supabase), projectId);
+  // ONE meaning of "assigned" (lib/projects/assigned-people.ts): the active
+  // PERSON assignments UNION the current members of every ACTIVELY assigned
+  // team, distinct per person; a person assigned both ways counts once and
+  // stays an individual assignment. A team-only member carries viaTeam.
+  const personAssignments = await readActiveAssignments(asAny(supabase), projectId);
+  const teamPeople = await readTeamAssignedPeople(asAny(supabase), [projectId]);
+  const assignments: (AssignmentRow & { viaTeam: boolean })[] = mergeAssignedPeople(
+    personAssignments.map((a) => ({ ...a, projectId, profileId: a.workerProfileId as string | null, workerId: a.workerId as string | null })),
+    teamPeople,
+  ).map((m) =>
+    m.viaTeam
+      ? {
+          // A team member without a worker row is still a person on the project;
+          // the profile id stands in as the row key (no readiness is read for it).
+          workerId: m.workerId ?? m.profileId ?? "",
+          workerProfileId: m.profileId ?? "",
+          name: m.name?.trim() || (m.profileId ?? "").slice(0, 8),
+          hasRealName: Boolean(m.name && m.name.trim().length > 0),
+          assignedAt: m.assignedAt ?? "",
+          viaTeam: true,
+        }
+      : {
+          workerId: m.workerId as string,
+          workerProfileId: m.workerProfileId,
+          name: m.name,
+          hasRealName: m.hasRealName,
+          assignedAt: m.assignedAt,
+          viaTeam: false,
+        },
+  );
   const [readiness, statuses, items] = await Promise.all([
     getWorkerReadiness(assignments.map((a) => a.workerId)),
     readOperationalStatuses(asAny(supabase), projectId),
@@ -275,6 +305,7 @@ export async function getProjectOperations(
       readiness: readiness.get(a.workerId) ?? EMPTY,
       operationalStatus: statuses.get(a.workerId) ?? null,
       readinessItems: items.get(a.workerId) ?? [],
+      viaTeam: a.viaTeam,
     }),
   );
 

@@ -7,7 +7,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
-import { listProjectAssignments } from "@/lib/projects/projects";
+import { listProjectAssignedPeople } from "@/lib/projects/projects";
 import { listActiveCompanyWorkers } from "@/lib/company/company-workers";
 import { listBookingEngagementWorkers } from "@/lib/projects/booking-engagement-workers";
 import {
@@ -205,7 +205,7 @@ export async function loadProjectDetailForResult(
       canManage = false;
     }
 
-    const assignments = await listProjectAssignments(projectId);
+    const assignments = await listProjectAssignedPeople(projectId);
 
     // Stages are behind an owner-gated migration. `applied: false` is a
     // DIFFERENT fact from "no stages" and travels as `null`, so the panel can
