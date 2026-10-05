@@ -371,9 +371,9 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
 
     const orgName = `QA${TAG} Build Ltd`;
     await page.getByTestId("company-setup-legal-name").fill(orgName);
-    await page.getByTestId("company-setup-company-type-construction").check({ force: true });
+    await page.locator('input[name="company_type"][value="construction"]').check({ force: true });
     await page.getByTestId("company-setup-country").selectOption("LT");
-    await page.getByTestId("company-setup-requester-role-owner").check({ force: true });
+    await page.locator('input[name="requester_role"][value="owner"]').check({ force: true });
     await shot(page, "1b-company-form");
     await page.getByTestId("company-setup-save-draft").click();
     await page.waitForLoadState("networkidle", { timeout: 60_000 }).catch(() => undefined);
