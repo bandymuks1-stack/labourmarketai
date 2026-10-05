@@ -102,6 +102,8 @@ export async function readEvidenceRecordsForWorker(
     .select("id")
     .eq("linked_worker_id", workerId)
     .eq("link_state", "linked")
+    // Only a link the PERSON confirmed makes history theirs (integrity doors v1).
+    .eq("link_method", "worker_confirmed")
     .limit(MAX_LINKED_PEOPLE);
   if (people.error) {
     if (MISSING_OBJECT_CODES.has(people.error.code ?? "")) return { kind: "needs-migration" };
