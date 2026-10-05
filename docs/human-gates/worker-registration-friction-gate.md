@@ -89,6 +89,10 @@ Pattern searched: `user.email`, session/JWT e-mail, `normEmail`, `invited_email`
 
 Regression guards: `apps/web/lib/guards/app-email-trust-paths.test.ts` — claim bridge gate order + fail-closed behaviour, gate behaviour matrix (unverified-using-someone-else's-address DENIED, verified owner ALLOWED, error / malformed / changed-address NOT verified), and a sweep that FAILS CI if any file reaches the service role while using the session e-mail as authority without the verified gate (the reviewed non-authorisation files are listed there with a reason each).
 
+### Forward guard and its single token-door exemption
+
+`email-verified-boundary.test.ts` fails CI for any LATER migration that reads `auth.jwt()->>'email'` or `email_confirmed_at` without the verified predicate. One explicit, structurally-checked exemption exists: **`20261003151100_staff_invitation_email_binding_v1.sql` (#2155)**. Its doors are TOKEN doors: possession of the one-time mailed token is the proof, and the JWT e-mail is compared only to bind an addressed invitation to its addressee (an unverified registrant whose address matches may accept; a stranger with a different address may not). The guard asserts the property rather than trusting the file name: every JWT-email read must sit in the `invitation_session_email_matches_v1` helper or in a function body that also matches `token_hash`, the helper may be called only from `token_hash` bodies, there is no top-level read and no `email_confirmed_at`. The shared core `accept_invitation_apply_v2` (it calls the helper but is not a door) is allowed only because the guard also asserts every caller of it, in every migration at or after this one, matches `token_hash` or the verified predicate (the token doors in #2155, and this PR's gated by-id door). Synthetic negative self-tests prove an e-mail read without a verified predicate and without a token check is still flagged.
+
 ## REQUIRED ORDER
 
 1. **Apply the migration** (owner channel, RED: Supabase MCP `apply_migration`, never `db push`).

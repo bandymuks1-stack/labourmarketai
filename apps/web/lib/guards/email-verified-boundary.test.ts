@@ -252,17 +252,156 @@ describe("no UI renders an unverified email as verified", () => {
   });
 });
 
+/**
+ * FORWARD GUARD. A migration after this one may not read the JWT e-mail (or
+ * email_confirmed_at) as authority unless it uses the verified predicate —
+ * with ONE narrow, structural exemption for TOKEN DOORS.
+ *
+ * Token door = possession of the one-time mailed secret is the proof; the JWT
+ * e-mail is compared ONLY to bind an addressed invitation to its addressee (a
+ * stranger with a different address is refused; an unverified registrant whose
+ * address matches may accept — registration-friction removal). That is not
+ * "e-mail as proof of mailbox", so no verified requirement applies — but only
+ * where the e-mail read is structurally subordinate to a token_hash match.
+ */
+const TOKEN_DOOR_EXEMPT: ReadonlyArray<readonly [string, string]> = [
+  [
+    "20261003151100_staff_invitation_email_binding_v1.sql",
+    "#2155 (owner-approved): addressed-invitation binding inside TOKEN doors; the JWT e-mail is read only in invitation_session_email_matches_v1, called only from bodies that select by token_hash",
+  ],
+];
+
+/**
+ * The shared acceptance CORE: it binds the addressee through the helper but is
+ * not itself a door — it is reached only from doors that already proved
+ * something (a token_hash match, or the verified predicate). The guard asserts
+ * that caller property across every migration at or after this one.
+ */
+const SHARED_CORES: readonly string[] = ["accept_invitation_apply_v2"];
+
+const VERIFIED_PREDICATE = /session_email_verified_v1|email_is_verified_v1|profile_id_by_verified_email_v1/;
+const JWT_EMAIL_READ = /jwt\(\)\s*->>\s*'email'|email_confirmed_at/i;
+
+function sqlCode(sql: string): string {
+  return sql.split("\n").filter((l) => !l.trim().startsWith("--")).join("\n");
+}
+
+/** Split into function chunks: [name, body]. Text before the first function is ignored. */
+function functionChunks(code: string): Array<readonly [string, string]> {
+  const out: Array<readonly [string, string]> = [];
+  const re = /create (?:or replace )?function\s+(?:public\.)?([a-z0-9_]+)/gi;
+  const starts = [...code.matchAll(re)].map((m) => [m[1], m.index ?? 0] as const);
+  starts.forEach(([name, at], i) => {
+    out.push([name, code.slice(at, i + 1 < starts.length ? starts[i + 1][1] : code.length)] as const);
+  });
+  return out;
+}
+
+/** Why a file's JWT-email reads are NOT acceptable as a token door ([] = acceptable). */
+function tokenDoorViolations(sql: string, helper: string, cores: readonly string[] = SHARED_CORES): string[] {
+  const code = sqlCode(sql);
+  const violations: string[] = [];
+  const chunks = functionChunks(code);
+  for (const [name, body] of chunks) {
+    const reads = JWT_EMAIL_READ.test(body);
+    const hasToken = /token_hash/i.test(body);
+    const isCore = cores.includes(name);
+    if (reads && name !== helper && !hasToken) {
+      violations.push(`${name}: reads the JWT e-mail with no token_hash match`);
+    }
+    // The helper may only be CALLED from a body that selects by token_hash.
+    if (name !== helper && !isCore && new RegExp(`\\b${helper}\\s*\\(`).test(body) && !hasToken) {
+      violations.push(`${name}: calls ${helper} with no token_hash match`);
+    }
+  }
+  // A JWT-email read outside any function body is never acceptable here.
+  const firstFn = chunks.length ? code.search(/create (?:or replace )?function/i) : code.length;
+  if (JWT_EMAIL_READ.test(code.slice(0, firstFn))) violations.push("top-level: reads the JWT e-mail outside a function");
+  return violations;
+}
+
 describe("forward guard: new SQL may not trust an email without the verified predicate", () => {
-  it("every migration after this one that reads the JWT email or email_confirmed_at also uses the verified predicate", () => {
-    const dir = join(REPO, "supabase", "migrations");
-    const later = readdirSync(dir).filter((f) => f.endsWith(".sql") && f > `${NAME}.sql`);
+  const dir = join(REPO, "supabase", "migrations");
+  const later = readdirSync(dir).filter((f) => f.endsWith(".sql") && f > `${NAME}.sql`);
+  const exempt = new Map(TOKEN_DOOR_EXEMPT);
+
+  it("every migration after this one that reads the JWT email or email_confirmed_at uses the verified predicate (or is a structurally proven token door)", () => {
     const offenders = later.filter((f) => {
-      const sql = readFileSync(join(dir, f), "utf8").split("\n").filter((l) => !l.trim().startsWith("--")).join("\n");
-      const trusts = /jwt\(\)\s*->>\s*'email'|email_confirmed_at/i.test(sql);
-      const gated = /session_email_verified_v1|email_is_verified_v1|profile_id_by_verified_email_v1/.test(sql);
-      return trusts && !gated;
+      const sql = sqlCode(readFileSync(join(dir, f), "utf8"));
+      if (!JWT_EMAIL_READ.test(sql)) return false;
+      if (VERIFIED_PREDICATE.test(sql)) return false;
+      return !exempt.has(f);
     });
     expect(offenders).toEqual([]);
+  });
+
+  it("an exempt file must STRUCTURALLY be a token door: every JWT-email read is in the helper or in a token_hash body", () => {
+    for (const f of exempt.keys()) {
+      const path = join(dir, f);
+      if (!existsSync(path)) continue; // exemption applies only where the file exists
+      const v = tokenDoorViolations(readFileSync(path, "utf8"), "invitation_session_email_matches_v1");
+      expect(v, `${f} is not a token door`).toEqual([]);
+      // and it must not read email_confirmed_at at all
+      expect(sqlCode(readFileSync(path, "utf8")), f).not.toMatch(/email_confirmed_at/i);
+    }
+  });
+
+  it("the shared acceptance core is reached only from doors that proved something (token_hash or the verified predicate)", () => {
+    const callers: string[] = [];
+    for (const f of readdirSync(dir).filter((x) => x.endsWith(".sql") && x >= `${NAME}.sql`)) {
+      for (const [name, body] of functionChunks(sqlCode(readFileSync(join(dir, f), "utf8")))) {
+        if (SHARED_CORES.includes(name)) continue;
+        if (!/accept_invitation_apply_v2\s*\(/.test(body)) continue;
+        callers.push(`${f}:${name}`);
+        expect(/token_hash/i.test(body) || VERIFIED_PREDICATE.test(body), `${f}:${name} calls the shared core without a token_hash match or the verified predicate`).toBe(true);
+      }
+    }
+    expect(callers.length).toBeGreaterThan(0); // this migration's by-id door at least
+  });
+
+  it("every exemption is explicit, justified and references its decision", () => {
+    expect(TOKEN_DOOR_EXEMPT.map(([f]) => f)).toContain("20261003151100_staff_invitation_email_binding_v1.sql");
+    for (const [f, why] of TOKEN_DOOR_EXEMPT) {
+      expect(f).toMatch(/^\d{14}_[a-z0-9_]+\.sql$/);
+      expect(why).toMatch(/#\d+/);
+    }
+  });
+
+  describe("self-test of the structural check (synthetic migrations)", () => {
+    const HELPER = "invitation_session_email_matches_v1";
+    it("NEGATIVE: a function reading the JWT e-mail with no verified predicate and no token check is flagged", () => {
+      const bad = `create or replace function public.claim_stuff(p_id uuid) returns text language plpgsql security definer as $$
+        begin if lower(auth.jwt() ->> 'email') = (select invited_email from public.x where id = p_id) then return 'ok'; end if; return 'no'; end $$;`;
+      expect(JWT_EMAIL_READ.test(sqlCode(bad))).toBe(true);
+      expect(VERIFIED_PREDICATE.test(bad)).toBe(false);
+      expect(tokenDoorViolations(bad, HELPER).length).toBeGreaterThan(0);
+    });
+    it("NEGATIVE: calling the helper from a body with no token_hash match is flagged", () => {
+      const bad = `create or replace function public.invitation_session_email_matches_v1(p text) returns boolean language sql as $$ select lower(auth.jwt() ->> 'email') = p $$;
+        create or replace function public.by_id_door(p_id uuid) returns text language plpgsql as $$
+        begin if public.invitation_session_email_matches_v1('a@b.c') then return 'ok'; end if; return 'no'; end $$;`;
+      expect(tokenDoorViolations(bad, HELPER).join("|")).toMatch(/by_id_door: calls invitation_session_email_matches_v1 with no token_hash/);
+    });
+    it("NEGATIVE: a top-level JWT e-mail read (policy / default) is flagged", () => {
+      const bad = `alter policy p on public.t using (lower(auth.jwt() ->> 'email') = invited_email);
+        create or replace function public.invitation_session_email_matches_v1(p text) returns boolean language sql as $$ select true $$;`;
+      expect(tokenDoorViolations(bad, HELPER).join("|")).toMatch(/top-level/);
+    });
+    it("NEGATIVE: a core-named function does not excuse a DIFFERENT function reading the JWT e-mail", () => {
+      const bad = `create or replace function public.accept_invitation_apply_v2(a uuid, b uuid) returns jsonb language plpgsql as $$ begin perform public.invitation_session_email_matches_v1('x'); return '{}'::jsonb; end $$;
+        create or replace function public.sneaky(a uuid) returns text language sql as $$ select auth.jwt() ->> 'email' $$;`;
+      expect(tokenDoorViolations(bad, HELPER).join("|")).toMatch(/sneaky: reads the JWT e-mail/);
+    });
+    it("POSITIVE: the helper plus a token_hash door is accepted", () => {
+      const good = `create or replace function public.invitation_session_email_matches_v1(p text) returns boolean language sql as $$ select lower(trim(coalesce(auth.jwt() ->> 'email',''))) = lower(trim(p)) $$;
+        create or replace function public.accept_invitation_v1(p_token text) returns text language plpgsql as $$
+        begin perform 1 from public.invitations where token_hash = encode(digest(p_token,'sha256'),'hex') and public.invitation_session_email_matches_v1(invited_email); return 'ok'; end $$;`;
+      expect(tokenDoorViolations(good, HELPER)).toEqual([]);
+    });
+    it("the verified-predicate path still passes without any exemption", () => {
+      const gated = `create or replace function public.f() returns text language sql as $$ select case when public.session_email_verified_v1() and lower(auth.jwt() ->> 'email') = 'x' then 'ok' end $$;`;
+      expect(VERIFIED_PREDICATE.test(gated)).toBe(true);
+    });
   });
 });
 
