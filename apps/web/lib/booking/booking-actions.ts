@@ -665,11 +665,26 @@ const deadlineColumnDowngrade = cache((): { absent: boolean } => ({ absent: fals
  */
 const readMyBookingsOnce = cache(readMyBookings);
 
-export async function listMyBookings(): Promise<BookingsListResult> {
+/**
+ * The bookings read with the FAILURE told apart from "no bookings" (SEP-7).
+ * `error` is a read that failed for a reason other than the owner-gated table
+ * being absent; the historical reader below answers it as an empty list.
+ */
+export type BookingsListHonestResult = BookingsListResult | { kind: "error" };
+
+export async function listMyBookingsResult(): Promise<BookingsListHonestResult> {
   return readMyBookingsOnce();
 }
 
-async function readMyBookings(): Promise<BookingsListResult> {
+export async function listMyBookings(): Promise<BookingsListResult> {
+  // Historical shape: a failed read is an empty list (the bookings page and
+  // badges keep their behaviour); callers that must not render a failure as
+  // "nothing" use `listMyBookingsResult`.
+  const r = await readMyBookingsOnce();
+  return r.kind === "error" ? { kind: "ok", incoming: [], outgoing: [] } : r;
+}
+
+async function readMyBookings(): Promise<BookingsListHonestResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -699,7 +714,7 @@ async function readMyBookings(): Promise<BookingsListResult> {
   const { data, error } = res!;
   if (error) {
     if (error.code && ABSENT.has(error.code)) return { kind: "needs-migration" };
-    return { kind: "ok", incoming: [], outgoing: [] };
+    return { kind: "error" };
   }
 
   const incoming: BookingRow[] = [];
@@ -803,6 +818,33 @@ export async function getPendingIncomingBookingCount(): Promise<number> {
  * marketplace seen model). Null when never opened or while the owner-gated
  * booking_requests_seen migration is not applied — both degrade to 0 "new".
  */
+export type BookingSeenAtResult =
+  | { status: "ok"; seenAt: string | null }
+  | { status: "unavailable" };
+
+/** The seen-at read with a failed read apart from "never seen". An absent
+ *  (owner-gated) table is "never seen": no response can have been shown yet. */
+export async function readBookingRequestsSeenAt(): Promise<BookingSeenAtResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { status: "unavailable" };
+  try {
+    const { data, error } = await asAny(supabase)
+      .from("booking_requests_seen")
+      .select("seen_at")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (error) {
+      return error.code && ABSENT.has(error.code) ? { status: "ok", seenAt: null } : { status: "unavailable" };
+    }
+    return { status: "ok", seenAt: data && typeof data.seen_at === "string" ? data.seen_at : null };
+  } catch {
+    return { status: "unavailable" };
+  }
+}
+
 export async function getBookingRequestsSeenAt(): Promise<string | null> {
   const supabase = await createClient();
   const {
@@ -826,6 +868,33 @@ export async function getBookingRequestsSeenAt(): Promise<string | null> {
  * absent — never a fabricated badge (audit PR5: booking responses were
  * silent for the proposing company).
  */
+export type BookingResponsesNewResult =
+  | { status: "ok"; count: number }
+  | { status: "unavailable" };
+
+/**
+ * `getBookingResponsesNewCount` with UNKNOWN apart from ZERO: a failed seen-at
+ * or bookings read is `unavailable`, never "no responses". Never-seen with no
+ * fallback, an absent table and an unauthenticated... are NOT failures only
+ * where they truly mean nothing can have been answered (ok, 0).
+ */
+export async function readBookingResponsesNewCount(opts?: {
+  fallbackDays?: number;
+}): Promise<BookingResponsesNewResult> {
+  const seen = await readBookingRequestsSeenAt();
+  if (seen.status !== "ok") return { status: "unavailable" };
+  const fallback =
+    opts?.fallbackDays && opts.fallbackDays > 0
+      ? new Date(Date.now() - opts.fallbackDays * 86400000).toISOString()
+      : null;
+  const seenAt = seen.seenAt ?? fallback;
+  if (!seenAt) return { status: "ok", count: 0 };
+  const result = await listMyBookingsResult();
+  if (result.kind === "error" || result.kind === "not-authed") return { status: "unavailable" };
+  if (result.kind !== "ok") return { status: "ok", count: 0 }; // needs-migration: nothing can be answered yet
+  return { status: "ok", count: countOwnerResponsesSince(result.outgoing, seenAt) };
+}
+
 export async function getBookingResponsesNewCount(opts?: {
   /** When the bookings surface was NEVER opened, count responses inside this
    *  many days instead of answering 0 — the opening brief's "what changed"

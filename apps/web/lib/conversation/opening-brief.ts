@@ -64,6 +64,7 @@ export type EmployerBriefSource =
   | "learners"
   | "agency-offers"
   | "interest"
+  | "bookings"
   | "journal-reviews"
   | "learning-review"
   | "absences"
@@ -536,10 +537,12 @@ export async function loadEmployerOpeningBriefResult(): Promise<EmployerOpeningB
     // decline in the chat left the employer's next greeting silent. Same
     // read the bookings badge uses; the caller's own moves never count.
     if (lines.length < MAX_LINES) {
-      const { getBookingResponsesNewCount } = await import("@/lib/booking/booking-actions");
-      const answered = await getBookingResponsesNewCount({ fallbackDays: 14 });
-      if (answered > 0) {
-        lines.push(t("briefEmployerBookingResponses", { count: answered }));
+      const { readBookingResponsesNewCount } = await import("@/lib/booking/booking-actions");
+      const answered = await readBookingResponsesNewCount({ fallbackDays: 14 });
+      if (answered.status === "unavailable") {
+        unknown.add("bookings");
+      } else if (answered.count > 0) {
+        lines.push(t("briefEmployerBookingResponses", { count: answered.count }));
         addChip("link:/dashboard/bookings", t("chipEmployerBookings"));
       }
     }
@@ -550,10 +553,12 @@ export async function loadEmployerOpeningBriefResult(): Promise<EmployerOpeningB
 
   // 1 ── work entries awaiting review ──────────────────────────────────────
   try {
-    const { fetchQuickReviewQueue } = await import("@/lib/journal/review-queue");
-    const queue = await fetchQuickReviewQueue();
-    if (queue.length > 0) {
-      lines.push(t("briefEmployerJournalReviews", { count: queue.length }));
+    const { readQuickReviewQueueResult } = await import("@/lib/journal/review-queue");
+    const queue = await readQuickReviewQueueResult();
+    if (queue.status === "unavailable") {
+      unknown.add("journal-reviews");
+    } else if (queue.status === "ok" && queue.entries.length > 0) {
+      lines.push(t("briefEmployerJournalReviews", { count: queue.entries.length }));
       addChip("link:/dashboard/inbox", t("chipEmployerInbox"));
     }
   } catch {
@@ -590,9 +595,11 @@ export async function loadEmployerOpeningBriefResult(): Promise<EmployerOpeningB
 
   // 2 ── absence requests awaiting decision ────────────────────────────────
   try {
-    const { getManagerPendingAbsences } = await import("@/lib/leave/absences");
-    const pending = await getManagerPendingAbsences();
-    if (pending.applied && pending.pending.length > 0 && lines.length < MAX_LINES) {
+    const { readManagerPendingAbsences } = await import("@/lib/leave/absences");
+    const pending = await readManagerPendingAbsences();
+    if (pending.status === "unavailable") {
+      unknown.add("absences");
+    } else if (pending.status === "ok" && pending.pending.length > 0 && lines.length < MAX_LINES) {
       lines.push(t("briefEmployerPendingAbsences", { count: pending.pending.length }));
       addChip("link:/dashboard/absences", t("chipEmployerAbsences"));
     }

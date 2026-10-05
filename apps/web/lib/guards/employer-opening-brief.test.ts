@@ -36,8 +36,8 @@ describe("the employer opening brief", () => {
     const fn = src.slice(src.indexOf("export async function loadEmployerOpeningBriefResult()"));
     // The manager's morning ladder, in order: reviews → absence decisions →
     // absent today → unread. Recruitment reads must NOT appear.
-    const reviews = fn.indexOf("fetchQuickReviewQueue");
-    const absences = fn.indexOf("getManagerPendingAbsences");
+    const reviews = fn.indexOf("readQuickReviewQueueResult");
+    const absences = fn.indexOf("readManagerPendingAbsences");
     const absentToday = fn.indexOf("absentOn");
     const unread = fn.indexOf("getUnreadConversationIdsForOrganization");
     expect(reviews).toBeGreaterThan(-1);
@@ -53,7 +53,7 @@ describe("the employer opening brief", () => {
     expect(fn).not.toMatch(/scouting|create-demand|matches/i);
     expect(fn).not.toMatch(/runScouting|listCompanyDemands/);
     const rungStart = fn.indexOf("readPendingInterestCountsForCompany");
-    const rungEnd = fn.indexOf("fetchQuickReviewQueue");
+    const rungEnd = fn.indexOf("readQuickReviewQueueResult");
     expect(rungStart).toBeGreaterThan(-1);
     const outsideRung = fn.slice(0, fn.lastIndexOf("// Candidates who raised a hand", rungStart)) + fn.slice(rungEnd);
     expect(outsideRung).not.toMatch(/candidate/i);

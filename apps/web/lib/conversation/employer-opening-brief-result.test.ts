@@ -47,20 +47,20 @@ vi.mock("@/lib/communication/organization-scope", () => ({
 vi.mock("@/lib/company/employer-company-context", () => ({ resolveEmployerCompanyContext: h.ctx }));
 vi.mock("@/lib/booking/booking-actions", () => ({
   getPendingIncomingBookingCount: h.noop,
-  getBookingResponsesNewCount: h.bookings,
+  readBookingResponsesNewCount: h.bookings,
 }));
 vi.mock("@/lib/journal/own-recent-confirmations", () => ({ loadOwnRecentConfirmations: h.noop }));
 vi.mock("@/lib/projects/worker-project-access", () => ({ getOwnWorkerId: h.noop }));
 vi.mock("@/lib/conversation/starter-signals", () => ({ loadCompanyStarterContext: h.starter }));
 vi.mock("@/lib/opportunities/interest", () => ({ readPendingInterestCountsForCompany: h.interest }));
 vi.mock("@/lib/conversation/client-offers", () => ({ loadClientOffersForChat: h.offers }));
-vi.mock("@/lib/journal/review-queue", () => ({ fetchQuickReviewQueue: h.queue }));
+vi.mock("@/lib/journal/review-queue", () => ({ readQuickReviewQueueResult: h.queue }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: h.sbClient }));
 vi.mock("@/lib/learning/signal-queue-producer", () => ({
   produceReviewQueueFromSignals: h.produce,
   countPendingReviewQueue: h.countPending,
 }));
-vi.mock("@/lib/leave/absences", () => ({ getManagerPendingAbsences: h.absences }));
+vi.mock("@/lib/leave/absences", () => ({ readManagerPendingAbsences: h.absences }));
 vi.mock("@/lib/planning/employer-availability", () => ({
   getEmployerWorkerAvailability: h.availability,
   absentOn: () => [],
@@ -77,12 +77,12 @@ function allClear() {
   });
   h.offers.mockResolvedValue({ kind: "ok", offers: [], openDemands: 0 });
   h.interest.mockResolvedValue({ status: "ok", counts: new Map() });
-  h.bookings.mockResolvedValue(0);
-  h.queue.mockResolvedValue([]);
+  h.bookings.mockResolvedValue({ status: "ok", count: 0 });
+  h.queue.mockResolvedValue({ status: "ok", entries: [] });
   h.sbClient.mockResolvedValue({});
   h.produce.mockResolvedValue(undefined);
   h.countPending.mockResolvedValue(0);
-  h.absences.mockResolvedValue({ applied: true, pending: [] });
+  h.absences.mockResolvedValue({ status: "ok", pending: [] });
   h.availability.mockResolvedValue({ status: "ok", unavailability: [] });
   h.ctx.mockResolvedValue({ kind: "ok", companyId: "co-1" });
   h.unreadScoped.mockResolvedValue({ status: "ok", ids: new Set() });
@@ -99,7 +99,7 @@ describe("loadEmployerOpeningBriefResult - success", () => {
   });
 
   it("data -> a brief with no unknown sources and no unknown note", async () => {
-    h.queue.mockResolvedValue([{}, {}]);
+    h.queue.mockResolvedValue({ status: "ok", entries: [{}, {}] });
     const r = await loadEmployerOpeningBriefResult();
     expect(r.kind).toBe("brief");
     if (r.kind !== "brief") return;
@@ -128,7 +128,7 @@ describe("loadEmployerOpeningBriefResult - failure is UNKNOWN, never none", () =
     if (r.kind === "unknown") expect(r.unknownNote).toBe("briefEmployerUnknown");
   });
 
-  it("a thrown review-queue read is named", async () => {
+  it("a thrown review-queue read is named (defence in depth)", async () => {
     h.queue.mockRejectedValue(new Error("boom"));
     expect(await loadEmployerOpeningBriefResult()).toMatchObject({
       kind: "unknown",
@@ -158,7 +158,7 @@ describe("loadEmployerOpeningBriefResult - failure is UNKNOWN, never none", () =
   });
 
   it("a line AND a failed source -> a brief that still says the list is incomplete", async () => {
-    h.queue.mockResolvedValue([{}]);
+    h.queue.mockResolvedValue({ status: "ok", entries: [{}] });
     h.unreadScoped.mockResolvedValue({ status: "unavailable" });
     const r = await loadEmployerOpeningBriefResult();
     expect(r.kind).toBe("brief");
@@ -169,7 +169,7 @@ describe("loadEmployerOpeningBriefResult - failure is UNKNOWN, never none", () =
 
   it("a failing starter context is named, the other rungs still run", async () => {
     h.starter.mockRejectedValue(new Error("boom"));
-    h.queue.mockResolvedValue([{}]);
+    h.queue.mockResolvedValue({ status: "ok", entries: [{}] });
     const r = await loadEmployerOpeningBriefResult();
     expect(r.kind).toBe("brief");
     if (r.kind === "brief") {
@@ -186,10 +186,43 @@ describe("loadEmployerOpeningBrief - legacy shape preserved", () => {
   });
 
   it("a brief keeps exactly { kind, lines, chips } - no new fields leak to old callers", async () => {
-    h.queue.mockResolvedValue([{}]);
+    h.queue.mockResolvedValue({ status: "ok", entries: [{}] });
     h.unreadScoped.mockResolvedValue({ status: "unavailable" });
     const legacy = await loadEmployerOpeningBrief();
     expect(legacy.kind).toBe("brief");
     expect(Object.keys(legacy).sort()).toEqual(["chips", "kind", "lines"]);
+  });
+});
+
+describe("loadEmployerOpeningBriefResult - the three formerly lossy readers", () => {
+  it("absences: ok-empty and not-applied are NOT unknown; unavailable is", async () => {
+    h.absences.mockResolvedValue({ status: "ok", pending: [] });
+    expect(await loadEmployerOpeningBriefResult()).toEqual({ kind: "none" });
+    h.absences.mockResolvedValue({ status: "not-applied" });
+    expect(await loadEmployerOpeningBriefResult()).toEqual({ kind: "none" });
+    h.absences.mockResolvedValue({ status: "unavailable" });
+    expect(await loadEmployerOpeningBriefResult()).toMatchObject({ kind: "unknown", unknown: ["absences"] });
+  });
+
+  it("absences: data is a line", async () => {
+    h.absences.mockResolvedValue({ status: "ok", pending: [{}, {}, {}] });
+    const r = await loadEmployerOpeningBriefResult();
+    expect(r.kind === "brief" && r.lines).toContain("briefEmployerPendingAbsences:3");
+  });
+
+  it("bookings: ok 0 is not unknown; unavailable is; data is a line", async () => {
+    expect(await loadEmployerOpeningBriefResult()).toEqual({ kind: "none" });
+    h.bookings.mockResolvedValue({ status: "unavailable" });
+    expect(await loadEmployerOpeningBriefResult()).toMatchObject({ kind: "unknown", unknown: ["bookings"] });
+    h.bookings.mockResolvedValue({ status: "ok", count: 2 });
+    const r = await loadEmployerOpeningBriefResult();
+    expect(r.kind === "brief" && r.lines).toContain("briefEmployerBookingResponses:2");
+  });
+
+  it("journal queue: needs-migration is not unknown; unavailable is", async () => {
+    h.queue.mockResolvedValue({ status: "needs-migration" });
+    expect(await loadEmployerOpeningBriefResult()).toEqual({ kind: "none" });
+    h.queue.mockResolvedValue({ status: "unavailable" });
+    expect(await loadEmployerOpeningBriefResult()).toMatchObject({ kind: "unknown", unknown: ["journal-reviews"] });
   });
 });

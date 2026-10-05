@@ -114,35 +114,56 @@ async function callerWorkerId(
   return data?.id ?? null;
 }
 
-/** Pending absence requests for workers the caller manages (RLS-scoped). */
-export async function getManagerPendingAbsences(): Promise<ManagerAbsencesData> {
+/**
+ * The manager's pending absences with the FAILURE told apart from "none"
+ * (SEP-7). `not-applied` = the leave model is absent (nothing can be pending).
+ * `unavailable` = a read failed — NOT "no requests". The historical
+ * `getManagerPendingAbsences` below keeps its shape and delegates.
+ */
+export type ManagerAbsencesResult =
+  | { status: "ok"; pending: WorkerAbsence[] }
+  | { status: "not-applied" }
+  | { status: "unavailable" };
+
+export async function readManagerPendingAbsences(): Promise<ManagerAbsencesResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { applied: false };
-
-  const selfWorkerId = await callerWorkerId(supabase, user.id);
-
-  const res = await asAny(supabase)
-    .from("worker_absences")
-    .select("id, worker_id, absence_type, start_date, end_date, half_day, note, status, workers(display_name)")
-    .eq("status", "requested")
-    .order("start_date", { ascending: true })
-    .limit(200);
-
-  if (res.error) {
-    if (res.error.code === RELATION_NOT_FOUND || res.error.code === UNDEFINED_COLUMN) {
-      return { applied: false };
+  if (!user) return { status: "not-applied" };
+  try {
+    const selfWorkerId = await callerWorkerId(supabase, user.id);
+    const res = await asAny(supabase)
+      .from("worker_absences")
+      .select("id, worker_id, absence_type, start_date, end_date, half_day, note, status, workers(display_name)")
+      .eq("status", "requested")
+      .order("start_date", { ascending: true })
+      .limit(200);
+    if (res.error) {
+      return res.error.code === RELATION_NOT_FOUND || res.error.code === UNDEFINED_COLUMN
+        ? { status: "not-applied" }
+        : { status: "unavailable" };
     }
-    return { applied: true, pending: [] };
+    const rows = ((res.data ?? []) as (Row & { workers?: { display_name?: string | null } })[])
+      .map((r) => toAbsence(r, r.workers?.display_name ?? null))
+      .filter((a): a is WorkerAbsence => a !== null);
+    // The `self` branch of the SELECT policy hands back the caller's OWN
+    // request; nobody reviews their own time off. See pendingAbsenceReviews.
+    return { status: "ok", pending: pendingAbsenceReviews(rows, selfWorkerId) };
+  } catch {
+    return { status: "unavailable" };
   }
-  const rows = ((res.data ?? []) as (Row & { workers?: { display_name?: string | null } })[])
-    .map((r) => toAbsence(r, r.workers?.display_name ?? null))
-    .filter((a): a is WorkerAbsence => a !== null);
-  // The `self` branch of the SELECT policy hands back the caller's OWN
-  // request; nobody reviews their own time off. See pendingAbsenceReviews.
-  return { applied: true, pending: pendingAbsenceReviews(rows, selfWorkerId) };
+}
+
+/** Pending absence requests for workers the caller manages (RLS-scoped).
+ *  Historical shape: a failed read answers `{ applied: true, pending: [] }`;
+ *  callers that must not render a failure as "none" use
+ *  `readManagerPendingAbsences`. */
+export async function getManagerPendingAbsences(): Promise<ManagerAbsencesData> {
+  const r = await readManagerPendingAbsences();
+  if (r.status === "not-applied") return { applied: false };
+  if (r.status === "unavailable") return { applied: true, pending: [] };
+  return { applied: true, pending: r.pending };
 }
 
 /**
