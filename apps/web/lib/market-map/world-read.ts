@@ -17,6 +17,7 @@ import {
 import { COUNTRY_CENTROID, listKnownCities } from "@/lib/location/city-coordinates";
 import { getOwnMarketSignals } from "./signals";
 import { buildPersonPresenceLayer } from "./spatial-entities";
+import { safeMarketLabel } from "./safe-label";
 import {
   WORLD_ROW_LIMIT,
   buildWorldLayerView,
@@ -89,12 +90,22 @@ interface LayerRead {
   readonly unplaced: number;
   readonly withheld: number;
   readonly truncated: boolean;
+  readonly newestAt: string | null;
   readonly notes: WorldNote[];
   readonly error: string | null;
 }
 
-function emptyRead(): { objects: WorldObject[]; unplaced: number; withheld: number; truncated: boolean; notes: WorldNote[]; error: string | null } {
-  return { objects: [], unplaced: 0, withheld: 0, truncated: false, notes: [], error: null };
+function emptyRead(): { objects: WorldObject[]; unplaced: number; withheld: number; truncated: boolean; newestAt: string | null; notes: WorldNote[]; error: string | null } {
+  return { objects: [], unplaced: 0, withheld: 0, truncated: false, newestAt: null, notes: [], error: null };
+}
+
+/** The later of two ISO timestamps; an unparseable one never wins. */
+function laterIso(current: string | null, candidate: string | null | undefined): string | null {
+  if (!candidate) return current;
+  const c = Date.parse(candidate);
+  if (!Number.isFinite(c)) return current;
+  if (!current) return candidate;
+  return c > Date.parse(current) ? candidate : current;
 }
 
 /** Every point the controlled geography can place — cities + centroids. */
@@ -140,6 +151,7 @@ export async function loadWorldView(request: WorldRequest): Promise<WorldViewRes
       unplaced: read.unplaced,
       withheld: read.withheld,
       truncated: read.truncated,
+      newestAt: read.newestAt,
       notes: read.notes,
       error: read.error,
     }),
@@ -267,16 +279,25 @@ async function readDemand(
   // demand INTENSITY, not a headcount claim: an unknown team size counts 1 —
   // "at least one need exists here" — the same floor market-result.ts uses,
   // and the list shows the role, never an invented number of people.
+  //
+  // PRESENTATION SAFETY (2026-10-05). The role text is the company's own
+  // free text and these rows reach OTHER people: it passes
+  // `safeMarketLabel` (no e-mail / phone / URL / handle, bounded length) and
+  // the object id is an opaque per-response index, never the customer_request
+  // uuid — a client holding another tenant's request id is one step from
+  // probing it, and nothing on the map opens a request by id.
+  let demandIndex = 0;
   for (const row of placeableDemand(dedupeCanonicalDemand(rows))) {
     const placed = placeWorldRow(row.country, row.cityLabel);
     if (!placed) {
       out.unplaced += 1;
       continue;
     }
+    out.newestAt = laterIso(out.newestAt, row.createdAt);
     out.objects.push({
-      id: row.key,
+      id: `need:${demandIndex++}`,
       layer: "demand",
-      label: row.roleText ?? placed.placeLabel,
+      label: safeMarketLabel(row.roleText) ?? placed.placeLabel,
       placeLabel: placed.placeLabel,
       country: row.country as string,
       lat: placed.lat,
@@ -297,6 +318,7 @@ interface ProjectRow {
   readonly country: string | null;
   readonly city: string | null;
   readonly status: string | null;
+  readonly created_at?: string | null;
 }
 
 async function readProjects(
@@ -306,7 +328,7 @@ async function readProjects(
   const out = emptyRead();
   const res = await asAny(supabase)
     .from("projects")
-    .select("id, title, country, city, status")
+    .select("id, title, country, city, status, created_at")
     .in("country", [...countries])
     .order("created_at", { ascending: false })
     .limit(WORLD_ROW_LIMIT + 1);
@@ -320,6 +342,7 @@ async function readProjects(
       out.unplaced += 1;
       continue;
     }
+    out.newestAt = laterIso(out.newestAt, p.created_at);
     out.objects.push({
       id: `project:${p.id}`,
       layer: "projects",

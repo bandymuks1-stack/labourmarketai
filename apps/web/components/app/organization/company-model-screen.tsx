@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import {
   Activity,
@@ -15,6 +16,7 @@ import {
   UsersRound,
 } from "lucide-react";
 
+import { HomeMarket } from "@/components/app/home/home-regions";
 import { Link } from "@/lib/i18n/navigation";
 
 /**
@@ -34,6 +36,12 @@ import { Link } from "@/lib/i18n/navigation";
  * re-checks its own rights under RLS. The calendar entry is the ONE calendar
  * (/dashboard/planning); "capacity" is the workforce zone, which the
  * context-parity guard records as a different capability, not a calendar.
+ *
+ * Below the doors sits the SAME market entrance the person's home carries
+ * (`HomeMarket`): the real needs, projects, vacancies and territory this
+ * workspace may see, each a link into the ONE Market Map. Company demand
+ * stays anonymous there — the map shows country, place and role, never the
+ * company's identity.
  */
 type Entry = {
   readonly id: string;
@@ -76,36 +84,43 @@ function Tile({ entry, label }: { entry: Entry; label: string }) {
 export async function CompanyModelScreen() {
   const t = await getTranslations("companyModel");
   return (
-    <section
-      aria-label={t("title")}
-      data-testid="company-model"
-      className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-4 pb-2 pt-4"
-    >
-      <h2 className="font-display text-card-title font-semibold text-text-primary">
-        {t("title")}
-      </h2>
-      <Link
-        href={"/dashboard/company/needs#demand-intake" as "/dashboard"}
-        data-testid="company-model-primary"
-        className="inline-flex min-h-11 w-fit items-center rounded-full bg-brand-orange px-5 text-sm font-semibold text-ink-900 hover:opacity-90"
+    <>
+      <section
+        aria-label={t("title")}
+        data-testid="company-model"
+        className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-4 pb-2 pt-4"
       >
-        {t("primary")}
-      </Link>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {PRIMARY.map((e) => (
-          <Tile key={e.id} entry={e} label={t(e.id)} />
-        ))}
-      </div>
-      <details className="group" data-testid="company-model-more">
-        <summary className="inline-flex min-h-11 cursor-pointer items-center text-sm font-medium text-text-secondary hover:text-brand-blue">
-          {t("more")}
-        </summary>
-        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {MORE.map((e) => (
+        <h2 className="font-display text-card-title font-semibold text-text-primary">
+          {t("title")}
+        </h2>
+        <Link
+          href={"/dashboard/company/needs#demand-intake" as "/dashboard"}
+          data-testid="company-model-primary"
+          className="inline-flex min-h-11 w-fit items-center rounded-full bg-brand-orange px-5 text-sm font-semibold text-ink-900 hover:opacity-90"
+        >
+          {t("primary")}
+        </Link>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {PRIMARY.map((e) => (
             <Tile key={e.id} entry={e} label={t(e.id)} />
           ))}
         </div>
-      </details>
-    </section>
+        <details className="group" data-testid="company-model-more">
+          <summary className="inline-flex min-h-11 cursor-pointer items-center text-sm font-medium text-text-secondary hover:text-brand-blue">
+            {t("more")}
+          </summary>
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {MORE.map((e) => (
+              <Tile key={e.id} entry={e} label={t(e.id)} />
+            ))}
+          </div>
+        </details>
+      </section>
+      <div className="mx-auto w-full max-w-2xl px-4 pb-2 pt-6" data-testid="company-model-market">
+        <Suspense fallback={null}>
+          <HomeMarket />
+        </Suspense>
+      </div>
+    </>
   );
 }

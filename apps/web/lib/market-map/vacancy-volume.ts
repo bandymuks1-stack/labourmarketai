@@ -56,6 +56,11 @@ export interface VacancyVolumeData {
   readonly derived: boolean;
   /** Exact count of browsable advertisements for this profession. */
   readonly activeAds: number;
+  /** Exact counts of ads PUBLISHED in the last 7 / 30 days (the facts read's
+   *  own `published_at` counts) and the moment they were measured. */
+  readonly newAds7d: number;
+  readonly newAds30d: number;
+  readonly measuredAtIso: string;
   /** How many newest ads the city/country volumes were tallied over. */
   readonly rankingWindowAds: number;
   /** True when that window was the whole browsable population. */
@@ -183,6 +188,9 @@ async function readVacancyVolume(): Promise<VacancyVolumeResult> {
       professionSlug: slug,
       derived,
       activeAds: facts.activeAds,
+      newAds7d: facts.newAds7d,
+      newAds30d: facts.newAds30d,
+      measuredAtIso: facts.measuredAtIso,
       rankingWindowAds: facts.rankingWindowAds,
       rankingWindowCoversAll: facts.rankingWindowCoversAll,
       countries,

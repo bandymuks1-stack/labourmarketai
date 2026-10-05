@@ -510,6 +510,9 @@ export interface WorldCounts {
   readonly withheld: number;
   /** A DB leg hit `WORLD_ROW_LIMIT` — every count is a lower bound. */
   readonly truncated: boolean;
+  /** `created_at` of the newest row the leg read — the only freshness this
+   *  layer can state truthfully. Null when no row carried a timestamp. */
+  readonly newestAt: string | null;
 }
 
 export interface WorldLayerView {
@@ -533,6 +536,7 @@ export interface BuildWorldLayerViewInput {
   readonly unplaced?: number;
   readonly withheld?: number;
   readonly truncated?: boolean;
+  readonly newestAt?: string | null;
   readonly notes?: readonly WorldNote[];
   /** A failed read: the view is empty AND says so as an error. */
   readonly error?: string | null;
@@ -572,6 +576,7 @@ export function buildWorldLayerView(input: BuildWorldLayerViewInput): WorldLayer
       unplaced: input.unplaced ?? 0,
       withheld: input.withheld ?? 0,
       truncated: input.truncated === true,
+      newestAt: input.newestAt ?? null,
     },
     notes: input.notes ?? [],
     countries: input.countries,

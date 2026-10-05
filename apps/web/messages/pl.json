@@ -1460,7 +1460,8 @@
         "error": "Nie udało się teraz odczytać tej warstwy. Zamiast zgadywać, nic nie pokazujemy.",
         "noPlaces": "Brak znanych miejsc w tej części mapy. Przesuń mapę do kraju lub miasta.",
         "signIn": "Zaloguj się, aby zobaczyć widok świata.",
-        "fetchFailed": "Dane mapy nie dotarły. Przesuń mapę, aby spróbować ponownie."
+        "fetchFailed": "Dane mapy nie dotarły. Przesuń mapę, aby spróbować ponownie.",
+        "suppressed": "Małe grupy są ukrywane dla ochrony prywatności. To nie jest liczba dostępnych osób."
       },
       "notes": {
         "aggregateOnly": "Ludzie są pokazywani tylko jako grupy liczące co najmniej 5 osób. Dziś tę warstwę zasila wyłącznie Twoja własna udostępniona lokalizacja."
@@ -1470,12 +1471,48 @@
         "count": "{count} obiektów",
         "approx": "przybliżone",
         "selected": "wybrane",
-        "more": "+{count} więcej"
+        "more": "+{count} więcej",
+        "openProject": "Otwórz projekt",
+        "openCompany": "Otwórz firmę"
       },
       "precision": {
         "city": "Miasto",
         "country": "Tylko kraj"
       }
+    },
+    "signals": {
+      "title": "Sygnały rynku",
+      "lead": "Co jest teraz dla Ciebie widoczne – z tych samych zapisów co na mapie.",
+      "toggle": "Sygnały",
+      "needs": {
+        "label": "Otwarte potrzeby",
+        "line": "{lower, select, yes {Co najmniej } other {}}{count, plural, one {# otwarta potrzeba} few {# otwarte potrzeby} many {# otwartych potrzeb} other {# otwartych potrzeb}} widocznych dla Ciebie",
+        "empty": "W widoku europejskim nie widać dla Ciebie otwartych potrzeb.",
+        "unknown": "Nie udało się teraz odczytać otwartych potrzeb."
+      },
+      "vacancies": {
+        "label": "Publiczne oferty pracy",
+        "line": "{count, plural, one {# publiczna oferta} few {# publiczne oferty} many {# publicznych ofert} other {# publicznych ofert}}: {profession}",
+        "fresh": "{n7} nowych w 7 dni · {n30} w 30 dni",
+        "empty": "Obecnie brak publicznych ofert dla zawodu „{profession}”.",
+        "derived": "Zawód ustalony na podstawie Twojej zapisanej pracy."
+      },
+      "projects": {
+        "label": "Projekty",
+        "line": "{lower, select, yes {Co najmniej } other {}}{count, plural, one {# projekt} few {# projekty} many {# projektów} other {# projektów}}, w których pracujesz lub którymi zarządzasz",
+        "unknown": "Nie udało się teraz odczytać Twoich projektów."
+      },
+      "territory": {
+        "label": "Twój obszar",
+        "line": "{places, plural, one {# miejsce} few {# miejsca} many {# miejsc} other {# miejsc}}, w których działa Twoja firma"
+      },
+      "places": "{places, plural, one {# miejsce} few {# miejsca} many {# miejsc} other {# miejsc}}",
+      "newest": "Najnowsze {date}",
+      "measured": "Zmierzono {date}",
+      "unplaced": "{count} bez znanego kraju nie jest pokazanych",
+      "show": "Pokaż na mapie",
+      "sizeNote": "Rozmiar znacznika jest względny wobec tego, co widać. Nie jest miarą rynku.",
+      "peopleNote": "Ludzie nie są tu liczeni. Osoby pozostają anonimowe, a grupy mniejsze niż pięć nigdy nie są pokazywane, więc mapa nie powie, ilu ludzi jest dostępnych."
     }
   },
   "demandLocationCapture": {
@@ -18526,6 +18563,10 @@
       "outside": {
         "eyebrow": "Poza Twoimi murami",
         "title": "Co jest na *rynku*"
+      },
+      "market": {
+        "eyebrow": "Żywy rynek",
+        "title": "Rynek, *jaki jest*"
       }
     },
     "chain": {
@@ -18551,6 +18592,11 @@
         "documentAcknowledged": "Dokument: zapoznano się",
         "relationshipFormed": "Relacja: nawiązana"
       }
+    },
+    "market": {
+      "open": "Otwórz mapę rynku",
+      "openHint": "Potrzeby, projekty i oferty pracy na jednej mapie",
+      "allEmpty": "W widoku europejskim nie widać jeszcze dla Ciebie niczego otwartego. Mapa pokaże, gdzie to się pojawi."
     }
   }
 }

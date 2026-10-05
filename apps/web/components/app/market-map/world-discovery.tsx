@@ -69,6 +69,20 @@ export interface WorldPlaceLink {
   readonly label: string;
 }
 
+/**
+ * FROM A MARKET OBJECT TO THE REAL ENTITY. A project the caller can see (own,
+ * assigned or managed — the map's RLS read) opens its project route, which
+ * authorises again on arrival; a place of the caller's own company territory
+ * opens the company context. Needs carry NO per-request link: a foreign
+ * customer request must never become detail access by id, so a need leads
+ * only to the opportunities list for its country (`placeLink`).
+ */
+export interface WorldEntityLinks {
+  /** `{id}` is the project uuid. */
+  readonly projectHrefTemplate: string;
+  readonly companyHref: string;
+}
+
 /** Layers drawn from a prepared view instead of the bounded world read. */
 export type StaticLayerKey = "jobs" | "territory";
 export interface StaticLayer {
@@ -76,7 +90,7 @@ export interface StaticLayer {
   /** One quiet line under the map (e.g. the vacancy count). */
   readonly caption?: string;
 }
-type LayerKey = WorldLayer | StaticLayerKey;
+export type LayerKey = WorldLayer | StaticLayerKey;
 const STATIC_LAYER_ORDER: readonly StaticLayerKey[] = ["jobs", "territory"];
 const STATIC_TO_MAP_LAYER: Record<StaticLayerKey, MarketMapLayer> = {
   jobs: "jobs",
@@ -86,7 +100,9 @@ const STATIC_TO_MAP_LAYER: Record<StaticLayerKey, MarketMapLayer> = {
 export function WorldDiscovery({
   initial,
   initialLayer = "demand",
+  initialKey,
   placeLink,
+  entityLinks,
   mapMode = "dashboard",
   ownLocation,
   staticLayers,
@@ -94,7 +110,10 @@ export function WorldDiscovery({
   /** The first view, rendered on the server for the default viewport. */
   initial: WorldViewResult;
   initialLayer?: WorldLayer;
+  /** Open on a static layer (`jobs` / `territory`) when its data exists. */
+  initialKey?: StaticLayerKey;
   placeLink?: WorldPlaceLink;
+  entityLinks?: WorldEntityLinks;
   /**
    * The canonical container height (`MODE_HEIGHT`). The market map page is
    * the map's own screen and keeps `dashboard` (60vh). On PASAULIS the map
@@ -121,7 +140,10 @@ export function WorldDiscovery({
 }) {
   const t = useTranslations("marketMap.world");
   const locale = useLocale();
-  const [layerKey, setLayerKey] = useState<LayerKey>(initialLayer);
+  const tSig = useTranslations("marketMap.signals");
+  const [layerKey, setLayerKey] = useState<LayerKey>(
+    initialKey && staticLayers?.[initialKey] ? initialKey : initialLayer,
+  );
   const own = useOwnLocation();
   const isStatic = (STATIC_LAYER_ORDER as readonly string[]).includes(layerKey);
   const staticLayer = isStatic ? staticLayers?.[layerKey as StaticLayerKey] : undefined;
@@ -253,7 +275,11 @@ export function WorldDiscovery({
       case "ok":
         return null;
       case "empty":
-        return t(`state.empty.${layerKey}`);
+        // People below the privacy threshold are WITHHELD, not absent: say so,
+        // and never let an empty people layer read as "nobody is available".
+        return layerKey === "supply" && (view?.counts.withheld ?? 0) > 0
+          ? t("state.suppressed")
+          : t(`state.empty.${layerKey}`);
       case "error":
         return t("state.error");
       case "unavailable":
@@ -364,6 +390,7 @@ export function WorldDiscovery({
           </>
         ) : null}
         {caption ? <span data-testid="world-caption">{caption}</span> : null}
+        {rows.length > 0 ? <span data-testid="world-size-note">{tSig("sizeNote")}</span> : null}
         {pending ? <span data-testid="world-loading">{t("loading")}</span> : null}
       </div>
 
@@ -427,13 +454,35 @@ export function WorldDiscovery({
                       ) : null}
                     </span>
                   </div>
-                  {selected && c.members.length > 0 ? (
+                  {(selected || layerKey === "projects") && c.members.length > 0 ? (
                     <ul className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-text-secondary">
                       {c.members.map((m) => (
-                        <li key={m.id}>{m.label}</li>
+                        <li key={m.id}>
+                          {layerKey === "projects" && entityLinks && m.id.startsWith("project:") ? (
+                            <a
+                              href={entityLinks.projectHrefTemplate.replace("{id}", m.id.slice("project:".length))}
+                              data-testid="world-project-link"
+                              aria-label={`${t("list.openProject")}: ${m.label}`}
+                              className="inline-flex min-h-11 items-center font-medium text-brand-blue underline-offset-4 hover:underline"
+                            >
+                              {m.label} →
+                            </a>
+                          ) : (
+                            m.label
+                          )}
+                        </li>
                       ))}
                       {c.moreMembers > 0 ? <li>{t("list.more", { count: c.moreMembers })}</li> : null}
                     </ul>
+                  ) : null}
+                  {layerKey === "territory" && entityLinks ? (
+                    <a
+                      href={entityLinks.companyHref}
+                      data-testid="world-company-link"
+                      className="inline-flex min-h-11 w-fit items-center text-xs font-medium text-brand-blue underline-offset-4 hover:underline"
+                    >
+                      {t("list.openCompany")} →
+                    </a>
                   ) : null}
                   {linkApplies && placeLink ? (
                     <a

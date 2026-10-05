@@ -1460,7 +1460,8 @@
         "error": "Šio sluoksnio dabar nepavyko nuskaityti. Vietoj spėjimo nerodoma nieko.",
         "noPlaces": "Šioje žemėlapio dalyje nėra žinomų vietų. Pastumkite žemėlapį į šalį ar miestą.",
         "signIn": "Prisijunkite, kad matytumėte pasaulio vaizdą.",
-        "fetchFailed": "Žemėlapio duomenys neatėjo. Pastumkite žemėlapį, kad pabandytumėte dar kartą."
+        "fetchFailed": "Žemėlapio duomenys neatėjo. Pastumkite žemėlapį, kad pabandytumėte dar kartą.",
+        "suppressed": "Mažos grupės nerodomos privatumo sumetimais. Tai nėra pasiekiamų žmonių skaičius."
       },
       "notes": {
         "aggregateOnly": "Žmonės rodomi tik grupėmis nuo 5. Šiandien šį sluoksnį pildo tik jūsų pačių pasidalinta vieta."
@@ -1470,12 +1471,48 @@
         "count": "{count} objektai",
         "approx": "apytiksliai",
         "selected": "pasirinkta",
-        "more": "dar {count}"
+        "more": "dar {count}",
+        "openProject": "Atidaryti projektą",
+        "openCompany": "Atidaryti įmonę"
       },
       "precision": {
         "city": "Miestas",
         "country": "Tik šalis"
       }
+    },
+    "signals": {
+      "title": "Rinkos signalai",
+      "lead": "Kas jums matoma dabar – iš tų pačių įrašų kaip ir žemėlapyje.",
+      "toggle": "Signalai",
+      "needs": {
+        "label": "Atviri poreikiai",
+        "line": "{lower, select, yes {Bent } other {}}{count, plural, one {# atviras poreikis} few {# atviri poreikiai} other {# atvirų poreikių}} jums matomi",
+        "empty": "Europos vaizde jums nematoma atvirų poreikių.",
+        "unknown": "Atvirų poreikių šiuo metu nepavyko nuskaityti."
+      },
+      "vacancies": {
+        "label": "Viešos laisvos vietos",
+        "line": "{count, plural, one {# vieša laisva vieta} few {# viešos laisvos vietos} other {# viešų laisvų vietų}}: {profession}",
+        "fresh": "{n7} naujų per 7 dienas · {n30} per 30 dienų",
+        "empty": "Šiuo metu viešų laisvų vietų pagal „{profession}“ nėra.",
+        "derived": "Profesija nustatyta pagal jūsų užfiksuotą darbą."
+      },
+      "projects": {
+        "label": "Projektai",
+        "line": "{lower, select, yes {Bent } other {}}{count, plural, one {# projektas} few {# projektai} other {# projektų}}, kuriuose dirbate arba kuriuos valdote",
+        "unknown": "Jūsų projektų šiuo metu nepavyko nuskaityti."
+      },
+      "territory": {
+        "label": "Jūsų teritorija",
+        "line": "{places, plural, one {# vieta} few {# vietos} other {# vietų}}, kur dirba jūsų įmonė"
+      },
+      "places": "{places, plural, one {# vieta} few {# vietos} other {# vietų}}",
+      "newest": "Naujausias {date}",
+      "measured": "Išmatuota {date}",
+      "unplaced": "{count} be žinomos šalies neatvaizduota",
+      "show": "Rodyti žemėlapyje",
+      "sizeNote": "Žymeklio dydis yra santykinis tam, kas matoma. Tai nėra rinkos matas.",
+      "peopleNote": "Žmonės čia neskaičiuojami. Asmenys lieka anonimiški, o grupės, mažesnės nei penki, niekada nerodomos, todėl žemėlapis negali pasakyti, kiek žmonių yra pasiekiama."
     }
   },
   "demandLocationCapture": {
@@ -18526,6 +18563,10 @@
       "outside": {
         "eyebrow": "Už jūsų sienų",
         "title": "Kas yra *rinkoje*"
+      },
+      "market": {
+        "eyebrow": "Gyva rinka",
+        "title": "Rinka, *kokia ji yra*"
       }
     },
     "chain": {
@@ -18551,6 +18592,11 @@
         "documentAcknowledged": "Dokumentas: susipažinta",
         "relationshipFormed": "Santykis: užmegztas"
       }
+    },
+    "market": {
+      "open": "Atidaryti rinkos žemėlapį",
+      "openHint": "Poreikiai, projektai ir laisvos vietos viename žemėlapyje",
+      "allEmpty": "Europos vaizde jums kol kas nematoma nieko atviro. Žemėlapis parodys, kur tai atsiras."
     }
   }
 }

@@ -1460,7 +1460,8 @@
         "error": "Diese Ebene konnte gerade nicht gelesen werden. Statt einer Vermutung wird nichts angezeigt.",
         "noPlaces": "Keine bekannten Orte in diesem Kartenausschnitt. Verschieben Sie die Karte zu einem Land oder einer Stadt.",
         "signIn": "Melden Sie sich an, um die Weltansicht zu sehen.",
-        "fetchFailed": "Die Kartendaten sind nicht angekommen. Verschieben Sie die Karte, um es erneut zu versuchen."
+        "fetchFailed": "Die Kartendaten sind nicht angekommen. Verschieben Sie die Karte, um es erneut zu versuchen.",
+        "suppressed": "Kleine Gruppen werden zum Schutz der Privatsphäre zurückgehalten. Das ist keine Zahl der verfügbaren Personen."
       },
       "notes": {
         "aggregateOnly": "Menschen werden nur als Gruppen ab 5 Personen gezeigt. Heute speist nur Ihr eigener geteilter Standort diese Ebene."
@@ -1470,12 +1471,48 @@
         "count": "{count} Objekte",
         "approx": "ungefähr",
         "selected": "ausgewählt",
-        "more": "+{count} weitere"
+        "more": "+{count} weitere",
+        "openProject": "Projekt öffnen",
+        "openCompany": "Unternehmen öffnen"
       },
       "precision": {
         "city": "Stadt",
         "country": "Nur Land"
       }
+    },
+    "signals": {
+      "title": "Marktsignale",
+      "lead": "Was Ihnen jetzt sichtbar ist, gelesen aus denselben Datensätzen wie die Karte.",
+      "toggle": "Signale",
+      "needs": {
+        "label": "Offene Bedarfe",
+        "line": "{lower, select, yes {Mindestens } other {}}{count, plural, one {# offener Bedarf} other {# offene Bedarfe}} für Sie sichtbar",
+        "empty": "In der Europa-Ansicht sind für Sie keine offenen Bedarfe sichtbar.",
+        "unknown": "Offene Bedarfe konnten gerade nicht gelesen werden."
+      },
+      "vacancies": {
+        "label": "Öffentliche Stellen",
+        "line": "{count, plural, one {# öffentliche Stelle} other {# öffentliche Stellen}} für {profession}",
+        "fresh": "{n7} neu in 7 Tagen · {n30} in 30 Tagen",
+        "empty": "Derzeit keine öffentlichen Stellen für {profession}.",
+        "derived": "Beruf aus Ihrer erfassten Arbeit abgeleitet."
+      },
+      "projects": {
+        "label": "Projekte",
+        "line": "{lower, select, yes {Mindestens } other {}}{count, plural, one {# Projekt} other {# Projekte}}, an denen Sie arbeiten oder die Sie leiten",
+        "unknown": "Ihre Projekte konnten gerade nicht gelesen werden."
+      },
+      "territory": {
+        "label": "Ihr Gebiet",
+        "line": "{places, plural, one {# Ort} other {# Orte}}, an denen Ihr Unternehmen arbeitet"
+      },
+      "places": "{places, plural, one {# Ort} other {# Orte}}",
+      "newest": "Neuester {date}",
+      "measured": "Gemessen {date}",
+      "unplaced": "{count} ohne bekanntes Land werden nicht dargestellt",
+      "show": "Auf der Karte zeigen",
+      "sizeNote": "Die Markergröße ist relativ zu dem, was im Ausschnitt liegt. Sie misst den Markt nicht.",
+      "peopleNote": "Personen werden hier nicht gezählt. Einzelne bleiben anonym und Gruppen unter fünf werden nie gezeigt; die Karte kann Ihnen daher nicht sagen, wie viele Personen verfügbar sind."
     }
   },
   "demandLocationCapture": {
@@ -18526,6 +18563,10 @@
       "outside": {
         "eyebrow": "Außerhalb Ihrer Mauern",
         "title": "Was im *Markt* ist"
+      },
+      "market": {
+        "eyebrow": "Der lebendige Markt",
+        "title": "Der Markt, *wie er steht*"
       }
     },
     "chain": {
@@ -18551,6 +18592,11 @@
         "documentAcknowledged": "Dokument: zur Kenntnis genommen",
         "relationshipFormed": "Beziehung: entstanden"
       }
+    },
+    "market": {
+      "open": "Marktkarte öffnen",
+      "openHint": "Bedarfe, Projekte und Stellen auf einer Karte",
+      "allEmpty": "In der Europa-Ansicht ist für Sie noch nichts Offenes sichtbar. Die Karte zeigt, wo es erscheinen wird."
     }
   }
 }

@@ -147,7 +147,12 @@ describe("§11 singleton-fallback ratchet", () => {
       join(WEB, "app", "[locale]", "dashboard", "market-map", "page.tsx"),
     );
     expect(map).not.toMatch(/getOwnCompany/);
-    expect(map).toMatch(/getOwnSpatialCollections/);
+    // The page reads the composer through the request-cached wrapper it shares
+    // with the market brief; the wrapper must still BE the composer.
+    expect(map).toMatch(/loadOwnSpatialOnce/);
+    expect(read(join(WEB, "lib", "market-map", "market-brief.ts"))).toMatch(
+      /getOwnSpatialCollections()/,
+    );
     const objects = read(join(WEB, "lib", "objects", "objects.ts"));
     expect(objects).toMatch(/resolveEmployerCompanyContext/);
     expect(read(join(WEB, "lib", "market-map", "spatial-read.ts"))).toMatch(

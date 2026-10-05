@@ -1460,7 +1460,8 @@
         "error": "Deze laag kon nu niet worden gelezen. Er wordt niets getoond in plaats van een gok.",
         "noPlaces": "Geen bekende plaatsen in dit deel van de kaart. Verschuif de kaart naar een land of stad.",
         "signIn": "Meld u aan om het wereldbeeld te zien.",
-        "fetchFailed": "De kaartgegevens zijn niet aangekomen. Verschuif de kaart om het opnieuw te proberen."
+        "fetchFailed": "De kaartgegevens zijn niet aangekomen. Verschuif de kaart om het opnieuw te proberen.",
+        "suppressed": "Kleine groepen worden om privacyredenen achtergehouden. Dit is geen aantal beschikbare mensen."
       },
       "notes": {
         "aggregateOnly": "Mensen worden alleen als groepen van 5 of meer getoond. Vandaag voedt alleen uw eigen gedeelde locatie deze laag."
@@ -1470,12 +1471,48 @@
         "count": "{count} objecten",
         "approx": "bij benadering",
         "selected": "geselecteerd",
-        "more": "+{count} meer"
+        "more": "+{count} meer",
+        "openProject": "Project openen",
+        "openCompany": "Bedrijf openen"
       },
       "precision": {
         "city": "Stad",
         "country": "Alleen land"
       }
+    },
+    "signals": {
+      "title": "Marktsignalen",
+      "lead": "Wat nu voor u zichtbaar is, gelezen uit dezelfde gegevens als de kaart.",
+      "toggle": "Signalen",
+      "needs": {
+        "label": "Open behoeften",
+        "line": "{lower, select, yes {Minstens } other {}}{count, plural, one {# open behoefte} other {# open behoeften}} voor u zichtbaar",
+        "empty": "In de Europese weergave zijn voor u geen open behoeften zichtbaar.",
+        "unknown": "Open behoeften konden nu niet worden gelezen."
+      },
+      "vacancies": {
+        "label": "Openbare vacatures",
+        "line": "{count, plural, one {# openbare vacature} other {# openbare vacatures}} voor {profession}",
+        "fresh": "{n7} nieuw in 7 dagen · {n30} in 30 dagen",
+        "empty": "Momenteel geen openbare vacatures voor {profession}.",
+        "derived": "Beroep afgeleid uit uw vastgelegde werk."
+      },
+      "projects": {
+        "label": "Projecten",
+        "line": "{lower, select, yes {Minstens } other {}}{count, plural, one {# project} other {# projecten}} waaraan u werkt of die u beheert",
+        "unknown": "Uw projecten konden nu niet worden gelezen."
+      },
+      "territory": {
+        "label": "Uw gebied",
+        "line": "{places, plural, one {# plaats} other {# plaatsen}} waar uw bedrijf werkt"
+      },
+      "places": "{places, plural, one {# plaats} other {# plaatsen}}",
+      "newest": "Nieuwste {date}",
+      "measured": "Gemeten {date}",
+      "unplaced": "{count} zonder bekend land worden niet getoond",
+      "show": "Op de kaart tonen",
+      "sizeNote": "De markergrootte is relatief aan wat in beeld is. Het is geen maat voor de markt.",
+      "peopleNote": "Mensen worden hier niet geteld. Individuen blijven anoniem en groepen kleiner dan vijf worden nooit getoond, dus de kaart kan niet zeggen hoeveel mensen beschikbaar zijn."
     }
   },
   "demandLocationCapture": {
@@ -18526,6 +18563,10 @@
       "outside": {
         "eyebrow": "Buiten uw muren",
         "title": "Wat er in de *markt* is"
+      },
+      "market": {
+        "eyebrow": "De levende markt",
+        "title": "De markt, *zoals hij staat*"
       }
     },
     "chain": {
@@ -18551,6 +18592,11 @@
         "documentAcknowledged": "Document: kennisgenomen",
         "relationshipFormed": "Relatie: aangegaan"
       }
+    },
+    "market": {
+      "open": "Marktkaart openen",
+      "openHint": "Behoeften, projecten en vacatures op één kaart",
+      "allEmpty": "In de Europese weergave is voor u nog niets openstaands zichtbaar. De kaart toont waar het zal verschijnen."
     }
   }
 }

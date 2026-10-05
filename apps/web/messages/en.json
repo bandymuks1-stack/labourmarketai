@@ -1460,7 +1460,8 @@
         "error": "This layer could not be read right now. Nothing is shown rather than a guess.",
         "noPlaces": "No known places in this part of the map. Move the map to a country or a city.",
         "signIn": "Sign in to see the world view.",
-        "fetchFailed": "The map data did not arrive. Move the map to try again."
+        "fetchFailed": "The map data did not arrive. Move the map to try again.",
+        "suppressed": "Small groups are withheld to protect privacy. This is not a count of the people available."
       },
       "notes": {
         "aggregateOnly": "People are shown only as groups of 5 or more. Today only your own shared location feeds this layer."
@@ -1470,12 +1471,48 @@
         "count": "{count} objects",
         "approx": "approximate",
         "selected": "selected",
-        "more": "+{count} more"
+        "more": "+{count} more",
+        "openProject": "Open project",
+        "openCompany": "Open company"
       },
       "precision": {
         "city": "City",
         "country": "Country only"
       }
+    },
+    "signals": {
+      "title": "Market signals",
+      "lead": "What is visible to you right now, read from the same records as the map.",
+      "toggle": "Signals",
+      "needs": {
+        "label": "Open needs",
+        "line": "{lower, select, yes {At least } other {}}{count, plural, one {# open need} other {# open needs}} visible to you",
+        "empty": "No open needs are visible to you in the European view.",
+        "unknown": "Open needs could not be read just now."
+      },
+      "vacancies": {
+        "label": "Public vacancies",
+        "line": "{count, plural, one {# public vacancy} other {# public vacancies}} for {profession}",
+        "fresh": "{n7} new in 7 days · {n30} in 30 days",
+        "empty": "No public vacancies for {profession} right now.",
+        "derived": "Profession read from your recorded work."
+      },
+      "projects": {
+        "label": "Projects",
+        "line": "{lower, select, yes {At least } other {}}{count, plural, one {# project} other {# projects}} you work on or manage",
+        "unknown": "Your projects could not be read just now."
+      },
+      "territory": {
+        "label": "Your territory",
+        "line": "{places, plural, one {# place} other {# places}} where your company works"
+      },
+      "places": "{places, plural, one {# place} other {# places}}",
+      "newest": "Newest {date}",
+      "measured": "Measured {date}",
+      "unplaced": "{count} without a known country are not drawn",
+      "show": "Show on the map",
+      "sizeNote": "Marker size is relative to what is in view. It is not a measure of the market.",
+      "peopleNote": "People are not counted here. Individuals stay anonymous and groups smaller than five are never shown, so this map cannot tell you how many people are available."
     }
   },
   "demandLocationCapture": {
@@ -18526,6 +18563,10 @@
       "outside": {
         "eyebrow": "Outside your walls",
         "title": "What is in the *market*"
+      },
+      "market": {
+        "eyebrow": "The live market",
+        "title": "The market, *as it stands*"
       }
     },
     "chain": {
@@ -18551,6 +18592,11 @@
         "documentAcknowledged": "Document: acknowledged",
         "relationshipFormed": "Relationship: formed"
       }
+    },
+    "market": {
+      "open": "Open the market map",
+      "openHint": "Needs, projects and vacancies on one map",
+      "allEmpty": "Nothing open is visible to you in the European view yet. The map shows where it will appear."
     }
   }
 }

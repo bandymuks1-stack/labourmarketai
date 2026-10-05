@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { PersonPortrait } from "@/components/app/identity/person-portrait";
-import { HomeBecause, HomeOutside, HomeRegionPending, HomeRunning, HomeWaiting } from "@/components/app/home/home-regions";
+import { HomeBecause, HomeMarket, HomeOutside, HomeRegionPending, HomeRunning, HomeWaiting } from "@/components/app/home/home-regions";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { Link } from "@/lib/i18n/navigation";
 import { deriveTodayState } from "@/lib/today/today-model";
@@ -31,6 +31,9 @@ import { loadTodayHead, loadTodayWorkIntelligence } from "@/lib/today/today-serv
  *   4. BECAUSE     what happened and — only where the event's own fact IS a
  *                  state change — event → consequence → state
  *   5. OUTSIDE     the market: one opportunity sentence with band counts
+ *      MARKET      the live market's entrance: the real signals the person
+ *                  may see (needs, projects, vacancies, territory), each a
+ *                  link into its layer of the ONE map
  *   6. stations    the contextual workspaces, as text links, one tap —
  *                  opportunities (the former PASAULIS tab) first
  *
@@ -145,6 +148,11 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
       </Suspense>
       <Suspense fallback={null}>
         <HomeOutside />
+      </Suspense>
+      {/* The ENTRANCE to the one market: the same signals the Market Map's
+          rail shows, each a link into its layer of that one map. */}
+      <Suspense fallback={null}>
+        <HomeMarket />
       </Suspense>
 
       {/* 6 · STATIONS — the contextual workspaces as text links, one tap. */}

@@ -119,7 +119,11 @@ describe("layer separation — the three kinds are layers of the ONE map (no sep
   });
 
   it("the page wires the owner composer into the territory layer", () => {
-    expect(PAGE).toMatch(/getOwnSpatialCollections/);
+    // The page reads the owner's spatial collections through the request-cached
+    // wrapper it shares with the market brief (one read, not two) — which must
+    // still BE `getOwnSpatialCollections`.
+    expect(PAGE).toMatch(/loadOwnSpatialOnce/);
+    expect(read("lib/market-map/market-brief.ts")).toMatch(/getOwnSpatialCollections()/);
     expect(PAGE).toMatch(/buildTerritoryView/);
     expect(PAGE).toMatch(/staticLayers\.territory\s*=/);
   });

@@ -12,13 +12,14 @@ import {
   type StaticLayer,
   type StaticLayerKey,
 } from "@/components/app/market-map/world-discovery";
-import { loadWorldView } from "@/lib/market-map/world-read";
+import { MarketSignalsRail } from "@/components/app/market-map/market-signals-rail";
 import {
-  DEFAULT_WORLD_BOUNDS,
-  DEFAULT_WORLD_ZOOM,
-} from "@/lib/market-map/world-model";
-import { loadVacancyVolume } from "@/lib/market-map/vacancy-volume";
-import { getOwnSpatialCollections } from "@/lib/market-map/spatial-read";
+  loadDefaultWorldView,
+  loadMarketBrief,
+  loadOwnSpatialOnce,
+  loadVacancyVolumeOnce,
+} from "@/lib/market-map/market-brief";
+import type { WorldLayer, WorldViewResult } from "@/lib/market-map/world-model";
 import { buildTerritoryView } from "@/lib/market-map/territory-view";
 import {
   listOwnPreferredLocations,
@@ -50,12 +51,34 @@ import { personMonogram } from "@/lib/visual/avatar-monogram";
  * Authenticated (under /dashboard, which the middleware gates; the explicit
  * getUser check is belt-and-suspenders). RLS owns visibility on every read.
  */
+/**
+ * `?layer=` — the edge from a market signal (the home's market region, the
+ * signals rail) to the layer of THIS map that shows exactly it. Only the four
+ * layers a signal can name are accepted; anything else opens the default
+ * (demand), and a static layer the person has no data for falls back too —
+ * never an empty layer reached by a typed URL.
+ */
+const WORLD_LAYER_PARAM: Readonly<Record<string, WorldLayer>> = {
+  demand: "demand",
+  projects: "projects",
+};
+const STATIC_LAYER_PARAM: Readonly<Record<string, StaticLayerKey>> = {
+  jobs: "jobs",
+  territory: "territory",
+};
+
 export default async function MarketMapPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale } = await params;
+  const sp = await searchParams;
+  const layerParam = typeof sp.layer === "string" ? sp.layer : "";
+  const worldLayer: WorldLayer = WORLD_LAYER_PARAM[layerParam] ?? "demand";
+  const staticKey: StaticLayerKey | undefined = STATIC_LAYER_PARAM[layerParam];
   setRequestLocale(locale);
 
   const supabase = await createClient();
@@ -90,15 +113,15 @@ export default async function MarketMapPage({
   // the client for the real viewport on every pan/zoom. Public vacancy volume
   // (the caller's occupation) and the owner's company territory are read once
   // and offered as further layers of the SAME map.
-  const [initialWorld, vacancyVolume, spatial] = await Promise.all([
-    loadWorldView({
-      bounds: DEFAULT_WORLD_BOUNDS,
-      zoom: DEFAULT_WORLD_ZOOM,
-      layer: "demand",
-    }),
-    loadVacancyVolume(),
-    getOwnSpatialCollections(),
+  // The same request-cached reads the market brief composes — one read per
+  // layer, shared between the map, the signals rail and the home.
+  const [initialWorldRead, vacancyVolume, spatial, brief] = await Promise.all([
+    loadDefaultWorldView(worldLayer),
+    loadVacancyVolumeOnce(),
+    loadOwnSpatialOnce(),
+    loadMarketBrief(),
   ]);
+  const initialWorld: WorldViewResult = initialWorldRead ?? { kind: "invalid" };
 
   const countryName = (code: string) =>
     tCountries.has(`countryNames.${code}`) ? tCountries(`countryNames.${code}`) : code;
@@ -191,16 +214,30 @@ export default async function MarketMapPage({
         {tMap("pageTitle")}
       </h1>
 
-      {/* ONE map: layers, location + radius, the map, its places. */}
-      <WorldDiscovery
-        initial={initialWorld}
-        ownLocation={{ identity }}
-        staticLayers={staticLayers}
-        placeLink={{
-          hrefTemplate: `/${locale}/dashboard/opportunities?country={country}`,
-          label: tMap("connections.opportunities"),
-        }}
-      />
+      {/* ONE map: layers, location + radius, the map, its places — with the
+          market's signals beside it (a compact sheet above it on a phone). */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start">
+        <div className="min-w-0">
+          <WorldDiscovery
+            initial={initialWorld}
+            initialLayer={worldLayer}
+            initialKey={staticKey}
+            ownLocation={{ identity }}
+            staticLayers={staticLayers}
+            placeLink={{
+              hrefTemplate: `/${locale}/dashboard/opportunities?country={country}`,
+              label: tMap("connections.opportunities"),
+            }}
+            entityLinks={{
+              projectHrefTemplate: `/${locale}/dashboard/projects/{id}`,
+              companyHref: `/${locale}/dashboard/company`,
+            }}
+          />
+        </div>
+        <div className="min-w-0 max-lg:order-first lg:sticky lg:top-4">
+          <MarketSignalsRail brief={brief} />
+        </div>
+      </div>
 
       {/* Where the data behind the map is managed — existing routes only. */}
       <nav

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { ProjectMark, ServiceMark } from "@/components/app/identity/identity-family";
+import { MarketSignalList } from "@/components/app/market-map/market-signal-list";
 import { Eyebrow, RegionHead, Surface } from "@/components/app/system/ui";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import {
@@ -36,6 +37,8 @@ import type {
 import type { TodayDoorKind } from "@/lib/today/today-model";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { Link } from "@/lib/i18n/navigation";
+import { loadMarketBrief } from "@/lib/market-map/market-brief";
+import type { MarketBrief } from "@/lib/market-map/market-brief-model";
 import type { GrowthDirection } from "@/lib/journal/growth-reading";
 import { FIT_BAND_ORDER } from "@/lib/opportunities/fit-band";
 import { formatUtcDate } from "@/lib/time/display";
@@ -551,6 +554,74 @@ export async function HomeOutsideView({ outside }: { readonly outside: OutsideRe
           </span>
           <span className="inline-flex items-center gap-1 text-support font-medium text-brand-blue max-md:col-span-2">
             {t("opportunity.open")} <ArrowRight className="h-4 w-4" aria-hidden />
+          </span>
+        </Link>
+      </Surface>
+    </section>
+  );
+}
+
+// ───────────────────────── 05 · THE LIVE MARKET ─────────────────────────
+
+/**
+ * THE ENTRANCE TO THE ONE MARKET. The home's other regions are about this
+ * person; this one says the market exists and where to see it. Its rows are
+ * the same `MarketBrief` the Market Map's signals rail draws
+ * (`components/app/market-map/market-signal-list.tsx`): real needs the person
+ * may see, the projects they work on, public vacancies for their own
+ * profession, their own company territory — each one a link to the layer of
+ * the ONE canonical map (`/dashboard/market-map`) that shows exactly it.
+ *
+ * It states only what a reader answered. A failed read is named, an empty
+ * answer is said once, a signal that does not apply is absent, and nothing
+ * here is a ratio, a rate, a match, a team or a people count — the brief has
+ * no field for them.
+ */
+export async function HomeMarket() {
+  return <HomeMarketView brief={await loadMarketBrief()} />;
+}
+
+export async function HomeMarketView({ brief }: { readonly brief: MarketBrief }) {
+  const [t, tRegion] = await Promise.all([
+    getTranslations("homeStage.market"),
+    getTranslations("homeStage.regions.market"),
+  ]);
+  const unknown =
+    brief.needs.state === "unknown" || brief.projects.state === "unknown";
+  const nothingToSay =
+    brief.needs.state === "empty" &&
+    brief.projects.state === "empty" &&
+    brief.vacancies.state === "absent" &&
+    brief.territory.state === "absent";
+
+  return (
+    <section
+      aria-label={tRegion("eyebrow")}
+      data-testid="home-market"
+      data-region="market"
+      data-state={unknown ? "unknown" : "known"}
+    >
+      <RegionHead eyebrow={tRegion("eyebrow")} title={tRegion("title")} className="[&_h2]:text-[clamp(1.35rem,2.2vw,1.8rem)]" />
+      <Surface className="mt-4 overflow-hidden">
+        {nothingToSay ? (
+          <p className={NOTE} data-testid="home-market-empty">
+            {t("allEmpty")}
+          </p>
+        ) : (
+          <MarketSignalList brief={brief} variant="home" />
+        )}
+        <Link
+          href="/dashboard/market-map"
+          data-testid="home-market-open"
+          className="grid min-h-11 grid-cols-[auto_1fr_auto] items-center gap-x-4 border-t border-text-primary/10 px-5 py-4 transition-colors hover:bg-text-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue md:px-6"
+        >
+          <ServiceMark id="market:map" size={44} icon={<Compass className="h-[46%] w-[46%]" aria-hidden />} label="" />
+          <span className="min-w-0">
+            <span className="block text-body font-medium text-text-primary">{t("open")}</span>
+            <span className="block text-support text-text-muted">{t("openHint")}</span>
+          </span>
+          <span className="inline-flex items-center text-brand-blue">
+            <ArrowUpRight className="h-4 w-4" aria-hidden />
           </span>
         </Link>
       </Surface>
