@@ -18,6 +18,7 @@ equals the version the tree publishes.
 
 | Fingerprint | Tools | Release | What changed |
 |---|---|---|---|
+| `0.1.0+t76.be37fbb5` | 76 | integration (#2143 + #2146 + #2149) | combined toolset of three lanes, each of which published its own row against the 62-tool base: +6 counterparty_review_* (#2143), +2 assignment_keep_draft/confirm (#2146), +6 team_assignment_create/replace/end draft/confirm (#2149). The three lane rows below are kept as their history; this row is the version the integrated tree publishes. |
 | `0.1.0+t68.7bcb01a2` | 68 | #2143 | +counterparty_review_queue_get, counterparty_review_entry_get, counterparty_review_decide_draft/confirm (accept / request correction / dispute; note required), counterparty_review_submit_draft/confirm (decision 0018; client acceptance is never an employer confirmation) |
 | `0.1.0+t64.79ba129f` | 64 | #2146 | +assignment_keep_draft, assignment_keep_confirm (the MCP door of the knowing override over the ONE keep core; assignment_create_draft/confirm gain `calendar` + a pending `override` decision) |
 | `0.1.0+t68.25e675e3` | 68 | team assignment tools (#2149) | +team_assignment_create_draft/confirm, team_assignment_replace_draft/confirm, team_assignment_end_draft/confirm (a team as ONE relationship over the same core the web UI uses; the draft carries the per-member clash verdict) |
