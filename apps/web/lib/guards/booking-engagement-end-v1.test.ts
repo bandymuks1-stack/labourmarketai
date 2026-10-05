@@ -1537,6 +1537,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261003140000_subject_contest_withdraw_constraint_reconcile_v1.sql",
       // 2026-10-05: integrity doors (journal attribution, skill self-verification, roster link without consent) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261003151300_integrity_doors_v1.sql",
+      // 2026-10-05: the subject's refuse / withdraw door (SECURITY DEFINER) - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      "20261005100000_roster_link_subject_answer_v1.sql",
 ]);
   });
 
