@@ -308,6 +308,8 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
         // component: every oauthConsent string renders on the server, the
         // form is native HTML, so no client i18n pick is needed.
         join(LOCALE_DIR, "oauth"),
+        // Design-proof class (frozen design candidate): static fixtures, no client i18n.
+        join(LOCALE_DIR, "design-proof"),
       ),
       join(LOCALE_DIR, "layout.tsx"),
       join(LOCALE_DIR, "error.tsx"),
@@ -331,6 +333,7 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
       "business",
       "cv",
       "dashboard",
+      "design-proof",
       "focus-landing",
       "invite",
       "oauth",

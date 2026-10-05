@@ -153,7 +153,8 @@ export function ConversationScreen({ seats, initialOpen = false }: { readonly se
       >
         <button type="button" aria-label="Attach" className="flex h-11 w-11 items-center justify-center rounded-xl text-text-muted hover:bg-text-primary/[0.06]"><Paperclip className="h-5 w-5" aria-hidden /></button>
         <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Message the team" aria-label="Message" className="min-h-11 flex-1 rounded-xl border border-text-primary/12 bg-text-primary/[0.03] px-4 text-[0.95rem] outline-none placeholder:text-text-muted focus:border-brand-blue/70" />
-        <Btn kind="primary" size="sm" type="submit" aria-label="Send"><Send className="h-4 w-4" aria-hidden /></Btn>
+        <Btn kind="primary" size="sm" type="submit" aria-label="Send" disabled={!draft.trim()}><Send className="h-4 w-4" aria-hidden /></Btn>
+        <span role="status" className="sr-only">{sent.length > 0 ? "Message sent" : ""}</span>
       </form>
     </div>
   );

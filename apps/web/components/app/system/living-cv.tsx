@@ -8,6 +8,8 @@ import { CompanyMark } from "./identity";
 import { EntityPlate } from "./entity";
 import { Avail, EvidenceBar, Eyebrow, LevelMark, RegionHead, Stamp } from "./ui";
 
+const HOURS_FMT = new Intl.NumberFormat("en-US");
+
 /**
  * THE LIVING CV — a person's working life, as normal people read it.
  *
@@ -106,7 +108,7 @@ export function LivingCv({ person, actions, embedded = false }: { readonly perso
         ) : null}
         {person.about ? <p className="max-w-[56ch] text-body text-text-secondary">{person.about}</p> : null}
 
-        <section className="flex flex-col gap-4"><RegionHead eyebrow={t.hours > 0 ? `${t.hours.toLocaleString("en")} h of recorded work` : "Capabilities"} title="What they *can do*" className="mb-3" />
+        <section className="flex flex-col gap-4"><RegionHead eyebrow={t.hours > 0 ? `${HOURS_FMT.format(t.hours)} h of recorded work` : "Capabilities"} title="What they *can do*" className="mb-3" />
           <ul className="flex flex-col">
             {shown.map((c) => (
               <li key={c.label} data-level={c.level} className="grid grid-cols-[1fr_auto] items-center gap-x-6 gap-y-1 border-t border-text-primary/10 py-3.5 first:border-t-0 sm:grid-cols-[1fr_5.5rem_9rem_4.5rem]">
@@ -118,7 +120,7 @@ export function LivingCv({ person, actions, embedded = false }: { readonly perso
                 <span className="text-meta text-text-muted max-sm:order-3 max-sm:col-span-2">
                   {c.level === "declared" ? "Says so; nothing shows it yet" : `${c.confirmed} confirmed · ${c.recorded} recorded`}
                 </span>
-                <span className="text-right font-display text-[1rem] font-semibold tabular-nums text-text-secondary">{c.hours > 0 ? `${c.hours.toLocaleString("en")} h` : "—"}</span>
+                <span className="text-right font-display text-[1rem] font-semibold tabular-nums text-text-secondary">{c.hours > 0 ? `${HOURS_FMT.format(c.hours)} h` : "—"}</span>
               </li>
             ))}
           </ul>
@@ -141,7 +143,7 @@ export function LivingCv({ person, actions, embedded = false }: { readonly perso
                     </div>
                     <div className="flex items-center gap-3 max-md:col-span-2 max-md:pl-[3.1rem] md:flex-col md:items-end md:gap-1.5">
                       <EvidenceBar confirmed={e.confirmed} recorded={e.recorded} width={72} />
-                      <span className="text-meta text-text-muted">{e.confirmed} confirmed{e.hours ? ` · ${e.hours.toLocaleString("en")} h` : ""}</span>
+                      <span className="text-meta text-text-muted">{e.confirmed} confirmed{e.hours ? ` · ${HOURS_FMT.format(e.hours)} h` : ""}</span>
                     </div>
                   </li>
                 );

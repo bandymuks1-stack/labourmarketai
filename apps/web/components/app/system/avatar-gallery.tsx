@@ -185,7 +185,7 @@ export function AvatarGallery() {
             <Ctx label="Notification">
               <MessageSquare className="h-4 w-4 text-text-muted" aria-hidden />
               <PersonAvatar person={personById("ap")} size={24} />
-              <span className="text-support text-text-secondary">Aistė confirmed 6 records</span>
+              <span className="text-support text-text-secondary">{personById("ap").name.split(" ")[0]} confirmed 6 records</span>
             </Ctx>
             <Ctx label="Search scope">
               <Search className="h-4 w-4 text-text-muted" aria-hidden />
