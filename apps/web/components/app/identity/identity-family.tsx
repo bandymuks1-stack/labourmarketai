@@ -323,13 +323,12 @@ export function ProjectMark({ project, size = 48, wide = true, className }: { re
 
 // ───────────────────────── service ─────────────────────────
 
-export function ServiceMark({ id, size = 40, icon, className }: { readonly id: string; readonly size?: number; readonly icon?: ReactNode; readonly className?: string }) {
+export function ServiceMark({ id, size = 40, icon, label = "Service", className }: { readonly id: string; readonly size?: number; readonly icon?: ReactNode; /** accessible name in the viewer's language; "" = decorative (the row names it) */ readonly label?: string; readonly className?: string }) {
   return (
     <span
       className={cn("relative inline-flex shrink-0 items-center justify-center text-[rgba(245,241,232,0.85)]", className)}
       style={{ width: size, height: size, background: plate(id), borderRadius: "28%", clipPath: "polygon(0 0, 74% 0, 100% 26%, 100% 100%, 0 100%)", boxShadow: HAIR }}
-      role="img"
-      aria-label="Service"
+      {...(label ? { role: "img", "aria-label": label } : { "aria-hidden": true })}
       data-identity="service"
     >
       <span style={{ width: size * 0.46, height: size * 0.46 }} className="flex items-center justify-center">

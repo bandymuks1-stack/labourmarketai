@@ -18238,5 +18238,55 @@
       "skills": "{count, plural, one {# vaardigheid gebaseerd op jouw registraties} other {# vaardigheden gebaseerd op jouw registraties}}",
       "next": "Waar je heen kunt"
     }
+  },
+  "homeStage": {
+    "regions": {
+      "waiting": {
+        "eyebrow": "Heeft u nodig",
+        "title": "Wat op u *wacht*",
+        "clear": "Er wacht niets op u.",
+        "unknown": "Wat op u wacht kon niet worden gelezen."
+      },
+      "running": {
+        "eyebrow": "In beweging",
+        "title": "Wat nu *loopt*",
+        "projectsUnknown": "Uw toegewezen projecten konden niet worden gelezen."
+      },
+      "because": {
+        "eyebrow": "Wat er veranderde",
+        "title": "Door wat er *gebeurde*",
+        "unknown": "Wat er veranderde kon niet worden gelezen.",
+        "also": "Ook",
+        "all": "Alle activiteit"
+      },
+      "outside": {
+        "eyebrow": "Buiten uw muren",
+        "title": "Wat er in de *markt* is"
+      }
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Een werkrelatie is begonnen",
+        "relationshipEnded": "Een werkrelatie is geëindigd",
+        "bookingAgreed": "De boeking is overeengekomen",
+        "bookingRefused": "De boeking is geweigerd",
+        "bookingWithdrawn": "De boeking is ingetrokken",
+        "absenceApproved": "De afwezigheid is goedgekeurd",
+        "absenceRefused": "De afwezigheid is geweigerd",
+        "decisionRecorded": "De beslissing is vastgelegd",
+        "acknowledgementRecorded": "De bevestiging van kennisname is vastgelegd",
+        "invitationAnswered": "Er is op de uitnodiging gereageerd"
+      },
+      "state": {
+        "engagementActive": "Dienstverband: actief",
+        "engagementClosed": "Dienstverband: beëindigd",
+        "bookingConfirmed": "Boeking: bevestigd",
+        "bookingClosed": "Boeking: gesloten",
+        "absenceDecided": "Afwezigheid: beslist",
+        "workflowClosed": "Goedkeuring: afgerond",
+        "documentAcknowledged": "Document: kennisgenomen",
+        "relationshipFormed": "Relatie: aangegaan"
+      }
+    }
   }
 }

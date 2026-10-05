@@ -13,7 +13,7 @@ describe("home loader — authorization boundary", () => {
 
   it("no reader takes an identity argument, so another identity's home cannot be requested", () => {
     // Every exported loader is a zero-argument cached function.
-    for (const name of ["loadHomeProjects", "loadHomeEvents", "loadHomeState"]) {
+    for (const name of ["loadHomeProjects", "loadHomeEvents", "loadHomeWaiting", "loadHomeRunning", "loadHomeBecause", "loadHomeOutside"]) {
       expect(code, name).toContain(`export const ${name} = cache(async ()`);
     }
   });

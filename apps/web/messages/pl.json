@@ -18238,5 +18238,55 @@
       "skills": "{count, plural, one {# umiejętność oparta na Twoich wpisach} few {# umiejętności oparte na Twoich wpisach} many {# umiejętności opartych na Twoich wpisach} other {# umiejętności opartej na Twoich wpisach}}",
       "next": "Dokąd możesz przejść"
     }
+  },
+  "homeStage": {
+    "regions": {
+      "waiting": {
+        "eyebrow": "Potrzebuje Cię",
+        "title": "Co *czeka* na Ciebie",
+        "clear": "Nic na Ciebie nie czeka.",
+        "unknown": "Nie udało się odczytać, co na Ciebie czeka."
+      },
+      "running": {
+        "eyebrow": "W toku",
+        "title": "Co *trwa* teraz",
+        "projectsUnknown": "Nie udało się odczytać przypisanych Ci projektów."
+      },
+      "because": {
+        "eyebrow": "Co się zmieniło",
+        "title": "Przez to, co się *wydarzyło*",
+        "unknown": "Nie udało się odczytać, co się zmieniło.",
+        "also": "Także",
+        "all": "Cała aktywność"
+      },
+      "outside": {
+        "eyebrow": "Poza Twoimi murami",
+        "title": "Co jest na *rynku*"
+      }
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Rozpoczęła się relacja zawodowa",
+        "relationshipEnded": "Relacja zawodowa się zakończyła",
+        "bookingAgreed": "Rezerwację uzgodniono",
+        "bookingRefused": "Rezerwację odrzucono",
+        "bookingWithdrawn": "Rezerwację wycofano",
+        "absenceApproved": "Nieobecność zatwierdzono",
+        "absenceRefused": "Nieobecność odrzucono",
+        "decisionRecorded": "Decyzję zapisano",
+        "acknowledgementRecorded": "Zapoznanie się zapisano",
+        "invitationAnswered": "Odpowiedziano na zaproszenie"
+      },
+      "state": {
+        "engagementActive": "Zatrudnienie: aktywne",
+        "engagementClosed": "Zatrudnienie: zakończone",
+        "bookingConfirmed": "Rezerwacja: potwierdzona",
+        "bookingClosed": "Rezerwacja: zamknięta",
+        "absenceDecided": "Nieobecność: rozstrzygnięta",
+        "workflowClosed": "Akceptacja: zamknięta",
+        "documentAcknowledged": "Dokument: zapoznano się",
+        "relationshipFormed": "Relacja: nawiązana"
+      }
+    }
   }
 }

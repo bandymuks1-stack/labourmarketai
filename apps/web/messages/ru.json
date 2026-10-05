@@ -18238,5 +18238,55 @@
       "skills": "{count, plural, one {# навык, основанный на ваших записях} few {# навыка, основанных на ваших записях} many {# навыков, основанных на ваших записях} other {# навыка, основанного на ваших записях}}",
       "next": "Куда можно перейти"
     }
+  },
+  "homeStage": {
+    "regions": {
+      "waiting": {
+        "eyebrow": "Нужно вам",
+        "title": "Что *ждёт* вас",
+        "clear": "Ничто не ждёт вашего ответа.",
+        "unknown": "Не удалось прочитать, что ждёт вас."
+      },
+      "running": {
+        "eyebrow": "В работе",
+        "title": "Что *идёт* сейчас",
+        "projectsUnknown": "Не удалось прочитать назначенные вам проекты."
+      },
+      "because": {
+        "eyebrow": "Что изменилось",
+        "title": "Из-за того, что *произошло*",
+        "unknown": "Не удалось прочитать, что изменилось.",
+        "also": "Также",
+        "all": "Вся активность"
+      },
+      "outside": {
+        "eyebrow": "За вашими стенами",
+        "title": "Что на *рынке*"
+      }
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Началась рабочая связь",
+        "relationshipEnded": "Рабочая связь закончилась",
+        "bookingAgreed": "Бронирование согласовано",
+        "bookingRefused": "Бронирование отклонено",
+        "bookingWithdrawn": "Бронирование отозвано",
+        "absenceApproved": "Отсутствие одобрено",
+        "absenceRefused": "Отсутствие отклонено",
+        "decisionRecorded": "Решение зафиксировано",
+        "acknowledgementRecorded": "Ознакомление зафиксировано",
+        "invitationAnswered": "На приглашение ответили"
+      },
+      "state": {
+        "engagementActive": "Трудоустройство: активно",
+        "engagementClosed": "Трудоустройство: закрыто",
+        "bookingConfirmed": "Бронирование: подтверждено",
+        "bookingClosed": "Бронирование: закрыто",
+        "absenceDecided": "Отсутствие: решено",
+        "workflowClosed": "Согласование: закрыто",
+        "documentAcknowledged": "Документ: ознакомлены",
+        "relationshipFormed": "Связь: установлена"
+      }
+    }
   }
 }

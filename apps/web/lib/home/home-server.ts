@@ -5,7 +5,14 @@ import { cache } from "react";
 import { readMyNotificationEvents, type NotificationEventRow } from "@/lib/notifications/events";
 import { listWorkerProjectsResult } from "@/lib/projects/worker-project-access";
 import { createClient } from "@/lib/supabase/server";
-import { deriveTodayModel } from "@/lib/today/today-model";
+import {
+  deriveTodayGrowth,
+  deriveTodayNext,
+  deriveTodayOpenItems,
+  deriveTodayOpportunity,
+  deriveTodayWork,
+  unknownTodayDoors,
+} from "@/lib/today/today-model";
 import {
   loadTodayAttention,
   loadTodayGrowth,
@@ -14,7 +21,7 @@ import {
   loadTodayWorkIntelligence,
 } from "@/lib/today/today-server";
 
-import { composeHomeState, type HomeProject, type HomeState } from "./home-state";
+import { deriveBecause, deriveOutside, deriveRunning, deriveWaiting, type HomeProject } from "./home-state";
 
 /**
  * THE HOME LOADER — the PERSON's four-state home, read through the readers
@@ -63,24 +70,36 @@ export const loadHomeEvents = cache(async (): Promise<readonly NotificationEvent
   }
 });
 
-export const loadHomeState = cache(async (): Promise<HomeState> => {
-  const [head, workIntelligence, growth, attention, opportunities, projects, events] = await Promise.all([
+/**
+ * One loader PER REGION, so each region streams on its own and a slow
+ * journal never holds the rest of the home back (owner walk 2026-09-28:
+ * "login has become slow"). Each is request-cached and composed from the
+ * same request-cached ŠIANDIEN readers, so no reader runs twice.
+ */
+export const loadHomeWaiting = cache(async () => {
+  const [head, workIntelligence, attention] = await Promise.all([
     loadTodayHead(),
     loadTodayWorkIntelligence(),
-    loadTodayGrowth(),
     loadTodayAttention(),
-    loadTodayOpportunities(),
-    loadHomeProjects(),
-    loadHomeEvents(),
   ]);
-  const today = deriveTodayModel({
-    displayName: head.displayName,
-    professionSlug: head.professionSlug,
-    workCard: head.workCard,
-    workIntelligence,
-    growth,
-    opportunities,
-    attention,
-  });
-  return composeHomeState({ today, projects, events });
+  return {
+    region: deriveWaiting(deriveTodayNext(head.workCard), deriveTodayOpenItems(workIntelligence, attention)),
+    /** Which door counters could not be read — named, never rendered as 0. */
+    unknownDoors: unknownTodayDoors(attention),
+  };
 });
+
+export const loadHomeRunning = cache(async () => {
+  const [workIntelligence, growth, projects] = await Promise.all([
+    loadTodayWorkIntelligence(),
+    loadTodayGrowth(),
+    loadHomeProjects(),
+  ]);
+  return deriveRunning(deriveTodayWork(workIntelligence), projects, deriveTodayGrowth(growth));
+});
+
+export const loadHomeBecause = cache(async () => deriveBecause(await loadHomeEvents()));
+
+export const loadHomeOutside = cache(async () =>
+  deriveOutside(deriveTodayOpportunity(await loadTodayOpportunities())),
+);

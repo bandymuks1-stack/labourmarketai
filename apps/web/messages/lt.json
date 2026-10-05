@@ -18238,5 +18238,55 @@
       "skills": "{count, plural, one {# jūsų įrašais pagrįstas gebėjimas} few {# jūsų įrašais pagrįsti gebėjimai} other {# jūsų įrašais pagrįstų gebėjimų}}",
       "next": "Kur galite eiti"
     }
+  },
+  "homeStage": {
+    "regions": {
+      "waiting": {
+        "eyebrow": "Reikia jūsų",
+        "title": "Kas *laukia* jūsų",
+        "clear": "Nieko, kas lauktų jūsų.",
+        "unknown": "Nepavyko nuskaityti, kas laukia jūsų."
+      },
+      "running": {
+        "eyebrow": "Vyksta",
+        "title": "Kas dabar *vyksta*",
+        "projectsUnknown": "Nepavyko nuskaityti jums priskirtų projektų."
+      },
+      "because": {
+        "eyebrow": "Kas pasikeitė",
+        "title": "Dėl to, kas *įvyko*",
+        "unknown": "Nepavyko nuskaityti, kas pasikeitė.",
+        "also": "Taip pat",
+        "all": "Visa veikla"
+      },
+      "outside": {
+        "eyebrow": "Už jūsų sienų",
+        "title": "Kas yra *rinkoje*"
+      }
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Prasidėjo darbo santykis",
+        "relationshipEnded": "Darbo santykis baigėsi",
+        "bookingAgreed": "Rezervacija sutarta",
+        "bookingRefused": "Rezervacija atmesta",
+        "bookingWithdrawn": "Rezervacija atšaukta",
+        "absenceApproved": "Nebuvimas patvirtintas",
+        "absenceRefused": "Nebuvimas atmestas",
+        "decisionRecorded": "Sprendimas užfiksuotas",
+        "acknowledgementRecorded": "Susipažinimas užfiksuotas",
+        "invitationAnswered": "Į kvietimą atsakyta"
+      },
+      "state": {
+        "engagementActive": "Įdarbinimas: aktyvus",
+        "engagementClosed": "Įdarbinimas: baigtas",
+        "bookingConfirmed": "Rezervacija: patvirtinta",
+        "bookingClosed": "Rezervacija: uždaryta",
+        "absenceDecided": "Nebuvimas: išspręstas",
+        "workflowClosed": "Patvirtinimas: uždarytas",
+        "documentAcknowledged": "Dokumentas: susipažinta",
+        "relationshipFormed": "Santykis: užmegztas"
+      }
+    }
   }
 }

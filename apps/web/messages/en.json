@@ -18238,5 +18238,55 @@
       "skills": "{count, plural, one {# skill backed by your records} other {# skills backed by your records}}",
       "next": "Where you can go"
     }
+  },
+  "homeStage": {
+    "regions": {
+      "waiting": {
+        "eyebrow": "Needs you",
+        "title": "What is *waiting* on you",
+        "clear": "Nothing is waiting on you.",
+        "unknown": "What is waiting on you could not be read."
+      },
+      "running": {
+        "eyebrow": "In motion",
+        "title": "What is *running* now",
+        "projectsUnknown": "Your assigned projects could not be read."
+      },
+      "because": {
+        "eyebrow": "What changed",
+        "title": "Because of what *happened*",
+        "unknown": "What changed could not be read.",
+        "also": "Also",
+        "all": "All activity"
+      },
+      "outside": {
+        "eyebrow": "Outside your walls",
+        "title": "What is in the *market*"
+      }
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "A working relationship started",
+        "relationshipEnded": "A working relationship ended",
+        "bookingAgreed": "The booking was agreed",
+        "bookingRefused": "The booking was refused",
+        "bookingWithdrawn": "The booking was withdrawn",
+        "absenceApproved": "The absence was approved",
+        "absenceRefused": "The absence was refused",
+        "decisionRecorded": "The decision was recorded",
+        "acknowledgementRecorded": "The acknowledgement was recorded",
+        "invitationAnswered": "The invitation was answered"
+      },
+      "state": {
+        "engagementActive": "Engagement: active",
+        "engagementClosed": "Engagement: closed",
+        "bookingConfirmed": "Booking: confirmed",
+        "bookingClosed": "Booking: closed",
+        "absenceDecided": "Absence: decided",
+        "workflowClosed": "Approval: closed",
+        "documentAcknowledged": "Document: acknowledged",
+        "relationshipFormed": "Relationship: formed"
+      }
+    }
   }
 }

@@ -1,4 +1,8 @@
-import type { NotificationEventRow } from "@/lib/notifications/events";
+import {
+  notificationEventHref,
+  notificationRenderedType,
+  type NotificationEventRow,
+} from "@/lib/notifications/events";
 import type {
   TodayGrowth,
   TodayModel,
@@ -107,6 +111,9 @@ export type HomeCauseChain = {
 export type HomeChange = {
   readonly id: string;
   readonly eventType: string;
+  /** The key under `auth.notifications.types` that labels this event — the
+   *  SAME copy the bell and the activity page use, never a second wording. */
+  readonly renderedType: string;
   readonly subject: HomeSubject;
   readonly occurredAt: string;
   readonly href: string;
@@ -211,9 +218,10 @@ export function deriveBecause(events: readonly NotificationEventRow[] | null): B
     const change: HomeChange = {
       id: e.id,
       eventType: e.eventType,
+      renderedType: notificationRenderedType(e.eventType, e.metadata),
       subject: { kind: EVENT_SUBJECT[e.entityType] ?? "relationship", id: e.entityId, label: null },
       occurredAt: e.createdAt,
-      href: "/dashboard/activity",
+      href: notificationEventHref(e.entityType, e.metadata) ?? "/dashboard/activity",
       read: e.readAt !== null,
     };
     const chain = CAUSAL_CHAINS[e.eventType];

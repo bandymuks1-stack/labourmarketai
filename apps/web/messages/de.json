@@ -18238,5 +18238,55 @@
       "skills": "{count, plural, one {# Fähigkeit, gestützt auf deine Einträge} other {# Fähigkeiten, gestützt auf deine Einträge}}",
       "next": "Wohin du gehen kannst"
     }
+  },
+  "homeStage": {
+    "regions": {
+      "waiting": {
+        "eyebrow": "Braucht Sie",
+        "title": "Was auf Sie *wartet*",
+        "clear": "Nichts wartet auf Sie.",
+        "unknown": "Was auf Sie wartet, konnte nicht gelesen werden."
+      },
+      "running": {
+        "eyebrow": "In Bewegung",
+        "title": "Was gerade *läuft*",
+        "projectsUnknown": "Ihre zugewiesenen Projekte konnten nicht gelesen werden."
+      },
+      "because": {
+        "eyebrow": "Was sich geändert hat",
+        "title": "Wegen dessen, was *geschah*",
+        "unknown": "Was sich geändert hat, konnte nicht gelesen werden.",
+        "also": "Außerdem",
+        "all": "Alle Aktivitäten"
+      },
+      "outside": {
+        "eyebrow": "Außerhalb Ihrer Mauern",
+        "title": "Was im *Markt* ist"
+      }
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Eine Arbeitsbeziehung hat begonnen",
+        "relationshipEnded": "Eine Arbeitsbeziehung ist beendet",
+        "bookingAgreed": "Die Buchung wurde vereinbart",
+        "bookingRefused": "Die Buchung wurde abgelehnt",
+        "bookingWithdrawn": "Die Buchung wurde zurückgezogen",
+        "absenceApproved": "Die Abwesenheit wurde genehmigt",
+        "absenceRefused": "Die Abwesenheit wurde abgelehnt",
+        "decisionRecorded": "Die Entscheidung wurde festgehalten",
+        "acknowledgementRecorded": "Die Kenntnisnahme wurde festgehalten",
+        "invitationAnswered": "Die Einladung wurde beantwortet"
+      },
+      "state": {
+        "engagementActive": "Einsatz: aktiv",
+        "engagementClosed": "Einsatz: beendet",
+        "bookingConfirmed": "Buchung: bestätigt",
+        "bookingClosed": "Buchung: geschlossen",
+        "absenceDecided": "Abwesenheit: entschieden",
+        "workflowClosed": "Freigabe: abgeschlossen",
+        "documentAcknowledged": "Dokument: zur Kenntnis genommen",
+        "relationshipFormed": "Beziehung: entstanden"
+      }
+    }
   }
 }
