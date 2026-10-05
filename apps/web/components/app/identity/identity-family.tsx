@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { Wrench } from "lucide-react";
 
+import { PLAYER_IDENTITY_AVATAR_BORDER, PLAYER_IDENTITY_FALLBACK_SURFACE } from "@/lib/identity/player-identity";
+import { personMonogram } from "@/lib/visual/avatar-monogram";
 import { cn } from "@/lib/utils";
 import type { CompanyIdentity, PersonIdentity, ProjectIdentity } from "@/lib/identity/identity-view";
 
@@ -53,13 +55,9 @@ const plate = (id: string) => {
 
 const HAIR = "inset 0 0 0 1px rgba(245,241,232,0.12)";
 
-export const initialsOf = (name: string) =>
-  name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]!.toUpperCase())
-    .join("");
+/** ONE source of initials for every person surface (`personMonogram`, pinned
+ *  by player-card-identity-consistency.test.ts) — never a second rule here. */
+export const initialsOf = personMonogram;
 
 // ───────────────────────── person ─────────────────────────
 
@@ -92,6 +90,7 @@ export function PersonAvatar({
   size = 40,
   bare = false,
   anonymousLabel = "Anonymous",
+  surface = "plate",
   className,
 }: {
   readonly person: PersonLike;
@@ -100,6 +99,15 @@ export function PersonAvatar({
   readonly bare?: boolean;
   /** the accessible name of a veiled person, in the viewer's language */
   readonly anonymousLabel?: string;
+  /**
+   * What a person WITHOUT a photo is drawn on. "plate" is the frozen
+   * family's tonal plate with an engraved figure (a fixed dark palette);
+   * "canonical" is the product's theme-swappable fallback surface
+   * (`PLAYER_IDENTITY_FALLBACK_SURFACE` + border, initials at every size),
+   * the one the persistent-portrait contract pins. Real routes that must
+   * swap theme choose "canonical"; the choice is explicit, never implicit.
+   */
+  readonly surface?: "plate" | "canonical";
   readonly className?: string;
 }) {
   const radius = bare ? 0 : "28%";
@@ -138,6 +146,25 @@ export function PersonAvatar({
         {size >= 40 ? (
           <span aria-hidden className="absolute bottom-[9%] left-1/2 h-[3px] w-[26%] -translate-x-1/2 rounded-full bg-[rgba(245,241,232,0.35)]" />
         ) : null}
+      </span>
+    );
+  }
+  if (surface === "canonical") {
+    return (
+      <span
+        className={cn(
+          "relative inline-flex shrink-0 items-center justify-center overflow-hidden font-display font-bold tracking-tightest",
+          PLAYER_IDENTITY_FALLBACK_SURFACE,
+          PLAYER_IDENTITY_AVATAR_BORDER,
+          className,
+        )}
+        style={{ ...base, fontSize: Math.max(10, size * 0.36) }}
+        role="img"
+        aria-label={person.name}
+        data-identity="person-fallback"
+        data-surface="canonical"
+      >
+        <span aria-hidden>{initialsOf(person.name)}</span>
       </span>
     );
   }
