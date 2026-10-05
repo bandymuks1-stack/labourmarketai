@@ -261,6 +261,19 @@ async function go(page: Page, path: string, anchor?: string) {
   await settle(page);
 }
 
+/** `next dev` hydrates a heavy page late: a fill/click before hydration is a silent no-op (observed on 5b and 11a). Wait for React
+ *  to own the element before the step types into it. */
+async function hydrated(page: Page, selector: string) {
+  await page.waitForFunction(
+    (sel) => {
+      const el = document.querySelector(sel);
+      return !!el && Object.keys(el).some((k) => k.startsWith("__reactProps") || k.startsWith("__reactFiber"));
+    },
+    selector,
+    { timeout: 180_000 },
+  );
+}
+
 test.describe.configure({ mode: "serial", timeout: 900_000 });
 
 test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
@@ -574,6 +587,7 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     const m1 = await acct("m1");
     const page = await loginUi(browser, "m1");
     await go(page, "/en/dashboard/journal", "#journal-composer textarea");
+    await hydrated(page, "#journal-composer textarea");
     // The team's project is the member's journal context, reached via the team.
     const text = `QA${TAG} member-entry: installed tiles in Block A, worked 6 hours, 12 m2`;
     await page.locator("#journal-composer textarea").fill(text);
@@ -884,6 +898,7 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     const m3 = await acct("m3");
     const page = await loginUi(browser, "m3");
     await go(page, "/en/dashboard/journal", "#journal-composer textarea");
+    await hydrated(page, "#journal-composer textarea");
     if (!S.ENTRY_CP) {
       const text = `QA${TAG} client-job: poured screed in Block A, worked 5 hours, 20 m2`;
       await page.locator("#journal-composer textarea").fill(text);
@@ -1170,9 +1185,14 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     expect(mid[0]).toMatchObject({ status: "pending", accepted_by_profile_id: null });
     expect(await rows(`engagement_contexts?profile_id=eq.${str.id}&organization_id=eq.${S.ORG}&select=id`)).toEqual([]);
     // the doors refuse as the stranger (real JWT): accept, decline, preview -> email_mismatch, row untouched
-    for (const fn of ["accept_invitation_v2", "decline_invitation_v2", "accept_invitation_v1", "decline_invitation_v1"]) {
+    for (const fn of ["accept_invitation_v2", "decline_invitation_v2"]) {
       const r = await rpcAs(str.jwt, fn, { p_token: token });
       expect(JSON.stringify(r.json), `${fn} as stranger`).toMatch(/email_mismatch/);
+    }
+    // The v1 doors are CLOSED to API callers (migration 20261003151500): denied by privilege before they can read the row.
+    for (const fn of ["accept_invitation_v1", "decline_invitation_v1"]) {
+      const r = await rpcAs(str.jwt, fn, { p_token: token });
+      expect(JSON.stringify(r.json), `${fn} as stranger`).toMatch(/permission denied/);
     }
     const pv = await rpcAs(str.jwt, "get_invitation_preview_v2", { p_token: token });
     expect(JSON.stringify(pv.json)).toMatch(/email_mismatch/);
@@ -1819,7 +1839,15 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     const own = await acct("own");
     const iw = await acct("iw");
     await dbOk("PATCH", `projects?id=eq.${S.PROJECT3}`, { start_date: "2026-12-01", end_date: "2026-12-20" });
+    // Since 20261003150950 the database VERIFIES every collision against its real source row: an absence is proved by an
+    // APPROVED worker_absences row (never by an id the caller supplies). NAMED SEED: one approved absence for the provider.
+    const haveAbs = await rows(`worker_absences?worker_id=eq.${iw.workerId}&start_date=eq.2026-12-05&select=id`);
+    if (haveAbs.length === 0) await dbOk("POST", "worker_absences", { worker_id: iw.workerId, absence_type: "annual_leave", start_date: "2026-12-05", end_date: "2026-12-08", status: "approved", requested_by: iw.id });
     const collisions = [{ kind: "absence", overlapStart: "2026-12-05", overlapEnd: "2026-12-08" }];
+    // a FABRICATED collision (no such absence) is refused 22023 even for the real manager - the designed behaviour of #2146's validator
+    const fabricated = await rpcAs(own.jwt, "record_commitment_override_v1", { p_project_id: S.PROJECT3, p_worker_profile_id: iw.id, p_collisions: [{ kind: "absence", overlapStart: "2026-12-10", overlapEnd: "2026-12-12" }], p_reason_code: "other" });
+    expect(fabricated.status).toBeGreaterThanOrEqual(400);
+    expect(JSON.stringify(fabricated.json)).toMatch(/collision not verified|22023/);
     const denied = await rpcAs((await acct("str")).jwt, "record_commitment_override_v1", { p_project_id: S.PROJECT3, p_worker_profile_id: iw.id, p_collisions: collisions, p_reason_code: "other" });
     expect(denied.status).toBeGreaterThanOrEqual(400);
     const ok = await rpcAs(own.jwt, "record_commitment_override_v1", { p_project_id: S.PROJECT3, p_worker_profile_id: iw.id, p_collisions: collisions, p_reason_code: "agreed_with_worker" });
@@ -1946,6 +1974,7 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     const P3 = S.PROJECT3 as string;
     const page = await loginUi(browser, "iw");
     await go(page, "/en/dashboard/journal", "#journal-composer textarea");
+    await hydrated(page, "#journal-composer textarea");
     const text = `QA${TAG} indep-job: laid 15 m2 of tiles for the client, worked 4 hours`;
     if (!S.ENTRY_IW) {
       await page.locator("#journal-composer textarea").fill(text);
@@ -2312,6 +2341,7 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     const page = await loginUi(browser, "sole");
     if (!S.ST_E1) {
       await go(page, "/en/dashboard/journal", "#journal-composer textarea");
+    await hydrated(page, "#journal-composer textarea");
       // fill until the "Read it back" control enables: a fill before React hydrates the composer is silently dropped
       const readBack = page.getByRole("button", { name: /Read it back/i });
       for (let attempt = 0; attempt < 6 && !(await readBack.isEnabled()); attempt++) {
