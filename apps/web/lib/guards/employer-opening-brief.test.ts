@@ -24,7 +24,7 @@ describe("the employer opening brief", () => {
     // same — each identity to its OWN brief — and the employer call takes
     // no option at all.
     expect(chat).toMatch(
-      /identity === "person" \? loadOpeningBrief\(briefOptions\) : loadEmployerOpeningBriefResult()\(\)/,
+      /identity === "person" \? loadOpeningBriefResult\(briefOptions\) : loadEmployerOpeningBriefResult\(\)/,
     );
     // The old silence gate must not come back.
     const opener = chat.slice(chat.indexOf("openedWithStateRef.current) return"));

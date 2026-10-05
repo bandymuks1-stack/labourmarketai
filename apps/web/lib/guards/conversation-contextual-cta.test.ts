@@ -90,7 +90,7 @@ describe("history + state-aware opening", () => {
     // profile gap server-side; `none` leaves the greeting standing alone.
     // Takes an optional `omit` of the rungs an opening context (ŠIANDIEN)
     // already states — see lib/guards/calm-home-contract.test.ts.
-    expect(CHAT).toMatch(/loadOpeningBrief\(briefOptions\)/);
+    expect(CHAT).toMatch(/loadOpeningBriefResult\(briefOptions\)/);
     // Re-anchored: the employer brief is the Result reader, whose `unknown` is said
     // (not silent); only `none` - every source answered, none had anything - returns.
     expect(CHAT).toMatch(/if \(brief\.kind === "none"\) return/);

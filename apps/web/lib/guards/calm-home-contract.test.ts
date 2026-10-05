@@ -53,7 +53,7 @@ describe("ŠIANDIEN owns the attention it already renders", () => {
     expect(CHAT).toMatch(
       /const briefOptions = todayOnScreen \? \{ omit: TODAY_COVERED_BRIEF_RUNGS \} : undefined;/,
     );
-    expect(CHAT).toMatch(/loadOpeningBrief\(briefOptions\) : loadEmployerOpeningBriefResult()\(\)/);
+    expect(CHAT).toMatch(/loadOpeningBriefResult\(briefOptions\) : loadEmployerOpeningBriefResult\(\)/);
     // Negative control: an unconditional omit would silence the brief for a
     // person who has no ŠIANDIEN above it.
     expect(CHAT).not.toMatch(/loadOpeningBrief\(\{\s*omit:/);
@@ -87,13 +87,16 @@ describe("ŠIANDIEN owns the attention it already renders", () => {
         getTranslations: async () => Object.assign((k: string) => k, { has: () => false }),
       }));
       vi.doMock("@/lib/booking/booking-actions", () => ({
-        getPendingIncomingBookingCount: spies.bookings,
+        readPendingIncomingBookingCount: async () => ({ status: "ok" as const, count: await spies.bookings() }),
       }));
       vi.doMock("@/lib/invitations/attention", () => ({
         listInvitationsAddressedToMe: spies.invitations,
       }));
       vi.doMock("@/lib/communication/unread", () => ({
-        getUnreadConversationCount: spies.unread,
+        getUnreadConversationIdsResult: async () => ({
+          status: "ok" as const,
+          ids: new Set(Array.from({ length: await spies.unread() }, (_, i) => String(i))),
+        }),
       }));
       vi.doMock("@/lib/conversation/profile-summary", () => ({
         loadProfileSummaryForChat: spies.profile,

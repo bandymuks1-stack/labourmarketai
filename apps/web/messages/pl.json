@@ -13927,6 +13927,7 @@
       "capacityEmpty": "W zespole nie ma jeszcze nikogo — zaproś ludzi.",
       "capacityUnavailable": "Nie udało się teraz odczytać dostępności zespołu.",
       "briefEmployerUnknown": "Nie udało się teraz sprawdzić wszystkiego na liście Twojej firmy. To nie znaczy, że nic nie czeka.",
+      "briefPersonUnknown": "Nie udało się teraz sprawdzić wszystkiego na Twojej liście. To nie znaczy, że nic nie czeka.",
       "chipAddTask": "Dodaj zadanie",
       "workerProjectsIntro": "Twoje projekty ({count} aktywne):",
       "workerProjectsEnded": "zakończone",

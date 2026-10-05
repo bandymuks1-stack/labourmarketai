@@ -27,6 +27,7 @@ import {
   listMyBookings,
   listMyBookingsResult,
   readBookingResponsesNewCount,
+  readPendingIncomingBookingCount,
 } from "./booking-actions";
 
 const NOW = Date.now();
@@ -86,5 +87,23 @@ describe("legacy readers keep their shape", () => {
   it("getBookingResponsesNewCount still answers a number (0 on any failure)", async () => {
     h.seen.mockResolvedValue({ data: null, error: { code: "57014" } });
     expect(await getBookingResponsesNewCount()).toBe(0);
+  });
+});
+
+describe("readPendingIncomingBookingCount", () => {
+  it("no proposals is ok 0 - the only 'no offers'", async () => {
+    expect(await readPendingIncomingBookingCount()).toEqual({ status: "ok", count: 0 });
+  });
+
+  it("a failed bookings read is unavailable, not 0; an absent table is ok 0", async () => {
+    h.bookings.mockResolvedValue({ data: null, error: { code: "57014" } });
+    expect(await readPendingIncomingBookingCount()).toEqual({ status: "unavailable" });
+    h.bookings.mockResolvedValue({ data: null, error: { code: "42P01" } });
+    expect(await readPendingIncomingBookingCount()).toEqual({ status: "ok", count: 0 });
+  });
+
+  it("signed out is unavailable", async () => {
+    h.user.mockReturnValue(null);
+    expect(await readPendingIncomingBookingCount()).toEqual({ status: "unavailable" });
   });
 });

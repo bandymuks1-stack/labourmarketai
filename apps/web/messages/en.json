@@ -13927,6 +13927,7 @@
       "capacityEmpty": "Nobody is on the team yet — invite people.",
       "capacityUnavailable": "The team's availability could not be read right now.",
       "briefEmployerUnknown": "I could not check everything on your company's list just now. That is not the same as nothing waiting.",
+      "briefPersonUnknown": "I could not check everything on your list just now. That is not the same as nothing waiting.",
       "chipAddTask": "Add a task",
       "workerProjectsIntro": "Your projects ({count} active):",
       "workerProjectsEnded": "ended",

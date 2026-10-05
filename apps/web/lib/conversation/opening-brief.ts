@@ -18,10 +18,10 @@ import {
   DOCUMENT_GAP_LINE_CAP,
   groupMissingDocumentsByType,
 } from "@/lib/conversation/documents-gap";
-import { getUnreadConversationCount } from "@/lib/communication/unread";
+import { getUnreadConversationIdsResult } from "@/lib/communication/unread";
 import { getUnreadConversationIdsForOrganizationResult } from "@/lib/communication/organization-scope";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
-import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
+import { readPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
 import { loadOwnRecentConfirmations } from "@/lib/journal/own-recent-confirmations";
 import { getOwnWorkerId } from "@/lib/projects/worker-project-access";
 
@@ -53,6 +53,31 @@ export type OpeningChip = { id: string; label: string };
 export type OpeningBrief =
   | { kind: "brief"; lines: string[]; chips: OpeningChip[] }
   | { kind: "none" };
+
+/** The person-brief sources whose read can fail independently (SEP-7). */
+export type PersonBriefSource =
+  | "bookings"
+  | "invitations"
+  | "documents"
+  | "opportunities"
+  | "calendar"
+  | "instructions"
+  | "confirmations"
+  | "unread"
+  | "learner"
+  | "profile";
+
+/** Same three outcomes as the employer brief: none / brief(+unknown) / unknown. */
+export type PersonOpeningBriefResult =
+  | {
+      kind: "brief";
+      lines: string[];
+      chips: OpeningChip[];
+      unknown: readonly PersonBriefSource[];
+      unknownNote: string | null;
+    }
+  | { kind: "none" }
+  | { kind: "unknown"; unknown: readonly PersonBriefSource[]; unknownNote: string };
 
 /**
  * The employer sources whose read can fail independently. A failed source is
@@ -124,7 +149,16 @@ const MAX_LINES = 3;
 const MAX_CHIPS = 3;
 
 export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<OpeningBrief> {
+  // Historical shape, kept for its callers; the honest reader is the same body.
+  const result = await loadOpeningBriefResult(options);
+  return result.kind === "brief"
+    ? { kind: "brief", lines: result.lines, chips: result.chips }
+    : { kind: "none" };
+}
+
+export async function loadOpeningBriefResult(options?: OpeningBriefOptions): Promise<PersonOpeningBriefResult> {
   const t = await getTranslations("conversation.chat");
+  const unknown = new Set<PersonBriefSource>();
   // Omitting only ever REMOVES a line from the caller's own brief: every read
   // below is still the caller's own, so the list is never an authority.
   const omitted = omittedRungs(options);
@@ -151,14 +185,20 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
   // lib/guards/booking-visibility-honest.test.ts) — which is exactly why the
   // conversation has to carry the signal.
   try {
-    const pending = omitted.has("bookings") ? 0 : await getPendingIncomingBookingCount();
+    let pending = 0;
+    if (!omitted.has("bookings")) {
+      const read = await readPendingIncomingBookingCount();
+      if (read.status === "ok") pending = read.count;
+      else unknown.add("bookings");
+    }
     if (pending > 0) {
       const tBookings = await getTranslations("bookings");
       lines.push(`${tBookings("pendingLink")} — ${tBookings("pendingNote")}`);
       addChip("offers", t("chipOffers"));
     }
   } catch {
-    /* no line — a failed read never invents an offer */
+    /* no line — a failed read never invents an offer, and is never "none" */
+    unknown.add("bookings");
   }
 
   // 0a ── an invitation addressed to THIS person (owner contract §4D: someone
@@ -176,10 +216,13 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
         const first = inv.items[0];
         lines.push(t("briefInvitations", { count: inv.total, who: first.organizationName ?? first.inviterName ?? t("invitationSomeone") }));
         addChip("invitations", t("chipInvitations"));
+      } else if (inv.status === "error") {
+        unknown.add("invitations");
       }
     }
   } catch {
-    /* no line — a failed read never invents an invitation */
+    /* no line — a failed read never invents an invitation, and is never "none" */
+    unknown.add("invitations");
   }
 
   // 0b ── a document about to expire (owner contract 2026-09-04 §4D/§14).
@@ -196,8 +239,10 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
       lines.push(t("briefDocumentsExpiring", { count: docGap.gap.expiring.length }));
       addChip("documents-centre", t("documentsChip"));
     }
+    if (docGap.kind === "unavailable") unknown.add("documents");
   } catch {
-    /* no line — a failed read never invents a document gap */
+    /* no line — a failed read never invents a document gap, and is never "none" */
+    unknown.add("documents");
   }
 
   // 1 ── new matching opportunities ────────────────────────────────────────
@@ -230,7 +275,8 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
       }
     }
   } catch {
-    /* no line — never a fabricated one */
+    /* no line — never a fabricated one, and a failed read is never "none" */
+    unknown.add("opportunities");
   }
 
   // 2 ── calendar conflicts / overdue, and 3 ── unlogged work ──────────────
@@ -255,9 +301,13 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
         lines.push(t("briefLogToday"));
         addChip("logwork", t("chipLogWork"));
       }
+      const failedSource = Object.values(planning.sources).some(
+        (src) => (src as { status?: string }).status === "error",
+      );
+      if (failedSource) unknown.add("calendar");
     }
   } catch {
-    /* no line */
+    unknown.add("calendar");
   }
 
   // 3a ── work instructions waiting — a manager asked for something (e.g. a
@@ -272,7 +322,7 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
       }
     }
   } catch {
-    /* no line */
+    unknown.add("instructions");
   }
 
   // 3a' ── the employer CONFIRMED this person's work (owner contract §14 —
@@ -292,7 +342,8 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
       }
     }
   } catch {
-    /* no line — a failed read never invents a confirmation */
+    /* no line — a failed read never invents a confirmation, and is never "none" */
+    unknown.add("confirmations");
   }
 
   // 3b ── unread human messages (owner audit §4.4/§8: with the tab row gone,
@@ -300,14 +351,16 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
   // unread thread announces itself, with the one chip that opens it).
   try {
     if (lines.length < MAX_LINES && !omitted.has("unread")) {
-      const unread = await getUnreadConversationCount();
+      const unreadRead = await getUnreadConversationIdsResult();
+      if (unreadRead.status === "unavailable") unknown.add("unread");
+      const unread = unreadRead.status === "ok" ? unreadRead.ids.size : 0;
       if (unread > 0) {
         lines.push(t("briefUnreadMessages", { count: unread }));
         addChip("link:/dashboard/communication", t("navMessages"));
       }
     }
   } catch {
-    /* no line */
+    unknown.add("unread");
   }
 
   // 3b ── documents missing for the person's OWN stated countries. No
@@ -341,7 +394,7 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
       addChip("documents-centre", t("documentsChip"));
     }
   } catch {
-    /* no line */
+    unknown.add("documents");
   }
 
   // 4 ── the first missing profile step ────────────────────────────────────
@@ -367,7 +420,8 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
       }
     }
   } catch {
-    /* no line — a failed read never invents an enrolment */
+    /* no line — a failed read never invents an enrolment, and is never "none" */
+    unknown.add("learner");
   }
 
   try {
@@ -383,11 +437,22 @@ export async function loadOpeningBrief(options?: OpeningBriefOptions): Promise<O
       }
     }
   } catch {
-    /* no line */
+    unknown.add("profile");
   }
 
-  if (lines.length === 0) return { kind: "none" };
-  return { kind: "brief", lines: lines.slice(0, MAX_LINES), chips };
+  const unknownSources = [...unknown];
+  if (lines.length === 0) {
+    return unknownSources.length > 0
+      ? { kind: "unknown", unknown: unknownSources, unknownNote: t("briefPersonUnknown") }
+      : { kind: "none" };
+  }
+  return {
+    kind: "brief",
+    lines: lines.slice(0, MAX_LINES),
+    chips,
+    unknown: unknownSources,
+    unknownNote: unknownSources.length > 0 ? t("briefPersonUnknown") : null,
+  };
 }
 
 /**

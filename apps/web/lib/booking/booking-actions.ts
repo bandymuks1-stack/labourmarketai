@@ -807,6 +807,18 @@ async function attachProposerAndChangedTerms(
  * any non-ok state (needs-migration / not-authed / no rows) so a missing data
  * model never produces a fake badge. Read-only; no schema/RLS change.
  */
+export type PendingIncomingBookingsResult =
+  | { status: "ok"; count: number }
+  | { status: "unavailable" };
+
+/** `getPendingIncomingBookingCount` with a FAILED read apart from "no offers" (SEP-7). */
+export async function readPendingIncomingBookingCount(): Promise<PendingIncomingBookingsResult> {
+  const result = await listMyBookingsResult();
+  if (result.kind === "error" || result.kind === "not-authed") return { status: "unavailable" };
+  if (result.kind !== "ok") return { status: "ok", count: 0 }; // needs-migration: nothing can be offered yet
+  return { status: "ok", count: result.incoming.filter((b) => b.status === "proposed").length };
+}
+
 export async function getPendingIncomingBookingCount(): Promise<number> {
   const result = await listMyBookings();
   if (result.kind !== "ok") return 0;

@@ -223,7 +223,7 @@ import { discoverChannels } from "@/lib/value-channels/discovery";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
 import {
   loadEmployerOpeningBriefResult,
-  loadOpeningBrief,
+  loadOpeningBriefResult,
 } from "@/lib/conversation/opening-brief";
 import { TODAY_COVERED_BRIEF_RUNGS } from "@/lib/today/today-route";
 import { PersonalWorkspaceIntro } from "@/components/app/workspace/personal-workspace-intro";
@@ -1704,10 +1704,10 @@ export function ConversationChat({
     // screen, the brief leaves out the rungs ŠIANDIEN states and keeps the
     // ones only the brief carries (lib/today/today-route.ts).
     const briefOptions = todayOnScreen ? { omit: TODAY_COVERED_BRIEF_RUNGS } : undefined;
-    (identity === "person" ? loadOpeningBrief(briefOptions) : loadEmployerOpeningBriefResult())
+    (identity === "person" ? loadOpeningBriefResult(briefOptions) : loadEmployerOpeningBriefResult())
       .then((brief) => {
-        // `none` = every source answered and none had anything. `unknown` (the
-        // employer brief only) = a source could not be read: said, not hidden.
+        // `none` = every source answered and none had anything. `unknown` = a
+        // source could not be read: said, not hidden (both identities).
         if (brief.kind === "none") return; // honest: nothing to report
         // The brief is a slow read. On production (2026-09-06) it landed
         // AFTER the person's first sentence and took the answer's chip row —
@@ -1722,10 +1722,7 @@ export function ConversationChat({
           text:
             brief.kind === "unknown"
               ? brief.unknownNote
-              : [
-                  ...brief.lines,
-                  ...("unknownNote" in brief && brief.unknownNote ? [brief.unknownNote] : []),
-                ].join("\n"),
+              : [...brief.lines, ...(brief.unknownNote ? [brief.unknownNote] : [])].join("\n"),
           chips: brief.kind === "unknown" ? [] : brief.chips,
         });
         // The brief asks with chips like any assistant() turn, so the phone
