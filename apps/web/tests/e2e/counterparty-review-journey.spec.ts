@@ -148,10 +148,21 @@ test.describe.serial("Counterparty journey: register -> submit -> correct -> res
     await expect(panel).toContainText("Please state the area in square metres.");
     // The existing journal correction control is offered (new version with correction_of).
     await expect(panel.getByRole("button", { name: /edit/i })).toBeVisible();
+    // The correction runs through the EXISTING compact editor (new version with correction_of), then RESUBMIT.
+    const reviewId = (await panel.getAttribute("data-testid"))!.replace("entry-review-", "");
+    await page.getByTestId(`journal-entry-edit-${reviewId}`).click();
+    const ed = page.getByTestId("journal-compact-text");
+    await expect(ed).toBeVisible({ timeout: 60_000 });
+    await ed.fill(`${E.COUNTERPARTY_ENTRY_TEXT} (area 18 m2, corrected)`);
+    await page.evaluate(() => document.querySelectorAll("nextjs-portal").forEach((n) => n.remove())); // dev-only error-overlay portal can sit over the control
+    await page.getByTestId("journal-compact-save").click();
+    await expect(page.getByTestId("journal-compact-saved")).toBeVisible({ timeout: 60_000 });
+    await page.goto("/en/dashboard/journal");
+    const fixed = page.locator('[data-testid^="entry-review-"][data-phase="ready_to_submit"]').first();
+    await expect(fixed).toBeVisible({ timeout: 60_000 });
+    await fixed.getByRole("button", { name: /resubmit|submit/i }).click();
+    await expect(page.locator('[data-testid^="entry-review-"][data-phase="submitted"]').first()).toBeVisible({ timeout: 60_000 });
     await ctx.close();
-    // The correction itself runs through the existing compact editor; the
-    // integration owner extends this step with the editor interaction, then:
-    //   the corrected entry shows "Resubmit" and, once pressed, phase "submitted".
   });
 
   test("F. accept is final, and the worker sees a CLIENT acceptance - not an employer confirmation", async ({ browser }) => {
@@ -162,7 +173,8 @@ test.describe.serial("Counterparty journey: register -> submit -> correct -> res
     await card.getByRole("radio", { name: /accept the work/i }).check();
     await expect(card.getByText(/cannot be undone/i)).toBeVisible();
     await card.locator('[data-testid^="counterparty-decide-"]').click();
-    const accepted = rep.page.locator('[data-testid^="counterparty-card-"]').filter({ hasText: E.COUNTERPARTY_ENTRY_TEXT! }).first();
+    // the CORRECTED version (the original stays in the list as superseded history and shares the leading text)
+    const accepted = rep.page.locator('[data-testid^="counterparty-card-"]').filter({ hasText: "(area 18 m2, corrected)" }).first();
     await expect(accepted).toHaveAttribute("data-bucket", "accepted", { timeout: 20_000 });
     await expect(accepted.locator('[data-testid^="counterparty-final-"]')).toBeVisible();
     await expect(accepted.locator('[data-testid^="counterparty-decide-"]')).toHaveCount(0);
@@ -172,7 +184,7 @@ test.describe.serial("Counterparty journey: register -> submit -> correct -> res
     await w.page.goto("/en/dashboard/journal");
     const panel = entryCard(w.page).locator('[data-testid^="entry-review-"]').first();
     await expect(panel).toHaveAttribute("data-phase", "accepted");
-    await expect(panel).toContainText(/separate from an employer/i);
+    await expect(panel).toContainText(/different thing from a manager.s record, does not verify a skill and is not a payment/i);
     await expect(panel).not.toContainText(/confirmed by (your )?(manager|employer)/i);
     await w.ctx.close();
   });
