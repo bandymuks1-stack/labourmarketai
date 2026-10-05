@@ -319,7 +319,7 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // one route (plus its page path for diff matching), one PR, A-01 only.
     const hours = SCOPED_OWNER_WAIVERS[5];
     expect(hours.axioms).toEqual(["A-01"]);
-    expect(hours.pullRequests).toEqual([1344, 2101]);
+    expect(hours.pullRequests).toEqual([1344, 2101, 2159]);
     expect(hours.files).toEqual([
       "/dashboard/hours",
       "apps/web/app/[locale]/dashboard/hours/page.tsx",
