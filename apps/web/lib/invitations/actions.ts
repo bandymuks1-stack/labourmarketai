@@ -267,10 +267,21 @@ export async function createAndSendInvitations(input: {
     const deliveryOutcome =
       sendResult.status === "sent" ? "sent" : "delivery_failed";
     // Record the TRUTHFUL provider result (never 'sent' without an ack).
-    await asAny(supabase).rpc("mark_invitation_delivery_v1", {
+    // The mail has already left (or failed) at the provider, so a bookkeeping
+    // failure here must not turn the send result into a lie in either
+    // direction — but it must not vanish either (G-12b): log it, never throw.
+    const markRes = (await asAny(supabase).rpc("mark_invitation_delivery_v1", {
       p_invitation_id: invitationId,
       p_outcome: deliveryOutcome,
-    });
+    })) as { error?: { message?: string } | null } | null;
+    if (markRes?.error) {
+      console.error(
+        "[invitations] mark_invitation_delivery_v1 failed:",
+        invitationId,
+        deliveryOutcome,
+        markRes.error.message,
+      );
+    }
     results.push({
       email,
       outcome: sendResult.status === "sent" ? "sent" : "delivery_failed",

@@ -9,6 +9,10 @@ import {
   readOwnedWorkspaceIds,
 } from "@/lib/journal/project-attribution-read";
 import { Button } from "@/components/ui/Button";
+import {
+  PendingButton,
+  PendingNativeButton,
+} from "@/components/app/pending-submit";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Select } from "@/components/ui/Select";
@@ -549,13 +553,13 @@ export default async function TasksPage({
                 <form action={unlinkTaskEvidenceAction}>
                   {hiddenContext()}
                   <input type="hidden" name="linkId" value={item.linkId} />
-                  <button
+                  <PendingNativeButton
                     type="submit"
                     className="inline-flex min-h-11 items-center text-text-muted underline decoration-dotted underline-offset-2 hover:text-state-danger"
                     data-testid={`task-evidence-unlink-${item.linkId}`}
                   >
                     {t("evidence.unlink")}
-                  </button>
+                  </PendingNativeButton>
                 </form>
               </li>
             ))}
@@ -593,13 +597,13 @@ export default async function TasksPage({
                 </option>
               ))}
             </select>
-            <button
+            <PendingNativeButton
               type="submit"
               className="rounded-md border border-ink-500 px-2 py-1 text-xs text-text-secondary hover:text-text-primary"
               data-testid={`task-evidence-link-${task.id}`}
             >
               {t("evidence.linkSubmit")}
-            </button>
+            </PendingNativeButton>
           </form>
         ) : linkableEntries.length === 0 ? (
           <p className="text-xs text-text-muted">{t("evidence.noLinkable")}</p>
@@ -692,13 +696,13 @@ export default async function TasksPage({
             </option>
           ))}
         </select>
-        <button
+        <PendingNativeButton
           type="submit"
           className="rounded-md border border-ink-500 px-2 py-1 text-xs text-text-secondary hover:text-text-primary"
           data-testid={`task-approval-request-${task.id}`}
         >
           {t("approval.request")}
-        </button>
+        </PendingNativeButton>
       </form>
     );
   }
@@ -932,13 +936,13 @@ export default async function TasksPage({
                       name="blockerTaskId"
                       value={b.blockerTaskId}
                     />
-                    <button
+                    <PendingNativeButton
                       type="submit"
                       className="text-text-muted underline decoration-dotted underline-offset-2 hover:text-state-danger"
                       data-testid={`task-dep-remove-${task.id}-${b.blockerTaskId}`}
                     >
                       {t("dependencies.remove")}
-                    </button>
+                    </PendingNativeButton>
                   </form>
                 ) : null}
               </li>
@@ -963,14 +967,14 @@ export default async function TasksPage({
               {hiddenContext()}
               <input type="hidden" name="taskId" value={task.id} />
               <input type="hidden" name="status" value={to} />
-              <Button
+              <PendingButton
                 type="submit"
                 variant="secondary"
                 size="sm"
                 data-testid={`task-action-${action}-${task.id}`}
               >
                 {t(`actions.${action}`)}
-              </Button>
+              </PendingButton>
             </form>
           ))}
           {/* Reopen — the gated managing act (done → in progress,
@@ -981,14 +985,14 @@ export default async function TasksPage({
             <form action={reopenWorkTaskAction}>
               {hiddenContext()}
               <input type="hidden" name="taskId" value={task.id} />
-              <Button
+              <PendingButton
                 type="submit"
                 variant="secondary"
                 size="sm"
                 data-testid={`task-action-reopen-${task.id}`}
               >
                 {t("actions.reopen")}
-              </Button>
+              </PendingButton>
             </form>
           ) : null}
         </div>
@@ -1018,14 +1022,14 @@ export default async function TasksPage({
                 ))}
               </Select>
             </label>
-            <Button
+            <PendingButton
               type="submit"
               variant="secondary"
               size="sm"
               data-testid={`task-assign-save-${task.id}`}
             >
               {t("assignForm.save")}
-            </Button>
+            </PendingButton>
           </form>
         ) : null}
 
@@ -1060,14 +1064,14 @@ export default async function TasksPage({
                     ))}
                   </Select>
                 </label>
-                <Button
+                <PendingButton
                   type="submit"
                   variant="secondary"
                   size="sm"
                   data-testid={`task-dep-add-save-${task.id}`}
                 >
                   {t("dependencies.add")}
-                </Button>
+                </PendingButton>
               </form>
             );
           })()
@@ -1170,9 +1174,9 @@ export default async function TasksPage({
                 </Select>
               </label>
             ) : null}
-            <Button type="submit" variant="secondary" size="sm">
+            <PendingButton type="submit" variant="secondary" size="sm">
               {t("actions.save")}
-            </Button>
+            </PendingButton>
           </form>
 
           {/* History — the append-only work_task_events timeline (newest
@@ -1698,9 +1702,9 @@ export default async function TasksPage({
             </>
           )}
           <div>
-            <Button type="submit" size="sm" data-testid="tasks-create-submit">
+            <PendingButton type="submit" size="sm" data-testid="tasks-create-submit">
               {t("form.submit")}
-            </Button>
+            </PendingButton>
           </div>
         </form>
         </div>
