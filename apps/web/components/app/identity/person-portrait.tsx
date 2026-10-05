@@ -66,7 +66,7 @@ export function PersonPortrait({
           aria-hidden
           data-testid={testids?.monogram}
           className={cn(
-            "relative flex h-full w-full items-center justify-center overflow-hidden rounded-xl font-display font-bold tracking-tightest",
+            "relative flex h-full w-full items-center justify-center overflow-hidden rounded-xl font-display font-semibold tracking-tightest",
             PLAYER_IDENTITY_FALLBACK_SURFACE,
             PLAYER_IDENTITY_AVATAR_BORDER,
           )}
