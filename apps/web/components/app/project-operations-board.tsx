@@ -18,7 +18,7 @@ import {
   upsertReadinessItemAction,
 } from "@/lib/projects/operations-actions";
 import { PrintButton } from "@/components/app/print-button";
-import { playerInitials } from "@/lib/identity/player-identity";
+import { PersonAvatar } from "@/components/app/identity/identity-family";
 
 /**
  * Project worker operations board (slices pilot-ops-launch-v1 +
@@ -466,10 +466,6 @@ function WorkerCard({
           ? labels.missingEvidence
           : code;
 
-  // WAGON 6: SAME identity monogram as the worker Player Card (one card
-  // system) — also fixes the broken local `split(/s+/)` initials copy.
-  const initials = playerInitials(worker.name);
-
   return (
     <article
       className="card-border glow-hover rise-in flex flex-col gap-3 p-4"
@@ -477,13 +473,15 @@ function WorkerCard({
     >
       <header className="flex flex-wrap items-center justify-between gap-2">
         <span className="flex min-w-0 items-center gap-2.5">
+          {/* The frame carries the TRUST state (confirmed skills); the person
+              inside is the ONE identity family (same plate and monogram as
+              the Player Card). */}
           <span
-            aria-hidden
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-ink-700 font-display text-xs font-bold text-text-primary ${
+            className={`flex shrink-0 rounded-xl border p-0.5 ${
               worker.confirmedSkills > 0 ? "border-trust-accent/50" : "border-ink-500"
             }`}
           >
-            {initials}
+            <PersonAvatar person={{ id: worker.workerId, name: worker.name }} size={32} />
           </span>
           <h3 className="truncate font-display text-base font-semibold tracking-tightest text-text-primary">
             {worker.name}

@@ -10,6 +10,7 @@ import { EMPLOYER_VISIBILITY_HREF } from "@/lib/privacy/employer-visibility";
 import { AnchoredOverlay } from "@/components/ui/anchored-overlay";
 import { FEEDBACK_OPEN_EVENT } from "@/components/app/language-feedback-widget";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
+import { PersonAvatar } from "@/components/app/identity/identity-family";
 import { canRenderInline, type ResultContext } from "@/lib/conversation/result-registry";
 
 /**
@@ -125,7 +126,6 @@ export function AccountMenu() {
   // stacking context can ever trap or cover it.
 
   const displayName = profile?.full_name?.trim() || profile?.email || user?.email || "";
-  const initial = (displayName || "?").trim().charAt(0).toUpperCase() || "?";
 
   return (
     <div ref={rootRef} className="relative">
@@ -138,11 +138,17 @@ export function AccountMenu() {
         data-testid="account-menu-trigger"
         className={cn(
           // size-11 = the 44px touch-target floor every header control keeps.
-          "inline-flex size-11 items-center justify-center rounded-full border border-ink-500 bg-ink-800 text-sm font-semibold text-text-primary hover:border-brand-blue",
+          "inline-flex size-11 items-center justify-center rounded-xl border border-ink-500 bg-ink-800 text-sm font-semibold text-text-primary hover:border-brand-blue",
           open && "border-brand-blue",
         )}
       >
-        <span aria-hidden>{initial}</span>
+        {/* The viewer is a PERSON: the one identity family (the button keeps
+            its 44px touch target and the hover/open border). */}
+        <PersonAvatar
+          person={{ id: user?.id ?? (displayName || "me"), name: displayName }}
+          size={32}
+          anonymousLabel=""
+        />
       </button>
 
       <AnchoredOverlay
