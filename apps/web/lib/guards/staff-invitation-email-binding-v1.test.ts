@@ -350,3 +350,104 @@ describe("app: the landing page shows the mismatch honestly", () => {
     });
   }
 });
+
+/**
+ * CONVERGENCE AUDIT F3 (P2): the v1 accept/decline doors were a full parallel
+ * implementation with no multi-use ledger -- ONE authenticated caller could
+ * exhaust (or decline) a shareable multi-use link for everybody through
+ * PostgREST. 20261003151500 takes them off the API; the app falls back to v1
+ * ONLY when v2 is absent and never on a permission error.
+ * Runtime proof: scripts/db-proof/invitation-v1-doors-not-api-callable-v1.sh.
+ */
+describe("F3: the v1 doors are not API-callable and the app never downgrades to them", () => {
+  const N2 = "20261003151500_invitation_v1_doors_not_api_callable_v1";
+  const sql2 = read(`supabase/migrations/${N2}.sql`);
+  const down2 = read(`supabase/rollbacks/${N2}.down.sql`);
+  const body2 = stripComments(sql2);
+  const V1_DOORS = [
+    "accept_invitation_v1(text)",
+    "accept_invitation_by_id_v1(uuid)",
+    "decline_invitation_v1(text)",
+  ];
+
+  it("is ordered after #2152 (151000) and #2155 (151100), is gated and has a rollback", () => {
+    expect(N2 > NAME).toBe(true);
+    expect(sql2.startsWith("-- @human-gate-approved")).toBe(true);
+    expect(sql2.replace(/\n--\s*/g, " ")).toMatch(/NO OWNER APPROVAL EXISTS FOR THIS FILE YET/);
+    expect(down2).not.toMatch(/@human-gate-approved/);
+  });
+
+  it("revokes EXECUTE on exactly the three v1 doors from public, anon and authenticated", () => {
+    const stmts = body2.split(";").map((s) => s.trim()).filter(Boolean);
+    expect(stmts).toEqual(
+      V1_DOORS.map((d) => `revoke all on function public.${d} from public, anon, authenticated`),
+    );
+  });
+
+  it("changes no body and grants nothing", () => {
+    expect(body2).not.toMatch(/create or replace|\bgrant\b|\bdrop\b|\balter\b|\bupdate\b|\bdelete\b/i);
+  });
+
+  it("does NOT revoke the functions that still have legitimate callers", () => {
+    expect(body2).not.toContain("create_invitation_v1");
+    expect(body2).not.toContain("get_invitation_preview_v1");
+    expect(body2).not.toContain("_v2");
+  });
+
+  it("the rollback restores the prior ACL (authenticated only, never anon / public)", () => {
+    const grants = stripComments(down2).split(";").map((s) => s.trim()).filter(Boolean);
+    expect(grants).toEqual(V1_DOORS.map((d) => `grant execute on function public.${d} to authenticated`));
+  });
+
+  const actions = read("apps/web/lib/invitations/actions.ts");
+
+  it("isMissingV2 is function-absent ONLY (PGRST202 / 42883) -- never a permission error", () => {
+    const fn = actions.slice(actions.indexOf("function isMissingV2("), actions.indexOf("function sha256Hex"));
+    expect(fn).toContain('error.code === "PGRST202" || error.code === "42883"');
+    const inner = fn.slice(fn.indexOf("if (!error)"));
+    expect(inner).not.toMatch(/42501|permission|\.message/);
+  });
+
+  it("every v1 retry in the server actions sits behind isMissingV2", () => {
+    for (const door of ["accept_invitation_v1", "decline_invitation_v1", "accept_invitation_by_id_v1"]) {
+      const at = actions.indexOf(`rpc("${door}"`);
+      expect(at, door).toBeGreaterThan(0);
+      const lead = actions.slice(Math.max(0, at - 160), at);
+      expect(lead, `${door} must only be retried when v2 is absent`).toMatch(/error && isMissingV2\(error\)/);
+    }
+  });
+
+  it("the page's preview fallback is function-absent only too", () => {
+    const page = read("apps/web/app/[locale]/invite/[token]/page.tsx");
+    expect(page).toMatch(/error\.code === "PGRST202" \|\| error\.code === "42883"/);
+    expect(page).toMatch(/if \(isMissingFunction\(error\)\) \{\s*\(\{ data, error \} = await asAny\(supabase\)\.rpc\("get_invitation_preview_v1"/);
+  });
+});
+
+/** CONVERGENCE AUDIT F5 (P3): the token door and the by-id door do the same afterwards. */
+describe("F5: one shared post-accept helper for the token and by-id doors", () => {
+  const actions = read("apps/web/lib/invitations/actions.ts");
+  const helperAt = actions.indexOf("async function afterInvitationAccepted(");
+  const helper = actions.slice(helperAt, actions.indexOf("export async function acceptInvitationAction("));
+
+  it("the helper notifies the inviter, the demand owner, records the funnel event and revalidates", () => {
+    expect(helperAt).toBeGreaterThan(0);
+    expect(helper).toContain("await emitInvitationAcceptedNotification(");
+    expect(helper).toContain("await emitDemandInterestNotification(");
+    expect(helper).toContain("emitServerFunnelEvent(FUNNEL_EVENTS.invitationAccepted");
+    expect(helper).toContain("revalidatePath(`/${locale}/dashboard/network`)");
+  });
+
+  it("both doors call it, and neither emits those effects itself any more", () => {
+    expect(actions.match(/await afterInvitationAccepted\(/g)?.length).toBe(2);
+    expect(actions.match(/emitInvitationAcceptedNotification\(/g)?.length).toBe(1);
+    expect(actions.match(/emitDemandInterestNotification\(/g)?.length).toBe(1);
+    expect(actions.match(/FUNNEL_EVENTS\.invitationAccepted/g)?.length).toBe(1);
+  });
+
+  it("the invite page passes the locale so the network page refreshes after a token accept", () => {
+    expect(read("apps/web/lib/invitations/invite-page-actions.ts")).toContain(
+      "acceptInvitationAction({ token, locale })",
+    );
+  });
+});

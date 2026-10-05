@@ -1537,6 +1537,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261003140000_subject_contest_withdraw_constraint_reconcile_v1.sql",
       // 2026-10-04: staff-invitation e-mail binding (token doors refuse an addressed invitation to another e-mail; SECURITY DEFINER bodies) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261003151100_staff_invitation_email_binding_v1.sql",
+      // 2026-10-05: the v1 invitation accept/decline doors lose API EXECUTE (privilege change) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      "20261003151500_invitation_v1_doors_not_api_callable_v1.sql",
 ]);
   });
 
