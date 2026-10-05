@@ -35,6 +35,7 @@ import {
   type WeeklyJournalFacts,
   type WeeklyPersonalIntelligence,
 } from "./weekly-intelligence-model";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /** Same cap as the canonical window report — an honest upper bound. */
 const ENTRY_READ_LIMIT = 2000;
@@ -122,7 +123,7 @@ export const getWeeklyPersonalIntelligence = cache(
     if (!worker) return { kind: "no-worker" };
 
     const supabase = await createClient();
-    const todayIso = new Date().toISOString().slice(0, 10);
+    const todayIso = (await viewerWorkToday()).todayIso;
 
     const [journal, recs, skillRows, linkRead] = await Promise.all([
       readOwnWeeklyJournalFacts(supabase, worker.id, todayIso),

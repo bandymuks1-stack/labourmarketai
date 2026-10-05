@@ -47,6 +47,7 @@ import {
 import { trackFunnel } from "@/lib/telemetry/task";
 import { formatUtcDate } from "@/lib/time/display";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { personCalendarDay } from "@/lib/time/person-calendar-day";
 
 export type WorkLogLabels = {
   understood: string;
@@ -1245,7 +1246,7 @@ function RecordedTimePreview({
   const record = useMemo(() => {
     const anchor = /^\d{4}-\d{2}-\d{2}$/.test(workDate)
       ? workDate
-      : new Date().toISOString().slice(0, 10);
+      : personCalendarDay();
     const t = deriveIntakeWorkTime(notes, anchor);
     const partsMinutes = t.fragments.reduce((sum, f) => {
       if (f.timeUnit === "hours") return sum + f.timeValue * 60;

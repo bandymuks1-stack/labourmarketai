@@ -45,6 +45,7 @@ import { WorkWeek } from "@/components/app/planning/work-week";
 import { WorkDay } from "@/components/app/planning/work-day";
 import { buildWorkRhythm, compactHours } from "@/lib/planning/work-rhythm";
 import { createUtcFormatter } from "@/lib/time/display";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /**
  * THE canonical calendar (core-network area C) — one planning surface over
@@ -146,7 +147,7 @@ export default async function PlanningPage({
   // calendar the owner found good was the journal's month grid — hours on the
   // date, little else). The agenda stays one tap away.
   const view: PlanningView = isPlanningView(rawView) ? rawView : "month";
-  const today = new Date().toISOString().slice(0, 10);
+  const today = (await viewerWorkToday()).todayIso;
   const anchor = parseIsoDay(rawDate) ?? today;
   const range = visibleRange(view, anchor);
 

@@ -245,6 +245,12 @@ export type WorkIntelligenceInput = {
   readonly skills: readonly WorkIntelligenceSkillRow[];
   /** UTC calendar day the periods end on (inclusive). */
   readonly todayIso: string;
+  /** Last work day that is NOT future (`lib/time/local-day.ts`). A work day
+   *  is the person's LOCAL day, so for a viewer ahead of UTC it can be
+   *  later than the UTC `todayIso`; the unbounded `all` period (and so every
+   *  all-time figure) ends here instead of dropping those hours as
+   *  "tomorrow". Omitted = `todayIso`. */
+  readonly horizonIso?: string;
   /** The period the skill / activity / context / output / provenance
    *  sections describe. `periods` and `months` are always computed over
    *  everything. Defaults to `all`. */
@@ -532,12 +538,14 @@ export function workPeriodBounds(
   key: WorkPeriodScope,
   todayIso: string,
   focusRange?: WorkRange | null,
+  horizonIso?: string,
 ): { startIso: string | null; endIso: string } {
+  const open = horizonIso && horizonIso > todayIso ? horizonIso : todayIso;
   if (key === "range") {
     const range = normalizeWorkRange(focusRange);
-    return range ? { startIso: range.startIso, endIso: range.endIso } : { startIso: null, endIso: todayIso };
+    return range ? { startIso: range.startIso, endIso: range.endIso } : { startIso: null, endIso: open };
   }
-  if (key === "all") return { startIso: null, endIso: todayIso };
+  if (key === "all") return { startIso: null, endIso: open };
   return {
     startIso: isoDayMinus(todayIso, PERIOD_DAYS[key] - 1),
     endIso: todayIso,
@@ -784,7 +792,7 @@ export function deriveWorkIntelligence(
     ? [...WORK_PERIOD_KEYS, "range"]
     : WORK_PERIOD_KEYS;
   const periods: WorkPeriodTotals[] = periodKeys.map((key) => {
-    const bounds = workPeriodBounds(key, input.todayIso, focusRange);
+    const bounds = workPeriodBounds(key, input.todayIso, focusRange, input.horizonIso);
     let hours = 0;
     let dayUnits = 0;
     let confirmedHours = 0;
@@ -829,7 +837,7 @@ export function deriveWorkIntelligence(
   // window when one was passed, else the tab.
   const focus: WorkPeriodKey = input.focus ?? "all";
   const scope: WorkPeriodScope = focusRange ? "range" : focus;
-  const focusBounds = workPeriodBounds(scope, input.todayIso, focusRange);
+  const focusBounds = workPeriodBounds(scope, input.todayIso, focusRange, input.horizonIso);
   const scoped = derived.filter((d) => inPeriod(d.time.day, focusBounds));
 
   // ── skills ────────────────────────────────────────────────────────────
@@ -1127,7 +1135,7 @@ export function deriveWorkIntelligence(
     orgRows === null
       ? null
       : periodKeys.map((key) => {
-          const bounds = workPeriodBounds(key, input.todayIso, focusRange);
+          const bounds = workPeriodBounds(key, input.todayIso, focusRange, input.horizonIso);
           let hours = 0;
           let rows = 0;
           let importedHours = 0;
