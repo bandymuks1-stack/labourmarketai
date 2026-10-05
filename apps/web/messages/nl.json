@@ -7379,7 +7379,6 @@
     "outcomeLinked": "Gekoppeld. Je bent nu verbonden.",
     "outcomeAlreadyLinked": "Je bent al gekoppeld.",
     "outcomeNoInvitation": "Uitnodiging niet gevonden.",
-
     "outcomeEmailUnverified": "Bevestig eerst je e-mail (pagina Netwerk) en accepteer daarna de uitnodiging.",
     "outcomeNoWorker": "Je werknemersprofiel is nog niet gereed.",
     "outcomeError": "Accepteren is niet gelukt. Probeer het opnieuw.",
@@ -11704,7 +11703,9 @@
         "rateLimited": "Er is zojuist een link verstuurd. Wacht een minuut voordat je een nieuwe aanvraagt.",
         "alreadyVerified": "Dit e-mailadres is al bevestigd. Ververs de pagina.",
         "failed": "Die link heeft je e-mail niet bevestigd (mogelijk is hij oud of elders geopend). Je kunt een nieuwe aanvragen.",
-        "error": "We konden de link niet versturen. Probeer het later opnieuw."
+        "error": "We konden de link niet versturen. Probeer het later opnieuw.",
+        "intakeTitle": "Bevestig je e-mail om een eerdere inzending voort te zetten",
+        "intakeBody": "Als je via ons openbare formulier met dit adres een bedrijfsbehoefte hebt ingediend, bevestig dan het adres; dan tonen we die hier zodat je niets opnieuw hoeft te typen. Al het andere werkt zoals het werkte."
       }
     },
     "search": {

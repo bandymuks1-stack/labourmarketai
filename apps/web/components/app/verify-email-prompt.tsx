@@ -23,9 +23,12 @@ export function VerifyEmailPrompt({
   next,
   /** `email_verify` result the callback appended to the URL, if any. */
   result,
+  variant = "invitations",
 }: {
   locale: string;
   next?: string | null;
+  /** Which trust-sensitive action needed the proof — only the wording differs. */
+  variant?: "invitations" | "intake";
   result?: string | null;
 }) {
   const t = useTranslations("network.incoming.verify");
@@ -55,8 +58,12 @@ export function VerifyEmailPrompt({
       className="flex flex-col gap-2 rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2"
       data-testid="verify-email-prompt"
     >
-      <p className="text-sm font-medium text-text-primary">{t("title")}</p>
-      <p className="text-xs text-text-secondary">{t("body")}</p>
+      <p className="text-sm font-medium text-text-primary">
+        {variant === "intake" ? t("intakeTitle") : t("title")}
+      </p>
+      <p className="text-xs text-text-secondary">
+        {variant === "intake" ? t("intakeBody") : t("body")}
+      </p>
       {failedReturn && phase.kind === "idle" && (
         <p role="alert" className="text-xs text-state-warning" data-testid="verify-email-failed">
           {t("failed")}

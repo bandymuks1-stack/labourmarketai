@@ -7379,7 +7379,6 @@
     "outcomeLinked": "Verknüpft. Sie sind jetzt verbunden.",
     "outcomeAlreadyLinked": "Sie sind bereits verknüpft.",
     "outcomeNoInvitation": "Einladung nicht gefunden.",
-
     "outcomeEmailUnverified": "Bestätigen Sie zuerst Ihre E-Mail (Seite Netzwerk) und nehmen Sie dann die Einladung an.",
     "outcomeNoWorker": "Ihr Arbeitskraft-Profil ist noch nicht bereit.",
     "outcomeError": "Konnte nicht angenommen werden. Bitte versuchen Sie es erneut.",
@@ -11704,7 +11703,9 @@
         "rateLimited": "Ein Link wurde gerade gesendet. Bitte warten Sie eine Minute, bevor Sie einen neuen anfordern.",
         "alreadyVerified": "Diese E-Mail-Adresse ist bereits bestätigt. Laden Sie die Seite neu.",
         "failed": "Dieser Link hat Ihre E-Mail nicht bestätigt (möglicherweise veraltet oder anderswo geöffnet). Sie können einen neuen anfordern.",
-        "error": "Der Link konnte nicht gesendet werden. Bitte versuchen Sie es später erneut."
+        "error": "Der Link konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.",
+        "intakeTitle": "Bestätigen Sie Ihre E-Mail, um eine frühere Einreichung fortzusetzen",
+        "intakeBody": "Wenn Sie über unser öffentliches Formular mit dieser Adresse einen Unternehmensbedarf eingereicht haben, bestätigen Sie die Adresse; wir zeigen ihn dann hier an, damit Sie nichts erneut eintippen müssen. Alles andere funktioniert wie bisher."
       }
     },
     "search": {
