@@ -1535,6 +1535,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-03: PER-12 subject-safe export projection (new SECURITY DEFINER read fn) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261003120000_privacy_export_import_lines_subject_v1.sql",
       "20261003140000_subject_contest_withdraw_constraint_reconcile_v1.sql",
+      // 2026-10-03: J-TIME-FREEDOM override receipt (new append-only table + SECURITY DEFINER writer) - marker is the human-gate acknowledgement; draft + needs-human-gate, NOT applied.
+      "20261003150100_commitment_override_receipts_v1.sql",
       // 2026-10-03: EVID-2 redesign (confirmation authority derives from the work relationship: counterparty links, submissions, guard + review RPCs) - marker is the human-gate acknowledgement; draft + needs-human-gate, NOT applied.
       "20261003150500_journal_counterparty_review_authority_v1.sql",
       // 2026-10-04: EVID-2 slice 2 (counterparty link over person AND team assignments, review read doors, employer-only review set, additive photo storage SELECT) - marker is the human-gate acknowledgement; draft + needs-human-gate, NOT applied.
@@ -1545,8 +1547,6 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261003150600_brigade_work_assignment_v1.sql",
       // 2026-10-04: WRK-6 follow-up — a team assignment becomes an active Journal/work context (replaces 4 live fns + 2 policies, SECURITY DEFINER) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261003150700_brigade_journal_context_v1.sql",
-      // 2026-10-03: J-TIME-FREEDOM override receipt (new append-only table + SECURITY DEFINER writer) - marker is the human-gate acknowledgement; draft + needs-human-gate, NOT applied.
-      "20261003150100_commitment_override_receipts_v1.sql",
       // 2026-10-04: receipt team basis (extends the writer for members of an actively assigned team) - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261003150900_commitment_override_receipt_brigade_basis_v1.sql",
       // 2026-10-05: receipt collisions verified against the real source rows (new INTERNAL SECURITY DEFINER validator + writer replacement) - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
