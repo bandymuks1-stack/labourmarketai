@@ -34,6 +34,9 @@ N3=20261003150900_commitment_override_receipt_brigade_basis_v1
 lf "$REPO/supabase/migrations/$N1.sql" "$LFD/m1.sql"
 lf "$REPO/supabase/migrations/$N3.sql" "$LFD/m3.sql"
 lf "$REPO/supabase/rollbacks/$N3.down.sql" "$LFD/d3.sql"
+N4=20261003150950_commitment_override_collision_validation_v1
+lf "$REPO/supabase/migrations/$N4.sql" "$LFD/m4.sql"
+lf "$REPO/supabase/rollbacks/$N4.down.sql" "$LFD/d4.sql"
 if [ -f "$REPO/supabase/migrations/$N2.sql" ]; then
   lf "$REPO/supabase/migrations/$N2.sql" "$LFD/m2.sql"
 else
@@ -199,6 +202,69 @@ check "D after rollback a team-only member is refused again" E22023 "$(rec $MGR 
 applyok "$LFD/m3.sql"; check "D re-applying 150900 after a rollback is clean" 0 "$?"
 PS -v ON_ERROR_STOP=1 -f "$LFD/m3.sql" > "$LFD/re.txt" 2>&1
 check "D applying 150900 twice is clean" 0 "$(grep -ciE 'ERROR' "$LFD/re.txt")"
+
+echo "--- V collision validation (20261003150950): the list is verified against REAL source rows"
+FN3=$(su "select md5(prosrc) from pg_proc where proname='record_commitment_override_v1'")
+WPW1=aaaa0001-0000-0000-0000-000000000001; WPW2=aaaa0002-0000-0000-0000-000000000002
+WTM1=cccc0001-0000-0000-0000-000000000001
+PA3=99999999-0000-0000-0000-0000000000a3; PA4=99999999-0000-0000-0000-0000000000a4
+B1=b1000000-0000-0000-0000-000000000001; B2=b1000000-0000-0000-0000-000000000002; B3=b1000000-0000-0000-0000-000000000003; B4=b1000000-0000-0000-0000-000000000004
+TR1=70000000-0000-0000-0000-000000000001; TR2=70000000-0000-0000-0000-000000000002
+PL1=91000000-0000-0000-0000-000000000001; PL2=91000000-0000-0000-0000-000000000002
+FAKE=fa4e0000-0000-4000-8000-000000000001
+su "insert into public.projects (id, company_id, organization_id, status, start_date, end_date) values ('$PA3','c0c0c0c0-0000-0000-0000-00000000000a','a0a0a0a0-0000-0000-0000-00000000000a','active','2026-10-18','2026-10-25'),('$PA4','c0c0c0c0-0000-0000-0000-00000000000a','a0a0a0a0-0000-0000-0000-00000000000a','active',null,null)" >/dev/null
+su "insert into public.project_worker_assignments (project_id, worker_id, status) values ('$PA3','$WPW1','active'),('$PA4','$WPW1','active')" >/dev/null
+su "insert into public.booking_requests (id, worker_id, status, start_date, expected_end_date) values ('$B1','$WPW1','accepted','2026-10-03','2026-10-07'),('$B2','$WPW1','proposed','2026-10-03','2026-10-07'),('$B3','$WPW2','accepted','2026-10-03','2026-10-07'),('$B4','$WTM1','accepted','2026-10-06',null)" >/dev/null
+su "insert into public.business_trips (id, profile_id, status, date_from, date_to) values ('$TR1','$PW1','approved','2026-10-10','2026-10-12'),('$TR2','$PW1','submitted','2026-10-10','2026-10-12')" >/dev/null
+su "insert into public.worker_absences (worker_id, status, start_date, end_date) values ('$WPW1','approved','2026-10-12','2026-10-13'),('$WPW1','pending','2026-10-15','2026-10-16'),('$WPW2','approved','2026-10-08','2026-10-09')" >/dev/null
+# the new team assignment (the earlier ones were removed in D)
+OUTV=$(as $MGR "select public.assign_team_to_work_v1('$T1','$PA1');")
+TAV=$(printf '%s' "$OUTV" | sed -n 's/.*"assignment_id": *"\([0-9a-f-]*\)".*/\1/p')
+check "V (setup) team T1 re-assigned to PA1" uuid "$(isuuid "$TAV")"
+applyok "$LFD/m4.sql" || { echo "20261003150950 FAILED"; exit 1; }
+echo "  migration 20261003150950 applied verbatim"
+col() { printf '[{"kind":"%s","sourceId":"%s","overlapStart":"%s","overlapEnd":"%s"}]' "$1" "$2" "$3" "$4"; }
+cnt() { su "select count(*) from public.commitment_override_receipts"; }
+C0=$(cnt)
+check "V honest booking (overlap = intersection 10-05..10-07) -> receipt" uuid "$(isuuid "$(rec $MGR $PA1 $PW1 "$(col booking $B1 2026-10-05 2026-10-07)" other)")"
+check "V honest trip (approved) -> receipt" uuid "$(isuuid "$(rec $MGR $PA1 $PW1 "$(col trip $TR1 2026-10-10 2026-10-12)" other)")"
+check "V honest project clash (PA3 18-25 vs window -> 10-18..10-20) -> receipt" uuid "$(isuuid "$(rec $MGR $PA1 $PW1 "$(col project $PA3 2026-10-18 2026-10-20)" other)")"
+check "V honest ABSENCE (approved, dates only, no id) -> receipt" uuid "$(isuuid "$(rec $MGR $PA1 $PW1 '[{"kind":"absence","overlapStart":"2026-10-12","overlapEnd":"2026-10-13"}]' other)")"
+check "V honest booking with open end on the TEAM basis -> receipt (basis = team)" "uuid|1" "$(isuuid "$(rec $MGR $PA1 $TM1 "$(col booking $B4 2026-10-06 2026-10-06)" other)")|$(su "select count(*) from public.commitment_override_receipts where team_assignment_id='$TAV' and worker_id='$WTM1'")"
+C1=$(cnt)
+check "V five honest receipts were written" "$((C0+5))" "$C1"
+check "V FABRICATED booking id refused" E22023 "$(rec $MGR $PA1 $PW1 "$(col booking $FAKE 2026-10-05 2026-10-07)" other)"
+check "V fabricated id for project and trip refused" "E22023|E22023" "$(rec $MGR $PA1 $PW1 "$(col project $FAKE 2026-10-18 2026-10-20)" other)|$(rec $MGR $PA1 $PW1 "$(col trip $FAKE 2026-10-10 2026-10-12)" other)"
+check "V a booking that is only PROPOSED (not accepted) refused" E22023 "$(rec $MGR $PA1 $PW1 "$(col booking $B2 2026-10-05 2026-10-07)" other)"
+check "V another worker's accepted booking refused" E22023 "$(rec $MGR $PA1 $PW1 "$(col booking $B3 2026-10-05 2026-10-07)" other)"
+check "V a SUBMITTED (unapproved) trip refused" E22023 "$(rec $MGR $PA1 $PW1 "$(col trip $TR2 2026-10-10 2026-10-12)" other)"
+check "V overlap dates that are not the real intersection refused" E22023 "$(rec $MGR $PA1 $PW1 "$(col booking $B1 2026-10-05 2026-10-06)" other)"
+check "V overlap outside the project window refused" E22023 "$(rec $MGR $PA1 $PW1 "$(col booking $B1 2026-10-03 2026-10-07)" other)"
+check "V a project that does not overlap the window refused (PA2)" E22023 "$(rec $MGR $PA1 $PW1 "$(col project $PA2 2026-10-18 2026-10-20)" other)"
+check "V the project being decided cannot collide with itself" E22023 "$(rec $MGR $PA1 $PW1 "$(col project $PA1 2026-10-05 2026-10-20)" other)"
+check "V an absence with only a PENDING match refused" E22023 "$(rec $MGR $PA1 $PW1 '[{"kind":"absence","overlapStart":"2026-10-15","overlapEnd":"2026-10-16"}]' other)"
+check "V an absence of ANOTHER worker refused" E22023 "$(rec $MGR $PA1 $PW1 '[{"kind":"absence","overlapStart":"2026-10-08","overlapEnd":"2026-10-09"}]' other)"
+check "V an invented absence window refused" E22023 "$(rec $MGR $PA1 $PW1 '[{"kind":"absence","overlapStart":"2026-10-06","overlapEnd":"2026-10-07"}]' other)"
+check "V ONE bad entry among honest ones refuses the whole list" E22023 "$(rec $MGR $PA1 $PW1 "[{\"kind\":\"booking\",\"sourceId\":\"$B1\",\"overlapStart\":\"2026-10-05\",\"overlapEnd\":\"2026-10-07\"},{\"kind\":\"trip\",\"sourceId\":\"$FAKE\",\"overlapStart\":\"2026-10-10\",\"overlapEnd\":\"2026-10-12\"}]" other)"
+check "V undated project window: nothing can be verified -> refused" E22023 "$(rec $MGR $PA4 $PW1 "$(col booking $B1 2026-10-05 2026-10-07)" other)"
+check "V 'plan' refused while work_plan_entries does not exist" E22023 "$(rec $MGR $PA1 $PW1 "$(col plan $PL1 2026-10-08 2026-10-08)" other)"
+su "create table public.work_plan_entries (id uuid primary key, worker_id uuid not null, status text not null, start_date date, end_date date)" >/dev/null
+su "insert into public.work_plan_entries values ('$PL1','$WPW1','planned','2026-10-08','2026-10-08'),('$PL2','$WPW2','planned','2026-10-08','2026-10-08')" >/dev/null
+check "V honest plan window (once the store exists) -> receipt" uuid "$(isuuid "$(rec $MGR $PA1 $PW1 "$(col plan $PL1 2026-10-08 2026-10-08)" other)")"
+check "V another worker's plan window refused" E22023 "$(rec $MGR $PA1 $PW1 "$(col plan $PL2 2026-10-08 2026-10-08)" other)"
+check "V replay of an honest receipt is still idempotent" "$(rec $MGR $PA1 $PW1 "$(col booking $B1 2026-10-05 2026-10-07)" other)" "$(rec $MGR $PA1 $PW1 "$(col booking $B1 2026-10-05 2026-10-07)" other)"
+check "V authority is still checked FIRST (other tenant manager: 42501)" E42501 "$(rec $MGRB $PA1 $PW1 "$(col booking $FAKE 2026-10-05 2026-10-07)" other)"
+check "V refusals wrote nothing (6 honest in total since C0)" "$((C0+6))" "$(cnt)"
+check "V the validator has NO grants: authenticated cannot call it" E42501 "$(as $MGR "select public.zz_try(\$q\$select public.commitment_override_validate_collisions_v1('$PA1','$WPW1','$PW1','2026-10-05','2026-10-20','[]'::jsonb)::text\$q\$);")"
+check "V ...nor anon" E42501 "$(as anon "select public.zz_try(\$q\$select public.commitment_override_validate_collisions_v1('$PA1','$WPW1','$PW1','2026-10-05','2026-10-20','[]'::jsonb)::text\$q\$);")"
+check "V validator is SECURITY DEFINER with a pinned search_path" "true|{search_path=public}" "$(su "select prosecdef||'|'||proconfig::text from pg_proc where proname='commitment_override_validate_collisions_v1'")"
+OUT_D4=$(PS -v ON_ERROR_STOP=1 -f "$LFD/d4.sql" 2>&1)
+check "V rollback of 150950 applies" "" "$(echo "$OUT_D4" | grep -i error)"
+check "V ...restores EXACTLY the 150900 writer body and drops the validator" "$FN3|0" "$(su "select md5(prosrc) from pg_proc where proname='record_commitment_override_v1'")|$(su "select count(*) from pg_proc where proname='commitment_override_validate_collisions_v1'")"
+check "V after that rollback a fabricated id is accepted again (the validator was the guard)" uuid "$(isuuid "$(rec $MGR $PA1 $PW1 "$(col booking $FAKE 2026-10-05 2026-10-07)" other)")"
+applyok "$LFD/m4.sql"; check "V re-applying 150950 is clean" 0 "$?"
+PS -v ON_ERROR_STOP=1 -f "$LFD/m4.sql" > "$LFD/re4.txt" 2>&1
+check "V applying 150950 twice is clean" 0 "$(grep -ciE 'ERROR' "$LFD/re4.txt")"
 
 echo
 echo "RESULT: pass=$pass fail=$fail"

@@ -3636,6 +3636,10 @@
           "label": "Pārcelt cilvēku uz citu projektu",
           "description": "Piesaista jaunajam projektam un beidz iepriekšējo piesaisti — pēc seku pārskata."
         },
+        "keepAssignment": {
+          "label": "Saglabāt piešķīrumu, neskatoties uz kalendāra konfliktu",
+          "description": "Reģistrē jūsu lēmumu saglabāt piešķīrumu, zinot par konfliktu, ar slēgtu iemesla kodu. Bez kvīts nekas netiek saglabāts."
+        },
         "offerCapacity": {
           "label": "Pierakstīt jūsu piedāvājumu"
         }
@@ -3959,6 +3963,9 @@
       "assignAlreadyCommitted": "[EN] Note: they are already committed on some of these dates ({count}). The assignment stands — you decide.",
       "assignCommitmentUnknown": "[EN] We could not confirm these dates are free. That is not the same as free.",
       "assignFailed": "[EN] The assignment could not be made.",
+      "keepPrompt": "Šajās dienās cilvēks jau ir aizņemts. Vai saglabājat piešķīrumu apzināti? Izvēlieties iemeslu - lēmums tiks reģistrēts.",
+      "keepRecorded": "Reģistrēts: jūs apzināti saglabājāt piešķīrumu.",
+      "keepFailed": "Lēmumu neizdevās reģistrēt, tāpēc nekas netika saglabāts. Mēģiniet vēlreiz.",
       "chipEngagements": "Ar ko es strādāju",
       "userEngagements": "Ar ko es strādāju?",
       "engagementsOpened": "Šeit ir reģistrētās darba attiecības. Vienas no tām vari beigt panelī.",

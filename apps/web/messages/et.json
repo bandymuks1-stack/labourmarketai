@@ -3636,6 +3636,10 @@
           "label": "Liiguta inimene teise projekti",
           "description": "Määrab uude projekti ja lõpetab eelmise määramise — pärast tagajärgede vaadet."
         },
+        "keepAssignment": {
+          "label": "Jäta määramine kalendrikonfliktist hoolimata",
+          "description": "Salvestab teie otsuse jätta määramine teadlikult alles, teades konfliktist, suletud põhjuskoodiga. Ilma kviitungita ei salvestata midagi."
+        },
         "offerCapacity": {
           "label": "Pane oma pakkumine kirja"
         }
@@ -3959,6 +3963,9 @@
       "assignAlreadyCommitted": "[EN] Note: they are already committed on some of these dates ({count}). The assignment stands — you decide.",
       "assignCommitmentUnknown": "[EN] We could not confirm these dates are free. That is not the same as free.",
       "assignFailed": "[EN] The assignment could not be made.",
+      "keepPrompt": "Inimene on neil päevadel juba hõivatud. Kas jätate määramise teadlikult alles? Valige põhjus - otsus salvestatakse.",
+      "keepRecorded": "Salvestatud: jätsite määramise teadlikult alles.",
+      "keepFailed": "Otsust ei õnnestunud salvestada, seega ei salvestatud midagi. Proovige uuesti.",
       "chipEngagements": "Kellega ma töötan",
       "userEngagements": "Kellega ma töötan?",
       "engagementsOpened": "Siin on registreeritud töösuhted. Ühe neist saab paneelil lõpetada.",

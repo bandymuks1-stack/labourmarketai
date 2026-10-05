@@ -13275,6 +13275,10 @@
           "label": "Move a person to another project",
           "description": "Assigns to the new project and ends the previous assignment — after the what-if."
         },
+        "keepAssignment": {
+          "label": "Keep an assignment despite a calendar clash",
+          "description": "Records your decision to keep the assignment knowing the clash, with a closed reason. Nothing is saved unless the receipt exists."
+        },
         "offerCapacity": {
           "label": "Record what you are offering"
         }
@@ -13636,6 +13640,9 @@
       "assignAlreadyCommitted": "Note: they are already committed on some of these dates ({count}). The assignment stands — you decide.",
       "assignCommitmentUnknown": "We could not confirm these dates are free. That is not the same as free.",
       "assignFailed": "The assignment could not be made.",
+      "keepPrompt": "They are already committed on those dates. Do you keep them on it knowingly? Choose a reason - the decision is recorded.",
+      "keepRecorded": "Recorded: you kept the assignment knowingly.",
+      "keepFailed": "The decision could not be recorded, so nothing was saved. Try again.",
       "chipEngagements": "Who I work with",
       "userEngagements": "Who do I work with?",
       "engagementsOpened": "Here are the work relationships on record. You can end one from the panel.",

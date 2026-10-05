@@ -13275,6 +13275,10 @@
           "label": "Przenieś osobę do innego projektu",
           "description": "Przypisuje do nowego projektu i kończy poprzednie przypisanie — po podglądzie skutków."
         },
+        "keepAssignment": {
+          "label": "Zachowaj przydział mimo konfliktu w kalendarzu",
+          "description": "Zapisuje Twoją decyzję o zachowaniu przydziału ze świadomością konfliktu, z zamkniętym kodem powodu. Bez potwierdzenia nic nie jest zapisywane."
+        },
         "offerCapacity": {
           "label": "Zapisz swoją ofertę"
         }
@@ -13636,6 +13640,9 @@
       "assignAlreadyCommitted": "Uwaga: ta osoba jest już zaangażowana w niektóre z tych dni ({count}). Przypisanie zostaje utrzymane — decyzja należy do Ciebie.",
       "assignCommitmentUnknown": "Nie udało się potwierdzić, że te dni są wolne. To nie to samo, co wolne.",
       "assignFailed": "Nie udało się dokonać przypisania.",
+      "keepPrompt": "Ta osoba ma już zobowiązania w tych dniach. Czy zachowujesz przydział świadomie? Wybierz powód - decyzja zostanie zapisana.",
+      "keepRecorded": "Zapisano: zachowano przydział świadomie.",
+      "keepFailed": "Nie udało się zapisać decyzji, więc nic nie zapisano. Spróbuj ponownie.",
       "chipEngagements": "Z kim pracuję",
       "userEngagements": "Z kim pracuję?",
       "engagementsOpened": "Oto zapisane relacje robocze. Jedną z nich możesz zakończyć w panelu.",

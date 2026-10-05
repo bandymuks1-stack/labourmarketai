@@ -33,6 +33,13 @@ const TEAM_KEEP = TEAM_KEEP_SRC.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/
 const TEAM_BLOCK_PATH = join(REPO, "apps", "web", "components", "app", "project-team-assignments.tsx");
 const TEAM_BLOCK = existsSync(TEAM_BLOCK_PATH) ? read("apps", "web", "components", "app", "project-team-assignments.tsx") : null;
 const NAME2 = "20261003150900_commitment_override_receipt_brigade_basis_v1";
+const NAME3 = "20261003150950_commitment_override_collision_validation_v1";
+const UP3 = read("supabase", "migrations", `${NAME3}.sql`);
+const DOWN3 = read("supabase", "rollbacks", `${NAME3}.down.sql`);
+const CORE = read("apps", "web", "lib", "projects", "override-keep-core.ts");
+const EXEC = read("apps", "web", "lib", "conversation", "company-executors.ts");
+const CHAT = read("apps", "web", "components", "app", "conversation", "chat", "conversation-chat.tsx");
+const CAPS = read("apps", "web", "lib", "capabilities", "employer-operations-capabilities.ts");
 const UP2 = read("supabase", "migrations", `${NAME2}.sql`);
 const DOWN2 = read("supabase", "rollbacks", `${NAME2}.down.sql`);
 
@@ -91,13 +98,47 @@ describe("migration - shape and safety", () => {
 });
 
 describe("wiring - fail-loud, server-recomputed", () => {
-  it("keepAssignmentAction recomputes the collisions server-side and returns failure", () => {
+  it("keepAssignmentAction is a thin door over the ONE keep core (collisions server-recomputed, fail-loud)", () => {
     const fn = ACTIONS.slice(ACTIONS.indexOf("export async function keepAssignmentAction"));
-    expect(fn).toMatch(/reservationAfterAssign\(/);
-    expect(fn).toMatch(/record_commitment_override_v1/);
-    expect(fn).toMatch(/ok: false, code: "error"/);
+    expect(fn).toMatch(/keepOverrideCore\(supabase, \{ projectId, workerProfileId, reasonCode \}\)/);
     // collisions never come from a client parameter
     expect(fn.slice(0, fn.indexOf("{\n  const supabase"))).not.toMatch(/collisions/i);
+    // the core: recompute -> whitelist -> writer; a blind or failed receipt is a failure
+    expect(CORE).toMatch(/reservationVerdictFor\(supabase, projectId, workerProfileId, caller\)/);
+    expect(CORE).toMatch(/record_commitment_override_v1/);
+    expect(CORE).toMatch(/if \(!current\) return \{ ok: false, code: "error" \}/);
+    expect(CORE).toMatch(/\{ ok: false, code: "error" \}/);
+    expect(CORE.slice(0, CORE.indexOf("export async function keepOverrideCore")).includes("p_collisions")).toBe(false);
+    // the assign path's own verdict comes from the same core function
+    expect(ACTIONS).toMatch(/reservationVerdictFor\(supabase, projectId, workerProfileId\)/);
+  });
+
+  it("CONVERGENCE: UI, chat and MCP all end in the same core; none takes collisions from outside", () => {
+    // UI
+    expect(ACTIONS).toMatch(/keepOverrideCore\(/);
+    // chat: executor -> the page's action; the chip carries ids + a closed code only
+    const chatExec = EXEC.slice(EXEC.indexOf('"company.keep-assignment": async'), EXEC.indexOf('"company.move-worker": async'))
+      .replace(/^\s*\/\/.*$/gm, "");
+    expect(chatExec).toMatch(/keepAssignmentAction\(input\.projectId, input\.workerProfileId, input\.reasonCode \?\? null\)/);
+    expect(chatExec).not.toMatch(/collisions/);
+    expect(chatExec).toMatch(/if \(!r\.ok\) return \{ ok: false, code: r\.code \}/);
+    expect(CHAT).toMatch(/dispatchWorkerAction\("company\.keep-assignment", input/);
+    expect(CHAT).toMatch(/assistant\(res\.ok \? labels\.keepRecorded : labels\.keepFailed\)/);
+    expect(CHAT).toMatch(/offerKeep\(projectId, workerProfileId, res\.data\)/);
+    expect(CHAT).toMatch(/offerKeep\(toProjectId, workerProfileId, res\.data\)/);
+    // MCP: draft -> confirm over the same core
+    expect(CAPS).toMatch(/keepOverrideCore\(caller\.supabase, \{/);
+    expect(CAPS).toMatch(/currentReceiptCollisions\(caller\.supabase/);
+    const keepBlock = CAPS.slice(CAPS.indexOf("const keepFields"), CAPS.indexOf('const [assignmentCreateDraft'));
+    expect(keepBlock).toMatch(/\.strict\(\)/);
+    expect(keepBlock).not.toMatch(/collisions:\s*z\./);
+    expect(keepBlock).toMatch(/ok: false, code: "unavailable", message: "The calendar could not be checked/);
+  });
+
+  it("MCP assignment confirm leaves the decision PENDING (like the page) and never records a receipt itself", () => {
+    const pair = CAPS.slice(CAPS.indexOf("function makeAssignmentPair"), CAPS.indexOf("// ── assignment.keep_*"));
+    expect(pair).toMatch(/override: \{ status: "pending"/);
+    expect(pair).not.toMatch(/record_commitment_override_v1|keepOverrideCore/);
   });
 
   it("the person keep path marks the decision as made only when the receipt action succeeded", () => {
@@ -185,6 +226,52 @@ describe("migration 20261003150900 - team basis for the receipt", () => {
   it("never fans out: no write to project_worker_assignments", () => {
     const code = UP2.replace(/--.*/g, "");
     expect(code).not.toMatch(/(insert into|update|delete from)\s+public\.project_worker_assignments/i);
+  });
+});
+
+describe("migration 20261003150950 - the collision list is verified against the real source rows", () => {
+  it("is RED-marked, declares its dependencies, has a rollback that restores the previous writer", () => {
+    expect(UP3).toMatch(/^-- @human-gate-approved/m);
+    expect(UP3).toMatch(/20261003150900_commitment_override_receipt_brigade_basis_v1/);
+    expect(DOWN3).not.toMatch(/@human-gate-approved/i);
+    expect(DOWN3).toMatch(/drop function if exists public\.commitment_override_validate_collisions_v1/);
+    expect(DOWN3).toMatch(/create or replace function public\.record_commitment_override_v1/);
+    expect(DOWN3).not.toMatch(/commitment_override_validate_collisions_v1\(\s*p_project_id/);
+  });
+
+  it("the validator is INTERNAL (no grants) and SECURITY DEFINER with a pinned search_path", () => {
+    expect(UP3).toMatch(/revoke all on function public\.commitment_override_validate_collisions_v1\(uuid, uuid, uuid, date, date, jsonb\) from public, anon, authenticated;/);
+    expect(UP3).not.toMatch(/grant execute on function public\.commitment_override_validate_collisions_v1/);
+    expect(UP3).toMatch(/security definer\s+set search_path to 'public'/);
+  });
+
+  it("every kind is checked against its real source with the reserveCapacity overlap rule", () => {
+    for (const rel of ["public.project_worker_assignments", "public.booking_requests", "public.business_trips", "public.worker_absences", "public.work_plan_entries"]) {
+      expect(UP3).toContain(rel);
+    }
+    expect(UP3).toMatch(/b\.status = 'accepted'/);
+    expect(UP3).toMatch(/t\.status in \('approved', 'completed'\)/);
+    expect(UP3).toMatch(/a\.status = 'approved'/);
+    expect(UP3).toMatch(/a\.project_id <> p_project_id/);
+    expect(UP3).toMatch(/greatest\(v_ws, /);
+    expect(UP3).toMatch(/least\(v_we, /);
+    // generic refusal: no oracle about which source or why
+    const validator = UP3.slice(UP3.indexOf("create or replace function public.commitment_override_validate_collisions_v1"), UP3.indexOf("revoke all on function public.commitment_override_validate_collisions_v1"));
+    const raises = validator.match(/raise exception '([^']+)'/g) ?? [];
+    expect(raises.length).toBeGreaterThan(0);
+    expect(raises.every((m) => /collision not verified/.test(m))).toBe(true);
+  });
+
+  it("the writer calls the validator with the whitelisted list and the project's own window", () => {
+    expect(UP3).toMatch(/perform public\.commitment_override_validate_collisions_v1\(\s*p_project_id, v_worker, p_worker_profile_id, v_start, v_end, v_clean\)/);
+    // authority is still checked before anything else
+    expect(UP3.indexOf("not coalesce(public.can_manage_project(p_project_id), false)")).toBeLessThan(UP3.indexOf("perform public.commitment_override_validate_collisions_v1"));
+  });
+
+  it("the TS overlap rule the DB mirrors is the one reserveCapacity applies (equality with the intersection)", () => {
+    const model = read("apps", "web", "lib", "workforce", "commitment-reservation.ts");
+    expect(model).toMatch(/overlapStart: laterOf\(input\.window\.startDate, held\.startDate\)/);
+    expect(model).toMatch(/overlapEnd: earlierOf\(windowEnd, heldEnd\)/);
   });
 });
 
