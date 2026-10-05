@@ -22,32 +22,41 @@ function asAny(supabase: SupabaseClient): any {
  *
  * Read shape: one participant read + one bounded counterpart-message read
  * (newest 500 rows across the caller's threads — generous at pilot scale;
- * a busier platform graduates this to a SQL-side aggregate). Defensive: any
- * error returns the empty state — a badge must never crash the shell, and
- * "no badge" is the honest default.
+ * a busier platform graduates this to a SQL-side aggregate).
+ *
+ * TWO READERS, ONE BODY (SEP-7: UNKNOWN ≠ ZERO). `getUnreadConversationIdsResult`
+ * tells a FAILED read ("unavailable") from a successful empty one
+ * ("ok" with no ids); surfaces that must not render a failure as "nothing
+ * unread" (the home's door) use it. `getUnreadConversationIds` keeps its
+ * historical, deliberately lossy shape for badges — a badge must never crash
+ * the shell, and "no badge" is its honest default — by delegating.
  */
+export type UnreadConversationIdsResult =
+  | { readonly status: "ok"; readonly ids: ReadonlySet<string> }
+  | { readonly status: "unavailable" };
+
 // Request-cached (P0 latency audit): the auth-shell spine and page surfaces
 // need this read in the same SSR pass — one query set per request, not two.
-export const getUnreadConversationIds = cache(
-  async (): Promise<ReadonlySet<string>> => {
+export const getUnreadConversationIdsResult = cache(
+  async (): Promise<UnreadConversationIdsResult> => {
   try {
     const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user) return new Set();
+    if (!user) return { status: "unavailable" };
 
     const { data: participantsRaw, error: pErr } = await asAny(supabase)
       .from("conversation_participants")
       .select("conversation_id, last_read_at")
       .eq("profile_id", user.id);
-    if (pErr) return new Set();
+    if (pErr) return { status: "unavailable" };
     const lastReadByConv = new Map<string, string | null>(
       ((participantsRaw ?? []) as { conversation_id: string; last_read_at: string | null }[]).map(
         (p) => [p.conversation_id, p.last_read_at],
       ),
     );
-    if (lastReadByConv.size === 0) return new Set();
+    if (lastReadByConv.size === 0) return { status: "ok", ids: new Set() };
 
     const { data: messagesRaw, error: mErr } = await asAny(supabase)
       .from("conversation_messages")
@@ -56,7 +65,7 @@ export const getUnreadConversationIds = cache(
       .neq("author_id", user.id)
       .order("created_at", { ascending: false })
       .limit(500);
-    if (mErr) return new Set();
+    if (mErr) return { status: "unavailable" };
 
     const unread = new Set<string>();
     for (const m of (messagesRaw ?? []) as {
@@ -71,10 +80,18 @@ export const getUnreadConversationIds = cache(
         unread.add(m.conversation_id);
       }
     }
-    return unread;
+    return { status: "ok", ids: unread };
   } catch {
-    return new Set();
+    return { status: "unavailable" };
   }
+  },
+);
+
+/** The historical shape: any failure reads as the empty state (badges). */
+export const getUnreadConversationIds = cache(
+  async (): Promise<ReadonlySet<string>> => {
+    const result = await getUnreadConversationIdsResult();
+    return result.status === "ok" ? result.ids : new Set();
   },
 );
 
