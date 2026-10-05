@@ -82,6 +82,18 @@ function isAbsent(error: { code?: string } | null): boolean {
   return !!error?.code && ABSENT.has(error.code);
 }
 
+/**
+ * The v1 write RPCs are the frozen, weaker doors (no expiry contract, no
+ * amounts) and are REVOKED once v2 exists (migration 20261003151400). The v1
+ * fallback may therefore trigger ONLY when the v2 FUNCTION is missing — never
+ * on a permission error (42501), a missing table/column or any other failure,
+ * which must surface as an error and never silently downgrade to v1.
+ */
+const FUNCTION_ABSENT = new Set(["42883", "PGRST202"]);
+function isFunctionAbsent(error: { code?: string } | null): boolean {
+  return !!error?.code && FUNCTION_ABSENT.has(error.code);
+}
+
 function clean(v: unknown, max: number): string | null {
   if (typeof v !== "string") return null;
   const t = v.trim();
@@ -476,7 +488,7 @@ export async function createMarketplaceListingAction(
     ...base,
     ...amountParams(input),
   });
-  if (error && isAbsent(error) && !needsV2(input)) {
+  if (error && isFunctionAbsent(error) && !needsV2(input)) {
     // v2 not applied yet and nothing here needs it → the frozen v1 path.
     ({ data, error } = await asAny(supabase).rpc("create_marketplace_listing_v1", base));
   }
@@ -541,7 +553,7 @@ export async function updateMarketplaceListingAction(
     ...base,
     ...amountParams(input),
   });
-  if (error && isAbsent(error) && !needsV2(input)) {
+  if (error && isFunctionAbsent(error) && !needsV2(input)) {
     ({ error } = await asAny(supabase).rpc("update_marketplace_listing_v1", base));
   }
   if (error) {
@@ -597,7 +609,7 @@ export async function setMarketplaceListingStatusAction(
     p_id: id,
     p_status: status,
   });
-  if (error && isAbsent(error) && status !== "paused") {
+  if (error && isFunctionAbsent(error) && status !== "paused") {
     ({ error } = await asAny(supabase).rpc("set_marketplace_listing_status_v1", {
       p_id: id,
       p_status: status as ListingStatus,
