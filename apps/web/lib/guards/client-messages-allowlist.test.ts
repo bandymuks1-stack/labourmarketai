@@ -308,8 +308,6 @@ describe("route-group provider subsetting (v2) — every group pick covers its t
         // component: every oauthConsent string renders on the server, the
         // form is native HTML, so no client i18n pick is needed.
         join(LOCALE_DIR, "oauth"),
-        // Design-proof class (frozen design candidate): static fixtures, no client i18n.
-        join(LOCALE_DIR, "design-proof"),
       ),
       join(LOCALE_DIR, "layout.tsx"),
       join(LOCALE_DIR, "error.tsx"),
@@ -411,8 +409,10 @@ describe("each layout ships its pick, not the full tree", () => {
   });
 
   it("the dashboard layout ships the FULL client pick", () => {
-    // W1 deleted the /design gallery, so "dashboard" is the whole list now.
-    for (const seg of ["dashboard"]) {
+    // W1 deleted the /design gallery; "dashboard" and the dev-only
+    // "design-proof" evidence tree (which renders real components that can
+    // reach whole-tree consumers) are the FULL-pick trees.
+    for (const seg of ["dashboard", "design-proof"]) {
       expect(layoutSrc(seg, "layout.tsx")).toMatch(
         /NextIntlClientProvider[\s\S]{0,200}?messages=\{pickClientMessages\(\s*await getMessages\(\),?\s*\)\}/,
       );
