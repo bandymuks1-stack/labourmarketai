@@ -226,9 +226,13 @@ describe("visiting the destination IS the read event", () => {
     // bell announces is both shown and resolvable at the href it points to.
     // Both ends are pinned: the same helper on both sides, and a real render.
     const spine = read("lib/notifications/spine.ts");
+    // F6/F7 (counter-canonical): the bell counts the CANONICAL definition
+    // (canonical invitations + roster invitations), the same read Today and
+    // the opening brief use - not the roster half alone.
     expect(spine).toMatch(
-      /import \{ listMyPendingWorkerInvitations \} from "@\/lib\/worker\/invitations"/,
+      /import \{ listInvitationsAddressedToMe \} from "@\/lib\/invitations\/attention"/,
     );
+    expect(spine).not.toMatch(/listMyPendingWorkerInvitations\(\)/);
     const workContext = read("lib/world-state/work-context-server.ts");
     expect(workContext).toMatch(/listMyPendingWorkerInvitations,?\s*$/m);
     expect(workContext).toMatch(/from "@\/lib\/worker\/invitations"/);

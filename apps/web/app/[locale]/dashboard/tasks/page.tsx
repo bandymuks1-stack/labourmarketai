@@ -400,6 +400,18 @@ export default async function TasksPage({
         </p>
       );
     }
+    // FAILED IS NOT EMPTY (SEP-7): an unread evidence set says so - it never
+    // renders as "no Work Journal record is attached".
+    if (evidence.status === "unreadable") {
+      return (
+        <p
+          className="text-xs text-text-muted"
+          data-testid={`task-evidence-unreadable-${task.id}`}
+        >
+          {t("evidence.unreadable")}
+        </p>
+      );
+    }
 
     const items = evidence.itemsByTask[task.id] ?? [];
     const summary = deriveEvidenceSummary(items);

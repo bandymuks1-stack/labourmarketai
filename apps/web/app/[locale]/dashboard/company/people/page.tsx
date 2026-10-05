@@ -237,10 +237,12 @@ export default async function CompanyPeoplePage({
       lastActivity: null,
     },
   }));
-  const pendingCount =
+  // UNKNOWN IS NOT ZERO (SEP-7): a failed invitations read must not read as
+  // "0 invitations pending" - it renders its own "could not be read" summary.
+  const pendingCount: number | null =
     invitationsResult.kind === "ok"
       ? invitationsResult.rows.filter((i) => i.status === "pending").length
-      : 0;
+      : null;
   const memberCount = orgMembers?.members.length ?? 0;
   const reviewCount = orgMembers?.members.filter((m) => m.reviewEnabled).length ?? 0;
 
@@ -261,12 +263,18 @@ export default async function CompanyPeoplePage({
           data-testid="company-people-summary"
         >
           {canManageInvitations
-            ? t("summary", {
-                active: activeWorkerRows.length,
-                pending: pendingCount,
-                members: memberCount,
-                review: reviewCount,
-              })
+            ? pendingCount === null
+              ? t("summaryInvitationsUnread", {
+                  active: activeWorkerRows.length,
+                  members: memberCount,
+                  review: reviewCount,
+                })
+              : t("summary", {
+                  active: activeWorkerRows.length,
+                  pending: pendingCount,
+                  members: memberCount,
+                  review: reviewCount,
+                })
             : t("summaryWithoutInvitations", {
                 active: activeWorkerRows.length,
                 members: memberCount,

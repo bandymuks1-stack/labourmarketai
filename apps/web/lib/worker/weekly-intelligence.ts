@@ -24,6 +24,8 @@ import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getWorkerCoreRow, getWorkerSkillRows } from "../data/worker-core";
+import { countedOnce } from "../journal/counted-once";
+import { countConfirmedEntries, type ConfirmationRow } from "../journal/review-status";
 import { readWorkerEntrySkillLinks } from "../journal/entry-skill-link-read";
 import { getWorkerJobRecommendations } from "../opportunities/recommendations";
 import {
@@ -52,6 +54,7 @@ async function readOwnWeeklyJournalFacts(
   supabase: SupabaseClient,
   workerId: string,
   todayIso: string,
+  subjectProfileId: string | null,
 ): Promise<WeeklyJournalFacts> {
   const window = journalReportWindow("week", todayIso);
   const { gteIso, ltIso } = windowCreatedAtBounds(window);
@@ -65,7 +68,7 @@ async function readOwnWeeklyJournalFacts(
   try {
     const entriesRes = await asAny(supabase)
       .from("journal_entries")
-      .select("id, created_at")
+      .select("id, created_at, correction_of")
       .eq("worker_id", workerId)
       .gte("created_at", gteIso)
       .lt("created_at", ltIso)
@@ -74,16 +77,21 @@ async function readOwnWeeklyJournalFacts(
       .order("created_at", { ascending: true })
       .limit(ENTRY_READ_LIMIT);
     if (entriesRes.error) return unavailable;
-    const entries = (entriesRes.data ?? []) as {
-      id: string;
-      created_at: string | null;
-    }[];
+    // COUNTED ONCE (lib/journal/counted-once.ts): a confirmed original that
+    // was corrected and resubmitted is one day of work, not two.
+    const entries = countedOnce(
+      (entriesRes.data ?? []) as {
+        id: string;
+        created_at: string | null;
+        correction_of: string | null;
+      }[],
+    );
 
     let confirmedCount = 0;
     if (entries.length > 0) {
       const confRes = await asAny(supabase)
         .from("journal_entry_confirmations")
-        .select("entry_id")
+        .select("entry_id, confirmation_scope, created_at, confirmer_id")
         .in(
           "entry_id",
           entries.map((e) => e.id),
@@ -91,12 +99,24 @@ async function readOwnWeeklyJournalFacts(
       // A failed confirmation read degrades the whole block rather than
       // silently reporting every entry as unconfirmed.
       if (confRes.error) return unavailable;
-      const confirmedIds = new Set(
-        ((confRes.data ?? []) as { entry_id: string | null }[])
-          .map((c) => c.entry_id)
-          .filter((v): v is string => typeof v === "string"),
+      // ONE definition of "confirmed" (lib/journal/review-status.ts): the
+      // latest decision is an approval by someone other than the person. The
+      // old test - "has any decision row" - counted a rejection and the
+      // person's own approval as confirmed.
+      const byEntry = new Map<string, ConfirmationRow[]>();
+      for (const c of (confRes.data ?? []) as (ConfirmationRow & {
+        entry_id: string | null;
+      })[]) {
+        if (typeof c.entry_id !== "string") continue;
+        byEntry.set(c.entry_id, [...(byEntry.get(c.entry_id) ?? []), c]);
+      }
+      confirmedCount = countConfirmedEntries(
+        entries.map((e) => ({
+          id: e.id,
+          journal_entry_confirmations: byEntry.get(e.id) ?? null,
+        })),
+        subjectProfileId,
       );
-      confirmedCount = entries.filter((e) => confirmedIds.has(e.id)).length;
     }
 
     const last = entries.length > 0 ? entries[entries.length - 1] : null;
@@ -125,7 +145,7 @@ export const getWeeklyPersonalIntelligence = cache(
     const todayIso = new Date().toISOString().slice(0, 10);
 
     const [journal, recs, skillRows, linkRead] = await Promise.all([
-      readOwnWeeklyJournalFacts(supabase, worker.id, todayIso),
+      readOwnWeeklyJournalFacts(supabase, worker.id, todayIso, worker.profile_id ?? null),
       getWorkerJobRecommendations(),
       // Request-cached canonical worker_skills read (own rows) — carries the
       // slug identity plus verified/source provenance.

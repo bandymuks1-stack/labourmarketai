@@ -154,25 +154,30 @@ export default async function CompanyDashboardPage({
     isStaffingAgency ? listAgencyClients() : null,
     companyRow ? listCompanyWorkerInvitations(companyRow.id) : null,
     companyRow ? getTeamBrigadesData() : Promise.resolve({ applied: false } as const),
-    companyRow ? countReviewablePendingEntries() : Promise.resolve(0),
+    companyRow ? countReviewablePendingEntries() : Promise.resolve<number | null>(0),
     companyRow && capabilityOrgId
       ? countWorkersWithUnconfirmableWork(capabilityOrgId)
       : Promise.resolve(null),
     companyRow ? loadCompanyHomeField({ roster: rosterRead }) : null,
   ] as const);
 
-  const pendingCount =
-    rInvitations && rInvitations.kind === "ok"
-      ? rInvitations.rows.filter((i) => i.status === "pending").length
-      : 0;
+  // UNKNOWN IS NOT ZERO (SEP-7): a failed invitations read is `null` and is
+  // rendered "could not be read", never as "no pending invitations".
+  const pendingCount: number | null =
+    rInvitations === null
+      ? 0
+      : rInvitations.kind === "ok"
+        ? rInvitations.rows.filter((i) => i.status === "pending").length
+        : null;
 
-  const decisionEntries = [
+  const decisionCandidates: { key: string; count: number | null; href: string }[] = [
     { key: "review", count: reviewPendingCount, href: `/${locale}/dashboard/inbox` },
     // Recorded work nobody can confirm yet (review switched off). Unknown (a
-    // failed read) is not shown as 0 and not shown as a number — it is absent.
+    // failed read) is not shown as 0 and not shown as a number — it renders
+    // as "could not be read".
     {
       key: "reviewOff",
-      count: reviewOffWorkers ?? 0,
+      count: reviewOffWorkers,
       href: `/${locale}/dashboard/company/people#org-members`,
     },
     {
@@ -185,7 +190,13 @@ export default async function CompanyDashboardPage({
       count: claimableIntakes.length,
       href: `/${locale}/dashboard/company/needs#company-claims`,
     },
-  ].filter((e) => e.count > 0);
+  ];
+  // UNKNOWN IS NOT ZERO (SEP-7): an entry whose read failed is never dropped as
+  // "nothing waiting" - it is listed apart as "could not be read".
+  const unreadDecisions = decisionCandidates.filter((e) => e.count === null);
+  const decisionEntries = decisionCandidates
+    .map((e) => ({ ...e, count: e.count ?? 0 }))
+    .filter((e) => e.count > 0);
 
   const primaryActions = [
     {
@@ -275,6 +286,14 @@ export default async function CompanyDashboardPage({
           their operational writes and roster reads until the owner grants it
           (renders for no other role). */}
       {employerCtx.kind === "ok" ? <ManagerScopeNotice role={employerCtx.role} /> : null}
+
+      {unreadDecisions.length > 0 ? (
+        <p className="text-sm text-text-muted" data-testid="company-decisions-unread">
+          {unreadDecisions
+            .map((e) => `${t(`decisions.${e.key}`)}: ${t("decisions.unreadable")}`)
+            .join(" · ")}
+        </p>
+      ) : null}
 
       {/* WHAT NEEDS ME — count-gated; zero pending = no strip. */}
       {decisionEntries.length > 0 ? (

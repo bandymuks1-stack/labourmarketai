@@ -14,7 +14,7 @@ import {
   type JournalConfirmationRow,
   type JournalMetricRow,
 } from "@/lib/journal/journal-list-core";
-import { deriveReviewResult } from "@/lib/journal/review-status";
+import { deriveIndependentReviewResult } from "@/lib/journal/review-status";
 import {
   deriveWorkIntelligence,
   type WorkIntelligenceEntry,
@@ -316,6 +316,9 @@ export type JournalWindowEntryRow = {
     display_name: string | null;
     profiles: { full_name: string | null; email: string | null } | null;
   } | null;
+  /** The subject (`subject:workers(profile_id)` alias) - independence
+   *  ("not the subject's own decision") needs it. */
+  subject?: { profile_id: string | null } | null;
   journal_entry_confirmations: JournalConfirmationRow[] | null;
   /** Present only when the read embedded the metric rows. */
   journal_entry_metrics?: JournalMetricRow[] | null;
@@ -345,7 +348,10 @@ export function deriveWindowWorkTime(
     createdAt: r.created_at,
     metrics: r.journal_entry_metrics ?? [],
     engagementContextId: r.engagement_context_id ?? null,
-    reviewResult: deriveReviewResult(r.journal_entry_confirmations),
+    reviewResult: deriveIndependentReviewResult(
+      r.journal_entry_confirmations,
+      r.subject?.profile_id ?? null,
+    ),
     linkedSkillIds: [],
   }));
   const wi = deriveWorkIntelligence({
@@ -442,7 +448,12 @@ export function rollUpJournalWindow(
       lastEntryAtIso: row.created_at,
     };
     bucket.rows.push(row);
-    const result = deriveReviewResult(row.journal_entry_confirmations);
+    // ONE definition of "confirmed" (review-status.ts): the subject's own
+    // approval is a decision, not a confirmation.
+    const result = deriveIndependentReviewResult(
+      row.journal_entry_confirmations,
+      row.subject?.profile_id ?? null,
+    );
     if (result === "approved") bucket.confirmed += 1;
     else if (result === "submitted") {
       // REVIEW OFF != AWAITING REVIEW. The same split the worker-facing
@@ -575,7 +586,7 @@ export async function getJournalWindowReport(
   // and the daily panel stay count-sized while every entry still lands on
   // the day it was WORKED; with it, the whole projection feeds the model.
   const select = [
-    `id, worker_id, created_at, correction_of, engagement_context_id, workers(${WORKER_NAME_FIELDS})`,
+    `id, worker_id, created_at, correction_of, engagement_context_id, workers(${WORKER_NAME_FIELDS}), subject:workers(profile_id)`,
     JOURNAL_ENTRY_CONFIRMATIONS_EMBED,
     JOURNAL_ENTRY_METRICS_EMBED,
   ].join(", ");

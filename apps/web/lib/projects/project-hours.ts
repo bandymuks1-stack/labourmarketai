@@ -103,7 +103,7 @@ async function readJournaled(
   // The report's own minimised projection — ids, timestamps, the review
   // rows and the metric rows. Never the entry text.
   const select = [
-    "id, worker_id, created_at, correction_of, engagement_context_id",
+    "id, worker_id, created_at, correction_of, engagement_context_id, subject:workers(profile_id)",
     JOURNAL_ENTRY_CONFIRMATIONS_EMBED,
     JOURNAL_ENTRY_METRICS_EMBED,
   ].join(", ");

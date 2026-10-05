@@ -545,7 +545,12 @@ export type NotificationFeedResult =
   | {
       readonly kind: "ready";
       readonly events: readonly NotificationEventRow[];
+      /** The REAL unread total (a head count), not the unread rows of the
+       *  loaded window. */
       readonly unreadCount: number;
+      /** True when the exact count could not be read and `unreadCount` is only
+       *  the unread rows inside the loaded window (a lower bound). */
+      readonly unreadCountIsWindowOnly?: boolean;
     }
   | { readonly kind: "feature_unavailable" }
   | { readonly kind: "unexpected_error"; readonly code: string };
@@ -565,11 +570,20 @@ export async function readMyNotificationEvents(
 ): Promise<NotificationFeedResult> {
   const rowLimit = Math.max(1, Math.min(Math.floor(limit), FEED_LIMIT_MAX));
   try {
-    const { data, error } = await client
-      .from("notification_events")
-      .select("id, event_type, entity_type, entity_id, created_at, read_at, metadata")
-      .order("created_at", { ascending: false })
-      .limit(rowLimit);
+    const [{ data, error }, unreadRes] = await Promise.all([
+      client
+        .from("notification_events")
+        .select("id, event_type, entity_type, entity_id, created_at, read_at, metadata")
+        .order("created_at", { ascending: false })
+        .limit(rowLimit),
+      // The unread TOTAL is its own count query: counting unread rows inside
+      // the loaded window capped it at the window (20 by default) and let the
+      // "unread" number disagree with the real backlog.
+      client
+        .from("notification_events")
+        .select("id", { count: "exact", head: true })
+        .is("read_at", null),
+    ]);
     if (error) {
       if (error.code && FEATURE_ABSENT_CODES.has(error.code)) {
         return { kind: "feature_unavailable" };
@@ -588,10 +602,14 @@ export async function readMyNotificationEvents(
         metadata: (r.metadata as NotificationEventMetadata) ?? {},
       };
     });
+    const windowUnread = events.filter((e) => e.readAt === null).length;
+    const exact =
+      !unreadRes.error && typeof unreadRes.count === "number" ? unreadRes.count : null;
     return {
       kind: "ready",
       events,
-      unreadCount: events.filter((e) => e.readAt === null).length,
+      unreadCount: exact ?? windowUnread,
+      ...(exact === null ? { unreadCountIsWindowOnly: true } : {}),
     };
   } catch {
     return { kind: "unexpected_error", code: "thrown" };

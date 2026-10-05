@@ -11,7 +11,7 @@ import {
   listJournalEntries,
   type JournalEntryListRow,
 } from "@/lib/journal/journal-list-core";
-import { deriveReviewResult } from "@/lib/journal/review-status";
+import { deriveIndependentReviewResult } from "@/lib/journal/review-status";
 import {
   deriveWorkIntelligence,
   type WorkIntelligence,
@@ -90,6 +90,10 @@ export function assembleWorkIntelligence(input: {
   /** The organization's PERIOD records from the same read — beside the
    *  day records, summed into nothing. */
   organizationPeriodRecords?: readonly WorkIntelligenceOrganizationPeriodRecord[] | null;
+  /** The person whose entries these are. With it, a decision the person made
+   *  on their own entry is not a confirmation (review-status.ts); without it
+   *  the result is the plain latest decision, as before. */
+  subjectProfileId?: string | null;
 }): WorkIntelligence {
   const entries: WorkIntelligenceEntry[] = input.entries.map((e) => ({
     entryId: e.id,
@@ -97,7 +101,10 @@ export function assembleWorkIntelligence(input: {
     originalText: e.original_text,
     metrics: e.journal_entry_metrics ?? [],
     engagementContextId: e.engagement_context_id ?? null,
-    reviewResult: deriveReviewResult(e.journal_entry_confirmations),
+    reviewResult: deriveIndependentReviewResult(
+      e.journal_entry_confirmations,
+      input.subjectProfileId ?? null,
+    ),
     linkedSkillIds: input.linksByEntry.get(e.id) ?? [],
     linkProvenance: input.provenanceByEntry.get(e.id),
     photoCount: input.photoCountByEntry?.get(e.id) ?? 0,
@@ -263,7 +270,7 @@ export async function loadWorkIntelligence(
   workerId: string,
   opts: { focus?: WorkPeriodKey; focusRange?: WorkRange | null } = {},
 ): Promise<WorkIntelligence | null> {
-  const [entriesRead, linkRead, skillsRead, organizationLedger] = await Promise.all([
+  const [entriesRead, linkRead, skillsRead, organizationLedger, subjectRead] = await Promise.all([
     listJournalEntries(caller, { workerId }),
     readWorkerEntrySkillLinks(caller.supabase, workerId),
     caller.supabase
@@ -271,6 +278,9 @@ export async function loadWorkIntelligence(
       .select("skill_id, verified, source, skills(slug)")
       .eq("worker_id", workerId),
     readOrganizationRecords(caller.supabase, workerId),
+    // Whose entries these are — "confirmed" excludes the subject's own
+    // decision (review-status.ts). Unreadable = the plain latest decision.
+    caller.supabase.from("workers").select("profile_id").eq("id", workerId).limit(1),
   ]);
   if (!entriesRead.ok || !linkRead.ok || skillsRead.error) return null;
   const photoCountByEntry = await readPhotoCountsByEntry(
@@ -300,6 +310,9 @@ export async function loadWorkIntelligence(
     photoCountByEntry,
     organizationRecords: organizationLedger?.records ?? null,
     organizationPeriodRecords: organizationLedger?.periodRecords ?? null,
+    subjectProfileId: subjectRead.error
+      ? null
+      : (((subjectRead.data ?? []) as { profile_id: string | null }[])[0]?.profile_id ?? null),
   });
 }
 

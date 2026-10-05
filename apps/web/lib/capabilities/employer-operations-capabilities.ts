@@ -1,5 +1,6 @@
 import "server-only";
 
+import { countedOnce } from "@/lib/journal/counted-once";
 import { z } from "zod";
 
 import { requireEmployerCompanyForCaller } from "@/lib/company/employer-company-context";
@@ -1001,7 +1002,7 @@ const journalReviewQueueGet: CapabilityDescriptor = {
 
     const { data: rows, error } = await asAny(caller.supabase)
       .from("journal_entries")
-      .select("id, original_text, created_at, project_id, workers!inner(profile_id, display_name)")
+      .select("id, original_text, created_at, project_id, correction_of, workers!inner(profile_id, display_name)")
       .in("id", ids.slice(0, 200))
       // LIVE ENTRIES ONLY — the RPC already excludes superseded and deleted
       // rows; asked again here so this read never depends on that.
@@ -1010,17 +1011,24 @@ const journalReviewQueueGet: CapabilityDescriptor = {
       .order("created_at", { ascending: true });
     // FAILED ≠ EMPTY: a failed read is named, never "nothing to review".
     if (error) return { ok: false, code: "unavailable", message: "The review queue read failed." };
+    // COUNTED ONCE (lib/journal/counted-once.ts): a corrected original that is
+    // also queued is replaced by its live correction, never listed twice.
+    const live = countedOnce(
+      (rows ?? []) as {
+        id: string;
+        original_text: string | null;
+        created_at: string;
+        project_id: string | null;
+        correction_of: string | null;
+        workers: { profile_id: string | null; display_name: string | null } | null;
+      }[],
+    );
+    const replaced = (rows ?? []).length - live.length;
     return {
       ok: true,
       data: {
-        total: ids.length,
-        pending: ((rows ?? []) as {
-          id: string;
-          original_text: string | null;
-          created_at: string;
-          project_id: string | null;
-          workers: { profile_id: string | null; display_name: string | null } | null;
-        }[]).map((r) => ({
+        total: ids.length - replaced,
+        pending: live.map((r) => ({
           entryId: r.id,
           person: { workerProfileId: r.workers?.profile_id ?? null, name: r.workers?.display_name ?? null },
           text: r.original_text,

@@ -51,7 +51,6 @@ import { listMyTasks } from "@/lib/tasks/tasks";
  * admin client. No outbound call of any kind.
  */
 
-const PROJECT_READ_LIMIT = 100;
 /** The applied projects model's status set (the assist/planning precedent). */
 // W11: `completed` joins the set. Before the lifecycle existed no project
 // could leave `draft`, so omitting a terminal status cost nothing. Now that a
@@ -121,9 +120,15 @@ export interface OrgReportsView {
     | {
         readonly state: "ok";
         readonly byStatus: Readonly<Record<ReportProjectStatus, number>>;
+        /** Projects whose status is not one of `REPORT_PROJECT_STATUSES`
+         *  (e.g. a legacy `closed`). Counted, never silently dropped. */
+        readonly other: number;
+        /** EVERY project the company owns: the listed statuses plus `other`. */
         readonly total: number;
       }
     | { readonly state: Exclude<SectionState, "ok"> };
+  /** The caller's OWN tasks (assignee or creator) - `listMyTasks`'s scope.
+   *  NOT an organisation total; the section title and basis say so. */
   readonly tasks:
     | {
         readonly state: "ok";
@@ -152,13 +157,18 @@ export interface OrgReportsView {
    * calendar days (UTC, inclusive of today) — the windowed-report lib's week
    * window, so the hub figure and /dashboard/reports/journal can never
    * disagree. `awaitingReview` is the CURRENT reviewable queue (not windowed);
-   * `confirmed` counts the window's entries that carry a manager confirmation.
+   * `confirmed` counts the window's CONFIRMED ENTRIES (one definition,
+   * lib/journal/review-status.ts - independent approval, counted once).
    */
   readonly journal:
     | {
         readonly state: "ok";
+        /** Entries in the 7-day window, each correction chain counted once. */
         readonly recorded: number;
-        readonly awaitingReview: number;
+        /** The WHOLE current review queue (not windowed); `null` = unread. */
+        readonly awaitingReview: number | null;
+        /** Window entries whose latest review is an approval by someone other
+         *  than the worker (review-status.ts `isConfirmedEntry`). */
         readonly confirmed: number;
       }
     | { readonly state: Exclude<SectionState, "ok"> };
@@ -256,31 +266,45 @@ async function readDemandCounts(): Promise<OrgReportsView["demand"]> {
 
 /** Own-company project status counts (owns_company RLS; bounded — the
  *  assist-page read pattern). No company → unavailable, never a fake zero. */
-async function readProjectCounts(): Promise<OrgReportsView["projects"]> {
+export async function readProjectCounts(): Promise<OrgReportsView["projects"]> {
   try {
     const companyId = await callerCompanyId();
     if (!companyId) return { state: "unavailable" };
     const supabase = await createClient();
-    const res = await asAny(supabase)
-      .from("projects")
-      .select("id, status")
-      .eq("company_id", companyId)
-      .limit(PROJECT_READ_LIMIT);
-    if (res.error) return { state: "unavailable" };
-    const byStatus: Record<ReportProjectStatus, number> = {
-      draft: 0,
-      live: 0,
-      paused: 0,
-      completed: 0,
+    // HEAD COUNTS, not a capped row read: a 100-row limit plus a status
+    // whitelist silently dropped every project past the 100th and every
+    // project in an unlisted status, so a company with 130 projects read 100
+    // here and 130 on the projects page. One exact count for the whole set
+    // and one per listed status; `other` is the remainder - nothing vanishes.
+    const countWhere = (status?: string) => {
+      const q = asAny(supabase)
+        .from("projects")
+        .select("id", { count: "exact", head: true })
+        .eq("company_id", companyId);
+      return status ? q.eq("status", status) : q;
     };
-    let total = 0;
-    for (const row of (res.data ?? []) as { status: string }[]) {
-      if ((REPORT_PROJECT_STATUSES as readonly string[]).includes(row.status)) {
-        byStatus[row.status as ReportProjectStatus] += 1;
-        total += 1;
-      }
+    const [all, ...perStatus] = (await Promise.all([
+      countWhere(),
+      ...REPORT_PROJECT_STATUSES.map((s) => countWhere(s)),
+    ])) as { count: number | null; error: unknown }[];
+    if (
+      !all ||
+      all.error ||
+      typeof all.count !== "number" ||
+      perStatus.some((r) => r.error || typeof r.count !== "number")
+    ) {
+      return { state: "unavailable" };
     }
-    return { state: "ok", byStatus, total };
+    const byStatus = Object.fromEntries(
+      REPORT_PROJECT_STATUSES.map((s, i) => [s, perStatus[i]!.count as number]),
+    ) as Record<ReportProjectStatus, number>;
+    const listed = Object.values(byStatus).reduce((n, c) => n + c, 0);
+    return {
+      state: "ok",
+      byStatus,
+      other: Math.max(0, all.count - listed),
+      total: all.count,
+    };
   } catch {
     return { state: "unavailable" };
   }
@@ -343,6 +367,7 @@ async function readJournalCounts(): Promise<OrgReportsView["journal"]> {
   try {
     const report = await getJournalWindowReport("week");
     if (!report.applied) return { state: "unavailable" };
+    // null = the queue could not be read (SEP-7) - rendered "—", never 0.
     const awaitingReview = await countReviewablePendingEntries();
     return {
       state: "ok",

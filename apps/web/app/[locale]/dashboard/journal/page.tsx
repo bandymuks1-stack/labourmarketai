@@ -1123,6 +1123,9 @@ export default async function JournalPage({
           // Evidence strength needs to know which entries carry photos —
           // one bounded read over the live ids already in hand.
           photoCountByEntry: entryPhotoCounts ?? new Map<string, number>(),
+          // The signed-in person IS the subject: their own approval of their
+          // own entry is not a confirmation (review-status.ts).
+          subjectProfileId: user.id,
           organizationRecords,
           organizationPeriodRecords,
         })

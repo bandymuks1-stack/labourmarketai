@@ -62,7 +62,8 @@ describe("buildCompanyWorkHistory", () => {
       objects,
     );
     expect(h.totalRecords).toBe(6);
-    expect(h.totalHours).toBe(825.5);
+    // F3: the 800 h period aggregate is NEVER summed into day hours.
+    expect(h.dayHours).toBe(25.5);
     expect(h.periodHours).toBe(800);
     expect(h.peopleCount).toBe(2);
     expect(h.byPlacement).toEqual({ object: 3, label: 2, none: 1 });
@@ -70,6 +71,9 @@ describe("buildCompanyWorkHistory", () => {
     expect(p1.name).toBe("Place 1");
     expect(p1.dayHours).toBe(14.5);
     expect(p1.people.map((p) => p.name)).toEqual(["Person A", "Person B"]);
+    // per-person: day and period hours are separate figures, never one sum
+    const a = h.places.find((p) => p.key === "l:Place 3")!;
+    expect(a.people.map((p) => [p.dayHours, p.periodHours])).toEqual([[5, 800]]);
     expect(p1.firstDate).toBe("2025-06-02");
     expect(p1.lastDate).toBe("2025-06-09");
     const l3 = h.places.find((p) => p.key === "l:Place 3")!;
@@ -78,7 +82,8 @@ describe("buildCompanyWorkHistory", () => {
     // "no place stated" is always last
     expect(h.places[h.places.length - 1]!.kind).toBe("none");
     // sum of place hours === total (nothing lost, nothing double counted)
-    expect(h.places.reduce((s, p) => s + p.dayHours + p.periodHours, 0)).toBe(h.totalHours);
+    expect(h.places.reduce((s, p) => s + p.dayHours, 0)).toBe(h.dayHours);
+    expect(h.places.reduce((s, p) => s + p.periodHours, 0)).toBe(h.periodHours);
   });
 
   it("reports customer/address/project as absent unless the data carries them", () => {
@@ -95,6 +100,6 @@ describe("buildCompanyWorkHistory", () => {
       [rec({ id: "1", workObjectId: "o1" }), rec({ id: "2", workObjectId: "o1", withdrawn: true, hours: 99 })],
       objects,
     );
-    expect(h.totalHours).toBe(8);
+    expect(h.dayHours).toBe(8);
   });
 });

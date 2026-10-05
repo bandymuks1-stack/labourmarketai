@@ -1,5 +1,5 @@
 import {
-  deriveIndependentReviewResult,
+  isConfirmedEntry,
   type ConfirmationRow,
 } from "@/lib/journal/review-status";
 
@@ -16,7 +16,7 @@ import {
  *     certification (that is `worker_skills.verified`) and is never merged
  *     into it;
  *   * a decision made by the worker themself does not count
- *     (`deriveIndependentReviewResult`) — submitting ≠ being confirmed;
+ *     (`isConfirmedEntry`, lib/journal/review-status.ts) — submitting ≠ being confirmed;
  *   * days = distinct WORK days (the entry's `work_date` metric, else the day
  *     it was recorded);
  *   * RLS-safe: the read runs as the CALLER. Where the caller cannot see a
@@ -40,6 +40,8 @@ export type ConfirmedWorkByWorker = ReadonlyMap<string, ReadonlyMap<string, Conf
 export const CONFIRMED_WORK_ROW_CAP = 5000;
 
 export interface ConfirmedEntryRow {
+  /** Entry id — needed to drop a corrected original (counted-once). */
+  readonly id?: string;
   readonly worker_id: string;
   readonly created_at: string | null;
   readonly journal_entry_confirmations: readonly ConfirmationRow[] | null;
@@ -68,15 +70,23 @@ export function entryWorkDay(row: ConfirmedEntryRow): string | null {
 export function aggregateConfirmedWork(
   rows: readonly ConfirmedEntryRow[],
   profileIdByWorker: ReadonlyMap<string, string | null>,
+  /** Ids of originals a LIVE correction replaces (the confirmed-only join
+   *  cannot see an unconfirmed correction row, so the reader supplies them). */
+  correctedOriginalIds: ReadonlySet<string> = new Set(),
 ): ConfirmedWorkByWorker {
   const entries = new Map<string, Map<string, number>>();
   const days = new Map<string, Map<string, Set<string>>>();
   for (const r of rows) {
-    const result = deriveIndependentReviewResult(
-      r.journal_entry_confirmations,
-      profileIdByWorker.get(r.worker_id) ?? null,
-    );
-    if (result !== "approved") continue;
+    // ONE definition of "confirmed" (lib/journal/review-status.ts): independent
+    // approval on a counted-once live entry.
+    if (r.id && correctedOriginalIds.has(r.id)) continue;
+    if (
+      !isConfirmedEntry(
+        r.journal_entry_confirmations,
+        profileIdByWorker.get(r.worker_id) ?? null,
+      )
+    )
+      continue;
     const day = entryWorkDay(r);
     // One entry counts once per skill, however often the skill is linked.
     const slugs = new Set(
@@ -117,6 +127,47 @@ type Sb = {
   };
 };
 
+
+/**
+ * The originals that a LIVE correction replaces, for these workers. The
+ * confirmed-work join only returns entries that HAVE a decision, and a fresh
+ * correction has none — so without this read a corrected original (which
+ * keeps `superseded_by` NULL by design) would still count as confirmed work
+ * beside its correction (counted-once, `lib/journal/counted-once.ts`).
+ * `null` = the read failed (UNKNOWN).
+ */
+async function readCorrectedOriginalIds(
+  supabase: unknown,
+  workerIds: readonly string[],
+): Promise<ReadonlySet<string> | null> {
+  try {
+    const res = (await (
+      supabase as {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        from: (t: string) => any;
+      }
+    )
+      .from("journal_entries")
+      .select("correction_of")
+      .in("worker_id", [...workerIds])
+      .not("correction_of", "is", null)
+      .is("deleted_at", null)
+      .is("superseded_by", null)
+      .limit(CONFIRMED_WORK_ROW_CAP)) as {
+      data: { correction_of: string | null }[] | null;
+      error: unknown;
+    };
+    if (res.error) return null;
+    return new Set(
+      (res.data ?? [])
+        .map((r) => r.correction_of)
+        .filter((v): v is string => typeof v === "string"),
+    );
+  } catch {
+    return null;
+  }
+}
+
 /**
  * ONE batched read for every worker in `workers`. Caller's RLS applies.
  * Returns `null` when the read failed (UNKNOWN), a (possibly empty) map
@@ -132,7 +183,7 @@ export async function readConfirmedWorkBySkill(
       (supabase as Sb)
         .from("journal_entries")
         .select(
-          "worker_id, created_at, journal_entry_confirmations!inner(confirmation_scope, created_at, confirmer_id), journal_entry_skills!inner(skills(slug)), journal_entry_metrics(metric_slug, value_text, created_at)",
+          "id, worker_id, created_at, journal_entry_confirmations!inner(confirmation_scope, created_at, confirmer_id), journal_entry_skills!inner(skills(slug)), journal_entry_metrics(metric_slug, value_text, created_at)",
         ) as {
         in: (c: string, v: string[]) => {
           is: (c: string, v: null) => {
@@ -151,9 +202,15 @@ export async function readConfirmedWorkBySkill(
       .is("superseded_by", null)
       .limit(CONFIRMED_WORK_ROW_CAP);
     if (res.error) return null;
+    const corrected = await readCorrectedOriginalIds(
+      supabase,
+      workers.map((w) => w.id),
+    );
+    if (corrected === null) return null;
     return aggregateConfirmedWork(
       (res.data ?? []) as ConfirmedEntryRow[],
       new Map(workers.map((w) => [w.id, w.profileId])),
+      corrected,
     );
   } catch {
     return null;
@@ -170,18 +227,16 @@ export interface ConfirmedWorkTotals {
 export function aggregateConfirmedTotals(
   rows: readonly Pick<
     ConfirmedEntryRow,
-    "created_at" | "journal_entry_confirmations" | "journal_entry_metrics"
+    "id" | "created_at" | "journal_entry_confirmations" | "journal_entry_metrics"
   >[],
   subjectProfileId: string | null,
+  correctedOriginalIds: ReadonlySet<string> = new Set(),
 ): ConfirmedWorkTotals {
   const days = new Set<string>();
   let entries = 0;
   for (const r of rows) {
-    if (
-      deriveIndependentReviewResult(r.journal_entry_confirmations, subjectProfileId) !==
-      "approved"
-    )
-      continue;
+    if (r.id && correctedOriginalIds.has(r.id)) continue;
+    if (!isConfirmedEntry(r.journal_entry_confirmations, subjectProfileId)) continue;
     entries += 1;
     const day = entryWorkDay({
       worker_id: "",
@@ -205,7 +260,7 @@ export async function readOwnConfirmedWorkTotals(
       (supabase as Sb)
         .from("journal_entries")
         .select(
-          "created_at, journal_entry_confirmations!inner(confirmation_scope, created_at, confirmer_id), journal_entry_metrics(metric_slug, value_text, created_at)",
+          "id, created_at, journal_entry_confirmations!inner(confirmation_scope, created_at, confirmer_id), journal_entry_metrics(metric_slug, value_text, created_at)",
         ) as {
         eq: (c: string, v: string) => {
           is: (c: string, v: null) => {
@@ -221,9 +276,12 @@ export async function readOwnConfirmedWorkTotals(
       .is("superseded_by", null)
       .limit(CONFIRMED_WORK_ROW_CAP);
     if (res.error) return null;
+    const corrected = await readCorrectedOriginalIds(supabase, [workerId]);
+    if (corrected === null) return null;
     return aggregateConfirmedTotals(
       (res.data ?? []) as ConfirmedEntryRow[],
       profileId,
+      corrected,
     );
   } catch {
     return null;

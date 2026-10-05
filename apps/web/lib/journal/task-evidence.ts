@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { isMigrationMissingCode } from "@/lib/tasks/task-model";
 import { JOURNAL_ENTRY_METRICS_EMBED } from "@/lib/journal/journal-list-core";
+import { deriveReviewResult, isConfirmedEntry, type ConfirmationRow } from "@/lib/journal/review-status";
 import { deriveEntryWorkTime, type WorkTimeMetricRow } from "@/lib/journal/work-time";
 import {
   NO_READABLE_NAME,
@@ -52,42 +53,171 @@ function asAny(supabase: SupabaseClient): any {
   return supabase;
 }
 
+/** One journal entry as this reader embeds it - live or not (see `resolveCurrentEntries`). */
+type EntryEmbed = {
+  id: string;
+  worker_id: string;
+  project_id?: string | null;
+  original_text: string;
+  original_language: string;
+  created_at: string;
+  deleted_at?: string | null;
+  superseded_by?: string | null;
+  correction_of?: string | null;
+  journal_entry_photos: { id: string }[] | null;
+  journal_entry_confirmations: ConfirmationRow[] | null;
+  journal_entry_metrics: WorkTimeMetricRow[] | null;
+  workers: AuthorEmbed | AuthorEmbed[];
+};
+
+type AuthorEmbed = NonNullable<WorkerNameRow> & { profile_id?: string | null };
+
 type LinkRow = {
   id: string;
   entry_id: string;
   linked_at: string;
   linked_by: string | null;
-  journal_entries: {
-    id: string;
-    worker_id: string;
-    project_id?: string | null;
-    original_text: string;
-    original_language: string;
-    created_at: string;
-    journal_entry_photos: { id: string }[] | null;
-    journal_entry_confirmations: { created_at: string }[] | null;
-    journal_entry_metrics: WorkTimeMetricRow[] | null;
-    workers: WorkerNameRow | WorkerNameRow[];
-  } | null;
+  journal_entries: EntryEmbed | null;
 };
 
+/** The entry columns, deleted / superseded / correction state INCLUDED: the
+ *  link read must SEE a replaced entry to follow it to its current version. */
+const ENTRY_SELECT =
+  "id, worker_id, project_id, original_text, original_language, created_at, " +
+  "deleted_at, superseded_by, correction_of, " +
+  `journal_entry_photos(id), journal_entry_confirmations(confirmation_scope, created_at, confirmer_id), ` +
+  `${JOURNAL_ENTRY_METRICS_EMBED}, workers(profile_id, ${WORKER_NAME_FIELDS})`;
+
 const LINK_SELECT =
-  "id, entry_id, linked_at, linked_by, " +
-  "journal_entries!inner(id, worker_id, project_id, original_text, original_language, created_at, " +
-  `journal_entry_photos(id), journal_entry_confirmations(created_at), ` +
-  `${JOURNAL_ENTRY_METRICS_EMBED}, workers(${WORKER_NAME_FIELDS}))`;
+  "id, entry_id, linked_at, linked_by, " + `journal_entries!inner(${ENTRY_SELECT})`;
+
+/** How many edit / correction hops are followed before the chain is treated
+ *  as unreadable. A real chain is one or two long. */
+const MAX_CHAIN_HOPS = 6;
+
+/**
+ * THE CURRENT VERSION OF EACH LINKED ENTRY (audit G-2).
+ *
+ * `journal_entry_tasks` links a task to the entry that existed when it was
+ * attached. Afterwards the entry may be
+ *   - DELETED (`journal_entry_soft_delete` does not touch links) - the task
+ *     must stop listing its text and hours;
+ *   - EDITED while unconfirmed (`journal_entry_supersede_v2` stamps
+ *     `superseded_by` on the old row and does not carry the link) - the task
+ *     must show the NEW text/hours, not the withdrawn ones;
+ *   - CORRECTED after confirmation (the original keeps `superseded_by` NULL by
+ *     design and the correction points back through `correction_of`) - one day
+ *     of work, counted once (`counted-once.ts`), by its live correction.
+ * Before this the reader filtered nothing: after an edit the task still showed
+ * the old entry and the edited version was linked to nothing.
+ *
+ * Returns original-entry-id -> its current LIVE entry, or `null` for an entry
+ * that is gone (deleted). A failed follow-up read returns "error" - an
+ * unreadable chain is NOT "no evidence" (SEP-7).
+ */
+async function resolveCurrentEntries(
+  supabase: SupabaseClient,
+  linked: readonly EntryEmbed[],
+): Promise<Map<string, EntryEmbed | null> | "error"> {
+  const result = new Map<string, EntryEmbed | null>();
+  // frontier: original id -> the entry we currently stand on for it
+  let frontier = new Map<string, EntryEmbed>();
+  for (const e of linked) frontier.set(e.id, e);
+
+  for (let hop = 0; hop < MAX_CHAIN_HOPS && frontier.size > 0; hop++) {
+    const needSuccessorById = new Map<string, string>(); // origId -> superseded_by id
+    const needCorrectionCheck = new Map<string, EntryEmbed>(); // origId -> live entry
+    for (const [orig, e] of frontier) {
+      if (e.deleted_at) result.set(orig, null);
+      else if (e.superseded_by) needSuccessorById.set(orig, e.superseded_by);
+      else needCorrectionCheck.set(orig, e);
+    }
+    const next = new Map<string, EntryEmbed>();
+
+    // superseded -> fetch the replacing row
+    if (needSuccessorById.size > 0) {
+      const ids = [...new Set(needSuccessorById.values())];
+      const res = await asAny(supabase).from("journal_entries").select(ENTRY_SELECT).in("id", ids);
+      if (res.error) return "error";
+      const byId = new Map(((res.data ?? []) as EntryEmbed[]).map((e) => [e.id, e]));
+      for (const [orig, succId] of needSuccessorById) {
+        const succ = byId.get(succId);
+        // A replacing row the caller cannot read cannot be shown, and the old
+        // text must not stand in for it.
+        if (succ) next.set(orig, succ);
+        else result.set(orig, null);
+      }
+    }
+
+    // live -> is there a live correction of it?
+    if (needCorrectionCheck.size > 0) {
+      const ids = [...new Set([...needCorrectionCheck.values()].map((e) => e.id))];
+      const res = await asAny(supabase)
+        .from("journal_entries")
+        .select(ENTRY_SELECT)
+        .in("correction_of", ids)
+        .is("deleted_at", null)
+        .is("superseded_by", null);
+      if (res.error) return "error";
+      const successorOf = new Map<string, EntryEmbed>();
+      for (const c of (res.data ?? []) as EntryEmbed[]) {
+        if (c.correction_of) successorOf.set(c.correction_of, c);
+      }
+      for (const [orig, e] of needCorrectionCheck) {
+        const corr = successorOf.get(e.id);
+        if (corr) next.set(orig, corr);
+        else result.set(orig, e);
+      }
+    }
+    frontier = next;
+  }
+  // A chain longer than the hop budget cannot be shown honestly.
+  if (frontier.size > 0) return "error";
+  return result;
+}
+
+/** Link rows -> items on the CURRENT version of each entry, each entry once. */
+async function toCurrentItems(
+  supabase: SupabaseClient,
+  rows: readonly LinkRow[],
+): Promise<
+  { ok: true; items: { taskId?: string; item: TaskEvidenceItem }[] } | { ok: false }
+> {
+  const linked = rows.map((r) => r.journal_entries).filter((e): e is EntryEmbed => e !== null);
+  const current = await resolveCurrentEntries(supabase, linked);
+  if (current === "error") return { ok: false };
+  const out: { taskId?: string; item: TaskEvidenceItem }[] = [];
+  const seen = new Set<string>();
+  for (const row of rows) {
+    const orig = row.journal_entries;
+    if (!orig) continue;
+    const cur = current.get(orig.id);
+    if (!cur) continue; // deleted / unreadable replacement: not evidence
+    const taskId = (row as LinkRow & { task_id?: string }).task_id;
+    const dedupe = `${taskId ?? ""}|${cur.id}`;
+    if (seen.has(dedupe)) continue;
+    seen.add(dedupe);
+    const item = toItem({ ...row, journal_entries: cur });
+    if (item) out.push({ taskId, item });
+  }
+  return { ok: true, items: out };
+}
 
 function toItem(row: LinkRow): TaskEvidenceItem | null {
   const e = row.journal_entries;
   if (!e) return null;
+  // ONE definition of "confirmed" (lib/journal/review-status.ts): the latest
+  // decision is an approval by someone other than the author. The old test -
+  // "any decision row exists" - read a rejection and the author's own approval
+  // as manager-confirmed.
+  const author = Array.isArray(e.workers) ? (e.workers[0] ?? null) : e.workers;
   const confirmations = e.journal_entry_confirmations ?? [];
-  // Earliest confirmation is the moment the work became manager-confirmed.
-  const confirmedAt =
-    confirmations.length > 0
-      ? confirmations
-          .map((c) => c.created_at)
-          .sort()[0]
-      : null;
+  const confirmedAt = isConfirmedEntry(confirmations, author?.profile_id ?? null)
+    ? (confirmations
+        .filter((c) => deriveReviewResult([c]) === "approved")
+        .map((c) => c.created_at ?? "")
+        .sort()[0] ?? null)
+    : null;
   return {
     linkId: row.id,
     entryId: e.id,
@@ -107,7 +237,7 @@ function toItem(row: LinkRow): TaskEvidenceItem | null {
 
 /** Hours from the ONE canonical derivation — no second hours computation. A
  *  figure only when it is a real positive hour total; otherwise null. */
-function entryHoursOf(e: NonNullable<LinkRow["journal_entries"]>): number | null {
+function entryHoursOf(e: EntryEmbed): number | null {
   const metrics = e.journal_entry_metrics ?? [];
   if (metrics.length === 0) return null;
   const hours = deriveEntryWorkTime({
@@ -156,21 +286,21 @@ export async function getTaskEvidence(
     if (isMigrationMissingCode(res.error.code)) {
       return { status: "needs-migration" };
     }
-    // Any other read failure degrades to "no evidence shown" rather than
-    // throwing into the task page. Never invent an item.
-    return { status: "ok", items: [], summary: ZERO_EVIDENCE_SUMMARY };
+    // FAILED IS NOT EMPTY (SEP-7): a failed read used to come back as "ok,
+    // no evidence", which the task page rendered as "nothing is attached".
+    return { status: "unreadable" };
   }
 
-  const items = ((res.data ?? []) as LinkRow[])
-    .map(toItem)
-    .filter((i): i is TaskEvidenceItem => i !== null);
+  const current = await toCurrentItems(supabase, (res.data ?? []) as LinkRow[]);
+  if (!current.ok) return { status: "unreadable" };
+  const items = current.items.map((i) => i.item);
 
   return { status: "ok", items, summary: deriveEvidenceSummary(items) };
 }
 
 export type TaskEvidenceBatch = {
   /** "needs-migration" once, for the whole page — never per card. */
-  readonly status: "ok" | "needs-migration";
+  readonly status: "ok" | "needs-migration" | "unreadable";
   readonly itemsByTask: Readonly<Record<string, readonly TaskEvidenceItem[]>>;
 };
 
@@ -208,14 +338,17 @@ export async function getTaskEvidenceByTask(
     if (isMigrationMissingCode(res.error.code)) {
       return { status: "needs-migration", itemsByTask: {} };
     }
-    return EMPTY_EVIDENCE_BATCH;
+    // FAILED IS NOT EMPTY (SEP-7): never "no evidence" for an unread link set.
+    return { status: "unreadable", itemsByTask: {} };
   }
 
+  const rows = (res.data ?? []) as (LinkRow & { task_id: string })[];
+  const current = await toCurrentItems(supabase, rows);
+  if (!current.ok) return { status: "unreadable", itemsByTask: {} };
   const itemsByTask: Record<string, TaskEvidenceItem[]> = {};
-  for (const row of (res.data ?? []) as (LinkRow & { task_id: string })[]) {
-    const item = toItem(row);
-    if (!item) continue;
-    (itemsByTask[row.task_id] ??= []).push(item);
+  for (const { taskId, item } of current.items) {
+    if (!taskId) continue;
+    (itemsByTask[taskId] ??= []).push(item);
   }
   return { status: "ok", itemsByTask };
 }

@@ -1,4 +1,5 @@
 import "server-only";
+import { countedOnce, type CorrectionChainRow } from "@/lib/journal/counted-once";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -293,12 +294,20 @@ export async function countWorkersWithUnconfirmableWork(
   const since = new Date(Date.now() - days * 86_400_000).toISOString();
   const { data: entries, error: entryError } = await supabase
     .from("journal_entries")
-    .select("engagement_context_id")
+    .select("id, correction_of, engagement_context_id")
     .in("engagement_context_id", ids)
     .is("superseded_by", null)
     .is("deleted_at", null)
     .gte("created_at", since)
     .limit(1000);
   if (entryError) return null;
-  return new Set((entries ?? []).map((e) => e.engagement_context_id as string)).size;
+  // Counted once per correction chain (counted-once.ts). This figure is a
+  // DISTINCT-context count, so a corrected original and its correction (same
+  // context) never changed it — the rule is applied anyway so every journal
+  // reader states the same population.
+  return new Set(
+    countedOnce((entries ?? []) as unknown as (CorrectionChainRow & { engagement_context_id: string })[]).map(
+      (e) => e.engagement_context_id,
+    ),
+  ).size;
 }
