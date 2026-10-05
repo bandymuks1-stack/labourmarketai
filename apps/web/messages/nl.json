@@ -18218,6 +18218,7 @@
       "progress": "{attributed} van {total} toegewezen aan {name}",
       "done": "{count} registraties toegewezen; {skipped} waren al toegewezen.",
       "refused": "Dit kon niet worden opgeslagen. Er is niets gewijzigd.",
+      "personPeriod": "{hours} u periodetotaal (niet bij losse dagen opgeteld)",
       "person": "{hours} u, {count, plural, one {# registratie} other {# registraties}}"
     },
     "periodShort": "{hours} u periodetotaal"

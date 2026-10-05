@@ -18218,6 +18218,7 @@
       "progress": "{attributed} von {total} zugeordnet: {name}",
       "done": "{count} Einträge zugeordnet; {skipped} waren bereits zugeordnet.",
       "refused": "Das konnte nicht gespeichert werden. Nichts wurde geändert.",
+      "personPeriod": "{hours} Std. Periodensumme (nicht zu Einzeltagen addiert)",
       "person": "{hours} Std., {count, plural, one {# Eintrag} other {# Einträge}}"
     },
     "periodShort": "{hours} Std. Zeitraumsumme"

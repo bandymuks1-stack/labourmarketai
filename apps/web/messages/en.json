@@ -18218,6 +18218,7 @@
       "progress": "{attributed} of {total} attributed to {name}",
       "done": "Attributed {count} records; {skipped} were already attributed.",
       "refused": "This could not be saved. Nothing was changed.",
+      "personPeriod": "{hours} h period total (not added to single days)",
       "person": "{hours} h, {count, plural, one {# record} other {# records}}"
     },
     "periodShort": "{hours} h period total"
