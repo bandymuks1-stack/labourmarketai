@@ -119,7 +119,7 @@ describe("the chain is reachable from the worker's home — ŠIANDIEN (IA 2026-0
   // composer right under ŠIANDIEN (owner decision 0017: the chat is the
   // home, not a tab). Nothing on the page writes.
   it("open items and the work station link to /dashboard/journal; no separate door to the chat", () => {
-    const work = read("components/app/today/today-work-section.tsx");
+    const work = read("components/app/home/home-regions.tsx");
     expect(work).toMatch(/href="\/dashboard\/journal"/);
     expect(work).toMatch(/today-open-\$\{item\.kind\}/);
     const screen = read("components/app/today/today-screen.tsx");
@@ -129,8 +129,9 @@ describe("the chain is reachable from the worker's home — ŠIANDIEN (IA 2026-0
   it("ŠIANDIEN performs no write of its own", () => {
     for (const rel of [
       "components/app/today/today-screen.tsx",
-      "components/app/today/today-work-section.tsx",
-      "components/app/today/today-opportunity-section.tsx",
+      "components/app/home/home-regions.tsx",
+      "lib/home/home-server.ts",
+      "lib/home/home-state.ts",
       "lib/today/today-server.ts",
       "lib/today/today-model.ts",
     ]) {

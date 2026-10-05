@@ -165,22 +165,29 @@ describe("ŠIANDIEN owns the attention it already renders", () => {
 // ── 2 · "Tuščia = tvarkinga" on ŠIANDIEN ────────────────────────────────────
 
 describe("ŠIANDIEN leaves an empty line out instead of stating it", () => {
-  const WORK = read("components/app/today/today-work-section.tsx");
-  const OPP = read("components/app/today/today-opportunity-section.tsx");
+  // The sections moved into the four-region home (frozen grammar, 2026-10):
+  // RUNNING carries the growth sentence, OUTSIDE the opportunity line. The
+  // invariant is unchanged — an EMPTY reading is left out, a FAILED read is
+  // named — only the file that holds the markup is new.
+  const WORK = read("components/app/home/home-regions.tsx");
+  const OPP = WORK;
 
-  it("the growth section renders only behind the pure predicate", () => {
-    expect(WORK).toMatch(/\{isTodayGrowthShown\(growthLine\) && \(\s*<section/);
+  it("the growth sentence renders only behind the pure predicate", () => {
+    expect(WORK).toMatch(/const growthShown = isTodayGrowthShown\(growth\);/);
+    expect(WORK).toMatch(/\{growthShown && \(/);
   });
 
-  it("the opportunity section returns nothing behind the pure predicate", () => {
+  it("the opportunity region returns nothing behind the pure predicate", () => {
     expect(OPP).toMatch(/if \(!isTodayOpportunityShown\(o\)\) return null;/);
   });
 
+  it("a causal chain is drawn only from the model's closed set; an empty 'because' region is left out", () => {
+    expect(WORK).toMatch(/if \(because\.causes\.length === 0 && because\.events\.length === 0\) return null;/);
+    expect(WORK).toMatch(/tChain\(`consequence\.\$\{c\.chain\.consequenceKey\}`\)/);
+  });
+
   it("NEGATIVE CONTROL: the empty-state sentences are no longer rendered anywhere on ŠIANDIEN", () => {
-    for (const [rel, src] of [
-      ["today-work-section.tsx", WORK],
-      ["today-opportunity-section.tsx", OPP],
-    ] as const) {
+    for (const [rel, src] of [["home-regions.tsx", WORK]] as const) {
       expect(src, rel).not.toMatch(/t\("growth\.(insufficient|none)"\)/);
       expect(src, rel).not.toMatch(/t\("opportunity\.(none|noWorker)"\)/);
     }
