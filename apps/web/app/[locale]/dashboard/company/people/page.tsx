@@ -262,14 +262,14 @@ export default async function CompanyPeoplePage({
           className="font-mono text-meta text-text-muted tabular-nums"
           data-testid="company-people-summary"
         >
-          {canManageInvitations
-            ? pendingCount === null
-              ? t("summaryInvitationsUnread", {
-                  active: activeWorkerRows.length,
-                  members: memberCount,
-                  review: reviewCount,
-                })
-              : t("summary", {
+          {canManageInvitations && pendingCount === null
+            ? t("summaryInvitationsUnread", {
+                active: activeWorkerRows.length,
+                members: memberCount,
+                review: reviewCount,
+              })
+            : canManageInvitations
+              ? t("summary", {
                   active: activeWorkerRows.length,
                   pending: pendingCount,
                   members: memberCount,
