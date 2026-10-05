@@ -1538,26 +1538,6 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-03: ORG-2 agency capability authority (RED, needs-human-gate, NOT applied): list_open_demand_for_agencies / mark_agency_can_offer / job_demands_select re-gated on owns_company + company_acts_as_agency.
       "20261003150000_org2_agency_capability_authority_v1.sql",
       // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
-      "20261003150950_commitment_override_collision_validation_v1.sql",
-      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
-      "20261003151300_integrity_doors_v1.sql",
-      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
-      "20261003151400_marketplace_v1_write_rpcs_closed_v1.sql",
-      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
-      "20261003151500_invitation_v1_doors_not_api_callable_v1.sql",
-      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
-      "20261003151200_market_org_capabilities_for_visible_listings_v1.sql",
-      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
-      "20261003150555_batch_review_exceptions_employer_only_v1.sql",
-      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
-      "20261003150550_counterparty_link_assignment_kinds_review_doors_v1.sql",
-      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
-      "20261003150700_brigade_journal_context_v1.sql",
-      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
-      "20261003150900_commitment_override_receipt_brigade_basis_v1.sql",
-      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
-      "20261003151100_staff_invitation_email_binding_v1.sql",
-      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
       "20261003150100_commitment_override_receipts_v1.sql",
       // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
       "20261003150200_work_plan_entries_v2.sql",
@@ -1568,11 +1548,31 @@ describe("the migration set is exactly what this slice declared", () => {
       // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
       "20261003150500_journal_counterparty_review_authority_v1.sql",
       // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150550_counterparty_link_assignment_kinds_review_doors_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150555_batch_review_exceptions_employer_only_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
       "20261003150600_brigade_work_assignment_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150700_brigade_journal_context_v1.sql",
       // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
       "20261003150800_ai_runs_retention_classes_v2.sql",
       // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150900_commitment_override_receipt_brigade_basis_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150950_commitment_override_collision_validation_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
       "20261003151000_email_verified_boundary_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003151100_staff_invitation_email_binding_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003151200_market_org_capabilities_for_visible_listings_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003151300_integrity_doors_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003151400_marketplace_v1_write_rpcs_closed_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003151500_invitation_v1_doors_not_api_callable_v1.sql",
 ]);
   });
 
