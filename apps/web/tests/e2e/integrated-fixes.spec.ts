@@ -1549,17 +1549,25 @@ test.describe(`INTEGRATED FIXES (tag ${TAG})`, () => {
     const idRefuse2 = await mk("Refuse Me Two");
     save({ RP_REFUSE: idRefuse, RP_REFUSE2: idRefuse2 });
     const patch = { link_state: "unlinked", link_method: null, linked_profile_id: null, linked_worker_id: null, linked_at: null, updated_at: new Date().toISOString() };
-    // EXACTLY the product's statement: update(patch).eq(id).eq(linked_profile_id).eq(link_state).select("id")  == RETURNING
+    // (1) WHY THE DOOR EXISTS: the plain UPDATE (what the product wrote before 20261005100000) is still refused by RLS - with and without RETURNING -
+    //     because the row stops naming the caller and the SELECT policy rejects the new row. This is the DEFECT SHAPE, kept as a standing proof.
     const withReturning = await asUser(tm2Jwt, "PATCH", `organization_people?id=eq.${idRefuse}&linked_profile_id=eq.${tm2.id}&link_state=eq.link_proposed&select=id`, patch);
-    // WITHOUT returning (Prefer: return=minimal)
     const noReturning = await asUser(tm2Jwt, "PATCH", `organization_people?id=eq.${idRefuse2}&linked_profile_id=eq.${tm2.id}&link_state=eq.link_proposed`, patch, "return=minimal");
-    const after = await rows<{ id: string; link_state: string }>(`organization_people?id=in.(${idRefuse},${idRefuse2})&select=id,link_state`);
-    test.info().annotations.push({ type: "b6-refuse-returning", description: `${withReturning.status} ${withReturning.text.slice(0, 200)}` });
-    test.info().annotations.push({ type: "b6-refuse-minimal", description: `${noReturning.status} ${noReturning.text.slice(0, 200)}` });
-    save({ B6_REFUSE_RETURNING: withReturning.status, B6_REFUSE_MINIMAL: noReturning.status, B6_AFTER: after });
-    expect(after.find((r) => r.id === idRefuse2)!.link_state, `minimal: ${noReturning.status} ${noReturning.text}`).toBe("unlinked");
-    expect(withReturning.status, `RETURNING: ${withReturning.text}`).toBe(200);
-    expect(after.find((r) => r.id === idRefuse)!.link_state).toBe("unlinked");
+    save({ B6_RAW_UPDATE_RETURNING: withReturning.status, B6_RAW_UPDATE_MINIMAL: noReturning.status });
+    expect(withReturning.status, withReturning.text).toBe(403);
+    expect(noReturning.status, noReturning.text).toBe(403);
+    expect((await rows<{ link_state: string }>(`organization_people?id=eq.${idRefuse}&select=link_state`))[0].link_state).toBe("link_proposed");
+    // (2) THE DOOR the product now uses: refuse -> unlinked, scoped to the offer
+    const wrongState = await rpcAs(tm2Jwt, "respond_to_roster_link_v1", { p_person_id: idRefuse, p_decision: "withdraw" });
+    expect(wrongState.json, "withdraw does not act on an OFFER").toBe("not_found");
+    const refused = await rpcAs(tm2Jwt, "respond_to_roster_link_v1", { p_person_id: idRefuse, p_decision: "refuse" });
+    expect(refused.json, refused.text).toBe("unlinked");
+    const after = await rows<{ link_state: string; linked_profile_id: string | null; linked_worker_id: string | null; link_method: string | null }>(`organization_people?id=eq.${idRefuse}&select=link_state,linked_profile_id,linked_worker_id,link_method`);
+    expect(after[0]).toEqual({ link_state: "unlinked", linked_profile_id: null, linked_worker_id: null, link_method: null });
+    // idempotent: answering again is not_found (nothing to refuse), never an error that leaks
+    const again = await rpcAs(tm2Jwt, "respond_to_roster_link_v1", { p_person_id: idRefuse, p_decision: "refuse" });
+    expect(again.json).toBe("not_found");
+    expect((await rows(`audit_logs?action=eq.roster_link_refuse&entity_id=eq.${idRefuse}&select=id`))).toHaveLength(1);
   });
 
   test("B6b. the subject WITHDRAWS a confirmed link (linked -> unlinked) exactly as the product writes it, and the history disappears", async () => {
@@ -1568,10 +1576,16 @@ test.describe(`INTEGRATED FIXES (tag ${TAG})`, () => {
     const pid = S.ROSTER_PID as string;
     expect(await rows(`organization_people?id=eq.${pid}&link_state=eq.linked&select=id`)).toHaveLength(1);
     const patch = { link_state: "unlinked", link_method: null, linked_profile_id: null, linked_worker_id: null, linked_at: null, updated_at: new Date().toISOString() };
-    const r = await asUser(ewJwt, "PATCH", `organization_people?id=eq.${pid}&linked_profile_id=eq.${ew.id}&link_state=eq.linked&select=id`, patch);
-    save({ B6_WITHDRAW_RETURNING: r.status });
+    // the plain UPDATE is still refused (the defect shape) ...
+    const raw = await asUser(ewJwt, "PATCH", `organization_people?id=eq.${pid}&linked_profile_id=eq.${ew.id}&link_state=eq.linked&select=id`, patch);
+    expect(raw.status, raw.text).toBe(403);
+    expect(await rows(`organization_people?id=eq.${pid}&link_state=eq.linked&select=id`)).toHaveLength(1);
+    // ... a refuse on a CONFIRMED link is not its door, withdraw is
+    expect((await rpcAs(ewJwt, "respond_to_roster_link_v1", { p_person_id: pid, p_decision: "refuse" })).json).toBe("not_found");
+    const r = await rpcAs(ewJwt, "respond_to_roster_link_v1", { p_person_id: pid, p_decision: "withdraw" });
+    save({ B6_WITHDRAW_RPC: r.json });
     const st = await rows<{ link_state: string }>(`organization_people?id=eq.${pid}&select=link_state`);
-    expect(r.status, `RETURNING: ${r.text}`).toBe(200);
+    expect(r.json, r.text).toBe("unlinked");
     expect(st[0].link_state).toBe("unlinked");
     expect((await asUser(ewJwt, "GET", `organization_evidence_records?organization_person_id=eq.${pid}&select=id`)).json).toEqual([]);
   });
@@ -1608,7 +1622,16 @@ test.describe(`INTEGRATED FIXES (tag ${TAG})`, () => {
     expect(acc.status, acc.text).toBe(200);
     await go(page, "/en/dashboard/profile");
     const row = page.locator(`[data-testid="roster-link-confirmed"][data-person-id="${idWithdraw}"]`);
-    await expect(row).toBeVisible({ timeout: 120_000 });
+    await expect(row).toBeAttached({ timeout: 120_000 });
+    // the confirmed-link section sits inside collapsed <details> on the profile: open them like a person would
+    await row.evaluate((el) => {
+      let d = el.closest("details");
+      while (d) {
+        d.open = true;
+        d = d.parentElement?.closest("details") ?? null;
+      }
+    });
+    await expect(row).toBeVisible({ timeout: 30_000 });
     await row.getByTestId("roster-link-withdraw-open").click();
     await row.getByTestId("roster-link-withdraw-confirm").click();
     await expect.poll(async () => (await rows<{ link_state: string }>(`organization_people?id=eq.${idWithdraw}&select=link_state`))[0].link_state, { timeout: 60_000, message: "UI withdraw must return the row to unlinked" }).toBe("unlinked");
