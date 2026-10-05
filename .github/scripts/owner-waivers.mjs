@@ -872,7 +872,10 @@ export const SCOPED_OWNER_WAIVERS = [
       "The manager hour-allocation surface /dashboard/hours (M3, decision package docs/DECISIONS/0010-owner-migration-decision-package-2026-08-31.md Item 2)",
     // #2101 — OWNER AUTHORISATION 2026-10-02 (task directive): the `/hours`
     // no-company state gets a link to the Work Journal; only that dead end.
-    pullRequests: [1344, 2101],
+    // #2159 — OWNER DECISION 2026-10-05 (option 1): the default day when no
+    // `?d=` is given comes from `viewerWorkToday()` instead of the UTC day.
+    // One-line correctness edit; the three waived answers are unchanged.
+    pullRequests: [1344, 2101, 2159],
     // Deliberately empty — the waiver lives IN the branch whose CI must
     // honour it, so pinning the head SHA would change the head SHA.
     approvedHeadShas: [],
