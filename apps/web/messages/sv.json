@@ -3637,6 +3637,10 @@
           "label": "Flytta en person till ett annat projekt",
           "description": "Tilldelar det nya projektet och avslutar den tidigare tilldelningen — efter konsekvensvisningen."
         },
+        "keepAssignment": {
+          "label": "Behåll en tilldelning trots en kalenderkonflikt",
+          "description": "Registrerar ditt beslut att behålla tilldelningen med vetskap om konflikten, med en sluten orsakskod. Inget sparas utan kvitto."
+        },
         "offerCapacity": {
           "label": "Registrera vad ni erbjuder"
         }
@@ -3960,6 +3964,9 @@
       "assignAlreadyCommitted": "[EN] Note: they are already committed on some of these dates ({count}). The assignment stands — you decide.",
       "assignCommitmentUnknown": "[EN] We could not confirm these dates are free. That is not the same as free.",
       "assignFailed": "[EN] The assignment could not be made.",
+      "keepPrompt": "Personen är redan bunden de här dagarna. Behåller du tilldelningen medvetet? Välj en orsak - beslutet registreras.",
+      "keepRecorded": "Registrerat: du behöll tilldelningen medvetet.",
+      "keepFailed": "Beslutet kunde inte registreras, så inget sparades. Försök igen.",
       "chipEngagements": "Vem jag arbetar med",
       "userEngagements": "Vem arbetar jag med?",
       "engagementsOpened": "Här är de registrerade arbetsrelationerna. Du kan avsluta en av dem i panelen.",

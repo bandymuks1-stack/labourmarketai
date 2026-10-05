@@ -317,6 +317,18 @@ export default async function ProjectsPage({
     reservationUndo: t("assign.reservation.undo"),
     reservationKeep: t("assign.reservation.keep"),
     reservationDecided: t("assign.reservation.decided"),
+    overrideReasons: {
+      label: t("assign.reservation.reasonLabel"),
+      none: t("assign.reservation.reasonNone"),
+      failed: t("assign.reservation.keepFailed"),
+      options: {
+        agreed_with_worker: t("assign.reservation.reason.agreed_with_worker"),
+        agreed_with_client: t("assign.reservation.reason.agreed_with_client"),
+        partial_overlap: t("assign.reservation.reason.partial_overlap"),
+        urgent_need: t("assign.reservation.reason.urgent_need"),
+        other: t("assign.reservation.reason.other"),
+      },
+    },
     precheckChecking: t("assign.reservation.precheckChecking"),
     precheckCollidesTitle: t("assign.reservation.precheckCollidesTitle"),
     precheckChoose: t("assign.reservation.precheckChoose"),

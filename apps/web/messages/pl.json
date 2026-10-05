@@ -6019,6 +6019,16 @@
         "precheckChoose": "Wybierz zamiast tego",
         "precheckAssignAnyway": "Przypisz mimo to",
         "precheckAdvisory": "Tylko ostrzeżenie: sprawdzone przed chwilą i niesprawdzane ponownie przy zapisie. Nic jeszcze nie zostało przypisane.",
+        "reasonLabel": "Powód pozostawienia (opcjonalnie)",
+        "reasonNone": "Nie podano powodu",
+        "keepFailed": "Nie udało się zapisać potwierdzenia wyjątku. Nic nie zapisano - spróbuj ponownie.",
+        "reason": {
+          "agreed_with_worker": "Uzgodnione z pracownikiem",
+          "agreed_with_client": "Uzgodnione ze zleceniodawcą",
+          "partial_overlap": "Nakładanie tylko częściowe",
+          "urgent_need": "Pilna potrzeba",
+          "other": "Inne"
+        },
         "collidesTitle": "Już zaangażowany w tych terminach",
         "notBlocking": "To nie blokuje przypisania — Ty decydujesz, co jest właściwe.",
         "alternativesTitle": "Wolni w tych dniach",
@@ -13169,6 +13179,10 @@
           "label": "Przenieś osobę do innego projektu",
           "description": "Przypisuje do nowego projektu i kończy poprzednie przypisanie — po podglądzie skutków."
         },
+        "keepAssignment": {
+          "label": "Zachowaj przydział mimo konfliktu w kalendarzu",
+          "description": "Zapisuje Twoją decyzję o zachowaniu przydziału ze świadomością konfliktu, z zamkniętym kodem powodu. Bez potwierdzenia nic nie jest zapisywane."
+        },
         "offerCapacity": {
           "label": "Zapisz swoją ofertę"
         }
@@ -13530,6 +13544,9 @@
       "assignAlreadyCommitted": "Uwaga: ta osoba jest już zaangażowana w niektóre z tych dni ({count}). Przypisanie zostaje utrzymane — decyzja należy do Ciebie.",
       "assignCommitmentUnknown": "Nie udało się potwierdzić, że te dni są wolne. To nie to samo, co wolne.",
       "assignFailed": "Nie udało się dokonać przypisania.",
+      "keepPrompt": "Ta osoba ma już zobowiązania w tych dniach. Czy zachowujesz przydział świadomie? Wybierz powód - decyzja zostanie zapisana.",
+      "keepRecorded": "Zapisano: zachowano przydział świadomie.",
+      "keepFailed": "Nie udało się zapisać decyzji, więc nic nie zapisano. Spróbuj ponownie.",
       "chipEngagements": "Z kim pracuję",
       "userEngagements": "Z kim pracuję?",
       "engagementsOpened": "Oto zapisane relacje robocze. Jedną z nich możesz zakończyć w panelu.",

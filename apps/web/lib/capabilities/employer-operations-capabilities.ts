@@ -1,6 +1,7 @@
 import "server-only";
 
 import { countedOnce } from "@/lib/journal/counted-once";
+import { createHash } from "node:crypto";
 import { z } from "zod";
 
 import { requireEmployerCompanyForCaller } from "@/lib/company/employer-company-context";
@@ -21,6 +22,12 @@ import {
   nextStatuses,
   PROJECT_STATUSES,
 } from "@/lib/projects/project-lifecycle-model";
+import {
+  currentReceiptCollisions,
+  keepOverrideCore,
+  reservationVerdictFor,
+} from "@/lib/projects/override-keep-core";
+import { OVERRIDE_REASON_CODES } from "@/lib/projects/override-receipt-model";
 import type { ExecResult } from "@/lib/conversation/executor-contract";
 
 import {
@@ -837,6 +844,44 @@ const assignmentFingerprint = (
   s: AssignmentSubject,
 ) => `${op}:${organizationId}:${s.project.id}:${s.workerId ?? "?"}:${s.currentStatus ?? "none"}`;
 
+/**
+ * CAL-7 for the MCP door: the SAME reservation verdict the project page and the
+ * chat show (`reservationVerdictFor`, the one core), as the model-facing facts
+ * it needs: kind + shared days (+ the place for a trip / project title; an
+ * absence NEVER carries a label). null = the check could not run (never read as
+ * "clear"). Absent the explicit caller the cookie session would be read, so the
+ * caller's OWN RLS-scoped client is always passed.
+ */
+async function clashFor(caller: CapabilityCaller, projectId: string, workerProfileId: string) {
+  try {
+    const r = await reservationVerdictFor(caller.supabase, projectId, workerProfileId, {
+      supabase: caller.supabase,
+      userId: caller.userId,
+    });
+    if (!r) return null;
+    return {
+      state: r.verdict.state,
+      collisions: r.verdict.collisions.map((c) => ({
+        kind: c.source as string,
+        label: c.source === "absence" ? null : c.label,
+        overlapStart: c.overlapStart,
+        overlapEnd: c.overlapEnd,
+      })),
+      unreadable: r.verdict.gaps.length,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** What the person is told after an assignment that stands over a clash. The
+ *  decision is PENDING - exactly the state the project page leaves it in
+ *  (keep / undo / swap controls visible, no receipt yet). */
+const KEEP_NEXT =
+  "The assignment stands; nothing blocked it. To keep it KNOWINGLY, call assignment.keep_draft then assignment.keep_confirm " +
+  "with the same projectId and workerProfileId and an optional closed reasonCode " +
+  `(${OVERRIDE_REASON_CODES.join(" | ")}). Until then no override receipt exists. To undo, use assignment.end_draft.`;
+
 function makeAssignmentPair(op: "assign" | "end"): [CapabilityDescriptor, CapabilityDescriptor] {
   const draftId = op === "assign" ? "assignment.create_draft" : "assignment.end_draft";
   const confirmId = op === "assign" ? "assignment.create_confirm" : "assignment.end_confirm";
@@ -881,9 +926,24 @@ function makeAssignmentPair(op: "assign" | "end"): [CapabilityDescriptor, Capabi
         userId: caller.userId,
         stateFingerprint: assignmentFingerprint(op, employer.organizationId, s),
       });
+      // Advisory only (checked now, not re-checked at confirm): the same
+      // verdict the page's pre-check shows. It never blocks (SEP-2).
+      const calendar = op === "assign" ? await clashFor(caller, parsed.projectId, parsed.workerProfileId) : undefined;
       return {
         ok: true,
         data: {
+          ...(op === "assign"
+            ? {
+                calendar: calendar ?? { state: "unknown", collisions: [], unreadable: 1 },
+                calendarNote:
+                  calendar?.state === "collides"
+                    ? "This person is already committed on some of these dates. Confirming still assigns (a warning never blocks); " +
+                      "you will then be asked to keep it knowingly or undo it."
+                    : calendar?.state === "clear"
+                      ? "No clash found."
+                      : "The calendar could not be fully checked. Unknown is not the same as free.",
+              }
+            : {}),
           preview: {
             actingFor: employer.organizationName,
             project: { id: s.project.id, title: s.project.title, status: s.project.status, city: s.project.city },
@@ -943,6 +1003,9 @@ function makeAssignmentPair(op: "assign" | "end"): [CapabilityDescriptor, Capabi
         .eq("project_id", parsed.projectId)
         .eq("worker_id", s.workerId)
         .maybeSingle();
+      // CAL-7 AFTER the write (a reservation warns, it never prohibits) - the
+      // same order and the same verdict as assignWorkerToProjectAction.
+      const calendar = op === "assign" ? await clashFor(caller, parsed.projectId, parsed.workerProfileId) : undefined;
       return {
         ok: true,
         data: {
@@ -952,12 +1015,163 @@ function makeAssignmentPair(op: "assign" | "end"): [CapabilityDescriptor, Capabi
           person: { workerProfileId: parsed.workerProfileId, name: s.workerName },
           readBack: row ?? null,
           structuredDestination: `/dashboard/projects/${s.project.id}`,
+          ...(op === "assign"
+            ? {
+                calendar: calendar ?? { state: "unknown", collisions: [], unreadable: 1 },
+                ...(calendar?.state === "collides"
+                  ? { override: { status: "pending", reasonCodes: [...OVERRIDE_REASON_CODES], next: KEEP_NEXT } }
+                  : {}),
+              }
+            : {}),
         },
       };
     },
   };
   return [draft, confirm];
 }
+
+// ── assignment.keep_* — the MCP door of "keep knowingly" ───────────────────
+//
+// J-TIME-FREEDOM (clash -> authorized override -> immutable receipt) had one
+// door, the web page. This is the SAME decision for an authorized assistant:
+// draft -> confirm like every other consequential write, over the SAME core
+// (`keepOverrideCore`, which keepAssignmentAction and the chat action
+// `company.keep-assignment` also call). The collisions are NEVER an input: the
+// draft recomputes them server-side and binds the token to them, so a model
+// cannot assert a clash that is not there (and the database independently
+// verifies each listed clash against its source row). BASIS-AGNOSTIC: the
+// person may hold a person assignment or be a member of an active TEAM
+// assignment on the project - the database resolves which; the team tools
+// reuse this pair unchanged.
+
+const keepFields = z
+  .object({
+    projectId: z.string().uuid(),
+    workerProfileId: z.string().uuid(),
+    reasonCode: z.enum(OVERRIDE_REASON_CODES).optional(),
+  })
+  .strict();
+
+const keepConfirmInput = keepFields.extend({ confirmationToken: z.string().min(10) });
+
+const keepFingerprint = (organizationId: string, s: AssignmentSubject, collisions: unknown) =>
+  `keep:${organizationId}:${s.project.id}:${s.workerId ?? "?"}:` +
+  createHash("sha256").update(JSON.stringify(collisions)).digest("hex").slice(0, 24);
+
+const assignmentKeepDraft: CapabilityDescriptor = {
+  id: "assignment.keep_draft",
+  kind: "draft",
+  title: "Draft keeping an assignment knowingly despite a calendar clash",
+  description:
+    "For a person assigned to the project - by a person assignment OR as a member of an active team assignment - who is " +
+    "already committed on some of the project's dates. Recomputes the clash SERVER-SIDE now (never taken from you), names it, and returns a " +
+    "one-time token bound to that exact clash. NOTHING is written. The reason is optional and CLOSED " +
+    `(${OVERRIDE_REASON_CODES.join(" | ")}); there is no free text. Confirming records an immutable, privacy-minimal receipt.`,
+  exposed: true,
+  annotations: readOnly,
+  inputSchema: keepFields,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = keepFields.parse(input);
+    const employer = await employerOrRefusal(caller);
+    if (!employer.ok) return demandContextRefusal(employer.reason);
+    const resolved = await resolveAssignmentSubject(caller, employer, parsed);
+    if (!resolved.ok) return resolved.result;
+    const s = resolved.subject;
+    if (!s.workerId) return { ok: false, code: "not_found", message: "No such worker." };
+    const current = await currentReceiptCollisions(caller.supabase, parsed.projectId, parsed.workerProfileId, {
+      supabase: caller.supabase,
+      userId: caller.userId,
+    });
+    if (!current) {
+      return { ok: false, code: "unavailable", message: "The calendar could not be checked, so nothing can be recorded blind." };
+    }
+    if (current.state !== "collides" || current.collisions.length === 0) {
+      return { ok: false, code: "no_clash", message: "There is no calendar clash now, so there is nothing to keep knowingly." };
+    }
+    const token = mintCapabilityConfirmation({
+      actionId: "assignment.keep_confirm",
+      input: parsed,
+      userId: caller.userId,
+      stateFingerprint: keepFingerprint(employer.organizationId, s, current.collisions),
+    });
+    return {
+      ok: true,
+      data: {
+        preview: {
+          actingFor: employer.organizationName,
+          project: { id: s.project.id, title: s.project.title },
+          person: { workerProfileId: parsed.workerProfileId, name: s.workerName },
+          // kind + shared days only (an absence never carries more).
+          clashes: current.collisions.map((c) => ({ kind: c.kind, overlapStart: c.overlapStart, overlapEnd: c.overlapEnd })),
+          reasonCode: parsed.reasonCode ?? null,
+          change: "records an immutable override receipt; assigns and ends nothing",
+        },
+        confirmationToken: token,
+        note: "Nothing was written. Confirming requires assignment.keep_confirm with this exact input and token.",
+      },
+    };
+  },
+};
+
+const assignmentKeepConfirm: CapabilityDescriptor = {
+  id: "assignment.keep_confirm",
+  kind: "confirm",
+  title: "Confirm keeping the assignment knowingly",
+  description:
+    "Verifies the token against the exact input, the caller's CURRENT organization and the clash as it stands NOW (a changed calendar voids it), " +
+    "then calls the same core the project page uses. Reports 'kept' ONLY when the receipt exists; any failure means NOTHING was saved and the decision is not made.",
+  exposed: true,
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  inputSchema: keepConfirmInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const { confirmationToken, ...parsed } = keepConfirmInput.parse(input);
+    const employer = await employerOrRefusal(caller);
+    if (!employer.ok) return demandContextRefusal(employer.reason);
+    const resolved = await resolveAssignmentSubject(caller, employer, parsed);
+    if (!resolved.ok) return resolved.result;
+    const s = resolved.subject;
+    const current = await currentReceiptCollisions(caller.supabase, parsed.projectId, parsed.workerProfileId, {
+      supabase: caller.supabase,
+      userId: caller.userId,
+    });
+    if (!current) {
+      return { ok: false, code: "unavailable", message: "The calendar could not be checked. NOTHING was saved; the decision is not made." };
+    }
+    const verdict = verifyCapabilityConfirmation({
+      actionId: "assignment.keep_confirm",
+      token: confirmationToken,
+      input: parsed,
+      userId: caller.userId,
+      currentStateFingerprint: keepFingerprint(employer.organizationId, s, current.collisions),
+    });
+    if (!verdict.ok) {
+      return { ok: false, code: "confirmation_rejected", message: `Confirmation token rejected (${verdict.reason}). Draft again.` };
+    }
+    const r = await keepOverrideCore(caller.supabase, {
+      projectId: parsed.projectId,
+      workerProfileId: parsed.workerProfileId,
+      reasonCode: parsed.reasonCode ?? null,
+      caller: { supabase: caller.supabase, userId: caller.userId },
+    });
+    if (!r.ok) {
+      const code =
+        r.code === "not_authorized" ? "not_authorized" : r.code === "needs_migration" ? "needs_migration" : r.code === "invalid" ? "invalid" : "unavailable";
+      return { ok: false, code, message: "The override receipt could not be recorded. NOTHING was saved; the decision is not made." };
+    }
+    return {
+      ok: true,
+      data: {
+        status: r.receipt === "recorded" ? "kept" : "not_needed",
+        actingFor: employer.organizationName,
+        project: { id: s.project.id, title: s.project.title },
+        person: { workerProfileId: parsed.workerProfileId, name: s.workerName },
+        reasonCode: parsed.reasonCode ?? null,
+        ...(r.receiptId ? { receiptId: r.receiptId } : {}),
+        structuredDestination: `/dashboard/projects/${s.project.id}`,
+      },
+    };
+  },
+};
 
 const [assignmentCreateDraft, assignmentCreateConfirm] = makeAssignmentPair("assign");
 const [assignmentEndDraft, assignmentEndConfirm] = makeAssignmentPair("end");
@@ -1059,5 +1273,7 @@ export const EMPLOYER_OPERATIONS_CAPABILITIES: readonly CapabilityDescriptor[] =
   assignmentCreateConfirm,
   assignmentEndDraft,
   assignmentEndConfirm,
+  assignmentKeepDraft,
+  assignmentKeepConfirm,
   journalReviewQueueGet,
 ];

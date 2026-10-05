@@ -11,7 +11,7 @@ import type { DemandLifecycleResult } from "@/lib/demand/demand-lifecycle";
 import { setShortlistAction } from "@/lib/scouting/scouting-actions";
 import { requestWorkerConversationAction } from "@/lib/communication/request-worker-conversation";
 import { proposeBookingAction } from "@/lib/booking/booking-actions";
-import { assignWorkerToProjectAction, createProjectAction, endAssignmentAction, type ProjectActionOk, type ProjectActionResult } from "@/lib/projects/actions";
+import { assignWorkerToProjectAction, createProjectAction, endAssignmentAction, keepAssignmentAction, type ProjectActionOk, type ProjectActionResult } from "@/lib/projects/actions";
 import {
   acceptConnectionAction,
   declineConnectionAction,
@@ -301,6 +301,18 @@ export const COMPANY_EXECUTORS: {
     if (!r.ok) return { ok: false, code: r.code, message: r.message };
     const data = assignPayload(r);
     return data ? { ok: true, data } : { ok: true };
+  },
+
+  "company.keep-assignment": async (input) => {
+    // J-TIME-FREEDOM, the chat door of the SAME decision the project page
+    // offers after an assignment over a known clash. `keepAssignmentAction` ->
+    // the ONE keep core: collisions recomputed SERVER-SIDE (the input carries
+    // only ids and a CLOSED reason code), fail-loud — "ok" only when the
+    // receipt exists (or the clash is gone), so the chat can never say
+    // "kept" for a decision nobody recorded.
+    const r = await keepAssignmentAction(input.projectId, input.workerProfileId, input.reasonCode ?? null);
+    if (!r.ok) return { ok: false, code: r.code };
+    return { ok: true, data: { receipt: r.receipt } };
   },
 
   "company.move-worker": async (input) => {

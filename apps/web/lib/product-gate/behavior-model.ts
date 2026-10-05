@@ -420,8 +420,12 @@ export const BEHAVIOR_CONFORMANCE = {
   // (saveCompanySetup → save_company_setup_v3). Anchored to
   // /dashboard/company/settings; keyed to the company actor type (subject
   // "company"), so actionsKeyedToARelationship stays 1 and the verdict stands.
-  conversationActions: 56,
-  actionsAnchoredToAPage: 56,
+  // 56 → 57 (2026-10-05, J-TIME-FREEDOM): +1 `company.keep-assignment` — the chat
+  // door of the knowing override the project page already offers (one keep
+  // core behind the page action, this action and the MCP assignment.keep_*
+  // tools). Anchored to /dashboard/projects; keyed to the company actor type.
+  conversationActions: 57,
+  actionsAnchoredToAPage: 57,
   /** The one action keyed to a relationship rather than to an RBAC role. */
   actionsKeyedToARelationship: 1,
   actionsThatOnlyDeepLink: 11,

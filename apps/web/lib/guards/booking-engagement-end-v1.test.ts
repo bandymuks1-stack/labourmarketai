@@ -1545,6 +1545,12 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261003150600_brigade_work_assignment_v1.sql",
       // 2026-10-04: WRK-6 follow-up — a team assignment becomes an active Journal/work context (replaces 4 live fns + 2 policies, SECURITY DEFINER) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261003150700_brigade_journal_context_v1.sql",
+      // 2026-10-03: J-TIME-FREEDOM override receipt (new append-only table + SECURITY DEFINER writer) - marker is the human-gate acknowledgement; draft + needs-human-gate, NOT applied.
+      "20261003150100_commitment_override_receipts_v1.sql",
+      // 2026-10-04: receipt team basis (extends the writer for members of an actively assigned team) - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      "20261003150900_commitment_override_receipt_brigade_basis_v1.sql",
+      // 2026-10-05: receipt collisions verified against the real source rows (new INTERNAL SECURITY DEFINER validator + writer replacement) - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      "20261003150950_commitment_override_collision_validation_v1.sql",
 ]);
   });
 

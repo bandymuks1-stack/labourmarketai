@@ -6019,6 +6019,16 @@
         "precheckChoose": "Rinktis šį",
         "precheckAssignAnyway": "Vis tiek priskirti",
         "precheckAdvisory": "Tik perspėjimas: patikrinta ką tik ir nepatikrinama iš naujo išsaugant. Kol kas nieko nepriskirta.",
+        "reasonLabel": "Palikimo priežastis (nebūtina)",
+        "reasonNone": "Priežastis nenurodyta",
+        "keepFailed": "Išimties kvito nepavyko įrašyti. Niekas neišsaugota - bandykite dar kartą.",
+        "reason": {
+          "agreed_with_worker": "Suderinta su darbuotoju",
+          "agreed_with_client": "Suderinta su užsakovu",
+          "partial_overlap": "Sutampa tik iš dalies",
+          "urgent_need": "Skubus poreikis",
+          "other": "Kita"
+        },
         "collidesTitle": "Šiomis dienomis jau turi įsipareigojimų",
         "notBlocking": "Tai neužkerta kelio priskyrimui — sprendimas jūsų.",
         "alternativesTitle": "Laisvi šiomis dienomis",
@@ -13169,6 +13179,10 @@
           "label": "Perkelti žmogų į kitą projektą",
           "description": "Priskiria naujam projektui ir baigia ankstesnį priskyrimą — po pasekmių peržiūros."
         },
+        "keepAssignment": {
+          "label": "Palikti priskyrimą nepaisant kalendoriaus kolizijos",
+          "description": "Užfiksuoja jūsų sprendimą palikti priskyrimą žinant apie koliziją, su uždaru priežasties kodu. Nieko neišsaugoma, jei kvito nėra."
+        },
         "offerCapacity": {
           "label": "Užrašyti, ką siūlote"
         }
@@ -13530,6 +13544,9 @@
       "assignAlreadyCommitted": "Pastaba: kai kuriomis šiomis dienomis jis (-i) jau turi įsipareigojimų ({count}). Priskyrimas galioja — sprendimas jūsų.",
       "assignCommitmentUnknown": "Nepavyko patvirtinti, kad šios dienos laisvos. Tai nėra tas pat, kas laisva.",
       "assignFailed": "Priskyrimo atlikti nepavyko.",
+      "keepPrompt": "Šiomis dienomis jis (-i) jau užimtas (-a). Ar paliekate sąmoningai? Pasirinkite priežastį - sprendimas bus užfiksuotas.",
+      "keepRecorded": "Užfiksuota: priskyrimą palikote sąmoningai.",
+      "keepFailed": "Sprendimo užfiksuoti nepavyko, todėl nieko neišsaugota. Bandykite dar kartą.",
       "chipEngagements": "Su kuo dirbu",
       "userEngagements": "Su kuo aš dirbu?",
       "engagementsOpened": "Štai įrašyti darbo santykiai. Skydelyje galite vieną iš jų užbaigti.",
