@@ -73,6 +73,18 @@ function boxes(step: number, mobile: boolean): Box[] {
 }
 
 const ease = (t: number) => t * t * (3 - 2 * t);
+
+/** First paint, before any script: the SETTLED first state, in percent units.
+ *  The first draw swaps these for the pixel transforms the animation uses. */
+const FIRST = boxes(0, false);
+const initialTile = (i: number) => {
+  const b = FIRST[i]!;
+  return { left: `${(b.cx - b.w / 2) * 100}%`, top: `${b.cy * 100}%`, transform: "translateY(-50%)", width: `${b.w * 100}%`, aspectRatio: `1 / ${b.asp}`, opacity: 1 } as const;
+};
+const initialChip = (i: number) => {
+  const b = FIRST[i]!;
+  return { left: `${(b.cx - b.w / 2) * 100}%`, top: `calc(${b.cy * 100}% + ${b.w * b.asp * 50}cqw + 10px)`, opacity: 1 } as const;
+};
 const lerp = (a: number, b: number, u: number) => a + (b - a) * u;
 /** where the chip sits relative to its tile: 0 below, 1 to the right */
 const CHIP_SIDE = [0, 1, 1, 1] as const;
@@ -145,7 +157,7 @@ export function StateStage({
         if (!el || !ch) return;
         // each tile leaves a beat after the one before it, so the stage is
         // recomposed in order (people, then the project, then the company)
-        const u = ease(Math.min(1, Math.max(0, (raw * 1.5 - i * 0.1))));
+        const u = ease(Math.min(1, Math.max(0, (raw - i * 0.03) / 0.62)));
         const w = lerp(A[i]!.w, B[i]!.w, u) * W;
         const h = w * lerp(A[i]!.asp, B[i]!.asp, u);
         const cx = lerp(A[i]!.cx, B[i]!.cx, u) * W;
@@ -160,17 +172,26 @@ export function StateStage({
         const side = lerp(sides[s0]!, sides[s0 + 1]!, u);
         const chx = lerp(cx - w / 2, cx + w / 2 + 14, side);
         const chy = lerp(cy + h / 2 + 10, cy - 14, side);
-        ch.style.transform = `translate3d(${chx}px, ${chy}px, 0)`;
+        // never let a chip leave the stage: if it would, it drops under its tile instead
+        const kk = Math.min(3, Math.max(0, Math.round(p)));
+        const cw = (ch.children[kk] as HTMLElement | undefined)?.offsetWidth ?? 0;
+        let fx = chx, fy = chy;
+        if (cw && chx + cw > W - 8) { fx = Math.max(8, Math.min(cx - w / 2, W - cw - 8)); fy = cy + h / 2 + 10; }
+        el.style.left = "0"; el.style.top = "0"; ch.style.left = "0"; ch.style.top = "0";
+        el.style.aspectRatio = "auto";
+        ch.style.transform = `translate3d(${fx}px, ${fy}px, 0)`;
         const nearest = Math.round(p);
         ch.style.opacity = String(w < 18 ? 0 : 1);
         Array.from(ch.children).forEach((c, k) => {
-          (c as HTMLElement).style.opacity = String(Math.max(0, 1 - Math.abs(p - k) * 2.2));
-          (c as HTMLElement).style.visibility = Math.abs(p - k) < 0.46 ? "visible" : "hidden";
+          // chips belong to a SETTLED state: they leave early, the tiles travel alone, they arrive late
+          const near = Math.max(0, 1 - Math.abs(p - k) / 0.22);
+          (c as HTMLElement).style.opacity = String(ease(near));
+          (c as HTMLElement).style.visibility = near > 0.01 ? "visible" : "hidden";
         });
         void nearest;
       });
       // IN MOTION: the people are connected to the project they belong to
-      const mot = Math.max(0, 1 - Math.abs(p - 1) * 2.4);
+      const mot = ease(Math.max(0, 1 - Math.abs(p - 1) / 0.22));
       const pr = tileEls.current[3];
       const parse = (el: HTMLElement) => {
         const m = /translate3d\(([-\d.]+)px, ([-\d.]+)px/.exec(el.style.transform || "");
@@ -199,9 +220,10 @@ export function StateStage({
   }, [mobile, reduce, onStep]);
 
   const headline = headlineFor(remaining);
-  if (mobile) return <MobileStage model={model} headline={headline} />;
   return (
-    <div ref={outer} data-testid="state-stage" data-step={step} className={cn("relative", mobile ? "" : "h-[340svh]")}>
+    <>
+    <div className="md:hidden"><MobileStage model={model} headline={headline} /></div>
+    <div ref={outer} data-testid="state-stage" data-step={step} className="relative h-[340svh] max-md:hidden">
       <div className={cn(mobile ? "relative" : "sticky top-16 h-[calc(100svh-4rem)]", "flex flex-col overflow-hidden px-4 pb-5 pt-7 md:px-10 md:pt-10")}>
         <Eyebrow>{model.date} · {model.actingAs.name}</Eyebrow>
         <h1 className="mt-3 max-w-[16ch] font-display text-[clamp(2.7rem,7.4vw,6.4rem)] font-semibold leading-[0.96] tracking-[-0.05em] md:max-w-none" data-testid="stage-headline">
@@ -209,9 +231,9 @@ export function StateStage({
         </h1>
 
         {/* the objects */}
-        <div ref={area} className={cn("relative mt-4 w-full flex-1", mobile && "min-h-[430px]")}>
+        <div ref={area} className="relative mt-4 w-full flex-1 [container-type:inline-size]">
           {model.tiles.map((t, i) => (
-            <div key={i} ref={(el) => { tileEls.current[i] = el; }} className="absolute left-0 top-0 will-change-transform" style={{ opacity: 0 }}>
+            <div key={i} ref={(el) => { tileEls.current[i] = el; }} className="absolute will-change-transform" data-compact="0" style={initialTile(i)}>
               <EntityCard entity={t.entity} aspect="fill" selected={step === 0 && i === 0}>
                 <span className="hidden" />
               </EntityCard>
@@ -224,9 +246,9 @@ export function StateStage({
             <div className="h-full rounded-full bg-[rgb(235,200,95)]" style={{ width: `${Math.round((model.motion[0]?.progress ?? 0.06) * 100)}%` }} />
           </div>
           {model.tiles.map((t, i) => (
-            <div key={`c${i}`} ref={(el) => { chipEls.current[i] = el; }} className="pointer-events-none absolute left-0 top-0 will-change-transform" style={{ opacity: 0 }}>
+            <div key={`c${i}`} ref={(el) => { chipEls.current[i] = el; }} className="pointer-events-none absolute will-change-transform" data-compact="0" style={initialChip(i)}>
               {t.chips.map((c: Chip, k) => (
-                <div key={k} className={cn("absolute left-0 top-0", mobile ? "w-[30vw] min-w-[110px] whitespace-normal" : "whitespace-nowrap")}>
+                <div key={k} className="absolute left-0 top-0 whitespace-nowrap" style={k === 0 ? undefined : { visibility: "hidden" }}>
                   {k === 2 ? <Chain tile={t} /> : <ChipView chip={c} who={resolve(t.entity).title} />}
                 </div>
               ))}
@@ -251,6 +273,7 @@ export function StateStage({
         </div>
       </div>
     </div>
+    </>
   );
 }
 
@@ -261,14 +284,14 @@ function ChipView({ chip, who }: { readonly chip: Chip; readonly who?: string })
       <span className="chip-name text-[1.02rem] font-medium leading-none text-text-primary">{who}</span>
     <span
       className={cn(
-        "inline-flex min-h-8 items-center gap-2 rounded-[18px] px-3.5 py-1 text-[0.88rem] font-medium leading-tight backdrop-blur-sm",
+        "inline-flex min-h-8 max-w-[min(26rem,78vw)] items-center gap-2 rounded-[18px] px-3.5 py-1 text-[0.88rem] font-medium leading-tight backdrop-blur-sm",
         tone === "action" && "bg-[rgba(212,175,55,0.16)] text-[rgb(235,200,95)] shadow-[inset_0_0_0_1px_rgba(212,175,55,0.5)]",
         tone === "event" && "bg-[rgba(52,211,153,0.12)] text-[rgb(110,231,183)] shadow-[inset_0_0_0_1px_rgba(52,211,153,0.4)]",
         tone === "quiet" && "bg-[rgba(245,241,232,0.07)] text-text-secondary shadow-[inset_0_0_0_1px_rgba(245,241,232,0.12)]",
       )}
     >
       <span aria-hidden className={cn("inline-block h-1.5 w-1.5 rounded-full", tone === "action" && "bg-[rgb(235,200,95)]", tone === "event" && "bg-[rgb(52,211,153)]", tone === "quiet" && "bg-text-muted")} />
-      {chip.text}
+      <span className="truncate">{chip.text}</span>
     </span>
     </span>
   );
@@ -291,9 +314,9 @@ function MobileStage({ model, headline }: { readonly model: Dashboard; readonly 
   const t = model.tiles;
   const chip = (i: number, k: number) => <ChipView chip={t[i]!.chips[k]!} />;
   return (
-    <div data-testid="state-stage" data-step={step} className="px-4 pb-7 pt-7">
+    <div data-testid="state-stage-mobile" data-step={step} className="px-4 pb-7 pt-7">
       <Eyebrow>{model.date} · {model.actingAs.name}</Eyebrow>
-      <h1 className="mt-3 font-display text-[clamp(2.6rem,12vw,3.6rem)] font-semibold leading-[0.96] tracking-[-0.05em]" data-testid="stage-headline">
+      <h1 className="mt-3 font-display text-[clamp(2.3rem,10.5vw,3.2rem)] font-semibold leading-[0.96] tracking-[-0.05em]" data-testid="stage-headline-mobile">
         <Accented text={headline} />
       </h1>
 
@@ -305,7 +328,8 @@ function MobileStage({ model, headline }: { readonly model: Dashboard; readonly 
         ))}
       </div>
 
-      <div key={step} className="mt-5 min-h-[400px] [animation:rise-in_420ms_var(--motion-ease-out)_both]">
+      <div key={`c${step}`} className="mt-5 [animation:rise-in_500ms_var(--motion-ease-out)_both]"><p className="font-display text-[1.35rem] font-semibold leading-none tracking-[-0.03em]">{STATE_TITLES[step]}</p><p className="mt-2 max-w-[36ch] text-[0.95rem] leading-snug text-text-muted">{model.captions[step]}</p></div>
+      <div key={step} className="mt-6 min-h-[380px] [animation:rise-in_420ms_var(--motion-ease-out)_both]">
         {step === 0 ? (
           <ul className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-1 [&::-webkit-scrollbar]:hidden">
             {t.map((tile, i) => (
@@ -362,7 +386,6 @@ function MobileStage({ model, headline }: { readonly model: Dashboard; readonly 
         ) : null}
       </div>
 
-      <div key={`c${step}`} className="mt-6 [animation:rise-in_500ms_var(--motion-ease-out)_both]"><p className="font-display text-[1.35rem] font-semibold leading-none tracking-[-0.03em]">{STATE_TITLES[step]}</p><p className="mt-2 max-w-[36ch] text-[0.95rem] leading-snug text-text-muted">{model.captions[step]}</p></div>
     </div>
   );
 }

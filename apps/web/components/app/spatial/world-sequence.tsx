@@ -17,7 +17,6 @@ import {
   frameOpacity,
   laneHoursAt,
   lerp,
-  needAlpha,
   needOffset,
   project,
   ramp,

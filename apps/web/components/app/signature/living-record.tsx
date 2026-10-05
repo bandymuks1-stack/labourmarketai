@@ -6,7 +6,7 @@ import { LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { Capability, CapabilityId, Chapter, WorkRecord } from "@/lib/design-proof/sample";
 
-import { EVENT, FOCUS, MAX_HOURS, QUIET, strandPresence, strandWidth } from "./hues";
+import { FOCUS, MAX_HOURS, QUIET, strandPresence, strandWidth } from "./hues";
 import { Plate } from "./plate";
 
 /**

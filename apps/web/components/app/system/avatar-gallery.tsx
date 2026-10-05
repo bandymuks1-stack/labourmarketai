@@ -2,7 +2,6 @@ import { Brush, Hammer, MessageSquare, Search, Truck } from "lucide-react";
 
 import {
   COMPANIES,
-  PEOPLE,
   PROJECTS,
   TEAMS,
   companyById,

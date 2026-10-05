@@ -8,7 +8,7 @@ import { PEOPLE, type Person } from "@/lib/design-proof/product-fixtures";
 
 import { PersonAvatar } from "./identity";
 import { PageHeader } from "./shell";
-import { Avail, Btn, EvidenceBar, LevelMark, Segmented, Stamp } from "./ui";
+import { Avail, Btn, EvidenceBar, LevelMark, Stamp } from "./ui";
 
 /**
  * PEOPLE — find, compare, decide. A dense working list, not a gallery.

@@ -1,6 +1,6 @@
 import { COMPANIES, PROJECTS, TEAMS } from "@/lib/design-proof/product-fixtures";
 
-import { EntityCard, EntityThumb, type Entity } from "./entity";
+import { EntityCard, EntityThumb, resolve, type Entity } from "./entity";
 import { Eyebrow, RegionHead } from "./ui";
 
 /**
@@ -19,6 +19,13 @@ const E: { readonly label: string; readonly e: Entity }[] = [
   { label: "Project · media", e: { kind: "project", id: PROJECTS[0]!.id } },
 ];
 
+const EDGE: { readonly label: string; readonly e: Entity }[] = [
+  { label: "Long person name · German", e: { kind: "person", id: "ex1" } },
+  { label: "Long company name", e: { kind: "company", id: "exco" } },
+  { label: "Long project name", e: { kind: "project", id: "exp" } },
+  { label: "Team of 40", e: { kind: "team", id: "t40" } },
+];
+
 export function StressTest() {
   return (
     <div className="mx-auto max-w-[1280px] px-4 pb-28 pt-24 md:px-10" data-testid="stress-test">
@@ -31,6 +38,26 @@ export function StressTest() {
           </li>
         ))}
       </ul>
+
+      <div className="mt-20">
+        <Eyebrow>Long strings, translated strings, large teams</Eyebrow>
+        <ul className="mt-5 grid grid-cols-2 gap-5 md:grid-cols-4" data-testid="edge-cases">
+          {EDGE.map((x) => (
+            <li key={x.label} className="flex flex-col gap-2.5">
+              <EntityCard entity={x.e} aspect="4 / 5" />
+              <Eyebrow>{x.label}</Eyebrow>
+            </li>
+          ))}
+        </ul>
+        <ul className="mt-8">
+          {EDGE.map((x) => (
+            <li key={x.label} className="flex items-center gap-4 border-t border-text-primary/10 py-3 first:border-t-0">
+              <EntityThumb entity={x.e} size={64} />
+              <span className="min-w-0 truncate text-[1rem] font-medium">{resolve(x.e).title}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <div className="mt-16 grid gap-x-14 gap-y-10 md:grid-cols-2">
         <section>

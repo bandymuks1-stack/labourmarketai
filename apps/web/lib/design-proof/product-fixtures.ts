@@ -364,6 +364,21 @@ export const PEOPLE: readonly Person[] = [
     documents: [{ label: "Electrical licence (EE)", valid: "to 2028", state: "valid" }],
     progression: ["Electrician"],
   },
+  {
+    id: "ex1",
+    name: "Maximilian Alexander von Hohenzollern-Weidenfeld",
+    headline: "Gerüstbauer-Vorarbeiter für Fassaden- und Denkmalpflegearbeiten",
+    role: "Gerüstbauer-Vorarbeiter",
+    location: "Garmisch-Partenkirchen, DE",
+    availability: { state: "from", note: "Verfügbar ab dem 17. November" },
+    languages: ["Deutsch", "Englisch"],
+    years: 12,
+    caps: [cap("Gerüstbau an denkmalgeschützten Fassaden", "confirmed", 3100, 38, 4), cap("Arbeiten in großer Höhe", "confirmed", 2800, 33, 2)],
+    experience: [],
+    training: [],
+    documents: [],
+    progression: [],
+  },
 ];
 
 export const personById = (id: string): Person => PEOPLE.find((p) => p.id === id)!;
@@ -397,6 +412,7 @@ export const COMPANIES: readonly Company[] = [
   { id: "fjord", name: "Fjord Electric AS", kind: "Contractor", place: "Stavanger, NO" },
   { id: "tellingud", name: "Tallinna Tellingud OÜ", kind: "Contractor", place: "Tallinn, EE" },
   { id: "helios", name: "Helios Interiors GmbH", kind: "Employer", place: "Hamburg, DE" },
+  { id: "exco", name: "Internationale Gebäudetechnik und Anlagenbau GmbH & Co. KG", kind: "Contractor", place: "Ludwigshafen am Rhein, DE" },
 ];
 
 export const companyById = (id: string): Company => COMPANIES.find((c) => c.id === id)!;
@@ -427,6 +443,7 @@ export const PROJECTS: readonly Project[] = [
   },
   { id: "oldtown", name: "Old Town façade restoration", place: "Vilnius, LT", client: "baltic", from: "2 Mar", to: "30 Jun", status: "Planning" },
   { id: "hotel", name: "Hotel kitchen refit", place: "Stavanger, NO", client: "fjord", from: "12 Jan", to: "20 Mar", status: "Active" },
+  { id: "exp", name: "Erweiterung des Hauptbahnhofs, Bauabschnitt 3b — Gleisfeld Nord und Bahnsteigüberdachung", place: "Frankfurt am Main, DE", client: "exco", from: "2 Mar", to: "30 Sep", status: "Planning" },
 ];
 
 export const NEED = {
@@ -449,6 +466,7 @@ export const WEEKS = 14;
 export const TEAMS = {
   pair: { id: "t2", name: "Façade crew A", members: ["tk", "mt"] },
   five: { id: "t5", name: "Harbour core team", members: ["is", "tk", "mt", "mn", "ap"] },
+  huge: { id: "t40", name: "Großbaustelle Hauptbahnhof, alle Gewerke", members: Array.from({ length: 40 }, (_, i) => ["is", "tk", "mt", "mn", "ap", "do", "lf", "pz"][i % 8]!) },
   large: {
     id: "t14",
     name: "Stavanger hotel works",

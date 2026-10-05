@@ -113,7 +113,7 @@ export function EntityPlate({ entity, className }: { readonly entity: Entity; re
       <div className={base} data-plate={p.anonymous ? "person-anonymous" : "person-fallback"} style={{ background: p.anonymous ? "linear-gradient(165deg,#17181a,#26282b)" : `linear-gradient(165deg,${a},${b})` }}>
         <div aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(90% 70% at 85% 8%, ${p.anonymous ? "rgba(245,241,232,0.10)" : glow}, transparent 70%)` }} />
         <BigFigure hatched={p.anonymous} id={p.id} />
-        {!p.anonymous ? <span aria-hidden className="absolute left-[8%] top-[6%] font-display text-[clamp(1.6rem,22cqw,4.4rem)] font-semibold leading-none tracking-[-0.05em] text-[rgba(245,241,232,0.16)]">{p.name.split(" ").slice(0, 2).map((w) => w[0]).join("")}</span> : null}
+        {!p.anonymous ? <span aria-hidden className="absolute left-[8%] top-[6%] font-display text-[clamp(0.75rem,22cqw,4.4rem)] font-semibold leading-none tracking-[-0.05em] text-[rgba(245,241,232,0.16)]">{p.name.split(" ").slice(0, 2).map((w) => w[0]).join("")}</span> : null}
       </div>
     );
   }
@@ -137,7 +137,7 @@ export function EntityPlate({ entity, className }: { readonly entity: Entity; re
               <svg viewBox={c.logo.viewBox ?? "0 0 64 64"} className="h-[62%] w-[62%]" aria-hidden><path d={c.logo.path} fill="#151513" /></svg>
             </span>
           ) : (
-            <span className="font-display text-[clamp(2.4rem,9cqw,5rem)] font-bold leading-none tracking-[-0.05em] text-[rgba(245,241,232,0.9)]">
+            <span className="font-display text-[clamp(0.85rem,26cqw,5rem)] font-bold leading-none tracking-[-0.05em] text-[rgba(245,241,232,0.9)]">
               {c.name.split(/\s+/).filter((w) => !/^(AS|UAB|OÜ|GmbH|Sp\.|AB)$/i.test(w)).slice(0, 2).map((w) => w[0]).join("")}
             </span>
           )}
@@ -250,13 +250,13 @@ export function EntityCard({
       <span className="ec-text absolute inset-x-0 bottom-0 flex flex-col gap-1 p-[7%] pt-10">
         {entity.kind === "person" && !eyebrow ? (
           <>
-            <span className="font-display text-[clamp(1.15rem,8.5cqw,1.85rem)] font-semibold leading-[1.02] tracking-[-0.035em] text-text-primary">{title ?? r.title}</span>
+            <span className="font-display line-clamp-3 [overflow-wrap:anywhere] text-[clamp(1.15rem,8.5cqw,1.85rem)] font-semibold leading-[1.02] tracking-[-0.035em] text-text-primary">{title ?? r.title}</span>
             <span className="text-[clamp(0.85rem,5.2cqw,1rem)] font-medium leading-tight text-text-primary/85">{r.eyebrow}</span>
           </>
         ) : (
           <>
             <span className="sig-stamp !text-[0.68rem] !text-[rgba(235,200,95,0.95)]">{eyebrow ?? r.eyebrow}</span>
-            <span className="font-display text-[clamp(1.05rem,7.5cqw,1.7rem)] font-semibold leading-[1.05] tracking-[-0.03em] text-text-primary">{title ?? r.title}</span>
+            <span className="font-display line-clamp-3 [overflow-wrap:anywhere] text-[clamp(1.05rem,7.5cqw,1.7rem)] font-semibold leading-[1.05] tracking-[-0.03em] text-text-primary">{title ?? r.title}</span>
           </>
         )}
         {r.sub ? <span className="text-[0.8rem] leading-tight text-text-muted">{r.sub}</span> : null}

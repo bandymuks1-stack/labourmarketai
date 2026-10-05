@@ -4,9 +4,9 @@ import { ArrowRight, FileCheck2, GraduationCap } from "lucide-react";
 import type { Experience, Person } from "@/lib/design-proof/product-fixtures";
 import { COMPANIES } from "@/lib/design-proof/product-fixtures";
 
-import { CompanyMark, PersonAvatar } from "./identity";
+import { CompanyMark } from "./identity";
 import { EntityPlate } from "./entity";
-import { Accented, Avail, EvidenceBar, Eyebrow, LevelMark, RegionHead, Stamp } from "./ui";
+import { Avail, EvidenceBar, Eyebrow, LevelMark, RegionHead, Stamp } from "./ui";
 
 /**
  * THE LIVING CV — a person's working life, as normal people read it.
