@@ -1,4 +1,184 @@
 {
+  "counterparty": {
+    "link": {
+      "title": "Užsakovo darbo priėmimas",
+      "lead": "Užregistruokite savo organizaciją kaip užsakovą darbuotojui, kuris aktyviai priskirtas šiam projektui tiesiogiai arba per komandą. Tada darbuotojas galės pateikti jums savo darbą peržiūrai. Be tikro priskyrimo niekas neregistruojama.",
+      "empty": "Šiame projekte dar nėra aktyviai priskirtų darbuotojų. Pirmiausia priskirkite asmenį ar komandą — jie atsiras čia.",
+      "loadFailed": "Nepavyko įkelti šio projekto darbuotojų. Pabandykite po akimirkos.",
+      "honestNote": "Registruoti ar atšaukti gali tik pats užsakovo atstovas. Darbuotojas niekada negali užregistruoti savo užsakovo. Užsakovo priėmimas skiriasi nuo vadovo įrašo ir nėra mokėjimo įrašas.",
+      "unnamedWorker": "Darbuotojas be vardo",
+      "kind": {
+        "person": "Priskirtas tiesiogiai",
+        "team": "Priskirtas per komandą"
+      },
+      "roleLabel": "Jūsų vaidmuo šiame darbe",
+      "role": {
+        "client": "Užsakovas",
+        "end_client": "Galutinis užsakovas",
+        "project_owner": "Projekto savininkas",
+        "customer": "Klientas",
+        "contracting_party": "Sutarties šalis"
+      },
+      "register": "Registruoti kaip kitą šalį",
+      "registering": "Registruojama…",
+      "registered": "Užregistruota",
+      "registeredAs": "Užregistruota kaip: {role}",
+      "revoke": "Atšaukti",
+      "revoking": "Atšaukiama…",
+      "revokeQuestion": "Atšaukti? Nebegalėsite spręsti dėl šio darbuotojo pateikto darbo.",
+      "revokeConfirm": "Taip, atšaukti",
+      "cancel": "Atsisakyti",
+      "result": {
+        "registered": "Užregistruota. Darbuotojas dabar gali pateikti jums savo darbą.",
+        "already_registered": "Jau užregistruota.",
+        "revoked": "Atšaukta. Jau priimti sprendimai lieka įrašyti.",
+        "already_revoked": "Jau atšaukta.",
+        "invalid_party_role": "Pasirinkite galiojantį vaidmenį.",
+        "project_not_found": "Projekto nerasta.",
+        "project_has_no_organization": "Šis projektas neturi savininko organizacijos, todėl užsakovo užregistruoti negalima.",
+        "not_authorized": "Tai gali daryti tik įgaliotas projekto organizacijos atstovas.",
+        "worker_not_found": "Darbuotojo nerasta.",
+        "subject_cannot_register_own_counterparty": "Negalite užregistruoti savo paties užsakovo.",
+        "no_work_relationship": "Šis darbuotojas projekte neturi aktyvaus priskyrimo, todėl nėra ką registruoti.",
+        "subject_is_member_of_counterparty": "Šis asmuo dirba jūsų organizacijoje. Jam taikoma vadovo peržiūra.",
+        "counterparty_not_independent": "Su šiuo darbuotoju dalijatės organizacija, todėl negalite būti jo užsakovas.",
+        "link_not_found": "Šios registracijos nerasta.",
+        "error": "Kažkas nepavyko. Niekas nepakeista.",
+        "needs_migration": "Ši funkcija dar neprieinama."
+      }
+    },
+    "entry": {
+      "title": "Užsakovo peržiūra",
+      "partyUnknown": "užsakovas",
+      "phase": {
+        "ready_to_submit": "Įrašyta",
+        "submitted": "Pateikta",
+        "accepted": "Užsakovo priimta",
+        "correction_requested": "Prašoma pataisyti",
+        "disputed": "Ginčijama"
+      },
+      "submitLead": "Šį įrašą galite pateikti šio darbo užsakovui peržiūrai. Jis išsiunčiamas tik paspaudus mygtuką.",
+      "resubmitLead": "Tai pataisyta anksčiau pateikto įrašo versija. Pateikite ją užsakovui dar kartą.",
+      "pickParty": "Kas turėtų peržiūrėti?",
+      "pickPartyPlaceholder": "Pasirinkite…",
+      "willGoTo": "Bus pateikta: {party}.",
+      "submit": "Pateikti peržiūrai",
+      "resubmit": "Pateikti iš naujo",
+      "submitting": "Pateikiama…",
+      "neverAutomatic": "Įrašai niekada nepateikiami automatiškai.",
+      "submittedTo": "Pateikta: {party}, {date}.",
+      "submittedGeneric": "Pateikta užsakovo peržiūrai.",
+      "awaiting": "Laukiama jų sprendimo.",
+      "isResubmission": "Tai pataisyta versija.",
+      "acceptedBy": "{party} priėmė darbą {date}.",
+      "acceptedNotEmployer": "Tai užsakovo darbo priėmimas. Jis skiriasi nuo vadovo įrašo, nepatvirtina įgūdžio ir nėra mokėjimo įrašas.",
+      "theirNote": "Jų pastaba",
+      "correctionRequestedBy": "{party} paprašė pataisyti ({date}).",
+      "disputedBy": "{party} užginčijo šį įrašą ({date}).",
+      "correctionHint": "Pataisykite įrašą ir pateikite naują versiją dar kartą. Ankstesnė versija ir prašymas lieka įrašyti.",
+      "disputedHint": "Ginčas lieka įrašytas, o užsakovas gali jį atšaukti. Taip pat galite pataisyti įrašą ir pateikti naują versiją.",
+      "result": {
+        "submitted": "Pateikta peržiūrai.",
+        "already_submitted": "Šis įrašas jau pateiktas.",
+        "entry_not_found": "Įrašo nerasta.",
+        "not_authorized": "Pateikti gali tik įrašo autorius.",
+        "entry_deleted": "Šis įrašas ištrintas.",
+        "entry_superseded": "Šį įrašą pakeitė naujesnė versija. Pateikite naujesnę.",
+        "entry_has_no_project": "Prieš pateikdami susiekite įrašą su projektu.",
+        "counterparty_not_valid": "Šis užsakovas šiam darbui nebeužregistruotas.",
+        "no_counterparty_registered": "Šiam darbui dar neužregistruotas joks užsakovas.",
+        "counterparty_ambiguous": "Užregistruota daugiau nei vienas užsakovas. Pasirinkite, kas turėtų peržiūrėti.",
+        "error": "Kažkas nepavyko. Niekas nepateikta.",
+        "needs_migration": "Ši funkcija dar neprieinama."
+      }
+    },
+    "queue": {
+      "title": "Užsakovo peržiūra",
+      "lead": "Darbas, kurį darbuotojai pateikė jums kaip užsakovui, klientui ar sutarties šaliai. Priimkite, prašykite pataisyti arba užginčykite, pridėdami pastabą.",
+      "honestNote": "Jūsų sprendimas įrašomas kaip užsakovo priėmimas. Jis skiriasi nuo vadovo įrašo, nepatvirtina įgūdžių ir nėra mokėjimo patvirtinimas. Priėmimas galutinis.",
+      "employerInboxLink": "Vadovo peržiūros dėžutė",
+      "openLink": "Užsakovo peržiūra",
+      "bucket": {
+        "to_decide": "Laukia sprendimo",
+        "disputed": "Ginčijama",
+        "waiting_for_worker": "Laukiama darbuotojo",
+        "accepted": "Priimta"
+      },
+      "loadFailed": "Nepavyko įkelti peržiūros eilės. Pabandykite po akimirkos.",
+      "emptyTitle": "Jums dar niekas nepateikta",
+      "empty": "Kai darbuotojas pateiks jums darbą kaip užsakovui, jis atsiras čia.",
+      "emptyNext": "Projekto puslapyje užregistruokite savo organizaciją kaip užsakovą, kad jo darbuotojai galėtų pateikti jums savo darbą.",
+      "truncated": "Rodomi naujausi {n} iš {m} pateikimų.",
+      "card": {
+        "workerUnknown": "Darbuotojas",
+        "yourRole": "jūs esate: {role}",
+        "submittedOn": "pateikta {date}",
+        "resubmission": "Pataisyta įrašo, kurį prašėte pataisyti, versija.",
+        "work": "Darbas",
+        "hours": "Valandos",
+        "hoursUnclear": "tekste neaišku",
+        "quantity": "Kiekis",
+        "photos": "Darbuotojo pridėtos nuotraukos",
+        "noPhotos": "Nuotraukų nepridėta.",
+        "photoUnavailable": "Nuotrauka neprieinama",
+        "photoAlt": "Darbo nuotrauka",
+        "history": "Istorija",
+        "decision": {
+          "approved": "Priimta",
+          "changes_requested": "Prašyta pataisyti",
+          "rejected": "Užginčyta"
+        },
+        "detailUnavailable": "Nepavyko įkelti šio pateikimo duomenų, todėl dabar jo spręsti negalima. Pabandykite po akimirkos.",
+        "acceptedFinal": "Priimta. Tai galutinis sprendimas.",
+        "waitingForWorker": "Paprašėte pataisyti. Pataisyta versija atsiras čia kaip naujas pateikimas.",
+        "yourDecision": "Jūsų sprendimas",
+        "action": {
+          "accept": "Priimti darbą",
+          "request_correction": "Prašyti pataisyti",
+          "dispute": "Užginčyti"
+        },
+        "actionHint": {
+          "accept": "Pripažįstate, kad darbas atliktas. Galutinai.",
+          "request_correction": "Darbuotojas pataiso įrašą ir pateikia dar kartą.",
+          "dispute": "Nesutinkate. Lieka įrašyta; vėliau galite atšaukti priimdami."
+        },
+        "withdrawDisputeHint": "Anksčiau užginčijote. Ginčą galite atšaukti priimdami; ginčas lieka istorijoje.",
+        "noteLabel": "Pastaba (nebūtina)",
+        "noteLabelRequired": "Pastaba (privaloma)",
+        "noteHint": "Darbuotojas matys šią pastabą.",
+        "chooseFirst": "Pasirinkite sprendimą",
+        "saving": "Saugoma…",
+        "submit": {
+          "accept": "Priimti",
+          "request_correction": "Prašyti pataisyti",
+          "dispute": "Užginčyti"
+        },
+        "acceptIsFinal": "Priėmimo atšaukti negalima.",
+        "result": {
+          "ok": {
+            "approved": "Priimta. Įrašyta kaip užsakovo priėmimas.",
+            "changes_requested": "Paprašyta pataisyti. Darbuotojas informuotas.",
+            "rejected": "Ginčas įrašytas."
+          },
+          "note_required": "Parašykite trumpą pastabą darbuotojui.",
+          "note_too_long": "Pastaba per ilga.",
+          "invalid_decision": "Pasirinkite sprendimą.",
+          "entry_not_found": "Įrašo nerasta.",
+          "entry_not_org_scoped": "Šio įrašo čia spręsti negalima.",
+          "not_authorized": "Neturite teisės to spręsti.",
+          "review_not_enabled": "Šiam darbui peržiūra neįjungta.",
+          "no_reviewer_engagement": "Šioje organizacijoje neturite peržiūros įgaliojimo.",
+          "self_review_not_allowed": "Negalite spręsti dėl savo paties darbo.",
+          "review_authority_not_established": "Nesate šio darbo užregistruotas užsakovas arba jis nebuvo pateiktas jums.",
+          "already_accepted": "Šis darbas jau priimtas. Priėmimas galutinis.",
+          "entry_superseded": "Darbuotojas šį įrašą pakeitė naujesne versija.",
+          "entry_deleted": "Šis įrašas ištrintas.",
+          "error": "Kažkas nepavyko. Niekas neįrašyta.",
+          "needs_migration": "Ši funkcija dar neprieinama."
+        }
+      }
+    }
+  },
   "cvBridge": "{confirmed} iš {total} įrašų peržiūrėta — peržiūrėti darbo įrašai matomi jūsų CV.",
   "cvBridgeEmpty": "Įrašų dar nėra — čia sukurti darbo įrašai pildys jūsų CV.",
   "cvBridgeLink": "Atidaryti CV",
@@ -203,7 +383,10 @@
       "entrySuperseded": "Įrašas jau buvo pakeistas naujesne versija — kortelė nebeaktuali ir bus pašalinta iš sąrašo.",
       "entryDeleted": "Įrašas buvo pašalintas — kortelė nebeaktuali ir bus pašalinta iš sąrašo.",
       "staleTerminalHint": "Niekas nebuvo įrašyta. Jei darbuotojas išsaugojo naujesnę versiją, ji atsiras gautuosiuose kaip nauja kortelė.",
-      "noReviewerEngagement": "Šį įrašą matote kaip vadovas, bet tvirtinimui reikia tvirtinimo teisės. Paprašykite organizacijos savininko ją suteikti Žmonių puslapyje."
+      "noReviewerEngagement": "Šį įrašą matote kaip vadovas, bet tvirtinimui reikia tvirtinimo teisės. Paprašykite organizacijos savininko ją suteikti Žmonių puslapyje.",
+      "selfReviewNotAllowed": "Savo paties darbo patvirtinti negalite. Įrašas lieka pažymėtas kaip paties deklaruotas; patvirtinti turi kitas įgaliotas asmuo.",
+      "reviewAuthorityNotEstablished": "Jūs nesate teisėta kita šio darbo šalis, todėl negalite jo patvirtinti. Patvirtinimas ateina iš darbdavio arba iš kliento, kuriam darbas pateiktas.",
+      "alreadyAccepted": "Šis darbas jau priimtas. Priėmimas yra galutinis."
     },
     "showOriginal": "Rodyti originalą",
     "skills": "Įgūdžiai",

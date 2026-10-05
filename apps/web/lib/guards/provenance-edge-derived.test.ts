@@ -68,6 +68,9 @@ const PROVENANCE_KEYS = [
   // like a supervisor's confirmation. See
   // lib/guards/self-confirmation-not-independent.test.ts.
   "evidenceSelfConfirmed",
+  // Added 2026-10-04 (EVID-2 slice 2): the CLIENT accepted the work - a different
+  // claim by a different party than the employer class, never the gold edge.
+  "evidenceClientAccepted",
   "employerConfirmed",
   "employerConfirmedNoDate",
   "systemDerived",

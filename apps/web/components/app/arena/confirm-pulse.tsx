@@ -3,6 +3,7 @@ import { ClipboardCheck, CheckCircle2 } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
 import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
+import { countCounterpartyToDecide } from "@/lib/journal/counterparty-to-decide-count";
 import { CountUp } from "@/components/app/today/count-up";
 
 /**
@@ -15,6 +16,9 @@ import { CountUp } from "@/components/app/today/count-up";
  */
 export async function ConfirmPulse() {
   const pending = await countReviewablePendingEntries();
+  // A DIFFERENT job (decision 0018): entries submitted to the caller as a
+  // client. Its own line and label - never added to the employer count.
+  const clientToDecide = await countCounterpartyToDecide();
   const t = await getTranslations("projects.pulse");
 
   return (
@@ -81,6 +85,18 @@ export async function ConfirmPulse() {
           </Link>
         </>
       )}
+      {clientToDecide !== null && clientToDecide > 0 ? (
+        <Link
+          href={"/dashboard/inbox/counterparty" as "/dashboard"}
+          data-testid="confirm-pulse-client-review"
+          className="inline-flex min-h-11 w-full items-center gap-2 rounded-md border border-brand-blue/40 px-4 py-2.5 text-sm font-medium text-brand-blue transition-colors duration-fast hover:bg-brand-blue/10"
+        >
+          <span className="font-semibold tabular-nums">{clientToDecide}</span>
+          <span className="min-w-0 flex-1">{t("clientTitle", { n: clientToDecide })}</span>
+          <span aria-hidden>→</span>
+          <span className="sr-only">{t("clientCta")}</span>
+        </Link>
+      ) : null}
     </section>
   );
 }

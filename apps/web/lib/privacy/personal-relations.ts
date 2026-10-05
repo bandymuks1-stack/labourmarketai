@@ -273,6 +273,19 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "learning_signals", key: "worker_id", column: "subject_worker_id" },
   { table: "learning_review_queue", key: "worker_id", column: "subject_worker_id" },
 
+  // EVID-2 redesign (2026-10-04): the person's own work submitted for
+  // counterparty review, and the counterparty relation about their work. The
+  // select policy of both is owns_worker(worker_id) (or the counterparty's
+  // manager / admin), so the subject reads their own rows under RLS.
+  // established_by / revoked_by are the COUNTERPARTY's representative - another
+  // person - so they are kept only when they are the subject's own id.
+  { table: "journal_entry_review_submissions", key: "worker_id" },
+  {
+    table: "work_counterparty_links",
+    key: "worker_id",
+    redactActors: ["established_by", "revoked_by"],
+  },
+
   // What the person attested about someone else's work — their own statement.
   { table: "journal_entry_confirmations", key: "profile_id", column: "confirmer_id" },
 

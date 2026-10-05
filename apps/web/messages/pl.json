@@ -2264,7 +2264,8 @@
         "invitations": "Oczekujące zaproszenia pracowników",
         "claims": "Publiczne zgłoszenia zapotrzebowania, które możesz przejąć",
         "reviewOff": "Pracownicy z zapisaną pracą, u których potwierdzanie jest wyłączone",
-        "unreadable": "nie udało się odczytać"
+        "unreadable": "nie udało się odczytać",
+        "clientReview": "Praca czekająca na Twoją decyzję jako zleceniodawcy"
       }
     },
     "agency": {
@@ -6056,7 +6057,9 @@
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# wpis czeka na Twoje potwierdzenie} few {# wpisy czekają na Twoje potwierdzenie} many {# wpisów czeka na Twoje potwierdzenie} other {# wpisu czeka na Twoje potwierdzenie}}",
+      "clientTitle": "{n, plural, one {# wpis czeka na Twoją decyzję jako zleceniodawcy} few {# wpisy czekają na Twoją decyzję jako zleceniodawcy} many {# wpisów czeka na Twoją decyzję jako zleceniodawcy} other {# wpisu czeka na Twoją decyzję jako zleceniodawcy}}",
       "pendingBody": "Jedno dotknięcie — i praca danej osoby staje się potwierdzonym dowodem.",
+      "clientCta": "Otwórz sprawdzenie zleceniodawcy",
       "cta": "Potwierdź teraz",
       "zero": "Obecnie nic nie czeka na potwierdzenie — rytm zespołu jest spokojny.",
       "zeroCta": "Przejrzyj kolejkę",
@@ -8193,6 +8196,7 @@
     "claimFromJournal": "z dziennika pracy",
     "recordedHours": "Zarejestrowana praca: {hours} h z dziennika pracy, w tym {confirmed} h potwierdzonych.",
     "confirmedWorkFact": "Wpisy dziennika pracy potwierdzone przez innych: {entries, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}} z {days, plural, one {# dnia roboczego} other {# dni roboczych}}",
+    "clientAcceptedWorkFact": "{entries, plural, one {# wpis pracy zaakceptowany} few {# wpisy pracy zaakceptowane} many {# wpisów pracy zaakceptowanych} other {# wpisu pracy zaakceptowanego}} przez zleceniodawcę. Odbiór przez zleceniodawcę nie jest wpisem przełożonego i nie jest zapisem płatności.",
     "recordedHoursNone": "Brak jeszcze wpisów w dzienniku z czasem trwania — godziny przy umiejętnościach pochodzą z Twoich własnych wpisów.",
     "skillHours": "{hours} h",
     "skillHoursOwn": "{hours} h, Twój własny zapis",
@@ -10950,6 +10954,7 @@
       "pendingDecisions": "Wnioski o nieobecność oczekujące na decyzję",
       "journalToday": "Wpisy pracy dzisiaj",
       "awaitingReview": "Wpisy oczekujące na przegląd",
+      "clientReviewToDecide": "Czeka na Twoją decyzję jako zleceniodawcy",
       "absentToday": "Zarejestrowana nieobecność dzisiaj",
       "absentNext": "Zarejestrowane nieobecności w ciągu najbliższych 7 dni",
       "noneRecordedToday": "Na dzisiaj nie zarejestrowano żadnej zatwierdzonej nieobecności.",
@@ -15160,6 +15165,7 @@
     "evidenceDocument": "Dokument ważny do {until} — jeszcze niepotwierdzone",
     "evidenceEntriesAndDocument": "{count, plural, one {# wpis pracy} few {# wpisy pracy} many {# wpisów pracy} other {# wpisu pracy}} oraz dokument ważny do {until} — jeszcze niepotwierdzone",
     "evidenceSelfConfirmed": "Potwierdziłeś to sam — niepotwierdzone niezależnie",
+    "evidenceClientAccepted": "Zaakceptowano przez zleceniodawcę — niepotwierdzone przez pracodawcę",
     "employerConfirmed": "Potwierdzone przez {org}, {date}",
     "employerConfirmedNoDate": "Potwierdzone przez pracodawcę",
     "systemDerived": "Wywnioskowane z: {source}"

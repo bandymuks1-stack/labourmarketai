@@ -47,6 +47,7 @@ function recordingClient(rows: unknown[]) {
       b.is = (c: string, v: null) => (filters.push(`is:${c}:${String(v)}`), b);
       b.gte = (c: string) => (filters.push(`gte:${c}`), b);
       b.in = (c: string) => (filters.push(`in:${c}`), b);
+      b.or = () => b;
       b.order = () => b;
       b.limit = () => b;
       b.range = () => b;

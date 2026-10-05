@@ -2264,7 +2264,8 @@
         "invitations": "Laukiantys kvietimai darbuotojams",
         "claims": "Viešos užklausos, kurias galite perimti",
         "reviewOff": "Dirbantys darbuotojai, kurių darbo patvirtinimas neįjungtas",
-        "unreadable": "nepavyko perskaityti"
+        "unreadable": "nepavyko perskaityti",
+        "clientReview": "Darbas, laukiantis jūsų sprendimo kaip užsakovo"
       }
     },
     "agency": {
@@ -6056,7 +6057,9 @@
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# įrašas laukia tavo patvirtinimo} few {# įrašai laukia tavo patvirtinimo} other {# įrašų laukia tavo patvirtinimo}}",
+      "clientTitle": "{n, plural, one {# įrašas laukia jūsų sprendimo kaip užsakovo} few {# įrašai laukia jūsų sprendimo kaip užsakovo} other {# įrašų laukia jūsų sprendimo kaip užsakovo}}",
       "pendingBody": "Vienas bakstelėjimas — ir žmogaus darbas tampa patvirtintu įrodymu.",
+      "clientCta": "Atidaryti užsakovo peržiūrą",
       "cta": "Patvirtinti dabar",
       "zero": "Šiuo metu patvirtinimų nelaukia — komandos ritmas ramus.",
       "zeroCta": "Peržiūros eilė",
@@ -8193,6 +8196,7 @@
     "claimFromJournal": "iš darbo įrašo",
     "recordedHours": "Užfiksuota darbo: {hours} val. iš darbo žurnalo, iš jų patvirtinta {confirmed} val.",
     "confirmedWorkFact": "Kitų patvirtinti darbo žurnalo įrašai: {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}} per {days, plural, one {# darbo dieną} few {# darbo dienas} other {# darbo dienų}}",
+    "clientAcceptedWorkFact": "{entries, plural, one {# darbo įrašas} few {# darbo įrašai} other {# darbo įrašų}}, kuriuos priėmė užsakovas. Užsakovo priėmimas nėra vadovo įrašas ir nėra mokėjimo įrašas.",
     "recordedHoursNone": "Darbo žurnale dar nėra įrašų su trukme — valandos prie įgūdžių atsiras iš jūsų įrašų.",
     "skillHours": "{hours} val.",
     "skillHoursOwn": "{hours} val., jūsų pačių įrašas",
@@ -10950,6 +10954,7 @@
       "pendingDecisions": "Neatvykimo prašymai laukia sprendimo",
       "journalToday": "Šiandienos darbo įrašai",
       "awaitingReview": "Įrašai laukia peržiūros",
+      "clientReviewToDecide": "Laukia jūsų sprendimo kaip užsakovo",
       "absentToday": "Užfiksuota, kad šiandien nedirba",
       "absentNext": "Užfiksuoti neatvykimai per artimiausias 7 dienas",
       "noneRecordedToday": "Šiandienai patvirtintų neatvykimų neužfiksuota.",
@@ -15160,6 +15165,7 @@
     "evidenceDocument": "Dokumentas galioja iki {until} — dar nepatvirtinta",
     "evidenceEntriesAndDocument": "{count, plural, one {# darbo įrašas} few {# darbo įrašai} many {# darbo įrašo} other {# darbo įrašų}} ir dokumentas iki {until} — dar nepatvirtinta",
     "evidenceSelfConfirmed": "Patvirtinote patys — nepriklausomo patvirtinimo dar nėra",
+    "evidenceClientAccepted": "Užsakovo priimta — darbdavio nepatvirtinta",
     "employerConfirmed": "Patvirtino {org}, {date}",
     "employerConfirmedNoDate": "Patvirtino darbdavys",
     "systemDerived": "Išvesta iš: {source}"

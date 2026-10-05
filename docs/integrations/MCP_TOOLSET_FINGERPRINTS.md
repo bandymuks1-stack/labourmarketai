@@ -18,6 +18,7 @@ equals the version the tree publishes.
 
 | Fingerprint | Tools | Release | What changed |
 |---|---|---|---|
+| `0.1.0+t68.7bcb01a2` | 68 | #2143 | +counterparty_review_queue_get, counterparty_review_entry_get, counterparty_review_decide_draft/confirm (accept / request correction / dispute; note required), counterparty_review_submit_draft/confirm (decision 0018; client acceptance is never an employer confirmation) |
 | `0.1.0+t62.142b9ca5` | 62 | evidence attest/withdraw PR | evidence_record_attest -> evidence_record_attest_draft/confirm; evidence_import_withdraw -> evidence_import_withdraw_draft/confirm (draft->confirm; the two direct-write tools are removed); server `instructions` now name the single-step exceptions |
 | `0.1.0+t60.bd088b58` | 60 | #2103 | journal_create_* gain optional project_id / not_project_work + project_required refusal with choices (no tool added) |
 | `0.1.0+t60.eaa3316a` | 60 | messaging PR | +conversation_list, conversation_get, message_send_draft, message_send_confirm |

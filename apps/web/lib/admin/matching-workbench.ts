@@ -1,5 +1,6 @@
 import "server-only";
 
+import { withoutCounterpartyRows } from "@/lib/journal/review-status";
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -361,12 +362,16 @@ export async function listWorkbench(
     if (entryRows.length > 0) {
       const { data: confs } = await asAny(supabase)
         .from("journal_entry_confirmations")
-        .select("entry_id")
+        .select("entry_id, confirmation_scope")
         .in(
           "entry_id",
           entryRows.map((e) => e.id),
         );
-      for (const c of (confs ?? []) as { entry_id: string }[]) {
+      // Employer confirmations only: a client's acceptance is another signal
+      // (decision 0018) and must not raise a worker's confirmation count.
+      for (const c of withoutCounterpartyRows(
+        (confs ?? []) as { entry_id: string; confirmation_scope: unknown }[],
+      )) {
         const wid = workerByEntry.get(c.entry_id);
         if (!wid) continue;
         confirmationsByWorker.set(

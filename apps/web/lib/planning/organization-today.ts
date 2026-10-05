@@ -4,6 +4,7 @@ import {
   getJournalWindowReport,
 } from "@/lib/journal/journal-window-report";
 import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
+import { countCounterpartyToDecide } from "@/lib/journal/counterparty-to-decide-count";
 import { getManagerPendingAbsences } from "@/lib/leave/absences";
 import {
   absentOn,
@@ -60,6 +61,9 @@ export type OrganizationToday =
       readonly pendingAbsenceDecisions: number | null;
       readonly journalEntriesToday: number | null;
       readonly awaitingReview: number | null;
+      /** Entries submitted to the caller as a CLIENT (decision 0018). Its own
+       *  number: never added to `awaitingReview`. null = unreadable. */
+      readonly clientReviewToDecide: number | null;
     }
   | { readonly applied: false; readonly reason: "not-authed" | "error" };
 
@@ -126,6 +130,8 @@ export async function getOrganizationToday(): Promise<OrganizationToday> {
     /* stays null */
   }
 
+  const clientReviewToDecide = await countCounterpartyToDecide();
+
   // Nothing measurable at all → the panel must not render an empty shell that
   // impersonates "all clear".
   if (
@@ -146,5 +152,6 @@ export async function getOrganizationToday(): Promise<OrganizationToday> {
     pendingAbsenceDecisions,
     journalEntriesToday,
     awaitingReview,
+    clientReviewToDecide,
   };
 }

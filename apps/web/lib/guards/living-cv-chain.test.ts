@@ -24,7 +24,7 @@ describe("living CV chain", () => {
   it("a proof row carries the engagement its own entry was recorded for — an id, never a name", () => {
     expect(CORE).toMatch(/engagementId: string \| null;/);
     expect(CORE).toMatch(/engagementId: entry\?\.engagementId \?\? null/);
-    expect(CORE).toMatch(/\.select\("id, created_at, project_id, engagement_context_id, deleted_at, superseded_by"\)/);
+    expect(CORE).toMatch(/\.select\("id, created_at, project_id, engagement_context_id, deleted_at, superseded_by, correction_of"\)/);
   });
 
   it("the standing is confirmed only by someone other than the person", () => {

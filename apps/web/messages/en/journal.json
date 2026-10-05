@@ -1,4 +1,184 @@
 {
+  "counterparty": {
+    "link": {
+      "title": "Client acceptance of the work",
+      "lead": "Register your organization as the client of a worker who is actively assigned to this project, directly or through a team. Then the worker can submit their work to you for review. Nothing is registered without a real assignment.",
+      "empty": "No worker has an active assignment on this project yet. Assign a person or a team first; they will appear here.",
+      "loadFailed": "Could not load the workers for this project. Try again in a moment.",
+      "honestNote": "Only the client's own representative can register or revoke this. The worker can never register their own client. A client's acceptance is a different thing from a manager's record and is not a payment record.",
+      "unnamedWorker": "Unnamed worker",
+      "kind": {
+        "person": "Assigned directly",
+        "team": "Assigned through a team"
+      },
+      "roleLabel": "Your role in this work",
+      "role": {
+        "client": "Client",
+        "end_client": "End client",
+        "project_owner": "Project owner",
+        "customer": "Customer",
+        "contracting_party": "Contracting party"
+      },
+      "register": "Register as counterparty",
+      "registering": "Registering…",
+      "registered": "Registered",
+      "registeredAs": "Registered as {role}",
+      "revoke": "Revoke",
+      "revoking": "Revoking…",
+      "revokeQuestion": "Revoke this? You will no longer be able to decide this worker's submitted work.",
+      "revokeConfirm": "Yes, revoke",
+      "cancel": "Cancel",
+      "result": {
+        "registered": "Registered. The worker can now submit their work to you.",
+        "already_registered": "Already registered.",
+        "revoked": "Revoked. Decisions already made stay on record.",
+        "already_revoked": "Already revoked.",
+        "invalid_party_role": "Choose a valid role.",
+        "project_not_found": "This project was not found.",
+        "project_has_no_organization": "This project has no owning organization, so no client can be registered.",
+        "not_authorized": "Only an authorized representative of the project's organization can do this.",
+        "worker_not_found": "This worker was not found.",
+        "subject_cannot_register_own_counterparty": "You cannot register your own client.",
+        "no_work_relationship": "This worker has no active assignment on the project, so there is nothing to register.",
+        "subject_is_member_of_counterparty": "This person works inside your organization. Their manager's review applies instead.",
+        "counterparty_not_independent": "You share an organization with this worker, so you cannot be their client.",
+        "link_not_found": "This registration was not found.",
+        "error": "Something went wrong. Nothing was changed.",
+        "needs_migration": "This feature is not available yet."
+      }
+    },
+    "entry": {
+      "title": "Client review",
+      "partyUnknown": "the client",
+      "phase": {
+        "ready_to_submit": "Recorded",
+        "submitted": "Submitted",
+        "accepted": "Accepted by the client",
+        "correction_requested": "Correction requested",
+        "disputed": "Disputed"
+      },
+      "submitLead": "You can submit this entry to the client of this work for review. It is only sent when you press the button.",
+      "resubmitLead": "This is a corrected version of an entry you submitted before. Submit it again for the client to review.",
+      "pickParty": "Who should review this?",
+      "pickPartyPlaceholder": "Choose…",
+      "willGoTo": "It will go to {party}.",
+      "submit": "Submit for review",
+      "resubmit": "Resubmit",
+      "submitting": "Submitting…",
+      "neverAutomatic": "Entries are never submitted automatically.",
+      "submittedTo": "Submitted to {party} on {date}.",
+      "submittedGeneric": "Submitted for client review.",
+      "awaiting": "Waiting for their decision.",
+      "isResubmission": "This is the corrected version.",
+      "acceptedBy": "Accepted by {party} on {date}.",
+      "acceptedNotEmployer": "This is the client's acceptance of the work. It is a different thing from a manager's record, does not verify a skill and is not a payment record.",
+      "theirNote": "Their note",
+      "correctionRequestedBy": "{party} asked for a correction on {date}.",
+      "disputedBy": "{party} disputed this entry on {date}.",
+      "correctionHint": "Correct the entry, then submit the new version again. The earlier version and the request stay on record.",
+      "disputedHint": "The dispute stays on record and the client can withdraw it. You can also correct the entry and submit the new version.",
+      "result": {
+        "submitted": "Submitted for review.",
+        "already_submitted": "This entry was already submitted.",
+        "entry_not_found": "This entry was not found.",
+        "not_authorized": "Only the author of the entry can submit it.",
+        "entry_deleted": "This entry was deleted.",
+        "entry_superseded": "This entry was replaced by a newer version. Submit the newer one.",
+        "entry_has_no_project": "Link this entry to a project before submitting it.",
+        "counterparty_not_valid": "That client is no longer registered for this work.",
+        "no_counterparty_registered": "No client is registered for this work yet.",
+        "counterparty_ambiguous": "More than one client is registered. Choose who should review this.",
+        "error": "Something went wrong. Nothing was submitted.",
+        "needs_migration": "This feature is not available yet."
+      }
+    },
+    "queue": {
+      "title": "Client review",
+      "lead": "Work that workers submitted to you as their client, customer or contracting party. Accept it, ask for a correction or dispute it, with a note.",
+      "honestNote": "Your decision is recorded as the client's acceptance. It is a different thing from a manager's record, does not verify skills and is not a payment approval. Accepting is final.",
+      "employerInboxLink": "Manager review inbox",
+      "openLink": "Client review",
+      "bucket": {
+        "to_decide": "To decide",
+        "disputed": "Disputed",
+        "waiting_for_worker": "Waiting for the worker",
+        "accepted": "Accepted"
+      },
+      "loadFailed": "Could not load the review queue. Try again in a moment.",
+      "emptyTitle": "Nothing submitted to you yet",
+      "empty": "When a worker submits work to you as their client, it appears here.",
+      "emptyNext": "Register your organization as the client on a project page, so workers on it can submit their work to you.",
+      "truncated": "Showing the newest {n} of {m} submissions.",
+      "card": {
+        "workerUnknown": "Worker",
+        "yourRole": "you are the {role}",
+        "submittedOn": "submitted {date}",
+        "resubmission": "Corrected version of an entry you asked to correct.",
+        "work": "Work",
+        "hours": "Hours",
+        "hoursUnclear": "unclear in the text",
+        "quantity": "Quantity",
+        "photos": "Photos the worker attached",
+        "noPhotos": "No photos attached.",
+        "photoUnavailable": "Photo unavailable",
+        "photoAlt": "Work photo",
+        "history": "History",
+        "decision": {
+          "approved": "Accepted",
+          "changes_requested": "Correction requested",
+          "rejected": "Disputed"
+        },
+        "detailUnavailable": "The details of this submission could not be loaded, so it cannot be decided now. Try again in a moment.",
+        "acceptedFinal": "Accepted. This is final.",
+        "waitingForWorker": "You asked for a correction. The corrected version will appear here as a new submission.",
+        "yourDecision": "Your decision",
+        "action": {
+          "accept": "Accept the work",
+          "request_correction": "Request a correction",
+          "dispute": "Dispute"
+        },
+        "actionHint": {
+          "accept": "You stand behind this work as done. Final.",
+          "request_correction": "The worker corrects the entry and submits it again.",
+          "dispute": "You disagree. It stays on record; you can withdraw it later by accepting."
+        },
+        "withdrawDisputeHint": "You disputed this earlier. You can withdraw the dispute by accepting; the dispute stays in the history.",
+        "noteLabel": "Note (optional)",
+        "noteLabelRequired": "Note (required)",
+        "noteHint": "The worker sees this note.",
+        "chooseFirst": "Choose a decision",
+        "saving": "Saving…",
+        "submit": {
+          "accept": "Accept",
+          "request_correction": "Request correction",
+          "dispute": "Dispute"
+        },
+        "acceptIsFinal": "Accepting cannot be undone.",
+        "result": {
+          "ok": {
+            "approved": "Accepted. Recorded as the client's acceptance.",
+            "changes_requested": "Correction requested. The worker has been told.",
+            "rejected": "Dispute recorded."
+          },
+          "note_required": "Write a short note for the worker.",
+          "note_too_long": "The note is too long.",
+          "invalid_decision": "Choose a decision.",
+          "entry_not_found": "This entry was not found.",
+          "entry_not_org_scoped": "This entry cannot be decided here.",
+          "not_authorized": "You are not authorized to decide this.",
+          "review_not_enabled": "Review is not enabled for this work.",
+          "no_reviewer_engagement": "You do not hold review authority for this organization.",
+          "self_review_not_allowed": "You cannot decide your own work.",
+          "review_authority_not_established": "You are not the registered client for this work, or it was not submitted to you.",
+          "already_accepted": "This work was already accepted. An acceptance is final.",
+          "entry_superseded": "The worker replaced this entry with a newer version.",
+          "entry_deleted": "This entry was deleted.",
+          "error": "Something went wrong. Nothing was recorded.",
+          "needs_migration": "This feature is not available yet."
+        }
+      }
+    }
+  },
   "cvBridge": "{confirmed} of {total} entries reviewed — reviewed work shows on your CV.",
   "cvBridgeEmpty": "No entries yet — work records you create here will feed your CV.",
   "cvBridgeLink": "Open CV",
@@ -203,7 +383,10 @@
       "entrySuperseded": "The entry was already replaced by a newer version — this card is no longer actionable and will be removed from the list.",
       "entryDeleted": "The entry was deleted — this card is no longer actionable and will be removed from the list.",
       "staleTerminalHint": "Nothing was recorded. If the worker saved a newer version, it appears in the inbox as a new card.",
-      "noReviewerEngagement": "You can see this entry as a manager, but confirming needs confirmation authority. Ask the organization owner to grant it on the People page."
+      "noReviewerEngagement": "You can see this entry as a manager, but confirming needs confirmation authority. Ask the organization owner to grant it on the People page.",
+      "selfReviewNotAllowed": "You cannot confirm your own work. The entry stays recorded as self-declared; confirmation has to come from another authorized person.",
+      "reviewAuthorityNotEstablished": "You are not the legitimate counterparty for this work, so you cannot confirm it. Confirmation comes from the employer or from the client party the work was submitted to.",
+      "alreadyAccepted": "This work was already accepted. An acceptance is final."
     },
     "showOriginal": "Show original",
     "skills": "Skills",
