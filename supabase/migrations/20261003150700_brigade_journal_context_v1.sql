@@ -50,6 +50,10 @@
 --   fn  my_team_work_contexts_v1()                                 authenticated
 --       the caller's OWN current team contexts (project, team name, scope) — the
 --       worker's "my projects via team" reader. Self only.
+--   fn  list_team_members_now_v1(uuid)                             authenticated
+--       the current members of a team (same single source, team_member_at_v1) for the
+--       caller who manages that team - lets the assistant draft name each member's
+--       calendar verdict before any assignment row exists. Reads only.
 --   fn  independent_journal_context_v1(uuid, uuid, uuid)           authenticated
 --       an INDEPENDENT person (personal / own-workspace context) with an active
 --       PERSON assignment on a CLIENT organisation's project may journal against
@@ -161,6 +165,47 @@ as $$
 $$;
 revoke all on function public.my_team_work_contexts_v1() from public, anon;
 grant execute on function public.my_team_work_contexts_v1() to authenticated;
+
+-- ── 2a. list_team_members_now_v1 — who a team's members are, BEFORE it is assigned ─
+-- The assistant's draft (and any pre-write check) must name each member's
+-- calendar verdict before a team_assignments row exists, so
+-- list_team_assignment_members_v1 (which needs an assignment) cannot answer.
+-- Same single membership source (team_member_at_v1), same authority as assigning
+-- (the caller manages the team organisation, or is admin); anyone else gets no
+-- rows. Reads only.
+create or replace function public.list_team_members_now_v1(p_team_org_id uuid)
+returns table (
+  profile_id uuid,
+  worker_id  uuid,
+  full_name  text
+)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'Not authenticated' using errcode = '42501';
+  end if;
+  if not coalesce(public.manages_organization(p_team_org_id) or public.is_admin(), false) then
+    return;
+  end if;
+  return query
+  select ec.profile_id, w.id, pr.full_name
+    from public.engagement_contexts ec
+    left join public.workers w   on w.profile_id = ec.profile_id
+    left join public.profiles pr on pr.id = ec.profile_id
+   where ec.organization_id = p_team_org_id
+     and ec.relationship_slug = 'employee'
+     and public.team_member_at_v1(p_team_org_id, ec.profile_id, now())
+   group by ec.profile_id, w.id, pr.full_name
+   order by pr.full_name nulls last, ec.profile_id
+   limit 200;
+end;
+$$;
+revoke all on function public.list_team_members_now_v1(uuid) from public, anon;
+grant execute on function public.list_team_members_now_v1(uuid) to authenticated;
 
 -- ── 2b. independent_journal_context_v1 — a PERSON assignment on a CLIENT's project ─
 -- An independent person (freelancer / sole trader / individual provider) has a

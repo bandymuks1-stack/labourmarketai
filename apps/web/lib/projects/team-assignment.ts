@@ -154,8 +154,9 @@ async function calendarAfterAssign(
 
 /**
  * CAL-7 for a team BEFORE the write (the assistant's draft names the clash
- * verdict; advisory only, SEP-2 - it never blocks). The members are the team's
- * current active employee engagements; each one's worker goes through the SAME
+ * verdict; advisory only, SEP-2 - it never blocks). The members come from the
+ * database's resolver (list_team_members_now_v1 -> team_member_at_v1, the same
+ * single source as list_team_assignment_members_v1); each one's worker goes through the SAME
  * reservation check the post-write advisory uses. A team whose members cannot
  * be read is reported as not known, and a member whose check could not run is
  * reported as unknown by the check itself - never as clear. Writes nothing.
@@ -166,29 +167,20 @@ export async function previewTeamAssignmentCalendar(
 ): Promise<{ readonly known: boolean; readonly members: readonly TeamMemberCalendar[] }> {
   try {
     const supabase = await clientOf(caller);
-    const [{ data: project }, ecs] = await Promise.all([
+    const [{ data: project }, membersRes] = await Promise.all([
       asAny(supabase).from("projects").select("start_date, end_date").eq("id", input.projectId).maybeSingle(),
-      asAny(supabase)
-        .from("engagement_contexts")
-        .select("profile_id")
-        .eq("organization_id", input.teamId)
-        .eq("relationship_slug", "employee")
-        .eq("status", "active")
-        .limit(READ_LIMIT),
+      asAny(supabase).rpc("list_team_members_now_v1", { p_team_org_id: input.teamId }),
     ]);
-    if (ecs.error) return { known: false, members: [] };
-    const profileIds = [...new Set(((ecs.data ?? []) as { profile_id: string }[]).map((e) => e.profile_id))];
-    if (profileIds.length === 0) return { known: true, members: [] };
-    const workers = await asAny(supabase).from("workers").select("id, profile_id").in("profile_id", profileIds);
-    if (workers.error) return { known: false, members: [] };
+    if (membersRes.error || !Array.isArray(membersRes.data)) return { known: false, members: [] };
     const window = {
       startDate: (project?.start_date as string | null) ?? null,
       endDate: (project?.end_date as string | null) ?? null,
     };
     const out: TeamMemberCalendar[] = [];
-    for (const w of (workers.data ?? []) as { id: string; profile_id: string }[]) {
-      const verdict = await checkWorkerReservation({ workerId: w.id, window, exclude: [input.projectId], caller });
-      out.push({ profileId: w.profile_id, name: null, verdict });
+    for (const m of membersRes.data as { profile_id: string; worker_id: string | null; full_name: string | null }[]) {
+      if (!m.worker_id) continue;
+      const verdict = await checkWorkerReservation({ workerId: m.worker_id, window, exclude: [input.projectId], caller });
+      out.push({ profileId: m.profile_id, name: m.full_name, verdict });
     }
     return { known: true, members: out };
   } catch (error) {
