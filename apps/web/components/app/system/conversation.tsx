@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { COMPANIES, PROJECTS, personById, type Person } from "@/lib/design-proof/product-fixtures";
 import { coverageOf, membersOf, seatTotals, type Seats } from "@/lib/design-proof/team-model";
 
-import { CompanyMark, PersonAvatar, TeamMark, TeamStack } from "./identity";
+import { CompanyMark, PersonAvatar, TeamMark, TeamStack } from "@/components/app/identity/identity-family";
 import { EntityPlate } from "./entity";
 import { Accented, Eyebrow } from "./ui";
 import { Btn, Stamp } from "./ui";

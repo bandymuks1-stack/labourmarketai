@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Wrench } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import type { Company, Person, Project } from "@/lib/design-proof/product-fixtures";
+import type { CompanyIdentity, PersonIdentity, ProjectIdentity } from "@/lib/identity/identity-view";
 
 /**
  * THE IDENTITY FAMILY — one visual family for everything that can be a party in
@@ -63,7 +63,7 @@ export const initialsOf = (name: string) =>
 
 // ───────────────────────── person ─────────────────────────
 
-type PersonLike = Pick<Person, "id" | "name" | "photo" | "anonymous">;
+type PersonLike = PersonIdentity;
 
 /** The engraved figure: head and shoulders, drawn once, scaled to any size. */
 function Figure({ hatched = false, id }: { readonly hatched?: boolean; readonly id: string }) {
@@ -91,12 +91,15 @@ export function PersonAvatar({
   person,
   size = 40,
   bare = false,
+  anonymousLabel = "Anonymous",
   className,
 }: {
   readonly person: PersonLike;
   readonly size?: number;
   /** no outer shape (used inside mosaics, which clip it) */
   readonly bare?: boolean;
+  /** the accessible name of a veiled person, in the viewer's language */
+  readonly anonymousLabel?: string;
   readonly className?: string;
 }) {
   const radius = bare ? 0 : "28%";
@@ -116,7 +119,7 @@ export function PersonAvatar({
           loading="lazy"
           draggable={false}
           className="h-full w-full object-cover"
-          style={{ objectPosition: `${person.photo.face.x * 100}% ${person.photo.face.y * 100}%` }}
+          style={{ objectPosition: `${(person.photo.face?.x ?? 0.5) * 100}% ${(person.photo.face?.y ?? 0.35) * 100}%` }}
         />
         <span aria-hidden className="absolute inset-0" style={{ boxShadow: "inset 0 -14px 18px -14px rgba(0,0,0,0.5)" }} />
       </span>
@@ -128,7 +131,7 @@ export function PersonAvatar({
         className={cn("relative inline-block shrink-0 overflow-hidden", className)}
         style={{ ...base, background: "linear-gradient(160deg,#1c1d1f,#27292c)" }}
         role="img"
-        aria-label="Anonymous candidate"
+        aria-label={anonymousLabel}
         data-identity="person-anonymous"
       >
         <Figure hatched id={person.id} />
@@ -162,8 +165,16 @@ export function PersonAvatar({
 
 // ───────────────────────── company ─────────────────────────
 
-export function CompanyMark({ company, size = 40, className }: { readonly company: Pick<Company, "id" | "name" | "logo">; readonly size?: number; readonly className?: string }) {
+export function CompanyMark({ company, size = 40, className }: { readonly company: CompanyIdentity; readonly size?: number; readonly className?: string }) {
   const style = { width: size, height: size, borderRadius: "14%", boxShadow: HAIR } as const;
+  if (company.logoUrl) {
+    return (
+      <span className={cn("relative inline-flex shrink-0 items-center justify-center overflow-hidden", className)} style={{ ...style, background: "#ece7dc" }} role="img" aria-label={company.name} data-identity="company-logo">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={company.logoUrl} alt="" loading="lazy" draggable={false} className="h-[62%] w-[62%] object-contain" />
+      </span>
+    );
+  }
   if (company.logo) {
     return (
       <span className={cn("relative inline-flex shrink-0 items-center justify-center", className)} style={{ ...style, background: "#ece7dc" }} role="img" aria-label={company.name} data-identity="company-logo">
@@ -281,14 +292,14 @@ export function TeamStack({ members, size = 28, max = 4, className }: { readonly
 
 // ───────────────────────── project ─────────────────────────
 
-export function ProjectMark({ project, size = 48, wide = true, className }: { readonly project: Pick<Project, "id" | "name" | "media">; readonly size?: number; readonly wide?: boolean; readonly className?: string }) {
+export function ProjectMark({ project, size = 48, wide = true, className }: { readonly project: ProjectIdentity; readonly size?: number; readonly wide?: boolean; readonly className?: string }) {
   const w = wide ? Math.round(size * 1.45) : size;
   const style = { width: w, height: size, borderRadius: "10%", boxShadow: HAIR } as const;
   if (project.media) {
     return (
       <span className={cn("relative inline-block shrink-0 overflow-hidden", className)} style={style} role="img" aria-label={project.name} data-identity="project-media">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={project.media.src} alt="" loading="lazy" draggable={false} className="h-full w-full object-cover saturate-[0.85]" style={{ objectPosition: project.media.pos }} />
+        <img src={project.media.src} alt="" loading="lazy" draggable={false} className="h-full w-full object-cover saturate-[0.85]" style={{ objectPosition: project.media.pos ?? "50% 50%" }} />
         <span aria-hidden className="absolute inset-0 bg-[linear-gradient(0deg,rgba(7,7,6,0.5),transparent_55%)]" />
       </span>
     );

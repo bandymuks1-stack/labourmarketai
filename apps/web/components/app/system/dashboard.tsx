@@ -15,7 +15,7 @@ import {
 } from "@/lib/design-proof/dashboard-model";
 import { personById } from "@/lib/design-proof/product-fixtures";
 
-import { TeamStack } from "./identity";
+import { TeamStack } from "@/components/app/identity/identity-family";
 import { EntityCard, EntityThumb, resolve } from "./entity";
 import { StateStage } from "./state-stage";
 import { Btn, Eyebrow, RegionHead, Segmented, Surface } from "./ui";

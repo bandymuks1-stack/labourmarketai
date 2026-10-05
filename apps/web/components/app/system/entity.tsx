@@ -11,7 +11,7 @@ import {
   personById,
 } from "@/lib/design-proof/product-fixtures";
 
-import { PersonAvatar, TeamMark } from "./identity";
+import { PersonAvatar, TeamMark } from "@/components/app/identity/identity-family";
 
 /**
  * ENTITY — one way to FILL a surface with who or what something is.

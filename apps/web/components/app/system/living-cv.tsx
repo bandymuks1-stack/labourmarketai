@@ -4,7 +4,7 @@ import { ArrowRight, FileCheck2, GraduationCap } from "lucide-react";
 import type { Experience, Person } from "@/lib/design-proof/product-fixtures";
 import { COMPANIES } from "@/lib/design-proof/product-fixtures";
 
-import { CompanyMark } from "./identity";
+import { CompanyMark } from "@/components/app/identity/identity-family";
 import { EntityPlate } from "./entity";
 import { Avail, EvidenceBar, Eyebrow, LevelMark, RegionHead, Stamp } from "./ui";
 

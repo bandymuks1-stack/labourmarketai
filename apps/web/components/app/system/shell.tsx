@@ -24,7 +24,7 @@ import {
   personById,
 } from "@/lib/design-proof/product-fixtures";
 
-import { CompanyMark, PersonAvatar, ProjectMark, TeamMark } from "./identity";
+import { CompanyMark, PersonAvatar, ProjectMark, TeamMark } from "@/components/app/identity/identity-family";
 import { Atmosphere } from "./atmosphere";
 import { Btn, Stamp } from "./ui";
 

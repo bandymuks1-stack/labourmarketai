@@ -14,7 +14,7 @@ import {
 } from "@/lib/design-proof/product-fixtures";
 import { conflictOf, coverageOf, membersOf, type Seats } from "@/lib/design-proof/team-model";
 
-import { CompanyMark, TeamStack } from "./identity";
+import { CompanyMark, TeamStack } from "@/components/app/identity/identity-family";
 import { EntityCard, EntityPlate, EntityThumb } from "./entity";
 import { Accented, Avail, Btn, Eyebrow, RegionHead, Surface, Tabs } from "./ui";
 

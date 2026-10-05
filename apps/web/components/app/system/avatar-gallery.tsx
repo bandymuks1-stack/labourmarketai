@@ -8,7 +8,7 @@ import {
   personById,
 } from "@/lib/design-proof/product-fixtures";
 
-import { CompanyMark, PersonAvatar, ProjectMark, ServiceMark, TeamMark, TeamStack } from "./identity";
+import { CompanyMark, PersonAvatar, ProjectMark, ServiceMark, TeamMark, TeamStack } from "@/components/app/identity/identity-family";
 import { Avail, EvidenceBar, Stamp } from "./ui";
 
 /**

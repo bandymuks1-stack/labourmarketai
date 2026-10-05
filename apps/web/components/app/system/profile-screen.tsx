@@ -5,7 +5,7 @@ import { ArrowLeft, MessageSquare } from "lucide-react";
 
 import { COMPANIES, PROJECTS, TEAMS, personById, type Person } from "@/lib/design-proof/product-fixtures";
 
-import { PersonAvatar, ProjectMark, TeamMark } from "./identity";
+import { PersonAvatar, ProjectMark, TeamMark } from "@/components/app/identity/identity-family";
 import { LivingCv } from "./living-cv";
 import { PageHeader } from "./shell";
 import { Avail, Btn, LevelMark, Section, Stamp, Tabs } from "./ui";

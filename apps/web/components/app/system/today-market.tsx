@@ -4,7 +4,7 @@ import { Brush, Hammer, Truck } from "lucide-react";
 
 import { COMPANIES, PROJECTS, TEAMS, personById } from "@/lib/design-proof/product-fixtures";
 
-import { CompanyMark, PersonAvatar, ProjectMark, ServiceMark, TeamMark, TeamStack } from "./identity";
+import { CompanyMark, PersonAvatar, ProjectMark, ServiceMark, TeamMark, TeamStack } from "@/components/app/identity/identity-family";
 import { PageHeader } from "./shell";
 import { Btn, Section, Stamp } from "./ui";
 

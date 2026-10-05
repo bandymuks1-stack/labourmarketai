@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PEOPLE, type Person } from "@/lib/design-proof/product-fixtures";
 
-import { PersonAvatar } from "./identity";
+import { PersonAvatar } from "@/components/app/identity/identity-family";
 import { PageHeader } from "./shell";
 import { Avail, Btn, EvidenceBar, LevelMark, Stamp } from "./ui";
 
