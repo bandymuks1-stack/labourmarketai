@@ -7449,7 +7449,6 @@
     "outcomeLinked": "Sujungta. Dabar esate prijungti.",
     "outcomeAlreadyLinked": "Jau esate sujungti.",
     "outcomeNoInvitation": "Pakvietimas nerastas.",
-
     "outcomeEmailUnverified": "Pirmiausia patvirtinkite el. paštą (puslapyje „Ryšiai“), tada priimkite pakvietimą.",
     "outcomeNoWorker": "Jūsų darbuotojo profilis dar neparuoštas.",
     "outcomeError": "Nepavyko priimti. Bandykite dar kartą.",
@@ -11784,7 +11783,9 @@
         "rateLimited": "Nuoroda išsiųsta prieš akimirką. Palaukite minutę, prieš prašydami kitos.",
         "alreadyVerified": "Šis el. pašto adresas jau patvirtintas. Atnaujinkite puslapį.",
         "failed": "Ši nuoroda nepatvirtino jūsų el. pašto (galbūt sena arba atidaryta kitur). Galite paprašyti naujos.",
-        "error": "Nepavyko išsiųsti nuorodos. Bandykite vėliau."
+        "error": "Nepavyko išsiųsti nuorodos. Bandykite vėliau.",
+        "intakeTitle": "Patvirtinkite el. paštą, kad tęstumėte ankstesnį pateikimą",
+        "intakeBody": "Jei per viešą formą pateikėte įmonės poreikį šiuo adresu, patvirtinkite adresą ir mes jį parodysime čia, kad nereikėtų rašyti iš naujo. Visa kita veikia kaip veikė."
       }
     },
     "search": {

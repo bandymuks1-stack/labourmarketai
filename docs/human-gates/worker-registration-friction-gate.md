@@ -68,7 +68,26 @@ closed set (`legacy_confirmed`, `legacy_autoconfirmed`, `social_provider`,
 | `lmc_admin_grant_v1`, `lmc_grant_promotional_v1` | money-adjacent, keyed on `auth.users.email_confirmed_at` | `email_is_verified_v1(u.id, u.email)` (also stops signup-bonus farming with throwaway addresses) |
 | `enforce_profile_email_binding` | binds `profiles.email` to the JWT email | UNCHANGED and now harmless: `profiles.email` is no longer authority anywhere; proven an unverified user cannot rebind to another address and a duplicate profile email cannot hijack resolution |
 | `accept_invitation_v1/v2`, `accept_invitation_apply_v2`, `get_invitation_preview_v1/v2` | **token-proved** (sha256 token custody) | untouched; proven: valid token ALLOWED for an unverified user, expired/used/invalid DENIED |
+| `claim-public-intake` (app layer, service role) | see the APP-LAYER sweep below: fixed with the verified-email gate |
 | login, recovery, onboarding, profile, CV, journal | do not consult email | untouched; guard asserts the sign-in/up/reset forms never call the verification RPCs |
+
+### APP-LAYER sweep (finding G-3, 2026-10-05) — server code that authorises by the caller's e-mail
+
+Pattern searched: `user.email`, session/JWT e-mail, `normEmail`, `invited_email` / `contact_email` / `email` filters, `createAdminClient` near e-mail, `lib/invitations|company|agency|sales|…`, `app/api/**`.
+
+| Path | Disposition |
+|---|---|
+| `lib/company/claim-public-intake.ts` — `listClaimablePublicIntakes[State]` and `claimPublicIntake` (service role; company-need intake incl. company name, headcount, description; sets the intake `converted`) | **WAS UNGATED, FIXED.** Authority is now the PROVEN address from `my_email_verification_v1` (via `lib/auth/verified-email-gate.ts`, caller's own client) checked BEFORE the service role is constructed; unverified / error / missing function / malformed => nothing. Unverified shows the progressive "verify your email" prompt (needs page + claim card) and reveals nothing about whether an intake exists. No DB change was needed. |
+| `lib/worker/invitations.ts` (`listMyPendingWorkerInvitations`), `lib/agency/bridge-read.ts` (`listMyConnectionInvites`) | DB-GATED: user-scoped client, rows come through the three RLS select policies that now require `session_email_verified_v1()`. An unverified person sees nothing there (the network page shows the prompt). Guard asserts no service role in either file. |
+| RPC callers passing an e-mail: `company/memberships.ts`, `training-actions`, `decisions-actions`, `approvals-actions`, `reviews-actions`, `lmc/admin-ledger`, `company-workers`/`agency-workers` invite | DB-GATED by the migration (resolver / predicate). `invite_*_worker` only asks "is this address already linked" and creates a pending invitation; it claims nothing. |
+| `app/[locale]/invite/[token]/page.tsx` (`addressedToOther`) | TOKEN-PROVED; the address comparison is a display hint (which door to offer), authority stays in `accept_agency_client_connection_v1`. |
+| `lib/admin/pilots.ts`, `lib/admin/company-need-intakes.ts` | ADMIN-ROLE gated; e-mail is a search key for an operator, not the caller's authority. |
+| `lib/billing/customer-store.ts`, `app/api/billing/test-checkout` | Not authorisation: the account address is sent to the payment provider as an attribute. |
+| `lib/sales/lead-intake.ts`, `app/api/waitlist`, `lib/invitations/external-referral-receive.ts`, `lib/invitations/public-preview.ts` | Anonymous WRITE-ONLY intake / TOKEN-PROVED; nothing is read back by e-mail. |
+| `lib/qa/synthetic-fixture.ts` `isSyntheticViewer` (`qa.*@labourmarket.ai` shape) | **ACCEPTED residual, low impact:** a registrant using that address shape sees LABELLED synthetic fixtures in marketplace discovery; it authorises no read of real data and no write (guard pins the single caller and that it has no write/RPC/admin path). Owner may drop the e-mail-shape fallback once every QA identity carries `app_metadata.qa_synthetic`. |
+| `onboarding` / `market-map` / `profile` / `account` pages (`user.email.split("@")[0]`, display) | Display only. |
+
+Regression guards: `apps/web/lib/guards/app-email-trust-paths.test.ts` — claim bridge gate order + fail-closed behaviour, gate behaviour matrix (unverified-using-someone-else's-address DENIED, verified owner ALLOWED, error / malformed / changed-address NOT verified), and a sweep that FAILS CI if any file reaches the service role while using the session e-mail as authority without the verified gate (the reviewed non-authorisation files are listed there with a reason each).
 
 ## REQUIRED ORDER
 

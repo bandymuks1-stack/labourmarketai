@@ -247,8 +247,8 @@ describe("no UI renders an unverified email as verified", () => {
     const readers = files
       .filter((f) => /my_email_verification_v1/.test(stripComments(readFileSync(f, "utf8"))))
       .map((f) => f.replace(WEB, "").replace(/\\/g, "/"));
-    // The action module is the one reader; the RPC inventory only NAMES it.
-    expect(readers).toEqual(["/lib/auth/email-verification-actions.ts", "/lib/security/canonical-authenticated-rpcs.ts"]);
+    // Readers: the action module and the server-only app-layer gate; the RPC inventory only NAMES it.
+    expect(readers).toEqual(["/lib/auth/email-verification-actions.ts", "/lib/auth/verified-email-gate.ts", "/lib/security/canonical-authenticated-rpcs.ts"]);
   });
 });
 

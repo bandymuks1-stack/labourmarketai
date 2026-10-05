@@ -7449,7 +7449,6 @@
     "outcomeLinked": "Połączono. Jesteś teraz połączony.",
     "outcomeAlreadyLinked": "Jesteś już połączony.",
     "outcomeNoInvitation": "Nie znaleziono zaproszenia.",
-
     "outcomeEmailUnverified": "Najpierw potwierdź e-mail (strona Sieć), a potem przyjmij zaproszenie.",
     "outcomeNoWorker": "Twój profil pracownika nie jest jeszcze gotowy.",
     "outcomeError": "Nie udało się zaakceptować. Spróbuj ponownie.",
@@ -11784,7 +11783,9 @@
         "rateLimited": "Link został wysłany chwilę temu. Poczekaj minutę, zanim poprosisz o kolejny.",
         "alreadyVerified": "Ten adres e-mail jest już potwierdzony. Odśwież stronę.",
         "failed": "Ten link nie potwierdził Twojego e-mail (może być stary lub otwarty gdzie indziej). Możesz poprosić o nowy.",
-        "error": "Nie udało się wysłać linku. Spróbuj ponownie później."
+        "error": "Nie udało się wysłać linku. Spróbuj ponownie później.",
+        "intakeTitle": "Potwierdź e-mail, aby kontynuować wcześniejsze zgłoszenie",
+        "intakeBody": "Jeśli przez nasz publiczny formularz zgłosiłeś potrzebę firmy z tego adresu, potwierdź adres, a pokażemy ją tutaj, abyś nie musiał wpisywać wszystkiego ponownie. Wszystko inne działa jak dotąd."
       }
     },
     "search": {

@@ -7449,7 +7449,6 @@
     "outcomeLinked": "Linked. You are now connected.",
     "outcomeAlreadyLinked": "You are already linked.",
     "outcomeNoInvitation": "Invitation not found.",
-
     "outcomeEmailUnverified": "Confirm your email first (Network page), then accept the invitation.",
     "outcomeNoWorker": "Your worker profile is not ready yet.",
     "outcomeError": "Could not accept. Please try again.",
@@ -11784,7 +11783,9 @@
         "rateLimited": "A link was sent a moment ago. Please wait a minute before asking for another.",
         "alreadyVerified": "This email address is already verified. Refresh the page.",
         "failed": "That link did not verify your email (it may be old or opened elsewhere). You can ask for a new one.",
-        "error": "We could not send the link. Please try again later."
+        "error": "We could not send the link. Please try again later.",
+        "intakeTitle": "Verify your email to continue an earlier submission",
+        "intakeBody": "If you sent us a company need through our public form with this address, verify the address and we will show it here so you do not have to type it again. Everything else works as it is."
       }
     },
     "search": {
