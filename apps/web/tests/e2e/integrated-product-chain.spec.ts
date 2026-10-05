@@ -2312,8 +2312,13 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     const page = await loginUi(browser, "sole");
     if (!S.ST_E1) {
       await go(page, "/en/dashboard/journal", "#journal-composer textarea");
-      await page.locator("#journal-composer textarea").fill(`QA${TAG} st-own-ws: fitted 3 windows for the client, worked 3 hours`);
-      await page.getByRole("button", { name: /Read it back/i }).click();
+      // fill until the "Read it back" control enables: a fill before React hydrates the composer is silently dropped
+      const readBack = page.getByRole("button", { name: /Read it back/i });
+      for (let attempt = 0; attempt < 6 && !(await readBack.isEnabled()); attempt++) {
+        await page.waitForTimeout(2_000);
+        await page.locator("#journal-composer textarea").fill(`QA${TAG} st-own-ws: fitted 3 windows for the client, worked 3 hours`);
+      }
+      await readBack.click();
       const ctxSel = page.getByTestId("worklog-context");
       await expect(ctxSel).toBeVisible({ timeout: 60_000 });
       const opts = await ctxSel.locator("option").evaluateAll((os) => os.map((o) => ({ v: (o as HTMLOptionElement).value, t: o.textContent ?? "" })));
