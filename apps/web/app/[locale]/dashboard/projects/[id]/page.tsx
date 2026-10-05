@@ -184,6 +184,12 @@ export default async function ProjectStadiumPage({
           <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
             <Users className="h-3 w-3" aria-hidden />
             {t("fieldCount", { n: ops.counters.totalAssigned })}
+            {(ops.counters.viaTeam ?? 0) > 0 ? (
+              <span data-testid="field-via-team">
+                {" · "}
+                {t("fieldViaTeam", { n: ops.counters.viaTeam ?? 0 })}
+              </span>
+            ) : null}
           </span>
         </div>
 

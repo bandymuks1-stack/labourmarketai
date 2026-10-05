@@ -9,6 +9,11 @@ import { buildVerifiedCv } from "@/lib/cv-export/verified-cv";
 import { getWorkerDocumentCentre } from "@/lib/documents/document-centre";
 import { getFinanceSummary } from "@/lib/finance/finance";
 import { getSpineCounts } from "@/lib/notifications/spine";
+import {
+  assignedCountsByProject,
+  mergeAssignedPeople,
+  readTeamAssignedPeople,
+} from "@/lib/projects/assigned-people";
 import { callerCompanyId } from "@/lib/projects/projects";
 import { buildEvidenceReport } from "@/lib/reports/evidence-report";
 import { createClient } from "@/lib/supabase/server";
@@ -173,14 +178,34 @@ async function readProjectRows(): Promise<{
     try {
       const assignRes = await asAny(supabase)
         .from("project_worker_assignments")
-        .select("project_id")
+        .select("project_id, worker_id, workers(profile_id)")
         .in(
           "project_id",
           projects.map((p) => p.id),
         )
         .eq("status", "active");
-      for (const row of (assignRes.data ?? []) as { project_id: string }[]) {
-        counts.set(row.project_id, (counts.get(row.project_id) ?? 0) + 1);
+      // ONE meaning of "assigned" (lib/projects/assigned-people.ts): distinct
+      // people = active person assignments + members of actively assigned teams,
+      // a person assigned both ways counted once.
+      const personRows = (
+        (assignRes.data ?? []) as {
+          project_id: string;
+          worker_id: string | null;
+          workers?: { profile_id: string | null } | null;
+        }[]
+      ).map((row) => ({
+        projectId: row.project_id,
+        profileId: row.workers?.profile_id ?? null,
+        workerId: row.worker_id ?? null,
+      }));
+      const teamRows = await readTeamAssignedPeople(
+        supabase,
+        projects.map((p) => p.id),
+      );
+      for (const [projectId, c] of assignedCountsByProject(
+        mergeAssignedPeople(personRows, teamRows),
+      )) {
+        counts.set(projectId, c.total);
       }
     } catch {
       // keep zeros — honest degradation, never a fabricated team size

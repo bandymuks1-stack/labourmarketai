@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { validateOperationsRoleAssignment } from "@/lib/operations/assign-operations-role";
 import type { ProfessionEntry } from "@/lib/worker/self-declared-profession";
 import type { SetJournalReviewOutcome } from "@/lib/operations/journal-review-actions";
+import { readTeamAssignedPeople } from "@/lib/projects/assigned-people";
 
 /**
  * Company-worker linking service (Stage 2 follow-up to PR #99).
@@ -229,6 +230,31 @@ async function readActiveProjectTitles(
     const list = out.get(r.worker_id as string) ?? [];
     if (!list.includes(title)) list.push(title);
     out.set(r.worker_id as string, list);
+  }
+  // A project reached through a team that is ACTIVELY assigned counts too (ONE
+  // meaning of "assigned": lib/projects/assigned-people.ts). A person assigned
+  // both ways lists the project once. A failed team read adds nothing.
+  const wanted = new Set(workerIds);
+  const teamRows = (await readTeamAssignedPeople(supabase)).filter(
+    (t) => t.workerId !== null && wanted.has(t.workerId),
+  );
+  if (teamRows.length > 0) {
+    const projectIds = [...new Set(teamRows.map((t) => t.projectId))];
+    const titles = await asAny(supabase).from("projects").select("id, title").in("id", projectIds);
+    const titleOf = new Map<string, string>();
+    if (!titles.error && Array.isArray(titles.data)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      for (const p of titles.data as any[]) {
+        if (typeof p.title === "string" && p.title.trim()) titleOf.set(p.id as string, p.title.trim());
+      }
+    }
+    for (const t of teamRows) {
+      const title = titleOf.get(t.projectId);
+      if (!title || !t.workerId) continue;
+      const list = out.get(t.workerId) ?? [];
+      if (!list.includes(title)) list.push(title);
+      out.set(t.workerId, list);
+    }
   }
   return out;
 }

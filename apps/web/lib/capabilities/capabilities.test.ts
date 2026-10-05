@@ -186,6 +186,14 @@ describe("the registry itself", () => {
       "assignment.end_draft",
       "assignment.end_confirm",
       "journal.review_queue.get",
+      // WRK-6 — a team assigned as ONE relationship, draft → confirm over the
+      // SAME core the web project page uses.
+      "team_assignment.create_draft",
+      "team_assignment.create_confirm",
+      "team_assignment.replace_draft",
+      "team_assignment.replace_confirm",
+      "team_assignment.end_draft",
+      "team_assignment.end_confirm",
       // Marketplace (2026-09-30) — candidate search + shortlist over the SAME
       // scouting cores as the web page; the activation queue names facts.
       "candidate.search",
@@ -270,6 +278,14 @@ describe("the registry itself", () => {
       "assignment.end_draft",
       "assignment.end_confirm",
       "journal.review_queue.get",
+      // WRK-6 — a team assigned as ONE relationship, draft → confirm over the
+      // SAME core the web project page uses.
+      "team_assignment.create_draft",
+      "team_assignment.create_confirm",
+      "team_assignment.replace_draft",
+      "team_assignment.replace_confirm",
+      "team_assignment.end_draft",
+      "team_assignment.end_confirm",
       // Marketplace (2026-09-30) — candidate search + shortlist over the SAME
       // scouting cores as the web page; the activation queue names facts.
       "candidate.search",

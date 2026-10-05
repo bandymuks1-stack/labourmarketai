@@ -37,6 +37,7 @@ import {
 import { demandContextRefusal } from "./employer-context-refusal";
 import { EMPLOYER_OPERATIONS_CAPABILITIES } from "./employer-operations-capabilities";
 import { MARKETPLACE_CAPABILITIES } from "./marketplace-capabilities";
+import { TEAM_ASSIGNMENT_CAPABILITIES } from "./team-assignment-capabilities";
 import { MESSAGING_CAPABILITIES } from "./messaging-capabilities";
 import { COMPANY_INGEST_CAPABILITIES } from "./company-ingest-capabilities";
 import { EVIDENCE_IMPORT_CAPABILITIES } from "./evidence-import-capabilities";
@@ -1744,6 +1745,10 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   // they work, what waits for its review — over the SAME cores and RPCs the
   // web company surfaces call (`employer-operations-capabilities.ts`).
   ...EMPLOYER_OPERATIONS_CAPABILITIES,
+  // A team assigned to a project / work object / task as ONE relationship:
+  // draft -> confirm over the SAME core the web project page uses
+  // (`team-assignment-capabilities.ts`, WRK-6).
+  ...TEAM_ASSIGNMENT_CAPABILITIES,
   // The marketplace meeting point — candidate search and the shortlist over
   // the SAME scouting/shortlist cores the web page runs, plus the named
   // conditions that keep a person from being matchable or discoverable.
