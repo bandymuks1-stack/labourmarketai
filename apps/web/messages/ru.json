@@ -18068,6 +18068,7 @@
       "progress": "{attributed} из {total} отнесено: {name}",
       "done": "Отнесено записей: {count}; уже было отнесено: {skipped}.",
       "refused": "Не удалось сохранить. Ничего не изменено.",
+      "personPeriod": "{hours} ч за период (не добавляются к отдельным дням)",
       "person": "{hours} ч, {count, plural, one {# запись} few {# записи} many {# записей} other {# записи}}"
     },
     "periodShort": "{hours} ч итог за период"

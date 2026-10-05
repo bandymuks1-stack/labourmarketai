@@ -18068,6 +18068,7 @@
       "progress": "{attributed} z {total} przypisano: {name}",
       "done": "Przypisano wpisów: {count}; już przypisanych: {skipped}.",
       "refused": "Nie udało się zapisać. Nic nie zmieniono.",
+      "personPeriod": "{hours} godz. suma okresowa (nie dodawana do pojedynczych dni)",
       "person": "{hours} godz., {count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}"
     },
     "periodShort": "{hours} godz. suma za okres"

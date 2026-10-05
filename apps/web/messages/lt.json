@@ -18068,6 +18068,7 @@
       "progress": "{attributed} iš {total} priskirta: {name}",
       "done": "Priskirta įrašų: {count}; jau buvo priskirta: {skipped}.",
       "refused": "Nepavyko išsaugoti. Nieko nepakeista.",
+      "personPeriod": "{hours} val. laikotarpio suma (nepridedama prie atskirų dienų)",
       "person": "{hours} val., {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}"
     },
     "periodShort": "{hours} val. laikotarpio suma"
