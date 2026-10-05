@@ -2038,7 +2038,10 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
       const q = await rpcAs(jwt, "list_counterparty_review_queue_v1", {});
       expect(JSON.stringify(q.json ?? "")).not.toContain(e1);
     }
-    expect(await rows(`journal_entry_confirmations?entry_id=eq.${e1}&select=id`)).toEqual([]);
+    // RE-ENTRANT: the negatives wrote nothing. (A re-run after an interrupted attempt finds the rep's own correction request - the only
+    // row this step writes before this point - and must still see that nothing ELSE was written.)
+    const pre9c = await rows<{ confirmation_scope: any }>(`journal_entry_confirmations?entry_id=eq.${e1}&select=confirmation_scope`);
+    expect(pre9c.filter((r) => r.confirmation_scope?.action !== "client_request_correction"), "the negatives wrote nothing").toEqual([]);
 
     const rep = await loginUi(browser, "rep2");
     await go(rep, "/en/dashboard/inbox/counterparty", `[data-testid="counterparty-card-${e1}"]`);
