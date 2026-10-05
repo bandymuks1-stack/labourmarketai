@@ -1539,6 +1539,7 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261003150300_marketplace_index_v1.sql",
       "20261003150400_marketplace_public_business_expiry_v1.sql",
       "20261003151200_market_org_capabilities_for_visible_listings_v1.sql",
+      "20261003151400_marketplace_v1_write_rpcs_closed_v1.sql",
 ]);
   });
 
