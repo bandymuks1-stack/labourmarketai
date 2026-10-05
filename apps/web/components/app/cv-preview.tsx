@@ -3,17 +3,9 @@
 import { useTranslations } from "next-intl";
 import { type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
+import { PersonAvatar } from "@/components/app/identity/identity-family";
 
 export type CvSkill = { slug: string; isCore: boolean };
-
-function initials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "—";
-  return parts
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase() ?? "")
-    .join("");
-}
 
 /**
  * Work passport — a premium READ MODEL of the worker's SAVED data (§7: mirrors
@@ -60,12 +52,7 @@ export function CvPreview({
 
       {/* Identity — avatar + name + profession */}
       <div className="mt-4 flex items-center gap-3">
-        <span
-          className="flex h-14 w-14 flex-none items-center justify-center rounded-full border border-brand-blue/40 bg-gradient-to-br from-brand-blue/20 to-brand-cyan/10 font-display text-lg font-bold tracking-tight text-text-primary"
-          aria-hidden
-        >
-          {initials(personName)}
-        </span>
+        <PersonAvatar person={{ id: personName || "cv", name: personName }} size={56} />
         <div className="min-w-0">
           <p className="truncate font-display text-lg font-bold tracking-tightest text-text-primary">
             {personName || "—"}

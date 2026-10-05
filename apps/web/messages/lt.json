@@ -13926,6 +13926,7 @@
       "capacityAbsencesUnknown": "Šiuo metu nepasiekiama.",
       "capacityEmpty": "Komandoje kol kas nieko nėra — pakvieskite žmones.",
       "capacityUnavailable": "Komandos prieinamumo dabar nuskaityti nepavyko.",
+      "briefEmployerUnknown": "Šiuo metu negalėjau patikrinti visko jūsų įmonės sąraše. Tai nereiškia, kad nieko nelaukia.",
       "chipAddTask": "Pridėti užduotį",
       "workerProjectsIntro": "Jūsų projektai ({count} aktyv.):",
       "workerProjectsEnded": "baigta",

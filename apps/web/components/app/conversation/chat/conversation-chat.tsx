@@ -222,7 +222,7 @@ import { applyCorrection } from "@/lib/structuring/apply-correction";
 import { discoverChannels } from "@/lib/value-channels/discovery";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
 import {
-  loadEmployerOpeningBrief,
+  loadEmployerOpeningBriefResult,
   loadOpeningBrief,
 } from "@/lib/conversation/opening-brief";
 import { TODAY_COVERED_BRIEF_RUNGS } from "@/lib/today/today-route";
@@ -1658,11 +1658,20 @@ export function ConversationChat({
       assistant(labels.adminRouteHint, [
         { id: "link:/dashboard/company", label: labels.chipCompanyHub },
       ]);
-    loadEmployerOpeningBrief()
+    loadEmployerOpeningBriefResult()
       .then((brief) => {
         setTyping(false);
-        if (brief.kind === "brief") assistant(brief.lines.join("\n"), brief.chips);
-        else hub();
+        // A source that could not be read is SAID, never folded into "nothing".
+        if (brief.kind === "brief") {
+          assistant(
+            [...brief.lines, ...(brief.unknownNote ? [brief.unknownNote] : [])].join("\n"),
+            brief.chips,
+          );
+        } else if (brief.kind === "unknown") {
+          assistant(brief.unknownNote, [
+            { id: "link:/dashboard/company", label: labels.chipCompanyHub },
+          ]);
+        } else hub();
       })
       .catch(() => {
         setTyping(false);
@@ -1695,9 +1704,11 @@ export function ConversationChat({
     // screen, the brief leaves out the rungs ŠIANDIEN states and keeps the
     // ones only the brief carries (lib/today/today-route.ts).
     const briefOptions = todayOnScreen ? { omit: TODAY_COVERED_BRIEF_RUNGS } : undefined;
-    (identity === "person" ? loadOpeningBrief(briefOptions) : loadEmployerOpeningBrief())
+    (identity === "person" ? loadOpeningBrief(briefOptions) : loadEmployerOpeningBriefResult())
       .then((brief) => {
-        if (brief.kind !== "brief") return; // honest: nothing to report
+        // `none` = every source answered and none had anything. `unknown` (the
+        // employer brief only) = a source could not be read: said, not hidden.
+        if (brief.kind === "none") return; // honest: nothing to report
         // The brief is a slow read. On production (2026-09-06) it landed
         // AFTER the person's first sentence and took the answer's chip row —
         // the worker who asked "kas man trūksta?" saw the brief's chips, not
@@ -1708,13 +1719,19 @@ export function ConversationChat({
           id: nid(),
           role: "assistant",
           kind: "text",
-          text: brief.lines.join("\n"),
-          chips: brief.chips,
+          text:
+            brief.kind === "unknown"
+              ? brief.unknownNote
+              : [
+                  ...brief.lines,
+                  ...("unknownNote" in brief && brief.unknownNote ? [brief.unknownNote] : []),
+                ].join("\n"),
+          chips: brief.kind === "unknown" ? [] : brief.chips,
         });
         // The brief asks with chips like any assistant() turn, so the phone
         // sheet (auto-opened for a pending invitation) yields to it the same
         // way instead of staying over the home.
-        if (brief.chips.length > 0) setChipsPostedAt(Date.now());
+        if (brief.kind === "brief" && brief.chips.length > 0) setChipsPostedAt(Date.now());
       })
       .catch(() => {
         /* the greeting stands on its own — never a fabricated brief */

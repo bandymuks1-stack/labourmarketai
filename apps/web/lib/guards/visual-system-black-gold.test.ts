@@ -479,12 +479,12 @@ describe("no letter stands in for the mark in the authenticated product", () => 
     ["components/app/avatar-display.tsx", /\{avatarMonogram\(displayName\)\}/],
     // Renders the shared AvatarDisplay above, with the person's own name.
     ["components/app/profile-avatar.tsx", /<AvatarDisplay\b[^>]*displayName=\{displayName\}/],
-    ["components/app/cv-preview.tsx", /\{initials\(personName\)\}/],
+    ["components/app/cv-preview.tsx", /<PersonAvatar person=\{\{ id: personName \|\| "cv", name: personName \}\}/],
     ["components/app/worker-player-card.tsx", /\{identity\.initials\}/],
     ["components/app/project-operations-board.tsx", /\{initials\}/],
     ["components/app/marketplace-loop-section.tsx", /\{requester\.initials\}/],
-    ["app/[locale]/dashboard/admin/matching/page.tsx", /\{initialsOf\(w\.displayName\)\}/],
-    ["app/[locale]/dashboard/projects/[id]/page.tsx", /\{initialsOf\(w\.name\)\}/],
+    ["app/[locale]/dashboard/admin/matching/page.tsx", /<PersonAvatar person=\{\{ id: w\.id, name: w\.displayName/],
+    ["app/[locale]/dashboard/projects/[id]/page.tsx", /<PersonAvatar person=\{\{ id: w\.workerId, name: w\.name/],
   ];
 
   const tsxUnder = (dir: string): string[] => {

@@ -28,6 +28,7 @@ import { CountUp } from "@/components/app/today/count-up";
 import { ProjectWorkGallery } from "@/components/app/project-work-gallery";
 import { type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
+import { PersonAvatar } from "@/components/app/identity/identity-family";
 
 export const dynamic = "force-dynamic";
 
@@ -119,10 +120,6 @@ export default async function ProjectStadiumPage({
           ? tLoc("statusUnverified")
           : tLoc("statusTextOnly");
 
-  const initialsOf = (name: string) => {
-    const parts = name.trim().split(/\s+/).slice(0, 2);
-    return parts.map((p) => p[0]?.toUpperCase() ?? "").join("") || "•";
-  };
   const positionLabel = (workerId: string) => {
     const slug = positions.get(workerId) ?? null;
     if (slug && tProf.has(slug)) return tProf(slug);
@@ -299,16 +296,17 @@ export default async function ProjectStadiumPage({
                   className="group flex items-center gap-3"
                   data-testid={`stadium-player-open-${w.workerId}`}
                 >
+                  {/* The frame carries the TRUST state (confirmed skills); the
+                      person inside is the ONE identity family. */}
                   <span
-                    aria-hidden
                     className={cn(
-                      "flex h-16 w-14 shrink-0 items-center justify-center rounded-xl border bg-ink-700 font-display text-lg font-bold text-text-primary",
+                      "flex shrink-0 rounded-xl border p-0.5",
                       w.confirmedSkills > 0
                         ? "border-trust-accent/50"
                         : "border-ink-500",
                     )}
                   >
-                    {initialsOf(w.name)}
+                    <PersonAvatar person={{ id: w.workerId, name: w.name }} size={52} />
                   </span>
                   <div className="min-w-0">
                     <p className="font-display text-lg font-semibold leading-tight tracking-tightest text-text-primary group-hover:text-brand-blue">

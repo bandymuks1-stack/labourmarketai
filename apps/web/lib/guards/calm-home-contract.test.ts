@@ -53,7 +53,7 @@ describe("ŠIANDIEN owns the attention it already renders", () => {
     expect(CHAT).toMatch(
       /const briefOptions = todayOnScreen \? \{ omit: TODAY_COVERED_BRIEF_RUNGS \} : undefined;/,
     );
-    expect(CHAT).toMatch(/loadOpeningBrief\(briefOptions\) : loadEmployerOpeningBrief\(\)/);
+    expect(CHAT).toMatch(/loadOpeningBrief\(briefOptions\) : loadEmployerOpeningBriefResult()\(\)/);
     // Negative control: an unconditional omit would silence the brief for a
     // person who has no ŠIANDIEN above it.
     expect(CHAT).not.toMatch(/loadOpeningBrief\(\{\s*omit:/);

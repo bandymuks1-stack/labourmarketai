@@ -60,7 +60,7 @@ describe("2. the company workspace's next step is the company's, not the person'
 
   it("startCompanyNextStep reuses the employer opening brief and falls back to the company hub — no second brief", () => {
     const fn = block(chat, "const startCompanyNextStep = useCallback(", "startProfileSummaryRef.current");
-    expect(fn).toContain("loadEmployerOpeningBrief()");
+    expect(fn).toContain("loadEmployerOpeningBriefResult()");
     expect(fn).toContain('id: "link:/dashboard/company"');
     expect(fn).not.toMatch(/\.from\(|\.rpc\(|fetch\(/);
   });

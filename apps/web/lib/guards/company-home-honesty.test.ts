@@ -16,7 +16,11 @@ const SECTION = read("components/app/company-home-field-section.tsx");
 
 describe("company home — a failed brief is unavailable, not all clear", () => {
   it("the attention read degrades to `unavailable`, never to `none`", () => {
-    expect(FIELD).toContain('loadEmployerOpeningBrief().catch((): { kind: "unavailable" } => ({ kind: "unavailable" }))');
+    // Re-anchored: the Result reader tells a failed source (`unknown`) from the
+    // all-clear (`none`); `unknown` AND a thrown read both degrade to unavailable.
+    expect(FIELD).toContain("loadEmployerOpeningBriefResult()");
+    expect(FIELD).toMatch(/r\.kind === "unknown"\s*\?\s*\{ kind: "unavailable" \}/);
+    expect(FIELD).toContain('.catch((): { kind: "unavailable" } => ({ kind: "unavailable" }))');
     expect(FIELD).not.toMatch(/\.catch\([^\n]*\{ kind: "none" \}/);
     expect(FIELD).toMatch(/readonly attention: OpeningBrief \| \{ readonly kind: "unavailable" \}/);
   });

@@ -68,8 +68,8 @@ describe("the chat has no message logic of its own", () => {
 describe("the employer brief counts the company's unread, not the person's whole inbox", () => {
   it("uses the organization-scoped unread read", () => {
     const brief = readFileSync(join(WEB, "lib", "conversation", "opening-brief.ts"), "utf8");
-    const employer = brief.slice(brief.indexOf("export async function loadEmployerOpeningBrief"));
-    expect(employer).toMatch(/getUnreadConversationIdsForOrganization\(ctx\.companyId\)/);
+    const employer = brief.slice(brief.indexOf("export async function loadEmployerOpeningBriefResult"));
+    expect(employer).toMatch(/getUnreadConversationIdsForOrganizationResult\(ctx\.companyId\)/);
     expect(employer).not.toMatch(/getUnreadConversationCount\(\)/);
   });
 });

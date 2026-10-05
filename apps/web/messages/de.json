@@ -13926,6 +13926,7 @@
       "capacityAbsencesUnknown": "Derzeit nicht verfügbar.",
       "capacityEmpty": "Noch niemand im Team — laden Sie Leute ein.",
       "capacityUnavailable": "Die Verfügbarkeit des Teams konnte gerade nicht gelesen werden.",
+      "briefEmployerUnknown": "Ich konnte gerade nicht alles auf der Liste Ihres Unternehmens prüfen. Das heißt nicht, dass nichts ansteht.",
       "chipAddTask": "Aufgabe hinzufügen",
       "workerProjectsIntro": "Ihre Projekte ({count} aktiv):",
       "workerProjectsEnded": "beendet",

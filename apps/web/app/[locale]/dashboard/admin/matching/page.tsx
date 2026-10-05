@@ -23,6 +23,7 @@ import {
 import { StructureNeedForm } from "@/components/app/structure-need-form";
 import { openDirectConversationAction } from "@/lib/communication/open-conversation-action";
 import type { DarkListboxOption } from "@/components/ui/DarkListbox";
+import { PersonAvatar } from "@/components/app/identity/identity-family";
 
 /**
  * Phase 3.2 — Human-Run Matching Workbench (Marketplace v1 heart, product
@@ -39,12 +40,6 @@ import type { DarkListboxOption } from "@/components/ui/DarkListbox";
  * cards. The decision stays 100% human — no scoring, no ranking, no
  * auto-pick; mobile-first stack.
  */
-
-function initialsOf(name: string | null): string {
-  if (!name) return "•";
-  const parts = name.trim().split(/\s+/).slice(0, 2);
-  return parts.map((p) => p[0]?.toUpperCase() ?? "").join("") || "•";
-}
 
 const STATUS_TONE: Record<string, string> = {
   submitted: "border-brand-blue/40 bg-brand-blue/5 text-brand-blue",
@@ -809,15 +804,16 @@ export default async function AdminMatchingWorkbenchPage({
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="flex min-w-0 items-center gap-2.5">
+                        {/* The frame carries the TRUST state (confirmed skills); the
+                            person inside is the ONE identity family. */}
                         <span
-                          aria-hidden
-                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-ink-700 font-display text-xs font-bold text-text-primary ${
+                          className={`flex shrink-0 rounded-xl border p-0.5 ${
                             w.skillsConfirmed > 0
                               ? "border-trust-accent/50"
                               : "border-ink-500"
                           }`}
                         >
-                          {initialsOf(w.displayName)}
+                          <PersonAvatar person={{ id: w.id, name: w.displayName ?? "" }} size={32} />
                         </span>
                         <span className="truncate text-sm font-semibold text-text-primary">
                           {w.displayName ?? t("supply.unnamed")}

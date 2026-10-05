@@ -38,6 +38,7 @@ import { readRecordedWorkFor } from "@/lib/player-card/work-history";
 import { readWorkPhotosFor } from "@/lib/journal/personal-gallery";
 import { listActiveOfferingsByProvider } from "@/lib/services/service-offerings";
 import { PersonImportedHistory } from "@/components/app/people/person-imported-history";
+import { personMonogram } from "@/lib/visual/avatar-monogram";
 
 export const dynamic = "force-dynamic";
 
@@ -285,14 +286,7 @@ export default async function PersonPage({
         <IdentityStage
           name={name}
           avatarUrl={avatarUrl}
-          initials={
-            name
-              .trim()
-              .split(/\s+/)
-              .slice(0, 2)
-              .map((p) => p[0]?.toUpperCase() ?? "")
-              .join("") || "•"
-          }
+          initials={personMonogram(name)}
           heading={
                 <h1
                   className="font-display text-2xl font-bold tracking-tightest text-text-primary"

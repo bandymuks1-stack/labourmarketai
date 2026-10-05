@@ -5,7 +5,7 @@ import type { ProjectRiskRow } from "@/lib/conversation/project-risk-contract";
 import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
 import type { CapacityChatResult } from "@/lib/conversation/capacity-contract";
 import { getOrgDemandRollup } from "@/lib/company/org-demand-rollup";
-import { loadEmployerOpeningBrief, type OpeningBrief } from "@/lib/conversation/opening-brief";
+import { loadEmployerOpeningBriefResult, type OpeningBrief } from "@/lib/conversation/opening-brief";
 import { listProjectStages } from "@/lib/projects/stages";
 import { listProjectAssignments } from "@/lib/projects/projects";
 import type { CompanyWorkersListResult } from "@/lib/company/company-workers";
@@ -40,7 +40,7 @@ import {
  *   who is free       → loadWhoIsAvailableForChat() (the chat's capacity answer;
  *                       the company page hands in the roster read it already
  *                       awaits, so the roster is queried once per request)
- *   needs you         → loadEmployerOpeningBrief()  (the chat's opening brief)
+ *   needs you         → loadEmployerOpeningBriefResult()  (the chat's opening brief)
  *
  * Every source degrades on its own into a named state — a failed read is
  * never a calm empty block (owner contract §1 rule 3: real state, never
@@ -147,7 +147,17 @@ export async function loadCompanyHomeField(
       (): CapacityChatResult => ({ kind: "error" }),
     ),
     // HONESTY (QA Q-2): a failed brief read is "unavailable", never "all clear".
-    loadEmployerOpeningBrief().catch((): { kind: "unavailable" } => ({ kind: "unavailable" })),
+    // A source that could not be read with nothing else to say is UNKNOWN, not
+    // `none`: it maps to "unavailable" here, never to "nothing needs you".
+    loadEmployerOpeningBriefResult()
+      .then((r): OpeningBrief | { kind: "unavailable" } =>
+        r.kind === "unknown"
+          ? { kind: "unavailable" }
+          : r.kind === "brief"
+            ? { kind: "brief", lines: r.lines, chips: r.chips }
+            : { kind: "none" },
+      )
+      .catch((): { kind: "unavailable" } => ({ kind: "unavailable" })),
     getOrgDemandRollup().catch((): { kind: "unavailable" } => ({ kind: "unavailable" })),
   ]);
   const interest: CompanyHomeField["interest"] =
