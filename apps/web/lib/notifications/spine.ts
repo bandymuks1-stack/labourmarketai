@@ -11,7 +11,7 @@ import {
   getPendingIncomingRequestCount,
   getServiceRequestsNewCounts,
 } from "@/lib/marketplace/service-requests";
-import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
+import { listInvitationsAddressedToMe } from "@/lib/invitations/attention";
 import { listMyMembershipInvitations } from "@/lib/company/memberships";
 import { getPendingAbsenceReviewCount } from "@/lib/leave/absences";
 import { getTaskAttentionCounts } from "@/lib/tasks/tasks";
@@ -61,7 +61,14 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     getServiceRequestsNewCounts(),
     getPendingIncomingBookingCount(),
     getBookingResponsesNewCount(),
-    listMyPendingWorkerInvitations(),
+    // ONE canonical definition of "an invitation is waiting on me": the
+    // canonical `invitations` table PLUS the company/agency roster invitations
+    // (`listInvitationsAddressedToMe` - the read behind Today, the opening
+    // brief and the chat). The bell used to count the roster half only, so a
+    // person invited through the canonical system saw a number on Today that
+    // the bell did not carry. `total` is the real count behind the display cap.
+    // A failed or unapplied read counts 0 here (the spine is defensive).
+    listInvitationsAddressedToMe(),
     // Governance invitations addressed to me — the SAME caller-scoped read
     // the Activity Setup Hub renders its panel from, so the bell and the
     // panel cannot disagree. A failed or unapplied read counts 0.
@@ -86,7 +93,7 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     serviceRequestResponsesNew: requestNewCounts.buyerNew,
     pendingIncomingBookings,
     bookingResponsesNew,
-    pendingInvitations: invitations.length,
+    pendingInvitations: invitations.status === "ok" ? invitations.total : 0,
     pendingMembershipInvitations:
       membershipInvitations.kind === "ok" ? membershipInvitations.invitations.length : 0,
     openTaskAttention: taskAttention.total,

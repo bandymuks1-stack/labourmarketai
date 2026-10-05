@@ -355,9 +355,12 @@ export function WorkHoursQuickEntry({
                       {e.objectName}
                       {e.note ? ` · ${e.note}` : ""}
                       {e.enteredForSomeoneElse ? ` · ${t("enteredForSomeoneElse")}` : ""}
+                      {e.rejected ? ` · ${t("rejectedNotCounted")}` : ""}
                     </span>
                   </span>
-                  <span className="ml-auto text-base font-semibold tabular-nums">
+                  <span
+                    className={`ml-auto text-base font-semibold tabular-nums ${e.rejected ? "text-text-muted line-through" : ""}`}
+                  >
                     {e.hours} h
                   </span>
                   <button

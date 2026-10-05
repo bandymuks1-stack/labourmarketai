@@ -30,12 +30,14 @@ interface Recorded {
 function fakeDb(options: {
   errorCode?: string | null;
   rows?: Record<string, unknown>[];
+  /** What the head count of unread rows answers (`count`), when given. */
+  unreadTotal?: number;
 } = {}) {
   const ops: Recorded[] = [];
   const result =
     options.errorCode != null
       ? { data: null, error: { code: options.errorCode } }
-      : { data: options.rows ?? [], error: null };
+      : { data: options.rows ?? [], error: null, count: options.unreadTotal };
   const chain: Record<string, unknown> = {};
   const self = () => chain;
   chain.select = (...args: unknown[]) => {
@@ -166,6 +168,35 @@ describe("readMyNotificationEvents", () => {
     expect(feed.events).toHaveLength(2);
     expect(feed.unreadCount).toBe(1);
     expect(feed.events[1].metadata).toEqual({ country: "SE" });
+  });
+
+  it("unread is the REAL total, not the unread rows of the loaded window (F7)", async () => {
+    const { client } = fakeDb({
+      rows: [
+        {
+          id: "a",
+          event_type: "absence_approved",
+          entity_type: "worker_absence",
+          entity_id: "e1",
+          created_at: "2026-08-10T07:00:00Z",
+          read_at: null,
+          metadata: {},
+        },
+      ],
+      unreadTotal: 57,
+    });
+    const feed = await readMyNotificationEvents(client);
+    if (feed.kind !== "ready") throw new Error("expected ready");
+    // pre-fix: 1 (capped to the 20-row window)
+    expect(feed.unreadCount).toBe(57);
+    expect(feed.unreadCountIsWindowOnly).toBeUndefined();
+  });
+
+  it("without an exact count the window figure is flagged as a lower bound", async () => {
+    const { client } = fakeDb({ rows: [] });
+    const feed = await readMyNotificationEvents(client);
+    if (feed.kind !== "ready") throw new Error("expected ready");
+    expect(feed.unreadCountIsWindowOnly).toBe(true);
   });
 
   it("an absent store is feature_unavailable — the bell renders exactly the pre-migration product", async () => {

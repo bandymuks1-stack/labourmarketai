@@ -800,15 +800,15 @@
     },
     "basis": {
       "label": "Pagrindas",
-      "workerEvidence": "Suskaičiuota pagal įrodymų ataskaitos taisykles iš jūsų pačių kataloguotų įgūdžių, darbo žurnalo įrašų ir vadovų patvirtinimų. Jokio balo, jokio spėjimo.",
+      "workerEvidence": "Suskaičiuota pagal įrodymų ataskaitos taisykles iš jūsų pačių kataloguotų įgūdžių ir darbo žurnalo įrašų. Patvirtinti įrašai — galiojantys vadovo patvirtinti įrašai, kiekvienas skaičiuojamas vieną kartą; jūsų pačių patvirtinimai ir atmesti įrašai neįtraukiami. Jokio balo, jokio spėjimo.",
       "workerActivity": "Jūsų darbo žurnalo įrašų ir įkeltų nuotraukų skaičiai.",
       "orgDemand": "Skaičiuojamos jūsų pačių sukurtos paklausos užklausos. Atviros = juodraštis, pateikta, peržiūrima arba reikia tęsinio.",
       "orgProjects": "Jūsų įmonės projektų eilučių skaičiai, sugrupuoti pagal kiekvienos eilutės įrašytą būseną.",
-      "orgTasks": "Užduočių, kuriose esate vykdytojas arba kūrėjas, skaičiai pagal įrašytą būseną.",
+      "orgTasks": "Užduočių, kuriose esate vykdytojas arba kūrėjas, skaičiai pagal užfiksuotą būseną. Tai jūsų pačių užduočių sąrašas, ne visos organizacijos.",
       "orgDocuments": "Skaičiuojami tik tie darbuotojai, kurie sutiko, kad jų dokumentų skaičiai būtų rodomi bendrai.",
       "orgFinance": "Skaičiuojami jūsų pačių įvesti finansų įrašai; vėlavimas išvedamas iš kiekvieno įrašo termino. Tik rankiniai įrašai — jokių mokėjimų duomenų.",
       "orgDemandOrg": "Skaičiai pagal jūsų organizacijai priskirtas poreikio užklausas (visi nariai su poreikių prieiga mato tuos pačius skaičius). Atviros = juodraštis, pateikta, peržiūrima arba reikia tęsinio. Darbuotojų susidomėjimas — darbuotojai, parodę susidomėjimą šiomis užklausomis.",
-      "journal": "Skaičiuojami darbo įrašai, kuriuos darbuotojai užfiksavo šios organizacijos darbo santykiuose per paskutines septynias kalendorines dienas. „Laukia peržiūros“ — dabartinė peržiūros eilė; „patvirtinta“ — lango įrašai, kuriuos patvirtino vadovas. Įrašų nebuvimas nėra įrodymas, kad darbas nevyko."
+      "journal": "Skaičiuojami darbo įrašai, kuriuos darbuotojai užfiksavo šios organizacijos darbo santykiuose per paskutines septynias kalendorines dienas; kiekviena pataisymų grandinė skaičiuojama vieną kartą. „Laukia peržiūros“ — visa dabartinė peržiūros eilė, ne tik paskutinės septynios dienos. „Patvirtinta“ — lango įrašai, kurių paskutinė peržiūra yra ne paties darbuotojo suteiktas patvirtinimas. Įrašų nebuvimas nėra įrodymas, kad darbas nevyko."
     },
     "worker": {
       "evidence": {
@@ -817,7 +817,7 @@
         "workSupported": "Pagrįsta darbo žurnalo įrašais",
         "confirmed": "Patvirtinti",
         "journalEntries": "Žurnalo įrašai",
-        "confirmations": "Patvirtinimai",
+        "confirmations": "Vadovo patvirtinti įrašai",
         "empty": "Įrodymų duomenų dar nėra — rodikliai atsiras, kai profilyje ir darbo žurnale bus tikrų įrašų.",
         "link": "Atidaryti visą įrodymų ataskaitą"
       },
@@ -859,10 +859,11 @@
         },
         "total": "Iš viso",
         "empty": "Projektų dar nėra — rodikliai atsiras, kai įmonė turės projektų eilučių.",
-        "link": "Atidaryti projektus"
+        "link": "Atidaryti projektus",
+        "other": "Kita būsena"
       },
       "tasks": {
-        "title": "Užduotys pagal būseną",
+        "title": "Jūsų užduotys pagal būseną",
         "open": "Atviros",
         "status": {
           "todo": "Laukia",
@@ -888,7 +889,7 @@
       "journal": {
         "title": "Darbo žurnalas (paskutinės septynios dienos)",
         "recorded": "Užfiksuoti įrašai",
-        "awaitingReview": "Laukia peržiūros",
+        "awaitingReview": "Laukia peržiūros (visos datos)",
         "confirmed": "Patvirtinta",
         "link": "Atverti žurnalo ataskaitą"
       }
@@ -2341,6 +2342,7 @@
         "invitations": "Laukiantys kvietimai darbuotojams",
         "claims": "Viešos užklausos, kurias galite perimti",
         "reviewOff": "Dirbantys darbuotojai, kurių darbo patvirtinimas neįjungtas",
+        "unreadable": "nepavyko perskaityti",
         "clientReview": "Darbas, laukiantis jūsų sprendimo kaip užsakovo"
       }
     },
@@ -6149,7 +6151,8 @@
       "clientCta": "Atidaryti užsakovo peržiūrą",
       "cta": "Patvirtinti dabar",
       "zero": "Šiuo metu patvirtinimų nelaukia — komandos ritmas ramus.",
-      "zeroCta": "Peržiūros eilė"
+      "zeroCta": "Peržiūros eilė",
+      "unreadable": "Peržiūros eilės dabar nepavyko perskaityti. Tai nereiškia, kad niekas nelaukia."
     },
     "draft": {
       "title": "Projektai ir komandos"
@@ -8133,9 +8136,9 @@
   "trust": {
     "unreadHint": "Kai kurių iš šių dalykų dabar nepavyko suskaičiuoti, todėl rodoma „—“. Tai nereiškia, kad jų neturite — tiesiog nepavyko perskaityti skaičių. Perkraukite po akimirkos.",
     "title": "Pasitikėjimo signalai",
-    "caption": "Šie skaičiai — tiesiai iš jūsų darbo įrašų.",
+    "caption": "Šie skaičiai — tiesiai iš jūsų darbo įrašų. Patvirtinti įrašai — tai vadovo patvirtinti įrašai, kiekvienas skaičiuojamas vieną kartą; jūsų pačių patvirtinimai ir atmesti įrašai neįtraukiami. Patvirtinti įgūdžiai skaičiuojami atskirai.",
     "verifiedSkills": "Vadovo patvirtinti įgūdžiai",
-    "managerConfirmations": "Vadovo patvirtinimai",
+    "managerConfirmations": "Vadovo patvirtinti įrašai",
     "journalEntries": "Žurnalo įrašai",
     "zeroHint": "Pasitikėjimo signalai auga iš realaus darbo: užfiksuok žurnalo įrašą ir papildyk savo profilį."
   },
@@ -8162,7 +8165,7 @@
     },
     "summary": {
       "verifiedSkills": "Vadovo patvirtinti įgūdžiai",
-      "managerConfirmations": "Vadovo patvirtinimai",
+      "managerConfirmations": "Vadovo patvirtinti įrašai",
       "journalEntries": "Žurnalo įrašai"
     },
     "proofTitle": "CV darbo įrašai",
@@ -11235,7 +11238,8 @@
         "limit_reached": "Pasiektas susiejimų limitas.",
         "entry_not_current": "Šis įrašas buvo pataisytas arba atšauktas — susiekite aktualią versiją.",
         "already_unlinked": "Šis susiejimas jau atšauktas."
-      }
+      },
+      "unreadable": "Prisegtų įrašų dabar nepavyko perskaityti. Tai nereiškia, kad jų nėra."
     },
     "approval": {
       "label": "Patvirtinimas",
@@ -16857,7 +16861,8 @@
     },
     "correct": "Taisyti",
     "correctCancel": "Atšaukti",
-    "correctHint": "Išsaugojus sukuriamas naujas įrašas, o pradinis lieka šalia — niekas neištrinama."
+    "correctHint": "Išsaugojus sukuriamas naujas įrašas, o pradinis lieka šalia — niekas neištrinama.",
+    "rejectedNotCounted": "atmesta, neįskaičiuota"
   },
   "oauthConsent": {
     "title": "Prieigos patvirtinimas",
@@ -17725,7 +17730,8 @@
           "notReviewableState": "Žurnalas dar neperžiūrimas: užsakymas nesukuria darbo konteksto. Pakvieskite šį žmogų prisijungti kaip darbuotoją — vos jam priėmus kvietimą, kontekstas atsiranda ir galėsite įjungti peržiūrą. Sukurti jo už žmogų negalite.",
           "inviteExit": "Pakviesti prisijungti kaip darbuotoją",
           "error": "Užsakytų žmonių dabar nepavyko nuskaityti. Tai nereiškia, kad niekas neužsakytas."
-        }
+        },
+        "summaryInvitationsUnread": "{active} aktyvūs · laukiančių kvietimų nepavyko perskaityti · {members} nariai · {review} peržiūri žurnalus"
       },
       "needs": {
         "title": "Darbuotojų poreikiai",
@@ -18175,7 +18181,8 @@
       "places": "Vietos",
       "people": "Žmonės",
       "hours": "Įrašytos valandos",
-      "period": "Laikotarpis"
+      "period": "Laikotarpis",
+      "dayHours": "Valandos pavienėmis dienomis"
     },
     "place": "Vieta",
     "noPlaceName": "Vieta nenurodyta",
@@ -18183,8 +18190,8 @@
     "people": "{count, plural, one {# žmogus} few {# žmonės} other {# žmonių}}",
     "entries": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
     "hoursShare": "{hours} val. šioje vietoje, palyginti su daugiausia dirbtąja vieta",
-    "noPlace": "{count, plural, one {# įraše} few {# įrašuose} other {# įrašų}} ({hours} val.) šaltinyje vieta nenurodyta.",
-    "periodAside": "Iš jų {hours} val. yra laikotarpio sumos, nurodytos visam tarpsniui, laikomos atskirai nuo pavienių dienų.",
+    "noPlace": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}} ({hours} val. pavienėmis dienomis) šaltinyje nenurodo vietos.",
+    "periodAside": "Į viršuje nurodytą sumą neįtraukta: {hours} val. – laikotarpio sumos, nurodytos visam tarpsniui. Tai atskiras skaičius, jis niekada nepridedamas prie pavienių dienų.",
     "scope": {
       "title": "Ką šis importas apima",
       "carried": "Šaltinyje yra: kas dirbo, kurią dieną, kiek valandų, kas daryta ir vieta taip, kaip parašyta.",
@@ -18212,7 +18219,8 @@
       "done": "Priskirta įrašų: {count}; jau buvo priskirta: {skipped}.",
       "refused": "Nepavyko išsaugoti. Nieko nepakeista.",
       "person": "{hours} val., {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}"
-    }
+    },
+    "periodShort": "{hours} val. laikotarpio suma"
   },
   "workPlan": {
     "title": "Suplanuotas darbas",

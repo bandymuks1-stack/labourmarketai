@@ -800,15 +800,15 @@
     },
     "basis": {
       "label": "Podstawa",
-      "workerEvidence": "Policzone według zasad raportu dowodowego na podstawie Twoich skatalogowanych umiejętności, wpisów w dzienniku pracy i potwierdzeń kierownika. Bez wyniku punktowego, bez szacunku.",
+      "workerEvidence": "Policzone według zasad raportu dowodowego na podstawie Twoich skatalogowanych umiejętności i wpisów w dzienniku pracy. Potwierdzone wpisy to aktualne wpisy zatwierdzone przez kierownika, każdy liczony raz; Twoje własne zatwierdzenia i odrzucone wpisy nie są wliczane. Bez wyniku punktowego, bez szacunku.",
       "workerActivity": "Liczby Twoich wpisów w dzienniku i przesłanych zdjęć.",
       "orgDemand": "Liczby dotyczące zapotrzebowań, które sam(a) utworzyłeś. Otwarte = szkic, zgłoszone, w trakcie rozpatrywania lub wymaga działania.",
       "orgProjects": "Liczby wierszy projektów Twojej firmy, pogrupowane według zarejestrowanego statusu każdego wiersza.",
-      "orgTasks": "Liczby zadań, w których jesteś przypisaną osobą lub twórcą, pogrupowane według zarejestrowanego statusu.",
+      "orgTasks": "Liczby zadań, w których jesteś wykonawcą lub twórcą, pogrupowane według zapisanego statusu. To Twoja własna lista zadań, nie całej organizacji.",
       "orgDocuments": "Liczeni są tylko pracownicy, którzy zgodzili się na udostępnianie łącznych liczb dokumentów.",
       "orgFinance": "Liczby dotyczące Twoich własnych zarejestrowanych zapisów finansowych; zaległość wynika z własnego terminu płatności każdego zapisu. Tylko zapisy ręczne — bez danych płatniczych.",
       "orgDemandOrg": "Liczby dotyczące zapotrzebowań przypisanych do Twojej organizacji (wszyscy członkowie z dostępem do zapotrzebowań widzą te same liczby). Otwarte = szkic, zgłoszone, w trakcie rozpatrywania lub wymaga działania. Zainteresowanie pracowników liczy pracowników, którzy zgłosili zainteresowanie tymi zapotrzebowaniami.",
-      "journal": "Liczby wpisów pracy zarejestrowanych przez pracowników w ramach zaangażowań tej organizacji w ciągu ostatnich siedmiu dni kalendarzowych. Oczekujące na przegląd to bieżąca kolejka przeglądu; potwierdzone liczy wpisy z tego okresu potwierdzone przez kierownika. Brak wpisów nie jest dowodem na to, że praca się nie odbyła."
+      "journal": "Liczby wpisów pracy zarejestrowanych przez pracowników w ramach zaangażowań tej organizacji w ciągu ostatnich siedmiu dni kalendarzowych, każdy łańcuch korekt liczony raz. Oczekujące na przegląd to cała bieżąca kolejka przeglądu, nie tylko ostatnie siedem dni. Potwierdzone liczy wpisy z tego okresu, których ostatni przegląd jest zatwierdzeniem przez kogoś innego niż pracownik. Brak wpisów nie jest dowodem na to, że praca się nie odbyła."
     },
     "worker": {
       "evidence": {
@@ -817,7 +817,7 @@
         "workSupported": "Poparte wpisami w dzienniku pracy",
         "confirmed": "Potwierdzone",
         "journalEntries": "Wpisy w dzienniku",
-        "confirmations": "Potwierdzenia",
+        "confirmations": "Wpisy potwierdzone przez kierownika",
         "empty": "Brak jeszcze danych dowodowych — liczby pojawią się, gdy Twój profil i dziennik pracy będą zawierać rzeczywiste zapisy.",
         "link": "Otwórz pełny raport dowodowy"
       },
@@ -859,10 +859,11 @@
         },
         "total": "Łącznie",
         "empty": "Brak jeszcze projektów — liczby pojawią się, gdy tylko Twoja firma będzie miała wiersze projektów.",
-        "link": "Otwórz projekty"
+        "link": "Otwórz projekty",
+        "other": "Inny status"
       },
       "tasks": {
-        "title": "Zadania według statusu",
+        "title": "Twoje zadania według statusu",
         "open": "Otwarte",
         "status": {
           "todo": "Do zrobienia",
@@ -888,7 +889,7 @@
       "journal": {
         "title": "Dziennik pracy (ostatnie siedem dni)",
         "recorded": "Zarejestrowane wpisy",
-        "awaitingReview": "Oczekujące na przegląd",
+        "awaitingReview": "Oczekujące na przegląd (wszystkie daty)",
         "confirmed": "Potwierdzone",
         "link": "Otwórz raport dziennika"
       }
@@ -2341,6 +2342,7 @@
         "invitations": "Oczekujące zaproszenia pracowników",
         "claims": "Publiczne zgłoszenia zapotrzebowania, które możesz przejąć",
         "reviewOff": "Pracownicy z zapisaną pracą, u których potwierdzanie jest wyłączone",
+        "unreadable": "nie udało się odczytać",
         "clientReview": "Praca czekająca na Twoją decyzję jako zleceniodawcy"
       }
     },
@@ -6149,7 +6151,8 @@
       "clientCta": "Otwórz sprawdzenie zleceniodawcy",
       "cta": "Potwierdź teraz",
       "zero": "Obecnie nic nie czeka na potwierdzenie — rytm zespołu jest spokojny.",
-      "zeroCta": "Przejrzyj kolejkę"
+      "zeroCta": "Przejrzyj kolejkę",
+      "unreadable": "Nie udało się teraz odczytać kolejki przeglądu. To nie znaczy, że nic nie czeka."
     },
     "draft": {
       "title": "Projekty i zespoły"
@@ -8133,9 +8136,9 @@
   "trust": {
     "unreadHint": "Części z tych rzeczy nie udało się teraz policzyć i są pokazane jako „—”. To nie znaczy, że ich nie masz — po prostu nie dało się odczytać liczb. Odśwież za chwilę.",
     "title": "Sygnały zaufania",
-    "caption": "Te liczby pochodzą bezpośrednio z Twoich dowodów z pracy.",
+    "caption": "Te liczby pochodzą bezpośrednio z Twoich dowodów z pracy. Potwierdzone wpisy to wpisy zatwierdzone przez kierownika, każdy liczony raz; Twoje własne zatwierdzenia i odrzucone wpisy nie są wliczane. Potwierdzone umiejętności liczone są osobno.",
     "verifiedSkills": "Umiejętności potwierdzone przez kierownika",
-    "managerConfirmations": "Potwierdzenia kierownika",
+    "managerConfirmations": "Wpisy potwierdzone przez kierownika",
     "journalEntries": "Wpisy w dzienniku",
     "zeroHint": "Sygnały zaufania rosną dzięki prawdziwej pracy: zapisz wpis w dzienniku i uzupełnij swój profil."
   },
@@ -8162,7 +8165,7 @@
     },
     "summary": {
       "verifiedSkills": "Umiejętności potwierdzone przez kierownika",
-      "managerConfirmations": "Potwierdzenia kierownika",
+      "managerConfirmations": "Wpisy potwierdzone przez kierownika",
       "journalEntries": "Wpisy w dzienniku"
     },
     "proofTitle": "Potwierdzone dowody pracy",
@@ -11235,7 +11238,8 @@
         "limit_reached": "Osiągnięto limit załączników.",
         "entry_not_current": "Ten wpis został poprawiony lub wycofany — dołącz aktualną wersję.",
         "already_unlinked": "Ten załącznik został już wycofany."
-      }
+      },
+      "unreadable": "Nie udało się teraz odczytać dołączonych wpisów. To nie znaczy, że ich nie ma."
     },
     "approval": {
       "label": "Zatwierdzenie",
@@ -16857,7 +16861,8 @@
     },
     "correct": "Popraw",
     "correctCancel": "Anuluj",
-    "correctHint": "Zapis tworzy nowy wpis, a pierwotny pozostaje obok — nic nie jest usuwane."
+    "correctHint": "Zapis tworzy nowy wpis, a pierwotny pozostaje obok — nic nie jest usuwane.",
+    "rejectedNotCounted": "odrzucone, niewliczone"
   },
   "oauthConsent": {
     "title": "Potwierdź dostęp",
@@ -17725,7 +17730,8 @@
           "notReviewableState": "Dziennik nie jest jeszcze dostępny do przeglądu: rezerwacja nie tworzy kontekstu pracy. Zaproś tę osobę do dołączenia jako pracownik — z chwilą akceptacji kontekst powstaje i możesz włączyć przegląd. Nie możesz utworzyć go za tę osobę.",
           "inviteExit": "Zaproś do dołączenia jako pracownik",
           "error": "Nie udało się teraz odczytać zarezerwowanych osób. Nic tutaj nie oznacza, że nikt nie jest zarezerwowany."
-        }
+        },
+        "summaryInvitationsUnread": "{active} aktywnych · oczekujących zaproszeń nie udało się odczytać · {members} członków · {review} przegląda dzienniki"
       },
       "needs": {
         "title": "Zapotrzebowanie na pracowników",
@@ -18175,7 +18181,8 @@
       "places": "Miejsca",
       "people": "Osoby",
       "hours": "Zapisane godziny",
-      "period": "Okres"
+      "period": "Okres",
+      "dayHours": "Godziny z pojedynczych dni"
     },
     "place": "Miejsce",
     "noPlaceName": "Nie podano miejsca",
@@ -18183,8 +18190,8 @@
     "people": "{count, plural, one {# osoba} few {# osoby} many {# osób} other {# osoby}}",
     "entries": "{count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}",
     "hoursShare": "{hours} godz. w tym miejscu, w porównaniu z najczęstszym miejscem",
-    "noPlace": "{count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}} ({hours} godz.) nie wskazuje w źródle miejsca.",
-    "periodAside": "Z tego {hours} godz. to sumy okresowe podane dla przedziału, trzymane osobno od pojedynczych dni.",
+    "noPlace": "{count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}} ({hours} godz. z pojedynczych dni) w źródle nie podaje miejsca.",
+    "periodAside": "Nie wliczone powyżej: {hours} godz. jako sumy za okres. To osobna liczba, nigdy nie dodawana do pojedynczych dni.",
     "scope": {
       "title": "Co zawiera ten import",
       "carried": "Źródło zawiera: kto pracował, którego dnia, ile godzin, co zrobiono i miejsce tak, jak je zapisano.",
@@ -18212,7 +18219,8 @@
       "done": "Przypisano wpisów: {count}; już przypisanych: {skipped}.",
       "refused": "Nie udało się zapisać. Nic nie zmieniono.",
       "person": "{hours} godz., {count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}"
-    }
+    },
+    "periodShort": "{hours} godz. suma za okres"
   },
   "workPlan": {
     "title": "Zaplanowana praca",

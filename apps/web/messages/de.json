@@ -800,15 +800,15 @@
     },
     "basis": {
       "label": "Grundlage",
-      "workerEvidence": "Gezählt nach den Regeln des Nachweisberichts aus Ihren eigenen katalogisierten Fähigkeiten, Arbeitsjournal-Einträgen und Bestätigungen von Verantwortlichen. Kein Score, keine Schätzung.",
+      "workerEvidence": "Gezählt nach den Regeln des Nachweisberichts aus Ihren eigenen katalogisierten Fähigkeiten und Arbeitsjournal-Einträgen. Bestätigte Einträge sind aktuelle Einträge, die eine Führungskraft genehmigt hat, jeweils einmal gezählt; Ihre eigenen Genehmigungen und abgelehnte Einträge sind nicht enthalten. Kein Score, keine Schätzung.",
       "workerActivity": "Anzahl Ihrer eigenen Journaleinträge und hochgeladenen Fotos.",
       "orgDemand": "Zählungen über die von Ihnen selbst erstellten Bedarfsanfragen. Offen = Entwurf, eingereicht, in Prüfung oder Nachfassen nötig.",
       "orgProjects": "Zählungen der Projektzeilen Ihres eigenen Unternehmens, gruppiert nach dem erfassten Status jeder Zeile.",
-      "orgTasks": "Zählungen der Aufgaben, bei denen Sie zuständig oder Ersteller sind, gruppiert nach erfasstem Status.",
+      "orgTasks": "Anzahl der Aufgaben, bei denen Sie Bearbeiter oder Ersteller sind, gruppiert nach erfasstem Status. Das ist Ihre eigene Aufgabenliste, nicht die der gesamten Organisation.",
       "orgDocuments": "Gezählt werden nur Arbeitskräfte, die dem Teilen von Gesamtzahlen ihrer Dokumente zugestimmt haben.",
       "orgFinance": "Zählungen über Ihre eigenen erfassten Finanzeinträge; überfällig wird aus dem Fälligkeitsdatum jedes Eintrags abgeleitet. Nur manuelle Einträge — keine Zahlungsdaten.",
       "orgDemandOrg": "Zählungen über die Ihrer Organisation zugeordneten Bedarfsanfragen (alle Mitglieder mit Bedarfszugriff sehen dieselben Zahlen). Offen = Entwurf, eingereicht, in Prüfung oder Nachfassen nötig. Interesse von Arbeitskräften zählt Arbeitskräfte, die Interesse an diesen Anfragen gezeigt haben.",
-      "journal": "Gezählt werden Arbeitseinträge, die Beschäftigte in den Beschäftigungsverhältnissen dieser Organisation in den letzten sieben Kalendertagen erfasst haben. „Wartet auf Prüfung“ ist die aktuelle Prüfliste; „bestätigt“ zählt die Einträge des Zeitfensters, die eine Führungskraft bestätigt hat. Fehlende Einträge sind kein Beleg dafür, dass nicht gearbeitet wurde."
+      "journal": "Gezählt werden Arbeitseinträge, die Beschäftigte in den Beschäftigungsverhältnissen dieser Organisation in den letzten sieben Kalendertagen erfasst haben, jede Korrekturkette einmal. „Wartet auf Prüfung“ ist die gesamte aktuelle Prüfliste, nicht nur die letzten sieben Tage. „Bestätigt“ zählt die Einträge des Zeitfensters, deren letzte Prüfung eine Genehmigung durch jemand anderen als die Person selbst ist. Fehlende Einträge sind kein Beleg dafür, dass nicht gearbeitet wurde."
     },
     "worker": {
       "evidence": {
@@ -817,7 +817,7 @@
         "workSupported": "Durch Arbeitstagebuch-Einträge belegt",
         "confirmed": "Bestätigt",
         "journalEntries": "Journaleinträge",
-        "confirmations": "Bestätigungen",
+        "confirmations": "Vom Manager bestätigte Einträge",
         "empty": "Noch keine Nachweisdaten — Kennzahlen erscheinen, sobald Profil und Arbeitsjournal echte Einträge enthalten.",
         "link": "Vollständigen Nachweisbericht öffnen"
       },
@@ -859,10 +859,11 @@
         },
         "total": "Gesamt",
         "empty": "Noch keine Projekte — Kennzahlen erscheinen, sobald Ihr Unternehmen Projektzeilen hat.",
-        "link": "Projekte öffnen"
+        "link": "Projekte öffnen",
+        "other": "Anderer Status"
       },
       "tasks": {
-        "title": "Aufgaben nach Status",
+        "title": "Ihre Aufgaben nach Status",
         "open": "Offen",
         "status": {
           "todo": "Zu erledigen",
@@ -888,7 +889,7 @@
       "journal": {
         "title": "Arbeitsjournal (letzte sieben Tage)",
         "recorded": "Erfasste Einträge",
-        "awaitingReview": "Wartet auf Prüfung",
+        "awaitingReview": "Wartet auf Prüfung (alle Daten)",
         "confirmed": "Bestätigt",
         "link": "Journalbericht öffnen"
       }
@@ -2341,6 +2342,7 @@
         "invitations": "Ausstehende Einladungen an Arbeitskräfte",
         "claims": "Öffentliche Anfragen, die du übernehmen kannst",
         "reviewOff": "Mitarbeitende mit erfasster Arbeit, deren Bestätigung ausgeschaltet ist",
+        "unreadable": "konnte nicht gelesen werden",
         "clientReview": "Arbeit, die auf Ihre Entscheidung als Auftraggeber wartet"
       }
     },
@@ -6149,7 +6151,8 @@
       "clientCta": "Prüfung als Auftraggeber öffnen",
       "cta": "Jetzt bestätigen",
       "zero": "Derzeit wartet nichts auf Bestätigung — der Rhythmus des Teams ist ruhig.",
-      "zeroCta": "Prüfwarteschlange"
+      "zeroCta": "Prüfwarteschlange",
+      "unreadable": "Die Prüfliste konnte gerade nicht gelesen werden. Das heißt nicht, dass nichts wartet."
     },
     "draft": {
       "title": "Projekte und Teams"
@@ -8133,9 +8136,9 @@
   "trust": {
     "unreadHint": "Einige davon konnten gerade nicht gezählt werden und werden als „—“ angezeigt. Das heißt nicht, dass Sie keine haben — die Zahlen ließen sich nur nicht lesen. Laden Sie gleich neu.",
     "title": "Vertrauenssignale",
-    "caption": "Diese Zahlen stammen direkt aus Ihren Arbeitseinträgen.",
+    "caption": "Diese Zahlen stammen direkt aus Ihren Arbeitseinträgen. Bestätigte Einträge sind Einträge, die eine Führungskraft genehmigt hat, jeweils einmal gezählt; Ihre eigenen Genehmigungen und abgelehnte Einträge sind nicht enthalten. Bestätigte Fähigkeiten werden getrennt gezählt.",
     "verifiedSkills": "Vom Manager bestätigte Fähigkeiten",
-    "managerConfirmations": "Manager-Bestätigungen",
+    "managerConfirmations": "Vom Manager bestätigte Einträge",
     "journalEntries": "Journaleinträge",
     "zeroHint": "Vertrauenssignale wachsen aus echter Arbeit: Erfassen Sie einen Journaleintrag und vervollständigen Sie Ihr Profil."
   },
@@ -8162,7 +8165,7 @@
     },
     "summary": {
       "verifiedSkills": "Vom Manager bestätigte Fähigkeiten",
-      "managerConfirmations": "Manager-Bestätigungen",
+      "managerConfirmations": "Vom Manager bestätigte Einträge",
       "journalEntries": "Journaleinträge"
     },
     "proofTitle": "Bestätigte Arbeitsnachweise",
@@ -11235,7 +11238,8 @@
         "limit_reached": "Limit für Verknüpfungen erreicht.",
         "entry_not_current": "Dieser Eintrag wurde korrigiert oder zurückgezogen — verknüpfen Sie die aktuelle Version.",
         "already_unlinked": "Diese Verknüpfung wurde bereits zurückgezogen."
-      }
+      },
+      "unreadable": "Die angehängten Einträge konnten gerade nicht gelesen werden. Das heißt nicht, dass keine angehängt sind."
     },
     "approval": {
       "label": "Freigabe",
@@ -16857,7 +16861,8 @@
     },
     "correct": "Korrigieren",
     "correctCancel": "Abbrechen",
-    "correctHint": "Beim Speichern entsteht ein neuer Eintrag, der ursprüngliche bleibt daneben erhalten — nichts wird gelöscht."
+    "correctHint": "Beim Speichern entsteht ein neuer Eintrag, der ursprüngliche bleibt daneben erhalten — nichts wird gelöscht.",
+    "rejectedNotCounted": "abgelehnt, nicht gezählt"
   },
   "oauthConsent": {
     "title": "Zugriff bestätigen",
@@ -17725,7 +17730,8 @@
           "notReviewableState": "Journal noch nicht prüfbar: eine Buchung erzeugt keinen Arbeitskontext. Laden Sie diese Person ein, als Mitarbeiter beizutreten — sobald sie annimmt, existiert der Kontext und Sie können die Prüfung aktivieren. Sie können ihn nicht für die Person anlegen.",
           "inviteExit": "Einladen, als Mitarbeiter beizutreten",
           "error": "Die gebuchten Personen konnten gerade nicht gelesen werden. Das ist keine Aussage, dass niemand gebucht ist."
-        }
+        },
+        "summaryInvitationsUnread": "{active} aktiv · offene Einladungen konnten nicht gelesen werden · {members} Mitglieder · {review} prüfen Journale"
       },
       "needs": {
         "title": "Personalbedarf",
@@ -18175,7 +18181,8 @@
       "places": "Orte",
       "people": "Personen",
       "hours": "Erfasste Stunden",
-      "period": "Zeitraum"
+      "period": "Zeitraum",
+      "dayHours": "Stunden an einzelnen Tagen"
     },
     "place": "Ort",
     "noPlaceName": "Kein Ort angegeben",
@@ -18183,8 +18190,8 @@
     "people": "{count, plural, one {# Person} other {# Personen}}",
     "entries": "{count, plural, one {# Eintrag} other {# Einträge}}",
     "hoursShare": "{hours} Std. an diesem Ort, im Vergleich zum meistbearbeiteten Ort",
-    "noPlace": "{count, plural, one {# Eintrag} other {# Einträge}} ({hours} Std.) nennen in der Quelle keinen Ort.",
-    "periodAside": "Davon sind {hours} Std. Zeitraumsummen für eine Spanne, getrennt von einzelnen Tagen.",
+    "noPlace": "{count, plural, one {# Eintrag} other {# Einträge}} ({hours} Std. an einzelnen Tagen) in der Quelle nennen keinen Ort.",
+    "periodAside": "Oben nicht enthalten: {hours} Std. als Zeitraumsummen für eine Spanne. Das ist eine eigene Zahl und wird nie zu einzelnen Tagen addiert.",
     "scope": {
       "title": "Was dieser Import enthält",
       "carried": "Die Quelle enthält: wer gearbeitet hat, an welchem Tag, wie viele Stunden, was getan wurde und den Ort wie geschrieben.",
@@ -18212,7 +18219,8 @@
       "done": "{count} Einträge zugeordnet; {skipped} waren bereits zugeordnet.",
       "refused": "Das konnte nicht gespeichert werden. Nichts wurde geändert.",
       "person": "{hours} Std., {count, plural, one {# Eintrag} other {# Einträge}}"
-    }
+    },
+    "periodShort": "{hours} Std. Zeitraumsumme"
   },
   "workPlan": {
     "title": "Geplante Arbeit",

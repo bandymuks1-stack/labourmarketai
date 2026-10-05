@@ -113,6 +113,7 @@ describe("trust-signals — the number that reaches the Verified CV", () => {
         b.select = () => b;
         b.eq = () => b;
         b.is = () => b;
+        b.limit = () => b;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         b.then = (ok: any) =>
           Promise.resolve({ data: null, error: { message: "boom" }, count: null }).then(ok);

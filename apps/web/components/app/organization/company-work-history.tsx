@@ -9,7 +9,7 @@ import {
   loadCompanyWorkHistory,
   type CompanyWorkHistoryLoad,
 } from "@/lib/organization-evidence/company-work-history-read";
-import type { PlaceGroup } from "@/lib/organization-evidence/company-work-history";
+import { isPeriodRecord, type PlaceGroup } from "@/lib/organization-evidence/company-work-history";
 
 /**
  * THE COMPANY'S IMPORTED WORK HISTORY — seen from the place (2026-10-01).
@@ -101,7 +101,7 @@ export async function CompanyWorkHistory({ locale }: { locale: string }) {
 
   const placed = history.places.filter((p) => p.kind !== "none");
   const none = history.places.find((p) => p.kind === "none");
-  const maxHours = Math.max(1, ...placed.map((p) => p.dayHours + p.periodHours));
+  const maxHours = Math.max(1, ...placed.map((p) => p.dayHours));
   const periodLabel = span(history.firstDate, history.lastDate, locale);
 
   return (
@@ -128,7 +128,7 @@ export async function CompanyWorkHistory({ locale }: { locale: string }) {
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <Stat concept="object" value={String(placed.length)} label={t("stats.places")} />
         <Stat concept="person" value={String(history.peopleCount)} label={t("stats.people")} />
-        <Stat concept="time" value={`${nf(history.totalHours)} h`} label={t("stats.hours")} />
+        <Stat concept="time" value={`${nf(history.dayHours)} h`} label={t("stats.dayHours")} />
         <Stat concept="calendar" value={periodLabel ?? "—"} label={t("stats.period")} />
       </div>
 
@@ -142,7 +142,7 @@ export async function CompanyWorkHistory({ locale }: { locale: string }) {
 
       {none ? (
         <p className="text-sm text-text-muted" data-testid="company-work-history-noplace">
-          {t("noPlace", { count: none.records.length, hours: nf(none.dayHours + none.periodHours) })}
+          {t("noPlace", { count: none.records.length, hours: nf(none.dayHours) })}
         </p>
       ) : null}
       {history.periodHours > 0 ? (
@@ -177,7 +177,7 @@ function PlaceTile({
   locale: string;
   maxHours: number;
 }) {
-  const hours = p.dayHours + p.periodHours;
+  const hours = p.dayHours;
   const when = span(p.firstDate, p.lastDate, locale);
   const latest = p.records.find((r) => r.text);
   return (
@@ -208,6 +208,11 @@ function PlaceTile({
         {when ? <span>{when}</span> : null}
         <span>{t("people", { count: p.people.length })}</span>
         <span>{t("entries", { count: p.records.length })}</span>
+        {p.periodHours > 0 ? (
+          <span data-testid="company-work-history-place-period">
+            {t("periodShort", { hours: nf(p.periodHours) })}
+          </span>
+        ) : null}
       </span>
       {latest ? (
         <span className="line-clamp-2 text-sm leading-relaxed text-text-secondary">{latest.text}</span>
@@ -261,10 +266,15 @@ export async function CompanyPlaceHistory({
       </header>
 
       <div className="grid gap-2 sm:grid-cols-3">
-        <Stat concept="time" value={`${nf(place.dayHours + place.periodHours)} h`} label={t("stats.hours")} />
+        <Stat concept="time" value={`${nf(place.dayHours)} h`} label={t("stats.dayHours")} />
         <Stat concept="person" value={String(place.people.length)} label={t("stats.people")} />
         <Stat concept="calendar" value={when ?? "—"} label={t("stats.period")} />
       </div>
+      {place.periodHours > 0 ? (
+        <p className="text-sm text-text-muted" data-testid="company-place-period">
+          {t("periodAside", { hours: nf(place.periodHours) })}
+        </p>
+      ) : null}
 
       <Card compact data-testid="company-place-facts">
         <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
@@ -292,7 +302,10 @@ export async function CompanyPlaceHistory({
               <span className="inline-flex items-center gap-2 rounded-full border border-ink-600 bg-ink-800/40 px-3 py-1 text-sm text-text-primary">
                 <SemanticIcon concept="person" label={t("stats.people")} className="h-3.5 w-3.5 text-brand-cyan" />
                 {pp.name ?? "—"}
-                <span className="font-mono text-meta text-text-muted">{nf(pp.hours)} h</span>
+                <span className="font-mono text-meta text-text-muted">
+                  {nf(pp.dayHours)} h
+                  {pp.periodHours > 0 ? ` + ${t("periodShort", { hours: nf(pp.periodHours) })}` : ""}
+                </span>
               </span>
             );
             return (
@@ -317,7 +330,7 @@ export async function CompanyPlaceHistory({
             <h3 className="font-display text-lg font-semibold text-text-primary">
               {formatUtcDate(`${month}-01`, locale, { month: "long", year: "numeric" }) ?? month}
               <span className="ml-3 font-mono text-meta font-normal text-text-muted">
-                {nf(recs.reduce((s, r) => s + (r.hours ?? 0), 0))} h
+                {nf(recs.filter((r) => !isPeriodRecord(r)).reduce((s, r) => s + (r.hours ?? 0), 0))} h
               </span>
             </h3>
             <ul className="flex flex-col gap-2">

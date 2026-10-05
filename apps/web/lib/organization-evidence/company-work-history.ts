@@ -13,7 +13,9 @@ import type { EvidenceRecordView } from "./import-core";
  *   · a record's place is its resolved work object, else its own source label,
  *     else "no place stated" — never a guess;
  *   · hours are the records' stated hours, summed once; a PERIOD record
- *     (start–end, no single day) is counted apart and never painted onto days;
+ *     (start–end, no single day) is counted apart and NEVER added to day
+ *     hours — not in the total, not per place, not per person (never-sum
+ *     rule, worker-evidence-read.ts / work-intelligence.ts);
  *   · customer / address / project are reported as PRESENT or ABSENT from the
  *     data (`PlaceScope`), so the surface can say exactly what the import did
  *     and did not carry — no fixture fills the gap.
@@ -54,13 +56,21 @@ export interface PlaceGroup {
   readonly periodCount: number;
   readonly firstDate: string | null;
   readonly lastDate: string | null;
-  readonly people: readonly { readonly id: string; readonly name: string | null; readonly hours: number }[];
+    /** Per person: hours of single days and period aggregates, NEVER summed. */
+  readonly people: readonly {
+    readonly id: string;
+    readonly name: string | null;
+    readonly dayHours: number;
+    readonly periodHours: number;
+  }[];
 }
 
 export interface CompanyWorkHistory {
   readonly places: readonly PlaceGroup[];
   readonly totalRecords: number;
-  readonly totalHours: number;
+  /** Hours of dated single-day records ONLY. Period aggregates are `periodHours`, never added in. */
+  readonly dayHours: number;
+  /** Hours of period aggregates (start-end, no single day), kept apart. */
   readonly periodHours: number;
   readonly peopleCount: number;
   readonly firstDate: string | null;
@@ -75,7 +85,7 @@ export function placeKeyOf(r: Pick<EvidenceRecordView, "workObjectId" | "context
   return label ? `l:${label}` : "none";
 }
 
-const isPeriod = (r: EvidenceRecordView) =>
+export const isPeriodRecord = (r: EvidenceRecordView) =>
   r.activityDate === null && r.periodStart !== null && r.periodEnd !== null;
 
 function minMax(dates: readonly (string | null)[]): [string | null, string | null] {
@@ -107,15 +117,24 @@ export function buildCompanyWorkHistory(
         : kind === "label"
           ? key.slice(2)
           : null;
-    const day = recs.filter((r) => !isPeriod(r));
-    const per = recs.filter(isPeriod);
+    const day = recs.filter((r) => !isPeriodRecord(r));
+    const per = recs.filter(isPeriodRecord);
     const [first, last] = minMax(
       recs.flatMap((r) => [r.activityDate, r.periodStart, r.periodEnd]),
     );
-    const byPerson = new Map<string, { id: string; name: string | null; hours: number }>();
+    const byPerson = new Map<
+      string,
+      { id: string; name: string | null; dayHours: number; periodHours: number }
+    >();
     for (const r of recs) {
-      const p = byPerson.get(r.personId) ?? { id: r.personId, name: r.personName, hours: 0 };
-      p.hours += r.hours ?? 0;
+      const p = byPerson.get(r.personId) ?? {
+        id: r.personId,
+        name: r.personName,
+        dayHours: 0,
+        periodHours: 0,
+      };
+      if (isPeriodRecord(r)) p.periodHours += r.hours ?? 0;
+      else p.dayHours += r.hours ?? 0;
       byPerson.set(r.personId, p);
     }
     return {
@@ -137,22 +156,24 @@ export function buildCompanyWorkHistory(
       periodCount: per.length,
       firstDate: first,
       lastDate: last,
-      people: [...byPerson.values()].sort((a, b) => b.hours - a.hours),
+      people: [...byPerson.values()].sort(
+        (a, b) => b.dayHours - a.dayHours || b.periodHours - a.periodHours,
+      ),
     } satisfies PlaceGroup;
   });
 
   // Placed places first (most hours first); "no place stated" always last.
   places.sort((a, b) => {
     if ((a.kind === "none") !== (b.kind === "none")) return a.kind === "none" ? 1 : -1;
-    return b.dayHours + b.periodHours - (a.dayHours + a.periodHours);
+    return b.dayHours - a.dayHours || b.periodHours - a.periodHours;
   });
 
   const [first, last] = minMax(live.flatMap((r) => [r.activityDate, r.periodStart, r.periodEnd]));
   return {
     places,
     totalRecords: live.length,
-    totalHours: live.reduce((s, r) => s + (r.hours ?? 0), 0),
-    periodHours: live.filter(isPeriod).reduce((s, r) => s + (r.hours ?? 0), 0),
+    dayHours: live.filter((r) => !isPeriodRecord(r)).reduce((s, r) => s + (r.hours ?? 0), 0),
+    periodHours: live.filter(isPeriodRecord).reduce((s, r) => s + (r.hours ?? 0), 0),
     peopleCount: new Set(live.map((r) => r.personId)).size,
     firstDate: first,
     lastDate: last,

@@ -60,18 +60,18 @@ describe("the shared discriminator", () => {
 });
 
 describe("reader: profile trust signals (managerConfirmations)", () => {
-  beforeEach(() => {
-    current = fakeSb({
-      worker_skills: { count: 0 },
-      journal_entries: { data: [{ id: "e1" }] },
-      journal_entry_confirmations: { count: 2 },
-    });
-  });
-  it("filters counterparty rows out of the manager-confirmation count", async () => {
-    const { getOwnTrustSignals } = await import("@/lib/profile/trust-signals");
-    await getOwnTrustSignals("w1");
-    const or = current.calls.find((c) => c.table === "journal_entry_confirmations" && c.method === "or");
-    expect(or?.args[0]).toContain("neq.counterparty");
+  it("counts through the ONE definition, which is employer-only by construction", async () => {
+    // counter-canonical v1: the count is `countConfirmedEntries`
+    // (review-status.ts), built on the shared derivation that drops
+    // counterparty rows - not a head count with its own `.or()` filter.
+    expect(read("lib/profile/trust-signals.ts")).toContain("countConfirmedEntries");
+    const { countConfirmedEntries } = await import("@/lib/journal/review-status");
+    expect(
+      countConfirmedEntries(
+        [{ id: "e1", journal_entry_confirmations: [{ ...client, created_at: "2026-10-04T10:00:00Z", confirmer_id: "rep" }] }],
+        "subject",
+      ),
+    ).toBe(0);
   });
 });
 
@@ -107,8 +107,8 @@ describe("static pins for readers whose queries are inside large functions", () 
     ["matching workbench confirmation count", "lib/admin/matching-workbench.ts", /select\("entry_id, confirmation_scope"\)[\s\S]{0,400}withoutCounterpartyRows/],
     ["agency pool confirmation count", "lib/agency/pool.ts", /select\("entry_id, confirmation_scope"\)[\s\S]{0,400}withoutCounterpartyRows/],
     ["capability registry journal.list confirmations", "lib/capabilities/registry.ts", /confirmations: withoutCounterpartyRows\(e\.journal_entry_confirmations\)\.length/],
-    ["task evidence confirmedAt", "lib/journal/task-evidence.ts", /journal_entry_confirmations\(created_at, confirmation_scope\)[\s\S]{0,2500}withoutCounterpartyRows\(e\.journal_entry_confirmations\)/],
-    ["weekly intelligence confirmedCount", "lib/worker/weekly-intelligence.ts", /select\("entry_id, confirmation_scope"\)[\s\S]{0,600}withoutCounterpartyRows/],
+    ["task evidence confirmedAt", "lib/journal/task-evidence.ts", /journal_entry_confirmations\(confirmation_scope, created_at, confirmer_id\)[\s\S]{0,12000}isConfirmedEntry\(confirmations/],
+    ["weekly intelligence confirmedCount", "lib/worker/weekly-intelligence.ts", /select\("entry_id, confirmation_scope, created_at, confirmer_id"\)[\s\S]{0,900}countConfirmedEntries/],
   ];
   for (const [name, file, rx] of cases) {
     it(`${name} filters counterparty rows`, () => {
@@ -130,7 +130,7 @@ describe("readers that derive through the shared review derivation are employer-
       "lib/planning/planning.ts",
       "lib/evidence/confirmed-work-read.ts",
     ]) {
-      expect(read(f), f).toMatch(/deriveReviewResult|deriveIndependentReviewResult/);
+      expect(read(f), f).toMatch(/deriveReviewResult|deriveIndependentReviewResult|isConfirmedEntry/);
     }
   });
 

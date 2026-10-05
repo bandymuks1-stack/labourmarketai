@@ -800,15 +800,15 @@
     },
     "basis": {
       "label": "Basis",
-      "workerEvidence": "Counted by the evidence-report rules from your own catalogued skills, work-journal entries and manager confirmations. No score, no estimate.",
+      "workerEvidence": "Counted by the evidence-report rules from your own catalogued skills and work-journal entries. Confirmed entries are live entries a manager approved, each counted once; your own approvals and rejected entries are not included. No score, no estimate.",
       "workerActivity": "Counts of your own journal entries and uploaded photos.",
       "orgDemand": "Counts over the demand requests you created yourself. Open = draft, submitted, in review or needs follow-up.",
       "orgProjects": "Counts of your own company's project rows, grouped by each row's recorded status.",
-      "orgTasks": "Counts of tasks where you are the assignee or the creator, grouped by recorded status.",
+      "orgTasks": "Counts of tasks where you are the assignee or the creator, grouped by recorded status. This is your own task list, not the whole organisation's.",
       "orgDocuments": "Only workers who agreed to share combined document counts are counted.",
       "orgFinance": "Counts over your own recorded finance records; overdue is derived from each record's own due date. Manual records only — no payment data.",
       "orgDemandOrg": "Counts over demand requests attributed to your organisation (all members with demand access see the same figures). Open = draft, submitted, in review or needs follow-up. Worker interest counts workers who signalled interest on these requests.",
-      "journal": "Counts of work entries recorded by workers in this organisation's engagements over the last seven calendar days. Awaiting review is the current review queue; confirmed counts the window's entries a manager has confirmed. An absence of entries is not evidence that no work happened."
+      "journal": "Counts of work entries recorded by workers in this organisation's engagements over the last seven calendar days, each correction chain counted once. Awaiting review is the whole current review queue, not only the last seven days. Confirmed counts the window's entries whose latest review is an approval by someone other than the worker. An absence of entries is not evidence that no work happened."
     },
     "worker": {
       "evidence": {
@@ -817,7 +817,7 @@
         "workSupported": "Backed by work journal entries",
         "confirmed": "Confirmed",
         "journalEntries": "Journal entries",
-        "confirmations": "Confirmations",
+        "confirmations": "Manager-confirmed entries",
         "empty": "No evidence data yet — figures appear once your profile and work journal carry real records.",
         "link": "Open the full evidence report"
       },
@@ -859,10 +859,11 @@
         },
         "total": "Total",
         "empty": "No projects yet — figures appear as soon as your company has project rows.",
-        "link": "Open projects"
+        "link": "Open projects",
+        "other": "Other status"
       },
       "tasks": {
-        "title": "Tasks by status",
+        "title": "Your tasks by status",
         "open": "Open",
         "status": {
           "todo": "To do",
@@ -888,7 +889,7 @@
       "journal": {
         "title": "Work journal (last seven days)",
         "recorded": "Entries recorded",
-        "awaitingReview": "Awaiting review",
+        "awaitingReview": "Awaiting review (all dates)",
         "confirmed": "Confirmed",
         "link": "Open the journal report"
       }
@@ -2341,6 +2342,7 @@
         "invitations": "Pending worker invitations",
         "claims": "Public need submissions you can claim",
         "reviewOff": "Workers with recorded work whose confirmation is switched off",
+        "unreadable": "could not be read",
         "clientReview": "Work waiting for your decision as the client"
       }
     },
@@ -6149,7 +6151,8 @@
       "clientCta": "Open client review",
       "cta": "Confirm now",
       "zero": "Nothing is waiting for confirmation right now — the team's rhythm is calm.",
-      "zeroCta": "Review queue"
+      "zeroCta": "Review queue",
+      "unreadable": "The review queue could not be read just now. That does not mean nothing is waiting."
     },
     "draft": {
       "title": "Projects and teams"
@@ -8133,9 +8136,9 @@
   "trust": {
     "unreadHint": "Some of these could not be counted just now, and are shown as “—”. It does not mean you have none — the numbers simply could not be read. Reload in a moment.",
     "title": "Trust signals",
-    "caption": "These counts come straight from your work records.",
+    "caption": "These counts come straight from your work records. Confirmed entries are entries a manager approved, each counted once; your own approvals and rejected entries are not included. Confirmed skills are a separate count.",
     "verifiedSkills": "Manager-confirmed skills",
-    "managerConfirmations": "Manager confirmations",
+    "managerConfirmations": "Manager-confirmed entries",
     "journalEntries": "Journal entries",
     "zeroHint": "Trust signals grow from real work: log a journal entry and complete your profile."
   },
@@ -8162,7 +8165,7 @@
     },
     "summary": {
       "verifiedSkills": "Manager-confirmed skills",
-      "managerConfirmations": "Manager confirmations",
+      "managerConfirmations": "Manager-confirmed entries",
       "journalEntries": "Journal entries"
     },
     "proofTitle": "CV work records",
@@ -11235,7 +11238,8 @@
         "limit_reached": "Attachment limit reached.",
         "entry_not_current": "That record was corrected or withdrawn — attach the current version.",
         "already_unlinked": "That attachment was already withdrawn."
-      }
+      },
+      "unreadable": "The attached records could not be read just now. That does not mean none are attached."
     },
     "approval": {
       "label": "Approval",
@@ -16857,7 +16861,8 @@
     },
     "correct": "Correct",
     "correctCancel": "Cancel",
-    "correctHint": "Saving writes a new record and keeps the original alongside it — nothing is erased."
+    "correctHint": "Saving writes a new record and keeps the original alongside it — nothing is erased.",
+    "rejectedNotCounted": "rejected, not counted"
   },
   "oauthConsent": {
     "title": "Confirm access",
@@ -17725,7 +17730,8 @@
           "notReviewableState": "Journal not reviewable yet: a booking does not create a work context. Invite this person to join as an employee — the moment they accept, the context exists and you can enable review. You cannot create it for them.",
           "inviteExit": "Invite to join as an employee",
           "error": "The booked people could not be read right now. Nothing here is a claim that nobody is booked."
-        }
+        },
+        "summaryInvitationsUnread": "{active} active · pending invitations could not be read · {members} members · {review} reviewing journals"
       },
       "needs": {
         "title": "Workforce needs",
@@ -18175,7 +18181,8 @@
       "places": "Places",
       "people": "People",
       "hours": "Hours on record",
-      "period": "Period"
+      "period": "Period",
+      "dayHours": "Hours on single days"
     },
     "place": "Place",
     "noPlaceName": "No place stated",
@@ -18183,8 +18190,8 @@
     "people": "{count, plural, one {# person} other {# people}}",
     "entries": "{count, plural, one {# entry} other {# entries}}",
     "hoursShare": "{hours} h on this place, compared with the busiest place",
-    "noPlace": "{count, plural, one {# entry} other {# entries}} ({hours} h) in the source name no place.",
-    "periodAside": "Of this, {hours} h are period totals stated for a span, kept apart from single days.",
+    "noPlace": "{count, plural, one {# entry} other {# entries}} ({hours} h on single days) in the source name no place.",
+    "periodAside": "Not included above: {hours} h stated as period totals for a span. They are a separate figure and are never added to single days.",
     "scope": {
       "title": "What this import carries",
       "carried": "Carried by the source: who worked, on which day, how many hours, what was done and the place as written.",
@@ -18212,7 +18219,8 @@
       "done": "Attributed {count} records; {skipped} were already attributed.",
       "refused": "This could not be saved. Nothing was changed.",
       "person": "{hours} h, {count, plural, one {# record} other {# records}}"
-    }
+    },
+    "periodShort": "{hours} h period total"
   },
   "workPlan": {
     "title": "Planned work",

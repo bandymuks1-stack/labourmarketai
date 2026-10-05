@@ -289,6 +289,8 @@ export function isLinkableForTask(
 export type TaskEvidenceResult =
   | { readonly status: "not-authed" }
   | { readonly status: "needs-migration" }
+  /** The read (or the version lookup behind it) failed: UNKNOWN, never "no evidence". */
+  | { readonly status: "unreadable" }
   | {
       readonly status: "ok";
       readonly items: readonly TaskEvidenceItem[];

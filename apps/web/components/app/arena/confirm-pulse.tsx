@@ -10,7 +10,7 @@ import { CountUp } from "@/components/app/today/count-up";
  * ARENA confirm pulse (TASK 07 slice 2) — the S3.5 one-tap confirm queue
  * woven into the manager's arena rhythm. The count is the REAL gated
  * reviewable set (reviewable_journal_entry_ids RPC, 0 when the RPC is absent
- * or nothing waits — never fabricated). One natural next step: the quick
+ * or nothing waits; null when the read failed — never fabricated). One natural next step: the quick
  * confirm queue. Zero state is honest calm, not an empty promise
  * (DESIGN_SOUL §2 — Kito žingsnio + Ramybės testai).
  */
@@ -26,7 +26,26 @@ export async function ConfirmPulse() {
       className="card-border glow-hover flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 p-5"
       data-testid="arena-confirm-pulse"
     >
-      {pending > 0 ? (
+      {pending === null ? (
+        // UNKNOWN IS NOT ZERO (SEP-7): a failed queue read is never the calm
+        // "nothing waits" state - it says it could not be read.
+        <>
+          <ClipboardCheck className="h-5 w-5 shrink-0 text-text-muted" aria-hidden />
+          <span
+            className="min-w-0 flex-1 text-sm leading-relaxed text-text-secondary"
+            data-testid="confirm-pulse-unread"
+          >
+            {t("unreadable")}
+          </span>
+          <Link
+            href={"/dashboard/inbox/quick" as "/dashboard"}
+            data-testid="confirm-pulse-cta"
+            className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-1.5 rounded-md border border-ink-500 px-4 py-2.5 text-sm font-medium text-text-secondary transition-colors duration-fast hover:bg-ink-700 sm:w-auto sm:justify-start"
+          >
+            {t("zeroCta")} →
+          </Link>
+        </>
+      ) : pending > 0 ? (
         <>
           <span className="flex items-center gap-3">
             <ClipboardCheck className="h-6 w-6 shrink-0 text-state-warning" aria-hidden />

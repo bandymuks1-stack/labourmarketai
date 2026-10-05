@@ -800,15 +800,15 @@
     },
     "basis": {
       "label": "Basis",
-      "workerEvidence": "Geteld volgens de regels van het bewijsrapport uit je eigen gecatalogiseerde vaardigheden, werkjournaalregels en bevestigingen van leidinggevenden. Geen score, geen schatting.",
+      "workerEvidence": "Geteld volgens de regels van het bewijsrapport uit je eigen gecatalogiseerde vaardigheden en werkjournaalregels. Bevestigde registraties zijn actuele registraties die een manager heeft goedgekeurd, elk één keer geteld; je eigen goedkeuringen en afgewezen registraties tellen niet mee. Geen score, geen schatting.",
       "workerActivity": "Aantallen van je eigen journaalposten en geüploade foto's.",
       "orgDemand": "Tellingen over de vraagaanvragen die je zelf hebt aangemaakt. Open = concept, ingediend, in beoordeling of vervolg nodig.",
       "orgProjects": "Tellingen van de projectregels van je eigen bedrijf, gegroepeerd per vastgelegde status.",
-      "orgTasks": "Tellingen van taken waarvan je de uitvoerder of maker bent, gegroepeerd per vastgelegde status.",
+      "orgTasks": "Aantallen taken waarvan jij de uitvoerder of de maker bent, gegroepeerd op vastgelegde status. Dit is je eigen takenlijst, niet die van de hele organisatie.",
       "orgDocuments": "Alleen werknemers die instemden met gedeelde totaalcijfers van documenten worden geteld.",
       "orgFinance": "Tellingen over je eigen vastgelegde financiële registraties; achterstallig wordt afgeleid uit de vervaldatum van elke registratie. Alleen handmatige registraties — geen betaalgegevens.",
       "orgDemandOrg": "Tellingen over aanvraagverzoeken die aan je organisatie zijn toegeschreven (alle leden met toegang tot aanvragen zien dezelfde cijfers). Open = concept, ingediend, in beoordeling of vervolg nodig. Interesse van werkers telt werkers die interesse toonden in deze verzoeken.",
-      "journal": "Telt werkregistraties die werkers in de dienstverbanden van deze organisatie hebben vastgelegd over de laatste zeven kalenderdagen. 'Wacht op beoordeling' is de huidige beoordelingswachtrij; 'bevestigd' telt de registraties uit het venster die een manager heeft bevestigd. Het ontbreken van registraties is geen bewijs dat er niet is gewerkt."
+      "journal": "Telt werkregistraties die werkers in de dienstverbanden van deze organisatie hebben vastgelegd over de laatste zeven kalenderdagen, elke correctieketen één keer geteld. 'Wacht op beoordeling' is de hele huidige beoordelingswachtrij, niet alleen de laatste zeven dagen. 'Bevestigd' telt de registraties uit het venster waarvan de laatste beoordeling een goedkeuring is door iemand anders dan de werker. Het ontbreken van registraties is geen bewijs dat er niet is gewerkt."
     },
     "worker": {
       "evidence": {
@@ -817,7 +817,7 @@
         "workSupported": "Onderbouwd door werkdagboek-invoer",
         "confirmed": "Bevestigd",
         "journalEntries": "Journaalregels",
-        "confirmations": "Bevestigingen",
+        "confirmations": "Door een manager bevestigde registraties",
         "empty": "Nog geen bewijsgegevens — cijfers verschijnen zodra je profiel en werkjournaal echte records bevatten.",
         "link": "Open het volledige bewijsrapport"
       },
@@ -859,10 +859,11 @@
         },
         "total": "Totaal",
         "empty": "Nog geen projecten — cijfers verschijnen zodra je bedrijf projectregels heeft.",
-        "link": "Open projecten"
+        "link": "Open projecten",
+        "other": "Andere status"
       },
       "tasks": {
-        "title": "Taken per status",
+        "title": "Jouw taken per status",
         "open": "Open",
         "status": {
           "todo": "Te doen",
@@ -888,7 +889,7 @@
       "journal": {
         "title": "Werkjournaal (laatste zeven dagen)",
         "recorded": "Vastgelegde registraties",
-        "awaitingReview": "Wacht op beoordeling",
+        "awaitingReview": "Wacht op beoordeling (alle datums)",
         "confirmed": "Bevestigd",
         "link": "Journaalrapport openen"
       }
@@ -2341,6 +2342,7 @@
         "invitations": "Openstaande uitnodigingen voor werknemers",
         "claims": "Openbare aanvragen die je kunt overnemen",
         "reviewOff": "Werknemers met vastgelegd werk waarvan bevestiging uitstaat",
+        "unreadable": "kon niet worden gelezen",
         "clientReview": "Werk dat wacht op uw beslissing als opdrachtgever"
       }
     },
@@ -6149,7 +6151,8 @@
       "clientCta": "Beoordeling opdrachtgever openen",
       "cta": "Nu bevestigen",
       "zero": "Er wacht op dit moment niets op bevestiging — het ritme van de ploeg is rustig.",
-      "zeroCta": "Wachtrij bekijken"
+      "zeroCta": "Wachtrij bekijken",
+      "unreadable": "De beoordelingswachtrij kon nu niet worden gelezen. Dat betekent niet dat er niets wacht."
     },
     "draft": {
       "title": "Projecten en teams"
@@ -8133,9 +8136,9 @@
   "trust": {
     "unreadHint": "Een deel hiervan kon zojuist niet worden geteld en wordt als “—” getoond. Het betekent niet dat u er geen hebt — de getallen konden alleen niet worden gelezen. Laad zo meteen opnieuw.",
     "title": "Vertrouwenssignalen",
-    "caption": "Deze aantallen komen rechtstreeks uit je werkregistraties.",
+    "caption": "Deze aantallen komen rechtstreeks uit je werkregistraties. Bevestigde registraties zijn registraties die een manager heeft goedgekeurd, elk één keer geteld; je eigen goedkeuringen en afgewezen registraties tellen niet mee. Bevestigde vaardigheden worden apart geteld.",
     "verifiedSkills": "Door manager bevestigde vaardigheden",
-    "managerConfirmations": "Managerbevestigingen",
+    "managerConfirmations": "Door een manager bevestigde registraties",
     "journalEntries": "Journaalitems",
     "zeroHint": "Vertrouwenssignalen groeien door echt werk: schrijf een journaalitem en maak je profiel compleet."
   },
@@ -8162,7 +8165,7 @@
     },
     "summary": {
       "verifiedSkills": "Door manager bevestigde vaardigheden",
-      "managerConfirmations": "Managerbevestigingen",
+      "managerConfirmations": "Door een manager bevestigde registraties",
       "journalEntries": "Dagboekregistraties"
     },
     "proofTitle": "Bevestigd werkbewijs",
@@ -11235,7 +11238,8 @@
         "limit_reached": "Koppellimiet bereikt.",
         "entry_not_current": "Dat record is gecorrigeerd of ingetrokken — koppel de actuele versie.",
         "already_unlinked": "Die koppeling is al ingetrokken."
-      }
+      },
+      "unreadable": "De gekoppelde registraties konden nu niet worden gelezen. Dat betekent niet dat er geen zijn."
     },
     "approval": {
       "label": "Goedkeuring",
@@ -16857,7 +16861,8 @@
     },
     "correct": "Corrigeren",
     "correctCancel": "Annuleren",
-    "correctHint": "Opslaan maakt een nieuw record aan en bewaart het origineel ernaast — er wordt niets gewist."
+    "correctHint": "Opslaan maakt een nieuw record aan en bewaart het origineel ernaast — er wordt niets gewist.",
+    "rejectedNotCounted": "afgewezen, niet meegeteld"
   },
   "oauthConsent": {
     "title": "Toegang bevestigen",
@@ -17725,7 +17730,8 @@
           "notReviewableState": "Journaal nog niet te beoordelen: een boeking maakt geen werkcontext aan. Nodig deze persoon uit om als medewerker toe te treden — zodra hij of zij accepteert, bestaat de context en kunt u beoordeling inschakelen. U kunt die niet namens hem of haar aanmaken.",
           "inviteExit": "Uitnodigen om als medewerker toe te treden",
           "error": "De geboekte mensen konden nu niet worden gelezen. Dit betekent niet dat niemand geboekt is."
-        }
+        },
+        "summaryInvitationsUnread": "{active} actief · openstaande uitnodigingen konden niet worden gelezen · {members} leden · {review} beoordelen journalen"
       },
       "needs": {
         "title": "Personeelsbehoeften",
@@ -18175,7 +18181,8 @@
       "places": "Plaatsen",
       "people": "Mensen",
       "hours": "Vastgelegde uren",
-      "period": "Periode"
+      "period": "Periode",
+      "dayHours": "Uren op losse dagen"
     },
     "place": "Plaats",
     "noPlaceName": "Geen plaats opgegeven",
@@ -18183,8 +18190,8 @@
     "people": "{count, plural, one {# persoon} other {# mensen}}",
     "entries": "{count, plural, one {# regel} other {# regels}}",
     "hoursShare": "{hours} u op deze plaats, vergeleken met de drukste plaats",
-    "noPlace": "{count, plural, one {# regel} other {# regels}} ({hours} u) in de bron noemen geen plaats.",
-    "periodAside": "Hiervan zijn {hours} u periodetotalen voor een tijdspanne, apart gehouden van losse dagen.",
+    "noPlace": "{count, plural, one {# registratie} other {# registraties}} ({hours} u op losse dagen) in de bron noemen geen plaats.",
+    "periodAside": "Niet meegeteld hierboven: {hours} u als periodetotalen voor een tijdspanne. Dat is een apart cijfer en wordt nooit bij losse dagen opgeteld.",
     "scope": {
       "title": "Wat deze import bevat",
       "carried": "De bron bevat: wie er werkte, op welke dag, hoeveel uur, wat er is gedaan en de plaats zoals geschreven.",
@@ -18212,7 +18219,8 @@
       "done": "{count} registraties toegewezen; {skipped} waren al toegewezen.",
       "refused": "Dit kon niet worden opgeslagen. Er is niets gewijzigd.",
       "person": "{hours} u, {count, plural, one {# registratie} other {# registraties}}"
-    }
+    },
+    "periodShort": "{hours} u periodetotaal"
   },
   "workPlan": {
     "title": "Gepland werk",

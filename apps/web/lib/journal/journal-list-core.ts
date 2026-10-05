@@ -57,6 +57,9 @@ export type JournalConfirmationRow = {
   confirmation_scope: unknown;
   created_at?: string | null;
   confirmer_role?: string | null;
+  /** WHO decided — needed so "confirmed" can exclude the subject's own
+   *  decision (review-status.ts `isConfirmedEntry`). */
+  confirmer_id?: string | null;
 };
 
 export type JournalEntryListRow = {
@@ -188,7 +191,7 @@ export const JOURNAL_ENTRY_METRICS_EMBED =
 /** The confirmation rows `deriveReviewResult` needs — the same fragment on
  *  every surface that turns them into a review result. */
 export const JOURNAL_ENTRY_CONFIRMATIONS_EMBED =
-  "journal_entry_confirmations(confirmation_scope, created_at, confirmer_role)";
+  "journal_entry_confirmations(confirmation_scope, created_at, confirmer_role, confirmer_id)";
 
 const V3_SELECT = `id, original_text, created_at, deleted_at, superseded_by, correction_of, engagement_context_id, ${JOURNAL_ENTRY_METRICS_EMBED}, ${JOURNAL_ENTRY_CONFIRMATIONS_EMBED}`;
 
