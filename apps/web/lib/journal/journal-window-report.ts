@@ -26,6 +26,7 @@ import {
 } from "@/lib/journal/worker-name";
 import { getAllocationsForRange } from "@/lib/work-hours/allocations";
 import { ALLOCATION_READ_LIMIT } from "@/lib/work-hours/allocations-model";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /**
  * Windowed journal report (V8 employer daily loop, GAP 4).
@@ -339,6 +340,7 @@ const round2 = (n: number): number => Math.round(n * 100) / 100;
 export function deriveWindowWorkTime(
   rows: readonly JournalWindowEntryRow[],
   todayIso: string,
+  horizonIso?: string,
 ): JournalWindowWorkTime {
   const entries: WorkIntelligenceEntry[] = rows.map((r) => ({
     entryId: r.id,
@@ -352,6 +354,7 @@ export function deriveWindowWorkTime(
     entries,
     skills: [],
     todayIso,
+    horizonIso,
     focus: "all",
   });
   const all = wi.periods.find((p) => p.key === "all");
@@ -497,7 +500,7 @@ export function rollUpJournalWindow(
 
 export async function getJournalWindowReport(
   windowKey: JournalWindowKey,
-  todayIso: string = new Date().toISOString().slice(0, 10),
+  todayIsoArg: string | undefined = undefined,
   opts: {
     /** Also embed the metric rows and derive each member's work time. Off
      *  by default so the hub tile and the daily panel stay count-sized. */
@@ -515,6 +518,8 @@ export async function getJournalWindowReport(
     };
   }
 
+  // The viewer's own day (lib/time/local-day.ts) unless the caller pinned one.
+  const todayIso = todayIsoArg ?? (await viewerWorkToday()).todayIso;
   const window = journalReportWindow(windowKey, todayIso);
   const supabase = await createClient();
 

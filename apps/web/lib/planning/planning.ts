@@ -45,6 +45,7 @@ import {
   toIsoDay,
   type PlanningItem,
 } from "@/lib/planning/planning-model";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /**
  * Planning composition (control room PR E, capability gap map §4) — the
@@ -1043,7 +1044,7 @@ export async function getPlanning(
   } = await supabase.auth.getUser();
   if (!user) return { status: "not-authed" };
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = (await viewerWorkToday()).todayIso;
   const rangeStart = range?.rangeStart ?? today;
   const rangeEnd =
     range && range.rangeEnd >= rangeStart ? range.rangeEnd : rangeStart;

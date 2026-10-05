@@ -89,7 +89,8 @@ import {
   toThermometerView,
 } from "@/lib/market/thermometer-data";
 import { getOwnAvatar } from "@/lib/profile/avatar";
-import { createUtcFormatter, formatUtcDate, utcTodayKey } from "@/lib/time/display";
+import { createUtcFormatter, formatUtcDate } from "@/lib/time/display";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 // ONE day-resolution rule for the Work Journal — the canonical work-time
 // rule's own (`resolveWorkDayDetail`), the same one the work-in-numbers
 // model groups by, so a record cannot sit on one day in the diary and
@@ -210,7 +211,9 @@ export default async function JournalPage({
   // the anchored period. Both are URL state — no client store, no second
   // source of "which day am I looking at".
   const calendarScale = resolveScale(sp.cal);
-  const todayIsoKey = utcTodayKey();
+  // The person's own day (lib/time/local-day.ts): entries are stamped in it.
+  const viewerToday = await viewerWorkToday();
+  const todayIsoKey = viewerToday.todayIso;
   // Evidence drill-down (W5 slice 3): ?skill=<slug> filters the records to
   // those linked to ONE of the worker's own skills — the player-card evidence
   // bars land here. Same shape as ?date=; anything not a plain slug is ignored.
@@ -1120,7 +1123,7 @@ export default async function JournalPage({
   // and declared skills loaded above — no second read, so the figures can
   // never disagree with the diary beneath them. Unreadable entries or links
   // → the section is withheld rather than rendered as zero hours (SEP-7).
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = viewerToday.todayIso;
   // ONE bounded photo-count read over the live entries — shared by the work
   // intelligence (evidence strength) and each row's EvidenceChain below.
   const entryPhotoCounts = entries
@@ -1137,6 +1140,7 @@ export default async function JournalPage({
           provenanceByEntry,
           skillRows: (skillIdRows ?? []) as unknown as WorkerSkillSourceRow[],
           todayIso,
+          horizonIso: viewerToday.horizonIso,
           focus: periodKey,
           coverage: entriesRead.ok
             ? {

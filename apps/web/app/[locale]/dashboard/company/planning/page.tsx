@@ -33,6 +33,7 @@ import {
 } from "@/lib/planning/roster-timeline-model";
 import { playerInitials } from "@/lib/identity/player-identity";
 import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /** The timeline window: four weeks, moved by whole windows. */
 const TIMELINE_DAYS = 28;
@@ -536,7 +537,7 @@ export default async function CompanyWorkforcePlanningPage({
      per person on one shared day axis. Busy / away / overlapping read at a
      glance; an empty stretch is "nothing on record", never "free". The window
      moves by whole four-week steps or jumps to any date (?from=). */
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = (await viewerWorkToday()).todayIso;
   const timelineFrom = mondayOf(parseIsoDay(rawFrom) ?? todayIso);
   // Same data, two readings: by person (default) or by project.
   const byProject = rawBy === "project";

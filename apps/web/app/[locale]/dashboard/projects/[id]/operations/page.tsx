@@ -57,6 +57,7 @@ import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
 import { getProjectManageFacts } from "@/lib/projects/responsible";
 import { listOrganizationMembers } from "@/lib/company/memberships";
 import { getProjectHoursSideBySide } from "@/lib/projects/project-hours";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 export const dynamic = "force-dynamic";
 
@@ -256,7 +257,7 @@ export default async function ProjectOperationsPage({
     memberNameByProfileId: new Map(
       responsibleOptions.map((m) => [m.profileId, m.name] as const),
     ),
-    todayIso: new Date().toISOString().slice(0, 10),
+    todayIso: (await viewerWorkToday()).todayIso,
   });
 
   // P4 — THE FIELD (frozen design §5, §1.5): a pure projection over the reads
