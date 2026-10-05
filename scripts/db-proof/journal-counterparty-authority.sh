@@ -303,6 +303,29 @@ check "all new objects are gone" contains "0" "$(q "select count(*) from pg_proc
 check "  ...and both tables" contains "0" "$(q "select count(*) from pg_class where relname in ('work_counterparty_links','journal_entry_review_submissions')")"
 check "after rollback the previous behaviour is back (defect reproduces => real revert)" contains "approved" "$(as_user $OWNERW "$(REVIEW $E_A approved)")"
 
+echo; echo "--- 13. a note-less negative CLIENT decision is refused by the guard trigger itself (audit C4)"
+OLD_REF=3090a1047
+c4_scenario() { # <db> <migration file>  -> echo the outcome of a DIRECT note-less client dispute (table owner, RLS bypassed)
+  $ADMIN -c "drop database if exists $1" -c "create database $1" >/dev/null
+  local P="psql -h $HOST -p $PORT -U postgres -d $1"
+  $P -q -v ON_ERROR_STOP=1 -f "$HERE/journal-counterparty-authority.prelude.sql" >/dev/null || { echo PRELUDE FAILED; return; }
+  $P -q -v ON_ERROR_STOP=1 -f "$HERE/journal-counterparty-authority.seed.sql" >/dev/null || { echo SEED FAILED; return; }
+  $P -q -v ON_ERROR_STOP=1 -f "$2" >/dev/null 2>&1 || { echo MIGRATION FAILED; return; }
+  PSQL="$P" as_user $CREP "$(REG $PC $FW)" >/dev/null
+  PSQL="$P" as_user $FREE "$(SUB $FE1)" >/dev/null
+  $P -tA -v ON_ERROR_STOP=0 -c "insert into public.journal_entry_confirmations (entry_id, confirmer_id, confirmer_engagement_context_id, confirmer_role, confirmation_scope) values ('$FE1','$CREP','ecc10000-0000-0000-0000-000000000001','manager','{\"action\":\"client_dispute\",\"decision\":\"rejected\",\"authority\":{\"basis\":\"counterparty\"}}')" 2>&1
+  $P -tA -c "select 'rows=' || count(*) from public.journal_entry_confirmations where entry_id='$FE1' and confirmation_scope->>'action'='client_dispute'"
+}
+git -C "$REPO" show "$OLD_REF:supabase/migrations/20261003150500_journal_counterparty_review_authority_v1.sql" > "$REPO/.tmp/m1_old.sql" 2>/dev/null || { mkdir -p "$REPO/.tmp"; git -C "$REPO" show "$OLD_REF:supabase/migrations/20261003150500_journal_counterparty_review_authority_v1.sql" > "$REPO/.tmp/m1_old.sql"; }
+OLDOUT="$(c4_scenario cpc4old "$REPO/.tmp/m1_old.sql")"
+check "DEFECT (pre-fix guard): a direct note-less client dispute IS recorded" contains "rows=1" "$OLDOUT"
+NEWOUT="$(c4_scenario cpc4new "$MIG")"
+check "FIXED: the same direct insert is refused by the trigger (note_required)" contains "note_required" "$NEWOUT"
+check "  ...and nothing was written" contains "rows=0" "$NEWOUT"
+check "FIXED: a client dispute WITH a note still works through the RPC" contains "rejected" "$(PSQL="psql -h $HOST -p $PORT -U postgres -d cpc4new" as_user $CREP "select public.review_journal_entry('$FE1'::uuid,'rejected','Wrong wall');")"
+check "employer-basis semantics unchanged: an employer reject WITHOUT a note is still allowed" contains "rejected" "$(PSQL="psql -h $HOST -p $PORT -U postgres -d cpc4new" as_user $MGR2 "select public.review_journal_entry('$E_NP'::uuid,'rejected',null);")"
+$ADMIN -c "drop database if exists cpc4old" -c "drop database if exists cpc4new" >/dev/null
+
 echo; echo "=============================================================="
 echo " RESULT: $pass passed, $fail failed"
 echo "=============================================================="

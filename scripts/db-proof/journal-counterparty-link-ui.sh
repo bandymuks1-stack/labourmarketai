@@ -18,6 +18,12 @@ M1="$REPO/supabase/migrations/20261003150500_journal_counterparty_review_authori
 M2="$REPO/supabase/migrations/20261003150550_counterparty_link_assignment_kinds_review_doors_v1.sql"
 M3="$REPO/supabase/migrations/20261003150555_batch_review_exceptions_employer_only_v1.sql"
 D3="$REPO/supabase/rollbacks/20261003150555_batch_review_exceptions_employer_only_v1.down.sql"
+OLD_REF=3090a1047   # the tree BEFORE the audit fixes C1/C2 (defects are demonstrated against it)
+TMPD="$REPO/.tmp"; mkdir -p "$TMPD"
+old_fn() { # <path-at-OLD_REF> <start-regex> <end-regex> : extract one function body from the pre-fix tree
+  git -C "$REPO" show "$OLD_REF:$1" | sed -n "/$2/,/$3/p"
+}
+new_fn() { sed -n "/$2/,/$3/p" "$REPO/$1"; }
 D2="$REPO/supabase/rollbacks/20261003150550_counterparty_link_assignment_kinds_review_doors_v1.down.sql"
 
 FW=aaaaf000-0000-0000-0000-000000000f01
@@ -191,6 +197,21 @@ check "ended team assignment: the team member is no longer a candidate" absent "
 $PSQL -q -c "insert into public.team_assignments (team_org_id, project_id) values ('$TEAM','$PC')" >/dev/null
 check "team assignment re-created -> authority returns" contains "approved" "$(as_user $CREP "$(REVIEW $TE1 approved)")"
 
+echo; echo "--- C2. ONE queue row per correction chain (audit C2)"
+TE1B=7e100000-0000-0000-0000-0000000000b1
+$PSQL -q -c "insert into public.journal_entries (id, worker_id, engagement_context_id, original_text, hash_self, project_id, correction_of) values ('$TE1B','$TW1','ec7e0011-0000-0000-0000-000000000011','Team member paving, corrected area.','ht1b','$PC','$TE1')" >/dev/null
+check "the corrected version is submitted explicitly" contains "submitted" "$(as_user $TM1 "$(SUB $TE1B)")"
+QF=public.list_counterparty_review_queue_v1
+old_fn "supabase/migrations/20261003150500_journal_counterparty_review_authority_v1.sql" "create or replace function public.list_counterparty_review_queue_v1" '^end \$\$;' > "$TMPD/q_old.sql"
+new_fn "supabase/migrations/20261003150500_journal_counterparty_review_authority_v1.sql" "create or replace function public.list_counterparty_review_queue_v1" '^end \$\$;' > "$TMPD/q_new.sql"
+$PSQL -q -v ON_ERROR_STOP=1 -f "$TMPD/q_old.sql" >/dev/null 2>&1
+check "DEFECT (pre-fix projection): the chain shows the ORIGINAL ..." contains "$TE1" "$(as_user $CREP "select entry_id from $QF();")"
+check "  ...AND the correction (the same work twice)" contains "$TE1B" "$(as_user $CREP "select entry_id from $QF();")"
+$PSQL -q -v ON_ERROR_STOP=1 -f "$TMPD/q_new.sql" >/dev/null 2>&1
+check "FIXED: the queue shows the LATEST version of the chain ..." contains "$TE1B" "$(as_user $CREP "select entry_id from $QF();")"
+check "  ...and not the earlier version" absent "$TE1|" "$(as_user $CREP "select entry_id||'|' from $QF();")"
+check "  ...the earlier version's history is still in the detail of the latest" contains "paving" "$(as_user $CREP "select public.counterparty_review_entry_detail_v1('$TE1B'::uuid)::text;")"
+
 echo; echo "--- D1. REVOKED link closes the photo and the detail at once"
 LNK="$(q "select id from public.work_counterparty_links where worker_id='$TW1' and project_id='$PC' and revoked_at is null limit 1")"
 check "before revocation the representative still opens the photo" contains "paving.jpg" "$(as_user $CREP "$PH")"
@@ -209,6 +230,23 @@ $PSQL -q -v ON_ERROR_STOP=1 -f "$D3" >/dev/null 2>&1   # the rollback script car
 $PSQL -q -c "alter table public.journal_entry_confirmations disable trigger user" >/dev/null
 for i in 1 2 3; do $PSQL -q -c "insert into public.journal_entry_confirmations (entry_id, confirmer_id, confirmer_engagement_context_id, confirmer_role, confirmation_scope) values ('$ENP','$CREP','ecc10000-0000-0000-0000-000000000001','manager','{\"action\":\"client_accept\",\"decision\":\"approved\",\"authority\":{\"basis\":\"counterparty\"}}')" >/dev/null; done
 $PSQL -q -c "alter table public.journal_entry_confirmations enable trigger user" >/dev/null
+echo; echo "--- C1. a CLIENT decision must not remove the employer's pending item (audit C1)"
+ENP3=e9000000-0000-0000-0000-000000000003
+$PSQL -q -c "insert into public.journal_entries (id, worker_id, engagement_context_id, original_text, hash_self) values ('$ENP3','aaaa0000-0000-0000-0000-000000000009','ecec1111-0000-0000-0000-000000000001','Agency-managed worker, third entry.','h9c')" >/dev/null
+check "precondition: the entry is in the employer's pending set" contains "$ENP3" "$(as_user $MGRU "select id from public.reviewable_journal_entry_ids() id;")"
+$PSQL -q -c "alter table public.journal_entry_confirmations disable trigger user" >/dev/null
+$PSQL -q -c "insert into public.journal_entry_confirmations (entry_id, confirmer_id, confirmer_engagement_context_id, confirmer_role, confirmation_scope) values ('$ENP3','$CREP','ecc10000-0000-0000-0000-000000000001','manager','{\"action\":\"client_accept\",\"decision\":\"approved\",\"authority\":{\"basis\":\"counterparty\"}}')" >/dev/null
+$PSQL -q -c "alter table public.journal_entry_confirmations enable trigger user" >/dev/null
+check "FIXED (current 150550): the client acceptance does NOT remove the employer's pending item" contains "$ENP3" "$(as_user $MGRU "select id from public.reviewable_journal_entry_ids() id;")"
+old_fn "supabase/migrations/20261003150550_counterparty_link_assignment_kinds_review_doors_v1.sql" "CREATE OR REPLACE FUNCTION public.reviewable_journal_entry_ids" '^end \$function\$;' > "$TMPD/r_old.sql"
+new_fn "supabase/migrations/20261003150550_counterparty_link_assignment_kinds_review_doors_v1.sql" "CREATE OR REPLACE FUNCTION public.reviewable_journal_entry_ids" '^end \$function\$;' > "$TMPD/r_new.sql"
+$PSQL -q -v ON_ERROR_STOP=1 -f "$TMPD/r_old.sql" >/dev/null 2>&1
+check "DEFECT (pre-fix body): the same client acceptance silently removed the employer's item" absent "$ENP3" "$(as_user $MGRU "select id from public.reviewable_journal_entry_ids() id;")"
+$PSQL -q -v ON_ERROR_STOP=1 -f "$TMPD/r_new.sql" >/dev/null 2>&1
+check "fix restored: employer's pending item is back" contains "$ENP3" "$(as_user $MGRU "select id from public.reviewable_journal_entry_ids() id;")"
+check "an EMPLOYER decision still closes it (the rule itself is intact)" contains "approved" "$(as_user $MGRU "select public.review_journal_entry('$ENP3'::uuid,'approved','ok');")"
+check "  ...and then it is no longer pending" absent "$ENP3" "$(as_user $MGRU "select id from public.reviewable_journal_entry_ids() id;")"
+
 check "BEFORE migration 3 the defect is real: three client acceptances hide the few-confirmations flag" absent "worker_first_entries" "$(as_user $MGRU "select exception_slug from public.batch_review_exceptions(array['$ENP2']::uuid[]);")"
 $PSQL -q -v ON_ERROR_STOP=1 -f "$M3" >/dev/null 2>&1 && echo "  migration 3 applied"
 check "AFTER migration 3 the flag is back (client rows are not employer approvals)" contains "worker_first_entries" "$(as_user $MGRU "select exception_slug from public.batch_review_exceptions(array['$ENP2']::uuid[]);")"

@@ -100,6 +100,7 @@ export async function decideCounterpartyCore(
       "self_review_not_allowed",
       "entry_superseded",
       "entry_deleted",
+      "note_required",
     ]) {
       if (msg.includes(known)) return { ok: false, code: known };
     }

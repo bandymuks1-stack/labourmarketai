@@ -428,6 +428,15 @@ begin
   if v_claimed is distinct from (v_auth ->> 'basis') then
     raise exception 'authority_basis_mismatch' using errcode = '42501';
   end if;
+  -- A client correction request / dispute carries its reason: enforced at the
+  -- choke point so a direct INSERT cannot record a note-less one (the RPC and
+  -- the web/chat doors enforce it as well). Employer-path semantics unchanged.
+  if v_claimed = 'counterparty'
+     and (coalesce(new.confirmation_scope ->> 'decision', '') in ('rejected', 'changes_requested')
+          or coalesce(new.confirmation_scope ->> 'action', '') in ('client_dispute', 'client_request_correction'))
+     and nullif(btrim(coalesce(new.confirmation_scope ->> 'note', '')), '') is null then
+    raise exception 'note_required' using errcode = '22023';
+  end if;
   return new;
 end $function$;
 
@@ -704,9 +713,13 @@ begin
       and coalesce(ec.journal_review_enabled, false) is true
       and coalesce(w.profile_id <> uid, true)
       and (public.journal_entry_review_authority_v1(je.id, uid) ->> 'basis') = 'employer'
+      -- Only EMPLOYER-path decisions close the employer's pending item: a
+      -- CLIENT decision (basis 'counterparty') neither substitutes for nor
+      -- suppresses employer review (decision 0018).
       and not exists (select 1 from public.journal_entry_confirmations c
                        where c.entry_id = je.id
-                         and c.confirmer_id is distinct from w.profile_id)
+                         and c.confirmer_id is distinct from w.profile_id
+                         and coalesce(c.confirmation_scope #>> '{authority,basis}', 'employer') <> 'counterparty')
     union
     -- COUNTERPARTY: submitted, not yet decided by the counterparty.
     select s.entry_id
@@ -747,6 +760,13 @@ begin
       join public.work_counterparty_links l on l.id = s.link_id
      where je.deleted_at is null and je.superseded_by is null
        and (public.journal_entry_review_authority_v1(s.entry_id, uid) ->> 'basis') = 'counterparty'
+       -- ONE row per correction chain: an earlier version is hidden once a later
+       -- version (correction_of -> it) has itself been submitted. A confirmed
+       -- original keeps superseded_by NULL by design, so the chain is read
+       -- through correction_of; the full history stays in the entry detail.
+       and not exists (select 1 from public.journal_entries je2
+                         join public.journal_entry_review_submissions s2 on s2.entry_id = je2.id
+                        where je2.correction_of = je.id and je2.deleted_at is null)
      order by s.submitted_at desc;
 end $$;
 

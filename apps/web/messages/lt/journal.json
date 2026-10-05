@@ -108,7 +108,7 @@
       "emptyTitle": "Jums dar niekas nepateikta",
       "empty": "Kai darbuotojas pateiks jums darbą kaip užsakovui, jis atsiras čia.",
       "emptyNext": "Projekto puslapyje užregistruokite savo organizaciją kaip užsakovą, kad jo darbuotojai galėtų pateikti jums savo darbą.",
-      "truncated": "Rodomi naujausi {n} pateikimai.",
+      "truncated": "Rodomi naujausi {n} iš {m} pateikimų.",
       "card": {
         "workerUnknown": "Darbuotojas",
         "yourRole": "jūs esate: {role}",

@@ -71,6 +71,9 @@ export default async function CounterpartyQueuePage({
   const rows: QueueRow[] = (queue ?? []).slice(0, MAX_CARDS);
   const truncated = (queue ?? []).length > MAX_CARDS;
   const parts = partitionQueue(rows);
+  // Bucket SIZES come from the full queue (the same set the inbox count and
+  // the attention counters use); only the cards are bounded.
+  const allParts = partitionQueue(queue ?? []);
 
   const views = new Map<string, CounterpartyCardView>();
   await Promise.all(
@@ -162,7 +165,7 @@ export default async function CounterpartyQueuePage({
             {BUCKET_ORDER.map((b) => (
               <span key={b}>
                 {t(`bucket.${b}`)}:{" "}
-                <span className="font-semibold text-text-primary">{parts[b].length}</span>
+                <span className="font-semibold text-text-primary">{allParts[b].length}</span>
               </span>
             ))}
           </div>
@@ -207,7 +210,7 @@ export default async function CounterpartyQueuePage({
       )}
       {truncated ? (
         <p className="text-meta text-text-muted" data-testid="counterparty-queue-truncated">
-          {t("truncated", { n: MAX_CARDS })}
+          {t("truncated", { n: MAX_CARDS, m: (queue ?? []).length })}
         </p>
       ) : null}
     </div>

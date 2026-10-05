@@ -2262,7 +2262,8 @@
         "review": "Journal entries to review",
         "invitations": "Pending worker invitations",
         "claims": "Public need submissions you can claim",
-        "reviewOff": "Workers with recorded work whose confirmation is switched off"
+        "reviewOff": "Workers with recorded work whose confirmation is switched off",
+        "clientReview": "Work waiting for your decision as the client"
       }
     },
     "agency": {
@@ -6054,7 +6055,9 @@
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
+      "clientTitle": "{n, plural, one {# entry is waiting for your decision as the client} other {# entries are waiting for your decision as the client}}",
       "pendingBody": "One tap — and a person's work becomes confirmed proof.",
+      "clientCta": "Open client review",
       "cta": "Confirm now",
       "zero": "Nothing is waiting for confirmation right now — the team's rhythm is calm.",
       "zeroCta": "Review queue"
@@ -10948,6 +10951,7 @@
       "pendingDecisions": "Absence requests awaiting decision",
       "journalToday": "Work entries today",
       "awaitingReview": "Entries awaiting review",
+      "clientReviewToDecide": "Waiting for your decision as the client",
       "absentToday": "Recorded absent today",
       "absentNext": "Recorded absences in the next 7 days",
       "noneRecordedToday": "No approved absence is recorded for today.",
