@@ -271,7 +271,7 @@ export default async function CompanyPeoplePage({
             : canManageInvitations
               ? t("summary", {
                   active: activeWorkerRows.length,
-                  pending: pendingCount,
+                  pending: pendingCount ?? 0,
                   members: memberCount,
                   review: reviewCount,
                 })
