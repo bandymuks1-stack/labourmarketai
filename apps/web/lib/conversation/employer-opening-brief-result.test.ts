@@ -25,6 +25,10 @@ const h = vi.hoisted(() => ({
   availability: vi.fn(),
   ctx: vi.fn(),
   unreadScoped: vi.fn(),
+  progress: vi.fn(),
+  shared: vi.fn(),
+  placements: vi.fn(),
+  awaiting: vi.fn(),
 }));
 
 vi.mock("next-intl/server", () => ({
@@ -58,8 +62,14 @@ vi.mock("@/lib/journal/review-queue", () => ({ readQuickReviewQueueResult: h.que
 vi.mock("@/lib/supabase/server", () => ({ createClient: h.sbClient }));
 vi.mock("@/lib/learning/signal-queue-producer", () => ({
   produceReviewQueueFromSignals: h.produce,
-  countPendingReviewQueue: h.countPending,
+  readPendingReviewQueue: h.countPending,
 }));
+vi.mock("@/lib/agency/bridge-read", () => ({
+  listAgencyOfferProgress: h.progress,
+  listSharedRequestsForAgency: h.shared,
+}));
+vi.mock("@/lib/agency/delegation-read", () => ({ listAgencyPlacements: h.placements }));
+vi.mock("@/lib/agency/bridge-model", () => ({ sharedNeedsAwaitingWorker: h.awaiting }));
 vi.mock("@/lib/leave/absences", () => ({ readManagerPendingAbsences: h.absences }));
 vi.mock("@/lib/planning/employer-availability", () => ({
   getEmployerWorkerAvailability: h.availability,
@@ -81,7 +91,7 @@ function allClear() {
   h.queue.mockResolvedValue({ status: "ok", entries: [] });
   h.sbClient.mockResolvedValue({});
   h.produce.mockResolvedValue(undefined);
-  h.countPending.mockResolvedValue(0);
+  h.countPending.mockResolvedValue({ status: "ok", count: 0 });
   h.absences.mockResolvedValue({ status: "ok", pending: [] });
   h.availability.mockResolvedValue({ status: "ok", unavailability: [] });
   h.ctx.mockResolvedValue({ kind: "ok", companyId: "co-1" });
@@ -224,5 +234,46 @@ describe("loadEmployerOpeningBriefResult - the three formerly lossy readers", ()
     expect(await loadEmployerOpeningBriefResult()).toEqual({ kind: "none" });
     h.queue.mockResolvedValue({ status: "unavailable" });
     expect(await loadEmployerOpeningBriefResult()).toMatchObject({ kind: "unknown", unknown: ["journal-reviews"] });
+  });
+});
+
+describe("loadEmployerOpeningBriefResult - learning-review count", () => {
+  it("ok 0 is the all-clear; unavailable is unknown; ok N is a line", async () => {
+    h.countPending.mockResolvedValue({ status: "unavailable" });
+    expect(await loadEmployerOpeningBriefResult()).toMatchObject({ kind: "unknown", unknown: ["learning-review"] });
+    h.countPending.mockResolvedValue({ status: "ok", count: 4 });
+    const r = await loadEmployerOpeningBriefResult();
+    expect(r.kind === "brief" && r.lines).toContain("briefEmployerLearningReview:4");
+  });
+});
+
+describe("loadEmployerOpeningBriefResult - agency workspace reads", () => {
+  function agency() {
+    h.starter.mockResolvedValue({
+      agencyWorkspace: true,
+      organizationId: "org-1",
+      signals: { capabilities: [], staffingAgency: true, facts: {} },
+    });
+    h.progress.mockResolvedValue({ kind: "ok", rows: [] });
+    h.shared.mockResolvedValue({ kind: "ok", rows: [] });
+    h.placements.mockResolvedValue({ kind: "ok", rows: [] });
+    h.awaiting.mockReturnValue([]);
+  }
+
+  it("all agency reads answering with nothing is the all-clear", async () => {
+    agency();
+    expect(await loadEmployerOpeningBriefResult()).toEqual({ kind: "none" });
+  });
+
+  it("a failed placements, progress or shared read names the agency as unknown", async () => {
+    agency();
+    h.placements.mockResolvedValue({ kind: "error" });
+    expect(await loadEmployerOpeningBriefResult()).toMatchObject({ kind: "unknown", unknown: ["agency"] });
+    agency();
+    h.progress.mockResolvedValue({ kind: "error" });
+    expect(await loadEmployerOpeningBriefResult()).toMatchObject({ kind: "unknown", unknown: ["agency"] });
+    agency();
+    h.shared.mockResolvedValue({ kind: "error" });
+    expect(await loadEmployerOpeningBriefResult()).toMatchObject({ kind: "unknown", unknown: ["agency"] });
   });
 });

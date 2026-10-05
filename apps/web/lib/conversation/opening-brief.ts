@@ -452,6 +452,8 @@ export async function loadEmployerOpeningBriefResult(): Promise<EmployerOpeningB
         Promise.all([listAgencyOfferProgress(), listSharedRequestsForAgency()]),
         listAgencyPlacements(),
       ]);
+      // A failed placements read means "needs a replacement?" cannot be told.
+      if (placements.kind === "error") unknown.add("agency");
       if (progress.kind === "ok") {
         // A client's shared need whose accepted person did not start (the
         // worker declined) or whose placement ended is OPEN AGAIN: the client
@@ -575,12 +577,14 @@ export async function loadEmployerOpeningBriefResult(): Promise<EmployerOpeningB
   try {
     if (lines.length < MAX_LINES) {
       const { createClient } = await import("@/lib/supabase/server");
-      const { produceReviewQueueFromSignals, countPendingReviewQueue } = await import(
+      const { produceReviewQueueFromSignals, readPendingReviewQueue } = await import(
         "@/lib/learning/signal-queue-producer"
       );
       const sb = await createClient();
       await produceReviewQueueFromSignals(sb);
-      const waiting = await countPendingReviewQueue(sb);
+      const pendingRead = await readPendingReviewQueue(sb);
+      if (pendingRead.status === "unavailable") unknown.add("learning-review");
+      const waiting = pendingRead.status === "ok" ? pendingRead.count : 0;
       if (waiting > 0) {
         lines.push(t("briefEmployerLearningReview", { count: waiting }));
         // The door exists ONLY in this N>0 state, so it is never empty
