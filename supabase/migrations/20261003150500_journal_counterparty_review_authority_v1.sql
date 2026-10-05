@@ -634,6 +634,12 @@ begin
   if v_eng is null then return 'no_reviewer_engagement'; end if;
 
   if v_basis = 'counterparty' then
+    -- SERIALISE per entry: the idempotency read below is read-then-insert, so two
+    -- simultaneous decisions (a double click that beats the UI guard, found by the
+    -- integrated local QA 2026-10-05) both saw "no prior decision" and BOTH wrote a
+    -- client_accept row. The transaction-scoped advisory lock makes the second
+    -- caller wait, then see the first one's committed row and return idempotently.
+    perform pg_advisory_xact_lock(hashtextextended('counterparty-review:' || p_entry_id::text, 0));
     -- ACCEPT is final; a dispute may be withdrawn/resolved only by a later
     -- acceptance; repeating the same decision is idempotent (no new row).
     select c.confirmation_scope ->> 'decision' into v_last

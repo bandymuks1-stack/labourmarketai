@@ -163,6 +163,16 @@ describe("the authority model (the principle, pinned)", () => {
     expect(body).toMatch(/if v_last = p_decision then return p_decision/);
   });
 
+  it("two simultaneous decisions cannot both write: the counterparty path takes a per-entry advisory lock BEFORE its idempotency read", () => {
+    // Found by the integrated local QA (2026-10-05): the idempotency check is read-then-insert, so a parallel double
+    // decision wrote TWO client_accept rows. The lock makes the second caller wait and then see the first one's row.
+    const fnBody = body.split("CREATE OR REPLACE FUNCTION public.review_journal_entry")[1] ?? "";
+    const lock = fnBody.indexOf("pg_advisory_xact_lock(hashtextextended('counterparty-review:' || p_entry_id::text, 0))");
+    const read = fnBody.indexOf("select c.confirmation_scope ->> 'decision' into v_last");
+    expect(lock).toBeGreaterThan(-1);
+    expect(read).toBeGreaterThan(lock);
+  });
+
   it("reviewability is no longer the universal relationship_types rule", () => {
     expect(body).not.toContain("journal_reviewable");
     expect(body).not.toMatch(/relationship_types/);
