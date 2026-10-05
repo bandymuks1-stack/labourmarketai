@@ -2338,7 +2338,8 @@
         "review": "Žurnalo įrašai peržiūrai",
         "invitations": "Laukiantys kvietimai darbuotojams",
         "claims": "Viešos užklausos, kurias galite perimti",
-        "reviewOff": "Dirbantys darbuotojai, kurių darbo patvirtinimas neįjungtas"
+        "reviewOff": "Dirbantys darbuotojai, kurių darbo patvirtinimas neįjungtas",
+        "clientReview": "Darbas, laukiantis jūsų sprendimo kaip užsakovo"
       }
     },
     "agency": {
@@ -6141,7 +6142,9 @@
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# įrašas laukia tavo patvirtinimo} few {# įrašai laukia tavo patvirtinimo} other {# įrašų laukia tavo patvirtinimo}}",
+      "clientTitle": "{n, plural, one {# įrašas laukia jūsų sprendimo kaip užsakovo} few {# įrašai laukia jūsų sprendimo kaip užsakovo} other {# įrašų laukia jūsų sprendimo kaip užsakovo}}",
       "pendingBody": "Vienas bakstelėjimas — ir žmogaus darbas tampa patvirtintu įrodymu.",
+      "clientCta": "Atidaryti užsakovo peržiūrą",
       "cta": "Patvirtinti dabar",
       "zero": "Šiuo metu patvirtinimų nelaukia — komandos ritmas ramus.",
       "zeroCta": "Peržiūros eilė"
@@ -11021,6 +11024,7 @@
       "pendingDecisions": "Neatvykimo prašymai laukia sprendimo",
       "journalToday": "Šiandienos darbo įrašai",
       "awaitingReview": "Įrašai laukia peržiūros",
+      "clientReviewToDecide": "Laukia jūsų sprendimo kaip užsakovo",
       "absentToday": "Užfiksuota, kad šiandien nedirba",
       "absentNext": "Užfiksuoti neatvykimai per artimiausias 7 dienas",
       "noneRecordedToday": "Šiandienai patvirtintų neatvykimų neužfiksuota.",

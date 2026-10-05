@@ -348,9 +348,13 @@ begin
       and coalesce(ec.journal_review_enabled, false) is true
       and coalesce(w.profile_id <> uid, true)
       and (public.journal_entry_review_authority_v1(je.id, uid) ->> 'basis') = 'employer'
+      -- Only EMPLOYER-path decisions close the employer's pending item: a
+      -- CLIENT decision (basis 'counterparty') neither substitutes for nor
+      -- suppresses employer review (decision 0018).
       and not exists (select 1 from public.journal_entry_confirmations c
                        where c.entry_id = je.id
-                         and c.confirmer_id is distinct from w.profile_id);
+                         and c.confirmer_id is distinct from w.profile_id
+                         and coalesce(c.confirmation_scope #>> '{authority,basis}', 'employer') <> 'counterparty');
 end $function$;
 
 -- 5c. The submitted entry's PHOTO FILES, under the counterparty's own session --

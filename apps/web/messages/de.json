@@ -2338,7 +2338,8 @@
         "review": "Journaleinträge zur Prüfung",
         "invitations": "Ausstehende Einladungen an Arbeitskräfte",
         "claims": "Öffentliche Anfragen, die du übernehmen kannst",
-        "reviewOff": "Mitarbeitende mit erfasster Arbeit, deren Bestätigung ausgeschaltet ist"
+        "reviewOff": "Mitarbeitende mit erfasster Arbeit, deren Bestätigung ausgeschaltet ist",
+        "clientReview": "Arbeit, die auf Ihre Entscheidung als Auftraggeber wartet"
       }
     },
     "agency": {
@@ -6141,7 +6142,9 @@
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# Eintrag wartet auf deine Bestätigung} other {# Einträge warten auf deine Bestätigung}}",
+      "clientTitle": "{n, plural, one {# Eintrag wartet auf Ihre Entscheidung als Auftraggeber} other {# Einträge warten auf Ihre Entscheidung als Auftraggeber}}",
       "pendingBody": "Ein Tippen — und die Arbeit eines Menschen wird zum bestätigten Nachweis.",
+      "clientCta": "Prüfung als Auftraggeber öffnen",
       "cta": "Jetzt bestätigen",
       "zero": "Derzeit wartet nichts auf Bestätigung — der Rhythmus des Teams ist ruhig.",
       "zeroCta": "Prüfwarteschlange"
@@ -11021,6 +11024,7 @@
       "pendingDecisions": "Abwesenheitsanträge warten auf Entscheidung",
       "journalToday": "Arbeitseinträge heute",
       "awaitingReview": "Einträge warten auf Prüfung",
+      "clientReviewToDecide": "Wartet auf Ihre Entscheidung als Auftraggeber",
       "absentToday": "Heute als abwesend erfasst",
       "absentNext": "Erfasste Abwesenheiten in den nächsten 7 Tagen",
       "noneRecordedToday": "Für heute ist keine genehmigte Abwesenheit erfasst.",

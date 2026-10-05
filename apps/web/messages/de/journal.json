@@ -108,7 +108,7 @@
       "emptyTitle": "Noch nichts bei Ihnen eingereicht",
       "empty": "Sobald eine Person Arbeit bei Ihnen als Auftraggeber einreicht, erscheint sie hier.",
       "emptyNext": "Registrieren Sie Ihre Organisation auf einer Projektseite als Auftraggeber, damit die Beschäftigten dort ihre Arbeit bei Ihnen einreichen können.",
-      "truncated": "Die neuesten {n} Einreichungen werden angezeigt.",
+      "truncated": "Die neuesten {n} von {m} Einreichungen werden angezeigt.",
       "card": {
         "workerUnknown": "Person",
         "yourRole": "Sie sind: {role}",

@@ -108,7 +108,7 @@
       "emptyTitle": "Er is nog niets bij u ingediend",
       "empty": "Zodra een werknemer werk bij u indient als opdrachtgever, verschijnt het hier.",
       "emptyNext": "Registreer uw organisatie als opdrachtgever op een projectpagina, zodat werknemers daarop hun werk bij u kunnen indienen.",
-      "truncated": "De nieuwste {n} inzendingen worden getoond.",
+      "truncated": "De nieuwste {n} van {m} inzendingen worden getoond.",
       "card": {
         "workerUnknown": "Werknemer",
         "yourRole": "u bent: {role}",

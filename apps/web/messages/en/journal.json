@@ -108,7 +108,7 @@
       "emptyTitle": "Nothing submitted to you yet",
       "empty": "When a worker submits work to you as their client, it appears here.",
       "emptyNext": "Register your organization as the client on a project page, so workers on it can submit their work to you.",
-      "truncated": "Showing the newest {n} submissions.",
+      "truncated": "Showing the newest {n} of {m} submissions.",
       "card": {
         "workerUnknown": "Worker",
         "yourRole": "you are the {role}",

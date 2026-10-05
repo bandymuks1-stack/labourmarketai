@@ -27,6 +27,7 @@ import {
 } from "@/lib/company/company-workers";
 import { getTeamBrigadesData } from "@/lib/company/team-brigades";
 import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
+import { countCounterpartyToDecide } from "@/lib/journal/counterparty-to-decide-count";
 import { countWorkersWithUnconfirmableWork } from "@/lib/operations/org-members";
 import { loadCompanyHomeField } from "@/lib/company/company-home-field";
 import { CompanyHomeFieldSection } from "@/components/app/company-home-field-section";
@@ -147,6 +148,7 @@ export default async function CompanyDashboardPage({
     reviewPendingCount,
     reviewOffWorkers,
     rHomeField,
+    clientToDecide,
   ] = await Promise.all([
     listOwnCustomerRequests(EMPLOYER_DEMAND_KINDS),
     listClaimablePublicIntakes(),
@@ -159,6 +161,9 @@ export default async function CompanyDashboardPage({
       ? countWorkersWithUnconfirmableWork(capabilityOrgId)
       : Promise.resolve(null),
     companyRow ? loadCompanyHomeField({ roster: rosterRead }) : null,
+    // Entries submitted to THIS caller as a client (decision 0018) - a
+    // different job from employer review, shown as its own labelled item.
+    countCounterpartyToDecide(),
   ] as const);
 
   const pendingCount =
@@ -168,6 +173,12 @@ export default async function CompanyDashboardPage({
 
   const decisionEntries = [
     { key: "review", count: reviewPendingCount, href: `/${locale}/dashboard/inbox` },
+    // Never summed with the employer count above: its own number and label.
+    {
+      key: "clientReview",
+      count: clientToDecide ?? 0,
+      href: `/${locale}/dashboard/inbox/counterparty`,
+    },
     // Recorded work nobody can confirm yet (review switched off). Unknown (a
     // failed read) is not shown as 0 and not shown as a number — it is absent.
     {

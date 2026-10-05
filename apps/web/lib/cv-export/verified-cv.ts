@@ -1,4 +1,5 @@
 import { readOwnConfirmedWorkTotals } from "@/lib/evidence/confirmed-work-read";
+import { cvLiveEntries } from "@/lib/cv-export/cv-entries";
 import "server-only";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
 import { orgDisplayName } from "@/lib/company/org-display";
@@ -348,7 +349,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       getOwnTrustSignals(workerId),
       supabase
         .from("journal_entries")
-        .select("id, created_at, project_id, engagement_context_id, deleted_at, superseded_by")
+        .select("id, created_at, project_id, engagement_context_id, deleted_at, superseded_by, correction_of")
         .eq("worker_id", workerId),
       supabase
         .from("engagement_contexts")
@@ -622,7 +623,22 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
 
   // Confirmed Work Proof — REAL confirmations only (action 'confirm' or an
   // approved review), one row per entry (latest confirmation), role only.
-  const entries = entriesRes.data ?? [];
+  // LIVE, COUNTED-ONCE entries only (lib/journal/counted-once.ts): a deleted or
+  // superseded entry is not work the CV may stand behind, and a confirmed
+  // original replaced by its live correction is the withdrawn figure - it must
+  // neither print as "Confirmed Work Proof" nor count as client-accepted. The
+  // correction carries no decision of its own until a party decides it.
+  const entries = cvLiveEntries(
+    (entriesRes.data ?? []) as unknown as {
+      id: string;
+      created_at: string;
+      project_id: string | null;
+      engagement_context_id: string | null;
+      deleted_at?: string | null;
+      superseded_by?: string | null;
+      correction_of?: string | null;
+    }[],
+  );
   const entryById = new Map(
     entries.map((e) => [
       e.id,

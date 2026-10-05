@@ -108,7 +108,7 @@
       "emptyTitle": "Nic jeszcze Ci nie przekazano",
       "empty": "Gdy pracownik przekaże Ci pracę jako zleceniodawcy, pojawi się tutaj.",
       "emptyNext": "Zarejestruj swoją organizację jako zleceniodawcę na stronie projektu, aby pracownicy projektu mogli przekazywać Ci swoją pracę.",
-      "truncated": "Pokazano {n} najnowszych przekazań.",
+      "truncated": "Pokazano {n} najnowszych z {m} przekazań.",
       "card": {
         "workerUnknown": "Pracownik",
         "yourRole": "Twoja rola: {role}",

@@ -2338,7 +2338,8 @@
         "review": "Journaalvermeldingen om te beoordelen",
         "invitations": "Openstaande uitnodigingen voor werknemers",
         "claims": "Openbare aanvragen die je kunt overnemen",
-        "reviewOff": "Werknemers met vastgelegd werk waarvan bevestiging uitstaat"
+        "reviewOff": "Werknemers met vastgelegd werk waarvan bevestiging uitstaat",
+        "clientReview": "Werk dat wacht op uw beslissing als opdrachtgever"
       }
     },
     "agency": {
@@ -6141,7 +6142,9 @@
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# vermelding wacht op je bevestiging} other {# vermeldingen wachten op je bevestiging}}",
+      "clientTitle": "{n, plural, one {# invoer wacht op uw beslissing als opdrachtgever} other {# invoeren wachten op uw beslissing als opdrachtgever}}",
       "pendingBody": "Eén tik — en iemands werk wordt bevestigd bewijs.",
+      "clientCta": "Beoordeling opdrachtgever openen",
       "cta": "Nu bevestigen",
       "zero": "Er wacht op dit moment niets op bevestiging — het ritme van de ploeg is rustig.",
       "zeroCta": "Wachtrij bekijken"
@@ -11021,6 +11024,7 @@
       "pendingDecisions": "Afwezigheidsverzoeken wachten op besluit",
       "journalToday": "Werkregistraties vandaag",
       "awaitingReview": "Registraties wachten op beoordeling",
+      "clientReviewToDecide": "Wacht op uw beslissing als opdrachtgever",
       "absentToday": "Vandaag geregistreerd afwezig",
       "absentNext": "Geregistreerde afwezigheden in de komende 7 dagen",
       "noneRecordedToday": "Voor vandaag is geen goedgekeurde afwezigheid geregistreerd.",
