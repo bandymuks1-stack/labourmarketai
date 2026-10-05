@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { Wrench } from "lucide-react";
 
-import { PLAYER_IDENTITY_AVATAR_BORDER, PLAYER_IDENTITY_FALLBACK_SURFACE } from "@/lib/identity/player-identity";
 import { personMonogram } from "@/lib/visual/avatar-monogram";
 import { cn } from "@/lib/utils";
 import type { CompanyIdentity, PersonIdentity, ProjectIdentity } from "@/lib/identity/identity-view";
@@ -33,27 +32,25 @@ import type { CompanyIdentity, PersonIdentity, ProjectIdentity } from "@/lib/ide
  * everywhere.
  */
 
-const TONES: readonly (readonly [string, string])[] = [
-  ["#2d2a26", "#3b3731"], // warm graphite
-  ["#24282b", "#323b41"], // slate
-  ["#282b25", "#373e33"], // olive grey
-  ["#2e2724", "#42352f"], // umber
-  ["#2a2630", "#3a3442"], // plum grey
-  ["#222b2b", "#2f3e3e"], // teal grey
-];
-
 const hash = (s: string) => {
   let h = 2166136261;
   for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
   return h >>> 0;
 };
-const tone = (id: string) => TONES[hash(id) % TONES.length]!;
-const plate = (id: string) => {
-  const [a, b] = tone(id);
-  return `linear-gradient(160deg, ${a}, ${b})`;
+/** Six tonal plates, theme tokens (`--c-identity-Na/Nb`), chosen from the id. */
+const TONE_COUNT = 6;
+const tone = (id: string) => (hash(id) % TONE_COUNT) + 1;
+export const plate = (id: string) => {
+  const n = tone(id);
+  return `linear-gradient(160deg, rgb(var(--c-identity-${n}a)), rgb(var(--c-identity-${n}b)))`;
 };
 
-const HAIR = "inset 0 0 0 1px rgba(245,241,232,0.12)";
+/** The ink figures, hairlines and monograms are drawn in, at an alpha. It is
+ *  light on the dark plates and deep on the light plates — the SAME character
+ *  in either theme, never a fixed palette. */
+const FIG = (alpha: number) => `rgb(var(--c-identity-figure) / ${alpha})`;
+
+const HAIR = `inset 0 0 0 1px ${FIG(0.14)}`;
 
 /** ONE source of initials for every person surface (`personMonogram`, pinned
  *  by player-card-identity-consistency.test.ts) — never a second rule here. */
@@ -64,21 +61,21 @@ export const initialsOf = personMonogram;
 type PersonLike = PersonIdentity;
 
 /** The engraved figure: head and shoulders, drawn once, scaled to any size. */
-function Figure({ hatched = false, id }: { readonly hatched?: boolean; readonly id: string }) {
+export function PersonFigure({ hatched = false, id }: { readonly hatched?: boolean; readonly id: string }) {
   return (
     <svg viewBox="0 0 100 100" aria-hidden className="absolute inset-0 h-full w-full">
       {hatched ? (
         <defs>
           <pattern id={`h-${id}`} width="3.2" height="3.2" patternUnits="userSpaceOnUse" patternTransform="rotate(135)">
-            <line x1="0" y1="0" x2="0" y2="3.2" stroke="rgba(245,241,232,0.5)" strokeWidth="0.9" />
+            <line x1="0" y1="0" x2="0" y2="3.2" stroke={FIG(0.5)} strokeWidth="0.9" />
           </pattern>
         </defs>
       ) : null}
-      <circle cx="50" cy="39" r="15.5" fill={hatched ? `url(#h-${id})` : "rgba(245,241,232,0.10)"} stroke="rgba(245,241,232,0.28)" strokeWidth="0.8" />
+      <circle cx="50" cy="39" r="15.5" fill={hatched ? `url(#h-${id})` : FIG(0.10)} stroke={FIG(0.28)} strokeWidth="0.8" />
       <path
         d="M17 104 C17 76 32 64 50 64 C68 64 83 76 83 104 Z"
-        fill={hatched ? `url(#h-${id})` : "rgba(245,241,232,0.10)"}
-        stroke="rgba(245,241,232,0.28)"
+        fill={hatched ? `url(#h-${id})` : FIG(0.10)}
+        stroke={FIG(0.28)}
         strokeWidth="0.8"
       />
     </svg>
@@ -90,7 +87,6 @@ export function PersonAvatar({
   size = 40,
   bare = false,
   anonymousLabel = "Anonymous",
-  surface = "plate",
   className,
 }: {
   readonly person: PersonLike;
@@ -99,15 +95,6 @@ export function PersonAvatar({
   readonly bare?: boolean;
   /** the accessible name of a veiled person, in the viewer's language */
   readonly anonymousLabel?: string;
-  /**
-   * What a person WITHOUT a photo is drawn on. "plate" is the frozen
-   * family's tonal plate with an engraved figure (a fixed dark palette);
-   * "canonical" is the product's theme-swappable fallback surface
-   * (`PLAYER_IDENTITY_FALLBACK_SURFACE` + border, initials at every size),
-   * the one the persistent-portrait contract pins. Real routes that must
-   * swap theme choose "canonical"; the choice is explicit, never implicit.
-   */
-  readonly surface?: "plate" | "canonical";
   readonly className?: string;
 }) {
   const radius = bare ? 0 : "28%";
@@ -137,34 +124,15 @@ export function PersonAvatar({
     return (
       <span
         className={cn("relative inline-block shrink-0 overflow-hidden", className)}
-        style={{ ...base, background: "linear-gradient(160deg,#1c1d1f,#27292c)" }}
+        style={{ ...base, background: "linear-gradient(160deg, rgb(var(--c-ink-800)), rgb(var(--c-ink-700)))" }}
         role="img"
         aria-label={anonymousLabel}
         data-identity="person-anonymous"
       >
-        <Figure hatched id={person.id} />
+        <PersonFigure hatched id={person.id} />
         {size >= 40 ? (
-          <span aria-hidden className="absolute bottom-[9%] left-1/2 h-[3px] w-[26%] -translate-x-1/2 rounded-full bg-[rgba(245,241,232,0.35)]" />
+          <span aria-hidden className="absolute bottom-[9%] left-1/2 h-[3px] w-[26%] -translate-x-1/2 rounded-full bg-[rgb(var(--c-identity-figure)/0.35)]" />
         ) : null}
-      </span>
-    );
-  }
-  if (surface === "canonical") {
-    return (
-      <span
-        className={cn(
-          "relative inline-flex shrink-0 items-center justify-center overflow-hidden font-display font-bold tracking-tightest",
-          PLAYER_IDENTITY_FALLBACK_SURFACE,
-          PLAYER_IDENTITY_AVATAR_BORDER,
-          className,
-        )}
-        style={{ ...base, fontSize: Math.max(10, size * 0.36) }}
-        role="img"
-        aria-label={person.name}
-        data-identity="person-fallback"
-        data-surface="canonical"
-      >
-        <span aria-hidden>{initialsOf(person.name)}</span>
       </span>
     );
   }
@@ -176,11 +144,11 @@ export function PersonAvatar({
       aria-label={person.name}
       data-identity="person-fallback"
     >
-      <Figure id={person.id} />
+      <PersonFigure id={person.id} />
       {size >= 40 ? (
         <span
           aria-hidden
-          className="absolute inset-x-0 flex items-end justify-center font-display font-semibold leading-none tracking-[-0.02em] text-[rgba(245,241,232,0.88)]"
+          className="absolute inset-x-0 flex items-end justify-center font-display font-semibold leading-none tracking-[-0.02em] text-[rgb(var(--c-identity-figure)/0.88)]"
           style={{ top: "56%", bottom: "6%", fontSize: Math.max(11, size * 0.27) }}
         >
           {initialsOf(person.name)}
@@ -217,13 +185,13 @@ export function CompanyMark({ company, size = 40, className }: { readonly compan
     <span className={cn("relative inline-flex shrink-0 items-center justify-center overflow-hidden", className)} style={{ ...style, background: plate(company.id) }} role="img" aria-label={company.name} data-identity="company-fallback">
       <svg viewBox="0 0 100 100" aria-hidden className="absolute inset-0 h-full w-full opacity-60">
         {[25, 50, 75].map((v) => (
-          <g key={v} stroke="rgba(245,241,232,0.13)" strokeWidth="0.7">
+          <g key={v} stroke={FIG(0.13)} strokeWidth="0.7">
             <line x1={v} y1="0" x2={v} y2="100" />
             <line x1="0" y1={v} x2="100" y2={v} />
           </g>
         ))}
       </svg>
-      <span className="relative font-display font-bold leading-none tracking-[-0.03em] text-[rgba(245,241,232,0.92)]" style={{ fontSize: Math.max(10, size * 0.36) }}>
+      <span className="relative font-display font-bold leading-none tracking-[-0.03em] text-[rgb(var(--c-identity-figure)/0.92)]" style={{ fontSize: Math.max(10, size * 0.36) }}>
         {size >= 28 ? mono : mono[0]}
       </span>
     </span>
@@ -282,7 +250,7 @@ export function TeamMark({ members, size = 48, className }: { readonly members: 
             {cell(members[3]!, q)}
           </div>
         ) : (
-          <div className="flex items-center justify-center bg-[#1b1a18] font-display font-semibold tracking-[-0.02em] text-[rgba(245,241,232,0.9)]" style={{ width: q, height: q, fontSize: Math.max(9, q * 0.42) }}>
+          <div className="flex items-center justify-center bg-ink-700 font-display font-semibold tracking-[-0.02em] text-[rgb(var(--c-identity-figure)/0.9)]" style={{ width: q, height: q, fontSize: Math.max(9, q * 0.42) }}>
             +{over}
           </div>
         )}
@@ -291,7 +259,7 @@ export function TeamMark({ members, size = 48, className }: { readonly members: 
   }
   void half;
   return (
-    <span className={cn("relative inline-block shrink-0 overflow-hidden", className)} style={{ width: size, height: size, borderRadius: "28%", boxShadow: HAIR, background: "#161513" }} role="img" aria-label={`Team of ${n}`} data-identity="team">
+    <span className={cn("relative inline-block shrink-0 overflow-hidden", className)} style={{ width: size, height: size, borderRadius: "28%", boxShadow: HAIR, background: "rgb(var(--c-ink-800))" }} role="img" aria-label={`Team of ${n}`} data-identity="team">
       {inner}
     </span>
   );
@@ -309,7 +277,7 @@ export function TeamStack({ members, size = 28, max = 4, className }: { readonly
         </span>
       ))}
       {over > 0 ? (
-        <span className="relative flex items-center justify-center rounded-[28%] bg-[#1d1c1a] font-display font-semibold text-[rgba(245,241,232,0.88)] ring-2 ring-ink-900" style={{ marginLeft: -overlap, width: size, height: size, fontSize: Math.max(9, size * 0.36), boxShadow: HAIR }}>
+        <span className="relative flex items-center justify-center rounded-[28%] bg-ink-700 font-display font-semibold text-[rgb(var(--c-identity-figure)/0.88)] ring-2 ring-ink-900" style={{ marginLeft: -overlap, width: size, height: size, fontSize: Math.max(9, size * 0.36), boxShadow: HAIR }}>
           +{over}
         </span>
       ) : null}
@@ -336,13 +304,13 @@ export function ProjectMark({ project, size = 48, wide = true, className }: { re
   return (
     <span className={cn("relative inline-block shrink-0 overflow-hidden", className)} style={{ ...style, background: plate(project.id) }} role="img" aria-label={project.name} data-identity="project-plan">
       <svg viewBox="0 0 145 100" preserveAspectRatio="xMidYMid slice" aria-hidden className="absolute inset-0 h-full w-full">
-        <g fill="none" stroke="rgba(245,241,232,0.16)" strokeWidth="0.8">
+        <g fill="none" stroke={FIG(0.16)} strokeWidth="0.8">
           <rect x="14" y="14" width="117" height="72" rx="3" />
           <rect x="30" y="28" width="62" height="44" rx="2" />
           <path d={`M${lines[0]!.x} 14 V86 M14 ${lines[1]!.y} H131`} />
-          <path d={`M${lines[2]!.x} ${lines[2]!.y} h38 v26 h-38 z`} stroke="rgba(245,241,232,0.3)" />
+          <path d={`M${lines[2]!.x} ${lines[2]!.y} h38 v26 h-38 z`} stroke={FIG(0.3)} />
         </g>
-        <circle cx={lines[3]!.x + 40} cy={lines[3]!.y} r="3.2" fill="rgba(245,241,232,0.7)" />
+        <circle cx={lines[3]!.x + 40} cy={lines[3]!.y} r="3.2" fill={FIG(0.7)} />
       </svg>
     </span>
   );
@@ -353,7 +321,7 @@ export function ProjectMark({ project, size = 48, wide = true, className }: { re
 export function ServiceMark({ id, size = 40, icon, label = "Service", className }: { readonly id: string; readonly size?: number; readonly icon?: ReactNode; /** accessible name in the viewer's language; "" = decorative (the row names it) */ readonly label?: string; readonly className?: string }) {
   return (
     <span
-      className={cn("relative inline-flex shrink-0 items-center justify-center text-[rgba(245,241,232,0.85)]", className)}
+      className={cn("relative inline-flex shrink-0 items-center justify-center text-[rgb(var(--c-identity-figure)/0.85)]", className)}
       style={{ width: size, height: size, background: plate(id), borderRadius: "28%", clipPath: "polygon(0 0, 74% 0, 100% 26%, 100% 100%, 0 100%)", boxShadow: HAIR }}
       {...(label ? { role: "img", "aria-label": label } : { "aria-hidden": true })}
       data-identity="service"

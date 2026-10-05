@@ -7,6 +7,7 @@ import { WorldSequence } from "@/components/app/spatial/world-sequence";
 import { AvatarGallery } from "@/components/app/system/avatar-gallery";
 import { StressTest } from "@/components/app/system/stress-test";
 import { HomeProof, type HomeProofState } from "@/components/app/system/home-proof";
+import { IdentitySizesProof } from "@/components/app/system/identity-sizes-proof";
 import { ProductProof, type ProofScreen } from "@/components/app/system/product-proof";
 import type { ActiveLocale } from "@/lib/i18n/config";
 
@@ -36,6 +37,14 @@ export default async function DesignProofPage({
   const { ptab, dash, v, p, autoplay, s, team, cv, profile, open, state } = await searchParams;
   const view = (VIEWS as readonly string[]).includes(v ?? "") ? (v as ProofView | "world" | "avatars" | "product" | "stress") : "product";
   const fixedP = p !== undefined && Number.isFinite(Number(p)) ? Math.min(1, Math.max(0, Number(p))) : undefined;
+
+  if (v === "identity-sizes") {
+    return (
+      <main className="min-h-screen bg-ink-900 text-text-primary" data-testid="design-proof">
+        <IdentitySizesProof />
+      </main>
+    );
+  }
 
   if (v === "home") {
     const homeState = (["rich", "light", "unknown", "partial"] as const).find((x) => x === state) ?? "rich";
