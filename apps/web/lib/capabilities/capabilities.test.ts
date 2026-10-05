@@ -185,6 +185,8 @@ describe("the registry itself", () => {
       "assignment.create_confirm",
       "assignment.end_draft",
       "assignment.end_confirm",
+      "assignment.keep_draft",
+      "assignment.keep_confirm",
       "journal.review_queue.get",
       // Marketplace (2026-09-30) — candidate search + shortlist over the SAME
       // scouting cores as the web page; the activation queue names facts.
@@ -269,6 +271,8 @@ describe("the registry itself", () => {
       "assignment.create_confirm",
       "assignment.end_draft",
       "assignment.end_confirm",
+      "assignment.keep_draft",
+      "assignment.keep_confirm",
       "journal.review_queue.get",
       // Marketplace (2026-09-30) — candidate search + shortlist over the SAME
       // scouting cores as the web page; the activation queue names facts.

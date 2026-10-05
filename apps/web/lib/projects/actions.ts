@@ -9,10 +9,9 @@ import { callerCompanyId } from "./projects";
 import { insertProjectForCompany } from "@/lib/projects/create-project-core";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
-import { checkWorkerReservation } from "@/lib/planning/worker-reservation";
 import { freeColleagues } from "@/lib/projects/free-colleagues";
 import type { ReservationVerdict } from "@/lib/workforce/commitment-reservation";
-import { parseOverrideReasonCode, toReceiptCollisions } from "@/lib/projects/override-receipt-model";
+import { keepOverrideCore, reservationVerdictFor, type KeepOverrideResult } from "@/lib/projects/override-keep-core";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
 import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
@@ -185,20 +184,9 @@ async function reservationAfterAssign(
   alternatives: { profileId: string; name: string }[];
 } | null> {
   try {
-    const [{ data: worker }, { data: project }] = await Promise.all([
-      asAny(supabase).from("workers").select("id").eq("profile_id", workerProfileId).maybeSingle(),
-      asAny(supabase).from("projects").select("start_date, end_date").eq("id", projectId).maybeSingle(),
-    ]);
-    if (!worker?.id) return null;
-    const window = {
-      startDate: (project?.start_date as string | null) ?? null,
-      endDate: (project?.end_date as string | null) ?? null,
-    };
-    const verdict = await checkWorkerReservation({
-      workerId: worker.id as string,
-      window,
-      exclude: [projectId],
-    });
+    const computed = await reservationVerdictFor(supabase, projectId, workerProfileId);
+    if (!computed) return null;
+    const { verdict, window } = computed;
     if (verdict.state !== "collides") return { verdict, alternatives: [] };
     return {
       verdict,
@@ -236,24 +224,16 @@ export async function recordAssignmentDecisionAction(
   }
 }
 
-export type KeepAssignmentResult =
-  | {
-      ok: true;
-      /** recorded = an immutable receipt exists; not_needed = the clash no
-       *  longer exists at decision time, so there is no override to record. */
-      receipt: "recorded" | "not_needed";
-    }
-  | { ok: false; code: "auth" | "invalid" | "not_authorized" | "needs_migration" | "error" };
+export type KeepAssignmentResult = KeepOverrideResult;
 
 /**
  * KEEP an assignment despite a known calendar clash = an explicit override.
  *
- * FAIL-LOUD: unlike the best-effort audit append, a failed receipt is returned
- * to the caller, which must NOT present the decision as made. The collisions
- * are recomputed HERE, server-side, at the moment of the decision (never taken
- * from the client), reduced to the whitelisted receipt shape (an absence keeps
- * kind + dates only), and handed to record_commitment_override_v1, which
- * re-validates authority and shape. The reason is a closed code, or none.
+ * The business logic lives in ONE core (lib/projects/override-keep-core.ts),
+ * shared with the chat door (`company.keep-assignment`) and the MCP tools
+ * (`assignment.keep_draft` / `assignment.keep_confirm`): collisions recomputed
+ * SERVER-SIDE at the moment of the decision, fail-loud, immutable receipt,
+ * closed reason code. This action only adds the session and the revalidation.
  */
 export async function keepAssignmentAction(
   projectId: string,
@@ -265,34 +245,9 @@ export async function keepAssignmentAction(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, code: "auth" };
-  if (!projectId || !workerProfileId) return { ok: false, code: "invalid" };
-  const reason = reasonCode ? parseOverrideReasonCode(reasonCode) : null;
-  if (reasonCode && !reason) return { ok: false, code: "invalid" };
-
-  const reservation = await reservationAfterAssign(supabase, projectId, workerProfileId);
-  // The check could not run: the receipt would be written blind. Say so.
-  if (!reservation) return { ok: false, code: "error" };
-  const collisions = toReceiptCollisions(reservation.verdict);
-  if (reservation.verdict.state !== "collides" || collisions.length === 0) {
-    await recordAssignmentDecisionAction(projectId, workerProfileId, "kept");
-    return { ok: true, receipt: "not_needed" };
-  }
-
-  const { error } = await asAny(supabase).rpc("record_commitment_override_v1", {
-    p_project_id: projectId,
-    p_worker_profile_id: workerProfileId,
-    p_collisions: collisions,
-    p_reason_code: reason,
-  });
-  if (error) {
-    if (migMissing(error.code) || error.code === "PGRST202") return { ok: false, code: "needs_migration" };
-    if (error.code === "42501") return { ok: false, code: "not_authorized" };
-    console.error("[projects] override receipt failed:", error.message);
-    return { ok: false, code: "error" };
-  }
-  await recordAssignmentDecisionAction(projectId, workerProfileId, "kept");
-  revalidatePath("/", "layout");
-  return { ok: true, receipt: "recorded" };
+  const r = await keepOverrideCore(supabase, { projectId, workerProfileId, reasonCode });
+  if (r.ok && r.receipt === "recorded") revalidatePath("/", "layout");
+  return r;
 }
 
 export async function endAssignmentAction(

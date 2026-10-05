@@ -573,6 +573,27 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
   },
   {
     /**
+     * J-TIME-FREEDOM — the manager KEEPS an assignment knowing a calendar
+     * clash: the chat door of the decision the project page offers right after
+     * `company.assign-worker` / `company.move-worker` report a clash. ONE keep
+     * core (lib/projects/override-keep-core.ts) behind the page action, this
+     * action and the MCP `assignment.keep_*` tools: server-recomputed
+     * collisions, closed reason code, immutable receipt, fail-loud.
+     */
+    id: "company.keep-assignment",
+    subject: "company",
+    allowedRoles: ["company"],
+    labelKey: "conversation.actions.company.keepAssignment.label",
+    descriptionKey: "conversation.actions.company.keepAssignment.description",
+    confirmation: "important_write", // records an immutable receipt; assigns nothing
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/projects",
+    handler: { kind: "server_action", ref: "keepAssignmentAction" },
+  },
+  {
+    /**
      * §11 (owner contract 2026-09-04) — the WHAT-IF move: a person leaves
      * project X for project Y. The chat shows the consequences on both sides
      * from canonical reads first; this action is the confirmed commit — two

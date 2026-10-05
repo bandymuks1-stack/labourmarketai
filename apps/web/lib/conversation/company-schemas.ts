@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { OPPORTUNITY_TYPES } from "@/lib/demand/structured-demand-v2";
+import { OVERRIDE_REASON_CODES } from "@/lib/projects/override-receipt-model";
 
 /**
  * Zod input schemas for the executable EMPLOYER-side conversation actions
@@ -139,6 +140,15 @@ export const companyProposeBookingSchema = z.object({
 export const companyAssignWorkerSchema = z.object({
   projectId: uuid,
   workerProfileId: uuid,
+});
+
+/** J-TIME-FREEDOM: the manager KEEPS an assignment knowing a calendar clash.
+ *  The closed reason code is the ONLY context a model or client can supply; the
+ *  collisions are NEVER an input — they are recomputed server-side. */
+export const companyKeepAssignmentSchema = z.object({
+  projectId: uuid,
+  workerProfileId: uuid,
+  reasonCode: z.enum(OVERRIDE_REASON_CODES).optional(),
 });
 
 /** §11 what-if MOVE: the person leaves project X for project Y. Both ids are
@@ -341,6 +351,7 @@ export const COMPANY_ACTION_SCHEMAS = {
   "company.propose-booking": companyProposeBookingSchema,
   "company.assign-worker": companyAssignWorkerSchema,
   "company.move-worker": companyMoveWorkerSchema,
+  "company.keep-assignment": companyKeepAssignmentSchema,
   "company.create-project": companyCreateProjectSchema,
   "company.respond-offer": companyRespondOfferSchema,
   "company.accept-connection": companyAcceptConnectionSchema,

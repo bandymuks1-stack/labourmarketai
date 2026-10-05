@@ -3634,6 +3634,10 @@
           "label": "Flyt en person til et andet projekt",
           "description": "Tildeler det nye projekt og afslutter den tidligere tildeling — efter konsekvensvisningen."
         },
+        "keepAssignment": {
+          "label": "Behold en tildeling trods en kalenderkonflikt",
+          "description": "Registrerer din beslutning om at beholde tildelingen med viden om konflikten, med en lukket årsagskode. Intet gemmes uden kvittering."
+        },
         "offerCapacity": {
           "label": "Registrér hvad I tilbyder"
         }
@@ -3957,6 +3961,9 @@
       "assignAlreadyCommitted": "Bemærk: personen er allerede booket på nogle af disse dage ({count}). Tildelingen står ved magt — du bestemmer.",
       "assignCommitmentUnknown": "Vi kunne ikke bekræfte, at disse dage er ledige. Det er ikke det samme som ledige.",
       "assignFailed": "Tildelingen kunne ikke gennemføres.",
+      "keepPrompt": "Personen er allerede bundet på disse datoer. Beholder du tildelingen bevidst? Vælg en årsag - beslutningen registreres.",
+      "keepRecorded": "Registreret: du beholdt tildelingen bevidst.",
+      "keepFailed": "Beslutningen kunne ikke registreres, så intet blev gemt. Prøv igen.",
       "chipEngagements": "Hvem jeg arbejder med",
       "userEngagements": "Hvem arbejder jeg med?",
       "engagementsOpened": "Her er de registrerede arbejdsrelationer. Du kan afslutte en af dem i panelet.",

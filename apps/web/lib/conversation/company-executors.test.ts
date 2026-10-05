@@ -27,7 +27,7 @@ vi.mock("@/lib/communication/request-worker-conversation", () => ({
   requestWorkerConversationAction: vi.fn(),
 }));
 vi.mock("@/lib/booking/booking-actions", () => ({ proposeBookingAction: vi.fn() }));
-vi.mock("@/lib/projects/actions", () => ({ assignWorkerToProjectAction: vi.fn() }));
+vi.mock("@/lib/projects/actions", () => ({ assignWorkerToProjectAction: vi.fn(), keepAssignmentAction: vi.fn() }));
 vi.mock("@/lib/agency/bridge-actions", () => ({
   inviteClientAction: vi.fn(),
   submitOfferAction: vi.fn(),
@@ -54,7 +54,7 @@ import {
 import { setShortlistAction } from "@/lib/scouting/scouting-actions";
 import { requestWorkerConversationAction } from "@/lib/communication/request-worker-conversation";
 import { proposeBookingAction } from "@/lib/booking/booking-actions";
-import { assignWorkerToProjectAction } from "@/lib/projects/actions";
+import { assignWorkerToProjectAction, keepAssignmentAction } from "@/lib/projects/actions";
 import { inviteClientAction, submitOfferAction } from "@/lib/agency/bridge-actions";
 import { renameActiveOrganization } from "@/lib/company/organization-rename";
 
@@ -365,6 +365,35 @@ describe("scouting / communication / booking / project executors", () => {
         ctx,
       ),
     ).toEqual({ ok: false, code: "not_authorized" });
+  });
+});
+
+describe("keep-assignment: the chat door of the knowing override", () => {
+  it("passes ONLY ids and a closed reason to the page's action; collisions are not an input", async () => {
+    asMock(keepAssignmentAction).mockResolvedValue({ ok: true, receipt: "recorded" });
+    const r = await COMPANY_EXECUTORS["company.keep-assignment"](
+      COMPANY_ACTION_SCHEMAS["company.keep-assignment"].parse({ projectId: UUID, workerProfileId: UUID2, reasonCode: "urgent_need" }),
+      ctx,
+    );
+    expect(asMock(keepAssignmentAction).mock.calls[0]).toEqual([UUID, UUID2, "urgent_need"]);
+    expect(r).toEqual({ ok: true, data: { receipt: "recorded" } });
+    // a model-supplied collision list / free-text reason is stripped or refused by the schema
+    expect(COMPANY_ACTION_SCHEMAS["company.keep-assignment"].safeParse({ projectId: UUID, workerProfileId: UUID2, reasonCode: "he was ill" }).success).toBe(false);
+    const stripped = COMPANY_ACTION_SCHEMAS["company.keep-assignment"].parse({ projectId: UUID, workerProfileId: UUID2, collisions: [{ kind: "trip" }] });
+    expect(stripped).toEqual({ projectId: UUID, workerProfileId: UUID2 });
+  });
+
+  it("is fail-loud: a refused or failed receipt is NEVER reported as kept", async () => {
+    for (const code of ["not_authorized", "needs_migration", "error", "invalid", "auth"] as const) {
+      asMock(keepAssignmentAction).mockResolvedValue({ ok: false, code });
+      expect(await COMPANY_EXECUTORS["company.keep-assignment"]({ projectId: UUID, workerProfileId: UUID2 }, ctx)).toEqual({ ok: false, code });
+    }
+  });
+
+  it("the action needs a fresh confirmation (important write) and a company role", () => {
+    const a = getConversationAction("company.keep-assignment");
+    expect(a?.confirmation).toBe("important_write");
+    expect(a?.allowedRoles).toEqual(["company"]);
   });
 });
 

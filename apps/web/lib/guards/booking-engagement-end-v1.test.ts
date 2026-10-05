@@ -1539,6 +1539,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261003150100_commitment_override_receipts_v1.sql",
       // 2026-10-04: receipt team basis (extends the writer for members of an actively assigned team) - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261003150900_commitment_override_receipt_brigade_basis_v1.sql",
+      // 2026-10-05: receipt collisions verified against the real source rows (new INTERNAL SECURITY DEFINER validator + writer replacement) - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      "20261003150950_commitment_override_collision_validation_v1.sql",
 ]);
   });
 

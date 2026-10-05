@@ -254,7 +254,8 @@ export default async function DashboardHomePage({
     getTranslations("relationshipTypes"),
   ]);
   const pins = pinsRead.kind === "ok" ? pinsRead.pins : null;
-  const labels = resolveChatLabels(tChat);
+  const tReservationLabels = await getTranslations("projects.assign.reservation");
+  const labels = resolveChatLabels(tChat, tReservationLabels);
   const workLogLabels = resolveWorkLogLabels(tWorkLog);
 
   // WHY THE PERSON IS HERE, when they did not choose to be.

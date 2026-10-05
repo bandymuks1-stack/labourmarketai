@@ -13189,6 +13189,10 @@
           "label": "Eine Person in ein anderes Projekt versetzen",
           "description": "Weist dem neuen Projekt zu und beendet die bisherige Zuweisung — nach der Folgenabschätzung."
         },
+        "keepAssignment": {
+          "label": "Zuweisung trotz Kalenderkonflikt beibehalten",
+          "description": "Hält Ihre Entscheidung fest, die Zuweisung in Kenntnis des Konflikts beizubehalten, mit einem geschlossenen Grundcode. Ohne Beleg wird nichts gespeichert."
+        },
         "offerCapacity": {
           "label": "Ihr Angebot festhalten"
         }
@@ -13550,6 +13554,9 @@
       "assignAlreadyCommitted": "Hinweis: An einigen dieser Tage besteht bereits eine Verpflichtung ({count}). Die Zuweisung bleibt bestehen — Sie entscheiden.",
       "assignCommitmentUnknown": "Wir konnten nicht bestätigen, dass diese Tage frei sind. Das ist nicht dasselbe wie frei.",
       "assignFailed": "Die Zuweisung konnte nicht vorgenommen werden.",
+      "keepPrompt": "Die Person ist an diesen Tagen bereits gebunden. Behalten Sie sie wissentlich bei? Wählen Sie einen Grund - die Entscheidung wird festgehalten.",
+      "keepRecorded": "Festgehalten: Sie haben die Zuweisung wissentlich beibehalten.",
+      "keepFailed": "Die Entscheidung konnte nicht festgehalten werden, daher wurde nichts gespeichert. Bitte erneut versuchen.",
       "chipEngagements": "Mit wem ich arbeite",
       "userEngagements": "Mit wem arbeite ich?",
       "engagementsOpened": "Das sind die erfassten Arbeitsbeziehungen. Im Panel kannst du eine davon beenden.",
