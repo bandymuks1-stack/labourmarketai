@@ -173,6 +173,13 @@ describe("the authority model (the principle, pinned)", () => {
     expect(read).toBeGreaterThan(lock);
   });
 
+  it("the EMPLOYER path is serialised too: repeating the reviewer's own latest decision is a no-op (no duplicate 'confirm' row)", () => {
+    const fnBody = body.split("CREATE OR REPLACE FUNCTION public.review_journal_entry")[1] ?? "";
+    expect(fnBody).toContain("pg_advisory_xact_lock(hashtextextended('employer-review:' || p_entry_id::text, 0))");
+    expect(fnBody).toMatch(/c\.confirmer_id = uid/);
+    expect(fnBody).toMatch(/if v_last is not null and v_last = p_decision then return p_decision; end if;/);
+  });
+
   it("reviewability is no longer the universal relationship_types rule", () => {
     expect(body).not.toContain("journal_reviewable");
     expect(body).not.toMatch(/relationship_types/);

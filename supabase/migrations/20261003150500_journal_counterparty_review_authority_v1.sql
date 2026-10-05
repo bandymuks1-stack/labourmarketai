@@ -660,6 +660,17 @@ begin
                                 when 'rejected' then 'client_dispute'
                                 else 'client_request_correction' end;
   else
+    -- The EMPLOYER path has the same read-then-insert exposure (a double click on
+    -- 'Confirm entry' wrote two 'confirm' rows - integrated local QA 2026-10-05):
+    -- serialise per entry, and repeating the reviewer's own latest decision is a
+    -- no-op. Approve -> reject -> approve by the same reviewer stays possible.
+    perform pg_advisory_xact_lock(hashtextextended('employer-review:' || p_entry_id::text, 0));
+    select c.confirmation_scope ->> 'decision' into v_last
+      from public.journal_entry_confirmations c
+     where c.entry_id = p_entry_id and c.confirmer_id = uid
+       and coalesce(c.confirmation_scope #>> '{authority,basis}', 'employer') <> 'counterparty'
+     order by c.created_at desc, c.id desc limit 1;
+    if v_last is not null and v_last = p_decision then return p_decision; end if;
     v_action := case p_decision when 'approved' then 'confirm'
                                 when 'rejected' then 'reject'
                                 else 'request_changes' end;
