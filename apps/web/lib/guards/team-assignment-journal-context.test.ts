@@ -68,6 +68,7 @@ describe("migration — the team resolver is wired into every precondition", () 
     for (const sig of [
       "team_work_context_v1\\(uuid, uuid, uuid, uuid, timestamptz\\)",
       "my_team_work_contexts_v1\\(\\)",
+      "list_team_members_now_v1\\(uuid\\)",
     ]) {
       expect(sql).toMatch(new RegExp(`revoke all on function public\\.${sig} from public, anon`));
       expect(sql).toMatch(new RegExp(`grant execute on function public\\.${sig} to authenticated`));

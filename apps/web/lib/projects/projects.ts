@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { mergeAssignedPeople, readTeamAssignedPeople } from "@/lib/projects/assigned-people";
 import {
   isEmployerContextFailure,
   resolveEmployerCompanyContext,
@@ -56,6 +57,9 @@ export interface ProjectAssignment {
   /** A signed photo URL when the viewer has the real work relationship;
    *  null/absent = initials. Filled by the page, never by this reader. */
   avatarUrl?: string | null;
+  /** Only on `listProjectAssignedPeople`: true when the person is on the project
+   *  ONLY through an actively assigned team (never from the person roster). */
+  viaTeam?: boolean;
 }
 
 function migMissing(code?: string): boolean {
@@ -136,6 +140,48 @@ export async function listManagedProjects(): Promise<ManagedProject[]> {
     status: p.status ?? null,
     responsibleProfileId: p.responsible_profile_id ?? null,
   }));
+}
+
+/**
+ * The people ASSIGNED to a project under the ONE meaning in
+ * lib/projects/assigned-people.ts: the active person assignments UNION the
+ * current members of every actively assigned team, distinct per person (a person
+ * assigned both ways appears once, as an individual assignment). Use this for
+ * every headcount / "N assigned" / names-on-the-project surface.
+ * `listProjectAssignments` stays the PERSON ROSTER (the rows an "end assignment"
+ * button acts on) - a team member has no such row.
+ */
+export async function listProjectAssignedPeople(
+  projectId: string,
+): Promise<ProjectAssignment[]> {
+  const persons = await listProjectAssignments(projectId);
+  const supabase = await createClient();
+  const team = await readTeamAssignedPeople(supabase, [projectId]);
+  return mergeAssignedPeople(
+    persons.map((a) => ({
+      ...a,
+      projectId,
+      profileId: a.workerProfileId as string | null,
+      workerId: (a.workerId ?? null) as string | null,
+    })),
+    team,
+  ).map((m): ProjectAssignment =>
+    m.viaTeam
+      ? {
+          workerProfileId: m.profileId ?? "",
+          name: m.name?.trim() || (m.profileId ?? "").slice(0, 8),
+          assignedAt: m.assignedAt ?? "",
+          workerId: m.workerId ?? undefined,
+          viaTeam: true,
+        }
+      : {
+          workerProfileId: m.workerProfileId,
+          name: m.name,
+          assignedAt: m.assignedAt,
+          workerId: m.workerId ?? undefined,
+          viaTeam: false,
+        },
+  );
 }
 
 /** Active worker assignments on a project (RLS: can_manage_project). */

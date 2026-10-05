@@ -127,7 +127,10 @@ describe("app — one RPC, never a fan-out", () => {
   });
 
   it("the advisory calendar check reuses the ONE reservation check, after the write, excluding this project", () => {
-    expect(core).toMatch(/checkWorkerReservation\(\{ workerId: m\.worker_id, window, exclude: \[projectId\] \}\)/);
+    // `caller` is the assistant door's own client (absent for the web UI's cookie session).
+    expect(core).toMatch(/checkWorkerReservation\(\{ workerId: m\.worker_id, window, exclude: \[projectId\](, caller)? \}\)/);
+    // the PRE-write verdict (assistant draft) reads its members from the resolver RPC too
+    expect(core).toMatch(/rpc\("list_team_members_now_v1"/);
   });
 
   it("the actions are thin and shape-check ids", () => {

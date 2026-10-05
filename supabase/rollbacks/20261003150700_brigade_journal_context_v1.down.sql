@@ -312,6 +312,7 @@ end;
 $function$;
 
 drop function if exists public.independent_journal_context_v1(uuid, uuid, uuid);
+drop function if exists public.list_team_members_now_v1(uuid);
 drop function if exists public.my_team_work_contexts_v1();
 drop function if exists public.team_work_context_v1(uuid, uuid, uuid, uuid, timestamptz);
 

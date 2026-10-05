@@ -6233,6 +6233,7 @@
     "countersTitle": "Einsatzübersicht",
     "counters": {
       "totalAssigned": "Zugewiesen",
+      "viaTeam": "Über Team",
       "ready": "Bereit",
       "readyBasis": "Basiert nur auf den hier geprüften Feldern.",
       "needsDeclaredSkills": "Keine angegebenen Fähigkeiten",
@@ -6374,6 +6375,7 @@
         "notReadyNote": "Ein eigener Projekt-Thread wird vorbereitet. Starten Sie die Unterhaltung vorerst in Ihrem allgemeinen Posteingang — der Projektkontext wird oben angezeigt."
       },
       "fieldCount": "{n, plural, one {# Person auf dem Feld} other {# Personen auf dem Feld}}",
+      "fieldViaTeam": "{n} über Team",
       "todayCount": "{n, plural, one {# Journaleintrag heute — der Tag ist in Bewegung} other {# Journaleinträge heute — der Tag ist in Bewegung}}",
       "todayZero": "Heute noch keine Einträge — der Tag wartet noch auf seinen ersten Eintrag.",
       "fieldTitle": "Das Feld — wer heute im Team ist",

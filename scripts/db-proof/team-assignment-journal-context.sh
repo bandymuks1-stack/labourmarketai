@@ -196,6 +196,14 @@ check "helper, Joined Late now: credited" "t" "$(at_ $LATE 2026-10-04T12:00:00Z)
 check "helper, before the assignment began: NOT credited" "f" "$(at_ $U1 2026-08-01T12:00:00Z)"
 check "helper: a peer cannot probe a colleague (no oracle)" "f" "$(as $U2 "select public.team_work_context_v1('$U1','$P1');")"
 
+echo; echo "== PROOF 5b — current members of a team BEFORE any assignment (assistant draft clash verdict)"
+check "team manager lists the CURRENT members (Left Early excluded)" "Joined Late,Member One,Member Two" "$(as $MA "select string_agg(full_name, ',' order by full_name) from public.list_team_members_now_v1('$TA');")"
+check "members carry their worker id (the calendar check is per person)" "aaaa1111-0000-0000-0000-000000000001" "$(as $MA "select worker_id from public.list_team_members_now_v1('$TA') where profile_id='$U1';")"
+check "a plain member (not a manager) gets nothing" "0" "$(as $U1 "select count(*) from public.list_team_members_now_v1('$TA');")"
+check "an outsider and an other-org manager get nothing" "00" "$(as $OUT "select count(*) from public.list_team_members_now_v1('$TA');")$(as $MB "select count(*) from public.list_team_members_now_v1('$TA');")"
+has "anon: denied" 'permission denied' "$(as anon "select * from public.list_team_members_now_v1('$TA');")"
+has "NULL uid: refused" 'Not authenticated' "$(as '' "select * from public.list_team_members_now_v1('$TA');")"
+
 echo; echo "== PROOF 6 — scope: task / work object / project"
 su "update public.team_assignments set assigned_at='2026-08-15' where id='$A1';" >/dev/null
 check "PROJECT-scope team: member does NOT see task K1 (not an assignee of every task)" "0" "$(as $U1 "select count(*) from public.work_tasks where id='$K1';")"

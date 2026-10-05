@@ -6233,6 +6233,7 @@
     "countersTitle": "Operations",
     "counters": {
       "totalAssigned": "Assigned",
+      "viaTeam": "Via team",
       "ready": "Ready",
       "readyBasis": "Based only on the fields checked here.",
       "needsDeclaredSkills": "No declared skills",
@@ -6374,6 +6375,7 @@
         "notReadyNote": "A dedicated project thread is being prepared. For now start the conversation in your general inbox — the project context is shown above."
       },
       "fieldCount": "{n, plural, one {# person on the field} other {# people on the field}}",
+      "fieldViaTeam": "{n} via team",
       "todayCount": "{n, plural, one {# journal entry today — the day is moving} other {# journal entries today — the day is moving}}",
       "todayZero": "No entries yet today — the day is still waiting for its first record.",
       "fieldTitle": "The field — who is on the team today",

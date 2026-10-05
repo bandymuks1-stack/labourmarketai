@@ -6233,6 +6233,7 @@
     "countersTitle": "Operaties",
     "counters": {
       "totalAssigned": "Toegewezen",
+      "viaTeam": "Via ploeg",
       "ready": "Klaar",
       "readyBasis": "Alleen gebaseerd op de velden die hier worden gecontroleerd.",
       "needsDeclaredSkills": "Geen opgegeven vaardigheden",
@@ -6374,6 +6375,7 @@
         "notReadyNote": "Een aparte projectthread wordt voorbereid. Start het gesprek voorlopig in je algemene inbox — de projectcontext staat hierboven."
       },
       "fieldCount": "{n, plural, one {# persoon op het veld} other {# personen op het veld}}",
+      "fieldViaTeam": "{n} via ploeg",
       "todayCount": "{n, plural, one {# journaalregistratie vandaag — de dag is in beweging} other {# journaalregistraties vandaag — de dag is in beweging}}",
       "todayZero": "Nog geen registraties vandaag — de dag wacht nog op zijn eerste registratie.",
       "fieldTitle": "Het veld — wie er vandaag in het team staat",

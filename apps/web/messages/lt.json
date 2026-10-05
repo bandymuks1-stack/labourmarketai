@@ -6233,6 +6233,7 @@
     "countersTitle": "Operacijos",
     "counters": {
       "totalAssigned": "Priskirta",
+      "viaTeam": "Per komandą",
       "ready": "Pasiruošę",
       "readyBasis": "Tik pagal čia patikrintus laukus.",
       "needsDeclaredSkills": "Nėra nurodytų įgūdžių",
@@ -6374,6 +6375,7 @@
         "notReadyNote": "Atskira projekto pokalbių gija dar ruošiama. Kol kas pokalbį pradėkite bendroje komunikacijoje — kontekstas (projektas) nurodytas viršuje."
       },
       "fieldCount": "{n, plural, one {# žmogus aikštėje} few {# žmonės aikštėje} other {# žmonių aikštėje}}",
+      "fieldViaTeam": "{n} per komandą",
       "todayCount": "{n, plural, one {# šiandienos žurnalo įrašas — diena juda} few {# šiandienos žurnalo įrašai — diena juda} other {# šiandienos žurnalo įrašų — diena juda}}",
       "todayZero": "Šiandien įrašų dar nėra — diena dar laukia pirmo įrašo.",
       "fieldTitle": "Aikštė — kas šiandien komandoje",

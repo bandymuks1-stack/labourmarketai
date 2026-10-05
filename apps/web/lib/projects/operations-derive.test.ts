@@ -125,6 +125,7 @@ describe("deriveOpsCounters — exact rolls", () => {
     const c = deriveOpsCounters([], 0);
     expect(c).toEqual({
       totalAssigned: 0,
+      viaTeam: 0,
       ready: 0,
       needsDeclaredSkills: 0,
       needsEvidence: 0,

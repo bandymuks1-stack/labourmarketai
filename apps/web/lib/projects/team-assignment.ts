@@ -37,6 +37,28 @@ function asAny(c: SupabaseClient): any {
 
 const READ_LIMIT = 200;
 
+/** The caller a non-cookie door (the assistant / MCP capabilities) supplies: its
+ *  OWN RLS-scoped client, already bound to the authenticated profile. Absent =
+ *  the cookie session (the web UI). The write is the SAME RPC either way. */
+export interface TeamAssignmentCaller {
+  readonly supabase: SupabaseClient;
+  /** The authenticated profile the client is bound to (never an argument of a tool). */
+  readonly userId: string;
+}
+
+/** The authenticated profile: the supplied caller's, else the cookie session's. */
+async function userIdOf(supabase: SupabaseClient, caller: TeamAssignmentCaller | undefined): Promise<string | null> {
+  if (caller) return caller.userId;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user?.id ?? null;
+}
+
+async function clientOf(caller: TeamAssignmentCaller | undefined): Promise<SupabaseClient> {
+  return caller?.supabase ?? (await createClient());
+}
+
 export type TeamAssignResult =
   | {
       readonly status: "ok";
@@ -54,12 +76,9 @@ export async function assignTeamToWork(input: {
   readonly workObjectId?: string | null;
   readonly taskId?: string | null;
   readonly replaceAssignmentId?: string | null;
-}): Promise<TeamAssignResult> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { status: "not_authed" };
+}, caller?: TeamAssignmentCaller): Promise<TeamAssignResult> {
+  const supabase = await clientOf(caller);
+  if (!(await userIdOf(supabase, caller))) return { status: "not_authed" };
 
   const { data, error } = await asAny(supabase).rpc("assign_team_to_work_v1", {
     p_team_org_id: input.teamId,
@@ -76,7 +95,7 @@ export async function assignTeamToWork(input: {
     status: "ok",
     outcome: parsed.outcome,
     assignmentId: parsed.assignmentId,
-    memberCalendar: await calendarAfterAssign(supabase, parsed.assignmentId, input.projectId),
+    memberCalendar: await calendarAfterAssign(supabase, parsed.assignmentId, input.projectId, caller),
   };
 }
 
@@ -87,12 +106,9 @@ export type EndTeamAssignmentResult =
 export async function endTeamAssignment(input: {
   readonly assignmentId: string;
   readonly reason?: string | null;
-}): Promise<EndTeamAssignmentResult> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { status: "not_authed" };
+}, caller?: TeamAssignmentCaller): Promise<EndTeamAssignmentResult> {
+  const supabase = await clientOf(caller);
+  if (!(await userIdOf(supabase, caller))) return { status: "not_authed" };
   const { data, error } = await asAny(supabase).rpc("end_team_assignment_v1", {
     p_assignment_id: input.assignmentId,
     p_reason: input.reason ?? null,
@@ -112,6 +128,7 @@ async function calendarAfterAssign(
   supabase: SupabaseClient,
   assignmentId: string,
   projectId: string,
+  caller?: TeamAssignmentCaller,
 ): Promise<TeamMemberCalendar[]> {
   try {
     const [{ data: project }, { data: members }] = await Promise.all([
@@ -125,13 +142,50 @@ async function calendarAfterAssign(
     const out: TeamMemberCalendar[] = [];
     for (const m of (members ?? []) as { profile_id: string; worker_id: string | null; full_name: string | null }[]) {
       if (!m.worker_id) continue;
-      const verdict = await checkWorkerReservation({ workerId: m.worker_id, window, exclude: [projectId] });
+      const verdict = await checkWorkerReservation({ workerId: m.worker_id, window, exclude: [projectId], caller });
       out.push({ profileId: m.profile_id, name: m.full_name, verdict });
     }
     return out;
   } catch (error) {
     console.error("[projects] team calendar check failed:", error);
     return [];
+  }
+}
+
+/**
+ * CAL-7 for a team BEFORE the write (the assistant's draft names the clash
+ * verdict; advisory only, SEP-2 - it never blocks). The members come from the
+ * database's resolver (list_team_members_now_v1 -> team_member_at_v1, the same
+ * single source as list_team_assignment_members_v1); each one's worker goes through the SAME
+ * reservation check the post-write advisory uses. A team whose members cannot
+ * be read is reported as not known, and a member whose check could not run is
+ * reported as unknown by the check itself - never as clear. Writes nothing.
+ */
+export async function previewTeamAssignmentCalendar(
+  input: { readonly teamId: string; readonly projectId: string },
+  caller?: TeamAssignmentCaller,
+): Promise<{ readonly known: boolean; readonly members: readonly TeamMemberCalendar[] }> {
+  try {
+    const supabase = await clientOf(caller);
+    const [{ data: project }, membersRes] = await Promise.all([
+      asAny(supabase).from("projects").select("start_date, end_date").eq("id", input.projectId).maybeSingle(),
+      asAny(supabase).rpc("list_team_members_now_v1", { p_team_org_id: input.teamId }),
+    ]);
+    if (membersRes.error || !Array.isArray(membersRes.data)) return { known: false, members: [] };
+    const window = {
+      startDate: (project?.start_date as string | null) ?? null,
+      endDate: (project?.end_date as string | null) ?? null,
+    };
+    const out: TeamMemberCalendar[] = [];
+    for (const m of membersRes.data as { profile_id: string; worker_id: string | null; full_name: string | null }[]) {
+      if (!m.worker_id) continue;
+      const verdict = await checkWorkerReservation({ workerId: m.worker_id, window, exclude: [input.projectId], caller });
+      out.push({ profileId: m.profile_id, name: m.full_name, verdict });
+    }
+    return { known: true, members: out };
+  } catch (error) {
+    console.error("[projects] team calendar preview failed:", error);
+    return { known: false, members: [] };
   }
 }
 

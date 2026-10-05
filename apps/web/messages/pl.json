@@ -6233,6 +6233,7 @@
     "countersTitle": "Operacje",
     "counters": {
       "totalAssigned": "Przypisano",
+      "viaTeam": "Przez zespół",
       "ready": "Gotowi",
       "readyBasis": "Na podstawie wyłącznie pól sprawdzanych tutaj.",
       "needsDeclaredSkills": "Brak zadeklarowanych umiejętności",
@@ -6374,6 +6375,7 @@
         "notReadyNote": "Dedykowany wątek projektu jest przygotowywany. Na razie rozpocznij rozmowę w swojej ogólnej skrzynce — kontekst projektu jest pokazany powyżej."
       },
       "fieldCount": "{n, plural, one {# osoba na placu} few {# osoby na placu} many {# osób na placu} other {# osoby na placu}}",
+      "fieldViaTeam": "{n} przez zespół",
       "todayCount": "{n, plural, one {# wpis w dzienniku dzisiaj — dzień się toczy} few {# wpisy w dzienniku dzisiaj — dzień się toczy} many {# wpisów w dzienniku dzisiaj — dzień się toczy} other {# wpisu w dzienniku dzisiaj — dzień się toczy}}",
       "todayZero": "Dzisiaj nie ma jeszcze żadnych wpisów — dzień wciąż czeka na swój pierwszy zapis.",
       "fieldTitle": "Plac budowy — kto jest dziś w zespole",
