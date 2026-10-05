@@ -70,7 +70,7 @@ export async function loadCompanyWorkHistory(locale: string): Promise<CompanyWor
       .limit(500),
     db(supabase)
       .from("organization_people")
-      .select("id, linked_worker_id, link_state")
+      .select("id, linked_worker_id, link_state, link_method")
       .eq("organization_id", org.organizationId)
       .limit(500),
   ]);
@@ -98,8 +98,11 @@ export async function loadCompanyWorkHistory(locale: string): Promise<CompanyWor
     id: string;
     linked_worker_id: string | null;
     link_state: string | null;
+    link_method: string | null;
   }[]) {
-    if (p.link_state === "linked" && p.linked_worker_id) linkedWorkers[p.id] = p.linked_worker_id;
+    // Identity only by the PERSON's own confirmation (integrity doors v1).
+    if (p.link_state === "linked" && p.link_method === "worker_confirmed" && p.linked_worker_id)
+      linkedWorkers[p.id] = p.linked_worker_id;
   }
 
   // Work stored in another organization's books but attributed HERE (a party

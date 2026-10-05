@@ -3524,8 +3524,10 @@ export async function listMyOrganizationEvidence(
 
   // Only a CONFIRMED link makes the history this person's. An offer they have
   // not answered must not quietly start showing their name on someone's work.
+  // `linked` alone is not consent: a manager-made link ('manager_link') is never
+  // the person's own history (integrity doors v1).
   const confirmed = links
-    .filter((l) => l.linkState === "linked")
+    .filter((l) => l.linkState === "linked" && l.linkMethod === "worker_confirmed")
     .map((l) => l.id);
   const recordsRes = await listEvidenceRecords(caller, {
     organizationPersonIds: confirmed,
