@@ -1,6 +1,13 @@
 import type { NotificationEventRow } from "@/lib/notifications/events";
-import type { OpportunitiesResultMatch } from "@/lib/marketplace/worker-opportunities-contract";
-import { TODAY_DOOR_HREFS, type TodayAttention, type TodayState } from "@/lib/today/today-model";
+import type {
+  TodayGrowth,
+  TodayModel,
+  TodayNext,
+  TodayOpenItem,
+  TodayOpenItems,
+  TodayOpportunity,
+  TodayWork,
+} from "@/lib/today/today-model";
 
 /**
  * THE HOME STATE — the PURE model behind the four regions of the one
@@ -11,41 +18,35 @@ import { TODAY_DOOR_HREFS, type TodayAttention, type TodayState } from "@/lib/to
  *   BECAUSE OF WHAT HAPPENED event → consequence → product state change
  *   OUTSIDE YOUR WALLS       market signals relevant to this context
  *
- * WHAT THIS IS NOT. It is not a second priority engine, a second ledger or a
- * second notification system. Every item is lifted from a model a canonical
- * reader already produced (`loadTodayAttention`, `listWorkerProjects`,
- * `readMyNotificationEvents`, `loadOpportunitiesResultAction`); this module
- * only decides what the home says about them.
+ * WHAT THIS IS NOT. It is not a second priority engine, a second ledger or
+ * a second notification system. The PERSON's regions are a PROJECTION of the
+ * canonical `TodayModel` (`deriveTodayModel`: work-card next action, work
+ * intelligence, attention doors, growth reading, opportunity bands) plus the
+ * two reads the old home never showed — the assigned projects
+ * (`listWorkerProjects`) and the notification feed
+ * (`readMyNotificationEvents`). This module only decides which region each
+ * fact belongs to.
  *
  * Honesty rules (all pinned by `home-state.test.ts`):
- *   - A reader that answered `null` yields `{ kind: "unknown" }`, never an
- *     empty list: UNKNOWN ≠ ZERO (SEP-7). "Could not read" is not "nothing".
+ *   - A reader that answered `null`/unknown yields `{ kind: "unknown" }`,
+ *     never an empty list: UNKNOWN ≠ ZERO (SEP-7). "Could not read" is not
+ *     "nothing". An EMPTY real result stays a known-empty region.
  *   - A causal chain exists ONLY for the closed set of events whose
  *     consequence the event itself states (`CAUSAL_CHAINS`). Any other event
- *     is shown as an event with `chain: null` — a consequence is never
- *     invented to make the region look explanatory.
+ *     is kept as a plain event with NO consequence — a consequence is never
+ *     invented, never inferred from time, never inferred about capability.
  *   - No KPI, no score, no figure that a reader did not return.
- *   - Subjects carry `label: null` rather than a guessed name, and an
- *     anonymous subject never gets one (privacy rules stay with the reader).
- *
- * The model is context-neutral: person, working person, employer, agency and
- * institution all compose the same four regions from whichever readers their
- * context has; a context without a reader for a region passes `null`.
+ *   - Subjects carry `label: null` rather than a guessed name.
  *
  * Pure and deterministic: no IO, no `Date`, no locale. Copy is resolved by
- * the view from the i18n keys carried here.
+ * the view from the keys carried here.
  */
 
 export type HomeRegionId = "waiting" | "running" | "because" | "outside";
 
-export const HOME_REGION_ORDER: readonly HomeRegionId[] = [
-  "waiting",
-  "running",
-  "because",
-  "outside",
-];
+export const HOME_REGION_ORDER: readonly HomeRegionId[] = ["waiting", "running", "because", "outside"];
 
-/** The identity family a region item belongs to (people, companies, teams,
+/** The identity family a change belongs to (people, companies, teams,
  *  projects and market objects share ONE visual family in the view). */
 export type HomeSubjectKind =
   | "person"
@@ -69,35 +70,14 @@ export type HomeSubject = {
   readonly label: string | null;
 };
 
-export type HomeItem = {
-  readonly id: string;
-  readonly region: HomeRegionId;
-  readonly subject: HomeSubject;
-  /** i18n key under `home.items`; the view supplies `count`. */
-  readonly titleKey: string;
-  readonly count: number | null;
-  /** A real route. The direct action is always the faster path than chat. */
-  readonly href: string;
-  /** `true` when the item can be answered without leaving the home (the
-   *  view then offers the direct action next to the conversation). */
-  readonly actionable: boolean;
-};
+/** One thing waiting on the person: the work-card's next action or an open
+ *  item (an offer, an invitation, unread messages, journal items). */
+export type WaitingItem =
+  | { readonly kind: "next"; readonly next: Extract<TodayNext, { kind: "action" }> }
+  | { readonly kind: "open"; readonly item: TodayOpenItem };
 
-export type HomeCauseChain = {
-  /** i18n key under `home.chain.consequence`. */
-  readonly consequenceKey: string;
-  /** i18n key under `home.chain.state`. */
-  readonly stateKey: string;
-};
-
-export type HomeChange = HomeItem & {
-  readonly occurredAt: string;
-  /** `null` = the event is shown as an event only (no supported consequence). */
-  readonly chain: HomeCauseChain | null;
-};
-
-export type HomeRegion<T extends HomeItem = HomeItem> =
-  | { readonly kind: "known"; readonly items: readonly T[]; readonly total: number }
+export type WaitingRegion =
+  | { readonly kind: "known"; readonly items: readonly WaitingItem[] }
   | { readonly kind: "unknown" };
 
 export type HomeProject = {
@@ -106,39 +86,76 @@ export type HomeProject = {
   readonly city: string | null;
 };
 
+export type RunningRegion =
+  | {
+      readonly kind: "known";
+      readonly work: TodayWork;
+      /** `null` = the assignments could not be read (not "no projects"). */
+      readonly projects: readonly HomeProject[] | null;
+      /** A READING of the person's own rows — not an event, never causal. */
+      readonly growth: TodayGrowth;
+    }
+  | { readonly kind: "unknown" };
+
+export type HomeCauseChain = {
+  /** i18n key under `home.chain.consequence`. */
+  readonly consequenceKey: string;
+  /** i18n key under `home.chain.state`. */
+  readonly stateKey: string;
+};
+
+export type HomeChange = {
+  readonly id: string;
+  readonly eventType: string;
+  readonly subject: HomeSubject;
+  readonly occurredAt: string;
+  readonly href: string;
+  readonly read: boolean;
+};
+
+/** A change WITH a supported causal consequence — the "because" ledger. */
+export type HomeCause = HomeChange & { readonly chain: HomeCauseChain };
+
+export type BecauseRegion =
+  | {
+      readonly kind: "known";
+      /** Events whose own fact IS a state change (closed set below). */
+      readonly causes: readonly HomeCause[];
+      /** Everything else in the feed — plain events, never given a
+       *  consequence. The activity centre keeps the complete list. */
+      readonly events: readonly HomeChange[];
+    }
+  | { readonly kind: "unknown" };
+
+export type OutsideRegion =
+  | { readonly kind: "known"; readonly opportunity: TodayOpportunity }
+  | { readonly kind: "unknown" };
+
 export type HomeInputs = {
-  /** `loadTodayAttention` — each counter is independently nullable. */
-  readonly attention: TodayAttention | null;
+  readonly today: TodayModel;
   /** Active assignments / projects; `null` = the reader failed. */
   readonly projects: readonly HomeProject[] | null;
-  /** Today's recorded work; `null`/unknown = the journal was unreadable. */
-  readonly today: TodayState | null;
   /** The notification feed; `null` = unavailable. */
   readonly events: readonly NotificationEventRow[] | null;
-  /** The ranked opportunity rows; `null` = unavailable. */
-  readonly opportunities: readonly OpportunitiesResultMatch[] | null;
 };
 
 export type HomeState = {
-  readonly waiting: HomeRegion;
-  readonly running: HomeRegion;
-  readonly because: HomeRegion<HomeChange>;
-  readonly outside: HomeRegion;
+  readonly waiting: WaitingRegion;
+  readonly running: RunningRegion;
+  readonly because: BecauseRegion;
+  readonly outside: OutsideRegion;
 };
 
-/** Each region shows at most this many items; the rest is one link away. */
+/** Each list region shows at most this many rows; the rest is one link away. */
 export const HOME_REGION_SHOWN = 4;
 
-const UNKNOWN: { readonly kind: "unknown" } = { kind: "unknown" };
-
-function known<T extends HomeItem>(items: readonly T[]): HomeRegion<T> {
-  return { kind: "known", items: items.slice(0, HOME_REGION_SHOWN), total: items.length };
-}
+const UNKNOWN = { kind: "unknown" } as const;
 
 /**
  * The closed set of event types whose consequence the event itself states.
  * Extending this map is a product decision: add an entry only when the
- * notification's own fact IS the state change named by `stateKey`.
+ * notification's own fact IS the state change named by `stateKey`. Temporal
+ * proximity never creates an entry; neither does a guess about capability.
  */
 export const CAUSAL_CHAINS: Readonly<Record<string, HomeCauseChain>> = {
   engagement_created: { consequenceKey: "relationshipStarted", stateKey: "engagementActive" },
@@ -161,139 +178,93 @@ const EVENT_SUBJECT: Readonly<Record<string, HomeSubjectKind>> = {
   worker_document: "document",
   org_document: "document",
   document_acknowledgement: "document",
+  conversation: "conversation",
 };
 
-export function deriveWaiting(attention: TodayAttention | null): HomeRegion {
-  if (!attention) return UNKNOWN;
-  const { offers, invitations, unread } = attention;
-  // Every counter unreadable → the region is unknown, not empty.
-  if (offers === null && invitations === null && unread === null) return UNKNOWN;
-  const items: HomeItem[] = [];
-  if (offers !== null && offers > 0) {
-    items.push({
-      id: "waiting:offers",
-      region: "waiting",
-      subject: { kind: "booking", id: null, label: null },
-      titleKey: "offers",
-      count: offers,
-      href: TODAY_DOOR_HREFS.offers,
-      actionable: true,
-    });
-  }
-  if (invitations !== null && invitations > 0) {
-    items.push({
-      id: "waiting:invitations",
-      region: "waiting",
-      subject: { kind: "invitation", id: null, label: null },
-      titleKey: "invitations",
-      count: invitations,
-      href: TODAY_DOOR_HREFS.invitations,
-      actionable: true,
-    });
-  }
-  if (unread !== null && unread.count > 0) {
-    items.push({
-      id: "waiting:unread",
-      region: "waiting",
-      subject: { kind: "conversation", id: unread.onlyId, label: null },
-      titleKey: "unread",
-      count: unread.count,
-      href: unread.onlyId ? `${TODAY_DOOR_HREFS.unread}/${unread.onlyId}` : TODAY_DOOR_HREFS.unread,
-      actionable: true,
-    });
-  }
-  // A partial read still reports what it did read; a counter that failed is
-  // simply absent — the view marks the region "partly unread" via `partial`.
-  return known(items);
+export function deriveWaiting(next: TodayNext, open: TodayOpenItems): WaitingRegion {
+  // The work-card engine and the doors are independent reads: the region is
+  // unknown only when NEITHER could answer. A failed half is never "nothing".
+  if (next.kind === "unknown" && open.kind === "unknown") return UNKNOWN;
+  const items: WaitingItem[] = [];
+  if (next.kind === "action") items.push({ kind: "next", next });
+  if (open.kind === "known") for (const item of open.items) items.push({ kind: "open", item });
+  return { kind: "known", items };
 }
 
-/** `true` when some, but not all, attention counters could not be read. */
-export function isWaitingPartial(attention: TodayAttention | null): boolean {
-  if (!attention) return false;
-  const answered = [attention.offers, attention.invitations, attention.unread].filter((v) => v !== null).length;
-  return answered > 0 && answered < 3;
+export function deriveRunning(
+  work: TodayWork,
+  projects: readonly HomeProject[] | null,
+  growth: TodayGrowth,
+): RunningRegion {
+  if (work.kind === "unknown" && projects === null) return UNKNOWN;
+  return { kind: "known", work, projects, growth };
 }
 
-export function deriveRunning(projects: readonly HomeProject[] | null, today: TodayState | null): HomeRegion {
-  const todayUnknown = !today || today.kind === "unknown";
-  if (projects === null && todayUnknown) return UNKNOWN;
-  const items: HomeItem[] = [];
-  if (today && today.kind === "recorded") {
-    items.push({
-      id: "running:today",
-      region: "running",
-      subject: { kind: "work", id: null, label: null },
-      titleKey: "workToday",
-      count: today.entries,
-      href: "/dashboard/journal",
-      actionable: false,
-    });
-  }
-  for (const p of projects ?? []) {
-    items.push({
-      id: `running:project:${p.projectId}`,
-      region: "running",
-      subject: { kind: "project", id: p.projectId, label: p.title?.trim() || null },
-      titleKey: "project",
-      count: null,
-      href: `/dashboard/projects/${p.projectId}`,
-      actionable: false,
-    });
-  }
-  return known(items);
-}
-
-export function deriveBecause(events: readonly NotificationEventRow[] | null): HomeRegion<HomeChange> {
+export function deriveBecause(events: readonly NotificationEventRow[] | null): BecauseRegion {
   if (events === null) return UNKNOWN;
-  const changes = [...events]
-    .sort((a, b) => (a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0))
-    .map((e): HomeChange => {
-      const chain = CAUSAL_CHAINS[e.eventType] ?? null;
-      return {
-        id: `because:${e.id}`,
-        region: "because",
-        subject: { kind: EVENT_SUBJECT[e.entityType] ?? "relationship", id: e.entityId, label: null },
-        titleKey: e.eventType,
-        count: null,
-        href: "/dashboard/activity",
-        actionable: false,
-        occurredAt: e.createdAt,
-        chain,
-      };
-    });
-  return known(changes);
-}
-
-export function deriveOutside(rows: readonly OpportunitiesResultMatch[] | null): HomeRegion {
-  if (rows === null) return UNKNOWN;
-  const items: HomeItem[] = rows.map((m) => ({
-    id: `outside:need:${m.requestId}`,
-    region: "outside",
-    subject: { kind: "need", id: m.requestId, label: m.companyName?.trim() || null },
-    titleKey: "need",
-    count: null,
-    href: "/dashboard/opportunities",
-    actionable: false,
-  }));
-  return known(items);
-}
-
-export function composeHomeState(inputs: HomeInputs): HomeState {
+  const ordered = [...events].sort((a, b) =>
+    a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0,
+  );
+  const causes: HomeCause[] = [];
+  const plain: HomeChange[] = [];
+  for (const e of ordered) {
+    const change: HomeChange = {
+      id: e.id,
+      eventType: e.eventType,
+      subject: { kind: EVENT_SUBJECT[e.entityType] ?? "relationship", id: e.entityId, label: null },
+      occurredAt: e.createdAt,
+      href: "/dashboard/activity",
+      read: e.readAt !== null,
+    };
+    const chain = CAUSAL_CHAINS[e.eventType];
+    if (chain) causes.push({ ...change, chain });
+    else plain.push(change);
+  }
   return {
-    waiting: deriveWaiting(inputs.attention),
-    running: deriveRunning(inputs.projects, inputs.today),
-    because: deriveBecause(inputs.events),
-    outside: deriveOutside(inputs.opportunities),
+    kind: "known",
+    causes: causes.slice(0, HOME_REGION_SHOWN),
+    events: plain.slice(0, HOME_REGION_SHOWN),
   };
 }
 
-/** The region the home leads with: the first that has something for the
- *  person to do, then what is moving, then what changed, then the market.
- *  An all-unknown home leads with nothing (the view says it could not read). */
-export function leadingRegion(state: HomeState): HomeRegionId | null {
-  for (const id of HOME_REGION_ORDER) {
-    const r = state[id];
-    if (r.kind === "known" && r.total > 0) return id;
+export function deriveOutside(opportunity: TodayOpportunity): OutsideRegion {
+  // "unknown" = the reader failed. "none" / "no-worker" / "unavailable" are
+  // honest, DISTINCT answers the view states in its own words.
+  if (opportunity.kind === "unknown") return UNKNOWN;
+  return { kind: "known", opportunity };
+}
+
+export function composeHomeState(inputs: HomeInputs): HomeState {
+  const t = inputs.today;
+  return {
+    waiting: deriveWaiting(t.next, t.openItems),
+    running: deriveRunning(t.work, inputs.projects, t.growth),
+    because: deriveBecause(inputs.events),
+    outside: deriveOutside(t.opportunity),
+  };
+}
+
+/** Whether a region has something for the person to look at. */
+export function regionHasContent(state: HomeState, id: HomeRegionId): boolean {
+  switch (id) {
+    case "waiting":
+      return state.waiting.kind === "known" && state.waiting.items.length > 0;
+    case "running": {
+      const r = state.running;
+      if (r.kind !== "known") return false;
+      const hasWork = r.work.kind === "known" && r.work.today.entries + r.work.week.entries > 0;
+      return hasWork || (r.projects?.length ?? 0) > 0;
+    }
+    case "because":
+      return state.because.kind === "known" && state.because.causes.length + state.because.events.length > 0;
+    case "outside":
+      return state.outside.kind === "known" && state.outside.opportunity.kind === "bands";
   }
-  return null;
+}
+
+/** The region the home leads with: what needs the person, then what is
+ *  moving, then what changed, then the market. A home with nothing in any
+ *  region leads with none (the view says so in words — never a blank). */
+export function leadingRegion(state: HomeState): HomeRegionId | null {
+  return HOME_REGION_ORDER.find((id) => regionHasContent(state, id)) ?? null;
 }
