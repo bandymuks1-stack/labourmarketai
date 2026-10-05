@@ -1573,6 +1573,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261003151400_marketplace_v1_write_rpcs_closed_v1.sql",
       // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
       "20261003151500_invitation_v1_doors_not_api_callable_v1.sql",
+      // 2026-10-05: the subject's refuse / withdraw door (SECURITY DEFINER) - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      "20261005100000_roster_link_subject_answer_v1.sql",
 ]);
   });
 

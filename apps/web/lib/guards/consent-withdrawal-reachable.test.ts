@@ -69,10 +69,16 @@ describe("a confirmed roster link can be withdrawn by the subject", () => {
   it("the domain function accepts `withdraw` and scopes it to CONFIRMED links only", () => {
     const fn = core.split("export async function respondToRosterLink(")[1] ?? "";
     expect(fn).toMatch(/"accept" \| "refuse" \| "withdraw"/);
-    expect(fn).toMatch(/input\.decision === "withdraw"\s*\?\s*query\.eq\("link_state", "linked"\)/);
-    // And the answer to an offer stays an answer to an offer.
-    expect(fn).toMatch(/query\.eq\("link_state", "link_proposed"\)/);
-    // The row must already name the caller — RLS says so too, this is belt.
+    // Refuse / withdraw go through the narrow database door (20261005100000): a plain UPDATE to
+    // `unlinked` fails for the subject (the row stops naming the caller, so the SELECT policy
+    // rejects the new row). The door scopes `withdraw` to CONFIRMED links and `refuse` to OFFERS.
+    expect(fn).toMatch(/input\.decision !== "accept"/);
+    expect(fn).toMatch(/rpc\("respond_to_roster_link_v1", \{\s*p_person_id: input\.personId,\s*p_decision: input\.decision,/);
+    const door = readFileSync(join(APP, "..", "..", "supabase", "migrations", "20261005100000_roster_link_subject_answer_v1.sql"), "utf8");
+    expect(door).toMatch(/p_decision = 'withdraw' and v_state <> 'linked'/);
+    expect(door).toMatch(/p_decision = 'refuse'\s+and v_state <> 'link_proposed'/);
+    // ACCEPT acts on an offer only, and the row must already name the caller (RLS says so too, this is belt).
+    expect(fn).toMatch(/\.eq\("link_state", "link_proposed"\)/);
     expect(fn).toMatch(/\.eq\("linked_profile_id", caller\.userId\)/);
   });
 
