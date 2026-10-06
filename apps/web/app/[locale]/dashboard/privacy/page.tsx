@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ContactDisclosureRequests } from "@/components/app/contact-disclosure-requests";
 import { DiscoverabilityConsent } from "@/components/app/discoverability-consent";
 import { PartnerSupplyRepresentation } from "@/components/app/partner-supply-representation";
+import { WorkerActivationSteps } from "@/components/app/worker-activation-steps";
 import { Card } from "@/components/ui/Card";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { PrivacyDeletionRequest } from "@/components/app/privacy-deletion-request";
@@ -28,6 +29,10 @@ import {
 } from "@/lib/privacy/consent-definitions";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { employerVisibilityOf } from "@/lib/privacy/employer-visibility";
+import { deriveWorkerActivationSteps } from "@/lib/privacy/worker-activation-steps";
+import { recordInboundReferralSignup } from "@/lib/invitations/external-referral-signup";
+import { WORKER_ACTIVATION_FLAG, parseContentTag } from "@/lib/auth/worker-activation";
 
 /** Never show a worker a raw database code. Turns `chat_message` /
  *  `contact_email` into "Chat message" / "Contact email" as a safe fallback
@@ -55,10 +60,13 @@ function humanizeCode(value: string): string {
  */
 export default async function PrivacyPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ activation?: string; referral?: string }>;
 }) {
   const { locale } = await params;
+  const { activation, referral } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("privacySelfService");
   const tc = await getTranslations("privacyConsent");
@@ -88,6 +96,25 @@ export default async function PrivacyPage({
 
   // The ONE consent-locale rule (PL → English, never Lithuanian), shared with
   // the conversation's copy of the consent (lib/privacy/discoverability-view.ts).
+  // INBOUND-WORKER CAMPAIGN (`?activation=worker`, set by the signup redirect):
+  // (1) record "this reference registered" - an idempotent observation that
+  // accepts nothing and grants no consent - and (2) show the person where each
+  // of their own decisions is. Nothing is switched on, filled in or implied.
+  const referralTag = parseContentTag(referral);
+  if (referralTag) {
+    await recordInboundReferralSignup(referralTag);
+  }
+  const showActivation =
+    activation === WORKER_ACTIVATION_FLAG &&
+    !(partnerSupplyState.kind === "ok" && !partnerSupplyState.hasWorkerProfile);
+  const activationSteps = showActivation
+    ? deriveWorkerActivationSteps({
+        visibility: employerVisibilityOf(state),
+        partnerSupply: partnerSupplyState,
+      })
+    : [];
+  const ta = showActivation ? await getTranslations("privacySelfService.activation") : null;
+
   const consentLocale: ConsentLocale = toConsentLocale(locale);
   const legal = PROFILE_DISCOVERABILITY_V1.texts[consentLocale];
   const partnerLegal = PARTNER_SUPPLY_REPRESENTATION_V1.texts[consentLocale];
@@ -153,6 +180,33 @@ export default async function PrivacyPage({
         </h1>
         <p className="mt-2 text-sm text-text-secondary">{t("intro")}</p>
       </header>
+
+      {showActivation && ta ? (
+        <WorkerActivationSteps
+          steps={activationSteps}
+          locale={locale}
+          labels={{
+            title: ta("title"),
+            intro: ta("intro"),
+            steps: {
+              visibility: { title: ta("steps.visibility.title") },
+              representation: { title: ta("steps.representation.title") },
+              declaration: {
+                title: ta("steps.declaration.title"),
+                hint: ta("steps.declaration.hint"),
+              },
+              profile: {
+                title: ta("steps.profile.title"),
+                hint: ta("steps.profile.hint"),
+              },
+            },
+            stateDone: ta("stateDone"),
+            stateOpen: ta("stateOpen"),
+            stateUnknown: ta("stateUnknown"),
+            go: ta("go"),
+          }}
+        />
+      ) : null}
 
       {/* 1. Employer visibility — the profile_discoverability consent. */}
       <section className="card-border p-5" data-testid="privacy-visibility" id="visibility">

@@ -5433,6 +5433,30 @@
         "approved": "Genehmigt",
         "closed": "Geschlossen"
       }
+    },
+    "activation": {
+      "title": "Ihre nächsten Schritte",
+      "intro": "Sie sind registriert. Die Registrierung schaltet nichts ein: Jeder Schritt unten ist Ihre eigene Entscheidung, und Sie können jeden davon ablehnen.",
+      "steps": {
+        "visibility": {
+          "title": "Entscheiden Sie, ob Arbeitgeber auf LabourMarket.ai Sie finden können"
+        },
+        "representation": {
+          "title": "Entscheiden Sie, ob LabourMarket.ai außerhalb der Plattform für Sie nach Arbeit suchen darf"
+        },
+        "declaration": {
+          "title": "Geben Sie an, ab wann Sie anfangen können und in welchen Ländern Sie rechtmäßig arbeiten dürfen",
+          "hint": "Dieses Formular erscheint, sobald Sie den Schritt darüber beantwortet haben. Es wird nichts für Sie ausgefüllt."
+        },
+        "profile": {
+          "title": "Ergänzen Sie Sprachen, Lizenzen und bevorzugte Länder",
+          "hint": "Optional und unabhängig von den beiden Erlaubnissen oben."
+        }
+      },
+      "stateDone": "Erledigt",
+      "stateOpen": "Noch offen",
+      "stateUnknown": "Konnte nicht gelesen werden",
+      "go": "Zu diesem Schritt"
     }
   },
   "legal": {

@@ -5433,6 +5433,30 @@
         "approved": "Approved",
         "closed": "Closed"
       }
+    },
+    "activation": {
+      "title": "Your next steps",
+      "intro": "You have registered. Registering does not switch anything on: each step below is your own decision, and you may say no to any of them.",
+      "steps": {
+        "visibility": {
+          "title": "Decide whether employers on LabourMarket.ai can find you"
+        },
+        "representation": {
+          "title": "Decide whether LabourMarket.ai may look for work for you outside the platform"
+        },
+        "declaration": {
+          "title": "Say when you can start and in which countries you may legally work",
+          "hint": "This form appears once you have answered the step above. Nothing is filled in for you."
+        },
+        "profile": {
+          "title": "Add your languages, licences and preferred countries",
+          "hint": "Optional, and separate from the two permissions above."
+        }
+      },
+      "stateDone": "Done",
+      "stateOpen": "Not done yet",
+      "stateUnknown": "Could not be read",
+      "go": "Go to this step"
     }
   },
   "legal": {

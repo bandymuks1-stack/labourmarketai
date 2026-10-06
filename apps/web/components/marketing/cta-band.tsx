@@ -1,4 +1,4 @@
-import { Link } from "@/lib/i18n/navigation";
+import { ActivationSignupLink } from "@/components/app/activation-signup-link";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { WaitlistModal } from "@/components/marketing/waitlist-modal";
 
@@ -41,7 +41,7 @@ export function CtaBand({
         </p>
         <div className="mt-8 flex justify-center">
           {ctaKind === "signup" ? (
-            <Link
+            <ActivationSignupLink
               href={
                 ctaNext
                   ? `/auth/signup?next=${encodeURIComponent(ctaNext)}`
@@ -50,7 +50,7 @@ export function CtaBand({
               className={buttonLinkClassName()}
             >
               {ctaLabel} →
-            </Link>
+            </ActivationSignupLink>
           ) : (
             <WaitlistModal
               trigger={ctaLabel}

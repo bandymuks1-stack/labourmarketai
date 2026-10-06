@@ -393,7 +393,13 @@ describe("first-touch attribution rides on EVERY client conversion step", () => 
 
   it("the signup form still stores the same bounded first-touch on the account", () => {
     const src = readApp("components/app/signup-form.tsx");
-    expect(src).toMatch(/data: \{ locale, \.\.\.getFirstTouchAttribution\(\) \}/);
+    // 2026-10-06 (worker-activation flow): the same bounded first-touch is still stored,
+    // and the explicit inbound-worker campaign link (validated, utm_* only) is spread
+    // AFTER it so a stale organic first touch cannot hide the campaign the person
+    // actually arrived through. The rule moved; it did not disappear.
+    expect(src).toMatch(
+      /data: \{\s*locale,\s*\.\.\.getFirstTouchAttribution\(\),\s*\.\.\.\(inbound \? inboundAttributionMetadata\(inbound\) : \{\}\),?\s*\}/,
+    );
   });
 });
 
