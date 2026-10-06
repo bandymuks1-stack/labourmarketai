@@ -142,6 +142,23 @@ describe("F-1 - conversation creation: the server decides, the database refuses 
     expect(core.indexOf("!isContactAuthority(authority)")).toBeLessThan(core.indexOf("createAdminClient()"));
     expect(core).toMatch(/createAdminClient\(\)\)\s*\.from\("conversation_participants"\)/);
   });
+  it("the service client's whole footprint is ONE insert, with no read-back, and the grant is exactly that (INSERT, this table)", () => {
+    const core = strip(rd("lib/communication/communication-core.ts", APP));
+    const at = core.indexOf("createAdminClient()");
+    const call = core.slice(at, core.indexOf(");", at));
+    expect(call).toMatch(/\.insert\(/);
+    // no .select()/.update()/.delete()/.upsert()/.rpc() chained on the service client: an insert without a
+    // read-back is PostgREST return=minimal and needs no SELECT privilege
+    expect(call).not.toMatch(/\.(select|update|delete|upsert|rpc)\(/);
+    const sql = strip(rd(`supabase/migrations/${M.conv}.sql`));
+    const toService = sql.match(/grant [^;]*to service_role;/g) ?? [];
+    expect(toService).toEqual(["grant insert on public.conversation_participants to service_role;"]);
+    // and no migration in this package grants service_role anything on the other chat tables
+    for (const f of Object.values(M)) {
+      const body = strip(rd(`supabase/migrations/${f}.sql`));
+      expect(body, f).not.toMatch(/grant [^;]*on (table )?public\.(conversations|conversation_messages)[^;]*to service_role/);
+    }
+  });
 });
 
 describe("F-4 - employer authority is held (an organization relationship), not asserted (a column the user writes)", () => {
