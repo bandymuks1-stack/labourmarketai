@@ -1,4 +1,4 @@
--- 20261006100000 — external referral: "this reference registered" (v1)
+-- 20261006100200 — external referral: "this reference registered" (v1)
 --
 -- SAFETY CLASS: RED (SECURITY DEFINER functions + GRANT/REVOKE). Draft PR +
 -- `needs-human-gate`. Ships UNAPPLIED. Apply ONLY via Supabase MCP
@@ -37,7 +37,7 @@
 -- bounded shapes for slug and reference.
 --
 -- Zero DML at apply time. No existing object is changed.
--- Rollback: supabase/rollbacks/20261006100000_external_referral_signup_observation_v1.down.sql
+-- Rollback: supabase/rollbacks/20261006100200_external_referral_signup_observation_v1.down.sql
 
 begin;
 
@@ -138,4 +138,4 @@ grant execute on function public.external_referral_observed_signups_v1(text, tex
 commit;
 
 -- ROLLBACK
--- See supabase/rollbacks/20261006100000_external_referral_signup_observation_v1.down.sql
+-- See supabase/rollbacks/20261006100200_external_referral_signup_observation_v1.down.sql

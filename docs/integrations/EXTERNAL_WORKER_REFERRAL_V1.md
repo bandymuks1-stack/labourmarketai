@@ -148,7 +148,7 @@ so it survives another browser or device, e-mail confirmation and Google sign-in
 The `utm_*` values are written to `auth.users.raw_user_meta_data`; the `referral`
 travels inside the existing safe `?next=` and, on the first authenticated screen
 (`/dashboard/privacy`), is recorded by `record_external_referral_signup_v1`
-(migration `20261006100000`, UNAPPLIED until the owner applies it) as ONE
+(migration `20261006100200`, UNAPPLIED until the owner applies it) as ONE
 append-only `audit_logs` row `external_referral_signup_observed` - the
 "reference X registered" observation (`OBSERVED_SIGNUP` on the source side). An
 authorised reader gets it through `external_referral_observed_signups_v1`

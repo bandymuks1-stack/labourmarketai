@@ -15,7 +15,7 @@
  *
  * SAFETY. LOCAL database only (loopback host, hard-refused otherwise). One
  * transaction, ROLLED BACK at the end - no residue. The new migration
- * (20261006100000) is applied INSIDE that transaction, so the local database is
+ * (20261006100200) is applied INSIDE that transaction, so the local database is
  * never changed and nothing is applied anywhere.
  *
  * Usage (from the repo root):
@@ -49,7 +49,7 @@ const DB_URL =
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const MIGRATION = readFileSync(
-  join(ROOT, "supabase/migrations/20261006100000_external_referral_signup_observation_v1.sql"),
+  join(ROOT, "supabase/migrations/20261006100200_external_referral_signup_observation_v1.sql"),
   "utf8",
 )
   // Stay inside the outer transaction (so the final ROLLBACK removes it).

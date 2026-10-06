@@ -15,7 +15,7 @@ import { createClient } from "@/lib/supabase/server";
  * `referral` param rides inside the safe `?next=` through e-mail
  * confirmation, OAuth and onboarding, so this works for every signup path and
  * on any device). One RPC, `record_external_referral_signup_v1`
- * (20261006100000): an idempotent audit row for (account, source, reference).
+ * (20261006100200): an idempotent audit row for (account, source, reference).
  *
  * IT IS AN OBSERVATION, NOT AN ACCEPTANCE. It does not accept the invitation,
  * does not read or expose `declared_context`, grants no consent and creates no

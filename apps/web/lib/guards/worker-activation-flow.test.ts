@@ -91,15 +91,15 @@ describe("registration is not consent - nothing is granted, ticked or prefilled"
   });
 });
 
-describe("migration 20261006100000 - an observation, not an acceptance", () => {
-  const raw = readRepo("supabase/migrations/20261006100000_external_referral_signup_observation_v1.sql");
+describe("migration 20261006100200 - an observation, not an acceptance", () => {
+  const raw = readRepo("supabase/migrations/20261006100200_external_referral_signup_observation_v1.sql");
   const sql = sqlCode(raw);
 
   it("ships UNAPPLIED with its rollback and without the owner-gate marker", () => {
     expect(raw.startsWith("-- @human-gate-approved")).toBe(false);
     expect(raw).not.toMatch(/^-- @human-gate-approved/m);
     const down = readRepo(
-      "supabase/rollbacks/20261006100000_external_referral_signup_observation_v1.down.sql",
+      "supabase/rollbacks/20261006100200_external_referral_signup_observation_v1.down.sql",
     );
     expect(down).toMatch(/drop function if exists public\.record_external_referral_signup_v1/);
     expect(down).toMatch(/drop function if exists public\.external_referral_observed_signups_v1/);
