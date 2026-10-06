@@ -3948,7 +3948,9 @@
       "check_email_body": "Wysłaliśmy link potwierdzający na adres {email}. Otwórz go, aby dokończyć tworzenie konta. Jeśli go nie widzisz, sprawdź folder spam — możesz też poprosić tutaj o nowy link.",
       "resend_label": "Wyślij link ponownie",
       "resend_sent": "Wysłano ponownie. Sprawdź skrzynkę odbiorczą i folder spam.",
-      "resend_wait": "O nowy link możesz poprosić za {seconds} s."
+      "resend_wait": "O nowy link możesz poprosić za {seconds} s.",
+      "invited_email_note": "To adres, na który wysłano zaproszenie.",
+      "show_password": "Pokaż hasło"
     },
     "login": {
       "headline": "Zaloguj się",
