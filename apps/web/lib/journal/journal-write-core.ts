@@ -680,7 +680,31 @@ export async function createJournalEntryCore(
     }
   }
 
+  // Voice provenance (owner decision U-26): text that was DICTATED and then
+  // reviewed by the worker keeps that fact on the record. Self-declared like
+  // every other worker_input field - a label, never a verification.
+  const voiceOrigin = String(formData.get("input_origin") ?? "") === "voice";
+  const voiceLanguage = String(formData.get("voice_language") ?? "").trim().slice(0, 8);
+  const voiceDisclosure = String(formData.get("voice_disclosure_version") ?? "").trim().slice(0, 40);
+
   const metrics: RpcMetricRow[] = [
+    ...(voiceOrigin
+      ? [
+          { metric_slug: "input_origin", value_text: "voice", source: "worker_input" as const },
+          ...(voiceLanguage
+            ? [{ metric_slug: "voice_language", value_text: voiceLanguage, source: "worker_input" as const }]
+            : []),
+          ...(voiceDisclosure
+            ? [
+                {
+                  metric_slug: "voice_disclosure_version",
+                  value_text: voiceDisclosure,
+                  source: "worker_input" as const,
+                },
+              ]
+            : []),
+        ]
+      : []),
     ...(workDirection
       ? [
           {

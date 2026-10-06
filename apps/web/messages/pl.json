@@ -711,7 +711,11 @@
     "closeLabel": "Zamknij wyszukiwanie",
     "voiceStart": "Szukaj głosem",
     "voiceStop": "Zatrzymaj wprowadzanie głosowe",
-    "voiceListening": "Słucham… powiedz, czego szukasz — tekst pojawi się w polu wyszukiwania."
+    "voiceListening": "Słucham… powiedz, czego szukasz — tekst pojawi się w polu wyszukiwania.",
+    "voiceConsentText": "Dyktowanie w polu wyszukiwania korzysta z wbudowanego rozpoznawania mowy przeglądarki. W zależności od przeglądarki (np. Chrome lub Safari) dźwięk jest wysyłany do usługi mowy producenta przeglądarki, a nie do LabourMarket.ai. Niczego nie zapisujemy. Aby dźwięk był przetwarzany na własnym serwerze LabourMarket.ai, użyj dziennika głosowego.",
+    "voiceConsentAllow": "Kontynuuj z dyktowaniem przeglądarki",
+    "voiceConsentCancel": "Nie teraz",
+    "voiceFailed": "Dyktowanie zatrzymane - przeglądarka nie mogła użyć mikrofonu lub usługi mowy."
   },
   "reports": {
     "eyebrow": "Raporty",

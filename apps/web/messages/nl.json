@@ -711,7 +711,11 @@
     "closeLabel": "Zoeken sluiten",
     "voiceStart": "Zoeken met spraak",
     "voiceStop": "Spraakinvoer stoppen",
-    "voiceListening": "Luisteren... zeg wat u zoekt — de tekst verschijnt in het zoekveld."
+    "voiceListening": "Luisteren... zeg wat u zoekt — de tekst verschijnt in het zoekveld.",
+    "voiceConsentText": "Dicteren in het zoekveld gebruikt de ingebouwde spraakherkenning van je browser. Afhankelijk van je browser (bijv. Chrome of Safari) wordt de audio naar de spraakdienst van die browserleverancier gestuurd, niet naar LabourMarket.ai. Wij slaan niets op. Gebruik het spraakjournaal voor audio die op de eigen server van LabourMarket.ai wordt verwerkt.",
+    "voiceConsentAllow": "Doorgaan met browserdictaat",
+    "voiceConsentCancel": "Niet nu",
+    "voiceFailed": "Dicteren gestopt - de browser kon de microfoon of spraakdienst niet gebruiken."
   },
   "reports": {
     "eyebrow": "Rapporten",

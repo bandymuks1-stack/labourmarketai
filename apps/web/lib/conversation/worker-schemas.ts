@@ -167,6 +167,15 @@ export const workerLogWorkSchema = z.object({
    *  that is not project work. Absent → the database's own rule (one active
    *  project auto-attributes; two or more are refused, see journal-write-core). */
   projectId: z.union([uuid, z.literal("none")]).optional(),
+  /** Provenance of the TEXT when it was dictated by voice and then reviewed and
+   *  edited by the person. It labels the entry's input origin only - it grants
+   *  no authority and changes no rule (the same schema, same confirmation). */
+  voice: z
+    .object({
+      language: z.string().trim().max(8),
+      disclosureVersion: z.string().trim().max(40),
+    })
+    .optional(),
 });
 
 /** Why the log-work write would refuse this evidence text, or `null`. */
