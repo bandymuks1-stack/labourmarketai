@@ -5319,6 +5319,8 @@
     "titleAccent": "sąžininga kaina.",
     "subcopyLive": "Kainos patvirtintos savininko ir galioja. Aktyvavimas vyksta organizacijos paskyroje per saugų Stripe mokėjimą; šiame puslapyje niekas nenuskaičiuojama.",
     "subcopy": "Kainos dar nėra galutinės ir sąskaitos už jus šiame puslapyje niekada nepradedamos. Žemiau pateikti planai apibūdina apimtį; aktyvavimas vyksta rankiniu būdu — susisiekite ir prieš pradedant suderinsime kainą bei apimtį.",
+    "subcopyConfirmed": "Kainos patvirtintos. Aktyvavimas internetu dar neatidarytas — užsirašykite į sąrašą, susisieksime ir organizaciją paleisime rankiniu būdu; šiame puslapyje niekas netraukiama.",
+    "trialNote": "Pirmoji organizacijos prenumerata prasideda 14 dienų bandomuoju laikotarpiu. Po jo kortelė apmokestinama mėnesio kaina, o atšaukti galite iki jo pabaigos.",
     "planCta": "Užsirašyti į šio plano sąrašą",
     "featuresLabel": "Apima",
     "plans": {
@@ -5338,8 +5340,8 @@
         "features": [
           "Iki 10 aktyvių pozicijų",
           "Viskas, kas nemokamame plane — darbiniu mastu",
-          "Vienas planas visoms organizacijos galimybėms",
-          "Projektų valdymas, parengtis, ataskaitos ir CSV"
+          "Vienas planas visoms organizacijų rūšims",
+          "Projektų valdymas, ataskaitos ir CSV eksportas"
         ]
       },
       "agency": {

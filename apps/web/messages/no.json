@@ -1034,8 +1034,8 @@
         "features": [
           "Up to 10 active positions",
           "Everything in Free, at operating scale",
-          "One plan for every organization capability",
-          "Project operations, readiness, reports and CSV"
+          "One plan for every kind of organization",
+          "Project operations, reports and CSV export"
         ]
       },
       "enterprise": {
@@ -1061,6 +1061,8 @@
     },
     "subcopyLive": "Prisene er bekreftet av eieren og gjelder. Aktivering skjer i organisasjonskontoen via en sikker Stripe-betaling; ingenting trekkes på denne siden.",
     "subcopy": "[EN] Prices are not finalised yet and billing is never started for you on this page. The tiers below describe scope; activation is manual — reach out and we'll confirm pricing and scope with you before anything starts.",
+    "subcopyConfirmed": "[EN] Prices are confirmed. Online activation is not open yet — join the waitlist and we will contact you to start your organization manually; nothing is charged on this page.",
+    "trialNote": "[EN] An organization's first subscription starts with a 14-day trial. Your card is charged the monthly price after the trial, and you can cancel before it ends.",
     "title": "[EN] Simple tiers,",
     "titleAccent": "[EN] set fairly.",
     "individual": {

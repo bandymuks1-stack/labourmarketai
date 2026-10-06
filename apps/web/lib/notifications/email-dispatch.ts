@@ -41,6 +41,7 @@ import {
   isTransactionalEmailPathActive,
   sendTransactionalEmail,
 } from "@/lib/email/transactional";
+import { reserveEmailSendSlot } from "./email-send-guard";
 import { renderNotificationEmail } from "@/lib/email/notification-email";
 import {
   resolveChannelEnabled,
@@ -70,6 +71,8 @@ export type NotificationEmailDispatchOutcome =
   | { readonly kind: "not_configured" }
   | { readonly kind: "no_recipient_email" }
   | { readonly kind: "render_failed" }
+  /** Fan-out ceiling reached (email-send-guard.ts) — bell notification stands. */
+  | { readonly kind: "rate_limited" }
   | { readonly kind: "send_failed"; readonly reason: string };
 
 /** Greppable marker for a REAL send failure (provider refused / transport
@@ -119,6 +122,11 @@ export async function maybeDispatchNotificationEmail(
       metadata: input.metadata,
     });
     if (!rendered) return { kind: "render_failed" };
+
+    // 4b. Fan-out ceiling (per-instance run window + per-recipient day).
+    if (!reserveEmailSendSlot(input.recipientProfileId)) {
+      return { kind: "rate_limited" };
+    }
 
     // 5. Truthful adapter outcome â€” "sent" only on a provider 2xx.
     const result = await sendTransactionalEmail({

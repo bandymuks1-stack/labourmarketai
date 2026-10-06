@@ -14,6 +14,8 @@
  * Next.js 15 strips thrown Error messages in prod), so the client renders an
  * honest done / error state.
  */
+import { runAutoMatchForDemand } from "@/lib/scouting/auto-match";
+import type { ScoutingEmployer } from "@/lib/scouting/scouting";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -220,7 +222,7 @@ export async function submitDemandRequest(
 
   const result = await submitDemandRequestCore(
     { supabase, userId: user.id },
-    { organizationId: employer.organizationId },
+    employer,
     intent,
     fields,
   );
@@ -238,7 +240,7 @@ export async function submitDemandRequest(
  */
 export async function submitDemandRequestCore(
   caller: DomainCaller,
-  employer: { organizationId: string },
+  employer: { organizationId: string } & Partial<ScoutingEmployer>,
   intent: DemandIntent,
   fields?: DemandFields,
 ): Promise<DemandRequestResult> {
@@ -447,6 +449,18 @@ export async function submitDemandRequestCore(
           }),
         )
         .catch(() => {});
+    }
+  }
+
+  // AUTOMATIC INTERNAL MATCHING (best-effort, after the row is saved and its
+  // structured columns are set). Deterministic match-v1 over existing
+  // LabourMarket.ai candidates only; a failure or throw can never fail the
+  // submit (runAutoMatchForDemand does not throw; the catch is belt-and-braces).
+  if (requestId && intent === "hire_workers") {
+    try {
+      await runAutoMatchForDemand(caller, employer, requestId, "submit");
+    } catch {
+      /* publish result is unaffected */
     }
   }
 

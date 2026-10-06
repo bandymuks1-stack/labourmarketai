@@ -7,15 +7,14 @@
  * (pilot access). The catalogue is the contract the later Stripe sprint wires.
  *
  * Honesty (guarded by lib/guards/no-live-payments.test.ts):
- *   - PAYMENTS_ENABLED is false; nothing here implies an active subscription;
+ *   - this file carries NO payments switch: whether billing is on is the
+ *     resolved billing config (lib/billing/config-core.ts, env-armed), never a
+ *     code constant here; nothing here implies an active subscription;
  *   - no plan auto-grants itself — `accessState` is explicit;
  *   - feature entitlements are limits/booleans only, never a charge.
  *
  * Pure data + types. No IO.
  */
-
-/** Global kill-switch. Stays false for the entire pre-payment sprint. */
-export const PAYMENTS_ENABLED = false as const;
 
 /**
  * OWNER LAUNCH PRICING (approved 2026-09-05, corrected the same day):

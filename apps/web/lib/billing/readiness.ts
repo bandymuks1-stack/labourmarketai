@@ -6,7 +6,7 @@
  * never a live-billing claim:
  *   - PRICING_READINESS_STATE is the owner-editable pricing state — prices
  *     stay drafts until the owner flips it to "owner_confirmed"; neither
- *     state makes anything purchasable (PAYMENTS_ENABLED stays false).
+ *     state makes anything purchasable (only the resolved billing config enables payments).
  *   - FEATURE_ENFORCEMENT maps EVERY plan feature key to its real
  *     enforcement seam or surface (guard-pinned: cited sites must exist and
  *     carry the real check — no phantom features, no silent claims).

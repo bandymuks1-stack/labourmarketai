@@ -222,7 +222,7 @@
           "done": "[EN] Saved. Your need is now visible in your space.",
           "error": "[EN] Couldn't send. Please try again.",
           "progressHelper": "[EN] These steps show progress. Active actions are shown below.",
-          "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
+          "errorOpenNeedLimitUpgrade": "Denne organisations gratis plan tillader 1 aktiv stilling. Luk én, eller aktivér planen „Organisation“ (99 €/md., op til 10) i din organisationskonto.",
           "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
           "openNeedUsage": "Active positions: {used} of {limit} used · {remaining} remaining",
           "openNeedUsageUpgradeCta": "Activate the Organization plan",
@@ -998,25 +998,25 @@
     "eyebrow": "[EN] Pricing",
     "faq": [
       {
-        "q": "Why only one paid plan?",
-        "a": "Every organization — employer, staffing provider, contractor or training provider — gets the same product. What changes is scale: 1 active position free, up to 10 for €99/month, and an individual plan above that."
+        "q": "Hvorfor kun én betalt plan?",
+        "a": "Alle organisationer — arbejdsgivere, vikarbureauer, entreprenører og uddannelsesudbydere — får det samme produkt. Det, der ændrer sig, er omfanget: 1 aktiv stilling gratis, op til 10 for 99 €/måned og en individuel plan derover."
       },
       {
-        "q": "Will the Free tier stay free?",
-        "a": "Yes. Persons stay free, and an organization can run one active position at no cost."
+        "q": "Forbliver gratisniveauet gratis?",
+        "a": "Ja. Personer forbliver gratis, og en organisation kan have én aktiv stilling uden omkostninger."
       },
       {
-        "q": "How is billing handled?",
-        "a": "Card payment through Stripe with VAT applied by Stripe Tax; invoices, cancellation and changes live in your organization account."
+        "q": "Hvordan håndteres betaling?",
+        "a": "Kortbetaling via Stripe, hvor Stripe Tax påfører moms; fakturaer, opsigelse og ændringer findes i din organisationskonto."
       },
       {
-        "q": "What happens above 10 active positions?",
-        "a": "Nothing is charged or upgraded automatically. You are asked to contact us and an individual plan is agreed."
+        "q": "Hvad sker der ved over 10 aktive stillinger?",
+        "a": "Intet opkræves eller opgraderes automatisk. Du bliver bedt om at kontakte os, og vi aftaler en individuel plan."
       }
     ],
     "faqTitle": "[EN] Pricing FAQ",
     "featuresLabel": "[EN] Includes",
-    "planCta": "[EN] Join the waitlist for this plan",
+    "planCta": "Skriv dig på ventelisten for denne plan",
     "plans": {
       "agency": {
         "features": [
@@ -1032,10 +1032,10 @@
         "name": "Organization",
         "tagline": "For organizations actively hiring and building teams",
         "features": [
-          "Up to 10 active positions",
-          "Everything in Free, at operating scale",
-          "One plan for every organization capability",
-          "Project operations, readiness, reports and CSV"
+          "Op til 10 aktive stillinger",
+          "Alt fra Gratis, i driftsskala",
+          "Én plan til alle slags organisationer",
+          "Projektdrift, rapporter og CSV-eksport"
         ]
       },
       "enterprise": {
@@ -1060,7 +1060,9 @@
       }
     },
     "subcopyLive": "Priserne er bekræftet af ejeren og gælder. Aktivering sker i organisationskontoen via en sikker Stripe-betaling; intet trækkes på denne side.",
-    "subcopy": "[EN] Prices are not finalised yet and billing is never started for you on this page. The tiers below describe scope; activation is manual — reach out and we'll confirm pricing and scope with you before anything starts.",
+    "subcopy": "Priserne er endnu ikke endelige, og fakturering startes aldrig for dig på denne side. Niveauerne nedenfor beskriver omfanget; aktivering sker manuelt — kontakt os, så bekræfter vi pris og omfang med dig, før noget starter.",
+    "subcopyConfirmed": "Priserne er bekræftet. Onlineaktivering er endnu ikke åben — skriv dig på ventelisten, så kontakter vi dig og starter din organisation manuelt; der trækkes intet på denne side.",
+    "trialNote": "En organisations første abonnement starter med en prøveperiode på 14 dage. Derefter trækkes månedsprisen på dit kort; du kan opsige, før prøveperioden slutter.",
     "title": "[EN] Simple tiers,",
     "titleAccent": "[EN] set fairly.",
     "individual": {
@@ -1073,9 +1075,9 @@
     "priceFree": "€0",
     "pricePerMonth": "€{price}/month",
     "ctaStartFree": "Start free in your organization account",
-    "ctaSubscribe": "Activate in your organization account",
+    "ctaSubscribe": "Aktivér i din organisationskonto",
     "priceState": {
-      "owner_confirmed": "Prices confirmed by the owner. Activation happens in your organization account; nothing is charged on this page."
+      "owner_confirmed": "Priser bekræftet af ejeren. Aktivering sker i din organisationskonto; der trækkes intet på denne side."
     }
   },
   "secondary": {
@@ -2414,7 +2416,7 @@
       "reopen": "[EN] Reopen this need",
       "closedNote": "[EN] Closed — hidden from workers.",
       "error": "[EN] Could not save. Try again.",
-      "limitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
+      "limitUpgrade": "Denne organisations gratis plan tillader 1 aktiv stilling. Luk én, eller aktivér planen „Organisation“ (99 €/md., op til 10) i din organisationskonto.",
       "limitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
       "closedCandidatesHistory": "[EN] This need is closed. Below is who was compared and what was decided while it was open — history, not an action list. Reopen the need to assess candidates again."
     },
@@ -3814,7 +3816,7 @@
         "errorInvalid": "[EN] Please check the fields and try again.",
         "errorNeedsMigration": "[EN] This isn't enabled yet. Please try later.",
         "errorConflict": "[EN] This value already differs. Open advanced mode to replace it.",
-        "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
+        "errorOpenNeedLimitUpgrade": "Denne organisations gratis plan tillader 1 aktiv stilling. Luk én, eller aktivér planen „Organisation“ (99 €/md., op til 10) i din organisationskonto.",
         "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
       },
       "urgency": {

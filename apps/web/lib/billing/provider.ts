@@ -32,6 +32,13 @@ export interface CheckoutSessionInput {
    * moment the operation closes. Stripe accepts 30 min … 24 h from creation.
    */
   readonly expiresAt?: number;
+  /**
+   * Trial days for the subscription (server-decided by trial-core.decideTrial;
+   * never client-supplied). Omitted = no trial. The adapter states the
+   * post-trial charge on the hosted page and fails closed if it cannot read
+   * the price it is about to describe.
+   */
+  readonly trialPeriodDays?: number;
   readonly successUrl: string;
   readonly cancelUrl: string;
 }

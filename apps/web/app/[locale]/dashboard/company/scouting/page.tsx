@@ -36,6 +36,9 @@ import { DemandLifecycleControls } from "@/components/app/demand-lifecycle-contr
 import { JourneyStrip } from "@/components/app/journey-strip";
 import { buildDemandJourney } from "@/lib/demand/demand-journey-model";
 import { FeatureNote } from "@/components/app/feature-note";
+import { AutoMatchReceiptNote } from "@/components/app/auto-match-receipt-note";
+import { readLastAutoMatchReceipt } from "@/lib/scouting/auto-match";
+import { createClient as createSupabaseServerClient } from "@/lib/supabase/server";
 import { AvailableSupplySection } from "@/components/app/available-supply-section";
 import { listAvailableSupplyForEmployer } from "@/lib/supply/employer-supply-discovery";
 import { isShortlistedForContact } from "@/lib/communication/communication-eligibility";
@@ -177,6 +180,10 @@ export default async function CompanyScoutingPage({
     demands[0]?.id ??
     null;
   const result = selected ? await runScouting(selected, requestedFilters) : null;
+  const autoMatchReceipt =
+    selected && result?.kind === "ok"
+      ? await readLastAutoMatchReceipt(await createSupabaseServerClient(), selected)
+      : null;
   // An AGENCY working on a need its client SHARED (owner decision 2026-09-28
   // B): it may read the need and see who fits, and it presents candidates from
   // its OWN roster (partners page). The client-owner actions — contact,
@@ -440,6 +447,10 @@ export default async function CompanyScoutingPage({
             ? t("pool.capped", { count: result.retrieval.poolSize })
             : t("pool.complete", { count: result.retrieval.poolSize })}
         </p>
+      ) : null}
+
+      {result?.kind === "ok" ? (
+        <AutoMatchReceiptNote receipt={autoMatchReceipt} locale={locale} />
       ) : null}
 
       {factsUnreadable ? (

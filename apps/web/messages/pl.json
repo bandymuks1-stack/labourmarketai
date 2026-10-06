@@ -5319,6 +5319,8 @@
     "titleAccent": "ustalone uczciwie.",
     "subcopyLive": "Ceny są potwierdzone przez właściciela i obowiązują. Aktywacja odbywa się na koncie organizacji poprzez bezpieczną płatność Stripe; na tej stronie nic nie jest pobierane.",
     "subcopy": "Ceny nie są jeszcze ostateczne, a rozliczenie nigdy nie jest tu uruchamiane za Ciebie. Poniższe plany opisują zakres; aktywacja jest ręczna — skontaktuj się, a przed rozpoczęciem potwierdzimy z Tobą cenę i zakres.",
+    "subcopyConfirmed": "Ceny są potwierdzone. Aktywacja online nie jest jeszcze otwarta — dołącz do listy oczekujących, skontaktujemy się i uruchomimy organizację ręcznie; na tej stronie nic nie jest pobierane.",
+    "trialNote": "Pierwsza subskrypcja organizacji zaczyna się od 14-dniowego okresu próbnego. Po nim z karty pobierana jest cena miesięczna; można zrezygnować przed jego końcem.",
     "planCta": "Dołącz do listy oczekujących na ten plan",
     "featuresLabel": "Zawiera",
     "plans": {
@@ -5338,8 +5340,8 @@
         "features": [
           "Do 10 aktywnych stanowisk",
           "Wszystko z planu Free, w skali operacyjnej",
-          "Jeden plan dla wszystkich możliwości organizacji",
-          "Operacje projektowe, gotowość, raporty i CSV"
+          "Jeden plan dla każdego rodzaju organizacji",
+          "Operacje projektowe, raporty i eksport CSV"
         ]
       },
       "agency": {

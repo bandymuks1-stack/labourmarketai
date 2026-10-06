@@ -1,6 +1,5 @@
 {
   "values": {
-    "PAYMENTS_ENABLED": false,
     "FREE_ORGANIZATION_PLAN_KEY": "free_organization",
     "ORGANIZATION_PLAN_KEY": "company_pilot",
     "OPEN_NEEDS_CONTACT_THRESHOLD": 10,

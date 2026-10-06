@@ -80,6 +80,14 @@ export async function PricingTable() {
               ))}
             </ul>
 
+            {/* The 14-day trial is mentioned only where it is truly offered:
+                the paid card, with billing armed and the table confirmed. */}
+            {billingOn && confirmed && price !== null && price > 0 ? (
+              <p className="mt-3 text-meta leading-snug text-text-muted" data-testid={`pricing-trial-${slug}`}>
+                {t("trialNote")}
+              </p>
+            ) : null}
+
             <div className="mt-6">
               {billingOn && confirmed ? (
                 <Link

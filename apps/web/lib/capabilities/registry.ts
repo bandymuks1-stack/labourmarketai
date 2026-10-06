@@ -1579,7 +1579,7 @@ const demandCreateConfirm: CapabilityDescriptor = {
 
     const result = await submitDemandRequestCore(
       caller,
-      { organizationId: employer.organizationId },
+      employer,
       draft.intent,
       {
         description: draft.description,

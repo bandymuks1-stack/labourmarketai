@@ -1,3 +1,4 @@
+import { runAutoMatchForDemand } from "@/lib/scouting/auto-match";
 import "server-only";
 
 import { z } from "zod";
@@ -322,6 +323,13 @@ function makeDemandLifecyclePair(op: "close" | "reopen"): [CapabilityDescriptor,
           code: res.kind === "not-owner" ? "not_authorized" : res.kind === "invalid" ? "invalid_transition" : "unavailable",
           message: "The need's status did not change.",
         };
+      }
+      if (op === "reopen") {
+        try {
+          await runAutoMatchForDemand(caller, employer, requestId, "reopen");
+        } catch {
+          /* the reopen result is unaffected */
+        }
       }
       const back = await readNeedForLifecycle(caller, employer.organizationId, requestId);
       return {

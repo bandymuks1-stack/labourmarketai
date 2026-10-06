@@ -5319,6 +5319,8 @@
     "titleAccent": "fair angesetzt.",
     "subcopyLive": "Die Preise sind vom Inhaber bestätigt und gültig. Die Aktivierung erfolgt im Organisationskonto über eine sichere Stripe-Zahlung; auf dieser Seite wird nichts abgebucht.",
     "subcopy": "Die Preise sind noch nicht endgültig, und die Abrechnung wird auf dieser Seite niemals für Sie gestartet. Die Stufen unten beschreiben den Umfang; die Aktivierung erfolgt manuell — melden Sie sich, und wir bestätigen Preis und Umfang mit Ihnen, bevor irgendetwas startet.",
+    "subcopyConfirmed": "Die Preise sind bestätigt. Die Online-Aktivierung ist noch nicht geöffnet — tragen Sie sich in die Warteliste ein, wir melden uns und starten Ihre Organisation manuell; auf dieser Seite wird nichts abgebucht.",
+    "trialNote": "Das erste Abonnement einer Organisation beginnt mit einer 14-tägigen Testphase. Danach wird Ihre Karte mit dem Monatspreis belastet; vor Ablauf können Sie kündigen.",
     "planCta": "Für diesen Plan auf die Warteliste",
     "featuresLabel": "Enthält",
     "plans": {
@@ -5338,8 +5340,8 @@
         "features": [
           "Bis zu 10 aktive Positionen",
           "Alles aus Kostenlos, im Betriebsmaßstab",
-          "Ein Plan für jede Organisationsfähigkeit",
-          "Projektbetrieb, Bereitschaft, Berichte und CSV"
+          "Ein Plan für jede Art von Organisation",
+          "Projektbetrieb, Berichte und CSV-Export"
         ]
       },
       "agency": {
