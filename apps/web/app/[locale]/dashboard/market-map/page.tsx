@@ -202,7 +202,7 @@ export default async function MarketMapPage({
   ];
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 max-lg:pb-24">
       <TelemetryView
         event={FUNNEL_EVENTS.preferredLocationViewed}
         metadata={{ surface: "market_map" }}
@@ -215,10 +215,14 @@ export default async function MarketMapPage({
       </h1>
 
       {/* ONE map: layers, location + radius, the map, its places — with the
-          market's signals beside it (a compact sheet above it on a phone). */}
+          market's signals beside it (a bottom sheet over it on a phone). */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start">
         <div className="min-w-0">
+          {/* Keyed on the requested layer: a signal that links to another layer
+              of THIS page re-opens the one map on that layer with its server
+              view (the client keeps its own layer state otherwise). */}
           <WorldDiscovery
+            key={layerParam || "default"}
             initial={initialWorld}
             initialLayer={worldLayer}
             initialKey={staticKey}
@@ -234,7 +238,7 @@ export default async function MarketMapPage({
             }}
           />
         </div>
-        <div className="min-w-0 max-lg:order-first lg:sticky lg:top-4">
+        <div className="min-w-0 max-lg:contents lg:sticky lg:top-4">
           <MarketSignalsRail brief={brief} />
         </div>
       </div>
