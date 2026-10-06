@@ -15,7 +15,8 @@
 -- makes the chain reproduce that invariant instead of depending on an
 -- out-of-ledger state.
 --
--- This is a pure TIGHTENING. Every legitimate writer is a SECURITY DEFINER
+-- APPLY AFTER 20261003150200 (creates work_plan_entries) and after the 150500
+-- group. This is a pure TIGHTENING. Every legitimate writer is a SECURITY DEFINER
 -- function owned by postgres (privileges of the owner are unaffected by
 -- revoking named roles); nothing in the app writes these tables directly.
 -- Owner TRUNCATE is refused too (statement trigger), because the table owner is
@@ -54,22 +55,16 @@ create trigger journal_entry_review_submissions_no_truncate
   before truncate on public.journal_entry_review_submissions
   for each statement execute function public.work_counterparty_no_truncate_v1();
 
--- 2. The other tables created by the same unapplied set: keep the DML grants
---    their policies/RPCs need, remove the three privileges no policy can gate.
-revoke truncate, references, trigger on
-  public.journal_entry_photos, public.company_locations, public.worker_external_profiles,
-  public.talent_source_records, public.identity_resolution_events, public.dashboard_preferences,
-  public.demand_interest_seen, public.work_plan_entries
+-- 2. The one other table the apply chain creates (150200). The remaining tables
+--    the local replay flags (journal_entry_photos, company_locations,
+--    worker_external_profiles, talent_source_records, identity_resolution_events,
+--    dashboard_preferences, demand_interest_seen) come from the OLD drafts that
+--    are superseded, retired or still undecided and are NEVER applied through
+--    this chain; production already holds 0 TRUNCATE-class privileges (read-only
+--    check 2026-10-06). Naming them here would make this migration fail in
+--    production (company_locations does not exist there).
+revoke truncate, references, trigger on public.work_plan_entries
   from public, anon, authenticated;
-
--- company_locations has only a SELECT policy; its writes are SECURITY DEFINER RPCs.
-revoke insert, update, delete on public.company_locations from authenticated;
-
--- No policy on these admits anon (every predicate uses auth.uid() / is_admin()).
-revoke all on
-  public.journal_entry_photos, public.company_locations, public.worker_external_profiles,
-  public.talent_source_records, public.identity_resolution_events, public.dashboard_preferences,
-  public.demand_interest_seen
-  from anon;
+revoke all on public.work_plan_entries from anon;
 
 commit;
