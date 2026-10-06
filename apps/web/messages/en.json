@@ -1495,6 +1495,7 @@
         "line": "{count, plural, one {# public vacancy} other {# public vacancies}} for {profession}",
         "fresh": "{n7} new in 7 days · {n30} in 30 days",
         "empty": "No public vacancies for {profession} right now.",
+        "unknown": "Public vacancies could not be read just now.",
         "derived": "Profession read from your recorded work."
       },
       "projects": {

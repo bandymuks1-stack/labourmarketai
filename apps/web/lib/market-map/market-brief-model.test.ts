@@ -124,6 +124,15 @@ describe("deriveMarketBrief", () => {
     });
   });
 
+  it("a vacancy read that FAILED is UNKNOWN and stays visible; 'does not apply' stays absent", () => {
+    const failed: VacancyVolumeResult = { kind: "unavailable", failed: true };
+    const brief = deriveMarketBrief({ needs: null, projects: null, vacancies: failed, territoryCount: null });
+    expect(brief.vacancies).toEqual({ state: "unknown" });
+    expect(visibleMarketSignals(brief)).toContain("vacancies");
+    const notApplicable = deriveMarketBrief({ needs: null, projects: null, vacancies: NO_VACANCIES, territoryCount: null });
+    expect(visibleMarketSignals(notApplicable)).not.toContain("vacancies");
+  });
+
   it("territory is absent unless the caller has one", () => {
     const base = { needs: null, projects: null, vacancies: NO_VACANCIES };
     expect(deriveMarketBrief({ ...base, territoryCount: null }).territory).toEqual({ state: "absent" });

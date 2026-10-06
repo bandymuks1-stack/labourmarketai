@@ -19,7 +19,8 @@ import type { WorldViewResult } from "./world-model";
  *  - A reader that FAILED is `unknown`, never `empty` and never a zero
  *    (SEP-7). A real empty answer is `empty`. A signal that does not apply
  *    to this person (no profession, no company territory) is `absent` and is
- *    not drawn at all — "Tuščia = tvarkinga".
+ *    not drawn at all — "Tuščia = tvarkinga". A vacancy read that broke is
+ *    `unknown`, distinct from one that does not apply.
  *  - A count over a leg that hit its row limit is flagged `lowerBound`.
  *  - Freshness is only the newest real `created_at` / `published_at` the
  *    reader saw; no timestamp, no freshness line. Nothing is "live" by
@@ -73,6 +74,8 @@ export type VacancySignal =
       readonly measuredAtIso: string;
     }
   | { readonly state: "empty"; readonly professionSlug: string; readonly derived: boolean }
+  /** The vacancy read FAILED — named, never dropped, never a zero. */
+  | { readonly state: "unknown" }
   | { readonly state: "absent" };
 
 export type TerritorySignal =
@@ -141,7 +144,9 @@ export function deriveMarketBrief(inputs: MarketBriefInputs): MarketBrief {
         }
       : v.kind === "empty"
         ? { state: "empty", professionSlug: v.professionSlug, derived: v.derived }
-        : { state: "absent" };
+        : v.failed
+          ? { state: "unknown" }
+          : { state: "absent" };
 
   return {
     needs: derivePlaceSignal(inputs.needs),

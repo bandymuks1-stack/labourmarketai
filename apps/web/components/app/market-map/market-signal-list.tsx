@@ -94,7 +94,9 @@ export async function MarketSignalList({
     else if (key === "vacancies" && brief.vacancies.state !== "absent") {
       const v = brief.vacancies;
       const label = t("vacancies.label");
-      if (v.state === "empty") {
+      if (v.state === "unknown") {
+        rows.push({ key, label, line: t("vacancies.unknown"), detail: [], state: "unknown" });
+      } else if (v.state === "empty") {
         rows.push({
           key,
           label,

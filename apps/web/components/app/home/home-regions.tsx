@@ -587,7 +587,7 @@ export async function HomeMarketView({ brief }: { readonly brief: MarketBrief })
     getTranslations("homeStage.regions.market"),
   ]);
   const unknown =
-    brief.needs.state === "unknown" || brief.projects.state === "unknown";
+    brief.needs.state === "unknown" || brief.projects.state === "unknown" || brief.vacancies.state === "unknown";
   const nothingToSay =
     brief.needs.state === "empty" &&
     brief.projects.state === "empty" &&

@@ -1495,6 +1495,7 @@
         "line": "{count, plural, one {# öffentliche Stelle} other {# öffentliche Stellen}} für {profession}",
         "fresh": "{n7} neu in 7 Tagen · {n30} in 30 Tagen",
         "empty": "Derzeit keine öffentlichen Stellen für {profession}.",
+        "unknown": "Öffentliche Stellen konnten gerade nicht gelesen werden.",
         "derived": "Beruf aus Ihrer erfassten Arbeit abgeleitet."
       },
       "projects": {

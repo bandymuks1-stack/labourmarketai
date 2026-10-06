@@ -1495,6 +1495,7 @@
         "line": "{count, plural, one {# publiczna oferta} few {# publiczne oferty} many {# publicznych ofert} other {# publicznych ofert}}: {profession}",
         "fresh": "{n7} nowych w 7 dni · {n30} w 30 dni",
         "empty": "Obecnie brak publicznych ofert dla zawodu „{profession}”.",
+        "unknown": "Nie udało się teraz odczytać publicznych ofert pracy.",
         "derived": "Zawód ustalony na podstawie Twojej zapisanej pracy."
       },
       "projects": {

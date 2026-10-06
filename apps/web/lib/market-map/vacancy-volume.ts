@@ -81,7 +81,13 @@ export type VacancyVolumeResult =
     }
   /** No profession to ask about, store not provisioned, caller not
    *  authenticated, or the read failed. The section renders nothing. */
-  | { readonly kind: "unavailable" };
+  | {
+      readonly kind: "unavailable";
+      /** The read itself failed (threw, errored, count unavailable) — as
+       *  opposed to "does not apply" (no profession, not signed in, store not
+       *  provisioned). Absent = does not apply. UNAVAILABLE != NOT APPLICABLE. */
+      readonly failed?: true;
+    };
 
 export async function loadVacancyVolume(): Promise<VacancyVolumeResult> {
   // Never throws — this feeds an ADDITIVE section on a page that already
@@ -89,7 +95,7 @@ export async function loadVacancyVolume(): Promise<VacancyVolumeResult> {
   try {
     return await readVacancyVolume();
   } catch {
-    return { kind: "unavailable" };
+    return { kind: "unavailable", failed: true };
   }
 }
 
@@ -105,7 +111,14 @@ async function readVacancyVolume(): Promise<VacancyVolumeResult> {
   const derived = !declared;
 
   const read = await getPublicMarketFacts(slug);
-  if (read.kind !== "ok") return { kind: "unavailable" };
+  if (read.kind !== "ok") {
+    // Only the reasons that mean "the read broke" are a failure; no profession
+    // / not authenticated simply do not apply to this viewer.
+    const failed =
+      read.kind === "unavailable" &&
+      (read.reason === "read_threw" || read.reason === "read_failed" || read.reason === "count_unavailable");
+    return failed ? { kind: "unavailable", failed: true } : { kind: "unavailable" };
+  }
   const facts = read.facts;
   if (facts.activeAds === 0) return { kind: "empty", professionSlug: slug, derived };
 

@@ -1495,6 +1495,7 @@
         "line": "{count, plural, one {# vieša laisva vieta} few {# viešos laisvos vietos} other {# viešų laisvų vietų}}: {profession}",
         "fresh": "{n7} naujų per 7 dienas · {n30} per 30 dienų",
         "empty": "Šiuo metu viešų laisvų vietų pagal „{profession}“ nėra.",
+        "unknown": "Viešų laisvų vietų šiuo metu nepavyko nuskaityti.",
         "derived": "Profesija nustatyta pagal jūsų užfiksuotą darbą."
       },
       "projects": {

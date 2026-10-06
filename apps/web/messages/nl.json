@@ -1495,6 +1495,7 @@
         "line": "{count, plural, one {# openbare vacature} other {# openbare vacatures}} voor {profession}",
         "fresh": "{n7} nieuw in 7 dagen · {n30} in 30 dagen",
         "empty": "Momenteel geen openbare vacatures voor {profession}.",
+        "unknown": "Openbare vacatures konden nu niet worden gelezen.",
         "derived": "Beroep afgeleid uit uw vastgelegde werk."
       },
       "projects": {
