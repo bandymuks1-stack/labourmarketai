@@ -537,9 +537,35 @@
       "too_large": "Įrašas per didelis (iki 25 MB).",
       "too_long": "Įrašas per ilgas (iki 10 minučių).",
       "unavailable": "Transkribavimo serveris šiuo metu nepasiekiamas.",
-      "undecodable": "Nepavyko nuskaityti garso — pabandykite dar kartą."
+      "undecodable": "Nepavyko nuskaityti garso — pabandykite dar kartą.",
+      "rate_limited": "Per daug įrašų per trumpą laiką - palaukite ir bandykite dar kartą.",
+      "token_expired": "Įkėlimo sesija baigėsi - bandykite dar kartą.",
+      "unauthorized": "Jūsų sesija neturi teisės naudoti balso - prisijunkite iš naujo.",
+      "service_unreachable": "Nepavyko pasiekti transkripcijos serverio. Patikrinkite ryšį ir bandykite dar kartą; įrašas laikomas šiame puslapyje, kol išeisite."
     },
-    "permissionDenied": "Prieiga prie mikrofono užblokuota. Leiskite mikrofoną naršyklės nustatymuose ir bandykite dar kartą."
+    "permissionDenied": "Prieiga prie mikrofono užblokuota. Leiskite mikrofoną naršyklės nustatymuose ir bandykite dar kartą.",
+    "disclosureProvenance": "Išsaugotas įrašas pažymimas kaip padiktuotas balsu ir jūsų peržiūrėtas.",
+    "state": {
+      "ready": "Paruošta. Pasirinkite kalbą, kuria kalbėsite, ir pradėkite įrašą.",
+      "permissionRequired": "Naršyklė paprašys leidimo naudoti mikrofoną, kai pradėsite. Kol neleisite, niekas neįrašoma.",
+      "policyBlocked": "Svetainės saugumo politika čia blokuoja mikrofoną. Balso įrašas šiame puslapyje nepasiekiamas - įrašą galite parašyti tekstu.",
+      "unsupported": "Ši naršyklė čia negali įrašyti garso (reikia saugaus puslapio ir mikrofono įrašymo palaikymo). Galite įkelti garso failą arba rašyti tekstu.",
+      "noDevice": "Šiame įrenginyje mikrofono nerasta.",
+      "deviceBusy": "Mikrofoną naudoja kita programa. Uždarykite ją ir bandykite dar kartą.",
+      "cancelled": "Įrašas atšauktas. Nieko neįkelta ir neišsaugota.",
+      "requesting": "Laukiama jūsų leidimo naudoti mikrofoną...",
+      "interrupted": "Įrašas pristabdytas, nes puslapis buvo paslėptas. Tęskite, kai grįšite.",
+      "interruptedKept": "Mikrofonas sustojo, todėl įrašas baigėsi anksčiau. Tai, kas užfiksuota, išrašyta žemiau - patikrinkite.",
+      "uploading": "Įkeliamas įrašas..."
+    },
+    "language": {
+      "label": "Kalbėjimo kalba",
+      "auto": "Atpažinti automatiškai",
+      "hint": "Pasirinkite kalbą, kuria kalbėsite - ji neprivalo sutapti su svetainės kalba."
+    },
+    "recordAgain": "Įrašyti iš naujo",
+    "announceStarted": "Įrašas prasidėjo",
+    "announceMinutes": "Įrašyta min.: {minutes}"
   },
   "savedOpenCv": "Peržiūrėti savo CV",
   "dayNav": {

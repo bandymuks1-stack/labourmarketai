@@ -787,7 +787,11 @@
     "closeLabel": "Close search",
     "voiceStart": "Search by voice",
     "voiceStop": "Stop voice input",
-    "voiceListening": "Listening... say what you are looking for — the text will appear in the search field."
+    "voiceListening": "Listening... say what you are looking for — the text will appear in the search field.",
+    "voiceConsentText": "Dictation in the search box uses your browser's built-in speech recognition. Depending on your browser (for example Chrome or Safari) the audio is sent to that browser vendor's speech service, not to LabourMarket.ai. Nothing is saved by us. Use the voice journal for audio processed on LabourMarket.ai's own server.",
+    "voiceConsentAllow": "Continue with browser dictation",
+    "voiceConsentCancel": "Not now",
+    "voiceFailed": "Dictation stopped - the browser could not use the microphone or speech service."
   },
   "reports": {
     "eyebrow": "Reports",

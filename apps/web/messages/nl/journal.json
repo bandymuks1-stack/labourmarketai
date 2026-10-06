@@ -537,9 +537,35 @@
       "too_large": "De opname is te groot (max. 25 MB).",
       "too_long": "De opname is te lang (max. 10 minuten).",
       "unavailable": "De transcriptieserver is momenteel niet beschikbaar.",
-      "undecodable": "De audio kon niet worden gelezen — probeer het opnieuw."
+      "undecodable": "De audio kon niet worden gelezen — probeer het opnieuw.",
+      "rate_limited": "Te veel opnames in korte tijd - wacht even en probeer opnieuw.",
+      "token_expired": "De uploadsessie is verlopen - probeer opnieuw.",
+      "unauthorized": "Je sessie is niet gemachtigd voor spraak - log opnieuw in.",
+      "service_unreachable": "De transcriptieserver is niet bereikbaar. Controleer je verbinding en probeer opnieuw; de opname blijft op deze pagina bewaard."
     },
-    "permissionDenied": "Microfoontoegang is geblokkeerd. Sta microfoontoegang toe in je browserinstellingen en probeer het opnieuw."
+    "permissionDenied": "Microfoontoegang is geblokkeerd. Sta microfoontoegang toe in je browserinstellingen en probeer het opnieuw.",
+    "disclosureProvenance": "De opgeslagen invoer wordt gemarkeerd als ingesproken en door jou gecontroleerd.",
+    "state": {
+      "ready": "Klaar. Kies de spreektaal en start de opname.",
+      "permissionRequired": "Je browser vraagt bij het starten om microfoontoestemming. Voor jouw toestemming wordt niets opgenomen.",
+      "policyBlocked": "Het beveiligingsbeleid van de site blokkeert hier de microfoon. Spraakopname is op deze pagina niet beschikbaar - je kunt de invoer als tekst schrijven.",
+      "unsupported": "Deze browser kan hier geen audio opnemen (veilige pagina en ondersteuning voor microfoonopname vereist). Je kunt een audiobestand uploaden of tekst schrijven.",
+      "noDevice": "Er is geen microfoon gevonden op dit apparaat.",
+      "deviceBusy": "De microfoon wordt door een andere app gebruikt. Sluit die en probeer opnieuw.",
+      "cancelled": "Opname geannuleerd. Er is niets geüpload of opgeslagen.",
+      "requesting": "Wachten op je toestemming voor de microfoon...",
+      "interrupted": "Opname gepauzeerd omdat de pagina verborgen was. Ga verder als je terug bent.",
+      "interruptedKept": "De microfoon stopte, dus de opname eindigde vroeg. Wat is opgenomen staat hieronder uitgeschreven - controleer het.",
+      "uploading": "Opname wordt geüpload..."
+    },
+    "language": {
+      "label": "Spreektaal",
+      "auto": "Automatisch detecteren",
+      "hint": "Kies de taal die je spreekt - die hoeft niet gelijk te zijn aan de taal van de site."
+    },
+    "recordAgain": "Opnieuw opnemen",
+    "announceStarted": "Opname gestart",
+    "announceMinutes": "{minutes} min opgenomen"
   },
   "savedOpenCv": "Bekijk uw cv",
   "dayNav": {

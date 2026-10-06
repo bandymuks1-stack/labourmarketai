@@ -149,6 +149,7 @@ import {
 import { workspaceDisplayLabels, type WorkspaceInfo } from "@/lib/company/organization-switch";
 import { extractWorkLog, journalDraftReadiness } from "@/lib/conversation/worklog-extract";
 import { VOICE_TRANSCRIPT_DRAFT_KEY } from "@/lib/voice/constants";
+import { decodeVoiceHandoff } from "@/lib/voice/capture-model";
 import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadContextBrief } from "@/lib/conversation/agenda-summary";
 import { loadMessagesForChat, type ChatInboxThread } from "@/lib/conversation/messages-chat";
@@ -3402,7 +3403,15 @@ export function ConversationChat({
 
   /** Work-log from a natural sentence → real journal save (deterministic). */
   const startWorkLog = useCallback(
-    (text: string, opts?: { photoFirst?: boolean; explicit?: boolean; file?: File }) => {
+    (
+      text: string,
+      opts?: {
+        photoFirst?: boolean;
+        explicit?: boolean;
+        file?: File;
+        voice?: { language: string; disclosureVersion: string };
+      },
+    ) => {
       // ASK -> PREFILL -> THE EXISTING SAVE FLOW.
       //
       // When a work-evidence conversation is in flight, the form opens filled
@@ -3470,6 +3479,7 @@ export function ConversationChat({
           labels={workLogLabels}
           photoFirst={opts?.photoFirst ?? false}
           initialFile={opts?.file ?? null}
+          voice={opts?.voice}
           onRegisterAttachSink={attachSinksRef.current.register}
           // After a work log lands, the person SEES their card change
           // (owner audit §5.1 "matoma po darbo įrašo atnaujinimo"): the
@@ -3546,11 +3556,15 @@ export function ConversationChat({
     } catch {
       draft = null;
     }
-    const text = (draft ?? "").trim();
-    if (!text) return;
+    const handoff = decodeVoiceHandoff(draft);
+    const text = handoff?.text ?? "";
+    if (!handoff || !text) return;
     voiceDraftConsumedRef.current = true;
     user(text);
-    startWorkLog(text);
+    // The provenance rides with the work-log flow's ONE save; it is a label on
+    // the record, not a second path (the dispatcher, confirmation and
+    // createJournalEntry are unchanged).
+    startWorkLog(text, { voice: { language: handoff.language, disclosureVersion: handoff.disclosureVersion } });
   }, [auth?.profile, identity, user, startWorkLog]);
 
   /**
