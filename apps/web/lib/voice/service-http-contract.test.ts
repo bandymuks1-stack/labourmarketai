@@ -1,5 +1,5 @@
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
-import { readdirSync } from "node:fs";
+import { mkdirSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -17,6 +17,9 @@ const PORT = 39000 + Math.floor(Math.random() * 500);
 const BASE = `http://127.0.0.1:${PORT}`;
 const SECRET = "contract-test-secret-0123456789abcdef0123456789";
 const ORIGIN = "https://app.example.test";
+// The service gets its OWN temp dir, so the no-persistence check lists a small, private directory
+// (a shared OS temp dir can hold thousands of unrelated entries and is slow to list under load).
+const SERVICE_TMP = join(tmpdir(), `lmai-contract-tmp-${PORT}`);
 const SERVER = join(__dirname, "..", "..", "..", "..", "services", "transcribe", "server.mjs");
 
 let child: ChildProcess;
@@ -59,6 +62,7 @@ async function post(tok: string, origin: string | null) {
 }
 
 beforeAll(async () => {
+  mkdirSync(SERVICE_TMP, { recursive: true });
   child = spawn(process.execPath, [SERVER], {
     env: {
       ...process.env,
@@ -67,6 +71,9 @@ beforeAll(async () => {
       ALLOWED_ORIGINS: ORIGIN,
       WHISPER_BIN: "definitely-not-installed",
       RATE_LIMIT_PER_MINUTE: "5",
+      TMPDIR: SERVICE_TMP,
+      TMP: SERVICE_TMP,
+      TEMP: SERVICE_TMP,
       IDEMPOTENCY_CACHE_DIR: join(tmpdir(), `lmai-contract-cache-${PORT}`),
     },
     stdio: "ignore",
@@ -76,6 +83,7 @@ beforeAll(async () => {
 
 afterAll(() => {
   child?.kill();
+  rmSync(SERVICE_TMP, { recursive: true, force: true });
 });
 
 describe("transcription service HTTP contract (real server, decided before the engine)", () => {
@@ -185,7 +193,15 @@ describe("transcription service HTTP contract (real server, decided before the e
   it("no raw-audio persistence: no work directory is left in the temp dir after requests", async () => {
     await post(token(), ORIGIN);
     await post(token(), ORIGIN);
-    const leftovers = readdirSync(tmpdir()).filter((n) => n.startsWith("tr-"));
+    // The reply is sent from inside the handler's try block and the work dir is removed in its
+    // `finally`, so the client can legitimately see the response a few ms BEFORE the removal
+    // completes. Persistence would mean it never goes away: poll for up to 5 s.
+    let leftovers: string[] = [];
+    for (let i = 0; i < 50; i += 1) {
+      leftovers = readdirSync(SERVICE_TMP).filter((n) => n.startsWith("tr-"));
+      if (leftovers.length === 0) break;
+      await new Promise((r) => setTimeout(r, 100));
+    }
     expect(leftovers).toEqual([]);
   });
 

@@ -33,7 +33,16 @@ export interface VoiceUploadInput {
   readonly signal?: AbortSignal;
 }
 
-export const VOICE_UPLOAD_TIMEOUT_MS = 180_000;
+/**
+ * Must outlast the service's own engine budget (WHISPER_TIMEOUT_MS = 300 s) plus
+ * upload time, otherwise the browser gives up on a recording the service is
+ * still legitimately transcribing and shows a false failure. A real 600 s
+ * recording on the production image exceeded 300 s on a loaded dev machine
+ * (engine_failed from the SERVICE'S timeout), so the honest numbers are: client
+ * 330 s, service 300 s, and a measured realtime factor on the target host
+ * before the 10-minute limit is advertised (services/transcribe/README.md).
+ */
+export const VOICE_UPLOAD_TIMEOUT_MS = 330_000;
 
 export function uploadForTranscription(
   input: VoiceUploadInput,

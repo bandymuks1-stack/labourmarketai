@@ -66,7 +66,7 @@ describe("uploadForTranscription - honest stages and failures", () => {
     expect(FakeXhr.last.headers.authorization).toBe("Bearer v1.tok.sig");
     expect(FakeXhr.last.headers["content-type"]).toBe("audio/webm");
     expect(FakeXhr.last.sent).toBeInstanceOf(Blob);
-    expect(FakeXhr.last.timeout).toBe(180_000);
+    expect(FakeXhr.last.timeout).toBe(330_000);
   });
 
   it("progress and the 'uploaded' stage come ONLY from real events", async () => {
