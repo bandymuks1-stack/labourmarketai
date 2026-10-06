@@ -86,6 +86,17 @@ On the service host set:
 Audio is processed in a temp directory and deleted as soon as the text is
 ready; the service logs sizes and codes only, never audio or transcript text.
 
+### Performance - measure before advertising 10 minutes
+Recognition cost is hardware- and model-dependent. On the production image
+(`tiny`, loaded 4-core dev machine, 2026-10-06) a ~7 s spoken sample took 45 s
+and 600 s of audio exceeded the 300 s engine budget (`502 engine_failed`). The
+numbers are not representative of a dedicated host, so before relying on the
+10-minute limit: run a ~10-minute real-speech file through the deployed host,
+record the realtime factor, and either raise `WHISPER_TIMEOUT_MS` (the browser
+waits up to 330 s: keep it below that, or raise both) / use more threads / a
+smaller model, or lower `VOICE_MAX_SECONDS`. The 413 `too_long` check and the
+25 MB check are decided before the engine and are exact.
+
 ### Web app wiring (after deploy)
 
 Set in the web app environment (Vercel):
