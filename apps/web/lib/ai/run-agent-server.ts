@@ -74,7 +74,7 @@ export async function runAiAgent<T = unknown>(
         }
       }
     } catch {
-      // no request context — honest skip
+      // no request context â€” honest skip
     }
   }
 

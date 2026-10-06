@@ -71,7 +71,7 @@ export type NotificationEmailDispatchOutcome =
   | { readonly kind: "not_configured" }
   | { readonly kind: "no_recipient_email" }
   | { readonly kind: "render_failed" }
-  /** Fan-out ceiling reached (email-send-guard.ts) — bell notification stands. */
+  /** Fan-out ceiling reached (email-send-guard.ts) â€” bell notification stands. */
   | { readonly kind: "rate_limited" }
   | { readonly kind: "send_failed"; readonly reason: string };
 

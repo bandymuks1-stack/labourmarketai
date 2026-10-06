@@ -1,5 +1,5 @@
 /**
- * Per-organization AI run cap — pure helpers + core enforcement (mock mode).
+ * Per-organization AI run cap â€” pure helpers + core enforcement (mock mode).
  */
 
 import { describe, it, expect } from "vitest";
@@ -137,6 +137,7 @@ describe("per-organization daily AI cap (org-run-cap)", () => {
   it("count helper reads usage_cost_events for the org and fails open (null) on error", async () => {
     const calls: Array<[string, string]> = [];
     const mk = (res: { count: number | null; error: { message?: string } | null }): OrgRunCountDb => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const q: any = {
         eq: (c: string, v: string) => { calls.push([c, v]); return q; },
         gte: async () => res,
