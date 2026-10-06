@@ -1,4 +1,6 @@
-import { spawn, type ChildProcess } from "node:child_process";
+import { spawn, spawnSync, type ChildProcess } from "node:child_process";
+import { readdirSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -33,8 +35,16 @@ async function waitUp(): Promise<void> {
 }
 
 const audio = () => new Uint8Array(4096);
+let subjectSeq = 0;
 const token = (over: Partial<Parameters<typeof mintUploadToken>[0]> = {}) =>
-  mintUploadToken({ secret: SECRET, profileId: "profile-1", maxBytes: 25 * 1024 * 1024, ...over }).token;
+  mintUploadToken({
+    secret: SECRET,
+    profileId: `profile-${(subjectSeq += 1)}`,
+    maxBytes: 25 * 1024 * 1024,
+    ...over,
+  }).token;
+const hasFfmpeg = spawnSync("ffmpeg", ["-version"]).status === 0;
+const SERVICE_CAP = 25 * 1024 * 1024;
 
 async function post(tok: string, origin: string | null) {
   return fetch(`${BASE}/v1/transcribe?language=lt`, {
@@ -56,6 +66,8 @@ beforeAll(async () => {
       TRANSCRIBE_TOKEN: SECRET,
       ALLOWED_ORIGINS: ORIGIN,
       WHISPER_BIN: "definitely-not-installed",
+      RATE_LIMIT_PER_MINUTE: "5",
+      IDEMPOTENCY_CACHE_DIR: join(tmpdir(), `lmai-contract-cache-${PORT}`),
     },
     stdio: "ignore",
   });
@@ -131,4 +143,73 @@ describe("transcription service HTTP contract (real server, decided before the e
     });
     expect(r.status).toBe(415);
   });
+
+  it("rate limit: the sixth request in a minute for ONE subject is 429, another subject is unaffected", async () => {
+    const one = mintUploadToken({ secret: SECRET, profileId: "limited-subject", maxBytes: SERVICE_CAP });
+    const codes: number[] = [];
+    for (let i = 0; i < 7; i += 1) {
+      const t = mintUploadToken({ secret: SECRET, profileId: "limited-subject", maxBytes: SERVICE_CAP }).token;
+      codes.push((await post(t, ORIGIN)).status);
+    }
+    expect(codes.slice(0, 5).every((c) => c !== 429)).toBe(true);
+    expect(codes.slice(5)).toEqual([429, 429]);
+    expect(one.token).toBeTruthy();
+    expect((await post(token(), ORIGIN)).status).not.toBe(429);
+  });
+
+  it("25 MB boundary: cap+1 bytes is 413 too_large with a readable body; exactly the cap passes the size gate", async () => {
+    const over = await fetch(`${BASE}/v1/transcribe?language=lt`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${token()}`, "content-type": "audio/webm", origin: ORIGIN },
+      body: new Uint8Array(SERVICE_CAP + 1),
+    });
+    expect(over.status).toBe(413);
+    expect((await over.json()).code).toBe("too_large");
+    const exact = await fetch(`${BASE}/v1/transcribe?language=lt`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${token()}`, "content-type": "audio/webm", origin: ORIGIN },
+      body: new Uint8Array(SERVICE_CAP),
+    });
+    // past the size gate: the (absent / zero-byte) media is refused as undecodable, never 413
+    expect(exact.status).not.toBe(413);
+    expect(["undecodable", "unreadable", "engine_failed"]).toContain((await exact.json()).code);
+  }, 60_000);
+
+  it("transcription failure is an honest 5xx/4xx code, never a 200 with empty text", async () => {
+    const r = await post(token(), ORIGIN);
+    const body = await r.json();
+    expect(r.status).toBeGreaterThanOrEqual(400);
+    expect(typeof body.code).toBe("string");
+  });
+
+  it("no raw-audio persistence: no work directory is left in the temp dir after requests", async () => {
+    await post(token(), ORIGIN);
+    await post(token(), ORIGIN);
+    const leftovers = readdirSync(tmpdir()).filter((n) => n.startsWith("tr-"));
+    expect(leftovers).toEqual([]);
+  });
+
+  it.skipIf(!hasFfmpeg)("10-minute boundary: 601 s of audio is 413 too_long, 600 s passes to the engine", async () => {
+    const wav = (seconds: number) => {
+      const rate = 8000;
+      const n = seconds * rate;
+      const buf = Buffer.alloc(44 + n * 2);
+      buf.write("RIFF", 0); buf.writeUInt32LE(36 + n * 2, 4); buf.write("WAVE", 8); buf.write("fmt ", 12);
+      buf.writeUInt32LE(16, 16); buf.writeUInt16LE(1, 20); buf.writeUInt16LE(1, 22); buf.writeUInt32LE(rate, 24);
+      buf.writeUInt32LE(rate * 2, 28); buf.writeUInt16LE(2, 32); buf.writeUInt16LE(16, 34); buf.write("data", 36);
+      buf.writeUInt32LE(n * 2, 40);
+      return buf;
+    };
+    const send = (sec: number) =>
+      fetch(`${BASE}/v1/transcribe?language=lt`, {
+        method: "POST",
+        headers: { authorization: `Bearer ${token()}`, "content-type": "audio/wav", origin: ORIGIN },
+        body: wav(sec),
+      });
+    const long = await send(601);
+    expect(long.status).toBe(413);
+    expect((await long.json()).code).toBe("too_long");
+    const ok = await send(600);
+    expect((await ok.json()).code).toBe("engine_failed"); // whisper is deliberately absent
+  }, 120_000);
 });

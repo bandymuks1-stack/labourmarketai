@@ -14134,7 +14134,9 @@
         "chipDocument": "Dokument hinzufügen"
       },
       "visibilityUnavailable": "Ihre Sichtbarkeit für Arbeitgeber konnte nicht geprüft werden. Das heißt nicht, dass sie aus ist — öffnen Sie die Einstellungen.",
-      "chipVisibility": "Sichtbarkeit für Arbeitgeber"
+      "chipVisibility": "Sichtbarkeit für Arbeitgeber",
+      "voiceOpen": "Sprechen",
+      "voiceBareYes": "Ein gesprochenes „Ja“ ist keine Bestätigung. Bestätigen Sie mit der Schaltfläche auf der Karte oder sagen Sie, was Sie tun möchten."
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",

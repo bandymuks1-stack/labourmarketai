@@ -14134,7 +14134,9 @@
         "chipDocument": "Dodaj dokument"
       },
       "visibilityUnavailable": "Nie udało się sprawdzić widoczności dla pracodawców. To nie znaczy, że jest wyłączona — otwórz ustawienia.",
-      "chipVisibility": "Widoczność dla pracodawców"
+      "chipVisibility": "Widoczność dla pracodawców",
+      "voiceOpen": "Mów",
+      "voiceBareYes": "Wypowiedziane „tak” nie jest potwierdzeniem. Potwierdź przyciskiem na karcie albo powiedz, co chcesz zrobić."
     },
     "worklog": {
       "understood": "Oto, co zrozumiałem — zapisać?",

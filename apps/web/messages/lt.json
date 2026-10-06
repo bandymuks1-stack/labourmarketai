@@ -14134,7 +14134,9 @@
         "chipDocument": "Pridėti dokumentą"
       },
       "visibilityUnavailable": "Nepavyko patikrinti matomumo darbdaviams. Tai nereiškia, kad jis išjungtas — atidarykite nustatymus.",
-      "chipVisibility": "Matomumas darbdaviams"
+      "chipVisibility": "Matomumas darbdaviams",
+      "voiceOpen": "Kalbėti",
+      "voiceBareYes": "Ištartas „taip“ nėra patvirtinimas. Patvirtinkite paspausdami kortelės mygtuką arba pasakykite, ką norite daryti."
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
