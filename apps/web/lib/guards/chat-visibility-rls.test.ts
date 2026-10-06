@@ -436,8 +436,29 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    Personal subjects keep the user-scoped read (owner_id = auth.uid()
     //    IS the policy). No RLS change; touches no chat table; sends
     //    nothing outbound.
+    //  - lib/communication/communication-core.ts — THE ONE EXCEPTION to "no
+    //    chat table is touched with the service role" (authority closure,
+    //    audit 2026-10-06 F-1). It performs exactly ONE service-role write:
+    //    inserting the OTHER participant(s) into a conversation THE CALLER
+    //    JUST CREATED under their own RLS, and only after a ContactAuthority
+    //    (lib/communication/contact-authority.ts) proves the section 8.1
+    //    contact gate held. Service role is genuinely required, not
+    //    convenient: migration 20261006100100 makes the database refuse any
+    //    end-user session that inserts ANOTHER profile into a conversation
+    //    (before it, any signed-in account could add anyone and message them,
+    //    bypassing the gate entirely), and the section 8.1 permission is a
+    //    server-side evaluation over many relationship facts that must not be
+    //    re-implemented in SQL as a parallel authorization system. The
+    //    authority is an identity-checked server-side token a browser cannot
+    //    forge; the browser-callable action (actions.ts) never has one and
+    //    never imports this client. Nothing is READ with the service role
+    //    (participants are still read under the sender's session), the
+    //    creator's own row and the thread are written under their own RLS,
+    //    and nothing is sent outbound. Pinned in
+    //    lib/guards/authority-closure-first-package.test.ts (exactly one
+    //    call, after the authority gate, only conversation_participants).
     //
-    // None touch a chat table; they write only billing_* /
+    // None of the others touch a chat table; they write only billing_* /
     // payment_webhook_events / one intake status column / the append-only
     // ai_runs audit row / the two operator-only vacancy tables / the
     // append-only notification_events rows (the reads write nothing at all).
@@ -456,6 +477,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/billing/reconcile.ts",
       "lib/billing/subscription-store.ts",
       "lib/commercial/handoff-dispatch.ts",
+      "lib/communication/communication-core.ts",
       "lib/company/claim-public-intake.ts",
       "lib/invitations/external-referral-receive.ts",
       "lib/invitations/public-preview.ts",

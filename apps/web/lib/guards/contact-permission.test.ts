@@ -125,11 +125,15 @@ describe("no contact without permission — the create path is gated", () => {
     expect(direct).toMatch(/isContactPermitted/);
     // The default-closed denial exists and carries the tagged code.
     expect(direct).toMatch(/code:\s*"no_permission"/);
-    // The gate sits BEFORE the createConversation call in source order.
+    // The gate sits BEFORE the creation call in source order. Creation goes
+    // through the core with an authority minted from THIS gate's result - never
+    // through the browser-callable `createConversation` action (audit F-1).
     const gate = direct.indexOf('code: "no_permission"');
-    const create = direct.indexOf("return createConversation(");
+    const create = direct.indexOf("await createConversationCore(");
     expect(gate).toBeGreaterThan(-1);
     expect(create).toBeGreaterThan(gate);
+    expect(direct).toMatch(/issueContactAuthority\(permission\)/);
+    expect(direct).not.toMatch(/createConversation\(/);
   });
 
   it("a caller-supplied grant is honoured ONLY when it is an allowed_* state", () => {

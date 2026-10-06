@@ -1,6 +1,8 @@
 import "server-only";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { createConversation, type CommunicationResult } from "./actions";
+import { createConversationCore, type CommunicationResult } from "./communication-core";
+import { issueContactAuthority } from "./contact-authority";
 import { resolveContactPermission } from "./contact-permission";
 import { findExistingDirectConversation } from "./direct-conversation-core";
 import {
@@ -83,11 +85,21 @@ export async function getOrCreateDirectConversation(
   // 3) Permitted — create a fresh direct conversation with both participants.
   //    The sourceHint (when the gated caller supplied one) is stamped only
   //    HERE, after the §8.1 gate held — stamping cannot mint permission.
-  return createConversation({
-    subject: subject ?? null,
-    kind: "direct",
-    participantProfileIds: [otherProfileId],
-    locale,
-    sourceHint: sourceHint ?? null,
-  });
+  //    The authority below is minted from THIS gate result and travels to the
+  //    core as the proof that the gate held; the browser-callable action
+  //    `createConversation` can never produce one.
+  const authority = issueContactAuthority(permission);
+  const created = await createConversationCore(
+    { supabase, userId: user.id },
+    {
+      subject: subject ?? null,
+      kind: "direct",
+      participantProfileIds: [otherProfileId],
+      locale,
+      sourceHint: sourceHint ?? null,
+    },
+    authority ?? undefined,
+  );
+  if (created.ok) revalidatePath(`/${locale}/dashboard/communication`);
+  return created;
 }
