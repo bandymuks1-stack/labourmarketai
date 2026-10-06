@@ -2,6 +2,8 @@
 
 import { toActiveLocale } from "@/lib/i18n/config";
 import { acceptInvitationAction } from "@/lib/invitations/actions";
+import { readInvitationSignupContext } from "@/lib/invitations/signup-bridge";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Continue the canonical invitation acceptance RIGHT AFTER a successful signup
@@ -31,4 +33,54 @@ export async function acceptInvitationAfterSignup(input: {
     return { accepted: result.outcome === "accepted", outcome: result.outcome };
   }
   return { accepted: false, outcome: result.status };
+}
+
+/**
+ * SIGNUP THROUGH AN ADDRESSED INVITATION, address kept server-side.
+ *
+ * The invited address is resolved HERE from the token and handed straight to
+ * `auth.signUp`; the browser only ever holds the masked form (c***@domain) and
+ * the password. So whoever holds a usable link learns no more than the existing
+ * public preview already shows. The e-mail binding (151100) is unchanged: it
+ * still compares the new session's address to the invited one at acceptance.
+ *
+ * Returns the auth error's code/message/status (never the address) so the form
+ * maps it exactly as it maps a client-side signUp failure.
+ */
+export type AddressedSignupResult =
+  | { status: "session"; accepted: boolean }
+  | { status: "check_email" }
+  | { status: "unavailable" }
+  | { status: "error"; code: string | null; message: string; httpStatus: number | null };
+
+export async function signUpAddressedInviteAction(input: {
+  token: string;
+  password: string;
+  locale: string;
+  emailRedirectTo: string;
+  metadata?: Record<string, string>;
+}): Promise<AddressedSignupResult> {
+  const token = String(input.token ?? "");
+  const context = await readInvitationSignupContext(token || null);
+  if (context.kind !== "addressed") return { status: "unavailable" };
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signUp({
+    email: context.email,
+    password: String(input.password ?? ""),
+    options: {
+      emailRedirectTo: input.emailRedirectTo,
+      data: { locale: input.locale, ...(input.metadata ?? {}) },
+    },
+  });
+  if (error) {
+    return {
+      status: "error",
+      code: (error as { code?: string }).code ?? null,
+      message: error.message.split(context.email).join("the invited address"),
+      httpStatus: error.status ?? null,
+    };
+  }
+  if (!data.session) return { status: "check_email" };
+  const accepted = await acceptInvitationAfterSignup({ token, locale: input.locale });
+  return { status: "session", accepted: accepted.accepted };
 }

@@ -64,9 +64,16 @@ describe("wiring - the security invariant and consent boundaries stay where they
 
   it("the signup form only auto-accepts for an addressed invitation, with the locked address, and never blocks onboarding on it", () => {
     const form = read("components/app/signup-form.tsx");
-    expect(form).toMatch(/if \(invitation\) \{[\s\S]*acceptInvitationAfterSignup/);
+    expect(form).toMatch(/if \(invitation\) \{[\s\S]*signUpAddressedInviteAction/);
     expect(form).toMatch(/readOnly=\{Boolean\(invitation\)\}/);
-    expect(form).toMatch(/catch \(e\) \{\s*console\.error\("\[signup\] invitation auto-accept failed:"/);
+    // the full invited address never reaches the browser: the form holds only the masked form
+    expect(form).toMatch(/invitation\?\.maskedEmail/);
+    expect(form).not.toMatch(/invitation\.email|invitation\?\.email/);
+    const act = read("lib/invitations/signup-accept-action.ts");
+    expect(act).toMatch(/context\.email/);
+    expect(act).not.toMatch(/return \{[^}]*email:/);
+    const page = read("app/[locale]/auth/signup/page.tsx");
+    expect(page).toMatch(/maskedEmail: maskEmail\(invite\.email\)/);
     // the normal (non-invite) signup keeps the confirm-password rule
     expect(form).toMatch(/if \(!invitation && password !== confirm\)/);
   });
