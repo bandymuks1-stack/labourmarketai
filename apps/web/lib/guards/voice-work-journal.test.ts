@@ -254,7 +254,8 @@ describe("provenance - voice-derived entries say so (self-declared label, never 
     expect(read("lib/conversation/worker-schemas.ts")).toMatch(/voice: z/);
   });
   it("the chat carries provenance through the existing work-log flow (no direct write)", () => {
-    expect(read(CHAT)).toMatch(/voice=\{opts\?\.voice\}/);
+    expect(read(CHAT)).toContain("opts?.voice ??");
+    expect(read(CHAT)).toContain("voiceProvenanceRef.current");
     expect(read("components/app/conversation/worker-worklog-flow.tsx")).toMatch(/\.\.\.\(voice \? \{ voice \} : \{\}\)/);
   });
 });

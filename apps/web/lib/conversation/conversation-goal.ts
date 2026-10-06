@@ -349,6 +349,16 @@ const CONTINUATION_OPENER: readonly RegExp[] = [
 const anyMatch = (patterns: readonly RegExp[], folded: string): boolean =>
   patterns.some((re) => re.test(folded));
 
+/**
+ * A BARE affirmation - the whole sentence is "yes"/"ok"/"taip"... and nothing
+ * else (the end-anchored first CONFIRMATION pattern only; "continue with X"
+ * carries content and is not bare). Used by the voice-turn policy: speech noise
+ * must never read as acceptance.
+ */
+export function isPlainAffirmation(text: string): boolean {
+  return CONFIRMATION[0].test(fold((text ?? "").trim()));
+}
+
 /** Words in the sentence — Unicode-aware, so LT and Cyrillic count correctly. */
 function wordCount(folded: string): number {
   const m = folded.match(/[\p{L}\p{N}]+/gu);

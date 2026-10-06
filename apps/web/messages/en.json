@@ -14212,7 +14212,9 @@
         "chipDocument": "Add the document"
       },
       "visibilityUnavailable": "Could not check your visibility to employers. That does not mean it is off — open the settings.",
-      "chipVisibility": "Visibility to employers"
+      "chipVisibility": "Visibility to employers",
+      "voiceOpen": "Speak",
+      "voiceBareYes": "Spoken “yes” is not a confirmation. Press the button on the card to confirm, or say what you want to do."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

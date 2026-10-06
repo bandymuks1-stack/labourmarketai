@@ -36,8 +36,10 @@ async function transcribeServiceUrl(): Promise<string | undefined> {
  * goes straight from the browser to the transcription service.
  *
  * THE SECURITY MODEL IS PRESERVED, NOT WEAKENED:
- *   - this action authenticates the person and requires a worker profile
- *     (unchanged);
+ *   - this action authenticates the person. ANY signed-in identity (worker,
+ *     employer, agency) may dictate: speech-to-text grants NO authority - what
+ *     the text then does is decided by the same chat spine and server-side
+ *     authority as typed text;
  *   - the browser never receives the master secret: it receives a SHORT-LIVED
  *     (120 s), SINGLE-USE, byte-bounded token signed with it, carrying only an
  *     OPAQUE subject (no profile id leaves this app);
@@ -69,7 +71,6 @@ export type VoiceUploadSession =
       status: "error";
       code:
         | "not_authenticated"
-        | "no_worker_profile"
         | "rate_limited"
         | "internal";
     };
@@ -86,13 +87,6 @@ export async function createVoiceUploadSession(): Promise<VoiceUploadSession> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { status: "error", code: "not_authenticated" };
-
-  const { data: worker } = await supabase
-    .from("workers")
-    .select("id")
-    .eq("profile_id", user.id)
-    .maybeSingle();
-  if (!worker) return { status: "error", code: "no_worker_profile" };
 
   const url = await transcribeServiceUrl();
   const secret = env.VOICE_TRANSCRIBE_TOKEN;

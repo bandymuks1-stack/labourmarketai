@@ -14212,7 +14212,9 @@
         "chipDocument": "Document toevoegen"
       },
       "visibilityUnavailable": "Kon uw zichtbaarheid voor werkgevers niet controleren. Dat betekent niet dat die uit staat — open de instellingen.",
-      "chipVisibility": "Zichtbaarheid voor werkgevers"
+      "chipVisibility": "Zichtbaarheid voor werkgevers",
+      "voiceOpen": "Spreken",
+      "voiceBareYes": "Een uitgesproken “ja” is geen bevestiging. Bevestig met de knop op de kaart, of zeg wat u wilt doen."
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
