@@ -28,6 +28,11 @@ import {
   getFirstTouchAttribution,
 } from "@/lib/telemetry/attribution";
 import { AUTH_INPUT_CLASS } from "@/components/app/auth-field-class";
+import {
+  buildActivationNext,
+  inboundAttributionMetadata,
+  parseInboundReferral,
+} from "@/lib/auth/worker-activation";
 
 function isValidEmail(v: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
@@ -60,7 +65,14 @@ export function SignupForm({
   // Honour the `?next=…` the middleware sets when it bounces an
   // unauthenticated user from a protected route to login → signup.
   const searchParams = useSearchParams();
-  const nextParam = searchParams.get("next");
+  // Inbound-worker campaign (Nonstop reply link): the campaign travels in the
+  // URL, so it survives another browser/device and an earlier organic first
+  // touch. Absent or malformed → null → the signup behaves exactly as before.
+  const inbound = parseInboundReferral(searchParams);
+  // An explicit `?next=` always wins. A campaign visit without one lands on
+  // the existing privacy screen (every consent + the supply declaration are
+  // the worker's own act there) instead of the generic dashboard.
+  const nextParam = searchParams.get("next") ?? (inbound ? buildActivationNext(inbound) : null);
   const nextPath = getSafeReturnPath(nextParam, locale);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -166,6 +178,8 @@ export function SignupForm({
       // page's OAuth buttons emit the same event for returning users.
       step: "signup_page",
       ...getFirstTouchAttribution(),
+      // The explicit campaign link beats a stale first touch for THIS signup.
+      ...(inbound ? inboundAttributionMetadata(inbound) : {}),
     });
     try {
       const supabase = createClient();
@@ -184,7 +198,14 @@ export function SignupForm({
           // Every value passed here has already been through the attribution
           // sanitizer (control chars stripped, angle brackets removed,
           // 120-char cap); when nothing was captured the spread adds nothing.
-          data: { locale, ...getFirstTouchAttribution() },
+          // The inbound-worker campaign link (when this visit carries one) is
+          // spread LAST: the person explicitly arrived through it, so it must
+          // not lose to an older organic first touch kept in localStorage.
+          data: {
+            locale,
+            ...getFirstTouchAttribution(),
+            ...(inbound ? inboundAttributionMetadata(inbound) : {}),
+          },
         },
       });
       if (err) throw err;

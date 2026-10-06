@@ -5433,6 +5433,30 @@
         "approved": "Goedgekeurd",
         "closed": "Gesloten"
       }
+    },
+    "activation": {
+      "title": "Uw volgende stappen",
+      "intro": "U bent geregistreerd. Registreren schakelt niets in: elke stap hieronder is uw eigen beslissing en u mag elke stap weigeren.",
+      "steps": {
+        "visibility": {
+          "title": "Bepaal of werkgevers op LabourMarket.ai u kunnen vinden"
+        },
+        "representation": {
+          "title": "Bepaal of LabourMarket.ai buiten het platform werk voor u mag zoeken"
+        },
+        "declaration": {
+          "title": "Geef aan wanneer u kunt starten en in welke landen u legaal mag werken",
+          "hint": "Dit formulier verschijnt zodra u de stap hierboven hebt beantwoord. Er wordt niets voor u ingevuld."
+        },
+        "profile": {
+          "title": "Voeg talen, licenties en voorkeurslanden toe",
+          "hint": "Optioneel en los van de twee toestemmingen hierboven."
+        }
+      },
+      "stateDone": "Gedaan",
+      "stateOpen": "Nog niet gedaan",
+      "stateUnknown": "Kon niet worden gelezen",
+      "go": "Ga naar deze stap"
     }
   },
   "legal": {

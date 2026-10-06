@@ -5433,6 +5433,30 @@
         "approved": "Patvirtinta",
         "closed": "Užbaigta"
       }
+    },
+    "activation": {
+      "title": "Jūsų kiti žingsniai",
+      "intro": "Jūs užsiregistravote. Registracija nieko neįjungia: kiekvienas žemiau esantis žingsnis yra jūsų pačių sprendimas, ir galite atsisakyti bet kurio iš jų.",
+      "steps": {
+        "visibility": {
+          "title": "Nuspręskite, ar darbdaviai LabourMarket.ai gali jus rasti"
+        },
+        "representation": {
+          "title": "Nuspręskite, ar LabourMarket.ai gali ieškoti jums darbo už platformos ribų"
+        },
+        "declaration": {
+          "title": "Nurodykite, nuo kada galite pradėti ir kuriose šalyse galite teisėtai dirbti",
+          "hint": "Ši forma atsiranda, kai atsakote į aukščiau esantį žingsnį. Nieko už jus neužpildoma."
+        },
+        "profile": {
+          "title": "Pridėkite kalbas, licencijas ir pageidaujamas šalis",
+          "hint": "Neprivaloma ir atskira nuo dviejų aukščiau esančių leidimų."
+        }
+      },
+      "stateDone": "Atlikta",
+      "stateOpen": "Dar neatlikta",
+      "stateUnknown": "Nepavyko nuskaityti",
+      "go": "Eiti į šį žingsnį"
     }
   },
   "legal": {

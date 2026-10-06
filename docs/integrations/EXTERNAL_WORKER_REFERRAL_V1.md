@@ -134,6 +134,35 @@ e-mail, a profession, a CV or a `reach` flag.
    e-mail similarity, and the partner never learns whether the address had an
    account.
 
+## Self-registration from the campaign link (worker-activation flow)
+
+A worker may also be sent a tokenless campaign link instead of the one-time
+`inviteUrl`:
+
+`/{locale}/for-workers?utm_source=nonstop&utm_medium=email&utm_campaign=worker-inbound-2026-09&utm_content=ns-inbound-<12 hex>`
+
+The 12 hex are this envelope's `leadId` (the `external_reference`). Clicking the
+signup button on that page carries the campaign in the URL itself
+(`/auth/signup?utm_*=...&next=/dashboard/privacy?activation=worker&referral=ns-inbound-<12 hex>`),
+so it survives another browser or device, e-mail confirmation and Google sign-in.
+The `utm_*` values are written to `auth.users.raw_user_meta_data`; the `referral`
+travels inside the existing safe `?next=` and, on the first authenticated screen
+(`/dashboard/privacy`), is recorded by `record_external_referral_signup_v1`
+(migration `20261006100000`, UNAPPLIED until the owner applies it) as ONE
+append-only `audit_logs` row `external_referral_signup_observed` - the
+"reference X registered" observation (`OBSERVED_SIGNUP` on the source side). An
+authorised reader gets it through `external_referral_observed_signups_v1`
+(service_role only: reference, first_observed_at, account count - never an
+account id, e-mail or name).
+
+It is an OBSERVATION. It does not accept the invitation, does not change
+`use_count`, exposes no `declared_context` and grants no consent. Registering
+switches nothing on: employer visibility, partner-supply representation and the
+supply declaration (availability, legally authorised work countries, markets)
+are each the worker's own explicit act on `/dashboard/privacy`, and only
+consent AND a live declaration make `first_party_supply_feed_v1()` emit the
+worker with `matchAuthority = GRANTED`. Proof: `scripts/db-proof-worker-activation-feed.mts`.
+
 ## Locales
 
 LT, EN, RU (plus NL, DE) for the landing, the review and the e-mail. The

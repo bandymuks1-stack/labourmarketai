@@ -5433,6 +5433,30 @@
         "approved": "Zatwierdzony",
         "closed": "Zamknięty"
       }
+    },
+    "activation": {
+      "title": "Twoje kolejne kroki",
+      "intro": "Rejestracja zakończona. Rejestracja niczego nie włącza: każdy krok poniżej to Twoja własna decyzja i możesz odmówić każdego z nich.",
+      "steps": {
+        "visibility": {
+          "title": "Zdecyduj, czy pracodawcy w LabourMarket.ai mogą Cię znaleźć"
+        },
+        "representation": {
+          "title": "Zdecyduj, czy LabourMarket.ai może szukać dla Ciebie pracy poza platformą"
+        },
+        "declaration": {
+          "title": "Podaj, od kiedy możesz zacząć i w jakich krajach możesz legalnie pracować",
+          "hint": "Ten formularz pojawi się po odpowiedzi na powyższy krok. Nic nie jest wypełniane za Ciebie."
+        },
+        "profile": {
+          "title": "Dodaj języki, uprawnienia i preferowane kraje",
+          "hint": "Opcjonalne i niezależne od dwóch zgód powyżej."
+        }
+      },
+      "stateDone": "Zrobione",
+      "stateOpen": "Jeszcze nie zrobione",
+      "stateUnknown": "Nie udało się odczytać",
+      "go": "Przejdź do tego kroku"
     }
   },
   "legal": {
