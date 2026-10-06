@@ -27,7 +27,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     useradd -r -u 10001 transcribe
 COPY --from=build /src/build/bin/whisper-cli /usr/local/bin/whisper-cli
 COPY --from=build /ggml-model.bin /models/ggml-model.bin
-COPY server.mjs /app/server.mjs
+# EVERY relative import of server.mjs must be copied (pinned by lib/guards/transcribe-image-contents.test.ts):
+# a missing module is a crash at start-up, i.e. a silently dead voice service.
+COPY server.mjs upload-auth.mjs /app/
 
 USER transcribe
 ENV PORT=8085 \
