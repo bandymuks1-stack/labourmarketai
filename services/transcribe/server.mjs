@@ -193,7 +193,16 @@ async function handleTranscribe(req, res) {
   // a real 413 (destroying the socket mid-upload reads as "service unreachable").
   const declared = Number(req.headers["content-length"]);
   if (Number.isFinite(declared) && declared > cap) {
-    res.setHeader("connection", "close");
+    // Answer first, then DRAIN (bounded) what the client is still sending: a
+    // server that closes mid-upload makes the browser report a network error
+    // instead of this 413. The drain is capped so a lying Content-Length
+    // cannot hold the socket.
+    let drained = 0;
+    req.on("data", (c) => {
+      drained += c.length;
+      if (drained > cap * 2) req.destroy();
+    });
+    req.on("error", () => {});
     return reply(413, { error: "body too large", code: "too_large" });
   }
 
