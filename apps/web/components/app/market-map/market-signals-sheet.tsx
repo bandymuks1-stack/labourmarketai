@@ -1,8 +1,10 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useEffect, useId, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 
+import { MARKET_LAYER_EVENT } from "@/components/app/market-map/world-discovery";
 import { cn } from "@/lib/utils";
 
 /**
@@ -34,13 +36,20 @@ export function MarketSignalsSheet({
   readonly summary: string | null;
   readonly children: ReactNode;
 }) {
-  const [open, setOpen] = useState(false);
+  // OPEN is derived from the layer the sheet was opened on, not stored as a
+  // bare flag: choosing a signal navigates to another `?layer=`, and the sheet
+  // simply stops being open when that layer commits. (Hiding the link inside the
+  // click itself aborts the in-flight navigation — the layer never switched.)
+  const layerParam = useSearchParams().get("layer") ?? "";
+  const [openAt, setOpenAt] = useState<string | null>(null);
+  const open = openAt !== null && openAt === layerParam;
+  const setOpen = (next: boolean) => setOpenAt(next ? layerParam : null);
   const bodyId = useId();
 
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") setOpenAt(null);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -61,8 +70,9 @@ export function MarketSignalsSheet({
         className={cn(
           "rounded-[22px] bg-[rgba(245,241,232,0.035)] shadow-[inset_0_0_0_1px_rgba(245,241,232,0.10)]",
           // The same plate as the home's Surface (26px, hairline), translucent
-          // and softly blurred on a phone so the map stays present beneath it.
-          "max-lg:rounded-[26px] max-lg:bg-[rgba(10,10,9,0.84)] max-lg:backdrop-blur-xl",
+          // and softly blurred on a phone so the map stays present beneath it. The
+          // plate is a THEME token (not a fixed dark rgba) so text stays readable in light.
+          "max-lg:rounded-[26px] max-lg:bg-ink-900/85 max-lg:backdrop-blur-xl",
           "max-lg:shadow-[inset_0_0_0_1px_rgba(245,241,232,0.14),0_-10px_36px_rgba(0,0,0,0.38)]",
         )}
       >
@@ -71,7 +81,7 @@ export function MarketSignalsSheet({
           aria-expanded={open}
           aria-controls={bodyId}
           data-testid="market-signals-toggle"
-          onClick={() => setOpen((v) => !v)}
+          onClick={() => setOpen(!open)}
           className="flex min-h-12 w-full items-center gap-3 px-4 py-2 text-left lg:hidden"
         >
           <span className="min-w-0 flex-1">
@@ -86,14 +96,26 @@ export function MarketSignalsSheet({
         <div
           id={bodyId}
           data-testid="market-signals-body"
-          // A chosen signal navigates to its layer; the sheet gets out of the
-          // way so the layer it chose is what the person sees.
+          // A chosen signal navigates to its layer and the sheet closes when that
+          // layer commits (see `open`). A signal for the layer already showing
+          // causes no navigation, so that one closes right away.
           onClick={(e) => {
-            if ((e.target as HTMLElement).closest("a")) setOpen(false);
+            const anchor = (e.target as HTMLElement).closest("a");
+            if (!anchor) return;
+            const target = new URL(anchor.href, window.location.href);
+            if (target.pathname !== window.location.pathname) return; // another page: a normal navigation
+            const layer = target.searchParams.get("layer") ?? "";
+            if (!layer) return;
+            // Same page: the one map switches layer in place — no round trip, so
+            // nothing can stall — and the URL follows so the view is shareable.
+            e.preventDefault();
+            window.dispatchEvent(new CustomEvent(MARKET_LAYER_EVENT, { detail: layer }));
+            window.history.replaceState(null, "", target.pathname + target.search);
+            setOpenAt(null);
           }}
           className={cn(
             "px-4 pb-4 pt-1 lg:block lg:p-5",
-            "max-lg:max-h-[min(38dvh,19rem)] max-lg:overflow-y-auto max-lg:overscroll-contain",
+            "max-lg:max-h-[min(22dvh,12rem)] max-lg:overflow-y-auto max-lg:overscroll-contain",
             open ? "block" : "hidden",
           )}
         >

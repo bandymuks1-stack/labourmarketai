@@ -97,6 +97,9 @@ const STATIC_TO_MAP_LAYER: Record<StaticLayerKey, MarketMapLayer> = {
   territory: "territory",
 };
 
+/** The window event a signal uses to ask the map for a layer (detail = layer). */
+export const MARKET_LAYER_EVENT = "market-map:choose-layer";
+
 export function WorldDiscovery({
   initial,
   initialLayer = "demand",
@@ -224,6 +227,22 @@ export function WorldDiscovery({
     setSelectedKey(null);
     if (!(STATIC_LAYER_ORDER as readonly string[]).includes(next)) refresh(next as WorldLayer);
   };
+
+  // A signal on THIS page (the rail / sheet) asks the one map for a layer. It is
+  // a client event, not a navigation: the layer switch needs no server round
+  // trip, and the page URL is updated by the sender so the choice is shareable.
+  const chooseLayerRef = useRef(chooseLayer);
+  chooseLayerRef.current = chooseLayer;
+  useEffect(() => {
+    const onChoose = (e: Event) => {
+      const next = (e as CustomEvent<string>).detail;
+      const world = next === "demand" || next === "supply" || next === "projects";
+      const prepared = (STATIC_LAYER_ORDER as readonly string[]).includes(next) && !!staticLayers?.[next as StaticLayerKey];
+      if (world || prepared) chooseLayerRef.current(next as LayerKey);
+    };
+    window.addEventListener(MARKET_LAYER_EVENT, onChoose);
+    return () => window.removeEventListener(MARKET_LAYER_EVENT, onChoose);
+  }, [staticLayers]);
 
   const onSelectAnchor = useCallback((anchor: MarketAnchor) => {
     setSelectedKey((k) => (k === anchor.id ? null : anchor.id));
