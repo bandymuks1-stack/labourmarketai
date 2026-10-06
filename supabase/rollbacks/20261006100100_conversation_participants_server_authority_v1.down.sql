@@ -13,4 +13,6 @@ alter policy conversation_participants_insert
     )
   );
 
+revoke insert on public.conversation_participants from service_role;
+
 commit;

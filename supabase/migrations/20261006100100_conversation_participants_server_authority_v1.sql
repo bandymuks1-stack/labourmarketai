@@ -76,4 +76,15 @@ alter policy conversation_participants_insert
     )
   );
 
+-- THE SERVER-SIDE ADD NEEDS A GRANT IN PRODUCTION. The communication core adds
+-- every OTHER participant with the service client (after ContactAuthority).
+-- 0021_communication granted this table to `authenticated` only, and tables
+-- created through the migration API give service_role no privileges in this
+-- project (read-only production check 2026-10-06:
+-- has_table_privilege('service_role', 'public.conversation_participants',
+-- 'INSERT') = false). Without this line every new direct thread fails for the
+-- NEW app even before the policy above is applied. INSERT only: the server
+-- writes nothing else here (reads and deletes stay on the end-user session).
+grant insert on public.conversation_participants to service_role;
+
 commit;

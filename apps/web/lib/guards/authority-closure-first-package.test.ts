@@ -101,6 +101,9 @@ describe("F-1 - conversation creation: the server decides, the database refuses 
   const sql = strip(rd(`supabase/migrations/${M.conv}.sql`));
   it("an end-user session may insert only its OWN participant row into a thread it created (admin branch kept)", () => {
     expect(sql).toMatch(/alter policy conversation_participants_insert/);
+    // production: service_role holds no privilege on tables created through the
+    // migration API, so the server-side participant add needs this one grant
+    expect(sql).toMatch(/grant insert on public\.conversation_participants to service_role;/);
     expect(sql).toMatch(/c\.created_by = auth\.uid\(\)\s*and\s*conversation_participants\.profile_id = auth\.uid\(\)/);
     expect(sql).toMatch(/public\.is_admin\(\)/);
   });
