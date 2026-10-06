@@ -123,6 +123,10 @@ describe("PageHero opts in — no other hero's CTA changed", () => {
       page: "for-agencies/page.tsx",
       guardedBy: "lib/guards/cold-start-doors-and-markets.test.ts",
     },
+    {
+      page: "pricing/page.tsx",
+      guardedBy: "lib/billing/launch-pricing.test.ts",
+    },
   ];
 
   it("only pages with their own guard pass ctaNext", () => {

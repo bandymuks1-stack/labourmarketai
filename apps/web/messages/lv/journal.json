@@ -133,6 +133,7 @@
     "invalidFile": "The photo must be JPG, PNG or WebP, up to 5 MB.",
     "uploaded": "Photo attached to the entry.",
     "limitReached": "This entry already has a photo — the free tier allows 1 photo per entry.",
+    "quotaReached": "Jūsu organizācijas krātuves limits ir sasniegts, tāpēc foto netika saglabāts. Pats ieraksts ir saglabāts.",
     "notReady": "Photo storage is not provisioned in this environment yet — the entry was saved without the photo.",
     "uploadFailed": "The photo could not be uploaded. The entry was saved — try attaching the photo again later.",
     "uploading": "[EN] Uploading photo…",

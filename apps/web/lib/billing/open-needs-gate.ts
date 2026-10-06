@@ -5,16 +5,22 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { getEffectiveEntitlements } from "@/lib/billing/effective-entitlements";
 import { entitlementAllows } from "@/lib/billing/entitlements-v1";
 import { limitFor } from "@/lib/billing/entitlements";
-import { FREE_ORGANIZATION_PLAN_KEY, OPEN_NEEDS_CONTACT_THRESHOLD, getPlan } from "@/lib/billing/plans";
+import { getPlan } from "@/lib/billing/plans";
 import { DEMAND_KIND_OR_FILTER } from "@/lib/demand/market-direction";
 
 /**
  * OPEN-NEEDS ENTITLEMENT SEAM (owner launch pricing 2026-09-05).
  *
  *   ORGANIZATION FREE  — 1 concurrent active position / open workforce need
- *   ORGANIZATION €99   — up to 10
- *   more than 10       — the individual-plan / contact path: never a silent
- *                        charge, never an automatic public tier.
+ *   ORGANIZATION €99   — NO fixed limit (owner decision 2026-10-06: the former
+ *                        ten-position ceiling is removed, replaced by no other
+ *                        commercial cap). The plan's `company_create_needs`
+ *                        entitlement is boolean `true`: included, unmetered.
+ *
+ * An unlimited plan is never counted and never fails closed on a count: a
+ * ceiling that does not exist cannot be unreadable. Abuse / security protections
+ * (request rate limits, intake throttles) live elsewhere and are not an
+ * entitlement.
  *
  * ONE place decides, for the ONE canonical demand creation path
  * (`submitDemandRequestCore` → `submit_demand_request_v2`): the organization's
@@ -52,7 +58,11 @@ export type OpenNeedsGate =
       readonly reason: "over_open_need_limit";
       readonly limit: number;
       readonly used: number;
-      /** FREE → the €99 plan; €99 → the individual plan (contact us). */
+      /**
+       * FREE → the €99 plan. "individual_plan" is retained in the union for
+       * callers' exhaustive handling but is no longer produced: no plan has a
+       * paid ceiling to be exceeded.
+       */
       readonly next: "upgrade" | "individual_plan";
       readonly planKey: string;
     };
@@ -90,6 +100,9 @@ export function decideOpenNeedsGate(input: {
   readonly used: number | null;
 }): OpenNeedsGate {
   if (!input.enforced) return { allowed: true, enforced: false, limit: input.limit, used: input.used ?? 0 };
+  // No numeric ceiling (the Organization plan): nothing to check, nothing to
+  // fail closed on - an unreadable count cannot block an unlimited plan.
+  if (input.limit === null) return { allowed: true, enforced: true, limit: null, used: input.used ?? 0 };
   // An unreadable count FAILS CLOSED once billing is enforced: a limit that
   // cannot be checked is not a limit.
   const used = input.used;
@@ -102,12 +115,8 @@ export function decideOpenNeedsGate(input: {
   return { allowed: true, enforced: true, limit: input.limit, used };
 }
 
-/** Past the paid plan's ceiling there is no next public tier — only a conversation. */
-function nextStep(planKey: string): "upgrade" | "individual_plan" {
-  const plan = getPlan(planKey);
-  const limit = plan ? limitFor(plan, "company_create_needs") : null;
-  if (planKey === FREE_ORGANIZATION_PLAN_KEY) return "upgrade";
-  if (limit !== null && limit >= OPEN_NEEDS_CONTACT_THRESHOLD) return "individual_plan";
+/** The only ceiling is the FREE plan's: the next step is always the Organization plan. */
+function nextStep(_planKey: string): "upgrade" | "individual_plan" {
   return "upgrade";
 }
 
@@ -130,6 +139,7 @@ export async function gateOpenNeeds(
   if (ctx.enforced && !included) {
     return { allowed: false, reason: "over_open_need_limit", limit: limit ?? 0, used: 0, next: nextStep(ctx.effectivePlanKey), planKey: ctx.effectivePlanKey };
   }
-  const used = ctx.enforced ? await countActiveOpenNeeds(supabase, organizationId, profileId) : 0;
+  // Unmetered plan (no numeric limit): skip the count entirely.
+  const used = ctx.enforced && limit !== null ? await countActiveOpenNeeds(supabase, organizationId, profileId) : 0;
   return decideOpenNeedsGate({ enforced: ctx.enforced, planKey: ctx.effectivePlanKey, limit, used });
 }

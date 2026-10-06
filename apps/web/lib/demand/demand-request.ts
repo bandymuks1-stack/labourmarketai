@@ -147,9 +147,9 @@ export type DemandRequestResult =
         | "no_company_context"
         | "invalid_estimate"
         // Owner launch pricing 2026-09-05: the organization's concurrent
-        // active open needs are at its plan's ceiling (FREE 1 / ORGANIZATION
-        // 10). `next` names the honest way forward — the €99 plan, or the
-        // individual plan (contact) above the paid ceiling. Nothing is charged.
+        // active open needs are at its plan's ceiling (FREE 1; the
+        // ORGANIZATION plan has none since 2026-10-06). `next` names the honest
+        // way forward — the €99 plan. Nothing is charged.
         | "over_open_need_limit";
       limit?: number;
       used?: number;
@@ -351,8 +351,8 @@ export async function submitDemandRequestCore(
     p_original_language: "lt",
   };
   // OPEN-NEEDS ENTITLEMENT SEAM (owner launch pricing 2026-09-05): FREE
-  // organization = 1 concurrent active need, ORGANIZATION €99 = up to 10,
-  // above → the individual-plan path. `hasFeature("company_create_needs")`
+  // organization = 1 concurrent active need, ORGANIZATION €99 = no fixed
+  // limit (owner decision 2026-10-06). `hasFeature("company_create_needs")`
   // is the plan boundary; the numeric ceiling is decided by the ONE gate over
   // the organization's real count. Permissive while billing is disabled
   // (pilot preserved — the same rule the booking gate follows); enforced the

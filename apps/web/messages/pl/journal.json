@@ -294,6 +294,7 @@
     "invalidFile": "Zdjęcie musi być w formacie JPG, PNG lub WebP i mieć maksymalnie 5 MB.",
     "uploaded": "Zdjęcie dołączone do wpisu.",
     "limitReached": "Ten wpis ma już zdjęcie — wersja bezpłatna pozwala dołączyć 1 zdjęcie do wpisu.",
+    "quotaReached": "Osiągnięto limit miejsca na dane Twojej organizacji, więc zdjęcie nie zostało zapisane. Sam wpis został zapisany.",
     "notReady": "Magazyn zdjęć nie jest jeszcze skonfigurowany w tym środowisku — wpis został zapisany bez zdjęcia.",
     "preparing": "Przygotowywanie zdjęcia…",
     "prepared": "Zdjęcie przeskalowane i gotowe do przesłania.",

@@ -290,7 +290,12 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    addressee, no message, no need, no declared context, no id), and
     //    re-applies that allowlist in TypeScript so a widened function cannot
     //    widen the page. Reads or writes no table directly.
-    //  - lib/company/claim-public-intake.ts — canonical-journey P3 claim
+    //  - lib/email/send-ledger-store.ts - the durable outbound-email cost
+    //    guardrail (2026-10-06). Calls ONE service_role-only RPC
+    //    (reserve_email_send_v1) that records a recipient HASH + organization
+    //    id + timestamp in a RLS-locked ledger. Reads/writes no chat table, no
+    //    other table, stores no address/subject/body, sends nothing itself.
+    //  - lib/company/claim-public-intake.ts— canonical-journey P3 claim
     //    bridge. Reads company_need_public_intakes rows ONLY where the
     //    caller's AUTHENTICATED email equals contact_email (re-checked on
     //    the claimed row), and updates ONLY that row's status to
@@ -457,6 +462,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/billing/subscription-store.ts",
       "lib/commercial/handoff-dispatch.ts",
       "lib/company/claim-public-intake.ts",
+      "lib/email/send-ledger-store.ts",
       "lib/invitations/external-referral-receive.ts",
       "lib/invitations/public-preview.ts",
       "lib/lmc/compensation.ts",

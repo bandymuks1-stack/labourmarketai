@@ -222,11 +222,11 @@
           "done": "[EN] Saved. Your need is now visible in your space.",
           "error": "[EN] Couldn't send. Please try again.",
           "progressHelper": "[EN] These steps show progress. Active actions are shown below.",
-          "errorOpenNeedLimitUpgrade": "Denne organisations gratis plan tillader 1 aktiv stilling. Luk én, eller aktivér planen „Organisation“ (99 €/md., op til 10) i din organisationskonto.",
-          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
-          "openNeedUsage": "Active positions: {used} of {limit} used · {remaining} remaining",
-          "openNeedUsageUpgradeCta": "Activate the Organization plan",
-          "openNeedUsageIndividual": "You have reached the Organization plan limit. For more than the included positions, contact us for an individual plan."
+          "errorOpenNeedLimitUpgrade": "Denne organisations gratis plan tillader 1 aktiv stilling. Luk én, eller aktivér planen „Organisation“ (99 €/md.) i din organisationskonto.",
+          "errorOpenNeedLimitIndividual": "Denne organisation har nået grænsen for aktive stillinger i sin plan. Intet blev opkrævet eller ændret. Kontakt os.",
+          "openNeedUsage": "Aktive stillinger: {used} af {limit} brugt · {remaining} tilbage",
+          "openNeedUsageUpgradeCta": "Aktivér planen „Organisation“",
+          "openNeedUsageIndividual": "Du har nået grænsen for din plan. Kontakt os for at drøfte dine behov."
         }
       },
       "account": {
@@ -999,7 +999,7 @@
     "faq": [
       {
         "q": "Hvorfor kun én betalt plan?",
-        "a": "Alle organisationer — arbejdsgivere, vikarbureauer, entreprenører og uddannelsesudbydere — får det samme produkt. Det, der ændrer sig, er omfanget: 1 aktiv stilling gratis, op til 10 for 99 €/måned og en individuel plan derover."
+        "a": "Alle organisationer — arbejdsgivere, vikarbureauer, entreprenører og uddannelsesudbydere — får det samme produkt. Det, der ændrer sig, er omfanget: 1 aktiv stilling gratis og ingen fast grænse for aktive stillinger for 99 €/måned."
       },
       {
         "q": "Forbliver gratisniveauet gratis?",
@@ -1010,8 +1010,8 @@
         "a": "Kortbetaling via Stripe, hvor Stripe Tax påfører moms; fakturaer, opsigelse og ændringer findes i din organisationskonto."
       },
       {
-        "q": "Hvad sker der ved over 10 aktive stillinger?",
-        "a": "Intet opkræves eller opgraderes automatisk. Du bliver bedt om at kontakte os, og vi aftaler en individuel plan."
+        "q": "Er der en grænse for aktive stillinger?",
+        "a": "Gratis omfatter 1 aktiv stilling. Planen „Organisation“ har ingen fast grænse for aktive stillinger. Almindelig beskyttelse mod misbrug, f.eks. begrænsning af antal forespørgsler, gælder stadig."
       }
     ],
     "faqTitle": "[EN] Pricing FAQ",
@@ -1032,7 +1032,7 @@
         "name": "Organization",
         "tagline": "For organizations actively hiring and building teams",
         "features": [
-          "Op til 10 aktive stillinger",
+          "Ingen fast grænse for aktive stillinger",
           "Alt fra Gratis, i driftsskala",
           "Én plan til alle slags organisationer",
           "Projektdrift, rapporter og CSV-eksport"
@@ -1066,10 +1066,10 @@
     "title": "[EN] Simple tiers,",
     "titleAccent": "[EN] set fairly.",
     "individual": {
-      "name": "Individual plan",
-      "tagline": "For more than 10 active positions",
-      "question": "Need more?",
-      "body": "Contact us for an individual plan — requirements, scale and commercial terms are agreed together. No automatic tier, no published price.",
+      "name": "Særlige behov",
+      "tagline": "Til behov ud over standardplanerne",
+      "question": "Har du noget bestemt i tankerne?",
+      "body": "Kontakt os, hvis du har særlige behov — vi aftaler dem sammen. Ingen automatisk tier, ingen offentliggjort pris.",
       "cta": "Contact us"
     },
     "priceFree": "€0",
@@ -2416,8 +2416,8 @@
       "reopen": "[EN] Reopen this need",
       "closedNote": "[EN] Closed — hidden from workers.",
       "error": "[EN] Could not save. Try again.",
-      "limitUpgrade": "Denne organisations gratis plan tillader 1 aktiv stilling. Luk én, eller aktivér planen „Organisation“ (99 €/md., op til 10) i din organisationskonto.",
-      "limitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
+      "limitUpgrade": "Denne organisations gratis plan tillader 1 aktiv stilling. Luk én, eller aktivér planen „Organisation“ (99 €/md.) i din organisationskonto.",
+      "limitIndividual": "Denne organisation har nået grænsen for aktive stillinger i sin plan. Intet blev opkrævet eller ændret. Kontakt os.",
       "closedCandidatesHistory": "[EN] This need is closed. Below is who was compared and what was decided while it was open — history, not an action list. Reopen the need to assess candidates again."
     },
     "verdict": {
@@ -3816,8 +3816,8 @@
         "errorInvalid": "[EN] Please check the fields and try again.",
         "errorNeedsMigration": "[EN] This isn't enabled yet. Please try later.",
         "errorConflict": "[EN] This value already differs. Open advanced mode to replace it.",
-        "errorOpenNeedLimitUpgrade": "Denne organisations gratis plan tillader 1 aktiv stilling. Luk én, eller aktivér planen „Organisation“ (99 €/md., op til 10) i din organisationskonto.",
-        "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
+        "errorOpenNeedLimitUpgrade": "Denne organisations gratis plan tillader 1 aktiv stilling. Luk én, eller aktivér planen „Organisation“ (99 €/md.) i din organisationskonto.",
+        "errorOpenNeedLimitIndividual": "Denne organisation har nået grænsen for aktive stillinger i sin plan. Intet blev opkrævet eller ændret. Kontakt os."
       },
       "urgency": {
         "flexible": "Fleksibel",
@@ -5456,6 +5456,7 @@
       "not_found": "Dokumentet blev ikke fundet.",
       "limit_reached": "Grænsen for dokumentlisten er nået.",
       "version_limit_reached": "Dokumentet har nået sin versionsgrænse.",
+      "storage_quota_exceeded": "Din organisations lagergrænse (2 GB) er nået. Fjern gamle filer, eller kontakt support, før du uploader flere.",
       "path_mismatch": "Uploaden kunne ikke verificeres — intet blev gemt. Prøv igen.",
       "file_too_large": "Filen er større end 5 MB — intet blev gemt.",
       "unsupported_type": "Denne filtype understøttes ikke — brug PDF, Word eller et foto.",

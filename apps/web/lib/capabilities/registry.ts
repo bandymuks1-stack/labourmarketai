@@ -1609,7 +1609,7 @@ const demandCreateConfirm: CapabilityDescriptor = {
               ? "No employer company resolves for this caller."
               : result.code === "over_open_need_limit"
                 ? result.next === "individual_plan"
-                  ? "This organization has reached the 10 active positions of the Organization plan. Nothing was charged. For more than 10, contact LabourMarket.ai for an individual plan."
+                  ? "This organization has reached the active-position limit of its plan. Nothing was charged. Contact LabourMarket.ai."
                   : "This organization's free plan allows 1 active position. Close one, or activate the Organization plan in the organization account."
                 : "Demand submit failed.",
       };

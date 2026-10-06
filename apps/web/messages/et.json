@@ -222,11 +222,11 @@
           "done": "[EN] Saved. Your need is now visible in your space.",
           "error": "[EN] Couldn't send. Please try again.",
           "progressHelper": "[EN] These steps show progress. Active actions are shown below.",
-          "errorOpenNeedLimitUpgrade": "Selle organisatsiooni tasuta plaan lubab 1 aktiivse ametikoha. Sulge üks või aktiveeri plaan „Organisatsioon“ (99 €/kuu, kuni 10) organisatsiooni kontol.",
-          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
-          "openNeedUsage": "Active positions: {used} of {limit} used · {remaining} remaining",
-          "openNeedUsageUpgradeCta": "Activate the Organization plan",
-          "openNeedUsageIndividual": "You have reached the Organization plan limit. For more than the included positions, contact us for an individual plan."
+          "errorOpenNeedLimitUpgrade": "Selle organisatsiooni tasuta plaan lubab 1 aktiivse ametikoha. Sulge üks või aktiveeri plaan „Organisatsioon“ (99 €/kuu) organisatsiooni kontol.",
+          "errorOpenNeedLimitIndividual": "See organisatsioon on saavutanud oma plaani aktiivsete ametikohtade piiri. Midagi ei võetud ega muudetud. Võta meiega ühendust.",
+          "openNeedUsage": "Aktiivsed ametikohad: kasutatud {used} / {limit} · jäänud {remaining}",
+          "openNeedUsageUpgradeCta": "Aktiveeri plaan „Organisatsioon“",
+          "openNeedUsageIndividual": "Oled jõudnud oma plaani piirini. Võta meiega ühendust, et oma vajadusi arutada."
         }
       },
       "account": {
@@ -999,7 +999,7 @@
     "faq": [
       {
         "q": "Miks on ainult üks tasuline plaan?",
-        "a": "Iga organisatsioon — tööandja, personaliteenuse pakkuja, töövõtja või koolitaja — saab sama toote. Muutub vaid maht: 1 aktiivne ametikoht tasuta, kuni 10 hinnaga 99 €/kuu ja sellest üle individuaalne plaan."
+        "a": "Iga organisatsioon — tööandja, personaliteenuse pakkuja, töövõtja või koolitaja — saab sama toote. Muutub vaid maht: 1 aktiivne ametikoht tasuta ja hinnaga 99 €/kuu pole aktiivsetel ametikohtadel kindlat piiri."
       },
       {
         "q": "Kas Tasuta tase jääb tasuta?",
@@ -1010,8 +1010,8 @@
         "a": "Kaardimakse Stripe'i kaudu, käibemaksu lisab Stripe Tax; arved, tühistamine ja muudatused on sinu organisatsiooni kontol."
       },
       {
-        "q": "Mis juhtub üle 10 aktiivse ametikoha korral?",
-        "a": "Midagi ei võeta ega uuendata automaatselt. Sinult palutakse meiega ühendust võtta ja lepitakse kokku individuaalne plaan."
+        "q": "Kas aktiivsetel ametikohtadel on piir?",
+        "a": "Tasuta plaan sisaldab 1 aktiivset ametikohta. Plaanil „Organisatsioon“ pole aktiivsetele ametikohtadele kindlat piiri. Tavapärased kuritarvitamise vastased kaitsemeetmed, näiteks päringute piirangud, kehtivad endiselt."
       }
     ],
     "faqTitle": "[EN] Pricing FAQ",
@@ -1032,7 +1032,7 @@
         "name": "Organization",
         "tagline": "For organizations actively hiring and building teams",
         "features": [
-          "Kuni 10 aktiivset ametikohta",
+          "Aktiivsete ametikohtade arvul pole kindlat piiri",
           "Kõik Tasuta plaanist, tööskaalas",
           "Üks plaan igat liiki organisatsioonile",
           "Projektitöö, aruanded ja CSV-eksport"
@@ -1066,10 +1066,10 @@
     "title": "[EN] Simple tiers,",
     "titleAccent": "[EN] set fairly.",
     "individual": {
-      "name": "Individual plan",
-      "tagline": "For more than 10 active positions",
-      "question": "Need more?",
-      "body": "Contact us for an individual plan — requirements, scale and commercial terms are agreed together. No automatic tier, no published price.",
+      "name": "Erinõuded",
+      "tagline": "Vajadustele, mis ületavad tavaplaane",
+      "question": "Mõtled midagi konkreetset?",
+      "body": "Võta meiega ühendust, kui sul on erinõudeid — lepime need koos kokku. Ei mingit automaatset taset, ei mingit avaldatud hinda.",
       "cta": "Contact us"
     },
     "priceFree": "€0",
@@ -2416,8 +2416,8 @@
       "reopen": "[EN] Reopen this need",
       "closedNote": "[EN] Closed — hidden from workers.",
       "error": "[EN] Could not save. Try again.",
-      "limitUpgrade": "Selle organisatsiooni tasuta plaan lubab 1 aktiivse ametikoha. Sulge üks või aktiveeri plaan „Organisatsioon“ (99 €/kuu, kuni 10) organisatsiooni kontol.",
-      "limitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
+      "limitUpgrade": "Selle organisatsiooni tasuta plaan lubab 1 aktiivse ametikoha. Sulge üks või aktiveeri plaan „Organisatsioon“ (99 €/kuu) organisatsiooni kontol.",
+      "limitIndividual": "See organisatsioon on saavutanud oma plaani aktiivsete ametikohtade piiri. Midagi ei võetud ega muudetud. Võta meiega ühendust.",
       "closedCandidatesHistory": "[EN] This need is closed. Below is who was compared and what was decided while it was open — history, not an action list. Reopen the need to assess candidates again."
     },
     "verdict": {
@@ -3816,8 +3816,8 @@
         "errorInvalid": "[EN] Please check the fields and try again.",
         "errorNeedsMigration": "[EN] This isn't enabled yet. Please try later.",
         "errorConflict": "[EN] This value already differs. Open advanced mode to replace it.",
-        "errorOpenNeedLimitUpgrade": "Selle organisatsiooni tasuta plaan lubab 1 aktiivse ametikoha. Sulge üks või aktiveeri plaan „Organisatsioon“ (99 €/kuu, kuni 10) organisatsiooni kontol.",
-        "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
+        "errorOpenNeedLimitUpgrade": "Selle organisatsiooni tasuta plaan lubab 1 aktiivse ametikoha. Sulge üks või aktiveeri plaan „Organisatsioon“ (99 €/kuu) organisatsiooni kontol.",
+        "errorOpenNeedLimitIndividual": "See organisatsioon on saavutanud oma plaani aktiivsete ametikohtade piiri. Midagi ei võetud ega muudetud. Võta meiega ühendust."
       },
       "urgency": {
         "flexible": "Paindlik",
@@ -5456,6 +5456,7 @@
       "not_found": "[EN] That document was not found.",
       "limit_reached": "[EN] The document list limit was reached.",
       "version_limit_reached": "[EN] This document reached its version limit.",
+      "storage_quota_exceeded": "Teie organisatsiooni salvestuspiir (2 GB) on täis. Eemaldage vanu faile või võtke ühendust toega, enne kui laadite üles juurde.",
       "path_mismatch": "[EN] The upload could not be verified — nothing was saved. Please try again.",
       "file_too_large": "[EN] The file is larger than 5 MB — nothing was saved.",
       "unsupported_type": "[EN] This file type is not supported — use PDF, Word or a photo.",

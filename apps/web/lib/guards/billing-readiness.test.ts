@@ -343,6 +343,11 @@ describe("plan boundary wiring is complete and real", () => {
           if (paidLimit !== null && freeLimit !== null) {
             expect(freeLimit, `${plan.slug}.${key}: the free ceiling must be lower`).toBeLessThan(paidLimit);
             deniedCount += 1;
+          } else if (paidLimit === null && freeLimit !== null && plan.entitlements[key] === true) {
+            // UNMETERED paid plan (owner decision 2026-10-06: the Organization
+            // plan has NO numeric active-position ceiling): the boundary is
+            // that the free fallback is capped and the paid plan is not.
+            deniedCount += 1;
           }
           continue;
         }

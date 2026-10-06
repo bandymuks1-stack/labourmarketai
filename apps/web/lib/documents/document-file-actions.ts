@@ -271,7 +271,7 @@ export async function uploadOrgDocumentFileAction(
       prepared.bytes.byteLength,
     )
   ) {
-    finish(locale, "limit_reached");
+    finish(locale, "storage_quota_exceeded");
   }
 
   const filesRes = await asAny(supabase)

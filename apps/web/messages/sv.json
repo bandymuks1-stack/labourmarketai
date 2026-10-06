@@ -222,11 +222,11 @@
           "done": "[EN] Saved. Your need is now visible in your space.",
           "error": "[EN] Couldn't send. Please try again.",
           "progressHelper": "[EN] These steps show progress. Active actions are shown below.",
-          "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
-          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
-          "openNeedUsage": "Active positions: {used} of {limit} used · {remaining} remaining",
-          "openNeedUsageUpgradeCta": "Activate the Organization plan",
-          "openNeedUsageIndividual": "You have reached the Organization plan limit. For more than the included positions, contact us for an individual plan."
+          "errorOpenNeedLimitUpgrade": "Den här organisationens gratisplan tillåter 1 aktiv position. Stäng en, eller aktivera planen Organisation (99 €/månad) i organisationskontot.",
+          "errorOpenNeedLimitIndividual": "Den här organisationen har nått gränsen för aktiva positioner i sin plan. Inget har debiterats eller ändrats. Kontakta oss.",
+          "openNeedUsage": "Aktiva positioner: {used} av {limit} använda · {remaining} kvar",
+          "openNeedUsageUpgradeCta": "Aktivera planen Organisation",
+          "openNeedUsageIndividual": "Du har nått gränsen för din plan. Kontakta oss för att diskutera dina behov."
         }
       },
       "account": {
@@ -993,91 +993,91 @@
   },
   "pricing": {
     "checkoutReturn": {
-      "cancelled": "Betalningen avbröts — inget debiterades och inget ändrades på ditt konto."
+      "cancelled": "Betalningen avbröts – inget debiterades och inget ändrades på ditt konto."
     },
-    "eyebrow": "[EN] Pricing",
+    "eyebrow": "Priser",
     "faq": [
       {
-        "q": "Why only one paid plan?",
-        "a": "Every organization — employer, staffing provider, contractor or training provider — gets the same product. What changes is scale: 1 active position free, up to 10 for €99/month, and an individual plan above that."
+        "q": "Varför bara en betald plan?",
+        "a": "Varje organisation – arbetsgivare, bemanningsföretag, entreprenör eller utbildningsanordnare – får samma produkt. Det som skiljer är omfattningen: 1 aktiv position gratis, och ingen fast gräns för aktiva positioner för 99 €/månad."
       },
       {
-        "q": "Will the Free tier stay free?",
-        "a": "Yes. Persons stay free, and an organization can run one active position at no cost."
+        "q": "Förblir gratisnivån gratis?",
+        "a": "Ja. Personer förblir kostnadsfria, och en organisation kan driva en aktiv position utan kostnad."
       },
       {
-        "q": "How is billing handled?",
-        "a": "Card payment through Stripe with VAT applied by Stripe Tax; invoices, cancellation and changes live in your organization account."
+        "q": "Hur hanteras betalningen?",
+        "a": "Kortbetalning via Stripe med moms hanterad av Stripe Tax; fakturor, uppsägning och ändringar finns i ditt organisationskonto."
       },
       {
-        "q": "What happens above 10 active positions?",
-        "a": "Nothing is charged or upgraded automatically. You are asked to contact us and an individual plan is agreed."
+        "q": "Finns det en gräns för aktiva positioner?",
+        "a": "Gratisplanen omfattar 1 aktiv position. Organisationsplanen har ingen fast gräns för aktiva positioner. Vanligt skydd mot missbruk, till exempel begränsning av antalet förfrågningar, gäller fortfarande."
       }
     ],
-    "faqTitle": "[EN] Pricing FAQ",
-    "featuresLabel": "[EN] Includes",
-    "planCta": "[EN] Join the waitlist for this plan",
+    "faqTitle": "Vanliga frågor om priser",
+    "featuresLabel": "Ingår",
+    "planCta": "Gå med i väntelistan för den här planen",
     "plans": {
       "agency": {
         "features": [
-          "[EN] Unlimited managed workers",
-          "[EN] Broker tools",
-          "[EN] Worker search",
-          "[EN] Priority support"
+          "Obegränsat antal hanterade arbetare",
+          "Förmedlingsverktyg",
+          "Arbetarsökning",
+          "Prioriterad support"
         ],
-        "name": "[EN] Agency",
-        "tagline": "[EN] For staffing partners."
+        "name": "Agentur",
+        "tagline": "För bemanningspartner."
       },
       "business": {
-        "name": "Organization",
-        "tagline": "For organizations actively hiring and building teams",
+        "name": "Organisation",
+        "tagline": "För organisationer som aktivt rekryterar och bygger team",
         "features": [
-          "Up to 10 active positions",
-          "Everything in Free, at operating scale",
-          "One plan for every kind of organization",
-          "Project operations, reports and CSV export"
+          "Ingen fast gräns för aktiva positioner",
+          "Allt i Gratis, i driftskala",
+          "En plan för alla typer av organisationer",
+          "Projektdrift, rapporter och CSV-export"
         ]
       },
       "enterprise": {
         "features": [
-          "[EN] Unlimited projects",
-          "[EN] SSO",
-          "[EN] SLA",
-          "[EN] Dedicated support"
+          "Obegränsat antal projekt",
+          "SSO",
+          "SLA",
+          "Dedikerad support"
         ],
-        "name": "[EN] Enterprise",
-        "tagline": "[EN] For scale and control."
+        "name": "Enterprise",
+        "tagline": "För skala och kontroll."
       },
       "free": {
-        "name": "Free",
-        "tagline": "For getting started",
+        "name": "Gratis",
+        "tagline": "För att komma igång",
         "features": [
-          "1 active position",
-          "Matching shortlist and candidate contact",
-          "Bookings, projects, instructions",
-          "Work confirmation by the employer"
+          "1 aktiv position",
+          "Matchningslista och kontakt med kandidater",
+          "Bokningar, projekt, instruktioner",
+          "Arbetsbekräftelse från arbetsgivaren"
         ]
       }
     },
-    "subcopyLive": "Priserna är bekräftade av ägaren och gäller. Aktivering sker i organisationskontot via en säker Stripe-betalning; ingenting dras på den här sidan.",
-    "subcopy": "[EN] Prices are not finalised yet and billing is never started for you on this page. The tiers below describe scope; activation is manual — reach out and we'll confirm pricing and scope with you before anything starts.",
-    "subcopyConfirmed": "[EN] Prices are confirmed. Online activation is not open yet — join the waitlist and we will contact you to start your organization manually; nothing is charged on this page.",
-    "trialNote": "[EN] An organization's first subscription starts with a 14-day trial. Your card is charged the monthly price after the trial, and you can cancel before it ends.",
-    "title": "[EN] Simple tiers,",
-    "titleAccent": "[EN] set fairly.",
+    "subcopyLive": "Priserna är bekräftade av ägaren och gäller. Aktivering sker i organisationskontot genom en säker Stripe-betalning; inget debiteras på den här sidan.",
+    "subcopy": "Priserna är inte slutgiltiga, och fakturering startas aldrig åt dig på den här sidan. Nivåerna nedan beskriver omfattning; aktiveringen är manuell – hör av dig så bekräftar vi pris och omfattning med dig innan något startar.",
+    "subcopyConfirmed": "Priserna är bekräftade. Aktivering online är inte öppen ännu – gå med i väntelistan så kontaktar vi dig för att starta din organisation manuellt; inget debiteras på den här sidan.",
+    "trialNote": "En organisations första prenumeration börjar med en 14 dagars provperiod. Därefter debiteras kortet månadspriset, och du kan avsluta innan provperioden tar slut.",
+    "title": "Enkla nivåer,",
+    "titleAccent": "satta rättvist.",
     "individual": {
-      "name": "Individual plan",
-      "tagline": "For more than 10 active positions",
-      "question": "Need more?",
-      "body": "Contact us for an individual plan — requirements, scale and commercial terms are agreed together. No automatic tier, no published price.",
-      "cta": "Contact us"
+      "name": "Särskilda behov",
+      "tagline": "För behov utöver standardplanerna",
+      "question": "Något särskilt i åtanke?",
+      "body": "Kontakta oss om du har särskilda behov – vi kommer överens om dem tillsammans. Ingen automatisk nivå, inget publicerat pris.",
+      "cta": "Kontakta oss"
     },
     "priceFree": "€0",
-    "pricePerMonth": "€{price}/month",
-    "ctaStartFree": "Start free in your organization account",
-    "ctaSubscribe": "Activate in your organization account",
+    "pricePerMonth": "€{price}/månad",
+    "ctaStartFree": "Kom igång gratis i ditt organisationskonto",
+    "ctaSubscribe": "Aktivera i ditt organisationskonto",
     "priceState": {
-      "owner_confirmed": "Prices confirmed by the owner. Activation happens in your organization account; nothing is charged on this page."
+      "owner_confirmed": "Priserna är bekräftade av ägaren. Aktivering sker i ditt organisationskonto; inget debiteras på den här sidan."
     }
   },
   "secondary": {
@@ -2416,8 +2416,8 @@
       "reopen": "[EN] Reopen this need",
       "closedNote": "[EN] Closed — hidden from workers.",
       "error": "[EN] Could not save. Try again.",
-      "limitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
-      "limitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
+      "limitUpgrade": "Den här organisationens gratisplan tillåter 1 aktiv position. Stäng en, eller aktivera planen Organisation (99 €/månad) i organisationskontot.",
+      "limitIndividual": "Den här organisationen har nått gränsen för aktiva positioner i sin plan. Inget har debiterats eller ändrats. Kontakta oss.",
       "closedCandidatesHistory": "[EN] This need is closed. Below is who was compared and what was decided while it was open — history, not an action list. Reopen the need to assess candidates again."
     },
     "verdict": {
@@ -3816,8 +3816,8 @@
         "errorInvalid": "[EN] Please check the fields and try again.",
         "errorNeedsMigration": "[EN] This isn't enabled yet. Please try later.",
         "errorConflict": "[EN] This value already differs. Open advanced mode to replace it.",
-        "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
-        "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
+        "errorOpenNeedLimitUpgrade": "Den här organisationens gratisplan tillåter 1 aktiv position. Stäng en, eller aktivera planen Organisation (99 €/månad) i organisationskontot.",
+        "errorOpenNeedLimitIndividual": "Den här organisationen har nått gränsen för aktiva positioner i sin plan. Inget har debiterats eller ändrats. Kontakta oss."
       },
       "urgency": {
         "flexible": "Flexibel",
@@ -5456,6 +5456,7 @@
       "not_found": "[EN] That document was not found.",
       "limit_reached": "[EN] The document list limit was reached.",
       "version_limit_reached": "[EN] This document reached its version limit.",
+      "storage_quota_exceeded": "Er organisations lagringsgräns (2 GB) är nådd. Ta bort gamla filer eller kontakta supporten innan ni laddar upp fler.",
       "path_mismatch": "[EN] The upload could not be verified — nothing was saved. Please try again.",
       "file_too_large": "[EN] The file is larger than 5 MB — nothing was saved.",
       "unsupported_type": "[EN] This file type is not supported — use PDF, Word or a photo.",

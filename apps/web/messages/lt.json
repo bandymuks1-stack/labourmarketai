@@ -4362,11 +4362,11 @@
               "humanConfirmNote": "Tai tik pasiūlymai — sprendžiate jūs. Jie niekada nekeičia jūsų skaičių."
             }
           },
-          "errorOpenNeedLimitUpgrade": "Šios organizacijos nemokamas planas leidžia 1 aktyvią poziciją. Uždarykite vieną arba aktyvuokite planą „Organizacija“ (99 €/mėn., iki 10) organizacijos paskyroje.",
-          "errorOpenNeedLimitIndividual": "Ši organizacija pasiekė plano „Organizacija“ ribą — 10 aktyvių pozicijų. Niekas nenuskaičiuota ir nepakeista. Daugiau nei 10 — susisiekite dėl individualaus plano.",
+          "errorOpenNeedLimitUpgrade": "Šios organizacijos nemokamas planas leidžia 1 aktyvią poziciją. Uždarykite vieną arba aktyvuokite planą „Organizacija“ (99 €/mėn.) organizacijos paskyroje.",
+          "errorOpenNeedLimitIndividual": "Ši organizacija pasiekė savo plano aktyvių pozicijų ribą. Niekas nenuskaičiuota ir nepakeista. Susisiekite su mumis.",
           "openNeedUsage": "Aktyvios pozicijos: panaudota {used} iš {limit} · liko {remaining}",
           "openNeedUsageUpgradeCta": "Aktyvuoti planą „Organizacija“",
-          "openNeedUsageIndividual": "Pasiekėte plano „Organizacija“ ribą. Daugiau pozicijų — susisiekite dėl individualaus plano."
+          "openNeedUsageIndividual": "Pasiekėte savo plano ribą. Susisiekite su mumis, kad aptartume jūsų poreikius."
         }
       },
       "greeting": "Sveiki, {name}",
@@ -5338,7 +5338,7 @@
         "name": "Organizacija",
         "tagline": "Organizacijoms, kurios aktyviai samdo ir buria komandas",
         "features": [
-          "Iki 10 aktyvių pozicijų",
+          "Be fiksuoto aktyvių pozicijų limito",
           "Viskas, kas nemokamame plane — darbiniu mastu",
           "Vienas planas visoms organizacijų rūšims",
           "Projektų valdymas, ataskaitos ir CSV eksportas"
@@ -5369,7 +5369,7 @@
     "faq": [
       {
         "q": "Kodėl tik vienas mokamas planas?",
-        "a": "Kiekviena organizacija — darbdavys, personalo tiekėjas, rangovas ar mokymo įstaiga — gauna tą patį produktą. Skiriasi tik mastas: 1 aktyvi pozicija nemokamai, iki 10 už 99 €/mėn., o virš to — individualus planas."
+        "a": "Kiekviena organizacija — darbdavys, personalo tiekėjas, rangovas ar mokymo įstaiga — gauna tą patį produktą. Skiriasi tik mastas: 1 aktyvi pozicija nemokamai, o už 99 €/mėn. — be fiksuoto aktyvių pozicijų limito."
       },
       {
         "q": "Ar nemokamas planas liks nemokamas?",
@@ -5380,8 +5380,8 @@
         "a": "Mokėjimas kortele per Stripe, PVM taiko Stripe Tax; sąskaitos, atšaukimas ir keitimai — organizacijos paskyroje."
       },
       {
-        "q": "Kas vyksta virš 10 aktyvių pozicijų?",
-        "a": "Niekas nenuskaičiuojama ir neperkeliama automatiškai. Paprašysime susisiekti ir suderinsime individualų planą."
+        "q": "Ar yra aktyvių pozicijų limitas?",
+        "a": "Nemokamas planas apima 1 aktyvią poziciją. Plane „Organizacija“ nėra fiksuoto aktyvių pozicijų limito. Įprastos apsaugos nuo piktnaudžiavimo, pavyzdžiui, užklausų skaičiaus ribos, ir toliau galioja."
       }
     ],
     "priceState": {
@@ -5389,10 +5389,10 @@
       "owner_confirmed": "Kainos patvirtintos savininko. Aktyvavimas vyksta organizacijos paskyroje; šiame puslapyje niekas nenuskaičiuojama."
     },
     "individual": {
-      "name": "Individualus planas",
-      "tagline": "Daugiau nei 10 aktyvių pozicijų",
-      "question": "Reikia daugiau?",
-      "body": "Susisiekite dėl individualaus plano — poreikiai, mastas ir komercinės sąlygos aptariami kartu. Jokio automatinio plano, jokios paskelbtos kainos.",
+      "name": "Ypatingi poreikiai",
+      "tagline": "Poreikiams, kurių standartiniai planai neapima",
+      "question": "Turite ką nors konkretaus omenyje?",
+      "body": "Susisiekite, jei turite ypatingų poreikių — juos aptariame kartu. Jokio automatinio plano, jokios paskelbtos kainos.",
       "cta": "Susisiekti"
     },
     "priceFree": "0 €",
@@ -7941,6 +7941,7 @@
       "not_found": "Dokumentas nerastas.",
       "limit_reached": "Pasiektas dokumentų sąrašo limitas.",
       "version_limit_reached": "Šis dokumentas pasiekė versijų limitą.",
+      "storage_quota_exceeded": "Pasiektas jūsų organizacijos saugyklos limitas (2 GB). Pašalinkite senus failus arba susisiekite su pagalba, kad galėtumėte įkelti daugiau.",
       "path_mismatch": "Įkėlimo nepavyko patikrinti — niekas neišsaugota. Bandykite dar kartą.",
       "file_too_large": "Failas didesnis nei 5 MB — niekas neišsaugota.",
       "unsupported_type": "Šis failo tipas nepalaikomas — naudokite PDF, Word arba nuotrauką.",
@@ -8550,8 +8551,8 @@
       "reopen": "Atidaryti iš naujo",
       "closedNote": "Uždaryta — darbuotojams nerodoma.",
       "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
-      "limitUpgrade": "Šios organizacijos nemokamas planas leidžia 1 aktyvią poziciją. Uždarykite vieną arba aktyvuokite planą „Organizacija“ (99 €/mėn., iki 10) organizacijos paskyroje.",
-      "limitIndividual": "Ši organizacija pasiekė plano „Organizacija“ ribą — 10 aktyvių pozicijų. Niekas nenuskaičiuota ir nepakeista. Daugiau nei 10 — susisiekite dėl individualaus plano.",
+      "limitUpgrade": "Šios organizacijos nemokamas planas leidžia 1 aktyvią poziciją. Uždarykite vieną arba aktyvuokite planą „Organizacija“ (99 €/mėn.) organizacijos paskyroje.",
+      "limitIndividual": "Ši organizacija pasiekė savo plano aktyvių pozicijų ribą. Niekas nenuskaičiuota ir nepakeista. Susisiekite su mumis.",
       "closedCandidatesHistory": "Šis poreikis uždarytas. Žemiau — kas buvo palyginta ir nuspręsta, kol jis buvo atviras: istorija, ne veiksmų sąrašas. Norėdami vėl vertinti kandidatus, atidarykite poreikį iš naujo."
     },
     "freshness": {
@@ -10497,7 +10498,7 @@
     },
     "subscribe": {
       "title": "Planas „Organizacija“",
-      "cta": "Aktyvuoti planą „Organizacija“ (iki 10 aktyvių pozicijų)",
+      "cta": "Aktyvuoti planą „Organizacija“",
       "note": "Būsite nukreipti į Stripe Checkout; prenumerata susiejama su šia organizacija."
     }
   },
@@ -13371,8 +13372,8 @@
         "errorDuplicateName": "Jau turi organizaciją tokiu pavadinimu. Pasirink kitą pavadinimą.",
         "errorStale": "Kol peržiūrėjai, kažkas pasikeitė (pvz., aktyvi darbo erdvė). Niekas neišsaugota — pradėk iš naujo.",
         "errorConflict": "Ši reikšmė jau skiriasi. Atidaryk išplėstinį režimą, kad pakeistum.",
-        "errorOpenNeedLimitUpgrade": "Šios organizacijos nemokamas planas leidžia 1 aktyvią poziciją. Uždarykite vieną arba aktyvuokite planą „Organizacija“ (99 €/mėn., iki 10) organizacijos paskyroje.",
-        "errorOpenNeedLimitIndividual": "Ši organizacija pasiekė plano „Organizacija“ ribą — 10 aktyvių pozicijų. Niekas nenuskaičiuota ir nepakeista. Daugiau nei 10 — susisiekite dėl individualaus plano."
+        "errorOpenNeedLimitUpgrade": "Šios organizacijos nemokamas planas leidžia 1 aktyvią poziciją. Uždarykite vieną arba aktyvuokite planą „Organizacija“ (99 €/mėn.) organizacijos paskyroje.",
+        "errorOpenNeedLimitIndividual": "Ši organizacija pasiekė savo plano aktyvių pozicijų ribą. Niekas nenuskaičiuota ir nepakeista. Susisiekite su mumis."
       },
       "urgency": {
         "flexible": "Lankstu",

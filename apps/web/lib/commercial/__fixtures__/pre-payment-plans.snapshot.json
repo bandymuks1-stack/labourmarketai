@@ -2,7 +2,6 @@
   "values": {
     "FREE_ORGANIZATION_PLAN_KEY": "free_organization",
     "ORGANIZATION_PLAN_KEY": "company_pilot",
-    "OPEN_NEEDS_CONTACT_THRESHOLD": 10,
     "DEFERRED_PLAN_KEYS": [
       "worker_plus",
       "agency_pilot"
@@ -67,7 +66,7 @@
         "labelKey": "company_pilot",
         "launch": "sellable",
         "entitlements": {
-          "company_create_needs": 10,
+          "company_create_needs": true,
           "vacancy_translations": false,
           "candidate_readiness_summaries": true,
           "booking_requests": true,

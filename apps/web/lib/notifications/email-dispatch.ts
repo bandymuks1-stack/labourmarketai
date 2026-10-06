@@ -41,7 +41,7 @@ import {
   isTransactionalEmailPathActive,
   sendTransactionalEmail,
 } from "@/lib/email/transactional";
-import { reserveEmailSendSlot } from "./email-send-guard";
+import { reserveEmailSend } from "@/lib/email/send-ledger-store";
 import { renderNotificationEmail } from "@/lib/email/notification-email";
 import {
   resolveChannelEnabled,
@@ -123,8 +123,15 @@ export async function maybeDispatchNotificationEmail(
     });
     if (!rendered) return { kind: "render_failed" };
 
-    // 4b. Fan-out ceiling (per-instance run window + per-recipient day).
-    if (!reserveEmailSendSlot(input.recipientProfileId)) {
+    // 4b. DURABLE fan-out ceiling (500 / org / 24h + 5 / recipient / 24h,
+    // atomic in the database - lib/email/durable-send-guard.ts). Unreadable
+    // store => fail open (loud warning) behind a per-instance backstop.
+    const slot = await reserveEmailSend({
+      recipientEmail: email,
+      recipientProfileId: input.recipientProfileId,
+      kind: "notification",
+    });
+    if (!slot.allowed) {
       return { kind: "rate_limited" };
     }
 

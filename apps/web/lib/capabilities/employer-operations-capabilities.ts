@@ -314,7 +314,7 @@ function makeDemandLifecyclePair(op: "close" | "reopen"): [CapabilityDescriptor,
             code: "over_open_need_limit",
             message:
               res.next === "individual_plan"
-                ? `This organization already has ${res.limit} active positions (the Organization plan ceiling). Nothing was reopened or charged.`
+                ? `This organization already has ${res.limit} active positions (the limit of its plan). Nothing was reopened or charged.`
                 : `This organization's plan allows ${res.limit} active position(s). Close one or activate the Organization plan. Nothing was reopened or charged.`,
           };
         }

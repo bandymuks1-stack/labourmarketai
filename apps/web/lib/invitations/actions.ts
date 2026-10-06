@@ -11,8 +11,8 @@ import { outboundLinkOrigin } from "@/lib/domain/canonical";
 import { createClient } from "@/lib/supabase/server";
 import {
   isTransactionalEmailConfigured,
-  sendTransactionalEmail,
 } from "@/lib/email/transactional";
+import { guardedSendTransactionalEmail } from "@/lib/email/send-ledger-store";
 import {
   buildInvitationBody,
   buildInvitationSubject,
@@ -249,14 +249,14 @@ export async function createAndSendInvitations(input: {
       continue;
     }
 
-    const sendResult = await sendTransactionalEmail({
+    const sendResult = await guardedSendTransactionalEmail({
       to: email,
       subject: buildInvitationSubject(tEmail, type),
       text: buildInvitationBody(tEmail, {
         link: inviteLink,
         personalMessage: input.personalMessage ?? null,
       }),
-    });
+    }, { kind: "invitation", organizationId: input.organizationId ?? null });
     const deliveryOutcome =
       sendResult.status === "sent" ? "sent" : "delivery_failed";
     // Record the TRUTHFUL provider result (never 'sent' without an ack).
@@ -354,14 +354,14 @@ export async function resendInvitationAction(input: {
       locale: recipientLocale,
       namespace: "invitations.email",
     });
-    const sendResult = await sendTransactionalEmail({
+    const sendResult = await guardedSendTransactionalEmail({
       to: addressee,
       subject: buildInvitationSubject(tEmail, input.invitationType),
       text: buildInvitationBody(tEmail, {
         link: inviteLink,
         personalMessage: input.personalMessage ?? null,
       }),
-    });
+    }, { kind: "invitation" });
     await asAny(supabase).rpc("mark_invitation_delivery_v1", {
       p_invitation_id: input.invitationId,
       p_outcome: sendResult.status === "sent" ? "sent" : "delivery_failed",
@@ -698,14 +698,14 @@ export async function createShareableInvitationAction(input: {
     locale: recipientLocale,
     namespace: "invitations.email",
   });
-  const sendResult = await sendTransactionalEmail({
+  const sendResult = await guardedSendTransactionalEmail({
     to: email,
     subject: buildInvitationSubject(tEmail, type),
     text: buildInvitationBody(tEmail, {
       link: inviteLink,
       personalMessage: input.personalMessage ?? null,
     }),
-  });
+  }, { kind: "invitation", organizationId: input.organizationId ?? null });
   const deliveryOutcome = sendResult.status === "sent" ? "sent" : "delivery_failed";
   await asAny(supabase).rpc("mark_invitation_delivery_v1", {
     p_invitation_id: invitationId,

@@ -277,6 +277,7 @@
     "invalidFile": "Kuvan on oltava JPG, PNG tai WebP, kooltaan enintään 5 MB.",
     "uploaded": "Kuva liitetty kirjaukseen.",
     "limitReached": "Tässä kirjauksessa on jo kuva — ilmaisversio sallii 1 kuvan kirjausta kohden.",
+    "quotaReached": "Organisaatiosi tallennustilaraja on täynnä, joten kuvaa ei tallennettu. Itse merkintä on tallennettu.",
     "notReady": "Kuvatallennusta ei ole vielä otettu käyttöön tässä ympäristössä — kirjaus tallennettiin ilman kuvaa.",
     "preparing": "Valmistellaan kuvaa…",
     "prepared": "Kuvan koko on muutettu, ja se on valmis ladattavaksi.",

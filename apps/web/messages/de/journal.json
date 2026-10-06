@@ -294,6 +294,7 @@
     "invalidFile": "The photo must be JPG, PNG or WebP, up to 5 MB.",
     "uploaded": "Photo attached to the entry.",
     "limitReached": "This entry already has a photo — the free tier allows 1 photo per entry.",
+    "quotaReached": "Das Speicherlimit Ihrer Organisation ist erreicht, daher wurde das Foto nicht gespeichert. Der Eintrag selbst ist gespeichert.",
     "notReady": "Photo storage is not provisioned in this environment yet — the entry was saved without the photo.",
     "preparing": "Foto wird vorbereitet…",
     "prepared": "Foto verkleinert und bereit zum Hochladen.",

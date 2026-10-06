@@ -10,9 +10,9 @@ import { isStripeActive } from "@/lib/billing/config-core";
  * /pricing — the owner's LAUNCH table (approved 2026-09-05):
  *
  *   €0          for getting started            1 active position
- *   €99/month   for organizations actively     up to 10 active positions
+ *   €99/month   for organizations actively     no fixed limit on active positions
  *               hiring / building teams
- *   Need more?  contact us for an individual plan (no public tier, no price)
+ *   Special requirements?  contact us (no public tier, no price)
  *
  * The price FIGURE is read from `plans.price_eur_monthly` (the one home a
  * price has) and rendered only once PRICING_READINESS_STATE is

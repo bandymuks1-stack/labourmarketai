@@ -294,6 +294,7 @@
     "invalidFile": "Nuotrauka turi būti JPG, PNG arba WebP formato, iki 5 MB.",
     "uploaded": "Nuotrauka pridėta prie įrašo.",
     "limitReached": "Šis įrašas jau turi nuotrauką — nemokamai galima 1 nuotrauka vienam įrašui.",
+    "quotaReached": "Pasiektas jūsų organizacijos saugyklos limitas, todėl nuotrauka neišsaugota. Pats įrašas išsaugotas.",
     "notReady": "Nuotraukų saugykla šioje aplinkoje dar neparuošta — įrašas išsaugotas be nuotraukos.",
     "preparing": "Ruošiama nuotrauka…",
     "prepared": "Nuotrauka sumažinta ir paruošta įkėlimui.",

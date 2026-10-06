@@ -229,6 +229,7 @@ const PHOTO_OUTCOME_KEY: Record<JournalPhotoUploadResult, string> = {
   uploaded: "uploaded",
   invalid: "invalidFile",
   limit: "limitReached",
+  quota: "quotaReached",
   "not-ready": "notReady",
   failed: "uploadFailed",
 };
