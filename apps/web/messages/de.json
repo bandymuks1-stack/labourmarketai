@@ -3948,7 +3948,9 @@
       "check_email_body": "Wir haben einen Bestätigungslink an {email} gesendet. Öffne ihn, um die Registrierung abzuschließen. Keine E-Mail? Prüfe den Spam-Ordner — einen neuen Link kannst du hier anfordern.",
       "resend_label": "Link erneut senden",
       "resend_sent": "Erneut gesendet. Prüfe Posteingang und Spam-Ordner.",
-      "resend_wait": "In {seconds} s kannst du einen neuen Link anfordern."
+      "resend_wait": "In {seconds} s kannst du einen neuen Link anfordern.",
+      "invited_email_note": "Das ist die Adresse, an die Ihre Einladung gesendet wurde.",
+      "show_password": "Passwort anzeigen"
     },
     "login": {
       "headline": "Anmelden",
@@ -7379,6 +7381,7 @@
     "outcomeLinked": "Verknüpft. Sie sind jetzt verbunden.",
     "outcomeAlreadyLinked": "Sie sind bereits verknüpft.",
     "outcomeNoInvitation": "Einladung nicht gefunden.",
+    "outcomeEmailUnverified": "Bestätigen Sie zuerst Ihre E-Mail (Seite Netzwerk) und nehmen Sie dann die Einladung an.",
     "outcomeNoWorker": "Ihr Arbeitskraft-Profil ist noch nicht bereit.",
     "outcomeError": "Konnte nicht angenommen werden. Bitte versuchen Sie es erneut.",
     "outcomeNeedsMigration": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut."
@@ -11689,7 +11692,22 @@
         "declined": "Einladung abgelehnt.",
         "no_worker_profile": "Erstellen Sie zuerst Ihr Arbeitsprofil und nehmen Sie die Einladung dann an.",
         "not_found": "Einladung nicht gefunden.",
-        "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+        "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+        "email_unverified": "Bestätigen Sie zuerst Ihre E-Mail und nehmen Sie dann die Einladung an."
+      },
+      "verify": {
+        "title": "Bestätigen Sie Ihre E-Mail, um daran gerichtete Einladungen zu sehen",
+        "body": "Einladungen, die an eine E-Mail-Adresse gerichtet sind, werden nur der Person gezeigt, die dieses Postfach öffnen kann. Alles andere in Ihrem Konto funktioniert wie bisher; das ist nur nötig, um diese Einladungen zu sehen oder anzunehmen.",
+        "send": "Einmal-Link senden",
+        "sending": "Wird gesendet…",
+        "sent": "Wir haben einen Einmal-Link an {email} gesendet. Öffnen Sie ihn auf diesem Gerät, um abzuschließen.",
+        "sentNoAddress": "Wir haben einen Einmal-Link an Ihre E-Mail-Adresse gesendet. Öffnen Sie ihn auf diesem Gerät, um abzuschließen.",
+        "rateLimited": "Ein Link wurde gerade gesendet. Bitte warten Sie eine Minute, bevor Sie einen neuen anfordern.",
+        "alreadyVerified": "Diese E-Mail-Adresse ist bereits bestätigt. Laden Sie die Seite neu.",
+        "failed": "Dieser Link hat Ihre E-Mail nicht bestätigt (möglicherweise veraltet oder anderswo geöffnet). Sie können einen neuen anfordern.",
+        "error": "Der Link konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.",
+        "intakeTitle": "Bestätigen Sie Ihre E-Mail, um eine frühere Einreichung fortzusetzen",
+        "intakeBody": "Wenn Sie über unser öffentliches Formular mit dieser Adresse einen Unternehmensbedarf eingereicht haben, bestätigen Sie die Adresse; wir zeigen ihn dann hier an, damit Sie nichts erneut eintippen müssen. Alles andere funktioniert wie bisher."
       }
     },
     "search": {
@@ -11885,6 +11903,7 @@
         "revoked": "Diese Einladung wurde widerrufen.",
         "declined": "Einladung abgelehnt.",
         "no_worker_profile": "Erstellen Sie zuerst Ihr Arbeitsprofil und nehmen Sie die Einladung dann an.",
+        "email_mismatch": "Diese Einladung ist an eine andere E-Mail-Adresse gerichtet.",
         "not_found": "Einladung nicht gefunden.",
         "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
         "exhausted": "Alle Plätze sind belegt.",
@@ -11907,7 +11926,13 @@
       "agencyClient": "Eine Personalagentur lädt Ihr Unternehmen ein, als Kunde zusammenzuarbeiten.",
       "agencyClientNext": "Nach dem Annehmen erscheint die Verbindungsanfrage auf der Partnerseite Ihrer Organisation — bestätigen Sie sie dort mit Ihrem Unternehmen. Bis dahin wird nichts geteilt.",
       "addressedToOther": "Diese Einladung ist an {email} gerichtet. Sie sind mit einer anderen Adresse angemeldet, daher kann die Verbindung aus diesem Konto nicht bestätigt werden — melden Sie sich mit der eingeladenen Adresse an und öffnen Sie diesen Link erneut.",
-      "switchAccount": "Abmelden und Konto wechseln"
+      "switchAccount": "Abmelden und Konto wechseln",
+      "emailMismatch": {
+        "title": "Diese Einladung gilt einer anderen E-Mail-Adresse",
+        "body": "Diese Einladung wurde an {email} gesendet. Sie sind mit einer anderen Adresse angemeldet, daher kann sie aus diesem Konto weder angezeigt noch beantwortet werden. Melden Sie sich mit der eingeladenen Adresse an und öffnen Sie diesen Link erneut.",
+        "bodyNoHint": "Diese Einladung wurde an eine andere E-Mail-Adresse gesendet als die, mit der Sie angemeldet sind, daher kann sie aus diesem Konto weder angezeigt noch beantwortet werden. Melden Sie sich mit der eingeladenen Adresse an und öffnen Sie diesen Link erneut.",
+        "untouched": "Es wurde nichts angenommen oder geändert. Die Einladung wartet weiterhin auf die Person, an die sie gesendet wurde."
+      }
     },
     "teamEnquiriesTitle": "Meine Anfragen an Kolonnen",
     "admin": {
