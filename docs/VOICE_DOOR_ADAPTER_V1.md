@@ -6,11 +6,12 @@ visual are **two equal input doors over the same canonical action spine**
 product, a database, an authorization system, a journal or a matching system.
 The Voice Work Journal is only the first slice.
 
-> **Status: `VOICE_FIRST = NOT_GREEN`.** The journal door is recovered and
-> proven end to end in a real browser at 390 px against a service that
-> implements the real HTTP contract. The recognition engine (whisper.cpp) in
-> production, the generic `handleSend(origin=voice)` door and real-device mobile
-> proof are **not** proven. See "Proven / not proven" below.
+> **Status: `VOICE_FIRST = NOT_GREEN`.** The journal door AND the generic door
+> over the typed chat spine (all three actors) are built and proven in a real
+> browser at 390 px against a service that implements the real HTTP contract.
+> The production recognition engine, real-device proof and the read/navigation
+> / draft-form breadth of the generic door are **not** proven. See "Proven / not
+> proven" below.
 
 ## The chain
 
@@ -123,3 +124,50 @@ screen-reader pass; interruption by a real incoming call; the generic
 `handleSend(origin=voice)` door with the G1-G3/G5 guards; employer/agency use of
 STT (today worker-only by the existing `workers` row requirement); TTS; the
 exact production origin list for `ALLOWED_ORIGINS`.
+
+## Generic door v1.1 (this slice)
+
+One persistent, discoverable control: the **composer microphone** (44 px, shown
+only when the transcription service exists - honest absence). It opens the
+reusable `VoiceCapturePanel` as a card in the thread. The reviewed text enters
+the same `handleSend` a typed sentence takes, tagged `origin = "voice"`; the
+intent router, action registry, executors, authority and confirmation cards are
+untouched. The only things `origin = "voice"` changes are in
+`lib/conversation/voice-turn-policy.ts`:
+
+1. a bare "yes"/"ok"/"taip"/... is **refused before routing** ("a spoken yes is not a confirmation - press the button on the card");
+2. `switch-context`, `open-conversation`, `write-employer` offer the single fuzzy match as a **chip the person presses** instead of acting on it.
+
+Dictated sentences that the router maps to *log work* reach the existing
+work-log preview and explicit Save; the voice provenance (`input_origin`,
+`voice_language`, `voice_disclosure_version`) is attached to that one canonical
+write. The journal page's own voice entry stays as the declared "log work"
+door (explicit intent), same write path.
+
+### Actors
+`createVoiceUploadSession` requires a signed-in person only: STT grants no
+authority. Verified in a real browser for **worker, company (employer) and
+agency** sessions: mic present, capture and review work, and the sentence is
+then governed by that actor's existing chat authority (e.g. company dictation
+routes through the company handlers). No action was duplicated per actor.
+
+### Classification coverage
+READ_SAFE (68 intents) and DRAFT_SAFE (22) are reachable by voice exactly as by
+typing, because voice only supplies text. CONFIRM_REQUIRED actions remain
+card-and-click. NOT_READY intents (3) are guarded as above. Capabilities / MCP
+are not used by voice (guard: `voice-door-adapter-boundary`).
+
+### Browser-vendor dictation (command finder) - can it be removed?
+Yes in principle: the canonical door could feed the finder query (record -> STT
+-> text into `setQuery`). Blockers: it is batch, not streaming (a search box
+wants live interim results), needs the service configured for every identity
+(now actor-neutral) and a latency budget. Recommendation: keep the disclosed
+vendor mic as the interim, do not build a third speech stack, and revisit once
+real-device latency of the canonical door is measured. No decision needed now.
+
+### Provenance chain proven
+voice -> transcript edit -> `handleSend` -> router -> work-log -> explicit Save
+-> `createJournalEntryCore` -> `journal_entry_metrics` rows (local DB, generic
+door and journal door). Speech recognition does **not** verify evidence: the
+rows are self-declared `worker_input` labels.
+
