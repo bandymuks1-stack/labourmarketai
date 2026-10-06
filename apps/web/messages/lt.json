@@ -11901,6 +11901,7 @@
         "revoked": "Kvietimas atšauktas.",
         "declined": "Kvietimas atmestas.",
         "no_worker_profile": "Pirmiausia susikurkite darbuotojo profilį, tada priimkite kvietimą.",
+        "email_mismatch": "Šis kvietimas adresuotas kitam el. pašto adresui.",
         "not_found": "Kvietimas nerastas.",
         "error": "Nepavyko. Bandykite dar kartą.",
         "exhausted": "Visos vietos užimtos.",
@@ -11923,7 +11924,13 @@
       "agencyClient": "Personalo agentūra kviečia jūsų įmonę bendradarbiauti kaip jos klientą.",
       "agencyClientNext": "Priėmus kvietimą, ryšio prašymas atsiras jūsų organizacijos puslapyje „Klientai ir partneriai“ — ten patvirtinkite jį savo įmonės vardu. Kol to nepadarysite, niekuo nesidalinama.",
       "addressedToOther": "Šis kvietimas adresuotas {email}. Esate prisijungę kitu adresu, todėl iš šios paskyros ryšio patvirtinti negalima — prisijunkite pakviestuoju adresu ir dar kartą atverkite šią nuorodą.",
-      "switchAccount": "Atsijungti ir pakeisti paskyrą"
+      "switchAccount": "Atsijungti ir pakeisti paskyrą",
+      "emailMismatch": {
+        "title": "Šis kvietimas skirtas kitam el. pašto adresui",
+        "body": "Šis kvietimas išsiųstas adresu {email}. Esate prisijungę kitu adresu, todėl iš šios paskyros jo parodyti ar į jį atsakyti negalima. Prisijunkite pakviestuoju adresu ir dar kartą atverkite šią nuorodą.",
+        "bodyNoHint": "Šis kvietimas išsiųstas kitu el. pašto adresu nei tas, kuriuo esate prisijungę, todėl iš šios paskyros jo parodyti ar į jį atsakyti negalima. Prisijunkite pakviestuoju adresu ir dar kartą atverkite šią nuorodą.",
+        "untouched": "Niekas nebuvo priimta ar pakeista. Kvietimas vis dar laukia to, kam jis buvo išsiųstas."
+      }
     },
     "teamEnquiriesTitle": "Mano užklausos komandoms",
     "admin": {
