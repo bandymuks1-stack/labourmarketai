@@ -3,7 +3,7 @@ import { setRequestLocale } from "next-intl/server";
 import { SignupForm } from "@/components/app/signup-form";
 import { getEnabledProviders } from "@/lib/auth/enabled-providers";
 import { isSafeReturnPath } from "@/lib/auth/redirect";
-import { inviteTokenFromNextPath } from "@/lib/invitations/model";
+import { inviteTokenFromNextPath, maskEmail } from "@/lib/invitations/model";
 import { readInvitationSignupContext } from "@/lib/invitations/signup-bridge";
 
 /** The provider surface can change without a deploy (owner flips a provider
@@ -43,7 +43,7 @@ export default async function SignupPage({
         facebookEnabled={providers.facebook}
         invitation={
           invite.kind === "addressed" && inviteToken
-            ? { token: inviteToken, email: invite.email }
+            ? { token: inviteToken, maskedEmail: maskEmail(invite.email) ?? "" }
             : undefined
         }
       />

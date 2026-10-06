@@ -15,7 +15,7 @@ import {
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
-import { acceptInvitationAfterSignup } from "@/lib/invitations/signup-accept-action";
+import { signUpAddressedInviteAction } from "@/lib/invitations/signup-accept-action";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
 import {
   RESEND_COOLDOWN_SECONDS,
@@ -61,11 +61,12 @@ export function SignupForm({
 }: {
   linkedinEnabled?: boolean;
   facebookEnabled?: boolean;
-  /** An ADDRESSED invitation resolved server-side from `?next=`: the address it
-   *  names is prefilled and locked (the e-mail binding compares the session to
-   *  exactly this address), the confirm-password field is not asked, and the
-   *  canonical acceptance continues right after the session exists. */
-  invitation?: { token: string; email: string };
+  /** An ADDRESSED invitation resolved server-side from `?next=`: the form shows
+   *  only the MASKED address (locked); the full address never reaches the
+   *  browser. A server action signs up with it (the e-mail binding still
+   *  compares the session to exactly that address), no confirm-password field
+   *  is asked, and the canonical acceptance continues once the session exists. */
+  invitation?: { token: string; maskedEmail: string };
 } = {}) {
   const t = useTranslations("auth.signup");
   const tSocial = useTranslations("auth.social");
@@ -77,7 +78,7 @@ export function SignupForm({
   const searchParams = useSearchParams();
   const nextParam = searchParams.get("next");
   const nextPath = getSafeReturnPath(nextParam, locale);
-  const [email, setEmail] = useState(invitation?.email ?? "");
+  const [email, setEmail] = useState(invitation?.maskedEmail ?? "");
   const [showPw, setShowPw] = useState(false);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -147,7 +148,7 @@ export function SignupForm({
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    if (!isValidEmail(email)) {
+    if (!invitation && !isValidEmail(email)) {
       setError(t("error_email"));
       return;
     }
@@ -186,6 +187,36 @@ export function SignupForm({
       ...getFirstTouchAttribution(),
     });
     try {
+      if (invitation) {
+        const res = await signUpAddressedInviteAction({
+          token: invitation.token,
+          password,
+          locale,
+          emailRedirectTo: emailRedirectTo(),
+          metadata: { ...getFirstTouchAttribution() },
+        });
+        if (res.status === "error") {
+          throw { code: res.code, message: res.message, status: res.httpStatus };
+        }
+        if (res.status === "unavailable") {
+          // Used / expired / revoked since the page rendered: reload as an
+          // ordinary signup (nothing is prefilled for an unusable invitation).
+          window.location.assign(`/${locale}/auth/signup`);
+          return;
+        }
+        if (res.status === "check_email") {
+          setStatus("check_email");
+          setCooldown(RESEND_COOLDOWN_SECONDS);
+          return;
+        }
+        markSignupPending("email");
+        // One full navigation lands the person on the profile step (the
+        // acceptance revalidates; a soft router.replace would be superseded).
+        window.location.assign(
+          `/${locale}${nextParam ? `/onboarding?next=${encodeURIComponent(nextPath)}` : "/onboarding"}`,
+        );
+        return;
+      }
       const supabase = createClient();
       const { data, error: err } = await supabase.auth.signUp({
         email: email.trim(),
@@ -222,29 +253,9 @@ export function SignupForm({
       // `next` so onboarding completion can fall back to the user's original
       // destination.
       markSignupPending("email");
-      if (invitation) {
-        // The same canonical acceptance the landing page's button runs; the
-        // e-mail binding (151100) refuses any session whose address differs.
-        // Never blocks onboarding: a failure leaves the invitation pending
-        // on the landing page.
-        try {
-          await acceptInvitationAfterSignup({ token: invitation.token, locale });
-        } catch (e) {
-          console.error("[signup] invitation auto-accept failed:", e);
-        }
-      }
       const onboardingPath = nextParam
         ? `/onboarding?next=${encodeURIComponent(nextPath)}`
         : "/onboarding";
-      if (invitation) {
-        // A server action that revalidates (the acceptance does) makes the
-        // client router refresh the CURRENT route and supersede a following
-        // soft `router.replace` - the person stayed on the signup form even
-        // though the invitation was accepted (measured locally). One full
-        // navigation lands them on the profile step deterministically.
-        window.location.assign(`/${locale}${onboardingPath}`);
-        return;
-      }
       router.replace(onboardingPath);
     } catch (e) {
       console.error("[signup] signUp failed:", e);
@@ -387,9 +398,9 @@ export function SignupForm({
       <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
         {t("email_label")}
         <input
-          type="email"
-          name="email"
-          autoComplete="email"
+          type={invitation ? "text" : "email"}
+          name={invitation ? "invited-address" : "email"}
+          autoComplete={invitation ? "off" : "email"}
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
