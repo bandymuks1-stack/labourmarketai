@@ -4029,7 +4029,9 @@
       "check_email_body": "We sent a confirmation link to {email}. Open it to finish creating your account. If you don't see it, check your spam folder — you can ask for a new link here.",
       "resend_label": "Send the link again",
       "resend_sent": "Sent again. Check your inbox and spam folder.",
-      "resend_wait": "You can request another link in {seconds} s."
+      "resend_wait": "You can request another link in {seconds} s.",
+      "invited_email_note": "This is the address your invitation was sent to.",
+      "show_password": "Show password"
     },
     "login": {
       "headline": "Sign in",

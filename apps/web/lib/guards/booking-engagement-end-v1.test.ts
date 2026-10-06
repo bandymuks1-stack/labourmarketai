@@ -1575,6 +1575,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261003151500_invitation_v1_doors_not_api_callable_v1.sql",
       // 2026-10-05: the subject's refuse / withdraw door (SECURITY DEFINER) - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261005100000_roster_link_subject_answer_v1.sql",
+      // 2026-10-06: service-role-only read of the invited address for the frictionless signup page - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      "20261006100500_invitation_signup_context_v1.sql",
 ]);
   });
 

@@ -4029,7 +4029,9 @@
       "check_email_body": "Išsiuntėme patvirtinimo nuorodą adresu {email}. Atidarykite ją, kad užbaigtumėte registraciją. Jei laiško nematote — patikrinkite šlamšto aplanką; naujos nuorodos galėsite paprašyti čia.",
       "resend_label": "Siųsti nuorodą dar kartą",
       "resend_sent": "Išsiųsta dar kartą. Patikrinkite pašto dėžutę ir šlamšto aplanką.",
-      "resend_wait": "Naujos nuorodos galėsite paprašyti po {seconds} s."
+      "resend_wait": "Naujos nuorodos galėsite paprašyti po {seconds} s.",
+      "invited_email_note": "Tai adresas, kuriuo gavote kvietimą.",
+      "show_password": "Rodyti slaptažodį"
     },
     "login": {
       "headline": "Prisijungti",

@@ -4029,7 +4029,9 @@
       "check_email_body": "Wir haben einen Bestätigungslink an {email} gesendet. Öffne ihn, um die Registrierung abzuschließen. Keine E-Mail? Prüfe den Spam-Ordner — einen neuen Link kannst du hier anfordern.",
       "resend_label": "Link erneut senden",
       "resend_sent": "Erneut gesendet. Prüfe Posteingang und Spam-Ordner.",
-      "resend_wait": "In {seconds} s kannst du einen neuen Link anfordern."
+      "resend_wait": "In {seconds} s kannst du einen neuen Link anfordern.",
+      "invited_email_note": "Das ist die Adresse, an die Ihre Einladung gesendet wurde.",
+      "show_password": "Passwort anzeigen"
     },
     "login": {
       "headline": "Anmelden",

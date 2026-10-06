@@ -421,3 +421,34 @@ export function declaredContextItems(raw: unknown): DeclaredContextItem[] {
   list("destinations", ctx.destinations, str);
   return out;
 }
+
+/**
+ * THE INVITE TOKEN OUT OF A SAFE RETURN PATH (frictionless addressed invite,
+ * owner decision 2026-10-06). The signup / onboarding pages receive the invite
+ * landing as `?next=/{locale}/invite/{token}`; this reads the token back out of
+ * exactly that shape and nothing else (url-safe, bounded, final path segment).
+ * Anything else - a query string, a nested path, another route - is null, so a
+ * crafted `next` can never name an arbitrary token source.
+ */
+export function inviteTokenFromNextPath(next: string | null | undefined): string | null {
+  if (!next) return null;
+  const m = /^\/(?:[a-z]{2}\/)?invite\/([A-Za-z0-9_-]{16,128})\/?$/.exec(next.trim());
+  return m ? m[1] : null;
+}
+
+/**
+ * Whether an addressed invitation CANONICALLY implies worker (person)
+ * onboarding, so the first-run role picker is redundant. Deliberately narrow:
+ * only an external-source referral of a person (the source's own consent notice
+ * is about a worker's search - see external-sources.ts) and an explicit
+ * employee invitation. Every other kind (organisation, team, partner, agency
+ * client, project, demand) names an actor that is genuinely ambiguous for the
+ * person arriving, so they still choose.
+ */
+export function invitationImpliesWorkerContext(input: {
+  invitationType: string | null | undefined;
+  externalSourceSlug: string | null | undefined;
+}): boolean {
+  if (input.invitationType === "join_as_employee") return true;
+  return input.invitationType === "join_platform" && Boolean(input.externalSourceSlug);
+}

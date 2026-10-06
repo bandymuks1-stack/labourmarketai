@@ -4029,7 +4029,9 @@
       "check_email_body": "We hebben een bevestigingslink naar {email} gestuurd. Open deze om je account te voltooien. Zie je de e-mail niet? Kijk in je spammap — hier kun je een nieuwe link aanvragen.",
       "resend_label": "Link opnieuw sturen",
       "resend_sent": "Opnieuw verstuurd. Controleer je inbox en spammap.",
-      "resend_wait": "Je kunt over {seconds} s een nieuwe link aanvragen."
+      "resend_wait": "Je kunt over {seconds} s een nieuwe link aanvragen.",
+      "invited_email_note": "Dit is het adres waarnaar je uitnodiging is gestuurd.",
+      "show_password": "Wachtwoord tonen"
     },
     "login": {
       "headline": "Inloggen",

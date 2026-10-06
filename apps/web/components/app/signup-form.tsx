@@ -15,6 +15,7 @@ import {
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
+import { acceptInvitationAfterSignup } from "@/lib/invitations/signup-accept-action";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
 import {
   RESEND_COOLDOWN_SECONDS,
@@ -56,9 +57,15 @@ const MIN_PASSWORD = 8;
 export function SignupForm({
   linkedinEnabled = false,
   facebookEnabled = false,
+  invitation,
 }: {
   linkedinEnabled?: boolean;
   facebookEnabled?: boolean;
+  /** An ADDRESSED invitation resolved server-side from `?next=`: the address it
+   *  names is prefilled and locked (the e-mail binding compares the session to
+   *  exactly this address), the confirm-password field is not asked, and the
+   *  canonical acceptance continues right after the session exists. */
+  invitation?: { token: string; email: string };
 } = {}) {
   const t = useTranslations("auth.signup");
   const tSocial = useTranslations("auth.social");
@@ -70,7 +77,8 @@ export function SignupForm({
   const searchParams = useSearchParams();
   const nextParam = searchParams.get("next");
   const nextPath = getSafeReturnPath(nextParam, locale);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(invitation?.email ?? "");
+  const [showPw, setShowPw] = useState(false);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [status, setStatus] = useState<
@@ -159,7 +167,7 @@ export function SignupForm({
       setError(t("error_password_special"));
       return;
     }
-    if (password !== confirm) {
+    if (!invitation && password !== confirm) {
       setError(t("error_password_mismatch"));
       return;
     }
@@ -214,9 +222,29 @@ export function SignupForm({
       // `next` so onboarding completion can fall back to the user's original
       // destination.
       markSignupPending("email");
+      if (invitation) {
+        // The same canonical acceptance the landing page's button runs; the
+        // e-mail binding (151100) refuses any session whose address differs.
+        // Never blocks onboarding: a failure leaves the invitation pending
+        // on the landing page.
+        try {
+          await acceptInvitationAfterSignup({ token: invitation.token, locale });
+        } catch (e) {
+          console.error("[signup] invitation auto-accept failed:", e);
+        }
+      }
       const onboardingPath = nextParam
         ? `/onboarding?next=${encodeURIComponent(nextPath)}`
         : "/onboarding";
+      if (invitation) {
+        // A server action that revalidates (the acceptance does) makes the
+        // client router refresh the CURRENT route and supersede a following
+        // soft `router.replace` - the person stayed on the signup form even
+        // though the invitation was accepted (measured locally). One full
+        // navigation lands them on the profile step deterministically.
+        window.location.assign(`/${locale}${onboardingPath}`);
+        return;
+      }
       router.replace(onboardingPath);
     } catch (e) {
       console.error("[signup] signUp failed:", e);
@@ -366,14 +394,22 @@ export function SignupForm({
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t("email_placeholder")}
+          readOnly={Boolean(invitation)}
+          aria-describedby={invitation ? "invited-email-note" : undefined}
+          data-testid={invitation ? "signup-invited-email" : undefined}
           className={AUTH_INPUT_CLASS}
         />
+        {invitation && (
+          <span id="invited-email-note" className="text-text-muted">
+            {t("invited_email_note")}
+          </span>
+        )}
       </label>
 
       <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
         {t("password_label")}
         <input
-          type="password"
+          type={invitation && showPw ? "text" : "password"}
           name="password"
           autoComplete="new-password"
           required
@@ -395,18 +431,30 @@ export function SignupForm({
         </span>
       </label>
 
-      <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
-        {t("confirm_password_label")}
-        <input
-          type="password"
-          name="confirm_password"
-          autoComplete="new-password"
-          required
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-          className={AUTH_INPUT_CLASS}
-        />
-      </label>
+      {invitation ? (
+        <button
+          type="button"
+          onClick={() => setShowPw((v) => !v)}
+          aria-pressed={showPw}
+          data-tap-floor="off"
+          className="inline-flex min-h-11 items-center self-start text-xs text-brand-blue hover:underline"
+        >
+          {t("show_password")}
+        </button>
+      ) : (
+        <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
+          {t("confirm_password_label")}
+          <input
+            type="password"
+            name="confirm_password"
+            autoComplete="new-password"
+            required
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            className={AUTH_INPUT_CLASS}
+          />
+        </label>
+      )}
 
       {error && (
         // The already-registered case is the most common reason an owner
