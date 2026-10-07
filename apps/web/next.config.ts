@@ -146,6 +146,12 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Never advertise the framework version to attackers scanning for CVEs.
   poweredByHeader: false,
+  experimental: {
+    // Document uploads (DOCUMENT_FILE_MAX_BYTES = 5 MB) go through server
+    // actions; Next's 1 MB default rejected anything larger before the handler
+    // ran. Voice (25 MB) does NOT fit here — it needs a non-action upload path.
+    serverActions: { bodySizeLimit: "5mb" },
+  },
   async redirects() {
     return [...LEGACY_HOST_REDIRECTS, ...W1_CANONICAL_REDIRECTS, ...ENTRY_SHORTCUT_REDIRECTS];
   },

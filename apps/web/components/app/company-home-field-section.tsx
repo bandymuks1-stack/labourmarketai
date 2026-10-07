@@ -4,7 +4,6 @@ import {
   ArrowRight,
   Ban,
   Bell,
-  CalendarClock,
   CheckCircle2,
   CircleDashed,
   FileWarning,
@@ -15,6 +14,8 @@ import {
 } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
+import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
+import { personMonogram } from "@/lib/visual/avatar-monogram";
 import { createUtcFormatter } from "@/lib/time/display";
 import { CAPABILITY_CHOICES } from "@/lib/organizations/capability-choices";
 import type { CustomerRequestRow } from "@/lib/buyer/customer-requests";
@@ -23,6 +24,8 @@ import type { AgencyClient } from "@/lib/agency/clients-model";
 import {
   COMPANY_HOME_BLOCK_LIMIT,
   attentionChipHref,
+  deriveNeedFit,
+  deriveOutlookGaps,
   selectOpenNeeds,
   type RiskSignal,
 } from "@/lib/company/company-home-field-model";
@@ -119,6 +122,11 @@ export async function CompanyHomeFieldSection({
           }))
           .filter((g) => g.count > 0)
       : [];
+
+  // ── capacity x needs: DERIVED from the SAME outlook the capacity box shows ──
+  const outlook = field.capacity.kind === "ok" ? (field.capacity.outlook ?? null) : null;
+  const gaps = deriveOutlookGaps(outlook);
+  const opportunityHref = "/dashboard/opportunities" as "/dashboard";
 
   // ── partners: only from reads that exist for this company; omitted otherwise ──
   const agencyRows = (partners.agencies ?? []).slice(0, COMPANY_HOME_BLOCK_LIMIT);
@@ -402,32 +410,93 @@ export async function CompanyHomeFieldSection({
               <p className="font-mono text-meta text-text-muted">
                 {day(field.capacity.from) ?? field.capacity.from} – {day(field.capacity.to) ?? field.capacity.to}
               </p>
+              {field.capacity.counts ? (
+                <p className="text-sm text-text-primary" data-testid="company-home-capacity-summary">
+                  {t("capacity.summary", {
+                    free: field.capacity.counts.free,
+                    committed: field.capacity.counts.committed,
+                    away: field.capacity.counts.unavailable,
+                  })}
+                </p>
+              ) : null}
               <ul className="flex flex-col gap-1">
-                {field.capacity.rows.map((w) => (
-                  <li
-                    key={w.workerId}
-                    className={`flex flex-wrap items-center justify-between gap-1 rounded-control bg-ink-900/40 px-2.5 py-1.5 ${w.state === "free" ? TONE_EDGE.ok : TONE_EDGE.quiet}`}
-                    data-testid={`company-home-capacity-${w.state}`}
-                  >
-                    <span className="min-w-0 break-words text-sm text-text-primary">{w.label}</span>
-                    <span className="inline-flex items-center gap-1 text-meta text-text-secondary">
-                      {w.state === "free" ? (
-                        <>
-                          <CheckCircle2 className="h-3 w-3 text-state-success" aria-hidden />
-                          {t("capacity.free")}
-                        </>
-                      ) : (
-                        <>
-                          <CalendarClock className="h-3 w-3 text-text-muted" aria-hidden />
-                          {w.unavailableUntil
-                            ? t("capacity.awayUntil", { date: day(w.unavailableUntil) ?? w.unavailableUntil })
-                            : t("capacity.away")}
-                        </>
-                      )}
-                    </span>
-                  </li>
-                ))}
+                {field.capacity.rows.map((w) => {
+                  // The state in words — the same strings the row always carried.
+                  const stateText =
+                    w.state === "free"
+                      ? t("capacity.free")
+                      : w.state === "committed"
+                        ? [
+                            w.committedTo
+                              ? t("capacity.onWork", { project: w.committedTo })
+                              : t("capacity.booked"),
+                            w.undated
+                              ? t("capacity.undated")
+                              : w.unavailableUntil
+                                ? t("capacity.until", { date: day(w.unavailableUntil) ?? w.unavailableUntil })
+                                : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")
+                        : w.unavailableUntil
+                          ? t("capacity.awayUntil", { date: day(w.unavailableUntil) ?? w.unavailableUntil })
+                          : t("capacity.away");
+                  return (
+                    <li
+                      key={w.workerId}
+                      className={`min-w-0 rounded-control bg-ink-900/40 px-2.5 py-1.5 ${w.state === "free" ? TONE_EDGE.ok : TONE_EDGE.quiet}`}
+                      data-testid={`company-home-capacity-${w.state}`}
+                    >
+                      {/* ONE professional identity, compact: the same card the
+                          team list and the application read use. The state
+                          rides in its meta line; nothing else is invented. */}
+                      <PersonIdentityCard
+                        variant="roster-person"
+                        density="compact"
+                        testid={`company-home-capacity-identity-${w.workerId}`}
+                        name={w.label}
+                        initials={personMonogram(w.label)}
+                        professions={[]}
+                        meta={[
+                          {
+                            key: "state",
+                            kind: w.state === "committed" ? "assignment" : "availability",
+                            label: stateText,
+                            live: w.state === "free",
+                          },
+                        ]}
+                      />
+                    </li>
+                  );
+                })}
               </ul>
+              {field.capacity.outlook ? (
+                <div className="flex flex-col gap-1" data-testid="company-home-outlook">
+                  <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+                    {t("capacity.outlookHeading")}
+                  </p>
+                  <ol className="grid grid-cols-4 gap-1">
+                    {field.capacity.outlook.map((w) => (
+                      <li
+                        key={w.from}
+                        className={`flex flex-col items-center rounded-control bg-ink-900/40 px-1 py-1.5 ${w.free === 0 ? TONE_EDGE.risk : TONE_EDGE.quiet}`}
+                        aria-label={t("capacity.outlookWeek", {
+                          date: day(w.from) ?? w.from,
+                          free: w.free,
+                          total: field.capacity.kind === "ok" ? field.capacity.rosterTotal : 0,
+                        })}
+                        data-testid="company-home-outlook-week"
+                      >
+                        <span className="font-mono text-base font-semibold tabular-nums text-text-primary">
+                          {w.free}
+                        </span>
+                        <span className="text-meta text-text-muted">{day(w.from) ?? w.from}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  <p className="text-meta italic text-text-muted">{t("capacity.outlookNote")}</p>
+                </div>
+              ) : null}
               {!field.capacity.absencesKnown ? (
                 <p className="text-meta text-text-muted">{t("capacity.absencesUnknown")}</p>
               ) : null}
@@ -469,7 +538,21 @@ export async function CompanyHomeFieldSection({
             <CircleDashed className="h-4 w-4 text-state-amber" aria-hidden />
             {t("missing.heading")}
           </h3>
-          {openNeeds.length === 0 && docGaps.length === 0 ? (
+          {gaps && (gaps.firstEmptyWeek || gaps.unclear > 0) ? (
+            <ul className="flex flex-col gap-1" data-testid="company-home-capacity-gaps">
+              {gaps.firstEmptyWeek ? (
+                <li className={`rounded-control bg-ink-900/40 px-2.5 py-1.5 text-sm text-text-primary ${TONE_EDGE.risk}`}>
+                  {t("missing.noOneFrom", { date: day(gaps.firstEmptyWeek) ?? gaps.firstEmptyWeek })}
+                </li>
+              ) : null}
+              {gaps.unclear > 0 ? (
+                <li className={`rounded-control bg-ink-900/40 px-2.5 py-1.5 text-sm text-text-secondary ${TONE_EDGE.quiet}`}>
+                  {t("missing.unclear", { count: gaps.unclear })}
+                </li>
+              ) : null}
+            </ul>
+          ) : null}
+          {openNeeds.length === 0 && docGaps.length === 0 && !(gaps && gaps.firstEmptyWeek) ? (
             <p className="text-sm text-text-secondary">{t("missing.nothing")}</p>
           ) : null}
           {openNeeds.length > 0 ? (
@@ -490,6 +573,22 @@ export async function CompanyHomeFieldSection({
                       .filter(Boolean)
                       .join(" · ") || t(`missing.status.${n.status}`)}
                   </span>
+                  {n.status !== "draft" && n.status !== "approved" ? (
+                    <span className="text-meta italic text-text-muted" data-testid="company-home-need-fit">
+                      {(() => {
+                        const fit = deriveNeedFit(n.teamSize, outlook);
+                        return fit.kind === "fits"
+                          ? t("missing.fit.fits")
+                          : fit.kind === "some"
+                            ? t("missing.fit.some")
+                            : fit.kind === "from"
+                            ? t("missing.fit.from", { date: day(fit.date) ?? fit.date })
+                            : fit.kind === "short"
+                              ? t("missing.fit.short", { count: fit.short })
+                              : t("missing.fit.unknown");
+                      })()}
+                    </span>
+                  ) : null}
                   {n.status === "draft" ? (
                     <Link href={needsHref} className={`${ACTION_LINK} w-fit`} data-testid="company-home-need-continue">
                       {t("missing.continueDraft")}
@@ -532,6 +631,28 @@ export async function CompanyHomeFieldSection({
                 </li>
               ))}
             </ul>
+          ) : null}
+          {field.interest.kind === "ok" && field.interest.waiting > 0 ? (
+            <div className="flex flex-col gap-1" data-testid="company-home-interest">
+              <span className="text-sm text-text-primary">
+                {t("missing.interest", { count: field.interest.waiting })}
+              </span>
+              <Link href={"/dashboard/company/scouting" as "/dashboard"} className={`${ACTION_LINK} w-fit`}>
+                {t("missing.interestCta")}
+                <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+              </Link>
+            </div>
+          ) : null}
+          {gaps && gaps.peakFree > 0 && gaps.peakFreeFrom && openNeeds.every((n) => deriveNeedFit(n.teamSize, outlook).kind !== "short") ? (
+            <div className="flex flex-col gap-1" data-testid="company-home-opportunity">
+              <span className="text-sm text-text-primary">
+                {t("missing.opportunity", { count: gaps.peakFree, date: day(gaps.peakFreeFrom) ?? gaps.peakFreeFrom })}
+              </span>
+              <Link href={opportunityHref} className={`${ACTION_LINK} w-fit`}>
+                {t("missing.opportunityCta")}
+                <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+              </Link>
+            </div>
           ) : null}
           <Link href={needsHref} className={`${PRIMARY_LINK} mt-auto w-fit`} data-testid="company-home-need-new">
             {t("missing.needsCta")}

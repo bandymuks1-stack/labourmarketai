@@ -32,6 +32,10 @@ export interface CreateWorkTaskInput {
   readonly dueDate?: string | null;
   readonly projectId?: string | null;
   readonly objectId?: string | null;
+  /** Optional stage of the project (project_stages.id). */
+  readonly stageId?: string | null;
+  /** Optional parent task (makes this a subtask; inherits the parent's stage). */
+  readonly parentTaskId?: string | null;
   readonly assigneeProfileId?: string | null;
   readonly assignSelf?: boolean;
 }
@@ -44,11 +48,22 @@ export type CreateWorkTaskCoreResult =
   | { readonly kind: "not_found" }
   | { readonly kind: "limit_reached" }
   | { readonly kind: "cycle" }
+  /** stage not in the project / parent invalid / depth cap exceeded. */
+  | { readonly kind: "invalid_structure" }
   | { readonly kind: "error" };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(c: SupabaseClient): any {
   return c;
+}
+
+/** Outcome words of the stage/subtask validation (20261002150000). */
+export function isStructureOutcome(outcome: string): boolean {
+  return (
+    outcome === "invalid_stage" ||
+    outcome === "invalid_parent" ||
+    outcome === "depth_exceeded"
+  );
 }
 
 function kindForRpcError(error: { code?: string }): CreateWorkTaskCoreResult {
@@ -64,6 +79,7 @@ function kindForOutcome(outcome: string): CreateWorkTaskCoreResult {
   if (outcome === "not_found") return { kind: "not_found" };
   if (outcome === "task_limit_reached" || outcome === "limit_reached") return { kind: "limit_reached" };
   if (outcome === "cycle") return { kind: "cycle" };
+  if (isStructureOutcome(outcome)) return { kind: "invalid_structure" };
   return { kind: "invalid" };
 }
 
@@ -84,6 +100,10 @@ export async function createWorkTaskCore(
   if (projectId && !UUID_RX.test(projectId)) return { kind: "invalid" };
   const objectId = (input.objectId ?? "").trim();
   if (objectId && !UUID_RX.test(objectId)) return { kind: "invalid" };
+  const stageId = (input.stageId ?? "").trim();
+  if (stageId && !UUID_RX.test(stageId)) return { kind: "invalid" };
+  const parentTaskId = (input.parentTaskId ?? "").trim();
+  if (parentTaskId && !UUID_RX.test(parentTaskId)) return { kind: "invalid" };
   const assigneeRaw = (input.assigneeProfileId ?? "").trim();
   const assignee = assigneeRaw || (input.assignSelf ? userId : "");
   if (assignee && !UUID_RX.test(assignee)) return { kind: "invalid" };
@@ -96,10 +116,17 @@ export async function createWorkTaskCore(
     p_project_id: projectId,
     p_object_id: objectId,
     p_assignee_profile_id: assignee,
+    // Sent ONLY when used: a plain create keeps the exact pre-migration
+    // argument set, so it works before AND after the stage/subtask
+    // migration is applied (the 9-arg RPC defaults both to null).
+    ...(stageId && !parentTaskId ? { p_stage_id: stageId } : {}),
+    ...(parentTaskId ? { p_parent_task_id: parentTaskId } : {}),
   });
 
   if (error && isMigrationMissingCode(error.code)) {
-    if (objectId || (assignee && assignee !== userId)) return { kind: "needs_migration" };
+    if (objectId || stageId || parentTaskId || (assignee && assignee !== userId)) {
+      return { kind: "needs_migration" };
+    }
     const v1 = await asAny(supabase).rpc("create_work_task_v1", {
       p_title: title,
       p_description: description,

@@ -29,6 +29,8 @@ export type AiProviderAdapterId =
   | "openai"
   | "gemini"
   | "deepl"
+  | "libretranslate"
+  | "cloudflare"
   | "meta_llama"
   | "xai"
   | "sora";
@@ -112,6 +114,28 @@ export const PROVIDER_ADAPTER_REGISTRY: readonly AiProviderAdapterDescriptor[] =
       "Real v2/translate wire in providers/deepl.ts, reached ONLY via the " +
       "translate_message languageRouting preference. Inert unless " +
       "AI_DEEPL_ENABLED=true + DEEPL_API_KEY; the LLM tier stays the fallback.",
+  },
+  {
+    id: "libretranslate",
+    displayName: "LibreTranslate (self-hosted)",
+    status: "wired_env_gated",
+    capabilities: ["translate_message"],
+    notes:
+      "Real /translate wire in providers/libretranslate.ts, reached ONLY via the " +
+      "translate_message secondary walk. Inert unless AI_LIBRETRANSLATE_ENABLED=true + " +
+      "LIBRETRANSLATE_URL; `local` for the egress gate only when " +
+      "AI_LIBRETRANSLATE_SELF_HOSTED=true.",
+  },
+  {
+    id: "cloudflare",
+    displayName: "Cloudflare Workers AI (m2m100)",
+    status: "wired_env_gated",
+    capabilities: ["translate_message"],
+    notes:
+      "Real ai/run wire in providers/cloudflare.ts (free-allocation model only), reached " +
+      "ONLY via the translate_message secondary walk. Inert unless AI_CLOUDFLARE_ENABLED=true + " +
+      "CLOUDFLARE_ACCOUNT_ID + CLOUDFLARE_API_TOKEN; external free tier, so the egress gate " +
+      "refuses private message text until the owner reclassifies it.",
   },
   {
     id: "meta_llama",

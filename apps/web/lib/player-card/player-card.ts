@@ -97,6 +97,12 @@ export interface WorkerPlayerCard {
   /** §5.2 LOCATION — the worker's own stated country code (ISO-2), or null.
    *  Country precision only: the card never implies an address. */
   locationCountry: string | null;
+  /** MOBILITY — the countries the worker says they would work in
+   *  (workers.preferred_countries, ISO-2 codes) and whether they would
+   *  relocate. The worker's OWN stated facts, read from the same canonical
+   *  row as the location; absent on the public sample card. */
+  preferredCountries?: readonly string[];
+  willingToRelocate?: boolean | null;
   /** §5.2 DOCUMENTS — real counts from the worker's OWN document records.
    *  `null` when the documents surface is unavailable for this account
    *  (honest absence, never a zeroed-out fake summary). */
@@ -617,6 +623,10 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
     workHistory,
     unavailable,
     locationCountry: worker?.current_location_country ?? null,
+    preferredCountries: Array.isArray(worker?.preferred_countries)
+      ? (worker.preferred_countries as string[]).filter((c) => typeof c === "string" && c.trim().length > 0)
+      : [],
+    willingToRelocate: worker?.willing_to_relocate ?? null,
     documents,
     // §5.2 — geometry comes from the pure derivers, so what the chart draws is
     // exactly what the unit tests assert.

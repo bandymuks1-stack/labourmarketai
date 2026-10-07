@@ -273,8 +273,15 @@ export async function POST(req: Request) {
     serverInfo: serverInfo(new URL(req.url).origin),
     instructions:
       "LabourMarket.ai capabilities for the signed-in user. Reads return " +
-      "recorded facts under the user's own permissions. Nothing here writes " +
-      "without an explicit draft→confirm step.",
+      "recorded facts under the user's own permissions. Consequential writes " +
+      "need an explicit draft→confirm step. The exceptions are single-step " +
+      "and named: the evidence-import staging steps (evidence_import_create_session, " +
+      "evidence_import_submit_rows, evidence_import_stage_file, evidence_import_resolve_row, " +
+      "evidence_import_resolve_label, evidence_import_resolve_time_semantics) " +
+      "write only staging rows that become records solely through the " +
+      "confirmed evidence_import_commit; context_switch changes which " +
+      "organization the session acts for; evidence_person_create adds one " +
+      "unlinked roster person.",
     tools: toolDefs(),
     callTool: async (name, args) => {
       const capabilityId = capabilityIdForTool(name);

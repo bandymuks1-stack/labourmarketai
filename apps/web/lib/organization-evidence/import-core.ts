@@ -7,6 +7,8 @@ import {
 } from "@/lib/timesheet-import/resolve-entities";
 import { orgDisplayName } from "@/lib/company/org-display";
 import {
+  anyStandingDispute,
+  contestWithdrawnBy,
   deriveEvidenceStanding,
   type ReportedEvidenceState,
   type RecordLifecycleEvent,
@@ -22,6 +24,7 @@ import {
   type StoreRow,
 } from "./evidence-store";
 import { chainHash, recordFingerprint } from "./fingerprint";
+import { splitAddress } from "./address-split";
 import {
   deriveImportSessionStatus,
   type ImportSessionEvent,
@@ -52,6 +55,8 @@ import {
   type TimeSemanticsKind,
 } from "./time-semantics";
 import { committedFactFields } from "./record-fact-fields";
+import { readRecordHistoryContexts } from "./history-context-read";
+import type { HistoryContext } from "./professional-history-context";
 import {
   resolveEvidenceOrganization,
   type EvidenceOrgReason,
@@ -2112,6 +2117,15 @@ export interface CommitPlanOptions {
   readonly createObjects: boolean;
   /** `relationship_kind` for people the plan creates (`other` when absent). */
   readonly relationshipKind?: string | null;
+  /**
+   * The human declared that the source does not establish WHICH company
+   * performed this work (two companies billed the same customer, no per-person
+   * contract or payroll). Every record this commit writes then carries
+   * `derived.performingCompany = { state: "not_established" }`, so no surface
+   * has to infer a performer from where the record happens to be stored. It
+   * changes no authority, role or evidence state; it is a stated absence.
+   */
+  readonly performerNotEstablished?: boolean;
 }
 
 /**
@@ -2228,14 +2242,17 @@ async function applyPlan(
               // inside the RPC `create_work_object_v1`, behind the store). It
               // answers a status, not an id, so the register is re-read and
               // matched — the same way a human's "add" is read back.
+              // The label is an ADDRESS only when it is unmistakably one
+              // (`<street> <number>[, <city>]`); otherwise the columns stay null.
+              const addr = splitAddress(seg.name);
               const rpc = await store.createWorkObject({
                 p_organization_id: session.organizationId,
                 p_name: tidy(seg.name).slice(0, 160),
                 p_project_id: null,
                 p_country: null,
                 p_region: null,
-                p_city: null,
-                p_address_line: null,
+                p_city: addr?.city ?? null,
+                p_address_line: addr?.addressLine ?? null,
                 p_latitude: null,
                 p_longitude: null,
               });
@@ -2377,6 +2394,7 @@ export async function commitImport(
     importedAt: new Date().toISOString(),
     userId: store.userId,
     evidenceState: opts?.evidenceState ?? "ORGANIZATION_REPORTED",
+    performerNotEstablished: planOpts.performerNotEstablished === true,
   });
 
   const ins = await store.insertRecords(payload);
@@ -2465,6 +2483,12 @@ export async function commitImport(
 /** Committing marks in flight at once — bounded, like every batch here. */
 const COMMIT_MARK_CONCURRENCY = 20;
 
+/** The stated absence (see `CommitPlanOptions.performerNotEstablished`). */
+export const PERFORMER_NOT_ESTABLISHED = {
+  state: "not_established",
+  method: "declared-at-import:v1",
+} as const;
+
 export interface CommitRowsInput {
   readonly sessionId: string;
   readonly session: {
@@ -2485,6 +2509,8 @@ export interface CommitRowsInput {
   /** The human the records name as supplier and importer. */
   readonly userId: string;
   readonly evidenceState: ReportedEvidenceState;
+  /** See `CommitPlanOptions.performerNotEstablished`. */
+  readonly performerNotEstablished?: boolean;
 }
 
 /**
@@ -2517,6 +2543,7 @@ export function buildCommitRows(input: CommitRowsInput): {
     // 2026-09-23): a start alone is not a period, and is never written as a
     // one-day span — such a row stays a dated fact with unknown duration.
     const derived = { ...((r.derived as Record<string, unknown> | null) ?? {}) };
+    if (input.performerNotEstablished) derived.performingCompany = PERFORMER_NOT_ESTABLISHED;
     const ts = readTimeSemantics(derived);
     const daily = countsAsDailyHours(ts);
     const period = ts && ts.value === "period_aggregate" && ts.periodStart && ts.periodEnd ? ts : null;
@@ -2573,7 +2600,9 @@ export function buildCommitRows(input: CommitRowsInput): {
       organization_person_id: (r.organization_person_id as string | null) ?? null,
       work_object_id: (r.work_object_id as string | null) ?? null,
       record_fingerprint: r.record_fingerprint as string,
-      derived: (r.derived as Record<string, unknown> | null) ?? {},
+      derived: input.performerNotEstablished
+        ? { ...((r.derived as Record<string, unknown> | null) ?? {}), performingCompany: PERFORMER_NOT_ESTABLISHED }
+        : ((r.derived as Record<string, unknown> | null) ?? {}),
       duplicate_state: "new",
       duplicate_of_record_id: null,
       problem: null,
@@ -2668,17 +2697,26 @@ function standingOf(r: SessionRecordWithEvents) {
  *
  * It deletes and updates nothing: every write is an append.
  */
-async function lifecycleSweep(
-  caller: EvidenceCaller,
+interface SweepPlan {
+  readonly organizationId: string;
+  /** The records that would gain the event, in stable (id) order. */
+  readonly pending: readonly SessionRecordWithEvents[];
+  /** True when the session's own latest lifecycle event is `rolled_back`. */
+  readonly sessionWithdrawn: boolean;
+  /** The session is already in the requested state AND no record needs the event. */
+  readonly nothingToDo: boolean;
+}
+
+/** THE pending computation of the batch lifecycle - shared by the sweep that
+ *  writes and by the read-only preview an agent confirms against, so what is
+ *  shown and what is written can never be computed two ways. Reads only. */
+async function planLifecycleSweep(
+  store: EvidenceStore,
   sessionId: string,
   eventType: "withdrawn" | "reinstated",
-  note?: string | null,
-): Promise<EvidenceImportResult<LifecycleResult>> {
-  const store = storeOf(caller);
+): Promise<EvidenceImportResult<{ plan: SweepPlan }>> {
   const session = await loadSession(store, sessionId);
   if (!session.ok) return session.failure;
-  const importEvent = eventType === "withdrawn" ? "rolled_back" : "reinstated";
-
   const records = await readSessionRecords(store, sessionId);
   if (!records.ok) return records.failure;
   const pending = records.value.filter((r) =>
@@ -2692,13 +2730,68 @@ async function lifecycleSweep(
   const latest = trail.data.find((e) => e.event_type === "rolled_back" || e.event_type === "reinstated");
   const sessionWithdrawn = latest?.event_type === "rolled_back";
   const alreadyThere = eventType === "withdrawn" ? sessionWithdrawn : !sessionWithdrawn;
-  if (pending.length === 0 && alreadyThere) {
+  return {
+    kind: "ok",
+    plan: {
+      organizationId: session.organizationId,
+      pending,
+      sessionWithdrawn,
+      nothingToDo: pending.length === 0 && alreadyThere,
+    },
+  };
+}
+
+/**
+ * READ-ONLY preview of withdrawing one import session: exactly the records the
+ * sweep would write a `withdrawn` event for. Writes nothing. The fingerprint
+ * parts (`pendingRecordIds`, `sessionWithdrawn`) are what a draft binds its
+ * one-time token to, so a change between preview and confirm voids the token.
+ */
+export async function previewWithdrawal(
+  caller: EvidenceCaller,
+  sessionId: string,
+): Promise<
+  EvidenceImportResult<{
+    organizationId: string;
+    pendingRecordIds: readonly string[];
+    peopleAffected: number;
+    sessionWithdrawn: boolean;
+    nothingToDo: boolean;
+  }>
+> {
+  const planned = await planLifecycleSweep(storeOf(caller), sessionId, "withdrawn");
+  if (planned.kind !== "ok") return planned;
+  const { plan } = planned;
+  const people = new Set(plan.pending.map((r) => r.organization_person_id).filter((x): x is string => !!x));
+  return {
+    kind: "ok",
+    organizationId: plan.organizationId,
+    pendingRecordIds: plan.pending.map((r) => r.id).sort(),
+    peopleAffected: people.size,
+    sessionWithdrawn: plan.sessionWithdrawn,
+    nothingToDo: plan.nothingToDo,
+  };
+}
+
+async function lifecycleSweep(
+  caller: EvidenceCaller,
+  sessionId: string,
+  eventType: "withdrawn" | "reinstated",
+  note?: string | null,
+): Promise<EvidenceImportResult<LifecycleResult>> {
+  const store = storeOf(caller);
+  const importEvent = eventType === "withdrawn" ? "rolled_back" : "reinstated";
+  const planned = await planLifecycleSweep(store, sessionId, eventType);
+  if (planned.kind !== "ok") return planned;
+  const { organizationId, pending, nothingToDo } = planned.plan;
+  if (nothingToDo) {
     return {
       kind: "ok",
       affected: 0,
       outcome: eventType === "withdrawn" ? "already_withdrawn" : "already_reinstated",
     };
   }
+  const session = { organizationId };
 
   let affected = 0;
   if (pending.length > 0) {
@@ -2751,6 +2844,55 @@ export const ATTESTATION_ROLES = [
 ] as const;
 
 /**
+ * READ-ONLY preview of an attestation: validates the role against the
+ * record's supplier role (the same rule `attestRecord` enforces) and reports
+ * the record's CURRENT attestation trail so a draft can bind its one-time
+ * token to it. Writes nothing.
+ */
+export async function previewAttestation(
+  caller: EvidenceCaller,
+  input: {
+    readonly recordId: string;
+    readonly actorRole?: (typeof ATTESTATION_ROLES)[number] | null;
+  },
+): Promise<
+  EvidenceImportResult<{
+    organizationId: string;
+    supplierRole: string;
+    /** Count of `attested` events on the record, from any actor. */
+    attestedEventCount: number;
+    /** Id of the newest `attested` event, or null. */
+    latestAttestedEventId: string | null;
+    /** The caller already attested this record. */
+    attestedByCaller: boolean;
+    /** The record's latest lifecycle event is a withdrawal. */
+    withdrawn: boolean;
+  }>
+> {
+  const store = storeOf(caller);
+  const rec = await store.readRecord(input.recordId);
+  if (rec.error) return classify(rec.error);
+  if (!rec.data) return { kind: "not-found" };
+  const supplierRole = (rec.data.supplier_role as string | null) ?? "other";
+  if (input.actorRole && input.actorRole !== supplierRole) {
+    return { kind: "invalid", problems: [`attestation role must be the record's supplier role (${supplierRole})`] };
+  }
+  const events = await store.listRecordEvents(input.recordId);
+  if (events.error) return classify(events.error);
+  const attested = events.data.filter((e) => e.event_type === "attested");
+  const lifecycle = events.data.find((e) => e.event_type === "withdrawn" || e.event_type === "reinstated");
+  return {
+    kind: "ok",
+    organizationId: rec.data.organization_id as string,
+    supplierRole,
+    attestedEventCount: attested.length,
+    latestAttestedEventId: (attested[0]?.id as string | undefined) ?? null,
+    attestedByCaller: attested.some((e) => e.actor_profile_id === store.userId),
+    withdrawn: lifecycle?.event_type === "withdrawn",
+  };
+}
+
+/**
  * The organization attesting a record it supplied.
  *
  * Attesting one's OWN work is ALLOWED (owner decision 3): a sole trader
@@ -2784,21 +2926,22 @@ export async function attestRecord(
   },
 ): Promise<EvidenceImportResult<{ eventId: string }>> {
   const store = storeOf(caller);
-  const rec = await store.readRecord(input.recordId);
-  if (rec.error) return classify(rec.error);
-  if (!rec.data) return { kind: "not-found" };
-  const supplierRole = (rec.data.supplier_role as string | null) ?? "other";
-  if (input.actorRole && input.actorRole !== supplierRole) {
-    return { kind: "invalid", problems: [`attestation role must be the record's supplier role (${supplierRole})`] };
+  const prior = await previewAttestation(caller, input);
+  if (prior.kind !== "ok") return prior;
+  const supplierRole = prior.supplierRole;
+  // One actor stands behind a record ONCE. A repeat adds no standing, only
+  // noise in an append-only ledger (and a replayed confirm must never mint a
+  // second event) - refused by name, not written.
+  if (prior.attestedByCaller) {
+    return { kind: "invalid", problems: ["this record is already attested by this actor"] };
   }
-
   const res = await store.insertRecordEvents([
     {
-      organization_id: rec.data.organization_id as string,
+      organization_id: prior.organizationId,
       record_id: input.recordId,
       event_type: "attested",
       actor_role: supplierRole,
-      actor_organization_id: rec.data.organization_id as string,
+      actor_organization_id: prior.organizationId,
       actor_profile_id: store.userId,
       note: input.note ?? null,
     },
@@ -2878,10 +3021,119 @@ export async function attestSessionRecords(
   return { kind: "ok", attested: res.data.length, skipped };
 }
 
+// ── performing-company attribution ──────────────────────────────────────────
+
+/** Roles a performing company can be named in (the party role vocabulary). */
+export const PERFORMING_PARTY_ROLES = ["employer", "subcontractor", "agency", "other"] as const;
+export type PerformingPartyRole = (typeof PERFORMING_PARTY_ROLES)[number];
+
+/**
+ * NAME THE COMPANY THAT PERFORMED RECORDS THAT ARE STORED IN ANOTHER
+ * ORGANIZATION'S BOOKS — additively, never by moving or copying them.
+ *
+ * Evidence records are append-only and hash-chained, and their organization
+ * is part of their identity: a record imported while the caller acted in
+ * organization A stays in A. When the work was really performed by company B,
+ * the existing party table already says so: one `organization_evidence_parties`
+ * row per record, `party_organization_id = B`, in a role such as `employer`.
+ * The existing read policies then do the rest: B's managers can READ those
+ * records (the records SELECT policy admits a managed party organization), and
+ * nothing else changes. The record, its fingerprint and hash, its events and
+ * its attestations are untouched, and `employer` is not a role that may
+ * independently verify, so no verification authority is granted.
+ *
+ * Authority is the caller's own RLS session: the insert policy admits only a
+ * manager of the RECORD's organization, and a party organization may not be
+ * named on a record whose project has a keyed customer (restrictive P6). The
+ * rows are append-only (no UPDATE, no DELETE grant): the product cannot undo
+ * this; a database administrator can delete exactly the rows this wrote
+ * (identified by `created_by` and the party organization).
+ *
+ * IDEMPOTENT: a record that already names this organization in this role is
+ * skipped, so a re-run writes nothing. A record that already lives in the
+ * performing organization is skipped (a company is not its own party).
+ */
+export async function attributeRecordsToPerformingOrganization(
+  caller: EvidenceCaller,
+  input: {
+    readonly recordIds: readonly string[];
+    readonly performingOrganizationId: string;
+    readonly role?: PerformingPartyRole;
+    /** Free text kept on the party row (at most 200 characters), e.g. the stated share. */
+    readonly label?: string | null;
+  },
+): Promise<EvidenceImportResult<{ attributed: number; skipped: number }>> {
+  const store = storeOf(caller);
+  const role: PerformingPartyRole = input.role ?? "employer";
+  if (!(PERFORMING_PARTY_ROLES as readonly string[]).includes(role)) {
+    return { kind: "invalid", problems: [`party role must be one of ${PERFORMING_PARTY_ROLES.join(", ")}`] };
+  }
+  const label = input.label?.trim() ? input.label.trim() : null;
+  if (label && label.length > 200) return { kind: "invalid", problems: ["label is at most 200 characters"] };
+  const ids = [...new Set(input.recordIds)];
+  if (ids.length === 0) return { kind: "ok", attributed: 0, skipped: 0 };
+
+  const orgs = await store.readRecordOrganizations(ids);
+  if (orgs.error) return classify(orgs.error);
+  const visible = new Map(orgs.data.map((r) => [r.id, r.organization_id]));
+  if (visible.size === 0) return { kind: "invalid", problems: ["none of the records is visible to the caller"] };
+
+  const existing = await store.readParties([...visible.keys()]);
+  if (existing.error) return classify(existing.error);
+  const already = new Set(
+    existing.data
+      .filter((p) => p.party_organization_id === input.performingOrganizationId && p.party_role === role)
+      .map((p) => p.record_id as string),
+  );
+
+  const rows: StoreRow[] = [];
+  for (const [id, orgId] of visible) {
+    if (orgId === input.performingOrganizationId || already.has(id)) continue;
+    rows.push({
+      organization_id: orgId,
+      record_id: id,
+      party_role: role,
+      party_organization_id: input.performingOrganizationId,
+      party_label: label,
+      created_by: store.userId,
+    });
+  }
+  const skipped = ids.length - rows.length;
+  if (rows.length === 0) return { kind: "ok", attributed: 0, skipped };
+  const res = await store.insertParties(rows);
+  if (res.error) {
+    if (res.error.code === "42501") return { kind: "not-authorized", reason: "not-authorized" };
+    return classify(res.error);
+  }
+  return { kind: "ok", attributed: res.data.length, skipped };
+}
+
+/** The records (any organization's books) that name this organization as a party. */
+export async function listRecordIdsAttributedTo(
+  caller: EvidenceCaller,
+  organizationId: string,
+): Promise<EvidenceImportResult<{ recordIds: readonly string[] }>> {
+  const store = storeOf(caller);
+  const res = await store.readRecordIdsNamingOrganization(organizationId);
+  if (res.error) return classify(res.error);
+  return { kind: "ok", recordIds: res.data };
+}
+
 // ── read-back ───────────────────────────────────────────────────────────────
+
+export interface EvidenceRecordPartyView {
+  readonly role: string;
+  /** The organization named (a performing company, a customer), when linked. */
+  readonly organizationId: string | null;
+  readonly label: string | null;
+}
 
 export interface EvidenceRecordView {
   readonly id: string;
+  /** The organization whose books hold the record. */
+  readonly organizationId: string;
+  /** Parties recorded on it (performing company, customer label, and so on). */
+  readonly parties: readonly EvidenceRecordPartyView[];
   readonly personId: string;
   readonly personName: string | null;
   readonly activityKind: string;
@@ -2893,6 +3145,16 @@ export interface EvidenceRecordView {
   readonly language: string;
   readonly contextLabel: string | null;
   readonly workObjectId: string | null;
+  /** The ordered work (project) the record belongs to; NULL = not identified. */
+  readonly projectId: string | null;
+  /** The roster relationship (employee, subcontractor, ...) of the person to
+   *  the supplying organisation. */
+  readonly relationshipKind: string | null;
+  /** The record's REPORTED (base) state, before any lifecycle event. */
+  readonly reportedState: string;
+  readonly supplierOrganizationId: string | null;
+  /** `parsed_file` / `agent_rows` / `typed` for historical timesheet rows. */
+  readonly rowOrigin: string | null;
   readonly supplierRole: string;
   readonly sourceKind: string;
   readonly sourceFilename: string | null;
@@ -2914,7 +3176,8 @@ export interface EvidenceRecordView {
    *  separate event with its own policy and is never implied by an import. */
   readonly independentlyVerified: boolean;
   /**
-   * THIS VIEWER has already contested this record.
+   * THIS VIEWER's own contest of this record STANDS right now (their latest
+   * dispute-family event is `disputed`; a later `dispute_withdrawn` ends it).
    *
    * Distinct from `state === "DISPUTED"`, which says only that SOMEBODY with
    * standing contested it — an organisation manager can dispute too. A surface
@@ -2926,6 +3189,12 @@ export interface EvidenceRecordView {
    * organisation-side read is to claim no authorship at all.
    */
   readonly disputedByViewer: boolean;
+  /**
+   * THIS VIEWER contested this record and then withdrew the contest. The
+   * contest existed and is no longer standing - the history stays visible, the
+   * surface offers a fresh contest, and the earlier event is never erased.
+   */
+  readonly contestWithdrawnByViewer: boolean;
 }
 
 /**
@@ -2951,6 +3220,15 @@ export async function listEvidenceRecords(
      * passing it can never widen that.
      */
     readonly viewerProfileId?: string | null;
+    /** ONE organization's records. A caller who belongs to several organizations
+     *  is shown every organization's rows by RLS; a surface that speaks for the
+     *  ACTIVE workspace passes it so another organization's work never lands in
+     *  it. A narrowing only — RLS still decides what is visible. */
+    readonly organizationId?: string | null;
+    /** Records tied to these work objects (a place / project). A narrowing only. */
+    readonly workObjectIds?: readonly string[] | null;
+    /** Exactly these records (e.g. the ones attributed to an organization). */
+    readonly recordIds?: readonly string[] | null;
     readonly limit?: number;
   } = {},
 ): Promise<EvidenceImportResult<{ records: readonly EvidenceRecordView[] }>> {
@@ -2966,11 +3244,20 @@ export async function listEvidenceRecords(
   let q = db(caller.supabase)
     .from("organization_evidence_records")
     .select(
-      "id, organization_person_id, activity_kind, activity_date, period_start, period_end, hours, original_text, original_language, context_label, work_object_id, supplier_role, source_kind, source_filename, imported_at, imported_by_profile_id, evidence_state, source_fact, derived, organization_people(display_name, linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at)",
+      "id, organization_person_id, activity_kind, activity_date, period_start, period_end, hours, original_text, original_language, context_label, work_object_id, project_id, supplied_by_organization_id, row_origin, supplier_role, source_kind, source_filename, imported_at, imported_by_profile_id, evidence_state, source_fact, derived, organization_id, organization_people(display_name, linked_profile_id, relationship_kind), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at), organization_evidence_parties!organization_evidence_parties_record_fk(party_role, party_organization_id, party_label)",
     )
     .order("activity_date", { ascending: false })
     .limit(Math.min(Math.max(filter.limit ?? 200, 1), 1000));
   if (filter.sessionId) q = q.eq("session_id", filter.sessionId);
+  if (filter.organizationId) q = q.eq("organization_id", filter.organizationId);
+  if (filter.recordIds) {
+    if (filter.recordIds.length === 0) return { kind: "ok", records: [] };
+    q = q.in("id", filter.recordIds as string[]);
+  }
+  if (filter.workObjectIds) {
+    if (filter.workObjectIds.length === 0) return { kind: "ok", records: [] };
+    q = q.in("work_object_id", filter.workObjectIds as string[]);
+  }
   if (filter.organizationPersonId) {
     q = q.eq("organization_person_id", filter.organizationPersonId);
   }
@@ -2997,6 +3284,7 @@ export async function listEvidenceRecords(
     const person = r.organization_people as {
       display_name?: string;
       linked_profile_id?: string | null;
+      relationship_kind?: string | null;
     } | null;
     // The subject's linked profile is what lets the derivation tell a
     // self-attestation from an independent one. Unlinked → no subject profile
@@ -3008,6 +3296,12 @@ export async function listEvidenceRecords(
     );
     return {
       id: r.id as string,
+      organizationId: (r.organization_id as string) ?? "",
+      parties: ((r.organization_evidence_parties as Record<string, unknown>[] | null) ?? []).map((p) => ({
+        role: p.party_role as string,
+        organizationId: (p.party_organization_id as string | null) ?? null,
+        label: (p.party_label as string | null) ?? null,
+      })),
       personId: r.organization_person_id as string,
       personName: person?.display_name ?? null,
       activityKind: (r.activity_kind as string) ?? "work",
@@ -3019,6 +3313,11 @@ export async function listEvidenceRecords(
       language: (r.original_language as string) ?? "",
       contextLabel: (r.context_label as string | null) ?? null,
       workObjectId: (r.work_object_id as string | null) ?? null,
+      projectId: (r.project_id as string | null) ?? null,
+      relationshipKind: person?.relationship_kind ?? null,
+      reportedState: (r.evidence_state as string) ?? "",
+      supplierOrganizationId: (r.supplied_by_organization_id as string | null) ?? null,
+      rowOrigin: (r.row_origin as string | null) ?? null,
       supplierRole: (r.supplier_role as string) ?? "other",
       sourceKind: (r.source_kind as string) ?? "",
       sourceFilename: (r.source_filename as string | null) ?? null,
@@ -3048,13 +3347,16 @@ export async function listEvidenceRecords(
           }
         : null,
       independentlyVerified: standing.independentlyVerified,
+      // Per-viewer, latest-wins: a withdrawn contest no longer stands, and
+      // someone else's contest is never the viewer's to withdraw.
       disputedByViewer:
         filter.viewerProfileId != null &&
-        events.some(
-          (e) =>
-            e.eventType === "disputed" &&
-            e.actorProfileId === filter.viewerProfileId,
+        anyStandingDispute(
+          events.filter((e) => e.actorProfileId === filter.viewerProfileId),
         ),
+      contestWithdrawnByViewer:
+        filter.viewerProfileId != null &&
+        contestWithdrawnBy(events, filter.viewerProfileId),
     } satisfies EvidenceRecordView;
   });
 
@@ -3176,6 +3478,10 @@ export interface MyOrganizationEvidence {
   readonly links: readonly SubjectRosterLink[];
   /** The offers still awaiting this person's answer. */
   readonly pendingOffers: readonly SubjectRosterLink[];
+  /** The work behind each record (project, client, capacity, source, proof
+   *  facts), keyed by record id. Composed inside this one read so no caller
+   *  needs a further serial stage. Absent entries = nothing to show. */
+  readonly contexts: Readonly<Record<string, HistoryContext>>;
 }
 
 /**
@@ -3242,6 +3548,9 @@ export async function listMyOrganizationEvidence(
     records: recordsRes.records,
     links,
     pendingOffers: links.filter((l) => l.linkState === "link_proposed"),
+    contexts: Object.fromEntries(
+      await readRecordHistoryContexts(caller.supabase, recordsRes.records),
+    ),
   };
 }
 
@@ -3337,5 +3646,47 @@ export async function respondToRosterLink(
   return {
     kind: "ok",
     linkState: input.decision === "accept" ? "linked" : "unlinked",
+  };
+}
+
+// ── the subject WITHDRAWS their contest ─────────────────────────────────────
+
+/**
+ * Take back the caller's own standing contest of a record.
+ *
+ * Appends a `dispute_withdrawn` event through
+ * `withdraw_organization_evidence_dispute_v1`; the earlier `disputed` event
+ * is never altered, so the fact that the contest existed stays on record. The
+ * RPC is the only door (no policy admits a subject to write this event type),
+ * it authorises exactly as the dispute policy does, and it is IDEMPOTENT:
+ * withdrawing with nothing standing appends nothing and answers
+ * `withdrawn: false`. SQLSTATE 42501 is the one refusal for "no such record",
+ * "not the subject", "not linked" and "not signed in" - a caller must not learn
+ * that a record exists from a different error.
+ */
+export async function withdrawEvidenceRecordDispute(
+  caller: DomainCaller,
+  input: { readonly recordId: string; readonly note?: string | null },
+): Promise<
+  EvidenceImportResult<{ readonly withdrawn: boolean; readonly standing: boolean }>
+> {
+  const note = (input.note ?? "").trim();
+  if (note.length > 1000) return { kind: "invalid", problems: ["note_too_long"] };
+  const res = await db(caller.supabase).rpc(
+    "withdraw_organization_evidence_dispute_v1",
+    { p_record_id: input.recordId, p_note: note === "" ? null : note },
+  );
+  if (res.error) {
+    if (res.error.code === "42501")
+      return { kind: "invalid", problems: ["not_subject"] };
+    if (res.error.code === "22001")
+      return { kind: "invalid", problems: ["note_too_long"] };
+    return classify(res.error);
+  }
+  const data = (res.data ?? {}) as { withdrawn?: boolean; standing?: boolean };
+  return {
+    kind: "ok",
+    withdrawn: data.withdrawn === true,
+    standing: data.standing === true,
   };
 }

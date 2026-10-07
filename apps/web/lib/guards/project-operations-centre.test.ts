@@ -108,6 +108,8 @@ function task(over: Partial<WorkTask> & { id: string }): WorkTask {
   return {
     projectId: "p1",
     objectId: null,
+    stageId: null,
+    parentTaskId: null,
     title: `Task ${over.id}`,
     description: null,
     status: "todo",

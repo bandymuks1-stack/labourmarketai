@@ -197,8 +197,12 @@ export interface JournalWindowWorkerRow {
   readonly workerId: string;
   readonly name: string;
   readonly entries: number;
-  /** Entries with no review decision yet. */
+  /** Entries with no review decision yet, in a context where review IS on. */
   readonly awaitingReview: number;
+  /** Entries with no decision in a context where the organization has NOT
+   *  switched review on - recorded, not "awaiting": nobody is expected to
+   *  review them. */
+  readonly reviewNotEnabled: number;
   /** Entries whose current review result is APPROVED. */
   readonly confirmed: number;
   /** Entries rejected or sent back for changes (reviewed, not confirmed). */
@@ -237,6 +241,7 @@ export type JournalWindowReport =
       readonly totals: {
         readonly entries: number;
         readonly awaitingReview: number;
+        readonly reviewNotEnabled: number;
         readonly confirmed: number;
         readonly returned: number;
         readonly workers: number;
@@ -400,7 +405,13 @@ function sumWorkTime(
  */
 export function rollUpJournalWindow(
   rows: readonly JournalWindowEntryRow[],
-  opts: { readonly workTime: boolean; readonly todayIso: string },
+  opts: {
+    readonly workTime: boolean;
+    readonly todayIso: string;
+    /** Engagement contexts whose organization has review switched OFF. A
+     *  decision-less entry there is "review not enabled", never "awaiting". */
+    readonly reviewOffContextIds?: ReadonlySet<string>;
+  },
 ): {
   readonly workers: readonly JournalWindowWorkerRow[];
   readonly totals: Extract<JournalWindowReport, { applied: true }>["totals"];
@@ -409,6 +420,7 @@ export function rollUpJournalWindow(
     name: string;
     rows: JournalWindowEntryRow[];
     awaitingReview: number;
+    reviewNotEnabled: number;
     confirmed: number;
     returned: number;
     lastEntryAtIso: string;
@@ -424,6 +436,7 @@ export function rollUpJournalWindow(
       name: workerName(row),
       rows: [],
       awaitingReview: 0,
+      reviewNotEnabled: 0,
       confirmed: 0,
       returned: 0,
       lastEntryAtIso: row.created_at,
@@ -431,7 +444,18 @@ export function rollUpJournalWindow(
     bucket.rows.push(row);
     const result = deriveReviewResult(row.journal_entry_confirmations);
     if (result === "approved") bucket.confirmed += 1;
-    else if (result === "submitted") bucket.awaitingReview += 1;
+    else if (result === "submitted") {
+      // REVIEW OFF != AWAITING REVIEW. The same split the worker-facing
+      // verification state makes (review_not_enabled vs verification_pending).
+      if (
+        row.engagement_context_id &&
+        opts.reviewOffContextIds?.has(row.engagement_context_id)
+      ) {
+        bucket.reviewNotEnabled += 1;
+      } else {
+        bucket.awaitingReview += 1;
+      }
+    }
     else bucket.returned += 1;
     if (row.created_at > bucket.lastEntryAtIso) bucket.lastEntryAtIso = row.created_at;
     byWorker.set(key, bucket);
@@ -443,6 +467,7 @@ export function rollUpJournalWindow(
       name: b.name,
       entries: b.rows.length,
       awaitingReview: b.awaitingReview,
+      reviewNotEnabled: b.reviewNotEnabled,
       confirmed: b.confirmed,
       returned: b.returned,
       lastEntryAtIso: b.lastEntryAtIso,
@@ -455,6 +480,7 @@ export function rollUpJournalWindow(
     totals: {
       entries: counted.length,
       awaitingReview: workers.reduce((n, w) => n + w.awaitingReview, 0),
+      reviewNotEnabled: workers.reduce((n, w) => n + w.reviewNotEnabled, 0),
       confirmed: workers.reduce((n, w) => n + w.confirmed, 0),
       returned: workers.reduce((n, w) => n + w.returned, 0),
       workers: workers.length,
@@ -506,11 +532,18 @@ export async function getJournalWindowReport(
   // ended engagement is still work that happened in this organization.
   const ctxRes = await asAny(supabase)
     .from("engagement_contexts")
-    .select("id")
+    .select("id, journal_review_enabled")
     .eq("organization_id", employer.organizationId)
     .limit(CONTEXT_READ_LIMIT);
   if (ctxRes.error) return { applied: false, reason: "error" };
-  const contextIds = ((ctxRes.data ?? []) as { id: string }[]).map((r) => r.id);
+  const contextRows = (ctxRes.data ?? []) as {
+    id: string;
+    journal_review_enabled: boolean | null;
+  }[];
+  const contextIds = contextRows.map((r) => r.id);
+  const reviewOffContextIds = new Set(
+    contextRows.filter((r) => r.journal_review_enabled === false).map((r) => r.id),
+  );
   if (contextIds.length === 0) {
     // Measured zero — the org genuinely has no engagements, not a read failure.
     return {
@@ -520,6 +553,7 @@ export async function getJournalWindowReport(
       totals: {
         entries: 0,
         awaitingReview: 0,
+        reviewNotEnabled: 0,
         confirmed: 0,
         returned: 0,
         workers: 0,
@@ -607,6 +641,7 @@ export async function getJournalWindowReport(
   const { workers, totals } = rollUpJournalWindow(entries, {
     workTime: opts.workTime === true,
     todayIso: window.endIso,
+    reviewOffContextIds,
   });
   return { applied: true, window, workers, totals, organizationLedger: await ledgerRead };
 }

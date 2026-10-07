@@ -119,3 +119,70 @@ export async function checkWorkerReservation(
     exclude: input.exclude,
   });
 }
+
+/**
+ * WHO ELSE IS CONFIRMED FREE ON THESE DAYS — the ALTERNATIVES step of the
+ * conflict flow (detect, explain, alternatives, human decision).
+ *
+ * Same two reads as `checkWorkerReservation`, asked ONCE for the whole set
+ * instead of once per person, and the same `reserveCapacity` rule. Only a
+ * `clear` verdict qualifies: a worker whose commitments could not be read is
+ * `unknown`, and an unknown is never offered as free (SEP-7). Returns [] when
+ * either read failed — no alternatives is honest; a guessed one is not.
+ */
+export async function findWorkersFreeInWindow(input: {
+  /** `workers.id` of each candidate. */
+  readonly workerIds: readonly string[];
+  readonly window: ReservationWindow;
+  /** Ignore this project's own assignments (the one being staffed). */
+  readonly exclude?: readonly string[];
+}): Promise<string[]> {
+  if (input.workerIds.length === 0) return [];
+  const [committed, availability] = await Promise.all([
+    getEmployerWorkerCommitments(input.workerIds),
+    getEmployerWorkerAvailability(),
+  ]);
+  if (committed.status !== "ok" || availability.status !== "ok") return [];
+
+  const free: string[] = [];
+  for (const workerId of input.workerIds) {
+    const held: HeldTime[] = [];
+    for (const c of committed.commitments) {
+      if (c.workerId !== workerId) continue;
+      held.push({
+        source: c.kind,
+        sourceId: c.sourceId,
+        label: c.label,
+        startDate: c.startDate,
+        endDate: c.endDate,
+      });
+    }
+    for (const u of committed.undatedProjects) {
+      if (u.workerId !== workerId) continue;
+      held.push({
+        source: "project",
+        sourceId: u.projectId,
+        label: u.label,
+        startDate: null,
+        endDate: null,
+      });
+    }
+    for (const u of availability.unavailability) {
+      if (u.workerId !== workerId) continue;
+      held.push({
+        source: "absence",
+        sourceId: u.item.id,
+        label: null,
+        startDate: u.item.startDate,
+        endDate: u.item.endDate,
+      });
+    }
+    const verdict = reserveCapacity({
+      window: input.window,
+      held,
+      exclude: input.exclude,
+    });
+    if (verdict.state === "clear") free.push(workerId);
+  }
+  return free;
+}

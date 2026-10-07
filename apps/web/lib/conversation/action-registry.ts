@@ -989,8 +989,9 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
   // these on the legacy `agency` role alone made every agency act
   // `not_authorized` for exactly the accounts that are agencies (found with
   // the first real recruiter, 2026-09-04). Both roles are accepted here; the
-  // real authority is re-derived in SQL (`owns_company` + the staffing_agency
-  // check inside each bridge RPC), where it always was.
+  // real authority is re-derived in SQL (`owns_company` +
+  // `company_acts_as_agency` inside each bridge RPC: company type OR a declared
+  // workforce role, migration 20260928180000), where it always was.
   {
     id: "agency.review-clients",
     subject: "agency",

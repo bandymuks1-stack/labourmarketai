@@ -55,6 +55,17 @@ export type RetrieveSubscriptionResult =
   | { ok: true; subscription: null }
   | { ok: false; reason: string };
 
+/**
+ * RAW read of one provider subscription — the Stripe object as plain data, for
+ * the canonical normalizer (webhook-core parseSubscriptionObject) to parse.
+ * Recovery uses this so there is NO second parser. `retryable` marks transient
+ * failures (429 / 5xx / connection) the caller may retry with backoff.
+ */
+export type RetrieveRawSubscriptionResult =
+  | { ok: true; object: Record<string, unknown>; livemode: boolean }
+  | { ok: true; object: null }
+  | { ok: false; reason: string; retryable: boolean };
+
 export type ListSubscriptionsResult =
   | { ok: true; subscriptions: readonly ProviderSubscriptionView[] }
   | { ok: false; reason: string };
@@ -114,6 +125,8 @@ export interface BillingProvider {
    * consult. Never creates, updates or charges anything.
    */
   retrieveSubscription(providerSubscriptionId: string): Promise<RetrieveSubscriptionResult>;
+  /** READ-ONLY: the raw provider subscription object (recovery / refresh). */
+  retrieveSubscriptionRaw(providerSubscriptionId: string): Promise<RetrieveRawSubscriptionResult>;
   /** READ-ONLY: every subscription (any status) of one provider customer. */
   listCustomerSubscriptions(providerCustomerId: string): Promise<ListSubscriptionsResult>;
 }

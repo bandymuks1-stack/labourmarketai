@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { validateOperationsRoleAssignment } from "@/lib/operations/assign-operations-role";
+import type { ProfessionEntry } from "@/lib/worker/self-declared-profession";
 import type { SetJournalReviewOutcome } from "@/lib/operations/journal-review-actions";
 
 /**
@@ -45,6 +46,23 @@ export interface LinkedCompanyWorker {
    *  the owner provisions the bridge (migration 0032 RPC) or the read RPC is
    *  applied. The journal-review toggle stays disabled until this is true. */
   readonly engagementContextLinked: boolean;
+  /** Identity-card facts (2026-10-01) - the worker's OWN stated availability
+   *  and country, read through the same RLS-scoped `workers` join. Null when
+   *  not stated; never inferred. */
+  readonly availabilityStatus: string | null;
+  readonly availableFrom: string | null;
+  readonly locationCountry: string | null;
+  /** Titles of the projects this worker is ACTIVELY assigned to, read under
+   *  the caller's RLS (can_manage_project). Empty when none or unreadable -
+   *  the card only renders the line when there is at least one title, so an
+   *  unreadable read is never presented as "unassigned". */
+  readonly currentProjects: readonly string[];
+  /** What the person DOES, from the ONE canonical profession store
+   *  (`worker_professions`: a registry slug, or their own words), primary
+   *  first. Read under the caller's RLS (`can_view_worker`, the same gate as
+   *  the `workers` join above). Empty when none is declared or the read did not
+   *  answer - never inferred from the role, skills or anything else. */
+  readonly professions: readonly ProfessionEntry[];
 }
 
 export interface CompanyWorkerInvitation {
@@ -87,7 +105,8 @@ export async function listActiveCompanyWorkers(
   caller?: { readonly supabase: SupabaseClient },
 ): Promise<CompanyWorkersListResult> {
   const supabase = caller?.supabase ?? (await createClient());
-  const WORKER_JOIN = "workers(profile_id, display_name, profiles(email))";
+  const WORKER_JOIN =
+    "workers(profile_id, display_name, availability_status, available_from, current_location_country, profiles(email))";
   const BASE_COLS = `worker_id, status, created_at, ${WORKER_JOIN}`;
   const BRIDGE_COLS = `worker_id, status, created_at, operations_role, operations_title, journal_review_enabled, ${WORKER_JOIN}`;
   const run = (cols: string) =>
@@ -117,6 +136,16 @@ export async function listActiveCompanyWorkers(
     "p_company_id",
     companyId,
   );
+  const projectsByWorker = await readActiveProjectTitles(
+    supabase,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (data ?? []).map((r: any) => r.worker_id as string),
+  );
+  const professionsByWorker = await readWorkerProfessions(
+    supabase,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (data ?? []).map((r: any) => r.worker_id as string),
+  );
   const rows: LinkedCompanyWorker[] = (data ?? []).map(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (r: any) => ({
@@ -131,9 +160,77 @@ export async function listActiveCompanyWorkers(
       operationsTitle: (r.operations_title as string | null) ?? null,
       journalReviewEnabled: r.journal_review_enabled === true,
       engagementContextLinked: linkedWorkerIds.has(r.worker_id as string),
+      availabilityStatus: (r.workers?.availability_status as string | null) ?? null,
+      availableFrom: (r.workers?.available_from as string | null) ?? null,
+      locationCountry: (r.workers?.current_location_country as string | null) ?? null,
+      currentProjects: projectsByWorker.get(r.worker_id as string) ?? [],
+      professions: professionsByWorker.get(r.worker_id as string) ?? [],
     }),
   );
   return { kind: "ok", rows };
+}
+
+/**
+ * Professions per worker, from the canonical `worker_professions` store (the
+ * same select `readWorkerProfessionRows` issues for the signed-in worker, here
+ * for the roster). Primary first. One bounded read under the caller's RLS -
+ * a company sees exactly the rows `can_view_worker` already grants it for the
+ * `workers` row it is reading. Any error degrades to "none declared"; the card
+ * then falls back to the role, and never states a profession it did not read.
+ */
+async function readWorkerProfessions(
+  supabase: SupabaseClient,
+  workerIds: readonly string[],
+): Promise<ReadonlyMap<string, readonly ProfessionEntry[]>> {
+  const out = new Map<string, ProfessionEntry[]>();
+  if (workerIds.length === 0) return out;
+  const res = await asAny(supabase)
+    .from("worker_professions")
+    .select("worker_id, is_primary, label, professions(slug)")
+    .in("worker_id", [...workerIds])
+    .order("is_primary", { ascending: false })
+    .limit(500);
+  if (res.error || !Array.isArray(res.data)) return out;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  for (const r of res.data as any[]) {
+    const prof = Array.isArray(r.professions) ? r.professions[0] : r.professions;
+    const slug = typeof prof?.slug === "string" ? prof.slug : null;
+    const label = typeof r.label === "string" && r.label.trim() ? r.label : null;
+    if (!slug && !label) continue;
+    const list = out.get(r.worker_id as string) ?? [];
+    list.push({ slug, label });
+    out.set(r.worker_id as string, list);
+  }
+  return out;
+}
+
+/**
+ * Active project titles per worker, for the team identity card. One bounded
+ * read under the caller's RLS; any error degrades to "no titles" (the card
+ * then simply omits the line - it never claims the person is unassigned).
+ */
+async function readActiveProjectTitles(
+  supabase: SupabaseClient,
+  workerIds: readonly string[],
+): Promise<ReadonlyMap<string, readonly string[]>> {
+  const out = new Map<string, string[]>();
+  if (workerIds.length === 0) return out;
+  const res = await asAny(supabase)
+    .from("project_worker_assignments")
+    .select("worker_id, projects(title)")
+    .in("worker_id", [...workerIds])
+    .eq("status", "active")
+    .limit(500);
+  if (res.error || !Array.isArray(res.data)) return out;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  for (const r of res.data as any[]) {
+    const title = typeof r.projects?.title === "string" ? r.projects.title.trim() : "";
+    if (!title) continue;
+    const list = out.get(r.worker_id as string) ?? [];
+    if (!list.includes(title)) list.push(title);
+    out.set(r.worker_id as string, list);
+  }
+  return out;
 }
 
 /**

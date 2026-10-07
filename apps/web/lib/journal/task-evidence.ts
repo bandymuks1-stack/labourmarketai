@@ -4,6 +4,14 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { isMigrationMissingCode } from "@/lib/tasks/task-model";
+import { JOURNAL_ENTRY_METRICS_EMBED } from "@/lib/journal/journal-list-core";
+import { deriveEntryWorkTime, type WorkTimeMetricRow } from "@/lib/journal/work-time";
+import {
+  NO_READABLE_NAME,
+  resolveWorkerName,
+  WORKER_NAME_FIELDS,
+  type WorkerNameRow,
+} from "@/lib/journal/worker-name";
 import {
   LINKABLE_ENTRY_LIMIT,
   TASK_EVIDENCE_READ_LIMIT,
@@ -52,18 +60,22 @@ type LinkRow = {
   journal_entries: {
     id: string;
     worker_id: string;
+    project_id?: string | null;
     original_text: string;
     original_language: string;
     created_at: string;
     journal_entry_photos: { id: string }[] | null;
     journal_entry_confirmations: { created_at: string }[] | null;
+    journal_entry_metrics: WorkTimeMetricRow[] | null;
+    workers: WorkerNameRow | WorkerNameRow[];
   } | null;
 };
 
 const LINK_SELECT =
   "id, entry_id, linked_at, linked_by, " +
-  "journal_entries!inner(id, worker_id, original_text, original_language, created_at, " +
-  "journal_entry_photos(id), journal_entry_confirmations(created_at))";
+  "journal_entries!inner(id, worker_id, project_id, original_text, original_language, created_at, " +
+  `journal_entry_photos(id), journal_entry_confirmations(created_at), ` +
+  `${JOURNAL_ENTRY_METRICS_EMBED}, workers(${WORKER_NAME_FIELDS}))`;
 
 function toItem(row: LinkRow): TaskEvidenceItem | null {
   const e = row.journal_entries;
@@ -87,7 +99,32 @@ function toItem(row: LinkRow): TaskEvidenceItem | null {
     linkedBy: row.linked_by,
     photoCount: (e.journal_entry_photos ?? []).length,
     confirmedAt,
+    entryHours: entryHoursOf(e),
+    authorName: authorNameOf(e.workers),
+    entryProjectId: e.project_id ?? null,
   };
+}
+
+/** Hours from the ONE canonical derivation — no second hours computation. A
+ *  figure only when it is a real positive hour total; otherwise null. */
+function entryHoursOf(e: NonNullable<LinkRow["journal_entries"]>): number | null {
+  const metrics = e.journal_entry_metrics ?? [];
+  if (metrics.length === 0) return null;
+  const hours = deriveEntryWorkTime({
+    entryId: e.id,
+    createdAt: e.created_at,
+    originalText: e.original_text,
+    metrics,
+  }).totalHours;
+  return hours > 0 ? hours : null;
+}
+
+/** The author's name where the VIEWER may read it (existing journal name
+ *  resolution); an unreadable name is omitted, not shown as a dash. */
+function authorNameOf(workers: WorkerNameRow | WorkerNameRow[]): string | null {
+  const row = Array.isArray(workers) ? (workers[0] ?? null) : workers;
+  const name = resolveWorkerName(row ?? null);
+  return name === NO_READABLE_NAME ? null : name;
 }
 
 /**
@@ -211,20 +248,31 @@ export async function listWorkerLinkableEntries(): Promise<
     .maybeSingle();
   if (!worker?.id) return [];
 
-  const res = await asAny(supabase)
-    .from("journal_entries")
-    .select("id, original_text, created_at, journal_entry_photos(id)")
-    .eq("worker_id", worker.id)
-    .is("deleted_at", null)
-    .is("superseded_by", null)
-    .order("created_at", { ascending: false })
-    .limit(LINKABLE_ENTRY_LIMIT);
+  const runEntries = (columns: string) =>
+    asAny(supabase)
+      .from("journal_entries")
+      .select(columns)
+      .eq("worker_id", worker.id)
+      .is("deleted_at", null)
+      .is("superseded_by", null)
+      .order("created_at", { ascending: false })
+      .limit(LINKABLE_ENTRY_LIMIT);
+  // Project + organization let the picker mirror the server's consistency
+  // check; if the embed is unavailable fall back to the original columns.
+  let res = await runEntries(
+    "id, original_text, created_at, project_id, engagement_contexts(organization_id), journal_entry_photos(id)",
+  );
+  if (res.error) {
+    res = await runEntries("id, original_text, created_at, journal_entry_photos(id)");
+  }
   if (res.error) return [];
 
   type EntryRow = {
     id: string;
     original_text: string;
     created_at: string;
+    project_id?: string | null;
+    engagement_contexts?: { organization_id: string | null } | { organization_id: string | null }[] | null;
     journal_entry_photos: { id: string }[] | null;
   };
 
@@ -235,5 +283,9 @@ export async function listWorkerLinkableEntries(): Promise<
     photoCount: (e.journal_entry_photos ?? []).length,
     // Resolved by the caller against the evidence batch it already holds.
     alreadyLinked: false,
+    projectId: e.project_id ?? null,
+    organizationId: Array.isArray(e.engagement_contexts)
+      ? (e.engagement_contexts[0]?.organization_id ?? null)
+      : (e.engagement_contexts?.organization_id ?? null),
   }));
 }

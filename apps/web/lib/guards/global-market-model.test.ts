@@ -89,19 +89,19 @@ describe("(b) no silent 'LT' country default", () => {
   });
 });
 
-describe("(c) live market map defaults to a WORLD view", () => {
-  it("DEFAULT_CENTER/DEFAULT_ZOOM are the world view, not a Europe crop", () => {
-    const src = strip(read("components/app/market-map/location-map.tsx"));
-    const center = src.match(/DEFAULT_CENTER[^=]*=\s*\[([^\]]+)\]/);
-    const zoom = src.match(/DEFAULT_ZOOM\s*=\s*(\d+)/);
-    expect(center, "DEFAULT_CENTER present").toBeTruthy();
-    expect(zoom, "DEFAULT_ZOOM present").toBeTruthy();
-    const [lat, lng] = center![1].split(",").map((s) => parseFloat(s.trim()));
-    // World view: low zoom, centred near the equator/prime-meridian band —
-    // NOT the old Baltic-region default ([56.5, 17], zoom 4).
-    expect(parseInt(zoom![1], 10)).toBeLessThanOrEqual(2);
-    expect(Math.abs(lat)).toBeLessThanOrEqual(40);
-    expect(Math.abs(lng)).toBeLessThanOrEqual(40);
+describe("(c) the one map can place a person ANYWHERE in the world", () => {
+  // One-canonical-map: the standalone location picker (default world view,
+  // zoom 2) was folded into the canonical market map, whose empty-data frame is
+  // the Europe-first market view. The global promise is kept where it matters —
+  // a saved location in ANY country is resolved and framed — not by a second
+  // map with a different default. The Europe frame is the market's, not a limit.
+  it("the own location resolves through the ISO centroid table and the map can zoom out to continents", () => {
+    const layer = strip(read("components/app/market-map/own-location-layer.ts"));
+    expect(layer).toMatch(/resolveLocation\(loc\)/);
+    const map = strip(read("components/app/market-map/market-map.tsx"));
+    const minZoom = map.match(/minZoom:\s*(\d+)/);
+    expect(minZoom, "minZoom present").toBeTruthy();
+    expect(parseInt(minZoom![1], 10)).toBeLessThanOrEqual(3);
   });
 });
 

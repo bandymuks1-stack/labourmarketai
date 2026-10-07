@@ -42,6 +42,10 @@ export async function getOrCreateDirectConversation(
    * retroactive relabelling). The generic open action passes nothing.
    */
   sourceHint?: ConversationSourceHint | null,
+  /** The project the contact was opened from (a person on it, per the
+   *  caller's own authority) — one more verified engagement fact, never a
+   *  grant by itself. */
+  projectId?: string | null,
 ): Promise<CommunicationResult<{ id: string }>> {
   const supabase = await createClient();
   const {
@@ -67,7 +71,7 @@ export async function getOrCreateDirectConversation(
   //    generic states here. Default-closed.
   const permission = isContactPermitted(grantedPermission)
     ? (grantedPermission as ContactPermissionState)
-    : await resolveContactPermission(otherProfileId);
+    : await resolveContactPermission(otherProfileId, { projectId: projectId ?? null });
   if (!isContactPermitted(permission)) {
     return {
       ok: false,

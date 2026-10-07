@@ -211,7 +211,15 @@ export function ContextPanel({
               setUnavailable(res.reason);
             }
           })
-        : loadWorkContext().then((res) => {
+        : resultContext !== "personal"
+          ? // The personal work context is not read in an organization
+            // workspace (see `orgRestingHome` below).
+            Promise.resolve().then(() => {
+              if (cancelled || token !== requestRef.current) return;
+              setEntity(null);
+              setWork(null);
+            })
+          : loadWorkContext().then((res) => {
             if (cancelled || token !== requestRef.current) return;
             setEntity(null);
             if (res.kind === "context") setWork(res.view);
@@ -332,15 +340,24 @@ export function ContextPanel({
   // not drawn, and the conversation takes the width. While the first read is
   // in flight it is not drawn either (it appears only WITH content, never as
   // an empty frame first). A failed read is still stated (`unavailable`).
+  // COMPANY CONTEXT SHOWS NO PERSONAL WORK COLUMN (owner order 2026-10-01).
+  // The resting work context is the PERSON'S own records ("Tavo darbas
+  // dabar — what YOUR OWN entries say") and the person's own invitations.
+  // Walked as a company owner it sat beside the company conversation and
+  // named a personal deadline. In an organization workspace the resting
+  // panel is not drawn at all; an entity or a result still opens it.
+  const orgRestingHome =
+    resultContext !== "personal" && panel.mode !== "entity" && !showsResult;
   const quietHome =
-    panel.mode !== "entity" &&
-    !showsResult &&
-    unavailable === null &&
-    (work === null
+    orgRestingHome ||
+    (panel.mode !== "entity" &&
+      !showsResult &&
+      unavailable === null &&
+      (work === null
       ? loading
       : work.facts.length === 0 &&
         work.recommendations.length === 0 &&
-        work.invitations === null);
+        work.invitations === null));
   if (quietHome) return null;
 
   return (

@@ -30,6 +30,11 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Izvēlieties iesaisti…",
   "engagementAmbiguous": "Šis darbs var piederēt vairāk nekā vienai iesaistei. Pirms saglabāšanas izvēlieties, kurai.",
+  "project": "Projekts",
+  "projectChoose": "Izvēlieties projektu…",
+  "projectNone": "Nav projekta darbs",
+  "projectAmbiguous": "Jūs esat piešķirts vairākiem projektiem. Pirms saglabāšanas izvēlieties, kuram projektam pieder šīs stundas (vai atzīmējiet, ka tas nav projekta darbs).",
+  "projectAuto": "Projekts: {name}",
   "unconfirmedTimeBlocked": "{count} reģistrētie ilgumi vēl gaida jūsu pārskatīšanu un netiktu saglabāti. Vispirms paturiet vai noņemiet tos.",
   "entry": {
     "status": {
@@ -243,7 +248,11 @@
     "sessionExpired": "Sesija ir beigusies. Lūdzu, pierakstieties vēlreiz.",
     "noWorkerProfile": "Darbinieka profils nav atrasts. Atveriet konta iestatījumus un ieslēdziet darbinieka lomu.",
     "engagementRequired": "Izvēlieties darba kontekstu (organizāciju vai projektu), kuram pieder šis ieraksts.",
+    "projectNotAssignable": "Izvēlētais projekts jums nav piešķirts vai pieder citai organizācijai. Izvēlieties projektu no saraksta.",
     "notesRequired": "Aprakstiet, ko darījāt — brīvais teksts ir ieraksta pamats.",
+    "workDateRequired": "Izvēlieties dienu, kurā šis darbs tika paveikts.",
+    "workDateInvalid": "Darba datums nav derīgs datums.",
+    "workDateFuture": "Darba datums nevar būt nākotnē.",
     "quantityInvalid": "Daudzumam jābūt nenegatīvam skaitlim.",
     "unitSlugUnknown": "Šī vienība vēl netiek atpazīta: {units}. Izvēlieties citu vienību vai mēģiniet vēlāk.",
     "sourceDocumentInvalid": "Norādītais avota dokuments nav atrasts starp taviem dokumentiem.",

@@ -189,7 +189,7 @@ describe("command finder — the train doc's term list resolves", () => {
   const ALL = new Set<CommandAudience>(["public", "worker", "company"]);
   const TERMS: ReadonlyArray<readonly [string, (typeof ACTIVE)[number]]> = [
     ["cv", "lt"],
-    ["player card", "en"],
+    ["work card", "en"],
     ["kortelė", "lt"],
     ["profile", "en"],
     ["profilis", "lt"],
@@ -247,7 +247,7 @@ describe("command finder — matching + audience behaviour", () => {
   const ALL = new Set<CommandAudience>(["public", "worker", "company", "admin"]);
   const PUBLIC_ONLY = new Set<CommandAudience>(["public"]);
 
-  it("diacritics-insensitive: 'kortele' finds the Player Card, 'zurnalas' the journal", () => {
+  it("diacritics-insensitive: 'kortele' finds the professional card, 'zurnalas' the journal", () => {
     const cards = matchCommands("kortele", "lt", ALL).map((e) => e.id);
     expect(cards).toContain("player_card");
     const journal = matchCommands("zurnalas", "lt", ALL).map((e) => e.id);

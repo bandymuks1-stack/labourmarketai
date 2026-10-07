@@ -8,6 +8,7 @@
  */
 
 import type { CompanyWorkersListResult } from "@/lib/company/company-workers";
+import type { OutlookWeek } from "@/lib/conversation/capacity-outlook";
 
 /**
  * QA Q-3 — a roster read a server caller has ALREADY issued for the same
@@ -88,6 +89,13 @@ export interface CapacityChatRow {
    *  otherwise, and null when the source row carries no title — never an
    *  invented name. */
   readonly committedTo: string | null;
+  /**
+   * True when the only thing on record is an assignment to a project nobody
+   * dated. The person is NOT free (a real commitment exists) and the window
+   * is NOT known — `unavailableUntil` stays null rather than an invented end
+   * (SEP-7: unknown is neither zero nor free).
+   */
+  readonly undated?: boolean;
 }
 
 export type CapacityChatResult =
@@ -111,6 +119,15 @@ export type CapacityChatResult =
        * of its inputs actually answered.
        */
       readonly commitmentsKnown: boolean;
+      /** Over the WHOLE active roster, not just the displayed rows. */
+      readonly counts?: {
+        readonly free: number;
+        readonly committed: number;
+        readonly unavailable: number;
+      };
+      /** DERIVED four-week outlook (headcount per window); null when the
+       *  inputs it needs did not answer — never a row of zeros. */
+      readonly outlook?: readonly OutlookWeek[] | null;
     }
   | { readonly kind: "no-company" }
   | { readonly kind: "empty" }

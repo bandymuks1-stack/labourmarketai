@@ -8,6 +8,7 @@ import {
   Handshake,
   History,
   Settings2,
+  Store,
   UserSearch,
   UsersRound,
 } from "lucide-react";
@@ -45,6 +46,7 @@ const ICONS: Record<
   people: UsersRound,
   work: FolderKanban,
   needs: UserSearch,
+  market: Store,
   calendar: CalendarDays,
   partners: Handshake,
   education: GraduationCap,

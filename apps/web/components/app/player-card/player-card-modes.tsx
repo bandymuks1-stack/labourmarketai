@@ -11,10 +11,11 @@ import { PLAYER_CARD_MODES, type PlayerCardMode } from "@/lib/player-card/card-m
  * HISTORY → NEXT).
  *
  * The identity stage above stays put — the person is the constant — and
- * only this body transforms. IDENTITY is the whole card exactly as it was
- * (the floor); every other mode brings forward the sections that answer
- * that question, with one short entrance (covered by the reduced-motion
- * block via `rise-in`).
+ * only this body transforms. IDENTITY is the card CLOSED (owner direction
+ * 2026-09-30: one central object, information opening on demand): the
+ * person alone, no section competing with them. Every other mode opens the
+ * sections that answer its question, with one short entrance (covered by
+ * the reduced-motion block via `rise-in`).
  *
  * The mode is shareable state: it can arrive as `initialMode` (a page
  * reading `?card=`, the chat asking to "show my skills") and a choice is
@@ -78,15 +79,17 @@ export function PlayerCardModes({
           </button>
         ))}
       </div>
-      <div
-        key={mode}
-        role="tabpanel"
-        data-mode={mode}
-        data-testid="player-card-mode-panel"
-        className="rise-in flex flex-col gap-5"
-      >
-        {sections[mode]}
-      </div>
+      {sections[mode] ? (
+        <div
+          key={mode}
+          role="tabpanel"
+          data-mode={mode}
+          data-testid="player-card-mode-panel"
+          className="rise-in flex flex-col gap-5"
+        >
+          {sections[mode]}
+        </div>
+      ) : null}
     </>
   );
 }

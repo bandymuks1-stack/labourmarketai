@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
-import { PersonPresence } from "@/components/app/work-world/primitives";
+import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
+import { personMonogram } from "@/lib/visual/avatar-monogram";
 import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/server";
 import type { DomainCaller } from "@/lib/domain/caller";
@@ -10,6 +11,7 @@ import {
   RosterLinkOfferForm,
   type RosterLinkCandidate,
 } from "@/components/app/roster-link-offer-form";
+import { RosterClaimInviteForm } from "@/components/app/roster-claim-invite-form";
 import { resolveEvidenceOrganization } from "@/lib/organization-evidence/evidence-org-context";
 
 /**
@@ -206,16 +208,18 @@ export async function OrganizationRosterSection({
               {/* A person reads as a presence, not a bare string (work-world
                   PersonPresence). The relationship is their role beside them;
                   an unknown slug renders as itself — a gap to see, not hide. */}
-              <PersonPresence
+              <PersonIdentityCard
+                variant="roster-person"
+                density="compact"
+                testid={`roster-identity-${p.id}`}
                 name={p.displayName}
-                role={
+                initials={personMonogram(p.displayName)}
+                professions={
                   p.relationshipKind
-                    ? tRel.has(p.relationshipKind)
-                      ? tRel(p.relationshipKind)
-                      : p.relationshipKind
-                    : null
+                    ? [tRel.has(p.relationshipKind) ? tRel(p.relationshipKind) : p.relationshipKind]
+                    : []
                 }
-                size={34}
+                meta={[]}
               />
               {p.externalRef ? (
                 <span className="font-mono text-meta text-text-muted">{p.externalRef}</span>
@@ -239,6 +243,34 @@ export async function OrganizationRosterSection({
                     offer: t("offer.offer"),
                     offered: t("offer.offered"),
                     error: t("offer.error"),
+                  }}
+                />
+              ) : null}
+              {/* The FIRST step for a name with no account: the ordinary
+                  invitation. It links nothing; the offer above and the
+                  person's own answer still decide. */}
+              {linkStateKey(p.linkState) === "unlinked" ? (
+                <RosterClaimInviteForm
+                  personId={p.id}
+                  locale={locale}
+                  labels={{
+                    label: t("claim.label"),
+                    placeholder: t("claim.placeholder"),
+                    invite: t("claim.invite"),
+                    sent: t("claim.sent"),
+                    created: t("claim.created"),
+                    deliveryFailed: t("claim.deliveryFailed"),
+                    hint: t("claim.hint"),
+                    errors: {
+                      generic: t("claim.errors.generic"),
+                      duplicate_pending: t("claim.errors.duplicate_pending"),
+                      rate_limited: t("claim.errors.rate_limited"),
+                      limit_reached: t("claim.errors.limit_reached"),
+                      not_authorized: t("claim.errors.not_authorized"),
+                      invalid_relationship: t("claim.errors.invalid_relationship"),
+                      invalid_email: t("claim.errors.invalid_email"),
+                      needs_migration: t("claim.errors.needs_migration"),
+                    },
                   }}
                 />
               ) : null}

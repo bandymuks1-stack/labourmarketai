@@ -1,5 +1,4 @@
 import {
-  MapPin,
   Shield,
   CalendarCheck2,
   Sparkle,
@@ -115,6 +114,12 @@ export interface PlayerCardLabels {
   /** §5.2 LOCATION — resolved country NAME for the worker's stated country
    *  code, or null when no location is stated. Country precision only. */
   locationName: string | null;
+  /** MOBILITY — the label, the country names the worker would work in
+   *  (empty when none are stated) and the relocation words (null unless the
+   *  worker said yes). */
+  mobilityLabel?: string;
+  mobilityCountries?: readonly string[];
+  relocateLabel?: string | null;
   /** §5.2 DOCUMENTS — resolved status line, or null when the documents
    *  surface is unavailable for this account (honest absence). */
   documentsLabel: string | null;
@@ -393,17 +398,6 @@ export function WorkerPlayerCard({
               {labels.availabilityFrom}
             </span>
           ) : null}
-          {/* §5.2 LOCATION — the worker's own stated country, country
-              precision only (the card never implies an address). */}
-          {labels.locationName ? (
-            <span
-              className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 text-meta text-text-secondary"
-              data-testid="player-card-location"
-            >
-              <MapPin className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />
-              {labels.locationName}
-            </span>
-          ) : null}
           <span
             className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
             data-testid="player-card-workcard"
@@ -464,32 +458,6 @@ export function WorkerPlayerCard({
               <span>· {labels.journalSupportedLabel}</span>
             </p>
           ) : null}
-        </div>
-    </>
-  );
-  const secD = (
-    <>
-        {/* ── §5.2 EVIDENCE VIEWS — the card's real data visualizations.
-              Growth over time and per-skill strength sit side by side on wide
-              screens and stack on a phone; both read from the worker's OWN rows
-              and both state an honest empty case instead of an empty frame. ── */}
-        <div
-          id="player-card-evidence"
-          className="grid scroll-mt-20 gap-3 lg:grid-cols-2"
-          data-testid="player-card-visualizations"
-        >
-          <EvidenceTimelineChart
-            months={card.evidenceTimeline}
-            labels={labels.visuals.evidence}
-          />
-          <SkillEvidenceChart
-            skills={card.skillEvidence}
-            labels={labels.visuals.skills}
-            // W5 slice 3: this card renders the worker's OWN rows only, so the
-            // drill-down never widens visibility — it opens their own journal.
-            // A sample card has no journal behind it, so it never drills down.
-            linkBarsToJournal={!sample}
-          />
         </div>
     </>
   );
@@ -690,6 +658,32 @@ export function WorkerPlayerCard({
         </div>
     </>
   );
+  // MOBILITY — where the person can go next: the countries they would work
+  // in and whether they would relocate, in their own stated words. Nothing
+  // is rendered for facts they have not given (an empty list is not a claim).
+  const mobilityCountries = labels.mobilityCountries ?? [];
+  const secMobility =
+    mobilityCountries.length > 0 || labels.relocateLabel ? (
+      <div className="flex flex-col gap-1.5" data-testid="player-card-mobility">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {labels.mobilityLabel}
+        </span>
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text-primary">
+          {mobilityCountries.map((c, i) => (
+            <span key={`${c}-${i}`} className="inline-flex items-center gap-2">
+              {i > 0 ? <span aria-hidden className="h-px w-4 bg-text-muted/60" /> : null}
+              {c}
+            </span>
+          ))}
+          {labels.relocateLabel ? (
+            <span className="text-text-secondary" data-testid="player-card-relocate">
+              {mobilityCountries.length > 0 ? "· " : ""}
+              {labels.relocateLabel}
+            </span>
+          ) : null}
+        </p>
+      </div>
+    ) : null;
   const secEvidenceChart = (
     <EvidenceTimelineChart
             months={card.evidenceTimeline}
@@ -773,7 +767,9 @@ export function WorkerPlayerCard({
               ? [labels.professionName]
               : []
         }
-        location={null}
+        // WHERE, closed: the country is part of who the person is now; it is
+        // said here once (the NEXT lens no longer repeats it).
+        location={labels.locationName}
         availability={null}
         currentWork={labels.currentWork}
         currentWorkLabel={labels.currentWorkLabel}
@@ -823,26 +819,19 @@ export function WorkerPlayerCard({
           next: labels.modes.next,
         }}
         sections={{
-          identity: (
-            <>
-              {secA}
-              {secB}
-              {secC}
-              {secD}
-              {secE}
-              {secF}
-              {secG}
-              {secH}
-              {secI}
-              {secJ}
-            </>
-          ),
+          // CLOSED (owner direction 2026-09-30): the person IS the card. The
+          // identity stage above says who, what, where now and what the real
+          // work adds up to; nothing else competes with it. Every section
+          // below is one lens away, and each lens opens in the owner's order:
+          // real work → projects/objects → hours → skills/evidence →
+          // availability → mobility → progression.
+          identity: null,
           work: (
             <>
-              {secA}
-              {secB}
-              {secF}
               {secJ}
+              {secG}
+              {secEvidenceChart}
+              {secF}
               {secWorkDoor}
             </>
           ),
@@ -869,6 +858,8 @@ export function WorkerPlayerCard({
           ),
           next: (
             <>
+              {secB}
+              {secMobility}
               {secA}
               {secI}
               {secNextDoor}

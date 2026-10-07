@@ -133,7 +133,6 @@ export function ExternalVacanciesSection({
           </Link>
         ) : null}
       </div>
-      <p className="text-meta leading-relaxed text-text-muted">{labels.sectionNote}</p>
       {notice ? (
         <p
           className="rounded-md border border-ink-500 bg-ink-900/40 p-3 text-basis leading-relaxed text-text-secondary"
@@ -246,31 +245,7 @@ export function ExternalOpportunityRow({
           <FitBandChip band={band} label={labels.bandLabel} />
         </div>
 
-        {/* WHICH LANGUAGE THE READER IS LOOKING AT. A rendering is named as a
-            rendering with the original one tap away (the original is the
-            FACT); an ad still in its source language is named as such — a
-            Lithuanian reader is never left to guess why a title is Swedish. */}
-        {view.sourceLanguage && view.presentedLanguage !== view.sourceLanguage ? (
-          <details className="group text-meta text-text-muted" data-testid="external-vacancy-translated">
-            <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-              {labels.translatedFrom(labels.languageName(view.sourceLanguage))}
-              {" · "}
-              <span className="underline underline-offset-4 group-open:hidden">{labels.showOriginal}</span>
-              <span className="hidden underline underline-offset-4 group-open:inline">{labels.hideOriginal}</span>
-            </summary>
-            <p className="mt-1 text-text-secondary" lang={view.sourceLanguage} data-testid="external-vacancy-title-original">
-              <span className="text-text-muted">{labels.originalTitle}: </span>
-              {view.titleOriginal}
-            </p>
-            <p className="mt-1">{labels.machineNote}</p>
-          </details>
-        ) : view.sourceLanguage ? (
-          <p className="text-meta text-text-muted" data-testid="external-vacancy-source-language">
-            {labels.originalIn(labels.languageName(view.sourceLanguage))}
-          </p>
-        ) : null}
-
-        {/* Organization / source · place · published. */}
+        {/* Organization · place · published. */}
         <p className="text-basis text-text-secondary">
           {[view.employerName, view.city, view.country].filter(Boolean).join(" · ")}
           {view.positions !== null ? ` · ${labels.positionsLabel(view.positions)}` : ""}
@@ -279,34 +254,72 @@ export function ExternalOpportunityRow({
         </p>
 
         {/* Pay EXACTLY as published — currency preserved, unit named or
-            honestly "not stated". Absent = absent. */}
-        <p className="text-basis text-text-secondary" data-testid="external-vacancy-pay">
-          {payAmount ? (
-            <>
-              {labels.payAsPublished}: <span className="tabular-nums">{payAmount}</span>
-              <span className="text-text-muted"> · {labels.payUnitNotStated}</span>
-            </>
-          ) : (
-            <span className="text-text-muted">{labels.payNotStated}</span>
-          )}
-        </p>
+            honestly "not stated". Pay only on the card face when KNOWN
+            (owner order 2026-10-01); the details door says when it is not. */}
+        {payAmount ? (
+          <p className="text-basis text-text-secondary" data-testid="external-vacancy-pay">
+            {labels.payAsPublished}: <span className="tabular-nums">{payAmount}</span>
+            <span className="text-text-muted"> · {labels.payUnitNotStated}</span>
+          </p>
+        ) : null}
 
-        {/* WHY the row sits in its band — the engine's codes, in words. */}
-        <p className="text-basis text-text-secondary" data-testid="external-vacancy-why">
-          <span className="font-medium text-text-primary">{labels.whyLabel} </span>
-          {why.length > 0 ? why.join(" · ") : labels.whyFallback}
-        </p>
-
-        {/* Provenance — always rendered, attribution first. */}
-        <p className="text-meta text-text-muted" data-testid="external-vacancy-attribution">
-          {labels.attributionText(view.provenance.attributionCode)}
-        </p>
+        {/* KEY REQUIREMENTS — the ad's own skill tags, the first three; the
+            full list stays behind details. */}
+        {view.skillSlugs.length > 0 ? (
+          <ul className="flex flex-wrap gap-1.5" data-testid="external-vacancy-requirements">
+            {view.skillSlugs.slice(0, 3).map((slug) => (
+              <li
+                key={slug}
+                className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
+              >
+                {labels.skillLabel(slug)}
+              </li>
+            ))}
+          </ul>
+        ) : null}
 
         <OpportunityDetailsDisclosure
           showLabel={labels.detailsShow}
           hideLabel={labels.detailsHide}
           testId={`external-vacancy-details-${key}`}
         >
+          {/* WHY the row sits in its band — the engine's codes, in words. */}
+          <p className="text-basis text-text-secondary" data-testid="external-vacancy-why">
+            <span className="font-medium text-text-primary">{labels.whyLabel} </span>
+            {why.length > 0 ? why.join(" · ") : labels.whyFallback}
+          </p>
+
+          {/* WHICH LANGUAGE THE READER IS LOOKING AT — a rendering is named as
+              a rendering with the original one tap away. Provenance lives
+              behind the details door, not on the card face. */}
+          {view.sourceLanguage && view.presentedLanguage !== view.sourceLanguage ? (
+            <details className="group text-meta text-text-muted" data-testid="external-vacancy-translated">
+              <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                {labels.translatedFrom(labels.languageName(view.sourceLanguage))}
+                {" · "}
+                <span className="underline underline-offset-4 group-open:hidden">{labels.showOriginal}</span>
+                <span className="hidden underline underline-offset-4 group-open:inline">{labels.hideOriginal}</span>
+              </summary>
+              <p className="mt-1 text-text-secondary" lang={view.sourceLanguage} data-testid="external-vacancy-title-original">
+                <span className="text-text-muted">{labels.originalTitle}: </span>
+                {view.titleOriginal}
+              </p>
+              <p className="mt-1">{labels.machineNote}</p>
+            </details>
+          ) : view.sourceLanguage ? (
+            <p className="text-meta text-text-muted" data-testid="external-vacancy-source-language">
+              {labels.originalIn(labels.languageName(view.sourceLanguage))}
+            </p>
+          ) : null}
+
+          {payAmount ? null : (
+            <p className="text-meta text-text-muted">{labels.payNotStated}</p>
+          )}
+
+          <p className="text-meta text-text-muted" data-testid="external-vacancy-attribution">
+            {labels.attributionText(view.provenance.attributionCode)}
+          </p>
+
           {view.skillSlugs.length > 0 ? (
             <div className="flex flex-wrap gap-1.5">
               {view.skillSlugs.map((slug) => (

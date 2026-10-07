@@ -332,6 +332,12 @@ export async function readWorkersLabels() {
     statusInvited: tWorkers("statusInvited"),
     statusAlreadyPending: tWorkers("statusAlreadyPending"),
     statusAlreadyLinked: tWorkers("statusAlreadyLinked"),
+    statusWordActive: tWorkers("statusWordActive"),
+    statusWordPending: tWorkers("statusWordPending"),
+    statusWordAccepted: tWorkers("statusWordAccepted"),
+    statusWordCancelled: tWorkers("statusWordCancelled"),
+    statusWordExpired: tWorkers("statusWordExpired"),
+    statusWordEnded: tWorkers("statusWordEnded"),
     statusNotOwner: tWorkers("statusNotOwner"),
     statusInvalidEmail: tWorkers("statusInvalidEmail"),
     statusError: tWorkers("statusError"),
@@ -344,6 +350,20 @@ export async function readWorkersLabels() {
     coordinationHeading: tWorkers("coordinationHeading"),
     coordinationBody: tWorkers("coordinationBody"),
     coordinationNextAction: tWorkers("coordinationNextAction"),
+    identity: {
+      availability: {
+        available: tWorkers("identity.availability.available"),
+        busy: tWorkers("identity.availability.busy"),
+        unavailable: tWorkers("identity.availability.unavailable"),
+      },
+    },
+    team: {
+      free: tWorkers("team.countFree"),
+      working: tWorkers("team.countWorking"),
+      away: tWorkers("team.countAway"),
+      assign: tWorkers("team.assign"),
+      openCalendar: tWorkers("team.openCalendar"),
+    },
     operations: {
       columnHeading: tWorkers("operations.columnHeading"),
       setupNote: tWorkers("operations.setupNote"),

@@ -77,6 +77,11 @@ const CLASSIFICATION: Record<string, string> = {
   // journal-only). Honest empty state points at the journal.
   "dashboard/gallery": "REAL_LAUNCH_SURFACE",
   "dashboard/inbox": "REAL_LAUNCH_SURFACE",
+  // EDU-5 (2026-10-01): reachable ONLY through the manager brief's chip, and only
+  // while the pending review count N>0 (no static nav link, not in the command
+  // finder or module registry - preview-surfaces-unlinked / command-finder /
+  // dashboard-module-registry still enforce that). Was GATED_PREVIEW (F-N1).
+  "dashboard/learning": "REAL_LAUNCH_SURFACE",
   // Market intelligence workspace (Labour Market Intelligence v1) — sourced,
   // deterministic salary/demand signals with per-card explanations; degrades
   // honestly (insufficient_data / needs_migration), external sources OFF.
@@ -174,7 +179,6 @@ const CLASSIFICATION: Record<string, string> = {
 
   // ── GATED_PREVIEW (guard-enforced zero inbound links) ─────────────────
   "dashboard/talent": "GATED_PREVIEW",
-  "dashboard/learning": "GATED_PREVIEW", // parked pending owner entry-point decision (F-N1)
   // NOTE (dashboard consolidation v1): the former GATED_PREVIEW `dashboard/hub`
   // route was REMOVED. The premium hub is now the canonical /dashboard lead
   // surface (REAL_LAUNCH_SURFACE, classified above) — there is no separate hub
