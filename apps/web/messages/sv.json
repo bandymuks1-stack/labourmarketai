@@ -7185,7 +7185,60 @@
       "unknown": "datum okänt"
     },
     "source": "Källa: {system}",
-    "more": "{n} fler foton visas inte här."
+    "more": "{n} fler foton visas inte här.",
+    "import": {
+      "title": "Historiska foton: bifoga källfiler",
+      "intro": "Bifoga de bildfiler organisationen har till en registrering, en plats, en person eller själva organisationen. Ni anger vad de hör till och var de kommer ifrån; ingenting kopplas efter datum eller filnamn. Foton lagras privat och är uppgivna, inte verifierade.",
+      "anchorKind": "Bifoga till",
+      "kind": {
+        "record": "En registrering",
+        "place": "En plats",
+        "person": "En person",
+        "organization": "Organisationen"
+      },
+      "choose": {
+        "record": "Registrering",
+        "place": "Plats",
+        "person": "Person"
+      },
+      "none": {
+        "record": "Inga registreringar ännu. Importera registreringar först, eller bifoga till en plats, en person eller organisationen.",
+        "place": "Inga platser registrerade ännu.",
+        "person": "Inga personer i listan ännu."
+      },
+      "truncated": "Bara de första posterna visas.",
+      "sourceSystem": "Källsystem",
+      "sourceSystemHint": "Var filerna kommer ifrån, till exempel namnet på arkivet eller programvaran.",
+      "sourceReference": "Källhänvisning (valfri)",
+      "files": "Bildfiler",
+      "filesHint": "JPEG, PNG, WebP eller HEIC, upp till {mb} MB per fil.",
+      "date": "Datum taget (valfritt)",
+      "dateHint": "Lämna tomt om ni inte vet det. Det sparas då som okänt, aldrig gissat. Ett datum gäller för alla filer i den här omgången.",
+      "basis": "Var datumet kommer ifrån",
+      "bases": {
+        "organization_stated": "Uppgivet av vår organisation",
+        "source_metadata": "Från källsystemets metadata",
+        "exif": "Från fotots egna metadata"
+      },
+      "caption": "Bildtext (valfri)",
+      "submit": "Bifoga foton",
+      "working": "Bifogar...",
+      "resultTitle": "Resultat",
+      "registered": "Bifogat.",
+      "duplicate": "Redan bifogat tidigare (samma fil). Inget ändrat.",
+      "unavailable": "Platserna, personerna och registreringarna att bifoga till kunde inte läsas just nu. Det betyder inte att det inte finns några.",
+      "refusal": {
+        "invalid": "Filen kunde inte användas.",
+        "no_anchor": "Välj först vad fotona hör till.",
+        "bad_date": "Ett datum måste ha sitt underlag och vara ett riktigt datum.",
+        "unsupported_type": "Inte en JPEG-, PNG-, WebP- eller HEIC-bild.",
+        "file_too_large": "Större än {mb} MB, så den skickades inte. Inget sparades.",
+        "anchor_not_found": "Registreringen, platsen eller personen hittades inte i den här organisationen.",
+        "needs_migration": "Fotolagring är inte påslagen i den här miljön ännu. Inget sparades.",
+        "not_allowed": "Bara personer som administrerar organisationen kan bifoga foton.",
+        "error": "Något gick fel. Fotot bifogades inte; försök igen."
+      }
+    }
   },
   "linkedDocuments": {
     "title": "Kopplade dokument",

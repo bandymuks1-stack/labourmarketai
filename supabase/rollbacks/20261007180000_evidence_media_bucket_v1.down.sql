@@ -14,4 +14,6 @@ $rb$;
 drop policy if exists "evidence-media orphan delete" on storage.objects;
 drop policy if exists "evidence-media scoped insert" on storage.objects;
 drop policy if exists "evidence-media entity read" on storage.objects;
+drop trigger if exists organization_evidence_media_path_pin on public.organization_evidence_media;
+drop function if exists public.organization_evidence_media_path_pin_v1();
 delete from storage.buckets where id = 'evidence-media';

@@ -18657,7 +18657,60 @@
       "unknown": "Datum unbekannt"
     },
     "source": "Quelle: {system}",
-    "more": "{n} weitere Fotos werden hier nicht angezeigt."
+    "more": "{n} weitere Fotos werden hier nicht angezeigt.",
+    "import": {
+      "title": "Historische Fotos: Quelldateien anhängen",
+      "intro": "Hängen Sie die Bilddateien Ihrer Organisation an einen Nachweis, einen Ort, eine Person oder die Organisation selbst an. Sie geben an, wozu sie gehören und woher sie stammen; nichts wird nach Datum oder Dateiname zugeordnet. Fotos werden privat gespeichert und sind angegeben, nicht verifiziert.",
+      "anchorKind": "Anhängen an",
+      "kind": {
+        "record": "Einen Nachweis",
+        "place": "Einen Ort",
+        "person": "Eine Person",
+        "organization": "Die Organisation"
+      },
+      "choose": {
+        "record": "Nachweis",
+        "place": "Ort",
+        "person": "Person"
+      },
+      "none": {
+        "record": "Noch keine Nachweise. Importieren Sie zuerst Nachweise oder hängen Sie an einen Ort, eine Person oder die Organisation an.",
+        "place": "Noch keine Orte erfasst.",
+        "person": "Noch keine Personen in der Liste."
+      },
+      "truncated": "Nur die ersten Einträge werden aufgelistet.",
+      "sourceSystem": "Quellsystem",
+      "sourceSystemHint": "Woher diese Dateien stammen, zum Beispiel der Name des Archivs oder der Software.",
+      "sourceReference": "Quellenverweis (optional)",
+      "files": "Bilddateien",
+      "filesHint": "JPEG, PNG, WebP oder HEIC, jeweils bis {mb} MB.",
+      "date": "Aufnahmedatum (optional)",
+      "dateHint": "Leer lassen, wenn Sie es nicht kennen. Es wird dann als unbekannt gespeichert, nie geschätzt. Ein Datum gilt für alle Dateien dieses Stapels.",
+      "basis": "Woher das Datum stammt",
+      "bases": {
+        "organization_stated": "Von unserer Organisation angegeben",
+        "source_metadata": "Aus den Metadaten des Quellsystems",
+        "exif": "Aus den eigenen Metadaten des Fotos"
+      },
+      "caption": "Bildunterschrift (optional)",
+      "submit": "Fotos anhängen",
+      "working": "Wird angehängt...",
+      "resultTitle": "Ergebnis",
+      "registered": "Angehängt.",
+      "duplicate": "Bereits früher angehängt (gleiche Datei). Nichts geändert.",
+      "unavailable": "Orte, Personen und Nachweise zum Anhängen konnten gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
+      "refusal": {
+        "invalid": "Diese Datei konnte nicht verwendet werden.",
+        "no_anchor": "Wählen Sie zuerst, wozu die Fotos gehören.",
+        "bad_date": "Ein Datum braucht seine Grundlage und muss ein echtes Datum sein.",
+        "unsupported_type": "Kein JPEG-, PNG-, WebP- oder HEIC-Bild.",
+        "file_too_large": "Größer als {mb} MB, daher nicht gesendet. Nichts wurde gespeichert.",
+        "anchor_not_found": "Dieser Nachweis, Ort oder diese Person wurde in dieser Organisation nicht gefunden.",
+        "needs_migration": "Die Fotospeicherung ist in dieser Umgebung noch nicht aktiviert. Nichts wurde gespeichert.",
+        "not_allowed": "Nur Personen, die diese Organisation verwalten, können Fotos anhängen.",
+        "error": "Etwas ist schiefgegangen. Das Foto wurde nicht angehängt; versuchen Sie es erneut."
+      }
+    }
   },
   "linkedDocuments": {
     "title": "Verknüpfte Dokumente",

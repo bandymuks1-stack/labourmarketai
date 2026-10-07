@@ -7185,7 +7185,60 @@
       "unknown": "dato ukendt"
     },
     "source": "Kilde: {system}",
-    "more": "{n} flere fotos vises ikke her."
+    "more": "{n} flere fotos vises ikke her.",
+    "import": {
+      "title": "Historiske fotos: vedhæft kildefiler",
+      "intro": "Vedhæft de billedfiler, jeres organisation har, til en registrering, et sted, en person eller selve organisationen. I angiver, hvad de hører til, og hvor de kommer fra; intet matches efter dato eller filnavn. Fotos gemmes privat og er oplyst, ikke verificeret.",
+      "anchorKind": "Vedhæft til",
+      "kind": {
+        "record": "En registrering",
+        "place": "Et sted",
+        "person": "En person",
+        "organization": "Organisationen"
+      },
+      "choose": {
+        "record": "Registrering",
+        "place": "Sted",
+        "person": "Person"
+      },
+      "none": {
+        "record": "Ingen registreringer endnu. Importér registreringer først, eller vedhæft til et sted, en person eller organisationen.",
+        "place": "Ingen steder registreret endnu.",
+        "person": "Ingen personer på listen endnu."
+      },
+      "truncated": "Kun de første poster vises.",
+      "sourceSystem": "Kildesystem",
+      "sourceSystemHint": "Hvor filerne kommer fra, for eksempel navnet på arkivet eller softwaren.",
+      "sourceReference": "Kildehenvisning (valgfri)",
+      "files": "Billedfiler",
+      "filesHint": "JPEG, PNG, WebP eller HEIC, op til {mb} MB hver.",
+      "date": "Dato taget (valgfri)",
+      "dateHint": "Lad feltet stå tomt, hvis I ikke kender den. Den gemmes så som ukendt, aldrig gættet. Én dato gælder for alle filer i denne omgang.",
+      "basis": "Hvor datoen kommer fra",
+      "bases": {
+        "organization_stated": "Oplyst af vores organisation",
+        "source_metadata": "Fra kildesystemets metadata",
+        "exif": "Fra fotoets egne metadata"
+      },
+      "caption": "Billedtekst (valgfri)",
+      "submit": "Vedhæft fotos",
+      "working": "Vedhæfter...",
+      "resultTitle": "Resultat",
+      "registered": "Vedhæftet.",
+      "duplicate": "Allerede vedhæftet tidligere (samme fil). Intet ændret.",
+      "unavailable": "Steder, personer og registreringer at vedhæfte til kunne ikke læses lige nu. Det betyder ikke, at der ingen er.",
+      "refusal": {
+        "invalid": "Filen kunne ikke bruges.",
+        "no_anchor": "Vælg først, hvad fotoene hører til.",
+        "bad_date": "En dato skal have sit grundlag og være en rigtig dato.",
+        "unsupported_type": "Ikke et JPEG-, PNG-, WebP- eller HEIC-billede.",
+        "file_too_large": "Større end {mb} MB, så den blev ikke sendt. Intet blev gemt.",
+        "anchor_not_found": "Registreringen, stedet eller personen blev ikke fundet i denne organisation.",
+        "needs_migration": "Fotolagring er endnu ikke slået til i dette miljø. Intet blev gemt.",
+        "not_allowed": "Kun personer, der administrerer organisationen, kan vedhæfte fotos.",
+        "error": "Noget gik galt. Fotoet blev ikke vedhæftet; prøv igen."
+      }
+    }
   },
   "linkedDocuments": {
     "title": "Tilknyttede dokumenter",

@@ -18657,7 +18657,60 @@
       "unknown": "date unknown"
     },
     "source": "Source: {system}",
-    "more": "{n} more photos are not shown here."
+    "more": "{n} more photos are not shown here.",
+    "import": {
+      "title": "Historical photos: attach source files",
+      "intro": "Attach the image files your organization holds to an evidence record, a place, a person or the organization itself. You state what they belong to and where they came from; nothing is matched by date or file name. Photos are stored privately and are reported, not verified.",
+      "anchorKind": "Attach to",
+      "kind": {
+        "record": "An evidence record",
+        "place": "A place",
+        "person": "A person",
+        "organization": "The organization"
+      },
+      "choose": {
+        "record": "Evidence record",
+        "place": "Place",
+        "person": "Person"
+      },
+      "none": {
+        "record": "No evidence records yet. Import records first, or attach to a place, a person or the organization.",
+        "place": "No places on record yet.",
+        "person": "No people on the roster yet."
+      },
+      "truncated": "Only the first entries are listed.",
+      "sourceSystem": "Source system",
+      "sourceSystemHint": "Where these files came from, for example the name of the archive or software.",
+      "sourceReference": "Source reference (optional)",
+      "files": "Image files",
+      "filesHint": "JPEG, PNG, WebP or HEIC, up to {mb} MB each.",
+      "date": "Date taken (optional)",
+      "dateHint": "Leave empty if you do not know it. It is then stored as unknown, never guessed. One date applies to every file in this batch.",
+      "basis": "Where the date comes from",
+      "bases": {
+        "organization_stated": "Stated by our organization",
+        "source_metadata": "From the source system's metadata",
+        "exif": "From the photo's own metadata"
+      },
+      "caption": "Caption (optional)",
+      "submit": "Attach photos",
+      "working": "Attaching...",
+      "resultTitle": "Result",
+      "registered": "Attached.",
+      "duplicate": "Already attached earlier (same file). Nothing changed.",
+      "unavailable": "The places, people and records to attach to could not be read right now. This does not mean there are none.",
+      "refusal": {
+        "invalid": "This file could not be used.",
+        "no_anchor": "Choose what the photos belong to first.",
+        "bad_date": "A date needs the basis it came from, and it must be a real date.",
+        "unsupported_type": "Not a JPEG, PNG, WebP or HEIC image.",
+        "file_too_large": "Larger than {mb} MB, so it was not sent. Nothing was stored.",
+        "anchor_not_found": "That record, place or person was not found in this organization.",
+        "needs_migration": "Photo storage is not switched on in this environment yet. Nothing was stored.",
+        "not_allowed": "Only people who manage this organization can attach photos.",
+        "error": "Something went wrong. The photo was not attached; try again."
+      }
+    }
   },
   "linkedDocuments": {
     "title": "Linked documents",

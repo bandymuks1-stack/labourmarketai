@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 import { createClient } from "@/lib/supabase/server";
 import { resolveEvidenceOrganization } from "./evidence-org-context";
+import { EVIDENCE_MEDIA_ACTION_MAX_BYTES, anchorsForKind } from "./evidence-media-model";
 import { registerEvidenceMedia, type EvidenceMediaWriteResult } from "./evidence-media-write";
 
 /**
@@ -32,6 +33,8 @@ export async function uploadEvidenceMediaAction(formData: FormData): Promise<Evi
 
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) return { ok: false, code: "invalid" };
+  // The action body limit is 5 MB; refuse above our cap before reading anything.
+  if (file.size > EVIDENCE_MEDIA_ACTION_MAX_BYTES) return { ok: false, code: "file_too_large" };
   const bytes = new Uint8Array(await file.arrayBuffer());
 
   const text = (k: string) => {
@@ -39,22 +42,24 @@ export async function uploadEvidenceMediaAction(formData: FormData): Promise<Evi
     return typeof v === "string" ? v : null;
   };
 
+  // ONE explicitly stated anchor: its kind and (except for the organization
+  // itself) its id. No default anchor, no fallback.
+  const anchors = anchorsForKind(text("anchorKind"), text("anchorId"));
+  if (!anchors) return { ok: false, code: "no_anchor" };
+
   const result = await registerEvidenceMedia(caller, {
     organizationId: org.organizationId,
     bytes,
-    anchors: {
-      evidenceRecordId: text("evidenceRecordId"),
-      workObjectId: text("workObjectId"),
-      organizationPersonId: text("organizationPersonId"),
-      organizationLevel: text("organizationLevel") === "true",
-    },
+    anchors,
     sourceSystem: text("sourceSystem") ?? "",
     sourceReference: text("sourceReference"),
+    // Provenance: the filename exactly as the browser supplied it, never renamed or parsed.
     originalFilename: file.name || null,
     originalTakenAt: text("originalTakenAt"),
     takenAtBasis: text("takenAtBasis"),
     caption: text("caption"),
-    visibility: text("visibility") === "subject" ? "subject" : "private",
+    // Private stays private: this path never widens visibility to the subject.
+    visibility: "private",
   });
   if (result.ok && result.outcome === "registered") revalidatePath("/", "layout");
   return result;

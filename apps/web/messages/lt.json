@@ -18657,7 +18657,60 @@
       "unknown": "data nežinoma"
     },
     "source": "Šaltinis: {system}",
-    "more": "Dar {n} nuotraukų čia nerodoma."
+    "more": "Dar {n} nuotraukų čia nerodoma.",
+    "import": {
+      "title": "Istorinės nuotraukos: pridėkite šaltinio failus",
+      "intro": "Pridėkite savo organizacijos turimus vaizdo failus prie įrašo, vietos, asmens arba pačios organizacijos. Jūs nurodote, kam jie priklauso ir iš kur gauti; niekas nesiejama pagal datą ar failo pavadinimą. Nuotraukos saugomos privačiai ir yra pateiktos, nepatikrintos.",
+      "anchorKind": "Pridėti prie",
+      "kind": {
+        "record": "Įrašo",
+        "place": "Vietos",
+        "person": "Asmens",
+        "organization": "Organizacijos"
+      },
+      "choose": {
+        "record": "Įrašas",
+        "place": "Vieta",
+        "person": "Asmuo"
+      },
+      "none": {
+        "record": "Įrašų dar nėra. Pirmiausia importuokite įrašus arba pridėkite prie vietos, asmens ar organizacijos.",
+        "place": "Vietų dar nėra.",
+        "person": "Sąraše dar nėra asmenų."
+      },
+      "truncated": "Rodomi tik pirmieji įrašai.",
+      "sourceSystem": "Šaltinio sistema",
+      "sourceSystemHint": "Iš kur gauti šie failai, pavyzdžiui, archyvo ar programos pavadinimas.",
+      "sourceReference": "Šaltinio nuoroda (neprivaloma)",
+      "files": "Vaizdo failai",
+      "filesHint": "JPEG, PNG, WebP arba HEIC, iki {mb} MB kiekvienas.",
+      "date": "Nuotraukos data (neprivaloma)",
+      "dateHint": "Palikite tuščią, jei nežinote. Tada ji saugoma kaip nežinoma, niekada neatspėjama. Viena data taikoma visiems šios partijos failams.",
+      "basis": "Iš kur data",
+      "bases": {
+        "organization_stated": "Nurodė mūsų organizacija",
+        "source_metadata": "Iš šaltinio sistemos metaduomenų",
+        "exif": "Iš pačios nuotraukos metaduomenų"
+      },
+      "caption": "Parašas (neprivaloma)",
+      "submit": "Pridėti nuotraukas",
+      "working": "Pridedama...",
+      "resultTitle": "Rezultatas",
+      "registered": "Pridėta.",
+      "duplicate": "Jau pridėta anksčiau (tas pats failas). Nieko nepakeista.",
+      "unavailable": "Dabar nepavyko nuskaityti vietų, asmenų ir įrašų, prie kurių galima pridėti. Tai nereiškia, kad jų nėra.",
+      "refusal": {
+        "invalid": "Šio failo panaudoti nepavyko.",
+        "no_anchor": "Pirmiausia pasirinkite, kam nuotraukos priklauso.",
+        "bad_date": "Datai reikia jos pagrindo, ir ji turi būti tikra data.",
+        "unsupported_type": "Tai nėra JPEG, PNG, WebP ar HEIC vaizdas.",
+        "file_too_large": "Didesnis nei {mb} MB, todėl neišsiųstas. Nieko neišsaugota.",
+        "anchor_not_found": "Šio įrašo, vietos ar asmens šioje organizacijoje nerasta.",
+        "needs_migration": "Nuotraukų saugykla šioje aplinkoje dar neįjungta. Nieko neišsaugota.",
+        "not_allowed": "Nuotraukas gali pridėti tik šią organizaciją valdantys žmonės.",
+        "error": "Kažkas nepavyko. Nuotrauka nepridėta; bandykite dar kartą."
+      }
+    }
   },
   "linkedDocuments": {
     "title": "Susieti dokumentai",

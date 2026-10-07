@@ -6,6 +6,14 @@
 
 export const EVIDENCE_MEDIA_BUCKET = "evidence-media";
 export const EVIDENCE_MEDIA_MAX_BYTES = 20 * 1024 * 1024;
+/**
+ * The per-file cap of the in-app upload path. The upload travels through a
+ * Next.js server action whose body limit is 5 MB (`next.config` serverActions),
+ * so a larger original is refused up front and SAID, never half-sent. The
+ * bucket and the table still admit up to EVIDENCE_MEDIA_MAX_BYTES; originals
+ * between the two need a direct-upload path (not built).
+ */
+export const EVIDENCE_MEDIA_ACTION_MAX_BYTES = 4 * 1024 * 1024;
 
 export type EvidenceMediaMime = "image/jpeg" | "image/png" | "image/webp" | "image/heic";
 
@@ -60,7 +68,7 @@ export function isUuid(v: unknown): v is string {
 /** The path contract pinned by the storage policies: org/<organization_id>/<sha256>.<ext>.
  *  Content-addressed, so the same bytes can only ever land on one path. */
 export function buildEvidenceMediaPath(organizationId: string, sha256: string, mime: EvidenceMediaMime): string {
-  return `org/${organizationId}/${sha256}.${EXT[mime]}`;
+  return `org/${organizationId.toLowerCase()}/${sha256}.${EXT[mime]}`;
 }
 
 export type TakenAtBasis = "exif" | "source_metadata" | "organization_stated" | "unknown";
@@ -113,4 +121,40 @@ export function resolveAnchors(input: {
   const organizationLevel = input.organizationLevel === true || input.organizationLevel === "true";
   if (!evidenceRecordId && !workObjectId && !organizationPersonId && !organizationLevel) return null;
   return { evidenceRecordId, workObjectId, organizationPersonId, organizationLevel };
+}
+
+/** One selectable anchor: a stored id plus the human label the manager sees. */
+export type PhotoAnchorChoice = { readonly id: string; readonly label: string };
+
+/** The four anchor kinds a manager can state. Exactly one per upload batch. */
+export const PHOTO_ANCHOR_KINDS = ["record", "place", "person", "organization"] as const;
+export type PhotoAnchorKind = (typeof PHOTO_ANCHOR_KINDS)[number];
+
+/**
+ * Translate ONE stated anchor choice into the writer's anchor input. A kind
+ * with a missing or malformed id is refused (null) - there is no default
+ * anchor and no fallback to "organization".
+ */
+export function anchorsForKind(
+  kind: unknown,
+  id: unknown,
+): { evidenceRecordId?: string; workObjectId?: string; organizationPersonId?: string; organizationLevel?: boolean } | null {
+  if (kind === "organization") return { organizationLevel: true };
+  if (!isUuid(id)) return null;
+  if (kind === "record") return { evidenceRecordId: id };
+  if (kind === "place") return { workObjectId: id };
+  if (kind === "person") return { organizationPersonId: id };
+  return null;
+}
+
+/** Label for an evidence record in the anchor list: date, person, place - as stored, nothing inferred. */
+export function buildRecordChoiceLabel(input: {
+  date: string | null;
+  personName: string | null;
+  contextLabel: string | null;
+}): string {
+  const parts = [input.date?.slice(0, 10), input.personName?.trim(), input.contextLabel?.trim()].filter(
+    (p): p is string => !!p,
+  );
+  return parts.length > 0 ? parts.join(" · ") : "-";
 }

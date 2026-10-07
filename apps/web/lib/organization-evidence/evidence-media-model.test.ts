@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  EVIDENCE_MEDIA_ACTION_MAX_BYTES,
+  anchorsForKind,
   buildEvidenceMediaPath,
+  buildRecordChoiceLabel,
   resolveAnchors,
   resolveDateProvenance,
   sniffEvidenceMediaMime,
@@ -79,5 +82,49 @@ describe("anchors are stated, never inferred", () => {
 
   it("refuses a malformed id instead of dropping it", () => {
     expect(resolveAnchors({ workObjectId: "not-a-uuid", organizationLevel: true })).toBeNull();
+  });
+});
+
+describe("anchorsForKind: ONE explicitly stated anchor, never a default", () => {
+  it("maps each kind to exactly its own anchor field", () => {
+    expect(anchorsForKind("record", U1)).toEqual({ evidenceRecordId: U1 });
+    expect(anchorsForKind("place", U1)).toEqual({ workObjectId: U1 });
+    expect(anchorsForKind("person", U1)).toEqual({ organizationPersonId: U1 });
+    expect(anchorsForKind("organization", null)).toEqual({ organizationLevel: true });
+  });
+
+  it("refuses a missing, malformed or unknown selection instead of falling back", () => {
+    expect(anchorsForKind("place", "")).toBeNull();
+    expect(anchorsForKind("person", "not-a-uuid")).toBeNull();
+    expect(anchorsForKind("record", null)).toBeNull();
+    expect(anchorsForKind("", U1)).toBeNull();
+    expect(anchorsForKind(undefined, U1)).toBeNull();
+    expect(anchorsForKind("project", U1)).toBeNull();
+  });
+
+  it("the result always satisfies resolveAnchors (at least one stated anchor)", () => {
+    for (const k of ["record", "place", "person", "organization"]) {
+      expect(resolveAnchors(anchorsForKind(k, U2) ?? {})).not.toBeNull();
+    }
+  });
+});
+
+describe("path + limits", () => {
+  it("the storage path is always lowercase (the bucket policy matches lowercase uuids only)", () => {
+    expect(buildEvidenceMediaPath(U1.toUpperCase(), SHA, "image/png")).toBe(`org/${U1}/${SHA}.png`);
+  });
+
+  it("the in-app cap stays under the 5 MB server-action body limit", () => {
+    expect(EVIDENCE_MEDIA_ACTION_MAX_BYTES).toBeLessThan(5 * 1024 * 1024);
+  });
+});
+
+describe("buildRecordChoiceLabel shows only what is stored", () => {
+  it("joins date, person and place; never invents a missing part", () => {
+    expect(buildRecordChoiceLabel({ date: "2019-05-01", personName: "Jonas", contextLabel: "Site A" })).toBe(
+      "2019-05-01 \u00b7 Jonas \u00b7 Site A",
+    );
+    expect(buildRecordChoiceLabel({ date: null, personName: null, contextLabel: "Site A" })).toBe("Site A");
+    expect(buildRecordChoiceLabel({ date: null, personName: null, contextLabel: null })).toBe("-");
   });
 });

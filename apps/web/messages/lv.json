@@ -7185,7 +7185,60 @@
       "unknown": "datums nav zināms"
     },
     "source": "Avots: {system}",
-    "more": "Vēl {n} fotogrāfijas šeit netiek rādītas."
+    "more": "Vēl {n} fotogrāfijas šeit netiek rādītas.",
+    "import": {
+      "title": "Vēsturiskās fotogrāfijas: pievienojiet avota failus",
+      "intro": "Pievienojiet savas organizācijas attēlu failus ierakstam, vietai, personai vai pašai organizācijai. Jūs norādāt, kam tie pieder un no kurienes nākuši; nekas netiek saskaņots pēc datuma vai faila nosaukuma. Fotogrāfijas tiek glabātas privāti un ir paziņotas, nav pārbaudītas.",
+      "anchorKind": "Pievienot",
+      "kind": {
+        "record": "Ierakstam",
+        "place": "Vietai",
+        "person": "Personai",
+        "organization": "Organizācijai"
+      },
+      "choose": {
+        "record": "Ieraksts",
+        "place": "Vieta",
+        "person": "Persona"
+      },
+      "none": {
+        "record": "Ierakstu vēl nav. Vispirms importējiet ierakstus vai pievienojiet vietai, personai vai organizācijai.",
+        "place": "Vietu vēl nav.",
+        "person": "Sarakstā vēl nav personu."
+      },
+      "truncated": "Tiek rādīti tikai pirmie ieraksti.",
+      "sourceSystem": "Avota sistēma",
+      "sourceSystemHint": "No kurienes šie faili, piemēram, arhīva vai programmatūras nosaukums.",
+      "sourceReference": "Avota atsauce (nav obligāta)",
+      "files": "Attēlu faili",
+      "filesHint": "JPEG, PNG, WebP vai HEIC, līdz {mb} MB katrs.",
+      "date": "Uzņemšanas datums (nav obligāts)",
+      "dateHint": "Atstājiet tukšu, ja nezināt. Tad tas tiek saglabāts kā nezināms, nekad nenoģīts. Viens datums attiecas uz visiem šīs partijas failiem.",
+      "basis": "No kurienes datums",
+      "bases": {
+        "organization_stated": "Norādījusi mūsu organizācija",
+        "source_metadata": "No avota sistēmas metadatiem",
+        "exif": "No pašas fotogrāfijas metadatiem"
+      },
+      "caption": "Paraksts (nav obligāts)",
+      "submit": "Pievienot fotogrāfijas",
+      "working": "Pievieno...",
+      "resultTitle": "Rezultāts",
+      "registered": "Pievienots.",
+      "duplicate": "Jau pievienots agrāk (tas pats fails). Nekas nav mainīts.",
+      "unavailable": "Vietas, personas un ierakstus, kam pievienot, pašlaik nevarēja nolasīt. Tas nenozīmē, ka to nav.",
+      "refusal": {
+        "invalid": "Šo failu nevarēja izmantot.",
+        "no_anchor": "Vispirms izvēlieties, kam fotogrāfijas pieder.",
+        "bad_date": "Datumam vajag savu pamatu, un tam jābūt īstam datumam.",
+        "unsupported_type": "Nav JPEG, PNG, WebP vai HEIC attēls.",
+        "file_too_large": "Lielāks par {mb} MB, tāpēc nav nosūtīts. Nekas nav saglabāts.",
+        "anchor_not_found": "Šajā organizācijā šo ierakstu, vietu vai personu neatrada.",
+        "needs_migration": "Fotogrāfiju glabāšana šajā vidē vēl nav ieslēgta. Nekas nav saglabāts.",
+        "not_allowed": "Fotogrāfijas var pievienot tikai šīs organizācijas pārvaldnieki.",
+        "error": "Kaut kas nogāja greizi. Fotogrāfija nav pievienota; mēģiniet vēlreiz."
+      }
+    }
   },
   "linkedDocuments": {
     "title": "Saistītie dokumenti",

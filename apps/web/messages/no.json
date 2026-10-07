@@ -7185,7 +7185,60 @@
       "unknown": "dato ukjent"
     },
     "source": "Kilde: {system}",
-    "more": "{n} flere bilder vises ikke her."
+    "more": "{n} flere bilder vises ikke her.",
+    "import": {
+      "title": "Historiske bilder: legg ved kildefiler",
+      "intro": "Legg ved bildefilene organisasjonen har til en registrering, et sted, en person eller selve organisasjonen. Dere oppgir hva de hører til og hvor de kommer fra; ingenting kobles etter dato eller filnavn. Bildene lagres privat og er oppgitt, ikke verifisert.",
+      "anchorKind": "Legg ved til",
+      "kind": {
+        "record": "En registrering",
+        "place": "Et sted",
+        "person": "En person",
+        "organization": "Organisasjonen"
+      },
+      "choose": {
+        "record": "Registrering",
+        "place": "Sted",
+        "person": "Person"
+      },
+      "none": {
+        "record": "Ingen registreringer ennå. Importer registreringer først, eller legg ved til et sted, en person eller organisasjonen.",
+        "place": "Ingen steder registrert ennå.",
+        "person": "Ingen personer på listen ennå."
+      },
+      "truncated": "Bare de første oppføringene vises.",
+      "sourceSystem": "Kildesystem",
+      "sourceSystemHint": "Hvor filene kommer fra, for eksempel navnet på arkivet eller programvaren.",
+      "sourceReference": "Kildehenvisning (valgfri)",
+      "files": "Bildefiler",
+      "filesHint": "JPEG, PNG, WebP eller HEIC, opptil {mb} MB hver.",
+      "date": "Dato tatt (valgfri)",
+      "dateHint": "La stå tomt hvis dere ikke kjenner den. Den lagres da som ukjent, aldri gjettet. Én dato gjelder for alle filene i denne omgangen.",
+      "basis": "Hvor datoen kommer fra",
+      "bases": {
+        "organization_stated": "Oppgitt av vår organisasjon",
+        "source_metadata": "Fra kildesystemets metadata",
+        "exif": "Fra bildets egne metadata"
+      },
+      "caption": "Bildetekst (valgfri)",
+      "submit": "Legg ved bilder",
+      "working": "Legger ved...",
+      "resultTitle": "Resultat",
+      "registered": "Lagt ved.",
+      "duplicate": "Allerede lagt ved tidligere (samme fil). Ingenting endret.",
+      "unavailable": "Steder, personer og registreringer å legge ved til kunne ikke leses akkurat nå. Det betyr ikke at det ikke finnes noen.",
+      "refusal": {
+        "invalid": "Filen kunne ikke brukes.",
+        "no_anchor": "Velg først hva bildene hører til.",
+        "bad_date": "En dato må ha sitt grunnlag og være en ekte dato.",
+        "unsupported_type": "Ikke et JPEG-, PNG-, WebP- eller HEIC-bilde.",
+        "file_too_large": "Større enn {mb} MB, så den ble ikke sendt. Ingenting ble lagret.",
+        "anchor_not_found": "Registreringen, stedet eller personen ble ikke funnet i denne organisasjonen.",
+        "needs_migration": "Bildelagring er ikke slått på i dette miljøet ennå. Ingenting ble lagret.",
+        "not_allowed": "Bare personer som administrerer organisasjonen kan legge ved bilder.",
+        "error": "Noe gikk galt. Bildet ble ikke lagt ved; prøv igjen."
+      }
+    }
   },
   "linkedDocuments": {
     "title": "Tilknyttede dokumenter",

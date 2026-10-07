@@ -7185,7 +7185,60 @@
       "unknown": "kuupäev teadmata"
     },
     "source": "Allikas: {system}",
-    "more": "Veel {n} fotot ei kuvata siin."
+    "more": "Veel {n} fotot ei kuvata siin.",
+    "import": {
+      "title": "Ajaloolised fotod: lisage lähtefailid",
+      "intro": "Lisage oma organisatsiooni pildifailid kirjele, kohale, isikule või organisatsioonile endale. Teie teatate, mille juurde need kuuluvad ja kust need pärinevad; midagi ei seostata kuupäeva ega failinime järgi. Fotod hoitakse privaatselt ja need on teatatud, mitte kontrollitud.",
+      "anchorKind": "Lisa",
+      "kind": {
+        "record": "Kirjele",
+        "place": "Kohale",
+        "person": "Isikule",
+        "organization": "Organisatsioonile"
+      },
+      "choose": {
+        "record": "Kirje",
+        "place": "Koht",
+        "person": "Isik"
+      },
+      "none": {
+        "record": "Kirjeid veel pole. Importige kõigepealt kirjed või lisage kohale, isikule või organisatsioonile.",
+        "place": "Kohti pole veel registreeritud.",
+        "person": "Nimekirjas pole veel isikuid."
+      },
+      "truncated": "Loetletud on ainult esimesed kirjed.",
+      "sourceSystem": "Lähtesüsteem",
+      "sourceSystemHint": "Kust need failid pärinevad, näiteks arhiivi või tarkvara nimi.",
+      "sourceReference": "Allika viide (valikuline)",
+      "files": "Pildifailid",
+      "filesHint": "JPEG, PNG, WebP või HEIC, kuni {mb} MB igaüks.",
+      "date": "Pildistamise kuupäev (valikuline)",
+      "dateHint": "Jätke tühjaks, kui te seda ei tea. Siis salvestatakse see teadmata kuupäevana, mitte kunagi oletatuna. Üks kuupäev kehtib kõigile selle partii failidele.",
+      "basis": "Kust kuupäev pärineb",
+      "bases": {
+        "organization_stated": "Teatas meie organisatsioon",
+        "source_metadata": "Lähtesüsteemi metaandmetest",
+        "exif": "Foto enda metaandmetest"
+      },
+      "caption": "Pealkiri (valikuline)",
+      "submit": "Lisa fotod",
+      "working": "Lisamine...",
+      "resultTitle": "Tulemus",
+      "registered": "Lisatud.",
+      "duplicate": "Juba varem lisatud (sama fail). Midagi ei muutunud.",
+      "unavailable": "Kohti, isikuid ja kirjeid, mille külge lisada, ei saanud praegu lugeda. See ei tähenda, et neid pole.",
+      "refusal": {
+        "invalid": "Seda faili ei saanud kasutada.",
+        "no_anchor": "Valige esmalt, mille juurde fotod kuuluvad.",
+        "bad_date": "Kuupäev vajab oma alust ja peab olema päris kuupäev.",
+        "unsupported_type": "Pole JPEG-, PNG-, WebP- ega HEIC-pilt.",
+        "file_too_large": "Suurem kui {mb} MB, seega ei saadetud. Midagi ei salvestatud.",
+        "anchor_not_found": "Seda kirjet, kohta või isikut ei leitud selles organisatsioonis.",
+        "needs_migration": "Fotode salvestus pole selles keskkonnas veel sisse lülitatud. Midagi ei salvestatud.",
+        "not_allowed": "Fotosid saavad lisada ainult selle organisatsiooni haldajad.",
+        "error": "Midagi läks valesti. Fotot ei lisatud; proovige uuesti."
+      }
+    }
   },
   "linkedDocuments": {
     "title": "Seotud dokumendid",

@@ -27,6 +27,10 @@ const linked = read("components/app/linked-documents.tsx");
 const serve = read("lib/organization-evidence/evidence-media-serve.ts");
 const writer = read("lib/organization-evidence/evidence-media-write.ts");
 const actions = read("lib/organization-evidence/evidence-media-actions.ts");
+const importForm = read("components/app/organization/historical-photo-import-form.tsx");
+const importSection = read("components/app/organization/historical-photo-import.tsx");
+const anchorsRead = read("lib/organization-evidence/evidence-media-anchors.ts");
+const historyPage = read("app/[locale]/dashboard/company/history/page.tsx");
 const projectPage = read("app/[locale]/dashboard/projects/[id]/page.tsx");
 const personPage = read("app/[locale]/dashboard/company/people/[personId]/page.tsx");
 
@@ -58,9 +62,34 @@ describe("bucket migration", () => {
     expect(sql).toMatch(/from public\.organization_evidence_media m\s+where m\.storage_path = storage\.objects\.name/);
   });
 
-  it("admits writes only under org/<id>/ for a manager of that organization", () => {
-    expect(sql).toMatch(/\(storage\.foldername\(name\)\)\[1\] = 'org'/);
-    expect(sql).toMatch(/public\.manages_organization\(\(\(storage\.foldername\(name\)\)\[2\]\)::uuid\)/);
+  it("admits writes only under org/<id>/<sha256>.<ext> for a manager of that organization", () => {
+    // ONE strict, anchored full-name regex gates every verb: exactly three segments,
+    // lowercase uuid, 64 hex, four extensions. No '..', no extra folder.
+    const strict = "name ~ '^org/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/[0-9a-f]{64}\\.(jpg|png|webp|heic)$'";
+    expect(sql.split(strict).length - 1).toBe(3);
+    expect(sql).toMatch(/public\.manages_organization\(split_part\(name, '\/', 2\)::uuid\)/);
+  });
+
+  it("the uuid cast only happens inside a CASE branch that already matched the prefix", () => {
+    const casts = sql.match(/::uuid/g) ?? [];
+    const guarded = sql.match(/when [^\n]*name ~ '\^org\/\[0-9a-f\]\{8\}[^\n]*\n\s*then [^\n]*::uuid/g) ?? [];
+    expect(casts.length).toBe(3);
+    expect(guarded.length).toBe(3);
+  });
+
+  it("applies to authenticated only", () => {
+    expect([...sql.matchAll(/for (select|insert|delete)\s+to authenticated/g)].length).toBe(3);
+  });
+
+  it("pins a registered row to its own organization and content hash (cross-org path forgery)", () => {
+    expect(sql).toMatch(/create trigger organization_evidence_media_path_pin\s+before insert on public\.organization_evidence_media/);
+    expect(sql).toMatch(/'org\/' \|\| new\.organization_id::text \|\| '\/' \|\| new\.content_sha256/);
+    expect(sql).toMatch(/m\.organization_id::text = split_part\(storage\.objects\.name, '\/', 2\)/);
+    expect(sql).not.toMatch(/security definer/i);
+  });
+
+  it("refuses to proceed when a pre-existing bucket is public", () => {
+    expect(sql).toMatch(/refusing to apply/);
   });
 
   it("never deletes a registered photo from the client", () => {
@@ -76,6 +105,7 @@ describe("bucket migration", () => {
   it("ships a guarded rollback", () => {
     expect(rollback).toMatch(/refusing to drop/);
     expect(rollback).toMatch(/drop policy if exists "evidence-media entity read"/);
+    expect(rollback).toMatch(/drop trigger if exists organization_evidence_media_path_pin/);
   });
 });
 
@@ -156,6 +186,50 @@ describe("linked documents are read-only and RLS-scoped", () => {
     expect(projectPage).toMatch(/<ProjectLinkedDocuments projectId=\{id\}/);
     expect(personPage).toMatch(/<LinkedDocuments/);
     expect(personPage).toMatch(/linked-documents-not-linked/);
+  });
+});
+
+describe("historical photo importer (history door)", () => {
+  it("is mounted on the history page, next to the record import", () => {
+    expect(historyPage).toMatch(/<HistoricalPhotoImport \/>/);
+  });
+
+  it("never infers a date, an anchor or a relationship", () => {
+    for (const src of [importForm, importSection, anchorsRead, actions]) {
+      expect(src).not.toMatch(/lastModified|exifr|new Date\(|Date\.now\(/);
+    }
+    // the filename is provenance only: it is passed through untouched
+    expect(actions).toMatch(/originalFilename: file\.name \|\| null/);
+  });
+
+  it("the anchor is chosen by the manager; the organization comes from the server", () => {
+    expect(actions).toMatch(/anchorsForKind\(text\("anchorKind"\), text\("anchorId"\)\)/);
+    expect(actions).toMatch(/resolveEvidenceOrganization\(caller, null\)/);
+    expect(importForm).not.toMatch(/organizationId/);
+    expect(anchorsRead).toMatch(/resolveEvidenceOrganization\(caller, null\)/);
+  });
+
+  it("a date is sent only together with its basis; empty stays unknown", () => {
+    expect(importForm).toMatch(/if \(date\) \{\s*fd\.append\("originalTakenAt", date\);\s*fd\.append\("takenAtBasis", basis\);/);
+  });
+
+  it("private stays private and no service role is used", () => {
+    expect(actions).toMatch(/visibility: "private"/);
+    expect(actions).not.toMatch(/"subject"/);
+    for (const src of [importForm, importSection, anchorsRead]) {
+      expect(src).not.toMatch(/service[-_]?role|createServiceClient|createAdminClient/i);
+    }
+  });
+
+  it("refusals are named per code and a failed anchor read is an error state, not an empty form", () => {
+    expect(importSection).toMatch(/data-status="unavailable"/);
+    expect(importSection).toMatch(/refusal\.\$\{c\}/);
+    expect(importForm).toMatch(/labels\.refusals\[res\.code\]/);
+  });
+
+  it("binds the displayed workspace so a stale screen cannot write", () => {
+    expect(importForm).toMatch(/DISPLAYED_WORKSPACE_FIELD/);
+    expect(actions).toMatch(/refuseStaleWorkspace\(displayedWorkspaceOf\(formData\)\)/);
   });
 });
 
