@@ -266,7 +266,11 @@ export function WorkerWorkLogFlow({
   photoFirst = false,
   initialFile = null,
   onRegisterAttachSink,
+  voice,
 }: {
+  /** Set only when the text came from the voice door (already reviewed by the
+   *  person): carried to the save as provenance, nothing more. */
+  voice?: { language: string; disclosureVersion: string };
   draft: WorkLogParse;
   locale: string;
   labels: WorkLogLabels;
@@ -501,6 +505,7 @@ export function WorkerWorkLogFlow({
       notes: notes.trim(),
       workDate,
       siteName: site.trim() || null,
+      ...(voice ? { voice } : {}),
       ...(projectPrompt === "ask" && projectChoiceValid
         ? { projectId: projectChoiceValid }
         : {}),

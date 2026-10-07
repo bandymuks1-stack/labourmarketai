@@ -96,6 +96,7 @@ describe("1. the client invitation is delivered through the one invitation primi
     const ADMIN_RPC_ONLY = new Set([
       "lib/invitations/public-preview.ts",
       "lib/invitations/external-referral-receive.ts",
+      "lib/invitations/signup-bridge.ts",
     ]);
     for (const rel of [...walk("lib/invitations"), ...walk("lib/agency")]) {
       const src = stripTs(read(rel));

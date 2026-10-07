@@ -117,6 +117,82 @@ export const FUNNEL_STAGES = [
 ] as const;
 
 /**
+ * MEASUREMENT STATE of one funnel stage (SEP-7: UNKNOWN != ZERO != FAILED !=
+ * NOT_MEASURED). A bare `0` used to stand for all four, so a stage with no
+ * emitter, a stage that never fired and a failed read were indistinguishable.
+ *
+ *   measured      an emitter exists AND the read succeeded — `count` is a
+ *                 number and a 0 is a REAL zero;
+ *   not_measured  no event / source exists for this stage — `count` is null
+ *                 and `reasonKey` says why (i18n key under `telemetry.funnel.reason`);
+ *   unavailable   the read failed — `count` is null; nothing is known.
+ */
+export type FunnelMeasurement = "measured" | "not_measured" | "unavailable";
+
+export type FunnelStageCount = {
+  key: string;
+  label: string;
+  measurement: FunnelMeasurement;
+  /** A number only when `measurement === "measured"`; null otherwise. */
+  count: number | null;
+  /** i18n key suffix (telemetry.funnel.reason.*) when not_measured. */
+  reasonKey: string | null;
+};
+
+/**
+ * Downstream stages the product defines but has NO event or source for. They
+ * are listed so the funnel does not end silently at "engagement"; they are
+ * NOT_MEASURED — no emitter is added here and no number is ever invented.
+ */
+export const NOT_MEASURED_STAGES = [
+  { key: "useful_profile_or_organization", label: "Useful profile / organization", reasonKey: "usefulUndefined" },
+  { key: "offer_side", label: "Offer side (need / offer)", reasonKey: "offerSide" },
+  { key: "commercial_value", label: "Commercial value", reasonKey: "commercialValue" },
+  { key: "trial_started", label: "Trial started", reasonKey: "trial" },
+  { key: "paid_conversion", label: "Paid conversion", reasonKey: "paidConversion" },
+  { key: "retention_repeat_use", label: "Retention / repeat use", reasonKey: "retention" },
+] as const;
+
+/** Rates whose numerator or denominator is a NOT_MEASURED stage. */
+export const NOT_MEASURED_RATES = [
+  { label: "Engagement created → commercial value", reasonKey: "commercialValue" },
+  { label: "Trial → paid conversion", reasonKey: "paidConversion" },
+  { label: "First use → repeat use", reasonKey: "retention" },
+] as const;
+
+/**
+ * Pure state mapping for one stage. A real zero requires `measured`; the count
+ * is never defaulted for a stage whose read failed.
+ */
+export function stageCount(
+  stage: { key: string; label: string },
+  countByEvent: ReadonlyMap<string, number>,
+  readOk: boolean,
+): FunnelStageCount {
+  if (!readOk) {
+    return { key: stage.key, label: stage.label, measurement: "unavailable", count: null, reasonKey: null };
+  }
+  return {
+    key: stage.key,
+    label: stage.label,
+    measurement: "measured",
+    count: countByEvent.get(stage.key) ?? 0,
+    reasonKey: null,
+  };
+}
+
+/** Stage rows for the stages that have no event or source at all. */
+export function notMeasuredStageCounts(): FunnelStageCount[] {
+  return NOT_MEASURED_STAGES.map((s) => ({
+    key: s.key,
+    label: s.label,
+    measurement: "not_measured" as const,
+    count: null,
+    reasonKey: s.reasonKey,
+  }));
+}
+
+/**
  * WHICH ROWS ARE CONVERSIONS for the first-touch `sources` breakdown.
  *
  * `registration_started` fires from BOTH auth pages: the login page's OAuth
@@ -270,8 +346,10 @@ export type FunnelRate = {
 
 export type AcquisitionFunnel = {
   available: boolean;
-  counts: { key: string; label: string; count: number }[];
+  counts: FunnelStageCount[];
   rates: FunnelRate[];
+  /** Conversion shares that cannot be stated because a side is NOT_MEASURED. */
+  unmeasuredRates: { label: string; reasonKey: string }[];
   /** Top first-touch utm_source values among conversion events. */
   sources: { source: string; count: number }[];
   /** Per-(utm_campaign, utm_content) step counts over the same rows — the
@@ -307,7 +385,9 @@ type FunnelRow = {
 /** A rate, or null. Null covers BOTH "no denominator" and "the denominator we
  *  can see is incomplete" — in neither case does the product know the answer,
  *  and in neither case is the answer 0%. */
-function pct(numerator: number, denominator: number): number | null {
+function pct(numerator: number | null, denominator: number | null): number | null {
+  // A side that is not measured / unavailable (null) is UNKNOWN, never 0.
+  if (numerator === null || denominator === null) return null;
   if (denominator <= 0) return null;
   return Math.round((numerator / denominator) * 1000) / 10;
 }
@@ -364,8 +444,12 @@ export async function getAcquisitionFunnel(
   if (error) {
     return {
       available: false,
-      counts: [],
+      counts: [
+        ...FUNNEL_STAGES.map((st) => stageCount(st, new Map(), false)),
+        ...notMeasuredStageCounts(),
+      ],
       rates: [],
+      unmeasuredRates: NOT_MEASURED_RATES.map((r) => ({ ...r })),
       sources: [],
       campaigns: [],
       totalEvents: 0,
@@ -493,11 +577,12 @@ export function summariseFunnel(
     }
   }
 
-  const counts = FUNNEL_STAGES.map((s) => ({
-    key: s.key,
-    label: s.label,
-    count: countByEvent.get(s.key) ?? 0,
-  }));
+  // Every FUNNEL_STAGES entry has an emitter and this read succeeded, so a 0
+  // here is a REAL zero. Stages with no event/source follow as NOT_MEASURED.
+  const counts: FunnelStageCount[] = [
+    ...FUNNEL_STAGES.map((st) => stageCount(st, countByEvent, true)),
+    ...notMeasuredStageCounts(),
+  ];
 
   const c = (k: string) => countByEvent.get(k) ?? 0;
   // The state is assigned once, below, for every rate at the same time — so
@@ -604,6 +689,7 @@ export function summariseFunnel(
     available: true,
     counts,
     rates: finalRates,
+    unmeasuredRates: NOT_MEASURED_RATES.map((r) => ({ ...r })),
     sources,
     campaigns,
     totalEvents: rows.length,

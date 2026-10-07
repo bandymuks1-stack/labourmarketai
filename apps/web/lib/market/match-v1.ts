@@ -249,6 +249,24 @@ export interface MatchSubject {
    * "this person has none".
    */
   readonly practiceEngagements?: number | null;
+
+  /**
+   * HISTORY SIGNALS - skills an ORGANIZATION'S imported history of this
+   * person names (`organization_evidence_competency_signals`, linked worker,
+   * live records only), as `{ uri: canonical skill slug, records }`.
+   *
+   * A labelled SIGNAL, provenance `organization_provided`: evidence that work
+   * was described that way (SEP-3 - EVIDENCE != VERIFICATION). It is NEVER a
+   * declared or verified skill, never added to `skills`, never an input to
+   * status, coverage, evidence confidence or ordering. It is only COUNTED
+   * beside the evidence ladder (`evidence.matchedHistorySignal`) for skills
+   * the person already holds and the need already requires.
+   *
+   * null / undefined = unknown (no linked history, or the read was
+   * unavailable) - NEVER "the history says nothing". A worker without history
+   * is scored exactly as before (SEP-7: unknown != zero).
+   */
+  readonly historySignals?: readonly { readonly uri: string; readonly records: number }[] | null;
 }
 
 /** Great-circle distance in km (haversine). Pure; used only when BOTH sides
@@ -354,6 +372,11 @@ export interface MatchResultV1 {
     readonly matchedConfirmedWork?: number;
     /** Matched skills whose confirmed work repeats across entries and days. */
     readonly matchedRepeatedConfirmed?: number;
+    /** Matched skills that an organization's imported history of the person
+     *  also NAMES (provenance `organization_provided`). A labelled signal
+     *  beside the ladder - not a tier, not verification, not an input to
+     *  status or ordering. Absent = unknown, never zero. */
+    readonly matchedHistorySignal?: number;
   };
   /**
    * Verification truth over the MATCHED skills, separate from `status` by
@@ -538,6 +561,12 @@ export function matchWorkerToNeed(
   }
   let matchedConfirmedWork = 0;
   let matchedRepeatedConfirmed = 0;
+  // History signals: counted over the MATCHED skills only, and only when the
+  // subject carries them (unknown stays unknown - the field is then omitted).
+  const historyUris = subject.historySignals
+    ? new Set(subject.historySignals.filter((h) => h.records > 0).map((h) => h.uri))
+    : null;
+  let matchedHistorySignal = 0;
 
   let matchedManagerConfirmed = 0;
   let matchedJournalSupported = 0;
@@ -546,6 +575,7 @@ export function matchWorkerToNeed(
     const tier = tierByUri.get(uri) ?? "self_declared";
     const work = workByUri.get(uri) ?? "none";
     if (work !== "none") matchedConfirmedWork += 1;
+    if (historyUris?.has(uri)) matchedHistorySignal += 1;
     if (work === "repeated_confirmed") matchedRepeatedConfirmed += 1;
     if (tier === "manager_confirmed") matchedManagerConfirmed += 1;
     else if (tier === "work_journal") matchedJournalSupported += 1;
@@ -1564,6 +1594,7 @@ export function matchWorkerToNeed(
       matchedSelfDeclared,
       matchedConfirmedWork,
       matchedRepeatedConfirmed,
+      ...(historyUris ? { matchedHistorySignal } : {}),
     },
     evidenceConfidence,
     reasons,

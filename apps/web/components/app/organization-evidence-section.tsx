@@ -7,6 +7,8 @@ import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { Card } from "@/components/ui/Card";
+import { HistoryContextBlock } from "@/components/app/history-context-block";
+import type { HistoryContext } from "@/lib/organization-evidence/professional-history-context";
 
 import {
   respondToRosterLinkAction,
@@ -458,9 +460,14 @@ export function OrganizationEvidenceSection({
   records,
   needsMigration,
   organizationNames = {},
+  contexts = {},
   showTitle = true,
 }: {
   records: readonly EvidenceRecordView[];
+  /** The work behind each record, keyed by record id: project, client,
+   *  capacity, source and the distinct proof facts. A record with no entry,
+   *  or whose context is empty, shows nothing extra. */
+  contexts?: Readonly<Record<string, HistoryContext>>;
   /** The store is not provisioned in this environment. The card still renders,
    *  with its honest note instead of a silently empty list. */
   needsMigration: boolean;
@@ -664,6 +671,7 @@ export function OrganizationEvidenceSection({
                       {tRecords("supplier")}: {tRole(rec.supplierRole as never)} ·{" "}
                       {tRecords("importedAt")}: {rec.importedAt.slice(0, 10)}
                     </p>
+                    <HistoryContextBlock context={contexts[rec.id]} />
                     {/* The one claim this surface makes about imported
                       evidence, and it is always the same one. */}
                     <p className="text-xs text-text-muted">

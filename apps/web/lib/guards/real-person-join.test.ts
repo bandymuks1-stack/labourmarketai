@@ -54,7 +54,9 @@ describe("2. onboarding starts from what the person already said", () => {
   it("the page reads the hand-off on the server and passes defaults down", () => {
     expect(page).toMatch(/readLandingHandoff\(safeNext\)/);
     expect(page).toMatch(/saidSentence=\{handoff\.sentence \|\| null\}/);
-    expect(page).toMatch(/defaultIntents=\{handoff\.intents\}/);
+    // the handoff's intents, except when an addressed invitation canonically implies a worker
+    // (then the worker intent is pre-set and the role step is skipped - server-decided)
+    expect(page).toMatch(/defaultIntents=\{impliedWorker \? \["work"\] : handoff\.intents\}/);
     expect(page).toMatch(/defaultProfessionSlug=\{handoff\.professionSlug\}/);
   });
   it("the wizard pre-ticks from the defaults and shows the sentence back", () => {

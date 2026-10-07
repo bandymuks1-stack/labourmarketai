@@ -130,8 +130,15 @@ describe("the stage", () => {
     expect(flat).toContain("next:(<>{secB}{secMobility}{secA}{secI}{secNextDoor}</>)");
     // A closed card shows no empty panel.
     expect(MODES.replace(/\s+/g, "")).toContain("{sections[mode]?(");
-    // The identity stage sits OUTSIDE the switching body — the person is the constant.
-    expect(CARD.indexOf("<IdentityStage")).toBeLessThan(CARD.indexOf("<PlayerCardModes"));
+    // The identity stage sits OUTSIDE the switching body — the person is the
+    // constant. Since the owner's visual correction (2026-09-29 §4, "no
+    // duplicate profile card") it is handed to the host as `stage`: shown as
+    // before when the world cannot be drawn, and — with the world drawn, where
+    // the person already stands in the scene — kept behind the "everything on
+    // the card" disclosure instead of repeated as a second card.
+    expect(CARD).toMatch(/stage=\{\s*<IdentityStage/);
+    expect(MODES).toMatch(/\{stage\}\s*\{tabs\(false\)\}/);
+    expect(MODES).toMatch(/data-testid="player-card-all-details"[\s\S]*\{stage\}/);
     // The switcher reads nothing; the public sample never writes the URL.
     expect(MODES).not.toMatch(/supabase|fetch\(|\.from\(/);
     expect(CARD).toContain("syncUrl={!sample}");

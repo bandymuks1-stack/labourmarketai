@@ -156,6 +156,7 @@
     "cancel": "Anuluj",
     "edit": "Edytuj",
     "remove": "Usuń",
+    "removeConfirm": "Usunąć to ogłoszenie na stałe?",
     "activate": "Opublikuj",
     "close": "Zamknij",
     "reopen": "Wznów jako szkic",
@@ -710,7 +711,11 @@
     "closeLabel": "Zamknij wyszukiwanie",
     "voiceStart": "Szukaj głosem",
     "voiceStop": "Zatrzymaj wprowadzanie głosowe",
-    "voiceListening": "Słucham… powiedz, czego szukasz — tekst pojawi się w polu wyszukiwania."
+    "voiceListening": "Słucham… powiedz, czego szukasz — tekst pojawi się w polu wyszukiwania.",
+    "voiceConsentText": "Dyktowanie w polu wyszukiwania korzysta z wbudowanego rozpoznawania mowy przeglądarki. W zależności od przeglądarki (np. Chrome lub Safari) dźwięk jest wysyłany do usługi mowy producenta przeglądarki, a nie do LabourMarket.ai. Niczego nie zapisujemy. Aby dźwięk był przetwarzany na własnym serwerze LabourMarket.ai, użyj dziennika głosowego.",
+    "voiceConsentAllow": "Kontynuuj z dyktowaniem przeglądarki",
+    "voiceConsentCancel": "Nie teraz",
+    "voiceFailed": "Dyktowanie zatrzymane - przeglądarka nie mogła użyć mikrofonu lub usługi mowy."
   },
   "reports": {
     "eyebrow": "Raporty",
@@ -1656,6 +1661,7 @@
       "journalLinkingDisabled": "Łączenie z dziennikiem nie jest jeszcze włączone.",
       "submit": "Utwórz",
       "success": "Kontekst projektu utworzony.",
+      "clientNotSaved": "Projekt utworzony, ale nie udało się zapisać klienta. Dodaj klienta na stronie projektu.",
       "backToDashboard": "Wróć do panelu firmy",
       "errorName": "Wprowadź nazwę projektu (co najmniej 2 znaki).",
       "errorNoCompany": "Tylko konto firmowe może utworzyć kontekst projektu.",
@@ -1926,7 +1932,36 @@
         "unavailable": "Nie udało się teraz wczytać programów. Odśwież stronę — nic z tego, co utworzyłeś, nie zostało utracone.",
         "inviteLearners": "Zaproś uczestników",
         "exportReport": "Pobierz raport (CSV)",
-        "exportReportHint": "Programy, grupy, liczba uczestników i aktualny popyt — a także wyniki Twoich uczestników. Liczby, których nie znamy, są zapisywane jako nieznane, nigdy jako zero."
+        "exportReportHint": "Programy, grupy, liczba uczestników i aktualny popyt — a także wyniki Twoich uczestników. Liczby, których nie znamy, są zapisywane jako nieznane, nigdy jako zero.",
+        "unassignedLearners": "Przyjęci uczestnicy, którzy nie należą jeszcze do żadnej grupy: {count}. Przypisz ich powyżej do grupy.",
+        "recognition": {
+          "title": "Zapisz uznanie",
+          "hint": "Decyzja niezależnego oceniającego, że wykazane kompetencje osoby spełniają formalne wymaganie. To nie jest certyfikat i nigdy nie powstaje wyłącznie z dowodów pracy.",
+          "pending": "Zapisywanie uznań nie jest jeszcze dostępne: rejestr za nim nie został jeszcze udostępniony. Do tego czasu zgłoszenie jest odrzucane, a nie zapisywane.",
+          "subject": "Uczestnik",
+          "chooseSubject": "Wybierz uczestnika",
+          "kind": "Rodzaj wymagania",
+          "kindDocument": "Typ dokumentu",
+          "kindSkill": "Umiejętność",
+          "kindProfession": "Zawód",
+          "key": "Klucz wymagania (slug)",
+          "country": "Kraj (2 litery)",
+          "evidence": "ID wpisów dowodowych",
+          "evidenceHint": "ID wpisów dziennika dotyczących pracy uczestnika, oddzielone przecinkami. Rejestr przyjmuje tylko wpisy zatwierdzone przez drugą osobę.",
+          "decision": "Decyzja",
+          "recognised": "Uznano",
+          "notRecognised": "Nie uznano",
+          "validFrom": "Ważne od",
+          "validUntil": "Ważne do",
+          "note": "Notatka oceniającego",
+          "submit": "Zapisz decyzję",
+          "saving": "Zapisywanie…",
+          "ok": "Uznanie zapisane.",
+          "needsMigration": "Nie zapisano: rejestr uznań nie jest jeszcze dostępny.",
+          "forbidden": "Ta instytucja nie może zapisać tego uznania dla tej osoby.",
+          "invalid": "Sprawdź wartości.",
+          "error": "Coś poszło nie tak. Spróbuj ponownie."
+        }
       },
       "learners": {
         "title": "Uczestnicy",
@@ -3948,7 +3983,9 @@
       "check_email_body": "Wysłaliśmy link potwierdzający na adres {email}. Otwórz go, aby dokończyć tworzenie konta. Jeśli go nie widzisz, sprawdź folder spam — możesz też poprosić tutaj o nowy link.",
       "resend_label": "Wyślij link ponownie",
       "resend_sent": "Wysłano ponownie. Sprawdź skrzynkę odbiorczą i folder spam.",
-      "resend_wait": "O nowy link możesz poprosić za {seconds} s."
+      "resend_wait": "O nowy link możesz poprosić za {seconds} s.",
+      "invited_email_note": "To adres, na który wysłano zaproszenie.",
+      "show_password": "Pokaż hasło"
     },
     "login": {
       "headline": "Zaloguj się",
@@ -6293,6 +6330,15 @@
       "noActivity": "Jeszcze brak wpisów.",
       "emptyTeam": "Ten projekt nie ma jeszcze zespołu — rozpocznij dobór i wprowadź pierwsze osoby na plac.",
       "emptyTeamCta": "Rozpocznij dobór",
+      "history": {
+        "title": "Wcześniejsza praca przy tym projekcie",
+        "provenance": "Historia dostarczona przez organizację, zaimportowana z jej własnych zapisów. Niezależnie niezweryfikowana.",
+        "unavailable": "Nie udało się teraz odczytać wcześniejszej pracy. Nie oznacza to, że jej nie ma.",
+        "empty": "Dla tego projektu nie zapisano wcześniejszej pracy dostarczonej przez organizację.",
+        "personUnknown": "Osoba nie podana",
+        "hoursUnknown": "Godziny nie podane",
+        "count": "Wpisów: {n}"
+      },
       "positionsTitle": "Brakujące stanowiska",
       "positionsEmpty": "Potrzeby dotyczące stanowisk są jeszcze w przygotowaniu — gdy będą gotowe, zobaczysz tutaj, kogo brakuje.",
       "openOps": "Otwórz zarządzanie projektem",
@@ -7322,6 +7368,21 @@
         "compared": "Porównano",
         "interest": "Zainteresowanie"
       }
+    },
+    "funnel": {
+      "notMeasured": "Jeszcze niemierzone",
+      "unavailable": "Niedostępne (odczyt nie powiódł się)",
+      "unavailableBanner": "Nie udało się odczytać lejka z magazynu zdarzeń. Wszystkie poniższe liczby są niedostępne. To nieudany odczyt, a nie zmierzone zero.",
+      "rateNotMeasured": "Jeszcze niemierzone",
+      "reason": {
+        "usefulUndefined": "Nie istnieje jeszcze definicja „użyteczności”, więc liczone są tylko częściowe zdarzenia ukończenia wdrożenia i utworzenia organizacji.",
+        "offerSide": "Żadne zdarzenie nie rejestruje strony oferty w parze potrzeba / oferta, więc ten etap nie ma źródła.",
+        "commercialValue": "Żadne zdarzenie ani źródło nie rejestruje wartości komercyjnej.",
+        "trial": "Żadne zdarzenie ani źródło nie rejestruje okresu próbnego.",
+        "paidConversion": "Żadne zdarzenie ani źródło nie rejestruje płatnej konwersji.",
+        "retention": "return_visit_detected jest zdefiniowane, ale nie jest wczytywane do tego lejka, a miara ponownego użycia nie istnieje."
+      },
+      "aiHelp": "Własna księgowość AI: wiersze audytu na uruchomienie (ai_runs, USD z zatwierdzonej tabeli cen) oraz kanoniczny rejestr użycia w eurocentach (usage_cost_events). Liczby pochodzą z bieżących odczytów obu tabel. Tabela, której nie da się odczytać, jest pokazana jako kreska (niedostępne), nigdy jako 0, a nieznany koszt również jako kreska."
     }
   },
   "languageFeedback": {
@@ -7379,6 +7440,7 @@
     "outcomeLinked": "Połączono. Jesteś teraz połączony.",
     "outcomeAlreadyLinked": "Jesteś już połączony.",
     "outcomeNoInvitation": "Nie znaleziono zaproszenia.",
+    "outcomeEmailUnverified": "Najpierw potwierdź e-mail (strona Sieć), a potem przyjmij zaproszenie.",
     "outcomeNoWorker": "Twój profil pracownika nie jest jeszcze gotowy.",
     "outcomeError": "Nie udało się zaakceptować. Spróbuj ponownie.",
     "outcomeNeedsMigration": "Nie udało się wykonać czynności. Spróbuj ponownie."
@@ -7658,6 +7720,14 @@
         "doorCalendar": "Ten tydzień w kalendarzu",
         "doorJournal": "Wszystkie wpisy w dzienniku pracy",
         "doorCv": "Żywe CV"
+      },
+      "world": {
+        "sceneLabel": "Świat pracy tej osoby: praca, umiejętności, wpisy, historia i co może być dalej. Te same fakty są opisane poniżej.",
+        "empty": "Nic tu jeszcze nie zapisano.",
+        "directionDetail": "Wspólne: {shared} · brakuje: {missing}",
+        "directionDetailNoGap": "Wspólne: {shared} · niczego nie brakuje",
+        "emptyNext": "Kierunki pojawią się, gdy wpisy o pracy potwierdzą co najmniej dwie umiejętności.",
+        "allDetails": "Wszystko na karcie"
       }
     }
   },
@@ -8409,6 +8479,7 @@
     "skillFit": "{matched}/{total} wymaganych umiejętności, {confirmed} potwierdzonych przez kierownika",
     "evidence": "Dowody — potwierdzone: {confirmed} · dziennik: {journal} · zadeklarowane samodzielnie: {self}",
     "confirmedWork": "Potwierdzone pracą: {work} z {matched} dopasowanych umiejętności (powtarza się: {repeated})",
+    "historySignal": "Wymienione w historii dostarczonej przez organizacje: {history} z {matched} dopasowanych umiejętności (sygnał, nie weryfikacja)",
     "evidenceNone": "Niepotwierdzone",
     "experienceYearsValue": "{years, plural, one {# rok} few {# lata} many {# lat} other {# roku}}",
     "shortlistError": "Nie udało się zapisać. Spróbuj ponownie.",
@@ -8565,6 +8636,7 @@
     },
     "pool": {
       "factsUnreadable": "Części tego, co te osoby zapisały, nie udało się teraz odczytać, więc ta kolejność nie jest wiarygodna. Nikt nie jest tu pokazany jako mający mniej, niż ma — po prostu brakuje faktów do porównania. Odśwież za chwilę.",
+      "historyUnavailable": "Historii dostarczonej przez organizacje nie udało się teraz odczytać, więc nie jest pokazana. Nie znaczy to, że jej nie ma, a powyższa kolejność od niej nie zależy.",
       "capped": "Nie porównano wszystkich. Do tej potrzeby pasuje więcej widocznych pracowników, niż mieści jedna lista, więc pobrano najpierw tych {count}, których umiejętności, zawód i kraj odpowiadają jej najbardziej bezpośrednio — nigdy najnowsze rejestracje. Zawęź potrzebę, aby mieć pewność, że porównywane są właściwe osoby.",
       "complete": "Wszystkich {count} widocznych pracowników porównano z tą potrzebą."
     },
@@ -11689,7 +11761,22 @@
         "declined": "Zaproszenie odrzucone.",
         "no_worker_profile": "Najpierw utwórz profil pracownika, a następnie zaakceptuj zaproszenie.",
         "not_found": "Nie znaleziono zaproszenia.",
-        "error": "Coś poszło nie tak. Spróbuj ponownie."
+        "error": "Coś poszło nie tak. Spróbuj ponownie.",
+        "email_unverified": "Najpierw potwierdź e-mail, a potem przyjmij zaproszenie."
+      },
+      "verify": {
+        "title": "Potwierdź e-mail, aby zobaczyć zaproszenia wysłane na ten adres",
+        "body": "Zaproszenia zaadresowane na adres e-mail są pokazywane tylko osobie, która może otworzyć tę skrzynkę. Wszystko inne na koncie działa jak dotąd; potwierdzenie jest potrzebne tylko do zobaczenia lub przyjęcia tych zaproszeń.",
+        "send": "Wyślij mi jednorazowy link",
+        "sending": "Wysyłanie…",
+        "sent": "Wysłaliśmy jednorazowy link na {email}. Otwórz go na tym urządzeniu, aby dokończyć.",
+        "sentNoAddress": "Wysłaliśmy jednorazowy link na Twój adres e-mail. Otwórz go na tym urządzeniu, aby dokończyć.",
+        "rateLimited": "Link został wysłany chwilę temu. Poczekaj minutę, zanim poprosisz o kolejny.",
+        "alreadyVerified": "Ten adres e-mail jest już potwierdzony. Odśwież stronę.",
+        "failed": "Ten link nie potwierdził Twojego e-mail (może być stary lub otwarty gdzie indziej). Możesz poprosić o nowy.",
+        "error": "Nie udało się wysłać linku. Spróbuj ponownie później.",
+        "intakeTitle": "Potwierdź e-mail, aby kontynuować wcześniejsze zgłoszenie",
+        "intakeBody": "Jeśli przez nasz publiczny formularz zgłosiłeś potrzebę firmy z tego adresu, potwierdź adres, a pokażemy ją tutaj, abyś nie musiał wpisywać wszystkiego ponownie. Wszystko inne działa jak dotąd."
       }
     },
     "search": {
@@ -11885,6 +11972,7 @@
         "revoked": "To zaproszenie zostało cofnięte.",
         "declined": "Zaproszenie odrzucone.",
         "no_worker_profile": "Najpierw utwórz profil pracownika, a następnie zaakceptuj zaproszenie.",
+        "email_mismatch": "To zaproszenie jest zaadresowane do innego adresu e-mail.",
         "not_found": "Nie znaleziono zaproszenia.",
         "error": "Coś poszło nie tak. Spróbuj ponownie.",
         "exhausted": "Wszystkie miejsca są zajęte.",
@@ -11907,7 +11995,13 @@
       "agencyClient": "Agencja pracy zaprasza Twoją firmę do współpracy jako klienta.",
       "agencyClientNext": "Po zaakceptowaniu prośba o połączenie pojawi się na stronie Partnerzy Twojej organizacji — potwierdź ją tam w imieniu swojej firmy. Do tego czasu nic nie jest udostępniane.",
       "addressedToOther": "To zaproszenie zostało zaadresowane do {email}. Jesteś zalogowany(a) innym adresem, więc z tego konta nie można potwierdzić połączenia — zaloguj się zaproszonym adresem i otwórz ten link ponownie.",
-      "switchAccount": "Wyloguj się i zmień konto"
+      "switchAccount": "Wyloguj się i zmień konto",
+      "emailMismatch": {
+        "title": "To zaproszenie jest przeznaczone dla innego adresu e-mail",
+        "body": "To zaproszenie zostało wysłane na adres {email}. Jesteś zalogowany(a) innym adresem, więc z tego konta nie można go wyświetlić ani na nie odpowiedzieć. Zaloguj się zaproszonym adresem i otwórz ten link ponownie.",
+        "bodyNoHint": "To zaproszenie zostało wysłane na inny adres e-mail niż ten, którym jesteś zalogowany(a), więc z tego konta nie można go wyświetlić ani na nie odpowiedzieć. Zaloguj się zaproszonym adresem i otwórz ten link ponownie.",
+        "untouched": "Nic nie zostało przyjęte ani zmienione. Zaproszenie nadal czeka na osobę, do której je wysłano."
+      }
     },
     "teamEnquiriesTitle": "Moje zapytania do zespołów",
     "admin": {
@@ -14092,7 +14186,9 @@
         "chipDocument": "Dodaj dokument"
       },
       "visibilityUnavailable": "Nie udało się sprawdzić widoczności dla pracodawców. To nie znaczy, że jest wyłączona — otwórz ustawienia.",
-      "chipVisibility": "Widoczność dla pracodawców"
+      "chipVisibility": "Widoczność dla pracodawców",
+      "voiceOpen": "Mów",
+      "voiceBareYes": "Wypowiedziane „tak” nie jest potwierdzeniem. Potwierdź przyciskiem na karcie albo powiedz, co chcesz zrobić."
     },
     "worklog": {
       "understood": "Oto, co zrozumiałem — zapisać?",
@@ -16802,6 +16898,38 @@
     "error": "Nie udało się zapisać zmiany i została ona cofnięta. Spróbuj ponownie.",
     "unavailable": "Ustawienia powiadomień są teraz niedostępne."
   },
+  "cvOrganizationHistory": {
+    "title": "Historia pracy dostarczona przez organizacje",
+    "note": "Pochodzi z własnych zapisów wymienionych tu organizacji. Nie jest zadeklarowana przez samą osobę ani niezależnie zweryfikowana.",
+    "untitled": "Praca zarejestrowana przez organizację",
+    "hoursTerm": "Godziny",
+    "hoursRecorded": "{hours} godz. zarejestrowano ({count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}})",
+    "hoursPeriod": "{hours} godz. podano dla okresu ({count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}})",
+    "contested": "Zakwestionowane przez uprawnioną stronę",
+    "more": "Nie pokazano jeszcze {count, plural, one {# wpisu} few {# wpisów} many {# wpisów} other {# wpisu}}"
+  },
+  "historyContext": {
+    "project": "Projekt",
+    "place": "Obiekt lub pakiet prac",
+    "client": "Zleceniodawca",
+    "otherParties": "Inni uczestnicy",
+    "capacity": "Rola",
+    "source": "Źródło",
+    "suppliedBy": "Dostarczone przez {name}",
+    "reconstructed": "Odtworzone z wcześniejszych zapisów",
+    "recordedAt": "Zapisano w systemie",
+    "proofTitle": "Co za tym stoi",
+    "proof": {
+      "SELF_DECLARED": "Podane przez osobę",
+      "EVIDENCE_SUPPORTED": "Poparte zapisem organizacji",
+      "EMPLOYER_CONFIRMED": "Potwierdzone przez pracodawcę",
+      "CLIENT_ACCEPTED": "Odebrane przez zleceniodawcę",
+      "SUPERVISOR_CONFIRMED": "Potwierdzone przez przełożonego",
+      "INDEPENDENTLY_VERIFIED": "Zweryfikowane niezależnie"
+    },
+    "attestedAs": "poświadczone jako {role}",
+    "proofNote": "Każdy wiersz to osobny fakt. Poświadczenie organizacji dostarczającej dane nie jest odbiorem przez zleceniodawcę ani zapłatą, a żaden z tych faktów nie jest niezależną weryfikacją, chyba że tak napisano."
+  },
   "evidenceImport": {
     "eyebrow": "Historyczne dowody pracy",
     "title": "Import historii pracy",
@@ -17412,7 +17540,27 @@
       "offer": "Zaproponuj powiązanie",
       "offered": "Zaproponowano powiązanie — osoba decyduje w swoim profilu",
       "error": "Nie udało się zaproponować powiązania"
-    }
+    },
+    "claim": {
+      "label": "Zaproś tę osobę, by przejęła swoją historię",
+      "placeholder": "Jej adres e-mail",
+      "invite": "Wyślij zaproszenie",
+      "sent": "Zaproszenie wysłane. Gdy osoba dołączy, zaproponuj tutaj powiązanie; decyzję podejmie w swoim profilu.",
+      "created": "Zaproszenie utworzone. Przekaż jej ten link:",
+      "deliveryFailed": "Zaproszenie zapisano, ale e-mail nie został wysłany. Przekaż jej ten link:",
+      "hint": "Osoba musi mieć konto, zanim jej historia będzie mogła zostać zaproponowana. Nic nie jest przypisywane, dopóki nie zaakceptuje.",
+      "errors": {
+        "generic": "Nie udało się wysłać zaproszenia",
+        "duplicate_pending": "Zaproszenie na ten adres już czeka",
+        "rate_limited": "Zbyt wiele zaproszeń. Spróbuj za chwilę",
+        "limit_reached": "Osiągnięto limit zaproszeń",
+        "not_authorized": "Nie możesz zapraszać osób w imieniu tej organizacji",
+        "invalid_relationship": "Relacji tej osoby nie można zaproponować w zaproszeniu",
+        "invalid_email": "Podaj jeden prawidłowy adres e-mail",
+        "needs_migration": "Chwilowo niedostępne"
+      }
+    },
+    "openHistory": "Otwórz historię"
   },
   "peopleImport": {
     "alreadyThere": "{count} jest już na Twojej liście",
@@ -18058,7 +18206,8 @@
       "done": "Przypisano wpisów: {count}; już przypisanych: {skipped}.",
       "refused": "Nie udało się zapisać. Nic nie zmieniono.",
       "person": "{hours} godz., {count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}"
-    }
+    },
+    "truncated": "Wpisów jest więcej, niż odczytuje jeden widok. Pokazano odczytane {count}; sumy obejmują tylko je."
   },
   "workLifecycle": {
     "pending": "Jeszcze nie",
@@ -18230,5 +18379,63 @@
       "skills": "{count, plural, one {# umiejętność oparta na Twoich wpisach} few {# umiejętności oparte na Twoich wpisach} many {# umiejętności opartych na Twoich wpisach} other {# umiejętności opartej na Twoich wpisach}}",
       "next": "Dokąd możesz przejść"
     }
+  },
+  "companyPerson": {
+    "eyebrow": "Historyczna karta osoby",
+    "back": "Osoby",
+    "badge": "Dostarczone przez organizację, niezależnie niezweryfikowane",
+    "provenance": "To, co {name} ma zapisane o tej osobie. Nikt inny tego nie potwierdził i nie zależy to od tego, czy osoba ma konto.",
+    "claim": {
+      "unlinked": "Jeszcze niepowiązane z kontem — historia jest już tu zapisana.",
+      "link_proposed": "Zaproponowano powiązanie z kontem i czeka na odpowiedź osoby — historia jest już tu zapisana.",
+      "linked": "Powiązane z własnym kontem osoby.",
+      "openProfile": "Otwórz stronę osoby"
+    },
+    "unavailable": "Nie udało się teraz odczytać historii tej osoby. To nie znaczy, że jej nie ma.",
+    "empty": "Dla tej osoby nie ma jeszcze zapisów historii. Odczyt się udał — nie ma ich.",
+    "stats": {
+      "records": "Wpisy",
+      "hours": "Godziny jak podano",
+      "period": "Okres"
+    },
+    "noHours": "Wpisy bez podanych godzin: {count}. Nieznane godziny nie są liczone jako zero.",
+    "undated": "Wpisy bez podanej daty: {count}. Zostają w historii poniżej.",
+    "periodApart": "{hours} godz. z sumy to sumy za okres, trzymane osobno i nigdy nierozdzielane na dni ani miesiące.",
+    "noWorkObject": "Wpisy niepowiązane z projektem ani miejscem znanym platformie: {count}. Zostają w tej historii pod nazwą źródła.",
+    "places": {
+      "title": "Według projektu lub miejsca",
+      "none": "Projekt lub miejsce niezapisane",
+      "records": "Wpisy: {count}"
+    },
+    "months": {
+      "title": "Podane godziny według miesięcy",
+      "note": "Tylko wpisy jednodniowe. Sum za okres nigdy nie rozdziela się na dni ani miesiące."
+    },
+    "skills": {
+      "title": "Umiejętności, na które wskazuje historia",
+      "note": "Wyprowadzone z historii organizacji, niezweryfikowane. Umiejętność jest podana, gdy nazwała ją sama organizacja; to nie jest twierdzenie o osobie.",
+      "records": "Wpisy: {count}",
+      "empty": "W tych wpisach nie nazwano żadnej umiejętności.",
+      "unavailable": "Nie udało się teraz odczytać sygnałów umiejętności. To nie znaczy, że ich nie ma.",
+      "truncated": "Sygnałów umiejętności jest więcej, niż odczytuje ten widok."
+    },
+    "shown": "Pokazano najnowsze {shown} z {total} wpisów. Pozostałe zostają zapisane.",
+    "truncated": "Wpisów jest więcej, niż odczytuje jeden widok. Pokazano odczytane {count}; sumy obejmują tylko je."
+  },
+  "qualificationRecognitions": {
+    "title": "Uznania",
+    "subtitle": "Decyzje niezależnych oceniających, że wykazane przez Ciebie kompetencje spełniają formalne wymaganie. To nie jest certyfikat ani kontrola Twojej pracy.",
+    "empty": "Nie zapisano jeszcze żadnego uznania.",
+    "unavailable": "Nie można teraz odczytać uznań. To nie to samo, co ich brak.",
+    "kindDocument": "Typ dokumentu",
+    "kindSkill": "Umiejętność",
+    "kindProfession": "Zawód",
+    "stateCurrent": "Uznano, ważne",
+    "stateLapsed": "Uznano, ważność wygasła",
+    "stateNotRecognised": "Oceniono, nie uznano",
+    "stateRevoked": "Cofnięte przez oceniającego",
+    "stateNotYetValid": "Uznano, jeszcze nieważne",
+    "validFrom": "od {date}",
+    "validUntil": "do {date}"
   }
 }

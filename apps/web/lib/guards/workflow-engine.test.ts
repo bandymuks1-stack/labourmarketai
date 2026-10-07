@@ -255,6 +255,7 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
      */
     const COMMAND_REDEFINER = "20260820070000_workflow_work_task_definition_v1";
     const SECURITY_FIX = "20261002141500_work_task_authz_null_safe_v1";
+    const EMAIL_BOUNDARY = "20261003151000_email_verified_boundary_v1";
 
     for (const dir of ["migrations", "rollbacks"]) {
       const abs = join(REPO, "supabase", dir);
@@ -279,6 +280,39 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
             expect(src, `${dir}/${f} must not drop ${fn}`).not.toMatch(
               new RegExp(`drop function[^(]*\\b${fn}\\b`, "i"),
             );
+          }
+          expect(src, `${dir}/${f} must not create a trigger on an engine table`).not.toMatch(
+            /create\s+trigger[^;]*\bon\s+public\.workflow_/i,
+          );
+          continue;
+        }
+        if (f.startsWith(EMAIL_BOUNDARY)) {
+          // 20261003151000 (+ its rollback) — verified-email boundary, #2152.
+          // NARROW, EXPLICIT EXCEPTION. The migration patches ONE engine command
+          // IN PLACE: delegate_workflow_step_v1's invitee lookup swaps
+          // `profiles.email` for the verified-email resolver
+          // (profile_id_by_verified_email_v1) via a guarded string patch of the
+          // live definition. It touches no engine table, defines no engine
+          // command (there is no CREATE FUNCTION for one in the file), drops
+          // nothing and adds no trigger. So it may NAME delegate_workflow_step_v1
+          // and nothing else of the engine; every other assertion stays on.
+          for (const tbl of TABLES) {
+            expect(src, `${dir}/${f} must not mention engine table ${tbl}`).not.toMatch(
+              new RegExp(`\\b${tbl}\\b`, "i"),
+            );
+          }
+          for (const fn of [...COMMANDS, ...HELPERS]) {
+            expect(src, `${dir}/${f} must not create or replace engine function ${fn}`).not.toMatch(
+              new RegExp(`create (or replace )?function[^(]*\\b${fn}\\b`, "i"),
+            );
+            expect(src, `${dir}/${f} must not drop ${fn}`).not.toMatch(
+              new RegExp(`drop function[^(]*\\b${fn}\\b`, "i"),
+            );
+            if (fn !== "delegate_workflow_step_v1") {
+              expect(src, `${dir}/${f} may name ONLY delegate_workflow_step_v1, not ${fn}`).not.toMatch(
+                new RegExp(`\\b${fn}\\b`),
+              );
+            }
           }
           expect(src, `${dir}/${f} must not create a trigger on an engine table`).not.toMatch(
             /create\s+trigger[^;]*\bon\s+public\.workflow_/i,

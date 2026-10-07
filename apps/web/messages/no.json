@@ -1980,6 +1980,15 @@
       "noActivity": "[EN] No entries yet.",
       "emptyTeam": "[EN] This project has no team yet — start the draft and bring the first people onto the field.",
       "emptyTeamCta": "[EN] Start the draft",
+      "history": {
+        "title": "Tidligere arbeid på dette prosjektet",
+        "provenance": "Historikk levert av organisasjonen, importert fra organisasjonens egne registre. Ikke uavhengig verifisert.",
+        "unavailable": "Tidligere arbeid kunne ikke leses akkurat nå. Det betyr ikke at det ikke finnes.",
+        "empty": "Det er ikke registrert tidligere arbeid levert av organisasjonen for dette prosjektet.",
+        "personUnknown": "Person ikke oppgitt",
+        "hoursUnknown": "Timer ikke oppgitt",
+        "count": "{n} poster"
+      },
       "positionsTitle": "[EN] Missing positions",
       "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
       "openOps": "[EN] Open the management arena"
@@ -2323,6 +2332,7 @@
   "scouting": {
     "pool": {
       "factsUnreadable": "Noe av det disse personene har registrert kunne ikke leses akkurat nå, så denne rekkefølgen er ikke pålitelig. Ingen vises her med mindre enn de har — det er fakta bak sammenligningen som mangler. Last inn på nytt om et øyeblikk.",
+      "historyUnavailable": "Historikk levert av organisasjoner kunne ikke leses akkurat nå, så den vises ikke. Det betyr ikke at det ikke finnes noen, og rekkefølgen over avhenger ikke av den.",
       "capped": "Ikke alle ble sammenlignet. Flere synlige arbeidere passer til dette behovet enn én liste rommer, så de {count} med de mest direkte samsvarende ferdighetene, yrket og landet ble hentet først — aldri de nyeste registreringene. Snevre inn behovet for å være sikker på at de rette personene sammenlignes.",
       "complete": "Alle {count} synlige arbeidere ble sammenlignet med dette behovet."
     },
@@ -2347,6 +2357,7 @@
     "skillFit": "[EN] {matched}/{total} required skills, {confirmed} manager-confirmed",
     "evidence": "[EN] Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
     "confirmedWork": "Bekreftet gjennom arbeid: {work} av {matched} matchende ferdigheter (gjentatt: {repeated})",
+    "historySignal": "Nevnt i historikk levert av organisasjoner: {history} av {matched} matchende ferdigheter (et signal, ikke verifisering)",
     "evidenceNone": "Ikke bekreftet",
     "experienceYearsValue": "{years, plural, one {# år} other {# år}}",
     "shortlistError": "[EN] Could not save. Try again.",
@@ -6702,6 +6713,38 @@
       }
     }
   },
+  "cvOrganizationHistory": {
+    "title": "Arbeidshistorikk levert av organisasjoner",
+    "note": "Hentet fra egne registreringer hos organisasjonene som er nevnt her. Den er verken selvdeklarert eller uavhengig verifisert.",
+    "untitled": "Arbeid registrert av en organisasjon",
+    "hoursTerm": "Timer",
+    "hoursRecorded": "{hours} t registrert i {count, plural, one {# registrering} other {# registreringer}}",
+    "hoursPeriod": "{hours} t oppgitt for en periode, i {count, plural, one {# registrering} other {# registreringer}}",
+    "contested": "Bestridt av en part med rett til det",
+    "more": "{count, plural, one {# post til} other {# poster til}} vises ikke"
+  },
+  "historyContext": {
+    "project": "Prosjekt",
+    "place": "Sted eller arbeidspakke",
+    "client": "Oppdragsgiver",
+    "otherParties": "Andre involverte",
+    "capacity": "Rolle",
+    "source": "Kilde",
+    "suppliedBy": "Levert av {name}",
+    "reconstructed": "Rekonstruert fra tidligere registreringer",
+    "recordedAt": "Registrert i systemet",
+    "proofTitle": "Hva som ligger bak",
+    "proof": {
+      "SELF_DECLARED": "Oppgitt av personen",
+      "EVIDENCE_SUPPORTED": "Støttet av en organisasjons registrering",
+      "EMPLOYER_CONFIRMED": "Bekreftet av arbeidsgiveren",
+      "CLIENT_ACCEPTED": "Godkjent av oppdragsgiveren",
+      "SUPERVISOR_CONFIRMED": "Bekreftet av en leder",
+      "INDEPENDENTLY_VERIFIED": "Uavhengig verifisert"
+    },
+    "attestedAs": "bekreftet som {role}",
+    "proofNote": "Hver linje er et eget faktum. En bekreftelse fra den leverende organisasjonen er ikke oppdragsgiverens godkjenning og ikke betaling, og ingen av dem er uavhengig verifisering med mindre det står."
+  },
   "evidenceImport": {
     "records": {
       "periodDerivedHuman": "[EN] Period set at import (human choice) — the source stated no dates",
@@ -6892,7 +6935,8 @@
       "done": "{count} poster tilskrevet; {skipped} var allerede tilskrevet.",
       "refused": "Dette kunne ikke lagres. Ingenting er endret.",
       "person": "{hours} t, {count, plural, one {# post} other {# poster}}"
-    }
+    },
+    "truncated": "Det finnes flere poster enn én visning leser. De {count} leste vises; summer dekker bare dem."
   },
   "workLifecycle": {
     "pending": "Ikke ennå",
@@ -7064,5 +7108,47 @@
       "skills": "{count, plural, one {# ferdighet basert på registreringene dine} other {# ferdigheter basert på registreringene dine}}",
       "next": "Hvor du kan gå videre"
     }
+  },
+  "companyPerson": {
+    "eyebrow": "Historisk personkort",
+    "back": "Personer",
+    "badge": "Levert av organisasjonen, ikke uavhengig verifisert",
+    "provenance": "Dette er hva {name} har registrert om denne personen. Ingen andre har bekreftet det, og det avhenger ikke av om personen har en konto.",
+    "claim": {
+      "unlinked": "Ennå ikke knyttet til en konto — historikken er allerede registrert her.",
+      "link_proposed": "En kobling til en konto er tilbudt og venter på personens svar — historikken er allerede registrert her.",
+      "linked": "Knyttet til personens egen konto.",
+      "openProfile": "Åpne personens side"
+    },
+    "unavailable": "Personens historikk kunne ikke leses akkurat nå. Det betyr ikke at det ikke finnes noen.",
+    "empty": "Det er ennå ingen historikkposter for denne personen. Lesingen gikk bra — det finnes ingen.",
+    "stats": {
+      "records": "Poster",
+      "hours": "Timer som oppgitt",
+      "period": "Periode"
+    },
+    "noHours": "Poster uten oppgitte timer: {count}. Ukjente timer regnes ikke som null.",
+    "undated": "Poster uten oppgitt dato: {count}. De blir i historikken nedenfor.",
+    "periodApart": "{hours} t av summen er periodesummer, holdt adskilt og aldri fordelt på dager eller måneder.",
+    "noWorkObject": "Poster uten tilknytning til et prosjekt eller sted plattformen kjenner: {count}. De blir i denne historikken under kildebetegnelsen.",
+    "places": {
+      "title": "Etter prosjekt eller sted",
+      "none": "Prosjekt eller sted ikke registrert",
+      "records": "Poster: {count}"
+    },
+    "months": {
+      "title": "Oppgitte timer per måned",
+      "note": "Kun poster for enkeltdager. Periodesummer fordeles aldri på dager eller måneder."
+    },
+    "skills": {
+      "title": "Ferdigheter historikken peker på",
+      "note": "Utledet fra organisasjonens historikk, ikke verifisert. En ferdighet vises når organisasjonen selv har nevnt den; det er ikke en påstand om personen.",
+      "records": "Poster: {count}",
+      "empty": "Ingen ferdighet er nevnt i disse postene.",
+      "unavailable": "Ferdighetssignaler kunne ikke leses akkurat nå. Det betyr ikke at det ikke finnes noen.",
+      "truncated": "Det finnes flere ferdighetssignaler enn denne visningen leser."
+    },
+    "shown": "Viser de nyeste {shown} av {total} poster. Resten forblir registrert.",
+    "truncated": "Det finnes flere poster enn én visning leser. De {count} leste vises; summer dekker bare dem."
   }
 }

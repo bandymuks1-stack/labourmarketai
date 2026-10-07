@@ -95,6 +95,12 @@ export type CapabilityDescriptor = {
    */
   readonly exposed: boolean;
   readonly annotations: CapabilityAnnotations;
+  /**
+   * Host-specific tool metadata passed through as the MCP `_meta` (for example
+   * ChatGPT's `openai/fileParams`, which names the arguments that arrive as
+   * uploaded files). Absent on every capability that needs none.
+   */
+  readonly meta?: Readonly<Record<string, unknown>>;
   readonly inputSchema: z.ZodTypeAny;
   readonly run: (
     caller: CapabilityCaller,

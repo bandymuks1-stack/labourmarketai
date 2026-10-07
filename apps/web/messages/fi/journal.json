@@ -322,9 +322,35 @@
       "too_large": "Tallenne on liian suuri (enint. 25 Mt).",
       "too_long": "Tallenne on liian pitkä (enint. 10 minuuttia).",
       "unavailable": "Litterointipalvelin ei ole juuri nyt käytettävissä.",
-      "undecodable": "Ääntä ei voitu lukea — yritä uudelleen."
+      "undecodable": "Ääntä ei voitu lukea — yritä uudelleen.",
+      "rate_limited": "Liian monta tallennetta lyhyessä ajassa - odota hetki ja yritä uudelleen.",
+      "token_expired": "Latausistunto vanheni - yritä uudelleen.",
+      "unauthorized": "Istuntosi ei ole oikeutettu puheeseen - kirjaudu uudelleen.",
+      "service_unreachable": "Litterointipalvelinta ei tavoitettu. Tarkista yhteys ja yritä uudelleen; tallenne säilyy tällä sivulla."
     },
-    "permissionDenied": "Mikrofonin käyttö estettiin. Salli mikrofoni selaimen asetuksista ja yritä uudelleen."
+    "permissionDenied": "Mikrofonin käyttö estettiin. Salli mikrofoni selaimen asetuksista ja yritä uudelleen.",
+    "disclosureProvenance": "Tallennettu merkintä merkitään puheella sanelluksi ja sinun tarkistamaksesi.",
+    "state": {
+      "ready": "Valmis. Valitse puhekieli ja aloita tallennus.",
+      "permissionRequired": "Selain pyytää mikrofonin käyttölupaa, kun aloitat. Mitään ei tallenneta ennen lupaasi.",
+      "policyBlocked": "Sivuston tietoturvakäytäntö estää mikrofonin täällä. Äänitys ei ole käytettävissä tällä sivulla - voit kirjoittaa merkinnän tekstinä.",
+      "unsupported": "Tämä selain ei voi tallentaa ääntä täällä (vaatii suojatun sivun ja mikrofonin tallennustuen). Voit ladata äänitiedoston tai kirjoittaa tekstin.",
+      "noDevice": "Tältä laitteelta ei löytynyt mikrofonia.",
+      "deviceBusy": "Toinen sovellus käyttää mikrofonia. Sulje se ja yritä uudelleen.",
+      "cancelled": "Tallennus peruutettu. Mitään ei ladattu tai tallennettu.",
+      "requesting": "Odotetaan lupaasi mikrofonin käyttöön...",
+      "interrupted": "Tallennus keskeytettiin, koska sivu oli piilossa. Jatka, kun palaat.",
+      "interruptedKept": "Mikrofoni pysähtyi, joten tallennus päättyi etuajassa. Tallennettu on litteroitu alle - tarkista se.",
+      "uploading": "Ladataan tallennetta..."
+    },
+    "language": {
+      "label": "Puhekieli",
+      "auto": "Tunnista automaattisesti",
+      "hint": "Valitse kieli, jota puhut - sen ei tarvitse vastata sivuston kieltä."
+    },
+    "recordAgain": "Tallenna uudelleen",
+    "announceStarted": "Tallennus alkoi",
+    "announceMinutes": "{minutes} min tallennettu"
   },
   "savedOpenCv": "Näytä CV",
   "statusExplainer": "Miten merkintöjäsi käytetään?",

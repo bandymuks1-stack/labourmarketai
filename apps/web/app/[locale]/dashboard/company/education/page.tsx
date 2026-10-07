@@ -11,6 +11,7 @@ import {
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { InstitutionLearnersSection } from "@/components/app/institution-learners-section";
 import { InstitutionProgramsSection } from "@/components/app/institution-programs-section";
+import { InstitutionRecognitionSection } from "@/components/app/institution-recognition-section";
 import { PublicDemandSection } from "@/components/app/public-demand-section";
 
 /**
@@ -64,6 +65,7 @@ export default async function CompanyEducationPage({
       </header>
       <InstitutionLearnersSection organizationId={capabilityOrgId} />
       <InstitutionProgramsSection organizationId={capabilityOrgId} />
+      <InstitutionRecognitionSection organizationId={capabilityOrgId} />
       <PublicDemandSection audience="institution" />
     </div>
   );

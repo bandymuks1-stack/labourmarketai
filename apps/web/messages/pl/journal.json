@@ -352,9 +352,35 @@
       "too_large": "Nagranie jest za duże (maks. 25 MB).",
       "too_long": "Nagranie jest za długie (maks. 10 minut).",
       "unavailable": "Serwer transkrypcji jest obecnie niedostępny.",
-      "undecodable": "Nie udało się odczytać audio — spróbuj ponownie."
+      "undecodable": "Nie udało się odczytać audio — spróbuj ponownie.",
+      "rate_limited": "Zbyt wiele nagrań w krótkim czasie - poczekaj chwilę i spróbuj ponownie.",
+      "token_expired": "Sesja przesyłania wygasła - spróbuj ponownie.",
+      "unauthorized": "Twoja sesja nie ma uprawnień do głosu - zaloguj się ponownie.",
+      "service_unreachable": "Nie udało się połączyć z serwerem transkrypcji. Sprawdź połączenie i spróbuj ponownie; nagranie zostaje na tej stronie."
     },
-    "permissionDenied": "Dostęp do mikrofonu został zablokowany. Zezwól na mikrofon w ustawieniach przeglądarki i spróbuj ponownie."
+    "permissionDenied": "Dostęp do mikrofonu został zablokowany. Zezwól na mikrofon w ustawieniach przeglądarki i spróbuj ponownie.",
+    "disclosureProvenance": "Zapisany wpis zostanie oznaczony jako podyktowany głosem i sprawdzony przez Ciebie.",
+    "state": {
+      "ready": "Gotowe. Wybierz język mówienia i rozpocznij nagrywanie.",
+      "permissionRequired": "Przeglądarka poprosi o zgodę na mikrofon po rozpoczęciu. Nic nie jest nagrywane przed Twoją zgodą.",
+      "policyBlocked": "Polityka bezpieczeństwa witryny blokuje tu mikrofon. Nagrywanie głosu jest na tej stronie niedostępne - wpis możesz napisać jako tekst.",
+      "unsupported": "Ta przeglądarka nie może tu nagrywać dźwięku (wymaga bezpiecznej strony i obsługi nagrywania z mikrofonu). Możesz przesłać plik audio lub napisać tekst.",
+      "noDevice": "Na tym urządzeniu nie znaleziono mikrofonu.",
+      "deviceBusy": "Mikrofon jest używany przez inną aplikację. Zamknij ją i spróbuj ponownie.",
+      "cancelled": "Nagrywanie anulowane. Nic nie przesłano ani nie zapisano.",
+      "requesting": "Czekam na Twoją zgodę na użycie mikrofonu...",
+      "interrupted": "Nagrywanie wstrzymane, bo strona była ukryta. Wznów, gdy wrócisz.",
+      "interruptedKept": "Mikrofon przestał działać, więc nagranie zakończyło się wcześniej. To, co zarejestrowano, jest poniżej - sprawdź to.",
+      "uploading": "Przesyłanie nagrania..."
+    },
+    "language": {
+      "label": "Język mówienia",
+      "auto": "Wykryj automatycznie",
+      "hint": "Wybierz język, w którym mówisz - nie musi być taki sam jak język witryny."
+    },
+    "recordAgain": "Nagraj ponownie",
+    "announceStarted": "Rozpoczęto nagrywanie",
+    "announceMinutes": "Nagrano {minutes} min"
   },
   "savedOpenCv": "Zobacz swoje CV",
   "dayNav": {

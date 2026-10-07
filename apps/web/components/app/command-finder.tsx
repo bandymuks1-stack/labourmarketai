@@ -72,8 +72,12 @@ const OBJECT_SEARCH_TIMEOUT_MS = 8000;
 type ObjectSearchState = "idle" | "loading" | "ok" | "error";
 
 /* ── Voice adapter (unified-text-navigation v1, Phase 3 rules) ──────────
- * Browser-native Web Speech API only — no external AI service, no separate
- * command model. The transcript feeds the SAME setQuery state as typing,
+ * Browser-native Web Speech API only — no LabourMarket AI service, no separate
+ * command model. HONESTY: depending on the browser (Chrome, Safari) the
+ * browser VENDOR's speech service receives the audio, so the first use shows
+ * a disclosure the person must accept (remembered per browser) - owner
+ * decision U-26, option A. The audio that LabourMarket.ai itself processes
+ * goes through the voice journal, not through here. The transcript feeds the SAME setQuery state as typing,
  * so voice → text → the one search → the user clicks a result. Nothing is
  * auto-executed and no transcript is persisted (local component state only).
  * When the API is unsupported the mic button is NOT rendered at all —
@@ -107,6 +111,17 @@ function getSpeechRecognitionCtor(): SpeechRecognitionCtor | null {
     webkitSpeechRecognition?: SpeechRecognitionCtor;
   };
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+}
+
+/** One-time acceptance of the browser-dictation disclosure (per browser). */
+const SPEECH_CONSENT_KEY = "lmai:command-finder-speech-consent:v1";
+
+function readSpeechConsent(): boolean {
+  try {
+    return window.localStorage.getItem(SPEECH_CONSENT_KEY) === "accepted";
+  } catch {
+    return false;
+  }
 }
 
 /** BCP-47 recognition language per ACTIVE locale. */
@@ -154,6 +169,8 @@ export function CommandFinder() {
   const [voiceSupported, setVoiceSupported] = useState(false);
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const [consentOpen, setConsentOpen] = useState(false);
+  const [voiceFailed, setVoiceFailed] = useState(false);
 
   useEffect(() => {
     setVoiceSupported(getSpeechRecognitionCtor() !== null);
@@ -166,6 +183,26 @@ export function CommandFinder() {
 
   const stopListening = () => {
     recognitionRef.current?.stop();
+  };
+
+  /** The mic button: disclosure first (until accepted), then listen. */
+  const requestListening = () => {
+    setVoiceFailed(false);
+    if (readSpeechConsent()) {
+      startListening();
+      return;
+    }
+    setConsentOpen(true);
+  };
+
+  const acceptSpeechConsent = () => {
+    try {
+      window.localStorage.setItem(SPEECH_CONSENT_KEY, "accepted");
+    } catch {
+      /* acceptance still applies to this start */
+    }
+    setConsentOpen(false);
+    startListening();
   };
 
   const startListening = () => {
@@ -192,6 +229,8 @@ export function CommandFinder() {
     };
     recognition.onerror = () => {
       // onend fires after onerror — state clears there; nothing to persist.
+      // The failure is NAMED (denied / no speech service / offline), never silent.
+      setVoiceFailed(true);
     };
     recognitionRef.current = recognition;
     setListening(true);
@@ -215,7 +254,9 @@ export function CommandFinder() {
   useEffect(() => {
     try {
       setRecentIds(
-        parseRecentIds(window.localStorage.getItem(RECENT_COMMANDS_STORAGE_KEY)),
+        parseRecentIds(
+          window.localStorage.getItem(RECENT_COMMANDS_STORAGE_KEY),
+        ),
       );
     } catch {
       // storage unavailable (private mode) — the finder works without recents
@@ -412,7 +453,7 @@ export function CommandFinder() {
         {voiceSupported && (
           <button
             type="button"
-            onClick={listening ? stopListening : startListening}
+            onClick={listening ? stopListening : requestListening}
             aria-label={listening ? t("voiceStop") : t("voiceStart")}
             aria-pressed={listening}
             data-testid="command-finder-voice"
@@ -430,6 +471,43 @@ export function CommandFinder() {
           </button>
         )}
       </div>
+      {consentOpen && (
+        <div
+          role="group"
+          aria-label={t("voiceStart")}
+          data-testid="command-finder-voice-consent"
+          className="rounded-md border border-ink-500 bg-ink-800/60 p-3 text-xs leading-relaxed text-text-secondary"
+        >
+          <p>{t("voiceConsentText")}</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={acceptSpeechConsent}
+              data-testid="command-finder-voice-consent-allow"
+              className="min-h-9 rounded-md bg-brand-blue px-3 text-xs font-medium text-text-on-brand"
+            >
+              {t("voiceConsentAllow")}
+            </button>
+            <button
+              type="button"
+              onClick={() => setConsentOpen(false)}
+              data-testid="command-finder-voice-consent-cancel"
+              className="min-h-9 rounded-md border border-ink-500 px-3 text-xs text-text-secondary"
+            >
+              {t("voiceConsentCancel")}
+            </button>
+          </div>
+        </div>
+      )}
+      {voiceFailed && !listening && (
+        <p
+          role="status"
+          data-testid="command-finder-voice-failed"
+          className="text-xs leading-relaxed text-text-muted"
+        >
+          {t("voiceFailed")}
+        </p>
+      )}
       {listening && (
         <p
           data-testid="command-finder-voice-listening"
@@ -552,7 +630,10 @@ export function CommandFinder() {
         </p>
       )}
       {objectState === "ok" && objectResultCount > 0 && (
-        <nav aria-label={t("objectsLabel")} data-testid="command-finder-objects">
+        <nav
+          aria-label={t("objectsLabel")}
+          data-testid="command-finder-objects"
+        >
           <ul className="flex flex-col gap-2">
             {objectGroups.map((group) => (
               <li key={group.source} className="flex flex-col gap-1">

@@ -26,7 +26,7 @@ import type { PlaceGroup } from "@/lib/organization-evidence/company-work-histor
  * independently verified: it is the company's own timesheet.
  */
 
-const nf = (n: number) => formatHoursAsStated(Math.round(n * 100) / 100);
+export const nf = (n: number) => formatHoursAsStated(Math.round(n * 100) / 100);
 
 function Provenance({ t, name }: { t: Awaited<ReturnType<typeof getTranslations>>; name: string }) {
   return (
@@ -43,7 +43,7 @@ function Provenance({ t, name }: { t: Awaited<ReturnType<typeof getTranslations>
   );
 }
 
-function Stat({ concept, value, label }: { concept: "object" | "person" | "time" | "calendar"; value: string; label: string }) {
+export function Stat({ concept, value, label }: { concept: "object" | "person" | "time" | "calendar"; value: string; label: string }) {
   return (
     <div className="flex items-center gap-3 rounded-card border border-ink-600 bg-ink-800/40 px-4 py-3">
       <SemanticIcon concept={concept} label={label} className="h-5 w-5 text-brand-cyan" />
@@ -55,7 +55,7 @@ function Stat({ concept, value, label }: { concept: "object" | "person" | "time"
   );
 }
 
-function span(first: string | null, last: string | null, locale: string): string | null {
+export function span(first: string | null, last: string | null, locale: string): string | null {
   if (!first) return null;
   const opts: Intl.DateTimeFormatOptions = { month: "short", year: "numeric" };
   const a = formatUtcDate(first, locale, opts);
@@ -118,6 +118,11 @@ export async function CompanyWorkHistory({ locale }: { locale: string }) {
         </h2>
         <p className="text-sm text-text-secondary">{t("subtitle", { name: organizationName })}</p>
         <Provenance t={t} name={organizationName} />
+        {load.truncated ? (
+          <p className="text-meta leading-relaxed text-text-muted" data-testid="company-work-history-truncated">
+            {t("truncated", { count: history.totalRecords })}
+          </p>
+        ) : null}
         {attributedCount > 0 ? (
           <p className="text-meta leading-relaxed text-text-muted" data-testid="company-work-history-attributed">
             {t("attributedNote", { count: attributedCount })}
@@ -258,6 +263,11 @@ export async function CompanyPlaceHistory({
           {place.name ?? t("noPlaceName")}
         </h1>
         <Provenance t={t} name={load.organizationName} />
+        {load.truncated ? (
+          <p className="text-meta leading-relaxed text-text-muted" data-testid="company-place-truncated">
+            {t("truncated", { count: load.history.totalRecords })}
+          </p>
+        ) : null}
       </header>
 
       <div className="grid gap-2 sm:grid-cols-3">
@@ -297,12 +307,20 @@ export async function CompanyPlaceHistory({
             );
             return (
               <li key={pp.id}>
+                {/* A linked person opens their own page; an UNLINKED one opens the
+                    company's historical card for that roster row — their history
+                    is already recorded here before any account claim. */}
                 {wid ? (
                   <Link href={`/dashboard/people/${wid}` as "/dashboard"} data-testid="company-place-person-link">
                     {chip}
                   </Link>
                 ) : (
-                  chip
+                  <Link
+                    href={`/dashboard/company/people/${pp.id}` as "/dashboard"}
+                    data-testid="company-place-person-history-link"
+                  >
+                    {chip}
+                  </Link>
                 )}
               </li>
             );
