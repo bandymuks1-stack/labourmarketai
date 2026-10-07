@@ -156,6 +156,7 @@
     "cancel": "Abbrechen",
     "edit": "Bearbeiten",
     "remove": "Löschen",
+    "removeConfirm": "Diese Anzeige endgültig löschen?",
     "activate": "Veröffentlichen",
     "close": "Schließen",
     "reopen": "Als Entwurf wieder öffnen",
@@ -710,7 +711,11 @@
     "closeLabel": "Suche schließen",
     "voiceStart": "Sprachsuche",
     "voiceStop": "Spracheingabe stoppen",
-    "voiceListening": "Zuhören... sagen Sie, was Sie suchen — der Text erscheint im Suchfeld."
+    "voiceListening": "Zuhören... sagen Sie, was Sie suchen — der Text erscheint im Suchfeld.",
+    "voiceConsentText": "Das Diktieren im Suchfeld nutzt die eingebaute Spracherkennung deines Browsers. Je nach Browser (z. B. Chrome oder Safari) wird das Audio an den Sprachdienst des Browser-Herstellers gesendet, nicht an LabourMarket.ai. Wir speichern nichts. Für Audio, das auf dem eigenen Server von LabourMarket.ai verarbeitet wird, nutze das Sprach-Journal.",
+    "voiceConsentAllow": "Mit Browser-Diktat fortfahren",
+    "voiceConsentCancel": "Jetzt nicht",
+    "voiceFailed": "Diktat beendet - der Browser konnte Mikrofon oder Sprachdienst nicht nutzen."
   },
   "reports": {
     "eyebrow": "Berichte",
@@ -1656,6 +1661,7 @@
       "journalLinkingDisabled": "Die Journal-Verknüpfung ist noch nicht aktiviert.",
       "submit": "Erstellen",
       "success": "Projektkontext erstellt.",
+      "clientNotSaved": "Projekt erstellt, aber der Kunde konnte nicht gespeichert werden. Fügen Sie den Kunden auf der Projektseite hinzu.",
       "backToDashboard": "Zurück zum Unternehmens-Dashboard",
       "errorName": "Geben Sie einen Projektnamen ein (mindestens 2 Zeichen).",
       "errorNoCompany": "Nur ein Unternehmenskonto kann einen Projektkontext anlegen.",
@@ -1926,7 +1932,36 @@
         "unavailable": "Die Studiengänge konnten gerade nicht geladen werden. Laden Sie die Seite neu; nichts von dem, was Sie angelegt haben, ist verloren.",
         "inviteLearners": "Lernende einladen",
         "exportReport": "Bericht herunterladen (CSV)",
-        "exportReportHint": "Programme, Kohorten, Lernendenzahlen und aktuelle Nachfrage — zusammen mit den Ergebnissen Ihrer Lernenden. Unbekannte Zahlen werden als unknown geschrieben, niemals als Null."
+        "exportReportHint": "Programme, Kohorten, Lernendenzahlen und aktuelle Nachfrage — zusammen mit den Ergebnissen Ihrer Lernenden. Unbekannte Zahlen werden als unknown geschrieben, niemals als Null.",
+        "unassignedLearners": "Angenommene Lernende, die noch keiner Kohorte angehören: {count}. Weisen Sie sie oben einer Kohorte zu.",
+        "recognition": {
+          "title": "Anerkennung erfassen",
+          "hint": "Die Entscheidung einer unabhängigen Prüfstelle, dass die gezeigte Kompetenz einer Person eine formale Anforderung erfüllt. Das ist kein Zertifikat und entsteht nie allein aus Arbeitsnachweisen.",
+          "pending": "Das Erfassen von Anerkennungen ist noch nicht verfügbar: Das Register dahinter wurde noch nicht freigegeben. Bis dahin wird eine Eingabe abgelehnt, nicht gespeichert.",
+          "subject": "Lernende/r",
+          "chooseSubject": "Lernende/n wählen",
+          "kind": "Art der Anforderung",
+          "kindDocument": "Dokumenttyp",
+          "kindSkill": "Fähigkeit",
+          "kindProfession": "Beruf",
+          "key": "Anforderungsschlüssel (Slug)",
+          "country": "Land (2 Buchstaben)",
+          "evidence": "IDs der Nachweiseinträge",
+          "evidenceHint": "IDs von Journaleinträgen der Arbeit der lernenden Person, durch Kommas getrennt. Das Register nimmt nur Einträge an, die eine zweite Person abgezeichnet hat.",
+          "decision": "Entscheidung",
+          "recognised": "Anerkannt",
+          "notRecognised": "Nicht anerkannt",
+          "validFrom": "Gültig ab",
+          "validUntil": "Gültig bis",
+          "note": "Notiz der Prüfstelle",
+          "submit": "Entscheidung erfassen",
+          "saving": "Wird gespeichert…",
+          "ok": "Anerkennung erfasst.",
+          "needsMigration": "Nicht erfasst: Das Anerkennungsregister ist noch nicht verfügbar.",
+          "forbidden": "Diese Einrichtung kann diese Anerkennung für diese Person nicht erfassen.",
+          "invalid": "Bitte prüfen Sie die Werte.",
+          "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+        }
       },
       "learners": {
         "title": "Lernende",
@@ -3948,7 +3983,9 @@
       "check_email_body": "Wir haben einen Bestätigungslink an {email} gesendet. Öffne ihn, um die Registrierung abzuschließen. Keine E-Mail? Prüfe den Spam-Ordner — einen neuen Link kannst du hier anfordern.",
       "resend_label": "Link erneut senden",
       "resend_sent": "Erneut gesendet. Prüfe Posteingang und Spam-Ordner.",
-      "resend_wait": "In {seconds} s kannst du einen neuen Link anfordern."
+      "resend_wait": "In {seconds} s kannst du einen neuen Link anfordern.",
+      "invited_email_note": "Das ist die Adresse, an die Ihre Einladung gesendet wurde.",
+      "show_password": "Passwort anzeigen"
     },
     "login": {
       "headline": "Anmelden",
@@ -6293,6 +6330,15 @@
       "noActivity": "Noch keine Einträge.",
       "emptyTeam": "Dieses Projekt hat noch kein Team — starte den Draft und hole die ersten Leute aufs Feld.",
       "emptyTeamCta": "Draft starten",
+      "history": {
+        "title": "Bisherige Arbeit an diesem Projekt",
+        "provenance": "Von der Organisation bereitgestellte Historie, aus deren eigenen Aufzeichnungen importiert. Nicht unabhängig geprüft.",
+        "unavailable": "Die bisherige Arbeit konnte gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
+        "empty": "Für dieses Projekt ist keine von der Organisation bereitgestellte frühere Arbeit erfasst.",
+        "personUnknown": "Person nicht genannt",
+        "hoursUnknown": "Stunden nicht angegeben",
+        "count": "{n} Einträge"
+      },
       "positionsTitle": "Fehlende Positionen",
       "positionsEmpty": "Der Positionsbedarf ist noch nicht bereit — sobald er da ist, siehst du hier, welche Leute fehlen.",
       "openOps": "Management-Arena öffnen",
@@ -7322,6 +7368,21 @@
         "compared": "Verglichen",
         "interest": "Interesse"
       }
+    },
+    "funnel": {
+      "notMeasured": "Noch nicht gemessen",
+      "unavailable": "Nicht verfügbar (Lesen fehlgeschlagen)",
+      "unavailableBanner": "Der Funnel konnte nicht aus dem Ereignisspeicher gelesen werden. Alle Zahlen unten sind nicht verfügbar. Das ist ein fehlgeschlagener Lesevorgang, keine gemessene Null.",
+      "rateNotMeasured": "Noch nicht gemessen",
+      "reason": {
+        "usefulUndefined": "Es gibt noch keine Definition von „nützlich“, daher werden nur die teilweisen Ereignisse für abgeschlossenes Onboarding und angelegte Organisation gezählt.",
+        "offerSide": "Kein Ereignis erfasst die Angebotsseite von Bedarf / Angebot, daher hat diese Stufe keine Quelle.",
+        "commercialValue": "Kein Ereignis und keine Quelle erfasst den kommerziellen Wert.",
+        "trial": "Kein Ereignis und keine Quelle erfasst eine Testphase.",
+        "paidConversion": "Kein Ereignis und keine Quelle erfasst eine zahlende Konversion.",
+        "retention": "return_visit_detected ist definiert, wird aber nicht in diesen Funnel gelesen, und es gibt keine Kennzahl für wiederholte Nutzung."
+      },
+      "aiHelp": "KI-Abrechnung aus erster Hand: Prüfzeilen pro Lauf (ai_runs, USD aus der geprüften Preistabelle) und das kanonische Nutzungsbuch in Euro-Cent (usage_cost_events). Die Zahlen stammen aus Live-Lesevorgängen beider Tabellen. Eine nicht lesbare Tabelle wird als Strich (nicht verfügbar) angezeigt, nie als 0, und unbekannte Kosten ebenfalls als Strich."
     }
   },
   "languageFeedback": {
@@ -7379,6 +7440,7 @@
     "outcomeLinked": "Verknüpft. Sie sind jetzt verbunden.",
     "outcomeAlreadyLinked": "Sie sind bereits verknüpft.",
     "outcomeNoInvitation": "Einladung nicht gefunden.",
+    "outcomeEmailUnverified": "Bestätigen Sie zuerst Ihre E-Mail (Seite Netzwerk) und nehmen Sie dann die Einladung an.",
     "outcomeNoWorker": "Ihr Arbeitskraft-Profil ist noch nicht bereit.",
     "outcomeError": "Konnte nicht angenommen werden. Bitte versuchen Sie es erneut.",
     "outcomeNeedsMigration": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut."
@@ -7658,6 +7720,14 @@
         "doorCalendar": "Diese Woche im Kalender",
         "doorJournal": "Alle Einträge im Arbeitsbuch",
         "doorCv": "Lebender Lebenslauf"
+      },
+      "world": {
+        "sceneLabel": "Die Arbeitswelt dieser Person: Arbeit, Fähigkeiten, Einträge, Verlauf und was als Nächstes kommen kann. Dieselben Fakten stehen unten.",
+        "empty": "Hier ist noch nichts erfasst.",
+        "directionDetail": "Gemeinsam: {shared} · fehlt: {missing}",
+        "directionDetailNoGap": "Gemeinsam: {shared} · nichts fehlt",
+        "emptyNext": "Richtungen erscheinen, sobald deine Arbeitseinträge mindestens zwei Fähigkeiten belegen.",
+        "allDetails": "Alles auf der Karte"
       }
     }
   },
@@ -8409,6 +8479,7 @@
     "skillFit": "{matched}/{total} benötigte Fähigkeiten, {confirmed} vom Manager bestätigt",
     "evidence": "Nachweise — bestätigt: {confirmed} · Journal: {journal} · selbst angegeben: {self}",
     "confirmedWork": "Durch Arbeit bestätigt: {work} von {matched} passenden Fähigkeiten (wiederholt: {repeated})",
+    "historySignal": "In von Organisationen gelieferter Historie genannt: {history} von {matched} passenden Fähigkeiten (ein Signal, keine Überprüfung)",
     "evidenceNone": "Nicht bestätigt",
     "experienceYearsValue": "{years, plural, one {# Jahr} other {# Jahre}}",
     "shortlistError": "Konnte nicht gespeichert werden. Bitte erneut versuchen.",
@@ -8565,6 +8636,7 @@
     },
     "pool": {
       "factsUnreadable": "Ein Teil dessen, was diese Personen erfasst haben, konnte gerade nicht gelesen werden, daher ist diese Reihenfolge nicht verlässlich. Niemand wird hier mit weniger dargestellt, als er hat — es fehlen schlicht die Fakten für den Vergleich. Laden Sie gleich neu.",
+      "historyUnavailable": "Von Organisationen gelieferte Historie konnte gerade nicht gelesen werden und wird daher nicht angezeigt. Das heißt nicht, dass es keine gibt, und die Reihenfolge oben hängt nicht davon ab.",
       "capped": "Es wurden nicht alle verglichen. Zu diesem Bedarf passen mehr sichtbare Arbeitskräfte, als in eine Liste passen. Deshalb wurden zuerst die {count} geladen, deren Qualifikationen, Beruf und Land am besten passen, nicht die neuesten Registrierungen. Grenzen Sie den Bedarf ein, damit die richtigen Personen verglichen werden.",
       "complete": "Alle {count} sichtbaren Arbeitskräfte wurden mit diesem Bedarf verglichen."
     },
@@ -11689,7 +11761,22 @@
         "declined": "Einladung abgelehnt.",
         "no_worker_profile": "Erstellen Sie zuerst Ihr Arbeitsprofil und nehmen Sie die Einladung dann an.",
         "not_found": "Einladung nicht gefunden.",
-        "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+        "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+        "email_unverified": "Bestätigen Sie zuerst Ihre E-Mail und nehmen Sie dann die Einladung an."
+      },
+      "verify": {
+        "title": "Bestätigen Sie Ihre E-Mail, um daran gerichtete Einladungen zu sehen",
+        "body": "Einladungen, die an eine E-Mail-Adresse gerichtet sind, werden nur der Person gezeigt, die dieses Postfach öffnen kann. Alles andere in Ihrem Konto funktioniert wie bisher; das ist nur nötig, um diese Einladungen zu sehen oder anzunehmen.",
+        "send": "Einmal-Link senden",
+        "sending": "Wird gesendet…",
+        "sent": "Wir haben einen Einmal-Link an {email} gesendet. Öffnen Sie ihn auf diesem Gerät, um abzuschließen.",
+        "sentNoAddress": "Wir haben einen Einmal-Link an Ihre E-Mail-Adresse gesendet. Öffnen Sie ihn auf diesem Gerät, um abzuschließen.",
+        "rateLimited": "Ein Link wurde gerade gesendet. Bitte warten Sie eine Minute, bevor Sie einen neuen anfordern.",
+        "alreadyVerified": "Diese E-Mail-Adresse ist bereits bestätigt. Laden Sie die Seite neu.",
+        "failed": "Dieser Link hat Ihre E-Mail nicht bestätigt (möglicherweise veraltet oder anderswo geöffnet). Sie können einen neuen anfordern.",
+        "error": "Der Link konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.",
+        "intakeTitle": "Bestätigen Sie Ihre E-Mail, um eine frühere Einreichung fortzusetzen",
+        "intakeBody": "Wenn Sie über unser öffentliches Formular mit dieser Adresse einen Unternehmensbedarf eingereicht haben, bestätigen Sie die Adresse; wir zeigen ihn dann hier an, damit Sie nichts erneut eintippen müssen. Alles andere funktioniert wie bisher."
       }
     },
     "search": {
@@ -11885,6 +11972,7 @@
         "revoked": "Diese Einladung wurde widerrufen.",
         "declined": "Einladung abgelehnt.",
         "no_worker_profile": "Erstellen Sie zuerst Ihr Arbeitsprofil und nehmen Sie die Einladung dann an.",
+        "email_mismatch": "Diese Einladung ist an eine andere E-Mail-Adresse gerichtet.",
         "not_found": "Einladung nicht gefunden.",
         "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
         "exhausted": "Alle Plätze sind belegt.",
@@ -11907,7 +11995,13 @@
       "agencyClient": "Eine Personalagentur lädt Ihr Unternehmen ein, als Kunde zusammenzuarbeiten.",
       "agencyClientNext": "Nach dem Annehmen erscheint die Verbindungsanfrage auf der Partnerseite Ihrer Organisation — bestätigen Sie sie dort mit Ihrem Unternehmen. Bis dahin wird nichts geteilt.",
       "addressedToOther": "Diese Einladung ist an {email} gerichtet. Sie sind mit einer anderen Adresse angemeldet, daher kann die Verbindung aus diesem Konto nicht bestätigt werden — melden Sie sich mit der eingeladenen Adresse an und öffnen Sie diesen Link erneut.",
-      "switchAccount": "Abmelden und Konto wechseln"
+      "switchAccount": "Abmelden und Konto wechseln",
+      "emailMismatch": {
+        "title": "Diese Einladung gilt einer anderen E-Mail-Adresse",
+        "body": "Diese Einladung wurde an {email} gesendet. Sie sind mit einer anderen Adresse angemeldet, daher kann sie aus diesem Konto weder angezeigt noch beantwortet werden. Melden Sie sich mit der eingeladenen Adresse an und öffnen Sie diesen Link erneut.",
+        "bodyNoHint": "Diese Einladung wurde an eine andere E-Mail-Adresse gesendet als die, mit der Sie angemeldet sind, daher kann sie aus diesem Konto weder angezeigt noch beantwortet werden. Melden Sie sich mit der eingeladenen Adresse an und öffnen Sie diesen Link erneut.",
+        "untouched": "Es wurde nichts angenommen oder geändert. Die Einladung wartet weiterhin auf die Person, an die sie gesendet wurde."
+      }
     },
     "teamEnquiriesTitle": "Meine Anfragen an Kolonnen",
     "admin": {
@@ -14092,7 +14186,9 @@
         "chipDocument": "Dokument hinzufügen"
       },
       "visibilityUnavailable": "Ihre Sichtbarkeit für Arbeitgeber konnte nicht geprüft werden. Das heißt nicht, dass sie aus ist — öffnen Sie die Einstellungen.",
-      "chipVisibility": "Sichtbarkeit für Arbeitgeber"
+      "chipVisibility": "Sichtbarkeit für Arbeitgeber",
+      "voiceOpen": "Sprechen",
+      "voiceBareYes": "Ein gesprochenes „Ja“ ist keine Bestätigung. Bestätigen Sie mit der Schaltfläche auf der Karte oder sagen Sie, was Sie tun möchten."
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
@@ -16802,6 +16898,38 @@
     "error": "Die Änderung konnte nicht gespeichert werden und wurde zurückgesetzt. Bitte versuchen Sie es erneut.",
     "unavailable": "Benachrichtigungseinstellungen sind derzeit nicht verfügbar."
   },
+  "cvOrganizationHistory": {
+    "title": "Von Organisationen gelieferte Arbeitshistorie",
+    "note": "Aus den Unterlagen der hier genannten Organisationen übernommen. Sie ist weder selbst erklärt noch unabhängig überprüft.",
+    "untitled": "Von einer Organisation erfasste Arbeit",
+    "hoursTerm": "Stunden",
+    "hoursRecorded": "{hours} Std. erfasst in {count, plural, one {# Eintrag} other {# Einträgen}}",
+    "hoursPeriod": "{hours} Std. für einen Zeitraum angegeben, in {count, plural, one {# Eintrag} other {# Einträgen}}",
+    "contested": "Von einer berechtigten Stelle bestritten",
+    "more": "{count, plural, one {# weiterer Eintrag wird} other {# weitere Einträge werden}} nicht angezeigt"
+  },
+  "historyContext": {
+    "project": "Projekt",
+    "place": "Objekt oder Arbeitspaket",
+    "client": "Auftraggeber",
+    "otherParties": "Weitere Beteiligte",
+    "capacity": "Funktion",
+    "source": "Quelle",
+    "suppliedBy": "Geliefert von {name}",
+    "reconstructed": "Aus früheren Aufzeichnungen rekonstruiert",
+    "recordedAt": "Im System erfasst",
+    "proofTitle": "Was dahintersteht",
+    "proof": {
+      "SELF_DECLARED": "Von der Person angegeben",
+      "EVIDENCE_SUPPORTED": "Durch den Eintrag einer Organisation gestützt",
+      "EMPLOYER_CONFIRMED": "Vom Arbeitgeber bestätigt",
+      "CLIENT_ACCEPTED": "Vom Auftraggeber abgenommen",
+      "SUPERVISOR_CONFIRMED": "Von einer Aufsichtsperson bestätigt",
+      "INDEPENDENTLY_VERIFIED": "Unabhängig überprüft"
+    },
+    "attestedAs": "bestätigt als {role}",
+    "proofNote": "Jede Zeile ist eine eigene Tatsache. Eine Bestätigung der liefernden Organisation ist keine Abnahme durch den Auftraggeber und keine Zahlung, und keine davon ist eine unabhängige Überprüfung, sofern nicht ausdrücklich angegeben."
+  },
   "evidenceImport": {
     "eyebrow": "Historische Arbeitsnachweise",
     "title": "Arbeitsgeschichte importieren",
@@ -17412,7 +17540,27 @@
       "offer": "Verknüpfung anbieten",
       "offered": "Verknüpfung angeboten — die Person entscheidet in ihrem Profil",
       "error": "Die Verknüpfung konnte nicht angeboten werden"
-    }
+    },
+    "claim": {
+      "label": "Diese Person einladen, ihre Historie zu übernehmen",
+      "placeholder": "Ihre E-Mail-Adresse",
+      "invite": "Einladung senden",
+      "sent": "Einladung gesendet. Sobald die Person beigetreten ist, bieten Sie hier die Verknüpfung an; sie entscheidet in ihrem Profil.",
+      "created": "Einladung erstellt. Teilen Sie diesen Link mit der Person:",
+      "deliveryFailed": "Die Einladung wurde gespeichert, die E-Mail ging aber nicht raus. Teilen Sie diesen Link mit der Person:",
+      "hint": "Die Person braucht zuerst ein Konto, bevor ihr die Historie angeboten werden kann. Nichts wird verknüpft, bis sie zustimmt.",
+      "errors": {
+        "generic": "Die Einladung konnte nicht gesendet werden",
+        "duplicate_pending": "Für diese Adresse wartet bereits eine Einladung",
+        "rate_limited": "Zu viele Einladungen. Bitte gleich noch einmal versuchen",
+        "limit_reached": "Das Einladungslimit ist erreicht",
+        "not_authorized": "Sie dürfen für diese Organisation keine Personen einladen",
+        "invalid_relationship": "Die Beziehung dieser Person kann nicht per Einladung angeboten werden",
+        "invalid_email": "Geben Sie genau eine gültige E-Mail-Adresse ein",
+        "needs_migration": "Derzeit nicht verfügbar"
+      }
+    },
+    "openHistory": "Historie öffnen"
   },
   "peopleImport": {
     "alreadyThere": "{count} stehen bereits auf Ihrer Liste",
@@ -18058,7 +18206,8 @@
       "done": "{count} Einträge zugeordnet; {skipped} waren bereits zugeordnet.",
       "refused": "Das konnte nicht gespeichert werden. Nichts wurde geändert.",
       "person": "{hours} Std., {count, plural, one {# Eintrag} other {# Einträge}}"
-    }
+    },
+    "truncated": "Es gibt mehr Einträge, als eine Ansicht liest. Die {count} gelesenen werden angezeigt; Summen umfassen nur diese."
   },
   "workLifecycle": {
     "pending": "Noch nicht",
@@ -18230,5 +18379,63 @@
       "skills": "{count, plural, one {# Fähigkeit, gestützt auf deine Einträge} other {# Fähigkeiten, gestützt auf deine Einträge}}",
       "next": "Wohin du gehen kannst"
     }
+  },
+  "companyPerson": {
+    "eyebrow": "Historische Personenkarte",
+    "back": "Personen",
+    "badge": "Von der Organisation bereitgestellt, nicht unabhängig geprüft",
+    "provenance": "Das hat {name} zu dieser Person erfasst. Niemand sonst hat es bestätigt, und es hängt nicht davon ab, ob die Person ein Konto hat.",
+    "claim": {
+      "unlinked": "Noch nicht mit einem Konto verknüpft — die Historie ist hier bereits erfasst.",
+      "link_proposed": "Eine Verknüpfung mit einem Konto wurde angeboten und wartet auf die Antwort der Person — die Historie ist hier bereits erfasst.",
+      "linked": "Mit dem eigenen Konto der Person verknüpft.",
+      "openProfile": "Seite der Person öffnen"
+    },
+    "unavailable": "Die Historie dieser Person konnte gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
+    "empty": "Für diese Person sind noch keine Historieneinträge gespeichert. Das Lesen hat funktioniert — es gibt keine.",
+    "stats": {
+      "records": "Einträge",
+      "hours": "Stunden wie angegeben",
+      "period": "Zeitraum"
+    },
+    "noHours": "Einträge ohne angegebene Stunden: {count}. Unbekannte Stunden zählen nicht als null.",
+    "undated": "Einträge ohne angegebenes Datum: {count}. Sie bleiben in der Historie unten.",
+    "periodApart": "{hours} Std. der Summe sind Zeitraumsummen, getrennt gehalten und nie auf Tage oder Monate verteilt.",
+    "noWorkObject": "Einträge ohne Bezug zu einem der Plattform bekannten Projekt oder Ort: {count}. Sie bleiben unter ihrer Quellbezeichnung in dieser Historie.",
+    "places": {
+      "title": "Nach Projekt oder Ort",
+      "none": "Projekt oder Ort nicht erfasst",
+      "records": "Einträge: {count}"
+    },
+    "months": {
+      "title": "Angegebene Stunden pro Monat",
+      "note": "Nur Einträge für einzelne Tage. Zeitraumsummen werden nie auf Tage oder Monate verteilt."
+    },
+    "skills": {
+      "title": "Fähigkeiten, auf die die Historie hinweist",
+      "note": "Aus der Historie der Organisation abgeleitet, nicht verifiziert. Eine Fähigkeit steht hier, wenn die Organisation sie selbst genannt hat; es ist keine Aussage über die Person.",
+      "records": "Einträge: {count}",
+      "empty": "In diesen Einträgen wurde keine Fähigkeit genannt.",
+      "unavailable": "Fähigkeitssignale konnten gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
+      "truncated": "Es gibt mehr Fähigkeitssignale, als diese Ansicht liest."
+    },
+    "shown": "Angezeigt werden die neuesten {shown} von {total} Einträgen. Der Rest bleibt erfasst.",
+    "truncated": "Es gibt mehr Einträge, als eine Ansicht liest. Die {count} gelesenen werden angezeigt; Summen umfassen nur diese."
+  },
+  "qualificationRecognitions": {
+    "title": "Anerkennungen",
+    "subtitle": "Entscheidungen unabhängiger Prüfstellen, dass Ihre gezeigte Kompetenz eine formale Anforderung erfüllt. Das ist kein Zertifikat und keine Prüfung Ihrer Arbeit.",
+    "empty": "Noch keine Anerkennung erfasst.",
+    "unavailable": "Anerkennungen können gerade nicht gelesen werden. Das ist nicht dasselbe wie keine zu haben.",
+    "kindDocument": "Dokumenttyp",
+    "kindSkill": "Fähigkeit",
+    "kindProfession": "Beruf",
+    "stateCurrent": "Anerkannt, gültig",
+    "stateLapsed": "Anerkannt, Gültigkeit abgelaufen",
+    "stateNotRecognised": "Geprüft, nicht anerkannt",
+    "stateRevoked": "Von der Prüfstelle widerrufen",
+    "stateNotYetValid": "Anerkannt, noch nicht gültig",
+    "validFrom": "ab {date}",
+    "validUntil": "bis {date}"
   }
 }

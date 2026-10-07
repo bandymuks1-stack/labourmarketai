@@ -1980,6 +1980,15 @@
       "noActivity": "[EN] No entries yet.",
       "emptyTeam": "[EN] This project has no team yet — start the draft and bring the first people onto the field.",
       "emptyTeamCta": "[EN] Start the draft",
+      "history": {
+        "title": "Iepriekšējais darbs šajā projektā",
+        "provenance": "Organizācijas sniegta vēsture, importēta no organizācijas pašas ierakstiem. Neatkarīgi nav pārbaudīta.",
+        "unavailable": "Iepriekšējo darbu pašlaik neizdevās nolasīt. Tas nenozīmē, ka tā nav.",
+        "empty": "Šim projektam nav reģistrēts organizācijas sniegts iepriekšējais darbs.",
+        "personUnknown": "Persona nav norādīta",
+        "hoursUnknown": "Stundas nav norādītas",
+        "count": "{n} ieraksti"
+      },
       "positionsTitle": "[EN] Missing positions",
       "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
       "openOps": "[EN] Open the management arena"
@@ -2323,6 +2332,7 @@
   "scouting": {
     "pool": {
       "factsUnreadable": "Daļu no tā, ko šie cilvēki ir fiksējuši, tikko neizdevās nolasīt, tāpēc šī secība nav uzticama. Neviens šeit netiek rādīts ar mazāk, nekā viņam ir — vienkārši trūkst faktu, pēc kuriem salīdzināt. Pārlādējiet pēc brīža.",
+      "historyUnavailable": "Organizāciju sniegto vēsturi pašlaik nevarēja nolasīt, tāpēc tā netiek rādīta. Tas nenozīmē, ka tās nav, un iepriekšējā secība no tās nav atkarīga.",
       "capped": "Ne visi tika salīdzināti. Šai vajadzībai atbilst vairāk redzamu darbinieku, nekā ietilpst vienā sarakstā, tāpēc vispirms tika iegūti tie {count}, kuru prasmes, profesija un valsts atbilst vistiešāk — nekad jaunākie reģistrējumi. Sašauriniet vajadzību, lai būtu droši, ka tiek salīdzināti īstie cilvēki.",
       "complete": "Visi {count} redzamie darbinieki tika salīdzināti ar šo vajadzību."
     },
@@ -2347,6 +2357,7 @@
     "skillFit": "[EN] {matched}/{total} required skills, {confirmed} manager-confirmed",
     "evidence": "[EN] Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
     "confirmedWork": "Apstiprināts ar darbu: {work} no {matched} atbilstošām prasmēm (atkārtojas: {repeated})",
+    "historySignal": "Minēts organizāciju sniegtajā vēsturē: {history} no {matched} atbilstošajām prasmēm (signāls, nevis pārbaude)",
     "evidenceNone": "Nav apstiprināts",
     "experienceYearsValue": "{years, plural, one {# gads} other {# gadi}}",
     "shortlistError": "[EN] Could not save. Try again.",
@@ -6702,6 +6713,38 @@
       }
     }
   },
+  "cvOrganizationHistory": {
+    "title": "Organizāciju sniegtā darba vēsture",
+    "note": "Ņemta no šeit minēto organizāciju ierakstiem. Tā nav paša cilvēka deklarēta un nav neatkarīgi pārbaudīta.",
+    "untitled": "Organizācijas reģistrēts darbs",
+    "hoursTerm": "Stundas",
+    "hoursRecorded": "{hours} h reģistrētas ({count, plural, one {# ieraksts} other {# ieraksti}})",
+    "hoursPeriod": "{hours} h norādītas periodam ({count, plural, one {# ieraksts} other {# ieraksti}})",
+    "contested": "Apstrīdējusi persona ar tiesībām to darīt",
+    "more": "Vēl {count, plural, one {# ieraksts} other {# ieraksti}} netiek rādīti"
+  },
+  "historyContext": {
+    "project": "Projekts",
+    "place": "Objekts vai darbu pakete",
+    "client": "Pasūtītājs",
+    "otherParties": "Citi iesaistītie",
+    "capacity": "Statuss",
+    "source": "Avots",
+    "suppliedBy": "Iesniedza {name}",
+    "reconstructed": "Atjaunots no iepriekšējiem ierakstiem",
+    "recordedAt": "Ierakstīts sistēmā",
+    "proofTitle": "Kas to apliecina",
+    "proof": {
+      "SELF_DECLARED": "Norādījusi pati persona",
+      "EVIDENCE_SUPPORTED": "Pamatots ar organizācijas ierakstu",
+      "EMPLOYER_CONFIRMED": "Apstiprinājis darba devējs",
+      "CLIENT_ACCEPTED": "Pasūtītājs pieņēmis",
+      "SUPERVISOR_CONFIRMED": "Apstiprinājis darbu vadītājs",
+      "INDEPENDENTLY_VERIFIED": "Neatkarīgi pārbaudīts"
+    },
+    "attestedAs": "apliecināja kā {role}",
+    "proofNote": "Katra rinda ir atsevišķs fakts. Iesniegušās organizācijas apliecinājums nav pasūtītāja apstiprinājums un nav samaksa, un neviens no šiem faktiem nav neatkarīga pārbaude, ja tas nav norādīts."
+  },
   "evidenceImport": {
     "records": {
       "periodDerivedHuman": "[EN] Period set at import (human choice) — the source stated no dates",
@@ -6892,7 +6935,8 @@
       "done": "Piešķirti ieraksti: {count}; jau bija piešķirti: {skipped}.",
       "refused": "Neizdevās saglabāt. Nekas nav mainīts.",
       "person": "{hours} h, {count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}"
-    }
+    },
+    "truncated": "Ierakstu ir vairāk, nekā nolasa viens skats. Rāda nolasītos {count}; kopsummas ietver tikai tos."
   },
   "workLifecycle": {
     "pending": "Vēl nav",
@@ -7064,5 +7108,47 @@
       "skills": "{count, plural, zero {# jūsu ierakstos balstītu prasmju} one {# jūsu ierakstos balstīta prasme} other {# jūsu ierakstos balstītas prasmes}}",
       "next": "Kur varat doties"
     }
+  },
+  "companyPerson": {
+    "eyebrow": "Vēsturiskā personas kartīte",
+    "back": "Cilvēki",
+    "badge": "Organizācijas sniegts, neatkarīgi nepārbaudīts",
+    "provenance": "Tas ir tas, ko {name} ir reģistrējusi par šo personu. Neviens cits to nav apstiprinājis, un tas nav atkarīgs no tā, vai personai ir konts.",
+    "claim": {
+      "unlinked": "Vēl nav saistīts ar kontu — vēsture jau ir reģistrēta šeit.",
+      "link_proposed": "Saistīšana ar kontu ir piedāvāta un gaida personas atbildi — vēsture jau ir reģistrēta šeit.",
+      "linked": "Saistīts ar pašas personas kontu.",
+      "openProfile": "Atvērt personas lapu"
+    },
+    "unavailable": "Šīs personas vēsturi pašlaik neizdevās nolasīt. Tas nenozīmē, ka tās nav.",
+    "empty": "Šai personai vēl nav vēstures ierakstu. Nolasīšana izdevās — to nav.",
+    "stats": {
+      "records": "Ieraksti",
+      "hours": "Stundas, kā norādīts",
+      "period": "Periods"
+    },
+    "noHours": "Ieraksti bez norādītām stundām: {count}. Nezināmas stundas netiek skaitītas kā nulle.",
+    "undated": "Ieraksti bez norādīta datuma: {count}. Tie paliek vēsturē zemāk.",
+    "periodApart": "{hours} h no kopsummas ir perioda kopsummas, turētas atsevišķi un nekad nesadalītas pa dienām vai mēnešiem.",
+    "noWorkObject": "Ieraksti, kas nav saistīti ar platformai zināmu projektu vai vietu: {count}. Tie paliek šajā vēsturē ar avota nosaukumu.",
+    "places": {
+      "title": "Pēc projekta vai vietas",
+      "none": "Projekts vai vieta nav reģistrēta",
+      "records": "Ieraksti: {count}"
+    },
+    "months": {
+      "title": "Norādītās stundas pa mēnešiem",
+      "note": "Tikai vienas dienas ieraksti. Perioda kopsummas nekad netiek sadalītas pa dienām vai mēnešiem."
+    },
+    "skills": {
+      "title": "Prasmes, uz kurām norāda vēsture",
+      "note": "Atvasināts no organizācijas vēstures, nepārbaudīts. Prasme ir norādīta, ja to nosaukusi pati organizācija; tas nav apgalvojums par personu.",
+      "records": "Ieraksti: {count}",
+      "empty": "Šajos ierakstos nav nosaukta neviena prasme.",
+      "unavailable": "Prasmju signālus pašlaik neizdevās nolasīt. Tas nenozīmē, ka to nav.",
+      "truncated": "Prasmju signālu ir vairāk, nekā nolasa šis skats."
+    },
+    "shown": "Rāda jaunākos {shown} no {total} ierakstiem. Pārējie paliek reģistrēti.",
+    "truncated": "Ierakstu ir vairāk, nekā nolasa viens skats. Rāda nolasītos {count}; kopsummas ietver tikai tos."
   }
 }

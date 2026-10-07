@@ -6,7 +6,7 @@ import {
   isEmployerContextFailure,
   requireEmployerCompany,
 } from "@/lib/company/employer-company-context";
-import { insertProjectForCompany } from "@/lib/projects/create-project-core";
+import { insertProjectForCompany, rollbackCreatedProject } from "@/lib/projects/create-project-core";
 import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
 import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
@@ -31,7 +31,14 @@ import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-
  */
 
 export type CreateProjectContextState =
-  | { ok: true }
+  | {
+      ok: true;
+      /** Persistence honesty (G-7): the PROJECT exists, but the optional
+       *  client row could not be saved and the project could not be rolled
+       *  back. Success is reported, the gap is named, and the form never
+       *  offers a blind retry (which would create a duplicate project). */
+      warning?: "client_not_saved";
+    }
   | {
       ok: false;
       /** `not_authorized` = the organization is real and the person is in it,
@@ -104,8 +111,15 @@ export async function createProjectContextAction(
 
   // Optional client record, linked to the just-created project. project_clients
   // is not in the generated Database type yet — cast (RLS still enforces
-  // can_manage_project). Best-effort: a client failure does not roll back the
-  // project; the owner can add a client later. No fake fallback row is written.
+  // can_manage_project). G-7 (persistence honesty): the project row is already
+  // committed when this runs, so a client failure must NEVER end as a plain
+  // `ok:false` — a retry would then create a DUPLICATE project. Either:
+  //   (a) the project, created seconds ago by THIS call and still empty, is
+  //       rolled back (compensating delete, verified by the returned row) and
+  //       the failure is reported — nothing persisted, retry is safe; or
+  //   (b) it cannot be removed (RLS / FK) — then success is reported WITH a
+  //       named warning (the project is real; the client is not) so the form
+  //       shows no retry. No fake fallback row is written either way.
   if (clientName) {
     const { error: clientError } = await (supabase as unknown as {
       from: (t: string) => {
@@ -115,9 +129,12 @@ export async function createProjectContextAction(
       .from("project_clients")
       .insert({ project_id: project.id, name: clientName });
     if (clientError) {
-      // Surface honestly but keep the created project; no silent fabrication.
+      const rolledBack = await rollbackCreatedProject(supabase, project.id);
       revalidatePath(`/${locale}/dashboard/company`);
-      return { ok: false, code: "error", message: clientError.message };
+      if (rolledBack) {
+        return { ok: false, code: "error", message: clientError.message };
+      }
+      return { ok: true, warning: "client_not_saved" };
     }
   }
 

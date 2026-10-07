@@ -178,9 +178,35 @@
       "too_large": "Optagelsen er for stor (maks. 25 MB).",
       "too_long": "Optagelsen er for lang (maks. 10 minutter).",
       "unavailable": "Transskriptionsserveren er ikke tilgængelig lige nu.",
-      "undecodable": "Lyden kunne ikke læses — prøv igen."
+      "undecodable": "Lyden kunne ikke læses — prøv igen.",
+      "rate_limited": "For mange optagelser på kort tid - vent lidt, og prøv igen.",
+      "token_expired": "Upload-sessionen er udløbet - prøv igen.",
+      "unauthorized": "Din session har ikke tilladelse til tale - log ind igen.",
+      "service_unreachable": "Transskriptionsserveren kunne ikke nås. Tjek forbindelsen og prøv igen; optagelsen bevares på denne side."
     },
-    "permissionDenied": "Mikrofonadgang blev blokeret. Tillad mikrofonen i browserindstillingerne, og prøv igen."
+    "permissionDenied": "Mikrofonadgang blev blokeret. Tillad mikrofonen i browserindstillingerne, og prøv igen.",
+    "disclosureProvenance": "Den gemte post markeres som indtalt og gennemgået af dig.",
+    "state": {
+      "ready": "Klar. Vælg talesprog, og start optagelsen.",
+      "permissionRequired": "Din browser beder om mikrofontilladelse, når du starter. Intet optages, før du tillader det.",
+      "policyBlocked": "Webstedets sikkerhedspolitik blokerer mikrofonen her. Stemmeoptagelse er ikke tilgængelig på denne side - du kan skrive posten som tekst.",
+      "unsupported": "Denne browser kan ikke optage lyd her (kræver en sikker side og understøttelse af mikrofonoptagelse). Du kan uploade en lydfil eller skrive tekst.",
+      "noDevice": "Der blev ikke fundet nogen mikrofon på denne enhed.",
+      "deviceBusy": "Mikrofonen bruges af en anden app. Luk den, og prøv igen.",
+      "cancelled": "Optagelsen er annulleret. Intet blev uploadet eller gemt.",
+      "requesting": "Venter på din tilladelse til mikrofonen...",
+      "interrupted": "Optagelsen er sat på pause, fordi siden var skjult. Fortsæt, når du er tilbage.",
+      "interruptedKept": "Mikrofonen stoppede, så optagelsen sluttede tidligt. Det optagne er transskriberet nedenfor - tjek det.",
+      "uploading": "Uploader din optagelse..."
+    },
+    "language": {
+      "label": "Talesprog",
+      "auto": "Registrer automatisk",
+      "hint": "Vælg det sprog, du taler - det behøver ikke matche sidens sprog."
+    },
+    "recordAgain": "Optag igen",
+    "announceStarted": "Optagelsen er startet",
+    "announceMinutes": "{minutes} min. optaget"
   },
   "statusExplainer": "Hvordan bruges dine poster?",
   "exampleLine": "For eksempel: jeg monterede gipsvægge, læste tegninger og arbejdede med et laserniveau.",

@@ -736,9 +736,13 @@ describe("the organization's hour records — a ledger beside the journal, never
       entries: journal,
       organizationRecords: imported,
     });
-    const { organizationRecords: a, organizationPeriodRecords: pa, checks: ca, ...restA } = without;
-    const { organizationRecords: b, organizationPeriodRecords: pb, checks: cb, ...restB } = withLedger;
+    const { organizationRecords: a, organizationPeriodRecords: pa, organizationContextRecords: xa, checks: ca, ...restA } = without;
+    const { organizationRecords: b, organizationPeriodRecords: pb, organizationContextRecords: xb, checks: cb, ...restB } = withLedger;
     expect(restB).toEqual(restA);
+    // the context pass-through follows the ledger too: UNKNOWN without it,
+    // and holds only records that carry a context (these carry none)
+    expect(xa).toBeNull();
+    expect(xb).toEqual([]);
     expect(a).toBeNull();
     // the period list follows the ledger: UNKNOWN with it, read-and-empty with it
     expect(pa).toBeNull();

@@ -4,17 +4,20 @@ import "server-only";
 import { outboundIntegrationUrl } from "@/lib/config/outbound-host-policy";
 import { readRequestHost } from "@/lib/config/request-host";
 import { env } from "@/lib/env";
+import { rateLimit } from "@/lib/security/rate-limit";
 import { createClient } from "@/lib/supabase/server";
-import { VOICE_ALLOWED_MIME, VOICE_MAX_BYTES } from "@/lib/voice/constants";
+import { VOICE_MAX_BYTES, VOICE_MAX_SECONDS } from "@/lib/voice/constants";
+import {
+  UPLOAD_TOKEN_TTL_SECONDS,
+  mintUploadToken,
+} from "@/lib/voice/upload-token";
 
 /**
  * VOICE_TRANSCRIBE_URL after the PRODUCTION host policy (2026-09-23): on the
- * production deployment a loopback / private / tunnel host — i.e. the service
- * running on somebody's workstation — is refused and the surface shows its
+ * production deployment a loopback / private / tunnel host - i.e. the service
+ * running on somebody's workstation - is refused and the surface shows its
  * honest "not configured" state. The host must be an always-on VM or
- * container service (services/transcribe/README.md § Deploy). Both callers
- * run inside a request, so the request's Host is the second production
- * evidence (2026-09-24) beside `VERCEL_ENV`.
+ * container service (services/transcribe/README.md § Deploy).
  */
 async function transcribeServiceUrl(): Promise<string | undefined> {
   return outboundIntegrationUrl(env.VOICE_TRANSCRIBE_URL, {
@@ -24,170 +27,100 @@ async function transcribeServiceUrl(): Promise<string | undefined> {
 }
 
 /**
- * Voice Work Journal — server-side transcription proxy.
+ * Voice Work Journal - UPLOAD SESSION (replaces the audio-proxy action).
  *
- * The browser records audio and posts it HERE (a server action). This action
- * forwards the bytes to the LabourMarket.ai-controlled self-hosted whisper.cpp
- * service (services/transcribe) over a bearer-token server-to-server call.
- * The browser never sees the service URL or token, and this module NEVER logs
- * transcript or audio content — only sizes, codes and durations.
+ * WHY THE AUDIO NO LONGER TRAVELS THROUGH THIS APP. The advertised recording
+ * is 25 MB / 10 minutes. A Server Action is capped at 5 MB (and the GLOBAL
+ * action limit must not be raised for one feature), and the platform caps any
+ * function request body at ~4.5 MB, so a 25 MB upload can only be honest if it
+ * goes straight from the browser to the transcription service.
+ *
+ * THE SECURITY MODEL IS PRESERVED, NOT WEAKENED:
+ *   - this action authenticates the person. ANY signed-in identity (worker,
+ *     employer, agency) may dictate: speech-to-text grants NO authority - what
+ *     the text then does is decided by the same chat spine and server-side
+ *     authority as typed text;
+ *   - the browser never receives the master secret: it receives a SHORT-LIVED
+ *     (120 s), SINGLE-USE, byte-bounded token signed with it, carrying only an
+ *     OPAQUE subject (no profile id leaves this app);
+ *   - the service accepts that token only from an exact allow-listed origin
+ *     and rate-limits per subject (services/transcribe/upload-auth.mjs);
+ *   - the raw audio is never stored by this app and is deleted by the service
+ *     as soon as the text is ready; nothing is logged but sizes and codes;
+ *   - minting is rate-limited per person.
  *
  * Honest degradation: when the service env is not configured the caller gets
- * `{ status: "unavailable" }` and the UI shows the truthful "not configured"
- * state. Nothing is simulated, nothing is invented.
- *
- * NO DATABASE WRITE happens here — the reviewed transcript flows into the
- * existing canonical journal composer (createJournalEntry) only after the
- * worker explicitly confirms. Voice job persistence (history, provenance,
- * idempotent confirmation) arrives with the separately gated
- * voice_journal_jobs migration (PR L) and stays absent until the owner
- * applies it.
+ * `{ status: "unavailable" }` and the UI shows the truthful state. Nothing is
+ * simulated. NO DATABASE WRITE happens here; the reviewed transcript reaches
+ * the canonical journal only after the worker's explicit confirmation.
  */
 
-const ALLOWED_MIME = new Set<string>(VOICE_ALLOWED_MIME);
-
-const ALLOWED_LANG = new Set([
-  "auto",
-  "lt",
-  "en",
-  "ru",
-  "nl",
-  "de",
-  "pl",
-  "lv",
-  "et",
-  "da",
-  "no",
-  "sv",
-  "fi",
-]);
-
-const REQUEST_TIMEOUT_MS = 180_000;
-
-export type VoiceTranscribeResult =
+export type VoiceUploadSession =
   | {
       status: "ok";
-      transcript: string;
-      language: string;
-      durationSeconds: number;
+      /** Absolute URL of the service's transcribe endpoint (no secret in it). */
+      uploadUrl: string;
+      token: string;
+      /** Unix seconds. */
+      expiresAt: number;
+      maxBytes: number;
+      maxSeconds: number;
     }
   | { status: "unavailable" }
   | {
       status: "error";
       code:
         | "not_authenticated"
-        | "no_worker_profile"
-        | "bad_mime"
-        | "too_large"
-        | "too_long"
-        | "empty"
-        | "undecodable"
-        | "engine_failed"
-        | "timeout"
+        | "rate_limited"
         | "internal";
     };
 
 /** True when the owner has configured the self-hosted transcription service.
- *  Server-only probe for the page shell — reveals nothing about the service. */
+ *  Server-only probe for the page shell - reveals nothing about the service. */
 export async function isVoiceTranscriptionConfigured(): Promise<boolean> {
   return Boolean((await transcribeServiceUrl()) && env.VOICE_TRANSCRIBE_TOKEN);
 }
 
-export async function transcribeVoiceRecording(
-  formData: FormData,
-): Promise<VoiceTranscribeResult> {
+export async function createVoiceUploadSession(): Promise<VoiceUploadSession> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { status: "error", code: "not_authenticated" };
 
-  const { data: worker } = await supabase
-    .from("workers")
-    .select("id")
-    .eq("profile_id", user.id)
-    .maybeSingle();
-  if (!worker) return { status: "error", code: "no_worker_profile" };
-
   const url = await transcribeServiceUrl();
-  const token = env.VOICE_TRANSCRIBE_TOKEN;
-  if (!url || !token) return { status: "unavailable" };
+  const secret = env.VOICE_TRANSCRIBE_TOKEN;
+  if (!url || !secret) return { status: "unavailable" };
 
-  const audio = formData.get("audio");
-  if (!(audio instanceof Blob) || audio.size === 0) {
-    return { status: "error", code: "empty" };
+  // A person records a handful of times a day; this only stops a loop.
+  if (
+    rateLimit({
+      name: "voice_upload_session",
+      key: user.id,
+      limit: 30,
+      windowMs: 10 * 60_000,
+    }).limited
+  ) {
+    return { status: "error", code: "rate_limited" };
   }
-  if (audio.size > VOICE_MAX_BYTES) {
-    return { status: "error", code: "too_large" };
-  }
-  const mime = (audio.type || "").split(";")[0].trim().toLowerCase();
-  if (!ALLOWED_MIME.has(mime)) {
-    return { status: "error", code: "bad_mime" };
-  }
-  const langRaw = String(formData.get("language") ?? "auto").toLowerCase();
-  const language = ALLOWED_LANG.has(langRaw) ? langRaw : "auto";
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
-    const res = await fetch(
-      `${url.replace(/\/$/, "")}/v1/transcribe?language=${language}`,
-      {
-        method: "POST",
-        headers: {
-          authorization: `Bearer ${token}`,
-          "content-type": mime,
-        },
-        body: Buffer.from(await audio.arrayBuffer()),
-        signal: controller.signal,
-        cache: "no-store",
-      },
-    );
-    if (!res.ok) {
-      let code: string | null = null;
-      try {
-        code = ((await res.json()) as { code?: string }).code ?? null;
-      } catch {
-        code = null;
-      }
-      const known = [
-        "bad_mime",
-        "too_large",
-        "too_long",
-        "empty",
-        "undecodable",
-        "engine_failed",
-      ] as const;
-      const mapped =
-        known.find((k) => k === code) ?? ("engine_failed" as const);
-      console.error(
-        `[voice] transcribe failed http=${res.status} code=${mapped} bytes=${audio.size}`,
-      );
-      return { status: "error", code: mapped };
-    }
-    const body = (await res.json()) as {
-      transcript?: string;
-      language?: string;
-      durationSeconds?: number;
-    };
-    const transcript = String(body.transcript ?? "").trim();
-    if (!transcript) return { status: "error", code: "empty" };
-    console.log(
-      `[voice] transcribe ok bytes=${audio.size} durS=${body.durationSeconds ?? "?"}`,
-    );
+    const { token, claims } = mintUploadToken({
+      secret,
+      profileId: user.id,
+      maxBytes: VOICE_MAX_BYTES,
+      ttlSeconds: UPLOAD_TOKEN_TTL_SECONDS,
+    });
     return {
       status: "ok",
-      transcript,
-      language: String(body.language ?? language),
-      durationSeconds: Number(body.durationSeconds ?? 0),
+      uploadUrl: `${url.replace(/\/$/, "")}/v1/transcribe`,
+      token,
+      expiresAt: claims.exp,
+      maxBytes: VOICE_MAX_BYTES,
+      maxSeconds: VOICE_MAX_SECONDS,
     };
-  } catch (e) {
-    const aborted = e instanceof Error && e.name === "AbortError";
-    console.error(
-      `[voice] transcribe ${aborted ? "timeout" : "network error"} bytes=${audio.size}`,
-    );
-    return { status: "error", code: aborted ? "timeout" : "internal" };
-  } finally {
-    clearTimeout(timer);
+  } catch {
+    console.error("[voice] upload session mint failed");
+    return { status: "error", code: "internal" };
   }
 }

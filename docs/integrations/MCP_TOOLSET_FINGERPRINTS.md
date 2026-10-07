@@ -18,7 +18,10 @@ equals the version the tree publishes.
 
 | Fingerprint | Tools | Release | What changed |
 |---|---|---|---|
+| `0.1.0+t63.f2d9c2d1` | 63 | voice journal recovery (ported from #2163 onto main) | journal_create_* input gains optional `voice` {language, disclosureVersion} provenance (input-origin label only; no authority, same schema and confirmation; no tool added) |
+| `0.1.0+t63.8ccad476` | 63 | file-import PR (#2012, merged over the t62 attest/withdraw release) | +evidence_import_stage_file (ChatGPT file argument → the existing audited reader → `stageImportSource`; first tool with `_meta["openai/fileParams"]`) |
 | `0.1.0+t62.142b9ca5` | 62 | evidence attest/withdraw PR | evidence_record_attest -> evidence_record_attest_draft/confirm; evidence_import_withdraw -> evidence_import_withdraw_draft/confirm (draft->confirm; the two direct-write tools are removed); server `instructions` now name the single-step exceptions |
+| `0.1.0+t61.f62b81d8` | 61 | file-import PR, branch-local before merging main (superseded by t63) | +evidence_import_stage_file (ChatGPT file argument → the existing audited reader → `stageImportSource`; first tool with `_meta["openai/fileParams"]`) |
 | `0.1.0+t60.bd088b58` | 60 | #2103 | journal_create_* gain optional project_id / not_project_work + project_required refusal with choices (no tool added) |
 | `0.1.0+t60.eaa3316a` | 60 | messaging PR | +conversation_list, conversation_get, message_send_draft, message_send_confirm |
 | `0.1.0+t56.a895a20a` | 56 | #2004 | +company_ingest_preview, company_ingest_confirm (marketplace_company_ingest capability) |
