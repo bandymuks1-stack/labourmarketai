@@ -3948,7 +3948,9 @@
       "check_email_body": "Išsiuntėme patvirtinimo nuorodą adresu {email}. Atidarykite ją, kad užbaigtumėte registraciją. Jei laiško nematote — patikrinkite šlamšto aplanką; naujos nuorodos galėsite paprašyti čia.",
       "resend_label": "Siųsti nuorodą dar kartą",
       "resend_sent": "Išsiųsta dar kartą. Patikrinkite pašto dėžutę ir šlamšto aplanką.",
-      "resend_wait": "Naujos nuorodos galėsite paprašyti po {seconds} s."
+      "resend_wait": "Naujos nuorodos galėsite paprašyti po {seconds} s.",
+      "invited_email_note": "Tai adresas, kuriuo gavote kvietimą.",
+      "show_password": "Rodyti slaptažodį"
     },
     "login": {
       "headline": "Prisijungti",
@@ -7379,6 +7381,7 @@
     "outcomeLinked": "Sujungta. Dabar esate prijungti.",
     "outcomeAlreadyLinked": "Jau esate sujungti.",
     "outcomeNoInvitation": "Pakvietimas nerastas.",
+    "outcomeEmailUnverified": "Pirmiausia patvirtinkite el. paštą (puslapyje „Ryšiai“), tada priimkite pakvietimą.",
     "outcomeNoWorker": "Jūsų darbuotojo profilis dar neparuoštas.",
     "outcomeError": "Nepavyko priimti. Bandykite dar kartą.",
     "outcomeNeedsMigration": "Šios funkcijos dar neįjungėme."
@@ -11689,7 +11692,22 @@
         "declined": "Kvietimas atmestas.",
         "no_worker_profile": "Pirmiausia susikurkite darbuotojo profilį, tada priimkite kvietimą.",
         "not_found": "Kvietimas nerastas.",
-        "error": "Nepavyko. Bandykite dar kartą."
+        "error": "Nepavyko. Bandykite dar kartą.",
+        "email_unverified": "Pirmiausia patvirtinkite el. paštą, tada priimkite pakvietimą."
+      },
+      "verify": {
+        "title": "Patvirtinkite el. paštą, kad matytumėte jam skirtus pakvietimus",
+        "body": "Pakvietimai, adresuoti el. pašto adresui, rodomi tik tam, kas gali atidaryti tą pašto dėžutę. Visa kita jūsų paskyroje veikia kaip veikė; tai reikalinga tik šiems pakvietimams matyti ar priimti.",
+        "send": "Atsiųskite man vienkartinę nuorodą",
+        "sending": "Siunčiama…",
+        "sent": "Išsiuntėme vienkartinę nuorodą adresu {email}. Atidarykite ją šiame įrenginyje, kad užbaigtumėte.",
+        "sentNoAddress": "Išsiuntėme vienkartinę nuorodą jūsų el. pašto adresu. Atidarykite ją šiame įrenginyje, kad užbaigtumėte.",
+        "rateLimited": "Nuoroda išsiųsta prieš akimirką. Palaukite minutę, prieš prašydami kitos.",
+        "alreadyVerified": "Šis el. pašto adresas jau patvirtintas. Atnaujinkite puslapį.",
+        "failed": "Ši nuoroda nepatvirtino jūsų el. pašto (galbūt sena arba atidaryta kitur). Galite paprašyti naujos.",
+        "error": "Nepavyko išsiųsti nuorodos. Bandykite vėliau.",
+        "intakeTitle": "Patvirtinkite el. paštą, kad tęstumėte ankstesnį pateikimą",
+        "intakeBody": "Jei per viešą formą pateikėte įmonės poreikį šiuo adresu, patvirtinkite adresą ir mes jį parodysime čia, kad nereikėtų rašyti iš naujo. Visa kita veikia kaip veikė."
       }
     },
     "search": {
@@ -11885,6 +11903,7 @@
         "revoked": "Kvietimas atšauktas.",
         "declined": "Kvietimas atmestas.",
         "no_worker_profile": "Pirmiausia susikurkite darbuotojo profilį, tada priimkite kvietimą.",
+        "email_mismatch": "Šis kvietimas adresuotas kitam el. pašto adresui.",
         "not_found": "Kvietimas nerastas.",
         "error": "Nepavyko. Bandykite dar kartą.",
         "exhausted": "Visos vietos užimtos.",
@@ -11907,7 +11926,13 @@
       "agencyClient": "Personalo agentūra kviečia jūsų įmonę bendradarbiauti kaip jos klientą.",
       "agencyClientNext": "Priėmus kvietimą, ryšio prašymas atsiras jūsų organizacijos puslapyje „Klientai ir partneriai“ — ten patvirtinkite jį savo įmonės vardu. Kol to nepadarysite, niekuo nesidalinama.",
       "addressedToOther": "Šis kvietimas adresuotas {email}. Esate prisijungę kitu adresu, todėl iš šios paskyros ryšio patvirtinti negalima — prisijunkite pakviestuoju adresu ir dar kartą atverkite šią nuorodą.",
-      "switchAccount": "Atsijungti ir pakeisti paskyrą"
+      "switchAccount": "Atsijungti ir pakeisti paskyrą",
+      "emailMismatch": {
+        "title": "Šis kvietimas skirtas kitam el. pašto adresui",
+        "body": "Šis kvietimas išsiųstas adresu {email}. Esate prisijungę kitu adresu, todėl iš šios paskyros jo parodyti ar į jį atsakyti negalima. Prisijunkite pakviestuoju adresu ir dar kartą atverkite šią nuorodą.",
+        "bodyNoHint": "Šis kvietimas išsiųstas kitu el. pašto adresu nei tas, kuriuo esate prisijungę, todėl iš šios paskyros jo parodyti ar į jį atsakyti negalima. Prisijunkite pakviestuoju adresu ir dar kartą atverkite šią nuorodą.",
+        "untouched": "Niekas nebuvo priimta ar pakeista. Kvietimas vis dar laukia to, kam jis buvo išsiųstas."
+      }
     },
     "teamEnquiriesTitle": "Mano užklausos komandoms",
     "admin": {
