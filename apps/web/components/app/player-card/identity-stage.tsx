@@ -1,11 +1,8 @@
 import type { ReactNode } from "react";
-import { MapPin } from "lucide-react";
+import { CircleDashed, MapPin } from "lucide-react";
 
-import {
-  PLAYER_AVATAR_PX,
-  PLAYER_IDENTITY_AVATAR_BORDER,
-  PLAYER_IDENTITY_FALLBACK_SURFACE,
-} from "@/lib/identity/player-identity";
+import { PLAYER_AVATAR_PX } from "@/lib/identity/player-identity";
+import { PersonPortrait } from "@/components/app/identity/person-portrait";
 import { cn } from "@/lib/utils";
 
 /**
@@ -35,8 +32,10 @@ import { cn } from "@/lib/utils";
  */
 
 export interface IdentityFact {
-  /** The figure, already formatted ("1 284"). */
-  readonly value: string;
+  /** The figure, already formatted ("1 284"). `null` = the fact is ABSENT
+   *  (not provided / not yet confirmed / no recorded evidence): shown as a
+   *  dashed state in words, never as 0 — UNKNOWN is not zero (SEP-7). */
+  readonly value: string | null;
   /** Its unit/meaning in words ("val. užfiksuota"). */
   readonly label: string;
   /** Visual role: recorded work is evidence (cyan); confirmed is trust green. */
@@ -115,42 +114,13 @@ export function IdentityStage({
         {/* ── THE PERSON ───────────────────────────────────────────────── */}
         <div className="identity-stage-person flex items-stretch gap-3 sm:row-span-2">
           {edge}
-          <div
-            className="identity-portrait relative shrink-0 overflow-hidden rounded-xl"
-            style={{ width: `clamp(96px, 30vw, ${px}px)`, aspectRatio: "4 / 5" }}
-          >
-            {avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={avatarUrl}
-                alt={name}
-                data-testid={avatarTestids.photo}
-                loading="lazy"
-                className={cn("h-full w-full object-cover", PLAYER_IDENTITY_AVATAR_BORDER, "rounded-xl")}
-              />
-            ) : (
-              <span
-                aria-hidden
-                data-testid={avatarTestids.monogram}
-                className={cn(
-                  "flex h-full w-full items-center justify-center rounded-xl font-display text-3xl font-bold tracking-tightest sm:text-6xl",
-                  PLAYER_IDENTITY_FALLBACK_SURFACE,
-                  PLAYER_IDENTITY_AVATAR_BORDER,
-                )}
-              >
-                {initials}
-              </span>
-            )}
-            {/* A lit edge on the portrait — the premium lighting treatment. */}
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 rounded-b-xl bg-gradient-to-t from-ink-900/60 to-transparent"
-            />
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-ink-500/60"
-            />
-          </div>
+          <PersonPortrait
+            name={name}
+            avatarUrl={avatarUrl}
+            initials={initials}
+            width={`clamp(96px, 30vw, ${px}px)`}
+            testids={avatarTestids}
+          />
         </div>
 
         {/* ── WHO, WHAT, WHERE, NOW ───────────────────────────────────── */}
@@ -219,26 +189,52 @@ export function IdentityStage({
           {children}
 
           {facts.length > 0 ? (
-            <dl
-              className="mt-auto grid grid-cols-3 gap-2 border-t border-ink-600/70 pt-3 sm:gap-4"
-              data-testid="identity-stage-facts"
-            >
-              {facts.map((f) => (
-                <div key={f.testid} className="flex min-w-0 flex-col gap-0.5" data-testid={f.testid}>
-                  <dt className="order-2 min-w-0 break-words font-mono text-[0.625rem] uppercase tracking-label text-text-muted sm:text-meta">
-                    {f.label}
-                  </dt>
-                  <dd
-                    className={cn(
-                      "order-1 font-display text-2xl font-bold leading-none tracking-tightest tabular-nums sm:text-3xl",
-                      FACT_TONE[f.tone],
-                    )}
-                  >
-                    {f.value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
+            <div className="mt-auto flex flex-col gap-3 border-t border-ink-600/70 pt-3" data-testid="identity-stage-facts">
+              {/* Figures keep their grid; ABSENT states (not provided / not yet
+                  confirmed / no records) get their own row so they can wrap
+                  freely and can never collide with a number (phone, 2026-10-02). */}
+              {facts.some((f) => f.value !== null) ? (
+                <dl
+                  className="grid gap-2 sm:gap-4"
+                  style={{ gridTemplateColumns: `repeat(${Math.min(3, facts.filter((f) => f.value !== null).length)}, minmax(0, 1fr))` }}
+                >
+                  {facts
+                    .filter((f) => f.value !== null)
+                    .map((f) => (
+                      <div key={f.testid} className="flex min-w-0 flex-col gap-0.5" data-testid={f.testid}>
+                        <dt className="order-2 min-w-0 break-words font-mono text-[0.625rem] uppercase tracking-label text-text-muted sm:text-meta">
+                          {f.label}
+                        </dt>
+                        <dd
+                          className={cn(
+                            "order-1 font-display text-2xl font-bold leading-none tracking-tightest tabular-nums sm:text-3xl",
+                            FACT_TONE[f.tone],
+                          )}
+                        >
+                          {f.value}
+                        </dd>
+                      </div>
+                    ))}
+                </dl>
+              ) : null}
+              {facts.some((f) => f.value === null) ? (
+                <ul className="flex flex-wrap gap-2" data-testid="identity-stage-absent">
+                  {facts
+                    .filter((f) => f.value === null)
+                    .map((f) => (
+                      <li
+                        key={f.testid}
+                        data-testid={f.testid}
+                        data-absent="true"
+                        className="inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-md border border-dashed border-ink-500 px-2 py-1 font-mono text-[0.625rem] uppercase tracking-label text-text-secondary sm:text-meta"
+                      >
+                        <CircleDashed className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
+                        <span className="min-w-0 break-words">{f.label}</span>
+                      </li>
+                    ))}
+                </ul>
+              ) : null}
+            </div>
           ) : null}
         </div>
       </div>

@@ -228,7 +228,7 @@ describe("Silent-trust: worker-facing learning copy is neutral (manager.* exclud
 
 describe("Silent-trust: self-view surfaces carry no certification visual token", () => {
   const card = read("components/app/worker-player-card.tsx");
-  const map = read("components/app/market-map/location-map.tsx");
+  const map = read("components/app/market-map/own-location-layer.ts");
   const trust = read("components/app/trust-block.tsx");
   const strip = read("components/app/evidence-status-strip.tsx");
   const cv = read("app/[locale]/cv/page.tsx");

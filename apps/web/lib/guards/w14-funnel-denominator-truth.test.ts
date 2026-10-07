@@ -206,6 +206,10 @@ describe("W14 — counts stay honest about what they are", () => {
     // A stage with no events reads 0, not absent — an absent row would hide
     // the fact that the stage is instrumented and simply never fired.
     expect(out.counts.length).toBeGreaterThan(1);
-    expect(out.counts.every((c) => typeof c.count === "number")).toBe(true);
+    expect(
+      out.counts
+        .filter((c) => c.measurement === "measured")
+        .every((c) => typeof c.count === "number"),
+    ).toBe(true);
   });
 });

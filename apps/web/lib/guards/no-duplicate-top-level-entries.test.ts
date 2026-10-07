@@ -75,7 +75,10 @@ describe("admin stays reachable but does not dominate navigation", () => {
 describe("one canonical market map (no separate/competing map products)", () => {
   it("the market-map page mounts exactly one map engine", () => {
     const page = read("app/[locale]/dashboard/market-map/page.tsx");
-    expect((page.match(/<MarketMapBase\b/g) ?? []).length).toBe(1);
+    // ONE map: the canonical <MarketMap> is mounted through WorldDiscovery;
+    // no second map component (the former MarketMapBase picker) is rendered.
+    expect((page.match(/<WorldDiscovery\b/g) ?? []).length).toBe(1);
+    expect(page).not.toMatch(/<MarketMapBase\b/);
   });
 
   it("/dashboard/marketplace redirects to the one map (not a competing surface)", () => {

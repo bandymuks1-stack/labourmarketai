@@ -30,13 +30,16 @@ describe("empty states lead somewhere", () => {
     for (const l of LOCALES) expect(at(msgs[l], "communication.emptyCta"), l).toBeTruthy();
   });
 
-  it("an empty pool on the map offers to change the work looked for", () => {
+  it("an empty vacancy pool is no longer a zero-block on the map — it simply offers no layer", () => {
+    // One-canonical-map: "N open positions: none" with a profile CTA was a
+    // zero-diagnostic block under the map. The vacancy layer now exists only
+    // when the viewer's occupation has advertisements (UNKNOWN is not zero);
+    // the opportunities door stays one chip away. The profile anchor the old
+    // CTA pointed at must still exist for the other surfaces that use it.
     const src = read("app/[locale]/dashboard/market-map/page.tsx");
-    expect(src).toMatch(/data-testid="market-map-vacancy-volume-none-cta"/);
-    // An anchor that EXISTS: the work directions are edited inside the
-    // profile's `#profile-edit` disclosure (there is no `#work-directions`).
-    expect(src).toMatch(/href="\/dashboard\/profile#profile-edit"/);
-    expect(src).not.toMatch(/#work-directions/);
+    expect(src).not.toMatch(/market-map-vacancy-volume-none/);
+    expect(src).toMatch(/vacancyVolume\.kind === "ok"/);
+    expect(src).toMatch(/connection-?|market-map-connection/);
     expect(read("app/[locale]/dashboard/profile/page.tsx")).toMatch(/<details\s+id="profile-edit"/);
     for (const l of LOCALES) expect(at(msgs[l], "marketExplanation.noneOpenCta"), l).toBeTruthy();
   });

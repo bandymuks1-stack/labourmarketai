@@ -1,3 +1,4 @@
+import { actsAsAgency } from "@/lib/company/agency-capability";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -17,6 +18,7 @@ import {
 } from "@/lib/company/company-workers";
 import { getOrgMembersData } from "@/lib/operations/org-members";
 import { getTeamBrigadesData } from "@/lib/company/team-brigades";
+import { listManagedProjects } from "@/lib/projects/projects";
 import { getWorkerReadiness } from "@/lib/company/worker-readiness";
 import { getManagerEvidence } from "@/lib/operations/manager-evidence";
 import {
@@ -31,9 +33,16 @@ import {
   readOrgMembersLabels,
   readWorkersLabels,
 } from "@/lib/company/company-section-labels";
+import { whoIsAvailableCore } from "@/lib/conversation/capacity-core";
+import { derivePeopleTeamState } from "@/lib/company/people-team-state";
+import { createUtcFormatter } from "@/lib/time/display";
+import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import { listBookedPeople } from "@/lib/company/booked-people";
 import { BookedPeopleSection } from "@/components/app/booked-people-section";
-import { CompanyWorkersSection } from "@/components/app/company-workers-section";
+import {
+  CompanyWorkersSection,
+  type CompanyWorkersTeamView,
+} from "@/components/app/company-workers-section";
 import { TeamRecordedWork } from "@/components/app/organization/team-recorded-work";
 import { TeamBrigadesPanel } from "@/components/app/team-brigades-panel";
 import { TeamRosterEmptyState } from "@/components/app/team-roster-empty-state";
@@ -95,7 +104,6 @@ export default async function CompanyPeoplePage({
       </div>
     );
   }
-  const isStaffingAgency = companyRow.companyType === "staffing_agency";
   // `manage-invitations` (owner direction 2026-09-24): owner/admin, never a
   // job title. Without it the invitations are not read at all — the database
   // would answer zero rows, which is not "nobody is invited" — and the page
@@ -107,6 +115,16 @@ export default async function CompanyPeoplePage({
       isCreator: employerCtx.isCreator,
       invitationDelegate: employerCtx.invitationDelegate,
     }).canManageInvitations;
+  // Operational roles are an owner/admin write (`assign_company_worker_role`
+  // is `owns_company`; the action refuses anyone else). A manager used to be
+  // shown the form and answered "could not save" - the button is not offered
+  // to someone the database will refuse.
+  const canAssignRoles =
+    employerCtx.kind === "ok" &&
+    projectOrganizationAuthority({
+      role: employerCtx.role,
+      isCreator: employerCtx.isCreator,
+    }).canGovern;
 
   const orgContext = await getActiveOrganizationContext();
   const capabilityOrgId =
@@ -116,14 +134,17 @@ export default async function CompanyPeoplePage({
   const declaredCapabilities = capabilityOrgId
     ? await readOrganizationCapabilities(capabilityOrgId)
     : [];
+  // ORG-2: the ONE agency rule (type OR declared workforce role).
+  const isStaffingAgency = actsAsAgency(companyRow.companyType, declaredCapabilities);
 
-  const [rWorkers, rInvitations, orgMembers, teamBrigades, managerEvidence] =
+  const [rWorkers, rInvitations, orgMembers, teamBrigades, managerEvidence, managedProjects] =
     await Promise.all([
       listActiveCompanyWorkers(companyRow.id),
       canManageInvitations ? listCompanyWorkerInvitations(companyRow.id) : null,
       getOrgMembersData("company", companyRow.id),
       getTeamBrigadesData(),
       getManagerEvidence(),
+      listManagedProjects(),
     ]);
   const workersResult = rWorkers ?? ({ kind: "ok", rows: [] } as const);
   const invitationsResult = rInvitations ?? ({ kind: "ok", rows: [] } as const);
@@ -134,6 +155,43 @@ export default async function CompanyPeoplePage({
   const engagementCandidates = capabilityOrgId
     ? await listRosterLinkCandidatesFromEngagements(await createClient(), capabilityOrgId)
     : [];
+  // The team's STATE (free / working / away) is the ONE capacity read the chat,
+  // the home and the planning page already use — handed the roster read above so
+  // the roster is not queried twice, for today, every person. A failed read says
+  // nothing about anyone (unknown is not zero).
+  const teamState = derivePeopleTeamState(
+    await whoIsAvailableCore(
+      companyRow.id,
+      null,
+      { roster: workersResult },
+      new Date().toISOString().slice(0, 10),
+      500,
+    ),
+  );
+  const tTeam = await getTranslations("roleDashboards.company.workers.team");
+  const dayFmt = createUtcFormatter(locale, { day: "numeric", month: "short" });
+  const teamView: CompanyWorkersTeamView = {
+    counts: teamState.counts,
+    byWorker: Object.fromEntries(
+      Object.entries(teamState.byWorker).map(([id, r]) => {
+        const date = r.until ? (dayFmt(r.until) ?? r.until) : null;
+        const text =
+          r.state === "free"
+            ? tTeam("free")
+            : r.state === "away"
+              ? date
+                ? tTeam("awayUntil", { date })
+                : tTeam("away")
+              : [
+                  r.project ? tTeam("workingOn", { project: r.project }) : tTeam("working"),
+                  date ? tTeam("until", { date }) : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ");
+        return [id, { state: r.state, text }] as const;
+      }),
+    ),
+  };
   const readinessMap = await getWorkerReadiness(activeWorkerRows.map((w) => w.workerId));
   // The team's PHOTOS (owner D1, 2026-09-30): an ACTIVE company_workers row is
   // a real work relationship, which the one photo rule
@@ -145,6 +203,18 @@ export default async function CompanyPeoplePage({
         async (w) => [w.workerId, await getAvatarForVisibleWorker(w.workerId)] as const,
       ),
     ),
+  );
+  // What each person DOES: the canonical profession read (registry slug via the
+  // catalogue, or their own words exactly as typed), primary first. Names are
+  // resolved here so the client section receives plain strings.
+  const tProf = await getTranslations("professions");
+  const professionsByWorker: Record<string, string[]> = Object.fromEntries(
+    activeWorkerRows.map((w) => [
+      w.workerId,
+      w.professions
+        .map((e) => professionDisplayName(e, (slug) => (tProf.has(slug) ? tProf(slug) : null)))
+        .filter((n): n is string => !!n),
+    ]),
   );
   // Booked people (R-2 GREEN half): the direct-booking relationship, visible
   // beside the roster it is not part of, with its honest journal state. The
@@ -216,9 +286,11 @@ export default async function CompanyPeoplePage({
           invitationsResult={invitationsResult}
           labels={workersLabels}
           avatarByWorker={avatarByWorker}
+          professionsByWorker={professionsByWorker}
           roleCoordinationEnabled={isOperationsRoleEnabled("foreman")}
-          canAssignRoles
+          canAssignRoles={canAssignRoles}
           canManageInvitations={canManageInvitations}
+          team={teamView}
           reviewElsewhere={
             orgMembers ? { href: "#org-members", label: orgMembersLabels.title } : undefined
           }
@@ -265,6 +337,9 @@ export default async function CompanyPeoplePage({
           invitationsApplied={teamBrigades.invitationsApplied}
           detailsApplied={teamBrigades.detailsApplied}
           enquiriesApplied={teamBrigades.enquiriesApplied}
+          projects={managedProjects
+            .filter((p) => p.status !== "completed")
+            .map((p) => ({ id: p.id, title: p.title }))}
         />
       ) : (
         <TeamRosterEmptyState variant={isStaffingAgency ? "agency" : "company"} />

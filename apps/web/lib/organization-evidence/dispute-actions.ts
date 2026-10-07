@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { withdrawEvidenceRecordDispute } from "@/lib/organization-evidence/import-core";
 
 // The evidence-import tables postdate the generated `Database` types — the
 // same `asAny` escape `import-core.ts` uses for every one of them. It is a
@@ -136,4 +137,65 @@ export async function disputeEvidenceRecordAction(
 
   revalidatePath("/[locale]/dashboard/profile", "page");
   return { ok: true };
+}
+
+export type WithdrawEvidenceContestResult =
+  | {
+      readonly ok: true;
+      /** False when nothing of the caller's stood: the withdrawal was an
+       *  idempotent no-op, and the honest answer is "no contest of yours". */
+      readonly withdrawn: boolean;
+    }
+  | {
+      readonly ok: false;
+      readonly code:
+        | "auth"
+        | "invalid"
+        | "not_allowed"
+        | "needs_migration"
+        | "error";
+    };
+
+/**
+ * "I WITHDRAW MY OBJECTION" - the way back from a contest.
+ *
+ * Appends a `dispute_withdrawn` event through the SECURITY DEFINER RPC (no
+ * policy admits a subject to write that event type directly). The earlier
+ * `disputed` event stays: a withdrawal ends the STANDING of the contest, it
+ * never erases the fact that the contest existed. Re-contesting afterwards is
+ * the ordinary dispute action again. The RPC is idempotent and re-checks
+ * subject authority itself; this action re-derives the caller and sends only
+ * the record id and the person's own words.
+ */
+export async function withdrawEvidenceContestAction(
+  _previous: WithdrawEvidenceContestResult | null,
+  form: FormData,
+): Promise<WithdrawEvidenceContestResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, code: "auth" };
+
+  const recordId = String(form.get("record_id") ?? "").trim();
+  if (recordId === "") return { ok: false, code: "invalid" };
+  const note = String(form.get("note") ?? "").trim();
+  if (note.length > 1000) return { ok: false, code: "invalid" };
+
+  const res = await withdrawEvidenceRecordDispute(
+    { supabase, userId: user.id },
+    { recordId, note: note === "" ? null : note },
+  );
+  if (res.kind !== "ok") {
+    if (res.kind === "needs-migration") return { ok: false, code: "needs_migration" };
+    if (res.kind === "invalid") {
+      return res.problems.includes("not_subject")
+        ? { ok: false, code: "not_allowed" }
+        : { ok: false, code: "invalid" };
+    }
+    return { ok: false, code: "error" };
+  }
+
+  revalidatePath("/[locale]/dashboard/profile", "page");
+  return { ok: true, withdrawn: res.withdrawn };
 }

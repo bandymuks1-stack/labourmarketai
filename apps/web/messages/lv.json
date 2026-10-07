@@ -223,7 +223,10 @@
           "error": "[EN] Couldn't send. Please try again.",
           "progressHelper": "[EN] These steps show progress. Active actions are shown below.",
           "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
-          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
+          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
+          "openNeedUsage": "Active positions: {used} of {limit} used · {remaining} remaining",
+          "openNeedUsageUpgradeCta": "Activate the Organization plan",
+          "openNeedUsageIndividual": "You have reached the Organization plan limit. For more than the included positions, contact us for an individual plan."
         }
       },
       "account": {
@@ -391,6 +394,11 @@
         "event_weekly_digest": "Tavs nedēļas darba un iespēju kopsavilkums ir gatavs",
         "event_saved_search_match": "Saglabātajā meklējumā ir jauni rezultāti",
         "event_job_alert": "Parādījies jauns darbs, kas atbilst taviem kritērijiem",
+        "event_message_received": "Tev ir jauna ziņa",
+        "event_journal_review_decided": "Tavs darba žurnāla ieraksts ir pārskatīts",
+        "event_journal_review_decided_approved": "Tavs darba žurnāla ieraksts ir apstiprināts",
+        "event_journal_review_decided_rejected": "Tavs darba žurnāla ieraksts ir noraidīts",
+        "event_journal_review_decided_changes_requested": "Tavā darba žurnāla ierakstā pieprasītas izmaiņas",
         "event_weekly_digest_profile_completion": "Lai parādītu tev piemērotus darbus, apstiprini, kādu darbu tu dari",
         "event_weekly_digest_journal": "Sagatavots tavas nedēļas darba žurnāla pārskats"
       },
@@ -1272,7 +1280,7 @@
         },
         {
           "desc": "[EN] Completed work strengthens your proof and readiness.",
-          "title": "[EN] Work, earn, level up"
+          "title": "[EN] Work, earn, build your record"
         }
       ]
     },
@@ -1933,7 +1941,8 @@
         "paused": "Apturēts",
         "completed": "Pabeigts"
       },
-      "progressNone": "Izmērāma progresa vēl nav"
+      "progressNone": "Izmērāma progresa vēl nav",
+      "progressStages": "{done} no {total} posmiem atzīmēti kā pabeigti"
     },
     "pulse": {
       "pendingTitle": "[EN] {n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
@@ -1971,6 +1980,15 @@
       "noActivity": "[EN] No entries yet.",
       "emptyTeam": "[EN] This project has no team yet — start the draft and bring the first people onto the field.",
       "emptyTeamCta": "[EN] Start the draft",
+      "history": {
+        "title": "Iepriekšējais darbs šajā projektā",
+        "provenance": "Organizācijas sniegta vēsture, importēta no organizācijas pašas ierakstiem. Neatkarīgi nav pārbaudīta.",
+        "unavailable": "Iepriekšējo darbu pašlaik neizdevās nolasīt. Tas nenozīmē, ka tā nav.",
+        "empty": "Šim projektam nav reģistrēts organizācijas sniegts iepriekšējais darbs.",
+        "personUnknown": "Persona nav norādīta",
+        "hoursUnknown": "Stundas nav norādītas",
+        "count": "{n} ieraksti"
+      },
       "positionsTitle": "[EN] Missing positions",
       "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
       "openOps": "[EN] Open the management arena"
@@ -1989,6 +2007,7 @@
       "title": "Projekta pārvaldība",
       "progressLabel": "Progress",
       "progressNone": "Izmērāma progresa vēl nav",
+      "progressStages": "{done} no {total} posmiem atzīmēti kā pabeigti",
       "responsibleLabel": "Atbildīgā persona",
       "responsibleNone": "Nav norādīta",
       "responsibleSave": "Saglabāt",
@@ -2313,6 +2332,7 @@
   "scouting": {
     "pool": {
       "factsUnreadable": "Daļu no tā, ko šie cilvēki ir fiksējuši, tikko neizdevās nolasīt, tāpēc šī secība nav uzticama. Neviens šeit netiek rādīts ar mazāk, nekā viņam ir — vienkārši trūkst faktu, pēc kuriem salīdzināt. Pārlādējiet pēc brīža.",
+      "historyUnavailable": "Organizāciju sniegto vēsturi pašlaik nevarēja nolasīt, tāpēc tā netiek rādīta. Tas nenozīmē, ka tās nav, un iepriekšējā secība no tās nav atkarīga.",
       "capped": "Ne visi tika salīdzināti. Šai vajadzībai atbilst vairāk redzamu darbinieku, nekā ietilpst vienā sarakstā, tāpēc vispirms tika iegūti tie {count}, kuru prasmes, profesija un valsts atbilst vistiešāk — nekad jaunākie reģistrējumi. Sašauriniet vajadzību, lai būtu droši, ka tiek salīdzināti īstie cilvēki.",
       "complete": "Visi {count} redzamie darbinieki tika salīdzināti ar šo vajadzību."
     },
@@ -2336,6 +2356,10 @@
     "namePlaceholder": "[EN] Worker",
     "skillFit": "[EN] {matched}/{total} required skills, {confirmed} manager-confirmed",
     "evidence": "[EN] Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
+    "confirmedWork": "Apstiprināts ar darbu: {work} no {matched} atbilstošām prasmēm (atkārtojas: {repeated})",
+    "historySignal": "Minēts organizāciju sniegtajā vēsturē: {history} no {matched} atbilstošajām prasmēm (signāls, nevis pārbaude)",
+    "evidenceNone": "Nav apstiprināts",
+    "experienceYearsValue": "{years, plural, one {# gads} other {# gadi}}",
     "shortlistError": "[EN] Could not save. Try again.",
     "footnote": "[EN] Matches are computed deterministically for this need only. No global rating, no fake candidates.",
     "status": {
@@ -2420,6 +2444,8 @@
       "link": "Present a candidate"
     },
     "identity": {
+      "noRecords": "Darba ierakstu vēl nav",
+      "noManagerRecord": "Vadītāja ieraksta vēl nav",
       "why": "Kāpēc šī persona ir piemērota",
       "skills": "Atbilstošās prasmes un uz ko tās balstās",
       "readiness": "Pieejamība, gatavība un dokumenti",
@@ -3967,6 +3993,13 @@
       "findWorkInCompanyContext": "Darba meklēšana ir tava paša darbība — uzņēmuma telpā es to neveicu. Pārslēdzies uz personīgo telpu un pajautā vēlreiz.",
       "findWorkInCompanyWhy": "Darbu meklē cilvēks, ne uzņēmums — atbildu no tavas personīgās telpas.",
       "personalOnlyInCompany": "Šī ir personiska darbība — uzņēmuma telpā es to neveicu. Pārslēdzies uz personisko telpu un turpini tur.",
+      "newJobsIntro": "Jauni sludinājumi pēc taviem kritērijiem: {count}.",
+      "newJobsAll": "Visas iespējas",
+      "newJobsNone": "Pēdējās dienās jaunu sludinājumu pēc taviem kritērijiem nav. Visas iespējas atradīsi iespēju lapā.",
+      "newJobsNeedProfession": "Lai parādītu jaunus darbus, pasaki, kādas profesijas darbu meklē.",
+      "newJobsNeedCountry": "Lai parādītu jaunus darbus, pasaki, kurās valstīs vēlies strādāt.",
+      "newJobsNoProfile": "Lai parādītu jaunus darbus, man vispirms vajadzīgs tavs profils.",
+      "newJobsUnavailable": "Šobrīd jaunos darbus pārbaudīt neizdevās. Mēģini vēlāk.",
       "openConversationOpening": "Atveru sarunu ar {name}.",
       "openConversationNone": "Es neatradu šo cilvēku starp taviem sarunu biedriem vai komandā. Ziņas atradīsi ziņu sadaļā.",
       "openConversationWhich": "Kuru cilvēku tu domā?",
@@ -5393,7 +5426,8 @@
       "refusedType": "Šī tipa failu nevar nolasīt kā tekstu.",
       "empty": "Šajā dokumentā nav atrasts lasāms teksts.",
       "failed": "Dokumentu neizdevās nolasīt.",
-      "noEngagement": "Vispirms vajadzīgs darba konteksts — atver paneli un izveido to."
+      "noEngagement": "Vispirms vajadzīgs darba konteksts — atver paneli un izveido to.",
+      "workDateHint": "Dokumentā nav norādīts, kurā dienā darbs paveikts. Izvēlieties datumu pats — nekas netiek aizpildīts jūsu vietā."
     },
     "currentVersion": "[EN] Version {n}",
     "download": "[EN] Download",
@@ -6663,9 +6697,54 @@
         "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company."
       },
       "workers": {
-        "invitationsManagedElsewhere": "Par ielūgumiem rūpējas par to atbildīgā uzņēmuma persona."
+        "invitationsManagedElsewhere": "Par ielūgumiem rūpējas par to atbildīgā uzņēmuma persona.",
+        "team": {
+          "free": "Brīvs",
+          "working": "Strādā",
+          "away": "Prombūtnē",
+          "countFree": "Brīvi",
+          "countWorking": "Strādā",
+          "countAway": "Prombūtnē",
+          "workingOn": "Strādā: {project}",
+          "until": "līdz {date}",
+          "awayUntil": "Prombūtnē līdz {date}",
+          "assign": "Piešķirt projektam",
+          "openCalendar": "Atvērt kalendāru"
+        }
       }
     }
+  },
+  "cvOrganizationHistory": {
+    "title": "Organizāciju sniegtā darba vēsture",
+    "note": "Ņemta no šeit minēto organizāciju ierakstiem. Tā nav paša cilvēka deklarēta un nav neatkarīgi pārbaudīta.",
+    "untitled": "Organizācijas reģistrēts darbs",
+    "hoursTerm": "Stundas",
+    "hoursRecorded": "{hours} h reģistrētas ({count, plural, one {# ieraksts} other {# ieraksti}})",
+    "hoursPeriod": "{hours} h norādītas periodam ({count, plural, one {# ieraksts} other {# ieraksti}})",
+    "contested": "Apstrīdējusi persona ar tiesībām to darīt",
+    "more": "Vēl {count, plural, one {# ieraksts} other {# ieraksti}} netiek rādīti"
+  },
+  "historyContext": {
+    "project": "Projekts",
+    "place": "Objekts vai darbu pakete",
+    "client": "Pasūtītājs",
+    "otherParties": "Citi iesaistītie",
+    "capacity": "Statuss",
+    "source": "Avots",
+    "suppliedBy": "Iesniedza {name}",
+    "reconstructed": "Atjaunots no iepriekšējiem ierakstiem",
+    "recordedAt": "Ierakstīts sistēmā",
+    "proofTitle": "Kas to apliecina",
+    "proof": {
+      "SELF_DECLARED": "Norādījusi pati persona",
+      "EVIDENCE_SUPPORTED": "Pamatots ar organizācijas ierakstu",
+      "EMPLOYER_CONFIRMED": "Apstiprinājis darba devējs",
+      "CLIENT_ACCEPTED": "Pasūtītājs pieņēmis",
+      "SUPERVISOR_CONFIRMED": "Apstiprinājis darbu vadītājs",
+      "INDEPENDENTLY_VERIFIED": "Neatkarīgi pārbaudīts"
+    },
+    "attestedAs": "apliecināja kā {role}",
+    "proofNote": "Katra rinda ir atsevišķs fakts. Iesniegušās organizācijas apliecinājums nav pasūtītāja apstiprinājums un nav samaksa, un neviens no šiem faktiem nav neatkarīga pārbaude, ja tas nav norādīts."
   },
   "evidenceImport": {
     "records": {
@@ -6857,6 +6936,220 @@
       "done": "Piešķirti ieraksti: {count}; jau bija piešķirti: {skipped}.",
       "refused": "Neizdevās saglabāt. Nekas nav mainīts.",
       "person": "{hours} h, {count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}"
+    },
+    "truncated": "Ierakstu ir vairāk, nekā nolasa viens skats. Rāda nolasītos {count}; kopsummas ietver tikai tos."
+  },
+  "workLifecycle": {
+    "pending": "Vēl nav",
+    "title": "Kas notiek ar jūsu paveikto darbu",
+    "titleCompany": "Kas notiek ar jūsu vadīto darbu",
+    "example": "Piemērs — nav īsts cilvēks un nav īsti dati",
+    "hint": "Izvēlieties soli. Katrs solis atver īstu vietu jūsu darba telpā.",
+    "open": "Atvērt darba telpā",
+    "list": "Darba dzīves cikla soļi",
+    "workers": {
+      "person": {
+        "label": "Jūs",
+        "fact": "Pavārs — profesionālā identitāte",
+        "detail": "Viena profesionālā identitāte, kas pieder jums — nav piesaistīta vienam darba devējam."
+      },
+      "team": {
+        "label": "Komanda",
+        "fact": "Virtuves komanda",
+        "detail": "Jūs pievienojaties īstai komandai — redzat, ar ko strādājat un kas to vada."
+      },
+      "project": {
+        "label": "Projekts",
+        "fact": "Rudens ēdienkartes ieviešana",
+        "detail": "Darbs pieder projektam, tāpēc tam ir vieta, mērķis un laiks."
+      },
+      "work": {
+        "label": "Darbs",
+        "fact": "Vakara pakalpojums — 8 st.",
+        "detail": "Ko jūs darījāt, kad un cik ilgi — fiksēts tad, kad tas notiek."
+      },
+      "evidence": {
+        "label": "Pierādījums",
+        "fact": "Foto + žurnāla ieraksts",
+        "detail": "Paveiktais darbs kļūst par pierādījumu, nevis pazūd."
+      },
+      "confirmation": {
+        "label": "Apstiprināts",
+        "fact": "Apstiprināja vadītājs",
+        "detail": "Vadītājs to apstiprina. Bez tā nekas netiek saukts par pārbaudītu."
+      },
+      "history": {
+        "label": "Vēsture",
+        "fact": "Pievienots jūsu vēsturei",
+        "detail": "Apstiprinātais darbs veido jūsu profesionālo vēsturi — tā paliek pie jums nākamajam darbam."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Vajadzība",
+        "fact": "4 pavāri no pirmdienas",
+        "detail": "Īsto vajadzību norādāt vienreiz: kas, kur un no kura laika."
+      },
+      "people": {
+        "label": "Cilvēki",
+        "fact": "Piemēroti profesionāļi",
+        "detail": "Profesionāļi, kuru īstā darba vēsture atbilst vajadzībai — ar to, kas ir pārbaudīts un kas vēl nav."
+      },
+      "team": {
+        "label": "Komanda",
+        "fact": "Virtuves komanda",
+        "detail": "Cilvēki kļūst par komandu ar vadītāju, maiņām un darba vietu."
+      },
+      "project": {
+        "label": "Projekts",
+        "fact": "Rudens ēdienkartes ieviešana",
+        "detail": "Komandas tiek organizētas ap projektu, ko tās īsteno."
+      },
+      "work": {
+        "label": "Darbs",
+        "fact": "Vakara pakalpojums — 8 st.",
+        "detail": "Darbs tiek fiksēts tur, kur tas notiek, nevis atjaunots vēlāk."
+      },
+      "confirmation": {
+        "label": "Apstiprināts",
+        "fact": "Gaida jūsu apstiprinājumu",
+        "detail": "Redzat, kas vēl jāapstiprina un kas jau ir izdarīts."
+      },
+      "report": {
+        "label": "Atskaite",
+        "fact": "Atskaite no īstā darba",
+        "detail": "Atskaites veidojas no apstiprinātā darba — neviens tās nepārraksta."
+      }
     }
+  },
+  "twoSides": {
+    "title": "Pieņemšana darbā ir sākums, nevis beigas.",
+    "professional": "Profesionālis",
+    "company": "Uzņēmums",
+    "steps": {
+      "find": {
+        "label": "Atrast",
+        "worker": "Atrod darbu, kas atbilst tam, ko viņi patiesi darījuši",
+        "company": "Atrod cilvēkus, kuru īstais darbs atbilst vajadzībai"
+      },
+      "connect": {
+        "label": "Sazināties",
+        "worker": "Runā savā valodā",
+        "company": "Pieņem darbā ar īstu sarunu"
+      },
+      "work": {
+        "label": "Strādāt",
+        "worker": "Fiksē darbu, kamēr tas notiek",
+        "company": "Veic darbu kopā ar savējiem"
+      },
+      "verify": {
+        "label": "Apstiprināt",
+        "worker": "Vadītājs to apstiprina",
+        "company": "Apstiprina, kas patiesībā paveikts"
+      },
+      "grow": {
+        "label": "Augt",
+        "worker": "Apstiprinātais darbs kļūst par viņu vēsturi",
+        "company": "Pārskati veidojas no apstiprināta darba"
+      },
+      "continue": {
+        "label": "Turpināt",
+        "worker": "Ņem šo vēsturi līdzi uz nākamo darbu",
+        "company": "Plāno nākamo projektu ar cilvēkiem, ko pazīst"
+      }
+    }
+  },
+  "evidenceChain": {
+    "label": "Ieraksta statuss",
+    "own": "Jūsu",
+    "nodes": {
+      "recorded": "Reģistrēts",
+      "photo": "Foto",
+      "manager": "Vadītāja ieraksts",
+      "history": "Jūsu vēsturē"
+    },
+    "status": {
+      "done": "Ir",
+      "waiting": "Gaida",
+      "absent": "Vēl nē",
+      "attention": "Vajag jūs",
+      "unknown": "Nav zināms"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Dzīvais CV",
+    "title": "Jūsu darbs kļūst par jūsu stāstu",
+    "now": "Tagad",
+    "noRecords": "Darba ierakstu vēl nav",
+    "legend": {
+      "managerRecord": "Vadītāja ieraksts",
+      "recorded": "Jūsu veiktais ieraksts"
+    },
+    "skillsTitle": "Ko rāda jūsu darbs",
+    "next": {
+      "title": "Jūsu stāsts ceļo kopā ar jums",
+      "body": "Katrs darbs, ko ierakstāt, to papildina. Ņemiet to līdzi uz nākamo iespēju.",
+      "cta": "Skatīt, kurp varat doties"
+    }
+  },
+  "workContext": {
+    "title": "Jūsu darbs vienuviet",
+    "nodes": {
+      "current": "Strādā tagad",
+      "records": "Ieraksti",
+      "manager": "Vadītāja ieraksts",
+      "history": "Vēsture",
+      "skills": "Prasmes",
+      "next": "Tālāk"
+    },
+    "facts": {
+      "records": "{count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}",
+      "manager": "{count, plural, zero {# vadītāja ierakstu} one {# vadītāja ieraksts} other {# vadītāja ieraksti}}",
+      "history": "{count, plural, zero {# darbu} one {# darbs} other {# darbi}}",
+      "skills": "{count, plural, zero {# jūsu ierakstos balstītu prasmju} one {# jūsu ierakstos balstīta prasme} other {# jūsu ierakstos balstītas prasmes}}",
+      "next": "Kur varat doties"
+    }
+  },
+  "companyPerson": {
+    "eyebrow": "Vēsturiskā personas kartīte",
+    "back": "Cilvēki",
+    "badge": "Organizācijas sniegts, neatkarīgi nepārbaudīts",
+    "provenance": "Tas ir tas, ko {name} ir reģistrējusi par šo personu. Neviens cits to nav apstiprinājis, un tas nav atkarīgs no tā, vai personai ir konts.",
+    "claim": {
+      "unlinked": "Vēl nav saistīts ar kontu — vēsture jau ir reģistrēta šeit.",
+      "link_proposed": "Saistīšana ar kontu ir piedāvāta un gaida personas atbildi — vēsture jau ir reģistrēta šeit.",
+      "linked": "Saistīts ar pašas personas kontu.",
+      "openProfile": "Atvērt personas lapu"
+    },
+    "unavailable": "Šīs personas vēsturi pašlaik neizdevās nolasīt. Tas nenozīmē, ka tās nav.",
+    "empty": "Šai personai vēl nav vēstures ierakstu. Nolasīšana izdevās — to nav.",
+    "stats": {
+      "records": "Ieraksti",
+      "hours": "Stundas, kā norādīts",
+      "period": "Periods"
+    },
+    "noHours": "Ieraksti bez norādītām stundām: {count}. Nezināmas stundas netiek skaitītas kā nulle.",
+    "undated": "Ieraksti bez norādīta datuma: {count}. Tie paliek vēsturē zemāk.",
+    "periodApart": "{hours} h no kopsummas ir perioda kopsummas, turētas atsevišķi un nekad nesadalītas pa dienām vai mēnešiem.",
+    "noWorkObject": "Ieraksti, kas nav saistīti ar platformai zināmu projektu vai vietu: {count}. Tie paliek šajā vēsturē ar avota nosaukumu.",
+    "places": {
+      "title": "Pēc projekta vai vietas",
+      "none": "Projekts vai vieta nav reģistrēta",
+      "records": "Ieraksti: {count}"
+    },
+    "months": {
+      "title": "Norādītās stundas pa mēnešiem",
+      "note": "Tikai vienas dienas ieraksti. Perioda kopsummas nekad netiek sadalītas pa dienām vai mēnešiem."
+    },
+    "skills": {
+      "title": "Prasmes, uz kurām norāda vēsture",
+      "note": "Atvasināts no organizācijas vēstures, nepārbaudīts. Prasme ir norādīta, ja to nosaukusi pati organizācija; tas nav apgalvojums par personu.",
+      "records": "Ieraksti: {count}",
+      "empty": "Šajos ierakstos nav nosaukta neviena prasme.",
+      "unavailable": "Prasmju signālus pašlaik neizdevās nolasīt. Tas nenozīmē, ka to nav.",
+      "truncated": "Prasmju signālu ir vairāk, nekā nolasa šis skats."
+    },
+    "shown": "Rāda jaunākos {shown} no {total} ierakstiem. Pārējie paliek reģistrēti.",
+    "truncated": "Ierakstu ir vairāk, nekā nolasa viens skats. Rāda nolasītos {count}; kopsummas ietver tikai tos."
   }
 }

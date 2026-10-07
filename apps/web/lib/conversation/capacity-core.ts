@@ -54,6 +54,9 @@ export async function whoIsAvailableCore(
   preRead?: CapacityPreRead,
   /** ONE named day (YYYY-MM-DD) instead of the default window — "kas laisvas pirmadienį?". */
   onDay?: string | null,
+  /** How many rows to return. The chat shows a short list (default); the
+   *  People door needs every person's state. `counts` is always the whole roster. */
+  rowLimit: number = CAPACITY_CHAT_LIMIT,
 ): Promise<CapacityChatResult> {
   try {
     const [roster, availability, t] = await Promise.all([
@@ -198,7 +201,7 @@ export async function whoIsAvailableCore(
             weeks: OUTLOOK_WEEKS,
           })
         : null;
-    return { kind: "ok", from: window.startDate, to: window.endDate, rows: rows.slice(0, CAPACITY_CHAT_LIMIT), rosterTotal: active.length, absencesKnown, commitmentsKnown, counts, outlook };
+    return { kind: "ok", from: window.startDate, to: window.endDate, rows: rows.slice(0, rowLimit), rosterTotal: active.length, absencesKnown, commitmentsKnown, counts, outlook };
   } catch {
     return { kind: "error" };
   }

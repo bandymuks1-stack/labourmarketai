@@ -1,0 +1,101 @@
+OPTION B PATCH (description + hunks) — apply on top of #2126 head 0eef7f473 (branch feat/cc/billing-recovery-adapter)
+NOT pushed, NOT applied. Written 2026-10-03 from read-only audit.
+
+FINDING: #2126 head does NOT implement Option B.
+  - Only gates on the route: CRON_SECRET (authorizeCronRequest) + billing state (inactive -> 503).
+  - Its own test header states the route "runs whenever it is called" with a valid secret.
+  - The only "switch" is the GitHub repo variable BILLING_RECOVERY_SCHEDULE_ENABLED, which gates the
+    workflow only (schedule), not the server. A valid CRON_SECRET (or anyone with it) can call
+    GET /api/cron/billing-recovery and cause live Stripe reads + subscription writes.
+  - No BILLING_RECOVERY_ENABLED identifier exists anywhere on the branch.
+
+TARGET (owner Option B):
+  server flag BILLING_RECOVERY_ENABLED, default OFF, strict "true" only, evaluated on the SERVER in the
+  route AND in runBillingRecovery (defense in depth). Schedule switch stays the separate GitHub variable.
+  Keep: batch 25, 45s budget, 30min cooldown, idempotency/audit rows, stale-event ordering, mode separation.
+
+--- NEW FILE apps/web/lib/billing/recovery-flag.ts ---
+import "server-only";
+/** Server-side master switch for scheduled billing recovery WRITES. Default OFF. Strict: only the
+ *  literal string "true" enables; unset/empty/"1"/"TRUE"/anything else = OFF (fail closed).
+ *  Independent of CRON_SECRET (auth) and of BILLING_RECOVERY_SCHEDULE_ENABLED (GitHub cadence). */
+export function isBillingRecoveryEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  return (env.BILLING_RECOVERY_ENABLED ?? "").trim() === "true";
+}
+
+--- apps/web/app/api/cron/billing-recovery/route.ts ---
+ import { authorizeCronRequest } from "@/lib/api/cron-auth";
+ import { runBillingRecovery } from "@/lib/billing/billing-recovery";
++import { isBillingRecoveryEnabled } from "@/lib/billing/recovery-flag";
+@@ GET
+   if (auth !== "ok") {
+     return NextResponse.json({ ok: false, reason: auth }, { status: 401 });
+   }
++  // OPTION B: a valid CRON_SECRET alone never permits live recovery writes.
++  if (!isBillingRecoveryEnabled()) {
++    return NextResponse.json({ ok: false, reason: "recovery_disabled" }, { status: 503 });
++  }
+   const result = await runBillingRecovery();
+
+--- apps/web/lib/billing/billing-recovery.ts ---
++import { isBillingRecoveryEnabled } from "@/lib/billing/recovery-flag";
+-  | { readonly kind: "unavailable"; readonly reason: "billing_inactive" | "needs_migration" | "store_error" }
++  | { readonly kind: "unavailable"; readonly reason: "recovery_disabled" | "billing_inactive" | "needs_migration" | "store_error" }
+@@ runBillingRecovery, FIRST statement (before getBillingConfig / any store read / any Stripe call)
++  if (!isBillingRecoveryEnabled()) return { kind: "unavailable", reason: "recovery_disabled" };
+   const cfg = getBillingConfig();
+
+--- .github/workflows/billing-recovery-cadence.yml ---
+Schedule switch stays BILLING_RECOVERY_SCHEDULE_ENABLED (unchanged, separately controllable).
+Treat the server-flag-off answer as a designed no-op, not a red run:
+-          [ "$code" = "200" ]
++          if [ "$code" = "503" ] && grep -q '"recovery_disabled"' body.json; then echo "Server flag OFF (designed no-op)"; exit 0; fi
++          [ "$code" = "200" ]
+
+--- tests ---
+billing-recovery-gates.test.ts / billing-recovery-route.test.ts / billing-recovery.test.ts:
+  * beforeEach: set process.env.BILLING_RECOVERY_ENABLED = "true" (existing tests keep meaning);
+    afterEach restore.
+  * NEW: with CRON_SECRET valid + stripe_live/stripe_test and flag unset -> route 503 reason
+    "recovery_disabled"; readRecoveryCandidates, getBillingProvider.retrieveSubscriptionRaw,
+    upsertSubscription all toHaveBeenCalledTimes(0).
+  * NEW: flag values "", "1", "TRUE", "yes", " false " -> OFF; only "true" -> ON.
+  * NEW: wrong/absent secret + flag ON -> 401 (auth still first).
+  * Fix the gates test header comment (it currently documents the route as not a switch).
+guards/billing-safety-invariants.test.ts: add pin that route.ts and billing-recovery.ts both reference
+  isBillingRecoveryEnabled before runBillingRecovery/any provider call.
+Docs/env: add BILLING_RECOVERY_ENABLED to the env inventory (lib/env.ts list is for client-validated
+  vars; read via process.env directly like CRON_SECRET) and to docs/billing runbook. Vercel env stays
+  UNSET (= OFF) at merge time.
+
+#2127 (user "Refresh billing status") — DECISION NEEDED, not changed here: it calls
+  reconcileSubscription({source:"user_refresh"}) and writes live state with a session, not a cron secret.
+  Option B as stated scopes to scheduled recovery. If the owner wants user refresh equally gated,
+  apply isBillingRecoveryEnabled() at the top of refreshMyBillingStatus (return status "try_later"/unavailable).
+
+--- P1: webhook ingestion stores non-secret refs (separate additive commit, same branch or follow-up) ---
+STATE TODAY (main df5caa089 AND #2126 head): webhook route builds payload = {id, type, created[, summary]}
+only. NO payload.refs. Prod payment_webhook_events: 0 rows (so nothing to backfill). #2126's reader
+(readRecoveryCandidates) already looks for payload.refs.subscription starting "sub_" => today every
+unprocessed event is counted "unmappable" by construction.
+
+apps/web/lib/billing/webhook-core.ts: add and export
+  export function extractEventRefs(type: string, obj: Record<string, unknown>):
+    { subscription?: string; customer?: string } {
+    const refs: { subscription?: string; customer?: string } = {};
+    const cus = idFrom(obj.customer);                 // existing helper
+    if (cus && /^cus_[A-Za-z0-9]+$/.test(cus)) refs.customer = cus;
+    let sub: string | null = null;
+    if (type.startsWith("customer.subscription.")) sub = typeof obj.id === "string" ? obj.id : null;
+    else if (type.startsWith("invoice.")) sub = subscriptionIdFromInvoice(obj); /* module-private today: export it */   // existing post/pre-Basil tolerant parser
+    else sub = idFrom(obj.subscription);               // checkout.session.*, others
+    if (sub && /^sub_[A-Za-z0-9]+$/.test(sub)) refs.subscription = sub;
+    return refs;
+  }
+apps/web/app/api/billing/webhook/route.ts after `lean` is built:
+  const refs = extractEventRefs(event.type, event.object);
+  if (refs.subscription || refs.customer) lean.refs = refs;
+Properties: ids only (sub_/cus_ pattern-validated), no email/amount/metadata/payload body; applies to every
+event incl. record-only ones; no schema change (payload is jsonb); additive, idempotent (event row written
+once). Tests: webhook-parity/webhook-route tests assert payload.refs for subscription.*, invoice.* (both API
+shapes), checkout.session.completed; assert no refs key when absent; assert pattern rejection of junk.

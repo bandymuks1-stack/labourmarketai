@@ -937,11 +937,15 @@ export default async function CompanyWorkforcePlanningPage({
             ) : null}
           </div>
         ) : null}
-        <CapacityBar
-          pct={view.totals.coveragePct}
-          riskLevel={view.risk.level}
-          label={`${t("summary.capacityLabel")}: ${view.totals.coveragePct}%`}
-        />
+        {/* No demand, no percentage: with nothing required a bar can only say
+            "100% covered", which is a claim about a need nobody stated. */}
+        {view.totals.requiredHeadcount > 0 ? (
+          <CapacityBar
+            pct={view.totals.coveragePct}
+            riskLevel={view.risk.level}
+            label={`${t("summary.capacityLabel")}: ${view.totals.coveragePct}%`}
+          />
+        ) : null}
         {/* Risk date — text label + tone, never colour-only. */}
         <p
           className="flex flex-wrap items-center gap-2 text-sm text-text-secondary"

@@ -99,6 +99,7 @@ export type IntentHandlerId =
   | "findPartners"
   | "productHelp"
   | "openConversation"
+  | "newJobs"
   | "offerValue"
   | "companyOverview"
   | "createOrganization"
@@ -255,6 +256,9 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // opens the ONE conversation (Messages); it sends no message. May create the
   // empty 1:1 thread through the §8.1 gate, so it is classed as a route (the gated door itself lives in the conversation system).
   "open-conversation": { domain: "communication", access: "route", handler: "openConversation", ownTyping: false },
+  // "Kokių naujų darbų man atsirado?" - the new ads over the ONE job-alert
+  // matching; a read, writes nothing.
+  "new-jobs": { domain: "matching", access: "read", handler: "newJobs", ownTyping: true },
   "product-help": { domain: "context", access: "read", handler: "productHelp", ownTyping: false },
   "find-partners": { domain: "company", access: "route", handler: "findPartners", ownTyping: false },
   // V9/V10: reads the statement, runs channel discovery, renders honest

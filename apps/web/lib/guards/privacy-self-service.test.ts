@@ -66,6 +66,8 @@ describe("the data export reads ONLY the caller's own data", () => {
         "worker_id",
         "organization_person_id",
         "organization_evidence_record_id",
+        // PER-12: a child read from ids of rows already delivered AS the caller.
+        "parent_row",
       ]).toContain(r.key);
     }
     expect(EXPORTED_RELATIONS.length).toBeGreaterThan(20);

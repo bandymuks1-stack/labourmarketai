@@ -78,6 +78,11 @@
   "engagement": "Context",
   "engagementChoose": "Kies de betrekking…",
   "engagementAmbiguous": "Dit werk kan bij meer dan één betrekking horen. Kies vóór het opslaan bij welke.",
+  "project": "Project",
+  "projectChoose": "Kies het project…",
+  "projectNone": "Geen projectwerk",
+  "projectAmbiguous": "Je bent aan meerdere projecten toegewezen. Kies vóór het opslaan bij welk project deze uren horen (of markeer ze als geen projectwerk).",
+  "projectAuto": "Project: {name}",
   "unconfirmedTimeBlocked": "{count, plural, one {# geregistreerde duur wacht nog op je beoordeling en zou niet worden opgeslagen.} other {# geregistreerde duren wachten nog op je beoordeling en zouden niet worden opgeslagen.}} Behoud of verwijder ze eerst.",
   "entry": {
     "reviewedBy": "Beoordeeld door",
@@ -100,7 +105,8 @@
       "approved": "Beoordeeld",
       "changes_requested": "Wijzigingen gevraagd",
       "rejected": "Teruggestuurd",
-      "reasonLabel": "Reden"
+      "reasonLabel": "Reden",
+      "notEnabled": "Vastgelegd — je leidinggevende heeft bevestiging nog niet ingeschakeld, dus niemand beoordeelt deze registratie; tot dan blijft het jouw eigen opgave"
     },
     "delete": "Item verwijderen",
     "deleting": "Verwijderen...",
@@ -346,9 +352,35 @@
       "too_large": "De opname is te groot (max. 25 MB).",
       "too_long": "De opname is te lang (max. 10 minuten).",
       "unavailable": "De transcriptieserver is momenteel niet beschikbaar.",
-      "undecodable": "De audio kon niet worden gelezen — probeer het opnieuw."
+      "undecodable": "De audio kon niet worden gelezen — probeer het opnieuw.",
+      "rate_limited": "Te veel opnames in korte tijd - wacht even en probeer opnieuw.",
+      "token_expired": "De uploadsessie is verlopen - probeer opnieuw.",
+      "unauthorized": "Je sessie is niet gemachtigd voor spraak - log opnieuw in.",
+      "service_unreachable": "De transcriptieserver is niet bereikbaar. Controleer je verbinding en probeer opnieuw; de opname blijft op deze pagina bewaard."
     },
-    "permissionDenied": "Microfoontoegang is geblokkeerd. Sta microfoontoegang toe in je browserinstellingen en probeer het opnieuw."
+    "permissionDenied": "Microfoontoegang is geblokkeerd. Sta microfoontoegang toe in je browserinstellingen en probeer het opnieuw.",
+    "disclosureProvenance": "De opgeslagen invoer wordt gemarkeerd als ingesproken en door jou gecontroleerd.",
+    "state": {
+      "ready": "Klaar. Kies de spreektaal en start de opname.",
+      "permissionRequired": "Je browser vraagt bij het starten om microfoontoestemming. Voor jouw toestemming wordt niets opgenomen.",
+      "policyBlocked": "Het beveiligingsbeleid van de site blokkeert hier de microfoon. Spraakopname is op deze pagina niet beschikbaar - je kunt de invoer als tekst schrijven.",
+      "unsupported": "Deze browser kan hier geen audio opnemen (veilige pagina en ondersteuning voor microfoonopname vereist). Je kunt een audiobestand uploaden of tekst schrijven.",
+      "noDevice": "Er is geen microfoon gevonden op dit apparaat.",
+      "deviceBusy": "De microfoon wordt door een andere app gebruikt. Sluit die en probeer opnieuw.",
+      "cancelled": "Opname geannuleerd. Er is niets geüpload of opgeslagen.",
+      "requesting": "Wachten op je toestemming voor de microfoon...",
+      "interrupted": "Opname gepauzeerd omdat de pagina verborgen was. Ga verder als je terug bent.",
+      "interruptedKept": "De microfoon stopte, dus de opname eindigde vroeg. Wat is opgenomen staat hieronder uitgeschreven - controleer het.",
+      "uploading": "Opname wordt geüpload..."
+    },
+    "language": {
+      "label": "Spreektaal",
+      "auto": "Automatisch detecteren",
+      "hint": "Kies de taal die je spreekt - die hoeft niet gelijk te zijn aan de taal van de site."
+    },
+    "recordAgain": "Opnieuw opnemen",
+    "announceStarted": "Opname gestart",
+    "announceMinutes": "{minutes} min opgenomen"
   },
   "savedOpenCv": "Bekijk uw cv",
   "dayNav": {
@@ -609,7 +641,11 @@
     "sessionExpired": "Je sessie is verlopen. Log opnieuw in.",
     "noWorkerProfile": "Werknemersprofiel niet gevonden. Open je accountinstellingen en activeer de werknemersrol.",
     "engagementRequired": "Kies de werkcontext (organisatie of project) waar deze registratie bij hoort.",
+    "projectNotAssignable": "Het gekozen project is niet aan jou toegewezen of hoort bij een andere organisatie. Kies een project uit de lijst.",
     "notesRequired": "Beschrijf wat je hebt gedaan — de vrije tekst vormt de kern van deze registratie.",
+    "workDateRequired": "Kies de dag waarop dit werk is gedaan.",
+    "workDateInvalid": "De werkdatum is geen geldige datum.",
+    "workDateFuture": "De werkdatum mag niet in de toekomst liggen.",
     "quantityInvalid": "De hoeveelheid moet een niet-negatief getal zijn.",
     "unitSlugUnknown": "Deze eenheid wordt nog niet herkend: {units}. Kies een andere eenheid of probeer het later opnieuw.",
     "sourceDocumentInvalid": "Het opgegeven brondocument is niet gevonden tussen je documenten.",
@@ -944,6 +980,8 @@
     "photoClose": "Foto sluiten",
     "photoPrev": "Vorige foto",
     "photoNext": "Volgende foto",
-    "photoCounter": "{index} / {total}"
+    "photoCounter": "{index} / {total}",
+    "recordedOnly": "{count, plural, one {# vastgelegd — bevestiging niet ingeschakeld} other {# vastgelegd — bevestiging niet ingeschakeld}}",
+    "confirmationNotEnabled": "Je leidinggevende heeft bevestiging nog niet ingeschakeld — niemand beoordeelt deze registraties."
   }
 }

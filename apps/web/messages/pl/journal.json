@@ -78,6 +78,11 @@
   "engagement": "Kontekst",
   "engagementChoose": "Wybierz zaangażowanie…",
   "engagementAmbiguous": "Ta praca może należeć do więcej niż jednego zaangażowania. Wybierz, do którego, przed zapisaniem.",
+  "project": "Projekt",
+  "projectChoose": "Wybierz projekt…",
+  "projectNone": "To nie praca projektowa",
+  "projectAmbiguous": "Jesteś przypisany do kilku projektów. Przed zapisaniem wybierz, do którego projektu należą te godziny (lub zaznacz, że to nie praca projektowa).",
+  "projectAuto": "Projekt: {name}",
   "unconfirmedTimeBlocked": "{count} zarejestrowanych czasów wciąż czeka na Twój przegląd i nie zostałoby zapisanych. Najpierw zachowaj je lub usuń.",
   "entry": {
     "reviewedBy": "Zweryfikowane przez",
@@ -100,7 +105,8 @@
       "approved": "Zweryfikowano",
       "changes_requested": "Poproszono o zmiany",
       "rejected": "Zwrócono",
-      "reasonLabel": "Powód"
+      "reasonLabel": "Powód",
+      "notEnabled": "Zapisano — przełożony nie włączył jeszcze potwierdzania, więc nikt nie sprawdza tego wpisu; do tego czasu pozostaje Twoim własnym stwierdzeniem"
     },
     "delete": "Usuń wpis",
     "deleting": "Usuwanie...",
@@ -346,9 +352,35 @@
       "too_large": "Nagranie jest za duże (maks. 25 MB).",
       "too_long": "Nagranie jest za długie (maks. 10 minut).",
       "unavailable": "Serwer transkrypcji jest obecnie niedostępny.",
-      "undecodable": "Nie udało się odczytać audio — spróbuj ponownie."
+      "undecodable": "Nie udało się odczytać audio — spróbuj ponownie.",
+      "rate_limited": "Zbyt wiele nagrań w krótkim czasie - poczekaj chwilę i spróbuj ponownie.",
+      "token_expired": "Sesja przesyłania wygasła - spróbuj ponownie.",
+      "unauthorized": "Twoja sesja nie ma uprawnień do głosu - zaloguj się ponownie.",
+      "service_unreachable": "Nie udało się połączyć z serwerem transkrypcji. Sprawdź połączenie i spróbuj ponownie; nagranie zostaje na tej stronie."
     },
-    "permissionDenied": "Dostęp do mikrofonu został zablokowany. Zezwól na mikrofon w ustawieniach przeglądarki i spróbuj ponownie."
+    "permissionDenied": "Dostęp do mikrofonu został zablokowany. Zezwól na mikrofon w ustawieniach przeglądarki i spróbuj ponownie.",
+    "disclosureProvenance": "Zapisany wpis zostanie oznaczony jako podyktowany głosem i sprawdzony przez Ciebie.",
+    "state": {
+      "ready": "Gotowe. Wybierz język mówienia i rozpocznij nagrywanie.",
+      "permissionRequired": "Przeglądarka poprosi o zgodę na mikrofon po rozpoczęciu. Nic nie jest nagrywane przed Twoją zgodą.",
+      "policyBlocked": "Polityka bezpieczeństwa witryny blokuje tu mikrofon. Nagrywanie głosu jest na tej stronie niedostępne - wpis możesz napisać jako tekst.",
+      "unsupported": "Ta przeglądarka nie może tu nagrywać dźwięku (wymaga bezpiecznej strony i obsługi nagrywania z mikrofonu). Możesz przesłać plik audio lub napisać tekst.",
+      "noDevice": "Na tym urządzeniu nie znaleziono mikrofonu.",
+      "deviceBusy": "Mikrofon jest używany przez inną aplikację. Zamknij ją i spróbuj ponownie.",
+      "cancelled": "Nagrywanie anulowane. Nic nie przesłano ani nie zapisano.",
+      "requesting": "Czekam na Twoją zgodę na użycie mikrofonu...",
+      "interrupted": "Nagrywanie wstrzymane, bo strona była ukryta. Wznów, gdy wrócisz.",
+      "interruptedKept": "Mikrofon przestał działać, więc nagranie zakończyło się wcześniej. To, co zarejestrowano, jest poniżej - sprawdź to.",
+      "uploading": "Przesyłanie nagrania..."
+    },
+    "language": {
+      "label": "Język mówienia",
+      "auto": "Wykryj automatycznie",
+      "hint": "Wybierz język, w którym mówisz - nie musi być taki sam jak język witryny."
+    },
+    "recordAgain": "Nagraj ponownie",
+    "announceStarted": "Rozpoczęto nagrywanie",
+    "announceMinutes": "Nagrano {minutes} min"
   },
   "savedOpenCv": "Zobacz swoje CV",
   "dayNav": {
@@ -609,7 +641,11 @@
     "sessionExpired": "Sesja wygasła. Zaloguj się ponownie.",
     "noWorkerProfile": "Nie znaleziono profilu pracownika. Otwórz ustawienia konta i włącz rolę pracownika.",
     "engagementRequired": "Wybierz kontekst pracy (organizację lub projekt), do którego należy ten wpis.",
+    "projectNotAssignable": "Wybrany projekt nie jest Ci przypisany lub należy do innej organizacji. Wybierz projekt z listy.",
     "notesRequired": "Opisz, co robiłeś — wolny tekst jest podstawą tego wpisu.",
+    "workDateRequired": "Wybierz dzień, w którym wykonano tę pracę.",
+    "workDateInvalid": "Data pracy nie jest prawidłową datą.",
+    "workDateFuture": "Data pracy nie może być w przyszłości.",
     "quantityInvalid": "Ilość musi być liczbą nieujemną.",
     "unitSlugUnknown": "Ta jednostka nie jest jeszcze rozpoznawana: {units}. Wybierz inną jednostkę lub spróbuj ponownie później.",
     "sourceDocumentInvalid": "Wskazany dokument źródłowy nie został znaleziony wśród Twoich dokumentów.",
@@ -944,6 +980,8 @@
     "photoClose": "Zamknij zdjęcie",
     "photoPrev": "Poprzednie zdjęcie",
     "photoNext": "Następne zdjęcie",
-    "photoCounter": "{index} / {total}"
+    "photoCounter": "{index} / {total}",
+    "recordedOnly": "{count, plural, one {# zapisany — potwierdzanie nieaktywne} few {# zapisane — potwierdzanie nieaktywne} many {# zapisanych — potwierdzanie nieaktywne} other {# zapisanych — potwierdzanie nieaktywne}}",
+    "confirmationNotEnabled": "Przełożony nie włączył jeszcze potwierdzania — nikt nie sprawdza tych wpisów."
   }
 }

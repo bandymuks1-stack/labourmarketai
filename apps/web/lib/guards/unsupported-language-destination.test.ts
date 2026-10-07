@@ -28,6 +28,7 @@ describe("a language code we do not route is not a page name", () => {
   it("sends the unrouted acquisition languages to the English product", () => {
     expect(unsupportedLanguageRedirectPath("/sv")).toBe("/en");
     expect(unsupportedLanguageRedirectPath("/uk")).toBe("/en");
+    expect(unsupportedLanguageRedirectPath("/ka")).toBe("/en");
     // PL is ROUTED since 2026-09-20 (owner approval): no redirect, the list is
     // derived from the active set and dropped it by itself.
     expect(unsupportedLanguageRedirectPath("/pl")).toBeNull();
@@ -124,6 +125,7 @@ describe("this file may never become a claim of language support", () => {
     // Ukrainian speakers reject being addressed in Russian, and a redirect is
     // a statement about the reader that the product cannot take back.
     expect(unsupportedLanguageRedirectPath("/uk")).toBe("/en");
+    expect(unsupportedLanguageRedirectPath("/ka")).toBe("/en");
   });
 
   it("does not add any acquisition-only language to the catalog set", () => {
