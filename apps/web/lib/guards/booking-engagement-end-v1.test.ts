@@ -1577,6 +1577,11 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261003151500_invitation_v1_doors_not_api_callable_v1.sql",
       // 2026-10-05: the subject's refuse / withdraw door (SECURITY DEFINER) - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261005100000_roster_link_subject_answer_v1.sql",
+      // 2026-10-06: authority closure first package (audit A1/F-1/F-4/F-8) - markers are the human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261006100000_work_hour_allocations_integrity_guard_v1.sql",
+      "20261006100100_conversation_participants_server_authority_v1.sql",
+      "20261006100200_employer_authority_not_self_asserted_v1.sql",
+      "20261006100300_lmc_ledger_server_only_execute_v1.sql",
       // 2026-10-06: service-role-only read of the invited address for the frictionless signup page - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261006100500_invitation_signup_context_v1.sql",
 ]);

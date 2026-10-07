@@ -170,10 +170,37 @@ rows above — `app/api/leads/route.ts` (writes `leads` only), the two
 billing paths (billing tables only), the superadmin-gated read-only
 `waitlist` intake read, and the superadmin-gated
 `company_need_public_intakes` owner queue — never a conversation table.** No
-user-facing chat read or write uses the service role. This inventory is pinned
+user-facing chat READ uses the service role, and — with ONE exception recorded
+below — no chat WRITE does either. This inventory is pinned
 in CI: `chat-visibility-rls.test.ts` fails if a new runtime `createAdminClient()`
 caller appears or if any chat path imports the admin client, forcing this doc to
 be updated and the new bypass justified.
+
+**The one exception (2026-10-06, authority closure F-1 — OWNER REVIEW
+REQUESTED).** `lib/communication/communication-core.ts` performs exactly one
+service-role write: inserting the OTHER participant(s) into a conversation the
+caller has just created under their own RLS, after a `ContactAuthority`
+(`lib/communication/contact-authority.ts`) proves the §8.1 contact gate held.
+Why it exists: migration `20261006100100_conversation_participants_server_
+authority_v1` makes the database refuse any end-user session that inserts
+ANOTHER profile into a conversation — before it, `conversation_participants_
+insert` let a conversation's creator add any profile uuid, so any signed-in
+account (directly through PostgREST, or through the exported `createConversation`
+server action) could open a thread to anyone and bypass the contact-consent
+gate, which existed only in TypeScript callers. The §8.1 permission is a
+server-side evaluation over many relationship facts and is deliberately not
+re-implemented in SQL (no parallel authorization system), so the only writer
+that can add another person is the server, after the gate.
+Constraints (pinned in `authority-closure-first-package.test.ts`): exactly one
+`createAdminClient()` call in the core, placed after the authority check, writing
+only `conversation_participants`; nothing is read with the service role
+(participants are still read under the sender's session, pinned by
+`notification-message-journal-events.test.ts`); the browser-callable
+`actions.ts` neither imports the authority nor the admin client; the authority
+is an identity-checked WeakSet token a client payload cannot reproduce. The
+alternative that keeps this section's original claim intact — a SECURITY DEFINER
+RPC callable only by `service_role` — is the same service-role write behind one
+more hop, so it was not chosen.
 
 ---
 

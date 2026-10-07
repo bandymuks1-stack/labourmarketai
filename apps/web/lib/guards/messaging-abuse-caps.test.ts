@@ -146,8 +146,23 @@ describe("§8.2 no bypass: only the capped actions insert into the 0021 tables",
     const callers = sources.filter(
       (rel) => rel !== "lib/communication/actions.ts" && read(rel).includes("createConversation("),
     );
+    // The browser-callable action has ONE legitimate caller (a self-only support
+    // thread). Conversations with another person go through the core, below.
+    expect(callers.sort()).toEqual(["components/app/support-conversation-launcher.tsx"]);
+  });
+
+  it("every creation-core caller is the unprivileged action or a gated direct-contact module", () => {
+    const callers = sources.filter(
+      (rel) =>
+        rel !== "lib/communication/communication-core.ts" &&
+        read(rel).includes("createConversationCore("),
+    );
     expect(callers.sort()).toEqual(
-      ["components/app/support-conversation-launcher.tsx", "lib/communication/direct-conversation.ts"].sort(),
+      [
+        "lib/communication/actions.ts",
+        "lib/communication/direct-conversation-core.ts",
+        "lib/communication/direct-conversation.ts",
+      ].sort(),
     );
   });
 });

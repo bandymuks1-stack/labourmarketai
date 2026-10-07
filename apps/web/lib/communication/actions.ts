@@ -38,7 +38,17 @@ function asAny(supabase: SupabaseClient): any {
   return supabase as unknown;
 }
 
-/** Web door: the cookie session, then THE core (`communication-core.ts`). */
+/**
+ * Web door: the cookie session, then THE core (`communication-core.ts`).
+ *
+ * BROWSER-CALLABLE, therefore deliberately UNPRIVILEGED: it never passes a
+ * `ContactAuthority`, so the core refuses any `participantProfileIds` naming
+ * another person and drops `sourceHint`. What it can still open is a thread
+ * with only the caller in it (the support launcher). A conversation with
+ * another person is opened ONLY by `getOrCreateDirectConversation` /
+ * `getOrCreateDirectConversationCore`, after the §8.1 gate (audit 2026-10-06
+ * F-1; pinned by lib/guards/conversation-creation-authority.test.ts).
+ */
 export async function createConversation(input: {
   subject?: string | null;
   kind?: "direct" | "support" | "team";
