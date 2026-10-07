@@ -27,6 +27,21 @@ import {
  */
 
 /**
+ * The token is user-controlled (form field / URL segment) and lands inside a
+ * same-origin PATH. Percent-encode it so a forged value (`/`, `..`, `?`, `#`,
+ * CR/LF) can neither add path segments nor query parameters nor split the
+ * Location header (G-12b). Real tokens are url-safe, so they pass unchanged.
+ */
+function invitePath(locale: string, token: string): string {
+  return `/${locale}/invite/${encodeURIComponent(token)}`;
+}
+
+/** Login redirect that returns to the invite; `next` is encoded as ONE value. */
+function loginNext(locale: string, token: string): string {
+  return `/${locale}/auth/login?next=${encodeURIComponent(invitePath(locale, token))}`;
+}
+
+/**
  * Whether the signed-in person holds the `company` role — the very fact the
  * partners door gates on (`requireRoleOrRedirect(locale, "company")`).
  * `null` when the read never answered or there is no session: an unknown is
@@ -53,12 +68,12 @@ export async function acceptInviteFormAction(formData: FormData): Promise<void> 
   const proposedRole = String(formData.get("proposedRole") ?? "") || null;
   if (!token) redirect(`/${locale}/dashboard`);
 
-  const result = await acceptInvitationAction({ token });
+  const result = await acceptInvitationAction({ token, locale });
   if (result.status === "not-authed") {
-    redirect(`/${locale}/auth/login?next=/${locale}/invite/${token}`);
+    redirect(loginNext(locale, token));
   }
   if (result.status === "needs-migration") {
-    redirect(`/${locale}/invite/${token}?notice=not_enabled`);
+    redirect(`${invitePath(locale, token)}?notice=not_enabled`);
   }
   if (result.status === "ok" && result.outcome === "accepted") {
     // An external-source referral carries declared context the person now
@@ -66,7 +81,7 @@ export async function acceptInviteFormAction(formData: FormData): Promise<void> 
     // it only to the person who accepted. Nothing was written to their
     // profile by accepting.
     if (result.hasDeclaredContext) {
-      redirect(`/${locale}/invite/${token}?notice=referral_accepted`);
+      redirect(`${invitePath(locale, token)}?notice=referral_accepted`);
     }
     // The agency's connection invitation: the partners door is where the
     // connection is confirmed, but that door is gated on the company role.
@@ -89,7 +104,7 @@ export async function acceptInviteFormAction(formData: FormData): Promise<void> 
     redirect(`/${locale}${destination}?notice=invitation_accepted`);
   }
   redirect(
-    `/${locale}/invite/${token}?notice=${encodeURIComponent(
+    `${invitePath(locale, token)}?notice=${encodeURIComponent(
       result.status === "ok" ? result.outcome : "error",
     )}`,
   );
@@ -102,10 +117,10 @@ export async function declineInviteFormAction(formData: FormData): Promise<void>
 
   const result = await declineInvitationAction({ token });
   if (result.status === "not-authed") {
-    redirect(`/${locale}/auth/login?next=/${locale}/invite/${token}`);
+    redirect(loginNext(locale, token));
   }
   redirect(
-    `/${locale}/invite/${token}?notice=${encodeURIComponent(
+    `${invitePath(locale, token)}?notice=${encodeURIComponent(
       result.status === "ok" ? result.outcome : "error",
     )}`,
   );

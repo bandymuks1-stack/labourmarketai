@@ -72,6 +72,7 @@ export async function DocumentJournalDraftReview({
               saved: t("journalDraft.saved"),
               savedLink: t("journalDraft.savedLink"),
               error: t("journalDraft.error"),
+              workDateHint: t("journalDraft.workDateHint"),
             }}
           />
         </div>

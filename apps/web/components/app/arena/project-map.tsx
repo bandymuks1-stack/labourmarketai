@@ -100,8 +100,8 @@ export async function ProjectMap({
                   {p.city}
                 </span>
               ) : null}
-              {/* Train D: derived progress — tasks + stages done/total,
-                  computed at read time. No countable work → an honest
+              {/* Train D: derived progress — leaf-task percent only (stages are a
+                  declared count when no task exists), computed at read time. No countable work → an honest
                   "no measurable progress yet" line, never 0% or 100%. */}
               {progress && progress[p.id] ? (
                 progress[p.id].percent !== null ? (
@@ -117,9 +117,18 @@ export async function ProjectMap({
                     </span>
                     <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {progress[p.id].percent}% (
-                      {progress[p.id].taskDone + progress[p.id].stageDone}/
-                      {progress[p.id].taskTotal + progress[p.id].stageTotal})
+                      {progress[p.id].taskDone}/{progress[p.id].taskTotal})
                     </span>
+                  </span>
+                ) : progress[p.id].basis === "stages" ? (
+                  <span
+                    className="font-mono text-meta uppercase tracking-label text-text-muted"
+                    data-testid={`project-progress-stages-${p.id}`}
+                  >
+                    {t("progressStages", {
+                      done: progress[p.id].stageDone,
+                      total: progress[p.id].stageTotal,
+                    })}
                   </span>
                 ) : (
                   <span

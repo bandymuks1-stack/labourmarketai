@@ -12,6 +12,7 @@ import { PublicEntry } from "@/components/marketing/public-entry";
 import { MarketProofBand } from "@/components/marketing/market-proof-band";
 import { PlayerCardShowcase } from "@/components/marketing/player-card-showcase";
 import { ProductChainBand } from "@/components/marketing/product-chain-band";
+import { TwoSidesSection } from "@/components/marketing/two-sides-section";
 import { TrustBand } from "@/components/marketing/trust-band";
 import { StartingContextsBand } from "@/components/marketing/starting-contexts-band";
 /* `PublicMarketMapBand` is deliberately NOT imported: the band is withdrawn
@@ -241,6 +242,11 @@ export async function FocusLanding({
 
                    It comes back when it can show a visitor real opportunity
                    geography, which is a boundary decision, not a copy change. */}
+            {/* TWO SIDES, ONE SPINE (premium completion 2026-10-02): the lifecycle
+                shared by professionals and companies — placed directly under
+                the entry, before the market proof. Presentation only. */}
+            <TwoSidesSection />
+
             <MarketProofBand market={market} locale={locale} />
 
             {/* ── REAL OPPORTUNITIES (owner directive 2026-09-23,

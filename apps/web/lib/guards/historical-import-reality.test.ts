@@ -241,7 +241,9 @@ describe("the company person page composes imported history (2026-09-20)", () =>
   it("through the ONE evidence read, via the person's LINKED roster row, with the shared primitives", () => {
     expect(page).toMatch(/<PersonImportedHistory workerId=\{worker\.id as string\} locale=\{locale\} \/>/);
     expect(section).toMatch(/\.eq\("linked_worker_id", workerId\)\s*\.eq\("link_state", "linked"\)/);
-    expect(section).toMatch(/listEvidenceRecords\(\s*\{ supabase, userId: user\.id, locale \},\s*\{ organizationPersonIds: personIds, limit: READ_LIMIT \},\s*\)/);
+    // PAGED to the end — the 50-record cap is gone (2026-10-07); a bound on the draw is disclosed
+    expect(section).toMatch(/listAllEvidenceRecords\(\s*\{ supabase, userId: user\.id, locale \},\s*\{ organizationPersonIds: personIds \},\s*\)/);
+    expect(section).not.toMatch(/READ_LIMIT|limit: 50/);
     // the standing through the canonical chip, the period through the ONE
     // period renderer every other surface uses (2026-09-23)
     expect(section).toMatch(/import \{\s*EvidenceState,\s*type EvidenceStanding,/);

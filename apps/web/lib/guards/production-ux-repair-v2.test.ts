@@ -142,7 +142,8 @@ describe("F2 — person page stays fail-closed and contact-free", () => {
 });
 
 describe("F12 — map location changes require explicit confirmation", () => {
-  const base = read("components/app/market-map-base.tsx");
+  // The controls of the one map (formerly market-map-base.tsx).
+  const base = read("components/app/market-map/map-location-controls.tsx");
   it("a map tap never persists directly — it stages a preview", () => {
     // pickFromMap must not call persist(); only savePreview does.
     const pick = base.slice(

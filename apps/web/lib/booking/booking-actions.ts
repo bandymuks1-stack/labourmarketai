@@ -1,5 +1,6 @@
 "use server";
 
+import { humanBookingNote, previousAgreedTerms } from "@/lib/booking/booking-note";
 import "server-only";
 
 import { cache } from "react";
@@ -714,7 +715,7 @@ async function readMyBookings(): Promise<BookingsListResult> {
       expectedEndDate: r.expected_end_date ?? null,
       locationCountry: r.location_country ?? null,
       roleText: r.role_text ?? null,
-      note: r.note ?? null,
+      note: humanBookingNote(r.note),
       isOwner: r.owner_id === user.id,
       readinessSnapshot: (r.readiness_snapshot as Record<string, unknown> | null) ?? null,
       createdAt: r.created_at,
@@ -776,10 +777,10 @@ async function attachProposerAndChangedTerms(
       // fresh proposal after a decline is not "changed terms" (walk 2026-09-28).
       seen.add(e.booking_request_id);
       if (!e.previous_terms) continue;
-      row.changedFrom = {
+      row.changedFrom = previousAgreedTerms({
         startDate: e.previous_terms.start_date ?? null,
         expectedEndDate: e.previous_terms.expected_end_date ?? null,
-      };
+      });
     }
   }
 }

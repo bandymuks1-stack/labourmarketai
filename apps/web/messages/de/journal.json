@@ -78,6 +78,11 @@
   "engagement": "Kontext",
   "engagementChoose": "Beschäftigung wählen…",
   "engagementAmbiguous": "Diese Arbeit könnte zu mehr als einer Beschäftigung gehören. Wählen Sie vor dem Speichern aus, zu welcher.",
+  "project": "Projekt",
+  "projectChoose": "Projekt wählen…",
+  "projectNone": "Keine Projektarbeit",
+  "projectAmbiguous": "Sie sind mehreren Projekten zugeordnet. Wählen Sie vor dem Speichern, zu welchem Projekt diese Stunden gehören (oder markieren Sie sie als keine Projektarbeit).",
+  "projectAuto": "Projekt: {name}",
   "unconfirmedTimeBlocked": "{count, plural, one {# erfasste Dauer wartet noch auf Ihre Durchsicht und würde nicht gespeichert.} other {# erfasste Dauern warten noch auf Ihre Durchsicht und würden nicht gespeichert.}} Behalten oder entfernen Sie sie zuerst.",
   "entry": {
     "reviewedBy": "Überprüft von",
@@ -100,7 +105,8 @@
       "approved": "Überprüft",
       "changes_requested": "Änderungen angefordert",
       "rejected": "Zurückgegeben",
-      "reasonLabel": "Grund"
+      "reasonLabel": "Grund",
+      "notEnabled": "Erfasst – Ihre Führungskraft hat die Bestätigung noch nicht aktiviert, daher prüft niemand diesen Eintrag; bis dahin bleibt es Ihre eigene Angabe"
     },
     "delete": "Eintrag löschen",
     "deleting": "Wird gelöscht...",
@@ -346,9 +352,35 @@
       "too_large": "Die Aufnahme ist zu groß (max. 25 MB).",
       "too_long": "Die Aufnahme ist zu lang (max. 10 Minuten).",
       "unavailable": "Der Transkriptionsserver ist derzeit nicht erreichbar.",
-      "undecodable": "Die Audiodatei konnte nicht gelesen werden — bitte erneut versuchen."
+      "undecodable": "Die Audiodatei konnte nicht gelesen werden — bitte erneut versuchen.",
+      "rate_limited": "Zu viele Aufnahmen in kurzer Zeit - warte kurz und versuche es erneut.",
+      "token_expired": "Die Upload-Sitzung ist abgelaufen - bitte erneut versuchen.",
+      "unauthorized": "Deine Sitzung ist für Sprache nicht berechtigt - bitte neu anmelden.",
+      "service_unreachable": "Der Transkriptionsserver ist nicht erreichbar. Prüfe die Verbindung und versuche es erneut; die Aufnahme bleibt auf dieser Seite erhalten."
     },
-    "permissionDenied": "Der Mikrofonzugriff wurde blockiert. Erlauben Sie den Zugriff in den Browsereinstellungen und versuchen Sie es erneut."
+    "permissionDenied": "Der Mikrofonzugriff wurde blockiert. Erlauben Sie den Zugriff in den Browsereinstellungen und versuchen Sie es erneut.",
+    "disclosureProvenance": "Der gespeicherte Eintrag wird als per Sprache diktiert und von dir geprüft markiert.",
+    "state": {
+      "ready": "Bereit. Wähle die Sprechsprache und starte die Aufnahme.",
+      "permissionRequired": "Dein Browser fragt beim Start nach der Mikrofonerlaubnis. Vor deiner Zustimmung wird nichts aufgenommen.",
+      "policyBlocked": "Die Sicherheitsrichtlinie der Seite blockiert hier das Mikrofon. Sprachaufnahme ist auf dieser Seite nicht verfügbar - du kannst den Eintrag als Text schreiben.",
+      "unsupported": "Dieser Browser kann hier kein Audio aufnehmen (sichere Seite und Mikrofonaufnahme nötig). Du kannst eine Audiodatei hochladen oder Text schreiben.",
+      "noDevice": "Auf diesem Gerät wurde kein Mikrofon gefunden.",
+      "deviceBusy": "Das Mikrofon wird von einer anderen App benutzt. Schließe sie und versuche es erneut.",
+      "cancelled": "Aufnahme abgebrochen. Nichts wurde hochgeladen oder gespeichert.",
+      "requesting": "Warte auf deine Erlaubnis für das Mikrofon...",
+      "interrupted": "Aufnahme pausiert, weil die Seite verborgen war. Setze fort, wenn du zurück bist.",
+      "interruptedKept": "Das Mikrofon wurde getrennt, die Aufnahme endete früher. Das Aufgenommene ist unten transkribiert - bitte prüfen.",
+      "uploading": "Aufnahme wird hochgeladen..."
+    },
+    "language": {
+      "label": "Sprechsprache",
+      "auto": "Automatisch erkennen",
+      "hint": "Wähle die Sprache, die du sprichst - sie muss nicht der Sprache dieser Seite entsprechen."
+    },
+    "recordAgain": "Erneut aufnehmen",
+    "announceStarted": "Aufnahme gestartet",
+    "announceMinutes": "{minutes} Min. aufgenommen"
   },
   "savedOpenCv": "Ihr CV ansehen",
   "dayNav": {
@@ -609,7 +641,11 @@
     "sessionExpired": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
     "noWorkerProfile": "Kein Arbeitnehmerprofil gefunden. Öffne die Kontoeinstellungen und aktiviere die Arbeitnehmerrolle.",
     "engagementRequired": "Wähle den Arbeitskontext (Organisation oder Projekt), zu dem dieser Eintrag gehört.",
+    "projectNotAssignable": "Das gewählte Projekt ist Ihnen nicht zugeordnet oder gehört zu einer anderen Organisation. Wählen Sie ein Projekt aus der Liste.",
     "notesRequired": "Beschreibe, was du gearbeitet hast — der Freitext ist der Kern dieses Eintrags.",
+    "workDateRequired": "Wähle den Tag, an dem diese Arbeit erledigt wurde.",
+    "workDateInvalid": "Das Arbeitsdatum ist kein gültiges Datum.",
+    "workDateFuture": "Das Arbeitsdatum darf nicht in der Zukunft liegen.",
     "quantityInvalid": "Die Menge muss eine nicht negative Zahl sein.",
     "unitSlugUnknown": "Diese Einheit wird noch nicht erkannt: {units}. Wählen Sie eine andere Einheit oder versuchen Sie es später erneut.",
     "sourceDocumentInvalid": "Das angegebene Quelldokument wurde in deinen Dokumenten nicht gefunden.",
@@ -944,6 +980,8 @@
     "photoClose": "Foto schließen",
     "photoPrev": "Vorheriges Foto",
     "photoNext": "Nächstes Foto",
-    "photoCounter": "{index} / {total}"
+    "photoCounter": "{index} / {total}",
+    "recordedOnly": "{count, plural, one {# erfasst — Bestätigung nicht aktiviert} other {# erfasst — Bestätigung nicht aktiviert}}",
+    "confirmationNotEnabled": "Ihre Führungskraft hat die Bestätigung noch nicht aktiviert – niemand prüft diese Einträge."
   }
 }

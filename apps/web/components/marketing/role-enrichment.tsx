@@ -27,6 +27,7 @@ export async function RoleEnrichment({
   ctaSource,
   ctaKind,
   ctaNext,
+  afterPreview,
 }: {
   root: "workers" | "companies" | "agencies";
   previewKey: "profile" | "demand" | "pool";
@@ -37,6 +38,9 @@ export async function RoleEnrichment({
    *  carries through `?next=`, so a page that promises ONE thing does not
    *  drop the visitor on the generic dashboard. Omitted = the default. */
   ctaNext?: string;
+  /** Optional block rendered right after the preview section (e.g. a page
+   *  that wants its benefit cards BELOW the visual proof, not above it). */
+  afterPreview?: React.ReactNode;
 }) {
   const t = await getTranslations(root);
   const sh = await getTranslations("shared");
@@ -66,7 +70,10 @@ export async function RoleEnrichment({
           {t(`${previewKey}.subcopy`)}
         </p>
         <div className="mt-10 grid items-center gap-10 lg:grid-cols-2">
-          <div className="flex justify-center">{preview}</div>
+          {/* min-w-0: a grid item defaults to its content's min width, so a
+              wide preview pushed the column past a phone screen (622 px in
+              375 px, prod 2026-09-29) and the card was clipped. */}
+          <div className="flex min-w-0 justify-center">{preview}</div>
           <ul className="flex flex-col gap-4">
             {bullets.map((b) => (
               <li key={b} className="flex items-start gap-3 text-sm text-text-secondary">
@@ -80,6 +87,8 @@ export async function RoleEnrichment({
           </ul>
         </div>
       </section>
+
+      {afterPreview}
 
       {/* (b) journey */}
       <section className="relative mx-auto max-w-container px-6 pt-20 sm:px-12">

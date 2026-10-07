@@ -53,7 +53,7 @@ export async function createProgramAction(_prev: ProgramActionState, formData: F
     p_description: description || null,
   });
   if (error) return mapErr(error.code, error.message);
-  revalidatePath("/[locale]/dashboard/company", "page");
+  revalidatePath("/[locale]/dashboard/company", "layout");
   return { status: "ok", id: typeof data === "string" ? data : undefined };
 }
 
@@ -73,7 +73,7 @@ export async function createCohortAction(_prev: ProgramActionState, formData: Fo
     p_ends_on: endsOn || null,
   });
   if (error) return mapErr(error.code, error.message);
-  revalidatePath("/[locale]/dashboard/company", "page");
+  revalidatePath("/[locale]/dashboard/company", "layout");
   return { status: "ok", id: typeof data === "string" ? data : undefined };
 }
 
@@ -90,7 +90,7 @@ export async function setCohortMemberAction(_prev: ProgramActionState, formData:
     p_status: status,
   });
   if (error) return mapErr(error.code, error.message);
-  revalidatePath("/[locale]/dashboard/company", "page");
+  revalidatePath("/[locale]/dashboard/company", "layout");
   return { status: "ok" };
 }
 
@@ -126,6 +126,6 @@ export async function updateProgramAction(_prev: ProgramActionState, formData: F
     p_description: description || null,
   });
   if (error) return mapErr(error.code, error.message);
-  revalidatePath("/[locale]/dashboard/company", "page");
+  revalidatePath("/[locale]/dashboard/company", "layout");
   return { status: "ok", id: programId };
 }

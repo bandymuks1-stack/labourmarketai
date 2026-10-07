@@ -1121,6 +1121,78 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     },
   },
 
+  // ORGANIZATION PERSON CARD — the historical person BEFORE claim.
+  // Organization-provided history exists before any account does; this is the
+  // address where the supplying organization sees one roster person with all of
+  // their recorded work, hours, skills the history points to, and claim status.
+  // It composes the EXISTING evidence readers and PersonImportedHistory; it
+  // adds no data model, no write path and no gate of any kind.
+  {
+    id: "/dashboard/company/people/[personId]",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "One roster person of the supplying organization as a historical Person card: who they are to this organization, ALL of the history the organization supplied (including records tied to no known project), the stated hours, the skills the history points to, and whether an account has claimed them yet. It exists whether or not the person has claimed an account.",
+    whyNotChat:
+      "The conversation can answer a single question about a person, but the card is where a manager stands while reading one person's whole supplied history across projects and years, with the roster one tap away; the chat links here and reads the same readers.",
+    whyNotExistingComponent:
+      "The worker page /dashboard/people/[workerId] is keyed on a linked account and renders nothing for an unclaimed person (41 of 43 roster people in production). The roster row is a list item, not a history. The history rendering is REUSED (PersonImportedHistory), not duplicated; only the destination keyed on the roster person was missing.",
+    owner: "Product architecture (DI) — owner decision 0020 (2026-10-07)",
+    ownsAction: null,
+
+    worldElement: "organizations",
+    whyNotExistingElement:
+      "It extends an existing element on the PERSON ↔ ORGANIZATION edge (§14 nodes PERSON, EVIDENCE, ORGANIZATION). No new element; it is the destination for evidence the model already holds.",
+    chatIntegration:
+      "Chat readbacks about a roster person link here; the card reads through the same evidence readers the chat answers from, and it adds no action the chat cannot already dispatch.",
+    avatarEffect:
+      "None — the card is read-only; claim later links an account and hands the PERSON control through the existing roster-claim flow.",
+    mapEffect:
+      "None — recorded as `reflectedOnMap: false` rather than invented.",
+    journalRelation:
+      "Read-only relation: organization-provided history is shown as such (not self-declared, not independently verified), and every write stays in the evidence import engine.",
+
+    pillar: "world_map",
+    objectType: "person",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "See, as the supplying organization, one roster person's whole supplied history before or without any account claim.",
+      graphEdge:
+        "PERSON ↔ EVIDENCE ↔ ORGANIZATION (§14 nodes PERSON, EVIDENCE, ORGANIZATION). The linked-worker page serves the claimed edge; no surface served the unclaimed person.",
+      whyReuseDamages:
+        "Reuse of /dashboard/people/[workerId] would require an account that does not exist yet (organization_people.link_state unlinked), hiding the organization's own history from it until a claim — the exact inversion the owner ruled out.",
+      evidence: [
+        "production read 2026-10-07: organization_evidence_records 2944 rows, all with organization_person_id; 41 of 43 organization_people unlinked",
+        "migration 20260907114500_organization_evidence_import_v1.sql: manager SELECT branches admit unlinked rows; only the subject branch requires link_state='linked'",
+        "apps/web/components/app/people/person-imported-history.tsx previously required link_state='linked' and rendered nothing for an unclaimed person",
+      ],
+      ownerRuling:
+        "Owner decision 0020 (2026-10-07, docs/DECISIONS/0020-organization-history-exists-before-claim.md): organization-provided historical worker data exists before account claim and must build the historical Person/worker card and company worker history; claim only later links an account.",
+    },
+  },
+
   // ORGANIZATION DOOR (needs) — owner IA correction 2026-09-16
   // (docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §2). One of the
   // doors the 1,709-line company hub was split into. It composes EXISTING

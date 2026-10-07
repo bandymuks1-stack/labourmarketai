@@ -10,7 +10,7 @@ import {
   absentWithinDays,
   getEmployerWorkerAvailability,
 } from "@/lib/planning/employer-availability";
-import { utcTodayKey } from "@/lib/time/display";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /**
  * Organization Today (V8 employer daily loop, GAP 2) — the manager's morning
@@ -66,7 +66,7 @@ export type OrganizationToday =
 const NEXT_DAYS = 7;
 
 export async function getOrganizationToday(): Promise<OrganizationToday> {
-  const todayIso = utcTodayKey();
+  const todayIso = (await viewerWorkToday()).todayIso;
 
   // Roster + absences — the W12 minimised availability read.
   let roster: number | null = null;

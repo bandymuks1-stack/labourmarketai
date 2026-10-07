@@ -20,6 +20,13 @@ import {
   type CreateJournalEntryResult,
 } from "@/lib/journal/actions";
 import type { WorkLogEngagement } from "@/lib/conversation/worklog-engagements";
+import { useTranslations } from "next-intl";
+import {
+  PROJECT_FIELD_NONE,
+  projectChoiceIsSatisfied,
+  projectPromptFor,
+  type AssignedProject,
+} from "@/lib/journal/project-attribution";
 
 export type DocumentJournalDraftFormLabels = {
   notesLabel: string;
@@ -29,7 +36,37 @@ export type DocumentJournalDraftFormLabels = {
   saved: string;
   savedLink: string;
   error: string;
+  /** Says the document does not state the work day — the worker chooses it. */
+  workDateHint: string;
 };
+
+function todayLocalIso(): string {
+  const d = new Date();
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+/**
+ * After a successful save, drop `?draftFrom` so a reload cannot re-open the
+ * draft and save the same text again. `history.replaceState` (Next syncs it
+ * with the router) rather than `router.replace`: the latter would re-render
+ * the server page without the draft section and remove the confirmation the
+ * worker is reading.
+ */
+function clearDraftFromUrl(): void {
+  try {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("draftFrom")) return;
+    url.searchParams.delete("draftFrom");
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${url.pathname}${url.search}${url.hash}`,
+    );
+  } catch {
+    /* URL cleanup is best-effort; the save already succeeded. */
+  }
+}
 
 export function DocumentJournalDraftForm({
   locale,
@@ -49,6 +86,17 @@ export function DocumentJournalDraftForm({
   const formRef = useRef<HTMLFormElement>(null);
   const [pending, startTransition] = useTransition();
   const [result, setResult] = useState<CreateJournalEntryResult | null>(null);
+  const tJournal = useTranslations("journal");
+  // Attribution is part of the draft: a document-derived entry is not saved as
+  // work evidence until the project question (2+ active projects) is answered.
+  const [engagementId, setEngagementId] = useState<string>(defaultEngagementId ?? "");
+  const [projectChoice, setProjectChoice] = useState<string>("");
+  const contextProjects: AssignedProject[] =
+    engagements.find((e) => e.id === engagementId)?.projects ?? [];
+  const projectPrompt = projectPromptFor(contextProjects);
+  const projectChoiceValid = projectChoiceIsSatisfied(contextProjects, projectChoice)
+    ? projectChoice
+    : "";
 
   if (result?.ok) {
     return (
@@ -75,10 +123,21 @@ export function DocumentJournalDraftForm({
       onSubmit={(e) => {
         e.preventDefault();
         if (!formRef.current || pending) return;
+        if (!projectChoiceIsSatisfied(contextProjects, projectChoiceValid)) {
+          setResult({
+            ok: false,
+            code: "project_required",
+            message: tJournal("projectAmbiguous"),
+          });
+          return;
+        }
         const fd = new FormData(formRef.current);
+        if (projectPrompt === "ask") fd.set("project_id", projectChoiceValid);
         startTransition(async () => {
           try {
-            setResult(await createJournalEntry(fd));
+            const saved = await createJournalEntry(fd);
+            setResult(saved);
+            if (saved.ok) clearDraftFromUrl();
           } catch {
             setResult({
               ok: false,
@@ -107,11 +166,25 @@ export function DocumentJournalDraftForm({
         />
       </label>
       <label className="flex flex-col gap-1 text-sm text-text-secondary">
+        {tJournal("date")}
+        <input
+          type="date"
+          name="work_date"
+          required
+          defaultValue=""
+          max={todayLocalIso()}
+          className="w-full max-w-xs rounded-md border border-ink-500 bg-ink-800/40 p-2 text-sm text-text-primary"
+          data-testid="doc-journal-draft-work-date"
+        />
+        <span className="text-xs text-text-muted">{labels.workDateHint}</span>
+      </label>
+      <label className="flex flex-col gap-1 text-sm text-text-secondary">
         {labels.engagementLabel}
         <select
           name="engagement_context_id"
           required
           defaultValue={defaultEngagementId ?? ""}
+          onChange={(e) => setEngagementId(e.target.value)}
           className="w-full max-w-md rounded-md border border-ink-500 bg-ink-800/40 p-2 text-sm text-text-primary"
           data-testid="doc-journal-draft-engagement"
         >
@@ -123,6 +196,25 @@ export function DocumentJournalDraftForm({
           ))}
         </select>
       </label>
+      {projectPrompt === "ask" ? (
+        <label className="flex flex-col gap-1 text-sm text-text-secondary">
+          {tJournal("project")}
+          <select
+            value={projectChoiceValid}
+            onChange={(e) => setProjectChoice(e.target.value)}
+            className="w-full max-w-md rounded-md border border-ink-500 bg-ink-800/40 p-2 text-sm text-text-primary"
+            data-testid="doc-journal-draft-project"
+          >
+            <option value="">{tJournal("projectChoose")}</option>
+            {contextProjects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.label}
+              </option>
+            ))}
+            <option value={PROJECT_FIELD_NONE}>{tJournal("projectNone")}</option>
+          </select>
+        </label>
+      ) : null}
       {result && !result.ok ? (
         <p
           role="alert"

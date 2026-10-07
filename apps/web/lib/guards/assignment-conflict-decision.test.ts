@@ -23,7 +23,9 @@ describe("assignment conflict decision", () => {
 
   it("alternatives are looked up only after a collision and never fail the assignment", () => {
     expect(actions).toMatch(/verdict\.state !== "collides"\) return \{ verdict, alternatives: \[\] \}/);
-    expect(actions).toMatch(/freeColleagues[\s\S]{0,900}catch/);
+    // The lookup moved to its own module so the read-only pre-check shares it.
+    expect(actions).toMatch(/freeColleagues\(supabase, workerProfileId, projectId, window\)/);
+    expect(read("lib/projects/free-colleagues.ts")).toMatch(/export async function freeColleagues[\s\S]{0,1600}catch/);
   });
 
   it("the panel offers undo and swap on a collision, with the assignment it answers", () => {

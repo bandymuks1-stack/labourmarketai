@@ -66,7 +66,10 @@ vi.mock("@/lib/supabase/admin", () => ({
     return fakeClient("admin");
   }),
 }));
-vi.mock("@/lib/auth/superadmin", () => ({ isSuperadmin: vi.fn(async () => false) }));
+vi.mock("@/lib/auth/superadmin", () => ({
+  isSuperadmin: vi.fn(async () => false),
+  isSuperadminFor: vi.fn(async () => false),
+}));
 vi.mock("@/lib/billing/config", () => ({ getBillingConfig: () => state.config }));
 vi.mock("@/lib/billing/billing-subject", () => ({
   resolveBillingSubject: vi.fn(async () => state.subject),
@@ -204,5 +207,20 @@ describe("unauthenticated", () => {
     const ent = await getEffectiveEntitlements();
     expect(ent.profileId).toBeNull();
     expect(subsCalls()).toHaveLength(0);
+  });
+});
+
+describe("explicit caller (bearer / MCP) — no cookie session, the caller's own organization", () => {
+  it("resolves the caller's organization plan even though the cookie session has NO user (defect 2026-09-30)", async () => {
+    state.user = null; // a bearer request carries no cookie session
+    state.subject = { subject: null };
+    state.handler = (c) => (c.table === "billing_subscriptions" ? { data: [ORG_ROW] } : { data: [] });
+    const caller = { supabase: fakeClient("user") as never, userId: "manager-1", organizationId: "org-7" };
+    const ctx = await getEffectiveEntitlements(caller);
+    expect(ctx.profileId).toBe("manager-1");
+    expect(ctx.effectivePlanKey).toBe("company_pilot");
+    const sub = state.calls.find((c) => c.table === "billing_subscriptions")!;
+    expect(sub.client).toBe("admin");
+    expect(sub.filters).toContainEqual(["organization_id", "org-7"]);
   });
 });

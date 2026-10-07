@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/server";
 import { listWorkspaceMemberships, withSessionWorkspacePointer } from "@/lib/company/active-organization";
 import { resolveEvidenceOrganization } from "@/lib/organization-evidence/evidence-org-context";
-import { listEvidenceRecords } from "@/lib/organization-evidence/import-core";
+import { listAllEvidenceRecords } from "@/lib/organization-evidence/evidence-pagination";
 import { attributePersonToPerformingCompanyAction } from "@/lib/organization-evidence/import-actions";
 import { formatHoursAsStated } from "@/lib/organization-evidence/period-provenance";
 import { PerformingCompanyForm } from "@/components/app/organization/performing-company-form";
@@ -44,7 +44,8 @@ export async function PerformingCompanyPanel({ locale }: { locale: string }) {
     .map((w) => ({ id: w.id, name: w.name?.trim() || w.id }));
   if (options.length === 0) return null;
 
-  const recs = await listEvidenceRecords(caller, { organizationId: org.organizationId, limit: 1000 });
+  // PAGED to the end (the server answers 1000 rows at most); a safety ceiling is disclosed below.
+  const recs = await listAllEvidenceRecords(caller, { organizationId: org.organizationId });
   if (recs.kind !== "ok") return null;
   const live = recs.records.filter((r) => !r.withdrawn);
   if (live.length === 0) return null;
@@ -68,6 +69,7 @@ export async function PerformingCompanyPanel({ locale }: { locale: string }) {
     done: t("done", { count: "{count}", skipped: "{skipped}" }),
     refused: t("refused"),
   };
+  const tHistory = await getTranslations("companyWorkHistory");
   const nameOf = new Map(options.map((o) => [o.id, o.name]));
 
   return (
@@ -75,6 +77,11 @@ export async function PerformingCompanyPanel({ locale }: { locale: string }) {
       <header className="flex flex-col gap-1">
         <h2 className="font-display text-xl font-bold tracking-tightest text-text-primary">{t("title")}</h2>
         <p className="text-sm leading-relaxed text-text-secondary">{t("intro")}</p>
+        {recs.truncated ? (
+          <p className="text-meta text-text-muted" data-testid="performing-company-truncated">
+            {tHistory("truncated", { count: recs.records.length })}
+          </p>
+        ) : null}
       </header>
       <ul className="flex flex-col gap-2">
         {[...byPerson.entries()]

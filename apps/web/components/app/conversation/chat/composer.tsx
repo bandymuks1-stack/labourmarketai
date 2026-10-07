@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Paperclip, ArrowUp, FileText, X } from "lucide-react";
+import { Paperclip, ArrowUp, FileText, Mic, X } from "lucide-react";
 
 import { iconControl, iconInline } from "./icon-scale";
 
@@ -56,7 +56,15 @@ export function Composer({
   attachSelectedLabel,
   variant = "bar",
   prefill,
+  onVoice,
+  voiceLabel,
 }: {
+  /** The voice door: a second way to enter the SAME turn. Rendered only when
+   *  the owner-configured transcription service exists (honest absence). It
+   *  opens the capture panel; the reviewed text comes back through `onSend`
+   *  like typed text. */
+  onVoice?: () => void;
+  voiceLabel?: string;
   placeholder: string;
   attachLabel: string;
   sendLabel: string;
@@ -248,6 +256,18 @@ export function Composer({
               <Paperclip {...iconControl()} aria-hidden />
             </button>
           </>
+        )}
+        {onVoice && (
+          <button
+            type="button"
+            onClick={onVoice}
+            aria-label={voiceLabel}
+            data-testid="composer-voice"
+            data-tap-floor="off"
+            className="ua-press flex size-11 flex-none items-center justify-center rounded-full border border-ink-500 text-text-secondary hover:border-brand-blue hover:text-brand-blue"
+          >
+            <Mic {...iconControl()} aria-hidden />
+          </button>
         )}
         <textarea
           ref={ref}

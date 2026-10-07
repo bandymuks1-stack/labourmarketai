@@ -223,7 +223,10 @@
           "error": "[EN] Couldn't send. Please try again.",
           "progressHelper": "[EN] These steps show progress. Active actions are shown below.",
           "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
-          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
+          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
+          "openNeedUsage": "Active positions: {used} of {limit} used · {remaining} remaining",
+          "openNeedUsageUpgradeCta": "Activate the Organization plan",
+          "openNeedUsageIndividual": "You have reached the Organization plan limit. For more than the included positions, contact us for an individual plan."
         }
       },
       "account": {
@@ -391,6 +394,11 @@
         "event_weekly_digest": "Din ugentlige oversigt over arbejde og muligheder er klar",
         "event_saved_search_match": "En gemt søgning har nye resultater",
         "event_job_alert": "Der er et nyt job, der passer til det, du søger",
+        "event_message_received": "Du har en ny besked",
+        "event_journal_review_decided": "Din journalpost er blevet gennemgået",
+        "event_journal_review_decided_approved": "Din journalpost er bekræftet",
+        "event_journal_review_decided_rejected": "Din journalpost er afvist",
+        "event_journal_review_decided_changes_requested": "Der er anmodet om ændringer i din journalpost",
         "event_weekly_digest_profile_completion": "For at vise dig passende job, bekræft hvilket arbejde du udfører",
         "event_weekly_digest_journal": "Ugens oversigt over din arbejdsjournal er klar"
       },
@@ -1272,7 +1280,7 @@
         },
         {
           "desc": "[EN] Completed work strengthens your proof and readiness.",
-          "title": "[EN] Work, earn, level up"
+          "title": "[EN] Work, earn, build your record"
         }
       ]
     },
@@ -1933,7 +1941,8 @@
         "paused": "På pause",
         "completed": "Afsluttet"
       },
-      "progressNone": "Ingen målbar fremgang endnu"
+      "progressNone": "Ingen målbar fremgang endnu",
+      "progressStages": "{done} af {total} faser markeret som færdige"
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# post venter på din bekræftelse} other {# poster venter på din bekræftelse}}",
@@ -1954,7 +1963,8 @@
       "label": "Aktive eller afsluttede projekter",
       "active": "Aktive",
       "archived": "Afsluttede",
-      "empty": "Ingen afsluttede projekter endnu."
+      "empty": "Ingen afsluttede projekter endnu.",
+      "partial": "Viser de seneste {shown} af {total}."
     }
   },
   "projectOps": {
@@ -1971,6 +1981,15 @@
       "noActivity": "Ingen poster endnu.",
       "emptyTeam": "Dette projekt har endnu intet hold — start draften og få de første folk på banen.",
       "emptyTeamCta": "Start draften",
+      "history": {
+        "title": "Tidligere arbejde på dette projekt",
+        "provenance": "Historik leveret af organisationen, importeret fra organisationens egne optegnelser. Ikke uafhængigt verificeret.",
+        "unavailable": "Tidligere arbejde kunne ikke læses lige nu. Det betyder ikke, at der intet er.",
+        "empty": "Der er ikke registreret tidligere arbejde leveret af organisationen for dette projekt.",
+        "personUnknown": "Person ikke angivet",
+        "hoursUnknown": "Timer ikke angivet",
+        "count": "{n} poster"
+      },
       "positionsTitle": "Manglende positioner",
       "positionsEmpty": "Modulet for positionsbehov er stadig under forberedelse — når det kommer, kan du her se, hvilke folk der mangler.",
       "openOps": "Åbn management-arenaen"
@@ -1989,6 +2008,7 @@
       "title": "Projektstyring",
       "progressLabel": "Fremgang",
       "progressNone": "Ingen målbar fremgang endnu",
+      "progressStages": "{done} af {total} faser markeret som færdige",
       "responsibleLabel": "Ansvarlig person",
       "responsibleNone": "Ikke angivet",
       "responsibleSave": "Gem",
@@ -2313,6 +2333,7 @@
   "scouting": {
     "pool": {
       "factsUnreadable": "Noget af det, disse personer har registreret, kunne ikke læses lige nu, så denne rækkefølge er ikke pålidelig. Ingen vises her med mindre, end de har — det er fakta bag sammenligningen, der mangler. Genindlæs om et øjeblik.",
+      "historyUnavailable": "Historik leveret af organisationer kunne ikke læses lige nu, så den vises ikke. Det betyder ikke, at der ingen er, og rækkefølgen ovenfor afhænger ikke af den.",
       "capped": "Ikke alle blev sammenlignet. Flere synlige arbejdere passer til dette behov, end én liste kan rumme, så de {count}, hvis kompetencer, fag og land passer mest direkte, blev hentet først — aldrig de nyeste registreringer. Indsnævr behovet for at være sikker på, at de rette personer sammenlignes.",
       "complete": "Alle {count} synlige arbejdere blev sammenlignet med dette behov."
     },
@@ -2336,6 +2357,10 @@
     "namePlaceholder": "Arbejder",
     "skillFit": "{matched}/{total} krævede færdigheder, {confirmed} bekræftet af leder",
     "evidence": "Dokumentation — bekræftet: {confirmed} · journal: {journal} · selvangivet: {self}",
+    "confirmedWork": "Bekræftet gennem arbejde: {work} af {matched} matchende færdigheder (gentaget: {repeated})",
+    "historySignal": "Nævnt i historik leveret af organisationer: {history} af {matched} matchende færdigheder (et signal, ikke verifikation)",
+    "evidenceNone": "Ikke bekræftet",
+    "experienceYearsValue": "{years, plural, one {# år} other {# år}}",
     "shortlistError": "Kunne ikke gemme. Prøv igen.",
     "footnote": "Match beregnes deterministisk kun for dette behov. Ingen global rating, ingen falske kandidater.",
     "status": {
@@ -2420,12 +2445,15 @@
       "link": "Present a candidate"
     },
     "identity": {
+      "noRecords": "Endnu ingen arbejdsregistreringer",
+      "noManagerRecord": "Endnu ingen registrering fra lederen",
       "why": "Hvorfor denne person er relevant",
       "skills": "Relevante færdigheder og hvad de bygger på",
       "readiness": "Tilgængelighed, parathed og dokumenter",
       "openTo": "Også åben for: {countries}",
       "skillCount": "{matched} af {total} krævede færdigheder",
-      "nameHidden": "Navn og kontaktoplysninger vises først, når personen tillader det."
+      "nameHidden": "Navn og kontaktoplysninger vises først, når personen tillader det.",
+      "appliedToYou": "Har ansøgt om dette behov — navn og billede følger med ansøgningen. Telefon og e-mail forbliver skjult."
     }
   },
   "waze": {
@@ -3966,6 +3994,13 @@
       "findWorkInCompanyContext": "At søge job er din egen handling — i virksomhedsrummet kører jeg den ikke. Skift til dit personlige rum og spørg igen.",
       "findWorkInCompanyWhy": "En person søger job, ikke en virksomhed — jeg svarer fra dit personlige rum.",
       "personalOnlyInCompany": "Det er en personlig handling — i en virksomhedsplads udfører jeg den ikke. Skift til dit personlige rum, og fortsæt der.",
+      "newJobsIntro": "Nye opslag, der passer til dine ønsker: {count}.",
+      "newJobsAll": "Alle muligheder",
+      "newJobsNone": "Der er ikke kommet nye opslag, der passer til dine ønsker, de seneste dage. Alle muligheder finder du på siden med muligheder.",
+      "newJobsNeedProfession": "For at vise nye job skal du fortælle, hvilket fag du søger.",
+      "newJobsNeedCountry": "For at vise nye job skal du fortælle, hvilke lande du vil arbejde i.",
+      "newJobsNoProfile": "For at vise nye job skal jeg først bruge din profil.",
+      "newJobsUnavailable": "Nye job kunne ikke kontrolleres lige nu. Prøv igen senere.",
       "openConversationOpening": "Åbner samtalen med {name}.",
       "openConversationNone": "Jeg fandt ikke den person blandt dine samtaler eller dit team. Dine beskeder ligger under beskeder.",
       "openConversationWhich": "Hvilken person mener du?",
@@ -5392,7 +5427,8 @@
       "refusedType": "Denne filtype kan ikke læses som tekst.",
       "empty": "Ingen læsbar tekst fundet i dette dokument.",
       "failed": "Dokumentet kunne ikke læses.",
-      "noEngagement": "Du skal først have en arbejdskontekst — åbn dashboardet og opret en."
+      "noEngagement": "Du skal først have en arbejdskontekst — åbn dashboardet og opret en.",
+      "workDateHint": "Dokumentet oplyser ikke, hvilken dag arbejdet blev udført. Vælg datoen selv — intet udfyldes for dig."
     },
     "currentVersion": "Version {n}",
     "download": "Download",
@@ -6663,9 +6699,54 @@
         "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company."
       },
       "workers": {
-        "invitationsManagedElsewhere": "Invitationer håndteres af den person i virksomheden, der har ansvaret for dem."
+        "invitationsManagedElsewhere": "Invitationer håndteres af den person i virksomheden, der har ansvaret for dem.",
+        "team": {
+          "free": "Ledig",
+          "working": "Arbejder",
+          "away": "Fraværende",
+          "countFree": "Ledige",
+          "countWorking": "Arbejder",
+          "countAway": "Fraværende",
+          "workingOn": "Arbejder på: {project}",
+          "until": "til {date}",
+          "awayUntil": "Fraværende til {date}",
+          "assign": "Tildel til projekt",
+          "openCalendar": "Åbn kalender"
+        }
       }
     }
+  },
+  "cvOrganizationHistory": {
+    "title": "Arbejdshistorik leveret af organisationer",
+    "note": "Hentet fra de nævnte organisationers egne registreringer. Den er hverken selverklæret eller uafhængigt verificeret.",
+    "untitled": "Arbejde registreret af en organisation",
+    "hoursTerm": "Timer",
+    "hoursRecorded": "{hours} t registreret i {count, plural, one {# registrering} other {# registreringer}}",
+    "hoursPeriod": "{hours} t opgivet for en periode, i {count, plural, one {# registrering} other {# registreringer}}",
+    "contested": "Bestridt af en part med ret til det",
+    "more": "{count, plural, one {# post mere} other {# poster mere}} vises ikke"
+  },
+  "historyContext": {
+    "project": "Projekt",
+    "place": "Sted eller arbejdspakke",
+    "client": "Bygherre / kunde",
+    "otherParties": "Andre involverede",
+    "capacity": "Rolle",
+    "source": "Kilde",
+    "suppliedBy": "Leveret af {name}",
+    "reconstructed": "Rekonstrueret fra tidligere registreringer",
+    "recordedAt": "Registreret i systemet",
+    "proofTitle": "Hvad der ligger bag",
+    "proof": {
+      "SELF_DECLARED": "Oplyst af personen",
+      "EVIDENCE_SUPPORTED": "Understøttet af en organisations registrering",
+      "EMPLOYER_CONFIRMED": "Bekræftet af arbejdsgiveren",
+      "CLIENT_ACCEPTED": "Godkendt af kunden",
+      "SUPERVISOR_CONFIRMED": "Bekræftet af en leder",
+      "INDEPENDENTLY_VERIFIED": "Uafhængigt verificeret"
+    },
+    "attestedAs": "bekræftet som {role}",
+    "proofNote": "Hver linje er et selvstændigt faktum. En bekræftelse fra den leverende organisation er ikke kundens godkendelse og ikke betaling, og ingen af dem er uafhængig verificering, medmindre det står der."
   },
   "evidenceImport": {
     "records": {
@@ -6857,6 +6938,220 @@
       "done": "{count} poster tilskrevet; {skipped} var allerede tilskrevet.",
       "refused": "Dette kunne ikke gemmes. Intet er ændret.",
       "person": "{hours} t, {count, plural, one {# post} other {# poster}}"
+    },
+    "truncated": "Der findes flere poster, end én visning læser. De {count} læste vises; summer dækker kun dem."
+  },
+  "workLifecycle": {
+    "pending": "Endnu ikke",
+    "title": "Hvad der sker med det arbejde, du udfører",
+    "titleCompany": "Hvad der sker med det arbejde, du driver",
+    "example": "Eksempel — ikke en rigtig person eller rigtige data",
+    "hint": "Vælg et trin. Hvert trin åbner det rigtige sted i dit arbejdsområde.",
+    "open": "Åbn i dit arbejdsområde",
+    "list": "Trin i arbejdets forløb",
+    "workers": {
+      "person": {
+        "label": "Dig",
+        "fact": "Kok — professionel identitet",
+        "detail": "Én professionel identitet, der er din — ikke knyttet til én arbejdsgiver."
+      },
+      "team": {
+        "label": "Hold",
+        "fact": "Køkkenhold",
+        "detail": "Du bliver en del af et rigtigt hold, med dem du arbejder sammen med og den, der leder det."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Lancering af efterårsmenu",
+        "detail": "Arbejdet hører til et projekt, så det har et sted, et formål og en tid."
+      },
+      "work": {
+        "label": "Arbejde",
+        "fact": "Aftenservice — 8 t",
+        "detail": "Hvad du lavede, hvornår og i hvor lang tid — registreret, mens det sker."
+      },
+      "evidence": {
+        "label": "Dokumentation",
+        "fact": "Foto + journalpost",
+        "detail": "Udført arbejde bliver til dokumentation i stedet for at forsvinde."
+      },
+      "confirmation": {
+        "label": "Bekræftet",
+        "fact": "Bekræftet af leder",
+        "detail": "En leder bekræfter det. Intet kaldes verificeret uden det."
+      },
+      "history": {
+        "label": "Historik",
+        "fact": "Tilføjet til din historik",
+        "detail": "Bekræftet arbejde opbygger din professionelle historik — den følger dig til næste job."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Behov",
+        "fact": "4 kokke, fra mandag",
+        "detail": "Du angiver det reelle behov én gang: hvem, hvor og fra hvornår."
+      },
+      "people": {
+        "label": "Personer",
+        "fact": "Professionelle, der passer",
+        "detail": "Professionelle, hvis faktiske arbejdshistorik passer til behovet — med det, der er verificeret, og det, der endnu ikke er."
+      },
+      "team": {
+        "label": "Hold",
+        "fact": "Køkkenhold",
+        "detail": "Personer bliver til et hold med en leder, vagter og et sted at arbejde."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Lancering af efterårsmenu",
+        "detail": "Holdene organiseres omkring det projekt, de leverer."
+      },
+      "work": {
+        "label": "Arbejde",
+        "fact": "Aftenservice — 8 t",
+        "detail": "Arbejdet registreres der, hvor det sker, og rekonstrueres ikke bagefter."
+      },
+      "confirmation": {
+        "label": "Bekræftet",
+        "fact": "Afventer din bekræftelse",
+        "detail": "Du kan se, hvad der stadig mangler at blive bekræftet, og hvad der allerede er gjort."
+      },
+      "report": {
+        "label": "Rapport",
+        "fact": "Rapport fra reelt arbejde",
+        "detail": "Rapporter bygger på bekræftet arbejde — ingen skriver dem om."
+      }
     }
+  },
+  "twoSides": {
+    "title": "Ansættelse er begyndelsen, ikke enden.",
+    "professional": "Fagperson",
+    "company": "Virksomhed",
+    "steps": {
+      "find": {
+        "label": "Find",
+        "worker": "Finder arbejde, der passer til det, de rent faktisk har lavet",
+        "company": "Finder folk, hvis faktiske arbejde passer til behovet"
+      },
+      "connect": {
+        "label": "Forbind",
+        "worker": "Taler på deres eget sprog",
+        "company": "Ansætter gennem en ægte samtale"
+      },
+      "work": {
+        "label": "Arbejd",
+        "worker": "Registrerer arbejdet, mens det sker",
+        "company": "Driver arbejdet sammen med sine folk"
+      },
+      "verify": {
+        "label": "Bekræft",
+        "worker": "En leder bekræfter det",
+        "company": "Bekræfter, hvad der rent faktisk blev udført"
+      },
+      "grow": {
+        "label": "Vokse",
+        "worker": "Bekræftet arbejde bliver deres historik",
+        "company": "Rapporter bygger på bekræftet arbejde"
+      },
+      "continue": {
+        "label": "Fortsæt",
+        "worker": "Tager historikken med til næste job",
+        "company": "Planlægger næste projekt med folk, de kender"
+      }
+    }
+  },
+  "evidenceChain": {
+    "label": "Indførslens status",
+    "own": "Af dig",
+    "nodes": {
+      "recorded": "Registreret",
+      "photo": "Foto",
+      "manager": "Lederens indførsel",
+      "history": "I din historik"
+    },
+    "status": {
+      "done": "Klar",
+      "waiting": "Venter",
+      "absent": "Ikke endnu",
+      "attention": "Kræver dig",
+      "unknown": "Ukendt"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Levende CV",
+    "title": "Dit arbejde bliver til din historie",
+    "now": "Nu",
+    "noRecords": "Ingen arbejdsregistreringer endnu",
+    "legend": {
+      "managerRecord": "Lederens registrering",
+      "recorded": "Registreret af dig"
+    },
+    "skillsTitle": "Hvad dit arbejde viser",
+    "next": {
+      "title": "Din historie følger dig",
+      "body": "Hvert job, du registrerer, føjer til den. Tag den med til den næste mulighed.",
+      "cta": "Se, hvor du kan komme hen"
+    }
+  },
+  "workContext": {
+    "title": "Dit arbejde på ét sted",
+    "nodes": {
+      "current": "Arbejder nu",
+      "records": "Registreringer",
+      "manager": "Lederens registrering",
+      "history": "Historik",
+      "skills": "Færdigheder",
+      "next": "Næste"
+    },
+    "facts": {
+      "records": "{count, plural, one {# registrering} other {# registreringer}}",
+      "manager": "{count, plural, one {# registrering fra lederen} other {# registreringer fra lederen}}",
+      "history": "{count, plural, one {# job} other {# jobs}}",
+      "skills": "{count, plural, one {# færdighed baseret på dine registreringer} other {# færdigheder baseret på dine registreringer}}",
+      "next": "Hvor du kan gå hen"
+    }
+  },
+  "companyPerson": {
+    "eyebrow": "Historisk personkort",
+    "back": "Personer",
+    "badge": "Leveret af organisationen, ikke uafhængigt verificeret",
+    "provenance": "Det er, hvad {name} har registreret om denne person. Ingen andre har bekræftet det, og det afhænger ikke af, om personen har en konto.",
+    "claim": {
+      "unlinked": "Endnu ikke knyttet til en konto — historikken er allerede registreret her.",
+      "link_proposed": "En kobling til en konto er tilbudt og afventer personens svar — historikken er allerede registreret her.",
+      "linked": "Knyttet til personens egen konto.",
+      "openProfile": "Åbn personens side"
+    },
+    "unavailable": "Personens historik kunne ikke læses lige nu. Det betyder ikke, at der ingen er.",
+    "empty": "Der er endnu ingen historikposter for denne person. Læsningen lykkedes — der er ingen.",
+    "stats": {
+      "records": "Poster",
+      "hours": "Timer som angivet",
+      "period": "Periode"
+    },
+    "noHours": "Poster uden angivne timer: {count}. Ukendte timer tælles ikke som nul.",
+    "undated": "Poster uden angivet dato: {count}. De bliver i historikken nedenfor.",
+    "periodApart": "{hours} t af summen er periodesummer, holdt adskilt og aldrig fordelt på dage eller måneder.",
+    "noWorkObject": "Poster uden tilknytning til et projekt eller sted, platformen kender: {count}. De bliver i denne historik under deres kildebetegnelse.",
+    "places": {
+      "title": "Efter projekt eller sted",
+      "none": "Projekt eller sted ikke registreret",
+      "records": "Poster: {count}"
+    },
+    "months": {
+      "title": "Angivne timer pr. måned",
+      "note": "Kun poster for enkeltdage. Periodesummer fordeles aldrig på dage eller måneder."
+    },
+    "skills": {
+      "title": "Færdigheder, historikken peger på",
+      "note": "Udledt af organisationens historik, ikke verificeret. En færdighed vises, når organisationen selv har nævnt den; det er ikke en påstand om personen.",
+      "records": "Poster: {count}",
+      "empty": "Ingen færdighed er nævnt i disse poster.",
+      "unavailable": "Færdighedssignaler kunne ikke læses lige nu. Det betyder ikke, at der ingen er.",
+      "truncated": "Der er flere færdighedssignaler, end denne visning læser."
+    },
+    "shown": "Viser de nyeste {shown} af {total} poster. Resten forbliver registreret.",
+    "truncated": "Der findes flere poster, end én visning læser. De {count} læste vises; summer dækker kun dem."
   }
 }

@@ -22,6 +22,8 @@ import { ConnectedAppsSection } from "@/components/app/connected-apps-section";
 import { parseConnectedAppsFeedback } from "@/lib/auth/connected-apps";
 import { AdminUiToggle } from "@/components/app/admin-ui-toggle";
 import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
+import { isStripeActive } from "@/lib/billing/config-core";
+import { getBillingConfig } from "@/lib/billing/config";
 import {
   NotificationPreferencesSection,
   type NotificationPreferenceRowView,
@@ -142,6 +144,10 @@ export default async function AccountPage({
     // Honest degradation: unknown status → show no status line at all.
   }
 
+  // Live billing is configured → the "payments not active yet" copy would
+  // contradict the real order control below. Same gate as /pricing.
+  const billingLive = isStripeActive(getBillingConfig());
+
   return (
     <div className="flex flex-col gap-5">
       <header>
@@ -155,9 +161,11 @@ export default async function AccountPage({
 
       {/* Honest payment readiness — payments are not active yet (billing
           disabled). No pay-now, no subscription-active, no paid unlock. */}
-      <FeatureNote testId="account-payment-readiness">
-        {tRoot("featureNotes.paymentReadiness")}
-      </FeatureNote>
+      {!billingLive && (
+        <FeatureNote testId="account-payment-readiness">
+          {tRoot("featureNotes.paymentReadiness")}
+        </FeatureNote>
+      )}
 
       {/* Your plan — billing readiness status (CR train WAGON 4). Settings-
           appropriate honest section reusing the WAGON 2 pattern: free pilot,
@@ -175,12 +183,16 @@ export default async function AccountPage({
         <p className="mt-2 text-sm text-text-primary">
           {tRoot("accountPlan.freePilot")}
         </p>
-        <p className="mt-2 text-xs leading-relaxed text-text-secondary">
-          {tRoot("accountPlan.prepared")}
-        </p>
-        <p className="mt-2 text-meta text-text-muted">
-          {tRoot(`planBoundary.readiness.${PRICING_READINESS_STATE}`)}
-        </p>
+        {!billingLive && (
+          <>
+            <p className="mt-2 text-xs leading-relaxed text-text-secondary">
+              {tRoot("accountPlan.prepared")}
+            </p>
+            <p className="mt-2 text-meta text-text-muted">
+              {tRoot(`planBoundary.readiness.${PRICING_READINESS_STATE}`)}
+            </p>
+          </>
+        )}
         <Link
           href="/pricing"
           className="mt-3 flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"

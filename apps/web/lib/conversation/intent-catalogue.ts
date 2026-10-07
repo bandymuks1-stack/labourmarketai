@@ -50,6 +50,8 @@ export const INTENT_HINTS: Readonly<Record<RoutedIntent, string>> = {
   "need-service": "a company or person needs a service from the marketplace",
   "open-conversation":
     "the speaker wants to message or open a conversation with a NAMED person ('parašyk Jonui', 'atidaryk pokalbį su Jonu', 'message Anna')",
+  "new-jobs":
+    "asks which NEW jobs appeared for the person ('kokių naujų darbų man atsirado?', 'any new jobs for me?') - not a fresh search",
   "product-help":
     "asks HOW to use the product or WHERE something is ('kaip pridėti žmogų?', 'kur mano valandos?', 'kodėl atsirado šis perspėjimas?', 'how do I schedule a worker?')",
   "find-partners":

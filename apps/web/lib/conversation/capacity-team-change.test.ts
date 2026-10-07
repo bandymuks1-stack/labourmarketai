@@ -53,6 +53,7 @@ function worker(workerId: string, displayName: string): LinkedCompanyWorker {
     availableFrom: null,
     locationCountry: null,
     currentProjects: [],
+    professions: [],
     workerId,
     status: "active",
     displayName,

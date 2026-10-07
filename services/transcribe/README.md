@@ -21,14 +21,30 @@ processing destination, there is no third-party STT provider.
 Unauthenticated liveness. `200 {"ok":true}` — reveals nothing else.
 
 ### `POST /v1/transcribe?language=<auto|lt|en|ru|nl|de|pl|lv|et|da|no|sv|fi>`
-- Headers: `Authorization: Bearer <TRANSCRIBE_TOKEN>`,
+- Auth, one of:
+  - `Authorization: Bearer <TRANSCRIBE_TOKEN>` — the master secret, for
+    server-to-server and smoke tests only. It is never sent to a browser.
+  - `Authorization: Bearer v1.<claims>.<sig>` — a **short-lived, single-use
+    upload token** the web app mints per recording (HMAC-SHA256 with the same
+    secret; max lifetime 300 s, the app uses 120 s). Claims carry an opaque
+    subject, a unique id, an expiry and an optional lower byte cap. Used by
+    the browser, which uploads the audio **directly** to this service
+    (the 25 MB recording cannot pass a 5 MB Server Action or the platform's
+    ~4.5 MB function body). A token request must come from an exact origin in
+    `ALLOWED_ORIGINS`; each token is accepted once (`401 token_used`);
+    rate limiting is per token subject.
+- Other headers:
   `Content-Type: audio/webm|audio/ogg|audio/mp4|audio/mpeg|audio/wav`,
   optional `X-Idempotency-Key: <=128 chars` (same key + same bytes → cached
   result, `"cached":true`).
 - Body: raw audio bytes (max 25 MB).
 - `200`: `{"transcript": "...", "language": "lt", "durationSeconds": 42.5,
   "model": "ggml-model.bin", "processingMs": 8100}`
-- Errors: `401 unauthorized · 415 bad_mime · 400 bad_language/undecodable/
+- CORS: `OPTIONS /v1/transcribe` answers the preflight for an allow-listed
+  origin only (exact match, no wildcard, no credentials). Any other origin gets
+  no CORS headers and token auth is refused (`403 origin_not_allowed`).
+- Errors: `401 unauthorized/token_expired/token_used · 403 origin_not_allowed ·
+  415 bad_mime · 400 bad_language/undecodable/
   unreadable/empty · 413 too_large/too_long · 429 rate_limited ·
   502 engine_failed · 500 internal` — always `{"error","code"}`.
 
@@ -58,6 +74,28 @@ web app enforces this: on the production deployment a `VOICE_TRANSCRIBE_URL`
 whose host is loopback, private, link-local, `.local` or a known tunnel domain
 is refused at read time (`lib/config/outbound-host-policy.ts`) and the voice
 surface stays in its honest "not configured" state.
+
+### Browser upload configuration (required for the voice journal)
+
+On the service host set:
+- `ALLOWED_ORIGINS=https://labourmarket.ai` (comma-separated exact origins;
+  add a preview origin only if you really test voice there). `*` is ignored.
+- `IDEMPOTENCY_CACHE_TTL_SECONDS` (default 600, hard maximum 3600): cached
+  results (transcript text, never audio) are deleted after this long.
+
+Audio is processed in a temp directory and deleted as soon as the text is
+ready; the service logs sizes and codes only, never audio or transcript text.
+
+### Performance - measure before advertising 10 minutes
+Recognition cost is hardware- and model-dependent. On the production image
+(`tiny`, loaded 4-core dev machine, 2026-10-06) a ~7 s spoken sample took 45 s
+and 600 s of audio exceeded the 300 s engine budget (`502 engine_failed`). The
+numbers are not representative of a dedicated host, so before relying on the
+10-minute limit: run a ~10-minute real-speech file through the deployed host,
+record the realtime factor, and either raise `WHISPER_TIMEOUT_MS` (the browser
+waits up to 330 s: keep it below that, or raise both) / use more threads / a
+smaller model, or lower `VOICE_MAX_SECONDS`. The 413 `too_long` check and the
+25 MB check are decided before the engine and are exact.
 
 ### Web app wiring (after deploy)
 
