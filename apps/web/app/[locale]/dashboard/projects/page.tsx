@@ -25,7 +25,10 @@ import {
 import { getSessionIsAdmin } from "@/lib/auth/session-admin-signal";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getOrgWorkObjects } from "@/lib/objects/objects";
-import { listManagedProjects } from "@/lib/projects/projects";
+import {
+  countManagedProjects,
+  listManagedProjects,
+} from "@/lib/projects/projects";
 import { getOrgMembersData } from "@/lib/operations/org-members";
 import { listOrganizationMembers } from "@/lib/company/memberships";
 import { getProjectGallerySummary } from "@/lib/journal/project-gallery";
@@ -185,6 +188,7 @@ export default async function ProjectsPage({
     tDoors,
     workObjectsLabels,
     companyGalleryLabels,
+    projectTotals,
   ] = await Promise.all([
     listProjectMap(),
     assignScope === "own-company-roster" && ownCompanyId
@@ -200,6 +204,7 @@ export default async function ProjectsPage({
     getTranslations("organizationDoors"),
     readWorkObjectsLabels(),
     readCompanyGalleryLabels(),
+    countManagedProjects(),
   ]);
   // The projects card the company hub used to carry (count · structurally
   // ready · the honest linking note · create) — now beside the projects it
@@ -227,6 +232,14 @@ export default async function ProjectsPage({
   const archivedProjects = allProjects.filter((p) => p.status === "completed");
   const activeProjects = allProjects.filter((p) => p.status !== "completed");
   const projects = showArchived ? archivedProjects : activeProjects;
+  // The toggle counts are REAL totals (head count, no row cap). The list is
+  // read in two capped buckets, so when a bucket holds more than was loaded
+  // the page says so; if the count itself is unreadable we fall back to the
+  // loaded length and claim nothing more.
+  const activeTotal = Math.max(projectTotals?.active ?? 0, activeProjects.length);
+  const archivedTotal = Math.max(projectTotals?.archived ?? 0, archivedProjects.length);
+  const shownTotal = showArchived ? archivedTotal : activeTotal;
+  const partialView = projects.length < shownTotal;
 
   // Train D — derived progress (tasks + stages done/total, computed at
   // read time; no stored number anywhere).
@@ -395,7 +408,7 @@ export default async function ProjectsPage({
           className={`text-xs font-semibold ${!showArchived ? "text-brand-blue" : "text-text-muted hover:text-brand-blue"}`}
           data-testid="projects-view-active"
         >
-          {t("archiveToggle.active")} ({activeProjects.length})
+          {t("archiveToggle.active")} ({activeTotal})
         </Link>
         <Link
           href={"/dashboard/projects?archived=1" as "/dashboard"}
@@ -403,9 +416,18 @@ export default async function ProjectsPage({
           className={`text-xs font-semibold ${showArchived ? "text-brand-blue" : "text-text-muted hover:text-brand-blue"}`}
           data-testid="projects-view-archived"
         >
-          {t("archiveToggle.archived")} ({archivedProjects.length})
+          {t("archiveToggle.archived")} ({archivedTotal})
         </Link>
       </nav>
+
+      {partialView ? (
+        <p
+          className="text-xs text-text-muted"
+          data-testid="projects-partial-view"
+        >
+          {t("archiveToggle.partial", { shown: projects.length, total: shownTotal })}
+        </p>
+      ) : null}
 
       {/* MAP — projects → teams → people; one click into each ARENA. */}
       {showArchived && projects.length === 0 ? (

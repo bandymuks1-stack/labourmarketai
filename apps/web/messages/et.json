@@ -1963,7 +1963,8 @@
       "label": "Aktiivsed või lõpetatud projektid",
       "active": "Aktiivsed",
       "archived": "Lõpetatud",
-      "empty": "Lõpetatud projekte veel pole."
+      "empty": "Lõpetatud projekte veel pole.",
+      "partial": "Kuvatakse uusimad {shown} kokku {total}-st."
     }
   },
   "projectOps": {

@@ -6108,7 +6108,8 @@
       "label": "Actieve of afgeronde projecten",
       "active": "Actief",
       "archived": "Afgerond",
-      "empty": "Nog geen afgeronde projecten."
+      "empty": "Nog geen afgeronde projecten.",
+      "partial": "De nieuwste {shown} van {total} worden getoond."
     }
   },
   "projectOps": {

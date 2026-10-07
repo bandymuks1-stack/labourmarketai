@@ -1963,7 +1963,8 @@
       "label": "Aktīvie vai pabeigtie projekti",
       "active": "Aktīvie",
       "archived": "Pabeigtie",
-      "empty": "Pabeigtu projektu vēl nav."
+      "empty": "Pabeigtu projektu vēl nav.",
+      "partial": "Rāda jaunākos {shown} no {total}."
     }
   },
   "projectOps": {
