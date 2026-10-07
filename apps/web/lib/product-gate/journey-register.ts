@@ -125,9 +125,9 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "Demonstrated capability is recognised against a formal requirement",
         capabilities: ["SKL-9"],
-        link: "NOT_BUILT",
+        link: "BROKEN",
         because:
-          "RPL / equivalence exists at no layer. It stays in the contract because 'five years of real work' currently reads as 'certificate missing', which is the wrong answer, not a missing feature.",
+          "Corrected 2026-10-01: NOT_BUILT was too red. The five-state derivation, the assessor authority rule and the read of a recognition record exist on main (SKL-9 is PARTIAL); what is missing is the assessor's WRITE - the recognition relation is an unapplied RED owner packet (P-3) and production holds 0 training providers - so no person can be recognised and 'five years of real work' still reads as 'certificate missing'.",
       },
     ],
   },
@@ -158,9 +158,9 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "It assigns a whole team or brigade",
         capabilities: ["WRK-6"],
-        link: "NOT_BUILT",
+        link: "BROKEN",
         because:
-          "No team→project FK exists and zero team organizations exist. Brigade work is a first-class case in construction and agency supply; the step stays so the gap is a decision, not an oversight.",
+          "Corrected 2026-10-03: a whole team can be fanned out to a project through the per-person write (#2084, WRK-6 PARTIAL), but no team→project FK exists, so a brigade is not assigned as a UNIT, and zero team organizations exist. Brigade work is a first-class case in construction and agency supply; the step stays so the gap is a decision, not an oversight.",
       },
       {
         step: "It sees who is free and who is committed",
@@ -266,7 +266,7 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
         capabilities: ["EDU-2"],
         link: "BROKEN",
         because:
-          "Corrected 2026-09-19: production holds ONE cohort-member row and it is the E2E learner fixture (added 2026-09-18 07:17 UTC through the institution UI and `left` two minutes later, in the cohort named `2026 ruduo (testinė)`), so the write path is proven and the earlier `zero rows` wording was stale — but no REAL learner has ever joined a cohort. The chain exists at every layer; the link is adoption, not code (a fixture is not a person), and calling it release-ready would still be false.",
+          "Corrected 2026-09-19: production holds ONE cohort-member row and it is the E2E learner fixture (added 2026-09-18 07:17 UTC through the institution UI and `left` two minutes later, in the cohort named `2026 ruduo (testinė)`), so the write path is proven and the earlier `zero rows` wording was stale — but no REAL learner has ever joined a cohort. Re-traced 2026-10-07: the link WORKS end to end in code - invitation, accept (a `student` engagement context), `set_education_cohort_member_v1`, the assign form in the programmes section and the chat action `company.assign-learner` all exist, and the section now says when accepted learners are not in any cohort yet. It is UNPROVEN by a real member: production holds one eligible accepted learner, one pending student invitation and nobody assigned. The gap is adoption, not code (a fixture is not a person), and calling it release-ready would still be false.",
       },
       {
         step: "A learner's practice is recorded as real work on their own profile",
@@ -286,7 +286,7 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
         capabilities: ["SKL-9", "SKL-10"],
         link: "BROKEN",
         because:
-          "Corrected 2026-09-14: NOT_BUILT was too red. SKL-9 (RPL / equivalence) is genuinely MISSING and deferred by ARCH-2 — but SKL-10, the training and certification register, is APPLIED and PARTIAL. So a piece of this step exists and the chain does not connect, and it does not connect BY DECISION: the register deliberately writes nothing into the skill ladder, because a certificate is not a demonstrated competency (SEP-6). The missing half is the recognition path, not the register.",
+          "Corrected 2026-09-14: NOT_BUILT was too red. SKL-9 (RPL / equivalence) is PARTIAL (pure model and read on main, the assessor's write is an unapplied owner packet) and SKL-10, the training and certification register, is APPLIED and PARTIAL. So a piece of this step exists and the chain does not connect, and it does not connect BY DECISION: the register deliberately writes nothing into the skill ladder, because a certificate is not a demonstrated competency (SEP-6). The missing half is the recognition path, not the register.",
       },
       {
         step: "The institution sees employer demand and reports outcomes",

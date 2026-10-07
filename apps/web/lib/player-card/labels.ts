@@ -12,6 +12,7 @@ import { provenanceTextKey, provenanceTextParams } from "@/lib/evidence/provenan
 import type { ContextWorkTime, WorkPeriodTotals } from "@/lib/journal/work-intelligence";
 import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import { buildIdentityFacts } from "@/lib/player-card/identity-facts";
+import { computeAdjacentDirections } from "@/lib/opportunities/adjacent-directions";
 import { mobilityLabels } from "@/lib/people/person-page-labels";
 
 /**
@@ -136,7 +137,42 @@ export async function buildPlayerCardLabels(
     t: (key, values) => tIdentity(key, values),
   });
 
+  // NEXT in the card's world: where the person's OWN evidenced skills
+  // already reach — the existing adjacency engine over the skills a record
+  // or a confirmation backs (a declared-only skill does not open a
+  // direction), minus every profession the person already holds.
+  const tWorld = await getTranslations("playerCard.identity.world");
+  const held = new Set(
+    [card.professionSlug, ...card.professions.map((p) => p.slug)].filter((s): s is string => Boolean(s)),
+  );
+  const evidenced = card.skillEvidence.filter((b) => b.entries > 0 || b.tier === "verified").map((b) => b.slug);
+  const directions = computeAdjacentDirections({
+    workerSkillSlugs: evidenced,
+    primaryProfessionSlug: card.professionSlug ?? null,
+  })
+    .directions.filter((d) => !held.has(d.professionId))
+    .slice(0, 4)
+    .map((d) => {
+      const missing = d.missingSkills.slice(0, 2).map((s) => (tSkill.has(s) ? tSkill(s) : s));
+      return {
+        id: d.professionId,
+        label: tProf.has(d.professionId) ? tProf(d.professionId) : d.professionId,
+        detail:
+          missing.length > 0
+            ? tWorld("directionDetail", { shared: d.sharedCount, missing: missing.join(", ") })
+            : tWorld("directionDetailNoGap", { shared: d.sharedCount }),
+        shared: d.sharedCount,
+      };
+    });
+
   return {
+    world: {
+      sceneLabel: tWorld("sceneLabel"),
+      empty: tWorld("empty"),
+      emptyNext: tWorld("emptyNext"),
+      allDetails: tWorld("allDetails"),
+      directions,
+    },
     professionNames,
     currentWork,
     currentWorkLabel: t("identity.currentWork"),

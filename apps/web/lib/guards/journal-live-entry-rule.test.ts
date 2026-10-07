@@ -218,6 +218,13 @@ const SEES_EVERY_ROW: Record<string, string> = {
   "lib/journal/journal-list-core.ts":
     "defines the rule; reads all rows because `correctedOriginals` needs the superseded ones",
 
+  // Notification recipient lookup: resolves ONE already-decided entry id to its
+  // worker so the decision can be announced. The review has happened; whether
+  // the entry was later superseded or retracted does not change who decided on
+  // it, and the lookup returns no content — only the worker id.
+  "lib/journal/review-notification.ts":
+    "recipient lookup for a decision already made — maps an entry id to its worker, returns no entry content",
+
   // Integrity: the append-only head must move when ANY row is appended,
   // including one later deleted or superseded — otherwise a confirm token
   // stops being one-time and a replay writes a second entry. (Moved out of

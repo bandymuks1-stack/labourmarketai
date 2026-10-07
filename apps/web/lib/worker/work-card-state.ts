@@ -157,3 +157,18 @@ export function deriveWorkCardState(
 
   return { state, clear, missing, next, staleDims };
 }
+
+/**
+ * An EXPLICIT clear of the preferred-countries list: the person had saved
+ * countries and now submits the field blank. A field that was empty and stays
+ * empty is "not touched" (keep), never a clear — the RPC coalesces null, so
+ * only the explicit `[]` (carried by the `preferred_countries_clear` flag the
+ * action already honours, W6) can remove a stored value. Preferences must be
+ * removable: they are search filters, not profile facts.
+ */
+export function preferredCountriesCleared(
+  saved: readonly string[],
+  typed: string,
+): boolean {
+  return saved.length > 0 && typed.trim() === "";
+}

@@ -223,7 +223,10 @@
           "error": "[EN] Couldn't send. Please try again.",
           "progressHelper": "[EN] These steps show progress. Active actions are shown below.",
           "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
-          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
+          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
+          "openNeedUsage": "Active positions: {used} of {limit} used · {remaining} remaining",
+          "openNeedUsageUpgradeCta": "Activate the Organization plan",
+          "openNeedUsageIndividual": "You have reached the Organization plan limit. For more than the included positions, contact us for an individual plan."
         }
       },
       "account": {
@@ -391,6 +394,11 @@
         "event_weekly_digest": "Sinu nädala töö ja võimaluste kokkuvõte on valmis",
         "event_saved_search_match": "Salvestatud otsingul on uusi tulemusi",
         "event_job_alert": "Ilmus uus töökoht, mis sobib sinu soovidega",
+        "event_message_received": "Sul on uus sõnum",
+        "event_journal_review_decided": "Sinu töölogi kanne on üle vaadatud",
+        "event_journal_review_decided_approved": "Sinu töölogi kanne on kinnitatud",
+        "event_journal_review_decided_rejected": "Sinu töölogi kanne lükati tagasi",
+        "event_journal_review_decided_changes_requested": "Sinu töölogi kande kohta on küsitud muudatusi",
         "event_weekly_digest_profile_completion": "Sobivate tööde näitamiseks kinnita, millist tööd sa teed",
         "event_weekly_digest_journal": "Sinu nädala tööpäeviku kokkuvõte on valmis"
       },
@@ -1272,7 +1280,7 @@
         },
         {
           "desc": "[EN] Completed work strengthens your proof and readiness.",
-          "title": "[EN] Work, earn, level up"
+          "title": "[EN] Work, earn, build your record"
         }
       ]
     },
@@ -1933,7 +1941,8 @@
         "paused": "Peatatud",
         "completed": "Lõpetatud"
       },
-      "progressNone": "Mõõdetavat edenemist veel pole"
+      "progressNone": "Mõõdetavat edenemist veel pole",
+      "progressStages": "{done} etapist {total}-st märgitud tehtuks"
     },
     "pulse": {
       "pendingTitle": "[EN] {n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
@@ -1971,6 +1980,15 @@
       "noActivity": "[EN] No entries yet.",
       "emptyTeam": "[EN] This project has no team yet — start the draft and bring the first people onto the field.",
       "emptyTeamCta": "[EN] Start the draft",
+      "history": {
+        "title": "Varasem töö selles projektis",
+        "provenance": "Organisatsiooni esitatud ajalugu, imporditud organisatsiooni enda kirjetest. Sõltumatult kontrollimata.",
+        "unavailable": "Varasemat tööd ei õnnestunud praegu lugeda. See ei tähenda, et seda poleks.",
+        "empty": "Selle projekti kohta pole organisatsiooni esitatud varasemat tööd registreeritud.",
+        "personUnknown": "Isik nimetamata",
+        "hoursUnknown": "Tunnid märkimata",
+        "count": "{n} kirjet"
+      },
       "positionsTitle": "[EN] Missing positions",
       "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
       "openOps": "[EN] Open the management arena"
@@ -1989,6 +2007,7 @@
       "title": "Projekti haldus",
       "progressLabel": "Edenemine",
       "progressNone": "Mõõdetavat edenemist veel pole",
+      "progressStages": "{done} etapist {total}-st märgitud tehtuks",
       "responsibleLabel": "Vastutav isik",
       "responsibleNone": "Määramata",
       "responsibleSave": "Salvesta",
@@ -2313,6 +2332,7 @@
   "scouting": {
     "pool": {
       "factsUnreadable": "Osa sellest, mille need inimesed on kirja pannud, ei õnnestunud praegu lugeda, seega see järjestus ei ole usaldusväärne. Kedagi ei näidata siin väiksemana, kui ta on — puuduvad lihtsalt võrdluse aluseks olevad faktid. Laadige hetke pärast uuesti.",
+      "historyUnavailable": "Organisatsioonide esitatud ajalugu ei õnnestunud praegu lugeda, seega seda ei näidata. See ei tähenda, et seda poleks, ja ülaltoodud järjestus sellest ei sõltu.",
       "capped": "Kõiki ei võrreldud. Sellele vajadusele sobib rohkem nähtavaid töötajaid, kui ühte nimekirja mahub, seega toodi esmalt need {count}, kelle oskused, amet ja riik vastavad sellele kõige otsesemalt — mitte kunagi kõige uuemad registreerumised. Piiritlege vajadus, et olla kindel, et võrreldakse õigeid inimesi.",
       "complete": "Kõiki {count} nähtavat töötajat võrreldi selle vajadusega."
     },
@@ -2336,6 +2356,10 @@
     "namePlaceholder": "[EN] Worker",
     "skillFit": "[EN] {matched}/{total} required skills, {confirmed} manager-confirmed",
     "evidence": "[EN] Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
+    "confirmedWork": "Tööga kinnitatud: {work} / {matched} sobivast oskusest (kordub: {repeated})",
+    "historySignal": "Organisatsioonide esitatud ajaloos nimetatud: {history} / {matched} sobivast oskusest (signaal, mitte kontrollimine)",
+    "evidenceNone": "Kinnitamata",
+    "experienceYearsValue": "{years, plural, one {# aasta} other {# aastat}}",
     "shortlistError": "[EN] Could not save. Try again.",
     "footnote": "[EN] Matches are computed deterministically for this need only. No global rating, no fake candidates.",
     "status": {
@@ -2420,6 +2444,8 @@
       "link": "Present a candidate"
     },
     "identity": {
+      "noRecords": "Töökirjeid veel pole",
+      "noManagerRecord": "Juhi kirjet veel pole",
       "why": "Miks see inimene sobib",
       "skills": "Asjakohased oskused ja millel need põhinevad",
       "readiness": "Saadavus, valmisolek ja dokumendid",
@@ -3966,6 +3992,13 @@
       "findWorkInCompanyContext": "Tööotsing on sinu enda tegevus — ettevõtte ruumis ma seda ei käivita. Lülitu oma isiklikku ruumi ja küsi uuesti.",
       "findWorkInCompanyWhy": "Tööd otsib inimene, mitte ettevõte — vastan sinu isiklikust ruumist.",
       "personalOnlyInCompany": "See on isiklik tegevus — ettevõtte ruumis ma seda ei tee. Lülitu isiklikku ruumi ja jätka seal.",
+      "newJobsIntro": "Uusi sinu eelistustele sobivaid kuulutusi: {count}.",
+      "newJobsAll": "Kõik võimalused",
+      "newJobsNone": "Viimastel päevadel pole sinu eelistustele sobivaid uusi kuulutusi ilmunud. Kõik võimalused leiad võimaluste lehelt.",
+      "newJobsNeedProfession": "Uute tööde näitamiseks ütle, millise ala tööd otsid.",
+      "newJobsNeedCountry": "Uute tööde näitamiseks ütle, millistes riikides soovid töötada.",
+      "newJobsNoProfile": "Uute tööde näitamiseks on mul esmalt vaja sinu profiili.",
+      "newJobsUnavailable": "Uusi töid ei õnnestunud praegu kontrollida. Proovi hiljem uuesti.",
       "openConversationOpening": "Avan vestluse inimesega {name}.",
       "openConversationNone": "Ma ei leidnud seda inimest sinu vestluspartnerite ega meeskonna hulgast. Sõnumid on sõnumite jaotises.",
       "openConversationWhich": "Millist inimest sa mõtled?",
@@ -5392,7 +5425,8 @@
       "refusedType": "Seda failitüüpi ei saa tekstina lugeda.",
       "empty": "Sellest dokumendist ei leitud loetavat teksti.",
       "failed": "Dokumenti ei õnnestunud lugeda.",
-      "noEngagement": "Kõigepealt on vaja töökonteksti — ava töölaud ja loo see."
+      "noEngagement": "Kõigepealt on vaja töökonteksti — ava töölaud ja loo see.",
+      "workDateHint": "Dokument ei ütle, mis päeval töö tehti. Valige kuupäev ise — midagi ei täideta teie eest."
     },
     "currentVersion": "[EN] Version {n}",
     "download": "[EN] Download",
@@ -6662,9 +6696,54 @@
         "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company."
       },
       "workers": {
-        "invitationsManagedElsewhere": "Kutsete eest hoolitseb selle eest vastutav ettevõtte isik."
+        "invitationsManagedElsewhere": "Kutsete eest hoolitseb selle eest vastutav ettevõtte isik.",
+        "team": {
+          "free": "Vaba",
+          "working": "Töötab",
+          "away": "Eemal",
+          "countFree": "Vabad",
+          "countWorking": "Töötavad",
+          "countAway": "Eemal",
+          "workingOn": "Töötab: {project}",
+          "until": "kuni {date}",
+          "awayUntil": "Eemal kuni {date}",
+          "assign": "Määra projektile",
+          "openCalendar": "Ava kalender"
+        }
       }
     }
+  },
+  "cvOrganizationHistory": {
+    "title": "Organisatsioonide esitatud töölugu",
+    "note": "Võetud siin nimetatud organisatsioonide enda andmetest. See ei ole enda deklareeritud ega sõltumatult kontrollitud.",
+    "untitled": "Organisatsiooni registreeritud töö",
+    "hoursTerm": "Tunnid",
+    "hoursRecorded": "{hours} h registreeritud ({count, plural, one {# kanne} other {# kannet}})",
+    "hoursPeriod": "{hours} h esitatud perioodi kohta ({count, plural, one {# kanne} other {# kannet}})",
+    "contested": "Vaidlustatud selleks õigust omava isiku poolt",
+    "more": "Veel {count, plural, one {# kirjet} other {# kirjet}} ei näidata"
+  },
+  "historyContext": {
+    "project": "Projekt",
+    "place": "Objekt või tööpakett",
+    "client": "Tellija",
+    "otherParties": "Teised osapooled",
+    "capacity": "Roll",
+    "source": "Allikas",
+    "suppliedBy": "Esitas {name}",
+    "reconstructed": "Taastatud varasematest kirjetest",
+    "recordedAt": "Süsteemi kantud",
+    "proofTitle": "Mis seda toetab",
+    "proof": {
+      "SELF_DECLARED": "Isiku enda väide",
+      "EVIDENCE_SUPPORTED": "Toetatud organisatsiooni kirjega",
+      "EMPLOYER_CONFIRMED": "Tööandja kinnitatud",
+      "CLIENT_ACCEPTED": "Tellija vastu võetud",
+      "SUPERVISOR_CONFIRMED": "Objektijuhi kinnitatud",
+      "INDEPENDENTLY_VERIFIED": "Sõltumatult kontrollitud"
+    },
+    "attestedAs": "kinnitas rollis {role}",
+    "proofNote": "Iga rida on eraldi fakt. Esitanud organisatsiooni kinnitus ei ole tellija heakskiit ega tasu maksmine ning ükski neist ei ole sõltumatu kontroll, kui seda pole öeldud."
   },
   "evidenceImport": {
     "records": {
@@ -6856,6 +6935,220 @@
       "done": "Omistatud kirjeid: {count}; juba omistatud: {skipped}.",
       "refused": "Salvestamine ebaõnnestus. Midagi ei muudetud.",
       "person": "{hours} h, {count, plural, one {# kirje} other {# kirjet}}"
+    },
+    "truncated": "Kirjeid on rohkem, kui üks vaade loeb. Näidatakse loetud {count}; summad hõlmavad ainult neid."
+  },
+  "workLifecycle": {
+    "pending": "Veel mitte",
+    "title": "Mis saab sinu tehtud tööst",
+    "titleCompany": "Mis saab teie juhitud tööst",
+    "example": "Näide — mitte päris inimene ega päris andmed",
+    "hint": "Valige samm. Iga samm avab päris koha teie töökeskkonnas.",
+    "open": "Ava töökeskkonnas",
+    "list": "Töö elutsükli sammud",
+    "workers": {
+      "person": {
+        "label": "Sina",
+        "fact": "Kokk — professionaalne identiteet",
+        "detail": "Üks professionaalne identiteet, mis on sinu oma — mitte seotud ühe tööandjaga."
+      },
+      "team": {
+        "label": "Meeskond",
+        "fact": "Köögimeeskond",
+        "detail": "Liitud päris meeskonnaga — näed, kellega koos töötad ja kes seda juhib."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Sügismenüü lansseerimine",
+        "detail": "Töö kuulub projekti, seega on sellel koht, eesmärk ja aeg."
+      },
+      "work": {
+        "label": "Töö",
+        "fact": "Õhtune teenindus — 8 t",
+        "detail": "Mida tegid, millal ja kui kaua — kirja pandud siis, kui see toimub."
+      },
+      "evidence": {
+        "label": "Tõendid",
+        "fact": "Foto + päeviku kanne",
+        "detail": "Tehtud töö muutub tõendiks, mitte ei kao ära."
+      },
+      "confirmation": {
+        "label": "Kinnitatud",
+        "fact": "Kinnitas juht",
+        "detail": "Juht kinnitab selle. Ilma selleta ei nimetata midagi kontrollituks."
+      },
+      "history": {
+        "label": "Ajalugu",
+        "fact": "Lisatud sinu ajalukku",
+        "detail": "Kinnitatud töö loob sinu professionaalse ajaloo — see jääb sinuga ka järgmisele tööle kaasa."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Vajadus",
+        "fact": "4 kokka alates esmaspäevast",
+        "detail": "Nimetate päris vajaduse ühe korra: kes, kus ja alates millal."
+      },
+      "people": {
+        "label": "Inimesed",
+        "fact": "Sobivad spetsialistid",
+        "detail": "Spetsialistid, kelle tegelik töölugu vajadusega sobib — koos sellega, mis on kinnitatud ja mis veel mitte."
+      },
+      "team": {
+        "label": "Meeskond",
+        "fact": "Köögimeeskond",
+        "detail": "Inimestest saab meeskond, kellel on juht, vahetused ja töökoht."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Sügismenüü lansseerimine",
+        "detail": "Meeskonnad korraldatakse selle projekti ümber, mida nad täidavad."
+      },
+      "work": {
+        "label": "Töö",
+        "fact": "Õhtune teenindus — 8 t",
+        "detail": "Töö pannakse kirja seal, kus see toimub, mitte ei taastata hiljem."
+      },
+      "confirmation": {
+        "label": "Kinnitatud",
+        "fact": "Ootab teie kinnitust",
+        "detail": "Näete, mis vajab veel kinnitamist ja mis on juba tehtud."
+      },
+      "report": {
+        "label": "Aruanne",
+        "fact": "Aruanne päris tööst",
+        "detail": "Aruanded tulevad kinnitatud tööst — keegi ei trüki neid uuesti."
+      }
     }
+  },
+  "twoSides": {
+    "title": "Tööle võtmine on algus, mitte lõpp.",
+    "professional": "Tööline",
+    "company": "Ettevõte",
+    "steps": {
+      "find": {
+        "label": "Leia",
+        "worker": "Leiab töö, mis sobib sellega, mida nad päriselt tegid",
+        "company": "Leiab inimesi, kelle tegelik töö vastab vajadusele"
+      },
+      "connect": {
+        "label": "Ühenda",
+        "worker": "Räägib oma keeles",
+        "company": "Võtab tööle päris vestluse kaudu"
+      },
+      "work": {
+        "label": "Tööta",
+        "worker": "Salvestab töö siis, kui see toimub",
+        "company": "Teeb tööd koos oma inimestega"
+      },
+      "verify": {
+        "label": "Kinnita",
+        "worker": "Juht kinnitab selle",
+        "company": "Kinnitab, mis päriselt tehti"
+      },
+      "grow": {
+        "label": "Kasva",
+        "worker": "Kinnitatud töö saab nende ajalooks",
+        "company": "Aruanded tulevad kinnitatud tööst"
+      },
+      "continue": {
+        "label": "Jätka",
+        "worker": "Viib selle ajaloo järgmisele tööle kaasa",
+        "company": "Planeerib järgmise projekti tuttavate inimestega"
+      }
+    }
+  },
+  "evidenceChain": {
+    "label": "Kande olek",
+    "own": "Teie tehtud",
+    "nodes": {
+      "recorded": "Registreeritud",
+      "photo": "Foto",
+      "manager": "Juhataja kanne",
+      "history": "Teie ajaloos"
+    },
+    "status": {
+      "done": "Olemas",
+      "waiting": "Ootel",
+      "absent": "Veel mitte",
+      "attention": "Vajab teid",
+      "unknown": "Teadmata"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Elav CV",
+    "title": "Sinu töö saab sinu looks",
+    "now": "Praegu",
+    "noRecords": "Töökandeid veel pole",
+    "legend": {
+      "managerRecord": "Juhi kanne",
+      "recorded": "Sinu tehtud kanne"
+    },
+    "skillsTitle": "Mida sinu töö näitab",
+    "next": {
+      "title": "Sinu lugu käib sinuga kaasas",
+      "body": "Iga töö, mille kirja paned, täiendab seda. Vii see järgmise võimaluseni kaasa.",
+      "cta": "Vaata, kuhu saad edasi minna"
+    }
+  },
+  "workContext": {
+    "title": "Sinu töö ühes vaates",
+    "nodes": {
+      "current": "Töötab praegu",
+      "records": "Kirjed",
+      "manager": "Juhi kirje",
+      "history": "Ajalugu",
+      "skills": "Oskused",
+      "next": "Edasi"
+    },
+    "facts": {
+      "records": "{count, plural, one {# kirje} other {# kirjet}}",
+      "manager": "{count, plural, one {# juhi kirje} other {# juhi kirjet}}",
+      "history": "{count, plural, one {# töö} other {# tööd}}",
+      "skills": "{count, plural, one {# sinu kirjetel põhinev oskus} other {# sinu kirjetel põhinevat oskust}}",
+      "next": "Kuhu saad edasi minna"
+    }
+  },
+  "companyPerson": {
+    "eyebrow": "Ajalooline isikukaart",
+    "back": "Inimesed",
+    "badge": "Organisatsiooni esitatud, sõltumatult kontrollimata",
+    "provenance": "See on, mida {name} on selle isiku kohta registreerinud. Keegi teine pole seda kinnitanud ja see ei sõltu sellest, kas isikul on konto.",
+    "claim": {
+      "unlinked": "Pole veel kontoga seotud — ajalugu on siin juba registreeritud.",
+      "link_proposed": "Kontoga sidumist on pakutud ja see ootab isiku vastust — ajalugu on siin juba registreeritud.",
+      "linked": "Seotud isiku enda kontoga.",
+      "openProfile": "Ava isiku leht"
+    },
+    "unavailable": "Selle isiku ajalugu ei õnnestunud praegu lugeda. See ei tähenda, et seda poleks.",
+    "empty": "Sellel isikul pole veel ajalookirjeid. Lugemine õnnestus — kirjeid pole.",
+    "stats": {
+      "records": "Kirjed",
+      "hours": "Tunnid nagu märgitud",
+      "period": "Periood"
+    },
+    "noHours": "Kirjed, kus tunde pole märgitud: {count}. Teadmata tunde ei loeta nulliks.",
+    "undated": "Kirjed ilma märgitud kuupäevata: {count}. Need jäävad allolevasse ajalukku.",
+    "periodApart": "{hours} t kogusummast on perioodisummad, hoitud eraldi ja mitte kunagi jaotatud päevadele ega kuudele.",
+    "noWorkObject": "Kirjed, mis pole seotud platvormile tuntud projekti ega kohaga: {count}. Need jäävad sellesse ajalukku allika nime all.",
+    "places": {
+      "title": "Projekti või koha järgi",
+      "none": "Projekti või kohta pole registreeritud",
+      "records": "Kirjed: {count}"
+    },
+    "months": {
+      "title": "Märgitud tunnid kuude kaupa",
+      "note": "Ainult ühe päeva kirjed. Perioodisummasid ei jaotata kunagi päevadele ega kuudele."
+    },
+    "skills": {
+      "title": "Oskused, millele ajalugu viitab",
+      "note": "Tuletatud organisatsiooni ajaloost, kontrollimata. Oskus on loetletud, kui organisatsioon ise seda nimetas; see ei ole väide isiku kohta.",
+      "records": "Kirjed: {count}",
+      "empty": "Neis kirjetes pole ühtegi oskust nimetatud.",
+      "unavailable": "Oskussignaale ei õnnestunud praegu lugeda. See ei tähenda, et neid poleks.",
+      "truncated": "Oskussignaale on rohkem, kui see vaade loeb."
+    },
+    "shown": "Näidatakse uusimat {shown} kirjet {total}-st. Ülejäänud jäävad registrisse.",
+    "truncated": "Kirjeid on rohkem, kui üks vaade loeb. Näidatakse loetud {count}; summad hõlmavad ainult neid."
   }
 }

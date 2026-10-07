@@ -101,6 +101,10 @@ export function toScoutSafeCandidate(input: {
     availableFrom: input.subject.availableFrom ?? null,
     rateMinEur: input.subject.salaryMinEur ?? null,
     evidenceCount: countWorkerEvidence(input.subject),
+    // The worker's own stated years - an already owner-approved preview
+    // field. Passed through only when the source holds a real value; a missing
+    // value stays null (rendered as nothing, never as 0).
+    experienceYears: input.subject.experienceYears ?? null,
   });
 
   // Runtime safety net at the company-facing boundary.

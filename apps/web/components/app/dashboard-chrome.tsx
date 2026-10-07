@@ -84,6 +84,9 @@ import {
  *  `lib/config/navigation.ts` (pure, beside the canonical admin nav item, so
  *  the admin route has ONE source and the guards read the same predicate). */
 
+/** The one map route — it carries no partner credit line. */
+const MARKET_MAP_PATH = "/dashboard/market-map";
+
 export function DashboardChrome({
   children,
   headerTitle,
@@ -136,7 +139,9 @@ export function DashboardChrome({
               that full serves only the admin console it would have vanished
               from every user-facing surface, so it hangs here instead — the
               same one-line credit, in the shell the product actually uses. */}
-          {rexora}
+          {/* The map is the product's own working surface: no partner credit
+              line under it (owner direction — one clean map). */}
+          {pathname === MARKET_MAP_PATH ? null : rexora}
         </main>
       </div>
     );

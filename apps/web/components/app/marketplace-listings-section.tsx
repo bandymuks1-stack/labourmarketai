@@ -78,6 +78,9 @@ export function MarketplaceListingsSection({
   >({ kind: "idle" });
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
   const [error, setError] = useState<string | null>(null);
+  // Two-step delete (G-12b): the trash icon only ARMS the row; the permanent
+  // delete needs the explicit second press.
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
   const inputCls =
     "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
@@ -147,6 +150,7 @@ export function MarketplaceListingsSection({
   }
 
   function remove(id: string) {
+    setConfirmingId(null);
     startTransition(async () => {
       const res = await deleteMarketplaceListingAction(id);
       if (res.kind === "ok") router.refresh();
@@ -372,15 +376,41 @@ export function MarketplaceListingsSection({
                   >
                     <Pencil aria-hidden className="h-4 w-4" />
                   </button>
-                  <button
-                    type="button"
-                    title={t("remove")}
-                    onClick={() => remove(row.id)}
-                    disabled={pending}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded border border-ink-500 text-state-danger hover:border-state-danger"
-                  >
-                    <Trash2 aria-hidden className="h-4 w-4" />
-                  </button>
+                  {confirmingId === row.id ? (
+                    <span
+                      role="alertdialog"
+                      aria-label={t("removeConfirm")}
+                      className="inline-flex items-center gap-2 text-xs text-text-secondary"
+                    >
+                      {t("removeConfirm")}
+                      <button
+                        type="button"
+                        onClick={() => remove(row.id)}
+                        disabled={pending}
+                        data-testid={`listing-remove-confirm-${row.id}`}
+                        className="rounded border border-state-danger px-2 py-1 text-state-danger"
+                      >
+                        {t("remove")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmingId(null)}
+                        className="rounded border border-ink-500 px-2 py-1"
+                      >
+                        {t("cancel")}
+                      </button>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      title={t("remove")}
+                      onClick={() => setConfirmingId(row.id)}
+                      disabled={pending}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded border border-ink-500 text-state-danger hover:border-state-danger"
+                    >
+                      <Trash2 aria-hidden className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
               </li>
             ))}

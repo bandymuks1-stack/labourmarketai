@@ -1,3 +1,4 @@
+import { readOwnConfirmedWorkTotals } from "@/lib/evidence/confirmed-work-read";
 import "server-only";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
 import { orgDisplayName } from "@/lib/company/org-display";
@@ -18,6 +19,7 @@ import {
   type OwnTrustSignals,
 } from "@/lib/profile/trust-signals";
 import { groupCvSkillTiers, type CvSkillTiers } from "./skill-tiers";
+import { buildCvOrganizationHistory, type CvOrganizationHistoryEntry } from "./organization-history";
 import {
   skillPracticeFromIntelligence,
   type SkillPracticeFacts,
@@ -253,6 +255,13 @@ export type VerifiedCvData = {
    * `recordedHoursBySkill`; `null` exactly when that map is null.
    */
   confirmedHoursBySkill: Record<string, number> | null;
+  /**
+   * Real work a manager confirmed, as FACTS: how many live entries were
+   * independently confirmed and across how many distinct work days. Not a
+   * score and not a skill certification. `null` = unreadable (never a zero);
+   * `{entries: 0}` = readable and none.
+   */
+  confirmedWorkTotals: { entries: number; days: number } | null;
   /** All-time recorded hours (every entry once), or null when unreadable. */
   recordedHoursTotal: number | null;
   /** Of the total, hours a manager/client confirmed. */
@@ -271,6 +280,15 @@ export type VerifiedCvData = {
     importedHours: number;
     approvedHours: number;
   } | null;
+  /**
+   * The WORK behind those organization-recorded hours: imported history
+   * grouped by supplying organisation / project / client / capacity, each
+   * entry carrying its source and proof facts and ONLY the hours the records
+   * stated (see organization-history.ts). Organization-provided, never
+   * self-attested; never added to `recordedHoursTotal`. `null` = the ledger
+   * could not be read (UNKNOWN, not "no history"); `[]` = read, none.
+   */
+  organizationHistory: CvOrganizationHistoryEntry[] | null;
   privateDetails: VerifiedCvPrivateDetails;
   signals: OwnTrustSignals;
   proof: VerifiedCvProofRow[];
@@ -432,6 +450,13 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
     (projectNamesRes.data ?? []).map((p) => [p.id, p.name?.trim() || null] as const),
   );
   // The journal's per-context figures (canonical reader; null = unreadable).
+  // Real work a manager independently confirmed, as facts (entries + distinct
+  // work days). One bounded read as the worker; null = unreadable, not zero.
+  const confirmedWorkTotals = await readOwnConfirmedWorkTotals(
+    supabase,
+    workerId,
+    user.id,
+  );
   const recordedByContext = workIntelligence
     ? new Map(
         workIntelligence.contexts
@@ -820,11 +845,18 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
             truncated: workIntelligence.coverage.truncated,
           }
         : null,
+      confirmedWorkTotals,
       recordedHoursTotal: workIntelligence ? workIntelligence.totalHours : null,
       recordedHoursConfirmed: workIntelligence
         ? (workIntelligence.periods.find((p) => p.key === "all")?.confirmedHours ?? null)
         : null,
       organizationRecordedHours: organizationRecordedHoursOf(workIntelligence),
+      organizationHistory: workIntelligence?.organizationContextRecords
+        ? buildCvOrganizationHistory(
+            workIntelligence.organizationContextRecords,
+            workIntelligence.organizationPeriodRecords ?? [],
+          )
+        : null,
       privateDetails: {
         salaryMinEur: privBase?.salary_min_eur ?? null,
         salaryMaxEur: privBase?.salary_max_eur ?? null,

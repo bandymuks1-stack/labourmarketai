@@ -22,8 +22,8 @@
 --   the published_at walk, so it scans to the end.
 -- FIX: plpgsql with one branch per filter combination (no dynamic SQL), each
 --   branch a plain equality / ilike so the planner uses
---   public_vacancies_active_profession_published_idx (ordered, early stop) or
---   public_vacancies_active_published_cover_idx (index-only text match).
+--   public_vacancies_active_profession_board_idx (ordered, early stop) or
+--   public_vacancies_active_board_cover_idx (index-only text match).
 --   `#variable_conflict use_column` because OUT names equal column names.
 --
 -- Behaviour: identical results and order (published_at desc nulls last, id),

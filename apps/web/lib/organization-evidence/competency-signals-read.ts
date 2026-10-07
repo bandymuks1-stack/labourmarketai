@@ -111,3 +111,35 @@ export async function readSubjectCompetencySignals(
     );
   return { kind: "ok", signals, truncated };
 }
+
+/**
+ * SKILLS THE ORGANIZATION'S HISTORY POINTS TO — for ONE roster person, read by
+ * the supplying organization's manager (2026-10-07).
+ *
+ * The signals were written on every commit and shown to the LINKED subject
+ * only; the company-side historical person card (an UNLINKED roster person,
+ * history recorded before any account claim) had nowhere to read them. The
+ * `…_competency_signals_select` policy already admits the managers of the
+ * supplying organization, so this adds NO authority — it asks the same
+ * question as `readSubjectCompetencySignals` for the record ids the caller
+ * already holds for that person, and says what the answer is: derived from the
+ * organization's words, never verified, never a claim about the person.
+ *
+ * Absent means "no skill was named" only when the read succeeded; a failed
+ * read is `error`, a missing store is `needs-migration` — never an empty list.
+ */
+export type PersonCompetencySignalsRead =
+  | (Extract<SubjectCompetencySignalsRead, { kind: "ok" }> & {
+      readonly provenance: "organization_history_derived";
+      readonly verified: false;
+    })
+  | Exclude<SubjectCompetencySignalsRead, { kind: "ok" }>;
+
+export async function readCompetencySignalsForPerson(
+  supabase: SupabaseClient,
+  recordIds: readonly string[],
+): Promise<PersonCompetencySignalsRead> {
+  const res = await readSubjectCompetencySignals(supabase, [...new Set(recordIds)]);
+  if (res.kind !== "ok") return res;
+  return { ...res, provenance: "organization_history_derived", verified: false };
+}

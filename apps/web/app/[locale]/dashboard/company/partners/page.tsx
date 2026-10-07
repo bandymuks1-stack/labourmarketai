@@ -1,5 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 
+import { actsAsClient } from "@/lib/company/agency-capability";
+import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { readActsAsAgency } from "@/lib/company/agency-capability-read";
 import { Link } from "@/lib/i18n/navigation";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
@@ -112,7 +114,16 @@ export default async function CompanyPartnersPage({
     companyRow.companyType,
     employerCtx.kind === "ok" ? employerCtx.organizationId : null,
   );
-  const alsoClient = companyRow.companyType !== "staffing_agency";
+  // ORG-2: also a client unless agency-ONLY (a staffing type that did not
+  // declare the employer role); every other organization buys people too.
+  const alsoClient = actsAsClient(
+    companyRow.companyType,
+    isStaffingAgency &&
+      employerCtx.kind === "ok" &&
+      employerCtx.organizationId
+      ? await readOrganizationCapabilities(employerCtx.organizationId)
+      : [],
+  );
   const ownCompany = { id: companyRow.id };
 
   const header = (

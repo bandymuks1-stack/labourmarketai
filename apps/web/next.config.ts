@@ -60,9 +60,22 @@ function supabaseOrigin(): string {
   }
 }
 
+/** Self-hosted transcription service origin: the browser uploads audio straight
+ *  to it (signed single-use token), so CSP connect-src must name exactly it. */
+function voiceServiceOrigin(): string {
+  const raw = process.env.VOICE_TRANSCRIBE_URL;
+  if (!raw) return "";
+  try {
+    const u = new URL(raw);
+    return u.protocol === "https:" ? u.origin : "";
+  } catch {
+    return "";
+  }
+}
+
 function contentSecurityPolicyReportOnly(): string {
   const supabase = supabaseOrigin();
-  const connect = ["'self'", supabase, "https://accounts.google.com"].filter(Boolean);
+  const connect = ["'self'", supabase, voiceServiceOrigin(), "https://accounts.google.com"].filter(Boolean);
   return [
     "default-src 'self'",
     // 'unsafe-inline' is required by the theme-bootstrap script and Next's
@@ -92,7 +105,11 @@ const SECURITY_HEADERS = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(self), payment=(), usb=()",
+    // microphone=(self): the Voice Work Journal (accepted capability, owner
+    // decision U-26) records on THIS origin only. Never widen to a third-party
+    // origin or `*`; the browser still asks the person for explicit permission.
+    // Pinned by lib/guards/security-headers.test.ts + voice-work-journal.test.ts.
+    value: "camera=(), microphone=(self), geolocation=(self), payment=(), usb=()",
   },
   // Vercel may also set HSTS at the edge; sending it explicitly means the
   // guarantee does not depend on a platform default we do not control.
@@ -146,6 +163,12 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Never advertise the framework version to attackers scanning for CVEs.
   poweredByHeader: false,
+  experimental: {
+    // Document uploads (DOCUMENT_FILE_MAX_BYTES = 5 MB) go through server
+    // actions; Next's 1 MB default rejected anything larger before the handler
+    // ran. Voice (25 MB) does NOT fit here — it needs a non-action upload path.
+    serverActions: { bodySizeLimit: "5mb" },
+  },
   async redirects() {
     return [...LEGACY_HOST_REDIRECTS, ...W1_CANONICAL_REDIRECTS, ...ENTRY_SHORTCUT_REDIRECTS];
   },

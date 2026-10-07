@@ -85,6 +85,7 @@ import {
   emitNotificationEventInBackground,
   isNotificationStoreWriteBlocked,
   type NotificationEventInput,
+  type JournalReviewDecision,
   type NotificationEventType,
 } from "./events";
 import {
@@ -97,7 +98,14 @@ import {
   resolveChannelEnabled,
   type NotificationPreferenceRow,
 } from "./notification-preferences";
-import { maybeDispatchNotificationEmail } from "./email-dispatch";
+import {
+  maybeDispatchNotificationEmail,
+  type NotificationEmailDispatchOutcome,
+} from "./email-dispatch";
+import {
+  journalReviewEntityId,
+  messageReceivedEntityId,
+} from "./message-coalescing";
 import { deterministicEntityId } from "./deterministic-entity-id";
 import { isoWeekKey } from "../worker/weekly-intelligence-model";
 import { getWorkerCoreRow } from "../data/worker-core";
@@ -145,6 +153,9 @@ async function readPrefRowsFailOpen(
   const prefs = await readNotificationPreferencesFor(admin, recipientProfileId);
   return prefs.kind === "ok" ? prefs.rows : [];
 }
+
+/** The email dispatcher's outcome tag (`sent`, `send_failed`, ...). */
+export type EmailOutcomeKind = NotificationEmailDispatchOutcome["kind"];
 
 /** What `deliver` did — the cron route reports these honestly. */
 type DeliverOutcome =
@@ -201,13 +212,27 @@ export type NotificationEmitResult =
       readonly outcome: "written" | "duplicate";
       /** Distinct recipients that now hold a row. */
       readonly recipients: number;
+      /**
+       * What the email hop did, per recipient whose row was WRITTEN now (a
+       * `duplicate` re-sends nothing). Absent for emitters that have not
+       * adopted it. `channel_disabled` is the default (email is opt-in);
+       * `not_configured` / `no_recipient_email` / `render_failed` /
+       * `send_failed` each mean the recipient OPTED IN and the mail still
+       * did not go — never to be read as success.
+       */
+      readonly emailOutcomes?: readonly EmailOutcomeKind[];
     }
   | { readonly delivered: false; readonly reason: NotificationUndeliveredReason };
 
 /** One `deliver` outcome, as a result. */
-function resultFromOutcome(outcome: DeliverOutcome): NotificationEmitResult {
+function resultFromOutcome(
+  outcome: DeliverOutcome,
+  email?: EmailOutcomeKind | null,
+): NotificationEmitResult {
   if (outcome === "written" || outcome === "duplicate") {
-    return { delivered: true, outcome, recipients: 1 };
+    return email
+      ? { delivered: true, outcome, recipients: 1, emailOutcomes: [email] }
+      : { delivered: true, outcome, recipients: 1 };
   }
   if (outcome === "unexpected_error") return { delivered: false, reason: "insert_failed" };
   return { delivered: false, reason: outcome };
@@ -227,6 +252,13 @@ function combineResults(
         ? "written"
         : "duplicate",
       recipients: held.length,
+      ...(held.some((r) => r.delivered && r.emailOutcomes)
+        ? {
+            emailOutcomes: held.flatMap((r) =>
+              r.delivered ? (r.emailOutcomes ?? []) : [],
+            ),
+          }
+        : {}),
     };
   }
   const first = results[0];
@@ -272,25 +304,82 @@ async function deliver(
   admin: AdminClient,
   input: NotificationEventInput,
 ): Promise<DeliverOutcome> {
+  return (await deliverDetailed(admin, input)).outcome;
+}
+
+/**
+ * Greppable marker for "the recipient OPTED IN to email for this type and no
+ * email went". `channel_disabled` (the default), `sent` and `logged` never
+ * come through here, so a hit is always an opted-in person who was not
+ * mailed. Event type + bounded outcome tag only — never the address, never
+ * content.
+ */
+export const NOTIFICATION_EMAIL_UNDELIVERED =
+  "[notifications/email] opted-in recipient not mailed";
+
+function reportEmailOutcome(
+  eventType: string,
+  email: NotificationEmailDispatchOutcome,
+): void {
+  if (
+    email.kind === "channel_disabled" ||
+    email.kind === "sent" ||
+    email.kind === "logged"
+  ) {
+    return;
+  }
+  const detail = {
+    eventType,
+    outcome: email.kind,
+    ...(email.kind === "send_failed" ? { reason: email.reason } : {}),
+  };
+  // `not_configured` is the NAMED, expected state until the owner sets a mail
+  // provider (like `feature_unavailable`): recorded, but not a warning - a
+  // warning that fires on correct behaviour is one everybody learns to ignore.
+  if (email.kind === "not_configured") {
+    console.info(NOTIFICATION_EMAIL_UNDELIVERED, detail);
+    return;
+  }
+  console.warn(NOTIFICATION_EMAIL_UNDELIVERED, detail);
+}
+
+/**
+ * `deliver`, with the email hop's outcome KEPT instead of discarded. The
+ * outcome is returned (so emitters can surface it in their result) and every
+ * opted-in-but-not-mailed outcome is logged through one marker. `email` is
+ * null when the row was not written now (duplicate / suppressed / blocked):
+ * no email hop ran.
+ */
+async function deliverDetailed(
+  admin: AdminClient,
+  input: NotificationEventInput,
+): Promise<{
+  readonly outcome: DeliverOutcome;
+  readonly email: NotificationEmailDispatchOutcome | null;
+}> {
   // The store refused the last write (42501): the preference read only
   // exists to feed the insert, so neither runs while the block holds.
-  if (isNotificationStoreWriteBlocked()) return "write_blocked";
+  if (isNotificationStoreWriteBlocked()) {
+    return { outcome: "write_blocked", email: null };
+  }
   const prefRows = await readPrefRowsFailOpen(admin, input.recipientProfileId);
   if (!resolveChannelEnabled(prefRows, input.eventType, "in_app")) {
     // APPROVED silence: the recipient turned this type off themselves.
-    return "suppressed_preference";
+    return { outcome: "suppressed_preference", email: null };
   }
   const outcome = await emitNotificationEvent(admin, input);
   if (outcome.kind === "unexpected_error") {
     // `duplicate` and `feature_unavailable` are approved outcomes and stay
     // quiet; this line only fires on something real.
     notDelivered(input.eventType, "insert_failed", outcome.code);
-    return "unexpected_error";
+    return { outcome: "unexpected_error", email: null };
   }
+  let email: NotificationEmailDispatchOutcome | null = null;
   if (outcome.kind === "written") {
-    await maybeDispatchNotificationEmail(admin, input, prefRows);
+    email = await maybeDispatchNotificationEmail(admin, input, prefRows);
+    reportEmailOutcome(input.eventType, email);
   }
-  return outcome.kind;
+  return { outcome: outcome.kind, email };
 }
 
 async function workerProfileId(
@@ -1640,6 +1729,128 @@ export async function emitInvitationAcceptedNotification(input: {
     });
   } catch {
     undelivered("invitation_accepted_emit_failed");
+  }
+}
+
+/**
+ * MESSAGE RECEIVED (v10) - somebody wrote in a thread the recipient is in.
+ *
+ * RECIPIENT: every OTHER participant, never the author - you do not need a
+ * bell for your own sentence. The participant ids are read by the SEND PATH
+ * under the author's own session (`conversation_participants_select` admits
+ * co-participants); service_role holds no grant on that table or on
+ * `profiles`, so this emitter never reads them (see the header).
+ *
+ * COALESCING: one row per recipient per thread per window
+ * (`messageReceivedEntityId`) - a ten-message burst is one bell, the next
+ * window's message is a new one. METADATA: the thread's opaque id as a link
+ * target, nothing else. The text, the author's name and the attachments never
+ * reach the event.
+ */
+export interface MessageReceivedNotificationFacts {
+  readonly conversationId: string;
+  /** auth.uid() of the sender - never notified about their own message. */
+  readonly authorProfileId: string;
+  /** All participant profile ids as read under the sender's session (the
+   *  sender may be included; it is filtered here). */
+  readonly participantProfileIds: readonly string[];
+  /** Clock seam - epoch ms; defaults to now. */
+  readonly nowMs?: number;
+}
+
+export async function emitMessageReceivedNotifications(
+  facts: MessageReceivedNotificationFacts,
+): Promise<NotificationEmitResult> {
+  try {
+    if (facts.participantProfileIds.length === 0) {
+      return undeliveredResult("message_received", "recipient_unresolved");
+    }
+    const recipients = [
+      ...new Set(
+        facts.participantProfileIds.filter(
+          (id) => id && id !== facts.authorProfileId,
+        ),
+      ),
+    ];
+    // APPROVED silence: the author is the only participant.
+    if (recipients.length === 0) return { delivered: false, reason: "self_action" };
+
+    const admin = createAdminClient();
+    const entityId = messageReceivedEntityId(
+      facts.conversationId,
+      facts.nowMs ?? Date.now(),
+    );
+    const results: NotificationEmitResult[] = [];
+    for (const recipient of recipients) {
+      const d = await deliverDetailed(admin, {
+        recipientProfileId: recipient,
+        eventType: "message_received",
+        entityType: "conversation",
+        entityId,
+        metadata: { conversationId: facts.conversationId },
+      });
+      results.push(resultFromOutcome(d.outcome, d.email?.kind ?? null));
+    }
+    return combineResults(results, "message_received");
+  } catch (err) {
+    return undeliveredResult(
+      "message_received",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
+  }
+}
+
+/**
+ * JOURNAL REVIEW DECIDED (v10) - a manager confirmed / rejected / asked for
+ * changes on a worker's journal entry.
+ *
+ * RECIPIENT: the WORKER whose entry it is (workers.profile_id through the
+ * granted `workers` read) - the offline party who otherwise learns the
+ * outcome only by opening the journal. Never the reviewer: a manager
+ * reviewing their own entry is not told about their own tap. The reviewer's
+ * NOTE is free text and never reaches the event; metadata carries only the
+ * decision.
+ */
+export interface JournalReviewNotificationFacts {
+  readonly entryId: string;
+  /** `journal_entries.worker_id`, read by the review path under the reviewer's session. */
+  readonly workerId: string | null;
+  /** auth.uid() of the reviewer. */
+  readonly actorProfileId: string;
+  readonly decision: JournalReviewDecision;
+}
+
+export async function emitJournalReviewDecisionNotification(
+  facts: JournalReviewNotificationFacts,
+): Promise<NotificationEmitResult> {
+  try {
+    if (!facts.workerId) {
+      return undeliveredResult("journal_review_decided", "recipient_unresolved");
+    }
+    const admin = createAdminClient();
+    const recipient = await workerProfileId(admin, facts.workerId);
+    if (!recipient) {
+      return undeliveredResult("journal_review_decided", "recipient_unresolved");
+    }
+    // APPROVED silence: reviewing your own entry needs no telling.
+    if (recipient === facts.actorProfileId) {
+      return { delivered: false, reason: "self_action" };
+    }
+    const d = await deliverDetailed(admin, {
+      recipientProfileId: recipient,
+      eventType: "journal_review_decided",
+      entityType: "journal_entry",
+      entityId: journalReviewEntityId(facts.entryId, facts.decision),
+      metadata: { decision: facts.decision },
+    });
+    return resultFromOutcome(d.outcome, d.email?.kind ?? null);
+  } catch (err) {
+    return undeliveredResult(
+      "journal_review_decided",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
   }
 }
 

@@ -62,9 +62,17 @@ describe("the fact strip", () => {
     expect(f[0].value).toBe("≥ 10");
   });
 
-  it("nothing recorded / not read → no strip, never three zeros", () => {
-    expect(buildIdentityFacts({ allTime: totals({}), truncated: false, locale: "en", t })).toEqual([]);
-    expect(buildIdentityFacts({ allTime: null, truncated: false, locale: "en", t })).toEqual([]);
+  it("nothing recorded / not read → ONE absent state in words, never three zeros", () => {
+    for (const allTime of [totals({}), null]) {
+      const f = buildIdentityFacts({ allTime, truncated: false, locale: "en", t });
+      expect(f.map((x) => [x.value, x.label])).toEqual([[null, "noRecords"]]);
+    }
+  });
+
+  it("recorded but nothing confirmed yet → 'no manager record yet', never '0 confirmed'", () => {
+    const f = buildIdentityFacts({ allTime: totals({ hours: 8, daysWorked: 1 }), truncated: false, locale: "en", t });
+    expect(f.find((x) => x.testid === "player-card-fact-confirmed")).toMatchObject({ value: null, label: "noManagerRecord" });
+    expect(f.map((x) => x.value)).not.toContain("0");
   });
 });
 
@@ -89,9 +97,13 @@ describe("the stage", () => {
   });
 
   it("the portrait is a real photo or the shared monogram — never a synthesised face", () => {
-    expect(STAGE).toMatch(/avatarUrl \?/);
-    expect(STAGE).toMatch(/PLAYER_IDENTITY_FALLBACK_SURFACE/);
-    expect(code(STAGE)).not.toMatch(/placeholder|unsplash|pravatar|randomuser/i);
+    // ONE persistent portrait (identity/person-portrait.tsx) is shared by the
+    // stage, the compact PersonPresence and the lifecycle graph.
+    const PORTRAIT = read("components/app/identity/person-portrait.tsx");
+    expect(STAGE).toMatch(/<PersonPortrait/);
+    expect(PORTRAIT).toMatch(/avatarUrl \?/);
+    expect(PORTRAIT).toMatch(/PLAYER_IDENTITY_FALLBACK_SURFACE/);
+    expect(code(PORTRAIT)).not.toMatch(/placeholder|unsplash|pravatar|randomuser/i);
   });
 
   it("working-now is current engagements only — an ended organization stays in history", () => {
@@ -118,8 +130,15 @@ describe("the stage", () => {
     expect(flat).toContain("next:(<>{secB}{secMobility}{secA}{secI}{secNextDoor}</>)");
     // A closed card shows no empty panel.
     expect(MODES.replace(/\s+/g, "")).toContain("{sections[mode]?(");
-    // The identity stage sits OUTSIDE the switching body — the person is the constant.
-    expect(CARD.indexOf("<IdentityStage")).toBeLessThan(CARD.indexOf("<PlayerCardModes"));
+    // The identity stage sits OUTSIDE the switching body — the person is the
+    // constant. Since the owner's visual correction (2026-09-29 §4, "no
+    // duplicate profile card") it is handed to the host as `stage`: shown as
+    // before when the world cannot be drawn, and — with the world drawn, where
+    // the person already stands in the scene — kept behind the "everything on
+    // the card" disclosure instead of repeated as a second card.
+    expect(CARD).toMatch(/stage=\{\s*<IdentityStage/);
+    expect(MODES).toMatch(/\{stage\}\s*\{tabs\(false\)\}/);
+    expect(MODES).toMatch(/data-testid="player-card-all-details"[\s\S]*\{stage\}/);
     // The switcher reads nothing; the public sample never writes the URL.
     expect(MODES).not.toMatch(/supabase|fetch\(|\.from\(/);
     expect(CARD).toContain("syncUrl={!sample}");
