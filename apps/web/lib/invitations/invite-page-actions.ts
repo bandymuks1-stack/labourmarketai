@@ -68,7 +68,7 @@ export async function acceptInviteFormAction(formData: FormData): Promise<void> 
   const proposedRole = String(formData.get("proposedRole") ?? "") || null;
   if (!token) redirect(`/${locale}/dashboard`);
 
-  const result = await acceptInvitationAction({ token });
+  const result = await acceptInvitationAction({ token, locale });
   if (result.status === "not-authed") {
     redirect(loginNext(locale, token));
   }

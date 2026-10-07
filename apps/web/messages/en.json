@@ -3950,7 +3950,9 @@
       "check_email_body": "We sent a confirmation link to {email}. Open it to finish creating your account. If you don't see it, check your spam folder — you can ask for a new link here.",
       "resend_label": "Send the link again",
       "resend_sent": "Sent again. Check your inbox and spam folder.",
-      "resend_wait": "You can request another link in {seconds} s."
+      "resend_wait": "You can request another link in {seconds} s.",
+      "invited_email_note": "This is the address your invitation was sent to.",
+      "show_password": "Show password"
     },
     "login": {
       "headline": "Sign in",
@@ -7381,6 +7383,7 @@
     "outcomeLinked": "Linked. You are now connected.",
     "outcomeAlreadyLinked": "You are already linked.",
     "outcomeNoInvitation": "Invitation not found.",
+    "outcomeEmailUnverified": "Confirm your email first (Network page), then accept the invitation.",
     "outcomeNoWorker": "Your worker profile is not ready yet.",
     "outcomeError": "Could not accept. Please try again.",
     "outcomeNeedsMigration": "Couldn’t complete the action. Please try again."
@@ -11691,7 +11694,22 @@
         "declined": "Invitation declined.",
         "no_worker_profile": "Create your worker profile first, then accept the invitation.",
         "not_found": "Invitation not found.",
-        "error": "Something went wrong. Please try again."
+        "error": "Something went wrong. Please try again.",
+        "email_unverified": "Confirm your email first, then accept the invitation."
+      },
+      "verify": {
+        "title": "Verify your email to see invitations sent to it",
+        "body": "Invitations addressed to an email address are shown only to the person who can open that mailbox. Everything else in your account works as it is; this is only needed to see or accept these invitations.",
+        "send": "Send me a one-time link",
+        "sending": "Sending…",
+        "sent": "We sent a one-time link to {email}. Open it on this device to finish.",
+        "sentNoAddress": "We sent a one-time link to your email address. Open it on this device to finish.",
+        "rateLimited": "A link was sent a moment ago. Please wait a minute before asking for another.",
+        "alreadyVerified": "This email address is already verified. Refresh the page.",
+        "failed": "That link did not verify your email (it may be old or opened elsewhere). You can ask for a new one.",
+        "error": "We could not send the link. Please try again later.",
+        "intakeTitle": "Verify your email to continue an earlier submission",
+        "intakeBody": "If you sent us a company need through our public form with this address, verify the address and we will show it here so you do not have to type it again. Everything else works as it is."
       }
     },
     "search": {
@@ -11887,6 +11905,7 @@
         "revoked": "This invitation was revoked.",
         "declined": "Invitation declined.",
         "no_worker_profile": "Create your worker profile first, then accept the invitation.",
+        "email_mismatch": "This invitation is addressed to a different e-mail address.",
         "not_found": "Invitation not found.",
         "error": "Something went wrong. Please try again.",
         "exhausted": "All places are taken.",
@@ -11909,7 +11928,13 @@
       "agencyClient": "A staffing agency invites your company to work together as its client.",
       "agencyClientNext": "After you accept, the connection request appears on your organization's Partners page — confirm it there with your company. Nothing is shared until you do.",
       "addressedToOther": "This invitation was addressed to {email}. You are signed in with a different address, so the connection cannot be confirmed from this account — sign in with the invited address and open this link again.",
-      "switchAccount": "Sign out and switch account"
+      "switchAccount": "Sign out and switch account",
+      "emailMismatch": {
+        "title": "This invitation is for another e-mail address",
+        "body": "This invitation was sent to {email}. You are signed in with a different address, so it cannot be shown or answered from this account. Sign in with the invited address and open this link again.",
+        "bodyNoHint": "This invitation was sent to a different e-mail address than the one you are signed in with, so it cannot be shown or answered from this account. Sign in with the invited address and open this link again.",
+        "untouched": "Nothing was accepted or changed. The invitation is still waiting for the person it was sent to."
+      }
     },
     "teamEnquiriesTitle": "My enquiries to teams",
     "admin": {
