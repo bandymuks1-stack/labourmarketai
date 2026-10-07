@@ -711,7 +711,11 @@
     "closeLabel": "Close search",
     "voiceStart": "Search by voice",
     "voiceStop": "Stop voice input",
-    "voiceListening": "Listening... say what you are looking for — the text will appear in the search field."
+    "voiceListening": "Listening... say what you are looking for — the text will appear in the search field.",
+    "voiceConsentText": "Dictation in the search box uses your browser's built-in speech recognition. Depending on your browser (for example Chrome or Safari) the audio is sent to that browser vendor's speech service, not to LabourMarket.ai. Nothing is saved by us. Use the voice journal for audio processed on LabourMarket.ai's own server.",
+    "voiceConsentAllow": "Continue with browser dictation",
+    "voiceConsentCancel": "Not now",
+    "voiceFailed": "Dictation stopped - the browser could not use the microphone or speech service."
   },
   "reports": {
     "eyebrow": "Reports",
@@ -14138,7 +14142,9 @@
         "chipDocument": "Add the document"
       },
       "visibilityUnavailable": "Could not check your visibility to employers. That does not mean it is off — open the settings.",
-      "chipVisibility": "Visibility to employers"
+      "chipVisibility": "Visibility to employers",
+      "voiceOpen": "Speak",
+      "voiceBareYes": "Spoken “yes” is not a confirmation. Press the button on the card to confirm, or say what you want to do."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

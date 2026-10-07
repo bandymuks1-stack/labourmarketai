@@ -711,7 +711,11 @@
     "closeLabel": "Suche schließen",
     "voiceStart": "Sprachsuche",
     "voiceStop": "Spracheingabe stoppen",
-    "voiceListening": "Zuhören... sagen Sie, was Sie suchen — der Text erscheint im Suchfeld."
+    "voiceListening": "Zuhören... sagen Sie, was Sie suchen — der Text erscheint im Suchfeld.",
+    "voiceConsentText": "Das Diktieren im Suchfeld nutzt die eingebaute Spracherkennung deines Browsers. Je nach Browser (z. B. Chrome oder Safari) wird das Audio an den Sprachdienst des Browser-Herstellers gesendet, nicht an LabourMarket.ai. Wir speichern nichts. Für Audio, das auf dem eigenen Server von LabourMarket.ai verarbeitet wird, nutze das Sprach-Journal.",
+    "voiceConsentAllow": "Mit Browser-Diktat fortfahren",
+    "voiceConsentCancel": "Jetzt nicht",
+    "voiceFailed": "Diktat beendet - der Browser konnte Mikrofon oder Sprachdienst nicht nutzen."
   },
   "reports": {
     "eyebrow": "Berichte",
@@ -14138,7 +14142,9 @@
         "chipDocument": "Dokument hinzufügen"
       },
       "visibilityUnavailable": "Ihre Sichtbarkeit für Arbeitgeber konnte nicht geprüft werden. Das heißt nicht, dass sie aus ist — öffnen Sie die Einstellungen.",
-      "chipVisibility": "Sichtbarkeit für Arbeitgeber"
+      "chipVisibility": "Sichtbarkeit für Arbeitgeber",
+      "voiceOpen": "Sprechen",
+      "voiceBareYes": "Ein gesprochenes „Ja“ ist keine Bestätigung. Bestätigen Sie mit der Schaltfläche auf der Karte oder sagen Sie, was Sie tun möchten."
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",

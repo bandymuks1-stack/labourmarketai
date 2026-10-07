@@ -711,7 +711,11 @@
     "closeLabel": "Užverti paiešką",
     "voiceStart": "Ieškoti balsu",
     "voiceStop": "Sustabdyti balso įvestį",
-    "voiceListening": "Klausomasi... pasakykite, ko ieškote — tekstas atsiras paieškos lauke."
+    "voiceListening": "Klausomasi... pasakykite, ko ieškote — tekstas atsiras paieškos lauke.",
+    "voiceConsentText": "Diktavimas paieškos lauke naudoja jūsų naršyklės įmontuotą kalbos atpažinimą. Priklausomai nuo naršyklės (pvz., Chrome ar Safari) garsas siunčiamas tos naršyklės gamintojo kalbos paslaugai, o ne LabourMarket.ai. Mes nieko neišsaugome. Jei norite, kad garsas būtų apdorojamas LabourMarket.ai serveryje, naudokite balso žurnalą.",
+    "voiceConsentAllow": "Tęsti su naršyklės diktavimu",
+    "voiceConsentCancel": "Ne dabar",
+    "voiceFailed": "Diktavimas sustojo - naršyklė negalėjo naudoti mikrofono ar kalbos paslaugos."
   },
   "reports": {
     "eyebrow": "Ataskaitos",
@@ -14138,7 +14142,9 @@
         "chipDocument": "Pridėti dokumentą"
       },
       "visibilityUnavailable": "Nepavyko patikrinti matomumo darbdaviams. Tai nereiškia, kad jis išjungtas — atidarykite nustatymus.",
-      "chipVisibility": "Matomumas darbdaviams"
+      "chipVisibility": "Matomumas darbdaviams",
+      "voiceOpen": "Kalbėti",
+      "voiceBareYes": "Ištartas „taip“ nėra patvirtinimas. Patvirtinkite paspausdami kortelės mygtuką arba pasakykite, ką norite daryti."
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
