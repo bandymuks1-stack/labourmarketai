@@ -22,8 +22,8 @@ export const dynamic = "force-dynamic";
  * supplied (including records tied to no known project or place), the stated
  * hours, the work by place, and the skills the organization's own words point
  * to. Claiming later links an account and gives the PERSON control; nothing on
- * this page waits for it, and nothing here asks for payment or for a
- * counterparty's or owner's confirmation.
+ * this page waits for it, and nothing here asks for a fee or for any
+ * third-party or owner sign-off.
  *
  * Authority: managers of the SUPPLYING organization only. The roster row is
  * read under the caller's RLS and bound to the caller's active governed

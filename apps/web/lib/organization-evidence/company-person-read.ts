@@ -22,8 +22,8 @@ import { summarizePersonHistory, type PersonHistorySummary } from "./person-hist
  * subject is a roster row, 41 of 43 rows unlinked — and the only person page
  * (`/dashboard/people/[workerId]`) is keyed on a LINKED worker, so none of it
  * had a person to hang on. Claim only LATER links an account and hands the
- * person control; it gates nothing here (no payment, no counterparty or owner
- * confirmation).
+ * person control; it gates nothing here (no fee, no third-party or owner
+ * sign-off).
  *
  * Authority: the roster row is selected under the caller's own RLS AND bound to
  * the caller's ACTIVE governed organization (`resolveEvidenceOrganization`), so
