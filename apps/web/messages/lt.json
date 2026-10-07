@@ -2014,7 +2014,6 @@
         "recognition": {
           "title": "Įrašyti pripažinimą",
           "hint": "Nepriklausomo vertintojo sprendimas, kad žmogaus parodyta kompetencija atitinka formalų reikalavimą. Tai nėra pažymėjimas ir niekada nesukuriamas vien iš darbo įrodymų.",
-          "pending": "Pripažinimų įrašymas dar nepasiekiamas: už jo esantis registras dar nepaleistas. Kol kas pateikimas atmetamas, o ne išsaugomas.",
           "subject": "Besimokantysis",
           "chooseSubject": "Pasirinkite besimokantįjį",
           "kind": "Reikalavimo tipas",

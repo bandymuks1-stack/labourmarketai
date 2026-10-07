@@ -2014,7 +2014,6 @@
         "recognition": {
           "title": "Erkenning vastleggen",
           "hint": "Het besluit van een onafhankelijke beoordelaar dat de getoonde competentie van een persoon aan een formele eis voldoet. Het is geen certificaat en ontstaat nooit alleen uit werkbewijs.",
-          "pending": "Erkenningen vastleggen is nog niet beschikbaar: het register erachter is nog niet vrijgegeven. Tot dan wordt een indiening geweigerd, niet opgeslagen.",
           "subject": "Lerende",
           "chooseSubject": "Kies een lerende",
           "kind": "Type eis",

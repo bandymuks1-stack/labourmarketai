@@ -2014,7 +2014,6 @@
         "recognition": {
           "title": "Zapisz uznanie",
           "hint": "Decyzja niezależnego oceniającego, że wykazane kompetencje osoby spełniają formalne wymaganie. To nie jest certyfikat i nigdy nie powstaje wyłącznie z dowodów pracy.",
-          "pending": "Zapisywanie uznań nie jest jeszcze dostępne: rejestr za nim nie został jeszcze udostępniony. Do tego czasu zgłoszenie jest odrzucane, a nie zapisywane.",
           "subject": "Uczestnik",
           "chooseSubject": "Wybierz uczestnika",
           "kind": "Rodzaj wymagania",

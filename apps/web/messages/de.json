@@ -2014,7 +2014,6 @@
         "recognition": {
           "title": "Anerkennung erfassen",
           "hint": "Die Entscheidung einer unabhängigen Prüfstelle, dass die gezeigte Kompetenz einer Person eine formale Anforderung erfüllt. Das ist kein Zertifikat und entsteht nie allein aus Arbeitsnachweisen.",
-          "pending": "Das Erfassen von Anerkennungen ist noch nicht verfügbar: Das Register dahinter wurde noch nicht freigegeben. Bis dahin wird eine Eingabe abgelehnt, nicht gespeichert.",
           "subject": "Lernende/r",
           "chooseSubject": "Lernende/n wählen",
           "kind": "Art der Anforderung",
