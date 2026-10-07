@@ -341,6 +341,7 @@ describe("competency signals reach the SUBJECT as suggestions (2026-09-20) — w
 // guard); they are not part of the 2026-09-16/17 history-import slices this block covers.
 const LATER_OWNER_APPROVED_MIGRATIONS = new Set<string>([
   "20260930140000_evidence_correction_integrity_v1.sql",
+  "20260930130000_organization_history_periods_v1.sql",
 ]);
 
 describe("what these slices did NOT do", () => {

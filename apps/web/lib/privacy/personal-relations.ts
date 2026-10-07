@@ -665,6 +665,7 @@ export const ACTOR_ONLY_RELATIONS: readonly string[] = [
   // Discovered-organization provenance: the person is only the recorder of a
   // fact or identifier about a COMPANY, never its subject.
   "organization_facts",
+  "organization_history_periods",
   "organization_identifiers",
   "agency_client_connections",
   "agency_client_request_shares",
