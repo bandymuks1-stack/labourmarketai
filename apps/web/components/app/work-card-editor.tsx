@@ -19,7 +19,10 @@ import {
   type WorkCardActionResult,
 } from "@/lib/worker/work-card-actions";
 import type { WorkCardValues } from "@/lib/worker/work-card";
-import type { WorkCardState } from "@/lib/worker/work-card-state";
+import {
+  preferredCountriesCleared,
+  type WorkCardState,
+} from "@/lib/worker/work-card-state";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
@@ -56,6 +59,10 @@ export interface WorkCardLabels {
   availableFromLabel: string;
   locationLabel: string;
   locationHint: string;
+  /** The country list for the "country I am in" field. When present the field
+   *  is a <select> that submits the ISO code; when absent it stays free text
+   *  (the action resolves a code or a name either way). */
+  locationOptions?: ReadonlyArray<{ code: string; label: string }>;
   preferredLabel: string;
   preferredHint: string;
   salaryMinLabel: string;
@@ -102,6 +109,9 @@ export function WorkCardEditor({
   checks?: WorkCardCheckItem[];
 }) {
   const [open, setOpen] = useState(false);
+  // What is typed in the preferred-countries field, so an emptied field that
+  // had saved countries is sent as an EXPLICIT clear (not as "keep").
+  const [typedCountries, setTypedCountries] = useState<string | null>(null);
 
   // Inline-dim "+" chips (availability/location/pay) open this editor via a
   // window event — they used to self-anchor to #work-card and do nothing
@@ -317,14 +327,30 @@ export function WorkCardEditor({
               <span className="font-mono uppercase tracking-label text-text-muted">
                 {labels.locationLabel}
               </span>
-              <input
-                type="text"
-                name="location_country"
-                maxLength={80}
-                placeholder={labels.locationHint}
-                defaultValue={values.locationCountry ?? ""}
-                className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
-              />
+              {labels.locationOptions && labels.locationOptions.length > 0 ? (
+                <select
+                  name="location_country"
+                  defaultValue={values.locationCountry ?? ""}
+                  data-testid="work-card-location-select"
+                  className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
+                >
+                  <option value="">—</option>
+                  {labels.locationOptions.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  name="location_country"
+                  maxLength={80}
+                  placeholder={labels.locationHint}
+                  defaultValue={values.locationCountry ?? ""}
+                  className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
+                />
+              )}
             </label>
 
             <label className="flex flex-col gap-1 text-xs">
@@ -336,9 +362,15 @@ export function WorkCardEditor({
                 name="preferred_countries"
                 placeholder={labels.preferredHint}
                 defaultValue={values.preferredCountries.join(", ")}
+                onChange={(e) => setTypedCountries(e.target.value)}
                 className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm uppercase text-text-primary"
               />
             </label>
+
+            {typedCountries !== null &&
+            preferredCountriesCleared(values.preferredCountries, typedCountries) ? (
+              <input type="hidden" name="preferred_countries_clear" value="1" />
+            ) : null}
 
             {/* kiek — pay */}
             <div className="grid grid-cols-2 gap-3">

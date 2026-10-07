@@ -473,7 +473,7 @@ export async function runVacancyImport(
       } else if (tokenConfig !== null) {
         // Resume point for a continuation-token feed. No token = the head of
         // the feed, which is a cold start and needs no parameter at all.
-        if (continuationToken !== null) {
+        if (continuationToken !== null && tokenConfig.queryKey !== undefined) {
           query[tokenConfig.queryKey] = continuationToken;
         }
         tokenWalkDrained = false;
@@ -489,6 +489,11 @@ export async function runVacancyImport(
         channel,
         query,
         apiKey: req.apiKey ?? null,
+        // A feed that names its next page by PATH takes the token here; the
+        // capture instant only starts a cold walk at a time (both are no-ops
+        // for every endpoint that declares neither).
+        continuationToken: tokenConfig !== null ? continuationToken : null,
+        coldStartAtIso: tokenConfig !== null ? req.capturedAt : null,
       });
 
       if (!fetched.ok) {

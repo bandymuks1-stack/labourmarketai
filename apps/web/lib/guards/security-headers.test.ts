@@ -86,12 +86,16 @@ describe("security response headers (audit M-01)", () => {
     ).toBeGreaterThanOrEqual(31536000);
   });
 
-  it("enforces a Permissions-Policy that denies camera, microphone and payment", async () => {
+  it("enforces a Permissions-Policy that denies camera and payment and limits the microphone to this origin", async () => {
     const headers = await catchAllHeaders();
     const value = headers.get("permissions-policy") ?? "";
-    for (const feature of ["camera=()", "microphone=()", "payment=()"]) {
+    for (const feature of ["camera=()", "payment=()"]) {
       expect(value, `Permissions-Policy is missing ${feature}`).toContain(feature);
     }
+    // Accepted capability (Voice Work Journal, U-26): same-origin ONLY.
+    // Never "()" (silently disables recording) and never "*" / a foreign origin.
+    expect(value).toContain("microphone=(self)");
+    expect(value).not.toMatch(/microphone=\([^)]*(\*|https?:)/);
   });
 
   it("does not advertise the framework version", async () => {

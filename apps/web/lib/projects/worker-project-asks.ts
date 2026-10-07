@@ -5,6 +5,7 @@ import {
   type CapabilityAssessment,
   type CapabilityEvidence,
 } from "@/lib/qualification/capability-standing";
+import { recognitionAnswersDocumentTypes, type RecognitionRow } from "@/lib/skills/recognition-model";
 
 /**
  * WHAT THE PROJECT STILL NEEDS FROM ME: pure derivation (owner contract §11
@@ -78,6 +79,12 @@ export function deriveWorkerProjectAsks(
    *  answer the question gets exactly the previous behaviour, never a guess
    *  in either direction. */
   evidence?: CapabilityEvidence | null,
+  /** The person's own recognition records (SKL-9). OPTIONAL and empty today:
+   *  the relation is an unapplied owner packet, so no caller can supply a
+   *  record yet. When one exists, an assessor's current, un-revoked,
+   *  positive recognition of one of this row's document types is the ONLY
+   *  thing that sets `hasRecognizedEquivalence` - recorded work never does. */
+  recognitions?: readonly RecognitionRow[] | null,
 ): Map<string, WorkerProjectAsk[]> {
   const byType = new Map<string, OwnDocumentState>();
   // WHETHER THE BEST RECORD IS VERIFIED. A document the worker recorded
@@ -131,6 +138,9 @@ export function deriveWorkerProjectAsks(
               // the real-work ladder below still speaks.
               hasValidCredential: own === "ready" && ownVerified,
               hasExpiringCredential: own === "expiring" && ownVerified,
+              hasRecognizedEquivalence:
+                recognitions != null &&
+                recognitionAnswersDocumentTypes(recognitions, slugs, now.toISOString().slice(0, 10)),
             },
             { formalRequirementRequired: true },
           )

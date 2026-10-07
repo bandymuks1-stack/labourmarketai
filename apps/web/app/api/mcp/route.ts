@@ -273,8 +273,15 @@ export async function POST(req: Request) {
     serverInfo: serverInfo(new URL(req.url).origin),
     instructions:
       "LabourMarket.ai capabilities for the signed-in user. Reads return " +
-      "recorded facts under the user's own permissions. Nothing here writes " +
-      "without an explicit draft→confirm step.",
+      "recorded facts under the user's own permissions. Consequential writes " +
+      "need an explicit draft→confirm step. The exceptions are single-step " +
+      "and named: the evidence-import staging steps (evidence_import_create_session, " +
+      "evidence_import_submit_rows, evidence_import_stage_file, evidence_import_resolve_row, " +
+      "evidence_import_resolve_label, evidence_import_resolve_time_semantics) " +
+      "write only staging rows that become records solely through the " +
+      "confirmed evidence_import_commit; context_switch changes which " +
+      "organization the session acts for; evidence_person_create adds one " +
+      "unlinked roster person.",
     tools: toolDefs(),
     callTool: async (name, args) => {
       const capabilityId = capabilityIdForTool(name);
@@ -356,7 +363,16 @@ export async function OPTIONS() {
 /** No SSE stream: this server is deliberately stateless (single-response). */
 export async function GET() {
   return NextResponse.json(
-    { ok: false, message: "This MCP endpoint is POST-only (stateless streamable HTTP)." },
+    {
+      ok: false,
+      message: "This MCP endpoint is POST-only (stateless streamable HTTP).",
+      // The published toolset as a version — the same value `initialize`
+      // reports as serverInfo.version. Public on purpose: it derives only from
+      // the static tool descriptions every authorized client is shown, so a
+      // release can be verified without a credential.
+      toolsetVersion: toolsetVersion(),
+      toolCount: toolDefs().length,
+    },
     { status: 405, headers: { ...CORS_HEADERS, Allow: "POST, OPTIONS" } },
   );
 }

@@ -342,6 +342,51 @@ export function weekColumnIndex(header: readonly string[]): number | undefined {
   return undefined;
 }
 
+/**
+ * A DATE-PROVENANCE column is the source's own statement of HOW its date cell
+ * came to be. Prepared exports (the owner's 2025 history) carry one because the
+ * original timesheets named only year + week + weekday and a pre-processing
+ * step reconstructed the calendar date: "Derived from ISO year 2025 + source
+ * week + source weekday; source did not contain calendar date". A date the
+ * source itself declares reconstructed is NOT something the source stated, so
+ * it must never enter `factFields` (owner rule 2026-09-30: an inferred field is
+ * never promoted to FACT).
+ */
+const DATE_PROVENANCE_HEADER_SYNONYMS: readonly string[] = [
+  "date provenance",
+  "date source",
+  "date origin",
+  "datos kilme",
+  "datos saltinis",
+  "datum herkomst",
+  "datum bron",
+  "datum herkunft",
+  "istochnik daty",
+];
+
+export function dateProvenanceColumnIndex(header: readonly string[]): number | undefined {
+  for (let i = 0; i < header.length; i++) {
+    const key = headerKey(header[i]);
+    if (key !== "" && DATE_PROVENANCE_HEADER_SYNONYMS.includes(key)) return i;
+  }
+  return undefined;
+}
+
+/** The reconstruction method a derived date carries. */
+export const DATE_RECONSTRUCTED_METHOD = "iso_week_weekday_reconstruction";
+
+/**
+ * True unless the provenance cell positively says the date was explicit.
+ * A cell that is present but says anything else (or says it was derived) is
+ * read as "not stated by the source" — under-claiming is the safe direction.
+ * An EMPTY cell says nothing, so the ordinary explicit-date reading stands.
+ */
+export function dateIsDeclaredReconstructed(provenanceCell: string): boolean {
+  const t = provenanceCell.trim();
+  if (t === "") return false;
+  return !/\b(explicit|stated in (the )?source|as written|as stated|original)\b/i.test(t);
+}
+
 /** A week number as the source wrote it ("50", "W50", "KW 50", "50 sav."),
  *  or null when the cell does not hold one in 1..53. */
 export function readWeekNumber(raw: string): number | null {
@@ -521,6 +566,7 @@ export function rowsFromGrid(
 
   const header = grid[headerIndex];
   const weekColumn = weekColumnIndex(header);
+  const provenanceColumn = dateProvenanceColumnIndex(header);
   const rows: SourceWorkRow[] = [];
   const positions: number[] = [];
   const skipped: { rowIndex: number; reason: string }[] = [];
@@ -566,6 +612,19 @@ export function rowsFromGrid(
             value: read.iso,
             method: "date_day_first",
             confidence: 0.6,
+          };
+        } else if (
+          provenanceColumn !== undefined &&
+          dateIsDeclaredReconstructed((line[provenanceColumn] ?? "").trim())
+        ) {
+          // The source's own provenance column says this date was rebuilt from
+          // year + week + weekday. Kept as the row's date (nothing is dropped)
+          // but recorded as DERIVED with its method, never as a stated fact.
+          derived.workDate = {
+            value: read.iso,
+            method: DATE_RECONSTRUCTED_METHOD,
+            confidence: 0.8,
+            note: tidy((line[provenanceColumn] ?? "").trim()).slice(0, 300),
           };
         } else {
           factFields.push("workDate");
@@ -617,7 +676,19 @@ export function rowsFromGrid(
     // source agreed. Only an EXPLICIT, unambiguous date can contradict a
     // week number; a day-first-guessed date cannot be used as evidence
     // against the author, so no comparison is recorded for it.
-    if (weekColumn !== undefined && workDate !== null && factFields.includes("workDate")) {
+    if (
+      weekColumn !== undefined &&
+      workDate !== null &&
+      derived.workDate?.method === DATE_RECONSTRUCTED_METHOD
+    ) {
+      // The date was BUILT from the source's week, so comparing the two would
+      // be circular ("consistent" by construction). The week the source
+      // actually stated is the only week fact here.
+      const sourceWeek = readWeekNumber((line[weekColumn] ?? "").trim());
+      if (sourceWeek !== null) {
+        derived.calendarWeek = { value: sourceWeek, method: "source_week", confidence: 1 };
+      }
+    } else if (weekColumn !== undefined && workDate !== null && factFields.includes("workDate")) {
       const sourceWeek = readWeekNumber((line[weekColumn] ?? "").trim());
       const calendarWeek = isoWeekOf(workDate);
       if (sourceWeek !== null && calendarWeek !== null) {

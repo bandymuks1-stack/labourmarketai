@@ -157,7 +157,7 @@ describe("webhook rejects live events", () => {
     expect(src).toMatch(/live_event_rejected/);
     // rejection happens BEFORE any subscription write
     expect(src.indexOf("live_event_rejected")).toBeLessThan(
-      src.indexOf("upsertSubscription("),
+      src.indexOf("applyRawSubscriptionObject("),
     );
   });
 });
@@ -285,9 +285,13 @@ describe("plan boundary wiring is complete and real", () => {
       expect(existsSync(p), `${key}: missing site ${e.site}`).toBe(true);
       const txt = readFileSync(p, "utf8");
       if (e.kind === "server_gate") {
-        expect(txt, `${key}: site lacks hasFeature("${key}")`).toContain(
-          `hasFeature("${key}")`,
-        );
+        // `hasFeature(k)` (cookie caller) or the SAME predicate on a context
+        // resolved for an explicit caller — `entitlementAllows(ctx, k)` — which
+        // a bearer (MCP) request needs (it carries no cookie session).
+        expect(
+          txt.includes(`hasFeature("${key}")`) || txt.includes(`entitlementAllows(ctx, "${key}")`),
+          `${key}: site lacks hasFeature("${key}") / entitlementAllows(ctx, "${key}")`,
+        ).toBe(true);
       }
       if (e.kind === "admin_rbac") {
         expect(txt, `${key}: RBAC site lacks superadmin check`).toMatch(

@@ -40,6 +40,10 @@ export const PLAYER_IDENTITY_VARIANTS = [
   "map-marker", // market-map simplified marker + hover card
   "request-provider", // marketplace request / provider compact card
   "history-card", // historical reconstruction — an organization's evidence about a person (2026-09-16)
+  "candidate-review", // an employer reading an application / candidate — layer 1 + disclosure (2026-10-01)
+  "team-member", // a person in the company's team list — role, assignment, availability (2026-10-01)
+  "assignment", // a person on a project's assignment list (2026-10-01)
+  "roster-person", // a person the organization's roster / booking records name (2026-10-01)
 ] as const;
 export type PlayerIdentityVariant = (typeof PLAYER_IDENTITY_VARIANTS)[number];
 
@@ -55,8 +59,9 @@ export const PLAYER_AVATAR_PX = {
   header: 64,
   hero: 96,
   /** The Professional Player Card identity stage: the person is the
-   *  primary visual object, a portrait rather than a dot (2026-09-29). */
-  portrait: 176,
+   *  primary visual object, a portrait rather than a dot (2026-09-29) —
+   *  and, closed, the whole card's centre (owner direction 2026-09-30). */
+  portrait: 224,
 } as const;
 export type PlayerAvatarSize = keyof typeof PLAYER_AVATAR_PX;
 

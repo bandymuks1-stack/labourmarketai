@@ -1,5 +1,4 @@
 import {
-  MapPin,
   Shield,
   CalendarCheck2,
   Sparkle,
@@ -36,6 +35,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { IdentityStage, type IdentityFact } from "@/components/app/player-card/identity-stage";
 import { PlayerCardModes } from "@/components/app/player-card/player-card-modes";
 import type { PlayerCardMode } from "@/lib/player-card/card-modes";
+import { buildCardWorld } from "@/lib/player-card/card-world";
 
 /**
  * Worker player-card — the premium scouting card (TASK 07 slice
@@ -58,6 +58,16 @@ import type { PlayerCardMode } from "@/lib/player-card/card-modes";
  */
 
 export interface PlayerCardLabels {
+  /** The person's spatial world (premium gate 2026-09-29) — its own words
+   *  and the NEXT directions the adjacency engine derives from evidence.
+   *  Optional: a caller without it gets the card without the world. */
+  world?: {
+    sceneLabel: string;
+    empty: string;
+    emptyNext: string;
+    allDetails: string;
+    directions: { id: string; label: string; detail: string | null; shared: number }[];
+  };
   /** Identity stage: EVERY profession's display name, primary-first (0/1/N). */
   professionNames: string[];
   /** Organizations of the CURRENT engagements only. */
@@ -115,6 +125,12 @@ export interface PlayerCardLabels {
   /** §5.2 LOCATION — resolved country NAME for the worker's stated country
    *  code, or null when no location is stated. Country precision only. */
   locationName: string | null;
+  /** MOBILITY — the label, the country names the worker would work in
+   *  (empty when none are stated) and the relocation words (null unless the
+   *  worker said yes). */
+  mobilityLabel?: string;
+  mobilityCountries?: readonly string[];
+  relocateLabel?: string | null;
   /** §5.2 DOCUMENTS — resolved status line, or null when the documents
    *  surface is unavailable for this account (honest absence). */
   documentsLabel: string | null;
@@ -393,17 +409,6 @@ export function WorkerPlayerCard({
               {labels.availabilityFrom}
             </span>
           ) : null}
-          {/* §5.2 LOCATION — the worker's own stated country, country
-              precision only (the card never implies an address). */}
-          {labels.locationName ? (
-            <span
-              className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 text-meta text-text-secondary"
-              data-testid="player-card-location"
-            >
-              <MapPin className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />
-              {labels.locationName}
-            </span>
-          ) : null}
           <span
             className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
             data-testid="player-card-workcard"
@@ -464,32 +469,6 @@ export function WorkerPlayerCard({
               <span>· {labels.journalSupportedLabel}</span>
             </p>
           ) : null}
-        </div>
-    </>
-  );
-  const secD = (
-    <>
-        {/* ── §5.2 EVIDENCE VIEWS — the card's real data visualizations.
-              Growth over time and per-skill strength sit side by side on wide
-              screens and stack on a phone; both read from the worker's OWN rows
-              and both state an honest empty case instead of an empty frame. ── */}
-        <div
-          id="player-card-evidence"
-          className="grid scroll-mt-20 gap-3 lg:grid-cols-2"
-          data-testid="player-card-visualizations"
-        >
-          <EvidenceTimelineChart
-            months={card.evidenceTimeline}
-            labels={labels.visuals.evidence}
-          />
-          <SkillEvidenceChart
-            skills={card.skillEvidence}
-            labels={labels.visuals.skills}
-            // W5 slice 3: this card renders the worker's OWN rows only, so the
-            // drill-down never widens visibility — it opens their own journal.
-            // A sample card has no journal behind it, so it never drills down.
-            linkBarsToJournal={!sample}
-          />
         </div>
     </>
   );
@@ -690,6 +669,32 @@ export function WorkerPlayerCard({
         </div>
     </>
   );
+  // MOBILITY — where the person can go next: the countries they would work
+  // in and whether they would relocate, in their own stated words. Nothing
+  // is rendered for facts they have not given (an empty list is not a claim).
+  const mobilityCountries = labels.mobilityCountries ?? [];
+  const secMobility =
+    mobilityCountries.length > 0 || labels.relocateLabel ? (
+      <div className="flex flex-col gap-1.5" data-testid="player-card-mobility">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {labels.mobilityLabel}
+        </span>
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text-primary">
+          {mobilityCountries.map((c, i) => (
+            <span key={`${c}-${i}`} className="inline-flex items-center gap-2">
+              {i > 0 ? <span aria-hidden className="h-px w-4 bg-text-muted/60" /> : null}
+              {c}
+            </span>
+          ))}
+          {labels.relocateLabel ? (
+            <span className="text-text-secondary" data-testid="player-card-relocate">
+              {mobilityCountries.length > 0 ? "· " : ""}
+              {labels.relocateLabel}
+            </span>
+          ) : null}
+        </p>
+      </div>
+    ) : null;
   const secEvidenceChart = (
     <EvidenceTimelineChart
             months={card.evidenceTimeline}
@@ -730,6 +735,57 @@ export function WorkerPlayerCard({
     </Link>
   );
 
+  // THE PERSON'S WORLD — the same rows the sections below state, placed in
+  // space (premium gate 2026-09-29). Built only when the caller gave the
+  // world its words; plain data, it crosses into the client scene.
+  const world = labels.world
+    ? buildCardWorld({
+        person: {
+          name,
+          initials: identity.initials,
+          avatarUrl: identity.avatarUrl,
+          professions:
+            labels.professionNames.length > 0
+              ? labels.professionNames
+              : labels.professionName
+                ? [labels.professionName]
+                : [],
+          confirmedEdge: card.provenance.class === "EMPLOYER_CONFIRMED",
+          currentWork: labels.currentWork,
+          currentWorkLabel: labels.currentWorkLabel,
+          // A fact with no value is simply not drawn (never a "0" or a placeholder).
+          facts: labels.identityFacts.flatMap((f) => (f.value ? [{ value: f.value, label: f.label }] : [])),
+          provenance: { label: labels.provenance.label, text: labels.provenance.text },
+        },
+        professionSlug: card.professionSlug,
+        modeLabels: {
+          work: labels.modes.work,
+          skills: labels.modes.skills,
+          evidence: labels.modes.evidence,
+          history: labels.modes.history,
+          next: labels.modes.next,
+        },
+        currentWork: labels.currentWork,
+        skillBars: card.skillEvidence,
+        skillNames: labels.visuals.skills.skillNames,
+        skillEntryLabels: labels.visuals.skills.entryLabels,
+        noEvidence: labels.visuals.skills.noEvidence,
+        tierLabels: labels.visuals.skills.tierLabels,
+        months: card.evidenceTimeline,
+        monthLabels: labels.visuals.evidence.monthLabels,
+        lanes: historyTimeline.lanes,
+        laneDetails: labels.visuals.history.laneDetails,
+        currentLabel: labels.visuals.history.current,
+        directions: labels.world.directions,
+        words: {
+          sceneLabel: labels.world.sceneLabel,
+          empty: labels.world.empty,
+          emptyNext: labels.world.emptyNext,
+          allDetails: labels.world.allDetails,
+        },
+      })
+    : null;
+
   return (
     <section
       className={cn(
@@ -745,72 +801,74 @@ export function WorkerPlayerCard({
       data-testid="worker-player-card"
       data-provenance={card.provenance.class}
     >
-      {/* ── THE PERSON (premium Player Card, 2026-09-29) ─────────────────
-          The identity stage: portrait-scale person, display-type name, EVERY
-          profession, where they work now and the journal's own figures. The
-          provenance edge stays THIS card's (gold only when derived from a
-          real confirmation, P6); the words sit under the name. */}
-      <IdentityStage
-        name={name}
-        avatarUrl={identity.avatarUrl}
-        initials={identity.initials}
-        avatarTestids={{ photo: "player-card-avatar-photo", monogram: "player-card-avatar-monogram" }}
-        edge={<ProvenanceEdge provenanceClass={card.provenance.class} />}
-        eyebrow={
-          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-            {labels.title}
-          </span>
-        }
-        heading={
-          <h2 className="break-words font-display text-2xl font-bold leading-[1.05] tracking-tightest text-text-primary sm:text-4xl">
-            {name}
-          </h2>
-        }
-        professions={
-          labels.professionNames.length > 0
-            ? labels.professionNames
-            : labels.professionName
-              ? [labels.professionName]
-              : []
-        }
-        location={null}
-        availability={null}
-        currentWork={labels.currentWork}
-        currentWorkLabel={labels.currentWorkLabel}
-        facts={labels.identityFacts}
-        trailing={
-          <ReadinessRing
-            met={readiness.met}
-            total={readiness.total}
-            level={readiness.level}
-            levelLabel={levelLabel}
-            size="md"
-          />
-        }
-      >
-        {labels.professionNames.length === 0 && !labels.professionName ? (
-          <p className="text-xs leading-relaxed text-text-secondary">{labels.subtitle}</p>
-        ) : null}
-        {/* P6 — the SAME fact as the edge, in words (a11y: state is never
-            colour alone). The words WRAP — never truncate (prod walk c893557b). */}
-        <p className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
-          <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">
-            {labels.provenance.label}
-          </span>
-          <ProvenanceLine
-            provenanceClass={card.provenance.class}
-            text={labels.provenance.text}
-            testid="player-card-provenance"
-            className="min-w-0 break-words"
-          />
-        </p>
-      </IdentityStage>
-
       {/* ── THE SAME PERSON, SEEN AS … — the card's modes (owner 2026-09-29
             §9). IDENTITY is the whole card as it was (the floor); each other
             mode brings forward the sections that answer it, under the SAME
             identity stage. Server-rendered slots; the switcher reads nothing. */}
       <PlayerCardModes
+        world={world}
+        // ── THE PERSON: the identity stage — name, EVERY profession, where
+        // they work now and the journal's own figures, under the world. The
+        // provenance edge stays THIS card's (gold only when derived from a
+        // real confirmation, P6); the words sit under the name.
+        stage={
+          <IdentityStage
+            name={name}
+            avatarUrl={identity.avatarUrl}
+            initials={identity.initials}
+            avatarTestids={{ photo: "player-card-avatar-photo", monogram: "player-card-avatar-monogram" }}
+            edge={<ProvenanceEdge provenanceClass={card.provenance.class} />}
+            eyebrow={
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                {labels.title}
+              </span>
+            }
+            heading={
+              <h2 className="break-words font-display text-2xl font-bold leading-[1.05] tracking-tightest text-text-primary sm:text-4xl">
+                {name}
+              </h2>
+            }
+            professions={
+              labels.professionNames.length > 0
+                ? labels.professionNames
+                : labels.professionName
+                  ? [labels.professionName]
+                  : []
+            }
+            // WHERE, closed: said here once (the NEXT lens no longer repeats it).
+            location={labels.locationName}
+            availability={null}
+            currentWork={labels.currentWork}
+            currentWorkLabel={labels.currentWorkLabel}
+            facts={labels.identityFacts}
+            trailing={
+              <ReadinessRing
+                met={readiness.met}
+                total={readiness.total}
+                level={readiness.level}
+                levelLabel={levelLabel}
+                size="md"
+              />
+            }
+          >
+            {labels.professionNames.length === 0 && !labels.professionName ? (
+              <p className="text-xs leading-relaxed text-text-secondary">{labels.subtitle}</p>
+            ) : null}
+            {/* P6 — the SAME fact as the edge, in words (a11y: state is never
+                colour alone). The words WRAP — never truncate (prod walk c893557b). */}
+            <p className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
+              <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">
+                {labels.provenance.label}
+              </span>
+              <ProvenanceLine
+                provenanceClass={card.provenance.class}
+                text={labels.provenance.text}
+                testid="player-card-provenance"
+                className="min-w-0 break-words"
+              />
+            </p>
+          </IdentityStage>
+        }
         label={labels.modes.label}
         initialMode={initialMode}
         syncUrl={!sample}
@@ -823,26 +881,19 @@ export function WorkerPlayerCard({
           next: labels.modes.next,
         }}
         sections={{
-          identity: (
-            <>
-              {secA}
-              {secB}
-              {secC}
-              {secD}
-              {secE}
-              {secF}
-              {secG}
-              {secH}
-              {secI}
-              {secJ}
-            </>
-          ),
+          // CLOSED (owner direction 2026-09-30): the person IS the card. The
+          // identity stage above says who, what, where now and what the real
+          // work adds up to; nothing else competes with it. Every section
+          // below is one lens away, and each lens opens in the owner's order:
+          // real work → projects/objects → hours → skills/evidence →
+          // availability → mobility → progression.
+          identity: null,
           work: (
             <>
-              {secA}
-              {secB}
-              {secF}
               {secJ}
+              {secG}
+              {secEvidenceChart}
+              {secF}
               {secWorkDoor}
             </>
           ),
@@ -869,6 +920,8 @@ export function WorkerPlayerCard({
           ),
           next: (
             <>
+              {secB}
+              {secMobility}
               {secA}
               {secI}
               {secNextDoor}

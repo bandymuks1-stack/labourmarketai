@@ -143,6 +143,7 @@ describe("§8-1 single write path — only createConversation writes the stamp",
       const src = read(rel);
       return (
         /source_type/.test(src) &&
+        /\.insert\(/.test(src) &&
         /\.from\(\s*["']conversations["']\s*\)/.test(src)
       );
     });

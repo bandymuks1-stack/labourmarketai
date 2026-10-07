@@ -51,6 +51,10 @@ export type {
  *  unapplied the column is missing (42703) and the reads FALL BACK to the v1
  *  column set so the live surface never regresses (booking version-fallback
  *  precedent). */
+/** v3 adds the stage / parent pointers (20261002150000). Absent → 42703 →
+ *  the reads fall back to v2, then v1, and the structure UI is simply hidden. */
+const SELECT_COLUMNS_V3 =
+  "id, project_id, object_id, stage_id, parent_task_id, title, description, status, priority, assignee_profile_id, created_by, due_at, created_at, resolved_at";
 const SELECT_COLUMNS_V2 =
   "id, project_id, object_id, title, description, status, priority, assignee_profile_id, created_by, due_at, created_at, resolved_at";
 const SELECT_COLUMNS_V1 =
@@ -65,6 +69,8 @@ type Row = {
   id: string;
   project_id: string | null;
   object_id?: string | null;
+  stage_id?: string | null;
+  parent_task_id?: string | null;
   title: string;
   description: string | null;
   status: string;
@@ -83,6 +89,8 @@ function toTask(r: Row): WorkTask | null {
     id: r.id,
     projectId: r.project_id ?? null,
     objectId: r.object_id ?? null,
+    stageId: r.stage_id ?? null,
+    parentTaskId: r.parent_task_id ?? null,
     title: r.title,
     description: r.description ?? null,
     status: r.status,
@@ -118,28 +126,37 @@ async function runTaskQuery(
   supabase: SupabaseClient,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   refine: (q: any) => any,
-): Promise<{ error: { code?: string; message: string } | null; data: unknown }> {
+): Promise<{
+  error: { code?: string; message: string } | null;
+  data: unknown;
+  structure: boolean;
+}> {
+  const v3 = await refine(orderedTaskQuery(supabase, SELECT_COLUMNS_V3));
+  if (!v3.error) return { ...v3, structure: true };
+  if (v3.error.code !== UNDEFINED_COLUMN) return { ...v3, structure: false };
   const v2 = await refine(orderedTaskQuery(supabase, SELECT_COLUMNS_V2));
   if (v2.error && v2.error.code === UNDEFINED_COLUMN) {
-    return refine(orderedTaskQuery(supabase, SELECT_COLUMNS_V1));
+    const v1 = await refine(orderedTaskQuery(supabase, SELECT_COLUMNS_V1));
+    return { ...v1, structure: false };
   }
-  return v2;
+  return { ...v2, structure: false };
 }
 
 function mapResult(res: {
   error: { code?: string; message: string } | null;
   data: unknown;
+  structure: boolean;
 }): MyTasksResult {
   if (res.error) {
     if (isMigrationMissingCode(res.error.code)) {
       return { status: "needs-migration" };
     }
-    return { status: "ok", tasks: [], error: res.error.message };
+    return { status: "ok", tasks: [], error: res.error.message, structure: false };
   }
   const tasks = ((res.data ?? []) as Row[])
     .map(toTask)
     .filter((t): t is WorkTask => t !== null);
-  return { status: "ok", tasks, error: null };
+  return { status: "ok", tasks, error: null, structure: res.structure };
 }
 
 /**
@@ -177,6 +194,37 @@ export async function readWorkTaskAssignmentFacts(
     };
   } catch {
     return { taskId, assigneeProfileId: null, actorProfileId, dueAt: null };
+  }
+}
+
+/**
+ * The three facts the assignment reservation check needs — assignee, due
+ * timestamp, owning project — read under the caller's own session. Lives here
+ * because this module is the ONE RLS-scoped work_tasks reader. Null on any
+ * failure (the caller then reports "not applicable", never "clear").
+ */
+export async function readWorkTaskReservationFacts(
+  supabase: SupabaseClient,
+  taskId: string,
+): Promise<{
+  assigneeProfileId: string | null;
+  dueAt: string | null;
+  projectId: string | null;
+} | null> {
+  try {
+    const { data } = await asAny(supabase)
+      .from("work_tasks")
+      .select("assignee_profile_id, due_at, project_id")
+      .eq("id", taskId)
+      .maybeSingle();
+    if (!data) return null;
+    return {
+      assigneeProfileId: (data.assignee_profile_id as string | null) ?? null,
+      dueAt: (data.due_at as string | null) ?? null,
+      projectId: (data.project_id as string | null) ?? null,
+    };
+  } catch {
+    return null;
   }
 }
 
@@ -313,18 +361,30 @@ export async function getTaskCollaboration(
     0,
     WORK_TASK_READ_LIMIT,
   );
-  const blockerMeta = new Map<string, { title: string; status: WorkTask["status"] }>();
+  const blockerMeta = new Map<
+    string,
+    { title: string; status: WorkTask["status"]; dueAt: string | null }
+  >();
   if (blockerIds.length > 0) {
     const blockersRes = await asAny(supabase)
       .from("work_tasks")
-      .select("id, title, status")
+      .select("id, title, status, due_at")
       .in("id", blockerIds)
       .limit(WORK_TASK_READ_LIMIT);
     if (!blockersRes.error) {
-      type SlimRow = { id: string; title: string; status: string };
+      type SlimRow = {
+        id: string;
+        title: string;
+        status: string;
+        due_at: string | null;
+      };
       for (const r of (blockersRes.data ?? []) as SlimRow[]) {
         if (isValidWorkTaskStatus(r.status)) {
-          blockerMeta.set(r.id, { title: r.title, status: r.status });
+          blockerMeta.set(r.id, {
+            title: r.title,
+            status: r.status,
+            dueAt: r.due_at ?? null,
+          });
         }
       }
     }
@@ -337,6 +397,7 @@ export async function getTaskCollaboration(
       blockerTaskId: d.blocker_task_id,
       title: meta?.title ?? null,
       status: meta?.status ?? null,
+      dueAt: meta?.dueAt ?? null,
     });
   }
 

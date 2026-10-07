@@ -390,15 +390,13 @@ test.describe("PR-I reality matrix — authenticated chat (desktop)", () => {
       timeout: 60_000,
     });
 
-    // The world overview lives in the collapsed "advanced" disclosure
-    // (progressive disclosure by design) — expand it, then assert.
-    await page.getByTestId("market-map-advanced").locator("summary").click();
-    await expect(page.getByTestId("labour-market-world-map")).toBeVisible({
+    // ONE map: the world view is the single canonical map with its layer
+    // pills (the conceptual zone diagram was unmounted from this page).
+    await expect(page.getByTestId("market-map")).toHaveCount(1, {
       timeout: 60_000,
     });
-    await expect(page.getByTestId("world-map-canvas")).toBeVisible();
-    await expect(page.getByTestId("world-map-legend")).toBeVisible();
-    await page.getByTestId("labour-market-world-map").scrollIntoViewIfNeeded();
+    await expect(page.getByTestId("world-layers")).toBeVisible();
+    await page.getByTestId("market-map").scrollIntoViewIfNeeded();
     await page.screenshot({
       path: evidencePath("s7-market-map-world.png"),
       fullPage: false,

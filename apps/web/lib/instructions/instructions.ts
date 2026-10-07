@@ -182,6 +182,41 @@ export async function listManagedWorkers(): Promise<ManagedWorker[]> {
 }
 
 /**
+ * Workers on the ACTIVE roster of ONE company (`company_workers` only — never
+ * agency rosters). The manager assign form's candidate list: the database
+ * admits a manager only for workers on the roster of the company that owns the
+ * project (migration 20261002142000). RLS-scoped; empty on any failure.
+ */
+export async function listCompanyRosterWorkers(companyId: string): Promise<ManagedWorker[]> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user || !companyId) return [];
+  const res = await asAny(supabase)
+    .from("company_workers")
+    .select("worker:workers!inner(profile_id, display_name, profiles(full_name))")
+    .eq("company_id", companyId)
+    .eq("status", "active");
+  if (res.error) return [];
+  const out = new Map<string, ManagedWorker>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  for (const r of (res.data ?? []) as any[]) {
+    const w = r.worker as {
+      profile_id: string | null;
+      display_name: string | null;
+      profiles: { full_name: string | null } | null;
+    } | null;
+    if (!w?.profile_id) continue;
+    out.set(w.profile_id, {
+      profileId: w.profile_id,
+      name: w.profiles?.full_name ?? w.display_name ?? w.profile_id.slice(0, 8),
+    });
+  }
+  return [...out.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/**
  * The people's ANSWERS to the manager's instructions on ONE project (owner
  * contract §11/§12 — the readiness answer shows what the person said, so the
  * manager can mark the row received without leaving the chat). Three

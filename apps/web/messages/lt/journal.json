@@ -78,6 +78,11 @@
   "engagement": "Kontekstas",
   "engagementChoose": "Pasirinkite darbo kontekstą…",
   "engagementAmbiguous": "Šis darbas gali priklausyti daugiau nei vienam darbo kontekstui. Prieš išsaugant pasirinkite, kuriam.",
+  "project": "Projektas",
+  "projectChoose": "Pasirinkite projektą…",
+  "projectNone": "Ne projekto darbas",
+  "projectAmbiguous": "Esate priskirti keliems projektams. Prieš išsaugant pasirinkite, kuriam projektui priklauso šios valandos (arba pažymėkite, kad tai ne projekto darbas).",
+  "projectAuto": "Projektas: {name}",
   "unconfirmedTimeBlocked": "{count, plural, one {# užfiksuota trukmė dar laukia jūsų peržiūros ir nebūtų išsaugota.} few {# užfiksuotos trukmės dar laukia jūsų peržiūros ir nebūtų išsaugotos.} other {# užfiksuotų trukmių dar laukia jūsų peržiūros ir nebūtų išsaugotos.}} Pirma palikite arba pašalinkite.",
   "entry": {
     "reviewedBy": "Peržiūrėjo",
@@ -100,7 +105,8 @@
       "approved": "Peržiūrėta",
       "changes_requested": "Paprašyta pataisymų",
       "rejected": "Grąžinta",
-      "reasonLabel": "Priežastis"
+      "reasonLabel": "Priežastis",
+      "notEnabled": "Užfiksuota — vadovas dar neįjungė patvirtinimo, todėl niekas šio įrašo neperžiūri; iki tol tai lieka jūsų nurodytas įrašas"
     },
     "delete": "Pašalinti įrašą",
     "deleting": "Šalinama...",
@@ -158,7 +164,7 @@
       "pending": "Laukia peržiūros",
       "confirmed": "Patvirtinta"
     },
-    "projectNote": "Įrašai gali būti susieti su projektu — duomenų modelis paruoštas, bet kol kas nė vienas įrašas nesusietas ir niekas neužpildoma automatiškai. Projektų, objektų ir užsakovų sluoksnis pildomas atskirame pjūvyje.",
+    "projectNote": "Įrašai gali būti susieti su projektu. Niekas neužpildoma automatiškai.",
     "reviewClarity": {
       "lead": "Jūsų peržiūra paverčia darbuotojo nurodytą įrašą patvirtintu įrodymu. Tai gali tik vadovas, savininkas ar kliento vadovas — kiekvienas patvirtinimas yra realus žmogaus sprendimas.",
       "actionsTitle": "Ką daro kiekvienas veiksmas",
@@ -247,6 +253,8 @@
   "listTitle": "Darbo įrašai",
   "navTitle": "Darbo žurnalas",
   "navSubtitle": "Parodykite, ką dirbote — taip stiprėja jūsų darbo kortelė.",
+  "orgContextNotice": "Tai jūsų asmeninis darbo žurnalas, o ne „{org}“. Veikiate įmonės vardu — įmonės darbai ir žmonės yra kitur.",
+  "orgContextCta": "Įmonės darbai →",
   "composerBenefit": "Šis įrašas sustiprina jūsų darbo kortelę.",
   "newEntry": "Naujas įrašas",
   "noEngagement": "Kol kas neturi aktyvaus darbo konteksto. Prisijunk prie organizacijos ar projekto, kad pildytum CV.",
@@ -344,9 +352,35 @@
       "too_large": "Įrašas per didelis (iki 25 MB).",
       "too_long": "Įrašas per ilgas (iki 10 minučių).",
       "unavailable": "Transkribavimo serveris šiuo metu nepasiekiamas.",
-      "undecodable": "Nepavyko nuskaityti garso — pabandykite dar kartą."
+      "undecodable": "Nepavyko nuskaityti garso — pabandykite dar kartą.",
+      "rate_limited": "Per daug įrašų per trumpą laiką - palaukite ir bandykite dar kartą.",
+      "token_expired": "Įkėlimo sesija baigėsi - bandykite dar kartą.",
+      "unauthorized": "Jūsų sesija neturi teisės naudoti balso - prisijunkite iš naujo.",
+      "service_unreachable": "Nepavyko pasiekti transkripcijos serverio. Patikrinkite ryšį ir bandykite dar kartą; įrašas laikomas šiame puslapyje, kol išeisite."
     },
-    "permissionDenied": "Prieiga prie mikrofono užblokuota. Leiskite mikrofoną naršyklės nustatymuose ir bandykite dar kartą."
+    "permissionDenied": "Prieiga prie mikrofono užblokuota. Leiskite mikrofoną naršyklės nustatymuose ir bandykite dar kartą.",
+    "disclosureProvenance": "Išsaugotas įrašas pažymimas kaip padiktuotas balsu ir jūsų peržiūrėtas.",
+    "state": {
+      "ready": "Paruošta. Pasirinkite kalbą, kuria kalbėsite, ir pradėkite įrašą.",
+      "permissionRequired": "Naršyklė paprašys leidimo naudoti mikrofoną, kai pradėsite. Kol neleisite, niekas neįrašoma.",
+      "policyBlocked": "Svetainės saugumo politika čia blokuoja mikrofoną. Balso įrašas šiame puslapyje nepasiekiamas - įrašą galite parašyti tekstu.",
+      "unsupported": "Ši naršyklė čia negali įrašyti garso (reikia saugaus puslapio ir mikrofono įrašymo palaikymo). Galite įkelti garso failą arba rašyti tekstu.",
+      "noDevice": "Šiame įrenginyje mikrofono nerasta.",
+      "deviceBusy": "Mikrofoną naudoja kita programa. Uždarykite ją ir bandykite dar kartą.",
+      "cancelled": "Įrašas atšauktas. Nieko neįkelta ir neišsaugota.",
+      "requesting": "Laukiama jūsų leidimo naudoti mikrofoną...",
+      "interrupted": "Įrašas pristabdytas, nes puslapis buvo paslėptas. Tęskite, kai grįšite.",
+      "interruptedKept": "Mikrofonas sustojo, todėl įrašas baigėsi anksčiau. Tai, kas užfiksuota, išrašyta žemiau - patikrinkite.",
+      "uploading": "Įkeliamas įrašas..."
+    },
+    "language": {
+      "label": "Kalbėjimo kalba",
+      "auto": "Atpažinti automatiškai",
+      "hint": "Pasirinkite kalbą, kuria kalbėsite - ji neprivalo sutapti su svetainės kalba."
+    },
+    "recordAgain": "Įrašyti iš naujo",
+    "announceStarted": "Įrašas prasidėjo",
+    "announceMinutes": "Įrašyta min.: {minutes}"
   },
   "savedOpenCv": "Peržiūrėti savo CV",
   "dayNav": {
@@ -607,7 +641,11 @@
     "sessionExpired": "Sesija nutrūko. Prisijunkite iš naujo.",
     "noWorkerProfile": "Nerastas darbuotojo profilis. Atidarykite paskyros nustatymus ir įjunkite darbuotojo vaidmenį.",
     "engagementRequired": "Pasirinkite darbo kontekstą (organizaciją ar projektą), prie kurio priklauso šis įrašas.",
+    "projectNotAssignable": "Pasirinktas projektas jums nepriskirtas arba priklauso kitai organizacijai. Pasirinkite projektą iš sąrašo.",
     "notesRequired": "Aprašykite ką dirbote — laisvas tekstas yra įrašo pagrindas.",
+    "workDateRequired": "Pasirinkite dieną, kurią šis darbas buvo atliktas.",
+    "workDateInvalid": "Darbo data neteisinga.",
+    "workDateFuture": "Darbo data negali būti ateityje.",
     "quantityInvalid": "Kiekis turi būti neneigiamas skaičius.",
     "unitSlugUnknown": "Šis vienetas kol kas neatpažįstamas: {units}. Pasirinkite kitą vienetą arba pabandykite vėliau.",
     "sourceDocumentInvalid": "Nurodytas šaltinio dokumentas nerastas tarp tavo dokumentų.",
@@ -908,5 +946,42 @@
   "stream": {
     "today": "Šiandien",
     "yesterday": "Vakar"
+  },
+  "dayObject": {
+    "title": "Šios dienos darbas",
+    "where": "Kur dirbau",
+    "what": "Ką dariau",
+    "howLong": "Kiek laiko",
+    "evidence": "Kas tai įrodo",
+    "confirmed": "Kas už tai stovi",
+    "added": "Ką tai pridėjo prie mano profesinės istorijos",
+    "records": "{count, plural, one {# įrašas} other {# įrašai}}",
+    "whereNone": "Šią dieną vieta nenurodyta.",
+    "whatNone": "Veikla nenurodyta — žr. įrašus žemiau.",
+    "timeNone": "Laikas dar neįrašytas.",
+    "untimed": "{count, plural, one {# įrašas be įrašyto laiko — jis neskaičiuojamas kaip nulis darbo.} other {# įrašai be įrašyto laiko — jie neskaičiuojami kaip nulis darbo.}}",
+    "photosNone": "Šią dieną nuotraukų nėra.",
+    "photosUnavailable": "Nuotraukų dabar nepavyko perskaityti.",
+    "photoCount": "{count, plural, one {# jūsų pridėta nuotrauka} other {# jūsų pridėtos nuotraukos}}",
+    "photoAlt": "Jūsų pridėta darbo nuotrauka",
+    "previewUnavailable": "Nuotrauka išsaugota — peržiūra šiuo metu neprieinama.",
+    "photosMore": "{count, plural, one {+# galerijoje} other {+# galerijoje}}",
+    "confirmedByOther": "{count, plural, one {# įrašą patvirtino kitas žmogus} other {# įrašus patvirtino kitas žmogus}}",
+    "selfConfirmed": "{count, plural, one {# patvirtinta tik jūsų} other {# patvirtinta tik jūsų}}",
+    "waiting": "{count, plural, one {# laukia patvirtinimo} other {# laukia patvirtinimo}}",
+    "contested": "{count, plural, one {# grąžinta arba ginčijama} other {# grąžinta arba ginčijama}}",
+    "automatic": "automatinis",
+    "confirmedNone": "Vadovas šios dienos dar nėra patvirtinęs.",
+    "addedNoSkills": "Prie šios dienos įrašų dar nesusieta jokių įgūdžių.",
+    "addedProof": "{time} šios dienos darbo dabar yra vadovo patvirtintas įrašas jūsų profesinėje istorijoje.",
+    "addedNoProof": "Iš šios dienos kol kas nėra vadovo patvirtinto įrašo — tik vadovo atsakymas paverčia jūsų įrašą patvirtintu.",
+    "openHistory": "Atverti mano profesinę istoriją",
+    "photoOpen": "Atidaryti nuotrauką didesnę",
+    "photoClose": "Uždaryti nuotrauką",
+    "photoPrev": "Ankstesnė nuotrauka",
+    "photoNext": "Kita nuotrauka",
+    "photoCounter": "{index} / {total}",
+    "recordedOnly": "{count, plural, one {# užfiksuotas — patvirtinimas neįjungtas} other {# užfiksuoti — patvirtinimas neįjungtas}}",
+    "confirmationNotEnabled": "Vadovas dar neįjungė patvirtinimo — niekas šių įrašų neperžiūri."
   }
 }

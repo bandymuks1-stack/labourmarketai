@@ -109,7 +109,7 @@ describe("G1 — the company context never runs the person's job search", () => 
   const chat = read("components", "app", "conversation", "chat", "conversation-chat.tsx");
   it("one line + the personal-space chip, before any search", () => {
     const handler = chat.slice(chat.indexOf("findWork: () => runWorkflow(async () => {"), chat.indexOf("professionStatement: () => {"));
-    const guard = handler.indexOf('if (identity === "company") {');
+    const guard = handler.indexOf('if (identity === "company" || Boolean(auth?.activeOrganizationId || auth?.activeOrgName)) {');
     expect(guard).toBeGreaterThan(-1);
     expect(guard).toBeLessThan(handler.indexOf("return runFindWork(text, goalRef.current?.filters);"));
     expect(handler).toContain('t("findWorkInCompanyContext")');

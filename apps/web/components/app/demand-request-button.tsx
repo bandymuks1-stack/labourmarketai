@@ -48,6 +48,7 @@ import {
   type EstimateInputs,
 } from "@/lib/estimate/estimate";
 import { cn } from "@/lib/utils";
+import type { OpenNeedsUsageView } from "@/lib/billing/open-needs-usage";
 
 /** Required tools / equipment options (§8.6) — a CLOSED set of EXISTING
  *  canonical taxonomy skill slugs (lib/taxonomy/profession-skills.ts; labels
@@ -85,8 +86,13 @@ export function DemandRequestButton({
   intent,
   stepTitles,
   repeatRequestId = null,
+  usage = null,
 }: {
   intent: "hire_workers" | "partner";
+  /** Pre-submit open-needs usage for the acting workspace: the ONE gate's
+   *  verdict reshaped (lib/billing/open-needs-usage.ts). Null / not visible
+   *  while billing is not enforced: nothing is shown. */
+  usage?: OpenNeedsUsageView | null;
   /** Localized titles for steps 1/2/3 (from auth.dashboard.wow.flow.company). */
   stepTitles: [string, string, string];
   /** "Repeat this need": a specific past request of the caller's whose
@@ -519,6 +525,24 @@ export function DemandRequestButton({
 
   return (
     <div className="flex flex-col gap-5" data-testid="demand-form">
+      {usage && usage.visible ? (
+        <div
+          className={cn(
+            "flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border px-3 py-2 text-meta leading-relaxed",
+            usage.atLimit ? "border-state-warning/30 bg-state-warning/5 text-text-primary" : "border-border-subtle text-text-secondary",
+          )}
+          data-testid="demand-open-need-usage"
+          data-at-limit={usage.atLimit ? "true" : "false"}
+        >
+          <span>{t("openNeedUsage", { used: usage.used, limit: usage.limit, remaining: usage.remaining })}</span>
+          {usage.atLimit && usage.next === "upgrade" ? (
+            <Link href="/dashboard/account" className="font-medium text-accent underline underline-offset-2" data-testid="demand-open-need-upgrade-cta">
+              {t("openNeedUsageUpgradeCta")}
+            </Link>
+          ) : null}
+          {usage.atLimit && usage.next === "individual_plan" ? <span>{t("openNeedUsageIndividual")}</span> : null}
+        </div>
+      ) : null}
       {/* Progress dots — progress-only (current/done), not tap targets. */}
       <ol className="flex items-center gap-2" aria-label={t("form.progressLabel")}>
         {stepTitles.map((title, i) => {

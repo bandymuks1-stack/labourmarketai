@@ -1,19 +1,38 @@
 # HUMAN GATE — NAV / Arbeidsplassen.no (Norway) inbound source ACTIVATION
 
-State: `OPEN — NOT APPROVED`. Scaffold registered 2026-09-22 (PR
-`feat/cc/nav-arbeidsplassen-inbound-scaffold-v1`). Nothing is activated,
-nothing is fetched, no token exists, the legal status is `unconfirmed`.
+State: `CONFIRMED — production API access granted (2026-09-30 record).`
+This supersedes the earlier `OPEN — NOT APPROVED` state, which was internal
+governance drift: the approval existed in the company mailbox and was never
+transcribed into the repository. **There is no owner-approval blocker for NAV.**
 
-Owner directive context: 2026-09-22 "LabourMarket.ai production closure +
-commercial launch", §19 — a bounded lane that must not block launch.
+## Sanitized receipt (public repository: no names, addresses, links or secrets)
 
-Research source of every external fact below:
-`docs/research/eu-vacancy-source-matrix-2026-08-18.md` §3 (lines 117–138)
-and the reuse table (line 462). Those facts came from a research pass that
-FETCHED the NAV docs site and the terms page; the feed itself has never been
-called from this codebase, no sample payload exists in the repository, and
-this scaffold made NO network call to any nav.no host (guard-pinned:
-`apps/web/lib/guards/nav-inbound-scaffold.test.ts` §(4)).
+| Fact | Value |
+|---|---|
+| Access requested from | Arbeidsplassen team, NAV (Norwegian Labour and Welfare Administration) |
+| Channel | e-mail thread in the company mailbox, subject "Request for Production API Access and Partnership Clarification" (thread reference: subject line + 2026-08-10 / 2026-09-17 / 2026-09-22 dates) |
+| 2026-08-10 | NAV: send company/contact details; read and accept the API terms by replying to the e-mail; access is then sent |
+| 2026-09-17 | Company replied with company details and EXPLICIT acceptance of the API terms and obligations |
+| 2026-09-22 | NAV sent API documentation and the private production token through a one-time secret link (valid 7 days, one open) |
+| Status of the token | The one-time link is past its 7-day validity; the token was NOT retrievable by this repository's process. A replacement is requested from NAV in the SAME thread. Until it is provisioned, credentials state = `NEW_TOKEN_REQUIRED` |
+| Terms | `arbeidsplassen.nav.no/vilkar-api` (fetched 2026-09-30): anyone may use; republication and statistical use permitted |
+
+Obligations accepted and where each is enforced in code:
+
+1. **Remove immediately when NAV deactivates an ad** — `INACTIVE` entries are never fetched and become removals; a listed ad that answers 404/410 is a removal; any status that is not `ACTIVE` is a removal (`nav-parse.ts`, `vacancy-detail-fanout.ts`). The store flips `is_active=false`; the public predicate also requires `expires_at` in the future.
+2. **Update promptly** — continuous path-cursor walk (`nav-supply-cadence.yml`, every 10 minutes), incremental: the feed lists every change, the walk resumes from the stored token.
+3. **Apply deep-links to the original supplier** — `applicationUrl`, falling back to `sourceurl`; never synthesised.
+4. **Show on the same domain as results** — the ad is a `public_vacancies` row served by the existing `/jobs` surface.
+5. **Norwegian data-protection law** — `contactList` (named persons, e-mail, phone) is never read or stored; guard-pinned in `nav-inbound-scaffold.test.ts`.
+
+Activation is two switches, neither in the repository: the GitHub variable
+`VACANCY_SOURCE_NAV_ENABLED=true` and the GitHub secret
+`VACANCY_SOURCE_NAV_API_TOKEN`. The governance row (`nav`) is now
+`legalStatus: confirmed`, `activation: on`.
+
+The sections below are the 2026-09-22 scaffold-time notes, kept for the
+history of what was assumed and what has since been verified (the field map is
+now VERIFIED against a real feed payload, 2026-09-30).
 
 ---
 

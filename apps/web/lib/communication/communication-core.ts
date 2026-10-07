@@ -17,6 +17,7 @@ import {
   validateConversationAttachments,
   type ConversationAttachmentInput,
 } from "@/lib/communication/attachment-model";
+import { emitMessageReceivedNotifications } from "@/lib/notifications/event-emitters";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
@@ -246,6 +247,39 @@ export async function createConversationCore(
   return { ok: true, data: { id: conversationId } };
 }
 
+/**
+ * Read the thread's participants under the SENDER's own session
+ * (`conversation_participants_select` admits co-participants; service_role
+ * holds no grant here) and hand them to the durable emitter. Best-effort by
+ * design: any failure is a console line, never an error to the sender.
+ */
+async function notifyOtherParticipants(
+  supabase: SupabaseClient,
+  authorId: string,
+  conversationId: string,
+): Promise<void> {
+  try {
+    const { data, error } = await asAny(supabase)
+      .from("conversation_participants")
+      .select("profile_id")
+      .eq("conversation_id", conversationId);
+    if (error) {
+      console.warn("[communication] notify: participants unreadable:", error.code ?? "unknown");
+      return;
+    }
+    const participantProfileIds = ((data ?? []) as { profile_id?: string | null }[])
+      .map((r) => r.profile_id)
+      .filter((id): id is string => typeof id === "string" && id.length > 0);
+    await emitMessageReceivedNotifications({
+      conversationId,
+      authorProfileId: authorId,
+      participantProfileIds,
+    });
+  } catch {
+    console.warn("[communication] notify: emit threw");
+  }
+}
+
 export async function sendMessageCore(
   caller: CommunicationCaller,
   input: {
@@ -450,6 +484,12 @@ export async function sendMessageCore(
     .from("conversations")
     .update({ updated_at: new Date().toISOString() })
     .eq("id", input.conversationId);
+
+  // DURABLE NOTIFICATION (message_received): the message is persisted, so tell
+  // the OTHER participants - coalesced per thread per window, never the
+  // author. AWAITED (a detached write is killable on the serverless runtime)
+  // and never throwing, so it can neither fail nor un-send the message.
+  await notifyOtherParticipants(supabase, user.id, input.conversationId);
 
   return { ok: true, data: { id: result.data.id as string, attachmentsFailed } };
 }

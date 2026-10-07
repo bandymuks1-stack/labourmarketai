@@ -1,5 +1,7 @@
 import "server-only";
 
+import { createHash } from "node:crypto";
+
 import { z } from "zod";
 
 import type { ExecResult } from "@/lib/conversation/executor-contract";
@@ -10,6 +12,8 @@ import {
   SUPPLIER_ROLES,
   ATTESTATION_ROLES,
   attestRecord,
+  previewAttestation,
+  previewWithdrawal,
   buildPreview,
   committableRows,
   commitImport,
@@ -20,11 +24,15 @@ import {
   resolveTimeSemantics,
   resolveContextLabel,
   resolveRow,
+  stageImportSource,
   submitRows,
   withdrawImport,
   type EvidenceImportFailure,
 } from "@/lib/organization-evidence/import-core";
 import { resolveEvidenceOrganization } from "@/lib/organization-evidence/evidence-org-context";
+import { fetchSourceFile } from "@/lib/organization-evidence/fetch-source-file";
+import { detectHeaderLanguage } from "@/lib/organization-evidence/parse-tabular";
+import { readEvidenceSourceFile } from "@/lib/organization-evidence/read-source-file";
 import {
   sourceWorkRowSchema,
   MAX_ROWS_PER_SESSION,
@@ -38,6 +46,10 @@ import {
 } from "@/lib/organization-evidence/commit-confirmation";
 
 import type { CapabilityCaller, CapabilityDescriptor } from "./contract";
+import {
+  mintCapabilityConfirmation,
+  verifyCapabilityConfirmation,
+} from "./confirmable";
 
 /**
  * ORGANIZATION EVIDENCE IMPORT — the AI/agent face of the SAME domain core the
@@ -391,6 +403,122 @@ const rowsSubmit: CapabilityDescriptor = {
   },
 };
 
+// ── evidence.import.stage_file ────────────────────────────────────────────
+
+/** The shape ChatGPT sends for a file argument (`openai/fileParams`): all four
+ *  properties are declared; `download_url` and `file_id` are always present. */
+const fileArgument = z
+  .object({
+    download_url: z.url().max(4000),
+    file_id: z.string().min(1).max(200),
+    mime_type: z.string().max(200).nullish(),
+    file_name: z.string().max(300).nullish(),
+  })
+  .strict();
+
+const stageFileInput = z
+  .object({
+    organization: z.string().min(1).max(200).optional(),
+    supplierRole: z.enum(SUPPLIER_ROLES),
+    /** Optional: derived from the source's own header words when absent. */
+    sourceLanguage: z.enum(locales).optional(),
+    notes: z.string().max(1000).nullish(),
+    file: fileArgument,
+  })
+  .strict();
+
+const fileStage: CapabilityDescriptor = {
+  id: "evidence.import.stage_file",
+  kind: "execute",
+  title: "Stage a spreadsheet or CSV into an evidence import",
+  description:
+    "Reads an uploaded .xlsx / .xlsm / .csv / .tsv (a ChatGPT file argument) with the SAME " +
+    "audited reader the web import uses — long-format sheets and monthly grids, header " +
+    "synonyms in the source languages, FACT vs DERIVED kept apart, a date nobody stated is " +
+    "never invented — and stages every row at its SOURCE POSITION into an import session. " +
+    "The session is keyed on the sha256 of the file's BYTES, never its name: the same file " +
+    "uploaded again resolves to the same session (`reused: true`) and stages nothing twice. " +
+    "Lines that could not become a row are counted in `notStaged`, never dropped silently. " +
+    "NOTHING here is evidence — call evidence.import.preview next, resolve what it asks, and " +
+    "commit through evidence.import.commit (the one commit path). Up to 5 MB and 20 000 rows. " +
+    "Use this instead of pasting rows into evidence.import.submit_rows.",
+  exposed: true,
+  annotations: appendWrite,
+  meta: { "openai/fileParams": ["file"] },
+  inputSchema: stageFileInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = stageFileInput.parse(input);
+    const fetched = await fetchSourceFile(parsed.file.download_url);
+    if (fetched.kind !== "ok") {
+      return {
+        ok: false,
+        code: fetched.reason === "too_large" ? "file_too_large" : "file_unreachable",
+        message:
+          fetched.reason === "too_large"
+            ? "The file is over 5 MB. Split it by year or sheet and stage each part."
+            : `The uploaded file could not be fetched (${fetched.reason}). Nothing was written.`,
+      };
+    }
+    const filename = parsed.file.file_name ?? "upload";
+    const read = await readEvidenceSourceFile(filename, fetched.bytes);
+    switch (read.kind) {
+      case "file-too-large":
+        return { ok: false, code: "file_too_large", message: "The file is over 5 MB. Split it and stage each part." };
+      case "file-unreadable":
+      case "unsupported-file":
+        return { ok: false, code: "file_unreadable", message: "Only .xlsx, .xlsm, .csv and .tsv files can be read. Nothing was written." };
+      case "month-not-stated":
+        return {
+          ok: false,
+          code: "month_not_stated",
+          message: "A monthly grid that never states its month would need every date invented. Nothing was written.",
+        };
+      case "nothing-parsed":
+        return { ok: false, code: "nothing_parsed", message: `No stageable rows were found (${read.detail}). Nothing was written.` };
+      case "ok":
+        break;
+    }
+    const sourceLanguage = parsed.sourceLanguage ?? detectHeaderLanguage(read.headers) ?? "en";
+    const staged = await stageImportSource(caller, {
+      session: {
+        organizationId: parsed.organization ?? null,
+        sourceKind: /\.(xlsx|xlsm)$/i.test(filename) ? "xlsx" : "csv",
+        supplierRole: parsed.supplierRole,
+        sourceLanguage,
+        sourceFilename: filename,
+        sourceReference: `chatgpt-file:${parsed.file.file_id}`,
+        sourceFingerprint: read.fingerprint,
+        sourceBytesSha256: read.bytesSha256,
+        notes: parsed.notes ?? null,
+        actorKind: "agent",
+        agentLabel: "chatgpt-file",
+      },
+      rows: read.rows,
+      positions: read.positions,
+      notStaged: read.notStaged,
+    });
+    if (staged.kind !== "ok") return fail(staged);
+    return {
+      ok: true,
+      data: {
+        session: staged.session,
+        reader: read.via,
+        sourceBytesSha256: read.bytesSha256,
+        rowsParsed: read.rows.length,
+        staged: staged.staged,
+        alreadyStaged: staged.alreadyStaged,
+        notStaged: staged.notStaged,
+        totalInSession: staged.totalInSession,
+        skipped: read.skipped.slice(0, 20),
+        skippedTotal: read.skipped.length,
+        note: staged.session.reused
+          ? "The same source was already staged: nothing was staged twice. Continue with evidence.import.preview."
+          : "Staged only. Call evidence.import.preview next; nothing is evidence yet.",
+      },
+    };
+  },
+};
+
 // ── evidence.import.preview (the draft leg) ───────────────────────────────
 
 const previewInput = z.object({ sessionId: z.uuid() }).strict();
@@ -713,7 +841,13 @@ const recordsList: CapabilityDescriptor = {
   },
 };
 
-// ── evidence.record.attest ────────────────────────────────────────────────
+// ── evidence.record.attest_draft / attest_confirm ─────────────────────────
+//
+// DRAFT -> CONFIRM, the canonical write contract (lib/capabilities/contract.ts
+// WRITE SEMANTICS), over the SAME `confirmable.ts` helpers the demand
+// close/reopen pair uses. Attesting stands the organization behind a record in
+// an append-only ledger: it is consequential, so a natural-language
+// instruction alone must never write it.
 
 const attestInput = z
   .object({
@@ -724,24 +858,99 @@ const attestInput = z
     note: z.string().max(1000).nullish(),
   })
   .strict();
+const attestConfirmInput = attestInput.extend({ confirmationToken: z.string().min(10) }).strict();
 
-const recordAttest: CapabilityDescriptor = {
-  id: "evidence.record.attest",
-  kind: "execute",
-  title: "Attest an evidence record in the organization's name",
+/** The NORMALIZED draft shape the token is hashed over - null-vs-absent is
+ *  decided here once, so draft and confirm hash identically. */
+function attestTokenInput(p: z.infer<typeof attestInput>): Record<string, unknown> {
+  return { recordId: p.recordId, actorRole: p.actorRole ?? null, note: p.note ?? null };
+}
+
+const ATTEST_CONFIRM_ID = "evidence.record.attest_confirm";
+
+const recordAttestDraft: CapabilityDescriptor = {
+  id: "evidence.record.attest_draft",
+  kind: "draft",
+  title: "Draft attesting an evidence record in the organization's name",
   description:
-    "Records the organization standing behind one evidence record, in the " +
-    "capacity the record was supplied in (its `supplierRole`) — omit " +
-    "`actorRole` to use it; any other role is refused. Attesting " +
-    "one's OWN work is allowed — a sole trader legitimately has nobody above " +
-    "them — and the result derives SELF_ATTESTED, which is permanent and never " +
-    "counts as independent verification. Independent verification is a " +
-    "different act, available only to a separately recorded party.",
+    "Previews the organization standing behind one evidence record, in the " +
+    "capacity the record was supplied in (its `supplierRole`) - omit " +
+    "`actorRole` to use it; any other role is refused. NOTHING is written. " +
+    "Attesting one's OWN work is allowed (a sole trader has nobody above " +
+    "them) and derives SELF_ATTESTED, which is permanent and never counts as " +
+    "independent verification; independent verification is a different act " +
+    "for a separately recorded party. Returns a one-time token bound to the " +
+    `record's CURRENT attestation trail. Confirm with ${ATTEST_CONFIRM_ID}.`,
   exposed: true,
-  annotations: appendWrite,
+  annotations: readOnly,
   inputSchema: attestInput,
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = attestInput.parse(input);
+    const pre = await previewAttestation(caller, { recordId: parsed.recordId, actorRole: parsed.actorRole ?? null });
+    if (pre.kind !== "ok") return fail(pre);
+    if (pre.attestedByCaller) {
+      return {
+        ok: false,
+        code: "already_attested",
+        message: "This record is already attested by this actor. Nothing was written and no token was issued.",
+      };
+    }
+    const token = mintCapabilityConfirmation({
+      actionId: ATTEST_CONFIRM_ID,
+      input: attestTokenInput(parsed),
+      userId: caller.userId,
+      stateFingerprint: `attest:${parsed.recordId}:${pre.attestedEventCount}:${pre.latestAttestedEventId ?? "none"}`,
+    });
+    return {
+      ok: true,
+      data: {
+        preview: {
+          recordId: parsed.recordId,
+          attestingAs: pre.supplierRole,
+          existingAttestations: pre.attestedEventCount,
+          recordWithdrawn: pre.withdrawn,
+          standing:
+            "Appends one `attested` event naming this organization. If the record's subject is the acting " +
+            "person the standing derives SELF_ATTESTED; either way it is NOT independent verification.",
+          independentlyVerified: false,
+        },
+        confirmationToken: token,
+        note: `Nothing was written. Confirming requires ${ATTEST_CONFIRM_ID} with this exact input and token.`,
+      },
+    };
+  },
+};
+
+const recordAttestConfirm: CapabilityDescriptor = {
+  id: ATTEST_CONFIRM_ID,
+  kind: "confirm",
+  title: "Confirm attesting the evidence record",
+  description:
+    "Verifies the one-time token against the exact drafted input, the caller " +
+    "and the record's CURRENT attestation trail (a replay or a changed record " +
+    "is refused), then appends the `attested` event as the caller and reports " +
+    "`independentlyVerified: false`. The same actor cannot attest a record twice.",
+  exposed: true,
+  annotations: appendWrite,
+  inputSchema: attestConfirmInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = attestConfirmInput.parse(input);
+    const pre = await previewAttestation(caller, { recordId: parsed.recordId, actorRole: parsed.actorRole ?? null });
+    if (pre.kind !== "ok") return fail(pre);
+    const verdict = verifyCapabilityConfirmation({
+      actionId: ATTEST_CONFIRM_ID,
+      token: parsed.confirmationToken,
+      input: attestTokenInput(parsed),
+      userId: caller.userId,
+      currentStateFingerprint: `attest:${parsed.recordId}:${pre.attestedEventCount}:${pre.latestAttestedEventId ?? "none"}`,
+    });
+    if (!verdict.ok) {
+      return {
+        ok: false,
+        code: "confirmation_rejected",
+        message: `Confirmation token rejected (${verdict.reason}). The record changed since the draft, or the token was already used. Draft again.`,
+      };
+    }
     const res = await attestRecord(caller, {
       recordId: parsed.recordId,
       actorRole: parsed.actorRole ?? null,
@@ -755,32 +964,111 @@ const recordAttest: CapabilityDescriptor = {
   },
 };
 
-// ── evidence.import.withdraw (the rollback path) ──────────────────────────
+// ── evidence.import.withdraw_draft / withdraw_confirm (the rollback path) ──
 
 const withdrawInput = z
   .object({ sessionId: z.uuid(), note: z.string().max(1000).nullish() })
   .strict();
+const withdrawConfirmInput = withdrawInput.extend({ confirmationToken: z.string().min(10) }).strict();
+const WITHDRAW_CONFIRM_ID = "evidence.import.withdraw_confirm";
 
-const importWithdraw: CapabilityDescriptor = {
-  id: "evidence.import.withdraw",
-  kind: "execute",
-  title: "Withdraw everything an import wrote",
+function withdrawTokenInput(p: z.infer<typeof withdrawInput>): Record<string, unknown> {
+  return { sessionId: p.sessionId, note: p.note ?? null };
+}
+
+/** Bound to exactly the records the sweep would withdraw (hashed - a large
+ *  import must not bloat the token) and the session's own lifecycle state. */
+function withdrawFingerprint(
+  sessionId: string,
+  pre: { pendingRecordIds: readonly string[]; sessionWithdrawn: boolean },
+): string {
+  const ids = [...pre.pendingRecordIds].sort();
+  const digest = createHash("sha256").update(ids.join(",")).digest("hex").slice(0, 24);
+  return `withdraw:${sessionId}:${ids.length}:${digest}:${pre.sessionWithdrawn}`;
+}
+
+const importWithdrawDraft: CapabilityDescriptor = {
+  id: "evidence.import.withdraw_draft",
+  kind: "draft",
+  title: "Draft withdrawing everything an import wrote",
   description:
-    "The recovery path. It DELETES NOTHING: every record gains an append-only " +
-    "`withdrawn` event, so the evidence and the reason both stay readable and " +
-    "the action itself is auditable. Reversible by reinstating. A session " +
-    "that committed nothing is still withdrawn (the act is recorded); a " +
-    "second withdrawal writes nothing and answers `alreadyWithdrawn: true`.",
+    "Previews the recovery path: how many records (and how many people's " +
+    "records) would gain an append-only `withdrawn` event. NOTHING is written " +
+    "and nothing is ever deleted - the evidence and the reason stay readable; " +
+    "reversible by reinstating. Returns a one-time token bound to exactly the " +
+    "records that would be withdrawn. When nothing is pending (already " +
+    `withdrawn) it says so and issues no token. Confirm with ${WITHDRAW_CONFIRM_ID}.`,
   exposed: true,
-  annotations: appendWrite,
+  annotations: readOnly,
   inputSchema: withdrawInput,
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = withdrawInput.parse(input);
-    const res = await withdrawImport(
-      caller,
-      parsed.sessionId,
-      parsed.note ?? null,
-    );
+    const pre = await previewWithdrawal(caller, parsed.sessionId);
+    if (pre.kind !== "ok") return fail(pre);
+    if (pre.nothingToDo) {
+      return {
+        ok: true,
+        data: {
+          preview: { sessionId: parsed.sessionId, recordsToWithdraw: 0, peopleAffected: 0 },
+          alreadyWithdrawn: true,
+          note: "Already withdrawn - nothing to confirm and no token was issued. Nothing was written.",
+        },
+      };
+    }
+    const token = mintCapabilityConfirmation({
+      actionId: WITHDRAW_CONFIRM_ID,
+      input: withdrawTokenInput(parsed),
+      userId: caller.userId,
+      stateFingerprint: withdrawFingerprint(parsed.sessionId, pre),
+    });
+    return {
+      ok: true,
+      data: {
+        preview: {
+          sessionId: parsed.sessionId,
+          recordsToWithdraw: pre.pendingRecordIds.length,
+          peopleAffected: pre.peopleAffected,
+          deletes: 0,
+        },
+        alreadyWithdrawn: false,
+        confirmationToken: token,
+        note: `Nothing was written. Confirming requires ${WITHDRAW_CONFIRM_ID} with this exact input and token.`,
+      },
+    };
+  },
+};
+
+const importWithdrawConfirm: CapabilityDescriptor = {
+  id: WITHDRAW_CONFIRM_ID,
+  kind: "confirm",
+  title: "Confirm withdrawing everything the import wrote",
+  description:
+    "Verifies the one-time token against the records that would be withdrawn " +
+    "NOW (a replay, or any change since the draft, is refused), then appends a " +
+    "`withdrawn` event per record and the session's `rolled_back` event as the " +
+    "caller. It DELETES NOTHING; the act is auditable and reversible.",
+  exposed: true,
+  annotations: appendWrite,
+  inputSchema: withdrawConfirmInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = withdrawConfirmInput.parse(input);
+    const pre = await previewWithdrawal(caller, parsed.sessionId);
+    if (pre.kind !== "ok") return fail(pre);
+    const verdict = verifyCapabilityConfirmation({
+      actionId: WITHDRAW_CONFIRM_ID,
+      token: parsed.confirmationToken,
+      input: withdrawTokenInput(parsed),
+      userId: caller.userId,
+      currentStateFingerprint: withdrawFingerprint(parsed.sessionId, pre),
+    });
+    if (!verdict.ok) {
+      return {
+        ok: false,
+        code: "confirmation_rejected",
+        message: `Confirmation token rejected (${verdict.reason}). The import changed since the draft, or the token was already used. Draft again.`,
+      };
+    }
+    const res = await withdrawImport(caller, parsed.sessionId, parsed.note ?? null);
     if (res.kind !== "ok") return fail(res);
     const already = res.outcome === "already_withdrawn";
     return {
@@ -790,8 +1078,8 @@ const importWithdraw: CapabilityDescriptor = {
         deleted: 0,
         alreadyWithdrawn: already,
         note: already
-          ? "Already withdrawn — nothing was written."
-          : "Nothing was deleted — each record carries a withdrawal event.",
+          ? "Already withdrawn - nothing was written."
+          : "Nothing was deleted - each record carries a withdrawal event.",
       },
     };
   },
@@ -803,12 +1091,15 @@ export const EVIDENCE_IMPORT_CAPABILITIES: readonly CapabilityDescriptor[] = [
   personCreate,
   sessionCreate,
   rowsSubmit,
+  fileStage,
   importPreview,
   rowResolve,
   labelResolve,
   timeSemanticsResolve,
   importCommit,
   recordsList,
-  recordAttest,
-  importWithdraw,
+  recordAttestDraft,
+  recordAttestConfirm,
+  importWithdrawDraft,
+  importWithdrawConfirm,
 ];

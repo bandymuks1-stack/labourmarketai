@@ -7,7 +7,8 @@ import { CompanyActionNextActions } from "@/components/app/company-action-next-a
 import { listProjectAssignments } from "@/lib/projects/projects";
 import { listProjectMap } from "@/lib/projects/map";
 import { getProjectsProgress } from "@/lib/projects/progress";
-import { listManagedWorkers } from "@/lib/instructions/instructions";
+import { listManagedWorkers, listCompanyRosterWorkers } from "@/lib/instructions/instructions";
+import { rosterAssignScope, rosterProjectIdsFor } from "@/lib/projects/assignment-authority";
 import { listBookingEngagementWorkers } from "@/lib/projects/booking-engagement-workers";
 import {
   ProjectAssignmentManager,
@@ -17,10 +18,17 @@ import { ProjectMap } from "@/components/app/arena/project-map";
 import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 import { listWorkerProjects } from "@/lib/projects/worker-project-access";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
-import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
+import {
+  projectOrganizationAuthority,
+  workspaceOpensCompanySpace,
+} from "@/lib/company/organization-authority";
+import { getSessionIsAdmin } from "@/lib/auth/session-admin-signal";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getOrgWorkObjects } from "@/lib/objects/objects";
-import { listManagedProjects } from "@/lib/projects/projects";
+import {
+  countManagedProjects,
+  listManagedProjects,
+} from "@/lib/projects/projects";
 import { getOrgMembersData } from "@/lib/operations/org-members";
 import { listOrganizationMembers } from "@/lib/company/memberships";
 import { getProjectGallerySummary } from "@/lib/journal/project-gallery";
@@ -34,6 +42,7 @@ import { OrganizationDoorsServer } from "@/components/app/organization/organizat
 import { ManagerScopeNotice } from "@/components/app/organization/manager-scope-notice";
 import { getCompanyProjectContext } from "@/lib/company/project-context";
 import { MapPin } from "lucide-react";
+import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
 import { type Role } from "@/lib/auth/actions";
 
 export const dynamic = "force-dynamic";
@@ -152,6 +161,23 @@ export default async function ProjectsPage({
   // (resolved above, before the branch) scopes them, and a manager without
   // a company workspace simply sees the projects surface as before.
   const ownCompanyId = employerCtx?.kind === "ok" ? employerCtx.companyId : null;
+  // `assign_worker_to_project` (migration 20261002142000) admits a roster
+  // worker for owner/admin or a platform admin, AND for a manager of the
+  // project's organization when the worker is on the ACTIVE roster of the
+  // company that owns the project. The form offers exactly that and nothing
+  // wider; the database still decides every write.
+  const isPlatformAdmin = await getSessionIsAdmin();
+  const assignScope = rosterAssignScope({
+    governs:
+      employerCtx?.kind === "ok" &&
+      projectOrganizationAuthority({ role: employerCtx.role }).canGovern,
+    isPlatformAdmin,
+    canOperate:
+      employerCtx?.kind === "ok" &&
+      projectOrganizationAuthority({ role: employerCtx.role }).canOperate,
+    hasCompanyContext: employerCtx?.kind === "ok",
+  });
+  const rosterAssignable = assignScope !== "none";
   const [
     allProjects,
     workers,
@@ -162,9 +188,12 @@ export default async function ProjectsPage({
     tDoors,
     workObjectsLabels,
     companyGalleryLabels,
+    projectTotals,
   ] = await Promise.all([
     listProjectMap(),
-    listManagedWorkers(),
+    assignScope === "own-company-roster" && ownCompanyId
+      ? listCompanyRosterWorkers(ownCompanyId)
+      : listManagedWorkers(),
     // Accepted-booking engagement candidates (bridge v1) — a SEPARATE list,
     // never merged into the roster read; empty + honest until the owner
     // applies migration 20260723120000.
@@ -175,6 +204,7 @@ export default async function ProjectsPage({
     getTranslations("organizationDoors"),
     readWorkObjectsLabels(),
     readCompanyGalleryLabels(),
+    countManagedProjects(),
   ]);
   // The projects card the company hub used to carry (count · structurally
   // ready · the honest linking note · create) — now beside the projects it
@@ -202,6 +232,14 @@ export default async function ProjectsPage({
   const archivedProjects = allProjects.filter((p) => p.status === "completed");
   const activeProjects = allProjects.filter((p) => p.status !== "completed");
   const projects = showArchived ? archivedProjects : activeProjects;
+  // The toggle counts are REAL totals (head count, no row cap). The list is
+  // read in two capped buckets, so when a bucket holds more than was loaded
+  // the page says so; if the count itself is unreadable we fall back to the
+  // loaded length and claim nothing more.
+  const activeTotal = Math.max(projectTotals?.active ?? 0, activeProjects.length);
+  const archivedTotal = Math.max(projectTotals?.archived ?? 0, archivedProjects.length);
+  const shownTotal = showArchived ? archivedTotal : activeTotal;
+  const partialView = projects.length < shownTotal;
 
   // Train D — derived progress (tasks + stages done/total, computed at
   // read time; no stored number anywhere).
@@ -210,7 +248,13 @@ export default async function ProjectsPage({
   const withAssignments = await Promise.all(
     activeProjects.map(async (p) => ({
       ...p,
-      assignments: await listProjectAssignments(p.id),
+      assignments: await Promise.all(
+        (await listProjectAssignments(p.id)).map(async (a) => ({
+          ...a,
+          // THE one photo rule (D1): the database decides; null = initials.
+          avatarUrl: a.workerId ? await getAvatarForVisibleWorker(a.workerId) : null,
+        })),
+      ),
     })),
   );
 
@@ -242,12 +286,24 @@ export default async function ProjectsPage({
     end: t("end"),
     sending: t("sending"),
     assignFromRoster: t("assign.fromRoster"),
+    rosterOwnerOnly: t("assign.rosterOwnerOnly"),
+    rosterOtherOrg: t("assign.rosterOtherOrg"),
     openBoard: t("map.openArena"),
     rosterGroupLabel: t("assign.rosterGroup"),
     engagementGroupLabel: t("assign.engagementGroup"),
     reservationCollidesTitle: t("assign.reservation.collidesTitle"),
     reservationNotBlocking: t("assign.reservation.notBlocking"),
     reservationUnknown: t("assign.reservation.unknown"),
+    reservationAlternativesTitle: t("assign.reservation.alternativesTitle"),
+    reservationSwap: t("assign.reservation.swap"),
+    reservationUndo: t("assign.reservation.undo"),
+    reservationKeep: t("assign.reservation.keep"),
+    reservationDecided: t("assign.reservation.decided"),
+    precheckChecking: t("assign.reservation.precheckChecking"),
+    precheckCollidesTitle: t("assign.reservation.precheckCollidesTitle"),
+    precheckChoose: t("assign.reservation.precheckChoose"),
+    precheckAssignAnyway: t("assign.reservation.precheckAssignAnyway"),
+    precheckAdvisory: t("assign.reservation.precheckAdvisory"),
     reservationSource: {
       project: t("assign.reservation.source.project"),
       booking: t("assign.reservation.source.booking"),
@@ -280,14 +336,14 @@ export default async function ProjectsPage({
           {t("intro")}
         </p>
         {/* WAGON 6 — compact operating-model explainer: one honest line +
-            a link to the full /about#sports-model section. No game layer. */}
+            a link to the /about#evidence explanation. No game layer. */}
         <p
           className="mt-1 max-w-prose rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
           data-testid="projects-model-note"
         >
           {t("model.note")}{" "}
           <Link
-            href="/about#sports-model"
+            href="/about#evidence"
             className="whitespace-nowrap text-brand-blue hover:underline"
           >
             {t("model.link")} →
@@ -352,7 +408,7 @@ export default async function ProjectsPage({
           className={`text-xs font-semibold ${!showArchived ? "text-brand-blue" : "text-text-muted hover:text-brand-blue"}`}
           data-testid="projects-view-active"
         >
-          {t("archiveToggle.active")} ({activeProjects.length})
+          {t("archiveToggle.active")} ({activeTotal})
         </Link>
         <Link
           href={"/dashboard/projects?archived=1" as "/dashboard"}
@@ -360,9 +416,18 @@ export default async function ProjectsPage({
           className={`text-xs font-semibold ${showArchived ? "text-brand-blue" : "text-text-muted hover:text-brand-blue"}`}
           data-testid="projects-view-archived"
         >
-          {t("archiveToggle.archived")} ({archivedProjects.length})
+          {t("archiveToggle.archived")} ({archivedTotal})
         </Link>
       </nav>
+
+      {partialView ? (
+        <p
+          className="text-xs text-text-muted"
+          data-testid="projects-partial-view"
+        >
+          {t("archiveToggle.partial", { shown: projects.length, total: shownTotal })}
+        </p>
+      ) : null}
 
       {/* MAP — projects → teams → people; one click into each ARENA. */}
       {showArchived && projects.length === 0 ? (
@@ -388,6 +453,12 @@ export default async function ProjectsPage({
           projects={withAssignments}
           workers={workers}
           engagementWorkers={[...engagementResult.workers]}
+          rosterAssignable={rosterAssignable}
+          rosterProjectIds={rosterProjectIdsFor(
+            assignScope,
+            withAssignments,
+            employerCtx?.kind === "ok" ? employerCtx.organizationId : null,
+          )}
           labels={labels}
         />
       </section>

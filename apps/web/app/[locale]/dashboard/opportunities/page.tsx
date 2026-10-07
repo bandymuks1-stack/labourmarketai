@@ -1,6 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { isAssessedFit } from "@/lib/opportunities/fit-band";
-import { getProfessionEntries } from "@/lib/data/worker-core";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import Link from "next/link";
@@ -76,6 +75,9 @@ import { MarketExplanationPanel } from "@/components/app/market-explanation-pane
    render site). Every one of those modules still exists and still serves
    /dashboard/market-map unchanged. */
 import { SavedSearchesStrip } from "@/components/app/saved-searches-strip";
+import { createClient as createSessionClient } from "@/lib/supabase/server";
+import { buildOwnWorkerContext } from "@/lib/opportunities/worker-subject";
+import { missingJobAlertCriteria } from "@/lib/opportunities/job-alert-model";
 import { getMySavedSearches, notifySavedSearchMatches } from "@/lib/opportunities/saved-searches";
 import { hasAnyCriteria, readSavedSearches } from "@/lib/opportunities/saved-search-model";
 import {
@@ -190,6 +192,67 @@ type WorldRow =
       readonly missingDataCodes: ExternalOpportunityCardV1["match"]["missingData"];
     };
 
+/**
+ * JOB ALERT READINESS (stream N) — one honest block on the existing board:
+ * either "new real jobs that fit you reach your notifications" or exactly which
+ * of the two required facts (profession, preferred countries) is not yet
+ * stated, with the door to the EXISTING work-card editor on the profile.
+ * Salary is optional and never listed as missing. Reads the person's OWN
+ * context (the subject the board matches with), so the block and the alerts
+ * can never disagree. Lives in this page (an already-declared surface), not a
+ * new component.
+ */
+async function JobAlertReadiness({ locale }: { locale: string }) {
+  const supabase = await createSessionClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const ctx = await buildOwnWorkerContext(supabase, user.id);
+  if (!ctx) return null;
+  const professions = ctx.subject.professionSlugs?.length
+    ? [...ctx.subject.professionSlugs]
+    : ctx.subject.professionSlug
+      ? [ctx.subject.professionSlug]
+      : [];
+  const missing = missingJobAlertCriteria({
+    professionSlugs: professions,
+    preferredCountries: [...(ctx.subject.preferredCountries ?? [])],
+    salaryMinEur: ctx.subject.salaryMinEur ?? null,
+  });
+  const t = await getTranslations("opportunities.jobAlerts");
+  return (
+    <Card data-testid="job-alert-readiness">
+      <div className="flex flex-col gap-2 p-4">
+        <h2 className="font-display text-base font-semibold text-text-primary">
+          {t("title")}
+        </h2>
+        {missing.length === 0 ? (
+          <p className="text-sm text-text-secondary" data-testid="job-alert-ready">
+            {t("ready")}
+          </p>
+        ) : (
+          <>
+            <p className="text-sm text-text-secondary">{t("missing")}</p>
+            <ul className="list-disc pl-5 text-sm text-text-primary" data-testid="job-alert-missing">
+              {missing.map((m) => (
+                <li key={m}>{t(m)}</li>
+              ))}
+            </ul>
+            <Link
+              href={`/${locale}/dashboard/profile#work-card-editor-section`}
+              data-testid="job-alert-fill-cta"
+              className={`mt-1 self-start ${buttonLinkClassName("secondary", "sm")}`}
+            >
+              {t("cta")} →
+            </Link>
+          </>
+        )}
+      </div>
+    </Card>
+  );
+}
+
 export default async function OpportunitiesPage({
   params,
   searchParams,
@@ -218,7 +281,7 @@ export default async function OpportunitiesPage({
   // Board + salary benchmark + weekly digest + world view + the person's
   // own work-seeking intent are independent reads — one combined await so
   // TTFB pays the slowest of them, not their sum.
-  const [result, salaryIntel, weekly, partnerSupply, discoverability, tVisibility, professionEntries] = await Promise.all([
+  const [result, salaryIntel, weekly, partnerSupply, discoverability, tVisibility] = await Promise.all([
     loadWorkerOpportunityBoard("opportunities_board", {
       externalDiscovery: {
         professionSlug: filters.profession,
@@ -245,17 +308,8 @@ export default async function OpportunitiesPage({
     // a read failed.
     getMyDiscoverabilityState().catch(() => null),
     getTranslations("privacyConsent.employerVisibility"),
-    // What the person SAYS they do — the same cached reader Home, the profile
-    // and the Living CV use. Display only: matching still reads the catalogue
-    // slug alone (#1881 pins that it never reads the words).
-    getProfessionEntries().catch(() => []),
   ]);
   const employerVisibility = employerVisibilityOf(discoverability);
-  // Their own words, when no catalogue profession names them (owner walk
-  // 2026-09-28 §9: one declared fact on Home, Profile, CV AND here — this
-  // page said "profesija nenurodyta" to a person who had stated it).
-  const ownProfessionWords =
-    professionEntries.map((e) => (e.label ?? "").trim()).find((w) => w.length > 0) ?? null;
   const declaredIntent: WorkerIntentState | null = (() => {
     if (!partnerSupply || partnerSupply.kind !== "ok") return null;
     const d = partnerSupply.declaration;
@@ -646,80 +700,6 @@ export default async function OpportunitiesPage({
       ? result.opportunities.length - filtered.length
       : 0;
 
-  // ── The assessment line: WHAT the fit was assessed against, in words,
-  //    from the subject reader's own facts. "Not stated" is a stated fact
-  //    here, never an omission. ─────────────────────────────────────────────
-  // Each fact knows whether it is a MISSING one, so the identity panel can
-  // draw it as an open (dashed) chip instead of hiding it (premium
-  // opportunities, 2026-09-29). The one-line sentence below is unchanged.
-  const missingFacts = new Set<string>(
-    (["professionMissing", "skillsMissing", "placeMissing", "payMissing", "languagesMissing"] as const).map(
-      (k) => t(`world.fact.${k}`),
-    ),
-  );
-  const assessedFacts: string[] =
-    result.kind === "ready"
-      ? (() => {
-          const r = result.readiness;
-          const facts: string[] = [];
-          if (r.professionSlugs.length > 1) {
-            // Every declared profession fed this board — so the basis names
-            // them all, never only the primary (owner decision 2026-09-28).
-            facts.push(
-              t("world.fact.professions", { value: r.professionSlugs.map(roleLabel).join(", ") }),
-            );
-          } else if (r.professionSlug) {
-            facts.push(t("world.fact.profession", { value: roleLabel(r.professionSlug) }));
-          } else {
-            // The declaration is shown as the person wrote it; when the fit
-            // was assessed against a profession read from their records, that
-            // is said too — beside the words, never instead of them.
-            if (ownProfessionWords) {
-              facts.push(t("world.fact.profession", { value: ownProfessionWords }));
-            }
-            if (r.evidencedProfessionSlug) {
-              facts.push(
-                t("world.fact.professionEvidenced", {
-                  value: roleLabel(r.evidencedProfessionSlug),
-                }),
-              );
-            } else if (!ownProfessionWords) {
-              facts.push(t("world.fact.professionMissing"));
-            }
-          }
-          facts.push(
-            r.assessedAgainst.skillCount > 0
-              ? t("world.fact.skills", { count: r.assessedAgainst.skillCount })
-              : t("world.fact.skillsMissing"),
-          );
-          const place = [r.assessedAgainst.city, r.countries[0] ? countryLabel(r.countries[0]) : null]
-            .filter(Boolean)
-            .join(", ");
-          facts.push(place ? t("world.fact.place", { value: place }) : t("world.fact.placeMissing"));
-          // WHERE THE PERSON WANTS TO GO — already in the match subject, said
-          // back here for the first time.
-          if (r.assessedAgainst.preferredCountries.length > 0) {
-            facts.push(
-              t("world.fact.preferredCountries", {
-                value: r.assessedAgainst.preferredCountries.map(countryLabel).join(", "),
-              }),
-            );
-          }
-          facts.push(
-            r.assessedAgainst.salaryMinEur != null
-              ? t("world.fact.pay", { amount: r.assessedAgainst.salaryMinEur })
-              : t("world.fact.payMissing"),
-          );
-          facts.push(
-            r.assessedAgainst.languages.length > 0
-              ? t("world.fact.languages", {
-                  list: r.assessedAgainst.languages.map(publicLanguageName).join(", "),
-                })
-              : t("world.fact.languagesMissing"),
-          );
-          return facts;
-        })()
-      : [];
   /*
    * §7 — TWO DIFFERENT KINDS OF SENTENCE WERE JOINED INTO ONE STRIP, and that
    * strip was the second thing on the page:
@@ -841,36 +821,6 @@ export default async function OpportunitiesPage({
         </h1>
         {result.kind === "ready" ? (
           <>
-            {/* THIS IS YOU → WHERE YOU CAN GO (premium opportunities,
-                2026-09-29). The facts the fit was assessed against, each a
-                chip; a missing one is an open dashed chip — said, never
-                hidden. The one-line sentence stays for screen readers. */}
-            <div
-              className="flex flex-col gap-2 rounded-xl border border-border-subtle bg-surface-1/50 p-3 sm:p-4"
-              data-testid="opportunities-assessment"
-            >
-              <p className="sr-only">
-                {t("world.assessedAgainst", { facts: assessedFacts.join(" · ") })}
-              </p>
-              <span aria-hidden className="font-mono text-meta uppercase tracking-label text-text-muted">
-                {t("world.youTitle")}
-              </span>
-              <ul aria-hidden className="flex flex-wrap gap-1.5" data-testid="opportunities-identity-facts">
-                {assessedFacts.map((f) => (
-                  <li
-                    key={f}
-                    data-missing={missingFacts.has(f) ? "true" : undefined}
-                    className={
-                      missingFacts.has(f)
-                        ? "inline-flex min-h-8 items-center rounded-full border border-dashed border-ink-500 px-3 text-support text-text-muted"
-                        : "inline-flex min-h-8 items-center rounded-full border border-ink-500 bg-ink-800/60 px-3 text-support text-text-primary"
-                    }
-                  >
-                    {f}
-                  </li>
-                ))}
-              </ul>
-            </div>
             {/* WHY YOU MAY BE SEEING LESS — and nothing else (§7). A capability
                 that is off, a read that FAILED, or the person's own filters
                 holding rows back. Rendered only when there is something to say,
@@ -921,22 +871,6 @@ export default async function OpportunitiesPage({
           opportunities" from real coordinates — then this section comes back
           as it was, with a center derived from data or from the person's own
           `current_location_country`, never from a constant. */}
-
-      {/* The full geographic Map (every layer, the legend, own place) — this
-          is the worker's canonical door to `/dashboard/market-map`, and it
-          must survive the viewport being withheld. The phone bar carries no
-          map station (owner IA, R-11) and the primary nav tabs render only in
-          the admin chrome, so without this link the protected MAP capability
-          sits behind a collapsed disclosure at the bottom of the page. */}
-      <p className="flex flex-wrap items-baseline gap-4">
-        <Link
-          href={`/${locale}/dashboard/market-map`}
-          data-testid="opportunities-map-full-link"
-          className="text-meta font-medium text-brand-blue underline-offset-4 hover:underline"
-        >
-          {t("marketMapLink")} →
-        </Link>
-      </p>
 
       <div id="opportunities-results" className="scroll-mt-4" />
 
@@ -1043,57 +977,6 @@ export default async function OpportunitiesPage({
             </p>
           ) : null}
 
-          {rows.length === 0 && active.length > 0 ? (
-            /* Empty state names WHICH active filters produced zero. */
-            <section
-              className="rounded-lg border border-dashed border-ink-500 px-4 py-6"
-              data-testid="opportunities-filtered-empty"
-            >
-              <h2 className="font-display text-card-title font-semibold text-text-primary">
-                {t("discovery.emptyFiltered.title")}
-              </h2>
-              <p className="mt-1 text-basis leading-relaxed text-text-secondary">
-                {t("discovery.emptyFiltered.body", {
-                  filters: active
-                    .map(
-                      ([dim, v]) =>
-                        `${t(`discovery.filters.${dim}` as never)}: ${filterValueLabel(dim, v)}`,
-                    )
-                    .join(" · "),
-                })}
-              </p>
-              <Link
-                href={boardHref}
-                className={`mt-3 ${buttonLinkClassName("secondary", "sm")}`}
-                data-testid="opportunities-filtered-empty-reset"
-              >
-                {t("discovery.emptyFiltered.reset")}
-              </Link>
-            </section>
-          ) : rows.length === 0 && result.capabilities.boardAvailable ? (
-            /* Honest empty (§18): the read worked, nothing was retrieved —
-               neither a platform need nor a public ad — and the ONE concrete
-               next step is named rather than implied. */
-            <section
-              className="rounded-lg border border-dashed border-ink-500 px-4 py-6"
-              data-testid="opportunities-empty"
-            >
-              <h2 className="font-display text-card-title font-semibold text-text-primary">
-                {t("approvedEmptyTitle")}
-              </h2>
-              <p className="mt-1 text-basis leading-relaxed text-text-secondary">
-                {t("approvedEmptyBody")}
-              </p>
-              <Link
-                href={profileHref}
-                data-testid="opportunities-empty-cta"
-                className={`mt-3 ${buttonLinkClassName("secondary", "sm")}`}
-              >
-                {t("approvedEmptyCta")} →
-              </Link>
-            </section>
-          ) : null}
-
           {(() => {
             // Facets over the FULL authorized universe — the chips must
             // offer every present value even while the first view shows
@@ -1105,17 +988,49 @@ export default async function OpportunitiesPage({
               initialView.visible.map((o) => o.need.id),
             );
             const expandedHref = `${boardHref}?view=all`;
+            // Public ads carry a profession and a country too — a worker whose
+            // supply is public ads only must still be able to edit those two
+            // criteria. An ACTIVE value is always offered so it can be
+            // switched off, even when the narrowed read no longer shows it.
+            const withValues = (
+              base: readonly string[],
+              extra: readonly (string | null | undefined)[],
+              current: string | null,
+            ): string[] =>
+              [
+                ...new Set([
+                  ...base,
+                  ...extra.filter((v): v is string => !!v && v.trim() !== ""),
+                  ...(current ? [current] : []),
+                ]),
+              ].sort();
             const facetGroups: ReadonlyArray<{
               dim: keyof DiscoveryFilterState;
               values: readonly string[];
             }> = [
-              { dim: "profession", values: facets.professions },
-              { dim: "country", values: facets.countries },
+              {
+                dim: "profession",
+                values: withValues(
+                  facets.professions,
+                  externalCards.map((c) => c.view.professionSlug),
+                  filters.profession,
+                ),
+              },
+              {
+                dim: "country",
+                values: withValues(
+                  facets.countries,
+                  externalCards.map((c) => (c.view.country ?? "").toUpperCase() || null),
+                  filters.country,
+                ),
+              },
               { dim: "start", values: facets.starts },
               { dim: "accommodation", values: facets.accommodations },
               { dim: "transport", values: facets.transports },
               { dim: "tool", values: facets.tools },
             ];
+            const showFilterControls =
+              active.length > 0 || facetGroups.some((g) => g.values.length > 0);
             // Saved bookmarks joined against the LIVE rows (facts are never
             // copied into a save — a saved id with no live row is honestly
             // reported as "no longer open", never rendered from stale data).
@@ -1135,6 +1050,159 @@ export default async function OpportunitiesPage({
                 : [];
             return (
               <OpportunityCompareProvider>
+                {/* ── CONTROLS: FILTERS · SORT · MAP (owner order 2026-10-01).
+                    Compact, ABOVE the results. The facet chips are the
+                    person's own search criteria and are editable in place:
+                    every chip is a real link, so a tap recomputes the list on
+                    the server immediately. Nothing is pre-selected from the
+                    profile — profile facts are not search filters; a filter
+                    exists only when the person set it. */}
+                <div
+                  className="flex flex-wrap items-center gap-2"
+                  data-testid="opportunities-controls"
+                >
+                  {showFilterControls ? (
+                    <details
+                      open={active.length > 0}
+                      className="group order-1 open:order-last open:w-full"
+                      data-testid="opportunities-filters"
+                    >
+                      <summary
+                        className="inline-flex min-h-11 cursor-pointer select-none items-center gap-1.5 rounded-md border border-ink-500 px-3 text-support font-medium text-text-primary marker:content-none hover:border-brand-blue [&::-webkit-details-marker]:hidden"
+                        data-testid="opportunities-filters-toggle"
+                      >
+                        {t("discovery.filters.title")}
+                        {active.length > 0 ? (
+                          <span className="rounded-full bg-brand-blue/20 px-1.5 text-meta text-text-primary">
+                            {active.length}
+                          </span>
+                        ) : null}
+                      </summary>
+                      <div className="mt-2 flex flex-col gap-3 rounded-lg border border-ink-600 bg-ink-800/30 p-3">
+                        {active.length > 0 ? (
+                          <div className="flex flex-wrap items-center justify-end gap-2">
+                            <Link
+                              href={boardHref}
+                              data-testid="opportunities-filters-reset"
+                              className="inline-flex min-h-11 items-center text-support font-medium text-brand-blue hover:text-brand-champagne"
+                            >
+                              {t("discovery.filters.reset")}
+                            </Link>
+                          </div>
+                        ) : null}
+                        {facetGroups
+                          .filter((g) => g.values.length > 0)
+                          .map((g) => (
+                            <div key={g.dim} className="flex flex-wrap items-center gap-1.5">
+                              <span className="min-w-[7rem] font-mono text-meta uppercase tracking-label text-text-muted">
+                                {t(`discovery.filters.${g.dim}` as never)}
+                              </span>
+                              {g.values.map((v) => {
+                                const isActive = filters[g.dim] === v;
+                                return (
+                                  <Link
+                                    key={v}
+                                    href={href({ [g.dim]: isActive ? null : v })}
+                                    aria-pressed={isActive}
+                                    className={chipClass(isActive)}
+                                    data-testid={`opportunities-filter-${g.dim}`}
+                                    data-active={isActive ? "true" : "false"}
+                                  >
+                                    {filterValueLabel(g.dim, v)}
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                          ))}
+                      </div>
+                    </details>
+                  ) : null}
+                  {showFilterControls ? (
+                    /* Sort — relevance (shared §19 comparator) | newest. */
+                    <div
+                      className="order-2 inline-flex items-center gap-1"
+                      role="group"
+                      aria-label={t("discovery.sort.label")}
+                      data-testid="opportunities-sort"
+                    >
+                      {(["relevance", "newest"] as const).map((s) => (
+                        <Link
+                          key={s}
+                          href={href({ sort: s })}
+                          aria-pressed={sort === s}
+                          className={chipClass(sort === s)}
+                          data-testid={`opportunities-sort-${s}`}
+                        >
+                          {t(`discovery.sort.${s}`)}
+                        </Link>
+                      ))}
+                    </div>
+                  ) : null}
+                  {/* The full geographic Map — the worker's canonical door to
+                      `/dashboard/market-map` (the embedded viewport stays
+                      withheld, owner decision 2026-09-27). */}
+                  <Link
+                    href={`/${locale}/dashboard/market-map`}
+                    data-testid="opportunities-map-full-link"
+                    className="order-3 inline-flex min-h-11 items-center rounded-md border border-ink-500 px-3 text-support font-medium text-text-primary hover:border-brand-blue"
+                  >
+                    {t("marketMapLink")}
+                  </Link>
+                </div>
+
+                {rows.length === 0 && active.length > 0 ? (
+                  /* Empty state names WHICH active filters produced zero. */
+                  <section
+                    className="rounded-lg border border-dashed border-ink-500 px-4 py-6"
+                    data-testid="opportunities-filtered-empty"
+                  >
+                    <h2 className="font-display text-card-title font-semibold text-text-primary">
+                      {t("discovery.emptyFiltered.title")}
+                    </h2>
+                    <p className="mt-1 text-basis leading-relaxed text-text-secondary">
+                      {t("discovery.emptyFiltered.body", {
+                        filters: active
+                          .map(
+                            ([dim, v]) =>
+                              `${t(`discovery.filters.${dim}` as never)}: ${filterValueLabel(dim, v)}`,
+                          )
+                          .join(" · "),
+                      })}
+                    </p>
+                    <Link
+                      href={boardHref}
+                      className={`mt-3 ${buttonLinkClassName("secondary", "sm")}`}
+                      data-testid="opportunities-filtered-empty-reset"
+                    >
+                      {t("discovery.emptyFiltered.reset")}
+                    </Link>
+                  </section>
+                ) : rows.length === 0 && result.capabilities.boardAvailable ? (
+                  /* Honest empty (§18): the read worked, nothing was retrieved —
+                     neither a platform need nor a public ad — and the ONE concrete
+                     next step is named rather than implied. */
+                  <section
+                    className="rounded-lg border border-dashed border-ink-500 px-4 py-6"
+                    data-testid="opportunities-empty"
+                  >
+                    <h2 className="font-display text-card-title font-semibold text-text-primary">
+                      {t("approvedEmptyTitle")}
+                    </h2>
+                    <p className="mt-1 text-basis leading-relaxed text-text-secondary">
+                      {t("approvedEmptyBody")}
+                    </p>
+                    <Link
+                      href={profileHref}
+                      data-testid="opportunities-empty-cta"
+                      className={`mt-3 ${buttonLinkClassName("secondary", "sm")}`}
+                    >
+                      {t("approvedEmptyCta")} →
+                    </Link>
+                  </section>
+                ) : null}
+
+                <JobAlertReadiness locale={locale} />
+
                 {savedSearches.available ? (
                   <SavedSearchesStrip
                     readings={savedSearchReadings}
@@ -1191,9 +1259,6 @@ export default async function OpportunitiesPage({
                       surface="opportunities_board"
                       requestIds={initialView.visible.map((o) => o.need.id)}
                     />
-                    <p className="text-meta leading-relaxed text-text-muted" data-testid="opportunities-derived-note">
-                      {t("world.derivedNote")}
-                    </p>
                     {world.strong.kind === "empty" ? (
                       <OpportunityBandSection
                         band="strong"
@@ -1294,7 +1359,6 @@ export default async function OpportunitiesPage({
                                 const whyLines = whyCodesFor(row)
                                   .map(whyText)
                                   .filter((s): s is string => s !== null);
-                                const pay = payText(structured?.compensation, ts, sd);
                                 return (
                                   <li
                                     key={row.key}
@@ -1374,11 +1438,6 @@ export default async function OpportunitiesPage({
                                         sd={sd}
                                         essence
                                       />
-                                      {pay === null ? (
-                                        <p className="text-meta text-text-muted" data-testid="opportunity-pay-not-stated">
-                                          {t("world.payNotStated")}
-                                        </p>
-                                      ) : null}
 
                                       {/* WHY the row sits in its band — the engine's own codes in
                                           words; a strong / possible row with no gap says so through
@@ -1448,6 +1507,7 @@ export default async function OpportunitiesPage({
                                               contacted: t("interest.contacted"),
                                               withdraw: t("interest.withdraw"),
                                               internalNote: t("interest.internalNote"),
+ identityConsent: t("interest.identityConsent"),
                                               error: t("interest.error"),
                                               contactedLink: t("interest.contactedLink"),
                                               contactEmployer: t("interest.contactEmployer"),
@@ -1824,83 +1884,6 @@ export default async function OpportunitiesPage({
                       {t("saved.privateHint")}
                     </p>
                   </section>
-                ) : null}
-
-                {/* ── Refine (URL-param links, server-rendered) — on request,
-                    never the primary experience (§T). `open={active.length > 0}`
-                    is the honesty rule: a narrowed page always shows what is
-                    narrowing it, and the reset link with it. Same facets, same
-                    links, same sort, same reset as before. */}
-                {result.capabilities.boardAvailable && result.opportunities.length > 0 ? (
-                  <details
-                    open={active.length > 0}
-                    className="group rounded-lg border border-ink-600 bg-ink-800/30"
-                    data-testid="opportunities-filters"
-                  >
-                    <summary className="flex min-h-11 cursor-pointer select-none items-center px-4 font-mono text-meta uppercase tracking-label text-text-muted marker:text-text-muted">
-                      {t("discovery.filters.title")}
-                      {active.length > 0
-                        ? ` · ${t("discovery.filters.activeCount", { count: active.length })}`
-                        : ""}
-                    </summary>
-                    <div className="flex flex-col gap-3 px-4 pb-4">
-                      {active.length > 0 ? (
-                        <div className="flex flex-wrap items-center justify-end gap-2">
-                          <Link
-                            href={boardHref}
-                            data-testid="opportunities-filters-reset"
-                            className="inline-flex min-h-11 items-center text-support font-medium text-brand-blue hover:text-brand-champagne"
-                          >
-                            {t("discovery.filters.reset")}
-                          </Link>
-                        </div>
-                      ) : null}
-                      {facetGroups
-                        .filter((g) => g.values.length > 0)
-                        .map((g) => (
-                          <div key={g.dim} className="flex flex-wrap items-center gap-1.5">
-                            <span className="min-w-[7rem] font-mono text-meta uppercase tracking-label text-text-muted">
-                              {t(`discovery.filters.${g.dim}` as never)}
-                            </span>
-                            {g.values.map((v) => {
-                              const isActive = filters[g.dim] === v;
-                              return (
-                                <Link
-                                  key={v}
-                                  href={href({ [g.dim]: isActive ? null : v })}
-                                  aria-pressed={isActive}
-                                  className={chipClass(isActive)}
-                                  data-testid={`opportunities-filter-${g.dim}`}
-                                  data-active={isActive ? "true" : "false"}
-                                >
-                                  {filterValueLabel(g.dim, v)}
-                                </Link>
-                              );
-                            })}
-                          </div>
-                        ))}
-                      {/* Sort — relevance (shared §19 comparator) | newest. */}
-                      <div
-                        className="flex flex-wrap items-center gap-1.5 border-t border-ink-600 pt-3"
-                        data-testid="opportunities-sort"
-                      >
-                        <span className="min-w-[7rem] font-mono text-meta uppercase tracking-label text-text-muted">
-                          {t("discovery.sort.label")}
-                        </span>
-                        {(["relevance", "newest"] as const).map((s) => (
-                          <Link
-                            key={s}
-                            href={href({ sort: s })}
-                            aria-pressed={sort === s}
-                            className={chipClass(sort === s)}
-                            data-testid={`opportunities-sort-${s}`}
-                          >
-                            {t(`discovery.sort.${s}`)}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  </details>
                 ) : null}
 
                 {/* Compare (P2-PR5) — pure client state over the loaded rows;

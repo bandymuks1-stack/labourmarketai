@@ -44,13 +44,30 @@ const dashboardLinks = (html: string) => html.match(/href="\/dashboard[^"]*"/g) 
 
 describe("the landing's sample Player Card", () => {
   it("renders the real card with its tiles, and not one link into /dashboard", async () => {
-    const html = renderToStaticMarkup(await PlayerCardShowcase());
-    // The card is really there — the tiles still render as facts…
-    for (const tile of ["player-card-skills", "player-card-candidate", "player-card-evidence", "player-card-attention"]) {
-      expect(html, tile).toContain(`data-testid="${tile}"`);
+    // The showcase mounts the card CLOSED (owner direction 2026-09-30: the
+    // person first, information on demand) — it carries no dashboard link.
+    const showcase = renderToStaticMarkup(await PlayerCardShowcase());
+    expect(showcase).toContain('data-testid="worker-player-card"');
+    expect(dashboardLinks(showcase)).toEqual([]);
+    // Opened on the lens that carries the tiles, the SAMPLE card still shows
+    // them as facts and still links none of them.
+    const card = buildSampleWorkerPlayerCard({
+      sampleName: "Sample",
+      sampleOrganization: "Sample kitchen",
+      now: new Date("2026-09-23T00:00:00Z"),
+    });
+    const labels = await buildPlayerCardLabels(card);
+    for (const mode of ["work", "skills", "evidence", "history", "next"] as const) {
+      const html = renderToStaticMarkup(
+        createElement(WorkerPlayerCard, { card, labels, thermometer: null, avatarUrl: null, sample: true, initialMode: mode }),
+      );
+      if (mode === "work") {
+        for (const tile of ["player-card-skills", "player-card-candidate", "player-card-evidence", "player-card-attention"]) {
+          expect(html, tile).toContain(`data-testid="${tile}"`);
+        }
+      }
+      expect(dashboardLinks(html), mode).toEqual([]);
     }
-    // …and none of them, nor any skill bar, opens a dashboard surface.
-    expect(dashboardLinks(html)).toEqual([]);
   });
 
   it("NEGATIVE CONTROL — the same card as a person's OWN card still links its tiles", async () => {
@@ -63,7 +80,7 @@ describe("the landing's sample Player Card", () => {
     });
     const labels = await buildPlayerCardLabels(card);
     const own = renderToStaticMarkup(
-      createElement(WorkerPlayerCard, { card, labels, thermometer: null, avatarUrl: null }),
+      createElement(WorkerPlayerCard, { card, labels, thermometer: null, avatarUrl: null, initialMode: "work" }),
     );
     expect(dashboardLinks(own)).toEqual(
       expect.arrayContaining([
@@ -72,7 +89,7 @@ describe("the landing's sample Player Card", () => {
       ]),
     );
     const sample = renderToStaticMarkup(
-      createElement(WorkerPlayerCard, { card, labels, thermometer: null, avatarUrl: null, sample: true }),
+      createElement(WorkerPlayerCard, { card, labels, thermometer: null, avatarUrl: null, sample: true, initialMode: "work" }),
     );
     expect(dashboardLinks(sample)).toEqual([]);
   });

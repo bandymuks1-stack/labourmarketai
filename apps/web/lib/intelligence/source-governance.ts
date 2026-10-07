@@ -208,30 +208,32 @@ export const INTELLIGENCE_SOURCE_PROFILES: readonly IntelligenceSourceProfile[] 
       // (lib/vacancy-sources/vacancy-provider-registry.ts), registered as a
       // SCAFFOLD on 2026-09-22.
       //
-      // LEGAL STATUS: "unconfirmed". The research matrix
-      // (docs/research/eu-vacancy-source-matrix-2026-08-18.md §3) records
-      // that republication is permitted under arbeidsplassen.nav.no/vilkar-api
-      // with ONGOING duties (immediate removal of withdrawn ads, immediate
-      // updates, deep-link the apply function to the original supplier, no
-      // contact data on inactive ads) — but written acceptance of those terms
-      // and a private token are an OWNER + NAV action that has not happened.
-      // A research fact is not a provider answer; this row stays a proposal.
+      // LEGAL STATUS: "confirmed" (2026-09-30). NAV's Arbeidsplassen team
+      // granted production API access after the company details were sent and
+      // the API terms (arbeidsplassen.nav.no/vilkar-api) were accepted in
+      // writing by return e-mail (August-September 2026). The ONGOING duties
+      // come with that acceptance and are enforced in code: withdrawn ads
+      // leave the result lists at once (INACTIVE/404/410 = removal), updates
+      // are polled continuously, the apply link deep-links to the original
+      // supplier, and contact data is never read (`contactList`). The earlier
+      // "unconfirmed" value was governance drift, not a missing approval; the
+      // sanitized receipt is docs/human-gates/nav-activation-gate.md.
       //
-      // ACTIVATION: "off". Flipping it is the owner decision recorded in
-      // docs/human-gates/nav-activation-gate.md, and even then the provider
-      // imports nothing until VACANCY_SOURCE_NAV_ENABLED is set and the
-      // bearer token VACANCY_SOURCE_NAV_API_TOKEN is provisioned.
+      // ACTIVATION: "on" is HALF the gate, exactly as for arbetsformedlingen:
+      // nothing is fetched until VACANCY_SOURCE_NAV_ENABLED is set and the
+      // bearer token VACANCY_SOURCE_NAV_API_TOKEN is provisioned, and
+      // VACANCY_IMPORT_KILL_SWITCH remains the instant global stop.
       key: "nav",
       displayNameCode: "intelligence.sources.nav",
       sourceKind: "public_official",
-      legalStatus: "unconfirmed",
-      activation: "off",
+      legalStatus: "confirmed",
+      activation: "on",
       termsNoteCode: "intelligence.sources.terms.nav",
       // Not stated by NAV's terms; required by our own product policy for
       // every external ad, exactly as for arbetsformedlingen.
       attributionRequired: true,
       homepage: "arbeidsplassen.nav.no",
-      proposedOnly: true,
+      proposedOnly: false,
       // Vacancies are never metric observations — fail-closed null, as the
       // boundary guard requires of every non-eurostat external source.
       importPolicy: null,

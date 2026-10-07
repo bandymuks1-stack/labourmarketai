@@ -16,6 +16,7 @@ import {
 import { listWorkObjectIdsForProject } from "@/lib/objects/objects";
 import { getAllocationsForObjects } from "@/lib/work-hours/allocations";
 import { sumHours } from "@/lib/work-hours/allocations-model";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /**
  * ONE PROJECT, TWO LEDGERS, SIDE BY SIDE — allocated vs journaled hours.
@@ -99,6 +100,7 @@ async function readJournaled(
   supabase: SupabaseClient,
   projectId: string,
   todayIso: string,
+  horizonIso: string,
 ): Promise<ProjectJournaledHours> {
   // The report's own minimised projection — ids, timestamps, the review
   // rows and the metric rows. Never the entry text.
@@ -122,7 +124,7 @@ async function readJournaled(
   const rows = res.data ?? [];
   // A confirmed entry the member corrected is one day of work, not two.
   const counted = countedOnce(rows);
-  const work = deriveWindowWorkTime(counted, todayIso);
+  const work = deriveWindowWorkTime(counted, todayIso, horizonIso);
   return {
     state: "measured",
     hours: work.hours,
@@ -138,12 +140,15 @@ async function readJournaled(
  */
 export async function getProjectHoursSideBySide(
   projectId: string,
-  todayIso: string = new Date().toISOString().slice(0, 10),
+  todayIsoArg?: string,
 ): Promise<ProjectHoursSideBySide> {
   const supabase = await createClient();
+  const viewer = await viewerWorkToday();
+  const todayIso = todayIsoArg ?? viewer.todayIso;
+  const horizonIso = todayIsoArg ? todayIsoArg : viewer.horizonIso;
   const [allocated, journaled] = await Promise.all([
     readAllocated(projectId),
-    readJournaled(supabase, projectId, todayIso),
+    readJournaled(supabase, projectId, todayIso, horizonIso),
   ]);
   return { allocated, journaled };
 }

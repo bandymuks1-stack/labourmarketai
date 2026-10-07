@@ -293,6 +293,7 @@ const CHAT_KEYS = [
   // reprioritise, the other you cannot. Two keys, never one word for both.
   "capacityCommittedUntil",
   "capacityCommittedToUntil",
+  "capacityCommittedUndated",
   "capacityAbsencesUnknown",
   "capacityCommitmentsUnknown",
   "capacityEmpty",

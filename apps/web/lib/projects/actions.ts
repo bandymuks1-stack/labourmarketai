@@ -10,6 +10,7 @@ import { insertProjectForCompany } from "@/lib/projects/create-project-core";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { checkWorkerReservation } from "@/lib/planning/worker-reservation";
+import { freeColleagues } from "@/lib/projects/free-colleagues";
 import type { ReservationVerdict } from "@/lib/workforce/commitment-reservation";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
@@ -46,6 +47,13 @@ export type ProjectActionResult =
        * discovering the clash later on a calendar they were not looking at.
        */
       reservation?: ReservationVerdict;
+      /** The assignment this call just wrote — so the screen can offer the
+       *  human decision (keep / undo / swap) without guessing which row. */
+      assigned?: { projectId: string; workerProfileId: string };
+      /** Present only when the verdict collides: colleagues CONFIRMED free on
+       *  the same dates (never an unknown) — the alternatives step of the
+       *  conflict flow. Names are the roster's own display names. */
+      alternatives?: { profileId: string; name: string }[];
     }
   | {
       ok: false;
@@ -147,7 +155,11 @@ export async function assignWorkerToProjectAction(
     metadata: { surface: "projects", role_context: "company" },
   });
   const reservation = await reservationAfterAssign(supabase, projectId, workerProfileId);
-  return reservation ? { ok: true, reservation } : { ok: true };
+  const assigned = { projectId, workerProfileId };
+  if (!reservation) return { ok: true, assigned };
+  return reservation.alternatives.length > 0
+    ? { ok: true, assigned, reservation: reservation.verdict, alternatives: reservation.alternatives }
+    : { ok: true, assigned, reservation: reservation.verdict };
 }
 
 /**
@@ -167,24 +179,59 @@ async function reservationAfterAssign(
   supabase: SupabaseClient,
   projectId: string,
   workerProfileId: string,
-): Promise<ReservationVerdict | null> {
+): Promise<{
+  verdict: ReservationVerdict;
+  alternatives: { profileId: string; name: string }[];
+} | null> {
   try {
     const [{ data: worker }, { data: project }] = await Promise.all([
       asAny(supabase).from("workers").select("id").eq("profile_id", workerProfileId).maybeSingle(),
       asAny(supabase).from("projects").select("start_date, end_date").eq("id", projectId).maybeSingle(),
     ]);
     if (!worker?.id) return null;
-    return await checkWorkerReservation({
+    const window = {
+      startDate: (project?.start_date as string | null) ?? null,
+      endDate: (project?.end_date as string | null) ?? null,
+    };
+    const verdict = await checkWorkerReservation({
       workerId: worker.id as string,
-      window: {
-        startDate: (project?.start_date as string | null) ?? null,
-        endDate: (project?.end_date as string | null) ?? null,
-      },
+      window,
       exclude: [projectId],
     });
+    if (verdict.state !== "collides") return { verdict, alternatives: [] };
+    return {
+      verdict,
+      alternatives: await freeColleagues(supabase, workerProfileId, projectId, window),
+    };
   } catch (error) {
     console.error("[projects] reservation check failed:", error);
     return null;
+  }
+}
+
+/**
+ * AUDIT of the human decision on a collision (kept / undone / swapped). One
+ * append to the existing `audit_logs` through a narrow SECURITY DEFINER writer.
+ * Best-effort by design: the decision itself already happened, so a missing
+ * function (not yet applied) or a failed write must never undo or fail it.
+ */
+export async function recordAssignmentDecisionAction(
+  projectId: string,
+  workerProfileId: string,
+  decision: "kept" | "undone" | "swapped",
+): Promise<void> {
+  try {
+    const supabase = await createClient();
+    const { error } = await asAny(supabase).rpc("record_assignment_decision", {
+      p_project_id: projectId,
+      p_worker_profile_id: workerProfileId,
+      p_decision: decision,
+    });
+    if (error && !migMissing(error.code)) {
+      console.error("[projects] decision audit failed:", error.message);
+    }
+  } catch (error) {
+    console.error("[projects] decision audit failed:", error);
   }
 }
 

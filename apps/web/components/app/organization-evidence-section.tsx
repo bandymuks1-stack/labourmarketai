@@ -7,6 +7,8 @@ import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { Card } from "@/components/ui/Card";
+import { HistoryContextBlock } from "@/components/app/history-context-block";
+import type { HistoryContext } from "@/lib/organization-evidence/professional-history-context";
 
 import {
   respondToRosterLinkAction,
@@ -14,7 +16,9 @@ import {
 } from "@/lib/organization-evidence/roster-link-actions";
 import {
   disputeEvidenceRecordAction,
+  withdrawEvidenceContestAction,
   type DisputeEvidenceResult,
+  type WithdrawEvidenceContestResult,
 } from "@/lib/organization-evidence/dispute-actions";
 import type {
   EvidenceRecordView,
@@ -193,6 +197,73 @@ function DisputeRecord({
           role="alert"
           className="text-xs text-state-warning"
           data-testid="evidence-dispute-error"
+        >
+          {state.code === "not_allowed" ? labels.notAllowed : labels.failed}
+        </p>
+      ) : null}
+    </form>
+  );
+}
+
+/**
+ * "I WITHDRAW MY OBJECTION" - the way back from a contest.
+ *
+ * Offered ONLY while the viewer's own contest stands (never for somebody
+ * else's - an organisation may contest too, and that is not the reader's to
+ * take back). It ends the standing of the contest; it does not erase that the
+ * contest was made, and the copy says so. A fresh contest is offered again
+ * afterwards.
+ */
+function WithdrawContest({
+  recordId,
+  labels,
+}: {
+  recordId: string;
+  labels: {
+    hint: string;
+    submit: string;
+    done: string;
+    notStanding: string;
+    notAllowed: string;
+    failed: string;
+  };
+}) {
+  const [state, submit, pending] = useActionState<
+    WithdrawEvidenceContestResult | null,
+    FormData
+  >(withdrawEvidenceContestAction, null);
+
+  if (state?.ok) {
+    return (
+      <p
+        className="text-xs text-state-amber"
+        role="status"
+        data-testid="evidence-dispute-withdrawn"
+      >
+        {state.withdrawn ? labels.done : labels.notStanding}
+      </p>
+    );
+  }
+
+  return (
+    <form action={submit} className="flex flex-col gap-2">
+      <input type="hidden" name="record_id" value={recordId} />
+      <p className="text-xs text-text-muted">{labels.hint}</p>
+      <div>
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded-md border border-ink-500 bg-ink-800 px-3 py-1.5 text-xs font-semibold text-text-secondary hover:border-state-amber hover:text-state-amber disabled:opacity-50"
+          data-testid="evidence-dispute-withdraw"
+        >
+          {labels.submit}
+        </button>
+      </div>
+      {state?.ok === false ? (
+        <p
+          role="alert"
+          className="text-xs text-state-warning"
+          data-testid="evidence-dispute-withdraw-error"
         >
           {state.code === "not_allowed" ? labels.notAllowed : labels.failed}
         </p>
@@ -389,9 +460,14 @@ export function OrganizationEvidenceSection({
   records,
   needsMigration,
   organizationNames = {},
+  contexts = {},
   showTitle = true,
 }: {
   records: readonly EvidenceRecordView[];
+  /** The work behind each record, keyed by record id: project, client,
+   *  capacity, source and the distinct proof facts. A record with no entry,
+   *  or whose context is empty, shows nothing extra. */
+  contexts?: Readonly<Record<string, HistoryContext>>;
   /** The store is not provisioned in this environment. The card still renders,
    *  with its honest note instead of a silently empty list. */
   needsMigration: boolean;
@@ -595,6 +671,7 @@ export function OrganizationEvidenceSection({
                       {tRecords("supplier")}: {tRole(rec.supplierRole as never)} ·{" "}
                       {tRecords("importedAt")}: {rec.importedAt.slice(0, 10)}
                     </p>
+                    <HistoryContextBlock context={contexts[rec.id]} />
                     {/* The one claim this surface makes about imported
                       evidence, and it is always the same one. */}
                     <p className="text-xs text-text-muted">
@@ -622,6 +699,30 @@ export function OrganizationEvidenceSection({
                     made one. It never appears on a withdrawn record: the
                     organisation has already taken that claim back, and
                     contesting a retracted statement would be theatre. */}
+                {rec.disputedByViewer ? (
+                  <WithdrawContest
+                    recordId={rec.id}
+                    labels={{
+                      hint: tRecords("disputeWithdrawHint"),
+                      submit: tRecords("disputeWithdraw"),
+                      done: tRecords("disputeWithdrawn"),
+                      notStanding: tRecords("disputeNotStanding"),
+                      notAllowed: tRecords("disputeNotAllowed"),
+                      failed: tRecords("disputeWithdrawFailed"),
+                    }}
+                  />
+                ) : null}
+                {/* The contest existed and was taken back. Said plainly,
+                    because a record that silently went back to normal would
+                    erase that the person once objected. */}
+                {!rec.disputedByViewer && rec.contestWithdrawnByViewer ? (
+                  <p
+                    className="text-xs text-text-muted"
+                    data-testid="evidence-dispute-withdrawn-history"
+                  >
+                    {tRecords("disputeWithdrawnHistory")}
+                  </p>
+                ) : null}
                 {!rec.disputedByViewer && !rec.withdrawn ? (
                   <DisputeRecord
                     recordId={rec.id}

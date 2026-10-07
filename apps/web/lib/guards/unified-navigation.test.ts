@@ -186,8 +186,13 @@ describe("3. voice input feeds the ONE existing search pipeline", () => {
     expect(FINDER).toMatch(/aria-label=\{listening \? t\("voiceStop"\) : t\("voiceStart"\)\}/);
     expect(FINDER).toMatch(/aria-pressed=\{listening\}/);
     // The only localStorage write stays the recent-command IDS write.
-    const writes = [...FINDER.matchAll(/localStorage\.setItem\(/g)];
+    // (plus the one-time vendor-speech DISCLOSURE flag - a consent marker,
+    // never a transcript; pinned separately below)
+    const writes = [...FINDER.matchAll(/localStorage\.setItem\(/g)].filter(
+      (m) => !FINDER.slice(m.index, m.index + 60).includes("SPEECH_CONSENT_KEY"),
+    );
     expect(writes.length).toBe(1);
+    expect(FINDER.match(/localStorage\.setItem\(\s*SPEECH_CONSENT_KEY, "accepted"\)/g)).toHaveLength(1);
     expect(FINDER).not.toMatch(/setItem\([^)]*transcript/i);
   });
 

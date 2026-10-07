@@ -128,7 +128,12 @@ describe("the intent registry is the enumerable routing contract", () => {
     // was invisible to the chat ("parodyk išsaugotus darbus" ran a search).
     // 88 → 89 (2026-09-29): open-tasks — "Kokios užduotys projekte …?" could
     // not read the task the project panel already counted.
-    expect(entries.length).toBe(89);
+    // 89 → 90 (2026-10-01): find-partners — "Noriu rasti partnerių savo
+    // verslui" was answered as a job search; a business-side route intent.
+    // 90 -> 91: product-help — how-to / where-is questions answered in words with the door.
+    // 91 -> 92: open-conversation - 'parašyk Jonui' opens the ONE conversation.
+    // 92 -> 93: new-jobs - the new ads over the one job-alert matching.
+    expect(entries.length).toBe(93);
     expect(Object.keys(INTENT_REGISTRY)).not.toContain("unknown");
   });
 
@@ -219,6 +224,9 @@ describe("the intent registry is the enumerable routing contract", () => {
       "cv-export",
       "cv-view",
       "documents",
+      // "Noriu rasti partnerių savo verslui" — chips to the existing
+      // marketplace doors (or which company); never a job search, no write.
+      "find-partners",
       "hours-import",
       "lmc",
       "market-map",
@@ -227,6 +235,8 @@ describe("the intent registry is the enumerable routing contract", () => {
       // already carries. Route-class for exactly the reason above.
       "my-team",
       "need-service",
+      // "Parašyk Jonui" — resolves WHO, then navigates to the ONE conversation; sends nothing.
+      "open-conversation",
       "timesheets",
       "work-hours",
     ]);

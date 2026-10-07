@@ -2,7 +2,8 @@
 
 import "server-only";
 
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 
 import { getWorkerPlayerCard, type WorkerPlayerCard } from "./player-card";
 import { deriveWorkCardChecks } from "@/lib/worker/work-card-plausibility";
@@ -25,6 +26,7 @@ import type {
   PlayerCardLabels,
   ThermometerView,
 } from "@/components/app/worker-player-card";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /**
  * THE PLAYER CARD RESULT (W3 row 1).
@@ -142,7 +144,7 @@ async function resolveWorkEditor(card: WorkerPlayerCard): Promise<{
   const tw = await getTranslations("auth.dashboard.workCard");
   // What the saved figures READ AS — derived from the same values the editor
   // prefills; the sentence names the figure, the person decides.
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = (await viewerWorkToday()).todayIso;
   const checks = deriveWorkCardChecks(
     {
       salaryMin: data.values.salaryMin,
@@ -181,6 +183,12 @@ async function resolveWorkEditor(card: WorkerPlayerCard): Promise<{
       availableFromLabel: tw("editor.availableFromLabel"),
       locationLabel: tw("editor.locationLabel"),
       locationHint: tw("editor.locationHint"),
+      // The ONE country list (active markets first, then every ISO country in
+      // the person's language) — the same one the company need form uses.
+      locationOptions: countryOptionsForLocale(await getLocale()).map((o) => ({
+        code: o.value,
+        label: o.label,
+      })),
       preferredLabel: tw("editor.preferredLabel"),
       preferredHint: tw("editor.preferredHint"),
       salaryMinLabel: tw("editor.salaryMinLabel"),
