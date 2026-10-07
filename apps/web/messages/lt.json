@@ -18638,5 +18638,38 @@
     "stateNotYetValid": "Pripažinta, dar negalioja",
     "validFrom": "nuo {date}",
     "validUntil": "iki {date}"
+  },
+  "evidenceMedia": {
+    "title": "Istorinės nuotraukos",
+    "provenance": "Nuotraukos, kurias organizacija pateikė iš savo įrašų. Pateikta, nepatikrinta.",
+    "reported": "Pateikta, nepatikrinta",
+    "unavailable": "Istorinių nuotraukų dabar nepavyko nuskaityti. Tai nereiškia, kad jų nėra.",
+    "emptyProject": "Šiam projektui istorinių nuotraukų neužregistruota.",
+    "emptyPerson": "Šiam asmeniui istorinių nuotraukų neužregistruota.",
+    "previewUnavailable": "Peržiūra nepasiekiama",
+    "photoAlt": "Istorinė darbo nuotrauka",
+    "taken": "Nufotografuota {date}",
+    "takenUnknown": "Data nenurodyta",
+    "basis": {
+      "exif": "data iš pačios nuotraukos metaduomenų",
+      "source_metadata": "data iš šaltinio sistemos metaduomenų",
+      "organization_stated": "datą nurodė organizacija",
+      "unknown": "data nežinoma"
+    },
+    "source": "Šaltinis: {system}",
+    "more": "Dar {n} nuotraukų čia nerodoma."
+  },
+  "linkedDocuments": {
+    "title": "Susieti dokumentai",
+    "introProject": "Registro dokumentai, susieti su šiuo projektu. Tik skaitymui – tvarkykite juos dokumentų registre.",
+    "introPerson": "Registro dokumentai, susieti su šiuo asmeniu. Tik skaitymui – tvarkykite juos dokumentų registre.",
+    "unavailable": "Susietų dokumentų dabar nepavyko nuskaityti. Tai nereiškia, kad jų nėra.",
+    "emptyProject": "Su šiuo projektu nesusietas nė vienas registro dokumentas.",
+    "emptyPerson": "Su šiuo asmeniu nesusietas nė vienas registro dokumentas.",
+    "personNotLinked": "Registro dokumentai priskiriami asmeniui, kai jo sąrašo įrašas susiejamas su paskyra.",
+    "noFile": "Failas dar neįkeltas",
+    "download": "Atsisiųsti",
+    "openRegister": "Atidaryti dokumentų registrą",
+    "more": "Registre yra dar {n} dokumentų."
   }
 }

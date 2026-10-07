@@ -18638,5 +18638,38 @@
     "stateNotYetValid": "Uznano, jeszcze nieważne",
     "validFrom": "od {date}",
     "validUntil": "do {date}"
+  },
+  "evidenceMedia": {
+    "title": "Historyczne zdjęcia",
+    "provenance": "Zdjęcia dostarczone przez organizację z jej własnych zapisów. Zgłoszone, niezweryfikowane.",
+    "reported": "Zgłoszone, niezweryfikowane",
+    "unavailable": "Nie udało się teraz odczytać historycznych zdjęć. To nie znaczy, że ich nie ma.",
+    "emptyProject": "Dla tego projektu nie zapisano historycznych zdjęć.",
+    "emptyPerson": "Dla tej osoby nie zapisano historycznych zdjęć.",
+    "previewUnavailable": "Podgląd niedostępny",
+    "photoAlt": "Historyczne zdjęcie z pracy",
+    "taken": "Wykonano {date}",
+    "takenUnknown": "Data niepodana",
+    "basis": {
+      "exif": "data z metadanych samego zdjęcia",
+      "source_metadata": "data z metadanych systemu źródłowego",
+      "organization_stated": "data podana przez organizację",
+      "unknown": "data nieznana"
+    },
+    "source": "Źródło: {system}",
+    "more": "Kolejnych zdjęć ({n}) nie pokazano tutaj."
+  },
+  "linkedDocuments": {
+    "title": "Powiązane dokumenty",
+    "introProject": "Dokumenty z rejestru powiązane z tym projektem. Tylko do odczytu – zarządzaj nimi w rejestrze dokumentów.",
+    "introPerson": "Dokumenty z rejestru powiązane z tą osobą. Tylko do odczytu – zarządzaj nimi w rejestrze dokumentów.",
+    "unavailable": "Nie udało się teraz odczytać powiązanych dokumentów. To nie znaczy, że ich nie ma.",
+    "emptyProject": "Z tym projektem nie powiązano dokumentów z rejestru.",
+    "emptyPerson": "Z tą osobą nie powiązano dokumentów z rejestru.",
+    "personNotLinked": "Dokumenty z rejestru są przypisywane do osoby, gdy jej wpis na liście jest powiązany z kontem.",
+    "noFile": "Nie przesłano jeszcze pliku",
+    "download": "Pobierz",
+    "openRegister": "Otwórz rejestr dokumentów",
+    "more": "W rejestrze jest jeszcze {n} dokumentów."
   }
 }

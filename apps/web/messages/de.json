@@ -18638,5 +18638,38 @@
     "stateNotYetValid": "Anerkannt, noch nicht gültig",
     "validFrom": "ab {date}",
     "validUntil": "bis {date}"
+  },
+  "evidenceMedia": {
+    "title": "Historische Fotos",
+    "provenance": "Fotos, die die Organisation aus ihren eigenen Unterlagen geliefert hat. Angegeben, nicht verifiziert.",
+    "reported": "Angegeben, nicht verifiziert",
+    "unavailable": "Historische Fotos konnten gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
+    "emptyProject": "Für dieses Projekt sind keine historischen Fotos erfasst.",
+    "emptyPerson": "Für diese Person sind keine historischen Fotos erfasst.",
+    "previewUnavailable": "Vorschau nicht verfügbar",
+    "photoAlt": "Historisches Arbeitsfoto",
+    "taken": "Aufgenommen {date}",
+    "takenUnknown": "Datum nicht angegeben",
+    "basis": {
+      "exif": "Datum aus den eigenen Metadaten des Fotos",
+      "source_metadata": "Datum aus den Metadaten des Quellsystems",
+      "organization_stated": "Datum von der Organisation angegeben",
+      "unknown": "Datum unbekannt"
+    },
+    "source": "Quelle: {system}",
+    "more": "{n} weitere Fotos werden hier nicht angezeigt."
+  },
+  "linkedDocuments": {
+    "title": "Verknüpfte Dokumente",
+    "introProject": "Dokumente aus dem Register, die mit diesem Projekt verknüpft sind. Nur lesbar – verwalten Sie sie im Dokumentenregister.",
+    "introPerson": "Dokumente aus dem Register, die mit dieser Person verknüpft sind. Nur lesbar – verwalten Sie sie im Dokumentenregister.",
+    "unavailable": "Verknüpfte Dokumente konnten gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
+    "emptyProject": "Mit diesem Projekt sind keine Registerdokumente verknüpft.",
+    "emptyPerson": "Mit dieser Person sind keine Registerdokumente verknüpft.",
+    "personNotLinked": "Registerdokumente werden einer Person zugeordnet, sobald ihr Personaleintrag mit einem Konto verknüpft ist.",
+    "noFile": "Noch keine Datei hochgeladen",
+    "download": "Herunterladen",
+    "openRegister": "Dokumentenregister öffnen",
+    "more": "{n} weitere Dokumente sind im Register."
   }
 }

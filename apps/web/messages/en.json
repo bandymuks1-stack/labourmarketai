@@ -18638,5 +18638,38 @@
     "stateNotYetValid": "Recognised, not valid yet",
     "validFrom": "from {date}",
     "validUntil": "until {date}"
+  },
+  "evidenceMedia": {
+    "title": "Historical photos",
+    "provenance": "Photos the organization supplied from its own records. Reported, not verified.",
+    "reported": "Reported, not verified",
+    "unavailable": "Historical photos could not be read right now. This does not mean there are none.",
+    "emptyProject": "No historical photos are recorded for this project.",
+    "emptyPerson": "No historical photos are recorded for this person.",
+    "previewUnavailable": "Preview unavailable",
+    "photoAlt": "Historical work photo",
+    "taken": "Taken {date}",
+    "takenUnknown": "Date not stated",
+    "basis": {
+      "exif": "date from the photo's own metadata",
+      "source_metadata": "date from the source system's metadata",
+      "organization_stated": "date stated by the organization",
+      "unknown": "date unknown"
+    },
+    "source": "Source: {system}",
+    "more": "{n} more photos are not shown here."
+  },
+  "linkedDocuments": {
+    "title": "Linked documents",
+    "introProject": "Register documents linked to this project. You can view them here; manage them in the document register.",
+    "introPerson": "Register documents linked to this person. You can view them here; manage them in the document register.",
+    "unavailable": "Linked documents could not be read right now. This does not mean there are none.",
+    "emptyProject": "No register documents are linked to this project.",
+    "emptyPerson": "No register documents are linked to this person.",
+    "personNotLinked": "Register documents attach to a person once their roster record is linked to an account.",
+    "noFile": "No file uploaded yet",
+    "download": "Download",
+    "openRegister": "Open the document register",
+    "more": "{n} more documents are in the register."
   }
 }

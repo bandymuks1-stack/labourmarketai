@@ -7166,5 +7166,38 @@
     },
     "shown": "Rāda jaunākos {shown} no {total} ierakstiem. Pārējie paliek reģistrēti.",
     "truncated": "Ierakstu ir vairāk, nekā nolasa viens skats. Rāda nolasītos {count}; kopsummas ietver tikai tos."
+  },
+  "evidenceMedia": {
+    "title": "Vēsturiskās fotogrāfijas",
+    "provenance": "Fotogrāfijas, ko organizācija iesniegusi no saviem ierakstiem. Paziņots, nav pārbaudīts.",
+    "reported": "Paziņots, nav pārbaudīts",
+    "unavailable": "Vēsturiskās fotogrāfijas pašlaik nevarēja nolasīt. Tas nenozīmē, ka to nav.",
+    "emptyProject": "Šim projektam nav reģistrētu vēsturisko fotogrāfiju.",
+    "emptyPerson": "Šai personai nav reģistrētu vēsturisko fotogrāfiju.",
+    "previewUnavailable": "Priekšskatījums nav pieejams",
+    "photoAlt": "Vēsturiska darba fotogrāfija",
+    "taken": "Uzņemts {date}",
+    "takenUnknown": "Datums nav norādīts",
+    "basis": {
+      "exif": "datums no pašas fotogrāfijas metadatiem",
+      "source_metadata": "datums no avota sistēmas metadatiem",
+      "organization_stated": "datumu norādījusi organizācija",
+      "unknown": "datums nav zināms"
+    },
+    "source": "Avots: {system}",
+    "more": "Vēl {n} fotogrāfijas šeit netiek rādītas."
+  },
+  "linkedDocuments": {
+    "title": "Saistītie dokumenti",
+    "introProject": "Reģistra dokumenti, kas saistīti ar šo projektu. Tikai lasāmi – pārvaldiet tos dokumentu reģistrā.",
+    "introPerson": "Reģistra dokumenti, kas saistīti ar šo personu. Tikai lasāmi – pārvaldiet tos dokumentu reģistrā.",
+    "unavailable": "Saistītos dokumentus pašlaik nevarēja nolasīt. Tas nenozīmē, ka to nav.",
+    "emptyProject": "Ar šo projektu nav saistīts neviens reģistra dokuments.",
+    "emptyPerson": "Ar šo personu nav saistīts neviens reģistra dokuments.",
+    "personNotLinked": "Reģistra dokumenti tiek piesaistīti personai, kad tās saraksta ieraksts ir saistīts ar kontu.",
+    "noFile": "Fails vēl nav augšupielādēts",
+    "download": "Lejupielādēt",
+    "openRegister": "Atvērt dokumentu reģistru",
+    "more": "Reģistrā ir vēl {n} dokumenti."
   }
 }

@@ -7166,5 +7166,38 @@
     },
     "shown": "Viser de nyeste {shown} af {total} poster. Resten forbliver registreret.",
     "truncated": "Der findes flere poster, end én visning læser. De {count} læste vises; summer dækker kun dem."
+  },
+  "evidenceMedia": {
+    "title": "Historiske fotos",
+    "provenance": "Fotos, som organisationen selv har leveret fra sine egne optegnelser. Oplyst, ikke verificeret.",
+    "reported": "Oplyst, ikke verificeret",
+    "unavailable": "Historiske fotos kunne ikke læses lige nu. Det betyder ikke, at der ingen er.",
+    "emptyProject": "Der er ingen historiske fotos registreret for dette projekt.",
+    "emptyPerson": "Der er ingen historiske fotos registreret for denne person.",
+    "previewUnavailable": "Forhåndsvisning utilgængelig",
+    "photoAlt": "Historisk arbejdsfoto",
+    "taken": "Taget {date}",
+    "takenUnknown": "Dato ikke oplyst",
+    "basis": {
+      "exif": "dato fra fotoets egne metadata",
+      "source_metadata": "dato fra kildesystemets metadata",
+      "organization_stated": "dato oplyst af organisationen",
+      "unknown": "dato ukendt"
+    },
+    "source": "Kilde: {system}",
+    "more": "{n} flere fotos vises ikke her."
+  },
+  "linkedDocuments": {
+    "title": "Tilknyttede dokumenter",
+    "introProject": "Dokumenter i registeret, der er knyttet til dette projekt. Skrivebeskyttet – administrer dem i dokumentregisteret.",
+    "introPerson": "Dokumenter i registeret, der er knyttet til denne person. Skrivebeskyttet – administrer dem i dokumentregisteret.",
+    "unavailable": "Tilknyttede dokumenter kunne ikke læses lige nu. Det betyder ikke, at der ingen er.",
+    "emptyProject": "Ingen registerdokumenter er knyttet til dette projekt.",
+    "emptyPerson": "Ingen registerdokumenter er knyttet til denne person.",
+    "personNotLinked": "Registerdokumenter knyttes til en person, når personens medarbejderpost er knyttet til en konto.",
+    "noFile": "Ingen fil uploadet endnu",
+    "download": "Download",
+    "openRegister": "Åbn dokumentregisteret",
+    "more": "{n} flere dokumenter findes i registeret."
   }
 }

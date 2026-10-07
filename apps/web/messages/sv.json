@@ -7166,5 +7166,38 @@
     },
     "shown": "Visar de senaste {shown} av {total} posterna. Resten finns kvar i registret.",
     "truncated": "Det finns fler poster än en vy läser. De {count} lästa visas; summorna omfattar bara dem."
+  },
+  "evidenceMedia": {
+    "title": "Historiska foton",
+    "provenance": "Foton som organisationen lämnat från sina egna register. Uppgivet, inte verifierat.",
+    "reported": "Uppgivet, inte verifierat",
+    "unavailable": "Historiska foton kunde inte läsas just nu. Det betyder inte att det inte finns några.",
+    "emptyProject": "Inga historiska foton är registrerade för det här projektet.",
+    "emptyPerson": "Inga historiska foton är registrerade för den här personen.",
+    "previewUnavailable": "Förhandsvisning saknas",
+    "photoAlt": "Historiskt arbetsfoto",
+    "taken": "Taget {date}",
+    "takenUnknown": "Datum inte angivet",
+    "basis": {
+      "exif": "datum från fotots egna metadata",
+      "source_metadata": "datum från källsystemets metadata",
+      "organization_stated": "datum angivet av organisationen",
+      "unknown": "datum okänt"
+    },
+    "source": "Källa: {system}",
+    "more": "{n} fler foton visas inte här."
+  },
+  "linkedDocuments": {
+    "title": "Kopplade dokument",
+    "introProject": "Registerdokument som är kopplade till det här projektet. Skrivskyddat – hantera dem i dokumentregistret.",
+    "introPerson": "Registerdokument som är kopplade till den här personen. Skrivskyddat – hantera dem i dokumentregistret.",
+    "unavailable": "Kopplade dokument kunde inte läsas just nu. Det betyder inte att det inte finns några.",
+    "emptyProject": "Inga registerdokument är kopplade till det här projektet.",
+    "emptyPerson": "Inga registerdokument är kopplade till den här personen.",
+    "personNotLinked": "Registerdokument knyts till en person när personens personalpost är kopplad till ett konto.",
+    "noFile": "Ingen fil uppladdad ännu",
+    "download": "Ladda ned",
+    "openRegister": "Öppna dokumentregistret",
+    "more": "{n} fler dokument finns i registret."
   }
 }

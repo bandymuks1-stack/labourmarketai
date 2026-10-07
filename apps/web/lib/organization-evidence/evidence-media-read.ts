@@ -12,12 +12,14 @@ import { untypedClient } from "./evidence-store";
  * admit: the supplying organization's managers, and the subject only once
  * linked AND only for rows marked visible to them. Private stays private.
  *
- * It returns METADATA ONLY. Serving bytes needs the separately gated storage
- * policy; nothing here builds a URL. A photo is never matched by date
- * proximity: `original_taken_at` is returned as stored and only the stated
- * anchor columns select rows.
+ * It returns METADATA ONLY; bytes are served by `evidence-media-serve.ts`
+ * (short-lived signed URLs, again under the caller's own session - the private
+ * `evidence-media` bucket's read policy delegates to this table's RLS, and
+ * exists only once migration 20261007180000 is applied). A photo is never
+ * matched by date proximity: `original_taken_at` is returned as stored and
+ * only the stated anchor columns select rows.
  *
- * Used by nothing yet (scaffold; no UI).
+ * Used by `components/app/evidence-media-strip.tsx`.
  *
  *   ok            the rows, possibly EMPTY (a genuine "none recorded")
  *   unavailable   a failed read - NEVER rendered as an empty list
@@ -49,6 +51,7 @@ export type EvidenceMediaRead =
 export type EvidenceMediaAnchor =
   | { readonly evidenceRecordId: string }
   | { readonly workObjectId: string }
+  | { readonly workObjectIds: readonly string[] }
   | { readonly organizationPersonId: string };
 
 const LIMIT = 200;
@@ -99,17 +102,21 @@ export async function readEvidenceMedia(
   caller: DomainCaller,
   anchor: EvidenceMediaAnchor,
 ): Promise<EvidenceMediaRead> {
-  const [column, id] =
-    "evidenceRecordId" in anchor
-      ? (["evidence_record_id", anchor.evidenceRecordId] as const)
-      : "workObjectId" in anchor
-        ? (["work_object_id", anchor.workObjectId] as const)
-        : (["organization_person_id", anchor.organizationPersonId] as const);
+  if ("workObjectIds" in anchor && anchor.workObjectIds.length === 0) {
+    // A project with no work objects has no stated media anchor: honest empty.
+    return { kind: "ok", media: [] };
+  }
+  const base = untypedClient(caller.supabase).from("organization_evidence_media").select(COLUMNS);
+  const filtered =
+    "workObjectIds" in anchor
+      ? base.in("work_object_id", [...anchor.workObjectIds])
+      : "evidenceRecordId" in anchor
+        ? base.eq("evidence_record_id", anchor.evidenceRecordId)
+        : "workObjectId" in anchor
+          ? base.eq("work_object_id", anchor.workObjectId)
+          : base.eq("organization_person_id", anchor.organizationPersonId);
 
-  const res = await untypedClient(caller.supabase)
-    .from("organization_evidence_media")
-    .select(COLUMNS)
-    .eq(column, id)
+  const res = await filtered
     .order("original_taken_at", { ascending: true, nullsFirst: false })
     .limit(LIMIT);
 
@@ -117,4 +124,27 @@ export async function readEvidenceMedia(
     return MISSING_CODES.has(res.error.code ?? "") ? { kind: "unprovisioned" } : { kind: "unavailable" };
   }
   return { kind: "ok", media: ((res.data ?? []) as Row[]).map(toView) };
+}
+
+const MAX_PROJECT_OBJECTS = 200;
+
+/**
+ * Photos stated against ANY work object (= project place) of one project.
+ * Resolves the project's work objects through the caller's own RLS, then reads
+ * only rows whose `work_object_id` is one of them - never by date proximity.
+ */
+export async function readEvidenceMediaForProject(
+  caller: DomainCaller,
+  projectId: string,
+): Promise<EvidenceMediaRead> {
+  const objs = await untypedClient(caller.supabase)
+    .from("work_objects")
+    .select("id")
+    .eq("project_id", projectId)
+    .limit(MAX_PROJECT_OBJECTS);
+  if (objs.error) {
+    return MISSING_CODES.has(objs.error.code ?? "") ? { kind: "unprovisioned" } : { kind: "unavailable" };
+  }
+  const ids = ((objs.data ?? []) as { id: string }[]).map((o) => o.id);
+  return readEvidenceMedia(caller, { workObjectIds: ids });
 }

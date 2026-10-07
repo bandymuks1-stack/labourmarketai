@@ -7166,5 +7166,38 @@
     },
     "shown": "Viser de nyeste {shown} av {total} poster. Resten forblir registrert.",
     "truncated": "Det finnes flere poster enn én visning leser. De {count} leste vises; summer dekker bare dem."
+  },
+  "evidenceMedia": {
+    "title": "Historiske bilder",
+    "provenance": "Bilder organisasjonen har levert fra sine egne registre. Oppgitt, ikke verifisert.",
+    "reported": "Oppgitt, ikke verifisert",
+    "unavailable": "Historiske bilder kunne ikke leses akkurat nå. Det betyr ikke at det ikke finnes noen.",
+    "emptyProject": "Ingen historiske bilder er registrert for dette prosjektet.",
+    "emptyPerson": "Ingen historiske bilder er registrert for denne personen.",
+    "previewUnavailable": "Forhåndsvisning utilgjengelig",
+    "photoAlt": "Historisk arbeidsbilde",
+    "taken": "Tatt {date}",
+    "takenUnknown": "Dato ikke oppgitt",
+    "basis": {
+      "exif": "dato fra bildets egne metadata",
+      "source_metadata": "dato fra kildesystemets metadata",
+      "organization_stated": "dato oppgitt av organisasjonen",
+      "unknown": "dato ukjent"
+    },
+    "source": "Kilde: {system}",
+    "more": "{n} flere bilder vises ikke her."
+  },
+  "linkedDocuments": {
+    "title": "Tilknyttede dokumenter",
+    "introProject": "Dokumenter i registeret som er knyttet til dette prosjektet. Skrivebeskyttet – administrer dem i dokumentregisteret.",
+    "introPerson": "Dokumenter i registeret som er knyttet til denne personen. Skrivebeskyttet – administrer dem i dokumentregisteret.",
+    "unavailable": "Tilknyttede dokumenter kunne ikke leses akkurat nå. Det betyr ikke at det ikke finnes noen.",
+    "emptyProject": "Ingen registerdokumenter er knyttet til dette prosjektet.",
+    "emptyPerson": "Ingen registerdokumenter er knyttet til denne personen.",
+    "personNotLinked": "Registerdokumenter knyttes til en person når personens ansattpost er knyttet til en konto.",
+    "noFile": "Ingen fil lastet opp ennå",
+    "download": "Last ned",
+    "openRegister": "Åpne dokumentregisteret",
+    "more": "{n} flere dokumenter finnes i registeret."
   }
 }

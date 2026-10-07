@@ -7166,5 +7166,38 @@
     },
     "shown": "Näidatakse uusimat {shown} kirjet {total}-st. Ülejäänud jäävad registrisse.",
     "truncated": "Kirjeid on rohkem, kui üks vaade loeb. Näidatakse loetud {count}; summad hõlmavad ainult neid."
+  },
+  "evidenceMedia": {
+    "title": "Ajaloolised fotod",
+    "provenance": "Fotod, mille organisatsioon esitas oma andmetest. Teatatud, mitte kontrollitud.",
+    "reported": "Teatatud, mitte kontrollitud",
+    "unavailable": "Ajaloolisi fotosid ei saanud praegu lugeda. See ei tähenda, et neid pole.",
+    "emptyProject": "Selle projekti kohta pole ajaloolisi fotosid registreeritud.",
+    "emptyPerson": "Selle isiku kohta pole ajaloolisi fotosid registreeritud.",
+    "previewUnavailable": "Eelvaade pole saadaval",
+    "photoAlt": "Ajalooline töökoha foto",
+    "taken": "Tehtud {date}",
+    "takenUnknown": "Kuupäev pole teatatud",
+    "basis": {
+      "exif": "kuupäev foto enda metaandmetest",
+      "source_metadata": "kuupäev lähtesüsteemi metaandmetest",
+      "organization_stated": "kuupäeva teatas organisatsioon",
+      "unknown": "kuupäev teadmata"
+    },
+    "source": "Allikas: {system}",
+    "more": "Veel {n} fotot ei kuvata siin."
+  },
+  "linkedDocuments": {
+    "title": "Seotud dokumendid",
+    "introProject": "Registri dokumendid, mis on selle projektiga seotud. Ainult lugemiseks – haldage neid dokumentide registris.",
+    "introPerson": "Registri dokumendid, mis on selle isikuga seotud. Ainult lugemiseks – haldage neid dokumentide registris.",
+    "unavailable": "Seotud dokumente ei saanud praegu lugeda. See ei tähenda, et neid pole.",
+    "emptyProject": "Selle projektiga pole registri dokumente seotud.",
+    "emptyPerson": "Selle isikuga pole registri dokumente seotud.",
+    "personNotLinked": "Registri dokumendid seotakse isikuga, kui tema nimekirjakirje on seotud kontoga.",
+    "noFile": "Faili pole veel üles laaditud",
+    "download": "Laadi alla",
+    "openRegister": "Ava dokumentide register",
+    "more": "Registris on veel {n} dokumenti."
   }
 }

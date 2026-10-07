@@ -18638,5 +18638,38 @@
     "stateNotYetValid": "Erkend, nog niet geldig",
     "validFrom": "vanaf {date}",
     "validUntil": "tot {date}"
+  },
+  "evidenceMedia": {
+    "title": "Historische foto's",
+    "provenance": "Foto's die de organisatie uit haar eigen administratie heeft aangeleverd. Opgegeven, niet geverifieerd.",
+    "reported": "Opgegeven, niet geverifieerd",
+    "unavailable": "Historische foto's konden nu niet worden gelezen. Dat betekent niet dat er geen zijn.",
+    "emptyProject": "Voor dit project zijn geen historische foto's vastgelegd.",
+    "emptyPerson": "Voor deze persoon zijn geen historische foto's vastgelegd.",
+    "previewUnavailable": "Voorbeeld niet beschikbaar",
+    "photoAlt": "Historische werkfoto",
+    "taken": "Genomen op {date}",
+    "takenUnknown": "Datum niet opgegeven",
+    "basis": {
+      "exif": "datum uit de eigen metadata van de foto",
+      "source_metadata": "datum uit de metadata van het bronsysteem",
+      "organization_stated": "datum opgegeven door de organisatie",
+      "unknown": "datum onbekend"
+    },
+    "source": "Bron: {system}",
+    "more": "Nog {n} foto's worden hier niet getoond."
+  },
+  "linkedDocuments": {
+    "title": "Gekoppelde documenten",
+    "introProject": "Registerdocumenten die aan dit project zijn gekoppeld. Alleen-lezen – beheer ze in het documentregister.",
+    "introPerson": "Registerdocumenten die aan deze persoon zijn gekoppeld. Alleen-lezen – beheer ze in het documentregister.",
+    "unavailable": "Gekoppelde documenten konden nu niet worden gelezen. Dat betekent niet dat er geen zijn.",
+    "emptyProject": "Aan dit project zijn geen registerdocumenten gekoppeld.",
+    "emptyPerson": "Aan deze persoon zijn geen registerdocumenten gekoppeld.",
+    "personNotLinked": "Registerdocumenten worden aan een persoon gekoppeld zodra diens personeelsrecord aan een account is gekoppeld.",
+    "noFile": "Nog geen bestand geüpload",
+    "download": "Downloaden",
+    "openRegister": "Documentregister openen",
+    "more": "Nog {n} documenten staan in het register."
   }
 }

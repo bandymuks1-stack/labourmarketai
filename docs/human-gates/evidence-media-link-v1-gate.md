@@ -2,9 +2,11 @@
 
 Migration: `supabase/migrations/20261007100000_evidence_record_media_link_v1.sql`
 Rollback:  `supabase/rollbacks/20261007100000_evidence_record_media_link_v1.down.sql`
-Reader scaffold (used by nothing yet): `apps/web/lib/organization-evidence/evidence-media-read.ts`
+Reader: `apps/web/lib/organization-evidence/evidence-media-read.ts` (now used by the project page and the company person card, see "Surfaces" below)
 
-State: `PROPOSED_AWAITING_OWNER_DECISION` — **not applied to any database.**
+State (corrected 2026-10-07; this file previously said "not applied to any database", which became stale):
+- Table migration `20261007100000_evidence_record_media_link_v1` — **APPLIED to production** (table live, RLS on, select + insert policies, 0 rows; verified read-only in a production proof on 2026-10-07). Its ledger version is not yet recorded in `docs/APPLIED_LEDGER.md` — add it with the version the MCP returned.
+- Bucket migration `20261007180000_evidence_media_bucket_v1` — `PROPOSED_AWAITING_OWNER_DECISION`, **not applied.** The private `evidence-media` bucket does not exist in production, so no photo byte can be stored or served yet. See "Bucket + storage policy" below.
 
 ## The gap (owner-confirmed, stays explicit until the apply below happens)
 
@@ -15,10 +17,11 @@ shows photos of journal entries that were auto-linked to a project. The evidence
 tables carry `work_object_id`, `context_label` and `organization_person_id` but
 no media relationship.
 
-**The gap is closed only after a human-approved apply of the migration above
-AND a separate importer/serving slice. Merging this PR does not close it.**
-Until then, no screen, copy or report may claim imported photos are attached to
-evidence, a project or a person.
+**The gap is closed only when the bucket migration is applied AND an importer
+calls the writer. The table alone does not close it, and neither does any UI.**
+Until both exist, no screen, copy or report may claim imported photos are
+attached to evidence, a project or a person. (The writer exists, but nothing
+calls it: no importer UI has shipped, so no photo has ever been stored.)
 
 ## What the migration adds
 
@@ -78,7 +81,27 @@ with `needs-human-gate`, so that is not an approval.
    returns. Rollback, if ever needed, is the paired `.down.sql` (guarded; it
    refuses while any row exists).
 
+## Bucket + storage policy (second gate, RED)
+
+Migration: `supabase/migrations/20261007180000_evidence_media_bucket_v1.sql`
+Rollback:  `supabase/rollbacks/20261007180000_evidence_media_bucket_v1.down.sql`
+(guarded: refuses while the bucket holds any object).
+
+- One private bucket `evidence-media` (20 MB per object; jpeg, png, webp, heic).
+- Path contract: `org/<organization_id>/<sha256>.<ext>` (content-addressed).
+- `storage.objects` policies, this bucket only:
+  - SELECT: an object is readable iff its registered `organization_evidence_media` row is readable under THAT table's RLS (the table decides, never the path); plus unregistered objects under an organization the caller manages (orphan cleanup).
+  - INSERT: only under `org/<organization_id>/` where `manages_organization(<organization_id>)`.
+  - DELETE: orphan cleanup only; a registered photo cannot be removed from the client.
+- No anon, no PUBLIC, no `USING (true)`, no UPDATE policy, no public bucket.
+- Apply via Supabase MCP `apply_migration` only (name `evidence_media_bucket_v1`), after explicit owner approval. Verify: bucket private with the limits above; exactly three `evidence-media` policies; a real manager can upload under their own org prefix and is refused under another's; a signed URL for a registered object mints for the manager and fails for a non-member; rolled-back probes only.
+
+## Surfaces (code, merged independently of the apply)
+
+- `components/app/evidence-media-strip.tsx` on the project page (anchor: the project's work objects) and the company person card (anchor: the roster person). Shows the original date with its basis (`unknown` stays `unknown`), the source system and a fixed reported-not-verified label. A failed read is an error state; an empty read is an honest empty line; a photo whose preview cannot be minted says so.
+- Until the bucket exists the table is empty, so the strip shows the empty state. That is true, not a defect.
+- `components/app/linked-documents.tsx` lists register documents linked to the project (`project_id`) or the person's worker record (`worker_id`) read-only, through `getOrgDocumentRegister` with a surface filter. No new access path.
+
 ## Follow-ups this deliberately does not do
 
-Private bucket + `storage.objects` read policy (RED, separate gate); the
-importer that computes sha256 and writes rows; UI; wiring the reader.
+The importer UI that calls the writer (`evidence-media-actions.ts`) with stated anchors and dates; subject-side display of `visibility = 'subject'` photos; EXIF extraction (a date is stored only when the caller states it together with its basis).
