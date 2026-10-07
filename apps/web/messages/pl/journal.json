@@ -976,7 +976,8 @@
         "body": "{hours} godz. w {days, plural, one {# dniu} few {# dniach} many {# dniach} other {# dnia}} ({period}) — godziny obecności wprowadzone przez Twoją organizację w ewidencji czasu pracy lub zaimportowane z dokumentu. Utrzymywane osobno od danych dziennika powyżej i do nich niedodawane.",
         "periodEmpty": "Nic w tym oknie czasowym ({period}); {hours} godz. w {days, plural, one {# dniu} few {# dniach} many {# dniach} other {# dnia}} przez cały czas. Utrzymywane osobno od danych dziennika powyżej i do nich niedodawane.",
         "rule": "Zapis godzin mówi kiedy i jak długo, a nie co zostało zrobione — dlatego te godziny nie trafiają do żadnej umiejętności ani rodzaju pracy. Robi to wyłącznie wpis w dzienniku tej osoby."
-      }
+      },
+      "emptyNoEntriesLedger": "Brak wpisów dla Twojej organizacji. Poniżej to, co Twoja organizacja ma zapisane o tej osobie."
     },
     "confirmedOfDays": "{confirmed} z {total} dn. potwierdzonych zapisem kierownika",
     "confirmedNoDuration": "{confirmed} z {entries, plural, one {# wpisu} few {# wpisów} many {# wpisów} other {# wpisu}} potwierdzonych przez kierownika lub klienta — zarejestrowanych bez czasu trwania, więc brak godzin do pokazania",
@@ -1056,7 +1057,8 @@
         "flat": "podobnie",
         "new": "nowość"
       }
-    }
+    },
+    "emptyNoEntriesLedger": "Brak jeszcze wpisów w dzienniku. Poniżej praca zapisana przez organizację."
   },
   "verification": {
     "state": {
