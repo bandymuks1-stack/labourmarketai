@@ -18706,7 +18706,7 @@
         "unsupported_type": "To nie jest obraz JPEG, PNG, WebP ani HEIC.",
         "file_too_large": "Większy niż {mb} MB, więc nie został wysłany. Nic nie zapisano.",
         "anchor_not_found": "Nie znaleziono tego wpisu, miejsca ani osoby w tej organizacji.",
-        "needs_migration": "Przechowywanie zdjęć nie jest jeszcze włączone w tym środowisku. Nic nie zapisano.",
+        "needs_migration": "Przesyłanie zdjęć nie jest jeszcze dostępne. Nic nie zapisano.",
         "not_allowed": "Zdjęcia mogą dołączać tylko osoby zarządzające tą organizacją.",
         "error": "Coś poszło nie tak. Zdjęcie nie zostało dołączone; spróbuj ponownie."
       }

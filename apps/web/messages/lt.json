@@ -18706,7 +18706,7 @@
         "unsupported_type": "Tai nėra JPEG, PNG, WebP ar HEIC vaizdas.",
         "file_too_large": "Didesnis nei {mb} MB, todėl neišsiųstas. Nieko neišsaugota.",
         "anchor_not_found": "Šio įrašo, vietos ar asmens šioje organizacijoje nerasta.",
-        "needs_migration": "Nuotraukų saugykla šioje aplinkoje dar neįjungta. Nieko neišsaugota.",
+        "needs_migration": "Nuotraukų įkėlimas dar nepasiekiamas. Nieko neišsaugota.",
         "not_allowed": "Nuotraukas gali pridėti tik šią organizaciją valdantys žmonės.",
         "error": "Kažkas nepavyko. Nuotrauka nepridėta; bandykite dar kartą."
       }

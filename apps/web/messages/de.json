@@ -18671,7 +18671,7 @@
       "choose": {
         "record": "Nachweis",
         "place": "Ort",
-        "person": "Person"
+        "person": "Person auswählen"
       },
       "none": {
         "record": "Noch keine Nachweise. Importieren Sie zuerst Nachweise oder hängen Sie an einen Ort, eine Person oder die Organisation an.",
@@ -18706,7 +18706,7 @@
         "unsupported_type": "Kein JPEG-, PNG-, WebP- oder HEIC-Bild.",
         "file_too_large": "Größer als {mb} MB, daher nicht gesendet. Nichts wurde gespeichert.",
         "anchor_not_found": "Dieser Nachweis, Ort oder diese Person wurde in dieser Organisation nicht gefunden.",
-        "needs_migration": "Die Fotospeicherung ist in dieser Umgebung noch nicht aktiviert. Nichts wurde gespeichert.",
+        "needs_migration": "Das Hochladen von Fotos ist noch nicht verfügbar. Nichts wurde gespeichert.",
         "not_allowed": "Nur Personen, die diese Organisation verwalten, können Fotos anhängen.",
         "error": "Etwas ist schiefgegangen. Das Foto wurde nicht angehängt; versuchen Sie es erneut."
       }

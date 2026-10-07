@@ -7234,7 +7234,7 @@
         "unsupported_type": "Nav JPEG, PNG, WebP vai HEIC attēls.",
         "file_too_large": "Lielāks par {mb} MB, tāpēc nav nosūtīts. Nekas nav saglabāts.",
         "anchor_not_found": "Šajā organizācijā šo ierakstu, vietu vai personu neatrada.",
-        "needs_migration": "Fotogrāfiju glabāšana šajā vidē vēl nav ieslēgta. Nekas nav saglabāts.",
+        "needs_migration": "Fotogrāfiju augšupielāde vēl nav pieejama. Nekas nav saglabāts.",
         "not_allowed": "Fotogrāfijas var pievienot tikai šīs organizācijas pārvaldnieki.",
         "error": "Kaut kas nogāja greizi. Fotogrāfija nav pievienota; mēģiniet vēlreiz."
       }

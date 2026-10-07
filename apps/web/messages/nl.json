@@ -18706,7 +18706,7 @@
         "unsupported_type": "Geen JPEG-, PNG-, WebP- of HEIC-afbeelding.",
         "file_too_large": "Groter dan {mb} MB, dus niet verzonden. Er is niets opgeslagen.",
         "anchor_not_found": "Die vastlegging, plek of persoon is in deze organisatie niet gevonden.",
-        "needs_migration": "Fotoopslag is in deze omgeving nog niet ingeschakeld. Er is niets opgeslagen.",
+        "needs_migration": "Foto's uploaden is nog niet beschikbaar. Er is niets opgeslagen.",
         "not_allowed": "Alleen mensen die deze organisatie beheren kunnen foto's toevoegen.",
         "error": "Er ging iets mis. De foto is niet toegevoegd; probeer het opnieuw."
       }

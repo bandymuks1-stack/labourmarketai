@@ -7234,7 +7234,7 @@
         "unsupported_type": "Ikke et JPEG-, PNG-, WebP- eller HEIC-bilde.",
         "file_too_large": "Større enn {mb} MB, så den ble ikke sendt. Ingenting ble lagret.",
         "anchor_not_found": "Registreringen, stedet eller personen ble ikke funnet i denne organisasjonen.",
-        "needs_migration": "Bildelagring er ikke slått på i dette miljøet ennå. Ingenting ble lagret.",
+        "needs_migration": "Opplasting av bilder er ikke tilgjengelig ennå. Ingenting ble lagret.",
         "not_allowed": "Bare personer som administrerer organisasjonen kan legge ved bilder.",
         "error": "Noe gikk galt. Bildet ble ikke lagt ved; prøv igjen."
       }

@@ -18706,7 +18706,7 @@
         "unsupported_type": "Not a JPEG, PNG, WebP or HEIC image.",
         "file_too_large": "Larger than {mb} MB, so it was not sent. Nothing was stored.",
         "anchor_not_found": "That record, place or person was not found in this organization.",
-        "needs_migration": "Photo storage is not switched on in this environment yet. Nothing was stored.",
+        "needs_migration": "Photo upload is not available yet. Nothing was stored.",
         "not_allowed": "Only people who manage this organization can attach photos.",
         "error": "Something went wrong. The photo was not attached; try again."
       }

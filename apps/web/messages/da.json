@@ -7234,7 +7234,7 @@
         "unsupported_type": "Ikke et JPEG-, PNG-, WebP- eller HEIC-billede.",
         "file_too_large": "Større end {mb} MB, så den blev ikke sendt. Intet blev gemt.",
         "anchor_not_found": "Registreringen, stedet eller personen blev ikke fundet i denne organisation.",
-        "needs_migration": "Fotolagring er endnu ikke slået til i dette miljø. Intet blev gemt.",
+        "needs_migration": "Upload af fotos er endnu ikke tilgængelig. Intet blev gemt.",
         "not_allowed": "Kun personer, der administrerer organisationen, kan vedhæfte fotos.",
         "error": "Noget gik galt. Fotoet blev ikke vedhæftet; prøv igen."
       }

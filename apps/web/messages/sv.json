@@ -7234,7 +7234,7 @@
         "unsupported_type": "Inte en JPEG-, PNG-, WebP- eller HEIC-bild.",
         "file_too_large": "Större än {mb} MB, så den skickades inte. Inget sparades.",
         "anchor_not_found": "Registreringen, platsen eller personen hittades inte i den här organisationen.",
-        "needs_migration": "Fotolagring är inte påslagen i den här miljön ännu. Inget sparades.",
+        "needs_migration": "Uppladdning av foton är inte tillgänglig ännu. Inget sparades.",
         "not_allowed": "Bara personer som administrerar organisationen kan bifoga foton.",
         "error": "Något gick fel. Fotot bifogades inte; försök igen."
       }

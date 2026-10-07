@@ -7234,7 +7234,7 @@
         "unsupported_type": "Pole JPEG-, PNG-, WebP- ega HEIC-pilt.",
         "file_too_large": "Suurem kui {mb} MB, seega ei saadetud. Midagi ei salvestatud.",
         "anchor_not_found": "Seda kirjet, kohta või isikut ei leitud selles organisatsioonis.",
-        "needs_migration": "Fotode salvestus pole selles keskkonnas veel sisse lülitatud. Midagi ei salvestatud.",
+        "needs_migration": "Fotode üleslaadimine pole veel saadaval. Midagi ei salvestatud.",
         "not_allowed": "Fotosid saavad lisada ainult selle organisatsiooni haldajad.",
         "error": "Midagi läks valesti. Fotot ei lisatud; proovige uuesti."
       }
