@@ -1984,7 +1984,16 @@
       "emptyTeamCta": "[EN] Start the draft",
       "positionsTitle": "[EN] Missing positions",
       "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
-      "openOps": "[EN] Open the management arena"
+      "openOps": "[EN] Open the management arena",
+      "history": {
+        "title": "Varasem töö selles projektis",
+        "provenance": "Organisatsiooni esitatud ajalugu, imporditud organisatsiooni enda kirjetest. Sõltumatult kontrollimata.",
+        "unavailable": "Varasemat tööd ei õnnestunud praegu lugeda. See ei tähenda, et seda poleks.",
+        "empty": "Selle projekti kohta pole organisatsiooni esitatud varasemat tööd registreeritud.",
+        "personUnknown": "Isik nimetamata",
+        "hoursUnknown": "Tunnid märkimata",
+        "count": "{n} kirjet"
+      }
     },
     "workerView": {
       "eyebrow": "Minu projekt",
@@ -2326,6 +2335,7 @@
   "scouting": {
     "pool": {
       "factsUnreadable": "Osa sellest, mille need inimesed on kirja pannud, ei õnnestunud praegu lugeda, seega see järjestus ei ole usaldusväärne. Kedagi ei näidata siin väiksemana, kui ta on — puuduvad lihtsalt võrdluse aluseks olevad faktid. Laadige hetke pärast uuesti.",
+      "historyUnavailable": "Organisatsioonide esitatud ajalugu ei õnnestunud praegu lugeda, seega seda ei näidata. See ei tähenda, et seda poleks, ja ülaltoodud järjestus sellest ei sõltu.",
       "capped": "Kõiki ei võrreldud. Sellele vajadusele sobib rohkem nähtavaid töötajaid, kui ühte nimekirja mahub, seega toodi esmalt need {count}, kelle oskused, amet ja riik vastavad sellele kõige otsesemalt — mitte kunagi kõige uuemad registreerumised. Piiritlege vajadus, et olla kindel, et võrreldakse õigeid inimesi.",
       "complete": "Kõiki {count} nähtavat töötajat võrreldi selle vajadusega."
     },
@@ -2350,6 +2360,7 @@
     "skillFit": "[EN] {matched}/{total} required skills, {confirmed} manager-confirmed",
     "evidence": "[EN] Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
     "confirmedWork": "Tööga kinnitatud: {work} / {matched} sobivast oskusest (kordub: {repeated})",
+    "historySignal": "Organisatsioonide esitatud ajaloos nimetatud: {history} / {matched} sobivast oskusest (signaal, mitte kontrollimine)",
     "evidenceNone": "Kinnitamata",
     "experienceYearsValue": "{years, plural, one {# aasta} other {# aastat}}",
     "shortlistError": "[EN] Could not save. Try again.",
@@ -6924,7 +6935,8 @@
       "done": "Omistatud kirjeid: {count}; juba omistatud: {skipped}.",
       "refused": "Salvestamine ebaõnnestus. Midagi ei muudetud.",
       "person": "{hours} h, {count, plural, one {# kirje} other {# kirjet}}"
-    }
+    },
+    "truncated": "Kirjeid on rohkem, kui üks vaade loeb. Näidatakse loetud {count}; summad hõlmavad ainult neid."
   },
   "workLifecycle": {
     "pending": "Veel mitte",
@@ -7096,5 +7108,57 @@
       "skills": "{count, plural, one {# sinu kirjetel põhinev oskus} other {# sinu kirjetel põhinevat oskust}}",
       "next": "Kuhu saad edasi minna"
     }
+  },
+  "cvOrganizationHistory": {
+    "title": "Organisatsioonide esitatud töölugu",
+    "note": "Võetud siin nimetatud organisatsioonide enda andmetest. See ei ole enda deklareeritud ega sõltumatult kontrollitud.",
+    "untitled": "Organisatsiooni registreeritud töö",
+    "hoursTerm": "Tunnid",
+    "hoursRecorded": "{hours} h registreeritud ({count, plural, one {# kanne} other {# kannet}})",
+    "hoursPeriod": "{hours} h esitatud perioodi kohta ({count, plural, one {# kanne} other {# kannet}})",
+    "contested": "Vaidlustatud selleks õigust omava isiku poolt",
+    "more": "Veel {count, plural, one {# kirjet} other {# kirjet}} ei näidata"
+  },
+  "companyPerson": {
+    "eyebrow": "Ajalooline isikukaart",
+    "back": "Inimesed",
+    "badge": "Organisatsiooni esitatud, sõltumatult kontrollimata",
+    "provenance": "See on, mida {name} on selle isiku kohta registreerinud. Keegi teine pole seda kinnitanud ja see ei sõltu sellest, kas isikul on konto.",
+    "claim": {
+      "unlinked": "Pole veel kontoga seotud — ajalugu on siin juba registreeritud.",
+      "link_proposed": "Kontoga sidumist on pakutud ja see ootab isiku vastust — ajalugu on siin juba registreeritud.",
+      "linked": "Seotud isiku enda kontoga.",
+      "openProfile": "Ava isiku leht"
+    },
+    "unavailable": "Selle isiku ajalugu ei õnnestunud praegu lugeda. See ei tähenda, et seda poleks.",
+    "empty": "Sellel isikul pole veel ajalookirjeid. Lugemine õnnestus — kirjeid pole.",
+    "stats": {
+      "records": "Kirjed",
+      "hours": "Tunnid nagu märgitud",
+      "period": "Periood"
+    },
+    "noHours": "Kirjed, kus tunde pole märgitud: {count}. Teadmata tunde ei loeta nulliks.",
+    "undated": "Kirjed ilma märgitud kuupäevata: {count}. Need jäävad allolevasse ajalukku.",
+    "periodApart": "{hours} t kogusummast on perioodisummad, hoitud eraldi ja mitte kunagi jaotatud päevadele ega kuudele.",
+    "noWorkObject": "Kirjed, mis pole seotud platvormile tuntud projekti ega kohaga: {count}. Need jäävad sellesse ajalukku allika nime all.",
+    "places": {
+      "title": "Projekti või koha järgi",
+      "none": "Projekti või kohta pole registreeritud",
+      "records": "Kirjed: {count}"
+    },
+    "months": {
+      "title": "Märgitud tunnid kuude kaupa",
+      "note": "Ainult ühe päeva kirjed. Perioodisummasid ei jaotata kunagi päevadele ega kuudele."
+    },
+    "skills": {
+      "title": "Oskused, millele ajalugu viitab",
+      "note": "Tuletatud organisatsiooni ajaloost, kontrollimata. Oskus on loetletud, kui organisatsioon ise seda nimetas; see ei ole väide isiku kohta.",
+      "records": "Kirjed: {count}",
+      "empty": "Neis kirjetes pole ühtegi oskust nimetatud.",
+      "unavailable": "Oskussignaale ei õnnestunud praegu lugeda. See ei tähenda, et neid poleks.",
+      "truncated": "Oskussignaale on rohkem, kui see vaade loeb."
+    },
+    "shown": "Näidatakse uusimat {shown} kirjet {total}-st. Ülejäänud jäävad registrisse.",
+    "truncated": "Kirjeid on rohkem, kui üks vaade loeb. Näidatakse loetud {count}; summad hõlmavad ainult neid."
   }
 }

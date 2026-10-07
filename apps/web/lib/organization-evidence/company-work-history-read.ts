@@ -6,6 +6,7 @@ import type { DomainCaller } from "@/lib/domain/caller";
 import { resolveEvidenceOrganization } from "./evidence-org-context";
 import { untypedClient } from "./evidence-store";
 import { listEvidenceRecords, listRecordIdsAttributedTo } from "./import-core";
+import { listAllEvidenceRecords, readAllPages } from "./evidence-pagination";
 import {
   buildCompanyWorkHistory,
   type CompanyWorkHistory,
@@ -35,12 +36,16 @@ export type CompanyWorkHistoryLoad =
       readonly linkedWorkers: Readonly<Record<string, string>>;
       /** Records stored in ANOTHER organization's books that name this one as the performing company. */
       readonly attributedCount: number;
+      /** A safety ceiling was reached while reading: the totals cover only
+       *  what was read and the surface MUST say so (never a silent cap). */
+      readonly truncated: boolean;
     }
   | { readonly kind: "unavailable" }
   | { readonly kind: "hidden" };
 
 const db = untypedClient;
-const LIMIT = 1000;
+/** Ids per `.in()` — a URL-length bound, not a coverage cap. */
+const ID_CHUNK = 100;
 
 export async function loadCompanyWorkHistory(locale: string): Promise<CompanyWorkHistoryLoad> {
   const supabase = await createClient();
@@ -61,31 +66,44 @@ export async function loadCompanyWorkHistory(locale: string): Promise<CompanyWor
       : { kind: "hidden" };
   }
 
+  // Every read is PAGED to the end (the server answers at most 1000 rows):
+  // production holds 2,944 records for one organization, and a bare
+  // `.limit(1000)` made every total on this page silently wrong.
   const [recs, objs, people] = await Promise.all([
-    listEvidenceRecords(caller, { organizationId: org.organizationId, limit: LIMIT }),
-    db(supabase)
-      .from("work_objects")
-      .select("id, name, address_line, city, project_id, status")
-      .eq("organization_id", org.organizationId)
-      .limit(500),
-    db(supabase)
-      .from("organization_people")
-      .select("id, linked_worker_id, link_state, link_method")
-      .eq("organization_id", org.organizationId)
-      .limit(500),
-  ]);
-  if (recs.kind !== "ok" || objs.error || people.error) return { kind: "unavailable" };
-
-  const objects: PlaceObjectFacts[] = (
-    (objs.data ?? []) as {
+    listAllEvidenceRecords(caller, { organizationId: org.organizationId }),
+    readAllPages<{
       id: string;
       name: string;
       address_line: string | null;
       city: string | null;
       project_id: string | null;
       status: string | null;
-    }[]
-  ).map((o) => ({
+    }>((from, to) =>
+      db(supabase)
+        .from("work_objects")
+        .select("id, name, address_line, city, project_id, status")
+        .eq("organization_id", org.organizationId)
+        .order("id", { ascending: true })
+        .range(from, to),
+    ),
+    readAllPages<{
+      id: string;
+      linked_worker_id: string | null;
+      link_state: string | null;
+      link_method: string | null;
+    }>(
+      (from, to) =>
+        db(supabase)
+          .from("organization_people")
+          .select("id, linked_worker_id, link_state, link_method")
+          .eq("organization_id", org.organizationId)
+          .order("id", { ascending: true })
+          .range(from, to),
+    ),
+  ]);
+  if (recs.kind !== "ok" || !objs || !people) return { kind: "unavailable" };
+
+  const objects: PlaceObjectFacts[] = objs.rows.map((o) => ({
     id: o.id,
     name: o.name,
     addressLine: o.address_line,
@@ -94,12 +112,7 @@ export async function loadCompanyWorkHistory(locale: string): Promise<CompanyWor
     archived: o.status === "archived",
   }));
   const linkedWorkers: Record<string, string> = {};
-  for (const p of (people.data ?? []) as {
-    id: string;
-    linked_worker_id: string | null;
-    link_state: string | null;
-    link_method: string | null;
-  }[]) {
+  for (const p of people.rows) {
     // Identity only by the PERSON's own confirmation (integrity doors v1).
     if (p.link_state === "linked" && p.link_method === "worker_confirmed" && p.linked_worker_id)
       linkedWorkers[p.id] = p.linked_worker_id;
@@ -113,10 +126,15 @@ export async function loadCompanyWorkHistory(locale: string): Promise<CompanyWor
   if (attributedIds.kind === "ok") {
     const own = new Set(recs.records.map((r) => r.id));
     const wanted = attributedIds.recordIds.filter((id) => !own.has(id));
-    if (wanted.length > 0) {
-      const extra = await listEvidenceRecords(caller, { recordIds: wanted, limit: LIMIT });
-      if (extra.kind === "ok") attributed = extra.records.filter((r) => r.organizationId !== org.organizationId);
+    const found: (typeof recs.records)[number][] = [];
+    for (let i = 0; i < wanted.length; i += ID_CHUNK) {
+      const extra = await listEvidenceRecords(caller, {
+        recordIds: wanted.slice(i, i + ID_CHUNK),
+        limit: ID_CHUNK,
+      });
+      if (extra.kind === "ok") found.push(...extra.records.filter((r) => r.organizationId !== org.organizationId));
     }
+    attributed = found;
   }
   const history = buildCompanyWorkHistory([...recs.records, ...attributed], objects);
 
@@ -127,7 +145,7 @@ export async function loadCompanyWorkHistory(locale: string): Promise<CompanyWor
       const memberships = await listWorkspaceMemberships(caller);
       for (const w of memberships) {
         if (w.kind !== "organization" || w.id === org.organizationId) continue;
-        const c = await listEvidenceRecords(caller, { organizationId: w.id, limit: LIMIT });
+        const c = await listAllEvidenceRecords(caller, { organizationId: w.id });
         if (c.kind === "ok" && c.records.length > 0) {
           elsewhere.push({ id: w.id, name: w.name?.trim() || w.id, count: c.records.length });
         }
@@ -144,5 +162,6 @@ export async function loadCompanyWorkHistory(locale: string): Promise<CompanyWor
     elsewhere,
     linkedWorkers,
     attributedCount: attributed.length,
+    truncated: recs.truncated,
   };
 }

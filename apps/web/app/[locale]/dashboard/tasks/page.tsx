@@ -8,7 +8,6 @@ import {
   readIndependentOrganizationsByProject,
   readOwnedWorkspaceIds,
 } from "@/lib/journal/project-attribution-read";
-import { Button } from "@/components/ui/Button";
 import {
   PendingButton,
   PendingNativeButton,

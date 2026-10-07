@@ -249,6 +249,13 @@ export const WORKER_EXECUTORS: {
         work_date: input.workDate,
         site_name: input.siteName ?? "",
         project_id: input.projectId ?? "",
+        ...(input.voice
+          ? {
+              input_origin: "voice",
+              voice_language: input.voice.language,
+              voice_disclosure_version: input.voice.disclosureVersion,
+            }
+          : {}),
         ...intakeWorkTimeFields(input.notes, input.workDate),
       }),
     );

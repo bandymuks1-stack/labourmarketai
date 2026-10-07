@@ -10,7 +10,8 @@ import {
   type EvidenceStanding,
 } from "@/components/app/work-world/primitives";
 import { createClient } from "@/lib/supabase/server";
-import { listEvidenceRecords } from "@/lib/organization-evidence/import-core";
+import { listAllEvidenceRecords } from "@/lib/organization-evidence/evidence-pagination";
+import type { EvidenceRecordView } from "@/lib/organization-evidence/import-core";
 import {
   formatHoursAsStated,
   periodProvenance,
@@ -40,7 +41,13 @@ import {
  * monthly figure — never as days; a day record shows its day. Every standing
  * comes through `EvidenceState`, so an import never wears verification green.
  */
-const READ_LIMIT = 50;
+/**
+ * THE 50-RECORD CAP IS GONE (2026-10-07). A person with hundreds of stated
+ * days was shown their newest 50 with no word that the rest existed. The read
+ * pages to the end; the only bound left is a DISPLAY bound on the draw, and it
+ * is disclosed (`companyPerson.shown`) — never a silent drop.
+ */
+const DISPLAY_LIMIT = 300;
 const MAX_LINKED_PEOPLE = 20;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -49,10 +56,22 @@ function db(c: unknown): any {
 }
 
 export async function PersonImportedHistory({
-  workerId,
+  workerId = "",
+  organizationPersonIds,
+  records: preloaded,
+  showEmpty = false,
   locale,
 }: {
-  workerId: string;
+  /** The LINKED worker whose roster rows are read (the person's own page). */
+  workerId?: string;
+  /** The roster rows to read DIRECTLY — the company-side card keyed on
+   *  `organization_people.id`, which works for an UNLINKED person. Wins over
+   *  `workerId`. RLS still decides what comes back. */
+  organizationPersonIds?: readonly string[];
+  /** Records the caller already read (live, paged) — skips a second read. */
+  records?: { readonly list: readonly EvidenceRecordView[]; readonly truncated: boolean };
+  /** Say "no history stored" instead of rendering nothing (company card). */
+  showEmpty?: boolean;
   locale: string;
 }) {
   const supabase = await createClient();
@@ -62,6 +81,7 @@ export async function PersonImportedHistory({
   if (!user) return null;
 
   const t = await getTranslations("people");
+  const tPerson = await getTranslations("companyPerson");
   const tRecords = await getTranslations("evidenceImport.records");
   const tState = await getTranslations("evidenceImport.evidenceState");
 
@@ -79,45 +99,83 @@ export async function PersonImportedHistory({
     </section>
   );
 
-  // The LINKED roster rows for this worker — identity by consent, never by
-  // a matching name. RLS: the viewer's own organizations' rows only.
-  const people = await db(supabase)
-    .from("organization_people")
-    .select("id")
-    .eq("linked_worker_id", workerId)
-    .eq("link_state", "linked")
-    // Identity by the PERSON's own confirmation, never a manager-made link.
-    .eq("link_method", "worker_confirmed")
-    .limit(MAX_LINKED_PEOPLE);
-  if (people.error) {
-    // A store that is not provisioned here is an honest nothing, not a failure.
-    if (people.error.code === "42P01" || people.error.code === "PGRST205") return null;
-    console.error("[people] roster-link read failed:", people.error.code);
-    return unavailable;
-  }
-  const personIds = ((people.data ?? []) as { id: string }[]).map((p) => p.id);
-  if (personIds.length === 0) return null;
+  let records: readonly EvidenceRecordView[];
+  let truncated = false;
+  if (preloaded) {
+    records = preloaded.list.filter((r) => !r.withdrawn);
+    truncated = preloaded.truncated;
+  } else {
+    let personIds: readonly string[] = organizationPersonIds ?? [];
+    if (!organizationPersonIds) {
+      // The LINKED roster rows for this worker — identity by consent, never by
+      // a matching name. RLS: the viewer's own organizations' rows only.
+      const people = await db(supabase)
+        .from("organization_people")
+        .select("id")
+        .eq("linked_worker_id", workerId)
+        .eq("link_state", "linked")
+        // Identity by the PERSON's own confirmation, never a manager-made link.
+        .eq("link_method", "worker_confirmed")
+        .limit(MAX_LINKED_PEOPLE);
+      if (people.error) {
+        // A store that is not provisioned here is an honest nothing, not a failure.
+        if (people.error.code === "42P01" || people.error.code === "PGRST205") return null;
+        console.error("[people] roster-link read failed:", people.error.code);
+        return unavailable;
+      }
+      personIds = ((people.data ?? []) as { id: string }[]).map((p) => p.id);
+      if (personIds.length === 0) return null;
+    }
 
-  const res = await listEvidenceRecords(
-    { supabase, userId: user.id, locale },
-    { organizationPersonIds: personIds, limit: READ_LIMIT },
-  );
-  if (res.kind === "needs-migration") return null;
-  if (res.kind !== "ok") return unavailable;
-  const records = res.records.filter((r) => !r.withdrawn);
-  if (records.length === 0) return null;
+    const res = await listAllEvidenceRecords(
+      { supabase, userId: user.id, locale },
+      { organizationPersonIds: personIds },
+    );
+    if (res.kind === "needs-migration") return null;
+    if (res.kind !== "ok") return unavailable;
+    records = res.records.filter((r) => !r.withdrawn);
+    truncated = res.truncated;
+  }
+  if (records.length === 0) {
+    if (!showEmpty) return null;
+    return (
+      <section className="flex flex-col gap-3" data-testid="person-history" data-count={0}>
+        <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
+          <History className="h-3.5 w-3.5" aria-hidden />
+          {t("historyTitle")} · 0
+        </h2>
+        <Card variant="empty" compact>
+          <p className="text-sm text-text-secondary" data-testid="person-history-empty">
+            {tPerson("empty")}
+          </p>
+        </Card>
+      </section>
+    );
+  }
+  const total = records.length;
+  const shown = records.slice(0, DISPLAY_LIMIT);
   // The work behind each record, through the ONE context reading. Names are
   // looked up under the viewer's RLS; what does not resolve is not shown.
-  const contexts = await readRecordHistoryContexts(supabase, records);
+  const contexts = await readRecordHistoryContexts(supabase, shown);
 
   return (
-    <section className="flex flex-col gap-3" data-testid="person-history" data-count={records.length}>
+    <section className="flex flex-col gap-3" data-testid="person-history" data-count={total}>
       <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
         <History className="h-3.5 w-3.5" aria-hidden />
-        {t("historyTitle")} · {records.length}
+        {t("historyTitle")} · {total}
       </h2>
+      {shown.length < total ? (
+        <p className="text-meta text-text-muted" data-testid="person-history-shown">
+          {tPerson("shown", { shown: shown.length, total })}
+        </p>
+      ) : null}
+      {truncated ? (
+        <p className="text-meta text-text-muted" data-testid="person-history-truncated">
+          {tPerson("truncated", { count: total })}
+        </p>
+      ) : null}
       <ul className="flex flex-col gap-2">
-        {records.map((rec) => {
+        {shown.map((rec) => {
           // The ONE period reading (owner rule 2026-09-23): a monthly share
           // only for a period the SOURCE stated; a span a person chose at
           // import is shown at month precision, labelled, with no figure.

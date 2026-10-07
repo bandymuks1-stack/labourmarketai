@@ -180,9 +180,35 @@
       "too_large": "Salvestis on liiga suur (max 25 MB).",
       "too_long": "Salvestis on liiga pikk (max 10 minutit).",
       "unavailable": "Transkriptsiooniserver pole praegu saadaval.",
-      "undecodable": "Heli ei õnnestunud lugeda — proovige uuesti."
+      "undecodable": "Heli ei õnnestunud lugeda — proovige uuesti.",
+      "rate_limited": "Liiga palju salvestusi lühikese ajaga - oota veidi ja proovi uuesti.",
+      "token_expired": "Üleslaadimise seanss aegus - proovi uuesti.",
+      "unauthorized": "Sinu seansil pole häälfunktsiooni luba - logi uuesti sisse.",
+      "service_unreachable": "Transkribeerimisserverit ei õnnestunud kätte saada. Kontrolli ühendust ja proovi uuesti; salvestus säilib sellel lehel."
     },
-    "permissionDenied": "Mikrofoni juurdepääs blokeeriti. Lubage mikrofon brauseri seadetes ja proovige uuesti."
+    "permissionDenied": "Mikrofoni juurdepääs blokeeriti. Lubage mikrofon brauseri seadetes ja proovige uuesti.",
+    "disclosureProvenance": "Salvestatud kirje märgitakse häälega dikteeritud ja sinu üle vaadatud kirjeks.",
+    "state": {
+      "ready": "Valmis. Vali kõnekeel ja alusta salvestamist.",
+      "permissionRequired": "Brauser küsib alustamisel mikrofoniluba. Enne sinu luba midagi ei salvestata.",
+      "policyBlocked": "Saidi turvapoliitika blokeerib siin mikrofoni. Häälsalvestus pole sellel lehel saadaval - kirje saad kirjutada tekstina.",
+      "unsupported": "See brauser ei saa siin heli salvestada (vaja on turvalist lehte ja mikrofoni salvestustuge). Saad laadida üles helifaili või kirjutada teksti.",
+      "noDevice": "Sellest seadmest ei leitud mikrofoni.",
+      "deviceBusy": "Mikrofoni kasutab teine rakendus. Sulge see ja proovi uuesti.",
+      "cancelled": "Salvestus tühistati. Midagi ei laaditud üles ega salvestatud.",
+      "requesting": "Ootan sinu luba mikrofoni kasutamiseks...",
+      "interrupted": "Salvestus peatati, sest leht oli peidetud. Jätka, kui oled tagasi.",
+      "interruptedKept": "Mikrofon peatus, seega salvestus lõppes varem. Salvestatu on allpool tekstiks tehtud - palun kontrolli.",
+      "uploading": "Salvestust laaditakse üles..."
+    },
+    "language": {
+      "label": "Kõnekeel",
+      "auto": "Tuvasta automaatselt",
+      "hint": "Vali keel, mida räägid - see ei pea olema sama mis saidi keel."
+    },
+    "recordAgain": "Salvesta uuesti",
+    "announceStarted": "Salvestus algas",
+    "announceMinutes": "Salvestatud {minutes} min"
   },
   "statusExplainer": "Kuidas teie sissekandeid kasutatakse?",
   "exampleLine": "Näiteks: paigaldasin kipsseinu, lugesin jooniseid ja töötasin laserloodiga.",

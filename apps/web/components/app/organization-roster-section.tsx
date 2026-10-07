@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
+import { Link } from "@/lib/i18n/navigation";
 import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
 import { personMonogram } from "@/lib/visual/avatar-monogram";
 import { Card } from "@/components/ui/Card";
@@ -230,6 +231,15 @@ export async function OrganizationRosterSection({
               >
                 {t(`linkState.${linkStateKey(p.linkState)}` as never)}
               </span>
+              {/* THE HISTORICAL PERSON CARD: what this organization recorded
+                  about the person is already a card here, linked account or not. */}
+              <Link
+                href={`/dashboard/company/people/${p.id}` as "/dashboard"}
+                className="text-sm font-medium text-brand-blue hover:underline"
+                data-testid={`organization-roster-history-${p.id}`}
+              >
+                {t("openHistory")} →
+              </Link>
               {/* The OFFER: the missing half of the link. A roster name reaches a
                   person's own history only after the manager offers the link
                   and the person accepts it on their profile. */}

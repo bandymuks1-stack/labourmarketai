@@ -180,9 +180,35 @@
       "too_large": "Opptaket er for stort (maks 25 MB).",
       "too_long": "Opptaket er for langt (maks 10 minutter).",
       "unavailable": "Transkripsjonsserveren er ikke tilgjengelig akkurat nå.",
-      "undecodable": "Lyden kunne ikke leses — prøv igjen."
+      "undecodable": "Lyden kunne ikke leses — prøv igjen.",
+      "rate_limited": "For mange opptak på kort tid - vent litt og prøv igjen.",
+      "token_expired": "Opplastingsøkten har utløpt - prøv igjen.",
+      "unauthorized": "Økten din har ikke tillatelse til tale - logg inn på nytt.",
+      "service_unreachable": "Transkripsjonsserveren kunne ikke nås. Sjekk tilkoblingen og prøv igjen; opptaket beholdes på denne siden."
     },
-    "permissionDenied": "Mikrofontilgang ble blokkert. Tillat mikrofonen i nettleserinnstillingene og prøv igjen."
+    "permissionDenied": "Mikrofontilgang ble blokkert. Tillat mikrofonen i nettleserinnstillingene og prøv igjen.",
+    "disclosureProvenance": "Den lagrede oppføringen merkes som dikteret med stemme og gjennomgått av deg.",
+    "state": {
+      "ready": "Klar. Velg talespråk og start opptaket.",
+      "permissionRequired": "Nettleseren ber om mikrofontillatelse når du starter. Ingenting tas opp før du tillater det.",
+      "policyBlocked": "Nettstedets sikkerhetspolicy blokkerer mikrofonen her. Stemmeopptak er ikke tilgjengelig på denne siden - du kan skrive oppføringen som tekst.",
+      "unsupported": "Denne nettleseren kan ikke ta opp lyd her (krever en sikker side og støtte for mikrofonopptak). Du kan laste opp en lydfil eller skrive tekst.",
+      "noDevice": "Fant ingen mikrofon på denne enheten.",
+      "deviceBusy": "Mikrofonen brukes av en annen app. Lukk den og prøv igjen.",
+      "cancelled": "Opptaket er avbrutt. Ingenting ble lastet opp eller lagret.",
+      "requesting": "Venter på tillatelsen din til mikrofonen...",
+      "interrupted": "Opptaket er satt på pause fordi siden var skjult. Fortsett når du er tilbake.",
+      "interruptedKept": "Mikrofonen stoppet, så opptaket endte tidlig. Det som ble tatt opp er transkribert nedenfor - kontroller det.",
+      "uploading": "Laster opp opptaket..."
+    },
+    "language": {
+      "label": "Talespråk",
+      "auto": "Gjenkjenn automatisk",
+      "hint": "Velg språket du snakker - det trenger ikke samsvare med språket på nettstedet."
+    },
+    "recordAgain": "Ta opp igjen",
+    "announceStarted": "Opptaket startet",
+    "announceMinutes": "{minutes} min tatt opp"
   },
   "statusExplainer": "Hvordan brukes oppføringene dine?",
   "exampleLine": "For eksempel: jeg monterte gipsvegger, leste tegninger og jobbet med laser-nivellér.",

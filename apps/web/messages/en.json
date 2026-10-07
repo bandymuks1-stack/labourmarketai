@@ -787,7 +787,11 @@
     "closeLabel": "Close search",
     "voiceStart": "Search by voice",
     "voiceStop": "Stop voice input",
-    "voiceListening": "Listening... say what you are looking for — the text will appear in the search field."
+    "voiceListening": "Listening... say what you are looking for — the text will appear in the search field.",
+    "voiceConsentText": "Dictation in the search box uses your browser's built-in speech recognition. Depending on your browser (for example Chrome or Safari) the audio is sent to that browser vendor's speech service, not to LabourMarket.ai. Nothing is saved by us. Use the voice journal for audio processed on LabourMarket.ai's own server.",
+    "voiceConsentAllow": "Continue with browser dictation",
+    "voiceConsentCancel": "Not now",
+    "voiceFailed": "Dictation stopped - the browser could not use the microphone or speech service."
   },
   "reports": {
     "eyebrow": "Reports",
@@ -4029,7 +4033,9 @@
       "check_email_body": "We sent a confirmation link to {email}. Open it to finish creating your account. If you don't see it, check your spam folder — you can ask for a new link here.",
       "resend_label": "Send the link again",
       "resend_sent": "Sent again. Check your inbox and spam folder.",
-      "resend_wait": "You can request another link in {seconds} s."
+      "resend_wait": "You can request another link in {seconds} s.",
+      "invited_email_note": "This is the address your invitation was sent to.",
+      "show_password": "Show password"
     },
     "login": {
       "headline": "Sign in",
@@ -6409,7 +6415,16 @@
       "allAreas": "All",
       "areaUnknown": "Profession not set",
       "areaBasis": "By each person's primary profession",
-      "teamLabel": "Team"
+      "teamLabel": "Team",
+      "history": {
+        "title": "Historical work on this project",
+        "provenance": "Organization-provided history, imported from the organization's own records. Not independently verified.",
+        "unavailable": "Historical work could not be read right now. This does not mean there is none.",
+        "empty": "No organization-provided historical work is recorded for this project.",
+        "personUnknown": "Person not named",
+        "hoursUnknown": "Hours not stated",
+        "count": "{n} records"
+      }
     },
     "workerView": {
       "eyebrow": "My project",
@@ -7734,6 +7749,14 @@
         "doorCalendar": "This week in the calendar",
         "doorJournal": "All work journal entries",
         "doorCv": "Living CV"
+      },
+      "world": {
+        "sceneLabel": "This person's working world: work, skills, records, history and what could come next. The same facts are written out below.",
+        "empty": "Nothing recorded here yet.",
+        "directionDetail": "Shared: {shared} · missing: {missing}",
+        "directionDetailNoGap": "Shared: {shared} · nothing missing",
+        "emptyNext": "Directions appear once your work records back at least two skills.",
+        "allDetails": "Everything on the card"
       }
     }
   },
@@ -8486,6 +8509,7 @@
     "skillFit": "{matched}/{total} required skills, {confirmed} manager-confirmed",
     "evidence": "Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
     "confirmedWork": "Confirmed in real work: {work} of {matched} matched skills (repeated: {repeated})",
+    "historySignal": "Named in organization-provided history: {history} of {matched} matched skills (a signal, not verification)",
     "evidenceNone": "Not confirmed",
     "experienceYearsValue": "{years, plural, one {# year} other {# years}}",
     "shortlistError": "Could not save. Try again.",
@@ -8642,6 +8666,7 @@
     },
     "pool": {
       "factsUnreadable": "Some of what these people have recorded could not be read just now, so this order is not reliable. Nobody here has been shown as having less than they do — the facts behind the comparison are simply missing. Reload in a moment.",
+      "historyUnavailable": "Organization-provided history could not be read just now, so it is not shown. That does not mean there is none, and the order above does not depend on it.",
       "capped": "Not everyone was compared. More discoverable workers fit this need than one list can hold, so the {count} whose skills, profession and country match it most directly were retrieved first — never the newest registrations. Narrow the need to be sure the right people are compared.",
       "complete": "All {count} discoverable workers were compared against this need."
     },
@@ -14208,7 +14233,9 @@
         "chipDocument": "Add the document"
       },
       "visibilityUnavailable": "Could not check your visibility to employers. That does not mean it is off — open the settings.",
-      "chipVisibility": "Visibility to employers"
+      "chipVisibility": "Visibility to employers",
+      "voiceOpen": "Speak",
+      "voiceBareYes": "Spoken “yes” is not a confirmation. Press the button on the card to confirm, or say what you want to do."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
@@ -17571,7 +17598,8 @@
         "invalid_email": "Enter one valid e-mail address",
         "needs_migration": "Not available right now"
       }
-    }
+    },
+    "openHistory": "Open history"
   },
   "peopleImport": {
     "alreadyThere": "{count} are already on your list",
@@ -18221,7 +18249,8 @@
       "personPeriod": "{hours} h period total (not added to single days)",
       "person": "{hours} h, {count, plural, one {# record} other {# records}}"
     },
-    "periodShort": "{hours} h period total"
+    "periodShort": "{hours} h period total",
+    "truncated": "More records exist than one view reads. The {count} read are shown; totals cover only these."
   },
   "workPlan": {
     "title": "Planned work",
@@ -18492,5 +18521,57 @@
       "projectPlaceholder": "Choose a project",
       "noProjects": "You have no open projects to assign the team to."
     }
+  },
+  "cvOrganizationHistory": {
+    "title": "Work history supplied by organizations",
+    "note": "Taken from the records of the organizations named here. It is not self-declared and not independently verified.",
+    "untitled": "Work recorded by an organization",
+    "hoursTerm": "Hours",
+    "hoursRecorded": "{hours} h recorded in {count, plural, one {# record} other {# records}}",
+    "hoursPeriod": "{hours} h stated for a period, in {count, plural, one {# record} other {# records}}",
+    "contested": "Contested by someone with standing",
+    "more": "{count, plural, one {# more entry} other {# more entries}} not shown"
+  },
+  "companyPerson": {
+    "eyebrow": "Historical person card",
+    "back": "People",
+    "badge": "Organization-provided, not independently verified",
+    "provenance": "This is what {name} has on record about this person. No one else has confirmed it, and it does not depend on the person having an account.",
+    "claim": {
+      "unlinked": "Not yet linked to an account — history is already recorded here.",
+      "link_proposed": "A link to an account has been offered and awaits the person's answer — history is already recorded here.",
+      "linked": "Linked to the person's own account.",
+      "openProfile": "Open the person's page"
+    },
+    "unavailable": "This person's history could not be read right now. That does not mean there is none.",
+    "empty": "No history records are stored for this person yet. The read worked — there are none.",
+    "stats": {
+      "records": "Records",
+      "hours": "Hours as stated",
+      "period": "Period"
+    },
+    "noHours": "Records that state no hours: {count}. Unknown hours are not counted as zero.",
+    "undated": "Records with no stated date: {count}. They stay in the history below.",
+    "periodApart": "{hours} h of the total are period totals, kept apart and never spread onto days or months.",
+    "noWorkObject": "Records tied to no project or place the platform knows: {count}. They stay in this history under their source label.",
+    "places": {
+      "title": "By project or place",
+      "none": "Project or place not recorded",
+      "records": "Records: {count}"
+    },
+    "months": {
+      "title": "Stated hours by month",
+      "note": "Single-day records only. Period totals are never spread onto days or months."
+    },
+    "skills": {
+      "title": "Skills the history points to",
+      "note": "Derived from organization history, not verified. A skill is listed when the organization's own words named it; it is not a statement about the person.",
+      "records": "Records: {count}",
+      "empty": "No skill was named in these records.",
+      "unavailable": "Skill signals could not be read right now. That does not mean none exist.",
+      "truncated": "More skill signals exist than this view reads."
+    },
+    "shown": "Showing the newest {shown} of {total} records. The rest remain on record.",
+    "truncated": "More records exist than one view reads. The {count} read are shown; totals cover only these."
   }
 }

@@ -787,7 +787,11 @@
     "closeLabel": "Zoeken sluiten",
     "voiceStart": "Zoeken met spraak",
     "voiceStop": "Spraakinvoer stoppen",
-    "voiceListening": "Luisteren... zeg wat u zoekt — de tekst verschijnt in het zoekveld."
+    "voiceListening": "Luisteren... zeg wat u zoekt — de tekst verschijnt in het zoekveld.",
+    "voiceConsentText": "Dicteren in het zoekveld gebruikt de ingebouwde spraakherkenning van je browser. Afhankelijk van je browser (bijv. Chrome of Safari) wordt de audio naar de spraakdienst van die browserleverancier gestuurd, niet naar LabourMarket.ai. Wij slaan niets op. Gebruik het spraakjournaal voor audio die op de eigen server van LabourMarket.ai wordt verwerkt.",
+    "voiceConsentAllow": "Doorgaan met browserdictaat",
+    "voiceConsentCancel": "Niet nu",
+    "voiceFailed": "Dicteren gestopt - de browser kon de microfoon of spraakdienst niet gebruiken."
   },
   "reports": {
     "eyebrow": "Rapporten",
@@ -4029,7 +4033,9 @@
       "check_email_body": "We hebben een bevestigingslink naar {email} gestuurd. Open deze om je account te voltooien. Zie je de e-mail niet? Kijk in je spammap — hier kun je een nieuwe link aanvragen.",
       "resend_label": "Link opnieuw sturen",
       "resend_sent": "Opnieuw verstuurd. Controleer je inbox en spammap.",
-      "resend_wait": "Je kunt over {seconds} s een nieuwe link aanvragen."
+      "resend_wait": "Je kunt over {seconds} s een nieuwe link aanvragen.",
+      "invited_email_note": "Dit is het adres waarnaar je uitnodiging is gestuurd.",
+      "show_password": "Wachtwoord tonen"
     },
     "login": {
       "headline": "Inloggen",
@@ -6409,7 +6415,16 @@
       "allAreas": "Alle",
       "areaUnknown": "Beroep niet ingesteld",
       "areaBasis": "Op basis van ieders hoofdberoep",
-      "teamLabel": "Ploeg"
+      "teamLabel": "Ploeg",
+      "history": {
+        "title": "Eerder werk aan dit project",
+        "provenance": "Door de organisatie aangeleverde geschiedenis, geïmporteerd uit de eigen gegevens van de organisatie. Niet onafhankelijk geverifieerd.",
+        "unavailable": "Eerder werk kon nu niet worden gelezen. Dat betekent niet dat er geen is.",
+        "empty": "Voor dit project is geen door de organisatie aangeleverd eerder werk vastgelegd.",
+        "personUnknown": "Persoon niet genoemd",
+        "hoursUnknown": "Uren niet opgegeven",
+        "count": "{n} registraties"
+      }
     },
     "workerView": {
       "eyebrow": "Mijn project",
@@ -7734,6 +7749,14 @@
         "doorCalendar": "Deze week in de kalender",
         "doorJournal": "Alle registraties in het werklogboek",
         "doorCv": "Levend cv"
+      },
+      "world": {
+        "sceneLabel": "De werkwereld van deze persoon: werk, vaardigheden, registraties, geschiedenis en wat er hierna kan komen. Dezelfde feiten staan hieronder.",
+        "empty": "Hier is nog niets vastgelegd.",
+        "directionDetail": "Gedeeld: {shared} · ontbreekt: {missing}",
+        "directionDetailNoGap": "Gedeeld: {shared} · niets ontbreekt",
+        "emptyNext": "Richtingen verschijnen zodra je werkregistraties minstens twee vaardigheden onderbouwen.",
+        "allDetails": "Alles op de kaart"
       }
     }
   },
@@ -8486,6 +8509,7 @@
     "skillFit": "{matched}/{total} vereiste vaardigheden, {confirmed} door manager bevestigd",
     "evidence": "Bewijs — bevestigd: {confirmed} · journaal: {journal} · zelf opgegeven: {self}",
     "confirmedWork": "Bevestigd door werk: {work} van {matched} passende vaardigheden (herhaaldelijk: {repeated})",
+    "historySignal": "Genoemd in door organisaties aangeleverde geschiedenis: {history} van {matched} passende vaardigheden (een signaal, geen verificatie)",
     "evidenceNone": "Niet bevestigd",
     "experienceYearsValue": "{years, plural, one {# jaar} other {# jaar}}",
     "shortlistError": "Opslaan is niet gelukt. Probeer opnieuw.",
@@ -8642,6 +8666,7 @@
     },
     "pool": {
       "factsUnreadable": "Een deel van wat deze mensen hebben vastgelegd kon zojuist niet worden gelezen, dus deze volgorde is niet betrouwbaar. Niemand wordt hier met minder getoond dan hij heeft — de feiten achter de vergelijking ontbreken simpelweg. Laad zo meteen opnieuw.",
+      "historyUnavailable": "De door organisaties aangeleverde geschiedenis kon nu niet worden gelezen en wordt daarom niet getoond. Dat betekent niet dat er geen is, en de volgorde hierboven hangt er niet van af.",
       "capped": "Niet iedereen is vergeleken. Er passen meer zichtbare werknemers bij deze vraag dan in één lijst passen, dus zijn eerst de {count} opgehaald van wie vaardigheden, beroep en land het beste aansluiten, niet de nieuwste registraties. Maak de vraag specifieker zodat de juiste mensen worden vergeleken.",
       "complete": "Alle {count} zichtbare werknemers zijn met deze vraag vergeleken."
     },
@@ -14208,7 +14233,9 @@
         "chipDocument": "Document toevoegen"
       },
       "visibilityUnavailable": "Kon uw zichtbaarheid voor werkgevers niet controleren. Dat betekent niet dat die uit staat — open de instellingen.",
-      "chipVisibility": "Zichtbaarheid voor werkgevers"
+      "chipVisibility": "Zichtbaarheid voor werkgevers",
+      "voiceOpen": "Spreken",
+      "voiceBareYes": "Een uitgesproken “ja” is geen bevestiging. Bevestig met de knop op de kaart, of zeg wat u wilt doen."
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
@@ -17571,7 +17598,8 @@
         "invalid_email": "Voer één geldig e-mailadres in",
         "needs_migration": "Nu niet beschikbaar"
       }
-    }
+    },
+    "openHistory": "Open geschiedenis"
   },
   "peopleImport": {
     "alreadyThere": "{count} staan al op je lijst",
@@ -18221,7 +18249,8 @@
       "personPeriod": "{hours} u periodetotaal (niet bij losse dagen opgeteld)",
       "person": "{hours} u, {count, plural, one {# registratie} other {# registraties}}"
     },
-    "periodShort": "{hours} u periodetotaal"
+    "periodShort": "{hours} u periodetotaal",
+    "truncated": "Er zijn meer records dan één weergave leest. De {count} gelezen records worden getoond; totalen omvatten alleen die."
   },
   "workPlan": {
     "title": "Gepland werk",
@@ -18492,5 +18521,57 @@
       "projectPlaceholder": "Kies een project",
       "noProjects": "Je hebt geen openstaande projecten om het team aan toe te wijzen."
     }
+  },
+  "cvOrganizationHistory": {
+    "title": "Door organisaties aangeleverde werkgeschiedenis",
+    "note": "Overgenomen uit de eigen registraties van de hier genoemde organisaties. Niet zelf verklaard en niet onafhankelijk geverifieerd.",
+    "untitled": "Door een organisatie geregistreerd werk",
+    "hoursTerm": "Uren",
+    "hoursRecorded": "{hours} u geregistreerd in {count, plural, one {# registratie} other {# registraties}}",
+    "hoursPeriod": "{hours} u opgegeven voor een periode, in {count, plural, one {# registratie} other {# registraties}}",
+    "contested": "Betwist door een daartoe bevoegde partij",
+    "more": "Nog {count, plural, one {# vermelding} other {# vermeldingen}} niet getoond"
+  },
+  "companyPerson": {
+    "eyebrow": "Historische persoonskaart",
+    "back": "Mensen",
+    "badge": "Aangeleverd door de organisatie, niet onafhankelijk geverifieerd",
+    "provenance": "Dit is wat {name} over deze persoon heeft vastgelegd. Niemand anders heeft het bevestigd, en het hangt er niet van af of de persoon een account heeft.",
+    "claim": {
+      "unlinked": "Nog niet gekoppeld aan een account — de geschiedenis staat hier al vastgelegd.",
+      "link_proposed": "Een koppeling met een account is aangeboden en wacht op het antwoord van de persoon — de geschiedenis staat hier al vastgelegd.",
+      "linked": "Gekoppeld aan het eigen account van de persoon.",
+      "openProfile": "Open de pagina van de persoon"
+    },
+    "unavailable": "De geschiedenis van deze persoon kon nu niet worden gelezen. Dat betekent niet dat er geen is.",
+    "empty": "Er zijn nog geen geschiedenisrecords voor deze persoon. Het lezen is gelukt — er zijn er geen.",
+    "stats": {
+      "records": "Registraties",
+      "hours": "Uren zoals opgegeven",
+      "period": "Periode"
+    },
+    "noHours": "Records zonder opgegeven uren: {count}. Onbekende uren tellen niet als nul.",
+    "undated": "Records zonder opgegeven datum: {count}. Ze blijven in de geschiedenis hieronder.",
+    "periodApart": "{hours} u van het totaal zijn periodetotalen, apart gehouden en nooit verdeeld over dagen of maanden.",
+    "noWorkObject": "Records die niet aan een bij het platform bekend project of bekende plek zijn gekoppeld: {count}. Ze blijven in deze geschiedenis onder hun bronlabel.",
+    "places": {
+      "title": "Per project of plek",
+      "none": "Project of plek niet vastgelegd",
+      "records": "Registraties: {count}"
+    },
+    "months": {
+      "title": "Opgegeven uren per maand",
+      "note": "Alleen records van één dag. Periodetotalen worden nooit verdeeld over dagen of maanden."
+    },
+    "skills": {
+      "title": "Vaardigheden waar de geschiedenis naar wijst",
+      "note": "Afgeleid van de geschiedenis van de organisatie, niet geverifieerd. Een vaardigheid staat er wanneer de organisatie die zelf noemde; het is geen uitspraak over de persoon.",
+      "records": "Registraties: {count}",
+      "empty": "In deze records is geen vaardigheid genoemd.",
+      "unavailable": "Vaardigheidssignalen konden nu niet worden gelezen. Dat betekent niet dat ze er niet zijn.",
+      "truncated": "Er zijn meer vaardigheidssignalen dan deze weergave leest."
+    },
+    "shown": "De nieuwste {shown} van {total} records worden getoond. De rest blijft vastgelegd.",
+    "truncated": "Er zijn meer records dan één weergave leest. De {count} gelezen records worden getoond; totalen omvatten alleen die."
   }
 }

@@ -787,7 +787,11 @@
     "closeLabel": "Zamknij wyszukiwanie",
     "voiceStart": "Szukaj głosem",
     "voiceStop": "Zatrzymaj wprowadzanie głosowe",
-    "voiceListening": "Słucham… powiedz, czego szukasz — tekst pojawi się w polu wyszukiwania."
+    "voiceListening": "Słucham… powiedz, czego szukasz — tekst pojawi się w polu wyszukiwania.",
+    "voiceConsentText": "Dyktowanie w polu wyszukiwania korzysta z wbudowanego rozpoznawania mowy przeglądarki. W zależności od przeglądarki (np. Chrome lub Safari) dźwięk jest wysyłany do usługi mowy producenta przeglądarki, a nie do LabourMarket.ai. Niczego nie zapisujemy. Aby dźwięk był przetwarzany na własnym serwerze LabourMarket.ai, użyj dziennika głosowego.",
+    "voiceConsentAllow": "Kontynuuj z dyktowaniem przeglądarki",
+    "voiceConsentCancel": "Nie teraz",
+    "voiceFailed": "Dyktowanie zatrzymane - przeglądarka nie mogła użyć mikrofonu lub usługi mowy."
   },
   "reports": {
     "eyebrow": "Raporty",
@@ -4029,7 +4033,9 @@
       "check_email_body": "Wysłaliśmy link potwierdzający na adres {email}. Otwórz go, aby dokończyć tworzenie konta. Jeśli go nie widzisz, sprawdź folder spam — możesz też poprosić tutaj o nowy link.",
       "resend_label": "Wyślij link ponownie",
       "resend_sent": "Wysłano ponownie. Sprawdź skrzynkę odbiorczą i folder spam.",
-      "resend_wait": "O nowy link możesz poprosić za {seconds} s."
+      "resend_wait": "O nowy link możesz poprosić za {seconds} s.",
+      "invited_email_note": "To adres, na który wysłano zaproszenie.",
+      "show_password": "Pokaż hasło"
     },
     "login": {
       "headline": "Zaloguj się",
@@ -6409,7 +6415,16 @@
       "allAreas": "Wszyscy",
       "areaUnknown": "Nie podano zawodu",
       "areaBasis": "Według głównego zawodu osoby",
-      "teamLabel": "Zespół"
+      "teamLabel": "Zespół",
+      "history": {
+        "title": "Wcześniejsza praca przy tym projekcie",
+        "provenance": "Historia dostarczona przez organizację, zaimportowana z jej własnych zapisów. Niezależnie niezweryfikowana.",
+        "unavailable": "Nie udało się teraz odczytać wcześniejszej pracy. Nie oznacza to, że jej nie ma.",
+        "empty": "Dla tego projektu nie zapisano wcześniejszej pracy dostarczonej przez organizację.",
+        "personUnknown": "Osoba nie podana",
+        "hoursUnknown": "Godziny nie podane",
+        "count": "Wpisów: {n}"
+      }
     },
     "workerView": {
       "eyebrow": "Mój projekt",
@@ -7734,6 +7749,14 @@
         "doorCalendar": "Ten tydzień w kalendarzu",
         "doorJournal": "Wszystkie wpisy w dzienniku pracy",
         "doorCv": "Żywe CV"
+      },
+      "world": {
+        "sceneLabel": "Świat pracy tej osoby: praca, umiejętności, wpisy, historia i co może być dalej. Te same fakty są opisane poniżej.",
+        "empty": "Nic tu jeszcze nie zapisano.",
+        "directionDetail": "Wspólne: {shared} · brakuje: {missing}",
+        "directionDetailNoGap": "Wspólne: {shared} · niczego nie brakuje",
+        "emptyNext": "Kierunki pojawią się, gdy wpisy o pracy potwierdzą co najmniej dwie umiejętności.",
+        "allDetails": "Wszystko na karcie"
       }
     }
   },
@@ -8486,6 +8509,7 @@
     "skillFit": "{matched}/{total} wymaganych umiejętności, {confirmed} potwierdzonych przez kierownika",
     "evidence": "Dowody — potwierdzone: {confirmed} · dziennik: {journal} · zadeklarowane samodzielnie: {self}",
     "confirmedWork": "Potwierdzone pracą: {work} z {matched} dopasowanych umiejętności (powtarza się: {repeated})",
+    "historySignal": "Wymienione w historii dostarczonej przez organizacje: {history} z {matched} dopasowanych umiejętności (sygnał, nie weryfikacja)",
     "evidenceNone": "Niepotwierdzone",
     "experienceYearsValue": "{years, plural, one {# rok} few {# lata} many {# lat} other {# roku}}",
     "shortlistError": "Nie udało się zapisać. Spróbuj ponownie.",
@@ -8642,6 +8666,7 @@
     },
     "pool": {
       "factsUnreadable": "Części tego, co te osoby zapisały, nie udało się teraz odczytać, więc ta kolejność nie jest wiarygodna. Nikt nie jest tu pokazany jako mający mniej, niż ma — po prostu brakuje faktów do porównania. Odśwież za chwilę.",
+      "historyUnavailable": "Historii dostarczonej przez organizacje nie udało się teraz odczytać, więc nie jest pokazana. Nie znaczy to, że jej nie ma, a powyższa kolejność od niej nie zależy.",
       "capped": "Nie porównano wszystkich. Do tej potrzeby pasuje więcej widocznych pracowników, niż mieści jedna lista, więc pobrano najpierw tych {count}, których umiejętności, zawód i kraj odpowiadają jej najbardziej bezpośrednio — nigdy najnowsze rejestracje. Zawęź potrzebę, aby mieć pewność, że porównywane są właściwe osoby.",
       "complete": "Wszystkich {count} widocznych pracowników porównano z tą potrzebą."
     },
@@ -14208,7 +14233,9 @@
         "chipDocument": "Dodaj dokument"
       },
       "visibilityUnavailable": "Nie udało się sprawdzić widoczności dla pracodawców. To nie znaczy, że jest wyłączona — otwórz ustawienia.",
-      "chipVisibility": "Widoczność dla pracodawców"
+      "chipVisibility": "Widoczność dla pracodawców",
+      "voiceOpen": "Mów",
+      "voiceBareYes": "Wypowiedziane „tak” nie jest potwierdzeniem. Potwierdź przyciskiem na karcie albo powiedz, co chcesz zrobić."
     },
     "worklog": {
       "understood": "Oto, co zrozumiałem — zapisać?",
@@ -17571,7 +17598,8 @@
         "invalid_email": "Podaj jeden prawidłowy adres e-mail",
         "needs_migration": "Chwilowo niedostępne"
       }
-    }
+    },
+    "openHistory": "Otwórz historię"
   },
   "peopleImport": {
     "alreadyThere": "{count} jest już na Twojej liście",
@@ -18221,7 +18249,8 @@
       "personPeriod": "{hours} godz. suma okresowa (nie dodawana do pojedynczych dni)",
       "person": "{hours} godz., {count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}"
     },
-    "periodShort": "{hours} godz. suma za okres"
+    "periodShort": "{hours} godz. suma za okres",
+    "truncated": "Wpisów jest więcej, niż odczytuje jeden widok. Pokazano odczytane {count}; sumy obejmują tylko je."
   },
   "workPlan": {
     "title": "Zaplanowana praca",
@@ -18492,5 +18521,57 @@
       "projectPlaceholder": "Wybierz projekt",
       "noProjects": "Nie masz otwartych projektów, do których można przypisać zespół."
     }
+  },
+  "cvOrganizationHistory": {
+    "title": "Historia pracy dostarczona przez organizacje",
+    "note": "Pochodzi z własnych zapisów wymienionych tu organizacji. Nie jest zadeklarowana przez samą osobę ani niezależnie zweryfikowana.",
+    "untitled": "Praca zarejestrowana przez organizację",
+    "hoursTerm": "Godziny",
+    "hoursRecorded": "{hours} godz. zarejestrowano ({count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}})",
+    "hoursPeriod": "{hours} godz. podano dla okresu ({count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}})",
+    "contested": "Zakwestionowane przez uprawnioną stronę",
+    "more": "Nie pokazano jeszcze {count, plural, one {# wpisu} few {# wpisów} many {# wpisów} other {# wpisu}}"
+  },
+  "companyPerson": {
+    "eyebrow": "Historyczna karta osoby",
+    "back": "Osoby",
+    "badge": "Dostarczone przez organizację, niezależnie niezweryfikowane",
+    "provenance": "To, co {name} ma zapisane o tej osobie. Nikt inny tego nie potwierdził i nie zależy to od tego, czy osoba ma konto.",
+    "claim": {
+      "unlinked": "Jeszcze niepowiązane z kontem — historia jest już tu zapisana.",
+      "link_proposed": "Zaproponowano powiązanie z kontem i czeka na odpowiedź osoby — historia jest już tu zapisana.",
+      "linked": "Powiązane z własnym kontem osoby.",
+      "openProfile": "Otwórz stronę osoby"
+    },
+    "unavailable": "Nie udało się teraz odczytać historii tej osoby. To nie znaczy, że jej nie ma.",
+    "empty": "Dla tej osoby nie ma jeszcze zapisów historii. Odczyt się udał — nie ma ich.",
+    "stats": {
+      "records": "Wpisy",
+      "hours": "Godziny jak podano",
+      "period": "Okres"
+    },
+    "noHours": "Wpisy bez podanych godzin: {count}. Nieznane godziny nie są liczone jako zero.",
+    "undated": "Wpisy bez podanej daty: {count}. Zostają w historii poniżej.",
+    "periodApart": "{hours} godz. z sumy to sumy za okres, trzymane osobno i nigdy nierozdzielane na dni ani miesiące.",
+    "noWorkObject": "Wpisy niepowiązane z projektem ani miejscem znanym platformie: {count}. Zostają w tej historii pod nazwą źródła.",
+    "places": {
+      "title": "Według projektu lub miejsca",
+      "none": "Projekt lub miejsce niezapisane",
+      "records": "Wpisy: {count}"
+    },
+    "months": {
+      "title": "Podane godziny według miesięcy",
+      "note": "Tylko wpisy jednodniowe. Sum za okres nigdy nie rozdziela się na dni ani miesiące."
+    },
+    "skills": {
+      "title": "Umiejętności, na które wskazuje historia",
+      "note": "Wyprowadzone z historii organizacji, niezweryfikowane. Umiejętność jest podana, gdy nazwała ją sama organizacja; to nie jest twierdzenie o osobie.",
+      "records": "Wpisy: {count}",
+      "empty": "W tych wpisach nie nazwano żadnej umiejętności.",
+      "unavailable": "Nie udało się teraz odczytać sygnałów umiejętności. To nie znaczy, że ich nie ma.",
+      "truncated": "Sygnałów umiejętności jest więcej, niż odczytuje ten widok."
+    },
+    "shown": "Pokazano najnowsze {shown} z {total} wpisów. Pozostałe zostają zapisane.",
+    "truncated": "Wpisów jest więcej, niż odczytuje jeden widok. Pokazano odczytane {count}; sumy obejmują tylko je."
   }
 }

@@ -15,6 +15,7 @@ import {
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
+import { signUpAddressedInviteAction } from "@/lib/invitations/signup-accept-action";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
 import {
   RESEND_COOLDOWN_SECONDS,
@@ -56,9 +57,16 @@ const MIN_PASSWORD = 8;
 export function SignupForm({
   linkedinEnabled = false,
   facebookEnabled = false,
+  invitation,
 }: {
   linkedinEnabled?: boolean;
   facebookEnabled?: boolean;
+  /** An ADDRESSED invitation resolved server-side from `?next=`: the form shows
+   *  only the MASKED address (locked); the full address never reaches the
+   *  browser. A server action signs up with it (the e-mail binding still
+   *  compares the session to exactly that address), no confirm-password field
+   *  is asked, and the canonical acceptance continues once the session exists. */
+  invitation?: { token: string; maskedEmail: string };
 } = {}) {
   const t = useTranslations("auth.signup");
   const tSocial = useTranslations("auth.social");
@@ -70,7 +78,8 @@ export function SignupForm({
   const searchParams = useSearchParams();
   const nextParam = searchParams.get("next");
   const nextPath = getSafeReturnPath(nextParam, locale);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(invitation?.maskedEmail ?? "");
+  const [showPw, setShowPw] = useState(false);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [status, setStatus] = useState<
@@ -139,7 +148,7 @@ export function SignupForm({
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    if (!isValidEmail(email)) {
+    if (!invitation && !isValidEmail(email)) {
       setError(t("error_email"));
       return;
     }
@@ -159,7 +168,7 @@ export function SignupForm({
       setError(t("error_password_special"));
       return;
     }
-    if (password !== confirm) {
+    if (!invitation && password !== confirm) {
       setError(t("error_password_mismatch"));
       return;
     }
@@ -178,6 +187,36 @@ export function SignupForm({
       ...getFirstTouchAttribution(),
     });
     try {
+      if (invitation) {
+        const res = await signUpAddressedInviteAction({
+          token: invitation.token,
+          password,
+          locale,
+          emailRedirectTo: emailRedirectTo(),
+          metadata: { ...getFirstTouchAttribution() },
+        });
+        if (res.status === "error") {
+          throw { code: res.code, message: res.message, status: res.httpStatus };
+        }
+        if (res.status === "unavailable") {
+          // Used / expired / revoked since the page rendered: reload as an
+          // ordinary signup (nothing is prefilled for an unusable invitation).
+          window.location.assign(`/${locale}/auth/signup`);
+          return;
+        }
+        if (res.status === "check_email") {
+          setStatus("check_email");
+          setCooldown(RESEND_COOLDOWN_SECONDS);
+          return;
+        }
+        markSignupPending("email");
+        // One full navigation lands the person on the profile step (the
+        // acceptance revalidates; a soft router.replace would be superseded).
+        window.location.assign(
+          `/${locale}${nextParam ? `/onboarding?next=${encodeURIComponent(nextPath)}` : "/onboarding"}`,
+        );
+        return;
+      }
       const supabase = createClient();
       const { data, error: err } = await supabase.auth.signUp({
         email: email.trim(),
@@ -359,21 +398,29 @@ export function SignupForm({
       <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
         {t("email_label")}
         <input
-          type="email"
-          name="email"
-          autoComplete="email"
+          type={invitation ? "text" : "email"}
+          name={invitation ? "invited-address" : "email"}
+          autoComplete={invitation ? "off" : "email"}
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t("email_placeholder")}
+          readOnly={Boolean(invitation)}
+          aria-describedby={invitation ? "invited-email-note" : undefined}
+          data-testid={invitation ? "signup-invited-email" : undefined}
           className={AUTH_INPUT_CLASS}
         />
+        {invitation && (
+          <span id="invited-email-note" className="text-text-muted">
+            {t("invited_email_note")}
+          </span>
+        )}
       </label>
 
       <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
         {t("password_label")}
         <input
-          type="password"
+          type={invitation && showPw ? "text" : "password"}
           name="password"
           autoComplete="new-password"
           required
@@ -395,18 +442,30 @@ export function SignupForm({
         </span>
       </label>
 
-      <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
-        {t("confirm_password_label")}
-        <input
-          type="password"
-          name="confirm_password"
-          autoComplete="new-password"
-          required
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-          className={AUTH_INPUT_CLASS}
-        />
-      </label>
+      {invitation ? (
+        <button
+          type="button"
+          onClick={() => setShowPw((v) => !v)}
+          aria-pressed={showPw}
+          data-tap-floor="off"
+          className="inline-flex min-h-11 items-center self-start text-xs text-brand-blue hover:underline"
+        >
+          {t("show_password")}
+        </button>
+      ) : (
+        <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
+          {t("confirm_password_label")}
+          <input
+            type="password"
+            name="confirm_password"
+            autoComplete="new-password"
+            required
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            className={AUTH_INPUT_CLASS}
+          />
+        </label>
+      )}
 
       {error && (
         // The already-registered case is the most common reason an owner

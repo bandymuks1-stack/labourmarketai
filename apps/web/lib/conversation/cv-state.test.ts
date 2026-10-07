@@ -35,6 +35,7 @@ function emptyCv(): VerifiedCvData {
     recordedHoursTotal: null,
     recordedHoursConfirmed: null,
     organizationRecordedHours: null,
+    organizationHistory: null,
     privateDetails: {} as VerifiedCvData["privateDetails"],
     signals: {} as VerifiedCvData["signals"],
     proof: [],

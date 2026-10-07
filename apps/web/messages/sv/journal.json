@@ -180,9 +180,35 @@
       "too_large": "Inspelningen är för stor (max 25 MB).",
       "too_long": "Inspelningen är för lång (max 10 minuter).",
       "unavailable": "Transkriberingsservern är inte tillgänglig just nu.",
-      "undecodable": "Ljudet kunde inte läsas — försök igen."
+      "undecodable": "Ljudet kunde inte läsas — försök igen.",
+      "rate_limited": "För många inspelningar på kort tid - vänta lite och försök igen.",
+      "token_expired": "Uppladdningssessionen har gått ut - försök igen.",
+      "unauthorized": "Din session har inte behörighet för tal - logga in igen.",
+      "service_unreachable": "Transkriptionsservern kunde inte nås. Kontrollera anslutningen och försök igen; inspelningen finns kvar på den här sidan."
     },
-    "permissionDenied": "Mikrofonåtkomst blockerades. Tillåt mikrofonen i webbläsarens inställningar och försök igen."
+    "permissionDenied": "Mikrofonåtkomst blockerades. Tillåt mikrofonen i webbläsarens inställningar och försök igen.",
+    "disclosureProvenance": "Den sparade posten markeras som dikterad med röst och granskad av dig.",
+    "state": {
+      "ready": "Redo. Välj talspråk och starta inspelningen.",
+      "permissionRequired": "Webbläsaren ber om mikrofontillstånd när du startar. Inget spelas in innan du tillåter det.",
+      "policyBlocked": "Webbplatsens säkerhetspolicy blockerar mikrofonen här. Röstinspelning är inte tillgänglig på den här sidan - du kan skriva posten som text.",
+      "unsupported": "Den här webbläsaren kan inte spela in ljud här (kräver en säker sida och stöd för mikrofoninspelning). Du kan ladda upp en ljudfil eller skriva text.",
+      "noDevice": "Ingen mikrofon hittades på den här enheten.",
+      "deviceBusy": "Mikrofonen används av en annan app. Stäng den och försök igen.",
+      "cancelled": "Inspelningen avbröts. Inget laddades upp eller sparades.",
+      "requesting": "Väntar på ditt tillstånd för mikrofonen...",
+      "interrupted": "Inspelningen pausades eftersom sidan var dold. Fortsätt när du är tillbaka.",
+      "interruptedKept": "Mikrofonen stannade, så inspelningen slutade tidigt. Det som spelades in är transkriberat nedan - kontrollera det.",
+      "uploading": "Laddar upp inspelningen..."
+    },
+    "language": {
+      "label": "Talspråk",
+      "auto": "Identifiera automatiskt",
+      "hint": "Välj språket du talar - det behöver inte vara samma som webbplatsens språk."
+    },
+    "recordAgain": "Spela in igen",
+    "announceStarted": "Inspelningen startade",
+    "announceMinutes": "{minutes} min inspelat"
   },
   "statusExplainer": "Hur används dina poster?",
   "exampleLine": "Till exempel: jag monterade gipsväggar, läste ritningar och arbetade med laserpass.",
