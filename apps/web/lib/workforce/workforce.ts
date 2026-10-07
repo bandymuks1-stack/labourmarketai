@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { callerCompanyId } from "@/lib/projects/projects";
 import { isMigrationMissingCode } from "@/lib/tasks/task-model";
 import { getTeamBrigadesData } from "@/lib/company/team-brigades";
+import { mergeAssignedPeople, readTeamAssignedPeople } from "@/lib/projects/assigned-people";
 import {
   composeFutureWork,
   readWorkforcePlanV1,
@@ -259,12 +260,23 @@ async function readAssignments(
   }
   const assignments: WorkerAssignmentInput[] = [];
   const workerIds = new Set<string>();
-  for (const r of (res.data ?? []) as AssignmentRow[]) {
-    if (!r.worker_id) continue;
-    workerIds.add(r.worker_id);
-    const dates = projectDates.get(r.project_id);
+  // ONE meaning of "assigned" (lib/projects/assigned-people.ts): the active
+  // person assignments + the members of actively assigned teams, a person
+  // assigned both ways held once for that project.
+  const merged = mergeAssignedPeople(
+    ((res.data ?? []) as AssignmentRow[]).map((r) => ({
+      projectId: r.project_id,
+      profileId: null as string | null,
+      workerId: r.worker_id || null,
+    })),
+    await readTeamAssignedPeople(supabase, projectIds),
+  );
+  for (const r of merged) {
+    if (!r.workerId) continue;
+    workerIds.add(r.workerId);
+    const dates = projectDates.get(r.projectId);
     assignments.push({
-      workerId: r.worker_id,
+      workerId: r.workerId,
       startDate: dates?.start ?? null,
       endDate: dates?.end ?? null,
     });

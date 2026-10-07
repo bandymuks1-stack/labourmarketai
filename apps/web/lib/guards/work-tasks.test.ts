@@ -161,6 +161,14 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
   const CONSUMERS = [
     LIFECYCLE_READER,
     "20260817232000_management_decisions_v1",
+    // 20261003150600 — team_assignments (WRK-6): holds an FK to public.work_tasks and reads it to
+    // check a task belongs to the project a team is assigned to. Creates/alters/writes nothing on it.
+    "20261003150600_brigade_work_assignment_v1",
+    // 20261003150700 — team assignment as an active Journal/work context: widens the wt_select
+    // predicate with ONE team-task OR-term (team assigned to THAT task or its work object) and
+    // adds the team-or-person authority to the evidence link. Creates/drops/writes nothing on
+    // work_tasks; the existing task RPCs stay the only writers.
+    "20261003150700_brigade_journal_context_v1",
     "20260819190000_journal_task_evidence_link_v1",
     /**
      *   20260819220000 — task attribution of canonical work-time (chain step
@@ -356,6 +364,8 @@ describe("2. writes are RPC-only, and only the task layer touches work_tasks", (
     expect(normalized).toEqual([
       "lib/approvals/task-approvals.ts",
       "lib/projects/progress.ts",
+      // WRK-6: the task picker of a team assignment — a title read under the caller's RLS, no write.
+      "lib/projects/team-assignment.ts",
       "lib/tasks/task-approval-actions.ts",
       "lib/tasks/tasks.ts",
     ]);

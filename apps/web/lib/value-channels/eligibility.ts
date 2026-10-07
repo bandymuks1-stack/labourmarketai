@@ -123,6 +123,19 @@ export function matchesFoodProduce(
   return FOOD_RES.some((re) => re.test(hay));
 }
 
+/** The SAME restricted-category needles applied to free text (listing title /
+ *  description) — used by the marketplace publish policy. No new needles. */
+export function textMatchesRestricted(text: string): boolean {
+  const hay = foldText(text);
+  return RESTRICTED_RES.some((re) => re.test(hay));
+}
+
+/** The SAME food / produce needles applied to free text. No new needles. */
+export function textMatchesFood(text: string): boolean {
+  const hay = foldText(text);
+  return FOOD_RES.some((re) => re.test(hay));
+}
+
 export function matchWorkBoundedCategory(
   statement: ValueStatement,
   text?: string,

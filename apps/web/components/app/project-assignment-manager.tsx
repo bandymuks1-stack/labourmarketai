@@ -9,8 +9,13 @@ import {
   assignWorkerToProjectAction,
   endAssignmentAction,
   recordAssignmentDecisionAction,
+  keepAssignmentAction,
   type ProjectActionResult,
 } from "@/lib/projects/actions";
+import {
+  OVERRIDE_REASON_CODES,
+  type OverrideReasonCode,
+} from "@/lib/projects/override-receipt-model";
 import { checkAssignmentClashAction } from "@/lib/projects/assignment-precheck";
 import type { AssignmentPrecheckResult } from "@/lib/projects/assignment-precheck-core";
 import type { ManagedProject, ProjectAssignment } from "@/lib/projects/projects";
@@ -24,6 +29,9 @@ import { playerInitials } from "@/lib/identity/player-identity";
 import { Link } from "@/lib/i18n/navigation";
 import { offersRosterWorker } from "@/lib/projects/assignment-authority";
 import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
+import { ProjectTeamAssignments } from "@/components/app/project-team-assignments";
+import type { AssignableTask, AssignableTeam } from "@/lib/projects/team-assignment";
+import type { TeamAssignmentRow } from "@/lib/projects/team-assignment-model";
 
 /**
  * Manager DRAFT surface for F4 (living-arena skin, TASK 07 slice 2): create a
@@ -88,6 +96,9 @@ export interface ProjectManagerLabels {
   reservationUndo: string;
   reservationKeep: string;
   reservationDecided: string;
+  /** The closed reason select on the keep (override) control. Optional so a
+   *  caller without it simply offers keep with no reason. */
+  overrideReasons?: OverrideReasonLabels;
   /** Shown when the caller may not assign ROSTER workers (SQL: owner/admin). */
   rosterOwnerOnly?: string;
   /** Shown when the selected project belongs to ANOTHER organization than the
@@ -101,6 +112,14 @@ export interface ProjectManagerLabels {
   precheckChoose?: string;
   precheckAssignAnyway?: string;
   precheckAdvisory?: string;
+}
+
+/** Labels of the closed override-reason select + the loud failure line. */
+export interface OverrideReasonLabels {
+  label: string;
+  none: string;
+  failed: string;
+  options: Record<OverrideReasonCode, string>;
 }
 
 /** The collision notice's own labels — shared by the single and the team
@@ -171,6 +190,8 @@ export function ReservationNotice({
   onSwap,
   onUndo,
   onKeep,
+  reasons,
+  keepFailed = false,
 }: {
   verdict: ReservationVerdict;
   labels: ReservationLabels;
@@ -179,8 +200,15 @@ export function ReservationNotice({
   busy?: boolean;
   onSwap?: (profileId: string) => void;
   onUndo?: () => void;
-  onKeep?: () => void;
+  /** Receives the closed reason code the manager picked, or null. */
+  onKeep?: (reasonCode: OverrideReasonCode | null) => void;
+  /** When present the keep control carries the closed reason select (no free
+   *  text exists anywhere on the receipt path). */
+  reasons?: OverrideReasonLabels;
+  /** The receipt could not be recorded: say so, the decision is NOT made. */
+  keepFailed?: boolean;
 }) {
+  const [reason, setReason] = useState<OverrideReasonCode | "">("");
   if (verdict.state === "clear") return null;
   if (verdict.state === "unknown") {
     return (
@@ -231,12 +259,35 @@ export function ReservationNotice({
           </ul>
         </div>
       ) : null}
+      {onKeep && reasons ? (
+        <label className="flex flex-col gap-1 text-xs text-text-secondary">
+          {reasons.label}
+          <select
+            value={reason}
+            onChange={(e) => setReason(e.target.value as OverrideReasonCode | "")}
+            data-testid="assign-reservation-reason"
+            className="min-h-11 sm:min-h-8 rounded-md border border-ink-500 bg-transparent px-2 py-1 text-xs"
+          >
+            <option value="">{reasons.none}</option>
+            {OVERRIDE_REASON_CODES.map((code) => (
+              <option key={code} value={code}>
+                {reasons.options[code]}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+      {keepFailed && reasons ? (
+        <p className="text-xs text-state-danger" role="alert" data-testid="assign-reservation-keep-failed">
+          {reasons.failed}
+        </p>
+      ) : null}
       <div className="flex flex-wrap gap-2">
         {onKeep ? (
           <button
             type="button"
             disabled={busy}
-            onClick={onKeep}
+            onClick={() => onKeep(reason === "" ? null : reason)}
             data-testid="assign-reservation-keep"
             className="min-h-11 sm:min-h-8 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-semibold text-text-secondary hover:border-brand-blue"
           >
@@ -266,6 +317,7 @@ export function ProjectAssignmentManager({
   rosterAssignable = true,
   rosterProjectIds = null,
   labels,
+  teamWork,
 }: {
   projects: ProjectWithAssignments[];
   workers: ManagedWorker[];
@@ -282,6 +334,14 @@ export function ProjectAssignmentManager({
    *  database still decides every write. */
   rosterProjectIds?: readonly string[] | null;
   labels: ProjectManagerLabels;
+  /** WRK-6 — teams as ONE assignment on a project (or one of its tasks).
+   *  Absent = the surface offers persons only (older callers). `byProject` is
+   *  a plain object so it crosses the server/client boundary. */
+  teamWork?: {
+    byProject: Readonly<Record<string, readonly TeamAssignmentRow[]>>;
+    teams: readonly AssignableTeam[];
+    tasks: readonly AssignableTask[];
+  };
 }) {
   const [selProject, setSelProject] = useState("");
   const rosterOfferedHere = offersRosterWorker(rosterProjectIds, selProject);
@@ -314,11 +374,18 @@ export function ProjectAssignmentManager({
       }
     });
   };
-  const keepAssignment = () => {
+  const [keepFailed, setKeepFailed] = useState(false);
+  const keepAssignment = (reasonCode: OverrideReasonCode | null) => {
     const a = assignState?.ok ? assignState.assigned : undefined;
     if (!a) return;
+    setKeepFailed(false);
     startDeciding(async () => {
-      await recordAssignmentDecisionAction(a.projectId, a.workerProfileId, "kept");
+      // FAIL-LOUD: the override is decided only when its receipt exists.
+      const r = await keepAssignmentAction(a.projectId, a.workerProfileId, reasonCode);
+      if (!r.ok) {
+        setKeepFailed(true);
+        return;
+      }
       setDecision({ for: assignState });
     });
   };
@@ -542,6 +609,8 @@ export function ProjectAssignmentManager({
               onSwap={swapAssignment}
               onUndo={undoAssignment}
               onKeep={keepAssignment}
+              reasons={labels.overrideReasons}
+              keepFailed={keepFailed}
             />
           ) : null}
         </form>
@@ -599,6 +668,15 @@ export function ProjectAssignmentManager({
               })}
             </ul>
           )}
+          {/* A team is assigned as ONE relationship, beside the person list. */}
+          {teamWork ? (
+            <ProjectTeamAssignments
+              projectId={p.id}
+              assignments={teamWork.byProject[p.id] ?? []}
+              teams={teamWork.teams}
+              tasks={teamWork.tasks.filter((x) => x.projectId === p.id)}
+            />
+          ) : null}
           {/* Roster actions: the EXISTING gated writes/views only — jump to the
               assign form above, open the existing manager-gated operations
               board (the permitted per-worker capability view). */}

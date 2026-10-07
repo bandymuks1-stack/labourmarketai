@@ -1,4 +1,184 @@
 {
+  "counterparty": {
+    "link": {
+      "title": "Odbiór pracy przez zleceniodawcę",
+      "lead": "Zarejestruj swoją organizację jako zleceniodawcę pracownika, który jest aktywnie przypisany do tego projektu – bezpośrednio lub przez zespół. Wtedy pracownik może przekazać Ci swoją pracę do sprawdzenia. Bez prawdziwego przypisania nic nie jest rejestrowane.",
+      "empty": "Do tego projektu nie jest jeszcze aktywnie przypisany nikt. Najpierw przypisz osobę lub zespół; pojawią się tutaj.",
+      "loadFailed": "Nie udało się wczytać pracowników tego projektu. Spróbuj ponownie za chwilę.",
+      "honestNote": "Zarejestrować lub cofnąć może to tylko przedstawiciel samego zleceniodawcy. Pracownik nigdy nie może zarejestrować własnego zleceniodawcy. Odbiór przez zleceniodawcę różni się od wpisu przełożonego i nie jest zapisem płatności.",
+      "unnamedWorker": "Pracownik bez nazwy",
+      "kind": {
+        "person": "Przypisany bezpośrednio",
+        "team": "Przypisany przez zespół"
+      },
+      "roleLabel": "Twoja rola w tej pracy",
+      "role": {
+        "client": "Zleceniodawca",
+        "end_client": "Klient końcowy",
+        "project_owner": "Właściciel projektu",
+        "customer": "Klient",
+        "contracting_party": "Strona umowy"
+      },
+      "register": "Zarejestruj jako stronę",
+      "registering": "Rejestrowanie…",
+      "registered": "Zarejestrowano",
+      "registeredAs": "Zarejestrowano jako: {role}",
+      "revoke": "Cofnij",
+      "revoking": "Cofanie…",
+      "revokeQuestion": "Cofnąć? Nie będziesz już mógł decydować o przekazanej pracy tego pracownika.",
+      "revokeConfirm": "Tak, cofnij",
+      "cancel": "Anuluj",
+      "result": {
+        "registered": "Zarejestrowano. Pracownik może teraz przekazywać Ci swoją pracę.",
+        "already_registered": "Już zarejestrowano.",
+        "revoked": "Cofnięto. Podjęte wcześniej decyzje pozostają w zapisie.",
+        "already_revoked": "Już cofnięto.",
+        "invalid_party_role": "Wybierz prawidłową rolę.",
+        "project_not_found": "Nie znaleziono projektu.",
+        "project_has_no_organization": "Projekt nie ma organizacji właściciela, więc nie można zarejestrować zleceniodawcy.",
+        "not_authorized": "Może to zrobić tylko upoważniony przedstawiciel organizacji projektu.",
+        "worker_not_found": "Nie znaleziono pracownika.",
+        "subject_cannot_register_own_counterparty": "Nie możesz zarejestrować własnego zleceniodawcy.",
+        "no_work_relationship": "Ten pracownik nie ma aktywnego przypisania do projektu, więc nie ma czego rejestrować.",
+        "subject_is_member_of_counterparty": "Ta osoba pracuje w Twojej organizacji. Obowiązuje sprawdzenie przez przełożonego.",
+        "counterparty_not_independent": "Dzielisz organizację z tym pracownikiem, więc nie możesz być jego zleceniodawcą.",
+        "link_not_found": "Nie znaleziono tej rejestracji.",
+        "error": "Coś poszło nie tak. Nic nie zmieniono.",
+        "needs_migration": "Ta funkcja nie jest jeszcze dostępna."
+      }
+    },
+    "entry": {
+      "title": "Sprawdzenie przez zleceniodawcę",
+      "partyUnknown": "zleceniodawca",
+      "phase": {
+        "ready_to_submit": "Zapisano",
+        "submitted": "Przekazano",
+        "accepted": "Zaakceptowano przez zleceniodawcę",
+        "correction_requested": "Poproszono o poprawkę",
+        "disputed": "Zakwestionowano"
+      },
+      "submitLead": "Możesz przekazać ten wpis zleceniodawcy tej pracy do sprawdzenia. Zostanie wysłany dopiero po naciśnięciu przycisku.",
+      "resubmitLead": "To poprawiona wersja wcześniej przekazanego wpisu. Przekaż ją zleceniodawcy ponownie.",
+      "pickParty": "Kto ma to sprawdzić?",
+      "pickPartyPlaceholder": "Wybierz…",
+      "willGoTo": "Trafi do: {party}.",
+      "submit": "Przekaż do sprawdzenia",
+      "resubmit": "Przekaż ponownie",
+      "submitting": "Przekazywanie…",
+      "neverAutomatic": "Wpisy nigdy nie są przekazywane automatycznie.",
+      "submittedTo": "Przekazano: {party}, {date}.",
+      "submittedGeneric": "Przekazano do sprawdzenia zleceniodawcy.",
+      "awaiting": "Czekamy na ich decyzję.",
+      "isResubmission": "To poprawiona wersja.",
+      "acceptedBy": "{party} zaakceptował(a) pracę {date}.",
+      "acceptedNotEmployer": "To odbiór pracy przez zleceniodawcę. Różni się od wpisu przełożonego, nie weryfikuje umiejętności i nie jest zapisem płatności.",
+      "theirNote": "Ich notatka",
+      "correctionRequestedBy": "{party} poprosił(a) o poprawkę ({date}).",
+      "disputedBy": "{party} zakwestionował(a) ten wpis ({date}).",
+      "correctionHint": "Popraw wpis i przekaż nową wersję ponownie. Wcześniejsza wersja i prośba pozostają w zapisie.",
+      "disputedHint": "Zakwestionowanie pozostaje w zapisie, a zleceniodawca może je wycofać. Możesz też poprawić wpis i przekazać nową wersję.",
+      "result": {
+        "submitted": "Przekazano do sprawdzenia.",
+        "already_submitted": "Ten wpis został już przekazany.",
+        "entry_not_found": "Nie znaleziono wpisu.",
+        "not_authorized": "Wpis może przekazać tylko jego autor.",
+        "entry_deleted": "Ten wpis został usunięty.",
+        "entry_superseded": "Ten wpis zastąpiła nowsza wersja. Przekaż nowszą.",
+        "entry_has_no_project": "Przed przekazaniem powiąż wpis z projektem.",
+        "counterparty_not_valid": "Ten zleceniodawca nie jest już zarejestrowany dla tej pracy.",
+        "no_counterparty_registered": "Dla tej pracy nie zarejestrowano jeszcze zleceniodawcy.",
+        "counterparty_ambiguous": "Zarejestrowano więcej niż jednego zleceniodawcę. Wybierz, kto ma sprawdzić.",
+        "error": "Coś poszło nie tak. Nic nie przekazano.",
+        "needs_migration": "Ta funkcja nie jest jeszcze dostępna."
+      }
+    },
+    "queue": {
+      "title": "Sprawdzenie przez zleceniodawcę",
+      "lead": "Praca, którą pracownicy przekazali Ci jako zleceniodawcy, klientowi lub stronie umowy. Zaakceptuj ją, poproś o poprawkę lub zakwestionuj – z notatką.",
+      "honestNote": "Twoja decyzja jest zapisywana jako odbiór przez zleceniodawcę. Różni się od wpisu przełożonego, nie weryfikuje umiejętności i nie jest zatwierdzeniem płatności. Akceptacja jest ostateczna.",
+      "employerInboxLink": "Skrzynka sprawdzeń przełożonego",
+      "openLink": "Sprawdzenie zleceniodawcy",
+      "bucket": {
+        "to_decide": "Do decyzji",
+        "disputed": "Zakwestionowane",
+        "waiting_for_worker": "Czeka na pracownika",
+        "accepted": "Zaakceptowane"
+      },
+      "loadFailed": "Nie udało się wczytać kolejki sprawdzeń. Spróbuj ponownie za chwilę.",
+      "emptyTitle": "Nic jeszcze Ci nie przekazano",
+      "empty": "Gdy pracownik przekaże Ci pracę jako zleceniodawcy, pojawi się tutaj.",
+      "emptyNext": "Zarejestruj swoją organizację jako zleceniodawcę na stronie projektu, aby pracownicy projektu mogli przekazywać Ci swoją pracę.",
+      "truncated": "Pokazano {n} najnowszych z {m} przekazań.",
+      "card": {
+        "workerUnknown": "Pracownik",
+        "yourRole": "Twoja rola: {role}",
+        "submittedOn": "przekazano {date}",
+        "resubmission": "Poprawiona wersja wpisu, o którego poprawkę prosiłeś.",
+        "work": "Praca",
+        "hours": "Godziny",
+        "hoursUnclear": "niejasne w tekście",
+        "quantity": "Ilość",
+        "photos": "Zdjęcia dołączone przez pracownika",
+        "noPhotos": "Nie dołączono zdjęć.",
+        "photoUnavailable": "Zdjęcie niedostępne",
+        "photoAlt": "Zdjęcie pracy",
+        "history": "Historia",
+        "decision": {
+          "approved": "Zaakceptowano",
+          "changes_requested": "Poproszono o poprawkę",
+          "rejected": "Zakwestionowano"
+        },
+        "detailUnavailable": "Nie udało się wczytać szczegółów tego przekazania, więc teraz nie można o nim zdecydować. Spróbuj ponownie za chwilę.",
+        "acceptedFinal": "Zaakceptowano. To ostateczne.",
+        "waitingForWorker": "Poprosiłeś o poprawkę. Poprawiona wersja pojawi się tutaj jako nowe przekazanie.",
+        "yourDecision": "Twoja decyzja",
+        "action": {
+          "accept": "Zaakceptuj pracę",
+          "request_correction": "Poproś o poprawkę",
+          "dispute": "Zakwestionuj"
+        },
+        "actionHint": {
+          "accept": "Potwierdzasz, że praca jest wykonana. Ostatecznie.",
+          "request_correction": "Pracownik poprawia wpis i przekazuje go ponownie.",
+          "dispute": "Nie zgadzasz się. Pozostaje w zapisie; później możesz to wycofać, akceptując."
+        },
+        "withdrawDisputeHint": "Wcześniej to zakwestionowałeś. Możesz wycofać zakwestionowanie, akceptując; pozostanie ono w historii.",
+        "noteLabel": "Notatka (opcjonalnie)",
+        "noteLabelRequired": "Notatka (wymagana)",
+        "noteHint": "Pracownik zobaczy tę notatkę.",
+        "chooseFirst": "Wybierz decyzję",
+        "saving": "Zapisywanie…",
+        "submit": {
+          "accept": "Zaakceptuj",
+          "request_correction": "Poproś o poprawkę",
+          "dispute": "Zakwestionuj"
+        },
+        "acceptIsFinal": "Akceptacji nie można cofnąć.",
+        "result": {
+          "ok": {
+            "approved": "Zaakceptowano. Zapisano jako odbiór przez zleceniodawcę.",
+            "changes_requested": "Poproszono o poprawkę. Pracownik został powiadomiony.",
+            "rejected": "Zakwestionowanie zapisano."
+          },
+          "note_required": "Napisz pracownikowi krótką notatkę.",
+          "note_too_long": "Notatka jest za długa.",
+          "invalid_decision": "Wybierz decyzję.",
+          "entry_not_found": "Nie znaleziono wpisu.",
+          "entry_not_org_scoped": "Tego wpisu nie można tu rozstrzygnąć.",
+          "not_authorized": "Nie masz uprawnień do tej decyzji.",
+          "review_not_enabled": "Sprawdzanie nie jest włączone dla tej pracy.",
+          "no_reviewer_engagement": "Nie masz uprawnień do sprawdzania w tej organizacji.",
+          "self_review_not_allowed": "Nie możesz decydować o własnej pracy.",
+          "review_authority_not_established": "Nie jesteś zarejestrowanym zleceniodawcą tej pracy albo nie została Ci przekazana.",
+          "already_accepted": "Ta praca została już zaakceptowana. Akceptacja jest ostateczna.",
+          "entry_superseded": "Pracownik zastąpił ten wpis nowszą wersją.",
+          "entry_deleted": "Ten wpis został usunięty.",
+          "error": "Coś poszło nie tak. Nic nie zapisano.",
+          "needs_migration": "Ta funkcja nie jest jeszcze dostępna."
+        }
+      }
+    }
+  },
   "cvBridge": "Potwierdzono {confirmed} z {total} wpisów — potwierdzona praca pojawia się w CV.",
   "cvBridgeEmpty": "Brak wpisów — utworzone tu wpisy pracy zasilą Twoje CV.",
   "cvBridgeLink": "Otwórz CV",
@@ -83,6 +263,8 @@
   "projectNone": "To nie praca projektowa",
   "projectAmbiguous": "Jesteś przypisany do kilku projektów. Przed zapisaniem wybierz, do którego projektu należą te godziny (lub zaznacz, że to nie praca projektowa).",
   "projectAuto": "Projekt: {name}",
+  "projectViaTeam": "{project} (przez zespół {team})",
+  "projectClient": "{project} (projekt klienta)",
   "unconfirmedTimeBlocked": "{count} zarejestrowanych czasów wciąż czeka na Twój przegląd i nie zostałoby zapisanych. Najpierw zachowaj je lub usuń.",
   "entry": {
     "reviewedBy": "Zweryfikowane przez",
@@ -203,7 +385,10 @@
       "entrySuperseded": "Wpis został już zastąpiony nowszą wersją — ta karta nie jest już aktualna i zostanie usunięta z listy.",
       "entryDeleted": "Wpis został usunięty — ta karta nie jest już aktualna i zostanie usunięta z listy.",
       "staleTerminalHint": "Nic nie zostało zapisane. Jeśli pracownik zapisał nowszą wersję, pojawi się ona w skrzynce jako nowa karta.",
-      "noReviewerEngagement": "Widzisz ten wpis jako kierownik, ale potwierdzanie wymaga uprawnień do potwierdzania. Poproś właściciela organizacji o ich nadanie na stronie Ludzie."
+      "noReviewerEngagement": "Widzisz ten wpis jako kierownik, ale potwierdzanie wymaga uprawnień do potwierdzania. Poproś właściciela organizacji o ich nadanie na stronie Ludzie.",
+      "selfReviewNotAllowed": "Nie możesz potwierdzić własnej pracy. Wpis pozostaje zapisany jako własna deklaracja; potwierdzić musi inna upoważniona osoba.",
+      "reviewAuthorityNotEstablished": "Nie jesteś uprawnioną stroną tej pracy, więc nie możesz jej potwierdzić. Potwierdzenie pochodzi od pracodawcy albo od klienta, któremu pracę przedłożono.",
+      "alreadyAccepted": "Ta praca została już zaakceptowana. Akceptacja jest ostateczna."
     },
     "showOriginal": "Pokaż oryginał",
     "skills": "Umiejętności",

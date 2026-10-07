@@ -1,5 +1,6 @@
 import "server-only";
 
+import { withoutCounterpartyRows } from "@/lib/journal/review-status";
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -202,9 +203,13 @@ export async function getAgencyPool(): Promise<AgencyPoolResult> {
       if (entryIds.length > 0) {
         const { data: confRows } = await asAny(supabase)
           .from("journal_entry_confirmations")
-          .select("entry_id")
+          .select("entry_id, confirmation_scope")
           .in("entry_id", entryIds);
-        for (const c of (confRows ?? []) as { entry_id: string }[]) {
+        // Employer confirmations only (decision 0018): a client acceptance is
+        // its own signal and never raises the pool's confirmation count.
+        for (const c of withoutCounterpartyRows(
+          (confRows ?? []) as { entry_id: string; confirmation_scope: unknown }[],
+        )) {
           const wid = entryWorker.get(c.entry_id);
           if (!wid) continue;
           confirmationsByWorker.set(

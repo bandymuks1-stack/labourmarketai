@@ -9,9 +9,9 @@ import { callerCompanyId } from "./projects";
 import { insertProjectForCompany } from "@/lib/projects/create-project-core";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
-import { checkWorkerReservation } from "@/lib/planning/worker-reservation";
 import { freeColleagues } from "@/lib/projects/free-colleagues";
 import type { ReservationVerdict } from "@/lib/workforce/commitment-reservation";
+import { keepOverrideCore, reservationVerdictFor, type KeepOverrideResult } from "@/lib/projects/override-keep-core";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
 import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
@@ -184,20 +184,9 @@ async function reservationAfterAssign(
   alternatives: { profileId: string; name: string }[];
 } | null> {
   try {
-    const [{ data: worker }, { data: project }] = await Promise.all([
-      asAny(supabase).from("workers").select("id").eq("profile_id", workerProfileId).maybeSingle(),
-      asAny(supabase).from("projects").select("start_date, end_date").eq("id", projectId).maybeSingle(),
-    ]);
-    if (!worker?.id) return null;
-    const window = {
-      startDate: (project?.start_date as string | null) ?? null,
-      endDate: (project?.end_date as string | null) ?? null,
-    };
-    const verdict = await checkWorkerReservation({
-      workerId: worker.id as string,
-      window,
-      exclude: [projectId],
-    });
+    const computed = await reservationVerdictFor(supabase, projectId, workerProfileId);
+    if (!computed) return null;
+    const { verdict, window } = computed;
     if (verdict.state !== "collides") return { verdict, alternatives: [] };
     return {
       verdict,
@@ -233,6 +222,32 @@ export async function recordAssignmentDecisionAction(
   } catch (error) {
     console.error("[projects] decision audit failed:", error);
   }
+}
+
+export type KeepAssignmentResult = KeepOverrideResult;
+
+/**
+ * KEEP an assignment despite a known calendar clash = an explicit override.
+ *
+ * The business logic lives in ONE core (lib/projects/override-keep-core.ts),
+ * shared with the chat door (`company.keep-assignment`) and the MCP tools
+ * (`assignment.keep_draft` / `assignment.keep_confirm`): collisions recomputed
+ * SERVER-SIDE at the moment of the decision, fail-loud, immutable receipt,
+ * closed reason code. This action only adds the session and the revalidation.
+ */
+export async function keepAssignmentAction(
+  projectId: string,
+  workerProfileId: string,
+  reasonCode?: string | null,
+): Promise<KeepAssignmentResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, code: "auth" };
+  const r = await keepOverrideCore(supabase, { projectId, workerProfileId, reasonCode });
+  if (r.ok && r.receipt === "recorded") revalidatePath("/", "layout");
+  return r;
 }
 
 export async function endAssignmentAction(

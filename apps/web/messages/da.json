@@ -1958,6 +1958,7 @@
     "myProjectsEmpty": "Du er endnu ikke tildelt noget projekt. Når en virksomhed tildeler dig, vises projektet her.",
     "assignmentActive": "Aktiv",
     "assignmentEnded": "Afsluttet",
+    "viaTeam": "via hold {team}",
     "untitledProject": "Projekt uden titel",
     "archiveToggle": {
       "label": "Aktive eller afsluttede projekter",
@@ -1971,6 +1972,7 @@
     "stadium": {
       "eyebrow": "Stadion",
       "fieldCount": "{n, plural, one {# person på banen} other {# personer på banen}}",
+      "fieldViaTeam": "{n} via hold",
       "todayCount": "{n, plural, one {# journalpost i dag — dagen er i bevægelse} other {# journalposter i dag — dagen er i bevægelse}}",
       "todayZero": "Ingen poster endnu i dag — dagen venter stadig på sin første post.",
       "fieldTitle": "Banen — hvem er på holdet i dag",
@@ -1981,6 +1983,9 @@
       "noActivity": "Ingen poster endnu.",
       "emptyTeam": "Dette projekt har endnu intet hold — start draften og få de første folk på banen.",
       "emptyTeamCta": "Start draften",
+      "positionsTitle": "Manglende positioner",
+      "positionsEmpty": "Modulet for positionsbehov er stadig under forberedelse — når det kommer, kan du her se, hvilke folk der mangler.",
+      "openOps": "Åbn management-arenaen",
       "history": {
         "title": "Tidligere arbejde på dette projekt",
         "provenance": "Historik leveret af organisationen, importeret fra organisationens egne optegnelser. Ikke uafhængigt verificeret.",
@@ -1989,16 +1994,14 @@
         "personUnknown": "Person ikke angivet",
         "hoursUnknown": "Timer ikke angivet",
         "count": "{n} poster"
-      },
-      "positionsTitle": "Manglende positioner",
-      "positionsEmpty": "Modulet for positionsbehov er stadig under forberedelse — når det kommer, kan du her se, hvilke folk der mangler.",
-      "openOps": "Åbn management-arenaen"
+      }
     },
     "workerView": {
       "eyebrow": "Mit projekt",
       "untitled": "Projekt uden titel",
       "assignmentActive": "Aktiv tildeling",
       "assignmentEnded": "Tildeling afsluttet",
+      "viaTeam": "via hold {team}",
       "projectRestricted": "Projektdetaljer er ikke tilgængelige for dig lige nu. Din tildeling forbliver synlig.",
       "journalCta": "Skriv journalindlæg",
       "chatCta": "Send besked",
@@ -3647,6 +3650,10 @@
           "label": "Flyt en person til et andet projekt",
           "description": "Tildeler det nye projekt og afslutter den tidligere tildeling — efter konsekvensvisningen."
         },
+        "keepAssignment": {
+          "label": "Behold en tildeling trods en kalenderkonflikt",
+          "description": "Registrerer din beslutning om at beholde tildelingen med viden om konflikten, med en lukket årsagskode. Intet gemmes uden kvittering."
+        },
         "offerCapacity": {
           "label": "Registrér hvad I tilbyder"
         }
@@ -3970,6 +3977,9 @@
       "assignAlreadyCommitted": "Bemærk: personen er allerede booket på nogle af disse dage ({count}). Tildelingen står ved magt — du bestemmer.",
       "assignCommitmentUnknown": "Vi kunne ikke bekræfte, at disse dage er ledige. Det er ikke det samme som ledige.",
       "assignFailed": "Tildelingen kunne ikke gennemføres.",
+      "keepPrompt": "Personen er allerede bundet på disse datoer. Beholder du tildelingen bevidst? Vælg en årsag - beslutningen registreres.",
+      "keepRecorded": "Registreret: du beholdt tildelingen bevidst.",
+      "keepFailed": "Beslutningen kunne ikke registreres, så intet blev gemt. Prøv igen.",
       "chipEngagements": "Hvem jeg arbejder med",
       "userEngagements": "Hvem arbejder jeg med?",
       "engagementsOpened": "Her er de registrerede arbejdsrelationer. Du kan afslutte en af dem i panelet.",
@@ -6715,16 +6725,6 @@
       }
     }
   },
-  "cvOrganizationHistory": {
-    "title": "Arbejdshistorik leveret af organisationer",
-    "note": "Hentet fra de nævnte organisationers egne registreringer. Den er hverken selverklæret eller uafhængigt verificeret.",
-    "untitled": "Arbejde registreret af en organisation",
-    "hoursTerm": "Timer",
-    "hoursRecorded": "{hours} t registreret i {count, plural, one {# registrering} other {# registreringer}}",
-    "hoursPeriod": "{hours} t opgivet for en periode, i {count, plural, one {# registrering} other {# registreringer}}",
-    "contested": "Bestridt af en part med ret til det",
-    "more": "{count, plural, one {# post mere} other {# poster mere}} vises ikke"
-  },
   "historyContext": {
     "project": "Projekt",
     "place": "Sted eller arbejdspakke",
@@ -7110,6 +7110,16 @@
       "skills": "{count, plural, one {# færdighed baseret på dine registreringer} other {# færdigheder baseret på dine registreringer}}",
       "next": "Hvor du kan gå hen"
     }
+  },
+  "cvOrganizationHistory": {
+    "title": "Arbejdshistorik leveret af organisationer",
+    "note": "Hentet fra de nævnte organisationers egne registreringer. Den er hverken selverklæret eller uafhængigt verificeret.",
+    "untitled": "Arbejde registreret af en organisation",
+    "hoursTerm": "Timer",
+    "hoursRecorded": "{hours} t registreret i {count, plural, one {# registrering} other {# registreringer}}",
+    "hoursPeriod": "{hours} t opgivet for en periode, i {count, plural, one {# registrering} other {# registreringer}}",
+    "contested": "Bestridt af en part med ret til det",
+    "more": "{count, plural, one {# post mere} other {# poster mere}} vises ikke"
   },
   "companyPerson": {
     "eyebrow": "Historisk personkort",

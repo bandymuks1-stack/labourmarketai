@@ -52,7 +52,7 @@ export interface WorkerCommitment {
    *  an APPROVED business trip is a person working somewhere else, which is a
    *  commitment by any reading, and it was the one dated commitment nothing
    *  on the employer side counted. */
-  readonly kind: "project" | "booking" | "trip";
+  readonly kind: "project" | "booking" | "trip" | "plan";
   /** The source row, so a caller can link to the real object. */
   readonly sourceId: string;
   /** Real title from the source; null renders an i18n noun, never invented
@@ -146,7 +146,78 @@ export async function getEmployerWorkerCommitments(
   }
 
   const assignments = (assignRes.data ?? []) as Record<string, unknown>[];
-  const projectIds = [...new Set(assignments.map((a) => a.project_id as string))];
+
+  // ACTIVE TEAM ASSIGNMENTS (WRK-6, 20261003150600). A team assignment is ONE
+  // relationship and writes NO per-person row above, so the members it
+  // resolves to are read HERE, from the one source, and join the very same
+  // lists: a project-level team assignment commits each member over the
+  // project band exactly like a person assignment (kind "project", the same
+  // source id, so every consumer — capacity, the reservation verdict, the
+  // `exclude` of a just-made assignment — treats the two identically); a task-
+  // or object-level one holds the member for a window nobody dated, so it is
+  // reported as an UNDATED commitment, never invented into a band.
+  //
+  // Before the migration is applied the relation does not exist: that is "no
+  // team assignments", not a failure of the whole read. Any OTHER failure is
+  // unavailable — an unread source must never look like an empty one.
+  const wanted = new Set(ids);
+  const teamPairs: { workerId: string; projectId: string; scope: "project" | "narrow" }[] = [];
+  const teamRes = await asAny(supabase)
+    .from("team_assignments")
+    .select("id, project_id, work_object_id, task_id")
+    .is("ended_at", null)
+    .limit(READ_LIMIT);
+  if (teamRes.error) {
+    if (!MISSING_OBJECT_CODES.has(teamRes.error.code ?? "")) return { status: "unavailable" };
+  } else {
+    const teamRows = (teamRes.data ?? []) as {
+      id: string;
+      project_id: string;
+      work_object_id: string | null;
+      task_id: string | null;
+    }[];
+    if (teamRows.length > 0) {
+      const memRes = await asAny(supabase).rpc("list_team_assignment_members_v1", {
+        p_assignment_ids: teamRows.map((r) => r.id),
+      });
+      if (memRes.error) {
+        if (!MISSING_OBJECT_CODES.has(memRes.error.code ?? "")) return { status: "unavailable" };
+      } else {
+        const rowById = new Map(teamRows.map((r) => [r.id, r]));
+        for (const m of (memRes.data ?? []) as { assignment_id: string; worker_id: string | null }[]) {
+          const row = rowById.get(m.assignment_id);
+          if (!row || !m.worker_id || !wanted.has(m.worker_id)) continue;
+          teamPairs.push({
+            workerId: m.worker_id,
+            projectId: row.project_id,
+            scope: row.work_object_id || row.task_id ? "narrow" : "project",
+          });
+        }
+      }
+    }
+  }
+  // A person who is ALSO assigned directly is one commitment, not two.
+  const directKey = new Set(assignments.map((a) => `${a.worker_id as string}:${a.project_id as string}`));
+  const seenTeamKey = new Set<string>();
+  const teamProjectLevel: Record<string, unknown>[] = [];
+  const teamNarrow: { workerId: string; projectId: string }[] = [];
+  for (const t of teamPairs) {
+    const key = `${t.workerId}:${t.projectId}`;
+    if (t.scope === "project") {
+      if (directKey.has(key) || seenTeamKey.has(key)) continue;
+      seenTeamKey.add(key);
+      teamProjectLevel.push({ worker_id: t.workerId, project_id: t.projectId });
+    } else {
+      teamNarrow.push({ workerId: t.workerId, projectId: t.projectId });
+    }
+  }
+  assignments.push(...teamProjectLevel);
+  const projectIds = [
+    ...new Set([
+      ...assignments.map((a) => a.project_id as string),
+      ...teamNarrow.map((t) => t.projectId),
+    ]),
+  ];
   const projectById = new Map<
     string,
     { title: string | null; startDate: string | null; endDate: string | null }
@@ -244,8 +315,47 @@ export async function getEmployerWorkerCommitments(
     tripRows = (tripsRes.data ?? []) as TripRow[];
   }
 
+  // PLANNED WORK WINDOWS (CAL-8, `work_plan_entries`). The organization's own
+  // one-off plan for its own people: a commitment somebody with authority made,
+  // so it holds the person's days exactly like an accepted booking does.
+  //
+  // NO NEW AUTHORITY: `work_plan_entries_select` admits the planning
+  // organization's managers and the planned worker — a manager reads the
+  // windows of the organizations they manage and nobody else's.
+  //
+  // WHEN THE STORE IS NOT PROVISIONED the table simply does not exist, so no
+  // window can exist either: that is a true "nothing planned", not an unread
+  // source, and it must not turn every capacity answer into "needs-migration".
+  // Any OTHER failure is a real failed read and is reported as `unavailable` —
+  // UNKNOWN is never read as zero.
+  const planRes = await asAny(supabase)
+    .from("work_plan_entries")
+    .select("id, worker_id, start_date, end_date")
+    .in("worker_id", ids)
+    .eq("status", "planned")
+    .limit(READ_LIMIT);
+  let planRows: Record<string, unknown>[] = [];
+  if (planRes.error) {
+    if (!MISSING_OBJECT_CODES.has(planRes.error.code ?? "")) {
+      return { status: "unavailable" };
+    }
+  } else {
+    planRows = (planRes.data ?? []) as Record<string, unknown>[];
+  }
+
   const commitments: WorkerCommitment[] = [];
   const undatedProjects: UndatedProjectCommitment[] = [];
+  for (const p of planRows) {
+    commitments.push({
+      workerId: p.worker_id as string,
+      kind: "plan",
+      sourceId: p.id as string,
+      // The window is the fact; a note is free text and is not read.
+      label: null,
+      startDate: (p.start_date as string | null) ?? null,
+      endDate: (p.end_date as string | null) ?? null,
+    });
+  }
   for (const t of tripRows) {
     const workerId = workerByProfile.get(t.profile_id);
     if (!workerId) continue;
@@ -293,6 +403,23 @@ export async function getEmployerWorkerCommitments(
       label: project.title,
       startDate: project.startDate,
       endDate: project.endDate,
+    });
+  }
+  // Task- / object-level team assignments: a real commitment, window unknown.
+  // One entry per (member, project) — and none when the member already holds
+  // that project through a dated commitment or an undated one above.
+  const heldKey = new Set([
+    ...commitments.filter((c) => c.kind === "project").map((c) => `${c.workerId}:${c.sourceId}`),
+    ...undatedProjects.map((u) => `${u.workerId}:${u.projectId}`),
+  ]);
+  for (const t of teamNarrow) {
+    const key = `${t.workerId}:${t.projectId}`;
+    if (heldKey.has(key)) continue;
+    heldKey.add(key);
+    undatedProjects.push({
+      workerId: t.workerId,
+      projectId: t.projectId,
+      label: projectById.get(t.projectId)?.title ?? null,
     });
   }
   return { status: "ok", commitments, undatedProjects };

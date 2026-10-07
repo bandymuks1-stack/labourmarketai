@@ -1958,6 +1958,7 @@
     "myProjectsEmpty": "Jūs vēl neesat piesaistīts nevienam projektam. Kad uzņēmums jūs piesaistīs, projekts parādīsies šeit.",
     "assignmentActive": "Aktīvs",
     "assignmentEnded": "Pabeigts",
+    "viaTeam": "caur komandu {team}",
     "untitledProject": "Projekts bez nosaukuma",
     "archiveToggle": {
       "label": "Aktīvie vai pabeigtie projekti",
@@ -1971,6 +1972,7 @@
     "stadium": {
       "eyebrow": "[EN] Stadium",
       "fieldCount": "[EN] {n, plural, one {# person on the field} other {# people on the field}}",
+      "fieldViaTeam": "{n} caur komandu",
       "todayCount": "[EN] {n, plural, one {# journal entry today — the day is moving} other {# journal entries today — the day is moving}}",
       "todayZero": "[EN] No entries yet today — the day is still waiting for its first record.",
       "fieldTitle": "[EN] The field — who is on the team today",
@@ -1981,6 +1983,9 @@
       "noActivity": "[EN] No entries yet.",
       "emptyTeam": "[EN] This project has no team yet — start the draft and bring the first people onto the field.",
       "emptyTeamCta": "[EN] Start the draft",
+      "positionsTitle": "[EN] Missing positions",
+      "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
+      "openOps": "[EN] Open the management arena",
       "history": {
         "title": "Iepriekšējais darbs šajā projektā",
         "provenance": "Organizācijas sniegta vēsture, importēta no organizācijas pašas ierakstiem. Neatkarīgi nav pārbaudīta.",
@@ -1989,16 +1994,14 @@
         "personUnknown": "Persona nav norādīta",
         "hoursUnknown": "Stundas nav norādītas",
         "count": "{n} ieraksti"
-      },
-      "positionsTitle": "[EN] Missing positions",
-      "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
-      "openOps": "[EN] Open the management arena"
+      }
     },
     "workerView": {
       "eyebrow": "Mans projekts",
       "untitled": "Projekts bez nosaukuma",
       "assignmentActive": "Aktīva piesaiste",
       "assignmentEnded": "Piesaiste pabeigta",
+      "viaTeam": "caur komandu {team}",
       "projectRestricted": "Projekta informācija jums šobrīd nav pieejama. Jūsu piesaiste paliek redzama.",
       "journalCta": "Rakstīt žurnāla ierakstu",
       "chatCta": "Sūtīt ziņu",
@@ -3647,6 +3650,10 @@
           "label": "Pārcelt cilvēku uz citu projektu",
           "description": "Piesaista jaunajam projektam un beidz iepriekšējo piesaisti — pēc seku pārskata."
         },
+        "keepAssignment": {
+          "label": "Saglabāt piešķīrumu, neskatoties uz kalendāra konfliktu",
+          "description": "Reģistrē jūsu lēmumu saglabāt piešķīrumu, zinot par konfliktu, ar slēgtu iemesla kodu. Bez kvīts nekas netiek saglabāts."
+        },
         "offerCapacity": {
           "label": "Pierakstīt jūsu piedāvājumu"
         }
@@ -3970,6 +3977,9 @@
       "assignAlreadyCommitted": "[EN] Note: they are already committed on some of these dates ({count}). The assignment stands — you decide.",
       "assignCommitmentUnknown": "[EN] We could not confirm these dates are free. That is not the same as free.",
       "assignFailed": "[EN] The assignment could not be made.",
+      "keepPrompt": "Šajās dienās cilvēks jau ir aizņemts. Vai saglabājat piešķīrumu apzināti? Izvēlieties iemeslu - lēmums tiks reģistrēts.",
+      "keepRecorded": "Reģistrēts: jūs apzināti saglabājāt piešķīrumu.",
+      "keepFailed": "Lēmumu neizdevās reģistrēt, tāpēc nekas netika saglabāts. Mēģiniet vēlreiz.",
       "chipEngagements": "Ar ko es strādāju",
       "userEngagements": "Ar ko es strādāju?",
       "engagementsOpened": "Šeit ir reģistrētās darba attiecības. Vienas no tām vari beigt panelī.",
@@ -6715,16 +6725,6 @@
       }
     }
   },
-  "cvOrganizationHistory": {
-    "title": "Organizāciju sniegtā darba vēsture",
-    "note": "Ņemta no šeit minēto organizāciju ierakstiem. Tā nav paša cilvēka deklarēta un nav neatkarīgi pārbaudīta.",
-    "untitled": "Organizācijas reģistrēts darbs",
-    "hoursTerm": "Stundas",
-    "hoursRecorded": "{hours} h reģistrētas ({count, plural, one {# ieraksts} other {# ieraksti}})",
-    "hoursPeriod": "{hours} h norādītas periodam ({count, plural, one {# ieraksts} other {# ieraksti}})",
-    "contested": "Apstrīdējusi persona ar tiesībām to darīt",
-    "more": "Vēl {count, plural, one {# ieraksts} other {# ieraksti}} netiek rādīti"
-  },
   "historyContext": {
     "project": "Projekts",
     "place": "Objekts vai darbu pakete",
@@ -7110,6 +7110,16 @@
       "skills": "{count, plural, zero {# jūsu ierakstos balstītu prasmju} one {# jūsu ierakstos balstīta prasme} other {# jūsu ierakstos balstītas prasmes}}",
       "next": "Kur varat doties"
     }
+  },
+  "cvOrganizationHistory": {
+    "title": "Organizāciju sniegtā darba vēsture",
+    "note": "Ņemta no šeit minēto organizāciju ierakstiem. Tā nav paša cilvēka deklarēta un nav neatkarīgi pārbaudīta.",
+    "untitled": "Organizācijas reģistrēts darbs",
+    "hoursTerm": "Stundas",
+    "hoursRecorded": "{hours} h reģistrētas ({count, plural, one {# ieraksts} other {# ieraksti}})",
+    "hoursPeriod": "{hours} h norādītas periodam ({count, plural, one {# ieraksts} other {# ieraksti}})",
+    "contested": "Apstrīdējusi persona ar tiesībām to darīt",
+    "more": "Vēl {count, plural, one {# ieraksts} other {# ieraksti}} netiek rādīti"
   },
   "companyPerson": {
     "eyebrow": "Vēsturiskā personas kartīte",

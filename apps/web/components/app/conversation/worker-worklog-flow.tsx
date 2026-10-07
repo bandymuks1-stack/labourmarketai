@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import {
   PROJECT_FIELD_NONE,
   projectChoiceIsSatisfied,
+  projectDisplayLabel,
   projectPromptFor,
   type AssignedProject,
 } from "@/lib/journal/project-attribution";
@@ -1129,7 +1130,7 @@ export function WorkerWorkLogFlow({
             <option value="">{tCandidate("projectChoose")}</option>
             {contextProjects.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.label}
+                {projectDisplayLabel(p, (k, v) => tCandidate(k, v))}
               </option>
             ))}
             <option value={PROJECT_FIELD_NONE}>{tCandidate("projectNone")}</option>
@@ -1148,7 +1149,11 @@ export function WorkerWorkLogFlow({
           className="text-meta leading-relaxed text-text-muted"
           data-testid="worklog-project-auto"
         >
-          {tCandidate("projectAuto", { name: contextProjects[0]?.label ?? "" })}
+          {tCandidate("projectAuto", {
+            name: contextProjects[0]
+              ? projectDisplayLabel(contextProjects[0], (k, v) => tCandidate(k, v))
+              : "",
+          })}
         </p>
       ) : null}
 

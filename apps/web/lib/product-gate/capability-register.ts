@@ -1206,18 +1206,18 @@ const MARKETPLACE: readonly CapabilityRow[] = [
   {
     id: "MKT-2",
     domain: "marketplace",
-    title: "Physical resource listings",
+    title: "Universal marketplace: listings + one discovery index",
     worldElement: "objects",
     status: "PARTIAL",
     strongestEvidence: "CODE_PROVEN",
     anchors: ["lib/marketplace"],
-    coreModule: null,
+    coreModule: "lib/marketplace/market-model.ts",
     surfaces: [
       "app/[locale]/dashboard/listings",
       "app/[locale]/business/[slug]",
     ],
     note:
-      "Corrected 2026-09-08: `no_navigation` was wrong. `/dashboard/listings` exists AND carries a surfaceRoute in the dashboard module registry; the public business page reads listings; chat references them. It is reachable. What is true is the rest of the old note: `marketplace_listings` holds 0 rows on production and there is no bridge to `assets`, so nothing proves the surface works end to end. PARTIAL and CODE_PROVEN for exactly that reason - reachable, wired, never once exercised. Reachability and use are different claims, and collapsing them is what produced the wrong status.",
+      "Owner direction (final): ONE universal marketplace — work resources, goods, free-standing SERVICE NEEDS, personal and project/contract listings, discoverable by others — over the EXISTING domain tables (marketplace_listings, service_offerings) with ONE discovery view (market_index_v1), a subject registry (market_subject_types) and ONE policy hook (market_publish_policy_v1). Contact stays the existing enquiry -> conversation path; NO payment, escrow or fulfilment; NO age / adult column (the model is person + a separate policy layer). STATUS, HONESTLY: the migration 20261003150300 is a DRAFT RED PR and is NOT applied to production, so on production the surface still runs the legacy work-resource shape and the app degrades to it (`extended: false`, probes 42703/42P01/42883). CODE_PROVEN means: the pure model + 13 use-case fixtures + guards pass, and the SQL was exercised end to end (create/activate/pause/expiry/anon-denied/rollback-guard/re-apply) on a scratch PostgreSQL 16 with stubbed auth helpers — NOT on production, NOT with real users. Earlier facts still hold: `marketplace_listings` held 0 rows on production and nothing has been through the surface end to end. Service offerings join the index but organization_id on service_offerings is deferred; demand (customer_requests) and public_vacancies are deliberately NOT in the index, and neither is worker supply. A project / contract opportunity IS discoverable: a `wanted` listing of subject project_work (a contractor's capability is the `sale` offer), optionally pointing at a real project via project_id (validated by can_manage_project). Execution and agreement stay in projects / proposals / agreements — no new engine; an accepted contact proceeds conversation -> agreement register, which is org-scoped (person-party agreements NOT BUILT).",
   },
   {
     id: "MKT-3",

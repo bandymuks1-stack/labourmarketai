@@ -25,6 +25,7 @@ import { readOwnOccupationPathForUser } from "@/lib/journal/journal-occupation-p
 import {
   parseProjectChoice,
   projectPromptFor,
+  projectsForContext,
   rpcProjectParams,
   type AssignedProject,
 } from "@/lib/journal/project-attribution";
@@ -470,9 +471,9 @@ export async function projectsToChooseFrom(
     .select("organization_id")
     .eq("id", engagementContextId)
     .maybeSingle();
-  if (!ctx?.organization_id) return null;
+  if (!ctx) return null;
   const byOrg = await readActiveProjectsByOrg(supabase, worker.id);
-  const projects = byOrg.get(ctx.organization_id) ?? [];
+  const projects = projectsForContext(byOrg, ctx.organization_id);
   return projectPromptFor(projects) === "ask" ? projects : null;
 }
 
@@ -787,9 +788,9 @@ export async function createJournalEntryCore(
       .select("organization_id")
       .eq("id", engagementId)
       .maybeSingle();
-    if (ctxOrg?.organization_id) {
+    if (ctxOrg) {
       const byOrg = await readActiveProjectsByOrg(supabase, worker.id);
-      const projects = byOrg.get(ctxOrg.organization_id) ?? [];
+      const projects = projectsForContext(byOrg, ctxOrg.organization_id);
       if (projectPromptFor(projects) === "ask") {
         return {
           ok: false,

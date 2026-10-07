@@ -14,6 +14,7 @@ import {
   isContactPermitted,
   type ContactPermissionState,
 } from "./communication-eligibility";
+import { issueContactAuthority } from "./contact-authority";
 
 /**
  * THE direct (1:1) conversation core for an EXPLICIT caller (G4 bridge,
@@ -207,12 +208,17 @@ export async function getOrCreateDirectConversationCore(
   if (plan.kind === "refused") {
     return { ok: false, code: "no_permission", message: "Nėra ryšio, leidžiančio pradėti pokalbį su šiuo asmeniu." };
   }
-  const created = await createConversationCore(caller, {
-    subject: opts.subject ?? null,
-    kind: "direct",
-    participantProfileIds: [otherProfileId],
-    locale: opts.locale,
-  });
+  const created = await createConversationCore(
+    caller,
+    {
+      subject: opts.subject ?? null,
+      kind: "direct",
+      participantProfileIds: [otherProfileId],
+      locale: opts.locale,
+    },
+    // The plan above IS the §8.1 gate (planDirectContact); its permission is the proof.
+    issueContactAuthority(plan.permission) ?? undefined,
+  );
   if (!created.ok) return created;
   return { ok: true, data: { id: created.data.id, created: true, permission: plan.permission } };
 }

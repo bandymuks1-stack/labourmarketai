@@ -41,6 +41,11 @@ import { CompanyGallerySection } from "@/components/app/company-gallery-section"
 import { OrganizationDoorsServer } from "@/components/app/organization/organization-doors-server";
 import { ManagerScopeNotice } from "@/components/app/organization/manager-scope-notice";
 import { getCompanyProjectContext } from "@/lib/company/project-context";
+import {
+  getAssignableTasks,
+  getAssignableTeams,
+  getProjectTeamAssignments,
+} from "@/lib/projects/team-assignment";
 import { MapPin } from "lucide-react";
 import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
 import { type Role } from "@/lib/auth/actions";
@@ -145,6 +150,14 @@ export default async function ProjectsPage({
                       ? t("assignmentActive")
                       : t("assignmentEnded")}
                   </span>
+                  {p.viaTeam ? (
+                    <span
+                      className="font-mono text-meta uppercase tracking-label text-text-secondary"
+                      data-testid="worker-project-via-team"
+                    >
+                      {t("viaTeam", { team: p.viaTeam })}
+                    </span>
+                  ) : null}
                 </Link>
               </li>
             ))}
@@ -258,6 +271,24 @@ export default async function ProjectsPage({
     })),
   );
 
+  // WRK-6 — teams as ONE assignment per project, read from the one relation.
+  // An unprovisioned or unreadable relation hides the team control; it is never
+  // rendered as "no team assigned" (a failed read is not an empty list).
+  const activeIds = activeProjects.map((p) => p.id);
+  const [teamAssignmentsRead, assignableTeams, assignableTasks] = await Promise.all([
+    getProjectTeamAssignments(activeIds),
+    getAssignableTeams(),
+    getAssignableTasks(activeIds),
+  ]);
+  const teamWork =
+    teamAssignmentsRead.status === "ok"
+      ? {
+          byProject: Object.fromEntries(teamAssignmentsRead.byProject),
+          teams: assignableTeams,
+          tasks: assignableTasks,
+        }
+      : undefined;
+
   const labels: ProjectManagerLabels = {
     createTitle: t("create.title"),
     createNameLabel: t("create.nameLabel"),
@@ -299,6 +330,18 @@ export default async function ProjectsPage({
     reservationUndo: t("assign.reservation.undo"),
     reservationKeep: t("assign.reservation.keep"),
     reservationDecided: t("assign.reservation.decided"),
+    overrideReasons: {
+      label: t("assign.reservation.reasonLabel"),
+      none: t("assign.reservation.reasonNone"),
+      failed: t("assign.reservation.keepFailed"),
+      options: {
+        agreed_with_worker: t("assign.reservation.reason.agreed_with_worker"),
+        agreed_with_client: t("assign.reservation.reason.agreed_with_client"),
+        partial_overlap: t("assign.reservation.reason.partial_overlap"),
+        urgent_need: t("assign.reservation.reason.urgent_need"),
+        other: t("assign.reservation.reason.other"),
+      },
+    },
     precheckChecking: t("assign.reservation.precheckChecking"),
     precheckCollidesTitle: t("assign.reservation.precheckCollidesTitle"),
     precheckChoose: t("assign.reservation.precheckChoose"),
@@ -308,6 +351,7 @@ export default async function ProjectsPage({
       project: t("assign.reservation.source.project"),
       booking: t("assign.reservation.source.booking"),
       trip: t("assign.reservation.source.trip"),
+      plan: t("assign.reservation.source.plan"),
       absence: t("assign.reservation.source.absence"),
     },
   };
@@ -460,6 +504,7 @@ export default async function ProjectsPage({
             employerCtx?.kind === "ok" ? employerCtx.organizationId : null,
           )}
           labels={labels}
+          teamWork={teamWork}
         />
       </section>
 

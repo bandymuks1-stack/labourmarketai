@@ -1,10 +1,14 @@
 import { readOwnConfirmedWorkTotals } from "@/lib/evidence/confirmed-work-read";
+import { cvLiveEntries } from "@/lib/cv-export/cv-entries";
 import "server-only";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
 import { orgDisplayName } from "@/lib/company/org-display";
 
 import { createClient } from "@/lib/supabase/server";
-import { selectStandingConfirmations } from "@/lib/cv-export/confirmation-standing";
+import {
+  countClientAcceptedEntries,
+  selectStandingConfirmations,
+} from "@/lib/cv-export/confirmation-standing";
 import {
   supportedSkillIds,
   type EntrySkillLinkRow,
@@ -262,6 +266,13 @@ export type VerifiedCvData = {
    * `{entries: 0}` = readable and none.
    */
   confirmedWorkTotals: { entries: number; days: number } | null;
+  /**
+   * Live entries the CLIENT / customer / contracting counterparty accepted
+   * (counterparty-basis rows, latest wins). A different claim by a different
+   * party than `confirmedWorkTotals` (employer): never added to it, never a
+   * skill certification, never a payment record. `null` = unreadable.
+   */
+  clientAcceptedEntries: number | null;
   /** All-time recorded hours (every entry once), or null when unreadable. */
   recordedHoursTotal: number | null;
   /** Of the total, hours a manager/client confirmed. */
@@ -348,7 +359,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       getOwnTrustSignals(workerId),
       supabase
         .from("journal_entries")
-        .select("id, created_at, project_id, engagement_context_id, deleted_at, superseded_by")
+        .select("id, created_at, project_id, engagement_context_id, deleted_at, superseded_by, correction_of")
         .eq("worker_id", workerId),
       supabase
         .from("engagement_contexts")
@@ -622,7 +633,22 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
 
   // Confirmed Work Proof — REAL confirmations only (action 'confirm' or an
   // approved review), one row per entry (latest confirmation), role only.
-  const entries = entriesRes.data ?? [];
+  // LIVE, COUNTED-ONCE entries only (lib/journal/counted-once.ts): a deleted or
+  // superseded entry is not work the CV may stand behind, and a confirmed
+  // original replaced by its live correction is the withdrawn figure - it must
+  // neither print as "Confirmed Work Proof" nor count as client-accepted. The
+  // correction carries no decision of its own until a party decides it.
+  const entries = cvLiveEntries(
+    (entriesRes.data ?? []) as unknown as {
+      id: string;
+      created_at: string;
+      project_id: string | null;
+      engagement_context_id: string | null;
+      deleted_at?: string | null;
+      superseded_by?: string | null;
+      correction_of?: string | null;
+    }[],
+  );
   const entryById = new Map(
     entries.map((e) => [
       e.id,
@@ -634,12 +660,14 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
     ]),
   );
   const proof: VerifiedCvProofRow[] = [];
+  let clientAcceptedEntries: number | null = entries.length === 0 ? 0 : null;
   if (entries.length > 0) {
     const { data: confs } = await supabase
       .from("journal_entry_confirmations")
       .select("entry_id, confirmer_role, created_at, confirmation_scope")
       .in("entry_id", entries.map((e) => e.id))
       .order("created_at", { ascending: false });
+    clientAcceptedEntries = confs ? countClientAcceptedEntries(confs) : null;
     const projectIds = new Set<string>();
     const confirmedRows: {
       entryId: string;
@@ -846,6 +874,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
           }
         : null,
       confirmedWorkTotals,
+      clientAcceptedEntries,
       recordedHoursTotal: workIntelligence ? workIntelligence.totalHours : null,
       recordedHoursConfirmed: workIntelligence
         ? (workIntelligence.periods.find((p) => p.key === "all")?.confirmedHours ?? null)

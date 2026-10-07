@@ -136,6 +136,7 @@ export class MemoryEvidenceDb {
       external_ref: null,
       linked_profile_id: null,
       link_state: row.linked_profile_id ? "linked" : "unlinked",
+      link_method: row.linked_profile_id ? "worker_confirmed" : null,
       ...row,
       id,
     });

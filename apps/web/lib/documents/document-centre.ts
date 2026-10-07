@@ -1,5 +1,6 @@
 import "server-only";
 
+import { COUNTED_ONCE_READ_CAP, countedOnceTotal } from "@/lib/journal/counted-once-count";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -198,10 +199,13 @@ async function readOwnJournalProofCounts(
     const [entriesRes, photosRes] = await Promise.all([
       asAny(supabase)
         .from("journal_entries")
-        .select("*", { count: "exact", head: true })
+        // id + correction_of so a corrected-and-resubmitted entry counts ONCE
+        // (counted-once-count.ts) — a head count cannot de-duplicate.
+        .select("id, correction_of")
         .eq("worker_id", workerId)
         .is("deleted_at", null)
-        .is("superseded_by", null),
+        .is("superseded_by", null)
+        .limit(COUNTED_ONCE_READ_CAP),
       asAny(supabase)
         .from("journal_entry_photos")
         .select("id, journal_entries!inner(worker_id, deleted_at, superseded_by)", {
@@ -214,10 +218,7 @@ async function readOwnJournalProofCounts(
         .eq("upload_status", "uploaded"),
     ]);
     return {
-      journalEntryCount:
-        !entriesRes.error && typeof entriesRes.count === "number"
-          ? entriesRes.count
-          : null,
+      journalEntryCount: countedOnceTotal(entriesRes),
       journalPhotoCount:
         !photosRes.error && typeof photosRes.count === "number"
           ? photosRes.count

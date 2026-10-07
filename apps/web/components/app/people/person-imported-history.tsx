@@ -114,6 +114,8 @@ export async function PersonImportedHistory({
         .select("id")
         .eq("linked_worker_id", workerId)
         .eq("link_state", "linked")
+        // Identity by the PERSON's own confirmation, never a manager-made link.
+        .eq("link_method", "worker_confirmed")
         .limit(MAX_LINKED_PEOPLE);
       if (people.error) {
         // A store that is not provisioned here is an honest nothing, not a failure.

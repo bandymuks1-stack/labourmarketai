@@ -1,4 +1,184 @@
 {
+  "counterparty": {
+    "link": {
+      "title": "Acceptatie van het werk door de opdrachtgever",
+      "lead": "Registreer uw organisatie als opdrachtgever van een werknemer die actief aan dit project is toegewezen, rechtstreeks of via een team. Daarna kan de werknemer zijn werk ter beoordeling bij u indienen. Zonder echte toewijzing wordt niets geregistreerd.",
+      "empty": "Er is nog niemand actief aan dit project toegewezen. Wijs eerst een persoon of een team toe; ze verschijnen dan hier.",
+      "loadFailed": "De werknemers van dit project konden niet worden geladen. Probeer het zo opnieuw.",
+      "honestNote": "Alleen de eigen vertegenwoordiger van de opdrachtgever kan dit registreren of intrekken. De werknemer kan nooit zijn eigen opdrachtgever registreren. De acceptatie door een opdrachtgever is iets anders dan een vastlegging door een manager en is geen betalingsregistratie.",
+      "unnamedWorker": "Werknemer zonder naam",
+      "kind": {
+        "person": "Rechtstreeks toegewezen",
+        "team": "Toegewezen via een team"
+      },
+      "roleLabel": "Uw rol bij dit werk",
+      "role": {
+        "client": "Opdrachtgever",
+        "end_client": "Eindklant",
+        "project_owner": "Projecteigenaar",
+        "customer": "Klant",
+        "contracting_party": "Contractpartij"
+      },
+      "register": "Registreren als wederpartij",
+      "registering": "Bezig met registreren…",
+      "registered": "Geregistreerd",
+      "registeredAs": "Geregistreerd als {role}",
+      "revoke": "Intrekken",
+      "revoking": "Bezig met intrekken…",
+      "revokeQuestion": "Intrekken? U kunt dan niet meer beslissen over het ingediende werk van deze werknemer.",
+      "revokeConfirm": "Ja, intrekken",
+      "cancel": "Annuleren",
+      "result": {
+        "registered": "Geregistreerd. De werknemer kan nu zijn werk bij u indienen.",
+        "already_registered": "Al geregistreerd.",
+        "revoked": "Ingetrokken. Eerder genomen beslissingen blijven vastgelegd.",
+        "already_revoked": "Al ingetrokken.",
+        "invalid_party_role": "Kies een geldige rol.",
+        "project_not_found": "Dit project is niet gevonden.",
+        "project_has_no_organization": "Dit project heeft geen eigenaar-organisatie, dus er kan geen opdrachtgever worden geregistreerd.",
+        "not_authorized": "Alleen een bevoegde vertegenwoordiger van de organisatie van het project kan dit doen.",
+        "worker_not_found": "Deze werknemer is niet gevonden.",
+        "subject_cannot_register_own_counterparty": "U kunt niet uw eigen opdrachtgever registreren.",
+        "no_work_relationship": "Deze werknemer heeft geen actieve toewijzing op het project, dus er valt niets te registreren.",
+        "subject_is_member_of_counterparty": "Deze persoon werkt binnen uw organisatie. De beoordeling door de manager is dan van toepassing.",
+        "counterparty_not_independent": "U deelt een organisatie met deze werknemer en kunt dus niet zijn opdrachtgever zijn.",
+        "link_not_found": "Deze registratie is niet gevonden.",
+        "error": "Er ging iets mis. Er is niets gewijzigd.",
+        "needs_migration": "Deze functie is nog niet beschikbaar."
+      }
+    },
+    "entry": {
+      "title": "Beoordeling door opdrachtgever",
+      "partyUnknown": "de opdrachtgever",
+      "phase": {
+        "ready_to_submit": "Vastgelegd",
+        "submitted": "Ingediend",
+        "accepted": "Geaccepteerd door opdrachtgever",
+        "correction_requested": "Correctie gevraagd",
+        "disputed": "Betwist"
+      },
+      "submitLead": "U kunt deze invoer ter beoordeling indienen bij de opdrachtgever van dit werk. Hij wordt pas verstuurd als u op de knop drukt.",
+      "resubmitLead": "Dit is een gecorrigeerde versie van een eerder ingediende invoer. Dien hem opnieuw in bij de opdrachtgever.",
+      "pickParty": "Wie moet dit beoordelen?",
+      "pickPartyPlaceholder": "Kies…",
+      "willGoTo": "Gaat naar {party}.",
+      "submit": "Indienen ter beoordeling",
+      "resubmit": "Opnieuw indienen",
+      "submitting": "Bezig met indienen…",
+      "neverAutomatic": "Invoer wordt nooit automatisch ingediend.",
+      "submittedTo": "Ingediend bij {party} op {date}.",
+      "submittedGeneric": "Ingediend ter beoordeling door de opdrachtgever.",
+      "awaiting": "Wachten op hun beslissing.",
+      "isResubmission": "Dit is de gecorrigeerde versie.",
+      "acceptedBy": "Geaccepteerd door {party} op {date}.",
+      "acceptedNotEmployer": "Dit is de acceptatie van het werk door de opdrachtgever. Het is iets anders dan een vastlegging door een manager, verifieert geen vaardigheid en is geen betalingsregistratie.",
+      "theirNote": "Hun opmerking",
+      "correctionRequestedBy": "{party} vroeg om een correctie op {date}.",
+      "disputedBy": "{party} betwistte deze invoer op {date}.",
+      "correctionHint": "Corrigeer de invoer en dien de nieuwe versie opnieuw in. De eerdere versie en het verzoek blijven vastgelegd.",
+      "disputedHint": "De betwisting blijft vastgelegd en de opdrachtgever kan haar intrekken. U kunt de invoer ook corrigeren en de nieuwe versie indienen.",
+      "result": {
+        "submitted": "Ingediend ter beoordeling.",
+        "already_submitted": "Deze invoer is al ingediend.",
+        "entry_not_found": "Deze invoer is niet gevonden.",
+        "not_authorized": "Alleen de auteur van de invoer kan hem indienen.",
+        "entry_deleted": "Deze invoer is verwijderd.",
+        "entry_superseded": "Deze invoer is vervangen door een nieuwere versie. Dien de nieuwere in.",
+        "entry_has_no_project": "Koppel deze invoer aan een project voordat u hem indient.",
+        "counterparty_not_valid": "Die opdrachtgever is niet meer geregistreerd voor dit werk.",
+        "no_counterparty_registered": "Voor dit werk is nog geen opdrachtgever geregistreerd.",
+        "counterparty_ambiguous": "Er is meer dan één opdrachtgever geregistreerd. Kies wie dit moet beoordelen.",
+        "error": "Er ging iets mis. Er is niets ingediend.",
+        "needs_migration": "Deze functie is nog niet beschikbaar."
+      }
+    },
+    "queue": {
+      "title": "Beoordeling door opdrachtgever",
+      "lead": "Werk dat werknemers bij u hebben ingediend als hun opdrachtgever, klant of contractpartij. Accepteer het, vraag om een correctie of betwist het, met een opmerking.",
+      "honestNote": "Uw beslissing wordt vastgelegd als acceptatie door de opdrachtgever. Ze is iets anders dan een vastlegging door een manager, verifieert geen vaardigheden en is geen betalingsgoedkeuring. Accepteren is definitief.",
+      "employerInboxLink": "Inbox beoordeling door manager",
+      "openLink": "Beoordeling opdrachtgever",
+      "bucket": {
+        "to_decide": "Te beslissen",
+        "disputed": "Betwist",
+        "waiting_for_worker": "Wachten op werknemer",
+        "accepted": "Geaccepteerd"
+      },
+      "loadFailed": "De beoordelingswachtrij kon niet worden geladen. Probeer het zo opnieuw.",
+      "emptyTitle": "Er is nog niets bij u ingediend",
+      "empty": "Zodra een werknemer werk bij u indient als opdrachtgever, verschijnt het hier.",
+      "emptyNext": "Registreer uw organisatie als opdrachtgever op een projectpagina, zodat werknemers daarop hun werk bij u kunnen indienen.",
+      "truncated": "De nieuwste {n} van {m} inzendingen worden getoond.",
+      "card": {
+        "workerUnknown": "Werknemer",
+        "yourRole": "u bent: {role}",
+        "submittedOn": "ingediend {date}",
+        "resubmission": "Gecorrigeerde versie van een invoer waarvoor u om correctie vroeg.",
+        "work": "Werk",
+        "hours": "Uren",
+        "hoursUnclear": "onduidelijk in de tekst",
+        "quantity": "Hoeveelheid",
+        "photos": "Foto's van de werknemer",
+        "noPhotos": "Geen foto's toegevoegd.",
+        "photoUnavailable": "Foto niet beschikbaar",
+        "photoAlt": "Werkfoto",
+        "history": "Geschiedenis",
+        "decision": {
+          "approved": "Geaccepteerd",
+          "changes_requested": "Correctie gevraagd",
+          "rejected": "Betwist"
+        },
+        "detailUnavailable": "De details van deze inzending konden niet worden geladen, dus er kan nu niet over beslist worden. Probeer het zo opnieuw.",
+        "acceptedFinal": "Geaccepteerd. Dit is definitief.",
+        "waitingForWorker": "U vroeg om een correctie. De gecorrigeerde versie verschijnt hier als nieuwe inzending.",
+        "yourDecision": "Uw beslissing",
+        "action": {
+          "accept": "Werk accepteren",
+          "request_correction": "Correctie vragen",
+          "dispute": "Betwisten"
+        },
+        "actionHint": {
+          "accept": "U staat achter dit werk als uitgevoerd. Definitief.",
+          "request_correction": "De werknemer corrigeert de invoer en dient hem opnieuw in.",
+          "dispute": "U bent het er niet mee eens. Het blijft vastgelegd; later kunt u het intrekken door te accepteren."
+        },
+        "withdrawDisputeHint": "U betwistte dit eerder. U kunt de betwisting intrekken door te accepteren; de betwisting blijft in de geschiedenis.",
+        "noteLabel": "Opmerking (optioneel)",
+        "noteLabelRequired": "Opmerking (verplicht)",
+        "noteHint": "De werknemer ziet deze opmerking.",
+        "chooseFirst": "Kies een beslissing",
+        "saving": "Bezig met opslaan…",
+        "submit": {
+          "accept": "Accepteren",
+          "request_correction": "Correctie vragen",
+          "dispute": "Betwisten"
+        },
+        "acceptIsFinal": "Accepteren kan niet ongedaan worden gemaakt.",
+        "result": {
+          "ok": {
+            "approved": "Geaccepteerd. Vastgelegd als acceptatie door de opdrachtgever.",
+            "changes_requested": "Correctie gevraagd. De werknemer is op de hoogte gebracht.",
+            "rejected": "Betwisting vastgelegd."
+          },
+          "note_required": "Schrijf een korte opmerking voor de werknemer.",
+          "note_too_long": "De opmerking is te lang.",
+          "invalid_decision": "Kies een beslissing.",
+          "entry_not_found": "Deze invoer is niet gevonden.",
+          "entry_not_org_scoped": "Over deze invoer kan hier niet worden beslist.",
+          "not_authorized": "U bent niet bevoegd hierover te beslissen.",
+          "review_not_enabled": "Beoordeling is voor dit werk niet ingeschakeld.",
+          "no_reviewer_engagement": "U heeft geen beoordelingsbevoegdheid voor deze organisatie.",
+          "self_review_not_allowed": "U kunt niet beslissen over uw eigen werk.",
+          "review_authority_not_established": "U bent niet de geregistreerde opdrachtgever voor dit werk, of het is niet bij u ingediend.",
+          "already_accepted": "Dit werk is al geaccepteerd. Een acceptatie is definitief.",
+          "entry_superseded": "De werknemer heeft deze invoer vervangen door een nieuwere versie.",
+          "entry_deleted": "Deze invoer is verwijderd.",
+          "error": "Er ging iets mis. Er is niets vastgelegd.",
+          "needs_migration": "Deze functie is nog niet beschikbaar."
+        }
+      }
+    }
+  },
   "cvBridge": "{confirmed} van {total} vermeldingen bevestigd — bevestigd werk verschijnt op je cv.",
   "cvBridgeEmpty": "Nog geen items — werkregistraties die je hier aanmaakt, voeden je CV.",
   "cvBridgeLink": "Cv openen",
@@ -83,6 +263,8 @@
   "projectNone": "Geen projectwerk",
   "projectAmbiguous": "Je bent aan meerdere projecten toegewezen. Kies vóór het opslaan bij welk project deze uren horen (of markeer ze als geen projectwerk).",
   "projectAuto": "Project: {name}",
+  "projectViaTeam": "{project} (via ploeg {team})",
+  "projectClient": "{project} (klantproject)",
   "unconfirmedTimeBlocked": "{count, plural, one {# geregistreerde duur wacht nog op je beoordeling en zou niet worden opgeslagen.} other {# geregistreerde duren wachten nog op je beoordeling en zouden niet worden opgeslagen.}} Behoud of verwijder ze eerst.",
   "entry": {
     "reviewedBy": "Beoordeeld door",
@@ -203,7 +385,10 @@
       "entrySuperseded": "De registratie is al vervangen door een nieuwere versie — deze kaart is niet meer uitvoerbaar en wordt uit de lijst verwijderd.",
       "entryDeleted": "De registratie is verwijderd — deze kaart is niet meer uitvoerbaar en wordt uit de lijst verwijderd.",
       "staleTerminalHint": "Er is niets vastgelegd. Als de medewerker een nieuwere versie heeft opgeslagen, verschijnt die als nieuwe kaart in de inbox.",
-      "noReviewerEngagement": "U ziet dit item als manager, maar bevestigen vereist bevestigingsbevoegdheid. Vraag de eigenaar van de organisatie die te verlenen op de pagina Mensen."
+      "noReviewerEngagement": "U ziet dit item als manager, maar bevestigen vereist bevestigingsbevoegdheid. Vraag de eigenaar van de organisatie die te verlenen op de pagina Mensen.",
+      "selfReviewNotAllowed": "U kunt uw eigen werk niet bevestigen. Het item blijft als zelf opgegeven vastgelegd; bevestiging moet van een andere bevoegde persoon komen.",
+      "reviewAuthorityNotEstablished": "U bent niet de legitieme wederpartij voor dit werk en kunt het dus niet bevestigen. Bevestiging komt van de werkgever of van de klant aan wie het werk is voorgelegd.",
+      "alreadyAccepted": "Dit werk is al geaccepteerd. Een acceptatie is definitief."
     },
     "showOriginal": "Origineel tonen",
     "skills": "Vaardigheden",

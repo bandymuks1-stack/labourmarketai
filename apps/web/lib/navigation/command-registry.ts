@@ -552,6 +552,29 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
       ],
     },
   },
+  // Client review queue — the counterparty of a worker's work (client /
+  // customer / contracting party) decides the entries the worker submitted.
+  {
+    id: "client_review_queue",
+    route: "/dashboard/inbox/counterparty",
+    audience: "company",
+    labels: {
+      en: "Review work submitted to you as client",
+      lt: "Peržiūrėti jums kaip užsakovui pateiktą darbą",
+      ru: "Проверить работу, поданную вам как заказчику",
+      nl: "Werk beoordelen dat aan u als opdrachtgever is voorgelegd",
+      de: "Als Auftraggeber eingereichte Arbeit prüfen",
+      pl: "Sprawdź pracę przekazaną Tobie jako zleceniodawcy",
+    },
+    synonyms: {
+      en: ["client review", "client acceptance", "accept work", "customer review"],
+      lt: ["užsakovo peržiūra", "darbo priėmimas", "priimti darbą", "kliento patvirtinimas"],
+      ru: ["проверка заказчика", "принять работу", "приёмка работы"],
+      nl: ["opdrachtgever beoordeling", "werk accepteren", "oplevering"],
+      de: ["auftraggeber prüfung", "arbeit abnehmen", "abnahme"],
+      pl: ["przegląd zleceniodawcy", "odbiór pracy", "akceptacja pracy"],
+    },
+  },
   {
     id: "follow_up",
     // Follow-up chips / counters live in project operations under the

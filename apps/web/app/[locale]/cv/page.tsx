@@ -1050,6 +1050,18 @@ export default async function VerifiedCvPage({
               })}
             </p>
           )}
+          {/* Work the CLIENT accepted - its own fact, beside (never inside) the
+              employer-confirmed figure; not a skill certification and not a
+              payment record. Shown only when it exists. */}
+          {cv.clientAcceptedEntries !== null && cv.clientAcceptedEntries > 0 && (
+            <p
+              className="text-meta text-text-muted"
+              data-testid="cv-client-accepted-work"
+              data-entries={cv.clientAcceptedEntries}
+            >
+              {t("clientAcceptedWorkFact", { entries: cv.clientAcceptedEntries })}
+            </p>
+          )}
           {/* The organization's own hour records (owner §19) — the second
               ledger, named beside the journal figure and added to nothing:
               an hour record proves attendance, not a skill. Shown only when

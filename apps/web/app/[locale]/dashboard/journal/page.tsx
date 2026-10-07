@@ -8,6 +8,7 @@ import {
   type JournalEngagement,
 } from "@/components/app/journal-entry-composer";
 import { readActiveProjectsByOrg } from "@/lib/journal/project-attribution-read";
+import { projectsForContext } from "@/lib/journal/project-attribution";
 import { JournalEntryRow } from "@/components/app/journal-entry-row";
 import { EvidenceChain } from "@/components/app/work-world/evidence-chain";
 import { deriveEvidenceChain } from "@/lib/evidence/evidence-chain";
@@ -60,6 +61,12 @@ import {
   deriveReviewTimeline,
 } from "@/lib/journal/review-status";
 import { EvidenceDecisionTimeline } from "@/components/app/evidence-decision-timeline";
+import { EntryReviewPanel } from "@/components/app/entry-review-panel";
+import { readEntryReviewStates } from "@/lib/journal/counterparty-review";
+import {
+  entryReviewPhase,
+  isResubmission,
+} from "@/lib/journal/counterparty-review-model";
 import { EmptyState } from "@/components/app/empty-state";
 import { JournalJobContext } from "@/components/app/journal-job-context";
 import { createClient } from "@/lib/supabase/server";
@@ -644,7 +651,7 @@ export default async function JournalPage({
     ]);
   const composerEngagements: JournalEngagement[] = engagements.map((e, i) => {
     const orgId = ecOrdered[i]?.organization_id ?? null;
-    return { ...e, projects: orgId ? (projectsByOrg.get(orgId) ?? []) : [] };
+    return { ...e, projects: projectsForContext(projectsByOrg, orgId) };
   });
   // The DAY records (what the calendar places and the day checks add) and
   // the PERIOD records (beside, never on a day) — one reading, split here.
@@ -742,6 +749,24 @@ export default async function JournalPage({
   const entries: JournalEntryRow[] | null = entriesRead.ok
     ? entriesRead.entries
     : null;
+
+  // ── Client review state (EVID-2 slice 2) ─────────────────────────────────
+  // Per entry: submitted? accepted / correction requested / disputed? and which
+  // counterparties the worker may submit to (valid registered links only).
+  // The ids of the entries a listed correction points at are included, so a
+  // corrected version knows its original WAS submitted ("Resubmit"). A failed
+  // read (null) shows no review panel - unknown is never rendered as "none".
+  const reviewStateIds = [
+    ...new Set(
+      (entries ?? []).flatMap((e) =>
+        e.correction_of ? [e.id, e.correction_of] : [e.id],
+      ),
+    ),
+  ];
+  const reviewStates =
+    entries && entries.length > 0
+      ? await readEntryReviewStates(supabase, reviewStateIds)
+      : null;
 
   // ── Lazy historical heal (Universal Journal Recall v2) ──────────────────
   // Up to 5 own live entries whose latest `pipeline_version` metric is below
@@ -1127,6 +1152,9 @@ export default async function JournalPage({
           // Evidence strength needs to know which entries carry photos —
           // one bounded read over the live ids already in hand.
           photoCountByEntry: entryPhotoCounts ?? new Map<string, number>(),
+          // The signed-in person IS the subject: their own approval of their
+          // own entry is not a confirmation (review-status.ts).
+          subjectProfileId: user.id,
           organizationRecords,
           organizationPeriodRecords,
         })
@@ -1809,8 +1837,14 @@ export default async function JournalPage({
                       // v3 — Delete control is offered only when the entry has no
                       // external confirmations yet. The RPC re-enforces the same
                       // rule server-side, so a stale client can't escalate.
+                      // An entry submitted to a client is no longer a private
+                      // draft: it is changed only through the visible
+                      // correction path below, never silently edited away.
+                      const reviewState = reviewStates?.get(e.id) ?? null;
+                      const reviewPhase = entryReviewPhase(reviewState);
                       const canDelete =
-                        (e.journal_entry_confirmations ?? []).length === 0;
+                        (e.journal_entry_confirmations ?? []).length === 0 &&
+                        reviewState?.submission == null;
                       // Edit-in-place (journal compact UX v1): the same full
                       // editable state the `?editing=` flow reconstructs, built
                       // per unconfirmed entry so the row's drawer-based editor
@@ -1939,6 +1973,40 @@ export default async function JournalPage({
                                   verification.state !== "verifier_not_identified"
                                 }
                               />
+                              {reviewState && reviewPhase !== "none" ? (
+                                <EntryReviewPanel
+                                  entryId={e.id}
+                                  phase={reviewPhase}
+                                  state={reviewState}
+                                  resubmission={isResubmission(
+                                    reviewState,
+                                    reviewStates ?? new Map(),
+                                  )}
+                                  correctSlot={
+                                    reviewPhase === "correction_requested" ||
+                                    reviewPhase === "disputed" ? (
+                                      <JournalEntryEditLauncher
+                                        key="correct-launcher"
+                                        entry={buildEditingEntry({
+                                          id: e.id,
+                                          originalText: e.original_text,
+                                          metrics: e.journal_entry_metrics,
+                                          engagementContextId:
+                                            e.engagement_context_id ?? null,
+                                          linkedSkillSlugs: (
+                                            linksByEntry.get(e.id) ?? []
+                                          )
+                                            .map((sid) => skillIdToSlug.get(sid))
+                                            .filter((s): s is string => !!s),
+                                        })}
+                                        engagements={engagements}
+                                        directions={directions}
+                                        workerSkills={workerSkills}
+                                      />
+                                    ) : undefined
+                                  }
+                                />
+                              ) : null}
                             </>
                           }
                         >

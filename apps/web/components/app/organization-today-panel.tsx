@@ -53,6 +53,14 @@ export async function OrganizationTodayPanel({
           t={t}
           testId="awaiting-review"
         />
+        {state.clientReviewToDecide !== null && state.clientReviewToDecide > 0 ? (
+          <Fact
+            label={t("clientReviewToDecide")}
+            value={state.clientReviewToDecide}
+            t={t}
+            testId="client-review-to-decide"
+          />
+        ) : null}
       </dl>
 
       <Band

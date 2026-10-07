@@ -35,6 +35,7 @@ function builderFor(table: string) {
     select: () => chain,
     eq: () => chain,
     in: () => chain,
+    limit: () => chain,
     // The journal read applies the shared live-entry rule, which chains two
     // `.is()` calls. This double is about the UNREAD-vs-ZERO semantics below,
     // so it just has to stay chainable; that the reader really asks for live
@@ -52,18 +53,38 @@ vi.mock("@/lib/supabase/server", () => ({
 
 import { getOwnTrustSignals } from "@/lib/profile/trust-signals";
 
+const SUBJECT = "profile-of-the-person";
+const approved = (by: string) => ({
+  confirmation_scope: { decision: "approved" },
+  created_at: "2026-09-01T10:00:00Z",
+  confirmer_id: by,
+});
+const rejected = (by: string) => ({
+  confirmation_scope: { decision: "rejected" },
+  created_at: "2026-09-01T10:00:00Z",
+  confirmer_id: by,
+});
+
 beforeEach(() => {
   tables.clear();
   tables.set("worker_skills", ok({ count: 4 }));
-  tables.set("journal_entries", ok({ data: [{ id: "e1" }, { id: "e2" }] }));
-  tables.set("journal_entry_confirmations", ok({ count: 12 }));
+  tables.set("workers", ok({ data: [{ profile_id: SUBJECT }] }));
+  tables.set(
+    "journal_entries",
+    ok({
+      data: [
+        { id: "e1", journal_entry_confirmations: [approved("manager-1")] },
+        { id: "e2", journal_entry_confirmations: [] },
+      ],
+    }),
+  );
 });
 
 describe("counts that were read are reported as they are", () => {
   it("returns the real numbers when every read succeeds", async () => {
     expect(await getOwnTrustSignals("w1")).toEqual({
       verifiedSkills: 4,
-      managerConfirmations: 12,
+      managerConfirmations: 1,
       journalEntries: 2,
     });
   });
@@ -82,13 +103,61 @@ describe("counts that were read are reported as they are", () => {
   });
 });
 
+describe("ONE definition of confirmed (F1/F2, counter-canonical)", () => {
+  it("counts ENTRIES, once, with an independent approval - not decision rows", async () => {
+    tables.set(
+      "journal_entries",
+      ok({
+        data: [
+          // approved twice by two managers: still ONE confirmed entry (was 2 rows)
+          { id: "a", journal_entry_confirmations: [approved("m1"), approved("m2")] },
+          // rejected: reviewed, NOT confirmed (was counted as a confirmation)
+          { id: "b", journal_entry_confirmations: [rejected("m1")] },
+          // the person approved their own entry: NOT confirmed (was counted)
+          { id: "c", journal_entry_confirmations: [approved(SUBJECT)] },
+          // a CONFIRMED original that was corrected and resubmitted: the
+          // correction replaces it, and carries no confirmation of its own
+          { id: "orig", journal_entry_confirmations: [approved("m1")] },
+          { id: "fix", correction_of: "orig", journal_entry_confirmations: [] },
+        ],
+      }),
+    );
+    const s = await getOwnTrustSignals("w1");
+    // pre-fix: 5 entries, 5 decision rows ("confirmations")
+    expect(s.journalEntries).toBe(4);
+    expect(s.managerConfirmations).toBe(1);
+  });
+});
+
+describe("decision 0018: a client acceptance is not a confirmed entry", () => {
+  it("trust-signals confirmations (profile, CV, reports hub) ignore client_accept rows", async () => {
+    const clientAccept = {
+      confirmation_scope: { action: "client_accept", decision: "approved", authority: { basis: "counterparty" } },
+      created_at: "2026-09-12T10:00:00Z",
+      confirmer_id: "client-user",
+    };
+    tables.set(
+      "journal_entries",
+      ok({
+        data: [
+          { id: "a", journal_entry_confirmations: [clientAccept] },
+          { id: "b", journal_entry_confirmations: [approved("m1"), clientAccept] },
+        ],
+      }),
+    );
+    const s = await getOwnTrustSignals("w1");
+    expect(s.journalEntries).toBe(2);
+    expect(s.managerConfirmations).toBe(1); // only the employer approval
+  });
+});
+
 describe("counts that failed are null, and only those", () => {
   it("a failed skills read does not say the person has no verified skills", async () => {
     tables.set("worker_skills", fails());
     const s = await getOwnTrustSignals("w1");
     expect(s.verifiedSkills).toBeNull();
     // The others were read and must keep their real values.
-    expect(s.managerConfirmations).toBe(12);
+    expect(s.managerConfirmations).toBe(1);
     expect(s.journalEntries).toBe(2);
   });
 
@@ -100,8 +169,8 @@ describe("counts that failed are null, and only those", () => {
     expect(s.verifiedSkills).toBe(4);
   });
 
-  it("a failed confirmations read leaves the entry count intact", async () => {
-    tables.set("journal_entry_confirmations", fails());
+  it("an unreadable subject makes the confirmed figure unknown, never a number that counts self-approvals", async () => {
+    tables.set("workers", fails());
     const s = await getOwnTrustSignals("w1");
     expect(s.managerConfirmations).toBeNull();
     expect(s.journalEntries).toBe(2);

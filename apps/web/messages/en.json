@@ -126,15 +126,15 @@
   },
   "marketplaceListings": {
     "pageTitle": "Marketplace",
-    "pageIntro": "Work resources across Europe — accommodation, premises, vehicles, tools and equipment offered for sale, rent or wanted. An enquiry opens a direct conversation.",
+    "pageIntro": "Offers and needs across Europe — work resources, goods, services and projects. An enquiry opens a direct conversation. No payments are taken here.",
     "title": "Marketplace listings",
     "myTitle": "My listings",
-    "intro": "List a work resource you offer or are looking for. Only active listings are visible to others.",
+    "intro": "List what you offer or need. Only active listings that have not expired are visible to others.",
     "notAvailable": "Not available right now.",
     "empty": "No listings yet. Add your first work resource.",
     "addButton": "Add listing",
     "browseTitle": "Browse active listings",
-    "browseIntro": "Work resources currently offered across the network.",
+    "browseIntro": "What is currently offered or needed across the network.",
     "browseEmpty": "No active listings to show yet.",
     "enquire": "Enquire",
     "linkToServices": "Looking for professional services? Open Services",
@@ -150,7 +150,7 @@
     "formLabelPlaceholder": "City or region",
     "formPriceLabel": "Price",
     "formPricePlaceholder": "e.g. €450/month or by agreement",
-    "priceHint": "Price is optional and free-text. No payment is taken here.",
+    "priceHint": "Price is optional and descriptive. No payment is taken here.",
     "save": "Save",
     "saving": "Saving…",
     "cancel": "Cancel",
@@ -166,7 +166,8 @@
     "status": {
       "draft": "Draft",
       "active": "Active",
-      "closed": "Closed"
+      "closed": "Closed",
+      "paused": "Paused"
     },
     "kinds": {
       "sale": "For sale",
@@ -180,7 +181,82 @@
       "tools": "Tools",
       "equipment": "Equipment",
       "machinery": "Machinery",
-      "safety_equipment": "Safety equipment"
+      "safety_equipment": "Safety equipment",
+      "goods_food_homegrown": "Home-grown food",
+      "goods_handmade": "Handmade & art",
+      "goods_household": "Household items",
+      "goods_other": "Other goods",
+      "service_general": "Service needed — general",
+      "service_trade": "Service needed — trades",
+      "service_creative": "Service needed — creative",
+      "service_other": "Service needed — other",
+      "personal": "Personal",
+      "project_work": "Project or contract work"
+    },
+    "formDomainLabel": "Area",
+    "formAmountLabel": "Price amount",
+    "formCurrencyLabel": "Currency",
+    "formQuantityLabel": "Quantity",
+    "formQuantityPlaceholder": "e.g. 30",
+    "formUnitLabel": "Unit",
+    "formUnitPlaceholder": "e.g. kg, pcs",
+    "formExpiryLabel": "Available until",
+    "formExpiryHint": "Optional. Amount, quantity and date are descriptive — no payment is taken here. After the date the listing stops appearing to others.",
+    "domainFilterLabel": "Filter by area",
+    "actorFilterLabel": "Filter by who offers or needs",
+    "actorKinds": {
+      "all": "All",
+      "person": "Person",
+      "company": "Company",
+      "institution": "Organisation or institution",
+      "agency": "Agency",
+      "service_provider": "Independent service provider",
+      "supplier": "Supplier",
+      "other": "Type not stated"
+    },
+    "errorPrice": "Enter a valid amount together with a 3-letter currency (e.g. EUR).",
+    "errorQuantity": "Quantity must be a number greater than zero.",
+    "errorExpiry": "The date must be in the future.",
+    "errorRestricted": "This kind of item cannot be listed here.",
+    "legalCheckFood": "Selling food or home-grown produce is subject to food-sale and hygiene rules. Before publishing, confirm you have checked the rules that apply to you.",
+    "legalCheckAck": "I have checked the rules that apply to me",
+    "serviceNeedHint": "A service need is always a wanted listing.",
+    "moreTypesSoon": "More listing types will be available here soon.",
+    "pause": "Pause",
+    "expired": "Expired",
+    "expiresOn": "Until {date}",
+    "openInServices": "Open in Services",
+    "domains": {
+      "all": "All",
+      "work_resource": "Work resources",
+      "goods": "Goods",
+      "service_need": "Services needed",
+      "personal": "Personal",
+      "project_work": "Projects & contracts",
+      "service": "Services offered",
+      "other": "Other",
+      "job": "Jobs & vacancies",
+      "workforce": "Available workforce"
+    },
+    "directions": {
+      "offer": "Offered",
+      "need": "Needed",
+      "other": "Other"
+    },
+    "federationPartial": "Some sources could not be read right now, so this list may be incomplete.",
+    "allJobsLink": "Browse the full jobs board",
+    "titleNotStated": "Title not stated",
+    "openInSource": "Open where it lives",
+    "visibility": {
+      "public": "Public",
+      "signed_in": "Signed-in members",
+      "organizations": "Organizations only",
+      "workers": "Workers only",
+      "own": "Yours"
+    },
+    "provenance": {
+      "platform": "On this platform",
+      "external_vacancy": "Public vacancy, external source"
     }
   },
   "quality": {
@@ -728,15 +804,15 @@
     },
     "basis": {
       "label": "Basis",
-      "workerEvidence": "Counted by the evidence-report rules from your own catalogued skills, work-journal entries and manager confirmations. No score, no estimate.",
+      "workerEvidence": "Counted by the evidence-report rules from your own catalogued skills and work-journal entries. Confirmed entries are live entries a manager approved, each counted once; your own approvals and rejected entries are not included. No score, no estimate.",
       "workerActivity": "Counts of your own journal entries and uploaded photos.",
       "orgDemand": "Counts over the demand requests you created yourself. Open = draft, submitted, in review or needs follow-up.",
       "orgProjects": "Counts of your own company's project rows, grouped by each row's recorded status.",
-      "orgTasks": "Counts of tasks where you are the assignee or the creator, grouped by recorded status.",
+      "orgTasks": "Counts of tasks where you are the assignee or the creator, grouped by recorded status. This is your own task list, not the whole organisation's.",
       "orgDocuments": "Only workers who agreed to share combined document counts are counted.",
       "orgFinance": "Counts over your own recorded finance records; overdue is derived from each record's own due date. Manual records only — no payment data.",
       "orgDemandOrg": "Counts over demand requests attributed to your organisation (all members with demand access see the same figures). Open = draft, submitted, in review or needs follow-up. Worker interest counts workers who signalled interest on these requests.",
-      "journal": "Counts of work entries recorded by workers in this organisation's engagements over the last seven calendar days. Awaiting review is the current review queue; confirmed counts the window's entries a manager has confirmed. An absence of entries is not evidence that no work happened."
+      "journal": "Counts of work entries recorded by workers in this organisation's engagements over the last seven calendar days, each correction chain counted once. Awaiting review is the whole current review queue, not only the last seven days. Confirmed counts the window's entries whose latest review is an approval by someone other than the worker. An absence of entries is not evidence that no work happened."
     },
     "worker": {
       "evidence": {
@@ -745,7 +821,7 @@
         "workSupported": "Backed by work journal entries",
         "confirmed": "Confirmed",
         "journalEntries": "Journal entries",
-        "confirmations": "Confirmations",
+        "confirmations": "Manager-confirmed entries",
         "empty": "No evidence data yet — figures appear once your profile and work journal carry real records.",
         "link": "Open the full evidence report"
       },
@@ -787,10 +863,11 @@
         },
         "total": "Total",
         "empty": "No projects yet — figures appear as soon as your company has project rows.",
-        "link": "Open projects"
+        "link": "Open projects",
+        "other": "Other status"
       },
       "tasks": {
-        "title": "Tasks by status",
+        "title": "Your tasks by status",
         "open": "Open",
         "status": {
           "todo": "To do",
@@ -816,7 +893,7 @@
       "journal": {
         "title": "Work journal (last seven days)",
         "recorded": "Entries recorded",
-        "awaitingReview": "Awaiting review",
+        "awaitingReview": "Awaiting review (all dates)",
         "confirmed": "Confirmed",
         "link": "Open the journal report"
       }
@@ -2297,7 +2374,9 @@
         "review": "Journal entries to review",
         "invitations": "Pending worker invitations",
         "claims": "Public need submissions you can claim",
-        "reviewOff": "Workers with recorded work whose confirmation is switched off"
+        "reviewOff": "Workers with recorded work whose confirmation is switched off",
+        "unreadable": "could not be read",
+        "clientReview": "Work waiting for your decision as the client"
       }
     },
     "agency": {
@@ -6053,6 +6132,16 @@
         "precheckChoose": "Choose instead",
         "precheckAssignAnyway": "Assign anyway",
         "precheckAdvisory": "Advisory: checked just now, and not re-checked when you save. Nothing has been assigned yet.",
+        "reasonLabel": "Reason for keeping (optional)",
+        "reasonNone": "No reason given",
+        "keepFailed": "The override receipt could not be recorded. Nothing was saved - try again.",
+        "reason": {
+          "agreed_with_worker": "Agreed with the worker",
+          "agreed_with_client": "Agreed with the client",
+          "partial_overlap": "Overlap is only partial",
+          "urgent_need": "Urgent need",
+          "other": "Other"
+        },
         "collidesTitle": "Already committed on these dates",
         "notBlocking": "This does not block the assignment — you decide what is right.",
         "alternativesTitle": "Free on these dates",
@@ -6065,7 +6154,8 @@
           "project": "Project",
           "booking": "Booking",
           "trip": "Business trip",
-          "absence": "Unavailable"
+          "absence": "Unavailable",
+          "plan": "Planned work"
         }
       }
     },
@@ -6091,10 +6181,13 @@
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
+      "clientTitle": "{n, plural, one {# entry is waiting for your decision as the client} other {# entries are waiting for your decision as the client}}",
       "pendingBody": "One tap — and a person's work becomes confirmed proof.",
+      "clientCta": "Open client review",
       "cta": "Confirm now",
       "zero": "Nothing is waiting for confirmation right now — the team's rhythm is calm.",
-      "zeroCta": "Review queue"
+      "zeroCta": "Review queue",
+      "unreadable": "The review queue could not be read just now. That does not mean nothing is waiting."
     },
     "draft": {
       "title": "Projects and teams"
@@ -6103,6 +6196,7 @@
     "myProjectsEmpty": "You are not assigned to any project yet. When a company assigns you, the project will appear here.",
     "assignmentActive": "Active",
     "assignmentEnded": "Ended",
+    "viaTeam": "via team {team}",
     "untitledProject": "Untitled project",
     "archiveToggle": {
       "label": "Active or finished projects",
@@ -6180,6 +6274,7 @@
     "countersTitle": "Operations",
     "counters": {
       "totalAssigned": "Assigned",
+      "viaTeam": "Via team",
       "ready": "Ready",
       "readyBasis": "Based only on the fields checked here.",
       "needsDeclaredSkills": "No declared skills",
@@ -6321,6 +6416,7 @@
         "notReadyNote": "A dedicated project thread is being prepared. For now start the conversation in your general inbox — the project context is shown above."
       },
       "fieldCount": "{n, plural, one {# person on the field} other {# people on the field}}",
+      "fieldViaTeam": "{n} via team",
       "todayCount": "{n, plural, one {# journal entry today — the day is moving} other {# journal entries today — the day is moving}}",
       "todayZero": "No entries yet today — the day is still waiting for its first record.",
       "fieldTitle": "The field — who is on the team today",
@@ -6331,15 +6427,6 @@
       "noActivity": "No entries yet.",
       "emptyTeam": "This project has no team yet — start the draft and bring the first people onto the field.",
       "emptyTeamCta": "Start the draft",
-      "history": {
-        "title": "Historical work on this project",
-        "provenance": "Organization-provided history, imported from the organization's own records. Not independently verified.",
-        "unavailable": "Historical work could not be read right now. This does not mean there is none.",
-        "empty": "No organization-provided historical work is recorded for this project.",
-        "personUnknown": "Person not named",
-        "hoursUnknown": "Hours not stated",
-        "count": "{n} records"
-      },
       "positionsTitle": "Missing positions",
       "positionsEmpty": "Position needs are still on the way — once ready, you will see here which people are missing.",
       "openOps": "Open project management",
@@ -6358,13 +6445,23 @@
       "allAreas": "All",
       "areaUnknown": "Profession not set",
       "areaBasis": "By each person's primary profession",
-      "teamLabel": "Team"
+      "teamLabel": "Team",
+      "history": {
+        "title": "Historical work on this project",
+        "provenance": "Organization-provided history, imported from the organization's own records. Not independently verified.",
+        "unavailable": "Historical work could not be read right now. This does not mean there is none.",
+        "empty": "No organization-provided historical work is recorded for this project.",
+        "personUnknown": "Person not named",
+        "hoursUnknown": "Hours not stated",
+        "count": "{n} records"
+      }
     },
     "workerView": {
       "eyebrow": "My project",
       "untitled": "Untitled project",
       "assignmentActive": "Active assignment",
       "assignmentEnded": "Assignment ended",
+      "viaTeam": "via team {team}",
       "projectRestricted": "Project details are not available to you right now. Your assignment stays visible.",
       "journalCta": "Write a journal entry",
       "chatCta": "Message",
@@ -7132,31 +7229,7 @@
         "error": "Could not save the answer. Nothing was changed."
       }
     },
-    "addableUnavailable": "The linked-worker list could not be loaded — adding is not possible right now.",
-    "assign": {
-      "heading": "Assign the whole team to a project",
-      "intro": "Each of the {count} members is assigned one by one, and you see the result for every person.",
-      "projectLabel": "Project",
-      "projectPlaceholder": "Choose a project",
-      "submit": "Assign the team",
-      "assigning": "Assigning…",
-      "noProjects": "You have no open projects to assign the team to.",
-      "summary": "{written} of {total} assigned.",
-      "member": {
-        "assigned": "Assigned",
-        "calendar_unknown": "Assigned · dates not confirmed",
-        "calendar_conflict": "Assigned · already busy on these dates",
-        "refused": "Not assigned · you cannot assign this person",
-        "error": "Not assigned · something went wrong"
-      },
-      "outcome": {
-        "not_authed": "Sign in again to continue.",
-        "no_such_team": "This team is not yours to assign.",
-        "empty_team": "This team has no members yet.",
-        "needs_migration": "Not available right now.",
-        "unavailable": "Could not assign the team. Nothing was changed."
-      }
-    }
+    "addableUnavailable": "The linked-worker list could not be loaded — adding is not possible right now."
   },
   "teamEnquiries": {
     "enquireButton": "Ask this team about work",
@@ -8131,9 +8204,9 @@
   "trust": {
     "unreadHint": "Some of these could not be counted just now, and are shown as “—”. It does not mean you have none — the numbers simply could not be read. Reload in a moment.",
     "title": "Trust signals",
-    "caption": "These counts come straight from your work records.",
+    "caption": "These counts come straight from your work records. Confirmed entries are entries a manager approved, each counted once; your own approvals and rejected entries are not included. Confirmed skills are a separate count.",
     "verifiedSkills": "Manager-confirmed skills",
-    "managerConfirmations": "Manager confirmations",
+    "managerConfirmations": "Manager-confirmed entries",
     "journalEntries": "Journal entries",
     "zeroHint": "Trust signals grow from real work: log a journal entry and complete your profile."
   },
@@ -8160,7 +8233,7 @@
     },
     "summary": {
       "verifiedSkills": "Manager-confirmed skills",
-      "managerConfirmations": "Manager confirmations",
+      "managerConfirmations": "Manager-confirmed entries",
       "journalEntries": "Journal entries"
     },
     "proofTitle": "CV work records",
@@ -8261,6 +8334,7 @@
     "claimFromJournal": "from work journal",
     "recordedHours": "Recorded work: {hours} h from the work journal, {confirmed} h of it confirmed.",
     "confirmedWorkFact": "Work journal entries confirmed by others: {entries, plural, one {# entry} other {# entries}} over {days, plural, one {# work day} other {# work days}}",
+    "clientAcceptedWorkFact": "{entries, plural, one {# work entry} other {# work entries}} accepted by the client. A client's acceptance is not a manager's record of the work and is not a payment record.",
     "recordedHoursNone": "No journal entries with a duration yet — hours next to skills come from your own entries.",
     "skillHours": "{hours} h",
     "skillHoursOwn": "{hours} h, your own record",
@@ -10787,7 +10861,8 @@
       "finance": "Finance",
       "invitation": "Invitation",
       "absence": "Leave",
-      "stage": "Stages"
+      "stage": "Stages",
+      "plan": "Planned work"
     },
     "sourceNotes": {
       "taskError": "Tasks could not be loaded right now. The rest of the plan is unaffected.",
@@ -10831,7 +10906,8 @@
       "finance": "Finance record",
       "invitation": "Invitation",
       "absence": "Leave / absence",
-      "stage": "Project stage"
+      "stage": "Project stage",
+      "plan": "Planned work"
     },
     "projectStatus": {
       "draft": "Draft",
@@ -10928,6 +11004,10 @@
       "dayNoWork": "No work recorded on this day.",
       "dayFuture": "This day has not come yet.",
       "recordOnDay": "Record work on this day"
+    },
+    "planStatus": {
+      "planned": "Planned",
+      "cancelled": "Cancelled"
     }
   },
   "workforcePlanning": {
@@ -11022,6 +11102,7 @@
       "pendingDecisions": "Absence requests awaiting decision",
       "journalToday": "Work entries today",
       "awaitingReview": "Entries awaiting review",
+      "clientReviewToDecide": "Waiting for your decision as the client",
       "absentToday": "Recorded absent today",
       "absentNext": "Recorded absences in the next 7 days",
       "noneRecordedToday": "No approved absence is recorded for today.",
@@ -11055,7 +11136,8 @@
       "kind": {
         "project": "project",
         "booking": "booking",
-        "trip": "business trip"
+        "trip": "business trip",
+        "plan": "planned work"
       },
       "untitled": "untitled",
       "openEnded": "from {start}, no end date recorded",
@@ -11160,6 +11242,7 @@
       "link": "Tasks for this project"
     },
     "objectLabel": "Object",
+    "viaTeam": "via team {team}",
     "assignee": {
       "label": "Assigned to",
       "you": "you",
@@ -11227,7 +11310,8 @@
         "limit_reached": "Attachment limit reached.",
         "entry_not_current": "That record was corrected or withdrawn — attach the current version.",
         "already_unlinked": "That attachment was already withdrawn."
-      }
+      },
+      "unreadable": "The attached records could not be read just now. That does not mean none are attached."
     },
     "approval": {
       "label": "Approval",
@@ -13276,6 +13360,10 @@
           "label": "Move a person to another project",
           "description": "Assigns to the new project and ends the previous assignment — after the what-if."
         },
+        "keepAssignment": {
+          "label": "Keep an assignment despite a calendar clash",
+          "description": "Records your decision to keep the assignment knowing the clash, with a closed reason. Nothing is saved unless the receipt exists."
+        },
         "offerCapacity": {
           "label": "Record what you are offering"
         }
@@ -13637,6 +13725,9 @@
       "assignAlreadyCommitted": "Note: they are already committed on some of these dates ({count}). The assignment stands — you decide.",
       "assignCommitmentUnknown": "We could not confirm these dates are free. That is not the same as free.",
       "assignFailed": "The assignment could not be made.",
+      "keepPrompt": "They are already committed on those dates. Do you keep them on it knowingly? Choose a reason - the decision is recorded.",
+      "keepRecorded": "Recorded: you kept the assignment knowingly.",
+      "keepFailed": "The decision could not be recorded, so nothing was saved. Try again.",
       "chipEngagements": "Who I work with",
       "userEngagements": "Who do I work with?",
       "engagementsOpened": "Here are the work relationships on record. You can end one from the panel.",
@@ -15255,6 +15346,7 @@
     "evidenceDocument": "Document valid until {until} — not yet confirmed",
     "evidenceEntriesAndDocument": "{count, plural, one {# work entry} other {# work entries}} and a document valid until {until} — not yet confirmed",
     "evidenceSelfConfirmed": "You confirmed this yourself — not independently confirmed",
+    "evidenceClientAccepted": "Accepted by the client — not confirmed by an employer",
     "employerConfirmed": "Confirmed by {org}, {date}",
     "employerConfirmedNoDate": "Confirmed by an employer",
     "systemDerived": "Derived from: {source}"
@@ -16843,7 +16935,8 @@
     },
     "correct": "Correct",
     "correctCancel": "Cancel",
-    "correctHint": "Saving writes a new record and keeps the original alongside it — nothing is erased."
+    "correctHint": "Saving writes a new record and keeps the original alongside it — nothing is erased.",
+    "rejectedNotCounted": "rejected, not counted"
   },
   "oauthConsent": {
     "title": "Confirm access",
@@ -16900,16 +16993,6 @@
     "emailInactiveNote": "Email delivery is not active on the platform yet. Your choices are saved and take effect as soon as it is.",
     "error": "The change could not be saved and was reverted. Please try again.",
     "unavailable": "Notification settings are not available right now."
-  },
-  "cvOrganizationHistory": {
-    "title": "Work history supplied by organizations",
-    "note": "Taken from the records of the organizations named here. It is not self-declared and not independently verified.",
-    "untitled": "Work recorded by an organization",
-    "hoursTerm": "Hours",
-    "hoursRecorded": "{hours} h recorded in {count, plural, one {# record} other {# records}}",
-    "hoursPeriod": "{hours} h stated for a period, in {count, plural, one {# record} other {# records}}",
-    "contested": "Contested by someone with standing",
-    "more": "{count, plural, one {# more entry} other {# more entries}} not shown"
   },
   "historyContext": {
     "project": "Project",
@@ -17722,7 +17805,8 @@
           "notReviewableState": "Journal not reviewable yet: a booking does not create a work context. Invite this person to join as an employee — the moment they accept, the context exists and you can enable review. You cannot create it for them.",
           "inviteExit": "Invite to join as an employee",
           "error": "The booked people could not be read right now. Nothing here is a claim that nobody is booked."
-        }
+        },
+        "summaryInvitationsUnread": "{active} active · pending invitations could not be read · {members} members · {review} reviewing journals"
       },
       "needs": {
         "title": "Workforce needs",
@@ -18172,7 +18256,8 @@
       "places": "Places",
       "people": "People",
       "hours": "Hours on record",
-      "period": "Period"
+      "period": "Period",
+      "dayHours": "Hours on single days"
     },
     "place": "Place",
     "noPlaceName": "No place stated",
@@ -18180,8 +18265,8 @@
     "people": "{count, plural, one {# person} other {# people}}",
     "entries": "{count, plural, one {# entry} other {# entries}}",
     "hoursShare": "{hours} h on this place, compared with the busiest place",
-    "noPlace": "{count, plural, one {# entry} other {# entries}} ({hours} h) in the source name no place.",
-    "periodAside": "Of this, {hours} h are period totals stated for a span, kept apart from single days.",
+    "noPlace": "{count, plural, one {# entry} other {# entries}} ({hours} h on single days) in the source name no place.",
+    "periodAside": "Not included above: {hours} h stated as period totals for a span. They are a separate figure and are never added to single days.",
     "scope": {
       "title": "What this import carries",
       "carried": "Carried by the source: who worked, on which day, how many hours, what was done and the place as written.",
@@ -18208,9 +18293,46 @@
       "progress": "{attributed} of {total} attributed to {name}",
       "done": "Attributed {count} records; {skipped} were already attributed.",
       "refused": "This could not be saved. Nothing was changed.",
+      "personPeriod": "{hours} h period total (not added to single days)",
       "person": "{hours} h, {count, plural, one {# record} other {# records}}"
     },
+    "periodShort": "{hours} h period total",
     "truncated": "More records exist than one view reads. The {count} read are shown; totals cover only these."
+  },
+  "workPlan": {
+    "title": "Planned work",
+    "intro": "Plan who works where and when. The calendar shows it as a plan; what actually happened stays in the work journal.",
+    "worker": "Worker",
+    "project": "Project (optional)",
+    "workObject": "Object / site (optional)",
+    "startDate": "From",
+    "endDate": "To",
+    "startTime": "Start time (optional)",
+    "endTime": "End time (optional)",
+    "note": "Note (optional)",
+    "none": "None",
+    "submit": "Plan work",
+    "pending": "Planning…",
+    "cancel": "Cancel plan",
+    "cancelPending": "Cancelling…",
+    "empty": "Nothing planned for this period yet.",
+    "noWorkers": "No workers on your roster yet. Invite people first, then plan their work.",
+    "unavailable": "Planning is not available here yet.",
+    "listTitle": "Planned windows",
+    "overlap": "Overlaps approved leave",
+    "outcome": {
+      "planned": "Work planned.",
+      "cancelled": "Plan cancelled.",
+      "invalid": "Check the dates and fields and try again.",
+      "not_allowed": "You cannot plan for this organization.",
+      "worker_not_in_scope": "That worker is not on this organization's roster.",
+      "project_not_in_organization": "That project belongs to another organization.",
+      "work_object_not_in_organization": "That object belongs to another organization.",
+      "unavailable": "Planning is not available here yet.",
+      "error": "Something went wrong. Try again.",
+      "planned_collides": "Planned, but this person already holds time on some of these days. You decide; cancel the plan below if it is not right.",
+      "planned_unknown": "Planned, but we could not confirm these days are free. That is not the same as free."
+    }
   },
   "workLifecycle": {
     "pending": "Not yet",
@@ -18382,6 +18504,80 @@
       "skills": "{count, plural, one {# skill backed by your records} other {# skills backed by your records}}",
       "next": "Where you can go"
     }
+  },
+  "teamAssignment": {
+    "title": "Teams on this project",
+    "intro": "A team is assigned as one unit. Its members come from the team's own membership, so people who left the team are not counted, and each person's hours and journal stay their own.",
+    "none": "No team is assigned to this project.",
+    "scope": {
+      "project": "Whole project",
+      "task": "Task: {title}",
+      "object": "Work site"
+    },
+    "membersNow": "Members now: {count}",
+    "noMembers": "No active members.",
+    "unnamedMember": "Team member",
+    "unnamedTeam": "Team",
+    "end": "End assignment",
+    "ending": "Ending…",
+    "replaceLabel": "Replace with another team",
+    "replacePlaceholder": "Choose a team",
+    "replaceSubmit": "Replace",
+    "assignTitle": "Assign a team",
+    "teamLabel": "Team",
+    "teamPlaceholder": "Choose a team",
+    "scopeLabel": "What the team works on",
+    "scopeProjectOption": "The whole project",
+    "scopeTaskOption": "One task",
+    "taskLabel": "Task",
+    "taskPlaceholder": "Choose a task",
+    "noTeams": "You do not manage a team yet. Create one on the People page.",
+    "noTasks": "This project has no open tasks.",
+    "submit": "Assign team",
+    "assigning": "Assigning…",
+    "outcome": {
+      "created": "Team assigned.",
+      "already_assigned": "This team is already assigned here. Nothing changed.",
+      "replaced": "Team replaced.",
+      "ended": "Assignment ended.",
+      "already_ended": "This assignment had already ended."
+    },
+    "refusal": {
+      "not_authorized": "You cannot assign this team to this project.",
+      "not_authed": "Sign in again to continue.",
+      "not_a_team": "This is not a team.",
+      "team_has_no_members": "This team has no active members yet.",
+      "project_completed": "This project is completed.",
+      "task_not_assignable": "This task cannot take a team (it is closed or belongs to another project).",
+      "object_not_assignable": "This work site cannot take a team.",
+      "one_scope_only": "Choose either a task or a work site, not both.",
+      "replace_target_not_active": "The assignment to replace is no longer active.",
+      "team_and_project_required": "Choose a team and a project.",
+      "needs_migration": "Not available right now.",
+      "error": "Could not complete this. Nothing was changed."
+    },
+    "calendar": {
+      "conflictsTitle": "Already committed on these dates",
+      "unknownTitle": "Dates could not be confirmed free for",
+      "advisory": "Advisory: the assignment is saved. End it above if the clash is real."
+    },
+    "form": {
+      "heading": "Assign the whole team to a project",
+      "intro": "Assign this team of {count} to a project as one unit.",
+      "projectLabel": "Project",
+      "projectPlaceholder": "Choose a project",
+      "noProjects": "You have no open projects to assign the team to."
+    }
+  },
+  "cvOrganizationHistory": {
+    "title": "Work history supplied by organizations",
+    "note": "Taken from the records of the organizations named here. It is not self-declared and not independently verified.",
+    "untitled": "Work recorded by an organization",
+    "hoursTerm": "Hours",
+    "hoursRecorded": "{hours} h recorded in {count, plural, one {# record} other {# records}}",
+    "hoursPeriod": "{hours} h stated for a period, in {count, plural, one {# record} other {# records}}",
+    "contested": "Contested by someone with standing",
+    "more": "{count, plural, one {# more entry} other {# more entries}} not shown"
   },
   "companyPerson": {
     "eyebrow": "Historical person card",

@@ -1958,6 +1958,7 @@
     "myProjectsEmpty": "Te pole veel ühelegi projektile määratud. Kui ettevõte teid määrab, ilmub projekt siia.",
     "assignmentActive": "Aktiivne",
     "assignmentEnded": "Lõppenud",
+    "viaTeam": "meeskonna {team} kaudu",
     "untitledProject": "Pealkirjata projekt",
     "archiveToggle": {
       "label": "Aktiivsed või lõpetatud projektid",
@@ -1971,6 +1972,7 @@
     "stadium": {
       "eyebrow": "[EN] Stadium",
       "fieldCount": "[EN] {n, plural, one {# person on the field} other {# people on the field}}",
+      "fieldViaTeam": "{n} meeskonna kaudu",
       "todayCount": "[EN] {n, plural, one {# journal entry today — the day is moving} other {# journal entries today — the day is moving}}",
       "todayZero": "[EN] No entries yet today — the day is still waiting for its first record.",
       "fieldTitle": "[EN] The field — who is on the team today",
@@ -1981,6 +1983,9 @@
       "noActivity": "[EN] No entries yet.",
       "emptyTeam": "[EN] This project has no team yet — start the draft and bring the first people onto the field.",
       "emptyTeamCta": "[EN] Start the draft",
+      "positionsTitle": "[EN] Missing positions",
+      "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
+      "openOps": "[EN] Open the management arena",
       "history": {
         "title": "Varasem töö selles projektis",
         "provenance": "Organisatsiooni esitatud ajalugu, imporditud organisatsiooni enda kirjetest. Sõltumatult kontrollimata.",
@@ -1989,16 +1994,14 @@
         "personUnknown": "Isik nimetamata",
         "hoursUnknown": "Tunnid märkimata",
         "count": "{n} kirjet"
-      },
-      "positionsTitle": "[EN] Missing positions",
-      "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
-      "openOps": "[EN] Open the management arena"
+      }
     },
     "workerView": {
       "eyebrow": "Minu projekt",
       "untitled": "Pealkirjata projekt",
       "assignmentActive": "Aktiivne määramine",
       "assignmentEnded": "Määramine lõppenud",
+      "viaTeam": "meeskonna {team} kaudu",
       "projectRestricted": "Projekti üksikasjad pole teile praegu kättesaadavad. Teie määramine jääb nähtavaks.",
       "journalCta": "Kirjuta päevikusse",
       "chatCta": "Saada sõnum",
@@ -3647,6 +3650,10 @@
           "label": "Liiguta inimene teise projekti",
           "description": "Määrab uude projekti ja lõpetab eelmise määramise — pärast tagajärgede vaadet."
         },
+        "keepAssignment": {
+          "label": "Jäta määramine kalendrikonfliktist hoolimata",
+          "description": "Salvestab teie otsuse jätta määramine teadlikult alles, teades konfliktist, suletud põhjuskoodiga. Ilma kviitungita ei salvestata midagi."
+        },
         "offerCapacity": {
           "label": "Pane oma pakkumine kirja"
         }
@@ -3970,6 +3977,9 @@
       "assignAlreadyCommitted": "[EN] Note: they are already committed on some of these dates ({count}). The assignment stands — you decide.",
       "assignCommitmentUnknown": "[EN] We could not confirm these dates are free. That is not the same as free.",
       "assignFailed": "[EN] The assignment could not be made.",
+      "keepPrompt": "Inimene on neil päevadel juba hõivatud. Kas jätate määramise teadlikult alles? Valige põhjus - otsus salvestatakse.",
+      "keepRecorded": "Salvestatud: jätsite määramise teadlikult alles.",
+      "keepFailed": "Otsust ei õnnestunud salvestada, seega ei salvestatud midagi. Proovige uuesti.",
       "chipEngagements": "Kellega ma töötan",
       "userEngagements": "Kellega ma töötan?",
       "engagementsOpened": "Siin on registreeritud töösuhted. Ühe neist saab paneelil lõpetada.",
@@ -6715,16 +6725,6 @@
       }
     }
   },
-  "cvOrganizationHistory": {
-    "title": "Organisatsioonide esitatud töölugu",
-    "note": "Võetud siin nimetatud organisatsioonide enda andmetest. See ei ole enda deklareeritud ega sõltumatult kontrollitud.",
-    "untitled": "Organisatsiooni registreeritud töö",
-    "hoursTerm": "Tunnid",
-    "hoursRecorded": "{hours} h registreeritud ({count, plural, one {# kanne} other {# kannet}})",
-    "hoursPeriod": "{hours} h esitatud perioodi kohta ({count, plural, one {# kanne} other {# kannet}})",
-    "contested": "Vaidlustatud selleks õigust omava isiku poolt",
-    "more": "Veel {count, plural, one {# kirjet} other {# kirjet}} ei näidata"
-  },
   "historyContext": {
     "project": "Projekt",
     "place": "Objekt või tööpakett",
@@ -7110,6 +7110,16 @@
       "skills": "{count, plural, one {# sinu kirjetel põhinev oskus} other {# sinu kirjetel põhinevat oskust}}",
       "next": "Kuhu saad edasi minna"
     }
+  },
+  "cvOrganizationHistory": {
+    "title": "Organisatsioonide esitatud töölugu",
+    "note": "Võetud siin nimetatud organisatsioonide enda andmetest. See ei ole enda deklareeritud ega sõltumatult kontrollitud.",
+    "untitled": "Organisatsiooni registreeritud töö",
+    "hoursTerm": "Tunnid",
+    "hoursRecorded": "{hours} h registreeritud ({count, plural, one {# kanne} other {# kannet}})",
+    "hoursPeriod": "{hours} h esitatud perioodi kohta ({count, plural, one {# kanne} other {# kannet}})",
+    "contested": "Vaidlustatud selleks õigust omava isiku poolt",
+    "more": "Veel {count, plural, one {# kirjet} other {# kirjet}} ei näidata"
   },
   "companyPerson": {
     "eyebrow": "Ajalooline isikukaart",

@@ -24,6 +24,7 @@ import { useTranslations } from "next-intl";
 import {
   PROJECT_FIELD_NONE,
   projectChoiceIsSatisfied,
+  projectDisplayLabel,
   projectPromptFor,
   type AssignedProject,
 } from "@/lib/journal/project-attribution";
@@ -208,7 +209,7 @@ export function DocumentJournalDraftForm({
             <option value="">{tJournal("projectChoose")}</option>
             {contextProjects.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.label}
+                {projectDisplayLabel(p, (k, v) => tJournal(k, v))}
               </option>
             ))}
             <option value={PROJECT_FIELD_NONE}>{tJournal("projectNone")}</option>

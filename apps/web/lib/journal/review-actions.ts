@@ -33,6 +33,15 @@ export type ReviewBlockCode =
   | "not_authorized"
   | "review_not_enabled"
   | "no_reviewer_engagement"
+  /** EVID-2: the reviewer is the entry's own author - self-declared work is
+   *  never turned into independent confirmation by reviewing it yourself. */
+  | "self_review_not_allowed"
+  /** The reviewer holds no authority FROM THE WORK RELATIONSHIP over this
+   *  entry (not its employer, not a submitted-to counterparty, or sharing an
+   *  organization with the subject). Never "some other manager exists". */
+  | "review_authority_not_established"
+  /** A counterparty ACCEPT is final for that entry. */
+  | "already_accepted"
   /** W1 (owner-hold v5): terminal stale outcomes — the entry was edited or
    *  deleted after the card loaded. The card must stop offering actions. */
   | "entry_superseded"
@@ -87,6 +96,12 @@ export async function reviewJournalEntry(
     // this RPC's pre-check and its confirmation INSERT — an error, not a
     // tagged return. Map it to the terminal outcome so the card stops offering
     // actions instead of retrying an impossible one (rev14, Codex P2).
+    if ((error.message ?? "").includes("self_review_not_allowed")) {
+      return { ok: false, code: "self_review_not_allowed" };
+    }
+    if ((error.message ?? "").includes("review_authority_not_established")) {
+      return { ok: false, code: "review_authority_not_established" };
+    }
     const stale = terminalStaleFromError(error.message);
     if (stale) {
       revalidatePath(`/${locale}/dashboard/inbox`);

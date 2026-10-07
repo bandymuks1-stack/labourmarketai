@@ -126,15 +126,15 @@
   },
   "marketplaceListings": {
     "pageTitle": "Marktplaats",
-    "pageIntro": "Werkmiddelen in heel Europa — huisvesting, bedrijfsruimte, voertuigen, gereedschap en uitrusting: te koop, te huur of gezocht. Een aanvraag opent een direct gesprek.",
+    "pageIntro": "Aanbod en vraag in heel Europa — werkmiddelen, goederen, diensten en projecten. Een aanvraag opent een direct gesprek. Er worden hier geen betalingen gedaan.",
     "title": "Marktplaats-advertenties",
     "myTitle": "Mijn advertenties",
-    "intro": "Plaats een werkmiddel dat u aanbiedt of zoekt. Alleen actieve advertenties zijn zichtbaar voor anderen.",
+    "intro": "Plaats wat u aanbiedt of nodig heeft. Alleen actieve advertenties die niet verlopen zijn, zijn zichtbaar voor anderen.",
     "notAvailable": "Momenteel niet beschikbaar.",
     "empty": "Nog geen advertenties. Voeg uw eerste werkmiddel toe.",
     "addButton": "Advertentie toevoegen",
     "browseTitle": "Actieve advertenties bekijken",
-    "browseIntro": "Werkmiddelen die nu in het netwerk worden aangeboden.",
+    "browseIntro": "Wat er momenteel in het netwerk wordt aangeboden of gezocht.",
     "browseEmpty": "Nog geen actieve advertenties.",
     "enquire": "Aanvragen",
     "linkToServices": "Op zoek naar professionele diensten? Open Diensten",
@@ -150,7 +150,7 @@
     "formLabelPlaceholder": "Stad of regio",
     "formPriceLabel": "Prijs",
     "formPricePlaceholder": "bijv. € 450/maand of in overleg",
-    "priceHint": "Prijs is optioneel en vrije tekst. Er wordt hier geen betaling gedaan.",
+    "priceHint": "Prijs is optioneel en beschrijvend. Er wordt hier geen betaling gedaan.",
     "save": "Opslaan",
     "saving": "Opslaan…",
     "cancel": "Annuleren",
@@ -166,7 +166,8 @@
     "status": {
       "draft": "Concept",
       "active": "Actief",
-      "closed": "Gesloten"
+      "closed": "Gesloten",
+      "paused": "Gepauzeerd"
     },
     "kinds": {
       "sale": "Te koop",
@@ -180,7 +181,82 @@
       "tools": "Gereedschap",
       "equipment": "Uitrusting",
       "machinery": "Machines",
-      "safety_equipment": "Veiligheidsuitrusting"
+      "safety_equipment": "Veiligheidsuitrusting",
+      "goods_food_homegrown": "Zelfgekweekt voedsel",
+      "goods_handmade": "Handgemaakt en kunst",
+      "goods_household": "Huishoudelijke spullen",
+      "goods_other": "Overige goederen",
+      "service_general": "Dienst gezocht — algemeen",
+      "service_trade": "Dienst gezocht — ambacht",
+      "service_creative": "Dienst gezocht — creatief",
+      "service_other": "Dienst gezocht — overig",
+      "personal": "Persoonlijk",
+      "project_work": "Project- of contractwerk"
+    },
+    "formDomainLabel": "Gebied",
+    "formAmountLabel": "Prijsbedrag",
+    "formCurrencyLabel": "Valuta",
+    "formQuantityLabel": "Hoeveelheid",
+    "formQuantityPlaceholder": "bijv. 30",
+    "formUnitLabel": "Eenheid",
+    "formUnitPlaceholder": "bijv. kg, stuks",
+    "formExpiryLabel": "Beschikbaar tot",
+    "formExpiryHint": "Optioneel. Bedrag, hoeveelheid en datum zijn beschrijvend — er wordt hier geen betaling gedaan. Na de datum verschijnt de advertentie niet meer voor anderen.",
+    "domainFilterLabel": "Filter op gebied",
+    "actorFilterLabel": "Filter op aanbieder of vrager",
+    "actorKinds": {
+      "all": "Alle",
+      "person": "Persoon",
+      "company": "Bedrijf",
+      "institution": "Organisatie of instelling",
+      "agency": "Bureau",
+      "service_provider": "Zelfstandige dienstverlener",
+      "supplier": "Leverancier",
+      "other": "Type niet vermeld"
+    },
+    "errorPrice": "Voer een geldig bedrag in met een valutacode van 3 letters (bijv. EUR).",
+    "errorQuantity": "De hoeveelheid moet een getal groter dan nul zijn.",
+    "errorExpiry": "De datum moet in de toekomst liggen.",
+    "errorRestricted": "Dit soort artikelen mag hier niet worden geplaatst.",
+    "legalCheckFood": "Voor de verkoop van voedsel of zelfgekweekte producten gelden regels voor voedselverkoop en hygiëne. Bevestig vóór publicatie dat u de regels hebt gecontroleerd die voor u gelden.",
+    "legalCheckAck": "Ik heb de regels gecontroleerd die voor mij gelden",
+    "serviceNeedHint": "Een gezochte dienst is altijd een advertentie van het type Gezocht.",
+    "moreTypesSoon": "Binnenkort komen hier meer advertentietypes beschikbaar.",
+    "pause": "Pauzeren",
+    "expired": "Verlopen",
+    "expiresOn": "Tot {date}",
+    "openInServices": "Open Diensten",
+    "domains": {
+      "all": "Alles",
+      "work_resource": "Werkmiddelen",
+      "goods": "Goederen",
+      "service_need": "Gezochte diensten",
+      "personal": "Persoonlijk",
+      "project_work": "Projecten en contracten",
+      "service": "Aangeboden diensten",
+      "other": "Overig",
+      "job": "Banen & vacatures",
+      "workforce": "Beschikbare arbeidskrachten"
+    },
+    "directions": {
+      "offer": "Aangeboden",
+      "need": "Gezocht",
+      "other": "Overig"
+    },
+    "federationPartial": "Sommige bronnen konden nu niet worden gelezen, dus deze lijst is mogelijk onvolledig.",
+    "allJobsLink": "Bekijk het volledige vacaturebord",
+    "titleNotStated": "Titel niet opgegeven",
+    "openInSource": "Openen waar het staat",
+    "visibility": {
+      "public": "Openbaar",
+      "signed_in": "Ingelogde leden",
+      "organizations": "Alleen organisaties",
+      "workers": "Alleen werknemers",
+      "own": "Van jou"
+    },
+    "provenance": {
+      "platform": "Op dit platform",
+      "external_vacancy": "Openbare vacature, externe bron"
     }
   },
   "quality": {
@@ -728,15 +804,15 @@
     },
     "basis": {
       "label": "Basis",
-      "workerEvidence": "Geteld volgens de regels van het bewijsrapport uit je eigen gecatalogiseerde vaardigheden, werkjournaalregels en bevestigingen van leidinggevenden. Geen score, geen schatting.",
+      "workerEvidence": "Geteld volgens de regels van het bewijsrapport uit je eigen gecatalogiseerde vaardigheden en werkjournaalregels. Bevestigde registraties zijn actuele registraties die een manager heeft goedgekeurd, elk één keer geteld; je eigen goedkeuringen en afgewezen registraties tellen niet mee. Geen score, geen schatting.",
       "workerActivity": "Aantallen van je eigen journaalposten en geüploade foto's.",
       "orgDemand": "Tellingen over de vraagaanvragen die je zelf hebt aangemaakt. Open = concept, ingediend, in beoordeling of vervolg nodig.",
       "orgProjects": "Tellingen van de projectregels van je eigen bedrijf, gegroepeerd per vastgelegde status.",
-      "orgTasks": "Tellingen van taken waarvan je de uitvoerder of maker bent, gegroepeerd per vastgelegde status.",
+      "orgTasks": "Aantallen taken waarvan jij de uitvoerder of de maker bent, gegroepeerd op vastgelegde status. Dit is je eigen takenlijst, niet die van de hele organisatie.",
       "orgDocuments": "Alleen werknemers die instemden met gedeelde totaalcijfers van documenten worden geteld.",
       "orgFinance": "Tellingen over je eigen vastgelegde financiële registraties; achterstallig wordt afgeleid uit de vervaldatum van elke registratie. Alleen handmatige registraties — geen betaalgegevens.",
       "orgDemandOrg": "Tellingen over aanvraagverzoeken die aan je organisatie zijn toegeschreven (alle leden met toegang tot aanvragen zien dezelfde cijfers). Open = concept, ingediend, in beoordeling of vervolg nodig. Interesse van werkers telt werkers die interesse toonden in deze verzoeken.",
-      "journal": "Telt werkregistraties die werkers in de dienstverbanden van deze organisatie hebben vastgelegd over de laatste zeven kalenderdagen. 'Wacht op beoordeling' is de huidige beoordelingswachtrij; 'bevestigd' telt de registraties uit het venster die een manager heeft bevestigd. Het ontbreken van registraties is geen bewijs dat er niet is gewerkt."
+      "journal": "Telt werkregistraties die werkers in de dienstverbanden van deze organisatie hebben vastgelegd over de laatste zeven kalenderdagen, elke correctieketen één keer geteld. 'Wacht op beoordeling' is de hele huidige beoordelingswachtrij, niet alleen de laatste zeven dagen. 'Bevestigd' telt de registraties uit het venster waarvan de laatste beoordeling een goedkeuring is door iemand anders dan de werker. Het ontbreken van registraties is geen bewijs dat er niet is gewerkt."
     },
     "worker": {
       "evidence": {
@@ -745,7 +821,7 @@
         "workSupported": "Onderbouwd door werkdagboek-invoer",
         "confirmed": "Bevestigd",
         "journalEntries": "Journaalregels",
-        "confirmations": "Bevestigingen",
+        "confirmations": "Door een manager bevestigde registraties",
         "empty": "Nog geen bewijsgegevens — cijfers verschijnen zodra je profiel en werkjournaal echte records bevatten.",
         "link": "Open het volledige bewijsrapport"
       },
@@ -787,10 +863,11 @@
         },
         "total": "Totaal",
         "empty": "Nog geen projecten — cijfers verschijnen zodra je bedrijf projectregels heeft.",
-        "link": "Open projecten"
+        "link": "Open projecten",
+        "other": "Andere status"
       },
       "tasks": {
-        "title": "Taken per status",
+        "title": "Jouw taken per status",
         "open": "Open",
         "status": {
           "todo": "Te doen",
@@ -816,7 +893,7 @@
       "journal": {
         "title": "Werkjournaal (laatste zeven dagen)",
         "recorded": "Vastgelegde registraties",
-        "awaitingReview": "Wacht op beoordeling",
+        "awaitingReview": "Wacht op beoordeling (alle datums)",
         "confirmed": "Bevestigd",
         "link": "Journaalrapport openen"
       }
@@ -2297,7 +2374,9 @@
         "review": "Journaalvermeldingen om te beoordelen",
         "invitations": "Openstaande uitnodigingen voor werknemers",
         "claims": "Openbare aanvragen die je kunt overnemen",
-        "reviewOff": "Werknemers met vastgelegd werk waarvan bevestiging uitstaat"
+        "reviewOff": "Werknemers met vastgelegd werk waarvan bevestiging uitstaat",
+        "unreadable": "kon niet worden gelezen",
+        "clientReview": "Werk dat wacht op uw beslissing als opdrachtgever"
       }
     },
     "agency": {
@@ -6053,6 +6132,16 @@
         "precheckChoose": "Kies deze in plaats daarvan",
         "precheckAssignAnyway": "Toch toewijzen",
         "precheckAdvisory": "Alleen een waarschuwing: zojuist gecontroleerd en niet opnieuw gecontroleerd bij het opslaan. Er is nog niets toegewezen.",
+        "reasonLabel": "Reden om te behouden (optioneel)",
+        "reasonNone": "Geen reden opgegeven",
+        "keepFailed": "Het uitzonderingsbewijs kon niet worden vastgelegd. Er is niets opgeslagen - probeer het opnieuw.",
+        "reason": {
+          "agreed_with_worker": "Afgestemd met de werknemer",
+          "agreed_with_client": "Afgestemd met de opdrachtgever",
+          "partial_overlap": "Overlap is slechts gedeeltelijk",
+          "urgent_need": "Dringende behoefte",
+          "other": "Overig"
+        },
         "collidesTitle": "Op deze dagen al vastgelegd",
         "notBlocking": "Dit blokkeert de toewijzing niet — jij beslist.",
         "alternativesTitle": "Vrij in deze periode",
@@ -6065,7 +6154,8 @@
           "project": "Projecttoewijzing",
           "booking": "Boeking",
           "trip": "Dienstreis",
-          "absence": "Niet beschikbaar"
+          "absence": "Niet beschikbaar",
+          "plan": "Gepland werk"
         }
       }
     },
@@ -6091,10 +6181,13 @@
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# vermelding wacht op je bevestiging} other {# vermeldingen wachten op je bevestiging}}",
+      "clientTitle": "{n, plural, one {# invoer wacht op uw beslissing als opdrachtgever} other {# invoeren wachten op uw beslissing als opdrachtgever}}",
       "pendingBody": "Eén tik — en iemands werk wordt bevestigd bewijs.",
+      "clientCta": "Beoordeling opdrachtgever openen",
       "cta": "Nu bevestigen",
       "zero": "Er wacht op dit moment niets op bevestiging — het ritme van de ploeg is rustig.",
-      "zeroCta": "Wachtrij bekijken"
+      "zeroCta": "Wachtrij bekijken",
+      "unreadable": "De beoordelingswachtrij kon nu niet worden gelezen. Dat betekent niet dat er niets wacht."
     },
     "draft": {
       "title": "Projecten en teams"
@@ -6103,6 +6196,7 @@
     "myProjectsEmpty": "Je bent nog aan geen enkel project toegewezen. Zodra een bedrijf je toewijst, verschijnt het project hier.",
     "assignmentActive": "Actief",
     "assignmentEnded": "Beëindigd",
+    "viaTeam": "via ploeg {team}",
     "untitledProject": "Project zonder titel",
     "archiveToggle": {
       "label": "Actieve of afgeronde projecten",
@@ -6180,6 +6274,7 @@
     "countersTitle": "Operaties",
     "counters": {
       "totalAssigned": "Toegewezen",
+      "viaTeam": "Via ploeg",
       "ready": "Klaar",
       "readyBasis": "Alleen gebaseerd op de velden die hier worden gecontroleerd.",
       "needsDeclaredSkills": "Geen opgegeven vaardigheden",
@@ -6321,6 +6416,7 @@
         "notReadyNote": "Een aparte projectthread wordt voorbereid. Start het gesprek voorlopig in je algemene inbox — de projectcontext staat hierboven."
       },
       "fieldCount": "{n, plural, one {# persoon op het veld} other {# personen op het veld}}",
+      "fieldViaTeam": "{n} via ploeg",
       "todayCount": "{n, plural, one {# journaalregistratie vandaag — de dag is in beweging} other {# journaalregistraties vandaag — de dag is in beweging}}",
       "todayZero": "Nog geen registraties vandaag — de dag wacht nog op zijn eerste registratie.",
       "fieldTitle": "Het veld — wie er vandaag in het team staat",
@@ -6331,15 +6427,6 @@
       "noActivity": "Nog geen registraties.",
       "emptyTeam": "Dit project heeft nog geen team — start de draft en breng de eerste mensen het veld op.",
       "emptyTeamCta": "Start de draft",
-      "history": {
-        "title": "Eerder werk aan dit project",
-        "provenance": "Door de organisatie aangeleverde geschiedenis, geïmporteerd uit de eigen gegevens van de organisatie. Niet onafhankelijk geverifieerd.",
-        "unavailable": "Eerder werk kon nu niet worden gelezen. Dat betekent niet dat er geen is.",
-        "empty": "Voor dit project is geen door de organisatie aangeleverd eerder werk vastgelegd.",
-        "personUnknown": "Persoon niet genoemd",
-        "hoursUnknown": "Uren niet opgegeven",
-        "count": "{n} registraties"
-      },
       "positionsTitle": "Ontbrekende posities",
       "positionsEmpty": "Positiebehoeften zijn er nog niet — zodra ze er zijn, zie je hier welke mensen ontbreken.",
       "openOps": "Open projectbeheer",
@@ -6358,13 +6445,23 @@
       "allAreas": "Alle",
       "areaUnknown": "Beroep niet ingesteld",
       "areaBasis": "Op basis van ieders hoofdberoep",
-      "teamLabel": "Ploeg"
+      "teamLabel": "Ploeg",
+      "history": {
+        "title": "Eerder werk aan dit project",
+        "provenance": "Door de organisatie aangeleverde geschiedenis, geïmporteerd uit de eigen gegevens van de organisatie. Niet onafhankelijk geverifieerd.",
+        "unavailable": "Eerder werk kon nu niet worden gelezen. Dat betekent niet dat er geen is.",
+        "empty": "Voor dit project is geen door de organisatie aangeleverd eerder werk vastgelegd.",
+        "personUnknown": "Persoon niet genoemd",
+        "hoursUnknown": "Uren niet opgegeven",
+        "count": "{n} registraties"
+      }
     },
     "workerView": {
       "eyebrow": "Mijn project",
       "untitled": "Project zonder titel",
       "assignmentActive": "Actieve toewijzing",
       "assignmentEnded": "Toewijzing beëindigd",
+      "viaTeam": "via ploeg {team}",
       "projectRestricted": "Projectdetails zijn momenteel niet voor je beschikbaar. Je toewijzing blijft zichtbaar.",
       "journalCta": "Journaalinvoer schrijven",
       "chatCta": "Bericht sturen",
@@ -7132,31 +7229,7 @@
         "error": "Het antwoord kon niet worden opgeslagen. Er is niets gewijzigd."
       }
     },
-    "addableUnavailable": "De lijst met gekoppelde werknemers kon niet worden geladen — toevoegen is nu niet mogelijk.",
-    "assign": {
-      "heading": "Het hele team aan een project toewijzen",
-      "intro": "Elk van de {count} leden wordt apart toegewezen en u ziet het resultaat per persoon.",
-      "projectLabel": "Project voor het team",
-      "projectPlaceholder": "Kies een project",
-      "submit": "Team toewijzen",
-      "assigning": "Bezig met toewijzen…",
-      "noProjects": "U hebt geen open projecten om het team aan toe te wijzen.",
-      "summary": "{written} van {total} toegewezen.",
-      "member": {
-        "assigned": "Toegewezen",
-        "calendar_unknown": "Toegewezen · data niet bevestigd",
-        "calendar_conflict": "Toegewezen · op deze dagen al bezet",
-        "refused": "Niet toegewezen · u mag deze persoon niet toewijzen",
-        "error": "Niet toegewezen · er ging iets mis"
-      },
-      "outcome": {
-        "not_authed": "Meld u opnieuw aan.",
-        "no_such_team": "Dit team kunt u niet toewijzen.",
-        "empty_team": "Dit team heeft nog geen leden.",
-        "needs_migration": "Momenteel niet beschikbaar.",
-        "unavailable": "Het team kon niet worden toegewezen. Er is niets gewijzigd."
-      }
-    }
+    "addableUnavailable": "De lijst met gekoppelde werknemers kon niet worden geladen — toevoegen is nu niet mogelijk."
   },
   "teamEnquiries": {
     "enquireButton": "Deze ploeg een aanvraag sturen",
@@ -8131,9 +8204,9 @@
   "trust": {
     "unreadHint": "Een deel hiervan kon zojuist niet worden geteld en wordt als “—” getoond. Het betekent niet dat u er geen hebt — de getallen konden alleen niet worden gelezen. Laad zo meteen opnieuw.",
     "title": "Vertrouwenssignalen",
-    "caption": "Deze aantallen komen rechtstreeks uit je werkregistraties.",
+    "caption": "Deze aantallen komen rechtstreeks uit je werkregistraties. Bevestigde registraties zijn registraties die een manager heeft goedgekeurd, elk één keer geteld; je eigen goedkeuringen en afgewezen registraties tellen niet mee. Bevestigde vaardigheden worden apart geteld.",
     "verifiedSkills": "Door manager bevestigde vaardigheden",
-    "managerConfirmations": "Managerbevestigingen",
+    "managerConfirmations": "Door een manager bevestigde registraties",
     "journalEntries": "Journaalitems",
     "zeroHint": "Vertrouwenssignalen groeien door echt werk: schrijf een journaalitem en maak je profiel compleet."
   },
@@ -8160,7 +8233,7 @@
     },
     "summary": {
       "verifiedSkills": "Door manager bevestigde vaardigheden",
-      "managerConfirmations": "Managerbevestigingen",
+      "managerConfirmations": "Door een manager bevestigde registraties",
       "journalEntries": "Dagboekregistraties"
     },
     "proofTitle": "Bevestigd werkbewijs",
@@ -8261,6 +8334,7 @@
     "claimFromJournal": "uit het werkjournaal",
     "recordedHours": "Vastgelegd werk: {hours} u uit het werkjournaal, waarvan {confirmed} u bevestigd.",
     "confirmedWorkFact": "Door anderen bevestigde werkjournaal-registraties: {entries, plural, one {# registratie} other {# registraties}} over {days, plural, one {# werkdag} other {# werkdagen}}",
+    "clientAcceptedWorkFact": "{entries, plural, one {# werkinvoer} other {# werkinvoeren}} geaccepteerd door de opdrachtgever. De acceptatie door een opdrachtgever is geen vastlegging door een manager en geen betalingsregistratie.",
     "recordedHoursNone": "Nog geen journaalregistraties met een duur — uren naast vaardigheden komen uit je eigen registraties.",
     "skillHours": "{hours} u",
     "skillHoursOwn": "{hours} u, uw eigen registratie",
@@ -10787,7 +10861,8 @@
       "finance": "Financiën",
       "invitation": "Uitnodiging",
       "absence": "Verlof",
-      "stage": "Fasen"
+      "stage": "Fasen",
+      "plan": "Gepland werk"
     },
     "sourceNotes": {
       "taskError": "Taken konden nu niet worden geladen. De rest van de planning blijft gewoon zichtbaar.",
@@ -10831,7 +10906,8 @@
       "finance": "Financieel record",
       "invitation": "Uitnodiging",
       "absence": "Verlof / afwezigheid",
-      "stage": "Projectfase"
+      "stage": "Projectfase",
+      "plan": "Gepland werk"
     },
     "projectStatus": {
       "draft": "Concept",
@@ -10928,6 +11004,10 @@
       "dayNoWork": "Op deze dag is geen werk vastgelegd.",
       "dayFuture": "Deze dag is nog niet gekomen.",
       "recordOnDay": "Werk vastleggen voor deze dag"
+    },
+    "planStatus": {
+      "planned": "Gepland",
+      "cancelled": "Geannuleerd"
     }
   },
   "workforcePlanning": {
@@ -11022,6 +11102,7 @@
       "pendingDecisions": "Afwezigheidsverzoeken wachten op besluit",
       "journalToday": "Werkregistraties vandaag",
       "awaitingReview": "Registraties wachten op beoordeling",
+      "clientReviewToDecide": "Wacht op uw beslissing als opdrachtgever",
       "absentToday": "Vandaag geregistreerd afwezig",
       "absentNext": "Geregistreerde afwezigheden in de komende 7 dagen",
       "noneRecordedToday": "Voor vandaag is geen goedgekeurde afwezigheid geregistreerd.",
@@ -11055,7 +11136,8 @@
       "kind": {
         "project": "projectopdracht",
         "booking": "boeking",
-        "trip": "dienstreis"
+        "trip": "dienstreis",
+        "plan": "gepland werk"
       },
       "untitled": "zonder titel",
       "openEnded": "vanaf {start}, geen einddatum vastgelegd",
@@ -11160,6 +11242,7 @@
       "link": "Taken voor dit project"
     },
     "objectLabel": "Object",
+    "viaTeam": "via ploeg {team}",
     "assignee": {
       "label": "Toegewezen aan",
       "you": "jou",
@@ -11227,7 +11310,8 @@
         "limit_reached": "Koppellimiet bereikt.",
         "entry_not_current": "Dat record is gecorrigeerd of ingetrokken — koppel de actuele versie.",
         "already_unlinked": "Die koppeling is al ingetrokken."
-      }
+      },
+      "unreadable": "De gekoppelde registraties konden nu niet worden gelezen. Dat betekent niet dat er geen zijn."
     },
     "approval": {
       "label": "Goedkeuring",
@@ -13276,6 +13360,10 @@
           "label": "Een persoon naar een ander project verplaatsen",
           "description": "Wijst toe aan het nieuwe project en beëindigt de vorige toewijzing — na de gevolgen."
         },
+        "keepAssignment": {
+          "label": "Een toewijzing behouden ondanks een agendaconflict",
+          "description": "Legt uw besluit vast om de toewijzing te behouden terwijl u het conflict kent, met een gesloten redencode. Zonder bewijs wordt niets opgeslagen."
+        },
         "offerCapacity": {
           "label": "Vastleggen wat u aanbiedt"
         }
@@ -13637,6 +13725,9 @@
       "assignAlreadyCommitted": "Let op: op sommige van deze dagen is deze persoon al vastgelegd ({count}). De toewijzing blijft staan — jij beslist.",
       "assignCommitmentUnknown": "We konden niet bevestigen dat deze dagen vrij zijn. Dat is niet hetzelfde als vrij.",
       "assignFailed": "De toewijzing kon niet worden gemaakt.",
+      "keepPrompt": "Deze persoon zit op die dagen al vast. Houdt u de toewijzing bewust aan? Kies een reden - het besluit wordt vastgelegd.",
+      "keepRecorded": "Vastgelegd: u hebt de toewijzing bewust behouden.",
+      "keepFailed": "Het besluit kon niet worden vastgelegd, dus er is niets opgeslagen. Probeer het opnieuw.",
       "chipEngagements": "Met wie ik werk",
       "userEngagements": "Met wie werk ik?",
       "engagementsOpened": "Dit zijn de vastgelegde werkrelaties. Je kunt er één beëindigen in het paneel.",
@@ -15255,6 +15346,7 @@
     "evidenceDocument": "Document geldig tot {until} — nog niet bevestigd",
     "evidenceEntriesAndDocument": "{count, plural, one {# werkregistratie} other {# werkregistraties}} en een document geldig tot {until} — nog niet bevestigd",
     "evidenceSelfConfirmed": "Door uzelf bevestigd — nog niet onafhankelijk bevestigd",
+    "evidenceClientAccepted": "Geaccepteerd door de opdrachtgever — niet bevestigd door een werkgever",
     "employerConfirmed": "Bevestigd door {org}, {date}",
     "employerConfirmedNoDate": "Bevestigd door een werkgever",
     "systemDerived": "Afgeleid uit: {source}"
@@ -16843,7 +16935,8 @@
     },
     "correct": "Corrigeren",
     "correctCancel": "Annuleren",
-    "correctHint": "Opslaan maakt een nieuw record aan en bewaart het origineel ernaast — er wordt niets gewist."
+    "correctHint": "Opslaan maakt een nieuw record aan en bewaart het origineel ernaast — er wordt niets gewist.",
+    "rejectedNotCounted": "afgewezen, niet meegeteld"
   },
   "oauthConsent": {
     "title": "Toegang bevestigen",
@@ -16900,16 +16993,6 @@
     "emailInactiveNote": "E-mailbezorging is op het platform nog niet actief. Uw keuzes worden opgeslagen en gelden zodra die actief is.",
     "error": "De wijziging kon niet worden opgeslagen en is teruggedraaid. Probeer het opnieuw.",
     "unavailable": "Meldingsinstellingen zijn momenteel niet beschikbaar."
-  },
-  "cvOrganizationHistory": {
-    "title": "Door organisaties aangeleverde werkgeschiedenis",
-    "note": "Overgenomen uit de eigen registraties van de hier genoemde organisaties. Niet zelf verklaard en niet onafhankelijk geverifieerd.",
-    "untitled": "Door een organisatie geregistreerd werk",
-    "hoursTerm": "Uren",
-    "hoursRecorded": "{hours} u geregistreerd in {count, plural, one {# registratie} other {# registraties}}",
-    "hoursPeriod": "{hours} u opgegeven voor een periode, in {count, plural, one {# registratie} other {# registraties}}",
-    "contested": "Betwist door een daartoe bevoegde partij",
-    "more": "Nog {count, plural, one {# vermelding} other {# vermeldingen}} niet getoond"
   },
   "historyContext": {
     "project": "Werkproject",
@@ -17722,7 +17805,8 @@
           "notReviewableState": "Journaal nog niet te beoordelen: een boeking maakt geen werkcontext aan. Nodig deze persoon uit om als medewerker toe te treden — zodra hij of zij accepteert, bestaat de context en kunt u beoordeling inschakelen. U kunt die niet namens hem of haar aanmaken.",
           "inviteExit": "Uitnodigen om als medewerker toe te treden",
           "error": "De geboekte mensen konden nu niet worden gelezen. Dit betekent niet dat niemand geboekt is."
-        }
+        },
+        "summaryInvitationsUnread": "{active} actief · openstaande uitnodigingen konden niet worden gelezen · {members} leden · {review} beoordelen journalen"
       },
       "needs": {
         "title": "Personeelsbehoeften",
@@ -18172,7 +18256,8 @@
       "places": "Plaatsen",
       "people": "Mensen",
       "hours": "Vastgelegde uren",
-      "period": "Periode"
+      "period": "Periode",
+      "dayHours": "Uren op losse dagen"
     },
     "place": "Plaats",
     "noPlaceName": "Geen plaats opgegeven",
@@ -18180,8 +18265,8 @@
     "people": "{count, plural, one {# persoon} other {# mensen}}",
     "entries": "{count, plural, one {# regel} other {# regels}}",
     "hoursShare": "{hours} u op deze plaats, vergeleken met de drukste plaats",
-    "noPlace": "{count, plural, one {# regel} other {# regels}} ({hours} u) in de bron noemen geen plaats.",
-    "periodAside": "Hiervan zijn {hours} u periodetotalen voor een tijdspanne, apart gehouden van losse dagen.",
+    "noPlace": "{count, plural, one {# registratie} other {# registraties}} ({hours} u op losse dagen) in de bron noemen geen plaats.",
+    "periodAside": "Niet meegeteld hierboven: {hours} u als periodetotalen voor een tijdspanne. Dat is een apart cijfer en wordt nooit bij losse dagen opgeteld.",
     "scope": {
       "title": "Wat deze import bevat",
       "carried": "De bron bevat: wie er werkte, op welke dag, hoeveel uur, wat er is gedaan en de plaats zoals geschreven.",
@@ -18208,9 +18293,46 @@
       "progress": "{attributed} van {total} toegewezen aan {name}",
       "done": "{count} registraties toegewezen; {skipped} waren al toegewezen.",
       "refused": "Dit kon niet worden opgeslagen. Er is niets gewijzigd.",
+      "personPeriod": "{hours} u periodetotaal (niet bij losse dagen opgeteld)",
       "person": "{hours} u, {count, plural, one {# registratie} other {# registraties}}"
     },
+    "periodShort": "{hours} u periodetotaal",
     "truncated": "Er zijn meer records dan één weergave leest. De {count} gelezen records worden getoond; totalen omvatten alleen die."
+  },
+  "workPlan": {
+    "title": "Gepland werk",
+    "intro": "Plan wie waar en wanneer werkt. De kalender toont het als plan; wat werkelijk gebeurde, staat in het werkjournaal.",
+    "worker": "Werknemer",
+    "project": "Project (optioneel)",
+    "workObject": "Object / locatie (optioneel)",
+    "startDate": "Van",
+    "endDate": "Tot",
+    "startTime": "Starttijd (optioneel)",
+    "endTime": "Eindtijd (optioneel)",
+    "note": "Notitie (optioneel)",
+    "none": "Geen",
+    "submit": "Werk plannen",
+    "pending": "Plannen…",
+    "cancel": "Plan annuleren",
+    "cancelPending": "Annuleren…",
+    "empty": "Voor deze periode is nog niets gepland.",
+    "noWorkers": "Nog geen werknemers op je lijst. Nodig eerst mensen uit en plan dan hun werk.",
+    "unavailable": "Plannen is hier nog niet beschikbaar.",
+    "listTitle": "Geplande periodes",
+    "overlap": "Overlapt met goedgekeurd verlof",
+    "outcome": {
+      "planned": "Werk gepland.",
+      "cancelled": "Plan geannuleerd.",
+      "invalid": "Controleer de datums en velden en probeer opnieuw.",
+      "not_allowed": "Je kunt niet plannen voor deze organisatie.",
+      "worker_not_in_scope": "Die werknemer staat niet op de lijst van deze organisatie.",
+      "project_not_in_organization": "Dat project hoort bij een andere organisatie.",
+      "work_object_not_in_organization": "Dat object hoort bij een andere organisatie.",
+      "unavailable": "Plannen is hier nog niet beschikbaar.",
+      "error": "Er ging iets mis. Probeer opnieuw.",
+      "planned_collides": "Gepland, maar deze persoon heeft op sommige van deze dagen al iets. U beslist; annuleer het plan hieronder als het niet klopt.",
+      "planned_unknown": "Gepland, maar we konden niet bevestigen dat deze dagen vrij zijn. Dat is niet hetzelfde als vrij."
+    }
   },
   "workLifecycle": {
     "pending": "Nog niet",
@@ -18382,6 +18504,80 @@
       "skills": "{count, plural, one {# vaardigheid gebaseerd op jouw registraties} other {# vaardigheden gebaseerd op jouw registraties}}",
       "next": "Waar je heen kunt"
     }
+  },
+  "teamAssignment": {
+    "title": "Teams in dit project",
+    "intro": "Een team wordt als één geheel toegewezen. De leden komen uit het lidmaatschap van het team zelf, dus wie het team heeft verlaten telt niet mee, en de uren en het logboek blijven van elke persoon zelf.",
+    "none": "Aan dit project is geen team toegewezen.",
+    "scope": {
+      "project": "Heel project",
+      "task": "Taak: {title}",
+      "object": "Werklocatie"
+    },
+    "membersNow": "Leden nu: {count}",
+    "noMembers": "Geen actieve leden.",
+    "unnamedMember": "Teamlid",
+    "unnamedTeam": "Ploeg",
+    "end": "Toewijzing beëindigen",
+    "ending": "Bezig met beëindigen…",
+    "replaceLabel": "Vervangen door een ander team",
+    "replacePlaceholder": "Kies een team",
+    "replaceSubmit": "Vervangen",
+    "assignTitle": "Een team toewijzen",
+    "teamLabel": "Ploeg",
+    "teamPlaceholder": "Kies een team",
+    "scopeLabel": "Waaraan het team werkt",
+    "scopeProjectOption": "Het hele project",
+    "scopeTaskOption": "Eén taak",
+    "taskLabel": "Taak",
+    "taskPlaceholder": "Kies een taak",
+    "noTeams": "Je beheert nog geen team. Maak er een aan op de pagina Mensen.",
+    "noTasks": "Dit project heeft geen openstaande taken.",
+    "submit": "Team toewijzen",
+    "assigning": "Bezig met toewijzen…",
+    "outcome": {
+      "created": "Team toegewezen.",
+      "already_assigned": "Dit team is hier al toegewezen. Er is niets gewijzigd.",
+      "replaced": "Team vervangen.",
+      "ended": "Toewijzing beëindigd.",
+      "already_ended": "Deze toewijzing was al beëindigd."
+    },
+    "refusal": {
+      "not_authorized": "Je mag dit team niet aan dit project toewijzen.",
+      "not_authed": "Log opnieuw in om verder te gaan.",
+      "not_a_team": "Dit is geen team.",
+      "team_has_no_members": "Dit team heeft nog geen actieve leden.",
+      "project_completed": "Dit project is afgerond.",
+      "task_not_assignable": "Aan deze taak kan geen team worden toegewezen (afgesloten of van een ander project).",
+      "object_not_assignable": "Aan deze werklocatie kan geen team worden toegewezen.",
+      "one_scope_only": "Kies een taak of een werklocatie, niet beide.",
+      "replace_target_not_active": "De toewijzing die vervangen moest worden is niet meer actief.",
+      "team_and_project_required": "Kies een team en een project.",
+      "needs_migration": "Nu niet beschikbaar.",
+      "error": "Dit lukte niet. Er is niets gewijzigd."
+    },
+    "calendar": {
+      "conflictsTitle": "Op deze dagen al ingepland",
+      "unknownTitle": "Beschikbaarheid op deze dagen niet bevestigd voor",
+      "advisory": "Let op: de toewijzing is opgeslagen. Beëindig haar hierboven als de overlap echt is."
+    },
+    "form": {
+      "heading": "Het hele team aan een project toewijzen",
+      "intro": "Wijs dit team van {count} leden als één geheel aan een project toe.",
+      "projectLabel": "Voor welk project",
+      "projectPlaceholder": "Kies een project",
+      "noProjects": "Je hebt geen openstaande projecten om het team aan toe te wijzen."
+    }
+  },
+  "cvOrganizationHistory": {
+    "title": "Door organisaties aangeleverde werkgeschiedenis",
+    "note": "Overgenomen uit de eigen registraties van de hier genoemde organisaties. Niet zelf verklaard en niet onafhankelijk geverifieerd.",
+    "untitled": "Door een organisatie geregistreerd werk",
+    "hoursTerm": "Uren",
+    "hoursRecorded": "{hours} u geregistreerd in {count, plural, one {# registratie} other {# registraties}}",
+    "hoursPeriod": "{hours} u opgegeven voor een periode, in {count, plural, one {# registratie} other {# registraties}}",
+    "contested": "Betwist door een daartoe bevoegde partij",
+    "more": "Nog {count, plural, one {# vermelding} other {# vermeldingen}} niet getoond"
   },
   "companyPerson": {
     "eyebrow": "Historische persoonskaart",

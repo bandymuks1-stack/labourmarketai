@@ -454,6 +454,9 @@ function OrgSections({
                   value={projects.byStatus[s]}
                 />
               ))}
+              {projects.other > 0 ? (
+                <MetricTile label={t("org.projects.other")} value={projects.other} />
+              ) : null}
               <MetricTile label={t("org.projects.total")} value={projects.total} />
             </dl>
           )

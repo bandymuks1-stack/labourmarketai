@@ -294,6 +294,7 @@ export default async function ProjectOperationsPage({
     schemaNote: t("schemaNote"),
     countersTitle: t("countersTitle"),
     totalAssigned: t("counters.totalAssigned"),
+    viaTeam: t("counters.viaTeam"),
     ready: t("counters.ready"),
     readyBasis: t("counters.readyBasis"),
     needsDeclaredSkills: t("counters.needsDeclaredSkills"),
@@ -478,6 +479,9 @@ export default async function ProjectOperationsPage({
           </span>
           <span className={chipClass}>
             {t("counters.totalAssigned")}: {ops.counters.totalAssigned}
+            {(ops.counters.viaTeam ?? 0) > 0
+              ? ` (${t("counters.viaTeam")}: ${ops.counters.viaTeam})`
+              : ""}
           </span>
           {tasks.status === "ok" ? (
             <span className={chipClass} data-testid="ops-centre-open-tasks">

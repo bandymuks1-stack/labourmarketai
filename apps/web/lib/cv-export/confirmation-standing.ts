@@ -21,12 +21,48 @@ export type ConfirmationLedgerRow = {
 };
 
 export function isConfirmingScope(scope: unknown): boolean {
-  const s = scope as { action?: unknown; decision?: unknown } | null;
+  const s = scope as {
+    action?: unknown;
+    decision?: unknown;
+    authority?: { basis?: unknown } | null;
+  } | null;
+  // A client / customer acceptance is NOT an employer confirmation: it is
+  // shown as "accepted by the client" (CLIENT_ACCEPTED), never counted here.
+  if (s?.authority?.basis === "counterparty") return false;
   return (
     s?.action === "confirm" ||
     s?.action === "auto_confirm" ||
     s?.decision === "approved"
   );
+}
+
+/**
+ * How many entries the CLIENT / customer / contracting counterparty currently
+ * stands behind: the newest COUNTERPARTY row per entry is an acceptance.
+ * A later correction request or dispute withdraws it (append-only, latest
+ * wins). This is "accepted by the client" - a different claim by a different
+ * party than an employer confirmation, and never a payment record.
+ */
+export function countClientAcceptedEntries(
+  rows: readonly ConfirmationLedgerRow[],
+): number {
+  const counterparty = rows.filter(
+    (r) =>
+      (r.confirmation_scope as { authority?: { basis?: unknown } | null } | null)
+        ?.authority?.basis === "counterparty",
+  );
+  const sorted = [...counterparty].sort((a, b) =>
+    a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0,
+  );
+  const seen = new Set<string>();
+  let n = 0;
+  for (const row of sorted) {
+    if (seen.has(row.entry_id)) continue;
+    seen.add(row.entry_id);
+    const d = (row.confirmation_scope as { decision?: unknown } | null)?.decision;
+    if (d === "approved") n += 1;
+  }
+  return n;
 }
 
 /**
@@ -37,7 +73,15 @@ export function isConfirmingScope(scope: unknown): boolean {
 export function selectStandingConfirmations<T extends ConfirmationLedgerRow>(
   rows: readonly T[],
 ): T[] {
-  const sorted = [...rows].sort((a, b) =>
+  // Counterparty rows are a separate ledger concern (CLIENT_ACCEPTED): a newer
+  // client dispute must not retract an employer confirmation, nor a client
+  // acceptance stand in for one.
+  const employerRows = rows.filter(
+    (r) =>
+      (r.confirmation_scope as { authority?: { basis?: unknown } | null } | null)
+        ?.authority?.basis !== "counterparty",
+  );
+  const sorted = [...employerRows].sort((a, b) =>
     a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0,
   );
   const seen = new Set<string>();

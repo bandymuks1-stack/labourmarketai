@@ -23,7 +23,7 @@ const h = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/projects/stages", () => ({ listProjectStages: h.listProjectStages }));
-vi.mock("@/lib/projects/projects", () => ({ listProjectAssignments: h.listProjectAssignments }));
+vi.mock("@/lib/projects/projects", () => ({ listProjectAssignedPeople: h.listProjectAssignments }));
 vi.mock("@/lib/conversation/project-risk", () => ({ loadProjectRiskForChat: h.loadProjectRiskForChat }));
 vi.mock("@/lib/conversation/capacity", () => ({ loadWhoIsAvailableForChat: h.loadWhoIsAvailableForChat }));
 vi.mock("@/lib/conversation/opening-brief", () => ({ loadEmployerOpeningBrief: h.loadEmployerOpeningBrief }));

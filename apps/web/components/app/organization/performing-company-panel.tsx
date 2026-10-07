@@ -7,6 +7,7 @@ import { resolveEvidenceOrganization } from "@/lib/organization-evidence/evidenc
 import { listAllEvidenceRecords } from "@/lib/organization-evidence/evidence-pagination";
 import { attributePersonToPerformingCompanyAction } from "@/lib/organization-evidence/import-actions";
 import { formatHoursAsStated } from "@/lib/organization-evidence/period-provenance";
+import { personHoursOf } from "@/lib/organization-evidence/person-hours";
 import { PerformingCompanyForm } from "@/components/app/organization/performing-company-form";
 
 /**
@@ -50,11 +51,11 @@ export async function PerformingCompanyPanel({ locale }: { locale: string }) {
   const live = recs.records.filter((r) => !r.withdrawn);
   if (live.length === 0) return null;
 
-  const byPerson = new Map<string, { name: string | null; count: number; hours: number; named: Map<string, number> }>();
+  // Day hours and period aggregates are NEVER summed (see lib/organization-evidence/person-hours.ts).
+  const byPerson = new Map<string, { name: string | null; recs: typeof live; named: Map<string, number> }>();
   for (const r of live) {
-    const e = byPerson.get(r.personId) ?? { name: r.personName, count: 0, hours: 0, named: new Map() };
-    e.count += 1;
-    e.hours += r.hours ?? 0;
+    const e = byPerson.get(r.personId) ?? { name: r.personName, recs: [], named: new Map() };
+    e.recs = [...e.recs, r];
     for (const p of r.parties) {
       if (p.role === "employer" && p.organizationId) e.named.set(p.organizationId, (e.named.get(p.organizationId) ?? 0) + 1);
     }
@@ -85,18 +86,24 @@ export async function PerformingCompanyPanel({ locale }: { locale: string }) {
       </header>
       <ul className="flex flex-col gap-2">
         {[...byPerson.entries()]
-          .sort((a, b) => b[1].hours - a[1].hours)
-          .map(([personId, e]) => (
+          .map(([personId, e]) => ({ personId, e, h: personHoursOf(e.recs) }))
+          .sort((a, b) => b.h.dayHours - a.h.dayHours || b.h.periodHours - a.h.periodHours)
+          .map(({ personId, e, h }) => (
             <li key={personId}>
               <Card compact className="flex flex-col gap-2" data-testid="performing-company-person">
                 <p className="flex flex-wrap items-baseline gap-x-3 text-sm">
                   <span className="font-medium text-text-primary">{e.name ?? "—"}</span>
                   <span className="font-mono text-meta text-text-muted">
-                    {t("person", { hours: formatHoursAsStated(Math.round(e.hours * 100) / 100), count: e.count })}
+                    {t("person", { hours: formatHoursAsStated(h.dayHours), count: h.count })}
                   </span>
+                  {h.periodHours > 0 ? (
+                    <span className="font-mono text-meta text-text-muted" data-testid="performing-company-period">
+                      {t("personPeriod", { hours: formatHoursAsStated(h.periodHours) })}
+                    </span>
+                  ) : null}
                   {[...e.named.entries()].map(([id, n]) => (
                     <span key={id} className="text-meta text-text-secondary" data-testid="performing-company-progress">
-                      {t("progress", { attributed: n, total: e.count, name: nameOf.get(id) ?? "—" })}
+                      {t("progress", { attributed: n, total: h.count, name: nameOf.get(id) ?? "—" })}
                     </span>
                   ))}
                 </p>

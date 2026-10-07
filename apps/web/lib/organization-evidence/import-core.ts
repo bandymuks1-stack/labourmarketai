@@ -3538,8 +3538,10 @@ export async function listMyOrganizationEvidence(
 
   // Only a CONFIRMED link makes the history this person's. An offer they have
   // not answered must not quietly start showing their name on someone's work.
+  // `linked` alone is not consent: a manager-made link ('manager_link') is never
+  // the person's own history (integrity doors v1).
   const confirmed = links
-    .filter((l) => l.linkState === "linked")
+    .filter((l) => l.linkState === "linked" && l.linkMethod === "worker_confirmed")
     .map((l) => l.id);
   const recordsRes = await listEvidenceRecords(caller, {
     organizationPersonIds: confirmed,
@@ -3620,41 +3622,40 @@ export async function respondToRosterLink(
 ): Promise<
   EvidenceImportResult<{ readonly linkState: "linked" | "unlinked" }>
 > {
-  const patch =
-    input.decision === "accept"
-      ? {
-          link_state: "linked",
-          link_method: "worker_confirmed",
-          linked_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }
-      : {
-          link_state: "unlinked",
-          link_method: null,
-          linked_profile_id: null,
-          linked_worker_id: null,
-          linked_at: null,
-          updated_at: new Date().toISOString(),
-        };
-  let query = db(caller.supabase)
+  // REFUSE / WITHDRAW go through ONE narrow database door
+  // (`respond_to_roster_link_v1`, 20261005100000). Writing them as a plain UPDATE
+  // never worked: the row stops naming the caller (linked_profile_id -> NULL), and
+  // PostgreSQL applies the SELECT policy to the NEW row of an UPDATE, so the
+  // person's own refusal failed with 42501 (found by the integrated local QA,
+  // 2026-10-05). The door re-derives the caller, acts on `link_proposed` for a
+  // refusal and on `linked` for a withdrawal only, and can never link anyone.
+  if (input.decision !== "accept") {
+    const answered = await db(caller.supabase).rpc("respond_to_roster_link_v1", {
+      p_person_id: input.personId,
+      p_decision: input.decision,
+    });
+    if (answered.error) return classify(answered.error);
+    if (answered.data !== "unlinked") return { kind: "not-found" };
+    return { kind: "ok", linkState: "unlinked" };
+  }
+  // ACCEPT stays the subject-policy UPDATE: the new row still names the caller,
+  // so the SELECT policy admits it.
+  const res = await db(caller.supabase)
     .from("organization_people")
-    .update(patch)
+    .update({
+      link_state: "linked",
+      link_method: "worker_confirmed",
+      linked_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", input.personId)
-    .eq("linked_profile_id", caller.userId);
-  // An answer to an offer acts on an offer; a withdrawal acts on a confirmed
-  // link. Neither may silently do the other's job.
-  query =
-    input.decision === "withdraw"
-      ? query.eq("link_state", "linked")
-      : query.eq("link_state", "link_proposed");
-  const res = await query.select("id");
+    .eq("linked_profile_id", caller.userId)
+    .eq("link_state", "link_proposed")
+    .select("id");
   if (res.error) return classify(res.error);
   if (!Array.isArray(res.data) || res.data.length === 0)
     return { kind: "not-found" };
-  return {
-    kind: "ok",
-    linkState: input.decision === "accept" ? "linked" : "unlinked",
-  };
+  return { kind: "ok", linkState: "linked" };
 }
 
 // ── the subject WITHDRAWS their contest ─────────────────────────────────────

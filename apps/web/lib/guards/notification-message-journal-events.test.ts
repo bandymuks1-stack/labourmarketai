@@ -58,8 +58,15 @@ describe("wired into the real write paths, after the domain write", () => {
   });
 
   it("the participants are read under the SENDER's session, not through admin", () => {
+    // Scoped to the NOTIFY path: the core's single service-role write (adding the
+    // OTHER participant after the contact authority, audit F-1) is pinned
+    // separately in authority-closure-first-package.test.ts and is not a read.
     const src = read("lib", "communication", "communication-core.ts");
-    expect(src).not.toMatch(/createAdminClient/);
+    const start = src.indexOf("async function notifyOtherParticipants(");
+    const end = src.indexOf("\nexport ", start);
+    expect(start).toBeGreaterThan(-1);
+    expect(end).toBeGreaterThan(start);
+    expect(src.slice(start, end)).not.toMatch(/createAdminClient/);
   });
 
   it("every journal review write path calls the one bridge after its RPC", () => {

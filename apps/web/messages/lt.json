@@ -126,15 +126,15 @@
   },
   "marketplaceListings": {
     "pageTitle": "Prekyvietė",
-    "pageIntro": "Darbo ištekliai visoje Europoje — apgyvendinimas, patalpos, transportas, įrankiai ir įranga parduodami, nuomojami ar ieškomi. Užklausa atveria tiesioginį pokalbį.",
+    "pageIntro": "Pasiūlymai ir poreikiai visoje Europoje — darbo ištekliai, prekės, paslaugos ir projektai. Užklausa atveria tiesioginį pokalbį. Mokėjimai čia nevykdomi.",
     "title": "Prekyvietės skelbimai",
     "myTitle": "Mano skelbimai",
-    "intro": "Paskelbkite darbo išteklių, kurį siūlote ar ieškote. Kiti mato tik aktyvius skelbimus.",
+    "intro": "Paskelbkite, ką siūlote ar ko reikia. Kiti mato tik aktyvius, nepasibaigusius skelbimus.",
     "notAvailable": "Šiuo metu nepasiekiama.",
     "empty": "Skelbimų dar nėra. Pridėkite pirmą darbo išteklių.",
     "addButton": "Pridėti skelbimą",
     "browseTitle": "Naršyti aktyvius skelbimus",
-    "browseIntro": "Šiuo metu tinkle siūlomi darbo ištekliai.",
+    "browseIntro": "Kas šiuo metu tinkle siūloma ar ieškoma.",
     "browseEmpty": "Aktyvių skelbimų dar nėra.",
     "enquire": "Užklausti",
     "linkToServices": "Ieškote profesinių paslaugų? Atverti Paslaugas",
@@ -150,7 +150,7 @@
     "formLabelPlaceholder": "Miestas ar regionas",
     "formPriceLabel": "Kaina",
     "formPricePlaceholder": "pvz. 450 €/mėn arba pagal susitarimą",
-    "priceHint": "Kaina neprivaloma ir laisvo teksto. Mokėjimai čia nevykdomi.",
+    "priceHint": "Kaina neprivaloma ir aprašomoji. Mokėjimai čia nevykdomi.",
     "save": "Išsaugoti",
     "saving": "Saugoma…",
     "cancel": "Atšaukti",
@@ -166,7 +166,8 @@
     "status": {
       "draft": "Juodraštis",
       "active": "Aktyvus",
-      "closed": "Uždarytas"
+      "closed": "Uždarytas",
+      "paused": "Pristabdytas"
     },
     "kinds": {
       "sale": "Parduodama",
@@ -180,7 +181,82 @@
       "tools": "Įrankiai",
       "equipment": "Įranga",
       "machinery": "Technika",
-      "safety_equipment": "Saugos priemonės"
+      "safety_equipment": "Saugos priemonės",
+      "goods_food_homegrown": "Savo užauginta ar pagaminta maisto produkcija",
+      "goods_handmade": "Rankų darbo gaminiai ir menas",
+      "goods_household": "Buities daiktai",
+      "goods_other": "Kitos prekės",
+      "service_general": "Reikalinga paslauga — bendra",
+      "service_trade": "Reikalinga paslauga — amatai",
+      "service_creative": "Reikalinga paslauga — kūrybinė",
+      "service_other": "Reikalinga paslauga — kita",
+      "personal": "Asmeninis",
+      "project_work": "Projektas ar sutartinis darbas"
+    },
+    "formDomainLabel": "Sritis",
+    "formAmountLabel": "Kainos suma",
+    "formCurrencyLabel": "Valiuta",
+    "formQuantityLabel": "Kiekis",
+    "formQuantityPlaceholder": "pvz. 30",
+    "formUnitLabel": "Matavimo vienetas",
+    "formUnitPlaceholder": "pvz. kg, vnt.",
+    "formExpiryLabel": "Galioja iki",
+    "formExpiryHint": "Neprivaloma. Suma, kiekis ir data yra aprašomieji — mokėjimai čia nevykdomi. Po šios datos skelbimas kitiems nebematomas.",
+    "domainFilterLabel": "Filtruoti pagal sritį",
+    "actorFilterLabel": "Filtruoti pagal siūlytoją ar ieškotoją",
+    "actorKinds": {
+      "all": "Visi",
+      "person": "Asmuo",
+      "company": "Įmonė",
+      "institution": "Organizacija ar įstaiga",
+      "agency": "Agentūra",
+      "service_provider": "Savarankiškas paslaugų teikėjas",
+      "supplier": "Tiekėjas",
+      "other": "Tipas nenurodytas"
+    },
+    "errorPrice": "Įveskite teisingą sumą ir 3 raidžių valiutos kodą (pvz. EUR).",
+    "errorQuantity": "Kiekis turi būti skaičius, didesnis už nulį.",
+    "errorExpiry": "Data turi būti ateityje.",
+    "errorRestricted": "Šios rūšies prekės čia skelbti negalima.",
+    "legalCheckFood": "Maisto ir savo užaugintos produkcijos pardavimui taikomos maisto prekybos ir higienos taisyklės. Prieš skelbdami patvirtinkite, kad susipažinote su jums taikomomis taisyklėmis.",
+    "legalCheckAck": "Susipažinau su man taikomomis taisyklėmis",
+    "serviceNeedHint": "Reikalinga paslauga visada yra skelbimas „ieškoma“.",
+    "moreTypesSoon": "Daugiau skelbimų tipų čia bus netrukus.",
+    "pause": "Pristabdyti",
+    "expired": "Pasibaigęs",
+    "expiresOn": "Iki {date}",
+    "openInServices": "Atverti Paslaugas",
+    "domains": {
+      "all": "Visi",
+      "work_resource": "Darbo ištekliai",
+      "goods": "Prekės",
+      "service_need": "Reikalingos paslaugos",
+      "personal": "Asmeniniai",
+      "project_work": "Projektai ir sutartys",
+      "service": "Siūlomos paslaugos",
+      "other": "Kita",
+      "job": "Darbo skelbimai",
+      "workforce": "Prieinama darbo jėga"
+    },
+    "directions": {
+      "offer": "Siūloma",
+      "need": "Ieškoma",
+      "other": "Kita"
+    },
+    "federationPartial": "Kai kurių šaltinių dabar nepavyko perskaityti, todėl sąrašas gali būti nepilnas.",
+    "allJobsLink": "Peržiūrėti visą darbo skelbimų lentą",
+    "titleNotStated": "Pavadinimas nenurodytas",
+    "openInSource": "Atidaryti šaltinyje",
+    "visibility": {
+      "public": "Vieša",
+      "signed_in": "Prisijungę nariai",
+      "organizations": "Tik organizacijos",
+      "workers": "Tik darbuotojai",
+      "own": "Jūsų"
+    },
+    "provenance": {
+      "platform": "Šioje platformoje",
+      "external_vacancy": "Viešas skelbimas, išorinis šaltinis"
     }
   },
   "quality": {
@@ -728,15 +804,15 @@
     },
     "basis": {
       "label": "Pagrindas",
-      "workerEvidence": "Suskaičiuota pagal įrodymų ataskaitos taisykles iš jūsų pačių kataloguotų įgūdžių, darbo žurnalo įrašų ir vadovų patvirtinimų. Jokio balo, jokio spėjimo.",
+      "workerEvidence": "Suskaičiuota pagal įrodymų ataskaitos taisykles iš jūsų pačių kataloguotų įgūdžių ir darbo žurnalo įrašų. Patvirtinti įrašai — galiojantys vadovo patvirtinti įrašai, kiekvienas skaičiuojamas vieną kartą; jūsų pačių patvirtinimai ir atmesti įrašai neįtraukiami. Jokio balo, jokio spėjimo.",
       "workerActivity": "Jūsų darbo žurnalo įrašų ir įkeltų nuotraukų skaičiai.",
       "orgDemand": "Skaičiuojamos jūsų pačių sukurtos paklausos užklausos. Atviros = juodraštis, pateikta, peržiūrima arba reikia tęsinio.",
       "orgProjects": "Jūsų įmonės projektų eilučių skaičiai, sugrupuoti pagal kiekvienos eilutės įrašytą būseną.",
-      "orgTasks": "Užduočių, kuriose esate vykdytojas arba kūrėjas, skaičiai pagal įrašytą būseną.",
+      "orgTasks": "Užduočių, kuriose esate vykdytojas arba kūrėjas, skaičiai pagal užfiksuotą būseną. Tai jūsų pačių užduočių sąrašas, ne visos organizacijos.",
       "orgDocuments": "Skaičiuojami tik tie darbuotojai, kurie sutiko, kad jų dokumentų skaičiai būtų rodomi bendrai.",
       "orgFinance": "Skaičiuojami jūsų pačių įvesti finansų įrašai; vėlavimas išvedamas iš kiekvieno įrašo termino. Tik rankiniai įrašai — jokių mokėjimų duomenų.",
       "orgDemandOrg": "Skaičiai pagal jūsų organizacijai priskirtas poreikio užklausas (visi nariai su poreikių prieiga mato tuos pačius skaičius). Atviros = juodraštis, pateikta, peržiūrima arba reikia tęsinio. Darbuotojų susidomėjimas — darbuotojai, parodę susidomėjimą šiomis užklausomis.",
-      "journal": "Skaičiuojami darbo įrašai, kuriuos darbuotojai užfiksavo šios organizacijos darbo santykiuose per paskutines septynias kalendorines dienas. „Laukia peržiūros“ — dabartinė peržiūros eilė; „patvirtinta“ — lango įrašai, kuriuos patvirtino vadovas. Įrašų nebuvimas nėra įrodymas, kad darbas nevyko."
+      "journal": "Skaičiuojami darbo įrašai, kuriuos darbuotojai užfiksavo šios organizacijos darbo santykiuose per paskutines septynias kalendorines dienas; kiekviena pataisymų grandinė skaičiuojama vieną kartą. „Laukia peržiūros“ — visa dabartinė peržiūros eilė, ne tik paskutinės septynios dienos. „Patvirtinta“ — lango įrašai, kurių paskutinė peržiūra yra ne paties darbuotojo suteiktas patvirtinimas. Įrašų nebuvimas nėra įrodymas, kad darbas nevyko."
     },
     "worker": {
       "evidence": {
@@ -745,7 +821,7 @@
         "workSupported": "Pagrįsta darbo žurnalo įrašais",
         "confirmed": "Patvirtinti",
         "journalEntries": "Žurnalo įrašai",
-        "confirmations": "Patvirtinimai",
+        "confirmations": "Vadovo patvirtinti įrašai",
         "empty": "Įrodymų duomenų dar nėra — rodikliai atsiras, kai profilyje ir darbo žurnale bus tikrų įrašų.",
         "link": "Atidaryti visą įrodymų ataskaitą"
       },
@@ -787,10 +863,11 @@
         },
         "total": "Iš viso",
         "empty": "Projektų dar nėra — rodikliai atsiras, kai įmonė turės projektų eilučių.",
-        "link": "Atidaryti projektus"
+        "link": "Atidaryti projektus",
+        "other": "Kita būsena"
       },
       "tasks": {
-        "title": "Užduotys pagal būseną",
+        "title": "Jūsų užduotys pagal būseną",
         "open": "Atviros",
         "status": {
           "todo": "Laukia",
@@ -816,7 +893,7 @@
       "journal": {
         "title": "Darbo žurnalas (paskutinės septynios dienos)",
         "recorded": "Užfiksuoti įrašai",
-        "awaitingReview": "Laukia peržiūros",
+        "awaitingReview": "Laukia peržiūros (visos datos)",
         "confirmed": "Patvirtinta",
         "link": "Atverti žurnalo ataskaitą"
       }
@@ -2297,7 +2374,9 @@
         "review": "Žurnalo įrašai peržiūrai",
         "invitations": "Laukiantys kvietimai darbuotojams",
         "claims": "Viešos užklausos, kurias galite perimti",
-        "reviewOff": "Dirbantys darbuotojai, kurių darbo patvirtinimas neįjungtas"
+        "reviewOff": "Dirbantys darbuotojai, kurių darbo patvirtinimas neįjungtas",
+        "unreadable": "nepavyko perskaityti",
+        "clientReview": "Darbas, laukiantis jūsų sprendimo kaip užsakovo"
       }
     },
     "agency": {
@@ -6053,6 +6132,16 @@
         "precheckChoose": "Rinktis šį",
         "precheckAssignAnyway": "Vis tiek priskirti",
         "precheckAdvisory": "Tik perspėjimas: patikrinta ką tik ir nepatikrinama iš naujo išsaugant. Kol kas nieko nepriskirta.",
+        "reasonLabel": "Palikimo priežastis (nebūtina)",
+        "reasonNone": "Priežastis nenurodyta",
+        "keepFailed": "Išimties kvito nepavyko įrašyti. Niekas neišsaugota - bandykite dar kartą.",
+        "reason": {
+          "agreed_with_worker": "Suderinta su darbuotoju",
+          "agreed_with_client": "Suderinta su užsakovu",
+          "partial_overlap": "Sutampa tik iš dalies",
+          "urgent_need": "Skubus poreikis",
+          "other": "Kita"
+        },
         "collidesTitle": "Šiomis dienomis jau turi įsipareigojimų",
         "notBlocking": "Tai neužkerta kelio priskyrimui — sprendimas jūsų.",
         "alternativesTitle": "Laisvi šiomis dienomis",
@@ -6065,7 +6154,8 @@
           "project": "Objektas",
           "booking": "Rezervacija",
           "trip": "Komandiruotė",
-          "absence": "Nepasiekiama"
+          "absence": "Nepasiekiama",
+          "plan": "Suplanuotas darbas"
         }
       }
     },
@@ -6091,10 +6181,13 @@
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# įrašas laukia tavo patvirtinimo} few {# įrašai laukia tavo patvirtinimo} other {# įrašų laukia tavo patvirtinimo}}",
+      "clientTitle": "{n, plural, one {# įrašas laukia jūsų sprendimo kaip užsakovo} few {# įrašai laukia jūsų sprendimo kaip užsakovo} other {# įrašų laukia jūsų sprendimo kaip užsakovo}}",
       "pendingBody": "Vienas bakstelėjimas — ir žmogaus darbas tampa patvirtintu įrodymu.",
+      "clientCta": "Atidaryti užsakovo peržiūrą",
       "cta": "Patvirtinti dabar",
       "zero": "Šiuo metu patvirtinimų nelaukia — komandos ritmas ramus.",
-      "zeroCta": "Peržiūros eilė"
+      "zeroCta": "Peržiūros eilė",
+      "unreadable": "Peržiūros eilės dabar nepavyko perskaityti. Tai nereiškia, kad niekas nelaukia."
     },
     "draft": {
       "title": "Projektai ir komandos"
@@ -6103,6 +6196,7 @@
     "myProjectsEmpty": "Kol kas nesate priskirtas jokiam projektui. Kai įmonė jus priskirs, projektą matysite čia.",
     "assignmentActive": "Aktyvus",
     "assignmentEnded": "Užbaigtas",
+    "viaTeam": "per komandą {team}",
     "untitledProject": "Projektas be pavadinimo",
     "archiveToggle": {
       "label": "Vykdomi arba užbaigti projektai",
@@ -6180,6 +6274,7 @@
     "countersTitle": "Operacijos",
     "counters": {
       "totalAssigned": "Priskirta",
+      "viaTeam": "Per komandą",
       "ready": "Pasiruošę",
       "readyBasis": "Tik pagal čia patikrintus laukus.",
       "needsDeclaredSkills": "Nėra nurodytų įgūdžių",
@@ -6321,6 +6416,7 @@
         "notReadyNote": "Atskira projekto pokalbių gija dar ruošiama. Kol kas pokalbį pradėkite bendroje komunikacijoje — kontekstas (projektas) nurodytas viršuje."
       },
       "fieldCount": "{n, plural, one {# žmogus aikštėje} few {# žmonės aikštėje} other {# žmonių aikštėje}}",
+      "fieldViaTeam": "{n} per komandą",
       "todayCount": "{n, plural, one {# šiandienos žurnalo įrašas — diena juda} few {# šiandienos žurnalo įrašai — diena juda} other {# šiandienos žurnalo įrašų — diena juda}}",
       "todayZero": "Šiandien įrašų dar nėra — diena dar laukia pirmo įrašo.",
       "fieldTitle": "Aikštė — kas šiandien komandoje",
@@ -6331,15 +6427,6 @@
       "noActivity": "Įrašų dar nėra.",
       "emptyTeam": "Projektas dar be komandos — pradėk draftą ir pakviesk pirmus žmones į aikštę.",
       "emptyTeamCta": "Pradėti draftą",
-      "history": {
-        "title": "Istorinis darbas šiame projekte",
-        "provenance": "Organizacijos pateikta istorija, importuota iš pačios organizacijos įrašų. Nepriklausomai nepatikrinta.",
-        "unavailable": "Istorinio darbo šiuo metu nepavyko nuskaityti. Tai nereiškia, kad jo nėra.",
-        "empty": "Šiam projektui organizacijos pateikto istorinio darbo nėra užfiksuota.",
-        "personUnknown": "Asmuo nenurodytas",
-        "hoursUnknown": "Valandos nenurodytos",
-        "count": "{n} įr."
-      },
       "positionsTitle": "Trūkstamos pozicijos",
       "positionsEmpty": "Pozicijų poreikiai dar ruošiami — kai atsiras, čia matysi, kokių žmonių trūksta.",
       "openOps": "Atidaryti projekto valdymą",
@@ -6358,13 +6445,23 @@
       "allAreas": "Visi",
       "areaUnknown": "Profesija nenurodyta",
       "areaBasis": "Pagal pagrindinę žmogaus profesiją",
-      "teamLabel": "Komanda"
+      "teamLabel": "Komanda",
+      "history": {
+        "title": "Istorinis darbas šiame projekte",
+        "provenance": "Organizacijos pateikta istorija, importuota iš pačios organizacijos įrašų. Nepriklausomai nepatikrinta.",
+        "unavailable": "Istorinio darbo šiuo metu nepavyko nuskaityti. Tai nereiškia, kad jo nėra.",
+        "empty": "Šiam projektui organizacijos pateikto istorinio darbo nėra užfiksuota.",
+        "personUnknown": "Asmuo nenurodytas",
+        "hoursUnknown": "Valandos nenurodytos",
+        "count": "{n} įr."
+      }
     },
     "workerView": {
       "eyebrow": "Mano projektas",
       "untitled": "Projektas be pavadinimo",
       "assignmentActive": "Aktyvus priskyrimas",
       "assignmentEnded": "Priskyrimas užbaigtas",
+      "viaTeam": "per komandą {team}",
       "projectRestricted": "Projekto informacija šiuo metu jums nepasiekiama. Jūsų priskyrimas išlieka matomas.",
       "journalCta": "Pildyti darbo žurnalą",
       "chatCta": "Susisiekti",
@@ -7132,31 +7229,7 @@
         "error": "Atsakymo išsaugoti nepavyko. Niekas nebuvo pakeista."
       }
     },
-    "addableUnavailable": "Susietų darbuotojų sąrašo nepavyko nuskaityti — pridėti kol kas negalima.",
-    "assign": {
-      "heading": "Priskirti visą komandą projektui",
-      "intro": "Kiekvienas iš {count} narių priskiriamas atskirai, o rezultatą matote kiekvienam žmogui.",
-      "projectLabel": "Projektas",
-      "projectPlaceholder": "Pasirinkite projektą",
-      "submit": "Priskirti komandą",
-      "assigning": "Priskiriama…",
-      "noProjects": "Neturite atvirų projektų, kuriems galėtumėte priskirti komandą.",
-      "summary": "Priskirta {written} iš {total}.",
-      "member": {
-        "assigned": "Priskirta",
-        "calendar_unknown": "Priskirta · datų nepavyko patvirtinti",
-        "calendar_conflict": "Priskirta · šiomis dienomis jau užimtas",
-        "refused": "Nepriskirta · šio žmogaus priskirti negalite",
-        "error": "Nepriskirta · nepavyko"
-      },
-      "outcome": {
-        "not_authed": "Prisijunkite iš naujo.",
-        "no_such_team": "Šios komandos priskirti negalite.",
-        "empty_team": "Komandoje dar nėra narių.",
-        "needs_migration": "Kol kas neprieinama.",
-        "unavailable": "Nepavyko priskirti komandos. Nieko nepakeista."
-      }
-    }
+    "addableUnavailable": "Susietų darbuotojų sąrašo nepavyko nuskaityti — pridėti kol kas negalima."
   },
   "teamEnquiries": {
     "enquireButton": "Pateikti užklausą šiai komandai",
@@ -8131,9 +8204,9 @@
   "trust": {
     "unreadHint": "Kai kurių iš šių dalykų dabar nepavyko suskaičiuoti, todėl rodoma „—“. Tai nereiškia, kad jų neturite — tiesiog nepavyko perskaityti skaičių. Perkraukite po akimirkos.",
     "title": "Pasitikėjimo signalai",
-    "caption": "Šie skaičiai — tiesiai iš jūsų darbo įrašų.",
+    "caption": "Šie skaičiai — tiesiai iš jūsų darbo įrašų. Patvirtinti įrašai — tai vadovo patvirtinti įrašai, kiekvienas skaičiuojamas vieną kartą; jūsų pačių patvirtinimai ir atmesti įrašai neįtraukiami. Patvirtinti įgūdžiai skaičiuojami atskirai.",
     "verifiedSkills": "Vadovo patvirtinti įgūdžiai",
-    "managerConfirmations": "Vadovo patvirtinimai",
+    "managerConfirmations": "Vadovo patvirtinti įrašai",
     "journalEntries": "Žurnalo įrašai",
     "zeroHint": "Pasitikėjimo signalai auga iš realaus darbo: užfiksuok žurnalo įrašą ir papildyk savo profilį."
   },
@@ -8160,7 +8233,7 @@
     },
     "summary": {
       "verifiedSkills": "Vadovo patvirtinti įgūdžiai",
-      "managerConfirmations": "Vadovo patvirtinimai",
+      "managerConfirmations": "Vadovo patvirtinti įrašai",
       "journalEntries": "Žurnalo įrašai"
     },
     "proofTitle": "CV darbo įrašai",
@@ -8261,6 +8334,7 @@
     "claimFromJournal": "iš darbo įrašo",
     "recordedHours": "Užfiksuota darbo: {hours} val. iš darbo žurnalo, iš jų patvirtinta {confirmed} val.",
     "confirmedWorkFact": "Kitų patvirtinti darbo žurnalo įrašai: {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}} per {days, plural, one {# darbo dieną} few {# darbo dienas} other {# darbo dienų}}",
+    "clientAcceptedWorkFact": "{entries, plural, one {# darbo įrašas} few {# darbo įrašai} other {# darbo įrašų}}, kuriuos priėmė užsakovas. Užsakovo priėmimas nėra vadovo įrašas ir nėra mokėjimo įrašas.",
     "recordedHoursNone": "Darbo žurnale dar nėra įrašų su trukme — valandos prie įgūdžių atsiras iš jūsų įrašų.",
     "skillHours": "{hours} val.",
     "skillHoursOwn": "{hours} val., jūsų pačių įrašas",
@@ -10787,7 +10861,8 @@
       "finance": "Finansai",
       "invitation": "Kvietimas",
       "absence": "Atostogos",
-      "stage": "Etapai"
+      "stage": "Etapai",
+      "plan": "Suplanuotas darbas"
     },
     "sourceNotes": {
       "taskError": "Užduočių šiuo metu nepavyko įkelti. Likusi plano dalis rodoma įprastai.",
@@ -10831,7 +10906,8 @@
       "finance": "Finansų įrašas",
       "invitation": "Kvietimas",
       "absence": "Atostogos / nedarbingumas",
-      "stage": "Projekto etapas"
+      "stage": "Projekto etapas",
+      "plan": "Suplanuotas darbas"
     },
     "projectStatus": {
       "draft": "Juodraštis",
@@ -10928,6 +11004,10 @@
       "dayNoWork": "Šią dieną darbas neužfiksuotas.",
       "dayFuture": "Ši diena dar neatėjo.",
       "recordOnDay": "Įrašyti darbą šiai dienai"
+    },
+    "planStatus": {
+      "planned": "Suplanuota",
+      "cancelled": "Atšaukta"
     }
   },
   "workforcePlanning": {
@@ -11022,6 +11102,7 @@
       "pendingDecisions": "Neatvykimo prašymai laukia sprendimo",
       "journalToday": "Šiandienos darbo įrašai",
       "awaitingReview": "Įrašai laukia peržiūros",
+      "clientReviewToDecide": "Laukia jūsų sprendimo kaip užsakovo",
       "absentToday": "Užfiksuota, kad šiandien nedirba",
       "absentNext": "Užfiksuoti neatvykimai per artimiausias 7 dienas",
       "noneRecordedToday": "Šiandienai patvirtintų neatvykimų neužfiksuota.",
@@ -11055,7 +11136,8 @@
       "kind": {
         "project": "projektas",
         "booking": "užsakymas",
-        "trip": "komandiruotė"
+        "trip": "komandiruotė",
+        "plan": "suplanuotas darbas"
       },
       "untitled": "be pavadinimo",
       "openEnded": "nuo {start}, pabaigos data neįrašyta",
@@ -11160,6 +11242,7 @@
       "link": "Šio projekto užduotys"
     },
     "objectLabel": "Objektas",
+    "viaTeam": "per komandą {team}",
     "assignee": {
       "label": "Priskirta",
       "you": "jums",
@@ -11227,7 +11310,8 @@
         "limit_reached": "Pasiektas susiejimų limitas.",
         "entry_not_current": "Šis įrašas buvo pataisytas arba atšauktas — susiekite aktualią versiją.",
         "already_unlinked": "Šis susiejimas jau atšauktas."
-      }
+      },
+      "unreadable": "Prisegtų įrašų dabar nepavyko perskaityti. Tai nereiškia, kad jų nėra."
     },
     "approval": {
       "label": "Patvirtinimas",
@@ -13276,6 +13360,10 @@
           "label": "Perkelti žmogų į kitą projektą",
           "description": "Priskiria naujam projektui ir baigia ankstesnį priskyrimą — po pasekmių peržiūros."
         },
+        "keepAssignment": {
+          "label": "Palikti priskyrimą nepaisant kalendoriaus kolizijos",
+          "description": "Užfiksuoja jūsų sprendimą palikti priskyrimą žinant apie koliziją, su uždaru priežasties kodu. Nieko neišsaugoma, jei kvito nėra."
+        },
         "offerCapacity": {
           "label": "Užrašyti, ką siūlote"
         }
@@ -13637,6 +13725,9 @@
       "assignAlreadyCommitted": "Pastaba: kai kuriomis šiomis dienomis jis (-i) jau turi įsipareigojimų ({count}). Priskyrimas galioja — sprendimas jūsų.",
       "assignCommitmentUnknown": "Nepavyko patvirtinti, kad šios dienos laisvos. Tai nėra tas pat, kas laisva.",
       "assignFailed": "Priskyrimo atlikti nepavyko.",
+      "keepPrompt": "Šiomis dienomis jis (-i) jau užimtas (-a). Ar paliekate sąmoningai? Pasirinkite priežastį - sprendimas bus užfiksuotas.",
+      "keepRecorded": "Užfiksuota: priskyrimą palikote sąmoningai.",
+      "keepFailed": "Sprendimo užfiksuoti nepavyko, todėl nieko neišsaugota. Bandykite dar kartą.",
       "chipEngagements": "Su kuo dirbu",
       "userEngagements": "Su kuo aš dirbu?",
       "engagementsOpened": "Štai įrašyti darbo santykiai. Skydelyje galite vieną iš jų užbaigti.",
@@ -15255,6 +15346,7 @@
     "evidenceDocument": "Dokumentas galioja iki {until} — dar nepatvirtinta",
     "evidenceEntriesAndDocument": "{count, plural, one {# darbo įrašas} few {# darbo įrašai} many {# darbo įrašo} other {# darbo įrašų}} ir dokumentas iki {until} — dar nepatvirtinta",
     "evidenceSelfConfirmed": "Patvirtinote patys — nepriklausomo patvirtinimo dar nėra",
+    "evidenceClientAccepted": "Užsakovo priimta — darbdavio nepatvirtinta",
     "employerConfirmed": "Patvirtino {org}, {date}",
     "employerConfirmedNoDate": "Patvirtino darbdavys",
     "systemDerived": "Išvesta iš: {source}"
@@ -16843,7 +16935,8 @@
     },
     "correct": "Taisyti",
     "correctCancel": "Atšaukti",
-    "correctHint": "Išsaugojus sukuriamas naujas įrašas, o pradinis lieka šalia — niekas neištrinama."
+    "correctHint": "Išsaugojus sukuriamas naujas įrašas, o pradinis lieka šalia — niekas neištrinama.",
+    "rejectedNotCounted": "atmesta, neįskaičiuota"
   },
   "oauthConsent": {
     "title": "Prieigos patvirtinimas",
@@ -16900,16 +16993,6 @@
     "emailInactiveNote": "El. laiškų siuntimas platformoje dar neaktyvus. Jūsų pasirinkimai išsaugomi ir pradės veikti vos jį įjungus.",
     "error": "Pakeitimo išsaugoti nepavyko, jis atšauktas. Bandykite dar kartą.",
     "unavailable": "Pranešimų nustatymai šiuo metu nepasiekiami."
-  },
-  "cvOrganizationHistory": {
-    "title": "Organizacijų pateikta darbo istorija",
-    "note": "Paimta iš čia nurodytų organizacijų įrašų. Ji nėra paties žmogaus deklaruota ir nėra nepriklausomai patikrinta.",
-    "untitled": "Organizacijos užfiksuotas darbas",
-    "hoursTerm": "Valandos",
-    "hoursRecorded": "{hours} val. užfiksuota ({count, plural, one {# įrašas} few {# įrašai} other {# įrašų}})",
-    "hoursPeriod": "{hours} val. nurodyta laikotarpiui ({count, plural, one {# įrašas} few {# įrašai} other {# įrašų}})",
-    "contested": "Ginčijama asmens, turinčio tam teisę",
-    "more": "Dar {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}} nerodoma"
   },
   "historyContext": {
     "project": "Projektas",
@@ -17722,7 +17805,8 @@
           "notReviewableState": "Žurnalas dar neperžiūrimas: užsakymas nesukuria darbo konteksto. Pakvieskite šį žmogų prisijungti kaip darbuotoją — vos jam priėmus kvietimą, kontekstas atsiranda ir galėsite įjungti peržiūrą. Sukurti jo už žmogų negalite.",
           "inviteExit": "Pakviesti prisijungti kaip darbuotoją",
           "error": "Užsakytų žmonių dabar nepavyko nuskaityti. Tai nereiškia, kad niekas neužsakytas."
-        }
+        },
+        "summaryInvitationsUnread": "{active} aktyvūs · laukiančių kvietimų nepavyko perskaityti · {members} nariai · {review} peržiūri žurnalus"
       },
       "needs": {
         "title": "Darbuotojų poreikiai",
@@ -18172,7 +18256,8 @@
       "places": "Vietos",
       "people": "Žmonės",
       "hours": "Įrašytos valandos",
-      "period": "Laikotarpis"
+      "period": "Laikotarpis",
+      "dayHours": "Valandos pavienėmis dienomis"
     },
     "place": "Vieta",
     "noPlaceName": "Vieta nenurodyta",
@@ -18180,8 +18265,8 @@
     "people": "{count, plural, one {# žmogus} few {# žmonės} other {# žmonių}}",
     "entries": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
     "hoursShare": "{hours} val. šioje vietoje, palyginti su daugiausia dirbtąja vieta",
-    "noPlace": "{count, plural, one {# įraše} few {# įrašuose} other {# įrašų}} ({hours} val.) šaltinyje vieta nenurodyta.",
-    "periodAside": "Iš jų {hours} val. yra laikotarpio sumos, nurodytos visam tarpsniui, laikomos atskirai nuo pavienių dienų.",
+    "noPlace": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}} ({hours} val. pavienėmis dienomis) šaltinyje nenurodo vietos.",
+    "periodAside": "Į viršuje nurodytą sumą neįtraukta: {hours} val. – laikotarpio sumos, nurodytos visam tarpsniui. Tai atskiras skaičius, jis niekada nepridedamas prie pavienių dienų.",
     "scope": {
       "title": "Ką šis importas apima",
       "carried": "Šaltinyje yra: kas dirbo, kurią dieną, kiek valandų, kas daryta ir vieta taip, kaip parašyta.",
@@ -18208,9 +18293,46 @@
       "progress": "{attributed} iš {total} priskirta: {name}",
       "done": "Priskirta įrašų: {count}; jau buvo priskirta: {skipped}.",
       "refused": "Nepavyko išsaugoti. Nieko nepakeista.",
+      "personPeriod": "{hours} val. laikotarpio suma (nepridedama prie atskirų dienų)",
       "person": "{hours} val., {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}"
     },
+    "periodShort": "{hours} val. laikotarpio suma",
     "truncated": "Įrašų yra daugiau, nei perskaito vienas vaizdas. Rodomi perskaityti {count}; sumos apima tik juos."
+  },
+  "workPlan": {
+    "title": "Suplanuotas darbas",
+    "intro": "Suplanuokite, kas, kur ir kada dirba. Kalendorius tai rodo kaip planą; kas iš tikrųjų įvyko, lieka darbo žurnale.",
+    "worker": "Darbuotojas",
+    "project": "Projektas (neprivaloma)",
+    "workObject": "Objektas (neprivaloma)",
+    "startDate": "Nuo",
+    "endDate": "Iki",
+    "startTime": "Pradžia (neprivaloma)",
+    "endTime": "Pabaiga (neprivaloma)",
+    "note": "Pastaba (neprivaloma)",
+    "none": "Nėra",
+    "submit": "Suplanuoti darbą",
+    "pending": "Planuojama…",
+    "cancel": "Atšaukti planą",
+    "cancelPending": "Atšaukiama…",
+    "empty": "Šiam laikotarpiui dar nieko nesuplanuota.",
+    "noWorkers": "Jūsų sąraše dar nėra darbuotojų. Pirmiausia pakvieskite žmones, tada planuokite jų darbą.",
+    "unavailable": "Planavimas čia dar nepasiekiamas.",
+    "listTitle": "Suplanuoti laikotarpiai",
+    "overlap": "Persidengia su patvirtintomis atostogomis",
+    "outcome": {
+      "planned": "Darbas suplanuotas.",
+      "cancelled": "Planas atšauktas.",
+      "invalid": "Patikrinkite datas ir laukus ir bandykite dar kartą.",
+      "not_allowed": "Negalite planuoti šiai organizacijai.",
+      "worker_not_in_scope": "Šis darbuotojas nėra šios organizacijos sąraše.",
+      "project_not_in_organization": "Šis projektas priklauso kitai organizacijai.",
+      "work_object_not_in_organization": "Šis objektas priklauso kitai organizacijai.",
+      "unavailable": "Planavimas čia dar nepasiekiamas.",
+      "error": "Kažkas nepavyko. Bandykite dar kartą.",
+      "planned_collides": "Suplanuota, bet šis žmogus jau turi darbų kai kuriomis iš šių dienų. Sprendžiate jūs; jei plano nereikia, atšaukite jį žemiau.",
+      "planned_unknown": "Suplanuota, bet nepavyko patvirtinti, ar tos dienos laisvos. Tai nereiškia, kad laisvos."
+    }
   },
   "workLifecycle": {
     "pending": "Dar ne",
@@ -18382,6 +18504,80 @@
       "skills": "{count, plural, one {# jūsų įrašais pagrįstas gebėjimas} few {# jūsų įrašais pagrįsti gebėjimai} other {# jūsų įrašais pagrįstų gebėjimų}}",
       "next": "Kur galite eiti"
     }
+  },
+  "teamAssignment": {
+    "title": "Komandos šiame projekte",
+    "intro": "Komanda skiriama kaip vienas vienetas. Nariai imami iš pačios komandos narystės, todėl komandą palikę žmonės neįskaičiuojami, o kiekvieno žmogaus valandos ir dienoraštis lieka jo paties.",
+    "none": "Šiam projektui komanda neskirta.",
+    "scope": {
+      "project": "Visas projektas",
+      "task": "Užduotis: {title}",
+      "object": "Darbo vieta"
+    },
+    "membersNow": "Dabar narių: {count}",
+    "noMembers": "Aktyvių narių nėra.",
+    "unnamedMember": "Komandos narys",
+    "unnamedTeam": "Komanda",
+    "end": "Baigti paskyrimą",
+    "ending": "Baigiama…",
+    "replaceLabel": "Pakeisti kita komanda",
+    "replacePlaceholder": "Pasirinkite komandą",
+    "replaceSubmit": "Pakeisti",
+    "assignTitle": "Paskirti komandą",
+    "teamLabel": "Komanda",
+    "teamPlaceholder": "Pasirinkite komandą",
+    "scopeLabel": "Ką komanda dirba",
+    "scopeProjectOption": "Visą projektą",
+    "scopeTaskOption": "Vieną užduotį",
+    "taskLabel": "Užduotis",
+    "taskPlaceholder": "Pasirinkite užduotį",
+    "noTeams": "Dar nevaldote nė vienos komandos. Sukurkite ją puslapyje „Žmonės“.",
+    "noTasks": "Šiame projekte atvirų užduočių nėra.",
+    "submit": "Paskirti komandą",
+    "assigning": "Skiriama…",
+    "outcome": {
+      "created": "Komanda paskirta.",
+      "already_assigned": "Ši komanda čia jau paskirta. Niekas nepasikeitė.",
+      "replaced": "Komanda pakeista.",
+      "ended": "Paskyrimas baigtas.",
+      "already_ended": "Šis paskyrimas jau buvo baigtas."
+    },
+    "refusal": {
+      "not_authorized": "Negalite paskirti šios komandos šiam projektui.",
+      "not_authed": "Prisijunkite iš naujo, kad tęstumėte.",
+      "not_a_team": "Tai nėra komanda.",
+      "team_has_no_members": "Šioje komandoje dar nėra aktyvių narių.",
+      "project_completed": "Šis projektas užbaigtas.",
+      "task_not_assignable": "Šiai užduočiai komandos paskirti negalima (ji uždaryta arba priklauso kitam projektui).",
+      "object_not_assignable": "Šiai darbo vietai komandos paskirti negalima.",
+      "one_scope_only": "Pasirinkite arba užduotį, arba darbo vietą, ne abi.",
+      "replace_target_not_active": "Keičiamas paskyrimas nebeaktyvus.",
+      "team_and_project_required": "Pasirinkite komandą ir projektą.",
+      "needs_migration": "Šiuo metu nepasiekiama.",
+      "error": "Nepavyko atlikti. Niekas nebuvo pakeista."
+    },
+    "calendar": {
+      "conflictsTitle": "Šiomis dienomis jau užimti",
+      "unknownTitle": "Nepavyko patvirtinti, kad šiomis dienomis laisvi:",
+      "advisory": "Patarimas: paskyrimas išsaugotas. Jei sutapimas tikras, baikite jį aukščiau."
+    },
+    "form": {
+      "heading": "Paskirti visą komandą projektui",
+      "intro": "Paskirkite šią {count} narių komandą projektui kaip vieną vienetą.",
+      "projectLabel": "Projektas",
+      "projectPlaceholder": "Pasirinkite projektą",
+      "noProjects": "Neturite atvirų projektų, kuriems galėtumėte paskirti komandą."
+    }
+  },
+  "cvOrganizationHistory": {
+    "title": "Organizacijų pateikta darbo istorija",
+    "note": "Paimta iš čia nurodytų organizacijų įrašų. Ji nėra paties žmogaus deklaruota ir nėra nepriklausomai patikrinta.",
+    "untitled": "Organizacijos užfiksuotas darbas",
+    "hoursTerm": "Valandos",
+    "hoursRecorded": "{hours} val. užfiksuota ({count, plural, one {# įrašas} few {# įrašai} other {# įrašų}})",
+    "hoursPeriod": "{hours} val. nurodyta laikotarpiui ({count, plural, one {# įrašas} few {# įrašai} other {# įrašų}})",
+    "contested": "Ginčijama asmens, turinčio tam teisę",
+    "more": "Dar {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}} nerodoma"
   },
   "companyPerson": {
     "eyebrow": "Istorinė asmens kortelė",

@@ -9,6 +9,7 @@ import { openDemandIntakeAsCompanyAction } from "@/lib/company/demand-intake-nav
 import { PROFESSION_SKILLS } from "@/lib/taxonomy/profession-skills";
 import { getWorkforce } from "@/lib/workforce/workforce";
 import { getEmployerWorkerAvailability } from "@/lib/planning/employer-availability";
+import { WorkPlanSection } from "@/components/app/work-plan-section";
 import { getRosterUtilisation } from "@/lib/planning/roster-utilisation";
 import { getRosterCommitments } from "@/lib/planning/roster-commitments";
 import { summariseRosterUtilisation } from "@/lib/workforce/utilisation";
@@ -40,6 +41,8 @@ const TIMELINE_TONE: Record<TimelineKind, string> = {
   project: "bg-brand-blue/40 border-brand-blue/60",
   booking: "bg-brand-cyan/35 border-brand-cyan/60",
   trip: "bg-brand-violet/35 border-brand-violet/60",
+  // CAL-8: a FORECAST — dashed, so a plan never reads as a fact.
+  plan: "border-dashed bg-brand-blue/15 border-brand-blue/60",
   absence: "bg-state-amber/30 border-state-amber/60",
 };
 
@@ -95,10 +98,11 @@ export default async function CompanyWorkforcePlanningPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ from?: string; by?: string }>;
+  /** `plan` — the work-plan actions' bounded return vocabulary (CAL-8). */
+  searchParams: Promise<{ from?: string; by?: string; plan?: string }>;
 }) {
   const { locale } = await params;
-  const { from: rawFrom, by: rawBy } = await searchParams;
+  const { from: rawFrom, by: rawBy, plan: planOutcome } = await searchParams;
   setRequestLocale(locale);
   await requireRoleOrRedirect(locale, "company");
 
@@ -822,6 +826,7 @@ export default async function CompanyWorkforcePlanningPage({
         {timelineSection}
         {commitmentsSection}
         {availabilitySection}
+        <WorkPlanSection locale={locale} outcome={planOutcome} />
         <div
           className="flex flex-col gap-3 rounded-md border border-dashed border-ink-500 p-5"
           data-testid="planning-zone-empty"
@@ -856,6 +861,7 @@ export default async function CompanyWorkforcePlanningPage({
       {timelineSection}
       {commitmentsSection}
       {availabilitySection}
+      <WorkPlanSection locale={locale} outcome={planOutcome} />
 
       {/* Capacity summary — short numbers + one bar, never a text wall. */}
       <section

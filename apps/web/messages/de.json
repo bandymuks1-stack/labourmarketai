@@ -126,15 +126,15 @@
   },
   "marketplaceListings": {
     "pageTitle": "Marktplatz",
-    "pageIntro": "Arbeitsressourcen in ganz Europa — Unterkunft, Räume, Fahrzeuge, Werkzeuge und Ausrüstung: zu verkaufen, zu mieten oder gesucht. Eine Anfrage öffnet ein direktes Gespräch.",
+    "pageIntro": "Angebote und Gesuche in ganz Europa — Arbeitsmittel, Waren, Dienstleistungen und Projekte. Eine Anfrage eröffnet ein direktes Gespräch. Zahlungen werden hier nicht abgewickelt.",
     "title": "Marktplatz-Anzeigen",
     "myTitle": "Meine Anzeigen",
-    "intro": "Bieten oder suchen Sie eine Arbeitsressource. Nur aktive Anzeigen sind für andere sichtbar.",
+    "intro": "Veröffentlichen Sie, was Sie anbieten oder suchen. Für andere sind nur aktive, nicht abgelaufene Anzeigen sichtbar.",
     "notAvailable": "Derzeit nicht verfügbar.",
     "empty": "Noch keine Anzeigen. Fügen Sie Ihre erste Arbeitsressource hinzu.",
     "addButton": "Anzeige hinzufügen",
     "browseTitle": "Aktive Anzeigen durchsuchen",
-    "browseIntro": "Derzeit im Netzwerk angebotene Arbeitsressourcen.",
+    "browseIntro": "Was derzeit im Netzwerk angeboten oder gesucht wird.",
     "browseEmpty": "Noch keine aktiven Anzeigen.",
     "enquire": "Anfragen",
     "linkToServices": "Suchen Sie professionelle Dienstleistungen? Dienste öffnen",
@@ -150,7 +150,7 @@
     "formLabelPlaceholder": "Stadt oder Region",
     "formPriceLabel": "Preis",
     "formPricePlaceholder": "z. B. 450 €/Monat oder nach Vereinbarung",
-    "priceHint": "Preis ist optional und Freitext. Hier erfolgt keine Zahlung.",
+    "priceHint": "Der Preis ist optional und beschreibend. Zahlungen werden hier nicht abgewickelt.",
     "save": "Speichern",
     "saving": "Speichern…",
     "cancel": "Abbrechen",
@@ -166,7 +166,8 @@
     "status": {
       "draft": "Entwurf",
       "active": "Aktiv",
-      "closed": "Geschlossen"
+      "closed": "Geschlossen",
+      "paused": "Pausiert"
     },
     "kinds": {
       "sale": "Zu verkaufen",
@@ -180,7 +181,82 @@
       "tools": "Werkzeuge",
       "equipment": "Ausrüstung",
       "machinery": "Maschinen",
-      "safety_equipment": "Sicherheitsausrüstung"
+      "safety_equipment": "Sicherheitsausrüstung",
+      "goods_food_homegrown": "Selbst angebaute Lebensmittel",
+      "goods_handmade": "Handgemachtes und Kunst",
+      "goods_household": "Haushaltsgegenstände",
+      "goods_other": "Sonstige Waren",
+      "service_general": "Dienstleistung gesucht — allgemein",
+      "service_trade": "Dienstleistung gesucht — Handwerk",
+      "service_creative": "Dienstleistung gesucht — kreativ",
+      "service_other": "Dienstleistung gesucht — sonstige",
+      "personal": "Persönlich",
+      "project_work": "Projekt- oder Auftragsarbeit"
+    },
+    "formDomainLabel": "Bereich",
+    "formAmountLabel": "Preisbetrag",
+    "formCurrencyLabel": "Währung",
+    "formQuantityLabel": "Menge",
+    "formQuantityPlaceholder": "z. B. 30",
+    "formUnitLabel": "Einheit",
+    "formUnitPlaceholder": "z. B. kg, Stk.",
+    "formExpiryLabel": "Verfügbar bis",
+    "formExpiryHint": "Optional. Betrag, Menge und Datum sind beschreibend — Zahlungen werden hier nicht abgewickelt. Nach dem Datum wird die Anzeige anderen nicht mehr angezeigt.",
+    "domainFilterLabel": "Nach Bereich filtern",
+    "actorFilterLabel": "Nach Anbieter bzw. Suchendem filtern",
+    "actorKinds": {
+      "all": "Alle",
+      "person": "Privatperson",
+      "company": "Unternehmen",
+      "institution": "Organisation oder Einrichtung",
+      "agency": "Agentur",
+      "service_provider": "Selbstständiger Dienstleister",
+      "supplier": "Lieferant",
+      "other": "Art nicht angegeben"
+    },
+    "errorPrice": "Geben Sie einen gültigen Betrag mit einem dreistelligen Währungscode ein (z. B. EUR).",
+    "errorQuantity": "Die Menge muss eine Zahl größer als null sein.",
+    "errorExpiry": "Das Datum muss in der Zukunft liegen.",
+    "errorRestricted": "Diese Art von Artikel darf hier nicht eingestellt werden.",
+    "legalCheckFood": "Für den Verkauf von Lebensmitteln oder selbst angebauten Erzeugnissen gelten Vorschriften zum Lebensmittelverkauf und zur Hygiene. Bestätigen Sie vor der Veröffentlichung, dass Sie die für Sie geltenden Vorschriften geprüft haben.",
+    "legalCheckAck": "Ich habe die für mich geltenden Vorschriften geprüft",
+    "serviceNeedHint": "Ein Dienstleistungsbedarf ist immer eine Gesuchs-Anzeige.",
+    "moreTypesSoon": "Weitere Anzeigentypen werden hier bald verfügbar sein.",
+    "pause": "Pausieren",
+    "expired": "Abgelaufen",
+    "expiresOn": "Bis {date}",
+    "openInServices": "Dienstleistungen öffnen",
+    "domains": {
+      "all": "Alle",
+      "work_resource": "Arbeitsmittel",
+      "goods": "Waren",
+      "service_need": "Gesuchte Dienstleistungen",
+      "personal": "Persönlich",
+      "project_work": "Projekte und Aufträge",
+      "service": "Angebotene Dienstleistungen",
+      "other": "Sonstiges",
+      "job": "Stellen & Vakanzen",
+      "workforce": "Verfügbare Arbeitskräfte"
+    },
+    "directions": {
+      "offer": "Angeboten",
+      "need": "Gesucht",
+      "other": "Sonstiges"
+    },
+    "federationPartial": "Einige Quellen konnten gerade nicht gelesen werden, daher ist diese Liste möglicherweise unvollständig.",
+    "allJobsLink": "Gesamte Jobbörse ansehen",
+    "titleNotStated": "Titel nicht angegeben",
+    "openInSource": "Am Ursprungsort öffnen",
+    "visibility": {
+      "public": "Öffentlich",
+      "signed_in": "Angemeldete Mitglieder",
+      "organizations": "Nur Organisationen",
+      "workers": "Nur Arbeitskräfte",
+      "own": "Ihr Eintrag"
+    },
+    "provenance": {
+      "platform": "Auf dieser Plattform",
+      "external_vacancy": "Öffentliche Vakanz, externe Quelle"
     }
   },
   "quality": {
@@ -728,15 +804,15 @@
     },
     "basis": {
       "label": "Grundlage",
-      "workerEvidence": "Gezählt nach den Regeln des Nachweisberichts aus Ihren eigenen katalogisierten Fähigkeiten, Arbeitsjournal-Einträgen und Bestätigungen von Verantwortlichen. Kein Score, keine Schätzung.",
+      "workerEvidence": "Gezählt nach den Regeln des Nachweisberichts aus Ihren eigenen katalogisierten Fähigkeiten und Arbeitsjournal-Einträgen. Bestätigte Einträge sind aktuelle Einträge, die eine Führungskraft genehmigt hat, jeweils einmal gezählt; Ihre eigenen Genehmigungen und abgelehnte Einträge sind nicht enthalten. Kein Score, keine Schätzung.",
       "workerActivity": "Anzahl Ihrer eigenen Journaleinträge und hochgeladenen Fotos.",
       "orgDemand": "Zählungen über die von Ihnen selbst erstellten Bedarfsanfragen. Offen = Entwurf, eingereicht, in Prüfung oder Nachfassen nötig.",
       "orgProjects": "Zählungen der Projektzeilen Ihres eigenen Unternehmens, gruppiert nach dem erfassten Status jeder Zeile.",
-      "orgTasks": "Zählungen der Aufgaben, bei denen Sie zuständig oder Ersteller sind, gruppiert nach erfasstem Status.",
+      "orgTasks": "Anzahl der Aufgaben, bei denen Sie Bearbeiter oder Ersteller sind, gruppiert nach erfasstem Status. Das ist Ihre eigene Aufgabenliste, nicht die der gesamten Organisation.",
       "orgDocuments": "Gezählt werden nur Arbeitskräfte, die dem Teilen von Gesamtzahlen ihrer Dokumente zugestimmt haben.",
       "orgFinance": "Zählungen über Ihre eigenen erfassten Finanzeinträge; überfällig wird aus dem Fälligkeitsdatum jedes Eintrags abgeleitet. Nur manuelle Einträge — keine Zahlungsdaten.",
       "orgDemandOrg": "Zählungen über die Ihrer Organisation zugeordneten Bedarfsanfragen (alle Mitglieder mit Bedarfszugriff sehen dieselben Zahlen). Offen = Entwurf, eingereicht, in Prüfung oder Nachfassen nötig. Interesse von Arbeitskräften zählt Arbeitskräfte, die Interesse an diesen Anfragen gezeigt haben.",
-      "journal": "Gezählt werden Arbeitseinträge, die Beschäftigte in den Beschäftigungsverhältnissen dieser Organisation in den letzten sieben Kalendertagen erfasst haben. „Wartet auf Prüfung“ ist die aktuelle Prüfliste; „bestätigt“ zählt die Einträge des Zeitfensters, die eine Führungskraft bestätigt hat. Fehlende Einträge sind kein Beleg dafür, dass nicht gearbeitet wurde."
+      "journal": "Gezählt werden Arbeitseinträge, die Beschäftigte in den Beschäftigungsverhältnissen dieser Organisation in den letzten sieben Kalendertagen erfasst haben, jede Korrekturkette einmal. „Wartet auf Prüfung“ ist die gesamte aktuelle Prüfliste, nicht nur die letzten sieben Tage. „Bestätigt“ zählt die Einträge des Zeitfensters, deren letzte Prüfung eine Genehmigung durch jemand anderen als die Person selbst ist. Fehlende Einträge sind kein Beleg dafür, dass nicht gearbeitet wurde."
     },
     "worker": {
       "evidence": {
@@ -745,7 +821,7 @@
         "workSupported": "Durch Arbeitstagebuch-Einträge belegt",
         "confirmed": "Bestätigt",
         "journalEntries": "Journaleinträge",
-        "confirmations": "Bestätigungen",
+        "confirmations": "Vom Manager bestätigte Einträge",
         "empty": "Noch keine Nachweisdaten — Kennzahlen erscheinen, sobald Profil und Arbeitsjournal echte Einträge enthalten.",
         "link": "Vollständigen Nachweisbericht öffnen"
       },
@@ -787,10 +863,11 @@
         },
         "total": "Gesamt",
         "empty": "Noch keine Projekte — Kennzahlen erscheinen, sobald Ihr Unternehmen Projektzeilen hat.",
-        "link": "Projekte öffnen"
+        "link": "Projekte öffnen",
+        "other": "Anderer Status"
       },
       "tasks": {
-        "title": "Aufgaben nach Status",
+        "title": "Ihre Aufgaben nach Status",
         "open": "Offen",
         "status": {
           "todo": "Zu erledigen",
@@ -816,7 +893,7 @@
       "journal": {
         "title": "Arbeitsjournal (letzte sieben Tage)",
         "recorded": "Erfasste Einträge",
-        "awaitingReview": "Wartet auf Prüfung",
+        "awaitingReview": "Wartet auf Prüfung (alle Daten)",
         "confirmed": "Bestätigt",
         "link": "Journalbericht öffnen"
       }
@@ -2297,7 +2374,9 @@
         "review": "Journaleinträge zur Prüfung",
         "invitations": "Ausstehende Einladungen an Arbeitskräfte",
         "claims": "Öffentliche Anfragen, die du übernehmen kannst",
-        "reviewOff": "Mitarbeitende mit erfasster Arbeit, deren Bestätigung ausgeschaltet ist"
+        "reviewOff": "Mitarbeitende mit erfasster Arbeit, deren Bestätigung ausgeschaltet ist",
+        "unreadable": "konnte nicht gelesen werden",
+        "clientReview": "Arbeit, die auf Ihre Entscheidung als Auftraggeber wartet"
       }
     },
     "agency": {
@@ -6053,6 +6132,16 @@
         "precheckChoose": "Stattdessen wählen",
         "precheckAssignAnyway": "Trotzdem zuweisen",
         "precheckAdvisory": "Nur ein Hinweis: gerade geprüft und beim Speichern nicht erneut geprüft. Es wurde noch nichts zugewiesen.",
+        "reasonLabel": "Grund für das Beibehalten (optional)",
+        "reasonNone": "Kein Grund angegeben",
+        "keepFailed": "Der Ausnahmebeleg konnte nicht gespeichert werden. Nichts wurde gespeichert - bitte erneut versuchen.",
+        "reason": {
+          "agreed_with_worker": "Mit der Fachkraft abgestimmt",
+          "agreed_with_client": "Mit dem Auftraggeber abgestimmt",
+          "partial_overlap": "Überschneidung nur teilweise",
+          "urgent_need": "Dringender Bedarf",
+          "other": "Sonstiges"
+        },
         "collidesTitle": "An diesen Tagen bereits verplant",
         "notBlocking": "Das blockiert die Zuweisung nicht — Sie entscheiden.",
         "alternativesTitle": "In diesem Zeitraum frei",
@@ -6065,7 +6154,8 @@
           "project": "Projekt",
           "booking": "Buchung",
           "trip": "Dienstreise",
-          "absence": "Nicht verfügbar"
+          "absence": "Nicht verfügbar",
+          "plan": "Geplante Arbeit"
         }
       }
     },
@@ -6091,10 +6181,13 @@
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# Eintrag wartet auf deine Bestätigung} other {# Einträge warten auf deine Bestätigung}}",
+      "clientTitle": "{n, plural, one {# Eintrag wartet auf Ihre Entscheidung als Auftraggeber} other {# Einträge warten auf Ihre Entscheidung als Auftraggeber}}",
       "pendingBody": "Ein Tippen — und die Arbeit eines Menschen wird zum bestätigten Nachweis.",
+      "clientCta": "Prüfung als Auftraggeber öffnen",
       "cta": "Jetzt bestätigen",
       "zero": "Derzeit wartet nichts auf Bestätigung — der Rhythmus des Teams ist ruhig.",
-      "zeroCta": "Prüfwarteschlange"
+      "zeroCta": "Prüfwarteschlange",
+      "unreadable": "Die Prüfliste konnte gerade nicht gelesen werden. Das heißt nicht, dass nichts wartet."
     },
     "draft": {
       "title": "Projekte und Teams"
@@ -6103,6 +6196,7 @@
     "myProjectsEmpty": "Sie sind noch keinem Projekt zugewiesen. Sobald ein Unternehmen Sie zuweist, erscheint das Projekt hier.",
     "assignmentActive": "Aktiv",
     "assignmentEnded": "Beendet",
+    "viaTeam": "über Team {team}",
     "untitledProject": "Projekt ohne Titel",
     "archiveToggle": {
       "label": "Aktive oder abgeschlossene Projekte",
@@ -6180,6 +6274,7 @@
     "countersTitle": "Einsatzübersicht",
     "counters": {
       "totalAssigned": "Zugewiesen",
+      "viaTeam": "Über Team",
       "ready": "Bereit",
       "readyBasis": "Basiert nur auf den hier geprüften Feldern.",
       "needsDeclaredSkills": "Keine angegebenen Fähigkeiten",
@@ -6321,6 +6416,7 @@
         "notReadyNote": "Ein eigener Projekt-Thread wird vorbereitet. Starten Sie die Unterhaltung vorerst in Ihrem allgemeinen Posteingang — der Projektkontext wird oben angezeigt."
       },
       "fieldCount": "{n, plural, one {# Person auf dem Feld} other {# Personen auf dem Feld}}",
+      "fieldViaTeam": "{n} über Team",
       "todayCount": "{n, plural, one {# Journaleintrag heute — der Tag ist in Bewegung} other {# Journaleinträge heute — der Tag ist in Bewegung}}",
       "todayZero": "Heute noch keine Einträge — der Tag wartet noch auf seinen ersten Eintrag.",
       "fieldTitle": "Das Feld — wer heute im Team ist",
@@ -6331,15 +6427,6 @@
       "noActivity": "Noch keine Einträge.",
       "emptyTeam": "Dieses Projekt hat noch kein Team — starte den Draft und hole die ersten Leute aufs Feld.",
       "emptyTeamCta": "Draft starten",
-      "history": {
-        "title": "Bisherige Arbeit an diesem Projekt",
-        "provenance": "Von der Organisation bereitgestellte Historie, aus deren eigenen Aufzeichnungen importiert. Nicht unabhängig geprüft.",
-        "unavailable": "Die bisherige Arbeit konnte gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
-        "empty": "Für dieses Projekt ist keine von der Organisation bereitgestellte frühere Arbeit erfasst.",
-        "personUnknown": "Person nicht genannt",
-        "hoursUnknown": "Stunden nicht angegeben",
-        "count": "{n} Einträge"
-      },
       "positionsTitle": "Fehlende Positionen",
       "positionsEmpty": "Der Positionsbedarf ist noch nicht bereit — sobald er da ist, siehst du hier, welche Leute fehlen.",
       "openOps": "Management-Arena öffnen",
@@ -6358,13 +6445,23 @@
       "allAreas": "Alle",
       "areaUnknown": "Beruf nicht angegeben",
       "areaBasis": "Nach dem Hauptberuf der Person",
-      "teamLabel": "Mannschaft"
+      "teamLabel": "Mannschaft",
+      "history": {
+        "title": "Bisherige Arbeit an diesem Projekt",
+        "provenance": "Von der Organisation bereitgestellte Historie, aus deren eigenen Aufzeichnungen importiert. Nicht unabhängig geprüft.",
+        "unavailable": "Die bisherige Arbeit konnte gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
+        "empty": "Für dieses Projekt ist keine von der Organisation bereitgestellte frühere Arbeit erfasst.",
+        "personUnknown": "Person nicht genannt",
+        "hoursUnknown": "Stunden nicht angegeben",
+        "count": "{n} Einträge"
+      }
     },
     "workerView": {
       "eyebrow": "Mein Projekt",
       "untitled": "Projekt ohne Titel",
       "assignmentActive": "Aktive Zuweisung",
       "assignmentEnded": "Zuweisung beendet",
+      "viaTeam": "über Team {team}",
       "projectRestricted": "Projektdetails sind für Sie derzeit nicht verfügbar. Ihre Zuweisung bleibt sichtbar.",
       "journalCta": "Journaleintrag schreiben",
       "chatCta": "Nachricht senden",
@@ -7132,31 +7229,7 @@
         "error": "Die Antwort konnte nicht gespeichert werden. Es wurde nichts geändert."
       }
     },
-    "addableUnavailable": "Die Liste der verknüpften Arbeitskräfte konnte nicht geladen werden — Hinzufügen ist derzeit nicht möglich.",
-    "assign": {
-      "heading": "Das ganze Team einem Projekt zuweisen",
-      "intro": "Jedes der {count} Mitglieder wird einzeln zugewiesen, und Sie sehen das Ergebnis für jede Person.",
-      "projectLabel": "Projekt",
-      "projectPlaceholder": "Projekt wählen",
-      "submit": "Team zuweisen",
-      "assigning": "Wird zugewiesen…",
-      "noProjects": "Sie haben keine offenen Projekte, dem Sie das Team zuweisen könnten.",
-      "summary": "{written} von {total} zugewiesen.",
-      "member": {
-        "assigned": "Zugewiesen",
-        "calendar_unknown": "Zugewiesen · Termine nicht bestätigt",
-        "calendar_conflict": "Zugewiesen · an diesen Tagen schon belegt",
-        "refused": "Nicht zugewiesen · Sie dürfen diese Person nicht zuweisen",
-        "error": "Nicht zugewiesen · etwas ist schiefgelaufen"
-      },
-      "outcome": {
-        "not_authed": "Bitte erneut anmelden.",
-        "no_such_team": "Dieses Team können Sie nicht zuweisen.",
-        "empty_team": "Dieses Team hat noch keine Mitglieder.",
-        "needs_migration": "Derzeit nicht verfügbar.",
-        "unavailable": "Das Team konnte nicht zugewiesen werden. Es wurde nichts geändert."
-      }
-    }
+    "addableUnavailable": "Die Liste der verknüpften Arbeitskräfte konnte nicht geladen werden — Hinzufügen ist derzeit nicht möglich."
   },
   "teamEnquiries": {
     "enquireButton": "Dieser Kolonne eine Anfrage senden",
@@ -8131,9 +8204,9 @@
   "trust": {
     "unreadHint": "Einige davon konnten gerade nicht gezählt werden und werden als „—“ angezeigt. Das heißt nicht, dass Sie keine haben — die Zahlen ließen sich nur nicht lesen. Laden Sie gleich neu.",
     "title": "Vertrauenssignale",
-    "caption": "Diese Zahlen stammen direkt aus Ihren Arbeitseinträgen.",
+    "caption": "Diese Zahlen stammen direkt aus Ihren Arbeitseinträgen. Bestätigte Einträge sind Einträge, die eine Führungskraft genehmigt hat, jeweils einmal gezählt; Ihre eigenen Genehmigungen und abgelehnte Einträge sind nicht enthalten. Bestätigte Fähigkeiten werden getrennt gezählt.",
     "verifiedSkills": "Vom Manager bestätigte Fähigkeiten",
-    "managerConfirmations": "Manager-Bestätigungen",
+    "managerConfirmations": "Vom Manager bestätigte Einträge",
     "journalEntries": "Journaleinträge",
     "zeroHint": "Vertrauenssignale wachsen aus echter Arbeit: Erfassen Sie einen Journaleintrag und vervollständigen Sie Ihr Profil."
   },
@@ -8160,7 +8233,7 @@
     },
     "summary": {
       "verifiedSkills": "Vom Manager bestätigte Fähigkeiten",
-      "managerConfirmations": "Manager-Bestätigungen",
+      "managerConfirmations": "Vom Manager bestätigte Einträge",
       "journalEntries": "Journaleinträge"
     },
     "proofTitle": "Bestätigte Arbeitsnachweise",
@@ -8261,6 +8334,7 @@
     "claimFromJournal": "aus dem Arbeitsjournal",
     "recordedHours": "Erfasste Arbeit: {hours} Std. aus dem Arbeitsjournal, davon {confirmed} Std. bestätigt.",
     "confirmedWorkFact": "Von anderen bestätigte Arbeitsjournal-Einträge: {entries, plural, one {# Eintrag} other {# Einträge}} an {days, plural, one {# Arbeitstag} other {# Arbeitstagen}}",
+    "clientAcceptedWorkFact": "{entries, plural, one {# Arbeitseintrag} other {# Arbeitseinträge}} vom Auftraggeber akzeptiert. Die Abnahme durch einen Auftraggeber ist kein Eintrag eines Vorgesetzten und kein Zahlungsnachweis.",
     "recordedHoursNone": "Noch keine Journaleinträge mit Dauer — Stunden neben Fähigkeiten stammen aus Ihren eigenen Einträgen.",
     "skillHours": "{hours} Std.",
     "skillHoursOwn": "{hours} Std., Ihr eigener Eintrag",
@@ -10787,7 +10861,8 @@
       "finance": "Finanzen",
       "invitation": "Einladung",
       "absence": "Urlaub",
-      "stage": "Phasen"
+      "stage": "Phasen",
+      "plan": "Geplante Arbeit"
     },
     "sourceNotes": {
       "taskError": "Aufgaben konnten gerade nicht geladen werden. Der Rest des Plans wird normal angezeigt.",
@@ -10831,7 +10906,8 @@
       "finance": "Finanzeintrag",
       "invitation": "Einladung",
       "absence": "Urlaub / Abwesenheit",
-      "stage": "Projektphase"
+      "stage": "Projektphase",
+      "plan": "Geplante Arbeit"
     },
     "projectStatus": {
       "draft": "Entwurf",
@@ -10928,6 +11004,10 @@
       "dayNoWork": "An diesem Tag wurde keine Arbeit erfasst.",
       "dayFuture": "Dieser Tag ist noch nicht gekommen.",
       "recordOnDay": "Arbeit für diesen Tag erfassen"
+    },
+    "planStatus": {
+      "planned": "Geplant",
+      "cancelled": "Storniert"
     }
   },
   "workforcePlanning": {
@@ -11022,6 +11102,7 @@
       "pendingDecisions": "Abwesenheitsanträge warten auf Entscheidung",
       "journalToday": "Arbeitseinträge heute",
       "awaitingReview": "Einträge warten auf Prüfung",
+      "clientReviewToDecide": "Wartet auf Ihre Entscheidung als Auftraggeber",
       "absentToday": "Heute als abwesend erfasst",
       "absentNext": "Erfasste Abwesenheiten in den nächsten 7 Tagen",
       "noneRecordedToday": "Für heute ist keine genehmigte Abwesenheit erfasst.",
@@ -11055,7 +11136,8 @@
       "kind": {
         "project": "Projekt",
         "booking": "Buchung",
-        "trip": "Dienstreise"
+        "trip": "Dienstreise",
+        "plan": "geplante Arbeit"
       },
       "untitled": "ohne Titel",
       "openEnded": "ab {start}, kein Enddatum erfasst",
@@ -11160,6 +11242,7 @@
       "link": "Aufgaben zu diesem Projekt"
     },
     "objectLabel": "Objekt",
+    "viaTeam": "über Team {team}",
     "assignee": {
       "label": "Zugewiesen an",
       "you": "Sie",
@@ -11227,7 +11310,8 @@
         "limit_reached": "Limit für Verknüpfungen erreicht.",
         "entry_not_current": "Dieser Eintrag wurde korrigiert oder zurückgezogen — verknüpfen Sie die aktuelle Version.",
         "already_unlinked": "Diese Verknüpfung wurde bereits zurückgezogen."
-      }
+      },
+      "unreadable": "Die angehängten Einträge konnten gerade nicht gelesen werden. Das heißt nicht, dass keine angehängt sind."
     },
     "approval": {
       "label": "Freigabe",
@@ -13276,6 +13360,10 @@
           "label": "Eine Person in ein anderes Projekt versetzen",
           "description": "Weist dem neuen Projekt zu und beendet die bisherige Zuweisung — nach der Folgenabschätzung."
         },
+        "keepAssignment": {
+          "label": "Zuweisung trotz Kalenderkonflikt beibehalten",
+          "description": "Hält Ihre Entscheidung fest, die Zuweisung in Kenntnis des Konflikts beizubehalten, mit einem geschlossenen Grundcode. Ohne Beleg wird nichts gespeichert."
+        },
         "offerCapacity": {
           "label": "Ihr Angebot festhalten"
         }
@@ -13637,6 +13725,9 @@
       "assignAlreadyCommitted": "Hinweis: An einigen dieser Tage besteht bereits eine Verpflichtung ({count}). Die Zuweisung bleibt bestehen — Sie entscheiden.",
       "assignCommitmentUnknown": "Wir konnten nicht bestätigen, dass diese Tage frei sind. Das ist nicht dasselbe wie frei.",
       "assignFailed": "Die Zuweisung konnte nicht vorgenommen werden.",
+      "keepPrompt": "Die Person ist an diesen Tagen bereits gebunden. Behalten Sie sie wissentlich bei? Wählen Sie einen Grund - die Entscheidung wird festgehalten.",
+      "keepRecorded": "Festgehalten: Sie haben die Zuweisung wissentlich beibehalten.",
+      "keepFailed": "Die Entscheidung konnte nicht festgehalten werden, daher wurde nichts gespeichert. Bitte erneut versuchen.",
       "chipEngagements": "Mit wem ich arbeite",
       "userEngagements": "Mit wem arbeite ich?",
       "engagementsOpened": "Das sind die erfassten Arbeitsbeziehungen. Im Panel kannst du eine davon beenden.",
@@ -15255,6 +15346,7 @@
     "evidenceDocument": "Dokument gültig bis {until} — noch nicht bestätigt",
     "evidenceEntriesAndDocument": "{count, plural, one {# Arbeitseintrag} other {# Arbeitseinträge}} und ein Dokument gültig bis {until} — noch nicht bestätigt",
     "evidenceSelfConfirmed": "Von Ihnen selbst bestätigt — noch nicht unabhängig bestätigt",
+    "evidenceClientAccepted": "Vom Auftraggeber akzeptiert — nicht von einem Arbeitgeber bestätigt",
     "employerConfirmed": "Bestätigt von {org}, {date}",
     "employerConfirmedNoDate": "Von einem Arbeitgeber bestätigt",
     "systemDerived": "Abgeleitet aus: {source}"
@@ -16843,7 +16935,8 @@
     },
     "correct": "Korrigieren",
     "correctCancel": "Abbrechen",
-    "correctHint": "Beim Speichern entsteht ein neuer Eintrag, der ursprüngliche bleibt daneben erhalten — nichts wird gelöscht."
+    "correctHint": "Beim Speichern entsteht ein neuer Eintrag, der ursprüngliche bleibt daneben erhalten — nichts wird gelöscht.",
+    "rejectedNotCounted": "abgelehnt, nicht gezählt"
   },
   "oauthConsent": {
     "title": "Zugriff bestätigen",
@@ -16900,16 +16993,6 @@
     "emailInactiveNote": "Der E-Mail-Versand ist auf der Plattform noch nicht aktiv. Ihre Auswahl wird gespeichert und gilt, sobald er aktiv ist.",
     "error": "Die Änderung konnte nicht gespeichert werden und wurde zurückgesetzt. Bitte versuchen Sie es erneut.",
     "unavailable": "Benachrichtigungseinstellungen sind derzeit nicht verfügbar."
-  },
-  "cvOrganizationHistory": {
-    "title": "Von Organisationen gelieferte Arbeitshistorie",
-    "note": "Aus den Unterlagen der hier genannten Organisationen übernommen. Sie ist weder selbst erklärt noch unabhängig überprüft.",
-    "untitled": "Von einer Organisation erfasste Arbeit",
-    "hoursTerm": "Stunden",
-    "hoursRecorded": "{hours} Std. erfasst in {count, plural, one {# Eintrag} other {# Einträgen}}",
-    "hoursPeriod": "{hours} Std. für einen Zeitraum angegeben, in {count, plural, one {# Eintrag} other {# Einträgen}}",
-    "contested": "Von einer berechtigten Stelle bestritten",
-    "more": "{count, plural, one {# weiterer Eintrag wird} other {# weitere Einträge werden}} nicht angezeigt"
   },
   "historyContext": {
     "project": "Projekt",
@@ -17472,7 +17555,7 @@
         "decisions": "Entscheidungen"
       },
       "icon": {
-        "person": "Person",
+        "person": "Privatperson",
         "time": "Zeit",
         "evidence": "Nachweis",
         "warning": "braucht Aufmerksamkeit",
@@ -17722,7 +17805,8 @@
           "notReviewableState": "Journal noch nicht prüfbar: eine Buchung erzeugt keinen Arbeitskontext. Laden Sie diese Person ein, als Mitarbeiter beizutreten — sobald sie annimmt, existiert der Kontext und Sie können die Prüfung aktivieren. Sie können ihn nicht für die Person anlegen.",
           "inviteExit": "Einladen, als Mitarbeiter beizutreten",
           "error": "Die gebuchten Personen konnten gerade nicht gelesen werden. Das ist keine Aussage, dass niemand gebucht ist."
-        }
+        },
+        "summaryInvitationsUnread": "{active} aktiv · offene Einladungen konnten nicht gelesen werden · {members} Mitglieder · {review} prüfen Journale"
       },
       "needs": {
         "title": "Personalbedarf",
@@ -18172,7 +18256,8 @@
       "places": "Orte",
       "people": "Personen",
       "hours": "Erfasste Stunden",
-      "period": "Zeitraum"
+      "period": "Zeitraum",
+      "dayHours": "Stunden an einzelnen Tagen"
     },
     "place": "Ort",
     "noPlaceName": "Kein Ort angegeben",
@@ -18180,8 +18265,8 @@
     "people": "{count, plural, one {# Person} other {# Personen}}",
     "entries": "{count, plural, one {# Eintrag} other {# Einträge}}",
     "hoursShare": "{hours} Std. an diesem Ort, im Vergleich zum meistbearbeiteten Ort",
-    "noPlace": "{count, plural, one {# Eintrag} other {# Einträge}} ({hours} Std.) nennen in der Quelle keinen Ort.",
-    "periodAside": "Davon sind {hours} Std. Zeitraumsummen für eine Spanne, getrennt von einzelnen Tagen.",
+    "noPlace": "{count, plural, one {# Eintrag} other {# Einträge}} ({hours} Std. an einzelnen Tagen) in der Quelle nennen keinen Ort.",
+    "periodAside": "Oben nicht enthalten: {hours} Std. als Zeitraumsummen für eine Spanne. Das ist eine eigene Zahl und wird nie zu einzelnen Tagen addiert.",
     "scope": {
       "title": "Was dieser Import enthält",
       "carried": "Die Quelle enthält: wer gearbeitet hat, an welchem Tag, wie viele Stunden, was getan wurde und den Ort wie geschrieben.",
@@ -18208,9 +18293,46 @@
       "progress": "{attributed} von {total} zugeordnet: {name}",
       "done": "{count} Einträge zugeordnet; {skipped} waren bereits zugeordnet.",
       "refused": "Das konnte nicht gespeichert werden. Nichts wurde geändert.",
+      "personPeriod": "{hours} Std. Periodensumme (nicht zu Einzeltagen addiert)",
       "person": "{hours} Std., {count, plural, one {# Eintrag} other {# Einträge}}"
     },
+    "periodShort": "{hours} Std. Zeitraumsumme",
     "truncated": "Es gibt mehr Einträge, als eine Ansicht liest. Die {count} gelesenen werden angezeigt; Summen umfassen nur diese."
+  },
+  "workPlan": {
+    "title": "Geplante Arbeit",
+    "intro": "Plane, wer wo und wann arbeitet. Der Kalender zeigt es als Plan; was tatsächlich geschah, bleibt im Arbeitsjournal.",
+    "worker": "Mitarbeiter",
+    "project": "Projekt (optional)",
+    "workObject": "Objekt / Standort (optional)",
+    "startDate": "Von",
+    "endDate": "Bis",
+    "startTime": "Beginn (optional)",
+    "endTime": "Ende (optional)",
+    "note": "Notiz (optional)",
+    "none": "Keine",
+    "submit": "Arbeit planen",
+    "pending": "Wird geplant…",
+    "cancel": "Plan stornieren",
+    "cancelPending": "Wird storniert…",
+    "empty": "Für diesen Zeitraum ist noch nichts geplant.",
+    "noWorkers": "Noch keine Mitarbeiter auf deiner Liste. Lade zuerst Personen ein und plane dann ihre Arbeit.",
+    "unavailable": "Planung ist hier noch nicht verfügbar.",
+    "listTitle": "Geplante Zeiträume",
+    "overlap": "Überschneidet sich mit genehmigtem Urlaub",
+    "outcome": {
+      "planned": "Arbeit geplant.",
+      "cancelled": "Plan storniert.",
+      "invalid": "Prüfe Daten und Felder und versuch es erneut.",
+      "not_allowed": "Du kannst für diese Organisation nicht planen.",
+      "worker_not_in_scope": "Diese Person steht nicht auf der Liste dieser Organisation.",
+      "project_not_in_organization": "Dieses Projekt gehört zu einer anderen Organisation.",
+      "work_object_not_in_organization": "Dieses Objekt gehört zu einer anderen Organisation.",
+      "unavailable": "Planung ist hier noch nicht verfügbar.",
+      "error": "Etwas ist schiefgelaufen. Versuch es erneut.",
+      "planned_collides": "Geplant, aber diese Person ist an einigen dieser Tage bereits eingeplant. Sie entscheiden; stornieren Sie den Plan unten, falls er nicht passt.",
+      "planned_unknown": "Geplant, aber wir konnten nicht bestätigen, dass diese Tage frei sind. Das ist nicht dasselbe wie frei."
+    }
   },
   "workLifecycle": {
     "pending": "Noch nicht",
@@ -18382,6 +18504,80 @@
       "skills": "{count, plural, one {# Fähigkeit, gestützt auf deine Einträge} other {# Fähigkeiten, gestützt auf deine Einträge}}",
       "next": "Wohin du gehen kannst"
     }
+  },
+  "teamAssignment": {
+    "title": "Teams in diesem Projekt",
+    "intro": "Ein Team wird als eine Einheit zugewiesen. Die Mitglieder stammen aus der Mitgliedschaft des Teams selbst; wer das Team verlassen hat, wird nicht gezählt, und Stunden und Journal bleiben bei jeder Person.",
+    "none": "Diesem Projekt ist kein Team zugewiesen.",
+    "scope": {
+      "project": "Ganzes Projekt",
+      "task": "Aufgabe: {title}",
+      "object": "Arbeitsstätte"
+    },
+    "membersNow": "Mitglieder jetzt: {count}",
+    "noMembers": "Keine aktiven Mitglieder.",
+    "unnamedMember": "Teammitglied",
+    "unnamedTeam": "Kolonne",
+    "end": "Zuweisung beenden",
+    "ending": "Wird beendet…",
+    "replaceLabel": "Durch ein anderes Team ersetzen",
+    "replacePlaceholder": "Team wählen",
+    "replaceSubmit": "Ersetzen",
+    "assignTitle": "Team zuweisen",
+    "teamLabel": "Kolonne",
+    "teamPlaceholder": "Team wählen",
+    "scopeLabel": "Woran das Team arbeitet",
+    "scopeProjectOption": "Das ganze Projekt",
+    "scopeTaskOption": "Eine Aufgabe",
+    "taskLabel": "Aufgabe",
+    "taskPlaceholder": "Aufgabe wählen",
+    "noTeams": "Sie verwalten noch kein Team. Legen Sie eines auf der Seite „Personen“ an.",
+    "noTasks": "Dieses Projekt hat keine offenen Aufgaben.",
+    "submit": "Team zuweisen",
+    "assigning": "Wird zugewiesen…",
+    "outcome": {
+      "created": "Team zugewiesen.",
+      "already_assigned": "Dieses Team ist hier bereits zugewiesen. Nichts wurde geändert.",
+      "replaced": "Team ersetzt.",
+      "ended": "Zuweisung beendet.",
+      "already_ended": "Diese Zuweisung war bereits beendet."
+    },
+    "refusal": {
+      "not_authorized": "Sie dürfen dieses Team diesem Projekt nicht zuweisen.",
+      "not_authed": "Bitte melden Sie sich erneut an, um fortzufahren.",
+      "not_a_team": "Das ist kein Team.",
+      "team_has_no_members": "Dieses Team hat noch keine aktiven Mitglieder.",
+      "project_completed": "Dieses Projekt ist abgeschlossen.",
+      "task_not_assignable": "Dieser Aufgabe kann kein Team zugewiesen werden (geschlossen oder in einem anderen Projekt).",
+      "object_not_assignable": "Dieser Arbeitsstätte kann kein Team zugewiesen werden.",
+      "one_scope_only": "Wählen Sie entweder eine Aufgabe oder eine Arbeitsstätte, nicht beides.",
+      "replace_target_not_active": "Die zu ersetzende Zuweisung ist nicht mehr aktiv.",
+      "team_and_project_required": "Wählen Sie ein Team und ein Projekt.",
+      "needs_migration": "Derzeit nicht verfügbar.",
+      "error": "Das ließ sich nicht abschließen. Nichts wurde geändert."
+    },
+    "calendar": {
+      "conflictsTitle": "An diesen Tagen bereits gebunden",
+      "unknownTitle": "Verfügbarkeit an diesen Tagen nicht bestätigt für",
+      "advisory": "Hinweis: Die Zuweisung ist gespeichert. Beenden Sie sie oben, wenn die Überschneidung echt ist."
+    },
+    "form": {
+      "heading": "Das ganze Team einem Projekt zuweisen",
+      "intro": "Weisen Sie dieses Team mit {count} Mitgliedern einem Projekt als eine Einheit zu.",
+      "projectLabel": "Projekt",
+      "projectPlaceholder": "Projekt wählen",
+      "noProjects": "Sie haben keine offenen Projekte, denen Sie das Team zuweisen könnten."
+    }
+  },
+  "cvOrganizationHistory": {
+    "title": "Von Organisationen gelieferte Arbeitshistorie",
+    "note": "Aus den Unterlagen der hier genannten Organisationen übernommen. Sie ist weder selbst erklärt noch unabhängig überprüft.",
+    "untitled": "Von einer Organisation erfasste Arbeit",
+    "hoursTerm": "Stunden",
+    "hoursRecorded": "{hours} Std. erfasst in {count, plural, one {# Eintrag} other {# Einträgen}}",
+    "hoursPeriod": "{hours} Std. für einen Zeitraum angegeben, in {count, plural, one {# Eintrag} other {# Einträgen}}",
+    "contested": "Von einer berechtigten Stelle bestritten",
+    "more": "{count, plural, one {# weiterer Eintrag wird} other {# weitere Einträge werden}} nicht angezeigt"
   },
   "companyPerson": {
     "eyebrow": "Historische Personenkarte",

@@ -389,7 +389,9 @@ describe("8 · the organization view composes the same reader (owner §14)", () 
 
 describe("9 · the organization's per-member roll-up rides the same model (owner §14)", () => {
   it("the window report derives hours through deriveWorkIntelligence — no second hours arithmetic", () => {
-    expect(windowReport).toContain('import { deriveReviewResult } from "@/lib/journal/review-status";');
+    // counter-canonical v1: the report reads ONE definition of "confirmed"
+    // (independent approval) - not the plain latest decision.
+    expect(windowReport).toContain('import { deriveIndependentReviewResult } from "@/lib/journal/review-status";');
     expect(windowReport).toMatch(/deriveWorkIntelligence,\s*type WorkIntelligenceEntry,\s*\} from "@\/lib\/journal\/work-intelligence"/);
     expect(windowReport).toContain("export function deriveWindowWorkTime(");
     expect(windowReport).toContain("export function rollUpJournalWindow(");

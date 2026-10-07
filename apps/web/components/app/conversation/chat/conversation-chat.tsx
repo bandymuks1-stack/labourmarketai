@@ -116,6 +116,7 @@ import type { WorkerProjectAsk } from "@/lib/projects/worker-project-asks";
 import { loadCompanyStagesForChat } from "@/lib/conversation/company-stages";
 import { loadProjectMoveOptionsForChat, loadProjectMoveWhatIfForChat } from "@/lib/conversation/project-move";
 import type { StageStatus } from "@/lib/projects/stages-model";
+import { OVERRIDE_REASON_CODES, type OverrideReasonCode } from "@/lib/projects/override-receipt-model";
 import { stripEndDatePhrase, parseEndDate, parseStartDate } from "@/lib/structuring/time-window";
 import { payPrefill, readPayStatement } from "@/lib/conversation/pay-statement";
 import { readStatedLanguages } from "@/lib/conversation/language-statement";
@@ -488,6 +489,20 @@ export type ChatLabels = {
   assignCommitmentUnknown: string;
   /** The assignment was refused by the server. The reason is the server's. */
   assignFailed: string;
+  /** J-TIME-FREEDOM: after an assignment over a known clash the chat offers the
+   *  SAME knowing-keep decision the project page offers. */
+  keepPrompt: string;
+  /** Said ONLY when the server answered ok = the receipt exists. */
+  keepRecorded: string;
+  /** The receipt could not be recorded: nothing was saved, the decision is NOT made. */
+  keepFailed: string;
+  keepReasonNone: string;
+  /** Closed reason codes (the same five the page offers); no free text exists. */
+  keepReason_agreed_with_worker: string;
+  keepReason_agreed_with_client: string;
+  keepReason_partial_overlap: string;
+  keepReason_urgent_need: string;
+  keepReason_other: string;
 
   // ── §7.1 — work relationships in the conversation ─────────────────────────
   /** The contextual chip. NOT a starter: the greeting is capped at three
@@ -746,6 +761,30 @@ function reservationNote(
   const count = Array.isArray(verdict.collisions) ? verdict.collisions.length : 0;
   if (count === 0) return "";
   return labels.assignAlreadyCommitted.replace("{count}", String(count));
+}
+
+/**
+ * J-TIME-FREEDOM — the keep-knowingly chips, offered ONLY when the server's
+ * verdict on the assignment just made collides. The chip carries ids and a
+ * CLOSED reason code (or "none") and NOTHING else: the collisions are never
+ * a chip payload — the server recomputes them at the decision.
+ */
+function keepClashChips(
+  projectId: string,
+  workerProfileId: string,
+  data: Record<string, unknown> | undefined,
+  labels: Pick<ChatLabels, "keepReasonNone" | `keepReason_${OverrideReasonCode}`>,
+): { id: string; label: string }[] | null {
+  const verdict = data?.reservation as { state?: string; collisions?: unknown[] } | undefined;
+  if (!verdict || verdict.state !== "collides") return null;
+  if (!Array.isArray(verdict.collisions) || verdict.collisions.length === 0) return null;
+  return [
+    ...OVERRIDE_REASON_CODES.map((code) => ({
+      id: `keep:${projectId}:${workerProfileId}:${code}`,
+      label: labels[`keepReason_${code}`],
+    })),
+    { id: `keep:${projectId}:${workerProfileId}:none`, label: labels.keepReasonNone },
+  ];
 }
 
 function formatDay(iso: string, locale: string): string {
@@ -3027,6 +3066,46 @@ export function ConversationChat({
    * up as a success, and the panel is re-opened on the project so the person
    * sees the roster that actually resulted.
    */
+  const offerKeep = useCallback(
+    (projectId: string, workerProfileId: string, data: Record<string, unknown> | undefined) => {
+      const chips = keepClashChips(projectId, workerProfileId, data, labels);
+      if (chips) assistant(labels.keepPrompt, chips);
+    },
+    [assistant, labels],
+  );
+
+  /** The decision itself: a fresh token, then the ONE dispatcher runs
+   *  `company.keep-assignment` (the page's keepAssignmentAction -> the one keep
+   *  core). FAIL-LOUD: "recorded" is said only when the server answered ok. */
+  const runKeepAssignment = useCallback(
+    (projectId: string, workerProfileId: string, reasonCode: OverrideReasonCode | null) => {
+      setTyping(true);
+      const input = reasonCode ? { projectId, workerProfileId, reasonCode } : { projectId, workerProfileId };
+      prepareConfirmationAction("company.keep-assignment", input)
+        .then((prep) => {
+          if (!prep.ok && prep.code !== "no_confirmation_needed") {
+            setTyping(false);
+            assistant(labels.keepFailed);
+            return;
+          }
+          return dispatchWorkerAction("company.keep-assignment", input, {
+            locale,
+            confirmationToken: prep.ok ? prep.token : undefined,
+            expectedWorkspaceId,
+          }).then((res) => {
+            if (answeredStaleContext(res)) return;
+            setTyping(false);
+            assistant(res.ok ? labels.keepRecorded : labels.keepFailed);
+          });
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.keepFailed);
+        });
+    },
+    [assistant, locale, labels.keepFailed, labels.keepRecorded, expectedWorkspaceId, answeredStaleContext],
+  );
+
   const runAssignWorker = useCallback(
     (projectId: string, workerProfileId: string) => {
       setTyping(true);
@@ -3052,6 +3131,8 @@ export function ConversationChat({
                     .join(" ")
                 : labels.assignFailed,
             );
+            // The clash was reported above; offer the knowing-keep decision.
+            if (res.ok) offerKeep(projectId, workerProfileId, res.data);
             // Re-open the project either way: after a success it shows the new
             // roster, and after a refusal it shows the state that refused.
             selectProjectRef.current(projectId);
@@ -3071,6 +3152,7 @@ export function ConversationChat({
       labels.assignCommitmentUnknown,
       expectedWorkspaceId,
       answeredStaleContext,
+      offerKeep,
     ],
   );
 
@@ -3892,6 +3974,7 @@ export function ConversationChat({
             }
             const ended = (res.data as { ended?: boolean } | undefined)?.ended === true;
             assistant(ended ? t("moveDone") : t("moveDonePartial"));
+            offerKeep(toProjectId, workerProfileId, res.data);
             selectProjectRef.current(toProjectId);
           });
         })
@@ -3900,7 +3983,7 @@ export function ConversationChat({
           assistant(labels.moveFailed);
         });
     },
-    [assistant, locale, t, labels.moveFailed, expectedWorkspaceId, answeredStaleContext],
+    [assistant, locale, t, labels.moveFailed, expectedWorkspaceId, answeredStaleContext, offerKeep],
   );
 
   /** "perkelk Joną į projektą Y": the person and the destination are
@@ -5470,6 +5553,15 @@ export function ConversationChat({
             // real rows the server re-verifies; the chip grants nothing.
             const [pid, wid] = chip.id.slice(7).split(":");
             if (pid && wid) runAssignWorker(pid, wid);
+          } else if (chip.id.startsWith("keep:")) {
+            // J-TIME-FREEDOM — `keep:<projectId>:<workerProfileId>:<reason|none>`.
+            // The reason must be one of the CLOSED codes; the server recomputes
+            // the collisions and re-checks authority. A chip grants nothing.
+            const [pid, wid, reason] = chip.id.slice(5).split(":");
+            const code = (OVERRIDE_REASON_CODES as readonly string[]).includes(reason ?? "")
+              ? (reason as OverrideReasonCode)
+              : null;
+            if (pid && wid && (code || reason === "none")) runKeepAssignment(pid, wid, code);
           } else if (chip.id.startsWith("project:")) {
             // W11 — the project-bound handoff, same shape as `demand:`.
             selectProjectRef.current(chip.id.slice(8));
@@ -5697,7 +5789,7 @@ export function ConversationChat({
           }
       }
     },
-    [identity, t, labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, renderOfferCards, locale, starterChips,runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startAddDocument, startInvitations, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, openConversationTarget, runAgencyRead, openProposeForm, startCapabilities],
+    [identity, t, labels, user, assistant, withTyping, pushEmbed, openForm, bookingOffers, bookingLabels, renderOfferCards, locale, starterChips,runEducationProgrammes, runPinChip, noteUsage, startPlayerCard, startAddDocument, startInvitations, startFindWork, startProfileSummary, startWorkLog, startAgenda, startEmployerCandidates, startProjects, startEngagements, runAssignWorker, runKeepAssignment, runMoveWhatIf, runMoveCommit, startMoveWorker, router, auth, performContextSwitch, openConversationTarget, runAgencyRead, openProposeForm, startCapabilities],
   );
   handleChipRef.current = handleChip;
 

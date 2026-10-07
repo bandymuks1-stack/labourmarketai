@@ -1958,6 +1958,7 @@
     "myProjectsEmpty": "Du är ännu inte tilldelad något projekt. När ett företag tilldelar dig visas projektet här.",
     "assignmentActive": "Aktiv",
     "assignmentEnded": "Avslutad",
+    "viaTeam": "via team {team}",
     "untitledProject": "Projekt utan titel",
     "archiveToggle": {
       "label": "Aktiva eller avslutade projekt",
@@ -1971,6 +1972,7 @@
     "stadium": {
       "eyebrow": "[EN] Stadium",
       "fieldCount": "[EN] {n, plural, one {# person on the field} other {# people on the field}}",
+      "fieldViaTeam": "{n} via team",
       "todayCount": "[EN] {n, plural, one {# journal entry today — the day is moving} other {# journal entries today — the day is moving}}",
       "todayZero": "[EN] No entries yet today — the day is still waiting for its first record.",
       "fieldTitle": "[EN] The field — who is on the team today",
@@ -1981,6 +1983,9 @@
       "noActivity": "[EN] No entries yet.",
       "emptyTeam": "[EN] This project has no team yet — start the draft and bring the first people onto the field.",
       "emptyTeamCta": "[EN] Start the draft",
+      "positionsTitle": "[EN] Missing positions",
+      "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
+      "openOps": "[EN] Open the management arena",
       "history": {
         "title": "Tidigare arbete i detta projekt",
         "provenance": "Historik tillhandahållen av organisationen, importerad från organisationens egna uppgifter. Inte oberoende verifierad.",
@@ -1989,16 +1994,14 @@
         "personUnknown": "Person ej angiven",
         "hoursUnknown": "Timmar ej angivna",
         "count": "{n} poster"
-      },
-      "positionsTitle": "[EN] Missing positions",
-      "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
-      "openOps": "[EN] Open the management arena"
+      }
     },
     "workerView": {
       "eyebrow": "Mitt projekt",
       "untitled": "Projekt utan titel",
       "assignmentActive": "Aktiv tilldelning",
       "assignmentEnded": "Tilldelning avslutad",
+      "viaTeam": "via team {team}",
       "projectRestricted": "Projektdetaljer är inte tillgängliga för dig just nu. Din tilldelning förblir synlig.",
       "journalCta": "Skriv journalinlägg",
       "chatCta": "Skicka meddelande",
@@ -3647,6 +3650,10 @@
           "label": "Flytta en person till ett annat projekt",
           "description": "Tilldelar det nya projektet och avslutar den tidigare tilldelningen — efter konsekvensvisningen."
         },
+        "keepAssignment": {
+          "label": "Behåll en tilldelning trots en kalenderkonflikt",
+          "description": "Registrerar ditt beslut att behålla tilldelningen med vetskap om konflikten, med en sluten orsakskod. Inget sparas utan kvitto."
+        },
         "offerCapacity": {
           "label": "Registrera vad ni erbjuder"
         }
@@ -3970,6 +3977,9 @@
       "assignAlreadyCommitted": "[EN] Note: they are already committed on some of these dates ({count}). The assignment stands — you decide.",
       "assignCommitmentUnknown": "[EN] We could not confirm these dates are free. That is not the same as free.",
       "assignFailed": "[EN] The assignment could not be made.",
+      "keepPrompt": "Personen är redan bunden de här dagarna. Behåller du tilldelningen medvetet? Välj en orsak - beslutet registreras.",
+      "keepRecorded": "Registrerat: du behöll tilldelningen medvetet.",
+      "keepFailed": "Beslutet kunde inte registreras, så inget sparades. Försök igen.",
       "chipEngagements": "Vem jag arbetar med",
       "userEngagements": "Vem arbetar jag med?",
       "engagementsOpened": "Här är de registrerade arbetsrelationerna. Du kan avsluta en av dem i panelen.",
@@ -6715,16 +6725,6 @@
       }
     }
   },
-  "cvOrganizationHistory": {
-    "title": "Arbetshistorik som tillhandahållits av organisationer",
-    "note": "Hämtad ur de angivna organisationernas egna uppgifter. Den är varken självdeklarerad eller oberoende verifierad.",
-    "untitled": "Arbete registrerat av en organisation",
-    "hoursTerm": "Timmar",
-    "hoursRecorded": "{hours} h registrerade i {count, plural, one {# registrering} other {# registreringar}}",
-    "hoursPeriod": "{hours} h angivna för en period, i {count, plural, one {# registrering} other {# registreringar}}",
-    "contested": "Bestridd av en part med rätt att göra det",
-    "more": "{count, plural, one {# post till} other {# poster till}} visas inte"
-  },
   "historyContext": {
     "project": "Projekt",
     "place": "Plats eller arbetspaket",
@@ -7110,6 +7110,16 @@
       "skills": "{count, plural, one {# färdighet baserad på dina registreringar} other {# färdigheter baserade på dina registreringar}}",
       "next": "Vart du kan gå"
     }
+  },
+  "cvOrganizationHistory": {
+    "title": "Arbetshistorik som tillhandahållits av organisationer",
+    "note": "Hämtad ur de angivna organisationernas egna uppgifter. Den är varken självdeklarerad eller oberoende verifierad.",
+    "untitled": "Arbete registrerat av en organisation",
+    "hoursTerm": "Timmar",
+    "hoursRecorded": "{hours} h registrerade i {count, plural, one {# registrering} other {# registreringar}}",
+    "hoursPeriod": "{hours} h angivna för en period, i {count, plural, one {# registrering} other {# registreringar}}",
+    "contested": "Bestridd av en part med rätt att göra det",
+    "more": "{count, plural, one {# post till} other {# poster till}} visas inte"
   },
   "companyPerson": {
     "eyebrow": "Historiskt personkort",

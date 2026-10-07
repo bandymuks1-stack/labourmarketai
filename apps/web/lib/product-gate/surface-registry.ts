@@ -1623,6 +1623,146 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     worldStateCanControlIt: false,
   },
 
+  // EVID-2 slice 2 (PR #2143): the counterparty's own review surface. Declared
+  // here, in the same PR, as the gate demands; the A-14 block records why it is
+  // not the employer inbox.
+  {
+    id: "/dashboard/inbox/counterparty",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "The client review queue: the representative of the party a worker submitted work to (client, customer, contracting party, project owner) sees the work, its hours, figures and photos, and decides - accept (final), request a correction, or dispute - with a note.",
+    whyNotChat:
+      "A decision about specific submitted work needs the work itself in front of the person - text, hours, photos, history - and an explicit, auditable act. The conversation can open this context (the command finder resolves 'client review' here) but cannot replace looking at the evidence and pressing a deliberate, final Accept.",
+    whyNotExistingComponent:
+      "The manager inbox is an employer surface (reviewer authority inside the worker's own organization, skill verification) and its set is employer-only; a client has neither. The queue reuses the shared EmptyState and Button primitives and the one review RPC; only the destination is new.",
+    owner: "Product owner - decision 0018 (counterparty review authority)",
+    ownsAction: null,
+
+    worldElement: "work_journal",
+    whyNotExistingElement:
+      "It extends the Work Journal element on the COUNTERPARTY edge: the entry, its evidence and its append-only decision rows already exist; this lets the party the work was submitted to see and decide them. No new element, no new table for the decision.",
+    chatIntegration:
+      "The command registry resolves 'client review / accept work' to this route; the decision runs through the same review_journal_entry RPC the employer path uses, so a capability can dispatch it later without a new write path.",
+    avatarEffect:
+      "None directly. An acceptance is read back separately as 'accepted by the client' (CLIENT_ACCEPTED) on the worker's journal, CV and card through the ONE provenance derivation; it is never an employer confirmation, never a skill verification and never a payment record.",
+    mapEffect:
+      "None - recorded as reflectedOnMap: false rather than invented.",
+    journalRelation:
+      "Reads the submitted entry through list_counterparty_review_queue_v1 and counterparty_review_entry_detail_v1 (the explicit submission is the grant; journal_entries RLS is not widened) and writes only through review_journal_entry, which appends to journal_entry_confirmations with basis 'counterparty' and provenance. History is append-only.",
+
+    pillar: "work_journal",
+    objectType: "worker",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "The client / customer / contracting party of a worker's work decides the work that worker explicitly submitted to them: accept it, ask for a correction, or dispute it, with a note.",
+      graphEdge:
+        "PERSON - WORK - COUNTERPARTY (the transaction / project relationship, section 14 nodes WORK_JOURNAL, EVIDENCE and the counterparty edge); not the employer REVIEW edge the manager inbox serves.",
+      whyReuseDamages:
+        "The manager inbox is an EMPLOYER surface: its decision verifies skills and requires reviewer authority inside the worker's own organization. A client is not the worker's employer; folding client decisions into that inbox would either let an acceptance read as an employer confirmation (the defect EVID-2 exists to remove) or hand a client skill-verification buttons the database refuses. The two claims are different proof concepts (CLIENT_ACCEPTED vs EMPLOYER_CONFIRMED) and must stay on different surfaces.",
+      evidence: [
+        "supabase/migrations/20261003150500_journal_counterparty_review_authority_v1.sql: the counterparty is a party of the work relationship; list_counterparty_review_queue_v1 is its only read door",
+        "apps/web/lib/journal/confirmation-origin.ts: CLIENT_ACCEPTED and EMPLOYER_CONFIRMED are distinct proof concepts",
+        "supabase/migrations/20261003150550_counterparty_link_assignment_kinds_review_doors_v1.sql: reviewable_journal_entry_ids() is employer-only, so the employer inbox cannot carry client decisions",
+        "scripts/db-proof/journal-counterparty-link-ui.sh and journal-counterparty-authority.sh: scratch-PG proof that the subject cannot be their own counterparty",
+      ],
+      ownerRuling:
+        "Owner decision 0018 (docs/DECISIONS/0018-counterparty-review-authority.md, owner-approved 2026-10-04): counterparty review authority derives from the real transaction / project relationship and the authorized counterparty representative, never implicitly from employer status; client acceptance is its own provenance-bearing signal.",
+    },
+  },
+
+  // EVID-2 slice 2 (PR #2143): the counterparty's own review surface. Declared
+  // here, in the same PR, as the gate demands; the A-14 block records why it is
+  // not the employer inbox.
+  {
+    id: "components/app/counterparty-review-card.tsx",
+    kind: "persistent_card",
+    originAxiom: "A-14",
+    purpose:
+      "One submitted entry in the client review queue: the work, hours, figures, photos and history, and the decision form (accept / request correction / dispute with a note).",
+    whyNotChat:
+      "The card is the evidence the decision is about. A decision is made looking at it; a chat message cannot present a photo grid and an append-only history next to a final, explicit Accept control.",
+    whyNotExistingComponent:
+      "The employer inbox card (journal-inbox-entry) carries skill verification and employer-only copy; reusing it would show a client skill-verification controls the database refuses and would label the result with employer wording. This card shares the same primitives and a different, narrower action set.",
+    owner: "Product owner - decision 0018 (counterparty review authority)",
+    ownsAction: null,
+
+    worldElement: "work_journal",
+    whyNotExistingElement:
+      "It extends the Work Journal element on the COUNTERPARTY edge: the entry, its evidence and its append-only decision rows already exist; this lets the party the work was submitted to see and decide them. No new element, no new table for the decision.",
+    chatIntegration:
+      "It is rendered only by the queue page the command registry resolves; its action calls the shared review RPC through one server action that re-derives the caller.",
+    avatarEffect:
+      "None directly. An acceptance is read back separately as 'accepted by the client' (CLIENT_ACCEPTED) on the worker's journal, CV and card through the ONE provenance derivation; it is never an employer confirmation, never a skill verification and never a payment record.",
+    mapEffect:
+      "None - recorded as reflectedOnMap: false rather than invented.",
+    journalRelation:
+      "Displays one entry's journal text, metrics and photo metadata read through the counterparty's narrow door, and appends one decision row via review_journal_entry; the worker sees it on the entry and in the CV as a client acceptance.",
+
+    pillar: "work_journal",
+    objectType: "worker",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "The client / customer / contracting party of a worker's work decides the work that worker explicitly submitted to them: accept it, ask for a correction, or dispute it, with a note.",
+      graphEdge:
+        "PERSON - WORK - COUNTERPARTY (the transaction / project relationship, section 14 nodes WORK_JOURNAL, EVIDENCE and the counterparty edge); not the employer REVIEW edge the manager inbox serves.",
+      whyReuseDamages:
+        "The manager inbox is an EMPLOYER surface: its decision verifies skills and requires reviewer authority inside the worker's own organization. A client is not the worker's employer; folding client decisions into that inbox would either let an acceptance read as an employer confirmation (the defect EVID-2 exists to remove) or hand a client skill-verification buttons the database refuses. The two claims are different proof concepts (CLIENT_ACCEPTED vs EMPLOYER_CONFIRMED) and must stay on different surfaces.",
+      evidence: [
+        "supabase/migrations/20261003150500_journal_counterparty_review_authority_v1.sql: the counterparty is a party of the work relationship; list_counterparty_review_queue_v1 is its only read door",
+        "apps/web/lib/journal/confirmation-origin.ts: CLIENT_ACCEPTED and EMPLOYER_CONFIRMED are distinct proof concepts",
+        "supabase/migrations/20261003150550_counterparty_link_assignment_kinds_review_doors_v1.sql: reviewable_journal_entry_ids() is employer-only, so the employer inbox cannot carry client decisions",
+        "scripts/db-proof/journal-counterparty-link-ui.sh and journal-counterparty-authority.sh: scratch-PG proof that the subject cannot be their own counterparty",
+      ],
+      ownerRuling:
+        "Owner decision 0018 (docs/DECISIONS/0018-counterparty-review-authority.md, owner-approved 2026-10-04): counterparty review authority derives from the real transaction / project relationship and the authorized counterparty representative, never implicitly from employer status; client acceptance is its own provenance-bearing signal.",
+    },
+  },
+
 ] as const;
 
 /**

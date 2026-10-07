@@ -26,6 +26,8 @@ import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 import { MessageButton } from "@/components/app/message-button";
 import { CountUp } from "@/components/app/today/count-up";
 import { ProjectWorkGallery } from "@/components/app/project-work-gallery";
+import { CounterpartyLinkPanel } from "@/components/app/counterparty-link-panel";
+import { readLinkCandidates } from "@/lib/journal/counterparty-review";
 import { ProjectHistoricalWork } from "@/components/app/project-historical-work";
 import { type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
@@ -101,6 +103,9 @@ export default async function ProjectStadiumPage({
 
   const { ops, positions, entriesToday } = stadium;
   const hasTeam = ops.workers.length > 0;
+  // Workers with a real relationship here + their active counterparty link
+  // (null = unreadable, rendered as "could not load", never as "none").
+  const linkCandidates = await readLinkCandidates(supabase, id);
 
   // systemic-ux-project-v1: honest location status (no fake marker) + project
   // place line, reusing the signal-only market-map mappability rule.
@@ -185,6 +190,12 @@ export default async function ProjectStadiumPage({
           <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
             <Users className="h-3 w-3" aria-hidden />
             {t("fieldCount", { n: ops.counters.totalAssigned })}
+            {(ops.counters.viaTeam ?? 0) > 0 ? (
+              <span data-testid="field-via-team">
+                {" · "}
+                {t("fieldViaTeam", { n: ops.counters.viaTeam ?? 0 })}
+              </span>
+            ) : null}
           </span>
         </div>
 
@@ -448,6 +459,17 @@ export default async function ProjectStadiumPage({
           {tComm("notReadyNote")}
         </p>
       </section>
+
+      {/* ── Client acceptance of the work: the owning organization's
+            authorized representative registers itself as the counterparty of
+            a worker who has a REAL active assignment here (person or team),
+            and can revoke it. Nothing is manufactured; the database derives
+            the candidates and re-checks every write. ── */}
+      <CounterpartyLinkPanel
+        projectId={id}
+        candidates={linkCandidates ?? []}
+        loadFailed={linkCandidates === null}
+      />
 
       {/* ── Confirm pulse — the S3.5 queue in the stadium rhythm ── */}
       <ConfirmPulse />

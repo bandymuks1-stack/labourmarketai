@@ -1541,14 +1541,51 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261003140000_subject_contest_withdraw_constraint_reconcile_v1.sql",
       // 2026-10-03: ORG-2 agency capability authority (RED, needs-human-gate, NOT applied): list_open_demand_for_agencies / mark_agency_can_offer / job_demands_select re-gated on owns_company + company_acts_as_agency.
       "20261003150000_org2_agency_capability_authority_v1.sql",
-      // 2026-10-04: ai_runs retention classes v2 (SECURITY DEFINER sweep/erasure/export, GRANT, BEFORE UPDATE trigger) — marker is the risk acknowledgement, NOT approval; PR is draft + needs-human-gate, NOT applied.
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150100_commitment_override_receipts_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150200_work_plan_entries_v2.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150300_marketplace_index_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150400_marketplace_public_business_expiry_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150500_journal_counterparty_review_authority_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150550_counterparty_link_assignment_kinds_review_doors_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150555_batch_review_exceptions_employer_only_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150600_brigade_work_assignment_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150700_brigade_journal_context_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
       "20261003150800_ai_runs_retention_classes_v2.sql",
-      // 2026-10-04: verified-email boundary (WORKER_REGISTRATION_FRICTION_REMOVAL, #2152). The marker is a risk acknowledgement, not approval.
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150900_commitment_override_receipt_brigade_basis_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003150950_commitment_override_collision_validation_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
       "20261003151000_email_verified_boundary_v1.sql",
-      // 2026-10-04: staff-invitation e-mail binding (token doors refuse an addressed invitation to another e-mail; SECURITY DEFINER bodies) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
       "20261003151100_staff_invitation_email_binding_v1.sql",
-      // 2026-10-05: the v1 invitation accept/decline doors lose API EXECUTE (privilege change) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003151200_market_org_capabilities_for_visible_listings_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003151300_integrity_doors_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261003151400_marketplace_v1_write_rpcs_closed_v1.sql",
+      // integration 2026-10-04: marker = human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
       "20261003151500_invitation_v1_doors_not_api_callable_v1.sql",
+      // 2026-10-05: the subject's refuse / withdraw door (SECURITY DEFINER) - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      "20261005100000_roster_link_subject_answer_v1.sql",
+      // 2026-10-06: authority closure first package (audit A1/F-1/F-4/F-8) - markers are the human-gate risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261006100000_work_hour_allocations_integrity_guard_v1.sql",
+      "20261006100100_conversation_participants_server_authority_v1.sql",
+      "20261006100200_employer_authority_not_self_asserted_v1.sql",
+      "20261006100300_lmc_ledger_server_only_execute_v1.sql",
+      // 2026-10-06: append-only privilege closure (#2164) - REVOKE UPDATE/DELETE/TRUNCATE on evidence tables; marker is the risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261006100400_append_only_privilege_closure_v1.sql",
       // 2026-10-06: service-role-only read of the invited address for the frictionless signup page - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261006100500_invitation_signup_context_v1.sql",
 ]);

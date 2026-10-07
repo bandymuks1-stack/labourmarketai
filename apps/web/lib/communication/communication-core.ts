@@ -17,6 +17,8 @@ import {
   validateConversationAttachments,
   type ConversationAttachmentInput,
 } from "@/lib/communication/attachment-model";
+import { isContactAuthority, type ContactAuthority } from "@/lib/communication/contact-authority";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { emitMessageReceivedNotifications } from "@/lib/notifications/event-emitters";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -26,9 +28,16 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
  * implementation the web server actions (`./actions.ts`) and the MCP door
  * (`message.send_*` on /api/mcp) both run: the same participant cap, the
  * same §8.2 abuse caps enforced BEFORE the insert, the same language stamp,
- * the same attachment registration, the same RLS (the caller's OWN client —
- * never a service role). Extracted verbatim from actions.ts; the web
- * wrappers only resolve the cookie session and revalidate paths.
+ * the same attachment registration, the same RLS (the caller's OWN client).
+ * Extracted verbatim from actions.ts; the web wrappers only resolve the
+ * cookie session and revalidate paths.
+ *
+ * ONE deliberate exception to "the caller's own client", and the only one:
+ * adding ANOTHER person to a new conversation. The database lets an end-user
+ * session add only itself (20261006100100), so the other participants are
+ * written by the server — and only after a `ContactAuthority` proves the §8.1
+ * contact gate held (see ./contact-authority.ts). No authority, no other
+ * participant, no source stamp, no row.
  */
 
 /** The caller: its own RLS-scoped client and its authenticated id. */
@@ -113,7 +122,15 @@ export async function createConversationCore(
    * is created WITHOUT a stamp. Forward-only; existing rows stay NULL.
    */
   sourceHint?: ConversationSourceHint | null;
-}): Promise<CommunicationResult<{ id: string }>> {
+},
+  /**
+   * Proof that the §8.1 contact gate held for the people being added. REQUIRED
+   * whenever `participantProfileIds` names anyone other than the caller; minted
+   * only by the gate modules (./contact-authority.ts). The exported
+   * browser-callable action never has one.
+   */
+  authority?: ContactAuthority,
+): Promise<CommunicationResult<{ id: string }>> {
   const supabase = caller.supabase;
   const user = { id: caller.userId };
 
@@ -140,6 +157,17 @@ export async function createConversationCore(
       ok: false,
       code: "invalid_input",
       message: `Per daug dalyvių (daugiausia ${MAX_PARTICIPANTS}).`,
+    };
+  }
+
+  // §8.1 AUTHORITY GATE — before ANY read or write. A thread that names another
+  // person needs proof the contact gate held; a look-alike object is not proof
+  // (identity-checked). Default-closed: nothing is created, nothing is stamped.
+  if (requestedParticipants.length > 0 && !isContactAuthority(authority)) {
+    return {
+      ok: false,
+      code: "no_permission",
+      message: "Nėra ryšio, leidžiančio pradėti pokalbį su šiuo asmeniu.",
     };
   }
 
@@ -178,7 +206,10 @@ export async function createConversationCore(
   //    20260706210000 — DRAFT, owner-gated apply) rides the same INSERT
   //    policy; normalizeConversationSourceHint is default-closed (off-set
   //    type / non-uuid id → no stamp, never a bad row).
-  const sourceHint = normalizeConversationSourceHint(input.sourceHint);
+  //    The stamp is a provenance claim, so it is honoured only with an authority.
+  const sourceHint = isContactAuthority(authority)
+    ? normalizeConversationSourceHint(input.sourceHint)
+    : null;
   let insertConv = await asAny(supabase)
     .from("conversations")
     .insert(
@@ -222,17 +253,22 @@ export async function createConversationCore(
 
   // 2) Auto-add the creator as a participant. RLS allows because they're
   //    the conversation's `created_by`.
-  const participantRows = [
-    { conversation_id: conversationId, profile_id: user.id, added_by: user.id },
-    ...requestedParticipants.map((id) => ({
-      conversation_id: conversationId,
-      profile_id: id,
-      added_by: user.id,
-    })),
-  ];
-  const insertPart = await asAny(supabase)
-    .from("conversation_participants")
-    .insert(participantRows);
+  //    The creator adds THEMSELVES under their own RLS (the only row an end-user
+  //    session may write); every OTHER participant is added by the server, after
+  //    the authority check above (20261006100100).
+  const creatorRow = { conversation_id: conversationId, profile_id: user.id, added_by: user.id };
+  let insertPart = await asAny(supabase).from("conversation_participants").insert([creatorRow]);
+  if (!insertPart.error && requestedParticipants.length > 0) {
+    insertPart = await asAny(createAdminClient())
+      .from("conversation_participants")
+      .insert(
+        requestedParticipants.map((id) => ({
+          conversation_id: conversationId,
+          profile_id: id,
+          added_by: user.id,
+        })),
+      );
+  }
   if (insertPart.error) {
     console.error("[communication] add participants failed:", insertPart.error?.message);
     // Best-effort: leave the conversation row in place. The creator can

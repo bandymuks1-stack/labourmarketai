@@ -87,6 +87,7 @@ const CLASSIFICATION: Record<string, string> = {
   // deterministic salary/demand signals with per-card explanations; degrades
   // honestly (insufficient_data / needs_migration), external sources OFF.
   "dashboard/intelligence": "REAL_LAUNCH_SURFACE",
+  "dashboard/inbox/counterparty": "REAL_LAUNCH_SURFACE",
   "dashboard/inbox/quick": "REAL_LAUNCH_SURFACE",
   "dashboard/inbox/report": "REAL_LAUNCH_SURFACE",
   "dashboard/journal": "REAL_LAUNCH_SURFACE",

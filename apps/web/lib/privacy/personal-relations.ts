@@ -180,6 +180,17 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "agency_workers", key: "worker_id" },
   { table: "project_members", key: "profile_id" },
   { table: "project_worker_assignments", key: "worker_id" },
+  // J-TIME-FREEDOM: the receipt that a manager kept this person on a project
+  // knowing a clash with THEIR OWN calendar (kind + overlap dates, closed
+  // reason code; an absence never carries its reason). Theirs above all. The
+  // deciding manager is another person's id (redacted); the fingerprint is an
+  // internal idempotency hash, not data about the person.
+  {
+    table: "commitment_override_receipts",
+    key: "worker_id",
+    redactActors: ["decided_by"],
+    omitColumns: ["fingerprint"],
+  },
   { table: "project_worker_readiness_items", key: "worker_id" },
   { table: "project_worker_operational_statuses", key: "worker_id" },
   { table: "asset_assignments", key: "worker_id" },
@@ -193,6 +204,10 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
     redactActors: ["requested_by", "reviewed_by"],
   },
   { table: "business_trips", key: "profile_id" },
+  // CAL-8: the windows an organization planned for THIS person — they may read
+  // their own (RLS), so the export carries them. Not yet on production; a
+  // relation the database lacks is reported empty, not unread.
+  { table: "work_plan_entries", key: "worker_id" },
   { table: "booking_requests", key: "worker_id" },
   { table: "worker_saved_opportunities", key: "worker_id" },
   // DEM-8: the QUESTION a person saved, not just the answer they bookmarked.
@@ -272,6 +287,19 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "pilot_outcomes", key: "profile_id", column: "participant_profile_id" },
   { table: "learning_signals", key: "worker_id", column: "subject_worker_id" },
   { table: "learning_review_queue", key: "worker_id", column: "subject_worker_id" },
+
+  // EVID-2 redesign (2026-10-04): the person's own work submitted for
+  // counterparty review, and the counterparty relation about their work. The
+  // select policy of both is owns_worker(worker_id) (or the counterparty's
+  // manager / admin), so the subject reads their own rows under RLS.
+  // established_by / revoked_by are the COUNTERPARTY's representative - another
+  // person - so they are kept only when they are the subject's own id.
+  { table: "journal_entry_review_submissions", key: "worker_id" },
+  {
+    table: "work_counterparty_links",
+    key: "worker_id",
+    redactActors: ["established_by", "revoked_by"],
+  },
 
   // What the person attested about someone else's work — their own statement.
   { table: "journal_entry_confirmations", key: "profile_id", column: "confirmer_id" },
@@ -670,6 +698,10 @@ export const ACTOR_ONLY_RELATIONS: readonly string[] = [
   "review_cycles",
   "review_evidence_links",
   "task_dependencies",
+  // WRK-6: a team bound to a project / task; the person columns are the
+  // manager who assigned or ended it. The members are the team's own
+  // engagements (exported on their own relation).
+  "team_assignments",
   "training_programs",
   "training_skill_links",
   "workflow_definition_versions",
@@ -738,6 +770,11 @@ export const CHILD_TABLES_NOT_EXPORTED: readonly ReviewedChild[] = [
     table: "organization_evidence_parties",
     reason:
       "the other organizations recorded as parties to an evidence record: third-party organization data, not data about you",
+  },
+  {
+    table: "team_assignments",
+    reason:
+      "an organization's assignment of one of its teams to a project or task: the organization's staffing record; the person appears on it only as the manager who assigned or ended it, and your own team membership is exported through your engagements",
   },
   {
     table: "task_dependencies",

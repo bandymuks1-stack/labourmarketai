@@ -161,6 +161,23 @@ describe("esco linkage migration — pinned to the mapping artifact", () => {
     expect(liveSql).toContain("raise exception");
   });
 
+  it("skips ONLY when the whole corpus is empty (clean replay); any loaded corpus keeps every abort", () => {
+    // The corpus is loaded by scripts/esco/import-esco.mjs, not by a migration,
+    // so `supabase db reset` reaches this file with both tables empty.
+    const skipAt = liveSql.indexOf("if not exists (select 1 from public.esco_skills)");
+    const loopAt = liveSql.indexOf("for r in");
+    expect(skipAt, "empty-corpus skip present before the loop").toBeGreaterThan(-1);
+    expect(skipAt).toBeLessThan(loopAt);
+    const skip = liveSql.slice(skipAt, loopAt);
+    // BOTH tables must be empty: a half-loaded corpus must still run the checks.
+    expect(skip).toMatch(/not exists \(select 1 from public\.esco_skills\)\s+and not exists \(select 1 from public\.esco_occupations\)/);
+    expect(skip).toContain("return;");
+    // The skip never writes and never relaxes the per-row assertions below it.
+    expect(skip).not.toMatch(/update |insert |delete /i);
+    expect(liveSql.slice(loopAt)).toContain("is not in the esco_skills corpus");
+    expect(liveSql.slice(loopAt)).toContain("is not in the esco_occupations corpus");
+  });
+
   it("is UPDATE-only: no DDL, no deletes, no inserts, no unique constraint, no URI-tail parsing", () => {
     const lower = liveSql.toLowerCase();
     for (const forbidden of [
