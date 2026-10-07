@@ -2014,7 +2014,6 @@
         "recognition": {
           "title": "Record a recognition",
           "hint": "An independent assessor's decision that the capability a person has shown answers a formal requirement. It is not a certificate, and it is never created from work evidence alone.",
-          "pending": "Recording recognitions is not available yet: the register behind it has not been released. Until then a submission is refused, not saved.",
           "subject": "Learner",
           "chooseSubject": "Choose a learner",
           "kind": "Requirement type",

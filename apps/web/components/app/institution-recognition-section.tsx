@@ -21,7 +21,6 @@ export async function InstitutionRecognitionSection({ organizationId }: { readon
   const labels: RecognitionFormLabels = {
     title: t("title"),
     hint: t("hint"),
-    pending: t("pending"),
     subject: t("subject"),
     chooseSubject: t("chooseSubject"),
     kind: t("kind"),
