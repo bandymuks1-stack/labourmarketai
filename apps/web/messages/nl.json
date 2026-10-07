@@ -4478,11 +4478,11 @@
               "humanConfirmNote": "Dit zijn alleen suggesties — jij bepaalt wat je invoert. Ze veranderen nooit je cijfers."
             }
           },
-          "errorOpenNeedLimitUpgrade": "Het gratis plan van deze organisatie staat 1 actieve positie toe. Sluit er een, of activeer het plan Organisatie (€99/maand, tot 10) in uw organisatieaccount.",
-          "errorOpenNeedLimitIndividual": "Deze organisatie heeft de 10 actieve posities van het plan Organisatie bereikt. Er is niets afgeschreven of gewijzigd. Voor meer dan 10: neem contact op voor een individueel plan.",
+          "errorOpenNeedLimitUpgrade": "Het gratis plan van deze organisatie staat 1 actieve positie toe. Sluit er een, of activeer het plan Organisatie (€99/maand) in uw organisatieaccount.",
+          "errorOpenNeedLimitIndividual": "Deze organisatie heeft de limiet voor actieve posities van haar plan bereikt. Er is niets afgeschreven of gewijzigd. Neem contact met ons op.",
           "openNeedUsage": "Actieve posities: {used} van {limit} gebruikt · {remaining} over",
           "openNeedUsageUpgradeCta": "Plan Organisatie activeren",
-          "openNeedUsageIndividual": "U hebt de limiet van het plan Organisatie bereikt. Voor meer posities: neem contact op voor een individueel plan."
+          "openNeedUsageIndividual": "U hebt de limiet van uw plan bereikt. Neem contact met ons op om uw behoeften te bespreken."
         }
       },
       "greeting": "Welkom terug, {name}",
@@ -5435,6 +5435,8 @@
     "titleAccent": "eerlijk vastgesteld.",
     "subcopyLive": "De prijzen zijn door de eigenaar bevestigd en gelden. Activering gebeurt in het organisatieaccount via een veilige Stripe-betaling; op deze pagina wordt niets afgeschreven.",
     "subcopy": "De prijzen zijn nog niet definitief en facturering wordt op deze pagina nooit voor je gestart. De niveaus hieronder beschrijven de omvang; activering gebeurt handmatig — neem contact op en we bevestigen prijs en omvang met je voordat er iets start.",
+    "subcopyConfirmed": "De prijzen zijn bevestigd. Online activering is nog niet geopend — zet je op de wachtlijst, dan nemen we contact op en starten we je organisatie handmatig; op deze pagina wordt niets afgeschreven.",
+    "trialNote": "Het eerste abonnement van een organisatie begint met een proefperiode van 14 dagen. Daarna wordt je kaart belast met de maandprijs; je kunt opzeggen voordat de proefperiode eindigt.",
     "planCta": "Zet je op de wachtlijst voor dit plan",
     "featuresLabel": "Inbegrepen",
     "plans": {
@@ -5452,10 +5454,10 @@
         "name": "Organisatie",
         "tagline": "Voor organisaties die actief werven en teams bouwen",
         "features": [
-          "Tot 10 actieve posities",
+          "Geen vaste limiet op actieve posities",
           "Alles uit Gratis, op werkschaal",
-          "Eén plan voor elke organisatiecapaciteit",
-          "Projectbeheer, gereedheid, rapporten en CSV"
+          "Eén plan voor elke soort organisatie",
+          "Projectbeheer, rapporten en CSV-export"
         ]
       },
       "agency": {
@@ -5483,7 +5485,7 @@
     "faq": [
       {
         "q": "Waarom maar één betaald plan?",
-        "a": "Elke organisatie — werkgever, uitzender, aannemer of opleider — krijgt hetzelfde product. Alleen de schaal verschilt: 1 actieve positie gratis, tot 10 voor €99/maand, daarboven een individueel plan."
+        "a": "Elke organisatie — werkgever, uitzender, aannemer of opleider — krijgt hetzelfde product. Alleen de schaal verschilt: 1 actieve positie gratis, en voor €99/maand geen vaste limiet op actieve posities."
       },
       {
         "q": "Blijft Gratis gratis?",
@@ -5494,8 +5496,8 @@
         "a": "Kaartbetaling via Stripe, btw via Stripe Tax; facturen, opzegging en wijzigingen in uw organisatieaccount."
       },
       {
-        "q": "Wat gebeurt er boven 10 actieve posities?",
-        "a": "Er wordt niets automatisch afgeschreven of geüpgraded. U wordt gevraagd contact op te nemen en een individueel plan wordt afgesproken."
+        "q": "Is er een limiet op actieve posities?",
+        "a": "Gratis bevat 1 actieve positie. Het plan Organisatie kent geen vaste limiet op actieve posities. Gebruikelijke bescherming tegen misbruik, zoals limieten op het aantal verzoeken, blijft gelden."
       }
     ],
     "priceState": {
@@ -5503,10 +5505,10 @@
       "owner_confirmed": "Prijzen bevestigd door de eigenaar. Activeren gebeurt in uw organisatieaccount; op deze pagina wordt niets afgeschreven."
     },
     "individual": {
-      "name": "Individueel plan",
-      "tagline": "Voor meer dan 10 actieve posities",
-      "question": "Meer nodig?",
-      "body": "Neem contact op voor een individueel plan — eisen, schaal en voorwaarden worden samen afgesproken. Geen automatische tier, geen gepubliceerde prijs.",
+      "name": "Bijzondere wensen",
+      "tagline": "Voor behoeften buiten de standaardplannen",
+      "question": "Iets specifieks in gedachten?",
+      "body": "Neem contact op als u bijzondere wensen hebt — we spreken ze samen af. Geen automatische tier, geen gepubliceerde prijs.",
       "cta": "Neem contact op"
     },
     "priceFree": "€ 0",
@@ -8083,6 +8085,7 @@
       "not_found": "Het document is niet gevonden.",
       "limit_reached": "De limiet van de documentenlijst is bereikt.",
       "version_limit_reached": "Dit document heeft zijn versielimiet bereikt.",
+      "storage_quota_exceeded": "De opslaglimiet van uw organisatie (2 GB) is bereikt. Verwijder oude bestanden of neem contact op met support voordat u meer uploadt.",
       "path_mismatch": "De upload kon niet worden geverifieerd — er is niets opgeslagen. Probeer opnieuw.",
       "file_too_large": "Het bestand is groter dan 5 MB — er is niets opgeslagen.",
       "unsupported_type": "Dit bestandstype wordt niet ondersteund — gebruik PDF, Word of een foto.",
@@ -8695,8 +8698,8 @@
       "reopen": "Deze behoefte heropenen",
       "closedNote": "Gesloten — verborgen voor werknemers.",
       "error": "Kon niet opslaan. Probeer het opnieuw.",
-      "limitUpgrade": "Het gratis plan van deze organisatie staat 1 actieve positie toe. Sluit er een, of activeer het plan Organisatie (€99/maand, tot 10) in uw organisatieaccount.",
-      "limitIndividual": "Deze organisatie heeft de 10 actieve posities van het plan Organisatie bereikt. Er is niets afgeschreven of gewijzigd. Voor meer dan 10: neem contact op voor een individueel plan.",
+      "limitUpgrade": "Het gratis plan van deze organisatie staat 1 actieve positie toe. Sluit er een, of activeer het plan Organisatie (€99/maand) in uw organisatieaccount.",
+      "limitIndividual": "Deze organisatie heeft de limiet voor actieve posities van haar plan bereikt. Er is niets afgeschreven of gewijzigd. Neem contact met ons op.",
       "closedCandidatesHistory": "Deze behoefte is gesloten. Hieronder staat wie vergeleken werd en wat besloten is toen ze open was — geschiedenis, geen actielijst. Heropen de behoefte om kandidaten opnieuw te beoordelen."
     },
     "freshness": {
@@ -10645,7 +10648,7 @@
     },
     "subscribe": {
       "title": "Plan Organisatie",
-      "cta": "Plan Organisatie activeren (tot 10 actieve posities)",
+      "cta": "Plan Organisatie activeren",
       "note": "U gaat naar Stripe Checkout; het abonnement is gekoppeld aan deze organisatie."
     }
   },
@@ -13555,8 +13558,8 @@
         "errorDuplicateName": "Je hebt al een organisatie met deze naam. Kies een andere naam.",
         "errorStale": "Tijdens het controleren is er iets veranderd (bijvoorbeeld de actieve werkruimte). Er is niets opgeslagen — begin opnieuw.",
         "errorConflict": "Deze waarde verschilt al. Open geavanceerde modus om te vervangen.",
-        "errorOpenNeedLimitUpgrade": "Het gratis plan van deze organisatie staat 1 actieve positie toe. Sluit er een, of activeer het plan Organisatie (€99/maand, tot 10) in uw organisatieaccount.",
-        "errorOpenNeedLimitIndividual": "Deze organisatie heeft de 10 actieve posities van het plan Organisatie bereikt. Er is niets afgeschreven of gewijzigd. Voor meer dan 10: neem contact op voor een individueel plan."
+        "errorOpenNeedLimitUpgrade": "Het gratis plan van deze organisatie staat 1 actieve positie toe. Sluit er een, of activeer het plan Organisatie (€99/maand) in uw organisatieaccount.",
+        "errorOpenNeedLimitIndividual": "Deze organisatie heeft de limiet voor actieve posities van haar plan bereikt. Er is niets afgeschreven of gewijzigd. Neem contact met ons op."
       },
       "urgency": {
         "flexible": "Flexibel",

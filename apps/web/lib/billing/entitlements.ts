@@ -4,12 +4,12 @@
  * Describes the plan boundary WITHOUT enforcing a hard paywall: payments are
  * off this sprint, so a premium surface shows an honest "payment not enabled —
  * request pilot access" state rather than charging or hard-blocking. The same
- * helpers will back real enforcement once the Stripe sprint flips
- * PAYMENTS_ENABLED.
+ * helpers will back real enforcement once the owner arms billing (the
+ * resolved billing config, lib/billing/config-core.ts).
  */
 
+import type { BillingConfig } from "./config-core";
 import {
-  PAYMENTS_ENABLED,
   getPlan,
   type Entitlement,
   type FeatureKey,
@@ -17,8 +17,12 @@ import {
   type PrePaymentPlan,
 } from "./plans";
 
-export function isPaymentEnabled(): boolean {
-  return PAYMENTS_ENABLED;
+/**
+ * Whether payments are on is the RESOLVED billing config (env-armed, live
+ * hard-blocked until the owner arms it) - there is no second, static answer.
+ */
+export function isPaymentEnabled(cfg: Pick<BillingConfig, "paymentsEnabled">): boolean {
+  return cfg.paymentsEnabled;
 }
 
 export function entitlementFor(

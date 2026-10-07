@@ -248,3 +248,13 @@ export async function persistUsageCostEvent(
     return false;
   }
 }
+
+/**
+ * Read handle for the usage ledger (service-role). Kept here so the ledger
+ * stays the single service-role touchpoint for usage_cost_events; used by the
+ * per-organization AI cap count (lib/ai/runtime/org-run-cap.ts).
+ */
+export async function usageLedgerReadClient(): Promise<unknown> {
+  const { createAdminClient } = await import("@/lib/supabase/admin");
+  return createAdminClient();
+}

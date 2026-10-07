@@ -14,6 +14,8 @@
  * Next.js 15 strips thrown Error messages in prod), so the client renders an
  * honest done / error state.
  */
+import { runAutoMatchForDemand } from "@/lib/scouting/auto-match";
+import type { ScoutingEmployer } from "@/lib/scouting/scouting";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -145,9 +147,9 @@ export type DemandRequestResult =
         | "no_company_context"
         | "invalid_estimate"
         // Owner launch pricing 2026-09-05: the organization's concurrent
-        // active open needs are at its plan's ceiling (FREE 1 / ORGANIZATION
-        // 10). `next` names the honest way forward — the €99 plan, or the
-        // individual plan (contact) above the paid ceiling. Nothing is charged.
+        // active open needs are at its plan's ceiling (FREE 1; the
+        // ORGANIZATION plan has none since 2026-10-06). `next` names the honest
+        // way forward — the €99 plan. Nothing is charged.
         | "over_open_need_limit";
       limit?: number;
       used?: number;
@@ -220,7 +222,7 @@ export async function submitDemandRequest(
 
   const result = await submitDemandRequestCore(
     { supabase, userId: user.id },
-    { organizationId: employer.organizationId },
+    employer,
     intent,
     fields,
   );
@@ -238,7 +240,7 @@ export async function submitDemandRequest(
  */
 export async function submitDemandRequestCore(
   caller: DomainCaller,
-  employer: { organizationId: string },
+  employer: { organizationId: string } & Partial<ScoutingEmployer>,
   intent: DemandIntent,
   fields?: DemandFields,
 ): Promise<DemandRequestResult> {
@@ -349,8 +351,8 @@ export async function submitDemandRequestCore(
     p_original_language: "lt",
   };
   // OPEN-NEEDS ENTITLEMENT SEAM (owner launch pricing 2026-09-05): FREE
-  // organization = 1 concurrent active need, ORGANIZATION €99 = up to 10,
-  // above → the individual-plan path. `hasFeature("company_create_needs")`
+  // organization = 1 concurrent active need, ORGANIZATION €99 = no fixed
+  // limit (owner decision 2026-10-06). `hasFeature("company_create_needs")`
   // is the plan boundary; the numeric ceiling is decided by the ONE gate over
   // the organization's real count. Permissive while billing is disabled
   // (pilot preserved — the same rule the booking gate follows); enforced the
@@ -447,6 +449,18 @@ export async function submitDemandRequestCore(
           }),
         )
         .catch(() => {});
+    }
+  }
+
+  // AUTOMATIC INTERNAL MATCHING (best-effort, after the row is saved and its
+  // structured columns are set). Deterministic match-v1 over existing
+  // LabourMarket.ai candidates only; a failure or throw can never fail the
+  // submit (runAutoMatchForDemand does not throw; the catch is belt-and-braces).
+  if (requestId && intent === "hire_workers") {
+    try {
+      await runAutoMatchForDemand(caller, employer, requestId, "submit");
+    } catch {
+      /* publish result is unaffected */
     }
   }
 

@@ -4478,11 +4478,11 @@
               "humanConfirmNote": "To tylko sugestie — Ty decydujesz, co wpisać. Nigdy nie zmieniają Twoich liczb."
             }
           },
-          "errorOpenNeedLimitUpgrade": "Plan bezpłatny tej organizacji pozwala na 1 aktywną pozycję. Zamknij jedną lub aktywuj plan Organizacja (99 €/mies., do 10) na koncie organizacji.",
-          "errorOpenNeedLimitIndividual": "Ta organizacja osiągnęła limit 10 aktywnych pozycji planu Organizacja. Nic nie pobrano ani nie zmieniono. Powyżej 10 skontaktuj się z nami w sprawie planu indywidualnego.",
+          "errorOpenNeedLimitUpgrade": "Plan bezpłatny tej organizacji pozwala na 1 aktywną pozycję. Zamknij jedną lub aktywuj plan Organizacja (99 €/mies.) na koncie organizacji.",
+          "errorOpenNeedLimitIndividual": "Ta organizacja osiągnęła limit aktywnych pozycji swojego planu. Nic nie pobrano ani nie zmieniono. Skontaktuj się z nami.",
           "openNeedUsage": "Aktywne pozycje: wykorzystano {used} z {limit} · pozostało {remaining}",
           "openNeedUsageUpgradeCta": "Aktywuj plan Organizacja",
-          "openNeedUsageIndividual": "Osiągnięto limit planu Organizacja. Dla większej liczby pozycji skontaktuj się z nami w sprawie planu indywidualnego."
+          "openNeedUsageIndividual": "Osiągnięto limit Twojego planu. Skontaktuj się z nami, aby omówić swoje potrzeby."
         }
       },
       "greeting": "Witaj ponownie, {name}",
@@ -5435,6 +5435,8 @@
     "titleAccent": "ustalone uczciwie.",
     "subcopyLive": "Ceny są potwierdzone przez właściciela i obowiązują. Aktywacja odbywa się na koncie organizacji poprzez bezpieczną płatność Stripe; na tej stronie nic nie jest pobierane.",
     "subcopy": "Ceny nie są jeszcze ostateczne, a rozliczenie nigdy nie jest tu uruchamiane za Ciebie. Poniższe plany opisują zakres; aktywacja jest ręczna — skontaktuj się, a przed rozpoczęciem potwierdzimy z Tobą cenę i zakres.",
+    "subcopyConfirmed": "Ceny są potwierdzone. Aktywacja online nie jest jeszcze otwarta — dołącz do listy oczekujących, skontaktujemy się i uruchomimy organizację ręcznie; na tej stronie nic nie jest pobierane.",
+    "trialNote": "Pierwsza subskrypcja organizacji zaczyna się od 14-dniowego okresu próbnego. Po nim z karty pobierana jest cena miesięczna; można zrezygnować przed jego końcem.",
     "planCta": "Dołącz do listy oczekujących na ten plan",
     "featuresLabel": "Zawiera",
     "plans": {
@@ -5452,10 +5454,10 @@
         "name": "Organizacja",
         "tagline": "Dla organizacji, które aktywnie rekrutują i budują zespoły",
         "features": [
-          "Do 10 aktywnych stanowisk",
+          "Bez stałego limitu aktywnych stanowisk",
           "Wszystko z planu Free, w skali operacyjnej",
-          "Jeden plan dla wszystkich możliwości organizacji",
-          "Operacje projektowe, gotowość, raporty i CSV"
+          "Jeden plan dla każdego rodzaju organizacji",
+          "Operacje projektowe, raporty i eksport CSV"
         ]
       },
       "agency": {
@@ -5483,7 +5485,7 @@
     "faq": [
       {
         "q": "Dlaczego tylko jeden płatny plan?",
-        "a": "Każda organizacja — pracodawca, dostawca pracowników, wykonawca czy instytucja szkoleniowa — otrzymuje ten sam produkt. Zmienia się tylko skala: 1 aktywne stanowisko bezpłatnie, do 10 za 99 €/miesiąc, a powyżej tego — plan indywidualny."
+        "a": "Każda organizacja — pracodawca, dostawca pracowników, wykonawca czy instytucja szkoleniowa — otrzymuje ten sam produkt. Zmienia się tylko skala: 1 aktywne stanowisko bezpłatnie, a za 99 €/miesiąc — bez stałego limitu aktywnych stanowisk."
       },
       {
         "q": "Czy plan bezpłatny pozostanie bezpłatny?",
@@ -5494,8 +5496,8 @@
         "a": "Płatność kartą przez Stripe, z podatkiem VAT naliczanym przez Stripe Tax; faktury, rezygnacja i zmiany znajdują się na koncie Twojej organizacji."
       },
       {
-        "q": "Co się dzieje powyżej 10 aktywnych stanowisk?",
-        "a": "Nic nie jest automatycznie naliczane ani podwyższane. Prosimy Cię o kontakt i ustalamy plan indywidualny."
+        "q": "Czy jest limit aktywnych stanowisk?",
+        "a": "Plan bezpłatny obejmuje 1 aktywne stanowisko. Plan Organizacja nie ma stałego limitu aktywnych stanowisk. Nadal obowiązują zwykłe zabezpieczenia przed nadużyciami, takie jak limity liczby zapytań."
       }
     ],
     "priceState": {
@@ -5503,10 +5505,10 @@
       "owner_confirmed": "Ceny potwierdzone przez właściciela. Aktywacja odbywa się na koncie organizacji; na tej stronie nic nie jest pobierane."
     },
     "individual": {
-      "name": "Plan indywidualny",
-      "tagline": "Ponad 10 aktywnych pozycji",
-      "question": "Potrzebujesz więcej?",
-      "body": "Skontaktuj się z nami w sprawie planu indywidualnego — wymagania, skala i warunki ustalane są wspólnie. Bez automatycznego progu, bez publikowanej ceny.",
+      "name": "Szczególne wymagania",
+      "tagline": "Dla potrzeb wykraczających poza standardowe plany",
+      "question": "Masz coś konkretnego na myśli?",
+      "body": "Skontaktuj się z nami, jeśli masz szczególne wymagania — ustalamy je wspólnie. Bez automatycznego progu, bez publikowanej ceny.",
       "cta": "Skontaktuj się"
     },
     "priceFree": "0 €",
@@ -8083,6 +8085,7 @@
       "not_found": "Nie znaleziono tego dokumentu.",
       "limit_reached": "Osiągnięto limit listy dokumentów.",
       "version_limit_reached": "Ten dokument osiągnął limit wersji.",
+      "storage_quota_exceeded": "Osiągnięto limit miejsca na dane Twojej organizacji (2 GB). Usuń stare pliki lub skontaktuj się z pomocą, zanim prześlesz kolejne.",
       "path_mismatch": "Nie udało się zweryfikować przesłanego pliku — nic nie zostało zapisane. Spróbuj ponownie.",
       "file_too_large": "Plik jest większy niż 5 MB — nic nie zostało zapisane.",
       "unsupported_type": "Ten typ pliku nie jest obsługiwany — użyj PDF, Word lub zdjęcia.",
@@ -8695,8 +8698,8 @@
       "reopen": "Otwórz ponownie tę potrzebę",
       "closedNote": "Zamknięta — ukryta przed pracownikami.",
       "error": "Nie udało się zapisać. Spróbuj ponownie.",
-      "limitUpgrade": "Plan bezpłatny tej organizacji pozwala na 1 aktywną pozycję. Zamknij jedną lub aktywuj plan Organizacja (99 €/mies., do 10) na koncie organizacji.",
-      "limitIndividual": "Ta organizacja osiągnęła limit 10 aktywnych pozycji planu Organizacja. Nic nie pobrano ani nie zmieniono. Powyżej 10 skontaktuj się z nami w sprawie planu indywidualnego.",
+      "limitUpgrade": "Plan bezpłatny tej organizacji pozwala na 1 aktywną pozycję. Zamknij jedną lub aktywuj plan Organizacja (99 €/mies.) na koncie organizacji.",
+      "limitIndividual": "Ta organizacja osiągnęła limit aktywnych pozycji swojego planu. Nic nie pobrano ani nie zmieniono. Skontaktuj się z nami.",
       "closedCandidatesHistory": "To zapotrzebowanie jest zamknięte. Poniżej — kogo porównano i co zdecydowano, gdy było otwarte: historia, nie lista działań. Aby ponownie oceniać kandydatów, otwórz zapotrzebowanie ponownie."
     },
     "freshness": {
@@ -10645,7 +10648,7 @@
     },
     "subscribe": {
       "title": "Plan Organizacja",
-      "cta": "Aktywuj plan Organizacja (do 10 aktywnych stanowisk)",
+      "cta": "Aktywuj plan Organizacja",
       "note": "Zostaniesz przekierowany/a do Stripe Checkout; subskrypcja jest przypisana do tej organizacji."
     }
   },
@@ -13555,8 +13558,8 @@
         "errorDuplicateName": "Masz już organizację o tej nazwie. Wybierz inną nazwę.",
         "errorStale": "Podczas sprawdzania coś się zmieniło (na przykład aktywna przestrzeń robocza). Nic nie zostało zapisane — zacznij od nowa.",
         "errorConflict": "Ta wartość jest już inna. Otwórz tryb zaawansowany, aby ją zastąpić.",
-        "errorOpenNeedLimitUpgrade": "Plan bezpłatny tej organizacji pozwala na 1 aktywną pozycję. Zamknij jedną lub aktywuj plan Organizacja (99 €/mies., do 10) na koncie organizacji.",
-        "errorOpenNeedLimitIndividual": "Ta organizacja osiągnęła limit 10 aktywnych pozycji planu Organizacja. Nic nie pobrano ani nie zmieniono. Powyżej 10 skontaktuj się z nami w sprawie planu indywidualnego."
+        "errorOpenNeedLimitUpgrade": "Plan bezpłatny tej organizacji pozwala na 1 aktywną pozycję. Zamknij jedną lub aktywuj plan Organizacja (99 €/mies.) na koncie organizacji.",
+        "errorOpenNeedLimitIndividual": "Ta organizacja osiągnęła limit aktywnych pozycji swojego planu. Nic nie pobrano ani nie zmieniono. Skontaktuj się z nami."
       },
       "urgency": {
         "flexible": "Elastycznie",

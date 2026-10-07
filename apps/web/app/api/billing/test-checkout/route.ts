@@ -18,7 +18,8 @@ import {
   checkoutIdempotencyKey,
   checkoutMetadata,
 } from "@/lib/billing/metadata-core";
-import { admitCheckout } from "@/lib/billing/checkout-admission";
+import { admitCheckout, readTrialHistory } from "@/lib/billing/checkout-admission";
+import { decideTrial } from "@/lib/billing/trial-core";
 import {
   attachProviderSession,
   markCheckoutOperationFailed,
@@ -171,6 +172,15 @@ export async function POST(req: Request) {
     ? operation.idempotencyKey
     : checkoutIdempotencyKey({ ownerId: user.id, planKey, organizationId });
 
+  // 3. TRIAL — 14 days, Organization plan only, once per organization. Decided
+  //    server-side from the subject's stored history; unreadable history → no
+  //    trial (fail closed), checkout itself is unaffected.
+  const trial = decideTrial({
+    planKey,
+    subjectType: scope.type,
+    history: await readTrialHistory({ scope, planKey, testMode: config.testMode }),
+  });
+
   const result = await provider.createCheckoutSession({
     planKey,
     priceId,
@@ -181,6 +191,7 @@ export async function POST(req: Request) {
     metadata: checkoutMetadata({ planKey, ownerId: user.id, organizationId }),
     idempotencyKey,
     expiresAt: operation ? expiresAtUnixFromIso(operation.expiresAt) : undefined,
+    ...(trial.trial ? { trialPeriodDays: trial.days } : {}),
     successUrl: `${origin}/dashboard/account?billing=${config.testMode ? "test_success" : "success"}`,
     cancelUrl: `${origin}/pricing?billing=${config.testMode ? "test_cancelled" : "cancelled"}`,
   });
@@ -198,5 +209,6 @@ export async function POST(req: Request) {
     // Evidence for support: which server-side operation this session belongs to.
     operationId: operation?.id ?? null,
     reused: opened.kind === "reused",
+    trialDays: trial.trial ? trial.days : null,
   });
 }

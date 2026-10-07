@@ -33,7 +33,7 @@ vi.mock("@/lib/billing/billing-subject", () => ({
 }));
 vi.mock("@/lib/billing/customer-store", () => ({ ensureBillingCustomer: vi.fn(async () => ({ ok: true, customerId: "cus_1" })) }));
 vi.mock("@/lib/billing/provider", () => ({ getBillingProvider: vi.fn() }));
-vi.mock("@/lib/billing/checkout-admission", () => ({ admitCheckout: vi.fn() }));
+vi.mock("@/lib/billing/checkout-admission", () => ({ admitCheckout: vi.fn(), readTrialHistory: vi.fn(async () => "has_history") }));
 vi.mock("@/lib/billing/checkout-operations-store", () => ({
   openCheckoutOperation: vi.fn(),
   attachProviderSession: vi.fn(async () => undefined),

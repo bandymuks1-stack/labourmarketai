@@ -150,8 +150,6 @@ export interface PlanCommercial {
   readonly stripeSlot: string | null;
   /** Open commercial questions about LMC; NOT entitlements. */
   readonly lmc: { readonly includedPerPeriod: OpenMarker; readonly topupDiscount: OpenMarker };
-  /** Individual (contact) plan above this many open needs; null = none. */
-  readonly individualAbove: number | null;
 }
 
 export type PlanCatalogueEntry = PrePaymentPlan & { readonly commercial: PlanCommercial };
@@ -172,8 +170,6 @@ export interface RetiredDbRow {
 
 export const CATALOGUE_FREE_ORGANIZATION_KEY = "free_organization" as const;
 export const CATALOGUE_ORGANIZATION_KEY = "company_pilot" as const;
-/** Live, enforced ceiling. NOT changed by this catalogue. */
-export const CATALOGUE_OPEN_NEEDS_CONTACT_THRESHOLD = 10 as const;
 export const CATALOGUE_DEFERRED_KEYS = ["worker_plus", "agency_pilot"] as const;
 
 const GATE = "docs/human-gates/payments-price-table-gate.md (owner launch pricing 2026-09-05)";
@@ -213,7 +209,6 @@ export const PLAN_CATALOGUE: readonly PlanCatalogueEntry[] = [
       dbSlug: null,
       stripeSlot: null,
       lmc: lmcOpen,
-      individualAbove: null,
     },
   },
   {
@@ -244,7 +239,6 @@ export const PLAN_CATALOGUE: readonly PlanCatalogueEntry[] = [
       dbSlug: null,
       stripeSlot: "worker_plus",
       lmc: lmcOpen,
-      individualAbove: null,
     },
   },
   {
@@ -277,13 +271,16 @@ export const PLAN_CATALOGUE: readonly PlanCatalogueEntry[] = [
       dbSlug: "free",
       stripeSlot: null,
       lmc: lmcOpen,
-      individualAbove: null,
     },
   },
   {
-    // ORGANIZATION (the ONE paid organization plan): up to TEN concurrent
-    // active positions. Above ten there is no automatic public tier - the
-    // individual plan (contact us). The monthly figure is referenced from the
+    // ORGANIZATION (the ONE paid organization plan): NO fixed limit on
+    // concurrent active positions (owner decision 2026-10-06 - the former
+    // ten-position ceiling is removed and replaced by no other commercial
+    // cap). `company_create_needs: true` is the plan boundary only (the
+    // feature is included); there is deliberately no numeric ceiling. Abuse and
+    // security protections (request rate limits, intake throttles) are separate
+    // from the entitlement and are never presented as one. The monthly figure is referenced from the
     // DB (`plans.business`), never copied; the live Stripe price is
     // EXTERNAL_CONFIGURATION_NOT_VERIFIED and is never inferred from the DB.
     slug: CATALOGUE_ORGANIZATION_KEY,
@@ -293,7 +290,7 @@ export const PLAN_CATALOGUE: readonly PlanCatalogueEntry[] = [
     labelKey: "company_pilot",
     launch: "sellable",
     entitlements: {
-      company_create_needs: CATALOGUE_OPEN_NEEDS_CONTACT_THRESHOLD,
+      company_create_needs: true, // included, NO numeric ceiling (owner 2026-10-06)
       vacancy_translations: false, // quantities NOT set by the owner yet
       candidate_readiness_summaries: true,
       booking_requests: true,
@@ -313,7 +310,6 @@ export const PLAN_CATALOGUE: readonly PlanCatalogueEntry[] = [
       dbSlug: "business",
       stripeSlot: "company_pilot",
       lmc: lmcOpen,
-      individualAbove: CATALOGUE_OPEN_NEEDS_CONTACT_THRESHOLD,
     },
   },
   {
@@ -346,7 +342,6 @@ export const PLAN_CATALOGUE: readonly PlanCatalogueEntry[] = [
       dbSlug: null, // DB `agency` / `enterprise` are RETIRED rows, not this plan
       stripeSlot: "agency_pilot",
       lmc: lmcOpen,
-      individualAbove: null,
     },
   },
   {
@@ -370,7 +365,6 @@ export const PLAN_CATALOGUE: readonly PlanCatalogueEntry[] = [
       dbSlug: null,
       stripeSlot: null,
       lmc: lmcOpen,
-      individualAbove: null,
     },
   },
 ] as const;

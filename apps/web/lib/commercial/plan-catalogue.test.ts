@@ -16,7 +16,6 @@ import { LMC_PURCHASES_ENABLED, LMC_PROMOTIONAL_GRANTS_ENABLED, LMC_REFERRALS_EN
 import {
   CATALOGUE_DEFERRED_KEYS,
   CATALOGUE_FREE_ORGANIZATION_KEY,
-  CATALOGUE_OPEN_NEEDS_CONTACT_THRESHOLD,
   CATALOGUE_ORGANIZATION_KEY,
   PLAN_CATALOGUE,
   RETIRED_DB_ROWS,
@@ -56,13 +55,12 @@ describe("plans.ts exports are derived from the catalogue with identical values"
   it("the guard-pinned literal keys in plans.ts equal the catalogue keys", () => {
     expect(Plans.FREE_ORGANIZATION_PLAN_KEY).toBe(CATALOGUE_FREE_ORGANIZATION_KEY);
     expect(Plans.ORGANIZATION_PLAN_KEY).toBe(CATALOGUE_ORGANIZATION_KEY);
-    expect(Plans.OPEN_NEEDS_CONTACT_THRESHOLD).toBe(CATALOGUE_OPEN_NEEDS_CONTACT_THRESHOLD);
     expect([...Plans.DEFERRED_PLAN_KEYS]).toEqual([...CATALOGUE_DEFERRED_KEYS]);
   });
 
-  it("live limits are preserved: organization 10, free organization 1, agency 25 (deferred)", () => {
+  it("live limits: organization has NO numeric ceiling (boolean true, owner 2026-10-06), free organization 1, agency 25 (deferred)", () => {
     const lim = (k: string) => PLAN_CATALOGUE.find((p) => p.slug === k)!.entitlements.company_create_needs;
-    expect(lim("company_pilot")).toBe(10);
+    expect(lim("company_pilot")).toBe(true);
     expect(lim("free_organization")).toBe(1);
     expect(lim("agency_pilot")).toBe(25);
   });

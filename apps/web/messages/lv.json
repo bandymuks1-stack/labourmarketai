@@ -222,11 +222,11 @@
           "done": "[EN] Saved. Your need is now visible in your space.",
           "error": "[EN] Couldn't send. Please try again.",
           "progressHelper": "[EN] These steps show progress. Active actions are shown below.",
-          "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
-          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
-          "openNeedUsage": "Active positions: {used} of {limit} used · {remaining} remaining",
-          "openNeedUsageUpgradeCta": "Activate the Organization plan",
-          "openNeedUsageIndividual": "You have reached the Organization plan limit. For more than the included positions, contact us for an individual plan."
+          "errorOpenNeedLimitUpgrade": "Šīs organizācijas bezmaksas plāns ļauj 1 aktīvu pozīciju. Aizveriet vienu vai aktivizējiet plānu „Organizācija” (99 €/mēn.) organizācijas kontā.",
+          "errorOpenNeedLimitIndividual": "Šī organizācija ir sasniegusi sava plāna aktīvo pozīciju ierobežojumu. Nekas netika iekasēts vai mainīts. Sazinieties ar mums.",
+          "openNeedUsage": "Aktīvās pozīcijas: izmantotas {used} no {limit} · atlikušas {remaining}",
+          "openNeedUsageUpgradeCta": "Aktivizēt plānu „Organizācija”",
+          "openNeedUsageIndividual": "Jūs esat sasniedzis sava plāna ierobežojumu. Sazinieties ar mums, lai pārrunātu savas vajadzības."
         }
       },
       "account": {
@@ -993,89 +993,91 @@
   },
   "pricing": {
     "checkoutReturn": {
-      "cancelled": "Maksājums tika atcelts — nekas netika iekasēts, un jūsu kontā nekas nemainījās."
+      "cancelled": "Norēķins tika atcelts — nekas netika iekasēts un jūsu kontā nekas nemainījās."
     },
-    "eyebrow": "[EN] Pricing",
+    "eyebrow": "Cenas",
     "faq": [
       {
-        "q": "Why only one paid plan?",
-        "a": "Every organization — employer, staffing provider, contractor or training provider — gets the same product. What changes is scale: 1 active position free, up to 10 for €99/month, and an individual plan above that."
+        "q": "Kāpēc tikai viens maksas plāns?",
+        "a": "Katra organizācija — darba devējs, personāla nodrošinātājs, darbuzņēmējs vai mācību iestāde — saņem to pašu produktu. Atšķiras tikai mērogs: 1 aktīva pozīcija bez maksas, bet par 99 €/mēn. — bez noteikta aktīvo pozīciju ierobežojuma."
       },
       {
-        "q": "Will the Free tier stay free?",
-        "a": "Yes. Persons stay free, and an organization can run one active position at no cost."
+        "q": "Vai bezmaksas līmenis paliks bezmaksas?",
+        "a": "Jā. Personām tas paliek bezmaksas, un organizācija var bez maksas pārvaldīt vienu aktīvu pozīciju."
       },
       {
-        "q": "How is billing handled?",
-        "a": "Card payment through Stripe with VAT applied by Stripe Tax; invoices, cancellation and changes live in your organization account."
+        "q": "Kā tiek apstrādāti maksājumi?",
+        "a": "Maksājums ar karti caur Stripe, PVN piemēro Stripe Tax; rēķini, atcelšana un izmaiņas ir pieejamas jūsu organizācijas kontā."
       },
       {
-        "q": "What happens above 10 active positions?",
-        "a": "Nothing is charged or upgraded automatically. You are asked to contact us and an individual plan is agreed."
+        "q": "Vai aktīvajām pozīcijām ir ierobežojums?",
+        "a": "Bezmaksas plānā ir 1 aktīva pozīcija. Plānam „Organizācija” nav noteikta aktīvo pozīciju ierobežojuma. Joprojām darbojas ierastā aizsardzība pret ļaunprātīgu izmantošanu, piemēram, pieprasījumu biežuma ierobežojumi."
       }
     ],
-    "faqTitle": "[EN] Pricing FAQ",
-    "featuresLabel": "[EN] Includes",
-    "planCta": "[EN] Join the waitlist for this plan",
+    "faqTitle": "Biežāk uzdotie jautājumi par cenām",
+    "featuresLabel": "Iekļauts",
+    "planCta": "Pierakstīties gaidīšanas sarakstā šim plānam",
     "plans": {
       "agency": {
         "features": [
-          "[EN] Unlimited managed workers",
-          "[EN] Broker tools",
-          "[EN] Worker search",
-          "[EN] Priority support"
+          "Neierobežots pārvaldīto darbinieku skaits",
+          "Starpniecības rīki",
+          "Darbinieku meklēšana",
+          "Prioritārs atbalsts"
         ],
-        "name": "[EN] Agency",
-        "tagline": "[EN] For staffing partners."
+        "name": "Aģentūra",
+        "tagline": "Personāla partneriem."
       },
       "business": {
-        "name": "Organization",
-        "tagline": "For organizations actively hiring and building teams",
+        "name": "Organizācija",
+        "tagline": "Organizācijām, kas aktīvi pieņem darbā un veido komandas",
         "features": [
-          "Up to 10 active positions",
-          "Everything in Free, at operating scale",
-          "One plan for every organization capability",
-          "Project operations, readiness, reports and CSV"
+          "Bez noteikta aktīvo pozīciju ierobežojuma",
+          "Viss no bezmaksas plāna — darbības mērogā",
+          "Viens plāns jebkura veida organizācijai",
+          "Projektu vadība, atskaites un CSV eksports"
         ]
       },
       "enterprise": {
         "features": [
-          "[EN] Unlimited projects",
-          "[EN] SSO",
-          "[EN] SLA",
-          "[EN] Dedicated support"
+          "Neierobežots projektu skaits",
+          "SSO",
+          "SLA",
+          "Veltīts atbalsts"
         ],
-        "name": "[EN] Enterprise",
-        "tagline": "[EN] For scale and control."
+        "name": "Enterprise",
+        "tagline": "Mērogam un kontrolei."
       },
       "free": {
-        "name": "Free",
-        "tagline": "For getting started",
+        "name": "Bezmaksas",
+        "tagline": "Darba sākšanai",
         "features": [
-          "1 active position",
-          "Matching shortlist and candidate contact",
-          "Bookings, projects, instructions",
-          "Work confirmation by the employer"
+          "1 aktīva pozīcija",
+          "Atbilstības īsais saraksts un saziņa ar kandidātiem",
+          "Rezervācijas, projekti, norādījumi",
+          "Darba apstiprināšana no darba devēja puses"
         ]
       }
     },
-    "subcopyLive": "Cenas ir apstiprinājis īpašnieks, un tās ir spēkā. Aktivizācija notiek organizācijas kontā ar drošu Stripe maksājumu; šajā lapā nekas netiek ieturēts.",
-    "subcopy": "[EN] Prices are not finalised yet and billing is never started for you on this page. The tiers below describe scope; activation is manual — reach out and we'll confirm pricing and scope with you before anything starts.",
-    "title": "[EN] Simple tiers,",
-    "titleAccent": "[EN] set fairly.",
+    "subcopyLive": "Cenas ir apstiprinājis īpašnieks un ir spēkā. Aktivizēšana notiek organizācijas kontā ar drošu Stripe maksājumu; šajā lapā nekas netiek iekasēts.",
+    "subcopy": "Cenas vēl nav galīgas, un norēķini šajā lapā jums nekad netiek uzsākti. Zemāk esošie līmeņi apraksta apjomu; aktivizēšana ir manuāla — sazinieties ar mums, un mēs pirms jebkā uzsākšanas apstiprināsim cenas un apjomu.",
+    "subcopyConfirmed": "Cenas ir apstiprinātas. Aktivizēšana tiešsaistē vēl nav atvērta — pierakstieties gaidīšanas sarakstā, un mēs ar jums sazināsimies, lai manuāli uzsāktu jūsu organizāciju; šajā lapā nekas netiek iekasēts.",
+    "trialNote": "Organizācijas pirmais abonements sākas ar 14 dienu izmēģinājuma periodu. Pēc tā jūsu karte tiek apmaksāta ar mēneša cenu, un līdz tā beigām varat atcelt abonementu.",
+    "title": "Vienkārši līmeņi,",
+    "titleAccent": "noteikti godīgi.",
     "individual": {
-      "name": "Individual plan",
-      "tagline": "For more than 10 active positions",
-      "question": "Need more?",
-      "body": "Contact us for an individual plan — requirements, scale and commercial terms are agreed together. No automatic tier, no published price.",
-      "cta": "Contact us"
+      "name": "Īpašas prasības",
+      "tagline": "Vajadzībām ārpus standarta plāniem",
+      "question": "Ir kas īpašs prātā?",
+      "body": "Sazinieties ar mums, ja jums ir īpašas prasības — mēs tās saskaņojam kopā. Bez automātiska līmeņa, bez publicētas cenas.",
+      "cta": "Sazināties"
     },
     "priceFree": "€0",
-    "pricePerMonth": "€{price}/month",
-    "ctaStartFree": "Start free in your organization account",
-    "ctaSubscribe": "Activate in your organization account",
+    "pricePerMonth": "€{price}/mēn.",
+    "ctaStartFree": "Sākt bez maksas savā organizācijas kontā",
+    "ctaSubscribe": "Aktivizēt savā organizācijas kontā",
     "priceState": {
-      "owner_confirmed": "Prices confirmed by the owner. Activation happens in your organization account; nothing is charged on this page."
+      "owner_confirmed": "Cenas apstiprinājis īpašnieks. Aktivizēšana notiek jūsu organizācijas kontā; šajā lapā nekas netiek iekasēts."
     }
   },
   "secondary": {
@@ -2429,8 +2431,8 @@
       "reopen": "[EN] Reopen this need",
       "closedNote": "[EN] Closed — hidden from workers.",
       "error": "[EN] Could not save. Try again.",
-      "limitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
-      "limitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
+      "limitUpgrade": "Šīs organizācijas bezmaksas plāns ļauj 1 aktīvu pozīciju. Aizveriet vienu vai aktivizējiet plānu „Organizācija” (99 €/mēn.) organizācijas kontā.",
+      "limitIndividual": "Šī organizācija ir sasniegusi sava plāna aktīvo pozīciju ierobežojumu. Nekas netika iekasēts vai mainīts. Sazinieties ar mums.",
       "closedCandidatesHistory": "[EN] This need is closed. Below is who was compared and what was decided while it was open — history, not an action list. Reopen the need to assess candidates again."
     },
     "verdict": {
@@ -3834,8 +3836,8 @@
         "errorInvalid": "[EN] Please check the fields and try again.",
         "errorNeedsMigration": "[EN] This isn't enabled yet. Please try later.",
         "errorConflict": "[EN] This value already differs. Open advanced mode to replace it.",
-        "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
-        "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
+        "errorOpenNeedLimitUpgrade": "Šīs organizācijas bezmaksas plāns ļauj 1 aktīvu pozīciju. Aizveriet vienu vai aktivizējiet plānu „Organizācija” (99 €/mēn.) organizācijas kontā.",
+        "errorOpenNeedLimitIndividual": "Šī organizācija ir sasniegusi sava plāna aktīvo pozīciju ierobežojumu. Nekas netika iekasēts vai mainīts. Sazinieties ar mums."
       },
       "urgency": {
         "flexible": "Elastīgi",
@@ -5477,6 +5479,7 @@
       "not_found": "[EN] That document was not found.",
       "limit_reached": "[EN] The document list limit was reached.",
       "version_limit_reached": "[EN] This document reached its version limit.",
+      "storage_quota_exceeded": "Jūsu organizācijas krātuves limits (2 GB) ir sasniegts. Izdzēsiet vecus failus vai sazinieties ar atbalstu, pirms augšupielādējat vairāk.",
       "path_mismatch": "[EN] The upload could not be verified — nothing was saved. Please try again.",
       "file_too_large": "[EN] The file is larger than 5 MB — nothing was saved.",
       "unsupported_type": "[EN] This file type is not supported — use PDF, Word or a photo.",

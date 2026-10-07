@@ -55,9 +55,9 @@ export async function getAdminReadinessOverview(): Promise<AdminReadinessOvervie
     bookingsByStatus: {},
     bookingsAvailable: false,
     // The RESOLVED billing config, not the static pre-payment constant:
-    // `PAYMENTS_ENABLED` in plans.ts is a code pin that never leaves `false`
-    // (guarded), so the readiness tile reported "off" while Stripe was live
-    // (measured 2026-09-22). `getBillingConfig()` is the same server-only
+    // A static code pin used to feed this tile and never left `false`, so it
+    // reported "off" while Stripe was live (measured 2026-09-22); the pin is
+    // gone and this is the only answer. `getBillingConfig()` is the same server-only
     // truth the admin billing overview and llms.txt already report.
     paymentsEnabled: getBillingConfig().paymentsEnabled,
     paidPlanCount: PRE_PAYMENT_PLANS.filter((p) => p.accessState === "payment_not_enabled").length,

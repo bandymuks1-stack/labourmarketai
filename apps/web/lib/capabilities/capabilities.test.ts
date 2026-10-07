@@ -1495,7 +1495,7 @@ describe("demand draft → confirm (G4 wagon 3)", () => {
     }
     expect(demandSubmit).toHaveBeenCalledTimes(1);
     const [, employerArg, intentArg, fieldsArg] = demandSubmit.mock.calls[0] as unknown[];
-    expect(employerArg).toEqual({ organizationId: "org-1" });
+    expect(employerArg).toMatchObject({ organizationId: "org-1" });
     expect(intentArg).toBe("hire_workers");
     expect(fieldsArg).toMatchObject({
       description: DRAFT.description,

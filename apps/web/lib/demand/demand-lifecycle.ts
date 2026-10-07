@@ -42,8 +42,9 @@ export type DemandLifecycleResult =
   | { kind: "not-owner" }
   | { kind: "nothing-to-confirm" }
   // Owner launch pricing 2026-09-05: reopening would exceed the organization's
-  // concurrent active open needs (FREE 1 / ORGANIZATION 10). The way forward is
-  // the paid plan or the individual plan; nothing is charged or reopened.
+  // concurrent active open needs (FREE 1; the ORGANIZATION plan has no fixed limit
+  // since 2026-10-06). The way forward is the paid plan; nothing is charged or
+  // reopened.
   | { kind: "over-limit"; limit: number; next: "upgrade" | "individual_plan" }
   | { kind: "error"; message: string };
 

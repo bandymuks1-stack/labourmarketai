@@ -28,6 +28,7 @@ import type { AiProviderState } from "./runtime/provider-chain";
 import { providerKindFor, type AiRuntimeConfig, type AiDisabledReason } from "./runtime/config-core";
 import type { AiCompletionRequest, AiCompletionResult, AiLocale, AiErrorCode } from "./runtime/types";
 import type { PromptRegistryEntry, AiAgentKey } from "./registry/types";
+import { assessOrgRunBudget } from "./runtime/org-run-cap";
 import {
   computeActualCostUsd,
   estimateCostUsd,
@@ -105,6 +106,13 @@ export interface RunAgentOptions {
    * caller-supplied-only — nothing fakes a counter.
    */
   readonly runsToday?: number;
+  /**
+   * Per-organization vendor runs today + the cap (lib/ai/runtime/org-run-cap.ts).
+   * Supplied by the server wrapper only when the run is attributable to an
+   * organization; absent = the per-org guard is simply not applied.
+   */
+  readonly orgRunsToday?: number;
+  readonly orgDailyRunCap?: number;
   /** Language of the run — a routing dimension (activates languageRouting). */
   readonly language?: string;
   /** Input-source LABEL for the audit trail (e.g. "cv_upload") — never content. */
@@ -324,6 +332,19 @@ export async function runAiAgentCore<T = unknown>(
       status: "needs_review",
       reason: "budget_exceeded",
       detail: `daily run budget reached (${opts.runsToday}/${cfg.dailyRunBudget})`,
+      routing: skippedAudit(decision),
+    };
+  }
+
+  if (
+    opts.orgRunsToday !== undefined &&
+    opts.orgDailyRunCap !== undefined &&
+    assessOrgRunBudget(opts.orgRunsToday, opts.orgDailyRunCap) === "budget_exceeded"
+  ) {
+    return {
+      status: "needs_review",
+      reason: "budget_exceeded",
+      detail: `organization daily AI allowance reached (${opts.orgRunsToday}/${opts.orgDailyRunCap}); resets at 00:00 UTC`,
       routing: skippedAudit(decision),
     };
   }

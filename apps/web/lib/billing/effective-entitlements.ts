@@ -86,7 +86,7 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
     .select("role")
     .eq("profile_id", user.id);
   const roles = ((roleRows ?? []) as { role: string }[]).map((r) => r.role);
-  const audience = pickAudience(roles);
+  const heldAudience = pickAudience(roles);
 
   // M-P0-7: the ENTITLEMENT SUBJECT is the active workspace's billing
   // subject — an organization workspace reads ONLY that organization's
@@ -104,6 +104,18 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
   const subject: BillingSubject | null = caller
     ? { type: "organization", id: caller.organizationId }
     : (await resolveBillingSubject()).subject;
+
+  // THE ORGANIZATION'S CAPABILITY, NOT THE PERSON'S LEGACY ROLE ROW. An
+  // organization subject was proven from the caller's own active governance
+  // membership; the organization's free fallback is ORGANIZATION FREE whatever
+  // `profile_roles` happens to hold. A member (for instance an invited
+  // owner/admin) whose rows carry only `worker` would otherwise resolve to the
+  // PERSON plan (`free_worker`, which has no `company_create_needs`) and be
+  // refused every need while billing is live. Roles still pick the audience
+  // for the personal workspace. This changes the FALLBACK plan only - never
+  // access: the employer gate / membership proof is decided before this read.
+  const audience: PlanAudience =
+    subject?.type === "organization" && heldAudience === "worker" ? "company" : heldAudience;
 
   // Real subscription + manual override (degrade if the billing tables are
   // not applied yet → null, i.e. free/permissive).

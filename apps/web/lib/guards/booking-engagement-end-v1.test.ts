@@ -1594,6 +1594,9 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261006100400_append_only_privilege_closure_v1.sql",
       // 2026-10-06: service-role-only read of the invited address for the frictionless signup page - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261006100500_invitation_signup_context_v1.sql",
+      // 2026-10-06 (#2166): org storage usage fn + durable email send ledger (renumbered after #2161 took 20261006100000).
+      "20261006120000_org_storage_usage_v1.sql",
+      "20261006130000_email_send_ledger_v1.sql",
       // 2026-10-07: historical sites become completed projects (INSERT projects + link work_objects) - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261007130000_historical_projects_from_work_objects_v1.sql",
 ]);

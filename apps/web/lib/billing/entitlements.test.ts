@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
 import {
   PRE_PAYMENT_PLANS,
-  PAYMENTS_ENABLED,
   getPlan,
 } from "./plans";
+import { resolveBillingConfig } from "./config-core";
 import {
   gateFeature,
   gateFeatureBySlug,
@@ -14,8 +14,13 @@ import {
 
 describe("pre-payment plan boundary", () => {
   it("payments are NOT enabled this sprint", () => {
-    expect(PAYMENTS_ENABLED).toBe(false);
-    expect(isPaymentEnabled()).toBe(false);
+    // The one answer is the resolved billing config; unset env resolves OFF.
+    const off = resolveBillingConfig({
+      paymentsEnabled: undefined, provider: undefined, mode: undefined,
+      secretKey: undefined, webhookSecret: undefined, publishableKey: undefined,
+    });
+    expect(off.paymentsEnabled).toBe(false);
+    expect(isPaymentEnabled(off)).toBe(false);
   });
 
   it("plan slugs are unique and cover the launch registry (owner pricing 2026-09-05)", () => {

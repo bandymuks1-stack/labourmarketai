@@ -121,7 +121,7 @@ describe("§13 hard boundaries stay", () => {
     expect((falses?.length ?? 0)).toBeGreaterThanOrEqual(6);
   });
 
-  it("PAYMENTS_ENABLED code pin remains false", () => {
-    expect(read("lib/billing/plans.ts")).toMatch(/PAYMENTS_ENABLED = false as const/);
+  it("plans.ts carries no static payments switch (the resolved billing config is the one answer)", () => {
+    expect(read("lib/billing/plans.ts")).not.toMatch(/export const PAYMENTS_ENABLED/);
   });
 });

@@ -9,8 +9,8 @@
 |---|---|---|---|---|---|
 | PERSON | €0 | every person / worker / learner | the whole identity loop (journal, CV, skills, documents, board, bookings, card, project asks) | none | free surfaces; no person plan is sellable (`worker_plus` deferred) |
 | ORGANIZATION FREE | €0 | any organization — employer, staffing provider, contractor, training provider | matching shortlist, candidate contact, bookings, projects, instructions, confirmation | **1 concurrent active position / open workforce need** | `free_organization` (`company_create_needs: 1`) via the open-needs gate on the ONE demand creation path |
-| ORGANIZATION | **€99** | the same organization, at operating scale | everything above at scale, project operations, readiness, reports, CSV, journal review | **up to 10** concurrent active positions | `company_pilot` (`company_create_needs: 10`); Stripe subscription bound to the organization |
-| ORGANIZATION — INDIVIDUAL | agreed individually | more than 10 active positions | — | — | the 11th need is refused with the contact path (`/company-need`); no automatic tier, no published price, never a silent charge |
+| ORGANIZATION | **€99** | the same organization, at operating scale | everything above at scale, project operations, readiness, reports, CSV, journal review | **no fixed limit** on concurrent active positions (owner decision 2026-10-06; supersedes the former ten-position ceiling) | `company_pilot` (`company_create_needs: true`, unmetered); Stripe subscription bound to the organization |
+| ~~ORGANIZATION — INDIVIDUAL~~ | withdrawn 2026-10-06 | — | — | — | the ten-position ceiling no longer exists, so there is no "11th need" refusal and no individual-plan step; /pricing carries only a neutral "special requirements - contact us" card |
 
 DEFERRED (not sold, not priced): ai_plus, vip_media, agency_start/growth/scale, the €299 alternative, LMC top-ups, priority visibility, media upsells, annual pricing, enterprise/custom pricing, institution pricing.
 
@@ -22,7 +22,7 @@ Where the truth lives (no second source): the FIGURE only in `public.plans.price
 |---|---|---|
 | Billing seam + Stripe adapter; live resolves ONLY through the owner-armed path (`STRIPE_MODE=live` + complete live keys + `STRIPE_LIVE_ACTIVATION=approved-by-owner` + `PRICING_READINESS_STATE=owner_confirmed`) | `lib/billing/config-core.ts`, `provider.ts`, `providers/` | IMPLEMENTED (#1441) |
 | Checkout (organization-bound, sellable plan only) → signature-verified idempotent webhook (mode-matched) → `billing_customers` / `billing_subscriptions` / `payment_webhook_events` → entitlements → account state → Customer Portal | `app/api/billing/{test-checkout,webhook,portal}`, `lib/billing/*`, `components/app/account-billing-section.tsx` | IMPLEMENTED; production chain NOT PROVEN (0 rows ever) |
-| Open-needs seam FREE 1 / ORGANIZATION 10 / above → individual plan | `lib/billing/open-needs-gate.ts` → `lib/demand/demand-request.ts` (the ONE demand path; chat + visual form both) | IMPLEMENTED (#1441), enforced once a Stripe adapter state is active |
+| Open-needs seam FREE 1 / ORGANIZATION unmetered (2026-10-06) | `lib/billing/open-needs-gate.ts` → `lib/demand/demand-request.ts` (the ONE demand path; chat + visual form both) | IMPLEMENTED (#1441), enforced once a Stripe adapter state is active |
 | Public `/pricing` — €0 / €99 from the DB figure + "Need more? Contact us" | `components/marketing/pricing-table.tsx` | IMPLEMENTED |
 | LMC ledger | prod | PROVEN; top-ups DEFERRED |
 

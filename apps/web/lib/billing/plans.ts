@@ -7,23 +7,22 @@
  * (pilot access). The catalogue is the contract the later Stripe sprint wires.
  *
  * Honesty (guarded by lib/guards/no-live-payments.test.ts):
- *   - PAYMENTS_ENABLED is false; nothing here implies an active subscription;
+ *   - this file carries NO payments switch: whether billing is on is the
+ *     resolved billing config (lib/billing/config-core.ts, env-armed), never a
+ *     code constant here; nothing here implies an active subscription;
  *   - no plan auto-grants itself — `accessState` is explicit;
  *   - feature entitlements are limits/booleans only, never a charge.
  *
  * Pure data + types. No IO.
  */
 
-/** Global kill-switch. Stays false for the entire pre-payment sprint. */
-export const PAYMENTS_ENABLED = false as const;
-
 /**
  * OWNER LAUNCH PRICING (approved 2026-09-05, corrected the same day):
  *   PERSON            €0   — core person / worker / learner participation
  *   ORGANIZATION FREE €0   — 1 concurrent active position / open workforce need
- *   ORGANIZATION      €99  — up to 10 concurrent active positions
- *   more than 10           — individual plan: contact LabourMarket.ai; no
- *                            automatic public tier, no invented price.
+ *   ORGANIZATION      €99  — NO fixed limit on concurrent active positions
+ *                            (owner decision 2026-10-06: the former ten-position
+ *                            ceiling is removed and replaced by no other cap).
  * Prices live ONLY in `plans.price_eur_monthly` (see lib/marketing/plans.ts);
  * this registry carries the boundary (what a plan DOES), never a figure.
  * Deferred and NOT sold: ai_plus, vip_media, agency tiers, LMC top-ups,
@@ -34,8 +33,6 @@ export const FREE_ORGANIZATION_PLAN_KEY = "free_organization" as const;
  *  subscription store, env price slot and admin grants — the label says
  *  "Organization"). */
 export const ORGANIZATION_PLAN_KEY = "company_pilot" as const;
-/** The paid ceiling; at or above it the next step is a conversation, not a tier. */
-export const OPEN_NEEDS_CONTACT_THRESHOLD = 10 as const;
 
 
 /** Plans that exist in the registry but are not offered at launch. */

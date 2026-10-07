@@ -224,3 +224,20 @@ describe("explicit caller (bearer / MCP) — no cookie session, the caller's own
     expect(sub.filters).toContainEqual(["organization_id", "org-7"]);
   });
 });
+
+describe("organization subject — the fallback plan follows the ORGANIZATION, not a legacy role row", () => {
+  it.each([["worker"], ["agency"]])("a member whose profile_roles carry only %s, acting in an organization workspace with no subscription, resolves to ORGANIZATION FREE", async (role) => {
+    state.roles = [{ role }];
+    state.handler = () => ({ data: [] });
+    const ent = await getEffectiveEntitlements();
+    expect(ent.effectivePlanKey).toBe("free_organization");
+  });
+
+  it("the personal workspace of a worker-only profile keeps the PERSON plan", async () => {
+    state.roles = [{ role: "worker" }];
+    state.subject = personalSubject;
+    state.handler = () => ({ data: [] });
+    const ent = await getEffectiveEntitlements();
+    expect(ent.effectivePlanKey).toBe("free_worker");
+  });
+});
