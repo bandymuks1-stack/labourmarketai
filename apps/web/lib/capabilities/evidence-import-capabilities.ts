@@ -17,6 +17,8 @@ import {
   buildPreview,
   committableRows,
   commitImport,
+  correctRecord,
+  correctSessionDateProvenance,
   createImportSession,
   createRosterPerson,
   listEvidenceRecords,
@@ -30,6 +32,7 @@ import {
   type EvidenceImportFailure,
 } from "@/lib/organization-evidence/import-core";
 import { resolveEvidenceOrganization } from "@/lib/organization-evidence/evidence-org-context";
+import { correctionInputSchema } from "@/lib/organization-evidence/record-correction";
 import { fetchSourceFile } from "@/lib/organization-evidence/fetch-source-file";
 import { detectHeaderLanguage } from "@/lib/organization-evidence/parse-tabular";
 import { readEvidenceSourceFile } from "@/lib/organization-evidence/read-source-file";
@@ -825,7 +828,10 @@ const recordsList: CapabilityDescriptor = {
     "at import, are never among them — `derived.timeSemantics` says how such " +
     "a period came to be), and the DERIVED standing (reported / attested / self-attested / " +
     "independently verified / withdrawn). `independentlyVerified` is true ONLY " +
-    "for a real independent verification event; a self-attestation never counts.",
+    "for a real independent verification event; a self-attestation never counts. " +
+    "EFFECTIVE reading: a record replaced by a correction is not listed — its " +
+    "replacement is, and `correctionOf` names the record it replaced — so the " +
+    "same work is never counted twice.",
   exposed: true,
   annotations: readOnly,
   inputSchema: recordsListInput,
@@ -1085,6 +1091,249 @@ const importWithdrawConfirm: CapabilityDescriptor = {
   },
 };
 
+// ── evidence.record.correct / evidence.session.correct_date_provenance ────
+
+// Both correction writes are draft -> confirm pairs (the MCP write contract:
+// only `confirm` may write). The draft evaluates EVERY refusal the confirm
+// would (dry run) and writes nothing; the confirm re-checks the token against
+// the exact input and the correction's current state, then writes.
+
+const CORRECT_CONFIRM_ID = "evidence.record.correct_confirm";
+const correctConfirmInput = correctionInputSchema.and(z.object({ confirmationToken: z.string().min(10) }));
+
+function correctTokenInput(p: z.infer<typeof correctionInputSchema>): Record<string, unknown> {
+  return JSON.parse(JSON.stringify(p)) as Record<string, unknown>;
+}
+
+function correctFingerprint(
+  recordId: string,
+  changed: { readonly derived: readonly string[]; readonly columns: readonly string[] },
+): string {
+  return `correct:${recordId}:${[...changed.derived].sort().join(",")}:${[...changed.columns].sort().join(",")}`;
+}
+
+const recordCorrectDraft: CapabilityDescriptor = {
+  id: "evidence.record.correct_draft",
+  kind: "draft",
+  title: "Draft correcting a committed evidence record (insert-only)",
+  description:
+    "Previews correcting ONE committed record without touching it: the original is never " +
+    "edited or deleted. Confirming writes a replacement record (`correction_of` = the original, " +
+    "hash chained from it) and appends a `corrected` event (actor, reason, time, replacement) " +
+    "to the original. Only the CURRENT record of a chain can be corrected (A -> B -> C); every " +
+    "effective reading - hours, counts, timelines - counts only the leaf, so the work is " +
+    "never counted twice. `derivedPatch` adds or replaces DERIVED entries (each with method " +
+    "and confidence): this is how a field the source never stated stops being reported as a " +
+    "source FACT. `overrides` may restate the date/period, hours, object or place label; the " +
+    "person, work text and source line can never change. `carryAttestation` re-attests the " +
+    "replacement as the acting organization, only when the original's attestation stands and " +
+    "no content field changed. NOTHING is written by this step. Returns a one-time token; " +
+    `confirm with ${CORRECT_CONFIRM_ID}. Requires authority over the record's organization.`,
+  exposed: true,
+  annotations: readOnly,
+  inputSchema: correctionInputSchema,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = correctionInputSchema.parse(input);
+    const res = await correctRecord(caller, parsed, { dryRun: true });
+    if (res.kind !== "ok") return fail(res);
+    if (res.idempotent) {
+      return {
+        ok: false,
+        code: "already_corrected",
+        message: "This exact correction already exists. Nothing was written and no token was issued.",
+      };
+    }
+    const token = mintCapabilityConfirmation({
+      actionId: CORRECT_CONFIRM_ID,
+      input: correctTokenInput(parsed),
+      userId: caller.userId,
+      stateFingerprint: correctFingerprint(parsed.recordId, res.changed),
+    });
+    return {
+      ok: true,
+      data: {
+        preview: {
+          recordId: parsed.recordId,
+          changed: res.changed,
+          standing:
+            "Writes a replacement record and a `corrected` event; the original is unchanged and is marked corrected.",
+        },
+        confirmationToken: token,
+        note: `Nothing was written. Confirming requires ${CORRECT_CONFIRM_ID} with this exact input and token.`,
+      },
+    };
+  },
+};
+
+const recordCorrectConfirm: CapabilityDescriptor = {
+  id: CORRECT_CONFIRM_ID,
+  kind: "confirm",
+  title: "Confirm correcting the evidence record",
+  description:
+    "Verifies the one-time token against the exact drafted input, the caller and the " +
+    "correction's current state (a replay or a record that changed is refused), then writes " +
+    "the insert-only correction. Idempotent: repeating the same correction writes nothing new.",
+  exposed: true,
+  annotations: appendWrite,
+  inputSchema: correctConfirmInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const all = correctConfirmInput.parse(input) as z.infer<typeof correctionInputSchema> & {
+      confirmationToken: string;
+    };
+    const { confirmationToken, ...rest } = all;
+    const parsed = correctionInputSchema.parse(rest);
+    const pre = await correctRecord(caller, parsed, { dryRun: true });
+    if (pre.kind !== "ok") return fail(pre);
+    const verdict = verifyCapabilityConfirmation({
+      actionId: CORRECT_CONFIRM_ID,
+      token: confirmationToken,
+      input: correctTokenInput(parsed),
+      userId: caller.userId,
+      currentStateFingerprint: correctFingerprint(parsed.recordId, pre.changed),
+    });
+    if (!verdict.ok) {
+      return {
+        ok: false,
+        code: "confirmation_rejected",
+        message: `Confirmation token rejected (${verdict.reason}). The record changed since the draft, or the token was already used. Draft again.`,
+      };
+    }
+    const res = await correctRecord(caller, parsed);
+    if (res.kind !== "ok") return fail(res);
+    return {
+      ok: true,
+      data: {
+        recordId: res.recordId,
+        correctionOf: res.correctionOf,
+        eventId: res.eventId,
+        changed: res.changed,
+        attestationCarried: res.attestationCarried,
+        idempotent: res.idempotent,
+        note: res.idempotent
+          ? "This exact correction already existed; nothing new was written."
+          : "The original is unchanged and now marked corrected; the replacement is the record that stands.",
+      },
+    };
+  },
+};
+
+const sessionDatesInput = z
+  .object({
+    sessionId: z.uuid(),
+    reason: z.string().trim().min(3).max(1000),
+    /** Re-attest each replacement as the acting organization where the original's attestation stands. */
+    carryAttestation: z.boolean().optional(),
+  })
+  .strict();
+const SESSION_DATES_CONFIRM_ID = "evidence.session.correct_date_provenance_confirm";
+const sessionDatesConfirmInput = sessionDatesInput.extend({ confirmationToken: z.string().min(10) }).strict();
+
+function sessionDatesTokenInput(p: z.infer<typeof sessionDatesInput>): Record<string, unknown> {
+  return { sessionId: p.sessionId, reason: p.reason, carryAttestation: p.carryAttestation === true };
+}
+
+/** Bound to exactly what the sweep would act on right now. */
+function sessionDatesFingerprint(
+  sessionId: string,
+  r: { examined: number; candidates: number; alreadyClassified: number },
+): string {
+  return `datecorr:${sessionId}:${r.examined}:${r.candidates}:${r.alreadyClassified}`;
+}
+
+const sessionDatesCorrectDraft: CapabilityDescriptor = {
+  id: "evidence.session.correct_date_provenance_draft",
+  kind: "draft",
+  title: "Draft reclassifying reconstructed dates of an import session as DERIVED",
+  description:
+    "For one import session: counts every committed record whose OWN source line says its " +
+    "calendar date was reconstructed (year + week + weekday - the `Date provenance` column). " +
+    "Confirming corrects each through the insert-only correction so the date is recorded as " +
+    "DERIVED (`iso_week_weekday_reconstruction`, confidence 0.8), not as a stated source fact. " +
+    "A date the source explicitly stated stays a FACT, undated period records are untouched, " +
+    "and nothing is guessed: the rule re-reads what each line already said. NOTHING is " +
+    `written by this step. Returns a one-time token; confirm with ${SESSION_DATES_CONFIRM_ID}.`,
+  exposed: true,
+  annotations: readOnly,
+  inputSchema: sessionDatesInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = sessionDatesInput.parse(input);
+    const res = await correctSessionDateProvenance(caller, { ...parsed, apply: false });
+    if (res.kind !== "ok") return fail(res);
+    const token =
+      res.candidates > 0
+        ? mintCapabilityConfirmation({
+            actionId: SESSION_DATES_CONFIRM_ID,
+            input: sessionDatesTokenInput(parsed),
+            userId: caller.userId,
+            stateFingerprint: sessionDatesFingerprint(parsed.sessionId, res),
+          })
+        : null;
+    return {
+      ok: true,
+      data: {
+        preview: {
+          examined: res.examined,
+          candidates: res.candidates,
+          alreadyClassified: res.alreadyClassified,
+        },
+        confirmationToken: token,
+        note:
+          res.candidates > 0
+            ? `Nothing was written. Confirming requires ${SESSION_DATES_CONFIRM_ID} with this exact input and token.`
+            : "Nothing to reclassify; nothing was written and no token was issued.",
+      },
+    };
+  },
+};
+
+const sessionDatesCorrectConfirm: CapabilityDescriptor = {
+  id: SESSION_DATES_CONFIRM_ID,
+  kind: "confirm",
+  title: "Confirm reclassifying the session's reconstructed dates",
+  description:
+    "Verifies the one-time token against the exact drafted input, the caller and what the " +
+    "sweep would act on now (a replay or a changed session is refused), then writes the " +
+    "insert-only corrections; originals are unchanged. Idempotent and resumable: a record " +
+    "already classified is not a candidate again.",
+  exposed: true,
+  annotations: appendWrite,
+  inputSchema: sessionDatesConfirmInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const { confirmationToken, ...rest } = sessionDatesConfirmInput.parse(input);
+    const parsed = sessionDatesInput.parse(rest);
+    const pre = await correctSessionDateProvenance(caller, { ...parsed, apply: false });
+    if (pre.kind !== "ok") return fail(pre);
+    const verdict = verifyCapabilityConfirmation({
+      actionId: SESSION_DATES_CONFIRM_ID,
+      token: confirmationToken,
+      input: sessionDatesTokenInput(parsed),
+      userId: caller.userId,
+      currentStateFingerprint: sessionDatesFingerprint(parsed.sessionId, pre),
+    });
+    if (!verdict.ok) {
+      return {
+        ok: false,
+        code: "confirmation_rejected",
+        message: `Confirmation token rejected (${verdict.reason}). The session changed since the draft, or the token was already used. Draft again.`,
+      };
+    }
+    const res = await correctSessionDateProvenance(caller, { ...parsed, apply: true });
+    if (res.kind !== "ok") return fail(res);
+    return {
+      ok: true,
+      data: {
+        applied: res.applied,
+        examined: res.examined,
+        candidates: res.candidates,
+        corrected: res.corrected,
+        alreadyClassified: res.alreadyClassified,
+        failed: res.failed,
+        note: "Corrections written; originals unchanged. Read the session back with evidence.records.list.",
+      },
+    };
+  },
+};
+
 export const EVIDENCE_IMPORT_CAPABILITIES: readonly CapabilityDescriptor[] = [
   organizationResolve,
   peopleList,
@@ -1102,4 +1351,8 @@ export const EVIDENCE_IMPORT_CAPABILITIES: readonly CapabilityDescriptor[] = [
   recordAttestConfirm,
   importWithdrawDraft,
   importWithdrawConfirm,
+  recordCorrectDraft,
+  recordCorrectConfirm,
+  sessionDatesCorrectDraft,
+  sessionDatesCorrectConfirm,
 ];

@@ -169,7 +169,9 @@ export async function readEvidenceRecordsForWorker(
       events,
       person?.linked_profile_id ?? null,
     );
-    if (standing.withdrawn) continue;
+    // EFFECTIVE reading: a record a correction replaced is not counted (the
+    // replacement is), so the same work never appears twice.
+    if (standing.withdrawn || standing.superseded) continue;
     // One record is one row, however many embedded rows (parties, events) it
     // came back with: never counted twice.
     if (seen.has(r.id as string)) continue;
