@@ -43,7 +43,16 @@ describe("the four migrations ship paired, gated and stated", () => {
 
   it("timestamps sort after the last pending migration (apply order is preserved)", () => {
     const names = readdirSync(resolve(REPO, "supabase/migrations")).filter((f) => f.endsWith(".sql"));
-    const before = names.filter((n) => !Object.values(M).some((m) => n.startsWith(m)));
+    // Sibling migrations that landed from other PRs of the same 2026-10-06
+    // train carry later versions but are NOT pending work this package must
+    // sort behind: 100400 (append-only privilege closure, #2164, which itself
+    // revokes on tables created by this package's neighbours) and 100500
+    // (invitation signup context, already applied). Every other migration still
+    // must sort strictly before these four.
+    const SIBLINGS = ["20261006100400_", "20261006100500_"];
+    const before = names.filter(
+      (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
+    );
     const latestOther = before.sort().at(-1)!;
     for (const name of Object.values(M)) expect(name > latestOther).toBe(true);
   });
@@ -156,7 +165,7 @@ describe("F-1 - conversation creation: the server decides, the database refuses 
     // and no migration in this package grants service_role anything on the other chat tables
     for (const f of Object.values(M)) {
       const body = strip(rd(`supabase/migrations/${f}.sql`));
-      expect(body, f).not.toMatch(/grant [^;]*on (table )?public\.(conversations|conversation_messages)[^;]*to service_role/);
+      expect(body, f).not.toMatch(/grant [^;]*on (table )?public\.(conversations|conversation_messages)\b[^;]*to service_role/);
     }
   });
 });

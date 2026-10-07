@@ -1582,6 +1582,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261006100100_conversation_participants_server_authority_v1.sql",
       "20261006100200_employer_authority_not_self_asserted_v1.sql",
       "20261006100300_lmc_ledger_server_only_execute_v1.sql",
+      // 2026-10-06: append-only privilege closure (#2164) - REVOKE UPDATE/DELETE/TRUNCATE on evidence tables; marker is the risk acknowledgement, NOT approval; draft + needs-human-gate, NOT applied.
+      "20261006100400_append_only_privilege_closure_v1.sql",
       // 2026-10-06: service-role-only read of the invited address for the frictionless signup page - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261006100500_invitation_signup_context_v1.sql",
 ]);
