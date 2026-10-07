@@ -6108,7 +6108,8 @@
       "label": "Vykdomi arba užbaigti projektai",
       "active": "Vykdomi",
       "archived": "Užbaigti",
-      "empty": "Užbaigtų projektų dar nėra."
+      "empty": "Užbaigtų projektų dar nėra.",
+      "partial": "Rodoma naujausių {shown} iš {total}."
     }
   },
   "projectOps": {

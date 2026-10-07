@@ -1963,7 +1963,8 @@
       "label": "Aktive eller afsluttede projekter",
       "active": "Aktive",
       "archived": "Afsluttede",
-      "empty": "Ingen afsluttede projekter endnu."
+      "empty": "Ingen afsluttede projekter endnu.",
+      "partial": "Viser de seneste {shown} af {total}."
     }
   },
   "projectOps": {

@@ -6108,7 +6108,8 @@
       "label": "Aktywne lub zakończone projekty",
       "active": "Aktywne",
       "archived": "Zakończone",
-      "empty": "Nie ma jeszcze zakończonych projektów."
+      "empty": "Nie ma jeszcze zakończonych projektów.",
+      "partial": "Wyświetlono najnowsze {shown} z {total}."
     }
   },
   "projectOps": {

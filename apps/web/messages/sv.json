@@ -1963,7 +1963,8 @@
       "label": "Aktiva eller avslutade projekt",
       "active": "Aktiva",
       "archived": "Avslutade",
-      "empty": "Inga avslutade projekt ännu."
+      "empty": "Inga avslutade projekt ännu.",
+      "partial": "Visar de senaste {shown} av {total}."
     }
   },
   "projectOps": {
