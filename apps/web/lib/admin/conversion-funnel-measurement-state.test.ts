@@ -38,7 +38,6 @@ describe("funnel stage measurement state", () => {
     const keys = NOT_MEASURED_STAGES.map((s) => s.key as string);
     for (const k of [
       "commercial_value",
-      "trial_started",
       "paid_conversion",
       "retention_repeat_use",
     ]) {
@@ -99,6 +98,7 @@ describe("funnel-emitters v1 stage states", () => {
     FUNNEL_EVENTS.organizationHiringReady,
     FUNNEL_EVENTS.offerCreated,
     FUNNEL_EVENTS.subscriptionStarted,
+    FUNNEL_EVENTS.trialStarted,
     FUNNEL_EVENTS.subscriptionInvoicePaid,
     FUNNEL_EVENTS.returnVisitDetected,
   ];
@@ -115,12 +115,12 @@ describe("funnel-emitters v1 stage states", () => {
     expect(out.counts.find((c) => c.key === FUNNEL_EVENTS.offerCreated)).toMatchObject({ measurement: "measured", count: 2 });
   });
 
-  it("trial, paid conversion, retention and commercial value stay NOT measured", () => {
+  it("paid conversion, retention and commercial value stay NOT measured (trial now has an emitter)", () => {
     expect(NOT_MEASURED_STAGES.map((s) => s.key as string).sort()).toEqual(
-      ["commercial_value", "paid_conversion", "retention_repeat_use", "trial_started"],
+      ["commercial_value", "paid_conversion", "retention_repeat_use"],
     );
     const out = summariseFunnel([]);
-    for (const k of ["commercial_value", "trial_started", "paid_conversion", "retention_repeat_use"]) {
+    for (const k of ["commercial_value", "paid_conversion", "retention_repeat_use"]) {
       expect(out.counts.find((c) => c.key === k)).toMatchObject({ measurement: "not_measured", count: null });
     }
   });

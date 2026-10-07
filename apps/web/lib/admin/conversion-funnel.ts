@@ -124,6 +124,7 @@ export const FUNNEL_STAGES = [
   { key: FUNNEL_EVENTS.organizationHiringReady, label: "Organization hiring-ready (useful organization)" },
   { key: FUNNEL_EVENTS.offerCreated, label: "Offer created (listing or service offering)" },
   { key: FUNNEL_EVENTS.subscriptionStarted, label: "Subscription checkout completed (live mode)" },
+  { key: FUNNEL_EVENTS.trialStarted, label: "Trial started (live-mode subscription created as trialing)" },
   { key: FUNNEL_EVENTS.subscriptionInvoicePaid, label: "Subscription invoice paid (amount > 0, live mode)" },
   { key: FUNNEL_EVENTS.returnVisitDetected, label: "Return visit detected (same browser, later day)" },
 ] as const;
@@ -158,7 +159,6 @@ export type FunnelStageCount = {
  */
 export const NOT_MEASURED_STAGES = [
   { key: "commercial_value", label: "Commercial value", reasonKey: "commercialValue" },
-  { key: "trial_started", label: "Trial started", reasonKey: "trial" },
   { key: "paid_conversion", label: "Paid conversion", reasonKey: "paidConversion" },
   { key: "retention_repeat_use", label: "Retention / repeat use", reasonKey: "retention" },
 ] as const;

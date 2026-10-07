@@ -52,3 +52,24 @@ export function invoiceHadPayment(
 export function shouldEmitBillingFunnel(result: string, testMode: boolean): boolean {
   return result === "ok" && !testMode;
 }
+
+/**
+ * A trial START = a verified `customer.subscription.created` whose subscription
+ * is "trialing" and carries a numeric `trial_end`. Stripe sends `created` once
+ * per subscription, so this counts a trial once; later `updated` events (the
+ * trial ending, converting to active) never match. It is not a payment and it
+ * says nothing about conversion.
+ */
+export function isTrialStart(
+  eventType: string,
+  obj: Record<string, unknown> | null | undefined,
+): boolean {
+  if (eventType !== "customer.subscription.created") return false;
+  const trialEnd = obj?.["trial_end"];
+  return (
+    obj?.["status"] === "trialing" &&
+    typeof trialEnd === "number" &&
+    Number.isFinite(trialEnd) &&
+    trialEnd > 0
+  );
+}
