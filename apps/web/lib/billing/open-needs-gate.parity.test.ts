@@ -94,14 +94,14 @@ describe("gateOpenNeeds without a cookie session (bearer / MCP / mobile)", () =>
     expect(g.allowed).toBe(true);
   });
 
-  it("enforced + PAID organization: allowed up to 10, the 11th goes to the individual plan", async () => {
+  it("enforced + PAID organization: no numeric ceiling — 10, 11 and 500 active needs are all allowed", async () => {
     state.subsByOrg["org-1"] = [PAID];
-    state.activeNeeds = 9;
-    expect((await gateOpenNeeds(bearer(), "org-1", "u-1")).allowed).toBe(true);
-    state.activeNeeds = 10;
-    const g = await gateOpenNeeds(bearer(), "org-1", "u-1");
-    expect(g.allowed).toBe(false);
-    if (!g.allowed) expect(g.next).toBe("individual_plan");
+    for (const n of [9, 10, 11, 500]) {
+      state.activeNeeds = n;
+      const g = await gateOpenNeeds(bearer(), "org-1", "u-1");
+      expect(g.allowed, String(n)).toBe(true);
+      if (g.allowed) expect(g.limit).toBeNull();
+    }
   });
 
   it("cross-org: another organization's paid plan never entitles this organization", async () => {
@@ -112,15 +112,16 @@ describe("gateOpenNeeds without a cookie session (bearer / MCP / mobile)", () =>
     expect(state.orgFiltersSeen).toEqual(["org-1"]);
   });
 
-  it("an unreadable count fails closed once enforced", async () => {
-    state.subsByOrg["org-1"] = [PAID];
+  it("an unreadable count fails closed once enforced for a metered plan; an unmetered plan is never counted", async () => {
     state.needsReadFails = true;
-    expect((await gateOpenNeeds(bearer(), "org-1", "u-1")).allowed).toBe(false);
+    expect((await gateOpenNeeds(bearer(), "org-1", "u-1")).allowed).toBe(false); // FREE, metered
+    state.subsByOrg["org-1"] = [PAID];
+    expect((await gateOpenNeeds(bearer(), "org-1", "u-1")).allowed).toBe(true); // unmetered
   });
 
   it("parity: a web caller (cookie user present) and a bearer caller get the SAME verdict for the same organization", async () => {
     state.subsByOrg["org-1"] = [PAID];
-    state.activeNeeds = 10;
+    state.activeNeeds = 25;
     const bearerVerdict = await gateOpenNeeds(bearer(), "org-1", "u-1");
     state.cookieUser = { id: "u-1" };
     const webVerdict = await gateOpenNeeds(client("user") as never, "org-1", "u-1");

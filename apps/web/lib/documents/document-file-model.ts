@@ -410,6 +410,7 @@ export type DocumentEngineNotice =
   | "not_found"
   | "limit_reached"
   | "version_limit_reached"
+  | "storage_quota_exceeded"
   | "path_mismatch"
   | "file_too_large"
   | "unsupported_type"
@@ -439,6 +440,7 @@ const PASSTHROUGH_OUTCOMES: readonly DocumentEngineNotice[] = [
   "not_found",
   "limit_reached",
   "version_limit_reached",
+  "storage_quota_exceeded",
   "path_mismatch",
   "file_too_large",
   "unsupported_type",

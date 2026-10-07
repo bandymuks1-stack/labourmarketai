@@ -222,11 +222,11 @@
           "done": "[EN] Saved. Your need is now visible in your space.",
           "error": "[EN] Couldn't send. Please try again.",
           "progressHelper": "[EN] These steps show progress. Active actions are shown below.",
-          "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
-          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
-          "openNeedUsage": "Active positions: {used} of {limit} used · {remaining} remaining",
-          "openNeedUsageUpgradeCta": "Activate the Organization plan",
-          "openNeedUsageIndividual": "You have reached the Organization plan limit. For more than the included positions, contact us for an individual plan."
+          "errorOpenNeedLimitUpgrade": "Selle organisatsiooni tasuta plaan lubab 1 aktiivse ametikoha. Sulge üks või aktiveeri plaan „Organisatsioon“ (99 €/kuu) organisatsiooni kontol.",
+          "errorOpenNeedLimitIndividual": "See organisatsioon on saavutanud oma plaani aktiivsete ametikohtade piiri. Midagi ei võetud ega muudetud. Võta meiega ühendust.",
+          "openNeedUsage": "Aktiivsed ametikohad: kasutatud {used} / {limit} · jäänud {remaining}",
+          "openNeedUsageUpgradeCta": "Aktiveeri plaan „Organisatsioon“",
+          "openNeedUsageIndividual": "Oled jõudnud oma plaani piirini. Võta meiega ühendust, et oma vajadusi arutada."
         }
       },
       "account": {
@@ -998,25 +998,25 @@
     "eyebrow": "[EN] Pricing",
     "faq": [
       {
-        "q": "Why only one paid plan?",
-        "a": "Every organization — employer, staffing provider, contractor or training provider — gets the same product. What changes is scale: 1 active position free, up to 10 for €99/month, and an individual plan above that."
+        "q": "Miks on ainult üks tasuline plaan?",
+        "a": "Iga organisatsioon — tööandja, personaliteenuse pakkuja, töövõtja või koolitaja — saab sama toote. Muutub vaid maht: 1 aktiivne ametikoht tasuta ja hinnaga 99 €/kuu pole aktiivsetel ametikohtadel kindlat piiri."
       },
       {
-        "q": "Will the Free tier stay free?",
-        "a": "Yes. Persons stay free, and an organization can run one active position at no cost."
+        "q": "Kas Tasuta tase jääb tasuta?",
+        "a": "Jah. Isikud jäävad tasuta ning organisatsioon saab pidada ühte aktiivset ametikohta tasuta."
       },
       {
-        "q": "How is billing handled?",
-        "a": "Card payment through Stripe with VAT applied by Stripe Tax; invoices, cancellation and changes live in your organization account."
+        "q": "Kuidas arveldus toimib?",
+        "a": "Kaardimakse Stripe'i kaudu, käibemaksu lisab Stripe Tax; arved, tühistamine ja muudatused on sinu organisatsiooni kontol."
       },
       {
-        "q": "What happens above 10 active positions?",
-        "a": "Nothing is charged or upgraded automatically. You are asked to contact us and an individual plan is agreed."
+        "q": "Kas aktiivsetel ametikohtadel on piir?",
+        "a": "Tasuta plaan sisaldab 1 aktiivset ametikohta. Plaanil „Organisatsioon“ pole aktiivsetele ametikohtadele kindlat piiri. Tavapärased kuritarvitamise vastased kaitsemeetmed, näiteks päringute piirangud, kehtivad endiselt."
       }
     ],
     "faqTitle": "[EN] Pricing FAQ",
     "featuresLabel": "[EN] Includes",
-    "planCta": "[EN] Join the waitlist for this plan",
+    "planCta": "Liitu selle plaani ootenimekirjaga",
     "plans": {
       "agency": {
         "features": [
@@ -1032,10 +1032,10 @@
         "name": "Organization",
         "tagline": "For organizations actively hiring and building teams",
         "features": [
-          "Up to 10 active positions",
-          "Everything in Free, at operating scale",
-          "One plan for every organization capability",
-          "Project operations, readiness, reports and CSV"
+          "Aktiivsete ametikohtade arvul pole kindlat piiri",
+          "Kõik Tasuta plaanist, tööskaalas",
+          "Üks plaan igat liiki organisatsioonile",
+          "Projektitöö, aruanded ja CSV-eksport"
         ]
       },
       "enterprise": {
@@ -1060,22 +1060,24 @@
       }
     },
     "subcopyLive": "Hinnad on omaniku kinnitatud ja kehtivad. Aktiveerimine toimub organisatsiooni kontol turvalise Stripe'i makse kaudu; sellel lehel midagi ei võeta.",
-    "subcopy": "[EN] Prices are not finalised yet and billing is never started for you on this page. The tiers below describe scope; activation is manual — reach out and we'll confirm pricing and scope with you before anything starts.",
+    "subcopy": "Hinnad ei ole veel lõplikud ning arveldust ei käivitata sinu eest sellel lehel. Allolevad tasemed kirjeldavad mahtu; aktiveerimine on käsitsi — võta ühendust ning kinnitame hinna ja mahu enne igasugust alustamist.",
+    "subcopyConfirmed": "Hinnad on kinnitatud. Veebipõhine aktiveerimine ei ole veel avatud — liitu ootenimekirjaga, võtame ühendust ja käivitame organisatsiooni käsitsi; sellel lehel midagi ei võeta.",
+    "trialNote": "Organisatsiooni esimene tellimus algab 14-päevase prooviperioodiga. Pärast seda võetakse kaardilt kuuhind; tühistada saab enne prooviperioodi lõppu.",
     "title": "[EN] Simple tiers,",
     "titleAccent": "[EN] set fairly.",
     "individual": {
-      "name": "Individual plan",
-      "tagline": "For more than 10 active positions",
-      "question": "Need more?",
-      "body": "Contact us for an individual plan — requirements, scale and commercial terms are agreed together. No automatic tier, no published price.",
+      "name": "Erinõuded",
+      "tagline": "Vajadustele, mis ületavad tavaplaane",
+      "question": "Mõtled midagi konkreetset?",
+      "body": "Võta meiega ühendust, kui sul on erinõudeid — lepime need koos kokku. Ei mingit automaatset taset, ei mingit avaldatud hinda.",
       "cta": "Contact us"
     },
     "priceFree": "€0",
     "pricePerMonth": "€{price}/month",
     "ctaStartFree": "Start free in your organization account",
-    "ctaSubscribe": "Activate in your organization account",
+    "ctaSubscribe": "Aktiveeri organisatsiooni kontol",
     "priceState": {
-      "owner_confirmed": "Prices confirmed by the owner. Activation happens in your organization account; nothing is charged on this page."
+      "owner_confirmed": "Hinnad on omaniku kinnitatud. Aktiveerimine toimub organisatsiooni kontol; sellel lehel midagi ei võeta."
     }
   },
   "secondary": {
@@ -2429,8 +2431,8 @@
       "reopen": "[EN] Reopen this need",
       "closedNote": "[EN] Closed — hidden from workers.",
       "error": "[EN] Could not save. Try again.",
-      "limitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
-      "limitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
+      "limitUpgrade": "Selle organisatsiooni tasuta plaan lubab 1 aktiivse ametikoha. Sulge üks või aktiveeri plaan „Organisatsioon“ (99 €/kuu) organisatsiooni kontol.",
+      "limitIndividual": "See organisatsioon on saavutanud oma plaani aktiivsete ametikohtade piiri. Midagi ei võetud ega muudetud. Võta meiega ühendust.",
       "closedCandidatesHistory": "[EN] This need is closed. Below is who was compared and what was decided while it was open — history, not an action list. Reopen the need to assess candidates again."
     },
     "verdict": {
@@ -3834,8 +3836,8 @@
         "errorInvalid": "[EN] Please check the fields and try again.",
         "errorNeedsMigration": "[EN] This isn't enabled yet. Please try later.",
         "errorConflict": "[EN] This value already differs. Open advanced mode to replace it.",
-        "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
-        "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
+        "errorOpenNeedLimitUpgrade": "Selle organisatsiooni tasuta plaan lubab 1 aktiivse ametikoha. Sulge üks või aktiveeri plaan „Organisatsioon“ (99 €/kuu) organisatsiooni kontol.",
+        "errorOpenNeedLimitIndividual": "See organisatsioon on saavutanud oma plaani aktiivsete ametikohtade piiri. Midagi ei võetud ega muudetud. Võta meiega ühendust."
       },
       "urgency": {
         "flexible": "Paindlik",
@@ -5477,6 +5479,7 @@
       "not_found": "[EN] That document was not found.",
       "limit_reached": "[EN] The document list limit was reached.",
       "version_limit_reached": "[EN] This document reached its version limit.",
+      "storage_quota_exceeded": "Teie organisatsiooni salvestuspiir (2 GB) on täis. Eemaldage vanu faile või võtke ühendust toega, enne kui laadite üles juurde.",
       "path_mismatch": "[EN] The upload could not be verified — nothing was saved. Please try again.",
       "file_too_large": "[EN] The file is larger than 5 MB — nothing was saved.",
       "unsupported_type": "[EN] This file type is not supported — use PDF, Word or a photo.",
@@ -5506,7 +5509,8 @@
       "org_correspondence_incoming": "[EN] Incoming correspondence",
       "org_correspondence_outgoing": "[EN] Outgoing correspondence",
       "org_internal": "[EN] Internal document",
-      "org_agreement_attachment": "[EN] Agreement attachment"
+      "org_agreement_attachment": "[EN] Agreement attachment",
+      "org_import_source": "[EN] Import source (original timesheet file)"
     },
     "status": {
       "active": "[EN] Active",

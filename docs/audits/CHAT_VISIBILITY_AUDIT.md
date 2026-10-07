@@ -440,3 +440,13 @@ audit.
   the worker's own `<profile_id>/` folder. No table read with the key, no
   chat table, no write, nothing public; any failure → the initials
   monogram. Pinned in the `chat-visibility-rls.test.ts` caller inventory.
+
+- **2026-10-06 - `lib/email/send-ledger-store.ts`** (durable outbound-email
+  cost guardrail, migration `20261006130000_email_send_ledger_v1`, RED,
+  owner-gated). The service key is used for ONE operation only - the
+  `reserve_email_send_v1` RPC, executable by `service_role` alone, which
+  atomically counts and records a hashed recipient + organization id +
+  timestamp in `email_send_ledger_v1` (RLS on, no policy, no client grant).
+  No chat table, no other table, no raw address/subject/body stored, nothing
+  sent by this module's reserve step. Pinned in the
+  `chat-visibility-rls.test.ts` caller inventory.

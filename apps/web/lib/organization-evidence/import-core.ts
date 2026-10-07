@@ -26,6 +26,12 @@ import {
 import { chainHash, recordFingerprint } from "./fingerprint";
 import { splitAddress } from "./address-split";
 import {
+  buildCorrection,
+  correctionInputSchema,
+  reconstructedDatePatch,
+  type CorrectionInput,
+} from "./record-correction";
+import {
   deriveImportSessionStatus,
   type ImportSessionEvent,
   type ImportSessionStatus,
@@ -2998,7 +3004,8 @@ export async function attestSessionRecords(
   const read = await readSessionRecords(store, input.sessionId);
   if (!read.ok) return read.failure;
   const records = read.value.map((r) => ({ id: r.id, supplierRole: r.supplier_role, ...standingOf(r) }));
-  const pending = records.filter((r) => !r.withdrawn && r.attestation === null);
+  // A superseded record is never attested: its replacement is the record that stands.
+  const pending = records.filter((r) => !r.withdrawn && !r.superseded && r.attestation === null);
   const skipped = records.length - pending.length;
   if (pending.length === 0) return { kind: "ok", attested: 0, skipped };
 
@@ -3019,6 +3026,297 @@ export async function attestSessionRecords(
   // The attestation events ARE the audit trail (actor, role, note, time on
   // every record); no session event is borrowed for it.
   return { kind: "ok", attested: res.data.length, skipped };
+}
+
+// ── correction (non-destructive) ────────────────────────────────────────────
+
+export interface CorrectRecordResult {
+  /** The record that now stands (the replacement, or the earlier one on a repeat). */
+  readonly recordId: string;
+  readonly correctionOf: string;
+  readonly eventId: string | null;
+  readonly attestationCarried: boolean;
+  /** True when this exact correction already existed: nothing new was written. */
+  readonly idempotent: boolean;
+  readonly changed: { readonly derived: readonly string[]; readonly columns: readonly string[] };
+}
+
+/** The current record of a chain: follow `correction_of` pointers forward. */
+async function chainLeafOf(store: EvidenceStore, recordId: string): Promise<string> {
+  let current = recordId;
+  for (let hops = 0; hops < 50; hops += 1) {
+    const next = await store.readCorrectionOf(current);
+    if (next.error || !next.data) return current;
+    current = next.data.id as string;
+  }
+  return current;
+}
+
+function lifecycleOf(rows: readonly StoreRow[]): RecordLifecycleEvent[] {
+  return rows.map(
+    (e): RecordLifecycleEvent => ({
+      eventType: e.event_type as RecordLifecycleEvent["eventType"],
+      actorRole: (e.actor_role as string | null) ?? null,
+      createdAt: (e.created_at as string | null) ?? null,
+      actorProfileId: (e.actor_profile_id as string | null) ?? null,
+    }),
+  );
+}
+
+/**
+ * CORRECT one committed record — INSERT-only. The original is never edited or
+ * deleted: a replacement record is written (`correction_of` = the original) and
+ * a `corrected` event (actor, reason, time, `replacement_record_id`) is appended
+ * to the original. Authority is the existing INSERT policies (manages the
+ * organization; the actor is the caller) — RLS refuses everyone else.
+ *
+ *   · only the CURRENT record of a chain can be corrected (A -> B -> C);
+ *   · a withdrawn record is reinstated first, never corrected around;
+ *   · IDEMPOTENT: the same correction of the same record resolves to the record
+ *     it already wrote, and completes a missing `corrected` event if a previous
+ *     attempt stopped between its two appends;
+ *   · `carryAttestation` re-attests the replacement as the ACTING organization
+ *     only when the original's attestation stands and nothing but a derived
+ *     classification changed.
+ */
+export async function correctRecord(
+  caller: EvidenceCaller,
+  rawInput: CorrectionInput,
+  opts: { readonly dryRun?: boolean } = {},
+): Promise<EvidenceImportResult<CorrectRecordResult>> {
+  const parsed = correctionInputSchema.safeParse(rawInput);
+  if (!parsed.success) {
+    return { kind: "invalid", problems: parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`) };
+  }
+  const input = parsed.data;
+  const store = storeOf(caller);
+
+  const rec = await store.readRecordFull(input.recordId);
+  if (rec.error) return classify(rec.error);
+  if (!rec.data) return { kind: "not-found" };
+  const original = rec.data;
+
+  const atIso = new Date().toISOString();
+  const built = buildCorrection(original, input, { actorProfileId: store.userId, atIso });
+  if (!built.ok) return { kind: "invalid", problems: built.problems };
+
+  const existing = await store.readCorrectionOf(input.recordId);
+  if (existing.error) return classify(existing.error);
+  const events = await store.readRecordEvents(input.recordId);
+  if (events.error) return classify(events.error);
+  const standing = deriveEvidenceStanding(original.evidence_state as ReportedEvidenceState, lifecycleOf(events.data));
+
+  if (existing.data) {
+    if ((existing.data.record_fingerprint as string) === built.fingerprint) {
+      // The same correction, already written. Complete the audit event if an
+      // earlier attempt stopped before appending it; write nothing else.
+      const replacementId = existing.data.id as string;
+      const hasEvent = events.data.some(
+        (e) => e.event_type === "corrected" && e.replacement_record_id === replacementId,
+      );
+      let eventId: string | null = null;
+      if (!hasEvent && !opts.dryRun) {
+        const ev = await appendCorrectedEvent(store, original, replacementId, input.reason);
+        if (ev.kind !== "ok") return ev;
+        eventId = ev.eventId;
+      }
+      return {
+        kind: "ok",
+        recordId: replacementId,
+        correctionOf: input.recordId,
+        eventId,
+        attestationCarried: false,
+        idempotent: true,
+        changed: built.changed,
+      };
+    }
+    const leaf = await chainLeafOf(store, input.recordId);
+    return {
+      kind: "invalid",
+      problems: [`this record was already corrected; correct the current record of the chain instead (${leaf})`],
+    };
+  }
+  if (standing.superseded) {
+    return { kind: "invalid", problems: ["this record is marked corrected but its replacement cannot be found; nothing was written"] };
+  }
+  if (standing.withdrawn) {
+    return { kind: "invalid", problems: ["this record is withdrawn; reinstate it before correcting it"] };
+  }
+
+  const carry = input.carryAttestation === true;
+  if (carry) {
+    if (built.changed.columns.length > 0) {
+      return { kind: "invalid", problems: ["an attestation cannot be carried across a change to the record's content"] };
+    }
+    if (!standing.attestation) {
+      return { kind: "invalid", problems: ["there is no standing attestation to carry"] };
+    }
+  }
+
+  // A DRY RUN stops here: every refusal above has been evaluated, nothing is
+  // written. This is what the draft step of the draft -> confirm pair previews.
+  if (opts.dryRun) {
+    return {
+      kind: "ok",
+      recordId: input.recordId,
+      correctionOf: input.recordId,
+      eventId: null,
+      attestationCarried: false,
+      idempotent: false,
+      changed: built.changed,
+    };
+  }
+
+  const ins = await store.insertRecords([built.row]);
+  if (ins.error) {
+    if (ins.error.code === "42501") return { kind: "not-authorized", reason: "not-authorized" };
+    return classify(ins.error);
+  }
+  const replacementId = ins.data[0]?.id;
+  if (!replacementId) return { kind: "error" };
+
+  const ev = await appendCorrectedEvent(store, original, replacementId, input.reason);
+  if (ev.kind !== "ok") return ev;
+
+  let attestationCarried = false;
+  if (carry) {
+    const attest = await store.insertRecordEvents([
+      {
+        organization_id: original.organization_id as string,
+        record_id: replacementId,
+        event_type: "attested",
+        actor_role: original.supplier_role as string,
+        actor_organization_id: original.organization_id as string,
+        actor_profile_id: store.userId,
+        note: `Carried across a correction of ${input.recordId} that changed only the derived classification (${built.changed.derived.join(", ")}). Reason: ${input.reason}`.slice(0, 1000),
+      },
+    ]);
+    if (attest.error) {
+      if (attest.error.code === "42501") return { kind: "not-authorized", reason: "not-authorized" };
+      return classify(attest.error);
+    }
+    attestationCarried = true;
+  }
+
+  return {
+    kind: "ok",
+    recordId: replacementId,
+    correctionOf: input.recordId,
+    eventId: ev.eventId,
+    attestationCarried,
+    idempotent: false,
+    changed: built.changed,
+  };
+}
+
+async function appendCorrectedEvent(
+  store: EvidenceStore,
+  original: StoreRow,
+  replacementId: string,
+  reason: string,
+): Promise<{ kind: "ok"; eventId: string } | EvidenceImportFailure> {
+  const res = await store.insertRecordEvents([
+    {
+      organization_id: original.organization_id as string,
+      record_id: original.id as string,
+      event_type: "corrected",
+      actor_role: null,
+      actor_organization_id: null,
+      actor_profile_id: store.userId,
+      replacement_record_id: replacementId,
+      note: reason,
+    },
+  ]);
+  if (res.error) {
+    if (res.error.code === "42501") return { kind: "not-authorized", reason: "not-authorized" };
+    return classify(res.error);
+  }
+  const id = res.data[0]?.id;
+  return id ? { kind: "ok", eventId: id } : { kind: "error" };
+}
+
+export interface CorrectSessionDatesResult {
+  readonly examined: number;
+  /** Records whose own source line declares the date reconstructed. */
+  readonly candidates: number;
+  /** Corrections written by THIS call (0 in a dry run). */
+  readonly corrected: number;
+  /** Records already carrying the derived classification. */
+  readonly alreadyClassified: number;
+  readonly failed: readonly { readonly recordId: string; readonly problem: string }[];
+  readonly applied: boolean;
+}
+
+/**
+ * Reclassify, for one import session, every record whose OWN source line says
+ * its calendar date was reconstructed (year + week + weekday) as a DERIVED
+ * date — by the correction writer, one replacement per record, never by editing
+ * a record. A dry run (the default) only counts. Idempotent: a record already
+ * carrying `derived.workDate` is not a candidate again.
+ */
+export async function correctSessionDateProvenance(
+  caller: EvidenceCaller,
+  input: {
+    readonly sessionId: string;
+    readonly reason: string;
+    readonly carryAttestation?: boolean;
+    readonly apply?: boolean;
+  },
+): Promise<EvidenceImportResult<CorrectSessionDatesResult>> {
+  const store = storeOf(caller);
+  const session = await loadSession(store, input.sessionId);
+  if (!session.ok) return session.failure;
+  const read = await readSessionRecords(store, input.sessionId);
+  if (!read.ok) return read.failure;
+
+  let examined = 0;
+  let alreadyClassified = 0;
+  let corrected = 0;
+  const failed: { recordId: string; problem: string }[] = [];
+  const candidates: { id: string; patch: NonNullable<ReturnType<typeof reconstructedDatePatch>> }[] = [];
+
+  for (const r of read.value) {
+    const standing = standingOf(r);
+    if (standing.superseded || standing.withdrawn) continue;
+    examined += 1;
+    const full = await store.readRecordFull(r.id);
+    if (full.error) return classify(full.error);
+    if (!full.data) continue;
+    const derived = (full.data.derived as Record<string, unknown> | null) ?? {};
+    const patch = reconstructedDatePatch({
+      activityDate: (full.data.activity_date as string | null) ?? null,
+      sourceFact: (full.data.source_fact as Record<string, unknown> | null) ?? null,
+      derived,
+    });
+    if (patch) candidates.push({ id: r.id, patch });
+    else if ((derived.workDate as { method?: string } | undefined)?.method === "iso_week_weekday_reconstruction") {
+      alreadyClassified += 1;
+    }
+  }
+
+  if (input.apply === true) {
+    for (const c of candidates) {
+      const res = await correctRecord(store, {
+        recordId: c.id,
+        reason: input.reason,
+        derivedPatch: c.patch,
+        carryAttestation: input.carryAttestation === true,
+      });
+      if (res.kind === "ok") corrected += res.idempotent ? 0 : 1;
+      else if (res.kind === "not-authorized") return res;
+      else failed.push({ recordId: c.id, problem: res.kind === "invalid" ? res.problems.join("; ") : res.kind });
+    }
+  }
+
+  return {
+    kind: "ok",
+    examined,
+    candidates: candidates.length,
+    corrected,
+    alreadyClassified,
+    failed,
+    applied: input.apply === true,
+  };
 }
 
 // ── performing-company attribution ──────────────────────────────────────────
@@ -3165,6 +3463,10 @@ export interface EvidenceRecordView {
   /** The DERIVED standing — base state composed with the append-only events. */
   readonly state: string;
   readonly withdrawn: boolean;
+  /** A correcting record replaced this one; effective readings skip it. */
+  readonly superseded: boolean;
+  /** The record this one corrects, when it is a correction. */
+  readonly correctionOf: string | null;
   readonly attestation: {
     readonly role: string | null;
     readonly at: string | null;
@@ -3230,6 +3532,12 @@ export async function listEvidenceRecords(
     /** Exactly these records (e.g. the ones attributed to an organization). */
     readonly recordIds?: readonly string[] | null;
     readonly limit?: number;
+    /**
+     * EFFECTIVE reading is the default: a record replaced by a correction is
+     * left out, so the same work is never counted twice. Pass true to read the
+     * whole chain (audit views, the correction writer's own read-back).
+     */
+    readonly includeSuperseded?: boolean;
     /** Rows to skip — PAGINATION. The server answers at most 1000 rows per
      *  request, so a reader that needs more pages with `offset` (see
      *  `listAllEvidenceRecords`); it never raises `limit` and hopes. */
@@ -3250,7 +3558,7 @@ export async function listEvidenceRecords(
   let q = db(caller.supabase)
     .from("organization_evidence_records")
     .select(
-      "id, organization_person_id, activity_kind, activity_date, period_start, period_end, hours, original_text, original_language, context_label, work_object_id, project_id, supplied_by_organization_id, row_origin, supplier_role, source_kind, source_filename, imported_at, imported_by_profile_id, evidence_state, source_fact, derived, organization_id, organization_people(display_name, linked_profile_id, relationship_kind), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at), organization_evidence_parties!organization_evidence_parties_record_fk(party_role, party_organization_id, party_label)",
+      "id, organization_person_id, activity_kind, activity_date, period_start, period_end, hours, original_text, original_language, context_label, work_object_id, project_id, supplied_by_organization_id, row_origin, supplier_role, source_kind, source_filename, imported_at, imported_by_profile_id, evidence_state, correction_of, source_fact, derived, organization_id, organization_people(display_name, linked_profile_id, relationship_kind), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at), organization_evidence_parties!organization_evidence_parties_record_fk(party_role, party_organization_id, party_label)",
     )
     .order("activity_date", { ascending: false })
     // A TOTAL order: pages over a non-unique sort key repeat or skip rows.
@@ -3347,6 +3655,8 @@ export async function listEvidenceRecords(
       derived: (r.derived as Record<string, unknown> | null) ?? {},
       state: standing.state,
       withdrawn: standing.withdrawn,
+      superseded: standing.superseded,
+      correctionOf: (r.correction_of as string | null) ?? null,
       attestation: standing.attestation
         ? {
             role: standing.attestation.role,
@@ -3368,7 +3678,10 @@ export async function listEvidenceRecords(
     } satisfies EvidenceRecordView;
   });
 
-  return { kind: "ok", records };
+  return {
+    kind: "ok",
+    records: filter.includeSuperseded ? records : records.filter((r) => !r.superseded),
+  };
 }
 
 // ── the organization's own imports ──────────────────────────────────────────

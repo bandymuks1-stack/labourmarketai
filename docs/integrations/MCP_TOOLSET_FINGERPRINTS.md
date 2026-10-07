@@ -18,6 +18,7 @@ equals the version the tree publishes.
 
 | Fingerprint | Tools | Release | What changed |
 |---|---|---|---|
+| `0.1.0+t81.1f8f7db4` | 81 | RED tiers A2-G release | the t77 toolset plus the correction writer (#2016): +evidence_record_correct_draft/confirm, evidence_session_correct_date_provenance_draft/confirm (insert-only correction chain; draft->confirm, so no single-step write is added). The other release branches add no MCP tool. |
 | `0.1.0+t77.330fc344` | 77 | integration refresh (merge of main into integration/local-qa-2026-10-04) | the t76 integrated toolset (#2143 + #2146 + #2149) plus +evidence_import_stage_file (#2012, the file-import tool published on main as t63). The voice-provenance input field (t63.f2d9c2d1) adds no tool. |
 | `0.1.0+t76.be37fbb5` | 76 | integration (#2143 + #2146 + #2149) | combined toolset of three lanes, each of which published its own row against the 62-tool base: +6 counterparty_review_* (#2143), +2 assignment_keep_draft/confirm (#2146), +6 team_assignment_create/replace/end draft/confirm (#2149). The three lane rows below are kept as their history; this row is the version the integrated tree publishes. |
 | `0.1.0+t68.7bcb01a2` | 68 | #2143 | +counterparty_review_queue_get, counterparty_review_entry_get, counterparty_review_decide_draft/confirm (accept / request correction / dispute; note required), counterparty_review_submit_draft/confirm (decision 0018; client acceptance is never an employer confirmation) |

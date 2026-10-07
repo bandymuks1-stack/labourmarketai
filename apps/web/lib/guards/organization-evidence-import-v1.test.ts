@@ -341,6 +341,10 @@ describe("the capabilities are registered, honest and complete", () => {
       "evidence.record.attest_confirm",
       "evidence.import.withdraw_draft",
       "evidence.import.withdraw_confirm",
+      "evidence.record.correct_draft",
+      "evidence.record.correct_confirm",
+      "evidence.session.correct_date_provenance_draft",
+      "evidence.session.correct_date_provenance_confirm",
     ]);
   });
 

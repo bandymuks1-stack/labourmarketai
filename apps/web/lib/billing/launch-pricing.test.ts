@@ -9,7 +9,6 @@ import { resolveEntitlements, entitlementAllows } from "./entitlements-v1";
 import {
   DEFERRED_PLAN_KEYS,
   FREE_ORGANIZATION_PLAN_KEY,
-  OPEN_NEEDS_CONTACT_THRESHOLD,
   ORGANIZATION_PLAN_KEY,
   PRE_PAYMENT_PLANS,
   defaultPlanFor,
@@ -21,8 +20,9 @@ import { PRICING_READINESS_STATE } from "./readiness";
 /**
  * OWNER LAUNCH PRICING (approved 2026-09-05, corrected the same day):
  *   PERSON €0 · ORGANIZATION FREE €0 (1 active position) · ORGANIZATION
- *   €99/month (up to 10) · above 10 = individual plan (contact), never an
- *   automatic tier or a silent charge. One organization subscription for
+ *   €99/month (NO fixed limit on active positions - owner decision
+ *   2026-10-06; the former ten-position ceiling is removed and replaced by no
+ *   other cap). One organization subscription for
  *   every capability. Deferred: ai_plus, vip_media, agency tiers, LMC
  *   top-ups, visibility / media / annual / enterprise / institution pricing.
  */
@@ -50,11 +50,13 @@ describe("the registry IS the approved launch table (limits, not figures)", () =
     expect(defaultPlanFor("agency").slug).toBe(FREE_ORGANIZATION_PLAN_KEY); // no role tunnel
   });
 
-  it("ORGANIZATION (€99): the ONE sellable plan, up to 10 active positions, the same capabilities; the figure is NOT here", () => {
+  it("ORGANIZATION (€99): the ONE sellable plan, NO numeric active-position limit, the same capabilities; the figure is NOT here", () => {
     const p = getPlan(ORGANIZATION_PLAN_KEY)!;
     expect(isSellablePlan(p)).toBe(true);
-    expect(limitFor(p, "company_create_needs")).toBe(10);
-    expect(OPEN_NEEDS_CONTACT_THRESHOLD).toBe(10);
+    // included (boolean true) and deliberately unmetered: no numeric ceiling
+    expect(limitFor(p, "company_create_needs")).toBeNull();
+    expect(planIncludes(p, "company_create_needs")).toBe(true);
+    expect(read("lib/billing/plans.ts")).not.toMatch(/OPEN_NEEDS_CONTACT_THRESHOLD/);
     expect(PRE_PAYMENT_PLANS.filter(isSellablePlan).map((x) => x.slug)).toEqual([ORGANIZATION_PLAN_KEY]);
     expect(/99/.test(read("lib/billing/plans.ts").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, ""))).toBe(false);
   });
@@ -73,10 +75,10 @@ describe("the registry IS the approved launch table (limits, not figures)", () =
 
 describe("cancellation / subscription state → access (enforced)", () => {
   const base = { billingActive: true, isAdmin: false, audience: "company" as const, subscriptionPlanKey: null, subscriptionStatus: null, manualOverridePlanKey: null };
-  it("active → 10; past_due (grace) → still 10; cancelled / unpaid / none → FREE (1)", () => {
+  it("active → unmetered; past_due (grace) → still unmetered; cancelled / unpaid / none → FREE (1)", () => {
     const limit = (c: ReturnType<typeof resolveEntitlements>) => limitFor(getPlan(c.effectivePlanKey)!, "company_create_needs");
-    expect(limit(resolveEntitlements({ ...base, subscriptionPlanKey: ORGANIZATION_PLAN_KEY, subscriptionStatus: "active" }))).toBe(10);
-    expect(limit(resolveEntitlements({ ...base, subscriptionPlanKey: ORGANIZATION_PLAN_KEY, subscriptionStatus: "past_due" }))).toBe(10);
+    expect(limit(resolveEntitlements({ ...base, subscriptionPlanKey: ORGANIZATION_PLAN_KEY, subscriptionStatus: "active" }))).toBeNull();
+    expect(limit(resolveEntitlements({ ...base, subscriptionPlanKey: ORGANIZATION_PLAN_KEY, subscriptionStatus: "past_due" }))).toBeNull();
     expect(limit(resolveEntitlements({ ...base, subscriptionPlanKey: ORGANIZATION_PLAN_KEY, subscriptionStatus: "cancelled" }))).toBe(1);
     expect(limit(resolveEntitlements({ ...base, subscriptionPlanKey: ORGANIZATION_PLAN_KEY, subscriptionStatus: "unpaid" }))).toBe(1);
     expect(limit(resolveEntitlements(base))).toBe(1);
@@ -93,12 +95,14 @@ describe("the open-needs gate — pure decision", () => {
     expect(decideOpenNeedsGate({ enforced: true, planKey: FREE_ORGANIZATION_PLAN_KEY, limit: 1, used: 0 })).toMatchObject({ allowed: true });
     expect(decideOpenNeedsGate({ enforced: true, planKey: FREE_ORGANIZATION_PLAN_KEY, limit: 1, used: 1 })).toMatchObject({ allowed: false, reason: "over_open_need_limit", limit: 1, used: 1, next: "upgrade" });
   });
-  it("ORGANIZATION: the 10th is allowed, the 11th goes to the individual plan — never another tier, never a charge", () => {
-    expect(decideOpenNeedsGate({ enforced: true, planKey: ORGANIZATION_PLAN_KEY, limit: 10, used: 9 })).toMatchObject({ allowed: true });
-    expect(decideOpenNeedsGate({ enforced: true, planKey: ORGANIZATION_PLAN_KEY, limit: 10, used: 10 })).toMatchObject({ allowed: false, limit: 10, used: 10, next: "individual_plan" });
+  it("ORGANIZATION: NO numeric ceiling — any number of active needs is allowed, no replacement cap, no individual-plan step", () => {
+    for (const used of [0, 9, 10, 11, 250]) {
+      expect(decideOpenNeedsGate({ enforced: true, planKey: ORGANIZATION_PLAN_KEY, limit: null, used })).toMatchObject({ allowed: true, enforced: true, limit: null });
+    }
   });
-  it("an unreadable count fails CLOSED once enforced", () => {
-    expect(decideOpenNeedsGate({ enforced: true, planKey: ORGANIZATION_PLAN_KEY, limit: 10, used: null })).toMatchObject({ allowed: false });
+  it("an unreadable count fails CLOSED once enforced for a metered (FREE) plan — but cannot block an unmetered plan", () => {
+    expect(decideOpenNeedsGate({ enforced: true, planKey: FREE_ORGANIZATION_PLAN_KEY, limit: 1, used: null })).toMatchObject({ allowed: false });
+    expect(decideOpenNeedsGate({ enforced: true, planKey: ORGANIZATION_PLAN_KEY, limit: null, used: null })).toMatchObject({ allowed: true });
   });
 });
 
@@ -157,7 +161,8 @@ describe("one canonical path, honest surfaces (source pins)", () => {
       expect(typeof m.conversation.forms.ui.errorOpenNeedLimitIndividual, loc).toBe("string");
       expect(typeof m.auth.dashboard.wow.demand.errorOpenNeedLimitIndividual, loc).toBe("string");
       expect(m.pricing.plans.free.features[0], loc).toMatch(/1 /);
-      expect(m.pricing.plans.business.features[0], loc).toMatch(/10/);
+      // the Organization plan has NO numeric limit (owner 2026-10-06): its first bullet must not pin a number
+      expect(m.pricing.plans.business.features[0], loc).not.toMatch(/\b10\b/);
       expect(typeof m.pricing.individual.cta, loc).toBe("string");
       expect(m.pricing.pricePerMonth, loc).toContain("{price}");
     }
@@ -174,5 +179,19 @@ describe("one canonical path, honest surfaces (source pins)", () => {
     expect(T).not.toMatch(/TestCheckoutButton|BillingTestCheckout/);
     expect(T).toMatch(/href="\/company-need"/);
     expect(read("lib/marketing/plans.ts")).toMatch(/PLAN_SLUGS = \["free", "business"\] as const/);
+  });
+});
+
+
+describe("pricing hero ctaNext (guard named by create-cv-acquisition-intent)", () => {
+  it("only promises /dashboard/account, and only when online activation is open", () => {
+    const src = readFileSync(
+      join(__dirname, "..", "..", "app", "[locale]", "(marketing)", "pricing", "page.tsx"),
+      "utf8",
+    );
+    const matches = src.match(/ctaNext=\{[^}]*\}/g) ?? [];
+    expect(matches).toHaveLength(1);
+    expect(matches[0]).toContain("activationOpen");
+    expect(matches[0]).toContain("/dashboard/account");
   });
 });

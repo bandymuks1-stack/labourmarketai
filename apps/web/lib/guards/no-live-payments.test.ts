@@ -3,7 +3,7 @@
  *
  * The chain may now run in Stripe TEST mode (env-gated), but LIVE must remain
  * impossible. Fails the build if:
- *   - the static default PAYMENTS_ENABLED const is flipped true (off by default);
+ *   - billing resolves ON with no env (off by default; there is no static switch);
  *   - any source OUTSIDE the allowlisted adapter imports the Stripe SDK;
  *   - a LIVE key literal (sk_live_/pk_live_/rk_live_<chars>) appears in source;
  *   - the config resolver would ever return an ACTIVE provider for live mode or
@@ -15,7 +15,6 @@ import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { PAYMENTS_ENABLED } from "../billing/plans";
 import { resolveBillingConfig } from "../billing/config-core";
 
 const here = resolve(fileURLToPath(import.meta.url), "..");
@@ -46,8 +45,14 @@ const SDK_IMPORT =
 const LIVE_KEY_LITERAL = /\b(?:sk|pk|rk)_live_[A-Za-z0-9]{6,}/;
 
 describe("no live payments (Stripe test-mode guard)", () => {
-  it("PAYMENTS_ENABLED static default is false (off by default)", () => {
-    expect(PAYMENTS_ENABLED).toBe(false);
+  it("billing is OFF by default: an unconfigured environment resolves to disabled, and plans.ts carries no payments switch", () => {
+    const c = resolveBillingConfig({
+      paymentsEnabled: undefined, provider: undefined, mode: undefined,
+      secretKey: undefined, webhookSecret: undefined, publishableKey: undefined,
+    });
+    expect(c.state).toBe("disabled");
+    expect(c.paymentsEnabled).toBe(false);
+    expect(readFileSync(join(webRoot, "lib/billing/plans.ts"), "utf8")).not.toMatch(/export const PAYMENTS_ENABLED/);
   });
 
   it("Stripe SDK is imported ONLY in the allowlisted adapter (production code)", () => {

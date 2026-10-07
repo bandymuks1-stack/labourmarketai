@@ -240,6 +240,10 @@ describe("the registry itself", () => {
       "evidence.record.attest_confirm",
       "evidence.import.withdraw_draft",
       "evidence.import.withdraw_confirm",
+      "evidence.record.correct_draft",
+      "evidence.record.correct_confirm",
+      "evidence.session.correct_date_provenance_draft",
+      "evidence.session.correct_date_provenance_confirm",
       // Organization PEOPLE ingestion (2026-09-10) — the roster half of that
       // same architecture, over `lib/organization-people/ingest-service.ts`,
       // which the web import panel calls too. Look, answer, commit: the
@@ -341,6 +345,10 @@ describe("the registry itself", () => {
       "evidence.record.attest_confirm",
       "evidence.import.withdraw_draft",
       "evidence.import.withdraw_confirm",
+      "evidence.record.correct_draft",
+      "evidence.record.correct_confirm",
+      "evidence.session.correct_date_provenance_draft",
+      "evidence.session.correct_date_provenance_confirm",
       // Organization PEOPLE ingestion (2026-09-10) — the roster half of that
       // same architecture, over `lib/organization-people/ingest-service.ts`,
       // which the web import panel calls too. Look, answer, commit: the
@@ -1487,7 +1495,7 @@ describe("demand draft → confirm (G4 wagon 3)", () => {
     }
     expect(demandSubmit).toHaveBeenCalledTimes(1);
     const [, employerArg, intentArg, fieldsArg] = demandSubmit.mock.calls[0] as unknown[];
-    expect(employerArg).toEqual({ organizationId: "org-1" });
+    expect(employerArg).toMatchObject({ organizationId: "org-1" });
     expect(intentArg).toBe("hire_workers");
     expect(fieldsArg).toMatchObject({
       description: DRAFT.description,

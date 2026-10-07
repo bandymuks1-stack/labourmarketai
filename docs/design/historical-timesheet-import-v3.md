@@ -4,6 +4,7 @@
 |---|---|
 | **Status** | SUPPORTING design, PROPOSED. **NOT THE CANONICAL ARCHITECTURE.** It realises §1.6 *Historical ingestion and provenance* of [`docs/OWNER_TARGET_ARCHITECTURE_V1.md`](../OWNER_TARGET_ARCHITECTURE_V1.md) and adds no graph node. Nothing in it has been applied. |
 | **Date** | 2026-09-23 |
+| **Amended** | 2026-09-30, owner decision "BUSINESS HISTORY CONTINUITY": the Nonstop supplying-organization assumption in §1, §2 and §3 is SUPERSEDED for the 2025 package. The continuous business-history anchor is LabourMarket.ai `19f47e78`; see [`business-history-continuity-v1.md`](business-history-continuity-v1.md). Wherever this record names `20b2c802` as the supplying organization of the 2025 history, read `19f47e78`. Nonstop Group stays a separate organization and is a party to a record only where the source establishes its role. |
 | **Governing input** | Owner rules of 2026-09-23 (§1). They are authoritative over everything below. |
 | **Supersedes** | The v2 "historical evidence graph" draft. It was never committed. Its **commercial expansion is SUPERSEDED by owner decision A**: invoices, payments, payroll, settlement, money columns and commercial links. v3 keeps only v2's reuse map and security analysis, and only where this record re-verifies them. |
 | **Companion** | [`historical-timesheet-fixture-v3.md`](historical-timesheet-fixture-v3.md): the synthetic acceptance fixture, T1 to T18. |
@@ -36,7 +37,7 @@ Standing platform rules that apply:
 - Every migration trips the three count ratchets.
 - There are no ratings or scores anywhere.
 - The 158 existing records in org `19f47e78` are never touched.
-- The canonical supplying organization is `20b2c802`.
+- ~~The canonical supplying organization is `20b2c802`.~~ **SUPERSEDED 2026-09-30 (owner):** for the 2025 history the continuous business-history organization is LabourMarket.ai `19f47e78`; the Vivat Rex period and the original source labels are preserved as provenance (`organization_history_periods`, dataset/session provenance). Nonstop Group is a separate organization.
 - Automation never commits real data.
 - No service-role path is used or added.
 
@@ -46,7 +47,7 @@ Standing platform rules that apply:
 
 | Fact | Value | Consequence |
 |---|---|---|
-| Evidence in prod | 158 records in 1 session, all in org `19f47e78`. The supplying org `20b2c802` has 0 records, 0 people and 0 objects. | The supplying org starts from nothing. |
+| Evidence in prod | 158 records in 1 session, all in org `19f47e78`. The supplying org `20b2c802` has 0 records, 0 people and 0 objects. **(2026-09-30: the 158 stay in `19f47e78`, which is the anchor for the whole 2025 package; `20b2c802` receives no copy.)** | ~~The supplying org starts from nothing.~~ Superseded: part1 and part2 join the SAME `19f47e78` history as part3. |
 | Supplying org | It holds the roles `employer` + `workforce_provider`, with an active owner membership and an active manager membership. Its legacy company is `048aa7e1`. | N1 applies (supplier-role precedence). The owner can create projects. The manager cannot. |
 | `projects` columns | `status` is nullable text with `CHECK (status in ('draft','live','paused','completed'))` and **no default**. `authenticated` holds INSERT, SELECT and UPDATE, and **no DELETE**. | A historical project never needs a live status (§5.1), and nobody can delete one (§5.3). |
 | `projects` RLS | Insert/update: `owns_company(company_id) OR is_admin()`. Select: `owns_company OR is_admin OR is_assigned_to_project`. **`organization_id` is not bound to `company_id`.** | A manager cannot SELECT projects. The owner of any company could create a project that names another org (N8, §8 P9). |
@@ -96,7 +97,7 @@ CUSTOMER (project_clients row with customer_key)          <- identified from the
    |
    +-- OBJECT / ADDRESS (work_objects address fields; source spellings kept on records)
           |
-SUPPLYING ORG (org 20b2c802, supplier_role employer)
+SUPPLYING ORG (2025 package: org 19f47e78 = continuous business-history anchor, supplier_role employer; 20b2c802 superseded 2026-09-30)
    |
 WORKERS (organization_people roster)
    |
@@ -721,6 +722,8 @@ Consequences:
 ### 9.3 Schema (M3, RED)
 
 M3 changes ONE existing SECURITY DEFINER body. The function `register_document_file_v1` hard-codes its own MIME list, so widening only the CHECK and the bucket would still return `'unsupported_type'`, and no timesheet could ever be preserved. The body is reproduced **byte-identical** to [`20260817140000_document_file_layer_v1.sql:554-674`](../../supabase/migrations/20260817140000_document_file_layer_v1.sql) except the MIME list. `SECURITY DEFINER` and `SET search_path = public` are kept. PR-4 must diff this body against production `pg_get_functiondef('public.register_document_file_v1(text,uuid,text,text,text,bigint,text)'::regprocedure)` before apply. If production differs from the repo, the production body is the one reproduced, still with only the list widened, and the PR body shows the diff.
+
+**PR-4 finding (2026-09-24, read-only `pg_get_functiondef` on production).** Production's stored body IS the repo body minus its two comment lines (`-- Lock the parent …` and `-- Supersede the previous current version …`): `md5(prosrc) = 23ee05137f9e6529fdf989cdbf2ca717`, 4,287 bytes, no CR. So M3 (`20260930160000_historical_timesheet_m3_source_preservation.sql`) reproduces the PRODUCTION body with only the MIME list widened (the widened body hashes to `e4954bc052bffb031d511d5c599649f6`), its rollback restores the production body byte-for-byte, and `apps/web/lib/guards/historical-timesheet-m2-m3-migration.test.ts` pins both hashes. The dry run `docs/design/historical-timesheet-m2-m3-dryrun.sql` asserts the live hash before applying (`PREMERGE_CHECK_M3_BODY_FAILED` otherwise). The SQL block below keeps the comments for readability; the file is the source of truth.
 
 ```sql
 -- M3 (RED): preserve CSV/XLSX timesheet sources through the existing document engine

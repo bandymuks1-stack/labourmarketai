@@ -1845,6 +1845,8 @@ export function JournalEntryComposer({
                   ? t("photo.uploaded")
                   : photoOutcome === "limit"
                     ? t("photo.limitReached")
+                    : photoOutcome === "quota"
+                      ? t("photo.quotaReached")
                     : photoOutcome === "not-ready"
                       ? t("photo.notReady")
                       : photoOutcome === "invalid"

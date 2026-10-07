@@ -17,8 +17,8 @@ describe("openNeedsUsageView", () => {
     const gate = decideOpenNeedsGate({ enforced: true, planKey: "free_organization", limit: 1, used: 1 });
     expect(openNeedsUsageView(gate)).toEqual({ visible: true, used: 1, limit: 1, remaining: 0, atLimit: true, next: "upgrade" });
   });
-  it("mirrors the gate's own next step at the paid ceiling", () => {
-    const gate = decideOpenNeedsGate({ enforced: true, planKey: "business", limit: 10, used: 10 });
+  it("mirrors the gate's own next step at a ceiling", () => {
+    const gate = decideOpenNeedsGate({ enforced: true, planKey: "free_organization", limit: 1, used: 1 });
     const v = openNeedsUsageView(gate);
     expect(v).toMatchObject({ visible: true, atLimit: true, remaining: 0 });
     if (v.visible) expect(v.next).toBe(gate.allowed ? null : gate.next);
@@ -27,7 +27,7 @@ describe("openNeedsUsageView", () => {
     const gate = decideOpenNeedsGate({ enforced: true, planKey: "free_organization", limit: 1, used: null });
     expect(openNeedsUsageView(gate)).toMatchObject({ visible: true, atLimit: true });
   });
-  it("unlimited plan shows nothing", () => {
+  it("unlimited plan (the Organization plan: limit null) shows nothing, whatever the count", () => {
     const gate = decideOpenNeedsGate({ enforced: true, planKey: "x", limit: null, used: 3 });
     expect(openNeedsUsageView(gate)).toEqual({ visible: false });
   });

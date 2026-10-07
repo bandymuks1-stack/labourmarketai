@@ -46,10 +46,24 @@ describe("evaluateCheckoutRequest — strict gate", () => {
     if (!r.ok) expect(r.reason).toBe("not_a_paid_plan");
   });
 
-  it("a user without the plan's audience role is not eligible", () => {
-    const r = evaluateCheckoutRequest({ ...ok, userRoles: ["worker"] });
+  it("a user without the plan's audience role AND without verified organization authority is not eligible", () => {
+    const r = evaluateCheckoutRequest({ ...ok, userRoles: ["worker"], orgBinding: "missing" });
     expect(r.ok).toBe(false);
     if (!r.ok) { expect(r.reason).toBe("not_eligible"); expect(r.status).toBe(403); }
+  });
+
+  it("a worker-only / legacy-agency-only profile WITH verified organization authority is eligible (capability, not role row)", () => {
+    for (const roles of [["worker"], ["agency"], []]) {
+      const r = evaluateCheckoutRequest({ ...ok, userRoles: roles, orgBinding: "verified" });
+      expect(r.ok, roles.join(",")).toBe(true);
+    }
+  });
+
+  it("the same profile WITHOUT verified authority is still refused (fail closed)", () => {
+    for (const orgBinding of ["missing", "not_member", undefined] as const) {
+      const r = evaluateCheckoutRequest({ ...ok, userRoles: ["agency"], orgBinding });
+      expect(r.ok).toBe(false);
+    }
   });
 
   it("an admin may start a test checkout for any paid plan (internal testing)", () => {

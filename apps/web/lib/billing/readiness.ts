@@ -6,7 +6,7 @@
  * never a live-billing claim:
  *   - PRICING_READINESS_STATE is the owner-editable pricing state — prices
  *     stay drafts until the owner flips it to "owner_confirmed"; neither
- *     state makes anything purchasable (PAYMENTS_ENABLED stays false).
+ *     state makes anything purchasable (only the resolved billing config enables payments).
  *   - FEATURE_ENFORCEMENT maps EVERY plan feature key to its real
  *     enforcement seam or surface (guard-pinned: cited sites must exist and
  *     carry the real check — no phantom features, no silent claims).
@@ -44,8 +44,8 @@ export type PricingReadinessState = "draft_pricing" | "owner_confirmed";
  * only future home is `plans.price_eur_monthly`, surfaced after this flips.
  */
 // Owner approval 2026-09-05 (launch pricing): PERSON €0 · ORGANIZATION FREE €0
-// (1 active position) · ORGANIZATION €99/month (up to 10) · more than 10 =
-// individual plan (contact). The figure itself lives ONLY in
+// (1 active position) · ORGANIZATION €99/month (no fixed limit on active
+// positions since the owner decision of 2026-10-06). The figure itself lives ONLY in
 // `plans.price_eur_monthly`; this flag only says the table is confirmed.
 export const PRICING_READINESS_STATE: PricingReadinessState = "owner_confirmed";
 
@@ -116,7 +116,7 @@ export const FEATURE_ENFORCEMENT: Readonly<
   // company
   company_create_needs: {
     // Owner launch pricing 2026-09-05: enforced on the ONE canonical demand
-    // creation path (FREE 1 / ORGANIZATION 10 / above → individual plan).
+    // creation path (FREE 1 / ORGANIZATION: no fixed limit, owner 2026-10-06).
     kind: "server_gate",
     site: "lib/billing/open-needs-gate.ts",
   },

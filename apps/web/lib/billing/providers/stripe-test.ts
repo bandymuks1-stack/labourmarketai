@@ -7,6 +7,7 @@ import {
   requireStripeSecret,
   requireStripeWebhookSecret,
 } from "@/lib/billing/config";
+import { trialConsentText } from "@/lib/billing/trial-core";
 import type {
   BillingProvider,
   BillingWebhookEvent,
@@ -111,6 +112,38 @@ export function createStripeProvider(): BillingProvider {
           ...(input.metadata ?? { plan_key: input.planKey }),
           ...environmentStamp,
         };
+        // 14-day trial (owner decision): the hosted page must say that the card
+        // is charged the price after the trial. The figure is READ from the
+        // Stripe price that will bill — if it cannot be read, no trial session
+        // is created (fail closed), never a trial with an unstated charge.
+        const trialDays = input.trialPeriodDays;
+        let trialFields: Partial<Stripe.Checkout.SessionCreateParams> = {};
+        let trialSubscriptionData: Stripe.Checkout.SessionCreateParams.SubscriptionData = {};
+        if (typeof trialDays === "number" && trialDays > 0) {
+          const price = await client().prices.retrieve(input.priceId);
+          if (typeof price.unit_amount !== "number" || !price.currency) {
+            return { ok: false, reason: "trial_price_unreadable" };
+          }
+          trialFields = {
+            payment_method_collection: "always",
+            custom_text: {
+              submit: {
+                message: trialConsentText({
+                  days: trialDays,
+                  unitAmountCents: price.unit_amount,
+                  currency: price.currency,
+                  interval: price.recurring?.interval ?? null,
+                }),
+              },
+            },
+          };
+          trialSubscriptionData = {
+            trial_period_days: trialDays,
+            // No card on file at trial end → the subscription ends; it never
+            // silently continues unpaid.
+            trial_settings: { end_behavior: { missing_payment_method: "cancel" } },
+          };
+        }
         const session = await client().checkout.sessions.create(
           {
             mode: "subscription",
@@ -139,7 +172,8 @@ export function createStripeProvider(): BillingProvider {
             // The SAME canonical metadata rides on the subscription object, so
             // customer.subscription.* events carry owner/plan/org linkage even
             // when they arrive before (or without) the session event.
-            subscription_data: { metadata },
+            subscription_data: { metadata, ...trialSubscriptionData },
+            ...trialFields,
             // Billing safety v1: the hosted session dies with the server-side
             // checkout operation's window — at most one payable session per
             // subject + plan at any instant.

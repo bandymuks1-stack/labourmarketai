@@ -303,6 +303,16 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
 
   // What the person attested about someone else's work — their own statement.
   { table: "journal_entry_confirmations", key: "profile_id", column: "confirmer_id" },
+  // Recognitions an independent assessor recorded about the person (RPL).
+  // The subject reads their own under RLS; the assessing person is another
+  // human and is redacted. Absent from the database until the gated
+  // migration 20261007120000 is applied: reported empty, never unread.
+  {
+    table: "competency_recognitions",
+    key: "profile_id",
+    column: "subject_profile_id",
+    redactActors: ["assessed_by"],
+  },
 
   // Work an organization assigned to the person, and what the person asked
   // of an organization.
@@ -592,6 +602,14 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
     reason:
       "an employer's private shortlisting decision about you — their judgement is their record; ask us and we will tell you what was decided, without exposing their notes",
   },
+  // 2026-10-07 (#2176, RED migration 20261007100000, UNAPPLIED until the release is applied):
+  // a photo an organization supplied as part of its own history, anchored to a record, place,
+  // roster person or the organization itself.
+  {
+    table: "organization_evidence_media",
+    reason:
+      "photos an organization supplied as part of its own work history — they are that organization's record and can show other people and places, so image files are not put in this bundle; ask us through the data-protection channel and we will tell you which photos are anchored to you and what can be released",
+  },
   {
     table: "org_documents",
     reason:
@@ -665,6 +683,7 @@ export const ACTOR_ONLY_RELATIONS: readonly string[] = [
   // Discovered-organization provenance: the person is only the recorder of a
   // fact or identifier about a COMPANY, never its subject.
   "organization_facts",
+  "organization_history_periods",
   "organization_identifiers",
   "agency_client_connections",
   "agency_client_request_shares",

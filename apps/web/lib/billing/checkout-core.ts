@@ -88,8 +88,18 @@ export function evaluateCheckoutRequest(input: {
     return { ok: false, status: 400, reason: "plan_deferred" };
   }
 
-  // Eligibility: the plan's audience role, or an admin (for internal testing).
-  const eligible = input.isAdmin || input.userRoles.includes(plan.audience);
+  // Eligibility: the plan's audience role, or an admin (for internal testing) -
+  // or, for an ORGANIZATION plan, the verified manage-billing authority over
+  // the organization itself. The organization's capability and the caller's
+  // proven owner/admin membership are the canonical authority; the legacy
+  // `profile_roles` row is a derived label that an invited owner/admin, or a
+  // legacy-`agency`-only profile, may not carry. Requiring it refused those
+  // callers with `not_eligible` although they hold the authority. Anyone
+  // without verified authority is still refused (below and here, fail closed).
+  const orgAuthorityVerified =
+    planRequiresOrganization(plan.audience) && input.orgBinding === "verified";
+  const eligible =
+    input.isAdmin || input.userRoles.includes(plan.audience) || orgAuthorityVerified;
   if (!eligible) return { ok: false, status: 403, reason: "not_eligible" };
 
   // Company/agency plans are bound to a canonical organization with a

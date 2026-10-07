@@ -170,7 +170,7 @@ describe("evidence reaches the ONE work model — through the linked roster row 
   });
   it("only linked people, only live records, only plausible dated hours on the DAY ledger", () => {
     expect(workerRead).toMatch(/\.eq\("linked_worker_id", workerId\)\s*\.eq\("link_state", "linked"\)/);
-    expect(workerRead).toMatch(/if \(standing\.withdrawn\) continue;/);
+    expect(workerRead).toMatch(/if \(standing\.withdrawn \|\| standing\.superseded\) continue;/);
     // 2026-09-20: the `.not("activity_date", "is", null)` filter is GONE on
     // purpose — it dropped every period record before the person's timeline
     // could see it. A period row now travels as `periodRows`; a dated row
@@ -337,10 +337,17 @@ describe("competency signals reach the SUBJECT as suggestions (2026-09-20) — w
   });
 });
 
+// Migrations added by LATER, separately owner-approved slices (each pinned by its own
+// guard); they are not part of the 2026-09-16/17 history-import slices this block covers.
+const LATER_OWNER_APPROVED_MIGRATIONS = new Set<string>([
+  "20260930140000_evidence_correction_integrity_v1.sql",
+  "20260930130000_organization_history_periods_v1.sql",
+]);
+
 describe("what these slices did NOT do", () => {
   it("no migration, no RLS, no authority change", () => {
     const migrations = readdirSync(path.join(dir, "../../supabase/migrations"));
-    expect(migrations.some((m) => m.startsWith("202609") && m > "20260916" && /evidence|import|context|player|team|history/.test(m))).toBe(false);
+    expect(migrations.some((m) => m.startsWith("202609") && m > "20260916" && /evidence|import|context|player|team|history/.test(m) && !LATER_OWNER_APPROVED_MIGRATIONS.has(m))).toBe(false);
     expect(core).not.toMatch(/security definer|create policy/i);
   });
   it("no brigade is inferred from co-presence", () => {
@@ -384,7 +391,7 @@ describe("the commit plan creates each canonical place ONCE (B1 walk, 2026-09-17
 });
 
 describe("attesting a whole session is the SAME event, per record, and nothing else (owner correction 2026-09-17)", () => {
-  const fn = core.slice(core.indexOf("export async function attestSessionRecords("), core.indexOf("// ── read-back"));
+  const fn = core.slice(core.indexOf("export async function attestSessionRecords("), core.indexOf("// ── correction (non-destructive)"));
   it("writes only `attested` events into the record lifecycle ledger — no record, hour or state column is touched", () => {
     // Through the EvidenceStore port (PR-2): the one write is
     // `store.insertRecordEvents(`, which the port implements as an INSERT
@@ -404,7 +411,7 @@ describe("attesting a whole session is the SAME event, per record, and nothing e
     expect(writer).toMatch(/\.from\("organization_evidence_events"\)\.insert\(rows\)/);
   });
   it("is idempotent and never re-attests or attests a withdrawn record", () => {
-    expect(fn).toMatch(/filter\(\(r\) => !r\.withdrawn && r\.attestation === null\)/);
+    expect(fn).toMatch(/filter\(\(r\) => !r\.withdrawn && !r\.superseded && r\.attestation === null\)/);
   });
   it("borrows no session event type for it — the attestation events are the audit trail", () => {
     expect(fn).not.toContain("recordEvent(");

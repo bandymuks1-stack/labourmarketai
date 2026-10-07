@@ -377,7 +377,9 @@ describe("objects, attention, the decision bar and the source", () => {
 describe("no second model of anything, no write before commit", () => {
   it("no new table, migration, calendar store, player-card store or team store", () => {
     const migrations = readdirSync(path.join(dir, "../../supabase/migrations"));
-    expect(migrations.some((m) => m > "20260916" && /player|team|calendar|history|evidence|visual/.test(m))).toBe(false);
+    // Later, separately owner-approved slices (each pinned by its own guard) are not part of this 2026-09-16/17 model.
+    const laterOwnerApproved = new Set<string>(["20260930140000_evidence_correction_integrity_v1.sql", "20260930130000_organization_history_periods_v1.sql", "20261007100000_evidence_record_media_link_v1.sql"]);
+    expect(migrations.some((m) => m > "20260916" && /player|team|calendar|history|evidence|visual/.test(m) && !laterOwnerApproved.has(m))).toBe(false);
     for (const f of ["lib/player-card/historical-player-card.ts", "lib/organization-evidence/team-board.ts", "lib/organization-evidence/calendar-store.ts", "lib/organization-evidence/historical-store.ts"]) {
       expect(existsSync(path.join(dir, f)), f).toBe(false);
     }

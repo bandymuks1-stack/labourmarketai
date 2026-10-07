@@ -4478,11 +4478,11 @@
               "humanConfirmNote": "These are suggestions only — you decide what to enter. They never change your numbers."
             }
           },
-          "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
-          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
+          "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month) in your organization account.",
+          "errorOpenNeedLimitIndividual": "This organization has reached the active-position limit of its plan. Nothing was charged or changed. Contact us.",
           "openNeedUsage": "Active positions: {used} of {limit} used · {remaining} remaining",
           "openNeedUsageUpgradeCta": "Activate the Organization plan",
-          "openNeedUsageIndividual": "You have reached the Organization plan limit. For more than the included positions, contact us for an individual plan."
+          "openNeedUsageIndividual": "You have reached your plan's limit. Contact us to discuss your needs."
         }
       },
       "greeting": "Welcome back, {name}",
@@ -5435,6 +5435,8 @@
     "titleAccent": "set fairly.",
     "subcopyLive": "Prices are confirmed by the owner and in force. Activation happens in the organization account through a secure Stripe payment; nothing is charged on this page.",
     "subcopy": "Prices are not finalised yet and billing is never started for you on this page. The tiers below describe scope; activation is manual — reach out and we'll confirm pricing and scope with you before anything starts.",
+    "subcopyConfirmed": "Prices are confirmed. Online activation is not open yet — join the waitlist and we will contact you to start your organization manually; nothing is charged on this page.",
+    "trialNote": "An organization's first subscription starts with a 14-day trial. Your card is charged the monthly price after the trial, and you can cancel before it ends.",
     "planCta": "Join the waitlist for this plan",
     "featuresLabel": "Includes",
     "plans": {
@@ -5452,10 +5454,10 @@
         "name": "Organization",
         "tagline": "For organizations actively hiring and building teams",
         "features": [
-          "Up to 10 active positions",
+          "No fixed limit on active positions",
           "Everything in Free, at operating scale",
-          "One plan for every organization capability",
-          "Project operations, readiness, reports and CSV"
+          "One plan for every kind of organization",
+          "Project operations, reports and CSV export"
         ]
       },
       "agency": {
@@ -5483,7 +5485,7 @@
     "faq": [
       {
         "q": "Why only one paid plan?",
-        "a": "Every organization — employer, staffing provider, contractor or training provider — gets the same product. What changes is scale: 1 active position free, up to 10 for €99/month, and an individual plan above that."
+        "a": "Every organization — employer, staffing provider, contractor or training provider — gets the same product. What changes is scale: 1 active position free, and no fixed limit on active positions for €99/month."
       },
       {
         "q": "Will the Free tier stay free?",
@@ -5494,8 +5496,8 @@
         "a": "Card payment through Stripe with VAT applied by Stripe Tax; invoices, cancellation and changes live in your organization account."
       },
       {
-        "q": "What happens above 10 active positions?",
-        "a": "Nothing is charged or upgraded automatically. You are asked to contact us and an individual plan is agreed."
+        "q": "Is there a limit on active positions?",
+        "a": "Free includes 1 active position. The Organization plan has no fixed limit on active positions. Normal protections against abuse, such as request rate limits, still apply."
       }
     ],
     "priceState": {
@@ -5503,10 +5505,10 @@
       "owner_confirmed": "Prices confirmed by the owner. Activation happens in your organization account; nothing is charged on this page."
     },
     "individual": {
-      "name": "Individual plan",
-      "tagline": "For more than 10 active positions",
-      "question": "Need more?",
-      "body": "Contact us for an individual plan — requirements, scale and commercial terms are agreed together. No automatic tier, no published price.",
+      "name": "Special requirements",
+      "tagline": "For needs beyond the standard plans",
+      "question": "Something specific in mind?",
+      "body": "Contact us if you have special requirements — we agree them together. No automatic tier, no published price.",
       "cta": "Contact us"
     },
     "priceFree": "€0",
@@ -8083,6 +8085,7 @@
       "not_found": "That document was not found.",
       "limit_reached": "The document list limit was reached.",
       "version_limit_reached": "This document reached its version limit.",
+      "storage_quota_exceeded": "Your organization's storage limit (2 GB) is reached. Remove old files or contact support before uploading more.",
       "path_mismatch": "The upload could not be verified — nothing was saved. Please try again.",
       "file_too_large": "The file is larger than 5 MB — nothing was saved.",
       "unsupported_type": "This file type is not supported — use PDF, Word or a photo.",
@@ -8112,7 +8115,8 @@
       "org_correspondence_incoming": "Incoming correspondence",
       "org_correspondence_outgoing": "Outgoing correspondence",
       "org_internal": "Internal document",
-      "org_agreement_attachment": "Agreement attachment"
+      "org_agreement_attachment": "Agreement attachment",
+      "org_import_source": "Import source (original timesheet file)"
     },
     "status": {
       "active": "Active",
@@ -8694,8 +8698,8 @@
       "reopen": "Reopen this need",
       "closedNote": "Closed — hidden from workers.",
       "error": "Could not save. Try again.",
-      "limitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
-      "limitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
+      "limitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month) in your organization account.",
+      "limitIndividual": "This organization has reached the active-position limit of its plan. Nothing was charged or changed. Contact us.",
       "closedCandidatesHistory": "This need is closed. Below is who was compared and what was decided while it was open — history, not an action list. Reopen the need to assess candidates again."
     },
     "freshness": {
@@ -10644,7 +10648,7 @@
     },
     "subscribe": {
       "title": "Organization plan",
-      "cta": "Activate the Organization plan (up to 10 active positions)",
+      "cta": "Activate the Organization plan",
       "note": "You will be taken to Stripe Checkout; the subscription is bound to this organization."
     }
   },
@@ -13554,8 +13558,8 @@
         "errorDuplicateName": "You already have an organization with this name. Choose another name.",
         "errorStale": "Something changed while you were reviewing (for example, the active workspace). Nothing was saved — start again.",
         "errorConflict": "This value already differs. Open advanced mode to replace it.",
-        "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
-        "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
+        "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month) in your organization account.",
+        "errorOpenNeedLimitIndividual": "This organization has reached the active-position limit of its plan. Nothing was charged or changed. Contact us."
       },
       "urgency": {
         "flexible": "Flexible",

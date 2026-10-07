@@ -16,6 +16,7 @@ import { PrePaymentPlanBoundary } from "@/components/marketing/pre-payment-plan-
 import { getBillingConfig } from "@/lib/billing/config";
 import { isStripeActive } from "@/lib/billing/config-core";
 import { isCheckoutCancelledReturn } from "@/lib/billing/checkout-return-core";
+import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
 import {
   ConciergeAccessBanner,
   ConciergeOfferSection,
@@ -45,6 +46,13 @@ export default async function PricingPage({
   // LIVE Stripe (owner-armed) changes the page's own words: the hero no longer
   // says prices are not final, and the pre-payment boundary is not shown.
   const billingLive = isStripeActive(getBillingConfig());
+  // The hero words and the hero CTA follow the REAL readiness state, never a
+  // static sentence: (1) prices not confirmed -> "not finalised" + waitlist;
+  // (2) prices confirmed but no Stripe adapter armed -> "confirmed, online
+  // activation not open" + waitlist; (3) confirmed AND billing armed ->
+  // "confirmed and in force" + the organization-account CTA (no waitlist).
+  const pricesConfirmed = PRICING_READINESS_STATE === "owner_confirmed";
+  const activationOpen = pricesConfirmed && billingLive;
   setRequestLocale(locale);
   const t = await getTranslations("pricing");
   const faq = t.raw("faq") as { q: string; a: string }[];
@@ -55,10 +63,18 @@ export default async function PricingPage({
         eyebrow={t("eyebrow")}
         title={t("title")}
         accent={t("titleAccent")}
-        subcopy={billingLive ? t("subcopyLive") : t("subcopy")}
-        ctaKind="waitlist"
-        ctaLabel={t("planCta")}
+        subcopy={
+          activationOpen
+            ? t("subcopyLive")
+            : pricesConfirmed
+              ? t("subcopyConfirmed")
+              : t("subcopy")
+        }
+        ctaKind={activationOpen ? "signup" : "waitlist"}
+        ctaLabel={activationOpen ? t("ctaSubscribe") : t("planCta")}
         ctaSource="pricing_hero"
+        ctaNext={activationOpen ? "/dashboard/account" : undefined}
+        ctaAudience={activationOpen ? "companies" : undefined}
       />
       {isCheckoutCancelledReturn(billing) ? (
         <div className="mx-auto max-w-container px-6 sm:px-12">

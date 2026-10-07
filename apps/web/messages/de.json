@@ -4478,11 +4478,11 @@
               "humanConfirmNote": "Dies sind nur Vorschläge — Sie entscheiden, was Sie eingeben. Sie ändern niemals Ihre Zahlen."
             }
           },
-          "errorOpenNeedLimitUpgrade": "Der kostenlose Plan dieser Organisation erlaubt 1 aktive Position. Schließen Sie eine oder aktivieren Sie den Plan „Organisation“ (99 €/Monat, bis zu 10) im Organisationskonto.",
-          "errorOpenNeedLimitIndividual": "Diese Organisation hat die 10 aktiven Positionen des Plans „Organisation“ erreicht. Nichts wurde belastet oder geändert. Für mehr als 10 kontaktieren Sie uns für einen individuellen Plan.",
+          "errorOpenNeedLimitUpgrade": "Der kostenlose Plan dieser Organisation erlaubt 1 aktive Position. Schließen Sie eine oder aktivieren Sie den Plan „Organisation“ (99 €/Monat) im Organisationskonto.",
+          "errorOpenNeedLimitIndividual": "Diese Organisation hat die Grenze für aktive Positionen ihres Plans erreicht. Nichts wurde belastet oder geändert. Kontaktieren Sie uns.",
           "openNeedUsage": "Aktive Positionen: {used} von {limit} genutzt · {remaining} übrig",
           "openNeedUsageUpgradeCta": "Plan „Organisation“ aktivieren",
-          "openNeedUsageIndividual": "Sie haben die Grenze des Plans „Organisation“ erreicht. Für mehr Positionen kontaktieren Sie uns für einen individuellen Plan."
+          "openNeedUsageIndividual": "Sie haben die Grenze Ihres Plans erreicht. Kontaktieren Sie uns, um Ihren Bedarf zu besprechen."
         }
       },
       "greeting": "Willkommen zurück, {name}",
@@ -5435,6 +5435,8 @@
     "titleAccent": "fair angesetzt.",
     "subcopyLive": "Die Preise sind vom Inhaber bestätigt und gültig. Die Aktivierung erfolgt im Organisationskonto über eine sichere Stripe-Zahlung; auf dieser Seite wird nichts abgebucht.",
     "subcopy": "Die Preise sind noch nicht endgültig, und die Abrechnung wird auf dieser Seite niemals für Sie gestartet. Die Stufen unten beschreiben den Umfang; die Aktivierung erfolgt manuell — melden Sie sich, und wir bestätigen Preis und Umfang mit Ihnen, bevor irgendetwas startet.",
+    "subcopyConfirmed": "Die Preise sind bestätigt. Die Online-Aktivierung ist noch nicht geöffnet — tragen Sie sich in die Warteliste ein, wir melden uns und starten Ihre Organisation manuell; auf dieser Seite wird nichts abgebucht.",
+    "trialNote": "Das erste Abonnement einer Organisation beginnt mit einer 14-tägigen Testphase. Danach wird Ihre Karte mit dem Monatspreis belastet; vor Ablauf können Sie kündigen.",
     "planCta": "Für diesen Plan auf die Warteliste",
     "featuresLabel": "Enthält",
     "plans": {
@@ -5452,10 +5454,10 @@
         "name": "Organisation",
         "tagline": "Für Organisationen, die aktiv einstellen und Teams aufbauen",
         "features": [
-          "Bis zu 10 aktive Positionen",
+          "Keine feste Obergrenze für aktive Positionen",
           "Alles aus Kostenlos, im Betriebsmaßstab",
-          "Ein Plan für jede Organisationsfähigkeit",
-          "Projektbetrieb, Bereitschaft, Berichte und CSV"
+          "Ein Plan für jede Art von Organisation",
+          "Projektbetrieb, Berichte und CSV-Export"
         ]
       },
       "agency": {
@@ -5483,7 +5485,7 @@
     "faq": [
       {
         "q": "Warum nur ein bezahlter Plan?",
-        "a": "Jede Organisation — Arbeitgeber, Personaldienstleister, Auftragnehmer oder Bildungsträger — erhält dasselbe Produkt. Nur der Umfang unterscheidet sich: 1 aktive Position kostenlos, bis zu 10 für 99 €/Monat, darüber ein individueller Plan."
+        "a": "Jede Organisation — Arbeitgeber, Personaldienstleister, Auftragnehmer oder Bildungsträger — erhält dasselbe Produkt. Nur der Umfang unterscheidet sich: 1 aktive Position kostenlos, für 99 €/Monat ohne feste Obergrenze für aktive Positionen."
       },
       {
         "q": "Bleibt der kostenlose Plan kostenlos?",
@@ -5494,8 +5496,8 @@
         "a": "Kartenzahlung über Stripe, Umsatzsteuer über Stripe Tax; Rechnungen, Kündigung und Änderungen im Organisationskonto."
       },
       {
-        "q": "Was passiert über 10 aktiven Positionen?",
-        "a": "Nichts wird automatisch belastet oder hochgestuft. Sie werden gebeten, uns zu kontaktieren, und ein individueller Plan wird vereinbart."
+        "q": "Gibt es eine Obergrenze für aktive Positionen?",
+        "a": "Kostenlos ist 1 aktive Position enthalten. Der Plan „Organisation“ hat keine feste Obergrenze für aktive Positionen. Übliche Schutzmaßnahmen gegen Missbrauch, etwa Anfragelimits, gelten weiterhin."
       }
     ],
     "priceState": {
@@ -5503,10 +5505,10 @@
       "owner_confirmed": "Preise vom Eigentümer bestätigt. Die Aktivierung erfolgt im Organisationskonto; auf dieser Seite wird nichts belastet."
     },
     "individual": {
-      "name": "Individueller Plan",
-      "tagline": "Für mehr als 10 aktive Positionen",
-      "question": "Mehr nötig?",
-      "body": "Kontaktieren Sie uns für einen individuellen Plan — Anforderungen, Umfang und Konditionen werden gemeinsam vereinbart. Keine automatische Stufe, kein veröffentlichter Preis.",
+      "name": "Besondere Anforderungen",
+      "tagline": "Für Bedarf jenseits der Standardpläne",
+      "question": "Etwas Besonderes im Sinn?",
+      "body": "Kontaktieren Sie uns bei besonderen Anforderungen — wir klären sie gemeinsam. Keine automatische Stufe, kein veröffentlichter Preis.",
       "cta": "Kontakt aufnehmen"
     },
     "priceFree": "0 €",
@@ -8083,6 +8085,7 @@
       "not_found": "Das Dokument wurde nicht gefunden.",
       "limit_reached": "Das Limit der Dokumentenliste wurde erreicht.",
       "version_limit_reached": "Dieses Dokument hat sein Versionslimit erreicht.",
+      "storage_quota_exceeded": "Das Speicherlimit Ihrer Organisation (2 GB) ist erreicht. Entfernen Sie alte Dateien oder wenden Sie sich an den Support, bevor Sie weitere hochladen.",
       "path_mismatch": "Der Upload konnte nicht überprüft werden — nichts wurde gespeichert. Bitte erneut versuchen.",
       "file_too_large": "Die Datei ist größer als 5 MB — nichts wurde gespeichert.",
       "unsupported_type": "Dieser Dateityp wird nicht unterstützt — verwenden Sie PDF, Word oder ein Foto.",
@@ -8112,7 +8115,8 @@
       "org_correspondence_incoming": "Eingehende Korrespondenz",
       "org_correspondence_outgoing": "Ausgehende Korrespondenz",
       "org_internal": "Internes Dokument",
-      "org_agreement_attachment": "Vertragsanlage"
+      "org_agreement_attachment": "Vertragsanlage",
+      "org_import_source": "Importquelle (Original-Stundenzettel)"
     },
     "status": {
       "active": "Aktiv",
@@ -8694,8 +8698,8 @@
       "reopen": "Diesen Bedarf wieder öffnen",
       "closedNote": "Geschlossen — für Arbeitskräfte nicht sichtbar.",
       "error": "Konnte nicht gespeichert werden. Versuchen Sie es erneut.",
-      "limitUpgrade": "Der kostenlose Plan dieser Organisation erlaubt 1 aktive Position. Schließen Sie eine oder aktivieren Sie den Plan „Organisation“ (99 €/Monat, bis zu 10) im Organisationskonto.",
-      "limitIndividual": "Diese Organisation hat die 10 aktiven Positionen des Plans „Organisation“ erreicht. Nichts wurde belastet oder geändert. Für mehr als 10 kontaktieren Sie uns für einen individuellen Plan.",
+      "limitUpgrade": "Der kostenlose Plan dieser Organisation erlaubt 1 aktive Position. Schließen Sie eine oder aktivieren Sie den Plan „Organisation“ (99 €/Monat) im Organisationskonto.",
+      "limitIndividual": "Diese Organisation hat die Grenze für aktive Positionen ihres Plans erreicht. Nichts wurde belastet oder geändert. Kontaktieren Sie uns.",
       "closedCandidatesHistory": "Dieser Bedarf ist geschlossen. Unten steht, wer verglichen und was entschieden wurde, solange er offen war – Historie, keine Aktionsliste. Öffnen Sie den Bedarf erneut, um Kandidaten wieder zu bewerten."
     },
     "freshness": {
@@ -10644,7 +10648,7 @@
     },
     "subscribe": {
       "title": "Plan „Organisation“",
-      "cta": "Plan „Organisation“ aktivieren (bis zu 10 aktive Positionen)",
+      "cta": "Plan „Organisation“ aktivieren",
       "note": "Sie werden zu Stripe Checkout weitergeleitet; das Abonnement ist an diese Organisation gebunden."
     }
   },
@@ -13554,8 +13558,8 @@
         "errorDuplicateName": "Sie haben bereits eine Organisation mit diesem Namen. Wählen Sie einen anderen Namen.",
         "errorStale": "Während der Prüfung hat sich etwas geändert (zum Beispiel der aktive Arbeitsbereich). Es wurde nichts gespeichert — bitte neu beginnen.",
         "errorConflict": "Dieser Wert weicht bereits ab. Öffne den erweiterten Modus zum Ersetzen.",
-        "errorOpenNeedLimitUpgrade": "Der kostenlose Plan dieser Organisation erlaubt 1 aktive Position. Schließen Sie eine oder aktivieren Sie den Plan „Organisation“ (99 €/Monat, bis zu 10) im Organisationskonto.",
-        "errorOpenNeedLimitIndividual": "Diese Organisation hat die 10 aktiven Positionen des Plans „Organisation“ erreicht. Nichts wurde belastet oder geändert. Für mehr als 10 kontaktieren Sie uns für einen individuellen Plan."
+        "errorOpenNeedLimitUpgrade": "Der kostenlose Plan dieser Organisation erlaubt 1 aktive Position. Schließen Sie eine oder aktivieren Sie den Plan „Organisation“ (99 €/Monat) im Organisationskonto.",
+        "errorOpenNeedLimitIndividual": "Diese Organisation hat die Grenze für aktive Positionen ihres Plans erreicht. Nichts wurde belastet oder geändert. Kontaktieren Sie uns."
       },
       "urgency": {
         "flexible": "Flexibel",

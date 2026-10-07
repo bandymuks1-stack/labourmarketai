@@ -1511,8 +1511,14 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260930110000_discovered_organizations_v1.sql",
       // owner 2026-09-30: PASVINTINIAI duplicate marked, nothing deleted.
       "20260930120000_project_duplicate_marker_v1.sql",
+      // owner 2026-09-30: continuing-business history periods (RED, GRANT on a new table).
+      "20260930130000_organization_history_periods_v1.sql",
       // owner 2026-09-30 (D1 #2015 APPROVED): a worker photo for real work relationships.
       "20260930133500_worker_avatar_path_for_relations_v1.sql",
+      // owner 2026-09-30: correction-chain integrity guards (RED, constraint on an existing table).
+      "20260930140000_evidence_correction_integrity_v1.sql",
+      // owner 2026-10-01 (#2029 APPROVED in chat): M3 source preservation only.
+      "20260930160000_historical_timesheet_m3_source_preservation.sql",
       // owner 2026-10-01 (#2041 APPROVED): the human decision on a staffing collision is audited.
       "20261001100000_assignment_decision_audit_v1.sql",
       // stream N (owner approval PENDING): service_role SELECT for the job-alert sweep.
@@ -1588,6 +1594,15 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261006100400_append_only_privilege_closure_v1.sql",
       // 2026-10-06: service-role-only read of the invited address for the frictionless signup page - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261006100500_invitation_signup_context_v1.sql",
+      // 2026-10-06 (#2166): org storage usage fn + durable email send ledger (renumbered after #2161 took 20261006100000).
+      "20261006120000_org_storage_usage_v1.sql",
+      "20261006130000_email_send_ledger_v1.sql",
+      // 2026-10-07 (#2176, owner-approved RED): photo link to a stated evidence record (new table + GRANT) - marker is the human-gate acknowledgement.
+      "20261007100000_evidence_record_media_link_v1.sql",
+      // 2026-10-07 (#2180, owner-approved RED): competency recognitions (new table + SECURITY DEFINER doors + GRANT) - marker is the human-gate acknowledgement.
+      "20261007120000_competency_recognitions_v1.sql",
+      // 2026-10-07: historical sites become completed projects (INSERT projects + link work_objects) - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      "20261007130000_historical_projects_from_work_objects_v1.sql",
 ]);
   });
 
