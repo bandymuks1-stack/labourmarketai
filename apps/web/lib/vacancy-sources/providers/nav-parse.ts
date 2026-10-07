@@ -1,22 +1,26 @@
 /**
- * NAV / ARBEIDSPLASSEN.NO (`pam-stilling-feed`) PAYLOAD PARSER — SCAFFOLD.
+ * NAV / ARBEIDSPLASSEN.NO (`pam-stilling-feed`) PAYLOAD PARSER.
  *
  * The one Norway-specific module. Everything a NAV ad's JSON shape implies is
  * confined here; the shared pipeline never learns that Norway exists.
  *
- * ── HONESTY NOTICE — READ BEFORE TRUSTING ANY FIELD BELOW ──────────────────
- * This parser was written on 2026-09-22 from the research matrix
- * (docs/research/eu-vacancy-source-matrix-2026-08-18.md §3), which records
- * the feed's DOCUMENTED field families (title, description, employment type,
- * occupation categories, position count, publication/expiry, application
- * URL, employer name + organisasjonsnummer, work address to municipality).
- * The feed itself has NEVER been called from this codebase, and no sample
- * payload exists in the repository. Every JSON key name in `NAV_FIELD_MAP`
- * is therefore ASSUMED — a best reading of the public docs, not a verified
- * contract — and MUST be re-verified against a real page captured under an
- * owner-provisioned token as the first step of
- * docs/human-gates/nav-activation-gate.md. Until then this parser is
- * exercised only by fixtures that mirror the same assumptions.
+ * ── PROVENANCE OF THE FIELD MAP ────────────────────────────────────────────
+ * Verified against a REAL feed on 2026-09-30 (read-only, public token; no
+ * payload is stored in the repository). What was observed:
+ *   - a feed page: `{ items: [ { url, _feed_entry: { uuid, status, title,
+ *     businessName, municipal, sistEndret } } ], next_url, next_id }`;
+ *   - a full ad, at the entry's `url`: `{ uuid, sistEndret, status,
+ *     ad_content: { published, expires, updated, title, description,
+ *     applicationUrl, sourceurl, jobtitle, engagementtype, extent, starttime,
+ *     positioncount, sector, employer{name,orgnr,description,homepage},
+ *     workLocations[{country,county,municipal,city,postalCode,address}],
+ *     categoryList[{categoryType,code,name,score}], contactList[...] } }`.
+ * The adapter (two-level fan-out, `vacancy-detail-fanout.ts`) resolves the
+ * page into `{ uuid, ad_content, status }` for a live ad and `{ uuid, status,
+ * title }` for a withdrawn one BEFORE this parser runs, so the parser sees
+ * exactly those two shapes. `status` sits on the wrapper, not on `ad_content`.
+ * `contactList` (named persons, e-mail, phone) is NEVER read or stored: the
+ * terms forbid contact data for inactive ads and nothing here needs it.
  *
  * What is NOT assumed:
  *   - the parser is TOTAL and DEFENSIVE: an unexpected shape yields a
@@ -75,35 +79,35 @@ const DEFAULT_CURRENCY = "NOK";
  * Exported so the activation gate can diff it against a captured page.
  */
 export const NAV_FIELD_MAP = {
-  externalId: { keys: ["uuid", "id"], assumed: true },
-  status: { keys: ["status"], assumed: true },
-  title: { keys: ["title"], assumed: true },
-  description: { keys: ["description"], assumed: true },
-  publishedAt: { keys: ["published"], assumed: true },
-  expiresAt: { keys: ["expires"], assumed: true },
-  startDate: { keys: ["starttime"], assumed: true },
-  positions: { keys: ["positioncount"], assumed: true },
-  employmentType: { keys: ["employmentType"], assumed: true },
-  workingTime: { keys: ["extent"], assumed: true },
+  externalId: { keys: ["uuid"], assumed: false },
+  status: { keys: ["status"], assumed: false },
+  title: { keys: ["ad_content.title"], assumed: false },
+  description: { keys: ["ad_content.description"], assumed: false },
+  publishedAt: { keys: ["ad_content.published"], assumed: false },
+  expiresAt: { keys: ["ad_content.expires"], assumed: false },
+  startDate: { keys: ["ad_content.starttime"], assumed: false },
+  positions: { keys: ["ad_content.positioncount"], assumed: false },
+  employmentType: { keys: ["ad_content.engagementtype"], assumed: false },
+  workingTime: { keys: ["ad_content.extent"], assumed: false },
   employer: {
-    keys: ["employer.name", "employer.orgnr", "employer.homepage"],
-    assumed: true,
+    keys: ["ad_content.employer.name", "ad_content.employer.orgnr", "ad_content.employer.homepage"],
+    assumed: false,
   },
   location: {
     keys: [
-      "workLocations[0].country",
-      "workLocations[0].county",
-      "workLocations[0].municipal",
+      "ad_content.workLocations[0].country",
+      "ad_content.workLocations[0].county",
+      "ad_content.workLocations[0].municipal",
     ],
-    assumed: true,
+    assumed: false,
   },
   occupation: {
-    keys: ["categoryList[0].name", "categoryList[0].categoryType", "categoryList[0].code"],
-    assumed: true,
+    keys: ["ad_content.categoryList[].name", "ad_content.categoryList[].categoryType", "ad_content.categoryList[].code"],
+    assumed: false,
   },
-  applicationUrl: { keys: ["applicationUrl", "sourceurl"], assumed: true },
-  /** Feed page wrapper: where the ads sit and where the next token is. */
-  page: { keys: ["items", "items[].ad_content", "next_id"], assumed: true },
+  applicationUrl: { keys: ["ad_content.applicationUrl", "ad_content.sourceurl"], assumed: false },
+  /** Feed page wrapper: where the entries sit and where the next token is. */
+  page: { keys: ["items", "items[]._feed_entry", "items[].url", "next_id"], assumed: false },
 } as const;
 
 // ── typed accessors over an unknown payload ─────────────────────────────────
@@ -144,6 +148,26 @@ function firstRecord(
  * the safe direction for a source whose terms require immediate removal.
  */
 const INACTIVE_STATUS = /^(inactive|deleted|stopped|rejected|expired|removed)$/i;
+
+/** A live ad must say it is live. `ACTIVE` is the only value NAV publishes for
+ *  a live ad (observed alongside `INACTIVE`); anything else — including a
+ *  MISSING status — is treated as a withdrawal, the safe direction for a
+ *  source whose terms require immediate removal. */
+const ACTIVE_STATUS = /^active$/i;
+
+/**
+ * The publisher's occupation category: the ESCO-typed one when NAV supplies it
+ * (observed: ESCO, JANZZ and STYRK08 entries side by side), otherwise the
+ * first entry. The concept id keeps its type so nothing is re-interpreted.
+ */
+function preferredCategory(ad: Record<string, unknown>): Record<string, unknown> | null {
+  const list = field(ad, "categoryList");
+  if (!Array.isArray(list)) return null;
+  const records = list.map(asRecord).filter((r): r is Record<string, unknown> => r !== null);
+  return (
+    records.find((r) => String(r.categoryType ?? "").toUpperCase() === "ESCO") ?? records[0] ?? null
+  );
+}
 
 /**
  * Norwegian employment-form vocabulary (ASSUMED labels — the documented
@@ -251,7 +275,7 @@ export function parseNavAd(args: {
   // NAV to leave our result lists IMMEDIATELY, so anything not clearly
   // active is a withdrawal (`removed` → is_active=false in the store).
   const status = normalizeOptionalText(field(ad, "status"));
-  const removed = status !== null && INACTIVE_STATUS.test(status);
+  const removed = status === null || INACTIVE_STATUS.test(status) || !ACTIVE_STATUS.test(status);
 
   const titleRaw = normalizeTitle(field(ad, "title"));
   if (titleRaw.length === 0 && !removed) {
@@ -271,7 +295,7 @@ export function parseNavAd(args: {
 
   const provider = getVacancyProvider(PROVIDER_KEY);
   const sourceLanguage = provider?.sourceLanguage ?? "nb";
-  const transformVersion = provider?.transformVersion ?? "vacancy-nav-v0-scaffold";
+  const transformVersion = provider?.transformVersion ?? "vacancy-nav-v1";
   const countryIso = provider?.countryIso ?? "NO";
   const attributionCode =
     provider?.attributionCode ?? "vacancySources.attribution.nav";
@@ -291,7 +315,7 @@ export function parseNavAd(args: {
   // Occupation: the publisher's FIRST category, verbatim. NAV categories may
   // be STYRK, JANZZ or ESCO typed; the type and code are kept together as the
   // concept id so nothing is re-interpreted here.
-  const category = firstRecord(ad, "categoryList");
+  const category = preferredCategory(ad);
   const occupationRaw = normalizeOptionalText(category?.name);
   const categoryType = normalizeOptionalText(category?.categoryType);
   const categoryCode = normalizeOptionalText(category?.code);
@@ -334,7 +358,7 @@ export function parseNavAd(args: {
       max: salaryMax,
       description: null,
     },
-    employmentForm: normalizeNorwegianEmploymentForm(field(ad, "employmentType")),
+    employmentForm: normalizeNorwegianEmploymentForm(field(ad, "engagementtype")),
     workingTime: normalizeWorkingTime(field(ad, "extent")),
     positions: normalizePositions(field(ad, "positioncount")),
     startDate: normalizeIsoDate(field(ad, "starttime")),

@@ -57,7 +57,7 @@ export async function SiteFooter() {
     <footer className="relative z-10 mt-24 border-t border-ink-600/60">
       <div className="mx-auto max-w-container px-6 sm:px-12">
         <div className="py-8 opacity-70">
-          <p className="mb-3 font-mono text-meta uppercase tracking-label text-text-muted">
+          <p className="mb-3 font-mono text-meta uppercase tracking-label text-text-secondary">
             {t("activity")}
           </p>
           <ActivityMap />

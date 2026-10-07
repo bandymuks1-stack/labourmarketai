@@ -571,6 +571,34 @@ export const SCOPED_OWNER_WAIVERS = [
       // nothing translated and nothing egressed. The anonymous visitor receives
       // fewer words and the same fields.
       1892,
+      // OWNER APPROVAL 2026-09-29, verbatim: "I approve adding PR #1991 and PR #1993 to the existing
+      // public-acquisition-route-jobs waiver pullRequests, strictly for the
+      // /jobs/[id] signed-in crash fix and the job-page hreflang fix."
+      // Bounded: not authority for any future waived change.
+      //
+      // #1991 — a signed-in reader of a foreign-language ad got the route
+      //         error page: server-to-client FUNCTION labels on the translate
+      //         control. Labels become template strings; no field, policy,
+      //         RLS or copy change.
+      // #1993 — the job page head declares the same language alternates its
+      //         sitemap already declares (one helper). Metadata still reads
+      //         only the anonymous projection.
+      1991, 1993,
+      // OWNER APPROVAL 2026-10-01, verbatim: "Patvirtinu #2045 įtraukimą į abu
+      // /jobs owner-waiver sąrašus."
+      // #2045 — a typed word that is exactly one catalogue profession in the
+      //         reader's language redirects to the SAME profession filter
+      //         (no second search); the search box takes the full row on
+      //         phones. No new route, projection, auth or schema change.
+      2045,
+      // OWNER AUTHORISATION 2026-10-02 (task directive, verbatim intent): the
+      // `/jobs` INTRO_MEMBER change, "if its only purpose is to remove an
+      // already-proven dead end / misleading state"; not authority for broader
+      // marketing, landing or product-structure changes.
+      // #2101 — a SIGNED-IN worker was told "sign in to see the employer…";
+      //         the intro now says to open the vacancy. One string selection,
+      //         no route, projection, auth or schema change.
+      2101,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
@@ -842,7 +870,9 @@ export const SCOPED_OWNER_WAIVERS = [
      */
     scope:
       "The manager hour-allocation surface /dashboard/hours (M3, decision package docs/DECISIONS/0010-owner-migration-decision-package-2026-08-31.md Item 2)",
-    pullRequests: [1344],
+    // #2101 — OWNER AUTHORISATION 2026-10-02 (task directive): the `/hours`
+    // no-company state gets a link to the Work Journal; only that dead end.
+    pullRequests: [1344, 2101],
     // Deliberately empty — the waiver lives IN the branch whose CI must
     // honour it, so pinning the head SHA would change the head SHA.
     approvedHeadShas: [],
@@ -869,6 +899,49 @@ export const SCOPED_OWNER_WAIVERS = [
     expiresAt: "2026-12-31",
     owner:
       "Owner decision, 2026-08-31 closure session — 'HOURS_PRODUCT_GATE_WAIVER: APPROVE' (scope: fresh #1344 / package 0010 only).",
+  },
+
+  {
+    id: "journal-photo-viewer-modal",
+    axioms: ["A-01", "A-09"],
+    /**
+     * JOURNAL PHOTO VIEWER — components/app/journal/journal-photo-viewer.tsx
+     * (PR #2026).
+     *
+     * OWNER APPROVAL, 2026-09-30, given in chat in answer to the gate block
+     * on #2026: option "Scoped owner waiver #2026 (Recommended)" — that the
+     * modal photo viewer is permitted, scoped to this PR and this file.
+     *
+     * WHAT IS BEING EXCUSED. The declaration states honest "no" answers: a
+     * photo zoom is opened by a tap on a thumbnail, not by the conversation,
+     * is not reflected on the map and cannot be operated by the World State.
+     * It refuses to claim otherwise; this record excuses exactly those
+     * answers for this one file.
+     */
+    scope:
+      "The Journal day-object photo viewer — a modal image zoom over the day's own already-signed private photos (owner request 2026-09-30)",
+    pullRequests: [2026],
+    approvedHeadShas: [],
+    postMergeBranches: ["main"],
+    files: ["components/app/journal/journal-photo-viewer.tsx"],
+    // EXACTLY the finding set produced by
+    //   BASE_SHA=origin/main PR_NUMBER=2026 node .github/scripts/product-gate.mjs
+    // on 2026-09-30, AFTER the declaration was added. Verified by running the
+    // gate, not by reading the rules.
+    expectedFindings: [
+      { code: "not_world_state_driven", file: "components/app/journal/journal-photo-viewer.tsx" },
+      { code: "not_reflected_on_map", file: "components/app/journal/journal-photo-viewer.tsx" },
+      { code: "not_ai_controlled", file: "components/app/journal/journal-photo-viewer.tsx" },
+      { code: "ai_cannot_work_with_entity", file: "components/app/journal/journal-photo-viewer.tsx" },
+      { code: "world_state_cannot_control_it", file: "components/app/journal/journal-photo-viewer.tsx" },
+    ],
+    reason:
+      "An image zoom over a private journal photo is a presentation of an already-loaded fact: it fetches, signs and stores nothing, and the assistant has no task in it. The owner asked for it explicitly and approved the waiver in chat.",
+    resolvedBy:
+      "a shared image viewer/lightbox component that the gate recognises as a declared primitive (then delete this record and fold the declaration into it)",
+    expiresAt: "2026-12-31",
+    owner:
+      "Owner decision 2026-09-30, in chat — selected 'Scoped owner waiver #2026 (Recommended)' for the Journal photo viewer modal (scope: #2026 / journal-photo-viewer.tsx only).",
   },
 ];
 

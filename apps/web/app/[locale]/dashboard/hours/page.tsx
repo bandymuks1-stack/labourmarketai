@@ -1,5 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { Link } from "@/lib/i18n/navigation";
+
 import { WorkHoursQuickEntry } from "@/components/app/work-hours-quick-entry";
 import { getHoursPageData, todayKey } from "@/lib/work-hours/hours-page-data";
 import { isValidWorkDate } from "@/lib/work-hours/allocations-model";
@@ -63,6 +65,21 @@ export default async function WorkHoursPage({
               : data.kind === "no-objects"
                 ? t("states.noObjects")
                 : t("states.error")}
+          {/* A person outside a company workspace reaches this screen by link or
+              back-navigation and met a sentence with no way on. Their own hours
+              live in the Work Journal. */}
+          {data.kind === "no-company" ? (
+            <>
+              {" "}
+              <Link
+                href="/dashboard/journal"
+                data-testid="hours-no-company-journal-link"
+                className="font-medium text-brand-blue hover:underline"
+              >
+                {t("states.noCompanyJournalLink")}
+              </Link>
+            </>
+          ) : null}
         </p>
       )}
     </div>

@@ -2,6 +2,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { createConversation, type CommunicationResult } from "./actions";
 import { resolveContactPermission } from "./contact-permission";
+import { findExistingDirectConversation } from "./direct-conversation-core";
 import {
   isContactPermitted,
   type ContactPermissionState,
@@ -41,6 +42,10 @@ export async function getOrCreateDirectConversation(
    * retroactive relabelling). The generic open action passes nothing.
    */
   sourceHint?: ConversationSourceHint | null,
+  /** The project the contact was opened from (a person on it, per the
+   *  caller's own authority) — one more verified engagement fact, never a
+   *  grant by itself. */
+  projectId?: string | null,
 ): Promise<CommunicationResult<{ id: string }>> {
   const supabase = await createClient();
   const {
@@ -53,45 +58,12 @@ export async function getOrCreateDirectConversation(
     return { ok: false, code: "invalid_input", message: "Netinkamas gavėjas." };
   }
 
-  // 1) Dedupe: find an existing DIRECT conversation both profiles are in.
-  const { data: mine } = await supabase
-    .from("conversation_participants")
-    .select("conversation_id")
-    .eq("profile_id", user.id);
-  const myConvIds = [
-    ...new Set(
-      (mine ?? [])
-        .map((r) => (r as { conversation_id: string | null }).conversation_id)
-        .filter((v): v is string => typeof v === "string"),
-    ),
-  ];
-  if (myConvIds.length > 0) {
-    const { data: shared } = await supabase
-      .from("conversation_participants")
-      .select("conversation_id")
-      .eq("profile_id", otherProfileId)
-      .in("conversation_id", myConvIds);
-    const sharedIds = [
-      ...new Set(
-        (shared ?? [])
-          .map((r) => (r as { conversation_id: string | null }).conversation_id)
-          .filter((v): v is string => typeof v === "string"),
-      ),
-    ];
-    if (sharedIds.length > 0) {
-      const { data: direct } = await supabase
-        .from("conversations")
-        .select("id, created_at")
-        .in("id", sharedIds)
-        .eq("kind", "direct")
-        .order("created_at", { ascending: true })
-        .limit(1);
-      const existing = (direct ?? [])[0] as { id: string } | undefined;
-      // allowed_existing_conversation — reopening a shared thread is always
-      // permitted; the conversation was opened through a gated path before.
-      if (existing?.id) return { ok: true, data: { id: existing.id } };
-    }
-  }
+  // 1) Dedupe: find an existing DIRECT conversation both profiles are in —
+  //    the ONE dedupe rule, shared with the explicit-caller core.
+  // allowed_existing_conversation — reopening a shared thread is always
+  // permitted; the conversation was opened through a gated path before.
+  const existingId = await findExistingDirectConversation(supabase, user.id, otherProfileId);
+  if (existingId) return { ok: true, data: { id: existingId } };
 
   // 2) §8.1 gate — a NEW direct conversation needs an explicit permission
   //    state. Trust only an allowed_* grant from a caller that verified its
@@ -99,7 +71,7 @@ export async function getOrCreateDirectConversation(
   //    generic states here. Default-closed.
   const permission = isContactPermitted(grantedPermission)
     ? (grantedPermission as ContactPermissionState)
-    : await resolveContactPermission(otherProfileId);
+    : await resolveContactPermission(otherProfileId, { projectId: projectId ?? null });
   if (!isContactPermitted(permission)) {
     return {
       ok: false,

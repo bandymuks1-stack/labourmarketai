@@ -83,7 +83,7 @@ function effectiveCheckLanguages(table: string): string[] | null {
 
 describe("message language set — one source, no drift", () => {
   it("the send path derives its accepted set from the canonical `communicationLocales` (no second hardcoded list)", () => {
-    const code = readFileSync(join(APP, "lib/communication/actions.ts"), "utf8");
+    const code = readFileSync(join(APP, "lib/communication/communication-core.ts"), "utf8");
     expect(code).toMatch(/import\s*\{\s*communicationLocales\s*\}\s*from\s*"@\/lib\/i18n\/config"/);
     expect(code).toMatch(/\(communicationLocales as readonly string\[\]\)\.includes\(input\.locale\)/);
     // The old private hardcoded array must be gone — that was the drift risk.

@@ -30,6 +30,11 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Velg tilknytning…",
   "engagementAmbiguous": "Dette arbeidet kan høre til mer enn én tilknytning. Velg hvilken før du lagrer.",
+  "project": "Prosjekt",
+  "projectChoose": "Velg prosjekt…",
+  "projectNone": "Ikke prosjektarbeid",
+  "projectAmbiguous": "Du er tildelt flere prosjekter. Velg før du lagrer hvilket prosjekt disse timene hører til (eller marker dem som ikke prosjektarbeid).",
+  "projectAuto": "Prosjekt: {name}",
   "unconfirmedTimeBlocked": "{count} registrerte varigheter venter fortsatt på gjennomgang og ville ikke bli lagret. Behold eller fjern dem først.",
   "entry": {
     "status": {
@@ -243,7 +248,11 @@
     "sessionExpired": "Økten er utløpt. Logg inn på nytt.",
     "noWorkerProfile": "Fant ikke arbeidstakerprofil. Åpne kontoinnstillingene og aktiver arbeidstakerrollen.",
     "engagementRequired": "Velg arbeidskonteksten (organisasjon eller prosjekt) som denne oppføringen hører til.",
+    "projectNotAssignable": "Det valgte prosjektet er ikke tildelt deg eller tilhører en annen organisasjon. Velg et prosjekt fra listen.",
     "notesRequired": "Beskriv hva du jobbet med — friteksten er kjernen i oppføringen.",
+    "workDateRequired": "Velg dagen arbeidet ble utført.",
+    "workDateInvalid": "Arbeidsdatoen er ikke en gyldig dato.",
+    "workDateFuture": "Arbeidsdatoen kan ikke være i fremtiden.",
     "quantityInvalid": "Mengden må være et ikke-negativt tall.",
     "unitSlugUnknown": "Denne enheten gjenkjennes ennå ikke: {units}. Velg en annen enhet, eller prøv igjen senere.",
     "sourceDocumentInvalid": "Det angitte kildedokumentet ble ikke funnet blant dokumentene dine.",

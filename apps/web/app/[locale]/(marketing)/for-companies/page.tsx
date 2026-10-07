@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
+import { WorkLifecycleSection } from "@/components/marketing/work-lifecycle-section";
 import { BenefitCards } from "@/components/marketing/benefit-cards";
 
 export async function generateMetadata({
@@ -40,6 +41,7 @@ export default async function ForCompaniesPage({
         ctaSource="companies_hero"
         ctaAudience="companies"
       />
+      <WorkLifecycleSection audience="companies" />
       <BenefitCards items={benefits} />
       <RoleEnrichment
         root="companies"

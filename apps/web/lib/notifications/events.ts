@@ -108,7 +108,25 @@ export type NotificationEventType =
   // and a campaign link notifies once per invitation — not once per seat,
   // which would turn a 30-person crew into 30 bells for the same fact. The
   // href is the network page, where the sent list already shows who joined.
-  | "invitation_accepted";
+  | "invitation_accepted"
+  // v9 (20261001110000, stream N): a REAL, ACTIVE job that fits what the
+  // worker themselves said they want (profession + preferred countries +
+  // salary expectation, from their existing work card). Recipient is the
+  // worker. entity_id is a deterministic uuid of this ad IN THIS REVISION
+  // (`job_alert:<vacancy id>:<content hash>`), so with UNIQUE (recipient,
+  // dedupe_key) the same unchanged job is never announced twice. metadata
+  // carries only PUBLIC ad facts (title, country, stated EUR pay, vacancy id).
+  | "job_alert"
+  // v10 (20261002140000): a new message in a conversation the recipient takes
+  // part in. Recipient is every OTHER participant, never the author. A burst
+  // in one thread COALESCES (see messageReceivedEntityId): the row is a
+  // pointer to the thread, never a copy of what was written.
+  | "message_received"
+  // v10: a manager decided a journal entry (confirmed / rejected / changes
+  // requested). Recipient is the WORKER whose entry it is — never the
+  // reviewer. metadata.decision names which of the three it was; the note the
+  // reviewer wrote never leaves the review row.
+  | "journal_review_decided";
 
 export type NotificationEntityType =
   | "booking_request"
@@ -136,7 +154,14 @@ export type NotificationEntityType =
   // criteria recomputes the answer live.
   | "saved_search"
   // v8: the canonical invitation row, seen from the inviter's side.
-  | "invitation";
+  | "invitation"
+  // v9: one public vacancy — resolves to its own page, /jobs/<vacancyId>.
+  | "public_vacancy"
+  // v10: one conversation — resolves to the thread itself when the row
+  // carries its (uuid-validated) conversationId, else to the inbox.
+  | "conversation"
+  // v10: the reviewed journal entry — resolves to the worker's journal.
+  | "journal_entry";
 
 /**
  * The canonical RUNTIME list of the code-side event types — the union above,
@@ -169,6 +194,9 @@ export const NOTIFICATION_EVENT_TYPES = [
   "weekly_digest",
   "saved_search_match",
   "invitation_accepted",
+  "job_alert",
+  "message_received",
+  "journal_review_decided",
 ] as const satisfies readonly NotificationEventType[];
 
 /** Compile-time exhaustiveness: a union member missing from the runtime list
@@ -241,7 +269,19 @@ export const NOTIFICATION_ENTITY_HREF: Record<NotificationEntityType, string> = 
   // v8: the sent-invitations list on the network page is where an inviter
   // already sees each invitation's state (opened / joined / accepted).
   invitation: "/dashboard/network",
+  // v9: the bare route is a fallback only — `notificationEventHref` resolves a
+  // job alert to the SPECIFIC ad (`/jobs/<vacancyId>`) from its metadata.
+  public_vacancy: "/jobs",
+  // v10: bare route is the inbox fallback; `notificationEventHref` resolves a
+  // message row to its own thread (`/dashboard/communication/<id>`).
+  conversation: "/dashboard/communication",
+  // v10: the journal is where the worker already sees each entry's review
+  // state; the reviewed entry is on the page the notification opens.
+  journal_entry: "/dashboard/journal",
 };
+
+const VACANCY_ID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** The canonical surface for a stored event, or undefined for an unknown
  *  entity type — an unmapped type renders as a plain row rather than a link
@@ -263,6 +303,23 @@ export function notificationEventHref(
   if (entityType === "weekly_digest" && metadata?.focus === "journal") {
     return "/dashboard/journal";
   }
+  // A job alert opens THE JOB it is about, not a list: the click lands on the
+  // real ad, where the worker can read it and take the next action.
+  if (
+    entityType === "public_vacancy" &&
+    typeof metadata?.vacancyId === "string" &&
+    VACANCY_ID_RE.test(metadata.vacancyId)
+  ) {
+    return `/jobs/${metadata.vacancyId}`;
+  }
+  // A message notification opens THE THREAD, not the inbox list.
+  if (
+    entityType === "conversation" &&
+    typeof metadata?.conversationId === "string" &&
+    VACANCY_ID_RE.test(metadata.conversationId)
+  ) {
+    return `/dashboard/communication/${metadata.conversationId}`;
+  }
   return NOTIFICATION_ENTITY_HREF[entityType as NotificationEntityType];
 }
 
@@ -276,6 +333,13 @@ export function notificationRenderedType(
   metadata?: NotificationEventMetadata,
 ): string {
   if (
+    eventType === "journal_review_decided" &&
+    metadata?.decision &&
+    (JOURNAL_REVIEW_DECISIONS as readonly string[]).includes(metadata.decision)
+  ) {
+    return `event_journal_review_decided_${metadata.decision}`;
+  }
+  if (
     eventType === "weekly_digest" &&
     metadata?.focus &&
     (WEEKLY_DIGEST_FOCUS as readonly string[]).includes(metadata.focus)
@@ -287,7 +351,32 @@ export function notificationRenderedType(
 
 /** The ONLY metadata keys an event may carry — safe render hints, never
  *  free-form text. Widening this list is a reviewable act. */
-const SAFE_METADATA_KEYS = ["country", "roleSlug", "startDate", "focus"] as const;
+const SAFE_METADATA_KEYS = [
+  "country",
+  "roleSlug",
+  "startDate",
+  "focus",
+  // v9 job alert: PUBLIC ad facts only — the ad's own headline, its stated EUR
+  // pay (absent when unknown) and its id. Never a worker fact, never a score.
+  "title",
+  "salary",
+  "vacancyId",
+  // v10 message: the thread's own (opaque uuid) id — a link target, never
+  // content. Validated as a uuid again when the href is built.
+  "conversationId",
+  // v10 journal review: one of JOURNAL_REVIEW_DECISIONS — which outcome the
+  // worker is being told about. Never the reviewer's note.
+  "decision",
+] as const;
+
+/** The three outcomes a journal review can record (the review RPC's own
+ *  vocabulary — lib/journal/review-status REVIEW_DECISIONS). */
+export const JOURNAL_REVIEW_DECISIONS = [
+  "approved",
+  "rejected",
+  "changes_requested",
+] as const;
+export type JournalReviewDecision = (typeof JOURNAL_REVIEW_DECISIONS)[number];
 
 /**
  * `focus` — what a WEEKLY DIGEST row may truthfully claim (2026-09-17).

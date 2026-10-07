@@ -3,7 +3,10 @@ import "server-only";
 import { z } from "zod";
 import { getTranslations } from "next-intl/server";
 
-import { createJournalEntryCore } from "@/lib/journal/journal-write-core";
+import {
+  createJournalEntryCore,
+  projectsToChooseFrom,
+} from "@/lib/journal/journal-write-core";
 import { journalChainFingerprint } from "@/lib/journal/journal-chain-fingerprint";
 import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 import { fd } from "@/lib/conversation/executor-contract";
@@ -31,6 +34,11 @@ import {
   mintCapabilityConfirmation,
   verifyCapabilityConfirmation,
 } from "./confirmable";
+import { demandContextRefusal } from "./employer-context-refusal";
+import { EMPLOYER_OPERATIONS_CAPABILITIES } from "./employer-operations-capabilities";
+import { MARKETPLACE_CAPABILITIES } from "./marketplace-capabilities";
+import { MESSAGING_CAPABILITIES } from "./messaging-capabilities";
+import { COMPANY_INGEST_CAPABILITIES } from "./company-ingest-capabilities";
 import { EVIDENCE_IMPORT_CAPABILITIES } from "./evidence-import-capabilities";
 import { PEOPLE_INGEST_CAPABILITIES } from "./people-ingest-capabilities";
 import {
@@ -411,12 +419,16 @@ function normalizedDraftForHash(draft: {
   notes: string;
   workDate: string;
   siteName?: string | null;
+  projectId?: string | null;
 }): Record<string, unknown> {
   return {
     engagementContextId: draft.engagementContextId,
     notes: draft.notes,
     workDate: draft.workDate,
     siteName: draft.siteName ?? null,
+    // The project the hours belong to ("none" = deliberately not project
+    // work) is part of what the human confirmed, so it is part of the hash.
+    projectId: draft.projectId ?? null,
   };
 }
 
@@ -635,6 +647,21 @@ const journalCreateDraft: CapabilityDescriptor = {
         },
       };
     }
+    if (!draft.projectId) {
+      const choices = await projectsToChooseFrom(caller.supabase, caller.userId, engagement.id);
+      if (choices) {
+        // NOTHING preselected, NO token minted — same shape as the
+        // engagement choice. "none" answers "not project work".
+        return {
+          ok: true,
+          data: {
+            status: "project_required",
+            options: choices.map((p) => ({ projectId: p.id, label: p.label })),
+            note: 'This worker has more than one active project here. Ask the user which project these hours belong to (or "not project work", projectId "none"), then draft again with projectId.',
+          },
+        };
+      }
+    }
     const state = await journalChainFingerprint(caller);
     if (!state.ok) return state.result;
     const resolved = {
@@ -642,6 +669,7 @@ const journalCreateDraft: CapabilityDescriptor = {
       notes: draft.notes,
       workDate: draft.workDate,
       siteName: draft.siteName ?? null,
+      projectId: draft.projectId ?? null,
     };
     const token = mintCapabilityConfirmation({
       actionId: "journal.confirm",
@@ -657,6 +685,7 @@ const journalCreateDraft: CapabilityDescriptor = {
           siteName: resolved.siteName,
           notes: resolved.notes,
           engagementContextId: resolved.engagementContextId,
+          projectId: resolved.projectId,
           // The RESOLVED context, named — the human must SEE which context
           // the entry will land in before confirming (preselect-and-show,
           // never silently assign).
@@ -730,12 +759,24 @@ const journalConfirm: CapabilityDescriptor = {
         notes: draft.notes,
         work_date: draft.workDate,
         site_name: draft.siteName ?? "",
+        project_id: draft.projectId ?? "",
         // The stated time becomes time on the record — the same derivation
         // the conversation executor applies (issue #1689).
         ...intakeWorkTimeFields(draft.notes, draft.workDate),
       }),
     );
     if (!result.ok) {
+      if (result.code === "project_required" && result.projects) {
+        // The write core is the net: surface the choices, never a bare error.
+        return {
+          ok: true,
+          data: {
+            status: "project_required",
+            options: result.projects.map((p) => ({ projectId: p.id, label: p.label })),
+            note: "Nothing was saved. Ask the user which project, then draft again with projectId.",
+          },
+        };
+      }
       return { ok: false, code: result.code, message: result.message };
     }
     return {
@@ -1430,39 +1471,6 @@ function normalizedDemandForHash(draft: DemandDraftInput): Record<string, unknow
   return out;
 }
 
-/** Employer-context refusal → an honest capability failure. `context.switch`
- *  is named because it is the caller's own way out of the personal space. */
-function demandContextRefusal(reason: string): ExecResult {
-  if (reason === "personal-workspace") {
-    return {
-      ok: false,
-      code: "personal_workspace",
-      message:
-        "The caller is acting in their personal space. A structured need belongs to an organization — switch with context.switch first.",
-    };
-  }
-  if (reason === "no-organization") {
-    return {
-      ok: false,
-      code: "no_organization",
-      message: "This account belongs to no organization, so it cannot create a demand.",
-    };
-  }
-  if (reason === "needs-migration") {
-    return {
-      ok: false,
-      code: "needs_migration",
-      message: "The organization store is not enabled on this environment.",
-    };
-  }
-  return {
-    ok: false,
-    code: "no_company_context",
-    message:
-      "No employer company resolves for this caller right now (workspace not company-bound, membership missing, or the read failed).",
-  };
-}
-
 const demandCreateDraft: CapabilityDescriptor = {
   id: "demand.create_draft",
   kind: "draft",
@@ -1732,10 +1740,24 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   contextList,
   contextSwitch,
   workforceAvailability,
-  // Organization evidence import — the ELEVEN capabilities that give an
+  // Employer operations — what the organization needs, who it has, where
+  // they work, what waits for its review — over the SAME cores and RPCs the
+  // web company surfaces call (`employer-operations-capabilities.ts`).
+  ...EMPLOYER_OPERATIONS_CAPABILITIES,
+  // The marketplace meeting point — candidate search and the shortlist over
+  // the SAME scouting/shortlist cores the web page runs, plus the named
+  // conditions that keep a person from being matchable or discoverable.
+  ...MARKETPLACE_CAPABILITIES,
+  // In-app conversations over the SAME core the web composer runs.
+  ...MESSAGING_CAPABILITIES,
+  // Real market companies in as DISCOVERED organizations (owner NULL) —
+  // the marketplace_company_ingest capability only; import is never a claim.
+  ...COMPANY_INGEST_CAPABILITIES,
+  // Organization evidence import — the FIFTEEN capabilities (thirteen steps;
+  // attest and withdraw are each a draft→confirm pair) that give an
   // authorized assistant the same historical-import flow the web UI performs,
   // over the same domain core (`lib/organization-evidence/import-core.ts`).
-  // Declared as a group because they are one flow, not eleven unrelated
+  // Declared as a group because they are one flow, not fifteen unrelated
   // actions; each descriptor is still reviewed individually in its own file.
   ...EVIDENCE_IMPORT_CAPABILITIES,
   // Organization people ingestion — the roster half of the same architecture.

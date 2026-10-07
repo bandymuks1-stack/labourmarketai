@@ -15,6 +15,12 @@ import {
   parseEmailVerification,
   parseRedirectToHint,
 } from "@/lib/auth/email-confirm";
+import {
+  VERIFY_RESULT_PARAM,
+  isVerifyEmailFlow,
+  verifyOutcomeToParam,
+  type VerifyResultParam,
+} from "@/lib/auth/email-verification";
 import { routing } from "@/lib/i18n/routing";
 
 /**
@@ -172,6 +178,21 @@ export async function GET(
       return NextResponse.redirect(loginUrl);
     }
 
+    // PROGRESSIVE EMAIL PROOF (flow=verify_email): the session just minted
+    // from the mailed one-time link is the evidence; the database decides
+    // (confirm_my_email_v1 checks the signed `amr` claim, the pending request
+    // and that the address is still the live one). A failure never blocks
+    // sign-in — the person is simply still unverified and is told so.
+    let verifyResult: VerifyResultParam | null = null;
+    if (isVerifyEmailFlow(url.searchParams)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: vData, error: vError } = await (supabase as any).rpc(
+        "confirm_my_email_v1",
+      );
+      verifyResult = vError ? "failed" : verifyOutcomeToParam(vData?.outcome);
+      console.info("[auth/callback] email proof", { trace: traceId, result: verifyResult });
+    }
+
     const { data: profile } = await supabase
       .from("profiles")
       .select("onboarded_at, locale, full_name, email")
@@ -272,7 +293,9 @@ export async function GET(
       trace: traceId,
       onboarded: !!profile?.onboarded_at,
     });
-    return withLocaleCookie(NextResponse.redirect(new URL(safeNext, url.origin)));
+    const destination = new URL(safeNext, url.origin);
+    if (verifyResult) destination.searchParams.set(VERIFY_RESULT_PARAM, verifyResult);
+    return withLocaleCookie(NextResponse.redirect(destination));
   } catch (e) {
     // Without this the bare catch silently swallowed every unexpected error
     // (env throws, fetch failures, etc.) and the user saw `error=callback`

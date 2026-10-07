@@ -359,6 +359,15 @@ audit.
   `chat-visibility-rls.test.ts` caller inventory. Full design and acceptance
   evidence: `docs/handoffs/FIRST_PARTY_SUPPLY_BRIDGE_V1.md`.
 
+- **2026-10-06 — `lib/invitations/signup-bridge.ts`** (frictionless addressed
+  invite, PR #2167). Calls ONE service_role-only SECURITY DEFINER read,
+  `get_invitation_signup_context_v1` (migration `20261006100500`, RED, not
+  applied), through the admin client to prefill the invited address on the
+  signup page - the same pattern and ACL as `public-preview.ts`. It reads no
+  table directly, writes nothing, touches no chat table, answers only for a
+  still-usable addressed invitation, and grants nothing: acceptance still needs
+  the session e-mail to equal the invited address (`20261003151100`).
+
 - **2026-09-17 — `lib/invitations/external-referral-receive.ts` and
   `lib/invitations/public-preview.ts`** (universal invitation / referral
   network v1). Both call service_role-ONLY SECURITY DEFINER functions from
@@ -390,3 +399,17 @@ audit.
   `not_configured` before the key is touched. Touches no chat table. Pinned
   in the `chat-visibility-rls.test.ts` caller inventory. Contract:
   `docs/integrations/NONSTOP_COMMERCIAL_HANDOFF_V1.md`.
+- **2026-09-30 — `lib/profile/avatar.ts` `getAvatarForVisibleWorker()`**
+  (owner decision D1: a worker's profile photo for the people who have a
+  REAL work relationship with them). The service key is used for ONE
+  operation only — `storage.createSignedUrl(path, 3600)` on the private
+  `profile-avatars` bucket — and only for a path the database has just
+  returned to the VIEWER's own session through the SECURITY DEFINER RPC
+  `worker_avatar_path_v1` (migration `20260930133500`, RED, owner-gated):
+  the worker themselves, or an ACTIVE company roster / agency roster /
+  engagement in a managed organization / assignment on a manageable
+  project. The discovery-consent branch of `can_view_worker()` is
+  deliberately NOT a basis, and a role alone never is. The path must lie in
+  the worker's own `<profile_id>/` folder. No table read with the key, no
+  chat table, no write, nothing public; any failure → the initials
+  monogram. Pinned in the `chat-visibility-rls.test.ts` caller inventory.

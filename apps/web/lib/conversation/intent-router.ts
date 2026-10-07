@@ -32,6 +32,7 @@ import {
   SEEK_VERB_SOURCE,
 } from "@/lib/structuring/role-label";
 import { PRESENT_ACTIVITY_VERB_SOURCE } from "@/lib/structuring/value-statement";
+import { HELP_TOPICS } from "./product-help-topics";
 
 export type ConversationIntent =
   | "log-work" // "šiandien dirbau nuo 8 iki 17" — record a work-journal entry
@@ -77,6 +78,23 @@ export type ConversationIntent =
   | "candidates" // "parodyk kandidatus" / "my candidates" — demand review
   | "find-workers" // "surask darbuotojų" — scouting, NOT demand intake
   | "need-service" // "reikia, kad kas nors sutaisytų stogą" — a JOB done, not a job
+  /**
+   * "Noriu rasti partnerių savo verslui" / "find business partners" — the
+   * speaker seeks other BUSINESSES to work with. Measured on production
+   * (owner 2026-10-01): the sentence scored 0, fell to the model proposer,
+   * and was answered as a JOB SEARCH ("Radau 5…", "Man tinkantys darbai") —
+   * the meaning of the request silently changed. A partner is neither a
+   * worker to hire (`need-workers`) nor a job to take (`find-work`); it is a
+   * business-side market question, answered in the company context over the
+   * marketplace surfaces that already exist.
+   */
+  | "find-partners"
+  /** "Kaip pridėti žmogų?" / "Kur mano valandos?" — HOW to use the product, answered in words with the door that does it (product-help-topics.ts). */
+  | "product-help"
+  /** "Kokių naujų darbų man atsirado?" — the NEW ads that fit the person's own preferences, over the one job-alert matching (new-jobs.ts). */
+  | "new-jobs"
+  /** "Parašyk Jonui" / "atidaryk pokalbį su Jonu" — open the ONE conversation with a named person (chat-open-conversation). */
+  | "open-conversation"
   | "context" // "ką tu apie mane žinai?"
   /**
    * "Ką galiu padaryti šioje paskyroje?" — WHAT CAN I ACHIEVE FROM HERE.
@@ -280,8 +298,17 @@ type IntentRule = { intent: ConversationIntent; patterns: Pattern[] };
  * the `u` flag), so short stems like `cv`/`job` stay properly bounded across
  * every launch language.
  */
+// A COMPACT letter/number class over the scripts the product speaks (Latin
+// incl. extended + additional, Greek, Cyrillic, Georgian, digits). It replaced
+// `[\p{L}\p{N}]` inside the boundary because V8 expands the property classes
+// into hundreds of ranges, eight times per boundary, across ~700 patterns: the
+// first sentence of a process cost ~2.8 s to compile and now costs ~90 ms
+// (router-boundary-cost.test.ts). Do not put `\p{...}` back in the boundary.
+const WORD_CLASS =
+  "[0-9A-Za-z\\u00C0-\\u024F\\u0370-\\u03FF\\u0400-\\u052F\\u10A0-\\u10FF\\u1C90-\\u1CBF\\u1E00-\\u1EFF]";
+
 export const UNICODE_WORD_BOUNDARY =
-  "(?:(?<![\\p{L}\\p{N}])(?=[\\p{L}\\p{N}])|(?<=[\\p{L}\\p{N}])(?![\\p{L}\\p{N}]))";
+  "(?:(?<!" + WORD_CLASS + ")(?=" + WORD_CLASS + ")|(?<=" + WORD_CLASS + ")(?!" + WORD_CLASS + "))";
 
 const UB = UNICODE_WORD_BOUNDARY;
 
@@ -651,6 +678,17 @@ const RULES: IntentRule[] = [
       // "I need … work" (10) — a LEARN verb is not a job search. Bound to WORK, so the
       // bare "ką turėčiau mokytis?" stays the learning compass (8).
       p("(ką|ka|what|что)\\s*.{0,16}(turėčiau|reikėtų|reikia|should\\s+i|do\\s+i\\s+need\\s+to|need\\s+to|нужно|надо)\\s*.{0,8}(išmokti|pramokti|learn|выучить|освоить|научиться)\\s*.{0,40}(dirbti|darb|work|job|работ)", 11),
+      // "Ko man trūksta / ko reikia, kad galėčiau dirbti X?" — the person
+      // asks what THEY lack for a named work (owner 2026-09-29 §13).
+      // Measured: need-workers (a hiring flow for a person asking about
+      // themselves) / unknown. Bound to the FIRST PERSON doing the work
+      // ("kad galėčiau dirbti", "am I missing … to work as", "um … zu
+      // arbeiten", "чтобы работать"), so "I need someone to work as a
+      // welder" keeps need-workers.
+      p("(ko|ką|ka)\\s+.{0,12}(trūksta|reikia|reikėtų)\\s*.{0,24}kad\\s+(galėčiau\\s+(dirbti|būti|tapti)|dirbčiau|tapčiau)", 12),
+      p("(what|which)\\s+.{0,20}(am\\s+i\\s+(missing|lacking)|do\\s+i\\s+(need|lack|miss))\\s*.{0,24}to\\s+(work\\s+as|become)\\b", 12),
+      p("(was|welche)\\s+.{0,30}(lernen|fehlt\\s+mir)\\s*.{0,30}(um\\s+.{0,30}zu\\s+arbeiten|zu\\s+werden)", 12),
+      p("(чему|что)\\s+.{0,20}(научиться|выучить|освоить|не\\s+хватает)\\s*.{0,24}чтобы\\s+(работать|стать)", 12),
       p("(what|which)\\s+skills?\\s*(am\\s+i|do\\s+i)?\\s*(missing|lack|need)", 5),
       p("(каких|какие)\\s+навык", 5),
       p("skill\\s*gap", 4),
@@ -950,7 +988,10 @@ const RULES: IntentRule[] = [
       // …and the noun stem was `žmoni`, which does not occur in "žmones" —
       // the ordinary plural. Only "žmonių"/"žmonėms" ever matched, so the
       // most natural phrasing missed on the stem as well as on the gap.
-      p("(surask|parodyk|rodyk|peržiūrėk)\\s*.{0,24}(darbuotoj|žmon)", 6),
+      // "Rask darbuotoją" / "rasti darbuotojų" scored 4 on need-workers (the
+      // demand FORM) because `rask`/`rasti` were not scouting verbs; they are
+      // the same ask as "surask darbuotojų" (owner 2026-10-01).
+      p("(surask|\\brask\\b|\\brasti\\b|parodyk|rodyk|peržiūrėk)\\s*.{0,24}(darbuotoj|žmon)", 6),
       p("(найди|покажи)\\s*.{0,24}(работник)", 6),
       // The imperative SHOW/FIND framing in DE/NL — scouting, exactly like
       // "surask darbuotojų". "Wir brauchen/zoeken Mitarbeiter" (a NEED) stays
@@ -1313,7 +1354,7 @@ const RULES: IntentRule[] = [
     // and not the others.
     intent: "capabilities",
     patterns: [
-      p("(ką|kas)\\s+(aš\\s+)?galiu\\s+(čia\\s+|šioje\\s+|šitoje\\s+|dabar\\s+)?[^.]{0,24}(padaryti|daryti|nuveikti)", 6),
+      p("(ką|kas)\\s+(aš\\s+|čia\\s+)?galiu\\s+(čia\\s+|šioje\\s+|šitoje\\s+|dabar\\s+)?[^.]{0,24}(padaryti|daryti|nuveikti)", 6),
       p("(ką|kas)\\s+(čia|šioje\\s+paskyroje|šioje\\s+sistemoje)\\s+galima\\s+(pa)?daryti", 6),
       p("kam\\s+skirta\\s+(ši|šita)\\s+(paskyra|sistema|platforma)", 4),
       // ── AND THE SAME QUESTION ASKED ABOUT THE ORGANIZATION (E, 2026-09-10).
@@ -2814,6 +2855,65 @@ const RULES: IntentRule[] = [
     ],
   },
   {
+    // FIND BUSINESS PARTNERS (owner 2026-10-01). Direction rule, not a
+    // deny-list: a seek verb (any launch language) bound, within three
+    // words, to the PARTNER noun. The words between may never be a WORK noun
+    // — "ieškau darbo pas partnerius" is a job search that names a partner,
+    // and `find-work` keeps it. Weight 15 sits above the 6 that
+    // `need-workers` scores by accident on the genitive "partnerių"
+    // (…-erių is an occupation suffix) and above find-work's 14.
+    intent: "find-partners",
+    patterns: [
+      p(
+        "(?:\\bras(?:ti|k|iu|ime)\\b|\\bsurast\\w*|\\bsurask\\w*|\\bieskau\\b|\\bieskome\\b|\\bieskok\\w*|\\bieskoti\\b|\\bnoriu\\b|\\bnorime\\b|\\breikia\\b|\\bpadek\\w*\\s+rasti|" +
+          "\\bfind\\b|\\bsearch\\b|\\blook(?:ing)?\\s+for\\b|\\bseek(?:ing)?\\b|\\bneed\\b|\\bwant\\b|\\bget\\b|" +
+          "найти|найди|найду|ищу|ищем|искать|нужны|нужен|хочу|хотим|" +
+          "\\bfinde\\w*|\\bfinden\\b|\\bsuche\\w*|\\bbrauche\\w*|\\bzoek\\w*|\\bvind\\w*|" +
+          "\\bszukam\\b|\\bszukamy\\b|\\bznajdz\\w*|\\bznalezc\\b|\\bpotrzebuj\\w*|\\bchce\\w*|\\bchcemy\\b|\\bmochte\\w*|\\bwollen\\b|\\bwil\\b|\\bwillen\\b)" +
+          "\\s+(?:(?!darb|job|work|работ|vakans|arbeit|stelle|werk|baan|prac)[^\\s]+\\s+){0,3}?" +
+          "(?:[^\\s]{0,14}partner[^\\s]*|[^\\s]{0,14}партнер[^\\s]*|" +
+          // THE OTHER BUSINESSES A COMPANY WORKS WITH (owner 2026-10-01):
+          // suppliers, subcontractors and service providers are the same
+          // business-side market question as a partner, never a hire and never
+          // a job.
+          "tiekej[^\\s]*|supplier[^\\s]*|subrangov[^\\s]*|subcontractor[^\\s]*|paslaug[^\\s]*\\s+teikej[^\\s]*|" +
+          "service\\s+provider[^\\s]*|lieferant[^\\s]*|subunternehmer[^\\s]*|leverancier[^\\s]*|onderaannemer[^\\s]*|" +
+          "поставщик[^\\s]*|подрядчик[^\\s]*|dostawc[^\\s]*|podwykonawc[^\\s]*|uslugodawc[^\\s]*)",
+        15,
+      ),
+    ],
+  },
+  {
+    // PRODUCT HELP (owner 2026-10-01): "how do I / where is / what does this
+    // mean" about the product itself. The patterns come from the SAME data the
+    // chat handler reads the topic back from (`product-help-topics.ts`), so the
+    // router and the answer cannot disagree. Weight 16 sits above every rule
+    // these sentences used to fall into by accident ("Kaip suplanuoti
+    // darbuotoją" scored 4 on need-workers, "Kaip naudotis šiuo projektu" 3 on
+    // projects, "Kaip pasiūlyti paslaugą" 6 on offer-value).
+    intent: "product-help",
+    patterns: HELP_TOPICS.flatMap((topic) => topic.sources.map((src) => p(src, 16))),
+  },
+  {
+    // NEW WORK SINCE LAST TIME (owner 2026-10-01). "Kokių naujų darbų man
+    // atsirado?" is not a fresh search: it asks what APPEARED for this person,
+    // which the job-alert matching (the one behind the notification bell)
+    // answers from the person's own preferences. The new-work word and a
+    // "appeared / new for me" frame are both required, so "ieškau darbo" and
+    // "rask man darbą" stay the search.
+    intent: "new-jobs",
+    patterns: [
+      p("\\bnauj\\w*\\s+(?:\\w+\\s+){0,2}(?:\\bdarb(?:u|ai|o|us|a)\\b|skelbim|vakansij|galimyb|pasiulym)\\w*", 15),
+      p("(?:\\bdarb(?:u|ai|o|us|a)\\b|skelbim|vakansij|galimyb|pasiulym)\\w*\\s+(?:\\w+\\s+){0,2}(?:atsirad|pasirod|atsirasd)\\w*", 15),
+      p("\\b(?:any\\s+)?new\\s+(?:jobs?|vacanc\\w+|openings?|opportunit\\w+|postings?)\\b", 15),
+      p("\\bnew\\s+(?:jobs?|work)\\s+(?:for\\s+me|appeared|came\\s+up|since)", 15),
+      p("нов[^\\s]*\\s+(?:ваканс|работ|предложен)[^\\s]*", 15),
+      p("\\bneue\\s+(?:jobs?|stellen|stellenangebote)\\b", 15),
+      p("\\bnieuwe\\s+(?:vacatures|banen|jobs)\\b", 15),
+      p("\\bnowe\\s+(?:oferty|prace|og[lł]oszenia)\\b", 15),
+    ],
+  },
+  {
     intent: "find-work",
     patterns: [
       // ── THE PERSON SEEKS WORK, NOT A WORKER (SEP-4: DEMAND ≠ SUPPLY) ────
@@ -3158,6 +3258,26 @@ const RULES: IntentRule[] = [
       p("\\bvertimą\\b", 2),
       p("(į|to|на)\\s+(olandų|nyderland|dutch|nederlands|немецк|anglų|english)", 1),
       p("(auf|ins|naar(\\s+het)?)\\s+(deutsch|englisch|niederländisch|nederlands|engels|duits|litouws)", 1),
+    ],
+  },
+  {
+    // OPEN THE CONVERSATION WITH A NAMED PERSON (owner 2026-10-01). The ONE
+    // conversation system is the Messages page; the chat only resolves WHO and
+    // opens it (lib/communication/chat-open-conversation.ts) — it sends nothing.
+    // Every pattern requires a person-like token after the verb, and the
+    // `parašyk` form refuses the targets `write-employer` owns ("šiai įmonei",
+    // "darbdaviui", "man") and the things one writes that are not a person
+    // ("laišką", "CV", "ataskaitą"), so that route keeps its sentences.
+    intent: "open-conversation",
+    patterns: [
+      p("\\b(?:parasyk|parasykite|rasyk)\\s+(?:(?:jam|jai|zinute|zinutes)\\s+)?(?!siai\\b|sitam\\b|siam\\b|tam\\b|tai\\b|visiems\\b|imonei|imonej|darbdav|man\\b|kam\\b|laisk|cv\\b|ataskait|santrauk|pranesim|aprasym|tekst|atsakym|pasiulym|skelbim|zinut)[^\\s]{3,}", 9),
+      p("(?:pokalb\\w*|pasikalb\\w*)\\s+su\\s+[^\\s]{3,}", 12),
+      p("\\bsusisiek\\s+su\\s+(?!siuo\\b|sia\\b|siai\\b|imone)[^\\s]{3,}", 12),
+      p("\\b(?:message|chat\\s+with|talk\\s+to|open\\s+(?:a\\s+)?(?:conversation|chat)\\s+with)\\s+(?!the\\b|this\\b|my\\b|them\\b|an?\\b|company\\b|employer\\b|us\\b|me\\b|support\\b)[^\\s]{2,}", 10),
+      p("(?:напиши|написать|свяжись\\s+с|открой\\s+(?:чат|диалог)\\s+с)\\s+(?!этой\\b|этому\\b|компании|работодател)[^\\s]{3,}", 10),
+      p("\\b(?:schreib|schreibe|kontaktiere|offne\\s+(?:ein\\s+)?(?:gesprach|chat)\\s+mit)\\s+(?!der\\b|dieser\\b|dem\\b|mir\\b|uns\\b)[^\\s]{3,}", 10),
+      p("\\b(?:open\\s+een\\s+(?:gesprek|chat)\\s+met|chat\\s+met|stuur)\\s+(?!de\\b|dit\\b|mij\\b|ons\\b)[^\\s]{3,}", 10),
+      p("\\b(?:napisz\\s+do|skontaktuj\\s+sie\\s+z|otworz\\s+(?:rozmowe|czat)\\s+z)\\s+(?!tej\\b|tego\\b|mnie\\b)[^\\s]{3,}", 10),
     ],
   },
   {

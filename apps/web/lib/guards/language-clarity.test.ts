@@ -153,7 +153,7 @@ describe("honesty helper text — write in your own language; the original is wh
     expect(composer).toMatch(/communicationLocales\.map\(/);
     expect(composer).toMatch(/originalLanguage: writeLang/);
     // the server accepts only communication locales — never a guessed code
-    const actions = read("lib/communication/actions.ts");
+    const actions = read("lib/communication/communication-core.ts");
     expect(actions).toMatch(/includes\(declared\)/);
     // the worker's clarification reply is stamped the same way
     const instr = read("lib/instructions/actions.ts");
@@ -212,7 +212,7 @@ describe("message language chip — data-backed only, never guessed", () => {
   });
 
   it("the send path derives its accepted set from the canonical `communicationLocales` (no second hardcoded list)", () => {
-    const actions = read("lib/communication/actions.ts");
+    const actions = read("lib/communication/communication-core.ts");
     // The old private KNOWN_LOCALES array was a drift risk; the accepted set is
     // now the product's declared COMMUNICATION languages (UI locales + the
     // communication-only ones, owner RED-1 2026-09-17), kept in lockstep with

@@ -5,68 +5,41 @@ import { join } from "node:path";
 import { landingTreeFiles, landingTreeSource } from "./landing-composition";
 
 /**
- * Production landing V1 guard (owner decision 2026-08-20).
+ * Production landing guard (owner decision 2026-08-20; one arm since the
+ * owner withdrew the LIVE presentation, 2026-09-30).
  *
- * The platform architecture remains global. This acquisition surface tells
- * the approved Europe-first story while keeping precise public data confined
- * to the verified Sweden supply reader. Conceptual sector animation may not
- * claim city-level geography or local market totals.
+ * The platform architecture remains global. The acquisition surface keeps
+ * precise public data confined to the governed supply reader, claims no city
+ * geography it does not have, links only to real routes, and owns its motion
+ * (reduced motion honoured, the living-worker story resting off screen). The
+ * LIVE scene's own pins (its cinematic world images, its conceptual activity
+ * layer and its links) left with the scene.
  */
 
 const WEB_ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(WEB_ROOT, rel), "utf8");
 const HOME_PAGE = "app/[locale]/page.tsx";
-const COMMAND = "app/[locale]/live-market-review/live-market-command.tsx";
-const STYLES = "app/[locale]/live-market-review/live-market-command.module.css";
+const FOCUS = "app/[locale]/focus-landing/focus-landing.tsx";
 const DATA = "lib/market/live-market-landing.ts";
 
-describe("(a) the canonical homepage is the approved living market V1", () => {
-  it("mounts the shared command surface with canonical SEO metadata", () => {
-    // Since the 2026-08-22 owner command (DEFAULT = FOCUS) and the 2026-08-31
-    // P0 entry-point fix, the approved living-market V1 is the landing's
-    // EXPLICIT-CHOICE arm: the canonical page statically serves FOCUS, and
-    // the cookie-gated live-market-review route mounts the command surface.
-    // Both arms build the same canonical SEO metadata for /{locale}.
+describe("(a) the canonical homepage", () => {
+  it("builds canonical SEO metadata for the one landing URL", () => {
     const page = read(HOME_PAGE);
     expect(page).toContain("buildPageMetadata");
-    const liveArm = read("app/[locale]/live-market-review/page.tsx");
-    expect(liveArm).toContain("LiveMarketLanding");
-    expect(liveArm).toContain("buildPageMetadata");
-    // The LIVE arm never mixes in the FOCUS hero.
-    expect(liveArm).not.toContain("HeroLiveDemo");
+    expect(page).toContain('buildPageMetadata({ locale, path: "" })');
   });
 
-  it("keeps the approved responsive cinematic image foundation", () => {
-    const command = read(COMMAND);
-    for (const asset of [
-      "world-desktop.webp",
-      "world-tablet.webp",
-      "world-mobile.webp",
-    ]) {
-      expect(command).toContain(asset);
-    }
-    expect(command).not.toMatch(/<video|\.mp4|\.webm/i);
-  });
-
-  it("the landing composition resolves to the new root and shared command", () => {
+  it("the landing composition resolves to the root and its one landing tree", () => {
     const files = landingTreeFiles(WEB_ROOT, 3);
     expect(files).toContain(HOME_PAGE);
-    expect(files).toContain(COMMAND);
+    expect(files).toContain(FOCUS);
+    expect(files.some((f) => f.includes("live-market-review"))).toBe(false);
   });
 });
 
-describe("(b) Europe is primary while geography and numbers remain truthful", () => {
-  it("pins the living European labour-market story", () => {
-    const catalog = JSON.parse(read("messages/en.json")) as {
-      livingMarketReview?: { tagline?: string };
-    };
-    expect(catalog.livingMarketReview?.tagline).toMatch(
-      /living labour market of Europe/i,
-    );
-  });
-
-  it("renders no named city markers in the conceptual activity layer", () => {
-    const command = read(COMMAND);
+describe("(b) geography and numbers remain truthful", () => {
+  it("names no city the public data cannot place", () => {
+    const source = landingTreeSource(WEB_ROOT, 3);
     for (const city of [
       "Rotterdam",
       "Berlin",
@@ -79,23 +52,17 @@ describe("(b) Europe is primary while geography and numbers remain truthful", ()
       "Copenhagen",
       "Valencia",
     ]) {
-      expect(command, city).not.toContain(city);
+      expect(source, city).not.toContain(city);
     }
-    expect(command).toContain('data-layer="conceptual-sector-activity"');
   });
 
-  it("confines real supply to the governed Sweden reader", () => {
-    const command = read(COMMAND);
+  it("confines real supply to the governed reader", () => {
+    const source = landingTreeSource(WEB_ROOT, 3);
     const data = read(DATA);
-    expect(command).toContain("labels.currentSupply");
-    // Owner directive 2026-08-24: no country naming on the anonymous
-    // surface — the generic source label replaces the Intl region name.
-    expect(command).toContain("labels.dataSourceGeneric");
-    expect(command).not.toContain('of("SE")');
     expect(data).toContain("readPublicVacancySupplyCounts");
     expect(data).toContain("searchPublicVacancyPreviews");
     expect(data).toContain("no vacancy coordinates");
-    expect(command).not.toMatch(/41[,.]272|7[,.]920|4[,.]289/);
+    expect(source).not.toMatch(/41[,.]272|7[,.]920|4[,.]289/);
   });
 });
 
@@ -110,28 +77,25 @@ describe("(c) landing navigation and actions stay real", () => {
     ].some((candidate) => existsSync(candidate));
   };
 
-  it("worker, employer and login actions resolve to real routes", () => {
-    const command = read(COMMAND);
-    const hrefs = [...command.matchAll(/href="([^"]+)"/g)].map(
-      (match) => match[1],
-    );
+  it("every literal landing link resolves to a real route", () => {
+    const source = landingTreeSource(WEB_ROOT, 3);
+    const hrefs = [...source.matchAll(/href="(\/[^"]*)"/g)].map((match) => match[1]!);
+    expect(hrefs.length).toBeGreaterThan(0);
     for (const href of hrefs.filter((value) => !value.includes("${"))) {
       expect(resolves(href), `dead landing link: ${href}`).toBe(true);
     }
   });
 
-  it("the how-it-works link lands on the evidence sequence", () => {
-    const command = read(COMMAND);
-    expect(command).toContain('href="/#how-it-works"');
-    expect(command).toContain('id="how-it-works"');
+  it("keeps the how-it-works anchor the navigation links to", () => {
+    expect(read(FOCUS)).toContain('id="how-it-works"');
   });
 });
 
 describe("(d) landing motion is optional and page-owned", () => {
-  it("honours reduced motion and pauses when the document is hidden", () => {
-    const source = landingTreeSource(WEB_ROOT, 3);
-    expect(source).toContain("prefers-reduced-motion: reduce");
-    expect(source).toContain("visibilitychange");
-    expect(read(STYLES)).toContain("@media (prefers-reduced-motion: reduce)");
+  it("honours reduced motion and rests the story when it is not on screen", () => {
+    const hero = read("components/marketing/living-worker-hero.tsx");
+    expect(hero).toContain("prefers-reduced-motion: reduce");
+    expect(hero).toContain("IntersectionObserver");
+    expect(read("app/globals.css")).toContain("@media (prefers-reduced-motion: reduce)");
   });
 });

@@ -10,6 +10,12 @@
  * No payment, no fake rows — these are plain shape definitions only.
  */
 
+/** A published "we are looking for partners" offering is an ordinary service
+ *  offering in this category — the EXISTING request/accept model carries it
+ *  (partner asks, owner accepts, the canonical conversation opens). No new
+ *  table, grant or consent. */
+export const PARTNERSHIP_CATEGORY = "partnership";
+
 export const SERVICE_OFFERING_STATUSES = ["draft", "active", "paused"] as const;
 export type ServiceOfferingStatus = (typeof SERVICE_OFFERING_STATUSES)[number];
 

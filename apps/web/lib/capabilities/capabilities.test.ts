@@ -27,6 +27,7 @@ const coreWrite = vi.fn(async () => ({
 }));
 vi.mock("@/lib/journal/journal-write-core", () => ({
   createJournalEntryCore: (...args: unknown[]) => coreWrite(...(args as [])),
+  projectsToChooseFrom: async () => null,
 }));
 
 vi.mock("next-intl/server", () => ({
@@ -166,7 +167,44 @@ describe("the registry itself", () => {
       // company questions to become an authorized action rather than a
       // chat-only answer, over the SAME core the chat calls.
       "workforce.availability",
-      // Organization evidence import (2026-09-07) — one flow, eleven steps,
+      // Employer operations (2026-09-30) — demand read, roster, projects,
+      // assignments (draft → confirm) and the review queue, over the SAME
+      // cores/RPCs the web company surfaces call.
+      "demand.list",
+      "demand.close_draft",
+      "demand.close_confirm",
+      "demand.reopen_draft",
+      "demand.reopen_confirm",
+      "roster.list",
+      "projects.list",
+      "project.create_draft",
+      "project.create_confirm",
+      "project.status_set_draft",
+      "project.status_set_confirm",
+      "assignment.create_draft",
+      "assignment.create_confirm",
+      "assignment.end_draft",
+      "assignment.end_confirm",
+      "journal.review_queue.get",
+      // Marketplace (2026-09-30) — candidate search + shortlist over the SAME
+      // scouting cores as the web page; the activation queue names facts.
+      "candidate.search",
+      "shortlist.get",
+      "shortlist.add_draft",
+      "shortlist.add_confirm",
+      "shortlist.remove_draft",
+      "shortlist.remove_confirm",
+      "worker.activation_queue.get",
+      "marketplace.funnel.get",
+      // In-app messaging (2026-09-30) over the shared communication core.
+      "conversation.list",
+      "conversation.get",
+      "message.send_draft",
+      "message.send_confirm",
+      // Market companies in as DISCOVERED organizations (2026-09-30, #2000).
+      "company.ingest.preview",
+      "company.ingest.confirm",
+      // Organization evidence import (2026-09-07) — one flow, thirteen steps (attest and withdraw are draft→confirm pairs),
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product
       // decision, so a new one must be added HERE, deliberately, to pass.
@@ -181,8 +219,10 @@ describe("the registry itself", () => {
       "evidence.import.resolve_time_semantics",
       "evidence.import.commit",
       "evidence.records.list",
-      "evidence.record.attest",
-      "evidence.import.withdraw",
+      "evidence.record.attest_draft",
+      "evidence.record.attest_confirm",
+      "evidence.import.withdraw_draft",
+      "evidence.import.withdraw_confirm",
       // Organization PEOPLE ingestion (2026-09-10) — the roster half of that
       // same architecture, over `lib/organization-people/ingest-service.ts`,
       // which the web import panel calls too. Look, answer, commit: the
@@ -211,7 +251,44 @@ describe("the registry itself", () => {
       // company questions to become an authorized action rather than a
       // chat-only answer, over the SAME core the chat calls.
       "workforce.availability",
-      // Organization evidence import (2026-09-07) — one flow, eleven steps,
+      // Employer operations (2026-09-30) — demand read, roster, projects,
+      // assignments (draft → confirm) and the review queue, over the SAME
+      // cores/RPCs the web company surfaces call.
+      "demand.list",
+      "demand.close_draft",
+      "demand.close_confirm",
+      "demand.reopen_draft",
+      "demand.reopen_confirm",
+      "roster.list",
+      "projects.list",
+      "project.create_draft",
+      "project.create_confirm",
+      "project.status_set_draft",
+      "project.status_set_confirm",
+      "assignment.create_draft",
+      "assignment.create_confirm",
+      "assignment.end_draft",
+      "assignment.end_confirm",
+      "journal.review_queue.get",
+      // Marketplace (2026-09-30) — candidate search + shortlist over the SAME
+      // scouting cores as the web page; the activation queue names facts.
+      "candidate.search",
+      "shortlist.get",
+      "shortlist.add_draft",
+      "shortlist.add_confirm",
+      "shortlist.remove_draft",
+      "shortlist.remove_confirm",
+      "worker.activation_queue.get",
+      "marketplace.funnel.get",
+      // In-app messaging (2026-09-30) over the shared communication core.
+      "conversation.list",
+      "conversation.get",
+      "message.send_draft",
+      "message.send_confirm",
+      // Market companies in as DISCOVERED organizations (2026-09-30, #2000).
+      "company.ingest.preview",
+      "company.ingest.confirm",
+      // Organization evidence import (2026-09-07) — one flow, thirteen steps (attest and withdraw are draft→confirm pairs),
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product
       // decision, so a new one must be added HERE, deliberately, to pass.
@@ -226,8 +303,10 @@ describe("the registry itself", () => {
       "evidence.import.resolve_time_semantics",
       "evidence.import.commit",
       "evidence.records.list",
-      "evidence.record.attest",
-      "evidence.import.withdraw",
+      "evidence.record.attest_draft",
+      "evidence.record.attest_confirm",
+      "evidence.import.withdraw_draft",
+      "evidence.import.withdraw_confirm",
       // Organization PEOPLE ingestion (2026-09-10) — the roster half of that
       // same architecture, over `lib/organization-people/ingest-service.ts`,
       // which the web import panel calls too. Look, answer, commit: the
@@ -241,8 +320,12 @@ describe("the registry itself", () => {
     const bridged = listCapabilities().filter((c) => c.conversationActionId);
     // Wagon 1 bridged express-interest; wagon 2 the work card; wagon 3 demand.
     expect(bridged.map((c) => c.id).sort()).toEqual([
+      "demand.close_confirm",
+      "demand.close_draft",
       "demand.create_confirm",
       "demand.create_draft",
+      "demand.reopen_confirm",
+      "demand.reopen_draft",
       "interest.express_confirm",
       "interest.express_draft",
       "work_card.save_confirm",
@@ -884,6 +967,7 @@ describe("journal draft → confirm", () => {
         siteName: "Vilnius A1",
         notes: DRAFT.notes,
         engagementContextId: DRAFT.engagementContextId,
+        projectId: null,
         // The named context — the human sees WHERE the entry lands before
         // confirming.
         engagementLabel: "Dev Statyba",
@@ -1086,6 +1170,7 @@ describe("journal draft → confirm", () => {
       notes: DRAFT.notes,
       work_date: DRAFT.workDate,
       site_name: DRAFT.siteName,
+      project_id: "",
       ...intakeWorkTimeFields(DRAFT.notes, DRAFT.workDate),
     });
     const fragments = JSON.parse(String(formData.get("fragments_json")));

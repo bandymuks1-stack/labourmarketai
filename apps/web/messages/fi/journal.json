@@ -151,7 +151,7 @@
       "pending": "Odottaa tarkastusta",
       "confirmed": "Vahvistettu"
     },
-    "projectNote": "Kirjaukset voidaan linkittää projektiin — tietomalli on valmis, mutta yhtään kirjausta ei ole vielä linkitetty eikä mitään täytetä automaattisesti. Projektien / kohteiden / asiakkaiden kerros täytetään erillisessä vaiheessa.",
+    "projectNote": "Kirjaukset voi linkittää projektiin. Mitään ei täytetä automaattisesti.",
     "reviewClarity": {
       "lead": "Tarkastuksesi muuttaa työntekijän itse ilmoittaman kirjauksen vahvistetuksi näytöksi. Vain esihenkilö, omistaja tai asiakkaan esihenkilö voi tehdä sen — jokainen vahvistus on aito ihmisen päätös.",
       "actionsTitle": "Mitä kukin toiminto tekee",
@@ -236,6 +236,8 @@
   "listTitle": "Työkirjaukset",
   "navTitle": "Työtiedot",
   "navSubtitle": "Näytä mitä teit — se vahvistaa työkorttiasi.",
+  "orgContextNotice": "Tämä on henkilökohtainen työpäiväkirjasi, ei yrityksen „{org}“. Toimit yrityksen puolesta — sen työt ja ihmiset ovat muualla.",
+  "orgContextCta": "Yrityksen työt →",
   "composerBenefit": "Tämä kirjaus vahvistaa työkorttiasi.",
   "newEntry": "Uusi kirjaus",
   "noEngagement": "Sinulla ei ole vielä aktiivista työkontekstia. Liity organisaatioon tai projektiin kartuttaaksesi CV:täsi.",

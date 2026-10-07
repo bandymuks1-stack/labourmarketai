@@ -41,6 +41,12 @@ export const EMPLOYER_VISIBILITY_HREF = "/dashboard/privacy#visibility";
 export const DISCOVERABILITY_CONSENT_SOURCES = [
   "dashboard_privacy_screen",
   "conversation",
+  // 2026-09-30 (owner P0: 0 real workers discoverable) — the two in-place
+  // doors the visual lane renders with the SAME consent component: the
+  // worker onboarding's last step and the work card. Each records itself so
+  // the ledger can prove where the person decided.
+  "onboarding",
+  "work_card",
 ] as const;
 export type DiscoverabilityConsentSource =
   (typeof DISCOVERABILITY_CONSENT_SOURCES)[number];

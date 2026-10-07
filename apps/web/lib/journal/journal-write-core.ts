@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createHash } from "node:crypto";
 import type { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
@@ -21,6 +22,14 @@ import {
   parseModuleFields,
 } from "@/lib/journal/journal-module-fields";
 import { readOwnOccupationPathForUser } from "@/lib/journal/journal-occupation-path";
+import {
+  parseProjectChoice,
+  projectPromptFor,
+  rpcProjectParams,
+  type AssignedProject,
+} from "@/lib/journal/project-attribution";
+import { readActiveProjectsByOrg } from "@/lib/journal/project-attribution-read";
+import { checkWorkDate } from "@/lib/journal/work-date";
 
 /**
  * JOURNAL WRITE CORE — the ONE transport-neutral implementation of the
@@ -46,6 +55,40 @@ import { readOwnOccupationPathForUser } from "@/lib/journal/journal-occupation-p
 type Translator = Awaited<ReturnType<typeof getTranslations>>;
 type ServerSupabase = Awaited<ReturnType<typeof createClient>>;
 
+/** PostgREST / Postgres codes meaning "this function does not exist" — the
+ *  only errors that may fall back to the legacy two-step save (G-12). */
+const MISSING_RPC_CODES = new Set(["PGRST202", "42883"]);
+
+/** Window in which an identical save by the same worker in the same context
+ *  is treated as the SAME submission (double click / network retry). */
+const DUPLICATE_SAVE_WINDOW_MS = 30_000;
+
+/** Id of an entry this worker saved in the same engagement context with the
+ *  same text moments ago, else null. A failed read is "no duplicate found"
+ *  (the save then proceeds exactly as before). */
+export async function findRecentDuplicateEntry(
+  supabase: ServerSupabase,
+  q: { workerId: string; engagementId: string; originalText: string },
+): Promise<string | null> {
+  try {
+    const since = new Date(Date.now() - DUPLICATE_SAVE_WINDOW_MS).toISOString();
+    const { data, error } = await supabase
+      .from("journal_entries")
+      .select("id")
+      .eq("worker_id", q.workerId)
+      .eq("engagement_context_id", q.engagementId)
+      .eq("original_text", q.originalText)
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) return null;
+    return (data as { id?: string } | null)?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export type JournalWriteCaller = {
   /** The caller's OWN RLS-scoped client. Every read and write below runs as
    *  them — this module adds no authority and no admin/elevated path. */
@@ -67,7 +110,14 @@ export type CreateJournalEntryResult =
        *  the save itself is unaffected either way. */
       dayCheck?: WorkDayCheck | null;
     }
-  | { ok: false; code: JournalSaveErrorCode; message: string };
+  | {
+      ok: false;
+      code: JournalSaveErrorCode;
+      message: string;
+      /** Set with `project_required`: the projects the caller must choose
+       *  between (or answer "not project work"). */
+      projects?: AssignedProject[];
+    };
 
 export type JournalSaveErrorCode =
   | "not_authenticated"
@@ -80,6 +130,11 @@ export type JournalSaveErrorCode =
    *  document the caller can read — a provenance claim that cannot be
    *  verified is refused, never silently dropped and never stored. */
   | "source_document_invalid"
+  /** The work date is explicit, never invented: a document-drafted entry
+   *  cannot be saved without one, a malformed one is refused, and a document
+   *  import cannot claim work that has not happened yet. */
+  | "work_date_required"
+  | "work_date_invalid"
   | "entry_insert_failed"
   | "metrics_insert_failed"
   /** P1-B — the target entry was already superseded (stale tab/deep link);
@@ -92,7 +147,14 @@ export type JournalSaveErrorCode =
    *  relationship does not compose (or the engagement is not the caller's).
    *  Refused, never silently dropped: the composition decides which fields
    *  an entry may carry, not the request. */
-  | "module_field_invalid";
+  | "module_field_invalid"
+  /** Explicit `project_id` the worker is not actively assigned to (or that
+   *  sits in another organization). Refused by the RPC, never re-pointed. */
+  | "project_not_assignable"
+  /** The worker has 2+ active projects in this entry's organization and the
+   *  request named none. Every entry path shares this rule: the hours are
+   *  never silently saved against no project (handoff 2026-10-02 §2). */
+  | "project_required";
 
 export type ParsedFragmentInput = {
   rawPhrase: string;
@@ -389,6 +451,31 @@ export async function legacyTwoStepSave(
   return { ok: true, entryId: entry.id };
 }
 
+/** The ONE attribution rule applied before a token/save: when the worker has
+ *  2+ ACTIVE projects in this entry's organization the human must choose
+ *  first. `null` = nothing to ask. */
+export async function projectsToChooseFrom(
+  supabase: SupabaseClient,
+  userId: string,
+  engagementContextId: string,
+): Promise<AssignedProject[] | null> {
+  const { data: worker } = await supabase
+    .from("workers")
+    .select("id")
+    .eq("profile_id", userId)
+    .maybeSingle();
+  if (!worker) return null;
+  const { data: ctx } = await supabase
+    .from("engagement_contexts")
+    .select("organization_id")
+    .eq("id", engagementContextId)
+    .maybeSingle();
+  if (!ctx?.organization_id) return null;
+  const byOrg = await readActiveProjectsByOrg(supabase, worker.id);
+  const projects = byOrg.get(ctx.organization_id) ?? [];
+  return projectPromptFor(projects) === "ask" ? projects : null;
+}
+
 /**
  * Persist a reviewed work-journal entry (M1) as `deps.userId`. Append-only
  * (§3): composes `original_text` (the worker's own words — never silently
@@ -453,6 +540,12 @@ export async function createJournalEntryCore(
     String(formData.get("rejected_slugs_json") ?? ""),
   );
   const quantity = quantityRaw === "" ? null : Number(quantityRaw);
+  // Which project the hours belong to. Absent → the DB auto-link rule; "none"
+  // → a deliberate non-project entry; a uuid → validated server-side against
+  // the worker's active assignment and the entry's own organization.
+  const projectChoice = parseProjectChoice(
+    String(formData.get("project_id") ?? ""),
+  );
 
   if (!engagementId) {
     return {
@@ -473,6 +566,23 @@ export async function createJournalEntryCore(
       ok: false,
       code: "quantity_invalid",
       message: t("quantityInvalid"),
+    };
+  }
+  const workDateCheck = checkWorkDate(workDate, {
+    requireDate: sourceDocumentFileId !== "",
+    rejectFuture: sourceDocumentFileId !== "",
+  });
+  if (workDateCheck) {
+    return {
+      ok: false,
+      code: workDateCheck.code,
+      message: t(
+        workDateCheck.code === "work_date_required"
+          ? "workDateRequired"
+          : workDateCheck.reason === "future"
+            ? "workDateFuture"
+            : "workDateInvalid",
+      ),
     };
   }
 
@@ -642,6 +752,31 @@ export async function createJournalEntryCore(
   // transaction (see 0017). Any failure rolls back the entry, so the worker
   // never lands in the half-saved "ghost entry" state where the row exists
   // but its interpretation does not.
+  // THE ONE ATTRIBUTION RULE for every entry path (composer, work-log flow,
+  // document draft, MCP). A request that names no project while the worker
+  // has two or more ACTIVE projects in this entry's organization is not
+  // saved: the caller must ask which (or "not project work"). One project is
+  // auto-attributed by the database, none asks nothing.
+  if (projectChoice.kind === "absent") {
+    const { data: ctxOrg } = await supabase
+      .from("engagement_contexts")
+      .select("organization_id")
+      .eq("id", engagementId)
+      .maybeSingle();
+    if (ctxOrg?.organization_id) {
+      const byOrg = await readActiveProjectsByOrg(supabase, worker.id);
+      const projects = byOrg.get(ctxOrg.organization_id) ?? [];
+      if (projectPromptFor(projects) === "ask") {
+        return {
+          ok: false,
+          code: "project_required",
+          message: t("projectAmbiguous"),
+          projects,
+        };
+      }
+    }
+  }
+
   const rpcParams = {
     p_worker_id: worker.id,
     p_engagement_context_id: engagementId,
@@ -653,11 +788,44 @@ export async function createJournalEntryCore(
     p_hash_self: hashSelf,
     p_visibility_scope: "closed",
     p_metrics: metrics,
+    ...rpcProjectParams(projectChoice),
   };
   // The generated supabase-js types are built from the schema cache and
   // don't include `create_journal_entry_full` until 0017 is applied AND the
   // local types are regenerated. The runtime call is correct; the cast just
   // suppresses the static name check.
+  // G-8: idempotent create. A double click / retry that reaches the server
+  // after the first save committed re-uses that entry instead of writing a
+  // second identical one (Next serialises one client's server actions, so the
+  // second call sees the first's committed row). Limit: two requests truly
+  // in flight at the same instant can both pass this read — closing that
+  // needs a DB unique key (an additive migration, not part of this slice).
+  const duplicateOf = await findRecentDuplicateEntry(supabase, {
+    workerId: worker.id,
+    engagementId,
+    originalText,
+  });
+  if (duplicateOf) {
+    const dupSkills = await runSkillPipeline({
+      entryId: duplicateOf,
+      text: originalText,
+      locale,
+      excludeSlugs: rejectedSlugs,
+      caller: { supabase, userId },
+    });
+    revalidatePath(`/${locale}/dashboard/journal`);
+    return {
+      ok: true,
+      entryId: duplicateOf,
+      skills: dupSkills,
+      dayCheck: await readSavedEntryDayCheck(
+        { supabase, userId },
+        worker.id,
+        duplicateOf,
+      ),
+    };
+  }
+
   const { data: rpcEntryId, error: rpcErr } = (await (
     supabase.rpc as unknown as (
       fn: string,
@@ -671,11 +839,19 @@ export async function createJournalEntryCore(
     // a 404 schema cache error). On every other failure we surface the
     // exact reason and DO NOT attempt a second write, so the save stays
     // all-or-nothing.
+    // G-12: ONLY the PostgREST function-absent codes qualify (PGRST202 =
+    // schema-cache miss, 42883 = undefined_function). Message-text sniffing
+    // ("function", the RPC's own name) used to route permission / validation /
+    // trigger errors into the legacy path, which bypasses project attribution.
     const isMissingRpc =
-      !!rpcErr &&
-      (/PGRST202/i.test(rpcErr.code ?? "") ||
-        /create_journal_entry_full/i.test(rpcErr.message ?? "") ||
-        rpcErr.message?.includes("function") === true);
+      !!rpcErr && MISSING_RPC_CODES.has((rpcErr.code ?? "").toUpperCase());
+    if (/project_not_assignable/.test(rpcErr?.message ?? "")) {
+      return {
+        ok: false,
+        code: "project_not_assignable",
+        message: t("projectNotAssignable"),
+      };
+    }
     if (!isMissingRpc) {
       console.error("[journal] rpc save failed:", rpcErr?.message);
       return {

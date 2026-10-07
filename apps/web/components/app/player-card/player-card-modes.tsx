@@ -12,6 +12,13 @@ import type { PlayerCardWorldModel } from "@/lib/player-card/card-world";
  * (owner command 2026-09-29 §9: IDENTITY → WORK → SKILLS → EVIDENCE →
  * HISTORY → NEXT).
  *
+ * The identity stage (the `stage` slot) stays put — the person is the constant — and
+ * only this body transforms. IDENTITY is the card CLOSED (owner direction
+ * 2026-09-30: one central object, information opening on demand): the
+ * person alone, no section competing with them. Every other mode opens the
+ * sections that answer its question, with one short entrance (covered by
+ * the reduced-motion block via `rise-in`).
+ *
  * The modes are STATES OF ONE WORLD (premium addendum E): when the browser
  * can draw it, the person's professional world is the hero — the person at
  * the centre, the five satellites around them, and a choice re-forms that
@@ -157,10 +164,12 @@ export function PlayerCardModes({
           </summary>
           <div role="tabpanel" data-mode={mode} data-testid="player-card-mode-panel" className="flex flex-col gap-5 border-t border-ink-600 p-4">
             {stage}
-            {sections[mode]}
           </div>
         </details>
-      ) : (
+      ) : null}
+      {/* IDENTITY is the card closed: its section slot is empty by design, so
+          this renders for every other mode (and never doubles the disclosure). */}
+      {sections[mode] ? (
         <div
           key={mode}
           role="tabpanel"
@@ -170,7 +179,7 @@ export function PlayerCardModes({
         >
           {sections[mode]}
         </div>
-      )}
+      ) : null}
     </>
   );
 }

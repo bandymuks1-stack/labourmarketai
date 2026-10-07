@@ -70,6 +70,9 @@ export const PROD_QA_WORKER_EMAIL = "qa.worker+goal3@labourmarket.ai" as const;
 export const PROD_QA_OWNER_EMAIL = "qa.owner+multiw@labourmarket.ai" as const;
 export const PROD_QA_MANAGER_EMAIL = "qa.manager+multiw@labourmarket.ai" as const;
 export const PROD_QA_SECOND_WORKER_EMAIL = "qa.worker+multiw@labourmarket.ai" as const;
+/** Owner decision 2026-09-30: the synthetic AGENCY identity, to walk
+ *  Agency → Calendar. Synthetic QA only; it changes no real user's rights. */
+export const PROD_QA_AGENCY_EMAIL = "qa.agency+multiw@labourmarket.ai" as const;
 
 /** Every allowlisted synthetic identity — equality-matched, never by prefix
  *  or pattern. */
@@ -78,6 +81,7 @@ export const PROD_QA_IDENTITIES: readonly string[] = [
   PROD_QA_OWNER_EMAIL,
   PROD_QA_MANAGER_EMAIL,
   PROD_QA_SECOND_WORKER_EMAIL,
+  PROD_QA_AGENCY_EMAIL,
 ];
 
 export const PRODUCTION_ORIGIN = `https://${PRODUCTION_PROJECT_REF}.supabase.co`;
@@ -94,6 +98,22 @@ export interface ProdQaTarget {
   readonly origin: string;
   readonly projectRef: string;
   readonly email: string;
+}
+
+/**
+ * Supabase's CURRENT opaque key formats: `sb_secret_…` (service) and
+ * `sb_publishable_…` (anon). Unlike the legacy JWTs they carry no `ref`
+ * claim, so the key itself cannot be bound to a project here. That binding is
+ * already enforced where it matters: the target origin must be EXACTLY the
+ * production project (check 1 above), and the key is only ever sent to that
+ * origin — a key for another project simply fails to authenticate. The shape
+ * is matched strictly and by role, so a service key cannot stand in for the
+ * anon key (or the reverse), and nothing else is widened.
+ */
+function isCurrentFormatKey(label: "service" | "anon", key: string): boolean {
+  const pattern =
+    label === "service" ? /^sb_secret_[A-Za-z0-9_-]{16,}$/ : /^sb_publishable_[A-Za-z0-9_-]{16,}$/;
+  return pattern.test(key);
 }
 
 /**
@@ -154,7 +174,7 @@ export function assertProdQaTarget(input: ProdQaTargetInput): ProdQaTarget {
           `"${PRODUCTION_PROJECT_REF}" (${redactKey(key)}).`,
       );
     }
-    if (!decodeJwtClaims(key)) {
+    if (!decodeJwtClaims(key) && !isCurrentFormatKey(label, key)) {
       throw new ProdQaGuardError(
         `the ${label} key is not a decodable Supabase key (${redactKey(key)}).`,
       );

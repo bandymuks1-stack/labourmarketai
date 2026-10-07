@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { resolveApiIdentity } from "@/lib/api/api-identity";
 import {
@@ -12,6 +11,7 @@ import {
   exposedCapabilities,
   runCapability,
 } from "@/lib/capabilities/registry";
+import { recordExternalReceipt } from "@/lib/capabilities/external-receipt";
 import {
   handleMcpMessage,
   parseErrorResponse,
@@ -20,6 +20,7 @@ import {
   type McpToolDef,
 } from "@/lib/mcp/protocol";
 import { localeFromAcceptLanguage } from "@/lib/mcp/accept-language";
+import { toolDefsOf, toolName, toolsetVersionOf } from "@/lib/mcp/toolset";
 import { summarizeCapabilityResult } from "@/lib/capabilities/presentation";
 
 export const runtime = "nodejs";
@@ -68,8 +69,6 @@ function logEvent(event: Parameters<typeof serializeAuthEvent>[0]): void {
   }
 }
 
-/** MCP tool names allow [a-zA-Z0-9_-]; capability ids use dots. */
-const toolName = (capabilityId: string): string => capabilityId.replace(/\./g, "_");
 
 /**
  * The tool list is DERIVED FROM THE REGISTRY AND CONSTANT for the lifetime of
@@ -88,15 +87,7 @@ let TOOL_DEFS: McpToolDef[] | null = null;
 
 function toolDefs(): McpToolDef[] {
   if (TOOL_DEFS) return TOOL_DEFS;
-  TOOL_DEFS = exposedCapabilities().map((c) => ({
-    name: toolName(c.id),
-    title: c.title,
-    description: c.description,
-    inputSchema: z.toJSONSchema(c.inputSchema) as Record<string, unknown>,
-    // Honest behavior hints declared per capability in review — clients can
-    // tell reads from writes without parsing prose.
-    annotations: c.annotations,
-  }));
+  TOOL_DEFS = toolDefsOf(exposedCapabilities());
   return TOOL_DEFS;
 }
 
@@ -126,10 +117,18 @@ function capabilityIdForTool(name: string): string | undefined {
  * decision — see docs/integrations/CHATGPT_MCP_CLIENT_V1.md for what remains
  * an owner action inside ChatGPT itself.
  */
+/** The published toolset as a version (`lib/mcp/toolset.ts`), memoized. */
+let TOOLSET_VERSION: string | null = null;
+
+function toolsetVersion(): string {
+  if (!TOOLSET_VERSION) TOOLSET_VERSION = toolsetVersionOf(toolDefs());
+  return TOOLSET_VERSION;
+}
+
 function serverInfo(origin: string) {
   return {
     name: "labourmarket-ai",
-    version: "0.1.0",
+    version: toolsetVersion(),
     title: "LabourMarket.ai",
     websiteUrl: origin,
     icons: [
@@ -274,8 +273,15 @@ export async function POST(req: Request) {
     serverInfo: serverInfo(new URL(req.url).origin),
     instructions:
       "LabourMarket.ai capabilities for the signed-in user. Reads return " +
-      "recorded facts under the user's own permissions. Nothing here writes " +
-      "without an explicit draft→confirm step.",
+      "recorded facts under the user's own permissions. Consequential writes " +
+      "need an explicit draft→confirm step. The exceptions are single-step " +
+      "and named: the evidence-import staging steps (evidence_import_create_session, " +
+      "evidence_import_submit_rows, evidence_import_resolve_row, " +
+      "evidence_import_resolve_label, evidence_import_resolve_time_semantics) " +
+      "write only staging rows that become records solely through the " +
+      "confirmed evidence_import_commit; context_switch changes which " +
+      "organization the session acts for; evidence_person_create adds one " +
+      "unlinked roster person.",
     tools: toolDefs(),
     callTool: async (name, args) => {
       const capabilityId = capabilityIdForTool(name);
@@ -287,6 +293,13 @@ export async function POST(req: Request) {
       const tCap = performance.now();
       const result = await runCapability(capabilityId, caller, args);
       marks.capability = performance.now() - tCap;
+      // AUDIT RECEIPT for every write through this door (confirm/execute):
+      // who, which capability, which object, which confirmation, outcome.
+      // Never undoes nor fails the write; the client is told its state.
+      const descriptor = exposedCapabilities().find((c) => c.id === capabilityId);
+      const receipt = descriptor
+        ? await recordExternalReceipt(caller, descriptor, args, result)
+        : ({ state: "not_applicable" } as const);
       logEvent({
         event: "external_client.tool",
         door: DOOR,
@@ -319,7 +332,11 @@ export async function POST(req: Request) {
         }
         marks.presentation = performance.now() - tPres;
       }
-      return { isError: !result.ok, payload: result, humanText };
+      return {
+        isError: !result.ok,
+        payload: receipt.state === "not_applicable" ? result : { ...result, receipt },
+        humanText,
+      };
     },
   });
 

@@ -3,6 +3,9 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { readHeldProfileRoles } from "@/lib/auth/profile-roles";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
 import { CompanyActionNextActions } from "@/components/app/company-action-next-actions";
 import { listOwnCandidateDrafts } from "@/lib/candidates/candidate-drafts";
 import { CANDIDATE_DRAFT_STATUSES, type CandidateDraftStatus } from "@/lib/candidates/candidate-draft-types";
@@ -37,6 +40,20 @@ export default async function CandidatesPage({
   if (!user) redirect(`/${locale}/auth/login`);
 
   const read = await listOwnCandidateDrafts();
+
+  // WHO IS LOOKING. The drafts are private to their author whatever the role
+  // (RLS: owner_id = auth.uid()), so the page stays open to everyone who can
+  // sign in. But the shell and the primary action below are the COMPANY hiring
+  // room: a worker who followed the role-choice link was told "Įmonė · Samdyti"
+  // and offered a button to /dashboard/company/scouting, which then bounces
+  // them (owner audit 2026-10-02). Without the company space the page is just
+  // the private list, under its own neutral title.
+  // An unanswered role read is NOT "no company role": it keeps the company
+  // shell this page always had instead of silently demoting a real manager.
+  const held = await readHeldProfileRoles({ supabase, userId: user.id });
+  const heldRoles = new Set<string>(held.ok ? held.value : ["company"]);
+  const inCompanySpace =
+    heldRoles.has("company") || workspaceOpensCompanySpace(await getWorkspaceContext());
 
   const labels: CandidateDraftsLabels = {
     eyebrow: t("eyebrow"),
@@ -94,11 +111,13 @@ export default async function CandidatesPage({
           className="font-mono text-meta uppercase tracking-label text-brand-orange"
           data-testid="company-context"
         >
-          {tRooms("candidates.context")}
+          {inCompanySpace ? tRooms("candidates.context") : t("eyebrow")}
         </p>
       </div>
 
-      <CompanyActionNextActions room="candidates" primaryHref="/dashboard/company/scouting" />
+      {inCompanySpace ? (
+        <CompanyActionNextActions room="candidates" primaryHref="/dashboard/company/scouting" />
+      ) : null}
 
       <CandidateDraftsManager
         drafts={read.kind === "ok" ? read.drafts : []}

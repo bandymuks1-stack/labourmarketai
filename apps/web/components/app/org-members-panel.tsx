@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { MessageButton } from "@/components/app/message-button";
 import {
   addOrgMember,
   endOrgMembership,
@@ -163,6 +164,12 @@ export function OrgMembersPanel({
                 {m.name}
               </span>
               <span className="flex flex-wrap items-center gap-2">
+                {/* WRITE — a team member opens the ONE conversation with a
+                    colleague (the §8.1 gate verifies the shared team under
+                    the caller's own RLS; nothing is sent from here). */}
+                {m.profileId && !(viewerIsRegisteredOwner && m.isRegisteredOwner) && (
+                  <MessageButton profileId={m.profileId} labelKey="messageWorker" />
+                )}
                 {/* Journal review is offered exactly where the RPC accepts it
                     (relationship_types.journal_reviewable): an employee, and
                     since 2026-09-28 a collaborator placed by an agency. */}

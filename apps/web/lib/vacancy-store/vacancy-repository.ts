@@ -100,8 +100,17 @@ const EXISTENCE_READ_CHUNK = 200;
  * both below: a smaller initial chunk, and a bounded halving retry on 57014
  * (`runStatementChunks`) so one slow statement shrinks instead of killing the
  * whole session.
+ *
+ * 2026-09-30: ~4 of 6 scheduled Sweden runs died as
+ * `vacancy_persist_update_failed:57014` even at 25-row statements (run
+ * 36697933169: 0 rows persisted, cursor honestly stuck). A rolled-back
+ * 200-row UPDATE measures 1.4 s on an idle database, so the 8 s timeouts are
+ * intermittent stalls (GIN pending-list flush / contention), not
+ * work-per-statement — shrinking alone cannot outwait them. Hence the chunk is
+ * halved again to 100 and a min-size statement now backs off and retries
+ * (see STALL_RETRY_DELAYS_MS) inside a per-call timeout budget.
  */
-const WRITE_CHUNK = 200;
+const WRITE_CHUNK = 100;
 
 /**
  * Touch and withdraw travel as `.in(external_id, …)` UPDATE filters, so their
@@ -118,6 +127,27 @@ const UPDATE_FILTER_CHUNK = 200;
  *  was ever observed to admit, so reaching a second 57014 here means the
  *  database itself is unwell and retrying harder would only mask it. */
 const MIN_STATEMENT_CHUNK = 25;
+
+/** Waits between retries of a MIN-size statement that keeps timing out. A
+ *  stall that shrinking cannot fix is usually transient (a GIN pending-list
+ *  flush or a lock held by another writer), so the honest answer is to wait it
+ *  out, not to fail the whole session after two back-to-back attempts. */
+const STALL_RETRY_DELAYS_MS: readonly number[] = [2_000, 5_000, 12_000];
+
+/** Per persistVacancies call: total 57014 answers tolerated across all arms
+ *  before the call fails fast. A persistently sick database must fail the run
+ *  in about a minute, not spend minutes timing out statement after statement. */
+const STATEMENT_TIMEOUT_BUDGET = 10;
+
+let sleepMs = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Test seam: swap the backoff sleep so retry paths run instantly. */
+export function __setVacancyRetrySleepForTest(
+  fn: ((ms: number) => Promise<void>) | null,
+): void {
+  sleepMs = fn ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
+}
 
 /** Postgres SQLSTATE for "canceling statement due to statement timeout". */
 const STATEMENT_TIMEOUT_CODE = "57014";
@@ -138,26 +168,30 @@ async function runStatementChunks<T>(
   chunkSize: number,
   runStatement: (chunk: readonly T[]) => Promise<{ code: string | null } | null>,
   fail: (code: string | null) => never,
+  budget: { timeouts: number },
 ): Promise<void> {
   const runChunk = async (
     chunk: readonly T[],
-    isRetry: boolean,
+    stallRetry: number,
   ): Promise<void> => {
     const error = await runStatement(chunk);
     if (error === null) return;
     if (error.code !== STATEMENT_TIMEOUT_CODE) fail(error.code);
+    budget.timeouts += 1;
+    if (budget.timeouts > STATEMENT_TIMEOUT_BUDGET) fail(error.code);
     if (chunk.length > MIN_STATEMENT_CHUNK) {
       const mid = Math.ceil(chunk.length / 2);
-      await runChunk(chunk.slice(0, mid), false);
-      await runChunk(chunk.slice(mid), false);
+      await runChunk(chunk.slice(0, mid), 0);
+      await runChunk(chunk.slice(mid), 0);
       return;
     }
-    if (!isRetry) return runChunk(chunk, true);
-    fail(error.code);
+    if (stallRetry >= STALL_RETRY_DELAYS_MS.length) fail(error.code);
+    await sleepMs(STALL_RETRY_DELAYS_MS[stallRetry] as number);
+    return runChunk(chunk, stallRetry + 1);
   };
 
   for (let i = 0; i < items.length; i += chunkSize) {
-    await runChunk(items.slice(i, i + chunkSize), false);
+    await runChunk(items.slice(i, i + chunkSize), 0);
   }
 }
 
@@ -229,6 +263,7 @@ export async function persistVacancies(
     }
   }
 
+  const timeoutBudget = { timeouts: 0 };
   const toInsert: PublicVacancyRowV1[] = [];
   const toUpdate: PublicVacancyRowV1[] = [];
   const toTouch: PublicVacancyRowV1[] = [];
@@ -280,11 +315,11 @@ export async function persistVacancies(
 
   await runStatementChunks(toInsert, WRITE_CHUNK, upsertChunk, (code) => {
     throw new Error(`vacancy_persist_insert_failed:${code ?? "unknown"}`);
-  });
+  }, timeoutBudget);
 
   await runStatementChunks(toUpdate, WRITE_CHUNK, upsertChunk, (code) => {
     throw new Error(`vacancy_persist_update_failed:${code ?? "unknown"}`);
-  });
+  }, timeoutBudget);
 
   // The narrow withdrawal write: lifecycle, liveness, and the run that did it.
   // Deliberately NOT the full row — a removal record's empty body must never
@@ -313,6 +348,7 @@ export async function persistVacancies(
       (code) => {
         throw new Error(`vacancy_persist_withdraw_failed:${code ?? "unknown"}`);
       },
+      timeoutBudget,
     );
   }
 
@@ -337,6 +373,7 @@ export async function persistVacancies(
       (code) => {
         throw new Error(`vacancy_persist_touch_failed:${code ?? "unknown"}`);
       },
+      timeoutBudget,
     );
   }
 

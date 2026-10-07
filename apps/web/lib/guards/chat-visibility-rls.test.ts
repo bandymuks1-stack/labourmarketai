@@ -357,6 +357,13 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    closed governance row or env switch are refused by the runner
     //    regardless of the admin's wishes. Touches no chat table, sends
     //    nothing outbound.
+    //  - lib/profile/avatar.ts — D1 (owner 2026-09-30): signs ONE storage
+    //    path for one hour, and only a path the database has just returned
+    //    to the VIEWER's own session through `worker_avatar_path_v1` (the
+    //    worker, or an ACTIVE work relationship — never discovery alone,
+    //    never a role alone; the path must be in the worker's own folder).
+    //    The service key is used for storage signing only: no table read,
+    //    no chat table, no write, nothing public.
     //  - lib/notifications/event-emitters.ts — durable notification events
     //    v1. Emits ONE append-only notification_events row per completed
     //    domain write (booking propose/respond, absence request/review,
@@ -452,8 +459,10 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/company/claim-public-intake.ts",
       "lib/invitations/external-referral-receive.ts",
       "lib/invitations/public-preview.ts",
+      "lib/invitations/signup-bridge.ts",
       "lib/lmc/compensation.ts",
       "lib/notifications/event-emitters.ts",
+      "lib/profile/avatar.ts",
       "lib/sales/lead-intake.ts",
       "lib/supply-bridge/feed-source.ts",
       "lib/usage/usage-cost-store.ts",

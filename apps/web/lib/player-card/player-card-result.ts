@@ -2,7 +2,8 @@
 
 import "server-only";
 
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 
 import { getWorkerPlayerCard, type WorkerPlayerCard } from "./player-card";
 import { deriveWorkCardChecks } from "@/lib/worker/work-card-plausibility";
@@ -181,6 +182,12 @@ async function resolveWorkEditor(card: WorkerPlayerCard): Promise<{
       availableFromLabel: tw("editor.availableFromLabel"),
       locationLabel: tw("editor.locationLabel"),
       locationHint: tw("editor.locationHint"),
+      // The ONE country list (active markets first, then every ISO country in
+      // the person's language) — the same one the company need form uses.
+      locationOptions: countryOptionsForLocale(await getLocale()).map((o) => ({
+        code: o.value,
+        label: o.label,
+      })),
       preferredLabel: tw("editor.preferredLabel"),
       preferredHint: tw("editor.preferredHint"),
       salaryMinLabel: tw("editor.salaryMinLabel"),

@@ -415,6 +415,19 @@ missing exposure.
 **After:** 26 — the two above. Exposure remains a reviewed decision, pinned in
 `lib/capabilities/capabilities.test.ts`.
 
+**Update 2026-10-02 (counts above are historical):** 62 exposed tools
+(`0.1.0+t62.142b9ca5`, see `MCP_TOOLSET_FINGERPRINTS.md`). The evidence-import
+flow is now 15 tool ids: `evidence.record.attest` and `evidence.import.withdraw`
+were single-step writes and are replaced by draft -> confirm pairs
+(`evidence.record.attest_draft` / `_confirm`, `evidence.import.withdraw_draft` /
+`_confirm`) over the same one-time-token machinery as demand close/reopen. The
+only single-step (`execute`) tools left are `context.switch`,
+`evidence.person.create` and the evidence-import staging steps
+(`create_session`, `submit_rows`, `resolve_row`, `resolve_label`,
+`resolve_time_semantics`); they are named in the server `instructions` and
+pinned by `lib/guards/mcp-execute-allowlist.test.ts`. Existing ChatGPT
+connectors must be **Refreshed** to see the new tool names.
+
 ---
 
 ## 10. Brand — the canonical mark on the ChatGPT app

@@ -30,7 +30,8 @@ import {
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 
-const COMM_ACTIONS = "lib/communication/actions.ts";
+// The capped write logic lives in the shared core since 2026-09-30 (actions.ts delegates).
+const COMM_ACTIONS = "lib/communication/communication-core.ts";
 const INSTR_ACTIONS = "lib/instructions/actions.ts";
 
 /** All non-test source files under the app-side trees. */
@@ -182,6 +183,8 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
    */
   const DIRECT_CONVERSATION_CALLERS = [
     "lib/booking/booking-conversation.ts",
+    // Chat door (2026-10-01) — passes NO subject (null) and NO grant.
+    "lib/communication/chat-open-conversation.ts",
     "lib/communication/contact-interested-worker.ts",
     "lib/communication/open-conversation-action.ts",
     "lib/communication/request-worker-conversation.ts",
@@ -204,7 +207,9 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
   it("direct-subject writers are ONLY the gated fact-verified actions (demand / offering title)", () => {
     // The generic entry point passes no subject…
     const open = read("lib/communication/open-conversation-action.ts");
-    expect(open).toMatch(/getOrCreateDirectConversation\(profileId, locale\)/);
+    expect(open).toMatch(
+      /getOrCreateDirectConversation\(\s*profileId,\s*locale,\s*null,\s*undefined,\s*null,\s*projectId,?\s*\)/,
+    );
     // …the scouting action derives it from the REAL demand row it verified…
     const scout = read("lib/communication/request-worker-conversation.ts");
     expect(scout).toMatch(/demand\?\.title/);

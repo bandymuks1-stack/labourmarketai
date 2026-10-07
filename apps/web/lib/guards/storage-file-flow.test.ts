@@ -346,7 +346,7 @@ const stripComments = (src: string): string =>
 
 describe("conversation attachments — orphan story (pre-send remove + honest register failure)", () => {
   const composer = read("components/app/communication-composer.tsx");
-  const actions = read("lib/communication/actions.ts");
+  const actions = read("lib/communication/communication-core.ts");
 
   it("removing an UPLOADED tray attachment deletes its blob (exact storagePath)", () => {
     expect(stripComments(composer)).toMatch(

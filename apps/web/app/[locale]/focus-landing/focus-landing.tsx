@@ -12,6 +12,7 @@ import { PublicEntry } from "@/components/marketing/public-entry";
 import { MarketProofBand } from "@/components/marketing/market-proof-band";
 import { PlayerCardShowcase } from "@/components/marketing/player-card-showcase";
 import { ProductChainBand } from "@/components/marketing/product-chain-band";
+import { TwoSidesSection } from "@/components/marketing/two-sides-section";
 import { TrustBand } from "@/components/marketing/trust-band";
 import { StartingContextsBand } from "@/components/marketing/starting-contexts-band";
 /* `PublicMarketMapBand` is deliberately NOT imported: the band is withdrawn
@@ -25,14 +26,15 @@ import {
 } from "@/lib/i18n/client-messages";
 import { readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
 import { resolveActiveLocale } from "@/lib/seo/metadata";
-import { LandingModeSwitcher } from "./landing-mode-switcher";
 import { LandingJourney } from "@/components/marketing/landing-journey";
 import { buildSampleJourney } from "@/lib/marketing/sample-journey";
+import { buildLivingWorkerHero } from "@/lib/marketing/living-worker-hero";
+import { LivingWorkerHero } from "@/components/marketing/living-worker-hero";
 
 /**
  * FOCUS — the previous production landing, RESTORED.
  *
- * This is not a calmer restyling of LIVE and not a new "focused" design. It
+ * This is not a restyling and not a new "focused" design. It
  * is the landing labourmarket.ai actually served in production immediately
  * before the living-market surface replaced it, recovered from git rather
  * than rebuilt from a screenshot:
@@ -68,15 +70,12 @@ import { buildSampleJourney } from "@/lib/marketing/sample-journey";
  * same <SiteFooter>, same marketing message pick — rather than visually
  * approximating it. Nothing here is a redesign of the restored landing.
  *
- * The one genuinely new element is <LandingModeSwitcher>: the control that
- * lets a visitor return to LIVE. Without it FOCUS would be a one-way door.
- * It is deliberately floating and self-contained so the historical layout
- * does not have to be edited to make room for it. Since 2026-09-24 it is
- * mounted at the END of the landing body rather than after the footer: from
- * 641px up it is still fixed to the corner (its DOM position is invisible
- * there), while on a phone its stylesheet puts it in the flow, so it has to
- * sit where the page ends — after the closing band, before the footer —
- * instead of floating over the counter line and the sample job cards.
+ * ONE LANDING (owner decision 2026-09-30). The optional LIVE arm — the
+ * living-market scene, its LIVE / FOCUS switcher and the middleware rewrite
+ * behind it — is removed until real demand, supply, availability, mobility
+ * and project signals can carry a living market honestly. The IDEA stays a
+ * product direction; the shared market reader stays (the bands below use
+ * it). Nothing replaces the scene: its space goes to the person's story.
  */
 export async function FocusLanding({
   params,
@@ -86,20 +85,35 @@ export async function FocusLanding({
   const { locale } = await params;
   setRequestLocale(locale);
   const activeLocale = resolveActiveLocale(locale);
-  // The SAME canonical snapshot LIVE reads, through the SAME 300 s
-  // `unstable_cache` entry — one market truth, one freshness window, no
-  // FOCUS-only reader (owner command §9/§12).
-  const [market, t, tHero, journey] = await Promise.all([
-    // FOCUS renders the supply counts only; it reads `professions`
-    // nowhere, so it does not pay for the per-profession reads. Same
-    // reader, same freshness window, same market numbers as LIVE.
+  // The ONE canonical market snapshot, through its 300 s `unstable_cache`
+  // entry — one market truth, one freshness window (owner command §9/§12).
+  const [market, t, tHero, journey, livingHero] = await Promise.all([
+    // The landing renders the supply counts only; it reads `professions`
+    // nowhere, so it does not pay for the per-profession reads.
     readLiveMarketLandingSnapshot({ resolveProfessions: false }),
     getTranslations("common"),
     getTranslations("landing.hero"),
     // The entry's SAMPLE story (owner decision 2026-09-29): translation copy
     // + the existing sample persona — no read, no production fact.
     buildSampleJourney(),
+    buildLivingWorkerHero(),
   ]);
+
+  // THE PROMISE — one headline, one sub, one set of primary doors, whichever
+  // hero carries it (the living worker hero, or the entry hero without it).
+  // `text-hero` was never defined (no token, no Tailwind entry): the h1
+  // rendered at body size. A real display scale now.
+  const promise = (
+    <>
+      <h1 className="font-display text-4xl font-bold leading-[1.04] tracking-tightest text-text-primary sm:text-5xl lg:text-6xl">
+        {tHero("headline")}
+      </h1>
+      <p className="mt-3 text-lead text-text-secondary">{tHero("sub")}</p>
+      <div className="mt-6">
+        <LandingPrimaryActions locale={locale} surface="landing_hero" />
+      </div>
+    </>
+  );
 
   return (
     <NextIntlClientProvider
@@ -142,37 +156,52 @@ export async function FocusLanding({
                 beneath. Phone: promise → entry → story, so the working entry
                 stays near the top. The story is the product's own pieces with
                 the landing's sample persona — see <LandingJourney>. */}
-            <section className="grid gap-8 lg:grid-cols-2 lg:items-start lg:gap-x-12">
-              <div className="order-1 max-w-3xl lg:col-start-1 lg:row-start-1 lg:self-center">
-                {/* `text-hero` was never defined (no token, no Tailwind entry): the h1
-                    rendered at body size. A real display scale now. */}
-                <h1 className="font-display text-4xl font-bold leading-[1.04] tracking-tightest text-text-primary sm:text-5xl lg:text-6xl">
-                  {tHero("headline")}
-                </h1>
-                <p className="mt-3 text-lead text-text-secondary">
-                  {tHero("sub")}
-                </p>
-                <div className="mt-6">
-                  <LandingPrimaryActions locale={locale} surface="landing_hero" />
-                </div>
-              </div>
-              <div className="order-3 lg:col-start-2 lg:row-start-1" data-testid="landing-entry-story">
-                <LandingJourney journey={journey} />
-              </div>
-              <div className="order-2 lg:col-span-2 lg:row-start-2">
+            {/* THE LIVING WORKER HERO (owner 2026-09-29): with its
+                photographs in place, the same sample person stands at the
+                centre of the hero and the promise sits over them; the working
+                sentence entry follows. Without the photographs, the entry
+                hero above stays exactly as it was — never an abstract
+                stand-in. */}
+            {livingHero ? (
+              <>
+                <LivingWorkerHero data={livingHero}>{promise}</LivingWorkerHero>
+                <section className="mt-8">
               <PublicEntry
-                supply={
-                  market.activeVacancies !== null && market.distinctEmployers !== null
-                    ? {
-                        vacancies: market.activeVacancies,
-                        employers: market.distinctEmployers,
-                        refreshedAt: market.lastRefreshedAt,
-                      }
-                    : null
-                }
-              />
-              </div>
-            </section>
+                  supply={
+                    market.activeVacancies !== null && market.distinctEmployers !== null
+                      ? {
+                          vacancies: market.activeVacancies,
+                          employers: market.distinctEmployers,
+                          refreshedAt: market.lastRefreshedAt,
+                        }
+                      : null
+                  }
+                />
+                </section>
+              </>
+            ) : (
+              <section className="grid gap-8 lg:grid-cols-2 lg:items-start lg:gap-x-12">
+                <div className="order-1 max-w-3xl lg:col-start-1 lg:row-start-1 lg:self-center">
+                  {promise}
+                </div>
+                <div className="order-3 lg:col-start-2 lg:row-start-1" data-testid="landing-entry-story">
+                  <LandingJourney journey={journey} />
+                </div>
+                <div className="order-2 lg:col-span-2 lg:row-start-2">
+                <PublicEntry
+                  supply={
+                    market.activeVacancies !== null && market.distinctEmployers !== null
+                      ? {
+                          vacancies: market.activeVacancies,
+                          employers: market.distinctEmployers,
+                          refreshedAt: market.lastRefreshedAt,
+                        }
+                      : null
+                  }
+                />
+                </div>
+              </section>
+            )}
 
             {/* ── §17 THE MARKET, IN PLACES ─────────────────────────────
                    Second, directly under the entry, because it answers the
@@ -213,6 +242,11 @@ export async function FocusLanding({
 
                    It comes back when it can show a visitor real opportunity
                    geography, which is a boundary decision, not a copy change. */}
+            {/* TWO SIDES, ONE SPINE (premium completion 2026-10-02): the lifecycle
+                shared by professionals and companies — placed directly under
+                the entry, before the market proof. Presentation only. */}
+            <TwoSidesSection />
+
             <MarketProofBand market={market} locale={locale} />
 
             {/* ── REAL OPPORTUNITIES (owner directive 2026-09-23,
@@ -255,10 +289,6 @@ export async function FocusLanding({
 
             {/* ── The page ends on what to do next, not on a claim ──────── */}
             <LandingClosingBand locale={locale} />
-
-            {/* ── LIVE / FOCUS: fixed to the corner from `sm` up; in the flow
-                   here, after everything, on a phone (2026-09-24). ────────── */}
-            <LandingModeSwitcher />
           </div>
         </main>
         <SiteFooter />

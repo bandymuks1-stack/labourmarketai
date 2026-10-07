@@ -2,6 +2,8 @@ import { getTranslations } from "next-intl/server";
 import { History } from "lucide-react";
 
 import { Card } from "@/components/ui/Card";
+import { HistoryContextBlock } from "@/components/app/history-context-block";
+import { readRecordHistoryContexts } from "@/lib/organization-evidence/history-context-read";
 import { PeriodMonthlyShare } from "@/components/app/period-monthly-share";
 import {
   EvidenceState,
@@ -102,6 +104,9 @@ export async function PersonImportedHistory({
   if (res.kind !== "ok") return unavailable;
   const records = res.records.filter((r) => !r.withdrawn);
   if (records.length === 0) return null;
+  // The work behind each record, through the ONE context reading. Names are
+  // looked up under the viewer's RLS; what does not resolve is not shown.
+  const contexts = await readRecordHistoryContexts(supabase, records);
 
   return (
     <section className="flex flex-col gap-3" data-testid="person-history" data-count={records.length}>
@@ -171,6 +176,7 @@ export async function PersonImportedHistory({
                   />
                 </div>
                 {rec.text ? <p className="text-sm text-text-secondary">{rec.text}</p> : null}
+                <HistoryContextBlock context={contexts.get(rec.id)} />
                 {/* A period record: one figure over a span — never spread onto
                     days, and onto months only when the SOURCE stated the
                     period. The same renderer every period surface uses. */}

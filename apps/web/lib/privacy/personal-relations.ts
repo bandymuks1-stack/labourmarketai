@@ -26,22 +26,37 @@ import "server-only";
  * inputs may quote a third party. Those are named, with the reason, so the
  * person can ask for them through a route that can redact.
  *
- * TWO REGISTERED RELATIONS ARE NOT ON PRODUCTION YET (re-measured 2026-09-15):
- * `dashboard_preferences` and `demand_interest_seen`. They are registered
- * anyway — the export reads what the database has, and reports a relation the
- * database LACKS as empty (it genuinely holds nothing for anyone), not as
- * unread. Registering them now means the bundle grows by itself the day the
- * migration lands, instead of quietly omitting them for however long it takes
- * someone to notice.
+ * SCALE (re-counted 2026-10-03): the register below reads well over a hundred
+ * relations over ~100 tables (a table can be read through two columns, and
+ * the chained children below hang off ids that were already exported). Do not
+ * trust a number written in a comment: `EXPORTED_RELATIONS.length` is the
+ * count, and the completeness guard fails when the register and the
+ * migrations disagree.
  *
- * THE OTHER TWO LANDED, WHICH IS THE POINT. This paragraph said FOUR on
- * 2026-09-14 and named `worker_external_profiles` and `worker_opportunity_seen`
- * among them; both were applied to production on 2026-09-15 (PER-11's split
- * `external_profiles_v1`, ledger 20260915042406, and `worker_opportunity_seen_v1`,
- * ledger 20260914202221). The bundle picked them up with no code change —
- * exactly the behaviour this design was for — and the only thing that needed
- * correcting was this sentence. Apply status belongs to the database, not to a
- * comment: re-measure before believing any line like the one this replaced.
+ * TWO REGISTERED RELATIONS ARE ABSENT FROM PRODUCTION (re-measured
+ * 2026-10-03): `dashboard_preferences` and `demand_interest_seen`. They are
+ * registered anyway: the export reads what the database has, and reports a
+ * relation the database LACKS (42P01 / 42703 / PGRST205) as empty, not as
+ * unread, because the person genuinely has no rows in a table that does not
+ * exist. That is NOT a live gap; registering them means the bundle grows by
+ * itself the day the migration lands.
+ *
+ * Two others used to be on this list (`worker_external_profiles`,
+ * `worker_opportunity_seen`); both were applied on 2026-09-14/15 and the
+ * bundle picked them up with no code change. Apply status belongs to the
+ * database, not to a comment: re-measure before believing any line like the
+ * one this replaced.
+ *
+ * CHILD TABLES WITHOUT A PERSON COLUMN (PER-12, 2026-10-03). Event, metric
+ * and signal tables carry only a parent id (`entry_id`, `task_id`, ...), so the
+ * migration sweep cannot see them as person-keyed, and several were parked in
+ * ACTOR_ONLY_RELATIONS because their only person column is an actor. A row in
+ * `journal_entry_metrics` or `booking_request_events` IS about the person: it
+ * hangs off THEIR journal entry or THEIR booking. Those are now exported by
+ * CHAINED reads (`key: "parent_row"`), keyed from ids the exporter already
+ * holds, still read as the person under RLS. Other people's ids in them
+ * (`actor_id`, `linked_by`, ...) are redacted per relation: see `redactActors`
+ * and `omitColumns`.
  */
 
 /**
@@ -56,7 +71,12 @@ export type PersonKey =
   | "profile_id"
   | "worker_id"
   | "organization_person_id"
-  | "organization_evidence_record_id";
+  | "organization_evidence_record_id"
+  /**
+   * A child table that carries no person column of its own and hangs off rows
+   * the exporter ALREADY delivered (`parent`). Read last, from those ids.
+   */
+  | "parent_row";
 
 export type ExportedRelation = {
   readonly table: string;
@@ -74,6 +94,41 @@ export type ExportedRelation = {
    * theirs, and must not overwrite each other). Defaults to the table name.
    */
   readonly as?: string;
+  /**
+   * `key: "parent_row"` only. The bundle key of the already-exported parent
+   * relation whose `id`s feed this read, joined through `column` (the FK on
+   * THIS table). If the parent read failed, this relation is reported
+   * unavailable; it is never guessed.
+   */
+  readonly parent?: string;
+  /**
+   * Columns holding ANOTHER person's profile id (a manager, an approver, the
+   * other party). The value is kept only when it is the subject's own id and
+   * is otherwise replaced with null: the event type and time stay, who else
+   * did it does not leave the platform in a subject-access bundle.
+   */
+  readonly redactActors?: readonly string[];
+  /**
+   * Columns set to null outright because their content is free-form state
+   * that can name a third party (assignee ids in a task history,
+   * counterparty terms in an agreement history).
+   */
+  readonly omitColumns?: readonly string[];
+  /**
+   * Said in the bundle beside the relation when the subject's own read may
+   * come back empty although rows about them exist, because the select policy
+   * does not admit them. The relation is still listed, never silently empty.
+   */
+  readonly rlsNote?: string;
+  /**
+   * Read through this SECURITY DEFINER function instead of the table, because
+   * the table's select policy must not be widened (rows can carry other
+   * people). The function takes no person argument: it derives the subject
+   * from auth.uid(), so a caller can only ever obtain their own rows. While
+   * the function is not applied the relation is reported `unavailable`
+   * (never silently empty).
+   */
+  readonly rpc?: string;
 };
 
 /**
@@ -88,6 +143,13 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "dashboard_preferences", key: "profile_id" },
   { table: "preferred_locations", key: "profile_id" },
   { table: "consented_login_location_signals", key: "profile_id" },
+  // How the platform classifies the account for reporting (real / test /
+  // internal) and why — data about the person, so it is theirs to see.
+  { table: "account_classifications", key: "profile_id" },
+  // Platform capabilities granted to the person (e.g. marketplace company
+  // ingest) and the organization claims they made — both are about them.
+  { table: "platform_capability_grants", key: "profile_id" },
+  { table: "organization_claims", key: "profile_id", column: "claimant_profile_id" },
 
   // ── What the person says about themselves ─────────────────────────────
   { table: "profile_skill_claims", key: "profile_id" },
@@ -124,7 +186,12 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "agreements", key: "worker_id" },
 
   // ── Availability, time and the market ─────────────────────────────────
-  { table: "worker_absences", key: "worker_id" },
+  // requested_by / reviewed_by can name a manager: another person's id.
+  {
+    table: "worker_absences",
+    key: "worker_id",
+    redactActors: ["requested_by", "reviewed_by"],
+  },
   { table: "business_trips", key: "profile_id" },
   { table: "booking_requests", key: "worker_id" },
   { table: "worker_saved_opportunities", key: "worker_id" },
@@ -250,6 +317,185 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "billing_subscriptions", key: "profile_id", column: "owner_id" },
   { table: "billing_checkout_operations", key: "profile_id", column: "owner_id" },
   { table: "lmc_transactions", key: "profile_id", column: "actor_profile_id" },
+
+  // -- PER-12 (2026-10-03): children that hang off exported rows ---------
+  // Each is read as the person under RLS, keyed by ids ALREADY in the bundle.
+  // The select policy of every one was read in supabase/migrations before it
+  // was added (see docs/security/PER-12-export-child-relations.md).
+  { table: "journal_entry_metrics", key: "parent_row", parent: "journal_entries", column: "entry_id" },
+  { table: "journal_entry_extractions", key: "parent_row", parent: "journal_entries", column: "entry_id" },
+  {
+    table: "journal_entry_tasks",
+    key: "parent_row",
+    parent: "journal_entries",
+    column: "entry_id",
+    redactActors: ["linked_by", "unlinked_by"],
+  },
+  {
+    table: "booking_request_events",
+    key: "parent_row",
+    parent: "booking_requests",
+    column: "booking_request_id",
+    redactActors: ["actor_id"],
+  },
+  {
+    table: "timesheet_events",
+    key: "parent_row",
+    parent: "timesheets",
+    column: "timesheet_id",
+    redactActors: ["actor_profile_id"],
+  },
+  {
+    table: "work_task_events",
+    key: "parent_row",
+    parent: "work_tasks",
+    column: "task_id",
+    redactActors: ["actor_profile_id"],
+    omitColumns: ["before_state", "after_state"],
+  },
+  {
+    table: "worker_document_events",
+    key: "parent_row",
+    parent: "worker_documents",
+    column: "worker_document_id",
+    redactActors: ["actor_id"],
+  },
+  {
+    table: "workflow_instance_steps",
+    key: "parent_row",
+    parent: "workflow_instances",
+    column: "instance_id",
+  },
+  {
+    table: "contact_disclosure_request_events",
+    key: "parent_row",
+    parent: "contact_disclosure_requests",
+    column: "contact_disclosure_request_id",
+    redactActors: ["actor_profile_id"],
+  },
+  {
+    table: "training_assignment_events",
+    key: "parent_row",
+    parent: "training_assignments",
+    column: "training_assignment_id",
+    redactActors: ["actor_id"],
+    omitColumns: ["before_state", "after_state"],
+  },
+  {
+    table: "agreement_events",
+    key: "parent_row",
+    parent: "agreements",
+    column: "agreement_id",
+    redactActors: ["actor_id"],
+    omitColumns: ["before_state", "after_state"],
+    rlsNote:
+      "NEEDS POLICY: agreement_events_select admits only the organization's owner/admin and the agreement's responsible person, not the worker the agreement is about, so this list can be empty for you although history exists. Ask us and we will answer through a route that can redact.",
+  },
+  {
+    table: "business_trip_events",
+    key: "parent_row",
+    parent: "business_trips",
+    column: "trip_id",
+    redactActors: ["actor_profile_id"],
+  },
+  {
+    table: "document_files",
+    key: "parent_row",
+    parent: "worker_documents",
+    column: "worker_document_id",
+    redactActors: ["uploaded_by"],
+  },
+  {
+    table: "engagement_lifecycle_events",
+    key: "parent_row",
+    parent: "engagement_contexts",
+    column: "engagement_context_id",
+    redactActors: ["actor_profile_id"],
+    omitColumns: ["metadata"],
+  },
+  {
+    table: "performance_review_events",
+    key: "parent_row",
+    parent: "performance_reviews",
+    column: "review_id",
+    redactActors: ["actor_id"],
+    omitColumns: ["metadata"],
+  },
+  {
+    table: "workflow_transitions",
+    key: "parent_row",
+    parent: "workflow_instances",
+    column: "instance_id",
+    redactActors: ["actor_profile_id"],
+    omitColumns: ["metadata"],
+  },
+  {
+    table: "team_enquiry_events",
+    key: "parent_row",
+    parent: "team_enquiries",
+    column: "enquiry_id",
+    redactActors: ["actor_profile_id"],
+  },
+  {
+    table: "agreement_amendments",
+    key: "parent_row",
+    parent: "agreements",
+    column: "agreement_id",
+    redactActors: ["created_by"],
+    rlsNote:
+      "NEEDS POLICY: agreement_amendments_select uses the same predicate as agreement_events_select (organization owner/admin or the agreement's responsible person), so this list can be empty for you although amendments exist. Ask us and we will answer through a route that can redact.",
+  },
+  {
+    table: "onboarding_runs",
+    key: "parent_row",
+    parent: "engagement_contexts",
+    column: "engagement_context_id",
+    redactActors: ["started_by"],
+  },
+  {
+    table: "offboarding_runs",
+    key: "parent_row",
+    parent: "engagement_contexts",
+    column: "engagement_context_id",
+    redactActors: ["started_by"],
+  },
+  { table: "lmc_lots", key: "parent_row", parent: "lmc_accounts", column: "account_id" },
+  { table: "lmc_lot_consumptions", key: "parent_row", parent: "lmc_accounts", column: "account_id" },
+  // Staged organization evidence about the person's roster row: competency
+  // signals the person may already read (their linked evidence record), and
+  // the import rows themselves.
+  {
+    table: "organization_evidence_competency_signals",
+    key: "parent_row",
+    parent: "organization_evidence_records",
+    column: "record_id",
+  },
+  // Read through `privacy_export_evidence_import_rows_v1()` (UNAPPLIED, RED:
+  // see docs/security/PER-12-export-child-relations.md). It returns ONLY the
+  // requesting person's own staged rows, without source_fact / fact_fields /
+  // derived / customer_* / matching internals, which can describe other people
+  // or the supplying organization's customers. Table RLS stays unchanged.
+  {
+    table: "evidence_import_rows",
+    key: "organization_person_id",
+    rpc: "privacy_export_evidence_import_rows_v1",
+    rlsNote:
+      "Staged import lines about you are read through a dedicated subject-safe function that returns only your own lines (dates, hours, kinds, status) and leaves out the raw source line, the free-text description, the project and customer labels, and other people's details. Until that function is applied in production this relation is listed as unavailable; ask us and we will answer through a route that can redact other people's rows.",
+  },
+  // A project that names the person as its responsible person. The project
+  // itself is the organization's record; the person is exported only because
+  // they are named on it. Rides the existing projects RLS (owner / manager /
+  // assigned worker / admin): a responsible person outside those roles
+  // receives nothing, which the note says.
+  {
+    table: "projects",
+    key: "profile_id",
+    column: "responsible_profile_id",
+    as: "projects_responsible",
+    redactActors: ["created_by", "owner_id"],
+    rlsNote:
+      "Projects you are named responsible for, as far as the project's own visibility rules let you read them; the project is the organization's record and you appear on it as its responsible person.",
+  },
 ];
 
 export type WithheldRelation = {
@@ -263,6 +509,16 @@ export type WithheldRelation = {
  * still withheld, because handing it over would hand over someone else too.
  */
 export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
+  {
+    table: "email_verifications_v1",
+    reason:
+      "proof that you control an email address (address, method, time) — held server-side as security evidence with no read path for your own session; whether your address is verified is shown to you in the product, and the evidence is available on request through the data-protection channel",
+  },
+  {
+    table: "email_verification_requests_v1",
+    reason:
+      "a pending request to prove an email address — short-lived security state with no read path for your own session",
+  },
   {
     table: "conversation_participants",
     reason:
@@ -370,39 +626,32 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
  * them names a subject, the table must be exported or withheld instead.
  */
 export const ACTOR_ONLY_RELATIONS: readonly string[] = [
+  // Discovered-organization provenance: the person is only the recorder of a
+  // fact or identifier about a COMPANY, never its subject.
+  "organization_facts",
+  "organization_identifiers",
   "agency_client_connections",
   "agency_client_request_shares",
-  "agreement_amendments",
-  "agreement_events",
   "assets",
   "audit_logs",
-  "booking_request_events",
-  "business_trip_events",
   "company_locations",
-  "contact_disclosure_request_events",
   "decision_document_links",
   "decision_task_links",
   "defect_corrections",
-  "document_files",
   "education_cohorts",
   "education_programs",
-  "engagement_lifecycle_events",
   "evidence_import_events",
   "evidence_import_sessions",
   "finance_records",
-  "journal_entry_tasks",
   "learning_policy_settings",
   "leave_balance_policies",
   "lmc_settings",
   "management_decision_events",
   "market_rate_averages",
   "offboarding_run_items",
-  "offboarding_runs",
-  "onboarding_runs",
   "onboarding_templates",
   "org_document_events",
   "organization_evidence_parties",
-  "performance_review_events",
   "pilots",
   "procurement_events",
   "procurement_offers",
@@ -413,16 +662,90 @@ export const ACTOR_ONLY_RELATIONS: readonly string[] = [
   "review_cycles",
   "review_evidence_links",
   "task_dependencies",
-  "team_enquiry_events",
-  "timesheet_events",
-  "training_assignment_events",
   "training_programs",
   "training_skill_links",
-  "work_task_events",
-  "worker_document_events",
   "workflow_definition_versions",
   "workflow_definitions",
-  "workflow_transitions",
+];
+
+/**
+ * Tables that hang off an exported table's id (an FK to it) and are
+ * deliberately NOT exported, each with the reason. PER-12 added this register
+ * because the person-column sweep cannot see a child table that carries only a
+ * parent id: without it a new event/metric table under an exported parent is
+ * silently absent from a subject-access bundle. The guard fails on any such
+ * child that is neither exported, withheld, nor listed here.
+ */
+export type ReviewedChild = {
+  readonly table: string;
+  readonly reason: string;
+};
+export const CHILD_TABLES_NOT_EXPORTED: readonly ReviewedChild[] = [
+  {
+    table: "decision_document_links",
+    reason:
+      "links an organization's management decision to a document: the decision is the organization's record and the person appears on it only as the responsible party",
+  },
+  {
+    table: "decision_task_links",
+    reason:
+      "links an organization's management decision to a task: organization structure, not data about the person",
+  },
+  {
+    table: "management_decision_events",
+    reason:
+      "audit trail of an organization's management decision; the person is named responsible on the decision (exported) but the trail is the organization's own record",
+  },
+  {
+    table: "defect_corrections",
+    reason:
+      "an organization's quality-correction record on a defect the person was assigned; the record belongs to the organization's quality process",
+  },
+  {
+    table: "procurement_events",
+    reason:
+      "audit trail of an organization's procurement inquiry; business record of the buying organization, not personal data",
+  },
+  {
+    table: "procurement_offers",
+    reason:
+      "supplier offers on an organization's procurement inquiry: supplier commercial terms, a third party's data",
+  },
+  {
+    table: "review_evidence_links",
+    reason:
+      "links a performance review to organization evidence records; the linked evidence is exported through its own relations",
+  },
+  {
+    table: "project_stages",
+    reason:
+      "a stage of an organization's project that may point at the person's engagement as its contractor; project structure, the organization's record",
+  },
+  {
+    table: "offboarding_run_items",
+    reason:
+      "checklist items of an organization's offboarding process; the organization's own task list (items assigned to you as the responsible person are exported on the onboarding side, and the run itself is exported)",
+  },
+  {
+    table: "organization_evidence_parties",
+    reason:
+      "the other organizations recorded as parties to an evidence record: third-party organization data, not data about you",
+  },
+  {
+    table: "task_dependencies",
+    reason:
+      "dependency edges between two organization tasks: workflow structure between tasks, not an attribute of a person",
+  },
+  {
+    table: "threads",
+    reason:
+      "conversation threads on a match; same thread rule as conversations: they hold the other party's words, so they need a route that can separate them",
+  },
+  {
+    table: "training_skill_links",
+    reason:
+      "links a training programme assignment to a skill taxonomy entry; programme content rather than personal data (the assignment itself is exported)",
+  },
 ];
 
 /**

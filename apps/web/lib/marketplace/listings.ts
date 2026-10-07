@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { hideQaMarked, isQaViewer } from "@/lib/marketplace/qa-marked";
 import { getOrCreateDirectConversation } from "@/lib/communication/direct-conversation";
 import {
   isListingCategory,
@@ -140,7 +141,12 @@ export async function discoverMarketplaceListings(filters?: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (r: any) => ({ ...mapRow(r), isMine: r.owner_id === user.id }),
   );
-  return { kind: "ok", rows };
+  // QA-labelled rows never reach real people (shared rule); a QA viewer
+  // still sees them.
+  return {
+    kind: "ok",
+    rows: hideQaMarked(rows, isQaViewer(user), (r) => [r.title, r.description]),
+  };
 }
 
 function validate(

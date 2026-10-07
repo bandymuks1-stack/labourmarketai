@@ -50,10 +50,34 @@ export interface ProjectAssignment {
   workerProfileId: string;
   name: string;
   assignedAt: string;
+  /** workers.id - lets the page ask the ONE photo rule (worker_avatar_path_v1)
+   *  whether this viewer may see the person's photo. */
+  workerId?: string | undefined;
+  /** A signed photo URL when the viewer has the real work relationship;
+   *  null/absent = initials. Filled by the page, never by this reader. */
+  avatarUrl?: string | null;
 }
 
 function migMissing(code?: string): boolean {
   return code === UNDEFINED_COLUMN || code === RELATION_NOT_FOUND;
+}
+
+/**
+ * Ids among `ids` marked as a DUPLICATE of a canonical project. The ONE reader
+ * of the marker for project lists; an unreadable marker hides nothing.
+ */
+export async function readDuplicateProjectIds(
+  supabase: SupabaseClient,
+  ids: readonly string[],
+): Promise<Set<string>> {
+  if (ids.length === 0) return new Set();
+  const { data, error } = await asAny(supabase)
+    .from("projects")
+    .select("id")
+    .in("id", ids)
+    .eq("record_state", "duplicate");
+  if (error) return new Set();
+  return new Set(((data ?? []) as { id: string }[]).map((r) => r.id));
 }
 
 /** Projects the caller manages (owns_company → projects RLS). */
@@ -82,6 +106,13 @@ export async function listManagedProjects(): Promise<ManagedProject[]> {
     res = await run(columnsV1);
   }
   if (res.error) return [];
+  // A project marked DUPLICATE of its canonical twin (20260930120000) is a
+  // record fact, not work — it leaves the working list, never the database.
+  // Unreadable marker (not applied) → nothing is hidden.
+  const duplicateIds = await readDuplicateProjectIds(
+    supabase,
+    ((res.data ?? []) as { id: string }[]).map((r) => r.id),
+  );
   type Row = {
     id: string;
     title: string | null;
@@ -92,7 +123,7 @@ export async function listManagedProjects(): Promise<ManagedProject[]> {
     organization_id: string | null;
     organizations: { display_name: string | null; legal_name: string | null } | null;
   };
-  return ((res.data ?? []) as Row[]).map((p) => ({
+  return ((res.data ?? []) as Row[]).filter((p) => !duplicateIds.has(p.id)).map((p) => ({
     id: p.id,
     title: p.title ?? null,
     city: p.city ?? null,
@@ -119,7 +150,7 @@ export async function listProjectAssignments(
     // every assignment and this list was always empty. The join only supplies
     // an optional display name that already has a fallback below.
     .select(
-      "assigned_at, worker:workers!inner(profile_id, display_name, profiles(full_name))",
+      "assigned_at, worker:workers!inner(id, profile_id, display_name, profiles(full_name))",
     )
     .eq("project_id", projectId)
     .eq("status", "active")
@@ -131,19 +162,21 @@ export async function listProjectAssignments(
   type Row = {
     assigned_at: string;
     worker: {
+      id: string | null;
       profile_id: string | null;
       display_name: string | null;
       profiles: { full_name: string | null } | null;
     } | null;
   };
   return ((res.data ?? []) as Row[])
-    .map((r) => {
+    .map((r): ProjectAssignment | null => {
       const w = r.worker;
       if (!w?.profile_id) return null;
       return {
         workerProfileId: w.profile_id,
         name: w.profiles?.full_name ?? w.display_name ?? w.profile_id.slice(0, 8),
         assignedAt: r.assigned_at,
+        workerId: w.id ?? undefined,
       };
     })
     .filter((x: ProjectAssignment | null): x is ProjectAssignment => x !== null);

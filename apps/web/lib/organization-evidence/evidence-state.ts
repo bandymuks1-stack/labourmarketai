@@ -199,6 +199,7 @@ export interface RecordLifecycleEvent {
     | "withdrawn"
     | "reinstated"
     | "disputed"
+    | "dispute_withdrawn"
     | "corrected";
   readonly actorRole?: AttestationActorRole | string | null;
   /** ISO timestamp; used for latest-wins ordering. */
@@ -254,13 +255,56 @@ function latestAt(
 }
 
 /**
+ * Does ANY party still contest this record?
+ *
+ * Latest-wins WITHIN the dispute family (disputed / dispute_withdrawn), PER
+ * ACTOR: more than one party may contest the same record, so a global pairing
+ * would let one party's withdrawal silently clear another party's standing
+ * contest. A withdrawal never erases the fact that the contest existed - the
+ * earlier `disputed` row stays in the events - it only ends the standing.
+ * A tie goes to the withdrawal, as the database trigger orders it. An event
+ * with no actor is its own party: an unattributable contest still stands and
+ * cannot be cancelled by someone else's withdrawal.
+ */
+export function anyStandingDispute(
+  events: readonly RecordLifecycleEvent[],
+): boolean {
+  const raised = new Map<string, number>();
+  const dropped = new Map<string, number>();
+  for (const e of events) {
+    if (e.eventType !== "disputed" && e.eventType !== "dispute_withdrawn") continue;
+    const who = e.actorProfileId ?? "";
+    const bucket = e.eventType === "disputed" ? raised : dropped;
+    bucket.set(who, Math.max(bucket.get(who) ?? 0, ts(e.createdAt)));
+  }
+  for (const [who, at] of raised) {
+    if (at > 0 && at > (dropped.get(who) ?? 0)) return true;
+  }
+  return false;
+}
+
+/** Did this actor contest and then take the contest back (their latest
+ *  dispute-family event is a withdrawal)? Drives the honest history line: the
+ *  contest existed, and it is no longer standing. */
+export function contestWithdrawnBy(
+  events: readonly RecordLifecycleEvent[],
+  actorProfileId: string,
+): boolean {
+  const mine = events.filter((e) => e.actorProfileId === actorProfileId);
+  const raised = latestAt(mine, "disputed");
+  const dropped = latestAt(mine, "dispute_withdrawn");
+  return raised > 0 && dropped >= raised;
+}
+
+/**
  * THE derivation: a record's base (reported) state, its append-only lifecycle
  * rows, and who the record is ABOUT → the state a surface may show.
  *
  * Precedence, strongest signal first:
  *   1. WITHDRAWN — a withdrawal not since reinstated hides the standing (never
  *      the record);
- *   2. DISPUTED — someone with standing contests it;
+ *   2. DISPUTED — someone with standing contests it and has not since
+ *      withdrawn that contest (latest-wins per actor);
  *   3. CORRECTED — a correcting record superseded it;
  *   4. INDEPENDENTLY_VERIFIED — a standing verification event;
  *   5. the standing attestation, self- or not;
@@ -276,7 +320,7 @@ export function deriveEvidenceStanding(
 ): EvidenceStanding {
   const withdrawnAt = latestAt(events, "withdrawn");
   const reinstatedAt = latestAt(events, "reinstated");
-  const disputedAt = latestAt(events, "disputed");
+  const disputeStands = anyStandingDispute(events);
   const correctedAt = latestAt(events, "corrected");
   const attestationWithdrawnAt = latestAt(events, "attestation_withdrawn");
   const verificationWithdrawnAt = latestAt(events, "verification_withdrawn");
@@ -313,7 +357,7 @@ export function deriveEvidenceStanding(
 
   let state: EvidenceState;
   if (isWithdrawn) state = "WITHDRAWN";
-  else if (disputedAt > 0) state = "DISPUTED";
+  else if (disputeStands) state = "DISPUTED";
   else if (correctedAt > 0) state = "CORRECTED";
   else if (verificationStands) state = INDEPENDENTLY_VERIFIED;
   else if (attestation) {

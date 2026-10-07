@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
+import { WorkLifecycleSection } from "@/components/marketing/work-lifecycle-section";
 import { BenefitCards } from "@/components/marketing/benefit-cards";
 
 export async function generateMetadata({
@@ -16,7 +17,7 @@ import { RoleEnrichment } from "@/components/marketing/role-enrichment";
 import { ExamplePreviewFrame } from "@/components/marketing/example-preview-frame";
 import { WorkerPlayerCard } from "@/components/app/worker-player-card";
 import { buildPlayerCardLabels } from "@/lib/player-card/labels";
-import { buildSampleWorkerPlayerCard } from "@/lib/player-card/sample-card";
+import { buildSampleAllTime, buildSampleWorkerPlayerCard } from "@/lib/player-card/sample-card";
 
 export default async function ForWorkersPage({
   params,
@@ -36,12 +37,13 @@ export default async function ForWorkersPage({
    * tiers, 0–99 stat bars) may never come back to a public surface.
    */
   const tCards = await getTranslations("playercards");
+  const now = new Date();
   const sampleCard = buildSampleWorkerPlayerCard({
     sampleName: tCards("sample.name"),
     sampleOrganization: tCards("sample.organization"),
-    now: new Date(),
+    now,
   });
-  const cardLabels = await buildPlayerCardLabels(sampleCard);
+  const cardLabels = await buildPlayerCardLabels(sampleCard, { allTime: buildSampleAllTime(now) });
 
   return (
     <>
@@ -54,9 +56,10 @@ export default async function ForWorkersPage({
         ctaLabel={t("cta")}
         ctaSource="workers_hero"
       />
-      <BenefitCards items={benefits} />
+      <WorkLifecycleSection audience="workers" />
       <RoleEnrichment
         root="workers"
+        afterPreview={<BenefitCards items={benefits} />}
         previewKey="profile"
         preview={
           <ExamplePreviewFrame>

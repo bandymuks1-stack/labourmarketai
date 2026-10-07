@@ -67,13 +67,17 @@ import { NON_UI_TAXONOMY_LOCALES } from "./launch-language-scope";
 
 /** Languages we publish acquisition copy in but hold no UI catalog for.
  *
+ * `ka` (Georgian) is the same case: a communication-only language (config.ts
+ * communicationLocales) with no UI catalog, so `/ka` must not fall through to
+ * `/lt/ka`.
+ *
  * `uk` is here because Agentai OS composes Ukrainian worker copy for external
  * community distribution while `messages/uk.json` does not exist. Listing it
  * does NOT make Ukrainian a locale — it is the opposite: it is the record that
  * we know the code names a language, so the router must stop reading it as a
  * page. Adding a code here is not a §2.4 catalog change and creates no claim of
  * Ukrainian support anywhere in the product. */
-export const ACQUISITION_ONLY_LANGUAGES = ["uk"] as const;
+export const ACQUISITION_ONLY_LANGUAGES = ["uk", "ka"] as const;
 
 /** Where a reader of an unrouted language is sent. */
 export const UNSUPPORTED_LANGUAGE_FALLBACK = "en";

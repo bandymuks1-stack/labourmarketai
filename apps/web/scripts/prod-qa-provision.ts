@@ -46,6 +46,7 @@
 import { createClient } from "@supabase/supabase-js";
 
 import {
+  PROD_QA_AGENCY_EMAIL,
   PROD_QA_WORKER_EMAIL,
   ProdQaGuardError,
   assertProdQaTarget,
@@ -84,7 +85,9 @@ async function main(): Promise<void> {
   try {
     target = assertProdQaTarget({
       url,
-      email: PROD_QA_WORKER_EMAIL,
+      // Only an allowlisted identity is accepted (assertProdQaTarget). Default:
+      // the original worker; PROD_QA_PROVISION_IDENTITY selects the synthetic agency.
+      email: process.env.PROD_QA_PROVISION_IDENTITY ?? PROD_QA_WORKER_EMAIL,
       serviceKey,
     });
   } catch (err) {
@@ -142,7 +145,10 @@ async function main(): Promise<void> {
       qa_purpose: "labourmarket.ai production E2E — EMPLOYEE_BETA_PRODUCTION_GATE",
       qa_provisioned_by: "owner",
     },
-    user_metadata: { role: "worker", locale: "lt" },
+    user_metadata: {
+      role: target.email === PROD_QA_AGENCY_EMAIL ? "agency" : "worker",
+      locale: "lt",
+    },
   });
 
   if (error || !data?.user) {

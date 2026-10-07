@@ -38,6 +38,7 @@ export type OrganizationDoorId =
   | "people"
   | "work"
   | "needs"
+  | "market"
   | "calendar"
   | "partners"
   | "education"
@@ -51,6 +52,7 @@ export const ORGANIZATION_DOOR_ROUTES: Readonly<
   people: "/dashboard/company/people",
   work: "/dashboard/projects",
   needs: "/dashboard/company/needs",
+  market: "/dashboard/service-requests",
   calendar: "/dashboard/company/planning",
   partners: "/dashboard/company/partners",
   education: "/dashboard/company/education",
@@ -65,6 +67,7 @@ export const ORGANIZATION_DOOR_ORDER: readonly OrganizationDoorId[] = [
   "people",
   "work",
   "needs",
+  "market",
   "calendar",
   "partners",
   "education",
