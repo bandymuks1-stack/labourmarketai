@@ -1520,6 +1520,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // owner 2026-10-01 (#2065 APPROVED in chat): board reads without parallel workers; drop the unused 129 MB GIN.
       "20261001180000_public_vacancy_board_no_parallel_v1.sql",
       "20261001180100_drop_unused_vacancy_fulltext_gin_v1.sql",
+      // owner approval PENDING (stream L): search function plpgsql branches so a rare profession is index-driven.
+      "20261001200100_search_public_vacancy_previews_plan_v3.sql",
       "20261002120000_journal_explicit_project_attribution_v1.sql",
       // 2026-10-03: SECURITY forward-fix (NULL-safe authorization guards, auth-core) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261002141500_work_task_authz_null_safe_v1.sql",

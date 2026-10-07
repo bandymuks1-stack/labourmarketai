@@ -2009,7 +2009,36 @@
         "unavailable": "Die Studiengänge konnten gerade nicht geladen werden. Laden Sie die Seite neu; nichts von dem, was Sie angelegt haben, ist verloren.",
         "inviteLearners": "Lernende einladen",
         "exportReport": "Bericht herunterladen (CSV)",
-        "exportReportHint": "Programme, Kohorten, Lernendenzahlen und aktuelle Nachfrage — zusammen mit den Ergebnissen Ihrer Lernenden. Unbekannte Zahlen werden als unknown geschrieben, niemals als Null."
+        "exportReportHint": "Programme, Kohorten, Lernendenzahlen und aktuelle Nachfrage — zusammen mit den Ergebnissen Ihrer Lernenden. Unbekannte Zahlen werden als unknown geschrieben, niemals als Null.",
+        "unassignedLearners": "Angenommene Lernende, die noch keiner Kohorte angehören: {count}. Weisen Sie sie oben einer Kohorte zu.",
+        "recognition": {
+          "title": "Anerkennung erfassen",
+          "hint": "Die Entscheidung einer unabhängigen Prüfstelle, dass die gezeigte Kompetenz einer Person eine formale Anforderung erfüllt. Das ist kein Zertifikat und entsteht nie allein aus Arbeitsnachweisen.",
+          "pending": "Das Erfassen von Anerkennungen ist noch nicht verfügbar: Das Register dahinter wurde noch nicht freigegeben. Bis dahin wird eine Eingabe abgelehnt, nicht gespeichert.",
+          "subject": "Lernende/r",
+          "chooseSubject": "Lernende/n wählen",
+          "kind": "Art der Anforderung",
+          "kindDocument": "Dokumenttyp",
+          "kindSkill": "Fähigkeit",
+          "kindProfession": "Beruf",
+          "key": "Anforderungsschlüssel (Slug)",
+          "country": "Land (2 Buchstaben)",
+          "evidence": "IDs der Nachweiseinträge",
+          "evidenceHint": "IDs von Journaleinträgen der Arbeit der lernenden Person, durch Kommas getrennt. Das Register nimmt nur Einträge an, die eine zweite Person abgezeichnet hat.",
+          "decision": "Entscheidung",
+          "recognised": "Anerkannt",
+          "notRecognised": "Nicht anerkannt",
+          "validFrom": "Gültig ab",
+          "validUntil": "Gültig bis",
+          "note": "Notiz der Prüfstelle",
+          "submit": "Entscheidung erfassen",
+          "saving": "Wird gespeichert…",
+          "ok": "Anerkennung erfasst.",
+          "needsMigration": "Nicht erfasst: Das Anerkennungsregister ist noch nicht verfügbar.",
+          "forbidden": "Diese Einrichtung kann diese Anerkennung für diese Person nicht erfassen.",
+          "invalid": "Bitte prüfen Sie die Werte.",
+          "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+        }
       },
       "learners": {
         "title": "Lernende",
@@ -7412,6 +7441,21 @@
         "compared": "Verglichen",
         "interest": "Interesse"
       }
+    },
+    "funnel": {
+      "notMeasured": "Noch nicht gemessen",
+      "unavailable": "Nicht verfügbar (Lesen fehlgeschlagen)",
+      "unavailableBanner": "Der Funnel konnte nicht aus dem Ereignisspeicher gelesen werden. Alle Zahlen unten sind nicht verfügbar. Das ist ein fehlgeschlagener Lesevorgang, keine gemessene Null.",
+      "rateNotMeasured": "Noch nicht gemessen",
+      "reason": {
+        "usefulUndefined": "Es gibt noch keine Definition von „nützlich“, daher werden nur die teilweisen Ereignisse für abgeschlossenes Onboarding und angelegte Organisation gezählt.",
+        "offerSide": "Kein Ereignis erfasst die Angebotsseite von Bedarf / Angebot, daher hat diese Stufe keine Quelle.",
+        "commercialValue": "Kein Ereignis und keine Quelle erfasst den kommerziellen Wert.",
+        "trial": "Kein Ereignis und keine Quelle erfasst eine Testphase.",
+        "paidConversion": "Kein Ereignis und keine Quelle erfasst eine zahlende Konversion.",
+        "retention": "return_visit_detected ist definiert, wird aber nicht in diesen Funnel gelesen, und es gibt keine Kennzahl für wiederholte Nutzung."
+      },
+      "aiHelp": "KI-Abrechnung aus erster Hand: Prüfzeilen pro Lauf (ai_runs, USD aus der geprüften Preistabelle) und das kanonische Nutzungsbuch in Euro-Cent (usage_cost_events). Die Zahlen stammen aus Live-Lesevorgängen beider Tabellen. Eine nicht lesbare Tabelle wird als Strich (nicht verfügbar) angezeigt, nie als 0, und unbekannte Kosten ebenfalls als Strich."
     }
   },
   "languageFeedback": {
@@ -18573,5 +18617,21 @@
     },
     "shown": "Angezeigt werden die neuesten {shown} von {total} Einträgen. Der Rest bleibt erfasst.",
     "truncated": "Es gibt mehr Einträge, als eine Ansicht liest. Die {count} gelesenen werden angezeigt; Summen umfassen nur diese."
+  },
+  "qualificationRecognitions": {
+    "title": "Anerkennungen",
+    "subtitle": "Entscheidungen unabhängiger Prüfstellen, dass Ihre gezeigte Kompetenz eine formale Anforderung erfüllt. Das ist kein Zertifikat und keine Prüfung Ihrer Arbeit.",
+    "empty": "Noch keine Anerkennung erfasst.",
+    "unavailable": "Anerkennungen können gerade nicht gelesen werden. Das ist nicht dasselbe wie keine zu haben.",
+    "kindDocument": "Dokumenttyp",
+    "kindSkill": "Fähigkeit",
+    "kindProfession": "Beruf",
+    "stateCurrent": "Anerkannt, gültig",
+    "stateLapsed": "Anerkannt, Gültigkeit abgelaufen",
+    "stateNotRecognised": "Geprüft, nicht anerkannt",
+    "stateRevoked": "Von der Prüfstelle widerrufen",
+    "stateNotYetValid": "Anerkannt, noch nicht gültig",
+    "validFrom": "ab {date}",
+    "validUntil": "bis {date}"
   }
 }

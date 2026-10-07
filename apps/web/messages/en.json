@@ -2009,7 +2009,36 @@
         "unavailable": "Programmes could not be loaded right now. Reload the page; nothing you created is lost.",
         "inviteLearners": "Invite learners",
         "exportReport": "Download the report (CSV)",
-        "exportReportHint": "Programmes, cohorts, learner counts and live demand — plus your learner outcomes. Counts that are not known are written as unknown, never as zero."
+        "exportReportHint": "Programmes, cohorts, learner counts and live demand — plus your learner outcomes. Counts that are not known are written as unknown, never as zero.",
+        "unassignedLearners": "Accepted learners not in a cohort yet: {count}. Add them from a cohort above.",
+        "recognition": {
+          "title": "Record a recognition",
+          "hint": "An independent assessor's decision that the capability a person has shown answers a formal requirement. It is not a certificate, and it is never created from work evidence alone.",
+          "pending": "Recording recognitions is not available yet: the register behind it has not been released. Until then a submission is refused, not saved.",
+          "subject": "Learner",
+          "chooseSubject": "Choose a learner",
+          "kind": "Requirement type",
+          "kindDocument": "Document type",
+          "kindSkill": "Skill",
+          "kindProfession": "Profession",
+          "key": "Requirement key (slug)",
+          "country": "Country (2 letters)",
+          "evidence": "Evidence entry IDs",
+          "evidenceHint": "Journal entry IDs of the learner's work, separated by commas. The register accepts only entries a second person has signed off.",
+          "decision": "Decision",
+          "recognised": "Recognised",
+          "notRecognised": "Not recognised",
+          "validFrom": "Valid from",
+          "validUntil": "Valid until",
+          "note": "Assessor note",
+          "submit": "Record decision",
+          "saving": "Saving…",
+          "ok": "Recognition recorded.",
+          "needsMigration": "Not recorded: the recognition register is not available yet.",
+          "forbidden": "This institution cannot record this recognition for this person.",
+          "invalid": "Please check the values.",
+          "error": "Something went wrong. Please try again."
+        }
       },
       "learners": {
         "title": "Learners",
@@ -7412,6 +7441,21 @@
         "compared": "Compared",
         "interest": "Interest"
       }
+    },
+    "funnel": {
+      "notMeasured": "Not measured yet",
+      "unavailable": "Unavailable (read failed)",
+      "unavailableBanner": "The funnel could not be read from the event store. Every count below is unavailable. This is a failed read, not a measured zero.",
+      "rateNotMeasured": "Not measured yet",
+      "reason": {
+        "usefulUndefined": "No definition of \"useful\" exists yet, so only the partial onboarding and organization-created events are counted.",
+        "offerSide": "No event records the offer side of need / offer, so this stage has no source.",
+        "commercialValue": "No event or source records commercial value.",
+        "trial": "No event or source records a trial.",
+        "paidConversion": "No event or source records a paid conversion.",
+        "retention": "return_visit_detected is defined but is not read into this funnel, and no repeat-use measure exists."
+      },
+      "aiHelp": "First-party AI accounting: per-run audit rows (ai_runs, USD from the reviewed pricing table) and the canonical EUR-cent usage ledger (usage_cost_events). The counts come from live reads of both tables. A table that cannot be read is shown as a dash (unavailable), never as 0, and an unknown cost is also a dash."
     }
   },
   "languageFeedback": {
@@ -18573,5 +18617,21 @@
     },
     "shown": "Showing the newest {shown} of {total} records. The rest remain on record.",
     "truncated": "More records exist than one view reads. The {count} read are shown; totals cover only these."
+  },
+  "qualificationRecognitions": {
+    "title": "Recognitions",
+    "subtitle": "Decisions by independent assessors that the capability you have shown answers a formal requirement. This is not a certificate and not a check of your work.",
+    "empty": "No recognition recorded yet.",
+    "unavailable": "Recognitions cannot be read right now. This is not the same as having none.",
+    "kindDocument": "Document type",
+    "kindSkill": "Skill",
+    "kindProfession": "Profession",
+    "stateCurrent": "Recognised, current",
+    "stateLapsed": "Recognised, validity ended",
+    "stateNotRecognised": "Assessed, not recognised",
+    "stateRevoked": "Revoked by the assessor",
+    "stateNotYetValid": "Recognised, not valid yet",
+    "validFrom": "from {date}",
+    "validUntil": "until {date}"
   }
 }

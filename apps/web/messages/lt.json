@@ -2009,7 +2009,36 @@
         "unavailable": "Šiuo metu programų įkelti nepavyko. Perkraukite puslapį; tai, ką sukūrėte, neprarasta.",
         "inviteLearners": "Pakviesti besimokančiuosius",
         "exportReport": "Atsisiųsti ataskaitą (CSV)",
-        "exportReportHint": "Programos, srautai, besimokančiųjų skaičiai ir gyva paklausa — kartu su jūsų besimokančiųjų rezultatais. Nežinomi skaičiai rašomi kaip „unknown“, niekada kaip nulis."
+        "exportReportHint": "Programos, srautai, besimokančiųjų skaičiai ir gyva paklausa — kartu su jūsų besimokančiųjų rezultatais. Nežinomi skaičiai rašomi kaip „unknown“, niekada kaip nulis.",
+        "unassignedLearners": "Priimtų besimokančiųjų, dar nepriskirtų grupei: {count}. Priskirkite juos aukščiau esančioje grupėje.",
+        "recognition": {
+          "title": "Įrašyti pripažinimą",
+          "hint": "Nepriklausomo vertintojo sprendimas, kad žmogaus parodyta kompetencija atitinka formalų reikalavimą. Tai nėra pažymėjimas ir niekada nesukuriamas vien iš darbo įrodymų.",
+          "pending": "Pripažinimų įrašymas dar nepasiekiamas: už jo esantis registras dar nepaleistas. Kol kas pateikimas atmetamas, o ne išsaugomas.",
+          "subject": "Besimokantysis",
+          "chooseSubject": "Pasirinkite besimokantįjį",
+          "kind": "Reikalavimo tipas",
+          "kindDocument": "Dokumento tipas",
+          "kindSkill": "Įgūdis",
+          "kindProfession": "Profesija",
+          "key": "Reikalavimo raktas (slug)",
+          "country": "Šalis (2 raidės)",
+          "evidence": "Įrodymų įrašų ID",
+          "evidenceHint": "Besimokančiojo darbo žurnalo įrašų ID, atskirti kableliais. Registras priima tik įrašus, kuriuos yra pažymėjęs antras asmuo.",
+          "decision": "Sprendimas",
+          "recognised": "Pripažinta",
+          "notRecognised": "Nepripažinta",
+          "validFrom": "Galioja nuo",
+          "validUntil": "Galioja iki",
+          "note": "Vertintojo pastaba",
+          "submit": "Įrašyti sprendimą",
+          "saving": "Saugoma…",
+          "ok": "Pripažinimas įrašytas.",
+          "needsMigration": "Neįrašyta: pripažinimų registras dar nepasiekiamas.",
+          "forbidden": "Ši įstaiga negali įrašyti šio pripažinimo šiam asmeniui.",
+          "invalid": "Patikrinkite reikšmes.",
+          "error": "Kažkas nepavyko. Bandykite dar kartą."
+        }
       },
       "learners": {
         "title": "Besimokantieji",
@@ -7412,6 +7441,21 @@
         "compared": "Palyginta",
         "interest": "Pareikšta susidomėjimo"
       }
+    },
+    "funnel": {
+      "notMeasured": "Dar neišmatuota",
+      "unavailable": "Nepasiekiama (skaitymas nepavyko)",
+      "unavailableBanner": "Piltuvėlio nepavyko nuskaityti iš įvykių saugyklos. Visi žemiau esantys skaičiai nepasiekiami. Tai nepavykęs skaitymas, o ne išmatuotas nulis.",
+      "rateNotMeasured": "Dar neišmatuota",
+      "reason": {
+        "usefulUndefined": "Kol kas nėra „naudingo“ apibrėžimo, todėl skaičiuojami tik dalinis registracijos užbaigimo ir organizacijos sukūrimo įvykiai.",
+        "offerSide": "Joks įvykis neregistruoja poreikio / pasiūlymo pasiūlymo pusės, todėl šis etapas neturi šaltinio.",
+        "commercialValue": "Joks įvykis ar šaltinis neregistruoja komercinės vertės.",
+        "trial": "Joks įvykis ar šaltinis neregistruoja bandomojo laikotarpio.",
+        "paidConversion": "Joks įvykis ar šaltinis neregistruoja mokamo perėjimo.",
+        "retention": "return_visit_detected apibrėžtas, bet į šį piltuvėlį neįtrauktas, o pakartotinio naudojimo rodiklio nėra."
+      },
+      "aiHelp": "Pirmosios šalies DI apskaita: kiekvieno paleidimo auditas (ai_runs, USD pagal peržiūrėtą kainoraštį) ir kanoninis naudojimo žurnalas eurocentais (usage_cost_events). Skaičiai gaunami tiesiogiai skaitant abi lenteles. Lentelė, kurios nepavyksta nuskaityti, rodoma brūkšneliu (nepasiekiama), o ne 0; nežinoma kaina taip pat rodoma brūkšneliu."
     }
   },
   "languageFeedback": {
@@ -18573,5 +18617,21 @@
     },
     "shown": "Rodomi naujausi {shown} iš {total} įrašų. Likusieji lieka įrašyti.",
     "truncated": "Įrašų yra daugiau, nei perskaito vienas vaizdas. Rodomi perskaityti {count}; sumos apima tik juos."
+  },
+  "qualificationRecognitions": {
+    "title": "Pripažinimai",
+    "subtitle": "Nepriklausomų vertintojų sprendimai, kad jūsų parodyta kompetencija atitinka formalų reikalavimą. Tai nėra pažymėjimas ir nėra jūsų darbo patikra.",
+    "empty": "Pripažinimų dar neįrašyta.",
+    "unavailable": "Pripažinimų dabar nepavyksta nuskaityti. Tai nereiškia, kad jų nėra.",
+    "kindDocument": "Dokumento tipas",
+    "kindSkill": "Įgūdis",
+    "kindProfession": "Profesija",
+    "stateCurrent": "Pripažinta, galioja",
+    "stateLapsed": "Pripažinta, galiojimas baigėsi",
+    "stateNotRecognised": "Įvertinta, nepripažinta",
+    "stateRevoked": "Vertintojo atšaukta",
+    "stateNotYetValid": "Pripažinta, dar negalioja",
+    "validFrom": "nuo {date}",
+    "validUntil": "iki {date}"
   }
 }

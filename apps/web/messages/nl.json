@@ -2009,7 +2009,36 @@
         "unavailable": "De opleidingen konden nu niet worden geladen. Vernieuw de pagina; wat je hebt aangemaakt is niet verloren.",
         "inviteLearners": "Lerenden uitnodigen",
         "exportReport": "Rapport downloaden (CSV)",
-        "exportReportHint": "Programma's, cohorten, aantallen lerenden en actuele vraag — samen met de uitkomsten van je lerenden. Onbekende aantallen worden als unknown geschreven, nooit als nul."
+        "exportReportHint": "Programma's, cohorten, aantallen lerenden en actuele vraag — samen met de uitkomsten van je lerenden. Onbekende aantallen worden als unknown geschreven, nooit als nul.",
+        "unassignedLearners": "Geaccepteerde lerenden die nog in geen cohort zitten: {count}. Voeg ze hierboven toe aan een cohort.",
+        "recognition": {
+          "title": "Erkenning vastleggen",
+          "hint": "Het besluit van een onafhankelijke beoordelaar dat de getoonde competentie van een persoon aan een formele eis voldoet. Het is geen certificaat en ontstaat nooit alleen uit werkbewijs.",
+          "pending": "Erkenningen vastleggen is nog niet beschikbaar: het register erachter is nog niet vrijgegeven. Tot dan wordt een indiening geweigerd, niet opgeslagen.",
+          "subject": "Lerende",
+          "chooseSubject": "Kies een lerende",
+          "kind": "Type eis",
+          "kindDocument": "Documenttype",
+          "kindSkill": "Vaardigheid",
+          "kindProfession": "Beroep",
+          "key": "Eissleutel (slug)",
+          "country": "Land (2 letters)",
+          "evidence": "ID's van bewijsvermeldingen",
+          "evidenceHint": "ID's van journaalvermeldingen van het werk van de lerende, gescheiden door komma's. Het register accepteert alleen vermeldingen die een tweede persoon heeft afgetekend.",
+          "decision": "Besluit",
+          "recognised": "Erkend",
+          "notRecognised": "Niet erkend",
+          "validFrom": "Geldig vanaf",
+          "validUntil": "Geldig tot",
+          "note": "Opmerking van de beoordelaar",
+          "submit": "Besluit vastleggen",
+          "saving": "Opslaan…",
+          "ok": "Erkenning vastgelegd.",
+          "needsMigration": "Niet vastgelegd: het erkenningsregister is nog niet beschikbaar.",
+          "forbidden": "Deze instelling kan deze erkenning niet voor deze persoon vastleggen.",
+          "invalid": "Controleer de waarden.",
+          "error": "Er ging iets mis. Probeer het opnieuw."
+        }
       },
       "learners": {
         "title": "Lerenden",
@@ -7412,6 +7441,21 @@
         "compared": "Vergeleken",
         "interest": "Interesse"
       }
+    },
+    "funnel": {
+      "notMeasured": "Nog niet gemeten",
+      "unavailable": "Niet beschikbaar (lezen mislukt)",
+      "unavailableBanner": "De funnel kon niet uit de gebeurtenissenopslag worden gelezen. Alle onderstaande aantallen zijn niet beschikbaar. Dit is een mislukte leesactie, geen gemeten nul.",
+      "rateNotMeasured": "Nog niet gemeten",
+      "reason": {
+        "usefulUndefined": "Er bestaat nog geen definitie van \"nuttig\", dus alleen de gedeeltelijke gebeurtenissen voor afgeronde onboarding en aangemaakte organisatie worden geteld.",
+        "offerSide": "Geen gebeurtenis legt de aanbodzijde van vraag / aanbod vast, dus deze stap heeft geen bron.",
+        "commercialValue": "Geen gebeurtenis of bron legt commerciële waarde vast.",
+        "trial": "Geen gebeurtenis of bron legt een proefperiode vast.",
+        "paidConversion": "Geen gebeurtenis of bron legt een betaalde conversie vast.",
+        "retention": "return_visit_detected is gedefinieerd maar wordt niet in deze funnel gelezen, en er bestaat geen maatstaf voor herhaald gebruik."
+      },
+      "aiHelp": "Eigen AI-boekhouding: auditregels per run (ai_runs, USD uit de gecontroleerde prijstabel) en het canonieke gebruiksgrootboek in eurocent (usage_cost_events). De aantallen komen uit live leesacties van beide tabellen. Een tabel die niet gelezen kan worden, wordt als streepje (niet beschikbaar) getoond, nooit als 0, en onbekende kosten ook als streepje."
     }
   },
   "languageFeedback": {
@@ -18573,5 +18617,21 @@
     },
     "shown": "De nieuwste {shown} van {total} records worden getoond. De rest blijft vastgelegd.",
     "truncated": "Er zijn meer records dan één weergave leest. De {count} gelezen records worden getoond; totalen omvatten alleen die."
+  },
+  "qualificationRecognitions": {
+    "title": "Erkenningen",
+    "subtitle": "Besluiten van onafhankelijke beoordelaars dat de competentie die u hebt getoond aan een formele eis voldoet. Dit is geen certificaat en geen controle van uw werk.",
+    "empty": "Nog geen erkenning vastgelegd.",
+    "unavailable": "Erkenningen kunnen nu niet worden gelezen. Dat is niet hetzelfde als er geen hebben.",
+    "kindDocument": "Documenttype",
+    "kindSkill": "Vaardigheid",
+    "kindProfession": "Beroep",
+    "stateCurrent": "Erkend, geldig",
+    "stateLapsed": "Erkend, geldigheid verlopen",
+    "stateNotRecognised": "Beoordeeld, niet erkend",
+    "stateRevoked": "Door de beoordelaar ingetrokken",
+    "stateNotYetValid": "Erkend, nog niet geldig",
+    "validFrom": "vanaf {date}",
+    "validUntil": "tot {date}"
   }
 }
