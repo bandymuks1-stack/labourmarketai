@@ -1137,7 +1137,7 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
       "The conversation can answer a single question about a person, but the card is where a manager stands while reading one person's whole supplied history across projects and years, with the roster one tap away; the chat links here and reads the same readers.",
     whyNotExistingComponent:
       "The worker page /dashboard/people/[workerId] is keyed on a linked account and renders nothing for an unclaimed person (41 of 43 roster people in production). The roster row is a list item, not a history. The history rendering is REUSED (PersonImportedHistory), not duplicated; only the destination keyed on the roster person was missing.",
-    owner: "Product architecture (DI) — owner directive 2026-10-07 (MASTER PRODUCT COMPLETION)",
+    owner: "Product architecture (DI) — owner decision 0020 (2026-10-07)",
     ownsAction: null,
 
     worldElement: "organizations",
@@ -1189,7 +1189,7 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
         "apps/web/components/app/people/person-imported-history.tsx previously required link_state='linked' and rendered nothing for an unclaimed person",
       ],
       ownerRuling:
-        "Owner directive 2026-10-07 (MASTER PRODUCT COMPLETION continuation): organization-provided historical worker data exists before account claim and must build the historical Person/worker card and company worker history; claim only later links an account. (Chat directive; no ADR file yet — flagged on the PR for the owner to confirm or reject.)",
+        "Owner decision 0020 (2026-10-07, docs/DECISIONS/0020-organization-history-exists-before-claim.md): organization-provided historical worker data exists before account claim and must build the historical Person/worker card and company worker history; claim only later links an account.",
     },
   },
 
