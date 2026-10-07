@@ -6297,6 +6297,15 @@
       "noActivity": "Įrašų dar nėra.",
       "emptyTeam": "Projektas dar be komandos — pradėk draftą ir pakviesk pirmus žmones į aikštę.",
       "emptyTeamCta": "Pradėti draftą",
+      "history": {
+        "title": "Istorinis darbas šiame projekte",
+        "provenance": "Organizacijos pateikta istorija, importuota iš pačios organizacijos įrašų. Nepriklausomai nepatikrinta.",
+        "unavailable": "Istorinio darbo šiuo metu nepavyko nuskaityti. Tai nereiškia, kad jo nėra.",
+        "empty": "Šiam projektui organizacijos pateikto istorinio darbo nėra užfiksuota.",
+        "personUnknown": "Asmuo nenurodytas",
+        "hoursUnknown": "Valandos nenurodytos",
+        "count": "{n} įr."
+      },
       "positionsTitle": "Trūkstamos pozicijos",
       "positionsEmpty": "Pozicijų poreikiai dar ruošiami — kai atsiras, čia matysi, kokių žmonių trūksta.",
       "openOps": "Atidaryti projekto valdymą",

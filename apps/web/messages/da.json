@@ -1980,6 +1980,15 @@
       "noActivity": "Ingen poster endnu.",
       "emptyTeam": "Dette projekt har endnu intet hold — start draften og få de første folk på banen.",
       "emptyTeamCta": "Start draften",
+      "history": {
+        "title": "Tidligere arbejde på dette projekt",
+        "provenance": "Historik leveret af organisationen, importeret fra organisationens egne optegnelser. Ikke uafhængigt verificeret.",
+        "unavailable": "Tidligere arbejde kunne ikke læses lige nu. Det betyder ikke, at der intet er.",
+        "empty": "Der er ikke registreret tidligere arbejde leveret af organisationen for dette projekt.",
+        "personUnknown": "Person ikke angivet",
+        "hoursUnknown": "Timer ikke angivet",
+        "count": "{n} poster"
+      },
       "positionsTitle": "Manglende positioner",
       "positionsEmpty": "Modulet for positionsbehov er stadig under forberedelse — når det kommer, kan du her se, hvilke folk der mangler.",
       "openOps": "Åbn management-arenaen"

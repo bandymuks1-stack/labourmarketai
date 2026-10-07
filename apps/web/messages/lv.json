@@ -1980,6 +1980,15 @@
       "noActivity": "[EN] No entries yet.",
       "emptyTeam": "[EN] This project has no team yet — start the draft and bring the first people onto the field.",
       "emptyTeamCta": "[EN] Start the draft",
+      "history": {
+        "title": "Iepriekšējais darbs šajā projektā",
+        "provenance": "Organizācijas sniegta vēsture, importēta no organizācijas pašas ierakstiem. Neatkarīgi nav pārbaudīta.",
+        "unavailable": "Iepriekšējo darbu pašlaik neizdevās nolasīt. Tas nenozīmē, ka tā nav.",
+        "empty": "Šim projektam nav reģistrēts organizācijas sniegts iepriekšējais darbs.",
+        "personUnknown": "Persona nav norādīta",
+        "hoursUnknown": "Stundas nav norādītas",
+        "count": "{n} ieraksti"
+      },
       "positionsTitle": "[EN] Missing positions",
       "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
       "openOps": "[EN] Open the management arena"

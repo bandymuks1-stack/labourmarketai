@@ -6297,6 +6297,15 @@
       "noActivity": "No entries yet.",
       "emptyTeam": "This project has no team yet — start the draft and bring the first people onto the field.",
       "emptyTeamCta": "Start the draft",
+      "history": {
+        "title": "Historical work on this project",
+        "provenance": "Organization-provided history, imported from the organization's own records. Not independently verified.",
+        "unavailable": "Historical work could not be read right now. This does not mean there is none.",
+        "empty": "No organization-provided historical work is recorded for this project.",
+        "personUnknown": "Person not named",
+        "hoursUnknown": "Hours not stated",
+        "count": "{n} records"
+      },
       "positionsTitle": "Missing positions",
       "positionsEmpty": "Position needs are still on the way — once ready, you will see here which people are missing.",
       "openOps": "Open project management",

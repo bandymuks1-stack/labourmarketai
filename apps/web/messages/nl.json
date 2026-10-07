@@ -6297,6 +6297,15 @@
       "noActivity": "Nog geen registraties.",
       "emptyTeam": "Dit project heeft nog geen team — start de draft en breng de eerste mensen het veld op.",
       "emptyTeamCta": "Start de draft",
+      "history": {
+        "title": "Eerder werk aan dit project",
+        "provenance": "Door de organisatie aangeleverde geschiedenis, geïmporteerd uit de eigen gegevens van de organisatie. Niet onafhankelijk geverifieerd.",
+        "unavailable": "Eerder werk kon nu niet worden gelezen. Dat betekent niet dat er geen is.",
+        "empty": "Voor dit project is geen door de organisatie aangeleverd eerder werk vastgelegd.",
+        "personUnknown": "Persoon niet genoemd",
+        "hoursUnknown": "Uren niet opgegeven",
+        "count": "{n} registraties"
+      },
       "positionsTitle": "Ontbrekende posities",
       "positionsEmpty": "Positiebehoeften zijn er nog niet — zodra ze er zijn, zie je hier welke mensen ontbreken.",
       "openOps": "Open projectbeheer",
