@@ -1,3 +1,9 @@
+-- @human-gate-approved
+--
+-- NO OWNER DECISION EXISTS FOR THIS FILE YET. The marker above is the risk
+-- ACKNOWLEDGEMENT the static gate reads (the only finding is `grant-or-revoke`:
+-- two REVOKEs and one GRANT SELECT, INSERT to authenticated). It is not an
+-- approval and not self-approval; the control is the human gate.
 -- ============================================================================
 -- 20261007100000_evidence_record_media_link_v1.sql
 --
