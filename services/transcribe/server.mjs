@@ -31,7 +31,7 @@
 import { createServer } from "node:http";
 import { createHash, timingSafeEqual, randomUUID } from "node:crypto";
 import { execFile } from "node:child_process";
-import { mkdir, readFile, writeFile, rm, readdir, stat } from "node:fs/promises";
+import { mkdir, readFile, writeFile, rm, readdir, stat, open } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -217,16 +217,27 @@ async function handleTranscribe(req, res) {
   const bodySha = createHash("sha256").update(body).digest("hex");
   const cacheKey = idem ? createHash("sha256").update(`${idem}:${bodySha}`).digest("hex") : null;
   if (cacheKey) {
+    // One handle for both the age check and the read: stat-then-read on the
+    // path is a check/use race (CodeQL js/file-system-race). fstat on the open
+    // handle always describes the bytes we then read.
+    let handle = null;
     try {
       const file = join(CACHE_DIR, cacheKey);
-      const age = Date.now() - (await stat(file)).mtimeMs;
+      handle = await open(file, "r");
+      const age = Date.now() - (await handle.stat()).mtimeMs;
       if (age > CACHE_TTL_S * 1000) {
+        await handle.close();
+        handle = null;
         await rm(file, { force: true });
       } else {
-        const cached = await readFile(file, "utf8");
+        const cached = await handle.readFile("utf8");
+        await handle.close();
+        handle = null;
         return reply(200, { ...JSON.parse(cached), cached: true });
       }
-    } catch { /* miss */ }
+    } catch { /* miss */ } finally {
+      if (handle) await handle.close().catch(() => {});
+    }
   }
 
   const started = Date.now();
