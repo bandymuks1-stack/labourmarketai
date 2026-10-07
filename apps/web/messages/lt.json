@@ -8724,6 +8724,7 @@
       "openTo": "Taip pat atviras: {countries}",
       "skillCount": "{matched} iš {total} reikalaujamų įgūdžių",
       "nameHidden": "Vardas ir kontaktai rodomi tik tada, kai žmogus tai leidžia.",
+      "appliedToYou": "Pateikė paraišką šiam poreikiui — vardas ir nuotrauka matomi dėl paraiškos. Telefonas ir el. paštas lieka paslėpti.",
       "skillUnknown": "Įgūdžių nenurodyta · reikia {total}"
     }
   },
@@ -9553,7 +9554,8 @@
       "reviewed": "Įmonė peržiūrėjo jūsų susidomėjimą",
       "contacted": "Įmonė pažymėjo: susisiekta",
       "contactEmployer": "Parašyti darbdaviui",
-      "contactError": "Nepavyko atidaryti pokalbio. Bandykite dar kartą."
+      "contactError": "Nepavyko atidaryti pokalbio. Bandykite dar kartą.",
+      "identityConsent": "Pateikus paraišką, šio darbo darbdavys matys jūsų vardą ir profilio nuotrauką."
     },
     "companyVerified": "Patikrinta įmonė",
     "structured": {

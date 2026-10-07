@@ -2451,7 +2451,8 @@
       "readiness": "Saadavus, valmisolek ja dokumendid",
       "openTo": "Avatud ka: {countries}",
       "skillCount": "{matched} / {total} nõutud oskust",
-      "nameHidden": "Nimi ja kontaktandmed ilmuvad alles siis, kui inimene seda lubab."
+      "nameHidden": "Nimi ja kontaktandmed ilmuvad alles siis, kui inimene seda lubab.",
+      "appliedToYou": "Esitas sellele vajadusele avalduse — nimi ja foto tulevad avaldusega. Telefon ja e-post jäävad peidetuks."
     }
   },
   "waze": {

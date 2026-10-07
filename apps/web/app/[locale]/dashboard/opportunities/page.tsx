@@ -1507,6 +1507,7 @@ export default async function OpportunitiesPage({
                                               contacted: t("interest.contacted"),
                                               withdraw: t("interest.withdraw"),
                                               internalNote: t("interest.internalNote"),
+ identityConsent: t("interest.identityConsent"),
                                               error: t("interest.error"),
                                               contactedLink: t("interest.contactedLink"),
                                               contactEmployer: t("interest.contactEmployer"),

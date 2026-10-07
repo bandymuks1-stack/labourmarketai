@@ -8724,6 +8724,7 @@
       "openTo": "Auch offen für: {countries}",
       "skillCount": "{matched} von {total} geforderten Fähigkeiten",
       "nameHidden": "Name und Kontaktdaten erscheinen erst, wenn die Person sie freigibt.",
+      "appliedToYou": "Hat sich auf diesen Bedarf beworben — Name und Foto gehören zur Bewerbung. Telefon und E-Mail bleiben verborgen.",
       "skillUnknown": "Keine Fähigkeiten angegeben · benötigt: {total}"
     }
   },
@@ -9553,7 +9554,8 @@
       "reviewed": "Das Unternehmen hat Ihr Interesse geprüft",
       "contacted": "Vom Unternehmen markiert: kontaktiert",
       "contactEmployer": "Arbeitgeber anschreiben",
-      "contactError": "Gespräch konnte nicht geöffnet werden. Bitte erneut versuchen."
+      "contactError": "Gespräch konnte nicht geöffnet werden. Bitte erneut versuchen.",
+      "identityConsent": "Wenn du dich bewirbst, sieht der Arbeitgeber dieser Stelle deinen Namen und dein Profilfoto."
     },
     "companyVerified": "Verifiziertes Unternehmen",
     "structured": {
