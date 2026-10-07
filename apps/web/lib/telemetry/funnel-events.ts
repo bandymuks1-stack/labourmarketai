@@ -259,6 +259,28 @@ export const FUNNEL_EVENTS = {
   requirementActivated: "requirement_activated",
   demandInterestExpressed: "demand_interest_expressed",
   conversationMessageSent: "conversation_message_sent",
+  // ── Remaining-instrumentation emitters (funnel-emitters v1, 2026-10-07).
+  //    Each is emitted ONLY after the product write / verified billing event
+  //    it names has succeeded; a failure emits nothing. Bounded scalars only.
+  //    - offer_created              the OFFER side became real: a marketplace
+  //                                 listing of an offering kind (sale|rental,
+  //                                 never `wanted`) was stored, or a service
+  //                                 offering went draft -> active.
+  //                                 `entity_type` says which.
+  //    - organization_hiring_ready  a company save moved the stored company from
+  //                                 not-hiring-ready to `hiring_ready` per
+  //                                 computeCompanyReadiness (all legal/billing
+  //                                 fields + a stated activity). Transition-only.
+  //    - subscription_started       verified Stripe checkout.session.completed
+  //                                 whose subscription link was persisted (ok).
+  //    - subscription_invoice_paid  verified Stripe invoice.paid with amount_paid
+  //                                 > 0, persisted ok. `result_kind` = the
+  //                                 invoice billing_reason (bounded). A zero-
+  //                                 amount (trial) invoice is NOT a payment.
+  offerCreated: "offer_created",
+  organizationHiringReady: "organization_hiring_ready",
+  subscriptionStarted: "subscription_started",
+  subscriptionInvoicePaid: "subscription_invoice_paid",
 } as const;
 
 /**

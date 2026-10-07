@@ -7451,12 +7451,10 @@
       "unavailableBanner": "Piltuvėlio nepavyko nuskaityti iš įvykių saugyklos. Visi žemiau esantys skaičiai nepasiekiami. Tai nepavykęs skaitymas, o ne išmatuotas nulis.",
       "rateNotMeasured": "Dar neišmatuota",
       "reason": {
-        "usefulUndefined": "Kol kas nėra „naudingo“ apibrėžimo, todėl skaičiuojami tik dalinis registracijos užbaigimo ir organizacijos sukūrimo įvykiai.",
-        "offerSide": "Joks įvykis neregistruoja poreikio / pasiūlymo pasiūlymo pusės, todėl šis etapas neturi šaltinio.",
         "commercialValue": "Joks įvykis ar šaltinis neregistruoja komercinės vertės.",
-        "trial": "Joks įvykis ar šaltinis neregistruoja bandomojo laikotarpio.",
-        "paidConversion": "Joks įvykis ar šaltinis neregistruoja mokamo perėjimo.",
-        "retention": "return_visit_detected apibrėžtas, bet į šį piltuvėlį neįtrauktas, o pakartotinio naudojimo rodiklio nėra."
+        "trial": "Produkte dar nėra bandomojo laikotarpio, todėl nėra ir jo įvykio – nėra ką skaičiuoti.",
+        "paidConversion": "Apmokėtos sąskaitos skaičiuojamos aukščiau, tačiau perėjimas į mokamą planą kiekvienam prenumeratoriui neišvedamas (nėra pirmo mokėjimo dedublikavimo pagal asmenį), todėl konversija nedeklaruojama.",
+        "retention": "Pakartotiniai apsilankymai aukščiau skaičiuojami tik kaip naršyklėje aptikti įvykiai; kohortinis išlaikymas pagal asmenį ar pakartotinio naudojimo rodiklis neišvedamas."
       },
       "aiHelp": "Pirmosios šalies DI apskaita: kiekvieno paleidimo auditas (ai_runs, USD pagal peržiūrėtą kainoraštį) ir kanoninis naudojimo žurnalas eurocentais (usage_cost_events). Skaičiai gaunami tiesiogiai skaitant abi lenteles. Lentelė, kurios nepavyksta nuskaityti, rodoma brūkšneliu (nepasiekiama), o ne 0; nežinoma kaina taip pat rodoma brūkšneliu."
     }
