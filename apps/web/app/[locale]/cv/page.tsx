@@ -32,6 +32,7 @@ import {
   resolveEuFormatDocument,
 } from "@/lib/cv-export/eu-format";
 import { WORKER_LANGUAGE_NATIVE_NAMES } from "@/lib/worker/worker-languages-model";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /**
  * Verified CV — PDF export (S3.5 + Full CV System v1). A print-clean sheet of
@@ -273,7 +274,7 @@ export default async function VerifiedCvPage({
       availabilityStatus: priv.availabilityStatus,
       availableFrom: priv.availableFrom,
     },
-    new Date().toISOString().slice(0, 10),
+    (await viewerWorkToday()).todayIso,
   ).map((c) => ({
     fingerprint: c.fingerprint,
     text: t(`checks.${c.code}`, {

@@ -72,12 +72,6 @@ export type HoursPageData =
   | { readonly kind: "no-objects"; readonly organizationId: string }
   | { readonly kind: "error" };
 
-/** Today in UTC — the same day key the rest of the platform files work under
- *  (W12), so an entry never lands on a different day than the journal. */
-export function todayKey(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
 export async function getHoursPageData(workDate: string): Promise<HoursPageData> {
   const ctx = await resolveEmployerCompanyContext();
   if (ctx.kind !== "ok") return { kind: "no-company" };
