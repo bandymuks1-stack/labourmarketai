@@ -26,6 +26,7 @@ import {
   SentInvitationList,
 } from "@/components/app/invitation-list";
 import { MessageButton } from "@/components/app/message-button";
+import { VerifyEmailPrompt } from "@/components/app/verify-email-prompt";
 import { resolveContactPermission } from "@/lib/communication/contact-permission";
 import { isContactPermitted } from "@/lib/communication/communication-eligibility";
 import {
@@ -84,11 +85,15 @@ export default async function NetworkPage({
     /** Which administration area the reader explicitly opened. Absent on the
      *  default screen, which is the whole point — see ADMIN_AREAS below. */
     area?: string;
+    /** Result of the progressive email proof the auth callback appended
+     *  (`ok` | `failed`); only ever used to word the prompt, never to claim
+     *  a verified state (the database alone establishes that). */
+    email_verify?: string;
   }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { q, type, org, project, relationship, invite, wf, req, reqStatus, reqType, rev, dec, area } =
+  const { q, type, org, project, relationship, invite, wf, req, reqStatus, reqType, rev, dec, area, email_verify } =
     await searchParams;
   // The invitation door, for the two empty states below. The search text is
   // kept so the reader lands back on the same screen with the panel open.
@@ -410,6 +415,18 @@ export default async function NetworkPage({
       </header>
 
       {/* Invitations addressed to ME — the most actionable thing first. */}
+      {/* An invitation addressed to an EMAIL is only shown to that mailbox's
+          proven owner. An unverified person is not blocked from anything else
+          — they are offered the one-tap proof, here, where it is needed. */}
+      {incoming.status === "email_unverified" && (
+        <section className="flex flex-col gap-2" data-testid="network-email-unverified">
+          <VerifyEmailPrompt
+            locale={locale}
+            next="/dashboard/network"
+            result={email_verify ?? null}
+          />
+        </section>
+      )}
       {incoming.status === "ok" && incoming.items.length > 0 && (
         <section className="flex flex-col gap-2" data-testid="network-incoming">
           <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
