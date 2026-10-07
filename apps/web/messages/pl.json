@@ -6297,6 +6297,15 @@
       "noActivity": "Jeszcze brak wpisów.",
       "emptyTeam": "Ten projekt nie ma jeszcze zespołu — rozpocznij dobór i wprowadź pierwsze osoby na plac.",
       "emptyTeamCta": "Rozpocznij dobór",
+      "history": {
+        "title": "Wcześniejsza praca przy tym projekcie",
+        "provenance": "Historia dostarczona przez organizację, zaimportowana z jej własnych zapisów. Niezależnie niezweryfikowana.",
+        "unavailable": "Nie udało się teraz odczytać wcześniejszej pracy. Nie oznacza to, że jej nie ma.",
+        "empty": "Dla tego projektu nie zapisano wcześniejszej pracy dostarczonej przez organizację.",
+        "personUnknown": "Osoba nie podana",
+        "hoursUnknown": "Godziny nie podane",
+        "count": "Wpisów: {n}"
+      },
       "positionsTitle": "Brakujące stanowiska",
       "positionsEmpty": "Potrzeby dotyczące stanowisk są jeszcze w przygotowaniu — gdy będą gotowe, zobaczysz tutaj, kogo brakuje.",
       "openOps": "Otwórz zarządzanie projektem",

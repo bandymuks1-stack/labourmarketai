@@ -6297,6 +6297,15 @@
       "noActivity": "Noch keine Einträge.",
       "emptyTeam": "Dieses Projekt hat noch kein Team — starte den Draft und hole die ersten Leute aufs Feld.",
       "emptyTeamCta": "Draft starten",
+      "history": {
+        "title": "Bisherige Arbeit an diesem Projekt",
+        "provenance": "Von der Organisation bereitgestellte Historie, aus deren eigenen Aufzeichnungen importiert. Nicht unabhängig geprüft.",
+        "unavailable": "Die bisherige Arbeit konnte gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
+        "empty": "Für dieses Projekt ist keine von der Organisation bereitgestellte frühere Arbeit erfasst.",
+        "personUnknown": "Person nicht genannt",
+        "hoursUnknown": "Stunden nicht angegeben",
+        "count": "{n} Einträge"
+      },
       "positionsTitle": "Fehlende Positionen",
       "positionsEmpty": "Der Positionsbedarf ist noch nicht bereit — sobald er da ist, siehst du hier, welche Leute fehlen.",
       "openOps": "Management-Arena öffnen",

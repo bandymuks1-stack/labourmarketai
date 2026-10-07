@@ -1980,6 +1980,15 @@
       "noActivity": "[EN] No entries yet.",
       "emptyTeam": "[EN] This project has no team yet — start the draft and bring the first people onto the field.",
       "emptyTeamCta": "[EN] Start the draft",
+      "history": {
+        "title": "Varasem töö selles projektis",
+        "provenance": "Organisatsiooni esitatud ajalugu, imporditud organisatsiooni enda kirjetest. Sõltumatult kontrollimata.",
+        "unavailable": "Varasemat tööd ei õnnestunud praegu lugeda. See ei tähenda, et seda poleks.",
+        "empty": "Selle projekti kohta pole organisatsiooni esitatud varasemat tööd registreeritud.",
+        "personUnknown": "Isik nimetamata",
+        "hoursUnknown": "Tunnid märkimata",
+        "count": "{n} kirjet"
+      },
       "positionsTitle": "[EN] Missing positions",
       "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
       "openOps": "[EN] Open the management arena"

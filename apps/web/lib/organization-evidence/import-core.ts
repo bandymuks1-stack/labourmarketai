@@ -3225,6 +3225,8 @@ export async function listEvidenceRecords(
      *  ACTIVE workspace passes it so another organization's work never lands in
      *  it. A narrowing only — RLS still decides what is visible. */
     readonly organizationId?: string | null;
+    /** Records tied to these work objects (a place / project). A narrowing only. */
+    readonly workObjectIds?: readonly string[] | null;
     /** Exactly these records (e.g. the ones attributed to an organization). */
     readonly recordIds?: readonly string[] | null;
     readonly limit?: number;
@@ -3251,6 +3253,10 @@ export async function listEvidenceRecords(
   if (filter.recordIds) {
     if (filter.recordIds.length === 0) return { kind: "ok", records: [] };
     q = q.in("id", filter.recordIds as string[]);
+  }
+  if (filter.workObjectIds) {
+    if (filter.workObjectIds.length === 0) return { kind: "ok", records: [] };
+    q = q.in("work_object_id", filter.workObjectIds as string[]);
   }
   if (filter.organizationPersonId) {
     q = q.eq("organization_person_id", filter.organizationPersonId);
