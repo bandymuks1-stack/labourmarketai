@@ -91,7 +91,10 @@ export async function readSignalsForWorkers(
       .from("organization_people")
       .select("id, linked_worker_id")
       .in("linked_worker_id", chunk)
-      .eq("link_state", "linked");
+      .eq("link_state", "linked")
+      // Same meaning of "linked" as the CV read (worker-evidence-read): only a
+      // link the PERSON confirmed makes history theirs.
+      .eq("link_method", "worker_confirmed");
     if (res.error) {
       if (MISSING_OBJECT_CODES.has(res.error.code ?? "")) return UNAVAILABLE_MISSING;
       console.error("[history-signals] roster-link read failed:", res.error.code);

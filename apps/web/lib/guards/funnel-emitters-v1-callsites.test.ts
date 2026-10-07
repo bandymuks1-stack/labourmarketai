@@ -34,6 +34,12 @@ describe("billing webhook emits only after the verified, persisted handler", () 
   it("counts invoice.paid only (never invoice.payment_succeeded) and requires money moved", () => {
     expect(src).toMatch(/event\.type === "invoice\.paid" && invoiceHadPayment\(event\.object\)/);
   });
+  it("emits trial_started only for a subscription.created trialing event, after the persisted-ok gate", () => {
+    const gate = src.indexOf("shouldEmitBillingFunnel(result, event.testMode)");
+    const e = src.indexOf("FUNNEL_EVENTS.trialStarted");
+    expect(src).toMatch(/isTrialStart\(event\.type, event\.object\)/);
+    expect(e).toBeGreaterThan(gate);
+  });
   it("does not touch billing configuration or arm charging", () => {
     expect(src).not.toMatch(/config-core|lmc-flags|setBillingState|stripe_live"\s*=/);
   });

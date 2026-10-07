@@ -158,9 +158,9 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "It assigns a whole team or brigade",
         capabilities: ["WRK-6"],
-        link: "BROKEN",
-        because:
-          "Corrected 2026-10-03: a whole team can be fanned out to a project through the per-person write (#2084, WRK-6 PARTIAL), but no team→project FK exists, so a brigade is not assigned as a UNIT, and zero team organizations exist. Brigade work is a first-class case in construction and agency supply; the step stays so the gap is a decision, not an oversight.",
+        link: "LIVE",
+        proof:
+          "PRODUCTION_DATA_PATH_PROVEN — corrected 2026-10-07: `team_assignments` and `assign_team_to_work_v1` are applied, and a synthetic rolled-back production proof assigned a team as a unit (plus the per-person fan-out, #2084). Production holds 0 real teams, so no real brigade has been assigned yet: adoption, not a code gap."
       },
       {
         step: "It sees who is free and who is committed",
@@ -239,7 +239,7 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
         capabilities: ["DEM-6", "WRK-6"],
         link: "BROKEN",
         because:
-          "Corrected 2026-09-14: this said NOT_BUILT — \"not built at any layer\" — while `matchTeamToNeed` is complete (coverage, set blockers, per-member results, honest insufficient_data terminals) and DEM-6 is PARTIAL. The engine exists; the CHAIN does not connect, for one reason: offering a brigade as a unit against a specific demand needs DEMAND-scoped consent, and the only consent relation that exists (`team_enquiries`) is ORGANIZATION-scoped. Substituting it would weaken ARCH-4, so E6 stays owner-blocked. WRK-6 (team → project assignment) is separately MISSING. Production holds 0 teams, so nothing is walkable regardless.",
+          "Corrected 2026-09-14: this said NOT_BUILT — \"not built at any layer\" — while `matchTeamToNeed` is complete (coverage, set blockers, per-member results, honest insufficient_data terminals) and DEM-6 is PARTIAL. The engine exists; the CHAIN does not connect, for one reason: offering a brigade as a unit against a specific demand needs DEMAND-scoped consent, and the only consent relation that exists (`team_enquiries`) is ORGANIZATION-scoped. Substituting it would weaken ARCH-4, so E6 stays owner-blocked. WRK-6 (team → project assignment as a unit) is no longer missing: it is applied and proven on a synthetic rolled-back production run (2026-10-07), so the remaining block is DEM-6 only (owner decision E6). Production holds 0 real teams, so nothing is walkable on real data regardless.",
       },
     ],
   },
@@ -266,7 +266,7 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
         capabilities: ["EDU-2"],
         link: "BROKEN",
         because:
-          "Corrected 2026-09-19: production holds ONE cohort-member row and it is the E2E learner fixture (added 2026-09-18 07:17 UTC through the institution UI and `left` two minutes later, in the cohort named `2026 ruduo (testinė)`), so the write path is proven and the earlier `zero rows` wording was stale — but no REAL learner has ever joined a cohort. Re-traced 2026-10-07: the link WORKS end to end in code - invitation, accept (a `student` engagement context), `set_education_cohort_member_v1`, the assign form in the programmes section and the chat action `company.assign-learner` all exist, and the section now says when accepted learners are not in any cohort yet. It is UNPROVEN by a real member: production holds one eligible accepted learner, one pending student invitation and nobody assigned. The gap is adoption, not code (a fixture is not a person), and calling it release-ready would still be false.",
+          "Corrected 2026-09-19: production holds ONE cohort-member row and it is the E2E learner fixture (added 2026-09-18 07:17 UTC through the institution UI and `left` two minutes later, in the cohort named `2026 ruduo (testinė)`), so the write path is proven and the earlier `zero rows` wording was stale — but no REAL learner has ever joined a cohort. Re-traced 2026-10-07: the link WORKS end to end in code - invitation, accept (a `student` engagement context), `set_education_cohort_member_v1`, the assign form in the programmes section and the chat action `company.assign-learner` all exist, and the section now says when accepted learners are not in any cohort yet. It is UNPROVEN by a real member: production holds one eligible accepted learner, one pending student invitation and nobody assigned. The institution assigns learners to a cohort; a learner cannot self-join one, and none is claimed. The gap is adoption, not code (a fixture is not a person), and calling it release-ready would still be false.",
       },
       {
         step: "A learner's practice is recorded as real work on their own profile",

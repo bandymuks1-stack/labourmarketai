@@ -18,6 +18,9 @@ import {
  * never spread onto days); every standing comes through `EvidenceState`, so an
  * import never wears verification green.
  */
+/** Cards rendered at once; the rest are DISCLOSED ("shown N of M"), never dropped silently. */
+const RENDER_LIMIT = 200;
+
 export async function ProjectHistoricalWork({
   projectId,
   locale,
@@ -34,6 +37,7 @@ export async function ProjectHistoricalWork({
   const t = await getTranslations("projectOps.stadium.history");
   const tRecords = await getTranslations("evidenceImport.records");
   const tState = await getTranslations("evidenceImport.evidenceState");
+  const tDisclose = await getTranslations("companyPerson");
 
   const read = await readEvidenceForProject({ supabase, userId: user.id, locale }, projectId);
   if (read.kind === "unprovisioned") return null;
@@ -73,19 +77,32 @@ export async function ProjectHistoricalWork({
     );
   }
 
+  const total = read.records.length;
+  const visible = read.records.slice(0, RENDER_LIMIT);
+
   return (
     <section
       className="flex flex-col gap-3"
       data-testid="project-history"
       data-status="ready"
-      data-count={read.records.length}
+      data-count={total}
     >
-      {heading(` · ${read.records.length}`)}
+      {heading(` · ${total}`)}
       <p className="text-xs leading-relaxed text-text-secondary" data-testid="project-history-provenance">
         {t("provenance")}
       </p>
+      {total > visible.length ? (
+        <p className="text-xs leading-relaxed text-text-muted" data-testid="project-history-shown">
+          {tDisclose("shown", { shown: visible.length, total })}
+        </p>
+      ) : null}
+      {read.truncated ? (
+        <p className="text-xs leading-relaxed text-text-muted" data-testid="project-history-truncated">
+          {tDisclose("truncated", { count: total })}
+        </p>
+      ) : null}
       <ul className="flex flex-col gap-2">
-        {read.records.map((rec) => {
+        {visible.map((rec) => {
           const standing = (
             rec.attestation
               ? rec.attestation.self

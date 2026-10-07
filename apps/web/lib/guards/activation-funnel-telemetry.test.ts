@@ -156,6 +156,7 @@ const EXPECTED_EVENTS = [
   "offer_created",
   "organization_hiring_ready",
   "subscription_started",
+  "trial_started",
   "subscription_invoice_paid",
 ] as const;
 

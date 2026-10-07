@@ -280,6 +280,11 @@ export const FUNNEL_EVENTS = {
   offerCreated: "offer_created",
   organizationHiringReady: "organization_hiring_ready",
   subscriptionStarted: "subscription_started",
+  // trial_started: a verified LIVE-mode `customer.subscription.created` whose
+  // subscription status is "trialing" with a trial_end, persisted ok. One per
+  // subscription (Stripe sends `created` once). NOT a payment and not paid
+  // conversion.
+  trialStarted: "trial_started",
   subscriptionInvoicePaid: "subscription_invoice_paid",
 } as const;
 
