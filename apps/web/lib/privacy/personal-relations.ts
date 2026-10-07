@@ -303,6 +303,16 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
 
   // What the person attested about someone else's work — their own statement.
   { table: "journal_entry_confirmations", key: "profile_id", column: "confirmer_id" },
+  // Recognitions an independent assessor recorded about the person (RPL).
+  // The subject reads their own under RLS; the assessing person is another
+  // human and is redacted. Absent from the database until the gated
+  // migration 20261007120000 is applied: reported empty, never unread.
+  {
+    table: "competency_recognitions",
+    key: "profile_id",
+    column: "subject_profile_id",
+    redactActors: ["assessed_by"],
+  },
 
   // Work an organization assigned to the person, and what the person asked
   // of an organization.
