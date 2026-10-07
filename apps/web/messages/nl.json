@@ -17461,6 +17461,25 @@
       "offer": "Koppeling aanbieden",
       "offered": "Koppeling aangeboden — de persoon beslist in zijn profiel",
       "error": "De koppeling kon niet worden aangeboden"
+    },
+    "claim": {
+      "label": "Nodig deze persoon uit om de eigen geschiedenis op te eisen",
+      "placeholder": "Hun e-mailadres",
+      "invite": "Uitnodiging versturen",
+      "sent": "Uitnodiging verstuurd. Zodra ze zich aansluiten, bied je hier de koppeling aan; zij beslissen in hun profiel.",
+      "created": "Uitnodiging aangemaakt. Deel deze link met hen:",
+      "deliveryFailed": "De uitnodiging is opgeslagen, maar de e-mail is niet verzonden. Deel deze link met hen:",
+      "hint": "Ze hebben eerst een account nodig voordat hun geschiedenis kan worden aangeboden. Er wordt niets gekoppeld tot ze akkoord gaan.",
+      "errors": {
+        "generic": "De uitnodiging kon niet worden verstuurd",
+        "duplicate_pending": "Er wacht al een uitnodiging op dit adres",
+        "rate_limited": "Te veel uitnodigingen. Probeer het zo opnieuw",
+        "limit_reached": "De uitnodigingslimiet is bereikt",
+        "not_authorized": "Je mag geen mensen uitnodigen voor deze organisatie",
+        "invalid_relationship": "De relatie van deze persoon kan niet via een uitnodiging worden aangeboden",
+        "invalid_email": "Voer één geldig e-mailadres in",
+        "needs_migration": "Nu niet beschikbaar"
+      }
     }
   },
   "peopleImport": {
