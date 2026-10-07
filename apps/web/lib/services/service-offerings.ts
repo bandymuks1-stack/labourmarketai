@@ -5,6 +5,8 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import {
   SERVICE_OFFERING_STATUSES,
   type ServiceOfferingInput,
@@ -252,6 +254,20 @@ export async function setServiceOfferingStatus(
     return { kind: "invalid", field: "status" };
   }
 
+  // Funnel "offer side": only the FIRST publication (draft -> active) counts.
+  // The prior status is read first; if that read fails the transition is
+  // unknown and nothing is emitted (ambiguity is never counted).
+  let wasDraft = false;
+  if (status === "active") {
+    const { data: prior } = await asAny(supabase)
+      .from("service_offerings")
+      .select("status")
+      .eq("id", id)
+      .eq("provider_id", user.id)
+      .maybeSingle();
+    wasDraft = prior?.status === "draft";
+  }
+
   const { error } = await asAny(supabase)
     .from("service_offerings")
     .update({ status, updated_at: new Date().toISOString() })
@@ -260,6 +276,12 @@ export async function setServiceOfferingStatus(
   if (error) {
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "error", message: error.message ?? "unknown" };
+  }
+  if (wasDraft) {
+    emitServerFunnelEvent(FUNNEL_EVENTS.offerCreated, {
+      source: "services",
+      metadata: { surface: "service_offering", entity_type: "service_offering" },
+    });
   }
   revalidatePath("/[locale]/dashboard/services", "page");
   return { kind: "ok", id };

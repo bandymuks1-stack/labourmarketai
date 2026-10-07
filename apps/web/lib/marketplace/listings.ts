@@ -7,6 +7,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { hideQaMarked, isQaViewer } from "@/lib/marketplace/qa-marked";
 import { getOrCreateDirectConversation } from "@/lib/communication/direct-conversation";
 import {
@@ -497,6 +499,15 @@ export async function createMarketplaceListingAction(
     const reason = policyReason(error);
     if (reason) return { kind: "restricted", reasonKey: reason };
     return { kind: "error", message: "create_failed" };
+  }
+  // Funnel "offer side": a listing of an OFFERING kind (sale | rental) was
+  // really stored by the RPC. A `wanted` listing is a need and is never an
+  // offer. Fires once, after success only; no ids/text in the payload.
+  if (deriveDirection(input.listingKind) === "offer") {
+    emitServerFunnelEvent(FUNNEL_EVENTS.offerCreated, {
+      source: "marketplace",
+      metadata: { surface: "marketplace_listing", entity_type: "marketplace_listing" },
+    });
   }
   revalidatePath(LISTINGS_PATH, "page");
   return { kind: "ok", id: typeof data === "string" ? data : undefined };

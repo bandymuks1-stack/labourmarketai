@@ -21,6 +21,13 @@ import {
   applyRawSubscriptionObject,
 } from "@/lib/billing/apply-subscription-snapshot";
 import {
+  invoiceBillingReason,
+  invoiceHadPayment,
+  shouldEmitBillingFunnel,
+} from "@/lib/billing/billing-funnel";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import {
   completeCheckoutOperationBySession,
   expireCheckoutOperationBySession,
 } from "@/lib/billing/checkout-operations-store";
@@ -115,6 +122,10 @@ export async function POST(req: Request) {
   }
 
   let result: string = "ok";
+  // Funnel facts observed while processing; emitted ONLY after the store
+  // reported "ok" (never on stale-event, error, throw or a duplicate).
+  let funnelSubscriptionStarted = false;
+  let funnelInvoicePaid: ReturnType<typeof invoiceBillingReason> | null = null;
   try {
     if (event.type === "checkout.session.completed") {
       const linked = await applyCheckoutLink(event.object, {
@@ -123,6 +134,7 @@ export async function POST(req: Request) {
       });
       if (linked) {
         result = linked.result;
+        funnelSubscriptionStarted = true;
         // Bookkeeping: the server-side checkout operation behind this session
         // is complete. Best-effort — the operation's window closes it anyway.
         const sessionId = typeof event.object.id === "string" ? event.object.id : null;
@@ -157,6 +169,12 @@ export async function POST(req: Request) {
         id: event.id,
         created,
       });
+      // Count the payment ONCE per invoice (invoice.paid only — Stripe also
+      // sends invoice.payment_succeeded for the same invoice) and only when
+      // money actually moved (a zero-amount trial invoice is not a payment).
+      if (event.type === "invoice.paid" && invoiceHadPayment(event.object)) {
+        funnelInvoicePaid = invoiceBillingReason(event.object);
+      }
     }
   } catch (e) {
     // Keep the idempotency record OPEN (processed=false) and answer non-2xx so
@@ -172,6 +190,28 @@ export async function POST(req: Request) {
     // "stale-event" (billing safety v1): the event is OLDER than the one that
     // last moved the row, or the row is terminal — skipped ON PURPOSE and
     // acknowledged as processed, so a replay does not re-apply it either.
+    if (shouldEmitBillingFunnel(result, event.testMode)) {
+      // Fire-and-forget; a lost telemetry row never fails the webhook. No
+      // ids, amounts or customer data in the payload.
+      if (funnelSubscriptionStarted) {
+        emitServerFunnelEvent(FUNNEL_EVENTS.subscriptionStarted, {
+          source: "billing-webhook",
+          route: "/api/billing/webhook",
+          metadata: { surface: "billing_webhook", success: true },
+        });
+      }
+      if (funnelInvoicePaid !== null) {
+        emitServerFunnelEvent(FUNNEL_EVENTS.subscriptionInvoicePaid, {
+          source: "billing-webhook",
+          route: "/api/billing/webhook",
+          metadata: {
+            surface: "billing_webhook",
+            result_kind: funnelInvoicePaid,
+            success: true,
+          },
+        });
+      }
+    }
     await markWebhookProcessed(event.id);
     return NextResponse.json({ ok: true, received: true, processed: true, result });
   }

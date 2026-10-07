@@ -114,6 +114,18 @@ export const FUNNEL_STAGES = [
   { key: FUNNEL_EVENTS.requirementActivated, label: "Requirement activated" },
   { key: FUNNEL_EVENTS.demandInterestExpressed, label: "Interest in an employer requirement" },
   { key: FUNNEL_EVENTS.conversationMessageSent, label: "Conversation message sent" },
+  // ── Remaining-instrumentation stages (funnel-emitters v1, 2026-10-07).
+  //    Each has a REAL emitter in code (see the comment on the event names in
+  //    lib/telemetry/funnel-events.ts), so each prints a real zero when no row
+  //    exists. Having an emitter makes a stage MEASURED — it does not make the
+  //    capability "working": a zero here can be a quiet period or a surface
+  //    nobody has used yet. Labels say exactly what is counted.
+  { key: FUNNEL_EVENTS.profileMatchable, label: "Worker profile matchable (useful profile)" },
+  { key: FUNNEL_EVENTS.organizationHiringReady, label: "Organization hiring-ready (useful organization)" },
+  { key: FUNNEL_EVENTS.offerCreated, label: "Offer created (listing or service offering)" },
+  { key: FUNNEL_EVENTS.subscriptionStarted, label: "Subscription checkout completed (live mode)" },
+  { key: FUNNEL_EVENTS.subscriptionInvoicePaid, label: "Subscription invoice paid (amount > 0, live mode)" },
+  { key: FUNNEL_EVENTS.returnVisitDetected, label: "Return visit detected (same browser, later day)" },
 ] as const;
 
 /**
@@ -145,8 +157,6 @@ export type FunnelStageCount = {
  * NOT_MEASURED — no emitter is added here and no number is ever invented.
  */
 export const NOT_MEASURED_STAGES = [
-  { key: "useful_profile_or_organization", label: "Useful profile / organization", reasonKey: "usefulUndefined" },
-  { key: "offer_side", label: "Offer side (need / offer)", reasonKey: "offerSide" },
   { key: "commercial_value", label: "Commercial value", reasonKey: "commercialValue" },
   { key: "trial_started", label: "Trial started", reasonKey: "trial" },
   { key: "paid_conversion", label: "Paid conversion", reasonKey: "paidConversion" },

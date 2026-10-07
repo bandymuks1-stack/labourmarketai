@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  FUNNEL_READ_EVENTS,
   FUNNEL_STAGES,
   NOT_MEASURED_STAGES,
   getAcquisitionFunnel,
@@ -40,7 +41,6 @@ describe("funnel stage measurement state", () => {
       "trial_started",
       "paid_conversion",
       "retention_repeat_use",
-      "offer_side",
     ]) {
       expect(keys).toContain(k);
     }
@@ -90,5 +90,42 @@ describe("funnel stage measurement state", () => {
     for (const u of zero.unmeasuredRates) {
       expect(zero.rates.some((x) => x.label === u.label)).toBe(false);
     }
+  });
+});
+
+describe("funnel-emitters v1 stage states", () => {
+  const NEW_EVENTS = [
+    FUNNEL_EVENTS.profileMatchable,
+    FUNNEL_EVENTS.organizationHiringReady,
+    FUNNEL_EVENTS.offerCreated,
+    FUNNEL_EVENTS.subscriptionStarted,
+    FUNNEL_EVENTS.subscriptionInvoicePaid,
+    FUNNEL_EVENTS.returnVisitDetected,
+  ];
+
+  it("every newly instrumented stage is measured with a REAL zero when no rows exist", () => {
+    const out = summariseFunnel([row(FUNNEL_EVENTS.landingViewed)]);
+    for (const ev of NEW_EVENTS) {
+      expect(out.counts.find((c) => c.key === ev)).toMatchObject({ measurement: "measured", count: 0 });
+    }
+  });
+
+  it("counts real rows of the new events", () => {
+    const out = summariseFunnel([row(FUNNEL_EVENTS.offerCreated), row(FUNNEL_EVENTS.offerCreated)]);
+    expect(out.counts.find((c) => c.key === FUNNEL_EVENTS.offerCreated)).toMatchObject({ measurement: "measured", count: 2 });
+  });
+
+  it("trial, paid conversion, retention and commercial value stay NOT measured", () => {
+    expect(NOT_MEASURED_STAGES.map((s) => s.key as string).sort()).toEqual(
+      ["commercial_value", "paid_conversion", "retention_repeat_use", "trial_started"],
+    );
+    const out = summariseFunnel([]);
+    for (const k of ["commercial_value", "trial_started", "paid_conversion", "retention_repeat_use"]) {
+      expect(out.counts.find((c) => c.key === k)).toMatchObject({ measurement: "not_measured", count: null });
+    }
+  });
+
+  it("new event stages are read from the store (FUNNEL_READ_EVENTS)", () => {
+    for (const ev of NEW_EVENTS) expect(FUNNEL_READ_EVENTS).toContain(ev);
   });
 });

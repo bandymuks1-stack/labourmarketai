@@ -7449,12 +7449,10 @@
       "unavailableBanner": "Nie udało się odczytać lejka z magazynu zdarzeń. Wszystkie poniższe liczby są niedostępne. To nieudany odczyt, a nie zmierzone zero.",
       "rateNotMeasured": "Jeszcze niemierzone",
       "reason": {
-        "usefulUndefined": "Nie istnieje jeszcze definicja „użyteczności”, więc liczone są tylko częściowe zdarzenia ukończenia wdrożenia i utworzenia organizacji.",
-        "offerSide": "Żadne zdarzenie nie rejestruje strony oferty w parze potrzeba / oferta, więc ten etap nie ma źródła.",
         "commercialValue": "Żadne zdarzenie ani źródło nie rejestruje wartości komercyjnej.",
-        "trial": "Żadne zdarzenie ani źródło nie rejestruje okresu próbnego.",
-        "paidConversion": "Żadne zdarzenie ani źródło nie rejestruje płatnej konwersji.",
-        "retention": "return_visit_detected jest zdefiniowane, ale nie jest wczytywane do tego lejka, a miara ponownego użycia nie istnieje."
+        "trial": "W produkcie nie ma jeszcze okresu próbnego, więc nie ma zdarzenia i nie ma czego liczyć.",
+        "paidConversion": "Opłacone faktury są liczone powyżej, ale konwersja do płatności na subskrybenta nie jest wyprowadzana (brak deduplikacji pierwszej płatności na osobę), więc konwersja nie jest deklarowana.",
+        "retention": "Powroty są liczone powyżej tylko jako zdarzenia wykryte w przeglądarce; kohortowe utrzymanie na osobę ani wskaźnik ponownego użycia nie są wyprowadzane."
       },
       "aiHelp": "Własna księgowość AI: wiersze audytu na uruchomienie (ai_runs, USD z zatwierdzonej tabeli cen) oraz kanoniczny rejestr użycia w eurocentach (usage_cost_events). Liczby pochodzą z bieżących odczytów obu tabel. Tabela, której nie da się odczytać, jest pokazana jako kreska (niedostępne), nigdy jako 0, a nieznany koszt również jako kreska."
     }

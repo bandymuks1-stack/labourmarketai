@@ -9,6 +9,7 @@ import {
 } from "@/lib/company/company-private-read";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { companyBecameHiringReady } from "@/lib/company/company-readiness";
 
 /**
  * Company profile-request service.
@@ -503,6 +504,39 @@ export async function saveCompanySetup(
       source: "company-setup",
       metadata: { surface: "company_setup", entity_type: "company" },
     });
+  }
+  // Funnel "useful organization": emit organization_hiring_ready ONLY on the
+  // transition into computeCompanyReadiness === hiring_ready (see
+  // companyBecameHiringReady). The pre-save row is the "before"; the "after" is
+  // what this save wrote (a verified company's locked legal fields come from
+  // the stored row via resolveCompanyLegalParams). company_type is taken from
+  // this save when given, else from the stored row. A failed pre-read (the
+  // "before" is unknown) emits nothing. No ids/PII in the payload.
+  if (existing.kind === "ok") {
+    const before = existing.row
+      ? {
+          legalName: existing.row.legalName,
+          country: existing.row.country,
+          registrationCode: existing.row.registrationCode,
+          contactEmail: existing.row.contactEmail,
+          companyType: existing.row.companyType,
+          verificationStatus: existing.row.verificationStatus,
+        }
+      : null;
+    const after = {
+      legalName: name,
+      country: rawCountry,
+      registrationCode: legal.registrationCode,
+      contactEmail: input.contactEmail?.trim() || null,
+      companyType: rawType ?? existing.row?.companyType ?? null,
+      verificationStatus: existing.row?.verificationStatus ?? null,
+    };
+    if (companyBecameHiringReady(before, after)) {
+      emitServerFunnelEvent(FUNNEL_EVENTS.organizationHiringReady, {
+        source: "company-setup",
+        metadata: { surface: "company_setup", entity_type: "company" },
+      });
+    }
   }
   return { kind: "ok", companyId: data as string };
 }

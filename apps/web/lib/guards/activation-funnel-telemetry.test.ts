@@ -152,6 +152,11 @@ const EXPECTED_EVENTS = [
   "requirement_activated",
   "demand_interest_expressed",
   "conversation_message_sent",
+  // funnel-emitters v1 (2026-10-07)
+  "offer_created",
+  "organization_hiring_ready",
+  "subscription_started",
+  "subscription_invoice_paid",
 ] as const;
 
 describe("activation funnel — event registry", () => {
