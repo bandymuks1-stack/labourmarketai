@@ -169,3 +169,16 @@ describe("billing funnel decisions", () => {
     }
   });
 });
+
+describe("isTrialStart", () => {
+  const trialing = { status: "trialing", trial_end: 1_800_000_000 };
+  it("is true only for subscription.created in trialing with a trial_end", async () => {
+    const { isTrialStart } = await import("@/lib/billing/billing-funnel");
+    expect(isTrialStart("customer.subscription.created", trialing)).toBe(true);
+    expect(isTrialStart("customer.subscription.updated", trialing)).toBe(false);
+    expect(isTrialStart("customer.subscription.created", { status: "active", trial_end: null })).toBe(false);
+    expect(isTrialStart("customer.subscription.created", { status: "trialing" })).toBe(false);
+    expect(isTrialStart("customer.subscription.created", null)).toBe(false);
+    expect(isTrialStart("checkout.session.completed", trialing)).toBe(false);
+  });
+});
