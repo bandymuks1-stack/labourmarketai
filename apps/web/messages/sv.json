@@ -6702,6 +6702,28 @@
       }
     }
   },
+  "historyContext": {
+    "project": "Projekt",
+    "place": "Plats eller arbetspaket",
+    "client": "Beställare",
+    "otherParties": "Andra inblandade",
+    "capacity": "Roll",
+    "source": "Källa",
+    "suppliedBy": "Levererat av {name}",
+    "reconstructed": "Rekonstruerat från tidigare uppgifter",
+    "recordedAt": "Registrerat i systemet",
+    "proofTitle": "Vad som ligger bakom",
+    "proof": {
+      "SELF_DECLARED": "Uppgett av personen",
+      "EVIDENCE_SUPPORTED": "Stöds av en organisations registrering",
+      "EMPLOYER_CONFIRMED": "Bekräftat av arbetsgivaren",
+      "CLIENT_ACCEPTED": "Godkänt av beställaren",
+      "SUPERVISOR_CONFIRMED": "Bekräftat av en arbetsledare",
+      "INDEPENDENTLY_VERIFIED": "Oberoende verifierat"
+    },
+    "attestedAs": "bekräftat som {role}",
+    "proofNote": "Varje rad är ett eget faktum. En bekräftelse från den levererande organisationen är inte beställarens godkännande och inte betalning, och ingen av dem är oberoende verifiering om det inte står så."
+  },
   "evidenceImport": {
     "records": {
       "periodDerivedHuman": "[EN] Period set at import (human choice) — the source stated no dates",

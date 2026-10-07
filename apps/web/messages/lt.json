@@ -16827,6 +16827,28 @@
     "error": "Pakeitimo išsaugoti nepavyko, jis atšauktas. Bandykite dar kartą.",
     "unavailable": "Pranešimų nustatymai šiuo metu nepasiekiami."
   },
+  "historyContext": {
+    "project": "Projektas",
+    "place": "Objektas arba darbų paketas",
+    "client": "Užsakovas",
+    "otherParties": "Kiti dalyviai",
+    "capacity": "Statusas",
+    "source": "Šaltinis",
+    "suppliedBy": "Pateikė {name}",
+    "reconstructed": "Atkurta iš ankstesnių įrašų",
+    "recordedAt": "Įrašyta sistemoje",
+    "proofTitle": "Kas tai patvirtina",
+    "proof": {
+      "SELF_DECLARED": "Nurodė pats asmuo",
+      "EVIDENCE_SUPPORTED": "Pagrįsta organizacijos įrašu",
+      "EMPLOYER_CONFIRMED": "Patvirtino darbdavys",
+      "CLIENT_ACCEPTED": "Užsakovas priėmė",
+      "SUPERVISOR_CONFIRMED": "Patvirtino darbų vadovas",
+      "INDEPENDENTLY_VERIFIED": "Nepriklausomai patikrinta"
+    },
+    "attestedAs": "paliudijo kaip {role}",
+    "proofNote": "Kiekviena eilutė yra atskiras faktas. Pateikusios organizacijos liudijimas nėra užsakovo patvirtinimas ir nėra apmokėjimas, o nė vienas iš šių faktų nėra nepriklausomas patikrinimas, nebent taip parašyta."
+  },
   "evidenceImport": {
     "eyebrow": "Istoriniai darbo įrodymai",
     "title": "Importuoti darbo istoriją",

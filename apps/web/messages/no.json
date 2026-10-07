@@ -6702,6 +6702,28 @@
       }
     }
   },
+  "historyContext": {
+    "project": "Prosjekt",
+    "place": "Sted eller arbeidspakke",
+    "client": "Oppdragsgiver",
+    "otherParties": "Andre involverte",
+    "capacity": "Rolle",
+    "source": "Kilde",
+    "suppliedBy": "Levert av {name}",
+    "reconstructed": "Rekonstruert fra tidligere registreringer",
+    "recordedAt": "Registrert i systemet",
+    "proofTitle": "Hva som ligger bak",
+    "proof": {
+      "SELF_DECLARED": "Oppgitt av personen",
+      "EVIDENCE_SUPPORTED": "Støttet av en organisasjons registrering",
+      "EMPLOYER_CONFIRMED": "Bekreftet av arbeidsgiveren",
+      "CLIENT_ACCEPTED": "Godkjent av oppdragsgiveren",
+      "SUPERVISOR_CONFIRMED": "Bekreftet av en leder",
+      "INDEPENDENTLY_VERIFIED": "Uavhengig verifisert"
+    },
+    "attestedAs": "bekreftet som {role}",
+    "proofNote": "Hver linje er et eget faktum. En bekreftelse fra den leverende organisasjonen er ikke oppdragsgiverens godkjenning og ikke betaling, og ingen av dem er uavhengig verifisering med mindre det står."
+  },
   "evidenceImport": {
     "records": {
       "periodDerivedHuman": "[EN] Period set at import (human choice) — the source stated no dates",
