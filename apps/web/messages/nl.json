@@ -8798,6 +8798,7 @@
       "openTo": "Ook open voor: {countries}",
       "skillCount": "{matched} van {total} vereiste vaardigheden",
       "nameHidden": "Naam en contactgegevens verschijnen pas wanneer de persoon dat toestaat.",
+      "appliedToYou": "Heeft gereageerd op deze vraag — naam en foto horen bij de reactie. Telefoon en e-mail blijven verborgen.",
       "skillUnknown": "Geen vaardigheden opgegeven · nodig: {total}"
     }
   },
@@ -9627,7 +9628,8 @@
       "reviewed": "Het bedrijf heeft je interesse bekeken",
       "contacted": "Bedrijf markeerde: contact opgenomen",
       "contactEmployer": "Werkgever een bericht sturen",
-      "contactError": "Gesprek kon niet worden geopend. Probeer het opnieuw."
+      "contactError": "Gesprek kon niet worden geopend. Probeer het opnieuw.",
+      "identityConsent": "Als je reageert, ziet de werkgever van deze baan je naam en profielfoto."
     },
     "companyVerified": "Geverifieerd bedrijf",
     "structured": {

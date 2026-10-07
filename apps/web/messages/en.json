@@ -8798,6 +8798,7 @@
       "openTo": "Also open to: {countries}",
       "skillCount": "{matched} of {total} required skills",
       "nameHidden": "Name and contact details appear only when the person allows them.",
+      "appliedToYou": "Applied for this need — name and photo come with the application. Phone and e-mail stay hidden.",
       "skillUnknown": "No skills stated · needs {total}"
     }
   },
@@ -9627,7 +9628,8 @@
       "reviewed": "Company reviewed your interest",
       "contacted": "Company marked: contacted",
       "contactEmployer": "Message the employer",
-      "contactError": "Could not open the conversation. Please try again."
+      "contactError": "Could not open the conversation. Please try again.",
+      "identityConsent": "When you apply, the employer behind this job will see your name and profile photo."
     },
     "companyVerified": "Verified company",
     "structured": {
