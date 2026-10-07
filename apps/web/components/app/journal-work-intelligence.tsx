@@ -295,7 +295,29 @@ export async function JournalWorkIntelligence({
           </p>
         </header>
 
-        {noEntriesAtAll ? (
+        {noEntriesAtAll && ledger.kind === "rows" ? (
+          /* NO JOURNAL ENTRIES, BUT THE ORGANIZATION HOLDS RECORDED WORK
+             (decision 0020). Imported history is real work: it must not be
+             hidden behind "no recorded work yet" just because the person has
+             not written a diary entry (or has no account at all). Only the
+             organization's own ledger is shown - the journal-derived
+             sections have nothing to derive from and are not invented. */
+          <>
+            <p
+              className="text-sm leading-relaxed text-text-secondary"
+              data-testid="wi-ledger-only"
+            >
+              {tk("emptyNoEntriesLedger")}
+            </p>
+            <OrgLedger
+              view={ledger}
+              periodWord={t(`period.${wi.focus}`)}
+              locale={locale}
+              t={t}
+              tk={tk}
+            />
+          </>
+        ) : noEntriesAtAll ? (
           <p
             className="text-sm leading-relaxed text-text-secondary"
             data-testid="wi-empty"

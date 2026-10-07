@@ -8585,7 +8585,8 @@
       "accommodation_ok": "Zakwaterowanie odpowiada",
       "city_match": "To samo miasto",
       "location_within_radius": "W zasięgu pracy",
-      "profession_related": "Pokrewny zawód (wspólne umiejętności)"
+      "profession_related": "Pokrewny zawód (wspólne umiejętności)",
+      "skills_history_reported": "Umiejętności wskazane w historii organizacji (niezweryfikowane)"
     },
     "gap": {
       "skills_missing": "Brakuje niektórych wymaganych umiejętności",
@@ -18620,7 +18621,20 @@
       "truncated": "Sygnałów umiejętności jest więcej, niż odczytuje ten widok."
     },
     "shown": "Pokazano najnowsze {shown} z {total} wpisów. Pozostałe zostają zapisane.",
-    "truncated": "Wpisów jest więcej, niż odczytuje jeden widok. Pokazano odczytane {count}; sumy obejmują tylko je."
+    "truncated": "Wpisów jest więcej, niż odczytuje jeden widok. Pokazano odczytane {count}; sumy obejmują tylko je.",
+    "profile": {
+      "title": "Żywy profil z historii tej organizacji",
+      "subtitle": "Zbudowany z zapisów dostarczonych przez Twoją organizację, zanim powstało jakiekolwiek konto. Zgłoszone przez organizację, niezależnie niezweryfikowane. Jeśli osoba później przejmie konto, zostanie ono powiązane bez zmiany tej historii.",
+      "unavailable": "Nie udało się teraz odczytać obrazu pracy. Nie oznacza to braku pracy.",
+      "fit": {
+        "title": "Dopasowanie do Twoich otwartych potrzeb",
+        "note": "Obliczone wewnątrz Twojej organizacji na podstawie umiejętności wskazanych w tej historii. Zgłoszone przez organizację, niezweryfikowane. Nic z tego nie jest pokazywane innym organizacjom.",
+        "noSignals": "Ta historia nie wskazuje jeszcze żadnej umiejętności z katalogu, więc nie można jej dopasować. To brak wiedzy, a nie słabe dopasowanie.",
+        "none": "Żadna z Twoich otwartych potrzeb nie dotyczy umiejętności wskazanych w tej historii.",
+        "unavailable": "Nie udało się teraz obliczyć dopasowania. Nie oznacza to, że go nie ma.",
+        "row": "{matched} z {total} wymaganych umiejętności wskazano w tej historii"
+      }
+    }
   },
   "qualificationRecognitions": {
     "title": "Uznania",

@@ -8585,7 +8585,8 @@
       "accommodation_ok": "Accommodation works",
       "city_match": "Same city",
       "location_within_radius": "Within the work radius",
-      "profession_related": "Related profession (shared skills)"
+      "profession_related": "Related profession (shared skills)",
+      "skills_history_reported": "Skills named in organization history (not verified)"
     },
     "gap": {
       "skills_missing": "Some required skills missing",
@@ -18620,7 +18621,20 @@
       "truncated": "More skill signals exist than this view reads."
     },
     "shown": "Showing the newest {shown} of {total} records. The rest remain on record.",
-    "truncated": "More records exist than one view reads. The {count} read are shown; totals cover only these."
+    "truncated": "More records exist than one view reads. The {count} read are shown; totals cover only these.",
+    "profile": {
+      "title": "Living profile from this organization's history",
+      "subtitle": "Built from the records your organization supplied, before any account exists. Organization-reported, not independently verified. If the person later claims an account, it is linked without changing this history.",
+      "unavailable": "The work picture could not be read right now. That does not mean there is no work.",
+      "fit": {
+        "title": "Fit to your open needs",
+        "note": "Worked out inside your organization from the skills this history names. Organization-reported, not verified. Nothing here is shown to other organizations.",
+        "noSignals": "This history names no catalogue skill yet, so it cannot be matched. That is unknown, not a poor fit.",
+        "none": "None of your open needs is spoken to by the skills this history names.",
+        "unavailable": "Fit could not be computed right now. That does not mean there is none.",
+        "row": "{matched} of {total} required skills named in this history"
+      }
+    }
   },
   "qualificationRecognitions": {
     "title": "Recognitions",

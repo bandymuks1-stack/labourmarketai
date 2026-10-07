@@ -8585,7 +8585,8 @@
       "accommodation_ok": "Unterkunft passt",
       "city_match": "Gleiche Stadt",
       "location_within_radius": "Innerhalb des Arbeitsradius",
-      "profession_related": "Verwandter Beruf (gemeinsame Fähigkeiten)"
+      "profession_related": "Verwandter Beruf (gemeinsame Fähigkeiten)",
+      "skills_history_reported": "In der Organisationshistorie genannte Fähigkeiten (nicht verifiziert)"
     },
     "gap": {
       "skills_missing": "Einige benötigte Fähigkeiten fehlen",
@@ -18620,7 +18621,20 @@
       "truncated": "Es gibt mehr Fähigkeitssignale, als diese Ansicht liest."
     },
     "shown": "Angezeigt werden die neuesten {shown} von {total} Einträgen. Der Rest bleibt erfasst.",
-    "truncated": "Es gibt mehr Einträge, als eine Ansicht liest. Die {count} gelesenen werden angezeigt; Summen umfassen nur diese."
+    "truncated": "Es gibt mehr Einträge, als eine Ansicht liest. Die {count} gelesenen werden angezeigt; Summen umfassen nur diese.",
+    "profile": {
+      "title": "Lebendes Profil aus der Historie dieser Organisation",
+      "subtitle": "Aufgebaut aus den Einträgen, die Ihre Organisation geliefert hat, noch bevor ein Konto existiert. Von der Organisation gemeldet, nicht unabhängig verifiziert. Übernimmt die Person später ein Konto, wird es verknüpft, ohne diese Historie zu ändern.",
+      "unavailable": "Das Arbeitsbild konnte gerade nicht gelesen werden. Das heißt nicht, dass es keine Arbeit gibt.",
+      "fit": {
+        "title": "Passung zu Ihren offenen Bedarfen",
+        "note": "Innerhalb Ihrer Organisation aus den in dieser Historie genannten Fähigkeiten berechnet. Von der Organisation gemeldet, nicht verifiziert. Anderen Organisationen wird nichts davon gezeigt.",
+        "noSignals": "Diese Historie nennt noch keine Katalog-Fähigkeit und lässt sich daher nicht zuordnen. Das ist unbekannt, keine schlechte Passung.",
+        "none": "Keinem Ihrer offenen Bedarfe entsprechen die in dieser Historie genannten Fähigkeiten.",
+        "unavailable": "Die Passung konnte gerade nicht berechnet werden. Das heißt nicht, dass es keine gibt.",
+        "row": "{matched} von {total} geforderten Fähigkeiten in dieser Historie genannt"
+      }
+    }
   },
   "qualificationRecognitions": {
     "title": "Anerkennungen",
