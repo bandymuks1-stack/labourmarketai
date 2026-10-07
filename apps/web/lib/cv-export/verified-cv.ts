@@ -19,6 +19,7 @@ import {
   type OwnTrustSignals,
 } from "@/lib/profile/trust-signals";
 import { groupCvSkillTiers, type CvSkillTiers } from "./skill-tiers";
+import { buildCvOrganizationHistory, type CvOrganizationHistoryEntry } from "./organization-history";
 import {
   skillPracticeFromIntelligence,
   type SkillPracticeFacts,
@@ -279,6 +280,15 @@ export type VerifiedCvData = {
     importedHours: number;
     approvedHours: number;
   } | null;
+  /**
+   * The WORK behind those organization-recorded hours: imported history
+   * grouped by supplying organisation / project / client / capacity, each
+   * entry carrying its source and proof facts and ONLY the hours the records
+   * stated (see organization-history.ts). Organization-provided, never
+   * self-attested; never added to `recordedHoursTotal`. `null` = the ledger
+   * could not be read (UNKNOWN, not "no history"); `[]` = read, none.
+   */
+  organizationHistory: CvOrganizationHistoryEntry[] | null;
   privateDetails: VerifiedCvPrivateDetails;
   signals: OwnTrustSignals;
   proof: VerifiedCvProofRow[];
@@ -841,6 +851,12 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         ? (workIntelligence.periods.find((p) => p.key === "all")?.confirmedHours ?? null)
         : null,
       organizationRecordedHours: organizationRecordedHoursOf(workIntelligence),
+      organizationHistory: workIntelligence?.organizationContextRecords
+        ? buildCvOrganizationHistory(
+            workIntelligence.organizationContextRecords,
+            workIntelligence.organizationPeriodRecords ?? [],
+          )
+        : null,
       privateDetails: {
         salaryMinEur: privBase?.salary_min_eur ?? null,
         salaryMaxEur: privBase?.salary_max_eur ?? null,
