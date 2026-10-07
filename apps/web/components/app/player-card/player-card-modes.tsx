@@ -57,7 +57,7 @@ export function PlayerCardModes({
       <div
         role="tablist"
         aria-label={label}
-        className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5"
+        className="flex gap-1 overflow-x-auto rounded-full bg-ink-900/80 p-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         data-testid="player-card-modes"
       >
         {PLAYER_CARD_MODES.map((key) => (
@@ -69,10 +69,10 @@ export function PlayerCardModes({
             onClick={() => choose(key)}
             data-testid={`player-card-mode-${key}`}
             className={cn(
-              "inline-flex min-h-11 shrink-0 items-center rounded-full border px-4 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue",
+              "inline-flex min-h-11 shrink-0 items-center rounded-full px-5 text-support font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue",
               mode === key
-                ? "border-brand-blue bg-brand-blue/10 text-text-primary"
-                : "border-ink-600 bg-ink-800/50 text-text-secondary hover:border-brand-blue hover:text-text-primary",
+                ? "bg-ink-600 text-text-primary shadow-[inset_0_0_0_1px_rgb(var(--c-brand-blue)/0.5)]"
+                : "text-text-secondary hover:text-text-primary",
             )}
           >
             {modeLabels[key]}

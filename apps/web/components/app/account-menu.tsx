@@ -11,6 +11,10 @@ import { AnchoredOverlay } from "@/components/ui/anchored-overlay";
 import { FEEDBACK_OPEN_EVENT } from "@/components/app/language-feedback-widget";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { canRenderInline, type ResultContext } from "@/lib/conversation/result-registry";
+import { PersonPortrait } from "@/components/app/identity/person-portrait";
+import { useOwnAvatarUrl } from "@/components/app/identity/own-avatar";
+import { avatarMonogram } from "@/lib/visual/avatar-monogram";
+import { PERSONAL_WORKSPACE_ID, workspaceDisplayLabels } from "@/lib/company/organization-switch";
 
 /**
  * Authenticated-header account dropdown. Surfaces the two controls that
@@ -34,7 +38,9 @@ export function AccountMenu() {
   const tCv = useTranslations("cvExport");
   const tCommon = useTranslations("common");
   const locale = useLocale();
-  const { user, profile, roles, isAdmin, adminUiHidden, activeOrganizationId, activeOrgName } = useAuth();
+  const tChat = useTranslations("conversation.chat");
+  const ownAvatarUrl = useOwnAvatarUrl();
+  const { user, profile, roles, isAdmin, adminUiHidden, activeOrganizationId, activeOrgName, workspaces, activeWorkspaceId } = useAuth();
   const [open, setOpen] = useState(false);
 
   // The player card's ONE home is a workspace RESULT, and the registry says
@@ -125,7 +131,24 @@ export function AccountMenu() {
   // stacking context can ever trap or cover it.
 
   const displayName = profile?.full_name?.trim() || profile?.email || user?.email || "";
-  const initial = (displayName || "?").trim().charAt(0).toUpperCase() || "?";
+  const initials = avatarMonogram(displayName || "?");
+  // WHERE this person is working right now — the SAME labels the workspace
+  // chip shows (never a fabricated name; an unnamed organization says so).
+  const workspaceList = workspaces ?? [];
+  const activeWorkspace =
+    workspaceList.find((w) => w.id === (activeWorkspaceId ?? PERSONAL_WORKSPACE_ID)) ?? null;
+  const workspaceLabel = activeWorkspace
+    ? (workspaceDisplayLabels(workspaceList, {
+        personal: tChat("workspacePersonal"),
+        unnamedOrganization: {
+          company: tChat("workspaceUnnamedCompany"),
+          agency: tChat("workspaceUnnamedAgency"),
+          team: tChat("workspaceUnnamedTeam"),
+          other: tChat("workspaceUnnamed"),
+        },
+      }).get(activeWorkspace.id) ??
+      activeWorkspace.name)
+    : activeOrgName ?? null;
 
   return (
     <div ref={rootRef} className="relative">
@@ -138,11 +161,20 @@ export function AccountMenu() {
         data-testid="account-menu-trigger"
         className={cn(
           // size-11 = the 44px touch-target floor every header control keeps.
-          "inline-flex size-11 items-center justify-center rounded-full border border-ink-500 bg-ink-800 text-sm font-semibold text-text-primary hover:border-brand-blue",
-          open && "border-brand-blue",
+          // The person's own face (or initials) IS the control — a lit edge
+          // when open, the same portrait edge as everywhere else.
+          "inline-flex size-11 items-center justify-center rounded-full text-sm font-semibold text-text-primary transition-shadow hover:shadow-[0_0_0_1px_rgb(var(--c-brand-blue)/0.6)]",
+          open && "shadow-[0_0_0_1px_rgb(var(--c-brand-blue)/0.6)]",
         )}
       >
-        <span aria-hidden>{initial}</span>
+        <PersonPortrait
+          name={displayName}
+          avatarUrl={ownAvatarUrl}
+          initials={initials}
+          width="2.25rem"
+          shape="round"
+          lit={open}
+        />
       </button>
 
       <AnchoredOverlay
@@ -153,12 +185,32 @@ export function AccountMenu() {
       >
         <div
           role="menu"
-          className="w-56 max-w-[calc(100vw-1.5rem)] rounded-md border border-ink-500 bg-ink-900/95 p-2 shadow-card"
+          className="w-56 max-w-[calc(100vw-1.5rem)] rounded-2xl border border-ink-500 bg-ink-900/95 p-2 shadow-card"
         >
           {displayName && (
-            <p className="truncate px-2 py-1 font-mono text-meta uppercase tracking-label text-text-muted">
-              {displayName}
-            </p>
+            <div
+              data-testid="account-menu-identity"
+              className="mb-1 flex items-center gap-3 border-b border-ink-600/60 px-2 pb-3 pt-2"
+            >
+              <PersonPortrait
+                name={displayName}
+                avatarUrl={ownAvatarUrl}
+                initials={initials}
+                width="2.75rem"
+                shape="round"
+                lit
+              />
+              <span className="min-w-0">
+                <span className="block truncate font-display text-body font-semibold text-text-primary">
+                  {displayName}
+                </span>
+                {workspaceLabel ? (
+                  <span className="block truncate text-support text-text-secondary">
+                    {workspaceLabel}
+                  </span>
+                ) : null}
+              </span>
+            </div>
           )}
           {featureLinks.map((l) => (
             <Link

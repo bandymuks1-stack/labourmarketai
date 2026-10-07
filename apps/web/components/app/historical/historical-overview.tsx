@@ -203,10 +203,10 @@ export function HistoricalOverview({
         data-testid="historical-footprint"
       >
         <div className="flex items-baseline justify-between gap-3">
-          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          <span className="text-support font-medium text-text-muted">
             {labels.footprint} · {labels.objects} {company.places}
           </span>
-          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          <span className="text-support font-medium text-text-muted">
             {labels.rhythm}
           </span>
         </div>
@@ -259,7 +259,7 @@ export function HistoricalOverview({
                         title={`${labels.weekShort} ${w.isoWeek} · ${fmt.day(w.days[0].date)} – ${fmt.day(w.days[w.days.length - 1].date)} · ${fmt.hours(w.hours)} h · ${w.personDays} ${labels.personDaysShort}`}
                         className="flex min-h-11 w-full flex-col items-stretch justify-end gap-1 rounded-md px-0.5 pt-1 transition-colors duration-fast hover:bg-ink-800/70"
                       >
-                        <span className="text-center font-mono text-meta tabular-nums text-text-secondary">
+                        <span className="text-center text-meta tabular-nums text-text-secondary">
                           {fmt.hours(w.hours)}
                         </span>
                         <span
@@ -286,7 +286,7 @@ export function HistoricalOverview({
                             />
                           ))}
                         </span>
-                        <span className="text-center font-mono text-meta tabular-nums text-text-muted">
+                        <span className="text-center text-meta tabular-nums text-text-muted">
                           {w.isoWeek}
                         </span>
                       </button>
@@ -347,7 +347,7 @@ export function HistoricalOverview({
                       >
                         {o.name}
                       </span>
-                      <span className="font-mono text-meta tabular-nums text-text-muted">
+                      <span className="text-meta tabular-nums text-text-muted">
                         {shown.personDays} {labels.days} · {shown.people.length}{" "}
                         <span className="sr-only">{labels.people}</span>
                         <SemanticIcon
@@ -412,7 +412,7 @@ export function HistoricalOverview({
               onClick={() => onSelectObject(o.name)}
               aria-pressed={selectedObject === o.name}
               className={cn(
-                "inline-flex min-h-11 max-w-full items-center gap-1.5 rounded-md px-2 font-mono text-meta tabular-nums",
+                "inline-flex min-h-11 max-w-full items-center gap-1.5 rounded-md px-2 text-meta tabular-nums",
                 selectedObject === o.name
                   ? "bg-brand-blue/10 text-text-primary"
                   : "text-text-secondary",
@@ -437,7 +437,7 @@ export function HistoricalOverview({
         {company.unknown.map((u) => (
           <li
             key={u}
-            className="inline-flex items-center gap-1 rounded-full border border-ink-600 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
+            className="inline-flex items-center gap-1 rounded-full border border-ink-600 px-2 py-0.5 text-support font-medium text-text-muted"
             title={labels.unknownItem(u)}
           >
             <SemanticIcon
@@ -457,7 +457,7 @@ export function HistoricalOverview({
         {company.activities.map((a) => (
           <li
             key={a}
-            className="inline-flex items-center gap-1 rounded-full border border-dashed border-ink-600 px-2 py-0.5 font-mono text-meta text-text-secondary"
+            className="inline-flex items-center gap-1 rounded-full border border-dashed border-ink-600 px-2 py-0.5 text-meta text-text-secondary"
             title={labels.activities}
           >
             <SemanticIcon

@@ -613,19 +613,45 @@ a {
 .identity-stage {
   container-type: inline-size;
 }
+/* PREMIUM (2026-10-02): the PERSON fills a real column - a large lit portrait
+   beside the name, the profession, where they work now and the journal figures.
+   Narrow (the chat panel, a phone): the portrait becomes a wide band over the
+   same content, so the person still leads. */
+.identity-stage-grid {
+  display: grid;
+  grid-template-columns: minmax(0, clamp(210px, 36cqi, 310px)) minmax(0, 1fr);
+  column-gap: 1.75rem;
+  row-gap: 1.25rem;
+  align-items: start;
+}
+.identity-stage-person {
+  grid-row: span 2;
+}
+.identity-stage-details {
+  grid-column: 2;
+}
+.identity-stage .identity-portrait {
+  width: 100% !important;
+}
+.identity-stage .identity-portrait img {
+  object-position: 50% 22%;
+}
 @container (max-width: 560px) {
+  .identity-stage-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .identity-stage-person {
-    grid-row: auto !important;
+    grid-row: auto;
   }
   .identity-stage-details {
-    grid-column: 1 / -1 !important;
+    grid-column: 1;
   }
   .identity-stage .identity-portrait {
-    width: clamp(84px, 24cqi, 120px) !important;
+    aspect-ratio: 5 / 4 !important;
   }
   .identity-stage h2 {
-    font-size: 1.5rem;
-    line-height: 1.1;
+    font-size: clamp(1.9rem, 9cqi, 2.4rem);
+    line-height: 1.04;
     overflow-wrap: normal;
     word-break: normal;
   }
@@ -1034,4 +1060,44 @@ a {
 .lwh-sheen { animation: lwh-sheen 1500ms cubic-bezier(0.4, 0, 0.2, 1) 500ms both; }
 @media (prefers-reduced-motion: reduce) {
   .living-hero-rise, .lwh-sweep, .lwh-frag, .lwh-sheen, .lwh-dip { animation: none; }
+}
+
+/* ── THE WORLD OF WORK (premium convergence, 2026-10-02: CURRENT × Q) ─────────
+   One visual idea for public AND product: a real person in a real working
+   context, the related context (team, project, work, record) visible around
+   them, and depth that explains hierarchy — the focused object is highest, the
+   related context quieter, the photographic world behind it quietest.
+   `.scope-dark` re-declares the dark channels so a photographic scene reads
+   the same under either theme (text over a photograph must never flip dark).
+   These are the SAME tokens as `:root` dark — no second theme. */
+.scope-dark {
+  --c-ink-900: 7 7 6;
+  --c-ink-800: 21 21 19;
+  --c-ink-700: 29 29 26;
+  --c-ink-600: 42 42 38;
+  --c-ink-500: 118 112 101;
+  --c-brand-blue: 212 175 55;
+  --c-brand-champagne: 242 214 117;
+  --c-state-success: 52 211 153;
+  --c-state-warning: 255 184 69;
+  --c-state-amber: 255 165 82;
+  --c-state-danger: 255 92 92;
+  --c-text-primary: 245 241 232;
+  --c-text-secondary: 207 201 188;
+  --c-text-muted: 163 156 141;
+  --c-text-on-brand: 10 10 10;
+  color: rgb(var(--c-text-primary));
+}
+@keyframes world-in {
+  from { opacity: 0; transform: translateY(18px); filter: blur(8px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+.world-in { animation: world-in 900ms cubic-bezier(0.32, 0.72, 0, 1) both; }
+@keyframes world-line {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.world-line { animation: world-line 900ms ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .world-in, .world-line { animation: none; }
 }

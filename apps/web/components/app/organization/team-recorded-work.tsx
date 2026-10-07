@@ -118,7 +118,7 @@ export async function TeamRecordedWork({
       data-unknown={team.unknown}
       data-no-readable={team.noReadableRecords}
     >
-      <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
+      <h2 className="inline-flex items-center gap-2 text-support font-medium text-text-muted">
         <NotebookPen className="h-3.5 w-3.5" aria-hidden />
         {t("title")} · {periodLabel}
       </h2>
@@ -201,7 +201,7 @@ function MemberRow({
           {m.name}
         </Link>
         <span
-          className="font-mono text-meta text-text-secondary"
+          className="text-meta text-text-secondary"
           data-testid={`team-recorded-work-journal-${m.workerId}`}
           data-state={j.state}
         >

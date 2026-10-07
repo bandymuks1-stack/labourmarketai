@@ -930,7 +930,7 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
         if (cardPinned && !cardRef.current?.contains(e.target as Node)) setCardPinned(false);
       }}
     >
-      <div className="relative h-[78svh] min-h-[30rem] w-full md:h-[min(86vh,56rem)]">
+      <div className="relative h-[38svh] min-h-[16rem] w-full sm:h-[62svh] sm:min-h-[30rem] md:h-[min(86vh,56rem)]">
         {/* on a wide screen the world starts right of the words, so the person
             never stands under the headline; on a phone it is full-bleed */}
         <div ref={stage} className="absolute inset-0 overflow-hidden md:left-[18%]">

@@ -102,7 +102,7 @@ export function WorkContextMap({
 
   return (
     <section aria-label={title} className="flex flex-col gap-4" data-testid={testId}>
-      <h3 className="font-mono text-meta uppercase tracking-label text-text-secondary">{title}</h3>
+      <h3 className="font-display text-lg font-semibold tracking-tightest text-text-primary">{title}</h3>
 
       {/* Desktop: the spatial map. */}
       <div className="relative mx-auto hidden aspect-[16/9] w-full max-w-3xl md:block" data-testid={`${testId}-spatial`}>
@@ -206,7 +206,7 @@ function NodeLink({
         </span>
       </span>
       <span className={cn("flex min-w-0 flex-col", row ? "items-start" : "items-center")}>
-        <span className="font-mono text-[0.625rem] uppercase tracking-label text-text-secondary">{node.label}</span>
+        <span className="text-meta font-medium text-text-secondary">{node.label}</span>
         <span
           className={cn(
             "text-sm [overflow-wrap:anywhere]",

@@ -101,21 +101,28 @@ export function PersonIdentityCard({
         {/* THE PERSISTENT PORTRAIT: the SAME 4:5 frame as IdentityStage at every
             density — only its size changes (it used to be a 1:1 square when
             compact, so the person changed shape between surfaces). */}
-        <PersonPortrait
-          name={name}
-          avatarUrl={avatarUrl}
-          initials={initials}
-          width={density === "compact" ? "40px" : "clamp(64px, 20vw, 88px)"}
-          testids={{ photo: "identity-card-photo", monogram: "identity-card-monogram" }}
-          className="identity-card-portrait"
-        />
+        <span
+          className={cn(
+            "shrink-0 rounded-xl",
+            density === "full" && "shadow-[0_0_0_2px_rgb(var(--c-brand-blue)/0.45),0_0_28px_rgb(var(--c-brand-blue)/0.16)]",
+          )}
+        >
+          <PersonPortrait
+            name={name}
+            avatarUrl={avatarUrl}
+            initials={initials}
+            width={density === "compact" ? "40px" : "clamp(72px, 22vw, 104px)"}
+            testids={{ photo: "identity-card-photo", monogram: "identity-card-monogram" }}
+            className="identity-card-portrait"
+          />
+        </span>
 
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1.5">
             <h3
               className={cn(
                 "min-w-0 font-display font-bold leading-tight tracking-tightest text-text-primary [overflow-wrap:anywhere]",
-                density === "compact" ? "text-sm" : "text-lg",
+                density === "compact" ? "text-sm" : "text-xl",
               )}
               data-testid="identity-card-name"
             >
@@ -171,7 +178,7 @@ export function PersonIdentityCard({
       ) : null}
 
       {children ? (
-        <div className="flex flex-col divide-y divide-ink-600/70 rounded-lg border border-ink-600/80 bg-surface-1/40">
+        <div className="flex flex-col divide-y divide-ink-600/50 rounded-xl bg-surface-1/40 shadow-[0_0_0_1px_rgb(var(--c-ink-600)/0.6)]">
           {children}
         </div>
       ) : null}

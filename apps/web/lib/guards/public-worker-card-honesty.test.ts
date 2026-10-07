@@ -83,24 +83,41 @@ describe("1. the FUT concept card stays deleted and unreferenced", () => {
   });
 });
 
-describe("2. /for-workers renders the canonical card from the shared sample", () => {
+describe("2. /for-workers shows only labelled, honest product moments", () => {
+  /**
+   * OWNER DIRECTIVE 2026-10-02 (premium convergence): /for-workers no longer
+   * mounts the dense Player Card; it shows focused product moments
+   * (`components/marketing/public/*`). The honesty intent of this section is
+   * unchanged and pinned here: whatever the page shows is labelled EXAMPLE,
+   * built from translation copy only, and never revives the rating fiction.
+   * The canonical card itself is still the only card component (section 6)
+   * and still mounts on the landing showcase (section 3).
+   */
   const page = read(FOR_WORKERS);
+  const moments = read("components/marketing/public/product-moments.tsx");
+  const sections = read("components/marketing/public/public-sections.tsx");
 
-  it("imports the canonical WorkerPlayerCard + the shared sample builder", () => {
-    expect(page).toMatch(/from\s+"@\/components\/app\/worker-player-card"/);
-    expect(page).toMatch(/buildSampleWorkerPlayerCard/);
-    expect(page).toMatch(/buildPlayerCardLabels/);
+  it("the page composes the public moments and imports no second card component", () => {
+    expect(page).toMatch(/components\/marketing\/public\/product-moments/);
+    expect(page).not.toMatch(/player-card\.tsx|ovr-ring/);
   });
 
   it("renders no OVR / tier / stat-bar fiction", () => {
-    const code = stripComments(page);
-    expect(code).not.toMatch(/\bOVR\b/);
-    expect(code).not.toMatch(/tier-(gold|silver|bronze)/);
-    expect(code).not.toMatch(/\bSTAT_KEYS\b/);
+    for (const src of [page, moments, sections]) {
+      const code = stripComments(src);
+      expect(code).not.toMatch(/\bOVR\b/);
+      expect(code).not.toMatch(/tier-(gold|silver|bronze)/);
+      expect(code).not.toMatch(/\bSTAT_KEYS\b/);
+    }
   });
 
-  it("keeps the always-visible Example frame around the sample card", () => {
-    expect(page).toMatch(/<ExamplePreviewFrame>/);
+  it("every moment card carries the always-visible Example label", () => {
+    const cards = moments.match(/<MomentCard\b[^>]*>/g) ?? [];
+    expect(cards.length).toBeGreaterThanOrEqual(6);
+    for (const c of cards) expect(c, c).toMatch(/sampleLabel=/);
+    const card = sections.slice(sections.indexOf("export function MomentCard"));
+    expect(card).toMatch(/sampleLabel/);
+    expect(stripComments(card)).not.toMatch(/title=|tooltip|hover:/i);
   });
 });
 
@@ -180,8 +197,11 @@ describe("6. one full Player Card system — no second card component", () => {
   });
 
   it("every public mount of the card goes through the canonical component", () => {
+    // The landing showcase must mount the canonical card. /for-workers (since
+    // the 2026-10-02 premium convergence) mounts no card at all; it may never
+    // mount a non-canonical one.
+    expect(read(SHOWCASE), SHOWCASE).toMatch(/<WorkerPlayerCard\b/);
     for (const rel of [FOR_WORKERS, SHOWCASE]) {
-      expect(read(rel), rel).toMatch(/<WorkerPlayerCard\b/);
       expect(read(rel), rel).not.toMatch(/<PlayerCard\b/);
     }
   });

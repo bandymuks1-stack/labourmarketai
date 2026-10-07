@@ -101,7 +101,7 @@ export default async function CompanyDashboardPage({
           metadata={{ surface: "company", step: setupIncomplete ? "setup_incomplete" : "no_profile" }}
         />
         <header className="flex flex-col gap-1">
-          <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+          <p className="text-support font-medium text-brand-orange">
             {t("eyebrow")}
           </p>
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -238,7 +238,7 @@ export default async function CompanyDashboardPage({
           </Link>
         </div>
         <p
-          className="font-mono text-meta uppercase tracking-label text-brand-orange"
+          className="text-support font-medium text-brand-orange"
           data-testid="company-context"
         >
           {tRooms("company.context")}
@@ -253,7 +253,7 @@ export default async function CompanyDashboardPage({
         {companyRow ? (
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <span
-              className="rounded-sm border border-brand-cyan/40 bg-brand-cyan/5 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
+              className="rounded-full bg-ink-800 px-2.5 py-0.5 text-meta font-medium text-text-secondary"
               data-testid="company-dashboard-type-chip"
             >
               {t(`setup.companyTypeOptions.${companyRow.companyType}`)}
@@ -281,18 +281,20 @@ export default async function CompanyDashboardPage({
         <section
           aria-label={t("decisions.title")}
           data-testid="company-decisions-strip"
-          className="flex flex-col gap-2"
+          className="flex flex-col gap-3 rounded-2xl border border-brand-orange/30 bg-brand-orange/5 p-4"
         >
-          <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+          {/* What needs me: the first thing on the page, one level of weight
+              above everything under it. Count-gated: zero = no card. */}
+          <h2 className="font-display text-lg font-semibold tracking-tightest text-text-primary">
             {t("decisions.title")}
-          </p>
+          </h2>
           <div className="flex flex-wrap gap-2">
             {decisionEntries.map((e) => (
               <a
                 key={e.key}
                 href={e.href}
                 data-testid={`company-decision-${e.key}`}
-                className="inline-flex items-center gap-2 rounded-md border border-brand-orange/40 bg-brand-orange/5 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:border-brand-orange"
+                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-ink-900/60 px-3.5 py-2 text-sm font-medium text-text-primary shadow-[0_0_0_1px_rgb(var(--c-brand-orange)/0.35)] transition-colors hover:bg-ink-900 hover:shadow-[0_0_0_1px_rgb(var(--c-brand-orange))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
               >
                 <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold text-text-on-brand tabular-nums">
                   {e.count}
@@ -350,7 +352,7 @@ export default async function CompanyDashboardPage({
             key={a.key}
             href={a.href as "/dashboard"}
             data-testid={`company-primary-action-${a.key}`}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 py-2 text-sm font-semibold text-brand-blue transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-brand-blue/10 px-4 py-2 text-sm font-semibold text-brand-blue transition-colors hover:bg-brand-blue/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
           >
             {a.icon}
             {a.label}

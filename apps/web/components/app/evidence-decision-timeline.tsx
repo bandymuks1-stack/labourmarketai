@@ -20,16 +20,17 @@ import type { ReviewTimelineEvent } from "@/lib/journal/review-status";
  */
 
 const DOT: Record<ReviewTimelineEvent["result"] | "created" | "waiting", string> = {
-  created: "bg-text-muted",
-  waiting: "bg-amber-500",
-  approved: "bg-emerald-500",
-  changes_requested: "bg-amber-500",
+  created: "bg-brand-cyan",
+  waiting: "bg-state-warning",
+  // Confirmation is state-success green (owner-ratified); gold is never it.
+  approved: "bg-state-success",
+  changes_requested: "bg-state-warning",
   rejected: "bg-state-danger",
 };
 
 const TEXT: Record<ReviewTimelineEvent["result"], string> = {
-  approved: "text-emerald-700",
-  changes_requested: "text-amber-700",
+  approved: "text-state-success",
+  changes_requested: "text-state-warning",
   rejected: "text-state-danger",
 };
 
@@ -51,16 +52,16 @@ export async function EvidenceDecisionTimeline({
 
   return (
     <ol
-      className="mt-2 flex flex-col gap-1.5 border-l border-border pl-3"
+      className="mt-2 flex flex-col gap-2 border-l-2 border-brand-cyan/30 pl-3"
       data-testid="evidence-decision-timeline"
       aria-label={t("entry.timeline.title")}
     >
       {/* Record created — always real (the entry's own timestamp). */}
       <li className="flex items-start gap-2" data-step="created">
-        <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${DOT.created}`} aria-hidden />
+        <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${DOT.created}`} aria-hidden />
         <span className="flex flex-wrap items-baseline gap-x-1.5 text-meta leading-tight text-text-secondary">
           <span>{t("entry.timeline.created")}</span>
-          <span className="font-mono text-meta text-text-muted">
+          <span className="text-meta tabular-nums text-text-muted">
             {createdAt.slice(0, 10)}
           </span>
         </span>
@@ -68,7 +69,7 @@ export async function EvidenceDecisionTimeline({
 
       {events.length === 0 && awaiting === false ? (
         <li className="flex items-start gap-2" data-step="not-enabled">
-          <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${DOT.waiting}`} aria-hidden />
+          <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${DOT.waiting}`} aria-hidden />
           <span className="text-meta leading-tight text-text-muted">
             {t("entry.timeline.notEnabled")}
           </span>
@@ -76,8 +77,8 @@ export async function EvidenceDecisionTimeline({
       ) : events.length === 0 ? (
         /* No human decision yet — honestly "waiting", never auto-confirmed. */
         <li className="flex items-start gap-2" data-step="waiting">
-          <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${DOT.waiting}`} aria-hidden />
-          <span className="text-meta leading-tight text-amber-700">
+          <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${DOT.waiting}`} aria-hidden />
+          <span className="text-meta leading-tight text-state-warning">
             {t("entry.timeline.waiting")}
           </span>
         </li>
@@ -94,7 +95,7 @@ export async function EvidenceDecisionTimeline({
               data-step={ev.result}
             >
               <span
-                className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${DOT[ev.result]}`}
+                className={`mt-1 h-2 w-2 shrink-0 rounded-full ${DOT[ev.result]}`}
                 aria-hidden
               />
               <span className="flex flex-col gap-0.5">
@@ -118,7 +119,7 @@ export async function EvidenceDecisionTimeline({
                     </span>
                   ) : null}
                   {ev.at ? (
-                    <span className="font-mono text-meta text-text-muted">
+                    <span className="text-meta tabular-nums text-text-muted">
                       · {ev.at.slice(0, 10)}
                     </span>
                   ) : null}

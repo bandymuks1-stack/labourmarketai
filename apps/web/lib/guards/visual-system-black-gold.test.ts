@@ -475,7 +475,9 @@ describe("no letter stands in for the mark in the authenticated product", () => 
   /** Person-initial avatars — legitimate monograms, each with the expression
    *  that proves the initial comes from the person's own name. */
   const PERSON_MONOGRAMS: ReadonlyArray<readonly [string, RegExp]> = [
-    ["components/app/account-menu.tsx", /\{initial\}/],
+    // The shell control renders the shared PersonPortrait monogram, whose
+    // initials come from the person's own name (`avatarMonogram(displayName)`).
+    ["components/app/account-menu.tsx", /avatarMonogram\(displayName/],
     ["components/app/avatar-display.tsx", /\{avatarMonogram\(displayName\)\}/],
     // Renders the shared AvatarDisplay above, with the person's own name.
     ["components/app/profile-avatar.tsx", /<AvatarDisplay\b[^>]*displayName=\{displayName\}/],

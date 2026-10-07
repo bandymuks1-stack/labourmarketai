@@ -45,7 +45,7 @@ function TextSaveIndicator({
     return (
       <p
         role="status"
-        className="font-mono text-meta uppercase tracking-label text-text-muted"
+        className="text-support font-medium text-text-muted"
       >
         {t("textSavingLabel")}
       </p>
@@ -55,7 +55,7 @@ function TextSaveIndicator({
     return (
       <p
         role="alert"
-        className="font-mono text-meta uppercase tracking-label text-state-danger"
+        className="text-support font-medium text-state-danger"
       >
         {t("textSaveErrorLabel")}
       </p>
@@ -64,7 +64,7 @@ function TextSaveIndicator({
   return (
     <p
       role="status"
-      className="font-mono text-meta uppercase tracking-label text-state-success"
+      className="text-support font-medium text-state-success"
     >
       ✓ {t("textSavedLabel")} · {t("textClaimNotVerified")}
     </p>
@@ -491,7 +491,7 @@ export function ProfileTextFirstFlow({
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="font-mono text-meta uppercase tracking-label text-text-secondary">
+        <p className="text-support font-medium text-text-secondary">
           <span className="text-text-muted">{tS("groupEyebrow")}</span> ·{" "}
           {headerCount}
         </p>
@@ -677,7 +677,7 @@ export function ProfileTextFirstFlow({
         >
           <p className="font-semibold">✓ {t("savedToCapabilities")}</p>
           <p className="mt-1 text-text-secondary">
-            <span className="font-mono text-meta uppercase tracking-label text-state-success">
+            <span className="text-support font-medium text-state-success">
               {t("confirmedByYou")}
             </span>{" "}
             · {t("addedToProfile")} · {t("needsExternalConfirmation")}

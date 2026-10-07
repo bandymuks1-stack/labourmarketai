@@ -46,7 +46,7 @@ export function JourneyTimeline({
         >
           <span
             aria-hidden
-            className="relative z-10 inline-grid h-10 w-10 place-items-center rounded-full border-2 border-tier-gold/60 bg-ink-800 font-mono text-sm font-bold text-tier-gold"
+            className="relative z-10 inline-grid h-10 w-10 place-items-center rounded-full border-2 border-tier-gold/60 bg-ink-800 font-display text-sm font-bold tabular-nums text-tier-gold"
           >
             {i + 1}
           </span>

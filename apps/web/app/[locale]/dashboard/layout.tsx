@@ -15,6 +15,7 @@ import { NotificationPanel } from "@/components/app/notification-panel";
 import { RoleSwitcher } from "@/components/app/role-switcher";
 import { SessionTelemetry } from "@/components/app/session-telemetry";
 import { SpineStream } from "@/components/app/spine-stream";
+import { OwnAvatarStream } from "@/components/app/identity/own-avatar-stream";
 import { AccountMenu } from "@/components/app/account-menu";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { LmLogo } from "@/components/ui/lm-logo";
@@ -399,6 +400,11 @@ export default async function DashboardLayout({
           soon as the derived signals resolve. Shared by every chrome mode. */}
         <Suspense fallback={null}>
           <SpineStream activeRole={activeRole} />
+        </Suspense>
+        {/* The person's OWN photo for the shell's account control — streamed after
+            first paint like the spine; initials until it arrives or if none. */}
+        <Suspense fallback={null}>
+          <OwnAvatarStream />
         </Suspense>
         <SessionTelemetry />
         <AmbientGlow />
