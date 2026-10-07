@@ -81,3 +81,20 @@ export async function getAvatarForVisibleWorker(workerId: string): Promise<strin
     return null;
   }
 }
+
+/**
+ * Sign ONE avatar path for one hour. The caller must already hold the
+ * DATABASE's answer for that path (worker_avatar_path_v1, or
+ * applicant_identity_v1 for an applicant to the caller's own need);
+ * this never decides who may see a photo.
+ */
+export async function signAvatarPath(path: string): Promise<string | null> {
+  try {
+    const { data: signed } = await createAdminClient()
+      .storage.from(AVATAR_BUCKET)
+      .createSignedUrl(path, 60 * 60);
+    return signed?.signedUrl ?? null;
+  } catch {
+    return null;
+  }
+}

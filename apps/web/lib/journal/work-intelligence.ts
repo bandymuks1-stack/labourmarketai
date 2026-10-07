@@ -137,6 +137,7 @@ import {
   type EvidenceTier,
 } from "@/lib/evidence/evidence-tier";
 import type { EntrySkillProvenance } from "@/lib/journal/entry-skill-source";
+import type { HistoryContext } from "@/lib/organization-evidence/professional-history-context";
 import { fragmentSkillsByIndex } from "@/lib/journal/fragment-skill-evidence";
 import {
   deriveWorkTimeChecks,
@@ -193,6 +194,10 @@ export type WorkIntelligenceOrganizationRecord = {
   /** Set only when the organization explicitly tied the row to a journal
    *  entry — the journal then already counts that work. */
   readonly journalEntryId: string | null;
+  /** What the record can say about the work behind the hours (project,
+   *  client, capacity, source, proof facts) - carried, never summed, and
+   *  absent where the record does not hold it. Imported evidence only. */
+  readonly context?: HistoryContext;
 };
 
 /** One PERIOD record the organization holds about the person: a total over
@@ -213,6 +218,8 @@ export type WorkIntelligenceOrganizationPeriodRecord = {
    *  A span that is not the source's is shown at month precision with this
    *  label, and never split (owner rule 2026-09-23). */
   readonly provenance: "source" | "human_choice" | "derived";
+  /** The same context the day records carry (imported evidence only). */
+  readonly context?: HistoryContext;
 };
 
 export type WorkPeriodKey = "today" | "week" | "month" | "year" | "all";
@@ -472,6 +479,12 @@ export type WorkIntelligence = {
    *  their own beside `organizationRecords`, in no period's `hours`, on no
    *  day. `null` exactly when `organizationRecords` is null (UNKNOWN). */
   readonly organizationPeriodRecords: readonly WorkIntelligenceOrganizationPeriodRecord[] | null;
+  /** The organization's DAY records that carry a professional-history context
+   *  (imported evidence), as read - handed through untouched so the Living CV can
+   *  name the work behind the hours. A pass-through, never a sum: no figure in
+   *  this model is derived from it a second time. `null` exactly when
+   *  `organizationRecords` is null (UNKNOWN). */
+  readonly organizationContextRecords?: readonly WorkIntelligenceOrganizationRecord[] | null;
   /** Every declared skill, hours desc (declared-only skills at zero). */
   readonly skills: readonly SkillWorkTime[];
   readonly activities: readonly ActivityWorkTime[];
@@ -1217,6 +1230,10 @@ export function deriveWorkIntelligence(
     periods,
     organizationRecords,
     organizationPeriodRecords,
+    organizationContextRecords:
+      orgRows === null
+        ? null
+        : orgRows.filter((r) => r.context !== undefined && r.status !== "rejected" && Number.isFinite(r.hours) && r.hours > 0),
     skills,
     activities,
     contexts,

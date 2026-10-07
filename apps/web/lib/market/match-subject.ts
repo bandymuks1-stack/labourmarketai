@@ -26,6 +26,7 @@ import {
   type LastActiveBucket,
 } from "@/lib/scouting/profile-freshness";
 import { PRACTICE_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
+import { readSignalsForWorkers } from "@/lib/organization-evidence/history-signals-read";
 
 /**
  * Read layer for matching v1 — assembles a `MatchSubject` for each
@@ -351,7 +352,7 @@ export async function buildSupplyCandidates(
   // null — an honest "not stated", exactly like the gated stores above. The
   // superadmin matching workbench, which is where a human actually weighs a
   // learner's placement today, reads the real rows.
-  const [skillsRes, profsRes, prefsRes, langsRes, practiceRes, confirmedWork] = await Promise.all([
+  const [skillsRes, profsRes, prefsRes, langsRes, practiceRes, confirmedWork, historyRead] = await Promise.all([
     asAny(supabase)
       .from("worker_skills")
       .select("worker_id, source, verified, skills ( slug, esco_uri )")
@@ -401,6 +402,15 @@ export async function buildSupplyCandidates(
         id: w.id as string,
         profileId: (w.profile_id as string | null) ?? null,
       })),
+    ),
+    // HISTORY SIGNALS (organization-provided): one batched read under the
+    // caller's RLS. Never throws into the ranking - an unavailable read leaves
+    // the signal UNKNOWN on every subject and is reported on the retrieval.
+    readSignalsForWorkers(supabase, workerIds).catch(
+      (): Awaited<ReturnType<typeof readSignalsForWorkers>> => ({
+        kind: "unavailable",
+        reason: "read_failed",
+      }),
     ),
   ]);
 
@@ -546,6 +556,15 @@ export async function buildSupplyCandidates(
           practiceByProfile === null
             ? null
             : (practiceByProfile.get((w.profile_id as string | null) ?? "") ?? 0),
+        // Organization-provided history signals: only for a worker whose
+        // linked history named at least one skill. Everyone else stays
+        // `undefined` (unknown) - never an empty list that reads as "none".
+        historySignals:
+          historyRead.kind === "ok" && historyRead.byWorker.has(w.id as string)
+            ? historyRead.byWorker
+                .get(w.id as string)!
+                .map((s) => ({ uri: s.slug, records: s.records }))
+            : undefined,
       } satisfies MatchSubject,
     };
   });
@@ -560,6 +579,10 @@ export async function buildSupplyCandidates(
       : candidates;
   return {
     candidates: shown,
-    retrieval: { ...retrieval, poolSize: shown.length, unreadableFacts },
+    retrieval: {
+      ...retrieval,
+      poolSize: shown.length, unreadableFacts,
+      ...(historyRead.kind === "unavailable" ? { historySignalsUnavailable: true } : {}),
+    },
   };
 }

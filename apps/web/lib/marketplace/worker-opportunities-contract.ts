@@ -202,6 +202,7 @@ export interface InterestLabelBag {
   readonly contacted: string;
   readonly withdraw: string;
   readonly internalNote: string;
+  readonly identityConsent: string;
   readonly error: string;
   readonly contactedLink: string;
   readonly contactEmployer: string;

@@ -186,6 +186,7 @@ export async function readOrganizationRecords(
           status: "recorded",
           organizationId: r.organizationId,
           journalEntryId: null,
+          context: r.context,
         }));
   // PERIOD records come only from imported documents (a timesheet line is
   // a day by construction). Beside the day rows, in the same reading.
@@ -201,6 +202,7 @@ export async function readOrganizationRecords(
           organizationId: r.organizationId,
           // How the SPAN came to be travels with it (owner rule 2026-09-23).
           provenance: r.provenance,
+          context: r.context,
         }));
   return { records: [...fromAllocations, ...fromEvidence], periodRecords };
 }

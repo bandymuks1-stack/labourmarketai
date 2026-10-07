@@ -1980,6 +1980,15 @@
       "noActivity": "Ingen poster endnu.",
       "emptyTeam": "Dette projekt har endnu intet hold — start draften og få de første folk på banen.",
       "emptyTeamCta": "Start draften",
+      "history": {
+        "title": "Tidligere arbejde på dette projekt",
+        "provenance": "Historik leveret af organisationen, importeret fra organisationens egne optegnelser. Ikke uafhængigt verificeret.",
+        "unavailable": "Tidligere arbejde kunne ikke læses lige nu. Det betyder ikke, at der intet er.",
+        "empty": "Der er ikke registreret tidligere arbejde leveret af organisationen for dette projekt.",
+        "personUnknown": "Person ikke angivet",
+        "hoursUnknown": "Timer ikke angivet",
+        "count": "{n} poster"
+      },
       "positionsTitle": "Manglende positioner",
       "positionsEmpty": "Modulet for positionsbehov er stadig under forberedelse — når det kommer, kan du her se, hvilke folk der mangler.",
       "openOps": "Åbn management-arenaen"
@@ -2323,6 +2332,7 @@
   "scouting": {
     "pool": {
       "factsUnreadable": "Noget af det, disse personer har registreret, kunne ikke læses lige nu, så denne rækkefølge er ikke pålidelig. Ingen vises her med mindre, end de har — det er fakta bag sammenligningen, der mangler. Genindlæs om et øjeblik.",
+      "historyUnavailable": "Historik leveret af organisationer kunne ikke læses lige nu, så den vises ikke. Det betyder ikke, at der ingen er, og rækkefølgen ovenfor afhænger ikke af den.",
       "capped": "Ikke alle blev sammenlignet. Flere synlige arbejdere passer til dette behov, end én liste kan rumme, så de {count}, hvis kompetencer, fag og land passer mest direkte, blev hentet først — aldrig de nyeste registreringer. Indsnævr behovet for at være sikker på, at de rette personer sammenlignes.",
       "complete": "Alle {count} synlige arbejdere blev sammenlignet med dette behov."
     },
@@ -2347,6 +2357,7 @@
     "skillFit": "{matched}/{total} krævede færdigheder, {confirmed} bekræftet af leder",
     "evidence": "Dokumentation — bekræftet: {confirmed} · journal: {journal} · selvangivet: {self}",
     "confirmedWork": "Bekræftet gennem arbejde: {work} af {matched} matchende færdigheder (gentaget: {repeated})",
+    "historySignal": "Nævnt i historik leveret af organisationer: {history} af {matched} matchende færdigheder (et signal, ikke verifikation)",
     "evidenceNone": "Ikke bekræftet",
     "experienceYearsValue": "{years, plural, one {# år} other {# år}}",
     "shortlistError": "Kunne ikke gemme. Prøv igen.",
@@ -2440,7 +2451,8 @@
       "readiness": "Tilgængelighed, parathed og dokumenter",
       "openTo": "Også åben for: {countries}",
       "skillCount": "{matched} af {total} krævede færdigheder",
-      "nameHidden": "Navn og kontaktoplysninger vises først, når personen tillader det."
+      "nameHidden": "Navn og kontaktoplysninger vises først, når personen tillader det.",
+      "appliedToYou": "Har ansøgt om dette behov — navn og billede følger med ansøgningen. Telefon og e-mail forbliver skjult."
     }
   },
   "waze": {
@@ -6702,6 +6714,38 @@
       }
     }
   },
+  "cvOrganizationHistory": {
+    "title": "Arbejdshistorik leveret af organisationer",
+    "note": "Hentet fra de nævnte organisationers egne registreringer. Den er hverken selverklæret eller uafhængigt verificeret.",
+    "untitled": "Arbejde registreret af en organisation",
+    "hoursTerm": "Timer",
+    "hoursRecorded": "{hours} t registreret i {count, plural, one {# registrering} other {# registreringer}}",
+    "hoursPeriod": "{hours} t opgivet for en periode, i {count, plural, one {# registrering} other {# registreringer}}",
+    "contested": "Bestridt af en part med ret til det",
+    "more": "{count, plural, one {# post mere} other {# poster mere}} vises ikke"
+  },
+  "historyContext": {
+    "project": "Projekt",
+    "place": "Sted eller arbejdspakke",
+    "client": "Bygherre / kunde",
+    "otherParties": "Andre involverede",
+    "capacity": "Rolle",
+    "source": "Kilde",
+    "suppliedBy": "Leveret af {name}",
+    "reconstructed": "Rekonstrueret fra tidligere registreringer",
+    "recordedAt": "Registreret i systemet",
+    "proofTitle": "Hvad der ligger bag",
+    "proof": {
+      "SELF_DECLARED": "Oplyst af personen",
+      "EVIDENCE_SUPPORTED": "Understøttet af en organisations registrering",
+      "EMPLOYER_CONFIRMED": "Bekræftet af arbejdsgiveren",
+      "CLIENT_ACCEPTED": "Godkendt af kunden",
+      "SUPERVISOR_CONFIRMED": "Bekræftet af en leder",
+      "INDEPENDENTLY_VERIFIED": "Uafhængigt verificeret"
+    },
+    "attestedAs": "bekræftet som {role}",
+    "proofNote": "Hver linje er et selvstændigt faktum. En bekræftelse fra den leverende organisation er ikke kundens godkendelse og ikke betaling, og ingen af dem er uafhængig verificering, medmindre det står der."
+  },
   "evidenceImport": {
     "records": {
       "periodDerivedHuman": "[EN] Period set at import (human choice) — the source stated no dates",
@@ -6892,7 +6936,8 @@
       "done": "{count} poster tilskrevet; {skipped} var allerede tilskrevet.",
       "refused": "Dette kunne ikke gemmes. Intet er ændret.",
       "person": "{hours} t, {count, plural, one {# post} other {# poster}}"
-    }
+    },
+    "truncated": "Der findes flere poster, end én visning læser. De {count} læste vises; summer dækker kun dem."
   },
   "workLifecycle": {
     "pending": "Endnu ikke",
@@ -7064,5 +7109,47 @@
       "skills": "{count, plural, one {# færdighed baseret på dine registreringer} other {# færdigheder baseret på dine registreringer}}",
       "next": "Hvor du kan gå hen"
     }
+  },
+  "companyPerson": {
+    "eyebrow": "Historisk personkort",
+    "back": "Personer",
+    "badge": "Leveret af organisationen, ikke uafhængigt verificeret",
+    "provenance": "Det er, hvad {name} har registreret om denne person. Ingen andre har bekræftet det, og det afhænger ikke af, om personen har en konto.",
+    "claim": {
+      "unlinked": "Endnu ikke knyttet til en konto — historikken er allerede registreret her.",
+      "link_proposed": "En kobling til en konto er tilbudt og afventer personens svar — historikken er allerede registreret her.",
+      "linked": "Knyttet til personens egen konto.",
+      "openProfile": "Åbn personens side"
+    },
+    "unavailable": "Personens historik kunne ikke læses lige nu. Det betyder ikke, at der ingen er.",
+    "empty": "Der er endnu ingen historikposter for denne person. Læsningen lykkedes — der er ingen.",
+    "stats": {
+      "records": "Poster",
+      "hours": "Timer som angivet",
+      "period": "Periode"
+    },
+    "noHours": "Poster uden angivne timer: {count}. Ukendte timer tælles ikke som nul.",
+    "undated": "Poster uden angivet dato: {count}. De bliver i historikken nedenfor.",
+    "periodApart": "{hours} t af summen er periodesummer, holdt adskilt og aldrig fordelt på dage eller måneder.",
+    "noWorkObject": "Poster uden tilknytning til et projekt eller sted, platformen kender: {count}. De bliver i denne historik under deres kildebetegnelse.",
+    "places": {
+      "title": "Efter projekt eller sted",
+      "none": "Projekt eller sted ikke registreret",
+      "records": "Poster: {count}"
+    },
+    "months": {
+      "title": "Angivne timer pr. måned",
+      "note": "Kun poster for enkeltdage. Periodesummer fordeles aldrig på dage eller måneder."
+    },
+    "skills": {
+      "title": "Færdigheder, historikken peger på",
+      "note": "Udledt af organisationens historik, ikke verificeret. En færdighed vises, når organisationen selv har nævnt den; det er ikke en påstand om personen.",
+      "records": "Poster: {count}",
+      "empty": "Ingen færdighed er nævnt i disse poster.",
+      "unavailable": "Færdighedssignaler kunne ikke læses lige nu. Det betyder ikke, at der ingen er.",
+      "truncated": "Der er flere færdighedssignaler, end denne visning læser."
+    },
+    "shown": "Viser de nyeste {shown} af {total} poster. Resten forbliver registreret.",
+    "truncated": "Der findes flere poster, end én visning læser. De {count} læste vises; summer dækker kun dem."
   }
 }

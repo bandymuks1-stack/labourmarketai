@@ -156,6 +156,7 @@
     "cancel": "Annuleren",
     "edit": "Bewerken",
     "remove": "Verwijderen",
+    "removeConfirm": "Deze advertentie definitief verwijderen?",
     "activate": "Publiceren",
     "close": "Sluiten",
     "reopen": "Heropenen als concept",
@@ -710,7 +711,11 @@
     "closeLabel": "Zoeken sluiten",
     "voiceStart": "Zoeken met spraak",
     "voiceStop": "Spraakinvoer stoppen",
-    "voiceListening": "Luisteren... zeg wat u zoekt — de tekst verschijnt in het zoekveld."
+    "voiceListening": "Luisteren... zeg wat u zoekt — de tekst verschijnt in het zoekveld.",
+    "voiceConsentText": "Dicteren in het zoekveld gebruikt de ingebouwde spraakherkenning van je browser. Afhankelijk van je browser (bijv. Chrome of Safari) wordt de audio naar de spraakdienst van die browserleverancier gestuurd, niet naar LabourMarket.ai. Wij slaan niets op. Gebruik het spraakjournaal voor audio die op de eigen server van LabourMarket.ai wordt verwerkt.",
+    "voiceConsentAllow": "Doorgaan met browserdictaat",
+    "voiceConsentCancel": "Niet nu",
+    "voiceFailed": "Dicteren gestopt - de browser kon de microfoon of spraakdienst niet gebruiken."
   },
   "reports": {
     "eyebrow": "Rapporten",
@@ -1656,6 +1661,7 @@
       "journalLinkingDisabled": "Journaalkoppeling is nog niet ingeschakeld.",
       "submit": "Aanmaken",
       "success": "Projectcontext aangemaakt.",
+      "clientNotSaved": "Project aangemaakt, maar de klant kon niet worden opgeslagen. Voeg de klant toe op de projectpagina.",
       "backToDashboard": "Terug naar bedrijfsdashboard",
       "errorName": "Voer een projectnaam in (minimaal 2 tekens).",
       "errorNoCompany": "Alleen een bedrijfsaccount kan een projectcontext aanmaken.",
@@ -1926,7 +1932,36 @@
         "unavailable": "De opleidingen konden nu niet worden geladen. Vernieuw de pagina; wat je hebt aangemaakt is niet verloren.",
         "inviteLearners": "Lerenden uitnodigen",
         "exportReport": "Rapport downloaden (CSV)",
-        "exportReportHint": "Programma's, cohorten, aantallen lerenden en actuele vraag — samen met de uitkomsten van je lerenden. Onbekende aantallen worden als unknown geschreven, nooit als nul."
+        "exportReportHint": "Programma's, cohorten, aantallen lerenden en actuele vraag — samen met de uitkomsten van je lerenden. Onbekende aantallen worden als unknown geschreven, nooit als nul.",
+        "unassignedLearners": "Geaccepteerde lerenden die nog in geen cohort zitten: {count}. Voeg ze hierboven toe aan een cohort.",
+        "recognition": {
+          "title": "Erkenning vastleggen",
+          "hint": "Het besluit van een onafhankelijke beoordelaar dat de getoonde competentie van een persoon aan een formele eis voldoet. Het is geen certificaat en ontstaat nooit alleen uit werkbewijs.",
+          "pending": "Erkenningen vastleggen is nog niet beschikbaar: het register erachter is nog niet vrijgegeven. Tot dan wordt een indiening geweigerd, niet opgeslagen.",
+          "subject": "Lerende",
+          "chooseSubject": "Kies een lerende",
+          "kind": "Type eis",
+          "kindDocument": "Documenttype",
+          "kindSkill": "Vaardigheid",
+          "kindProfession": "Beroep",
+          "key": "Eissleutel (slug)",
+          "country": "Land (2 letters)",
+          "evidence": "ID's van bewijsvermeldingen",
+          "evidenceHint": "ID's van journaalvermeldingen van het werk van de lerende, gescheiden door komma's. Het register accepteert alleen vermeldingen die een tweede persoon heeft afgetekend.",
+          "decision": "Besluit",
+          "recognised": "Erkend",
+          "notRecognised": "Niet erkend",
+          "validFrom": "Geldig vanaf",
+          "validUntil": "Geldig tot",
+          "note": "Opmerking van de beoordelaar",
+          "submit": "Besluit vastleggen",
+          "saving": "Opslaan…",
+          "ok": "Erkenning vastgelegd.",
+          "needsMigration": "Niet vastgelegd: het erkenningsregister is nog niet beschikbaar.",
+          "forbidden": "Deze instelling kan deze erkenning niet voor deze persoon vastleggen.",
+          "invalid": "Controleer de waarden.",
+          "error": "Er ging iets mis. Probeer het opnieuw."
+        }
       },
       "learners": {
         "title": "Lerenden",
@@ -3948,7 +3983,9 @@
       "check_email_body": "We hebben een bevestigingslink naar {email} gestuurd. Open deze om je account te voltooien. Zie je de e-mail niet? Kijk in je spammap — hier kun je een nieuwe link aanvragen.",
       "resend_label": "Link opnieuw sturen",
       "resend_sent": "Opnieuw verstuurd. Controleer je inbox en spammap.",
-      "resend_wait": "Je kunt over {seconds} s een nieuwe link aanvragen."
+      "resend_wait": "Je kunt over {seconds} s een nieuwe link aanvragen.",
+      "invited_email_note": "Dit is het adres waarnaar je uitnodiging is gestuurd.",
+      "show_password": "Wachtwoord tonen"
     },
     "login": {
       "headline": "Inloggen",
@@ -6293,6 +6330,15 @@
       "noActivity": "Nog geen registraties.",
       "emptyTeam": "Dit project heeft nog geen team — start de draft en breng de eerste mensen het veld op.",
       "emptyTeamCta": "Start de draft",
+      "history": {
+        "title": "Eerder werk aan dit project",
+        "provenance": "Door de organisatie aangeleverde geschiedenis, geïmporteerd uit de eigen gegevens van de organisatie. Niet onafhankelijk geverifieerd.",
+        "unavailable": "Eerder werk kon nu niet worden gelezen. Dat betekent niet dat er geen is.",
+        "empty": "Voor dit project is geen door de organisatie aangeleverd eerder werk vastgelegd.",
+        "personUnknown": "Persoon niet genoemd",
+        "hoursUnknown": "Uren niet opgegeven",
+        "count": "{n} registraties"
+      },
       "positionsTitle": "Ontbrekende posities",
       "positionsEmpty": "Positiebehoeften zijn er nog niet — zodra ze er zijn, zie je hier welke mensen ontbreken.",
       "openOps": "Open projectbeheer",
@@ -7322,6 +7368,21 @@
         "compared": "Vergeleken",
         "interest": "Interesse"
       }
+    },
+    "funnel": {
+      "notMeasured": "Nog niet gemeten",
+      "unavailable": "Niet beschikbaar (lezen mislukt)",
+      "unavailableBanner": "De funnel kon niet uit de gebeurtenissenopslag worden gelezen. Alle onderstaande aantallen zijn niet beschikbaar. Dit is een mislukte leesactie, geen gemeten nul.",
+      "rateNotMeasured": "Nog niet gemeten",
+      "reason": {
+        "usefulUndefined": "Er bestaat nog geen definitie van \"nuttig\", dus alleen de gedeeltelijke gebeurtenissen voor afgeronde onboarding en aangemaakte organisatie worden geteld.",
+        "offerSide": "Geen gebeurtenis legt de aanbodzijde van vraag / aanbod vast, dus deze stap heeft geen bron.",
+        "commercialValue": "Geen gebeurtenis of bron legt commerciële waarde vast.",
+        "trial": "Geen gebeurtenis of bron legt een proefperiode vast.",
+        "paidConversion": "Geen gebeurtenis of bron legt een betaalde conversie vast.",
+        "retention": "return_visit_detected is gedefinieerd maar wordt niet in deze funnel gelezen, en er bestaat geen maatstaf voor herhaald gebruik."
+      },
+      "aiHelp": "Eigen AI-boekhouding: auditregels per run (ai_runs, USD uit de gecontroleerde prijstabel) en het canonieke gebruiksgrootboek in eurocent (usage_cost_events). De aantallen komen uit live leesacties van beide tabellen. Een tabel die niet gelezen kan worden, wordt als streepje (niet beschikbaar) getoond, nooit als 0, en onbekende kosten ook als streepje."
     }
   },
   "languageFeedback": {
@@ -7379,6 +7440,7 @@
     "outcomeLinked": "Gekoppeld. Je bent nu verbonden.",
     "outcomeAlreadyLinked": "Je bent al gekoppeld.",
     "outcomeNoInvitation": "Uitnodiging niet gevonden.",
+    "outcomeEmailUnverified": "Bevestig eerst je e-mail (pagina Netwerk) en accepteer daarna de uitnodiging.",
     "outcomeNoWorker": "Je werknemersprofiel is nog niet gereed.",
     "outcomeError": "Accepteren is niet gelukt. Probeer het opnieuw.",
     "outcomeNeedsMigration": "De actie kon niet worden voltooid. Probeer het opnieuw."
@@ -7658,6 +7720,14 @@
         "doorCalendar": "Deze week in de kalender",
         "doorJournal": "Alle registraties in het werklogboek",
         "doorCv": "Levend cv"
+      },
+      "world": {
+        "sceneLabel": "De werkwereld van deze persoon: werk, vaardigheden, registraties, geschiedenis en wat er hierna kan komen. Dezelfde feiten staan hieronder.",
+        "empty": "Hier is nog niets vastgelegd.",
+        "directionDetail": "Gedeeld: {shared} · ontbreekt: {missing}",
+        "directionDetailNoGap": "Gedeeld: {shared} · niets ontbreekt",
+        "emptyNext": "Richtingen verschijnen zodra je werkregistraties minstens twee vaardigheden onderbouwen.",
+        "allDetails": "Alles op de kaart"
       }
     }
   },
@@ -8409,6 +8479,7 @@
     "skillFit": "{matched}/{total} vereiste vaardigheden, {confirmed} door manager bevestigd",
     "evidence": "Bewijs — bevestigd: {confirmed} · journaal: {journal} · zelf opgegeven: {self}",
     "confirmedWork": "Bevestigd door werk: {work} van {matched} passende vaardigheden (herhaaldelijk: {repeated})",
+    "historySignal": "Genoemd in door organisaties aangeleverde geschiedenis: {history} van {matched} passende vaardigheden (een signaal, geen verificatie)",
     "evidenceNone": "Niet bevestigd",
     "experienceYearsValue": "{years, plural, one {# jaar} other {# jaar}}",
     "shortlistError": "Opslaan is niet gelukt. Probeer opnieuw.",
@@ -8565,6 +8636,7 @@
     },
     "pool": {
       "factsUnreadable": "Een deel van wat deze mensen hebben vastgelegd kon zojuist niet worden gelezen, dus deze volgorde is niet betrouwbaar. Niemand wordt hier met minder getoond dan hij heeft — de feiten achter de vergelijking ontbreken simpelweg. Laad zo meteen opnieuw.",
+      "historyUnavailable": "De door organisaties aangeleverde geschiedenis kon nu niet worden gelezen en wordt daarom niet getoond. Dat betekent niet dat er geen is, en de volgorde hierboven hangt er niet van af.",
       "capped": "Niet iedereen is vergeleken. Er passen meer zichtbare werknemers bij deze vraag dan in één lijst passen, dus zijn eerst de {count} opgehaald van wie vaardigheden, beroep en land het beste aansluiten, niet de nieuwste registraties. Maak de vraag specifieker zodat de juiste mensen worden vergeleken.",
       "complete": "Alle {count} zichtbare werknemers zijn met deze vraag vergeleken."
     },
@@ -8652,6 +8724,7 @@
       "openTo": "Ook open voor: {countries}",
       "skillCount": "{matched} van {total} vereiste vaardigheden",
       "nameHidden": "Naam en contactgegevens verschijnen pas wanneer de persoon dat toestaat.",
+      "appliedToYou": "Heeft gereageerd op deze vraag — naam en foto horen bij de reactie. Telefoon en e-mail blijven verborgen.",
       "skillUnknown": "Geen vaardigheden opgegeven · nodig: {total}"
     }
   },
@@ -9481,7 +9554,8 @@
       "reviewed": "Het bedrijf heeft je interesse bekeken",
       "contacted": "Bedrijf markeerde: contact opgenomen",
       "contactEmployer": "Werkgever een bericht sturen",
-      "contactError": "Gesprek kon niet worden geopend. Probeer het opnieuw."
+      "contactError": "Gesprek kon niet worden geopend. Probeer het opnieuw.",
+      "identityConsent": "Als je reageert, ziet de werkgever van deze baan je naam en profielfoto."
     },
     "companyVerified": "Geverifieerd bedrijf",
     "structured": {
@@ -11689,7 +11763,22 @@
         "declined": "Uitnodiging afgewezen.",
         "no_worker_profile": "Maak eerst uw werkprofiel aan en accepteer daarna de uitnodiging.",
         "not_found": "Uitnodiging niet gevonden.",
-        "error": "Er ging iets mis. Probeer het opnieuw."
+        "error": "Er ging iets mis. Probeer het opnieuw.",
+        "email_unverified": "Bevestig eerst je e-mail en accepteer daarna de uitnodiging."
+      },
+      "verify": {
+        "title": "Bevestig je e-mail om uitnodigingen te zien die ernaar zijn gestuurd",
+        "body": "Uitnodigingen die aan een e-mailadres zijn gericht, worden alleen getoond aan wie dat postvak kan openen. Al het andere in je account werkt zoals het werkte; dit is alleen nodig om deze uitnodigingen te zien of te accepteren.",
+        "send": "Stuur me een eenmalige link",
+        "sending": "Bezig met verzenden…",
+        "sent": "We hebben een eenmalige link naar {email} gestuurd. Open hem op dit apparaat om af te ronden.",
+        "sentNoAddress": "We hebben een eenmalige link naar je e-mailadres gestuurd. Open hem op dit apparaat om af te ronden.",
+        "rateLimited": "Er is zojuist een link verstuurd. Wacht een minuut voordat je een nieuwe aanvraagt.",
+        "alreadyVerified": "Dit e-mailadres is al bevestigd. Ververs de pagina.",
+        "failed": "Die link heeft je e-mail niet bevestigd (mogelijk is hij oud of elders geopend). Je kunt een nieuwe aanvragen.",
+        "error": "We konden de link niet versturen. Probeer het later opnieuw.",
+        "intakeTitle": "Bevestig je e-mail om een eerdere inzending voort te zetten",
+        "intakeBody": "Als je via ons openbare formulier met dit adres een bedrijfsbehoefte hebt ingediend, bevestig dan het adres; dan tonen we die hier zodat je niets opnieuw hoeft te typen. Al het andere werkt zoals het werkte."
       }
     },
     "search": {
@@ -11885,6 +11974,7 @@
         "revoked": "Deze uitnodiging is ingetrokken.",
         "declined": "Uitnodiging afgewezen.",
         "no_worker_profile": "Maak eerst uw werkprofiel aan en accepteer daarna de uitnodiging.",
+        "email_mismatch": "Deze uitnodiging is gericht aan een ander e-mailadres.",
         "not_found": "Uitnodiging niet gevonden.",
         "error": "Er ging iets mis. Probeer het opnieuw.",
         "exhausted": "Alle plaatsen zijn bezet.",
@@ -11907,7 +11997,13 @@
       "agencyClient": "Een uitzendbureau nodigt je bedrijf uit om als klant samen te werken.",
       "agencyClientNext": "Na het accepteren verschijnt het verbindingsverzoek op de pagina Partners van je organisatie — bevestig het daar met je bedrijf. Tot dan wordt er niets gedeeld.",
       "addressedToOther": "Deze uitnodiging is gericht aan {email}. Je bent ingelogd met een ander adres, dus de verbinding kan niet vanuit dit account worden bevestigd — log in met het uitgenodigde adres en open deze link opnieuw.",
-      "switchAccount": "Uitloggen en van account wisselen"
+      "switchAccount": "Uitloggen en van account wisselen",
+      "emailMismatch": {
+        "title": "Deze uitnodiging is voor een ander e-mailadres",
+        "body": "Deze uitnodiging is verstuurd naar {email}. Je bent ingelogd met een ander adres, dus ze kan vanuit dit account niet worden getoond of beantwoord. Log in met het uitgenodigde adres en open deze link opnieuw.",
+        "bodyNoHint": "Deze uitnodiging is verstuurd naar een ander e-mailadres dan dat waarmee je bent ingelogd, dus ze kan vanuit dit account niet worden getoond of beantwoord. Log in met het uitgenodigde adres en open deze link opnieuw.",
+        "untouched": "Er is niets geaccepteerd of gewijzigd. De uitnodiging wacht nog steeds op de persoon aan wie ze is gestuurd."
+      }
     },
     "teamEnquiriesTitle": "Mijn aanvragen aan ploegen",
     "admin": {
@@ -14092,7 +14188,9 @@
         "chipDocument": "Document toevoegen"
       },
       "visibilityUnavailable": "Kon uw zichtbaarheid voor werkgevers niet controleren. Dat betekent niet dat die uit staat — open de instellingen.",
-      "chipVisibility": "Zichtbaarheid voor werkgevers"
+      "chipVisibility": "Zichtbaarheid voor werkgevers",
+      "voiceOpen": "Spreken",
+      "voiceBareYes": "Een uitgesproken “ja” is geen bevestiging. Bevestig met de knop op de kaart, of zeg wat u wilt doen."
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
@@ -16802,6 +16900,38 @@
     "error": "De wijziging kon niet worden opgeslagen en is teruggedraaid. Probeer het opnieuw.",
     "unavailable": "Meldingsinstellingen zijn momenteel niet beschikbaar."
   },
+  "cvOrganizationHistory": {
+    "title": "Door organisaties aangeleverde werkgeschiedenis",
+    "note": "Overgenomen uit de eigen registraties van de hier genoemde organisaties. Niet zelf verklaard en niet onafhankelijk geverifieerd.",
+    "untitled": "Door een organisatie geregistreerd werk",
+    "hoursTerm": "Uren",
+    "hoursRecorded": "{hours} u geregistreerd in {count, plural, one {# registratie} other {# registraties}}",
+    "hoursPeriod": "{hours} u opgegeven voor een periode, in {count, plural, one {# registratie} other {# registraties}}",
+    "contested": "Betwist door een daartoe bevoegde partij",
+    "more": "Nog {count, plural, one {# vermelding} other {# vermeldingen}} niet getoond"
+  },
+  "historyContext": {
+    "project": "Werkproject",
+    "place": "Locatie of werkpakket",
+    "client": "Opdrachtgever",
+    "otherParties": "Andere betrokkenen",
+    "capacity": "Functie",
+    "source": "Bron",
+    "suppliedBy": "Aangeleverd door {name}",
+    "reconstructed": "Gereconstrueerd uit eerdere registraties",
+    "recordedAt": "In het systeem vastgelegd",
+    "proofTitle": "Wat eronder ligt",
+    "proof": {
+      "SELF_DECLARED": "Opgegeven door de persoon",
+      "EVIDENCE_SUPPORTED": "Ondersteund door een registratie van een organisatie",
+      "EMPLOYER_CONFIRMED": "Bevestigd door de werkgever",
+      "CLIENT_ACCEPTED": "Geaccepteerd door de opdrachtgever",
+      "SUPERVISOR_CONFIRMED": "Bevestigd door een leidinggevende",
+      "INDEPENDENTLY_VERIFIED": "Onafhankelijk geverifieerd"
+    },
+    "attestedAs": "bevestigd als {role}",
+    "proofNote": "Elke regel is een apart feit. Een bevestiging door de aanleverende organisatie is geen oplevering door de opdrachtgever en geen betaling, en geen daarvan is een onafhankelijke verificatie, tenzij het er staat."
+  },
   "evidenceImport": {
     "eyebrow": "Historisch werkbewijs",
     "title": "Werkgeschiedenis importeren",
@@ -17412,7 +17542,27 @@
       "offer": "Koppeling aanbieden",
       "offered": "Koppeling aangeboden — de persoon beslist in zijn profiel",
       "error": "De koppeling kon niet worden aangeboden"
-    }
+    },
+    "claim": {
+      "label": "Nodig deze persoon uit om de eigen geschiedenis op te eisen",
+      "placeholder": "Hun e-mailadres",
+      "invite": "Uitnodiging versturen",
+      "sent": "Uitnodiging verstuurd. Zodra ze zich aansluiten, bied je hier de koppeling aan; zij beslissen in hun profiel.",
+      "created": "Uitnodiging aangemaakt. Deel deze link met hen:",
+      "deliveryFailed": "De uitnodiging is opgeslagen, maar de e-mail is niet verzonden. Deel deze link met hen:",
+      "hint": "Ze hebben eerst een account nodig voordat hun geschiedenis kan worden aangeboden. Er wordt niets gekoppeld tot ze akkoord gaan.",
+      "errors": {
+        "generic": "De uitnodiging kon niet worden verstuurd",
+        "duplicate_pending": "Er wacht al een uitnodiging op dit adres",
+        "rate_limited": "Te veel uitnodigingen. Probeer het zo opnieuw",
+        "limit_reached": "De uitnodigingslimiet is bereikt",
+        "not_authorized": "Je mag geen mensen uitnodigen voor deze organisatie",
+        "invalid_relationship": "De relatie van deze persoon kan niet via een uitnodiging worden aangeboden",
+        "invalid_email": "Voer één geldig e-mailadres in",
+        "needs_migration": "Nu niet beschikbaar"
+      }
+    },
+    "openHistory": "Open geschiedenis"
   },
   "peopleImport": {
     "alreadyThere": "{count} staan al op je lijst",
@@ -18058,7 +18208,8 @@
       "done": "{count} registraties toegewezen; {skipped} waren al toegewezen.",
       "refused": "Dit kon niet worden opgeslagen. Er is niets gewijzigd.",
       "person": "{hours} u, {count, plural, one {# registratie} other {# registraties}}"
-    }
+    },
+    "truncated": "Er zijn meer records dan één weergave leest. De {count} gelezen records worden getoond; totalen omvatten alleen die."
   },
   "workLifecycle": {
     "pending": "Nog niet",
@@ -18230,5 +18381,63 @@
       "skills": "{count, plural, one {# vaardigheid gebaseerd op jouw registraties} other {# vaardigheden gebaseerd op jouw registraties}}",
       "next": "Waar je heen kunt"
     }
+  },
+  "companyPerson": {
+    "eyebrow": "Historische persoonskaart",
+    "back": "Mensen",
+    "badge": "Aangeleverd door de organisatie, niet onafhankelijk geverifieerd",
+    "provenance": "Dit is wat {name} over deze persoon heeft vastgelegd. Niemand anders heeft het bevestigd, en het hangt er niet van af of de persoon een account heeft.",
+    "claim": {
+      "unlinked": "Nog niet gekoppeld aan een account — de geschiedenis staat hier al vastgelegd.",
+      "link_proposed": "Een koppeling met een account is aangeboden en wacht op het antwoord van de persoon — de geschiedenis staat hier al vastgelegd.",
+      "linked": "Gekoppeld aan het eigen account van de persoon.",
+      "openProfile": "Open de pagina van de persoon"
+    },
+    "unavailable": "De geschiedenis van deze persoon kon nu niet worden gelezen. Dat betekent niet dat er geen is.",
+    "empty": "Er zijn nog geen geschiedenisrecords voor deze persoon. Het lezen is gelukt — er zijn er geen.",
+    "stats": {
+      "records": "Registraties",
+      "hours": "Uren zoals opgegeven",
+      "period": "Periode"
+    },
+    "noHours": "Records zonder opgegeven uren: {count}. Onbekende uren tellen niet als nul.",
+    "undated": "Records zonder opgegeven datum: {count}. Ze blijven in de geschiedenis hieronder.",
+    "periodApart": "{hours} u van het totaal zijn periodetotalen, apart gehouden en nooit verdeeld over dagen of maanden.",
+    "noWorkObject": "Records die niet aan een bij het platform bekend project of bekende plek zijn gekoppeld: {count}. Ze blijven in deze geschiedenis onder hun bronlabel.",
+    "places": {
+      "title": "Per project of plek",
+      "none": "Project of plek niet vastgelegd",
+      "records": "Registraties: {count}"
+    },
+    "months": {
+      "title": "Opgegeven uren per maand",
+      "note": "Alleen records van één dag. Periodetotalen worden nooit verdeeld over dagen of maanden."
+    },
+    "skills": {
+      "title": "Vaardigheden waar de geschiedenis naar wijst",
+      "note": "Afgeleid van de geschiedenis van de organisatie, niet geverifieerd. Een vaardigheid staat er wanneer de organisatie die zelf noemde; het is geen uitspraak over de persoon.",
+      "records": "Registraties: {count}",
+      "empty": "In deze records is geen vaardigheid genoemd.",
+      "unavailable": "Vaardigheidssignalen konden nu niet worden gelezen. Dat betekent niet dat ze er niet zijn.",
+      "truncated": "Er zijn meer vaardigheidssignalen dan deze weergave leest."
+    },
+    "shown": "De nieuwste {shown} van {total} records worden getoond. De rest blijft vastgelegd.",
+    "truncated": "Er zijn meer records dan één weergave leest. De {count} gelezen records worden getoond; totalen omvatten alleen die."
+  },
+  "qualificationRecognitions": {
+    "title": "Erkenningen",
+    "subtitle": "Besluiten van onafhankelijke beoordelaars dat de competentie die u hebt getoond aan een formele eis voldoet. Dit is geen certificaat en geen controle van uw werk.",
+    "empty": "Nog geen erkenning vastgelegd.",
+    "unavailable": "Erkenningen kunnen nu niet worden gelezen. Dat is niet hetzelfde als er geen hebben.",
+    "kindDocument": "Documenttype",
+    "kindSkill": "Vaardigheid",
+    "kindProfession": "Beroep",
+    "stateCurrent": "Erkend, geldig",
+    "stateLapsed": "Erkend, geldigheid verlopen",
+    "stateNotRecognised": "Beoordeeld, niet erkend",
+    "stateRevoked": "Door de beoordelaar ingetrokken",
+    "stateNotYetValid": "Erkend, nog niet geldig",
+    "validFrom": "vanaf {date}",
+    "validUntil": "tot {date}"
   }
 }

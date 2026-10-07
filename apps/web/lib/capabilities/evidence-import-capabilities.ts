@@ -24,11 +24,15 @@ import {
   resolveTimeSemantics,
   resolveContextLabel,
   resolveRow,
+  stageImportSource,
   submitRows,
   withdrawImport,
   type EvidenceImportFailure,
 } from "@/lib/organization-evidence/import-core";
 import { resolveEvidenceOrganization } from "@/lib/organization-evidence/evidence-org-context";
+import { fetchSourceFile } from "@/lib/organization-evidence/fetch-source-file";
+import { detectHeaderLanguage } from "@/lib/organization-evidence/parse-tabular";
+import { readEvidenceSourceFile } from "@/lib/organization-evidence/read-source-file";
 import {
   sourceWorkRowSchema,
   MAX_ROWS_PER_SESSION,
@@ -394,6 +398,122 @@ const rowsSubmit: CapabilityDescriptor = {
         skipped: res.skipped,
         totalInSession: res.totalInSession,
         note: "Staged only. Call evidence.import.preview next; nothing is evidence yet.",
+      },
+    };
+  },
+};
+
+// ── evidence.import.stage_file ────────────────────────────────────────────
+
+/** The shape ChatGPT sends for a file argument (`openai/fileParams`): all four
+ *  properties are declared; `download_url` and `file_id` are always present. */
+const fileArgument = z
+  .object({
+    download_url: z.url().max(4000),
+    file_id: z.string().min(1).max(200),
+    mime_type: z.string().max(200).nullish(),
+    file_name: z.string().max(300).nullish(),
+  })
+  .strict();
+
+const stageFileInput = z
+  .object({
+    organization: z.string().min(1).max(200).optional(),
+    supplierRole: z.enum(SUPPLIER_ROLES),
+    /** Optional: derived from the source's own header words when absent. */
+    sourceLanguage: z.enum(locales).optional(),
+    notes: z.string().max(1000).nullish(),
+    file: fileArgument,
+  })
+  .strict();
+
+const fileStage: CapabilityDescriptor = {
+  id: "evidence.import.stage_file",
+  kind: "execute",
+  title: "Stage a spreadsheet or CSV into an evidence import",
+  description:
+    "Reads an uploaded .xlsx / .xlsm / .csv / .tsv (a ChatGPT file argument) with the SAME " +
+    "audited reader the web import uses — long-format sheets and monthly grids, header " +
+    "synonyms in the source languages, FACT vs DERIVED kept apart, a date nobody stated is " +
+    "never invented — and stages every row at its SOURCE POSITION into an import session. " +
+    "The session is keyed on the sha256 of the file's BYTES, never its name: the same file " +
+    "uploaded again resolves to the same session (`reused: true`) and stages nothing twice. " +
+    "Lines that could not become a row are counted in `notStaged`, never dropped silently. " +
+    "NOTHING here is evidence — call evidence.import.preview next, resolve what it asks, and " +
+    "commit through evidence.import.commit (the one commit path). Up to 5 MB and 20 000 rows. " +
+    "Use this instead of pasting rows into evidence.import.submit_rows.",
+  exposed: true,
+  annotations: appendWrite,
+  meta: { "openai/fileParams": ["file"] },
+  inputSchema: stageFileInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = stageFileInput.parse(input);
+    const fetched = await fetchSourceFile(parsed.file.download_url);
+    if (fetched.kind !== "ok") {
+      return {
+        ok: false,
+        code: fetched.reason === "too_large" ? "file_too_large" : "file_unreachable",
+        message:
+          fetched.reason === "too_large"
+            ? "The file is over 5 MB. Split it by year or sheet and stage each part."
+            : `The uploaded file could not be fetched (${fetched.reason}). Nothing was written.`,
+      };
+    }
+    const filename = parsed.file.file_name ?? "upload";
+    const read = await readEvidenceSourceFile(filename, fetched.bytes);
+    switch (read.kind) {
+      case "file-too-large":
+        return { ok: false, code: "file_too_large", message: "The file is over 5 MB. Split it and stage each part." };
+      case "file-unreadable":
+      case "unsupported-file":
+        return { ok: false, code: "file_unreadable", message: "Only .xlsx, .xlsm, .csv and .tsv files can be read. Nothing was written." };
+      case "month-not-stated":
+        return {
+          ok: false,
+          code: "month_not_stated",
+          message: "A monthly grid that never states its month would need every date invented. Nothing was written.",
+        };
+      case "nothing-parsed":
+        return { ok: false, code: "nothing_parsed", message: `No stageable rows were found (${read.detail}). Nothing was written.` };
+      case "ok":
+        break;
+    }
+    const sourceLanguage = parsed.sourceLanguage ?? detectHeaderLanguage(read.headers) ?? "en";
+    const staged = await stageImportSource(caller, {
+      session: {
+        organizationId: parsed.organization ?? null,
+        sourceKind: /\.(xlsx|xlsm)$/i.test(filename) ? "xlsx" : "csv",
+        supplierRole: parsed.supplierRole,
+        sourceLanguage,
+        sourceFilename: filename,
+        sourceReference: `chatgpt-file:${parsed.file.file_id}`,
+        sourceFingerprint: read.fingerprint,
+        sourceBytesSha256: read.bytesSha256,
+        notes: parsed.notes ?? null,
+        actorKind: "agent",
+        agentLabel: "chatgpt-file",
+      },
+      rows: read.rows,
+      positions: read.positions,
+      notStaged: read.notStaged,
+    });
+    if (staged.kind !== "ok") return fail(staged);
+    return {
+      ok: true,
+      data: {
+        session: staged.session,
+        reader: read.via,
+        sourceBytesSha256: read.bytesSha256,
+        rowsParsed: read.rows.length,
+        staged: staged.staged,
+        alreadyStaged: staged.alreadyStaged,
+        notStaged: staged.notStaged,
+        totalInSession: staged.totalInSession,
+        skipped: read.skipped.slice(0, 20),
+        skippedTotal: read.skipped.length,
+        note: staged.session.reused
+          ? "The same source was already staged: nothing was staged twice. Continue with evidence.import.preview."
+          : "Staged only. Call evidence.import.preview next; nothing is evidence yet.",
       },
     };
   },
@@ -971,6 +1091,7 @@ export const EVIDENCE_IMPORT_CAPABILITIES: readonly CapabilityDescriptor[] = [
   personCreate,
   sessionCreate,
   rowsSubmit,
+  fileStage,
   importPreview,
   rowResolve,
   labelResolve,

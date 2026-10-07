@@ -36,6 +36,7 @@ const EMPTY: VerifiedCvData = {
   recordedHoursTotal: null,
   recordedHoursConfirmed: null,
   organizationRecordedHours: null,
+  organizationHistory: null,
   privateDetails: {
     salaryMinEur: null,
     salaryMaxEur: null,
@@ -240,5 +241,54 @@ describe("the document is a view, not a second person", () => {
       expect(flat).not.toContain(absent);
     }
     expect(eu.present.educationAndTraining).toBe(true);
+  });
+});
+
+describe("organization-provided history in the EU export", () => {
+  const entry = {
+    key: "k",
+    organizationName: "Acme",
+    project: "Harbour Tower",
+    place: null,
+    clients: [],
+    relationshipKind: "employee",
+    sourceKind: "xlsx",
+    reconstructed: false,
+    dayHours: 14.5,
+    dayRecords: 2,
+    periodHours: null,
+    periodRecords: 0,
+    from: "2025-03-04",
+    to: "2025-03-05",
+    proof: ["EVIDENCE_SUPPORTED"],
+    attestedByRole: null,
+    contested: false,
+  } as const;
+
+  it("makes the Work experience block present on its own, without touching the person's own entries", () => {
+    const eu = buildEuFormatCv({ ...EMPTY, organizationHistory: [entry as never] });
+    expect(eu.present.workExperience).toBe(true);
+    expect(eu.workExperience).toEqual([]);
+    expect(eu.organizationHistory).toHaveLength(1);
+  });
+
+  it("an unreadable ledger (null) and a read-empty one both add nothing", () => {
+    expect(buildEuFormatCv(EMPTY).organizationHistory).toEqual([]);
+    expect(buildEuFormatCv({ ...EMPTY, organizationHistory: [] }).present.workExperience).toBe(false);
+  });
+
+  it("is resolved only by a caller that renders the group; otherwise it is omitted, not blank", () => {
+    const eu = buildEuFormatCv({ ...EMPTY, organizationHistory: [entry as never] });
+    expect(resolveEuFormatDocument(eu, R).organizationHistory).toEqual([]);
+    const doc = resolveEuFormatDocument(eu, {
+      ...R,
+      organizationHistory: (e) => ({
+        heading: e.project ?? "",
+        subheading: e.organizationName,
+        period: null,
+        note: null,
+      }),
+    });
+    expect(doc.organizationHistory[0].heading).toBe("Harbour Tower");
   });
 });

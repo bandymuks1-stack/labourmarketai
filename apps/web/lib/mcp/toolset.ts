@@ -19,6 +19,7 @@ export function toolDefsOf(capabilities: readonly CapabilityDescriptor[]): McpTo
     // Honest behavior hints declared per capability in review — clients can
     // tell reads from writes without parsing prose.
     annotations: c.annotations,
+    ...(c.meta ? { _meta: c.meta } : {}),
   }));
 }
 
@@ -37,7 +38,13 @@ export const SERVER_VERSION_CORE = "0.1.0";
  */
 export function toolsetVersionOf(defs: readonly McpToolDef[]): string {
   const digest = createHash("sha256")
-    .update(JSON.stringify(defs.map((d) => [d.name, d.description, d.inputSchema, d.annotations])))
+    // `_meta` joins the hashed tuple ONLY where a tool declares it, so the
+    // fingerprint of every tool published before it existed is unchanged.
+    .update(
+      JSON.stringify(
+        defs.map((d) => (d._meta ? [d.name, d.description, d.inputSchema, d.annotations, d._meta] : [d.name, d.description, d.inputSchema, d.annotations])),
+      ),
+    )
     .digest("hex")
     .slice(0, 8);
   return `${SERVER_VERSION_CORE}+t${defs.length}.${digest}`;

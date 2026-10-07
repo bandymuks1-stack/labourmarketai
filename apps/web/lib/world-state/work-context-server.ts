@@ -205,6 +205,7 @@ async function resolveInvitations(
       outcomeLinked: t("outcomeLinked"),
       outcomeAlreadyLinked: t("outcomeAlreadyLinked"),
       outcomeNoInvitation: t("outcomeNoInvitation"),
+      outcomeEmailUnverified: t("outcomeEmailUnverified"),
       outcomeNoWorker: t("outcomeNoWorker"),
       outcomeError: t("outcomeError"),
       outcomeNeedsMigration: t("outcomeNeedsMigration"),

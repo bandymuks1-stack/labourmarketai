@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
+import { Link } from "@/lib/i18n/navigation";
 import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
 import { personMonogram } from "@/lib/visual/avatar-monogram";
 import { Card } from "@/components/ui/Card";
@@ -11,6 +12,7 @@ import {
   RosterLinkOfferForm,
   type RosterLinkCandidate,
 } from "@/components/app/roster-link-offer-form";
+import { RosterClaimInviteForm } from "@/components/app/roster-claim-invite-form";
 import { resolveEvidenceOrganization } from "@/lib/organization-evidence/evidence-org-context";
 
 /**
@@ -229,6 +231,15 @@ export async function OrganizationRosterSection({
               >
                 {t(`linkState.${linkStateKey(p.linkState)}` as never)}
               </span>
+              {/* THE HISTORICAL PERSON CARD: what this organization recorded
+                  about the person is already a card here, linked account or not. */}
+              <Link
+                href={`/dashboard/company/people/${p.id}` as "/dashboard"}
+                className="text-sm font-medium text-brand-blue hover:underline"
+                data-testid={`organization-roster-history-${p.id}`}
+              >
+                {t("openHistory")} →
+              </Link>
               {/* The OFFER: the missing half of the link. A roster name reaches a
                   person's own history only after the manager offers the link
                   and the person accepts it on their profile. */}
@@ -242,6 +253,34 @@ export async function OrganizationRosterSection({
                     offer: t("offer.offer"),
                     offered: t("offer.offered"),
                     error: t("offer.error"),
+                  }}
+                />
+              ) : null}
+              {/* The FIRST step for a name with no account: the ordinary
+                  invitation. It links nothing; the offer above and the
+                  person's own answer still decide. */}
+              {linkStateKey(p.linkState) === "unlinked" ? (
+                <RosterClaimInviteForm
+                  personId={p.id}
+                  locale={locale}
+                  labels={{
+                    label: t("claim.label"),
+                    placeholder: t("claim.placeholder"),
+                    invite: t("claim.invite"),
+                    sent: t("claim.sent"),
+                    created: t("claim.created"),
+                    deliveryFailed: t("claim.deliveryFailed"),
+                    hint: t("claim.hint"),
+                    errors: {
+                      generic: t("claim.errors.generic"),
+                      duplicate_pending: t("claim.errors.duplicate_pending"),
+                      rate_limited: t("claim.errors.rate_limited"),
+                      limit_reached: t("claim.errors.limit_reached"),
+                      not_authorized: t("claim.errors.not_authorized"),
+                      invalid_relationship: t("claim.errors.invalid_relationship"),
+                      invalid_email: t("claim.errors.invalid_email"),
+                      needs_migration: t("claim.errors.needs_migration"),
+                    },
                   }}
                 />
               ) : null}

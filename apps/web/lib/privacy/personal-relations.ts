@@ -482,6 +482,19 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
     rlsNote:
       "Staged import lines about you are read through a dedicated subject-safe function that returns only your own lines (dates, hours, kinds, status) and leaves out the raw source line, the free-text description, the project and customer labels, and other people's details. Until that function is applied in production this relation is listed as unavailable; ask us and we will answer through a route that can redact other people's rows.",
   },
+  // AI run audit rows still linked to the person (retention class
+  // `subject_linkage`, de-linked after 90 days — see
+  // 20261003150800_ai_runs_retention_classes_v2). Read through a subject-safe
+  // function: metadata only, never the AI output or free-text routing reason.
+  // Until that function is applied in production this relation is listed as
+  // unavailable (never silently empty).
+  {
+    table: "ai_runs",
+    key: "profile_id",
+    rpc: "privacy_export_ai_runs_subject_v1",
+    rlsNote:
+      "AI runs made about you that are still linked to your account (the link is removed automatically after 90 days; the technical audit row stays without it). You receive what was run, when, by which provider and its review state; the AI's output text is not included. Until the dedicated read function is applied in production this relation is listed as unavailable; ask us and we will answer through a route that can redact.",
+  },
   // A project that names the person as its responsible person. The project
   // itself is the organization's record; the person is exported only because
   // they are named on it. Rides the existing projects RLS (owner / manager /
@@ -509,6 +522,16 @@ export type WithheldRelation = {
  * still withheld, because handing it over would hand over someone else too.
  */
 export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
+  {
+    table: "email_verifications_v1",
+    reason:
+      "proof that you control an email address (address, method, time) — held server-side as security evidence with no read path for your own session; whether your address is verified is shown to you in the product, and the evidence is available on request through the data-protection channel",
+  },
+  {
+    table: "email_verification_requests_v1",
+    reason:
+      "a pending request to prove an email address — short-lived security state with no read path for your own session",
+  },
   {
     table: "conversation_participants",
     reason:
@@ -545,11 +568,6 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
     table: "org_documents",
     reason:
       "documents an organization owns that happen to reference you — the organization is their subject, not you",
-  },
-  {
-    table: "ai_runs",
-    reason:
-      "AI run records — their inputs can quote another person, so they need a redaction pass before they can be handed over",
   },
   {
     table: "pilot_drafts",
