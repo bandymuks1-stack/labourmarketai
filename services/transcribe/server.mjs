@@ -53,7 +53,11 @@ const MAX_DURATION_S = Number(process.env.MAX_DURATION_SECONDS || 600);
 const WHISPER_TIMEOUT_MS = Number(process.env.WHISPER_TIMEOUT_MS || 300_000);
 const THREADS = Number(process.env.WHISPER_THREADS || 4);
 const RATE_LIMIT = Number(process.env.RATE_LIMIT_PER_MINUTE || 10);
-const CACHE_DIR = process.env.IDEMPOTENCY_CACHE_DIR || join(tmpdir(), "transcribe-cache");
+// The idempotency cache holds transcript text, so it must NOT default to the
+// shared, world-writable OS temp directory (CodeQL js/insecure-temporary-file).
+// Default: a private directory beside the service, created mode 0700. If it is
+// not writable the cache simply misses (it is an optimisation, never a dependency).
+const CACHE_DIR = process.env.IDEMPOTENCY_CACHE_DIR || join(process.cwd(), ".idempotency-cache");
 const CACHE_MAX_ENTRIES = 500;
 const CACHE_TTL_S = cacheTtlSeconds(process.env.IDEMPOTENCY_CACHE_TTL_SECONDS);
 const ALLOWED_ORIGINS = parseAllowedOrigins(process.env.ALLOWED_ORIGINS);
@@ -280,7 +284,7 @@ async function handleTranscribe(req, res) {
       processingMs: Date.now() - started,
     };
     if (cacheKey) {
-      await mkdir(CACHE_DIR, { recursive: true });
+      await mkdir(CACHE_DIR, { recursive: true, mode: 0o700 });
       await writeFile(join(CACHE_DIR, cacheKey), JSON.stringify(result)).catch(() => {});
       cachePrune();
     }
