@@ -45,6 +45,7 @@ describe("readSignalsForWorkers", () => {
     expect(out).toEqual({ kind: "ok", byWorker: new Map() });
     const people = calls.find((c) => c.table === "organization_people")!;
     expect(people.eq).toContainEqual(["link_state", "linked"]);
+    expect(people.eq).toContainEqual(["link_method", "worker_confirmed"]);
   });
 
   it("counts DISTINCT live records per worker and skill, labelled organization_provided", async () => {

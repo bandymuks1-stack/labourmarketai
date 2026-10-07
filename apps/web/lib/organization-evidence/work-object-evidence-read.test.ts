@@ -55,7 +55,11 @@ const row = (id: string, state = "ORGANIZATION_REPORTED", events: unknown[] = []
 describe("readEvidenceForWorkObject", () => {
   it("empty is ok with no records", async () => {
     const { c } = caller({ organization_evidence_records: { data: [] } });
-    expect(await readEvidenceForWorkObject(c, "w1")).toEqual({ kind: "ok", records: [] });
+    expect(await readEvidenceForWorkObject(c, "w1")).toEqual({
+      kind: "ok",
+      records: [],
+      truncated: false,
+    });
   });
 
   it("a failed read is unavailable, never an empty list", async () => {
@@ -83,7 +87,11 @@ describe("readEvidenceForWorkObject", () => {
 describe("readEvidenceForProject", () => {
   it("a project with no work objects is an honest empty", async () => {
     const { c } = caller({ work_objects: { data: [] } });
-    expect(await readEvidenceForProject(c, "p")).toEqual({ kind: "ok", records: [] });
+    expect(await readEvidenceForProject(c, "p")).toEqual({
+      kind: "ok",
+      records: [],
+      truncated: false,
+    });
   });
 
   it("a failed work-object read is unavailable", async () => {
@@ -98,6 +106,39 @@ describe("readEvidenceForProject", () => {
     });
     const res = await readEvidenceForProject(c, "p");
     expect(res.kind === "ok" && res.records.length).toBe(1);
+  });
+});
+
+describe("history beyond one page is never silently cut", () => {
+  it("reads past 200 (and past one 1000-row page) and says nothing was truncated", async () => {
+    const mk = (n: number, start: number) => Array.from({ length: n }, (_, i) => row(`r${start + i}`));
+    let page = 0;
+    const c = {
+      supabase: {
+        from: (t: string) => {
+          const b: Record<string, unknown> = {};
+          for (const m of ["select", "order", "limit", "eq", "in"]) b[m] = () => b;
+          b.range = () => {
+            if (t === "organization_evidence_records") page += 1;
+            return b;
+          };
+          b.then = (res: (v: Result) => unknown) =>
+            Promise.resolve({
+              data: t === "organization_evidence_records" ? (page === 1 ? mk(1000, 0) : mk(593, 1000)) : [{ id: "w1" }],
+              error: null,
+            }).then(res);
+          return b;
+        },
+      },
+      userId: "u",
+      locale: "en",
+    } as unknown as DomainCaller;
+    const res = await readEvidenceForWorkObject(c, "w1");
+    expect(res.kind).toBe("ok");
+    if (res.kind === "ok") {
+      expect(res.records.length).toBe(1593);
+      expect(res.truncated).toBe(false);
+    }
   });
 });
 
