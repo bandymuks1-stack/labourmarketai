@@ -13,6 +13,8 @@
 -- Two branches added to the existing three; nothing removed or loosened.
 -- Caller authority is NOT in this function: create_work_plan_entry_v1 still
 -- gates on manages_organization() before it ever asks about scope.
+-- RED by rule (redefines a SECURITY DEFINER function). Apply only via Supabase MCP apply_migration after human approval.
+-- @human-gate-approved
 -- Rollback: supabase/rollbacks/20261007140000_work_plan_scope_roster_engagement_v1.down.sql
 -- ============================================================================
 
