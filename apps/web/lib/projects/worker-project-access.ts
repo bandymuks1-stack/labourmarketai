@@ -8,6 +8,7 @@ import { listWorkerInstructions } from "@/lib/instructions/instructions";
 import { deriveWorkerProjectAsks, type WorkerProjectAsk } from "@/lib/projects/worker-project-asks";
 import {
   UNKNOWN_RECORDED_WORK,
+  getOwnRecognitionRows,
   getOwnRecordedWorkEvidence,
 } from "@/lib/qualification/capability-evidence";
 
@@ -283,6 +284,12 @@ export async function loadOwnProjectAsks(projectIds: readonly string[]): Promise
           () => UNKNOWN_RECORDED_WORK,
         )
       : null;
+  // SKL-9: the person's own recognition records. Empty today (the relation is
+  // an unapplied owner packet); `null` = unknown, which claims nothing.
+  const recognitions =
+    items.length > 0 && ownProfileId
+      ? await getOwnRecognitionRows(ownProfileId).catch(() => null)
+      : null;
   const asks =
     items.length > 0
       ? deriveWorkerProjectAsks(
@@ -299,6 +306,7 @@ export async function loadOwnProjectAsks(projectIds: readonly string[]): Promise
                 hasRecognizedEquivalence: false,
               }
             : null,
+          recognitions,
         )
       : new Map<string, WorkerProjectAsk[]>();
   const instructions = new Map<string, OwnProjectAsks["instruction"]>();

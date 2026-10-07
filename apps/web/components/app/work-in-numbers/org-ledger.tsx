@@ -2,6 +2,8 @@ import type { OrgLedgerView } from "@/lib/journal/work-in-numbers-view";
 import { formatMonthSpan, monthSpanOf } from "@/lib/organization-evidence/period-provenance";
 import { formatUtcDateRange } from "@/lib/time/display";
 
+import { HistoryContextBlock } from "@/components/app/history-context-block";
+
 import { fmtHours, type Translate } from "./format";
 
 /** A span a person chose, at the precision it has: "Jun – Nov 2025". */
@@ -135,6 +137,9 @@ export function OrgLedger({
                     hours: fmtHours(p.hours, locale),
                     span: monthSpanLabel(p.periodStart, p.periodEnd, locale),
                   })}
+              {/* The work behind the span (project, client, capacity, source,
+                  proof facts) - only what the record carries. */}
+              <HistoryContextBlock context={p.context} />
             </li>
           ))}
           {foldedPeriods > 0 && (

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Link } from "@/lib/i18n/navigation";
+import { Link, redirect } from "@/lib/i18n/navigation";
+import { matchProfessionByLabel } from "@/lib/vacancy-store/public-vacancy-profession-match";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
 import type { ActiveLocale } from "@/lib/i18n/config";
@@ -69,6 +70,19 @@ const INTRO: L = {
   nl: "Actuele vacatures uit officiële openbare arbeidsbronnen. Log in om de werkgever, de locatie en de sollicitatiewijze te zien.",
   de: "Aktuelle Stellen aus offiziellen öffentlichen Arbeitsmarktquellen. Melden Sie sich an, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
   pl: "Aktualne oferty pracy importowane z oficjalnych publicznych źródeł zatrudnienia. Zaloguj się, aby zobaczyć pracodawcę, lokalizację i sposób aplikowania.",
+};
+
+/** The intro for someone who is ALREADY signed in. The anonymous intro above
+ *  promises the employer, location and apply route "after you sign in" — said to
+ *  a signed-in worker it is a false instruction (the board never reads it as
+ *  such, but the sentence did). They get the same facts, one tap away. */
+const INTRO_MEMBER: L = {
+  en: "Live vacancies imported from official public employment sources. Open a vacancy to see the employer, the location and how to apply.",
+  lt: "Gyvos darbo vietos iš oficialių viešų užimtumo šaltinių. Atidaryk skelbimą — pamatysi darbdavį, vietovę ir kaip kandidatuoti.",
+  ru: "Актуальные вакансии из официальных публичных источников занятости. Откройте вакансию, чтобы увидеть работодателя, местоположение и способ подачи заявки.",
+  nl: "Actuele vacatures uit officiële openbare arbeidsbronnen. Open een vacature om de werkgever, de locatie en de sollicitatiewijze te zien.",
+  de: "Aktuelle Stellen aus offiziellen öffentlichen Arbeitsmarktquellen. Öffnen Sie eine Stelle, um Arbeitgeber, Ort und Bewerbungsweg zu sehen.",
+  pl: "Aktualne oferty pracy importowane z oficjalnych publicznych źródeł zatrudnienia. Otwórz ofertę, aby zobaczyć pracodawcę, lokalizację i sposób aplikowania.",
 };
 
 /** The anonymous search matches the OCCUPATION label (the field the card
@@ -322,6 +336,14 @@ export default async function JobsPage({
     slug,
     label: professionName(slug),
   })).sort((a, b) => a.label.localeCompare(b.label, active));
+  // A typed word that IS a catalogue profession in the reader's language
+  // ("valytojas") would otherwise search Swedish publisher labels and report a
+  // false zero. Resolve it through the same slug filter, in the URL, so reload,
+  // share and "clear filter" all behave as for a picked profession.
+  if (!profession && query && sp.saved !== "1") {
+    const mapped = matchProfessionByLabel(query, professionOptions);
+    if (mapped) redirect({ href: `/jobs?profession=${mapped}`, locale: active });
+  }
   const page = Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1);
   const wantsSaved = sp.saved === "1";
 
@@ -396,7 +418,7 @@ export default async function JobsPage({
         {H1[active]}
       </h1>
       <p className="mt-3 max-w-2xl text-sm text-text-muted sm:text-base">
-        {INTRO[active]}
+        {(user ? INTRO_MEMBER : INTRO)[active]}
       </p>
 
       {/* A PLAIN GET FORM, no client JS. The board is the crawler-facing
@@ -414,7 +436,7 @@ export default async function JobsPage({
           defaultValue={query}
           placeholder={SEARCH_LABEL[active]}
           maxLength={120}
-          className="min-w-0 flex-1 rounded-md border border-border-subtle bg-surface-1 px-3 py-2 text-sm"
+          className="min-w-0 basis-full rounded-md border border-border-subtle bg-surface-1 px-3 py-2 text-sm sm:flex-1 sm:basis-0"
         />
         {/* THE FILTER THAT LETS A WORKER SEARCH IN THEIR OWN LANGUAGE. The
             free-text box matches the publisher's own words, so on a supply

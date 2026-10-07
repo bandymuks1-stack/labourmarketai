@@ -19,6 +19,7 @@ const h = vi.hoisted(() => ({
   loadProjectRiskForChat: vi.fn(),
   loadWhoIsAvailableForChat: vi.fn(),
   loadEmployerOpeningBrief: vi.fn(),
+  getOrgDemandRollup: vi.fn(),
 }));
 
 vi.mock("@/lib/projects/stages", () => ({ listProjectStages: h.listProjectStages }));
@@ -26,6 +27,8 @@ vi.mock("@/lib/projects/projects", () => ({ listProjectAssignments: h.listProjec
 vi.mock("@/lib/conversation/project-risk", () => ({ loadProjectRiskForChat: h.loadProjectRiskForChat }));
 vi.mock("@/lib/conversation/capacity", () => ({ loadWhoIsAvailableForChat: h.loadWhoIsAvailableForChat }));
 vi.mock("@/lib/conversation/opening-brief", () => ({ loadEmployerOpeningBrief: h.loadEmployerOpeningBrief }));
+
+vi.mock("@/lib/company/org-demand-rollup", () => ({ getOrgDemandRollup: h.getOrgDemandRollup }));
 
 import { loadCompanyHomeField } from "@/lib/company/company-home-field";
 import {
@@ -69,6 +72,11 @@ function riskRow(overrides: Partial<ProjectRiskRow> & Pick<ProjectRiskRow, "proj
 }
 
 beforeEach(() => {
+  h.getOrgDemandRollup.mockReset();
+  h.getOrgDemandRollup.mockResolvedValue({
+    kind: "ok",
+    interest: { state: "ok", byStatus: { interested: 2, withdrawn: 0, reviewed: 0, contacted: 0 }, total: 2 },
+  });
   h.listProjectStages.mockReset();
   h.listProjectAssignments.mockReset();
   h.loadProjectRiskForChat.mockReset();
@@ -213,5 +221,16 @@ describe("carriedStages / carriedPeopleNames — the completeness rule (pure)", 
 
   it("the panel's roster slice always covers the home's chips — so a complete panel roster never forces a re-read", () => {
     expect(COMPANY_HOME_PEOPLE_CHIP_LIMIT).toBeLessThanOrEqual(PROJECT_ASSIGNMENT_LIMIT);
+  });
+});
+
+describe("opportunity from the one existing company-scoped demand read", () => {
+  it("counts people waiting from real rows, and is unknown (not zero) when the read fails", async () => {
+    h.loadProjectRiskForChat.mockResolvedValue({ kind: "empty" });
+    h.loadWhoIsAvailableForChat.mockResolvedValue({ kind: "empty" });
+    h.loadEmployerOpeningBrief.mockResolvedValue({ kind: "none" });
+    expect((await loadCompanyHomeField()).interest).toEqual({ kind: "ok", waiting: 2 });
+    h.getOrgDemandRollup.mockRejectedValue(new Error("down"));
+    expect((await loadCompanyHomeField()).interest).toEqual({ kind: "unknown" });
   });
 });

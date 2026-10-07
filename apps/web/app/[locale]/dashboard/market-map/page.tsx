@@ -5,15 +5,13 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { MarketMapShell } from "@/components/app/market-map-shell";
-import { MarketMapBase } from "@/components/app/market-map-base";
-import { LabourMarketWorldMap } from "@/components/app/labour-market-world-map";
 import { MarketMapCapture } from "@/components/app/market-map-capture";
 import { MarketMapOwnerReadiness } from "@/components/app/market-map-owner-readiness";
-import { MapLayersLegend } from "@/components/app/map-layers-legend";
-import { MarketMapEntityLayers } from "@/components/app/market-map-entity-layers";
-import { MarketMap } from "@/components/app/market-map/market-map";
-import { WorldDiscovery } from "@/components/app/market-map/world-discovery";
+import {
+  WorldDiscovery,
+  type StaticLayer,
+  type StaticLayerKey,
+} from "@/components/app/market-map/world-discovery";
 import { loadWorldView } from "@/lib/market-map/world-read";
 import {
   DEFAULT_WORLD_BOUNDS,
@@ -21,8 +19,7 @@ import {
 } from "@/lib/market-map/world-model";
 import { loadVacancyVolume } from "@/lib/market-map/vacancy-volume";
 import { getOwnSpatialCollections } from "@/lib/market-map/spatial-read";
-import { emptySpatialCollections } from "@/lib/market-map/spatial-entities";
-import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
+import { buildTerritoryView } from "@/lib/market-map/territory-view";
 import {
   listOwnPreferredLocations,
   getOwnLoginConsent,
@@ -32,16 +29,26 @@ import {
   getOwnAvailability,
   getOwnCapabilities,
 } from "@/lib/market-map/owner-readiness";
-import { FeatureNote } from "@/components/app/feature-note";
 import { getOwnAvatar } from "@/lib/profile/avatar";
-import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { personMonogram } from "@/lib/visual/avatar-monogram";
 
 /**
- * Live market map — FOUNDATION route (v1). Authenticated (under /dashboard,
- * which the middleware gates; the explicit getUser check is belt-and-suspenders
- * and mirrors the other dashboard rooms). Renders the honest map shell — no
- * fake markers, no external map API / key, no DB geo reads yet (none exist).
+ * THE ONE MAP (owner target: one map, not several).
+ *
+ * `WorldDiscovery` mounts the single canonical `MarketMap` (one Leaflet
+ * engine, one instance on this page). Everything else is a CONTROL or a LAYER
+ * of that one map, never a second map:
+ *
+ *  - location + radius: the compact control bar above the map; the saved
+ *    location and its radius are drawn on the same map;
+ *  - layers (filters): needs / people / projects from the viewport-bounded
+ *    world read, plus public vacancies and the owner company's territory as
+ *    layers of the same map — each offered ONLY when its data exists for this
+ *    viewer (no placeholders, no "coming soon" catalogue);
+ *  - open: each place leads to the opportunities list for that country.
+ *
+ * Authenticated (under /dashboard, which the middleware gates; the explicit
+ * getUser check is belt-and-suspenders). RLS owns visibility on every read.
  */
 export default async function MarketMapPage({
   params,
@@ -57,16 +64,9 @@ export default async function MarketMapPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const tNote = await getTranslations("featureNotes");
   const tMap = await getTranslations("marketMap");
-  // The vacancy layer reuses the market panel's profession +
-  // derived-occupation lexicon — one vocabulary per fact.
-  const tExplanation = await getTranslations("marketExplanation");
   const tProfessions = await getTranslations("professions");
-  // Marketplace loop reachability (M7): the OFFER half reuses the loop's own
-  // canonical labels (marketplace.hubOffer*) — no parallel copy source.
   const tMarketplace = await getTranslations("marketplace");
-  const tLayers = await getTranslations("mapLayers");
   const tRec = await getTranslations("marketRecognition");
   const tCountries = await getTranslations("labourMarket");
   // Owner-scoped current state for the capture forms (RLS — caller's own rows).
@@ -79,365 +79,158 @@ export default async function MarketMapPage({
       getOwnCapabilities(),
       supabase
         .from("profiles")
-        .select("full_name, email, active_role")
+        .select("full_name, email")
         .eq("id", user.id)
         .single(),
       getOwnAvatar(),
     ]);
-  // ONE unified market map. The active identity only changes which LAYER is
-  // focused — never whether a separate map exists. The personal "my person
-  // signal" marker stays visible whenever the user has a real location; the
-  // company is an additional layer/panel on the SAME map (incomplete when it
-  // has no confirmed location — never a fake company point, never the personal
-  // marker relabelled as the company).
-  // Three-entity spatial read (Sprint v2 §6): typed collections — person
-  // presence (aggregate-only, §20), company territory, project locations —
-  // composed from the caller's own RLS-scoped rows only.
-  const spatial = await getOwnSpatialCollections();
-  // THE REAL MARKET on the page named "market map" (this page previously
-  // mounted only self-signal surfaces, while the conversation registry's
-  // "advanced" link for the market result points here — a promise this page
-  // did not keep). Two clearly separated layers, both origin:"live":
-  //  - the WORLD (P8 subset, stage H2): the canonical demand / people /
-  //    projects reads, VIEWPORT-BOUNDED, clustered, capped at 60 places with
-  //    the folded remainder counted — first rendered here for the default
-  //    Europe viewport, then re-read by the client for the real viewport
-  //    on every pan/zoom (`lib/market-map/world-read.ts`); and
-  //  - public vacancy volume for the caller's occupation, projected from the
-  //    EXISTING authenticated `getPublicMarketFacts` aggregate.
-  const [initialWorld, vacancyVolume] = await Promise.all([
+
+  // The canonical demand / people / projects reads, viewport-bounded and
+  // clustered; first rendered for the default Europe viewport, then re-read by
+  // the client for the real viewport on every pan/zoom. Public vacancy volume
+  // (the caller's occupation) and the owner's company territory are read once
+  // and offered as further layers of the SAME map.
+  const [initialWorld, vacancyVolume, spatial] = await Promise.all([
     loadWorldView({
       bounds: DEFAULT_WORLD_BOUNDS,
       zoom: DEFAULT_WORLD_ZOOM,
       layer: "demand",
     }),
     loadVacancyVolume(),
+    getOwnSpatialCollections(),
   ]);
-  const spatialCollections = spatial?.collections ?? emptySpatialCollections();
-  const companyTerritorySource = spatial?.companyTerritorySource ?? "error";
-  const countryNames = Object.fromEntries(
-    MARKET_COUNTRIES.map((code) => [code, tCountries(`countryNames.${code}`)]),
-  );
-  const activeRole = profileRes.data?.active_role ?? null;
-  const isCompanyContext = activeRole === "company" || activeRole === "agency";
-  // §11: the map's company identity is the ACTIVE WORKSPACE's organization —
-  // workspace-aware (a person owning A and B sees the selected one), never
-  // the `companies.profile_id` singleton (which errors at 2 owned rows).
-  const employerCtx = isCompanyContext
-    ? await resolveEmployerCompanyContext()
-    : null;
-  const companyName =
-    employerCtx && employerCtx.kind === "ok"
-      ? employerCtx.organizationName.trim() || null
-      : null;
-  // The user's OWN person identity for the player-card marker (real data only).
-  // ALWAYS built — the personal layer is never suppressed by company context.
+
+  const countryName = (code: string) =>
+    tCountries.has(`countryNames.${code}`) ? tCountries(`countryNames.${code}`) : code;
+
+  const staticLayers: Partial<Record<StaticLayerKey, StaticLayer>> = {};
+  if (vacancyVolume.kind === "ok") {
+    const profession = tProfessions.has(vacancyVolume.data.professionSlug)
+      ? tProfessions(vacancyVolume.data.professionSlug)
+      : vacancyVolume.data.professionSlug;
+    staticLayers.jobs = {
+      view: vacancyVolume.data.view,
+      caption: tMap("vacancyVolume.scope", {
+        count: vacancyVolume.data.activeAds,
+        profession,
+        countries: vacancyVolume.data.countries.map(countryName).join(", "),
+      }),
+    };
+  }
+  const territories = spatial?.collections.companyTerritories ?? [];
+  if (territories.length > 0) {
+    const territoryView = buildTerritoryView(territories, countryName);
+    if (territoryView.regions.length > 0) {
+      staticLayers.territory = { view: territoryView };
+    }
+  }
+
+  // The user's OWN person identity for the own-location marker (real data only).
   const ownName =
     profileRes.data?.full_name?.trim() ||
     (profileRes.data?.email ? profileRes.data.email.split("@")[0] : "") ||
     (user.email ? user.email.split("@")[0] : "");
   // Neutral marker signals only (silent-trust rule): availability when the
-  // worker really set a status. No verified/confirmed-skills badge on the
-  // marker — confirmation stays an internal signal, never advertised here.
+  // worker really set a status. No verified/confirmed-skills badge on the marker.
   const availabilityLabel =
     availability.hasWorker && availability.state !== "unknown"
       ? tMap(`markerAvail.${availability.state}`)
       : null;
-  const mapIdentity = ownName
+  const identity = ownName
     ? {
         kind: "person" as const,
         name: ownName,
-        // Same monogram logic as the Player Card header so the map own-marker
-        // shows the identical initials ("Jonas Petraitis" → "JP", not "J").
         initial: personMonogram(ownName),
         avatarUrl: avatar.signedUrl,
         statusLabel: tMap("markerYou"),
         availabilityLabel,
       }
     : undefined;
-  // Own needs/demands carry NO coordinates (capture stores country/region only),
-  // so they are an honest "not on map yet" panel row, never fake points.
-  const needsCount = Array.isArray(demand) ? demand.length : 0;
-  // The person signal is honestly "active" ONLY when the user has a real saved
-  // location (a preferred_locations row, RLS-scoped own data). With no saved
-  // location they are NOT actually on the market map yet, so the row shows an
-  // honest "incomplete — add your location" state instead of always claiming an
-  // active signal. Existing data only; no fake marker, no schema.
-  const hasPreferredLocation = Array.isArray(preferred) && preferred.length > 0;
-  // Unified visible-now layer rows (real state only — no fake markers).
-  const visibleRows: {
-    label: string;
-    state: "active" | "incomplete" | "off-map";
-    hint?: string;
-    href?: string;
-  }[] = [
+
+  const links = [
     {
-      label: `${tLayers("personSignal")}${ownName ? `: ${ownName}` : ""}`,
-      state: hasPreferredLocation ? "active" : "incomplete",
-      hint: hasPreferredLocation ? undefined : tLayers("personIncomplete"),
-      // Dead-UI rule C: an incomplete row must lead to its fix — the
-      // location picker further down this page.
-      href: hasPreferredLocation ? undefined : "#market-map-base",
+      key: "opportunities",
+      href: "/dashboard/opportunities",
+      label: tMap("connections.opportunities"),
+    },
+    {
+      key: "marketplace",
+      href: "/dashboard/service-requests",
+      label: tMap("connections.marketplace"),
+    },
+    {
+      // Marketplace loop reachability (M7): the loop's OFFER half.
+      key: "services",
+      href: "/dashboard/services",
+      label: tMarketplace("hubOffer"),
+    },
+    {
+      key: "bookings",
+      href: "/dashboard/bookings",
+      label: tMap("connections.bookings"),
+    },
+    {
+      // Pre-search gate entry (the recognizer): answer the right questions
+      // BEFORE searching, so the market shows fewer but better options.
+      key: "recognize",
+      href: "/dashboard/market/recognize",
+      label: tRec("entry.cta"),
     },
   ];
-  if (isCompanyContext) {
-    visibleRows.push({
-      label: `${tLayers("companyLayer")}${companyName ? `: ${companyName}` : ""}`,
-      state: "incomplete",
-      hint: tLayers("companyIncomplete"),
-      href: `/${locale}/dashboard/company`,
-    });
-  }
-  if (needsCount > 0) {
-    visibleRows.push({
-      label: `${tLayers("needsLayer")} (${needsCount})`,
-      state: "off-map",
-      hint: tLayers("notOnMapYet"),
-    });
-  }
+
   return (
     <div className="flex flex-col gap-4">
       <TelemetryView
         event={FUNNEL_EVENTS.preferredLocationViewed}
         metadata={{ surface: "market_map" }}
       />
-      <header className="flex flex-col gap-1" data-testid="market-map-page-header">
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {tMap("pageTitle")}
-        </h1>
-        <p className="text-sm leading-relaxed text-text-secondary">
-          {tMap("pageLead")}
-        </p>
-      </header>
-      {/* Pre-search gate entry — answer the right questions BEFORE searching, so
-          the market shows fewer but better options. Opens the recognizer (PR
-          #561), which hands off to the existing real surfaces. */}
-      {/* Owner UX recovery v1: compact one-row entry (was a tall 3-line
-          card pushing the map down) — the map is the dominant surface. */}
-      <Link
-        href={"/dashboard/market/recognize" as "/dashboard"}
-        data-testid="market-recognize-entry"
-        className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 card-border bg-ink-900/40 px-3 py-2 transition-colors hover:border-brand-blue"
-        title={tRec("entry.body")}
+      <h1
+        className="font-display text-2xl font-bold tracking-tightest text-text-primary"
+        data-testid="market-map-page-header"
       >
-        <span className="flex min-w-0 flex-col">
-          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-            {tRec("entry.title")}
-          </span>
-          <span className="truncate text-xs leading-relaxed text-text-secondary">
-            {tRec("entry.body")}
-          </span>
-        </span>
-        <span className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-text-primary">
-          {tRec("entry.cta")}
-          <span aria-hidden className="text-text-muted">
-            →
-          </span>
-        </span>
-      </Link>
-      {/* ONE unified map — the dominant, app-like surface (tall on mobile). The
-          personal player-card marker is ALWAYS shown when a real location
-          exists; the active context only changes the focused layer/panel below,
-          never whether a separate map exists. */}
-      <MarketMapBase identity={mapIdentity} />
-      {/* ── THE WORLD ────────────────────────────────────────────────────
-          The canonical demand / people / projects layers on the canonical
-          <MarketMap>, viewport-bounded and clustered (≤60 places on screen,
-          the rest COUNTED — "N more places, zoom in"), FACT / DERIVED named
-          in words, honest per-layer states (error ≠ empty ≠ no known places),
-          and the same places as a list (design S). Replaces the unbounded
-          live-demand map this section used to draw; the conversation's own
-          market result (`loadMarketResult`) is untouched. */}
-      <WorldDiscovery initial={initialWorld} />
-      {/* Public vacancy volume for the caller's occupation — the
-          `getPublicMarketFacts` aggregate (imported public advertisements,
-          authenticated read) projected onto the same canonical map as its own
-          layer. The covered countries are DERIVED from the data and named in
-          the copy: the source's true current scope, never a product boundary.
-          No profession and no data render nothing; an advertised-nothing
-          market renders as words, never as an empty-looking map. */}
-      {vacancyVolume.kind === "ok" ? (
-        <section
-          className="flex flex-col gap-2"
-          data-testid="market-map-vacancy-volume"
-        >
-          <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
-            {tMap("vacancyVolume.title")}
-          </h2>
-          <p className="text-sm leading-relaxed text-text-secondary">
-            {tMap("vacancyVolume.scope", {
-              count: vacancyVolume.data.activeAds,
-              profession: tProfessions.has(vacancyVolume.data.professionSlug)
-                ? tProfessions(vacancyVolume.data.professionSlug)
-                : vacancyVolume.data.professionSlug,
-              countries: vacancyVolume.data.countries
-                .map((code) =>
-                  tCountries.has(`countryNames.${code}`)
-                    ? tCountries(`countryNames.${code}`)
-                    : code,
-                )
-                .join(", "),
-            })}
-          </p>
-          {vacancyVolume.data.derived ? (
-            <p
-              className="text-xs leading-relaxed text-text-muted"
-              data-testid="market-map-vacancy-volume-derived"
-            >
-              {tExplanation("derivedFromWork")}
-            </p>
-          ) : null}
-          <MarketMap view={vacancyVolume.data.view} mode="result" layer="jobs" />
-          {!vacancyVolume.data.rankingWindowCoversAll ? (
-            <p
-              className="text-xs leading-relaxed text-text-muted"
-              data-testid="market-map-vacancy-volume-window"
-            >
-              {tMap("vacancyVolume.window", {
-                window: vacancyVolume.data.rankingWindowAds,
-              })}
-            </p>
-          ) : null}
-        </section>
-      ) : vacancyVolume.kind === "empty" ? (
-        <div
-          className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-secondary"
-          data-testid="market-map-vacancy-volume-none"
-        >
-          <p>
-            {tExplanation("noneOpen", {
-              profession: tProfessions.has(vacancyVolume.professionSlug)
-                ? tProfessions(vacancyVolume.professionSlug)
-                : vacancyVolume.professionSlug,
-            })}
-          </p>
-          {/* The next canonical action from an empty pool: widen the work
-              directions the map searches for (2026-09-19). They are edited
-              inside the profile's `#profile-edit` disclosure, which
-              `DetailsHashOpener` opens on arrival (the old "work-directions"
-              anchor never existed — that link landed at the top). */}
-          <Link
-            href="/dashboard/profile#profile-edit"
-            className="inline-flex min-h-11 w-fit items-center text-sm font-medium text-brand-blue underline-offset-4 hover:underline"
-            data-testid="market-map-vacancy-volume-none-cta"
-          >
-            {tExplanation("noneOpenCta")} →
-          </Link>
-        </div>
-      ) : null}
-      {/* Unified layers panel — the real visible-now layers WITH state on the
-          SAME map: my person signal (active), the selected company (incomplete
-          when it has no confirmed location), own needs (off-map until
-          coordinates exist) + disabled future layers. No fake markers/data. */}
-      <MapLayersLegend
-        labels={{
-          title: tLayers("title"),
-          intro: tLayers("intro"),
-          visibleNow: tLayers("visibleNow"),
-          futureLayers: tLayers("futureLayers"),
-          futureBadge: tLayers("futureBadge"),
-          visibleRows,
-          futureItems: [
-            tLayers("items.workers"),
-            tLayers("items.companies"),
-            tLayers("items.teams"),
-            tLayers("items.opportunities"),
-            tLayers("items.workNeeds"),
-            tLayers("items.services"),
-            tLayers("items.rentals"),
-            tLayers("items.shops"),
-            tLayers("items.availability"),
-            tLayers("items.trust"),
-          ],
+        {tMap("pageTitle")}
+      </h1>
+
+      {/* ONE map: layers, location + radius, the map, its places. */}
+      <WorldDiscovery
+        initial={initialWorld}
+        ownLocation={{ identity }}
+        staticLayers={staticLayers}
+        placeLink={{
+          hrefTemplate: `/${locale}/dashboard/opportunities?country={country}`,
+          label: tMap("connections.opportunities"),
         }}
       />
-      {/* THREE spatial entities (Sprint v2 §6) — person presence (aggregate
-          only, §20-safe), company operating territory, project locations — as
-          three toggleable layers with distinct visual languages, never mixed
-          into one pin type. Data: owner-scoped typed collections only. */}
-      <MarketMapEntityLayers
-        collections={spatialCollections}
-        companyTerritorySource={companyTerritorySource}
-        countryNames={countryNames}
-      />
-      {/* Operating-layer bridge (§8.9): the map shows WHERE things are; the
-          real data is managed on these surfaces. Existing routes only, no fake
-          markers, mobile-safe tap targets. The legend (future layers) stays the
-          honest "not on map yet" signal; this strip is the actionable bridge. */}
-      <section
-        className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-3"
+
+      {/* Where the data behind the map is managed — existing routes only. */}
+      <nav
+        aria-label={tMap("pageTitle")}
+        className="flex flex-wrap gap-2"
         data-testid="market-map-connections"
       >
-        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {tMap("connections.title")}
-        </span>
-        <div className="grid gap-2 sm:grid-cols-2">
-          {[
-            {
-              key: "marketplace",
-              href: "/dashboard/service-requests",
-              label: tMap("connections.marketplace"),
-              note: tMap("connections.marketplaceNote"),
-            },
-            {
-              // Marketplace loop reachability (M7): the loop's OFFER half.
-              // Until this link the only door to /dashboard/services was the
-              // cross-link inside /dashboard/service-requests itself — a
-              // provider could not discover where to publish an offering.
-              // Existing route + existing i18n keys; every identity may offer
-              // services (registry: services.roles = ALL_ROLES).
-              key: "services",
-              href: "/dashboard/services",
-              label: tMarketplace("hubOffer"),
-              note: tMarketplace("hubOfferNote"),
-            },
-            {
-              key: "opportunities",
-              href: "/dashboard/opportunities",
-              label: tMap("connections.opportunities"),
-              note: tMap("connections.opportunitiesNote"),
-            },
-            {
-              key: "bookings",
-              href: "/dashboard/bookings",
-              label: tMap("connections.bookings"),
-              note: tMap("connections.bookingsNote"),
-            },
-          ].map((l) => (
-            <Link
-              key={l.key}
-              href={l.href as "/dashboard"}
-              data-testid={`market-map-connection-${l.key}`}
-              className="flex min-h-[3.25rem] flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue"
-            >
-              <span className="font-semibold">{l.label}</span>
-              <span className="text-xs text-text-muted">{l.note}</span>
-            </Link>
-          ))}
-        </div>
-      </section>
+        {links.map((l) => (
+          <Link
+            key={l.key}
+            href={l.href as "/dashboard"}
+            data-testid={`market-map-connection-${l.key}`}
+            className="inline-flex min-h-11 items-center rounded-md border border-ink-500 bg-ink-800/40 px-3 text-sm font-medium text-text-primary transition-colors hover:border-brand-blue"
+          >
+            {l.label}
+          </Link>
+        ))}
+      </nav>
 
-      {/* The map + legend above carry the signal visually. Everything below is
-          a secondary "Manage my locations & market layers" panel, collapsed by
-          default so the map dominates: it LEADS with the functional capture +
-          readiness tools, and the explanatory signal board / world overview are
-          demoted to the end (progressive disclosure, not the main carrier). */}
+      {/* The functional tools that feed the map's layers — manage your own
+          locations and readiness. Collapsed so the map dominates. */}
       <details className="group flex flex-col gap-4" data-testid="market-map-advanced">
-        <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary">
           <span className="font-mono text-meta uppercase tracking-label text-text-muted group-open:hidden">+</span>
           <span className="hidden font-mono text-meta uppercase tracking-label text-text-muted group-open:inline">−</span>
           {tMap("advanced")}
         </summary>
         <div className="mt-4 flex flex-col gap-4">
-          {/* Functional tools first — manage your real locations + readiness. */}
           <MarketMapCapture preferred={preferred} login={login} demand={demand} />
           <MarketMapOwnerReadiness availability={availability} capabilities={capabilities} />
-          {/* Explanatory surfaces demoted to the end — never the primary view. */}
-          <FeatureNote testId="feature-note-market-map">
-            {tNote("marketplaceMap")}
-          </FeatureNote>
-          <MarketMapShell />
-          <LabourMarketWorldMap />
         </div>
       </details>
     </div>

@@ -50,6 +50,12 @@ export interface ProjectAssignment {
   workerProfileId: string;
   name: string;
   assignedAt: string;
+  /** workers.id - lets the page ask the ONE photo rule (worker_avatar_path_v1)
+   *  whether this viewer may see the person's photo. */
+  workerId?: string | undefined;
+  /** A signed photo URL when the viewer has the real work relationship;
+   *  null/absent = initials. Filled by the page, never by this reader. */
+  avatarUrl?: string | null;
 }
 
 function migMissing(code?: string): boolean {
@@ -74,7 +80,55 @@ export async function readDuplicateProjectIds(
   return new Set(((data ?? []) as { id: string }[]).map((r) => r.id));
 }
 
-/** Projects the caller manages (owns_company → projects RLS). */
+/**
+ * Per-bucket ceiling of the manager project list. ACTIVE (draft/live/paused,
+ * or an unreadable status) and FINISHED (completed — including historical
+ * projects promoted from imported sites) are read by SEPARATE queries, so a
+ * long finished history can never evict a working project from the window.
+ * A ceiling is never silent: `countManagedProjects` returns the real totals
+ * and the page discloses when a bucket is shown in part.
+ */
+export const MANAGED_PROJECTS_BUCKET_LIMIT = 100;
+
+/**
+ * Real, uncapped counts of the caller's projects (RLS-scoped), split into
+ * working vs finished. Rows marked DUPLICATE are excluded, matching the list.
+ * Null = the count could not be read (never a fabricated zero).
+ */
+export async function countManagedProjects(): Promise<{
+  active: number;
+  archived: number;
+} | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const count = async (completed: boolean, excludeDuplicates: boolean) => {
+    let q = asAny(supabase).from("projects").select("id", { count: "exact", head: true });
+    q = completed ? q.eq("status", "completed") : q.or("status.is.null,status.neq.completed");
+    if (excludeDuplicates) q = q.or("record_state.is.null,record_state.neq.duplicate");
+    return q;
+  };
+  const both = async (excludeDuplicates: boolean) =>
+    Promise.all([count(false, excludeDuplicates), count(true, excludeDuplicates)]);
+  let [active, archived] = await both(true);
+  // record_state ships in a gated migration; until applied fall back to the
+  // status-only count (duplicates are then counted — same as the list).
+  if (active.error?.code === UNDEFINED_COLUMN || archived.error?.code === UNDEFINED_COLUMN) {
+    [active, archived] = await both(false);
+  }
+  if (active.error || archived.error) return null;
+  if (typeof active.count !== "number" || typeof archived.count !== "number") return null;
+  return { active: active.count, archived: archived.count };
+}
+
+/**
+ * Projects the caller manages (owns_company → projects RLS). ACTIVE projects
+ * come first and are read by their own query, then FINISHED ones by another:
+ * 150 finished + 10 active always lists all 10 active. Each bucket is capped
+ * at MANAGED_PROJECTS_BUCKET_LIMIT, newest first.
+ */
 export async function listManagedProjects(): Promise<ManagedProject[]> {
   const supabase = await createClient();
   const {
@@ -89,17 +143,31 @@ export async function listManagedProjects(): Promise<ManagedProject[]> {
     "id, title, city, country, status, responsible_profile_id, organization_id, organizations(display_name, legal_name)";
   const columnsV1 =
     "id, title, city, country, status, organization_id, organizations(display_name, legal_name)";
-  const run = (columns: string) =>
-    asAny(supabase)
-      .from("projects")
-      .select(columns)
+  const run = (columns: string, completed: boolean) => {
+    const q = asAny(supabase).from("projects").select(columns);
+    return (
+      completed ? q.eq("status", "completed") : q.or("status.is.null,status.neq.completed")
+    )
       .order("created_at", { ascending: false })
-      .limit(100);
-  let res = await run(columnsV2);
-  if (res.error && res.error.code === UNDEFINED_COLUMN) {
-    res = await run(columnsV1);
-  }
-  if (res.error) return [];
+      .limit(MANAGED_PROJECTS_BUCKET_LIMIT);
+  };
+  const bucket = async (completed: boolean) => {
+    let r = await run(columnsV2, completed);
+    if (r.error && r.error.code === UNDEFINED_COLUMN) {
+      r = await run(columnsV1, completed);
+    }
+    return r;
+  };
+  const [activeRes, finishedRes] = await Promise.all([bucket(false), bucket(true)]);
+  // The working list is the contract: if it cannot be read, nothing is shown
+  // (as before). An unreadable finished bucket degrades to working-only.
+  if (activeRes.error) return [];
+  const res = {
+    data: [
+      ...((activeRes.data ?? []) as unknown[]),
+      ...(finishedRes.error ? [] : ((finishedRes.data ?? []) as unknown[])),
+    ],
+  };
   // A project marked DUPLICATE of its canonical twin (20260930120000) is a
   // record fact, not work — it leaves the working list, never the database.
   // Unreadable marker (not applied) → nothing is hidden.
@@ -144,7 +212,7 @@ export async function listProjectAssignments(
     // every assignment and this list was always empty. The join only supplies
     // an optional display name that already has a fallback below.
     .select(
-      "assigned_at, worker:workers!inner(profile_id, display_name, profiles(full_name))",
+      "assigned_at, worker:workers!inner(id, profile_id, display_name, profiles(full_name))",
     )
     .eq("project_id", projectId)
     .eq("status", "active")
@@ -156,19 +224,21 @@ export async function listProjectAssignments(
   type Row = {
     assigned_at: string;
     worker: {
+      id: string | null;
       profile_id: string | null;
       display_name: string | null;
       profiles: { full_name: string | null } | null;
     } | null;
   };
   return ((res.data ?? []) as Row[])
-    .map((r) => {
+    .map((r): ProjectAssignment | null => {
       const w = r.worker;
       if (!w?.profile_id) return null;
       return {
         workerProfileId: w.profile_id,
         name: w.profiles?.full_name ?? w.display_name ?? w.profile_id.slice(0, 8),
         assignedAt: r.assigned_at,
+        workerId: w.id ?? undefined,
       };
     })
     .filter((x: ProjectAssignment | null): x is ProjectAssignment => x !== null);

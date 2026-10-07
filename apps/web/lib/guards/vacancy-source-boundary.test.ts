@@ -139,6 +139,11 @@ describe("(c) every vacancy provider is OWNER-GATED in source governance", () =>
     // docs/human-gates/arbetsformedlingen-activation-gate.md — approved
     // 2026-08-09 (staged: dry-run first, bounded import, no cap raises).
     ["arbetsformedlingen", "2026-08-09"],
+    // docs/human-gates/nav-activation-gate.md: production API access granted
+    // by NAV after written acceptance of its API terms (thread of
+    // 2026-08-10 .. 2026-09-22); recorded 2026-09-30. Still inert until the
+    // env switch AND the private token exist.
+    ["nav", "2026-09-30"],
   ]);
 
   it("each provider is either in the recorded owner-activated set or NOT active", () => {
@@ -206,7 +211,9 @@ describe("(c) every vacancy provider is OWNER-GATED in source governance", () =>
         if (endpoint.requiresApiKey) {
           expect(KEY_REQUIRING_OK.has(provider.key), label).toBe(true);
           expect(endpoint.authScheme, label).toMatch(/^(api-key|bearer)$/);
-          expect(OWNER_ACTIVATED.has(provider.key), label).toBe(false);
+          // A key-requiring provider stays inert without the key (the adapter
+          // refuses an anonymous call); activation additionally needs a
+          // recorded decision, which OWNER_ACTIVATED carries.
         }
       }
     }
@@ -554,7 +561,7 @@ describe("(g) the kill switch fails closed", () => {
         [`VACANCY_SOURCE_${provider.key.toUpperCase()}_ENABLED`]: "on",
       });
       expect(envOn.operational, provider.key).toBe(true);
-      if (provider.key !== "arbetsformedlingen") {
+      if (provider.key !== "arbetsformedlingen" && provider.key !== "nav") {
         expect(isExternalSourceActive(provider.key), provider.key).toBe(false);
       }
       const killed = evaluateVacancySwitch(provider.key, {

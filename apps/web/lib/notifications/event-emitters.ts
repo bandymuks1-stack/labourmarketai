@@ -85,6 +85,7 @@ import {
   emitNotificationEventInBackground,
   isNotificationStoreWriteBlocked,
   type NotificationEventInput,
+  type JournalReviewDecision,
   type NotificationEventType,
 } from "./events";
 import {
@@ -97,10 +98,19 @@ import {
   resolveChannelEnabled,
   type NotificationPreferenceRow,
 } from "./notification-preferences";
-import { maybeDispatchNotificationEmail } from "./email-dispatch";
+import {
+  maybeDispatchNotificationEmail,
+  type NotificationEmailDispatchOutcome,
+} from "./email-dispatch";
+import {
+  journalReviewEntityId,
+  messageReceivedEntityId,
+} from "./message-coalescing";
 import { deterministicEntityId } from "./deterministic-entity-id";
 import { isoWeekKey } from "../worker/weekly-intelligence-model";
 import { getWorkerCoreRow } from "../data/worker-core";
+import { createClient as createServerClient } from "@/lib/supabase/server";
+import { buildOwnWorkerContext } from "@/lib/opportunities/worker-subject";
 import { getWorkerJobRecommendations } from "@/lib/opportunities/recommendations";
 import { getWeeklyPersonalIntelligence } from "../worker/weekly-intelligence";
 
@@ -143,6 +153,9 @@ async function readPrefRowsFailOpen(
   const prefs = await readNotificationPreferencesFor(admin, recipientProfileId);
   return prefs.kind === "ok" ? prefs.rows : [];
 }
+
+/** The email dispatcher's outcome tag (`sent`, `send_failed`, ...). */
+export type EmailOutcomeKind = NotificationEmailDispatchOutcome["kind"];
 
 /** What `deliver` did — the cron route reports these honestly. */
 type DeliverOutcome =
@@ -199,13 +212,27 @@ export type NotificationEmitResult =
       readonly outcome: "written" | "duplicate";
       /** Distinct recipients that now hold a row. */
       readonly recipients: number;
+      /**
+       * What the email hop did, per recipient whose row was WRITTEN now (a
+       * `duplicate` re-sends nothing). Absent for emitters that have not
+       * adopted it. `channel_disabled` is the default (email is opt-in);
+       * `not_configured` / `no_recipient_email` / `render_failed` /
+       * `send_failed` each mean the recipient OPTED IN and the mail still
+       * did not go — never to be read as success.
+       */
+      readonly emailOutcomes?: readonly EmailOutcomeKind[];
     }
   | { readonly delivered: false; readonly reason: NotificationUndeliveredReason };
 
 /** One `deliver` outcome, as a result. */
-function resultFromOutcome(outcome: DeliverOutcome): NotificationEmitResult {
+function resultFromOutcome(
+  outcome: DeliverOutcome,
+  email?: EmailOutcomeKind | null,
+): NotificationEmitResult {
   if (outcome === "written" || outcome === "duplicate") {
-    return { delivered: true, outcome, recipients: 1 };
+    return email
+      ? { delivered: true, outcome, recipients: 1, emailOutcomes: [email] }
+      : { delivered: true, outcome, recipients: 1 };
   }
   if (outcome === "unexpected_error") return { delivered: false, reason: "insert_failed" };
   return { delivered: false, reason: outcome };
@@ -225,6 +252,13 @@ function combineResults(
         ? "written"
         : "duplicate",
       recipients: held.length,
+      ...(held.some((r) => r.delivered && r.emailOutcomes)
+        ? {
+            emailOutcomes: held.flatMap((r) =>
+              r.delivered ? (r.emailOutcomes ?? []) : [],
+            ),
+          }
+        : {}),
     };
   }
   const first = results[0];
@@ -270,25 +304,82 @@ async function deliver(
   admin: AdminClient,
   input: NotificationEventInput,
 ): Promise<DeliverOutcome> {
+  return (await deliverDetailed(admin, input)).outcome;
+}
+
+/**
+ * Greppable marker for "the recipient OPTED IN to email for this type and no
+ * email went". `channel_disabled` (the default), `sent` and `logged` never
+ * come through here, so a hit is always an opted-in person who was not
+ * mailed. Event type + bounded outcome tag only — never the address, never
+ * content.
+ */
+export const NOTIFICATION_EMAIL_UNDELIVERED =
+  "[notifications/email] opted-in recipient not mailed";
+
+function reportEmailOutcome(
+  eventType: string,
+  email: NotificationEmailDispatchOutcome,
+): void {
+  if (
+    email.kind === "channel_disabled" ||
+    email.kind === "sent" ||
+    email.kind === "logged"
+  ) {
+    return;
+  }
+  const detail = {
+    eventType,
+    outcome: email.kind,
+    ...(email.kind === "send_failed" ? { reason: email.reason } : {}),
+  };
+  // `not_configured` is the NAMED, expected state until the owner sets a mail
+  // provider (like `feature_unavailable`): recorded, but not a warning - a
+  // warning that fires on correct behaviour is one everybody learns to ignore.
+  if (email.kind === "not_configured") {
+    console.info(NOTIFICATION_EMAIL_UNDELIVERED, detail);
+    return;
+  }
+  console.warn(NOTIFICATION_EMAIL_UNDELIVERED, detail);
+}
+
+/**
+ * `deliver`, with the email hop's outcome KEPT instead of discarded. The
+ * outcome is returned (so emitters can surface it in their result) and every
+ * opted-in-but-not-mailed outcome is logged through one marker. `email` is
+ * null when the row was not written now (duplicate / suppressed / blocked):
+ * no email hop ran.
+ */
+async function deliverDetailed(
+  admin: AdminClient,
+  input: NotificationEventInput,
+): Promise<{
+  readonly outcome: DeliverOutcome;
+  readonly email: NotificationEmailDispatchOutcome | null;
+}> {
   // The store refused the last write (42501): the preference read only
   // exists to feed the insert, so neither runs while the block holds.
-  if (isNotificationStoreWriteBlocked()) return "write_blocked";
+  if (isNotificationStoreWriteBlocked()) {
+    return { outcome: "write_blocked", email: null };
+  }
   const prefRows = await readPrefRowsFailOpen(admin, input.recipientProfileId);
   if (!resolveChannelEnabled(prefRows, input.eventType, "in_app")) {
     // APPROVED silence: the recipient turned this type off themselves.
-    return "suppressed_preference";
+    return { outcome: "suppressed_preference", email: null };
   }
   const outcome = await emitNotificationEvent(admin, input);
   if (outcome.kind === "unexpected_error") {
     // `duplicate` and `feature_unavailable` are approved outcomes and stay
     // quiet; this line only fires on something real.
     notDelivered(input.eventType, "insert_failed", outcome.code);
-    return "unexpected_error";
+    return { outcome: "unexpected_error", email: null };
   }
+  let email: NotificationEmailDispatchOutcome | null = null;
   if (outcome.kind === "written") {
-    await maybeDispatchNotificationEmail(admin, input, prefRows);
+    email = await maybeDispatchNotificationEmail(admin, input, prefRows);
+    reportEmailOutcome(input.eventType, email);
   }
-  return outcome.kind;
+  return { outcome: outcome.kind, email };
 }
 
 async function workerProfileId(
@@ -1638,5 +1729,362 @@ export async function emitInvitationAcceptedNotification(input: {
     });
   } catch {
     undelivered("invitation_accepted_emit_failed");
+  }
+}
+
+/**
+ * MESSAGE RECEIVED (v10) - somebody wrote in a thread the recipient is in.
+ *
+ * RECIPIENT: every OTHER participant, never the author - you do not need a
+ * bell for your own sentence. The participant ids are read by the SEND PATH
+ * under the author's own session (`conversation_participants_select` admits
+ * co-participants); service_role holds no grant on that table or on
+ * `profiles`, so this emitter never reads them (see the header).
+ *
+ * COALESCING: one row per recipient per thread per window
+ * (`messageReceivedEntityId`) - a ten-message burst is one bell, the next
+ * window's message is a new one. METADATA: the thread's opaque id as a link
+ * target, nothing else. The text, the author's name and the attachments never
+ * reach the event.
+ */
+export interface MessageReceivedNotificationFacts {
+  readonly conversationId: string;
+  /** auth.uid() of the sender - never notified about their own message. */
+  readonly authorProfileId: string;
+  /** All participant profile ids as read under the sender's session (the
+   *  sender may be included; it is filtered here). */
+  readonly participantProfileIds: readonly string[];
+  /** Clock seam - epoch ms; defaults to now. */
+  readonly nowMs?: number;
+}
+
+export async function emitMessageReceivedNotifications(
+  facts: MessageReceivedNotificationFacts,
+): Promise<NotificationEmitResult> {
+  try {
+    if (facts.participantProfileIds.length === 0) {
+      return undeliveredResult("message_received", "recipient_unresolved");
+    }
+    const recipients = [
+      ...new Set(
+        facts.participantProfileIds.filter(
+          (id) => id && id !== facts.authorProfileId,
+        ),
+      ),
+    ];
+    // APPROVED silence: the author is the only participant.
+    if (recipients.length === 0) return { delivered: false, reason: "self_action" };
+
+    const admin = createAdminClient();
+    const entityId = messageReceivedEntityId(
+      facts.conversationId,
+      facts.nowMs ?? Date.now(),
+    );
+    const results: NotificationEmitResult[] = [];
+    for (const recipient of recipients) {
+      const d = await deliverDetailed(admin, {
+        recipientProfileId: recipient,
+        eventType: "message_received",
+        entityType: "conversation",
+        entityId,
+        metadata: { conversationId: facts.conversationId },
+      });
+      results.push(resultFromOutcome(d.outcome, d.email?.kind ?? null));
+    }
+    return combineResults(results, "message_received");
+  } catch (err) {
+    return undeliveredResult(
+      "message_received",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
+  }
+}
+
+/**
+ * JOURNAL REVIEW DECIDED (v10) - a manager confirmed / rejected / asked for
+ * changes on a worker's journal entry.
+ *
+ * RECIPIENT: the WORKER whose entry it is (workers.profile_id through the
+ * granted `workers` read) - the offline party who otherwise learns the
+ * outcome only by opening the journal. Never the reviewer: a manager
+ * reviewing their own entry is not told about their own tap. The reviewer's
+ * NOTE is free text and never reaches the event; metadata carries only the
+ * decision.
+ */
+export interface JournalReviewNotificationFacts {
+  readonly entryId: string;
+  /** `journal_entries.worker_id`, read by the review path under the reviewer's session. */
+  readonly workerId: string | null;
+  /** auth.uid() of the reviewer. */
+  readonly actorProfileId: string;
+  readonly decision: JournalReviewDecision;
+}
+
+export async function emitJournalReviewDecisionNotification(
+  facts: JournalReviewNotificationFacts,
+): Promise<NotificationEmitResult> {
+  try {
+    if (!facts.workerId) {
+      return undeliveredResult("journal_review_decided", "recipient_unresolved");
+    }
+    const admin = createAdminClient();
+    const recipient = await workerProfileId(admin, facts.workerId);
+    if (!recipient) {
+      return undeliveredResult("journal_review_decided", "recipient_unresolved");
+    }
+    // APPROVED silence: reviewing your own entry needs no telling.
+    if (recipient === facts.actorProfileId) {
+      return { delivered: false, reason: "self_action" };
+    }
+    const d = await deliverDetailed(admin, {
+      recipientProfileId: recipient,
+      eventType: "journal_review_decided",
+      entityType: "journal_entry",
+      entityId: journalReviewEntityId(facts.entryId, facts.decision),
+      metadata: { decision: facts.decision },
+    });
+    return resultFromOutcome(d.outcome, d.email?.kind ?? null);
+  } catch (err) {
+    return undeliveredResult(
+      "journal_review_decided",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
+  }
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+ * JOB ALERTS (stream N, 2026-10-01) — a REAL active job that fits what the
+ * worker said they want reaches them in the bell, once.
+ *
+ * ONE chain, two entrances, ONE pure judgement (lib/opportunities/
+ * job-alert-model.ts, which applies the match engine's own profession /
+ * country / pay rules) and ONE canonical read (searchPublicVacancies):
+ *
+ *   read-time  — the worker's own dashboard render (below): their OWN session
+ *                supplies profession + countries + salary under RLS, so it
+ *                needs no privilege beyond the emit grant production holds.
+ *   sweep      — `emitJobAlertNotificationsForCron`: reaches workers who have
+ *                not logged in. Needs service_role SELECT on worker_professions
+ *                + professions (RED grant, separate PR); until then it reports
+ *                `unavailable` and the read-time path carries the feature.
+ *
+ * CONSENT is the existing rule, unchanged: `deliver` honours a stored in-app
+ * opt-out for `job_alert`; e-mail goes out ONLY with an explicit
+ * (job_alert, email, enabled) row, through the existing dispatcher.
+ * EXACTLY ONCE: entity id = hash(ad id + content hash); the store's UNIQUE
+ * (recipient, dedupe_key) refuses the second send of an unchanged job.
+ * ═════════════════════════════════════════════════════════════════════════ */
+
+import {
+  jobAlertEntityId,
+  jobAlertFacts,
+  missingJobAlertCriteria,
+  type JobAlertCriteria,
+} from "@/lib/opportunities/job-alert-model";
+import {
+  loadJobAlertVacancies,
+  pairReaderFor,
+  type JobAlertPairReader,
+} from "@/lib/opportunities/job-alert-candidates";
+import type { StoredPublicVacancyV1 } from "@/lib/vacancy-store/vacancy-read";
+
+export interface JobAlertRunCounts {
+  written: number;
+  duplicates: number;
+  suppressed: number;
+  failures: number;
+}
+
+/** Deliver the selected ads to one person. Counts only. */
+async function announceJobs(
+  admin: AdminClient,
+  recipientProfileId: string,
+  vacancies: readonly StoredPublicVacancyV1[],
+): Promise<JobAlertRunCounts | "blocked"> {
+  const counts: JobAlertRunCounts = {
+    written: 0,
+    duplicates: 0,
+    suppressed: 0,
+    failures: 0,
+  };
+  for (const v of vacancies) {
+    const facts = jobAlertFacts(v);
+    if (!facts || !v.storeId) continue;
+    const outcome = await deliver(admin, {
+      recipientProfileId,
+      eventType: "job_alert",
+      entityType: "public_vacancy",
+      entityId: jobAlertEntityId(v.storeId, v.contentHash),
+      metadata: {
+        title: facts.title,
+        ...(facts.country ? { country: facts.country } : {}),
+        ...(facts.salary ? { salary: facts.salary } : {}),
+        vacancyId: facts.vacancyId,
+      },
+    });
+    if (outcome === "written") counts.written += 1;
+    else if (outcome === "duplicate") counts.duplicates += 1;
+    else if (outcome === "suppressed_preference") {
+      counts.suppressed += 1;
+      break; // opted out of the type: every further ad is suppressed too
+    } else if (outcome === "unexpected_error") counts.failures += 1;
+    else if (outcome === "feature_unavailable" || outcome === "write_blocked") {
+      return "blocked";
+    }
+  }
+  return counts;
+}
+
+/** Best-effort throttle for the read-time path: one evaluation per person per
+ *  window per warm instance. The dedupe key, not this map, is the authority. */
+const JOB_ALERT_READ_TIME_TTL_MS = 30 * 60 * 1000;
+const jobAlertLastRun = new Map<string, number>();
+
+/**
+ * Read-time entrance — fired from the worker's own dashboard render, detached
+ * like the weekly digest (an insert killed by the serverless freeze self-heals
+ * on the next visit: same deterministic ids).
+ */
+export function maybeEmitJobAlertsInBackground(): void {
+  void (async () => {
+    try {
+      if (isNotificationStoreWriteBlocked()) return;
+      const supabase = await createServerClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+      const last = jobAlertLastRun.get(user.id) ?? 0;
+      if (Date.now() - last < JOB_ALERT_READ_TIME_TTL_MS) return;
+      jobAlertLastRun.set(user.id, Date.now());
+
+      const ctx = await buildOwnWorkerContext(supabase, user.id);
+      if (!ctx) return;
+      const criteria: JobAlertCriteria = {
+        professionSlugs: ctx.subject.professionSlugs?.length
+          ? [...ctx.subject.professionSlugs]
+          : ctx.subject.professionSlug
+            ? [ctx.subject.professionSlug]
+            : [],
+        preferredCountries: [...(ctx.subject.preferredCountries ?? [])],
+        salaryMinEur: ctx.subject.salaryMinEur ?? null,
+      };
+      if (missingJobAlertCriteria(criteria).length > 0) return;
+
+      const nowIso = new Date().toISOString();
+      const vacancies = await loadJobAlertVacancies(
+        pairReaderFor(supabase, nowIso),
+        criteria,
+        nowIso,
+      );
+      if (vacancies.length === 0) return;
+      await announceJobs(createAdminClient(), user.id, vacancies);
+    } catch {
+      // Observability only — never the page. The next visit tries again.
+    }
+  })();
+}
+
+export type JobAlertCronResult =
+  | ({ readonly kind: "ran"; readonly candidates: number } & JobAlertRunCounts)
+  | { readonly kind: "unavailable"; readonly reason: string };
+
+/** Workers a single sweep considers. */
+const JOB_ALERT_CRON_WORKER_LIMIT = 2000;
+
+/**
+ * Sweep entrance — service role. Reads ONLY: workers (profile, preferred
+ * countries, salary), their catalogue professions, public ads. Returns counts,
+ * never ids or people. `unavailable` (with a reason code) when a read is
+ * refused — e.g. 42501 until the owner applies the SELECT grant — so a missing
+ * grant is a named state, not silence.
+ */
+export async function emitJobAlertNotificationsForCron(): Promise<JobAlertCronResult> {
+  try {
+    const admin = createAdminClient();
+    const nowIso = new Date().toISOString();
+
+    const wres = await admin
+      .from("workers")
+      .select("id, profile_id, preferred_countries, salary_min_eur")
+      .not("profile_id", "is", null)
+      .not("preferred_countries", "eq", "{}")
+      .limit(JOB_ALERT_CRON_WORKER_LIMIT);
+    if (wres.error) {
+      return { kind: "unavailable", reason: `workers_${wres.error.code ?? "read"}` };
+    }
+    const workers = (wres.data ?? []) as {
+      id: string;
+      profile_id: string;
+      preferred_countries: string[] | null;
+      salary_min_eur: number | string | null;
+    }[];
+
+    const professionsByWorker = new Map<string, string[]>();
+    for (let i = 0; i < workers.length; i += 100) {
+      const ids = workers.slice(i, i + 100).map((w) => w.id);
+      const pres = await admin
+        .from("worker_professions")
+        .select("worker_id, professions ( slug )")
+        .in("worker_id", ids);
+      if (pres.error) {
+        return {
+          kind: "unavailable",
+          reason: `worker_professions_${pres.error.code ?? "read"}`,
+        };
+      }
+      for (const r of (pres.data ?? []) as unknown as {
+        worker_id: string;
+        professions: { slug?: string | null } | { slug?: string | null }[] | null;
+      }[]) {
+        const p = Array.isArray(r.professions) ? r.professions[0] : r.professions;
+        const slug = p?.slug?.trim();
+        if (!slug) continue;
+        const list = professionsByWorker.get(r.worker_id) ?? [];
+        if (!list.includes(slug)) list.push(slug);
+        professionsByWorker.set(r.worker_id, list);
+      }
+    }
+
+    // One canonical read per distinct (country, profession) across ALL workers.
+    const cache = new Map<string, Promise<readonly StoredPublicVacancyV1[]>>();
+    const base = pairReaderFor(admin, nowIso);
+    const read: JobAlertPairReader = (country, professionSlug) => {
+      const key = `${country}:${professionSlug}`;
+      let hit = cache.get(key);
+      if (!hit) {
+        hit = base(country, professionSlug);
+        cache.set(key, hit);
+      }
+      return hit;
+    };
+
+    const total: JobAlertRunCounts = { written: 0, duplicates: 0, suppressed: 0, failures: 0 };
+    let candidates = 0;
+    for (const w of workers) {
+      const criteria: JobAlertCriteria = {
+        professionSlugs: professionsByWorker.get(w.id) ?? [],
+        preferredCountries: w.preferred_countries ?? [],
+        salaryMinEur:
+          w.salary_min_eur === null || w.salary_min_eur === undefined
+            ? null
+            : Number(w.salary_min_eur),
+      };
+      if (missingJobAlertCriteria(criteria).length > 0) continue;
+      candidates += 1;
+      const vacancies = await loadJobAlertVacancies(read, criteria, nowIso);
+      if (vacancies.length === 0) continue;
+      const res = await announceJobs(admin, w.profile_id, vacancies);
+      if (res === "blocked") return { kind: "unavailable", reason: "store_blocked" };
+      total.written += res.written;
+      total.duplicates += res.duplicates;
+      total.suppressed += res.suppressed;
+      total.failures += res.failures;
+    }
+    return { kind: "ran", candidates, ...total };
+  } catch {
+    return { kind: "unavailable", reason: "thrown" };
   }
 }

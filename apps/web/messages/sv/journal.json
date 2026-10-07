@@ -30,6 +30,11 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Välj engagemang…",
   "engagementAmbiguous": "Det här arbetet kan höra till mer än ett engagemang. Välj vilket innan du sparar.",
+  "project": "Projekt",
+  "projectChoose": "Välj projekt…",
+  "projectNone": "Inte projektarbete",
+  "projectAmbiguous": "Du är tilldelad flera projekt. Välj innan du sparar vilket projekt dessa timmar hör till (eller markera dem som inte projektarbete).",
+  "projectAuto": "Projekt: {name}",
   "unconfirmedTimeBlocked": "{count} registrerade varaktigheter väntar fortfarande på granskning och skulle inte sparas. Behåll eller ta bort dem först.",
   "entry": {
     "status": {
@@ -173,9 +178,35 @@
       "too_large": "Inspelningen är för stor (max 25 MB).",
       "too_long": "Inspelningen är för lång (max 10 minuter).",
       "unavailable": "Transkriberingsservern är inte tillgänglig just nu.",
-      "undecodable": "Ljudet kunde inte läsas — försök igen."
+      "undecodable": "Ljudet kunde inte läsas — försök igen.",
+      "rate_limited": "För många inspelningar på kort tid - vänta lite och försök igen.",
+      "token_expired": "Uppladdningssessionen har gått ut - försök igen.",
+      "unauthorized": "Din session har inte behörighet för tal - logga in igen.",
+      "service_unreachable": "Transkriptionsservern kunde inte nås. Kontrollera anslutningen och försök igen; inspelningen finns kvar på den här sidan."
     },
-    "permissionDenied": "Mikrofonåtkomst blockerades. Tillåt mikrofonen i webbläsarens inställningar och försök igen."
+    "permissionDenied": "Mikrofonåtkomst blockerades. Tillåt mikrofonen i webbläsarens inställningar och försök igen.",
+    "disclosureProvenance": "Den sparade posten markeras som dikterad med röst och granskad av dig.",
+    "state": {
+      "ready": "Redo. Välj talspråk och starta inspelningen.",
+      "permissionRequired": "Webbläsaren ber om mikrofontillstånd när du startar. Inget spelas in innan du tillåter det.",
+      "policyBlocked": "Webbplatsens säkerhetspolicy blockerar mikrofonen här. Röstinspelning är inte tillgänglig på den här sidan - du kan skriva posten som text.",
+      "unsupported": "Den här webbläsaren kan inte spela in ljud här (kräver en säker sida och stöd för mikrofoninspelning). Du kan ladda upp en ljudfil eller skriva text.",
+      "noDevice": "Ingen mikrofon hittades på den här enheten.",
+      "deviceBusy": "Mikrofonen används av en annan app. Stäng den och försök igen.",
+      "cancelled": "Inspelningen avbröts. Inget laddades upp eller sparades.",
+      "requesting": "Väntar på ditt tillstånd för mikrofonen...",
+      "interrupted": "Inspelningen pausades eftersom sidan var dold. Fortsätt när du är tillbaka.",
+      "interruptedKept": "Mikrofonen stannade, så inspelningen slutade tidigt. Det som spelades in är transkriberat nedan - kontrollera det.",
+      "uploading": "Laddar upp inspelningen..."
+    },
+    "language": {
+      "label": "Talspråk",
+      "auto": "Identifiera automatiskt",
+      "hint": "Välj språket du talar - det behöver inte vara samma som webbplatsens språk."
+    },
+    "recordAgain": "Spela in igen",
+    "announceStarted": "Inspelningen startade",
+    "announceMinutes": "{minutes} min inspelat"
   },
   "statusExplainer": "Hur används dina poster?",
   "exampleLine": "Till exempel: jag monterade gipsväggar, läste ritningar och arbetade med laserpass.",
@@ -243,7 +274,11 @@
     "sessionExpired": "Din session har gått ut. Logga in igen.",
     "noWorkerProfile": "Ingen arbetarprofil hittades. Öppna kontoinställningarna och aktivera arbetarrollen.",
     "engagementRequired": "Välj det arbetssammanhang (organisation eller projekt) som denna post tillhör.",
+    "projectNotAssignable": "Det valda projektet är inte tilldelat dig eller tillhör en annan organisation. Välj ett projekt i listan.",
     "notesRequired": "Beskriv vad du arbetade med — fritexten är kärnan i posten.",
+    "workDateRequired": "Välj den dag arbetet utfördes.",
+    "workDateInvalid": "Arbetsdatumet är inte ett giltigt datum.",
+    "workDateFuture": "Arbetsdatumet kan inte ligga i framtiden.",
     "quantityInvalid": "Mängden måste vara ett icke-negativt tal.",
     "unitSlugUnknown": "Den här enheten känns ännu inte igen: {units}. Välj en annan enhet eller försök igen senare.",
     "sourceDocumentInvalid": "Det angivna källdokumentet hittades inte bland dina dokument.",

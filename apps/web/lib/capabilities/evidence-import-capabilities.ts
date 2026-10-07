@@ -1,5 +1,7 @@
 import "server-only";
 
+import { createHash } from "node:crypto";
+
 import { z } from "zod";
 
 import type { ExecResult } from "@/lib/conversation/executor-contract";
@@ -10,6 +12,8 @@ import {
   SUPPLIER_ROLES,
   ATTESTATION_ROLES,
   attestRecord,
+  previewAttestation,
+  previewWithdrawal,
   buildPreview,
   committableRows,
   commitImport,
@@ -45,6 +49,10 @@ import {
 } from "@/lib/organization-evidence/commit-confirmation";
 
 import type { CapabilityCaller, CapabilityDescriptor } from "./contract";
+import {
+  mintCapabilityConfirmation,
+  verifyCapabilityConfirmation,
+} from "./confirmable";
 
 /**
  * ORGANIZATION EVIDENCE IMPORT — the AI/agent face of the SAME domain core the
@@ -839,7 +847,13 @@ const recordsList: CapabilityDescriptor = {
   },
 };
 
-// ── evidence.record.attest ────────────────────────────────────────────────
+// ── evidence.record.attest_draft / attest_confirm ─────────────────────────
+//
+// DRAFT -> CONFIRM, the canonical write contract (lib/capabilities/contract.ts
+// WRITE SEMANTICS), over the SAME `confirmable.ts` helpers the demand
+// close/reopen pair uses. Attesting stands the organization behind a record in
+// an append-only ledger: it is consequential, so a natural-language
+// instruction alone must never write it.
 
 const attestInput = z
   .object({
@@ -850,24 +864,99 @@ const attestInput = z
     note: z.string().max(1000).nullish(),
   })
   .strict();
+const attestConfirmInput = attestInput.extend({ confirmationToken: z.string().min(10) }).strict();
 
-const recordAttest: CapabilityDescriptor = {
-  id: "evidence.record.attest",
-  kind: "execute",
-  title: "Attest an evidence record in the organization's name",
+/** The NORMALIZED draft shape the token is hashed over - null-vs-absent is
+ *  decided here once, so draft and confirm hash identically. */
+function attestTokenInput(p: z.infer<typeof attestInput>): Record<string, unknown> {
+  return { recordId: p.recordId, actorRole: p.actorRole ?? null, note: p.note ?? null };
+}
+
+const ATTEST_CONFIRM_ID = "evidence.record.attest_confirm";
+
+const recordAttestDraft: CapabilityDescriptor = {
+  id: "evidence.record.attest_draft",
+  kind: "draft",
+  title: "Draft attesting an evidence record in the organization's name",
   description:
-    "Records the organization standing behind one evidence record, in the " +
-    "capacity the record was supplied in (its `supplierRole`) — omit " +
-    "`actorRole` to use it; any other role is refused. Attesting " +
-    "one's OWN work is allowed — a sole trader legitimately has nobody above " +
-    "them — and the result derives SELF_ATTESTED, which is permanent and never " +
-    "counts as independent verification. Independent verification is a " +
-    "different act, available only to a separately recorded party.",
+    "Previews the organization standing behind one evidence record, in the " +
+    "capacity the record was supplied in (its `supplierRole`) - omit " +
+    "`actorRole` to use it; any other role is refused. NOTHING is written. " +
+    "Attesting one's OWN work is allowed (a sole trader has nobody above " +
+    "them) and derives SELF_ATTESTED, which is permanent and never counts as " +
+    "independent verification; independent verification is a different act " +
+    "for a separately recorded party. Returns a one-time token bound to the " +
+    `record's CURRENT attestation trail. Confirm with ${ATTEST_CONFIRM_ID}.`,
   exposed: true,
-  annotations: appendWrite,
+  annotations: readOnly,
   inputSchema: attestInput,
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = attestInput.parse(input);
+    const pre = await previewAttestation(caller, { recordId: parsed.recordId, actorRole: parsed.actorRole ?? null });
+    if (pre.kind !== "ok") return fail(pre);
+    if (pre.attestedByCaller) {
+      return {
+        ok: false,
+        code: "already_attested",
+        message: "This record is already attested by this actor. Nothing was written and no token was issued.",
+      };
+    }
+    const token = mintCapabilityConfirmation({
+      actionId: ATTEST_CONFIRM_ID,
+      input: attestTokenInput(parsed),
+      userId: caller.userId,
+      stateFingerprint: `attest:${parsed.recordId}:${pre.attestedEventCount}:${pre.latestAttestedEventId ?? "none"}`,
+    });
+    return {
+      ok: true,
+      data: {
+        preview: {
+          recordId: parsed.recordId,
+          attestingAs: pre.supplierRole,
+          existingAttestations: pre.attestedEventCount,
+          recordWithdrawn: pre.withdrawn,
+          standing:
+            "Appends one `attested` event naming this organization. If the record's subject is the acting " +
+            "person the standing derives SELF_ATTESTED; either way it is NOT independent verification.",
+          independentlyVerified: false,
+        },
+        confirmationToken: token,
+        note: `Nothing was written. Confirming requires ${ATTEST_CONFIRM_ID} with this exact input and token.`,
+      },
+    };
+  },
+};
+
+const recordAttestConfirm: CapabilityDescriptor = {
+  id: ATTEST_CONFIRM_ID,
+  kind: "confirm",
+  title: "Confirm attesting the evidence record",
+  description:
+    "Verifies the one-time token against the exact drafted input, the caller " +
+    "and the record's CURRENT attestation trail (a replay or a changed record " +
+    "is refused), then appends the `attested` event as the caller and reports " +
+    "`independentlyVerified: false`. The same actor cannot attest a record twice.",
+  exposed: true,
+  annotations: appendWrite,
+  inputSchema: attestConfirmInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = attestConfirmInput.parse(input);
+    const pre = await previewAttestation(caller, { recordId: parsed.recordId, actorRole: parsed.actorRole ?? null });
+    if (pre.kind !== "ok") return fail(pre);
+    const verdict = verifyCapabilityConfirmation({
+      actionId: ATTEST_CONFIRM_ID,
+      token: parsed.confirmationToken,
+      input: attestTokenInput(parsed),
+      userId: caller.userId,
+      currentStateFingerprint: `attest:${parsed.recordId}:${pre.attestedEventCount}:${pre.latestAttestedEventId ?? "none"}`,
+    });
+    if (!verdict.ok) {
+      return {
+        ok: false,
+        code: "confirmation_rejected",
+        message: `Confirmation token rejected (${verdict.reason}). The record changed since the draft, or the token was already used. Draft again.`,
+      };
+    }
     const res = await attestRecord(caller, {
       recordId: parsed.recordId,
       actorRole: parsed.actorRole ?? null,
@@ -881,32 +970,111 @@ const recordAttest: CapabilityDescriptor = {
   },
 };
 
-// ── evidence.import.withdraw (the rollback path) ──────────────────────────
+// ── evidence.import.withdraw_draft / withdraw_confirm (the rollback path) ──
 
 const withdrawInput = z
   .object({ sessionId: z.uuid(), note: z.string().max(1000).nullish() })
   .strict();
+const withdrawConfirmInput = withdrawInput.extend({ confirmationToken: z.string().min(10) }).strict();
+const WITHDRAW_CONFIRM_ID = "evidence.import.withdraw_confirm";
 
-const importWithdraw: CapabilityDescriptor = {
-  id: "evidence.import.withdraw",
-  kind: "execute",
-  title: "Withdraw everything an import wrote",
+function withdrawTokenInput(p: z.infer<typeof withdrawInput>): Record<string, unknown> {
+  return { sessionId: p.sessionId, note: p.note ?? null };
+}
+
+/** Bound to exactly the records the sweep would withdraw (hashed - a large
+ *  import must not bloat the token) and the session's own lifecycle state. */
+function withdrawFingerprint(
+  sessionId: string,
+  pre: { pendingRecordIds: readonly string[]; sessionWithdrawn: boolean },
+): string {
+  const ids = [...pre.pendingRecordIds].sort();
+  const digest = createHash("sha256").update(ids.join(",")).digest("hex").slice(0, 24);
+  return `withdraw:${sessionId}:${ids.length}:${digest}:${pre.sessionWithdrawn}`;
+}
+
+const importWithdrawDraft: CapabilityDescriptor = {
+  id: "evidence.import.withdraw_draft",
+  kind: "draft",
+  title: "Draft withdrawing everything an import wrote",
   description:
-    "The recovery path. It DELETES NOTHING: every record gains an append-only " +
-    "`withdrawn` event, so the evidence and the reason both stay readable and " +
-    "the action itself is auditable. Reversible by reinstating. A session " +
-    "that committed nothing is still withdrawn (the act is recorded); a " +
-    "second withdrawal writes nothing and answers `alreadyWithdrawn: true`.",
+    "Previews the recovery path: how many records (and how many people's " +
+    "records) would gain an append-only `withdrawn` event. NOTHING is written " +
+    "and nothing is ever deleted - the evidence and the reason stay readable; " +
+    "reversible by reinstating. Returns a one-time token bound to exactly the " +
+    "records that would be withdrawn. When nothing is pending (already " +
+    `withdrawn) it says so and issues no token. Confirm with ${WITHDRAW_CONFIRM_ID}.`,
   exposed: true,
-  annotations: appendWrite,
+  annotations: readOnly,
   inputSchema: withdrawInput,
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = withdrawInput.parse(input);
-    const res = await withdrawImport(
-      caller,
-      parsed.sessionId,
-      parsed.note ?? null,
-    );
+    const pre = await previewWithdrawal(caller, parsed.sessionId);
+    if (pre.kind !== "ok") return fail(pre);
+    if (pre.nothingToDo) {
+      return {
+        ok: true,
+        data: {
+          preview: { sessionId: parsed.sessionId, recordsToWithdraw: 0, peopleAffected: 0 },
+          alreadyWithdrawn: true,
+          note: "Already withdrawn - nothing to confirm and no token was issued. Nothing was written.",
+        },
+      };
+    }
+    const token = mintCapabilityConfirmation({
+      actionId: WITHDRAW_CONFIRM_ID,
+      input: withdrawTokenInput(parsed),
+      userId: caller.userId,
+      stateFingerprint: withdrawFingerprint(parsed.sessionId, pre),
+    });
+    return {
+      ok: true,
+      data: {
+        preview: {
+          sessionId: parsed.sessionId,
+          recordsToWithdraw: pre.pendingRecordIds.length,
+          peopleAffected: pre.peopleAffected,
+          deletes: 0,
+        },
+        alreadyWithdrawn: false,
+        confirmationToken: token,
+        note: `Nothing was written. Confirming requires ${WITHDRAW_CONFIRM_ID} with this exact input and token.`,
+      },
+    };
+  },
+};
+
+const importWithdrawConfirm: CapabilityDescriptor = {
+  id: WITHDRAW_CONFIRM_ID,
+  kind: "confirm",
+  title: "Confirm withdrawing everything the import wrote",
+  description:
+    "Verifies the one-time token against the records that would be withdrawn " +
+    "NOW (a replay, or any change since the draft, is refused), then appends a " +
+    "`withdrawn` event per record and the session's `rolled_back` event as the " +
+    "caller. It DELETES NOTHING; the act is auditable and reversible.",
+  exposed: true,
+  annotations: appendWrite,
+  inputSchema: withdrawConfirmInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = withdrawConfirmInput.parse(input);
+    const pre = await previewWithdrawal(caller, parsed.sessionId);
+    if (pre.kind !== "ok") return fail(pre);
+    const verdict = verifyCapabilityConfirmation({
+      actionId: WITHDRAW_CONFIRM_ID,
+      token: parsed.confirmationToken,
+      input: withdrawTokenInput(parsed),
+      userId: caller.userId,
+      currentStateFingerprint: withdrawFingerprint(parsed.sessionId, pre),
+    });
+    if (!verdict.ok) {
+      return {
+        ok: false,
+        code: "confirmation_rejected",
+        message: `Confirmation token rejected (${verdict.reason}). The import changed since the draft, or the token was already used. Draft again.`,
+      };
+    }
+    const res = await withdrawImport(caller, parsed.sessionId, parsed.note ?? null);
     if (res.kind !== "ok") return fail(res);
     const already = res.outcome === "already_withdrawn";
     return {
@@ -916,8 +1084,8 @@ const importWithdraw: CapabilityDescriptor = {
         deleted: 0,
         alreadyWithdrawn: already,
         note: already
-          ? "Already withdrawn — nothing was written."
-          : "Nothing was deleted — each record carries a withdrawal event.",
+          ? "Already withdrawn - nothing was written."
+          : "Nothing was deleted - each record carries a withdrawal event.",
       },
     };
   },
@@ -925,28 +1093,111 @@ const importWithdraw: CapabilityDescriptor = {
 
 // ── evidence.record.correct / evidence.session.correct_date_provenance ────
 
-const recordCorrect: CapabilityDescriptor = {
-  id: "evidence.record.correct",
-  kind: "execute",
-  title: "Correct a committed evidence record (insert-only)",
+// Both correction writes are draft -> confirm pairs (the MCP write contract:
+// only `confirm` may write). The draft evaluates EVERY refusal the confirm
+// would (dry run) and writes nothing; the confirm re-checks the token against
+// the exact input and the correction's current state, then writes.
+
+const CORRECT_CONFIRM_ID = "evidence.record.correct_confirm";
+const correctConfirmInput = correctionInputSchema.and(z.object({ confirmationToken: z.string().min(10) }));
+
+function correctTokenInput(p: z.infer<typeof correctionInputSchema>): Record<string, unknown> {
+  return JSON.parse(JSON.stringify(p)) as Record<string, unknown>;
+}
+
+function correctFingerprint(
+  recordId: string,
+  changed: { readonly derived: readonly string[]; readonly columns: readonly string[] },
+): string {
+  return `correct:${recordId}:${[...changed.derived].sort().join(",")}:${[...changed.columns].sort().join(",")}`;
+}
+
+const recordCorrectDraft: CapabilityDescriptor = {
+  id: "evidence.record.correct_draft",
+  kind: "draft",
+  title: "Draft correcting a committed evidence record (insert-only)",
   description:
-    "Corrects ONE committed record without touching it: the original is never edited or " +
-    "deleted. A replacement record is written (`correction_of` = the original, hash chained " +
-    "from it) and a `corrected` event (actor, reason, time, replacement) is appended to the " +
-    "original. Only the CURRENT record of a chain can be corrected (A -> B -> C); every " +
-    "effective reading — hours, counts, timelines — counts only the leaf, so the work is " +
+    "Previews correcting ONE committed record without touching it: the original is never " +
+    "edited or deleted. Confirming writes a replacement record (`correction_of` = the original, " +
+    "hash chained from it) and appends a `corrected` event (actor, reason, time, replacement) " +
+    "to the original. Only the CURRENT record of a chain can be corrected (A -> B -> C); every " +
+    "effective reading - hours, counts, timelines - counts only the leaf, so the work is " +
     "never counted twice. `derivedPatch` adds or replaces DERIVED entries (each with method " +
     "and confidence): this is how a field the source never stated stops being reported as a " +
     "source FACT. `overrides` may restate the date/period, hours, object or place label; the " +
     "person, work text and source line can never change. `carryAttestation` re-attests the " +
     "replacement as the acting organization, only when the original's attestation stands and " +
-    "no content field changed. Idempotent: repeating the same correction writes nothing new. " +
-    "A withdrawn record is reinstated first. Requires authority over the record's organization.",
+    "no content field changed. NOTHING is written by this step. Returns a one-time token; " +
+    `confirm with ${CORRECT_CONFIRM_ID}. Requires authority over the record's organization.`,
   exposed: true,
-  annotations: appendWrite,
+  annotations: readOnly,
   inputSchema: correctionInputSchema,
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = correctionInputSchema.parse(input);
+    const res = await correctRecord(caller, parsed, { dryRun: true });
+    if (res.kind !== "ok") return fail(res);
+    if (res.idempotent) {
+      return {
+        ok: false,
+        code: "already_corrected",
+        message: "This exact correction already exists. Nothing was written and no token was issued.",
+      };
+    }
+    const token = mintCapabilityConfirmation({
+      actionId: CORRECT_CONFIRM_ID,
+      input: correctTokenInput(parsed),
+      userId: caller.userId,
+      stateFingerprint: correctFingerprint(parsed.recordId, res.changed),
+    });
+    return {
+      ok: true,
+      data: {
+        preview: {
+          recordId: parsed.recordId,
+          changed: res.changed,
+          standing:
+            "Writes a replacement record and a `corrected` event; the original is unchanged and is marked corrected.",
+        },
+        confirmationToken: token,
+        note: `Nothing was written. Confirming requires ${CORRECT_CONFIRM_ID} with this exact input and token.`,
+      },
+    };
+  },
+};
+
+const recordCorrectConfirm: CapabilityDescriptor = {
+  id: CORRECT_CONFIRM_ID,
+  kind: "confirm",
+  title: "Confirm correcting the evidence record",
+  description:
+    "Verifies the one-time token against the exact drafted input, the caller and the " +
+    "correction's current state (a replay or a record that changed is refused), then writes " +
+    "the insert-only correction. Idempotent: repeating the same correction writes nothing new.",
+  exposed: true,
+  annotations: appendWrite,
+  inputSchema: correctConfirmInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const all = correctConfirmInput.parse(input) as z.infer<typeof correctionInputSchema> & {
+      confirmationToken: string;
+    };
+    const { confirmationToken, ...rest } = all;
+    const parsed = correctionInputSchema.parse(rest);
+    const pre = await correctRecord(caller, parsed, { dryRun: true });
+    if (pre.kind !== "ok") return fail(pre);
+    const verdict = verifyCapabilityConfirmation({
+      actionId: CORRECT_CONFIRM_ID,
+      token: confirmationToken,
+      input: correctTokenInput(parsed),
+      userId: caller.userId,
+      currentStateFingerprint: correctFingerprint(parsed.recordId, pre.changed),
+    });
+    if (!verdict.ok) {
+      return {
+        ok: false,
+        code: "confirmation_rejected",
+        message: `Confirmation token rejected (${verdict.reason}). The record changed since the draft, or the token was already used. Draft again.`,
+      };
+    }
     const res = await correctRecord(caller, parsed);
     if (res.kind !== "ok") return fail(res);
     return {
@@ -972,30 +1223,101 @@ const sessionDatesInput = z
     reason: z.string().trim().min(3).max(1000),
     /** Re-attest each replacement as the acting organization where the original's attestation stands. */
     carryAttestation: z.boolean().optional(),
-    /** false (default) = a dry run that only counts; true writes the corrections. */
-    apply: z.boolean().optional(),
   })
   .strict();
+const SESSION_DATES_CONFIRM_ID = "evidence.session.correct_date_provenance_confirm";
+const sessionDatesConfirmInput = sessionDatesInput.extend({ confirmationToken: z.string().min(10) }).strict();
 
-const sessionDatesCorrect: CapabilityDescriptor = {
-  id: "evidence.session.correct_date_provenance",
-  kind: "execute",
-  title: "Reclassify reconstructed dates of an import session as DERIVED",
+function sessionDatesTokenInput(p: z.infer<typeof sessionDatesInput>): Record<string, unknown> {
+  return { sessionId: p.sessionId, reason: p.reason, carryAttestation: p.carryAttestation === true };
+}
+
+/** Bound to exactly what the sweep would act on right now. */
+function sessionDatesFingerprint(
+  sessionId: string,
+  r: { examined: number; candidates: number; alreadyClassified: number },
+): string {
+  return `datecorr:${sessionId}:${r.examined}:${r.candidates}:${r.alreadyClassified}`;
+}
+
+const sessionDatesCorrectDraft: CapabilityDescriptor = {
+  id: "evidence.session.correct_date_provenance_draft",
+  kind: "draft",
+  title: "Draft reclassifying reconstructed dates of an import session as DERIVED",
   description:
-    "For one import session: every committed record whose OWN source line says its calendar " +
-    "date was reconstructed (year + week + weekday — the `Date provenance` column) is " +
-    "corrected through evidence.record.correct so the date is recorded as DERIVED " +
-    "(`iso_week_weekday_reconstruction`, confidence 0.8), not as a stated source fact. A date " +
-    "the source explicitly stated stays a FACT, undated period records are untouched, and " +
-    "nothing is guessed: the rule re-reads what each line already said. DRY RUN BY DEFAULT — " +
-    "returns the candidate count; pass `apply: true` to write. Idempotent and resumable: a " +
-    "record already classified is not a candidate again.",
+    "For one import session: counts every committed record whose OWN source line says its " +
+    "calendar date was reconstructed (year + week + weekday - the `Date provenance` column). " +
+    "Confirming corrects each through the insert-only correction so the date is recorded as " +
+    "DERIVED (`iso_week_weekday_reconstruction`, confidence 0.8), not as a stated source fact. " +
+    "A date the source explicitly stated stays a FACT, undated period records are untouched, " +
+    "and nothing is guessed: the rule re-reads what each line already said. NOTHING is " +
+    `written by this step. Returns a one-time token; confirm with ${SESSION_DATES_CONFIRM_ID}.`,
   exposed: true,
-  annotations: appendWrite,
+  annotations: readOnly,
   inputSchema: sessionDatesInput,
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = sessionDatesInput.parse(input);
-    const res = await correctSessionDateProvenance(caller, parsed);
+    const res = await correctSessionDateProvenance(caller, { ...parsed, apply: false });
+    if (res.kind !== "ok") return fail(res);
+    const token =
+      res.candidates > 0
+        ? mintCapabilityConfirmation({
+            actionId: SESSION_DATES_CONFIRM_ID,
+            input: sessionDatesTokenInput(parsed),
+            userId: caller.userId,
+            stateFingerprint: sessionDatesFingerprint(parsed.sessionId, res),
+          })
+        : null;
+    return {
+      ok: true,
+      data: {
+        preview: {
+          examined: res.examined,
+          candidates: res.candidates,
+          alreadyClassified: res.alreadyClassified,
+        },
+        confirmationToken: token,
+        note:
+          res.candidates > 0
+            ? `Nothing was written. Confirming requires ${SESSION_DATES_CONFIRM_ID} with this exact input and token.`
+            : "Nothing to reclassify; nothing was written and no token was issued.",
+      },
+    };
+  },
+};
+
+const sessionDatesCorrectConfirm: CapabilityDescriptor = {
+  id: SESSION_DATES_CONFIRM_ID,
+  kind: "confirm",
+  title: "Confirm reclassifying the session's reconstructed dates",
+  description:
+    "Verifies the one-time token against the exact drafted input, the caller and what the " +
+    "sweep would act on now (a replay or a changed session is refused), then writes the " +
+    "insert-only corrections; originals are unchanged. Idempotent and resumable: a record " +
+    "already classified is not a candidate again.",
+  exposed: true,
+  annotations: appendWrite,
+  inputSchema: sessionDatesConfirmInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const { confirmationToken, ...rest } = sessionDatesConfirmInput.parse(input);
+    const parsed = sessionDatesInput.parse(rest);
+    const pre = await correctSessionDateProvenance(caller, { ...parsed, apply: false });
+    if (pre.kind !== "ok") return fail(pre);
+    const verdict = verifyCapabilityConfirmation({
+      actionId: SESSION_DATES_CONFIRM_ID,
+      token: confirmationToken,
+      input: sessionDatesTokenInput(parsed),
+      userId: caller.userId,
+      currentStateFingerprint: sessionDatesFingerprint(parsed.sessionId, pre),
+    });
+    if (!verdict.ok) {
+      return {
+        ok: false,
+        code: "confirmation_rejected",
+        message: `Confirmation token rejected (${verdict.reason}). The session changed since the draft, or the token was already used. Draft again.`,
+      };
+    }
+    const res = await correctSessionDateProvenance(caller, { ...parsed, apply: true });
     if (res.kind !== "ok") return fail(res);
     return {
       ok: true,
@@ -1006,9 +1328,7 @@ const sessionDatesCorrect: CapabilityDescriptor = {
         corrected: res.corrected,
         alreadyClassified: res.alreadyClassified,
         failed: res.failed,
-        note: res.applied
-          ? "Corrections written; originals unchanged. Read the session back with evidence.records.list."
-          : "Dry run: nothing was written. Call again with apply: true to write the corrections.",
+        note: "Corrections written; originals unchanged. Read the session back with evidence.records.list.",
       },
     };
   },
@@ -1027,8 +1347,12 @@ export const EVIDENCE_IMPORT_CAPABILITIES: readonly CapabilityDescriptor[] = [
   timeSemanticsResolve,
   importCommit,
   recordsList,
-  recordAttest,
-  importWithdraw,
-  recordCorrect,
-  sessionDatesCorrect,
+  recordAttestDraft,
+  recordAttestConfirm,
+  importWithdrawDraft,
+  importWithdrawConfirm,
+  recordCorrectDraft,
+  recordCorrectConfirm,
+  sessionDatesCorrectDraft,
+  sessionDatesCorrectConfirm,
 ];

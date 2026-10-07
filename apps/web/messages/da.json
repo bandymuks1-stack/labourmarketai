@@ -223,7 +223,10 @@
           "error": "[EN] Couldn't send. Please try again.",
           "progressHelper": "[EN] These steps show progress. Active actions are shown below.",
           "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month, up to 10) in your organization account.",
-          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan."
+          "errorOpenNeedLimitIndividual": "This organization has reached the 10 active positions of the Organization plan. Nothing was charged or changed. For more than 10, contact us for an individual plan.",
+          "openNeedUsage": "Active positions: {used} of {limit} used · {remaining} remaining",
+          "openNeedUsageUpgradeCta": "Activate the Organization plan",
+          "openNeedUsageIndividual": "You have reached the Organization plan limit. For more than the included positions, contact us for an individual plan."
         }
       },
       "account": {
@@ -292,7 +295,8 @@
         "journal": "Mit CV",
         "search": "[EN] Search",
         "advanced": "Avanceret styring",
-        "playerCard": "Mit kort"
+        "playerCard": "Min faglige profil",
+        "companyProfile": "Virksomhedsprofil"
       },
       "moreSection": {
         "title": "Detaljeret overblik",
@@ -389,6 +393,12 @@
         "event_demand_interest_reviewed": "En virksomhed har markeret din interesse som gennemgået",
         "event_weekly_digest": "Din ugentlige oversigt over arbejde og muligheder er klar",
         "event_saved_search_match": "En gemt søgning har nye resultater",
+        "event_job_alert": "Der er et nyt job, der passer til det, du søger",
+        "event_message_received": "Du har en ny besked",
+        "event_journal_review_decided": "Din journalpost er blevet gennemgået",
+        "event_journal_review_decided_approved": "Din journalpost er bekræftet",
+        "event_journal_review_decided_rejected": "Din journalpost er afvist",
+        "event_journal_review_decided_changes_requested": "Der er anmodet om ændringer i din journalpost",
         "event_weekly_digest_profile_completion": "For at vise dig passende job, bekræft hvilket arbejde du udfører",
         "event_weekly_digest_journal": "Ugens oversigt over din arbejdsjournal er klar"
       },
@@ -1142,10 +1152,10 @@
     "primaryBadge": "[EN] Primary",
     "directionAdded": "[EN] Direction added",
     "coreBadge": "[EN] Core",
-    "customComingSoon": "[EN] coming soon",
+    "customComingSoon": "Ikke tilgængelig lige nu.",
     "customPrompt": "[EN] Can't find your skill?",
     "empty": "[EN] No skills yet for this profession",
-    "importComingSoon": "[EN] CV import will be enabled in M2.",
+    "importComingSoon": "Ikke tilgængelig lige nu.",
     "importNotSaved": "[EN] Selected: {file}. The file isn't uploaded or stored yet.",
     "importPrompt": "[EN] Have an old CV? Upload PDF or DOCX",
     "loading": "[EN] Loading...",
@@ -1270,7 +1280,7 @@
         },
         {
           "desc": "[EN] Completed work strengthens your proof and readiness.",
-          "title": "[EN] Work, earn, level up"
+          "title": "[EN] Work, earn, build your record"
         }
       ]
     },
@@ -1532,7 +1542,7 @@
     "hub": {
       "matching": "[EN] Matching workbench",
       "market": "[EN] Market situation",
-      "league": "Landsliga"
+      "league": "Lande — arbejdsmarked"
     },
     "market": {
       "eyebrow": "[EN] Admin · Market",
@@ -1606,12 +1616,12 @@
       }
     },
     "league": {
-      "eyebrow": "Landsliga",
-      "title": "Arbejdsmarkedsliga",
+      "eyebrow": "Arbejdsmarked pr. land",
+      "title": "Arbejdsmarked pr. land",
       "subtitle": "Faglige tabeller pr. land — rigtige hold, tilgængelighed og markedstermometeret.",
       "methodNote": "En termometerværdi vises KUN dér, hvor en admin har indtastet et kildebelagt markedsgennemsnit, OG stikprøven af erklærede forventninger er mindst 2 personer. Alle andre steder siger cellen \"utilstrækkelige markedsdata\" — tabellen vurderer aldrig et menneske.",
       "back": "Tilbage til admin-hub",
-      "empty": "Ingen liga-data endnu — tabellerne kommer af sig selv, når arbejdere angiver deres fag.",
+      "empty": "Ingen data endnu — tabellerne kommer af sig selv, når arbejdere angiver deres fag.",
       "unknownCountry": "Land ikke angivet",
       "cellCount": "{n, plural, one {# fag} other {# fag}}",
       "availableNow": "ledige nu",
@@ -1643,7 +1653,7 @@
       "items": {
         "public_market_entry": "[EN] Public market entry",
         "user_identity": "[EN] User identity system",
-        "worker_profile_player_card": "[EN] Worker profile / player card",
+        "worker_profile_player_card": "[EN] Worker professional profile",
         "skill_intelligence": "[EN] Skill intelligence",
         "work_journal": "[EN] Work journal / real work records",
         "company_demand": "[EN] Company / demand system",
@@ -1663,9 +1673,9 @@
     "eyebrow": "[EN] MY DOCUMENTS",
     "title": "[EN] My documents",
     "subtitle": "[EN] What you have, what is missing, and the next step — per country.",
-    "preparing": "[EN] Document readiness is being prepared — it goes live once the document storage layer is reviewed and enabled. Nothing here is active yet.",
+    "preparing": "Ikke tilgængelig lige nu.",
     "disclaimer": "[EN] Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
-    "needsMigration": "[EN] The documents storage layer is not enabled in this environment yet.",
+    "needsMigration": "Ikke tilgængelig lige nu.",
     "noWorker": "[EN] Create your worker profile first — documents attach to it.",
     "error": "[EN] Could not load your documents.",
     "empty": "[EN] No documents recorded yet. Start with your CV and ID document.",
@@ -1684,6 +1694,7 @@
     "country": {
       "title": "[EN] What is missing for a country",
       "help": "[EN] Pick a destination country to see which documents it asks for.",
+      "mine": "[EN] Your preferred countries come first.",
       "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
       "next": "[EN] Next step: take care of — {doc}.",
       "ok": "[EN] All curated requirements for {country} are covered."
@@ -1711,7 +1722,7 @@
     "consent": {
       "title": "Hvad mit bureau må se",
       "explainer": "Hvis du slår dette til, ser DIT bureau kun tal på kategoriniveau om din dokumentparathed (gyldige / udløber snart / kræver opmærksomhed). Det ser aldrig dokumentindhold, filer, noter eller typer. Standard er fra; du kan slå det fra når som helst.",
-      "needsGate": "Samtykkelaget er under forberedelse — det aktiveres, når den godkendelseskrævende ændring er anvendt.",
+      "needsGate": "Ikke tilgængelig lige nu.",
       "onLabel": "Deling af aggregater: TIL",
       "offLabel": "Deling af aggregater: FRA",
       "onHint": "Dit bureau ser kun tal. Tryk for at slå fra.",
@@ -1829,7 +1840,7 @@
       "sections": {
         "action": "Dagens handling",
         "overview": "Uge & vækst",
-        "playerCard": "Spillerkort"
+        "playerCard": "Professionelt profil"
       }
     }
   },
@@ -1930,7 +1941,8 @@
         "paused": "På pause",
         "completed": "Afsluttet"
       },
-      "progressNone": "Ingen målbar fremgang endnu"
+      "progressNone": "Ingen målbar fremgang endnu",
+      "progressStages": "{done} af {total} faser markeret som færdige"
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# post venter på din bekræftelse} other {# poster venter på din bekræftelse}}",
@@ -1951,7 +1963,8 @@
       "label": "Aktive eller afsluttede projekter",
       "active": "Aktive",
       "archived": "Afsluttede",
-      "empty": "Ingen afsluttede projekter endnu."
+      "empty": "Ingen afsluttede projekter endnu.",
+      "partial": "Viser de seneste {shown} af {total}."
     }
   },
   "projectOps": {
@@ -1968,6 +1981,15 @@
       "noActivity": "Ingen poster endnu.",
       "emptyTeam": "Dette projekt har endnu intet hold — start draften og få de første folk på banen.",
       "emptyTeamCta": "Start draften",
+      "history": {
+        "title": "Tidligere arbejde på dette projekt",
+        "provenance": "Historik leveret af organisationen, importeret fra organisationens egne optegnelser. Ikke uafhængigt verificeret.",
+        "unavailable": "Tidligere arbejde kunne ikke læses lige nu. Det betyder ikke, at der intet er.",
+        "empty": "Der er ikke registreret tidligere arbejde leveret af organisationen for dette projekt.",
+        "personUnknown": "Person ikke angivet",
+        "hoursUnknown": "Timer ikke angivet",
+        "count": "{n} poster"
+      },
       "positionsTitle": "Manglende positioner",
       "positionsEmpty": "Modulet for positionsbehov er stadig under forberedelse — når det kommer, kan du her se, hvilke folk der mangler.",
       "openOps": "Åbn management-arenaen"
@@ -1986,6 +2008,7 @@
       "title": "Projektstyring",
       "progressLabel": "Fremgang",
       "progressNone": "Ingen målbar fremgang endnu",
+      "progressStages": "{done} af {total} faser markeret som færdige",
       "responsibleLabel": "Ansvarlig person",
       "responsibleNone": "Ikke angivet",
       "responsibleSave": "Gem",
@@ -2040,7 +2063,7 @@
     "demand": {
       "title": "Åben efterspørgsel",
       "humanNote": "\"Vi kan tilbyde\" er dit forslag til en forespørgsel — det endelige match registreres altid af et menneske på platformsiden.",
-      "needsGate": "Synlighed af åben efterspørgsel for bureauer er under forberedelse — den aktiveres, når den godkendelseskrævende ændring er anvendt.",
+      "needsGate": "Ikke tilgængelig lige nu.",
       "empty": "Ingen åbne forespørgsler lige nu.",
       "noRole": "Rolle ikke angivet",
       "teamSize": "{n} pers.",
@@ -2240,7 +2263,7 @@
     "external": {
       "sectionTitle": "Offentlige jobannoncer",
       "sectionNote": "Annoncer fra officielle offentlige arbejdsformidlinger. De udgives af arbejdsgiveren ved kilden — labourmarket.ai viser dem, så du kan finde dem; ansøgning sker via den originale annonce.",
-      "shownOfTotal": "top {shown} af {total}",
+      "shownOfTotal": "viser {shown} af {total}",
       "bandBest": "Passer bedst",
       "bandPossible": "Muligvis passende",
       "bandExplore": "Øvrige annoncer",
@@ -2297,11 +2320,20 @@
         "LOOKING_FOR_WORK": "Søger arbejde",
         "LOOKING_FOR_PROJECTS": "Søger projekter"
       }
+    },
+    "jobAlerts": {
+      "title": "Beskeder om nye job",
+      "ready": "Når et nyt rigtigt job passer til dit fag og de lande, du har valgt, vises det i dine notifikationer. Et job uden oplyst løn skjules aldrig på grund af løn.",
+      "missing": "For at få beskeder om nye job skal du oplyse:",
+      "profession": "hvilket arbejde du udfører",
+      "country": "hvilke lande du vil arbejde i",
+      "cta": "Udfyld mine ønsker"
     }
   },
   "scouting": {
     "pool": {
       "factsUnreadable": "Noget af det, disse personer har registreret, kunne ikke læses lige nu, så denne rækkefølge er ikke pålidelig. Ingen vises her med mindre, end de har — det er fakta bag sammenligningen, der mangler. Genindlæs om et øjeblik.",
+      "historyUnavailable": "Historik leveret af organisationer kunne ikke læses lige nu, så den vises ikke. Det betyder ikke, at der ingen er, og rækkefølgen ovenfor afhænger ikke af den.",
       "capped": "Ikke alle blev sammenlignet. Flere synlige arbejdere passer til dette behov, end én liste kan rumme, så de {count}, hvis kompetencer, fag og land passer mest direkte, blev hentet først — aldrig de nyeste registreringer. Indsnævr behovet for at være sikker på, at de rette personer sammenlignes.",
       "complete": "Alle {count} synlige arbejdere blev sammenlignet med dette behov."
     },
@@ -2323,8 +2355,12 @@
     "needsSetup": "Scouting er ikke tilgængelig i dette miljø endnu.",
     "noCandidates": "Ingen matchende arbejdere endnu til dette behov.",
     "namePlaceholder": "Arbejder",
-    "skillFit": "{pct}% — {matched}/{total} krævede færdigheder, {confirmed} bekræftet af leder",
+    "skillFit": "{matched}/{total} krævede færdigheder, {confirmed} bekræftet af leder",
     "evidence": "Dokumentation — bekræftet: {confirmed} · journal: {journal} · selvangivet: {self}",
+    "confirmedWork": "Bekræftet gennem arbejde: {work} af {matched} matchende færdigheder (gentaget: {repeated})",
+    "historySignal": "Nævnt i historik leveret af organisationer: {history} af {matched} matchende færdigheder (et signal, ikke verifikation)",
+    "evidenceNone": "Ikke bekræftet",
+    "experienceYearsValue": "{years, plural, one {# år} other {# år}}",
     "shortlistError": "Kunne ikke gemme. Prøv igen.",
     "footnote": "Match beregnes deterministisk kun for dette behov. Ingen global rating, ingen falske kandidater.",
     "status": {
@@ -2381,7 +2417,7 @@
       "markContacted": "[EN] Mark contacted",
       "internalNote": "[EN] Internal record only — nothing is sent to the worker or outside the platform.",
       "error": "[EN] Could not save. Try again.",
-      "notAvailable": "[EN] Acknowledgement is not enabled yet."
+      "notAvailable": "Ikke tilgængelig lige nu."
     },
     "lifecycle": {
       "confirm": "[EN] Confirm recognized skills",
@@ -2407,6 +2443,17 @@
     "agencyPresent": {
       "note": "Your client shared this need with you. You present candidates to the client from your own roster.",
       "link": "Present a candidate"
+    },
+    "identity": {
+      "noRecords": "Endnu ingen arbejdsregistreringer",
+      "noManagerRecord": "Endnu ingen registrering fra lederen",
+      "why": "Hvorfor denne person er relevant",
+      "skills": "Relevante færdigheder og hvad de bygger på",
+      "readiness": "Tilgængelighed, parathed og dokumenter",
+      "openTo": "Også åben for: {countries}",
+      "skillCount": "{matched} af {total} krævede færdigheder",
+      "nameHidden": "Navn og kontaktoplysninger vises først, når personen tillader det.",
+      "appliedToYou": "Har ansøgt om dette behov — navn og billede følger med ansøgningen. Telefon og e-mail forbliver skjult."
     }
   },
   "waze": {
@@ -2636,7 +2683,7 @@
     "saving": "Gemmer…",
     "saved": "Præferencer gemt.",
     "error": "Kunne ikke gemme. Prøv igen.",
-    "needsMigration": "Denne sektion er ikke aktiveret endnu — intet blev gemt.",
+    "needsMigration": "Ikke tilgængelig lige nu. Intet blev gemt.",
     "v2": {
       "title": "Flere arbejdspræferencer",
       "hint": "Samme regel gælder — alt, der står som “Ikke angivet”, forbliver ikke angivet.",
@@ -2651,7 +2698,7 @@
       "licenceCategories": "Kørekortkategorier",
       "ownVehicle": "Har eget køretøj",
       "ownTools": "Har eget værktøj",
-      "notEnabled": "Disse ekstra præferencer er ikke aktiveret endnu — intet gemmes her indtil videre.",
+      "notEnabled": "Ikke tilgængelig lige nu.",
       "notSaved": "Gemt, undtagen de ekstra præferencer — den del er ikke aktiveret endnu."
     }
   },
@@ -2666,7 +2713,7 @@
     "adding": "Tilføjer…",
     "remove": "Fjern",
     "empty": "Ingen sprog tilføjet endnu.",
-    "notEnabled": "Denne sektion er ikke aktiveret endnu — intet blev gemt.",
+    "notEnabled": "Ikke tilgængelig lige nu. Intet blev gemt.",
     "error": "Kunne ikke gemme. Prøv igen.",
     "invalid": "Vælg et sprog og et niveau."
   },
@@ -2685,11 +2732,11 @@
     "visibility": "Synlighed",
     "visibilityPrivate": "Privat",
     "visibilityEmployers": "Arbejdsgivere",
-    "visibilityNote": "Visning for arbejdsgivere er ikke slået til endnu — dit valg gemmes og træder i kraft, når den bliver det.",
+    "visibilityNote": "Ikke tilgængelig lige nu.",
     "importNote": "Automatisk import fra disse sider tilbydes ikke. Upload en eksporteret CV-fil i profileditoren for at få dine data ind.",
     "importLink": "Åbn profileditoren",
     "empty": "Ingen eksterne profiler tilknyttet endnu.",
-    "notEnabled": "Denne sektion er ikke aktiveret endnu — intet blev gemt.",
+    "notEnabled": "Ikke tilgængelig lige nu. Intet blev gemt.",
     "error": "Kunne ikke gemme. Prøv igen.",
     "invalid": "Indtast et fuldt https://-link og vælg en side.",
     "platformNames": {
@@ -3091,7 +3138,7 @@
         "statGovLt": "Officiel statistik; kildeangivelse påkrævet; aktivering afventer ejerens bekræftelse.",
         "eurostat": "Officiel EU-statistik; kildeangivelse påkrævet; aktivering afventer ejerens bekræftelse.",
         "arbetsformedlingen": "Aktiv kilde. Brugsvilkår bekræftet: en gratis offentlig datakilde (CC0). Kilden vises ved hver annonce, og hver annonce linker tilbage til det oprindelige opslag.",
-        "nav": "Foreslået kilde. NAV's API-vilkår tillader genudgivelse med løbende forpligtelser: en tilbagetrukket annonce skal fjernes med det samme, en opdateret annonce skal opdateres med det samme, og ansøgningslinket skal føre til den oprindelige annonce. Accept af vilkårene og et token kræver ejerens handling — intet hentes i dag.",
+        "nav": "Aktiv kilde. NAV's API-vilkår er accepteret, og adgang er givet. De løbende pligter overholdes: et tilbagetrukket opslag fjernes straks, et opdateret opslag genopfriskes hurtigt, og ansøgningslinket fører til det oprindelige opslag.",
         "cvbankas": "Kun et forslag — brugstilladelse ubekræftet; blandes aldrig med interne tal.",
         "eures": "Foreslået kilde. Brugsvilkår endnu ikke gennemgået — aktivering kræver ejerens bekræftelse. Intet hentes i dag.",
         "uztLt": "Foreslået kilde. Brugsvilkår endnu ikke gennemgået — aktivering kræver ejerens bekræftelse. Intet hentes i dag."
@@ -3890,7 +3937,7 @@
       "briefOverdue": "[EN] {count} tasks are past their due day.",
       "briefLogToday": "[EN] You are working today and nothing is logged yet.",
       "briefProfileGap": "[EN] Your profile is still missing: {step}.",
-      "playerCardOpened": "Dit kort er åbent i panelet — rigtige data fra dine egne registreringer.",
+      "playerCardOpened": "Din faglige profil er åben i panelet — rigtige data fra dine egne registreringer.",
       "attachChoice": "Hvad er denne fil til?",
       "chipAttachPhoto": "Mit arbejdsfoto",
       "chipAttachCv": "Mit CV",
@@ -3946,9 +3993,45 @@
       },
       "findWorkInCompanyContext": "At søge job er din egen handling — i virksomhedsrummet kører jeg den ikke. Skift til dit personlige rum og spørg igen.",
       "findWorkInCompanyWhy": "En person søger job, ikke en virksomhed — jeg svarer fra dit personlige rum.",
+      "personalOnlyInCompany": "Det er en personlig handling — i en virksomhedsplads udfører jeg den ikke. Skift til dit personlige rum, og fortsæt der.",
+      "newJobsIntro": "Nye opslag, der passer til dine ønsker: {count}.",
+      "newJobsAll": "Alle muligheder",
+      "newJobsNone": "Der er ikke kommet nye opslag, der passer til dine ønsker, de seneste dage. Alle muligheder finder du på siden med muligheder.",
+      "newJobsNeedProfession": "For at vise nye job skal du fortælle, hvilket fag du søger.",
+      "newJobsNeedCountry": "For at vise nye job skal du fortælle, hvilke lande du vil arbejde i.",
+      "newJobsNoProfile": "For at vise nye job skal jeg først bruge din profil.",
+      "newJobsUnavailable": "Nye job kunne ikke kontrolleres lige nu. Prøv igen senere.",
+      "openConversationOpening": "Åbner samtalen med {name}.",
+      "openConversationNone": "Jeg fandt ikke den person blandt dine samtaler eller dit team. Dine beskeder ligger under beskeder.",
+      "openConversationWhich": "Hvilken person mener du?",
+      "openConversationNoPermission": "Jeg kan ikke åbne en samtale med {name} — du har ikke tilladelse til det.",
+      "openConversationFailed": "Samtalen kunne ikke åbnes. Prøv igen, eller åbn dine beskeder.",
       "journalAskWhatYouDid": "Hvad lavede du i dag? Skriv det i feltet »Hvad du lavede« med dine egne ord — f.eks. »monterede vinduer på byggepladsen i Kaunas fra 8 til 17«. Selve anmodningen gemmes ikke i dagbogen.",
       "serviceNeedHint": "Det er en opgave, der skal løses — jeg viser dig, hvem der tilbyder den ydelse.",
       "chipServiceRequests": "Find en ydelse",
+      "findPartnersDoors": "Det er en søgning efter forretningspartnere, ikke efter job. Den kører over den eksisterende markedsplads — vælg, hvor du vil starte.",
+      "findPartnersPickCompany": "Forretningspartnere søges på vegne af en virksomhed. Hvilken virksomhed mener du?",
+      "findPartnersNoCompany": "Forretningspartnere søges på vegne af en virksomhed, og der er endnu ingen virksomhedsprofil. Opret en, eller se ydelsesmarkedet.",
+      "chipPartnersServices": "Ydelsesudbydere",
+      "chipPartnersListings": "Markedspladsens annoncer",
+      "chipPartnersRelations": "Kunder og partnere",
+      "productHelp": {
+        "projectUse": "Et projekt er stedet for arbejde, mennesker og deadlines. Åbn et projekt, tilføj opgaver og personer, og det udførte arbejde vises lige der.",
+        "addPerson": "Du tilføjer en person med en invitation: skriv kontakten, og personen bekræfter i sin egen konto. Invitationer og dit team finder du under team.",
+        "hours": "Timer ligger i timesektionen — der ser du dage, ugen og timesedlen.",
+        "offerService": "Du tilbyder en ydelse under ydelser: beskriv den, så kan andre virksomheder og personer se den.",
+        "warning": "En advarsel vises, når noget kan stå i vejen for arbejdet — for eksempel et dokument, der udløber, eller manglende data. Alle beskeder og deres årsag ser du under beskeder.",
+        "forecast": "En prognose er en beregning ud fra de allerede registrerede timer og det planlagte arbejde. Den er en pejling, ikke et løfte, og ændrer sig med data. Planen og tallene finder du under planlægning.",
+        "scheduleWorker": "Du planlægger en medarbejder under planlægning: vælg dag og projekt, og tildel personen samme sted.",
+        "doneWork": "Udført arbejde ser du, hvor det er registreret — i arbejdsjournalen eller timesektionen: registreringer, timer og bekræftelser.",
+        "chips": {
+          "chipHelpProjects": "Åbn projekter",
+          "chipHelpPeople": "Team og invitationer",
+          "chipHelpPlanning": "Åbn planlægning",
+          "chipHelpServices": "Mine ydelser",
+          "chipHelpJournal": "Arbejdsjournal"
+        }
+      },
       "interestInboxAmbiguous": "Det kan betyde to ting — hvad vil du se?",
       "chipInterestOnMyNeeds": "Interesse i mine forespørgsler",
       "chipMyOwnInterest": "Min egen interesse",
@@ -4055,7 +4138,7 @@
       "capacityIntro": "Team {from} – {to} ({count} personer):",
       "capacityFree": "ledig",
       "capacityBusyUntil": "utilgængelig indtil {date}",
-      "capacityAbsencesUnknown": "Fraværsdata er ikke tilgængelige i dette miljø — kun listen vises.",
+      "capacityAbsencesUnknown": "Ikke tilgængelig lige nu.",
       "capacityEmpty": "Der er ingen på holdet endnu — inviter folk.",
       "capacityUnavailable": "Holdets tilgængelighed kunne ikke læses lige nu.",
       "chipAddTask": "Tilføj opgave",
@@ -4122,15 +4205,15 @@
       "briefInstructions": "Ventende instruktioner: {count}.",
       "chipInstructions": "Instruktioner",
       "briefWorkConfirmed": "En leder har bekræftet {count, plural, one {# af dine arbejdsposter} other {# af dine arbejdsposter}} de seneste 7 dage — bekræftede kompetencer: {skills}.",
-      "chipMyCard": "Mit kort",
+      "chipMyCard": "Min faglige profil",
       "confirmIntro": "Afventer din bekræftelse: {count} poster.",
       "confirmLine": "• {name} · {date} — {text} (+{skills} kompet.)",
       "confirmChip": "Bekræft: {name} · {date}",
       "confirmDone": "Bekræftet: {name} — bekræftede kompetencer: {count}.",
       "confirmNone": "Ingen arbejdsposter venter.",
-      "confirmNotEnabled": "Arbejdsgennemgang er endnu ikke slået til for: {names}. Slå den til, så vises deres poster her.",
+      "confirmNotEnabled": "Ikke tilgængelig lige nu.",
       "confirmEnableChip": "Slå gennemgang til: {name}",
-      "confirmEnabled": "Gennemgang slået til: {name} — arbejdsposterne afventer din bekræftelse.",
+      "confirmEnabled": "Ikke tilgængelig lige nu.",
       "confirmFailed": "Bekræftelsen kunne ikke foretages.",
       "confirmUnavailable": "Bekræftelser kunne ikke læses lige nu.",
       "chipOpenInbox": "Åbn bekræftelsesindbakken",
@@ -4154,7 +4237,7 @@
       "moveToLine": "• “{to}”: personer {before} → {after}; paratheds-tjeklisten der starter på 0/{total}.",
       "moveCountryLine": "• Landet skifter: {from} → {to} — andre dokumentkrav.",
       "moveNoDatesLine": "• “{to}” har ingen datoer — fravær kan ikke tjekkes.",
-      "moveAvailabilityUnknownLine": "• Fravær ukendt — fraværsmodellen svarer ikke her.",
+      "moveAvailabilityUnknownLine": "• Fravær ukendt.",
       "moveAvailabilityLine": "• Inden for {start}–{end} har han {count} fraværsregistreringer.",
       "moveAvailabilityFreeLine": "• Intet fravær inden for datoerne for “{to}”.",
       "moveOnlyConfirmLine": "Intet er ændret endnu — kun din bekræftelse ændrer noget.",
@@ -4242,7 +4325,7 @@
       "introOne": "[EN] I found 1 suitable option:",
       "emptyState": "[EN] I didn't find any active openings matching your criteria right now. I have no alerts yet, so I won't promise to notify you — ask me again later, or add more to your profile so more needs match.",
       "blockedNoWorker": "[EN] To search for work, enable the worker role in account settings.",
-      "blockedNoAccess": "[EN] The opportunities list isn't enabled in this environment yet. When it is, I'll show real needs.",
+      "blockedNoAccess": "Ikke tilgængelig lige nu.",
       "fitStrong": "[EN] Strong fit",
       "fitPossible": "[EN] Possible fit",
       "fitWeak": "[EN] Weak fit",
@@ -4339,7 +4422,7 @@
       },
       "engagementsError": "Arbejdsrelationerne kunne ikke indlæses.",
       "engagementsBlocked": "Arbejdsrelationerne kan ikke læses lige nu. Det er ikke det samme som ingen at have.",
-      "engagementsNeedsMigration": "Arbejdsrelationer er endnu ikke tilgængelige i dette miljø.",
+      "engagementsNeedsMigration": "Ikke tilgængelig lige nu.",
       "engagementsEmptyCompany": "Denne organisation har ingen registrerede arbejdsrelationer.",
       "engagementsEmptyWorker": "Du har ingen registrerede arbejdsrelationer.",
       "engagementsUnavailable": "Denne arbejdsrelation er ikke tilgængelig for dig.",
@@ -4672,7 +4755,7 @@
         "radius": "afstand"
       },
       "whyFiltered": "[EN] You said: {words}. I narrowed the search to that.",
-      "whyUnfiltered": "[EN] I searched your whole board — you did not narrow it.",
+      "whyUnfiltered": "Ingen ekstra filtre — jeg viser alt, hvad der er synligt for dig.",
       "whyFromYourBoard": "[EN] From the demands that are visible to you right now.",
       "whyNoWorker": "[EN] This needs a worker profile, and there is none on this account yet.",
       "whyNoAccess": "[EN] Open demands are not available to your account yet.",
@@ -4831,7 +4914,7 @@
     "page": {
       "title": "Erfaringer",
       "lead": "Subjektive erfaringer fra rigtige, afsluttede arbejdsinteraktioner. En erfaring er én persons beretning — ikke en kendsgerning om nogens faglige evner.",
-      "unavailableTitle": "Erfaringer er endnu ikke tilgængelige i dette miljø.",
+      "unavailableTitle": "Ikke tilgængelig lige nu.",
       "unavailableBody": "Intet blev gemt. Du kan arbejde videre som sædvanligt.",
       "aboutMe": "Om mig",
       "aboutMeEmpty": "Der er endnu ingen offentliggjorte erfaringer om dig.",
@@ -4846,7 +4929,7 @@
       "caution": "Flere negative end positive erfaringer — værd at se nærmere efter, før du beslutter.",
       "meaning": "Det er subjektive beretninger om rigtige interaktioner. Ikke en bedømmelse, ikke en score og ikke en dom fra platformen.",
       "notEnough": "Der er endnu ikke nok offentliggjorte erfaringer.",
-      "unavailable": "Erfaringstællinger er endnu ikke tilgængelige i dette miljø."
+      "unavailable": "Ikke tilgængelig lige nu."
     },
     "sentiment": {
       "positive": "Positiv erfaring",
@@ -4871,7 +4954,7 @@
       "rejected": "Afvist",
       "title": "Moderation af erfaringer",
       "lead": "Hver erfaring gennemgår moderation før offentliggørelse. Hver beslutning kræver en begrundelse og registreres i revisionssporet.",
-      "unavailable": "Erfaringsområdet er ikke tilgængeligt i dette miljø.",
+      "unavailable": "Ikke tilgængelig lige nu.",
       "queueTitle": "Venter på moderation",
       "queueEmpty": "Intet venter på moderation.",
       "disputeQueueTitle": "Tvister",
@@ -4888,7 +4971,7 @@
         "removed": "Fjern fra offentlig visning"
       },
       "errors": {
-        "needs_migration": "Erfaringer er endnu ikke tilgængelige i dette miljø. Intet blev gemt.",
+        "needs_migration": "Ikke tilgængelig lige nu. Intet blev gemt.",
         "not_authenticated": "Log venligst ind først.",
         "not_eligible": "Du kan kun beskrive en interaktion, du reelt deltog i, og som er afsluttet.",
         "duplicate_for_interaction": "Du har allerede indsendt en erfaring for denne interaktion.",
@@ -4918,7 +5001,7 @@
       "sending": "Åbner…",
       "openedNote": "Tvist åbnet. Erfaringen forbliver offentliggjort, indtil en moderator beslutter.",
       "errors": {
-        "needs_migration": "Erfaringer er endnu ikke tilgængelige i dette miljø. Intet blev gemt.",
+        "needs_migration": "Ikke tilgængelig lige nu. Intet blev gemt.",
         "not_authenticated": "Log venligst ind først.",
         "not_eligible": "Du kan kun beskrive en interaktion, du reelt deltog i, og som er afsluttet.",
         "duplicate_for_interaction": "Du har allerede indsendt en erfaring for denne interaktion.",
@@ -4942,7 +5025,7 @@
       "sending": "Sender…",
       "submitted": "Svar indsendt. Det bliver synligt efter moderation.",
       "errors": {
-        "needs_migration": "Erfaringer er endnu ikke tilgængelige i dette miljø. Intet blev gemt.",
+        "needs_migration": "Ikke tilgængelig lige nu. Intet blev gemt.",
         "not_authenticated": "Log venligst ind først.",
         "not_eligible": "Du kan kun beskrive en interaktion, du reelt deltog i, og som er afsluttet.",
         "duplicate_for_interaction": "Du har allerede indsendt en erfaring for denne interaktion.",
@@ -4976,7 +5059,7 @@
       "submitted": "Erfaring indsendt.",
       "awaitingModeration": "Den venter på moderation og er endnu ikke offentliggjort.",
       "errors": {
-        "needs_migration": "Erfaringer er endnu ikke tilgængelige i dette miljø. Intet blev gemt.",
+        "needs_migration": "Ikke tilgængelig lige nu. Intet blev gemt.",
         "not_authenticated": "Log venligst ind først.",
         "not_eligible": "Du kan kun beskrive en interaktion, du reelt deltog i, og som er afsluttet.",
         "duplicate_for_interaction": "Du har allerede indsendt en erfaring for denne interaktion.",
@@ -5115,7 +5198,7 @@
   "approvals": {
     "title": "Godkendelser",
     "intro": "Godkendelsesanmodninger i dine organisationer: indsend en anmodning, afgør det der venter på dig, og følg hver runde.",
-    "unavailable": "Godkendelser er endnu ikke slået til i dette miljø. Intet går tabt — dette område åbner, når godkendelseslageret er gennemgået og taget i brug.",
+    "unavailable": "Ikke tilgængelig lige nu.",
     "honestNote": "Beslutninger bliver inde i produktet. Intet sendes med e-mail eller andre kanaler — opdateringer ses på denne side og i notifikationsklokken.",
     "loadError": "En del af godkendelsesdataene kunne ikke indlæses lige nu. Det, du ser, er ægte, men kan være ufuldstændigt.",
     "inbox": {
@@ -5254,7 +5337,7 @@
       "not_pending": "Denne anmodning er ikke længere åben.",
       "invalid": "Tjek de indtastede værdier, og prøv igen.",
       "invalid_delegate": "Den kollega kunne ikke findes i denne organisation.",
-      "needs_migration": "Godkendelser er endnu ikke slået til i dette miljø. Intet blev gemt.",
+      "needs_migration": "Ikke tilgængelig lige nu. Intet blev gemt.",
       "not_authorized": "Du har ikke lov til at gøre dette.",
       "not_found": "Anmodningen blev ikke fundet.",
       "limit_reached": "Grænsen for åbne poster er nået. Luk noget først.",
@@ -5270,7 +5353,7 @@
     "tpl": {
       "title": "Skabelonopsætning",
       "intro": "Bestem, hvem der godkender hvad i hver af dine organisationer. Alt, du ændrer her, gælder kun nye anmodninger.",
-      "unavailable": "Skabelonopsætningen er forberedt, men endnu ikke slået til i dette miljø.",
+      "unavailable": "Ikke tilgængelig lige nu.",
       "runningImmuneNote": "Udgivelse af en ny version påvirker kun anmodninger, der starter derefter. En anmodning, der allerede er i gang, beholder de runder og de personer, den startede med.",
       "templateCount": "Skabeloner: {count}",
       "installTitle": "Installer standardsættet",
@@ -5344,7 +5427,8 @@
       "refusedType": "Denne filtype kan ikke læses som tekst.",
       "empty": "Ingen læsbar tekst fundet i dette dokument.",
       "failed": "Dokumentet kunne ikke læses.",
-      "noEngagement": "Du skal først have en arbejdskontekst — åbn dashboardet og opret en."
+      "noEngagement": "Du skal først have en arbejdskontekst — åbn dashboardet og opret en.",
+      "workDateHint": "Dokumentet oplyser ikke, hvilken dag arbejdet blev udført. Vælg datoen selv — intet udfyldes for dig."
     },
     "currentVersion": "Version {n}",
     "download": "Download",
@@ -5386,7 +5470,7 @@
       "path_mismatch": "Uploaden kunne ikke verificeres — intet blev gemt. Prøv igen.",
       "file_too_large": "Filen er større end 5 MB — intet blev gemt.",
       "unsupported_type": "Denne filtype understøttes ikke — brug PDF, Word eller et foto.",
-      "needs_migration": "Filupload er endnu ikke aktiveret i dette miljø — intet blev gemt.",
+      "needs_migration": "Ikke tilgængelig lige nu. Intet blev gemt.",
       "error": "Noget gik galt — intet blev gemt.",
       "updated": "Ændringen er gemt.",
       "submitted": "Dokumentet er sendt til godkendelse.",
@@ -5401,7 +5485,7 @@
     "title": "Virksomhedens dokumentregister",
     "intro": "Dokumenter for {org}: politikker, procedurer, instruktioner og korrespondance med versioner og læsebekræftelser.",
     "unavailable": "Dokumentregistret kan ikke indlæses lige nu.",
-    "preparing": "Dokumentregistret er forberedt, men endnu ikke aktiveret i dette miljø.",
+    "preparing": "Ikke tilgængelig lige nu.",
     "error": "Dokumentregistret kunne ikke indlæses — prøv igen senere.",
     "empty": "Ingen dokumenter registreret endnu.",
     "scopeNote": "Dette register indeholder organisationens egne dokumenter. Medarbejdernes personlige dokumenter forbliver i deres egne hænder og vises aldrig her.",
@@ -5504,7 +5588,7 @@
   "timesheets": {
     "title": "Timesedler",
     "intro": "Timedokumenter pr. periode, afledt af din arbejdsjournal. Timer rettes altid i journalen; en timeseddel er en fastfrosset kopi, der indsendes til godkendelse.",
-    "needsMigration": "Timesedler er endnu ikke aktiveret i dette miljø.",
+    "needsMigration": "Ikke tilgængelig lige nu.",
     "readError": "En del af timeseddeldataene kunne ikke indlæses lige nu.",
     "noLines": "Ingen registrerede timer i denne periode endnu. Notér dit arbejde i journalen og opdatér.",
     "linesTitle": "Linjer ({count})",
@@ -5582,7 +5666,7 @@
       "no_approvers": "Der kunne ikke findes godkendere for denne organisations skabelon.",
       "not_published": "Godkendelsesskabelonen er endnu ikke offentliggjort.",
       "invalid": "Anmodningen var ugyldig.",
-      "needs_migration": "Timesedler er endnu ikke aktiveret i dette miljø.",
+      "needs_migration": "Ikke tilgængelig lige nu.",
       "not_authorized": "Det må du ikke.",
       "not_found": "Timeseddel ikke fundet.",
       "limit_reached": "For mange åbne timesedler — indsend eller ryd op i de eksisterende først.",
@@ -5593,7 +5677,7 @@
   "requests": {
     "title": "Anmodninger",
     "intro": "Bed din arbejdsgiver om noget og følg, hvad der sker. Hver anmodning følger den godkendelsesproces, din virksomhed har sat op.",
-    "unavailable": "Anmodninger er endnu ikke slået til i dette miljø. Intet går tabt — sektionen åbner, når opdateringen er gennemgået og installeret.",
+    "unavailable": "Ikke tilgængelig lige nu.",
     "honestNote": "En anmodning afgøres af rigtige mennesker i din virksomhed. Intet godkendes automatisk, og intet forlader produktet.",
     "notice": {
       "created": "Anmodning sendt. De rette personer er bedt om at se på den.",
@@ -5606,7 +5690,7 @@
       "not_published": "Godkendelsesprocessen for anmodninger er ikke klar endnu.",
       "not_pending": "Denne anmodning venter ikke længere — nedenfor ses dens aktuelle tilstand.",
       "invalid": "Tjek oplysningerne og prøv igen.",
-      "needs_migration": "Ikke tilgængelig endnu — opdateringen er ikke installeret i dette miljø.",
+      "needs_migration": "Ikke tilgængelig lige nu.",
       "not_authorized": "Det må du ikke.",
       "not_found": "Ikke fundet.",
       "limit_reached": "For mange åbne anmodninger. Vent først på afgørelser om de eksisterende.",
@@ -5718,7 +5802,7 @@
     "relationshipNote": "Kontraktlisten ovenfor er det tidligere personlige kommercielle register og fungerer uændret. Nye aftaler hører til her.",
     "unavailable": "Aftaleregistret kan ikke vises lige nu.",
     "needsOrgWorkspace": "Aftaleregistret fungerer i et organisationsarbejdsområde. Skift til din organisation.",
-    "preparing": "Aftaleregistret er forberedt, men endnu ikke aktiveret i dette miljø.",
+    "preparing": "Ikke tilgængelig lige nu.",
     "error": "Aftaleregistret kunne ikke læses.",
     "empty": "Ingen aftaler registreret endnu.",
     "emptyFiltered": "Ingen aftaler matcher disse filtre.",
@@ -5821,14 +5905,14 @@
       "not_found": "Registrering ikke fundet.",
       "not_allowed": "Kun organisationens ejer eller administrator kan gøre dette.",
       "limit_reached": "Registergrænsen er nået.",
-      "needs_migration": "Aftaleregistret er endnu ikke aktiveret i dette miljø.",
+      "needs_migration": "Ikke tilgængelig lige nu.",
       "error": "Noget gik galt. Intet blev gemt."
     }
   },
   "lifecycle": {
     "title": "Ansættelsens livscyklus",
     "intro": "Onboarding, prøvetid, ændringer, offboarding og afslutning for organisationens ansættelser — med tjeklister og fuld historik.",
-    "unavailable": "Ansættelsens livscyklus er endnu ikke slået til i dette miljø. Intet går tabt — området åbner, når lageret er gennemgået og taget i brug.",
+    "unavailable": "Ikke tilgængelig lige nu.",
     "honestNote": "Alt her bliver i produktet. At markere et trin som udført registrerer kun hvem der bekræftede hvad og hvornår — intet sendes nogen steder hen.",
     "loadError": "Nogle data kunne ikke indlæses lige nu. Det, du ser, er ægte, men kan være ufuldstændigt.",
     "stage": {
@@ -5959,7 +6043,7 @@
       "last_owner": "Den sidste ejers ansættelse kan ikke afsluttes — udpeg først en anden ejer.",
       "limit_reached": "Grænsen for denne organisation er nået.",
       "invalid": "Ugyldigt input.",
-      "needs_migration": "Denne funktion er endnu ikke slået til i dette miljø.",
+      "needs_migration": "Ikke tilgængelig lige nu.",
       "not_authorized": "Du har ikke rettigheder til dette.",
       "not_found": "Posten er ikke tilgængelig.",
       "error": "Mislykkedes — prøv igen."
@@ -6000,7 +6084,7 @@
   "procurement": {
     "title": "Indkøb",
     "intro": "Bed om materialer eller ydelser, notér leverandørtilbud, og registrér hvad der blev valgt. Intet her kontakter en leverandør eller bestiller noget — det er din registrering.",
-    "needsMigration": "Indkøbsanmodninger er endnu ikke aktiveret i dette miljø.",
+    "needsMigration": "Ikke tilgængelig lige nu.",
     "readError": "Indkøbsanmodninger kunne ikke indlæses. Prøv igen.",
     "empty": "Ingen indkøbsanmodninger endnu.",
     "noOffers": "Ingen leverandørtilbud noteret endnu.",
@@ -6059,7 +6143,7 @@
       "unlinked": "Fakturatilknytning fjernet.",
       "cancelled": "Indkøbsanmodning annulleret.",
       "invalid": "Tjek de indtastede oplysninger.",
-      "needs_migration": "Indkøbsanmodninger er endnu ikke aktiveret i dette miljø.",
+      "needs_migration": "Ikke tilgængelig lige nu.",
       "not_authorized": "Det kan du ikke gøre for denne anmodning.",
       "not_found": "Denne indkøbsanmodning blev ikke fundet.",
       "not_editable": "I denne tilstand er det trin ikke muligt.",
@@ -6078,7 +6162,7 @@
   "trips": {
     "title": "Tjenesterejser",
     "intro": "Anmod om en rejse, få den godkendt, og hold dens udgifter samlet. Intet her booker rejser eller udbetaler penge — det er din registrering.",
-    "needsMigration": "Tjenesterejser er endnu ikke aktiveret i dette miljø.",
+    "needsMigration": "Ikke tilgængelig lige nu.",
     "readError": "Tjenesterejser kunne ikke indlæses. Prøv igen.",
     "empty": "Ingen tjenesterejser endnu.",
     "orgHeading": "Rejser for personer, du leder",
@@ -6131,7 +6215,7 @@
       "unlinked": "Post fjernet fra rejsen.",
       "invalid": "Tjek de indtastede oplysninger.",
       "invalid_dates": "Tjek rejsedatoerne.",
-      "needs_migration": "Tjenesterejser er endnu ikke aktiveret i dette miljø.",
+      "needs_migration": "Ikke tilgængelig lige nu.",
       "not_authorized": "Det kan du ikke gøre for denne rejse.",
       "not_found": "Denne rejse blev ikke fundet.",
       "not_editable": "I denne tilstand er det trin ikke muligt.",
@@ -6148,7 +6232,7 @@
     "title": "Kurser og beviser",
     "intro": "Kurser, som din organisation beder folk gennemføre, og de beviser, der følger efter.",
     "evidenceNote": "Et bevis viser, at et kursus er gennemført. Det siger ikke noget om, hvor godt nogen arbejder — det bliver i dine arbejdsnoter og din leders bekræftelser.",
-    "notAvailable": "Kurser er ikke slået til i dette arbejdsrum endnu.",
+    "notAvailable": "Ikke tilgængelig lige nu.",
     "status": {
       "assigned": "Skal gøres",
       "completed": "Færdig",
@@ -6210,7 +6294,7 @@
       "invalid_file": "Den fil hører ikke til din organisation.",
       "invalid_skill": "Færdigheden blev ikke fundet.",
       "invalid_state": "Det kan ikke lade sig gøre i dette trin.",
-      "needs_migration": "Kurser er ikke slået til i dette arbejdsrum endnu.",
+      "needs_migration": "Ikke tilgængelig lige nu.",
       "not_authorized": "Du har ikke rettigheder til det.",
       "not_found": "Ikke fundet.",
       "limit_reached": "Der er allerede for meget her.",
@@ -6221,7 +6305,7 @@
     "title": "Udviklingssamtaler",
     "intro": "En nedskrevet samtale mellem to navngivne personer om arbejdet og om, hvad der kommer nu.",
     "noScoreNote": "Der er ingen karakter, ingen point og ingen rangliste her — det er med vilje. Alt nedenfor er enten et nedskrevet faktum, en henvisning til rigtigt arbejde eller én persons egne ord, tydeligt markeret som sådan.",
-    "notAvailable": "Udviklingssamtaler er ikke slået til i dette arbejdsrum endnu.",
+    "notAvailable": "Ikke tilgængelig lige nu.",
     "empty": "Der er endnu ingen samtale, der handler om dig.",
     "cycles": {
       "heading": "Perioder",
@@ -6287,7 +6371,7 @@
       "invalid_subject": "Personen hører ikke til din organisation.",
       "invalid_reviewer": "Den person kan ikke føre samtalen.",
       "invalid_reference": "Den henvisning peger ikke på rigtigt arbejde fra denne person.",
-      "needs_migration": "Udviklingssamtaler er ikke slået til i dette arbejdsrum endnu.",
+      "needs_migration": "Ikke tilgængelig lige nu.",
       "not_authorized": "Du har ikke rettigheder til det.",
       "not_found": "Ikke fundet.",
       "limit_reached": "Der er allerede for meget her.",
@@ -6298,7 +6382,7 @@
     "title": "Ledelsesbeslutninger",
     "intro": "Hvad der blev lagt frem for ledelsen, hvad der blev besluttet, hvem der er ansvarlig og hvornår.",
     "engineNote": "Afstemningen sker i godkendelseslisten ovenfor: en skabelon, der kræver alle godkendere, er en enstemmig afstemning, og en, der kun kræver én, afgøres af det første svar. Her tælles der ingen stemmer.",
-    "notAvailable": "Ledelsesbeslutninger er ikke slået til i dette arbejdsrum endnu.",
+    "notAvailable": "Ikke tilgængelig lige nu.",
     "empty": "Ingen beslutninger nedskrevet endnu.",
     "form": {
       "title": "Spørgsmål",
@@ -6351,7 +6435,7 @@
       "invalid_document": "Det dokument hører ikke til din organisation.",
       "invalid_task": "Den opgave er ikke din.",
       "invalid_responsible": "Personen hører ikke til din organisation.",
-      "needs_migration": "Ledelsesbeslutninger er ikke slået til i dette arbejdsrum endnu.",
+      "needs_migration": "Ikke tilgængelig lige nu.",
       "not_authorized": "Du har ikke rettigheder til det.",
       "not_found": "Ikke fundet.",
       "limit_reached": "Der er allerede for meget her.",
@@ -6369,7 +6453,7 @@
     "badge": "Forhåndsvisning / ejerens gennemgang · kun eksempeldata",
     "workers": {
       "title": "Medarbejderkort",
-      "description": "Gennemarbejdede medarbejderfelter i spillerkortstil. Geometrisk monogram som reserve — der opdigtes aldrig et ansigt.",
+      "description": "Gennemarbejdede medarbejderprofiler. Geometrisk monogram som reserve — der opdigtes aldrig et ansigt.",
       "listLabel": "Eksempler på medarbejderkort"
     },
     "jobs": {
@@ -6481,7 +6565,7 @@
         "duplicatesFound": "Identiske eksisterende registreringer: {count}. Intet blev skrevet — markér bekræftelsen for at skrive dem alligevel.",
         "noRows": "Ingen rækker at skrive.",
         "tooManyRows": "For mange rækker til én import — del filen op.",
-        "needsMigration": "Denne funktion er endnu ikke aktiveret i denne database.",
+        "needsMigration": "Ikke tilgængelig lige nu.",
         "notAuthorized": "Du må ikke registrere disse timer.",
         "generic": "Behandlingen mislykkedes. Prøv igen."
       }
@@ -6531,6 +6615,14 @@
       "free": "ledig",
       "away": "fraværende",
       "awayUntil": "fraværende indtil {date}",
+      "summary": "{free} ledige · {committed} i arbejde · {away} fraværende",
+      "onWork": "på {project}",
+      "booked": "booket",
+      "until": "til {date}",
+      "undated": "uden datoer",
+      "outlookHeading": "Ledige personer, næste 4 uger",
+      "outlookWeek": "Fra {date}: {free} af {total} ledige",
+      "outlookNote": "Ud fra registrerede bookinger og fravær — et skøn, ikke et løfte.",
       "absencesUnknown": "Fravær registreres endnu ikke — ledig betyder, at ingen har sagt andet.",
       "more": "{count, plural, =1 {1 person mere på planlægningssiden} other {# personer mere på planlægningssiden}}",
       "assign": "Sæt på et projekt",
@@ -6556,7 +6648,20 @@
       "openNeed": "Åbn behovet",
       "gapsRow": "{count, plural, =1 {1 person på {project} mangler dokumenter} other {# personer på {project} mangler dokumenter}}",
       "gapsCta": "Tjek dokumenter",
-      "needsCta": "Beskriv et behov"
+      "needsCta": "Beskriv et behov",
+      "noOneFrom": "Ingen er ledig fra {date}",
+      "unclear": "{count, plural, =1 {1 person har arbejde uden datoer — ledig tid kan være mindre} other {# personer har arbejde uden datoer — ledig tid kan være mindre}}",
+      "fit": {
+        "fits": "Ledige personer dækker det",
+        "from": "Ledige personer dækker det fra {date}",
+        "short": "{count, plural, =1 {Mangler 1 person} other {Mangler # personer}}",
+        "some": "Ledige personer dækker kun nogle uger",
+        "unknown": "For lidt information til sammenligning"
+      },
+      "opportunity": "{count, plural, =1 {Op til 1 person er ledig fra {date}} other {Op til # personer er ledige fra {date}}}",
+      "opportunityCta": "Find arbejde",
+      "interest": "{count, plural, =1 {1 person har vist interesse for jeres behov} other {# personer har vist interesse for jeres behov}}",
+      "interestCta": "Se hvem"
     },
     "attention": {
       "heading": "Kræver dig",
@@ -6593,9 +6698,54 @@
         "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company."
       },
       "workers": {
-        "invitationsManagedElsewhere": "Invitationer håndteres af den person i virksomheden, der har ansvaret for dem."
+        "invitationsManagedElsewhere": "Invitationer håndteres af den person i virksomheden, der har ansvaret for dem.",
+        "team": {
+          "free": "Ledig",
+          "working": "Arbejder",
+          "away": "Fraværende",
+          "countFree": "Ledige",
+          "countWorking": "Arbejder",
+          "countAway": "Fraværende",
+          "workingOn": "Arbejder på: {project}",
+          "until": "til {date}",
+          "awayUntil": "Fraværende til {date}",
+          "assign": "Tildel til projekt",
+          "openCalendar": "Åbn kalender"
+        }
       }
     }
+  },
+  "cvOrganizationHistory": {
+    "title": "Arbejdshistorik leveret af organisationer",
+    "note": "Hentet fra de nævnte organisationers egne registreringer. Den er hverken selverklæret eller uafhængigt verificeret.",
+    "untitled": "Arbejde registreret af en organisation",
+    "hoursTerm": "Timer",
+    "hoursRecorded": "{hours} t registreret i {count, plural, one {# registrering} other {# registreringer}}",
+    "hoursPeriod": "{hours} t opgivet for en periode, i {count, plural, one {# registrering} other {# registreringer}}",
+    "contested": "Bestridt af en part med ret til det",
+    "more": "{count, plural, one {# post mere} other {# poster mere}} vises ikke"
+  },
+  "historyContext": {
+    "project": "Projekt",
+    "place": "Sted eller arbejdspakke",
+    "client": "Bygherre / kunde",
+    "otherParties": "Andre involverede",
+    "capacity": "Rolle",
+    "source": "Kilde",
+    "suppliedBy": "Leveret af {name}",
+    "reconstructed": "Rekonstrueret fra tidligere registreringer",
+    "recordedAt": "Registreret i systemet",
+    "proofTitle": "Hvad der ligger bag",
+    "proof": {
+      "SELF_DECLARED": "Oplyst af personen",
+      "EVIDENCE_SUPPORTED": "Understøttet af en organisations registrering",
+      "EMPLOYER_CONFIRMED": "Bekræftet af arbejdsgiveren",
+      "CLIENT_ACCEPTED": "Godkendt af kunden",
+      "SUPERVISOR_CONFIRMED": "Bekræftet af en leder",
+      "INDEPENDENTLY_VERIFIED": "Uafhængigt verificeret"
+    },
+    "attestedAs": "bekræftet som {role}",
+    "proofNote": "Hver linje er et selvstændigt faktum. En bekræftelse fra den leverende organisation er ikke kundens godkendelse og ikke betaling, og ingen af dem er uafhængig verificering, medmindre det står der."
   },
   "evidenceImport": {
     "records": {
@@ -6650,7 +6800,7 @@
       "invalid_role": "Ugyldig rolle.",
       "last_owner": "Den sidste ejer kan ikke træde tilbage — aktivér først en anden ejer.",
       "no_workspace": "Vælg først et organisationsarbejdsområde.",
-      "needs_migration": "Denne mulighed er endnu ikke slået til i dette miljø.",
+      "needs_migration": "Ikke tilgængelig lige nu.",
       "invalid": "Ugyldige data.",
       "error": "Noget gik galt — prøv igen."
     },
@@ -6737,5 +6887,270 @@
       "confirmed": "Confirmed and shared",
       "failed": "Could not confirm."
     }
+  },
+  "companyWorkHistory": {
+    "title": "Importeret arbejdshistorik for virksomheden",
+    "subtitle": "Hvad {name} har registreret fra egne gamle timesedler: hvor arbejdet var, hvornår, hvem der arbejdede, hvad der blev gjort og hvor længe.",
+    "badge": "Importeret virksomhedshistorik",
+    "provenance": "Hentet fra {name}s egen timeseddel. Personerne brugte ikke LabourMarket.ai dengang, og oplysningerne er ikke uafhængigt verificeret.",
+    "unavailable": "Den importerede arbejdshistorik kunne ikke læses lige nu. Det betyder ikke, at der ikke er nogen.",
+    "empty": "{name} har ingen importeret arbejdshistorik registreret.",
+    "elsewhere": "{name} har {count, plural, one {# importeret post} other {# importerede poster}} om tidligere arbejde. Skift til det arbejdsområde for at se dem.",
+    "stats": {
+      "places": "Steder",
+      "people": "Personer",
+      "hours": "Registrerede timer",
+      "period": "Periode"
+    },
+    "place": "Sted",
+    "noPlaceName": "Intet sted angivet",
+    "open": "Åbn",
+    "people": "{count, plural, one {# person} other {# personer}}",
+    "entries": "{count, plural, one {# post} other {# poster}}",
+    "hoursShare": "{hours} t på dette sted, sammenlignet med det travleste sted",
+    "noPlace": "{count, plural, one {# post} other {# poster}} ({hours} t) angiver intet sted i kilden.",
+    "periodAside": "Heraf er {hours} t periodesummer angivet for et tidsrum, holdt adskilt fra enkeltdage.",
+    "scope": {
+      "title": "Hvad denne import indeholder",
+      "carried": "Kilden indeholder: hvem der arbejdede, hvilken dag, hvor mange timer, hvad der blev gjort og stedet som skrevet.",
+      "missing": "Ikke i kilden: kunden, adressen og projektet. De vises som ikke i kilden og udfyldes aldrig."
+    },
+    "facts": {
+      "customer": "Kunde",
+      "address": "Adresse",
+      "project": "Projekt",
+      "notInSource": "Ikke i kilden",
+      "linked": "Knyttet"
+    },
+    "whoWorked": "Hvem der arbejdede her",
+    "timeline": "Hvad der blev gjort",
+    "back": "Tilbage til historik",
+    "placeMissing": "Dette sted findes ikke i den importerede historik for det aktive arbejdsområde.",
+    "attributedNote": "Omfatter {count, plural, one {# post} other {# poster}}, der ligger i en anden organisations bøger og er tilskrevet her som det udførende firma.",
+    "attribution": {
+      "title": "Hvem udførte dette arbejde?",
+      "intro": "Arbejde i denne organisations bøger kan tilskrives en anden af dine organisationer som det udførende firma. Intet flyttes eller kopieres: posterne bliver, og den anden organisation kan læse dem.",
+      "performedBy": "Udført af",
+      "note": "Note (valgfri), for eksempel den angivne andel af timer",
+      "button": "Tilskriv",
+      "progress": "{attributed} af {total} tilskrevet {name}",
+      "done": "{count} poster tilskrevet; {skipped} var allerede tilskrevet.",
+      "refused": "Dette kunne ikke gemmes. Intet er ændret.",
+      "person": "{hours} t, {count, plural, one {# post} other {# poster}}"
+    },
+    "truncated": "Der findes flere poster, end én visning læser. De {count} læste vises; summer dækker kun dem."
+  },
+  "workLifecycle": {
+    "pending": "Endnu ikke",
+    "title": "Hvad der sker med det arbejde, du udfører",
+    "titleCompany": "Hvad der sker med det arbejde, du driver",
+    "example": "Eksempel — ikke en rigtig person eller rigtige data",
+    "hint": "Vælg et trin. Hvert trin åbner det rigtige sted i dit arbejdsområde.",
+    "open": "Åbn i dit arbejdsområde",
+    "list": "Trin i arbejdets forløb",
+    "workers": {
+      "person": {
+        "label": "Dig",
+        "fact": "Kok — professionel identitet",
+        "detail": "Én professionel identitet, der er din — ikke knyttet til én arbejdsgiver."
+      },
+      "team": {
+        "label": "Hold",
+        "fact": "Køkkenhold",
+        "detail": "Du bliver en del af et rigtigt hold, med dem du arbejder sammen med og den, der leder det."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Lancering af efterårsmenu",
+        "detail": "Arbejdet hører til et projekt, så det har et sted, et formål og en tid."
+      },
+      "work": {
+        "label": "Arbejde",
+        "fact": "Aftenservice — 8 t",
+        "detail": "Hvad du lavede, hvornår og i hvor lang tid — registreret, mens det sker."
+      },
+      "evidence": {
+        "label": "Dokumentation",
+        "fact": "Foto + journalpost",
+        "detail": "Udført arbejde bliver til dokumentation i stedet for at forsvinde."
+      },
+      "confirmation": {
+        "label": "Bekræftet",
+        "fact": "Bekræftet af leder",
+        "detail": "En leder bekræfter det. Intet kaldes verificeret uden det."
+      },
+      "history": {
+        "label": "Historik",
+        "fact": "Tilføjet til din historik",
+        "detail": "Bekræftet arbejde opbygger din professionelle historik — den følger dig til næste job."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Behov",
+        "fact": "4 kokke, fra mandag",
+        "detail": "Du angiver det reelle behov én gang: hvem, hvor og fra hvornår."
+      },
+      "people": {
+        "label": "Personer",
+        "fact": "Professionelle, der passer",
+        "detail": "Professionelle, hvis faktiske arbejdshistorik passer til behovet — med det, der er verificeret, og det, der endnu ikke er."
+      },
+      "team": {
+        "label": "Hold",
+        "fact": "Køkkenhold",
+        "detail": "Personer bliver til et hold med en leder, vagter og et sted at arbejde."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Lancering af efterårsmenu",
+        "detail": "Holdene organiseres omkring det projekt, de leverer."
+      },
+      "work": {
+        "label": "Arbejde",
+        "fact": "Aftenservice — 8 t",
+        "detail": "Arbejdet registreres der, hvor det sker, og rekonstrueres ikke bagefter."
+      },
+      "confirmation": {
+        "label": "Bekræftet",
+        "fact": "Afventer din bekræftelse",
+        "detail": "Du kan se, hvad der stadig mangler at blive bekræftet, og hvad der allerede er gjort."
+      },
+      "report": {
+        "label": "Rapport",
+        "fact": "Rapport fra reelt arbejde",
+        "detail": "Rapporter bygger på bekræftet arbejde — ingen skriver dem om."
+      }
+    }
+  },
+  "twoSides": {
+    "title": "Ansættelse er begyndelsen, ikke enden.",
+    "professional": "Fagperson",
+    "company": "Virksomhed",
+    "steps": {
+      "find": {
+        "label": "Find",
+        "worker": "Finder arbejde, der passer til det, de rent faktisk har lavet",
+        "company": "Finder folk, hvis faktiske arbejde passer til behovet"
+      },
+      "connect": {
+        "label": "Forbind",
+        "worker": "Taler på deres eget sprog",
+        "company": "Ansætter gennem en ægte samtale"
+      },
+      "work": {
+        "label": "Arbejd",
+        "worker": "Registrerer arbejdet, mens det sker",
+        "company": "Driver arbejdet sammen med sine folk"
+      },
+      "verify": {
+        "label": "Bekræft",
+        "worker": "En leder bekræfter det",
+        "company": "Bekræfter, hvad der rent faktisk blev udført"
+      },
+      "grow": {
+        "label": "Vokse",
+        "worker": "Bekræftet arbejde bliver deres historik",
+        "company": "Rapporter bygger på bekræftet arbejde"
+      },
+      "continue": {
+        "label": "Fortsæt",
+        "worker": "Tager historikken med til næste job",
+        "company": "Planlægger næste projekt med folk, de kender"
+      }
+    }
+  },
+  "evidenceChain": {
+    "label": "Indførslens status",
+    "own": "Af dig",
+    "nodes": {
+      "recorded": "Registreret",
+      "photo": "Foto",
+      "manager": "Lederens indførsel",
+      "history": "I din historik"
+    },
+    "status": {
+      "done": "Klar",
+      "waiting": "Venter",
+      "absent": "Ikke endnu",
+      "attention": "Kræver dig",
+      "unknown": "Ukendt"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Levende CV",
+    "title": "Dit arbejde bliver til din historie",
+    "now": "Nu",
+    "noRecords": "Ingen arbejdsregistreringer endnu",
+    "legend": {
+      "managerRecord": "Lederens registrering",
+      "recorded": "Registreret af dig"
+    },
+    "skillsTitle": "Hvad dit arbejde viser",
+    "next": {
+      "title": "Din historie følger dig",
+      "body": "Hvert job, du registrerer, føjer til den. Tag den med til den næste mulighed.",
+      "cta": "Se, hvor du kan komme hen"
+    }
+  },
+  "workContext": {
+    "title": "Dit arbejde på ét sted",
+    "nodes": {
+      "current": "Arbejder nu",
+      "records": "Registreringer",
+      "manager": "Lederens registrering",
+      "history": "Historik",
+      "skills": "Færdigheder",
+      "next": "Næste"
+    },
+    "facts": {
+      "records": "{count, plural, one {# registrering} other {# registreringer}}",
+      "manager": "{count, plural, one {# registrering fra lederen} other {# registreringer fra lederen}}",
+      "history": "{count, plural, one {# job} other {# jobs}}",
+      "skills": "{count, plural, one {# færdighed baseret på dine registreringer} other {# færdigheder baseret på dine registreringer}}",
+      "next": "Hvor du kan gå hen"
+    }
+  },
+  "companyPerson": {
+    "eyebrow": "Historisk personkort",
+    "back": "Personer",
+    "badge": "Leveret af organisationen, ikke uafhængigt verificeret",
+    "provenance": "Det er, hvad {name} har registreret om denne person. Ingen andre har bekræftet det, og det afhænger ikke af, om personen har en konto.",
+    "claim": {
+      "unlinked": "Endnu ikke knyttet til en konto — historikken er allerede registreret her.",
+      "link_proposed": "En kobling til en konto er tilbudt og afventer personens svar — historikken er allerede registreret her.",
+      "linked": "Knyttet til personens egen konto.",
+      "openProfile": "Åbn personens side"
+    },
+    "unavailable": "Personens historik kunne ikke læses lige nu. Det betyder ikke, at der ingen er.",
+    "empty": "Der er endnu ingen historikposter for denne person. Læsningen lykkedes — der er ingen.",
+    "stats": {
+      "records": "Poster",
+      "hours": "Timer som angivet",
+      "period": "Periode"
+    },
+    "noHours": "Poster uden angivne timer: {count}. Ukendte timer tælles ikke som nul.",
+    "undated": "Poster uden angivet dato: {count}. De bliver i historikken nedenfor.",
+    "periodApart": "{hours} t af summen er periodesummer, holdt adskilt og aldrig fordelt på dage eller måneder.",
+    "noWorkObject": "Poster uden tilknytning til et projekt eller sted, platformen kender: {count}. De bliver i denne historik under deres kildebetegnelse.",
+    "places": {
+      "title": "Efter projekt eller sted",
+      "none": "Projekt eller sted ikke registreret",
+      "records": "Poster: {count}"
+    },
+    "months": {
+      "title": "Angivne timer pr. måned",
+      "note": "Kun poster for enkeltdage. Periodesummer fordeles aldrig på dage eller måneder."
+    },
+    "skills": {
+      "title": "Færdigheder, historikken peger på",
+      "note": "Udledt af organisationens historik, ikke verificeret. En færdighed vises, når organisationen selv har nævnt den; det er ikke en påstand om personen.",
+      "records": "Poster: {count}",
+      "empty": "Ingen færdighed er nævnt i disse poster.",
+      "unavailable": "Færdighedssignaler kunne ikke læses lige nu. Det betyder ikke, at der ingen er.",
+      "truncated": "Der er flere færdighedssignaler, end denne visning læser."
+    },
+    "shown": "Viser de nyeste {shown} af {total} poster. Resten forbliver registreret.",
+    "truncated": "Der findes flere poster, end én visning læser. De {count} læste vises; summer dækker kun dem."
   }
 }

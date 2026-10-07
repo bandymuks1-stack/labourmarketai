@@ -97,8 +97,8 @@ export default async function AdminTelemetryPage({
   const ttfv = await getTimeToFirstValueByActor(supabase);
 
   // AI cost & usage (W14 Pilot Analytics slice v1) — caller's RLS client
-  // over ai_runs + usage_cost_events. Production has 0 rows while
-  // AI_PROVIDER_MODE stays 'disabled'; the section states that honestly.
+  // over ai_runs + usage_cost_events. Counts come only from these live reads;
+  // an unreadable table is `available: false` (shown as a dash), never 0.
   const [aiRuns, usageLedger] = await Promise.all([
     getAiRunsSummary(supabase),
     getUsageLedgerSummary(supabase),
@@ -266,21 +266,44 @@ export default async function AdminTelemetryPage({
           ) : null}
         </div>
         {!funnel.available ? (
-          <p className="text-sm text-text-secondary">
-            No funnel events yet, or the event store is unavailable.
+          <p
+            className="rounded-md border border-state-warning/50 bg-state-warning/5 px-3 py-2 text-sm text-state-warning"
+            data-testid="telemetry-funnel-unavailable"
+          >
+            {t("funnel.unavailableBanner")}
           </p>
-        ) : (
+        ) : null}
+        {(
           <div className="flex flex-col gap-4">
+            {/* SEP-7: a stage is MEASURED (a number, and 0 is a real zero),
+                NOT MEASURED (no event or source — a reason, never a number) or
+                UNAVAILABLE (the read failed — never a number). */}
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {funnel.counts.map((s) => (
                 <div
                   key={s.key}
                   className="rounded-md border border-ink-600/60 px-3 py-2"
+                  data-testid={`funnel-stage-${s.measurement}`}
                 >
-                  <div className="font-mono text-lg text-text-primary">
-                    {funnel.countsAreLowerBound ? `≥ ${s.count}` : s.count}
-                  </div>
+                  {s.measurement === "measured" ? (
+                    <div className="font-mono text-lg text-text-primary">
+                      {funnel.countsAreLowerBound ? `≥ ${s.count}` : s.count}
+                    </div>
+                  ) : s.measurement === "not_measured" ? (
+                    <div className="text-sm font-medium text-text-muted">
+                      {t("funnel.notMeasured")}
+                    </div>
+                  ) : (
+                    <div className="text-sm font-medium text-state-warning">
+                      {t("funnel.unavailable")}
+                    </div>
+                  )}
                   <div className="text-meta text-text-muted">{s.label}</div>
+                  {s.measurement === "not_measured" && s.reasonKey ? (
+                    <div className="text-meta text-text-muted">
+                      {t(`funnel.reason.${s.reasonKey}`)}
+                    </div>
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -312,6 +335,22 @@ export default async function AdminTelemetryPage({
                   <span className="text-meta text-text-muted">{r.note}</span>
                 </div>
               ))}
+              {funnel.unmeasuredRates.map((r) => (
+                <div key={r.label} className="flex flex-col gap-0.5">
+                  <div className="flex items-center justify-between gap-3 text-xs">
+                    <span className="text-text-secondary">{r.label}</span>
+                    <span
+                      className="font-mono text-text-muted"
+                      data-testid="funnel-rate-not_measured"
+                    >
+                      {t("funnel.rateNotMeasured")}
+                    </span>
+                  </div>
+                  <span className="text-meta text-text-muted">
+                    {t(`funnel.reason.${r.reasonKey}`)}
+                  </span>
+                </div>
+              ))}
             </div>
             <div className="flex flex-col gap-1">
               <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
@@ -319,7 +358,9 @@ export default async function AdminTelemetryPage({
               </h3>
               {funnel.sources.length === 0 ? (
                 <p className="text-xs text-text-secondary">
-                  No attributed conversions yet.
+                  {funnel.available
+                    ? "No attributed conversions yet."
+                    : t("funnel.unavailable")}
                 </p>
               ) : (
                 funnel.sources.map((s) => (
@@ -352,7 +393,9 @@ export default async function AdminTelemetryPage({
               </h3>
               {funnel.campaigns.length === 0 ? (
                 <p className="text-xs text-text-secondary">
-                  {t("campaigns.empty")}
+                  {funnel.available
+                    ? t("campaigns.empty")
+                    : t("funnel.unavailable")}
                 </p>
               ) : (
                 <div className="overflow-x-auto">
@@ -520,12 +563,7 @@ export default async function AdminTelemetryPage({
             AI cost and usage
           </h2>
           <p className="text-meta text-text-muted">
-            First-party AI accounting: per-run audit rows (ai_runs, USD from
-            the reviewed pricing table) and the canonical EUR-cent usage
-            ledger (usage_cost_events). While the AI provider mode stays
-            disabled in production both tables hold 0 rows — the zeros below
-            are real measurements, not placeholders. Unknown cost is shown as
-            a dash, never as 0.
+            {t("funnel.aiHelp")}
           </p>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">

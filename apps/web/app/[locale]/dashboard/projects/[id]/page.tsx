@@ -23,8 +23,10 @@ import {
   formatProjectPlace,
 } from "@/lib/projects/location";
 import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
+import { MessageButton } from "@/components/app/message-button";
 import { CountUp } from "@/components/app/today/count-up";
 import { ProjectWorkGallery } from "@/components/app/project-work-gallery";
+import { ProjectHistoricalWork } from "@/components/app/project-historical-work";
 import { type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 
@@ -357,6 +359,14 @@ export default async function ProjectStadiumPage({
                     ? t("lastActivity", { date: w.lastActivity.slice(0, 10) })
                     : t("noActivity")}
                 </p>
+                {/* WRITE — the person on the project opens the ONE conversation
+                    (the §8.1 gate reads the caller's own authority over this
+                    project; nothing is sent until the manager writes). */}
+                <MessageButton
+                  profileId={w.workerProfileId}
+                  projectId={id}
+                  labelKey="messageWorker"
+                />
               </li>
             ))}
           </ul>
@@ -482,6 +492,9 @@ export default async function ProjectStadiumPage({
           }
         />
       </div>
+
+      {/* ── Historical work: organization-provided imported history on this project ── */}
+      <ProjectHistoricalWork projectId={id} locale={locale} />
 
       {/* ── Missing positions: the needs model does not exist yet — say so ── */}
       <section className="flex flex-col gap-2" data-testid="stadium-positions-note">

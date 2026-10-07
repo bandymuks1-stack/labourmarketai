@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { notifyJournalReviewDecisions } from "./review-notification";
 
 /**
  * Batch review with the EXCEPTIONS PYRAMID (DESIGN_SOUL §3) — read side.
@@ -87,13 +88,26 @@ export async function reviewEntriesBatch(
       },
     );
     if (error || !Array.isArray(data)) return { ok: false, outcomes: [] };
-    return {
-      ok: true,
-      outcomes: (data as { entry_id: string; outcome: string }[]).map((r) => ({
-        entryId: r.entry_id,
-        outcome: r.outcome,
-      })),
-    };
+    const outcomes = (data as { entry_id: string; outcome: string }[]).map((r) => ({
+      entryId: r.entry_id,
+      outcome: r.outcome,
+    }));
+    // DURABLE NOTIFICATION (journal_review_decided): each entry the RPC
+    // actually approved tells its worker. Awaited, never throws.
+    const approved = outcomes.filter((o) => o.outcome === "approved");
+    if (approved.length > 0) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        await notifyJournalReviewDecisions(
+          supabase,
+          user.id,
+          approved.map((o) => ({ entryId: o.entryId, decision: "approved" as const })),
+        );
+      }
+    }
+    return { ok: true, outcomes };
   } catch {
     return { ok: false, outcomes: [] };
   }

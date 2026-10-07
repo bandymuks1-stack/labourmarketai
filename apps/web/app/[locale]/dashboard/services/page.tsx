@@ -44,6 +44,7 @@ export default async function ServicesPage({
     notAvailable: t("notAvailable"),
     empty: t("empty"),
     addButton: t("addButton"),
+    addPartnership: t("addPartnership"),
     formTitleLabel: t("form.titleLabel"),
     formTitlePlaceholder: t("form.titlePlaceholder"),
     formDescriptionLabel: t("form.descriptionLabel"),

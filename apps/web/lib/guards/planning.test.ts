@@ -146,6 +146,9 @@ describe("1. read-only composition of existing RLS-scoped reads", () => {
         "journal_entries",
         "journal_entry_metrics",
         "engagement_contexts",
+        // 2026-09-30: the caller's OWN active manager-class memberships — the
+        // manages_organization() predicate, so a manager sees what they manage.
+        "company_memberships",
         // premium calendar 2026-09-29: the review rows of the SAME entry ids,
         // so a week block can say an entry was confirmed by someone else.
         "journal_entry_confirmations",
@@ -207,7 +210,11 @@ describe("2. every item href is a real registered route", () => {
     const smokeRoutes = new Set(PRIMARY_ROUTES.map((r) => r.urlPattern));
     expect(hrefForSource("booking", "x")).toBe("/dashboard/bookings");
     expect(smokeRoutes.has("/dashboard/bookings")).toBe(true);
-    expect(hrefForSource("task", "x")).toBe("/dashboard/tasks");
+    // Deep-links the specific task (anchor + highlight), not the bare list.
+    expect(hrefForSource("task", "x")).toBe("/dashboard/tasks?task=x#task-x");
+    expect(hrefForSource("task", "x", "p1")).toBe(
+      "/dashboard/tasks?project=p1&task=x#task-x",
+    );
     expect(smokeRoutes.has("/dashboard/tasks")).toBe(true);
   });
 

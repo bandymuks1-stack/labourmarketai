@@ -155,7 +155,7 @@ export const agencyInviteClientSchema = z.object({
   /** Optional since 2026-09-04: the chat never knows the company id — the
    *  executor resolves the ACTIVE workspace's company (M-P0-3, the same
    *  resolver every employer write uses). A supplied id is still re-checked
-   *  by the RPC (`owns_company` + staffing_agency). */
+   *  by the RPC (`owns_company` + `company_acts_as_agency`). */
   agencyCompanyId: uuid.optional(),
   /** Shape gate only — the canonical `validateInviteEmail` stays authoritative. */
   email: z.string().trim().email().max(254),

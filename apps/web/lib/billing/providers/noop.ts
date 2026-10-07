@@ -31,6 +31,9 @@ export function noopProvider(): BillingProvider {
     async retrieveSubscription() {
       return { ok: false as const, reason: "payments_disabled" };
     },
+    async retrieveSubscriptionRaw() {
+      return { ok: false as const, reason: "payments_disabled", retryable: false };
+    },
     async listCustomerSubscriptions() {
       return { ok: false as const, reason: "payments_disabled" };
     },

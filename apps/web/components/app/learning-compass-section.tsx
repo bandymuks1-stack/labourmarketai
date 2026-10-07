@@ -2,7 +2,12 @@ import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/lib/i18n/navigation";
-import type { CompassNextStep, LearningCompass } from "@/lib/learning/learning-compass-model";
+import {
+  importedJobsHref,
+  recommendationNextAction,
+  type CompassNextStep,
+  type LearningCompass,
+} from "@/lib/learning/learning-compass-model";
 
 /** Where each next step is actually done — in-page anchors on the profile
  *  (the compass renders there) or the one canonical route. */
@@ -40,7 +45,7 @@ export async function LearningCompassSection({
   const professionLabel = (slug: string) =>
     tProf.has(slug as never) ? tProf(slug as never) : slug.replace(/-/g, " ");
 
-  const { becoming, evidence, fitsNow, missing, nextSteps } = compass;
+  const { becoming, evidence, fitsNow, missing, nextSteps, recommendations } = compass;
 
   return (
     <Card compact>
@@ -100,6 +105,15 @@ export async function LearningCompassSection({
                           {c.demandCount === null ? t("cohortDemandUnknown") : t("cohortDemand", { count: c.demandCount })}
                         </span>
                       ) : null}
+                      {c.targetProfessionSlug && c.demandCount !== null && c.demandCount > 0 ? (
+                        <Link
+                          href={importedJobsHref(c.targetProfessionSlug) as "/jobs"}
+                          className="w-fit text-brand-blue hover:underline"
+                          data-testid={`compass-cohort-jobs-${c.cohortId}`}
+                        >
+                          {t("cohortDemandOpen")} →
+                        </Link>
+                      ) : null}
                     </li>
                   ))}
                 </ul>
@@ -135,6 +149,7 @@ export async function LearningCompassSection({
 
         <div className="flex flex-col gap-1" data-testid="compass-fits">
           <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("fits")}</h3>
+          <p className="text-meta text-text-muted" data-testid="compass-fits-source">{t("fitsSource")}</p>
           {fitsNow.length === 0 ? (
             <p className="text-xs leading-relaxed text-text-muted">{t("fitsNone")}</p>
           ) : (
@@ -194,6 +209,66 @@ export async function LearningCompassSection({
             </>
           )}
         </div>
+
+        {recommendations.length > 0 ? (
+          <div className="flex flex-col gap-1" data-testid="compass-recommendations">
+            <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("recTitle")}</h3>
+            <ul className="flex flex-col gap-1.5 text-xs">
+              {recommendations.map((r) => {
+                const first = r.sources[0];
+                const role = first?.roleSlug ? professionLabel(first.roleSlug) : null;
+                return (
+                  <li
+                    key={`${r.basis}:${r.skillSlug}`}
+                    className="rounded-md border border-ink-500 px-2 py-1.5"
+                    data-testid="compass-recommendation"
+                    data-basis={r.basis}
+                  >
+                    <span className="font-medium text-text-primary">{skillLabel(r.skillSlug)}</span>
+                    <span className="block leading-relaxed text-text-secondary">
+                      {r.basis === "profession_gap"
+                        ? t("recWhyProfession", {
+                            profession: r.professionSlug ? professionLabel(r.professionSlug) : "",
+                          })
+                        : r.basis === "demand_weak_evidence"
+                          ? t(role ? "recWhyWeakRole" : "recWhyWeak", { role: role ?? "" })
+                          : t(role ? "recWhyMissingRole" : "recWhyMissing", { role: role ?? "" })}
+                      {r.sources.length > 1 ? ` ${t("recMoreRequests", { count: r.sources.length - 1 })}` : ""}
+                    </span>
+                    {(() => {
+                      const action = recommendationNextAction(r);
+                      return (
+                        <Link
+                          href={
+                            (action.kind === "opportunities"
+                              ? action.professionSlug
+                                ? `/dashboard/opportunities?profession=${encodeURIComponent(action.professionSlug)}`
+                                : "/dashboard/opportunities"
+                              : action.kind === "journal"
+                                ? "/dashboard/journal"
+                                : "/dashboard/profile#profile-edit") as "/dashboard/profile"
+                          }
+                          className="mt-1 inline-block text-brand-blue hover:underline"
+                          data-testid="compass-recommendation-action"
+                          data-action={action.kind}
+                        >
+                          {t(
+                            action.kind === "opportunities"
+                              ? "recActionOpportunity"
+                              : action.kind === "journal"
+                                ? "recActionJournal"
+                                : "recActionProfile",
+                          )}{" "}
+                          →
+                        </Link>
+                      );
+                    })()}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ) : null}
 
         <div className="flex flex-col gap-1" data-testid="compass-next">
           <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("next")}</h3>

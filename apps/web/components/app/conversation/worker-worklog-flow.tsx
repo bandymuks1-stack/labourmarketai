@@ -4,6 +4,12 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { mentionsOrganization } from "@/lib/journal/org-mention";
 import { useTranslations } from "next-intl";
 import {
+  PROJECT_FIELD_NONE,
+  projectChoiceIsSatisfied,
+  projectPromptFor,
+  type AssignedProject,
+} from "@/lib/journal/project-attribution";
+import {
   ChatAction,
   ChatActionRow,
 } from "@/components/app/conversation/chat/chat-action";
@@ -41,6 +47,7 @@ import {
 import { trackFunnel } from "@/lib/telemetry/task";
 import { formatUtcDate } from "@/lib/time/display";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { personCalendarDay } from "@/lib/time/person-calendar-day";
 
 export type WorkLogLabels = {
   understood: string;
@@ -260,7 +267,11 @@ export function WorkerWorkLogFlow({
   photoFirst = false,
   initialFile = null,
   onRegisterAttachSink,
+  voice,
 }: {
+  /** Set only when the text came from the voice door (already reviewed by the
+   *  person): carried to the save as provenance, nothing more. */
+  voice?: { language: string; disclosureVersion: string };
   draft: WorkLogParse;
   locale: string;
   labels: WorkLogLabels;
@@ -293,6 +304,11 @@ export function WorkerWorkLogFlow({
   }, [savedEntryId]);
   const [engagements, setEngagements] = useState<WorkLogEngagement[]>([]);
   const [engagementId, setEngagementId] = useState<string>("");
+  /** Which project the hours belong to. Two or more active projects in the
+   *  chosen context → nothing is preselected and the person must answer
+   *  (a project, or "not project work"); the shared rule lives in
+   *  lib/journal/project-attribution. */
+  const [projectChoice, setProjectChoice] = useState<string>("");
   /** Rule C: several engagements are legitimately possible, so the flow must
    *  ask instead of preselecting one. */
   const [mustChooseEngagement, setMustChooseEngagement] = useState(false);
@@ -476,12 +492,24 @@ export function WorkerWorkLogFlow({
     };
   }, [labels.errorGeneric]);
 
+  const contextProjects: AssignedProject[] =
+    engagements.find((e) => e.id === engagementId)?.projects ?? [];
+  const projectPrompt = projectPromptFor(contextProjects);
+  // A choice made for another context's projects never carries over.
+  const projectChoiceValid = projectChoiceIsSatisfied(contextProjects, projectChoice)
+    ? projectChoice
+    : "";
+
   function input() {
     return {
       engagementContextId: engagementId,
       notes: notes.trim(),
       workDate,
       siteName: site.trim() || null,
+      ...(voice ? { voice } : {}),
+      ...(projectPrompt === "ask" && projectChoiceValid
+        ? { projectId: projectChoiceValid }
+        : {}),
     };
   }
 
@@ -511,6 +539,10 @@ export function WorkerWorkLogFlow({
         kind: "error",
         message: engagements.length > 1 ? labels.contextAmbiguous : labels.errorGeneric,
       });
+      return;
+    }
+    if (!projectChoiceIsSatisfied(contextProjects, projectChoiceValid)) {
+      setPhase({ kind: "error", message: tCandidate("projectAmbiguous") });
       return;
     }
     start(async () => {
@@ -1081,6 +1113,45 @@ export function WorkerWorkLogFlow({
         </label>
       )}
 
+      {projectPrompt === "ask" ? (
+        <label className="flex flex-col gap-1 text-support">
+          <span className="text-text-muted">{tCandidate("project")}</span>
+          <select
+            value={projectChoiceValid}
+            disabled={confirming || pending}
+            onChange={(e) => {
+              setProjectChoice(e.target.value);
+              clearError();
+            }}
+            data-testid="worklog-project"
+            className="rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-support text-text-primary"
+          >
+            <option value="">{tCandidate("projectChoose")}</option>
+            {contextProjects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.label}
+              </option>
+            ))}
+            <option value={PROJECT_FIELD_NONE}>{tCandidate("projectNone")}</option>
+          </select>
+          {projectChoiceValid === "" ? (
+            <span
+              className="text-meta leading-relaxed text-state-warning"
+              data-testid="worklog-project-must-choose"
+            >
+              {tCandidate("projectAmbiguous")}
+            </span>
+          ) : null}
+        </label>
+      ) : projectPrompt === "auto" ? (
+        <p
+          className="text-meta leading-relaxed text-text-muted"
+          data-testid="worklog-project-auto"
+        >
+          {tCandidate("projectAuto", { name: contextProjects[0]?.label ?? "" })}
+        </p>
+      ) : null}
+
       {photoFirst ? null : photoField}
 
       {confirming ? (
@@ -1180,7 +1251,7 @@ function RecordedTimePreview({
   const record = useMemo(() => {
     const anchor = /^\d{4}-\d{2}-\d{2}$/.test(workDate)
       ? workDate
-      : new Date().toISOString().slice(0, 10);
+      : personCalendarDay();
     const t = deriveIntakeWorkTime(notes, anchor);
     const partsMinutes = t.fragments.reduce((sum, f) => {
       if (f.timeUnit === "hours") return sum + f.timeValue * 60;

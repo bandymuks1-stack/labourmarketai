@@ -832,6 +832,10 @@ export default async function ProfilePage({
           ),
         )
       : {};
+  // The work behind each record (project, client, capacity, source, proof
+  // facts) is composed INSIDE the evidence read already in the page's one
+  // batch (`listMyOrganizationEvidence`), so it adds no serial stage here.
+  const historyContexts = myOrgEvidence.kind === "ok" ? myOrgEvidence.contexts : {};
 
   return (
     <div className="flex flex-col gap-6">
@@ -1050,6 +1054,7 @@ export default async function ProfilePage({
                   records={myOrgEvidence.records}
                   needsMigration={false}
                   organizationNames={orgNamesByPerson}
+                  contexts={historyContexts}
                   showTitle={false}
                 />
               ) : null}

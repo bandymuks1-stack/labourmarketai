@@ -30,6 +30,11 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Valige seotus…",
   "engagementAmbiguous": "See töö võib kuuluda rohkem kui ühe seotuse alla. Valige enne salvestamist, millise.",
+  "project": "Projekt",
+  "projectChoose": "Valige projekt…",
+  "projectNone": "Pole projektitöö",
+  "projectAmbiguous": "Teid on määratud mitmele projektile. Enne salvestamist valige, millisele projektile need tunnid kuuluvad (või märkige, et see pole projektitöö).",
+  "projectAuto": "Projekt: {name}",
   "unconfirmedTimeBlocked": "{count} registreeritud kestust ootab veel ülevaatamist ega salvestuks. Jätke need alles või eemaldage.",
   "entry": {
     "status": {
@@ -173,9 +178,35 @@
       "too_large": "Salvestis on liiga suur (max 25 MB).",
       "too_long": "Salvestis on liiga pikk (max 10 minutit).",
       "unavailable": "Transkriptsiooniserver pole praegu saadaval.",
-      "undecodable": "Heli ei õnnestunud lugeda — proovige uuesti."
+      "undecodable": "Heli ei õnnestunud lugeda — proovige uuesti.",
+      "rate_limited": "Liiga palju salvestusi lühikese ajaga - oota veidi ja proovi uuesti.",
+      "token_expired": "Üleslaadimise seanss aegus - proovi uuesti.",
+      "unauthorized": "Sinu seansil pole häälfunktsiooni luba - logi uuesti sisse.",
+      "service_unreachable": "Transkribeerimisserverit ei õnnestunud kätte saada. Kontrolli ühendust ja proovi uuesti; salvestus säilib sellel lehel."
     },
-    "permissionDenied": "Mikrofoni juurdepääs blokeeriti. Lubage mikrofon brauseri seadetes ja proovige uuesti."
+    "permissionDenied": "Mikrofoni juurdepääs blokeeriti. Lubage mikrofon brauseri seadetes ja proovige uuesti.",
+    "disclosureProvenance": "Salvestatud kirje märgitakse häälega dikteeritud ja sinu üle vaadatud kirjeks.",
+    "state": {
+      "ready": "Valmis. Vali kõnekeel ja alusta salvestamist.",
+      "permissionRequired": "Brauser küsib alustamisel mikrofoniluba. Enne sinu luba midagi ei salvestata.",
+      "policyBlocked": "Saidi turvapoliitika blokeerib siin mikrofoni. Häälsalvestus pole sellel lehel saadaval - kirje saad kirjutada tekstina.",
+      "unsupported": "See brauser ei saa siin heli salvestada (vaja on turvalist lehte ja mikrofoni salvestustuge). Saad laadida üles helifaili või kirjutada teksti.",
+      "noDevice": "Sellest seadmest ei leitud mikrofoni.",
+      "deviceBusy": "Mikrofoni kasutab teine rakendus. Sulge see ja proovi uuesti.",
+      "cancelled": "Salvestus tühistati. Midagi ei laaditud üles ega salvestatud.",
+      "requesting": "Ootan sinu luba mikrofoni kasutamiseks...",
+      "interrupted": "Salvestus peatati, sest leht oli peidetud. Jätka, kui oled tagasi.",
+      "interruptedKept": "Mikrofon peatus, seega salvestus lõppes varem. Salvestatu on allpool tekstiks tehtud - palun kontrolli.",
+      "uploading": "Salvestust laaditakse üles..."
+    },
+    "language": {
+      "label": "Kõnekeel",
+      "auto": "Tuvasta automaatselt",
+      "hint": "Vali keel, mida räägid - see ei pea olema sama mis saidi keel."
+    },
+    "recordAgain": "Salvesta uuesti",
+    "announceStarted": "Salvestus algas",
+    "announceMinutes": "Salvestatud {minutes} min"
   },
   "statusExplainer": "Kuidas teie sissekandeid kasutatakse?",
   "exampleLine": "Näiteks: paigaldasin kipsseinu, lugesin jooniseid ja töötasin laserloodiga.",
@@ -243,7 +274,11 @@
     "sessionExpired": "Seanss on aegunud. Palun logige uuesti sisse.",
     "noWorkerProfile": "Töötaja profiili ei leitud. Avage konto seaded ja lülitage töötaja roll sisse.",
     "engagementRequired": "Valige töökontekst (organisatsioon või projekt), kuhu see sissekanne kuulub.",
+    "projectNotAssignable": "Valitud projekt pole teile määratud või kuulub teisele organisatsioonile. Valige projekt nimekirjast.",
     "notesRequired": "Kirjeldage, mida tegite — vaba tekst on sissekande alus.",
+    "workDateRequired": "Valige päev, mil see töö tehti.",
+    "workDateInvalid": "Töö kuupäev ei ole kehtiv kuupäev.",
+    "workDateFuture": "Töö kuupäev ei tohi olla tulevikus.",
     "quantityInvalid": "Kogus peab olema mittenegatiivne arv.",
     "unitSlugUnknown": "Seda ühikut ei tunta veel ära: {units}. Valige teine ühik või proovige hiljem uuesti.",
     "sourceDocumentInvalid": "Viidatud lähtedokumenti sinu dokumentide hulgast ei leitud.",

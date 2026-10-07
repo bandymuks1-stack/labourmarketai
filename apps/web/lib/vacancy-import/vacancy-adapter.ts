@@ -43,6 +43,7 @@ import {
   readVacancyJsonLines,
   type VacancyJsonLinesStopReason,
 } from "@/lib/vacancy-sources/vacancy-json-lines";
+import { expandDetailFanOut, type DetailFetchResult } from "@/lib/vacancy-sources/vacancy-detail-fanout";
 import { assertVacancyProviderOperational } from "./vacancy-kill-switch";
 
 /**
@@ -74,7 +75,9 @@ export type VacancyFetchErrorCode =
   | "response_too_large"
   | "invalid_json"
   | "network_error"
-  | "timeout";
+  | "timeout"
+  /** A two-level feed's detail request failed: the page fails closed. */
+  | "detail_fetch_failed";
 
 export interface VacancyFetchRequestV1 {
   readonly provider: VacancyProviderDescriptorV1;
@@ -83,7 +86,22 @@ export interface VacancyFetchRequestV1 {
   readonly query?: Readonly<Record<string, string | number>>;
   /** Owner-provisioned key for a key-requiring endpoint. Never logged. */
   readonly apiKey?: string | null;
+  /**
+   * The continuation token to resume from, for a `cursor` endpoint that names
+   * its next page by PATH. Substituted into the descriptor's `pathTemplate`
+   * after a plain-identifier check; never a caller-supplied path.
+   */
+  readonly continuationToken?: string | null;
+  /**
+   * The capture instant (ISO), used ONLY to start a cold walk at a time on a
+   * feed whose head is years old (`cursor.coldStart`). Deterministic: the
+   * caller's clock, never read here.
+   */
+  readonly coldStartAtIso?: string | null;
 }
+
+/** A continuation token that may be placed in a path: one identifier segment. */
+const PATH_TOKEN = /^[A-Za-z0-9_-]{8,100}$/;
 
 export type VacancyFetchResult =
   | {
@@ -110,8 +128,14 @@ export type VacancyFetchResult =
 export function buildVacancyRequestUrl(
   endpoint: VacancyChannelEndpointV1,
   query: Readonly<Record<string, string | number>> = {},
+  continuationToken: string | null = null,
 ): string {
-  const url = new URL(endpoint.path, `https://${endpoint.host}`);
+  const template = endpoint.pagination === "cursor" ? (endpoint.cursor?.pathTemplate ?? null) : null;
+  const path =
+    template !== null && continuationToken !== null && PATH_TOKEN.test(continuationToken)
+      ? template.replace("{token}", continuationToken)
+      : endpoint.path;
+  const url = new URL(path, `https://${endpoint.host}`);
   // A `cursor` endpoint's continuation-token key is part of the closed set
   // too — it is DECLARED on the descriptor, not supplied by a caller, so the
   // allowlist stays closed while the adapter stays provider-agnostic.
@@ -151,6 +175,50 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/** Largest single ad accepted from a two-level feed's detail endpoint. */
+const MAX_DETAIL_BYTES = 1024 * 1024;
+
+/**
+ * One detail request of a two-level feed, under the provider's own retry,
+ * timeout and byte bounds. 404/410 report `gone` (the ad no longer exists);
+ * any other 4xx is deterministic and reported as a failure without retry.
+ */
+async function fetchDetailJson(
+  url: string,
+  headers: Readonly<Record<string, string>>,
+  bounds: ReturnType<typeof resolveProviderBounds>,
+): Promise<DetailFetchResult> {
+  const attempts = bounds.maxRetries + 1;
+  let detail = "no_attempt";
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    if (attempt > 0) await sleep(bounds.retryBackoffMs * attempt);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), bounds.requestTimeoutMs);
+    try {
+      const res = await fetch(url, { method: "GET", headers, signal: controller.signal, redirect: "error" });
+      if (res.status === 404 || res.status === 410) return { ok: false, gone: true, detail: String(res.status) };
+      if (!res.ok) {
+        detail = `http_${res.status}`;
+        if (res.status >= 400 && res.status < 500) return { ok: false, gone: false, detail };
+        continue;
+      }
+      if (!/json/i.test(res.headers.get("content-type") ?? "")) return { ok: false, gone: false, detail: "content_type_invalid" };
+      const raw = await res.arrayBuffer();
+      if (raw.byteLength > MAX_DETAIL_BYTES) return { ok: false, gone: false, detail: "detail_too_large" };
+      try {
+        return { ok: true, body: JSON.parse(Buffer.from(raw).toString("utf8")) };
+      } catch {
+        return { ok: false, gone: false, detail: "invalid_json" };
+      }
+    } catch (err) {
+      detail = err instanceof Error && (err.name === "AbortError" || /abort/i.test(err.message)) ? "timeout" : "network_error";
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  return { ok: false, gone: false, detail };
+}
+
 /**
  * Fetch one page from one provider channel with every bound enforced. The
  * kill switch is asserted before the first attempt.
@@ -170,7 +238,7 @@ export async function fetchVacancyPage(
     };
   }
 
-  const requestUrl = buildVacancyRequestUrl(endpoint, req.query);
+  const requestUrl = buildVacancyRequestUrl(endpoint, req.query, req.continuationToken ?? null);
   // The provenance reference is the URL itself — it carries no secret by
   // construction, because the key (when required) travels as a header.
   const requestRef = requestUrl;
@@ -196,6 +264,14 @@ export async function fetchVacancyPage(
     "application/json",
     req.apiKey,
   );
+  // A cold walk on a feed whose head is years old starts at a time instead.
+  const coldStart = endpoint.pagination === "cursor" ? (endpoint.cursor?.coldStart ?? null) : null;
+  if (coldStart !== null && (req.continuationToken ?? null) === null && req.coldStartAtIso) {
+    const at = Date.parse(req.coldStartAtIso);
+    if (Number.isFinite(at)) {
+      headers["If-Modified-Since"] = new Date(at - coldStart.ifModifiedSinceLookbackSeconds * 1000).toUTCString();
+    }
+  }
 
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     if (attempt > 0) await sleep(bounds.retryBackoffMs * attempt);
@@ -266,6 +342,21 @@ export async function fetchVacancyPage(
           errorCode: "invalid_json",
           detail: "unparseable_body",
         };
+      }
+
+      // A TWO-LEVEL feed (NAV): resolve the page's entries into full ads before
+      // the pure parser sees it. Any detail failure fails the WHOLE page, so
+      // the cursor can never move past an ad that was not read.
+      if (endpoint.detailFanOut) {
+        const expanded = await expandDetailFanOut({
+          endpoint,
+          body,
+          fetchDetail: (url) => fetchDetailJson(url, headers, bounds),
+        });
+        if (!expanded.ok) {
+          return { ok: false, requestRef, errorCode: "detail_fetch_failed", detail: expanded.detail };
+        }
+        return { ok: true, requestRef, httpStatus: res.status, responseSha256, byteLength, body: expanded.body };
       }
 
       return {

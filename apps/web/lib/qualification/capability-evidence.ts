@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import type { CapabilityEvidence } from "@/lib/qualification/capability-standing";
+import type { RecognitionRow } from "@/lib/skills/recognition-model";
 
 /**
  * THE PERSON'S OWN RECORDED WORK, counted for a capability question.
@@ -111,4 +112,46 @@ export async function getOwnRecordedWorkEvidence(
     recordedEntries,
     verifiedSkills,
   };
+}
+
+/**
+ * THE PERSON'S OWN RECOGNITION RECORDS (SKL-9) - a READ of an assessor's act.
+ *
+ * `competency_recognitions` is a prepared, UNAPPLIED owner packet (RED): the
+ * relation does not exist on production, so today this answers `[]` and
+ * `hasRecognizedEquivalence` stays false. When the packet is applied, the
+ * subject's own rows (RLS: subject always reads their own) flow through here
+ * with no further change. A missing relation is "nobody has recognised", never
+ * an error; any OTHER failure is `null` - unknown, which the caller must not
+ * turn into a claim in either direction.
+ *
+ * Nothing here writes, and nothing here derives a recognition from work
+ * evidence: only the assessor's record can reach `recognised`.
+ */
+export async function getOwnRecognitionRows(
+  subjectProfileId: string,
+): Promise<readonly RecognitionRow[] | null> {
+  const supabase = await createClient();
+  const res = await asAny(supabase)
+    .from("competency_recognitions")
+    .select(
+      "id, decision, valid_from, valid_until, assessor_organization_id, requirement_kind, requirement_key, revoked_at",
+    )
+    .eq("subject_profile_id", subjectProfileId)
+    .limit(ENTRY_READ_LIMIT);
+  if (res.error) {
+    const code = (res.error as { code?: string }).code;
+    // 42P01 undefined_table / PGRST205 not in schema cache: not applied yet.
+    return code === "42P01" || code === "PGRST205" ? [] : null;
+  }
+  return ((res.data ?? []) as Record<string, unknown>[]).map((r) => ({
+    id: r.id as string,
+    decision: r.decision as RecognitionRow["decision"],
+    validFrom: (r.valid_from as string | null) ?? null,
+    validUntil: (r.valid_until as string | null) ?? null,
+    assessorOrganizationId: r.assessor_organization_id as string,
+    requirementKind: r.requirement_kind as RecognitionRow["requirementKind"],
+    requirementKey: r.requirement_key as string,
+    revokedAt: (r.revoked_at as string | null) ?? null,
+  }));
 }

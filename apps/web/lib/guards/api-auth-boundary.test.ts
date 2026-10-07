@@ -62,13 +62,25 @@ const CLASSIFICATION: Record<
     class: "cookie-only",
     why: "Same reasoning as the portal, and test-mode only on top of it: it starts a Stripe Checkout a browser then completes.",
   },
+  "billing/refresh/route.ts": {
+    class: "cookie-only",
+    why: "Money surface, user self-service: 'refresh my billing status' for the person's CURRENT workspace. It takes no input (workspace, customer and subscription are resolved server-side from the cookie session), only READS the provider, and answers one status word - a non-browser caller has no product reason to poke it, and billing is where a mistake is least recoverable.",
+  },
   "billing/reconcile/route.ts": {
     class: "cookie-only",
     why: "Billing safety v1: the superadmin's READ-ONLY reconciliation report (local billing tables vs the provider's view). Operator surface for a browser session; it takes no input, writes nothing and never charges — a non-browser caller has no product reason to read an anomaly report.",
   },
+  "cron/billing-recovery/route.ts": {
+    class: "public",
+    why: "Triggered by the billing-recovery-cadence GitHub Actions workflow (inert until the owner enables it); identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user - 401 while unset, so never an open trigger. It only READS Stripe and applies through the canonical subscription-apply primitive; it never creates, changes, cancels or refunds a payment. Answers counts and a reason code only, no ids.",
+  },
   "cron/commercial-handoffs/route.ts": {
     class: "public",
     why: "Vercel cron delivers it (once the owner schedules it); identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. Inert a second time while NONSTOP_HANDOFF_ENDPOINT / NONSTOP_HANDOFF_TOKEN are unset (answers not_configured, calls nothing). Its only outbound target is the configured partner door; the body it returns is counts only.",
+  },
+  "cron/job-alerts/route.ts": {
+    class: "public",
+    why: "Triggered by the job-alerts-cadence GitHub Actions workflow; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset, so never an open trigger. Answers counts and a reason code only.",
   },
   "cron/weekly-digest/route.ts": {
     class: "public",

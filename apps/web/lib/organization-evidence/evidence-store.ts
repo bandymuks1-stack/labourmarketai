@@ -96,6 +96,8 @@ export interface SessionRecordWithEvents {
   readonly organization_id: string;
   readonly supplier_role: string;
   readonly evidence_state: string;
+  /** The roster person the record is about (null when none). */
+  readonly organization_person_id?: string | null;
   /** The subject's linked profile, so a self-attestation stays visible. */
   readonly subject_profile_id: string | null;
   readonly events: readonly {
@@ -181,8 +183,21 @@ export interface EvidenceStore {
     sessionId: string,
     page: { readonly offset: number; readonly limit: number },
   ): Promise<StoreResult<readonly SessionRecordWithEvents[]>>;
+  /** One record's lifecycle rows, newest first, bounded (read-only). */
+  listRecordEvents(recordId: string): Promise<StoreResult<readonly StoreRow[]>>;
   /** Append-only lifecycle rows; returns the ids written. */
   insertRecordEvents(rows: readonly StoreRow[]): Promise<StoreResult<readonly { readonly id: string }[]>>;
+
+  // ── parties (append-only: INSERT and SELECT are the only grants) ──────────
+  /** The organization each record belongs to (RLS decides which are visible). */
+  readRecordOrganizations(
+    recordIds: readonly string[],
+  ): Promise<StoreResult<readonly { readonly id: string; readonly organization_id: string }[]>>;
+  /** The parties already recorded on these records. */
+  readParties(recordIds: readonly string[]): Promise<StoreResult<readonly StoreRow[]>>;
+  /** The record ids that name this organization as a party (its attributed work). */
+  readRecordIdsNamingOrganization(partyOrganizationId: string): Promise<StoreResult<readonly string[]>>;
+  insertParties(rows: readonly StoreRow[]): Promise<StoreResult<readonly { readonly id: string }[]>>;
 }
 
 /** A transport's caller, or a store that already IS the data plane. */
@@ -437,7 +452,7 @@ export function supabaseEvidenceStore(caller: DomainCaller): EvidenceStore {
       const res = await db()
         .from("organization_evidence_records")
         .select(
-          "id, organization_id, supplier_role, evidence_state, organization_people(linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at)",
+          "id, organization_id, supplier_role, evidence_state, organization_person_id, organization_people(linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at)",
         )
         .eq("session_id", sessionId)
         .order("id", { ascending: true })
@@ -448,6 +463,7 @@ export function supabaseEvidenceStore(caller: DomainCaller): EvidenceStore {
         organization_id: r.organization_id as string,
         supplier_role: (r.supplier_role as string) ?? "other",
         evidence_state: (r.evidence_state as string) ?? "ORGANIZATION_REPORTED",
+        organization_person_id: (r.organization_person_id as string | null) ?? null,
         subject_profile_id:
           ((r.organization_people as { linked_profile_id?: string | null } | null)?.linked_profile_id ?? null),
         events: ((r.organization_evidence_events as StoreRow[] | null) ?? []).map((e) => ({
@@ -460,8 +476,60 @@ export function supabaseEvidenceStore(caller: DomainCaller): EvidenceStore {
       return { data: rows, error: null };
     },
 
+    async listRecordEvents(recordId) {
+      const res = await db()
+        .from("organization_evidence_events")
+        .select("id, event_type, actor_role, actor_profile_id, created_at")
+        .eq("record_id", recordId)
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (res.error) return fail(res.error);
+      return { data: (res.data ?? []) as StoreRow[], error: null };
+    },
+
     async insertRecordEvents(rows) {
       const res = await db().from("organization_evidence_events").insert(rows).select("id");
+      if (res.error) return fail(res.error);
+      return { data: (Array.isArray(res.data) ? res.data : []) as { id: string }[], error: null };
+    },
+
+    async readRecordOrganizations(recordIds) {
+      if (recordIds.length === 0) return { data: [], error: null };
+      const res = await db()
+        .from("organization_evidence_records")
+        .select("id, organization_id")
+        .in("id", recordIds as string[])
+        .limit(1000);
+      if (res.error) return fail(res.error);
+      return { data: (res.data ?? []) as { id: string; organization_id: string }[], error: null };
+    },
+
+    async readParties(recordIds) {
+      if (recordIds.length === 0) return { data: [], error: null };
+      const res = await db()
+        .from("organization_evidence_parties")
+        .select("id, record_id, organization_id, party_role, party_organization_id, party_label")
+        .in("record_id", recordIds as string[])
+        .limit(5000);
+      if (res.error) return fail(res.error);
+      return { data: (res.data ?? []) as StoreRow[], error: null };
+    },
+
+    async readRecordIdsNamingOrganization(partyOrganizationId) {
+      const res = await db()
+        .from("organization_evidence_parties")
+        .select("record_id")
+        .eq("party_organization_id", partyOrganizationId)
+        .limit(5000);
+      if (res.error) return fail(res.error);
+      return {
+        data: [...new Set(((res.data ?? []) as { record_id: string }[]).map((r) => r.record_id))],
+        error: null,
+      };
+    },
+
+    async insertParties(rows) {
+      const res = await db().from("organization_evidence_parties").insert(rows).select("id");
       if (res.error) return fail(res.error);
       return { data: (Array.isArray(res.data) ? res.data : []) as { id: string }[], error: null };
     },

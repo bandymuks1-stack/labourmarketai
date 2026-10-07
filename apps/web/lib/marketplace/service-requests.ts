@@ -6,6 +6,7 @@ import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { hideQaMarked, isQaViewer } from "@/lib/marketplace/qa-marked";
 import {
   DISCOVERY_READ_LIMIT,
   RESPOND_DECISIONS,
@@ -46,12 +47,18 @@ function isAbsent(error: { code?: string } | null): boolean {
   return !!error?.code && ABSENT.has(error.code);
 }
 
-async function uid(): Promise<{ supabase: SupabaseClient; userId: string } | null> {
+async function uid(): Promise<{
+  supabase: SupabaseClient;
+  userId: string;
+  /** The viewer is a documented QA identity (may see QA-labelled rows). */
+  qaViewer: boolean;
+} | null> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  return user ? { supabase, userId: user.id } : null;
+  if (!user) return null;
+  return { supabase, userId: user.id, qaViewer: isQaViewer(user) };
 }
 
 function offeringTitle(r: Record<string, unknown>): string | null {
@@ -124,7 +131,13 @@ export async function listDiscoverableOfferings(
     providerId: String(r.provider_id ?? ""),
     createdAt: String(r.created_at ?? ""),
   }));
-  return { kind: "ok", rows };
+  // QA-labelled rows never reach real people (owner order 2026-10-01): discovery
+  // is open to every authenticated user, so a QA-labelled service published for a
+  // production proof was visible to anyone. Only a documented QA viewer sees them.
+  return {
+    kind: "ok",
+    rows: hideQaMarked(rows, ctx.qaViewer, (r) => [r.title, r.description]),
+  };
 }
 
 /** The caller's own outgoing requests (buyer status view). */

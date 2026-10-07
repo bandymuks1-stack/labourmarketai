@@ -20,7 +20,8 @@ const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 
 const MODEL = read("lib/market-map/spatial-entities.ts");
 const COMPOSER = read("lib/market-map/spatial-read.ts");
-const COMPONENT = read("components/app/market-map-entity-layers.tsx");
+const TERRITORY = read("lib/market-map/territory-view.ts");
+const WORLD_UI = read("components/app/market-map/world-discovery.tsx");
 const PAGE = read("app/[locale]/dashboard/market-map/page.tsx");
 
 const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
@@ -49,7 +50,8 @@ describe("typed three-entity model", () => {
     // No direct-contact channel may surface on map entities.
     for (const banned of [/phoneNumber/, /emailAddress/, /directContact/]) {
       expect(MODEL).not.toMatch(banned);
-      expect(COMPONENT).not.toMatch(banned);
+      expect(WORLD_UI).not.toMatch(banned);
+      expect(TERRITORY).not.toMatch(banned);
     }
   });
 
@@ -103,55 +105,52 @@ describe("owner-scoped composer — RLS only, no privileged path", () => {
   });
 });
 
-describe("layer-separation UI — three toggleable layers, props-only", () => {
-  it("the component receives typed collections via props and never imports a fetcher", () => {
-    expect(COMPONENT).toMatch(/SpatialEntityCollections/);
-    expect(COMPONENT).not.toMatch(/from\s+"@\/lib\/market-map\/signals"/);
-    expect(COMPONENT).not.toMatch(/from\s+"@\/lib\/market-map\/spatial-read"/);
-    expect(COMPONENT).not.toMatch(/getOwnSpatialCollections|getOwnMarketSignals/);
+describe("layer separation — the three kinds are layers of the ONE map (no separate list component)", () => {
+  // History: this block pinned `market-map-entity-layers.tsx`, a props-only
+  // text list with one toggle per kind. The one-canonical-map change folded it
+  // into the canonical map: the three kinds stay SEPARATE typed collections and
+  // reach the viewer as separate layers, never one mixed pin type —
+  //   person_presence   → the world "supply" layer (aggregate-only buckets),
+  //   project_location  → the world "projects" layer,
+  //   company_territory → the "territory" layer built by `territory-view.ts`.
+  it("the old list component is gone and the page no longer renders it", () => {
+    expect(existsSync(join(APP, "components/app/market-map-entity-layers.tsx"))).toBe(false);
+    expect(PAGE).not.toMatch(/MarketMapEntityLayers/);
   });
 
-  it("renders one toggle and one honest empty state PER entity kind", () => {
-    // The toggle testid is templated over the kind; the per-kind sections and
-    // empty states are literal.
-    expect(COMPONENT).toContain("entity-layer-toggle-${kind}");
-    for (const kind of ["person_presence", "company_territory", "project_location"]) {
-      expect(COMPONENT).toContain(`data-testid="entity-layer-${kind}"`);
-      expect(COMPONENT).toContain(`data-testid="entity-layer-empty-${kind}"`);
-    }
-    expect(COMPONENT).toContain('data-testid="entity-layers-legend"');
-    expect(COMPONENT).toContain('data-testid="entity-layers-never-mixed"');
-  });
-
-  it("the page wires the owner composer into the layers component", () => {
+  it("the page wires the owner composer into the territory layer", () => {
     expect(PAGE).toMatch(/getOwnSpatialCollections/);
-    expect(PAGE).toMatch(/MarketMapEntityLayers/);
+    expect(PAGE).toMatch(/buildTerritoryView/);
+    expect(PAGE).toMatch(/staticLayers\.territory\s*=/);
+  });
+
+  it("the territory layer is its own colour/layer, never the person or project pin", () => {
+    expect(TERRITORY).toMatch(/layer:\s*"territory"/);
+    expect(TERRITORY).not.toMatch(/layer:\s*"(people|projects|demand)"/);
+  });
+
+  it("the map offers a layer pill per world kind + only the data layers that exist", () => {
+    const world = read("components/app/market-map/world-discovery.tsx");
+    expect(world).toMatch(/\.\.\.WORLD_LAYERS,\s*\.\.\.availableStatic/);
+    expect(world).toMatch(/aria-pressed=\{active\}/);
   });
 });
 
-describe("i18n — marketMap.entities present in the five active locales", () => {
+describe("i18n — the removed entities copy is gone; the layer names exist in every locale", () => {
   for (const loc of ACTIVE_LOCALES) {
-    it(`${loc}: entities subtree with the three kinds + separation/contact notes`, () => {
-      const e = mmEntities(loc);
-      expect(e, `${loc} marketMap.entities`).toBeTruthy();
-      for (const key of ["title", "intro", "neverMixedNote", "contactNote"]) {
-        expect(e[key], `${loc} ${key}`).toBeTruthy();
+    it(`${loc}: no marketMap.entities subtree; layer pills named`, () => {
+      expect(mmEntities(loc), `${loc} marketMap.entities`).toBeUndefined();
+      const layers = JSON.parse(read(`messages/${loc}.json`)).marketMap.world.layers;
+      for (const k of ["demand", "supply", "projects", "jobs", "territory"]) {
+        expect(layers[k], `${loc} layers.${k}`).toBeTruthy();
       }
-      for (const kind of ["person", "company", "project"]) {
-        expect(e[kind]?.name, `${loc} ${kind}.name`).toBeTruthy();
-        expect(e[kind]?.legend, `${loc} ${kind}.legend`).toBeTruthy();
-        expect(e[kind]?.empty, `${loc} ${kind}.empty`).toBeTruthy();
-        expect(e[kind]?.visibilityNote, `${loc} ${kind}.visibilityNote`).toBeTruthy();
-      }
-      // The §20 small-sample band is user-visible as "<5".
-      expect(String(e.person.smallSample)).toContain("<5");
     });
   }
 });
 
 describe("no new migration — the slice derives from existing tables", () => {
   it("the model/composer/component add no DB schema statements", () => {
-    for (const src of [MODEL, COMPOSER, COMPONENT]) {
+    for (const src of [MODEL, COMPOSER, TERRITORY]) {
       expect(src).not.toMatch(/create table|alter table|drop table/i);
     }
   });

@@ -137,6 +137,7 @@ import {
   type EvidenceTier,
 } from "@/lib/evidence/evidence-tier";
 import type { EntrySkillProvenance } from "@/lib/journal/entry-skill-source";
+import type { HistoryContext } from "@/lib/organization-evidence/professional-history-context";
 import { fragmentSkillsByIndex } from "@/lib/journal/fragment-skill-evidence";
 import {
   deriveWorkTimeChecks,
@@ -193,6 +194,10 @@ export type WorkIntelligenceOrganizationRecord = {
   /** Set only when the organization explicitly tied the row to a journal
    *  entry — the journal then already counts that work. */
   readonly journalEntryId: string | null;
+  /** What the record can say about the work behind the hours (project,
+   *  client, capacity, source, proof facts) - carried, never summed, and
+   *  absent where the record does not hold it. Imported evidence only. */
+  readonly context?: HistoryContext;
 };
 
 /** One PERIOD record the organization holds about the person: a total over
@@ -213,6 +218,8 @@ export type WorkIntelligenceOrganizationPeriodRecord = {
    *  A span that is not the source's is shown at month precision with this
    *  label, and never split (owner rule 2026-09-23). */
   readonly provenance: "source" | "human_choice" | "derived";
+  /** The same context the day records carry (imported evidence only). */
+  readonly context?: HistoryContext;
 };
 
 export type WorkPeriodKey = "today" | "week" | "month" | "year" | "all";
@@ -245,6 +252,12 @@ export type WorkIntelligenceInput = {
   readonly skills: readonly WorkIntelligenceSkillRow[];
   /** UTC calendar day the periods end on (inclusive). */
   readonly todayIso: string;
+  /** Last work day that is NOT future (`lib/time/local-day.ts`). A work day
+   *  is the person's LOCAL day, so for a viewer ahead of UTC it can be
+   *  later than the UTC `todayIso`; the unbounded `all` period (and so every
+   *  all-time figure) ends here instead of dropping those hours as
+   *  "tomorrow". Omitted = `todayIso`. */
+  readonly horizonIso?: string;
   /** The period the skill / activity / context / output / provenance
    *  sections describe. `periods` and `months` are always computed over
    *  everything. Defaults to `all`. */
@@ -466,6 +479,12 @@ export type WorkIntelligence = {
    *  their own beside `organizationRecords`, in no period's `hours`, on no
    *  day. `null` exactly when `organizationRecords` is null (UNKNOWN). */
   readonly organizationPeriodRecords: readonly WorkIntelligenceOrganizationPeriodRecord[] | null;
+  /** The organization's DAY records that carry a professional-history context
+   *  (imported evidence), as read - handed through untouched so the Living CV can
+   *  name the work behind the hours. A pass-through, never a sum: no figure in
+   *  this model is derived from it a second time. `null` exactly when
+   *  `organizationRecords` is null (UNKNOWN). */
+  readonly organizationContextRecords?: readonly WorkIntelligenceOrganizationRecord[] | null;
   /** Every declared skill, hours desc (declared-only skills at zero). */
   readonly skills: readonly SkillWorkTime[];
   readonly activities: readonly ActivityWorkTime[];
@@ -532,12 +551,14 @@ export function workPeriodBounds(
   key: WorkPeriodScope,
   todayIso: string,
   focusRange?: WorkRange | null,
+  horizonIso?: string,
 ): { startIso: string | null; endIso: string } {
+  const open = horizonIso && horizonIso > todayIso ? horizonIso : todayIso;
   if (key === "range") {
     const range = normalizeWorkRange(focusRange);
-    return range ? { startIso: range.startIso, endIso: range.endIso } : { startIso: null, endIso: todayIso };
+    return range ? { startIso: range.startIso, endIso: range.endIso } : { startIso: null, endIso: open };
   }
-  if (key === "all") return { startIso: null, endIso: todayIso };
+  if (key === "all") return { startIso: null, endIso: open };
   return {
     startIso: isoDayMinus(todayIso, PERIOD_DAYS[key] - 1),
     endIso: todayIso,
@@ -784,7 +805,7 @@ export function deriveWorkIntelligence(
     ? [...WORK_PERIOD_KEYS, "range"]
     : WORK_PERIOD_KEYS;
   const periods: WorkPeriodTotals[] = periodKeys.map((key) => {
-    const bounds = workPeriodBounds(key, input.todayIso, focusRange);
+    const bounds = workPeriodBounds(key, input.todayIso, focusRange, input.horizonIso);
     let hours = 0;
     let dayUnits = 0;
     let confirmedHours = 0;
@@ -829,7 +850,7 @@ export function deriveWorkIntelligence(
   // window when one was passed, else the tab.
   const focus: WorkPeriodKey = input.focus ?? "all";
   const scope: WorkPeriodScope = focusRange ? "range" : focus;
-  const focusBounds = workPeriodBounds(scope, input.todayIso, focusRange);
+  const focusBounds = workPeriodBounds(scope, input.todayIso, focusRange, input.horizonIso);
   const scoped = derived.filter((d) => inPeriod(d.time.day, focusBounds));
 
   // ── skills ────────────────────────────────────────────────────────────
@@ -1127,7 +1148,7 @@ export function deriveWorkIntelligence(
     orgRows === null
       ? null
       : periodKeys.map((key) => {
-          const bounds = workPeriodBounds(key, input.todayIso, focusRange);
+          const bounds = workPeriodBounds(key, input.todayIso, focusRange, input.horizonIso);
           let hours = 0;
           let rows = 0;
           let importedHours = 0;
@@ -1209,6 +1230,10 @@ export function deriveWorkIntelligence(
     periods,
     organizationRecords,
     organizationPeriodRecords,
+    organizationContextRecords:
+      orgRows === null
+        ? null
+        : orgRows.filter((r) => r.context !== undefined && r.status !== "rejected" && Number.isFinite(r.hours) && r.hours > 0),
     skills,
     activities,
     contexts,

@@ -27,6 +27,7 @@ const coreWrite = vi.fn(async () => ({
 }));
 vi.mock("@/lib/journal/journal-write-core", () => ({
   createJournalEntryCore: (...args: unknown[]) => coreWrite(...(args as [])),
+  projectsToChooseFrom: async () => null,
 }));
 
 vi.mock("next-intl/server", () => ({
@@ -203,7 +204,7 @@ describe("the registry itself", () => {
       // Market companies in as DISCOVERED organizations (2026-09-30, #2000).
       "company.ingest.preview",
       "company.ingest.confirm",
-      // Organization evidence import (2026-09-07) — one flow, eleven steps,
+      // Organization evidence import (2026-09-07) — one flow, thirteen steps (attest and withdraw are draft→confirm pairs),
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product
       // decision, so a new one must be added HERE, deliberately, to pass.
@@ -219,10 +220,14 @@ describe("the registry itself", () => {
       "evidence.import.resolve_time_semantics",
       "evidence.import.commit",
       "evidence.records.list",
-      "evidence.record.attest",
-      "evidence.import.withdraw",
-      "evidence.record.correct",
-      "evidence.session.correct_date_provenance",
+      "evidence.record.attest_draft",
+      "evidence.record.attest_confirm",
+      "evidence.import.withdraw_draft",
+      "evidence.import.withdraw_confirm",
+      "evidence.record.correct_draft",
+      "evidence.record.correct_confirm",
+      "evidence.session.correct_date_provenance_draft",
+      "evidence.session.correct_date_provenance_confirm",
       // Organization PEOPLE ingestion (2026-09-10) — the roster half of that
       // same architecture, over `lib/organization-people/ingest-service.ts`,
       // which the web import panel calls too. Look, answer, commit: the
@@ -288,7 +293,7 @@ describe("the registry itself", () => {
       // Market companies in as DISCOVERED organizations (2026-09-30, #2000).
       "company.ingest.preview",
       "company.ingest.confirm",
-      // Organization evidence import (2026-09-07) — one flow, eleven steps,
+      // Organization evidence import (2026-09-07) — one flow, thirteen steps (attest and withdraw are draft→confirm pairs),
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product
       // decision, so a new one must be added HERE, deliberately, to pass.
@@ -304,10 +309,14 @@ describe("the registry itself", () => {
       "evidence.import.resolve_time_semantics",
       "evidence.import.commit",
       "evidence.records.list",
-      "evidence.record.attest",
-      "evidence.import.withdraw",
-      "evidence.record.correct",
-      "evidence.session.correct_date_provenance",
+      "evidence.record.attest_draft",
+      "evidence.record.attest_confirm",
+      "evidence.import.withdraw_draft",
+      "evidence.import.withdraw_confirm",
+      "evidence.record.correct_draft",
+      "evidence.record.correct_confirm",
+      "evidence.session.correct_date_provenance_draft",
+      "evidence.session.correct_date_provenance_confirm",
       // Organization PEOPLE ingestion (2026-09-10) — the roster half of that
       // same architecture, over `lib/organization-people/ingest-service.ts`,
       // which the web import panel calls too. Look, answer, commit: the
@@ -968,6 +977,7 @@ describe("journal draft → confirm", () => {
         siteName: "Vilnius A1",
         notes: DRAFT.notes,
         engagementContextId: DRAFT.engagementContextId,
+        projectId: null,
         // The named context — the human sees WHERE the entry lands before
         // confirming.
         engagementLabel: "Dev Statyba",
@@ -1170,6 +1180,7 @@ describe("journal draft → confirm", () => {
       notes: DRAFT.notes,
       work_date: DRAFT.workDate,
       site_name: DRAFT.siteName,
+      project_id: "",
       ...intakeWorkTimeFields(DRAFT.notes, DRAFT.workDate),
     });
     const fragments = JSON.parse(String(formData.get("fragments_json")));

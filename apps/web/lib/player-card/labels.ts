@@ -12,6 +12,8 @@ import { provenanceTextKey, provenanceTextParams } from "@/lib/evidence/provenan
 import type { ContextWorkTime, WorkPeriodTotals } from "@/lib/journal/work-intelligence";
 import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import { buildIdentityFacts } from "@/lib/player-card/identity-facts";
+import { computeAdjacentDirections } from "@/lib/opportunities/adjacent-directions";
+import { mobilityLabels } from "@/lib/people/person-page-labels";
 
 /**
  * One place that turns the player-card's REAL data into resolved viewer-locale
@@ -49,6 +51,10 @@ export async function buildPlayerCardLabels(
   // P6 — the provenance line's words: ONE namespace, one key per fact shape
   // (`provenanceTextKey`), so every mount of the card says the same thing.
   const tProv = await getTranslations("provenance");
+  // Mobility words already exist where the same facts are shown elsewhere
+  // (the person page, the CV export) — one wording, no new copy.
+  const tPeople = await getTranslations("people");
+  const tCvPrivate = await getTranslations("cvExport.privateDetails");
 
   const availabilityKey = card.availabilityStatus
     ? `editor.availabilityOption.${card.availabilityStatus}`
@@ -131,7 +137,42 @@ export async function buildPlayerCardLabels(
     t: (key, values) => tIdentity(key, values),
   });
 
+  // NEXT in the card's world: where the person's OWN evidenced skills
+  // already reach — the existing adjacency engine over the skills a record
+  // or a confirmation backs (a declared-only skill does not open a
+  // direction), minus every profession the person already holds.
+  const tWorld = await getTranslations("playerCard.identity.world");
+  const held = new Set(
+    [card.professionSlug, ...card.professions.map((p) => p.slug)].filter((s): s is string => Boolean(s)),
+  );
+  const evidenced = card.skillEvidence.filter((b) => b.entries > 0 || b.tier === "verified").map((b) => b.slug);
+  const directions = computeAdjacentDirections({
+    workerSkillSlugs: evidenced,
+    primaryProfessionSlug: card.professionSlug ?? null,
+  })
+    .directions.filter((d) => !held.has(d.professionId))
+    .slice(0, 4)
+    .map((d) => {
+      const missing = d.missingSkills.slice(0, 2).map((s) => (tSkill.has(s) ? tSkill(s) : s));
+      return {
+        id: d.professionId,
+        label: tProf.has(d.professionId) ? tProf(d.professionId) : d.professionId,
+        detail:
+          missing.length > 0
+            ? tWorld("directionDetail", { shared: d.sharedCount, missing: missing.join(", ") })
+            : tWorld("directionDetailNoGap", { shared: d.sharedCount }),
+        shared: d.sharedCount,
+      };
+    });
+
   return {
+    world: {
+      sceneLabel: tWorld("sceneLabel"),
+      empty: tWorld("empty"),
+      emptyNext: tWorld("emptyNext"),
+      allDetails: tWorld("allDetails"),
+      directions,
+    },
     professionNames,
     currentWork,
     currentWorkLabel: t("identity.currentWork"),
@@ -198,6 +239,15 @@ export async function buildPlayerCardLabels(
         ? (tlm(`countryNames.${card.locationCountry}`) as string)
         : card.locationCountry
       : null,
+    // MOBILITY — where the worker says they would work, and whether they
+    // would relocate. Country NAMES from the one catalogue (an unknown code
+    // stays the code, never a guess); nothing is shown for facts not given.
+    mobilityLabel: tPeople("mobility"),
+    mobilityCountries: mobilityLabels(card.preferredCountries ?? [], {
+      has: (key: string) => tlm.has(`countryNames.${key}`),
+      get: (key: string) => tlm(`countryNames.${key}`) as string,
+    }),
+    relocateLabel: card.willingToRelocate === true ? tCvPrivate("relocate") : null,
     // §5.2 DOCUMENTS — real counts only; absent when the surface is not
     // available for this account (the card then shows no documents block).
     documentsLabel: card.documents ? t("documentsLabel") : null,

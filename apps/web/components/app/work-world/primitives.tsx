@@ -1,5 +1,8 @@
 import type { ReactNode } from "react";
 
+import { PersonPortrait } from "@/components/app/identity/person-portrait";
+import { playerInitials } from "@/lib/identity/player-identity";
+
 /**
  * WORK-WORLD PRIMITIVES — the shared visual grammar of LabourMarket.ai.
  *
@@ -143,19 +146,13 @@ export function PersonPresence({
   const initial = (name.trim()[0] ?? "·").toUpperCase();
   return (
     <span className="flex items-center gap-3" data-testid="ww-person">
-      <span
-        className={`relative grid flex-none place-items-center overflow-hidden rounded-full font-display font-bold ${
-          gold ? "bg-gradient-metallic text-text-on-brand" : "bg-surface-2 text-text-secondary"
-        }`}
-        style={{ width: size, height: size, fontSize: Math.round(size * 0.38) }}
-      >
-        {photoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={photoUrl} alt="" className="h-full w-full object-cover" />
-        ) : (
-          initial
-        )}
-      </span>
+      <PersonPortrait
+        name={name}
+        avatarUrl={photoUrl ?? null}
+        initials={playerInitials(name)}
+        width={`${Math.round(size * 0.8)}px`}
+        working={available}
+      />
       <span className="min-w-0">
         <span className="block truncate text-sm font-semibold text-text-primary">{name}</span>
         {role ? <span className="block truncate text-xs text-text-muted">{role}</span> : null}

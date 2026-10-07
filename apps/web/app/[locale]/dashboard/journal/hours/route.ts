@@ -12,6 +12,7 @@ import {
   summarizeHours,
   type HoursExportEntryContext,
 } from "@/lib/journal/hours-export";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /**
  * GET — download the caller's OWN work hours for one week, two weeks or one
@@ -46,7 +47,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const rawPeriod = params.get("period");
   const period = isHoursExportPeriod(rawPeriod) ? rawPeriod : "month";
   const rawDate = params.get("date");
-  const anchor = isIsoDay(rawDate) ? rawDate : new Date().toISOString().slice(0, 10);
+  const anchor = isIsoDay(rawDate) ? rawDate : (await viewerWorkToday()).todayIso;
   const range = hoursExportRange(period, anchor);
 
   const read = await readMyEntryWorkTime();

@@ -412,7 +412,10 @@ describe("9 · the organization's per-member roll-up rides the same model (owner
     expect(windowReport).toContain("skills: [],");
   });
   it("confirmed counts APPROVED entries only; a rejection is returned, never confirmed", () => {
-    expect(windowReport).toMatch(/if \(result === "approved"\) bucket\.confirmed \+= 1;\s*else if \(result === "submitted"\) bucket\.awaitingReview \+= 1;\s*else bucket\.returned \+= 1;/);
+    // approved → confirmed; a decision-less entry is awaiting ONLY where review
+    // is on (review OFF = reviewNotEnabled, never "awaiting"); anything else
+    // (rejected / changes requested) is returned.
+    expect(windowReport).toMatch(/if \(result === "approved"\) bucket\.confirmed \+= 1;\s*else if \(result === "submitted"\) \{[\s\S]*?bucket\.reviewNotEnabled \+= 1;[\s\S]*?bucket\.awaitingReview \+= 1;[\s\S]*?\}\s*else bucket\.returned \+= 1;/);
     // the pre-fix shape: any confirmation row → confirmed
     expect(windowReport).not.toMatch(/confirmedIds/);
   });
