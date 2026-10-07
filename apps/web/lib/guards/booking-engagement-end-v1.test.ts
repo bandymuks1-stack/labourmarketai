@@ -1535,6 +1535,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-03: PER-12 subject-safe export projection (new SECURITY DEFINER read fn) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261003120000_privacy_export_import_lines_subject_v1.sql",
       "20261003140000_subject_contest_withdraw_constraint_reconcile_v1.sql",
+      // 2026-10-03: ORG-2 agency capability authority (RED, needs-human-gate, NOT applied): list_open_demand_for_agencies / mark_agency_can_offer / job_demands_select re-gated on owns_company + company_acts_as_agency.
+      "20261003150000_org2_agency_capability_authority_v1.sql",
       // 2026-10-04: ai_runs retention classes v2 (SECURITY DEFINER sweep/erasure/export, GRANT, BEFORE UPDATE trigger) — marker is the risk acknowledgement, NOT approval; PR is draft + needs-human-gate, NOT applied.
       "20261003150800_ai_runs_retention_classes_v2.sql",
       // 2026-10-04: verified-email boundary (WORKER_REGISTRATION_FRICTION_REMOVAL, #2152). The marker is a risk acknowledgement, not approval.
