@@ -8112,7 +8112,8 @@
       "org_correspondence_incoming": "Gaunama korespondencija",
       "org_correspondence_outgoing": "Siunčiama korespondencija",
       "org_internal": "Vidinis dokumentas",
-      "org_agreement_attachment": "Sutarties priedas"
+      "org_agreement_attachment": "Sutarties priedas",
+      "org_import_source": "Importo šaltinis (originalus darbo laiko žiniaraštis)"
     },
     "status": {
       "active": "Aktyvus",

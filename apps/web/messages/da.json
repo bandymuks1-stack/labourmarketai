@@ -5506,7 +5506,8 @@
       "org_correspondence_incoming": "Indgående korrespondance",
       "org_correspondence_outgoing": "Udgående korrespondance",
       "org_internal": "Internt dokument",
-      "org_agreement_attachment": "Aftalebilag"
+      "org_agreement_attachment": "Aftalebilag",
+      "org_import_source": "Importkilde (original timeseddel)"
     },
     "status": {
       "active": "Aktiv",

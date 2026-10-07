@@ -8112,7 +8112,8 @@
       "org_correspondence_incoming": "Incoming correspondence",
       "org_correspondence_outgoing": "Outgoing correspondence",
       "org_internal": "Internal document",
-      "org_agreement_attachment": "Agreement attachment"
+      "org_agreement_attachment": "Agreement attachment",
+      "org_import_source": "Import source (original timesheet file)"
     },
     "status": {
       "active": "Active",

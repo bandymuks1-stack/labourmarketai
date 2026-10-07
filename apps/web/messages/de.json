@@ -8112,7 +8112,8 @@
       "org_correspondence_incoming": "Eingehende Korrespondenz",
       "org_correspondence_outgoing": "Ausgehende Korrespondenz",
       "org_internal": "Internes Dokument",
-      "org_agreement_attachment": "Vertragsanlage"
+      "org_agreement_attachment": "Vertragsanlage",
+      "org_import_source": "Importquelle (Original-Stundenzettel)"
     },
     "status": {
       "active": "Aktiv",
