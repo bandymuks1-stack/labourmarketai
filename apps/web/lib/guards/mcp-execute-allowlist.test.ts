@@ -29,6 +29,9 @@ const SINGLE_STEP_ALLOWLIST: readonly string[] = [
   // through the confirmed `evidence.import.commit`.
   "evidence.import.create_session",
   "evidence.import.submit_rows",
+  // A spreadsheet the user attached in ChatGPT, read by the one audited reader into the
+  // SAME staging session as submit_rows: staging only, no record until commit.
+  "evidence.import.stage_file",
   "evidence.import.resolve_row",
   "evidence.import.resolve_label",
   "evidence.import.resolve_time_semantics",
