@@ -8,7 +8,7 @@ import { join } from "node:path";
  * before GRANT, service_role only, paired rollback file.
  */
 const REPO = join(__dirname, "..", "..", "..", "..");
-const NAME = "20261006110000_email_send_ledger_v1";
+const NAME = "20261006130000_email_send_ledger_v1";
 const raw = readFileSync(join(REPO, `supabase/migrations/${NAME}.sql`), "utf8");
 const code = raw
   .split(/\r?\n/)

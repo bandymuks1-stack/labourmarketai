@@ -135,7 +135,7 @@ describe("durable email send guard", () => {
     await send(ledger, email, "o1");
     const dump = JSON.stringify(ledger.rows);
     expect(dump).not.toMatch(/secret/i);
-    expect(dump.toLowerCase().includes("example.com")).toBe(false);
+    expect(dump).not.toMatch(/example\.com/i);
     expect(ledger.rows[0].hash).toMatch(/^[0-9a-f]{64}$/);
     expect(hashRecipient(email)).toBe(hashRecipient("secret.person@example.com"));
     expect(hashRecipient(email, { EMAIL_SEND_LEDGER_SALT: "s" })).not.toBe(hashRecipient(email));

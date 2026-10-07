@@ -13,7 +13,7 @@
  *           upload_status = 'uploaded'; a context with NULL organization is
  *           PERSONAL and is never attributed to any org)
  *   Both are summed server-side by `org_storage_used_bytes_v1` (migration
- *   20261006100000), which also authorizes the caller (org member / admin).
+ *   20261006120000), which also authorizes the caller (org member / admin).
  *
  * SCHEMA GAP (deliberately NOT counted, no provable organization relation):
  *   customer-request attachments (customers.profile_id only), conversation

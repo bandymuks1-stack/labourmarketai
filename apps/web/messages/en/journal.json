@@ -353,9 +353,35 @@
       "too_large": "The recording is too large (max 25 MB).",
       "too_long": "The recording is too long (max 10 minutes).",
       "unavailable": "The transcription server is not available right now.",
-      "undecodable": "The audio could not be read — please try again."
+      "undecodable": "The audio could not be read — please try again.",
+      "rate_limited": "Too many recordings in a short time - wait a moment and try again.",
+      "token_expired": "The upload session expired - please try again.",
+      "unauthorized": "Your session is not authorised for voice - please sign in again.",
+      "service_unreachable": "The transcription server could not be reached. Check your connection and try again; your recording is kept on this page until you leave."
     },
-    "permissionDenied": "Microphone access was blocked. Allow microphone access in your browser settings and try again."
+    "permissionDenied": "Microphone access was blocked. Allow microphone access in your browser settings and try again.",
+    "disclosureProvenance": "The saved entry is marked as dictated by voice and reviewed by you.",
+    "state": {
+      "ready": "Ready. Choose the speaking language, then start recording.",
+      "permissionRequired": "Your browser will ask for microphone permission when you start. Nothing is recorded before you allow it.",
+      "policyBlocked": "The site's security policy blocks the microphone here. Voice recording is unavailable on this page - you can write the entry as text.",
+      "unsupported": "This browser cannot record audio here (it needs a secure page and microphone recording support). You can upload an audio file or write the entry as text.",
+      "noDevice": "No microphone was found on this device.",
+      "deviceBusy": "The microphone is in use by another app. Close it and try again.",
+      "cancelled": "Recording cancelled. Nothing was uploaded or saved.",
+      "requesting": "Waiting for your permission to use the microphone...",
+      "interrupted": "Recording paused because this page was hidden. Resume when you are back.",
+      "interruptedKept": "The microphone stopped, so the recording ended early. What was captured is transcribed below - check it.",
+      "uploading": "Uploading your recording..."
+    },
+    "language": {
+      "label": "Speaking language",
+      "auto": "Detect automatically",
+      "hint": "Choose the language you will speak - it does not have to match the language of this site."
+    },
+    "recordAgain": "Record again",
+    "announceStarted": "Recording started",
+    "announceMinutes": "{minutes} min recorded"
   },
   "savedOpenCv": "View your CV",
   "dayNav": {

@@ -353,9 +353,35 @@
       "too_large": "Die Aufnahme ist zu groß (max. 25 MB).",
       "too_long": "Die Aufnahme ist zu lang (max. 10 Minuten).",
       "unavailable": "Der Transkriptionsserver ist derzeit nicht erreichbar.",
-      "undecodable": "Die Audiodatei konnte nicht gelesen werden — bitte erneut versuchen."
+      "undecodable": "Die Audiodatei konnte nicht gelesen werden — bitte erneut versuchen.",
+      "rate_limited": "Zu viele Aufnahmen in kurzer Zeit - warte kurz und versuche es erneut.",
+      "token_expired": "Die Upload-Sitzung ist abgelaufen - bitte erneut versuchen.",
+      "unauthorized": "Deine Sitzung ist für Sprache nicht berechtigt - bitte neu anmelden.",
+      "service_unreachable": "Der Transkriptionsserver ist nicht erreichbar. Prüfe die Verbindung und versuche es erneut; die Aufnahme bleibt auf dieser Seite erhalten."
     },
-    "permissionDenied": "Der Mikrofonzugriff wurde blockiert. Erlauben Sie den Zugriff in den Browsereinstellungen und versuchen Sie es erneut."
+    "permissionDenied": "Der Mikrofonzugriff wurde blockiert. Erlauben Sie den Zugriff in den Browsereinstellungen und versuchen Sie es erneut.",
+    "disclosureProvenance": "Der gespeicherte Eintrag wird als per Sprache diktiert und von dir geprüft markiert.",
+    "state": {
+      "ready": "Bereit. Wähle die Sprechsprache und starte die Aufnahme.",
+      "permissionRequired": "Dein Browser fragt beim Start nach der Mikrofonerlaubnis. Vor deiner Zustimmung wird nichts aufgenommen.",
+      "policyBlocked": "Die Sicherheitsrichtlinie der Seite blockiert hier das Mikrofon. Sprachaufnahme ist auf dieser Seite nicht verfügbar - du kannst den Eintrag als Text schreiben.",
+      "unsupported": "Dieser Browser kann hier kein Audio aufnehmen (sichere Seite und Mikrofonaufnahme nötig). Du kannst eine Audiodatei hochladen oder Text schreiben.",
+      "noDevice": "Auf diesem Gerät wurde kein Mikrofon gefunden.",
+      "deviceBusy": "Das Mikrofon wird von einer anderen App benutzt. Schließe sie und versuche es erneut.",
+      "cancelled": "Aufnahme abgebrochen. Nichts wurde hochgeladen oder gespeichert.",
+      "requesting": "Warte auf deine Erlaubnis für das Mikrofon...",
+      "interrupted": "Aufnahme pausiert, weil die Seite verborgen war. Setze fort, wenn du zurück bist.",
+      "interruptedKept": "Das Mikrofon wurde getrennt, die Aufnahme endete früher. Das Aufgenommene ist unten transkribiert - bitte prüfen.",
+      "uploading": "Aufnahme wird hochgeladen..."
+    },
+    "language": {
+      "label": "Sprechsprache",
+      "auto": "Automatisch erkennen",
+      "hint": "Wähle die Sprache, die du sprichst - sie muss nicht der Sprache dieser Seite entsprechen."
+    },
+    "recordAgain": "Erneut aufnehmen",
+    "announceStarted": "Aufnahme gestartet",
+    "announceMinutes": "{minutes} Min. aufgenommen"
   },
   "savedOpenCv": "Ihr CV ansehen",
   "dayNav": {

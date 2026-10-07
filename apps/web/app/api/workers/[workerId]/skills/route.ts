@@ -96,7 +96,7 @@ export async function POST(
   // Current saved set (also the diff baseline below).
   const { data: existingRows, error: exErr } = await supabase
     .from("worker_skills")
-    .select("skill_id")
+    .select("skill_id, verified, source")
     .eq("worker_id", workerId);
   if (exErr) {
     console.error("[api/workers/skills POST] read failed:", exErr.message);
@@ -126,31 +126,56 @@ export async function POST(
   }
   const requestedSet = new Set(requested);
   const toInsert = requested.filter((id) => !existing.has(id));
-  const toDelete = [...existing].filter(
-    (id): id is string => id !== null && !requestedSet.has(id),
-  );
+  // G-6: this route may only retire the worker's OWN self-declared, unverified
+  // claims. A manager-verified / journal-derived / confirmed row is evidence
+  // somebody else produced — a stale client list must never erase it, so those
+  // rows are never in the delete set (and the delete below re-states the
+  // restriction in SQL, so a row verified AFTER the read above survives too).
+  const retained: string[] = [];
+  const toDelete: string[] = [];
+  for (const row of existingRows ?? []) {
+    const id = row.skill_id;
+    if (id === null || requestedSet.has(id)) continue;
+    if (row.verified === false && row.source === "self_declared") toDelete.push(id);
+    else retained.push(id);
+  }
 
+  // ORDER matters (no transaction over PostgREST): ADD first, then REMOVE. A
+  // failed insert leaves the saved set untouched and returns an honest 500;
+  // the old delete-then-insert order could lose skills and still say 500. The
+  // insert is an idempotent upsert on the (worker_id, skill_id) unique key, so
+  // two concurrent saves cannot collide and an existing row (e.g. verified
+  // meanwhile) is never overwritten.
+  if (toInsert.length > 0) {
+    // source/verified take their column defaults (self_declared / false).
+    const { error } = await supabase
+      .from("worker_skills")
+      .upsert(
+        toInsert.map((skill_id) => ({ worker_id: workerId, skill_id })),
+        { onConflict: "worker_id,skill_id", ignoreDuplicates: true },
+      );
+    if (error) {
+      console.error("[api/workers/skills POST] insert failed:", error.message);
+      return NextResponse.json({ ok: false, message: "Failed to save" }, { status: 500 });
+    }
+  }
   if (toDelete.length > 0) {
     const { error } = await supabase
       .from("worker_skills")
       .delete()
       .eq("worker_id", workerId)
+      .eq("verified", false)
+      .eq("source", "self_declared")
       .in("skill_id", toDelete);
     if (error) {
       console.error("[api/workers/skills POST] delete failed:", error.message);
       return NextResponse.json({ ok: false, message: "Failed to save" }, { status: 500 });
     }
   }
-  if (toInsert.length > 0) {
-    // source/verified take their column defaults (self_declared / false).
-    const { error } = await supabase
-      .from("worker_skills")
-      .insert(toInsert.map((skill_id) => ({ worker_id: workerId, skill_id })));
-    if (error) {
-      console.error("[api/workers/skills POST] insert failed:", error.message);
-      return NextResponse.json({ ok: false, message: "Failed to save" }, { status: 500 });
-    }
-  }
 
-  return NextResponse.json({ ok: true, count: requested.length });
+  return NextResponse.json({
+    ok: true,
+    count: requestedSet.size + retained.length,
+    ...(retained.length > 0 ? { retained } : {}),
+  });
 }

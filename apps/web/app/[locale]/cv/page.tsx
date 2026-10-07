@@ -23,6 +23,8 @@ import {
 } from "@/lib/cv-export/tailored";
 import { formatUtcDate } from "@/lib/time/display";
 import { EuFormatCv } from "@/components/app/cv/eu-format-cv";
+import { CvOrganizationHistory } from "@/components/app/cv/cv-organization-history";
+import { organizationHistoryLines } from "@/components/app/cv/organization-history-lines";
 import { LivingCvStory, type LivingCvStoryData } from "@/components/app/cv/living-cv-story";
 import { playerInitials } from "@/lib/identity/player-identity";
 import {
@@ -30,6 +32,7 @@ import {
   resolveEuFormatDocument,
 } from "@/lib/cv-export/eu-format";
 import { WORKER_LANGUAGE_NATIVE_NAMES } from "@/lib/worker/worker-languages-model";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /**
  * Verified CV — PDF export (S3.5 + Full CV System v1). A print-clean sheet of
@@ -105,6 +108,11 @@ export default async function VerifiedCvPage({
   const tRole = await getTranslations("auth.signup.role");
   const tDocTypes = await getTranslations("documents.types");
   const tEduTypes = await getTranslations("cvSections.educationTypes");
+  const tOrgHist = await getTranslations("cvOrganizationHistory");
+  const tHistCtx = await getTranslations("historyContext");
+  const tEvRole = await getTranslations("evidenceImport.role");
+  const tEvKind = await getTranslations("evidenceImport.sourceKind");
+  const tEvRel = await getTranslations("evidenceImport.relationship");
 
   const template = parseCvTemplateId(sp.template);
   const compact = template === "compact";
@@ -266,7 +274,7 @@ export default async function VerifiedCvPage({
       availabilityStatus: priv.availabilityStatus,
       availableFrom: priv.availableFrom,
     },
-    new Date().toISOString().slice(0, 10),
+    (await viewerWorkToday()).todayIso,
   ).map((c) => ({
     fingerprint: c.fingerprint,
     text: t(`checks.${c.code}`, {
@@ -638,6 +646,30 @@ export default async function VerifiedCvPage({
                 tDocTypes.has(slug) ? tDocTypes(slug) : slug,
               date: (iso) => formatUtcDate(iso, locale),
               present: t("present"),
+              // Organization-provided history: the SAME composition the
+              // on-screen CV uses, so the two documents never disagree.
+              organizationHistory: (e) => {
+                const l = organizationHistoryLines(e, {
+                  t: (k, v) => tOrgHist(k as never, v as never),
+                  h: (k, v) => tHistCtx(k as never, v as never),
+                  role: (s) => (tEvRole.has(s as never) ? tEvRole(s as never) : null),
+                  sourceKind: (s) => (tEvKind.has(s as never) ? tEvKind(s as never) : null),
+                  relationship: (s) => (tEvRel.has(s as never) ? tEvRel(s as never) : null),
+                  hours: (n) => fmtHours(n),
+                  date: (iso) => formatUtcDate(iso, locale),
+                });
+                return {
+                  heading: l.heading,
+                  subheading: l.subheading,
+                  period: l.period,
+                  note:
+                    [
+                      ...l.details.map((d) => `${d.term}: ${d.value}`),
+                      ...l.proof.map((p) => p.text),
+                      ...(l.contested ? [tOrgHist("contested")] : []),
+                    ].join(" · ") || null,
+                };
+              },
             })}
             labels={{
               documentTitle: t("templates.eu"),
@@ -645,6 +677,8 @@ export default async function VerifiedCvPage({
               nameNotProvided: t("nameNotProvided"),
               personal: t("euFormat.personal"),
               workExperience: t("euFormat.workExperience"),
+              organizationHistory: tOrgHist("title"),
+              organizationHistoryNote: tOrgHist("note"),
               educationAndTraining: t("euFormat.educationAndTraining"),
               personalSkills: t("euFormat.personalSkills"),
               languages: t("languagesTitle"),
@@ -862,6 +896,19 @@ export default async function VerifiedCvPage({
               {historyItems(practiceHistory)}
             </ul>
           </section>
+        ) : null}
+
+        {/* Work history SUPPLIED BY ORGANIZATIONS - imported records with the
+            work behind the hours (project, client, capacity, source, proof
+            facts). Its own group, apart from the person's own history: not
+            self-declared, not independently verified. Omitted when the ledger
+            holds none or could not be read (null = unknown, never "none"). */}
+        {cv.organizationHistory && cv.organizationHistory.length > 0 ? (
+          <CvOrganizationHistory
+            entries={cv.organizationHistory}
+            headingClassName={sectionTitle}
+            bodyClassName={bodyText}
+          />
         ) : null}
 
         {/* Education — self-declared entries; slug labels from i18n. */}

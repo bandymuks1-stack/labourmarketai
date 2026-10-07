@@ -156,6 +156,7 @@
     "cancel": "Atšaukti",
     "edit": "Redaguoti",
     "remove": "Ištrinti",
+    "removeConfirm": "Ištrinti šį skelbimą negrįžtamai?",
     "activate": "Paskelbti",
     "close": "Uždaryti",
     "reopen": "Grąžinti į juodraštį",
@@ -710,7 +711,11 @@
     "closeLabel": "Užverti paiešką",
     "voiceStart": "Ieškoti balsu",
     "voiceStop": "Sustabdyti balso įvestį",
-    "voiceListening": "Klausomasi... pasakykite, ko ieškote — tekstas atsiras paieškos lauke."
+    "voiceListening": "Klausomasi... pasakykite, ko ieškote — tekstas atsiras paieškos lauke.",
+    "voiceConsentText": "Diktavimas paieškos lauke naudoja jūsų naršyklės įmontuotą kalbos atpažinimą. Priklausomai nuo naršyklės (pvz., Chrome ar Safari) garsas siunčiamas tos naršyklės gamintojo kalbos paslaugai, o ne LabourMarket.ai. Mes nieko neišsaugome. Jei norite, kad garsas būtų apdorojamas LabourMarket.ai serveryje, naudokite balso žurnalą.",
+    "voiceConsentAllow": "Tęsti su naršyklės diktavimu",
+    "voiceConsentCancel": "Ne dabar",
+    "voiceFailed": "Diktavimas sustojo - naršyklė negalėjo naudoti mikrofono ar kalbos paslaugos."
   },
   "reports": {
     "eyebrow": "Ataskaitos",
@@ -1656,6 +1661,7 @@
       "journalLinkingDisabled": "Susiejimas su darbo žurnalu dar neįjungtas.",
       "submit": "Sukurti",
       "success": "Projekto kontekstas sukurtas.",
+      "clientNotSaved": "Projektas sukurtas, bet kliento išsaugoti nepavyko. Pridėkite klientą projekto puslapyje.",
       "backToDashboard": "Grįžti į įmonės skydelį",
       "errorName": "Įveskite projekto pavadinimą (bent 2 simboliai).",
       "errorNoCompany": "Tik įmonės paskyra gali kurti projekto kontekstą.",
@@ -1926,7 +1932,36 @@
         "unavailable": "Šiuo metu programų įkelti nepavyko. Perkraukite puslapį; tai, ką sukūrėte, neprarasta.",
         "inviteLearners": "Pakviesti besimokančiuosius",
         "exportReport": "Atsisiųsti ataskaitą (CSV)",
-        "exportReportHint": "Programos, srautai, besimokančiųjų skaičiai ir gyva paklausa — kartu su jūsų besimokančiųjų rezultatais. Nežinomi skaičiai rašomi kaip „unknown“, niekada kaip nulis."
+        "exportReportHint": "Programos, srautai, besimokančiųjų skaičiai ir gyva paklausa — kartu su jūsų besimokančiųjų rezultatais. Nežinomi skaičiai rašomi kaip „unknown“, niekada kaip nulis.",
+        "unassignedLearners": "Priimtų besimokančiųjų, dar nepriskirtų grupei: {count}. Priskirkite juos aukščiau esančioje grupėje.",
+        "recognition": {
+          "title": "Įrašyti pripažinimą",
+          "hint": "Nepriklausomo vertintojo sprendimas, kad žmogaus parodyta kompetencija atitinka formalų reikalavimą. Tai nėra pažymėjimas ir niekada nesukuriamas vien iš darbo įrodymų.",
+          "pending": "Pripažinimų įrašymas dar nepasiekiamas: už jo esantis registras dar nepaleistas. Kol kas pateikimas atmetamas, o ne išsaugomas.",
+          "subject": "Besimokantysis",
+          "chooseSubject": "Pasirinkite besimokantįjį",
+          "kind": "Reikalavimo tipas",
+          "kindDocument": "Dokumento tipas",
+          "kindSkill": "Įgūdis",
+          "kindProfession": "Profesija",
+          "key": "Reikalavimo raktas (slug)",
+          "country": "Šalis (2 raidės)",
+          "evidence": "Įrodymų įrašų ID",
+          "evidenceHint": "Besimokančiojo darbo žurnalo įrašų ID, atskirti kableliais. Registras priima tik įrašus, kuriuos yra pažymėjęs antras asmuo.",
+          "decision": "Sprendimas",
+          "recognised": "Pripažinta",
+          "notRecognised": "Nepripažinta",
+          "validFrom": "Galioja nuo",
+          "validUntil": "Galioja iki",
+          "note": "Vertintojo pastaba",
+          "submit": "Įrašyti sprendimą",
+          "saving": "Saugoma…",
+          "ok": "Pripažinimas įrašytas.",
+          "needsMigration": "Neįrašyta: pripažinimų registras dar nepasiekiamas.",
+          "forbidden": "Ši įstaiga negali įrašyti šio pripažinimo šiam asmeniui.",
+          "invalid": "Patikrinkite reikšmes.",
+          "error": "Kažkas nepavyko. Bandykite dar kartą."
+        }
       },
       "learners": {
         "title": "Besimokantieji",
@@ -3948,7 +3983,9 @@
       "check_email_body": "Išsiuntėme patvirtinimo nuorodą adresu {email}. Atidarykite ją, kad užbaigtumėte registraciją. Jei laiško nematote — patikrinkite šlamšto aplanką; naujos nuorodos galėsite paprašyti čia.",
       "resend_label": "Siųsti nuorodą dar kartą",
       "resend_sent": "Išsiųsta dar kartą. Patikrinkite pašto dėžutę ir šlamšto aplanką.",
-      "resend_wait": "Naujos nuorodos galėsite paprašyti po {seconds} s."
+      "resend_wait": "Naujos nuorodos galėsite paprašyti po {seconds} s.",
+      "invited_email_note": "Tai adresas, kuriuo gavote kvietimą.",
+      "show_password": "Rodyti slaptažodį"
     },
     "login": {
       "headline": "Prisijungti",
@@ -6073,7 +6110,8 @@
       "label": "Vykdomi arba užbaigti projektai",
       "active": "Vykdomi",
       "archived": "Užbaigti",
-      "empty": "Užbaigtų projektų dar nėra."
+      "empty": "Užbaigtų projektų dar nėra.",
+      "partial": "Rodoma naujausių {shown} iš {total}."
     }
   },
   "projectOps": {
@@ -6295,6 +6333,15 @@
       "noActivity": "Įrašų dar nėra.",
       "emptyTeam": "Projektas dar be komandos — pradėk draftą ir pakviesk pirmus žmones į aikštę.",
       "emptyTeamCta": "Pradėti draftą",
+      "history": {
+        "title": "Istorinis darbas šiame projekte",
+        "provenance": "Organizacijos pateikta istorija, importuota iš pačios organizacijos įrašų. Nepriklausomai nepatikrinta.",
+        "unavailable": "Istorinio darbo šiuo metu nepavyko nuskaityti. Tai nereiškia, kad jo nėra.",
+        "empty": "Šiam projektui organizacijos pateikto istorinio darbo nėra užfiksuota.",
+        "personUnknown": "Asmuo nenurodytas",
+        "hoursUnknown": "Valandos nenurodytos",
+        "count": "{n} įr."
+      },
       "positionsTitle": "Trūkstamos pozicijos",
       "positionsEmpty": "Pozicijų poreikiai dar ruošiami — kai atsiras, čia matysi, kokių žmonių trūksta.",
       "openOps": "Atidaryti projekto valdymą",
@@ -7324,6 +7371,21 @@
         "compared": "Palyginta",
         "interest": "Pareikšta susidomėjimo"
       }
+    },
+    "funnel": {
+      "notMeasured": "Dar neišmatuota",
+      "unavailable": "Nepasiekiama (skaitymas nepavyko)",
+      "unavailableBanner": "Piltuvėlio nepavyko nuskaityti iš įvykių saugyklos. Visi žemiau esantys skaičiai nepasiekiami. Tai nepavykęs skaitymas, o ne išmatuotas nulis.",
+      "rateNotMeasured": "Dar neišmatuota",
+      "reason": {
+        "usefulUndefined": "Kol kas nėra „naudingo“ apibrėžimo, todėl skaičiuojami tik dalinis registracijos užbaigimo ir organizacijos sukūrimo įvykiai.",
+        "offerSide": "Joks įvykis neregistruoja poreikio / pasiūlymo pasiūlymo pusės, todėl šis etapas neturi šaltinio.",
+        "commercialValue": "Joks įvykis ar šaltinis neregistruoja komercinės vertės.",
+        "trial": "Joks įvykis ar šaltinis neregistruoja bandomojo laikotarpio.",
+        "paidConversion": "Joks įvykis ar šaltinis neregistruoja mokamo perėjimo.",
+        "retention": "return_visit_detected apibrėžtas, bet į šį piltuvėlį neįtrauktas, o pakartotinio naudojimo rodiklio nėra."
+      },
+      "aiHelp": "Pirmosios šalies DI apskaita: kiekvieno paleidimo auditas (ai_runs, USD pagal peržiūrėtą kainoraštį) ir kanoninis naudojimo žurnalas eurocentais (usage_cost_events). Skaičiai gaunami tiesiogiai skaitant abi lenteles. Lentelė, kurios nepavyksta nuskaityti, rodoma brūkšneliu (nepasiekiama), o ne 0; nežinoma kaina taip pat rodoma brūkšneliu."
     }
   },
   "languageFeedback": {
@@ -7381,6 +7443,7 @@
     "outcomeLinked": "Sujungta. Dabar esate prijungti.",
     "outcomeAlreadyLinked": "Jau esate sujungti.",
     "outcomeNoInvitation": "Pakvietimas nerastas.",
+    "outcomeEmailUnverified": "Pirmiausia patvirtinkite el. paštą (puslapyje „Ryšiai“), tada priimkite pakvietimą.",
     "outcomeNoWorker": "Jūsų darbuotojo profilis dar neparuoštas.",
     "outcomeError": "Nepavyko priimti. Bandykite dar kartą.",
     "outcomeNeedsMigration": "Šios funkcijos dar neįjungėme."
@@ -7660,6 +7723,14 @@
         "doorCalendar": "Ši savaitė kalendoriuje",
         "doorJournal": "Visi darbo žurnalo įrašai",
         "doorCv": "Gyvas CV"
+      },
+      "world": {
+        "sceneLabel": "Žmogaus profesinis pasaulis: darbas, gebėjimai, įrašai, istorija ir kas toliau. Tie patys faktai surašyti žemiau.",
+        "empty": "Čia dar nėra įrašų.",
+        "directionDetail": "Sutampa: {shared} · trūksta: {missing}",
+        "directionDetailNoGap": "Sutampa: {shared} · nieko netrūksta",
+        "emptyNext": "Kryptys atsiras, kai darbo įrašai parems bent du gebėjimus.",
+        "allDetails": "Visa kortelės informacija"
       }
     }
   },
@@ -8412,6 +8483,7 @@
     "skillFit": "{matched}/{total} reikalaujamų įgūdžių, {confirmed} patvirtinti vadovo",
     "evidence": "Įrodymai — patvirtinti: {confirmed} · žurnalas: {journal} · savideklaruoti: {self}",
     "confirmedWork": "Darbu patvirtinta: {work} iš {matched} atitinkančių įgūdžių (pasikartoja: {repeated})",
+    "historySignal": "Paminėta organizacijų pateiktoje istorijoje: {history} iš {matched} atitinkančių įgūdžių (signalas, ne patvirtinimas)",
     "evidenceNone": "Nepatvirtinta",
     "experienceYearsValue": "{years, plural, one {# metai} few {# metai} other {# metų}}",
     "shortlistError": "Nepavyko išsaugoti. Bandyk dar kartą.",
@@ -8568,6 +8640,7 @@
     },
     "pool": {
       "factsUnreadable": "Kai ko iš to, ką šie žmonės yra užfiksavę, dabar nepavyko perskaityti, todėl ši eilė nėra patikima. Niekas čia nėra parodytas turintis mažiau, nei turi — tiesiog trūksta faktų, pagal kuriuos lyginama. Perkraukite po akimirkos.",
+      "historyUnavailable": "Organizacijų pateiktos istorijos dabar nepavyko perskaityti, todėl ji nerodoma. Tai nereiškia, kad jos nėra, o aukščiau pateikta tvarka nuo jos nepriklauso.",
       "capped": "Palyginti ne visi. Šį poreikį atitinka daugiau matomų darbuotojų, nei telpa į vieną sąrašą, todėl pirmiausia paimti {count} darbuotojai, kurių įgūdžiai, profesija ir šalis labiausiai atitinka poreikį, o ne naujausiai užsiregistravusieji. Patikslinkite poreikį, kad būtų palyginti tinkami žmonės.",
       "complete": "Su šiuo poreikiu palyginti visi {count} matomi darbuotojai."
     },
@@ -8655,6 +8728,7 @@
       "openTo": "Taip pat atviras: {countries}",
       "skillCount": "{matched} iš {total} reikalaujamų įgūdžių",
       "nameHidden": "Vardas ir kontaktai rodomi tik tada, kai žmogus tai leidžia.",
+      "appliedToYou": "Pateikė paraišką šiam poreikiui — vardas ir nuotrauka matomi dėl paraiškos. Telefonas ir el. paštas lieka paslėpti.",
       "skillUnknown": "Įgūdžių nenurodyta · reikia {total}"
     }
   },
@@ -9484,7 +9558,8 @@
       "reviewed": "Įmonė peržiūrėjo jūsų susidomėjimą",
       "contacted": "Įmonė pažymėjo: susisiekta",
       "contactEmployer": "Parašyti darbdaviui",
-      "contactError": "Nepavyko atidaryti pokalbio. Bandykite dar kartą."
+      "contactError": "Nepavyko atidaryti pokalbio. Bandykite dar kartą.",
+      "identityConsent": "Pateikus paraišką, šio darbo darbdavys matys jūsų vardą ir profilio nuotrauką."
     },
     "companyVerified": "Patikrinta įmonė",
     "structured": {
@@ -11692,7 +11767,22 @@
         "declined": "Kvietimas atmestas.",
         "no_worker_profile": "Pirmiausia susikurkite darbuotojo profilį, tada priimkite kvietimą.",
         "not_found": "Kvietimas nerastas.",
-        "error": "Nepavyko. Bandykite dar kartą."
+        "error": "Nepavyko. Bandykite dar kartą.",
+        "email_unverified": "Pirmiausia patvirtinkite el. paštą, tada priimkite pakvietimą."
+      },
+      "verify": {
+        "title": "Patvirtinkite el. paštą, kad matytumėte jam skirtus pakvietimus",
+        "body": "Pakvietimai, adresuoti el. pašto adresui, rodomi tik tam, kas gali atidaryti tą pašto dėžutę. Visa kita jūsų paskyroje veikia kaip veikė; tai reikalinga tik šiems pakvietimams matyti ar priimti.",
+        "send": "Atsiųskite man vienkartinę nuorodą",
+        "sending": "Siunčiama…",
+        "sent": "Išsiuntėme vienkartinę nuorodą adresu {email}. Atidarykite ją šiame įrenginyje, kad užbaigtumėte.",
+        "sentNoAddress": "Išsiuntėme vienkartinę nuorodą jūsų el. pašto adresu. Atidarykite ją šiame įrenginyje, kad užbaigtumėte.",
+        "rateLimited": "Nuoroda išsiųsta prieš akimirką. Palaukite minutę, prieš prašydami kitos.",
+        "alreadyVerified": "Šis el. pašto adresas jau patvirtintas. Atnaujinkite puslapį.",
+        "failed": "Ši nuoroda nepatvirtino jūsų el. pašto (galbūt sena arba atidaryta kitur). Galite paprašyti naujos.",
+        "error": "Nepavyko išsiųsti nuorodos. Bandykite vėliau.",
+        "intakeTitle": "Patvirtinkite el. paštą, kad tęstumėte ankstesnį pateikimą",
+        "intakeBody": "Jei per viešą formą pateikėte įmonės poreikį šiuo adresu, patvirtinkite adresą ir mes jį parodysime čia, kad nereikėtų rašyti iš naujo. Visa kita veikia kaip veikė."
       }
     },
     "search": {
@@ -11888,6 +11978,7 @@
         "revoked": "Kvietimas atšauktas.",
         "declined": "Kvietimas atmestas.",
         "no_worker_profile": "Pirmiausia susikurkite darbuotojo profilį, tada priimkite kvietimą.",
+        "email_mismatch": "Šis kvietimas adresuotas kitam el. pašto adresui.",
         "not_found": "Kvietimas nerastas.",
         "error": "Nepavyko. Bandykite dar kartą.",
         "exhausted": "Visos vietos užimtos.",
@@ -11910,7 +12001,13 @@
       "agencyClient": "Personalo agentūra kviečia jūsų įmonę bendradarbiauti kaip jos klientą.",
       "agencyClientNext": "Priėmus kvietimą, ryšio prašymas atsiras jūsų organizacijos puslapyje „Klientai ir partneriai“ — ten patvirtinkite jį savo įmonės vardu. Kol to nepadarysite, niekuo nesidalinama.",
       "addressedToOther": "Šis kvietimas adresuotas {email}. Esate prisijungę kitu adresu, todėl iš šios paskyros ryšio patvirtinti negalima — prisijunkite pakviestuoju adresu ir dar kartą atverkite šią nuorodą.",
-      "switchAccount": "Atsijungti ir pakeisti paskyrą"
+      "switchAccount": "Atsijungti ir pakeisti paskyrą",
+      "emailMismatch": {
+        "title": "Šis kvietimas skirtas kitam el. pašto adresui",
+        "body": "Šis kvietimas išsiųstas adresu {email}. Esate prisijungę kitu adresu, todėl iš šios paskyros jo parodyti ar į jį atsakyti negalima. Prisijunkite pakviestuoju adresu ir dar kartą atverkite šią nuorodą.",
+        "bodyNoHint": "Šis kvietimas išsiųstas kitu el. pašto adresu nei tas, kuriuo esate prisijungę, todėl iš šios paskyros jo parodyti ar į jį atsakyti negalima. Prisijunkite pakviestuoju adresu ir dar kartą atverkite šią nuorodą.",
+        "untouched": "Niekas nebuvo priimta ar pakeista. Kvietimas vis dar laukia to, kam jis buvo išsiųstas."
+      }
     },
     "teamEnquiriesTitle": "Mano užklausos komandoms",
     "admin": {
@@ -14095,7 +14192,9 @@
         "chipDocument": "Pridėti dokumentą"
       },
       "visibilityUnavailable": "Nepavyko patikrinti matomumo darbdaviams. Tai nereiškia, kad jis išjungtas — atidarykite nustatymus.",
-      "chipVisibility": "Matomumas darbdaviams"
+      "chipVisibility": "Matomumas darbdaviams",
+      "voiceOpen": "Kalbėti",
+      "voiceBareYes": "Ištartas „taip“ nėra patvirtinimas. Patvirtinkite paspausdami kortelės mygtuką arba pasakykite, ką norite daryti."
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
@@ -16805,6 +16904,38 @@
     "error": "Pakeitimo išsaugoti nepavyko, jis atšauktas. Bandykite dar kartą.",
     "unavailable": "Pranešimų nustatymai šiuo metu nepasiekiami."
   },
+  "cvOrganizationHistory": {
+    "title": "Organizacijų pateikta darbo istorija",
+    "note": "Paimta iš čia nurodytų organizacijų įrašų. Ji nėra paties žmogaus deklaruota ir nėra nepriklausomai patikrinta.",
+    "untitled": "Organizacijos užfiksuotas darbas",
+    "hoursTerm": "Valandos",
+    "hoursRecorded": "{hours} val. užfiksuota ({count, plural, one {# įrašas} few {# įrašai} other {# įrašų}})",
+    "hoursPeriod": "{hours} val. nurodyta laikotarpiui ({count, plural, one {# įrašas} few {# įrašai} other {# įrašų}})",
+    "contested": "Ginčijama asmens, turinčio tam teisę",
+    "more": "Dar {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}} nerodoma"
+  },
+  "historyContext": {
+    "project": "Projektas",
+    "place": "Objektas arba darbų paketas",
+    "client": "Užsakovas",
+    "otherParties": "Kiti dalyviai",
+    "capacity": "Statusas",
+    "source": "Šaltinis",
+    "suppliedBy": "Pateikė {name}",
+    "reconstructed": "Atkurta iš ankstesnių įrašų",
+    "recordedAt": "Įrašyta sistemoje",
+    "proofTitle": "Kas tai patvirtina",
+    "proof": {
+      "SELF_DECLARED": "Nurodė pats asmuo",
+      "EVIDENCE_SUPPORTED": "Pagrįsta organizacijos įrašu",
+      "EMPLOYER_CONFIRMED": "Patvirtino darbdavys",
+      "CLIENT_ACCEPTED": "Užsakovas priėmė",
+      "SUPERVISOR_CONFIRMED": "Patvirtino darbų vadovas",
+      "INDEPENDENTLY_VERIFIED": "Nepriklausomai patikrinta"
+    },
+    "attestedAs": "paliudijo kaip {role}",
+    "proofNote": "Kiekviena eilutė yra atskiras faktas. Pateikusios organizacijos liudijimas nėra užsakovo patvirtinimas ir nėra apmokėjimas, o nė vienas iš šių faktų nėra nepriklausomas patikrinimas, nebent taip parašyta."
+  },
   "evidenceImport": {
     "eyebrow": "Istoriniai darbo įrodymai",
     "title": "Importuoti darbo istoriją",
@@ -17415,7 +17546,27 @@
       "offer": "Pasiūlyti susiejimą",
       "offered": "Susiejimas pasiūlytas — žmogus sprendžia savo profilyje",
       "error": "Susiejimo pasiūlyti nepavyko"
-    }
+    },
+    "claim": {
+      "label": "Pakviesti šį žmogų perimti savo istoriją",
+      "placeholder": "Jų el. pašto adresas",
+      "invite": "Siųsti kvietimą",
+      "sent": "Kvietimas išsiųstas. Kai žmogus prisijungs, pasiūlykite susiejimą čia, o sprendimą jis priims savo profilyje.",
+      "created": "Kvietimas sukurtas. Pasidalykite šia nuoroda:",
+      "deliveryFailed": "Kvietimas išsaugotas, bet el. laiškas neišsiųstas. Pasidalykite šia nuoroda:",
+      "hint": "Kad istoriją būtų galima pasiūlyti, žmogus turi turėti paskyrą. Niekas nepriskiriama, kol jis nesutinka.",
+      "errors": {
+        "generic": "Kvietimo išsiųsti nepavyko",
+        "duplicate_pending": "Kvietimas šiuo adresu jau laukia atsakymo",
+        "rate_limited": "Per daug kvietimų. Pabandykite vėliau",
+        "limit_reached": "Pasiektas kvietimų limitas",
+        "not_authorized": "Neturite teisės kviesti žmonių šios organizacijos vardu",
+        "invalid_relationship": "Šio žmogaus ryšio negalima pasiūlyti kvietimu",
+        "invalid_email": "Įveskite vieną tinkamą el. pašto adresą",
+        "needs_migration": "Šiuo metu nepasiekiama"
+      }
+    },
+    "openHistory": "Atidaryti istoriją"
   },
   "peopleImport": {
     "alreadyThere": "Jau yra jūsų sąraše: {count}",
@@ -18061,7 +18212,8 @@
       "done": "Priskirta įrašų: {count}; jau buvo priskirta: {skipped}.",
       "refused": "Nepavyko išsaugoti. Nieko nepakeista.",
       "person": "{hours} val., {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}"
-    }
+    },
+    "truncated": "Įrašų yra daugiau, nei perskaito vienas vaizdas. Rodomi perskaityti {count}; sumos apima tik juos."
   },
   "workLifecycle": {
     "pending": "Dar ne",
@@ -18233,5 +18385,63 @@
       "skills": "{count, plural, one {# jūsų įrašais pagrįstas gebėjimas} few {# jūsų įrašais pagrįsti gebėjimai} other {# jūsų įrašais pagrįstų gebėjimų}}",
       "next": "Kur galite eiti"
     }
+  },
+  "companyPerson": {
+    "eyebrow": "Istorinė asmens kortelė",
+    "back": "Žmonės",
+    "badge": "Pateikė organizacija, nepriklausomai nepatvirtinta",
+    "provenance": "Tai, ką {name} turi įrašę apie šį asmenį. Niekas kitas to nepatvirtino, ir tai nepriklauso nuo to, ar asmuo turi paskyrą.",
+    "claim": {
+      "unlinked": "Dar nesusieta su paskyra — istorija jau įrašyta čia.",
+      "link_proposed": "Pasiūlyta susieti su paskyra, laukiama asmens atsakymo — istorija jau įrašyta čia.",
+      "linked": "Susieta su paties asmens paskyra.",
+      "openProfile": "Atidaryti asmens puslapį"
+    },
+    "unavailable": "Šio asmens istorijos dabar nepavyko perskaityti. Tai nereiškia, kad jos nėra.",
+    "empty": "Šiam asmeniui istorijos įrašų dar nėra. Skaitymas pavyko — jų tikrai nėra.",
+    "stats": {
+      "records": "Įrašai",
+      "hours": "Valandos, kaip nurodyta",
+      "period": "Laikotarpis"
+    },
+    "noHours": "Įrašai, kuriuose nenurodytos valandos: {count}. Nežinomos valandos neskaičiuojamos kaip nulis.",
+    "undated": "Įrašai be nurodytos datos: {count}. Jie lieka istorijoje žemiau.",
+    "periodApart": "{hours} val. iš bendros sumos yra laikotarpio sumos, laikomos atskirai ir niekada neišskaidomos į dienas ar mėnesius.",
+    "noWorkObject": "Įrašai, nesusieti su platformai žinomu projektu ar vieta: {count}. Jie lieka šioje istorijoje pagal šaltinio pavadinimą.",
+    "places": {
+      "title": "Pagal projektą ar vietą",
+      "none": "Projektas ar vieta neįrašyti",
+      "records": "Įrašai: {count}"
+    },
+    "months": {
+      "title": "Nurodytos valandos pagal mėnesį",
+      "note": "Tik vienos dienos įrašai. Laikotarpio sumos niekada neišskaidomos į dienas ar mėnesius."
+    },
+    "skills": {
+      "title": "Įgūdžiai, į kuriuos rodo istorija",
+      "note": "Išvesta iš organizacijos istorijos, nepatvirtinta. Įgūdis įtraukiamas, kai jį įvardijo pati organizacija; tai nėra teiginys apie asmenį.",
+      "records": "Įrašai: {count}",
+      "empty": "Šiuose įrašuose joks įgūdis neįvardytas.",
+      "unavailable": "Įgūdžių signalų dabar nepavyko perskaityti. Tai nereiškia, kad jų nėra.",
+      "truncated": "Įgūdžių signalų yra daugiau, nei perskaito šis vaizdas."
+    },
+    "shown": "Rodomi naujausi {shown} iš {total} įrašų. Likusieji lieka įrašyti.",
+    "truncated": "Įrašų yra daugiau, nei perskaito vienas vaizdas. Rodomi perskaityti {count}; sumos apima tik juos."
+  },
+  "qualificationRecognitions": {
+    "title": "Pripažinimai",
+    "subtitle": "Nepriklausomų vertintojų sprendimai, kad jūsų parodyta kompetencija atitinka formalų reikalavimą. Tai nėra pažymėjimas ir nėra jūsų darbo patikra.",
+    "empty": "Pripažinimų dar neįrašyta.",
+    "unavailable": "Pripažinimų dabar nepavyksta nuskaityti. Tai nereiškia, kad jų nėra.",
+    "kindDocument": "Dokumento tipas",
+    "kindSkill": "Įgūdis",
+    "kindProfession": "Profesija",
+    "stateCurrent": "Pripažinta, galioja",
+    "stateLapsed": "Pripažinta, galiojimas baigėsi",
+    "stateNotRecognised": "Įvertinta, nepripažinta",
+    "stateRevoked": "Vertintojo atšaukta",
+    "stateNotYetValid": "Pripažinta, dar negalioja",
+    "validFrom": "nuo {date}",
+    "validUntil": "iki {date}"
   }
 }

@@ -103,6 +103,21 @@ describe("worker launch — email signup is never a silent dead-end", () => {
     expect(src).toContain("data.session");
     expect(src).toContain('data-testid="signup-check-email"');
   });
+  it("a LIVE session goes straight to onboarding with no email step (registration friction removal)", () => {
+    const afterSignUp = src.slice(src.indexOf("await supabase.auth.signUp"));
+    const noSessionBlock = afterSignUp.indexOf("if (!data.session)");
+    const liveBranch = afterSignUp.indexOf('markSignupPending("email")');
+    const toOnboarding = afterSignUp.indexOf("router.replace(onboardingPath)");
+    // The defensive no-session block comes first and RETURNS; the live-session
+    // branch then marks the signup and lands on /onboarding.
+    expect(noSessionBlock).toBeGreaterThan(0);
+    expect(liveBranch).toBeGreaterThan(noSessionBlock);
+    expect(toOnboarding).toBeGreaterThan(liveBranch);
+    expect(afterSignUp.slice(noSessionBlock, liveBranch)).toMatch(/return;/);
+    // Nothing between the session check and the redirect asks for a mailbox.
+    expect(afterSignUp.slice(liveBranch, toOnboarding)).not.toMatch(/resend|check_email|verify/i);
+    expect(src).toContain('"/onboarding"');
+  });
   it("marks the signup pending so signup_completed fires on the next authed surface", () => {
     expect(src).toContain('markSignupPending("email")');
   });

@@ -359,6 +359,15 @@ audit.
   `chat-visibility-rls.test.ts` caller inventory. Full design and acceptance
   evidence: `docs/handoffs/FIRST_PARTY_SUPPLY_BRIDGE_V1.md`.
 
+- **2026-10-06 — `lib/invitations/signup-bridge.ts`** (frictionless addressed
+  invite, PR #2167). Calls ONE service_role-only SECURITY DEFINER read,
+  `get_invitation_signup_context_v1` (migration `20261006100500`, RED, not
+  applied), through the admin client to prefill the invited address on the
+  signup page - the same pattern and ACL as `public-preview.ts`. It reads no
+  table directly, writes nothing, touches no chat table, answers only for a
+  still-usable addressed invitation, and grants nothing: acceptance still needs
+  the session e-mail to equal the invited address (`20261003151100`).
+
 - **2026-09-17 — `lib/invitations/external-referral-receive.ts` and
   `lib/invitations/public-preview.ts`** (universal invitation / referral
   network v1). Both call service_role-ONLY SECURITY DEFINER functions from
@@ -406,7 +415,7 @@ audit.
   monogram. Pinned in the `chat-visibility-rls.test.ts` caller inventory.
 
 - **2026-10-06 - `lib/email/send-ledger-store.ts`** (durable outbound-email
-  cost guardrail, migration `20261006110000_email_send_ledger_v1`, RED,
+  cost guardrail, migration `20261006130000_email_send_ledger_v1`, RED,
   owner-gated). The service key is used for ONE operation only - the
   `reserve_email_send_v1` RPC, executable by `service_role` alone, which
   atomically counts and records a hashed recipient + organization id +

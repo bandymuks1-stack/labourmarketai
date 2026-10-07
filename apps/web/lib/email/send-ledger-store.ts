@@ -2,7 +2,7 @@ import "server-only";
 
 /**
  * Supabase-backed {@link EmailSendStore}: calls the atomic, service-role-only
- * `reserve_email_send_v1` RPC (migration 20261006110000) through the
+ * `reserve_email_send_v1` RPC (migration 20261006130000) through the
  * service-role client. Any failure (RPC absent, DB error, missing service env,
  * malformed answer) THROWS so the guard applies its documented fail policy.
  *

@@ -26,6 +26,7 @@ import type {
   PlayerCardLabels,
   ThermometerView,
 } from "@/components/app/worker-player-card";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /**
  * THE PLAYER CARD RESULT (W3 row 1).
@@ -143,7 +144,7 @@ async function resolveWorkEditor(card: WorkerPlayerCard): Promise<{
   const tw = await getTranslations("auth.dashboard.workCard");
   // What the saved figures READ AS — derived from the same values the editor
   // prefills; the sentence names the figure, the person decides.
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = (await viewerWorkToday()).todayIso;
   const checks = deriveWorkCardChecks(
     {
       salaryMin: data.values.salaryMin,

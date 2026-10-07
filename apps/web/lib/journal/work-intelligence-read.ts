@@ -1,5 +1,7 @@
 import "server-only";
 
+import { viewerWorkToday } from "@/lib/time/viewer-day";
+import type { WorkToday } from "@/lib/time/local-day";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { readWorkerCoreRow } from "@/lib/data/worker-core";
@@ -74,6 +76,8 @@ export function assembleWorkIntelligence(input: {
   provenanceByEntry: ReadonlyMap<string, ReadonlyMap<string, EntrySkillProvenance | null>>;
   skillRows: readonly WorkerSkillSourceRow[];
   todayIso: string;
+  /** Last day that is not future (`lib/time/local-day.ts`); omitted = `todayIso`. */
+  horizonIso?: string;
   focus?: WorkPeriodKey;
   /** An explicit window instead of a tab (see the model's `focusRange`). */
   focusRange?: WorkRange | null;
@@ -117,6 +121,7 @@ export function assembleWorkIntelligence(input: {
     entries,
     skills,
     todayIso: input.todayIso,
+    horizonIso: input.horizonIso,
     focus: input.focus,
     focusRange: input.focusRange ?? null,
     coverage: input.coverage,
@@ -181,6 +186,7 @@ export async function readOrganizationRecords(
           status: "recorded",
           organizationId: r.organizationId,
           journalEntryId: null,
+          context: r.context,
         }));
   // PERIOD records come only from imported documents (a timesheet line is
   // a day by construction). Beside the day rows, in the same reading.
@@ -196,6 +202,7 @@ export async function readOrganizationRecords(
           organizationId: r.organizationId,
           // How the SPAN came to be travels with it (owner rule 2026-09-23).
           provenance: r.provenance,
+          context: r.context,
         }));
   return { records: [...fromAllocations, ...fromEvidence], periodRecords };
 }
@@ -237,9 +244,10 @@ export async function readPhotoCountsByEntry(
   return out;
 }
 
-/** Today as the UTC calendar day — the same day key the journal groups by. */
-export function workIntelligenceToday(): string {
-  return new Date().toISOString().slice(0, 10);
+/** The viewer's work "today" (their local day when their zone is known, else
+ *  UTC with a UTC+1 not-future horizon) — see `lib/time/local-day.ts`. */
+export async function workIntelligenceToday(): Promise<WorkToday> {
+  return viewerWorkToday();
 }
 
 /**
@@ -284,12 +292,14 @@ export async function loadWorkIntelligence(
     if (!list.includes(r.skill_id)) list.push(r.skill_id);
     linksByEntry.set(r.journal_entry_id, list);
   }
+  const today = await workIntelligenceToday();
   return assembleWorkIntelligence({
     entries: entriesRead.entries,
     linksByEntry,
     provenanceByEntry: linkRead.provenanceByEntry,
     skillRows: (skillsRead.data ?? []) as unknown as WorkerSkillSourceRow[],
-    todayIso: workIntelligenceToday(),
+    todayIso: today.todayIso,
+    horizonIso: today.horizonIso,
     focus: opts.focus,
     focusRange: opts.focusRange ?? null,
     coverage: {

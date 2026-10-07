@@ -7,7 +7,7 @@
 -- FOR THIS FILE YET: the marker above is the risk acknowledgement the static
 -- gate reads, not an approval.
 --
--- 20261006110000 — durable outbound-email send ledger + atomic reserve RPC.
+-- 20261006130000 — durable outbound-email send ledger + atomic reserve RPC.
 --
 -- WHY: the trial-readiness cost guardrail (apps/web/lib/notifications/
 -- email-send-guard.ts) was in-memory, per server instance: a cold start or a
@@ -48,7 +48,7 @@
 -- RETENTION: rows older than 24h no longer influence any decision. Suggested
 -- housekeeping (owner/cron, NOT automated here): delete rows from
 -- public.email_send_ledger_v1 whose sent_at is older than 30 days.
--- ROLLBACK: supabase/rollbacks/20261006110000_email_send_ledger_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20261006130000_email_send_ledger_v1.down.sql
 
 begin;
 
@@ -163,4 +163,4 @@ grant execute on function public.reserve_email_send_v1(uuid, uuid, text, text, i
 
 commit;
 
--- ROLLBACK: supabase/rollbacks/20261006110000_email_send_ledger_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20261006130000_email_send_ledger_v1.down.sql

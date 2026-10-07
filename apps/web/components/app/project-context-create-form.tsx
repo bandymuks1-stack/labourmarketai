@@ -32,6 +32,15 @@ export function ProjectContextCreateForm() {
         role="status"
       >
         <p className="text-sm font-medium text-state-success">{t("success")}</p>
+        {state.warning === "client_not_saved" && (
+          <p
+            className="text-xs text-state-warning"
+            role="alert"
+            data-testid="project-create-client-warning"
+          >
+            {t("clientNotSaved")}
+          </p>
+        )}
         <p className="text-xs text-text-secondary">{t("journalLinkingDisabled")}</p>
         <Link
           href="/dashboard/company"

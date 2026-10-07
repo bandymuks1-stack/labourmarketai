@@ -486,7 +486,7 @@ const SKILLS: readonly CapabilityRow[] = [
     anchors: ["lib/qualification", "lib/skills/recognition-model.ts", "lib/player-card/requirement-ledger.ts"],
     coreModule: "lib/qualification/capability-standing.ts",
     surfaces: [],
-    note: "CORRECTED 2026-10-01 from MISSING by a full-history trace: the previous note ('nothing at any layer') was false. What EXISTS: the five SEP-6 concepts as a pure derivation (`lib/qualification/capability-standing.ts`, read by the worker's project asks through `capability-evidence.ts`), the PER-13 requirement ledger, the SKL-8 matrix, the SKL-10 register, and the pure recognition model (`lib/skills/recognition-model.ts`: the closed five-state set, the assessor authority rule - training_provider, managed by the actor, neither the subject nor an organization engaging the subject - and `recognitionAnswersDocumentTypes`, the only road to `hasRecognizedEquivalence`). The READ is wired: `getOwnRecognitionRows` answers the person's own `competency_recognitions` rows, an absent relation as `[]` and any other failure as unknown. WHAT IS DISCONNECTED: nothing recognises. The relation and its two commands (migration `20260915140000_competency_recognitions_v1`, draft PR #1741, owner packet P-3) are a RED owner gate and were never applied, production holds 0 training providers, and no assessor act exists, so `hasRecognizedEquivalence` is false for every person today. No surface names a recognition yet (`surfaces` is empty on purpose). Demonstrated capability still never satisfies a formal requirement (SEP-6).",
+    note: "CORRECTED 2026-10-01 from MISSING by a full-history trace: the previous note ('nothing at any layer') was false. What EXISTS: the five SEP-6 concepts as a pure derivation (`lib/qualification/capability-standing.ts`, read by the worker's project asks through `capability-evidence.ts`), the PER-13 requirement ledger, the SKL-8 matrix, the SKL-10 register, and the pure recognition model (`lib/skills/recognition-model.ts`: the closed five-state set, the assessor authority rule - training_provider, managed by the actor, neither the subject nor an organization engaging the subject - and `recognitionAnswersDocumentTypes`, the only road to `hasRecognizedEquivalence`). The READ is wired: `getOwnRecognitionRows` answers the person's own `competency_recognitions` rows, an absent relation as `[]` and any other failure as unknown. WHAT IS DISCONNECTED: nothing recognises. The relation and its two commands (migration `20260915140000_competency_recognitions_v1`, draft PR #1741, owner packet P-3) are a RED owner gate and were never applied, production holds 2 training providers (re-checked 2026-10-07; the capability exists in data, the recognition register does not), and no assessor act can be recorded: the assessor form and `recordRecognitionAction` are on main but degrade to an explicit needs-migration result, so `hasRecognizedEquivalence` is false for every person today. The person's own Recognitions block (document centre) renders the read honestly - empty, unavailable and rows are three different states, and nothing is ever labelled verified. `surfaces` stays empty on purpose until a real recognition exists. Demonstrated capability still never satisfies a formal requirement (SEP-6).",
   },
   {
     id: "SKL-10",
@@ -1362,6 +1362,51 @@ const COMMUNICATION: readonly CapabilityRow[] = [
     coreModule: "lib/notifications/spine-signals.ts",
     surfaces: ["components/app"],
     note: "Fragmented across four surfaces.",
+  },
+  {
+    id: "COM-6",
+    domain: "communication",
+    title: "Voice Work Journal (record or upload, transcript, work journal)",
+    worldElement: "work_journal",
+    status: "PARTIAL",
+    strongestEvidence: "TEST_PROVEN",
+    anchors: ["components/app/voice-journal-recorder.tsx", "lib/voice"],
+    coreModule: "lib/voice/transcribe-action.ts",
+    surfaces: ["app/[locale]/dashboard/journal/voice/page.tsx"],
+    ownerDecision:
+      "U-26 (is the voice work journal programme still in scope) and the Permissions-Policy decision: the site sends microphone=() on every response, so browser recording is denied.",
+    note:
+      "ACCEPTED PLAN, BUILT 2026-07-12 (#741): voice is an INPUT METHOD into the one Work Journal - disclosure, record or upload, self-hosted whisper.cpp transcript, the worker edits it, then the existing deterministic work-log preview and explicit confirm; no second write path (voice-work-journal.test.ts). " +
+      "REGRESSED IN PRODUCTION (2026-10-06 recovery audit, PROVEN): `next.config.ts` sends `Permissions-Policy: microphone=()` (added 2026-07-27, #871, after the recorder shipped); in a real browser with a fake audio device the app page gets NotAllowedError while a header-less control page gets the microphone, and the live site serves the same header, so only the file-upload fallback can work. " +
+      "ALSO: the 25 MB / 10 min limits are unreachable behind the 5 MB server-action cap; recognition language is the UI locale (no picker); no voice provenance is stored; the transcribe service's deployment and env are UNKNOWN (unset renders an honest not-configured state). Reachable only by workers through one text link on the journal page. voice_journal_jobs (#740) is an unapplied draft - do not apply blindly. Detail: apps/.evidence/audit/VOICE_FIRST_RECOVERY_AUDIT.md.",
+  },
+  {
+    id: "COM-7",
+    domain: "communication",
+    title: "Voice dictation in the command finder",
+    worldElement: "communication",
+    status: "PARTIAL",
+    strongestEvidence: "CODE_PROVEN",
+    anchors: ["components/app/command-finder.tsx"],
+    coreModule: null,
+    surfaces: ["components/app/command-finder.tsx"],
+    note:
+      "SHIPPED #796 (2026-07-17): a browser Web Speech mic button that only fills the search box; the person must still choose a result (no auto-execution, no transcript persisted). Probably denied by the same microphone=() Permissions-Policy (live behaviour UNKNOWN - headless Chromium has no speech recognition); the error handler is empty, so a denial is silent. Audio goes to the browser vendor with no disclosure, outside the AI-runtime governance. Not an action path.",
+  },
+  {
+    id: "COM-8",
+    domain: "communication",
+    title: "Voice as an equal door to the canonical action spine",
+    worldElement: "ai_conversation",
+    status: "MISSING",
+    strongestEvidence: "NONE",
+    anchors: [],
+    coreModule: null,
+    surfaces: [],
+    ownerDecision:
+      "Whether and when to build it (frozen design doctrine, a design target not an implementation plan); it must reuse the one intent, authorization and canonical-action spine and never become a second architecture.",
+    note:
+      "FROZEN DESIGN DOCTRINE (docs/design/final/00-GALUTINE-DIZAINO-SISTEMA.md section A.2): two equal doors, visual and linguistic (sentence, voice), over the SAME spine - 'no capability exists in only one path'; mobile 'Ask (Conversation, voice)' tab and voice into the composer or journal. NOT IMPLEMENTED at any layer: no chat-composer microphone, no voice API route, no MCP voice tool, no spoken-command or intent adapter, no voice in apps/mobile. The only voice-to-action chain today is COM-6 (journal text). The label 'voice-first' appears nowhere in the repository history.",
   },
 ];
 

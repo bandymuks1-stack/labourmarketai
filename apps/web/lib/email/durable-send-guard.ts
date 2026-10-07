@@ -4,7 +4,7 @@
  * Owner decision: 500 emails / rolling 24h per ORGANIZATION, plus 5 emails /
  * recipient / 24h anti-runaway — surviving process restart, container restart
  * and multiple instances. The counting + recording is ONE atomic database call
- * (`reserve_email_send_v1`, migration 20261006110000: advisory locks, count,
+ * (`reserve_email_send_v1`, migration 20261006130000: advisory locks, count,
  * insert in a single transaction), so concurrent instances cannot
  * over-subscribe a cap.
  *

@@ -78,6 +78,25 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
           <p className="text-xs leading-relaxed text-text-muted" data-testid="institution-programs-unavailable">{t("unavailable")}</p>
         ) : (
           <>
+            {(() => {
+              // Adoption nudge: learners already accepted (and eligible) who sit
+              // in no cohort while a cohort is still empty. Derived from the
+              // same read as the assign dropdown - no extra query.
+              const inACohort = new Set(
+                read.programs.flatMap((p) =>
+                  p.cohorts.flatMap((c) => c.members.filter((m) => m.status === "active").map((m) => m.profileId)),
+                ),
+              );
+              const waiting = read.assignable.filter((l) => !inACohort.has(l.profileId)).length;
+              const hasEmptyCohort = read.programs.some((p) =>
+                p.cohorts.some((c) => c.members.every((m) => m.status !== "active")),
+              );
+              return waiting > 0 && hasEmptyCohort ? (
+                <p className="text-xs leading-relaxed text-state-warning" data-testid="institution-learners-not-in-cohort">
+                  {t("unassignedLearners", { count: waiting })}
+                </p>
+              ) : null;
+            })()}
             {read.programs.length === 0 ? (
               <p className="text-xs leading-relaxed text-text-muted" data-testid="institution-programs-empty">{t("empty")}</p>
             ) : (

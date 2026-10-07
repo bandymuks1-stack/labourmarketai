@@ -330,6 +330,7 @@ describe("the capabilities are registered, honest and complete", () => {
       "evidence.person.create",
       "evidence.import.create_session",
       "evidence.import.submit_rows",
+      "evidence.import.stage_file",
       "evidence.import.preview",
       "evidence.import.resolve_row",
       "evidence.import.resolve_label",

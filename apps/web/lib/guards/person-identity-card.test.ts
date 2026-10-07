@@ -68,6 +68,9 @@ describe("PersonIdentityCard — one identity, different depth", () => {
   });
 
   it("the candidate stays anonymized: no name or photo is read for it", () => {
-    expect(SCOUT).not.toMatch(/avatarUrl=|displayName|getAvatarForVisibleWorker/);
+    // 2026-10-01 (owner approved): ONLY an applicant to this employer's own need,
+    // and only through the database answer, may show a name/photo.
+    expect(SCOUT).not.toMatch(/displayName|getAvatarForVisibleWorker/);
+    expect(SCOUT).toContain("getApplicantIdentity");
   });
 });

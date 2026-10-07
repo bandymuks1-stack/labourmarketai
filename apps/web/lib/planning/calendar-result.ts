@@ -16,6 +16,7 @@ import {
   visibleRange,
 } from "@/lib/planning/planning-model";
 import { buildWorkRhythm, compactHours } from "@/lib/planning/work-rhythm";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /**
  * THE CALENDAR RESULT (W3 — the panel presentation of the Time Engine).
@@ -115,7 +116,7 @@ function degradedSourceKeys(sources: PlanningSources): string[] {
 
 export async function loadCalendarResult(): Promise<CalendarResultView> {
   const locale = await getLocale();
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = (await viewerWorkToday()).todayIso;
   const range = visibleRange("agenda", todayIso);
   // ONE read, widened back to this week's Monday so the rhythm strip sees
   // the days already worked. The agenda below is built from exactly the

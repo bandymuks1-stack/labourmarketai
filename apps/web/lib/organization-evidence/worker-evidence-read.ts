@@ -6,7 +6,15 @@ import { HOURS_EXCEED_DAY_METHOD } from "./parse-tabular";
 import { periodProvenance, type PeriodProvenance } from "./period-provenance";
 import { countsAsDailyHours, type TimeSemantics } from "./time-semantics";
 import {
+  contextWithLookups,
+  EMPTY_HISTORY_LOOKUPS,
+  lookupIdsOf,
+  readHistoryLookups,
+} from "./history-context-read";
+import type { HistoryContext, HistoryContextInput } from "./professional-history-context";
+import {
   deriveEvidenceStanding,
+  anyStandingDispute,
   type RecordLifecycleEvent,
   type ReportedEvidenceState,
 } from "./evidence-state";
@@ -57,6 +65,10 @@ export interface WorkerEvidenceRecordRow {
   readonly organizationId: string;
   readonly workDate: string;
   readonly hours: number;
+  /** What the record can honestly say about the work behind the hours
+   *  (project, client, capacity, source, proof facts). Every field is absent
+   *  when the record does not carry it - see professional-history-context. */
+  readonly context: HistoryContext;
 }
 
 /** One period record: the organization's total over a span, no source days.
@@ -71,6 +83,7 @@ export interface WorkerEvidencePeriodRow {
   readonly periodEnd: string;
   readonly hours: number;
   readonly provenance: PeriodProvenance;
+  readonly context: HistoryContext;
 }
 
 export type WorkerEvidenceRead =
@@ -117,7 +130,7 @@ export async function readEvidenceRecordsForWorker(
   const res = await db(supabase)
     .from("organization_evidence_records")
     .select(
-      "id, organization_id, organization_person_id, activity_date, period_start, period_end, hours, evidence_state, derived, organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at)",
+      "id, organization_id, organization_person_id, activity_date, period_start, period_end, hours, evidence_state, derived, activity_kind, context_label, work_object_id, project_id, supplied_by_organization_id, supplier_role, source_kind, row_origin, imported_at, organization_people(relationship_kind, linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at), organization_evidence_parties!organization_evidence_parties_record_fk(party_role, party_organization_id, party_label)",
     )
     .in("organization_person_id", personIds)
     .order("activity_date", { ascending: false, nullsFirst: false })
@@ -128,8 +141,10 @@ export async function readEvidenceRecordsForWorker(
     return { kind: "error" };
   }
 
-  const rows: WorkerEvidenceRecordRow[] = [];
-  const periodRows: WorkerEvidencePeriodRow[] = [];
+  type Raw = Omit<HistoryContextInput, "workObjectName" | "projectName" | "organizationNames">;
+  const rows: (Omit<WorkerEvidenceRecordRow, "context"> & { raw: Raw })[] = [];
+  const periodRows: (Omit<WorkerEvidencePeriodRow, "context"> & { raw: Raw })[] = [];
+  const seen = new Set<string>();
   for (const r of (res.data ?? []) as Record<string, unknown>[]) {
     const hours = r.hours === null || r.hours === undefined ? null : Number(r.hours);
     if (hours === null || !Number.isFinite(hours) || hours <= 0) continue;
@@ -141,12 +156,54 @@ export async function readEvidenceRecordsForWorker(
         createdAt: (e.created_at as string | null) ?? null,
       }),
     );
-    const standing = deriveEvidenceStanding(r.evidence_state as ReportedEvidenceState, events);
+    // The subject's linked profile lets the derivation tell a self-attestation
+    // from an independent one (the same input `listEvidenceRecords` passes).
+    const person = r.organization_people as {
+      relationship_kind?: string | null;
+      linked_profile_id?: string | null;
+    } | null;
+    const standing = deriveEvidenceStanding(
+      r.evidence_state as ReportedEvidenceState,
+      events,
+      person?.linked_profile_id ?? null,
+    );
     if (standing.withdrawn) continue;
+    // One record is one row, however many embedded rows (parties, events) it
+    // came back with: never counted twice.
+    if (seen.has(r.id as string)) continue;
+    seen.add(r.id as string);
 
     const periodStart = (r.period_start as string | null) ?? null;
     const periodEnd = (r.period_end as string | null) ?? null;
     const derived = (r.derived as Record<string, unknown> | null) ?? {};
+    const raw: Raw = {
+      activityDate: (r.activity_date as string | null) ?? null,
+      periodStart,
+      periodEnd,
+      importedAt: (r.imported_at as string | null) ?? null,
+      contextLabel: (r.context_label as string | null) ?? null,
+      activityKind: (r.activity_kind as string | null) ?? null,
+      workObjectId: (r.work_object_id as string | null) ?? null,
+      projectId: (r.project_id as string | null) ?? null,
+      parties: ((r.organization_evidence_parties as Record<string, unknown>[] | null) ?? []).map(
+        (p) => ({
+          role: p.party_role as string,
+          organizationId: (p.party_organization_id as string | null) ?? null,
+          label: (p.party_label as string | null) ?? null,
+        }),
+      ),
+      relationshipKind: person?.relationship_kind ?? null,
+      supplierRole: (r.supplier_role as string | null) ?? null,
+      supplierOrganizationId: (r.supplied_by_organization_id as string | null) ?? null,
+      sourceKind: (r.source_kind as string | null) ?? null,
+      rowOrigin: (r.row_origin as string | null) ?? null,
+      reportedState: (r.evidence_state as string | null) ?? null,
+      attestation: standing.attestation
+        ? { role: standing.attestation.role, self: standing.attestation.self }
+        : null,
+      independentlyVerified: standing.independentlyVerified,
+      contested: anyStandingDispute(events),
+    };
     if (periodStart && periodEnd && ISO_DAY.test(periodStart) && ISO_DAY.test(periodEnd)) {
       // A period aggregate: one figure over a span. Never a day.
       periodRows.push({
@@ -157,6 +214,7 @@ export async function readEvidenceRecordsForWorker(
         hours,
         // From the already-selected `derived.timeSemantics` — the ONE rule.
         provenance: periodProvenance({ activityDate: null, periodStart, factFields: [], derived }),
+        raw,
       });
       continue;
     }
@@ -174,7 +232,26 @@ export async function readEvidenceRecordsForWorker(
       organizationId: r.organization_id as string,
       workDate,
       hours,
+      raw,
     });
   }
-  return { kind: "ok", rows, periodRows };
+
+  // Names for the ids the rows carry - bounded name-only reads under the
+  // caller's RLS. A failed or invisible lookup leaves the name absent; it
+  // never fails the history read and never changes a row, an hour or a count.
+  const lookups =
+    rows.length + periodRows.length === 0
+      ? EMPTY_HISTORY_LOOKUPS
+      : await readHistoryLookups(
+          supabase,
+          lookupIdsOf([...rows, ...periodRows].map((x) => x.raw)),
+        );
+  return {
+    kind: "ok",
+    rows: rows.map(({ raw, ...row }) => ({ ...row, context: contextWithLookups(raw, lookups) })),
+    periodRows: periodRows.map(({ raw, ...row }) => ({
+      ...row,
+      context: contextWithLookups(raw, lookups),
+    })),
+  };
 }

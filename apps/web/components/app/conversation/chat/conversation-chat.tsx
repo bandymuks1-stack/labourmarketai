@@ -148,6 +148,14 @@ import {
 import { workspaceDisplayLabels, type WorkspaceInfo } from "@/lib/company/organization-switch";
 import { extractWorkLog, journalDraftReadiness } from "@/lib/conversation/worklog-extract";
 import { VOICE_TRANSCRIPT_DRAFT_KEY } from "@/lib/voice/constants";
+import { decodeVoiceHandoff } from "@/lib/voice/capture-model";
+import { isVoiceTranscriptionConfigured } from "@/lib/voice/transcribe-action";
+import { VoiceCapturePanel, type VoiceCaptureResult } from "@/components/app/voice/voice-capture-panel";
+import {
+  preRouteDisposition,
+  singleMatchNeedsChip,
+  type TurnOrigin,
+} from "@/lib/conversation/voice-turn-policy";
 import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadContextBrief } from "@/lib/conversation/agenda-summary";
 import { loadMessagesForChat, type ChatInboxThread } from "@/lib/conversation/messages-chat";
@@ -1111,6 +1119,25 @@ export function ConversationChat({
   /** QA Q-4: a `?say=` sentence that did NOT arrive through our own door is
    *  handed to the composer for the person to send — see `referrerIsOurOwnDoor`. */
   const [sayPrefill, setSayPrefill] = useState("");
+  // VOICE DOOR (owner U-26): a second way to INPUT the same typed turn. The
+  // origin only changes two guards (lib/conversation/voice-turn-policy.ts);
+  // routing, authority and confirmation are the typed path's, unchanged.
+  const turnOriginRef = useRef<TurnOrigin>("typed");
+  const voiceProvenanceRef = useRef<{ language: string; disclosureVersion: string } | null>(null);
+  const [voiceAvailable, setVoiceAvailable] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    isVoiceTranscriptionConfigured()
+      .then((ok) => {
+        if (alive) setVoiceAvailable(ok);
+      })
+      .catch(() => {
+        /* honest absence: no microphone button when the service is not there */
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   /**
    * Transcript persistence (owner-gated schema). While the RED migration is
@@ -2400,6 +2427,16 @@ export function ConversationChat({
           }
           if (res.status === "one") {
             const p = res.person;
+            // Voice: the single phonetic match is a chip the person presses.
+            if (singleMatchNeedsChip(turnOriginRef.current, "openConversation")) {
+              assistant(t("openConversationWhich"), [
+                {
+                  id: p.kind === "conversation" ? `oc:c:${p.conversationId}` : `oc:p:${p.profileId}`,
+                  label: p.label,
+                },
+              ]);
+              return;
+            }
             openConversationTarget(
               p.kind === "conversation"
                 ? { conversationId: p.conversationId, label: p.label }
@@ -2464,6 +2501,17 @@ export function ConversationChat({
             label: w.kind === "personal" ? t("switchContextPersonal") : workspaceLabelOf(w),
           })),
         );
+        return;
+      }
+      // Voice: one fuzzy name match is offered as a chip, not acted on - a
+      // misheard organisation would silently re-attribute everything after it.
+      if (singleMatchNeedsChip(turnOriginRef.current, "switchContext")) {
+        assistant(t("switchContextPick"), [
+          {
+            id: `ws:${target.id}`,
+            label: target.kind === "personal" ? t("switchContextPersonal") : workspaceLabelOf(target),
+          },
+        ]);
         return;
       }
       performContextSwitch(target);
@@ -3320,7 +3368,15 @@ export function ConversationChat({
 
   /** Work-log from a natural sentence → real journal save (deterministic). */
   const startWorkLog = useCallback(
-    (text: string, opts?: { photoFirst?: boolean; explicit?: boolean; file?: File }) => {
+    (
+      text: string,
+      opts?: {
+        photoFirst?: boolean;
+        explicit?: boolean;
+        file?: File;
+        voice?: { language: string; disclosureVersion: string };
+      },
+    ) => {
       // ASK -> PREFILL -> THE EXISTING SAVE FLOW.
       //
       // When a work-evidence conversation is in flight, the form opens filled
@@ -3388,6 +3444,10 @@ export function ConversationChat({
           labels={workLogLabels}
           photoFirst={opts?.photoFirst ?? false}
           initialFile={opts?.file ?? null}
+          voice={
+            opts?.voice ??
+            (turnOriginRef.current === "voice" ? (voiceProvenanceRef.current ?? undefined) : undefined)
+          }
           onRegisterAttachSink={attachSinksRef.current.register}
           // After a work log lands, the person SEES their card change
           // (owner audit §5.1 "matoma po darbo įrašo atnaujinimo"): the
@@ -3464,11 +3524,15 @@ export function ConversationChat({
     } catch {
       draft = null;
     }
-    const text = (draft ?? "").trim();
-    if (!text) return;
+    const handoff = decodeVoiceHandoff(draft);
+    const text = handoff?.text ?? "";
+    if (!handoff || !text) return;
     voiceDraftConsumedRef.current = true;
     user(text);
-    startWorkLog(text);
+    // The provenance rides with the work-log flow's ONE save; it is a label on
+    // the record, not a second path (the dispatcher, confirmation and
+    // createJournalEntry are unchanged).
+    startWorkLog(text, { voice: { language: handoff.language, disclosureVersion: handoff.disclosureVersion } });
   }, [auth?.profile, identity, user, startWorkLog]);
 
   /**
@@ -6087,11 +6151,23 @@ export function ConversationChat({
      * same thing for a new goal, and the whole goal so far for a
      * continuation (see the comment where it is derived).
      */
-    (sent: string) => {
+    (sent: string, originArg?: unknown) => {
       user(sent);
       // QA Q-4: whatever is sent, a pending hand-off is consumed — the composer
       // that mounts after the first turn must not offer the sentence again.
       setSayPrefill("");
+      // Anything that is not exactly "voice" is a typed turn (callbacks may
+      // hand this function a second, unrelated argument).
+      const origin: TurnOrigin = originArg === "voice" ? "voice" : "typed";
+      turnOriginRef.current = origin;
+      if (origin === "typed") voiceProvenanceRef.current = null;
+      // A bare "yes" from speech is noise, never an acceptance: the person is
+      // pointed at the button on the card (a spoken "yes" is NOT the
+      // confirmation) and nothing is routed, continued or executed.
+      if (preRouteDisposition({ origin, text: sent }) === "refuse-bare-affirmation") {
+        assistant(t("voiceBareYes"));
+        return;
+      }
 
       // V10 §36: an explicit correction ("Ne 30, o 300 kg") of the LAST
       // interpretation replaces exactly the corrected fact and re-renders
@@ -7363,7 +7439,10 @@ export function ConversationChat({
           setTyping(true);
           resolveWriteEmployerTarget()
             .then(async (res) => {
-              if (res.kind === "one") {
+              // Voice: never open a counterparty-visible thread from one
+              // recognised sentence - take the "several" path (the card with
+              // its own button).
+              if (res.kind === "one" && !singleMatchNeedsChip(turnOriginRef.current, "writeEmployer")) {
                 const r = await contactEmployerAction({ locale, requestId: res.requestId });
                 setTyping(false);
                 if (r.ok) {
@@ -7378,7 +7457,7 @@ export function ConversationChat({
                 failed();
                 return;
               }
-              if (res.kind === "many") {
+              if (res.kind === "many" || res.kind === "one") {
                 assistant(labels.writeEmployerMany);
               } else {
                 // none / no-worker: the door is "show interest first".
@@ -7512,6 +7591,25 @@ export function ConversationChat({
     },
     [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startFindPartners, startOpenConversation, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
   );
+
+  /**
+   * THE VOICE DOOR. One reusable capture panel enters the thread as a card
+   * (like every other flow); the REVIEWED text is sent through the same
+   * `handleSend` a typed sentence takes, tagged "voice". The panel imports no
+   * action module (guard: voice-door-adapter-boundary).
+   */
+  const openVoiceDoor = useCallback(() => {
+    pushEmbed(
+      <VoiceCapturePanel
+        serviceConfigured
+        onUse={(r: VoiceCaptureResult) => {
+          voiceProvenanceRef.current = { language: r.language, disclosureVersion: r.disclosureVersion };
+          handleSend(r.text, "voice");
+          return true;
+        }}
+      />,
+    );
+  }, [pushEmbed, handleSend]);
 
   /**
    * Public entry hand-off (frozen design contract §5 P1, #1528): the landing
@@ -7872,6 +7970,8 @@ export function ConversationChat({
                     attachRemoveLabel={t("attachRemove")}
                     attachSelectedLabel={t("attachSelected")}
                     prefill={sayPrefill}
+                    onVoice={voiceAvailable ? openVoiceDoor : undefined}
+                    voiceLabel={t("voiceOpen")}
                   />
                 )
               }
@@ -7888,6 +7988,8 @@ export function ConversationChat({
                 attachRemoveLabel={t("attachRemove")}
                 attachSelectedLabel={t("attachSelected")}
                 prefill={sayPrefill}
+                onVoice={voiceAvailable ? openVoiceDoor : undefined}
+                voiceLabel={t("voiceOpen")}
               />
             )}
           </div>

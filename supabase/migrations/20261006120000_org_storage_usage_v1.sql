@@ -7,7 +7,7 @@
 -- approval. Apply ONLY via Supabase MCP `apply_migration` after explicit owner
 -- approval. Never `supabase db push`.
 --
--- 20261006100000 — organization storage usage (fair-use cap, 2 GiB default).
+-- 20261006120000 — organization storage usage (fair-use cap, 2 GiB default).
 --
 -- WHAT THIS ADDS (additive, read-only, no table/column/policy touched):
 --   1. org_storage_usage_v1_authorized(uuid)  — NOT created; the check is
@@ -47,7 +47,7 @@
 -- documents-only total / fail-open when these are absent):
 --   -- drop function if exists public.org_storage_journal_entry_org_v1(uuid);
 --   -- drop function if exists public.org_storage_used_bytes_v1(uuid);
--- Paired file: supabase/rollbacks/20261006100000_org_storage_usage_v1.down.sql
+-- Paired file: supabase/rollbacks/20261006120000_org_storage_usage_v1.down.sql
 
 begin;
 

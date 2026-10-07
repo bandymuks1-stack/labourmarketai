@@ -7,7 +7,7 @@ import { join } from "node:path";
  * pinned search_path, authenticated-only, with a paired rollback file.
  */
 const REPO = join(__dirname, "..", "..", "..", "..");
-const NAME = "20261006100000_org_storage_usage_v1";
+const NAME = "20261006120000_org_storage_usage_v1";
 const raw = readFileSync(join(REPO, `supabase/migrations/${NAME}.sql`), "utf8");
 const code = raw
   .split(/\r?\n/)

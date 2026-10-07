@@ -33,6 +33,7 @@ import { DocumentJournalDraftReview } from "@/components/app/document-journal-dr
 import { DocumentAckInbox } from "@/components/app/document-ack-inbox";
 import { OrgDocumentsRegister } from "@/components/app/org-documents-register";
 import { TrainingRegister } from "@/components/app/training-register";
+import { OwnRecognitionsBlock } from "@/components/app/own-recognitions-block";
 import { getWorkerDocumentFiles } from "@/lib/documents/document-files";
 import { parseOrgRegisterFilters } from "@/lib/documents/document-file-model";
 import { getDocsConsent } from "@/lib/documents/consent-actions";
@@ -929,6 +930,10 @@ export default async function WorkerDocumentsPage({
       {/* Training & Certification v1 — the person's own training and their
           certificates. Completing is self-only; nobody records it for them. */}
       <TrainingRegister locale={locale} notice={sp.trn} />
+
+      {/* SKL-9 — the person's own recognitions (assessor decisions), read-only;
+          distinct from certificates and from work evidence (SEP-6). */}
+      {user ? <OwnRecognitionsBlock profileId={user.id} /> : null}
 
       <DocsConsentToggle current={docsConsent} />
 

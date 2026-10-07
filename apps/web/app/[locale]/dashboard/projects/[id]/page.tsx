@@ -26,6 +26,7 @@ import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 import { MessageButton } from "@/components/app/message-button";
 import { CountUp } from "@/components/app/today/count-up";
 import { ProjectWorkGallery } from "@/components/app/project-work-gallery";
+import { ProjectHistoricalWork } from "@/components/app/project-historical-work";
 import { type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 
@@ -491,6 +492,9 @@ export default async function ProjectStadiumPage({
           }
         />
       </div>
+
+      {/* ── Historical work: organization-provided imported history on this project ── */}
+      <ProjectHistoricalWork projectId={id} locale={locale} />
 
       {/* ── Missing positions: the needs model does not exist yet — say so ── */}
       <section className="flex flex-col gap-2" data-testid="stadium-positions-note">

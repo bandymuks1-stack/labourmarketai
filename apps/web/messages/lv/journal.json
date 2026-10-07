@@ -179,9 +179,35 @@
       "too_large": "Ieraksts ir pārāk liels (maks. 25 MB).",
       "too_long": "Ieraksts ir pārāk garš (maks. 10 minūtes).",
       "unavailable": "Transkripcijas serveris šobrīd nav pieejams.",
-      "undecodable": "Neizdevās nolasīt audio — mēģiniet vēlreiz."
+      "undecodable": "Neizdevās nolasīt audio — mēģiniet vēlreiz.",
+      "rate_limited": "Pārāk daudz ierakstu īsā laikā - uzgaidi un mēģini vēlreiz.",
+      "token_expired": "Augšupielādes sesija beidzās - mēģini vēlreiz.",
+      "unauthorized": "Tava sesija nav autorizēta balsij - pieslēdzies vēlreiz.",
+      "service_unreachable": "Transkripcijas serveris nav sasniedzams. Pārbaudi savienojumu un mēģini vēlreiz; ieraksts paliek šajā lapā."
     },
-    "permissionDenied": "Piekļuve mikrofonam tika bloķēta. Atļaujiet mikrofonu pārlūka iestatījumos un mēģiniet vēlreiz."
+    "permissionDenied": "Piekļuve mikrofonam tika bloķēta. Atļaujiet mikrofonu pārlūka iestatījumos un mēģiniet vēlreiz.",
+    "disclosureProvenance": "Saglabātais ieraksts tiks atzīmēts kā ar balsi diktēts un tavā pārskatīts.",
+    "state": {
+      "ready": "Gatavs. Izvēlies runas valodu un sāc ierakstu.",
+      "permissionRequired": "Pārlūks pieprasīs mikrofona atļauju, kad sāksi. Pirms atļaujas nekas netiek ierakstīts.",
+      "policyBlocked": "Vietnes drošības politika šeit bloķē mikrofonu. Balss ieraksts šajā lapā nav pieejams - ierakstu vari uzrakstīt kā tekstu.",
+      "unsupported": "Šis pārlūks šeit nevar ierakstīt skaņu (vajadzīga droša lapa un mikrofona ierakstīšanas atbalsts). Vari augšupielādēt audio failu vai rakstīt tekstu.",
+      "noDevice": "Šajā ierīcē mikrofons netika atrasts.",
+      "deviceBusy": "Mikrofonu izmanto cita lietotne. Aizver to un mēģini vēlreiz.",
+      "cancelled": "Ieraksts atcelts. Nekas netika augšupielādēts vai saglabāts.",
+      "requesting": "Gaida tavu atļauju izmantot mikrofonu...",
+      "interrupted": "Ieraksts apturēts, jo lapa bija paslēpta. Turpini, kad atgriezīsies.",
+      "interruptedKept": "Mikrofons apstājās, tāpēc ieraksts beidzās agrāk. Ierakstītais ir pārrakstīts zemāk - lūdzu, pārbaudi.",
+      "uploading": "Augšupielādē ierakstu..."
+    },
+    "language": {
+      "label": "Runas valoda",
+      "auto": "Noteikt automātiski",
+      "hint": "Izvēlies valodu, kurā runāsi - tai nav jāsakrīt ar vietnes valodu."
+    },
+    "recordAgain": "Ierakstīt vēlreiz",
+    "announceStarted": "Ieraksts sākās",
+    "announceMinutes": "Ierakstīts {minutes} min"
   },
   "statusExplainer": "Kā tiek izmantoti jūsu ieraksti?",
   "exampleLine": "Piemēram: montēju ģipša starpsienas, lasīju rasējumus un strādāju ar lāzera līmeņrādi.",

@@ -47,6 +47,7 @@ import {
 import { trackFunnel } from "@/lib/telemetry/task";
 import { formatUtcDate } from "@/lib/time/display";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { personCalendarDay } from "@/lib/time/person-calendar-day";
 
 export type WorkLogLabels = {
   understood: string;
@@ -267,7 +268,11 @@ export function WorkerWorkLogFlow({
   photoFirst = false,
   initialFile = null,
   onRegisterAttachSink,
+  voice,
 }: {
+  /** Set only when the text came from the voice door (already reviewed by the
+   *  person): carried to the save as provenance, nothing more. */
+  voice?: { language: string; disclosureVersion: string };
   draft: WorkLogParse;
   locale: string;
   labels: WorkLogLabels;
@@ -502,6 +507,7 @@ export function WorkerWorkLogFlow({
       notes: notes.trim(),
       workDate,
       siteName: site.trim() || null,
+      ...(voice ? { voice } : {}),
       ...(projectPrompt === "ask" && projectChoiceValid
         ? { projectId: projectChoiceValid }
         : {}),
@@ -1246,7 +1252,7 @@ function RecordedTimePreview({
   const record = useMemo(() => {
     const anchor = /^\d{4}-\d{2}-\d{2}$/.test(workDate)
       ? workDate
-      : new Date().toISOString().slice(0, 10);
+      : personCalendarDay();
     const t = deriveIntakeWorkTime(notes, anchor);
     const partsMinutes = t.fragments.reduce((sum, f) => {
       if (f.timeUnit === "hours") return sum + f.timeValue * 60;
