@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { CircleDashed, MapPin } from "lucide-react";
 
-import { PLAYER_AVATAR_PX } from "@/lib/identity/player-identity";
 import { PersonPortrait } from "@/components/app/identity/person-portrait";
 import { cn } from "@/lib/utils";
 
@@ -38,13 +37,13 @@ export interface IdentityFact {
   readonly value: string | null;
   /** Its unit/meaning in words ("val. užfiksuota"). */
   readonly label: string;
-  /** Visual role: recorded work is evidence (cyan); confirmed is trust green. */
+  /** Visual role: recorded work is shown in brand gold figures; confirmation is said in words, never by colour. */
   readonly tone: "evidence" | "confirmed" | "neutral";
   readonly testid: string;
 }
 
 const FACT_TONE: Record<IdentityFact["tone"], string> = {
-  evidence: "text-brand-cyan",
+  evidence: "text-brand-blue",
   // Confirmation colour lives ONLY in the provenance edge (person-card
   // family rule); the confirmed figure is said in words, in plain ink.
   confirmed: "text-text-primary",
@@ -90,10 +89,9 @@ export function IdentityStage({
   readonly children?: ReactNode;
   readonly avatarTestids?: { readonly photo: string; readonly monogram: string };
 }) {
-  const px = PLAYER_AVATAR_PX.portrait;
   return (
     <div
-      className="identity-stage relative isolate overflow-hidden rounded-2xl border border-ink-600 bg-surface-1/60 p-4 sm:p-6"
+      className="identity-stage relative isolate overflow-hidden rounded-[1.6rem] bg-ink-900/70 p-3 sm:p-5"
       data-testid="identity-stage"
       data-professions={professions.length}
     >
@@ -101,7 +99,7 @@ export function IdentityStage({
           faint horizon line — depth, not decoration; no particles, no blobs. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(90%_70%_at_12%_18%,rgb(var(--c-brand-cyan)/0.10),transparent_62%)]"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(70%_90%_at_16%_30%,rgb(var(--c-brand-blue)/0.2),transparent_66%)]"
       />
       <span
         aria-hidden
@@ -110,21 +108,28 @@ export function IdentityStage({
 
       {/* Phone: the portrait sits BESIDE the name and the details run full
           width below; wider: the portrait holds its own column. */}
-      <div className="identity-stage-grid grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-4 gap-y-4 sm:gap-x-6">
+      <div className="identity-stage-grid">
         {/* ── THE PERSON ───────────────────────────────────────────────── */}
-        <div className="identity-stage-person flex items-stretch gap-3 sm:row-span-2">
-          {edge}
-          <PersonPortrait
-            name={name}
-            avatarUrl={avatarUrl}
-            initials={initials}
-            width={`clamp(96px, 30vw, ${px}px)`}
-            testids={avatarTestids}
-          />
+        <div className="identity-stage-person relative">
+          {/* The lit edge: the same gold ring the public pages put on the
+              person, so the professional is recognisably the same one here.
+              The person fills their column (and, on a phone, the band). */}
+          <span className="identity-stage-lit block rounded-[1.4rem] shadow-[0_0_0_2px_rgb(var(--c-brand-blue)/0.6),0_0_60px_rgb(var(--c-brand-blue)/0.22)]">
+            <PersonPortrait
+              name={name}
+              avatarUrl={avatarUrl}
+              initials={initials}
+              width="100%"
+              testids={avatarTestids}
+              className="block rounded-[1.4rem]"
+            />
+          </span>
+          {/* the caller provenance edge, laid ON the portrait left edge */}
+          {edge ? <span className="pointer-events-none absolute inset-y-4 left-3 z-10 flex items-stretch">{edge}</span> : null}
         </div>
 
         {/* ── WHO, WHAT, WHERE, NOW ───────────────────────────────────── */}
-        <div className="flex min-w-0 flex-wrap items-start justify-between gap-x-3 gap-y-2 self-center sm:flex-nowrap sm:self-start">
+        <div className="flex min-w-0 flex-wrap items-start justify-between gap-x-3 gap-y-2">
             <div className="flex min-w-[9rem] flex-1 flex-col gap-1 [overflow-wrap:anywhere]">
               {eyebrow}
               {heading}
@@ -132,7 +137,7 @@ export function IdentityStage({
             {trailing ? <div className="shrink-0">{trailing}</div> : null}
         </div>
 
-        <div className="identity-stage-details col-span-2 flex min-w-0 flex-col gap-3 sm:col-span-1 sm:col-start-2">
+        <div className="identity-stage-details flex min-w-0 flex-col gap-4">
 
           {professions.length > 0 ? (
             <ul
@@ -143,10 +148,10 @@ export function IdentityStage({
                 <li
                   key={`${p}-${i}`}
                   className={cn(
-                    "inline-flex min-h-8 items-center rounded-full border px-3 py-1 text-sm",
+                    "inline-flex min-h-9 items-center rounded-full px-4 py-1 text-base",
                     i === 0
-                      ? "border-ink-500 bg-ink-700/70 font-semibold text-text-primary"
-                      : "border-ink-600 bg-ink-800/60 text-text-secondary",
+                      ? "bg-brand-blue/15 font-semibold text-text-primary shadow-[inset_0_0_0_1px_rgb(var(--c-brand-blue)/0.35)]"
+                      : "bg-ink-700/60 text-text-secondary",
                   )}
                 >
                   {p}
@@ -163,7 +168,7 @@ export function IdentityStage({
                   data-testid="identity-stage-current-work"
                 >
                   <span className="live-dot" aria-hidden />
-                  <span className="whitespace-nowrap font-mono text-meta uppercase tracking-label text-text-muted">
+                  <span className="whitespace-nowrap text-support font-medium text-text-muted">
                     {currentWorkLabel}
                   </span>
                   <span className="min-w-0 break-words font-medium text-text-primary">
@@ -189,7 +194,7 @@ export function IdentityStage({
           {children}
 
           {facts.length > 0 ? (
-            <div className="mt-auto flex flex-col gap-3 border-t border-ink-600/70 pt-3" data-testid="identity-stage-facts">
+            <div className="mt-auto flex flex-col gap-3 pt-3" data-testid="identity-stage-facts">
               {/* Figures keep their grid; ABSENT states (not provided / not yet
                   confirmed / no records) get their own row so they can wrap
                   freely and can never collide with a number (phone, 2026-10-02). */}
@@ -202,12 +207,12 @@ export function IdentityStage({
                     .filter((f) => f.value !== null)
                     .map((f) => (
                       <div key={f.testid} className="flex min-w-0 flex-col gap-0.5" data-testid={f.testid}>
-                        <dt className="order-2 min-w-0 break-words font-mono text-[0.625rem] uppercase tracking-label text-text-muted sm:text-meta">
+                        <dt className="order-2 min-w-0 text-support text-text-secondary">
                           {f.label}
                         </dt>
                         <dd
                           className={cn(
-                            "order-1 font-display text-2xl font-bold leading-none tracking-tightest tabular-nums sm:text-3xl",
+                            "order-1 font-display text-4xl font-bold leading-none tracking-tightest tabular-nums sm:text-5xl",
                             FACT_TONE[f.tone],
                           )}
                         >
@@ -226,7 +231,7 @@ export function IdentityStage({
                         key={f.testid}
                         data-testid={f.testid}
                         data-absent="true"
-                        className="inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-md border border-dashed border-ink-500 px-2 py-1 font-mono text-[0.625rem] uppercase tracking-label text-text-secondary sm:text-meta"
+                        className="inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-md border border-dashed border-ink-500 px-2 py-1 text-support text-text-secondary"
                       >
                         <CircleDashed className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
                         <span className="min-w-0 break-words">{f.label}</span>

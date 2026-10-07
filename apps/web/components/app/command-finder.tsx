@@ -62,6 +62,7 @@ const STARTER_COMMAND_IDS: readonly string[] = [
   "work_journal",
   "planning",
   "messages",
+  "discover",
   "market_map",
   "profile",
 ];

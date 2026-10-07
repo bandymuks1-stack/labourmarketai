@@ -98,6 +98,9 @@ const CLASSIFICATION: Record<string, string> = {
   // dominant-skill answer first, share bars, period selector, checks, the
   // organization's ledger beside, growth kinds. UNKNOWN is said, never zero.
   "dashboard/work-in-numbers": "REAL_LAUNCH_SURFACE",
+  // Discover (2026-10-02): the role-aware offer/seek destination; links to the
+  // sections below, owns no data. Map is its spatial lens, no longer a tab.
+  "dashboard/market": "REAL_LAUNCH_SURFACE",
   "dashboard/market-map": "REAL_LAUNCH_SURFACE",
   "dashboard/opportunities": "REAL_LAUNCH_SURFACE",
   // Person detail page (production UX repair v2, F2) — the single permitted
@@ -243,6 +246,7 @@ describe("route truth map — every dashboard route is deliberately classified",
     // all classified REAL_LAUNCH_SURFACE.
     for (const target of [
       "dashboard",
+      "dashboard/market",
       "dashboard/market-map",
       "dashboard/journal",
       "dashboard/communication",

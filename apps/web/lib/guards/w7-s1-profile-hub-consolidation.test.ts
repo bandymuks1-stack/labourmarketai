@@ -91,7 +91,9 @@ describe("W7-S1 — exactly one canonical overview", () => {
 describe("W7-S1 — no capability was lost", () => {
   const CAPABILITIES: ReadonlyArray<readonly [string, RegExp]> = [
     // ── from ProfileStateStrip ──────────────────────────────────────────
-    ["readiness state word", /readiness\.\$\{readiness\.level\}|readiness\.\${readiness\.level}/],
+    // Relabelled deliberately: a bare "Ready" word is replaced by the named count
+    // "Profile steps: N of M done" (see no-unexplained-readiness.test.ts).
+    ["readiness state (named count)", /readiness\.summary/],
     ["freshness (newest entry date)", /profile-hub-freshness/],
     ["today's activity count", /profile-hub-activity/],
     // ── from LiveProfileSection ─────────────────────────────────────────
@@ -102,7 +104,7 @@ describe("W7-S1 — no capability was lost", () => {
     ["closest-match §19 basis", /closestBasis/],
     // ── from WorkerSetupJourney ─────────────────────────────────────────
     ["the 5 named steps", /steps\.\$\{s\.key\}\.title|steps\.\${s\.key}\.title/],
-    ["done-of-total progress", /tStep\("progress"/],
+    ["done-of-total progress", /done: readiness\.met/],
     ["the #setup-journey deep-link anchor", /id="setup-journey"/],
     // ── from SkillsReviewBanner ─────────────────────────────────────────
     ["unsupported-skill review note", /profile-hub-review-note/],
@@ -185,7 +187,7 @@ describe("W7-S1 — accessibility of the surface it introduced", () => {
 
   it("semantic headings: the hub is an h2 with h3 subsections", () => {
     expect(HUB).toMatch(/<h2 className="truncate font-display/);
-    expect(HUB).toMatch(/<h3 className="font-mono text-meta/);
+    expect(HUB).toMatch(/<h3 className="text-support font-medium/);
     // The page keeps exactly one h1.
     expect((PAGE.match(/<h1/g) ?? []).length).toBe(1);
   });

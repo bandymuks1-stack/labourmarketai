@@ -1,0 +1,152 @@
+{
+  "home@1440": {
+    "lcpMs": 624,
+    "cls": 0.0001,
+    "tbtMs": 954,
+    "longTasks": 8,
+    "inpMs": 48,
+    "jsKB": 425,
+    "jsFiles": 41,
+    "imgKB": 437,
+    "imgFiles": 8,
+    "runs": [
+      {
+        "lcp": 788,
+        "cls": 0.0001
+      },
+      {
+        "lcp": 624,
+        "cls": 0.0001
+      },
+      {
+        "lcp": 308,
+        "cls": 0.0001
+      }
+    ]
+  },
+  "for-workers@1440": {
+    "lcpMs": 1036,
+    "cls": 0.002,
+    "tbtMs": 917,
+    "longTasks": 10,
+    "inpMs": 40,
+    "jsKB": 429,
+    "jsFiles": 42,
+    "imgKB": 235,
+    "imgFiles": 4,
+    "runs": [
+      {
+        "lcp": 1000,
+        "cls": 0.002
+      },
+      {
+        "lcp": 1036,
+        "cls": 0.002
+      },
+      {
+        "lcp": 2116,
+        "cls": 0
+      }
+    ]
+  },
+  "for-companies@1440": {
+    "lcpMs": 740,
+    "cls": 0,
+    "tbtMs": 912,
+    "longTasks": 6,
+    "inpMs": 32,
+    "jsKB": 325,
+    "jsFiles": 33,
+    "imgKB": 192,
+    "imgFiles": 4,
+    "runs": [
+      {
+        "lcp": 620,
+        "cls": 0
+      },
+      {
+        "lcp": 740,
+        "cls": 0
+      },
+      {
+        "lcp": 912,
+        "cls": 0
+      }
+    ]
+  },
+  "home@375": {
+    "lcpMs": 548,
+    "cls": 0.0016,
+    "tbtMs": 3652,
+    "longTasks": 33,
+    "inpMs": 176,
+    "jsKB": 423,
+    "jsFiles": 39,
+    "imgKB": 176,
+    "imgFiles": 7,
+    "runs": [
+      {
+        "lcp": 2056,
+        "cls": 0.0016
+      },
+      {
+        "lcp": 472,
+        "cls": 0.0014
+      },
+      {
+        "lcp": 548,
+        "cls": 0.0016
+      }
+    ]
+  },
+  "for-workers@375": {
+    "lcpMs": 1244,
+    "cls": 0.0065,
+    "tbtMs": 2368,
+    "longTasks": 13,
+    "inpMs": 88,
+    "jsKB": 436,
+    "jsFiles": 45,
+    "imgKB": 85,
+    "imgFiles": 4,
+    "runs": [
+      {
+        "lcp": 1244,
+        "cls": 0.0065
+      },
+      {
+        "lcp": 2448,
+        "cls": 0.0065
+      },
+      {
+        "lcp": 800,
+        "cls": 0.0065
+      }
+    ]
+  },
+  "for-companies@375": {
+    "lcpMs": 2172,
+    "cls": 0.0057,
+    "tbtMs": 1453,
+    "longTasks": 13,
+    "inpMs": 40,
+    "jsKB": 336,
+    "jsFiles": 38,
+    "imgKB": 72,
+    "imgFiles": 4,
+    "runs": [
+      {
+        "lcp": 2172,
+        "cls": 0.0057
+      },
+      {
+        "lcp": 1024,
+        "cls": 0.006
+      },
+      {
+        "lcp": 2496,
+        "cls": 0.0057
+      }
+    ]
+  }
+}

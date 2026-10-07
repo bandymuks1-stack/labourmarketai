@@ -42,7 +42,7 @@ export async function WorkDay({ day, locale }: { day: RhythmDay; locale: string 
     >
       <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
         <div className="flex flex-col gap-1">
-          <span className={`font-mono text-meta uppercase tracking-label ${day.isToday ? "text-brand-blue" : "text-text-muted"}`}>
+          <span className={`text-support ${day.isToday ? "text-brand-blue" : "text-text-muted"}`}>
             {day.isToday ? t("today") : weekday}
           </span>
           <span className="font-display text-3xl font-bold leading-none tracking-tightest text-text-primary sm:text-4xl">
@@ -74,12 +74,12 @@ export async function WorkDay({ day, locale }: { day: RhythmDay; locale: string 
           </div>
           <ul className="flex flex-wrap gap-x-5 gap-y-1">
             {timed.map((b, i) => (
-              <li key={b.id} className="inline-flex min-w-0 items-center gap-2 text-support text-text-secondary">
+              <li key={b.id} className="inline-flex min-w-0 items-center gap-2 text-support font-medium text-text-secondary">
                 <span aria-hidden className={`size-2 shrink-0 rounded-full ${b.confirmed ? "bg-trust-accent" : SEGMENT_TONES[i % SEGMENT_TONES.length]}`} />
                 <span className="truncate">
                   {[b.organization, b.place].filter(Boolean).join(" · ") || (b.label ?? t("fallback.journal"))}
                 </span>
-                <span className="shrink-0 font-mono tabular-nums text-text-primary">{dur(b.minutes ?? 0)}</span>
+                <span className="shrink-0 tabular-nums text-text-primary">{dur(b.minutes ?? 0)}</span>
               </li>
             ))}
           </ul>
@@ -91,7 +91,7 @@ export async function WorkDay({ day, locale }: { day: RhythmDay; locale: string 
       )}
 
       {day.blocks.length > 0 && day.confirmation !== "unknown" ? (
-        <p className="mt-3 font-mono text-meta uppercase tracking-label text-text-muted" data-testid="planning-work-day-confirmed">
+        <p className="mt-3 text-support font-medium text-text-muted" data-testid="planning-work-day-confirmed">
           {t("rhythm.dayConfirmed", { confirmed: confirmedBlocks, total: day.blocks.length })}
         </p>
       ) : null}

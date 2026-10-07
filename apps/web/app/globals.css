@@ -613,19 +613,45 @@ a {
 .identity-stage {
   container-type: inline-size;
 }
+/* PREMIUM (2026-10-02): the PERSON fills a real column - a large lit portrait
+   beside the name, the profession, where they work now and the journal figures.
+   Narrow (the chat panel, a phone): the portrait becomes a wide band over the
+   same content, so the person still leads. */
+.identity-stage-grid {
+  display: grid;
+  grid-template-columns: minmax(0, clamp(210px, 36cqi, 310px)) minmax(0, 1fr);
+  column-gap: 1.75rem;
+  row-gap: 1.25rem;
+  align-items: start;
+}
+.identity-stage-person {
+  grid-row: span 2;
+}
+.identity-stage-details {
+  grid-column: 2;
+}
+.identity-stage .identity-portrait {
+  width: 100% !important;
+}
+.identity-stage .identity-portrait img {
+  object-position: 50% 22%;
+}
 @container (max-width: 560px) {
+  .identity-stage-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .identity-stage-person {
-    grid-row: auto !important;
+    grid-row: auto;
   }
   .identity-stage-details {
-    grid-column: 1 / -1 !important;
+    grid-column: 1;
   }
   .identity-stage .identity-portrait {
-    width: clamp(84px, 24cqi, 120px) !important;
+    aspect-ratio: 5 / 4 !important;
   }
   .identity-stage h2 {
-    font-size: 1.5rem;
-    line-height: 1.1;
+    font-size: clamp(1.9rem, 9cqi, 2.4rem);
+    line-height: 1.04;
     overflow-wrap: normal;
     word-break: normal;
   }
@@ -656,6 +682,45 @@ a {
 .rhythm-grow-x {
   transform-origin: left;
   animation: rhythm-grow-x var(--motion-slow) var(--motion-ease-out) both;
+}
+
+/* WORK IN TIME (/dashboard/planning perspectives) — subtle, compositor-only
+   motion: bars grow in from their start, the capacity band rises, and the
+   now-line breathes. Every one of them is disabled under reduced motion. */
+@keyframes wit-grow-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes wit-now {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+.wit-grow-y {
+  transform-origin: bottom;
+  animation: wit-grow-y var(--motion-slow) var(--motion-ease-out) both;
+}
+.wit-bar {
+  transform-origin: left;
+  animation: rhythm-grow-x var(--motion-slow) var(--motion-ease-out) both;
+}
+.wit-now {
+  animation: wit-now 3.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wit-grow-y,
+  .wit-bar,
+  .wit-now {
+    animation: none !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1034,4 +1099,107 @@ a {
 .lwh-sheen { animation: lwh-sheen 1500ms cubic-bezier(0.4, 0, 0.2, 1) 500ms both; }
 @media (prefers-reduced-motion: reduce) {
   .living-hero-rise, .lwh-sweep, .lwh-frag, .lwh-sheen, .lwh-dip { animation: none; }
+}
+
+/* ── THE WORLD OF WORK (premium convergence, 2026-10-02: CURRENT × Q) ─────────
+   One visual idea for public AND product: a real person in a real working
+   context, the related context (team, project, work, record) visible around
+   them, and depth that explains hierarchy — the focused object is highest, the
+   related context quieter, the photographic world behind it quietest.
+   `.scope-dark` re-declares the dark channels so a photographic scene reads
+   the same under either theme (text over a photograph must never flip dark).
+   These are the SAME tokens as `:root` dark — no second theme. */
+.scope-dark {
+  --c-ink-900: 7 7 6;
+  --c-ink-800: 21 21 19;
+  --c-ink-700: 29 29 26;
+  --c-ink-600: 42 42 38;
+  --c-ink-500: 118 112 101;
+  --c-brand-blue: 212 175 55;
+  --c-brand-champagne: 242 214 117;
+  --c-state-success: 52 211 153;
+  --c-state-warning: 255 184 69;
+  --c-state-amber: 255 165 82;
+  --c-state-danger: 255 92 92;
+  --c-text-primary: 245 241 232;
+  --c-text-secondary: 207 201 188;
+  --c-text-muted: 163 156 141;
+  --c-text-on-brand: 10 10 10;
+  color: rgb(var(--c-text-primary));
+}
+@keyframes world-in {
+  from { opacity: 0; transform: translateY(18px); filter: blur(8px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+.world-in { animation: world-in 900ms cubic-bezier(0.32, 0.72, 0, 1) both; }
+@keyframes world-line {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.world-line { animation: world-line 900ms ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .world-in, .world-line { animation: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   CINEMATIC STORY (public acquisition pages) — one stage, one set of entities.
+   The camera, focus, composition and relationships change with scroll; nothing
+   is swapped like a slide. Transforms and opacity only (compositor).
+   Reduced motion: no pinning, no transitions, the complete composition.
+   --------------------------------------------------------------------------- */
+/* The global `html, body { overflow-x: hidden }` makes <body> a scroll container, which stops any
+   `position: sticky` descendant from pinning to the viewport. On pages that carry the story, clip
+   instead of hiding: same horizontal containment, no scroll container, the stage pins. */
+html:has(.cine-track), html:has(.cine-track) body { overflow-x: clip; overflow-y: visible; }
+.cine-track { --cine-h: clamp(620px, 100svh, 1100px); --beat: 64svh; }
+@media (min-width: 1024px) { .cine-track { --beat: 70svh; } }
+.cine-pin { position: sticky; top: 0; height: var(--cine-h); overflow: hidden; }
+.cine-stage { position: absolute; inset: 0; container-type: size; }
+.cine-beats { position: relative; margin-top: calc(-1 * var(--cine-h)); pointer-events: none; list-style: none; padding: 0; }
+.cine-beat { height: var(--beat); }
+.cine-beat:last-child { height: calc(var(--beat) * 1.7); }
+.cine-par { transform: translate3d(0, calc((var(--p, 0) - 0.5) * -3%), 0); will-change: transform; }
+.cine-bd { opacity: 0; transition: opacity 1100ms ease, transform 1700ms cubic-bezier(0.32, 0.72, 0, 1); will-change: transform, opacity; }
+.cine-bd[data-on="true"] { opacity: 1; }
+.cine-shade {
+  background:
+    linear-gradient(180deg, rgb(var(--c-ink-900) / 0.55), transparent 22%, transparent 40%, rgb(var(--c-ink-900) / 0.94) 100%);
+}
+@media (min-width: 1024px) {
+  .cine-shade {
+    background:
+      linear-gradient(90deg, rgb(var(--c-ink-900) / 0.86), rgb(var(--c-ink-900) / 0.4) 40%, transparent 62%),
+      linear-gradient(180deg, rgb(var(--c-ink-900) / 0.5), transparent 24%, transparent 60%, rgb(var(--c-ink-900) / 0.9));
+  }
+}
+.cine-ent {
+  position: absolute; left: 0; top: 0; width: var(--wm, min(70cqw, 280px));
+  transform: translate3d(calc(var(--mx) * 1cqw - 50%), calc(var(--my) * 1cqh - 50%), 0);
+  translate: 0 14px; opacity: 0; pointer-events: none;
+  transition: transform 1100ms cubic-bezier(0.32, 0.72, 0, 1), translate 800ms ease, opacity 700ms ease;
+  will-change: transform, opacity;
+}
+.cine-ent[data-on="true"] { translate: 0 0; opacity: 1; }
+@media (max-width: 1023.98px) { .cine-ent[data-mhide="true"] { opacity: 0; } }
+@media (min-width: 1024px) {
+  .cine-ent { width: var(--wd, clamp(230px, 22cqw, 330px)); transform: translate3d(calc(var(--dx) * 1cqw - 50%), calc(var(--dy) * 1cqh - 50%), 0); }
+}
+.cine-stage:not([data-ready]) .cine-bd, .cine-stage:not([data-ready]) .cine-ent { transition: none; }
+@keyframes cine-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.cine-rise { animation: cine-rise 700ms cubic-bezier(0.32, 0.72, 0, 1) both; animation-delay: calc(var(--i, 0) * 380ms + 350ms); }
+.cine-swap { animation: cine-rise 600ms cubic-bezier(0.32, 0.72, 0, 1) both; }
+.cine-cap { animation: cine-rise 800ms cubic-bezier(0.32, 0.72, 0, 1) both; animation-delay: 250ms; }
+@keyframes cine-wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+.cine-wipe { animation: cine-wipe 900ms cubic-bezier(0.32, 0.72, 0, 1) both; animation-delay: calc(var(--i, 0) * 380ms + 500ms); }
+@keyframes cine-draw { from { stroke-dashoffset: 1; opacity: 0.2; } to { stroke-dashoffset: 0; opacity: 1; } }
+.cine-draw { animation: cine-draw 1000ms ease-out both; animation-delay: 550ms; }
+@keyframes cine-fade { from { opacity: 0; } to { opacity: 1; } }
+.cine-fade { animation: cine-fade 900ms ease-out both; animation-delay: 650ms; }
+@media (prefers-reduced-motion: reduce) {
+  .cine-pin { position: relative; }
+  .cine-beats { margin-top: 0; pointer-events: auto; }
+  .cine-beat, .cine-beat:last-child { height: auto; }
+  .cine-par { transform: none; will-change: auto; }
+  .cine-bd, .cine-ent { transition: none; will-change: auto; }
+  .cine-rise, .cine-swap, .cine-cap, .cine-wipe, .cine-draw, .cine-fade { animation: none; }
 }

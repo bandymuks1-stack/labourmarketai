@@ -1,0 +1,252 @@
+{
+  "axe": [
+    {
+      "page": "/en",
+      "reduced": false,
+      "violations": []
+    },
+    {
+      "page": "/en/for-workers",
+      "reduced": false,
+      "violations": []
+    },
+    {
+      "page": "/en/for-companies",
+      "reduced": false,
+      "violations": []
+    },
+    {
+      "page": "/en",
+      "reduced": true,
+      "violations": []
+    },
+    {
+      "page": "/en/for-workers",
+      "reduced": true,
+      "violations": []
+    },
+    {
+      "page": "/en/for-companies",
+      "reduced": true,
+      "violations": []
+    }
+  ],
+  "overflow": [
+    {
+      "loc": "en",
+      "p": "",
+      "w": 375,
+      "worst": 0
+    },
+    {
+      "loc": "en",
+      "p": "",
+      "w": 1280,
+      "worst": 0
+    },
+    {
+      "loc": "en",
+      "p": "/for-workers",
+      "w": 375,
+      "worst": 0
+    },
+    {
+      "loc": "en",
+      "p": "/for-workers",
+      "w": 1280,
+      "worst": 0
+    },
+    {
+      "loc": "en",
+      "p": "/for-companies",
+      "w": 375,
+      "worst": 0
+    },
+    {
+      "loc": "en",
+      "p": "/for-companies",
+      "w": 1280,
+      "worst": 0
+    },
+    {
+      "loc": "lt",
+      "p": "",
+      "w": 375,
+      "worst": 0
+    },
+    {
+      "loc": "lt",
+      "p": "",
+      "w": 1280,
+      "worst": 0
+    },
+    {
+      "loc": "lt",
+      "p": "/for-workers",
+      "w": 375,
+      "worst": 0
+    },
+    {
+      "loc": "lt",
+      "p": "/for-workers",
+      "w": 1280,
+      "worst": 0
+    },
+    {
+      "loc": "lt",
+      "p": "/for-companies",
+      "w": 375,
+      "worst": 0
+    },
+    {
+      "loc": "lt",
+      "p": "/for-companies",
+      "w": 1280,
+      "worst": 0
+    },
+    {
+      "loc": "de",
+      "p": "",
+      "w": 375,
+      "worst": 0
+    },
+    {
+      "loc": "de",
+      "p": "",
+      "w": 1280,
+      "worst": 0
+    },
+    {
+      "loc": "de",
+      "p": "/for-workers",
+      "w": 375,
+      "worst": 0
+    },
+    {
+      "loc": "de",
+      "p": "/for-workers",
+      "w": 1280,
+      "worst": 0
+    },
+    {
+      "loc": "de",
+      "p": "/for-companies",
+      "w": 375,
+      "worst": 0
+    },
+    {
+      "loc": "de",
+      "p": "/for-companies",
+      "w": 1280,
+      "worst": 0
+    },
+    {
+      "loc": "pl",
+      "p": "",
+      "w": 375,
+      "worst": 0
+    },
+    {
+      "loc": "pl",
+      "p": "",
+      "w": 1280,
+      "worst": 0
+    },
+    {
+      "loc": "pl",
+      "p": "/for-workers",
+      "w": 375,
+      "worst": 0
+    },
+    {
+      "loc": "pl",
+      "p": "/for-workers",
+      "w": 1280,
+      "worst": 0
+    },
+    {
+      "loc": "pl",
+      "p": "/for-companies",
+      "w": 375,
+      "worst": 0
+    },
+    {
+      "loc": "pl",
+      "p": "/for-companies",
+      "w": 1280,
+      "worst": 0
+    },
+    {
+      "loc": "ru",
+      "p": "",
+      "w": 375,
+      "worst": 0
+    },
+    {
+      "loc": "ru",
+      "p": "",
+      "w": 1280,
+      "worst": 0
+    },
+    {
+      "loc": "ru",
+      "p": "/for-workers",
+      "w": 375,
+      "worst": 0
+    },
+    {
+      "loc": "ru",
+      "p": "/for-workers",
+      "w": 1280,
+      "worst": 0
+    },
+    {
+      "loc": "ru",
+      "p": "/for-companies",
+      "w": 375,
+      "worst": 0
+    },
+    {
+      "loc": "ru",
+      "p": "/for-companies",
+      "w": 1280,
+      "worst": 0
+    },
+    {
+      "loc": "nl",
+      "p": "",
+      "w": 375,
+      "worst": 0
+    },
+    {
+      "loc": "nl",
+      "p": "",
+      "w": 1280,
+      "worst": 0
+    },
+    {
+      "loc": "nl",
+      "p": "/for-workers",
+      "w": 375,
+      "worst": 0
+    },
+    {
+      "loc": "nl",
+      "p": "/for-workers",
+      "w": 1280,
+      "worst": 0
+    },
+    {
+      "loc": "nl",
+      "p": "/for-companies",
+      "w": 375,
+      "worst": 0
+    },
+    {
+      "loc": "nl",
+      "p": "/for-companies",
+      "w": 1280,
+      "worst": 0
+    }
+  ]
+}

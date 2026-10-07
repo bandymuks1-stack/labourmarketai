@@ -263,9 +263,9 @@ export async function buildPlayerCardLabels(
     readiness: {
       label: t("readiness.label"),
       hint: t("readiness.hint"),
-      levelReady: t("readiness.levelReady"),
-      levelBuilding: t("readiness.levelBuilding"),
-      levelStart: t("readiness.levelStart"),
+      ringAria: t("readiness.ringAria"),
+      stepDone: t("readiness.stepDone"),
+      stepOpen: t("readiness.stepOpen"),
       signalsTemplate: t("readiness.signalsTemplate"),
       nextLabel: t("readiness.nextLabel"),
       pillars: {

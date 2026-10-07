@@ -1,0 +1,109 @@
+{
+  "label": "before",
+  "actor": "agency",
+  "base": "http://127.0.0.1:3101",
+  "shots": [
+    {
+      "file": "before-agency-my-time-1440.png",
+      "path": "/en/dashboard/planning",
+      "finalUrl": "http://127.0.0.1:3101/en/dashboard/planning",
+      "status": 200,
+      "title": "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+      "lens": "me",
+      "h1": "Calendar",
+      "hScroll": false
+    },
+    {
+      "file": "before-agency-people-in-time-1440.png",
+      "path": "/en/dashboard/planning?lens=people",
+      "finalUrl": "http://127.0.0.1:3101/en/dashboard/planning?lens=people",
+      "status": 200,
+      "title": "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+      "lens": "me",
+      "h1": "Calendar",
+      "hScroll": false
+    },
+    {
+      "file": "before-agency-projects-in-time-1440.png",
+      "path": "/en/dashboard/planning?lens=projects",
+      "finalUrl": "http://127.0.0.1:3101/en/dashboard/planning?lens=projects",
+      "status": 200,
+      "title": "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+      "lens": "me",
+      "h1": "Calendar",
+      "hScroll": false
+    },
+    {
+      "file": "before-agency-people-focus-1440.png",
+      "path": "/en/dashboard/planning?lens=people&focus=person:1249b2b9-d246-431a-bc46-0e0acde4230e",
+      "finalUrl": "http://127.0.0.1:3101/en/dashboard/planning?lens=people&focus=person:1249b2b9-d246-431a-bc46-0e0acde4230e",
+      "status": 200,
+      "title": "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+      "lens": "me",
+      "h1": "Calendar",
+      "hScroll": false
+    },
+    {
+      "file": "before-agency-projects-focus-1440.png",
+      "path": "/en/dashboard/planning?lens=projects&focus=project:eeeeeeee-0000-0000-0000-000000000001",
+      "finalUrl": "http://127.0.0.1:3101/en/dashboard/planning?lens=projects&focus=project:eeeeeeee-0000-0000-0000-000000000001",
+      "status": 200,
+      "title": "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+      "lens": "me",
+      "h1": "Calendar",
+      "hScroll": false
+    },
+    {
+      "file": "before-agency-my-time-375.png",
+      "path": "/en/dashboard/planning",
+      "finalUrl": "http://127.0.0.1:3101/en/dashboard/planning",
+      "status": 200,
+      "title": "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+      "lens": "me",
+      "h1": "Calendar",
+      "hScroll": false
+    },
+    {
+      "file": "before-agency-people-in-time-375.png",
+      "path": "/en/dashboard/planning?lens=people",
+      "finalUrl": "http://127.0.0.1:3101/en/dashboard/planning?lens=people",
+      "status": 200,
+      "title": "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+      "lens": "me",
+      "h1": "Calendar",
+      "hScroll": false
+    },
+    {
+      "file": "before-agency-projects-in-time-375.png",
+      "path": "/en/dashboard/planning?lens=projects",
+      "finalUrl": "http://127.0.0.1:3101/en/dashboard/planning?lens=projects",
+      "status": 200,
+      "title": "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+      "lens": "me",
+      "h1": "Calendar",
+      "hScroll": false
+    },
+    {
+      "file": "before-agency-people-focus-375.png",
+      "path": "/en/dashboard/planning?lens=people&focus=person:1249b2b9-d246-431a-bc46-0e0acde4230e",
+      "finalUrl": "http://127.0.0.1:3101/en/dashboard/planning?lens=people&focus=person:1249b2b9-d246-431a-bc46-0e0acde4230e",
+      "status": 200,
+      "title": "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+      "lens": "me",
+      "h1": "Calendar",
+      "hScroll": false
+    },
+    {
+      "file": "before-agency-projects-focus-375.png",
+      "path": "/en/dashboard/planning?lens=projects&focus=project:eeeeeeee-0000-0000-0000-000000000001",
+      "finalUrl": "http://127.0.0.1:3101/en/dashboard/planning?lens=projects&focus=project:eeeeeeee-0000-0000-0000-000000000001",
+      "status": 200,
+      "title": "LabourMarket.ai — Workers, Employers, Skills and Work Opportunities in Europe",
+      "lens": "me",
+      "h1": "Calendar",
+      "hScroll": false
+    }
+  ],
+  "axe": {},
+  "notes": []
+}

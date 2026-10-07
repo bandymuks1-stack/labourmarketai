@@ -136,7 +136,7 @@ export function HistoricalObjects({
       {spanFirst && spanLast && (
         <div
           aria-hidden
-          className="flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted"
+          className="flex items-center gap-2 text-support font-medium text-text-muted"
         >
           <span>{fmt.day(spanFirst)}</span>
           <span className="h-px flex-1 bg-ink-600" />
@@ -205,7 +205,7 @@ export function HistoricalObjects({
                     >
                       {pl.name}
                     </span>
-                    <span className="flex items-center gap-2.5 font-mono text-meta tabular-nums text-text-muted">
+                    <span className="flex items-center gap-2.5 text-meta tabular-nums text-text-muted">
                       <span className="inline-flex items-center gap-1">
                         <SemanticIcon
                           concept="calendar"
@@ -250,7 +250,7 @@ export function HistoricalObjects({
                       ))}
                     </span>
                     {(at?.people.length ?? 0) > 5 && (
-                      <span className="font-mono text-meta text-text-muted">
+                      <span className="text-meta text-text-muted">
                         +{(at?.people.length ?? 0) - 5}
                       </span>
                     )}
@@ -328,10 +328,10 @@ export function HistoricalObjectFocus({
           <h3 className="truncate font-display text-title font-semibold tracking-tightest text-text-primary">
             {place.name}
           </h3>
-          <div className="flex flex-wrap items-center gap-2 font-mono text-meta">
+          <div className="flex flex-wrap items-center gap-2 text-meta">
             <span
               className={cn(
-                "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 uppercase tracking-label",
+                "inline-flex items-center gap-1 rounded-full border px-2 py-0.5",
                 place.state === "existing"
                   ? "border-state-success/40 text-state-success"
                   : "border-brand-cyan/40 text-brand-cyan",
@@ -368,7 +368,7 @@ export function HistoricalObjectFocus({
               className="h-3.5 w-3.5 self-center text-text-muted"
             />
             {at?.days ?? place.rows}
-            <span className="font-mono text-meta font-normal uppercase tracking-label text-text-muted">
+            <span className="text-support font-normal text-text-muted">
               {labels.days}
             </span>
           </dd>
@@ -386,7 +386,7 @@ export function HistoricalObjectFocus({
             ) : (
               <UnknownToken what={labels.hoursUnknown} className="text-title" />
             )}
-            <span className="font-mono text-meta font-normal uppercase tracking-label text-text-muted">
+            <span className="text-support font-normal text-text-muted">
               h
             </span>
           </dd>
@@ -400,14 +400,14 @@ export function HistoricalObjectFocus({
               className="h-3.5 w-3.5 self-center text-text-muted"
             />
             {at?.people.length ?? place.people}
-            <span className="font-mono text-meta font-normal uppercase tracking-label text-text-muted">
+            <span className="text-support font-normal text-text-muted">
               {labels.people}
             </span>
           </dd>
         </div>
         {place.sharedRows > 0 && (
           <div
-            className="flex items-baseline gap-1.5 font-mono text-meta tabular-nums text-text-secondary"
+            className="flex items-baseline gap-1.5 text-meta tabular-nums text-text-secondary"
             title={labels.shared(place.sharedRows)}
           >
             <dt className="sr-only">{labels.shared(place.sharedRows)}</dt>
@@ -448,7 +448,7 @@ export function HistoricalObjectFocus({
                   <span className="truncate text-support font-semibold text-text-primary">
                     {p.label}
                   </span>
-                  <span className="font-mono text-meta tabular-nums text-text-muted">
+                  <span className="text-meta tabular-nums text-text-muted">
                     {p.days} {labels.days} ·{" "}
                     {p.hours !== null ? `${fmt.hours(p.hours)} h` : "?"}
                   </span>
@@ -478,7 +478,7 @@ export function HistoricalObjectFocus({
       {/* WHEN — the object's rhythm by week */}
       {weeks.length > 0 && (
         <div className="flex flex-col gap-1">
-          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          <span className="text-support font-medium text-text-muted">
             {labels.weeks}
           </span>
           <ol className="flex h-14 items-end gap-1.5" aria-label={labels.weeks}>
@@ -500,7 +500,7 @@ export function HistoricalObjectFocus({
                       height: `${Math.max(2, Math.round((w.days / maxDays) * 30))}px`,
                     }}
                   />
-                  <span className="font-mono text-meta tabular-nums text-text-muted">
+                  <span className="text-meta tabular-nums text-text-muted">
                     {w.isoWeek}
                   </span>
                 </button>
@@ -516,7 +516,7 @@ export function HistoricalObjectFocus({
           className="group/details"
           data-testid="historical-object-source"
         >
-          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-support text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-support font-medium text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
             <SemanticIcon
               concept="source"
               label={labels.source}
@@ -525,7 +525,7 @@ export function HistoricalObjectFocus({
             {labels.source}
             <span
               aria-hidden
-              className="ml-auto font-mono text-meta text-text-muted transition-transform group-open/details:rotate-90"
+              className="ml-auto text-meta text-text-muted transition-transform group-open/details:rotate-90"
             >
               ›
             </span>

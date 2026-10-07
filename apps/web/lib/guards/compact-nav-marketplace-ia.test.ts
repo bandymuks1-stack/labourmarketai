@@ -10,6 +10,11 @@ import {
 import { getFeatureConfig } from "../config/feature-availability";
 
 /**
+ * UPDATE 2026-10-02 (owner decision, see discover-ia.test.ts): the second tab
+ * is now DISCOVER (/dashboard/market) - the broader offer/seek world - and the
+ * map is its spatial lens, not a tab. The rest of this file's history is kept
+ * for context.
+ *
  * Compact, MAP-FIRST navigation IA guard.
  *
  * Owner direction (action-first IA v1): the map (Žemėlapis) is its own PRIMARY
@@ -33,10 +38,10 @@ const MAP = "app/[locale]/dashboard/market-map/page.tsx";
 
 
 describe("the global nav is the compact, map-first set, in order", () => {
-  it("primary nav ids = overview, market_map, journal_text_first, communication, planning, network (production UX repair v2 F14/F15: the calendar and the network are core modules and must be findable through normal navigation)", () => {
+  it("primary nav ids = overview, discover, journal_text_first, communication, planning, network (production UX repair v2 F14/F15: the calendar and the network are core modules and must be findable through normal navigation)", () => {
     expect(VISIBLE_PRIMARY_NAV_ITEMS.map((i) => i.id)).toEqual([
       "overview",
-      "market_map",
+      "discover",
       "journal_text_first",
       "communication",
       "planning",
@@ -44,13 +49,18 @@ describe("the global nav is the compact, map-first set, in order", () => {
     ]);
   });
 
-  it("the Žemėlapis tab routes DIRECTLY to the real map surface", () => {
-    const f = getFeatureConfig("market_map");
+  it("the Discover tab routes to the role-aware Discover destination; the map is its lens, not a tab (owner decision 2026-10-02, see discover-ia.test.ts)", () => {
+    const f = getFeatureConfig("discover");
     expect(f.availability).toBe("active");
     expect(f.safeToShowInPrimaryNav).toBe(true);
-    expect(f.primaryRoute).toBe("/dashboard/market-map");
-    const item = VISIBLE_PRIMARY_NAV_ITEMS.find((i) => i.id === "market_map");
-    expect(item?.href).toBe("/dashboard/market-map");
+    expect(f.primaryRoute).toBe("/dashboard/market");
+    const item = VISIBLE_PRIMARY_NAV_ITEMS.find((i) => i.id === "discover");
+    expect(item?.href).toBe("/dashboard/market");
+    // The map stays a real, active product surface - one tap inside Discover.
+    const map = getFeatureConfig("market_map");
+    expect(map.availability).toBe("active");
+    expect(map.primaryRoute).toBe("/dashboard/market-map");
+    expect(map.safeToShowInPrimaryNav).toBe(false);
   });
 
   it("the marketplace hub is SECONDARY — active but not a global tab", () => {
@@ -129,8 +139,8 @@ describe("the map is the primary surface; marketplace is secondary", () => {
     expect(map).not.toMatch(/<MapLayersLegend\b/);
   });
 
-  it("/dashboard/marketplace is secondary — redirects to the map", () => {
-    expect(isCanonicallyRedirected("/dashboard/marketplace", "/dashboard/market-map")).toBe(true);
+  it("/dashboard/marketplace redirects to Discover (the marketplace home)", () => {
+    expect(isCanonicallyRedirected("/dashboard/marketplace", "/dashboard/market")).toBe(true);
   });
 });
 

@@ -32,10 +32,26 @@ const VIEWPORTS = [
 ] as const;
 
 const SURFACES = [
-  { path: "/en/for-workers", testid: "work-lifecycle-workers" },
-  { path: "/en/for-companies", testid: "work-lifecycle-companies" },
+  // Premium convergence 2026-10-02: the signature visual of the two acquisition
+  // pages is the cinematic story (one stage, one set of entities); the lifecycle graph lives in the
+  // folded "explore every step" section and is exercised below.
+  { path: "/en/for-workers", testid: "cinematic-story" },
+  { path: "/en/for-companies", testid: "cinematic-story" },
   { path: "/en", testid: "two-sides-lifecycle" },
 ] as const;
+
+/** Opens the folded lifecycle graph on /for-workers (kept, not removed). */
+async function openWorkersFold(page: import("@playwright/test").Page) {
+  await page.goto("/en/for-workers", { waitUntil: "load" });
+  await page.waitForLoadState("networkidle");
+  const fold = page.getByTestId("explore-steps");
+  await fold.scrollIntoViewIfNeeded();
+  // A click that lands during hydration can be undone by it: retry until it sticks.
+  await expect(async () => {
+    if (!(await fold.evaluate((e) => (e as HTMLDetailsElement).open))) await fold.locator("summary").click();
+    await expect(fold).toHaveJSProperty("open", true, { timeout: 1_000 });
+  }).toPass({ timeout: 15_000 });
+}
 
 for (const s of SURFACES) {
   for (const v of VIEWPORTS) {
@@ -80,7 +96,7 @@ test.describe("lifecycle graph accessibility", () => {
   });
 
   test("reduced motion: no auto-play — the whole record is present immediately", async ({ page }) => {
-    await page.goto("/en/for-workers", { waitUntil: "load" });
+    await openWorkersFold(page);
     const record = page.getByTestId("work-lifecycle-workers-record");
     await expect(record).toBeVisible({ timeout: 30_000 });
     // Every row is filled at once; nothing is left to a timer.
@@ -89,7 +105,7 @@ test.describe("lifecycle graph accessibility", () => {
   });
 
   test("keyboard: stages are buttons, Enter selects, selection is exposed (aria-pressed) and focus is visible", async ({ page }) => {
-    await page.goto("/en/for-workers", { waitUntil: "load" });
+    await openWorkersFold(page);
     const work = page.getByTestId("work-lifecycle-workers-stage-work");
     await expect(work).toBeVisible({ timeout: 30_000 });
     await page.keyboard.press("Tab"); // enter the page via keyboard so :focus-visible applies
@@ -108,7 +124,7 @@ test.describe("lifecycle graph accessibility", () => {
   });
 
   test("state is never colour alone: pending rows carry words and a dashed shape", async ({ page }) => {
-    await page.goto("/en/for-workers", { waitUntil: "load" });
+    await openWorkersFold(page);
     await page.getByTestId("work-lifecycle-workers-stage-project").click();
     const pending = page.getByTestId("work-lifecycle-workers-record").locator('li[data-state="pending"]').first();
     await expect(pending).toContainText(/not yet/i);
@@ -116,7 +132,7 @@ test.describe("lifecycle graph accessibility", () => {
   });
 
   test("the stages are an ordered list with a name, in lifecycle order", async ({ page }) => {
-    await page.goto("/en/for-workers", { waitUntil: "load" });
+    await openWorkersFold(page);
     const list = page.getByTestId("work-lifecycle-workers-stages");
     await expect(list).toHaveAttribute("aria-label", /.+/);
     await expect(list.locator("button")).toHaveCount(7);

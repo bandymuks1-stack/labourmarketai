@@ -40,11 +40,13 @@ const ACTIVE_STYLE: Record<EvidenceStatus, { chip: string; dot: string }> = {
     chip: "border-state-warning/40 bg-state-warning/10 text-state-warning",
     dot: "bg-state-warning",
   },
-  // Silent-trust rule: the strongest state carries a NEUTRAL tone, not a green
-  // "verified" chip — it is a private signal, never a public certification.
+  // A real confirmation by someone else is state-success green (owner-ratified
+  // rule: confirmation = green, gold = waiting/action). It only ever renders
+  // active when the caller passes "confirmed" from a real approved row, and it
+  // still says "reviewed", never a public certification.
   confirmed: {
-    chip: "border-ink-500 bg-ink-800 text-text-secondary",
-    dot: "bg-text-muted",
+    chip: "border-state-success/40 bg-state-success/10 text-state-success",
+    dot: "bg-state-success",
   },
 };
 
@@ -66,11 +68,11 @@ export async function EvidenceStatusStrip({
 
   return (
     <ul
-      className={`m-0 flex list-none flex-wrap items-center gap-1.5 p-0 ${className ?? ""}`}
+      className={`m-0 flex list-none flex-wrap items-center gap-x-1 gap-y-1.5 p-0 ${className ?? ""}`}
       data-testid={testId}
       aria-label={t("aria")}
     >
-      {ORDER.map((status) => {
+      {ORDER.map((status, index) => {
         const isActive = activeSet.has(status);
         const chip = (
           <span
@@ -95,7 +97,8 @@ export async function EvidenceStatusStrip({
         // Evidence Report prints exactly that ladder.
         if (status === "awaiting_confirmation" && isActive) {
           return (
-            <li key={status}>
+            <li key={status} className="flex items-center gap-1">
+              {index > 0 ? <span aria-hidden className="h-px w-3 bg-border" /> : null}
               <Link
                 href="/dashboard/reports/evidence"
                 className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
@@ -106,7 +109,14 @@ export async function EvidenceStatusStrip({
             </li>
           );
         }
-        return <li key={status}>{chip}</li>;
+        return (
+          <li key={status} className="flex items-center gap-1">
+            {index > 0 ? (
+              <span aria-hidden className="h-px w-3 bg-border" />
+            ) : null}
+            {chip}
+          </li>
+        );
       })}
     </ul>
   );

@@ -48,9 +48,12 @@ describe("landing entry story", () => {
   });
 
   it("the hero keeps its h1, its primary actions and the working sentence entry", () => {
-    expect(FOCUS).toMatch(/<h1 className="font-display text-4xl/);
-    expect(FOCUS).toContain('surface="landing_hero"');
-    expect(FOCUS).toMatch(/<LandingJourney journey=\{journey\} \/>[\s\S]{0,200}<PublicEntry/);
+    // 2026-10-02 (owner, CURRENT x Q): the first screen is <HomeWorldHero>; the
+    // working sentence entry follows it directly. (LandingJourney still exists,
+    // unchanged and frozen, but is no longer the first impression.)
+    const HERO = read("components/marketing/public/world-heroes.tsx");
+    expect(HERO).toMatch(/<h1 className="world-in font-display/);
+    expect(FOCUS).toMatch(/<HomeWorldHero \/>[\s\S]{0,900}<PublicEntry/);
   });
 
   it("the new entry is frozen with the landing (the new floor)", () => {

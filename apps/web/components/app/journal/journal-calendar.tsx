@@ -183,7 +183,7 @@ export async function JournalCalendar({
           <span
             key={iso}
             aria-hidden
-            className="py-1 text-center font-mono text-[0.625rem] uppercase tracking-label text-text-muted"
+            className="py-1 text-center text-support font-medium text-text-muted"
           >
             {weekdayFmt.format(new Date(`${iso}T00:00:00Z`)).slice(0, 2)}
           </span>
@@ -204,7 +204,7 @@ export async function JournalCalendar({
                 data-day={cell.iso}
                 data-state={cell.inScope ? "future" : "outside"}
                 className={`${shared.join(" ")} border-transparent text-xs ${
-                  cell.inScope ? "text-text-muted" : "text-text-muted/40"
+                  cell.inScope ? "text-text-muted" : "text-text-muted/80"
                 }`}
               >
                 {cell.dayOfMonth}
@@ -278,7 +278,7 @@ export async function JournalCalendar({
                   className="flex items-center gap-0.5 leading-none"
                 >
                   {cell.totalMinutes > 0 ? (
-                    <span className="font-mono text-[0.5625rem] text-text-secondary">
+                    <span className="text-meta text-text-secondary">
                       {hoursLabel(cell.totalMinutes)}
                     </span>
                   ) : null}
@@ -306,7 +306,7 @@ export async function JournalCalendar({
                   className="flex items-center gap-0.5 leading-none"
                 >
                   {cell.entryCount === 0 ? (
-                    <span className="font-mono text-[0.5625rem] text-text-secondary">
+                    <span className="text-meta text-text-secondary">
                       {hoursLabel(cell.reportedMinutes)}
                     </span>
                   ) : null}

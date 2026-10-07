@@ -1504,10 +1504,8 @@
   },
   "profileState": {
     "readiness": {
-      "label": "Profilio parengtis",
-      "ready": "Užpildytas",
-      "building": "Dar pildomas",
-      "start": "Tik pradėtas"
+      "label": "Profilio žingsniai",
+      "summary": "Profilio žingsniai: atlikta {done} iš {total}"
     },
     "freshness": {
       "label": "Aktualumas",
@@ -4504,12 +4502,12 @@
       },
       "tabs": {
         "overview": "Mano erdvė",
+        "discover": "Naršyti",
         "marketplace": "Prekyvietė",
         "marketMap": "Žemėlapis",
         "profile": "Profilis",
         "journal": "Darbo žurnalas",
         "communication": "Žinutės",
-        "discover": "Naršyti",
         "search": "Ieškoti",
         "account": "Nustatymai",
         "admin": "Administravimas",
@@ -7561,11 +7559,8 @@
       }
     },
     "readiness": {
-      "label": "Pasirengimas",
+      "label": "Profilio žingsniai",
       "hint": "Viskas paruošta.",
-      "levelReady": "Pasiruošęs",
-      "levelBuilding": "Formuojasi",
-      "levelStart": "Pradžia",
       "signalsTemplate": "žingsnių atlikta",
       "nextLabel": "Toliau:",
       "pillars": {
@@ -7575,7 +7570,10 @@
         "journal": "Darbo žurnalas",
         "evidence": "Įrašai",
         "workCard": "Darbo kortelė"
-      }
+      },
+      "ringAria": "Profilio žingsniai: atlikta {met} iš {total}",
+      "stepDone": "atlikta",
+      "stepOpen": "neatlikta"
     },
     "verifiedTitle": "Vadovo patvirtinti įgūdžiai",
     "verifiedEmpty": "Tokių įgūdžių dar nėra. Jie atsiranda iš jūsų darbo įrašų.",
@@ -10696,6 +10694,129 @@
         "unknown": "Nepavyko patikrinti, ar įmonės mato jūsų profilį. Tai nereiškia, kad matomumas išjungtas — atidarykite privatumo nustatymus.",
         "noWorker": "Matomumas darbdaviams taikomas darbuotojo profiliui, o šioje paskyroje jo dar nėra."
       }
+    }
+  },
+  "workInTime": {
+    "notAuthed": "Prisijunkite, kad matytumėte savo laiką.",
+    "lens": {
+      "label": "Požiūris",
+      "me": "Mano laikas",
+      "people": "Žmonės laike",
+      "projects": "Projektai laike",
+      "hint": {
+        "me": "Jūsų dienos: kas jus riša, ką užfiksavote, kas toliau.",
+        "people": "Jūsų komanda vienoje laiko ašyje: priskyrimai, atostogos, persidengimai ir tai, kas užfiksuota.",
+        "projects": "Projektai vienoje laiko ašyje: etapai, žmonių priskyrimas laike ir atviri poreikiai."
+      },
+      "notManager": "Žmonės ir projektai laike atsiveria, kai veikiate organizacijos, kuri valdo komandą ar projektą, vardu. Savo dienas rasite skiltyje Mano laikas."
+    },
+    "state": {
+      "known": "Žinoma",
+      "planned": "Planuota",
+      "recorded": "Užfiksuota",
+      "confirmed": "Patvirtinta",
+      "openNeed": "Atviras poreikis",
+      "notProvided": "Nepateikta",
+      "unknown": "Nežinoma"
+    },
+    "legend": {
+      "title": "Kiek tuo galima pasitikėti?",
+      "rule": "Nežinoma nereiškia nulio. Nepranešta nereiškia, kad nebuvo. Nėra įrašo nereiškia, kad nebuvo darbo."
+    },
+    "window": {
+      "label": "Laiko langas",
+      "prev": "Ankstesnės keturios savaitės",
+      "next": "Kitos keturios savaitės",
+      "today": "Šiandien"
+    },
+    "me": {
+      "title": "Mano laikas",
+      "today": "Šiandien",
+      "nothingToday": "Šiandienai įrašų nėra. Tai nereiškia, kad darbo nebuvo.",
+      "moreToday": "+{count} šiandien",
+      "recordedTimed": "Užfiksuota {duration} (įrašų: {count})",
+      "recordedUntimed": "Užfiksuota be trukmės (įrašų: {count})",
+      "notRecordedYet": "Šiandienos darbas dar neužfiksuotas.",
+      "recordToday": "Užfiksuoti šiandienos darbą",
+      "openJournalDay": "Atidaryti šiandieną žurnale",
+      "next": "Toliau",
+      "nextIn": "{count, plural, =0 {šiandien} =1 {rytoj} other {po {count} d.}}",
+      "nothingNext": "Artėjančių datuotų įrašų nėra.",
+      "undated": "Be datos: {count}. Jie nepriskirti jokiai dienai.",
+      "stripTitle": "Dienos aplink dabar",
+      "stripRule": "Auksinė – planuota, žydra – užfiksuota, gintarinė – nebūsite.",
+      "stripPlanned": "planuota: {count}",
+      "stripRecorded": "užfiksuotų įrašų: {count}",
+      "stripNoRecord": "įrašų nėra",
+      "stripAway": "nebūsite",
+      "legendPlanned": "Planuota",
+      "legendRecorded": "Užfiksuota, pagal trukmę",
+      "legendUntimed": "Užfiksuota, be trukmės",
+      "legendAway": "Nebūsite",
+      "calendarHeading": "Kalendorius",
+      "unknown": "Jūsų laiko dabar nepavyko perskaityti. Tai nežinoma, o ne tuščia."
+    },
+    "roster": {
+      "unknown": "Komandos sąrašo dabar nepavyko perskaityti. Tai nežinoma, o ne tuščia."
+    },
+    "people": {
+      "title": "Žmonės laike",
+      "intro": "Visi jūsų komandos žmonės vienoje ašyje. Tuščias tarpas reiškia, kad įrašų nėra. Tai nereiškia, kad žmogus laisvas.",
+      "capacity": "Komanda pagal dieną",
+      "capacitySummary": "Komandoje {total}. Daugiausia užimtų vieną dieną: {peak}, {date}.",
+      "capacityDay": "{date}: užimta {committed}, nebūsite {away}, įrašų nėra {noRecord}",
+      "away": "Nebūna",
+      "overlap": "Persidengia",
+      "unnamed": "Žmogus",
+      "now": "Dabar",
+      "next": "Toliau",
+      "noRecord": "Įrašų nėra",
+      "noRecordWindow": "Šiame lange įrašų nėra",
+      "noRecordUnknownLeave": "Įrašų nėra. Atostogų perskaityti nepavyko.",
+      "outside": "už lango ribų: {count}",
+      "kind": {
+        "project": "Projektas",
+        "booking": "Užsakymas",
+        "trip": "Kelionė",
+        "absence": "Nebūna"
+      },
+      "absenceUnknown": "Patvirtintų atostogų dabar nepavyko perskaityti. Nebuvimas čia nežinomas, o ne neegzistuoja.",
+      "withoutRecord": "Komandos žmonių, kurių šiame lange įrašų nėra: {count}. Jie nerodomi juostomis ir nelaikomi laisvais.",
+      "none": "Jūsų komandoje dar nėra žmonių."
+    },
+    "projects": {
+      "title": "Projektai laike",
+      "intro": "Kiekvienas projektas: jo laikotarpis, etapai ir kiek žmonių priskirta kiekvieną dieną.",
+      "untitled": "Projektas be pavadinimo",
+      "stage": "Etapas",
+      "noDates": "Datos nepateiktos",
+      "noStages": "Datuotų etapų nepateikta",
+      "noStageNow": "Šiandien etapo nėra",
+      "noStageNext": "Vėlesnio etapo įrašų nėra",
+      "noStaffingRecord": "Šiame lange priskyrimų įrašų nėra",
+      "needOpen": "Dar atvira {missing} iš {required}",
+      "needCovered": "Reikia {required}, padengta",
+      "needNotProvided": "Žmonių skaičius nepateiktas",
+      "staffed": "Priskirta: {count}",
+      "needsTitle": "Atviri poreikiai be projekto",
+      "needsUndated": "Nurodytų poreikių be datų: {count}",
+      "gaps": "Perdavimų ir dokumentų ar sertifikatų terminų planavimo duomenyse dar nėra, todėl jiems nieko nepiešiame.",
+      "unplacedTitle": "Projektai be datų, etapų ar priskyrimų įrašų: {count}. Išvardyti, bet nepiešiami.",
+      "withoutDates": "Projektų be datų: {count}. Ašyje jiems vietos nėra.",
+      "none": "Šiam langui projektų ar atvirų poreikių įrašų nėra.",
+      "unknown": "Projektų ir etapų dabar nepavyko perskaityti. Tai nežinoma, o ne tuščia."
+    },
+    "focus": {
+      "selected": "Pasirinkta",
+      "close": "Uždaryti",
+      "person": "{name} laike",
+      "project": "{name} laike",
+      "nothingOnRecord": "Šiame lange šiam žmogui įrašų nėra.",
+      "openPerson": "Atidaryti žmogų",
+      "openTeam": "Atidaryti komandą",
+      "openConversations": "Pokalbiai",
+      "openProject": "Atidaryti projektą",
+      "openWork": "Atidaryti darbą"
     }
   },
   "planning": {
@@ -18229,14 +18350,27 @@
     "noRecords": "Dar nėra darbo įrašų",
     "legend": {
       "managerRecord": "Vadovo įrašas",
-      "recorded": "Jūsų užfiksuota"
+      "recorded": "Jūsų užfiksuota",
+      "declared": "Nurodyta jūsų",
+      "declaredHint": "Jūsų žodžiai. Dar niekas netikrino.",
+      "recordedHint": "Valandos ir įrašai iš jūsų darbo žurnalo.",
+      "managerRecordHint": "Už darbą atsakingas vadovas ar darbdavys tai patvirtino."
     },
     "skillsTitle": "Ką rodo jūsų darbas",
     "next": {
       "title": "Jūsų istorija keliauja su jumis",
       "body": "Kiekvienas užfiksuotas darbas ją papildo. Pasiimkite ją į kitą galimybę.",
-      "cta": "Pažiūrėti, kur galite eiti"
-    }
+      "cta": "Pažiūrėti, kur galite eiti",
+      "label": "Toliau, ne istorija",
+      "notRecord": "nėra jūsų įrašo dalis"
+    },
+    "promise": {
+      "mine": "Tai jūsų profesinė istorija.",
+      "grows": "Ji auga kaskart, kai dirbate.",
+      "follows": "Įrašas gali sekti paskui jus į kitą galimybę."
+    },
+    "keyTitle": "Kaip skaityti kiekvieną eilutę",
+    "historyTitle": "Darbo istorija"
   },
   "workContext": {
     "title": "Jūsų darbas vienoje vietoje",
@@ -18254,6 +18388,508 @@
       "history": "{count, plural, one {# darbas} few {# darbai} other {# darbų}}",
       "skills": "{count, plural, one {# jūsų įrašais pagrįstas gebėjimas} few {# jūsų įrašais pagrįsti gebėjimai} other {# jūsų įrašais pagrįstų gebėjimų}}",
       "next": "Kur galite eiti"
+    }
+  },
+  "publicCinema": {
+    "title": "Sekite vieną žmogų ir vieną įmonę per visą darbą.",
+    "sub": "Tie patys žmonės, tas pats projektas ir tas pats įrašas: nuo pirmos paieškos iki kito etapo. Slinkite, ir kamera judės.",
+    "skip": "Praleisti istoriją",
+    "railLabel": "Istorijos skyriai",
+    "privacy": "Privatu, kol neįjungiamas matomumas.",
+    "chapters": [
+      "Rasti darbą",
+      "Rasti žmones",
+      "Vykdyti darbą",
+      "Išsaugoti įrašą",
+      "Eiti toliau"
+    ],
+    "scenes": [
+      {
+        "title": "Žmogus su tikru darbu už nugaros.",
+        "body": "{name} — {trade}. Profilis prasideda nuo to, ką žmogus iš tikrųjų daro."
+      },
+      {
+        "title": "Poreikis ir žmogus susitinka atvirai.",
+        "body": "Įmonė pasako, ko jai reikia. Specialistas tai mato šalia darbo, kurį iš tikrųjų atlieka, o ne kaip vieną įvertį."
+      },
+      {
+        "title": "Jie kalbasi savo kalba.",
+        "body": "Kiekvienas rašo savo kalba. Žinutes galima skaityti jūsų kalba, o originalas lieka šalia."
+      },
+      {
+        "title": "Žmonės įtraukiami į projektą.",
+        "body": "Kartu dirbantys žmonės priskiriami projektui, todėl visi mato tą patį darbą."
+      },
+      {
+        "title": "Nurodymas, darbas, valandos, nuotrauka.",
+        "body": "Aiškus nurodymas, atliktas darbas, jam skirtas laikas ir nuotrauka: užrašyta vieną kartą."
+      },
+      {
+        "title": "Diena tampa įrašu.",
+        "body": "Iš pradžių tai paties žmogaus įrašas. Niekas dar nevadinama patvirtintu."
+      },
+      {
+        "title": "Vadovas jį patvirtina.",
+        "body": "Vadovas mato, kas užfiksuota, ir patvirtina arba grąžina su pastaba."
+      },
+      {
+        "title": "Patvirtintas darbas kuria istoriją.",
+        "body": "Patvirtintas darbas patenka į profesinę istoriją. Niekieno nepatvirtintas darbas lieka matomas kaip paties žmogaus įrašas ir taip pažymėtas."
+      },
+      {
+        "title": "O toliau — kitas etapas.",
+        "body": "Žmogus nurodo, kada gali pradėti. Įmonė skelbia kitą poreikį ir planuoja į priekį. Abu pradeda nuo to, kas iš tikrųjų įvyko."
+      }
+    ],
+    "labels": {
+      "person": "Žmogus",
+      "need": "Poreikis",
+      "company": "Įmonė",
+      "project": "Projektas",
+      "team": "Komanda",
+      "instruction": "Nurodymas",
+      "work": "Darbas",
+      "hours": "Valandos",
+      "photo": "Nuotrauka",
+      "record": "Įrašas",
+      "manager": "Vadovas",
+      "history": "Profesinė istorija",
+      "next": "Toliau, ne istorija"
+    },
+    "chain": {
+      "project": "Projektas",
+      "people": "Žmonės projekte",
+      "need": "Kitas poreikis",
+      "plan": "Planavimas"
+    },
+    "kinds": [
+      "Darbas",
+      "Paslauga",
+      "Skelbimas"
+    ],
+    "kindsNote": "Darbai, paslaugos ir skelbimai yra toje pačioje vietoje.",
+    "translateTag": "Rodoma jūsų kalba · originalas išsaugotas",
+    "teamMeta": "3 žmonės šiame projekte",
+    "plan": "Planuokite artimiausias savaites kalendoriuje",
+    "addedBy": "Pridėjo {name}",
+    "nextMeta": "Kaip nurodo {name}",
+    "hours": "8 val.",
+    "msgOut": "Taip, galiu pradėti 20 d.",
+    "construction": {
+      "trade": "pastolių montuotojas",
+      "needTitle": "Fasado pastoliai · 3 žmonės",
+      "managerRole": "Meistras",
+      "msgIn": "Ar galite pradėti šiaurinio fasado darbus spalio 20 d.?",
+      "instruction": "Šiaurinis fasadas, 3 aukštas, rytinė dalis: inkarai kas 1,5 m.",
+      "photoAlt": "Pastoliai šiauriniame fasade",
+      "hNowT": "{project} · Pastolių montuotojas",
+      "hNowM": "Šiaurinis fasadas · nuo rugsėjo",
+      "hRecentT": "Senamiesčio renovacija · Pastolių montuotojas",
+      "nextNeed": "Fasado pastolių montuotojai nuo spalio 20 d."
+    },
+    "hospitality": {
+      "trade": "virėja",
+      "managerRole": "Šefas",
+      "msgIn": "Ar galite pradėti rudens meniu spalio 20 d.?",
+      "instruction": "Rudens meniu: naują užkandį išdėliokite, kaip nurodyta kortelėje."
+    }
+  },
+  "publicSlice": {
+    "sample": "Pavyzdys",
+    "states": {
+      "own": "Jūsų pačių įrašas",
+      "waiting": "Laukia vadovo peržiūros",
+      "confirmed": "Vadovo patvirtinta",
+      "unknown": "Dar neįrašyta"
+    },
+    "imagery": {
+      "tomasAlt": "Pastolių montuotojas dirba ant fasado pastolių senamiesčio gatvėje",
+      "rasaAlt": "Virėja prie išdavimo linijos restorano virtuvėje",
+      "tomasCaption": "Tomas K. · Pastolių montuotojas",
+      "rasaCaption": "Rasa J. · Virėja",
+      "vanAlt": "Pastolių montuotojas šalia furgono statybvietėje",
+      "ownerAlt": "Restorano savininkė su dviem kolegomis prie stalo"
+    },
+    "workers": {
+      "hero": {
+        "title": "Raskite darbą.",
+        "accent": "Išsaugokite tai, ką sukuriate.",
+        "sub": "Raskite darbą, atitinkantį tai, ką iš tikrųjų darote. Pradėjus dirbti, jūsų diena, komanda ir žinutės yra vienoje vietoje. Darbas, kurį įrašote, tampa jūsų profesine istorija.",
+        "cta": "Susikurti nemokamą profilį",
+        "secondary": "Peržiūrėti darbo skelbimus",
+        "note": "Žmonėms nemokama. Mokami planai yra tik organizacijoms."
+      },
+      "day": {
+        "title": "Žinokite, kas vyksta šiandien.",
+        "body": "Pirmiausia matote darbą, prie kurio dirbate, savo komandą ir žinutes. Tada keliomis eilutėmis, su nuotrauka ir laiku įrašote, ką nuveikėte.",
+        "todayLabel": "Šiandien",
+        "task": "Vakaro aptarnavimas",
+        "taskDetail": "Rudens meniu pradžia · Virtuvės komanda",
+        "message": "Šefas: nauji patiekalai pradedami teikti šįvakar.",
+        "primary": "Įrašyti šiandienos darbą",
+        "secondary": "Parašyti komandai",
+        "recordLabel": "Jūsų įrašas",
+        "recordText": "Vadovavau išdavimo linijai naujam rudens meniu. Du patiekalai grąžinti ir pagaminti iš naujo.",
+        "time": "8 val.",
+        "photo": "1 nuotrauka",
+        "sent": "Išsiųsta vadovui"
+      },
+      "history": {
+        "title": "Patvirtintas darbas kuria jūsų istoriją.",
+        "body": "Darbas, kurį patvirtina vadovas, tampa jūsų profesinės istorijos dalimi. Dar niekieno nepatvirtintas darbas lieka matomas kaip jūsų pačių įrašas, aiškiai pažymėtas. Tai, kam sakote esantys laisvi, rodoma atskirai – kaip tai, kas bus toliau.",
+        "now": "Dabar",
+        "recent": "Naujausias darbas",
+        "earlier": "Anksčiau",
+        "next": "Toliau, ne istorija",
+        "nowTitle": "Restoranas „Ąžuolas” · Virėja",
+        "nowMeta": "Rudens meniu pradžia · nuo rugsėjo",
+        "nowState": "Vadovo patvirtinta",
+        "recentTitle": "Kavinė „Uostas” · Linijos virėja",
+        "recentMeta": "2023–2024",
+        "recentState": "Jūsų pačių įrašas · nepatvirtinta",
+        "earlierTitle": "Pridėjo Rasa",
+        "earlierMeta": "2019–2022",
+        "earlierState": "Dar neįrašyta",
+        "nextTitle": "Laisva nuo spalio 20 d.",
+        "nextMeta": "Kaip nurodo Rasa",
+        "nextState": "Pasiūlymo dar nėra"
+      },
+      "outcome": {
+        "title": "Jūsų darbas neišnyksta pasibaigus sutarčiai.",
+        "body": "Kitas darbdavys sutinka žmogų su tikru darbo įrašu, ne tik CV. Jūsų profilis lieka privatus, kol neįjungsite matomumo."
+      },
+      "faq": {
+        "title": "Prieš registruojantis",
+        "items": [
+          {
+            "q": "Ar tai kainuoja?",
+            "a": "Ne. „LabourMarket.ai” žmonėms nemokama. Mokami planai yra tik organizacijoms."
+          },
+          {
+            "q": "Kas gali matyti mano profilį?",
+            "a": "Niekas jūsų neranda, kol neįjungsite matomumo. Tada įmonės mato trumpą profesinę santrauką. CV ir kontaktai atskleidžiami tik jums patvirtinus. Įmonė, kurioje dirbate, mato jai užregistruotą darbą."
+          },
+          {
+            "q": "O jei vadovas nepatvirtina mano darbo?",
+            "a": "Jis lieka jūsų pačių įrašu, aiškiai pažymėtu kaip nepatvirtintas. Jį išsaugote bet kuriuo atveju."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Pradėkite nuo savo",
+        "accent": "profesinio profilio.",
+        "button": "Susikurti nemokamą profilį"
+      }
+    },
+    "companies": {
+      "hero": {
+        "title": "Raskite reikalingus žmones.",
+        "accent": "Tada vykdykite darbą.",
+        "sub": "Pasakykite, ko reikia. Susipažinkite su žmonėmis, kurių tikras darbas tinka. Paskirkite juos į projektą, matykite jų įrašomą darbą, patvirtinkite jį ir paskelbkite kitą poreikį.",
+        "cta": "Paskelbti poreikį",
+        "secondary": "Kainos",
+        "note": "Paskelbti poreikį nemokama."
+      },
+      "need": {
+        "title": "Pasakykite, ko reikia. Pamatykite, kas tinka.",
+        "body": "Aprašykite darbą, kiek žmonių ir nuo kada. Matykite žmones, kurių darbo istorija tinka tam poreikiui – lyginant su konkrečiu darbu, o ne vienu bendru balu.",
+        "needLabel": "Jūsų poreikis",
+        "needTitle": "Linijos virėjas · 2 žmonės",
+        "needMeta": "Nuo spalio 20 d. · Vilnius",
+        "personRole": "Virėja",
+        "personMeta": "Laisva nuo spalio 20 d., kaip nurodo pati",
+        "personState": "Patvirtintas darbas restorane „Ąžuolas”"
+      },
+      "project": {
+        "title": "Paskirkite žmones į darbą.",
+        "body": "Pridėkite žmones, su kuriais dirbate, prie projekto. Kasdien jie įrašo, kas padaryta. Matote, kurie įrašai laukia jūsų, tada juos patvirtinate arba grąžinate pataisyti.",
+        "label": "Projektas",
+        "name": "Rudens meniu pradžia",
+        "people": "Virtuvės komanda · 3 žmonės",
+        "waiting": "1 įrašas laukia jūsų peržiūros",
+        "confirmed": "Šią savaitę patvirtinti 2 įrašai"
+      },
+      "attention": {
+        "title": "Matykite, ko reikia iš jūsų. Planuokite, kas toliau.",
+        "body": "Peržiūros laukiantys įrašai ir paskelbti poreikiai yra vienoje vietoje, todėl kitas sprendimas samdyti prasideda nuo to, kas iš tikrųjų vyksta.",
+        "label": "Laukia jūsų",
+        "items": [
+          {
+            "text": "1 įrašas laukia jūsų peržiūros",
+            "state": "wait"
+          },
+          {
+            "text": "Linijos virėjas nuo spalio 20 d.: atviras poreikis",
+            "state": "wait"
+          },
+          {
+            "text": "Konditerijos skyrius: įrašų nėra nuo ketvirtadienio",
+            "state": "unk"
+          }
+        ]
+      },
+      "faq": {
+        "title": "Prieš pradedant",
+        "items": [
+          {
+            "q": "Kiek tai kainuoja?",
+            "a": "Viena aktyvi pozicija organizacijai nemokama. Daugiau pozicijų reikia organizacijos plano, jis rodomas kainų puslapyje. Paskelbti poreikį nemokama."
+          },
+          {
+            "q": "Ar galiu patvirtinti savo žmonių įrašytą darbą?",
+            "a": "Taip. Organizacijos vadovas ar savininkas gali patvirtinti įrašą, grąžinti jį pataisyti arba atmesti, kai organizacijai įjungta peržiūra."
+          },
+          {
+            "q": "Ką matau apie žmogų prieš susisiekdamas?",
+            "a": "Trumpą profesinę santrauką: vardą, profesijas, patirtį, laisvumą ir įgūdžius. Tik tų žmonių, kurie įjungė matomumą. CV ir kontaktai atskleidžiami tik jiems patvirtinus."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Pradėkite nuo žmonių,",
+        "accent": "kurių jums reikia.",
+        "button": "Paskelbti poreikį"
+      }
+    },
+    "transition": {
+      "title": "Viena darbo diena – nuo įrašo iki istorijos.",
+      "sub": "Sekite vieną pamainą. Įrašas, įrodymas ir peržiūra įvyksta po vieną kartą, o rezultatą mato abi pusės.",
+      "stageNav": "Pasirinkite etapą",
+      "replay": "Paleisti iš naujo",
+      "stages": {
+        "work": {
+          "label": "Darbas",
+          "caption": "Rasa vadovauja vakaro aptarnavimui."
+        },
+        "proof": {
+          "label": "Įrodymas",
+          "caption": "Ji įrašo, ką padarė, ir prideda nuotrauką."
+        },
+        "review": {
+          "label": "Peržiūra",
+          "caption": "Jos vadovas patvirtina įrašą."
+        },
+        "history": {
+          "label": "Istorija",
+          "caption": "Tai tampa jos profesinės istorijos dalimi."
+        },
+        "next": {
+          "label": "Toliau",
+          "caption": "Įmonė mato pažangą. Abi pusės gali planuoti, kas toliau."
+        }
+      },
+      "pro": {
+        "role": "Virėja",
+        "recordTitle": "Vakaro aptarnavimas · 8 val.",
+        "recordText": "Vadovavau išdavimo linijai naujam rudens meniu.",
+        "photoAlt": "Išdavimo linija virtuvėje prieš aptarnavimą",
+        "historyLabel": "Jos profesinėje istorijoje",
+        "historyTitle": "Restoranas „Ąžuolas” · Virėja",
+        "historyMeta": "Rudens meniu pradžia",
+        "nextLabel": "Toliau, ne istorija",
+        "nextMeta": "Laisva nuo spalio 20 d., kaip nurodo pati"
+      },
+      "co": {
+        "project": "Rudens meniu pradžia",
+        "waiting": "1 įrašas laukia peržiūros",
+        "done": "Įrašas patvirtintas",
+        "nextLabel": "Kas toliau",
+        "nextNeed": "Linijos virėjas nuo spalio 20 d.",
+        "nextCta": "Paskelbti kitą poreikį"
+      }
+    },
+    "home": {
+      "title": "Pasirinkite savo pusę.",
+      "sub": "Ta pati vieta, tas pats įrašas. Ką darysite toliau, priklauso nuo to, kur stovite.",
+      "workerTitle": "Ieškau darbo",
+      "workerBody": "Raskite jums tinkantį darbą, tada išsaugokite savo darbo įrašą.",
+      "workerCta": "Profesionalams",
+      "companyTitle": "Samdau žmones",
+      "companyBody": "Raskite reikalingus žmones, tada kartu vykdykite darbą.",
+      "companyCta": "Įmonėms"
+    },
+    "explore": {
+      "summary": "Peržiūrėkite kiekvieną žingsnį ir atverkite jį savo darbo erdvėje"
+    },
+    "world": {
+      "labels": {
+        "person": "Žmogus",
+        "team": "Komanda",
+        "project": "Projektas",
+        "work": "Šiandienos darbas",
+        "today": "Šiandien",
+        "record": "Jūsų įrašas",
+        "needs": "Laukia jūsų",
+        "kitchen": "Virtuvės komanda"
+      },
+      "home": {
+        "title": "Vienas darbo pasaulis.",
+        "sub": "Tikri žmonės, tikros įmonės ir darbas tarp jų, vienoje vietoje.",
+        "primary": "Ieškau darbo",
+        "secondary": "Samdau žmones",
+        "personRole": "Pastolių montuotojas · Vilnius",
+        "crew": "Šiaurės brigada",
+        "projectMeta": "Šiaurinis fasadas · 3–4 aukštas",
+        "workTitle": "3 aukštas, rytinė dalis",
+        "workMeta": "8 val. · inkarai kas 1,5 m",
+        "doneTitle": "Įtraukta į jo istoriją",
+        "doneMeta": "Vadovo patvirtinta · 1 nuotrauka"
+      },
+      "workers": {
+        "taskMeta": "Patikra 14:00",
+        "recordTitle": "3 aukštas, rytinė dalis",
+        "recordMeta": "8 val. · 1 nuotrauka",
+        "doneTitle": "Dabar jūsų istorijoje",
+        "taskTitle": "Šiaurinis fasadas"
+      },
+      "companies": {
+        "projectDone": "5 iš 9 įrašų patvirtinta šią savaitę",
+        "teamMeta": "3 žmonės šiame projekte"
+      }
+    }
+  },
+  "journalContinuity": {
+    "title": "Nuo nurodymo iki jūsų istorijos",
+    "intro": "Kiekvienas įrašas yra grandinės dalis. Atidarykite bet kurį žingsnį ir tęskite.",
+    "instruction": {
+      "label": "Nurodymas",
+      "unit": "planuotas darbas"
+    },
+    "work": {
+      "label": "Atliktas darbas",
+      "unit": "įrašai"
+    },
+    "time": {
+      "label": "Laikas",
+      "unit": "užfiksuota"
+    },
+    "evidence": {
+      "label": "Įrodymai",
+      "unit": "su nuotraukomis"
+    },
+    "review": {
+      "label": "Peržiūra",
+      "unit": "laukia"
+    },
+    "confirmed": {
+      "label": "Patvirtinta",
+      "unit": "vadovo",
+      "returned": "{count} grąžinta"
+    },
+    "project": {
+      "label": "Projektas",
+      "unit": "jo istorija"
+    },
+    "history": {
+      "label": "Jūsų istorija",
+      "unit": "gyvas CV"
+    }
+  },
+  "projectContinuity": {
+    "title": "Šis projektas tęsiasi",
+    "people": "Žmonės",
+    "calendar": "Kalendorius",
+    "journal": "Darbo žurnalas",
+    "review": "Peržiūra",
+    "history": "Įmonės istorija"
+  },
+  "discover": {
+    "eyebrow": "Atrask",
+    "title": "Raskite, ko reikia. Pasiūlykite, ką turite.",
+    "lead": "Čia žmonės ir įmonės siūlo bei ieško darbo, žmonių, paslaugų ir darbo išteklių. Matote tik tai, ką gali naudoti jūsų rolė.",
+    "honesty": "Kiekviena kortelė žemiau yra durys į realų skyrių. Nieko šiame puslapyje nėra pavyzdinis skelbimas.",
+    "feature": {
+      "label": "Atrask",
+      "description": "Raskite darbo, žmonių, paslaugų ir darbo išteklių - arba pasiūlykite savo."
+    },
+    "side": {
+      "seek": "Jūs ieškote",
+      "offer": "Jūs siūlote",
+      "both": "Ieškoti arba siūlyti"
+    },
+    "status": {
+      "early": "Ką tik atidaryta",
+      "earlyNote": "Skyriai su žyma „Ką tik atidaryta“ yra baigti ir veikia, bet įrašų dar nedaug - galite būti tarp pirmųjų."
+    },
+    "groups": {
+      "around": {
+        "title": "Šalia jūsų",
+        "lead": "Pamatykite rinką žemėlapyje arba savais žodžiais pasakykite, ką siūlote ar ko reikia."
+      },
+      "work": {
+        "title": "Darbas",
+        "lead": "Laisvos pozicijos ir signalai už jų."
+      },
+      "people": {
+        "title": "Žmonės ir įmonės",
+        "lead": "Raskite žmonių poreikiui, paskelbkite savo poreikį ir palaikykite ryšius."
+      },
+      "offers": {
+        "title": "Paslaugos ir darbo ištekliai",
+        "lead": "Siūlykite paslaugą, užsisakykite ją arba skelbkite įrankius, transportą, patalpas ir įrangą darbui."
+      },
+      "grow": {
+        "title": "Augimas",
+        "lead": "Paverskite tai, ką randate ir darote, įgūdžiais ir mokymusi."
+      }
+    },
+    "entries": {
+      "map": {
+        "title": "Rinkos žemėlapis",
+        "desc": "Poreikiai, žmonės ir projektai viename žemėlapyje. Rodomos tik vietos su tikrais duomenimis."
+      },
+      "recognize": {
+        "title": "Pasakykite, ką siūlote ar ko reikia",
+        "desc": "Aprašykite savais žodžiais ir pereikite į tinkamą vietą. Nieko neišsaugoma, kol nepasirinksite."
+      },
+      "opportunities": {
+        "title": "Galimybės jums",
+        "desc": "Laisvos pozicijos pagal jūsų darbo istoriją, su išsaugotomis paieškomis."
+      },
+      "jobs": {
+        "title": "Viešoji darbo skelbimų lenta",
+        "desc": "Naršykite paskelbtas laisvas vietas neprisijungę."
+      },
+      "intelligence": {
+        "title": "Rinkos signalai",
+        "desc": "Atlyginimo ir paklausos signalai iš jūsų pačių duomenų, nurodant šaltinius."
+      },
+      "scouting": {
+        "title": "Rasti žmonių",
+        "desc": "Atrinkite anonimizuotus kandidatus savo poreikiams ir sekite juos per procesą."
+      },
+      "needs": {
+        "title": "Darbuotojų poreikiai",
+        "desc": "Aprašykite, kokių žmonių reikia - tai vienintelė vieta, kur užfiksuojama jūsų paklausa."
+      },
+      "candidates": {
+        "title": "Kandidatų juodraščiai",
+        "desc": "Privačios pastabos apie žmones, kuriuos galite pasitelkti. Juodraštis nėra paskyra."
+      },
+      "buyer": {
+        "title": "Užsakyti darbą ar paslaugas",
+        "desc": "Nustatykite klientą ir aprašykite, ką reikia padaryti."
+      },
+      "network": {
+        "title": "Tinklas",
+        "desc": "Ieškokite žmonių ir įmonių, siųskite kvietimus, palaikykite ryšius."
+      },
+      "services": {
+        "title": "Siūlyti paslaugą",
+        "desc": "Paskelbkite, ką galite padaryti kitiems jūs ar jūsų įmonė."
+      },
+      "service_requests": {
+        "title": "Rasti ir užsisakyti paslaugas",
+        "desc": "Naršykite aktyvias paslaugas ir siųskite užklausą arba atsakykite į užklausas savo paslaugoms."
+      },
+      "listings": {
+        "title": "Darbo ištekliai",
+        "desc": "Įrankiai, įranga, transportas, patalpos ir apgyvendinimas parduodami, nuomojami ar ieškomi - tik darbo reikmėms."
+      },
+      "education": {
+        "title": "Mokymo programos",
+        "desc": "Besimokantieji, programos ir srautai jūsų mokymo organizacijai."
+      }
     }
   }
 }

@@ -65,9 +65,11 @@ function Tile({ entry, label }: { entry: Entry; label: string }) {
     <Link
       href={entry.href as "/dashboard"}
       data-testid={`company-model-${entry.id}`}
-      className="flex min-h-11 items-center gap-2 rounded-lg border border-ink-500 bg-ink-800/40 px-3 py-2.5 text-sm font-medium text-text-primary transition-colors hover:border-brand-blue"
+      className="group flex min-h-11 items-center gap-3 rounded-xl bg-ink-800/50 px-3 py-2.5 text-sm font-medium text-text-primary transition-colors hover:bg-ink-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
     >
-      <entry.Icon className="size-4 flex-none text-text-secondary" />
+      <span className="grid size-8 flex-none place-items-center rounded-full bg-ink-700/70 text-text-secondary transition-colors group-hover:text-brand-blue">
+        <entry.Icon className="size-4" />
+      </span>
       <span className="min-w-0 truncate">{label}</span>
     </Link>
   );

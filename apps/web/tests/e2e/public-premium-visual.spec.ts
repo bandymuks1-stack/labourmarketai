@@ -29,6 +29,12 @@ test.beforeEach(async ({ page }) => {
   // page.emulateMedia is reliable; the `test.use({ reducedMotion })` fixture option
   // did not take effect here and left the graph mid-animation.
   await page.emulateMedia({ reducedMotion: "reduce" });
+  // Never bake the Next dev-overlay badge into a baseline.
+  await page.addInitScript(() => {
+    const s = document.createElement("style");
+    s.textContent = "nextjs-portal{display:none!important}";
+    document.addEventListener("DOMContentLoaded", () => document.head.appendChild(s));
+  });
 });
 
 const WIDTHS = [
@@ -50,6 +56,15 @@ for (const s of SIGNATURES) {
       // The page streams in Suspense chunks; let it settle so the element we
       // measure is the final one (otherwise it can be swapped under us).
       await page.waitForLoadState("networkidle");
+      // The graph is folded on the acquisition pages: open it before measuring.
+      const fold = page.getByTestId("explore-steps");
+      if (await fold.count()) {
+        await fold.scrollIntoViewIfNeeded();
+        await expect(async () => {
+          if (!(await fold.evaluate((e) => (e as HTMLDetailsElement).open))) await fold.locator("summary").click();
+          await expect(fold).toHaveJSProperty("open", true, { timeout: 1_000 });
+        }).toPass({ timeout: 15_000 });
+      }
       const el = page.getByTestId(s.testid);
       await expect(el).toBeVisible({ timeout: 30_000 });
       await el.scrollIntoViewIfNeeded();

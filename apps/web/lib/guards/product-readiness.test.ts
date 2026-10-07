@@ -476,6 +476,9 @@ describe("feature-availability + config-driven dashboard", () => {
         // nav from the catalogue. The three text-first surfaces remain
         // the only feature workflows that ship today.
         "overview",
+        // Discover (owner decision 2026-10-02): the role-aware offer/seek
+        // destination; links to real sections, owns no data.
+        "discover",
         // IA cleanup v2: the Marketplace HUB is an active surface — one compact
         // page that connects the map + opportunities + real owned companies,
         // with honest "preparing" states for supply-side offers/shop. It is real

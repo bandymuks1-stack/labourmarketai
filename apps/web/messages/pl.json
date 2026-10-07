@@ -1504,10 +1504,8 @@
   },
   "profileState": {
     "readiness": {
-      "label": "Gotowość profilu",
-      "ready": "Gotowy",
-      "building": "Jeszcze uzupełniany",
-      "start": "Dopiero rozpoczęty"
+      "label": "Kroki profilu",
+      "summary": "Kroki profilu: wykonano {done} z {total}"
     },
     "freshness": {
       "label": "Aktualność",
@@ -4504,12 +4502,12 @@
       },
       "tabs": {
         "overview": "Moja przestrzeń",
+        "discover": "Odkrywaj",
         "marketplace": "Rynek usług",
         "marketMap": "Mapa",
         "profile": "Profil",
         "journal": "Moje CV",
         "communication": "Wiadomości",
-        "discover": "Odkrywaj",
         "search": "Szukaj",
         "account": "Ustawienia",
         "admin": "Administracja",
@@ -7561,11 +7559,8 @@
       }
     },
     "readiness": {
-      "label": "Gotowość",
+      "label": "Kroki profilu",
       "hint": "Wszystko gotowe.",
-      "levelReady": "Gotowe",
-      "levelBuilding": "W budowie",
-      "levelStart": "Na początku",
       "signalsTemplate": "wykonanych kroków",
       "nextLabel": "Dalej:",
       "pillars": {
@@ -7575,7 +7570,10 @@
         "journal": "Dziennik pracy",
         "evidence": "Wpisy",
         "workCard": "Karta pracy"
-      }
+      },
+      "ringAria": "Kroki profilu: wykonano {met} z {total}",
+      "stepDone": "zrobione",
+      "stepOpen": "do zrobienia"
     },
     "verifiedTitle": "Umiejętności potwierdzone przez kierownika",
     "verifiedEmpty": "Jeszcze żadnych. Powstają na podstawie Twoich wpisów pracy.",
@@ -10696,6 +10694,129 @@
         "unknown": "Nie udało się sprawdzić, czy firmy widzą Twój profil. To nie znaczy, że widoczność jest wyłączona — otwórz ustawienia prywatności.",
         "noWorker": "Widoczność dla pracodawców dotyczy profilu pracownika, a to konto jeszcze go nie ma."
       }
+    }
+  },
+  "workInTime": {
+    "notAuthed": "Zaloguj się, aby zobaczyć swój czas.",
+    "lens": {
+      "label": "Perspektywa",
+      "me": "Mój czas",
+      "people": "Ludzie w czasie",
+      "projects": "Projekty w czasie",
+      "hint": {
+        "me": "Twoje własne dni: co Cię wiąże, co zapisano i co dalej.",
+        "people": "Twój zespół na jednej osi czasu: przydziały, nieobecności, nakładanie się i to, co zapisano.",
+        "projects": "Projekty na jednej osi czasu: etapy, obsada w czasie i otwarte potrzeby."
+      },
+      "notManager": "Ludzie i projekty w czasie otwierają się, gdy działasz w imieniu organizacji zarządzającej zespołem lub projektem. Własne dni znajdziesz w Moim czasie."
+    },
+    "state": {
+      "known": "Znane",
+      "planned": "Zaplanowane",
+      "recorded": "Zapisane",
+      "confirmed": "Potwierdzone",
+      "openNeed": "Otwarta potrzeba",
+      "notProvided": "Nie podano",
+      "unknown": "Nieznane"
+    },
+    "legend": {
+      "title": "Na ile to pewne?",
+      "rule": "Nieznane to nie zero. Niezgłoszone to nie nieobecne. Brak zapisu to nie brak pracy."
+    },
+    "window": {
+      "label": "Okno czasu",
+      "prev": "Poprzednie cztery tygodnie",
+      "next": "Następne cztery tygodnie",
+      "today": "Dziś"
+    },
+    "me": {
+      "title": "Mój czas",
+      "today": "Dziś",
+      "nothingToday": "Na dziś nic nie zapisano. To nie znaczy, że nie było pracy.",
+      "moreToday": "+{count} więcej dziś",
+      "recordedTimed": "Zapisano {duration} (wpisów: {count})",
+      "recordedUntimed": "Zapisano bez czasu trwania (wpisów: {count})",
+      "notRecordedYet": "Praca z dzisiaj nie została jeszcze zapisana.",
+      "recordToday": "Zapisz dzisiejszą pracę",
+      "openJournalDay": "Otwórz dziś w dzienniku",
+      "next": "Następne",
+      "nextIn": "{count, plural, =0 {dziś} =1 {jutro} other {za {count} dni}}",
+      "nothingNext": "Nie nadchodzi nic z datą.",
+      "undated": "Bez daty: {count}. Nie są przypisane do żadnego dnia.",
+      "stripTitle": "Dni wokół teraz",
+      "stripRule": "Złoty to zaplanowane, błękitny to zapisane, bursztynowy to nieobecność.",
+      "stripPlanned": "zaplanowane: {count}",
+      "stripRecorded": "zapisane wpisy: {count}",
+      "stripNoRecord": "brak zapisu",
+      "stripAway": "nieobecność",
+      "legendPlanned": "Zaplanowane",
+      "legendRecorded": "Zapisane, wg długości",
+      "legendUntimed": "Zapisane, bez długości",
+      "legendAway": "Nieobecność",
+      "calendarHeading": "Kalendarz",
+      "unknown": "Nie udało się teraz odczytać Twojego czasu. To nieznane, a nie puste."
+    },
+    "roster": {
+      "unknown": "Nie udało się teraz odczytać listy zespołu. To nieznane, a nie puste."
+    },
+    "people": {
+      "title": "Ludzie w czasie",
+      "intro": "Wszyscy z Twojego zespołu na jednej osi. Pusty odcinek oznacza brak zapisu. Nie oznacza, że osoba jest wolna.",
+      "capacity": "Zespół dzień po dniu",
+      "capacitySummary": "Zespół: {total}. Najwięcej zajętych jednego dnia: {peak}, {date}.",
+      "capacityDay": "{date}: zajętych {committed}, nieobecnych {away}, bez zapisu {noRecord}",
+      "away": "Nieobecność",
+      "overlap": "Nakładanie",
+      "unnamed": "Osoba",
+      "now": "Teraz",
+      "next": "Potem",
+      "noRecord": "Brak zapisu",
+      "noRecordWindow": "W tym oknie brak zapisu",
+      "noRecordUnknownLeave": "Brak zapisu. Nie udało się odczytać nieobecności.",
+      "outside": "poza oknem: {count}",
+      "kind": {
+        "project": "Projekt",
+        "booking": "Rezerwacja",
+        "trip": "Wyjazd",
+        "absence": "Nieobecność"
+      },
+      "absenceUnknown": "Nie udało się teraz odczytać zatwierdzonych nieobecności. Nieobecność jest tu nieznana, a nie nieobecna.",
+      "withoutRecord": "Osoby z zespołu bez zapisu w tym oknie: {count}. Nie są rysowane jako pasy i nie są liczone jako wolne.",
+      "none": "W Twoim zespole nie ma jeszcze nikogo."
+    },
+    "projects": {
+      "title": "Projekty w czasie",
+      "intro": "Każdy projekt: jego zakres, etapy i ile osób jest przypisanych każdego dnia.",
+      "untitled": "Projekt bez nazwy",
+      "stage": "Etap",
+      "noDates": "Nie podano dat",
+      "noStages": "Nie podano etapów z datami",
+      "noStageNow": "Dziś brak etapu",
+      "noStageNext": "Brak zapisanego późniejszego etapu",
+      "noStaffingRecord": "W tym oknie brak zapisanych przydziałów",
+      "needOpen": "Nadal otwarte {missing} z {required}",
+      "needCovered": "Potrzeba {required}, pokryte",
+      "needNotProvided": "Nie podano liczby osób",
+      "staffed": "Przypisano: {count}",
+      "needsTitle": "Otwarte potrzeby bez projektu",
+      "needsUndated": "Zgłoszone potrzeby bez dat: {count}",
+      "gaps": "Przekazania oraz terminy dokumentów lub certyfikatów nie są jeszcze w danych planowania, więc nic dla nich nie rysujemy.",
+      "unplacedTitle": "Projekty bez zapisanych dat, etapów ani przydziałów: {count}. Wymienione, nie rysowane.",
+      "withoutDates": "Projekty bez dat: {count}. Nie mają miejsca na osi.",
+      "none": "Brak zapisanych projektów ani otwartych potrzeb w tym oknie.",
+      "unknown": "Nie udało się teraz odczytać projektów i etapów. To nieznane, a nie puste."
+    },
+    "focus": {
+      "selected": "Wybrano",
+      "close": "Zamknij",
+      "person": "{name} w czasie",
+      "project": "{name} w czasie",
+      "nothingOnRecord": "Brak zapisu dla tej osoby w tym oknie.",
+      "openPerson": "Otwórz osobę",
+      "openTeam": "Otwórz zespół",
+      "openConversations": "Rozmowy",
+      "openProject": "Otwórz projekt",
+      "openWork": "Otwórz pracę"
     }
   },
   "planning": {
@@ -18229,14 +18350,27 @@
     "noRecords": "Brak jeszcze wpisów o pracy",
     "legend": {
       "managerRecord": "Wpis przełożonego",
-      "recorded": "Wpisane przez Ciebie"
+      "recorded": "Wpisane przez Ciebie",
+      "declared": "Podane przez Ciebie",
+      "declaredHint": "Twoje własne słowa. Nikt jeszcze tego nie sprawdził.",
+      "recordedHint": "Godziny i wpisy z Twojego dziennika pracy.",
+      "managerRecordHint": "Odpowiedzialny kierownik lub pracodawca to potwierdził."
     },
     "skillsTitle": "Co pokazuje Twoja praca",
     "next": {
       "title": "Twoja historia idzie z Tobą",
       "body": "Każda praca, którą zapiszesz, ją uzupełnia. Zabierz ją na następną okazję.",
-      "cta": "Zobacz, dokąd możesz pójść"
-    }
+      "cta": "Zobacz, dokąd możesz pójść",
+      "label": "Dalej, nie historia",
+      "notRecord": "nie jest częścią Twojego zapisu"
+    },
+    "promise": {
+      "mine": "To Twoja historia zawodowa.",
+      "grows": "Rośnie za każdym razem, gdy pracujesz.",
+      "follows": "Zapis może pójść z Tobą do kolejnej okazji."
+    },
+    "keyTitle": "Jak czytać każdy wiersz",
+    "historyTitle": "Historia pracy"
   },
   "workContext": {
     "title": "Twoja praca w jednym miejscu",
@@ -18254,6 +18388,508 @@
       "history": "{count, plural, one {# praca} few {# prace} many {# prac} other {# pracy}}",
       "skills": "{count, plural, one {# umiejętność oparta na Twoich wpisach} few {# umiejętności oparte na Twoich wpisach} many {# umiejętności opartych na Twoich wpisach} other {# umiejętności opartej na Twoich wpisach}}",
       "next": "Dokąd możesz przejść"
+    }
+  },
+  "publicCinema": {
+    "title": "Prześledź jedną osobę i jedną firmę przez całą pracę.",
+    "sub": "Ci sami ludzie, ten sam projekt i ten sam zapis: od pierwszego szukania do następnego rozdziału. Przewijaj, a kamera będzie się przesuwać.",
+    "skip": "Pomiń historię",
+    "railLabel": "Rozdziały historii",
+    "privacy": "Prywatny, dopóki nie włączysz widoczności.",
+    "chapters": [
+      "Znajdź pracę",
+      "Znajdź ludzi",
+      "Prowadź pracę",
+      "Zachowaj zapis",
+      "Idź dalej"
+    ],
+    "scenes": [
+      {
+        "title": "Człowiek z prawdziwą pracą za sobą.",
+        "body": "{name}, {trade}. Profil zaczyna się od tego, co ta osoba naprawdę robi."
+      },
+      {
+        "title": "Potrzeby i ludzie spotykają się otwarcie.",
+        "body": "Firma mówi, czego potrzebuje. Specjalista widzi to obok pracy, którą naprawdę wykonuje, nigdy jako jedną ocenę."
+      },
+      {
+        "title": "Rozmawiają we własnym języku.",
+        "body": "Każdy pisze w swoim języku. Wiadomości można czytać w Twoim, a oryginał zostaje obok."
+      },
+      {
+        "title": "Ludzie trafiają do projektu.",
+        "body": "Osoby pracujące razem są przypisane do projektu, więc wszyscy widzą tę samą pracę."
+      },
+      {
+        "title": "Polecenie, praca, godziny, zdjęcie.",
+        "body": "Jasne polecenie, wykonana praca, czas, który zajęła, i zdjęcie: zapisane raz."
+      },
+      {
+        "title": "Z dnia robi się zapis.",
+        "body": "Zaczyna się jako własny zapis osoby. Nic nie jest jeszcze nazwane potwierdzonym."
+      },
+      {
+        "title": "Kierownik to potwierdza.",
+        "body": "Kierownik widzi, co zapisano, i potwierdza to albo odsyła z notatką."
+      },
+      {
+        "title": "Potwierdzona praca buduje historię.",
+        "body": "Potwierdzona praca trafia do historii zawodowej. Praca, której nikt nie potwierdził, pozostaje widoczna jako własny zapis i jest tak oznaczona."
+      },
+      {
+        "title": "A potem to, co dalej.",
+        "body": "Osoba podaje, od kiedy jest dostępna. Firma publikuje kolejną potrzebę i planuje z wyprzedzeniem. Oboje zaczynają od tego, co naprawdę się wydarzyło."
+      }
+    ],
+    "labels": {
+      "person": "Osoba",
+      "need": "Potrzeba",
+      "company": "Firma",
+      "project": "Projekt",
+      "team": "Zespół",
+      "instruction": "Polecenie",
+      "work": "Praca",
+      "hours": "Godziny",
+      "photo": "Zdjęcie",
+      "record": "Zapis",
+      "manager": "Kierownik",
+      "history": "Historia zawodowa",
+      "next": "Dalej, nie historia"
+    },
+    "chain": {
+      "project": "Projekt",
+      "people": "Ludzie w nim",
+      "need": "Następna potrzeba",
+      "plan": "Planowanie"
+    },
+    "kinds": [
+      "Praca",
+      "Usługa",
+      "Ogłoszenie"
+    ],
+    "kindsNote": "Prace, usługi i ogłoszenia są w jednym miejscu.",
+    "translateTag": "Pokazano w Twoim języku · oryginał zachowany",
+    "teamMeta": "3 osoby w tym projekcie",
+    "plan": "Planuj kolejne tygodnie w kalendarzu",
+    "addedBy": "Dodane przez {name}",
+    "nextMeta": "Tak podaje {name}",
+    "hours": "8 godz.",
+    "msgOut": "Tak, mogę zacząć 20.",
+    "construction": {
+      "trade": "monter rusztowań",
+      "needTitle": "Rusztowania elewacyjne · 3 osoby",
+      "managerRole": "Brygadzista",
+      "msgIn": "Czy możesz zacząć na północnej elewacji 20 października?",
+      "instruction": "Elewacja północna, poziom 3, sekcja wschodnia: kotwy co 1,5 m.",
+      "photoAlt": "Rusztowanie na północnej elewacji",
+      "hNowT": "{project} · Monter rusztowań",
+      "hNowM": "Elewacja północna · od września",
+      "hRecentT": "Remont Starego Miasta · Monter rusztowań",
+      "nextNeed": "Monterzy rusztowań elewacyjnych od 20 października"
+    },
+    "hospitality": {
+      "trade": "kucharka",
+      "managerRole": "Szefowa kuchni",
+      "msgIn": "Czy możesz zacząć jesienne menu 20 października?",
+      "instruction": "Jesienne menu: nową przystawkę podaj jak na karcie."
+    }
+  },
+  "publicSlice": {
+    "sample": "Przykład",
+    "states": {
+      "own": "Twój własny wpis",
+      "waiting": "Czeka na przegląd przełożonego",
+      "confirmed": "Potwierdzone przez przełożonego",
+      "unknown": "Jeszcze nie zapisano"
+    },
+    "imagery": {
+      "tomasAlt": "Monter rusztowań pracuje na rusztowaniu fasadowym przy ulicy starego miasta",
+      "rasaAlt": "Kucharka przy podaniu w kuchni restauracji",
+      "tomasCaption": "Tomas K. · Monter rusztowań",
+      "rasaCaption": "Rasa J. · Kucharka",
+      "vanAlt": "Monter rusztowań obok swojego busa na budowie",
+      "ownerAlt": "Właścicielka restauracji z dwoma współpracownikami przy stole"
+    },
+    "workers": {
+      "hero": {
+        "title": "Znajdź pracę.",
+        "accent": "Zachowaj to, co budujesz.",
+        "sub": "Znajdź pracę, która pasuje do tego, co naprawdę robisz. Gdy zaczniesz, Twój dzień, zespół i wiadomości są w jednym miejscu. Praca, którą zapisujesz, staje się Twoją historią zawodową.",
+        "cta": "Utwórz bezpłatny profil",
+        "secondary": "Zobacz oferty pracy",
+        "note": "Dla osób bezpłatnie. Płatne plany są tylko dla organizacji."
+      },
+      "day": {
+        "title": "Wiedz, co dzieje się dziś.",
+        "body": "Najpierw widzisz pracę, przy której jesteś, swój zespół i wiadomości. Potem w kilku linijkach, ze zdjęciem i czasem, zapisujesz, co zostało zrobione.",
+        "todayLabel": "Dziś",
+        "task": "Wieczorny serwis",
+        "taskDetail": "Start jesiennego menu · Zespół kuchni",
+        "message": "Szef kuchni: nowe dania wchodzą dziś wieczorem.",
+        "primary": "Zapisz dzisiejszą pracę",
+        "secondary": "Napisz do zespołu",
+        "recordLabel": "Twój wpis",
+        "recordText": "Prowadziłam podanie przy nowym jesiennym menu. Dwa dania wróciły i zrobiłam je od nowa.",
+        "time": "8 godz.",
+        "photo": "1 zdjęcie",
+        "sent": "Wysłane do przełożonego"
+      },
+      "history": {
+        "title": "Potwierdzona praca buduje Twoją historię.",
+        "body": "Praca, którą potwierdzi przełożony, staje się częścią Twojej historii zawodowej. Praca, której nikt jeszcze nie potwierdził, pozostaje widoczna jako Twój własny wpis, wyraźnie oznaczona. To, do czego deklarujesz dostępność, jest osobno, jako to, co dalej.",
+        "now": "Teraz",
+        "recent": "Ostatnia praca",
+        "earlier": "Wcześniej",
+        "next": "Dalej, nie historia",
+        "nowTitle": "Restauracja Ąžuolas · Kucharka",
+        "nowMeta": "Start jesiennego menu · od września",
+        "nowState": "Potwierdzone przez przełożonego",
+        "recentTitle": "Kawiarnia Port · Kucharka na linii",
+        "recentMeta": "2023–2024",
+        "recentState": "Twój własny wpis · niepotwierdzone",
+        "earlierTitle": "Dodane przez Rasę",
+        "earlierMeta": "2019–2022",
+        "earlierState": "Jeszcze nie zapisano",
+        "nextTitle": "Dostępna od 20 października",
+        "nextMeta": "Tak jak podaje Rasa",
+        "nextState": "Jeszcze bez oferty"
+      },
+      "outcome": {
+        "title": "Twoja praca nie znika, gdy kończy się zlecenie.",
+        "body": "Następny pracodawca spotyka osobę z prawdziwym zapisem pracy, nie tylko z CV. Twój profil pozostaje prywatny, dopóki nie włączysz widoczności."
+      },
+      "faq": {
+        "title": "Zanim się zarejestrujesz",
+        "items": [
+          {
+            "q": "Czy to coś kosztuje?",
+            "a": "Nie. LabourMarket.ai jest bezpłatny dla osób. Płatne plany są tylko dla organizacji."
+          },
+          {
+            "q": "Kto widzi mój profil?",
+            "a": "Nikt Cię nie znajdzie, dopóki nie włączysz widoczności. Wtedy firmy widzą krótkie podsumowanie zawodowe. CV i dane kontaktowe są udostępniane tylko po Twoim potwierdzeniu. Firma, w której pracujesz, widzi pracę zapisaną dla niej."
+          },
+          {
+            "q": "Co jeśli przełożony nie potwierdzi mojej pracy?",
+            "a": "Zostaje Twoim własnym wpisem, wyraźnie oznaczonym jako niepotwierdzony. W każdym przypadku go zachowujesz."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Zacznij od własnego",
+        "accent": "profilu zawodowego.",
+        "button": "Utwórz bezpłatny profil"
+      }
+    },
+    "companies": {
+      "hero": {
+        "title": "Znajdź ludzi, których potrzebujesz.",
+        "accent": "Potem prowadź pracę.",
+        "sub": "Powiedz, czego potrzebujesz. Poznaj osoby, których prawdziwa praca pasuje. Przypisz je do projektu, zobacz zapisaną przez nie pracę, potwierdź ją i zgłoś kolejną potrzebę.",
+        "cta": "Zgłoś potrzebę",
+        "secondary": "Zobacz cennik",
+        "note": "Zgłoszenie potrzeby jest bezpłatne."
+      },
+      "need": {
+        "title": "Powiedz, czego potrzebujesz. Zobacz, kto pasuje.",
+        "body": "Opisz pracę, ile osób i od kiedy. Zobaczysz osoby, których historia pracy pasuje do tej potrzeby, oceniane względem konkretnego zadania, nigdy jako jedna uniwersalna ocena.",
+        "needLabel": "Twoja potrzeba",
+        "needTitle": "Kucharz na linii · 2 osoby",
+        "needMeta": "Od 20 października · Wilno",
+        "personRole": "Kucharka",
+        "personMeta": "Dostępna od 20 października, tak jak podaje",
+        "personState": "Potwierdzona praca w restauracji Ąžuolas"
+      },
+      "project": {
+        "title": "Przypisz swoich ludzi do pracy.",
+        "body": "Dodaj osoby, z którymi pracujesz, do projektu. Każdego dnia zapisują, co zrobiono. Widzisz, które wpisy czekają na Ciebie, i potwierdzasz je albo zwracasz do poprawy.",
+        "label": "Projekt",
+        "name": "Start jesiennego menu",
+        "people": "Zespół kuchni · 3 osoby",
+        "waiting": "1 wpis czeka na Twój przegląd",
+        "confirmed": "2 wpisy potwierdzone w tym tygodniu"
+      },
+      "attention": {
+        "title": "Zobacz, co Cię potrzebuje. Zaplanuj, co dalej.",
+        "body": "Wpisy czekające na przegląd i zgłoszone potrzeby są w jednym miejscu, więc kolejna decyzja o zatrudnieniu zaczyna się od tego, co naprawdę się dzieje.",
+        "label": "Czeka na Ciebie",
+        "items": [
+          {
+            "text": "1 wpis czeka na Twój przegląd",
+            "state": "wait"
+          },
+          {
+            "text": "Kucharz na linii od 20 października: otwarta potrzeba",
+            "state": "wait"
+          },
+          {
+            "text": "Cukiernia: brak wpisu od czwartku",
+            "state": "unk"
+          }
+        ]
+      },
+      "faq": {
+        "title": "Zanim zaczniesz",
+        "items": [
+          {
+            "q": "Ile to kosztuje?",
+            "a": "Jedno aktywne stanowisko na organizację jest bezpłatne. Więcej stanowisk wymaga planu organizacji, podanego na stronie cennika. Zgłoszenie potrzeby jest bezpłatne."
+          },
+          {
+            "q": "Czy mogę potwierdzać pracę zapisaną przez moich ludzi?",
+            "a": "Tak. Przełożony lub właściciel organizacji może potwierdzić wpis, zwrócić go do poprawy albo odrzucić, gdy przegląd jest włączony dla organizacji."
+          },
+          {
+            "q": "Co widzę o osobie, zanim się skontaktuję?",
+            "a": "Krótkie podsumowanie zawodowe: imię, zawody, doświadczenie, dostępność i umiejętności. Tylko osób, które włączyły widoczność. CV i dane kontaktowe są udostępniane tylko po ich potwierdzeniu."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Zacznij od ludzi,",
+        "accent": "których potrzebujesz.",
+        "button": "Zgłoś potrzebę"
+      }
+    },
+    "transition": {
+      "title": "Jeden dzień pracy, od wpisu do historii.",
+      "sub": "Prześledź jedną zmianę. Wpis, dowód i przegląd dzieją się po jednym razie, a obie strony widzą wynik.",
+      "stageNav": "Wybierz etap",
+      "replay": "Odtwórz ponownie",
+      "stages": {
+        "work": {
+          "label": "Praca",
+          "caption": "Rasa prowadzi wieczorny serwis."
+        },
+        "proof": {
+          "label": "Dowód",
+          "caption": "Zapisuje, co zrobiła, i dodaje zdjęcie."
+        },
+        "review": {
+          "label": "Przegląd",
+          "caption": "Jej przełożony to potwierdza."
+        },
+        "history": {
+          "label": "Historia",
+          "caption": "Staje się częścią jej historii zawodowej."
+        },
+        "next": {
+          "label": "Dalej",
+          "caption": "Firma widzi postęp. Obie strony mogą planować, co dalej."
+        }
+      },
+      "pro": {
+        "role": "Kucharka",
+        "recordTitle": "Wieczorny serwis · 8 godz.",
+        "recordText": "Prowadziłam podanie przy nowym jesiennym menu.",
+        "photoAlt": "Podanie w kuchni przed serwisem",
+        "historyLabel": "W jej historii zawodowej",
+        "historyTitle": "Restauracja Ąžuolas · Kucharka",
+        "historyMeta": "Start jesiennego menu",
+        "nextLabel": "Dalej, nie historia",
+        "nextMeta": "Dostępna od 20 października, tak jak podaje"
+      },
+      "co": {
+        "project": "Start jesiennego menu",
+        "waiting": "1 wpis czeka na przegląd",
+        "done": "Wpis potwierdzony",
+        "nextLabel": "Co dalej",
+        "nextNeed": "Kucharz na linii od 20 października",
+        "nextCta": "Zgłoś kolejną potrzebę"
+      }
+    },
+    "home": {
+      "title": "Wybierz swoją stronę.",
+      "sub": "To samo miejsce, ten sam zapis. To, co zrobisz dalej, zależy od tego, gdzie stoisz.",
+      "workerTitle": "Szukam pracy",
+      "workerBody": "Znajdź pracę, która pasuje, a potem zachowaj zapis tego, co robisz.",
+      "workerCta": "Dla specjalistów",
+      "companyTitle": "Zatrudniam ludzi",
+      "companyBody": "Znajdź ludzi, których potrzebujesz, a potem prowadź z nimi pracę.",
+      "companyCta": "Dla firm"
+    },
+    "explore": {
+      "summary": "Zobacz każdy krok i otwórz go w swojej przestrzeni roboczej"
+    },
+    "world": {
+      "labels": {
+        "person": "Osoba",
+        "team": "Zespół",
+        "project": "Projekt",
+        "work": "Dzisiejsza praca",
+        "today": "Dziś",
+        "record": "Twój wpis",
+        "needs": "Czeka na Ciebie",
+        "kitchen": "Zespół kuchni"
+      },
+      "home": {
+        "title": "Jeden świat pracy.",
+        "sub": "Prawdziwi ludzie, prawdziwe firmy i praca między nimi, w jednym miejscu.",
+        "primary": "Szukam pracy",
+        "secondary": "Zatrudniam",
+        "personRole": "Monter rusztowań · Wilno",
+        "crew": "Ekipa północna",
+        "projectMeta": "Elewacja północna · poziom 3 do 4",
+        "workTitle": "Poziom 3, część wschodnia",
+        "workMeta": "8 godz. · kotwy co 1,5 m",
+        "doneTitle": "Dodane do jego historii",
+        "doneMeta": "Potwierdzone przez przełożonego · 1 zdjęcie"
+      },
+      "workers": {
+        "taskMeta": "Odbiór 14:00",
+        "recordTitle": "Poziom 3, część wschodnia",
+        "recordMeta": "8 godz. · 1 zdjęcie",
+        "doneTitle": "Teraz w Twojej historii",
+        "taskTitle": "Elewacja północna"
+      },
+      "companies": {
+        "projectDone": "5 z 9 wpisów potwierdzonych w tym tygodniu",
+        "teamMeta": "3 osoby w tym projekcie"
+      }
+    }
+  },
+  "journalContinuity": {
+    "title": "Od polecenia do Twojej historii",
+    "intro": "Każdy wpis jest częścią łańcucha. Otwórz dowolny krok, by kontynuować.",
+    "instruction": {
+      "label": "Polecenie",
+      "unit": "zaplanowana praca"
+    },
+    "work": {
+      "label": "Wykonana praca",
+      "unit": "wpisy"
+    },
+    "time": {
+      "label": "Czas",
+      "unit": "zapisany"
+    },
+    "evidence": {
+      "label": "Dowody",
+      "unit": "ze zdjęciami"
+    },
+    "review": {
+      "label": "Przegląd",
+      "unit": "oczekuje"
+    },
+    "confirmed": {
+      "label": "Potwierdzone",
+      "unit": "przez kierownika",
+      "returned": "{count} zwrócone"
+    },
+    "project": {
+      "label": "Projekt",
+      "unit": "jego historia"
+    },
+    "history": {
+      "label": "Twoja historia",
+      "unit": "żywe CV"
+    }
+  },
+  "projectContinuity": {
+    "title": "Ten projekt toczy się dalej w",
+    "people": "Ludzie",
+    "calendar": "Kalendarz",
+    "journal": "Dziennik pracy",
+    "review": "Przegląd",
+    "history": "Historia firmy"
+  },
+  "discover": {
+    "eyebrow": "Odkrywaj",
+    "title": "Znajdź, czego potrzebujesz. Zaoferuj, co masz.",
+    "lead": "Ludzie i firmy oferują oraz szukają tu pracy, ludzi, usług i zasobów do pracy. Widzisz tylko to, z czego może korzystać Twoja rola.",
+    "honesty": "Każda karta poniżej prowadzi do prawdziwej sekcji. Nic na tej stronie nie jest przykładowym ogłoszeniem.",
+    "feature": {
+      "label": "Odkrywaj",
+      "description": "Znajdź pracę, ludzi, usługi i zasoby do pracy - albo zaoferuj własne."
+    },
+    "side": {
+      "seek": "Szukasz",
+      "offer": "Oferujesz",
+      "both": "Szukaj lub oferuj"
+    },
+    "status": {
+      "early": "Dopiero otwarte",
+      "earlyNote": "Sekcje oznaczone „Dopiero otwarte” są gotowe i działają, ale mają jeszcze niewiele wpisów - możesz być wśród pierwszych."
+    },
+    "groups": {
+      "around": {
+        "title": "W pobliżu",
+        "lead": "Zobacz rynek na mapie albo własnymi słowami powiedz, co oferujesz lub czego potrzebujesz."
+      },
+      "work": {
+        "title": "Praca",
+        "lead": "Otwarte stanowiska i sygnały, które za nimi stoją."
+      },
+      "people": {
+        "title": "Ludzie i firmy",
+        "lead": "Znajdź ludzi do potrzeby, zgłoś swoją potrzebę i dbaj o relacje."
+      },
+      "offers": {
+        "title": "Usługi i zasoby do pracy",
+        "lead": "Zaoferuj usługę lub zleć ją, dodaj narzędzia, pojazdy, lokale i sprzęt do pracy."
+      },
+      "grow": {
+        "title": "Rozwój",
+        "lead": "Zamień to, co znajdujesz i robisz, w umiejętności i szkolenia."
+      }
+    },
+    "entries": {
+      "map": {
+        "title": "Mapa rynku",
+        "desc": "Potrzeby, ludzie i projekty na jednej mapie. Pojawiają się tylko miejsca z prawdziwymi danymi."
+      },
+      "recognize": {
+        "title": "Powiedz, co oferujesz lub czego potrzebujesz",
+        "desc": "Opisz to własnymi słowami i przejdź we właściwe miejsce. Nic nie jest zapisywane, dopóki nie wybierzesz."
+      },
+      "opportunities": {
+        "title": "Okazje dla Ciebie",
+        "desc": "Otwarte stanowiska dopasowane do Twojego zapisu pracy, z zapisanymi wyszukiwaniami."
+      },
+      "jobs": {
+        "title": "Publiczna tablica ofert",
+        "desc": "Przeglądaj opublikowane oferty bez logowania."
+      },
+      "intelligence": {
+        "title": "Sygnały rynku",
+        "desc": "Sygnały płac i popytu z Twoich własnych danych, ze wskazanymi źródłami."
+      },
+      "scouting": {
+        "title": "Znajdź ludzi",
+        "desc": "Wybierz zanonimizowanych kandydatów do swoich potrzeb i prowadź ich przez proces."
+      },
+      "needs": {
+        "title": "Potrzeby kadrowe",
+        "desc": "Opisz, kogo potrzebujesz - jedyne miejsce, w którym zapisywany jest Twój popyt."
+      },
+      "candidates": {
+        "title": "Szkice kandydatów",
+        "desc": "Prywatne notatki o osobach, które możesz włączyć. Szkic nie jest kontem."
+      },
+      "buyer": {
+        "title": "Zleć pracę lub usługi",
+        "desc": "Skonfiguruj się jako klient i opisz, co trzeba zrobić."
+      },
+      "network": {
+        "title": "Sieć",
+        "desc": "Szukaj ludzi i firm, wysyłaj zaproszenia, dbaj o relacje."
+      },
+      "services": {
+        "title": "Zaoferuj usługę",
+        "desc": "Opublikuj, co Ty lub Twoja firma możecie zrobić dla innych."
+      },
+      "service_requests": {
+        "title": "Znajdź i zleć usługi",
+        "desc": "Przeglądaj aktywne usługi i wyślij zapytanie albo odpowiadaj na zapytania do swoich usług."
+      },
+      "listings": {
+        "title": "Zasoby do pracy",
+        "desc": "Narzędzia, sprzęt, pojazdy, lokale i zakwaterowanie na sprzedaż, wynajem lub poszukiwane - tylko do pracy."
+      },
+      "education": {
+        "title": "Programy szkoleniowe",
+        "desc": "Uczący się, programy i kohorty dla Twojej organizacji szkoleniowej."
+      }
     }
   }
 }

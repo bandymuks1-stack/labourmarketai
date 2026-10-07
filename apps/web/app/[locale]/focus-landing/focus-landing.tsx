@@ -12,13 +12,12 @@ import { PublicEntry } from "@/components/marketing/public-entry";
 import { MarketProofBand } from "@/components/marketing/market-proof-band";
 import { PlayerCardShowcase } from "@/components/marketing/player-card-showcase";
 import { ProductChainBand } from "@/components/marketing/product-chain-band";
-import { TwoSidesSection } from "@/components/marketing/two-sides-section";
+import { HomeSides } from "@/components/marketing/public/home-sides";
+import { HomeWorldHero } from "@/components/marketing/public/world-heroes";
+import { CinematicStorySection } from "@/components/marketing/public/cinematic-story-section";
 import { TrustBand } from "@/components/marketing/trust-band";
 import { StartingContextsBand } from "@/components/marketing/starting-contexts-band";
-/* `PublicMarketMapBand` is deliberately NOT imported: the band is withdrawn
-   from the landing (owner decision 2026-09-27, reasoning at the render site).
-   The component file and the map capability are untouched. */
-import { LandingPrimaryActions, LandingClosingBand } from "@/components/marketing/landing-primary-actions";
+import { LandingClosingBand } from "@/components/marketing/landing-primary-actions";
 import { LandingOpenJobsBand } from "@/components/marketing/landing-open-jobs-band";
 import {
   MARKETING_CLIENT_MESSAGE_ROOTS,
@@ -26,56 +25,29 @@ import {
 } from "@/lib/i18n/client-messages";
 import { readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
 import { resolveActiveLocale } from "@/lib/seo/metadata";
-import { LandingJourney } from "@/components/marketing/landing-journey";
-import { buildSampleJourney } from "@/lib/marketing/sample-journey";
-import { buildLivingWorkerHero } from "@/lib/marketing/living-worker-hero";
-import { LivingWorkerHero } from "@/components/marketing/living-worker-hero";
 
 /**
- * FOCUS — the previous production landing, RESTORED.
+ * THE LANDING — one world of work (owner directive 2026-10-02, CURRENT x Q).
  *
- * This is not a restyling and not a new "focused" design. It
- * is the landing labourmarket.ai actually served in production immediately
- * before the living-market surface replaced it, recovered from git rather
- * than rebuilt from a screenshot:
+ * First screen: a real professional in a real working context, with the
+ * relationships around him (person, team, project, work, record, history)
+ * embedded in the scene (<HomeWorldHero>). Then the working sentence entry, the
+ * signature transition (one shift becomes professional history while the
+ * company gains context), the two doors, and the real market below.
  *
- *   source: apps/web/app/[locale]/(marketing)/page.tsx
- *   provenance: 7179882 — the state of `main` immediately before #1221
- *           (5c78ac5) deleted that file; content last shaped by #1176.
+ * 2026-10-02 (owner, premium design programme): the signature transition became
+ * the CINEMATIC STORY (components/marketing/public/cinematic-story.tsx) — one
+ * continuous scroll-driven story over one persistent set of entities (person,
+ * company, team, work -> record -> history -> next) instead of a replayed strip.
  *
- * `(marketing)/page.tsx` is the only file that has ever served `/{locale}`,
- * and `git log --diff-filter=D` shows 5c78ac5 deleted it, so 7179882 is its
- * final production state by definition rather than by judgement.
- *
- * The composition started as that file's, node for node, and has since been
- * changed only by named owner decisions — P1 (2026-09-05) put <PublicEntry>
- * where the scripted <HeroLiveDemo> scenario played; window 11 (2026-09-07,
- * §§16–20) moved the map and the starting contexts above the product chain;
- * and landing §22 + PUBLIC_LANDING_REAL_JOB_DISCOVERY (2026-09-23) put the
- * VALUE first. The order today:
- *
- *   hero (what / who / why) + one clear next step + <PublicEntry>
- *   → the market in places (+ its proof)
- *   → a few REAL open jobs, from the board itself
- *   → starting contexts → the product chain (#how-it-works)
- *   → the sample Player Card → trust → the closing next step
- *
- * The same wrapper class and the same #how-it-works anchor throughout.
- *
- * ── COMPATIBILITY ONLY — NO MODERNISATION ─────────────────────────────────
- * The original rendered inside the (marketing) route group, whose layout
- * supplied the chrome. `/{locale}` sits outside that group, so this component
- * reproduces that layout directly — same skip link, same <AmbientGlow>, same
- * <MarketingFunnelBeacon>, same <SiteNav>, same <main id="main-content">,
- * same <SiteFooter>, same marketing message pick — rather than visually
- * approximating it. Nothing here is a redesign of the restored landing.
- *
- * ONE LANDING (owner decision 2026-09-30). The optional LIVE arm — the
- * living-market scene, its LIVE / FOCUS switcher and the middleware rewrite
- * behind it — is removed until real demand, supply, availability, mobility
- * and project signals can carry a living market honestly. The IDEA stays a
- * product direction; the shared market reader stays (the bands below use
- * it). Nothing replaces the scene: its space goes to the person's story.
+ * Supersedes the living-worker carousel hero, the entry journey story and the
+ * six-step two-sides strip as the FIRST impression; those components still
+ * exist and are unchanged (living-worker-hero, landing-journey, two-sides-*).
+ * Same chrome as before: skip link, <AmbientGlow>, <MarketingFunnelBeacon>,
+ * <SiteNav>, <main id="main-content">, <SiteFooter>, marketing message pick.
+ * The market map band stays withdrawn (owner decision 2026-09-27).
+ * provenance: 7179882 — the pre-#1221 landing, since moved only by named owner
+ * decisions (the latest: the world-of-work hero, 2026-10-02).
  */
 export async function FocusLanding({
   params,
@@ -85,35 +57,10 @@ export async function FocusLanding({
   const { locale } = await params;
   setRequestLocale(locale);
   const activeLocale = resolveActiveLocale(locale);
-  // The ONE canonical market snapshot, through its 300 s `unstable_cache`
-  // entry — one market truth, one freshness window (owner command §9/§12).
-  const [market, t, tHero, journey, livingHero] = await Promise.all([
-    // The landing renders the supply counts only; it reads `professions`
-    // nowhere, so it does not pay for the per-profession reads.
+  const [market, t] = await Promise.all([
     readLiveMarketLandingSnapshot({ resolveProfessions: false }),
     getTranslations("common"),
-    getTranslations("landing.hero"),
-    // The entry's SAMPLE story (owner decision 2026-09-29): translation copy
-    // + the existing sample persona — no read, no production fact.
-    buildSampleJourney(),
-    buildLivingWorkerHero(),
   ]);
-
-  // THE PROMISE — one headline, one sub, one set of primary doors, whichever
-  // hero carries it (the living worker hero, or the entry hero without it).
-  // `text-hero` was never defined (no token, no Tailwind entry): the h1
-  // rendered at body size. A real display scale now.
-  const promise = (
-    <>
-      <h1 className="font-display text-4xl font-bold leading-[1.04] tracking-tightest text-text-primary sm:text-5xl lg:text-6xl">
-        {tHero("headline")}
-      </h1>
-      <p className="mt-3 text-lead text-text-secondary">{tHero("sub")}</p>
-      <div className="mt-6">
-        <LandingPrimaryActions locale={locale} surface="landing_hero" />
-      </div>
-    </>
-  );
 
   return (
     <NextIntlClientProvider
@@ -133,161 +80,43 @@ export async function FocusLanding({
         <MarketingFunnelBeacon />
         <SiteNav />
         <main id="main-content" className="relative">
-          {/* ── The restored landing body, verbatim from 7179882 ────────── */}
+          <HomeWorldHero />
           <div className="mx-auto max-w-container px-6 py-14 sm:px-12">
-            {/* ── VALUE FIRST (owner directive 2026-09-23, landing §22 "fix
-                   the story, not CSS"). The h1 says WHAT this is and WHO it
-                   is for; the sub says what a person accomplishes here and
-                   WHY it is different; the actions say what to do NEXT —
-                   before any control asks anything. This supersedes #1609
-                   §16, which had made the h1 an instruction for the field
-                   below; the field's own label still carries that instruction.
-
-                   Entry: the first screen understands a REAL sentence
-                   (frozen design contract 2026-09-05, package P1). The
-                   visitor's own words go through the ONE deterministic
-                   router, the page says what it understood, and the auth
-                   doors carry the sentence. The public numbers are the SAME
-                   canonical snapshot the market proof band prints, omitted
-                   when the reader cannot answer. */}
-            {/* THE ENTRY (owner decision 2026-09-29 — landing freeze lifted
-                for the entry hero ONLY). Desktop: the promise left, the
-                product story right, the working sentence entry full width
-                beneath. Phone: promise → entry → story, so the working entry
-                stays near the top. The story is the product's own pieces with
-                the landing's sample persona — see <LandingJourney>. */}
-            {/* THE LIVING WORKER HERO (owner 2026-09-29): with its
-                photographs in place, the same sample person stands at the
-                centre of the hero and the promise sits over them; the working
-                sentence entry follows. Without the photographs, the entry
-                hero above stays exactly as it was — never an abstract
-                stand-in. */}
-            {livingHero ? (
-              <>
-                <LivingWorkerHero data={livingHero}>{promise}</LivingWorkerHero>
-                <section className="mt-8">
+            {/* THE WORKING ENTRY: the visitor's own sentence goes through the ONE
+                deterministic router; the page says what it understood. */}
+            <section>
               <PublicEntry
-                  supply={
-                    market.activeVacancies !== null && market.distinctEmployers !== null
-                      ? {
-                          vacancies: market.activeVacancies,
-                          employers: market.distinctEmployers,
-                          refreshedAt: market.lastRefreshedAt,
-                        }
-                      : null
-                  }
-                />
-                </section>
-              </>
-            ) : (
-              <section className="grid gap-8 lg:grid-cols-2 lg:items-start lg:gap-x-12">
-                <div className="order-1 max-w-3xl lg:col-start-1 lg:row-start-1 lg:self-center">
-                  {promise}
-                </div>
-                <div className="order-3 lg:col-start-2 lg:row-start-1" data-testid="landing-entry-story">
-                  <LandingJourney journey={journey} />
-                </div>
-                <div className="order-2 lg:col-span-2 lg:row-start-2">
-                <PublicEntry
-                  supply={
-                    market.activeVacancies !== null && market.distinctEmployers !== null
-                      ? {
-                          vacancies: market.activeVacancies,
-                          employers: market.distinctEmployers,
-                          refreshedAt: market.lastRefreshedAt,
-                        }
-                      : null
-                  }
-                />
-                </div>
-              </section>
-            )}
+                supply={
+                  market.activeVacancies !== null && market.distinctEmployers !== null
+                    ? {
+                        vacancies: market.activeVacancies,
+                        employers: market.distinctEmployers,
+                        refreshedAt: market.lastRefreshedAt,
+                      }
+                    : null
+                }
+              />
+            </section>
+          </div>
 
-            {/* ── §17 THE MARKET, IN PLACES ─────────────────────────────
-                   Second, directly under the entry, because it answers the
-                   question a visitor has immediately after "what is this?" —
-                   *does it work where I am?* The canonical <MarketMap> draws
-                   the markets this product operates in, at real centroids,
-                   and says in words what it is NOT showing.
+          {/* THE CINEMATIC STORY: full-bleed, one stage, one set of entities. The
+              camera, focus and relationships change as the page scrolls; the
+              scenes run from a person to a company and back to the next chapter. */}
+          <div>
+            <CinematicStorySection audience="home" />
+          </div>
 
-                   The market PROOF renders INSIDE it. That is the §16 move:
-                   46k vacancies and 8k employers used to be a section of their
-                   own, which made the counts read as the product's definition.
-                   As evidence under the map they support the story instead of
-                   being it. Nothing was removed — same band, same canonical
-                   snapshot, same figures. ─────────────────────────────── */}
-            {/* ── THE MAP BAND IS WITHDRAWN FROM THE LANDING (owner decision
-                   2026-09-27). Its code and the map capability are UNTOUCHED:
-                   `public-market-map-band.tsx`, `<MarketMap>` and
-                   `publicCoverageView()` all still exist, and /dashboard/market-map
-                   is unaffected. It is simply no longer rendered to a visitor.
-
-                   WHY. The band could only draw `MARKET_COUNTRIES` centroids —
-                   markets the product serves, never activity, because the anon
-                   boundary publishes no country, region, city or coordinate. A
-                   map that cannot show work geography then needed THREE lines of
-                   copy to explain what its markers were not:
-                   "Darbo rinka egzistuoja tikrose vietose", "Žmonės, darbai ir
-                   poreikiai yra kažkur", "Tai rinkos, ne šios dienos veikla".
-                   That is the product explaining its own data model to a
-                   visitor, which is exactly what the owner banned — and a
-                   decorative map that requires an explanation is the thing the
-                   explanation was compensating for.
-
-                   NOTHING OF VALUE WAS REMOVED WITH IT. The market PROOF — the
-                   real vacancy and employer counts from the canonical snapshot —
-                   was already a self-contained `<section>` with its own heading;
-                   it just rendered inside the map band. It now stands on its own
-                   and carries the `#market` anchor the public nav links to.
-
-                   It comes back when it can show a visitor real opportunity
-                   geography, which is a boundary decision, not a copy change. */}
-            {/* TWO SIDES, ONE SPINE (premium completion 2026-10-02): the lifecycle
-                shared by professionals and companies — placed directly under
-                the entry, before the market proof. Presentation only. */}
-            <TwoSidesSection />
+          <div className="mx-auto max-w-container px-6 pb-14 sm:px-12">
+            <HomeSides />
 
             <MarketProofBand market={market} locale={locale} />
-
-            {/* ── REAL OPPORTUNITIES (owner directive 2026-09-23,
-                   PUBLIC_LANDING_REAL_JOB_DISCOVERY). Right after the market
-                   says it exists, a few of its real, current vacancies —
-                   the board's own first page through the board's own card,
-                   read once by the SAME snapshot reader above. Omitted when
-                   that read could not answer; never a placeholder. ───────── */}
             <LandingOpenJobsBand sample={market.sample} locale={activeLocale} />
-
-            {/* ── §20 STARTING CONTEXTS ─────────────────────────────────
-                   Moved UP, from the very bottom of a 4,967px page to the
-                   third screen. A visitor who does not want to type a sentence
-                   had to scroll past everything to find a door; §19 asks how
-                   long it takes before someone understands how to start, and
-                   the honest answer was "too long". Same five real
-                   destinations, reframed as contexts (§20). ────────────── */}
             <StartingContextsBand />
-
-            {/* ── The product chain — six links, journal as pivot. Carries
-                   the #how-it-works nav anchor.
-
-                   Now BELOW the map and the doors (§19). All six steps and all
-                   six bodies are intact — this is a change of order, not of
-                   content: the chain explains the product to someone who has
-                   decided to care, and it was standing between the entry and
-                   the reason to use it. ─────────────────────────────────── */}
             <div id="how-it-works" className="scroll-mt-24">
               <ProductChainBand />
             </div>
-
-            {/* ── Player Card: the real card, the real component (§19 — kept
-                   in full, moved down). It is the densest thing on the page and
-                   it belongs after the explanation it illustrates, not before
-                   it. ─────────────────────────────────────────────────── */}
             <PlayerCardShowcase />
-
-            {/* ── Trust & security — verifiable claims only ─────────────── */}
             <TrustBand />
-
-            {/* ── The page ends on what to do next, not on a claim ──────── */}
             <LandingClosingBand locale={locale} />
           </div>
         </main>
