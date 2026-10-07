@@ -17501,7 +17501,8 @@
         "invalid_email": "Geben Sie genau eine gültige E-Mail-Adresse ein",
         "needs_migration": "Derzeit nicht verfügbar"
       }
-    }
+    },
+    "openHistory": "Historie öffnen"
   },
   "peopleImport": {
     "alreadyThere": "{count} stehen bereits auf Ihrer Liste",
@@ -18147,7 +18148,8 @@
       "done": "{count} Einträge zugeordnet; {skipped} waren bereits zugeordnet.",
       "refused": "Das konnte nicht gespeichert werden. Nichts wurde geändert.",
       "person": "{hours} Std., {count, plural, one {# Eintrag} other {# Einträge}}"
-    }
+    },
+    "truncated": "Es gibt mehr Einträge, als eine Ansicht liest. Die {count} gelesenen werden angezeigt; Summen umfassen nur diese."
   },
   "workLifecycle": {
     "pending": "Noch nicht",
@@ -18319,5 +18321,47 @@
       "skills": "{count, plural, one {# Fähigkeit, gestützt auf deine Einträge} other {# Fähigkeiten, gestützt auf deine Einträge}}",
       "next": "Wohin du gehen kannst"
     }
+  },
+  "companyPerson": {
+    "eyebrow": "Historische Personenkarte",
+    "back": "Personen",
+    "badge": "Von der Organisation bereitgestellt, nicht unabhängig geprüft",
+    "provenance": "Das hat {name} zu dieser Person erfasst. Niemand sonst hat es bestätigt, und es hängt nicht davon ab, ob die Person ein Konto hat.",
+    "claim": {
+      "unlinked": "Noch nicht mit einem Konto verknüpft — die Historie ist hier bereits erfasst.",
+      "link_proposed": "Eine Verknüpfung mit einem Konto wurde angeboten und wartet auf die Antwort der Person — die Historie ist hier bereits erfasst.",
+      "linked": "Mit dem eigenen Konto der Person verknüpft.",
+      "openProfile": "Seite der Person öffnen"
+    },
+    "unavailable": "Die Historie dieser Person konnte gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
+    "empty": "Für diese Person sind noch keine Historieneinträge gespeichert. Das Lesen hat funktioniert — es gibt keine.",
+    "stats": {
+      "records": "Einträge",
+      "hours": "Stunden wie angegeben",
+      "period": "Zeitraum"
+    },
+    "noHours": "Einträge ohne angegebene Stunden: {count}. Unbekannte Stunden zählen nicht als null.",
+    "undated": "Einträge ohne angegebenes Datum: {count}. Sie bleiben in der Historie unten.",
+    "periodApart": "{hours} Std. der Summe sind Zeitraumsummen, getrennt gehalten und nie auf Tage oder Monate verteilt.",
+    "noWorkObject": "Einträge ohne Bezug zu einem der Plattform bekannten Projekt oder Ort: {count}. Sie bleiben unter ihrer Quellbezeichnung in dieser Historie.",
+    "places": {
+      "title": "Nach Projekt oder Ort",
+      "none": "Projekt oder Ort nicht erfasst",
+      "records": "Einträge: {count}"
+    },
+    "months": {
+      "title": "Angegebene Stunden pro Monat",
+      "note": "Nur Einträge für einzelne Tage. Zeitraumsummen werden nie auf Tage oder Monate verteilt."
+    },
+    "skills": {
+      "title": "Fähigkeiten, auf die die Historie hinweist",
+      "note": "Aus der Historie der Organisation abgeleitet, nicht verifiziert. Eine Fähigkeit steht hier, wenn die Organisation sie selbst genannt hat; es ist keine Aussage über die Person.",
+      "records": "Einträge: {count}",
+      "empty": "In diesen Einträgen wurde keine Fähigkeit genannt.",
+      "unavailable": "Fähigkeitssignale konnten gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
+      "truncated": "Es gibt mehr Fähigkeitssignale, als diese Ansicht liest."
+    },
+    "shown": "Angezeigt werden die neuesten {shown} von {total} Einträgen. Der Rest bleibt erfasst.",
+    "truncated": "Es gibt mehr Einträge, als eine Ansicht liest. Die {count} gelesenen werden angezeigt; Summen umfassen nur diese."
   }
 }

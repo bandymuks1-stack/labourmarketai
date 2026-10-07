@@ -6935,7 +6935,8 @@
       "done": "Piešķirti ieraksti: {count}; jau bija piešķirti: {skipped}.",
       "refused": "Neizdevās saglabāt. Nekas nav mainīts.",
       "person": "{hours} h, {count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}"
-    }
+    },
+    "truncated": "Ierakstu ir vairāk, nekā nolasa viens skats. Rāda nolasītos {count}; kopsummas ietver tikai tos."
   },
   "workLifecycle": {
     "pending": "Vēl nav",
@@ -7107,5 +7108,47 @@
       "skills": "{count, plural, zero {# jūsu ierakstos balstītu prasmju} one {# jūsu ierakstos balstīta prasme} other {# jūsu ierakstos balstītas prasmes}}",
       "next": "Kur varat doties"
     }
+  },
+  "companyPerson": {
+    "eyebrow": "Vēsturiskā personas kartīte",
+    "back": "Cilvēki",
+    "badge": "Organizācijas sniegts, neatkarīgi nepārbaudīts",
+    "provenance": "Tas ir tas, ko {name} ir reģistrējusi par šo personu. Neviens cits to nav apstiprinājis, un tas nav atkarīgs no tā, vai personai ir konts.",
+    "claim": {
+      "unlinked": "Vēl nav saistīts ar kontu — vēsture jau ir reģistrēta šeit.",
+      "link_proposed": "Saistīšana ar kontu ir piedāvāta un gaida personas atbildi — vēsture jau ir reģistrēta šeit.",
+      "linked": "Saistīts ar pašas personas kontu.",
+      "openProfile": "Atvērt personas lapu"
+    },
+    "unavailable": "Šīs personas vēsturi pašlaik neizdevās nolasīt. Tas nenozīmē, ka tās nav.",
+    "empty": "Šai personai vēl nav vēstures ierakstu. Nolasīšana izdevās — to nav.",
+    "stats": {
+      "records": "Ieraksti",
+      "hours": "Stundas, kā norādīts",
+      "period": "Periods"
+    },
+    "noHours": "Ieraksti bez norādītām stundām: {count}. Nezināmas stundas netiek skaitītas kā nulle.",
+    "undated": "Ieraksti bez norādīta datuma: {count}. Tie paliek vēsturē zemāk.",
+    "periodApart": "{hours} h no kopsummas ir perioda kopsummas, turētas atsevišķi un nekad nesadalītas pa dienām vai mēnešiem.",
+    "noWorkObject": "Ieraksti, kas nav saistīti ar platformai zināmu projektu vai vietu: {count}. Tie paliek šajā vēsturē ar avota nosaukumu.",
+    "places": {
+      "title": "Pēc projekta vai vietas",
+      "none": "Projekts vai vieta nav reģistrēta",
+      "records": "Ieraksti: {count}"
+    },
+    "months": {
+      "title": "Norādītās stundas pa mēnešiem",
+      "note": "Tikai vienas dienas ieraksti. Perioda kopsummas nekad netiek sadalītas pa dienām vai mēnešiem."
+    },
+    "skills": {
+      "title": "Prasmes, uz kurām norāda vēsture",
+      "note": "Atvasināts no organizācijas vēstures, nepārbaudīts. Prasme ir norādīta, ja to nosaukusi pati organizācija; tas nav apgalvojums par personu.",
+      "records": "Ieraksti: {count}",
+      "empty": "Šajos ierakstos nav nosaukta neviena prasme.",
+      "unavailable": "Prasmju signālus pašlaik neizdevās nolasīt. Tas nenozīmē, ka to nav.",
+      "truncated": "Prasmju signālu ir vairāk, nekā nolasa šis skats."
+    },
+    "shown": "Rāda jaunākos {shown} no {total} ierakstiem. Pārējie paliek reģistrēti.",
+    "truncated": "Ierakstu ir vairāk, nekā nolasa viens skats. Rāda nolasītos {count}; kopsummas ietver tikai tos."
   }
 }

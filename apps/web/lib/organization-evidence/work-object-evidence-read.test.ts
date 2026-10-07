@@ -12,7 +12,7 @@ type Result = { data?: unknown; error?: { code?: string } | null };
 /** A thenable query builder: every chained call returns itself, awaiting yields the result. */
 function builder(result: Result, calls: { in: [string, unknown][] }) {
   const b: Record<string, unknown> = {};
-  for (const m of ["select", "order", "limit", "eq"]) b[m] = () => b;
+  for (const m of ["select", "order", "limit", "range", "eq"]) b[m] = () => b;
   b.in = (col: string, v: unknown) => {
     calls.in.push([col, v]);
     return b;

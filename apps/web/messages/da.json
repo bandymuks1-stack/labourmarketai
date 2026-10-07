@@ -6935,7 +6935,8 @@
       "done": "{count} poster tilskrevet; {skipped} var allerede tilskrevet.",
       "refused": "Dette kunne ikke gemmes. Intet er ændret.",
       "person": "{hours} t, {count, plural, one {# post} other {# poster}}"
-    }
+    },
+    "truncated": "Der findes flere poster, end én visning læser. De {count} læste vises; summer dækker kun dem."
   },
   "workLifecycle": {
     "pending": "Endnu ikke",
@@ -7107,5 +7108,47 @@
       "skills": "{count, plural, one {# færdighed baseret på dine registreringer} other {# færdigheder baseret på dine registreringer}}",
       "next": "Hvor du kan gå hen"
     }
+  },
+  "companyPerson": {
+    "eyebrow": "Historisk personkort",
+    "back": "Personer",
+    "badge": "Leveret af organisationen, ikke uafhængigt verificeret",
+    "provenance": "Det er, hvad {name} har registreret om denne person. Ingen andre har bekræftet det, og det afhænger ikke af, om personen har en konto.",
+    "claim": {
+      "unlinked": "Endnu ikke knyttet til en konto — historikken er allerede registreret her.",
+      "link_proposed": "En kobling til en konto er tilbudt og afventer personens svar — historikken er allerede registreret her.",
+      "linked": "Knyttet til personens egen konto.",
+      "openProfile": "Åbn personens side"
+    },
+    "unavailable": "Personens historik kunne ikke læses lige nu. Det betyder ikke, at der ingen er.",
+    "empty": "Der er endnu ingen historikposter for denne person. Læsningen lykkedes — der er ingen.",
+    "stats": {
+      "records": "Poster",
+      "hours": "Timer som angivet",
+      "period": "Periode"
+    },
+    "noHours": "Poster uden angivne timer: {count}. Ukendte timer tælles ikke som nul.",
+    "undated": "Poster uden angivet dato: {count}. De bliver i historikken nedenfor.",
+    "periodApart": "{hours} t af summen er periodesummer, holdt adskilt og aldrig fordelt på dage eller måneder.",
+    "noWorkObject": "Poster uden tilknytning til et projekt eller sted, platformen kender: {count}. De bliver i denne historik under deres kildebetegnelse.",
+    "places": {
+      "title": "Efter projekt eller sted",
+      "none": "Projekt eller sted ikke registreret",
+      "records": "Poster: {count}"
+    },
+    "months": {
+      "title": "Angivne timer pr. måned",
+      "note": "Kun poster for enkeltdage. Periodesummer fordeles aldrig på dage eller måneder."
+    },
+    "skills": {
+      "title": "Færdigheder, historikken peger på",
+      "note": "Udledt af organisationens historik, ikke verificeret. En færdighed vises, når organisationen selv har nævnt den; det er ikke en påstand om personen.",
+      "records": "Poster: {count}",
+      "empty": "Ingen færdighed er nævnt i disse poster.",
+      "unavailable": "Færdighedssignaler kunne ikke læses lige nu. Det betyder ikke, at der ingen er.",
+      "truncated": "Der er flere færdighedssignaler, end denne visning læser."
+    },
+    "shown": "Viser de nyeste {shown} af {total} poster. Resten forbliver registreret.",
+    "truncated": "Der findes flere poster, end én visning læser. De {count} læste vises; summer dækker kun dem."
   }
 }

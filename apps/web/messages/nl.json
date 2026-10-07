@@ -17501,7 +17501,8 @@
         "invalid_email": "Voer één geldig e-mailadres in",
         "needs_migration": "Nu niet beschikbaar"
       }
-    }
+    },
+    "openHistory": "Open geschiedenis"
   },
   "peopleImport": {
     "alreadyThere": "{count} staan al op je lijst",
@@ -18147,7 +18148,8 @@
       "done": "{count} registraties toegewezen; {skipped} waren al toegewezen.",
       "refused": "Dit kon niet worden opgeslagen. Er is niets gewijzigd.",
       "person": "{hours} u, {count, plural, one {# registratie} other {# registraties}}"
-    }
+    },
+    "truncated": "Er zijn meer records dan één weergave leest. De {count} gelezen records worden getoond; totalen omvatten alleen die."
   },
   "workLifecycle": {
     "pending": "Nog niet",
@@ -18319,5 +18321,47 @@
       "skills": "{count, plural, one {# vaardigheid gebaseerd op jouw registraties} other {# vaardigheden gebaseerd op jouw registraties}}",
       "next": "Waar je heen kunt"
     }
+  },
+  "companyPerson": {
+    "eyebrow": "Historische persoonskaart",
+    "back": "Mensen",
+    "badge": "Aangeleverd door de organisatie, niet onafhankelijk geverifieerd",
+    "provenance": "Dit is wat {name} over deze persoon heeft vastgelegd. Niemand anders heeft het bevestigd, en het hangt er niet van af of de persoon een account heeft.",
+    "claim": {
+      "unlinked": "Nog niet gekoppeld aan een account — de geschiedenis staat hier al vastgelegd.",
+      "link_proposed": "Een koppeling met een account is aangeboden en wacht op het antwoord van de persoon — de geschiedenis staat hier al vastgelegd.",
+      "linked": "Gekoppeld aan het eigen account van de persoon.",
+      "openProfile": "Open de pagina van de persoon"
+    },
+    "unavailable": "De geschiedenis van deze persoon kon nu niet worden gelezen. Dat betekent niet dat er geen is.",
+    "empty": "Er zijn nog geen geschiedenisrecords voor deze persoon. Het lezen is gelukt — er zijn er geen.",
+    "stats": {
+      "records": "Records",
+      "hours": "Uren zoals opgegeven",
+      "period": "Periode"
+    },
+    "noHours": "Records zonder opgegeven uren: {count}. Onbekende uren tellen niet als nul.",
+    "undated": "Records zonder opgegeven datum: {count}. Ze blijven in de geschiedenis hieronder.",
+    "periodApart": "{hours} u van het totaal zijn periodetotalen, apart gehouden en nooit verdeeld over dagen of maanden.",
+    "noWorkObject": "Records die niet aan een bij het platform bekend project of bekende plek zijn gekoppeld: {count}. Ze blijven in deze geschiedenis onder hun bronlabel.",
+    "places": {
+      "title": "Per project of plek",
+      "none": "Project of plek niet vastgelegd",
+      "records": "Records: {count}"
+    },
+    "months": {
+      "title": "Opgegeven uren per maand",
+      "note": "Alleen records van één dag. Periodetotalen worden nooit verdeeld over dagen of maanden."
+    },
+    "skills": {
+      "title": "Vaardigheden waar de geschiedenis naar wijst",
+      "note": "Afgeleid van de geschiedenis van de organisatie, niet geverifieerd. Een vaardigheid staat er wanneer de organisatie die zelf noemde; het is geen uitspraak over de persoon.",
+      "records": "Records: {count}",
+      "empty": "In deze records is geen vaardigheid genoemd.",
+      "unavailable": "Vaardigheidssignalen konden nu niet worden gelezen. Dat betekent niet dat ze er niet zijn.",
+      "truncated": "Er zijn meer vaardigheidssignalen dan deze weergave leest."
+    },
+    "shown": "De nieuwste {shown} van {total} records worden getoond. De rest blijft vastgelegd.",
+    "truncated": "Er zijn meer records dan één weergave leest. De {count} gelezen records worden getoond; totalen omvatten alleen die."
   }
 }
