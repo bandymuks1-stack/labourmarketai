@@ -7166,5 +7166,12 @@
     },
     "shown": "Visar de senaste {shown} av {total} posterna. Resten finns kvar i registret.",
     "truncated": "Det finns fler poster än en vy läser. De {count} lästa visas; summorna omfattar bara dem."
+  },
+  "recognisedBy": {
+    "title": "Erkänt av en institution",
+    "recognisedBy": "Erkänt av {institution}",
+    "recognisedByUnnamed": "Erkänt av en bedömande institution",
+    "validUntil": "giltigt till {date}",
+    "note": "En oberoende bedömare har beslutat att ditt visade arbete motsvarar detta. Det är inte en arbetsgivares bekräftelse och inte ett betyg."
   }
 }

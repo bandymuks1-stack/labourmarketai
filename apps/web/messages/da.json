@@ -7166,5 +7166,12 @@
     },
     "shown": "Viser de nyeste {shown} af {total} poster. Resten forbliver registreret.",
     "truncated": "Der findes flere poster, end én visning læser. De {count} læste vises; summer dækker kun dem."
+  },
+  "recognisedBy": {
+    "title": "Anerkendt af en institution",
+    "recognisedBy": "Anerkendt af {institution}",
+    "recognisedByUnnamed": "Anerkendt af en vurderende institution",
+    "validUntil": "gyldig til {date}",
+    "note": "En uafhængig bedømmer har afgjort, at dit viste arbejde svarer hertil. Det er ikke en arbejdsgivers bekræftelse og ikke en score."
   }
 }

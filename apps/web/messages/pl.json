@@ -18638,5 +18638,12 @@
     "stateNotYetValid": "Uznano, jeszcze nieważne",
     "validFrom": "od {date}",
     "validUntil": "do {date}"
+  },
+  "recognisedBy": {
+    "title": "Uznane przez instytucję",
+    "recognisedBy": "Uznane przez: {institution}",
+    "recognisedByUnnamed": "Uznane przez instytucję oceniającą",
+    "validUntil": "ważne do {date}",
+    "note": "Niezależny oceniający uznał, że pokazana praca spełnia ten wymóg. To nie jest potwierdzenie pracodawcy ani ocena punktowa."
   }
 }

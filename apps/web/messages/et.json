@@ -7166,5 +7166,12 @@
     },
     "shown": "Näidatakse uusimat {shown} kirjet {total}-st. Ülejäänud jäävad registrisse.",
     "truncated": "Kirjeid on rohkem, kui üks vaade loeb. Näidatakse loetud {count}; summad hõlmavad ainult neid."
+  },
+  "recognisedBy": {
+    "title": "Asutuse tunnustatud",
+    "recognisedBy": "Tunnustanud: {institution}",
+    "recognisedByUnnamed": "Tunnustanud hindav asutus",
+    "validUntil": "kehtib kuni {date}",
+    "note": "Sõltumatu hindaja otsustas, et teie näidatud töö vastab sellele. See ei ole tööandja kinnitus ega hinne."
   }
 }

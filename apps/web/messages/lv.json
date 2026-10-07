@@ -7166,5 +7166,12 @@
     },
     "shown": "Rāda jaunākos {shown} no {total} ierakstiem. Pārējie paliek reģistrēti.",
     "truncated": "Ierakstu ir vairāk, nekā nolasa viens skats. Rāda nolasītos {count}; kopsummas ietver tikai tos."
+  },
+  "recognisedBy": {
+    "title": "Iestādes atzīts",
+    "recognisedBy": "Atzinusi: {institution}",
+    "recognisedByUnnamed": "Atzinusi vērtējošā iestāde",
+    "validUntil": "derīgs līdz {date}",
+    "note": "Neatkarīgs vērtētājs nolēma, ka jūsu parādītais darbs atbilst šai prasībai. Tas nav darba devēja apstiprinājums un nav vērtējums."
   }
 }

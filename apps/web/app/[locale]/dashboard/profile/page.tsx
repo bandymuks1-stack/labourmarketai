@@ -19,6 +19,7 @@ import {
   supportedSkillIds,
   type EntrySkillLinkRow,
 } from "@/lib/journal/journal-entry-skills";
+import { RecognisedByBlock } from "@/components/app/recognised-by-block";
 import { CapabilityProfileSection } from "@/components/app/capability-profile-section";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { SkillClarifySection } from "@/components/app/skill-clarify-section";
@@ -1536,6 +1537,7 @@ export default async function ProfilePage({
             skillPresentation={workerId ? skillPresentation : null}
             professionIconSlug={workerId ? professionIconSlug : null}
           />
+          <RecognisedByBlock profileId={user.id} variant="profile" locale={locale} />
           {/* Candidate skill clarify-capture (slice skill-clarify-capture-v1)
               — on the canonical capability surface, NOT a new route.
               Worker-only. It stood OPEN after this disclosure as a four-field
