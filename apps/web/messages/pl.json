@@ -1932,7 +1932,36 @@
         "unavailable": "Nie udało się teraz wczytać programów. Odśwież stronę — nic z tego, co utworzyłeś, nie zostało utracone.",
         "inviteLearners": "Zaproś uczestników",
         "exportReport": "Pobierz raport (CSV)",
-        "exportReportHint": "Programy, grupy, liczba uczestników i aktualny popyt — a także wyniki Twoich uczestników. Liczby, których nie znamy, są zapisywane jako nieznane, nigdy jako zero."
+        "exportReportHint": "Programy, grupy, liczba uczestników i aktualny popyt — a także wyniki Twoich uczestników. Liczby, których nie znamy, są zapisywane jako nieznane, nigdy jako zero.",
+        "unassignedLearners": "Przyjęci uczestnicy, którzy nie należą jeszcze do żadnej grupy: {count}. Przypisz ich powyżej do grupy.",
+        "recognition": {
+          "title": "Zapisz uznanie",
+          "hint": "Decyzja niezależnego oceniającego, że wykazane kompetencje osoby spełniają formalne wymaganie. To nie jest certyfikat i nigdy nie powstaje wyłącznie z dowodów pracy.",
+          "pending": "Zapisywanie uznań nie jest jeszcze dostępne: rejestr za nim nie został jeszcze udostępniony. Do tego czasu zgłoszenie jest odrzucane, a nie zapisywane.",
+          "subject": "Uczestnik",
+          "chooseSubject": "Wybierz uczestnika",
+          "kind": "Rodzaj wymagania",
+          "kindDocument": "Typ dokumentu",
+          "kindSkill": "Umiejętność",
+          "kindProfession": "Zawód",
+          "key": "Klucz wymagania (slug)",
+          "country": "Kraj (2 litery)",
+          "evidence": "ID wpisów dowodowych",
+          "evidenceHint": "ID wpisów dziennika dotyczących pracy uczestnika, oddzielone przecinkami. Rejestr przyjmuje tylko wpisy zatwierdzone przez drugą osobę.",
+          "decision": "Decyzja",
+          "recognised": "Uznano",
+          "notRecognised": "Nie uznano",
+          "validFrom": "Ważne od",
+          "validUntil": "Ważne do",
+          "note": "Notatka oceniającego",
+          "submit": "Zapisz decyzję",
+          "saving": "Zapisywanie…",
+          "ok": "Uznanie zapisane.",
+          "needsMigration": "Nie zapisano: rejestr uznań nie jest jeszcze dostępny.",
+          "forbidden": "Ta instytucja nie może zapisać tego uznania dla tej osoby.",
+          "invalid": "Sprawdź wartości.",
+          "error": "Coś poszło nie tak. Spróbuj ponownie."
+        }
       },
       "learners": {
         "title": "Uczestnicy",
@@ -18377,5 +18406,21 @@
     },
     "shown": "Pokazano najnowsze {shown} z {total} wpisów. Pozostałe zostają zapisane.",
     "truncated": "Wpisów jest więcej, niż odczytuje jeden widok. Pokazano odczytane {count}; sumy obejmują tylko je."
+  },
+  "qualificationRecognitions": {
+    "title": "Uznania",
+    "subtitle": "Decyzje niezależnych oceniających, że wykazane przez Ciebie kompetencje spełniają formalne wymaganie. To nie jest certyfikat ani kontrola Twojej pracy.",
+    "empty": "Nie zapisano jeszcze żadnego uznania.",
+    "unavailable": "Nie można teraz odczytać uznań. To nie to samo, co ich brak.",
+    "kindDocument": "Typ dokumentu",
+    "kindSkill": "Umiejętność",
+    "kindProfession": "Zawód",
+    "stateCurrent": "Uznano, ważne",
+    "stateLapsed": "Uznano, ważność wygasła",
+    "stateNotRecognised": "Oceniono, nie uznano",
+    "stateRevoked": "Cofnięte przez oceniającego",
+    "stateNotYetValid": "Uznano, jeszcze nieważne",
+    "validFrom": "od {date}",
+    "validUntil": "do {date}"
   }
 }
