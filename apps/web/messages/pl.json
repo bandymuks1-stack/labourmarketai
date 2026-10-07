@@ -7339,6 +7339,21 @@
         "compared": "Porównano",
         "interest": "Zainteresowanie"
       }
+    },
+    "funnel": {
+      "notMeasured": "Jeszcze niemierzone",
+      "unavailable": "Niedostępne (odczyt nie powiódł się)",
+      "unavailableBanner": "Nie udało się odczytać lejka z magazynu zdarzeń. Wszystkie poniższe liczby są niedostępne. To nieudany odczyt, a nie zmierzone zero.",
+      "rateNotMeasured": "Jeszcze niemierzone",
+      "reason": {
+        "usefulUndefined": "Nie istnieje jeszcze definicja „użyteczności”, więc liczone są tylko częściowe zdarzenia ukończenia wdrożenia i utworzenia organizacji.",
+        "offerSide": "Żadne zdarzenie nie rejestruje strony oferty w parze potrzeba / oferta, więc ten etap nie ma źródła.",
+        "commercialValue": "Żadne zdarzenie ani źródło nie rejestruje wartości komercyjnej.",
+        "trial": "Żadne zdarzenie ani źródło nie rejestruje okresu próbnego.",
+        "paidConversion": "Żadne zdarzenie ani źródło nie rejestruje płatnej konwersji.",
+        "retention": "return_visit_detected jest zdefiniowane, ale nie jest wczytywane do tego lejka, a miara ponownego użycia nie istnieje."
+      },
+      "aiHelp": "Własna księgowość AI: wiersze audytu na uruchomienie (ai_runs, USD z zatwierdzonej tabeli cen) oraz kanoniczny rejestr użycia w eurocentach (usage_cost_events). Liczby pochodzą z bieżących odczytów obu tabel. Tabela, której nie da się odczytać, jest pokazana jako kreska (niedostępne), nigdy jako 0, a nieznany koszt również jako kreska."
     }
   },
   "languageFeedback": {

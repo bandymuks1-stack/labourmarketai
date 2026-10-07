@@ -7339,6 +7339,21 @@
         "compared": "Palyginta",
         "interest": "Pareikšta susidomėjimo"
       }
+    },
+    "funnel": {
+      "notMeasured": "Dar neišmatuota",
+      "unavailable": "Nepasiekiama (skaitymas nepavyko)",
+      "unavailableBanner": "Piltuvėlio nepavyko nuskaityti iš įvykių saugyklos. Visi žemiau esantys skaičiai nepasiekiami. Tai nepavykęs skaitymas, o ne išmatuotas nulis.",
+      "rateNotMeasured": "Dar neišmatuota",
+      "reason": {
+        "usefulUndefined": "Kol kas nėra „naudingo“ apibrėžimo, todėl skaičiuojami tik dalinis registracijos užbaigimo ir organizacijos sukūrimo įvykiai.",
+        "offerSide": "Joks įvykis neregistruoja poreikio / pasiūlymo pasiūlymo pusės, todėl šis etapas neturi šaltinio.",
+        "commercialValue": "Joks įvykis ar šaltinis neregistruoja komercinės vertės.",
+        "trial": "Joks įvykis ar šaltinis neregistruoja bandomojo laikotarpio.",
+        "paidConversion": "Joks įvykis ar šaltinis neregistruoja mokamo perėjimo.",
+        "retention": "return_visit_detected apibrėžtas, bet į šį piltuvėlį neįtrauktas, o pakartotinio naudojimo rodiklio nėra."
+      },
+      "aiHelp": "Pirmosios šalies DI apskaita: kiekvieno paleidimo auditas (ai_runs, USD pagal peržiūrėtą kainoraštį) ir kanoninis naudojimo žurnalas eurocentais (usage_cost_events). Skaičiai gaunami tiesiogiai skaitant abi lenteles. Lentelė, kurios nepavyksta nuskaityti, rodoma brūkšneliu (nepasiekiama), o ne 0; nežinoma kaina taip pat rodoma brūkšneliu."
     }
   },
   "languageFeedback": {
