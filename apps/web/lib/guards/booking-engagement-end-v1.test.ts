@@ -1522,6 +1522,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // owner 2026-10-01 (#2065 APPROVED in chat): board reads without parallel workers; drop the unused 129 MB GIN.
       "20261001180000_public_vacancy_board_no_parallel_v1.sql",
       "20261001180100_drop_unused_vacancy_fulltext_gin_v1.sql",
+      // owner approval PENDING (stream L): search function plpgsql branches so a rare profession is index-driven.
+      "20261001200100_search_public_vacancy_previews_plan_v3.sql",
       "20261002120000_journal_explicit_project_attribution_v1.sql",
       // 2026-10-03: SECURITY forward-fix (NULL-safe authorization guards, auth-core) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261002141500_work_task_authz_null_safe_v1.sql",
@@ -1537,6 +1539,10 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-03: PER-12 subject-safe export projection (new SECURITY DEFINER read fn) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261003120000_privacy_export_import_lines_subject_v1.sql",
       "20261003140000_subject_contest_withdraw_constraint_reconcile_v1.sql",
+      // 2026-10-03: ORG-2 agency capability authority (RED, needs-human-gate, NOT applied): list_open_demand_for_agencies / mark_agency_can_offer / job_demands_select re-gated on owns_company + company_acts_as_agency.
+      "20261003150000_org2_agency_capability_authority_v1.sql",
+      // 2026-10-04: ai_runs retention classes v2 (SECURITY DEFINER sweep/erasure/export, GRANT, BEFORE UPDATE trigger) — marker is the risk acknowledgement, NOT approval; PR is draft + needs-human-gate, NOT applied.
+      "20261003150800_ai_runs_retention_classes_v2.sql",
       // 2026-10-04: verified-email boundary (WORKER_REGISTRATION_FRICTION_REMOVAL, #2152). The marker is a risk acknowledgement, not approval.
       "20261003151000_email_verified_boundary_v1.sql",
       // 2026-10-04: staff-invitation e-mail binding (token doors refuse an addressed invitation to another e-mail; SECURITY DEFINER bodies) — marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
