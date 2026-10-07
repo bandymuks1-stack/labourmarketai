@@ -23,6 +23,7 @@ import {
 import {
   invoiceBillingReason,
   invoiceHadPayment,
+  isTrialStart,
   shouldEmitBillingFunnel,
 } from "@/lib/billing/billing-funnel";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
@@ -126,6 +127,7 @@ export async function POST(req: Request) {
   // reported "ok" (never on stale-event, error, throw or a duplicate).
   let funnelSubscriptionStarted = false;
   let funnelInvoicePaid: ReturnType<typeof invoiceBillingReason> | null = null;
+  let funnelTrialStarted = false;
   try {
     if (event.type === "checkout.session.completed") {
       const linked = await applyCheckoutLink(event.object, {
@@ -156,6 +158,7 @@ export async function POST(req: Request) {
         deleted: event.type === "customer.subscription.deleted",
       });
       if (applied !== null) result = applied;
+      if (isTrialStart(event.type, event.object)) funnelTrialStarted = true;
     } else if (
       event.type === "invoice.paid" ||
       event.type === "invoice.payment_succeeded" ||
@@ -195,6 +198,13 @@ export async function POST(req: Request) {
       // ids, amounts or customer data in the payload.
       if (funnelSubscriptionStarted) {
         emitServerFunnelEvent(FUNNEL_EVENTS.subscriptionStarted, {
+          source: "billing-webhook",
+          route: "/api/billing/webhook",
+          metadata: { surface: "billing_webhook", success: true },
+        });
+      }
+      if (funnelTrialStarted) {
+        emitServerFunnelEvent(FUNNEL_EVENTS.trialStarted, {
           source: "billing-webhook",
           route: "/api/billing/webhook",
           metadata: { surface: "billing_webhook", success: true },
