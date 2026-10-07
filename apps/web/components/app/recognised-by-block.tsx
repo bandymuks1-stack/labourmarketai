@@ -1,7 +1,7 @@
 import { getFormatter, getTranslations } from "next-intl/server";
 
 import { getOwnRecognisedByRows } from "@/lib/qualification/capability-evidence";
-import { deriveRecognisedByItems } from "@/lib/qualification/recognised-by-view";
+import { deriveRecognisedByItems, type RecognisedByItem } from "@/lib/qualification/recognised-by-view";
 
 /**
  * "RECOGNISED BY <institution>" on the person's OWN profile and Living CV
@@ -31,7 +31,25 @@ export async function RecognisedByBlock({
     new Date().toISOString().slice(0, 10),
   );
   if (items.length === 0) return null;
+  return <RecognisedByList items={items} variant={variant} locale={locale} audience="self" />;
+}
 
+/**
+ * The presentational list, shared by the person's own surfaces (`self`) and the
+ * company-side person page (`viewer`). Only the closing sentence differs: each
+ * audience is told, in its own terms, what this is NOT.
+ */
+export async function RecognisedByList({
+  items,
+  variant,
+  locale,
+  audience,
+}: {
+  readonly items: readonly RecognisedByItem[];
+  readonly variant: "profile" | "cv";
+  readonly locale: string;
+  readonly audience: "self" | "viewer";
+}) {
   const t = await getTranslations("recognisedBy");
   const tSkill = await getTranslations("skillNames");
   const tProf = await getTranslations("professions");
@@ -47,10 +65,18 @@ export async function RecognisedByBlock({
       className="flex flex-col gap-2 scroll-mt-20"
       data-testid="recognised-by"
       data-variant={variant}
+      data-audience={audience}
       data-evidence-class="assessor_recognition"
       aria-labelledby="recognised-by-title"
     >
-      <h2 id="recognised-by-title" className={variant === "cv" ? "font-display text-lg font-bold" : "font-display text-base font-semibold text-text-primary"}>
+      <h2
+        id="recognised-by-title"
+        className={
+          variant === "cv"
+            ? "font-display text-lg font-bold"
+            : "font-display text-base font-semibold text-text-primary"
+        }
+      >
         {t("title")}
       </h2>
       <ul className="flex flex-col gap-1.5">
@@ -61,12 +87,14 @@ export async function RecognisedByBlock({
               {i.institutionName
                 ? t("recognisedBy", { institution: i.institutionName })
                 : t("recognisedByUnnamed")}
-              {i.validUntil ? ` · ${t("validUntil", { date: fmt.dateTime(new Date(i.validUntil), { dateStyle: "medium" }) })}` : ""}
+              {i.validUntil
+                ? ` · ${t("validUntil", { date: fmt.dateTime(new Date(i.validUntil), { dateStyle: "medium" }) })}`
+                : ""}
             </span>
           </li>
         ))}
       </ul>
-      <p className="text-meta text-text-muted">{t("note")}</p>
+      <p className="text-meta text-text-muted">{t(audience === "self" ? "note" : "noteViewer")}</p>
     </section>
   );
 }

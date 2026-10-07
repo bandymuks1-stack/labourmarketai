@@ -18763,6 +18763,7 @@
     "recognisedBy": "Pripažino {institution}",
     "recognisedByUnnamed": "Pripažino vertinanti institucija",
     "validUntil": "galioja iki {date}",
-    "note": "Nepriklausomas vertintojas nusprendė, kad jūsų parodytas darbas atitinka šį reikalavimą. Tai nėra darbdavio patvirtinimas ir ne įvertis."
+    "note": "Nepriklausomas vertintojas nusprendė, kad jūsų parodytas darbas atitinka šį reikalavimą. Tai nėra darbdavio patvirtinimas ir ne įvertis.",
+    "noteViewer": "Nepriklausomas vertintojas nusprendė, kad šio asmens parodytas darbas atitinka šį reikalavimą. Tai nėra darbdavio atlikto darbo patvirtinimas, ne įvertis ir jis nekeičia jokio reitingo."
   }
 }

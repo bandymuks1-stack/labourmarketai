@@ -18763,6 +18763,7 @@
     "recognisedBy": "Anerkannt durch {institution}",
     "recognisedByUnnamed": "Anerkannt durch eine bewertende Einrichtung",
     "validUntil": "gültig bis {date}",
-    "note": "Eine unabhängige Prüfstelle hat entschieden, dass Ihre gezeigte Arbeit dies erfüllt. Das ist keine Bestätigung durch einen Arbeitgeber und keine Bewertung."
+    "note": "Eine unabhängige Prüfstelle hat entschieden, dass Ihre gezeigte Arbeit dies erfüllt. Das ist keine Bestätigung durch einen Arbeitgeber und keine Bewertung.",
+    "noteViewer": "Eine unabhängige Prüfstelle hat entschieden, dass die gezeigte Arbeit dieser Person dies erfüllt. Das ist keine Bestätigung durch einen Arbeitgeber, keine Bewertung und ändert kein Ranking."
   }
 }

@@ -18763,6 +18763,7 @@
     "recognisedBy": "Recognised by {institution}",
     "recognisedByUnnamed": "Recognised by an assessing institution",
     "validUntil": "valid until {date}",
-    "note": "An independent assessor decided that your work answers this. It is not confirmation of your work by an employer and it is not a score."
+    "note": "An independent assessor decided that your work answers this. It is not confirmation of your work by an employer and it is not a score.",
+    "noteViewer": "An independent assessor decided that this person's work answers this. It is not confirmation of the work by an employer, it is not a score and it does not change any ranking."
   }
 }
