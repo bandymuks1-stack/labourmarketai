@@ -6935,7 +6935,8 @@
       "done": "Omistatud kirjeid: {count}; juba omistatud: {skipped}.",
       "refused": "Salvestamine ebaõnnestus. Midagi ei muudetud.",
       "person": "{hours} h, {count, plural, one {# kirje} other {# kirjet}}"
-    }
+    },
+    "truncated": "Kirjeid on rohkem, kui üks vaade loeb. Näidatakse loetud {count}; summad hõlmavad ainult neid."
   },
   "workLifecycle": {
     "pending": "Veel mitte",
@@ -7107,5 +7108,47 @@
       "skills": "{count, plural, one {# sinu kirjetel põhinev oskus} other {# sinu kirjetel põhinevat oskust}}",
       "next": "Kuhu saad edasi minna"
     }
+  },
+  "companyPerson": {
+    "eyebrow": "Ajalooline isikukaart",
+    "back": "Inimesed",
+    "badge": "Organisatsiooni esitatud, sõltumatult kontrollimata",
+    "provenance": "See on, mida {name} on selle isiku kohta registreerinud. Keegi teine pole seda kinnitanud ja see ei sõltu sellest, kas isikul on konto.",
+    "claim": {
+      "unlinked": "Pole veel kontoga seotud — ajalugu on siin juba registreeritud.",
+      "link_proposed": "Kontoga sidumist on pakutud ja see ootab isiku vastust — ajalugu on siin juba registreeritud.",
+      "linked": "Seotud isiku enda kontoga.",
+      "openProfile": "Ava isiku leht"
+    },
+    "unavailable": "Selle isiku ajalugu ei õnnestunud praegu lugeda. See ei tähenda, et seda poleks.",
+    "empty": "Sellel isikul pole veel ajalookirjeid. Lugemine õnnestus — kirjeid pole.",
+    "stats": {
+      "records": "Kirjed",
+      "hours": "Tunnid nagu märgitud",
+      "period": "Periood"
+    },
+    "noHours": "Kirjed, kus tunde pole märgitud: {count}. Teadmata tunde ei loeta nulliks.",
+    "undated": "Kirjed ilma märgitud kuupäevata: {count}. Need jäävad allolevasse ajalukku.",
+    "periodApart": "{hours} t kogusummast on perioodisummad, hoitud eraldi ja mitte kunagi jaotatud päevadele ega kuudele.",
+    "noWorkObject": "Kirjed, mis pole seotud platvormile tuntud projekti ega kohaga: {count}. Need jäävad sellesse ajalukku allika nime all.",
+    "places": {
+      "title": "Projekti või koha järgi",
+      "none": "Projekti või kohta pole registreeritud",
+      "records": "Kirjed: {count}"
+    },
+    "months": {
+      "title": "Märgitud tunnid kuude kaupa",
+      "note": "Ainult ühe päeva kirjed. Perioodisummasid ei jaotata kunagi päevadele ega kuudele."
+    },
+    "skills": {
+      "title": "Oskused, millele ajalugu viitab",
+      "note": "Tuletatud organisatsiooni ajaloost, kontrollimata. Oskus on loetletud, kui organisatsioon ise seda nimetas; see ei ole väide isiku kohta.",
+      "records": "Kirjed: {count}",
+      "empty": "Neis kirjetes pole ühtegi oskust nimetatud.",
+      "unavailable": "Oskussignaale ei õnnestunud praegu lugeda. See ei tähenda, et neid poleks.",
+      "truncated": "Oskussignaale on rohkem, kui see vaade loeb."
+    },
+    "shown": "Näidatakse uusimat {shown} kirjet {total}-st. Ülejäänud jäävad registrisse.",
+    "truncated": "Kirjeid on rohkem, kui üks vaade loeb. Näidatakse loetud {count}; summad hõlmavad ainult neid."
   }
 }

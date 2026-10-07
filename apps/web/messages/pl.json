@@ -17515,7 +17515,8 @@
         "invalid_email": "Podaj jeden prawidłowy adres e-mail",
         "needs_migration": "Chwilowo niedostępne"
       }
-    }
+    },
+    "openHistory": "Otwórz historię"
   },
   "peopleImport": {
     "alreadyThere": "{count} jest już na Twojej liście",
@@ -18161,7 +18162,8 @@
       "done": "Przypisano wpisów: {count}; już przypisanych: {skipped}.",
       "refused": "Nie udało się zapisać. Nic nie zmieniono.",
       "person": "{hours} godz., {count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}"
-    }
+    },
+    "truncated": "Wpisów jest więcej, niż odczytuje jeden widok. Pokazano odczytane {count}; sumy obejmują tylko je."
   },
   "workLifecycle": {
     "pending": "Jeszcze nie",
@@ -18333,5 +18335,47 @@
       "skills": "{count, plural, one {# umiejętność oparta na Twoich wpisach} few {# umiejętności oparte na Twoich wpisach} many {# umiejętności opartych na Twoich wpisach} other {# umiejętności opartej na Twoich wpisach}}",
       "next": "Dokąd możesz przejść"
     }
+  },
+  "companyPerson": {
+    "eyebrow": "Historyczna karta osoby",
+    "back": "Osoby",
+    "badge": "Dostarczone przez organizację, niezależnie niezweryfikowane",
+    "provenance": "To, co {name} ma zapisane o tej osobie. Nikt inny tego nie potwierdził i nie zależy to od tego, czy osoba ma konto.",
+    "claim": {
+      "unlinked": "Jeszcze niepowiązane z kontem — historia jest już tu zapisana.",
+      "link_proposed": "Zaproponowano powiązanie z kontem i czeka na odpowiedź osoby — historia jest już tu zapisana.",
+      "linked": "Powiązane z własnym kontem osoby.",
+      "openProfile": "Otwórz stronę osoby"
+    },
+    "unavailable": "Nie udało się teraz odczytać historii tej osoby. To nie znaczy, że jej nie ma.",
+    "empty": "Dla tej osoby nie ma jeszcze zapisów historii. Odczyt się udał — nie ma ich.",
+    "stats": {
+      "records": "Wpisy",
+      "hours": "Godziny jak podano",
+      "period": "Okres"
+    },
+    "noHours": "Wpisy bez podanych godzin: {count}. Nieznane godziny nie są liczone jako zero.",
+    "undated": "Wpisy bez podanej daty: {count}. Zostają w historii poniżej.",
+    "periodApart": "{hours} godz. z sumy to sumy za okres, trzymane osobno i nigdy nierozdzielane na dni ani miesiące.",
+    "noWorkObject": "Wpisy niepowiązane z projektem ani miejscem znanym platformie: {count}. Zostają w tej historii pod nazwą źródła.",
+    "places": {
+      "title": "Według projektu lub miejsca",
+      "none": "Projekt lub miejsce niezapisane",
+      "records": "Wpisy: {count}"
+    },
+    "months": {
+      "title": "Podane godziny według miesięcy",
+      "note": "Tylko wpisy jednodniowe. Sum za okres nigdy nie rozdziela się na dni ani miesiące."
+    },
+    "skills": {
+      "title": "Umiejętności, na które wskazuje historia",
+      "note": "Wyprowadzone z historii organizacji, niezweryfikowane. Umiejętność jest podana, gdy nazwała ją sama organizacja; to nie jest twierdzenie o osobie.",
+      "records": "Wpisy: {count}",
+      "empty": "W tych wpisach nie nazwano żadnej umiejętności.",
+      "unavailable": "Nie udało się teraz odczytać sygnałów umiejętności. To nie znaczy, że ich nie ma.",
+      "truncated": "Sygnałów umiejętności jest więcej, niż odczytuje ten widok."
+    },
+    "shown": "Pokazano najnowsze {shown} z {total} wpisów. Pozostałe zostają zapisane.",
+    "truncated": "Wpisów jest więcej, niż odczytuje jeden widok. Pokazano odczytane {count}; sumy obejmują tylko je."
   }
 }

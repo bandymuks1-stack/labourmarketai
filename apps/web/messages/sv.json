@@ -6935,7 +6935,8 @@
       "done": "{count} poster tillskrivna; {skipped} var redan tillskrivna.",
       "refused": "Det gick inte att spara. Inget ändrades.",
       "person": "{hours} h, {count, plural, one {# post} other {# poster}}"
-    }
+    },
+    "truncated": "Det finns fler poster än en vy läser. De {count} lästa visas; summorna omfattar bara dem."
   },
   "workLifecycle": {
     "pending": "Ännu inte",
@@ -7107,5 +7108,47 @@
       "skills": "{count, plural, one {# färdighet baserad på dina registreringar} other {# färdigheter baserade på dina registreringar}}",
       "next": "Vart du kan gå"
     }
+  },
+  "companyPerson": {
+    "eyebrow": "Historiskt personkort",
+    "back": "Personer",
+    "badge": "Lämnat av organisationen, inte oberoende verifierat",
+    "provenance": "Detta är vad {name} har registrerat om personen. Ingen annan har bekräftat det, och det beror inte på om personen har ett konto.",
+    "claim": {
+      "unlinked": "Ännu inte kopplat till ett konto — historiken är redan registrerad här.",
+      "link_proposed": "En koppling till ett konto har erbjudits och väntar på personens svar — historiken är redan registrerad här.",
+      "linked": "Kopplat till personens eget konto.",
+      "openProfile": "Öppna personens sida"
+    },
+    "unavailable": "Personens historik kunde inte läsas just nu. Det betyder inte att det saknas någon.",
+    "empty": "Det finns ännu inga historikposter för den här personen. Läsningen lyckades — det finns inga.",
+    "stats": {
+      "records": "Poster",
+      "hours": "Timmar som angivna",
+      "period": "Period"
+    },
+    "noHours": "Poster utan angivna timmar: {count}. Okända timmar räknas inte som noll.",
+    "undated": "Poster utan angivet datum: {count}. De finns kvar i historiken nedan.",
+    "periodApart": "{hours} h av summan är periodsummor, hållna isär och aldrig fördelade på dagar eller månader.",
+    "noWorkObject": "Poster utan koppling till ett projekt eller en plats som plattformen känner till: {count}. De finns kvar i den här historiken under sin källbeteckning.",
+    "places": {
+      "title": "Per projekt eller plats",
+      "none": "Projekt eller plats inte registrerad",
+      "records": "Poster: {count}"
+    },
+    "months": {
+      "title": "Angivna timmar per månad",
+      "note": "Endast poster för enstaka dagar. Periodsummor fördelas aldrig på dagar eller månader."
+    },
+    "skills": {
+      "title": "Färdigheter som historiken pekar på",
+      "note": "Härlett ur organisationens historik, inte verifierat. En färdighet visas när organisationen själv har nämnt den; det är inget påstående om personen.",
+      "records": "Poster: {count}",
+      "empty": "Ingen färdighet nämns i de här posterna.",
+      "unavailable": "Färdighetssignaler kunde inte läsas just nu. Det betyder inte att det saknas några.",
+      "truncated": "Det finns fler färdighetssignaler än den här vyn läser."
+    },
+    "shown": "Visar de senaste {shown} av {total} posterna. Resten finns kvar i registret.",
+    "truncated": "Det finns fler poster än en vy läser. De {count} lästa visas; summorna omfattar bara dem."
   }
 }

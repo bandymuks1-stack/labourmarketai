@@ -60,6 +60,7 @@ const CLASSIFICATION: Record<string, string> = {
   // hub split into its domains. Each composes sections that already existed
   // on /dashboard/company; none introduces a data model or a write path.
   "dashboard/company/people": "REAL_LAUNCH_SURFACE",
+  "dashboard/company/people/[personId]": "REAL_LAUNCH_SURFACE",
   "dashboard/company/needs": "REAL_LAUNCH_SURFACE",
   "dashboard/company/partners": "REAL_LAUNCH_SURFACE",
   "dashboard/company/education": "REAL_LAUNCH_SURFACE",

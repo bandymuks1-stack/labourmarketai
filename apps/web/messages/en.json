@@ -17515,7 +17515,8 @@
         "invalid_email": "Enter one valid e-mail address",
         "needs_migration": "Not available right now"
       }
-    }
+    },
+    "openHistory": "Open history"
   },
   "peopleImport": {
     "alreadyThere": "{count} are already on your list",
@@ -18161,7 +18162,8 @@
       "done": "Attributed {count} records; {skipped} were already attributed.",
       "refused": "This could not be saved. Nothing was changed.",
       "person": "{hours} h, {count, plural, one {# record} other {# records}}"
-    }
+    },
+    "truncated": "More records exist than one view reads. The {count} read are shown; totals cover only these."
   },
   "workLifecycle": {
     "pending": "Not yet",
@@ -18333,5 +18335,47 @@
       "skills": "{count, plural, one {# skill backed by your records} other {# skills backed by your records}}",
       "next": "Where you can go"
     }
+  },
+  "companyPerson": {
+    "eyebrow": "Historical person card",
+    "back": "People",
+    "badge": "Organization-provided, not independently verified",
+    "provenance": "This is what {name} has on record about this person. No one else has confirmed it, and it does not depend on the person having an account.",
+    "claim": {
+      "unlinked": "Not yet linked to an account — history is already recorded here.",
+      "link_proposed": "A link to an account has been offered and awaits the person's answer — history is already recorded here.",
+      "linked": "Linked to the person's own account.",
+      "openProfile": "Open the person's page"
+    },
+    "unavailable": "This person's history could not be read right now. That does not mean there is none.",
+    "empty": "No history records are stored for this person yet. The read worked — there are none.",
+    "stats": {
+      "records": "Records",
+      "hours": "Hours as stated",
+      "period": "Period"
+    },
+    "noHours": "Records that state no hours: {count}. Unknown hours are not counted as zero.",
+    "undated": "Records with no stated date: {count}. They stay in the history below.",
+    "periodApart": "{hours} h of the total are period totals, kept apart and never spread onto days or months.",
+    "noWorkObject": "Records tied to no project or place the platform knows: {count}. They stay in this history under their source label.",
+    "places": {
+      "title": "By project or place",
+      "none": "Project or place not recorded",
+      "records": "Records: {count}"
+    },
+    "months": {
+      "title": "Stated hours by month",
+      "note": "Single-day records only. Period totals are never spread onto days or months."
+    },
+    "skills": {
+      "title": "Skills the history points to",
+      "note": "Derived from organization history, not verified. A skill is listed when the organization's own words named it; it is not a statement about the person.",
+      "records": "Records: {count}",
+      "empty": "No skill was named in these records.",
+      "unavailable": "Skill signals could not be read right now. That does not mean none exist.",
+      "truncated": "More skill signals exist than this view reads."
+    },
+    "shown": "Showing the newest {shown} of {total} records. The rest remain on record.",
+    "truncated": "More records exist than one view reads. The {count} read are shown; totals cover only these."
   }
 }

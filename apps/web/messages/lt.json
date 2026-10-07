@@ -17515,7 +17515,8 @@
         "invalid_email": "Įveskite vieną tinkamą el. pašto adresą",
         "needs_migration": "Šiuo metu nepasiekiama"
       }
-    }
+    },
+    "openHistory": "Atidaryti istoriją"
   },
   "peopleImport": {
     "alreadyThere": "Jau yra jūsų sąraše: {count}",
@@ -18161,7 +18162,8 @@
       "done": "Priskirta įrašų: {count}; jau buvo priskirta: {skipped}.",
       "refused": "Nepavyko išsaugoti. Nieko nepakeista.",
       "person": "{hours} val., {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}"
-    }
+    },
+    "truncated": "Įrašų yra daugiau, nei perskaito vienas vaizdas. Rodomi perskaityti {count}; sumos apima tik juos."
   },
   "workLifecycle": {
     "pending": "Dar ne",
@@ -18333,5 +18335,47 @@
       "skills": "{count, plural, one {# jūsų įrašais pagrįstas gebėjimas} few {# jūsų įrašais pagrįsti gebėjimai} other {# jūsų įrašais pagrįstų gebėjimų}}",
       "next": "Kur galite eiti"
     }
+  },
+  "companyPerson": {
+    "eyebrow": "Istorinė asmens kortelė",
+    "back": "Žmonės",
+    "badge": "Pateikė organizacija, nepriklausomai nepatvirtinta",
+    "provenance": "Tai, ką {name} turi įrašę apie šį asmenį. Niekas kitas to nepatvirtino, ir tai nepriklauso nuo to, ar asmuo turi paskyrą.",
+    "claim": {
+      "unlinked": "Dar nesusieta su paskyra — istorija jau įrašyta čia.",
+      "link_proposed": "Pasiūlyta susieti su paskyra, laukiama asmens atsakymo — istorija jau įrašyta čia.",
+      "linked": "Susieta su paties asmens paskyra.",
+      "openProfile": "Atidaryti asmens puslapį"
+    },
+    "unavailable": "Šio asmens istorijos dabar nepavyko perskaityti. Tai nereiškia, kad jos nėra.",
+    "empty": "Šiam asmeniui istorijos įrašų dar nėra. Skaitymas pavyko — jų tikrai nėra.",
+    "stats": {
+      "records": "Įrašai",
+      "hours": "Valandos, kaip nurodyta",
+      "period": "Laikotarpis"
+    },
+    "noHours": "Įrašai, kuriuose nenurodytos valandos: {count}. Nežinomos valandos neskaičiuojamos kaip nulis.",
+    "undated": "Įrašai be nurodytos datos: {count}. Jie lieka istorijoje žemiau.",
+    "periodApart": "{hours} val. iš bendros sumos yra laikotarpio sumos, laikomos atskirai ir niekada neišskaidomos į dienas ar mėnesius.",
+    "noWorkObject": "Įrašai, nesusieti su platformai žinomu projektu ar vieta: {count}. Jie lieka šioje istorijoje pagal šaltinio pavadinimą.",
+    "places": {
+      "title": "Pagal projektą ar vietą",
+      "none": "Projektas ar vieta neįrašyti",
+      "records": "Įrašai: {count}"
+    },
+    "months": {
+      "title": "Nurodytos valandos pagal mėnesį",
+      "note": "Tik vienos dienos įrašai. Laikotarpio sumos niekada neišskaidomos į dienas ar mėnesius."
+    },
+    "skills": {
+      "title": "Įgūdžiai, į kuriuos rodo istorija",
+      "note": "Išvesta iš organizacijos istorijos, nepatvirtinta. Įgūdis įtraukiamas, kai jį įvardijo pati organizacija; tai nėra teiginys apie asmenį.",
+      "records": "Įrašai: {count}",
+      "empty": "Šiuose įrašuose joks įgūdis neįvardytas.",
+      "unavailable": "Įgūdžių signalų dabar nepavyko perskaityti. Tai nereiškia, kad jų nėra.",
+      "truncated": "Įgūdžių signalų yra daugiau, nei perskaito šis vaizdas."
+    },
+    "shown": "Rodomi naujausi {shown} iš {total} įrašų. Likusieji lieka įrašyti.",
+    "truncated": "Įrašų yra daugiau, nei perskaito vienas vaizdas. Rodomi perskaityti {count}; sumos apima tik juos."
   }
 }
