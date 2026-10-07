@@ -49,7 +49,16 @@ describe("the four migrations ship paired, gated and stated", () => {
     // revokes on tables created by this package's neighbours) and 100500
     // (invitation signup context, already applied). Every other migration still
     // must sort strictly before these four.
-    const SIBLINGS = ["20261006100400_", "20261006100500_"];
+    const SIBLINGS = [
+      "20261006100400_",
+      "20261006100500_",
+      // 2026-10-07 RED tiers A2-G release: later-train siblings, applied individually.
+      "20261006120000_",
+      "20261006130000_",
+      "20261007100000_",
+      "20261007120000_",
+      "20261007130000_",
+    ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
     );

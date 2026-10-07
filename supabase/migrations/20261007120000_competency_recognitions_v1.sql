@@ -119,7 +119,7 @@ create index if not exists competency_recognitions_assessor_idx
 
 alter table public.competency_recognitions enable row level security;
 alter table public.competency_recognitions force row level security;
-revoke all on public.competency_recognitions from public, anon;
+revoke all on public.competency_recognitions from public, anon, authenticated;
 grant select on public.competency_recognitions to authenticated;
 
 drop policy if exists competency_recognitions_select on public.competency_recognitions;

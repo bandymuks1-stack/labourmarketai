@@ -152,6 +152,7 @@ comment on table public.organization_evidence_media is
 -- Privileges: the minimum. RLS decides rows; this decides which verbs exist.
 revoke all on public.organization_evidence_media from public;
 revoke all on public.organization_evidence_media from anon;
+revoke all on public.organization_evidence_media from authenticated;
 grant select, insert on public.organization_evidence_media to authenticated;
 
 alter table public.organization_evidence_media enable row level security;
