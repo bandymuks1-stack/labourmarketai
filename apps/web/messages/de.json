@@ -18507,6 +18507,111 @@
       "next": "Wohin du gehen kannst"
     }
   },
+  "teamDemandOffer": {
+    "heading": "Dieses Team für einen Bedarf anbieten",
+    "intro": "Bieten Sie das Team als eine Einheit für einen offenen Bedarf eines verifizierten Unternehmens an.",
+    "privacy": "Das Unternehmen sieht nur Fakten auf Teamebene: Größe, Fähigkeiten, Verfügbarkeit. Das Angebot nennt kein Mitglied und zeigt kein Mitgliedsprofil. Mitglieder erscheinen erst in einem Projekt, nachdem das Unternehmen das Team angenommen und dort zugewiesen hat.",
+    "tooSmall": "Ein Team kann nur angeboten werden, wenn es mindestens 2 aktive Mitglieder hat.",
+    "loading": "Wird geladen…",
+    "unavailable": "Der offene Bedarf konnte gerade nicht geladen werden.",
+    "noDemand": "Derzeit gibt es keinen offenen Bedarf, für den sich ein Angebot lohnt.",
+    "demandLabel": "Bedarf",
+    "demandPlaceholder": "Bedarf wählen",
+    "alreadyOffered": "bereits angeboten",
+    "noteLabel": "Hinweis an das Unternehmen (optional)",
+    "notePlaceholder": "Zum Beispiel: Trupp von 3, Start in zwei Wochen möglich",
+    "submit": "Team anbieten",
+    "submitting": "Wird angeboten…",
+    "sent": {
+      "heading": "Ihre Angebote",
+      "none": "Noch keine Angebote.",
+      "withdraw": "Zurückziehen"
+    },
+    "status": {
+      "offered": "Wartet auf Antwort",
+      "accepted": "Angenommen",
+      "declined": "Abgelehnt",
+      "withdrawn": "Zurückgezogen",
+      "assigned": "Einem Projekt zugewiesen"
+    },
+    "outcome": {
+      "created": "Angebot gesendet.",
+      "already_offered": "Dieses Team ist diesem Bedarf bereits angeboten. Nichts wurde geändert.",
+      "withdrawn": "Angebot zurückgezogen.",
+      "already_withdrawn": "Dieses Angebot war bereits zurückgezogen."
+    },
+    "refusal": {
+      "not_authed": "Bitte melden Sie sich erneut an.",
+      "not_authorized": "Das dürfen Sie für dieses Team oder diesen Bedarf nicht tun.",
+      "demand_not_offerable": "Für diesen Bedarf kann kein Team angeboten werden (geschlossen, kein Personalbedarf oder Ihr eigener).",
+      "team_too_small": "Ein Team braucht mindestens 2 aktive Mitglieder.",
+      "previously_declined": "Dieser Bedarf hat ein Angebot dieses Teams bereits abgelehnt.",
+      "offer_limit_reached": "Dieses Team hat bereits 20 offene Angebote. Ziehen Sie zuerst eines zurück.",
+      "offer_not_open": "Dieses Angebot ist nicht mehr offen.",
+      "offer_not_accepted": "Nehmen Sie das Angebot an, bevor Sie das Team zuweisen.",
+      "demand_closed": "Dieser Bedarf ist geschlossen, das Angebot kann nicht angenommen werden.",
+      "project_not_of_demand_owner": "Wählen Sie eines Ihrer eigenen Projekte.",
+      "project_completed": "Dieses Projekt ist abgeschlossen.",
+      "task_not_assignable": "Dieser Aufgabe kann kein Team zugewiesen werden.",
+      "object_not_assignable": "Diesem Einsatzort kann kein Team zugewiesen werden.",
+      "one_scope_only": "Wählen Sie entweder eine Aufgabe oder einen Einsatzort, nicht beides.",
+      "team_has_no_members": "Dieses Team hat keine aktiven Mitglieder.",
+      "project_required": "Wählen Sie ein Projekt.",
+      "invalid_decision": "Unbekannte Antwort.",
+      "needs_migration": "Derzeit nicht verfügbar.",
+      "error": "Das ließ sich nicht abschließen. Nichts wurde geändert."
+    },
+    "received": {
+      "title": "Für diesen Bedarf angebotene Teams",
+      "subtitle": "Ein Team hat sich als eine Einheit für diesen Bedarf angeboten. Sie entscheiden, ob Sie es annehmen und wo Sie es einsetzen.",
+      "privacy": "Es werden nur Fakten auf Teamebene gezeigt. Hier wird kein Mitglied genannt. Nachdem Sie das Team angenommen und einem Projekt zugewiesen haben, erscheinen seine Mitglieder in diesem Projekt, wie bei jedem Team.",
+      "members": "{count} Mitglieder",
+      "deployable": "Einsatzgröße {min}-{max}",
+      "availability": "Verfügbarkeit",
+      "availableNow": "Sofort verfügbar",
+      "availableFrom": "Verfügbar ab {date}",
+      "notAvailable": "Nicht verfügbar",
+      "availabilityUnknown": "Nicht angegeben",
+      "consent": "Per Einladung beigetreten",
+      "consentValue": "{consented} von {total} Mitgliedern",
+      "skills": "Fähigkeiten (Mitglieder, die sie angeben)",
+      "skillsUnknown": "Noch keine Fähigkeiten angegeben",
+      "skillCount": "{declared} angegeben, {confirmed} bestätigt",
+      "languages": "Sprachen",
+      "fit": "Passung zu diesem Bedarf",
+      "matchStatus": {
+        "strong": "stark",
+        "possible": "möglich",
+        "weak": "schwach",
+        "insufficient_data": "zu wenig Daten"
+      },
+      "coverage": "{covered} von {total} benötigten Fähigkeiten abgedeckt",
+      "basis": {
+        "aggregate": "Basiert auf den angegebenen Summen des Teams, nicht auf einzelnen Mitgliedern.",
+        "members": "Basiert auf einzelnen Mitgliedern."
+      },
+      "blockers": "Das Team als Ganzes erfüllt nicht: {list}",
+      "missing": "Nicht angegeben: {list}",
+      "noNeedStructure": "Dieser Bedarf ist noch nicht strukturiert, daher kann das Team nicht damit abgeglichen werden.",
+      "note": "Hinweis des Teams",
+      "accept": "Team annehmen",
+      "decline": "Ablehnen",
+      "noProjects": "Sie haben kein offenes Projekt, dem Sie das Team zuweisen könnten. Legen Sie zuerst ein Projekt an.",
+      "assignIntro": "Angenommen. Weisen Sie das Team einem Ihrer Projekte zu.",
+      "projectLabel": "Projekt",
+      "projectPlaceholder": "Projekt wählen",
+      "assign": "Team dem Projekt zuweisen",
+      "assignedNote": "Zugewiesen. Die Mitglieder des Teams erscheinen jetzt in diesem Projekt.",
+      "outcome": {
+        "accepted": "Team angenommen.",
+        "declined": "Angebot abgelehnt.",
+        "already_accepted": "Bereits angenommen.",
+        "already_declined": "Bereits abgelehnt.",
+        "assigned": "Team dem Projekt zugewiesen.",
+        "already_assigned": "Dieses Team war bereits zugewiesen. Nichts wurde geändert."
+      }
+    }
+  },
   "teamAssignment": {
     "title": "Teams in diesem Projekt",
     "intro": "Ein Team wird als eine Einheit zugewiesen. Die Mitglieder stammen aus der Mitgliedschaft des Teams selbst; wer das Team verlassen hat, wird nicht gezählt, und Stunden und Journal bleiben bei jeder Person.",

@@ -13,6 +13,7 @@ import type { TeamBrigade } from "@/lib/company/team-brigades";
 import { TeamDetailsForm } from "@/components/app/team-details-form";
 import { TeamEnquiryInbox } from "@/components/app/team-enquiry-inbox";
 import { TeamAssignForm } from "@/components/app/team-assign-form";
+import { TeamDemandOfferForm } from "@/components/app/team-demand-offer-form";
 import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
@@ -304,6 +305,11 @@ export function TeamBrigadesPanel({
                   <TeamAssignForm teamId={team.id} memberCount={team.members.length} projects={projects} />
                 </div>
               </details>
+
+              {/* E6 — offer the whole team as ONE unit against ONE open demand.
+                  The receiving company sees team-level aggregates only; no
+                  member is disclosed by the offer itself. */}
+              <TeamDemandOfferForm teamId={team.id} memberCount={team.members.length} />
 
               {/* Folded: edit team details (gap 2). */}
               {detailsApplied && (

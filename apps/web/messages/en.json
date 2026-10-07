@@ -18507,6 +18507,111 @@
       "next": "Where you can go"
     }
   },
+  "teamDemandOffer": {
+    "heading": "Offer this team to a demand",
+    "intro": "Offer the team as one unit against one open demand from a verified company.",
+    "privacy": "The company sees only team-level facts: size, skills, availability. The offer names no member and shows no member profile. Members appear on a project only after the company accepts and assigns the team there.",
+    "tooSmall": "A team needs at least 2 active members to be offered.",
+    "loading": "Loading…",
+    "unavailable": "Open demand could not be loaded right now.",
+    "noDemand": "There is no open demand to offer against right now.",
+    "demandLabel": "Demand",
+    "demandPlaceholder": "Choose a demand",
+    "alreadyOffered": "already offered",
+    "noteLabel": "Note to the company (optional)",
+    "notePlaceholder": "For example: crew of 3, can start in two weeks",
+    "submit": "Offer team",
+    "submitting": "Offering…",
+    "sent": {
+      "heading": "Your offers",
+      "none": "No offers yet.",
+      "withdraw": "Withdraw"
+    },
+    "status": {
+      "offered": "Waiting for an answer",
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "withdrawn": "Withdrawn",
+      "assigned": "Assigned to a project"
+    },
+    "outcome": {
+      "created": "Offer sent.",
+      "already_offered": "This team is already offered to this demand. Nothing changed.",
+      "withdrawn": "Offer withdrawn.",
+      "already_withdrawn": "This offer was already withdrawn."
+    },
+    "refusal": {
+      "not_authed": "Sign in again to continue.",
+      "not_authorized": "You cannot do this for this team or demand.",
+      "demand_not_offerable": "This demand cannot take a team offer (it is closed, not a need for people, or your own).",
+      "team_too_small": "A team needs at least 2 active members.",
+      "previously_declined": "This demand already declined an offer from this team.",
+      "offer_limit_reached": "This team already has 20 open offers. Withdraw one first.",
+      "offer_not_open": "This offer is no longer open.",
+      "offer_not_accepted": "Accept the offer before assigning the team.",
+      "demand_closed": "This need is closed, so the offer cannot be accepted.",
+      "project_not_of_demand_owner": "Choose one of your own projects.",
+      "project_completed": "This project is completed.",
+      "task_not_assignable": "This task cannot take a team.",
+      "object_not_assignable": "This work site cannot take a team.",
+      "one_scope_only": "Choose either a task or a work site, not both.",
+      "team_has_no_members": "This team has no active members.",
+      "project_required": "Choose a project.",
+      "invalid_decision": "Unknown answer.",
+      "needs_migration": "Not available right now.",
+      "error": "Could not complete this. Nothing was changed."
+    },
+    "received": {
+      "title": "Teams offered for this need",
+      "subtitle": "A team offered itself as one unit against this need. You decide whether to accept it and where to assign it.",
+      "privacy": "Only team-level facts are shown. No member is named here. After you accept and assign the team to a project, its members appear on that project, as for any team.",
+      "members": "{count} members",
+      "deployable": "Deployable size {min}-{max}",
+      "availability": "Availability",
+      "availableNow": "Available now",
+      "availableFrom": "Available from {date}",
+      "notAvailable": "Not available",
+      "availabilityUnknown": "Not stated",
+      "consent": "Joined by invitation",
+      "consentValue": "{consented} of {total} members",
+      "skills": "Skills (members who declare them)",
+      "skillsUnknown": "No skills stated yet",
+      "skillCount": "{declared} declared, {confirmed} confirmed",
+      "languages": "Languages",
+      "fit": "Fit for this need",
+      "matchStatus": {
+        "strong": "strong",
+        "possible": "possible",
+        "weak": "weak",
+        "insufficient_data": "not enough data"
+      },
+      "coverage": "{covered} of {total} needed skills covered",
+      "basis": {
+        "aggregate": "Based on the team's stated totals, not on individual members.",
+        "members": "Based on individual members."
+      },
+      "blockers": "The team as a whole does not meet: {list}",
+      "missing": "Not stated: {list}",
+      "noNeedStructure": "This need is not structured yet, so the team cannot be matched against it.",
+      "note": "Note from the team",
+      "accept": "Accept team",
+      "decline": "Decline",
+      "noProjects": "You have no open project to assign the team to. Create a project first.",
+      "assignIntro": "Accepted. Assign the team to one of your projects.",
+      "projectLabel": "Project",
+      "projectPlaceholder": "Choose a project",
+      "assign": "Assign team to project",
+      "assignedNote": "Assigned. The team's members now appear on that project.",
+      "outcome": {
+        "accepted": "Team accepted.",
+        "declined": "Offer declined.",
+        "already_accepted": "Already accepted.",
+        "already_declined": "Already declined.",
+        "assigned": "Team assigned to the project.",
+        "already_assigned": "This team was already assigned. Nothing changed."
+      }
+    }
+  },
   "teamAssignment": {
     "title": "Teams on this project",
     "intro": "A team is assigned as one unit. Its members come from the team's own membership, so people who left the team are not counted, and each person's hours and journal stay their own.",
