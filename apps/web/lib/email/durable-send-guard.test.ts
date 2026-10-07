@@ -134,8 +134,11 @@ describe("durable email send guard", () => {
     const email = "Secret.Person@Example.com";
     await send(ledger, email, "o1");
     const dump = JSON.stringify(ledger.rows);
-    expect(dump).not.toMatch(/secret/i);
-    expect(dump).not.toMatch(/example\.com/i);
+    // Derive the needles from the input address itself: no part of it (local part
+    // or domain) may reach the store, whatever the address is.
+    const [localPart, domainPart] = email.toLowerCase().split("@");
+    expect(dump.toLowerCase()).not.toContain(localPart);
+    expect(dump.toLowerCase()).not.toContain(domainPart);
     expect(ledger.rows[0].hash).toMatch(/^[0-9a-f]{64}$/);
     expect(hashRecipient(email)).toBe(hashRecipient("secret.person@example.com"));
     expect(hashRecipient(email, { EMAIL_SEND_LEDGER_SALT: "s" })).not.toBe(hashRecipient(email));
