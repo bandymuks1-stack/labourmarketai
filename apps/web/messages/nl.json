@@ -7672,6 +7672,14 @@
         "doorCalendar": "Deze week in de kalender",
         "doorJournal": "Alle registraties in het werklogboek",
         "doorCv": "Levend cv"
+      },
+      "world": {
+        "sceneLabel": "De werkwereld van deze persoon: werk, vaardigheden, registraties, geschiedenis en wat er hierna kan komen. Dezelfde feiten staan hieronder.",
+        "empty": "Hier is nog niets vastgelegd.",
+        "directionDetail": "Gedeeld: {shared} · ontbreekt: {missing}",
+        "directionDetailNoGap": "Gedeeld: {shared} · niets ontbreekt",
+        "emptyNext": "Richtingen verschijnen zodra je werkregistraties minstens twee vaardigheden onderbouwen.",
+        "allDetails": "Alles op de kaart"
       }
     }
   },
