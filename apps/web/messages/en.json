@@ -7339,6 +7339,21 @@
         "compared": "Compared",
         "interest": "Interest"
       }
+    },
+    "funnel": {
+      "notMeasured": "Not measured yet",
+      "unavailable": "Unavailable (read failed)",
+      "unavailableBanner": "The funnel could not be read from the event store. Every count below is unavailable. This is a failed read, not a measured zero.",
+      "rateNotMeasured": "Not measured yet",
+      "reason": {
+        "usefulUndefined": "No definition of \"useful\" exists yet, so only the partial onboarding and organization-created events are counted.",
+        "offerSide": "No event records the offer side of need / offer, so this stage has no source.",
+        "commercialValue": "No event or source records commercial value.",
+        "trial": "No event or source records a trial.",
+        "paidConversion": "No event or source records a paid conversion.",
+        "retention": "return_visit_detected is defined but is not read into this funnel, and no repeat-use measure exists."
+      },
+      "aiHelp": "First-party AI accounting: per-run audit rows (ai_runs, USD from the reviewed pricing table) and the canonical EUR-cent usage ledger (usage_cost_events). The counts come from live reads of both tables. A table that cannot be read is shown as a dash (unavailable), never as 0, and an unknown cost is also a dash."
     }
   },
   "languageFeedback": {

@@ -7339,6 +7339,21 @@
         "compared": "Verglichen",
         "interest": "Interesse"
       }
+    },
+    "funnel": {
+      "notMeasured": "Noch nicht gemessen",
+      "unavailable": "Nicht verfügbar (Lesen fehlgeschlagen)",
+      "unavailableBanner": "Der Funnel konnte nicht aus dem Ereignisspeicher gelesen werden. Alle Zahlen unten sind nicht verfügbar. Das ist ein fehlgeschlagener Lesevorgang, keine gemessene Null.",
+      "rateNotMeasured": "Noch nicht gemessen",
+      "reason": {
+        "usefulUndefined": "Es gibt noch keine Definition von „nützlich“, daher werden nur die teilweisen Ereignisse für abgeschlossenes Onboarding und angelegte Organisation gezählt.",
+        "offerSide": "Kein Ereignis erfasst die Angebotsseite von Bedarf / Angebot, daher hat diese Stufe keine Quelle.",
+        "commercialValue": "Kein Ereignis und keine Quelle erfasst den kommerziellen Wert.",
+        "trial": "Kein Ereignis und keine Quelle erfasst eine Testphase.",
+        "paidConversion": "Kein Ereignis und keine Quelle erfasst eine zahlende Konversion.",
+        "retention": "return_visit_detected ist definiert, wird aber nicht in diesen Funnel gelesen, und es gibt keine Kennzahl für wiederholte Nutzung."
+      },
+      "aiHelp": "KI-Abrechnung aus erster Hand: Prüfzeilen pro Lauf (ai_runs, USD aus der geprüften Preistabelle) und das kanonische Nutzungsbuch in Euro-Cent (usage_cost_events). Die Zahlen stammen aus Live-Lesevorgängen beider Tabellen. Eine nicht lesbare Tabelle wird als Strich (nicht verfügbar) angezeigt, nie als 0, und unbekannte Kosten ebenfalls als Strich."
     }
   },
   "languageFeedback": {

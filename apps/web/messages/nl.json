@@ -7339,6 +7339,21 @@
         "compared": "Vergeleken",
         "interest": "Interesse"
       }
+    },
+    "funnel": {
+      "notMeasured": "Nog niet gemeten",
+      "unavailable": "Niet beschikbaar (lezen mislukt)",
+      "unavailableBanner": "De funnel kon niet uit de gebeurtenissenopslag worden gelezen. Alle onderstaande aantallen zijn niet beschikbaar. Dit is een mislukte leesactie, geen gemeten nul.",
+      "rateNotMeasured": "Nog niet gemeten",
+      "reason": {
+        "usefulUndefined": "Er bestaat nog geen definitie van \"nuttig\", dus alleen de gedeeltelijke gebeurtenissen voor afgeronde onboarding en aangemaakte organisatie worden geteld.",
+        "offerSide": "Geen gebeurtenis legt de aanbodzijde van vraag / aanbod vast, dus deze stap heeft geen bron.",
+        "commercialValue": "Geen gebeurtenis of bron legt commerciële waarde vast.",
+        "trial": "Geen gebeurtenis of bron legt een proefperiode vast.",
+        "paidConversion": "Geen gebeurtenis of bron legt een betaalde conversie vast.",
+        "retention": "return_visit_detected is gedefinieerd maar wordt niet in deze funnel gelezen, en er bestaat geen maatstaf voor herhaald gebruik."
+      },
+      "aiHelp": "Eigen AI-boekhouding: auditregels per run (ai_runs, USD uit de gecontroleerde prijstabel) en het canonieke gebruiksgrootboek in eurocent (usage_cost_events). De aantallen komen uit live leesacties van beide tabellen. Een tabel die niet gelezen kan worden, wordt als streepje (niet beschikbaar) getoond, nooit als 0, en onbekende kosten ook als streepje."
     }
   },
   "languageFeedback": {
