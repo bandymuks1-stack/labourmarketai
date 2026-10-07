@@ -4,8 +4,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 
-import type { MatchNeed } from "./match-v1";
-import { matchTeamToNeed } from "./match-team-v1";
+import type { MatchNeed } from "@/lib/market/match-v1";
+import { matchTeamToNeed } from "@/lib/market/match-team-v1";
 import {
   offerToTeamMatchInput,
   summarizeTeamMatch,
@@ -21,7 +21,7 @@ import {
   type ReceivedTeamOffer,
   type SentTeamOffer,
   type TeamOfferRefusal,
-} from "./team-offer-model";
+} from "@/lib/market/team-offer-model";
 
 /**
  * OFFER A TEAM / BRIGADE AGAINST ONE DEMAND (owner decision E6, DEM-6 / WRK-6).

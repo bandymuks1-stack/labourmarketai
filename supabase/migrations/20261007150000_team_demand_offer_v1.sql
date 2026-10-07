@@ -29,7 +29,7 @@
 --   What IS reused: the demand (`customer_requests`, owner and market-direction
 --   rule), the team (`organizations.organization_type='team'` + active
 --   'employee' engagement_contexts), the aggregates source
---   (worker_skills / team_details, same facts as get_team_capability_summary_v1
+--   (worker_skills / team_details, same facts as the team capability summary
 --   and the TeamMatchInputV1 contract), the assignment relation
 --   (`team_assignments`, same table, same unique index, same audit action), and
 --   the existing disclosure of members (list_team_assignment_members_v1).

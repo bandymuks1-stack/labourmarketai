@@ -19,7 +19,7 @@ import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibilit
 // controls below, keyed on (requestId, workerId).
 import { listOfferedCandidatesForRequest, readOfferBookingStatuses } from "@/lib/agency/bridge-read";
 import { TeamOffersReceived } from "@/components/app/team-offers-received";
-import { loadTeamOffersForDemand } from "@/lib/market/team-offer";
+import { loadTeamOffersForDemand } from "@/lib/company/team-offer";
 import { listManagedProjects } from "@/lib/projects/projects";
 import {
   hasActiveScoutFilters,

@@ -1603,6 +1603,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261007120000_competency_recognitions_v1.sql",
       // 2026-10-07: historical sites become completed projects (INSERT projects + link work_objects) - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261007130000_historical_projects_from_work_objects_v1.sql",
+      // 2026-10-07 (E6, owner decision): a team/brigade offered against one demand (new table + SECURITY DEFINER doors + GRANT) - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
+      "20261007150000_team_demand_offer_v1.sql",
 ]);
   });
 

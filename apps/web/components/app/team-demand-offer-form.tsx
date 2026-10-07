@@ -10,7 +10,7 @@ import {
   offerTeamToDemandAction,
   withdrawTeamOfferAction,
   type TeamOfferPanelData,
-} from "@/lib/market/team-offer-actions";
+} from "@/lib/company/team-offer-actions";
 import type { TeamOfferRefusal } from "@/lib/market/team-offer-model";
 
 /**

@@ -1013,9 +1013,9 @@ const DEMAND_SUPPLY: readonly CapabilityRow[] = [
     strongestEvidence: "TEST_PROVEN",
     anchors: [
       "lib/market/match-team-v1.ts",
-      "lib/market/team-offer.ts",
+      "lib/company/team-offer.ts",
       "lib/market/team-offer-model.ts",
-      "lib/market/team-offer-actions.ts",
+      "lib/company/team-offer-actions.ts",
       "components/app/team-demand-offer-form.tsx",
       "components/app/team-offers-received.tsx",
     ],

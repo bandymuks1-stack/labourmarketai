@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/Button";
-import { handOffTeamOfferAction, respondToTeamOfferAction } from "@/lib/market/team-offer-actions";
+import { handOffTeamOfferAction, respondToTeamOfferAction } from "@/lib/company/team-offer-actions";
 import type { OfferMatchView, ReceivedTeamOffer, TeamOfferRefusal } from "@/lib/market/team-offer-model";
 
 /**
@@ -69,7 +69,7 @@ export function TeamOffersReceived({
   }
 
   return (
-    <section className="card-border flex flex-col gap-3 p-4" data-testid="scouting-team-offers">
+    <section className="flex flex-col gap-3 rounded-lg border border-ink-600 p-4" data-testid="scouting-team-offers">
       <header className="flex flex-col gap-1">
         <h2 className="font-display text-base font-semibold text-text-primary">{t("received.title")}</h2>
         <p className="text-xs leading-relaxed text-text-secondary">{t("received.subtitle")}</p>
@@ -85,7 +85,7 @@ export function TeamOffersReceived({
           return (
             <li
               key={offer.offerId}
-              className="card-border flex flex-col gap-3 p-3"
+              className="flex flex-col gap-3 rounded-md border border-ink-600 bg-ink-800/30 p-3"
               data-testid={`team-offer-received-${offer.offerId}`}
             >
               <div className="flex flex-wrap items-center gap-2">

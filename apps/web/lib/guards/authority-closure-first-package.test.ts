@@ -58,6 +58,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261007100000_",
       "20261007120000_",
       "20261007130000_",
+      // 2026-10-07 E6 (brigade offer against a demand): a later, separately gated RED draft, NOT applied.
+      "20261007150000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

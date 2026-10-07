@@ -160,8 +160,8 @@ describe("4. hand-off reuses the assignment relation - no second model, no gate"
 
 describe("5. the application side is thin, RPC-only and registered", () => {
   const files = [
-    "lib/market/team-offer.ts",
-    "lib/market/team-offer-actions.ts",
+    "lib/company/team-offer.ts",
+    "lib/company/team-offer-actions.ts",
     "components/app/team-demand-offer-form.tsx",
     "components/app/team-offers-received.tsx",
   ];
@@ -170,14 +170,14 @@ describe("5. the application side is thin, RPC-only and registered", () => {
   });
 
   it("never writes the offer table directly and never selects a member", () => {
-    const svc = read(join(WEB, "lib/market/team-offer.ts"));
+    const svc = read(join(WEB, "lib/company/team-offer.ts"));
     expect(svc).not.toMatch(/\.from\(["']team_demand_offers["']\)/);
     expect(svc).not.toMatch(/engagement_contexts|\.from\(["']profiles["']\)|\.from\(["']workers["']\)/);
     for (const rpc of FNS) expect(svc, rpc).toContain(rpc);
   });
 
   it("server actions take no identity argument", () => {
-    const actions = read(join(WEB, "lib/market/team-offer-actions.ts"));
+    const actions = read(join(WEB, "lib/company/team-offer-actions.ts"));
     expect(actions).toMatch(/^"use server";/);
     expect(actions).not.toMatch(/userId|profileId|ownerId|actorId/);
   });
@@ -190,7 +190,7 @@ describe("5. the application side is thin, RPC-only and registered", () => {
     const page = read(join(WEB, "app/[locale]/dashboard/company/scouting/page.tsx"));
     expect(page).toMatch(/TeamOffersReceived/);
     expect(page).toMatch(/loadTeamOffersForDemand/);
-    const svc = read(join(WEB, "lib/market/team-offer.ts"));
+    const svc = read(join(WEB, "lib/company/team-offer.ts"));
     expect(svc).toMatch(/matchTeamToNeed\(need, offerToTeamMatchInput\(offer\)\)/);
     // no member subjects passed -> team_aggregate basis only
     expect(svc).not.toMatch(/matchTeamToNeed\([^)]*,[^)]*,/);

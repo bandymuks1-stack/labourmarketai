@@ -18598,7 +18598,7 @@
       "decline": "Afwijzen",
       "noProjects": "U hebt geen openstaand project om het team aan toe te wijzen. Maak eerst een project aan.",
       "assignIntro": "Geaccepteerd. Wijs het team toe aan een van uw projecten.",
-      "projectLabel": "Project",
+      "projectLabel": "Project om aan toe te wijzen",
       "projectPlaceholder": "Kies een project",
       "assign": "Team aan project toewijzen",
       "assignedNote": "Toegewezen. De leden van het team verschijnen nu in dat project.",

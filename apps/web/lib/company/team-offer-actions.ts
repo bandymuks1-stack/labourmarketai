@@ -9,12 +9,12 @@ import {
   offerTeamToDemand,
   respondToTeamOffer,
   withdrawTeamOffer,
-} from "@/lib/market/team-offer";
+} from "@/lib/company/team-offer";
 import type { OfferableDemand, SentTeamOffer, TeamOfferRefusal } from "@/lib/market/team-offer-model";
 
 /**
  * Server actions for offering a team against a demand (E6). Thin: shape-check the
- * ids and hand off to the ONE composition in lib/market/team-offer.ts; the
+ * ids and hand off to the ONE composition in lib/company/team-offer.ts; the
  * database decides authority. Identity is never an argument - it is the session.
  */
 
