@@ -2323,6 +2323,7 @@
   "scouting": {
     "pool": {
       "factsUnreadable": "Osa sellest, mille need inimesed on kirja pannud, ei õnnestunud praegu lugeda, seega see järjestus ei ole usaldusväärne. Kedagi ei näidata siin väiksemana, kui ta on — puuduvad lihtsalt võrdluse aluseks olevad faktid. Laadige hetke pärast uuesti.",
+      "historyUnavailable": "Organisatsioonide esitatud ajalugu ei õnnestunud praegu lugeda, seega seda ei näidata. See ei tähenda, et seda poleks, ja ülaltoodud järjestus sellest ei sõltu.",
       "capped": "Kõiki ei võrreldud. Sellele vajadusele sobib rohkem nähtavaid töötajaid, kui ühte nimekirja mahub, seega toodi esmalt need {count}, kelle oskused, amet ja riik vastavad sellele kõige otsesemalt — mitte kunagi kõige uuemad registreerumised. Piiritlege vajadus, et olla kindel, et võrreldakse õigeid inimesi.",
       "complete": "Kõiki {count} nähtavat töötajat võrreldi selle vajadusega."
     },
@@ -2347,6 +2348,7 @@
     "skillFit": "[EN] {matched}/{total} required skills, {confirmed} manager-confirmed",
     "evidence": "[EN] Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
     "confirmedWork": "Tööga kinnitatud: {work} / {matched} sobivast oskusest (kordub: {repeated})",
+    "historySignal": "Organisatsioonide esitatud ajaloos nimetatud: {history} / {matched} sobivast oskusest (signaal, mitte kontrollimine)",
     "evidenceNone": "Kinnitamata",
     "experienceYearsValue": "{years, plural, one {# aasta} other {# aastat}}",
     "shortlistError": "[EN] Could not save. Try again.",
@@ -6701,6 +6703,16 @@
         }
       }
     }
+  },
+  "cvOrganizationHistory": {
+    "title": "Organisatsioonide esitatud töölugu",
+    "note": "Võetud siin nimetatud organisatsioonide enda andmetest. See ei ole enda deklareeritud ega sõltumatult kontrollitud.",
+    "untitled": "Organisatsiooni registreeritud töö",
+    "hoursTerm": "Tunnid",
+    "hoursRecorded": "{hours} h registreeritud ({count, plural, one {# kanne} other {# kannet}})",
+    "hoursPeriod": "{hours} h esitatud perioodi kohta ({count, plural, one {# kanne} other {# kannet}})",
+    "contested": "Vaidlustatud selleks õigust omava isiku poolt",
+    "more": "Veel {count, plural, one {# kirjet} other {# kirjet}} ei näidata"
   },
   "historyContext": {
     "project": "Projekt",

@@ -8414,6 +8414,7 @@
     "skillFit": "{matched}/{total} required skills, {confirmed} manager-confirmed",
     "evidence": "Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
     "confirmedWork": "Confirmed in real work: {work} of {matched} matched skills (repeated: {repeated})",
+    "historySignal": "Named in organization-provided history: {history} of {matched} matched skills (a signal, not verification)",
     "evidenceNone": "Not confirmed",
     "experienceYearsValue": "{years, plural, one {# year} other {# years}}",
     "shortlistError": "Could not save. Try again.",
@@ -8570,6 +8571,7 @@
     },
     "pool": {
       "factsUnreadable": "Some of what these people have recorded could not be read just now, so this order is not reliable. Nobody here has been shown as having less than they do — the facts behind the comparison are simply missing. Reload in a moment.",
+      "historyUnavailable": "Organization-provided history could not be read just now, so it is not shown. That does not mean there is none, and the order above does not depend on it.",
       "capped": "Not everyone was compared. More discoverable workers fit this need than one list can hold, so the {count} whose skills, profession and country match it most directly were retrieved first — never the newest registrations. Narrow the need to be sure the right people are compared.",
       "complete": "All {count} discoverable workers were compared against this need."
     },
@@ -16828,6 +16830,16 @@
     "emailInactiveNote": "Email delivery is not active on the platform yet. Your choices are saved and take effect as soon as it is.",
     "error": "The change could not be saved and was reverted. Please try again.",
     "unavailable": "Notification settings are not available right now."
+  },
+  "cvOrganizationHistory": {
+    "title": "Work history supplied by organizations",
+    "note": "Taken from the records of the organizations named here. It is not self-declared and not independently verified.",
+    "untitled": "Work recorded by an organization",
+    "hoursTerm": "Hours",
+    "hoursRecorded": "{hours} h recorded in {count, plural, one {# record} other {# records}}",
+    "hoursPeriod": "{hours} h stated for a period, in {count, plural, one {# record} other {# records}}",
+    "contested": "Contested by someone with standing",
+    "more": "{count, plural, one {# more entry} other {# more entries}} not shown"
   },
   "historyContext": {
     "project": "Project",

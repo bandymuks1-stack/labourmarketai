@@ -8414,6 +8414,7 @@
     "skillFit": "{matched}/{total} reikalaujamų įgūdžių, {confirmed} patvirtinti vadovo",
     "evidence": "Įrodymai — patvirtinti: {confirmed} · žurnalas: {journal} · savideklaruoti: {self}",
     "confirmedWork": "Darbu patvirtinta: {work} iš {matched} atitinkančių įgūdžių (pasikartoja: {repeated})",
+    "historySignal": "Paminėta organizacijų pateiktoje istorijoje: {history} iš {matched} atitinkančių įgūdžių (signalas, ne patvirtinimas)",
     "evidenceNone": "Nepatvirtinta",
     "experienceYearsValue": "{years, plural, one {# metai} few {# metai} other {# metų}}",
     "shortlistError": "Nepavyko išsaugoti. Bandyk dar kartą.",
@@ -8570,6 +8571,7 @@
     },
     "pool": {
       "factsUnreadable": "Kai ko iš to, ką šie žmonės yra užfiksavę, dabar nepavyko perskaityti, todėl ši eilė nėra patikima. Niekas čia nėra parodytas turintis mažiau, nei turi — tiesiog trūksta faktų, pagal kuriuos lyginama. Perkraukite po akimirkos.",
+      "historyUnavailable": "Organizacijų pateiktos istorijos dabar nepavyko perskaityti, todėl ji nerodoma. Tai nereiškia, kad jos nėra, o aukščiau pateikta tvarka nuo jos nepriklauso.",
       "capped": "Palyginti ne visi. Šį poreikį atitinka daugiau matomų darbuotojų, nei telpa į vieną sąrašą, todėl pirmiausia paimti {count} darbuotojai, kurių įgūdžiai, profesija ir šalis labiausiai atitinka poreikį, o ne naujausiai užsiregistravusieji. Patikslinkite poreikį, kad būtų palyginti tinkami žmonės.",
       "complete": "Su šiuo poreikiu palyginti visi {count} matomi darbuotojai."
     },
@@ -16828,6 +16830,16 @@
     "emailInactiveNote": "El. laiškų siuntimas platformoje dar neaktyvus. Jūsų pasirinkimai išsaugomi ir pradės veikti vos jį įjungus.",
     "error": "Pakeitimo išsaugoti nepavyko, jis atšauktas. Bandykite dar kartą.",
     "unavailable": "Pranešimų nustatymai šiuo metu nepasiekiami."
+  },
+  "cvOrganizationHistory": {
+    "title": "Organizacijų pateikta darbo istorija",
+    "note": "Paimta iš čia nurodytų organizacijų įrašų. Ji nėra paties žmogaus deklaruota ir nėra nepriklausomai patikrinta.",
+    "untitled": "Organizacijos užfiksuotas darbas",
+    "hoursTerm": "Valandos",
+    "hoursRecorded": "{hours} val. užfiksuota ({count, plural, one {# įrašas} few {# įrašai} other {# įrašų}})",
+    "hoursPeriod": "{hours} val. nurodyta laikotarpiui ({count, plural, one {# įrašas} few {# įrašai} other {# įrašų}})",
+    "contested": "Ginčijama asmens, turinčio tam teisę",
+    "more": "Dar {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}} nerodoma"
   },
   "historyContext": {
     "project": "Projektas",

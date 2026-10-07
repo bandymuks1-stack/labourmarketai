@@ -2323,6 +2323,7 @@
   "scouting": {
     "pool": {
       "factsUnreadable": "En del av det dessa personer har registrerat gick inte att läsa just nu, så den här ordningen är inte tillförlitlig. Ingen visas här med mindre än vad de har — det är fakta bakom jämförelsen som saknas. Ladda om om en stund.",
+      "historyUnavailable": "Historik från organisationer kunde inte läsas just nu och visas därför inte. Det betyder inte att det saknas någon, och ordningen ovan beror inte på den.",
       "capped": "Alla jämfördes inte. Fler synliga arbetare passar det här behovet än vad en lista rymmer, så de {count} vars kompetenser, yrke och land stämmer mest direkt hämtades först — aldrig de senast registrerade. Avgränsa behovet för att vara säker på att rätt personer jämförs.",
       "complete": "Alla {count} synliga arbetare jämfördes mot det här behovet."
     },
@@ -2347,6 +2348,7 @@
     "skillFit": "[EN] {matched}/{total} required skills, {confirmed} manager-confirmed",
     "evidence": "[EN] Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
     "confirmedWork": "Bekräftat genom arbete: {work} av {matched} matchande färdigheter (upprepat: {repeated})",
+    "historySignal": "Nämnd i historik från organisationer: {history} av {matched} matchande färdigheter (en signal, inte verifiering)",
     "evidenceNone": "Inte bekräftat",
     "experienceYearsValue": "{years, plural, one {# år} other {# år}}",
     "shortlistError": "[EN] Could not save. Try again.",
@@ -6701,6 +6703,16 @@
         }
       }
     }
+  },
+  "cvOrganizationHistory": {
+    "title": "Arbetshistorik som tillhandahållits av organisationer",
+    "note": "Hämtad ur de angivna organisationernas egna uppgifter. Den är varken självdeklarerad eller oberoende verifierad.",
+    "untitled": "Arbete registrerat av en organisation",
+    "hoursTerm": "Timmar",
+    "hoursRecorded": "{hours} h registrerade i {count, plural, one {# registrering} other {# registreringar}}",
+    "hoursPeriod": "{hours} h angivna för en period, i {count, plural, one {# registrering} other {# registreringar}}",
+    "contested": "Bestridd av en part med rätt att göra det",
+    "more": "{count, plural, one {# post till} other {# poster till}} visas inte"
   },
   "historyContext": {
     "project": "Projekt",

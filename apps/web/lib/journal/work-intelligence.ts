@@ -473,6 +473,12 @@ export type WorkIntelligence = {
    *  their own beside `organizationRecords`, in no period's `hours`, on no
    *  day. `null` exactly when `organizationRecords` is null (UNKNOWN). */
   readonly organizationPeriodRecords: readonly WorkIntelligenceOrganizationPeriodRecord[] | null;
+  /** The organization's DAY records that carry a professional-history context
+   *  (imported evidence), as read - handed through untouched so the Living CV can
+   *  name the work behind the hours. A pass-through, never a sum: no figure in
+   *  this model is derived from it a second time. `null` exactly when
+   *  `organizationRecords` is null (UNKNOWN). */
+  readonly organizationContextRecords?: readonly WorkIntelligenceOrganizationRecord[] | null;
   /** Every declared skill, hours desc (declared-only skills at zero). */
   readonly skills: readonly SkillWorkTime[];
   readonly activities: readonly ActivityWorkTime[];
@@ -1216,6 +1222,10 @@ export function deriveWorkIntelligence(
     periods,
     organizationRecords,
     organizationPeriodRecords,
+    organizationContextRecords:
+      orgRows === null
+        ? null
+        : orgRows.filter((r) => r.context !== undefined && r.status !== "rejected" && Number.isFinite(r.hours) && r.hours > 0),
     skills,
     activities,
     contexts,

@@ -2323,6 +2323,7 @@
   "scouting": {
     "pool": {
       "factsUnreadable": "Daļu no tā, ko šie cilvēki ir fiksējuši, tikko neizdevās nolasīt, tāpēc šī secība nav uzticama. Neviens šeit netiek rādīts ar mazāk, nekā viņam ir — vienkārši trūkst faktu, pēc kuriem salīdzināt. Pārlādējiet pēc brīža.",
+      "historyUnavailable": "Organizāciju sniegto vēsturi pašlaik nevarēja nolasīt, tāpēc tā netiek rādīta. Tas nenozīmē, ka tās nav, un iepriekšējā secība no tās nav atkarīga.",
       "capped": "Ne visi tika salīdzināti. Šai vajadzībai atbilst vairāk redzamu darbinieku, nekā ietilpst vienā sarakstā, tāpēc vispirms tika iegūti tie {count}, kuru prasmes, profesija un valsts atbilst vistiešāk — nekad jaunākie reģistrējumi. Sašauriniet vajadzību, lai būtu droši, ka tiek salīdzināti īstie cilvēki.",
       "complete": "Visi {count} redzamie darbinieki tika salīdzināti ar šo vajadzību."
     },
@@ -2347,6 +2348,7 @@
     "skillFit": "[EN] {matched}/{total} required skills, {confirmed} manager-confirmed",
     "evidence": "[EN] Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
     "confirmedWork": "Apstiprināts ar darbu: {work} no {matched} atbilstošām prasmēm (atkārtojas: {repeated})",
+    "historySignal": "Minēts organizāciju sniegtajā vēsturē: {history} no {matched} atbilstošajām prasmēm (signāls, nevis pārbaude)",
     "evidenceNone": "Nav apstiprināts",
     "experienceYearsValue": "{years, plural, one {# gads} other {# gadi}}",
     "shortlistError": "[EN] Could not save. Try again.",
@@ -6701,6 +6703,16 @@
         }
       }
     }
+  },
+  "cvOrganizationHistory": {
+    "title": "Organizāciju sniegtā darba vēsture",
+    "note": "Ņemta no šeit minēto organizāciju ierakstiem. Tā nav paša cilvēka deklarēta un nav neatkarīgi pārbaudīta.",
+    "untitled": "Organizācijas reģistrēts darbs",
+    "hoursTerm": "Stundas",
+    "hoursRecorded": "{hours} h reģistrētas ({count, plural, one {# ieraksts} other {# ieraksti}})",
+    "hoursPeriod": "{hours} h norādītas periodam ({count, plural, one {# ieraksts} other {# ieraksti}})",
+    "contested": "Apstrīdējusi persona ar tiesībām to darīt",
+    "more": "Vēl {count, plural, one {# ieraksts} other {# ieraksti}} netiek rādīti"
   },
   "historyContext": {
     "project": "Projekts",

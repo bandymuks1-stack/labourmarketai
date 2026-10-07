@@ -442,6 +442,15 @@ export default async function CompanyScoutingPage({
         </p>
       ) : null}
 
+      {result?.kind === "ok" && result.retrieval.historySignalsUnavailable ? (
+        <p
+          className="rounded-md border border-border-subtle bg-surface-1/50 px-4 py-3 text-xs leading-relaxed text-text-secondary"
+          data-testid="scouting-history-unavailable"
+        >
+          {t("pool.historyUnavailable")}
+        </p>
+      ) : null}
+
       {factsUnreadable ? (
         <p
           className="rounded-md border border-state-warning/40 bg-state-warning/10 px-4 py-3 text-xs leading-relaxed text-text-secondary"
@@ -1316,6 +1325,22 @@ export default async function CompanyScoutingPage({
                       work: c.match.evidence.matchedConfirmedWork ?? 0,
                       matched: fit.matchedTotal,
                       repeated: c.match.evidence.matchedRepeatedConfirmed ?? 0,
+                    })}
+                  </p>
+                ) : null}
+                {/* ORGANIZATION-PROVIDED HISTORY - a labelled signal: an
+                    organization's own records of this person name the matched
+                    skill. Evidence, not verification, and not an input to the
+                    status or the order. Shown only when it exists; absence is
+                    silence, never a "0". */}
+                {(c.match.evidence.matchedHistorySignal ?? 0) > 0 && fit ? (
+                  <p
+                    className="font-mono text-meta text-text-muted"
+                    data-testid={`scout-history-signal-${c.workerId}`}
+                  >
+                    {t("historySignal", {
+                      history: c.match.evidence.matchedHistorySignal ?? 0,
+                      matched: fit.matchedTotal,
                     })}
                   </p>
                 ) : null}

@@ -8414,6 +8414,7 @@
     "skillFit": "{matched}/{total} wymaganych umiejętności, {confirmed} potwierdzonych przez kierownika",
     "evidence": "Dowody — potwierdzone: {confirmed} · dziennik: {journal} · zadeklarowane samodzielnie: {self}",
     "confirmedWork": "Potwierdzone pracą: {work} z {matched} dopasowanych umiejętności (powtarza się: {repeated})",
+    "historySignal": "Wymienione w historii dostarczonej przez organizacje: {history} z {matched} dopasowanych umiejętności (sygnał, nie weryfikacja)",
     "evidenceNone": "Niepotwierdzone",
     "experienceYearsValue": "{years, plural, one {# rok} few {# lata} many {# lat} other {# roku}}",
     "shortlistError": "Nie udało się zapisać. Spróbuj ponownie.",
@@ -8570,6 +8571,7 @@
     },
     "pool": {
       "factsUnreadable": "Części tego, co te osoby zapisały, nie udało się teraz odczytać, więc ta kolejność nie jest wiarygodna. Nikt nie jest tu pokazany jako mający mniej, niż ma — po prostu brakuje faktów do porównania. Odśwież za chwilę.",
+      "historyUnavailable": "Historii dostarczonej przez organizacje nie udało się teraz odczytać, więc nie jest pokazana. Nie znaczy to, że jej nie ma, a powyższa kolejność od niej nie zależy.",
       "capped": "Nie porównano wszystkich. Do tej potrzeby pasuje więcej widocznych pracowników, niż mieści jedna lista, więc pobrano najpierw tych {count}, których umiejętności, zawód i kraj odpowiadają jej najbardziej bezpośrednio — nigdy najnowsze rejestracje. Zawęź potrzebę, aby mieć pewność, że porównywane są właściwe osoby.",
       "complete": "Wszystkich {count} widocznych pracowników porównano z tą potrzebą."
     },
@@ -16828,6 +16830,16 @@
     "emailInactiveNote": "Dostarczanie e-maili nie jest jeszcze aktywne na platformie. Twoje wybory są zapisane i zaczną obowiązywać, gdy tylko zostanie aktywowane.",
     "error": "Nie udało się zapisać zmiany i została ona cofnięta. Spróbuj ponownie.",
     "unavailable": "Ustawienia powiadomień są teraz niedostępne."
+  },
+  "cvOrganizationHistory": {
+    "title": "Historia pracy dostarczona przez organizacje",
+    "note": "Pochodzi z własnych zapisów wymienionych tu organizacji. Nie jest zadeklarowana przez samą osobę ani niezależnie zweryfikowana.",
+    "untitled": "Praca zarejestrowana przez organizację",
+    "hoursTerm": "Godziny",
+    "hoursRecorded": "{hours} godz. zarejestrowano ({count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}})",
+    "hoursPeriod": "{hours} godz. podano dla okresu ({count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}})",
+    "contested": "Zakwestionowane przez uprawnioną stronę",
+    "more": "Nie pokazano jeszcze {count, plural, one {# wpisu} few {# wpisów} many {# wpisów} other {# wpisu}}"
   },
   "historyContext": {
     "project": "Projekt",

@@ -40,6 +40,7 @@
  */
 
 import type { CvSkillTier } from "./skill-tiers";
+import type { CvOrganizationHistoryEntry } from "./organization-history";
 import type { VerifiedCvData } from "./verified-cv";
 
 /** The five top-level blocks, in the order a European reader expects them. */
@@ -105,6 +106,10 @@ export interface EuFormatCv {
   /** Profession slugs — the caller localizes them. */
   readonly professions: readonly string[];
   readonly workExperience: readonly EuDatedEntry[];
+  /** Organization-provided history (imported evidence) with its context -
+   *  printed under Work experience as its own labelled group, never merged
+   *  into the person's own entries. */
+  readonly organizationHistory: readonly CvOrganizationHistoryEntry[];
   readonly education: readonly EuEducationEntry[];
   readonly languages: readonly EuLanguageEntry[];
   readonly skillGroups: readonly EuSkillGroup[];
@@ -133,6 +138,9 @@ export interface EuFormatResolvers {
   readonly date: (iso: string | null) => string | null;
   /** "2019 – 2022", "2019 – present", "2019" — never an invented endpoint. */
   readonly present: string;
+  /** One organization-provided history entry -> its printed lines. Absent in
+   *  callers that do not render that group (it is then omitted, not blank). */
+  readonly organizationHistory?: (e: CvOrganizationHistoryEntry) => EuDisplayEntry;
 }
 
 export interface EuDisplayEntry {
@@ -147,6 +155,7 @@ export interface EuDisplayDocument {
   readonly professions: string | null;
   readonly summary: string | null;
   readonly workExperience: readonly EuDisplayEntry[];
+  readonly organizationHistory: readonly EuDisplayEntry[];
   readonly education: readonly EuDisplayEntry[];
   readonly languages: readonly { name: string; level: string }[];
   readonly skillGroups: readonly { tier: CvSkillTier; names: readonly string[] }[];
@@ -229,6 +238,9 @@ export function resolveEuFormatDocument(
         : null,
     summary: cv.summary,
     workExperience,
+    organizationHistory: r.organizationHistory
+      ? cv.organizationHistory.map((e) => r.organizationHistory!(e))
+      : [],
     education,
     languages: cv.languages.map((l) => ({
       name: r.language(l.lang),
@@ -327,6 +339,7 @@ export function buildEuFormatCv(cv: VerifiedCvData): EuFormatCv {
       .map((p) => p.slug)
       .filter((slug): slug is string => !!slug),
     workExperience,
+    organizationHistory: cv.organizationHistory ?? [],
     education,
     languages,
     skillGroups,
@@ -338,7 +351,7 @@ export function buildEuFormatCv(cv: VerifiedCvData): EuFormatCv {
       // The person's own name is enough to warrant the block; when even that
       // is missing the renderer shows its honest "name not provided" state.
       personal: true,
-      workExperience: workExperience.length > 0,
+      workExperience: workExperience.length > 0 || (cv.organizationHistory ?? []).length > 0,
       educationAndTraining: education.length > 0,
       personalSkills,
       additionalInformation:

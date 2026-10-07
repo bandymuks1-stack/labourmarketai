@@ -8414,6 +8414,7 @@
     "skillFit": "{matched}/{total} vereiste vaardigheden, {confirmed} door manager bevestigd",
     "evidence": "Bewijs — bevestigd: {confirmed} · journaal: {journal} · zelf opgegeven: {self}",
     "confirmedWork": "Bevestigd door werk: {work} van {matched} passende vaardigheden (herhaaldelijk: {repeated})",
+    "historySignal": "Genoemd in door organisaties aangeleverde geschiedenis: {history} van {matched} passende vaardigheden (een signaal, geen verificatie)",
     "evidenceNone": "Niet bevestigd",
     "experienceYearsValue": "{years, plural, one {# jaar} other {# jaar}}",
     "shortlistError": "Opslaan is niet gelukt. Probeer opnieuw.",
@@ -8570,6 +8571,7 @@
     },
     "pool": {
       "factsUnreadable": "Een deel van wat deze mensen hebben vastgelegd kon zojuist niet worden gelezen, dus deze volgorde is niet betrouwbaar. Niemand wordt hier met minder getoond dan hij heeft — de feiten achter de vergelijking ontbreken simpelweg. Laad zo meteen opnieuw.",
+      "historyUnavailable": "De door organisaties aangeleverde geschiedenis kon nu niet worden gelezen en wordt daarom niet getoond. Dat betekent niet dat er geen is, en de volgorde hierboven hangt er niet van af.",
       "capped": "Niet iedereen is vergeleken. Er passen meer zichtbare werknemers bij deze vraag dan in één lijst passen, dus zijn eerst de {count} opgehaald van wie vaardigheden, beroep en land het beste aansluiten, niet de nieuwste registraties. Maak de vraag specifieker zodat de juiste mensen worden vergeleken.",
       "complete": "Alle {count} zichtbare werknemers zijn met deze vraag vergeleken."
     },
@@ -16828,6 +16830,16 @@
     "emailInactiveNote": "E-mailbezorging is op het platform nog niet actief. Uw keuzes worden opgeslagen en gelden zodra die actief is.",
     "error": "De wijziging kon niet worden opgeslagen en is teruggedraaid. Probeer het opnieuw.",
     "unavailable": "Meldingsinstellingen zijn momenteel niet beschikbaar."
+  },
+  "cvOrganizationHistory": {
+    "title": "Door organisaties aangeleverde werkgeschiedenis",
+    "note": "Overgenomen uit de eigen registraties van de hier genoemde organisaties. Niet zelf verklaard en niet onafhankelijk geverifieerd.",
+    "untitled": "Door een organisatie geregistreerd werk",
+    "hoursTerm": "Uren",
+    "hoursRecorded": "{hours} u geregistreerd in {count, plural, one {# registratie} other {# registraties}}",
+    "hoursPeriod": "{hours} u opgegeven voor een periode, in {count, plural, one {# registratie} other {# registraties}}",
+    "contested": "Betwist door een daartoe bevoegde partij",
+    "more": "Nog {count, plural, one {# vermelding} other {# vermeldingen}} niet getoond"
   },
   "historyContext": {
     "project": "Werkproject",
