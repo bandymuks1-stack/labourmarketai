@@ -561,6 +561,11 @@ export type WithheldRelation = {
  */
 export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
   {
+    table: "finance_record_line_sources",
+    reason:
+      "the issuer's accounting evidence for one invoice line: a frozen copy of which confirmed work-report rows (day, hours or quantity, confirmation ids) were billed. Your own journal entries and their reviews are exported; the invoice and its lines belong to the issuing organization's books and cannot be separated from its other customers' figures",
+  },
+  {
     table: "email_verifications_v1",
     reason:
       "proof that you control an email address (address, method, time) — held server-side as security evidence with no read path for your own session; whether your address is verified is shown to you in the product, and the evidence is available on request through the data-protection channel",
@@ -680,6 +685,13 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
  * them names a subject, the table must be exported or withheld instead.
  */
 export const ACTOR_ONLY_RELATIONS: readonly string[] = [
+  // Project-to-invoice lifecycle (20261008150000): the person is only the recorder / agreeing
+  // party of an organization's commercial or accounting record (agreed_by, created_by,
+  // confirmed_by, tax_set_by); they are not its subject.
+  "project_rate_terms",
+  "billing_periods",
+  "organization_tax_presets",
+  "finance_record_lines",
   // Discovered-organization provenance: the person is only the recorder of a
   // fact or identifier about a COMPANY, never its subject.
   "organization_facts",

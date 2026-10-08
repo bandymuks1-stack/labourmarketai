@@ -128,6 +128,8 @@ describe("1. exactly one migration owns finance_records — the human-gated I2 p
   // membership_actor_role_v1. It is the ONLY other file allowed to name
   // them; its own invariants are pinned in security-train-a-v1.test.ts.
   const ORG_AUTHORITY = "20260817123000_finance_org_authority_v1";
+  /** Owner-gated: replaces the two v1 write RPCs so an ISSUED invoice cannot change silently. */
+  const INVOICE_LIFECYCLE = "20261008150000_project_invoice_lifecycle_v1";
   // Financial ops (train J, 2026-08-17) EXTENDS finance_records additively:
   // the invoice-upgrades pair adds four nullable columns + _v2 create/update
   // commands + the engine approval mirror; the business-trips pair adds the
@@ -148,6 +150,17 @@ describe("1. exactly one migration owns finance_records — the human-gated I2 p
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
         if (f.startsWith(I2) || f.startsWith(ORG_AUTHORITY)) continue;
         const src = readFileSync(join(abs, f), "utf8");
+        if (f.startsWith(INVOICE_LIFECYCLE)) {
+          // The project-to-invoice lifecycle EXTENDS the header and REPLACES exactly the two
+          // v1 write RPCs that let an issued invoice change (update_finance_record_v1 and
+          // set_finance_record_status_v1) so they refuse it. It never creates/drops the table
+          // and never touches create_finance_record_v1.
+          expect(src, `${dir}/${f} may extend but never create/drop finance_records`).not.toMatch(
+            /(create table[^(]*\bfinance_records\b|drop table[^;]*\bfinance_records\b)/i,
+          );
+          expect(src, `${dir}/${f} must not (re)define create_finance_record_v1`).not.toMatch(/(create (or replace )?function[^(]*\bcreate_finance_record_v1\b|drop function[^(]*\bcreate_finance_record_v1\b)/i);
+          continue;
+        }
         if (TRAIN_J.some((p) => f.startsWith(p))) {
           // An EXTENSION may name the table (alter/insert/select) but must
           // never create or drop it, and must never (re)define a v1 RPC.
@@ -242,12 +255,14 @@ describe("2. writes are RPC-only, and only the finance read service touches fina
       const src = readFileSync(abs, "utf8");
       if (/\.from\("finance_records"\)/.test(src)) offenders.push(abs);
     }
-    expect(offenders.map((p) => p.split("\\").join("/"))).toEqual(
-      expect.arrayContaining([
-        expect.stringContaining("lib/finance/finance.ts"),
-      ]),
-    );
-    expect(offenders).toHaveLength(1);
+    // Two sanctioned RLS-scoped readers: the manual-records service and the project-to-invoice
+    // lifecycle reader (lines, sources and chain are read by invoice id, never summed across projects).
+    const names = offenders.map((p) => p.split("\\").join("/")).sort();
+    expect(names).toEqual([
+      expect.stringContaining("lib/finance/finance.ts"),
+      expect.stringContaining("lib/finance/project-invoice.ts"),
+    ]);
+    expect(offenders).toHaveLength(2);
   });
 
   it("reads are bounded and RLS-scoped (server client, never the admin client)", () => {

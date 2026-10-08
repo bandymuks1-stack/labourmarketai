@@ -213,6 +213,20 @@ export const CANONICAL_APP_RPCS = [
   "withdraw_service_offering_request",
   "withdraw_team_demand_offer_v1",
   "withdraw_team_enquiry_v1",
+  "add_invoice_basis_line_v1",
+  "add_project_rate_term_v1",
+  "billing_period_changes_v1",
+  "billing_period_preview_v1",
+  "correct_invoice_v1",
+  "create_billing_period_v1",
+  "create_invoice_draft_from_period_v1",
+  "discard_invoice_draft_v1",
+  "end_project_rate_term_v1",
+  "invoice_correction_chain_v1",
+  "issue_invoice_v1",
+  "save_org_tax_preset_v1",
+  "set_invoice_line_tax_v1",
+  "set_invoice_tax_v1",
 ]  as const;
 
 export type CanonicalAppRpc = (typeof CANONICAL_APP_RPCS)[number];

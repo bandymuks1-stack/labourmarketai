@@ -123,6 +123,11 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/projects": "REAL_LAUNCH_SURFACE",
   "dashboard/projects/[id]": "REAL_LAUNCH_SURFACE",
   "dashboard/projects/[id]/operations": "REAL_LAUNCH_SURFACE",
+  // Project-to-invoice lifecycle (20261008150000, owner-gated migration): agreed basis, billing periods,
+  // invoice drafts built from confirmed work, issue, correction chain. Degrades to an honest "not available yet"
+  // state until the migration is applied.
+  "dashboard/projects/[id]/invoicing": "REAL_LAUNCH_SURFACE",
+  "dashboard/projects/[id]/invoicing/[invoiceId]": "REAL_LAUNCH_SURFACE",
   "dashboard/service-requests": "REAL_LAUNCH_SURFACE",
   "dashboard/services": "REAL_LAUNCH_SURFACE",
   // W13 European Work & Business Ecosystem Marketplace — work-resource listings

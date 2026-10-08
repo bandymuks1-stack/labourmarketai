@@ -66,6 +66,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261007150000_",
       // 2026-10-08 (#2191, owner-approved RED): unshare withdraws live agency offers.
       "20261008090000_",
+      // 2026-10-08 project-to-invoice lifecycle (RED, needs-human-gate, draft; not applied).
+      "20261008150000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
