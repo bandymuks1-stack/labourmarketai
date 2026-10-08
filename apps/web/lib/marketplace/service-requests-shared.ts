@@ -192,3 +192,9 @@ export type RequestMutateResult =
    *  honestly instead of a generic "try again" (repeat actions, PR 6b). */
   | { kind: "inactive" }
   | { kind: "error"; message: string };
+
+/** The status string a status-returning RPC handed back; anything that is not a
+ *  string is treated as an unknown (non-ok) outcome, never as success. */
+export function rpcOutcome(data: unknown): string {
+  return typeof data === "string" && data.length > 0 ? data : "unknown";
+}

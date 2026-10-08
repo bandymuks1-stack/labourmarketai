@@ -976,7 +976,8 @@
         "body": "{hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} ({period}) — darbo laiko valandos, kurias jūsų organizacija įvedė žiniaraštyje arba importavo iš dokumento. Skaičiuojamos atskirai nuo žurnalo skaičių aukščiau ir prie jų nepridedamos.",
         "periodEmpty": "Šiame lange ({period}) nieko; per visą laiką {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}}. Skaičiuojamos atskirai nuo žurnalo skaičių aukščiau ir prie jų nepridedamos.",
         "rule": "Valandų įrašas sako kada ir kiek, bet ne kas buvo daroma — todėl šios valandos nepasiekia jokio įgūdžio ir jokios darbo rūšies. Tai daro tik paties žmogaus žurnalo įrašas."
-      }
+      },
+      "emptyNoEntriesLedger": "Jūsų organizacijai užfiksuotų įrašų nėra. Žemiau – ką jūsų organizacija turi apie šį žmogų."
     },
     "confirmedOfDays": "{confirmed} iš {total} d. patvirtinta vadovo įrašu",
     "confirmedNoDuration": "{confirmed} iš {entries, plural, one {# įrašo} few {# įrašų} other {# įrašų}} patvirtinta vadovo ar kliento — užfiksuota be trukmės, todėl valandų rodyti nėra",
@@ -1056,7 +1057,8 @@
         "flat": "panašiai",
         "new": "nauja"
       }
-    }
+    },
+    "emptyNoEntriesLedger": "Žurnalo įrašų dar nėra. Žemiau – darbas, kurį organizacija turi užfiksavusi."
   },
   "verification": {
     "state": {

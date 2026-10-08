@@ -976,7 +976,8 @@
         "body": "{hours} u op {days, plural, one {# dag} other {# dagen}} ({period}) — aanwezigheidsuren die uw organisatie in een urenstaat invoerde of uit een document importeerde. Gescheiden gehouden van de journaalcijfers hierboven en er niet bij opgeteld.",
         "periodEmpty": "Niets in dit venster ({period}); {hours} u op {days, plural, one {# dag} other {# dagen}} in totaal. Gescheiden gehouden van de journaalcijfers hierboven en er niet bij opgeteld.",
         "rule": "Een urenregistratie zegt wanneer en hoe lang, niet wat er is gedaan — daarom bereiken deze uren geen enkele vaardigheid en geen enkel soort werk. Alleen de journaalregistratie van de persoon doet dat."
-      }
+      },
+      "emptyNoEntriesLedger": "Geen registraties voor uw organisatie. Hieronder staat wat uw organisatie over deze persoon heeft vastgelegd."
     },
     "confirmedOfDays": "{confirmed} van {total} d. bevestigd door een registratie van de leidinggevende",
     "confirmedNoDuration": "{confirmed} van {entries, plural, one {# registratie} other {# registraties}} bevestigd door leidinggevende of klant — geregistreerd zonder duur, dus geen uren om te tonen",
@@ -1056,7 +1057,8 @@
         "flat": "ongeveer gelijk",
         "new": "nieuw"
       }
-    }
+    },
+    "emptyNoEntriesLedger": "Nog geen dagboekregistraties. Hieronder staat het werk dat de organisatie heeft vastgelegd."
   },
   "verification": {
     "state": {

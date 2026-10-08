@@ -976,7 +976,8 @@
         "body": "{hours} Std. an {days, plural, one {# Tag} other {# Tagen}} ({period}) — Anwesenheitsstunden, die Ihre Organisation in einem Stundenzettel eingetragen oder aus einem Dokument importiert hat. Getrennt von den Journalzahlen oben geführt und nicht dazugezählt.",
         "periodEmpty": "Nichts in diesem Zeitraum ({period}); insgesamt {hours} Std. an {days, plural, one {# Tag} other {# Tagen}}. Getrennt von den Journalzahlen oben geführt und nicht dazugezählt.",
         "rule": "Ein Stundeneintrag sagt wann und wie lange, nicht was getan wurde — deshalb erreichen diese Stunden keine Fähigkeit und keine Art von Arbeit. Das tut nur der Journaleintrag der Person."
-      }
+      },
+      "emptyNoEntriesLedger": "Keine Einträge für Ihre Organisation. Unten steht, was Ihre Organisation über diese Person erfasst hat."
     },
     "confirmedOfDays": "{confirmed} von {total} T. durch einen Eintrag der Führungskraft bestätigt",
     "confirmedNoDuration": "{confirmed} von {entries, plural, one {# Eintrag} other {# Einträgen}} von Führungskraft oder Kunde bestätigt — ohne Dauer erfasst, daher keine Stunden anzuzeigen",
@@ -1056,7 +1057,8 @@
         "flat": "etwa gleich",
         "new": "neu"
       }
-    }
+    },
+    "emptyNoEntriesLedger": "Noch keine Journaleinträge. Unten steht die Arbeit, die die Organisation erfasst hat."
   },
   "verification": {
     "state": {

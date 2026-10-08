@@ -2014,7 +2014,6 @@
         "recognition": {
           "title": "Erkenning vastleggen",
           "hint": "Het besluit van een onafhankelijke beoordelaar dat de getoonde competentie van een persoon aan een formele eis voldoet. Het is geen certificaat en ontstaat nooit alleen uit werkbewijs.",
-          "pending": "Erkenningen vastleggen is nog niet beschikbaar: het register erachter is nog niet vrijgegeven. Tot dan wordt een indiening geweigerd, niet opgeslagen.",
           "subject": "Lerende",
           "chooseSubject": "Kies een lerende",
           "kind": "Type eis",
@@ -8586,7 +8585,8 @@
       "accommodation_ok": "Huisvesting past",
       "city_match": "Zelfde stad",
       "location_within_radius": "Binnen de werkradius",
-      "profession_related": "Verwant beroep (gedeelde vaardigheden)"
+      "profession_related": "Verwant beroep (gedeelde vaardigheden)",
+      "skills_history_reported": "Vaardigheden genoemd in de geschiedenis van de organisatie (niet geverifieerd)"
     },
     "gap": {
       "skills_missing": "Enkele vereiste vaardigheden ontbreken",
@@ -18621,7 +18621,20 @@
       "truncated": "Er zijn meer vaardigheidssignalen dan deze weergave leest."
     },
     "shown": "De nieuwste {shown} van {total} records worden getoond. De rest blijft vastgelegd.",
-    "truncated": "Er zijn meer records dan één weergave leest. De {count} gelezen records worden getoond; totalen omvatten alleen die."
+    "truncated": "Er zijn meer records dan één weergave leest. De {count} gelezen records worden getoond; totalen omvatten alleen die.",
+    "profile": {
+      "title": "Levend profiel uit de geschiedenis van deze organisatie",
+      "subtitle": "Opgebouwd uit de gegevens die uw organisatie aanleverde, nog voor er een account bestaat. Door de organisatie gemeld, niet onafhankelijk geverifieerd. Claimt de persoon later een account, dan wordt die gekoppeld zonder deze geschiedenis te wijzigen.",
+      "unavailable": "Het werkbeeld kon nu niet worden gelezen. Dat betekent niet dat er geen werk is.",
+      "fit": {
+        "title": "Match met uw openstaande behoeften",
+        "note": "Binnen uw organisatie berekend op basis van de vaardigheden die deze geschiedenis noemt. Door de organisatie gemeld, niet geverifieerd. Niets hiervan wordt aan andere organisaties getoond.",
+        "noSignals": "Deze geschiedenis noemt nog geen vaardigheid uit de catalogus, dus er is geen match mogelijk. Dat is onbekend, geen slechte match.",
+        "none": "Geen van uw openstaande behoeften wordt geraakt door de vaardigheden die deze geschiedenis noemt.",
+        "unavailable": "De match kon nu niet worden berekend. Dat betekent niet dat die er niet is.",
+        "row": "{matched} van {total} vereiste vaardigheden genoemd in deze geschiedenis"
+      }
+    }
   },
   "qualificationRecognitions": {
     "title": "Erkenningen",
