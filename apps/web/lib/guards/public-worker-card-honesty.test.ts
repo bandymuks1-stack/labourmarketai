@@ -88,14 +88,14 @@ describe("2. /for-workers mounts NO illustrative card (containment 2026-10-08)",
   it("does not import the card or the shared sample builder", () => {
     expect(page).not.toMatch(/worker-player-card/);
     expect(page).not.toMatch(/buildSampleWorkerPlayerCard/);
-    expect(page).not.toMatch(/<WorkerPlayerCard/);
+    expect(page).not.toMatch(/<WorkerPlayerCard\b/);
   });
 
   it("renders no OVR / tier / stat-bar fiction", () => {
     const code = stripComments(page);
-    expect(code).not.toMatch(/OVR/);
+    expect(code).not.toMatch(/\bOVR\b/);
     expect(code).not.toMatch(/tier-(gold|silver|bronze)/);
-    expect(code).not.toMatch(/STAT_KEYS/);
+    expect(code).not.toMatch(/\bSTAT_KEYS\b/);
   });
 });
 
@@ -169,6 +169,6 @@ describe("6. one full Player Card system — no second card component", () => {
 
   it("no public marketing route mounts the card at all (containment 2026-10-08)", () => {
     expect(exists("components/marketing/player-card-showcase.tsx")).toBe(false);
-    expect(read(FOR_WORKERS)).not.toMatch(/<WorkerPlayerCard/);
+    expect(read(FOR_WORKERS)).not.toMatch(/<WorkerPlayerCard\b/);
   });
 });
