@@ -13,8 +13,6 @@ export async function generateMetadata({
 }
 import { PageHero } from "@/components/marketing/page-hero";
 import { RoleEnrichment } from "@/components/marketing/role-enrichment";
-import { ExamplePreviewFrame } from "@/components/marketing/example-preview-frame";
-import { AgencyPoolPreview } from "@/components/app/agency-pool-preview";
 import { AGENCY_DOOR_NEXT } from "@/lib/marketing/public-doors";
 
 export default async function ForAgenciesPage({
@@ -44,11 +42,6 @@ export default async function ForAgenciesPage({
       <RoleEnrichment
         root="agencies"
         previewKey="pool"
-        preview={
-          <ExamplePreviewFrame>
-            <AgencyPoolPreview id="agency.pool.preview" />
-          </ExamplePreviewFrame>
-        }
         ctaSource="agencies_cta"
         ctaKind="signup"
         ctaNext={AGENCY_DOOR_NEXT}

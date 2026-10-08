@@ -406,7 +406,7 @@ describe("§22 the first screen says what this is, then offers one next step", (
     expect(focus.match(/<LandingPrimaryActions\b/g) ?? []).toHaveLength(1);
     const body = focus.slice(bodyStart);
     // each hero branch renders the promise before the working entry
-    for (const branch of [body.indexOf("<LivingWorkerHero"), body.indexOf('<section className="grid gap-8 lg:grid-cols-2')]) {
+    for (const branch of [body.indexOf("<LivingWorkerHero"), body.indexOf('<section className="grid gap-8 lg:items-start')]) {
       expect(branch).toBeGreaterThan(-1);
       const from = body.slice(branch);
       expect(from.indexOf("{promise}")).toBeGreaterThan(-1);

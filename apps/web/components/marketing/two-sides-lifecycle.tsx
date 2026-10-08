@@ -14,7 +14,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import { PersonPortrait } from "@/components/app/identity/person-portrait";
 import { cn } from "@/lib/utils";
 
 /**
@@ -65,15 +64,11 @@ export function TwoSidesLifecycle({
   title,
   professionalLabel,
   companyLabel,
-  sampleName,
-  sampleInitials,
   steps,
 }: {
   readonly title: string;
   readonly professionalLabel: string;
   readonly companyLabel: string;
-  readonly sampleName: string;
-  readonly sampleInitials: string;
   readonly steps: readonly TwoSidesStep[];
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -100,7 +95,9 @@ export function TwoSidesLifecycle({
           {/* Lane labels (desktop): the two sides, aligned to their rows. */}
           <div aria-hidden className="hidden md:grid md:grid-rows-[auto_auto_auto] md:gap-y-4">
             <div className="flex min-h-[5.5rem] items-center gap-3">
-              <PersonPortrait name={sampleName} avatarUrl={null} initials={sampleInitials} width="44px" />
+              <span className="flex h-[55px] w-11 items-center justify-center rounded-xl border border-ink-500 bg-ink-700 text-text-primary">
+                <UserRound className="h-5 w-5" strokeWidth={1.75} />
+              </span>
               <span className="font-mono text-meta uppercase tracking-label text-text-primary">
                 {professionalLabel}
               </span>

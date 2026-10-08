@@ -25,8 +25,6 @@ import {
 } from "@/lib/i18n/client-messages";
 import { readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
 import { resolveActiveLocale } from "@/lib/seo/metadata";
-import { LandingJourney } from "@/components/marketing/landing-journey";
-import { buildSampleJourney } from "@/lib/marketing/sample-journey";
 import { buildLivingWorkerHero } from "@/lib/marketing/living-worker-hero";
 import { LivingWorkerHero } from "@/components/marketing/living-worker-hero";
 
@@ -86,15 +84,12 @@ export async function FocusLanding({
   const activeLocale = resolveActiveLocale(locale);
   // The ONE canonical market snapshot, through its 300 s `unstable_cache`
   // entry — one market truth, one freshness window (owner command §9/§12).
-  const [market, t, tHero, journey, livingHero] = await Promise.all([
+  const [market, t, tHero, livingHero] = await Promise.all([
     // The landing renders the supply counts only; it reads `professions`
     // nowhere, so it does not pay for the per-profession reads.
     readLiveMarketLandingSnapshot({ resolveProfessions: false }),
     getTranslations("common"),
     getTranslations("landing.hero"),
-    // The entry's SAMPLE story (owner decision 2026-09-29): translation copy
-    // + the existing sample persona — no read, no production fact.
-    buildSampleJourney(),
     buildLivingWorkerHero(),
   ]);
 
@@ -179,14 +174,11 @@ export async function FocusLanding({
                 </section>
               </>
             ) : (
-              <section className="grid gap-8 lg:grid-cols-2 lg:items-start lg:gap-x-12">
+              <section className="grid gap-8 lg:items-start">
                 <div className="order-1 max-w-3xl lg:col-start-1 lg:row-start-1 lg:self-center">
                   {promise}
                 </div>
-                <div className="order-3 lg:col-start-2 lg:row-start-1" data-testid="landing-entry-story">
-                  <LandingJourney journey={journey} />
-                </div>
-                <div className="order-2 lg:col-span-2 lg:row-start-2">
+                <div>
                 <PublicEntry
                   supply={
                     market.activeVacancies !== null && market.distinctEmployers !== null
