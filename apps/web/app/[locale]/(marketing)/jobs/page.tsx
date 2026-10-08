@@ -7,6 +7,8 @@ import { buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import {
   searchPublicVacancyPreviews,
+  readPublicVacancyCountryFacetCached,
+  readCountryParam,
   type PublicVacancyPreview,
 } from "@/lib/vacancy-store/public-vacancy-preview";
 import { PublicVacancyCard } from "@/components/marketing/public-vacancy-card";
@@ -227,6 +229,44 @@ const UNAVAILABLE: L = {
   pl: "Tablica ofert pracy nie odpowiedziała na czas. Spróbuj ponownie za chwilę.",
 };
 
+const COUNTRY_LABEL: L = {
+  en: "Country",
+  lt: "Šalis",
+  ru: "Страна",
+  nl: "Land",
+  de: "Land",
+  pl: "Kraj",
+};
+
+const COUNTRY_ANY: L = {
+  en: "All countries",
+  lt: "Visos šalys",
+  ru: "Все страны",
+  nl: "Alle landen",
+  de: "Alle Länder",
+  pl: "Wszystkie kraje",
+};
+
+/** A country with no live ad answers for ITSELF - it never falls back to
+ *  showing every country's ads under a filter the reader asked for. */
+const EMPTY_FOR_COUNTRY: Record<ActiveLocale, (c: string) => string> = {
+  en: (c) => `No open jobs in ${c} right now.`,
+  lt: (c) => `Šiuo metu nėra laisvų darbo vietų šalyje: ${c}.`,
+  ru: (c) => `Сейчас нет открытых вакансий: ${c}.`,
+  nl: (c) => `Momenteel geen openstaande vacatures in ${c}.`,
+  de: (c) => `Derzeit keine offenen Stellen in ${c}.`,
+  pl: (c) => `Obecnie brak otwartych ofert pracy: ${c}.`,
+};
+
+/** Region names come from the platform's own CLDR data (no hand-kept list). */
+function countryName(code: string, locale: ActiveLocale): string {
+  try {
+    return new Intl.DisplayNames([locale], { type: "region" }).of(code) ?? code;
+  } catch {
+    return code;
+  }
+}
+
 const SAVED_TAB: L = {
   en: "Saved",
   lt: "Išsaugoti",
@@ -303,6 +343,7 @@ export default async function JobsPage({
     page?: string;
     saved?: string;
     profession?: string;
+    country?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -379,13 +420,59 @@ export default async function JobsPage({
     if (r.status === "ok") savedPreviews = r.previews;
   }
 
+  // ── COUNTRY (Norway vs Sweden) ─────────────────────────────────────────────
+  // The facet is the MAINTAINED per-country row (constant cost) and doubles as
+  // the allow-list. The country filter is country-only: a typed word or a
+  // profession wins and the country param is ignored (country+profession is not
+  // provably within the anonymous 3 s timeout). The plain default view still
+  // calls the generic path below with no country argument.
+  const rawCountry =
+    typeof sp.country === "string" && /^[A-Za-z]{2}$/.test(sp.country.trim())
+      ? sp.country.trim().toUpperCase()
+      : null;
+  const countryRequested = !query && !profession && !showSaved ? rawCountry : null;
+  // No country asked for: the facet read runs IN PARALLEL with the generic
+  // search, so the default board waits for neither.
+  const facetPromise = showSaved
+    ? Promise.resolve({ status: "ok" as const, countries: [] })
+    : readPublicVacancyCountryFacetCached();
+  const defaultSearch =
+    !showSaved && !countryRequested
+      ? searchPublicVacancyPreviews({ query, professionSlug: profession, page })
+      : null;
+  const facet = await facetPromise;
+  const country = countryRequested ? readCountryParam(countryRequested, facet) : null;
+  // A requested country the facet does not list is an honest empty answer; one
+  // the facet could not confirm is "unavailable" - never "all jobs".
+  const countryUnknown =
+    countryRequested !== null && country === null && facet.status === "ok";
+  const countryUnconfirmed =
+    countryRequested !== null && country === null && facet.status !== "ok";
+  const countryOptions = facet.countries
+    .map((c) => ({ ...c, label: countryName(c.code, active) }))
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, active));
+
   const result = showSaved
     ? { status: "ok" as const, vacancies: [], totalCount: 0, hasMore: false }
-    : await searchPublicVacancyPreviews({
-        query,
-        professionSlug: profession,
-        page,
-      });
+    : countryUnconfirmed
+      ? {
+          status: (facet.status === "unavailable"
+            ? "unavailable"
+            : "not_provisioned") as "unavailable" | "not_provisioned",
+          vacancies: [],
+          totalCount: 0,
+          hasMore: false,
+        }
+      : countryUnknown
+        ? { status: "ok" as const, vacancies: [], totalCount: 0, hasMore: false }
+        : defaultSearch
+          ? await defaultSearch
+          : await searchPublicVacancyPreviews({
+              query,
+              professionSlug: profession,
+              country,
+              page,
+            });
 
   const pageHref = (p: number) => {
     const qs = new URLSearchParams();
@@ -393,6 +480,7 @@ export default async function JobsPage({
     // Dropping the filter on page 2 would silently widen the result set under
     // the reader — the same bug class as a search box that forgets its term.
     if (profession) qs.set("profession", profession);
+    if (country) qs.set("country", country);
     if (p > 1) qs.set("page", String(p));
     const s = qs.toString();
     return s ? `/jobs?${s}` : "/jobs";
@@ -462,6 +550,45 @@ export default async function JobsPage({
           {SEARCH_BUTTON[active]}
         </button>
       </form>
+
+      {/* COUNTRY SELECTOR: plain links (real URLs, no client JS). Hidden when the
+          facet could not be read - no fake chips. Choosing a country starts a
+          country view; typing a search or picking a profession above searches
+          every country. */}
+      {!showSaved && countryOptions.length > 1 && (
+        <nav
+          aria-label={COUNTRY_LABEL[active]}
+          data-testid="jobs-country-selector"
+          className="mt-4 flex flex-wrap items-center gap-2 text-sm"
+        >
+          <span className="text-text-muted">{COUNTRY_LABEL[active]}:</span>
+          <Link
+            href="/jobs"
+            aria-current={country || countryRequested ? undefined : "page"}
+            className={
+              country || countryRequested
+                ? "rounded-full border px-3 py-1 text-text-muted"
+                : "rounded-full border border-text-primary px-3 py-1 font-medium"
+            }
+          >
+            {COUNTRY_ANY[active]}
+          </Link>
+          {countryOptions.map((c) => (
+            <Link
+              key={c.code}
+              href={`/jobs?country=${c.code}`}
+              aria-current={country === c.code ? "page" : undefined}
+              className={
+                country === c.code
+                  ? "rounded-full border border-text-primary px-3 py-1 font-medium"
+                  : "rounded-full border px-3 py-1 text-text-muted"
+              }
+            >
+              {c.label} ({c.count.toLocaleString()})
+            </Link>
+          ))}
+        </nav>
+      )}
 
       {/* The saved view exists only for a signed-in worker whose bookmark read
           succeeded. Anonymous visitors and non-workers see no tab at all —
@@ -546,7 +673,9 @@ export default async function JobsPage({
                   professions have no live ad today, and "nothing found" without
                   saying what was asked reads as "the board is broken". */}
               <p>
-                {profession && query
+                {countryUnknown && countryRequested
+                  ? EMPTY_FOR_COUNTRY[active](countryName(countryRequested, active))
+                  : profession && query
                   ? EMPTY_FOR_PROFESSION_AND_QUERY[active](
                       professionName(profession),
                       query,
@@ -555,6 +684,14 @@ export default async function JobsPage({
                     ? EMPTY_FOR_PROFESSION[active](professionName(profession))
                     : EMPTY[active]}
               </p>
+              {countryUnknown && (
+                <Link
+                  href="/jobs"
+                  className="mt-3 inline-block underline underline-offset-4"
+                >
+                  {COUNTRY_ANY[active]}
+                </Link>
+              )}
               {profession && (
                 <Link
                   href={query ? `/jobs?q=${encodeURIComponent(query)}` : "/jobs"}

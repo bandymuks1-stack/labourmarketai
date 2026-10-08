@@ -234,8 +234,19 @@ const inFlight = new Map<string, Promise<PublicVacancySearchResult>>();
 
 /** The parameter tuple, and ONLY the parameter tuple. Anything caller-specific
  *  appearing in this key would mean the cached value is not shareable. */
-function cacheKey(query: string | null, professionSlug: string | null, offset: number): string {
-  return JSON.stringify([query, professionSlug, offset, PUBLIC_VACANCY_PAGE_SIZE]);
+function cacheKey(
+  query: string | null,
+  professionSlug: string | null,
+  offset: number,
+  country: string | null = null,
+): string {
+  // The country slot is appended ONLY when set, so the unfiltered key (and its
+  // behaviour) is exactly what it was before the country filter existed.
+  return JSON.stringify(
+    country
+      ? [query, professionSlug, offset, PUBLIC_VACANCY_PAGE_SIZE, country]
+      : [query, professionSlug, offset, PUBLIC_VACANCY_PAGE_SIZE],
+  );
 }
 
 function remember(key: string, entry: CacheEntry): void {
@@ -257,6 +268,10 @@ export async function searchPublicVacancyPreviews(
   input: {
     query?: string | null;
     professionSlug?: string | null;
+    /** ISO alpha-2, already validated against the facet. Served by the
+     *  country-only RPC; combining it with query/profession is not supported
+     *  (not provably within the anon timeout) and the caller must not try. */
+    country?: string | null;
     page?: number;
   },
   suppliedClient?: SupabaseClient,
@@ -266,7 +281,8 @@ export async function searchPublicVacancyPreviews(
   const offset = (page - 1) * limit;
   const queryParam = input.query?.trim() || null;
   const slugParam = input.professionSlug?.trim() || null;
-  const key = cacheKey(queryParam, slugParam, offset);
+  const countryParam = input.country?.trim().toUpperCase() || null;
+  const key = cacheKey(queryParam, slugParam, offset, countryParam);
   const now = Date.now();
 
   const cached = resultCache.get(key);
@@ -284,7 +300,10 @@ export async function searchPublicVacancyPreviews(
   if (pending) return pending;
 
   const run = (async (): Promise<PublicVacancySearchResult> => {
-    const result = await runSearch({ queryParam, slugParam, limit, offset }, suppliedClient);
+    const result = await runSearch(
+      { queryParam, slugParam, countryParam, limit, offset },
+      suppliedClient,
+    );
     if (result.status === "ok") remember(key, { kind: "fresh", at: Date.now(), value: result });
     else if (result.status === "unavailable") remember(key, { kind: "cooldown", at: Date.now() });
     return result;
@@ -302,23 +321,27 @@ async function runSearch(
   params: {
     queryParam: string | null;
     slugParam: string | null;
+    countryParam: string | null;
     limit: number;
     offset: number;
   },
   suppliedClient?: SupabaseClient,
 ): Promise<PublicVacancySearchResult> {
-  const { queryParam, slugParam, limit, offset } = params;
+  const { queryParam, slugParam, countryParam, limit, offset } = params;
 
   const supabase = suppliedClient ?? (await createClient());
-  const { data, error } = await asAny(supabase).rpc(
-    "search_public_vacancy_previews_v1",
-    {
-      p_query: queryParam,
-      p_profession_slug: slugParam,
-      p_limit: limit,
-      p_offset: offset,
-    },
-  );
+  const { data, error } = countryParam
+    ? await asAny(supabase).rpc("search_public_vacancy_country_board_v1", {
+        p_country: countryParam,
+        p_limit: limit,
+        p_offset: offset,
+      })
+    : await asAny(supabase).rpc("search_public_vacancy_previews_v1", {
+        p_query: queryParam,
+        p_profession_slug: slugParam,
+        p_limit: limit,
+        p_offset: offset,
+      });
 
   if (error) {
     if (isNotProvisioned(error.code)) {
@@ -415,6 +438,85 @@ export async function readPublicVacancySupplyCounts(
     distinctEmployers: toNumber(row?.distinct_employers ?? null) ?? 0,
     lastRefreshedAt: row?.last_refreshed_at ?? null,
   };
+}
+
+export interface PublicVacancyCountryFacet {
+  /** `unavailable`: the read failed — the selector is hidden, never faked. */
+  readonly status: PublicVacancyPreviewStatus | "unavailable";
+  readonly countries: readonly { readonly code: string; readonly count: number }[];
+}
+
+/**
+ * The countries that currently hold active, unexpired ads, read from the
+ * MAINTAINED per-country row (constant cost, <= 10 min stale) - never a live
+ * aggregate (that took 5.4 s cold, against anon's 3 s timeout). This is also
+ * the allow-list for the `country` search param.
+ */
+export async function readPublicVacancyCountryFacet(
+  suppliedClient?: SupabaseClient,
+): Promise<PublicVacancyCountryFacet> {
+  try {
+    const supabase = suppliedClient ?? (await createClient());
+    const { data, error } = await asAny(supabase).rpc(
+      "list_public_vacancy_country_counts_v1",
+    );
+    if (error) {
+      if (isNotProvisioned(error.code)) {
+        return { status: "not_provisioned", countries: [] };
+      }
+      return { status: "unavailable", countries: [] };
+    }
+    const rows = (data ?? []) as {
+      country: string;
+      active_vacancies: number | string | null;
+    }[];
+    const countries = rows
+      .map((r) => ({
+        code: String(r.country ?? "").toUpperCase(),
+        count: toNumber(r.active_vacancies) ?? 0,
+      }))
+      .filter((c) => /^[A-Z]{2}$/.test(c.code) && c.count > 0);
+    return { status: "ok", countries };
+  } catch {
+    return { status: "unavailable", countries: [] };
+  }
+}
+
+const FACET_FRESH_MS = 60_000;
+let facetCache: { at: number; value: PublicVacancyCountryFacet } | null = null;
+let facetInFlight: Promise<PublicVacancyCountryFacet> | null = null;
+
+/** In-process, 60 s, coalesced; only an `ok` facet is remembered, so a failure
+ *  is retried on the next render rather than served as data. */
+export async function readPublicVacancyCountryFacetCached(): Promise<PublicVacancyCountryFacet> {
+  if (facetCache && Date.now() - facetCache.at < FACET_FRESH_MS) return facetCache.value;
+  if (facetInFlight) return facetInFlight;
+  facetInFlight = readPublicVacancyCountryFacet()
+    .then((v) => {
+      if (v.status === "ok") facetCache = { at: Date.now(), value: v };
+      return v;
+    })
+    .finally(() => {
+      facetInFlight = null;
+    });
+  return facetInFlight;
+}
+
+/** Test hook. */
+export function __resetPublicVacancyFacetCache(): void {
+  facetCache = null;
+  facetInFlight = null;
+}
+
+/** A `country` param is honoured only if it is in the facet. Anything else
+ *  (unknown, lowercase junk, a country with no live rows) is "no filter". */
+export function readCountryParam(
+  raw: string | string[] | undefined,
+  facet: PublicVacancyCountryFacet,
+): string | null {
+  if (typeof raw !== "string") return null;
+  const code = raw.trim().toUpperCase();
+  return facet.countries.some((c) => c.code === code) ? code : null;
 }
 
 /**
