@@ -2393,7 +2393,8 @@
       "accommodation_ok": "[EN] Accommodation works",
       "city_match": "[EN] Same city",
       "location_within_radius": "[EN] Within the work radius",
-      "profession_related": "[EN] Related profession (shared skills)"
+      "profession_related": "[EN] Related profession (shared skills)",
+      "skills_history_reported": "[EN] Skills named in organization history (not verified)"
     },
     "gap": {
       "skills_missing": "[EN] Some required skills missing",
@@ -7165,6 +7166,19 @@
       "truncated": "Det finnes flere ferdighetssignaler enn denne visningen leser."
     },
     "shown": "Viser de nyeste {shown} av {total} poster. Resten forblir registrert.",
-    "truncated": "Det finnes flere poster enn én visning leser. De {count} leste vises; summer dekker bare dem."
+    "truncated": "Det finnes flere poster enn én visning leser. De {count} leste vises; summer dekker bare dem.",
+    "profile": {
+      "title": "[EN] Living profile from this organization's history",
+      "subtitle": "[EN] Built from the records your organization supplied, before any account exists. Organization-reported, not independently verified. If the person later claims an account, it is linked without changing this history.",
+      "unavailable": "[EN] The work picture could not be read right now. That does not mean there is no work.",
+      "fit": {
+        "title": "[EN] Fit to your open needs",
+        "note": "[EN] Worked out inside your organization from the skills this history names. Organization-reported, not verified. Nothing here is shown to other organizations.",
+        "noSignals": "[EN] This history names no catalogue skill yet, so it cannot be matched. That is unknown, not a poor fit.",
+        "none": "[EN] None of your open needs is spoken to by the skills this history names.",
+        "unavailable": "[EN] Fit could not be computed right now. That does not mean there is none.",
+        "row": "[EN] {matched} of {total} required skills named in this history"
+      }
+    }
   }
 }

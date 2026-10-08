@@ -124,6 +124,49 @@ export async function readEvidenceRecordsForWorker(
     return { kind: "error" };
   }
   const personIds = ((people.data ?? []) as { id: string }[]).map((p) => p.id);
+  return readEvidenceRecordsForPeople(supabase, personIds);
+}
+
+/**
+ * THE HISTORICAL PERSON, BEFORE ANY CLAIM (decision 0020, owner 2026-10-07).
+ *
+ * The same read, the same row shape, the same standing/withdrawal/period/
+ * time-semantics rules as `readEvidenceRecordsForWorker` - keyed on the
+ * ROSTER ROW instead of an account. It exists so an organization-provided
+ * history forms the person's work model (Work Intelligence, Living CV
+ * history) without an account link being a prerequisite. Because both entry
+ * points hand their person ids to ONE function (`readEvidenceRecordsForPeople`),
+ * a person's figures are identical before and after a claim: claiming only
+ * changes WHICH key finds the rows, never which rows count.
+ *
+ * Authority is the caller's RLS (a manager of the supplying organization
+ * sees the organization's records); the organization pin below is a belt on
+ * top of it, so a person id from another organization yields an empty ledger.
+ */
+export async function readEvidenceRecordsForOrganizationPerson(
+  supabase: SupabaseClient,
+  input: { readonly organizationId: string; readonly personId: string },
+): Promise<WorkerEvidenceRead> {
+  const person = await db(supabase)
+    .from("organization_people")
+    .select("id")
+    .eq("id", input.personId)
+    .eq("organization_id", input.organizationId)
+    .maybeSingle();
+  if (person.error) {
+    if (MISSING_OBJECT_CODES.has(person.error.code ?? "")) return { kind: "needs-migration" };
+    console.error("[evidence] roster person read failed:", person.error.code);
+    return { kind: "error" };
+  }
+  if (!person.data) return { kind: "ok", rows: [], periodRows: [] };
+  return readEvidenceRecordsForPeople(supabase, [person.data.id as string]);
+}
+
+/** The ONE read behind both keys: live, effective records of these roster rows. */
+export async function readEvidenceRecordsForPeople(
+  supabase: SupabaseClient,
+  personIds: readonly string[],
+): Promise<WorkerEvidenceRead> {
   if (personIds.length === 0) return { kind: "ok", rows: [], periodRows: [] };
 
   // Dated AND period records in ONE bounded read: a period row has no
