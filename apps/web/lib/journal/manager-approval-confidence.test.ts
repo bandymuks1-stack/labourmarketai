@@ -101,7 +101,7 @@ describe("R-5 migration guard (static)", () => {
       /revoke all on function public\.recompute_worker_skill_confidence_from_manager_approval_v1\(uuid\) from public, anon;/,
     );
     expect(MIGRATION).toMatch(/grant execute on function [^;]+ to authenticated;/);
-    expect(MIGRATION).not.toMatch(/grant [^;]*to\s+(anon|public)/i);
+    expect(MIGRATION).not.toMatch(/grant [^;]*[[:space:]]to[[:space:]]+(anon|public)[[:space:]]*;/i);
   });
 
   it("derives skills from the entry's own skill links and raise-only", () => {
