@@ -58,6 +58,7 @@ import { getProjectManageFacts } from "@/lib/projects/responsible";
 import { listOrganizationMembers } from "@/lib/company/memberships";
 import { getProjectHoursSideBySide } from "@/lib/projects/project-hours";
 import { viewerWorkToday } from "@/lib/time/viewer-day";
+import { ProjectFinancialHistory } from "@/components/app/project-financial-history";
 
 export const dynamic = "force-dynamic";
 
@@ -991,6 +992,15 @@ export default async function ProjectOperationsPage({
           {tCentre("evidence.link")} →
         </Link>
       </section>
+
+      {/* Project-to-invoice lifecycle: durable financial history (periods and
+            issued invoices / credit notes), read from the frozen snapshots. Renders
+            nothing until the owner-gated lifecycle migration is applied. */}
+      <ProjectFinancialHistory
+        projectId={id}
+        organizationId={projectOrgId}
+        locale={locale}
+      />
 
       {/* Honest scope line: the centre composes records that already exist —
           nothing absent (milestones, issue registers, resource tables) is

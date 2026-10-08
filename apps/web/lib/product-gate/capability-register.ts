@@ -1311,6 +1311,20 @@ const MARKETPLACE: readonly CapabilityRow[] = [
     deferredByDesign: true,
     note: "Corrected 2026-09-15: FIVE lmc_* base tables and TWO views are live in production (re-counted from information_schema 2026-10-03; the earlier 'seven tables' counted the two views as tables). Sixteen RPCs live; all six flags remain false in code AND in the database. Spend has no reversal — that is the recorded blocker, and it is why this stays ARCHITECTURE_ONLY + deferredByDesign even though the machinery exists: the capability is deliberately unarmed, not unbuilt. Arming it is MKT-7, an owner decision (two independent owner acts). The row now names `lib/lmc/lmc-account.ts` and `/dashboard/account`, where LmcBalanceSection renders the disabled state — so the claim is checkable rather than merely asserted. Naming them does not arm anything.",
   },
+  {
+    id: "MKT-9",
+    domain: "marketplace",
+    title: "Project-to-invoice lifecycle",
+    worldElement: "objects",
+    status: "BLOCKED",
+    strongestEvidence: "TEST_PROVEN",
+    anchors: ["lib/finance/project-invoice.ts", "lib/finance/invoice-tax-model.ts", "app/[locale]/dashboard/projects/[id]/invoicing"],
+    coreModule: "lib/finance/project-invoice.ts",
+    surfaces: ["app/[locale]/dashboard/projects/[id]/invoicing/page.tsx"],
+    note:
+      "Agreed commercial basis -> billing period -> invoice built ONLY from internally confirmed work reports (client acceptance of the WORK is an optional, separate evidence class) -> country-neutral tax snapshot per line -> issue (immutable) -> correction by credit note and replacement. Proven on a scratch PostgreSQL 16 (scripts/db-proof/project-invoice-lifecycle-v1.sh); NOT applied to production and never driven by a human in a browser: the migration 20261008150000 is a needs-human-gate draft. There is NO invoice approval or acceptance step, and no payment processing. Numbering is configured per issuing organization and document type; the recipient is a frozen snapshot of the issuer's own contact record; corrections support full and partial credit notes; day and any generic unit are billable in their own unit.",
+    ownerDecision: "Approve the exact SQL of 20261008150000_project_invoice_lifecycle_v1 (RED: SECURITY DEFINER, grants, triggers, policy replacement).",
+  },
 ];
 
 // ── I. COMMUNICATION · ATTENTION ────────────────────────────────────────────

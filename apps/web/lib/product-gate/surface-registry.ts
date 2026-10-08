@@ -1763,6 +1763,142 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     },
   },
 
+  // PROJECT-TO-INVOICE LIFECYCLE (PR #2203, DRAFT, needs-human-gate). Two
+  // issuer-side screens over the billing chain agreed commercial basis ->
+  // confirmed work reports -> billing period -> invoice -> correction chain.
+  // Honest answers only: nothing here is dressed up as a workspace surface and
+  // the assistant/MCP door exists (lib/capabilities/project-invoice-capabilities.ts) and is what
+  // `aiControlled` / `aiCanWorkWithIt` rest on - it prepares and drafts, it never issues.
+  {
+    id: "/dashboard/projects/[id]/invoicing",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "The issuing organization's invoicing workspace for ONE project: rate terms, billing periods with explicit evidence selection, recipients, series configuration and the list of drafts and issued invoices.",
+    whyNotChat:
+      "Choosing which approved work rows are billed, confirming tax treatment line by line and issuing a numbered, immutable document are reviewed multi-object decisions with legal weight; a one-question-at-a-time dialog would hide the evidence selection and the numbers the issuer must see before issuing.",
+    whyNotExistingComponent:
+      "The legacy finance record register is EUR-only, manual and has no basis, evidence, tax or correction chain; it deliberately cannot represent lifecycle invoices. The project operations page shows work and hours, not billing. Neither can carry a period, a selection and a frozen document.",
+    owner: "Product architecture (DI) - project-to-invoice owner chain, PR #2203",
+    ownsAction: "project_invoice.manage",
+
+    worldElement: "organizations",
+    whyNotExistingElement:
+      "It extends the ORGANIZATION as issuer over a PROJECT's confirmed work. No new world element; invoices are finance records of an existing organization and project.",
+    chatIntegration:
+      "The assistant/MCP capabilities project_invoice.* (one capability registry, run as the caller, draft -> confirm) read the project's invoicing state, explain what is billable and what is held back and why, create invoice DRAFTS from explicitly selected billable work, and help with rate terms, periods, recipients, draft lines and tax treatment through the same database commands this page calls. The assistant never issues an invoice, confirms tax or creates a credit note: those stay explicit owner/admin actions here, and the assistant returns the link.",
+    avatarEffect:
+      "None. Invoicing changes no person's profile, skills or history.",
+    mapEffect:
+      "None - recorded as reflectedOnMap: false rather than invented.",
+    journalRelation:
+      "Reads confirmed, billable Work Journal evidence through the shared evidence reader and bills only explicitly selected rows; it never writes the journal.",
+
+    pillar: "world_map",
+    objectType: "project",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "Turn the agreed commercial basis and confirmed work of one project into a traceable, numbered invoice and its correction chain.",
+      graphEdge:
+        "PROJECT -> ORGANIZATION (issuer) money edge; distinct from the work/hours edge served by project operations.",
+      whyReuseDamages:
+        "Folding billing into project operations would mix a legal, issuer-authority-only document flow into a page managers read for work; the legacy register cannot represent basis, tax or corrections.",
+      evidence: [
+        "supabase/migrations/20261008150000_project_invoice_lifecycle_v1.sql: lifecycle tables and RPC-only writes",
+        "scripts/db-proof/project-invoice-lifecycle-v1.sh: scratch-PG proof of authority, immutability and numbering",
+        "apps/web/lib/finance/project-invoice-model.ts: the one model both screens read",
+      ],
+      ownerRuling:
+        "Owner chain recorded in PR #2203 (client/org -> Project -> commercial basis -> work reports -> invoice -> correction chain) under decision 0015 / A-14; the owner's confirmation of this distinct-surface classification is part of the needs-human-gate review.",
+    },
+  },
+  {
+    id: "/dashboard/projects/[id]/invoicing/[invoiceId]",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "One invoice or credit note: draft editing (lines, per-line tax treatment, recipient), issue, frozen issued view, evidence per line, correction chain and export.",
+    whyNotChat:
+      "Reviewing line-level evidence and tax before issuing an immutable numbered document needs the whole document in view; a dialog cannot show it.",
+    whyNotExistingComponent:
+      "The project invoicing list shows periods and documents; the document itself (lines, sources, tax, corrections) has no existing detail component.",
+    owner: "Product architecture (DI) - project-to-invoice owner chain, PR #2203",
+    ownsAction: null,
+
+    worldElement: "organizations",
+    whyNotExistingElement:
+      "Same element as the invoicing list screen: the issuing ORGANIZATION's finance record for a PROJECT.",
+    chatIntegration:
+      "The assistant/MCP reads this document (project_invoice.invoice_get), prepares a correction without creating one (project_invoice.correction_prepare) and helps complete a draft; it never issues, confirms tax or credits - those are explicit owner/admin actions on this page, and the assistant returns the link.",
+    avatarEffect:
+      "None. Viewing or preparing a document changes no person's profile, skills or history.",
+    mapEffect:
+      "None - recorded as reflectedOnMap: false rather than invented.",
+    journalRelation:
+      "Read-only: each line shows the confirmed journal evidence it bills.",
+
+    pillar: "world_map",
+    objectType: "project",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "Inspect, complete, issue and correct a single invoice document with its evidence and tax treatment.",
+      graphEdge:
+        "PROJECT -> ORGANIZATION (issuer) money edge, document level.",
+      whyReuseDamages:
+        "A modal on the list would hide line evidence and the correction chain that must be readable before issue.",
+      evidence: [
+        "apps/web/lib/finance/project-invoice-model.ts: document, line, source and correction shapes",
+        "scripts/db-proof/project-invoice-lifecycle-v1.sh: immutability of issued documents",
+      ],
+      ownerRuling:
+        "Owner chain recorded in PR #2203 under decision 0015 / A-14; the owner's confirmation of this distinct-surface classification is part of the needs-human-gate review.",
+    },
+  },
+
 ] as const;
 
 /**

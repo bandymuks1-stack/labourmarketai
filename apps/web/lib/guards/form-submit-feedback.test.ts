@@ -131,6 +131,10 @@ const NATIVE_NAV = new Set([
   // banner at the top of the page), exactly the tasks/finance pattern.
   // Pure server component — no client state.
   "app/[locale]/dashboard/projects/[id]/operations/page.tsx",
+  // Project-to-invoice lifecycle: every form is a NATIVE-NAV server action that ALWAYS redirects back with the
+  // database's own ?notice=<status> answer, rendered as a role="status" banner. Pure server components.
+  "app/[locale]/dashboard/projects/[id]/invoicing/page.tsx",
+  "app/[locale]/dashboard/projects/[id]/invoicing/[invoiceId]/page.tsx",
   // Project facts form (R-3, 2026-09-19) — mounted in the same manage strip:
   // setProjectFactsAction ALWAYS redirects back with ?notice= (updated /
   // invalid / invalid_dates / completed_read_only / needs_migration / …),

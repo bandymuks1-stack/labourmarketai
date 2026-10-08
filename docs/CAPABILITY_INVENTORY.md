@@ -608,6 +608,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | MKT-6 | Business trips | `business_trips` (0 rows) | IMPL (0 rows) | — | 3 | `TripsSection` renders on `/dashboard/finance`; trips already feed commitment/capacity. Calendar link still open |
 | MKT-7 | Billing / plans / entitlements | `plans`, `billing_*` | DEFERRED | — | 1 | test mode; two independent owner acts to arm |
 | MKT-8 | LMC credit ledger | 5 tables, 16 RPCs | DEFERRED | — | 3 | all six flags false in code AND database |
+| MKT-9 | Project-to-invoice lifecycle | `project_rate_terms`, `billing_periods`, `finance_record_lines`, `finance_records` | BLOCKED (draft, not applied) | — | 1 | owner approves the exact SQL; no invoice approval step, no payment processing |
 
 #### I. COMMUNICATION · ATTENTION
 
