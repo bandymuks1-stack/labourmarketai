@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 /**
  * Layout wrappers for the project-invoicing surfaces. They paint through the
  * canonical `Card` primitive (visual contract v1), so the invoicing pages carry
- * no hand-typed `card-border`. Pure server components; no state, no copy.
+ * no hand-rolled card border classes. Pure server components; no state, no copy.
  */
 export function InvoicePanel({
   id,
