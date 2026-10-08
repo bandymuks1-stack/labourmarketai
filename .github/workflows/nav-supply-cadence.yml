@@ -117,6 +117,23 @@ jobs:
               hasBearerPrefix: /^\s*Bearer\s/i.test(raw),
               lengthBucket: raw.length === 0 ? "0" : raw.length < 100 ? "<100" : raw.length < 400 ? "100-399" : raw.length < 1200 ? "400-1199" : ">=1200",
               jwtSegments: seg.length,
+              exactLength: raw.length,
+              segmentLengths: seg.map((x) => x.length),
+              segmentFingerprints12: seg.map((x) => (x.length ? fp(x) : null)),
+              base64urlCharsetOnly: /^[A-Za-z0-9._-]+$/.test(raw),
+              nonAsciiCount: [...raw].filter((c) => c.charCodeAt(0) > 126 || c.charCodeAt(0) < 33).length,
+              headerKeys: (() => {
+                try {
+                  const h = JSON.parse(Buffer.from(seg[0].replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8"));
+                  return { keys: Object.keys(h).sort(), alg: h.alg ?? null, typ: h.typ ?? null };
+                } catch (_) { return null; }
+              })(),
+              payloadDecodesToPrintableRatio: (() => {
+                try {
+                  const b = Buffer.from(seg[1].replace(/-/g, "+").replace(/_/g, "/"), "base64");
+                  return b.length ? Math.round((b.filter((c) => c >= 32 && c < 127).length / b.length) * 100) / 100 : 0;
+                } catch (_) { return null; }
+              })(),
               claims,
               nowIso: new Date().toISOString(),
             }, null, 2));
