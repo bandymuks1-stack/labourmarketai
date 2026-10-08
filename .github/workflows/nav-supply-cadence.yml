@@ -85,7 +85,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: NAV token SHAPE (fingerprint and metadata only; never the value)
-        if: steps.gate.outputs.configuration_gated == 'false'
+        if: always()
         env:
           NAV_TOKEN_UNDER_TEST: ${{ secrets.VACANCY_SOURCE_NAV_API_TOKEN }}
         run: |
@@ -140,7 +140,7 @@ jobs:
           '
 
       - name: Bounded NAV stream session (canonical operator runner)
-        if: steps.gate.outputs.configuration_gated == 'false'
+        if: false  # DIAGNOSTIC BRANCH: shape check only, no NAV request
         working-directory: apps/web
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
