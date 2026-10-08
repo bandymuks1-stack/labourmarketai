@@ -2,7 +2,7 @@
   "files": {
     "app/[locale]/page.tsx": "29818d172da3311417844a7ac066c8dfd3e72aa873829c4ec1e2e0da8067ecfb",
     "lib/market/live-market-landing.ts": "2953b2835101594604e8d0273e4c6becd3be6fb9c0427a2a3f1c3608c065d99a",
-    "app/[locale]/focus-landing/focus-landing.tsx": "8fa9159029d3b6ee3811a4638ae25f1df1ac3a0cfcce428a9e0fc92bdaa77886",
+    "app/[locale]/focus-landing/focus-landing.tsx": "3f9db4720efabc0f5d7db1b42d4a7c6be25c2de62742ccde3d7ec4306ef09c9f",
     "components/marketing/public-entry.tsx": "e01d1a84ef97d923bed451e702f106ceba20b24b3e70145b28d035f0e198145e",
     "lib/marketing/public-entry.ts": "51848fe4a89f9d1cc8d8563c28660cc13b8b989cfdf0163473dbe989ffd61b85",
     "components/marketing/product-chain-band.tsx": "7c783b5307ad308396157d91bbe9002f889728a603c07a8072df52f492d78024",
@@ -15,8 +15,6 @@
     "components/marketing/public-market-map-band.tsx": "996c87d45f44d5dc02f8cce9c9ece066df7def66da353f6ef9fff275d82522b7",
     "components/marketing/landing-primary-actions.tsx": "1ff914c67a14d87041c517b95d386d779e26a899ed9bb6e1d3f2e1ad7a2da85f",
     "components/marketing/landing-open-jobs-band.tsx": "d4aca1f453b24c178d9a68144b1f0147426c0affd015113edd3490b3a4370e3b",
-    "components/marketing/landing-journey.tsx": "5b45e5c2c73080ff08f10cfa678c36f30d26e37dfc8ca83997b8ff93c605328e",
-    "lib/marketing/sample-journey.ts": "83860ac7e57594045824a41242a9a2f50e6828d6c4860cf36b7bd5ff6f98fa0c",
     "components/marketing/living-worker-hero.tsx": "3df617e9fb02d8c46eb470788d87d75c86c3a0775f4ee63cf0aaadfbcd84370d",
     "lib/marketing/living-worker-hero.ts": "7855371657eb13ea1aaaf8814474a7ce6b3fe794b900f0adb761532b92b9b7e8"
   },

@@ -137,3 +137,39 @@ describe("navigation and chat expose no 3D / world / mannequin surface", () => {
     expect(isCanonicallyRedirected("/dashboard/player-card")).toBe(true);
   });
 });
+
+describe("no named illustrative persona or fixture is rendered by public components (containment 2026-10-08)", () => {
+  // The photoreal home hero (living-worker-hero, labelled SAMPLE) is an owner
+  // decision of its own and is deliberately NOT scanned here.
+  const SCANNED = [
+    ...walk("app/[locale]/(marketing)"),
+    ...walk("app/[locale]/focus-landing"),
+    ...walk("components/marketing"),
+  ].filter((rel) => !/living-worker-hero/.test(rel));
+
+  it("none names Rasa J., Restaurant Ąžuolas or an EXAMPLE persona banner", () => {
+    const offenders = SCANNED.filter((rel) =>
+      /Rasa J\.|Ąžuolas|NOT A REAL PERSON|playercards["']|sample\.name|sample\.organization/.test(stripComments(read(rel))),
+    );
+    expect(offenders, offenders.join(", ")).toEqual([]);
+  });
+
+  it("the persona-driven landing story and lifecycle subject are gone", () => {
+    expect(exists("components/marketing/landing-journey.tsx")).toBe(false);
+    expect(exists("lib/marketing/sample-journey.ts")).toBe(false);
+    const lifecycle = stripComments(read("components/marketing/work-lifecycle-section.tsx"));
+    expect(lifecycle).not.toMatch(/\.fact\b|subject=|playercards/);
+    const twoSides = stripComments(read("components/marketing/two-sides-section.tsx"));
+    expect(twoSides).not.toMatch(/sampleName|playercards/);
+  });
+
+  it("the /for-* pages mount no fabricated preview fixture", () => {
+    for (const rel of [
+      "app/[locale]/(marketing)/for-companies/page.tsx",
+      "app/[locale]/(marketing)/for-agencies/page.tsx",
+      "app/[locale]/(marketing)/for-workers/page.tsx",
+    ]) {
+      expect(stripComments(read(rel)), rel).not.toMatch(/ExamplePreviewFrame|DemandPreviewCard|AgencyPoolPreview/);
+    }
+  });
+});

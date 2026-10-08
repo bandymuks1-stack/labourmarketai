@@ -14,8 +14,6 @@ export async function generateMetadata({
 }
 import { PageHero } from "@/components/marketing/page-hero";
 import { RoleEnrichment } from "@/components/marketing/role-enrichment";
-import { ExamplePreviewFrame } from "@/components/marketing/example-preview-frame";
-import { DemandPreviewCard } from "@/components/app/demand-preview-card";
 
 export default async function ForCompaniesPage({
   params,
@@ -46,11 +44,6 @@ export default async function ForCompaniesPage({
       <RoleEnrichment
         root="companies"
         previewKey="demand"
-        preview={
-          <ExamplePreviewFrame>
-            <DemandPreviewCard id="demand.featured.1" />
-          </ExamplePreviewFrame>
-        }
         ctaSource="companies_cta"
         ctaKind="signup"
       />

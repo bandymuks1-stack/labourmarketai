@@ -668,8 +668,6 @@ export const FROZEN_LANDING_FILES = [
   "components/marketing/landing-open-jobs-band.tsx",
   // Owner decision 2026-09-29: the freeze was lifted for the ENTRY HERO
   // only; the new entry story is frozen with it as the new floor.
-  "components/marketing/landing-journey.tsx",
-  "lib/marketing/sample-journey.ts",
   // Owner directive 2026-09-29 ("realistic living worker hero"): the same
   // lifted scope — the entry hero only. The living worker hero and its data
   // builder are frozen with it as the new floor; the photographs themselves
