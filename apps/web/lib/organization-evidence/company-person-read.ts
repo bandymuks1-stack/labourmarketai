@@ -12,6 +12,10 @@ import { readCompetencySignalsForPerson, type PersonCompetencySignalsRead } from
 import type { EvidenceRecordView } from "./import-core";
 import type { PlaceObjectFacts } from "./company-work-history";
 import { summarizePersonHistory, type PersonHistorySummary } from "./person-history-summary";
+import { loadHistoricalPersonIntelligence } from "@/lib/journal/work-intelligence-read";
+import type { WorkIntelligence } from "@/lib/journal/work-intelligence";
+import { buildCvOrganizationHistory, type CvOrganizationHistoryEntry } from "@/lib/cv-export/organization-history";
+import { readRosterPersonFit, type RosterPersonFitRead } from "@/lib/market/roster-person-fit-read";
 
 /**
  * THE COMPANY-SIDE HISTORICAL PERSON CARD — one roster person, keyed on
@@ -45,6 +49,27 @@ export interface CompanyPerson {
   readonly linkedWorkerId: string | null;
 }
 
+/**
+ * THE HISTORICAL PERSON'S LIVING PROFILE (decision 0020, owner 2026-10-07):
+ * what the organization-provided history adds up to, built by the SAME pure
+ * builders the claimed person's Living CV and Work Intelligence use, from the
+ * organization's own records - with no account link as a prerequisite.
+ *
+ *   intelligence   the work model (organization ledger only; no journal, no
+ *                  declared skills exist without an account). null = the
+ *                  ledger could not be read - UNKNOWN, never "no work".
+ *   cvHistory      the Living CV's organization-history entries; null = unknown
+ *   fit            this organization's own open needs this history speaks to
+ *
+ * Everything here is class ORGANIZATION_REPORTED: derived from what the
+ * organization recorded, not independently verified.
+ */
+export interface HistoricalPersonProfile {
+  readonly intelligence: WorkIntelligence | null;
+  readonly cvHistory: readonly CvOrganizationHistoryEntry[] | null;
+  readonly fit: RosterPersonFitRead;
+}
+
 export type CompanyPersonLoad =
   | {
       readonly kind: "ready";
@@ -56,6 +81,8 @@ export type CompanyPersonLoad =
       readonly truncated: boolean;
       readonly summary: PersonHistorySummary;
       readonly signals: PersonCompetencySignalsRead;
+      /** Set by `loadCompanyPerson` (the web door); absent from the bare read. */
+      readonly profile?: HistoricalPersonProfile;
     }
   | { readonly kind: "not-found" }
   | { readonly kind: "hidden" }
@@ -154,10 +181,33 @@ export async function loadCompanyPerson(locale: string, personId: string): Promi
       ? { kind: "unavailable" }
       : { kind: "hidden" };
   }
-  return readCompanyPerson({
+  const base = await readCompanyPerson({
     caller,
     organizationId: org.organizationId,
     organizationName: org.organizationName,
     personId,
   });
+  if (base.kind !== "ready") return base;
+  const intelligence = await loadHistoricalPersonIntelligence(supabase, {
+    organizationId: org.organizationId,
+    personId,
+  });
+  const fit = await readRosterPersonFit(supabase, {
+    userId: user.id,
+    organizationId: org.organizationId,
+    personId,
+  });
+  return {
+    ...base,
+    profile: {
+      intelligence,
+      cvHistory: intelligence?.organizationContextRecords
+        ? buildCvOrganizationHistory(
+            intelligence.organizationContextRecords,
+            intelligence.organizationPeriodRecords ?? [],
+          )
+        : null,
+      fit,
+    },
+  };
 }
