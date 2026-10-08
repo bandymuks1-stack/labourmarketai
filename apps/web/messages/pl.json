@@ -18781,7 +18781,7 @@
       "term_ended": "Podstawa handlowa zakończona.",
       "period_created": "Okres rozliczeniowy utworzony.",
       "draft_created": "Szkic faktury utworzony z potwierdzonych raportów pracy. Przed wystawieniem ustaw sposób opodatkowania każdej pozycji.",
-      "draft_discarded": "Szkic odrzucony. Okres rozliczeniowy jest znowu otwarty.",
+      "draft_discarded": "Szkic odrzucony.",
       "line_added": "Pozycja dodana.",
       "tax_saved": "Sposób opodatkowania zapisany.",
       "invoice_issued": "Faktura wystawiona. Okres rozliczeniowy jest teraz zablokowany.",
@@ -18814,7 +18814,18 @@
       "error": "Coś poszło nie tak. Nic nie zostało zmienione.",
       "corrected": "Nota korygująca wystawiona. Pierwotna faktura pozostaje bez zmian i jest z nią powiązana.",
       "invalid_replacement": "Tej faktury nie można zastąpić z tego okresu.",
-      "already_replaced": "Ta faktura ma już fakturę zastępczą."
+      "already_replaced": "Ta faktura ma już fakturę zastępczą.",
+      "recipient_saved": "Odbiorca zapisany.",
+      "recipient_archived": "Odbiorca zarchiwizowany.",
+      "series_saved": "Seria numeracji zapisana. Dotyczy dokumentów wystawianych od teraz; wystawione już numery nigdy się nie zmieniają.",
+      "recipient_missing": "Przed wystawieniem wybierz odbiorcę.",
+      "recipient_incomplete": "Odbiorca musi mieć nazwę prawną, adres i kraj, zanim faktura zostanie wystawiona.",
+      "recipient_not_found": "Nie ma takiego odbiorcy w Twojej książce adresowej.",
+      "selection_not_billable": "Część wyboru nie jest już dowodem do zafakturowania. Przeładuj okres i wybierz ponownie.",
+      "time_basis_conflict": "Tej samej pracy nie można fakturować jednocześnie według godzin i według dni. Wybierz jedną podstawę.",
+      "over_credit": "Ta korekta przekracza kwotę pozostałą na pozycji faktury.",
+      "invalid_line": "Tej pozycji nie ma na tej fakturze.",
+      "limit_reached": "Osiągnięto limit."
     },
     "kind": {
       "invoice": "Faktura",
@@ -18855,7 +18866,7 @@
       "end": "Zakończ podstawę",
       "basis": "Podstawa",
       "unit": "Jednostka",
-      "unitHint": "Tylko dla ilości, na przykład square_meters. Godziny używają hours.",
+      "unitHint": "Tylko dla ilości, na przykład square_meters lub days. Godziny używają hours.",
       "rate": "Stawka lub kwota",
       "currency": "Waluta (3 litery)",
       "label": "Nazwa",
@@ -18923,13 +18934,19 @@
       }
     },
     "draft": {
-      "customerName": "Nazwa klienta",
-      "customerVatId": "Identyfikator podatkowy klienta (opcjonalnie)",
-      "customerAddress": "Adres klienta (opcjonalnie)",
-      "clientOrgId": "ID organizacji odbiorcy (opcjonalnie)",
-      "clientOrgHint": "Tylko odniesienie. Nie daje odbiorcy dostępu ani roli zatwierdzającego.",
       "dueDate": "Termin płatności (opcjonalnie)",
-      "create": "Zbuduj szkic faktury"
+      "create": "Zbuduj szkic faktury",
+      "selectEvidence": "Dowody pracy do zafakturowania",
+      "selectEvidenceHelp": "Fakturowana jest tylko zatwierdzona praca wybrana tutaj. To, co zostanie niezaznaczone, pozostaje dostępne i nigdy nie jest fakturowane po cichu.",
+      "noAgreedRate": "dla tego dnia nie obowiązuje uzgodniona stawka",
+      "recipient": "Odbiorca",
+      "chooseRecipient": "Wybierz odbiorcę",
+      "noRecipientYet": "Najpierw dodaj odbiorcę w sekcji powyżej.",
+      "held": {
+        "not_confirmed": "jeszcze niepotwierdzone",
+        "client_disputed": "zakwestionowane przez klienta",
+        "billed": "już zafakturowane"
+      }
     },
     "changes": {
       "title": "Zmiany od wystawienia faktury",
@@ -18947,7 +18964,8 @@
       "title": "Faktury i noty korygujące",
       "empty": "Brak faktur.",
       "draftNoNumber": "Szkic",
-      "netOnly": "netto"
+      "netOnly": "netto",
+      "totalsNote": "Sumy są pokazywane osobno dla każdej waluty i nigdy nie są dodawane między walutami."
     },
     "view": {
       "title": "Faktura",
@@ -18966,7 +18984,7 @@
       "issueSubmit": "Wystaw fakturę",
       "discard": "Odrzuć szkic",
       "correctTitle": "Skoryguj tę fakturę",
-      "correctHelp": "Wystawionej faktury nigdy się nie edytuje. Nota korygująca zostawia oryginał nietknięty, zapisuje kto, kiedy i dlaczego skorygował, i jest z nim powiązana. W razie potrzeby można potem zbudować fakturę zastępczą. Korekta nie zależy od klienta.",
+      "correctHelp": "Wystawionej faktury nigdy się nie edytuje. Nota korygująca zostawia oryginał nietknięty, zapisuje kto, kiedy i dlaczego skorygował, i jest z nim powiązana. Okres pozostaje zablokowany. Gdy faktura jest w pełni skorygowana, można zbudować fakturę zastępczą. Korekta nie zależy od klienta.",
       "correctReason": "Powód",
       "correctSubmit": "Wystaw notę korygującą",
       "chain": "Łańcuch korekt",
@@ -18976,7 +18994,7 @@
       "correctReference": "Odniesienie (opcjonalnie)",
       "creditedNotice": "Ta faktura została skorygowana notą {number}. Zachowana bez zmian.",
       "replaceTitle": "Faktura zastępcza",
-      "replaceHelp": "Opcjonalnie. Buduje nowy szkic dla tego samego okresu z bieżących potwierdzonych raportów pracy i łączy go z tą fakturą oraz jej notą korygującą.",
+      "replaceHelp": "Opcjonalnie, gdy faktura jest w pełni skorygowana. Buduje nowy szkic dla tego samego okresu z bieżącej zatwierdzonej pracy i łączy go z tą fakturą oraz jej notą korygującą. Okres pozostaje zablokowany.",
       "replaceSubmit": "Zbuduj szkic faktury zastępczej",
       "replacesNotice": "Ta faktura zastępuje wcześniejszą fakturę."
     },
@@ -19017,6 +19035,41 @@
       "reason": "Powód",
       "reference": "Odniesienie",
       "actedAt": "Zapisano"
+    },
+    "recipients": {
+      "title": "Odbiorcy",
+      "intro": "Twoja własna książka adresowa podmiotów, którym wystawiasz faktury. Odbiorca nie potrzebuje konta w LabourMarket. Każda faktura zamraża kopię odbiorcy w chwili wystawienia.",
+      "empty": "Brak odbiorców.",
+      "incomplete": "niekompletne: przed wystawieniem dodaj adres i kraj",
+      "archive": "Archiwizuj",
+      "legalName": "Nazwa prawna",
+      "country": "Kraj (2 litery)",
+      "address": "Adres",
+      "taxId": "Identyfikator podatkowy / VAT (opcjonalnie)",
+      "reference": "Twoje odniesienie (opcjonalnie)",
+      "contactName": "Osoba kontaktowa (opcjonalnie)",
+      "contactEmail": "E-mail kontaktowy (opcjonalnie)",
+      "minimum": "Aby wystawić fakturę, odbiorca potrzebuje nazwy prawnej, adresu i kraju. Identyfikator podatkowy jest zapisywany, jeśli go podasz.",
+      "save": "Zapisz odbiorcę",
+      "frozenNote": "To odbiorca w chwili wystawienia; późniejsze zmiany w książce adresowej go nie zmieniają.",
+      "invoiceTitle": "Odbiorca",
+      "invoiceHelp": "Wybierz lub utwórz odbiorcę tej faktury. Kopia zostaje zamrożona przy wystawieniu.",
+      "noneChosen": "Nie wybrano jeszcze odbiorcy.",
+      "attach": "Użyj tego odbiorcy",
+      "createNew": "Utwórz nowego odbiorcę",
+      "saveAndAttach": "Zapisz i użyj"
+    },
+    "series": {
+      "title": "Numeracja",
+      "intro": "Każdy typ dokumentu ma w Twojej organizacji własną numerację: prefiks, znak rozdzielający, liczbę cyfr i, jeśli chcesz, licznik zaczynający się co roku od nowa. Numery idą kolejno bez luk i po wystawieniu nigdy się nie zmieniają.",
+      "prefix": "Prefiks",
+      "separator": "Znak rozdzielający",
+      "pad": "Cyfry",
+      "yearBased": "Zaczynaj od nowa co rok",
+      "save": "Zapisz",
+      "example": "Następny numer będzie wyglądał tak: {example}",
+      "notConfigured": "Jeszcze nie skonfigurowano",
+      "note": "Jeśli serii nie skonfigurowano, domyślna jest tworzona i zapisywana przy wystawieniu pierwszego dokumentu tego typu. Zmiana serii dotyczy tylko dokumentów wystawianych później."
     }
   }
 }

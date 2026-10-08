@@ -10,6 +10,9 @@ begin
   if (select count(*) from public.project_rate_terms) > 0
      or (select count(*) from public.billing_periods) > 0
      or (select count(*) from public.finance_record_lines) > 0
+     or (select count(*) from public.invoice_recipients) > 0
+     or (select count(*) from public.invoice_series_configs) > 0
+     or (select count(*) from public.invoice_number_counters) > 0
      or exists (select 1 from public.finance_records where issuer_org_id is not null or billing_period_id is not null
                 or issued_at is not null or invoice_kind <> 'invoice') then
     raise exception 'rollback refused: invoice lifecycle rows exist (financial history)';
@@ -20,6 +23,8 @@ begin
 end $$;
 
 drop trigger if exists finance_records_issued_guard on public.finance_records;
+drop trigger if exists finance_records_lifecycle_currency_guard on public.finance_records;
+drop trigger if exists finance_record_lines_credit_guard on public.finance_record_lines;
 drop policy if exists fr_select on public.finance_records;
 create policy fr_select on public.finance_records
   for select to authenticated
@@ -27,12 +32,15 @@ create policy fr_select on public.finance_records
 
 drop table if exists public.finance_record_line_sources;
 drop table if exists public.finance_record_lines;
-drop table if exists public.invoice_number_sequences;
+drop table if exists public.invoice_number_counters;
+drop table if exists public.invoice_series_configs;
 drop table if exists public.organization_tax_presets;
 
 alter table public.finance_records drop constraint if exists fr_credit_shape;
 alter table public.finance_records drop constraint if exists fr_no_approval_on_lifecycle;
 drop index if exists public.fr_one_replacement_per_invoice;
+drop index if exists public.fr_issuer_seq_uq;
+drop index if exists public.fr_credit_of_idx;
 drop index if exists public.fr_one_live_invoice_per_period;
 drop index if exists public.fr_issuer_number_uq;
 drop index if exists public.fr_one_credit_per_invoice;
@@ -43,9 +51,12 @@ alter table public.finance_records
   drop column if exists invoice_kind, drop column if exists supersedes_id, drop column if exists replaces_id,
   drop column if exists correction_reason, drop column if exists correction_reference, drop column if exists corrected_by,
   drop column if exists corrected_at, drop column if exists credited_at, drop column if exists credited_by_id,
+  drop column if exists number_series, drop column if exists number_year, drop column if exists number_seq,
+  drop column if exists recipient_id, drop column if exists recipient_snapshot,
   drop column if exists issued_at, drop column if exists issued_by, drop column if exists customer_vat_id, drop column if exists customer_address,
   drop column if exists tax_rounding, drop column if exists net_total_cents, drop column if exists tax_total_cents,
   drop column if exists gross_total_cents, drop column if exists tax_breakdown;
+drop table if exists public.invoice_recipients;
 drop table if exists public.billing_periods;
 drop table if exists public.project_rate_terms;
 
@@ -284,14 +295,23 @@ drop function if exists public.save_org_tax_preset_v1(uuid, text, text, numeric,
 drop function if exists public.create_billing_period_v1(uuid, date, date, uuid);
 drop function if exists public.mark_billing_period_ready_v1(uuid, boolean);
 drop function if exists public.billing_period_preview_v1(uuid);
-drop function if exists public.create_invoice_draft_from_period_v1(uuid, text, uuid, text, text, date, text, uuid);
+drop function if exists public.create_invoice_draft_from_period_v1(uuid, text, uuid, text, text, date, text, uuid, uuid, jsonb);
 drop function if exists public.add_invoice_basis_line_v1(uuid, uuid, numeric, text);
 drop function if exists public.set_invoice_line_tax_v1(uuid, text, numeric, text);
 drop function if exists public.set_invoice_tax_v1(uuid, text, numeric, text, boolean);
 drop function if exists public.update_invoice_draft_details_v1(uuid, text, uuid, text, text, date, text);
 drop function if exists public.discard_invoice_draft_v1(uuid);
 drop function if exists public.issue_invoice_v1(uuid, boolean);
-drop function if exists public.correct_invoice_v1(uuid, text, text);
+drop function if exists public.correct_invoice_v1(uuid, text, text, jsonb);
+drop function if exists public.configure_invoice_series_v1(uuid, text, text, text, int, boolean);
+drop function if exists public.save_invoice_recipient_v1(uuid, uuid, text, text, text, text, text, text, text, uuid, uuid);
+drop function if exists public.archive_invoice_recipient_v1(uuid);
+drop function if exists public.set_invoice_recipient_v1(uuid, uuid);
+drop function if exists public.project_invoice_totals_v1(uuid);
+drop function if exists public._invoice_take_number_v1(uuid, text);
+drop function if exists public.invoice_period_reader_v1(uuid, uuid);
+drop function if exists public.finance_records_lifecycle_currency_guard_v1();
+drop function if exists public.finance_record_lines_credit_guard_v1();
 drop function if exists public.invoice_correction_chain_v1(uuid);
 drop function if exists public.billing_period_changes_v1(uuid);
 drop function if exists public._invoice_period_evidence_v1(uuid, uuid);

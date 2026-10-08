@@ -76,6 +76,70 @@ export type TaxBreakdownRow = {
   readonly lineCount: number;
 };
 
+/** The recipient AS ISSUED: frozen with the invoice. Not a LabourMarket user record. */
+export type RecipientSnapshot = {
+  readonly legalName: string;
+  readonly address: string | null;
+  readonly country: string | null;
+  readonly taxId: string | null;
+  readonly contactName: string | null;
+  readonly contactEmail: string | null;
+  readonly reference: string | null;
+};
+
+/** One entry of the ISSUER's contact book (mutable; invoices keep their own snapshot). */
+export type InvoiceRecipient = RecipientSnapshot & {
+  readonly id: string;
+  readonly linkedOrganizationId: string | null;
+};
+
+export type SeriesDocumentType = "invoice" | "credit_note";
+
+export type SeriesConfig = {
+  readonly documentType: SeriesDocumentType;
+  readonly prefix: string;
+  readonly separator: string;
+  readonly pad: number;
+  readonly yearBased: boolean;
+};
+
+/** Totals of issued documents of ONE project, one row per (currency, kind): never summed across currencies. */
+export type CurrencyTotal = {
+  readonly currency: string;
+  readonly kind: InvoiceKind;
+  readonly documents: number;
+  readonly netCents: number;
+  readonly taxCents: number;
+  readonly grossCents: number;
+};
+
+/** Which currencies appear in a set of totals (a sum over them is meaningless, so none is offered). */
+export function totalsByCurrency(rows: readonly CurrencyTotal[]): ReadonlyMap<string, readonly CurrencyTotal[]> {
+  const out = new Map<string, CurrencyTotal[]>();
+  for (const r of rows) out.set(r.currency, [...(out.get(r.currency) ?? []), r]);
+  return out;
+}
+
+/** What an invoice number would look like for a series (preview only; the database allocates the real one). */
+export function formatNumberPreview(cfg: SeriesConfig, year: number, seq: number): string {
+  return [cfg.prefix || null, cfg.yearBased ? String(year) : null, String(seq).padStart(cfg.pad, "0")]
+    .filter((p): p is string => p !== null)
+    .join(cfg.separator);
+}
+
+/** Row key the issuer's explicit selection uses (entry + source). */
+export function selectionKey(r: { entryId: string; sourceKey: string }): string {
+  return `${r.entryId}|${r.sourceKey}`;
+}
+
+export function parseSelectionKeys(keys: readonly string[]): { entry_id: string; source_key: string }[] {
+  return keys.flatMap((k) => {
+    const i = k.indexOf("|");
+    if (i <= 0) return [];
+    return [{ entry_id: k.slice(0, i), source_key: k.slice(i + 1) }];
+  });
+}
+
 export type InvoiceHeader = {
   readonly id: string;
   readonly projectId: string | null;
@@ -102,6 +166,11 @@ export type InvoiceHeader = {
   readonly issuerOrgId: string | null;
   readonly clientOrgId: string | null;
   readonly taxRounding: string;
+  readonly recipientId: string | null;
+  readonly recipient: RecipientSnapshot | null;
+  readonly numberSeries: SeriesDocumentType | null;
+  readonly numberYear: number | null;
+  readonly numberSeq: number | null;
   readonly netTotalCents: number | null;
   readonly taxTotalCents: number | null;
   readonly grossTotalCents: number | null;
@@ -258,7 +327,7 @@ function csvCell(v: string | number | null | undefined): string {
 export function invoiceToCsv(view: InvoiceView, labels: CsvLabels): string {
   const h = view.header;
   const head = [
-    "document_kind", "number", "status", "issued_at", "currency", "customer", "customer_vat_id",
+    "document_kind", "number", "status", "issued_at", "currency", "customer", "customer_vat_id", "customer_country", "customer_address",
     "line_no", "basis", "description", "quantity", "unit", "unit_price", "net", "tax_treatment",
     "tax_rate_percent", "tax", "gross", "evidence_class", "client_accepted_quantity", "tax_note",
   ];
@@ -267,6 +336,7 @@ export function invoiceToCsv(view: InvoiceView, labels: CsvLabels): string {
     rows.push(
       [
         labels.kind[h.kind], h.invoiceNumber, h.status, h.issuedAt, h.currency, h.customerName, h.customerVatId,
+        h.recipient?.country ?? "", h.recipient?.address ?? h.customerAddress ?? "",
         l.lineNo, labels.basis[l.basisType], l.description, formatQuantity(l.quantity), l.unit,
         centsToDecimalString(l.unitPriceCents, h.currency), centsToDecimalString(l.netCents, h.currency),
         l.taxTreatment ? labels.treatment[l.taxTreatment] : "", l.taxRatePercent ?? "",
@@ -348,7 +418,7 @@ dl{display:grid;grid-template-columns:max-content 1fr;gap:2px 16px}dt{opacity:.7
 ${banner}
 <dl><dt>${escapeHtml(labels.number)}</dt><dd>${escapeHtml(h.invoiceNumber ?? "-")}</dd>
 <dt>${escapeHtml(labels.issued)}</dt><dd>${escapeHtml(h.issuedAt ? h.issuedAt.slice(0, 10) : "-")}</dd>
-<dt>${escapeHtml(labels.customer)}</dt><dd>${escapeHtml(h.customerName)}${h.customerAddress ? `<div class="small">${escapeHtml(h.customerAddress)}</div>` : ""}</dd>
+<dt>${escapeHtml(labels.customer)}</dt><dd>${escapeHtml(h.recipient?.legalName ?? h.customerName)}${(h.recipient?.address ?? h.customerAddress) ? `<div class="small">${escapeHtml(h.recipient?.address ?? h.customerAddress ?? "")}${h.recipient?.country ? `, ${escapeHtml(h.recipient.country)}` : ""}</div>` : ""}</dd>
 ${h.customerVatId ? `<dt>${escapeHtml(labels.vatId)}</dt><dd>${escapeHtml(h.customerVatId)}</dd>` : ""}</dl>
 <table><thead><tr><th>#</th><th>${escapeHtml(labels.colDescription)}</th><th class="r">${escapeHtml(labels.colQuantity)}</th><th class="r">${escapeHtml(labels.colUnitPrice)}</th><th class="r">${escapeHtml(labels.colNet)}</th><th class="r">${escapeHtml(labels.colTax)}</th><th class="r">${escapeHtml(labels.colGross)}</th><th>${escapeHtml(labels.colEvidence)}</th></tr></thead><tbody>${lineRows}</tbody></table>
 <h2>${escapeHtml(labels.totalsHeading)}</h2>

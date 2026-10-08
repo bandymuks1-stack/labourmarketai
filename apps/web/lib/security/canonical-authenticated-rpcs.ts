@@ -227,6 +227,11 @@ export const CANONICAL_APP_RPCS = [
   "save_org_tax_preset_v1",
   "set_invoice_line_tax_v1",
   "set_invoice_tax_v1",
+  "archive_invoice_recipient_v1",
+  "configure_invoice_series_v1",
+  "project_invoice_totals_v1",
+  "save_invoice_recipient_v1",
+  "set_invoice_recipient_v1",
 ]  as const;
 
 export type CanonicalAppRpc = (typeof CANONICAL_APP_RPCS)[number];

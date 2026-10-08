@@ -18781,7 +18781,7 @@
       "term_ended": "Komercinis pagrindas užbaigtas.",
       "period_created": "Fakturavimo laikotarpis sukurtas.",
       "draft_created": "Sąskaitos juodraštis sukurtas iš patvirtintų darbo ataskaitų. Prieš išrašydami nustatykite kiekvienos eilutės mokesčių režimą.",
-      "draft_discarded": "Juodraštis atmestas. Fakturavimo laikotarpis vėl atidarytas.",
+      "draft_discarded": "Juodraštis atmestas.",
       "line_added": "Eilutė pridėta.",
       "tax_saved": "Mokesčių režimas išsaugotas.",
       "invoice_issued": "Sąskaita išrašyta. Fakturavimo laikotarpis užrakintas.",
@@ -18814,7 +18814,18 @@
       "error": "Kažkas nepavyko. Nieko nepakeista.",
       "corrected": "Kreditinė sąskaita išrašyta. Pradinė sąskaita nepakito ir susieta su ja.",
       "invalid_replacement": "Šios sąskaitos iš šio laikotarpio pakeisti negalima.",
-      "already_replaced": "Ši sąskaita jau turi pakeičiančią sąskaitą."
+      "already_replaced": "Ši sąskaita jau turi pakeičiančią sąskaitą.",
+      "recipient_saved": "Gavėjas išsaugotas.",
+      "recipient_archived": "Gavėjas archyvuotas.",
+      "series_saved": "Numeracijos serija išsaugota. Ji taikoma nuo šiol išrašomiems dokumentams; jau išrašyti numeriai nesikeičia.",
+      "recipient_missing": "Prieš išrašydami pasirinkite gavėją.",
+      "recipient_incomplete": "Prieš išrašant sąskaitą gavėjas turi turėti juridinį pavadinimą, adresą ir šalį.",
+      "recipient_not_found": "Šio gavėjo jūsų adresatų knygoje nėra.",
+      "selection_not_billable": "Dalis jūsų pasirinkimo nebėra išrašytini įrodymai. Iš naujo įkelkite laikotarpį ir pasirinkite dar kartą.",
+      "time_basis_conflict": "To paties darbo negalima išrašyti ir pagal valandas, ir pagal dienas. Pasirinkite vieną pagrindą.",
+      "over_credit": "Šis kreditas didesnis nei likutis sąskaitos eilutėje.",
+      "invalid_line": "Tokios eilutės šioje sąskaitoje nėra.",
+      "limit_reached": "Pasiektas limitas."
     },
     "kind": {
       "invoice": "Sąskaita faktūra",
@@ -18855,7 +18866,7 @@
       "end": "Užbaigti pagrindą",
       "basis": "Pagrindas",
       "unit": "Vienetas",
-      "unitHint": "Tik kiekiui, pavyzdžiui square_meters. Valandoms naudojama hours.",
+      "unitHint": "Tik kiekiui, pavyzdžiui square_meters arba days. Valandoms naudojama hours.",
       "rate": "Įkainis arba suma",
       "currency": "Valiuta (3 raidės)",
       "label": "Pavadinimas",
@@ -18923,13 +18934,19 @@
       }
     },
     "draft": {
-      "customerName": "Kliento pavadinimas",
-      "customerVatId": "Kliento mokesčių mokėtojo kodas (nebūtina)",
-      "customerAddress": "Kliento adresas (nebūtina)",
-      "clientOrgId": "Gavėjo organizacijos ID (nebūtina)",
-      "clientOrgHint": "Tik nuoroda. Gavėjui nesuteikia nei prieigos, nei patvirtinimo vaidmens.",
       "dueDate": "Apmokėjimo terminas (nebūtina)",
-      "create": "Sudaryti sąskaitos juodraštį"
+      "create": "Sudaryti sąskaitos juodraštį",
+      "selectEvidence": "Išrašytini darbo įrodymai",
+      "selectEvidenceHelp": "Išrašomas tik čia pažymėtas patvirtintas darbas. Nepažymėtas lieka prieinamas ir niekada neišrašomas tyliai.",
+      "noAgreedRate": "šiai dienai sutarto įkainio nėra",
+      "recipient": "Gavėjas",
+      "chooseRecipient": "Pasirinkite gavėją",
+      "noRecipientYet": "Pirmiausia pridėkite gavėją aukščiau esančiame skyriuje.",
+      "held": {
+        "not_confirmed": "dar nepatvirtinta",
+        "client_disputed": "kliento užginčyta",
+        "billed": "jau išrašyta"
+      }
     },
     "changes": {
       "title": "Pakeitimai po sąskaitos išrašymo",
@@ -18947,7 +18964,8 @@
       "title": "Sąskaitos ir kreditinės sąskaitos",
       "empty": "Sąskaitų dar nėra.",
       "draftNoNumber": "Juodraštis",
-      "netOnly": "be mokesčių"
+      "netOnly": "be mokesčių",
+      "totalsNote": "Sumos rodomos pagal valiutą ir niekada nesumuojamos tarp valiutų."
     },
     "view": {
       "title": "Sąskaita faktūra",
@@ -18966,7 +18984,7 @@
       "issueSubmit": "Išrašyti sąskaitą",
       "discard": "Atmesti juodraštį",
       "correctTitle": "Ištaisyti šią sąskaitą",
-      "correctHelp": "Išrašyta sąskaita niekada netaisoma. Kreditinė sąskaita palieka originalą nepaliestą, užfiksuoja kas, kada ir kodėl ištaisė, ir susiejama su juo. Prireikus galima sudaryti pakeičiančią sąskaitą. Taisymas nepriklauso nuo kliento.",
+      "correctHelp": "Išrašyta sąskaita niekada netaisoma. Kreditinė sąskaita palieka originalą nepaliestą, užfiksuoja kas, kada ir kodėl ištaisė, ir susiejama su juo. Laikotarpis lieka užrakintas. Kai sąskaita visiškai kredituota, galima sudaryti pakeičiančią sąskaitą. Taisymas nepriklauso nuo kliento.",
       "correctReason": "Priežastis",
       "correctSubmit": "Išrašyti kreditinę sąskaitą",
       "chain": "Taisymų grandinė",
@@ -18976,7 +18994,7 @@
       "correctReference": "Nuoroda (nebūtina)",
       "creditedNotice": "Ši sąskaita buvo kredituota kreditine sąskaita {number}. Ji išsaugota nepakitusi.",
       "replaceTitle": "Pakeičianti sąskaita",
-      "replaceHelp": "Neprivaloma. Sukuria naują to paties laikotarpio juodraštį iš dabartinių patvirtintų darbo ataskaitų ir susieja jį su šia sąskaita bei jos kreditine sąskaita.",
+      "replaceHelp": "Neprivaloma, kai sąskaita visiškai kredituota. Sukuria naują to paties laikotarpio juodraštį iš dabartinio patvirtinto darbo ir susieja jį su šia sąskaita bei jos kreditine sąskaita. Laikotarpis lieka užrakintas.",
       "replaceSubmit": "Sudaryti pakeičiančios sąskaitos juodraštį",
       "replacesNotice": "Ši sąskaita pakeičia ankstesnę sąskaitą."
     },
@@ -19017,6 +19035,41 @@
       "reason": "Priežastis",
       "reference": "Nuoroda",
       "actedAt": "Užfiksuota"
+    },
+    "recipients": {
+      "title": "Gavėjai",
+      "intro": "Jūsų pačių adresatų knyga: kam išrašote sąskaitas. Gavėjui nereikia LabourMarket paskyros. Išrašant sąskaitą jos gavėjo kopija užšaldoma.",
+      "empty": "Gavėjų dar nėra.",
+      "incomplete": "neišsami: prieš išrašydami pridėkite adresą ir šalį",
+      "archive": "Archyvuoti",
+      "legalName": "Juridinis pavadinimas",
+      "country": "Šalis (2 raidės)",
+      "address": "Adresas",
+      "taxId": "Mokesčių mokėtojo kodas (nebūtina)",
+      "reference": "Jūsų nuoroda (nebūtina)",
+      "contactName": "Kontaktinis asmuo (nebūtina)",
+      "contactEmail": "Kontaktinis el. paštas (nebūtina)",
+      "minimum": "Sąskaitai išrašyti gavėjas turi turėti juridinį pavadinimą, adresą ir šalį. Mokesčių mokėtojo kodas saugomas, jei jį nurodote.",
+      "save": "Išsaugoti gavėją",
+      "frozenNote": "Tai gavėjas, kaip išrašyta; vėlesni adresatų knygos pakeitimai jo nekeičia.",
+      "invoiceTitle": "Gavėjas",
+      "invoiceHelp": "Pasirinkite arba sukurkite šios sąskaitos gavėją. Išrašant sąskaitą jo kopija užšaldoma.",
+      "noneChosen": "Gavėjas dar nepasirinktas.",
+      "attach": "Naudoti šį gavėją",
+      "createNew": "Sukurti naują gavėją",
+      "saveAndAttach": "Išsaugoti ir naudoti"
+    },
+    "series": {
+      "title": "Numeracija",
+      "intro": "Kiekvienas dokumento tipas jūsų organizacijoje turi savo numeraciją: priešdėlį, skirtuką, skaitmenų skaičių ir, jei norite, skaitiklį, kuris kasmet prasideda iš naujo. Numeriai eina iš eilės be spragų ir išrašius nebesikeičia.",
+      "prefix": "Priešdėlis",
+      "separator": "Skirtukas",
+      "pad": "Skaitmenys",
+      "yearBased": "Pradėti iš naujo kiekvienais metais",
+      "save": "Išsaugoti",
+      "example": "Kitas numeris atrodys taip: {example}",
+      "notConfigured": "Dar nesukonfigūruota",
+      "note": "Jei serija nesukonfigūruota, pirmą kartą išrašant šio tipo dokumentą sukuriama ir užfiksuojama numatytoji. Serijos keitimas veikia tik vėliau išrašomus dokumentus."
     }
   }
 }

@@ -23,6 +23,8 @@ import {
   createInvoiceDraftAction,
   discardDraftAction,
   issueInvoiceAction,
+  saveRecipientAction,
+  setInvoiceRecipientAction,
   setTaxAction,
 } from "@/lib/finance/project-invoice-actions";
 
@@ -34,9 +36,10 @@ const NOTICE_KEYS = new Set([
   "invalid", "invalid_tax", "not_found", "not_allowed", "tax_confirmation_required", "tax_treatment_missing",
   "evidence_changed", "no_lines", "not_draft", "invalid_term", "already_billed",
   "already_credited", "invalid_replacement", "already_replaced", "period_locked", "issued_invoice_is_immutable", "not_issued_invoice",
-  "invalid_state", "mixed_currency", "needs_migration", "error",
+  "invalid_state", "mixed_currency", "needs_migration", "recipient_saved", "recipient_missing", "recipient_incomplete",
+  "recipient_not_found", "over_credit", "invalid_line", "error",
 ]);
-const GOOD = new Set(["draft_created", "line_added", "tax_saved", "invoice_issued", "corrected"]);
+const GOOD = new Set(["draft_created", "line_added", "tax_saved", "invoice_issued", "corrected", "recipient_saved"]);
 
 const inputClass =
   "rounded-lg border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue";
@@ -91,6 +94,7 @@ export default async function InvoiceViewPage({
   const isCredited = h.creditedAt !== null;
   const projectInvoicing = issuerSide && isDraft ? await getProjectInvoicing(id, facts?.organizationId ?? null) : null;
   const presets = projectInvoicing && projectInvoicing.kind === "ok" ? projectInvoicing.value.presets : [];
+  const recipients = projectInvoicing && projectInvoicing.kind === "ok" ? projectInvoicing.value.recipients : [];
   const basisTerms =
     projectInvoicing && projectInvoicing.kind === "ok"
       ? projectInvoicing.value.rateTerms.filter((x) => (x.basisType === "milestone" || x.basisType === "fixed") && !x.validTo)
@@ -177,7 +181,8 @@ export default async function InvoiceViewPage({
       <InvoicePanel gap={2}>
         <div><span className="text-text-muted">{t("export.customer")}: </span><span className="font-semibold text-text-primary">{h.customerName}</span></div>
         {h.customerVatId ? <div><span className="text-text-muted">{t("export.vatId")}: </span>{h.customerVatId}</div> : null}
-        {h.customerAddress ? <div className="sm:col-span-2"><span className="text-text-muted">{t("draft.customerAddress")}: </span>{h.customerAddress}</div> : null}
+        {(h.recipient?.address ?? h.customerAddress) ? <div className="sm:col-span-2"><span className="text-text-muted">{t("recipients.address")}: </span>{h.recipient?.address ?? h.customerAddress}{h.recipient?.country ? `, ${h.recipient.country}` : ""}</div> : null}
+        {h.recipient ? <div className="sm:col-span-2 text-meta text-text-muted">{t("recipients.frozenNote")}</div> : null}
         {h.issuedAt ? <div><span className="text-text-muted">{t("export.issued")}: </span>{h.issuedAt.slice(0, 10)}</div> : null}
         {h.dueDate ? <div><span className="text-text-muted">{t("draft.dueDate")}: </span>{h.dueDate}</div> : null}
         {h.correctionReason ? <div className="sm:col-span-2"><span className="text-text-muted">{t("chain.reason")}: </span>{h.correctionReason}{h.correctionReference ? ` (${h.correctionReference})` : ""}</div> : null}
@@ -292,6 +297,60 @@ export default async function InvoiceViewPage({
       {/* ── draft: tax for all lines, milestone/fixed lines, issue, discard ── */}
       {issuerSide && isDraft ? (
         <>
+          <InvoicePanel testId="invoice-recipient" gap={3}>
+            <h2 className={sectionTitleClass}>{t("recipients.invoiceTitle")}</h2>
+            <p className="text-sm text-text-secondary">{t("recipients.invoiceHelp")}</p>
+            <p className="text-sm text-text-primary" data-testid="invoice-recipient-current">
+              {h.recipientId ? `${h.customerName}` : t("recipients.noneChosen")}
+            </p>
+            <form action={setInvoiceRecipientAction} className="flex flex-wrap items-end gap-2">
+              <input type="hidden" name="locale" value={locale} />
+              <input type="hidden" name="project_id" value={id} />
+              <input type="hidden" name="invoice_id" value={invoiceId} />
+              <label className="flex flex-col gap-1 text-xs text-text-secondary">
+                {t("draft.recipient")}
+                <select name="recipient_id" required className={inputClass} defaultValue={h.recipientId ?? ""}>
+                  <option value="" disabled>{t("draft.chooseRecipient")}</option>
+                  {recipients.map((r) => (
+                    <option key={r.id} value={r.id}>{r.legalName}{r.country ? ` (${r.country})` : ""}</option>
+                  ))}
+                </select>
+              </label>
+              <button type="submit" className={buttonClass}>{t("recipients.attach")}</button>
+            </form>
+            <details className="text-sm text-text-secondary">
+              <summary className="cursor-pointer">{t("recipients.createNew")}</summary>
+              <form action={saveRecipientAction} className="mt-2 grid gap-3 sm:grid-cols-2">
+                <input type="hidden" name="locale" value={locale} />
+                <input type="hidden" name="project_id" value={id} />
+                <input type="hidden" name="invoice_id" value={invoiceId} />
+                <input type="hidden" name="organization_id" value={h.issuerOrgId ?? ""} />
+                <label className="flex flex-col gap-1 text-xs text-text-secondary">
+                  {t("recipients.legalName")}
+                  <input name="legal_name" required minLength={2} maxLength={160} className={inputClass} />
+                </label>
+                <label className="flex flex-col gap-1 text-xs text-text-secondary">
+                  {t("recipients.country")}
+                  <input name="country" minLength={2} maxLength={2} pattern="[A-Za-z]{2}" required className={`${inputClass} uppercase`} />
+                </label>
+                <label className="flex flex-col gap-1 text-xs text-text-secondary sm:col-span-2">
+                  {t("recipients.address")}
+                  <input name="address" required maxLength={400} className={inputClass} />
+                </label>
+                <label className="flex flex-col gap-1 text-xs text-text-secondary">
+                  {t("recipients.taxId")}
+                  <input name="tax_id" maxLength={60} className={inputClass} />
+                </label>
+                <label className="flex flex-col gap-1 text-xs text-text-secondary">
+                  {t("recipients.contactEmail")}
+                  <input name="contact_email" type="email" maxLength={200} className={inputClass} />
+                </label>
+                <div className="sm:col-span-2"><button type="submit" className={buttonClass}>{t("recipients.saveAndAttach")}</button></div>
+              </form>
+            </details>
+            <p className="text-meta text-text-muted">{t("recipients.minimum")}</p>
+          </InvoicePanel>
+
           <InvoicePanel id="invoice-tax-all" testId="invoice-tax-all" gap={3}>
             <h2 className={sectionTitleClass}>{t("tax.title")}</h2>
             <p className="text-sm text-text-secondary">{t("tax.confirmIntro")}</p>
@@ -405,10 +464,7 @@ export default async function InvoiceViewPage({
             <input type="hidden" name="project_id" value={id} />
             <input type="hidden" name="period_id" value={h.billingPeriodId} />
             <input type="hidden" name="replaces_id" value={h.id} />
-            <input type="hidden" name="customer_name" value={h.customerName} />
-            <input type="hidden" name="customer_vat_id" value={h.customerVatId ?? ""} />
-            <input type="hidden" name="customer_address" value={h.customerAddress ?? ""} />
-            <input type="hidden" name="client_org_id" value={h.clientOrgId ?? ""} />
+            <input type="hidden" name="recipient_id" value={h.recipientId ?? ""} />
             <button type="submit" className={buttonClass}>{t("view.replaceSubmit")}</button>
           </form>
         </InvoicePanel>

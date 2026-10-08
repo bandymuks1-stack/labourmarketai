@@ -124,12 +124,21 @@ export async function listMyFinanceRecords(): Promise<MyFinanceRecordsResult> {
   } = await supabase.auth.getUser();
   if (!user) return { status: "not-authed" };
 
-  const res = await asAny(supabase)
-    .from("finance_records")
-    .select(SELECT_COLUMNS)
-    .order("due_date", { ascending: true, nullsFirst: false })
-    .order("created_at", { ascending: false })
-    .limit(FINANCE_READ_LIMIT);
+  // The legacy manual register is EUR-only and single-currency. Lifecycle invoices (a billing period is
+  // set) can be in ANY currency and have their own surface and per-currency totals
+  // (lib/finance/project-invoice.ts), so they are excluded here: they can neither be summed into EUR
+  // totals nor mislabelled by this register. Before the lifecycle migration the column does not exist
+  // (42703) and the unfiltered read is exactly the old behaviour.
+  const run = (filtered: boolean) => {
+    let query = asAny(supabase).from("finance_records").select(SELECT_COLUMNS);
+    if (filtered) query = query.is("billing_period_id", null);
+    return query
+      .order("due_date", { ascending: true, nullsFirst: false })
+      .order("created_at", { ascending: false })
+      .limit(FINANCE_READ_LIMIT);
+  };
+  let res = await run(true);
+  if (res.error && res.error.code === "42703") res = await run(false);
 
   if (res.error) {
     if (isMigrationMissingCode(res.error.code)) {

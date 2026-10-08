@@ -97,3 +97,42 @@ describe("period preview summary", () => {
     expect(s).toEqual({ billableRows: 2, billableHours: 3.5, unpricedRows: 1, notConfirmed: 1, clientDisputed: 1, alreadyBilled: 1, clientAcceptedRows: 1 });
   });
 });
+
+import { deriveFinanceSummary } from "@/lib/finance/finance-model";
+import {
+  formatNumberPreview,
+  parseSelectionKeys,
+  selectionKey,
+  totalsByCurrency,
+  type CurrencyTotal,
+} from "@/lib/finance/project-invoice-model";
+
+describe("totals are grouped per currency, never summed across currencies", () => {
+  const rows: CurrencyTotal[] = [
+    { currency: "SEK", kind: "invoice", documents: 1, netCents: 135000, taxCents: 33750, grossCents: 168750 },
+    { currency: "SEK", kind: "credit_note", documents: 1, netCents: 10000, taxCents: 2500, grossCents: 12500 },
+    { currency: "JPY", kind: "invoice", documents: 1, netCents: 15000, taxCents: 3750, grossCents: 18750 },
+  ];
+  it("groups by currency and keeps kinds apart", () => {
+    const g = totalsByCurrency(rows);
+    expect([...g.keys()].sort()).toEqual(["JPY", "SEK"]);
+    expect(g.get("SEK")?.map((r) => r.kind)).toEqual(["invoice", "credit_note"]);
+  });
+  it("the legacy summary refuses to add EUR and SEK", () => {
+    const base = { recordType: "invoice_issued" as const, status: "issued" as const, dueDate: null, projectId: null };
+    expect(() => deriveFinanceSummary([{ ...base, amountCents: 1, currency: "EUR" }, { ...base, amountCents: 2, currency: "SEK" }], new Date())).toThrow(/refusing to sum across currencies/);
+    expect(deriveFinanceSummary([{ ...base, amountCents: 1, currency: "EUR" }, { ...base, amountCents: 2, currency: "EUR" }], new Date()).issuedInvoiceCents).toBe(3);
+  });
+});
+
+describe("numbering preview and selection keys", () => {
+  it("formats prefix / year / padded sequence with the configured separator", () => {
+    expect(formatNumberPreview({ documentType: "invoice", prefix: "FA", separator: "/", pad: 5, yearBased: true }, 2026, 1)).toBe("FA/2026/00001");
+    expect(formatNumberPreview({ documentType: "invoice", prefix: "", separator: "-", pad: 4, yearBased: false }, 2026, 7)).toBe("0007");
+    expect(formatNumberPreview({ documentType: "credit_note", prefix: "XX", separator: ".", pad: 6, yearBased: false }, 2026, 3)).toBe("XX.000003");
+  });
+  it("selection keys round-trip entry + source and drop malformed keys", () => {
+    const k = selectionKey({ entryId: "e-1", sourceKey: "q:days" });
+    expect(parseSelectionKeys([k, "broken", "|x"])).toEqual([{ entry_id: "e-1", source_key: "q:days" }]);
+  });
+});

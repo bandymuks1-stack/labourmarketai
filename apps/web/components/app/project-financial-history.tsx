@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { InvoicePanel } from "@/components/app/invoice-panel";
 import { getProjectInvoicing } from "@/lib/finance/project-invoice";
-import { formatMoney } from "@/lib/finance/project-invoice-model";
+import { formatMoney, totalsByCurrency } from "@/lib/finance/project-invoice-model";
 
 /**
  * Durable financial history of ONE project, read from the lifecycle records:
@@ -25,7 +25,7 @@ export async function ProjectFinancialHistory({
 }) {
   const read = await getProjectInvoicing(projectId, organizationId);
   if (read.kind !== "ok") return null;
-  const { periods, invoices, rateTerms } = read.value;
+  const { periods, invoices, rateTerms, totals } = read.value;
   const t = await getTranslations("projectInvoice");
   const issued = invoices.filter((i) => i.issuedAt !== null);
   return (
@@ -42,6 +42,17 @@ export async function ProjectFinancialHistory({
           {t("history.invoices", { count: issued.length })}
         </span>
       </div>
+      {totals.length > 0 ? (
+        <div className="flex flex-col gap-1" data-testid="ops-financial-totals">
+          {[...totalsByCurrency(totals).entries()].map(([cur, rows]) => (
+            <p key={cur} className="text-sm text-text-primary">
+              <span className="font-semibold">{cur}</span>:{" "}
+              {rows.map((r) => `${t(`kind.${r.kind}`)} ${formatMoney(r.grossCents, r.currency, locale)} (${r.documents})`).join(" - ")}
+            </p>
+          ))}
+          <p className="text-meta text-text-muted">{t("invoices.totalsNote")}</p>
+        </div>
+      ) : null}
       {issued.length > 0 ? (
         <ul className="flex flex-col gap-1 text-sm text-text-primary">
           {issued.slice(0, 8).map((i) => (

@@ -18781,7 +18781,7 @@
       "term_ended": "Kaufmännische Grundlage beendet.",
       "period_created": "Abrechnungszeitraum angelegt.",
       "draft_created": "Rechnungsentwurf aus bestätigten Arbeitsberichten erstellt. Legen Sie vor dem Ausstellen die steuerliche Behandlung jeder Zeile fest.",
-      "draft_discarded": "Entwurf verworfen. Der Abrechnungszeitraum ist wieder offen.",
+      "draft_discarded": "Entwurf verworfen.",
       "line_added": "Zeile hinzugefügt.",
       "tax_saved": "Steuerliche Behandlung gespeichert.",
       "invoice_issued": "Rechnung ausgestellt. Der Abrechnungszeitraum ist jetzt gesperrt.",
@@ -18814,7 +18814,18 @@
       "error": "Etwas ist schiefgegangen. Es wurde nichts geändert.",
       "corrected": "Gutschrift ausgestellt. Die ursprüngliche Rechnung bleibt unverändert und ist damit verknüpft.",
       "invalid_replacement": "Diese Rechnung kann aus diesem Zeitraum nicht ersetzt werden.",
-      "already_replaced": "Diese Rechnung hat bereits eine Ersatzrechnung."
+      "already_replaced": "Diese Rechnung hat bereits eine Ersatzrechnung.",
+      "recipient_saved": "Empfänger gespeichert.",
+      "recipient_archived": "Empfänger archiviert.",
+      "series_saved": "Nummernkreis gespeichert. Er gilt für ab jetzt ausgestellte Dokumente; bereits vergebene Nummern ändern sich nie.",
+      "recipient_missing": "Wählen Sie vor dem Ausstellen einen Empfänger.",
+      "recipient_incomplete": "Der Empfänger braucht vor dem Ausstellen einen Firmennamen, eine Adresse und ein Land.",
+      "recipient_not_found": "Dieser Empfänger ist in Ihrem Adressbuch nicht vorhanden.",
+      "selection_not_billable": "Ein Teil Ihrer Auswahl ist kein abrechenbarer Nachweis mehr. Laden Sie den Zeitraum neu und wählen Sie erneut.",
+      "time_basis_conflict": "Dieselbe Arbeit kann nicht zugleich nach Stunden und nach Tagen abgerechnet werden. Wählen Sie eine Grundlage.",
+      "over_credit": "Diese Gutschrift übersteigt den Restbetrag der Rechnungszeile.",
+      "invalid_line": "Diese Zeile gehört nicht zu dieser Rechnung.",
+      "limit_reached": "Das Limit wurde erreicht."
     },
     "kind": {
       "invoice": "Rechnung",
@@ -18855,7 +18866,7 @@
       "end": "Grundlage beenden",
       "basis": "Grundlage",
       "unit": "Einheit",
-      "unitHint": "Nur für Menge, zum Beispiel square_meters. Stunden verwenden hours.",
+      "unitHint": "Nur für Menge, zum Beispiel square_meters oder days. Stunden verwenden hours.",
       "rate": "Satz oder Betrag",
       "currency": "Währung (3 Buchstaben)",
       "label": "Bezeichnung",
@@ -18923,13 +18934,19 @@
       }
     },
     "draft": {
-      "customerName": "Name des Kunden",
-      "customerVatId": "Steuer-ID des Kunden (optional)",
-      "customerAddress": "Adresse des Kunden (optional)",
-      "clientOrgId": "ID der Empfängerorganisation (optional)",
-      "clientOrgHint": "Nur ein Verweis. Er gibt dem Empfänger weder Zugriff noch eine Genehmigungsrolle.",
       "dueDate": "Fälligkeitsdatum (optional)",
-      "create": "Rechnungsentwurf erstellen"
+      "create": "Rechnungsentwurf erstellen",
+      "selectEvidence": "Abzurechnende Arbeitsnachweise",
+      "selectEvidenceHelp": "Abgerechnet wird nur die hier gewählte bestätigte Arbeit. Alles Nichtgewählte bleibt verfügbar und wird nie stillschweigend abgerechnet.",
+      "noAgreedRate": "für diesen Tag gilt kein vereinbarter Satz",
+      "recipient": "Empfänger",
+      "chooseRecipient": "Empfänger wählen",
+      "noRecipientYet": "Legen Sie zuerst oben einen Empfänger an.",
+      "held": {
+        "not_confirmed": "noch nicht bestätigt",
+        "client_disputed": "vom Kunden bestritten",
+        "billed": "bereits abgerechnet"
+      }
     },
     "changes": {
       "title": "Änderungen seit der Rechnung",
@@ -18947,7 +18964,8 @@
       "title": "Rechnungen und Gutschriften",
       "empty": "Noch keine Rechnung.",
       "draftNoNumber": "Entwurf",
-      "netOnly": "netto"
+      "netOnly": "netto",
+      "totalsNote": "Summen werden je Währung gezeigt und nie über Währungen hinweg addiert."
     },
     "view": {
       "title": "Rechnung",
@@ -18966,7 +18984,7 @@
       "issueSubmit": "Rechnung ausstellen",
       "discard": "Entwurf verwerfen",
       "correctTitle": "Diese Rechnung korrigieren",
-      "correctHelp": "Eine ausgestellte Rechnung wird nie bearbeitet. Eine Gutschrift lässt das Original unberührt, erfasst, wer wann und warum korrigiert hat, und ist damit verknüpft. Danach kann bei Bedarf eine Ersatzrechnung erstellt werden. Die Korrektur hängt nicht vom Kunden ab.",
+      "correctHelp": "Eine ausgestellte Rechnung wird nie bearbeitet. Eine Gutschrift lässt das Original unberührt, erfasst, wer wann und warum korrigiert hat, und ist damit verknüpft. Der Zeitraum bleibt gesperrt. Sobald die Rechnung vollständig gutgeschrieben ist, kann eine Ersatzrechnung erstellt werden. Die Korrektur hängt nicht vom Kunden ab.",
       "correctReason": "Grund",
       "correctSubmit": "Gutschrift ausstellen",
       "chain": "Korrekturkette",
@@ -18976,7 +18994,7 @@
       "correctReference": "Referenz (optional)",
       "creditedNotice": "Diese Rechnung wurde durch die Gutschrift {number} gutgeschrieben. Sie bleibt unverändert erhalten.",
       "replaceTitle": "Ersatzrechnung",
-      "replaceHelp": "Optional. Erstellt einen neuen Entwurf für denselben Zeitraum aus den aktuellen bestätigten Arbeitsberichten und verknüpft ihn mit dieser Rechnung und ihrer Gutschrift.",
+      "replaceHelp": "Optional, sobald die Rechnung vollständig gutgeschrieben ist. Erstellt einen neuen Entwurf für denselben Zeitraum aus der aktuellen bestätigten Arbeit und verknüpft ihn mit dieser Rechnung und ihrer Gutschrift. Der Zeitraum bleibt gesperrt.",
       "replaceSubmit": "Entwurf der Ersatzrechnung erstellen",
       "replacesNotice": "Diese Rechnung ersetzt eine frühere Rechnung."
     },
@@ -19017,6 +19035,41 @@
       "reason": "Grund",
       "reference": "Referenz",
       "actedAt": "Erfasst"
+    },
+    "recipients": {
+      "title": "Empfänger",
+      "intro": "Ihr eigenes Adressbuch der Parteien, denen Sie Rechnungen stellen. Ein Empfänger braucht kein LabourMarket-Konto. Jede Rechnung friert beim Ausstellen eine Kopie des Empfängers ein.",
+      "empty": "Noch keine Empfänger.",
+      "incomplete": "unvollständig: vor dem Ausstellen Adresse und Land ergänzen",
+      "archive": "Archivieren",
+      "legalName": "Firmenname",
+      "country": "Land (2 Buchstaben)",
+      "address": "Adresse",
+      "taxId": "Steuer-ID / VAT-ID (optional)",
+      "reference": "Ihre Referenz (optional)",
+      "contactName": "Ansprechperson (optional)",
+      "contactEmail": "Kontakt-E-Mail (optional)",
+      "minimum": "Zum Ausstellen braucht der Empfänger Firmennamen, Adresse und Land. Die Steuer-ID wird gespeichert, wenn Sie sie angeben.",
+      "save": "Empfänger speichern",
+      "frozenNote": "Dies ist der Empfänger wie ausgestellt; spätere Änderungen im Adressbuch ändern ihn nicht.",
+      "invoiceTitle": "Empfänger",
+      "invoiceHelp": "Wählen oder erstellen Sie den Empfänger dieser Rechnung. Beim Ausstellen wird eine Kopie eingefroren.",
+      "noneChosen": "Noch kein Empfänger gewählt.",
+      "attach": "Diesen Empfänger verwenden",
+      "createNew": "Neuen Empfänger anlegen",
+      "saveAndAttach": "Speichern und verwenden"
+    },
+    "series": {
+      "title": "Nummerierung",
+      "intro": "Jeder Dokumenttyp hat in Ihrer Organisation eine eigene Nummerierung: Präfix, Trennzeichen, Stellenzahl und auf Wunsch einen Zähler, der jedes Jahr neu beginnt. Die Nummern sind lückenlos fortlaufend und ändern sich nach dem Ausstellen nie.",
+      "prefix": "Präfix",
+      "separator": "Trennzeichen",
+      "pad": "Stellen",
+      "yearBased": "Jedes Jahr neu beginnen",
+      "save": "Speichern",
+      "example": "Die nächste Nummer sieht so aus: {example}",
+      "notConfigured": "Noch nicht eingerichtet",
+      "note": "Ist ein Nummernkreis nicht eingerichtet, wird beim Ausstellen des ersten Dokuments dieses Typs ein Standard angelegt und protokolliert. Änderungen betreffen nur danach ausgestellte Dokumente."
     }
   }
 }

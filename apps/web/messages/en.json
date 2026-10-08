@@ -18781,7 +18781,7 @@
       "term_ended": "Commercial basis ended.",
       "period_created": "Billing period created.",
       "draft_created": "Invoice draft created from confirmed work reports. Set the tax treatment for each line before issuing.",
-      "draft_discarded": "Draft discarded. The billing period is open again.",
+      "draft_discarded": "Draft discarded.",
       "line_added": "Line added.",
       "tax_saved": "Tax treatment saved.",
       "invoice_issued": "Invoice issued. The billing period is now locked.",
@@ -18814,7 +18814,18 @@
       "error": "Something went wrong. Nothing was changed.",
       "corrected": "Credit note issued. The original invoice is unchanged and linked to it.",
       "invalid_replacement": "That invoice cannot be replaced from this period.",
-      "already_replaced": "This invoice already has a replacement."
+      "already_replaced": "This invoice already has a replacement.",
+      "recipient_saved": "Recipient saved.",
+      "recipient_archived": "Recipient archived.",
+      "series_saved": "Numbering series saved. It applies to documents issued from now on; numbers already issued never change.",
+      "recipient_missing": "Choose a recipient before issuing.",
+      "recipient_incomplete": "The recipient needs a legal name, an address and a country before the invoice can be issued.",
+      "recipient_not_found": "That recipient was not found in your contact book.",
+      "selection_not_billable": "Part of your selection is no longer billable evidence. Reload the period and select again.",
+      "time_basis_conflict": "The same work cannot be billed both by the hour and by the day. Select one basis.",
+      "over_credit": "That credit is more than what remains on the invoice line.",
+      "invalid_line": "That line is not on this invoice.",
+      "limit_reached": "The limit was reached."
     },
     "kind": {
       "invoice": "Invoice",
@@ -18855,7 +18866,7 @@
       "end": "End basis",
       "basis": "Basis",
       "unit": "Unit",
-      "unitHint": "For quantity only, for example square_meters. Hours use hours.",
+      "unitHint": "For quantity only, for example square_meters or days. Hours use hours.",
       "rate": "Rate or amount",
       "currency": "Currency (3 letters)",
       "label": "Label",
@@ -18923,13 +18934,19 @@
       }
     },
     "draft": {
-      "customerName": "Customer name",
-      "customerVatId": "Customer tax ID (optional)",
-      "customerAddress": "Customer address (optional)",
-      "clientOrgId": "Recipient organization ID (optional)",
-      "clientOrgHint": "Reference only. It gives the recipient no access and no approval role.",
       "dueDate": "Due date (optional)",
-      "create": "Build invoice draft"
+      "create": "Build invoice draft",
+      "selectEvidence": "Work evidence to bill",
+      "selectEvidenceHelp": "Only the approved work you select here is billed. Anything left unticked stays available and is never billed silently.",
+      "noAgreedRate": "no agreed rate covers this day",
+      "recipient": "Recipient",
+      "chooseRecipient": "Choose a recipient",
+      "noRecipientYet": "Add a recipient in the section above first.",
+      "held": {
+        "not_confirmed": "not confirmed yet",
+        "client_disputed": "disputed by the client",
+        "billed": "already invoiced"
+      }
     },
     "changes": {
       "title": "Changes since invoice",
@@ -18947,7 +18964,8 @@
       "title": "Invoices and credit notes",
       "empty": "No invoice yet.",
       "draftNoNumber": "Draft",
-      "netOnly": "net"
+      "netOnly": "net",
+      "totalsNote": "Totals are shown per currency and are never added across currencies."
     },
     "view": {
       "title": "Invoice",
@@ -18966,7 +18984,7 @@
       "issueSubmit": "Issue invoice",
       "discard": "Discard draft",
       "correctTitle": "Correct this invoice",
-      "correctHelp": "An issued invoice is never edited. A credit note keeps the original untouched, records who corrected it, when and why, and links to it. A replacement invoice can then be built if needed. Correcting does not depend on the client.",
+      "correctHelp": "An issued invoice is never edited. A credit note keeps the original untouched, records who corrected it, when and why, and links to it. The period stays locked. Once the invoice is fully credited, a replacement invoice can be built. Correcting does not depend on the client.",
       "correctReason": "Reason",
       "correctSubmit": "Issue credit note",
       "chain": "Correction chain",
@@ -18976,7 +18994,7 @@
       "correctReference": "Reference (optional)",
       "creditedNotice": "This invoice was credited by credit note {number}. It is preserved unchanged.",
       "replaceTitle": "Replacement invoice",
-      "replaceHelp": "Optional. Builds a new draft for the same period from the current confirmed work reports and links it to this invoice and its credit note.",
+      "replaceHelp": "Optional, once the invoice is fully credited. Builds a new draft for the same period from the current confirmed work and links it to this invoice and its credit note. The period stays locked.",
       "replaceSubmit": "Build replacement draft",
       "replacesNotice": "This invoice replaces an earlier invoice."
     },
@@ -19017,6 +19035,41 @@
       "reason": "Reason",
       "reference": "Reference",
       "actedAt": "Recorded"
+    },
+    "recipients": {
+      "title": "Recipients",
+      "intro": "Your own contact book of the parties you invoice. A recipient does not need a LabourMarket account. Each invoice freezes a copy of the recipient when it is issued.",
+      "empty": "No recipients yet.",
+      "incomplete": "incomplete: add an address and a country before issuing",
+      "archive": "Archive",
+      "legalName": "Legal name",
+      "country": "Country (2 letters)",
+      "address": "Address",
+      "taxId": "Tax / VAT ID (optional)",
+      "reference": "Your reference (optional)",
+      "contactName": "Contact person (optional)",
+      "contactEmail": "Contact e-mail (optional)",
+      "minimum": "To issue an invoice the recipient needs a legal name, an address and a country. The tax ID is stored when you provide it.",
+      "save": "Save recipient",
+      "frozenNote": "This is the recipient as issued; later edits to your contact book do not change it.",
+      "invoiceTitle": "Recipient",
+      "invoiceHelp": "Select or create the recipient of this invoice. A copy is frozen on the invoice when you issue it.",
+      "noneChosen": "No recipient chosen yet.",
+      "attach": "Use this recipient",
+      "createNew": "Create a new recipient",
+      "saveAndAttach": "Save and use"
+    },
+    "series": {
+      "title": "Numbering",
+      "intro": "Each document type has its own numbering for your organization: a prefix, a separator, the number of digits and, if you want, a counter that restarts every year. Numbers are sequential without gaps and never change once issued.",
+      "prefix": "Prefix",
+      "separator": "Separator",
+      "pad": "Digits",
+      "yearBased": "Restart every year",
+      "save": "Save",
+      "example": "Next number looks like: {example}",
+      "notConfigured": "Not configured yet",
+      "note": "If a series is not configured, a default is created, and recorded, when you issue the first document of that type. Changing a series affects only documents issued afterwards."
     }
   }
 }

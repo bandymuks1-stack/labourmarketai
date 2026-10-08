@@ -18781,7 +18781,7 @@
       "term_ended": "Commerciële basis beëindigd.",
       "period_created": "Factuurperiode aangemaakt.",
       "draft_created": "Conceptfactuur gemaakt uit bevestigde werkrapporten. Stel vóór het uitgeven de belastingbehandeling van elke regel in.",
-      "draft_discarded": "Concept verworpen. De factuurperiode is weer open.",
+      "draft_discarded": "Concept verworpen.",
       "line_added": "Regel toegevoegd.",
       "tax_saved": "Belastingbehandeling opgeslagen.",
       "invoice_issued": "Factuur uitgegeven. De factuurperiode is nu vergrendeld.",
@@ -18814,7 +18814,18 @@
       "error": "Er ging iets mis. Er is niets gewijzigd.",
       "corrected": "Creditnota uitgegeven. De oorspronkelijke factuur is ongewijzigd en eraan gekoppeld.",
       "invalid_replacement": "Die factuur kan vanuit deze periode niet worden vervangen.",
-      "already_replaced": "Deze factuur heeft al een vervangende factuur."
+      "already_replaced": "Deze factuur heeft al een vervangende factuur.",
+      "recipient_saved": "Ontvanger opgeslagen.",
+      "recipient_archived": "Ontvanger gearchiveerd.",
+      "series_saved": "Nummerreeks opgeslagen. Ze geldt voor documenten die vanaf nu worden uitgegeven; reeds uitgegeven nummers veranderen nooit.",
+      "recipient_missing": "Kies een ontvanger voordat u uitgeeft.",
+      "recipient_incomplete": "De ontvanger heeft een bedrijfsnaam, een adres en een land nodig voordat de factuur kan worden uitgegeven.",
+      "recipient_not_found": "Die ontvanger staat niet in uw adresboek.",
+      "selection_not_billable": "Een deel van uw selectie is geen factureerbaar bewijs meer. Laad de periode opnieuw en selecteer opnieuw.",
+      "time_basis_conflict": "Hetzelfde werk kan niet zowel per uur als per dag worden gefactureerd. Kies één basis.",
+      "over_credit": "Die creditering is meer dan wat er op de factuurregel resteert.",
+      "invalid_line": "Die regel staat niet op deze factuur.",
+      "limit_reached": "De limiet is bereikt."
     },
     "kind": {
       "invoice": "Factuur",
@@ -18855,7 +18866,7 @@
       "end": "Basis beëindigen",
       "basis": "Grondslag",
       "unit": "Eenheid",
-      "unitHint": "Alleen voor hoeveelheid, bijvoorbeeld square_meters. Uren gebruiken hours.",
+      "unitHint": "Alleen voor hoeveelheid, bijvoorbeeld square_meters of days. Uren gebruiken hours.",
       "rate": "Tarief of bedrag",
       "currency": "Valuta (3 letters)",
       "label": "Omschrijving",
@@ -18923,13 +18934,19 @@
       }
     },
     "draft": {
-      "customerName": "Naam klant",
-      "customerVatId": "Belastingnummer klant (optioneel)",
-      "customerAddress": "Adres klant (optioneel)",
-      "clientOrgId": "ID ontvangende organisatie (optioneel)",
-      "clientOrgHint": "Alleen een verwijzing. Geeft de ontvanger geen toegang en geen goedkeuringsrol.",
       "dueDate": "Vervaldatum (optioneel)",
-      "create": "Conceptfactuur opbouwen"
+      "create": "Conceptfactuur opbouwen",
+      "selectEvidence": "Te factureren werkbewijs",
+      "selectEvidenceHelp": "Alleen het hier geselecteerde goedgekeurde werk wordt gefactureerd. Wat u niet aanvinkt blijft beschikbaar en wordt nooit stilzwijgend gefactureerd.",
+      "noAgreedRate": "voor deze dag geldt geen afgesproken tarief",
+      "recipient": "Ontvanger",
+      "chooseRecipient": "Kies een ontvanger",
+      "noRecipientYet": "Voeg eerst hierboven een ontvanger toe.",
+      "held": {
+        "not_confirmed": "nog niet bevestigd",
+        "client_disputed": "door klant betwist",
+        "billed": "al gefactureerd"
+      }
     },
     "changes": {
       "title": "Wijzigingen sinds de factuur",
@@ -18947,7 +18964,8 @@
       "title": "Facturen en creditnota's",
       "empty": "Nog geen factuur.",
       "draftNoNumber": "Concept",
-      "netOnly": "netto"
+      "netOnly": "netto",
+      "totalsNote": "Totalen worden per valuta getoond en nooit over valuta's heen opgeteld."
     },
     "view": {
       "title": "Factuur",
@@ -18966,7 +18984,7 @@
       "issueSubmit": "Factuur uitgeven",
       "discard": "Concept verwerpen",
       "correctTitle": "Deze factuur corrigeren",
-      "correctHelp": "Een uitgegeven factuur wordt nooit bewerkt. Een creditnota laat het origineel onaangeroerd, legt vast wie wanneer en waarom heeft gecorrigeerd, en is eraan gekoppeld. Daarna kan indien nodig een vervangende factuur worden opgebouwd. Corrigeren hangt niet van de klant af.",
+      "correctHelp": "Een uitgegeven factuur wordt nooit bewerkt. Een creditnota laat het origineel onaangeroerd, legt vast wie wanneer en waarom heeft gecorrigeerd, en is eraan gekoppeld. De periode blijft vergrendeld. Zodra de factuur volledig is gecrediteerd, kan een vervangende factuur worden opgebouwd. Corrigeren hangt niet van de klant af.",
       "correctReason": "Reden",
       "correctSubmit": "Creditnota uitgeven",
       "chain": "Correctieketen",
@@ -18976,7 +18994,7 @@
       "correctReference": "Referentie (optioneel)",
       "creditedNotice": "Deze factuur is gecrediteerd met creditnota {number}. Ze blijft ongewijzigd bewaard.",
       "replaceTitle": "Vervangende factuur",
-      "replaceHelp": "Optioneel. Bouwt een nieuw concept voor dezelfde periode uit de huidige bevestigde werkrapporten en koppelt het aan deze factuur en haar creditnota.",
+      "replaceHelp": "Optioneel, zodra de factuur volledig is gecrediteerd. Bouwt een nieuw concept voor dezelfde periode uit het huidige bevestigde werk en koppelt het aan deze factuur en haar creditnota. De periode blijft vergrendeld.",
       "replaceSubmit": "Concept van vervangende factuur opbouwen",
       "replacesNotice": "Deze factuur vervangt een eerdere factuur."
     },
@@ -19017,6 +19035,41 @@
       "reason": "Reden",
       "reference": "Referentie",
       "actedAt": "Vastgelegd"
+    },
+    "recipients": {
+      "title": "Ontvangers",
+      "intro": "Uw eigen adresboek van de partijen die u factureert. Een ontvanger heeft geen LabourMarket-account nodig. Elke factuur bevriest bij het uitgeven een kopie van de ontvanger.",
+      "empty": "Nog geen ontvangers.",
+      "incomplete": "onvolledig: voeg vóór het uitgeven een adres en een land toe",
+      "archive": "Archiveren",
+      "legalName": "Bedrijfsnaam",
+      "country": "Land (2 letters)",
+      "address": "Adres",
+      "taxId": "Belastingnummer / VAT-ID (optioneel)",
+      "reference": "Uw referentie (optioneel)",
+      "contactName": "Contactpersoon (optioneel)",
+      "contactEmail": "Contact-e-mail (optioneel)",
+      "minimum": "Om een factuur uit te geven heeft de ontvanger een bedrijfsnaam, een adres en een land nodig. Het belastingnummer wordt bewaard als u het opgeeft.",
+      "save": "Ontvanger opslaan",
+      "frozenNote": "Dit is de ontvanger zoals uitgegeven; latere wijzigingen in uw adresboek veranderen dit niet.",
+      "invoiceTitle": "Ontvanger",
+      "invoiceHelp": "Kies of maak de ontvanger van deze factuur. Bij het uitgeven wordt een kopie bevroren.",
+      "noneChosen": "Nog geen ontvanger gekozen.",
+      "attach": "Deze ontvanger gebruiken",
+      "createNew": "Nieuwe ontvanger aanmaken",
+      "saveAndAttach": "Opslaan en gebruiken"
+    },
+    "series": {
+      "title": "Nummering",
+      "intro": "Elk documenttype heeft in uw organisatie een eigen nummering: een voorvoegsel, een scheidingsteken, het aantal cijfers en, als u wilt, een teller die elk jaar opnieuw begint. Nummers lopen opeenvolgend zonder hiaten en veranderen nooit meer na het uitgeven.",
+      "prefix": "Voorvoegsel",
+      "separator": "Scheidingsteken",
+      "pad": "Cijfers",
+      "yearBased": "Elk jaar opnieuw beginnen",
+      "save": "Opslaan",
+      "example": "Het volgende nummer ziet er zo uit: {example}",
+      "notConfigured": "Nog niet ingesteld",
+      "note": "Is een reeks niet ingesteld, dan wordt bij het uitgeven van het eerste document van dat type een standaard aangemaakt en vastgelegd. Wijzigingen gelden alleen voor daarna uitgegeven documenten."
     }
   }
 }

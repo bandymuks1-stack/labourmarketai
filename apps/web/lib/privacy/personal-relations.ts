@@ -561,6 +561,11 @@ export type WithheldRelation = {
  */
 export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
   {
+    table: "invoice_recipients",
+    reason:
+      "the issuing organization's contact book of the parties it invoices (legal names, addresses, tax ids, contact details of THIRD PARTIES that may include a sole trader). It is the issuer's business record, readable only by the issuer's owner/admin; the frozen copy on each issued invoice belongs to the issuer's books. A person referenced there is not given an export of the issuer's customers",
+  },
+  {
     table: "finance_record_line_sources",
     reason:
       "the issuer's accounting evidence for one invoice line: a frozen copy of which confirmed work-report rows (day, hours or quantity, confirmation ids) were billed. Your own journal entries and their reviews are exported; the invoice and its lines belong to the issuing organization's books and cannot be separated from its other customers' figures",
@@ -690,6 +695,7 @@ export const ACTOR_ONLY_RELATIONS: readonly string[] = [
   // confirmed_by, tax_set_by); they are not its subject.
   "project_rate_terms",
   "billing_periods",
+  "invoice_series_configs",
   "organization_tax_presets",
   "finance_record_lines",
   // Discovered-organization provenance: the person is only the recorder of a

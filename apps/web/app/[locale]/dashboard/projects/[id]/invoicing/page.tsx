@@ -14,14 +14,22 @@ import {
 import {
   BASIS_TYPES,
   formatMoney,
+  formatNumberPreview,
+  selectionKey,
   summarizePreview,
+  totalsByCurrency,
   type BillingPeriod,
   type RateTerm,
+  type SeriesConfig,
+  type SeriesDocumentType,
 } from "@/lib/finance/project-invoice-model";
 import { TAX_TREATMENTS } from "@/lib/finance/invoice-tax-model";
 import {
   addRateTermAction,
+  archiveRecipientAction,
+  configureSeriesAction,
   createInvoiceDraftAction,
+  saveRecipientAction,
   createPeriodAction,
   endRateTermAction,
   saveTaxPresetAction,
@@ -36,11 +44,13 @@ const NOTICE_KEYS = new Set([
   "nothing_billable", "ambiguous_rate_terms", "mixed_currency", "tax_confirmation_required",
   "tax_treatment_missing", "evidence_changed", "no_lines", "not_draft", "invalid_term", "already_billed",
   "invalid_client_org", "already_credited", "invalid_replacement", "already_replaced", "needs_migration", "project_has_no_organization",
+  "recipient_saved", "recipient_archived", "series_saved", "recipient_missing", "recipient_incomplete", "recipient_not_found",
+  "selection_not_billable", "time_basis_conflict", "over_credit", "invalid_line", "limit_reached",
   "error",
 ]);
 const GOOD_NOTICES = new Set([
   "term_created", "term_ended", "period_created", "draft_created", "draft_discarded", "line_added", "tax_saved",
-  "invoice_issued", "corrected", "preset_saved",
+  "invoice_issued", "corrected", "preset_saved", "recipient_saved", "recipient_archived", "series_saved",
 ]);
 
 const inputClass =
@@ -91,7 +101,7 @@ export default async function ProjectInvoicingPage({
       </div>
     );
   }
-  const { rateTerms, periods, invoices, presets } = read.value;
+  const { rateTerms, periods, invoices, presets, recipients, series, totals } = read.value;
   const unattributed = orgId ? await countUnattributedEntries(orgId) : null;
   const money = (c: number, cur: string) => formatMoney(c, cur, locale);
 
@@ -183,7 +193,7 @@ export default async function ProjectInvoicingPage({
           </label>
           <label className="flex flex-col gap-1 text-xs text-text-secondary">
             {t("terms.unit")}
-            <input name="unit" maxLength={60} placeholder="square_meters" className={inputClass} />
+            <input name="unit" maxLength={60} className={inputClass} />
             <span className="text-text-muted">{t("terms.unitHint")}</span>
           </label>
           <label className="flex flex-col gap-1 text-xs text-text-secondary">
@@ -269,6 +279,110 @@ export default async function ProjectInvoicingPage({
         </InvoicePanel>
       ) : null}
 
+      {/* ── 2b. Recipients: the issuer's own contact book ─────────── */}
+      {orgId ? (
+        <InvoicePanel id="invoicing-recipients" testId="invoicing-recipients" gap={3}>
+          <h2 className={sectionTitleClass}>{t("recipients.title")}</h2>
+          <p className="text-sm text-text-secondary">{t("recipients.intro")}</p>
+          {recipients.length === 0 ? (
+            <p className="text-sm text-text-muted">{t("recipients.empty")}</p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {recipients.map((r) => (
+                <li key={r.id} className="flex flex-wrap items-center gap-2 text-sm text-text-primary">
+                  <span className="font-semibold">{r.legalName}</span>
+                  <span className="text-text-muted">{[r.address, r.country, r.taxId].filter(Boolean).join(" - ") || t("recipients.incomplete")}</span>
+                  <form action={archiveRecipientAction}>
+                    <input type="hidden" name="locale" value={locale} />
+                    <input type="hidden" name="project_id" value={id} />
+                    <input type="hidden" name="recipient_id" value={r.id} />
+                    <button type="submit" className={buttonClass}>{t("recipients.archive")}</button>
+                  </form>
+                </li>
+              ))}
+            </ul>
+          )}
+          <form action={saveRecipientAction} className="grid gap-3 sm:grid-cols-2" data-testid="recipient-form">
+            <input type="hidden" name="locale" value={locale} />
+            <input type="hidden" name="project_id" value={id} />
+            <input type="hidden" name="organization_id" value={orgId} />
+            <label className="flex flex-col gap-1 text-xs text-text-secondary">
+              {t("recipients.legalName")}
+              <input name="legal_name" required minLength={2} maxLength={160} className={inputClass} />
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-text-secondary">
+              {t("recipients.country")}
+              <input name="country" minLength={2} maxLength={2} pattern="[A-Za-z]{2}" className={`${inputClass} uppercase`} />
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-text-secondary sm:col-span-2">
+              {t("recipients.address")}
+              <input name="address" maxLength={400} className={inputClass} />
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-text-secondary">
+              {t("recipients.taxId")}
+              <input name="tax_id" maxLength={60} className={inputClass} />
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-text-secondary">
+              {t("recipients.reference")}
+              <input name="reference" maxLength={200} className={inputClass} />
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-text-secondary">
+              {t("recipients.contactName")}
+              <input name="contact_name" maxLength={160} className={inputClass} />
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-text-secondary">
+              {t("recipients.contactEmail")}
+              <input name="contact_email" type="email" maxLength={200} className={inputClass} />
+            </label>
+            <div className="sm:col-span-2 flex flex-col gap-1">
+              <p className="text-meta text-text-muted">{t("recipients.minimum")}</p>
+              <div><button type="submit" className={buttonClass}>{t("recipients.save")}</button></div>
+            </div>
+          </form>
+        </InvoicePanel>
+      ) : null}
+
+      {/* ── 2c. Numbering series: configured by the issuing organization ── */}
+      {orgId ? (
+        <InvoicePanel id="invoicing-series" testId="invoicing-series" gap={3}>
+          <h2 className={sectionTitleClass}>{t("series.title")}</h2>
+          <p className="text-sm text-text-secondary">{t("series.intro")}</p>
+          {(["invoice", "credit_note"] as SeriesDocumentType[]).map((dt) => {
+            const cfg: SeriesConfig | undefined = series.find((x) => x.documentType === dt);
+            return (
+              <form key={dt} action={configureSeriesAction} className="flex flex-wrap items-end gap-3" data-testid={`series-${dt}`}>
+                <input type="hidden" name="locale" value={locale} />
+                <input type="hidden" name="project_id" value={id} />
+                <input type="hidden" name="organization_id" value={orgId} />
+                <input type="hidden" name="document_type" value={dt} />
+                <span className="w-32 text-sm font-semibold text-text-primary">{t(`kind.${dt}`)}</span>
+                <label className="flex flex-col gap-1 text-xs text-text-secondary">
+                  {t("series.prefix")}
+                  <input name="prefix" maxLength={20} defaultValue={cfg?.prefix ?? ""} className={`${inputClass} w-28`} />
+                </label>
+                <label className="flex flex-col gap-1 text-xs text-text-secondary">
+                  {t("series.separator")}
+                  <input name="separator" maxLength={3} defaultValue={cfg?.separator ?? "-"} className={`${inputClass} w-16`} />
+                </label>
+                <label className="flex flex-col gap-1 text-xs text-text-secondary">
+                  {t("series.pad")}
+                  <input name="pad" type="number" min={1} max={12} defaultValue={cfg?.pad ?? 4} className={`${inputClass} w-20`} />
+                </label>
+                <label className="flex items-center gap-2 text-xs text-text-secondary">
+                  <input type="checkbox" name="year_based" value="yes" defaultChecked={cfg?.yearBased ?? false} />
+                  {t("series.yearBased")}
+                </label>
+                <button type="submit" className={buttonClass}>{t("series.save")}</button>
+                <span className="text-meta text-text-muted">
+                  {cfg ? t("series.example", { example: formatNumberPreview(cfg, new Date().getUTCFullYear(), 1) }) : t("series.notConfigured")}
+                </span>
+              </form>
+            );
+          })}
+          <p className="text-meta text-text-muted">{t("series.note")}</p>
+        </InvoicePanel>
+      ) : null}
+
       {/* ── 3. Billing periods ───────────────────────────────────── */}
       <InvoicePanel id="invoicing-periods" testId="invoicing-periods" gap={4}>
         <h2 className={sectionTitleClass}>{t("periods.title")}</h2>
@@ -290,6 +404,7 @@ export default async function ProjectInvoicingPage({
         {periodDetails.map(({ period, preview, changes }) => {
           const inv = invoiceByPeriod.get(period.id);
           const sum = preview && preview.kind === "ok" ? summarizePreview(preview.value) : null;
+          const previewRows = preview && preview.kind === "ok" ? preview.value : [];
           return (
             <article key={period.id} className="flex flex-col gap-3 rounded-lg border border-ink-500 p-4" data-testid={`period-${period.id}`}>
               <div className="flex flex-wrap items-center gap-2">
@@ -314,32 +429,48 @@ export default async function ProjectInvoicingPage({
                   </ul>
                   <p className="text-meta text-text-muted">{t("periods.summary.basis")}</p>
                   {!inv && sum.billableRows > 0 ? (
-                    <form action={createInvoiceDraftAction} className="grid gap-3 sm:grid-cols-2" data-testid="draft-form">
+                    <form action={createInvoiceDraftAction} className="flex flex-col gap-3" data-testid="draft-form">
                       <input type="hidden" name="locale" value={locale} />
                       <input type="hidden" name="project_id" value={id} />
                       <input type="hidden" name="period_id" value={period.id} />
+                      <input type="hidden" name="explicit" value="1" />
+                      <fieldset className="flex flex-col gap-1">
+                        <legend className="text-xs font-semibold text-text-secondary">{t("draft.selectEvidence")}</legend>
+                        <p className="text-meta text-text-muted">{t("draft.selectEvidenceHelp")}</p>
+                        {previewRows.filter((r) => r.eligibility === "billable" && r.termId).map((r) => (
+                          <label key={selectionKey(r)} className="flex items-center gap-2 text-sm text-text-primary">
+                            <input type="checkbox" name="pick" value={selectionKey(r)} defaultChecked />
+                            <span>
+                              {r.workDay} - {r.kind === "hours" ? `${r.hours} h` : `${r.quantity} ${r.unit ?? ""}`} - {t(`evidence.${r.evidenceClass}`)}
+                            </span>
+                          </label>
+                        ))}
+                        {previewRows.filter((r) => r.eligibility === "billable" && !r.termId).map((r) => (
+                          <p key={selectionKey(r)} className="text-meta text-text-muted">
+                            {r.workDay} - {r.kind === "hours" ? `${r.hours} h` : `${r.quantity} ${r.unit ?? ""}`} - {t("draft.noAgreedRate")}
+                          </p>
+                        ))}
+                        {previewRows.filter((r) => r.eligibility !== "billable").map((r) => (
+                          <p key={selectionKey(r)} className="text-meta text-text-muted">
+                            {r.workDay} - {r.kind === "hours" ? `${r.hours} h` : `${r.quantity} ${r.unit ?? ""}`} - {t(`draft.held.${r.eligibility}`)}
+                          </p>
+                        ))}
+                      </fieldset>
                       <label className="flex flex-col gap-1 text-xs text-text-secondary">
-                        {t("draft.customerName")}
-                        <input name="customer_name" required minLength={2} maxLength={160} className={inputClass} />
-                      </label>
-                      <label className="flex flex-col gap-1 text-xs text-text-secondary">
-                        {t("draft.customerVatId")}
-                        <input name="customer_vat_id" maxLength={60} className={inputClass} />
-                      </label>
-                      <label className="flex flex-col gap-1 text-xs text-text-secondary sm:col-span-2">
-                        {t("draft.customerAddress")}
-                        <input name="customer_address" maxLength={400} className={inputClass} />
-                      </label>
-                      <label className="flex flex-col gap-1 text-xs text-text-secondary">
-                        {t("draft.clientOrgId")}
-                        <input name="client_org_id" pattern="[0-9a-fA-F-]{36}" className={inputClass} />
-                        <span className="text-text-muted">{t("draft.clientOrgHint")}</span>
+                        {t("draft.recipient")}
+                        <select name="recipient_id" required className={inputClass} defaultValue="">
+                          <option value="" disabled>{t("draft.chooseRecipient")}</option>
+                          {recipients.map((r) => (
+                            <option key={r.id} value={r.id}>{r.legalName}{r.country ? ` (${r.country})` : ""}</option>
+                          ))}
+                        </select>
+                        {recipients.length === 0 ? <span className="text-state-warning">{t("draft.noRecipientYet")}</span> : null}
                       </label>
                       <label className="flex flex-col gap-1 text-xs text-text-secondary">
                         {t("draft.dueDate")}
                         <input type="date" name="due_date" className={inputClass} />
                       </label>
-                      <div className="sm:col-span-2">
+                      <div>
                         <button type="submit" className={buttonClass}>{t("draft.create")}</button>
                       </div>
                     </form>
@@ -377,6 +508,17 @@ export default async function ProjectInvoicingPage({
       {/* ── 4. Invoices ─────────────────────────────────────────── */}
       <InvoicePanel id="invoicing-invoices" testId="invoicing-invoices" gap={3}>
         <h2 className={sectionTitleClass}>{t("invoices.title")}</h2>
+        {totals.length > 0 ? (
+          <div className="flex flex-col gap-1" data-testid="invoicing-totals">
+            {[...totalsByCurrency(totals).entries()].map(([cur, rows]) => (
+              <p key={cur} className="text-sm text-text-primary">
+                <span className="font-semibold">{cur}</span>:{" "}
+                {rows.map((r) => `${t(`kind.${r.kind}`)} ${money(r.grossCents, r.currency)} (${r.documents})`).join(" - ")}
+              </p>
+            ))}
+            <p className="text-meta text-text-muted">{t("invoices.totalsNote")}</p>
+          </div>
+        ) : null}
         {invoices.length === 0 ? (
           <p className="text-sm text-text-muted">{t("invoices.empty")}</p>
         ) : (

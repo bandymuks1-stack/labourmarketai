@@ -9,6 +9,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { isMigrationMissingCode } from "@/lib/finance/finance-model";
 import { isKnownCurrency, parseMajorToMinor } from "@/lib/finance/invoice-currency";
+import { parseSelectionKeys } from "@/lib/finance/project-invoice-model";
 import { isTaxTreatment, validateTax } from "@/lib/finance/invoice-tax-model";
 
 /**
@@ -150,20 +151,101 @@ export async function createInvoiceDraftAction(fd: FormData): Promise<void> {
   if (!projectId) redirect(`/${locale}/dashboard`);
   if (!periodId) back(locale, projectId, null, "invalid");
   const due = str(fd, "due_date", 16);
+  // EXPLICIT SELECTION: the issuer ticks the approved work evidence to bill. `explicit=1` means the list
+  // (possibly empty) is the selection; the database refuses rows that are not billable.
+  const picks = fd.getAll("pick").filter((v): v is string => typeof v === "string").slice(0, 5000);
+  const selection = str(fd, "explicit", 2) === "1" ? parseSelectionKeys(picks) : null;
   const { status, data } = await call("create_invoice_draft_from_period_v1", {
     p_period_id: periodId,
-    p_customer_name: str(fd, "customer_name", 160),
-    p_client_org_id: uuid(fd, "client_org_id"),
-    p_customer_vat_id: str(fd, "customer_vat_id", 60) || null,
-    p_customer_address: str(fd, "customer_address", 400) || null,
+    p_customer_name: null,
+    p_client_org_id: null,
+    p_customer_vat_id: null,
+    p_customer_address: null,
     p_due_date: DATE_RX.test(due) ? due : null,
     p_note: str(fd, "note", 1000) || null,
     p_replaces_id: uuid(fd, "replaces_id"),
+    p_recipient_id: uuid(fd, "recipient_id"),
+    p_selection: selection,
   });
   revalidate(locale, projectId);
   const id = typeof data.invoice_id === "string" && UUID_RX.test(data.invoice_id) ? data.invoice_id : null;
   if (status === "created" && id) back(locale, projectId, id, "draft_created");
   back(locale, projectId, null, status);
+}
+
+/** Create or update an entry of the ISSUER's contact book. Not a LabourMarket account. */
+export async function saveRecipientAction(fd: FormData): Promise<void> {
+  const locale = localeOf(fd);
+  const projectId = uuid(fd, "project_id");
+  const orgId = uuid(fd, "organization_id");
+  if (!projectId) redirect(`/${locale}/dashboard`);
+  if (!orgId) back(locale, projectId, null, "invalid");
+  const invoiceId = uuid(fd, "invoice_id");
+  const country = str(fd, "country", 2).toUpperCase();
+  const { status, data } = await call("save_invoice_recipient_v1", {
+    p_issuer_org: orgId,
+    p_recipient_id: uuid(fd, "recipient_id"),
+    p_legal_name: str(fd, "legal_name", 160),
+    p_address: str(fd, "address", 400) || null,
+    p_country: country || null,
+    p_tax_id: str(fd, "tax_id", 60) || null,
+    p_contact_name: str(fd, "contact_name", 160) || null,
+    p_contact_email: str(fd, "contact_email", 200) || null,
+    p_reference: str(fd, "reference", 200) || null,
+    p_linked_org: uuid(fd, "linked_org_id"),
+    p_linked_profile: null,
+  });
+  revalidate(locale, projectId);
+  // creating the contact from an open draft attaches it to that draft
+  const newId = typeof data.id === "string" && UUID_RX.test(data.id) ? data.id : null;
+  if (status === "saved" && invoiceId && newId) {
+    const attach = await call("set_invoice_recipient_v1", { p_invoice_id: invoiceId, p_recipient_id: newId });
+    back(locale, projectId, invoiceId, attach.status === "updated" ? "recipient_saved" : attach.status);
+  }
+  back(locale, projectId, invoiceId, status === "saved" ? "recipient_saved" : status);
+}
+
+export async function archiveRecipientAction(fd: FormData): Promise<void> {
+  const locale = localeOf(fd);
+  const projectId = uuid(fd, "project_id");
+  const recipientId = uuid(fd, "recipient_id");
+  if (!projectId) redirect(`/${locale}/dashboard`);
+  if (!recipientId) back(locale, projectId, null, "invalid");
+  const { status } = await call("archive_invoice_recipient_v1", { p_recipient_id: recipientId });
+  revalidate(locale, projectId);
+  back(locale, projectId, null, status === "archived" ? "recipient_archived" : status);
+}
+
+export async function setInvoiceRecipientAction(fd: FormData): Promise<void> {
+  const locale = localeOf(fd);
+  const projectId = uuid(fd, "project_id");
+  const invoiceId = uuid(fd, "invoice_id");
+  const recipientId = uuid(fd, "recipient_id");
+  if (!projectId) redirect(`/${locale}/dashboard`);
+  if (!invoiceId || !recipientId) back(locale, projectId, invoiceId, "invalid");
+  const { status } = await call("set_invoice_recipient_v1", { p_invoice_id: invoiceId, p_recipient_id: recipientId });
+  revalidate(locale, projectId);
+  back(locale, projectId, invoiceId, status === "updated" ? "recipient_saved" : status);
+}
+
+/** Numbering: prefix / separator / padding / optional year-based reset, per document type of the ISSUING org. */
+export async function configureSeriesAction(fd: FormData): Promise<void> {
+  const locale = localeOf(fd);
+  const projectId = uuid(fd, "project_id");
+  const orgId = uuid(fd, "organization_id");
+  if (!projectId) redirect(`/${locale}/dashboard`);
+  if (!orgId) back(locale, projectId, null, "invalid");
+  const pad = Number(str(fd, "pad", 3));
+  const { status } = await call("configure_invoice_series_v1", {
+    p_org: orgId,
+    p_document_type: str(fd, "document_type", 16),
+    p_prefix: str(fd, "prefix", 20),
+    p_separator: str(fd, "separator", 3),
+    p_pad: Number.isInteger(pad) ? pad : 0,
+    p_year_based: str(fd, "year_based", 4) === "yes",
+  });
+  revalidate(locale, projectId);
+  back(locale, projectId, null, status === "saved" ? "series_saved" : status);
 }
 
 export async function addBasisLineAction(fd: FormData): Promise<void> {
@@ -255,6 +337,7 @@ export async function correctInvoiceAction(fd: FormData): Promise<void> {
     p_invoice_id: invoiceId,
     p_reason: str(fd, "reason", 500),
     p_reference: str(fd, "reference", 200) || null,
+    p_lines: null, // pilot UI = full credit of what remains; the RPC also accepts [{line_id, quantity?, net_cents?}]
   });
   revalidate(locale, projectId);
   const cn = typeof data.credit_note_id === "string" && UUID_RX.test(data.credit_note_id) ? data.credit_note_id : null;

@@ -10,6 +10,10 @@ import type {
   BasisType,
   ChainDocument,
   BillingPeriod,
+  CurrencyTotal,
+  InvoiceRecipient,
+  RecipientSnapshot,
+  SeriesConfig,
   EvidenceClass,
   InvoiceHeader,
   InvoiceKind,
@@ -53,7 +57,7 @@ const TERM_COLS =
   "id, project_id, organization_id, basis_type, unit, rate_cents, currency, label, role_label, valid_from, valid_to, agreed_at, note";
 const PERIOD_COLS = "id, project_id, organization_id, period_start, period_end, status, locked_at";
 const INVOICE_COLS =
-  "id, title, counterparty_name, currency, status, invoice_kind, invoice_number, issued_at, replaces_id, correction_reason, correction_reference, corrected_by, corrected_at, credited_at, credited_by_id, due_date, paid_at, billing_period_id, supersedes_id, issuer_org_id, client_org_id, customer_vat_id, customer_address, tax_rounding, net_total_cents, tax_total_cents, gross_total_cents, tax_breakdown, note, project_id, created_at";
+  "id, title, counterparty_name, currency, status, invoice_kind, invoice_number, issued_at, replaces_id, correction_reason, correction_reference, corrected_by, corrected_at, credited_at, credited_by_id, due_date, paid_at, billing_period_id, supersedes_id, issuer_org_id, client_org_id, customer_vat_id, customer_address, tax_rounding, recipient_id, recipient_snapshot, number_series, number_year, number_seq, net_total_cents, tax_total_cents, gross_total_cents, tax_breakdown, note, project_id, created_at";
 const LINE_COLS =
   "id, invoice_id, line_no, basis_type, description, rate_term_id, unit, quantity, unit_price_cents, net_cents, currency, evidence_class, qty_client_accepted, confirmed_at, tax_treatment, tax_rate_percent, tax_note, tax_cents, gross_cents, credits_line_id";
 
@@ -120,6 +124,11 @@ function mapInvoice(r: Row): InvoiceHeader {
     issuerOrgId: s(r.issuer_org_id),
     clientOrgId: s(r.client_org_id),
     taxRounding: String(r.tax_rounding ?? "per_line"),
+    recipientId: s(r.recipient_id),
+    recipient: mapSnapshot(r.recipient_snapshot),
+    numberSeries: r.number_series === "credit_note" ? "credit_note" : r.number_series === "invoice" ? "invoice" : null,
+    numberYear: r.number_year == null ? null : toInt(r.number_year),
+    numberSeq: r.number_seq == null ? null : toInt(r.number_seq),
     netTotalCents: r.net_total_cents == null ? null : toInt(r.net_total_cents),
     taxTotalCents: r.tax_total_cents == null ? null : toInt(r.tax_total_cents),
     grossTotalCents: r.gross_total_cents == null ? null : toInt(r.gross_total_cents),
@@ -192,11 +201,29 @@ function mapChain(r: { data?: unknown; error?: unknown }): readonly ChainDocumen
   }));
 }
 
+function mapSnapshot(v: unknown): RecipientSnapshot | null {
+  if (!v || typeof v !== "object") return null;
+  const o = v as Row;
+  if (typeof o.legal_name !== "string") return null;
+  return {
+    legalName: o.legal_name,
+    address: s(o.address),
+    country: s(o.country),
+    taxId: s(o.tax_id),
+    contactName: s(o.contact_name),
+    contactEmail: s(o.contact_email),
+    reference: s(o.reference),
+  };
+}
+
 function failKind(code: string | undefined): "needs-migration" | "error" {
   return isMigrationMissingCode(code) || code === "PGRST205" ? "needs-migration" : "error";
 }
 
 export type ProjectInvoicing = {
+  readonly recipients: readonly InvoiceRecipient[];
+  readonly series: readonly SeriesConfig[];
+  readonly totals: readonly CurrencyTotal[];
   readonly rateTerms: readonly RateTerm[];
   readonly periods: readonly BillingPeriod[];
   readonly invoices: readonly InvoiceHeader[];
@@ -247,9 +274,53 @@ export async function getProjectInvoicing(
       );
     }
   }
+  let recipients: InvoiceRecipient[] = [];
+  let series: SeriesConfig[] = [];
+  if (organizationId) {
+    const [rc, sc] = await Promise.all([
+      db.from("invoice_recipients").select("id, legal_name, address, country, tax_id, contact_name, contact_email, reference, linked_organization_id").eq("issuer_org_id", organizationId).is("archived_at", null).order("legal_name", { ascending: true }).limit(500),
+      db.from("invoice_series_configs").select("document_type, prefix, separator, pad, year_based").eq("organization_id", organizationId).limit(10),
+    ]);
+    if (!rc.error) {
+      recipients = ((rc.data ?? []) as Row[]).map((r) => ({
+        id: String(r.id),
+        legalName: String(r.legal_name),
+        address: s(r.address),
+        country: s(r.country),
+        taxId: s(r.tax_id),
+        contactName: s(r.contact_name),
+        contactEmail: s(r.contact_email),
+        reference: s(r.reference),
+        linkedOrganizationId: s(r.linked_organization_id),
+      }));
+    }
+    if (!sc.error) {
+      series = ((sc.data ?? []) as Row[]).flatMap((r) =>
+        r.document_type === "invoice" || r.document_type === "credit_note"
+          ? [{ documentType: r.document_type, prefix: String(r.prefix ?? ""), separator: String(r.separator ?? "-"), pad: toInt(r.pad), yearBased: r.year_based === true }]
+          : [],
+      );
+    }
+  }
+  // Totals per (currency, kind) from the database: one row each, never summed across currencies.
+  let totals: CurrencyTotal[] = [];
+  const tr = await db.rpc("project_invoice_totals_v1", { p_project_id: projectId });
+  if (!tr.error) {
+    totals = ((tr.data ?? []) as Row[]).map((r) => ({
+      currency: String(r.currency),
+      kind: r.invoice_kind === "credit_note" ? ("credit_note" as const) : ("invoice" as const),
+      documents: toInt(r.documents),
+      netCents: toInt(r.net_cents),
+      taxCents: toInt(r.tax_cents),
+      grossCents: toInt(r.gross_cents),
+    }));
+  }
   return {
     kind: "ok",
     value: {
+      recipients,
+      series,
+      totals,
       rateTerms: ((terms.data ?? []) as Row[]).flatMap((r) => mapTerm(r) ?? []),
       periods: ((periods.data ?? []) as Row[]).map(mapPeriod),
       invoices: ((invoices.data ?? []) as Row[]).map(mapInvoice),
