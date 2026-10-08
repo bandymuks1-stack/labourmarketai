@@ -18,6 +18,9 @@ import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibilit
 // for THIS demand (which the client owns) — reviewed with the SAME canonical
 // controls below, keyed on (requestId, workerId).
 import { listOfferedCandidatesForRequest, readOfferBookingStatuses } from "@/lib/agency/bridge-read";
+import { TeamOffersReceived } from "@/components/app/team-offers-received";
+import { loadTeamOffersForDemand } from "@/lib/company/team-offer";
+import { listManagedProjects } from "@/lib/projects/projects";
 import {
   hasActiveScoutFilters,
   parseScoutFilterParams,
@@ -199,6 +202,21 @@ export default async function CompanyScoutingPage({
   // returns rows only to the request owner). Empty until the owner-gated bridge
   // migration is applied.
   const offeredCandidates = selected ? await listOfferedCandidatesForRequest(selected) : [];
+  // E6 - brigades that offered THEMSELVES as one unit against this need. Team-level
+  // aggregates only (the database never returns a member), matched against the SAME
+  // need the candidates were judged against. An agency acting for a client does not
+  // answer for it, so the section is the owner's. Projects load only when an offer
+  // is accepted and waiting for its assignment.
+  const teamOffers =
+    selected && !actsForClient
+      ? await loadTeamOffersForDemand(selected, result?.kind === "ok" ? (result.need ?? null) : null)
+      : null;
+  const teamOfferProjects =
+    teamOffers && teamOffers.offers.some((o) => o.offer.status === "accepted")
+      ? (await listManagedProjects())
+          .filter((p) => p.status !== "completed")
+          .map((p) => ({ id: p.id, title: p.title }))
+      : [];
   // WHO APPLIED (owner order 2026-10-01): for a worker whose application is
   // on THIS employer's own need, the database (applicant_identity_v1, owner of
   // the demand + application not withdrawn) may release the name and photo.
@@ -824,6 +842,10 @@ export default async function CompanyScoutingPage({
             ))}
           </ul>
         </section>
+      ) : null}
+
+      {teamOffers && teamOffers.offers.length > 0 ? (
+        <TeamOffersReceived offers={teamOffers.offers} projects={teamOfferProjects} needOpen={needOpen} />
       ) : null}
 
       {result?.kind === "ok" && result.candidates.length > 0 ? (

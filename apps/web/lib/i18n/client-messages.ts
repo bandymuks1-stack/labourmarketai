@@ -137,6 +137,7 @@ export const CLIENT_MESSAGE_ROOTS = [
   "tasks",
   "teamAssignment",
   "teamBrigades",
+  "teamDemandOffer",
   "teamEnquiries",
   "waitlist",
   "waze",

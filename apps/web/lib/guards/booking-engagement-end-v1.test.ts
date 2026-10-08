@@ -1604,6 +1604,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-07: historical sites become completed projects (INSERT projects + link work_objects) - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261007130000_historical_projects_from_work_objects_v1.sql",
       "20261007140000_work_plan_scope_roster_engagement_v1.sql",
+      // 2026-10-07 (E6, owner decision): a team/brigade offered against one demand (new table + SECURITY DEFINER doors + GRANT) - marker is the human-gate acknowledgement; owner-approved 2026-10-08 (separate hand-off RPC).
+      "20261007150000_team_demand_offer_v1.sql",
       // 2026-10-07: private evidence-media bucket + storage.objects policies (RED storage policy) - marker is the human-gate acknowledgement; owner-approved in chat 2026-10-08 (PR #2189).
       "20261007180000_evidence_media_bucket_v1.sql",
       // 2026-10-08 (#2191, owner-approved RED): unshare withdraws live agency offers (SECURITY DEFINER replace + data DML) - marker is the human-gate acknowledgement.

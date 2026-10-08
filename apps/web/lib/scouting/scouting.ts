@@ -12,7 +12,7 @@ import { isDemandKind } from "@/lib/demand/market-direction";
 import { parseStructuredNeed } from "@/lib/market/fit";
 import type { NeedSkillSource } from "@/lib/market/need-skills";
 import { buildNeedFromRequestRow } from "@/lib/market/need-from-request";
-import { matchWorkerToNeed, compareMatches } from "@/lib/market/match-v1";
+import { matchWorkerToNeed, compareMatches, type MatchNeed } from "@/lib/market/match-v1";
 import { buildSupplyCandidates } from "@/lib/market/match-subject";
 import { isSyntheticFixtureLabel } from "@/lib/qa/synthetic-fixture";
 import type { SupplyRetrievalReport } from "@/lib/market/supply-retrieval";
@@ -178,6 +178,12 @@ export type ScoutResult =
        *  disclose `capped` — an employer reading "no candidates" is entitled
        *  to know whether the platform actually looked at everyone. */
       retrieval: SupplyRetrievalReport;
+      /** The need exactly as the matcher reads it (the same assembly the
+       *  candidates were judged against). Carried so the team-offer section
+       *  (E6) matches an offered brigade against the SAME need - never a
+       *  second reduction. Optional: older callers/tests build results
+       *  without it. */
+      need?: MatchNeed;
     }
   | { kind: "not-found" }
   | { kind: "not-structured"; demand: CompanyDemand }
@@ -472,7 +478,7 @@ export async function runScoutingCore(
     metadata: { candidate_count: candidates.length, surface: "scouting" },
   });
 
-  return { kind: "ok", demand, candidates, interestByWorker, facets, filters, retrieval };
+  return { kind: "ok", demand, candidates, interestByWorker, facets, filters, retrieval, need };
 }
 
 export type ShortlistWriteResult =

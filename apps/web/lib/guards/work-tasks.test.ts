@@ -164,6 +164,10 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
     // 20261003150600 — team_assignments (WRK-6): holds an FK to public.work_tasks and reads it to
     // check a task belongs to the project a team is assigned to. Creates/alters/writes nothing on it.
     "20261003150600_brigade_work_assignment_v1",
+    // 20261007150000 - team_demand_offers (E6): hand_off_team_demand_offer_v1 reads public.work_tasks to
+    // check a task belongs to the project the team is handed off to (the same check assign_team_to_work_v1
+    // makes). Creates/alters/writes nothing on it.
+    "20261007150000_team_demand_offer_v1",
     // 20261003150700 — team assignment as an active Journal/work context: widens the wt_select
     // predicate with ONE team-task OR-term (team assigned to THAT task or its work object) and
     // adds the team-or-person authority to the evidence link. Creates/drops/writes nothing on

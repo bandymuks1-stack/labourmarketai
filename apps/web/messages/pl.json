@@ -18508,6 +18508,111 @@
       "next": "Dokąd możesz przejść"
     }
   },
+  "teamDemandOffer": {
+    "heading": "Zaproponuj ten zespół do zapotrzebowania",
+    "intro": "Zaproponuj zespół jako jedną jednostkę do jednego otwartego zapotrzebowania zweryfikowanej firmy.",
+    "privacy": "Firma widzi tylko fakty na poziomie zespołu: wielkość, umiejętności, dostępność. Oferta nie wskazuje żadnego członka ani nie pokazuje profilu członka. Członkowie pojawiają się w projekcie dopiero po tym, jak firma przyjmie zespół i tam go przypisze.",
+    "tooSmall": "Zespół można zaproponować tylko wtedy, gdy ma co najmniej 2 aktywnych członków.",
+    "loading": "Ładowanie…",
+    "unavailable": "Nie udało się teraz wczytać otwartego zapotrzebowania.",
+    "noDemand": "Obecnie nie ma otwartego zapotrzebowania, do którego można złożyć ofertę.",
+    "demandLabel": "Zapotrzebowanie",
+    "demandPlaceholder": "Wybierz zapotrzebowanie",
+    "alreadyOffered": "już zaproponowano",
+    "noteLabel": "Wiadomość do firmy (opcjonalnie)",
+    "notePlaceholder": "Na przykład: brygada 3 osób, start za dwa tygodnie",
+    "submit": "Zaproponuj zespół",
+    "submitting": "Wysyłanie…",
+    "sent": {
+      "heading": "Twoje oferty",
+      "none": "Brak ofert.",
+      "withdraw": "Wycofaj"
+    },
+    "status": {
+      "offered": "Czeka na odpowiedź",
+      "accepted": "Przyjęta",
+      "declined": "Odrzucona",
+      "withdrawn": "Wycofana",
+      "assigned": "Przypisana do projektu"
+    },
+    "outcome": {
+      "created": "Oferta wysłana.",
+      "already_offered": "Ten zespół jest już zaproponowany do tego zapotrzebowania. Nic nie zmieniono.",
+      "withdrawn": "Oferta wycofana.",
+      "already_withdrawn": "Ta oferta była już wycofana."
+    },
+    "refusal": {
+      "not_authed": "Zaloguj się ponownie, aby kontynuować.",
+      "not_authorized": "Nie możesz tego zrobić dla tego zespołu ani zapotrzebowania.",
+      "demand_not_offerable": "Do tego zapotrzebowania nie można zaproponować zespołu (jest zamknięte, nie dotyczy ludzi albo jest Twoje własne).",
+      "team_too_small": "Zespół musi mieć co najmniej 2 aktywnych członków.",
+      "previously_declined": "To zapotrzebowanie odrzuciło już ofertę tego zespołu.",
+      "offer_limit_reached": "Ten zespół ma już 20 otwartych ofert. Najpierw wycofaj jedną.",
+      "offer_not_open": "Ta oferta nie jest już otwarta.",
+      "offer_not_accepted": "Przyjmij ofertę, zanim przypiszesz zespół.",
+      "demand_closed": "To zapotrzebowanie jest zamknięte, więc oferty nie można przyjąć.",
+      "project_not_of_demand_owner": "Wybierz jeden z własnych projektów.",
+      "project_completed": "Ten projekt jest zakończony.",
+      "task_not_assignable": "Do tego zadania nie można przypisać zespołu.",
+      "object_not_assignable": "Do tego miejsca pracy nie można przypisać zespołu.",
+      "one_scope_only": "Wybierz zadanie albo miejsce pracy, nie oba naraz.",
+      "team_has_no_members": "Ten zespół nie ma aktywnych członków.",
+      "project_required": "Wybierz projekt.",
+      "invalid_decision": "Nieznana odpowiedź.",
+      "needs_migration": "Obecnie niedostępne.",
+      "error": "Nie udało się tego wykonać. Nic nie zmieniono."
+    },
+    "received": {
+      "title": "Zespoły zaproponowane do tego zapotrzebowania",
+      "subtitle": "Zespół zaproponował się jako jedna jednostka do tego zapotrzebowania. To Ty decydujesz, czy go przyjąć i gdzie przypisać.",
+      "privacy": "Pokazywane są tylko fakty na poziomie zespołu. Żaden członek nie jest tu wskazany. Po przyjęciu zespołu i przypisaniu go do projektu jego członkowie pojawią się w tym projekcie, jak w przypadku każdego zespołu.",
+      "members": "Członków: {count}",
+      "deployable": "Wielkość do wysłania {min}-{max}",
+      "availability": "Dostępność",
+      "availableNow": "Dostępny od zaraz",
+      "availableFrom": "Dostępny od {date}",
+      "notAvailable": "Niedostępny",
+      "availabilityUnknown": "Nie podano",
+      "consent": "Dołączyli przez zaproszenie",
+      "consentValue": "{consented} z {total} członków",
+      "skills": "Umiejętności (członkowie, którzy je deklarują)",
+      "skillsUnknown": "Nie podano jeszcze umiejętności",
+      "skillCount": "zadeklarowano {declared}, potwierdzono {confirmed}",
+      "languages": "Języki",
+      "fit": "Dopasowanie do tego zapotrzebowania",
+      "matchStatus": {
+        "strong": "silne",
+        "possible": "możliwe",
+        "weak": "słabe",
+        "insufficient_data": "za mało danych"
+      },
+      "coverage": "pokryto {covered} z {total} wymaganych umiejętności",
+      "basis": {
+        "aggregate": "Na podstawie podanych sum zespołu, nie poszczególnych członków.",
+        "members": "Na podstawie poszczególnych członków."
+      },
+      "blockers": "Zespół jako całość nie spełnia: {list}",
+      "missing": "Nie podano: {list}",
+      "noNeedStructure": "To zapotrzebowanie nie jest jeszcze uporządkowane, więc zespołu nie można z nim porównać.",
+      "note": "Wiadomość od zespołu",
+      "accept": "Przyjmij zespół",
+      "decline": "Odrzuć",
+      "noProjects": "Nie masz otwartego projektu, do którego można przypisać zespół. Najpierw utwórz projekt.",
+      "assignIntro": "Przyjęto. Przypisz zespół do jednego ze swoich projektów.",
+      "projectLabel": "Projekt",
+      "projectPlaceholder": "Wybierz projekt",
+      "assign": "Przypisz zespół do projektu",
+      "assignedNote": "Przypisano. Członkowie zespołu są teraz widoczni w tym projekcie.",
+      "outcome": {
+        "accepted": "Zespół przyjęty.",
+        "declined": "Oferta odrzucona.",
+        "already_accepted": "Już przyjęto.",
+        "already_declined": "Już odrzucono.",
+        "assigned": "Zespół przypisany do projektu.",
+        "already_assigned": "Ten zespół był już przypisany. Nic nie zmieniono."
+      }
+    }
+  },
   "teamAssignment": {
     "title": "Zespoły w tym projekcie",
     "intro": "Zespół jest przypisywany jako jedna całość. Członkowie pochodzą z członkostwa samego zespołu, więc osoby, które go opuściły, nie są liczone, a godziny i dziennik każdej osoby pozostają jej własne.",

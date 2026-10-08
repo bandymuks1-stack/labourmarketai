@@ -18508,6 +18508,111 @@
       "next": "Kur galite eiti"
     }
   },
+  "teamDemandOffer": {
+    "heading": "Pasiūlyti šią komandą paklausai",
+    "intro": "Pasiūlykite komandą kaip vieną vienetą vienai atviroms patvirtintos įmonės paklausai.",
+    "privacy": "Įmonė mato tik komandos lygio faktus: dydį, įgūdžius, prieinamumą. Pasiūlymas nenurodo jokio nario ir nerodo nario profilio. Nariai projekte matomi tik tada, kai įmonė komandą priima ir ten priskiria.",
+    "tooSmall": "Komandą galima siūlyti tik jei joje yra bent 2 aktyvūs nariai.",
+    "loading": "Kraunama…",
+    "unavailable": "Šiuo metu nepavyko įkelti atviros paklausos.",
+    "noDemand": "Šiuo metu nėra atviros paklausos, kuriai galima siūlyti.",
+    "demandLabel": "Paklausa",
+    "demandPlaceholder": "Pasirinkite paklausą",
+    "alreadyOffered": "jau pasiūlyta",
+    "noteLabel": "Pastaba įmonei (nebūtina)",
+    "notePlaceholder": "Pavyzdžiui: 3 žmonių brigada, galime pradėti po dviejų savaičių",
+    "submit": "Pasiūlyti komandą",
+    "submitting": "Siūloma…",
+    "sent": {
+      "heading": "Jūsų pasiūlymai",
+      "none": "Pasiūlymų dar nėra.",
+      "withdraw": "Atšaukti"
+    },
+    "status": {
+      "offered": "Laukiama atsakymo",
+      "accepted": "Priimta",
+      "declined": "Atmesta",
+      "withdrawn": "Atšaukta",
+      "assigned": "Priskirta projektui"
+    },
+    "outcome": {
+      "created": "Pasiūlymas išsiųstas.",
+      "already_offered": "Ši komanda šiai paklausai jau pasiūlyta. Niekas nepasikeitė.",
+      "withdrawn": "Pasiūlymas atšauktas.",
+      "already_withdrawn": "Šis pasiūlymas jau buvo atšauktas."
+    },
+    "refusal": {
+      "not_authed": "Prisijunkite iš naujo, kad tęstumėte.",
+      "not_authorized": "Šio veiksmo su šia komanda ar paklausa atlikti negalite.",
+      "demand_not_offerable": "Šiai paklausai komandos pasiūlyti negalima (ji uždaryta, nėra žmonių poreikis arba yra jūsų pačių).",
+      "team_too_small": "Komandoje turi būti bent 2 aktyvūs nariai.",
+      "previously_declined": "Ši paklausa jau atmetė šios komandos pasiūlymą.",
+      "offer_limit_reached": "Ši komanda jau turi 20 atvirų pasiūlymų. Pirmiausia vieną atšaukite.",
+      "offer_not_open": "Šis pasiūlymas nebeatviras.",
+      "offer_not_accepted": "Prieš priskirdami komandą, priimkite pasiūlymą.",
+      "demand_closed": "Šis poreikis uždarytas, todėl pasiūlymo priimti negalima.",
+      "project_not_of_demand_owner": "Pasirinkite vieną iš savo projektų.",
+      "project_completed": "Šis projektas užbaigtas.",
+      "task_not_assignable": "Šiai užduočiai komandos priskirti negalima.",
+      "object_not_assignable": "Šiai darbo vietai komandos priskirti negalima.",
+      "one_scope_only": "Pasirinkite arba užduotį, arba darbo vietą, ne abu.",
+      "team_has_no_members": "Šioje komandoje nėra aktyvių narių.",
+      "project_required": "Pasirinkite projektą.",
+      "invalid_decision": "Nežinomas atsakymas.",
+      "needs_migration": "Šiuo metu nepasiekiama.",
+      "error": "Nepavyko atlikti. Niekas nebuvo pakeista."
+    },
+    "received": {
+      "title": "Šiam poreikiui pasiūlytos komandos",
+      "subtitle": "Komanda pasiūlė save kaip vieną vienetą šiam poreikiui. Jūs sprendžiate, ar ją priimti ir kur priskirti.",
+      "privacy": "Rodomi tik komandos lygio faktai. Čia nėra nurodytas nė vienas narys. Kai priimsite komandą ir priskirsite projektui, jos nariai bus matomi tame projekte, kaip ir bet kurios kitos komandos atveju.",
+      "members": "Narių: {count}",
+      "deployable": "Išsiunčiamas dydis {min}-{max}",
+      "availability": "Prieinamumas",
+      "availableNow": "Prieinama dabar",
+      "availableFrom": "Prieinama nuo {date}",
+      "notAvailable": "Neprieinama",
+      "availabilityUnknown": "Nenurodyta",
+      "consent": "Prisijungė per kvietimą",
+      "consentValue": "{consented} iš {total} narių",
+      "skills": "Įgūdžiai (narių, kurie juos nurodė)",
+      "skillsUnknown": "Įgūdžiai dar nenurodyti",
+      "skillCount": "deklaruota {declared}, patvirtinta {confirmed}",
+      "languages": "Kalbos",
+      "fit": "Atitiktis šiam poreikiui",
+      "matchStatus": {
+        "strong": "stipri",
+        "possible": "galima",
+        "weak": "silpna",
+        "insufficient_data": "per mažai duomenų"
+      },
+      "coverage": "padengta {covered} iš {total} reikiamų įgūdžių",
+      "basis": {
+        "aggregate": "Pagal komandos nurodytas sumas, ne pagal atskirus narius.",
+        "members": "Pagal atskirus narius."
+      },
+      "blockers": "Komanda kaip visuma neatitinka: {list}",
+      "missing": "Nenurodyta: {list}",
+      "noNeedStructure": "Šis poreikis dar nesustruktūruotas, todėl komandos su juo palyginti negalima.",
+      "note": "Komandos pastaba",
+      "accept": "Priimti komandą",
+      "decline": "Atmesti",
+      "noProjects": "Neturite atviro projekto, kuriam galėtumėte priskirti komandą. Pirmiausia sukurkite projektą.",
+      "assignIntro": "Priimta. Priskirkite komandą vienam iš savo projektų.",
+      "projectLabel": "Projektas",
+      "projectPlaceholder": "Pasirinkite projektą",
+      "assign": "Priskirti komandą projektui",
+      "assignedNote": "Priskirta. Komandos nariai dabar matomi tame projekte.",
+      "outcome": {
+        "accepted": "Komanda priimta.",
+        "declined": "Pasiūlymas atmestas.",
+        "already_accepted": "Jau priimta.",
+        "already_declined": "Jau atmesta.",
+        "assigned": "Komanda priskirta projektui.",
+        "already_assigned": "Ši komanda jau priskirta. Niekas nepasikeitė."
+      }
+    }
+  },
   "teamAssignment": {
     "title": "Komandos šiame projekte",
     "intro": "Komanda skiriama kaip vienas vienetas. Nariai imami iš pačios komandos narystės, todėl komandą palikę žmonės neįskaičiuojami, o kiekvieno žmogaus valandos ir dienoraštis lieka jo paties.",
