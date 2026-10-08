@@ -51,7 +51,7 @@ import {
  * Worker-facing opportunities loader. READ-ONLY, own-data only.
  *
  * Readiness is built from the worker's OWN rows (workers / worker_skills /
- * worker_documents / worker_professions — all self-readable under existing
+ * worker_professions - all self-readable under existing
  * RLS). The open-demand list comes from the gated, curated SECURITY DEFINER
  * RPC `list_open_demand_for_workers()` (applied; Model A approved routes).
  *
@@ -207,7 +207,7 @@ export async function loadWorkerOpportunities(
   // real next step is confirming what their entries already describe.
   const nowIso = new Date().toISOString();
   const [
-    [{ data: docs }, entryCountRes],
+    [entryCountRes],
     { myInterest, handoffByVacancy },
     mySaved,
     demandRead,
@@ -215,10 +215,8 @@ export async function loadWorkerOpportunities(
     savedVacancyPreviews,
   ] = await Promise.all([
     Promise.all([
-      asAny(supabase)
-        .from("worker_documents")
-        .select("id")
-        .eq("worker_id", ctx.workerId),
+      // Document records are READINESS, not fit (decision 0021): the board no longer
+      // reads them at all.
       liveJournalEntriesOnly(
         asAny(supabase)
           .from("journal_entries")
@@ -302,7 +300,6 @@ export async function loadWorkerOpportunities(
     availabilitySet:
       ctx.worker.availability_status === "available" ||
       Boolean(ctx.worker.available_from),
-    documentsCount: docs?.length ?? 0,
     availabilityStatus: ctx.worker.availability_status,
     professionSlug: ctx.subject.professionSlug ?? null,
     professionSlugs: declaredProfessionSlugs(ctx.subject),

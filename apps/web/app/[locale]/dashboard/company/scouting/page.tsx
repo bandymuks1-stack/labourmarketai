@@ -1484,6 +1484,24 @@ export default async function CompanyScoutingPage({
                   </span>
                 </div>
 
+                {/* READINESS beside FIT, never inside it (decision 0021): what
+                    still has to be checked and by which stage. Not a filter -
+                    the match above is unchanged - and no file is required. */}
+                {c.match.readiness ? (
+                  <p
+                    className="text-meta text-text-secondary"
+                    data-testid={`scout-readiness-checks-${c.workerId}`}
+                    data-readiness-checks={c.match.readiness.status}
+                  >
+                    {c.match.readiness.status === "checks_outstanding" && c.match.readiness.nextStage
+                      ? t("readinessChecks.outstanding", {
+                          count: c.match.readiness.outstanding,
+                          stage: t(`readinessChecks.stage.${c.match.readiness.nextStage}` as never),
+                        })
+                      : t(`readinessChecks.${c.match.readiness.status}` as never)}
+                  </p>
+                ) : null}
+
                   </IdentityDisclosure>
                 </PersonIdentityCard>
               </li>

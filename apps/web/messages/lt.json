@@ -8804,6 +8804,17 @@
       "nameHidden": "Vardas ir kontaktai rodomi tik tada, kai žmogus tai leidžia.",
       "appliedToYou": "Pateikė paraišką šiam poreikiui — vardas ir nuotrauka matomi dėl paraiškos. Telefonas ir el. paštas lieka paslėpti.",
       "skillUnknown": "Įgūdžių nenurodyta · reikia {total}"
+    },
+    "readinessChecks": {
+      "outstanding": "Pasirengimas (atskirai nuo tinkamumo): {count} patikrinti, pirmiausia iki etapo: {stage}. Tai ne filtras - svarstyti galima ir be dokumento kopijos.",
+      "clear": "Pasirengimas (atskirai nuo tinkamumo): neliko jokių patikrų.",
+      "unknown": "Pasirengimas (atskirai nuo tinkamumo): šios šalies reikalavimai dar nežinomi.",
+      "stage": {
+        "contract": "sutartis",
+        "assignment": "paskyrimas",
+        "mobilisation": "mobilizacija",
+        "work_start": "darbo pradžia"
+      }
     }
   },
   "planBoundary": {

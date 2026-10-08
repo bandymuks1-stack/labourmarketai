@@ -8804,6 +8804,17 @@
       "nameHidden": "Name and contact details appear only when the person allows them.",
       "appliedToYou": "Applied for this need — name and photo come with the application. Phone and e-mail stay hidden.",
       "skillUnknown": "No skills stated · needs {total}"
+    },
+    "readinessChecks": {
+      "outstanding": "Readiness (separate from fit): {count} to check, first by {stage}. Not a filter - no document copy is needed to be considered.",
+      "clear": "Readiness (separate from fit): no outstanding checks.",
+      "unknown": "Readiness (separate from fit): requirements for this country are not known yet.",
+      "stage": {
+        "contract": "contract",
+        "assignment": "assignment",
+        "mobilisation": "mobilisation",
+        "work_start": "work start"
+      }
     }
   },
   "planBoundary": {

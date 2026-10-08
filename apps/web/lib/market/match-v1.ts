@@ -31,6 +31,7 @@ import { computeContextFit, type FitBasis, type SubjectEscoSkill } from "./fit";
 import { professionRelatedness } from "@/lib/taxonomy/profession-skills";
 import type { NeedSkillSource } from "./need-skills";
 import type { StructuredDemandV2 } from "@/lib/demand/structured-demand-v2";
+import type { ReadinessSummary } from "@/lib/readiness/readiness-model";
 import {
   MATCH_CALC_VERSION,
   compareCompensationV2,
@@ -432,6 +433,13 @@ export interface MatchResultV1 {
    *  Missing data NEVER fabricates an outcome. (Sits beside the legacy
    *  `missingData` code list, which stays untouched for compatibility.) */
   readonly missingFacts: readonly MatchMissingFact[];
+  /**
+   * READINESS (decision 0021) - a SIBLING of fit, never an input to it.
+   * Attached by `attachReadiness` (lib/readiness/with-readiness.ts) AFTER the
+   * match is computed; `matchWorkerToNeed` never sets it and nothing in this
+   * file reads it. Absent = readiness not assessed (not "ready", not "clear").
+   */
+  readonly readiness?: ReadinessSummary;
 }
 
 /**
