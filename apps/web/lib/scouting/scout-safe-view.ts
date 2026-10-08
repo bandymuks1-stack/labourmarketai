@@ -22,6 +22,9 @@ import {
   companyCandidateReadiness,
   type CompanyCandidateReadiness,
 } from "@/lib/scouting/candidate-readiness";
+import { attachReadiness } from "@/lib/readiness/with-readiness";
+import { deriveReadiness } from "@/lib/readiness/readiness-model";
+import { requirementsForContext } from "@/lib/readiness/context-requirements";
 import type { LastActiveBucket } from "@/lib/scouting/profile-freshness";
 import {
   mayOfferEmployerActions,
@@ -88,6 +91,8 @@ export function toScoutSafeCandidate(input: {
    *  caller that had to decide it anyway must hand it over, so no surface
    *  can assemble a candidate without one. */
   readonly actionability: CandidateActionabilityV1;
+  /** Clock for expiry arithmetic (defaults to now). */
+  readonly now?: Date;
 }): ScoutSafeCandidate {
   const preview = toShortlistSafePreview({
     id: input.workerId,
@@ -128,7 +133,23 @@ export function toScoutSafeCandidate(input: {
     professionSlug: input.professionSlug,
     preview,
     canContact,
-    match: input.match,
+    // FIT is input.match untouched; READINESS (decision 0021) rides beside it
+    // as requirement-only: a company cannot read a worker's records, so
+    // nothing is "missing" here - outstanding pre-contract checks are
+    // `required`, and an unknowable requirement set is `unknown`. It never
+    // changes the match status, the ranking, or who is shown.
+    match: attachReadiness(
+      input.match,
+      deriveReadiness({
+        requirements: requirementsForContext({
+          workCountry: input.needCountry,
+          personCountry: input.subject.country,
+        }),
+        records: [],
+        recordsReadable: false,
+        now: input.now ?? new Date(),
+      }),
+    ),
     readiness,
     shortlistStatus: input.shortlistStatus,
     shortlistNote: input.shortlistNote ?? null,

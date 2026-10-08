@@ -8804,6 +8804,17 @@
       "nameHidden": "Name und Kontaktdaten erscheinen erst, wenn die Person sie freigibt.",
       "appliedToYou": "Hat sich auf diesen Bedarf beworben — Name und Foto gehören zur Bewerbung. Telefon und E-Mail bleiben verborgen.",
       "skillUnknown": "Keine Fähigkeiten angegeben · benötigt: {total}"
+    },
+    "readinessChecks": {
+      "outstanding": "Bereitschaft (getrennt von Eignung): {count} zu prüfen, zuerst bis: {stage}. Kein Filter - keine Dokumentkopie nötig, um berücksichtigt zu werden.",
+      "clear": "Bereitschaft (getrennt von Eignung): keine offenen Prüfungen.",
+      "unknown": "Bereitschaft (getrennt von Eignung): Anforderungen für dieses Land sind noch nicht bekannt.",
+      "stage": {
+        "contract": "Vertrag",
+        "assignment": "Einsatzzuweisung",
+        "mobilisation": "Mobilisierung",
+        "work_start": "Arbeitsbeginn"
+      }
     }
   },
   "planBoundary": {

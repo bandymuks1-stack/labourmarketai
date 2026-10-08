@@ -35,7 +35,7 @@ describe("the board tells the two silences apart", () => {
     // It must ride with the documents read, not stack behind it. Since
     // 2026-09-28 that pair is itself one branch of the loader's single
     // `await Promise.all` (every board read starts together).
-    expect(loader).toMatch(/\[\{ data: docs \}, entryCountRes\],[\s\S]{0,400}?\] = await Promise\.all\(\[\s*Promise\.all\(\[/);
+    expect(loader).toMatch(/\[entryCountRes\],[\s\S]{0,400}?\] = await Promise\.all\(\[\s*Promise\.all\(\[/);
     // A head count — never a full row fetch just to learn "is there any".
     expect(loader).toMatch(/count: "exact", head: true/);
   });

@@ -113,9 +113,9 @@ describe("WHY codes and retrieval counts", () => {
       whyCodesFor({
         gapCodes: ["skills_missing", "country_mismatch"],
         missingDataCodes: ["pay_unknown", "pay_unknown"],
-        profileGapCodes: ["country_mismatch", "no_documents"],
+        profileGapCodes: ["country_mismatch", "availability_unknown"],
       }),
-    ).toEqual(["skills_missing", "country_mismatch", "pay_unknown", "no_documents"]);
+    ).toEqual(["skills_missing", "country_mismatch", "pay_unknown", "availability_unknown"]);
   });
 
   it("retrieved vs shown never goes negative and shown never exceeds retrieved", () => {
