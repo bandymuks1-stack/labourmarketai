@@ -7,7 +7,7 @@ import { recognitionAnswersDocumentTypes } from "@/lib/skills/recognition-model"
 
 /**
  * REAL ROWS. These three rows are the exact `learner_reads` output of ONE
- * rolled-back production DO block (project gorgitwvdzxbnaxhrsrw, 2026-10-07,
+ * rolled-back production DO block (production project, 2026-10-07,
  * synthetic zz-proof data, zero residue verified afterwards): invitation
  * (student) -> accept -> student engagement context -> cohort member ->
  * independently confirmed work -> record_competency_recognition_v1 for a
