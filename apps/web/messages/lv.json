@@ -7180,5 +7180,12 @@
         "row": "[EN] {matched} of {total} required skills named in this history"
       }
     }
+  },
+  "recognisedBy": {
+    "title": "Iestādes atzīts",
+    "recognisedBy": "Atzinusi: {institution}",
+    "recognisedByUnnamed": "Atzinusi vērtējošā iestāde",
+    "validUntil": "derīgs līdz {date}",
+    "note": "Neatkarīgs vērtētājs nolēma, ka jūsu parādītais darbs atbilst šai prasībai. Tas nav darba devēja apstiprinājums un nav vērtējums."
   }
 }

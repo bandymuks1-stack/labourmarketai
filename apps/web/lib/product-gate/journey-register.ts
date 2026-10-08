@@ -127,7 +127,7 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
         capabilities: ["SKL-9"],
         link: "BROKEN",
         because:
-          "Corrected 2026-10-01: NOT_BUILT was too red. The five-state derivation, the assessor authority rule and the read of a recognition record exist on main (SKL-9 is PARTIAL); what is missing is the assessor's WRITE - the recognition relation is an unapplied RED owner packet (P-3) and production holds 0 training providers - so no person can be recognised and 'five years of real work' still reads as 'certificate missing'.",
+          "Corrected 2026-10-01: NOT_BUILT was too red. The five-state derivation, the assessor authority rule and the read of a recognition record exist on main (SKL-9 is PARTIAL); UPDATE 2026-10-07: the recognition relation and its two commands are APPLIED (#2184) and the whole chain - invitation, learner context, cohort assignment, independently confirmed work, document-type and skill and profession recognitions, the learner's own read, outsider and anonymous refused - was walked on production in ONE rolled-back block with synthetic zz-proof rows and zero residue. What is still missing is ADOPTION and the employer-side read: no real assessor has recorded a recognition (so 'five years of real work' still reads as 'certificate missing' for every real person), and an employer cannot read a recognition at all (RLS: subject, assessing-organization managers, admin) - that read is a RED migration drafted separately.",
       },
     ],
   },
@@ -286,7 +286,7 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
         capabilities: ["SKL-9", "SKL-10"],
         link: "BROKEN",
         because:
-          "Corrected 2026-09-14: NOT_BUILT was too red. SKL-9 (RPL / equivalence) is PARTIAL (pure model and read on main, the assessor's write is an unapplied owner packet) and SKL-10, the training and certification register, is APPLIED and PARTIAL. So a piece of this step exists and the chain does not connect, and it does not connect BY DECISION: the register deliberately writes nothing into the skill ladder, because a certificate is not a demonstrated competency (SEP-6). The missing half is the recognition path, not the register.",
+          "Corrected 2026-09-14: NOT_BUILT was too red. SKL-9 (RPL / equivalence) is PARTIAL (pure model, read, assessor write and the learner-side 'recognised by' view are on main and the write was proven on production in a rolled-back chain walk 2026-10-07; no real recognition exists yet) and SKL-10, the training and certification register, is APPLIED and PARTIAL. So a piece of this step exists and the chain does not connect, and it does not connect BY DECISION: the register deliberately writes nothing into the skill ladder, because a certificate is not a demonstrated competency (SEP-6). The missing half is the recognition path, not the register.",
       },
       {
         step: "The institution sees employer demand and reports outcomes",

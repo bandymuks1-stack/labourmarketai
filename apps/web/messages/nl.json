@@ -6087,7 +6087,8 @@
       "helpLine": "Een vertaling helpt je de instructie te begrijpen, maar het origineel blijft bewaard.",
       "capabilityDemonstrated": "U hebt hier vastgelegd werk dat iemand anders heeft bevestigd.",
       "capabilitySelfReported": "U hebt hier vastgelegd werk dat nog door niemand anders is bevestigd.",
-      "capabilityStillRequired": "Het document blijft vereist — vraag of deze ervaring daaraan getoetst kan worden."
+      "capabilityStillRequired": "Het document blijft vereist — vraag of deze ervaring daaraan getoetst kan worden.",
+      "capabilityRecognised": "Een beoordelende instelling heeft uw eerdere leren en ervaring erkend als voldoend aan deze eis."
     }
   },
   "projects": {
@@ -18756,5 +18757,12 @@
     "stateNotYetValid": "Erkend, nog niet geldig",
     "validFrom": "vanaf {date}",
     "validUntil": "tot {date}"
+  },
+  "recognisedBy": {
+    "title": "Erkend door een instelling",
+    "recognisedBy": "Erkend door {institution}",
+    "recognisedByUnnamed": "Erkend door een beoordelende instelling",
+    "validUntil": "geldig tot {date}",
+    "note": "Een onafhankelijke beoordelaar heeft besloten dat je getoonde werk hieraan voldoet. Dit is geen bevestiging door een werkgever en geen score."
   }
 }
