@@ -8804,6 +8804,17 @@
       "nameHidden": "Imię i dane kontaktowe pojawiają się dopiero, gdy osoba na to pozwoli.",
       "appliedToYou": "Zgłosił(a) się na tę potrzebę — imię i zdjęcie wynikają ze zgłoszenia. Telefon i e-mail pozostają ukryte.",
       "skillUnknown": "Nie podano umiejętności · potrzeba: {total}"
+    },
+    "readinessChecks": {
+      "outstanding": "Gotowość (oddzielnie od dopasowania): {count} do sprawdzenia, najpierw na etapie: {stage}. To nie filtr - kopia dokumentu nie jest potrzebna, by być branym pod uwagę.",
+      "clear": "Gotowość (oddzielnie od dopasowania): brak otwartych kontroli.",
+      "unknown": "Gotowość (oddzielnie od dopasowania): wymagania dla tego kraju nie są jeszcze znane.",
+      "stage": {
+        "contract": "umowa",
+        "assignment": "przydział",
+        "mobilisation": "mobilizacja",
+        "work_start": "rozpoczęcie pracy"
+      }
     }
   },
   "planBoundary": {
@@ -18763,7 +18774,8 @@
     "recognisedBy": "Uznane przez: {institution}",
     "recognisedByUnnamed": "Uznane przez instytucję oceniającą",
     "validUntil": "ważne do {date}",
-    "note": "Niezależny oceniający uznał, że pokazana praca spełnia ten wymóg. To nie jest potwierdzenie pracodawcy ani ocena punktowa."
+    "note": "Niezależny oceniający uznał, że pokazana praca spełnia ten wymóg. To nie jest potwierdzenie pracodawcy ani ocena punktowa.",
+    "noteViewer": "Niezależny oceniający uznał, że pokazana praca tej osoby spełnia ten wymóg. To nie jest potwierdzenie pracodawcy ani ocena punktowa i nie zmienia żadnego rankingu."
   },
   "evidenceMedia": {
     "title": "Historyczne zdjęcia",

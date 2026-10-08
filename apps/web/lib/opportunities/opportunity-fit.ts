@@ -9,24 +9,24 @@
  * Honest statuses:
  *   - missing_profile_info — the profile is too thin to compare (no work type
  *     or no skills). The worker should complete their profile first.
- *   - needs_documents      — profile basics are there but no documents yet;
- *     most cross-border work needs them, so flag it as the next step.
- *   - check_conditions     — basics + docs present, but country doesn't line up
+ *   - check_conditions     — basics present, but country doesn't line up
  *     or availability is unstated — worth checking the conditions.
- *   - possible_match       — work type, skills, documents, country and
- *     availability all line up enough to be a genuine possibility.
+ *   - possible_match       — work type, skills, country and availability all
+ *     line up enough to be a genuine possibility.
+ *
+ * DOCUMENTS ARE NOT FIT (decision 0021): an uploaded/recorded document is a
+ * readiness requirement, checked at the stage it applies (contract /
+ * mobilisation / work start) - it never vetoes a possible match.
  */
 
 export type OpportunityStatus =
   | "possible_match"
   | "missing_profile_info"
-  | "needs_documents"
   | "check_conditions";
 
 /** Short, neutral gap codes the UI can render as "what to check / fix". */
 export type OpportunityGap =
   | "incomplete_profile"
-  | "no_documents"
   | "country_mismatch"
   | "country_unknown"
   | "availability_unknown";
@@ -44,8 +44,9 @@ export interface WorkerOpportunityProfile {
   readonly countries: readonly string[];
   /** Availability is stated (status "available" or an available-from date). */
   readonly availabilitySet: boolean;
-  /** Count of the worker's own documents. */
-  readonly documentsCount: number;
+  /** Retired input (decision 0021): documents are readiness, never fit. Kept
+   *  optional only so older fixtures still type-check; the fit ignores it. */
+  readonly documentsCount?: number;
 }
 
 export interface OpportunityNeed {
@@ -115,13 +116,7 @@ export function computeOpportunityFit(
     return { status: "missing_profile_info", gaps };
   }
 
-  // 2) Basics there, but no documents yet.
-  if (profile.documentsCount === 0) {
-    gaps.push("no_documents");
-    return { status: "needs_documents", gaps };
-  }
-
-  // 3) Country / availability checks.
+  // 2) Country / availability checks.
   const cf = countryFit(need.country, profile.countries);
   if (cf === "mismatch") gaps.push("country_mismatch");
   else if (cf === "unknown") gaps.push("country_unknown");
@@ -131,14 +126,13 @@ export function computeOpportunityFit(
     return { status: "check_conditions", gaps };
   }
 
-  // 4) Everything that we can check lines up.
+  // 3) Everything that we can check lines up.
   return { status: "possible_match", gaps };
 }
 
 export const OPPORTUNITY_STATUSES: readonly OpportunityStatus[] = [
   "possible_match",
   "check_conditions",
-  "needs_documents",
   "missing_profile_info",
 ];
 

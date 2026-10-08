@@ -7186,7 +7186,8 @@
     "recognisedBy": "Anerkendt af {institution}",
     "recognisedByUnnamed": "Anerkendt af en vurderende institution",
     "validUntil": "gyldig til {date}",
-    "note": "En uafhængig bedømmer har afgjort, at dit viste arbejde svarer hertil. Det er ikke en arbejdsgivers bekræftelse og ikke en score."
+    "note": "En uafhængig bedømmer har afgjort, at dit viste arbejde svarer hertil. Det er ikke en arbejdsgivers bekræftelse og ikke en score.",
+    "noteViewer": "En uafhængig bedømmer har afgjort, at denne persons viste arbejde svarer hertil. Det er ikke en arbejdsgivers bekræftelse, ikke en score og ændrer ingen rangering."
   },
   "evidenceMedia": {
     "title": "Historiske fotos",

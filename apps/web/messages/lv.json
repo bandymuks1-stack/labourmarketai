@@ -7186,7 +7186,8 @@
     "recognisedBy": "Atzinusi: {institution}",
     "recognisedByUnnamed": "Atzinusi vērtējošā iestāde",
     "validUntil": "derīgs līdz {date}",
-    "note": "Neatkarīgs vērtētājs nolēma, ka jūsu parādītais darbs atbilst šai prasībai. Tas nav darba devēja apstiprinājums un nav vērtējums."
+    "note": "Neatkarīgs vērtētājs nolēma, ka jūsu parādītais darbs atbilst šai prasībai. Tas nav darba devēja apstiprinājums un nav vērtējums.",
+    "noteViewer": "Neatkarīgs vērtētājs nolēma, ka šīs personas parādītais darbs atbilst šai prasībai. Tas nav darba devēja apstiprinājums, nav vērtējums un nemaina nekādu ranžējumu."
   },
   "evidenceMedia": {
     "title": "Vēsturiskās fotogrāfijas",

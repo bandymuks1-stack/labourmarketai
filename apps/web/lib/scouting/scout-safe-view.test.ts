@@ -67,7 +67,10 @@ describe("toScoutSafeCandidate — anonymized + profile-safe", () => {
   });
 
   it("passes the deterministic match through untouched", () => {
-    expect(c.match).toBe(fakeMatch);
+    // Fit is untouched; readiness rides beside it as a sibling block.
+    const { readiness, ...fit } = c.match;
+    expect(fit).toEqual(fakeMatch);
+    expect(readiness).toBeDefined();
   });
 
   it("carries the honest freshness bucket (non-PII) through", () => {

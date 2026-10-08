@@ -7186,7 +7186,8 @@
     "recognisedBy": "Tunnustanud: {institution}",
     "recognisedByUnnamed": "Tunnustanud hindav asutus",
     "validUntil": "kehtib kuni {date}",
-    "note": "Sõltumatu hindaja otsustas, et teie näidatud töö vastab sellele. See ei ole tööandja kinnitus ega hinne."
+    "note": "Sõltumatu hindaja otsustas, et teie näidatud töö vastab sellele. See ei ole tööandja kinnitus ega hinne.",
+    "noteViewer": "Sõltumatu hindaja otsustas, et selle inimese näidatud töö vastab sellele. See ei ole tööandja kinnitus, ei ole hinne ega muuda ühtegi järjestust."
   },
   "evidenceMedia": {
     "title": "Ajaloolised fotod",

@@ -42,10 +42,11 @@ describe("buildMatchCardView — honest per-dimension breakdown, never a score",
     expect(v.signals.find((s) => s.key === "country")?.state).toBe("unknown");
   });
 
-  it("no documents → documents signal check + needs_documents status", () => {
-    const v = buildMatchCardView({ ...FULL_PROFILE, documentsCount: 0 }, NEED);
-    expect(v.signals.find((s) => s.key === "documents")?.state).toBe("check");
-    expect(v.status).toBe("needs_documents");
+  it("no documents → NO effect on fit (decision 0021: documents are readiness, not fit)", () => {
+    const withDocs = buildMatchCardView(FULL_PROFILE, NEED);
+    const noDocs = buildMatchCardView({ ...FULL_PROFILE, documentsCount: 0 }, NEED);
+    expect(noDocs).toEqual(withDocs);
+    expect(noDocs.signals.some((s) => (s.key as string) === "documents")).toBe(false);
   });
 
   it("thin profile → missing_profile_info; never a numeric score anywhere", () => {

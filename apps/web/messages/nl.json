@@ -8804,6 +8804,17 @@
       "nameHidden": "Naam en contactgegevens verschijnen pas wanneer de persoon dat toestaat.",
       "appliedToYou": "Heeft gereageerd op deze vraag — naam en foto horen bij de reactie. Telefoon en e-mail blijven verborgen.",
       "skillUnknown": "Geen vaardigheden opgegeven · nodig: {total}"
+    },
+    "readinessChecks": {
+      "outstanding": "Gereedheid (los van geschiktheid): {count} te controleren, eerst uiterlijk bij: {stage}. Geen filter - geen kopie van een document nodig om in aanmerking te komen.",
+      "clear": "Gereedheid (los van geschiktheid): geen openstaande controles.",
+      "unknown": "Gereedheid (los van geschiktheid): de vereisten voor dit land zijn nog niet bekend.",
+      "stage": {
+        "contract": "overeenkomst",
+        "assignment": "toewijzing",
+        "mobilisation": "mobilisatie",
+        "work_start": "start werk"
+      }
     }
   },
   "planBoundary": {
@@ -18763,7 +18774,8 @@
     "recognisedBy": "Erkend door {institution}",
     "recognisedByUnnamed": "Erkend door een beoordelende instelling",
     "validUntil": "geldig tot {date}",
-    "note": "Een onafhankelijke beoordelaar heeft besloten dat je getoonde werk hieraan voldoet. Dit is geen bevestiging door een werkgever en geen score."
+    "note": "Een onafhankelijke beoordelaar heeft besloten dat je getoonde werk hieraan voldoet. Dit is geen bevestiging door een werkgever en geen score.",
+    "noteViewer": "Een onafhankelijke beoordelaar heeft besloten dat het getoonde werk van deze persoon hieraan voldoet. Dit is geen bevestiging door een werkgever, geen score en wijzigt geen rangschikking."
   },
   "evidenceMedia": {
     "title": "Historische foto's",

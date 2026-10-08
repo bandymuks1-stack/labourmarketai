@@ -8804,6 +8804,17 @@
       "nameHidden": "Name and contact details appear only when the person allows them.",
       "appliedToYou": "Applied for this need — name and photo come with the application. Phone and e-mail stay hidden.",
       "skillUnknown": "No skills stated · needs {total}"
+    },
+    "readinessChecks": {
+      "outstanding": "Readiness (separate from fit): {count} to check, first by {stage}. Not a filter - no document copy is needed to be considered.",
+      "clear": "Readiness (separate from fit): no outstanding checks.",
+      "unknown": "Readiness (separate from fit): requirements for this country are not known yet.",
+      "stage": {
+        "contract": "contract",
+        "assignment": "assignment",
+        "mobilisation": "mobilisation",
+        "work_start": "work start"
+      }
     }
   },
   "planBoundary": {
@@ -18763,7 +18774,8 @@
     "recognisedBy": "Recognised by {institution}",
     "recognisedByUnnamed": "Recognised by an assessing institution",
     "validUntil": "valid until {date}",
-    "note": "An independent assessor decided that your work answers this. It is not confirmation of your work by an employer and it is not a score."
+    "note": "An independent assessor decided that your work answers this. It is not confirmation of your work by an employer and it is not a score.",
+    "noteViewer": "An independent assessor decided that this person's work answers this. It is not confirmation of the work by an employer, it is not a score and it does not change any ranking."
   },
   "evidenceMedia": {
     "title": "Historical photos",
