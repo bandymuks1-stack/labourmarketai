@@ -105,7 +105,7 @@ export const NAV_FIELD_MAP = {
     keys: ["ad_content.categoryList[].name", "ad_content.categoryList[].categoryType", "ad_content.categoryList[].code"],
     assumed: false,
   },
-  applicationUrl: { keys: ["ad_content.applicationUrl", "ad_content.sourceurl"], assumed: false },
+  applicationUrl: { keys: ["ad_content.applicationUrl", "ad_content.sourceurl", "ad_content.link"], assumed: false },
   /** Feed page wrapper: where the entries sit and where the next token is. */
   page: { keys: ["items", "items[]._feed_entry", "items[].url", "next_id"], assumed: false },
 } as const;
@@ -380,11 +380,15 @@ export function parseNavAd(args: {
     categorizationOrigin: categorization.origin,
     // Not documented on the feed; never inferred from the text.
     requiredLanguages: [],
-    // Deep-link duty: the publisher's own apply route first, the source ad
-    // second, never a synthesised address.
+    // Deep-link duty: the publisher's own apply route first, then its source
+    // url, then NAV's own posting (`link`, always set by the feed). NAV writes
+    // applicationUrl/sourceurl as "" when the employer gave none, which
+    // normalizeApplicationUrl rejects, so the chain falls through. Never a
+    // synthesised address.
     applicationUrl:
       normalizeApplicationUrl(field(ad, "applicationUrl")) ??
-      normalizeApplicationUrl(field(ad, "sourceurl")),
+      normalizeApplicationUrl(field(ad, "sourceurl")) ??
+      normalizeApplicationUrl(field(ad, "link")),
     attributionCode,
     translation: null,
     requestRef: clampText(args.requestRef, VACANCY_IMPORT_BOUNDS.maxTitleChars),

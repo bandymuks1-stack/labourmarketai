@@ -798,6 +798,34 @@ describe("nav parser: the field map is VERIFIED against a real payload; nothing 
     expect(JSON.stringify(v)).not.toMatch(/Not Stored|nobody@example/);
   });
 
+  it("apply URL: publisher url wins, then sourceurl, then NAV link; empty/non-http never counts", () => {
+    const url = (over: Record<string, unknown>): string | null => {
+      const o = parseNavBatch({
+        body: [navAd(over)],
+        channel: "stream",
+        capturedAt: NOW,
+        requestRef: "r",
+      }).outcomes[0];
+      if (o.kind !== "parsed") throw new Error("expected parsed");
+      return o.vacancy.applicationUrl;
+    };
+    const LINK = "https://arbeidsplassen.nav.no/stillinger/stilling/nav-1";
+    // NAV writes "" for both when the employer gave none -> falls through to link.
+    expect(url({ applicationUrl: "", sourceurl: "", link: LINK })).toBe(LINK);
+    expect(url({ applicationUrl: undefined, sourceurl: "", link: LINK })).toBe(LINK);
+    // Publisher's own apply route still wins, then sourceurl, over link.
+    expect(url({ applicationUrl: "https://bygg.example/apply", sourceurl: "", link: LINK })).toBe(
+      "https://bygg.example/apply",
+    );
+    expect(url({ applicationUrl: "", sourceurl: "https://bygg.example/ad", link: LINK })).toBe(
+      "https://bygg.example/ad",
+    );
+    // A non-http link is rejected; a missing link yields null.
+    expect(url({ applicationUrl: "", sourceurl: "", link: "javascript:alert(1)" })).toBeNull();
+    expect(url({ applicationUrl: "", sourceurl: "", link: "" })).toBeNull();
+    expect(url({ applicationUrl: "", sourceurl: "" })).toBeNull();
+  });
+
   it("an INACTIVE withdrawal (title only) is the shape the removal duty needs", () => {
     const batch = parseNavBatch({
       body: [{ uuid: "nav-9", status: "INACTIVE", title: "" }, navAd({ uuid: "nav-8", status: "INACTIVE" })],
