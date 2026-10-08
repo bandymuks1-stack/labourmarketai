@@ -160,6 +160,6 @@ export function deriveWorkerProjectAsks(
 
 /** The first ask the person can close by recording a document: the chip. */
 export function firstRecordableAsk(asks: Iterable<readonly WorkerProjectAsk[]>): WorkerProjectAsk | null {
-  for (const list of asks) for (const a of list) if (a.documentTypeSlug && a.own === "none") return a;
+  for (const list of asks) for (const a of list) if (a.documentTypeSlug && a.own === "none" && !a.capability?.formalRequirementMet) return a;
   return null;
 }

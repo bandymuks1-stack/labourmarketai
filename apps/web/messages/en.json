@@ -6087,7 +6087,8 @@
       "helpLine": "A translation helps you understand the instruction, but the original stays preserved.",
       "capabilityDemonstrated": "You have recorded work here that someone else confirmed.",
       "capabilitySelfReported": "You have recorded work here, not yet confirmed by anyone else.",
-      "capabilityStillRequired": "The document is still required — ask for this experience to be assessed against it."
+      "capabilityStillRequired": "The document is still required — ask for this experience to be assessed against it.",
+      "capabilityRecognised": "An assessing institution has recognised your prior learning and experience as meeting this requirement."
     }
   },
   "projects": {

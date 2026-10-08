@@ -6087,7 +6087,8 @@
       "helpLine": "Tłumaczenie pomaga zrozumieć instrukcję, ale oryginał pozostaje zachowany.",
       "capabilityDemonstrated": "Jest tu zarejestrowana praca, którą potwierdziła inna osoba.",
       "capabilitySelfReported": "Jest tu zarejestrowana praca, jeszcze niepotwierdzona przez nikogo innego.",
-      "capabilityStillRequired": "Dokument jest nadal wymagany — poproś o ocenę tego doświadczenia względem niego."
+      "capabilityStillRequired": "Dokument jest nadal wymagany — poproś o ocenę tego doświadczenia względem niego.",
+      "capabilityRecognised": "Instytucja oceniająca uznała Twoją wcześniejszą naukę i doświadczenie za spełnienie tego wymogu."
     }
   },
   "projects": {
