@@ -18508,6 +18508,111 @@
       "next": "Waar je heen kunt"
     }
   },
+  "teamDemandOffer": {
+    "heading": "Dit team aanbieden voor een vraag",
+    "intro": "Bied het team als één eenheid aan voor één openstaande vraag van een geverifieerd bedrijf.",
+    "privacy": "Het bedrijf ziet alleen feiten op teamniveau: omvang, vaardigheden, beschikbaarheid. Het aanbod noemt geen enkel lid en toont geen ledenprofiel. Leden verschijnen pas in een project nadat het bedrijf het team heeft geaccepteerd en daar heeft ingedeeld.",
+    "tooSmall": "Een team kan alleen worden aangeboden met minstens 2 actieve leden.",
+    "loading": "Laden…",
+    "unavailable": "De openstaande vraag kon nu niet worden geladen.",
+    "noDemand": "Er is nu geen openstaande vraag om een aanbod op te doen.",
+    "demandLabel": "Vraag",
+    "demandPlaceholder": "Kies een vraag",
+    "alreadyOffered": "al aangeboden",
+    "noteLabel": "Bericht aan het bedrijf (optioneel)",
+    "notePlaceholder": "Bijvoorbeeld: ploeg van 3, kan over twee weken starten",
+    "submit": "Team aanbieden",
+    "submitting": "Aanbieden…",
+    "sent": {
+      "heading": "Uw aanbiedingen",
+      "none": "Nog geen aanbiedingen.",
+      "withdraw": "Intrekken"
+    },
+    "status": {
+      "offered": "Wacht op antwoord",
+      "accepted": "Geaccepteerd",
+      "declined": "Afgewezen",
+      "withdrawn": "Ingetrokken",
+      "assigned": "Aan een project toegewezen"
+    },
+    "outcome": {
+      "created": "Aanbod verzonden.",
+      "already_offered": "Dit team is al aan deze vraag aangeboden. Er is niets gewijzigd.",
+      "withdrawn": "Aanbod ingetrokken.",
+      "already_withdrawn": "Dit aanbod was al ingetrokken."
+    },
+    "refusal": {
+      "not_authed": "Meld u opnieuw aan om door te gaan.",
+      "not_authorized": "U mag dit niet doen voor dit team of deze vraag.",
+      "demand_not_offerable": "Voor deze vraag kan geen team worden aangeboden (gesloten, geen personeelsvraag of uw eigen vraag).",
+      "team_too_small": "Een team heeft minstens 2 actieve leden nodig.",
+      "previously_declined": "Deze vraag heeft een aanbod van dit team al afgewezen.",
+      "offer_limit_reached": "Dit team heeft al 20 openstaande aanbiedingen. Trek eerst een aanbod in.",
+      "offer_not_open": "Dit aanbod staat niet meer open.",
+      "offer_not_accepted": "Accepteer het aanbod voordat u het team indeelt.",
+      "demand_closed": "Deze vraag is gesloten, dus het aanbod kan niet worden geaccepteerd.",
+      "project_not_of_demand_owner": "Kies een van uw eigen projecten.",
+      "project_completed": "Dit project is afgerond.",
+      "task_not_assignable": "Aan deze taak kan geen team worden toegewezen.",
+      "object_not_assignable": "Aan deze werklocatie kan geen team worden toegewezen.",
+      "one_scope_only": "Kies een taak of een werklocatie, niet allebei.",
+      "team_has_no_members": "Dit team heeft geen actieve leden.",
+      "project_required": "Kies een project.",
+      "invalid_decision": "Onbekend antwoord.",
+      "needs_migration": "Nu niet beschikbaar.",
+      "error": "Dit kon niet worden voltooid. Er is niets gewijzigd."
+    },
+    "received": {
+      "title": "Voor deze vraag aangeboden teams",
+      "subtitle": "Een team heeft zich als één eenheid voor deze vraag aangeboden. U beslist of u het accepteert en waar u het inzet.",
+      "privacy": "Alleen feiten op teamniveau worden getoond. Hier wordt geen enkel lid genoemd. Nadat u het team hebt geaccepteerd en aan een project hebt toegewezen, verschijnen de leden in dat project, zoals bij elk team.",
+      "members": "{count} leden",
+      "deployable": "Inzetbare omvang {min}-{max}",
+      "availability": "Beschikbaarheid",
+      "availableNow": "Nu beschikbaar",
+      "availableFrom": "Beschikbaar vanaf {date}",
+      "notAvailable": "Niet beschikbaar",
+      "availabilityUnknown": "Niet opgegeven",
+      "consent": "Via uitnodiging toegetreden",
+      "consentValue": "{consented} van {total} leden",
+      "skills": "Vaardigheden (leden die ze opgeven)",
+      "skillsUnknown": "Nog geen vaardigheden opgegeven",
+      "skillCount": "{declared} opgegeven, {confirmed} bevestigd",
+      "languages": "Talen",
+      "fit": "Match met deze vraag",
+      "matchStatus": {
+        "strong": "sterk",
+        "possible": "mogelijk",
+        "weak": "zwak",
+        "insufficient_data": "te weinig gegevens"
+      },
+      "coverage": "{covered} van {total} benodigde vaardigheden gedekt",
+      "basis": {
+        "aggregate": "Gebaseerd op de opgegeven totalen van het team, niet op afzonderlijke leden.",
+        "members": "Gebaseerd op afzonderlijke leden."
+      },
+      "blockers": "Het team als geheel voldoet niet aan: {list}",
+      "missing": "Niet opgegeven: {list}",
+      "noNeedStructure": "Deze vraag is nog niet gestructureerd, dus het team kan er niet mee worden vergeleken.",
+      "note": "Bericht van het team",
+      "accept": "Team accepteren",
+      "decline": "Afwijzen",
+      "noProjects": "U hebt geen openstaand project om het team aan toe te wijzen. Maak eerst een project aan.",
+      "assignIntro": "Geaccepteerd. Wijs het team toe aan een van uw projecten.",
+      "projectLabel": "Project om aan toe te wijzen",
+      "projectPlaceholder": "Kies een project",
+      "assign": "Team aan project toewijzen",
+      "assignedNote": "Toegewezen. De leden van het team verschijnen nu in dat project.",
+      "outcome": {
+        "accepted": "Team geaccepteerd.",
+        "declined": "Aanbod afgewezen.",
+        "already_accepted": "Al geaccepteerd.",
+        "already_declined": "Al afgewezen.",
+        "assigned": "Team aan het project toegewezen.",
+        "already_assigned": "Dit team was al toegewezen. Er is niets gewijzigd."
+      }
+    }
+  },
   "teamAssignment": {
     "title": "Teams in dit project",
     "intro": "Een team wordt als één geheel toegewezen. De leden komen uit het lidmaatschap van het team zelf, dus wie het team heeft verlaten telt niet mee, en de uren en het logboek blijven van elke persoon zelf.",

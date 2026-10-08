@@ -721,6 +721,10 @@ export const ACTOR_ONLY_RELATIONS: readonly string[] = [
   // manager who assigned or ended it. The members are the team's own
   // engagements (exported on their own relation).
   "team_assignments",
+  // E6: a team offered against one demand; the person columns are the manager
+  // who offered it and the demand owner's staff who answered. No member of the
+  // team is on the row.
+  "team_demand_offers",
   "training_programs",
   "training_skill_links",
   "workflow_definition_versions",
