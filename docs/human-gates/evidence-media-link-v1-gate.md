@@ -137,6 +137,10 @@ Rollback, if ever needed: the paired `.down.sql` (refuses while the bucket holds
 - Until the bucket exists the table is empty, so the strip shows the empty state. That is true, not a defect.
 - `components/app/linked-documents.tsx` lists register documents linked to the project (`project_id`) or the person's worker record (`worker_id`) read-only, through `getOrgDocumentRegister` with a surface filter. No new access path.
 
+## Scope (owner product decision, 2026-10-08)
+
+LabourMarket.ai does NOT require workers, teams, agencies or companies to upload and permanently store full copies of documents in order to register, match, apply, be shortlisted or be planned. The default model is document/readiness requirements plus verification state; file upload and storage is OPTIONAL unless a specific legal, contractual or product reason requires the file. This work (bucket, importer, linkage, signed reads, the Person/Project strips) serves files that genuinely belong here: historical work photos, work/evidence media, project/person documents, user-chosen supporting evidence and workflow-required files. It is not a mandatory universal worker-document repository, and nothing in it gates registration, matching, applying, shortlisting or planning on an uploaded file. The linked-documents block is read-only and neutral (it lists what exists; an empty state is never a "missing document" prompt).
+
 ## Follow-ups this deliberately does not do
 
 A direct-to-storage upload path for originals above 4 MB; per-file dates in one batch; moving/re-anchoring an existing photo (rows are append-only); subject-side display of `visibility = 'subject'` photos; EXIF extraction (a date is stored only when the caller states it together with its basis).
