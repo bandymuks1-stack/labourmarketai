@@ -127,20 +127,11 @@ export async function reviewJournalEntry(
     return { ok: false, code: outcome as ReviewBlockCode };
   }
 
-  // Approval closes the verified-skill loop (parity with legacy confirmEntry).
+  // Approval raises the confidence of the entry's linked skills (R-5): a
+  // bounded, idempotent, confidence-only write through a SECURITY DEFINER door.
+  // It does NOT verify any skill.
   if (decision === "approved") {
-    const { data: entry } = await supabase
-      .from("journal_entries")
-      .select("worker_id, profession_id")
-      .eq("id", entryId)
-      .maybeSingle();
-    if (entry) {
-      await applyApprovalSkillEffects(supabase, {
-        workerId: entry.worker_id as string,
-        professionId: (entry.profession_id as string | null) ?? null,
-        confirmerId: user.id,
-      });
-    }
+    await applyApprovalSkillEffects(supabase, { entryId, confirmerId: user.id });
   }
 
   // DURABLE NOTIFICATION (journal_review_decided): tell the worker the

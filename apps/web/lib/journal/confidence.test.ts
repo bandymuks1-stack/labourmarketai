@@ -173,7 +173,11 @@ describe("W6 containment: self-logged volume alone never substantiates", () => {
     expect(src).not.toMatch(/export .*(reputation|trustScore|personScore)/i);
     // And the only writer touches only the confidence columns.
     const writer = readFileSync(join(WEB, "lib/journal/confirm-actions.ts"), "utf8");
-    expect(writer).toMatch(/confidence_score: score,\s*\n\s*confidence_bin: bin/);
+    // R-5 (2026-10-08): the writer is the SECURITY DEFINER door (pinned in
+    // manager-approval-confidence.test.ts); the app file only calls it and
+    // never writes worker_skills itself.
+    expect(writer).toContain("recompute_worker_skill_confidence_from_manager_approval_v1");
+    expect(writer).not.toMatch(/from\("worker_skills"\)/);
     expect(writer).not.toMatch(/verified:\s*true/);
   });
 });

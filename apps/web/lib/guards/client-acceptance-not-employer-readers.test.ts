@@ -143,7 +143,15 @@ describe("readers that derive through the shared review derivation are employer-
 
 describe("readers that are SAFE as written (pinned so they stay safe)", () => {
   it("skill confidence counts only action 'confirm' (a client row's action is client_accept)", () => {
-    expect(read("lib/journal/confirm-actions.ts")).toMatch(/if \(action !== "confirm"\) continue;/);
+    // R-5 (2026-10-08): the confidence reader moved into the SECURITY DEFINER
+    // door; it counts only employer-path 'confirm' rows and never a counterparty row.
+    const sql = readFileSync(
+      join(REPO, "supabase/migrations/20261008120000_manager_approval_skill_confidence_v1.sql"),
+      "utf8",
+    );
+    expect(sql).toMatch(/confirmation_scope ->> 'action' = 'confirm'/);
+    expect(sql).toMatch(/#>> '\{authority,basis\}', 'employer'\) <> 'counterparty'/);
+    expect(read("lib/journal/confirm-actions.ts")).not.toMatch(/from("journal_entry_confirmations")/);
   });
   it("manager evidence counts only action 'confirm' of the caller's own rows", () => {
     expect(read("lib/operations/manager-evidence.ts")).toMatch(/action === "confirm"/);
