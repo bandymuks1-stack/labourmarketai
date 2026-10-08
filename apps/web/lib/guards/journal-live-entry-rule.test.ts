@@ -239,8 +239,6 @@ const SEES_EVERY_ROW: Record<string, string> = {
   // row they are about to change.
   "lib/journal/journal-write-core.ts":
     "append/correct path — it writes the very rows the rule later filters",
-  "lib/journal/review-actions.ts":
-    "writer — records a manager's review against one entry addressed by id",
   "lib/journal/journal-entry-skills-actions.ts": "writer — links skills to a specific entry",
   "lib/journal/skill-pipeline.ts": "ownership lookup of one entry by id before writing",
 
