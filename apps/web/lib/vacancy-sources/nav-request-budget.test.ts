@@ -15,10 +15,10 @@
  *   NOMINAL (every request succeeds first time):  102/session ->  14,688/day
  *   HARD    (every request needs both retries):   306/session ->  44,064/day
  *
- * They are reached ONLY while a backlog exists (cold start, or an outage). In
- * steady state a session is one listing request plus the few new entries (NAV
- * publishes ~1,500 changes/day), because the head page is checkpointed
- * mid-page. BEFORE this budget the same arithmetic gave 5,005/session and
+ * They are reached ONLY while a backlog exists (cold start, or an outage) or
+ * while the open head page holds more live entries than the budget: the open
+ * page is re-read from its start every poll (idempotent upsert + content_hash),
+ * so steady state costs up to the budget per session, never more. BEFORE this budget the same arithmetic gave 5,005/session and
  * 720,720/day nominal (5 pages x (1 + 1000 details), concurrency 8, no spacing).
  */
 import { readFileSync } from "node:fs";

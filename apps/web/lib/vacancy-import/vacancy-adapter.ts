@@ -43,6 +43,7 @@ import {
   readVacancyJsonLines,
   type VacancyJsonLinesStopReason,
 } from "@/lib/vacancy-sources/vacancy-json-lines";
+import { readContinuationToken } from "@/lib/vacancy-sources/vacancy-cursor";
 import { expandDetailFanOut, type DetailFetchResult } from "@/lib/vacancy-sources/vacancy-detail-fanout";
 import { assertVacancyProviderOperational } from "./vacancy-kill-switch";
 
@@ -123,6 +124,9 @@ export type VacancyFetchResult =
        *  got. `consumedEntries` counts the `skipEntries` prefix; `pageComplete`
        *  is false when the session's detail budget stopped the page early. */
       readonly fanOut?: {
+        /** True when the page names a successor: it is CLOSED and can no longer
+         *  receive appended entries. Only then is an in-page position valid. */
+        readonly pageClosed: boolean;
         readonly consumedEntries: number;
         readonly pageComplete: boolean;
         readonly detailFetched: number;
@@ -388,11 +392,20 @@ export async function fetchVacancyPage(
       // the cursor can never move past an ad that was not read.
       if (endpoint.detailFanOut) {
         let detailRequestsSpent = 0;
+        // INVARIANT: an in-page resume position is honoured ONLY on a CLOSED
+        // page (one that names a successor). The open head page can still grow,
+        // so a stored position on it is ignored and the page is read from its
+        // start: a re-read is safe, a skip is not.
+        const nextPath = endpoint.cursor?.nextTokenPath ?? null;
+        const successor =
+          nextPath !== null ? readContinuationToken(body, nextPath) : null;
+        const pageClosed =
+          successor !== null && successor !== (req.continuationToken ?? null);
         const expanded = await expandDetailFanOut({
           endpoint,
           body,
           detailBudget: req.detailBudget,
-          skipEntries: req.skipEntries,
+          skipEntries: pageClosed ? req.skipEntries : 0,
           fetchDetail: (url) =>
             fetchDetailJson(
               url,
@@ -415,6 +428,7 @@ export async function fetchVacancyPage(
           byteLength,
           body: expanded.body,
           fanOut: {
+            pageClosed,
             consumedEntries: expanded.consumedEntries,
             pageComplete: expanded.pageComplete,
             // Live entries resolved (fetched, or 404/410 -> withdrawal): what the

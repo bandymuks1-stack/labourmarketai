@@ -564,14 +564,21 @@ export async function runVacancyImport(
           detailBudgetLeft = Math.max(0, detailBudgetLeft - fetched.fanOut.detailFetched);
         }
         if (!fetched.fanOut.pageComplete) {
-          // The budget stopped the page part-way. The checkpoint stays ON this
-          // page, at the first entry not consumed; the next session re-reads
-          // the listing and resumes there. The walk is NOT drained.
-          midPageCheckpoint = encodeContinuationCheckpoint({
-            token: continuationToken,
-            skipEntries: fetched.fanOut.consumedEntries,
-            coldStartAtIso: coldStartAnchorIso,
-          });
+          // The budget stopped the page part-way. The walk is NOT drained.
+          // INVARIANT: a position inside the page is stored ONLY when the page
+          // is CLOSED (it names a successor, so it can no longer receive
+          // appended entries). On the open head page nothing is stored: the
+          // checkpoint stays at the page start and the next session re-reads
+          // it whole (idempotent upsert + content_hash), so no entry can be
+          // skipped. Entries past the cut on an open page are delayed until
+          // the page closes, never lost.
+          midPageCheckpoint = fetched.fanOut.pageClosed
+            ? encodeContinuationCheckpoint({
+                token: continuationToken,
+                skipEntries: fetched.fanOut.consumedEntries,
+                coldStartAtIso: coldStartAnchorIso,
+              })
+            : null;
           log("warn", "detail_budget_exhausted_mid_page", String(fetched.fanOut.consumedEntries));
           break;
         }
@@ -589,17 +596,6 @@ export async function runVacancyImport(
         );
         if (next === null || next === continuationToken) {
           tokenWalkDrained = true;
-          // The head page is a growing log: remember how much of it is read
-          // so the next poll costs one listing request plus only the NEW
-          // entries, not the whole page again. A reader that finds the page
-          // shorter than this position re-reads it from the start.
-          if (fetched.fanOut) {
-            midPageCheckpoint = encodeContinuationCheckpoint({
-              token: continuationToken,
-              skipEntries: fetched.fanOut.consumedEntries,
-              coldStartAtIso: coldStartAnchorIso,
-            });
-          }
           log("info", "cursor_walk_drained", String(page + 1));
           break;
         }

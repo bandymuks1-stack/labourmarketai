@@ -128,7 +128,8 @@ describe("NAV per-session request budget", () => {
       seenCursors.push(cursor);
       if (n === 0) {
         // Budget hit mid-head-page: not caught up, checkpoint ON the head page
-        // at the first unfetched entry, never at page-two-token.
+        // at the first unfetched entry (the page is CLOSED: it has a successor),
+        // never at page-two-token.
         expect(r.caughtUp).toBe(false);
         expect(cursor).toMatch(new RegExp(`^continuation-token:#${BUDGET}@\\d+$`));
         expect(f.detailIds()).toEqual(head.slice(0, BUDGET));
@@ -138,7 +139,8 @@ describe("NAV per-session request budget", () => {
 
     expect([...accepted].sort()).toEqual([...head, ...tail].sort());
     expect(new Set(accepted).size).toBe(accepted.length); // no repeats either
-    expect(seenCursors.at(-1)).toBe(`continuation-token:page-two-token#${tail.length}`);
+    // Drained on the open end: the checkpoint is the page token, no position.
+    expect(seenCursors.at(-1)).toBe("continuation-token:page-two-token");
   });
 
   it("the head page keeps the SAME cold-start instant across sessions", async () => {
@@ -168,31 +170,43 @@ describe("NAV per-session request budget", () => {
     expect(r.caughtUp).toBe(false);
   });
 
-  it("steady state: the drained head page costs one listing request plus only NEW entries", async () => {
+  it("steady state: the open head page is re-read from its start every poll (no stored position)", async () => {
     const tail = ids("t", 12);
     const f = feed({ "": { items: tail.map((u) => navEntry(u)) } });
     const s1 = await session(null, 0);
     expect(s1.caughtUp).toBe(true);
     expect(f.detailIds()).toHaveLength(12);
-    expect(s1.nextCursor).toMatch(/^continuation-token:#12@\d+$/);
+    // Drained on an OPEN page: the checkpoint carries NO in-page position.
+    expect(s1.nextCursor).toBeNull();
 
     f.reset();
     const s2 = await session(s1.nextCursor, 1);
-    expect(f.calls).toHaveLength(1); // listing only, zero details
+    expect(f.detailIds()).toEqual(tail); // whole page again, bounded by the budget
     expect(s2.caughtUp).toBe(true);
-
-    // NAV appends two changes to the log: only those two are fetched.
-    const f2 = feed({ "": { items: [...tail, "n1", "n2"].map((u) => navEntry(u)) } });
-    const s3 = await session(s2.nextCursor, 2);
-    expect(f2.detailIds()).toEqual(["n1", "n2"]);
-    expect(s3.nextCursor).toMatch(/^continuation-token:#14@\d+$/);
   });
 
-  it("a head page SHORTER than the stored position is re-read from the start (fail toward a re-read)", async () => {
-    const f = feed({ "": { items: ids("t", 5).map((u) => navEntry(u)) } });
-    const r = await session(`continuation-token:#50@${Math.floor(Date.parse(NOW) / 1000)}`, 0);
-    expect(f.detailIds()).toHaveLength(5);
-    expect(r.caughtUp).toBe(true);
+  it("budget exhausted on an OPEN page: nothing is stored, caughtUp=false, the page is re-read whole next time", async () => {
+    const open = ids("o", BUDGET + 20);
+    const f = feed({ "": { items: open.map((u) => navEntry(u)) } });
+    const s1 = await session(null, 0);
+    expect(f.detailIds()).toEqual(open.slice(0, BUDGET));
+    expect(s1.caughtUp).toBe(false);
+    expect(s1.nextCursor).toBeNull(); // never a position on a page that can still grow
+    f.reset();
+    const s2 = await session(s1.nextCursor, 1);
+    expect(f.detailIds()).toEqual(open.slice(0, BUDGET)); // same start: delayed, never skipped
+    expect(s2.nextCursor).toBeNull();
+  });
+
+  it("a stored position on a page that is NOT closed is ignored: the page is read from its start", async () => {
+    const f = feed({ "": { items: ids("t", 10).map((u) => navEntry(u)) } });
+    await session(`continuation-token:#6@${Math.floor(Date.parse(NOW) / 1000)}`, 0);
+    expect(f.detailIds()).toEqual(ids("t", 10));
+    f.reset();
+    // Same for a token page that has become the open end of the feed.
+    const g = feed({ "tok-open-page": { items: ids("u", 4).map((u) => navEntry(u)) } });
+    await session("continuation-token:tok-open-page#3", 1);
+    expect(g.detailIds()).toEqual(ids("u", 4));
   });
 
   it("requests are spaced: every request after the first reserves a slot of the declared gap", async () => {

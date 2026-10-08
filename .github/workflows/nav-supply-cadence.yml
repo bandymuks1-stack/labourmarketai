@@ -26,7 +26,7 @@
 # apps/web/lib/vacancy-sources/vacancy-provider-registry.ts (2 listing pages,
 # 100 detail requests, 2 in flight, >= 500 ms between requests; worst case
 # pinned by apps/web/lib/vacancy-sources/nav-request-budget.test.ts). A cold
-# start therefore drains over several runs, checkpointing inside the page.
+# start therefore drains over several runs, resuming inside a CLOSED page only.
 name: nav-supply-cadence
 
 on:

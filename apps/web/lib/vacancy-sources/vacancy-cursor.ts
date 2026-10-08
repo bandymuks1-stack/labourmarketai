@@ -196,8 +196,13 @@ export function decodeContinuationTokenCursor(
  *
  *   continuation-token:<token>             whole page not yet started (legacy)
  *   continuation-token:<token>#<n>         first <n> entries of <token>'s page consumed
- *   continuation-token:#<n>@<epochSeconds> the HEAD page (no token), <n> consumed,
+ *   continuation-token:#<n>@<epochSeconds> the cold-start page (no token), <n> consumed,
  *                                          cold-start anchor <epochSeconds>
+ *
+ * INVARIANT: a position is only ever STORED for a CLOSED page (one that names
+ * a successor and so can no longer receive appended entries), and the adapter
+ * only HONOURS one on a closed page. On the open end of the feed it is ignored
+ * and the page is read from its start.
  *
  * The anchor exists because the head page is requested with an
  * `If-Modified-Since` computed from the capture instant; resuming it with a new
