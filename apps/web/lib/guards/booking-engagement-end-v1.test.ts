@@ -1604,6 +1604,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-07: historical sites become completed projects (INSERT projects + link work_objects) - marker is the human-gate acknowledgement; PR is draft + needs-human-gate, NOT applied.
       "20261007130000_historical_projects_from_work_objects_v1.sql",
       "20261007140000_work_plan_scope_roster_engagement_v1.sql",
+      // 2026-10-08 (#2191, owner-approved RED): unshare withdraws live agency offers (SECURITY DEFINER replace + data DML) - marker is the human-gate acknowledgement.
+      "20261008090000_chain_proof_unshare_withdraws_offers_v1.sql",
 ]);
   });
 

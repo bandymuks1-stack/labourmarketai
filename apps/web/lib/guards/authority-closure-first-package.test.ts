@@ -60,6 +60,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261007130000_",
       // 2026-10-08 owner-approved work-plan scope extension (roster + engagement).
       "20261007140000_",
+      // 2026-10-08 (#2191, owner-approved RED): unshare withdraws live agency offers.
+      "20261008090000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
