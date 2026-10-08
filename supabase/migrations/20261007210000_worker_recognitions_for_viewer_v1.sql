@@ -1,7 +1,9 @@
 -- @human-gate-approved
--- The marker above is the human-gate ACKNOWLEDGEMENT, not an approval: NO OWNER
--- APPROVAL EXISTS FOR THIS FILE. The PR is draft + needs-human-gate and this
--- migration is NOT applied to production.
+-- The marker above is the human-gate ACKNOWLEDGEMENT. OWNER DECISION (chat,
+-- 2026-10-08): APPROVED with the NARROWER audience below - employer-side
+-- visibility requires a CURRENT engagement / authorized organizational
+-- relationship with the Person; the generic ability to view a Person
+-- (discoverability alone) is NOT sufficient.
 -- ============================================================================
 -- 20261007210000 - worker_recognitions_for_viewer_v1 (SKL-9 downstream, company side)
 --
@@ -13,19 +15,21 @@
 -- <institution>" without a new, narrow read.
 --
 -- WHAT. ONE read-only SECURITY DEFINER function. It returns, for a worker the
--- caller may ALREADY VIEW (`can_view_worker` - the same rule that gates the
--- person page and its skills; self, admin, discoverable-to-employer, active
--- work relationship), only the CURRENT, POSITIVE, UN-REVOKED skill and
--- profession recognitions, with the assessing institution's name and validity.
+-- caller is the SUBJECT of, or that the caller's organization CURRENTLY
+-- ENGAGES (the engagement branches of `can_view_worker`, reused one for one,
+-- WITHOUT its discoverability branch), only the CURRENT, POSITIVE, UN-REVOKED
+-- skill and profession recognitions, with the assessing institution's name
+-- and validity. Engagement branches: active company_workers (company owner),
+-- active agency_workers (agency owner), active company_worker_engagements
+-- (owns_company), active engagement_contexts whose relationship grants worker
+-- visibility (manages_organization), active project_worker_assignments
+-- (can_manage_project). An ENDED engagement matches none of them.
 -- It returns NO note, NO evidence entry ids, NO assessor person, NO
 -- document_type rows (those answer formal requirements, not a profile).
 -- Evidence class `assessor_recognition`: not worker-verified, not a score.
 --
--- DECISIONS FOR THE OWNER (why this is RED):
---   1. Is "can view the person" the right audience? The alternative is the
---      narrower "currently engages the person" (engagement_contexts) rule.
---   2. Recognition is a legally significant statement; showing it to a
---      discoverability-based viewer is a visibility decision.
+-- OWNER DECISION (resolved): audience = subject + current engagement. A viewer
+-- whose only link is discoverability / generic can_view_worker sees 0 rows.
 --
 -- RLS on the table is UNCHANGED. anon: no execute. Not an admin override.
 -- RISK / REVERSIBILITY. Additive function only. Rollback:
@@ -37,7 +41,9 @@ begin;
 do $$
 begin
   if to_regclass('public.competency_recognitions') is null then raise exception 'competency_recognitions missing'; end if;
-  if not exists (select 1 from pg_proc where proname = 'can_view_worker') then raise exception 'can_view_worker missing'; end if;
+  if to_regprocedure('public.owns_worker(uuid)') is null or to_regprocedure('public.owns_company(uuid)') is null
+     or to_regprocedure('public.manages_organization(uuid)') is null or to_regprocedure('public.can_manage_project(uuid)') is null
+     or to_regprocedure('public.is_admin()') is null then raise exception 'engagement helpers missing'; end if;
 end $$;
 
 create or replace function public.worker_recognitions_for_viewer_v1(p_worker_id uuid)
@@ -57,8 +63,39 @@ set search_path = public
 as $$
 begin
   if auth.uid() is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
-  -- the caller must already be allowed to see this person
-  if p_worker_id is null or not public.can_view_worker(p_worker_id) then
+  if p_worker_id is null then return; end if;
+  -- Audience (owner decision 2026-10-08): the subject, an admin, or a viewer
+  -- with a CURRENT engagement / authorized organizational relationship with the
+  -- Person. NOT can_view_worker alone: its discoverability branch is excluded.
+  if not (
+    public.owns_worker(p_worker_id)
+    or public.is_admin()
+    or exists (
+      select 1 from public.company_workers cw
+        join public.companies c on c.id = cw.company_id
+       where cw.worker_id = p_worker_id and cw.status = 'active' and c.profile_id = auth.uid()
+    )
+    or exists (
+      select 1 from public.agency_workers aw
+        join public.agencies a on a.id = aw.agency_id
+       where aw.worker_id = p_worker_id and aw.status = 'active' and a.profile_id = auth.uid()
+    )
+    or exists (
+      select 1 from public.company_worker_engagements e
+       where e.worker_id = p_worker_id and e.status = 'active' and public.owns_company(e.company_id)
+    )
+    or exists (
+      select 1 from public.engagement_contexts ec
+        join public.relationship_types rt on rt.slug = ec.relationship_slug and rt.grants_worker_visibility
+        join public.workers x on x.id = p_worker_id and x.profile_id = ec.profile_id
+       where ec.status = 'active' and public.manages_organization(ec.organization_id)
+    )
+    or exists (
+      select 1 from public.project_worker_assignments pwa
+       where pwa.worker_id = p_worker_id and pwa.status = 'active' and pwa.ended_at is null
+         and public.can_manage_project(pwa.project_id)
+    )
+  ) then
     return;
   end if;
   return query
