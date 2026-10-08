@@ -295,6 +295,29 @@ describe("paper meets a FORMAL requirement only when a reviewer verified it (202
     expect(run([row])).toMatchObject({ standing: "recognized_equivalence", formalRequirementMet: true });
   });
 
+  it("SKL-9 downstream: a recognised requirement is not offered as 'record a document' and the surface says it is recognised", () => {
+    const row = {
+      id: "r1",
+      decision: "recognised" as const,
+      validFrom: null,
+      validUntil: null,
+      assessorOrganizationId: "inst",
+      requirementKind: "document_type" as const,
+      requirementKey: slug,
+      revokedAt: null,
+    };
+    const asks = (recs: Parameters<typeof deriveWorkerProjectAsks>[4]) =>
+      deriveWorkerProjectAsks([item("p1", "qualification_or_skill_evidence")], [], NOW, EVIDENCE, recs);
+    // Not recognised: the paper is still the open ask.
+    expect(firstRecordableAsk(asks([]).values())).not.toBeNull();
+    // Recognised: the requirement is answered, so no 'record a document' nudge.
+    expect(firstRecordableAsk(asks([row]).values())).toBeNull();
+    const ui = read("components/app/instruction-project-asks.tsx");
+    expect(ui).toContain('data-testid="instruction-project-ask-recognised"');
+    expect(ui).toContain("labels.capabilityRecognised");
+    expect(read("app/[locale]/dashboard/instructions/page.tsx")).toContain('t("card.capabilityRecognised")');
+  });
+
   it("the derivation reads the verification axis, not the worker's own status", () => {
     const src = read("lib/projects/worker-project-asks.ts");
     expect(src).toMatch(/hasValidCredential: own === "ready" && ownVerified/);

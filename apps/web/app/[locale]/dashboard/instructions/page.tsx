@@ -163,6 +163,7 @@ export default async function InstructionsPage({
     capabilityDemonstrated: t("card.capabilityDemonstrated"),
     capabilitySelfReported: t("card.capabilitySelfReported"),
     capabilityStillRequired: t("card.capabilityStillRequired"),
+    capabilityRecognised: t("card.capabilityRecognised"),
   };
 
   // P3 — the contextual requirement ledger per instruction project (frozen
