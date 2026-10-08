@@ -33,6 +33,8 @@ import {
 } from "@/lib/cv-export/eu-format";
 import { WORKER_LANGUAGE_NATIVE_NAMES } from "@/lib/worker/worker-languages-model";
 import { viewerWorkToday } from "@/lib/time/viewer-day";
+import { RecognisedByBlock } from "@/components/app/recognised-by-block";
+import { createClient as createSupabaseServerClient } from "@/lib/supabase/server";
 
 /**
  * Verified CV — PDF export (S3.5 + Full CV System v1). A print-clean sheet of
@@ -147,6 +149,7 @@ export default async function VerifiedCvPage({
   }
 
   const { cv } = result;
+  const cvProfileId = (await (await createSupabaseServerClient()).auth.getUser()).data.user?.id ?? null;
 
   // Tailored mode — read-only reuse of the gated worker demand RPC + the §19
   // fit engine. Anything not "ok" falls back to the standard CV honestly.
@@ -955,6 +958,11 @@ export default async function VerifiedCvPage({
             <p className="text-meta text-text-muted">{t("languagesSelfStated")}</p>
           </section>
         ) : null}
+
+        {/* RECOGNISED BY - an independent assessor's decision (evidence class
+            assessor_recognition). Renders only when a current skill or
+            profession recognition exists; never a score, never "verified". */}
+        {cvProfileId ? <RecognisedByBlock profileId={cvProfileId} variant="cv" locale={locale} /> : null}
 
         {/* Certificates & licences — document inventory rows (READY +
             unexpired), driving licence categories, and text-declared

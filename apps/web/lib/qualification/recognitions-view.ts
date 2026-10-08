@@ -6,7 +6,7 @@ import type { RecognitionRow } from "@/lib/skills/recognition-model";
  * Three honest states, never collapsed (SEP-7):
  *   - `unavailable`: the read failed (`null`) — unknown, claims nothing;
  *   - `empty`: the read succeeded and nobody has recorded a recognition
- *     (today always so: the relation is an unapplied owner packet);
+ *     (the relation is APPLIED on production, #2184; until an assessor records one this is the honest state);
  *   - `rows`: the assessor's own records, shown as what they are.
  *
  * A recognition is an independent assessor's act. It is distinct from

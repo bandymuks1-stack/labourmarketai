@@ -6087,7 +6087,8 @@
       "helpLine": "Vertimas padeda suprasti nurodymą, bet originalas išlieka išsaugotas.",
       "capabilityDemonstrated": "Turite čia užfiksuotų darbų, kuriuos patvirtino kitas asmuo.",
       "capabilitySelfReported": "Turite čia užfiksuotų darbų, kurių dar niekas kitas nepatvirtino.",
-      "capabilityStillRequired": "Dokumentas vis tiek reikalingas — paprašykite, kad ši patirtis būtų įvertinta jo atžvilgiu."
+      "capabilityStillRequired": "Dokumentas vis tiek reikalingas — paprašykite, kad ši patirtis būtų įvertinta jo atžvilgiu.",
+      "capabilityRecognised": "Vertinimo institucija pripažino jūsų ankstesnį mokymąsi ir patirtį atitinkančiais šį reikalavimą."
     }
   },
   "projects": {
@@ -18651,6 +18652,13 @@
     "stateNotYetValid": "Pripažinta, dar negalioja",
     "validFrom": "nuo {date}",
     "validUntil": "iki {date}"
+  },
+  "recognisedBy": {
+    "title": "Institucijos pripažinta",
+    "recognisedBy": "Pripažino {institution}",
+    "recognisedByUnnamed": "Pripažino vertinanti institucija",
+    "validUntil": "galioja iki {date}",
+    "note": "Nepriklausomas vertintojas nusprendė, kad jūsų parodytas darbas atitinka šį reikalavimą. Tai nėra darbdavio patvirtinimas ir ne įvertis."
   },
   "evidenceMedia": {
     "title": "Istorinės nuotraukos",

@@ -6087,7 +6087,8 @@
       "helpLine": "Eine Übersetzung hilft Ihnen, die Anweisung zu verstehen, aber das Original bleibt erhalten.",
       "capabilityDemonstrated": "Sie haben hier erfasste Arbeit, die jemand anderes bestätigt hat.",
       "capabilitySelfReported": "Sie haben hier erfasste Arbeit, die noch niemand anderes bestätigt hat.",
-      "capabilityStillRequired": "Das Dokument bleibt erforderlich — lassen Sie diese Erfahrung daraufhin bewerten."
+      "capabilityStillRequired": "Das Dokument bleibt erforderlich — lassen Sie diese Erfahrung daraufhin bewerten.",
+      "capabilityRecognised": "Eine prüfende Einrichtung hat Ihr früheres Lernen und Ihre Erfahrung als Erfüllung dieser Anforderung anerkannt."
     }
   },
   "projects": {
@@ -18651,6 +18652,13 @@
     "stateNotYetValid": "Anerkannt, noch nicht gültig",
     "validFrom": "ab {date}",
     "validUntil": "bis {date}"
+  },
+  "recognisedBy": {
+    "title": "Von einer Einrichtung anerkannt",
+    "recognisedBy": "Anerkannt durch {institution}",
+    "recognisedByUnnamed": "Anerkannt durch eine bewertende Einrichtung",
+    "validUntil": "gültig bis {date}",
+    "note": "Eine unabhängige Prüfstelle hat entschieden, dass Ihre gezeigte Arbeit dies erfüllt. Das ist keine Bestätigung durch einen Arbeitgeber und keine Bewertung."
   },
   "evidenceMedia": {
     "title": "Historische Fotos",

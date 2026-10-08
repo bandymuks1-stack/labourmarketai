@@ -6087,7 +6087,8 @@
       "helpLine": "Tłumaczenie pomaga zrozumieć instrukcję, ale oryginał pozostaje zachowany.",
       "capabilityDemonstrated": "Jest tu zarejestrowana praca, którą potwierdziła inna osoba.",
       "capabilitySelfReported": "Jest tu zarejestrowana praca, jeszcze niepotwierdzona przez nikogo innego.",
-      "capabilityStillRequired": "Dokument jest nadal wymagany — poproś o ocenę tego doświadczenia względem niego."
+      "capabilityStillRequired": "Dokument jest nadal wymagany — poproś o ocenę tego doświadczenia względem niego.",
+      "capabilityRecognised": "Instytucja oceniająca uznała Twoją wcześniejszą naukę i doświadczenie za spełnienie tego wymogu."
     }
   },
   "projects": {
@@ -18651,6 +18652,13 @@
     "stateNotYetValid": "Uznano, jeszcze nieważne",
     "validFrom": "od {date}",
     "validUntil": "do {date}"
+  },
+  "recognisedBy": {
+    "title": "Uznane przez instytucję",
+    "recognisedBy": "Uznane przez: {institution}",
+    "recognisedByUnnamed": "Uznane przez instytucję oceniającą",
+    "validUntil": "ważne do {date}",
+    "note": "Niezależny oceniający uznał, że pokazana praca spełnia ten wymóg. To nie jest potwierdzenie pracodawcy ani ocena punktowa."
   },
   "evidenceMedia": {
     "title": "Historyczne zdjęcia",

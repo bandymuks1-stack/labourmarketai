@@ -6087,7 +6087,8 @@
       "helpLine": "A translation helps you understand the instruction, but the original stays preserved.",
       "capabilityDemonstrated": "You have recorded work here that someone else confirmed.",
       "capabilitySelfReported": "You have recorded work here, not yet confirmed by anyone else.",
-      "capabilityStillRequired": "The document is still required — ask for this experience to be assessed against it."
+      "capabilityStillRequired": "The document is still required — ask for this experience to be assessed against it.",
+      "capabilityRecognised": "An assessing institution has recognised your prior learning and experience as meeting this requirement."
     }
   },
   "projects": {
@@ -18651,6 +18652,13 @@
     "stateNotYetValid": "Recognised, not valid yet",
     "validFrom": "from {date}",
     "validUntil": "until {date}"
+  },
+  "recognisedBy": {
+    "title": "Recognised by an institution",
+    "recognisedBy": "Recognised by {institution}",
+    "recognisedByUnnamed": "Recognised by an assessing institution",
+    "validUntil": "valid until {date}",
+    "note": "An independent assessor decided that your work answers this. It is not confirmation of your work by an employer and it is not a score."
   },
   "evidenceMedia": {
     "title": "Historical photos",

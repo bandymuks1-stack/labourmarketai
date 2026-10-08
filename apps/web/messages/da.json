@@ -7181,6 +7181,13 @@
       }
     }
   },
+  "recognisedBy": {
+    "title": "Anerkendt af en institution",
+    "recognisedBy": "Anerkendt af {institution}",
+    "recognisedByUnnamed": "Anerkendt af en vurderende institution",
+    "validUntil": "gyldig til {date}",
+    "note": "En uafhængig bedømmer har afgjort, at dit viste arbejde svarer hertil. Det er ikke en arbejdsgivers bekræftelse og ikke en score."
+  },
   "evidenceMedia": {
     "title": "Historiske fotos",
     "provenance": "Fotos, som organisationen selv har leveret fra sine egne optegnelser. Oplyst, ikke verificeret.",
