@@ -165,7 +165,7 @@ describe("demo previews on /for-* pages carry the always-visible Example frame",
       const src = read(rel);
       // Containment 2026-10-08: fabricated previews were removed; a page may
       // carry one only inside the always-visible Example frame.
-      if (/Preview/.test(src)) expect(src, rel).toMatch(/<ExamplePreviewFrame>/);
+      if (/Preview/.test(src)) expect(src, rel).toMatch(/<ExamplePreviewFrame>/);
     }
   });
 
