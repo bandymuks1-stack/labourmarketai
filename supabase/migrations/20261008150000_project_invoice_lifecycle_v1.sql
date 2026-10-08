@@ -18,9 +18,9 @@
 --                                 confirmation ids, evidence class, photos)
 --   organization_tax_presets      PRE-FILL only. Never decides legal treatment.
 --   invoice_number_sequences      gapless numbering per issuing org + series
---   invoice_client_responses      OPTIONAL client acceptance of an issued invoice
---   finance_records (+columns)    issuer/client org, period, kind, credit chain,
---                                 issue/void stamps, customer VAT id, tax totals
+--   finance_records (+columns)    issuer/recipient org, period, kind, correction chain
+--                                 (credits / replaces / reason / reference / actor / time),
+--                                 issue stamps, customer tax id, tax totals
 --
 -- TAX IS COUNTRY-NEUTRAL DATA (owner decision): treatment is an explicit value
 -- (standard | reduced | zero_rated | reverse_charge | exempt | outside_scope)
@@ -40,12 +40,30 @@
 -- treatment) cannot change - enforced by triggers even against a privileged
 -- writer. The two pre-existing write RPCs that allowed it
 -- (update_finance_record_v1/v2, set_finance_record_status_v1) are REPLACED.
--- Corrections are explicit: void_or_credit_invoice_v1 (credit-note chain).
+-- Corrections are explicit and traceable: correct_invoice_v1 issues a full
+-- CREDIT NOTE linked to the original (reason, reference, actor, time), and a
+-- REPLACEMENT invoice can then be built (create_invoice_draft_from_period_v1
+-- with p_replaces_id). original -> credit note -> replacement; the original is
+-- never edited and the chain is readable from any document
+-- (invoice_correction_chain_v1).
 --
--- RLS DIFF (reviewer: read this): fr_select GAINS two read paths -
---   (a) issuer-org finance authority (owner/admin membership of issuer_org_id)
---   (b) client-org manager for NON-DRAFT rows with client_org_id = their org.
--- All new tables: RLS on, SELECT-only to authenticated, writes RPC-only, anon
+-- NO INVOICE APPROVAL / ACCEPTANCE (owner decision): there is no invoice
+-- acceptance state, no client invoice-accept command and no gate on client
+-- confirmation anywhere in this slice. Client acceptance of WORK (the
+-- counterparty path, decision 0018) is evidence on a source row; it is never
+-- an acceptance of the invoice. Lifecycle invoices cannot carry the legacy
+-- internal approval_status mirror (CHECK fr_no_approval_on_lifecycle).
+--
+-- CURRENCY-NEUTRAL: currency is an ISO 4217 code (3 uppercase letters, shape
+-- enforced by CHECK on every table; the closed list is NOT hard-coded in SQL -
+-- the app validates against the ISO list). Amounts are integer MINOR units;
+-- the minor-unit exponent (JPY 0, KWD 3, most 2) lives in the calculation
+-- model, so the database arithmetic is exponent-independent.
+--
+-- RLS DIFF (reviewer: read this): fr_select GAINS one read path -
+--   issuer-org finance authority (owner/admin membership of issuer_org_id).
+-- There is NO client/recipient read path in this slice (optional, dropped to
+-- keep the slice free of any invoice approval path). All new tables: RLS on, SELECT-only to authenticated, writes RPC-only, anon
 -- and PUBLIC revoked.
 --
 -- ROLLBACK: supabase/rollbacks/20261008150000_project_invoice_lifecycle_v1.down.sql
@@ -79,8 +97,12 @@ begin
 end $$;
 
 -- ============================================================================
--- 0. Currency: relax the EUR-only CHECK additively (documented limitation).
---    ISO-4217 SHAPE only; existing 0 rows; create/update RPCs unchanged.
+-- 0. Currency: REMOVE the EUR-only CHECK additively (owner decision).
+--    ISO 4217 SHAPE only (3 uppercase letters); existing 0 rows.
+--    NOTE: the legacy MANUAL-record commands create_finance_record_v1/v2 still
+--    stamp 'EUR' on rows they insert; they are not part of this lifecycle and
+--    are listed as an open follow-up. Lifecycle invoices take their currency
+--    from the agreed rate terms.
 -- ============================================================================
 alter table public.finance_records drop constraint if exists finance_records_currency_check;
 alter table public.finance_records
@@ -106,16 +128,6 @@ as $$
                   and o.legacy_company_id is not null
                   and coalesce(public.finance_company_authority_v1(o.legacy_company_id), false))
   ), false)
-$$;
-
--- The client organization's authorized representative (read + respond only).
-create or replace function public.invoice_client_reader_v1(p_client_org uuid)
-returns boolean
-language sql stable security definer
-set search_path = public
-as $$
-  select coalesce(p_client_org is not null and auth.uid() is not null
-     and public.profile_manages_organization_v1(auth.uid(), p_client_org), false)
 $$;
 
 -- May this ISSUER org invoice work on this PROJECT, and does the caller hold finance authority for it?
@@ -258,9 +270,18 @@ alter table public.finance_records
   add column if not exists supersedes_id     uuid references public.finance_records(id) on delete restrict,
   add column if not exists issued_at         timestamptz,
   add column if not exists issued_by         uuid references public.profiles(id),
-  add column if not exists voided_at         timestamptz,
-  add column if not exists voided_by         uuid references public.profiles(id),
-  add column if not exists void_reason       text check (void_reason is null or char_length(void_reason) <= 500),
+  -- CORRECTION CHAIN. supersedes_id = the invoice a CREDIT NOTE credits;
+  -- replaces_id = the invoice a REPLACEMENT invoice replaces. The reason /
+  -- reference / actor / time are stored on the correcting document itself.
+  add column if not exists replaces_id          uuid references public.finance_records(id) on delete restrict,
+  add column if not exists correction_reason    text check (correction_reason is null or char_length(correction_reason) between 3 and 500),
+  add column if not exists correction_reference text check (correction_reference is null or char_length(correction_reference) <= 200),
+  add column if not exists corrected_by         uuid references public.profiles(id),
+  add column if not exists corrected_at         timestamptz,
+  -- control stamp on the ORIGINAL: which credit note cancelled it financially.
+  -- Written once by correct_invoice_v1; no financial content of the original changes.
+  add column if not exists credited_at          timestamptz,
+  add column if not exists credited_by_id       uuid references public.finance_records(id) on delete restrict,
   add column if not exists customer_vat_id   text check (customer_vat_id is null or char_length(customer_vat_id) <= 60),
   add column if not exists customer_address  text check (customer_address is null or char_length(customer_address) <= 400),
   add column if not exists tax_rounding      text not null default 'per_line' check (tax_rounding in ('per_line')),
@@ -272,12 +293,24 @@ alter table public.finance_records
 alter table public.finance_records
   add constraint fr_credit_shape check (
     (invoice_kind = 'credit_note') = (supersedes_id is not null)
-    and (invoice_kind = 'invoice' or record_type = 'invoice_issued'));
+    and (invoice_kind = 'invoice' or record_type = 'invoice_issued')
+    and (replaces_id is null or invoice_kind = 'invoice')
+    and (supersedes_id is null or replaces_id is null)
+    and ((supersedes_id is null and replaces_id is null)
+         or (correction_reason is not null and corrected_by is not null and corrected_at is not null))
+    and ((credited_at is null) = (credited_by_id is null)));
+
+-- No invoice approval state on lifecycle invoices: issuance and correction belong to the
+-- authorized issuer; the legacy internal approval mirror cannot be attached to them.
+alter table public.finance_records
+  add constraint fr_no_approval_on_lifecycle check (billing_period_id is null or approval_status is null);
 
 create unique index fr_one_live_invoice_per_period
   on public.finance_records (billing_period_id)
   where billing_period_id is not null and invoice_kind = 'invoice'
-    and voided_at is null and status <> 'cancelled';
+    and credited_at is null and status <> 'cancelled';
+create unique index fr_one_replacement_per_invoice
+  on public.finance_records (replaces_id) where replaces_id is not null;
 create unique index fr_issuer_number_uq
   on public.finance_records (issuer_org_id, invoice_kind, lower(invoice_number))
   where issuer_org_id is not null and invoice_number is not null and issued_at is not null;
@@ -388,13 +421,19 @@ create index frls_line_idx  on public.finance_record_line_sources (line_id);
 -- Frozen children: lines/sources may change ONLY while the parent is a draft.
 create or replace function public.invoice_child_frozen_guard_v1()
 returns trigger language plpgsql set search_path = public as $$
-declare v_status text; v_inv uuid;
+declare v_status text; v_inv uuid; v_cur text;
 begin
   v_inv := case when tg_op = 'DELETE' then old.invoice_id else new.invoice_id end;
-  select status into v_status from public.finance_records where id = v_inv;
+  select status, currency::text into v_status, v_cur from public.finance_records where id = v_inv;
   if found and v_status <> 'draft' then
     raise exception 'issued_invoice_is_immutable: % rows cannot change after issue', tg_table_name
       using errcode = '55000';
+  end if;
+  -- a line carries exactly its invoice's currency (one invoice, one currency)
+  if found and tg_op <> 'DELETE' and tg_table_name = 'finance_record_lines' then
+    if to_jsonb(new) ->> 'currency' is distinct from v_cur then
+      raise exception 'line_currency_mismatch: a line must use its invoice currency' using errcode = '23514';
+    end if;
   end if;
   if tg_op = 'UPDATE' and new.invoice_id is distinct from old.invoice_id then
     raise exception 'line invoice is immutable' using errcode = '55000';
@@ -407,30 +446,6 @@ create trigger finance_record_lines_frozen
 create trigger finance_record_line_sources_frozen
   before insert or update or delete on public.finance_record_line_sources
   for each row execute function public.invoice_child_frozen_guard_v1();
-
--- ============================================================================
--- 8. invoice_client_responses (OPTIONAL client acceptance; append-only)
--- ============================================================================
-create table public.invoice_client_responses (
-  id              uuid primary key default gen_random_uuid(),
-  invoice_id      uuid not null references public.finance_records(id) on delete restrict,
-  client_org_id   uuid not null references public.organizations(id),
-  responded_by    uuid not null references public.profiles(id),
-  decision        text not null check (decision in ('accepted','disputed','correction_requested')),
-  note            text check (note is null or char_length(note) <= 1000),
-  created_at      timestamptz not null default now(),
-  constraint icr_note_required check (decision = 'accepted' or nullif(btrim(coalesce(note,'')), '') is not null)
-);
-create index icr_invoice_idx on public.invoice_client_responses (invoice_id, created_at desc);
-
-create or replace function public.invoice_append_only_v1()
-returns trigger language plpgsql set search_path = public as $$
-begin
-  raise exception 'append_only: % rows cannot be updated or deleted', tg_table_name using errcode = '55000';
-end $$;
-create trigger invoice_client_responses_append_only
-  before update or delete on public.invoice_client_responses
-  for each row execute function public.invoice_append_only_v1();
 
 -- ============================================================================
 -- 9. Frozen-header guard on finance_records (covers EVERY writer)
@@ -455,27 +470,29 @@ begin
   if old.status = 'cancelled' then
     raise exception 'issued_invoice_is_immutable: a cancelled invoice is final' using errcode = '55000';
   end if;
-  if new.status = 'cancelled' and v_lifecycle
-     and not (old.voided_at is null and new.voided_at is not null) then
-    raise exception 'issued_invoice_is_immutable: use void_or_credit_invoice_v1' using errcode = '55000';
+  if new.status = 'cancelled' and v_lifecycle then
+    raise exception 'issued_invoice_is_immutable: use correct_invoice_v1 (credit note)' using errcode = '55000';
   end if;
   if (new.id, new.record_type, new.title, new.counterparty_name, new.amount_cents, new.currency,
       new.vat_amount_cents, new.invoice_number, new.project_id, new.company_id, new.created_by,
       new.issuer_org_id, new.client_org_id, new.billing_period_id, new.invoice_kind, new.supersedes_id,
+      new.replaces_id, new.correction_reason, new.correction_reference, new.corrected_by, new.corrected_at,
       new.issued_at, new.issued_by, new.customer_vat_id, new.customer_address, new.tax_rounding,
       new.net_total_cents, new.tax_total_cents, new.gross_total_cents, new.tax_breakdown)
      is distinct from
      (old.id, old.record_type, old.title, old.counterparty_name, old.amount_cents, old.currency,
       old.vat_amount_cents, old.invoice_number, old.project_id, old.company_id, old.created_by,
       old.issuer_org_id, old.client_org_id, old.billing_period_id, old.invoice_kind, old.supersedes_id,
+      old.replaces_id, old.correction_reason, old.correction_reference, old.corrected_by, old.corrected_at,
       old.issued_at, old.issued_by, old.customer_vat_id, old.customer_address, old.tax_rounding,
       old.net_total_cents, old.tax_total_cents, old.gross_total_cents, old.tax_breakdown) then
-    raise exception 'issued_invoice_is_immutable: amount, tax, parties and numbering are frozen after issue'
+    raise exception 'issued_invoice_is_immutable: amount, currency, tax, parties and numbering are frozen after issue'
       using errcode = '55000';
   end if;
-  if old.voided_at is not null
-     and (new.voided_at is distinct from old.voided_at or new.void_reason is distinct from old.void_reason) then
-    raise exception 'issued_invoice_is_immutable: void stamp is final' using errcode = '55000';
+  -- the credited stamp is a one-way control mark written by correct_invoice_v1
+  if old.credited_at is not null
+     and (new.credited_at, new.credited_by_id) is distinct from (old.credited_at, old.credited_by_id) then
+    raise exception 'issued_invoice_is_immutable: the correction link is final' using errcode = '55000';
   end if;
   return new;
 end $$;
@@ -492,19 +509,8 @@ alter table public.organization_tax_presets    enable row level security;
 alter table public.invoice_number_sequences    enable row level security;
 alter table public.finance_record_lines        enable row level security;
 alter table public.finance_record_line_sources enable row level security;
-alter table public.invoice_client_responses    enable row level security;
 
--- can the caller read this invoice HEADER row (same predicate as fr_select)
-create or replace function public.invoice_can_read_v1(p_invoice_id uuid)
-returns boolean language sql stable security definer set search_path = public as $$
-  select exists (select 1 from public.finance_records fr
-    where fr.id = p_invoice_id
-      and (fr.created_by = auth.uid() or public.is_admin()
-           or public.finance_company_authority_v1(fr.company_id)
-           or public.invoice_issuer_authority_v1(fr.issuer_org_id)
-           or (fr.status <> 'draft' and public.invoice_client_reader_v1(fr.client_org_id))))
-$$;
--- issuer side only (evidence internals are not shown to the client)
+-- issuer side only: the invoice's creator, platform admin or the issuer's finance authority
 create or replace function public.invoice_issuer_side_v1(p_invoice_id uuid)
 returns boolean language sql stable security definer set search_path = public as $$
   select exists (select 1 from public.finance_records fr
@@ -522,7 +528,6 @@ create policy fr_select on public.finance_records
     or public.is_admin()
     or public.finance_company_authority_v1(company_id)
     or public.invoice_issuer_authority_v1(issuer_org_id)
-    or (status <> 'draft' and public.invoice_client_reader_v1(client_org_id))
   );
 
 create policy prt_select on public.project_rate_terms for select to authenticated
@@ -534,18 +539,15 @@ create policy otp_select on public.organization_tax_presets for select to authen
 create policy ins_select on public.invoice_number_sequences for select to authenticated
   using (public.invoice_issuer_authority_v1(organization_id));
 create policy frl_select on public.finance_record_lines for select to authenticated
-  using (public.invoice_can_read_v1(invoice_id));
+  using (public.invoice_issuer_side_v1(invoice_id));
 create policy frls_select on public.finance_record_line_sources for select to authenticated
   using (public.invoice_issuer_side_v1(invoice_id));
-create policy icr_select on public.invoice_client_responses for select to authenticated
-  using (public.invoice_can_read_v1(invoice_id));
-
 revoke all on table public.project_rate_terms, public.billing_periods, public.organization_tax_presets,
-  public.invoice_number_sequences, public.finance_record_lines, public.finance_record_line_sources,
-  public.invoice_client_responses from public, anon, authenticated;
+  public.invoice_number_sequences, public.finance_record_lines, public.finance_record_line_sources
+  from public, anon, authenticated;
 grant select on table public.project_rate_terms, public.billing_periods, public.organization_tax_presets,
-  public.invoice_number_sequences, public.finance_record_lines, public.finance_record_line_sources,
-  public.invoice_client_responses to authenticated;
+  public.invoice_number_sequences, public.finance_record_lines, public.finance_record_line_sources
+  to authenticated;
 
 -- ============================================================================
 -- 11. Tax validation + arithmetic (single definition; mirrored by the TS model)
@@ -719,7 +721,7 @@ begin
       select ls.invoice_id from public.finance_record_line_sources ls
         join public.finance_records f on f.id = ls.invoice_id
        where ls.journal_entry_id = e.eid and ls.source_key = w.skey
-         and f.invoice_kind = 'invoice' and f.voided_at is null and f.status <> 'cancelled'
+         and f.invoice_kind = 'invoice' and f.credited_at is null and f.status <> 'cancelled'
          and f.id is distinct from p_exclude_invoice
        limit 1) b on true
    where e.day between v_start and v_end;
@@ -757,7 +759,8 @@ begin
      or (p_valid_to is not null and p_valid_to < p_valid_from) then
     return jsonb_build_object('status','invalid');
   end if;
-  v_cur := upper(btrim(coalesce(p_currency,'')));
+  v_cur := coalesce(p_currency, '');
+  -- ISO 4217 shape only (3 uppercase letters); lowercase or padded input is refused, never normalised
   if v_cur !~ '^[A-Z]{3}$' then return jsonb_build_object('status','invalid'); end if;
   v_unit := case p_basis_type when 'hours' then 'hours' when 'quantity' then nullif(btrim(coalesce(p_unit,'')),'') else null end;
   if p_basis_type = 'quantity' and (v_unit is null or v_unit in ('hours','minutes','days')) then
@@ -893,10 +896,10 @@ end $$;
 create or replace function public.create_invoice_draft_from_period_v1(
   p_period_id uuid, p_customer_name text, p_client_org_id uuid default null,
   p_customer_vat_id text default null, p_customer_address text default null,
-  p_due_date date default null, p_note text default null)
+  p_due_date date default null, p_note text default null, p_replaces_id uuid default null)
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare
-  uid uuid := auth.uid(); b record; pr record; v_name text := btrim(coalesce(p_customer_name,''));
+  uid uuid := auth.uid(); b record; pr record; orig record; v_reason text; v_ref text; v_name text := btrim(coalesce(p_customer_name,''));
   v_inv uuid; v_currency text; v_n int := 0; g record; v_line uuid; v_unpriced jsonb; v_ambiguous int;
   v_company uuid; v_net bigint;
 begin
@@ -906,6 +909,24 @@ begin
   select * into pr from public.projects where id = b.project_id;
   if not public.invoice_issuer_project_link_v1(b.organization_id, b.project_id) then
     return jsonb_build_object('status','not_found');
+  end if;
+  if p_replaces_id is not null then
+    -- REPLACEMENT of a corrected invoice: the original must be credited, belong to this period and issuer,
+    -- and not already be replaced. Building it re-opens the period (the authorized issuer's explicit choice).
+    select * into orig from public.finance_records where id = p_replaces_id;
+    if not found or orig.invoice_kind <> 'invoice' or orig.billing_period_id is distinct from b.id
+       or orig.issuer_org_id is distinct from b.organization_id or orig.credited_at is null then
+      return jsonb_build_object('status','invalid_replacement');
+    end if;
+    if exists (select 1 from public.finance_records r where r.replaces_id = orig.id) then
+      return jsonb_build_object('status','already_replaced');
+    end if;
+    select c.correction_reason, c.correction_reference into v_reason, v_ref
+      from public.finance_records c where c.id = orig.credited_by_id;
+    if b.status = 'invoiced' then
+      update public.billing_periods set status = 'open', locked_at = null, locked_by = null where id = b.id;
+      b.status := 'open';
+    end if;
   end if;
   if b.status = 'invoiced' then return jsonb_build_object('status','period_locked'); end if;
   if char_length(v_name) not between 2 and 160 or char_length(coalesce(p_note,'')) > 1000 then
@@ -917,7 +938,7 @@ begin
   end if;
   perform pg_advisory_xact_lock(hashtextextended(b.project_id::text, 0));
   if exists (select 1 from public.finance_records f where f.billing_period_id = b.id
-              and f.invoice_kind = 'invoice' and f.voided_at is null and f.status <> 'cancelled') then
+              and f.invoice_kind = 'invoice' and f.credited_at is null and f.status <> 'cancelled') then
     return jsonb_build_object('status','already_has_invoice');
   end if;
 
@@ -955,11 +976,15 @@ begin
   select o.legacy_company_id into v_company from public.organizations o where o.id = b.organization_id;
   insert into public.finance_records (record_type, title, counterparty_name, amount_cents, currency, status,
       due_date, project_id, company_id, note, created_by, issuer_org_id, client_org_id, billing_period_id,
-      customer_vat_id, customer_address, invoice_kind)
+      customer_vat_id, customer_address, invoice_kind, replaces_id, correction_reason, correction_reference,
+      corrected_by, corrected_at)
   values ('invoice_issued', 'Project invoice ' || b.period_start::text || ' - ' || b.period_end::text,
       v_name, 0, v_currency, 'draft', p_due_date, b.project_id, v_company, nullif(btrim(coalesce(p_note,'')),''),
       uid, b.organization_id, p_client_org_id, b.id,
-      nullif(btrim(coalesce(p_customer_vat_id,'')),''), nullif(btrim(coalesce(p_customer_address,'')),''), 'invoice')
+      nullif(btrim(coalesce(p_customer_vat_id,'')),''), nullif(btrim(coalesce(p_customer_address,'')),''), 'invoice',
+      p_replaces_id, case when p_replaces_id is not null then v_reason end,
+      case when p_replaces_id is not null then v_ref end,
+      case when p_replaces_id is not null then uid end, case when p_replaces_id is not null then now() end)
   returning id into v_inv;
 
   for g in
@@ -990,7 +1015,8 @@ begin
 
   perform public._invoice_recompute_totals_v1(v_inv);
   perform public._invoice_audit_v1('create_invoice_draft','finance_records', v_inv,
-    jsonb_build_object('period_id', b.id, 'lines', v_n, 'unpriced', jsonb_array_length(v_unpriced)));
+    jsonb_build_object('period_id', b.id, 'lines', v_n, 'unpriced', jsonb_array_length(v_unpriced),
+                       'replaces_id', p_replaces_id));
   return jsonb_build_object('status','created','invoice_id', v_inv, 'lines', v_n, 'unpriced', v_unpriced);
 end $$;
 
@@ -1012,7 +1038,7 @@ begin
   if v_qty <= 0 or v_qty > 1000000 or char_length(coalesce(p_description,'')) > 300 then return jsonb_build_object('status','invalid'); end if;
   if exists (select 1 from public.finance_record_lines l join public.finance_records x on x.id = l.invoice_id
               where l.rate_term_id = p_rate_term_id and x.invoice_kind = 'invoice'
-                and x.voided_at is null and x.status <> 'cancelled' and x.id <> p_invoice_id)
+                and x.credited_at is null and x.status <> 'cancelled' and x.id <> p_invoice_id)
      and t.basis_type = 'fixed' then
     return jsonb_build_object('status','already_billed');
   end if;
@@ -1158,22 +1184,20 @@ begin
   return jsonb_build_object('status','issued','invoice_number', v_number);
 end $$;
 
--- 13.9 void / credit -----------------------------------------------------------
-create or replace function public.void_or_credit_invoice_v1(p_invoice_id uuid, p_mode text, p_reason text)
+-- 13.9 correction: full CREDIT NOTE linked to the original (original untouched) ------
+create or replace function public.correct_invoice_v1(p_invoice_id uuid, p_reason text, p_reference text default null)
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare
-  uid uuid := auth.uid(); f record; v_seq record; v_no bigint; v_number text; v_cn uuid; v_reason text := btrim(coalesce(p_reason,''));
-  l record; v_newline uuid;
+  uid uuid := auth.uid(); f record; v_seq record; v_no bigint; v_number text; v_cn uuid;
+  v_reason text := btrim(coalesce(p_reason,'')); v_ref text := nullif(btrim(coalesce(p_reference,'')),''); l record;
 begin
   if uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
   select * into f from public.finance_records where id = p_invoice_id for update;
   if not found or not public.invoice_issuer_authority_v1(f.issuer_org_id) then return jsonb_build_object('status','not_found'); end if;
   if exists (select 1 from public.finance_records c where c.supersedes_id = f.id) then return jsonb_build_object('status','already_credited'); end if;
-  if f.invoice_kind <> 'invoice' or f.issued_at is null or f.voided_at is not null then return jsonb_build_object('status','not_issued_invoice'); end if;
-  if p_mode not in ('void','credit_note') or char_length(v_reason) not between 3 and 500 then return jsonb_build_object('status','invalid'); end if;
-  if p_mode = 'void' and f.status <> 'issued' then return jsonb_build_object('status','void_requires_unpaid'); end if;
+  if f.invoice_kind <> 'invoice' or f.issued_at is null then return jsonb_build_object('status','not_issued_invoice'); end if;
   if f.status not in ('issued','partially_paid','paid') then return jsonb_build_object('status','invalid_state'); end if;
-  if exists (select 1 from public.finance_records c where c.supersedes_id = f.id) then return jsonb_build_object('status','already_credited'); end if;
+  if char_length(v_reason) not between 3 and 500 or char_length(coalesce(v_ref,'')) > 200 then return jsonb_build_object('status','invalid'); end if;
 
   insert into public.invoice_number_sequences (organization_id, series, prefix) values (f.issuer_org_id, 'credit_note', 'CN-')
     on conflict do nothing;
@@ -1184,13 +1208,15 @@ begin
   update public.invoice_number_sequences set next_number = v_no + 1
    where organization_id = f.issuer_org_id and series = 'credit_note';
 
-  -- credit note is built as a DRAFT so its lines can be copied, then issued in the same transaction
+  -- built as a DRAFT so its lines can be copied, then issued in the same transaction
   insert into public.finance_records (record_type, title, counterparty_name, amount_cents, currency, status,
       project_id, company_id, created_by, issuer_org_id, client_org_id, billing_period_id, invoice_kind,
-      supersedes_id, customer_vat_id, customer_address, tax_rounding, note)
+      supersedes_id, customer_vat_id, customer_address, tax_rounding,
+      correction_reason, correction_reference, corrected_by, corrected_at)
   values ('invoice_issued', 'Credit note for ' || coalesce(f.invoice_number,'invoice'), f.counterparty_name, 0,
       f.currency, 'draft', f.project_id, f.company_id, uid, f.issuer_org_id, f.client_org_id, f.billing_period_id,
-      'credit_note', f.id, f.customer_vat_id, f.customer_address, f.tax_rounding, v_reason)
+      'credit_note', f.id, f.customer_vat_id, f.customer_address, f.tax_rounding,
+      v_reason, v_ref, uid, now())
   returning id into v_cn;
   for l in select * from public.finance_record_lines where invoice_id = f.id order by line_no loop
     insert into public.finance_record_lines (invoice_id, line_no, basis_type, description, rate_term_id, unit, quantity,
@@ -1204,45 +1230,41 @@ begin
   update public.finance_records
      set status = 'issued', issued_at = now(), issued_by = uid, invoice_number = v_number, updated_at = now()
    where id = v_cn;
-
-  if p_mode = 'void' then
-    update public.finance_records
-       set status = 'cancelled', voided_at = now(), voided_by = uid, void_reason = v_reason, updated_at = now()
-     where id = f.id;
-    -- release the period so a corrected invoice can be built; the voided invoice + credit note remain as history
-    update public.billing_periods set status = 'open', locked_at = null, locked_by = null where id = f.billing_period_id;
-  end if;
-  perform public._invoice_audit_v1('void_or_credit_invoice','finance_records', f.id,
-    jsonb_build_object('mode', p_mode, 'credit_note_id', v_cn));
-  return jsonb_build_object('status', case p_mode when 'void' then 'voided' else 'credited' end,
-                            'credit_note_id', v_cn, 'credit_note_number', v_number);
+  -- one-way control mark on the original; none of its financial content changes
+  update public.finance_records set credited_at = now(), credited_by_id = v_cn, updated_at = now() where id = f.id;
+  perform public._invoice_audit_v1('correct_invoice','finance_records', f.id,
+    jsonb_build_object('credit_note_id', v_cn, 'reference', v_ref));
+  return jsonb_build_object('status','corrected','credit_note_id', v_cn, 'credit_note_number', v_number);
 end $$;
 
--- 13.10 OPTIONAL client response ---------------------------------------------------
-create or replace function public.record_invoice_client_response_v1(
-  p_invoice_id uuid, p_decision text, p_note text default null)
-returns jsonb language plpgsql security definer set search_path = public as $$
-declare uid uuid := auth.uid(); f record; v_id uuid;
+-- 13.10 the chain, readable from ANY document of it ---------------------------------------
+create or replace function public.invoice_correction_chain_v1(p_invoice_id uuid)
+returns jsonb language plpgsql stable security definer set search_path = public as $$
+declare v_cur uuid := p_invoice_id; v_next uuid; n int := 0; v_docs jsonb;
 begin
-  if uid is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
-  select * into f from public.finance_records where id = p_invoice_id;
-  if not found or f.status = 'draft' or not public.invoice_client_reader_v1(f.client_org_id) then
-    return jsonb_build_object('status','not_found');
-  end if;
-  if f.invoice_kind <> 'invoice' or f.voided_at is not null then return jsonb_build_object('status','not_respondable'); end if;
-  -- the issuer's own people are not the client's representative
-  if public.profile_is_member_of_organization_v1(uid, f.issuer_org_id) then return jsonb_build_object('status','not_allowed'); end if;
-  if p_decision not in ('accepted','disputed','correction_requested')
-     or (p_decision <> 'accepted' and nullif(btrim(coalesce(p_note,'')),'') is null)
-     or char_length(coalesce(p_note,'')) > 1000 then
-    return jsonb_build_object('status','invalid');
-  end if;
-  insert into public.invoice_client_responses (invoice_id, client_org_id, responded_by, decision, note)
-  values (p_invoice_id, f.client_org_id, uid, p_decision, nullif(btrim(coalesce(p_note,'')),''))
-  returning id into v_id;
-  perform public._invoice_audit_v1('invoice_client_response','finance_records', p_invoice_id,
-    jsonb_build_object('decision', p_decision));
-  return jsonb_build_object('status','recorded','id', v_id);
+  if auth.uid() is null then raise exception 'Not authenticated' using errcode = '42501'; end if;
+  if not public.invoice_issuer_side_v1(p_invoice_id) then return jsonb_build_object('status','not_found'); end if;
+  loop
+    select coalesce(supersedes_id, replaces_id) into v_next from public.finance_records where id = v_cur;
+    exit when v_next is null or n >= 50;
+    v_cur := v_next; n := n + 1;
+  end loop;
+  with recursive t as (
+    select f.id, 0 as depth from public.finance_records f where f.id = v_cur
+    union all
+    select c.id, t.depth + 1 from public.finance_records c join t on (c.supersedes_id = t.id or c.replaces_id = t.id)
+     where t.depth < 50)
+  select coalesce(jsonb_agg(jsonb_build_object(
+           'id', f.id, 'kind', f.invoice_kind, 'number', f.invoice_number, 'status', f.status,
+           'issued_at', f.issued_at, 'currency', f.currency, 'gross_cents', f.gross_total_cents,
+           'credits_id', f.supersedes_id, 'replaces_id', f.replaces_id, 'credited_by_id', f.credited_by_id,
+           'reason', f.correction_reason, 'reference', f.correction_reference,
+           'acted_by', f.corrected_by, 'acted_at', f.corrected_at)
+         order by f.created_at, f.id), '[]'::jsonb)
+    into v_docs
+    from public.finance_records f join t on t.id = f.id
+   where public.invoice_issuer_side_v1(f.id);
+  return jsonb_build_object('status','ok','root_id', v_cur, 'documents', v_docs);
 end $$;
 
 -- 13.11 changes since invoice (derived, never stale) ---------------------------------
@@ -1257,7 +1279,7 @@ begin
     return jsonb_build_object('status','not_found');
   end if;
   select f.id into v_inv from public.finance_records f
-   where f.billing_period_id = b.id and f.invoice_kind = 'invoice' and f.voided_at is null and f.status <> 'cancelled'
+   where f.billing_period_id = b.id and f.invoice_kind = 'invoice' and f.credited_at is null and f.status <> 'cancelled'
      and f.issued_at is not null;
   if v_inv is null then return jsonb_build_object('status','no_issued_invoice','changes','[]'::jsonb); end if;
   select coalesce(jsonb_agg(x order by x ->> 'entry_id', x ->> 'source_key'), '[]'::jsonb) into v_changes from (
@@ -1470,7 +1492,7 @@ begin
     if v_cur.billing_period_id is not null and v_cur.status = 'draft' and v_status <> 'draft' then
       return 'use_issue_invoice';
     end if;
-    if v_cur.issued_at is not null and v_status = 'cancelled' then return 'use_void_or_credit'; end if;
+    if v_cur.issued_at is not null and v_status = 'cancelled' then return 'use_correct_invoice'; end if;
     if v_cur.invoice_kind = 'credit_note' and v_status <> v_cur.status then return 'not_applicable'; end if;
   end if;
 
@@ -1495,7 +1517,6 @@ revoke all on function public._invoice_safe_date_v1(text) from public, anon, aut
 revoke all on function public._invoice_tax_rate_v1(text, numeric) from public, anon, authenticated;
 revoke all on function public.billing_periods_guard_v1() from public, anon, authenticated;
 revoke all on function public.finance_records_issued_guard_v1() from public, anon, authenticated;
-revoke all on function public.invoice_append_only_v1() from public, anon, authenticated;
 revoke all on function public.invoice_child_frozen_guard_v1() from public, anon, authenticated;
 revoke all on function public.project_rate_terms_guard_v1() from public, anon, authenticated;
 
@@ -1510,16 +1531,12 @@ revoke all on function public.billing_period_preview_v1(uuid) from public, anon;
 grant execute on function public.billing_period_preview_v1(uuid) to authenticated;
 revoke all on function public.create_billing_period_v1(uuid, date, date, uuid) from public, anon;
 grant execute on function public.create_billing_period_v1(uuid, date, date, uuid) to authenticated;
-revoke all on function public.create_invoice_draft_from_period_v1(uuid, text, uuid, text, text, date, text) from public, anon;
-grant execute on function public.create_invoice_draft_from_period_v1(uuid, text, uuid, text, text, date, text) to authenticated;
+revoke all on function public.create_invoice_draft_from_period_v1(uuid, text, uuid, text, text, date, text, uuid) from public, anon;
+grant execute on function public.create_invoice_draft_from_period_v1(uuid, text, uuid, text, text, date, text, uuid) to authenticated;
 revoke all on function public.discard_invoice_draft_v1(uuid) from public, anon;
 grant execute on function public.discard_invoice_draft_v1(uuid) to authenticated;
 revoke all on function public.end_project_rate_term_v1(uuid, date) from public, anon;
 grant execute on function public.end_project_rate_term_v1(uuid, date) to authenticated;
-revoke all on function public.invoice_can_read_v1(uuid) from public, anon;
-grant execute on function public.invoice_can_read_v1(uuid) to authenticated;
-revoke all on function public.invoice_client_reader_v1(uuid) from public, anon;
-grant execute on function public.invoice_client_reader_v1(uuid) to authenticated;
 revoke all on function public.invoice_issuer_authority_v1(uuid) from public, anon;
 grant execute on function public.invoice_issuer_authority_v1(uuid) to authenticated;
 revoke all on function public.invoice_issuer_project_link_v1(uuid, uuid) from public, anon;
@@ -1530,8 +1547,10 @@ revoke all on function public.issue_invoice_v1(uuid, boolean) from public, anon;
 grant execute on function public.issue_invoice_v1(uuid, boolean) to authenticated;
 revoke all on function public.mark_billing_period_ready_v1(uuid, boolean) from public, anon;
 grant execute on function public.mark_billing_period_ready_v1(uuid, boolean) to authenticated;
-revoke all on function public.record_invoice_client_response_v1(uuid, text, text) from public, anon;
-grant execute on function public.record_invoice_client_response_v1(uuid, text, text) to authenticated;
+revoke all on function public.correct_invoice_v1(uuid, text, text) from public, anon;
+grant execute on function public.correct_invoice_v1(uuid, text, text) to authenticated;
+revoke all on function public.invoice_correction_chain_v1(uuid) from public, anon;
+grant execute on function public.invoice_correction_chain_v1(uuid) to authenticated;
 revoke all on function public.save_org_tax_preset_v1(uuid, text, text, numeric, text, boolean) from public, anon;
 grant execute on function public.save_org_tax_preset_v1(uuid, text, text, numeric, text, boolean) to authenticated;
 revoke all on function public.set_finance_record_status_v1(text, text) from public, anon;
@@ -1546,7 +1565,5 @@ revoke all on function public.update_finance_record_v2(text, text, text, text, t
 grant execute on function public.update_finance_record_v2(text, text, text, text, text, text, text, text, text) to authenticated;
 revoke all on function public.update_invoice_draft_details_v1(uuid, text, uuid, text, text, date, text) from public, anon;
 grant execute on function public.update_invoice_draft_details_v1(uuid, text, uuid, text, text, date, text) to authenticated;
-revoke all on function public.void_or_credit_invoice_v1(uuid, text, text) from public, anon;
-grant execute on function public.void_or_credit_invoice_v1(uuid, text, text) to authenticated;
 
 commit;
