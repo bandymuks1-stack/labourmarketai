@@ -650,7 +650,6 @@ export const FROZEN_LANDING_FILES = [
   "lib/marketing/public-entry.ts",
   "components/marketing/product-chain-band.tsx",
   "components/marketing/market-proof-band.tsx",
-  "components/marketing/player-card-showcase.tsx",
   "components/marketing/trust-band.tsx",
   "components/marketing/final-cta-band.tsx",
   // Window 6, 2026-09-06: the pure door registry the band renders from.

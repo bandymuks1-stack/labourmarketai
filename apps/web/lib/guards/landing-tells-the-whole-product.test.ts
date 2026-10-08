@@ -298,11 +298,12 @@ describe("§20 starting contexts are contexts, not identities", () => {
 describe("§19 the visitor reaches a way to start without a long scroll", () => {
   const focus = read("app/[locale]/focus-landing/focus-landing.tsx");
 
-  it("the doors come BEFORE the explanation, the chain and the sample card", () => {
+  it("the doors come BEFORE the explanation and the chain", () => {
     const i = (c: string) => focus.indexOf(`<${c}`);
     expect(i("StartingContextsBand")).toBeGreaterThan(0);
     expect(i("StartingContextsBand")).toBeLessThan(i("ProductChainBand"));
-    expect(i("StartingContextsBand")).toBeLessThan(i("PlayerCardShowcase"));
+    // The sample player-card showcase was removed from the landing (containment 2026-10-08).
+    expect(i("PlayerCardShowcase")).toBe(-1);
   });
 
   it("the market EVIDENCE comes before both, directly under the entry", () => {
@@ -323,18 +324,6 @@ describe("§19 the visitor reaches a way to start without a long scroll", () => 
     expect(i("MarketProofBand")).toBeLessThan(i("StartingContextsBand"));
     // And the withdrawn band must not quietly return without a decision.
     expect(i("PublicMarketMapBand")).toBe(-1);
-  });
-
-  it("the sample card no longer out-shouts the page's own headings", () => {
-    // Read the h2's OWN className, not the file: the comment beside it names
-    // the old scale, and a whole-file match would fail on the explanation of
-    // the very change it is checking for.
-    const showcase = read("components/marketing/player-card-showcase.tsx");
-    const h2 = showcase.match(/<h2 className="([^"]+)"/)?.[1];
-    expect(h2, "the showcase has no <h2> with a className").toBeTypeOf("string");
-    expect(h2, "the showcase heading is a second hero").not.toMatch(/sm:text-5xl/);
-    expect(h2).toMatch(/text-3xl/);
-    expect(h2).toMatch(/sm:text-4xl/);
   });
 });
 

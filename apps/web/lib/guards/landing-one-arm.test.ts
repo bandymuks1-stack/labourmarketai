@@ -114,7 +114,6 @@ describe("the landing has one arm", () => {
       "PublicEntry",
       "ProductChainBand",
       "MarketProofBand",
-      "PlayerCardShowcase",
       "TrustBand",
       "StartingContextsBand",
       "LandingOpenJobsBand",
@@ -135,7 +134,6 @@ describe("the landing has one arm", () => {
       "LandingOpenJobsBand",
       "StartingContextsBand",
       "ProductChainBand",
-      "PlayerCardShowcase",
       "TrustBand",
       "LandingClosingBand",
     ].map((c) => code(focus).search(new RegExp(`<${c}[\\s/>]`)));

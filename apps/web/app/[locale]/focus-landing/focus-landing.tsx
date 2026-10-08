@@ -10,7 +10,6 @@ import { SiteFooter } from "@/components/layouts/site-footer";
 import { SiteNav } from "@/components/layouts/site-nav";
 import { PublicEntry } from "@/components/marketing/public-entry";
 import { MarketProofBand } from "@/components/marketing/market-proof-band";
-import { PlayerCardShowcase } from "@/components/marketing/player-card-showcase";
 import { ProductChainBand } from "@/components/marketing/product-chain-band";
 import { TwoSidesSection } from "@/components/marketing/two-sides-section";
 import { TrustBand } from "@/components/marketing/trust-band";
@@ -277,12 +276,6 @@ export async function FocusLanding({
             <div id="how-it-works" className="scroll-mt-24">
               <ProductChainBand />
             </div>
-
-            {/* ── Player Card: the real card, the real component (§19 — kept
-                   in full, moved down). It is the densest thing on the page and
-                   it belongs after the explanation it illustrates, not before
-                   it. ─────────────────────────────────────────────────── */}
-            <PlayerCardShowcase />
 
             {/* ── Trust & security — verifiable claims only ─────────────── */}
             <TrustBand />

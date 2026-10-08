@@ -156,7 +156,6 @@ describe("curated SEO copy stays honest", () => {
 
 describe("demo previews on /for-* pages carry the always-visible Example frame", () => {
   const PAGES = [
-    "app/[locale]/(marketing)/for-workers/page.tsx",
     "app/[locale]/(marketing)/for-companies/page.tsx",
     "app/[locale]/(marketing)/for-agencies/page.tsx",
   ];

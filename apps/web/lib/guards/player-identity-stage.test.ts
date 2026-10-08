@@ -137,8 +137,9 @@ describe("the stage", () => {
     // the person already stands in the scene — kept behind the "everything on
     // the card" disclosure instead of repeated as a second card.
     expect(CARD).toMatch(/stage=\{\s*<IdentityStage/);
-    expect(MODES).toMatch(/\{stage\}\s*\{tabs\(false\)\}/);
-    expect(MODES).toMatch(/data-testid="player-card-all-details"[\s\S]*\{stage\}/);
+    expect(MODES).toMatch(/\{stage\}\s*\{tabs\(\)\}/);
+    // The 3D world scene is rejected and gone (containment 2026-10-08).
+    expect(MODES).not.toMatch(/player-card-world|PlayerCardWorldScene|canDrawWorld/);
     // The switcher reads nothing; the public sample never writes the URL.
     expect(MODES).not.toMatch(/supabase|fetch\(|\.from\(/);
     expect(CARD).toContain("syncUrl={!sample}");

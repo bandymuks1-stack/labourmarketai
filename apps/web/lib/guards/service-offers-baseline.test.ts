@@ -50,7 +50,6 @@ describe("Guard: cinematic baseline is preserved (no visual rebuild)", () => {
       "LivingWorkerHero",
       "MarketProofBand",
       "LandingOpenJobsBand",
-      "PlayerCardShowcase",
     ]) {
       expect(page, `landing must keep the cinematic baseline marker ${sym}`).toContain(
         sym,

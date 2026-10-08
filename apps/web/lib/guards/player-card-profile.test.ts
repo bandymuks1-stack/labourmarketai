@@ -84,12 +84,8 @@ describe("3. journal-derived skills show their evidence basis", () => {
 });
 
 describe("4. no fake verified labels", () => {
-  it("the showcase renders the CANONICAL card with a visible not-a-real-person line (owner audit §3.7)", () => {
-    const showcase = read("components/marketing/player-card-showcase.tsx");
-    // Landing = product: the SAME WorkerPlayerCard, never the FUT concept.
-    expect(showcase).toMatch(/WorkerPlayerCard/);
-    expect(showcase).not.toMatch(/<PlayerCard\b/);
-    expect(showcase).toMatch(/conceptNote/);
+  it("the public sample showcase is gone; the not-a-real-person copy stays in every locale for any labelled example", () => {
+    expect(() => read("components/marketing/player-card-showcase.tsx")).toThrow();
     for (const [locale, needle] of [
       ["en", "not a real person"],
       ["lt", "ne realus asmuo"],

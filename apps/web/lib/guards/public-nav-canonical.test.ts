@@ -208,13 +208,8 @@ describe("the landing player-card is the CANONICAL card (owner audit §3.7)", ()
   // Supersedes the FUT-card stat-legend contract: the acronym codes left the
   // landing together with the concept cards. The canonical WorkerPlayerCard
   // explains itself with full localized labels, so no legend is needed.
-  it("showcase renders WorkerPlayerCard, never the FUT concept card or its stat codes", () => {
-    const showcase = read("components/marketing/player-card-showcase.tsx");
-    expect(showcase).toMatch(/WorkerPlayerCard/);
-    expect(showcase).not.toContain("<PlayerCard ");
-    expect(showcase).not.toContain("STAT_KEYS");
-    // No universal human score / medal tiers anywhere near the landing card.
-    expect(showcase).not.toMatch(/gold|silver|bronze|\bOVR\b/i);
+  it("the landing no longer mounts a sample player-card showcase (containment 2026-10-08)", () => {
+    expect(() => read("components/marketing/player-card-showcase.tsx")).toThrow();
   });
 
   it("the stat-code legend died with the concept card in every active locale (S3)", () => {
