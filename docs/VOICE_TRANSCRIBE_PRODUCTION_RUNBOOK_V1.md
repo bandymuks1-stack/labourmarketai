@@ -1,5 +1,7 @@
 # Voice transcription: production runbook (V1, 2026-10-08)
 
+DEFERRED (owner decision 2026-10-08): production transcription is a later implementation stage. Do not deploy or purchase a service now, and do not treat the missing host as a current product failure. This runbook is kept for that later stage.
+
 Status: the voice journal's contract is built and tested (`docs/VOICE_DOOR_ADAPTER_V1.md`,
 `services/transcribe`). What is missing is an always-on HTTPS host. Without
 `VOICE_TRANSCRIBE_URL` + `VOICE_TRANSCRIBE_TOKEN` on Vercel Production the voice
