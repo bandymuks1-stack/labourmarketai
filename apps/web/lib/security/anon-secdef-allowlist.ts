@@ -133,6 +133,39 @@ export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
       "Discloses the size and freshness of the imported corpus and the number of distinct employers in it. Both are already stated publicly as market-coverage claims, and neither identifies an employer.",
   },
   {
+    name: "list_public_vacancy_country_counts_v1",
+    identityArgs: "",
+    mutates: false,
+    publicCaller:
+      "The public job board country selector (app/[locale]/(marketing)/jobs). Lists which countries currently hold live ads so Norway and Sweden can be told apart.",
+    authorization:
+      "Returns (ISO alpha-2 country, active count) rows read from the maintained public_vacancy_supply_counts_by_country table only - public_vacancies is not read. No vacancy row, employer or location is reachable.",
+    inputValidation: "No parameters, so there is no input surface.",
+    abuseControls:
+      "No DB-level rate limit. Read-only, constant cost, a handful of rows (one per country).",
+    definerJustification:
+      "The per-country table is deny-all RLS with no grants; DEFINER exposes only the aggregate.",
+    residualRisk:
+      "Discloses which countries have live ads and how many, <= 10 minutes stale - the same class of figure the landing counter already publishes.",
+  },
+  {
+    name: "search_public_vacancy_country_board_v1",
+    identityArgs: "p_country text, p_limit integer, p_offset integer",
+    mutates: false,
+    publicCaller:
+      "The public job board when a country is selected (app/[locale]/(marketing)/jobs?country=XX).",
+    authorization:
+      "Identical projection to search_public_vacancy_previews_v1 (title_raw and attribution_code NULL; no employer, region, city, coordinates, application URL or description) and the same live-row filter. The selected country is the only new fact an anonymous caller can learn per row.",
+    inputValidation:
+      "p_country is trimmed, upper-cased and must match ^[A-Z]{2}$ AND have a positive maintained count, otherwise no rows. p_limit is clamped to 1..50 and p_offset floored at 0.",
+    abuseControls:
+      "No DB-level rate limit. Read-only; page size hard-capped at 50. Measured: country page 0.16 ms (NO) / 6.4 ms (SE) on production.",
+    definerJustification:
+      "public_vacancies has no anon grant; DEFINER narrows access to the public projection instead of opening the table.",
+    residualRisk:
+      "Rows can be listed by country; the anonymous projection still withholds title, employer and location, so the country filter does not identify an employer or place.",
+  },
+  {
     name: "list_public_vacancy_sitemap_v1",
     identityArgs: "p_limit integer, p_offset integer",
     mutates: false,
