@@ -20,6 +20,7 @@ import {
   type OutgoingRequestRow,
   type OutgoingRequestSummary,
   type RequestMutateResult,
+  rpcOutcome,
   type RespondDecision,
   type ServiceRequestsNewCounts,
 } from "@/lib/marketplace/service-requests-shared";
@@ -257,8 +258,13 @@ export async function respondToRequest(
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "error", message: error.message ?? "unknown" };
   }
+  // The RPC reports a refusal as a returned status ('not_provider', 'not_found',
+  // 'not_pending', ...), not as an exception. Only 'ok' is a success - anything
+  // else must never be shown to the actor as a completed action.
+  const outcome = rpcOutcome(data);
+  if (outcome !== "ok") return { kind: "error", message: outcome };
   revalidatePath("/[locale]/dashboard/service-requests", "page");
-  return { kind: "ok", detail: typeof data === "string" ? data : undefined };
+  return { kind: "ok", detail: outcome };
 }
 
 /** Buyer withdraws their own pending request (via the RPC). */
@@ -274,8 +280,13 @@ export async function withdrawRequest(id: string): Promise<RequestMutateResult> 
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "error", message: error.message ?? "unknown" };
   }
+  // The RPC reports a refusal as a returned status ('not_provider', 'not_found',
+  // 'not_pending', ...), not as an exception. Only 'ok' is a success - anything
+  // else must never be shown to the actor as a completed action.
+  const outcome = rpcOutcome(data);
+  if (outcome !== "ok") return { kind: "error", message: outcome };
   revalidatePath("/[locale]/dashboard/service-requests", "page");
-  return { kind: "ok", detail: typeof data === "string" ? data : undefined };
+  return { kind: "ok", detail: outcome };
 }
 
 /**

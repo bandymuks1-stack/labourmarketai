@@ -2393,7 +2393,8 @@
       "accommodation_ok": "Indkvartering passer",
       "city_match": "[EN] Same city",
       "location_within_radius": "[EN] Within the work radius",
-      "profession_related": "[EN] Related profession (shared skills)"
+      "profession_related": "[EN] Related profession (shared skills)",
+      "skills_history_reported": "Kompetencer nævnt i organisationens historik (ikke verificeret)"
     },
     "gap": {
       "skills_missing": "Nogle krævede færdigheder mangler",
@@ -7165,7 +7166,20 @@
       "truncated": "Der er flere færdighedssignaler, end denne visning læser."
     },
     "shown": "Viser de nyeste {shown} af {total} poster. Resten forbliver registreret.",
-    "truncated": "Der findes flere poster, end én visning læser. De {count} læste vises; summer dækker kun dem."
+    "truncated": "Der findes flere poster, end én visning læser. De {count} læste vises; summer dækker kun dem.",
+    "profile": {
+      "title": "Levende profil fra denne organisations historik",
+      "subtitle": "Opbygget af de poster, din organisation har leveret, før der findes en konto. Meldt af organisationen, ikke uafhængigt verificeret. Hvis personen senere overtager en konto, knyttes den uden at ændre denne historik.",
+      "unavailable": "Arbejdsbilledet kunne ikke læses lige nu. Det betyder ikke, at der ikke er noget arbejde.",
+      "fit": {
+        "title": "Match med dine åbne behov",
+        "note": "Beregnet internt i din organisation ud fra de kompetencer, historikken nævner. Meldt af organisationen, ikke verificeret. Intet af dette vises for andre organisationer.",
+        "noSignals": "Historikken nævner endnu ingen kompetence fra kataloget og kan derfor ikke matches. Det er ukendt, ikke et dårligt match.",
+        "none": "Ingen af dine åbne behov berøres af de kompetencer, historikken nævner.",
+        "unavailable": "Matchet kunne ikke beregnes lige nu. Det betyder ikke, at der ikke er et.",
+        "row": "{matched} af {total} krævede kompetencer nævnt i denne historik"
+      }
+    }
   },
   "recognisedBy": {
     "title": "Anerkendt af en institution",

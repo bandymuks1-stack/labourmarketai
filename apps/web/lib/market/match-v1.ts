@@ -255,12 +255,19 @@ export interface MatchSubject {
    * person names (`organization_evidence_competency_signals`, linked worker,
    * live records only), as `{ uri: canonical skill slug, records }`.
    *
-   * A labelled SIGNAL, provenance `organization_provided`: evidence that work
-   * was described that way (SEP-3 - EVIDENCE != VERIFICATION). It is NEVER a
-   * declared or verified skill, never added to `skills`, never an input to
-   * status, coverage, evidence confidence or ordering. It is only COUNTED
-   * beside the evidence ladder (`evidence.matchedHistorySignal`) for skills
-   * the person already holds and the need already requires.
+   * A labelled SIGNAL, evidence class ORGANIZATION_REPORTED, provenance
+   * `organization_provided`: evidence that work was described that way
+   * (SEP-3 - EVIDENCE != VERIFICATION). It is NEVER a declared or verified
+   * skill and is never added to `skills`.
+   *
+   * OWNER DECISION (2026-10-07, B): supported historical skill signals DO
+   * contribute to matching. A required skill the person did not declare but
+   * the organization's history names counts toward skill fit as its OWN
+   * class (`evidence.matchedOrganizationReported`) - never as self-declared,
+   * journal-supported or manager-confirmed, and never lifting
+   * `evidenceConfidence` above "unverified". For a skill the person also
+   * declares, the signal stays a labelled count beside the ladder
+   * (`evidence.matchedHistorySignal`).
    *
    * null / undefined = unknown (no linked history, or the read was
    * unavailable) - NEVER "the history says nothing". A worker without history
@@ -306,6 +313,10 @@ export type MatchReason =
   | { readonly code: "skill_fit"; readonly matched: number; readonly total: number; readonly confirmed: number }
   | { readonly code: "skills_journal_supported"; readonly count: number }
   | { readonly code: "skills_manager_confirmed"; readonly count: number }
+  /** Required skills held ONLY through an organization's history of the
+   *  person (class ORGANIZATION_REPORTED). Its own code and label so it can
+   *  never read as a declared, journal-supported or confirmed skill. */
+  | { readonly code: "skills_history_reported"; readonly count: number }
   /** Completed PRACTICE placements (student / volunteer). Its own code, with
    *  its own localized label, so it can never be read as employment. */
   | { readonly code: "practice_experience"; readonly count: number }
@@ -377,6 +388,11 @@ export interface MatchResultV1 {
      *  beside the ladder - not a tier, not verification, not an input to
      *  status or ordering. Absent = unknown, never zero. */
     readonly matchedHistorySignal?: number;
+    /** Matched skills the person holds ONLY through organization history
+     *  (class ORGANIZATION_REPORTED): not self-declared, not verified. They
+     *  count toward `skillFit` but in no tier above. Absent = no history
+     *  signals known, never zero. */
+    readonly matchedOrganizationReported?: number;
   };
   /**
    * Verification truth over the MATCHED skills, separate from `status` by
@@ -513,6 +529,16 @@ export function matchWorkerToNeed(
     uri: s.uri,
     verified: s.evidence === "manager_confirmed",
   }));
+  // History-only skills (owner decision 2026-10-07 B): a skill the
+  // organization's history names and the person did not declare is held as
+  // ORGANIZATION_REPORTED - never `verified`, never a declared tier.
+  const declaredUris = new Set(subject.skills.map((s) => s.uri));
+  const historyOnlyUris = new Set(
+    (subject.historySignals ?? [])
+      .filter((h) => h.records > 0 && !declaredUris.has(h.uri))
+      .map((h) => h.uri),
+  );
+  for (const uri of historyOnlyUris) fitSubject.push({ uri, verified: false });
   const skillFit = computeContextFit(needSkillIds, fitSubject);
 
   // Unstructured need ⇒ no percentage exists, ever (§19). Cannot match.
@@ -567,6 +593,7 @@ export function matchWorkerToNeed(
     ? new Set(subject.historySignals.filter((h) => h.records > 0).map((h) => h.uri))
     : null;
   let matchedHistorySignal = 0;
+  let matchedOrganizationReported = 0;
 
   let matchedManagerConfirmed = 0;
   let matchedJournalSupported = 0;
@@ -577,6 +604,10 @@ export function matchWorkerToNeed(
     if (work !== "none") matchedConfirmedWork += 1;
     if (historyUris?.has(uri)) matchedHistorySignal += 1;
     if (work === "repeated_confirmed") matchedRepeatedConfirmed += 1;
+    if (historyOnlyUris.has(uri)) {
+      matchedOrganizationReported += 1;
+      continue;
+    }
     if (tier === "manager_confirmed") matchedManagerConfirmed += 1;
     else if (tier === "work_journal") matchedJournalSupported += 1;
     else matchedSelfDeclared += 1;
@@ -589,11 +620,11 @@ export function matchWorkerToNeed(
       ? null
       : matchedManagerConfirmed === matchedCount
         ? "confirmed"
-        : matchedSelfDeclared === matchedCount
+        : matchedSelfDeclared + matchedOrganizationReported === matchedCount
           ? "unverified"
           : "mixed";
 
-  if (subject.skills.length === 0) {
+  if (subject.skills.length === 0 && historyOnlyUris.size === 0) {
     missingData.push("no_subject_skills");
     missingFacts.push({
       criterion: "skills_coverage",
@@ -621,6 +652,8 @@ export function matchWorkerToNeed(
     reasons.push({ code: "skills_manager_confirmed", count: matchedManagerConfirmed });
   if (matchedJournalSupported > 0)
     reasons.push({ code: "skills_journal_supported", count: matchedJournalSupported });
+  if (matchedOrganizationReported > 0)
+    reasons.push({ code: "skills_history_reported", count: matchedOrganizationReported });
   if (matchedManagerConfirmed + matchedJournalSupported > 0) {
     strengths.push({
       criterion: "evidence_tiers",
@@ -1552,7 +1585,7 @@ export function matchWorkerToNeed(
     skillFit.needTotal > 0 ? skillFit.matchedTotal / skillFit.needTotal : 0;
   let status: MatchStatus;
   if (skillFit.matchedTotal === 0) {
-    status = subject.skills.length === 0 ? "insufficient_data" : "weak";
+    status = subject.skills.length === 0 && historyOnlyUris.size === 0 ? "insufficient_data" : "weak";
   } else if (rawCoverage >= 0.8) status = "strong";
   else if (rawCoverage >= 0.5) status = "possible";
   else status = "weak";
@@ -1594,7 +1627,7 @@ export function matchWorkerToNeed(
       matchedSelfDeclared,
       matchedConfirmedWork,
       matchedRepeatedConfirmed,
-      ...(historyUris ? { matchedHistorySignal } : {}),
+      ...(historyUris ? { matchedHistorySignal, matchedOrganizationReported } : {}),
     },
     evidenceConfidence,
     reasons,

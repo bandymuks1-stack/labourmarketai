@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { SemanticIcon } from "@/components/app/semantic-icon";
 import { PersonImportedHistory } from "@/components/app/people/person-imported-history";
 import { PersonHistorySummaryBlock } from "@/components/app/organization/person-history-summary";
+import { HistoricalPersonProfileBlock } from "@/components/app/organization/historical-person-profile";
 import { loadCompanyPerson } from "@/lib/organization-evidence/company-person-read";
 
 export const dynamic = "force-dynamic";
@@ -129,6 +130,13 @@ export default async function CompanyPersonHistoryPage({
       ) : null}
 
       <PersonHistorySummaryBlock summary={load.summary} signals={load.signals} locale={locale} />
+
+      {/* THE LIVING PROFILE - Work Intelligence, the Living CV's organization
+          history and the fit to this organization's own needs, built from the
+          same history before any claim (decision 0020). */}
+      {load.profile ? (
+        <HistoricalPersonProfileBlock profile={load.profile} locale={locale} personId={person.id} />
+      ) : null}
 
       <PersonImportedHistory
         records={{ list: load.records, truncated: false }}

@@ -16,3 +16,11 @@ Organization-provided historical people and their professional history must exis
 ## Where it is realized
 
 `/dashboard/company/people/[personId]` (surface registry A-14 declaration), `lib/organization-evidence/company-person-read.ts`, `evidence-pagination.ts`.
+
+## Realization 2026-10-08 - Living CV, Work Intelligence and matching before claim
+
+Owner decisions (A) and (B), same session:
+
+- **Profile before claim.** `readEvidenceRecordsForPeople` is the single read behind both the roster-person key (`readEvidenceRecordsForOrganizationPerson`) and the linked-worker key (`readEvidenceRecordsForWorker`), so Work Intelligence and the Living CV organization-history group are identical before and after a claim. The company person card renders them (`HistoricalPersonProfileBlock`). Work Intelligence no longer says "no recorded work" when the only recorded work is the organization's ledger.
+- **Matching.** Skills an organization's history names count toward skill fit as their own class (`matchedOrganizationReported`, reason `skills_history_reported`): never self-declared, journal-supported or confirmed; `evidenceConfidence` never rises above "unverified". The supplying organization matches its own roster people against its own needs (`roster-person-fit-read.ts`) - internal computation only: no consent gate, no cross-organization disclosure. The disclosure boundary stays a separate, unresolved decision.
+- No migration: every read is an existing RLS-governed table read.
