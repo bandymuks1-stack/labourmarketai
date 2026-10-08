@@ -178,22 +178,99 @@ export function encodeContinuationTokenCursor(token: string): string | null {
 
 /** The continuation token a stored checkpoint carries, or null when the value
  *  is absent, is a timestamp, is an offset, or is malformed. Null means
- *  "walk from the head of the feed" — the cold start a feed is designed for. */
+ *  "walk from the head of the feed" — the cold start a feed is designed for.
+ *  A MID-PAGE checkpoint (`<token>#<n>`) still yields its token, so an older
+ *  reader never mistakes it for a fresh cold start. */
 export function decodeContinuationTokenCursor(
   cursor: string | null,
 ): string | null {
-  if (typeof cursor !== "string") return null;
+  return decodeContinuationCheckpoint(cursor).token;
+}
+
+/**
+ * A continuation-token checkpoint that may sit INSIDE a page.
+ *
+ * A session with a request budget (NAV: `maxDetailFetchesPerSession`) can run
+ * out part-way through a page. The page's own token cannot say "from entry
+ * 120", so the position travels in the same opaque value:
+ *
+ *   continuation-token:<token>             whole page not yet started (legacy)
+ *   continuation-token:<token>#<n>         first <n> entries of <token>'s page consumed
+ *   continuation-token:#<n>@<epochSeconds> the HEAD page (no token), <n> consumed,
+ *                                          cold-start anchor <epochSeconds>
+ *
+ * The anchor exists because the head page is requested with an
+ * `If-Modified-Since` computed from the capture instant; resuming it with a new
+ * instant would shift the page under the stored position. `n` only ever counts
+ * entries READ, so a wrong value costs a re-read, never a skipped ad — and a
+ * reader that finds fewer entries than `n` re-reads the page from the start.
+ */
+export interface ContinuationCheckpoint {
+  /** null = the head of the feed (cold start). */
+  readonly token: string | null;
+  /** Entries of this page already consumed. 0 = none. */
+  readonly skipEntries: number;
+  /** Head page only: the cold-start instant (ISO) the position refers to. */
+  readonly coldStartAtIso: string | null;
+}
+
+const NO_CHECKPOINT: ContinuationCheckpoint = {
+  token: null,
+  skipEntries: 0,
+  coldStartAtIso: null,
+};
+
+/** Largest in-page position stored. A page is far smaller; this only bounds a
+ *  corrupted value. */
+const CONTINUATION_SKIP_MAX = 1_000_000;
+
+export function encodeContinuationCheckpoint(
+  cp: ContinuationCheckpoint,
+): string | null {
+  const skip = Math.floor(cp.skipEntries);
+  if (!Number.isFinite(skip) || skip < 0 || skip > CONTINUATION_SKIP_MAX) {
+    return null;
+  }
+  if (cp.token !== null) {
+    const base = encodeContinuationTokenCursor(cp.token);
+    if (base === null) return null;
+    return skip > 0 ? `${base}#${skip}` : base;
+  }
+  // Head page: only meaningful mid-page, and only with its anchor.
+  if (skip === 0 || cp.coldStartAtIso === null) return null;
+  const at = Date.parse(cp.coldStartAtIso);
+  if (!Number.isFinite(at)) return null;
+  return `${VACANCY_CONTINUATION_TOKEN_PREFIX}#${skip}@${Math.floor(at / 1000)}`;
+}
+
+export function decodeContinuationCheckpoint(
+  cursor: string | null,
+): ContinuationCheckpoint {
+  if (typeof cursor !== "string") return NO_CHECKPOINT;
   const trimmed = cursor.trim();
-  if (!trimmed.startsWith(VACANCY_CONTINUATION_TOKEN_PREFIX)) return null;
-  const raw = trimmed.slice(VACANCY_CONTINUATION_TOKEN_PREFIX.length);
+  if (!trimmed.startsWith(VACANCY_CONTINUATION_TOKEN_PREFIX)) {
+    return NO_CHECKPOINT;
+  }
+  const body = trimmed.slice(VACANCY_CONTINUATION_TOKEN_PREFIX.length);
+  const m = /^([^#@]*)(?:#(\d{1,7}))?(?:@(\d{1,12}))?$/.exec(body);
+  if (m === null) return NO_CHECKPOINT;
+  const raw = m[1];
+  const skip = m[2] === undefined ? 0 : Number(m[2]);
+  if (skip > CONTINUATION_SKIP_MAX) return NO_CHECKPOINT;
+  if (raw.length === 0) {
+    // Head-page position: needs both a position and an anchor, else cold.
+    if (skip === 0 || m[3] === undefined) return NO_CHECKPOINT;
+    const iso = new Date(Number(m[3]) * 1000).toISOString();
+    return { token: null, skipEntries: skip, coldStartAtIso: iso };
+  }
+  if (m[3] !== undefined) return NO_CHECKPOINT; // an anchor belongs to the head only
   if (
-    raw.length === 0 ||
     raw.length > VACANCY_CONTINUATION_TOKEN_MAX_CHARS ||
     !CONTINUATION_TOKEN_SHAPE.test(raw)
   ) {
-    return null;
+    return NO_CHECKPOINT;
   }
-  return raw;
+  return { token: raw, skipEntries: skip, coldStartAtIso: null };
 }
 
 /**

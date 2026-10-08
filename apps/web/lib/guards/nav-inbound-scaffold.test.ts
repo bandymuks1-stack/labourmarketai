@@ -341,7 +341,7 @@ describe("(3) a cursor channel walks by continuation token and checkpoints on it
     expect(readContinuationToken([], ["next_id"])).toBeNull();
   });
 
-  it("dry run: walks page → page by path token, fans out to each ad, stops at the head", async () => {
+  it("dry run: walks page → page by path token (two per session), fans out to each ad, resumes to the head", async () => {
     enableNav(true);
     const impl = stubFeed(
       {
@@ -371,28 +371,39 @@ describe("(3) a cursor channel walks by continuation token and checkpoints on it
       cursor: null,
     });
 
-    expect(pageTokens(impl)).toEqual(["", "token-page-2", "token-page-3"]);
+    // NAV's request budget caps a session at TWO listing pages (was five): the
+    // third page is left for the next session, with the checkpoint on it.
+    expect(pageTokens(impl)).toEqual(["", "token-page-2"]);
     const detailUrls = impl.mock.calls
       .map((c) => new URL(String(c[0])).pathname)
       .filter((p) => p.startsWith("/api/v1/feedentry/"));
     // INACTIVE entries are never fetched: they become withdrawals directly.
-    expect(detailUrls).toEqual([
-      "/api/v1/feedentry/nav-1",
-      "/api/v1/feedentry/nav-2",
-      "/api/v1/feedentry/nav-3",
-    ]);
-    expect(result.metrics.pagesRequested).toBe(3);
-    expect(result.metrics.itemsParsed).toBe(4);
-    // Governance is confirmed: the live ads are accepted. The INACTIVE entry
-    // withdraws an ad we do not hold, which is nothing to remove.
+    expect(detailUrls).toEqual(["/api/v1/feedentry/nav-1", "/api/v1/feedentry/nav-2"]);
+    expect(result.metrics.pagesRequested).toBe(2);
+    expect(result.metrics.itemsParsed).toBe(3);
     expect(result.activated).toBe(true);
-    expect(result.acceptedVacancies.map((v) => v.externalId).sort()).toEqual([
-      "nav-1",
-      "nav-2",
-      "nav-3",
-    ]);
     expect(result.nextCursor).toBe("continuation-token:token-page-3");
-    expect(result.caughtUp).toBe(true);
+    expect(result.caughtUp).toBe(false);
+
+    // The next session resumes at the checkpoint and reaches the head.
+    const second = await runVacancyImport({
+      provider: NAV,
+      channel: "stream",
+      mode: "dry_run",
+      sessionId: "s1-next",
+      startedAtIso: NOW,
+      finishedAtIso: NOW,
+      capturedAt: NOW,
+      apiKey: TOKEN,
+      cursor: result.nextCursor,
+    });
+    expect(second.acceptedVacancies.map((v) => v.externalId)).toEqual(["nav-3"]);
+    expect(second.caughtUp).toBe(true);
+    // Together the two sessions read every ad exactly once. The INACTIVE entry
+    // withdraws an ad we do not hold, which is nothing to remove.
+    expect(
+      [...result.acceptedVacancies, ...second.acceptedVacancies].map((v) => v.externalId).sort(),
+    ).toEqual(["nav-1", "nav-2", "nav-3"]);
   });
 
   it("the cold start sends If-Modified-Since on the head page", async () => {

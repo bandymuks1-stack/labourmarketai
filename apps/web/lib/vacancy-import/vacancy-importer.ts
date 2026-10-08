@@ -54,7 +54,8 @@ import {
 import {
   computeNextVacancyCursor,
   cursorRequestBound,
-  decodeContinuationTokenCursor,
+  decodeContinuationCheckpoint,
+  encodeContinuationCheckpoint,
   decodeRecordOffsetCursor,
   encodeContinuationTokenCursor,
   encodeRecordOffsetCursor,
@@ -320,11 +321,23 @@ export async function runVacancyImport(
   // names no successor is the head of the feed: the walk is drained, and the
   // checkpoint stays on THAT page so the next poll re-reads it (dedup collapses
   // the overlap — the same reasoning as the 1 s timestamp overlap).
-  let continuationToken: string | null = tokenWalk
-    ? decodeContinuationTokenCursor(req.cursor ?? null)
+  const storedCheckpoint = tokenWalk
+    ? decodeContinuationCheckpoint(req.cursor ?? null)
     : null;
+  let continuationToken: string | null = storedCheckpoint?.token ?? null;
+  /** Entries of the CURRENT page a previous session already consumed. */
+  let pageSkip = storedCheckpoint?.skipEntries ?? 0;
+  /** The cold-start instant the head page's position refers to. */
+  const coldStartAnchorIso =
+    storedCheckpoint?.coldStartAtIso ?? req.capturedAt;
   /** The token of the first page NOT yet consumed — the honest checkpoint. */
   let lastContinuationToken: string | null = null;
+  /** Set when a session stops INSIDE a page: the exact checkpoint to store. */
+  let midPageCheckpoint: string | null = null;
+  /** Per-session detail-request budget of a two-level feed (null = none). */
+  const sessionDetailBudget =
+    (endpoint?.detailFanOut?.maxDetailFetchesPerSession ?? null);
+  let detailBudgetLeft: number | null = sessionDetailBudget;
   /** True only when a page named no successor — the head was reached. */
   let tokenWalkDrained: boolean | null = null;
 
@@ -464,6 +477,12 @@ export async function runVacancyImport(
     let offset = Number(req.query?.offset ?? 0);
 
     for (let page = 0; page < maxPages; page += 1) {
+      // A spent budget ends the session BEFORE another listing request: the
+      // checkpoint already names where to resume.
+      if (detailBudgetLeft !== null && detailBudgetLeft <= 0) {
+        log("warn", "detail_budget_exhausted", String(page));
+        break;
+      }
       const query: Record<string, string | number> = { ...(req.query ?? {}) };
       if (endpoint.pagination === "offset_limit") {
         query.offset = offset;
@@ -498,7 +517,10 @@ export async function runVacancyImport(
         // capture instant only starts a cold walk at a time (both are no-ops
         // for every endpoint that declares neither).
         continuationToken: tokenConfig !== null ? continuationToken : null,
-        coldStartAtIso: tokenConfig !== null ? req.capturedAt : null,
+        coldStartAtIso: tokenConfig !== null ? coldStartAnchorIso : null,
+        ...(detailBudgetLeft !== null
+          ? { detailBudget: detailBudgetLeft, skipEntries: pageSkip }
+          : {}),
       });
 
       if (!fetched.ok) {
@@ -537,6 +559,25 @@ export async function runVacancyImport(
 
       log("info", "page_done", String(batch.outcomes.length));
 
+      if (tokenConfig !== null && fetched.fanOut) {
+        if (detailBudgetLeft !== null) {
+          detailBudgetLeft = Math.max(0, detailBudgetLeft - fetched.fanOut.detailFetched);
+        }
+        if (!fetched.fanOut.pageComplete) {
+          // The budget stopped the page part-way. The checkpoint stays ON this
+          // page, at the first entry not consumed; the next session re-reads
+          // the listing and resumes there. The walk is NOT drained.
+          midPageCheckpoint = encodeContinuationCheckpoint({
+            token: continuationToken,
+            skipEntries: fetched.fanOut.consumedEntries,
+            coldStartAtIso: coldStartAnchorIso,
+          });
+          log("warn", "detail_budget_exhausted_mid_page", String(fetched.fanOut.consumedEntries));
+          break;
+        }
+        pageSkip = 0;
+      }
+
       if (tokenConfig !== null) {
         // This page is fully consumed. If it names a successor, that
         // successor is the honest checkpoint: the first page not yet read.
@@ -548,6 +589,17 @@ export async function runVacancyImport(
         );
         if (next === null || next === continuationToken) {
           tokenWalkDrained = true;
+          // The head page is a growing log: remember how much of it is read
+          // so the next poll costs one listing request plus only the NEW
+          // entries, not the whole page again. A reader that finds the page
+          // shorter than this position re-reads it from the start.
+          if (fetched.fanOut) {
+            midPageCheckpoint = encodeContinuationCheckpoint({
+              token: continuationToken,
+              skipEntries: fetched.fanOut.consumedEntries,
+              coldStartAtIso: coldStartAnchorIso,
+            });
+          }
           log("info", "cursor_walk_drained", String(page + 1));
           break;
         }
@@ -800,11 +852,13 @@ export async function runVacancyImport(
         ? encodeRecordOffsetCursor(streamNextOffset)
         : (req.cursor ?? null)
       : tokenWalk
-        ? lastContinuationToken !== null
-          ? (encodeContinuationTokenCursor(lastContinuationToken) ??
-            req.cursor ??
-            null)
-          : (req.cursor ?? null)
+        ? midPageCheckpoint !== null
+          ? midPageCheckpoint
+          : lastContinuationToken !== null
+            ? (encodeContinuationTokenCursor(lastContinuationToken) ??
+              req.cursor ??
+              null)
+            : (req.cursor ?? null)
         : windowPlan !== null
           ? (lastCompletedWindowEnd ?? req.cursor ?? null)
           : computeNextVacancyCursor(req.cursor ?? null, parsed),

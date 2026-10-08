@@ -21,6 +21,12 @@
 # run resumes where the last stopped; the first runs walk the bounded cold-start
 # window forward, later runs poll the head. contactList is never read.
 # Kill switch: unset/false VACANCY_SCHEDULE_ENABLED or VACANCY_SOURCE_NAV_ENABLED.
+#
+# REQUEST BUDGET: each run is bounded by the NAV descriptor in
+# apps/web/lib/vacancy-sources/vacancy-provider-registry.ts (2 listing pages,
+# 100 detail requests, 2 in flight, >= 500 ms between requests; worst case
+# pinned by apps/web/lib/vacancy-sources/nav-request-budget.test.ts). A cold
+# start therefore drains over several runs, checkpointing inside the page.
 name: nav-supply-cadence
 
 on:

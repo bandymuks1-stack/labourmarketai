@@ -98,6 +98,14 @@ export interface VacancyFetchRequestV1 {
    * caller's clock, never read here.
    */
   readonly coldStartAtIso?: string | null;
+  /**
+   * Two-level feeds only: most detail requests this page may spend (the
+   * session's REMAINING budget). Absent = the descriptor's per-page cap only.
+   */
+  readonly detailBudget?: number;
+  /** Two-level feeds only: leading entries of this page a previous session
+   *  already consumed (see `expandDetailFanOut`). */
+  readonly skipEntries?: number;
 }
 
 /** A continuation token that may be placed in a path: one identifier segment. */
@@ -111,6 +119,15 @@ export type VacancyFetchResult =
       readonly responseSha256: string;
       readonly byteLength: number;
       readonly body: unknown;
+      /** Present only for a two-level feed: how far into the page this fetch
+       *  got. `consumedEntries` counts the `skipEntries` prefix; `pageComplete`
+       *  is false when the session's detail budget stopped the page early. */
+      readonly fanOut?: {
+        readonly consumedEntries: number;
+        readonly pageComplete: boolean;
+        readonly detailFetched: number;
+        readonly detailRequestsSpent: number;
+      };
     }
   | {
       readonly ok: false;
@@ -175,6 +192,22 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/**
+ * Request spacing for a host whose descriptor declares `minRequestSpacingMs`.
+ * Process-wide per host: slots are RESERVED synchronously, so concurrent
+ * workers queue behind one another instead of bursting. Tests replace
+ * `vacancyPacing.sleep` so they do not wait in real time.
+ */
+export const vacancyPacing = { sleep };
+const nextRequestSlotByHost = new Map<string, number>();
+async function paceRequest(host: string, spacingMs: number | undefined): Promise<void> {
+  if (typeof spacingMs !== "number" || !(spacingMs > 0)) return;
+  const now = Date.now();
+  const slot = Math.max(now, nextRequestSlotByHost.get(host) ?? 0);
+  nextRequestSlotByHost.set(host, slot + spacingMs);
+  if (slot > now) await vacancyPacing.sleep(slot - now);
+}
+
 /** Largest single ad accepted from a two-level feed's detail endpoint. */
 const MAX_DETAIL_BYTES = 1024 * 1024;
 
@@ -187,11 +220,15 @@ async function fetchDetailJson(
   url: string,
   headers: Readonly<Record<string, string>>,
   bounds: ReturnType<typeof resolveProviderBounds>,
+  pace: () => Promise<void>,
+  onRequest: () => void,
 ): Promise<DetailFetchResult> {
   const attempts = bounds.maxRetries + 1;
   let detail = "no_attempt";
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     if (attempt > 0) await sleep(bounds.retryBackoffMs * attempt);
+    await pace();
+    onRequest();
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), bounds.requestTimeoutMs);
     try {
@@ -273,8 +310,10 @@ export async function fetchVacancyPage(
     }
   }
 
+  const spacingMs = endpoint.detailFanOut?.minRequestSpacingMs;
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     if (attempt > 0) await sleep(bounds.retryBackoffMs * attempt);
+    await paceRequest(endpoint.host, spacingMs);
 
     const controller = new AbortController();
     const timer = setTimeout(
@@ -348,15 +387,42 @@ export async function fetchVacancyPage(
       // the pure parser sees it. Any detail failure fails the WHOLE page, so
       // the cursor can never move past an ad that was not read.
       if (endpoint.detailFanOut) {
+        let detailRequestsSpent = 0;
         const expanded = await expandDetailFanOut({
           endpoint,
           body,
-          fetchDetail: (url) => fetchDetailJson(url, headers, bounds),
+          detailBudget: req.detailBudget,
+          skipEntries: req.skipEntries,
+          fetchDetail: (url) =>
+            fetchDetailJson(
+              url,
+              headers,
+              bounds,
+              () => paceRequest(endpoint.host, spacingMs),
+              () => {
+                detailRequestsSpent += 1;
+              },
+            ),
         });
         if (!expanded.ok) {
           return { ok: false, requestRef, errorCode: "detail_fetch_failed", detail: expanded.detail };
         }
-        return { ok: true, requestRef, httpStatus: res.status, responseSha256, byteLength, body: expanded.body };
+        return {
+          ok: true,
+          requestRef,
+          httpStatus: res.status,
+          responseSha256,
+          byteLength,
+          body: expanded.body,
+          fanOut: {
+            consumedEntries: expanded.consumedEntries,
+            pageComplete: expanded.pageComplete,
+            // Live entries resolved (fetched, or 404/410 -> withdrawal): what the
+            // session budget pays for.
+            detailFetched: expanded.stats.detailFetched + expanded.stats.goneAsWithdrawn,
+            detailRequestsSpent,
+          },
+        };
       }
 
       return {
