@@ -84,6 +84,44 @@ jobs:
         if: steps.gate.outputs.configuration_gated == 'false'
         run: pnpm install --frozen-lockfile
 
+      - name: NAV token SHAPE (fingerprint and metadata only; never the value)
+        if: steps.gate.outputs.configuration_gated == 'false'
+        env:
+          NAV_TOKEN_UNDER_TEST: ${{ secrets.VACANCY_SOURCE_NAV_API_TOKEN }}
+        run: |
+          node -e '
+            const crypto = require("node:crypto");
+            const raw = process.env.NAV_TOKEN_UNDER_TEST ?? "";
+            const fp = (s) => crypto.createHash("sha256").update(s, "utf8").digest("hex").slice(0, 12);
+            const trimmed = raw.trim().replace(/^["\x27]|["\x27]$/g, "");
+            const norm = trimmed.replace(/^Bearer\s+/i, "");
+            const seg = norm.split(".");
+            let claims = null;
+            try {
+              const p = JSON.parse(Buffer.from(seg[1].replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8"));
+              claims = {
+                claimKeys: Object.keys(p).sort(),
+                iat: typeof p.iat === "number" ? new Date(p.iat * 1000).toISOString() : null,
+                exp: typeof p.exp === "number" ? new Date(p.exp * 1000).toISOString() : null,
+              };
+            } catch (_) { claims = null; }
+            console.log(JSON.stringify({
+              present: raw.length > 0,
+              rawFingerprint12: raw.length ? fp(raw) : null,
+              normalisedFingerprint12: norm.length ? fp(norm) : null,
+              expectedFingerprint12: "5d3a2cc1a85a",
+              rawEqualsNormalised: raw === norm,
+              hasOuterWhitespace: raw !== raw.trim(),
+              hasCarriageReturnOrNewline: /[\r\n]/.test(raw),
+              hasQuotes: /["\x27]/.test(raw),
+              hasBearerPrefix: /^\s*Bearer\s/i.test(raw),
+              lengthBucket: raw.length === 0 ? "0" : raw.length < 100 ? "<100" : raw.length < 400 ? "100-399" : raw.length < 1200 ? "400-1199" : ">=1200",
+              jwtSegments: seg.length,
+              claims,
+              nowIso: new Date().toISOString(),
+            }, null, 2));
+          '
+
       - name: Bounded NAV stream session (canonical operator runner)
         if: steps.gate.outputs.configuration_gated == 'false'
         working-directory: apps/web
