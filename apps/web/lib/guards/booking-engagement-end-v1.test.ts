@@ -1614,6 +1614,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261008090000_chain_proof_unshare_withdraws_offers_v1.sql",
       // 2026-10-08 (R-5, owner-approved in chat, RED): manager approval raises skill confidence - one SECURITY DEFINER function + GRANT; marker is the human-gate acknowledgement.
       "20261008120000_manager_approval_skill_confidence_v1.sql",
+      // 2026-10-08 (RED by GRANT, needs-human-gate): SELECT to authenticated on five RLS tables whose policies were unreachable - marker is the human-gate acknowledgement.
+      "20261008210000_rls_tables_missing_select_grant_v1.sql",
 ]);
   });
 
