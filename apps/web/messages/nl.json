@@ -18651,5 +18651,12 @@
     "stateNotYetValid": "Erkend, nog niet geldig",
     "validFrom": "vanaf {date}",
     "validUntil": "tot {date}"
+  },
+  "recognisedBy": {
+    "title": "Erkend door een instelling",
+    "recognisedBy": "Erkend door {institution}",
+    "recognisedByUnnamed": "Erkend door een beoordelende instelling",
+    "validUntil": "geldig tot {date}",
+    "note": "Een onafhankelijke beoordelaar heeft besloten dat je getoonde werk hieraan voldoet. Dit is geen bevestiging door een werkgever en geen score."
   }
 }

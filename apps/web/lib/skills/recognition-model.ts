@@ -13,8 +13,8 @@
  * This module names the five, says which evidence can move a person between
  * them, and says WHO may say so. It is PURE — no IO, no clock (the caller
  * passes `today`) — and it writes nothing: the recognition RECORD is a
- * separate, owner-gated relation (`competency_recognitions_v1`, prepared and
- * unapplied). Everything here can be exercised today against the evidence
+ * separate relation (`competency_recognitions`, APPLIED on production via
+ * #2184). Everything here can be exercised today against the evidence
  * that already exists, and nothing here can produce a recognition without
  * an assessor.
  *
@@ -210,9 +210,8 @@ export function deriveRecognitionStanding(input: StandingInput): StandingResult 
 /**
  * A recognition record together with WHAT it answers. The record type above
  * is the decision; this is the decision plus the requirement it was made
- * against, as the gated relation (`competency_recognitions`, prepared and
- * unapplied) carries it. The relation does not exist on production yet, so
- * today the only honest list of these is the empty one.
+ * against, as `competency_recognitions` (applied on production, #2184)
+ * carries it. A person with no assessor decision has the empty list.
  */
 export interface RecognitionRow extends RecognitionRecord {
   readonly requirementKind: RequirementTarget["kind"];

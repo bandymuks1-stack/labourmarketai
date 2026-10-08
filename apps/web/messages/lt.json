@@ -18651,5 +18651,12 @@
     "stateNotYetValid": "Pripažinta, dar negalioja",
     "validFrom": "nuo {date}",
     "validUntil": "iki {date}"
+  },
+  "recognisedBy": {
+    "title": "Institucijos pripažinta",
+    "recognisedBy": "Pripažino {institution}",
+    "recognisedByUnnamed": "Pripažino vertinanti institucija",
+    "validUntil": "galioja iki {date}",
+    "note": "Nepriklausomas vertintojas nusprendė, kad jūsų parodytas darbas atitinka šį reikalavimą. Tai nėra darbdavio patvirtinimas ir ne įvertis."
   }
 }
