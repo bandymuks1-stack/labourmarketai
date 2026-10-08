@@ -1486,37 +1486,67 @@ end $$;
 -- ============================================================================
 -- 15. Grants (explicit; anon + PUBLIC revoked on EVERY new function)
 -- ============================================================================
-do $$
-declare r record;
-begin
-  for r in
-    select p.oid::regprocedure as sig, p.proname
-      from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-     where n.nspname = 'public' and p.proname in (
-       'invoice_issuer_authority_v1','invoice_issuer_project_link_v1','invoice_client_reader_v1','_invoice_safe_date_v1','invoice_can_read_v1',
-       'invoice_issuer_side_v1','_invoice_tax_rate_v1','_invoice_line_tax_cents_v1','_invoice_recompute_totals_v1',
-       '_invoice_period_evidence_v1','_invoice_audit_v1','add_project_rate_term_v1','end_project_rate_term_v1',
-       'save_org_tax_preset_v1','create_billing_period_v1','mark_billing_period_ready_v1','billing_period_preview_v1',
-       'create_invoice_draft_from_period_v1','add_invoice_basis_line_v1','set_invoice_line_tax_v1',
-       'set_invoice_tax_v1','update_invoice_draft_details_v1','discard_invoice_draft_v1','issue_invoice_v1',
-       'void_or_credit_invoice_v1','record_invoice_client_response_v1','billing_period_changes_v1',
-       'update_finance_record_v1','update_finance_record_v2','set_finance_record_status_v1',
-       'project_rate_terms_guard_v1','billing_periods_guard_v1','invoice_child_frozen_guard_v1',
-       'invoice_append_only_v1','finance_records_issued_guard_v1')
-  loop
-    execute format('revoke all on function %s from public', r.sig);
-    execute format('revoke all on function %s from anon', r.sig);
-    execute format('revoke all on function %s from authenticated', r.sig);
-    -- RLS predicates + the user-facing commands are callable by authenticated
-    if r.proname in ('invoice_issuer_authority_v1','invoice_issuer_project_link_v1','invoice_client_reader_v1','invoice_can_read_v1','invoice_issuer_side_v1',
-        'add_project_rate_term_v1','end_project_rate_term_v1','save_org_tax_preset_v1','create_billing_period_v1',
-        'mark_billing_period_ready_v1','billing_period_preview_v1','create_invoice_draft_from_period_v1',
-        'add_invoice_basis_line_v1','set_invoice_line_tax_v1','set_invoice_tax_v1','update_invoice_draft_details_v1',
-        'discard_invoice_draft_v1','issue_invoice_v1','void_or_credit_invoice_v1','record_invoice_client_response_v1',
-        'billing_period_changes_v1','update_finance_record_v1','update_finance_record_v2','set_finance_record_status_v1') then
-      execute format('grant execute on function %s to authenticated', r.sig);
-    end if;
-  end loop;
-end $$;
+-- INTERNAL helpers and trigger functions: no direct caller (definer-invoked or trigger-only).
+revoke all on function public._invoice_audit_v1(text, text, uuid, jsonb) from public, anon, authenticated;
+revoke all on function public._invoice_line_tax_cents_v1(bigint, numeric) from public, anon, authenticated;
+revoke all on function public._invoice_period_evidence_v1(uuid, uuid) from public, anon, authenticated;
+revoke all on function public._invoice_recompute_totals_v1(uuid) from public, anon, authenticated;
+revoke all on function public._invoice_safe_date_v1(text) from public, anon, authenticated;
+revoke all on function public._invoice_tax_rate_v1(text, numeric) from public, anon, authenticated;
+revoke all on function public.billing_periods_guard_v1() from public, anon, authenticated;
+revoke all on function public.finance_records_issued_guard_v1() from public, anon, authenticated;
+revoke all on function public.invoice_append_only_v1() from public, anon, authenticated;
+revoke all on function public.invoice_child_frozen_guard_v1() from public, anon, authenticated;
+revoke all on function public.project_rate_terms_guard_v1() from public, anon, authenticated;
+
+-- USER-FACING commands and RLS predicates: authenticated only (anon + PUBLIC revoked).
+revoke all on function public.add_invoice_basis_line_v1(uuid, uuid, numeric, text) from public, anon;
+grant execute on function public.add_invoice_basis_line_v1(uuid, uuid, numeric, text) to authenticated;
+revoke all on function public.add_project_rate_term_v1(uuid, text, text, bigint, text, text, text, date, date, uuid, text, uuid) from public, anon;
+grant execute on function public.add_project_rate_term_v1(uuid, text, text, bigint, text, text, text, date, date, uuid, text, uuid) to authenticated;
+revoke all on function public.billing_period_changes_v1(uuid) from public, anon;
+grant execute on function public.billing_period_changes_v1(uuid) to authenticated;
+revoke all on function public.billing_period_preview_v1(uuid) from public, anon;
+grant execute on function public.billing_period_preview_v1(uuid) to authenticated;
+revoke all on function public.create_billing_period_v1(uuid, date, date, uuid) from public, anon;
+grant execute on function public.create_billing_period_v1(uuid, date, date, uuid) to authenticated;
+revoke all on function public.create_invoice_draft_from_period_v1(uuid, text, uuid, text, text, date, text) from public, anon;
+grant execute on function public.create_invoice_draft_from_period_v1(uuid, text, uuid, text, text, date, text) to authenticated;
+revoke all on function public.discard_invoice_draft_v1(uuid) from public, anon;
+grant execute on function public.discard_invoice_draft_v1(uuid) to authenticated;
+revoke all on function public.end_project_rate_term_v1(uuid, date) from public, anon;
+grant execute on function public.end_project_rate_term_v1(uuid, date) to authenticated;
+revoke all on function public.invoice_can_read_v1(uuid) from public, anon;
+grant execute on function public.invoice_can_read_v1(uuid) to authenticated;
+revoke all on function public.invoice_client_reader_v1(uuid) from public, anon;
+grant execute on function public.invoice_client_reader_v1(uuid) to authenticated;
+revoke all on function public.invoice_issuer_authority_v1(uuid) from public, anon;
+grant execute on function public.invoice_issuer_authority_v1(uuid) to authenticated;
+revoke all on function public.invoice_issuer_project_link_v1(uuid, uuid) from public, anon;
+grant execute on function public.invoice_issuer_project_link_v1(uuid, uuid) to authenticated;
+revoke all on function public.invoice_issuer_side_v1(uuid) from public, anon;
+grant execute on function public.invoice_issuer_side_v1(uuid) to authenticated;
+revoke all on function public.issue_invoice_v1(uuid, boolean) from public, anon;
+grant execute on function public.issue_invoice_v1(uuid, boolean) to authenticated;
+revoke all on function public.mark_billing_period_ready_v1(uuid, boolean) from public, anon;
+grant execute on function public.mark_billing_period_ready_v1(uuid, boolean) to authenticated;
+revoke all on function public.record_invoice_client_response_v1(uuid, text, text) from public, anon;
+grant execute on function public.record_invoice_client_response_v1(uuid, text, text) to authenticated;
+revoke all on function public.save_org_tax_preset_v1(uuid, text, text, numeric, text, boolean) from public, anon;
+grant execute on function public.save_org_tax_preset_v1(uuid, text, text, numeric, text, boolean) to authenticated;
+revoke all on function public.set_finance_record_status_v1(text, text) from public, anon;
+grant execute on function public.set_finance_record_status_v1(text, text) to authenticated;
+revoke all on function public.set_invoice_line_tax_v1(uuid, text, numeric, text) from public, anon;
+grant execute on function public.set_invoice_line_tax_v1(uuid, text, numeric, text) to authenticated;
+revoke all on function public.set_invoice_tax_v1(uuid, text, numeric, text, boolean) from public, anon;
+grant execute on function public.set_invoice_tax_v1(uuid, text, numeric, text, boolean) to authenticated;
+revoke all on function public.update_finance_record_v1(text, text, text, text, text, text) from public, anon;
+grant execute on function public.update_finance_record_v1(text, text, text, text, text, text) to authenticated;
+revoke all on function public.update_finance_record_v2(text, text, text, text, text, text, text, text, text) from public, anon;
+grant execute on function public.update_finance_record_v2(text, text, text, text, text, text, text, text, text) to authenticated;
+revoke all on function public.update_invoice_draft_details_v1(uuid, text, uuid, text, text, date, text) from public, anon;
+grant execute on function public.update_invoice_draft_details_v1(uuid, text, uuid, text, text, date, text) to authenticated;
+revoke all on function public.void_or_credit_invoice_v1(uuid, text, text) from public, anon;
+grant execute on function public.void_or_credit_invoice_v1(uuid, text, text) to authenticated;
 
 commit;
