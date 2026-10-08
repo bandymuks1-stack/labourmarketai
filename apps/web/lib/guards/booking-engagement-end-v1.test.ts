@@ -1610,6 +1610,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261007180000_evidence_media_bucket_v1.sql",
       // 2026-10-08 (#2191, owner-approved RED): unshare withdraws live agency offers (SECURITY DEFINER replace + data DML) - marker is the human-gate acknowledgement.
       "20261008090000_chain_proof_unshare_withdraws_offers_v1.sql",
+      // 2026-10-08 (R-5, owner-approved in chat, RED): manager approval raises skill confidence - one SECURITY DEFINER function + GRANT; marker is the human-gate acknowledgement.
+      "20261008120000_manager_approval_skill_confidence_v1.sql",
 ]);
   });
 

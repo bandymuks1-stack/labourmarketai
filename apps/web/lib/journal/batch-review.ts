@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { applyApprovalSkillEffects } from "./confirm-actions";
 import { notifyJournalReviewDecisions } from "./review-notification";
 
 /**
@@ -105,6 +106,12 @@ export async function reviewEntriesBatch(
           user.id,
           approved.map((o) => ({ entryId: o.entryId, decision: "approved" as const })),
         );
+        // R-5: each batch-approved entry raises its linked skills' confidence
+        // through the same bounded, idempotent SECURITY DEFINER door the single
+        // approval uses. Confidence only - nothing is verified.
+        for (const o of approved) {
+          await applyApprovalSkillEffects(supabase, { entryId: o.entryId, confirmerId: user.id });
+        }
       }
     }
     return { ok: true, outcomes };
