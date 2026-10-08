@@ -7180,5 +7180,12 @@
         "row": "[EN] {matched} of {total} required skills named in this history"
       }
     }
+  },
+  "recognisedBy": {
+    "title": "Erkänt av en institution",
+    "recognisedBy": "Erkänt av {institution}",
+    "recognisedByUnnamed": "Erkänt av en bedömande institution",
+    "validUntil": "giltigt till {date}",
+    "note": "En oberoende bedömare har beslutat att ditt visade arbete motsvarar detta. Det är inte en arbetsgivares bekräftelse och inte ett betyg."
   }
 }

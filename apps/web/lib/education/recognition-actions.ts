@@ -11,10 +11,11 @@ import {
 
 /**
  * SKL-9 — the assessor's act, as a server action. A thin wrapper over
- * `record_competency_recognition_v1` (owner packet P-3, draft PR #1741, a RED
- * migration that is NOT applied). Until it is, every call degrades to an
- * explicit `needs_migration` result: the form never pretends a recognition
- * was recorded. Every rule (training_provider capability, manager of the
+ * `record_competency_recognition_v1` (APPLIED on production via #2184; proven
+ * by a rolled-back production chain walk on 2026-10-07). Where the RPC is
+ * absent (another environment) a call degrades to an explicit
+ * `needs_migration` result: the form never pretends a recognition was
+ * recorded. Every rule (training_provider capability, manager of the
  * assessor organisation, not the subject, not a beneficiary employer,
  * evidence belongs to the subject) lives in the RPC, not here.
  */

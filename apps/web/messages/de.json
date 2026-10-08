@@ -18651,5 +18651,12 @@
     "stateNotYetValid": "Anerkannt, noch nicht gültig",
     "validFrom": "ab {date}",
     "validUntil": "bis {date}"
+  },
+  "recognisedBy": {
+    "title": "Von einer Einrichtung anerkannt",
+    "recognisedBy": "Anerkannt durch {institution}",
+    "recognisedByUnnamed": "Anerkannt durch eine bewertende Einrichtung",
+    "validUntil": "gültig bis {date}",
+    "note": "Eine unabhängige Prüfstelle hat entschieden, dass Ihre gezeigte Arbeit dies erfüllt. Das ist keine Bestätigung durch einen Arbeitgeber und keine Bewertung."
   }
 }

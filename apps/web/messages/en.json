@@ -18651,5 +18651,12 @@
     "stateNotYetValid": "Recognised, not valid yet",
     "validFrom": "from {date}",
     "validUntil": "until {date}"
+  },
+  "recognisedBy": {
+    "title": "Recognised by an institution",
+    "recognisedBy": "Recognised by {institution}",
+    "recognisedByUnnamed": "Recognised by an assessing institution",
+    "validUntil": "valid until {date}",
+    "note": "An independent assessor decided that your work answers this. It is not confirmation of your work by an employer and it is not a score."
   }
 }
