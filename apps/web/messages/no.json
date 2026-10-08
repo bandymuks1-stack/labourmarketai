@@ -7186,6 +7186,7 @@
     "recognisedBy": "Anerkjent av {institution}",
     "recognisedByUnnamed": "Anerkjent av en vurderende institusjon",
     "validUntil": "gyldig til {date}",
-    "note": "En uavhengig vurderer har avgjort at arbeidet du har vist, svarer til dette. Det er ikke en arbeidsgivers bekreftelse og ikke en score."
+    "note": "En uavhengig vurderer har avgjort at arbeidet du har vist, svarer til dette. Det er ikke en arbeidsgivers bekreftelse og ikke en score.",
+    "noteViewer": "En uavhengig vurderer har avgjort at denne personens viste arbeid svarer til dette. Det er ikke en arbeidsgivers bekreftelse, ikke en score og endrer ingen rangering."
   }
 }

@@ -7186,6 +7186,7 @@
     "recognisedBy": "Erkänt av {institution}",
     "recognisedByUnnamed": "Erkänt av en bedömande institution",
     "validUntil": "giltigt till {date}",
-    "note": "En oberoende bedömare har beslutat att ditt visade arbete motsvarar detta. Det är inte en arbetsgivares bekräftelse och inte ett betyg."
+    "note": "En oberoende bedömare har beslutat att ditt visade arbete motsvarar detta. Det är inte en arbetsgivares bekräftelse och inte ett betyg.",
+    "noteViewer": "En oberoende bedömare har beslutat att personens visade arbete motsvarar detta. Det är inte en arbetsgivares bekräftelse, inte ett betyg och ändrar ingen rangordning."
   }
 }

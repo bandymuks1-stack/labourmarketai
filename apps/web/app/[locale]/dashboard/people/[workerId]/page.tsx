@@ -37,6 +37,8 @@ import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibilit
 import { readRecordedWorkFor } from "@/lib/player-card/work-history";
 import { readWorkPhotosFor } from "@/lib/journal/personal-gallery";
 import { listActiveOfferingsByProvider } from "@/lib/services/service-offerings";
+import { RecognisedByList } from "@/components/app/recognised-by-block";
+import { getViewerRecognisedByItems } from "@/lib/qualification/viewer-recognitions";
 import { PersonImportedHistory } from "@/components/app/people/person-imported-history";
 
 export const dynamic = "force-dynamic";
@@ -123,6 +125,8 @@ export default async function PersonPage({
   if (!worker) {
     return <RestrictedState t={t} />;
   }
+
+  const recognisedBy = await getViewerRecognisedByItems(workerId).catch(() => null);
 
   // Own row → the canonical self surface, not a duplicate person view.
   if (worker.profile_id === user.id) {
@@ -368,6 +372,12 @@ export default async function PersonPage({
           />
         </div>
       </header>
+
+      {/* RECOGNISED BY - an independent assessor's decision, read through the
+          RLS-governed viewer function. Appears only when one exists. */}
+      {recognisedBy && recognisedBy.length > 0 ? (
+        <RecognisedByList items={recognisedBy} variant="profile" locale={locale} audience="viewer" />
+      ) : null}
 
       {/* WHAT THEY CAN DO — the concrete work offered, not a profession label.
           Only ACTIVE offerings: the table's own discovery policy publishes
