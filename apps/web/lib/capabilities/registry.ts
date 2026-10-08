@@ -40,6 +40,7 @@ import { EMPLOYER_OPERATIONS_CAPABILITIES } from "./employer-operations-capabili
 import { COUNTERPARTY_REVIEW_CAPABILITIES } from "./counterparty-review-capabilities";
 import { MARKETPLACE_CAPABILITIES } from "./marketplace-capabilities";
 import { TEAM_ASSIGNMENT_CAPABILITIES } from "./team-assignment-capabilities";
+import { PROJECT_INVOICE_CAPABILITIES } from "./project-invoice-capabilities";
 import { MESSAGING_CAPABILITIES } from "./messaging-capabilities";
 import { COMPANY_INGEST_CAPABILITIES } from "./company-ingest-capabilities";
 import { EVIDENCE_IMPORT_CAPABILITIES } from "./evidence-import-capabilities";
@@ -1758,6 +1759,10 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   // draft -> confirm over the SAME core the web project page uses
   // (`team-assignment-capabilities.ts`, WRK-6).
   ...TEAM_ASSIGNMENT_CAPABILITIES,
+  // Project-to-invoice: read, explain what is billable, prepare drafts and corrections, over
+  // the SAME readers/RPCs the invoicing pages use; NEVER issues or confirms tax
+  // (`project-invoice-capabilities.ts`, PR #2203).
+  ...PROJECT_INVOICE_CAPABILITIES,
   // The marketplace meeting point — candidate search and the shortlist over
   // the SAME scouting/shortlist cores the web page runs, plus the named
   // conditions that keep a person from being matchable or discoverable.

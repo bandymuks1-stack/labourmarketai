@@ -1767,8 +1767,8 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
   // issuer-side screens over the billing chain agreed commercial basis ->
   // confirmed work reports -> billing period -> invoice -> correction chain.
   // Honest answers only: nothing here is dressed up as a workspace surface and
-  // no chat door exists for it yet, so `aiControlled` / `aiCanWorkWithIt` stay
-  // false rather than invented.
+  // the assistant/MCP door exists (lib/capabilities/project-invoice-capabilities.ts) and is what
+  // `aiControlled` / `aiCanWorkWithIt` rest on - it prepares and drafts, it never issues.
   {
     id: "/dashboard/projects/[id]/invoicing",
     kind: "screen",
@@ -1786,7 +1786,7 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     whyNotExistingElement:
       "It extends the ORGANIZATION as issuer over a PROJECT's confirmed work. No new world element; invoices are finance records of an existing organization and project.",
     chatIntegration:
-      "None yet, recorded as a NO. The server actions are the only write path; no intent or chat chip drives them.",
+      "The assistant/MCP capabilities project_invoice.* (one capability registry, run as the caller, draft -> confirm) read the project's invoicing state, explain what is billable and what is held back and why, create invoice DRAFTS from explicitly selected billable work, and help with rate terms, periods, recipients, draft lines and tax treatment through the same database commands this page calls. The assistant never issues an invoice, confirms tax or creates a credit note: those stay explicit owner/admin actions here, and the assistant returns the link.",
     avatarEffect:
       "None. Invoicing changes no person's profile, skills or history.",
     mapEffect:
@@ -1803,7 +1803,7 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
 
     changesWorldState: false,
     reflectedOnMap: false,
-    aiControlled: false,
+    aiControlled: true,
     usableWithoutLeavingWorkspace: false,
     needsNoNewPage: false,
 
@@ -1812,7 +1812,7 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     registrationIsEnough: true,
     createsNewRole: false,
     createsNewRelationship: false,
-    aiCanWorkWithIt: false,
+    aiCanWorkWithIt: true,
 
     newBehaviorIsEnough: true,
     newRelationshipIsEnough: true,
@@ -1851,9 +1851,9 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     whyNotExistingElement:
       "Same element as the invoicing list screen: the issuing ORGANIZATION's finance record for a PROJECT.",
     chatIntegration:
-      "None yet, recorded as a NO.",
+      "The assistant/MCP reads this document (project_invoice.invoice_get), prepares a correction without creating one (project_invoice.correction_prepare) and helps complete a draft; it never issues, confirms tax or credits - those are explicit owner/admin actions on this page, and the assistant returns the link.",
     avatarEffect:
-      "None.",
+      "None. Viewing or preparing a document changes no person's profile, skills or history.",
     mapEffect:
       "None - recorded as reflectedOnMap: false rather than invented.",
     journalRelation:
@@ -1868,7 +1868,7 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
 
     changesWorldState: false,
     reflectedOnMap: false,
-    aiControlled: false,
+    aiControlled: true,
     usableWithoutLeavingWorkspace: false,
     needsNoNewPage: false,
 
@@ -1877,7 +1877,7 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     registrationIsEnough: true,
     createsNewRole: false,
     createsNewRelationship: false,
-    aiCanWorkWithIt: false,
+    aiCanWorkWithIt: true,
 
     newBehaviorIsEnough: true,
     newRelationshipIsEnough: true,

@@ -234,8 +234,9 @@ export type ProjectInvoicing = {
 export async function getProjectInvoicing(
   projectId: string,
   organizationId: string | null,
+  client?: SupabaseClient,
 ): Promise<Read<ProjectInvoicing>> {
-  const supabase = await createClient();
+  const supabase = client ?? (await createClient());
   const db = asAny(supabase);
   const [terms, periods, invoices] = await Promise.all([
     db.from("project_rate_terms").select(TERM_COLS).eq("project_id", projectId).order("valid_from", { ascending: false }).limit(200),
@@ -330,8 +331,8 @@ export async function getProjectInvoicing(
 }
 
 /** One invoice with its lines, sources (issuer side only) and the full correction chain. */
-export async function getInvoiceView(invoiceId: string): Promise<Read<InvoiceView | null>> {
-  const supabase = await createClient();
+export async function getInvoiceView(invoiceId: string, client?: SupabaseClient): Promise<Read<InvoiceView | null>> {
+  const supabase = client ?? (await createClient());
   const db = asAny(supabase);
   const inv = await db.from("finance_records").select(INVOICE_COLS).eq("id", invoiceId).maybeSingle();
   if (inv.error) {
@@ -382,8 +383,8 @@ export async function getInvoiceView(invoiceId: string): Promise<Read<InvoiceVie
 }
 
 /** The server-side evidence preview of a period: what can be billed and why the rest cannot. */
-export async function getPeriodPreview(periodId: string): Promise<Read<readonly PeriodPreviewRow[]>> {
-  const supabase = await createClient();
+export async function getPeriodPreview(periodId: string, client?: SupabaseClient): Promise<Read<readonly PeriodPreviewRow[]>> {
+  const supabase = client ?? (await createClient());
   const r = await asAny(supabase).rpc("billing_period_preview_v1", { p_period_id: periodId });
   if (r.error) {
     const kind = failKind(r.error.code);
@@ -411,8 +412,8 @@ export async function getPeriodPreview(periodId: string): Promise<Read<readonly 
 }
 
 /** "Changes since invoice" for a locked period (derived live from the evidence, never a stale flag). */
-export async function getPeriodChanges(periodId: string): Promise<Read<readonly PeriodChange[]>> {
-  const supabase = await createClient();
+export async function getPeriodChanges(periodId: string, client?: SupabaseClient): Promise<Read<readonly PeriodChange[]>> {
+  const supabase = client ?? (await createClient());
   const r = await asAny(supabase).rpc("billing_period_changes_v1", { p_period_id: periodId });
   if (r.error) {
     const kind = failKind(r.error.code);
@@ -436,8 +437,8 @@ export async function getPeriodChanges(periodId: string): Promise<Read<readonly 
  * Journal entries by this organization's people that name NO project: they can
  * never reach an invoice. A count only (no text), RLS-scoped; null = unreadable.
  */
-export async function countUnattributedEntries(organizationId: string): Promise<number | null> {
-  const supabase = await createClient();
+export async function countUnattributedEntries(organizationId: string, client?: SupabaseClient): Promise<number | null> {
+  const supabase = client ?? (await createClient());
   const r = await asAny(supabase)
     .from("journal_entries")
     .select("id, engagement_contexts!inner(organization_id)", { count: "exact", head: true })
