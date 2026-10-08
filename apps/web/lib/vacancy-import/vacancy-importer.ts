@@ -217,6 +217,11 @@ export async function runVacancyImport(
   const tally = (code: string): void => {
     reasonCounts.set(code, (reasonCounts.get(code) ?? 0) + 1);
   };
+  // An HTTP failure carries its status (a bare 3-digit code, never a payload):
+  // 401 vs 403 vs 429 vs 5xx are different operator actions, and collapsing
+  // them into `http_error` hid the cause of a failing source.
+  const fetchFailureDetail = (errorCode: string, detail: string): string =>
+    errorCode === "http_error" && /^\d{3}$/.test(detail) ? `${errorCode}:${detail}` : errorCode;
 
   const counters = {
     pagesRequested: 0,
@@ -382,7 +387,7 @@ export async function runVacancyImport(
       counters.pagesFailed += 1;
       tally(`fetch_${slice.errorCode}`);
       errors.push(`${channel}:${slice.errorCode}:${slice.detail}`);
-      log("error", "page_fetch_failed", slice.errorCode);
+      log("error", "page_fetch_failed", fetchFailureDetail(slice.errorCode, slice.detail));
     } else {
       counters.bytesFetched += slice.byteLength;
       counters.recordsSkipped += slice.recordsSkipped;
@@ -500,7 +505,7 @@ export async function runVacancyImport(
         counters.pagesFailed += 1;
         tally(`fetch_${fetched.errorCode}`);
         errors.push(`${channel}:${fetched.errorCode}:${fetched.detail}`);
-        log("error", "page_fetch_failed", fetched.errorCode);
+        log("error", "page_fetch_failed", fetchFailureDetail(fetched.errorCode, fetched.detail));
         break;
       }
 
