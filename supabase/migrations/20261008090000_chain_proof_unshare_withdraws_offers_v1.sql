@@ -162,4 +162,11 @@ begin
 end;
 $function$;
 
+-- Explicit anon revoke (secdef-local-reset guard). Production already holds only
+-- postgres + authenticated EXECUTE on all three; this is a no-op there and makes
+-- a local reset reproducible. authenticated keeps EXECUTE (nothing is loosened).
+revoke all on function public.unshare_request_v1(uuid) from anon;
+revoke all on function public.request_service_offering(uuid, text) from anon;
+revoke all on function public.respond_agency_candidate_offer_v1(uuid, text, text) from anon;
+
 commit;
