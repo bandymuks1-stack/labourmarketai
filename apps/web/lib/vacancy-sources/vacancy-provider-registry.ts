@@ -183,6 +183,21 @@ export interface VacancyDetailFanOutV1 {
   readonly maxDetailFetchesPerPage: number;
   /** Detail requests in flight at once. */
   readonly concurrency: number;
+  /**
+   * Most detail requests ONE import session may spend, across all its pages.
+   * When it runs out mid-page the session stops cleanly and its checkpoint
+   * records exactly how many of that page's entries were consumed, so the next
+   * session resumes there: nothing is skipped, nothing is silently dropped.
+   * Absent = no per-session cap (every other provider).
+   */
+  readonly maxDetailFetchesPerSession?: number;
+  /**
+   * Minimum gap, in ms, between the STARTS of two requests to this host
+   * (listing pages and details alike, process-wide). Absent = no spacing
+   * (every other provider). For a shared grant whose publisher states no
+   * numeric rate limit.
+   */
+  readonly minRequestSpacingMs?: number;
 }
 
 /**
@@ -464,8 +479,19 @@ const NAV: VacancyProviderDescriptorV1 = {
         statusPath: ["_feed_entry", "status"],
         activeValue: "ACTIVE",
         withdrawalKeys: ["uuid", "status", "title"],
+        // Anomaly guard only: one page may never cost more than this. The
+        // real cost control is the per-session budget below.
         maxDetailFetchesPerPage: 1000,
-        concurrency: 8,
+        // REQUEST BUDGET (2026-10-08, shared NAV grant; NAV states no numeric
+        // limit but may revoke for abuse). Pinned, with the worst-case
+        // arithmetic, by lib/vacancy-sources/nav-request-budget.test.ts.
+        // Before: 5 pages x (1 + 1000 details), concurrency 8, no spacing =
+        // 5,005 requests/session, ~720k/day on the */10 cron. Now: 100 details
+        // + 2 listing pages per session, 2 in flight, >= 500 ms between request
+        // starts. A cold start resumes across sessions (mid-page checkpoint).
+        concurrency: 2,
+        maxDetailFetchesPerSession: 100,
+        minRequestSpacingMs: 500,
       },
       // RECORDED: a signed JWT, sent as `Authorization: Bearer <token>`.
       requiresApiKey: true,
@@ -485,9 +511,10 @@ const NAV: VacancyProviderDescriptorV1 = {
       },
     },
   ],
-  // A page is 1000 entries and every live one costs a detail request, so a
-  // session reads at most five pages (bounds may only ever be TIGHTENED).
-  boundOverrides: { maxPagesPerSession: 5, requestTimeoutMs: 20_000 },
+  // At most two listing pages per session (was five); the detail requests they
+  // cost are capped separately by detailFanOut.maxDetailFetchesPerSession.
+  // Bounds may only ever be TIGHTENED.
+  boundOverrides: { maxPagesPerSession: 2, requestTimeoutMs: 20_000 },
   transformVersion: "vacancy-nav-v1",
 };
 

@@ -20,7 +20,12 @@
  *     direction; any other failure fails the WHOLE page closed, so the cursor
  *     can never move past an ad that was not read;
  *   - a page that would cost more detail requests than the descriptor allows
- *     fails closed instead of being silently truncated.
+ *     fails closed instead of being silently truncated;
+ *   - a SESSION BUDGET may stop the page part-way, but only ever at an entry
+ *     BOUNDARY: every entry before the cut is fully resolved, every entry from
+ *     the cut on is untouched, and `consumedEntries` says exactly where the cut
+ *     is. The caller checkpoints on that number and the next session starts at
+ *     it (`skipEntries`), so a budget can delay an ad but never skip one.
  */
 import type { VacancyChannelEndpointV1 } from "./vacancy-provider-registry";
 
@@ -37,7 +42,15 @@ export interface DetailFanOutStats {
 }
 
 export type DetailFanOutOutcome =
-  | { readonly ok: true; readonly body: unknown; readonly stats: DetailFanOutStats }
+  | {
+      readonly ok: true;
+      readonly body: unknown;
+      readonly stats: DetailFanOutStats;
+      /** Entries of the WHOLE page consumed, counting the `skipEntries` prefix. */
+      readonly consumedEntries: number;
+      /** False when the budget stopped the page before its last entry. */
+      readonly pageComplete: boolean;
+    }
   | { readonly ok: false; readonly detail: string; readonly stats: DetailFanOutStats };
 
 function asRecord(v: unknown): Record<string, unknown> | null {
@@ -76,15 +89,29 @@ export async function expandDetailFanOut(args: {
   readonly endpoint: Pick<VacancyChannelEndpointV1, "host" | "detailFanOut">;
   readonly body: unknown;
   readonly fetchDetail: (url: string) => Promise<DetailFetchResult>;
+  /** Most detail requests this call may spend. Absent = unlimited. */
+  readonly detailBudget?: number;
+  /** Leading entries of the page already consumed by an earlier session. A
+   *  value larger than the page is ignored (re-read from the start). */
+  readonly skipEntries?: number;
 }): Promise<DetailFanOutOutcome> {
   const cfg = args.endpoint.detailFanOut;
   const empty: DetailFanOutStats = { entries: 0, duplicatesCollapsed: 0, detailFetched: 0, withdrawn: 0, goneAsWithdrawn: 0 };
-  if (!cfg) return { ok: true, body: args.body, stats: empty };
+  if (!cfg) {
+    return { ok: true, body: args.body, stats: empty, consumedEntries: 0, pageComplete: true };
+  }
   const page = asRecord(args.body);
-  const items = page ? page[cfg.itemsKey] : undefined;
-  if (page === null || !Array.isArray(items)) {
+  const allItems = page ? page[cfg.itemsKey] : undefined;
+  if (page === null || !Array.isArray(allItems)) {
     return { ok: false, detail: "fan_out_body_not_a_page", stats: empty };
   }
+  // Resume inside the page. A stored position past the end means the page is
+  // not the page it was: re-read it whole (a re-read is safe, a skip is not).
+  const skip =
+    typeof args.skipEntries === "number" && Number.isInteger(args.skipEntries) && args.skipEntries > 0 && args.skipEntries <= allItems.length
+      ? args.skipEntries
+      : 0;
+  const items = skip > 0 ? allItems.slice(skip) : allItems;
 
   // Latest entry per uuid wins; first-seen order of the winners is kept.
   const latest = new Map<string, { entry: Record<string, unknown>; index: number }>();
@@ -99,14 +126,37 @@ export async function expandDetailFanOut(args: {
   const winners = [...latest.values(), ...unkeyed].sort((a, b) => a.index - b.index);
   const duplicatesCollapsed = items.length - winners.length;
 
-  const live = winners.filter((w) => readPath(w.entry, cfg.statusPath) === cfg.activeValue);
-  if (live.length > cfg.maxDetailFetchesPerPage) {
+  const isLive = (w: { entry: Record<string, unknown> }) => readPath(w.entry, cfg.statusPath) === cfg.activeValue;
+  if (winners.filter(isLive).length > cfg.maxDetailFetchesPerPage) {
     return {
       ok: false,
-      detail: `fan_out_page_over_budget:${live.length}`,
+      detail: `fan_out_page_over_budget:${winners.filter(isLive).length}`,
       stats: { ...empty, entries: items.length, duplicatesCollapsed },
     };
   }
+
+  // SESSION BUDGET. Cut at the first live winner the budget cannot pay for.
+  // Everything before it (including free withdrawals) is consumed; it and
+  // everything after are left for the next session. Index in `items`.
+  const budget =
+    typeof args.detailBudget === "number" && Number.isFinite(args.detailBudget)
+      ? Math.max(0, Math.floor(args.detailBudget))
+      : Infinity;
+  let cutAt = items.length;
+  let affordable = winners;
+  {
+    let spent = 0;
+    for (let i = 0; i < winners.length; i += 1) {
+      if (!isLive(winners[i])) continue;
+      if (spent >= budget) {
+        cutAt = winners[i].index;
+        affordable = winners.slice(0, i);
+        break;
+      }
+      spent += 1;
+    }
+  }
+  const live = affordable.filter(isLive);
 
   const resolved = new Map<number, unknown>();
   let fetched = 0;
@@ -152,11 +202,17 @@ export async function expandDetailFanOut(args: {
     entries: items.length,
     duplicatesCollapsed,
     detailFetched: fetched,
-    withdrawn: winners.length - live.length + goneAsWithdrawn,
+    withdrawn: affordable.length - live.length + goneAsWithdrawn,
     goneAsWithdrawn,
   };
   if (failure !== null) return { ok: false, detail: failure, stats };
 
-  const expanded = winners.map((w) => (resolved.has(w.index) ? resolved.get(w.index) : withdrawal(w.entry)));
-  return { ok: true, body: { ...page, [cfg.itemsKey]: expanded }, stats };
+  const expanded = affordable.map((w) => (resolved.has(w.index) ? resolved.get(w.index) : withdrawal(w.entry)));
+  return {
+    ok: true,
+    body: { ...page, [cfg.itemsKey]: expanded },
+    stats,
+    consumedEntries: skip + cutAt,
+    pageComplete: cutAt === items.length,
+  };
 }
