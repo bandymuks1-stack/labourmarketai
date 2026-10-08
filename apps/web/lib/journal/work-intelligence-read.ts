@@ -26,7 +26,11 @@ import {
   type WorkRange,
 } from "@/lib/journal/work-intelligence";
 import { readAllocationsForWorker } from "@/lib/work-hours/allocations";
-import { readEvidenceRecordsForWorker } from "@/lib/organization-evidence/worker-evidence-read";
+import {
+  readEvidenceRecordsForOrganizationPerson,
+  readEvidenceRecordsForWorker,
+  type WorkerEvidenceRead,
+} from "@/lib/organization-evidence/worker-evidence-read";
 import { readOwnOccupationPath } from "@/lib/journal/journal-occupation-path";
 
 /**
@@ -170,6 +174,34 @@ export async function readOrganizationRecords(
     readEvidenceRecordsForWorker(supabase, workerId),
   ]);
   if (allocations.kind === "error" || evidence.kind === "error") return null;
+  return organizationLedgerFrom(allocations, evidence);
+}
+
+/**
+ * The ONE mapping from the two reads to the model's ledger. Pure and shared:
+ * the linked worker's reading (`readOrganizationRecords`) and the historical
+ * person's reading (`loadHistoricalPersonIntelligence`) both go through it, so
+ * a person's imported-history rows are mapped identically before and after an
+ * account claim. `allocations` is `needs-migration` for a person with no
+ * account (a timesheet line is keyed on a worker; none can exist yet).
+ */
+export function organizationLedgerFrom(
+  allocations:
+    | { readonly kind: "needs-migration" }
+    | {
+        readonly kind: "ok";
+        readonly rows: readonly {
+          readonly id: string;
+          readonly workDate: string;
+          readonly hours: number;
+          readonly source: WorkIntelligenceOrganizationRecord["source"];
+          readonly status: WorkIntelligenceOrganizationRecord["status"];
+          readonly organizationId: string;
+          readonly journalEntryId: string | null;
+        }[];
+      },
+  evidence: Exclude<WorkerEvidenceRead, { kind: "error" }>,
+): OrganizationLedgerRead {
   const fromAllocations: WorkIntelligenceOrganizationRecord[] =
     allocations.kind === "needs-migration"
       ? []
@@ -212,6 +244,51 @@ export async function readOrganizationRecords(
           context: r.context,
         }));
   return { records: [...fromAllocations, ...fromEvidence], periodRecords };
+}
+
+/**
+ * WORK INTELLIGENCE OF A HISTORICAL PERSON - a roster row, no account
+ * (decision 0020). The model is the SAME one (`deriveWorkIntelligence`),
+ * built from what the organization recorded: its imported day and period
+ * records, labelled as the organization's ledger. There are no journal
+ * entries and no declared skills to include - they belong to an account and
+ * none exists - so the model carries none and invents none.
+ *
+ * `null` = the ledger could not be read (UNKNOWN, never "no work").
+ */
+export function historicalPersonIntelligence(
+  evidence: WorkerEvidenceRead,
+  today: WorkToday,
+  opts: { focus?: WorkPeriodKey } = {},
+): WorkIntelligence | null {
+  if (evidence.kind === "error") return null;
+  const ledger = organizationLedgerFrom({ kind: "needs-migration" }, evidence);
+  return assembleWorkIntelligence({
+    entries: [],
+    linksByEntry: new Map(),
+    provenanceByEntry: new Map(),
+    skillRows: [],
+    todayIso: today.todayIso,
+    horizonIso: today.horizonIso,
+    focus: opts.focus,
+    organizationRecords: ledger.records,
+    organizationPeriodRecords: ledger.periodRecords,
+  });
+}
+
+/**
+ * The company-side reading of one roster person, under the CALLER's RLS and
+ * pinned to the organization the caller governs. Same read the linked
+ * worker's CV uses, keyed on the roster row.
+ */
+export async function loadHistoricalPersonIntelligence(
+  supabase: SupabaseClient,
+  input: { readonly organizationId: string; readonly personId: string },
+  opts: { focus?: WorkPeriodKey } = {},
+): Promise<WorkIntelligence | null> {
+  const evidence = await readEvidenceRecordsForOrganizationPerson(supabase, input);
+  const today = await workIntelligenceToday();
+  return historicalPersonIntelligence(evidence, today, opts);
 }
 
 /** Entry ids per `.in()` filter — a URL-length bound, not a coverage cap:

@@ -2014,7 +2014,6 @@
         "recognition": {
           "title": "Įrašyti pripažinimą",
           "hint": "Nepriklausomo vertintojo sprendimas, kad žmogaus parodyta kompetencija atitinka formalų reikalavimą. Tai nėra pažymėjimas ir niekada nesukuriamas vien iš darbo įrodymų.",
-          "pending": "Pripažinimų įrašymas dar nepasiekiamas: už jo esantis registras dar nepaleistas. Kol kas pateikimas atmetamas, o ne išsaugomas.",
           "subject": "Besimokantysis",
           "chooseSubject": "Pasirinkite besimokantįjį",
           "kind": "Reikalavimo tipas",
@@ -8586,7 +8585,8 @@
       "accommodation_ok": "Apgyvendinimas tinka",
       "city_match": "Tas pats miestas",
       "location_within_radius": "Darbo spinduliu",
-      "profession_related": "Susijusi profesija (bendri įgūdžiai)"
+      "profession_related": "Susijusi profesija (bendri įgūdžiai)",
+      "skills_history_reported": "Įgūdžiai, paminėti organizacijos istorijoje (nepatvirtinta)"
     },
     "gap": {
       "skills_missing": "Trūksta dalies reikalaujamų įgūdžių",
@@ -18621,7 +18621,20 @@
       "truncated": "Įgūdžių signalų yra daugiau, nei perskaito šis vaizdas."
     },
     "shown": "Rodomi naujausi {shown} iš {total} įrašų. Likusieji lieka įrašyti.",
-    "truncated": "Įrašų yra daugiau, nei perskaito vienas vaizdas. Rodomi perskaityti {count}; sumos apima tik juos."
+    "truncated": "Įrašų yra daugiau, nei perskaito vienas vaizdas. Rodomi perskaityti {count}; sumos apima tik juos.",
+    "profile": {
+      "title": "Gyvas profilis iš šios organizacijos istorijos",
+      "subtitle": "Sudaryta iš jūsų organizacijos pateiktų įrašų, dar prieš atsirandant paskyrai. Organizacijos pateikta, nepriklausomai nepatvirtinta. Jei asmuo vėliau perims paskyrą, ji bus susieta nekeičiant šios istorijos.",
+      "unavailable": "Darbo vaizdo dabar nepavyko nuskaityti. Tai nereiškia, kad darbo nėra.",
+      "fit": {
+        "title": "Atitikimas jūsų atviriems poreikiams",
+        "note": "Apskaičiuota jūsų organizacijos viduje pagal šioje istorijoje paminėtus įgūdžius. Organizacijos pateikta, nepatvirtinta. Kitoms organizacijoms to nerodoma.",
+        "noSignals": "Šioje istorijoje dar nepaminėtas joks katalogo įgūdis, todėl suderinti neįmanoma. Tai nežinoma, o ne prastas atitikimas.",
+        "none": "Nė vienam jūsų atvirų poreikių šioje istorijoje paminėti įgūdžiai neatsako.",
+        "unavailable": "Atitikimo dabar apskaičiuoti nepavyko. Tai nereiškia, kad jo nėra.",
+        "row": "{matched} iš {total} reikalaujamų įgūdžių paminėta šioje istorijoje"
+      }
+    }
   },
   "qualificationRecognitions": {
     "title": "Pripažinimai",

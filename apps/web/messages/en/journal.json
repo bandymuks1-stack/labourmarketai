@@ -976,7 +976,8 @@
         "body": "{hours} h on {days, plural, one {# day} other {# days}} ({period}) — attendance hours your organization entered in a timesheet or imported from a document. Kept apart from the journal figures above and not added to them.",
         "periodEmpty": "Nothing in this window ({period}); {hours} h on {days, plural, one {# day} other {# days}} all time. Kept apart from the journal figures above and not added to them.",
         "rule": "An hour record says when and how long, not what was done — so these hours reach no skill and no kind of work. Only the person's journal entry does that."
-      }
+      },
+      "emptyNoEntriesLedger": "No entries logged against your organization. Below is what your organization has on record about this person."
     },
     "confirmedOfDays": "{confirmed} of {total} d. confirmed by a manager's record",
     "confirmedNoDuration": "{confirmed} of {entries, plural, one {# entry} other {# entries}} confirmed by a manager or client — recorded without a duration, so no hours to show",
@@ -1056,7 +1057,8 @@
         "flat": "about the same",
         "new": "new"
       }
-    }
+    },
+    "emptyNoEntriesLedger": "No journal entries yet. What follows is the work the organization has on record."
   },
   "verification": {
     "state": {

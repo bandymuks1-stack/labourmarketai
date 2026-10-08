@@ -14,7 +14,8 @@ import {
  *
  * `organization_evidence_competency_signals` reached the person's own profile
  * and nothing that ranks or filters people. This is the ONE batched reader the
- * matching layer composes (match-subject.ts), under the CALLER's RLS session -
+ * matching layer composes (owner decision 2026-10-07 B: the signals now enter
+ * skill fit as their own evidence class, ORGANIZATION_REPORTED) (match-subject.ts), under the CALLER's RLS session -
  * never a service role. Whatever the database lets the caller see is what
  * comes back: a worker's own session sees their own history, an employer's
  * session sees the history their own organization supplied, and nothing else.
@@ -24,8 +25,11 @@ import {
  *    It is evidence that work was DESCRIBED that way (SEP-3: evidence is not
  *    verification), by an organization, not by the worker. It is never a
  *    verified skill and it never writes `worker_skills`.
- *  - ONLY workers linked to a roster row (`link_state = 'linked'`). A name is
- *    never an identity; an unlinked person's history does not reach anyone.
+ *  - `readSignalsForWorkers`: ONLY workers linked to a roster row
+ *    (`link_state = 'linked'`). A name is never an identity.
+ *    `readSignalsForRosterPeople`: a roster row's own signals for the
+ *    supplying organization's INTERNAL computation (decision 0020) - no
+ *    account is needed, and the result is never a disclosure to anyone else.
  *  - ONLY live records: a withdrawn import counts nowhere.
  *  - A worker with no history is ABSENT from the map. Absent means "nothing
  *    known", never zero (SEP-7) - consumers must not score the difference.
@@ -68,8 +72,8 @@ function db(c: SupabaseClient): any {
   return c;
 }
 
-const UNAVAILABLE_FAILED: HistorySignalsRead = { kind: "unavailable", reason: "read_failed" };
-const UNAVAILABLE_MISSING: HistorySignalsRead = { kind: "unavailable", reason: "not_installed" };
+const UNAVAILABLE_FAILED = { kind: "unavailable", reason: "read_failed" } as const;
+const UNAVAILABLE_MISSING = { kind: "unavailable", reason: "not_installed" } as const;
 
 function chunks<T>(xs: readonly T[], n: number): T[][] {
   const out: T[][] = [];
@@ -105,7 +109,51 @@ export async function readSignalsForWorkers(
     }
   }
   if (workerByPerson.size === 0) return { kind: "ok", byWorker: new Map() };
+  const res = await signalsByKey(supabase, workerByPerson);
+  return res.kind === "ok" ? { kind: "ok", byWorker: res.byKey } : res;
+}
 
+export type RosterPersonSignalsRead =
+  | {
+      readonly kind: "ok";
+      /** roster person id -> signals, most-evidenced first. A person whose
+       *  history names no canonical skill is ABSENT: unknown, not zero. */
+      readonly byPerson: ReadonlyMap<string, readonly WorkerHistorySkillSignal[]>;
+    }
+  | { readonly kind: "unavailable"; readonly reason: "not_installed" | "read_failed" };
+
+/**
+ * THE HISTORICAL PERSON'S SIGNALS, BEFORE ANY CLAIM (decision 0020, owner
+ * 2026-10-07). The same live-record, standing and canonical-skill rules as
+ * `readSignalsForWorkers`, keyed on the ROSTER ROW - so an organization-
+ * provided history can inform the organization's OWN matching of its roster
+ * people without an account link being a prerequisite.
+ *
+ * Under the caller's RLS: a manager sees the signals of the organization
+ * they manage and nothing else. The result is for INTERNAL computation by
+ * that organization; it is not a disclosure channel to anyone else, and the
+ * cross-organization disclosure boundary is a separate, unresolved decision
+ * this function neither widens nor settles.
+ */
+export async function readSignalsForRosterPeople(
+  supabase: SupabaseClient,
+  personIds: readonly string[],
+): Promise<RosterPersonSignalsRead> {
+  const ids = [...new Set(personIds.filter((p) => typeof p === "string" && p !== ""))];
+  if (ids.length === 0) return { kind: "ok", byPerson: new Map() };
+  const res = await signalsByKey(supabase, new Map(ids.map((id) => [id, id])));
+  return res.kind === "ok" ? { kind: "ok", byPerson: res.byKey } : res;
+}
+
+/** Live records of the given roster rows -> distinct-record signal counts per
+ *  caller-chosen key (a worker id, or the roster row itself). */
+async function signalsByKey(
+  supabase: SupabaseClient,
+  workerByPerson: ReadonlyMap<string, string>,
+): Promise<
+  | { readonly kind: "ok"; readonly byKey: ReadonlyMap<string, readonly WorkerHistorySkillSignal[]> }
+  | { readonly kind: "unavailable"; readonly reason: "not_installed" | "read_failed" }
+> {
   // 2) LIVE records of those people (a withdrawn import counts nowhere).
   const workerByRecord = new Map<string, string>();
   for (const chunk of chunks([...workerByPerson.keys()], PERSON_CHUNK)) {
@@ -142,7 +190,7 @@ export async function readSignalsForWorkers(
       workerByRecord.set(r.id as string, worker);
     }
   }
-  if (workerByRecord.size === 0) return { kind: "ok", byWorker: new Map() };
+  if (workerByRecord.size === 0) return { kind: "ok", byKey: new Map() };
 
   // 3) Signals that name a canonical skill, counted as DISTINCT records.
   const recordsBy = new Map<string, Map<string, Set<string>>>(); // worker -> slug -> records
@@ -183,5 +231,5 @@ export async function readSignalsForWorkers(
         .sort((a, b) => b.records - a.records || (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0)),
     );
   }
-  return { kind: "ok", byWorker };
+  return { kind: "ok", byKey: byWorker };
 }

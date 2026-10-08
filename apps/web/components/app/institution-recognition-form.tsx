@@ -10,7 +10,6 @@ const IDLE: RecognitionActionState = { status: "idle" };
 export type RecognitionFormLabels = {
   readonly title: string;
   readonly hint: string;
-  readonly pending: string;
   readonly subject: string;
   readonly chooseSubject: string;
   readonly kind: string;
@@ -79,7 +78,6 @@ export function RecordRecognitionForm({
       <summary className="cursor-pointer text-xs font-semibold text-text-primary">{labels.title}</summary>
       <form action={action} className="mt-3 flex flex-col gap-2">
         <p className="text-xs leading-relaxed text-text-secondary">{labels.hint}</p>
-        <p className="text-xs leading-relaxed text-state-warning" data-testid="recognition-pending-note">{labels.pending}</p>
         <input type="hidden" name="assessorOrganizationId" value={organizationId} readOnly />
         <label className="flex flex-col gap-1 text-xs text-text-secondary">
           {labels.subject}
