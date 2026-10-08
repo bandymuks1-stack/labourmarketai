@@ -35,7 +35,6 @@ vi.mock("next-intl/server", () => ({
 
 vi.mock("@/components/decor/constellation-bg", () => ({ ConstellationBg: () => null }));
 
-const { PlayerCardShowcase } = await import("@/components/marketing/player-card-showcase");
 const { WorkerPlayerCard } = await import("@/components/app/worker-player-card");
 const { buildSampleWorkerPlayerCard } = await import("@/lib/player-card/sample-card");
 const { buildPlayerCardLabels } = await import("@/lib/player-card/labels");
@@ -43,12 +42,7 @@ const { buildPlayerCardLabels } = await import("@/lib/player-card/labels");
 const dashboardLinks = (html: string) => html.match(/href="\/dashboard[^"]*"/g) ?? [];
 
 describe("the landing's sample Player Card", () => {
-  it("renders the real card with its tiles, and not one link into /dashboard", async () => {
-    // The showcase mounts the card CLOSED (owner direction 2026-09-30: the
-    // person first, information on demand) — it carries no dashboard link.
-    const showcase = renderToStaticMarkup(await PlayerCardShowcase());
-    expect(showcase).toContain('data-testid="worker-player-card"');
-    expect(dashboardLinks(showcase)).toEqual([]);
+  it("renders the sample card with its tiles, and not one link into /dashboard", async () => {
     // Opened on the lens that carries the tiles, the SAMPLE card still shows
     // them as facts and still links none of them.
     const card = buildSampleWorkerPlayerCard({

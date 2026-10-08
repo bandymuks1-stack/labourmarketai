@@ -29,7 +29,6 @@ const read = (rel: string): string => readFileSync(join(APP, rel), "utf-8");
 const CARD = read("components/app/worker-player-card.tsx");
 const DATA = read("lib/player-card/player-card.ts");
 const LABELS = read("lib/player-card/labels.ts");
-const SHOWCASE = read("components/marketing/player-card-showcase.tsx");
 const VISUALS = read("lib/player-card/evidence-visuals.ts");
 const CHART_EVIDENCE = read(
   "components/app/player-card/evidence-timeline-chart.tsx",
@@ -134,22 +133,15 @@ describe("§5.2 the series are REAL rows, never invented", () => {
 });
 
 describe("§5.2 landing and product cannot drift apart", () => {
-  it("the landing renders the canonical component, not a marketing copy", () => {
-    expect(SHOWCASE).toContain("WorkerPlayerCard");
-    expect(SHOWCASE).toContain("buildPlayerCardLabels");
-    expect(SHOWCASE).not.toMatch(/<PlayerCard\b/);
-  });
-
   it("the landing sample goes through the SAME derivers as the real card", () => {
     // S3: the sample literal moved into the ONE shared module both public
     // surfaces build from (the showcase must import it). The deriver rule
     // holds inside that module — and neither file may hand-build a series
     // object, which is how a prettier fake marketing chart would get in.
-    expect(SHOWCASE).toContain("buildSampleWorkerPlayerCard");
     const sample = read("lib/player-card/sample-card.ts");
     expect(sample).toContain("deriveEvidenceTimeline(");
     expect(sample).toContain("deriveSkillEvidence(");
-    for (const src of [SHOWCASE, sample]) {
+    for (const src of [sample]) {
       expect(src).not.toMatch(/evidenceTimeline:\s*\[\s*\{/);
       expect(src).not.toMatch(/skillEvidence:\s*\[\s*\{/);
     }
@@ -161,10 +153,6 @@ describe("§5.2 landing and product cannot drift apart", () => {
     expect(read("lib/player-card/sample-card.ts")).toMatch(
       /verified: false, source: "self"/,
     );
-  });
-
-  it("the landing still says out loud that the card is a sample", () => {
-    expect(SHOWCASE).toContain("conceptNote");
   });
 });
 

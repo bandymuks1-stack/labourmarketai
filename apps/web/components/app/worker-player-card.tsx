@@ -35,7 +35,6 @@ import { Link } from "@/lib/i18n/navigation";
 import { IdentityStage, type IdentityFact } from "@/components/app/player-card/identity-stage";
 import { PlayerCardModes } from "@/components/app/player-card/player-card-modes";
 import type { PlayerCardMode } from "@/lib/player-card/card-modes";
-import { buildCardWorld } from "@/lib/player-card/card-world";
 
 /**
  * Worker player-card — the premium scouting card (TASK 07 slice
@@ -58,16 +57,6 @@ import { buildCardWorld } from "@/lib/player-card/card-world";
  */
 
 export interface PlayerCardLabels {
-  /** The person's spatial world (premium gate 2026-09-29) — its own words
-   *  and the NEXT directions the adjacency engine derives from evidence.
-   *  Optional: a caller without it gets the card without the world. */
-  world?: {
-    sceneLabel: string;
-    empty: string;
-    emptyNext: string;
-    allDetails: string;
-    directions: { id: string; label: string; detail: string | null; shared: number }[];
-  };
   /** Identity stage: EVERY profession's display name, primary-first (0/1/N). */
   professionNames: string[];
   /** Organizations of the CURRENT engagements only. */
@@ -735,57 +724,6 @@ export function WorkerPlayerCard({
     </Link>
   );
 
-  // THE PERSON'S WORLD — the same rows the sections below state, placed in
-  // space (premium gate 2026-09-29). Built only when the caller gave the
-  // world its words; plain data, it crosses into the client scene.
-  const world = labels.world
-    ? buildCardWorld({
-        person: {
-          name,
-          initials: identity.initials,
-          avatarUrl: identity.avatarUrl,
-          professions:
-            labels.professionNames.length > 0
-              ? labels.professionNames
-              : labels.professionName
-                ? [labels.professionName]
-                : [],
-          confirmedEdge: card.provenance.class === "EMPLOYER_CONFIRMED",
-          currentWork: labels.currentWork,
-          currentWorkLabel: labels.currentWorkLabel,
-          // A fact with no value is simply not drawn (never a "0" or a placeholder).
-          facts: labels.identityFacts.flatMap((f) => (f.value ? [{ value: f.value, label: f.label }] : [])),
-          provenance: { label: labels.provenance.label, text: labels.provenance.text },
-        },
-        professionSlug: card.professionSlug,
-        modeLabels: {
-          work: labels.modes.work,
-          skills: labels.modes.skills,
-          evidence: labels.modes.evidence,
-          history: labels.modes.history,
-          next: labels.modes.next,
-        },
-        currentWork: labels.currentWork,
-        skillBars: card.skillEvidence,
-        skillNames: labels.visuals.skills.skillNames,
-        skillEntryLabels: labels.visuals.skills.entryLabels,
-        noEvidence: labels.visuals.skills.noEvidence,
-        tierLabels: labels.visuals.skills.tierLabels,
-        months: card.evidenceTimeline,
-        monthLabels: labels.visuals.evidence.monthLabels,
-        lanes: historyTimeline.lanes,
-        laneDetails: labels.visuals.history.laneDetails,
-        currentLabel: labels.visuals.history.current,
-        directions: labels.world.directions,
-        words: {
-          sceneLabel: labels.world.sceneLabel,
-          empty: labels.world.empty,
-          emptyNext: labels.world.emptyNext,
-          allDetails: labels.world.allDetails,
-        },
-      })
-    : null;
-
   return (
     <section
       className={cn(
@@ -806,9 +744,8 @@ export function WorkerPlayerCard({
             mode brings forward the sections that answer it, under the SAME
             identity stage. Server-rendered slots; the switcher reads nothing. */}
       <PlayerCardModes
-        world={world}
         // ── THE PERSON: the identity stage — name, EVERY profession, where
-        // they work now and the journal's own figures, under the world. The
+        // they work now and the journal's own figures, under the card. The
         // provenance edge stays THIS card's (gold only when derived from a
         // real confirmation, P6); the words sit under the name.
         stage={
