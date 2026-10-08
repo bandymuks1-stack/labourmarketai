@@ -1,16 +1,20 @@
 import { describe, expect, it } from "vitest";
 
 import type { DomainCaller } from "@/lib/domain/caller";
-import { readEvidenceMedia } from "./evidence-media-read";
+import { readEvidenceMedia, readEvidenceMediaForProject } from "./evidence-media-read";
 
 type Result = { data?: unknown; error?: { code?: string } | null };
 
 function caller(result: Result) {
-  const calls = { from: [] as string[], eq: [] as [string, unknown][] };
+  const calls = { from: [] as string[], eq: [] as [string, unknown][], in: [] as [string, unknown][] };
   const b: Record<string, unknown> = {};
   for (const m of ["select", "order", "limit"]) b[m] = () => b;
   b.eq = (col: string, v: unknown) => {
     calls.eq.push([col, v]);
+    return b;
+  };
+  b.in = (col: string, v: unknown) => {
+    calls.in.push([col, v]);
     return b;
   };
   b.then = (res: (v: Result) => unknown) => Promise.resolve({ data: null, error: null, ...result }).then(res);
@@ -83,5 +87,32 @@ describe("readEvidenceMedia", () => {
     expect(await readEvidenceMedia(c, { workObjectId: "w1" })).toEqual({ kind: "unprovisioned" });
     const d = caller({ error: { code: "PGRST205" } });
     expect(await readEvidenceMedia(d.c, { workObjectId: "w1" })).toEqual({ kind: "unprovisioned" });
+  });
+});
+
+describe("project anchor (through the project's own work objects)", () => {
+  it("an empty set of work objects is an honest empty, with no query on the media table", async () => {
+    const a = caller({ data: [] });
+    expect(await readEvidenceMedia(a.c, { workObjectIds: [] })).toEqual({ kind: "ok", media: [] });
+    expect(a.calls.from).toEqual([]);
+  });
+
+  it("selects only rows whose work_object_id is one of the stated ids", async () => {
+    const a = caller({ data: [row] });
+    await readEvidenceMedia(a.c, { workObjectIds: ["w1", "w2"] });
+    expect(a.calls.in).toEqual([["work_object_id", ["w1", "w2"]]]);
+    expect(a.calls.eq).toEqual([]);
+  });
+
+  it("readEvidenceMediaForProject resolves the project's work objects first; a failed lookup is unavailable", async () => {
+    const a = caller({ error: { code: "500" } });
+    expect(await readEvidenceMediaForProject(a.c, "p1")).toEqual({ kind: "unavailable" });
+    expect(a.calls.from).toEqual(["work_objects"]);
+    expect(a.calls.eq).toEqual([["project_id", "p1"]]);
+  });
+
+  it("a project with no work objects has no stated anchor: ok and empty", async () => {
+    const a = caller({ data: [] });
+    expect(await readEvidenceMediaForProject(a.c, "p1")).toEqual({ kind: "ok", media: [] });
   });
 });

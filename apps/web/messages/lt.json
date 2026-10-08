@@ -8804,6 +8804,17 @@
       "nameHidden": "Vardas ir kontaktai rodomi tik tada, kai žmogus tai leidžia.",
       "appliedToYou": "Pateikė paraišką šiam poreikiui — vardas ir nuotrauka matomi dėl paraiškos. Telefonas ir el. paštas lieka paslėpti.",
       "skillUnknown": "Įgūdžių nenurodyta · reikia {total}"
+    },
+    "readinessChecks": {
+      "outstanding": "Pasirengimas (atskirai nuo tinkamumo): {count} patikrinti, pirmiausia iki etapo: {stage}. Tai ne filtras - svarstyti galima ir be dokumento kopijos.",
+      "clear": "Pasirengimas (atskirai nuo tinkamumo): neliko jokių patikrų.",
+      "unknown": "Pasirengimas (atskirai nuo tinkamumo): šios šalies reikalavimai dar nežinomi.",
+      "stage": {
+        "contract": "sutartis",
+        "assignment": "paskyrimas",
+        "mobilisation": "mobilizacija",
+        "work_start": "darbo pradžia"
+      }
     }
   },
   "planBoundary": {
@@ -18763,7 +18774,94 @@
     "recognisedBy": "Pripažino {institution}",
     "recognisedByUnnamed": "Pripažino vertinanti institucija",
     "validUntil": "galioja iki {date}",
-    "note": "Nepriklausomas vertintojas nusprendė, kad jūsų parodytas darbas atitinka šį reikalavimą. Tai nėra darbdavio patvirtinimas ir ne įvertis."
+    "note": "Nepriklausomas vertintojas nusprendė, kad jūsų parodytas darbas atitinka šį reikalavimą. Tai nėra darbdavio patvirtinimas ir ne įvertis.",
+    "noteViewer": "Nepriklausomas vertintojas nusprendė, kad šio asmens parodytas darbas atitinka šį reikalavimą. Tai nėra darbdavio atlikto darbo patvirtinimas, ne įvertis ir jis nekeičia jokio reitingo."
+  },
+  "evidenceMedia": {
+    "title": "Istorinės nuotraukos",
+    "provenance": "Nuotraukos, kurias organizacija pateikė iš savo įrašų. Pateikta, nepatikrinta.",
+    "reported": "Pateikta, nepatikrinta",
+    "unavailable": "Istorinių nuotraukų dabar nepavyko nuskaityti. Tai nereiškia, kad jų nėra.",
+    "emptyProject": "Šiam projektui istorinių nuotraukų neužregistruota.",
+    "emptyPerson": "Šiam asmeniui istorinių nuotraukų neužregistruota.",
+    "previewUnavailable": "Peržiūra nepasiekiama",
+    "photoAlt": "Istorinė darbo nuotrauka",
+    "taken": "Nufotografuota {date}",
+    "takenUnknown": "Data nenurodyta",
+    "basis": {
+      "exif": "data iš pačios nuotraukos metaduomenų",
+      "source_metadata": "data iš šaltinio sistemos metaduomenų",
+      "organization_stated": "datą nurodė organizacija",
+      "unknown": "data nežinoma"
+    },
+    "source": "Šaltinis: {system}",
+    "more": "Dar {n} nuotraukų čia nerodoma.",
+    "import": {
+      "title": "Istorinės nuotraukos: pridėkite šaltinio failus",
+      "intro": "Pridėkite savo organizacijos turimus vaizdo failus prie įrašo, vietos, asmens arba pačios organizacijos. Jūs nurodote, kam jie priklauso ir iš kur gauti; niekas nesiejama pagal datą ar failo pavadinimą. Nuotraukos saugomos privačiai ir yra pateiktos, nepatikrintos.",
+      "anchorKind": "Pridėti prie",
+      "kind": {
+        "record": "Įrašo",
+        "place": "Vietos",
+        "person": "Asmens",
+        "organization": "Organizacijos"
+      },
+      "choose": {
+        "record": "Įrašas",
+        "place": "Vieta",
+        "person": "Asmuo"
+      },
+      "none": {
+        "record": "Įrašų dar nėra. Pirmiausia importuokite įrašus arba pridėkite prie vietos, asmens ar organizacijos.",
+        "place": "Vietų dar nėra.",
+        "person": "Sąraše dar nėra asmenų."
+      },
+      "truncated": "Rodomi tik pirmieji įrašai.",
+      "sourceSystem": "Šaltinio sistema",
+      "sourceSystemHint": "Iš kur gauti šie failai, pavyzdžiui, archyvo ar programos pavadinimas.",
+      "sourceReference": "Šaltinio nuoroda (neprivaloma)",
+      "files": "Vaizdo failai",
+      "filesHint": "JPEG, PNG, WebP arba HEIC, iki {mb} MB kiekvienas.",
+      "date": "Nuotraukos data (neprivaloma)",
+      "dateHint": "Palikite tuščią, jei nežinote. Tada ji saugoma kaip nežinoma, niekada neatspėjama. Viena data taikoma visiems šios partijos failams.",
+      "basis": "Iš kur data",
+      "bases": {
+        "organization_stated": "Nurodė mūsų organizacija",
+        "source_metadata": "Iš šaltinio sistemos metaduomenų",
+        "exif": "Iš pačios nuotraukos metaduomenų"
+      },
+      "caption": "Parašas (neprivaloma)",
+      "submit": "Pridėti nuotraukas",
+      "working": "Pridedama...",
+      "resultTitle": "Rezultatas",
+      "registered": "Pridėta.",
+      "duplicate": "Jau pridėta anksčiau (tas pats failas). Nieko nepakeista.",
+      "unavailable": "Dabar nepavyko nuskaityti vietų, asmenų ir įrašų, prie kurių galima pridėti. Tai nereiškia, kad jų nėra.",
+      "refusal": {
+        "invalid": "Šio failo panaudoti nepavyko.",
+        "no_anchor": "Pirmiausia pasirinkite, kam nuotraukos priklauso.",
+        "bad_date": "Datai reikia jos pagrindo, ir ji turi būti tikra data.",
+        "unsupported_type": "Tai nėra JPEG, PNG, WebP ar HEIC vaizdas.",
+        "file_too_large": "Didesnis nei {mb} MB, todėl neišsiųstas. Nieko neišsaugota.",
+        "anchor_not_found": "Šio įrašo, vietos ar asmens šioje organizacijoje nerasta.",
+        "needs_migration": "Nuotraukų įkėlimas dar nepasiekiamas. Nieko neišsaugota.",
+        "not_allowed": "Nuotraukas gali pridėti tik šią organizaciją valdantys žmonės.",
+        "error": "Kažkas nepavyko. Nuotrauka nepridėta; bandykite dar kartą."
+      }
+    }
+  },
+  "linkedDocuments": {
+    "title": "Susieti dokumentai",
+    "introProject": "Registro dokumentai, susieti su šiuo projektu. Tik skaitymui – tvarkykite juos dokumentų registre.",
+    "introPerson": "Registro dokumentai, susieti su šiuo asmeniu. Tik skaitymui – tvarkykite juos dokumentų registre.",
+    "unavailable": "Susietų dokumentų dabar nepavyko nuskaityti. Tai nereiškia, kad jų nėra.",
+    "emptyProject": "Su šiuo projektu nesusietas nė vienas registro dokumentas.",
+    "emptyPerson": "Su šiuo asmeniu nesusietas nė vienas registro dokumentas.",
+    "personNotLinked": "Registro dokumentai priskiriami asmeniui, kai jo sąrašo įrašas susiejamas su paskyra.",
+    "noFile": "Failas dar neįkeltas",
+    "download": "Atsisiųsti",
+    "openRegister": "Atidaryti dokumentų registrą",
+    "more": "Registre yra dar {n} dokumentų."
   },
   "projectInvoice": {
     "page": {

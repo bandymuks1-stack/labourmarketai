@@ -73,6 +73,7 @@ export interface HistoricalPersonProfile {
 export type CompanyPersonLoad =
   | {
       readonly kind: "ready";
+      readonly organizationId: string;
       readonly organizationName: string;
       readonly person: CompanyPerson;
       /** Live (not withdrawn) records, newest first as the read returns them. */
@@ -159,6 +160,7 @@ export async function readCompanyPerson(input: {
 
   return {
     kind: "ready",
+    organizationId: input.organizationId,
     organizationName: input.organizationName,
     person,
     records,

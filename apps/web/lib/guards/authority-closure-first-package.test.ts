@@ -58,7 +58,7 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261007100000_",
       "20261007120000_",
       "20261007130000_",
-      "20261007140000_",
+      "20261007180000_",
       "20261008120000_",
       // 2026-10-08 owner-approved work-plan scope extension (roster + engagement).
       "20261007140000_",
@@ -66,6 +66,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261007150000_",
       // 2026-10-08 (#2191, owner-approved RED): unshare withdraws live agency offers.
       "20261008090000_",
+      // 2026-10-08 (#2195, owner-approved RED): company-side recognitions read, subject + current engagement only.
+      "20261007210000_",
       // 2026-10-08 project-to-invoice lifecycle (RED, needs-human-gate, draft; not applied).
       "20261008150000_",
     ];

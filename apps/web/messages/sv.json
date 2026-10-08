@@ -7186,6 +7186,93 @@
     "recognisedBy": "Erkänt av {institution}",
     "recognisedByUnnamed": "Erkänt av en bedömande institution",
     "validUntil": "giltigt till {date}",
-    "note": "En oberoende bedömare har beslutat att ditt visade arbete motsvarar detta. Det är inte en arbetsgivares bekräftelse och inte ett betyg."
+    "note": "En oberoende bedömare har beslutat att ditt visade arbete motsvarar detta. Det är inte en arbetsgivares bekräftelse och inte ett betyg.",
+    "noteViewer": "En oberoende bedömare har beslutat att personens visade arbete motsvarar detta. Det är inte en arbetsgivares bekräftelse, inte ett betyg och ändrar ingen rangordning."
+  },
+  "evidenceMedia": {
+    "title": "Historiska foton",
+    "provenance": "Foton som organisationen lämnat från sina egna register. Uppgivet, inte verifierat.",
+    "reported": "Uppgivet, inte verifierat",
+    "unavailable": "Historiska foton kunde inte läsas just nu. Det betyder inte att det inte finns några.",
+    "emptyProject": "Inga historiska foton är registrerade för det här projektet.",
+    "emptyPerson": "Inga historiska foton är registrerade för den här personen.",
+    "previewUnavailable": "Förhandsvisning saknas",
+    "photoAlt": "Historiskt arbetsfoto",
+    "taken": "Taget {date}",
+    "takenUnknown": "Datum inte angivet",
+    "basis": {
+      "exif": "datum från fotots egna metadata",
+      "source_metadata": "datum från källsystemets metadata",
+      "organization_stated": "datum angivet av organisationen",
+      "unknown": "datum okänt"
+    },
+    "source": "Källa: {system}",
+    "more": "{n} fler foton visas inte här.",
+    "import": {
+      "title": "Historiska foton: bifoga källfiler",
+      "intro": "Bifoga de bildfiler organisationen har till en registrering, en plats, en person eller själva organisationen. Ni anger vad de hör till och var de kommer ifrån; ingenting kopplas efter datum eller filnamn. Foton lagras privat och är uppgivna, inte verifierade.",
+      "anchorKind": "Bifoga till",
+      "kind": {
+        "record": "En registrering",
+        "place": "En plats",
+        "person": "En person",
+        "organization": "Organisationen"
+      },
+      "choose": {
+        "record": "Registrering",
+        "place": "Plats",
+        "person": "Person"
+      },
+      "none": {
+        "record": "Inga registreringar ännu. Importera registreringar först, eller bifoga till en plats, en person eller organisationen.",
+        "place": "Inga platser registrerade ännu.",
+        "person": "Inga personer i listan ännu."
+      },
+      "truncated": "Bara de första posterna visas.",
+      "sourceSystem": "Källsystem",
+      "sourceSystemHint": "Var filerna kommer ifrån, till exempel namnet på arkivet eller programvaran.",
+      "sourceReference": "Källhänvisning (valfri)",
+      "files": "Bildfiler",
+      "filesHint": "JPEG, PNG, WebP eller HEIC, upp till {mb} MB per fil.",
+      "date": "Datum taget (valfritt)",
+      "dateHint": "Lämna tomt om ni inte vet det. Det sparas då som okänt, aldrig gissat. Ett datum gäller för alla filer i den här omgången.",
+      "basis": "Var datumet kommer ifrån",
+      "bases": {
+        "organization_stated": "Uppgivet av vår organisation",
+        "source_metadata": "Från källsystemets metadata",
+        "exif": "Från fotots egna metadata"
+      },
+      "caption": "Bildtext (valfri)",
+      "submit": "Bifoga foton",
+      "working": "Bifogar...",
+      "resultTitle": "Resultat",
+      "registered": "Bifogat.",
+      "duplicate": "Redan bifogat tidigare (samma fil). Inget ändrat.",
+      "unavailable": "Platserna, personerna och registreringarna att bifoga till kunde inte läsas just nu. Det betyder inte att det inte finns några.",
+      "refusal": {
+        "invalid": "Filen kunde inte användas.",
+        "no_anchor": "Välj först vad fotona hör till.",
+        "bad_date": "Ett datum måste ha sitt underlag och vara ett riktigt datum.",
+        "unsupported_type": "Inte en JPEG-, PNG-, WebP- eller HEIC-bild.",
+        "file_too_large": "Större än {mb} MB, så den skickades inte. Inget sparades.",
+        "anchor_not_found": "Registreringen, platsen eller personen hittades inte i den här organisationen.",
+        "needs_migration": "Uppladdning av foton är inte tillgänglig ännu. Inget sparades.",
+        "not_allowed": "Bara personer som administrerar organisationen kan bifoga foton.",
+        "error": "Något gick fel. Fotot bifogades inte; försök igen."
+      }
+    }
+  },
+  "linkedDocuments": {
+    "title": "Kopplade dokument",
+    "introProject": "Registerdokument som är kopplade till det här projektet. Skrivskyddat – hantera dem i dokumentregistret.",
+    "introPerson": "Registerdokument som är kopplade till den här personen. Skrivskyddat – hantera dem i dokumentregistret.",
+    "unavailable": "Kopplade dokument kunde inte läsas just nu. Det betyder inte att det inte finns några.",
+    "emptyProject": "Inga registerdokument är kopplade till det här projektet.",
+    "emptyPerson": "Inga registerdokument är kopplade till den här personen.",
+    "personNotLinked": "Registerdokument knyts till en person när personens personalpost är kopplad till ett konto.",
+    "noFile": "Ingen fil uppladdad ännu",
+    "download": "Ladda ned",
+    "openRegister": "Öppna dokumentregistret",
+    "more": "{n} fler dokument finns i registret."
   }
 }

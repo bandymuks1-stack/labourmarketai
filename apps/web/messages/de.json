@@ -8804,6 +8804,17 @@
       "nameHidden": "Name und Kontaktdaten erscheinen erst, wenn die Person sie freigibt.",
       "appliedToYou": "Hat sich auf diesen Bedarf beworben — Name und Foto gehören zur Bewerbung. Telefon und E-Mail bleiben verborgen.",
       "skillUnknown": "Keine Fähigkeiten angegeben · benötigt: {total}"
+    },
+    "readinessChecks": {
+      "outstanding": "Bereitschaft (getrennt von Eignung): {count} zu prüfen, zuerst bis: {stage}. Kein Filter - keine Dokumentkopie nötig, um berücksichtigt zu werden.",
+      "clear": "Bereitschaft (getrennt von Eignung): keine offenen Prüfungen.",
+      "unknown": "Bereitschaft (getrennt von Eignung): Anforderungen für dieses Land sind noch nicht bekannt.",
+      "stage": {
+        "contract": "Vertrag",
+        "assignment": "Einsatzzuweisung",
+        "mobilisation": "Mobilisierung",
+        "work_start": "Arbeitsbeginn"
+      }
     }
   },
   "planBoundary": {
@@ -18763,7 +18774,94 @@
     "recognisedBy": "Anerkannt durch {institution}",
     "recognisedByUnnamed": "Anerkannt durch eine bewertende Einrichtung",
     "validUntil": "gültig bis {date}",
-    "note": "Eine unabhängige Prüfstelle hat entschieden, dass Ihre gezeigte Arbeit dies erfüllt. Das ist keine Bestätigung durch einen Arbeitgeber und keine Bewertung."
+    "note": "Eine unabhängige Prüfstelle hat entschieden, dass Ihre gezeigte Arbeit dies erfüllt. Das ist keine Bestätigung durch einen Arbeitgeber und keine Bewertung.",
+    "noteViewer": "Eine unabhängige Prüfstelle hat entschieden, dass die gezeigte Arbeit dieser Person dies erfüllt. Das ist keine Bestätigung durch einen Arbeitgeber, keine Bewertung und ändert kein Ranking."
+  },
+  "evidenceMedia": {
+    "title": "Historische Fotos",
+    "provenance": "Fotos, die die Organisation aus ihren eigenen Unterlagen geliefert hat. Angegeben, nicht verifiziert.",
+    "reported": "Angegeben, nicht verifiziert",
+    "unavailable": "Historische Fotos konnten gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
+    "emptyProject": "Für dieses Projekt sind keine historischen Fotos erfasst.",
+    "emptyPerson": "Für diese Person sind keine historischen Fotos erfasst.",
+    "previewUnavailable": "Vorschau nicht verfügbar",
+    "photoAlt": "Historisches Arbeitsfoto",
+    "taken": "Aufgenommen {date}",
+    "takenUnknown": "Datum nicht angegeben",
+    "basis": {
+      "exif": "Datum aus den eigenen Metadaten des Fotos",
+      "source_metadata": "Datum aus den Metadaten des Quellsystems",
+      "organization_stated": "Datum von der Organisation angegeben",
+      "unknown": "Datum unbekannt"
+    },
+    "source": "Quelle: {system}",
+    "more": "{n} weitere Fotos werden hier nicht angezeigt.",
+    "import": {
+      "title": "Historische Fotos: Quelldateien anhängen",
+      "intro": "Hängen Sie die Bilddateien Ihrer Organisation an einen Nachweis, einen Ort, eine Person oder die Organisation selbst an. Sie geben an, wozu sie gehören und woher sie stammen; nichts wird nach Datum oder Dateiname zugeordnet. Fotos werden privat gespeichert und sind angegeben, nicht verifiziert.",
+      "anchorKind": "Anhängen an",
+      "kind": {
+        "record": "Einen Nachweis",
+        "place": "Einen Ort",
+        "person": "Eine Person",
+        "organization": "Die Organisation"
+      },
+      "choose": {
+        "record": "Nachweis",
+        "place": "Ort",
+        "person": "Person auswählen"
+      },
+      "none": {
+        "record": "Noch keine Nachweise. Importieren Sie zuerst Nachweise oder hängen Sie an einen Ort, eine Person oder die Organisation an.",
+        "place": "Noch keine Orte erfasst.",
+        "person": "Noch keine Personen in der Liste."
+      },
+      "truncated": "Nur die ersten Einträge werden aufgelistet.",
+      "sourceSystem": "Quellsystem",
+      "sourceSystemHint": "Woher diese Dateien stammen, zum Beispiel der Name des Archivs oder der Software.",
+      "sourceReference": "Quellenverweis (optional)",
+      "files": "Bilddateien",
+      "filesHint": "JPEG, PNG, WebP oder HEIC, jeweils bis {mb} MB.",
+      "date": "Aufnahmedatum (optional)",
+      "dateHint": "Leer lassen, wenn Sie es nicht kennen. Es wird dann als unbekannt gespeichert, nie geschätzt. Ein Datum gilt für alle Dateien dieses Stapels.",
+      "basis": "Woher das Datum stammt",
+      "bases": {
+        "organization_stated": "Von unserer Organisation angegeben",
+        "source_metadata": "Aus den Metadaten des Quellsystems",
+        "exif": "Aus den eigenen Metadaten des Fotos"
+      },
+      "caption": "Bildunterschrift (optional)",
+      "submit": "Fotos anhängen",
+      "working": "Wird angehängt...",
+      "resultTitle": "Ergebnis",
+      "registered": "Angehängt.",
+      "duplicate": "Bereits früher angehängt (gleiche Datei). Nichts geändert.",
+      "unavailable": "Orte, Personen und Nachweise zum Anhängen konnten gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
+      "refusal": {
+        "invalid": "Diese Datei konnte nicht verwendet werden.",
+        "no_anchor": "Wählen Sie zuerst, wozu die Fotos gehören.",
+        "bad_date": "Ein Datum braucht seine Grundlage und muss ein echtes Datum sein.",
+        "unsupported_type": "Kein JPEG-, PNG-, WebP- oder HEIC-Bild.",
+        "file_too_large": "Größer als {mb} MB, daher nicht gesendet. Nichts wurde gespeichert.",
+        "anchor_not_found": "Dieser Nachweis, Ort oder diese Person wurde in dieser Organisation nicht gefunden.",
+        "needs_migration": "Das Hochladen von Fotos ist noch nicht verfügbar. Nichts wurde gespeichert.",
+        "not_allowed": "Nur Personen, die diese Organisation verwalten, können Fotos anhängen.",
+        "error": "Etwas ist schiefgegangen. Das Foto wurde nicht angehängt; versuchen Sie es erneut."
+      }
+    }
+  },
+  "linkedDocuments": {
+    "title": "Verknüpfte Dokumente",
+    "introProject": "Dokumente aus dem Register, die mit diesem Projekt verknüpft sind. Nur lesbar – verwalten Sie sie im Dokumentenregister.",
+    "introPerson": "Dokumente aus dem Register, die mit dieser Person verknüpft sind. Nur lesbar – verwalten Sie sie im Dokumentenregister.",
+    "unavailable": "Verknüpfte Dokumente konnten gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt.",
+    "emptyProject": "Mit diesem Projekt sind keine Registerdokumente verknüpft.",
+    "emptyPerson": "Mit dieser Person sind keine Registerdokumente verknüpft.",
+    "personNotLinked": "Registerdokumente werden einer Person zugeordnet, sobald ihr Personaleintrag mit einem Konto verknüpft ist.",
+    "noFile": "Noch keine Datei hochgeladen",
+    "download": "Herunterladen",
+    "openRegister": "Dokumentenregister öffnen",
+    "more": "{n} weitere Dokumente sind im Register."
   },
   "projectInvoice": {
     "page": {

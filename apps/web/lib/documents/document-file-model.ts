@@ -159,6 +159,11 @@ export type OrgRegisterFilters = {
   readonly objectId: string | null;
   readonly retention: RetentionState | null;
   readonly q: string;
+  /** Surface-scoped filters (a project page / a person page). Set only by the
+   *  server component that owns the surface - never parsed from the URL, so
+   *  they open no new access path (RLS still decides every row). */
+  readonly projectId: string | null;
+  readonly workerId: string | null;
 };
 
 export const EMPTY_ORG_REGISTER_FILTERS: OrgRegisterFilters = {
@@ -167,6 +172,8 @@ export const EMPTY_ORG_REGISTER_FILTERS: OrgRegisterFilters = {
   objectId: null,
   retention: null,
   q: "",
+  projectId: null,
+  workerId: null,
 };
 
 const UUID_RE =
@@ -202,6 +209,8 @@ export function parseOrgRegisterFilters(sp: {
     objectId,
     retention,
     q: sanitizeRegisterSearch(String(sp.regQ ?? "")),
+    projectId: null,
+    workerId: null,
   };
 }
 

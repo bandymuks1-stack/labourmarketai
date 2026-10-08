@@ -147,7 +147,6 @@ import { createUtcFormatter } from "@/lib/time/display";
 const STATUS_TONE: Record<OpportunityStatus, string> = {
   possible_match: "border-state-success/40 bg-state-success/10 text-state-success",
   check_conditions: "border-state-amber/40 bg-state-amber/10 text-state-amber",
-  needs_documents: "border-brand-blue/40 bg-brand-blue/10 text-brand-blue",
   missing_profile_info: "border-ink-500 bg-ink-800/40 text-text-muted",
 };
 
@@ -2004,7 +2003,6 @@ export default async function OpportunitiesPage({
                       ["workType", result.readiness.hasWorkType],
                       ["skills", result.readiness.hasSkills],
                       ["country", result.readiness.countries.length > 0],
-                      ["documents", result.readiness.documentsCount > 0],
                       ["availability", result.readiness.availabilitySet],
                     ] as const
                   ).map(([key, ok]) => (

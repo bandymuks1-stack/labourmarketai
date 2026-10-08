@@ -7,6 +7,7 @@ import { EvidenceImportSection } from "@/components/app/evidence-import-section"
 import { CompanyWorkHistory, CompanyPlaceHistory } from "@/components/app/organization/company-work-history";
 import { PerformingCompanyPanel } from "@/components/app/organization/performing-company-panel";
 import { EvidenceImportSessions } from "@/components/app/organization/evidence-import-sessions";
+import { HistoricalPhotoImport } from "@/components/app/organization/historical-photo-import";
 
 /**
  * ISTORIJA — the historical import door (owner IA correction 2026-09-16,
@@ -71,6 +72,9 @@ export default async function CompanyHistoryPage({
           was reachable only by its bookmark (class F: rendered ≠ reachable). */}
       <EvidenceImportSessions locale={locale} activeSessionId={evidenceSession ?? null} />
 
+      {/* HISTORICAL PHOTOS — source image files attached to a STATED record,
+          place, person or the organization; provenance + date basis kept. */}
+      <HistoricalPhotoImport />
 
       {/* Neighbouring doors of the same evidence: the hours surface (whose
           grid this engine also reads) and the evidence reports. */}

@@ -24,8 +24,7 @@ export type MatchSignalKey =
   | "workType"
   | "skills"
   | "country"
-  | "availability"
-  | "documents";
+  | "availability";
 
 /** fit = the dimension lines up; check = needs attention; unknown = not enough
  *  data to say (never guessed as a fit). */
@@ -58,7 +57,6 @@ export function buildMatchCardView(
     { key: "skills", state: profile.hasSkills ? "fit" : "check" },
     { key: "country", state: countrySignal(need.country, profile.countries) },
     { key: "availability", state: profile.availabilitySet ? "fit" : "check" },
-    { key: "documents", state: profile.documentsCount > 0 ? "fit" : "check" },
   ];
   return {
     status: fit.status,

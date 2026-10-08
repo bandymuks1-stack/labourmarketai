@@ -7186,6 +7186,93 @@
     "recognisedBy": "Anerkjent av {institution}",
     "recognisedByUnnamed": "Anerkjent av en vurderende institusjon",
     "validUntil": "gyldig til {date}",
-    "note": "En uavhengig vurderer har avgjort at arbeidet du har vist, svarer til dette. Det er ikke en arbeidsgivers bekreftelse og ikke en score."
+    "note": "En uavhengig vurderer har avgjort at arbeidet du har vist, svarer til dette. Det er ikke en arbeidsgivers bekreftelse og ikke en score.",
+    "noteViewer": "En uavhengig vurderer har avgjort at denne personens viste arbeid svarer til dette. Det er ikke en arbeidsgivers bekreftelse, ikke en score og endrer ingen rangering."
+  },
+  "evidenceMedia": {
+    "title": "Historiske bilder",
+    "provenance": "Bilder organisasjonen har levert fra sine egne registre. Oppgitt, ikke verifisert.",
+    "reported": "Oppgitt, ikke verifisert",
+    "unavailable": "Historiske bilder kunne ikke leses akkurat nå. Det betyr ikke at det ikke finnes noen.",
+    "emptyProject": "Ingen historiske bilder er registrert for dette prosjektet.",
+    "emptyPerson": "Ingen historiske bilder er registrert for denne personen.",
+    "previewUnavailable": "Forhåndsvisning utilgjengelig",
+    "photoAlt": "Historisk arbeidsbilde",
+    "taken": "Tatt {date}",
+    "takenUnknown": "Dato ikke oppgitt",
+    "basis": {
+      "exif": "dato fra bildets egne metadata",
+      "source_metadata": "dato fra kildesystemets metadata",
+      "organization_stated": "dato oppgitt av organisasjonen",
+      "unknown": "dato ukjent"
+    },
+    "source": "Kilde: {system}",
+    "more": "{n} flere bilder vises ikke her.",
+    "import": {
+      "title": "Historiske bilder: legg ved kildefiler",
+      "intro": "Legg ved bildefilene organisasjonen har til en registrering, et sted, en person eller selve organisasjonen. Dere oppgir hva de hører til og hvor de kommer fra; ingenting kobles etter dato eller filnavn. Bildene lagres privat og er oppgitt, ikke verifisert.",
+      "anchorKind": "Legg ved til",
+      "kind": {
+        "record": "En registrering",
+        "place": "Et sted",
+        "person": "En person",
+        "organization": "Organisasjonen"
+      },
+      "choose": {
+        "record": "Registrering",
+        "place": "Sted",
+        "person": "Person"
+      },
+      "none": {
+        "record": "Ingen registreringer ennå. Importer registreringer først, eller legg ved til et sted, en person eller organisasjonen.",
+        "place": "Ingen steder registrert ennå.",
+        "person": "Ingen personer på listen ennå."
+      },
+      "truncated": "Bare de første oppføringene vises.",
+      "sourceSystem": "Kildesystem",
+      "sourceSystemHint": "Hvor filene kommer fra, for eksempel navnet på arkivet eller programvaren.",
+      "sourceReference": "Kildehenvisning (valgfri)",
+      "files": "Bildefiler",
+      "filesHint": "JPEG, PNG, WebP eller HEIC, opptil {mb} MB hver.",
+      "date": "Dato tatt (valgfri)",
+      "dateHint": "La stå tomt hvis dere ikke kjenner den. Den lagres da som ukjent, aldri gjettet. Én dato gjelder for alle filene i denne omgangen.",
+      "basis": "Hvor datoen kommer fra",
+      "bases": {
+        "organization_stated": "Oppgitt av vår organisasjon",
+        "source_metadata": "Fra kildesystemets metadata",
+        "exif": "Fra bildets egne metadata"
+      },
+      "caption": "Bildetekst (valgfri)",
+      "submit": "Legg ved bilder",
+      "working": "Legger ved...",
+      "resultTitle": "Resultat",
+      "registered": "Lagt ved.",
+      "duplicate": "Allerede lagt ved tidligere (samme fil). Ingenting endret.",
+      "unavailable": "Steder, personer og registreringer å legge ved til kunne ikke leses akkurat nå. Det betyr ikke at det ikke finnes noen.",
+      "refusal": {
+        "invalid": "Filen kunne ikke brukes.",
+        "no_anchor": "Velg først hva bildene hører til.",
+        "bad_date": "En dato må ha sitt grunnlag og være en ekte dato.",
+        "unsupported_type": "Ikke et JPEG-, PNG-, WebP- eller HEIC-bilde.",
+        "file_too_large": "Større enn {mb} MB, så den ble ikke sendt. Ingenting ble lagret.",
+        "anchor_not_found": "Registreringen, stedet eller personen ble ikke funnet i denne organisasjonen.",
+        "needs_migration": "Opplasting av bilder er ikke tilgjengelig ennå. Ingenting ble lagret.",
+        "not_allowed": "Bare personer som administrerer organisasjonen kan legge ved bilder.",
+        "error": "Noe gikk galt. Bildet ble ikke lagt ved; prøv igjen."
+      }
+    }
+  },
+  "linkedDocuments": {
+    "title": "Tilknyttede dokumenter",
+    "introProject": "Dokumenter i registeret som er knyttet til dette prosjektet. Skrivebeskyttet – administrer dem i dokumentregisteret.",
+    "introPerson": "Dokumenter i registeret som er knyttet til denne personen. Skrivebeskyttet – administrer dem i dokumentregisteret.",
+    "unavailable": "Tilknyttede dokumenter kunne ikke leses akkurat nå. Det betyr ikke at det ikke finnes noen.",
+    "emptyProject": "Ingen registerdokumenter er knyttet til dette prosjektet.",
+    "emptyPerson": "Ingen registerdokumenter er knyttet til denne personen.",
+    "personNotLinked": "Registerdokumenter knyttes til en person når personens ansattpost er knyttet til en konto.",
+    "noFile": "Ingen fil lastet opp ennå",
+    "download": "Last ned",
+    "openRegister": "Åpne dokumentregisteret",
+    "more": "{n} flere dokumenter finnes i registeret."
   }
 }

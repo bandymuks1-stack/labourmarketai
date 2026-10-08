@@ -1606,6 +1606,10 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261007140000_work_plan_scope_roster_engagement_v1.sql",
       // 2026-10-07 (E6, owner decision): a team/brigade offered against one demand (new table + SECURITY DEFINER doors + GRANT) - marker is the human-gate acknowledgement; owner-approved 2026-10-08 (separate hand-off RPC).
       "20261007150000_team_demand_offer_v1.sql",
+      // 2026-10-07: private evidence-media bucket + storage.objects policies (RED storage policy) - marker is the human-gate acknowledgement; owner-approved in chat 2026-10-08 (PR #2189).
+      "20261007180000_evidence_media_bucket_v1.sql",
+      // 2026-10-08 (#2195, owner-approved RED, narrower audience: subject + CURRENT engagement only): company-side recognitions read (SECURITY DEFINER + GRANT) - marker is the human-gate acknowledgement.
+      "20261007210000_worker_recognitions_for_viewer_v1.sql",
       // 2026-10-08 (#2191, owner-approved RED): unshare withdraws live agency offers (SECURITY DEFINER replace + data DML) - marker is the human-gate acknowledgement.
       "20261008090000_chain_proof_unshare_withdraws_offers_v1.sql",
       // 2026-10-08 (R-5, owner-approved in chat, RED): manager approval raises skill confidence - one SECURITY DEFINER function + GRANT; marker is the human-gate acknowledgement.
