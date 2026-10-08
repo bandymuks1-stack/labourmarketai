@@ -58,7 +58,7 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261007100000_",
       "20261007120000_",
       "20261007130000_",
-      "20261007140000_",
+      "20261007180000_",
       "20261008120000_",
       // 2026-10-08 owner-approved work-plan scope extension (roster + engagement).
       "20261007140000_",

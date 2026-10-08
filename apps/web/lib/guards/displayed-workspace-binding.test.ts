@@ -52,6 +52,7 @@ const BOUND_ACTIONS: readonly (readonly [string, string])[] = [
   ["lib/documents/org-document-actions.ts", "createOrgDocumentAction"],
   ["lib/objects/objects-actions.ts", "saveWorkObjectAction"],
   ["lib/organization-evidence/import-actions.ts", "startEvidenceImportAction"],
+  ["lib/organization-evidence/evidence-media-actions.ts", "uploadEvidenceMediaAction"],
   ["lib/organization-people/ingest-actions.ts", "commitPeopleIngestAction"],
   ["lib/privacy/contact-disclosure-actions.ts", "requestContactDisclosureAction"],
   ["lib/projects/actions.ts", "createProjectAction"],

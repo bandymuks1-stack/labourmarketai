@@ -8,6 +8,8 @@ import { Card } from "@/components/ui/Card";
 import { SemanticIcon } from "@/components/app/semantic-icon";
 import { PersonImportedHistory } from "@/components/app/people/person-imported-history";
 import { PersonHistorySummaryBlock } from "@/components/app/organization/person-history-summary";
+import { EvidenceMediaStrip } from "@/components/app/evidence-media-strip";
+import { LinkedDocuments } from "@/components/app/linked-documents";
 import { HistoricalPersonProfileBlock } from "@/components/app/organization/historical-person-profile";
 import { loadCompanyPerson } from "@/lib/organization-evidence/company-person-read";
 
@@ -45,6 +47,7 @@ export default async function CompanyPersonHistoryPage({
 
   const t = await getTranslations("companyPerson");
   const tRel = await getTranslations("evidenceImport.relationship");
+  const tLinked = await getTranslations("linkedDocuments");
 
   const load = await loadCompanyPerson(locale, personId);
   if (load.kind === "hidden" || load.kind === "not-found") notFound();
@@ -144,6 +147,22 @@ export default async function CompanyPersonHistoryPage({
         showEmpty
         locale={locale}
       />
+
+      {/* Photos the organization supplied for this person, by their stated anchor. */}
+      <EvidenceMediaStrip locale={locale} anchor={{ kind: "person", organizationPersonId: person.id }} />
+
+      {/* Register documents linked to the person's WORKER record. Documents attach to a worker,
+          so this exists only once the roster record is linked - said, not hidden. */}
+      {person.linkedWorkerId ? (
+        <LinkedDocuments
+          organizationId={load.organizationId}
+          scope={{ kind: "worker", workerId: person.linkedWorkerId }}
+        />
+      ) : (
+        <p className="text-meta text-text-muted" data-testid="linked-documents-not-linked">
+          {tLinked("personNotLinked")}
+        </p>
+      )}
     </div>
   );
 }

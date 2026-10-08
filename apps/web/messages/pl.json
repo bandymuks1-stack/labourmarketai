@@ -18776,5 +18776,91 @@
     "validUntil": "ważne do {date}",
     "note": "Niezależny oceniający uznał, że pokazana praca spełnia ten wymóg. To nie jest potwierdzenie pracodawcy ani ocena punktowa.",
     "noteViewer": "Niezależny oceniający uznał, że pokazana praca tej osoby spełnia ten wymóg. To nie jest potwierdzenie pracodawcy ani ocena punktowa i nie zmienia żadnego rankingu."
+  },
+  "evidenceMedia": {
+    "title": "Historyczne zdjęcia",
+    "provenance": "Zdjęcia dostarczone przez organizację z jej własnych zapisów. Zgłoszone, niezweryfikowane.",
+    "reported": "Zgłoszone, niezweryfikowane",
+    "unavailable": "Nie udało się teraz odczytać historycznych zdjęć. To nie znaczy, że ich nie ma.",
+    "emptyProject": "Dla tego projektu nie zapisano historycznych zdjęć.",
+    "emptyPerson": "Dla tej osoby nie zapisano historycznych zdjęć.",
+    "previewUnavailable": "Podgląd niedostępny",
+    "photoAlt": "Historyczne zdjęcie z pracy",
+    "taken": "Wykonano {date}",
+    "takenUnknown": "Data niepodana",
+    "basis": {
+      "exif": "data z metadanych samego zdjęcia",
+      "source_metadata": "data z metadanych systemu źródłowego",
+      "organization_stated": "data podana przez organizację",
+      "unknown": "data nieznana"
+    },
+    "source": "Źródło: {system}",
+    "more": "Kolejnych zdjęć ({n}) nie pokazano tutaj.",
+    "import": {
+      "title": "Historyczne zdjęcia: dołącz pliki źródłowe",
+      "intro": "Dołącz pliki obrazów, które posiada Twoja organizacja, do wpisu, miejsca, osoby lub samej organizacji. Ty wskazujesz, do czego należą i skąd pochodzą; nic nie jest dopasowywane według daty ani nazwy pliku. Zdjęcia są przechowywane prywatnie i są zgłoszone, niezweryfikowane.",
+      "anchorKind": "Dołącz do",
+      "kind": {
+        "record": "Wpisu",
+        "place": "Miejsca",
+        "person": "Osoby",
+        "organization": "Organizacji"
+      },
+      "choose": {
+        "record": "Wpis",
+        "place": "Miejsce",
+        "person": "Osoba"
+      },
+      "none": {
+        "record": "Brak jeszcze wpisów. Najpierw zaimportuj wpisy albo dołącz do miejsca, osoby lub organizacji.",
+        "place": "Brak jeszcze miejsc.",
+        "person": "Brak jeszcze osób na liście."
+      },
+      "truncated": "Wyświetlono tylko pierwsze pozycje.",
+      "sourceSystem": "System źródłowy",
+      "sourceSystemHint": "Skąd pochodzą te pliki, na przykład nazwa archiwum lub oprogramowania.",
+      "sourceReference": "Odwołanie do źródła (opcjonalnie)",
+      "files": "Pliki obrazów",
+      "filesHint": "JPEG, PNG, WebP lub HEIC, do {mb} MB każdy.",
+      "date": "Data wykonania (opcjonalnie)",
+      "dateHint": "Zostaw puste, jeśli jej nie znasz. Zostanie zapisana jako nieznana, nigdy zgadnięta. Jedna data dotyczy wszystkich plików tej partii.",
+      "basis": "Skąd pochodzi data",
+      "bases": {
+        "organization_stated": "Podana przez naszą organizację",
+        "source_metadata": "Z metadanych systemu źródłowego",
+        "exif": "Z metadanych samego zdjęcia"
+      },
+      "caption": "Podpis (opcjonalnie)",
+      "submit": "Dołącz zdjęcia",
+      "working": "Dołączanie...",
+      "resultTitle": "Wynik",
+      "registered": "Dołączono.",
+      "duplicate": "Już wcześniej dołączono (ten sam plik). Nic się nie zmieniło.",
+      "unavailable": "Nie udało się teraz odczytać miejsc, osób i wpisów, do których można dołączyć. To nie znaczy, że ich nie ma.",
+      "refusal": {
+        "invalid": "Nie można użyć tego pliku.",
+        "no_anchor": "Najpierw wybierz, do czego należą zdjęcia.",
+        "bad_date": "Data wymaga podania źródła i musi być prawdziwą datą.",
+        "unsupported_type": "To nie jest obraz JPEG, PNG, WebP ani HEIC.",
+        "file_too_large": "Większy niż {mb} MB, więc nie został wysłany. Nic nie zapisano.",
+        "anchor_not_found": "Nie znaleziono tego wpisu, miejsca ani osoby w tej organizacji.",
+        "needs_migration": "Przesyłanie zdjęć nie jest jeszcze dostępne. Nic nie zapisano.",
+        "not_allowed": "Zdjęcia mogą dołączać tylko osoby zarządzające tą organizacją.",
+        "error": "Coś poszło nie tak. Zdjęcie nie zostało dołączone; spróbuj ponownie."
+      }
+    }
+  },
+  "linkedDocuments": {
+    "title": "Powiązane dokumenty",
+    "introProject": "Dokumenty z rejestru powiązane z tym projektem. Tylko do odczytu – zarządzaj nimi w rejestrze dokumentów.",
+    "introPerson": "Dokumenty z rejestru powiązane z tą osobą. Tylko do odczytu – zarządzaj nimi w rejestrze dokumentów.",
+    "unavailable": "Nie udało się teraz odczytać powiązanych dokumentów. To nie znaczy, że ich nie ma.",
+    "emptyProject": "Z tym projektem nie powiązano dokumentów z rejestru.",
+    "emptyPerson": "Z tą osobą nie powiązano dokumentów z rejestru.",
+    "personNotLinked": "Dokumenty z rejestru są przypisywane do osoby, gdy jej wpis na liście jest powiązany z kontem.",
+    "noFile": "Nie przesłano jeszcze pliku",
+    "download": "Pobierz",
+    "openRegister": "Otwórz rejestr dokumentów",
+    "more": "W rejestrze jest jeszcze {n} dokumentów."
   }
 }

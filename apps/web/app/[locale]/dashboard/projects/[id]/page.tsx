@@ -29,6 +29,8 @@ import { ProjectWorkGallery } from "@/components/app/project-work-gallery";
 import { CounterpartyLinkPanel } from "@/components/app/counterparty-link-panel";
 import { readLinkCandidates } from "@/lib/journal/counterparty-review";
 import { ProjectHistoricalWork } from "@/components/app/project-historical-work";
+import { EvidenceMediaStrip } from "@/components/app/evidence-media-strip";
+import { ProjectLinkedDocuments } from "@/components/app/linked-documents";
 import { type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 
@@ -517,6 +519,12 @@ export default async function ProjectStadiumPage({
 
       {/* ── Historical work: organization-provided imported history on this project ── */}
       <ProjectHistoricalWork projectId={id} locale={locale} />
+
+      {/* ── Historical photos the organization supplied, by their stated work-object anchor ── */}
+      <EvidenceMediaStrip locale={locale} anchor={{ kind: "project", projectId: id }} />
+
+      {/* ── Register documents linked to this project (read-only, RLS-scoped) ── */}
+      <ProjectLinkedDocuments projectId={id} />
 
       {/* ── Missing positions: the needs model does not exist yet — say so ── */}
       <section className="flex flex-col gap-2" data-testid="stadium-positions-note">

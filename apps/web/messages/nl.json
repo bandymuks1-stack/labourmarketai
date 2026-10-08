@@ -18776,5 +18776,91 @@
     "validUntil": "geldig tot {date}",
     "note": "Een onafhankelijke beoordelaar heeft besloten dat je getoonde werk hieraan voldoet. Dit is geen bevestiging door een werkgever en geen score.",
     "noteViewer": "Een onafhankelijke beoordelaar heeft besloten dat het getoonde werk van deze persoon hieraan voldoet. Dit is geen bevestiging door een werkgever, geen score en wijzigt geen rangschikking."
+  },
+  "evidenceMedia": {
+    "title": "Historische foto's",
+    "provenance": "Foto's die de organisatie uit haar eigen administratie heeft aangeleverd. Opgegeven, niet geverifieerd.",
+    "reported": "Opgegeven, niet geverifieerd",
+    "unavailable": "Historische foto's konden nu niet worden gelezen. Dat betekent niet dat er geen zijn.",
+    "emptyProject": "Voor dit project zijn geen historische foto's vastgelegd.",
+    "emptyPerson": "Voor deze persoon zijn geen historische foto's vastgelegd.",
+    "previewUnavailable": "Voorbeeld niet beschikbaar",
+    "photoAlt": "Historische werkfoto",
+    "taken": "Genomen op {date}",
+    "takenUnknown": "Datum niet opgegeven",
+    "basis": {
+      "exif": "datum uit de eigen metadata van de foto",
+      "source_metadata": "datum uit de metadata van het bronsysteem",
+      "organization_stated": "datum opgegeven door de organisatie",
+      "unknown": "datum onbekend"
+    },
+    "source": "Bron: {system}",
+    "more": "Nog {n} foto's worden hier niet getoond.",
+    "import": {
+      "title": "Historische foto's: bronbestanden toevoegen",
+      "intro": "Voeg de beeldbestanden van uw organisatie toe aan een vastlegging, een plek, een persoon of de organisatie zelf. U geeft aan waartoe ze behoren en waar ze vandaan komen; er wordt niets gekoppeld op datum of bestandsnaam. Foto's worden privé opgeslagen en zijn opgegeven, niet geverifieerd.",
+      "anchorKind": "Toevoegen aan",
+      "kind": {
+        "record": "Een vastlegging",
+        "place": "Een plek",
+        "person": "Een persoon",
+        "organization": "De organisatie"
+      },
+      "choose": {
+        "record": "Vastlegging",
+        "place": "Plek",
+        "person": "Persoon"
+      },
+      "none": {
+        "record": "Nog geen vastleggingen. Importeer eerst vastleggingen of voeg toe aan een plek, een persoon of de organisatie.",
+        "place": "Nog geen plekken vastgelegd.",
+        "person": "Nog geen personen in de lijst."
+      },
+      "truncated": "Alleen de eerste items worden getoond.",
+      "sourceSystem": "Bronsysteem",
+      "sourceSystemHint": "Waar deze bestanden vandaan komen, bijvoorbeeld de naam van het archief of de software.",
+      "sourceReference": "Bronverwijzing (optioneel)",
+      "files": "Beeldbestanden",
+      "filesHint": "JPEG, PNG, WebP of HEIC, elk tot {mb} MB.",
+      "date": "Datum van opname (optioneel)",
+      "dateHint": "Laat leeg als u die niet weet. Dan wordt hij als onbekend opgeslagen, nooit geraden. Eén datum geldt voor alle bestanden in deze batch.",
+      "basis": "Waar de datum vandaan komt",
+      "bases": {
+        "organization_stated": "Opgegeven door onze organisatie",
+        "source_metadata": "Uit de metadata van het bronsysteem",
+        "exif": "Uit de eigen metadata van de foto"
+      },
+      "caption": "Onderschrift (optioneel)",
+      "submit": "Foto's toevoegen",
+      "working": "Toevoegen...",
+      "resultTitle": "Resultaat",
+      "registered": "Toegevoegd.",
+      "duplicate": "Eerder al toegevoegd (hetzelfde bestand). Niets gewijzigd.",
+      "unavailable": "De plekken, personen en vastleggingen om aan toe te voegen konden nu niet worden gelezen. Dat betekent niet dat er geen zijn.",
+      "refusal": {
+        "invalid": "Dit bestand kon niet worden gebruikt.",
+        "no_anchor": "Kies eerst waartoe de foto's behoren.",
+        "bad_date": "Een datum heeft zijn grondslag nodig en moet een echte datum zijn.",
+        "unsupported_type": "Geen JPEG-, PNG-, WebP- of HEIC-afbeelding.",
+        "file_too_large": "Groter dan {mb} MB, dus niet verzonden. Er is niets opgeslagen.",
+        "anchor_not_found": "Die vastlegging, plek of persoon is in deze organisatie niet gevonden.",
+        "needs_migration": "Foto's uploaden is nog niet beschikbaar. Er is niets opgeslagen.",
+        "not_allowed": "Alleen mensen die deze organisatie beheren kunnen foto's toevoegen.",
+        "error": "Er ging iets mis. De foto is niet toegevoegd; probeer het opnieuw."
+      }
+    }
+  },
+  "linkedDocuments": {
+    "title": "Gekoppelde documenten",
+    "introProject": "Registerdocumenten die aan dit project zijn gekoppeld. Alleen-lezen – beheer ze in het documentregister.",
+    "introPerson": "Registerdocumenten die aan deze persoon zijn gekoppeld. Alleen-lezen – beheer ze in het documentregister.",
+    "unavailable": "Gekoppelde documenten konden nu niet worden gelezen. Dat betekent niet dat er geen zijn.",
+    "emptyProject": "Aan dit project zijn geen registerdocumenten gekoppeld.",
+    "emptyPerson": "Aan deze persoon zijn geen registerdocumenten gekoppeld.",
+    "personNotLinked": "Registerdocumenten worden aan een persoon gekoppeld zodra diens personeelsrecord aan een account is gekoppeld.",
+    "noFile": "Nog geen bestand geüpload",
+    "download": "Downloaden",
+    "openRegister": "Documentregister openen",
+    "more": "Nog {n} documenten staan in het register."
   }
 }
