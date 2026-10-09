@@ -19,9 +19,11 @@ describe("room 'My spaces' switch is an unmistakable tappable chip", () => {
   for (const r of ROOMS) {
     const src = read(`app/[locale]/dashboard/${r}/page.tsx`);
     it(`${r} My-spaces link is a bordered chip, not a plain underline`, () => {
-      // The link region carries the bordered-chip cue.
+      // The link region carries the bordered-chip cue. The SHAPE is the
+      // affordance; the border may be neutral (2026-10-09 premium direction:
+      // gold is reserved for the one primary action on a page).
       expect(src).toMatch(/data-testid="room-my-spaces-link"/);
-      expect(src).toMatch(/room-my-spaces-link[\s\S]{0,160}rounded-md border border-brand-blue\/40|rounded-md border border-brand-blue\/40[\s\S]{0,160}room-my-spaces-link/);
+      expect(src).toMatch(/room-my-spaces-link[\s\S]{0,160}rounded-md border border-(brand-blue\/40|border-subtle)|rounded-md border border-(brand-blue\/40|border-subtle)[\s\S]{0,160}room-my-spaces-link/);
       // …and not the old plain-underline-only treatment.
       expect(src).not.toMatch(/room-my-spaces-link[\s\S]{0,80}text-brand-blue hover:underline"/);
     });

@@ -894,7 +894,7 @@ export default async function ProfilePage({
             {workerId ? (
               <Link
                 href="/cv"
-                className="rounded-md px-2.5 py-1 text-xs font-medium text-text-secondary underline-offset-4 transition-colors hover:text-brand-champagne hover:underline"
+                className="rounded-md px-2.5 py-1 text-xs font-medium text-text-secondary underline-offset-4 transition-colors hover:text-text-primary hover:underline"
                 data-testid="profile-cv-export-link"
               >
                 {tCv("exportButton")}
@@ -902,7 +902,7 @@ export default async function ProfilePage({
             ) : null}
           </div>
           <details className="group" data-testid="profile-more-destinations">
-            <summary className="inline-flex min-h-11 cursor-pointer select-none list-none items-center font-mono text-meta uppercase tracking-label text-text-secondary transition-colors hover:text-text-primary [&::-webkit-details-marker]:hidden">
+            <summary className="inline-flex min-h-11 cursor-pointer select-none list-none items-center text-sm font-medium text-text-secondary transition-colors hover:text-text-primary [&::-webkit-details-marker]:hidden">
               {tQuick("moreDestinations")}
               <span aria-hidden className="ml-1 transition-transform group-open:rotate-90">
                 ›
@@ -914,7 +914,7 @@ export default async function ProfilePage({
             {workerId && DOCUMENTS_READINESS_ENABLED ? (
               <Link
                 href={"/dashboard/documents" as "/dashboard"}
-                className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+                className="rounded-md border border-border-subtle px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-ink-500 hover:text-text-primary"
                 data-testid="profile-documents-link"
               >
                 {tDocs("title")}
@@ -927,7 +927,7 @@ export default async function ProfilePage({
             {workerId ? (
               <Link
                 href={"/dashboard/privacy" as "/dashboard"}
-                className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+                className="rounded-md border border-border-subtle px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-ink-500 hover:text-text-primary"
                 data-testid="profile-visibility-link"
               >
                 {tPrivacySections("visibility")}
@@ -937,7 +937,7 @@ export default async function ProfilePage({
             {workerId ? (
               <Link
                 href={"/dashboard/gallery" as "/dashboard"}
-                className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+                className="rounded-md border border-border-subtle px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-ink-500 hover:text-text-primary"
                 data-testid="profile-gallery-link"
               >
                 {tGallery("title")}
@@ -949,14 +949,14 @@ export default async function ProfilePage({
                 in an existing row, not a replacement card. */}
             <Link
               href={"/dashboard/network" as "/dashboard"}
-              className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+              className="rounded-md border border-border-subtle px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-ink-500 hover:text-text-primary"
               data-testid="profile-network-link"
             >
               {tNetwork("title")} →
             </Link>
             <Link
               href="/dashboard"
-              className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+              className="rounded-md border border-border-subtle px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-ink-500 hover:text-text-primary"
               data-testid="room-my-spaces-link"
             >
               {tSpaces("mySpaces")} →
@@ -1534,7 +1534,7 @@ export default async function ProfilePage({
         <div className="flex flex-col gap-3 px-4 pb-4">
           <Link
             href="/dashboard/journal"
-            className="inline-flex min-h-11 w-fit items-center font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
+            className="inline-flex min-h-11 w-fit items-center text-sm font-medium text-text-secondary underline-offset-4 hover:text-text-primary hover:underline"
             data-testid="profile-mano-cv-records-link"
           >
             {tQuick("fullRecordsInCv")} →

@@ -755,7 +755,9 @@ export default async function VerifiedCvPage({
           <PremiumLivingCv
             name={cv.personName.trim() && cv.personName.trim() !== "—" ? cv.personName : t("nameNotProvided")}
             eyebrow={professionNames.length > 0 ? professionNames.join(" · ") : tPremium("eyebrowFallback")}
-            summary={cv.professionalSummary}
+            /* The summary renders ONCE, in its own section below (which also
+               prints); the hero carries name + professions only. */
+            summary={null}
             facts={premiumFacts}
             capabilities={premiumCapsAll.slice(0, PREMIUM_CAPS_SHOWN)}
             hiddenCapabilities={Math.max(premiumCapsAll.length - PREMIUM_CAPS_SHOWN, 0)}
@@ -779,7 +781,10 @@ export default async function VerifiedCvPage({
           <p className="font-mono text-meta uppercase tracking-widest text-text-muted">
             {t("pageTitle")}
           </p>
-          <h1 className={`mt-1 font-display font-bold tracking-tight ${compact ? "text-2xl" : "text-3xl"}`}>
+          {/* With the premium hero on screen the name and professions are
+              already its h1 + eyebrow: here they stay for PRINT only (the
+              hero is print:hidden), so the screen never shows them twice. */}
+          <h1 className={`mt-1 font-display font-bold tracking-tight ${compact ? "text-2xl" : "text-3xl"} ${template !== "eu" ? "hidden print:block" : ""}`}>
             {cv.personName.trim() && cv.personName.trim() !== "—" ? (
               cv.personName
             ) : (
@@ -789,7 +794,7 @@ export default async function VerifiedCvPage({
             )}
           </h1>
           {cv.professionSlugs.length > 0 ? (
-            <p className="mt-1 text-sm text-text-secondary" data-testid="cv-professions">
+            <p className={`mt-1 text-sm text-text-secondary ${template !== "eu" ? "hidden print:block" : ""}`} data-testid="cv-professions">
               {cv.professionSlugs
                 .map((p) => {
                   // Registry professions are named by the catalogue; the
@@ -871,18 +876,25 @@ export default async function VerifiedCvPage({
             compact template keeps the screen dense too). */}
         {!compact ? (
           <section
-            className="rounded-lg border border-ink-600 bg-ink-800 p-4 print:hidden"
+            className="rounded-lg border border-ink-600 bg-ink-800 px-4 py-3 print:hidden"
             data-testid="cv-built-from"
           >
-            <p className="text-sm text-text-secondary">{t("builtFrom.lead")}</p>
-            <ul className="mt-2 flex list-disc flex-col gap-1 pl-5 text-sm text-text-secondary">
-              <li>{t("builtFrom.profile")}</li>
-              <li>{t("builtFrom.skills")}</li>
-              <li>{t("builtFrom.records")}</li>
-            </ul>
-            <p className="mt-2 text-xs text-text-muted" data-testid="cv-built-from-privacy">
-              {t("builtFrom.privacy")}
-            </p>
+            {/* Reference, not content: collapsed by default so the CV itself
+                comes first; one tap opens how it is built. */}
+            <details className="group">
+              <summary className="cursor-pointer list-none text-sm text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
+                <span aria-hidden className="mr-1.5 inline-block transition-transform group-open:rotate-90">›</span>
+                {t("builtFrom.lead")}
+              </summary>
+              <ul className="mt-2 flex list-disc flex-col gap-1 pl-5 text-sm text-text-secondary">
+                <li>{t("builtFrom.profile")}</li>
+                <li>{t("builtFrom.skills")}</li>
+                <li>{t("builtFrom.records")}</li>
+              </ul>
+              <p className="mt-2 text-xs text-text-muted" data-testid="cv-built-from-privacy">
+                {t("builtFrom.privacy")}
+              </p>
+            </details>
           </section>
         ) : null}
 
