@@ -32,6 +32,7 @@ export function JournalEntryRow({
   skillLinks,
   statusSlot,
   editSlot,
+  correctionSlot,
   standing = "UNKNOWN",
   standingSolid = false,
   chainSlot,
@@ -55,6 +56,12 @@ export function JournalEntryRow({
    *  over the list — no navigation, scroll/day position preserved. Absent →
    *  the `?editing=` link below stays the fallback path. */
   editSlot?: React.ReactNode;
+  /** The worker's correction control on an entry an employer asked to
+   *  change (decision `changes_requested`). The entry is reviewed, so it is
+   *  never edited in place or deleted: the control submits a CORRECTION that
+   *  supersedes it visibly (`correction_of`), the original stays. Absent → only
+   *  the "already reviewed" note shows, as before. */
+  correctionSlot?: React.ReactNode;
   /** Journal Entry ↔ Skill links v1 — present only when the worker owns the
    *  entry and the durable relation is available. Omitted → no link UI. */
   skillLinks?: {
@@ -229,9 +236,12 @@ export function JournalEntryRow({
               />
             </>
           ) : (
-            <span className="inline-flex min-h-[2.75rem] items-center font-mono text-meta uppercase tracking-label text-text-muted">
-              {t("entry.deleteBlocked")}
-            </span>
+            <>
+              {correctionSlot}
+              <span className="inline-flex min-h-[2.75rem] items-center font-mono text-meta uppercase tracking-label text-text-muted">
+                {t("entry.deleteBlocked")}
+              </span>
+            </>
           )}
           {/* P0 Track B: unobtrusive idempotent re-run of the canonical
               recognition pipeline for THIS entry (recovery path after a

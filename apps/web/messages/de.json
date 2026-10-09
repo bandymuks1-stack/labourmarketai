@@ -1726,19 +1726,19 @@
     "projectsBody": "Hier sehen Sie Projekte, Kunden, Projekt-Arbeitskräfte und Arbeitspositionen. Nichts wird automatisch befüllt — neue Projekte und Kunden können noch nicht angelegt werden; diese Möglichkeit wird vorbereitet.",
     "projectsCount": "Projekte",
     "projectsEmpty": "noch keine Projekte angelegt",
-    "projectsLinkingNote": "Die Journal-Verknüpfung ist noch nicht aktiviert. Sie können jetzt einen Projektkontext anlegen, aber nichts wird automatisch befüllt.",
+    "projectsLinkingNote": "Arbeitsjournal-Einträge werden von den Personen, die sie erfassen, einem Projekt zugeordnet. Ein neuer Projektkontext beginnt leer — nichts wird automatisch ausgefüllt.",
     "projectsManageCta": "Projektboard öffnen",
     "createProject": {
       "entryCta": "Projektkontext anlegen",
       "title": "Projektkontext anlegen",
-      "subtitle": "Dies erstellt nur einen Projekt-/Kundenkontext. Die Journal-Verknüpfung ist noch nicht aktiviert.",
+      "subtitle": "Damit wird ein Projekt-/Kundenkontext angelegt. Arbeitsjournal-Einträge können ihm zugeordnet werden; nichts wird automatisch ausgefüllt.",
       "nameLabel": "Projektname",
       "namePlaceholder": "z. B. Baustelle Vilnius",
       "locationLabel": "Standort oder Adresse (optional)",
       "locationPlaceholder": "z. B. Vilnius",
       "clientLabel": "Kunde (optional)",
       "clientPlaceholder": "z. B. Nordic Logistics",
-      "journalLinkingDisabled": "Die Journal-Verknüpfung ist noch nicht aktiviert.",
+      "journalLinkingDisabled": "Journaleinträge werden von den Personen, die sie erfassen, dem Projekt zugeordnet — nichts wird automatisch ausgefüllt.",
       "submit": "Erstellen",
       "success": "Projektkontext erstellt.",
       "clientNotSaved": "Projekt erstellt, aber der Kunde konnte nicht gespeichert werden. Fügen Sie den Kunden auf der Projektseite hinzu.",
@@ -6104,7 +6104,7 @@
   },
   "projects": {
     "title": "Projekte und Zuweisungen",
-    "intro": "Erstellen Sie ein Projekt und weisen Sie ihm Arbeitskräfte aus Ihrem Team zu. Später können Sie Anweisungen auf Projektebene senden.",
+    "intro": "Legen Sie ein Projekt an und weisen Sie ihm Mitarbeitende aus Ihrem Team zu. Nachrichten zum Projekt senden Sie über seine Karte.",
     "managerOnly": "Diese Seite ist für Manager eines Unternehmens oder einer Personalagentur.",
     "needsMigration": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
     "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
@@ -8633,6 +8633,7 @@
     "noRate": "Nicht angegeben",
     "comms": {
       "eligible": "Diese Arbeitskraft hat eine offene Verfügbarkeit — das Messaging wird in einem späteren Schritt geöffnet.",
+      "inConversation": "Sie sind mit dieser Arbeitskraft bereits im Gespräch — setzen Sie es unter Nachrichten fort.",
       "blocked": "Die Kommunikation wird verfügbar, wenn die Arbeitskraft eine offene Verfügbarkeit oder ein Verfügbar-ab-Datum hat."
     },
     "request": {

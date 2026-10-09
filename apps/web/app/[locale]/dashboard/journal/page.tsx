@@ -767,6 +767,11 @@ export default async function JournalPage({
     entries && entries.length > 0
       ? await readEntryReviewStates(supabase, reviewStateIds)
       : null;
+  // Originals that already have a live correction among the read entries:
+  // their "changes requested" was answered, so no second correction is offered.
+  const correctedOriginalIds = new Set(
+    (entries ?? []).map((e) => e.correction_of).filter((id): id is string => !!id),
+  );
 
   // ── Lazy historical heal (Universal Journal Recall v2) ──────────────────
   // Up to 5 own live entries whose latest `pipeline_version` metric is below
@@ -1850,6 +1855,16 @@ export default async function JournalPage({
                       // per unconfirmed entry so the row's drawer-based editor
                       // opens over the list — no navigation, the worker's
                       // scroll position / selected day stay exactly as-is.
+                      // An EMPLOYER asked for changes (manager review in the
+                      // inbox, decision `changes_requested`) - the worker must
+                      // be able to answer it. Before, only the client-review
+                      // phase offered the correction control, so this request
+                      // was a dead end (walk 2026-10-09).
+                      const employerAskedChanges =
+                        timeline.at(-1)?.result === "changes_requested" &&
+                        !correctedOriginalIds.has(e.id) &&
+                        reviewPhase !== "correction_requested" &&
+                        reviewPhase !== "disputed";
                       const rowEditingEntry = canDelete
                         ? buildEditingEntry({
                             id: e.id,
@@ -1933,6 +1948,25 @@ export default async function JournalPage({
                               })}
                               testId={`journal-entry-evidence-chain-${e.id}`}
                             />
+                          }
+                          correctionSlot={
+                            employerAskedChanges ? (
+                              <JournalEntryEditLauncher
+                                key="employer-correct-launcher"
+                                entry={buildEditingEntry({
+                                  id: e.id,
+                                  originalText: e.original_text,
+                                  metrics: e.journal_entry_metrics,
+                                  engagementContextId: e.engagement_context_id ?? null,
+                                  linkedSkillSlugs: (linksByEntry.get(e.id) ?? [])
+                                    .map((sid) => skillIdToSlug.get(sid))
+                                    .filter((s): s is string => !!s),
+                                })}
+                                engagements={engagements}
+                                directions={directions}
+                                workerSkills={workerSkills}
+                              />
+                            ) : undefined
                           }
                           editSlot={
                             rowEditingEntry ? (
