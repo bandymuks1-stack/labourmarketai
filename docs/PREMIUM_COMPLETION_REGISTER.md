@@ -50,7 +50,7 @@ Raw enum leak confirmed: `components/app/agency-workers-section.tsx:374`
 Capability register: 34 usable, 69 partial, 16 human-UI-proven. Candidate
 actions, to be verified before work (some register notes pre-date merged work):
 
-1. DEM-4 ingestion scheduling — VERIFIED 2026-10-09: NAV self-rearms ~10 min (nav-supply-cadence.yml), Sweden 3-hourly + 4.5 h backstop; incident handling live. No infra change justified; #2227 watchdog stays a draft (re-evaluate only on a NAV gap >30 min or Sweden >4.5 h with backstop failing). Stale register note corrected.
+1. DEM-4 ingestion — OWNER POLICY 2026-10-09 (#2241): daily completeness is sufficient. NAV 4 scheduled runs/day + bounded self-rearming catch-up (>=600 s spacing, stops at feed head); Sweden 3 stream runs/day (+ transient invalid_json retry, #2239); ingestion-freshness.yml checks each source every 6 h, stale after 26 h, one incident per source, bounded recovery. OPEN: NAV is NOT yet proven caught up (2026-10-09 16:05Z: caughtUp=false, cursor still advancing; opaque token, no backlog estimate). Track separately: last session / last verified head catch-up / backlog / new+updated / withdrawn / failures. Verify withdrawal handling against the source rules. #2227 watchdog stays unapplied (needs a new owner decision).
 2. MKT-2 universal marketplace — APPLIED in production 2026-10-07 (ledger 20261007155109/155211/155215/160116). No approval needed; remaining work is UI + walk evidence.
 3. CAL-6 / COM-2 expiry — NOT scheduled. Both RPCs refuse a service-role caller. Package: new migration adding two service_role-only wrapper RPCs (sweep_expire_stale_booking_requests_v1, sweep_expire_contact_disclosure_requests_v1) + /api/cron/expiry-sweeps + daily workflow. RED (SECURITY DEFINER + GRANT). Pre-apply checks: booking_request_events.actor_id nullable; contact_disclosure_log_change accepts null actor. Owner approval required before apply.
 4. DEM-6 team offers — APPLIED in production 2026-10-08 (ledger 20261008050149), 0 rows; remaining work is UI + walk evidence.
@@ -84,4 +84,9 @@ ORG-2, EVID-2, MKT-7, COM-6, COM-8, GOV-1. RED drafts awaiting gate: #2227,
 ## Slice log
 | Slice | PR | State |
 |---|---|---|
-| register | this PR | open |
+| register | #2229 | merged |
+| register reconcile 2026-10-09 | this PR | open |
+| #2242 lane B pass | #2242 | CI pending, auto-merge armed |
+| #2240 PGRST303 bounded retry | #2240 | CI green, draft; owner approved scope; ready/merge pending |
+| #2235 expiry RED | #2235 | unapplied; awaiting final owner approval after the 7 pre-apply checks |
+| React hydration #418 | - | OPEN, unresolved; needs cold prod-build repeat + profile route scan |
