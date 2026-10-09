@@ -75,7 +75,7 @@ export async function OrganizationsLeadership({
             ))}
             <Link
               href={`/dashboard/company/history?org=${o.organizationId}` as "/dashboard"}
-              className="inline-flex min-h-11 w-fit items-center text-sm font-semibold text-brand-blue hover:underline"
+              className="inline-flex min-h-11 w-fit items-center text-sm font-semibold text-text-primary underline-offset-4 hover:underline"
               data-testid="organizations-leadership-history-link"
             >
               {t("openHistory")} →

@@ -696,7 +696,7 @@ export function ProfileTextFirstFlow({
               data-testid="profile-text-flow-needs-direction"
             >
               {t("needsDirection")}{" "}
-              <a href="#profile-edit" className="font-semibold text-brand-blue hover:text-brand-champagne">
+              <a href="#profile-edit" className="font-semibold text-text-primary underline underline-offset-4 hover:no-underline">
                 {t("needsDirectionCta")} →
               </a>
             </p>
@@ -723,7 +723,7 @@ export function ProfileTextFirstFlow({
               a silent dead end. */}
           <a
             href="#capabilities"
-            className="mt-2 inline-flex text-meta font-semibold text-brand-blue hover:text-brand-champagne"
+            className="mt-2 inline-flex text-meta font-semibold text-text-primary underline-offset-4 hover:underline"
             data-testid="profile-text-flow-view-capabilities"
           >
             {t("viewCapabilities")} →
@@ -731,7 +731,7 @@ export function ProfileTextFirstFlow({
           {promotion && promotion.promoted > 0 && (
             <Link
               href={"/cv" as "/dashboard"}
-              className="ml-3 mt-2 inline-flex text-meta font-semibold text-brand-blue hover:text-brand-champagne"
+              className="ml-3 mt-2 inline-flex text-meta font-semibold text-text-primary underline-offset-4 hover:underline"
               data-testid="profile-text-flow-view-cv"
             >
               {t("viewUpdatedCv")} →
