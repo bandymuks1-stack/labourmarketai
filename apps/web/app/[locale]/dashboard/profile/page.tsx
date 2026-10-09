@@ -1230,7 +1230,7 @@ export default async function ProfilePage({
         className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40"
         data-testid="profile-edit-disclosure"
       >
-        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 text-sm font-medium text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
           <span className="inline-flex items-center gap-2">
             <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
             {t("editDisclosure")}
@@ -1280,7 +1280,7 @@ export default async function ProfilePage({
         id="cv-details"
         className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40"
       >
-        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
+        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 text-sm font-medium text-text-secondary hover:text-text-primary">
           <span className="inline-flex items-center gap-2">
             <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
             {tQuick("details")}
@@ -1525,7 +1525,7 @@ export default async function ProfilePage({
       ) : null}
       <DetailsHashOpener targetId="capabilities" />
       <details id="capabilities" className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40">
-        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
+        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 text-sm font-medium text-text-secondary hover:text-text-primary">
           <span className="inline-flex items-center gap-2">
             <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
             {tQuick("capabilities")}
@@ -1578,7 +1578,7 @@ export default async function ProfilePage({
         className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40"
         data-testid="profile-about-disclosure"
       >
-        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
+        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 text-sm font-medium text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
           <span className="inline-flex items-center gap-2">
             <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
             {t("aboutDisclosure")}

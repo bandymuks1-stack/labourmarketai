@@ -80,7 +80,7 @@
      and the bright point of the metallic ramp. NOT a second brand colour: it is
      the light ON the gold. 12.76:1 on graphite. */
   --c-brand-champagne: 242 214 117;
-  --c-brand-cyan: 0 194 255; /* EVIDENCE_SUPPORTED in the provenance ladder */
+  --c-brand-cyan: 138 170 200; /* #8AAAC8 muted steel blue — informational / EVIDENCE_SUPPORTED only (owner 2026-10-09: no neon cyan). Was 0 194 255. */
   --c-brand-violet: 123 92 255;
   --c-brand-purple: 181 123 255;
   --c-brand-orange: 224 150 70; /* AMBER, attention only (owner 2026-10-09: no decorative orange). Was 255 107 26. */

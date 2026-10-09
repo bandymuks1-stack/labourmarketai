@@ -773,7 +773,7 @@ export default async function CompanyWorkforcePlanningPage({
   const availabilitySection =
     availability.status === "ok" && availability.unavailability.length > 0 ? (
       <section
-        className="flex flex-col gap-3 rounded-md border border-state-amber/40 bg-state-amber/5 p-4"
+        className="flex flex-col gap-3 rounded-md border border-ink-600 bg-ink-800/30 p-4"
         data-testid="employer-availability"
       >
         <h2 className="font-display text-base font-semibold text-text-primary">
@@ -790,7 +790,7 @@ export default async function CompanyWorkforcePlanningPage({
               <span className="text-sm font-semibold text-text-primary">
                 {u.workerName ?? t("availability.unnamedWorker")}
               </span>
-              <span className="font-mono text-meta uppercase tracking-label text-state-amber">
+              <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
                 {t("availability.unavailable")}
               </span>
               <span className="font-mono text-meta uppercase tracking-label text-text-muted">
