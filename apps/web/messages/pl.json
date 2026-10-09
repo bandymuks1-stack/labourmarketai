@@ -7789,6 +7789,7 @@
       "currentWork": "Pracuje teraz",
       "recorded": "godz. zapisano",
       "confirmed": "godz. z wpisem przełożonego",
+      "organizationHistory": "godz. w historii organizacji",
       "days": "{count, plural, one {dzień pracy} few {dni pracy} many {dni pracy} other {dnia pracy}}",
       "modes": {
         "label": "Części karty",
@@ -8357,7 +8358,8 @@
     "skillNoRecords": "brak jeszcze zapisów",
     "recordedHoursScope": "Cały okres.",
     "recordedHoursScopeTruncated": "Na podstawie ostatnich {count} wpisów; starsze wpisy nie są ujęte w tych liczbach.",
-    "organizationRecordedHours": "Zapisy organizacji: {hours} h w {days, plural, one {# dniu} few {# dniach} many {# dniach} other {# dniu}} w ewidencji czasu pracy lub zaimportowanych dokumentach ({imported} h zaimportowanych, {approved} h zatwierdzonych) — oddzielnie od liczby z dziennika i nieprzypisane do żadnej umiejętności."
+    "organizationRecordedHours": "Zapisy organizacji: {hours} h w {days, plural, one {# dniu} few {# dniach} many {# dniach} other {# dniu}} w ewidencji czasu pracy lub zaimportowanych dokumentach ({imported} h zaimportowanych, {approved} h zatwierdzonych) — oddzielnie od liczby z dziennika i nieprzypisane do żadnej umiejętności.",
+    "organizationRecordedHoursWithPeriods": "Zapisy organizacji: łącznie {total} godz. — {hours} godz. w {days, plural, one {# dniu} few {# dniach} many {# dniach} other {# dnia}} oraz {periodHours} godz. podane jako suma za okres ({from} – {to}) w ewidencjach czasu pracy lub zaimportowanych dokumentach ({approved} godz. zatwierdzonych). Liczone oddzielnie od dziennika i nieprzypisane do żadnej umiejętności."
   },
   "todayScreen": {
     "eyebrow": "Dzisiaj",

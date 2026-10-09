@@ -7789,6 +7789,7 @@
       "currentWork": "Dirba dabar",
       "recorded": "val. užfiksuota",
       "confirmed": "val. su vadovo įrašu",
+      "organizationHistory": "val. organizacijų istorijoje",
       "days": "{count, plural, one {darbo diena} few {darbo dienos} other {darbo dienų}}",
       "modes": {
         "label": "Kortelės dalys",
@@ -8357,7 +8358,8 @@
     "skillNoRecords": "įrašų dar nėra",
     "recordedHoursScope": "Visas laikas.",
     "recordedHoursScopeTruncated": "Iš paskutinių {count} įrašų; senesni įrašai į šiuos skaičius neįtraukti.",
-    "organizationRecordedHours": "Organizacijos apskaitoje: {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} žiniaraščiuose ar importuotuose dokumentuose ({imported} val. importuota, {approved} val. vadovo patvirtinta žiniaraštyje) — skaičiuojama atskirai nuo žurnalo skaičiaus ir nepriskiriama jokiam įgūdžiui."
+    "organizationRecordedHours": "Organizacijos apskaitoje: {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} žiniaraščiuose ar importuotuose dokumentuose ({imported} val. importuota, {approved} val. vadovo patvirtinta žiniaraštyje) — skaičiuojama atskirai nuo žurnalo skaičiaus ir nepriskiriama jokiam įgūdžiui.",
+    "organizationRecordedHoursWithPeriods": "Organizacijų įrašai: iš viso {total} val. — {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} ir {periodHours} val., nurodytos kaip laikotarpio suma ({from} – {to}), darbo laiko žiniaraščiuose ar importuotuose dokumentuose ({approved} val. patvirtinta). Laikoma atskirai nuo žurnalo skaičiaus ir nepriskiriama jokiam gebėjimui."
   },
   "todayScreen": {
     "eyebrow": "Šiandien",

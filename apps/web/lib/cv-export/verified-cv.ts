@@ -1,4 +1,5 @@
 import { readOwnConfirmedWorkTotals } from "@/lib/evidence/confirmed-work-read";
+import { organizationAllTime } from "@/lib/journal/organization-all-time";
 import { cvLiveEntries } from "@/lib/cv-export/cv-entries";
 import "server-only";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
@@ -286,10 +287,20 @@ export type VerifiedCvData = {
    * ledger could not be read; zero hours when it holds nothing.
    */
   organizationRecordedHours: {
+    /** Day records only (timesheet lines + dated imported rows). */
     hours: number;
     days: number;
     importedHours: number;
     approvedHours: number;
+    /** Period records an imported document stated as one total over a span
+     *  (#2169, owner 2026-10-09): they count in all-time experience, are
+     *  never split into days, and need no invoice or payment to count. */
+    periodHours: number;
+    periodRecords: number;
+    /** hours + periodHours — all-time organization-recorded work. */
+    totalHours: number;
+    from: string | null;
+    to: string | null;
   } | null;
   /**
    * The WORK behind those organization-recorded hours: imported history
@@ -905,13 +916,20 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
 function organizationRecordedHoursOf(
   wi: WorkIntelligence | null,
 ): VerifiedCvData["organizationRecordedHours"] {
-  const all = wi?.organizationRecords?.find((p) => p.key === "all") ?? null;
-  if (!all) return null;
+  // The ONE all-time rule (lib/journal/organization-all-time.ts): day and
+  // period records, overlaps refused, nothing else consulted.
+  const a = organizationAllTime(wi);
+  if (!a) return null;
   return {
-    hours: all.hours,
-    days: all.daysWorked,
-    importedHours: all.importedHours,
-    approvedHours: all.approvedHours,
+    hours: a.dayHours,
+    days: a.days,
+    importedHours: a.importedHours,
+    approvedHours: a.approvedHours,
+    periodHours: a.periodHours,
+    periodRecords: a.periodRecords,
+    totalHours: a.totalHours,
+    from: a.from,
+    to: a.to,
   };
 }
 

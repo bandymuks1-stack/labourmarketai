@@ -1074,18 +1074,34 @@ export default async function VerifiedCvPage({
               ledger, named beside the journal figure and added to nothing:
               an hour record proves attendance, not a skill. Shown only when
               it holds hours; null (unreadable) renders nothing. */}
-          {cv.organizationRecordedHours !== null && cv.organizationRecordedHours.hours > 0 && (
+          {/* #2169 (owner 2026-10-09): a period record an imported document
+              stated ("800 h, 2025-06 – 2025-11") counts in the all-time
+              figure without an invoice or a confirmation, and is named as a
+              period total — never split into days. */}
+          {cv.organizationRecordedHours !== null && cv.organizationRecordedHours.totalHours > 0 && (
             <p
               className="text-meta text-text-muted"
               data-testid="cv-organization-recorded-hours"
               data-hours={cv.organizationRecordedHours.hours}
+              data-period-hours={cv.organizationRecordedHours.periodHours}
+              data-total-hours={cv.organizationRecordedHours.totalHours}
             >
-              {t("organizationRecordedHours", {
-                hours: fmtHours(cv.organizationRecordedHours.hours),
-                days: cv.organizationRecordedHours.days,
-                imported: fmtHours(cv.organizationRecordedHours.importedHours),
-                approved: fmtHours(cv.organizationRecordedHours.approvedHours),
-              })}
+              {cv.organizationRecordedHours.periodHours > 0
+                ? t("organizationRecordedHoursWithPeriods", {
+                    total: fmtHours(cv.organizationRecordedHours.totalHours),
+                    hours: fmtHours(cv.organizationRecordedHours.hours),
+                    days: cv.organizationRecordedHours.days,
+                    periodHours: fmtHours(cv.organizationRecordedHours.periodHours),
+                    from: formatUtcDate(cv.organizationRecordedHours.from, locale) ?? "",
+                    to: formatUtcDate(cv.organizationRecordedHours.to, locale) ?? "",
+                    approved: fmtHours(cv.organizationRecordedHours.approvedHours),
+                  })
+                : t("organizationRecordedHours", {
+                    hours: fmtHours(cv.organizationRecordedHours.hours),
+                    days: cv.organizationRecordedHours.days,
+                    imported: fmtHours(cv.organizationRecordedHours.importedHours),
+                    approved: fmtHours(cv.organizationRecordedHours.approvedHours),
+                  })}
             </p>
           )}
           {/* Skills as ONE presentation (owner defects C + D, 2026-09-12):

@@ -1,4 +1,5 @@
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
+import { organizationAllTime } from "@/lib/journal/organization-all-time";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { TelemetryView } from "@/components/app/telemetry-view";
@@ -362,6 +363,7 @@ export default async function ProfilePage({
   let workContexts: readonly ContextWorkTime[] | null = null;
   // The identity stage's fact strip: the SAME model's all-time row.
   let workAllTime: { totals: WorkPeriodTotals; truncated: boolean } | null = null;
+  let organizationHistoryHours: number | null = null;
   // Self-stated languages (P2-PR3) — `worker_languages`, APPLIED in production
   // 2026-07-11 (ledger `20260711203623`; 11 real rows). The needs-migration
   // branch is kept for fresh/local databases, not because production lacks it.
@@ -492,6 +494,9 @@ export default async function ProfilePage({
     workContexts = workIntelligence?.contexts ?? null;
     {
       const all = workIntelligence?.periods.find((p) => p.key === "all");
+      // Imported organization history counts as experience (#2169): the ONE
+      // all-time rule, day + period records, no invoice consulted.
+      organizationHistoryHours = organizationAllTime(workIntelligence)?.totalHours ?? null;
       workAllTime = all
         ? { totals: all, truncated: workIntelligence?.coverage.truncated ?? false }
         : null;
@@ -1138,6 +1143,7 @@ export default async function ProfilePage({
         // hub's history list (the same ledger the skills above read).
         workContexts={workContexts}
         workAllTime={workAllTime}
+        organizationHistoryHours={organizationHistoryHours}
         // Identity-essential presence sourced from the ONE minimum card contract
         // (launch audit §7.3) — only data already fetched above, no new reads.
         cardSource={{

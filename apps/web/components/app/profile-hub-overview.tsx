@@ -130,6 +130,7 @@ export async function ProfileHubOverview({
   workerId,
   workContexts = null,
   workAllTime = null,
+  organizationHistoryHours = null,
 }: {
   cvProvided: boolean;
   selfDeclaredCount: number;
@@ -162,6 +163,8 @@ export async function ProfileHubOverview({
    *  that read was truncated) — the identity stage's fact strip. Null → no
    *  strip (the journal was not read), never zeros. */
   workAllTime?: { readonly totals: WorkPeriodTotals; readonly truncated: boolean } | null;
+  /** All-time hours organizations recorded (day + period records), #2169. */
+  organizationHistoryHours?: number | null;
 }) {
   /**
    * W7-S3: seven namespaces and the locale in ONE stage. They were eight
@@ -446,6 +449,7 @@ export async function ProfileHubOverview({
         facts={buildIdentityFacts({
           allTime: workAllTime?.totals,
           truncated: workAllTime?.truncated ?? false,
+          organizationHistoryHours,
           locale,
           t: (key, values) => tIdentity(key, values),
         })}

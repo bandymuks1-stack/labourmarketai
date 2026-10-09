@@ -7789,6 +7789,7 @@
       "currentWork": "Working now",
       "recorded": "h recorded",
       "confirmed": "h with a manager's record",
+      "organizationHistory": "h in organization history",
       "days": "{count, plural, one {day worked} other {days worked}}",
       "modes": {
         "label": "Card sections",
@@ -8357,7 +8358,8 @@
     "skillNoRecords": "no records yet",
     "recordedHoursScope": "All time.",
     "recordedHoursScopeTruncated": "From the last {count} entries; older entries are not in these figures.",
-    "organizationRecordedHours": "Organization records: {hours} h on {days, plural, one {# day} other {# days}} in timesheets or imported documents ({imported} h imported, {approved} h approved) — kept apart from the journal figure and attributed to no skill."
+    "organizationRecordedHours": "Organization records: {hours} h on {days, plural, one {# day} other {# days}} in timesheets or imported documents ({imported} h imported, {approved} h approved) — kept apart from the journal figure and attributed to no skill.",
+    "organizationRecordedHoursWithPeriods": "Organization records: {total} h in total — {hours} h on {days, plural, one {# day} other {# days}} and {periodHours} h stated as period totals ({from} – {to}) in timesheets or imported documents ({approved} h approved). Kept apart from the journal figure and attributed to no skill."
   },
   "todayScreen": {
     "eyebrow": "Today",

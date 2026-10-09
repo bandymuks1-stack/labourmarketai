@@ -7789,6 +7789,7 @@
       "currentWork": "Werkt nu",
       "recorded": "u vastgelegd",
       "confirmed": "u met registratie van leidinggevende",
+      "organizationHistory": "u in organisatiehistorie",
       "days": "{count, plural, one {werkdag} other {werkdagen}}",
       "modes": {
         "label": "Onderdelen van de kaart",
@@ -8357,7 +8358,8 @@
     "skillNoRecords": "nog geen registraties",
     "recordedHoursScope": "Alle tijd.",
     "recordedHoursScopeTruncated": "Uit de laatste {count} records; oudere records zitten niet in deze cijfers.",
-    "organizationRecordedHours": "Registratie van de organisatie: {hours} u op {days, plural, one {# dag} other {# dagen}} in urenstaten of geïmporteerde documenten ({imported} u geïmporteerd, {approved} u goedgekeurd) — gescheiden van het journaalcijfer en aan geen enkele vaardigheid toegewezen."
+    "organizationRecordedHours": "Registratie van de organisatie: {hours} u op {days, plural, one {# dag} other {# dagen}} in urenstaten of geïmporteerde documenten ({imported} u geïmporteerd, {approved} u goedgekeurd) — gescheiden van het journaalcijfer en aan geen enkele vaardigheid toegewezen.",
+    "organizationRecordedHoursWithPeriods": "Registraties van organisaties: {total} u in totaal — {hours} u op {days, plural, one {# dag} other {# dagen}} en {periodHours} u vermeld als periodetotaal ({from} – {to}) in urenstaten of geïmporteerde documenten ({approved} u goedgekeurd). Apart gehouden van het journaalcijfer en aan geen vaardigheid toegekend."
   },
   "todayScreen": {
     "eyebrow": "Vandaag",
