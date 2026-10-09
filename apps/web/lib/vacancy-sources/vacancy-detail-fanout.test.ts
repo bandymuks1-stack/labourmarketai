@@ -185,3 +185,45 @@ describe("expandDetailFanOut — wall-clock deadline and diagnostics", () => {
     expect(!out.ok && out.diagnostics.firstFailure).toMatchObject({ uuid: "c", position: 2, cause: "http_503" });
   });
 });
+
+describe("expandDetailFanOut — feed position (source time)", () => {
+  const withChanged = {
+    ...endpoint,
+    detailFanOut: { ...endpoint.detailFanOut!, changedAtPath: ["_feed_entry", "sistEndret"] },
+  };
+  const at = (uuid: string, sistEndret: string, status = "ACTIVE") => ({
+    url: `/d/${uuid}`,
+    _feed_entry: { uuid, status, sistEndret },
+  });
+
+  it("reports the newest change time among CONSUMED entries only", async () => {
+    const out = await expandDetailFanOut({
+      endpoint: withChanged,
+      body: {
+        items: [
+          at("a", "2026-08-10T10:00:00Z"),
+          at("x", "2026-08-11T09:00:00Z", "INACTIVE"),
+          at("b", "2026-08-10T12:00:00Z"),
+          at("c", "2026-08-20T00:00:00Z"),
+        ],
+      },
+      detailBudget: 2,
+      fetchDetail: fetcher([]),
+    });
+    if (!out.ok) throw new Error("expected ok");
+    expect(out.consumedEntries).toBe(3);
+    // c was not consumed, so its later time must not count.
+    expect(out.diagnostics.feedPositionAt).toBe("2026-08-11T09:00:00.000Z");
+  });
+
+  it("is absent when unconfigured, and absent when no entry carries a parseable time", async () => {
+    const plain = await expandDetailFanOut({ endpoint, body: { items: [entry("a")] }, fetchDetail: fetcher([]) });
+    expect(plain.diagnostics.feedPositionAt).toBeUndefined();
+    const junk = await expandDetailFanOut({
+      endpoint: withChanged,
+      body: { items: [at("a", "not a date")] },
+      fetchDetail: fetcher([]),
+    });
+    expect(junk.diagnostics.feedPositionAt).toBeUndefined();
+  });
+});

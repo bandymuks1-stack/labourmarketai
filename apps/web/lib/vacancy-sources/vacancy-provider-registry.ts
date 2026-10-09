@@ -178,6 +178,9 @@ export interface VacancyDetailFanOutV1 {
   readonly activeValue: string;
   /** Keys to copy from an INACTIVE entry into the withdrawal record. */
   readonly withdrawalKeys: readonly string[];
+  /** Path, root first, to the entry's own last-changed timestamp (SOURCE
+   *  time). Reported as the session's feed position; never used to decide. */
+  readonly changedAtPath?: readonly string[];
   /** Most detail requests one page may cost. Entries beyond it are not
    *  consumed: the page fails closed instead of silently dropping ads. */
   readonly maxDetailFetchesPerPage: number;
@@ -497,6 +500,7 @@ const NAV: VacancyProviderDescriptorV1 = {
         statusPath: ["_feed_entry", "status"],
         activeValue: "ACTIVE",
         withdrawalKeys: ["uuid", "status", "title"],
+        changedAtPath: ["_feed_entry", "sistEndret"],
         // Anomaly guard only: one page may never cost more than this. The
         // real cost control is the per-session budget below.
         maxDetailFetchesPerPage: 1000,

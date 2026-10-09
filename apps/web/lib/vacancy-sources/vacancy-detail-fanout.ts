@@ -52,6 +52,13 @@ export interface DetailFanOutDiagnostics {
     readonly cause: string;
     readonly elapsedMs: number | null;
   } | null;
+  /**
+   * The newest source last-changed time (descriptor `changedAtPath`) among the
+   * entries this session CONSUMED — how far into the feed the cursor reached,
+   * in the publisher's own clock. Null when unconfigured or none parse. The
+   * honest catch-up measure: a successful session is not a caught-up feed.
+   */
+  readonly feedPositionAt?: string | null;
 }
 
 export interface DetailFanOutStats {
@@ -264,6 +271,17 @@ export async function expandDetailFanOut(args: {
     withdrawn: affordable.length - liveInScope + goneAsWithdrawn,
     goneAsWithdrawn,
   };
+  // Feed position: only entries actually consumed, only on a clean page.
+  let feedPositionAt: string | null = null;
+  if (cfg.changedAtPath && failure === null) {
+    let newest: number | null = null;
+    for (const w of affordable) {
+      const raw = readPath(w.entry, cfg.changedAtPath);
+      const ms = typeof raw === "string" ? Date.parse(raw) : NaN;
+      if (Number.isFinite(ms) && (newest === null || ms > newest)) newest = ms;
+    }
+    if (newest !== null) feedPositionAt = new Date(newest).toISOString();
+  }
   const sorted = [...latencies].sort((a, b) => a - b);
   const diagnostics: DetailFanOutDiagnostics = {
     attempted,
@@ -273,6 +291,7 @@ export async function expandDetailFanOut(args: {
       ? { min: sorted[0], median: sorted[Math.floor((sorted.length - 1) / 2)], max: sorted[sorted.length - 1] }
       : null,
     firstFailure,
+    ...(feedPositionAt !== null ? { feedPositionAt } : {}),
   };
   if (failure !== null) return { ok: false, detail: failure, stats, diagnostics };
 
