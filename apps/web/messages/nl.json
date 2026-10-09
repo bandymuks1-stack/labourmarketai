@@ -18321,7 +18321,60 @@
       "person": "{hours} u, {count, plural, one {# registratie} other {# registraties}}"
     },
     "periodShort": "{hours} u periodetotaal",
-    "truncated": "Er zijn meer records dan één weergave leest. De {count} gelezen records worden getoond; totalen omvatten alleen die."
+    "truncated": "Er zijn meer records dan één weergave leest. De {count} gelezen records worden getoond; totalen omvatten alleen die.",
+    "business": {
+      "unavailable": "De bedrijfsgeschiedenis kon nu niet worden gelezen. Er is niets verloren — probeer het later opnieuw.",
+      "eyebrow": "Bedrijfsgeschiedenis",
+      "title": "{name}: één doorlopende geschiedenis",
+      "subtitle": "Elk cijfer hieronder telt het vastgelegde werk van de organisatie precies één keer. Periodes tonen wat er over eerdere rechtspersonen is verklaard en waarop die verklaring rust.",
+      "figures": "{records} registraties · {hours} u · {people} personen · {places} plaatsen",
+      "totals": {
+        "records": "Registraties",
+        "hours": "Uren",
+        "people": "Personen",
+        "places": "Plaatsen",
+        "projects": "Projecten",
+        "span": "Periode"
+      },
+      "spanUnknown": "datums niet vastgelegd",
+      "periodsTitle": "Periodes van het bedrijf",
+      "noPeriods": "Er is nog geen periode van dit bedrijf verklaard. Begon het werk onder een eerdere rechtspersoon, dan kan dat als verklaarde periode worden vastgelegd — de registraties zelf blijven ongewijzigd.",
+      "bounds": "{from} tot {to}",
+      "notDocumented": "niet gedocumenteerd",
+      "boundsNotDocumented": "Datums niet gedocumenteerd",
+      "legalEntity": "Rechtspersoon destijds: {name}",
+      "relation": {
+        "not_asserted": "Niet verklaard als dezelfde rechtspersoon — één doorlopende bedrijfsgeschiedenis.",
+        "same_entity": "Verklaard als dezelfde rechtspersoon.",
+        "renamed": "Verklaard als dezelfde rechtspersoon onder een eerdere naam.",
+        "successor": "Verklaard als juridische voorganger.",
+        "sold_and_continued_by_new_entity": "De eerdere rechtspersoon is verkocht; het bedrijf ging verder via een nieuwe.",
+        "other": "Een andere gedocumenteerde relatie tussen de rechtspersonen."
+      },
+      "basis": {
+        "owner_statement": "Verklaring van de eigenaar",
+        "registry_extract": "Registeruittreksel",
+        "contract": "Overeenkomst",
+        "other_document": "Ander document"
+      },
+      "periodNoRecords": "Aan deze periode zijn nog geen registraties toegewezen.",
+      "placedBy": "Toegewezen via het bronlabel {labels}: {byLabel} registraties; via gedocumenteerde datums: {byDate}.",
+      "notPlaced": "Niet aan een verklaarde periode toegewezen (de bron draagt geen periodelabel): {figures} · {span}.",
+      "yearsTitle": "Werk per jaar",
+      "undated": "{count, plural, one {# registratie heeft geen datum en telt} other {# registraties hebben geen datum en tellen}} alleen mee in de totalen.",
+      "doorsLabel": "Dezelfde registraties openen",
+      "doors": {
+        "people": "Personen",
+        "projects": "Projecten",
+        "places": "Plaatsen"
+      },
+      "workspace": {
+        "note": "Je opende de geschiedenis van {name} buiten de werkomgeving. Personen en projecten openen in de actieve werkomgeving.",
+        "open": "Werkomgeving {name} openen",
+        "opening": "Bezig met openen…",
+        "error": "De werkomgeving kon niet worden geopend."
+      }
+    }
   },
   "workPlan": {
     "title": "Gepland werk",
@@ -18897,5 +18950,30 @@
     "openBuyerSetup": "Koperinstelling openen →",
     "startBuyerProfile": "Koperprofiel starten →",
     "footer": "Hier is niets verzonnen: elke getoonde status komt uit je account."
+  },
+  "organizationsLeadership": {
+    "unavailable": "Je organisaties konden nu niet worden gelezen.",
+    "eyebrow": "Organisaties en leiding",
+    "title": "Organisaties die je leidt",
+    "subtitle": "Organisaties waarvan je eigenaar bent of die je leidt, de verklaarde bedrijfsperiodes en hun volledige geschiedenis.",
+    "unnamed": "Organisatie nog zonder naam",
+    "role": {
+      "owner": "Eigenaar",
+      "manager": "Leidinggevende"
+    },
+    "period": "Eerdere bedrijfsperiode: {label} ({from} – {to})",
+    "notDocumented": "datums niet gedocumenteerd",
+    "basis": {
+      "owner_statement": "verklaring van de eigenaar",
+      "registry_extract": "registeruittreksel",
+      "contract": "overeenkomst",
+      "other_document": "ander document"
+    },
+    "relation": {
+      "not_asserted": "niet verklaard als dezelfde rechtspersoon",
+      "stated": "juridische relatie verklaard"
+    },
+    "openHistory": "Bedrijfsgeschiedenis openen",
+    "note": "Leiding geven aan een organisatie staat los van je eigen werk: de uren van de organisatie tellen nooit als de jouwe."
   }
 }
