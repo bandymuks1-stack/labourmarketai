@@ -7789,6 +7789,7 @@
       "currentWork": "Работает сейчас",
       "recorded": "ч записано",
       "confirmed": "ч с записью руководителя",
+      "organizationHistory": "ч в истории организаций",
       "days": "{count, plural, one {рабочий день} few {рабочих дня} many {рабочих дней} other {рабочего дня}}",
       "modes": {
         "label": "Разделы карточки",
@@ -8357,7 +8358,8 @@
     "skillNoRecords": "записей пока нет",
     "recordedHoursScope": "За всё время.",
     "recordedHoursScopeTruncated": "По последним {count} записям; более старые записи в эти цифры не входят.",
-    "organizationRecordedHours": "В учёте организации: {hours} ч за {days, plural, one {# день} few {# дня} many {# дней} other {# дней}} в табелях или импортированных документах ({imported} ч импортировано, {approved} ч утверждено) — учитываются отдельно от цифры журнала и не относятся ни к одному навыку."
+    "organizationRecordedHours": "В учёте организации: {hours} ч за {days, plural, one {# день} few {# дня} many {# дней} other {# дней}} в табелях или импортированных документах ({imported} ч импортировано, {approved} ч утверждено) — учитываются отдельно от цифры журнала и не относятся ни к одному навыку.",
+    "organizationRecordedHoursWithPeriods": "Записи организаций: всего {total} ч — {hours} ч за {days, plural, one {# день} few {# дня} other {# дней}} и {periodHours} ч, указанные как итог за период ({from} – {to}), в табелях или импортированных документах ({approved} ч утверждено). Учитывается отдельно от журнала и не относится ни к одному навыку."
   },
   "todayScreen": {
     "eyebrow": "Сегодня",

@@ -485,6 +485,12 @@ export type WorkIntelligence = {
    *  this model is derived from it a second time. `null` exactly when
    *  `organizationRecords` is null (UNKNOWN). */
   readonly organizationContextRecords?: readonly WorkIntelligenceOrganizationRecord[] | null;
+  /** EVERY live organization DAY record (timesheet lines and imported
+   *  evidence), as read - a pass-through so an all-time reading can refuse to
+   *  add a period record over days the same organization already recorded
+   *  (lib/journal/organization-all-time.ts). Never summed here. `null` exactly
+   *  when `organizationRecords` is null (UNKNOWN). */
+  readonly organizationDayRecords?: readonly WorkIntelligenceOrganizationRecord[] | null;
   /** Every declared skill, hours desc (declared-only skills at zero). */
   readonly skills: readonly SkillWorkTime[];
   readonly activities: readonly ActivityWorkTime[];
@@ -1234,6 +1240,10 @@ export function deriveWorkIntelligence(
       orgRows === null
         ? null
         : orgRows.filter((r) => r.context !== undefined && r.status !== "rejected" && Number.isFinite(r.hours) && r.hours > 0),
+    organizationDayRecords:
+      orgRows === null
+        ? null
+        : orgRows.filter((r) => r.status !== "rejected" && Number.isFinite(r.hours) && r.hours > 0),
     skills,
     activities,
     contexts,

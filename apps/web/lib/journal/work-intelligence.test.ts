@@ -736,8 +736,12 @@ describe("the organization's hour records — a ledger beside the journal, never
       entries: journal,
       organizationRecords: imported,
     });
-    const { organizationRecords: a, organizationPeriodRecords: pa, organizationContextRecords: xa, checks: ca, ...restA } = without;
-    const { organizationRecords: b, organizationPeriodRecords: pb, organizationContextRecords: xb, checks: cb, ...restB } = withLedger;
+    const { organizationRecords: a, organizationPeriodRecords: pa, organizationContextRecords: xa, organizationDayRecords: da, checks: ca, ...restA } = without;
+    const { organizationRecords: b, organizationPeriodRecords: pb, organizationContextRecords: xb, organizationDayRecords: db, checks: cb, ...restB } = withLedger;
+    // the day-record pass-through (#2169 all-time rule) follows the ledger:
+    // UNKNOWN without it, every live day record with it, summed nowhere here.
+    expect(da).toBeNull();
+    expect(db?.map((r) => r.id)).toEqual(imported.filter((r) => r.status !== "rejected").map((r) => r.id));
     expect(restB).toEqual(restA);
     // the context pass-through follows the ledger too: UNKNOWN without it,
     // and holds only records that carry a context (these carry none)

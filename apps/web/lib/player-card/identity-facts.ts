@@ -16,21 +16,41 @@ export function buildIdentityFacts({
   truncated,
   locale,
   t,
+  organizationHistoryHours = null,
 }: {
   readonly allTime: WorkPeriodTotals | null | undefined;
   readonly truncated: boolean;
   readonly locale: string;
   /** Translator bound to the `playerCard.identity` namespace. */
   readonly t: (
-    key: "recorded" | "confirmed" | "days" | "noRecords" | "noManagerRecord",
+    key: "recorded" | "confirmed" | "days" | "noRecords" | "noManagerRecord" | "organizationHistory",
     values?: { count: number },
   ) => string;
+  /** All-time hours organizations recorded about the person (day + period
+   *  records, lib/journal/organization-all-time.ts) — imported history counts
+   *  as work experience without an invoice or a confirmation (#2169). A fact
+   *  of its own beside the journal figures, never added to them. */
+  readonly organizationHistoryHours?: number | null;
 }): IdentityFact[] {
+  const n0 = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
+  const historyFact: IdentityFact[] =
+    organizationHistoryHours !== null && organizationHistoryHours > 0
+      ? [
+          {
+            value: n0.format(organizationHistoryHours),
+            label: t("organizationHistory"),
+            tone: "evidence",
+            testid: "player-card-fact-organization-history",
+          },
+        ]
+      : [];
   // UNKNOWN is not zero (SEP-7): nothing recorded is said in words as an
   // absent state — never three zeros, and never a silent gap that makes the
   // person look empty.
   if (!allTime || (allTime.hours <= 0 && allTime.daysWorked <= 0)) {
-    return [{ value: null, label: t("noRecords"), tone: "neutral", testid: "player-card-fact-none" }];
+    return historyFact.length > 0
+      ? historyFact
+      : [{ value: null, label: t("noRecords"), tone: "neutral", testid: "player-card-fact-none" }];
   }
   const n = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
   const atLeast = truncated ? "≥ " : "";
@@ -62,5 +82,6 @@ export function buildIdentityFacts({
       tone: "neutral",
       testid: "player-card-fact-days",
     },
+    ...historyFact,
   ];
 }
