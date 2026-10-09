@@ -257,7 +257,10 @@
     "provenance": {
       "platform": "Na tej platformie",
       "external_vacancy": "Publiczna oferta, źródło zewnętrzne"
-    }
+    },
+    "formChoose": "Wybierz…",
+    "errorKindRequired": "Wybierz, czy sprzedajesz, wynajmujesz, czy szukasz.",
+    "errorCategoryRequired": "Wybierz, czego dotyczy ogłoszenie."
   },
   "quality": {
     "title": "Usterki i jakość",

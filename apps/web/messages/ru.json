@@ -257,7 +257,10 @@
     "provenance": {
       "platform": "На этой платформе",
       "external_vacancy": "Публичная вакансия, внешний источник"
-    }
+    },
+    "formChoose": "Выберите…",
+    "errorKindRequired": "Выберите: продаёте, сдаёте в аренду или ищете.",
+    "errorCategoryRequired": "Выберите, о чём объявление."
   },
   "quality": {
     "title": "Дефекты и качество",

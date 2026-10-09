@@ -257,7 +257,10 @@
     "provenance": {
       "platform": "Auf dieser Plattform",
       "external_vacancy": "Öffentliche Vakanz, externe Quelle"
-    }
+    },
+    "formChoose": "Bitte wählen…",
+    "errorKindRequired": "Wählen Sie, ob Sie verkaufen, vermieten oder suchen.",
+    "errorCategoryRequired": "Wählen Sie, worum es in der Anzeige geht."
   },
   "quality": {
     "title": "Mängel & Qualität",

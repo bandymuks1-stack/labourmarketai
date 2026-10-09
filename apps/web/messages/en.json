@@ -257,7 +257,10 @@
     "provenance": {
       "platform": "On this platform",
       "external_vacancy": "Public vacancy, external source"
-    }
+    },
+    "formChoose": "Choose…",
+    "errorKindRequired": "Choose whether you sell, rent out or are looking for it.",
+    "errorCategoryRequired": "Choose what the listing is about."
   },
   "quality": {
     "title": "Defects & quality",

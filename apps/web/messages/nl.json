@@ -257,7 +257,10 @@
     "provenance": {
       "platform": "Op dit platform",
       "external_vacancy": "Openbare vacature, externe bron"
-    }
+    },
+    "formChoose": "Kies…",
+    "errorKindRequired": "Kies of je verkoopt, verhuurt of zoekt.",
+    "errorCategoryRequired": "Kies waar de advertentie over gaat."
   },
   "quality": {
     "title": "Gebreken & kwaliteit",
