@@ -221,8 +221,19 @@ export async function runVacancyImport(
   // An HTTP failure carries its status (a bare 3-digit code, never a payload):
   // 401 vs 403 vs 429 vs 5xx are different operator actions, and collapsing
   // them into `http_error` hid the cause of a failing source.
-  const fetchFailureDetail = (errorCode: string, detail: string): string =>
-    errorCode === "http_error" && /^\d{3}$/.test(detail) ? `${errorCode}:${detail}` : errorCode;
+  //
+  // A two-level feed's DETAIL failure carries its cause the same way
+  // (`detail_fetch_failed:timeout`, `:http_503`, `:http_403`): a transient
+  // timeout and a permanently refused ad need different handling and were
+  // indistinguishable as a bare `detail_fetch_failed`.
+  const fetchFailureDetail = (errorCode: string, detail: string): string => {
+    if (errorCode === "http_error" && /^\d{3}$/.test(detail)) return `${errorCode}:${detail}`;
+    if (errorCode === "detail_fetch_failed") {
+      const m = /^(?:fan_out_detail_failed:)?([a-z][a-z0-9_]{0,40})/.exec(detail);
+      if (m) return `${errorCode}:${m[1]}`;
+    }
+    return errorCode;
+  };
 
   const counters = {
     pagesRequested: 0,

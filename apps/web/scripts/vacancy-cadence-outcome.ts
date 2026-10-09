@@ -104,7 +104,19 @@ export function classifyErrorCode(raw: string): { transient: boolean; code: stri
     }
     return { transient: false, code: "http_error" };
   }
-  if (head === "timeout" || head === "network_error" || head === "detail_fetch_failed" || head === "stream_interrupted") {
+  if (head === "detail_fetch_failed") {
+    // `detail_fetch_failed:<cause>`; a bare code (older accounting) is unknown
+    // cause and treated as transient. A refused ad (4xx), bad JSON or an
+    // over-budget page is deterministic: retrying cannot change the answer.
+    const cause = parts[1];
+    if (cause === undefined) return { transient: true, code: head };
+    const status = /^http_(\d{3})$/.exec(cause);
+    const transient = status
+      ? Number(status[1]) >= 500 || status[1] === "429" || status[1] === "408"
+      : cause === "timeout" || cause === "network_error";
+    return { transient, code: `${head}:${cause}` };
+  }
+  if (head === "timeout" || head === "network_error" || head === "stream_interrupted") {
     return { transient: true, code: head };
   }
   // 401/403/400 land in http_error above; everything below is deterministic.
