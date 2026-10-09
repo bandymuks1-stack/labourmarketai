@@ -87,6 +87,28 @@ import {
 /** The one map route — it carries no partner credit line. */
 const MARKET_MAP_PATH = "/dashboard/market-map";
 
+/**
+ * HYDRATION BOUNDARY for server-authored slots (React #418, 2026-10-09).
+ *
+ * `children` and the slot props arrive from the RSC payload and may still be
+ * LAZY references when hydration reaches `<main>`. Reconciling a lazy child
+ * directly under a HOST element suspends that host fiber; React then REPLAYS
+ * the host element's begin phase — but the hydration cursor already moved into
+ * `<main>` on the first attempt, so the replayed claim compares `main` against
+ * its own first child and throws #418 ("server rendered HTML didn't match").
+ * Intermittent by nature: it fires only when the RSC chunk lands after the
+ * hydrator reaches `<main>` (measured 2–4 of 12 cold loads on /opportunities,
+ * /inbox; byte-identical server HTML on failing and passing loads).
+ *
+ * A function component between the host element and the slots moves that
+ * suspension onto a fiber that claims no DOM, so its replay cannot desync the
+ * cursor. Renders exactly its children — no element, no behaviour.
+ * Guard: lib/guards/hydration-slot-boundary.test.ts.
+ */
+function SlotBoundary({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
+}
+
 export function DashboardChrome({
   children,
   headerTitle,
@@ -133,15 +155,17 @@ export function DashboardChrome({
       <div className="flex min-h-[100dvh] flex-col bg-ink-900" data-chrome="simple" data-surface={mode}>
         <ConversationHeader title={headerTitle} nav={nav} />
         <main className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 py-6 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
-          {children}
-          {/* The Rexora product credit (owner directive 2026-07-14, pinned by
-              legal-entity-truth.test.ts) used to hang off the FULL chrome. Now
-              that full serves only the admin console it would have vanished
-              from every user-facing surface, so it hangs here instead — the
-              same one-line credit, in the shell the product actually uses. */}
-          {/* The map is the product's own working surface: no partner credit
-              line under it (owner direction — one clean map). */}
-          {pathname === MARKET_MAP_PATH ? null : rexora}
+          <SlotBoundary>
+            {children}
+            {/* The Rexora product credit (owner directive 2026-07-14, pinned by
+                legal-entity-truth.test.ts) used to hang off the FULL chrome. Now
+                that full serves only the admin console it would have vanished
+                from every user-facing surface, so it hangs here instead — the
+                same one-line credit, in the shell the product actually uses. */}
+            {/* The map is the product's own working surface: no partner credit
+                line under it (owner direction — one clean map). */}
+            {pathname === MARKET_MAP_PATH ? null : rexora}
+          </SlotBoundary>
         </main>
       </div>
     );
@@ -150,12 +174,14 @@ export function DashboardChrome({
   // Full: the Advanced-mode chrome, rendered from the layout-authored slots.
   return (
     <div className="relative min-h-screen" data-chrome="full">
-      {fullHeader}
+      <SlotBoundary>{fullHeader}</SlotBoundary>
       <main className="relative z-10 mx-auto max-w-container px-4 py-6 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
-        {children}
-        {rexora}
+        <SlotBoundary>
+          {children}
+          {rexora}
+        </SlotBoundary>
       </main>
-      {fullBottomNav}
+      <SlotBoundary>{fullBottomNav}</SlotBoundary>
     </div>
   );
 }
