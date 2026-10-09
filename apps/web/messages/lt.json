@@ -257,7 +257,10 @@
     "provenance": {
       "platform": "Šioje platformoje",
       "external_vacancy": "Viešas skelbimas, išorinis šaltinis"
-    }
+    },
+    "formChoose": "Pasirinkite…",
+    "errorKindRequired": "Pasirinkite, ar parduodate, nuomojate, ar ieškote.",
+    "errorCategoryRequired": "Pasirinkite, apie ką skelbimas."
   },
   "quality": {
     "title": "Defektai ir kokybė",

@@ -66,7 +66,9 @@ const STATUS_RING: Record<ListingStatus, string> = {
 
 type Draft = {
   domain: ListingDomain;
-  listingKind: ListingKind;
+  /** "" until the person chooses — no silent default (walk 2026-10-09). */
+  listingKind: ListingKind | "";
+  /** "" until the person chooses. */
   category: string;
   title: string;
   description: string;
@@ -82,8 +84,12 @@ type Draft = {
 
 const EMPTY_DRAFT: Draft = {
   domain: "work_resource",
-  listingKind: "rental",
-  category: "accommodation",
+  // A listing that nobody chose a kind or a subject for read "For rent ·
+  // Home-grown food" once saved (walk 2026-10-09): the first option of each
+  // select was taken as the person's answer. Both start unchosen now; a
+  // select with exactly one possible value is filled (that is not a guess).
+  listingKind: "",
+  category: "",
   title: "",
   description: "",
   locationCountry: "",
@@ -214,8 +220,13 @@ export function MarketplaceListingsSection({
     setDraft({
       ...draft,
       domain,
-      category: nextSubjects[0],
-      listingKind: kinds.includes(draft.listingKind) ? draft.listingKind : kinds[0],
+      category: nextSubjects.length === 1 ? nextSubjects[0] : "",
+      listingKind:
+        kinds.length === 1
+          ? kinds[0]
+          : draft.listingKind !== "" && kinds.includes(draft.listingKind)
+            ? draft.listingKind
+            : "",
     });
   }
 
@@ -235,11 +246,14 @@ export function MarketplaceListingsSection({
     setError(null);
     const priceAmount = toNumber(draft.priceAmount);
     const quantity = toNumber(draft.quantity);
+    const chosenKind = draft.listingKind;
+    if (chosenKind === "") return setError(t("errorKindRequired"));
+    if (draft.category === "") return setError(t("errorCategoryRequired"));
     if (Number.isNaN(priceAmount)) return setError(t("errorPrice"));
     if (Number.isNaN(quantity)) return setError(t("errorQuantity"));
     startTransition(async () => {
       const input = {
-        listingKind: draft.listingKind,
+        listingKind: chosenKind,
         category: draft.category,
         title: draft.title,
         description: draft.description || null,
@@ -392,6 +406,9 @@ export function MarketplaceListingsSection({
                   value={draft.listingKind}
                   onChange={(e) => setDraft({ ...draft, listingKind: e.target.value as ListingKind })}
                 >
+                  <option value="" disabled>
+                    {t("formChoose")}
+                  </option>
                   {LISTING_KINDS.filter((k) => allowedKinds.includes(k)).map((k) => (
                     <option key={k} value={k}>
                       {t(`kinds.${k}`)}
@@ -406,6 +423,9 @@ export function MarketplaceListingsSection({
                   value={draft.category}
                   onChange={(e) => setDraft({ ...draft, category: e.target.value })}
                 >
+                  <option value="" disabled>
+                    {t("formChoose")}
+                  </option>
                   {subjects.map((c) => (
                     <option key={c} value={c}>
                       {t(`categories.${c}`)}
