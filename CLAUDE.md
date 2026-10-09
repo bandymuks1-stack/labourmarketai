@@ -205,6 +205,16 @@ auto-merge is inert and Claude Code falls back to waiting for CI then merging.
 - Feature branches: GREEN-class PRs auto-merge once CI is green (see **Merge
   model** above); RED-class PRs open as **draft** with `needs-human-gate` for DI.
 
+## Reading owner instructions (binding, decision 0022)
+
+"Don't touch / mix / pause X while doing Y" is **task-local**: keep the current task
+isolated and preserve X during it. It never means "freeze X permanently" or "leave X's
+known defects unfixed". Only treat something as permanently prohibited, deferred or
+owner-gated when the owner explicitly said so; when wording is ambiguous, choose the
+narrower task-local reading. Known technical defects within existing authority are fixed
+without waiting for the owner to repeat the instruction. See
+`docs/DECISIONS/0022-task-local-instructions-are-not-permanent-restrictions.md`.
+
 ## Policy overrides
 
 DI's explicit prompt instruction always wins. If a prompt says "do not commit" 
