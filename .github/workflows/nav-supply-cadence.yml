@@ -95,6 +95,7 @@ jobs:
     timeout-minutes: 20
     outputs:
       gated: ${{ steps.gate.outputs.configuration_gated }}
+      started: ${{ steps.gate.outputs.started }}
     steps:
       - name: Kill switch / configuration gate
         id: gate
@@ -105,6 +106,7 @@ jobs:
           HAS_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL != '' }}
           HAS_TOKEN: ${{ secrets.VACANCY_SOURCE_NAV_API_TOKEN != '' }}
         run: |
+          echo "started=$(date +%s)" >> "$GITHUB_OUTPUT"
           if [ "$SCHEDULE_ENABLED" != "true" ] || [ "$PROVIDER_ENABLED" != "true" ] || [ "$HAS_KEY" != "true" ] || [ "$HAS_URL" != "true" ] || [ "$HAS_TOKEN" != "true" ]; then
             echo "configuration_gated=true" >> "$GITHUB_OUTPUT"
             echo "Inert: NAV schedule/provider variables or secrets not configured. This is the designed no-op state."
@@ -182,12 +184,16 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          RUN_STARTED_AT: ${{ github.run_started_at }}
+          # Epoch seconds recorded by the gate step (the run-start API field is NOT a
+          # runner context value: it expanded empty and the wait was skipped).
+          RUN_START_EPOCH: ${{ needs.import.outputs.started }}
         run: |
           # REQUEST BUDGET: starts are spaced >= 600 s apart (the documented
           # 144 sessions/day ceiling in nav-request-budget.test.ts), measured from
           # this run's START, never from its end.
-          start=$(date -d "$RUN_STARTED_AT" +%s)
+          start="$RUN_START_EPOCH"
+          # Fail safe: a missing/garbled start means a FULL 600 s wait, never none.
+          case "$start" in ''|*[!0-9]*) start=$(date +%s) ;; esac
           wait=$(( start + 600 - $(date +%s) ))
           if [ "$wait" -gt 0 ]; then sleep "$wait"; fi
           # At most one successor: skip if another run is already queued.

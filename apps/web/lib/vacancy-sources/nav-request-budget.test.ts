@@ -176,6 +176,13 @@ describe("NAV scheduler independence (rearm) keeps the 144 runs/day ceiling", ()
   it("the rearm job spaces run STARTS >= 600 s apart, honours the kill switch and queues at most one successor", () => {
     expect(yml).toMatch(/needs\.import\.outputs\.gated == 'false'/);
     expect(yml).toMatch(/start \+ 600/);
+    // The start epoch must come from a step that really exists. `github.run_started_at`
+    // is not a runner context value: it expanded empty, `date -d ""` was midnight,
+    // and the wait was silently skipped (observed 2026-10-09).
+    expect(yml).not.toMatch(/github\.run_started_at/);
+    expect(yml).toMatch(/echo "started=\$\(date \+%s\)" >> "\$GITHUB_OUTPUT"/);
+    expect(yml).toMatch(/RUN_START_EPOCH: \$\{\{ needs\.import\.outputs\.started \}\}/);
+    expect(yml).toMatch(/\*\[!0-9\]\*\) start=\$\(date \+%s\)/);
     expect(yml).toMatch(/--status queued/);
     expect(yml).toMatch(/gh workflow run nav-supply-cadence\.yml -f mode=persist/);
   });
