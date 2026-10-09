@@ -18325,7 +18325,60 @@
       "person": "{hours} Std., {count, plural, one {# Eintrag} other {# Einträge}}"
     },
     "periodShort": "{hours} Std. Zeitraumsumme",
-    "truncated": "Es gibt mehr Einträge, als eine Ansicht liest. Die {count} gelesenen werden angezeigt; Summen umfassen nur diese."
+    "truncated": "Es gibt mehr Einträge, als eine Ansicht liest. Die {count} gelesenen werden angezeigt; Summen umfassen nur diese.",
+    "business": {
+      "unavailable": "Die Unternehmensgeschichte konnte gerade nicht gelesen werden. Nichts ist verloren — bitte später erneut versuchen.",
+      "eyebrow": "Unternehmensgeschichte",
+      "title": "{name}: eine durchgehende Geschichte",
+      "subtitle": "Jede Zahl unten zählt die erfasste Arbeit der Organisation genau einmal. Zeiträume zeigen, was über frühere Rechtsträger erklärt wurde und worauf diese Erklärung beruht.",
+      "figures": "{records} Einträge · {hours} Std. · {people} Personen · {places} Orte",
+      "totals": {
+        "records": "Einträge",
+        "hours": "Stunden",
+        "people": "Personen",
+        "places": "Orte",
+        "projects": "Projekte",
+        "span": "Zeitraum"
+      },
+      "spanUnknown": "Daten nicht erfasst",
+      "periodsTitle": "Zeiträume des Unternehmens",
+      "noPeriods": "Für dieses Unternehmen ist noch kein Zeitraum erklärt. Begann die Arbeit unter einem früheren Rechtsträger, lässt sich das als erklärter Zeitraum festhalten — die Einträge selbst bleiben unverändert.",
+      "bounds": "{from} bis {to}",
+      "notDocumented": "nicht dokumentiert",
+      "boundsNotDocumented": "Daten nicht dokumentiert",
+      "legalEntity": "Damaliger Rechtsträger: {name}",
+      "relation": {
+        "not_asserted": "Nicht als derselbe Rechtsträger erklärt — eine durchgehende Unternehmensgeschichte.",
+        "same_entity": "Als derselbe Rechtsträger erklärt.",
+        "renamed": "Als derselbe Rechtsträger unter früherem Namen erklärt.",
+        "successor": "Als Rechtsvorgänger erklärt.",
+        "sold_and_continued_by_new_entity": "Der frühere Rechtsträger wurde verkauft; das Geschäft lief über einen neuen weiter.",
+        "other": "Eine andere dokumentierte Beziehung zwischen den Rechtsträgern."
+      },
+      "basis": {
+        "owner_statement": "Erklärung des Inhabers",
+        "registry_extract": "Registerauszug",
+        "contract": "Vertrag",
+        "other_document": "Dokument"
+      },
+      "periodNoRecords": "Diesem Zeitraum sind noch keine Einträge zugeordnet.",
+      "placedBy": "Zugeordnet über die Quellbezeichnung {labels}: {byLabel} Einträge; über dokumentierte Daten: {byDate}.",
+      "notPlaced": "Keinem erklärten Zeitraum zugeordnet (die Quelle trägt keine Zeitraum-Bezeichnung): {figures} · {span}.",
+      "yearsTitle": "Arbeit nach Jahren",
+      "undated": "{count, plural, one {# Eintrag hat kein Datum und zählt} other {# Einträge haben kein Datum und zählen}} nur in den Summen.",
+      "doorsLabel": "Dieselben Einträge öffnen",
+      "doors": {
+        "people": "Personen",
+        "projects": "Projekte",
+        "places": "Orte"
+      },
+      "workspace": {
+        "note": "Sie haben die Geschichte von {name} außerhalb des Arbeitsbereichs geöffnet. Personen und Projekte öffnen sich im aktiven Arbeitsbereich.",
+        "open": "Arbeitsbereich {name} öffnen",
+        "opening": "Wird geöffnet…",
+        "error": "Der Arbeitsbereich konnte nicht geöffnet werden."
+      }
+    }
   },
   "workPlan": {
     "title": "Geplante Arbeit",
@@ -18901,5 +18954,30 @@
     "openBuyerSetup": "Käufereinrichtung öffnen →",
     "startBuyerProfile": "Käuferprofil starten →",
     "footer": "Hier ist nichts erfunden: Jeder angezeigte Zustand stammt aus deinem Konto."
+  },
+  "organizationsLeadership": {
+    "unavailable": "Ihre Organisationen konnten gerade nicht gelesen werden.",
+    "eyebrow": "Organisationen und Leitung",
+    "title": "Organisationen, die Sie leiten",
+    "subtitle": "Organisationen, die Ihnen gehören oder die Sie leiten, die für sie erklärten Geschäftszeiträume und ihre ganze Geschichte.",
+    "unnamed": "Organisation noch ohne Namen",
+    "role": {
+      "owner": "Inhaber",
+      "manager": "Leitung"
+    },
+    "period": "Früherer Geschäftszeitraum: {label} ({from} – {to})",
+    "notDocumented": "Daten nicht dokumentiert",
+    "basis": {
+      "owner_statement": "Erklärung des Inhabers",
+      "registry_extract": "Registerauszug",
+      "contract": "Vertrag",
+      "other_document": "Dokument"
+    },
+    "relation": {
+      "not_asserted": "nicht als derselbe Rechtsträger erklärt",
+      "stated": "rechtliche Beziehung erklärt"
+    },
+    "openHistory": "Unternehmensgeschichte öffnen",
+    "note": "Die Leitung einer Organisation wird getrennt von Ihrer eigenen Arbeit gezeigt: Stunden der Organisation zählen nie als Ihre."
   }
 }

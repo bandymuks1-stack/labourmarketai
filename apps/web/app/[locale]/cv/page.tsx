@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { OrganizationsLeadership } from "@/components/app/organization/organizations-leadership";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
@@ -906,6 +907,11 @@ export default async function VerifiedCvPage({
             facts). Its own group, apart from the person's own history: not
             self-declared, not independently verified. Omitted when the ledger
             holds none or could not be read (null = unknown, never "none"). */}
+        {/* Organizations this person owns or manages, with their business
+            history - leadership, shown apart from personally performed work. */}
+        <div className="print:hidden">
+          <OrganizationsLeadership locale={locale} variant="cv" />
+        </div>
         {cv.organizationHistory && cv.organizationHistory.length > 0 ? (
           <CvOrganizationHistory
             entries={cv.organizationHistory}

@@ -18325,7 +18325,60 @@
       "person": "{hours} val., {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}"
     },
     "periodShort": "{hours} val. laikotarpio suma",
-    "truncated": "Įrašų yra daugiau, nei perskaito vienas vaizdas. Rodomi perskaityti {count}; sumos apima tik juos."
+    "truncated": "Įrašų yra daugiau, nei perskaito vienas vaizdas. Rodomi perskaityti {count}; sumos apima tik juos.",
+    "business": {
+      "unavailable": "Verslo istorijos dabar nepavyko perskaityti. Niekas neprarasta — bandykite vėliau.",
+      "eyebrow": "Verslo istorija",
+      "title": "{name}: viena tęstinė istorija",
+      "subtitle": "Kiekvienas skaičius žemiau skaičiuoja organizacijos užfiksuotą darbą vieną kartą. Laikotarpiai rodo, kas pasakyta apie ankstesnius juridinius asmenis ir kuo tas teiginys grindžiamas.",
+      "figures": "{records} įrašai · {hours} val. · {people} žmonės · {places} vietos",
+      "totals": {
+        "records": "Įrašai",
+        "hours": "Valandos",
+        "people": "Žmonės",
+        "places": "Vietos",
+        "projects": "Projektai",
+        "span": "Laikotarpis"
+      },
+      "spanUnknown": "datos neužfiksuotos",
+      "periodsTitle": "Verslo laikotarpiai",
+      "noPeriods": "Šio verslo laikotarpis dar nenurodytas. Jei darbas prasidėjo kitu juridiniu asmeniu, tai galima užfiksuoti kaip nurodytą laikotarpį — patys įrašai lieka nepakitę.",
+      "bounds": "nuo {from} iki {to}",
+      "notDocumented": "nedokumentuota",
+      "boundsNotDocumented": "Datos nedokumentuotos",
+      "legalEntity": "Tuometinis juridinis asmuo: {name}",
+      "relation": {
+        "not_asserted": "Neteigiama, kad tai tas pats juridinis asmuo — viena tęstinė verslo istorija.",
+        "same_entity": "Teigiama, kad tai tas pats juridinis asmuo.",
+        "renamed": "Teigiama, kad tai tas pats juridinis asmuo ankstesniu pavadinimu.",
+        "successor": "Teigiama, kad tai teisinis pirmtakas.",
+        "sold_and_continued_by_new_entity": "Ankstesnis juridinis asmuo parduotas; verslas tęsiamas per naują.",
+        "other": "Kitas dokumentuotas juridinių asmenų ryšys."
+      },
+      "basis": {
+        "owner_statement": "Savininko teiginys",
+        "registry_extract": "Registro išrašas",
+        "contract": "Sutartis",
+        "other_document": "Dokumentas"
+      },
+      "periodNoRecords": "Šiam laikotarpiui įrašų dar nepriskirta.",
+      "placedBy": "Priskirta pagal šaltinio žymą {labels}: {byLabel} įrašai; pagal dokumentuotas datas: {byDate}.",
+      "notPlaced": "Nepriskirta nurodytam laikotarpiui (šaltinyje nėra laikotarpio žymos): {figures} · {span}.",
+      "yearsTitle": "Darbas pagal metus",
+      "undated": "{count, plural, one {# įrašas neturi datos ir skaičiuojamas} few {# įrašai neturi datos ir skaičiuojami} other {# įrašų neturi datos ir skaičiuojami}} tik bendruose skaičiuose.",
+      "doorsLabel": "Atverti tuos pačius įrašus",
+      "doors": {
+        "people": "Žmonės",
+        "projects": "Projektai",
+        "places": "Vietos"
+      },
+      "workspace": {
+        "note": "Atvėrėte {name} istoriją ne iš jos darbo erdvės. Žmonės ir projektai atsidaro aktyvioje darbo erdvėje.",
+        "open": "Atverti {name} darbo erdvę",
+        "opening": "Atveriama…",
+        "error": "Darbo erdvės atverti nepavyko."
+      }
+    }
   },
   "workPlan": {
     "title": "Suplanuotas darbas",
@@ -18901,5 +18954,30 @@
     "openBuyerSetup": "Atidaryti pirkėjo nustatymą →",
     "startBuyerProfile": "Pradėti pirkėjo profilį →",
     "footer": "Čia niekas nesugalvota: kiekviena būsena nuskaityta iš jūsų paskyros."
+  },
+  "organizationsLeadership": {
+    "unavailable": "Jūsų organizacijų dabar nepavyko perskaityti.",
+    "eyebrow": "Organizacijos ir vadovavimas",
+    "title": "Organizacijos, kurioms vadovaujate",
+    "subtitle": "Organizacijos, kurias valdote ar kurioms vadovaujate, joms nurodyti verslo laikotarpiai ir visa jų istorija.",
+    "unnamed": "Organizacija dar be pavadinimo",
+    "role": {
+      "owner": "Savininkas",
+      "manager": "Vadovas"
+    },
+    "period": "Ankstesnis verslo laikotarpis: {label} ({from} – {to})",
+    "notDocumented": "datos nedokumentuotos",
+    "basis": {
+      "owner_statement": "savininko teiginys",
+      "registry_extract": "registro išrašas",
+      "contract": "sutartis",
+      "other_document": "dokumentas"
+    },
+    "relation": {
+      "not_asserted": "neteigiama, kad tai tas pats juridinis asmuo",
+      "stated": "teisinis ryšys nurodytas"
+    },
+    "openHistory": "Atverti verslo istoriją",
+    "note": "Vadovavimas organizacijai rodomas atskirai nuo jūsų paties darbo: organizacijos valandos niekada nepriskiriamos jums."
   }
 }

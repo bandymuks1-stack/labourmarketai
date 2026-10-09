@@ -18325,7 +18325,60 @@
       "person": "{hours} h, {count, plural, one {# record} other {# records}}"
     },
     "periodShort": "{hours} h period total",
-    "truncated": "More records exist than one view reads. The {count} read are shown; totals cover only these."
+    "truncated": "More records exist than one view reads. The {count} read are shown; totals cover only these.",
+    "business": {
+      "unavailable": "The business history could not be read right now. Nothing is lost — try again later.",
+      "eyebrow": "Business history",
+      "title": "{name}: one continuous history",
+      "subtitle": "Every figure below counts the organisation's own recorded work, once. Periods show what was stated about earlier legal entities and what that statement rests on.",
+      "figures": "{records} records · {hours} h · {people} people · {places} places",
+      "totals": {
+        "records": "Records",
+        "hours": "Hours",
+        "people": "People",
+        "places": "Places",
+        "projects": "Projects",
+        "span": "Span"
+      },
+      "spanUnknown": "dates not recorded",
+      "periodsTitle": "Periods of the business",
+      "noPeriods": "No period of this business has been stated yet. If the work began under an earlier legal entity, that can be recorded as a stated period — the records themselves stay as they are.",
+      "bounds": "{from} – {to}",
+      "notDocumented": "not documented",
+      "boundsNotDocumented": "Dates not documented",
+      "legalEntity": "Legal entity at the time: {name}",
+      "relation": {
+        "not_asserted": "Not stated to be the same legal entity — one continuous business history.",
+        "same_entity": "Stated to be the same legal entity.",
+        "renamed": "Stated to be the same legal entity under an earlier name.",
+        "successor": "Stated to be a legal predecessor.",
+        "sold_and_continued_by_new_entity": "The earlier entity was sold; the business continued through a new entity.",
+        "other": "Another documented relationship between the entities."
+      },
+      "basis": {
+        "owner_statement": "Owner's statement",
+        "registry_extract": "Registry extract",
+        "contract": "Contract",
+        "other_document": "Document"
+      },
+      "periodNoRecords": "No records are placed in this period yet.",
+      "placedBy": "Placed by the source label {labels}: {byLabel} records; by documented dates: {byDate}.",
+      "notPlaced": "Not placed in a stated period (the source carries no period label): {figures} · {span}.",
+      "yearsTitle": "Work by year",
+      "undated": "{count, plural, one {# record has} other {# records have}} no date and {count, plural, one {is} other {are}} counted in the totals only.",
+      "doorsLabel": "Open the same records",
+      "doors": {
+        "people": "People",
+        "projects": "Projects",
+        "places": "Places"
+      },
+      "workspace": {
+        "note": "You opened {name}'s history from outside its workspace. People and projects open in the active workspace.",
+        "open": "Open {name} workspace",
+        "opening": "Opening…",
+        "error": "The workspace could not be opened."
+      }
+    }
   },
   "workPlan": {
     "title": "Planned work",
@@ -18901,5 +18954,30 @@
     "openBuyerSetup": "Open buyer setup →",
     "startBuyerProfile": "Start buyer profile →",
     "footer": "Nothing here is invented: every state shown is read from your account."
+  },
+  "organizationsLeadership": {
+    "unavailable": "Your organisations could not be read right now.",
+    "eyebrow": "Organisations and leadership",
+    "title": "Organisations you lead",
+    "subtitle": "Organisations you own or manage, the business periods stated for them, and their full history.",
+    "unnamed": "Organisation without a name yet",
+    "role": {
+      "owner": "Owner",
+      "manager": "Manager"
+    },
+    "period": "Earlier business period: {label} ({from} – {to})",
+    "notDocumented": "dates not documented",
+    "basis": {
+      "owner_statement": "owner's statement",
+      "registry_extract": "registry extract",
+      "contract": "contract",
+      "other_document": "document"
+    },
+    "relation": {
+      "not_asserted": "not stated to be the same legal entity",
+      "stated": "legal relationship stated"
+    },
+    "openHistory": "Open the business history",
+    "note": "Leading an organisation is shown apart from your own work: the organisation's hours are never counted as yours."
   }
 }

@@ -10,6 +10,9 @@ import {
   type CompanyWorkHistoryLoad,
 } from "@/lib/organization-evidence/company-work-history-read";
 import { isPeriodRecord, type PlaceGroup } from "@/lib/organization-evidence/company-work-history";
+import { BusinessHistoryOverview } from "@/components/app/organization/business-history-overview";
+import { OpenWorkspaceButton } from "@/components/app/organization/open-workspace-button";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
 
 /**
  * THE COMPANY'S IMPORTED WORK HISTORY — seen from the place (2026-10-01).
@@ -63,8 +66,15 @@ export function span(first: string | null, last: string | null, locale: string):
   return b && b !== a ? `${a} – ${b}` : a;
 }
 
-export async function CompanyWorkHistory({ locale }: { locale: string }) {
-  const load = await loadCompanyWorkHistory(locale);
+export async function CompanyWorkHistory({
+  locale,
+  organizationId = null,
+}: {
+  locale: string;
+  /** `?org=` — an organization the caller belongs to, opened by name. */
+  organizationId?: string | null;
+}) {
+  const load = await loadCompanyWorkHistory(locale, organizationId);
   if (load.kind === "hidden") return null;
   const t = await getTranslations("companyWorkHistory");
 
@@ -130,6 +140,17 @@ export async function CompanyWorkHistory({ locale }: { locale: string }) {
         ) : null}
       </header>
 
+      {/* Opened for a named organization that is not the active workspace:
+          the people / projects doors read the ACTIVE one, so offer the switch. */}
+      {organizationId ? <WorkspaceNotice organizationId={load.organizationId} name={organizationName} /> : null}
+
+      <BusinessHistoryOverview
+        business={load.business}
+        organizationId={load.organizationId}
+        organizationName={organizationName}
+        locale={locale}
+      />
+
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <Stat concept="object" value={String(placed.length)} label={t("stats.places")} />
         <Stat concept="person" value={String(history.peopleCount)} label={t("stats.people")} />
@@ -137,7 +158,7 @@ export async function CompanyWorkHistory({ locale }: { locale: string }) {
         <Stat concept="calendar" value={periodLabel ?? "—"} label={t("stats.period")} />
       </div>
 
-      <ul className="grid gap-3 md:grid-cols-2" data-testid="company-work-history-places">
+      <ul id="company-work-history-places" className="grid scroll-mt-20 gap-3 md:grid-cols-2" data-testid="company-work-history-places">
         {placed.map((p) => (
           <li key={p.key}>
             <PlaceTile p={p} t={t} locale={locale} maxHours={maxHours} />
@@ -374,6 +395,31 @@ export async function CompanyPlaceHistory({
           </div>
         ))}
       </section>
+    </div>
+  );
+}
+
+async function WorkspaceNotice({ organizationId, name }: { organizationId: string; name: string }) {
+  let active: string | null = null;
+  try {
+    active = (await getWorkspaceContext()).activeWorkspaceId;
+  } catch {
+    active = null;
+  }
+  if (active === organizationId) return null;
+  const t = await getTranslations("companyWorkHistory.business.workspace");
+  return (
+    <div
+      className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-brand-orange/40 bg-brand-orange/5 px-4 py-3"
+      data-testid="business-history-workspace-notice"
+    >
+      <p className="text-sm text-text-secondary">{t("note", { name })}</p>
+      <OpenWorkspaceButton
+        organizationId={organizationId}
+        label={t("open", { name })}
+        pendingLabel={t("opening")}
+        errorLabel={t("error")}
+      />
     </div>
   );
 }

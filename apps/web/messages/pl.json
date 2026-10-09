@@ -18325,7 +18325,60 @@
       "person": "{hours} godz., {count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}"
     },
     "periodShort": "{hours} godz. suma za okres",
-    "truncated": "Wpisów jest więcej, niż odczytuje jeden widok. Pokazano odczytane {count}; sumy obejmują tylko je."
+    "truncated": "Wpisów jest więcej, niż odczytuje jeden widok. Pokazano odczytane {count}; sumy obejmują tylko je.",
+    "business": {
+      "unavailable": "Nie udało się teraz odczytać historii firmy. Nic nie zginęło — spróbuj później.",
+      "eyebrow": "Historia firmy",
+      "title": "{name}: jedna ciągła historia",
+      "subtitle": "Każda liczba poniżej liczy zarejestrowaną pracę organizacji dokładnie raz. Okresy pokazują, co zadeklarowano o wcześniejszych podmiotach prawnych i na czym ta deklaracja się opiera.",
+      "figures": "{records} wpisów · {hours} godz. · {people} osób · {places} miejsc",
+      "totals": {
+        "records": "Wpisy",
+        "hours": "Godziny",
+        "people": "Osoby",
+        "places": "Miejsca",
+        "projects": "Projekty",
+        "span": "Okres"
+      },
+      "spanUnknown": "daty nie zarejestrowane",
+      "periodsTitle": "Okresy działalności",
+      "noPeriods": "Nie zadeklarowano jeszcze okresu tej działalności. Jeśli praca zaczęła się pod wcześniejszym podmiotem prawnym, można to zapisać jako zadeklarowany okres — same wpisy pozostają bez zmian.",
+      "bounds": "od {from} do {to}",
+      "notDocumented": "nieudokumentowane",
+      "boundsNotDocumented": "Daty nieudokumentowane",
+      "legalEntity": "Podmiot prawny w tamtym czasie: {name}",
+      "relation": {
+        "not_asserted": "Nie zadeklarowano, że to ten sam podmiot prawny — jedna ciągła historia działalności.",
+        "same_entity": "Zadeklarowano jako ten sam podmiot prawny.",
+        "renamed": "Zadeklarowano jako ten sam podmiot pod wcześniejszą nazwą.",
+        "successor": "Zadeklarowano jako poprzednika prawnego.",
+        "sold_and_continued_by_new_entity": "Wcześniejszy podmiot sprzedano; działalność kontynuowano przez nowy.",
+        "other": "Inny udokumentowany związek między podmiotami."
+      },
+      "basis": {
+        "owner_statement": "Oświadczenie właściciela",
+        "registry_extract": "Odpis z rejestru",
+        "contract": "Umowa",
+        "other_document": "Dokument"
+      },
+      "periodNoRecords": "Do tego okresu nie przypisano jeszcze wpisów.",
+      "placedBy": "Przypisano według etykiety źródła {labels}: {byLabel} wpisów; według udokumentowanych dat: {byDate}.",
+      "notPlaced": "Nie przypisano do zadeklarowanego okresu (źródło nie ma etykiety okresu): {figures} · {span}.",
+      "yearsTitle": "Praca według lat",
+      "undated": "{count, plural, one {# wpis nie ma daty i liczy się} few {# wpisy nie mają daty i liczą się} many {# wpisów nie ma daty i liczy się} other {# wpisu nie ma daty i liczy się}} tylko w sumach.",
+      "doorsLabel": "Otwórz te same wpisy",
+      "doors": {
+        "people": "Osoby",
+        "projects": "Projekty",
+        "places": "Miejsca"
+      },
+      "workspace": {
+        "note": "Historia {name} została otwarta spoza jej przestrzeni roboczej. Osoby i projekty otwierają się w aktywnej przestrzeni.",
+        "open": "Otwórz przestrzeń {name}",
+        "opening": "Otwieranie…",
+        "error": "Nie udało się otworzyć przestrzeni roboczej."
+      }
+    }
   },
   "workPlan": {
     "title": "Zaplanowana praca",
@@ -18901,5 +18954,30 @@
     "openBuyerSetup": "Otwórz konfigurację kupującego →",
     "startBuyerProfile": "Rozpocznij profil kupującego →",
     "footer": "Nic tu nie jest wymyślone: każdy pokazany stan pochodzi z Twojego konta."
+  },
+  "organizationsLeadership": {
+    "unavailable": "Nie udało się teraz odczytać Twoich organizacji.",
+    "eyebrow": "Organizacje i kierowanie",
+    "title": "Organizacje, którymi kierujesz",
+    "subtitle": "Organizacje, których jesteś właścicielem lub którymi zarządzasz, zadeklarowane dla nich okresy działalności i ich pełna historia.",
+    "unnamed": "Organizacja jeszcze bez nazwy",
+    "role": {
+      "owner": "Właściciel",
+      "manager": "Kierownik"
+    },
+    "period": "Wcześniejszy okres działalności: {label} ({from} – {to})",
+    "notDocumented": "daty nieudokumentowane",
+    "basis": {
+      "owner_statement": "oświadczenie właściciela",
+      "registry_extract": "odpis z rejestru",
+      "contract": "umowa",
+      "other_document": "dokument"
+    },
+    "relation": {
+      "not_asserted": "nie zadeklarowano, że to ten sam podmiot prawny",
+      "stated": "zadeklarowano związek prawny"
+    },
+    "openHistory": "Otwórz historię firmy",
+    "note": "Kierowanie organizacją jest pokazane osobno od Twojej własnej pracy: godziny organizacji nigdy nie liczą się jako Twoje."
   }
 }

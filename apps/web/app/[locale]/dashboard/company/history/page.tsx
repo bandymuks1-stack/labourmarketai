@@ -44,6 +44,7 @@ export default async function CompanyHistoryPage({
       : undefined;
   const place =
     typeof sp.place === "string" && sp.place.trim() !== "" ? sp.place : undefined;
+  const org = typeof sp.org === "string" && sp.org.trim() !== "" ? sp.org.trim() : null;
   const t = await getTranslations("organizationDoors.pages.history");
 
   return (
@@ -57,7 +58,7 @@ export default async function CompanyHistoryPage({
 
       {/* WHAT IS ALREADY ON RECORD — the committed history seen by place,
           before the door for adding more. */}
-      <CompanyWorkHistory locale={locale} />
+      <CompanyWorkHistory locale={locale} organizationId={org} />
 
       {/* WHO PERFORMED IT — only when this organization's books hold work that
           another organization of the same caller performed. */}

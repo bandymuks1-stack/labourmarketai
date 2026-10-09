@@ -1,4 +1,5 @@
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
+import { OrganizationsLeadership } from "@/components/app/organization/organizations-leadership";
 import { organizationAllTime } from "@/lib/journal/organization-all-time";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -1166,6 +1167,9 @@ export default async function ProfilePage({
            journal-entry count query went with them — it had no other consumer,
            so the slice removes one DB round trip as well as one number. */
       />
+      {/* Organizations the person owns or manages + their business history
+          (owner request 2026-10-09) - a relationship, never personal hours. */}
+      <OrganizationsLeadership locale={locale} variant="profile" />
 
       {/* The avatar EDITOR moved into `#cv-details` (summary first,
           2026-09-23): the hub above already shows the avatar, so a second
