@@ -46,6 +46,7 @@ import { WorkDay } from "@/components/app/planning/work-day";
 import { buildWorkRhythm, compactHours } from "@/lib/planning/work-rhythm";
 import { createUtcFormatter } from "@/lib/time/display";
 import { viewerWorkToday } from "@/lib/time/viewer-day";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * THE canonical calendar (core-network area C) — one planning surface over
@@ -186,9 +187,7 @@ export default async function PlanningPage({
 
   const header = (
     <header>
-      <h1 className="font-display text-title font-bold tracking-tightest text-text-primary">
-        {t("title")}
-      </h1>
+      <PageTitle>{t("title")}</PageTitle>
     </header>
   );
 

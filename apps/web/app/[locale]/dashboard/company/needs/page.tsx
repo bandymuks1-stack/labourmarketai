@@ -23,6 +23,7 @@ import { ClaimPublicIntakeCard } from "@/components/app/claim-public-intake-card
 import { PublicDemandSection } from "@/components/app/public-demand-section";
 import { CompanyScoutingBridge } from "@/components/app/company-scouting-bridge";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 // W3 rows 7/8/25: the employer demand kinds the owner readback is scoped to —
 // a dual-role user's buyer service requests stay in the buyer room.
@@ -142,9 +143,7 @@ export default async function CompanyNeedsPage({
   return (
     <div className="flex flex-col gap-6" data-testid="company-needs">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 

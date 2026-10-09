@@ -37,6 +37,7 @@ import {
 } from "@/lib/agency/delegation-read";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
 import { resolveDemandTitle } from "@/lib/demand/sanitize-demand-title";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * KLIENTAI IR PARTNERIAI — the relationship door (owner IA correction
@@ -128,9 +129,7 @@ export default async function CompanyPartnersPage({
 
   const header = (
     <header className="flex flex-col gap-1">
-      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-        {t("title")}
-      </h1>
+      <PageTitle>{t("title")}</PageTitle>
       <p className="text-sm text-text-secondary">{t("subtitle")}</p>
     </header>
   );

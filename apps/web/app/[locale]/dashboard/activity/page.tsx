@@ -13,6 +13,7 @@ import {
   getDurableNotifications,
   getSpineCounts,
 } from "@/lib/notifications/spine";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Unified activity centre (control room PR C) — ONE cross-module surface
@@ -87,9 +88,7 @@ export default async function ActivityCentrePage({
         <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {tA("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {tA("title")}
-        </h1>
+        <PageTitle>{tA("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{tA("intro")}</p>
       </header>
 

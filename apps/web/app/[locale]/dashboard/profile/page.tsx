@@ -102,6 +102,7 @@ import {
   RosterLinkOffers,
   RosterLinkWithdrawals,
 } from "@/components/app/organization-evidence-section";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 type WorkerDirection = { id: string; slug: string; name: string; isPrimary: boolean };
 
@@ -852,9 +853,7 @@ export default async function ProfilePage({
       />
       <header id="profile-top" className="scroll-mt-20">
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-          <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-            {t("pageTitle")}
-          </h1>
+          <PageTitle>{t("pageTitle")}</PageTitle>
           {/* systemic-ux-mobile-v1: action cluster never clips on 360px — it
               stacks to a 2-column grid on mobile (max 2 actions across) and
               flows inline only from sm+. */}

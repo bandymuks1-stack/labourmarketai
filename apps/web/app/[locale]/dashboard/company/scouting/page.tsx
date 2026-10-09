@@ -59,6 +59,7 @@ import {
   type CandidatePipelineStage,
 } from "@/lib/pipeline/candidate-pipeline";
 import { loadDemandPipelineFacts } from "@/lib/pipeline/candidate-pipeline-facts";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 const READINESS_TONE: Record<CompanyCandidateLabel, string> = {
   can_be_considered: "border-state-success/40 bg-state-success/10 text-state-success",
@@ -131,9 +132,7 @@ export default async function CompanyScoutingPage({
     return (
       <div className="mx-auto flex w-full max-w-content flex-col gap-6">
         <header className="flex flex-col gap-1">
-          <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-            {t("title")}
-          </h1>
+          <PageTitle>{t("title")}</PageTitle>
           <p className="text-sm leading-relaxed text-text-secondary">{t("intro")}</p>
         </header>
         <EmployerContextNotice
@@ -339,9 +338,7 @@ export default async function CompanyScoutingPage({
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm leading-relaxed text-text-secondary">{t("intro")}</p>
       </header>
 

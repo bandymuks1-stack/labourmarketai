@@ -53,6 +53,7 @@ import { ManagerEvidenceCard } from "@/components/app/manager-evidence-card";
 import { OrgMembersPanel } from "@/components/app/org-members-panel";
 import { LifecycleSection } from "../lifecycle-section";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * ŽMONĖS — the organization's people door (owner IA correction 2026-09-16,
@@ -254,9 +255,7 @@ export default async function CompanyPeoplePage({
   return (
     <div className="flex flex-col gap-6" data-testid="company-people">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
         <p
           className="font-mono text-meta text-text-muted tabular-nums"

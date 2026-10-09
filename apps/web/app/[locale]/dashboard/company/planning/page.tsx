@@ -34,6 +34,7 @@ import {
 import { playerInitials } from "@/lib/identity/player-identity";
 import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
 import { viewerWorkToday } from "@/lib/time/viewer-day";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /** The timeline window: four weeks, moved by whole windows. */
 const TIMELINE_DAYS = 28;
@@ -113,9 +114,7 @@ export default async function CompanyWorkforcePlanningPage({
       <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
         {t("eyebrow")}
       </p>
-      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-        {t("title")}
-      </h1>
+      <PageTitle>{t("title")}</PageTitle>
       <p className="text-sm text-text-secondary">{t("intro")}</p>
     </header>
   );

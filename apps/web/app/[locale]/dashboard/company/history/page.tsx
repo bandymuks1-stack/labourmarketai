@@ -8,6 +8,7 @@ import { CompanyWorkHistory, CompanyPlaceHistory } from "@/components/app/organi
 import { PerformingCompanyPanel } from "@/components/app/organization/performing-company-panel";
 import { EvidenceImportSessions } from "@/components/app/organization/evidence-import-sessions";
 import { HistoricalPhotoImport } from "@/components/app/organization/historical-photo-import";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * ISTORIJA — the historical import door (owner IA correction 2026-09-16,
@@ -50,9 +51,7 @@ export default async function CompanyHistoryPage({
   return (
     <div className="flex flex-col gap-6" data-testid="company-history">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 

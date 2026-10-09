@@ -32,6 +32,7 @@ import { countWorkersWithUnconfirmableWork } from "@/lib/operations/org-members"
 import { loadCompanyHomeField } from "@/lib/company/company-home-field";
 import { CompanyHomeFieldSection } from "@/components/app/company-home-field-section";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 // The employer demand kinds the home field's "what we are missing" reads —
 // a dual-role user's buyer service requests stay in the buyer room.
@@ -105,9 +106,7 @@ export default async function CompanyDashboardPage({
           <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
             {t("eyebrow")}
           </p>
-          <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-            {t("title")}
-          </h1>
+          <PageTitle>{t("title")}</PageTitle>
         </header>
         <CompanyNoProfileGuide
           reason={employerCtx.kind === "ok" ? null : employerCtx.reason}
@@ -265,9 +264,7 @@ export default async function CompanyDashboardPage({
         >
           {tRooms("company.context")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{tDoors("subtitle")}</p>
         {/* ONE canonical company profile — the workspace re-labels itself
             from companies.company_type after every save/refresh. An agency is

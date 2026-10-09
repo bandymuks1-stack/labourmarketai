@@ -23,6 +23,7 @@ import {
 import { StructureNeedForm } from "@/components/app/structure-need-form";
 import { openDirectConversationAction } from "@/lib/communication/open-conversation-action";
 import type { DarkListboxOption } from "@/components/ui/DarkListbox";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Phase 3.2 — Human-Run Matching Workbench (Marketplace v1 heart, product
@@ -163,9 +164,7 @@ export default async function AdminMatchingWorkbenchPage({
         <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
         {/* Honest method statement — the match is a human decision. */}
         <p

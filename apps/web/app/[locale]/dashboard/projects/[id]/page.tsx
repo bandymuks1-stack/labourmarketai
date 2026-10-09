@@ -33,6 +33,7 @@ import { EvidenceMediaStrip } from "@/components/app/evidence-media-strip";
 import { ProjectLinkedDocuments } from "@/components/app/linked-documents";
 import { type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 export const dynamic = "force-dynamic";
 
@@ -90,9 +91,7 @@ export default async function ProjectStadiumPage({
     }
     return (
       <div className="mx-auto flex w-full max-w-content flex-col gap-4">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("eyebrow")}
-        </h1>
+        <PageTitle>{t("eyebrow")}</PageTitle>
         <p
           className="card-border p-4 text-sm text-text-secondary"
           data-testid="stadium-not-authorized"
@@ -173,9 +172,7 @@ export default async function ProjectStadiumPage({
           <Activity className="h-3.5 w-3.5" aria-hidden />
           {t("eyebrow")}
         </span>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {ops.project.title ?? tOps("untitledProject")}
-        </h1>
+        <PageTitle>{ops.project.title ?? tOps("untitledProject")}</PageTitle>
         <div className="flex flex-wrap gap-2">
           {ops.project.city ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">

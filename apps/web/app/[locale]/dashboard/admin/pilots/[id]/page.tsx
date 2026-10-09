@@ -15,6 +15,7 @@ import {
   RemoveParticipantButton,
 } from "@/components/app/admin-pilots-forms";
 import { formatUtcDate, formatUtcDateTime } from "@/lib/time/display";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Pilot cohort detail — participants, status and the owner-recorded outcome
@@ -99,9 +100,7 @@ export default async function AdminPilotDetailPage({
         >
           ← {t("detail.back")}
         </Link>
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {pilot.name}
-        </h1>
+        <PageTitle>{pilot.name}</PageTitle>
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t(`kind.${pilot.organisationKind}`)} · {t(`status.${pilot.status}`)} ·{" "}
           {pilot.startsOn || pilot.endsOn

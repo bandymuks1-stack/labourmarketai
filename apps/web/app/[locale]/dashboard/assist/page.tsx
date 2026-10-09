@@ -7,6 +7,7 @@ import { getAssistView } from "@/lib/assist/assist";
 import { ORG_SUMMARY_SOURCE_KEYS } from "@/lib/assist/assist-model";
 import type { Role } from "@/lib/auth/actions";
 import { createUtcFormatter } from "@/lib/time/display";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * AI assistance centre (control room PR J, capability gap map §10) — ONE
@@ -88,9 +89,7 @@ export default async function AssistPage({
         <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
       </header>
 

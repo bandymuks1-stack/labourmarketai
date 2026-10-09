@@ -49,6 +49,7 @@ import {
 import { MapPin } from "lucide-react";
 import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
 import { type Role } from "@/lib/auth/actions";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 export const dynamic = "force-dynamic";
 
@@ -114,9 +115,7 @@ export default async function ProjectsPage({
         className="mx-auto flex w-full max-w-content flex-col gap-4"
         data-testid="worker-projects-list"
       >
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("myProjectsTitle")}
-        </h1>
+        <PageTitle>{t("myProjectsTitle")}</PageTitle>
         {myProjects.length === 0 ? (
           <p className="card-border p-4 text-sm text-text-secondary">
             {t("myProjectsEmpty")}
@@ -373,9 +372,7 @@ export default async function ProjectsPage({
         >
           {tRooms("projects.context")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm leading-relaxed text-text-secondary">
           {t("intro")}
         </p>

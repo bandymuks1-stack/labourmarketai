@@ -46,6 +46,7 @@ import {
   type WorkerCountryReadinessStatus,
 } from "@/lib/readiness/worker-readiness";
 import type { Role } from "@/lib/auth/actions";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * "Mano dokumentai" — the document & work-proof centre (control room PR H,
@@ -1057,9 +1058,7 @@ function Header({ t }: { t: Awaited<ReturnType<typeof getTranslations>> }) {
       <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
         {t("eyebrow")}
       </p>
-      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-        {t("title")}
-      </h1>
+      <PageTitle>{t("title")}</PageTitle>
       <p className="text-sm text-text-secondary">{t("subtitle")}</p>
     </header>
   );

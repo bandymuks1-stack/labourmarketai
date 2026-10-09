@@ -26,6 +26,7 @@ import {
   type ComposerLabels,
 } from "@/components/app/manager-instruction-composer";
 import { type Role } from "@/lib/auth/actions";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 export const dynamic = "force-dynamic";
 
@@ -71,9 +72,7 @@ export default async function InstructionsPage({
 
   const Header = (
     <header className="flex flex-col gap-1">
-      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-        {isManager ? t("managerTitle") : t("workerTitle")}
-      </h1>
+      <PageTitle>{isManager ? t("managerTitle") : t("workerTitle")}</PageTitle>
       <p className="text-sm leading-relaxed text-text-secondary">
         {isManager ? t("managerIntro") : t("workerIntro")}
       </p>

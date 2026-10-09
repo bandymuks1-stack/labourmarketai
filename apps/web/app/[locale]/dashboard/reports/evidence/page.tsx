@@ -5,6 +5,7 @@ import { PrintButton } from "@/components/app/print-button";
 import { createClient } from "@/lib/supabase/server";
 import { buildVerifiedCv } from "@/lib/cv-export/verified-cv";
 import { buildEvidenceReport } from "@/lib/reports/evidence-report";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Evidence Report v1 (PR #479) — a print-ready, honest evidence report built
@@ -35,7 +36,7 @@ export default async function EvidenceReportPage({
   if (!cvRes.ok) {
     return (
       <div className="mx-auto flex w-full max-w-content flex-col gap-3">
-        <h1 className="font-display text-2xl font-bold text-text-primary">{t("title")}</h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary" data-testid="evidence-report-not-worker">{t("notWorker")}</p>
         <Link href="/dashboard/profile" className="text-sm font-medium text-brand-blue hover:underline">{t("back")} →</Link>
       </div>
@@ -69,7 +70,7 @@ export default async function EvidenceReportPage({
       <header className="flex flex-wrap items-start justify-between gap-3 print:hidden">
         <div className="flex flex-col gap-1">
           <Link href="/dashboard/profile" className="self-start text-xs font-medium text-brand-blue hover:underline">← {t("back")}</Link>
-          <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">{t("title")}</h1>
+          <PageTitle>{t("title")}</PageTitle>
           <p className="max-w-2xl text-sm leading-relaxed text-text-secondary">{t("subtitle")}</p>
         </div>
         <PrintButton label={t("print")} className="border-ink-500 bg-ink-800 px-4 py-2 text-sm text-text-primary hover:border-brand-blue" />

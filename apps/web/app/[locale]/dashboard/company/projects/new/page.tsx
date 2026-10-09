@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { ProjectContextCreateForm } from "@/components/app/project-context-create-form";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Company-side "create project context" route. Gated to the company role
@@ -29,9 +30,7 @@ export default async function NewProjectContextPage({
         >
           ← {t("backToDashboard")}
         </Link>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 

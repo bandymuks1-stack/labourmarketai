@@ -87,6 +87,7 @@ import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-co
 import { listOrganizationMembers } from "@/lib/company/memberships";
 import { createUtcFormatter } from "@/lib/time/display";
 import { taskAnchorId } from "@/lib/projects/stage-gantt";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Work tasks (control room PR D, capability gap map §3) — the role-aware
@@ -1266,9 +1267,7 @@ export default async function TasksPage({
       <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
         {t("eyebrow")}
       </p>
-      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-        {t("title")}
-      </h1>
+      <PageTitle>{t("title")}</PageTitle>
       <p className="text-sm text-text-secondary">{t("intro")}</p>
     </header>
   );

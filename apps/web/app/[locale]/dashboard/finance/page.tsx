@@ -35,6 +35,7 @@ import { ProcurementSection } from "./procurement-section";
 import { TripsSection } from "./trips-section";
 import type { ProcurementNotice } from "@/lib/procurement/procurement-model";
 import type { TripNotice } from "@/lib/trips/trips-model";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Operational finance records (control room PR I, capability gap map §9) —
@@ -233,9 +234,7 @@ export default async function FinancePage({
       <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
         {t("eyebrow")}
       </p>
-      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-        {t("title")}
-      </h1>
+      <PageTitle>{t("title")}</PageTitle>
       <p className="text-sm text-text-secondary">{t("intro")}</p>
     </header>
   );

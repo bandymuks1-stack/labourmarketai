@@ -30,6 +30,7 @@ import { HelpRequestPanel } from "@/components/app/help-request-panel";
 import { FeatureNote } from "@/components/app/feature-note";
 import { MembershipInvitationsPanel } from "@/components/app/membership-invitations-panel";
 import { OrganizationMembersSection } from "@/components/app/organization-members-section";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * NUSTATYMAI — the organization's own record (owner IA correction
@@ -138,9 +139,7 @@ export default async function CompanySettingsPage({
   return (
     <div className="flex flex-col gap-6" data-testid="company-settings">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
         {/* ONE canonical company profile — the workspace re-labels itself
             from companies.company_type after every save/refresh. */}

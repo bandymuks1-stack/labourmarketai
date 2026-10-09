@@ -7,6 +7,7 @@ import {
   getLaunchReadiness,
 } from "@/lib/admin/launch-readiness";
 import { getWorkerAdsReadiness } from "@/lib/ads/limited-worker-ads-readiness";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Operator launch-readiness view (launch repair Scope E).
@@ -79,9 +80,7 @@ export default async function AdminLaunchReadinessPage({
         <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
       </header>
 

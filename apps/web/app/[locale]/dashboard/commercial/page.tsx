@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getMyCommercial } from "@/lib/commercial/commercial";
 import { CommercialPanel } from "@/components/app/commercial-panel";
 import { AgreementsRegister } from "@/components/app/agreements-register";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 export const dynamic = "force-dynamic";
 
@@ -46,9 +47,7 @@ export default async function CommercialPage({
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("pageTitle")}
-        </h1>
+        <PageTitle>{t("pageTitle")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("pageIntro")}</p>
       </header>
       <CommercialPanel data={data} />

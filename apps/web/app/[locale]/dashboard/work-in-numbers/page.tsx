@@ -35,6 +35,7 @@ import { createClient } from "@/lib/supabase/server";
 import { skillsForProfession } from "@/lib/taxonomy/profession-skills";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { formatUtcDate } from "@/lib/time/display";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * MANO VEIKLA SKAIČIAIS — the Work-in-Numbers station (target worker IA
@@ -190,9 +191,7 @@ export default async function WorkInNumbersPage({
         metadata={{ surface: "journal", step: "numbers" }}
       />
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-title font-bold tracking-tightest text-text-primary sm:text-title-lg">
-          {t("numbers.stationTitle")}
-        </h1>
+        <PageTitle>{t("numbers.stationTitle")}</PageTitle>
         <p className="text-support leading-relaxed text-text-secondary">
           {t("numbers.stationSubtitle")}
         </p>

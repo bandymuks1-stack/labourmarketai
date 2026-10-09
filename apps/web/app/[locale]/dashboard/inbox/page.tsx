@@ -19,6 +19,7 @@ import {
   resolveWorkerName,
   type WorkerNameRow,
 } from "@/lib/journal/worker-name";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 // Structured-field slugs that have a localized label; others fall back to slug.
 const FIELD_LABEL_SLUGS = new Set(["site_name", "tile_type", "area_done"]);
@@ -236,9 +237,7 @@ export default async function InboxPage({
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("inbox.title")}
-        </h1>
+        <PageTitle>{t("inbox.title")}</PageTitle>
         <div
           className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-secondary"
           data-testid="inbox-summary"

@@ -119,6 +119,7 @@ import type {
   OpportunityStatus,
 } from "@/lib/opportunities/opportunity-fit";
 import { createUtcFormatter } from "@/lib/time/display";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * PASAULIS — the worker's discovery-and-matching destination
@@ -876,9 +877,7 @@ export default async function OpportunitiesPage({
         />
       ) : null}
       <header className="flex flex-col gap-2">
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("world.title")}
-        </h1>
+        <PageTitle>{t("world.title")}</PageTitle>
         {result.kind === "ready" ? (
           <>
             {/* WHY YOU MAY BE SEEING LESS — and nothing else (§7). A capability

@@ -13,6 +13,7 @@ import { InstitutionLearnersSection } from "@/components/app/institution-learner
 import { InstitutionProgramsSection } from "@/components/app/institution-programs-section";
 import { InstitutionRecognitionSection } from "@/components/app/institution-recognition-section";
 import { PublicDemandSection } from "@/components/app/public-demand-section";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * MOKYMAI — the education door (owner IA correction 2026-09-16,
@@ -58,9 +59,7 @@ export default async function CompanyEducationPage({
   return (
     <div className="flex flex-col gap-6" data-testid="company-education">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
       <InstitutionLearnersSection organizationId={capabilityOrgId} />

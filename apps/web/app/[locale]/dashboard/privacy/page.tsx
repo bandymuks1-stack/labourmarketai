@@ -28,6 +28,7 @@ import {
 } from "@/lib/privacy/consent-definitions";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /** Never show a worker a raw database code. Turns `chat_message` /
  *  `contact_email` into "Chat message" / "Contact email" as a safe fallback
@@ -148,9 +149,7 @@ export default async function PrivacyPage({
   return (
     <div className="flex flex-col gap-5" data-testid="privacy-page">
       <header>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="mt-2 text-sm text-text-secondary">{t("intro")}</p>
       </header>
 

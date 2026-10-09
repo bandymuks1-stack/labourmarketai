@@ -23,6 +23,7 @@ import {
   type CompanySetupFormLabels,
 } from "@/components/app/company-setup-form";
 import { Card } from "@/components/ui/Card";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Company profile-REQUEST setup (real persistence + honest verification).
@@ -275,9 +276,7 @@ export default async function CompanyStartPage({
         <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {label("ĮMONĖS NUSTATYMAS", "COMPANY SETUP")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {label("Įmonės profilis", "Company profile")}
-        </h1>
+        <PageTitle>{label("Įmonės profilis", "Company profile")}</PageTitle>
       </header>
 
       <Link

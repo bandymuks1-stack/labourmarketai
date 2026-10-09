@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Link } from "@/lib/i18n/navigation";
 import { VoiceJournalRecorder } from "@/components/app/voice-journal-recorder";
 import { isVoiceTranscriptionConfigured } from "@/lib/voice/transcribe-action";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /** Voice input for the ONE Work Journal (nested under /dashboard/journal —
  *  no new top-level module). Record → self-hosted transcription → review and
@@ -36,9 +37,7 @@ export default async function VoiceJournalPage({
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 p-4">
       <div className="flex flex-col gap-1">
-        <h1 className="font-display text-xl font-semibold text-text-primary">
-          {t("pageTitle")}
-        </h1>
+        <PageTitle>{t("pageTitle")}</PageTitle>
         <p className="text-sm leading-relaxed text-text-secondary">
           {t("pageIntro")}
         </p>
