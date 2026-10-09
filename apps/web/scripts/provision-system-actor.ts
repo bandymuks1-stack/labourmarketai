@@ -10,7 +10,7 @@
  *
  * This is an OWNER-RUN step for production (Admin API). It refuses any target
  * that is not explicitly named by SYSTEM_ACTOR_SUPABASE_URL +
- * SYSTEM_ACTOR_SERVICE_KEY, never reads .env.local, and prints no key. The
+ * SYSTEM_ACTOR_SERVICE_KEY, never reads a local env file, and prints no key. The
  * fixed id must equal public.expiry_sweep_actor_id_v1() in the migration.
  *
  *   SYSTEM_ACTOR_SUPABASE_URL=... SYSTEM_ACTOR_SERVICE_KEY=... \
@@ -28,7 +28,7 @@ async function main(): Promise<void> {
   const key = process.env.SYSTEM_ACTOR_SERVICE_KEY;
   if (!url || !key) {
     console.error(
-      "Set SYSTEM_ACTOR_SUPABASE_URL and SYSTEM_ACTOR_SERVICE_KEY explicitly (nothing is read from .env.local).",
+      "Set SYSTEM_ACTOR_SUPABASE_URL and SYSTEM_ACTOR_SERVICE_KEY explicitly (nothing is read from a local env file).",
     );
     process.exitCode = 2;
     return;
