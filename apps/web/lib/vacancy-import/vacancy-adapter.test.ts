@@ -140,3 +140,44 @@ describe("retries are reported to the caller (onRetry)", () => {
     expect(none).toBe(0);
   });
 }, 15_000);
+
+describe("an unparseable 200 body is retried like a transient failure (Sweden invalid_json, 2026-10-09)", () => {
+  const json = { "content-type": "application/json" };
+
+  it("recovers when a later attempt returns a parseable page, reporting one retry", async () => {
+    enable();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response('{"hits":[{"id":1', { status: 200, headers: json }))
+      .mockResolvedValueOnce(new Response("[]", { status: 200, headers: json }));
+    vi.stubGlobal("fetch", fetchMock);
+    let retries = 0;
+    const result = await fetchVacancyPage({
+      provider: PROVIDER,
+      channel: "stream",
+      query: { date: "2026-08-04T00:00:00.000Z" },
+      onRetry: () => {
+        retries += 1;
+      },
+    });
+    expect(result.ok).toBe(true);
+    expect(retries).toBe(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("still fails as invalid_json, bounded by maxRetries, when the body never parses", async () => {
+    enable();
+    const fetchMock = vi
+      .fn()
+      .mockImplementation(async () => new Response("<html>", { status: 200, headers: json }));
+    vi.stubGlobal("fetch", fetchMock);
+    const result = await fetchVacancyPage({
+      provider: PROVIDER,
+      channel: "stream",
+      query: { date: "2026-08-04T00:00:00.000Z" },
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.errorCode).toBe("invalid_json");
+    expect(fetchMock).toHaveBeenCalledTimes(3); // 1 + maxRetries (2): never unbounded
+  });
+}, 20_000);
