@@ -8362,7 +8362,38 @@
     "recordedHoursScope": "All time.",
     "recordedHoursScopeTruncated": "From the last {count} entries; older entries are not in these figures.",
     "organizationRecordedHours": "Organization records: {hours} h on {days, plural, one {# day} other {# days}} in timesheets or imported documents ({imported} h imported, {approved} h approved) — kept apart from the journal figure and attributed to no skill.",
-    "organizationRecordedHoursWithPeriods": "Organization records: {total} h in total — {hours} h on {days, plural, one {# day} other {# days}} and {periodHours} h stated as period totals ({from} – {to}) in timesheets or imported documents ({approved} h approved). Kept apart from the journal figure and attributed to no skill."
+    "organizationRecordedHoursWithPeriods": "Organization records: {total} h in total — {hours} h on {days, plural, one {# day} other {# days}} and {periodHours} h stated as period totals ({from} – {to}) in timesheets or imported documents ({approved} h approved). Kept apart from the journal figure and attributed to no skill.",
+    "premium": {
+      "eyebrowFallback": "Living CV",
+      "facts": {
+        "recorded": "recorded in your work journal",
+        "confirmed": "with a manager's record",
+        "organization": "in organisation records",
+        "languages": "languages"
+      },
+      "capEyebrow": "Capabilities",
+      "capEyebrowHours": "{hours} h of recorded work",
+      "capTitle": "What you *can do*",
+      "expEyebrow": "Experience",
+      "expTitle": "Where you have *worked*",
+      "evidence": {
+        "both": "{confirmed} h with a manager's record · {recorded} h recorded",
+        "recorded": "{hours} h recorded",
+        "shown": "Shown by your records",
+        "declared": "You say so; nothing shows it yet"
+      },
+      "source": {
+        "own": "Your record",
+        "organization": "Organisation records"
+      },
+      "orgDayHours": "{hours} h on {count, plural, one {# record} other {# records}}",
+      "orgPeriodHours": "{hours} h stated as a period total",
+      "present": "now",
+      "more": "+ {count} more in the full register below",
+      "emptyCapabilities": "No skills on record yet. Skills you add — and the work that shows them — appear here.",
+      "emptyExperience": "No work history yet. Your journal and the records of organisations you worked for build this.",
+      "untitled": "Work without a name in the source"
+    }
   },
   "todayScreen": {
     "eyebrow": "Today",

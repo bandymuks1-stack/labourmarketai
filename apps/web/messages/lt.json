@@ -8362,7 +8362,38 @@
     "recordedHoursScope": "Visas laikas.",
     "recordedHoursScopeTruncated": "Iš paskutinių {count} įrašų; senesni įrašai į šiuos skaičius neįtraukti.",
     "organizationRecordedHours": "Organizacijos apskaitoje: {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} žiniaraščiuose ar importuotuose dokumentuose ({imported} val. importuota, {approved} val. vadovo patvirtinta žiniaraštyje) — skaičiuojama atskirai nuo žurnalo skaičiaus ir nepriskiriama jokiam įgūdžiui.",
-    "organizationRecordedHoursWithPeriods": "Organizacijų įrašai: iš viso {total} val. — {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} ir {periodHours} val., nurodytos kaip laikotarpio suma ({from} – {to}), darbo laiko žiniaraščiuose ar importuotuose dokumentuose ({approved} val. patvirtinta). Laikoma atskirai nuo žurnalo skaičiaus ir nepriskiriama jokiam gebėjimui."
+    "organizationRecordedHoursWithPeriods": "Organizacijų įrašai: iš viso {total} val. — {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} ir {periodHours} val., nurodytos kaip laikotarpio suma ({from} – {to}), darbo laiko žiniaraščiuose ar importuotuose dokumentuose ({approved} val. patvirtinta). Laikoma atskirai nuo žurnalo skaičiaus ir nepriskiriama jokiam gebėjimui.",
+    "premium": {
+      "eyebrowFallback": "Gyvas CV",
+      "facts": {
+        "recorded": "užfiksuota darbo žurnale",
+        "confirmed": "su vadovo įrašu",
+        "organization": "organizacijų įrašuose",
+        "languages": "kalbos"
+      },
+      "capEyebrow": "Gebėjimai",
+      "capEyebrowHours": "{hours} val. užfiksuoto darbo",
+      "capTitle": "Ką *mokate*",
+      "expEyebrow": "Patirtis",
+      "expTitle": "Kur esate *dirbę*",
+      "evidence": {
+        "both": "{confirmed} val. su vadovo įrašu · {recorded} val. užfiksuota",
+        "recorded": "{hours} val. užfiksuota",
+        "shown": "Rodo jūsų įrašai",
+        "declared": "Nurodėte patys; kol kas neparodyta"
+      },
+      "source": {
+        "own": "Jūsų įrašas",
+        "organization": "Organizacijos įrašai"
+      },
+      "orgDayHours": "{hours} val. per {count, plural, one {# įrašą} few {# įrašus} other {# įrašų}}",
+      "orgPeriodHours": "{hours} val. nurodyta kaip laikotarpio suma",
+      "present": "dabar",
+      "more": "+ dar {count} pilname registre žemiau",
+      "emptyCapabilities": "Gebėjimų dar nėra. Čia atsiras jūsų pridėti gebėjimai ir juos rodantis darbas.",
+      "emptyExperience": "Darbo istorijos dar nėra. Ją kuria jūsų žurnalas ir organizacijų, kuriose dirbote, įrašai.",
+      "untitled": "Darbas be pavadinimo šaltinyje"
+    }
   },
   "todayScreen": {
     "eyebrow": "Šiandien",

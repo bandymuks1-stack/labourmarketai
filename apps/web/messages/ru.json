@@ -8362,7 +8362,38 @@
     "recordedHoursScope": "За всё время.",
     "recordedHoursScopeTruncated": "По последним {count} записям; более старые записи в эти цифры не входят.",
     "organizationRecordedHours": "В учёте организации: {hours} ч за {days, plural, one {# день} few {# дня} many {# дней} other {# дней}} в табелях или импортированных документах ({imported} ч импортировано, {approved} ч утверждено) — учитываются отдельно от цифры журнала и не относятся ни к одному навыку.",
-    "organizationRecordedHoursWithPeriods": "Записи организаций: всего {total} ч — {hours} ч за {days, plural, one {# день} few {# дня} other {# дней}} и {periodHours} ч, указанные как итог за период ({from} – {to}), в табелях или импортированных документах ({approved} ч утверждено). Учитывается отдельно от журнала и не относится ни к одному навыку."
+    "organizationRecordedHoursWithPeriods": "Записи организаций: всего {total} ч — {hours} ч за {days, plural, one {# день} few {# дня} other {# дней}} и {periodHours} ч, указанные как итог за период ({from} – {to}), в табелях или импортированных документах ({approved} ч утверждено). Учитывается отдельно от журнала и не относится ни к одному навыку.",
+    "premium": {
+      "eyebrowFallback": "Живое резюме",
+      "facts": {
+        "recorded": "записано в журнале работ",
+        "confirmed": "с записью руководителя",
+        "organization": "в записях организаций",
+        "languages": "языки"
+      },
+      "capEyebrow": "Навыки",
+      "capEyebrowHours": "{hours} ч записанной работы",
+      "capTitle": "Что вы *умеете*",
+      "expEyebrow": "Опыт",
+      "expTitle": "Где вы *работали*",
+      "evidence": {
+        "both": "{confirmed} ч с записью руководителя · {recorded} ч записано",
+        "recorded": "{hours} ч записано",
+        "shown": "Показано вашими записями",
+        "declared": "Указано вами; работа это пока не показывает"
+      },
+      "source": {
+        "own": "Ваша запись",
+        "organization": "Записи организации"
+      },
+      "orgDayHours": "{hours} ч в {count, plural, one {# записи} few {# записях} many {# записях} other {# записи}}",
+      "orgPeriodHours": "{hours} ч указано как итог за период",
+      "present": "сейчас",
+      "more": "+ ещё {count} в полном реестре ниже",
+      "emptyCapabilities": "Навыков пока нет. Здесь появятся добавленные вами навыки и работа, которая их показывает.",
+      "emptyExperience": "Истории работы пока нет. Её создают ваш журнал и записи организаций, где вы работали.",
+      "untitled": "Работа без названия в источнике"
+    }
   },
   "todayScreen": {
     "eyebrow": "Сегодня",
