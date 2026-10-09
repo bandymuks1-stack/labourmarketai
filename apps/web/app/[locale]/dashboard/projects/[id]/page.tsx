@@ -172,7 +172,7 @@ export default async function ProjectStadiumPage({
           <Activity className="h-3.5 w-3.5" aria-hidden />
           {t("eyebrow")}
         </span>
-        <PageTitle plain>{ops.project.title ?? tOps("untitledProject")}</PageTitle>
+        <PageTitle>{ops.project.title ?? tOps("untitledProject")}</PageTitle>
         <div className="flex flex-wrap gap-2">
           {ops.project.city ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">

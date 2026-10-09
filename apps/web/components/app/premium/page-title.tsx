@@ -2,28 +2,24 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
-import { Accented } from "./grammar";
-
 /**
- * THE PAGE TITLE — the h1 of every signed-in route, in the premium grammar's
- * rhythm (display face, tight tracking, ONE accent word). It replaces seven
+ * THE PAGE TITLE — the h1 of every signed-in route. One type treatment in the
+ * premium grammar (display face, tight tracking, warm-white text) replacing
  * hand-copied h1 class strings that had drifted across text-2xl, text-3xl and
  * text-title.
  *
- * The accent is applied to the LAST word of a multi-word, translated title, so
- * no locale needs new copy and no title is ever altered — only styled. A
- * one-word title stays plain: an accent on the only word is decoration.
- * Non-string children (a title with markup) are rendered untouched.
+ * It is deliberately PLAIN: no accent word, no italics, no colour. Owner
+ * direction 2026-10-09 — the identity is restrained (black, warm white,
+ * champagne gold for selected actions), and a decorative accent on every title
+ * is exactly the repetition that was rejected. Hierarchy comes from size,
+ * weight and spacing, not from ornament.
  */
 export function PageTitle({
   children,
   className,
-  plain,
 }: {
   readonly children: ReactNode;
   readonly className?: string;
-  /** A name, not a sentence (person, project, organization): never accented. */
-  readonly plain?: boolean;
 }) {
   return (
     <h1
@@ -32,16 +28,7 @@ export function PageTitle({
         className,
       )}
     >
-      {typeof children === "string" && !plain ? <Accented text={accentLastWord(children)} /> : children}
+      {children}
     </h1>
   );
-}
-
-/** "My projects" -> "My *projects*". Exported for the unit test. */
-export function accentLastWord(title: string): string {
-  const clean = title.replace(/\*/g, "");
-  const trimmed = clean.trim();
-  const i = trimmed.lastIndexOf(" ");
-  if (i <= 0) return clean;
-  return `${trimmed.slice(0, i)} *${trimmed.slice(i + 1)}*`;
 }

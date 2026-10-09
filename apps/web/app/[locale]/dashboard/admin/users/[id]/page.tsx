@@ -80,7 +80,7 @@ export default async function AdminUserPage({
         >
           ← {t("back")}
         </Link>
-        <PageTitle plain>{profile.full_name ?? profile.email ?? id}</PageTitle>
+        <PageTitle>{profile.full_name ?? profile.email ?? id}</PageTitle>
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {profile.active_role ?? "—"} ·{" "}
           {profile.onboarded_at ? t("user.onboarded") : t("user.notOnboarded")}

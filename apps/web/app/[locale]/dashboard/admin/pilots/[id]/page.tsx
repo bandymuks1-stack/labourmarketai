@@ -100,7 +100,7 @@ export default async function AdminPilotDetailPage({
         >
           ← {t("detail.back")}
         </Link>
-        <PageTitle plain>{pilot.name}</PageTitle>
+        <PageTitle>{pilot.name}</PageTitle>
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t(`kind.${pilot.organisationKind}`)} · {t(`status.${pilot.status}`)} ·{" "}
           {pilot.startsOn || pilot.endsOn

@@ -6,7 +6,6 @@ import { WorkHoursQuickEntry } from "@/components/app/work-hours-quick-entry";
 import { getHoursPageData } from "@/lib/work-hours/hours-page-data";
 import { isValidWorkDate } from "@/lib/work-hours/allocations-model";
 import { viewerWorkToday } from "@/lib/time/viewer-day";
-import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * WORK HOURS — the operator's daily surface.
@@ -42,7 +41,7 @@ export default async function WorkHoursPage({
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-5 pb-16">
       <header className="flex flex-col gap-1">
-        <PageTitle>{t("title")}</PageTitle>
+        <h1 className="font-display text-2xl font-semibold">{t("title")}</h1>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 
