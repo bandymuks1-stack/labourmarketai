@@ -23,12 +23,12 @@ name: sweden-supply-cadence
 
 on:
   schedule:
-    # Every 3 hours (was 5/11/17 UTC). Ads carry a deadline; the public
-    # count drops as they pass (2 515 expired at one midnight, 2026-09-27),
-    # and three runs a day left a ~14 h overnight gap in which the count only
-    # fell. A stream run takes about a minute; JobStream is built for
-    # frequent polling.
-    - cron: "17 */3 * * *"
+    # DAILY OBJECTIVE (owner decision 2026-10-09): one complete update cycle per
+    # 24 h. Three scheduled stream runs a day absorb GitHub's throttled cron (about
+    # one delivered event per 5 h) and a transient failure (the next run resumes
+    # from the durable cursor); ingestion-freshness.yml alerts and re-dispatches if
+    # the cursor is ever more than 26 h old. A stream run takes about a minute.
+    - cron: "17 1,9,17 * * *"
   workflow_dispatch:
     inputs:
       channel:

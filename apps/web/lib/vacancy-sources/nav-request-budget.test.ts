@@ -53,14 +53,26 @@ const CEILING = {
   maxConcurrency: 2,
 } as const;
 
-function cronSessionsPerDay(): number {
+/**
+ * Worst-case NAV runs per day. Since the 2026-10-09 daily-freshness decision the
+ * schedule itself is only a few runs a day; the ceiling that matters is the
+ * back-to-back backlog CHAIN, whose run STARTS are spaced >= 600 s apart
+ * (pinned in the rearm describe below).
+ */
+const CHAIN_RUNS_PER_DAY = Math.floor(86_400 / 600); // 144
+
+function scheduledRunsPerDay(): number {
   const yml = readFileSync(
     join(__dirname, "..", "..", "..", "..", ".github", "workflows", "nav-supply-cadence.yml"),
     "utf8",
   );
-  const m = /cron:\s*"\*\/(\d+) \* \* \* \*"/.exec(yml);
-  if (!m) throw new Error("nav-supply-cadence cron is no longer a */N schedule; update the budget test");
-  return Math.floor(1440 / Number(m[1]));
+  const m = /cron:\s*"(\d+) ([\d,]+) \* \* \*"/.exec(yml);
+  if (!m) throw new Error("nav-supply-cadence cron is no longer a fixed-hours daily schedule; update the budget test");
+  return m[2].split(",").length;
+}
+
+function cronSessionsPerDay(): number {
+  return CHAIN_RUNS_PER_DAY;
 }
 
 function worstCase(pages: number, details: number, retries: number) {
@@ -76,8 +88,9 @@ describe("NAV request budget", () => {
     bounds.maxRetries,
   );
 
-  it("the cadence is the documented every-10-minutes (144 sessions/day)", () => {
+  it("the worst case is the backlog chain (144 runs/day); the plain schedule is at most 6 runs/day", () => {
     expect(sessions).toBe(144);
+    expect(scheduledRunsPerDay()).toBeLessThanOrEqual(6);
   });
 
   it("the descriptor declares a finite per-session budget, spacing and low concurrency", () => {
@@ -175,7 +188,12 @@ describe("NAV scheduler independence (rearm) keeps the 144 runs/day ceiling", ()
 
   it("the rearm job spaces run STARTS >= 600 s apart, honours the kill switch and queues at most one successor", () => {
     expect(yml).toMatch(/needs\.import\.outputs\.gated == 'false'/);
-    expect(yml).toMatch(/start \+ 600/);
+    // Backlog-driven: a caught-up run does not rearm; a failed run backs off 30 min;
+    // a manual dry run never starts a persist chain.
+    expect(yml).toMatch(/needs\.import\.outputs\.behind == 'true'/);
+    expect(yml).toMatch(/floor=600; \[ "\$IMPORT_RESULT" = "success" \] \|\| floor=1800/);
+    expect(yml).toMatch(/github\.event_name != 'workflow_dispatch' \|\| inputs\.mode == 'persist'/);
+    expect(yml).toMatch(/wait=\$\(\( start \+ floor - \$\(date \+%s\) \)\)/);
     // The start epoch must come from a step that really exists. `github.run_started_at`
     // is not a runner context value: it expanded empty, `date -d ""` was midnight,
     // and the wait was silently skipped (observed 2026-10-09).
