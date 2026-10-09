@@ -599,6 +599,19 @@ export const SCOPED_OWNER_WAIVERS = [
       //         the intro now says to open the vacancy. One string selection,
       //         no route, projection, auth or schema change.
       2101,
+      // OWNER APPROVAL 2026-10-09, verbatim: "I approve the scoped
+      // public-acquisition-route-jobs owner waiver strictly for the three
+      // described /jobs fixes in PR #2211: out-of-range pagination recovery,
+      // cross-active-locale profession filter mapping, and locale-correct
+      // LT/RU number formatting. This approval does not authorize removal,
+      // narrowing or replacement of any existing /jobs functionality, data
+      // source, country, filter, route, projection, authorization rule or
+      // schema." Bounded — not authority for any future waived change.
+      // #2211 — an empty page past the end redirects to page 1 of the SAME
+      //         search; a profession word from another active catalogue maps
+      //         to the same slug filter (reader's own catalogue first, only
+      //         an unambiguous slug); the count uses Intl.NumberFormat.
+      2211,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.

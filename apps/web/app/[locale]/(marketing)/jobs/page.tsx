@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link, redirect } from "@/lib/i18n/navigation";
-import { matchProfessionByLabel } from "@/lib/vacancy-store/public-vacancy-profession-match";
+import { matchProfessionAcrossLocales } from "@/lib/vacancy-store/public-vacancy-profession-match";
+import { activeLocales } from "@/lib/i18n/config";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { buildPageMetadataFor, resolveActiveLocale } from "@/lib/seo/metadata";
 import type { ActiveLocale } from "@/lib/i18n/config";
@@ -340,8 +341,21 @@ export default async function JobsPage({
   // ("valytojas") would otherwise search Swedish publisher labels and report a
   // false zero. Resolve it through the same slug filter, in the URL, so reload,
   // share and "clear filter" all behave as for a picked profession.
+  // The other active catalogues are tried only when the reader's own finds
+  // nothing ("welder" on the Lithuanian board) — see matchProfessionAcrossLocales.
   if (!profession && query && sp.saved !== "1") {
-    const mapped = matchProfessionByLabel(query, professionOptions);
+    const others = await Promise.all(
+      activeLocales
+        .filter((l) => l !== active)
+        .map(async (locale) => {
+          const t = await getTranslations({ locale, namespace: "professions" });
+          return PUBLIC_VACANCY_PROFESSION_SLUGS.map((slug) => ({
+            slug,
+            label: t.has(slug as never) ? t(slug as never) : slug,
+          }));
+        }),
+    );
+    const mapped = matchProfessionAcrossLocales(query, professionOptions, others);
     if (mapped) redirect({ href: `/jobs?profession=${mapped}`, locale: active });
   }
   const page = Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1);
@@ -397,6 +411,14 @@ export default async function JobsPage({
     const s = qs.toString();
     return s ? `/jobs?${s}` : "/jobs";
   };
+
+  // A PAGE PAST THE END IS NOT AN EMPTY BOARD (2026-10-08 walk). The count
+  // rides on the page's own rows, so `?page=9999` read "0 vacancies found"
+  // over 50,000 live ads. An empty page beyond the first goes back to the
+  // first page of the SAME search, which tells the truth about the count.
+  if (!showSaved && result.status === "ok" && result.vacancies.length === 0 && page > 1) {
+    redirect({ href: pageHref(1), locale: active });
+  }
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
@@ -537,7 +559,7 @@ export default async function JobsPage({
           {/* role="status": a search is a full navigation, so the result count
               is the one thing a screen reader must hear after it lands. */}
           <p role="status" className="mt-6 text-sm text-text-muted">
-            {result.totalCount.toLocaleString()} {RESULTS[active]}
+            {new Intl.NumberFormat(active).format(result.totalCount)} {RESULTS[active]}
           </p>
 
           {result.vacancies.length === 0 ? (

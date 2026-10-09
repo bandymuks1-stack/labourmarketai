@@ -1,3 +1,4 @@
+import { authPageMetadata } from "@/lib/auth/auth-page-metadata";
 import { Suspense } from "react";
 import { setRequestLocale } from "next-intl/server";
 import { SignupForm } from "@/components/app/signup-form";
@@ -19,6 +20,14 @@ export const revalidate = 300;
  *  settings endpoint and passed down as plain booleans — the client form
  *  never guesses which providers exist (§18: never advertise a sign-in
  *  button the auth server cannot complete). */
+export function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  return authPageMetadata(params, "signup");
+}
+
 export default async function SignupPage({
   params,
   searchParams,

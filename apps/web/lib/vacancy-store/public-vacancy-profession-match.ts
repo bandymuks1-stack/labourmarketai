@@ -54,3 +54,29 @@ export function matchProfessionByLabel(
   });
   return loose.length === 1 ? loose[0]!.slug : null;
 }
+
+/**
+ * THE SAME WORD IN ANOTHER ACTIVE LANGUAGE (2026-10-08 anonymous walk).
+ *
+ * `/lt/jobs?q=welder` and `/en/jobs?q=valytojas` reported a false zero: the
+ * word IS a catalogue profession, just not in the reader's language (a
+ * Lithuanian reading the English board, a shared link, a habit). The reader's
+ * own catalogue is tried first and wins; only when it finds nothing are the
+ * other active catalogues tried, and a slug is returned only when every
+ * catalogue that matches agrees on the SAME slug — a word that means two
+ * different professions in two languages stays a plain text search.
+ */
+export function matchProfessionAcrossLocales(
+  query: string,
+  readerOptions: readonly ProfessionLabel[],
+  otherLocaleOptions: readonly (readonly ProfessionLabel[])[],
+): string | null {
+  const own = matchProfessionByLabel(query, readerOptions);
+  if (own) return own;
+  const hits = new Set<string>();
+  for (const options of otherLocaleOptions) {
+    const slug = matchProfessionByLabel(query, options);
+    if (slug) hits.add(slug);
+  }
+  return hits.size === 1 ? [...hits][0]! : null;
+}

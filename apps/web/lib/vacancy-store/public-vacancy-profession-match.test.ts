@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { matchProfessionByLabel } from "./public-vacancy-profession-match";
+import { matchProfessionAcrossLocales, matchProfessionByLabel } from "./public-vacancy-profession-match";
 
 const LT = [
   { slug: "baker", label: "Kepėjas" },
@@ -37,5 +37,31 @@ describe("a typed catalogue profession becomes its filter", () => {
         { slug: "b", label: "Virtuvės pagalbininkas" },
       ]),
     ).toBeNull();
+  });
+});
+
+describe("the same word in another active language", () => {
+  const EN = [
+    { slug: "cleaner", label: "Cleaner" },
+    { slug: "welder", label: "Welder" },
+  ];
+  const RU = [
+    { slug: "cleaner", label: "Уборщик" },
+    { slug: "welder", label: "Сварщик" },
+  ];
+
+  it("resolves an English word on the Lithuanian board and vice versa", () => {
+    expect(matchProfessionAcrossLocales("welder", LT, [EN, RU])).toBe("welder");
+    expect(matchProfessionAcrossLocales("valytojas", EN, [LT, RU])).toBe("cleaner");
+  });
+
+  it("the reader's own catalogue wins", () => {
+    expect(matchProfessionAcrossLocales("valytojas", LT, [EN])).toBe("cleaner");
+  });
+
+  it("never guesses when two catalogues disagree", () => {
+    const X = [{ slug: "baker", label: "Welder" }];
+    expect(matchProfessionAcrossLocales("welder", LT, [EN, X])).toBeNull();
+    expect(matchProfessionAcrossLocales("lagerarbetare", LT, [EN, RU])).toBeNull();
   });
 });
