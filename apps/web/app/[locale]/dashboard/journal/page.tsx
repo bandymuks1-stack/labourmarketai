@@ -1772,7 +1772,7 @@ export default async function JournalPage({
                     <span className="flex items-center gap-3 font-mono text-meta uppercase tracking-label text-text-muted">
                       {totalLabel && (
                         <span
-                          className="font-display text-xl font-bold normal-case tracking-tightest text-brand-cyan tabular-nums sm:text-2xl"
+                          className="font-display text-xl font-bold normal-case tracking-tightest text-text-primary tabular-nums sm:text-2xl"
                           data-testid="journal-day-hours"
                         >
                           {totalLabel}

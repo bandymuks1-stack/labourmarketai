@@ -44,7 +44,7 @@ export async function CompanyActionNextActions({
       >
         {(["step1", "step2", "step3"] as const).map((step, i) => (
           <li key={step} className="flex items-start gap-2 text-sm text-text-secondary">
-            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-brand-blue/40 font-mono text-meta text-brand-blue">
+            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-ink-500 font-mono text-meta text-text-secondary">
               {i + 1}
             </span>
             <span className="leading-relaxed">{t(`flow.${step}`)}</span>
@@ -55,7 +55,7 @@ export async function CompanyActionNextActions({
         <Link
           href={primaryHref as "/dashboard"}
           data-testid="company-action-primary"
-          className="mt-1 inline-flex items-center gap-1.5 self-start rounded-md bg-gradient-cta px-4 py-2 text-sm font-semibold text-text-on-brand shadow-cta-glow transition-opacity hover:opacity-95"
+          className="mt-1 inline-flex items-center gap-1.5 self-start rounded-md bg-gradient-cta px-4 py-2 text-sm font-semibold text-text-on-brand transition-opacity hover:opacity-95"
         >
           {t("primaryLabel")}
           <ArrowRight className="h-4 w-4" strokeWidth={2} aria-hidden />

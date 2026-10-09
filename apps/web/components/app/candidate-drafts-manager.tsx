@@ -1,5 +1,6 @@
 "use client";
 
+import { PageTitle } from "@/components/app/premium/page-title";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
@@ -158,7 +159,7 @@ function CreateForm({ labels }: { labels: CandidateDraftsLabels }) {
           type="button"
           onClick={submit}
           disabled={pending || form.nameOrTitle.trim() === ""}
-          className="rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
+          className="rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-on-brand hover:bg-brand-champagne disabled:bg-ink-700 disabled:text-text-muted disabled:hover:bg-ink-700"
           data-testid="draft-create-submit"
         >
           {pending ? labels.creating : labels.create}
@@ -272,12 +273,7 @@ export function CandidateDraftsManager({
   return (
     <div className="flex flex-col gap-6" data-testid="candidate-drafts-manager">
       <header className="flex flex-col gap-1">
-        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {labels.eyebrow}
-        </span>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {labels.title}
-        </h1>
+        <PageTitle>{labels.title}</PageTitle>
         <p className="text-sm leading-relaxed text-text-secondary">{labels.intro}</p>
         <p
           className="rounded-md border border-ink-600 bg-ink-800/40 p-3 text-meta leading-relaxed text-text-muted"

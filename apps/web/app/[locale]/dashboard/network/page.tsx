@@ -549,7 +549,7 @@ export default async function NetworkPage({
                         <span className="text-sm font-medium text-text-primary">
                           {c.displayName}
                         </span>
-                        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                        <span className="text-meta text-text-muted">
                           {t(`search.orgType.${c.organizationType}`)}
                         </span>
                         {c.country && (
@@ -763,7 +763,7 @@ export default async function NetworkPage({
                 <span className="text-sm text-text-primary">
                   {e.organizationName ?? t("relationships.noOrg")}
                 </span>
-                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                <span className="text-meta text-text-muted">
                   {t(`relationships.slug.${e.relationshipSlug}`)}
                 </span>
                 {e.title && (
