@@ -1,4 +1,5 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { toActiveLocale } from "@/lib/i18n/config";
 
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/lib/i18n/navigation";
@@ -34,6 +35,9 @@ export async function PublicDemandSection({
 }) {
   const t = await getTranslations("publicDemand");
   const tProf = await getTranslations("professions");
+  const locale = toActiveLocale(await getLocale());
+  // Counts are formatted for the reader ("49 169", not "49169").
+  const n = (value: number) => new Intl.NumberFormat(locale).format(value);
   const [counts, previews] = await Promise.all([
     readPublicVacancySupplyCounts().catch(() => null),
     searchPublicVacancyPreviews({ query: null, professionSlug, page: 1 }).catch(() => null),
@@ -61,14 +65,14 @@ export async function PublicDemandSection({
           <>
             <ul className="flex flex-wrap gap-2 text-xs" data-testid="public-demand-counts">
               <li className="rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2.5 py-1 text-text-primary">
-                {t("active", { count: counts.activeVacancies })}
+                {t("active", { count: n(counts.activeVacancies) })}
               </li>
               <li className="rounded-full border border-ink-500 bg-ink-800 px-2.5 py-1 text-text-secondary">
-                {t("employers", { count: counts.distinctEmployers })}
+                {t("employers", { count: n(counts.distinctEmployers) })}
               </li>
               {professionSlug ? (
                 <li className="rounded-full border border-ink-500 bg-ink-800 px-2.5 py-1 text-text-secondary">
-                  {t("filtered", { profession: professionLabel(professionSlug) ?? professionSlug, count: previews.totalCount })}
+                  {t("filtered", { profession: professionLabel(professionSlug) ?? professionSlug, count: n(previews.totalCount) })}
                 </li>
               ) : null}
             </ul>
@@ -77,14 +81,14 @@ export async function PublicDemandSection({
             ) : (
               <ul className="flex flex-col divide-y divide-ink-600" data-testid="public-demand-list">
                 {previews.vacancies.slice(0, 5).map((v) => (
-                  <li key={v.id} className="flex items-center justify-between gap-3 py-1.5 text-xs">
+                  <li key={v.id} className="flex items-center gap-3 py-1.5 text-xs">
                     <Link href={`/jobs/${v.id}`} className="min-w-0 truncate text-text-primary hover:underline">
                       {professionLabel(v.professionSlug) ?? v.occupation ?? "—"}
                       {v.positions && v.positions > 1 ? ` · ×${v.positions}` : ""}
                     </Link>
-                    <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">
-                      {v.employmentForm ?? ""}
-                    </span>
+                    {/* No contract-type chip here: the panel printed the raw source
+                        value ("UNKNOWN", "PERMANENT") untranslated (agency walk
+                        2026-10-08). The job page names it in the reader's language. */}
                   </li>
                 ))}
               </ul>
