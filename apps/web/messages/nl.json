@@ -9881,6 +9881,49 @@
       "profession": "welk werk je doet",
       "country": "in welke landen je wilt werken",
       "cta": "Mijn voorkeuren invullen"
+    },
+    "personal": {
+      "title": "Jouw mogelijkheden",
+      "subtitle": "De beste mogelijkheden die nu zijn gevonden op basis van je gegevens en je Living CV.",
+      "discoverTitle": "Meer voor jou",
+      "discoverSubtitle": "Tot {count} passende mogelijkheden uit wat we vandaag voor je hebben bekeken.",
+      "status": {
+        "strong": "Past goed",
+        "possible": "Kan passen"
+      },
+      "kind": {
+        "vacancy": "Openbare vacature",
+        "demand": "Aanvraag op LabourMarket.ai"
+      },
+      "why": {
+        "profession_match": "Past bij je beroep.",
+        "skills_confirmed": "{count, plural, one {Gebruikt een vaardigheid} other {Gebruikt # vaardigheden}} die je bevestigde werk laat zien.",
+        "skills_journal": "{count, plural, one {Gebruikt een vaardigheid} other {Gebruikt # vaardigheden}} uit je werkjournaal.",
+        "skills_history": "{count, plural, one {Gebruikt een vaardigheid} other {Gebruikt # vaardigheden}} die je werkgeschiedenis laat zien.",
+        "skill_fit": "Je hebt {matched} van de {total} gevraagde vaardigheden.",
+        "profession_related": "Dicht bij je beroep.",
+        "city_match": "In jouw stad.",
+        "country_match": "In het land waar je wilt werken."
+      },
+      "form": {
+        "permanent": "Vast",
+        "temporary": "Tijdelijk",
+        "seasonal": "Seizoensgebonden"
+      },
+      "time": {
+        "full_time": "Voltijd",
+        "part_time": "Deeltijd"
+      },
+      "positions": "{count} plaatsen",
+      "starts": "Start {date}",
+      "open": "Details bekijken",
+      "more": "Toon tot {count} voor jou",
+      "back": "Terug naar je top drie",
+      "market": "De hele markt verkennen",
+      "moreLabel": "Meer mogelijkheden",
+      "emptyTitle": "Nu niets passends",
+      "emptyBody": "Geen enkele bekeken mogelijkheid past goed genoeg bij je gegevens om aan te raden. Vul je beroep, vaardigheden of landen waar je wilt werken aan — of bekijk de hele markt.",
+      "improveProfile": "Profiel aanvullen"
     }
   },
   "workerIntake": {

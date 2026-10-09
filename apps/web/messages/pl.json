@@ -9881,6 +9881,49 @@
       "profession": "jaką pracę wykonujesz",
       "country": "w jakich krajach chcesz pracować",
       "cta": "Uzupełnij preferencje"
+    },
+    "personal": {
+      "title": "Twoje możliwości",
+      "subtitle": "Najlepsze obecnie znalezione możliwości na podstawie Twoich danych i Living CV.",
+      "discoverTitle": "Więcej dla Ciebie",
+      "discoverSubtitle": "Do {count} pasujących możliwości spośród sprawdzonych dla Ciebie dzisiaj.",
+      "status": {
+        "strong": "Dobrze pasuje",
+        "possible": "Może pasować"
+      },
+      "kind": {
+        "vacancy": "Publiczne ogłoszenie",
+        "demand": "Zapytanie w LabourMarket.ai"
+      },
+      "why": {
+        "profession_match": "Pasuje do Twojego zawodu.",
+        "skills_confirmed": "{count, plural, one {Wymaga # umiejętności} few {Wymaga # umiejętności} many {Wymaga # umiejętności} other {Wymaga # umiejętności}} potwierdzonych Twoją pracą.",
+        "skills_journal": "{count, plural, one {Wymaga # umiejętności} few {Wymaga # umiejętności} many {Wymaga # umiejętności} other {Wymaga # umiejętności}} z Twojego dziennika pracy.",
+        "skills_history": "{count, plural, one {Wymaga # umiejętności} few {Wymaga # umiejętności} many {Wymaga # umiejętności} other {Wymaga # umiejętności}} widocznych w Twojej historii pracy.",
+        "skill_fit": "Masz {matched} z {total} wymaganych umiejętności.",
+        "profession_related": "Bliskie Twojemu zawodowi.",
+        "city_match": "W Twoim mieście.",
+        "country_match": "W kraju, w którym chcesz pracować."
+      },
+      "form": {
+        "permanent": "Na czas nieokreślony",
+        "temporary": "Na czas określony",
+        "seasonal": "Sezonowa"
+      },
+      "time": {
+        "full_time": "Pełny etat",
+        "part_time": "Niepełny etat"
+      },
+      "positions": "{count} miejsc",
+      "starts": "Start {date}",
+      "open": "Zobacz szczegóły",
+      "more": "Pokaż do {count} dla Ciebie",
+      "back": "Wróć do trzech najlepszych",
+      "market": "Przeglądaj cały rynek",
+      "moreLabel": "Więcej możliwości",
+      "emptyTitle": "Teraz nic pasującego",
+      "emptyBody": "Żadna sprawdzona możliwość nie pasuje wystarczająco do Twoich danych, by ją polecić. Uzupełnij zawód, umiejętności lub kraje, w których chcesz pracować — albo przejrzyj cały rynek.",
+      "improveProfile": "Uzupełnij profil"
     }
   },
   "workerIntake": {

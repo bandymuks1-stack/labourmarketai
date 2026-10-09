@@ -9881,6 +9881,49 @@
       "profession": "welche Arbeit Sie machen",
       "country": "in welchen Ländern Sie arbeiten möchten",
       "cta": "Meine Angaben ausfüllen"
+    },
+    "personal": {
+      "title": "Ihre Möglichkeiten",
+      "subtitle": "Die besten derzeit gefundenen Möglichkeiten auf Grundlage Ihrer Angaben und Ihres Living CV.",
+      "discoverTitle": "Mehr für Sie",
+      "discoverSubtitle": "Bis zu {count} passende Möglichkeiten aus den heute für Sie geprüften.",
+      "status": {
+        "strong": "Passt gut",
+        "possible": "Könnte passen"
+      },
+      "kind": {
+        "vacancy": "Öffentliche Stellenanzeige",
+        "demand": "Anfrage auf LabourMarket.ai"
+      },
+      "why": {
+        "profession_match": "Passt zu Ihrem Beruf.",
+        "skills_confirmed": "{count, plural, one {Nutzt eine Fähigkeit} other {Nutzt # Fähigkeiten}}, die Ihre bestätigte Arbeit zeigt.",
+        "skills_journal": "{count, plural, one {Nutzt eine Fähigkeit} other {Nutzt # Fähigkeiten}} aus Ihrem Arbeitsjournal.",
+        "skills_history": "{count, plural, one {Nutzt eine Fähigkeit} other {Nutzt # Fähigkeiten}}, die Ihre Arbeitsgeschichte zeigt.",
+        "skill_fit": "Sie haben {matched} von {total} gefragten Fähigkeiten.",
+        "profession_related": "Nah an Ihrem Beruf.",
+        "city_match": "In Ihrer Stadt.",
+        "country_match": "In dem Land, in dem Sie arbeiten möchten."
+      },
+      "form": {
+        "permanent": "Unbefristet",
+        "temporary": "Befristet",
+        "seasonal": "Saisonal"
+      },
+      "time": {
+        "full_time": "Vollzeit",
+        "part_time": "Teilzeit"
+      },
+      "positions": "{count} Stellen",
+      "starts": "Beginn {date}",
+      "open": "Details ansehen",
+      "more": "Bis zu {count} für Sie zeigen",
+      "back": "Zurück zu Ihren drei besten",
+      "market": "Den ganzen Markt erkunden",
+      "moreLabel": "Weitere Möglichkeiten",
+      "emptyTitle": "Gerade nichts Passendes",
+      "emptyBody": "Keine geprüfte Möglichkeit passt gut genug zu Ihren Angaben, um sie zu empfehlen. Ergänzen Sie Beruf, Fähigkeiten oder Länder, in denen Sie arbeiten möchten — oder sehen Sie sich den ganzen Markt an.",
+      "improveProfile": "Profil ergänzen"
     }
   },
   "workerIntake": {

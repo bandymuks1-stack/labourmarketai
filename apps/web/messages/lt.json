@@ -9881,6 +9881,49 @@
       "profession": "kokį darbą dirbi",
       "country": "kuriose šalyse nori dirbti",
       "cta": "Užpildyti pageidavimus"
+    },
+    "personal": {
+      "title": "Jūsų galimybės",
+      "subtitle": "Geriausios šiuo metu rastos galimybės pagal jūsų pateiktą informaciją ir suformuotą Living CV.",
+      "discoverTitle": "Daugiau jums",
+      "discoverSubtitle": "Iki {count} tinkamų galimybių iš šiandien jums patikrintų.",
+      "status": {
+        "strong": "Labai tinka",
+        "possible": "Gali tikti"
+      },
+      "kind": {
+        "vacancy": "Viešas darbo skelbimas",
+        "demand": "Užklausa LabourMarket.ai"
+      },
+      "why": {
+        "profession_match": "Atitinka jūsų profesiją.",
+        "skills_confirmed": "{count, plural, one {Reikia # gebėjimo} few {Reikia # gebėjimų} other {Reikia # gebėjimų}}, kuriuos rodo jūsų patvirtintas darbas.",
+        "skills_journal": "{count, plural, one {Reikia # gebėjimo} few {Reikia # gebėjimų} other {Reikia # gebėjimų}} iš jūsų darbo žurnalo.",
+        "skills_history": "{count, plural, one {Reikia # gebėjimo} few {Reikia # gebėjimų} other {Reikia # gebėjimų}}, kuriuos rodo jūsų darbo istorija.",
+        "skill_fit": "Turite {matched} iš {total} reikalingų gebėjimų.",
+        "profession_related": "Artima jūsų profesijai.",
+        "city_match": "Jūsų mieste.",
+        "country_match": "Šalyje, kurioje norite dirbti."
+      },
+      "form": {
+        "permanent": "Neterminuota",
+        "temporary": "Terminuota",
+        "seasonal": "Sezoninis"
+      },
+      "time": {
+        "full_time": "Visas etatas",
+        "part_time": "Ne visas etatas"
+      },
+      "positions": "{count} vietos",
+      "starts": "Pradžia {date}",
+      "open": "Peržiūrėti",
+      "more": "Rodyti iki {count} jums",
+      "back": "Atgal į geriausias tris",
+      "market": "Naršyti visą rinką",
+      "moreLabel": "Daugiau galimybių",
+      "emptyTitle": "Šiuo metu nieko tinkamo",
+      "emptyBody": "Nė viena patikrinta galimybė nepakankamai atitinka jūsų informacijos, kad galėtume ją rekomenduoti. Nurodykite profesiją, gebėjimus ar šalis, kuriose norite dirbti — arba peržiūrėkite visą rinką.",
+      "improveProfile": "Papildyti profilį"
     }
   },
   "workerIntake": {
