@@ -107,6 +107,13 @@ export interface VacancyFetchRequestV1 {
   /** Two-level feeds only: leading entries of this page a previous session
    *  already consumed (see `expandDetailFanOut`). */
   readonly skipEntries?: number;
+  /**
+   * Called once per RETRY (an attempt after the first) of any request this
+   * fetch makes — the listing request and, on a two-level feed, each detail
+   * request. Lets the caller account retries exactly; the adapter keeps no
+   * counter of its own.
+   */
+  readonly onRetry?: () => void;
 }
 
 /** A continuation token that may be placed in a path: one identifier segment. */
@@ -226,11 +233,15 @@ async function fetchDetailJson(
   bounds: ReturnType<typeof resolveProviderBounds>,
   pace: () => Promise<void>,
   onRequest: () => void,
+  onRetry?: () => void,
 ): Promise<DetailFetchResult> {
   const attempts = bounds.maxRetries + 1;
   let detail = "no_attempt";
   for (let attempt = 0; attempt < attempts; attempt += 1) {
-    if (attempt > 0) await sleep(bounds.retryBackoffMs * attempt);
+    if (attempt > 0) {
+      onRetry?.();
+      await sleep(bounds.retryBackoffMs * attempt);
+    }
     await pace();
     onRequest();
     const controller = new AbortController();
@@ -316,7 +327,10 @@ export async function fetchVacancyPage(
 
   const spacingMs = endpoint.detailFanOut?.minRequestSpacingMs;
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    if (attempt > 0) await sleep(bounds.retryBackoffMs * attempt);
+    if (attempt > 0) {
+      req.onRetry?.();
+      await sleep(bounds.retryBackoffMs * attempt);
+    }
     await paceRequest(endpoint.host, spacingMs);
 
     const controller = new AbortController();
@@ -415,6 +429,7 @@ export async function fetchVacancyPage(
               () => {
                 detailRequestsSpent += 1;
               },
+              req.onRetry,
             ),
         });
         if (!expanded.ok) {
@@ -591,7 +606,10 @@ export async function fetchVacancyJsonLines(
   };
 
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    if (attempt > 0) await sleep(bounds.retryBackoffMs * attempt);
+    if (attempt > 0) {
+      req.onRetry?.();
+      await sleep(bounds.retryBackoffMs * attempt);
+    }
 
     const controller = new AbortController();
     // A streamed session is bounded by its OWN wall clock, not by

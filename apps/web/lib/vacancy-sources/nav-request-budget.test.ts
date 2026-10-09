@@ -31,6 +31,12 @@ import {
   VACANCY_PROVIDERS,
 } from "./vacancy-provider-registry";
 import { VACANCY_IMPORT_BOUNDS } from "./vacancy-contract";
+import {
+  MAX_IN_RUN_RETRIES,
+  MAX_SESSIONS_PER_RUN,
+  NO_NEW_SESSION_AFTER_MS,
+  SESSION_HARD_DEADLINE_MS,
+} from "../../scripts/vacancy-cadence-outcome";
 
 const NAV = getVacancyProvider("nav")!;
 const SE = getVacancyProvider("arbetsformedlingen")!;
@@ -108,6 +114,55 @@ describe("NAV request budget", () => {
   it("only tightens the shared bounds and keeps the per-page guard above the session budget", () => {
     expect(bounds.maxPagesPerSession).toBeLessThan(VACANCY_IMPORT_BOUNDS.maxPagesPerSession);
     expect(FAN.maxDetailFetchesPerPage).toBeGreaterThanOrEqual(FAN.maxDetailFetchesPerSession ?? 0);
+  });
+});
+
+describe("NAV multi-session run budget (cadence loop)", () => {
+  const bounds = resolveProviderBounds(NAV);
+  const perSession = worstCase(
+    bounds.maxPagesPerSession,
+    FAN.maxDetailFetchesPerSession ?? Number.POSITIVE_INFINITY,
+    bounds.maxRetries,
+  );
+  /** Pinned per-RUN ceilings. Raising one is an owner decision. */
+  const RUN_CEILING = { nominal: 816, hard: 2_448, realRunsPerDay: 6, agentaiPerDay: 5_280 } as const;
+
+  it("the loop is bounded: <= 8 sessions per run, <= 2 in-run retries", () => {
+    expect(MAX_SESSIONS_PER_RUN).toBeLessThanOrEqual(8);
+    expect(MAX_IN_RUN_RETRIES).toBeLessThanOrEqual(2);
+  });
+
+  it("worst-case requests per RUN stay under the pinned ceilings", () => {
+    expect(perSession.nominal * MAX_SESSIONS_PER_RUN).toBeLessThanOrEqual(RUN_CEILING.nominal);
+    expect(perSession.hard * MAX_SESSIONS_PER_RUN).toBeLessThanOrEqual(RUN_CEILING.hard);
+    expect(perSession.nominal * MAX_SESSIONS_PER_RUN).toBe(816);
+  });
+
+  it("at the REAL GitHub firing rate (<= 6 runs/day) the daily worst case is below Agentai's 5,280/day", () => {
+    expect(perSession.nominal * MAX_SESSIONS_PER_RUN * RUN_CEILING.realRunsPerDay).toBeLessThanOrEqual(
+      RUN_CEILING.agentaiPerDay,
+    );
+  });
+
+  it("the caught-up steady state at the nominal 144 runs/day is the unchanged 102/run", () => {
+    expect(perSession.nominal * cronSessionsPerDay()).toBeLessThanOrEqual(CEILING.nominalPerDay);
+  });
+
+  it("the per-session budget itself did not move (loop adds sessions, never widens one)", () => {
+    expect(bounds.maxPagesPerSession).toBe(2);
+    expect(FAN.maxDetailFetchesPerSession).toBe(100);
+    expect(FAN.minRequestSpacingMs).toBeGreaterThanOrEqual(500);
+    expect(FAN.concurrency).toBeLessThanOrEqual(2);
+  });
+
+  it("the loop's wall-clock design fits inside the workflow's 20 minute job timeout", () => {
+    expect(NO_NEW_SESSION_AFTER_MS).toBeLessThan(SESSION_HARD_DEADLINE_MS);
+    expect(SESSION_HARD_DEADLINE_MS).toBeLessThan(20 * 60_000);
+    const yml = readFileSync(
+      join(__dirname, "..", "..", "..", "..", ".github", "workflows", "nav-supply-cadence.yml"),
+      "utf8",
+    );
+    expect(/timeout-minutes:\s*20(?!\d)/.test(yml)).toBe(true);
   });
 });
 

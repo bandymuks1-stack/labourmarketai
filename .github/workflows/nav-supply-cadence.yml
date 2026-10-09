@@ -27,6 +27,26 @@
 # 100 detail requests, 2 in flight, >= 500 ms between requests; worst case
 # pinned by apps/web/lib/vacancy-sources/nav-request-budget.test.ts). A cold
 # start therefore drains over several runs, resuming inside a CLOSED page only.
+#
+# SELF-RECOVERY + INCIDENT DE-DUPLICATION (2026-10-09; apps/web/scripts/
+# vacancy-cadence-outcome.ts, provider-agnostic): GitHub fires this cron only a
+# handful of times a day, so one run must do more than one session and one
+# transient failure must not cost hours or mail the owner on every red run.
+#   - a persist run loops up to 8 sessions (13 min wall clock, inside the 20 min
+#     job timeout), stopping at caughtUp, at the first failure, or when the
+#     source is behind but the cursor is not moving. The per-session request
+#     budget above is UNCHANGED: runs x sessions x 102 is the new ceiling, pinned
+#     in nav-request-budget.test.ts.
+#   - a TRANSIENT failure (timeout, network, 5xx, 429) is retried in-run up to
+#     twice after a 30-60 s jittered wait; 401/403/400/validation never are.
+#   - notifications are per INCIDENT, not per failed run: failed runs 1-2 are a
+#     warning annotation + job summary (green check); the 3rd consecutive failed
+#     run, or the first hard failure, opens ONE `ingestion-incident` issue and
+#     fails that run once; further failing runs stay quiet (status comment at
+#     most daily); the first success comments "recovered" and closes the issue.
+#   - the kill switch is untouched: the gate step below and the runner's own
+#     VACANCY_SOURCE_NAV_ENABLED check are byte-equivalent to before, and a
+#     session the runner reports as `blocked` is a hard failure, never skipped.
 name: nav-supply-cadence
 
 on:
@@ -52,6 +72,10 @@ concurrency:
 
 permissions:
   contents: read
+  # issues: write lets the cadence helper open/comment/close the single
+  # `ingestion-incident` issue (and create that label once). Nothing else:
+  # no contents, pull-requests, actions or packages write.
+  issues: write
 
 jobs:
   import:
@@ -90,7 +114,7 @@ jobs:
         if: steps.gate.outputs.configuration_gated == 'false'
         run: pnpm install --frozen-lockfile
 
-      - name: Bounded NAV stream session (canonical operator runner)
+      - name: Bounded NAV stream sessions (canonical operator runner, self-recovering)
         if: steps.gate.outputs.configuration_gated == 'false'
         working-directory: apps/web
         env:
@@ -98,6 +122,8 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           VACANCY_SOURCE_NAV_ENABLED: "true"
           VACANCY_SOURCE_NAV_API_TOKEN: ${{ secrets.VACANCY_SOURCE_NAV_API_TOKEN }}
+          # Used only by the helper's `gh` calls (issue open/comment/close).
+          GH_TOKEN: ${{ github.token }}
           # Schedule events carry no inputs: empty falls back to persist, the
           # cadence's purpose. A manual run defaults to dry_run.
           IMPORT_MODE: ${{ inputs.mode || 'persist' }}
@@ -106,9 +132,9 @@ jobs:
           # tee's (always 0) and a runner crash shows a green check.
           set -o pipefail
           if [ "$IMPORT_MODE" = "persist" ]; then
-            pnpm tsx --conditions=react-server scripts/vacancy-operator-run.ts \
-              --provider nav --channel stream --mode persist \
-              --apply --i-understand-this-writes-production | tee run-accounting.json
+            # Loop + retry + incident de-duplication. Exit 1 ONLY for a newly
+            # opened incident (the single notification); see the header.
+            pnpm tsx scripts/vacancy-cadence-outcome.ts --provider nav --channel stream
           else
             pnpm tsx --conditions=react-server scripts/vacancy-operator-run.ts \
               --provider nav --channel stream --mode dry_run | tee run-accounting.json
@@ -122,5 +148,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: nav-run-accounting-${{ github.run_id }}
-          path: apps/web/run-accounting.json
+          path: |
+            apps/web/run-accounting.json
+            apps/web/run-sessions.json
+          if-no-files-found: ignore
           retention-days: 30
