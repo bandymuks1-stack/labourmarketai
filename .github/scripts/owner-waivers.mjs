@@ -888,7 +888,11 @@ export const SCOPED_OWNER_WAIVERS = [
     // #2159 — OWNER DECISION 2026-10-05 (option 1): the default day when no
     // `?d=` is given comes from `viewerWorkToday()` instead of the UTC day.
     // One-line correctness edit; the three waived answers are unchanged.
-    pullRequests: [1344, 2101, 2159],
+    // #2234 — OWNER DECISION 2026-10-09: narrowly scoped waiver for the PREMIUM
+    // REDESIGN of `/dashboard/hours` — presentation only (page title, card
+    // layout, empty-state next action). Data, permissions, accounting semantics
+    // and the three waived answers are unchanged; no other route is covered.
+    pullRequests: [1344, 2101, 2159, 2234],
     // Deliberately empty — the waiver lives IN the branch whose CI must
     // honour it, so pinning the head SHA would change the head SHA.
     approvedHeadShas: [],
