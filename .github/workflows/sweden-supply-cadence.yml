@@ -45,6 +45,8 @@ concurrency:
 
 permissions:
   contents: read
+  # One open incident issue per unresolved problem (see the incident step).
+  issues: write
 
 jobs:
   import:
@@ -90,6 +92,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Bounded stream import (canonical operator runner)
+        id: runner
+        # The runner's verdict is not hidden: the incident step below turns it
+        # into the job's own red/green, once per unresolved problem instead of
+        # once per failed run.
+        continue-on-error: true
         if: steps.gate.outputs.configuration_gated == 'false'
         working-directory: apps/web
         env:
@@ -125,3 +132,46 @@ jobs:
           name: sweden-run-accounting-${{ github.run_id }}
           path: apps/web/run-accounting.json
           retention-days: 30
+
+      # INCIDENT DE-DUPLICATION. One unresolved problem = one open issue, not one
+      # notification per failed run. Failures are never silent: every failing run
+      # writes the job summary and an error annotation, and the cursor row
+      # carries consecutive_failures / last_failure_code.
+      #   - success, open incident     -> close it with a recovery comment;
+      #   - failure, no open incident  -> open ONE issue and fail the job (the
+      #                                   single red run that notifies);
+      #   - failure, open incident     -> comment on it; job stays green with an
+      #                                   error annotation (same problem, already
+      #                                   notified).
+      - name: Incident bookkeeping
+        if: always() && steps.gate.outputs.configuration_gated == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUNNER_OUTCOME: ${{ steps.runner.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          LABEL="sweden-supply-incident"
+          open_issue=$(gh issue list --label "$LABEL" --state open --json number --jq '.[0].number // empty' || true)
+          detail="runner step outcome: $RUNNER_OUTCOME"
+          if [ -s apps/web/run-accounting.json ]; then
+            detail="$(node -e 'try{const a=JSON.parse(require("fs").readFileSync("apps/web/run-accounting.json","utf8"));console.log("status="+a.session.status+" errors="+JSON.stringify(a.session.errors)+" cursor="+(a.after&&a.after.cursor&&a.after.cursor.cursor_value)+" consecutive_failures="+(a.after&&a.after.cursor&&a.after.cursor.consecutive_failures))}catch(e){console.log("accounting unreadable")}')"
+          fi
+          if [ "$RUNNER_OUTCOME" = "success" ]; then
+            echo "Swedish import OK ($detail)" >> "$GITHUB_STEP_SUMMARY"
+            if [ -n "$open_issue" ]; then
+              gh issue comment "$open_issue" --body "Recovered: $RUN_URL succeeded ($detail). Closing."
+              gh issue close "$open_issue"
+            fi
+            exit 0
+          fi
+          echo "### Swedish import FAILED" >> "$GITHUB_STEP_SUMMARY"
+          echo "$detail" >> "$GITHUB_STEP_SUMMARY"
+          echo "::error title=Swedish import failed::$detail"
+          if [ -n "$open_issue" ]; then
+            gh issue comment "$open_issue" --body "Still failing: $RUN_URL ($detail)"
+            echo "Existing incident #$open_issue updated; not re-notifying." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          gh label create "$LABEL" --color B60205 --description "Swedish supply cadence incident (auto-managed)" 2>/dev/null || true
+          gh issue create --label "$LABEL"             --title "Swedish supply cadence failing"             --body "First failure of a new streak: $RUN_URL ($detail). The cursor is not advanced on failure; the next run re-reads the same window. This issue is closed automatically by the next successful run; later failures in the streak comment here instead of notifying again."
+          exit 1
