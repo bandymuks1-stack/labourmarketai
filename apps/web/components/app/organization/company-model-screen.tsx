@@ -44,7 +44,7 @@ type Entry = {
 const PRIMARY: readonly Entry[] = [
   { id: "need", href: "/dashboard/company/needs", Icon: UserSearch },
   { id: "offer", href: "/dashboard/services", Icon: Package },
-  { id: "market", href: "/dashboard/service-requests", Icon: Store },
+  { id: "market", href: "/dashboard/listings", Icon: Store },
   { id: "people", href: "/dashboard/company/people", Icon: UsersRound },
   { id: "projects", href: "/dashboard/projects", Icon: FolderKanban },
   { id: "messages", href: "/dashboard/communication", Icon: MessageSquare },

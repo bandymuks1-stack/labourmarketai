@@ -38,10 +38,10 @@ export function MessageButton({
         type="submit"
         className={
           variant === "primary"
-            ? "inline-flex min-h-11 w-fit items-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 py-2 text-xs font-semibold text-brand-blue transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
+            ? "inline-flex min-h-11 w-fit items-center rounded-control border border-ink-500 px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:border-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
             : variant === "quiet"
               ? "inline-flex min-h-11 w-fit items-center rounded-control px-2.5 py-2 text-xs font-medium text-text-secondary underline-offset-4 hover:text-text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
-              : "w-fit rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue hover:bg-brand-blue/10"
+              : "w-fit rounded-md border border-ink-500 px-2.5 py-1 text-xs font-medium text-text-primary hover:border-text-secondary"
         }
         data-testid={`message-button-${labelKey}`}
       >

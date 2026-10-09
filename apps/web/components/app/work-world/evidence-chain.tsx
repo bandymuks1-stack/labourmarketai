@@ -122,7 +122,7 @@ export function EvidenceChain({
               </span>
               <span
                 className={cn(
-                  "text-center font-mono text-[0.625rem] uppercase leading-tight tracking-label text-text-secondary",
+                  "text-center text-[0.6875rem] leading-tight text-text-secondary",
                   full ? "max-w-[5.5rem]" : "sr-only",
                 )}
               >
