@@ -184,7 +184,7 @@ export default async function InvitePage({
     const source = findExternalReferralSource(p.externalSourceSlug);
     return shell(
       <>
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
         <h1 className="font-display text-2xl font-bold text-text-primary">
@@ -282,7 +282,7 @@ export default async function InvitePage({
   if (preview.outcome === "email_mismatch") {
     return shell(
       <>
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
         <h1 className="font-display text-2xl font-bold text-text-primary">
@@ -405,7 +405,7 @@ export default async function InvitePage({
 
   return shell(
     <>
-      <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("eyebrow")}
       </p>
       <h1 className="font-display text-2xl font-bold text-text-primary">

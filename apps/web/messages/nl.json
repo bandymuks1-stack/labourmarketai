@@ -6207,6 +6207,8 @@
     },
     "myProjectsTitle": "Mijn projecten",
     "myProjectsEmpty": "Je bent nog aan geen enkel project toegewezen. Zodra een bedrijf je toewijst, verschijnt het project hier.",
+    "myProjectsHow": "Een project verschijnt hier wanneer een bedrijf je eraan toewijst of wanneer je een uitnodiging om mee te doen accepteert. Je eigen werkgeschiedenis is al van jou, met of zonder project.",
+    "myProjectsNext": "Wat je nu kunt doen",
     "assignmentActive": "Actief",
     "assignmentEnded": "Beëindigd",
     "viaTeam": "via ploeg {team}",

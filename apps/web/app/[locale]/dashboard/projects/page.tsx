@@ -110,6 +110,11 @@ export default async function ProjectsPage({
     // projects (real assignments under RLS), never a dead "managers only"
     // explanation. Honest empty state when they have no assignments yet.
     const myProjects = await listWorkerProjects();
+    const [tOpp, tJournal, tQuick] = await Promise.all([
+      getTranslations("opportunities"),
+      getTranslations("journal"),
+      getTranslations("quickNav"),
+    ]);
     return (
       <div
         className="mx-auto flex w-full max-w-content flex-col gap-4"
@@ -117,9 +122,41 @@ export default async function ProjectsPage({
       >
         <PageTitle>{t("myProjectsTitle")}</PageTitle>
         {myProjects.length === 0 ? (
-          <p className="card-border p-4 text-sm text-text-secondary">
-            {t("myProjectsEmpty")}
-          </p>
+          <section
+            className="card-border flex flex-col gap-4 p-5"
+            data-testid="worker-projects-empty"
+          >
+            <div className="flex flex-col gap-2">
+              <p className="text-base text-text-primary">{t("myProjectsEmpty")}</p>
+              <p className="text-sm leading-relaxed text-text-secondary">{t("myProjectsHow")}</p>
+            </div>
+            <div className="flex flex-col gap-2">
+              <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+                {t("myProjectsNext")}
+              </p>
+              <ul className="grid gap-2 sm:grid-cols-3">
+                {[
+                  { href: "/dashboard/opportunities", label: tOpp("title"), primary: true },
+                  { href: "/dashboard/journal", label: tJournal("navTitle"), primary: false },
+                  { href: "/dashboard/profile", label: tQuick("identity"), primary: false },
+                ].map((a) => (
+                  <li key={a.href}>
+                    <Link
+                      href={a.href as "/dashboard"}
+                      className={
+                        a.primary
+                          ? "flex min-h-11 items-center justify-between gap-2 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 py-2 text-sm font-semibold text-brand-blue transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
+                          : "flex min-h-11 items-center justify-between gap-2 rounded-control border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
+                      }
+                    >
+                      {a.label}
+                      <span aria-hidden>→</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
         ) : (
           <ul className="grid gap-3 sm:grid-cols-2">
             {myProjects.map((p) => (
@@ -367,7 +404,7 @@ export default async function ProjectsPage({
           ← {tRooms("backToActions")}
         </Link>
         <p
-          className="font-mono text-meta uppercase tracking-label text-brand-orange"
+          className="font-mono text-meta uppercase tracking-label text-text-muted"
           data-testid="company-context"
         >
           {tRooms("projects.context")}

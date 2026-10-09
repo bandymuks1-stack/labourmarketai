@@ -6207,6 +6207,8 @@
     },
     "myProjectsTitle": "Moje projekty",
     "myProjectsEmpty": "Nie jesteś jeszcze przypisany do żadnego projektu. Gdy firma Cię przypisze, projekt pojawi się tutaj.",
+    "myProjectsHow": "Projekt pojawi się tutaj, gdy firma Cię do niego przypisze lub gdy przyjmiesz zaproszenie. Twoja historia pracy już należy do Ciebie – z projektem lub bez.",
+    "myProjectsNext": "Co możesz zrobić teraz",
     "assignmentActive": "Aktywne",
     "assignmentEnded": "Zakończone",
     "viaTeam": "przez zespół {team}",

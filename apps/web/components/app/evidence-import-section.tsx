@@ -157,11 +157,11 @@ export async function EvidenceImportSection({
   // section's accessible name, nothing else above the state strip.
   const header = sessionId ? (
     <header>
-      <h2 className="font-mono text-meta uppercase tracking-label text-brand-orange">{t("eyebrow")}</h2>
+      <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("eyebrow")}</h2>
     </header>
   ) : (
     <header className="flex flex-col gap-1">
-      <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("eyebrow")}
       </p>
       <h2 className="font-display text-2xl font-bold tracking-tightest text-text-primary">

@@ -482,7 +482,7 @@ export default async function AdminDashboardPage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-dashboard">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
         <PageTitle>{t("title")}</PageTitle>
@@ -504,7 +504,7 @@ export default async function AdminDashboardPage({
 
       {/* BAND 1 — WHAT NEEDS AN OPERATOR DECISION. Each row IS the queue. */}
       <section className="flex flex-col gap-2" data-testid="admin-attention">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("room.attention.title")}
         </p>
         {attention.length === 0 ? (

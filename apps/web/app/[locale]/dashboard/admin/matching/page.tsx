@@ -161,7 +161,7 @@ export default async function AdminMatchingWorkbenchPage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-matching-workbench">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
         <PageTitle>{t("title")}</PageTitle>

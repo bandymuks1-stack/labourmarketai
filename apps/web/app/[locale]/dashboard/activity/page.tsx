@@ -85,7 +85,7 @@ export default async function ActivityCentrePage({
   return (
     <div className="flex flex-col gap-6" data-testid="activity-centre-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {tA("eyebrow")}
         </p>
         <PageTitle>{tA("title")}</PageTitle>

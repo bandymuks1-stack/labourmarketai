@@ -43,7 +43,7 @@ export async function OrganizationsLeadership({
       data-count={read.organizations.length}
     >
       <header className="flex flex-col gap-1">
-        <span className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-brand-orange">{t("eyebrow")}</span>
+        <span className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-text-muted">{t("eyebrow")}</span>
         <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-text-primary">{t("title")}</h2>
         <p className="max-w-[60ch] text-sm text-text-secondary">{t("subtitle")}</p>
       </header>

@@ -103,7 +103,7 @@ export default async function CompanyDashboardPage({
           metadata={{ surface: "company", step: setupIncomplete ? "setup_incomplete" : "no_profile" }}
         />
         <header className="flex flex-col gap-1">
-          <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("eyebrow")}
           </p>
           <PageTitle>{t("title")}</PageTitle>
@@ -259,7 +259,7 @@ export default async function CompanyDashboardPage({
           </Link>
         </div>
         <p
-          className="font-mono text-meta uppercase tracking-label text-brand-orange"
+          className="font-mono text-meta uppercase tracking-label text-text-muted"
           data-testid="company-context"
         >
           {tRooms("company.context")}
@@ -269,7 +269,7 @@ export default async function CompanyDashboardPage({
         {/* ONE canonical company profile — the workspace re-labels itself
             from companies.company_type after every save/refresh. An agency is
             this same profile with type 'staffing_agency'. */}
-        {companyRow ? (
+        {companyRow && companyRow.companyType !== "other" ? (
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <span
               className="rounded-sm border border-brand-cyan/40 bg-brand-cyan/5 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
@@ -310,21 +310,22 @@ export default async function CompanyDashboardPage({
           data-testid="company-decisions-strip"
           className="flex flex-col gap-2"
         >
-          <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("decisions.title")}
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             {decisionEntries.map((e) => (
               <a
                 key={e.key}
                 href={e.href}
                 data-testid={`company-decision-${e.key}`}
-                className="inline-flex items-center gap-2 rounded-md border border-brand-orange/40 bg-brand-orange/5 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:border-brand-orange"
+                className="group flex min-h-16 items-center gap-4 rounded-card border border-brand-blue/40 bg-brand-blue/5 px-4 py-3 text-base font-medium text-text-primary transition-colors hover:border-brand-blue hover:bg-brand-blue/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
               >
-                <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold text-text-on-brand tabular-nums">
+                <span className="font-display text-3xl font-semibold leading-none tracking-tight text-brand-blue tabular-nums">
                   {e.count}
                 </span>
-                {t(`decisions.${e.key}`)}
+                <span className="min-w-0 flex-1 break-words">{t(`decisions.${e.key}`)}</span>
+                <span aria-hidden className="text-brand-blue transition-transform group-hover:translate-x-0.5">→</span>
               </a>
             ))}
           </div>

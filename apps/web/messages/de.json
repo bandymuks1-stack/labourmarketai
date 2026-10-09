@@ -6207,6 +6207,8 @@
     },
     "myProjectsTitle": "Meine Projekte",
     "myProjectsEmpty": "Sie sind noch keinem Projekt zugewiesen. Sobald ein Unternehmen Sie zuweist, erscheint das Projekt hier.",
+    "myProjectsHow": "Ein Projekt erscheint hier, sobald ein Unternehmen Sie ihm zuweist oder Sie eine Einladung annehmen. Ihre eigene Arbeitshistorie gehört Ihnen bereits – mit oder ohne Projekt.",
+    "myProjectsNext": "Was Sie jetzt tun können",
     "assignmentActive": "Aktiv",
     "assignmentEnded": "Beendet",
     "viaTeam": "über Team {team}",
