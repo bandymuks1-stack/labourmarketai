@@ -167,6 +167,25 @@ describe("NAV multi-session run budget (cadence loop)", () => {
   });
 });
 
+describe("NAV scheduler independence (rearm) keeps the 144 runs/day ceiling", () => {
+  const yml = readFileSync(
+    join(__dirname, "..", "..", "..", "..", ".github", "workflows", "nav-supply-cadence.yml"),
+    "utf8",
+  );
+
+  it("the rearm job spaces run STARTS >= 600 s apart, honours the kill switch and queues at most one successor", () => {
+    expect(yml).toMatch(/needs\.import\.outputs\.gated == 'false'/);
+    expect(yml).toMatch(/start \+ 600/);
+    expect(yml).toMatch(/--status queued/);
+    expect(yml).toMatch(/gh workflow run nav-supply-cadence\.yml -f mode=persist/);
+  });
+
+  it("the default token may only add actions: write for the self-dispatch", () => {
+    expect(yml).toMatch(/permissions:\s*\n\s*contents: read[\s\S]*?issues: write[\s\S]*?actions: write/);
+    expect(yml).not.toMatch(/contents: write|pull-requests: write/);
+  });
+});
+
 describe("NAV slow-publisher tolerance (2026-10-09)", () => {
   it("raises ONLY the per-request wait and bounds the detail phase; request counts, spacing and concurrency are untouched", () => {
     expect(FAN.requestTimeoutMs).toBe(45_000);
