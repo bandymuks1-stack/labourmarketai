@@ -99,6 +99,8 @@ export interface VacancyIngestionSessionResultV1 {
   readonly blockedReason: string | null;
   /** The importer's exact-sum metrics, verbatim. Null only on exception. */
   readonly metrics: VacancyImportResultV1["metrics"] | null;
+  /** Per-page timing evidence (see the importer). Absent on exception/blocked. */
+  readonly fetchDiagnostics?: VacancyImportResultV1["fetchDiagnostics"];
   readonly persisted: {
     readonly inserted: number;
     readonly updated: number;
@@ -271,6 +273,7 @@ export async function runVacancyIngestionSession(
         status: "blocked",
         blockedReason: result.blockedReason,
         metrics: result.metrics,
+        fetchDiagnostics: result.fetchDiagnostics,
         errors,
       };
     }
@@ -294,7 +297,10 @@ export async function runVacancyIngestionSession(
           ? result.nextCursor
           : null;
 
-      await writeVacancyCursor(client, {
+      // A DRY RUN is a diagnostic: it must not write failure markers to the
+      // shared cursor row (it would bump the failure streak that drives the
+      // persist cadence's incident de-duplication). Persist semantics unchanged.
+      if (req.mode === "persist") await writeVacancyCursor(client, {
         providerKey: provider.key,
         channel: req.channel,
         succeeded: false,
@@ -309,6 +315,7 @@ export async function runVacancyIngestionSession(
         status: "fetch_failed",
         blockedReason: null,
         metrics: result.metrics,
+        fetchDiagnostics: result.fetchDiagnostics,
         // Rows consumed before the failure WERE written. Reporting zero here
         // would understate what production now holds.
         persisted: {
@@ -328,6 +335,7 @@ export async function runVacancyIngestionSession(
         status: "dry_run_complete",
         blockedReason: null,
         metrics: result.metrics,
+        fetchDiagnostics: result.fetchDiagnostics,
         caughtUp: result.caughtUp,
         errors,
       };
@@ -350,6 +358,7 @@ export async function runVacancyIngestionSession(
       status: "imported",
       blockedReason: null,
       metrics: result.metrics,
+      fetchDiagnostics: result.fetchDiagnostics,
       persisted: {
         inserted: persistedInserted,
         updated: persistedUpdated,
