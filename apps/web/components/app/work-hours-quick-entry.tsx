@@ -161,15 +161,18 @@ export function WorkHoursQuickEntry({
   }
 
   return (
-    <div className="flex w-full flex-col gap-5">
+    <div className="grid w-full gap-6 lg:grid-cols-[minmax(0,28rem)_minmax(0,1fr)] lg:items-start">
       <Link
         href="?import=1"
-        className="self-start text-sm underline underline-offset-4"
+        className="self-start text-sm underline underline-offset-4 lg:col-span-2"
         data-testid="hours-import-link"
       >
         {t("import.entryLink")}
       </Link>
-      <form action={action} className="flex flex-col gap-4">
+      <form
+        action={action}
+        className="flex flex-col gap-4 rounded-card border border-ink-600 bg-surface-1/40 p-4 sm:p-5"
+      >
         <DisplayedWorkspaceField />
         {/* The server reads only these. `entered_by` is never a form field —
             it is taken from the session, so an operator cannot be recorded as
@@ -326,10 +329,16 @@ export function WorkHoursQuickEntry({
         </div>
       </form>
 
-      <section className="flex flex-col gap-2" data-testid="hours-entries">
-        <div className="flex items-baseline justify-between">
-          <h2 className="text-base font-semibold">{t("entriesTitle")}</h2>
-          <span className="text-sm text-text-secondary" data-testid="hours-day-total">
+      <section
+        className="flex flex-col gap-3 rounded-card border border-ink-600 bg-surface-1/40 p-4 sm:p-5"
+        data-testid="hours-entries"
+      >
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="font-display text-lg font-semibold tracking-tight text-text-primary">{t("entriesTitle")}</h2>
+          <span
+            className="rounded-full border border-ink-500 px-2.5 py-1 font-mono text-meta tabular-nums text-text-primary"
+            data-testid="hours-day-total"
+          >
             {t("dayTotal")}: {dayTotal} h
           </span>
         </div>
