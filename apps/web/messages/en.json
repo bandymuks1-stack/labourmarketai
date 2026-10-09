@@ -9881,6 +9881,49 @@
       "profession": "what work you do",
       "country": "which countries you want to work in",
       "cta": "Fill in my preferences"
+    },
+    "personal": {
+      "title": "Your opportunities",
+      "subtitle": "The best opportunities currently found based on your information and Living CV.",
+      "discoverTitle": "More for you",
+      "discoverSubtitle": "Up to {count} relevant opportunities from the ones we checked for you today.",
+      "status": {
+        "strong": "Strong fit",
+        "possible": "Possible fit"
+      },
+      "kind": {
+        "vacancy": "Public job ad",
+        "demand": "Request on LabourMarket.ai"
+      },
+      "why": {
+        "profession_match": "Matches your profession.",
+        "skills_confirmed": "{count, plural, one {Uses a skill} other {Uses # skills}} your confirmed work shows.",
+        "skills_journal": "{count, plural, one {Uses a skill} other {Uses # skills}} from your work journal.",
+        "skills_history": "{count, plural, one {Uses a skill} other {Uses # skills}} your work history shows.",
+        "skill_fit": "Uses {matched} of the {total} skills it asks for.",
+        "profession_related": "Close to your profession.",
+        "city_match": "In your city.",
+        "country_match": "In the country you want to work in."
+      },
+      "form": {
+        "permanent": "Permanent",
+        "temporary": "Temporary",
+        "seasonal": "Seasonal"
+      },
+      "time": {
+        "full_time": "Full time",
+        "part_time": "Part time"
+      },
+      "positions": "{count} positions",
+      "starts": "Starts {date}",
+      "open": "See details",
+      "more": "Show up to {count} for you",
+      "back": "Back to your top three",
+      "market": "Explore the whole market",
+      "moreLabel": "More opportunities",
+      "emptyTitle": "Nothing relevant right now",
+      "emptyBody": "No opportunity we checked fits your information well enough to recommend. Add your profession, skills or the countries you want to work in — or look through the whole market.",
+      "improveProfile": "Improve my profile"
     }
   },
   "workerIntake": {

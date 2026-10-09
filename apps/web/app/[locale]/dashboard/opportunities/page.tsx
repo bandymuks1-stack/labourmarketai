@@ -1,6 +1,12 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { isAssessedFit } from "@/lib/opportunities/fit-band";
 import { TelemetryView } from "@/components/app/telemetry-view";
+import { PersonalOpportunities } from "@/components/app/opportunities/personal-opportunities";
+import {
+  FIRST_VIEW_COUNT,
+  FREE_DISCOVERY_SET,
+  selectPersonalOpportunities,
+} from "@/lib/opportunities/personal-recommendations";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import Link from "next/link";
 
@@ -276,19 +282,27 @@ export default async function OpportunitiesPage({
   // the matches are counted against the SAME cards the worker sees, under
   // their own authorization. Unavailable (owner-gated migration unapplied, or
   // a failed read) renders no controls at all.
+  // THE PERSONAL FIRST VIEW (owner addendum 2026-10-09): the pristine page
+  // and the free discovery set render "Your opportunities" only. The full
+  // board (filters, sort, ?view=all) is unchanged - so the reads only it
+  // uses are skipped here and taken lazily if the page falls back to it.
+  const personalCandidate =
+    view !== "all" &&
+    activeFilterEntries(filters).length === 0 &&
+    sort === "relevance";
   const savedSearches = await getMySavedSearches();
   // Board + salary benchmark + weekly digest + world view + the person's
   // own work-seeking intent are independent reads — one combined await so
   // TTFB pays the slowest of them, not their sum.
-  const [result, salaryIntel, weekly, partnerSupply, discoverability, tVisibility] = await Promise.all([
+  const [result, salaryIntelEarly, weeklyEarly, partnerSupply, discoverability, tVisibility] = await Promise.all([
     loadWorkerOpportunityBoard("opportunities_board", {
       externalDiscovery: {
         professionSlug: filters.profession,
         country: filters.country,
       },
     }),
-    getWorkerSalaryIntelligence(),
-    getWeeklyPersonalIntelligence(),
+    personalCandidate ? Promise.resolve(null) : getWorkerSalaryIntelligence(),
+    personalCandidate ? Promise.resolve(null) : getWeeklyPersonalIntelligence(),
     // The world read that fed this page's map viewport is GONE WITH THE
     // VIEWPORT (owner decision 2026-09-27, explained at the render site
     // below). `loadWorldView` itself is untouched and still serves
@@ -382,6 +396,53 @@ export default async function OpportunitiesPage({
   //    trend). Every card degrades honestly — the unavailable ones say WHY,
   //    what is required, which sources are off and what activation changes.
   //    Nothing here fabricates a number (§18).
+  if (personalCandidate && result.kind === "ready" && result.capabilities.boardAvailable) {
+    const personalItems = selectPersonalOpportunities(
+      result.opportunities,
+      externalCards,
+      view === "discover" ? FREE_DISCOVERY_SET : FIRST_VIEW_COUNT,
+    );
+    const discoverySize =
+      view === "discover"
+        ? personalItems.length
+        : selectPersonalOpportunities(result.opportunities, externalCards, FREE_DISCOVERY_SET).length;
+    const personalWorkLabels = buildWorkTypeLabelMap(locale);
+    const tProfessionPersonal = await getTranslations("professions");
+    return (
+      <>
+        <TelemetryView
+          event={FUNNEL_EVENTS.marketplaceOrOpportunitiesViewed}
+          metadata={{
+            surface: "opportunities",
+            role_context: "worker",
+            candidate_count: result.opportunities.length,
+          }}
+        />
+        {result.readiness.hasWorkType && result.readiness.hasSkills ? (
+          <TelemetryView event={FUNNEL_EVENTS.profileMatchable} metadata={{ surface: "opportunities", role_context: "worker" }} />
+        ) : null}
+        {result.opportunities.length > 0 || result.externalVacancies.cards.length > 0 ? (
+          <TelemetryView
+            event={FUNNEL_EVENTS.realOpportunitiesLoaded}
+            metadata={{ surface: "opportunities", role_context: "worker", success: true }}
+          />
+        ) : null}
+        <PersonalOpportunities
+          items={personalItems}
+          mode={view === "discover" ? "discover" : "top"}
+          locale={locale}
+          roleLabel={(slug) => (slug && personalWorkLabels[slug]) || t("fieldRoleUnknown")}
+          professionLabel={(slug) => (slug && tProfessionPersonal.has(slug as never) ? tProfessionPersonal(slug as never) : null)}
+          countryLabel={(code) => (code && tlm.has(`countryNames.${code}`) ? tlm(`countryNames.${code}`) : (code ?? ""))}
+          discoverySet={FREE_DISCOVERY_SET}
+          canShowMore={discoverySize > personalItems.length}
+        />
+      </>
+    );
+  }
+  // Fallback to the full board: the reads the personal view skipped.
+  const salaryIntel = salaryIntelEarly ?? (await getWorkerSalaryIntelligence());
+  const weekly = weeklyEarly ?? (await getWeeklyPersonalIntelligence());
   const tIntel = await getTranslations("intelligence");
   // Root translator — provenance/attribution codes are FULL key paths
   // (vacancySources.*), stored as codes on the record, resolved only here.
