@@ -1723,19 +1723,19 @@
     "projectsBody": "Hier ziet u projecten, klanten, projectwerknemers en werkitems. Niets wordt automatisch ingevuld — nieuwe projecten en klanten aanmaken kan nog niet; die mogelijkheid wordt voorbereid.",
     "projectsCount": "Projecten",
     "projectsEmpty": "nog geen projecten aangemaakt",
-    "projectsLinkingNote": "Journaalkoppeling is nog niet ingeschakeld. Je kunt nu een projectcontext aanmaken, maar niets wordt automatisch ingevuld.",
+    "projectsLinkingNote": "Werkjournaalregels worden door de mensen die ze vastleggen aan een project gekoppeld. Een nieuwe projectcontext begint leeg — er wordt niets automatisch ingevuld.",
     "projectsManageCta": "Projectenbord openen",
     "createProject": {
       "entryCta": "Projectcontext aanmaken",
       "title": "Projectcontext aanmaken",
-      "subtitle": "Dit maakt alleen een project-/klantcontext aan. Journaalkoppeling is nog niet ingeschakeld.",
+      "subtitle": "Dit maakt een project-/klantcontext aan. Werkjournaalregels kunnen eraan gekoppeld worden; er wordt niets automatisch ingevuld.",
       "nameLabel": "Projectnaam",
       "namePlaceholder": "bijv. bouwplaats Vilnius",
       "locationLabel": "Locatie of adres (optioneel)",
       "locationPlaceholder": "bijv. Vilnius",
       "clientLabel": "Klant (optioneel)",
       "clientPlaceholder": "bijv. Nordic Logistics",
-      "journalLinkingDisabled": "Journaalkoppeling is nog niet ingeschakeld.",
+      "journalLinkingDisabled": "Journaalregels worden door de mensen die ze vastleggen aan het project gekoppeld — er wordt niets automatisch ingevuld.",
       "submit": "Aanmaken",
       "success": "Projectcontext aangemaakt.",
       "clientNotSaved": "Project aangemaakt, maar de klant kon niet worden opgeslagen. Voeg de klant toe op de projectpagina.",
@@ -6101,7 +6101,7 @@
   },
   "projects": {
     "title": "Projecten en toewijzingen",
-    "intro": "Maak een project aan en wijs er werknemers uit je ploeg aan toe. Later kun je instructies op projectniveau versturen.",
+    "intro": "Maak een project aan en wijs er werknemers uit je team aan toe. Stuur het team een bericht over een project via de projectkaart.",
     "managerOnly": "Deze pagina is voor een manager van een bedrijf of uitzendbureau.",
     "needsMigration": "Kon de actie niet voltooien. Probeer het opnieuw.",
     "error": "Er is iets misgegaan. Probeer het opnieuw.",
@@ -8630,6 +8630,7 @@
     "noRate": "Niet opgegeven",
     "comms": {
       "eligible": "Deze werknemer heeft open beschikbaarheid — berichten sturen wordt in een latere stap mogelijk.",
+      "inConversation": "U bent al in gesprek met deze werknemer — ga verder in Berichten.",
       "blocked": "Communicatie wordt beschikbaar wanneer de werknemer open beschikbaarheid of een beschikbaar-vanaf-datum heeft."
     },
     "request": {

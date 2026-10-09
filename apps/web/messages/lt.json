@@ -1723,19 +1723,19 @@
     "projectsBody": "Čia matote projektus, užsakovus, projekto darbuotojus ir darbo elementus. Niekas neužpildoma automatiškai — naujus projektus ir užsakovus kurti kol kas negalima; ši galimybė ruošiama.",
     "projectsCount": "Projektai",
     "projectsEmpty": "dar nesukurta nė vieno projekto",
-    "projectsLinkingNote": "Susiejimas su darbo žurnalu dar neįjungtas. Projekto kontekstą jau galite sukurti, bet niekas neužpildoma automatiškai.",
+    "projectsLinkingNote": "Darbo žurnalo įrašus prie projekto priskiria juos fiksuojantys žmonės. Naujas projekto kontekstas prasideda tuščias — niekas neužpildoma automatiškai.",
     "projectsManageCta": "Atidaryti projektų lentą",
     "createProject": {
       "entryCta": "Sukurti projekto kontekstą",
       "title": "Sukurti projekto kontekstą",
-      "subtitle": "Sukuriamas tik projekto/užsakovo kontekstas. Susiejimas su darbo žurnalu dar neįjungtas.",
+      "subtitle": "Sukuriamas projekto / kliento kontekstas. Prie jo galima priskirti darbo žurnalo įrašus; niekas neužpildoma automatiškai.",
       "nameLabel": "Projekto pavadinimas",
       "namePlaceholder": "pvz. Vilniaus objektas",
       "locationLabel": "Vieta arba adresas (nebūtina)",
       "locationPlaceholder": "pvz. Vilnius",
       "clientLabel": "Užsakovas (nebūtina)",
       "clientPlaceholder": "pvz. UAB „Šiaurės logistika“",
-      "journalLinkingDisabled": "Susiejimas su darbo žurnalu dar neįjungtas.",
+      "journalLinkingDisabled": "Žurnalo įrašus prie projekto priskiria juos fiksuojantys žmonės — niekas neužpildoma automatiškai.",
       "submit": "Sukurti",
       "success": "Projekto kontekstas sukurtas.",
       "clientNotSaved": "Projektas sukurtas, bet kliento išsaugoti nepavyko. Pridėkite klientą projekto puslapyje.",
@@ -6101,7 +6101,7 @@
   },
   "projects": {
     "title": "Projektai ir priskyrimai",
-    "intro": "Sukurkite projektą ir priskirkite jam savo komandos darbuotojus. Vėliau galėsite siųsti projekto lygio nurodymus.",
+    "intro": "Sukurkite projektą ir priskirkite jam savo komandos darbuotojus. Žinutę komandai apie projektą parašysite iš projekto kortelės.",
     "managerOnly": "Šis puslapis skirtas įmonės ar agentūros vadovui.",
     "needsMigration": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
     "error": "Nepavyko. Bandykite dar kartą.",
@@ -8630,6 +8630,7 @@
     "noRate": "Nenurodyta",
     "comms": {
       "eligible": "Šis darbuotojas turi laisvą prieinamumą — žinutės atsiras vėliau, atskiru žingsniu.",
+      "inConversation": "Su šiuo darbuotoju jau kalbatės — tęskite pokalbį Žinutėse.",
       "blocked": "Komunikacija taps prieinama, kai darbuotojas turės laisvą prieinamumą arba datą „laisvas nuo“."
     },
     "request": {

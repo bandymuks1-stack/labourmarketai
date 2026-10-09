@@ -863,6 +863,7 @@ export default async function CompanyScoutingPage({
               conversationExists:
                 pipelineFacts?.conversationByWorker.has(c.workerId) ?? false,
             });
+            const inConversation = pipelineFacts?.conversationByWorker.has(c.workerId) ?? false;
             const nextAction = nextActionForStage(stage, {
               locale,
               requestId: result.demand.id,
@@ -1035,9 +1036,11 @@ export default async function CompanyScoutingPage({
                     <span aria-hidden>{c.canContact && needOpen ? "💬" : "⏳"}</span>
                     {!needOpen
                       ? t("lifecycle.closedNote")
-                      : c.canContact
-                        ? t("comms.eligible")
-                        : t("comms.blocked")}
+                      : inConversation
+                        ? t("comms.inConversation")
+                        : c.canContact
+                          ? t("comms.eligible")
+                          : t("comms.blocked")}
                   </p>
                   {c.canContact && needOpen ? (
                     <div className="flex flex-col gap-2">
@@ -1060,7 +1063,9 @@ export default async function CompanyScoutingPage({
                             limitReached: t("request.limitReached"),
                           }}
                         />
-                      ) : (
+                      ) : inConversation ? null : (
+                        // A conversation that already exists is the fact: no
+                        // "shortlist first" under it (scouting walk 2026-10-09).
                         <p
                           className="text-meta text-text-muted"
                           data-testid={`scout-shortlist-first-${c.workerId}`}

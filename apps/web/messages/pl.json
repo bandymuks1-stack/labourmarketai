@@ -1723,19 +1723,19 @@
     "projectsBody": "Tutaj widzisz projekty, klientów, pracowników przypisanych do projektów i pozycje pracy. Nic nie jest wypełniane automatycznie — tworzenie nowych projektów i klientów nie jest jeszcze możliwe; ta funkcja jest przygotowywana.",
     "projectsCount": "Projekty",
     "projectsEmpty": "nie utworzono jeszcze żadnych projektów",
-    "projectsLinkingNote": "Łączenie z dziennikiem nie jest jeszcze włączone. Możesz teraz utworzyć kontekst projektu, ale nic nie jest wypełniane automatycznie.",
+    "projectsLinkingNote": "Wpisy dziennika pracy przypisują do projektu osoby, które je tworzą. Nowy kontekst projektu zaczyna się pusty — nic nie jest wypełniane automatycznie.",
     "projectsManageCta": "Otwórz tablicę projektów",
     "createProject": {
       "entryCta": "Utwórz kontekst projektu",
       "title": "Utwórz kontekst projektu",
-      "subtitle": "To tworzy jedynie kontekst projektu/klienta. Łączenie z dziennikiem nie jest jeszcze włączone.",
+      "subtitle": "Tworzy kontekst projektu / klienta. Można do niego przypisywać wpisy dziennika pracy; nic nie jest wypełniane automatycznie.",
       "nameLabel": "Nazwa projektu",
       "namePlaceholder": "np. budowa w Wilnie",
       "locationLabel": "Lokalizacja lub adres (opcjonalnie)",
       "locationPlaceholder": "np. Wilno",
       "clientLabel": "Klient (opcjonalnie)",
       "clientPlaceholder": "np. Nordic Logistics",
-      "journalLinkingDisabled": "Łączenie z dziennikiem nie jest jeszcze włączone.",
+      "journalLinkingDisabled": "Wpisy dziennika przypisują do projektu osoby, które je tworzą — nic nie jest wypełniane automatycznie.",
       "submit": "Utwórz",
       "success": "Kontekst projektu utworzony.",
       "clientNotSaved": "Projekt utworzony, ale nie udało się zapisać klienta. Dodaj klienta na stronie projektu.",
@@ -6101,7 +6101,7 @@
   },
   "projects": {
     "title": "Projekty i przypisania",
-    "intro": "Utwórz projekt i przypisz do niego pracowników ze swojego zespołu. Później będziesz mógł wysyłać instrukcje na poziomie projektu.",
+    "intro": "Utwórz projekt i przypisz do niego pracowników ze swojego zespołu. Wiadomość do zespołu o projekcie wyślesz z karty projektu.",
     "managerOnly": "Ta strona jest przeznaczona dla kierownika firmy lub agencji.",
     "needsMigration": "Nie udało się wykonać czynności. Spróbuj ponownie.",
     "error": "Coś poszło nie tak. Spróbuj ponownie.",
@@ -8630,6 +8630,7 @@
     "noRate": "Nie podano",
     "comms": {
       "eligible": "Ten pracownik ma otwartą dostępność — wysyłanie wiadomości otworzy się w kolejnym kroku.",
+      "inConversation": "Rozmawiasz już z tym pracownikiem — kontynuuj w Wiadomościach.",
       "blocked": "Komunikacja stanie się dostępna, gdy pracownik będzie miał otwartą dostępność lub datę dostępności od."
     },
     "request": {

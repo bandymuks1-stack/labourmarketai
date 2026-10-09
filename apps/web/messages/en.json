@@ -1723,19 +1723,19 @@
     "projectsBody": "Here you see projects, clients, project workers and work items. Nothing is filled automatically — creating new projects and clients is not possible yet; that ability is being prepared.",
     "projectsCount": "Projects",
     "projectsEmpty": "no projects created yet",
-    "projectsLinkingNote": "Journal linking is not enabled yet. You can now create a project context, but nothing is filled automatically.",
+    "projectsLinkingNote": "Work journal entries can be attributed to a project by the people who record them. A new project context starts empty — nothing is filled in automatically.",
     "projectsManageCta": "Open projects board",
     "createProject": {
       "entryCta": "Create project context",
       "title": "Create project context",
-      "subtitle": "This creates a project/client context only. Journal linking is not enabled yet.",
+      "subtitle": "This creates a project/client context. Work journal entries can be attributed to it; nothing is filled in automatically.",
       "nameLabel": "Project name",
       "namePlaceholder": "e.g. Vilnius site",
       "locationLabel": "Location or address (optional)",
       "locationPlaceholder": "e.g. Vilnius",
       "clientLabel": "Client (optional)",
       "clientPlaceholder": "e.g. Nordic Logistics",
-      "journalLinkingDisabled": "Journal linking is not enabled yet.",
+      "journalLinkingDisabled": "Journal entries are attributed to the project by the people who record them — nothing is filled in automatically.",
       "submit": "Create",
       "success": "Project context created.",
       "clientNotSaved": "Project created, but the client could not be saved. Add the client from the project page.",
@@ -6101,7 +6101,7 @@
   },
   "projects": {
     "title": "Projects and assignments",
-    "intro": "Create a project and assign workers from your team to it. You'll be able to send project-level instructions later.",
+    "intro": "Create a project and assign workers from your team to it. Message the team about a project from its card.",
     "managerOnly": "This page is for a company or agency manager.",
     "needsMigration": "Couldn’t complete the action. Please try again.",
     "error": "Something went wrong. Please try again.",
@@ -8630,6 +8630,7 @@
     "noRate": "Not stated",
     "comms": {
       "eligible": "This worker has open availability — messaging opens in a later step.",
+      "inConversation": "You are already in a conversation with this worker — continue it in Messages.",
       "blocked": "Communication becomes available when the worker has open availability or an available-from date."
     },
     "request": {
