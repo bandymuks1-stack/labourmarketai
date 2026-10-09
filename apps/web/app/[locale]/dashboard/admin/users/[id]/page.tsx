@@ -148,7 +148,7 @@ export default async function AdminUserPage({
                   className="card-border flex flex-col gap-2 p-3"
                 >
                   <header className="flex items-baseline justify-between gap-3">
-                    <span className="font-mono text-meta uppercase tracking-label text-brand-orange">
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                       {t(
                         `user.draftType.${d.draft_type as DraftType}`,
                       )}

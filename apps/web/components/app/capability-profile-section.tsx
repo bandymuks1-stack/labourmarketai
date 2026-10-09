@@ -430,7 +430,7 @@ export function CapabilityProfileSection({
                       </p>
                     </div>
                     {c.isPrimary && (
-                      <span className="flex-none rounded-sm px-1 font-mono text-meta uppercase tracking-label text-brand-orange">
+                      <span className="flex-none rounded-sm px-1 font-mono text-meta uppercase tracking-label text-text-muted">
                         {tEng("primary")}
                       </span>
                     )}
@@ -560,7 +560,7 @@ export function CapabilityProfileSection({
                                     </span>
                                   </span>
                                   {s.isCore && (
-                                    <span className="flex-none rounded-sm px-1 font-mono text-meta uppercase tracking-label text-brand-orange">
+                                    <span className="flex-none rounded-sm px-1 font-mono text-meta uppercase tracking-label text-text-muted">
                                       {tEng("primary")}
                                     </span>
                                   )}

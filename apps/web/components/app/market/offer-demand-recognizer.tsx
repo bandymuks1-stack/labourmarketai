@@ -204,7 +204,7 @@ export function OfferDemandRecognizer() {
           {/* Missing */}
           {card.missing.length > 0 && (
             <div className="flex flex-col gap-2 border-t border-ink-600 pt-4">
-              <span className="font-mono text-meta uppercase tracking-label text-brand-orange">
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                 {t("missingTitle")}
               </span>
               <div className="flex flex-wrap gap-1.5">
@@ -250,7 +250,7 @@ export function OfferDemandRecognizer() {
 
           {/* Up to 3 next steps → existing real surfaces. No dead end. */}
           <div className="flex flex-col gap-2 border-t border-ink-600 pt-4">
-            <span className="font-mono text-meta uppercase tracking-label text-brand-orange">
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
               {t("nextActionTitle")}
             </span>
             {card.nextActions.map((a) => {

@@ -24,29 +24,21 @@ export function Stamp({ children, className }: { readonly children: ReactNode; r
   );
 }
 
-/** Gold eyebrow — the first line of every region. */
+/** Quiet eyebrow — the first line of every region (neutral, not a colour accent). */
 export function Eyebrow({ children, className }: { readonly children: ReactNode; readonly className?: string }) {
   return (
-    <span className={cn("font-mono text-[0.7rem] uppercase tracking-[0.14em] text-brand-orange", className)}>{children}</span>
+    <span className={cn("font-mono text-[0.7rem] uppercase tracking-[0.14em] text-text-muted", className)}>{children}</span>
   );
 }
 
-/** "Where things *stand*." — exactly one accent word, set in the accent face. */
+/**
+ * Historical emphasis markup ("Where things *stand*."). The emphasis is no
+ * longer rendered as a coloured italic — owner direction 2026-10-09 rejected
+ * decorative accent words — so the markers are stripped and the text is plain.
+ * Kept as a component so existing call sites and copy keep working.
+ */
 export function Accented({ text, className }: { readonly text: string; readonly className?: string }) {
-  const parts = text.split("*");
-  return (
-    <span className={className}>
-      {parts.map((p, i) =>
-        i % 2 === 1 ? (
-          <em key={i} className="font-accent font-normal italic tracking-[-0.01em] text-brand-orange">
-            {p}
-          </em>
-        ) : (
-          <span key={i}>{p}</span>
-        ),
-      )}
-    </span>
-  );
+  return <span className={className}>{text.replace(/[*]/g, "")}</span>;
 }
 
 /** The region head — repeated at every region; that repetition is the rhythm. */

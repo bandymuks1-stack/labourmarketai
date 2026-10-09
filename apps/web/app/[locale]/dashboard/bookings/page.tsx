@@ -73,7 +73,7 @@ export default async function BookingsPage({
           the "new responses" dashboard/bell markers (audit PR5). */}
       <MarkBookingsSeen />
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
         <PageTitle>{t("title")}</PageTitle>

@@ -6207,6 +6207,8 @@
     },
     "myProjectsTitle": "My projects",
     "myProjectsEmpty": "You are not assigned to any project yet. When a company assigns you, the project will appear here.",
+    "myProjectsHow": "A project appears here when a company assigns you to it, or when you accept an invitation to join it. Your own work history is already yours, with or without a project.",
+    "myProjectsNext": "What you can do now",
     "assignmentActive": "Active",
     "assignmentEnded": "Ended",
     "viaTeam": "via team {team}",

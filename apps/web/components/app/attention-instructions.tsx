@@ -26,7 +26,7 @@ export async function AttentionInstructions() {
       data-testid="attention-instructions"
     >
       <div className="flex flex-col gap-0.5">
-        <span className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </span>
         <h2 className="font-display text-base font-semibold text-text-primary">

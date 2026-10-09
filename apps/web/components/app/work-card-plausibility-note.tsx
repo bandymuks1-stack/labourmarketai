@@ -93,7 +93,7 @@ export function WorkCardPlausibilityNote({
       data-testid="work-card-checks"
       className={`flex flex-col gap-3 rounded-card border border-dashed border-brand-orange/60 bg-ink-800 p-3 print:hidden ${className ?? ""}`}
     >
-      <span className="font-mono text-meta uppercase tracking-label text-brand-orange">
+      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
         {eyebrow}
       </span>
       {visible.map((i) => (

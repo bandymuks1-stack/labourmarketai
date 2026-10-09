@@ -6207,6 +6207,8 @@
     },
     "myProjectsTitle": "Mano projektai",
     "myProjectsEmpty": "Kol kas nesate priskirtas jokiam projektui. Kai įmonė jus priskirs, projektą matysite čia.",
+    "myProjectsHow": "Projektas čia atsiranda, kai įmonė jus į jį priskiria arba kai priimate kvietimą prisijungti. Jūsų darbo istorija jau priklauso jums, nesvarbu, ar esate projekte.",
+    "myProjectsNext": "Ką galite daryti dabar",
     "assignmentActive": "Aktyvus",
     "assignmentEnded": "Užbaigtas",
     "viaTeam": "per komandą {team}",

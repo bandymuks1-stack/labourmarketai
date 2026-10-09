@@ -273,7 +273,7 @@ export default async function CompanyStartPage({
   return (
     <div className="flex flex-col gap-6" data-testid="company-start-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {label("ĮMONĖS NUSTATYMAS", "COMPANY SETUP")}
         </p>
         <PageTitle>{label("Įmonės profilis", "Company profile")}</PageTitle>

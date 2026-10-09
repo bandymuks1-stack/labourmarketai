@@ -76,7 +76,7 @@ export default async function BuyerStartPage({
   return (
     <div className="flex flex-col gap-6" data-testid="buyer-start-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {label("PIRKĖJO BŪSENA", "BUYER STATE")}
         </p>
         <PageTitle>{label("Pirkėjo / kliento paskyra", "Buyer / client account")}</PageTitle>

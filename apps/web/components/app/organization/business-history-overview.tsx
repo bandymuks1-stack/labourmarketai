@@ -61,7 +61,7 @@ export async function BusinessHistoryOverview({
       data-periods={business.periods.length}
     >
       <header className="flex flex-col gap-2">
-        <span className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-brand-orange">{t("eyebrow")}</span>
+        <span className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-text-muted">{t("eyebrow")}</span>
         <h2 className="font-display text-[clamp(1.55rem,2.6vw,2.15rem)] font-semibold leading-[1.05] tracking-[-0.04em] text-text-primary">
           {t("title", { name: organizationName })}
         </h2>

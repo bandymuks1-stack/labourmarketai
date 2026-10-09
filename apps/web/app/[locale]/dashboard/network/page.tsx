@@ -318,7 +318,7 @@ export default async function NetworkPage({
         <header className="flex flex-col gap-1">
           <Link
             href={"/dashboard/network" as "/dashboard"}
-            className="inline-flex min-h-11 items-center gap-1 self-start font-mono text-meta uppercase tracking-label text-brand-orange transition-colors hover:text-text-primary"
+            className="inline-flex min-h-11 items-center gap-1 self-start font-mono text-meta uppercase tracking-label text-text-muted transition-colors hover:text-text-primary"
             data-testid="network-admin-back"
           >
             ← {t("admin.back")}
@@ -406,7 +406,7 @@ export default async function NetworkPage({
   return (
     <div className="flex flex-col gap-6" data-testid="network-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
         <PageTitle>{t("title")}</PageTitle>

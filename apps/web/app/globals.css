@@ -83,7 +83,7 @@
   --c-brand-cyan: 0 194 255; /* EVIDENCE_SUPPORTED in the provenance ladder */
   --c-brand-violet: 123 92 255;
   --c-brand-purple: 181 123 255;
-  --c-brand-orange: 255 107 26;
+  --c-brand-orange: 224 150 70; /* AMBER, attention only (owner 2026-10-09: no decorative orange). Was 255 107 26. */
   /* state — semantic, NOT rebranded (owner §18: gold does not replace meaning) */
   --c-state-live: 0 230 118;
   --c-state-success: 52 211 153;
@@ -178,7 +178,7 @@
   --c-brand-cyan: 0 117 156; /* #00759c — was 0 150 198 (3.40:1 on a card). 5.22:1 card / 4.83:1 page / 4.57:1 nested (owner ratified 2026-09-22: AA over the exact legacy light hue) */
   --c-brand-violet: 106 69 240;
   --c-brand-purple: 140 86 224;
-  --c-brand-orange: 188 69 6; /* #bc4506 — was 224 84 8 (3.86:1). 5.26:1 card / 4.87:1 page / 4.61:1 nested */
+  --c-brand-orange: 150 88 8; /* amber, attention only; #965808 — 5.9:1 on white */
   /* state */
   --c-state-live: 0 126 73; /* #007e49 — was 0 168 86 (3.12:1). 5.15:1 card / 4.76:1 page / 4.51:1 nested */
   --c-state-success: 16 122 83; /* #107a53 — was 17 132 90 (4.34:1 on the page). 5.34:1 card / 4.94:1 page / 4.68:1 nested */
