@@ -1,0 +1,51 @@
+# Expiry sweeps cadence: daily, closes stale booking proposals and stale
+# contact-disclosure requests in the database (RED / owner-gated — see
+# supabase/migrations/20261009150000_expiry_sweeps_service_role_v1.sql).
+#
+# Why GitHub Actions and not vercel.json: the Vercel Hobby plan already holds the
+# maximum number of crons; the supply cadences use Actions the same way.
+#
+# INERT BY DEFAULT: no-ops until the repo variable EXPIRY_SWEEPS_SCHEDULE_ENABLED=true
+# and the secret CRON_SECRET are set in the GitHub console (never committed).
+# Kill switch: unset the variable. The endpoint returns 503 + a reason code
+# until the migration is applied and EXPIRY_SWEEP_ACTOR_PROFILE_ID is set.
+name: expiry-sweeps-cadence
+
+on:
+  schedule:
+    - cron: "43 3 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: expiry-sweeps-cadence
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Gate
+        id: gate
+        env:
+          ENABLED: ${{ vars.EXPIRY_SWEEPS_SCHEDULE_ENABLED }}
+          HAS_SECRET: ${{ secrets.CRON_SECRET != '' }}
+        run: |
+          if [ "$ENABLED" != "true" ] || [ "$HAS_SECRET" != "true" ]; then
+            echo "gated=true" >> "$GITHUB_OUTPUT"
+            echo "Inert: EXPIRY_SWEEPS_SCHEDULE_ENABLED / CRON_SECRET not configured (designed no-op)."
+          else
+            echo "gated=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Run the sweep
+        if: steps.gate.outputs.gated == 'false'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          code=$(curl -sS -o body.json -w "%{http_code}" -H "Authorization: Bearer $CRON_SECRET" https://labourmarket.ai/api/cron/expiry-sweeps)
+          echo "status=$code"
+          cat body.json
+          [ "$code" = "200" ]
