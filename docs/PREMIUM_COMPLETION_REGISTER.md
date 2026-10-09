@@ -86,7 +86,7 @@ ORG-2, EVID-2, MKT-7, COM-6, COM-8, GOV-1. RED drafts awaiting gate: #2227,
 |---|---|---|
 | register | #2229 | merged |
 | register reconcile 2026-10-09 | this PR | open |
-| #2242 lane B pass | #2242 | CI pending, auto-merge armed |
-| #2240 PGRST303 bounded retry | #2240 | CI green, draft; owner approved scope; ready/merge pending |
-| #2235 expiry RED | #2235 | unapplied; awaiting final owner approval after the 7 pre-apply checks |
+| #2242 lane B pass | #2242 | merged 2026-10-09 |
+| #2240 PGRST303 bounded retry | #2240 | merged 2026-10-09 (owner-authorized); prod verification pending |
+| #2235 expiry RED | #2235 | UNAPPLIED. Pre-apply (read-only prod, 2026-10-09): sweeps would expire 0 booking + 0 disclosure rows today; actor user/profile absent (wrappers refuse, change nothing); provisioning script already neutralises triggers handle_new_user (role only from metadata) and ensure_worker_profile (deletes workers row). Still unproven until provisioned: banned user cannot log in, no privileges, audit attribution. Needs owner final approval |
 | React hydration #418 | - | OPEN, unresolved; needs cold prod-build repeat + profile route scan |
