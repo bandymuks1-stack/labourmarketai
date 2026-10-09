@@ -4197,6 +4197,14 @@
         "s4": "Voeg werkervaring en bewijs toe",
         "note": "Vaardigheden beginnen als zelf opgegeven. Documenten, je werkdagboek en bevestigingen van mensen maken ze na verloop van tijd sterker."
       },
+      "nextStepsOrganization": {
+        "eyebrow": "Hierna — je organisatie",
+        "s1": "Geef je organisatie een naam en zeg wat ze doet (neemt in dienst, levert mensen, werft, leidt op, voert projecten uit)",
+        "s2": "Voeg je mensen, teams of het personeel dat je levert toe",
+        "s3": "Publiceer een behoefte, bied capaciteit aan — of allebei",
+        "s4": "Praat met de mensen en organisaties die passen en voer het werk samen uit",
+        "note": "Je organisatie is meteen bruikbaar. Verificatie is een aparte, sterkere vertrouwensstap."
+      },
       "display_name_label": "Weergavenaam",
       "country_label": "Waar woon je nu?",
       "country_placeholder": "Kies je land",
@@ -18862,5 +18870,30 @@
     "download": "Downloaden",
     "openRegister": "Documentregister openen",
     "more": "Nog {n} documenten staan in het register."
+  },
+  "activitySetupHub": {
+    "eyebrow": "ACTIVITEIT INSTELLEN",
+    "title": "Waar te beginnen",
+    "subtitle": "Drie manieren om mee te doen. Elk laat zien waar je staat — al begonnen of wacht op je volgende stap.",
+    "agency": "Bureau",
+    "started": "✓ Begonnen",
+    "agencyStarted": "Bureauprofiel begonnen.",
+    "agencyIsCompanyType": "Een bureau is voortaan een bedrijfstype — start een nieuw bureau als bedrijf met het type „Uitzendbureau”.",
+    "legalName": "Bedrijfsnaam",
+    "country": "Land",
+    "company": "Bedrijf",
+    "notStarted": "nog niet begonnen",
+    "companyStarted": "Bedrijfsprofiel begonnen.",
+    "openCompanySetup": "Bedrijfsinstelling openen →",
+    "goToCompanyDashboard": "Naar de bedrijfsomgeving →",
+    "companyIntro": "Maak een bedrijfsprofiel aan. Het type (bouw, uitzendbureau, onderaannemer, productie, diensten, klant / opdrachtgever, overig) kies je in het profiel — één profiel voor elk type.",
+    "startCompanySetup": "Bedrijfsinstelling starten →",
+    "buyer": "Koper",
+    "buyerStarted": "Koperprofiel begonnen. Je kunt werkaanvragen maken — ze blijven privé tot je anders beslist.",
+    "nameContact": "Naam / contact",
+    "buyerIntro": "Zoek je een persoon of dienst voor jezelf? Start een koperprofiel en beschrijf wat je nodig hebt. Je aanvraagconcept wordt opgeslagen en blijft privé. Koop je namens een bedrijf? Maak dan een bedrijfsprofiel met het type „Klant / opdrachtgever”.",
+    "openBuyerSetup": "Koperinstelling openen →",
+    "startBuyerProfile": "Koperprofiel starten →",
+    "footer": "Hier is niets verzonnen: elke getoonde status komt uit je account."
   }
 }

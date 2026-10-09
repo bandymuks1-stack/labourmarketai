@@ -429,6 +429,14 @@
         "s4": "Lägg till arbetslivserfarenhet och bevis",
         "note": "Färdigheter är först självangivna. Dokument, din arbetsdagbok och bekräftelser från personer gör dem starkare med tiden."
       },
+      "nextStepsOrganization": {
+        "eyebrow": "Därefter — din organisation",
+        "s1": "Namnge din organisation och vad den gör (anställer, hyr ut personal, rekryterar, utbildar, driver projekt)",
+        "s2": "Lägg till dina medarbetare, team eller den personal du levererar",
+        "s3": "Publicera ett behov, erbjud kapacitet — eller båda",
+        "s4": "Prata med de personer och organisationer som passar och utför arbetet tillsammans",
+        "note": "Din organisation kan användas direkt. Verifiering är ett separat, starkare förtroendesteg."
+      },
       "display_name_label": "[EN] Display name",
       "error_generic": "[EN] Something went wrong. Please try again.",
       "error_name_required": "[EN] Please enter a display name.",
@@ -7274,5 +7282,30 @@
     "download": "Ladda ned",
     "openRegister": "Öppna dokumentregistret",
     "more": "{n} fler dokument finns i registret."
+  },
+  "activitySetupHub": {
+    "eyebrow": "KOM IGÅNG",
+    "title": "Var du ska börja",
+    "subtitle": "Tre sätt att delta. Var och ett visar var du är — redan påbörjat eller väntar på ditt nästa steg.",
+    "agency": "Byrå",
+    "started": "✓ Påbörjad",
+    "agencyStarted": "Byråprofil påbörjad.",
+    "agencyIsCompanyType": "Framöver är en byrå en företagstyp — skapa en ny byrå som ett företag av typen ”Bemanningsföretag”.",
+    "legalName": "Juridiskt namn",
+    "country": "Land",
+    "company": "Företag",
+    "notStarted": "inte påbörjad",
+    "companyStarted": "Företagsprofil påbörjad.",
+    "openCompanySetup": "Öppna företagsinställning →",
+    "goToCompanyDashboard": "Gå till företagets arbetsyta →",
+    "companyIntro": "Skapa en företagsprofil. Typen (bygg, bemanningsföretag, underentreprenör, tillverkning, tjänster, kund / beställare, annat) väljer du i profilen — en profil för alla typer.",
+    "startCompanySetup": "Starta företagsinställning →",
+    "buyer": "Köpare",
+    "buyerStarted": "Köparprofil påbörjad. Du kan skapa arbetsförfrågningar — de förblir privata tills du bestämmer annat.",
+    "nameContact": "Namn / kontakt",
+    "buyerIntro": "Letar du efter en person eller en tjänst åt dig själv? Skapa en köparprofil och beskriv vad du behöver. Ditt utkast sparas och förblir privat. Köper du för ett företags räkning? Skapa i stället en företagsprofil av typen ”Kund / beställare”.",
+    "openBuyerSetup": "Öppna köparinställning →",
+    "startBuyerProfile": "Starta köparprofil →",
+    "footer": "Inget här är påhittat: varje visat läge är läst från ditt konto."
   }
 }

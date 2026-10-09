@@ -4197,6 +4197,14 @@
         "s4": "Füge Arbeitserfahrung und Nachweise hinzu",
         "note": "Fähigkeiten sind zunächst selbst angegeben. Dokumente, dein Arbeitsjournal und Bestätigungen von Personen machen sie mit der Zeit stärker."
       },
+      "nextStepsOrganization": {
+        "eyebrow": "Danach — deine Organisation",
+        "s1": "Benenne deine Organisation und was sie tut (beschäftigt, stellt Personal, rekrutiert, bildet aus, führt Projekte)",
+        "s2": "Füge deine Leute, Teams oder das Personal hinzu, das du stellst",
+        "s3": "Veröffentliche einen Bedarf, biete Kapazität an — oder beides",
+        "s4": "Sprich mit passenden Personen und Organisationen und erledigt die Arbeit gemeinsam",
+        "note": "Deine Organisation ist sofort nutzbar. Die Verifizierung ist ein separater, stärkerer Vertrauensschritt."
+      },
       "display_name_label": "Anzeigename",
       "country_label": "Wo wohnen Sie zurzeit?",
       "country_placeholder": "Land auswählen",
@@ -18862,5 +18870,30 @@
     "download": "Herunterladen",
     "openRegister": "Dokumentenregister öffnen",
     "more": "{n} weitere Dokumente sind im Register."
+  },
+  "activitySetupHub": {
+    "eyebrow": "AKTIVITÄT EINRICHTEN",
+    "title": "Wo anfangen",
+    "subtitle": "Drei Wege mitzumachen. Jeder zeigt, wo du stehst — bereits begonnen oder wartet auf deinen nächsten Schritt.",
+    "agency": "Agentur",
+    "started": "✓ Begonnen",
+    "agencyStarted": "Agenturprofil begonnen.",
+    "agencyIsCompanyType": "Eine Agentur ist ab jetzt ein Unternehmenstyp — lege eine neue Agentur als Unternehmen mit dem Typ „Personalagentur“ an.",
+    "legalName": "Firmenname",
+    "country": "Land",
+    "company": "Unternehmen",
+    "notStarted": "noch nicht begonnen",
+    "companyStarted": "Unternehmensprofil begonnen.",
+    "openCompanySetup": "Unternehmenseinrichtung öffnen →",
+    "goToCompanyDashboard": "Zum Unternehmensbereich →",
+    "companyIntro": "Lege ein Unternehmensprofil an. Den Typ (Bau, Personalagentur, Subunternehmer, Fertigung, Dienstleistungen, Kunde / Auftraggeber, Sonstiges) wählst du im Profil — ein Profil für jeden Typ.",
+    "startCompanySetup": "Unternehmenseinrichtung starten →",
+    "buyer": "Käufer",
+    "buyerStarted": "Käuferprofil begonnen. Du kannst Arbeitsanfragen erstellen — sie bleiben privat, bis du etwas anderes entscheidest.",
+    "nameContact": "Name / Kontakt",
+    "buyerIntro": "Suchst du eine Person oder eine Dienstleistung für dich selbst? Lege ein Käuferprofil an und beschreibe, was du brauchst. Dein Anfrageentwurf wird gespeichert und bleibt privat. Kaufst du für ein Unternehmen? Lege stattdessen ein Unternehmensprofil mit dem Typ „Kunde / Auftraggeber“ an.",
+    "openBuyerSetup": "Käufereinrichtung öffnen →",
+    "startBuyerProfile": "Käuferprofil starten →",
+    "footer": "Hier ist nichts erfunden: Jeder angezeigte Zustand stammt aus deinem Konto."
   }
 }

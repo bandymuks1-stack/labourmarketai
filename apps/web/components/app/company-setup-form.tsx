@@ -1,6 +1,6 @@
 "use client";
 
-import { countryOptionsForLocale } from "@/lib/location/country-options";
+import type { CountryOption } from "@/lib/location/country-options";
 
 import { useActionState, useRef } from "react";
 
@@ -47,6 +47,11 @@ export interface CompanySetupFormLabels {
   readonly countryOptions: Record<string, string>;
   /** The page locale — country labels for the whole world come from CLDR in it. */
   readonly locale: string;
+  /** Every country, named ON THE SERVER (countryOptionsForLocale). Built here
+   *  in the browser, the browser's ICU named four countries differently from
+   *  Node's ("Hong Kong" vs "Hong Kong SAR China") and the page failed to
+   *  hydrate (React #418, agency onboarding walk 2026-10-08). */
+  readonly countryList: readonly CountryOption[];
   readonly statusInvalidCountry: string;
   readonly registrationCode: string;
   readonly registrationCodeHelp: string;
@@ -257,7 +262,7 @@ export function CompanySetupForm({
           <option value="" disabled>
             {labels.countryPlaceholder}
           </option>
-          {countryOptionsForLocale(labels.locale).map((o) => (
+          {labels.countryList.map((o) => (
             <option key={o.value} value={o.value}>
               {labels.countryOptions[o.value] ?? o.label}
             </option>

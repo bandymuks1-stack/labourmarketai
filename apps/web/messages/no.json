@@ -429,6 +429,14 @@
         "s4": "Legg til arbeidserfaring og bevis",
         "note": "Ferdigheter er først selvoppgitte. Dokumenter, arbeidsdagboken din og bekreftelser fra personer gjør dem sterkere over tid."
       },
+      "nextStepsOrganization": {
+        "eyebrow": "Deretter — organisasjonen din",
+        "s1": "Gi organisasjonen et navn og si hva den gjør (ansetter, leverer folk, rekrutterer, lærer opp, driver prosjekter)",
+        "s2": "Legg til folkene dine, team eller arbeidskraften du leverer",
+        "s3": "Publiser et behov, tilby kapasitet — eller begge deler",
+        "s4": "Snakk med personene og organisasjonene som passer, og gjør jobben sammen",
+        "note": "Organisasjonen kan brukes med en gang. Verifisering er et eget, sterkere tillitstrinn."
+      },
       "display_name_label": "[EN] Display name",
       "error_generic": "[EN] Something went wrong. Please try again.",
       "error_name_required": "[EN] Please enter a display name.",
@@ -7274,5 +7282,30 @@
     "download": "Last ned",
     "openRegister": "Åpne dokumentregisteret",
     "more": "{n} flere dokumenter finnes i registeret."
+  },
+  "activitySetupHub": {
+    "eyebrow": "KOM I GANG",
+    "title": "Hvor du skal starte",
+    "subtitle": "Tre måter å delta på. Hver viser hvor du er — allerede startet, eller venter på ditt neste steg.",
+    "agency": "Byrå",
+    "started": "✓ Startet",
+    "agencyStarted": "Byråprofil startet.",
+    "agencyIsCompanyType": "Fremover er et byrå en bedriftstype — opprett et nytt byrå som en bedrift av typen «Bemanningsbyrå».",
+    "legalName": "Juridisk navn",
+    "country": "Land",
+    "company": "Bedrift",
+    "notStarted": "ikke startet",
+    "companyStarted": "Bedriftsprofil startet.",
+    "openCompanySetup": "Åpne bedriftsoppsett →",
+    "goToCompanyDashboard": "Gå til bedriftens arbeidsområde →",
+    "companyIntro": "Opprett en bedriftsprofil. Typen (bygg, bemanningsbyrå, underleverandør, produksjon, tjenester, kunde / oppdragsgiver, annet) velger du i profilen — én profil for alle typer.",
+    "startCompanySetup": "Start bedriftsoppsett →",
+    "buyer": "Kjøper",
+    "buyerStarted": "Kjøperprofil startet. Du kan opprette arbeidsforespørsler — de forblir private til du bestemmer noe annet.",
+    "nameContact": "Navn / kontakt",
+    "buyerIntro": "Ser du etter en person eller en tjeneste til deg selv? Opprett en kjøperprofil og beskriv hva du trenger. Utkastet lagres og forblir privat. Kjøper du på vegne av en bedrift? Opprett i stedet en bedriftsprofil av typen «Kunde / oppdragsgiver».",
+    "openBuyerSetup": "Åpne kjøperoppsett →",
+    "startBuyerProfile": "Start kjøperprofil →",
+    "footer": "Ingenting her er oppdiktet: hver viste status er lest fra kontoen din."
   }
 }

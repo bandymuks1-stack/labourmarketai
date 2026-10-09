@@ -4197,6 +4197,14 @@
         "s4": "Add work experience and records",
         "note": "Skills start out waiting for review. Documents, your work journal and reviews from people make them stronger over time."
       },
+      "nextStepsOrganization": {
+        "eyebrow": "After this — your organisation",
+        "s1": "Name your organisation and say what it does (employs, supplies people, recruits, trains, runs projects)",
+        "s2": "Add your people, teams or the workforce you supply",
+        "s3": "Publish a need, offer capacity — or both",
+        "s4": "Talk to the people and organisations that fit, then run the work together",
+        "note": "Your organisation is usable straight away. Verification is a separate, stronger trust step."
+      },
       "display_name_label": "Display name",
       "country_label": "Where do you live now?",
       "country_placeholder": "Select your country",
@@ -18862,5 +18870,30 @@
     "download": "Download",
     "openRegister": "Open the document register",
     "more": "{n} more documents are in the register."
+  },
+  "activitySetupHub": {
+    "eyebrow": "ACTIVITY SETUP",
+    "title": "Where to start",
+    "subtitle": "Three ways to take part. Each shows where you are — already started, or waiting for your next step.",
+    "agency": "Agency",
+    "started": "✓ Started",
+    "agencyStarted": "Agency profile started.",
+    "agencyIsCompanyType": "Going forward an agency is a company type — start a new agency as a company whose type is “Staffing agency”.",
+    "legalName": "Legal name",
+    "country": "Country",
+    "company": "Company",
+    "notStarted": "not started",
+    "companyStarted": "Company profile started.",
+    "openCompanySetup": "Open company setup →",
+    "goToCompanyDashboard": "Go to the company workspace →",
+    "companyIntro": "Create a company profile. You pick the type (construction, staffing agency, subcontractor, manufacturing, services, client / requester, other) inside it — one profile for every type.",
+    "startCompanySetup": "Start company setup →",
+    "buyer": "Buyer",
+    "buyerStarted": "Buyer profile started. You can create work requests — they stay private until you decide otherwise.",
+    "nameContact": "Name / contact",
+    "buyerIntro": "Looking for a person or a service for yourself? Start a buyer profile and describe what you need. Your request draft is saved and stays private. Buying on behalf of a company? Create a company profile with the “Client / requester” type instead.",
+    "openBuyerSetup": "Open buyer setup →",
+    "startBuyerProfile": "Start buyer profile →",
+    "footer": "Nothing here is invented: every state shown is read from your account."
   }
 }

@@ -4197,6 +4197,14 @@
         "s4": "Dodaj doświadczenie zawodowe i dowody",
         "note": "Umiejętności są początkowo deklarowane przez Ciebie. Dokumenty, dziennik pracy i potwierdzenia od osób z czasem je wzmacniają."
       },
+      "nextStepsOrganization": {
+        "eyebrow": "Dalej — Twoja organizacja",
+        "s1": "Nazwij organizację i określ, czym się zajmuje (zatrudnia, dostarcza ludzi, rekrutuje, szkoli, prowadzi projekty)",
+        "s2": "Dodaj swoich ludzi, zespoły lub dostarczaną siłę roboczą",
+        "s3": "Opublikuj zapotrzebowanie, zaoferuj moce — albo jedno i drugie",
+        "s4": "Porozmawiaj z pasującymi osobami i organizacjami, a potem realizujcie pracę razem",
+        "note": "Z organizacji można korzystać od razu. Weryfikacja to osobny, silniejszy krok zaufania."
+      },
       "display_name_label": "Nazwa wyświetlana",
       "country_label": "Gdzie teraz mieszkasz?",
       "country_placeholder": "Wybierz kraj",
@@ -18862,5 +18870,30 @@
     "download": "Pobierz",
     "openRegister": "Otwórz rejestr dokumentów",
     "more": "W rejestrze jest jeszcze {n} dokumentów."
+  },
+  "activitySetupHub": {
+    "eyebrow": "START DZIAŁALNOŚCI",
+    "title": "Od czego zacząć",
+    "subtitle": "Trzy sposoby udziału. Każdy pokazuje, gdzie jesteś — już rozpoczęte lub czeka na Twój kolejny krok.",
+    "agency": "Agencja",
+    "started": "✓ Rozpoczęto",
+    "agencyStarted": "Profil agencji rozpoczęty.",
+    "agencyIsCompanyType": "Od teraz agencja to typ firmy — nową agencję utwórz jako firmę z typem „Agencja pracy”.",
+    "legalName": "Nazwa",
+    "country": "Kraj",
+    "company": "Firma",
+    "notStarted": "jeszcze nie rozpoczęto",
+    "companyStarted": "Profil firmy rozpoczęty.",
+    "openCompanySetup": "Otwórz konfigurację firmy →",
+    "goToCompanyDashboard": "Przejdź do przestrzeni firmy →",
+    "companyIntro": "Utwórz profil firmy. Typ (budownictwo, agencja pracy, podwykonawca, produkcja, usługi, klient / zleceniodawca, inne) wybierzesz w profilu — jeden profil dla każdego typu.",
+    "startCompanySetup": "Rozpocznij konfigurację firmy →",
+    "buyer": "Kupujący",
+    "buyerStarted": "Profil kupującego rozpoczęty. Możesz tworzyć zapytania o pracę — pozostają prywatne, dopóki nie zdecydujesz inaczej.",
+    "nameContact": "Imię / kontakt",
+    "buyerIntro": "Szukasz osoby lub usługi dla siebie? Utwórz profil kupującego i opisz, czego potrzebujesz. Szkic zapytania jest zapisywany i pozostaje prywatny. Kupujesz w imieniu firmy? Utwórz profil firmy z typem „Klient / zleceniodawca”.",
+    "openBuyerSetup": "Otwórz konfigurację kupującego →",
+    "startBuyerProfile": "Rozpocznij profil kupującego →",
+    "footer": "Nic tu nie jest wymyślone: każdy pokazany stan pochodzi z Twojego konta."
   }
 }

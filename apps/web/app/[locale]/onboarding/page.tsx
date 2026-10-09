@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AmbientGlow } from "@/components/decor/ambient-glow";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
@@ -174,6 +175,7 @@ export default async function OnboardingPage({
           defaultProfessionSlug={handoff.professionSlug}
           doorIntents={handoff.door}
           doorWords={doorWords}
+          countryOptions={countryOptionsForLocale(locale)}
         />
       </main>
     </div>
