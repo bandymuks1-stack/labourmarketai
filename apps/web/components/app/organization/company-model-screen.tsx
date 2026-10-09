@@ -87,7 +87,7 @@ export async function CompanyModelScreen() {
       <Link
         href={"/dashboard/company/needs#demand-intake" as "/dashboard"}
         data-testid="company-model-primary"
-        className="inline-flex min-h-11 w-fit items-center rounded-full bg-brand-orange px-5 text-sm font-semibold text-ink-900 hover:opacity-90"
+        className="inline-flex min-h-11 w-fit items-center rounded-full bg-brand-blue px-5 text-sm font-semibold text-text-on-brand transition-colors hover:bg-brand-champagne"
       >
         {t("primary")}
       </Link>

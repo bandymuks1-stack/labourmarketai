@@ -163,7 +163,7 @@ export function ConversationHeader({
                 className={cn(
                   "flex h-11 items-center gap-1.5 rounded-full px-2.5 text-support font-medium transition-colors lg:px-3",
                   active
-                    ? "text-brand-orange"
+                    ? "text-brand-blue"
                     : "text-text-secondary hover:text-text-primary",
                 )}
               >

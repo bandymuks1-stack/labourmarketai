@@ -348,7 +348,7 @@ export function MarketplaceListingsSection({
     <div className="flex flex-col gap-6">
       {/* ── Manage my listings ─────────────────────────────────────────── */}
       <section className="flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
           <div>
             <h2 className="font-display text-lg font-semibold text-text-primary">{t("myTitle")}</h2>
             <p className="text-sm text-text-secondary">{t("intro")}</p>
@@ -357,7 +357,7 @@ export function MarketplaceListingsSection({
             <button
               type="button"
               onClick={openCreate}
-              className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md border border-brand-blue bg-brand-blue/10 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-brand-blue/20"
+              className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md border border-brand-blue bg-brand-blue px-3 py-2 text-sm font-semibold text-text-on-brand transition-colors hover:bg-brand-champagne hover:bg-brand-blue/20"
             >
               <Plus aria-hidden className="h-4 w-4" />
               {t("addButton")}

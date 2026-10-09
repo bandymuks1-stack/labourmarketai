@@ -115,15 +115,18 @@ export default async function CandidatesPage({
         </p>
       </div>
 
-      {inCompanySpace ? (
-        <CompanyActionNextActions room="candidates" primaryHref="/dashboard/company/scouting" />
-      ) : null}
-
+      {/* The page says where you are first (title), does its job (the
+          drafts), and only then offers the room's next step — the guide used
+          to sit above the title and answer "what can I do" before "where am I". */}
       <CandidateDraftsManager
         drafts={read.kind === "ok" ? read.drafts : []}
         labels={labels}
         needsMigration={read.kind === "needs-migration"}
       />
+
+      {inCompanySpace ? (
+        <CompanyActionNextActions room="candidates" primaryHref="/dashboard/company/scouting" />
+      ) : null}
     </div>
   );
 }

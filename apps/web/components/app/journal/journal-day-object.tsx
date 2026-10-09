@@ -44,7 +44,7 @@ export async function JournalDayObject({
   const hiddenPhotos = Math.max(0, photoTotal - shownPhotos.length);
 
   const stepLabel =
-    "flex items-center gap-2 font-mono text-meta font-semibold uppercase tracking-label text-text-muted before:inline-block before:h-[7px] before:w-[7px] before:shrink-0 before:rotate-45 before:rounded-[2px] before:bg-brand-cyan/70";
+    "flex items-center gap-2 font-mono text-meta font-semibold uppercase tracking-label text-text-muted before:inline-block before:h-[7px] before:w-[7px] before:shrink-0 before:rotate-45 before:rounded-[2px] before:bg-brand-blue/70";
 
   return (
     <section
@@ -69,7 +69,7 @@ export async function JournalDayObject({
           </p>
         </div>
         <p
-          className="font-display text-4xl font-bold leading-none tracking-tightest text-brand-cyan tabular-nums sm:text-5xl"
+          className="font-display text-4xl font-bold leading-none tracking-tightest text-text-primary tabular-nums sm:text-5xl"
           data-testid="journal-day-object-time"
         >
           {day.totalMinutes > 0 ? dur(day.totalMinutes) : "—"}
@@ -228,7 +228,7 @@ export async function JournalDayObject({
                   className={`rounded-md border px-2 py-0.5 text-sm ${
                     s.confirmed
                       ? "border-trust-accent/40 text-trust-accent"
-                      : "border-brand-cyan/40 text-brand-cyan"
+                      : "border-ink-500 text-text-secondary"
                   }`}
                   data-confirmed={s.confirmed ? "true" : "false"}
                 >

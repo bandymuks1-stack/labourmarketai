@@ -219,7 +219,7 @@ export function ServiceOfferingsSection({
                 type="button"
                 onClick={openCreate}
                 data-testid="service-offering-add"
-                className="inline-flex w-fit items-center gap-1.5 rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+                className="inline-flex w-fit items-center gap-1.5 rounded-md border border-brand-blue bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-colors hover:bg-brand-champagne"
               >
                 <Plus className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
                 {labels.addButton}

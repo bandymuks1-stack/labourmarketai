@@ -894,7 +894,7 @@ export default async function ProfilePage({
             {workerId ? (
               <Link
                 href="/cv"
-                className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+                className="rounded-md px-2.5 py-1 text-xs font-medium text-text-secondary underline-offset-4 transition-colors hover:text-brand-champagne hover:underline"
                 data-testid="profile-cv-export-link"
               >
                 {tCv("exportButton")}
