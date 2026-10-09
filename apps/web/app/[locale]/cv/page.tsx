@@ -26,8 +26,12 @@ import { formatUtcDate } from "@/lib/time/display";
 import { EuFormatCv } from "@/components/app/cv/eu-format-cv";
 import { CvOrganizationHistory } from "@/components/app/cv/cv-organization-history";
 import { organizationHistoryLines } from "@/components/app/cv/organization-history-lines";
-import { LivingCvStory, type LivingCvStoryData } from "@/components/app/cv/living-cv-story";
-import { playerInitials } from "@/lib/identity/player-identity";
+import {
+  PremiumLivingCv,
+  type PremiumCvCapability,
+  type PremiumCvExperience,
+  type PremiumCvFact,
+} from "@/components/app/cv/premium-living-cv";
 import {
   buildEuFormatCv,
   resolveEuFormatDocument,
@@ -105,7 +109,7 @@ export default async function VerifiedCvPage({
   const tRel = await getTranslations("relationshipTypes");
   const tTier = await getTranslations("evidenceTier");
   const tQuick = await getTranslations("quickNav");
-  const tStory = await getTranslations("livingCvStory");
+  const tPremium = await getTranslations("cvExport.premium");
   const fmtHours = (h: number) =>
     new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(h);
   const tRole = await getTranslations("auth.signup.role");
@@ -539,42 +543,87 @@ export default async function VerifiedCvPage({
   // prints, re-read as a history that grows from work — relative work volume,
   // capability by what stands behind it, and where it goes next.
   const skillLabel = (slug: string) => (tSkill.has(slug as never) ? tSkill(slug as never) : slug);
-  const storyData: LivingCvStoryData = {
-    name: cv.personName ?? t("nameNotProvided"),
-    initials: playerInitials(cv.personName ?? ""),
-    professions: cv.professionSlugs.map((p) => p.label ?? p.slug).filter((x): x is string => Boolean(x)),
-    engagements: cv.workHistory.map((e, i) => {
-      const start = formatUtcDate(e.startedAt, locale);
-      const end = formatUtcDate(e.endedAt, locale);
-      const period = start && end ? `${start} – ${end}` : start ? `${start} – ${t("present")}` : (end ?? "");
-      const org =
-        e.orgName ??
-        (tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship);
+  // THE PREMIUM LIVING CV (frozen design class 4e695e261, ported as grammar):
+  // built ONLY from the fields this page already read; the register below
+  // stays the printable document.
+  const premiumHours = (h: number) => `${fmtNum.format(roundHours(h))} h`;
+  const professionNames = cv.professionSlugs
+    .map((p) => professionDisplayName(p, (slug) => (tProf.has(slug) ? tProf(slug) : null)))
+    .filter((v): v is string => !!v);
+  const premiumFacts: PremiumCvFact[] = [];
+  if (cv.recordedHoursTotal !== null && cv.recordedHoursTotal > 0)
+    premiumFacts.push({ value: premiumHours(cv.recordedHoursTotal), label: tPremium("facts.recorded") });
+  if (cv.recordedHoursConfirmed !== null && cv.recordedHoursConfirmed > 0)
+    premiumFacts.push({ value: premiumHours(cv.recordedHoursConfirmed), label: tPremium("facts.confirmed") });
+  if (cv.organizationRecordedHours !== null && cv.organizationRecordedHours.totalHours > 0)
+    premiumFacts.push({ value: premiumHours(cv.organizationRecordedHours.totalHours), label: tPremium("facts.organization") });
+  if (cv.languages.length > 0)
+    premiumFacts.push({ value: cv.languages.map((l) => l.lang.toUpperCase()).join(" · "), label: tPremium("facts.languages") });
+  const tierLevel = { confirmed: "confirmed", evidence: "recorded", declared: "declared" } as const;
+  const premiumCapsAll: PremiumCvCapability[] = (["confirmed", "evidence", "declared"] as const).flatMap((tier) =>
+    cv.tiers[tier].map((slug): PremiumCvCapability => {
+      const practice = cv.skillPractice?.[slug] ?? null;
+      const hours = practice && practice.attributedHours > 0 ? practice.attributedHours : null;
+      const confirmedHours = practice?.confirmedHours ?? 0;
+      const evidenceText =
+        hours !== null && confirmedHours > 0
+          ? tPremium("evidence.both", { confirmed: fmtNum.format(roundHours(confirmedHours)), recorded: fmtNum.format(roundHours(hours)) })
+          : hours !== null
+            ? tPremium("evidence.recorded", { hours: fmtNum.format(roundHours(hours)) })
+            : tier === "declared"
+              ? tPremium("evidence.declared")
+              : tPremium("evidence.shown");
+      return { key: `${tier}:${slug}`, label: skillLabel(slug), level: tierLevel[tier], hours, confirmedHours, evidenceText };
+    }),
+  );
+  const levelRank = { confirmed: 0, recorded: 1, declared: 2 } as const;
+  premiumCapsAll.sort((a, b) => levelRank[a.level] - levelRank[b.level] || (b.hours ?? 0) - (a.hours ?? 0));
+  const PREMIUM_CAPS_SHOWN = 8;
+  const monthYear = (iso: string | null) =>
+    iso ? (formatUtcDate(iso, locale, { month: "short", year: "numeric" }) ?? null) : null;
+  const premiumExperience: (PremiumCvExperience & { sortKey: string })[] = [
+    ...cv.workHistory.map((e, i): PremiumCvExperience & { sortKey: string } => {
+      const org = e.orgName ?? (tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship);
+      const from = monthYear(e.startedAt);
+      const to = e.endedAt ? monthYear(e.endedAt) : tPremium("present");
       const rec = e.recorded && e.recorded.entries > 0 ? e.recorded : null;
       return {
-        id: e.id ?? `eng-${i}`,
-        organization: org,
-        title: e.orgName ? (e.title ?? null) : null,
-        period,
-        current: !e.endedAt,
-        recorded: rec ? { hours: rec.hours, confirmedHours: rec.confirmedHours } : null,
-        recordedText: rec
+        key: `own:${e.id ?? i}`,
+        period: from ? `${from} – ${to}` : e.endedAt ? to : null,
+        title: e.orgName ? (e.title ?? org) : org,
+        subtitle: e.orgName && e.title ? e.orgName : null,
+        detail: rec
           ? rec.confirmedHours > 0
-            ? t("history.recordedConfirmed", {
-                hours: fmtNum.format(roundHours(rec.hours)),
-                confirmed: fmtNum.format(roundHours(rec.confirmedHours)),
-                count: rec.entries,
-              })
-            : t("history.recorded", { hours: fmtNum.format(roundHours(rec.hours)), count: rec.entries })
+            ? tPremium("evidence.both", { confirmed: fmtNum.format(roundHours(rec.confirmedHours)), recorded: fmtNum.format(roundHours(rec.hours)) })
+            : tPremium("evidence.recorded", { hours: fmtNum.format(roundHours(rec.hours)) })
           : null,
+        source: tPremium("source.own"),
+        level: rec && rec.confirmedHours > 0 ? "confirmed" : rec ? "recorded" : "declared",
+        current: !e.endedAt,
+        sortKey: e.endedAt ?? "9999-12-31",
       };
     }),
-    skills: {
-      confirmed: cv.tiers.confirmed.map(skillLabel),
-      evidence: cv.tiers.evidence.map(skillLabel),
-      declared: cv.tiers.declared.map(skillLabel),
-    },
-  };
+    ...(cv.organizationHistory ?? []).map((h): PremiumCvExperience & { sortKey: string } => {
+      const title = h.project ?? h.place ?? h.organizationName ?? tPremium("untitled");
+      const from = monthYear(h.from);
+      const to = monthYear(h.to);
+      const detailParts = [
+        h.dayHours !== null ? tPremium("orgDayHours", { hours: fmtNum.format(roundHours(h.dayHours)), count: h.dayRecords }) : null,
+        h.periodHours !== null ? tPremium("orgPeriodHours", { hours: fmtNum.format(roundHours(h.periodHours)) }) : null,
+      ].filter((x): x is string => !!x);
+      return {
+        key: `org:${h.key}`,
+        period: from && to && from !== to ? `${from} – ${to}` : (from ?? to),
+        title,
+        subtitle: h.organizationName && h.organizationName !== title ? h.organizationName : null,
+        detail: detailParts.length > 0 ? detailParts.join(" · ") : null,
+        source: tPremium("source.organization"),
+        level: h.proof.includes("INDEPENDENTLY_VERIFIED") || h.proof.includes("EMPLOYER_CONFIRMED") ? "confirmed" : "recorded",
+        current: false,
+        sortKey: h.to ?? h.from ?? "0000",
+      };
+    }),
+  ].sort((a, b) => Number(b.current) - Number(a.current) || b.sortKey.localeCompare(a.sortKey));
 
   return (
     <div className="cv-doc min-h-screen bg-ink-900 px-6 py-8 text-text-primary print:p-0">
@@ -702,24 +751,27 @@ export default async function VerifiedCvPage({
         ) : (
           <>
         {/* Player-card style header — identity + honest counters. */}
-        {template !== "eu" && cv.workHistory.length > 0 ? (
-          <LivingCvStory
-            data={storyData}
-            labels={{
-              eyebrow: tStory("eyebrow"),
-              title: tStory("title"),
-              now: tStory("now"),
-              noRecords: tStory("noRecords"),
-              legend: { managerRecord: tStory("legend.managerRecord"), recorded: tStory("legend.recorded") },
-              skillsTitle: tStory("skillsTitle"),
-              tiers: { confirmed: t("tiers.confirmed"), evidence: t("tiers.evidence"), declared: t("tiers.declared") },
-              next: {
-                title: tStory("next.title"),
-                body: tStory("next.body"),
-                cta: tStory("next.cta"),
-                href: `/${locale}/dashboard/opportunities`,
-              },
+        {template !== "eu" ? (
+          <PremiumLivingCv
+            name={cv.personName.trim() && cv.personName.trim() !== "—" ? cv.personName : t("nameNotProvided")}
+            eyebrow={professionNames.length > 0 ? professionNames.join(" · ") : tPremium("eyebrowFallback")}
+            summary={cv.professionalSummary}
+            facts={premiumFacts}
+            capabilities={premiumCapsAll.slice(0, PREMIUM_CAPS_SHOWN)}
+            hiddenCapabilities={Math.max(premiumCapsAll.length - PREMIUM_CAPS_SHOWN, 0)}
+            moreLabel={tPremium("more", { count: Math.max(premiumCapsAll.length - PREMIUM_CAPS_SHOWN, 0) })}
+            capabilitiesHead={{
+              eyebrow:
+                cv.recordedHoursTotal !== null && cv.recordedHoursTotal > 0
+                  ? tPremium("capEyebrowHours", { hours: fmtNum.format(roundHours(cv.recordedHoursTotal)) })
+                  : tPremium("capEyebrow"),
+              title: tPremium("capTitle"),
             }}
+            experience={premiumExperience}
+            experienceHead={{ eyebrow: tPremium("expEyebrow"), title: tPremium("expTitle") }}
+            emptyCapabilities={tPremium("emptyCapabilities")}
+            emptyExperience={tPremium("emptyExperience")}
+            leadership={<OrganizationsLeadership locale={locale} variant="cv" />}
           />
         ) : null}
 
@@ -907,11 +959,6 @@ export default async function VerifiedCvPage({
             facts). Its own group, apart from the person's own history: not
             self-declared, not independently verified. Omitted when the ledger
             holds none or could not be read (null = unknown, never "none"). */}
-        {/* Organizations this person owns or manages, with their business
-            history - leadership, shown apart from personally performed work. */}
-        <div className="print:hidden">
-          <OrganizationsLeadership locale={locale} variant="cv" />
-        </div>
         {cv.organizationHistory && cv.organizationHistory.length > 0 ? (
           <CvOrganizationHistory
             entries={cv.organizationHistory}

@@ -8362,7 +8362,38 @@
     "recordedHoursScope": "Cały okres.",
     "recordedHoursScopeTruncated": "Na podstawie ostatnich {count} wpisów; starsze wpisy nie są ujęte w tych liczbach.",
     "organizationRecordedHours": "Zapisy organizacji: {hours} h w {days, plural, one {# dniu} few {# dniach} many {# dniach} other {# dniu}} w ewidencji czasu pracy lub zaimportowanych dokumentach ({imported} h zaimportowanych, {approved} h zatwierdzonych) — oddzielnie od liczby z dziennika i nieprzypisane do żadnej umiejętności.",
-    "organizationRecordedHoursWithPeriods": "Zapisy organizacji: łącznie {total} godz. — {hours} godz. w {days, plural, one {# dniu} few {# dniach} many {# dniach} other {# dnia}} oraz {periodHours} godz. podane jako suma za okres ({from} – {to}) w ewidencjach czasu pracy lub zaimportowanych dokumentach ({approved} godz. zatwierdzonych). Liczone oddzielnie od dziennika i nieprzypisane do żadnej umiejętności."
+    "organizationRecordedHoursWithPeriods": "Zapisy organizacji: łącznie {total} godz. — {hours} godz. w {days, plural, one {# dniu} few {# dniach} many {# dniach} other {# dnia}} oraz {periodHours} godz. podane jako suma za okres ({from} – {to}) w ewidencjach czasu pracy lub zaimportowanych dokumentach ({approved} godz. zatwierdzonych). Liczone oddzielnie od dziennika i nieprzypisane do żadnej umiejętności.",
+    "premium": {
+      "eyebrowFallback": "Żywe CV",
+      "facts": {
+        "recorded": "zapisane w dzienniku pracy",
+        "confirmed": "z wpisem kierownika",
+        "organization": "w zapisach organizacji",
+        "languages": "języki"
+      },
+      "capEyebrow": "Umiejętności",
+      "capEyebrowHours": "{hours} godz. zapisanej pracy",
+      "capTitle": "Co *potrafisz*",
+      "expEyebrow": "Doświadczenie",
+      "expTitle": "Gdzie *pracowałeś*",
+      "evidence": {
+        "both": "{confirmed} godz. z wpisem kierownika · {recorded} godz. zapisane",
+        "recorded": "{hours} godz. zapisane",
+        "shown": "Widać w Twoich zapisach",
+        "declared": "Podane przez Ciebie; jeszcze nie pokazane"
+      },
+      "source": {
+        "own": "Twój zapis",
+        "organization": "Zapisy organizacji"
+      },
+      "orgDayHours": "{hours} godz. w {count, plural, one {# wpisie} few {# wpisach} many {# wpisach} other {# wpisu}}",
+      "orgPeriodHours": "{hours} godz. podane jako suma za okres",
+      "present": "obecnie",
+      "more": "+ jeszcze {count} w pełnym rejestrze poniżej",
+      "emptyCapabilities": "Brak umiejętności. Tu pojawią się dodane umiejętności i praca, która je pokazuje.",
+      "emptyExperience": "Brak historii pracy. Tworzą ją Twój dziennik i zapisy organizacji, w których pracowałeś.",
+      "untitled": "Praca bez nazwy w źródle"
+    }
   },
   "todayScreen": {
     "eyebrow": "Dzisiaj",

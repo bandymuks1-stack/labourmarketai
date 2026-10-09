@@ -8362,7 +8362,38 @@
     "recordedHoursScope": "Gesamte Zeit.",
     "recordedHoursScopeTruncated": "Aus den letzten {count} Einträgen; ältere Einträge sind in diesen Zahlen nicht enthalten.",
     "organizationRecordedHours": "Erfassung der Organisation: {hours} Std. an {days, plural, one {# Tag} other {# Tagen}} in Stundenzetteln oder importierten Dokumenten ({imported} Std. importiert, {approved} Std. genehmigt) — getrennt von der Journalzahl geführt und keiner Fähigkeit zugeordnet.",
-    "organizationRecordedHoursWithPeriods": "Aufzeichnungen von Organisationen: insgesamt {total} Std. — {hours} Std. an {days, plural, one {# Tag} other {# Tagen}} und {periodHours} Std. als Zeitraumsumme ({from} – {to}) in Stundenzetteln oder importierten Dokumenten ({approved} Std. bestätigt). Getrennt von der Journalzahl geführt und keiner Fähigkeit zugeordnet."
+    "organizationRecordedHoursWithPeriods": "Aufzeichnungen von Organisationen: insgesamt {total} Std. — {hours} Std. an {days, plural, one {# Tag} other {# Tagen}} und {periodHours} Std. als Zeitraumsumme ({from} – {to}) in Stundenzetteln oder importierten Dokumenten ({approved} Std. bestätigt). Getrennt von der Journalzahl geführt und keiner Fähigkeit zugeordnet.",
+    "premium": {
+      "eyebrowFallback": "Lebendiger Lebenslauf",
+      "facts": {
+        "recorded": "im Arbeitsjournal erfasst",
+        "confirmed": "mit Eintrag der Leitung",
+        "organization": "in Aufzeichnungen von Organisationen",
+        "languages": "Sprachen"
+      },
+      "capEyebrow": "Fähigkeiten",
+      "capEyebrowHours": "{hours} Std. erfasste Arbeit",
+      "capTitle": "Was Sie *können*",
+      "expEyebrow": "Erfahrung",
+      "expTitle": "Wo Sie *gearbeitet* haben",
+      "evidence": {
+        "both": "{confirmed} Std. mit Eintrag der Leitung · {recorded} Std. erfasst",
+        "recorded": "{hours} Std. erfasst",
+        "shown": "Durch Ihre Einträge belegt",
+        "declared": "Von Ihnen angegeben; noch nicht belegt"
+      },
+      "source": {
+        "own": "Ihr Eintrag",
+        "organization": "Aufzeichnungen der Organisation"
+      },
+      "orgDayHours": "{hours} Std. in {count, plural, one {# Eintrag} other {# Einträgen}}",
+      "orgPeriodHours": "{hours} Std. als Zeitraumsumme angegeben",
+      "present": "heute",
+      "more": "+ {count} weitere im vollständigen Register unten",
+      "emptyCapabilities": "Noch keine Fähigkeiten erfasst. Hier erscheinen Ihre Fähigkeiten und die Arbeit, die sie zeigt.",
+      "emptyExperience": "Noch keine Arbeitsgeschichte. Ihr Journal und die Aufzeichnungen Ihrer Arbeitgeber bauen sie auf.",
+      "untitled": "Arbeit ohne Namen in der Quelle"
+    }
   },
   "todayScreen": {
     "eyebrow": "Heute",
