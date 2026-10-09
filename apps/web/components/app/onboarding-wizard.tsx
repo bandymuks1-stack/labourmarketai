@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { completeOnboarding, type Role } from "@/lib/auth/actions";
@@ -85,6 +85,7 @@ export function OnboardingWizard({
   defaultProfessionSlug = null,
   doorIntents = [],
   doorWords = null,
+  employerVisibility = null,
   countryOptions: serverCountryOptions,
 }: {
   defaultName: string;
@@ -117,6 +118,12 @@ export function OnboardingWizard({
   /** That door's plain words (the landing button the person pressed),
    *  resolved on the server — shown back, like the sentence. */
   doorWords?: string | null;
+  /** The EXISTING employer-visibility consent (DiscoverabilityConsent,
+   *  source "onboarding"), rendered by the page on the server. Shown only when
+   *  the person chose a worker context — equal grant / decline, nothing
+   *  pre-granted. Production 2026-10-09: 0 of 22 real workers had ever been
+   *  asked, so no real worker was findable by any company. */
+  employerVisibility?: ReactNode;
   /** Country options named on the server (countryOptionsForLocale). */
   countryOptions?: readonly CountryOption[];
   /** Education-type registry labels, resolved on the SERVER (the
@@ -827,6 +834,10 @@ export function OnboardingWizard({
           </span>
         </div>
       )}
+
+      {employerVisibility && roles.has("worker") ? (
+        <div data-testid="onboarding-employer-visibility">{employerVisibility}</div>
+      ) : null}
 
       {/* Landing→profile continuity (DESIGN.md): honestly preview the real
           profile the user builds next, so the first post-CTA screen does not

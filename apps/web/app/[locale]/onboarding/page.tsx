@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import { DiscoverabilityConsent } from "@/components/app/discoverability-consent";
+import { loadEmployerVisibilityForChat } from "@/lib/conversation/employer-visibility-chat";
 import { countryOptionsForLocale } from "@/lib/location/country-options";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AmbientGlow } from "@/components/decor/ambient-glow";
@@ -104,6 +106,14 @@ export default async function OnboardingPage({
   // Slice 10 — an invited-but-not-yet-onboarded user lands here; surface the
   // real pending invitation so they aren't confused by a bare role-start screen.
   const pendingInvites = await listMyPendingWorkerInvitations();
+  // The employer-visibility consent, asked where a worker starts (owner P0
+  // 2026-09-30, source "onboarding"). The SAME loader the chat uses: an
+  // unknown state or an account with no worker row embeds nothing (SEP-7).
+  const visibility = await loadEmployerVisibilityForChat();
+  const employerVisibility =
+    visibility.kind === "state" && visibility.consent ? (
+      <DiscoverabilityConsent locale={locale} source="onboarding" {...visibility.consent} />
+    ) : null;
   const tOnboard = await getTranslations("auth.onboarding");
   // Student step (universal first-run router): the education-type registry
   // labels, resolved here on the server from the CV namespace so the wizard's
@@ -175,6 +185,7 @@ export default async function OnboardingPage({
           defaultProfessionSlug={handoff.professionSlug}
           doorIntents={handoff.door}
           doorWords={doorWords}
+          employerVisibility={employerVisibility}
           countryOptions={countryOptionsForLocale(locale)}
         />
       </main>
