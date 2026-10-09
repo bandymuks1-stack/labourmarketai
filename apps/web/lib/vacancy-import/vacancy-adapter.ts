@@ -430,12 +430,14 @@ async function fetchVacancyPageInner(
       try {
         body = JSON.parse(text);
       } catch {
-        return {
-          ok: false,
-          requestRef,
-          errorCode: "invalid_json",
-          detail: "unparseable_body",
-        };
+        // A 200 JSON response that does not parse is, in practice, a body cut
+        // short by a slow publisher (Sweden, 2026-10-09: a 29.8 s listing, then
+        // invalid_json, about once a day, every time healed by the next run).
+        // The GET is read-only, so it is retried within the shared bound
+        // (maxRetries) like a timeout; a persistent failure still ends as
+        // invalid_json once the attempts are spent.
+        lastError = { errorCode: "invalid_json", detail: "unparseable_body" };
+        continue;
       }
 
       // A TWO-LEVEL feed (NAV): resolve the page's entries into full ads before
