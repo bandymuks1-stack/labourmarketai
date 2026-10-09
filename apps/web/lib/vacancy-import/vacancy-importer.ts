@@ -386,6 +386,9 @@ export async function runVacancyImport(
     counters.pagesRequested += 1;
 
     const slice = await fetchVacancyJsonLines({
+      onRetry: () => {
+        counters.retriesUsed += 1;
+      },
       provider,
       channel,
       query: req.query,
@@ -509,6 +512,9 @@ export async function runVacancyImport(
 
       counters.pagesRequested += 1;
       const fetched = await fetchVacancyPage({
+        onRetry: () => {
+          counters.retriesUsed += 1;
+        },
         provider,
         channel,
         query,
