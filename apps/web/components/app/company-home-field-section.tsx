@@ -268,10 +268,12 @@ export async function CompanyHomeFieldSection({
               </div>
             );
           })()}
-          <ol className="flex flex-col gap-2">
-            {[...field.projects.rows]
-              .sort((a, b) => (b.riskKnown ? b.risk.length : 0) - (a.riskKnown ? a.risk.length : 0))
-              .map((p) => {
+          {(() => {
+            const sorted = [...field.projects.rows].sort(
+              (a, b) => (b.riskKnown ? b.risk.length : 0) - (a.riskKnown ? a.risk.length : 0),
+            );
+            const VISIBLE = 4;
+            const render = (p: HomeProjectRow) => {
               const nowTone: Tone =
                 p.timeline.now.kind === "in_progress"
                   ? "now"
@@ -468,8 +470,22 @@ export async function CompanyHomeFieldSection({
                   </article>
                 </li>
               );
-            })}
-          </ol>
+            };
+            const rest = sorted.slice(VISIBLE);
+            return (
+              <>
+                <ol className="flex flex-col gap-2">{sorted.slice(0, VISIBLE).map(render)}</ol>
+                {rest.length > 0 ? (
+                  <details className="group" data-testid="company-home-projects-rest">
+                    <summary className="inline-flex min-h-11 cursor-pointer items-center font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
+                      {t("projects.more", { count: rest.length })}
+                    </summary>
+                    <ol className="mt-2 flex flex-col gap-2">{rest.map(render)}</ol>
+                  </details>
+                ) : null}
+              </>
+            );
+          })()}
           </>
         ) : field.projects.kind === "empty" ? (
           <div className="flex flex-col gap-2 rounded-card border border-dashed border-ink-500 p-4" data-testid="company-home-projects-empty">
@@ -574,7 +590,7 @@ export async function CompanyHomeFieldSection({
                     {field.capacity.outlook.map((w) => (
                       <li
                         key={w.from}
-                        className={`flex flex-col items-center rounded-control bg-ink-900/40 px-1 py-1.5 ${w.free === 0 ? TONE_EDGE.risk : TONE_EDGE.quiet}`}
+                        className={`flex flex-col items-center rounded-control bg-ink-900/40 px-1 py-1.5 ${w.free === 0 ? TONE_EDGE.quiet : TONE_EDGE.quiet}`}
                         aria-label={t("capacity.outlookWeek", {
                           date: day(w.from) ?? w.from,
                           free: w.free,
