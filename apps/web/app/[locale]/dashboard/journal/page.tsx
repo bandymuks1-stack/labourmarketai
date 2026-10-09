@@ -137,6 +137,7 @@ import {
   resolveAnchor,
   resolveScale,
 } from "@/lib/journal/journal-calendar";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
 // A worker without an active engagement here has nothing to log against.
@@ -554,9 +555,7 @@ export default async function JournalPage({
           metadata={{ surface: "journal", step: "no_context" }}
         />
         <header className="flex flex-col gap-1">
-          <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-            {t("navTitle")}
-          </h1>
+          <PageTitle>{t("navTitle")}</PageTitle>
           <p className="text-sm leading-relaxed text-text-secondary">
             {t("navSubtitle")}
           </p>
@@ -1219,9 +1218,7 @@ export default async function JournalPage({
       />
       <header id="mano-cv-top" className="flex flex-col gap-1 scroll-mt-20">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-            {t("navTitle")}
-          </h1>
+          <PageTitle>{t("navTitle")}</PageTitle>
           <Link
             href="/dashboard"
             className="shrink-0 rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"

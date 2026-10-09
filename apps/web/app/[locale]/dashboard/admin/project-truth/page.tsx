@@ -5,6 +5,7 @@ import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { checkEngagementInvariant } from "@/lib/booking/engagement-invariant";
 import { showPlaceholderMarkers } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Type-escape for tables not in the generated `Database` type.
@@ -188,9 +189,7 @@ export default async function ProjectTruthPage({
         <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           P0 · PROJECT TRUTH
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          Project truth — admin diagnostic
-        </h1>
+        <PageTitle>Project truth — admin diagnostic</PageTitle>
         <p className="text-sm text-text-secondary">
           Real situation, not a preview. No fake rows, no fake counts. Read-only diagnostic
           — this page never writes to production.

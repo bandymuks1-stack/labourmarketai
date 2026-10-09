@@ -7,6 +7,7 @@ import {
   type SandboxLabels,
 } from "@/components/intelligence/manual-import-sandbox-form";
 import { runSandboxValidationAction } from "./actions";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * MANUAL IMPORT SANDBOX workspace (Manual Import Sandbox v1) — the
@@ -122,9 +123,7 @@ export default async function ManualImportSandboxPage({
         <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("sandbox.eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("sandbox.title")}
-        </h1>
+        <PageTitle>{t("sandbox.title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("sandbox.intro")}</p>
         <p className="text-xs text-text-muted">{t("sandbox.isolationNote")}</p>
       </header>

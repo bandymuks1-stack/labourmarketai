@@ -43,6 +43,7 @@ import { DevelopmentReviewsSection } from "@/components/app/development-reviews-
 import { ManagementDecisionsSection } from "@/components/app/management-decisions-section";
 import { ApprovalsSection } from "./approvals-section";
 import { RequestsSection } from "./requests-section";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * "Mano tinklas" (core-network area B) — a SUB-SURFACE of the person /
@@ -408,9 +409,7 @@ export default async function NetworkPage({
         <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
       </header>
 

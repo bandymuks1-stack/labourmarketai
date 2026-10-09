@@ -10,6 +10,7 @@ import {
   CompanyNeedIntakeStatusControl,
   type CompanyNeedIntakeStatusLabels,
 } from "@/components/app/company-need-intake-status";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Public Intake Owner Queue v1.
@@ -89,9 +90,7 @@ export default async function AdminCompanyNeedIntakesPage({
         <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
         <Link
           href={"/dashboard/admin" as "/dashboard"}

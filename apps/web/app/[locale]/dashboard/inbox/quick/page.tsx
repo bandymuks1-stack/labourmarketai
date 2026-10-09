@@ -7,6 +7,7 @@ import { fetchQuickReviewQueue } from "@/lib/journal/review-queue";
 import { fetchBatchExceptions } from "@/lib/journal/batch-review";
 import { createClient } from "@/lib/supabase/server";
 import { utcDayKey, utcTodayKey } from "@/lib/time/display";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /** One-Tap Confirm (S3.5) — the manager's mobile-first confirm queue. Same
  *  gated reviewable set as the inbox, same write RPCs; this view only cuts
@@ -67,9 +68,7 @@ export default async function QuickConfirmPage({
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-5">
       <header className="flex flex-col gap-1.5">
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("inbox.quick.title")}
-        </h1>
+        <PageTitle>{t("inbox.quick.title")}</PageTitle>
         <p className="text-xs leading-relaxed text-text-secondary">
           {t("inbox.quick.subtitle")}
         </p>

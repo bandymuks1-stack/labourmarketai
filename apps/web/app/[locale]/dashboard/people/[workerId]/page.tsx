@@ -40,6 +40,7 @@ import { listActiveOfferingsByProvider } from "@/lib/services/service-offerings"
 import { RecognisedByList } from "@/components/app/recognised-by-block";
 import { getViewerRecognisedByItems } from "@/lib/qualification/viewer-recognitions";
 import { PersonImportedHistory } from "@/components/app/people/person-imported-history";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 export const dynamic = "force-dynamic";
 
@@ -660,9 +661,7 @@ async function RestrictedState({
       className="mx-auto flex w-full max-w-content flex-col gap-4"
       data-testid="person-restricted"
     >
-      <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-        {t("restrictedTitle")}
-      </h1>
+      <PageTitle>{t("restrictedTitle")}</PageTitle>
       <p className="card-border p-4 text-sm leading-relaxed text-text-secondary">
         {t("restrictedBody")}
       </p>

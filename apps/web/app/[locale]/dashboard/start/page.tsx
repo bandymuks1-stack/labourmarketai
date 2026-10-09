@@ -10,6 +10,7 @@ import { getMembershipLabels } from "@/lib/company/membership-labels";
 import { MembershipInvitationsPanel } from "@/components/app/membership-invitations-panel";
 import { MyOnboardingSection } from "./my-onboarding-section";
 import { isLifecycleNotice } from "@/lib/lifecycle/lifecycle-model";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Stage 2 — Activity Setup Hub.
@@ -107,9 +108,7 @@ export default async function ActivitySetupHubPage({
         <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">
           {t("subtitle")}
         </p>

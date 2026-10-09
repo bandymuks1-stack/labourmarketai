@@ -18,6 +18,7 @@ import {
 import { OPEN_WORK_TASK_STATUSES } from "@/lib/tasks/task-model";
 import { createUtcFormatter } from "@/lib/time/display";
 import type { Role } from "@/lib/auth/actions";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Reports hub (control room PR K, capability gap map §12) — the role-specific
@@ -170,9 +171,7 @@ export default async function ReportsHubPage({
         <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
         <p className="text-xs text-text-muted">{t("honestyNote")}</p>
       </header>

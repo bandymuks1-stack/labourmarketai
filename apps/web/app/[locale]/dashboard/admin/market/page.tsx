@@ -12,6 +12,7 @@ import {
   type MarketAverageFormLabels,
 } from "@/components/app/market-average-form";
 import { MarketPulseBoard } from "@/components/app/market-pulse-board";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * "Kokia situacija rinkoje" — admin market analysis v1 (S4 item 4).
@@ -81,9 +82,7 @@ export default async function AdminMarketPage({
         <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
         <p
           className="mt-1 rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs text-text-secondary"

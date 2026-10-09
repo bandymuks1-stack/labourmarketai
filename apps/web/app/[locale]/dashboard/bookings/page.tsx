@@ -18,6 +18,7 @@ import {
   type BookingStatus,
 } from "@/lib/booking/booking-state";
 import { ActionCard } from "@/components/app/action-card";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Bookings (Stage 6) — the worker's incoming proposals (accept/decline) and the
@@ -75,9 +76,7 @@ export default async function BookingsPage({
         <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
       </header>
 

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getReviewReport } from "@/lib/journal/review-report";
 import { PrintButton } from "@/components/app/print-button";
 import { formatUtcDate } from "@/lib/time/display";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Company review report preview (v1). Read-only summary of the entries the
@@ -40,9 +41,7 @@ export default async function ReviewReportPage({
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-            {t("title")}
-          </h1>
+          <PageTitle>{t("title")}</PageTitle>
           <PrintButton label={t("print")} />
         </div>
         <p className="text-xs text-text-secondary">{t("origin")}</p>

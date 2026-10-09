@@ -12,6 +12,7 @@ import {
 import { AdminPilotGrantForm } from "@/components/app/admin-pilot-grant-form";
 import { AdminLmcPanel } from "@/components/app/admin-lmc-panel";
 import { BillingTestCheckout } from "@/components/marketing/billing-test-checkout";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Admin billing center (Stripe sprint PR6). Shows the billing config state
@@ -49,9 +50,7 @@ export default async function AdminBillingPage({
         <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
       </header>
 

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { type Role } from "@/lib/auth/actions";
 import { getAssetsOverview, getMyAssignedAssets } from "@/lib/assets/assets";
 import { AssetsRegistry, MyAssignedAssetsPanel } from "@/components/app/assets-panel";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 export const dynamic = "force-dynamic";
 
@@ -47,9 +48,7 @@ export default async function AssetsPage({
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("pageTitle")}
-        </h1>
+        <PageTitle>{t("pageTitle")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("pageIntro")}</p>
       </header>
 

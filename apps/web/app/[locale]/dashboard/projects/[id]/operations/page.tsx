@@ -58,6 +58,7 @@ import { getProjectManageFacts } from "@/lib/projects/responsible";
 import { listOrganizationMembers } from "@/lib/company/memberships";
 import { getProjectHoursSideBySide } from "@/lib/projects/project-hours";
 import { viewerWorkToday } from "@/lib/time/viewer-day";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 export const dynamic = "force-dynamic";
 
@@ -123,9 +124,7 @@ export default async function ProjectOperationsPage({
     if (workerView) redirect(`/${locale}/dashboard/projects/${id}`);
     return (
       <div className="mx-auto flex w-full max-w-content flex-col gap-4">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("eyebrow")}
-        </h1>
+        <PageTitle>{t("eyebrow")}</PageTitle>
         <p className="card-border p-4 text-sm text-text-secondary">{t("managerOnly")}</p>
       </div>
     );
@@ -135,9 +134,7 @@ export default async function ProjectOperationsPage({
   if (!centre) {
     return (
       <div className="mx-auto flex w-full max-w-content flex-col gap-4">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("eyebrow")}
-        </h1>
+        <PageTitle>{t("eyebrow")}</PageTitle>
         <p className="card-border p-4 text-sm text-text-secondary" data-testid="ops-not-authorized">
           {t("notAuthorized")}
         </p>

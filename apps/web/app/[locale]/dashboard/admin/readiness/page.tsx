@@ -3,6 +3,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { getAdminReadinessOverview } from "@/lib/admin/readiness-overview";
 import { AdminDocVerifyButtons } from "@/components/app/admin-doc-verify-buttons";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Admin readiness control center (Stage 9) — the payment-readiness blockers in
@@ -43,9 +44,7 @@ export default async function AdminReadinessPage({
         <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
       </header>
 

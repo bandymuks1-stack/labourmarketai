@@ -35,6 +35,7 @@ import {
   resolveEffectivePreferences,
 } from "@/lib/notifications/notification-preferences";
 import { isTransactionalEmailConfigured } from "@/lib/email/transactional";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Account — SETTINGS ONLY (marketplace IA cleanup 2026-06-25).
@@ -151,9 +152,7 @@ export default async function AccountPage({
   return (
     <div className="flex flex-col gap-5">
       <header>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("tabs.account")}
-        </h1>
+        <PageTitle>{t("tabs.account")}</PageTitle>
         <p className="mt-2 text-sm text-text-secondary">
           {t("empty.account_intro")}
         </p>

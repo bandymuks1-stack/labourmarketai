@@ -3,6 +3,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { listPilots } from "@/lib/admin/pilots";
 import { CreatePilotForm } from "@/components/app/admin-pilots-forms";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Pilot cohort administration — list + create (Pilot Onboarding and
@@ -38,9 +39,7 @@ export default async function AdminPilotsPage({
         <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 

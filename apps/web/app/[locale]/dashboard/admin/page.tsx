@@ -17,6 +17,7 @@ import { FollowUpQueuePanel } from "@/components/app/follow-up-queue-panel";
 import { SalesIntakePanel } from "@/components/app/sales-intake-panel";
 import type { AdminReviewPriorityStatus } from "@/lib/buyer/admin-review-priority";
 import type { ExtractionReadiness } from "@/lib/buyer/attachment-readiness";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /** Stable display order for the file-readiness summary. */
 const READINESS_KINDS: readonly ExtractionReadiness[] = [
@@ -484,9 +485,7 @@ export default async function AdminDashboardPage({
         <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 

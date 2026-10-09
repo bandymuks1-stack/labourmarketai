@@ -27,6 +27,7 @@ import {
   EUROSTAT_ATTRIBUTION_CODE,
   EUROSTAT_KIND_DATASET,
 } from "@/lib/intelligence/trust-card-model";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Market intelligence workspace (Labour Market Intelligence v1) — the ONE
@@ -93,9 +94,7 @@ export default async function IntelligencePage({
       <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
         {t("page.eyebrow")}
       </p>
-      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-        {t("page.title")}
-      </h1>
+      <PageTitle>{t("page.title")}</PageTitle>
       <p className="text-sm text-text-secondary">{t("page.intro")}</p>
     </header>
   );

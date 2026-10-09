@@ -20,6 +20,7 @@ import {
 import { ConversationQuickReply } from "@/components/app/conversation-quick-reply";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
 import { formatUtcDateTime } from "@/lib/time/display";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Communication v1 — thread list page.
@@ -376,9 +377,7 @@ export default async function CommunicationListPage({
       {/* One name for one surface: the nav says "Žinutės", so does the page.
           No explanatory subtitle — the workspace below says what it is. */}
       <header>
-        <h1 className="font-display text-title font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
       </header>
 
       {/* Honest restricted state when a "message" entry point could not open a

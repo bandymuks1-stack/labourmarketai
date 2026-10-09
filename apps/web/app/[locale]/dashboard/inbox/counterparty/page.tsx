@@ -19,6 +19,7 @@ import {
   type QueueRow,
 } from "@/lib/journal/counterparty-review-model";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 export const dynamic = "force-dynamic";
 
@@ -152,9 +153,7 @@ export default async function CounterpartyQueuePage({
   return (
     <div className="flex flex-col gap-6" data-testid="counterparty-queue">
       <header className="flex flex-col gap-2">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm leading-relaxed text-text-secondary">{t("lead")}</p>
         <p className="text-meta leading-relaxed text-text-muted">{t("honestNote")}</p>
         {!loadFailed ? (

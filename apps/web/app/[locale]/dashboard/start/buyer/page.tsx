@@ -5,6 +5,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnCustomer } from "@/lib/buyer/customers";
 import { BuyerSetupForm } from "@/components/app/buyer-setup-form";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Stage 2 PR 1 — Buyer / customer setup (real persistence).
@@ -78,9 +79,7 @@ export default async function BuyerStartPage({
         <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {label("PIRKĖJO BŪSENA", "BUYER STATE")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {label("Pirkėjo / kliento paskyra", "Buyer / client account")}
-        </h1>
+        <PageTitle>{label("Pirkėjo / kliento paskyra", "Buyer / client account")}</PageTitle>
       </header>
 
       <Link

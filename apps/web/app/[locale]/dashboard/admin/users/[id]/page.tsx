@@ -8,6 +8,7 @@ import {
   listDemandDraftsForProfile,
   type DraftType,
 } from "@/lib/demand/demand-drafts";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 type ClaimRow = {
   id: string;
@@ -79,9 +80,7 @@ export default async function AdminUserPage({
         >
           ← {t("back")}
         </Link>
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {profile.full_name ?? profile.email ?? id}
-        </h1>
+        <PageTitle plain>{profile.full_name ?? profile.email ?? id}</PageTitle>
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {profile.active_role ?? "—"} ·{" "}
           {profile.onboarded_at ? t("user.onboarded") : t("user.notOnboarded")}

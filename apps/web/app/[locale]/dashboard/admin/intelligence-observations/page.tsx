@@ -18,6 +18,7 @@ import { INTELLIGENCE_SOURCE_PROFILES } from "@/lib/intelligence/source-governan
 import { buildOwnerActivationChecklist } from "@/lib/intelligence/source-activation";
 import { deriveSourceHealth } from "@/lib/intelligence/source-health";
 import { deriveSourceLifecycleState } from "@/lib/intelligence/source-lifecycle";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Observation INSPECTOR page (Trust Layer v1) — developer-only, read-only
@@ -109,9 +110,7 @@ export default async function IntelligenceObservationInspectorPage({
         <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
           {t("inspector.eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("inspector.title")}
-        </h1>
+        <PageTitle>{t("inspector.title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("inspector.intro")}</p>
         <p className="text-xs text-text-muted">{t("inspector.readOnlyNote")}</p>
       </header>

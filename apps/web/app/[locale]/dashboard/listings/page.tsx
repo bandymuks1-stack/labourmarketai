@@ -9,6 +9,7 @@ import {
   discoverMarketplaceListings,
 } from "@/lib/marketplace/listings";
 import { MarketplaceListingsSection } from "@/components/app/marketplace-listings-section";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 export const dynamic = "force-dynamic";
 
@@ -56,9 +57,7 @@ export default async function ListingsPage({
   return (
     <div className="flex flex-col gap-4" data-testid="listings-page">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("pageTitle")}
-        </h1>
+        <PageTitle>{t("pageTitle")}</PageTitle>
         <p className="text-sm leading-relaxed text-text-secondary">{t("pageIntro")}</p>
       </header>
 
