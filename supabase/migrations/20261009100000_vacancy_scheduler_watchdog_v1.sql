@@ -52,7 +52,16 @@ create table if not exists public.vacancy_scheduler_policy (
   tolerance      interval    not null,
   cooldown       interval    not null,
   enabled        boolean     not null default true,
-  primary key (provider_key, channel)
+  primary key (provider_key, channel),
+  -- WORKFLOW ALLOWLIST (server-side, in the schema itself): only the two existing
+  -- vacancy workflows, each bound to its own provider and fixed inputs.
+  constraint vacancy_scheduler_policy_binding check (
+    (provider_key = 'nav' and channel = 'stream'
+       and workflow_file = 'nav-supply-cadence.yml' and dispatch_inputs = '{"mode":"persist"}'::jsonb)
+    or
+    (provider_key = 'arbetsformedlingen' and channel = 'stream'
+       and workflow_file = 'sweden-supply-cadence.yml' and dispatch_inputs = '{"channel":"stream"}'::jsonb)
+  )
 );
 
 create table if not exists public.vacancy_scheduler_state (
@@ -65,6 +74,7 @@ create table if not exists public.vacancy_scheduler_state (
   last_dispatch_request_id bigint,
   last_dispatch_status text,
   dispatch_count      integer     not null default 0,
+  dispatch_streak     integer     not null default 0,  -- dispatches since last on-time; drives back-off
   updated_at          timestamptz not null default now(),
   primary key (provider_key, channel)
 );
@@ -106,7 +116,7 @@ create or replace function public.vacancy_scheduler_watchdog_v1()
 returns table (provider_key text, channel text, classification text, action text, scheduler_delay interval)
 language plpgsql
 security definer
-set search_path = public, extensions
+set search_path = pg_catalog, public
 as $$
 declare
   p        record;
@@ -119,7 +129,7 @@ declare
   v_req    bigint;
   v_status text;
 begin
-  if session_user <> 'postgres' and coalesce(auth.role(), '') <> 'service_role' then
+  if session_user <> 'postgres' then
     raise exception 'forbidden' using errcode = '42501';
   end if;
 
@@ -161,9 +171,13 @@ begin
 
     if v_delay <= p.expected_every + p.tolerance then
       v_class := 'on_time'; v_action := 'none';
+      if s.dispatch_streak > 0 then
+        update public.vacancy_scheduler_state st set dispatch_streak = 0, updated_at = now()
+         where st.provider_key = p.provider_key and st.channel = p.channel;
+      end if;
       if s.incident_open then
         update public.vacancy_scheduler_state st
-           set incident_open = false, incident_kind = null, updated_at = now()
+           set incident_open = false, incident_kind = null, dispatch_streak = 0, updated_at = now()
          where st.provider_key = p.provider_key and st.channel = p.channel;
         insert into public.vacancy_scheduler_events (provider_key, channel, kind, last_run_at, scheduler_delay, detail)
           values (p.provider_key, p.channel, 'incident_recovered', c.last_run_at, v_delay,
@@ -189,7 +203,8 @@ begin
           values (p.provider_key, p.channel, 'incident_opened', c.last_run_at, v_delay, v_class);
       end if;
 
-      if s.last_dispatch_at is not null and now() - s.last_dispatch_at < p.cooldown then
+      if s.last_dispatch_at is not null
+         and now() - s.last_dispatch_at < least(p.cooldown * power(2, least(s.dispatch_streak, 4)), interval '6 hours') then
         v_action := 'cooldown';
       elsif v_token is null then
         v_action := 'dispatch_unavailable';
@@ -209,7 +224,7 @@ begin
           timeout_milliseconds := 10000) into v_req;
         update public.vacancy_scheduler_state st
            set last_dispatch_at = now(), last_dispatch_request_id = v_req, last_dispatch_status = null,
-               dispatch_count = st.dispatch_count + 1, updated_at = now()
+               dispatch_count = st.dispatch_count + 1, dispatch_streak = st.dispatch_streak + 1, updated_at = now()
          where st.provider_key = p.provider_key and st.channel = p.channel;
         insert into public.vacancy_scheduler_events (provider_key, channel, kind, last_run_at, scheduler_delay, detail)
           values (p.provider_key, p.channel, 'fallback_dispatched', c.last_run_at, v_delay,
@@ -225,8 +240,8 @@ begin
 end;
 $$;
 
-revoke execute on function public.vacancy_scheduler_watchdog_v1() from public, anon, authenticated;
-grant execute on function public.vacancy_scheduler_watchdog_v1() to service_role;
+revoke execute on function public.vacancy_scheduler_watchdog_v1() from public, anon, authenticated, service_role;
+-- No service_role EXECUTE: the only caller is pg_cron (postgres). Owner/operators run it via SQL.
 
 comment on function public.vacancy_scheduler_watchdog_v1() is
   'Scheduler watchdog: compares each provider cursor''s last_run_at to its contracted cadence, records scheduler incidents, and re-invokes the SAME workflow via workflow_dispatch when a Vault credential exists. Never ingests.';
