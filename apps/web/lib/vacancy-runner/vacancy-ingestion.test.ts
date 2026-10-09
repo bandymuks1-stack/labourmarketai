@@ -151,6 +151,8 @@ function fakeDb(options: {
     chain.or = self;
     chain.order = self;
     chain.range = self;
+    chain.gt = self;
+    chain.limit = self;
     chain.maybeSingle = () => Promise.resolve(single);
     chain.then = (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) => {
       if (headCount) {

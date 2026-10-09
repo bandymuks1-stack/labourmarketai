@@ -523,6 +523,8 @@ describe("(3) a cursor channel walks by continuation token and checkpoints on it
       chain.or = self;
       chain.order = self;
       chain.range = self;
+      chain.gt = self;
+      chain.limit = self;
       chain.maybeSingle = () => Promise.resolve({ data: null, error: null });
       chain.then = (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) =>
         Promise.resolve({ data: [], error: null }).then(ok, err);
@@ -621,6 +623,8 @@ describe("(4) no nav.no host is reachable while the switch is closed", () => {
       chain.or = self;
       chain.order = self;
       chain.range = self;
+      chain.gt = self;
+      chain.limit = self;
       chain.maybeSingle = () => Promise.resolve({ data: null, error: null });
       chain.then = (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) =>
         Promise.resolve({ data: [], error: null }).then(ok, err);
@@ -905,27 +909,42 @@ describe("removal duty at store scale: the dedup state is read PAGED, never as a
     const target = stored[1700].external_id;
     stubFeed({ "": { items: [navEntry(target, "INACTIVE")] } });
 
-    const ranges: [number, number][] = [];
+    // KEYSET paging (2026-10-09): `external_id > last` + `limit`, never OFFSET.
+    const afters: (string | null)[] = [];
+    let usedRange = false;
     const chainFor = (table: string) => {
       const chain: Record<string, unknown> = {};
-      let range: [number, number] | null = null;
+      let after: string | null = null;
+      let isRead = false;
       const self = () => chain;
-      chain.select = self;
+      chain.select = () => {
+        isRead = true;
+        return chain;
+      };
       chain.eq = self;
       chain.in = self;
       chain.or = self;
       chain.order = self;
-      chain.range = (from: number, to: number) => {
-        range = [from, to];
-        ranges.push([from, to]);
+      chain.range = () => {
+        usedRange = true;
         return chain;
       };
+      chain.gt = (_c: string, v: string) => {
+        after = v;
+        return chain;
+      };
+      chain.limit = self;
       chain.maybeSingle = () => Promise.resolve({ data: null, error: null });
-      chain.then = (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) =>
-        Promise.resolve({
-          data: table === "public_vacancies" && range ? stored.slice(range[0], range[1] + 1) : [],
+      chain.then = (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) => {
+        if (table === "public_vacancies" && isRead) afters.push(after);
+        return Promise.resolve({
+          data:
+            table === "public_vacancies" && isRead
+              ? stored.filter((r) => after === null || r.external_id > after).slice(0, 1000)
+              : [],
           error: null,
         }).then(ok, err);
+      };
       chain.upsert = () => Promise.resolve({ data: null, error: null });
       return chain;
     };
@@ -935,11 +954,8 @@ describe("removal duty at store scale: the dedup state is read PAGED, never as a
       mode: "dry_run",
       nowIso: NOW,
     });
-    expect(ranges).toEqual([
-      [0, 999],
-      [1000, 1999],
-      [2000, 2999],
-    ]);
+    expect(usedRange).toBe(false);
+    expect(afters).toEqual([null, "held-00999", "held-01999"]);
     expect(session.metrics?.itemsRemoval).toBe(1);
   });
 });
