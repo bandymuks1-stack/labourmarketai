@@ -429,6 +429,14 @@
         "s4": "Lisa töökogemus ja tõendid",
         "note": "Oskused on alguses sinu enda märgitud. Dokumendid, töömärkmik ja inimeste kinnitused muudavad need aja jooksul tugevamaks."
       },
+      "nextStepsOrganization": {
+        "eyebrow": "Seejärel — sinu organisatsioon",
+        "s1": "Nimeta organisatsioon ja ütle, mida see teeb (palkab, vahendab inimesi, värbab, koolitab, viib ellu projekte)",
+        "s2": "Lisa oma inimesed, meeskonnad või vahendatav tööjõud",
+        "s3": "Avalda vajadus, paku võimekust — või mõlemat",
+        "s4": "Räägi sobivate inimeste ja organisatsioonidega ning tehke töö koos",
+        "note": "Organisatsioon on kohe kasutatav. Kinnitamine on eraldi, tugevam usaldusetapp."
+      },
       "display_name_label": "[EN] Display name",
       "error_generic": "[EN] Something went wrong. Please try again.",
       "error_name_required": "[EN] Please enter a display name.",
@@ -7274,5 +7282,30 @@
     "download": "Laadi alla",
     "openRegister": "Ava dokumentide register",
     "more": "Registris on veel {n} dokumenti."
+  },
+  "activitySetupHub": {
+    "eyebrow": "TEGEVUSE ALUSTAMINE",
+    "title": "Kust alustada",
+    "subtitle": "Kolm osalemise viisi. Igaüks näitab, kus sa oled — juba alustatud või ootab sinu järgmist sammu.",
+    "agency": "Agentuur",
+    "started": "✓ Alustatud",
+    "agencyStarted": "Agentuuri profiil alustatud.",
+    "agencyIsCompanyType": "Edaspidi on agentuur ettevõtte tüüp — loo uus agentuur ettevõttena, mille tüüp on „Personaliagentuur“.",
+    "legalName": "Juriidiline nimi",
+    "country": "Riik",
+    "company": "Ettevõte",
+    "notStarted": "pole alustatud",
+    "companyStarted": "Ettevõtte profiil alustatud.",
+    "openCompanySetup": "Ava ettevõtte seadistus →",
+    "goToCompanyDashboard": "Mine ettevõtte tööruumi →",
+    "companyIntro": "Loo ettevõtte profiil. Tüübi (ehitus, personaliagentuur, alltöövõtja, tootmine, teenused, klient / tellija, muu) valid profiilis — üks profiil kõigile tüüpidele.",
+    "startCompanySetup": "Alusta ettevõtte seadistamist →",
+    "buyer": "Ostja",
+    "buyerStarted": "Ostja profiil alustatud. Saad luua tööpäringuid — need jäävad privaatseks, kuni otsustad teisiti.",
+    "nameContact": "Nimi / kontakt",
+    "buyerIntro": "Otsid inimest või teenust endale? Loo ostja profiil ja kirjelda, mida vajad. Päringu mustand salvestatakse ja jääb privaatseks. Ostad ettevõtte nimel? Loo selle asemel ettevõtte profiil tüübiga „Klient / tellija“.",
+    "openBuyerSetup": "Ava ostja seadistus →",
+    "startBuyerProfile": "Alusta ostja profiili →",
+    "footer": "Siin pole midagi välja mõeldud: iga kuvatud olek on loetud sinu kontolt."
   }
 }

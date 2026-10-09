@@ -429,6 +429,14 @@
         "s4": "Pievieno darba pieredzi un pierādījumus",
         "note": "Prasmes sākotnēji ir tevis norādītas. Dokumenti, darba žurnāls un cilvēku apstiprinājumi laika gaitā padara tās stiprākas."
       },
+      "nextStepsOrganization": {
+        "eyebrow": "Pēc tam — jūsu organizācija",
+        "s1": "Nosauciet organizāciju un norādiet, ko tā dara (nodarbina, piegādā cilvēkus, atlasa, apmāca, vada projektus)",
+        "s2": "Pievienojiet savus cilvēkus, komandas vai piegādāto darbaspēku",
+        "s3": "Publicējiet vajadzību, piedāvājiet jaudu — vai abus",
+        "s4": "Sazinieties ar piemērotiem cilvēkiem un organizācijām un veiciet darbu kopā",
+        "note": "Organizāciju var izmantot uzreiz. Verifikācija ir atsevišķs, stiprāks uzticamības solis."
+      },
       "display_name_label": "[EN] Display name",
       "error_generic": "[EN] Something went wrong. Please try again.",
       "error_name_required": "[EN] Please enter a display name.",
@@ -7274,5 +7282,30 @@
     "download": "Lejupielādēt",
     "openRegister": "Atvērt dokumentu reģistru",
     "more": "Reģistrā ir vēl {n} dokumenti."
+  },
+  "activitySetupHub": {
+    "eyebrow": "DARBĪBAS SĀKUMS",
+    "title": "Ar ko sākt",
+    "subtitle": "Trīs dalības veidi. Katrs parāda, kur esat — jau sākts vai gaida jūsu nākamo soli.",
+    "agency": "Aģentūra",
+    "started": "✓ Sākts",
+    "agencyStarted": "Aģentūras profils sākts.",
+    "agencyIsCompanyType": "Turpmāk aģentūra ir uzņēmuma veids — jaunu aģentūru veidojiet kā uzņēmumu ar veidu “Personāla aģentūra”.",
+    "legalName": "Juridiskais nosaukums",
+    "country": "Valsts",
+    "company": "Uzņēmums",
+    "notStarted": "vēl nav sākts",
+    "companyStarted": "Uzņēmuma profils sākts.",
+    "openCompanySetup": "Atvērt uzņēmuma iestatīšanu →",
+    "goToCompanyDashboard": "Doties uz uzņēmuma darba vidi →",
+    "companyIntro": "Izveidojiet uzņēmuma profilu. Veidu (būvniecība, personāla aģentūra, apakšuzņēmējs, ražošana, pakalpojumi, klients / pasūtītājs, cits) izvēlēsieties profilā — viens profils visiem veidiem.",
+    "startCompanySetup": "Sākt uzņēmuma iestatīšanu →",
+    "buyer": "Pircējs",
+    "buyerStarted": "Pircēja profils sākts. Varat veidot darba pieprasījumus — tie paliek privāti, līdz izlemsiet citādi.",
+    "nameContact": "Vārds / kontakts",
+    "buyerIntro": "Meklējat cilvēku vai pakalpojumu sev? Izveidojiet pircēja profilu un aprakstiet, kas vajadzīgs. Pieprasījuma melnraksts tiek saglabāts un paliek privāts. Pērkat uzņēmuma vārdā? Izveidojiet uzņēmuma profilu ar veidu “Klients / pasūtītājs”.",
+    "openBuyerSetup": "Atvērt pircēja iestatīšanu →",
+    "startBuyerProfile": "Sākt pircēja profilu →",
+    "footer": "Šeit nekas nav izdomāts: katrs parādītais stāvoklis nolasīts no jūsu konta."
   }
 }

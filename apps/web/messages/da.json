@@ -429,6 +429,14 @@
         "s4": "Tilføj arbejdserfaring og dokumentation",
         "note": "Færdigheder er i starten selvangivne. Dokumenter, din arbejdsdagbog og bekræftelser fra personer gør dem stærkere med tiden."
       },
+      "nextStepsOrganization": {
+        "eyebrow": "Derefter — din organisation",
+        "s1": "Navngiv din organisation og hvad den gør (ansætter, leverer folk, rekrutterer, uddanner, driver projekter)",
+        "s2": "Tilføj dine folk, teams eller den arbejdskraft, du leverer",
+        "s3": "Offentliggør et behov, tilbyd kapacitet — eller begge dele",
+        "s4": "Tal med de personer og organisationer, der passer, og udfør arbejdet sammen",
+        "note": "Din organisation kan bruges med det samme. Verifikation er et separat, stærkere tillidstrin."
+      },
       "display_name_label": "[EN] Display name",
       "error_generic": "[EN] Something went wrong. Please try again.",
       "error_name_required": "[EN] Please enter a display name.",
@@ -7274,5 +7282,30 @@
     "download": "Download",
     "openRegister": "Åbn dokumentregisteret",
     "more": "{n} flere dokumenter findes i registeret."
+  },
+  "activitySetupHub": {
+    "eyebrow": "KOM I GANG",
+    "title": "Hvor skal du starte",
+    "subtitle": "Tre måder at deltage på. Hver viser, hvor du er — allerede startet eller venter på dit næste skridt.",
+    "agency": "Bureau",
+    "started": "✓ Startet",
+    "agencyStarted": "Bureauprofil startet.",
+    "agencyIsCompanyType": "Fremover er et bureau en virksomhedstype — opret et nyt bureau som en virksomhed af typen “Vikarbureau”.",
+    "legalName": "Juridisk navn",
+    "country": "Land",
+    "company": "Virksomhed",
+    "notStarted": "ikke startet",
+    "companyStarted": "Virksomhedsprofil startet.",
+    "openCompanySetup": "Åbn virksomhedsopsætning →",
+    "goToCompanyDashboard": "Gå til virksomhedens arbejdsområde →",
+    "companyIntro": "Opret en virksomhedsprofil. Typen (byggeri, vikarbureau, underleverandør, produktion, tjenester, kunde / rekvirent, andet) vælger du i profilen — én profil til alle typer.",
+    "startCompanySetup": "Start virksomhedsopsætning →",
+    "buyer": "Køber",
+    "buyerStarted": "Køberprofil startet. Du kan oprette arbejdsforespørgsler — de forbliver private, indtil du beslutter andet.",
+    "nameContact": "Navn / kontakt",
+    "buyerIntro": "Leder du efter en person eller en tjeneste til dig selv? Opret en køberprofil og beskriv, hvad du har brug for. Dit udkast gemmes og forbliver privat. Køber du på vegne af en virksomhed? Opret i stedet en virksomhedsprofil af typen “Kunde / rekvirent”.",
+    "openBuyerSetup": "Åbn køberopsætning →",
+    "startBuyerProfile": "Start køberprofil →",
+    "footer": "Intet her er opfundet: hver viste status er læst fra din konto."
   }
 }

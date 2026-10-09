@@ -12,6 +12,7 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { DarkListbox } from "@/components/ui/DarkListbox";
 import {
   countryOptionsForLocale,
+  type CountryOption,
   filterCountryOptions,
 } from "@/lib/location/country-options";
 import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
@@ -84,6 +85,7 @@ export function OnboardingWizard({
   defaultProfessionSlug = null,
   doorIntents = [],
   doorWords = null,
+  countryOptions: serverCountryOptions,
 }: {
   defaultName: string;
   /** Safe internal path (e.g. an invite deep link) that onboarding
@@ -115,6 +117,8 @@ export function OnboardingWizard({
   /** That door's plain words (the landing button the person pressed),
    *  resolved on the server — shown back, like the sentence. */
   doorWords?: string | null;
+  /** Country options named on the server (countryOptionsForLocale). */
+  countryOptions?: readonly CountryOption[];
   /** Education-type registry labels, resolved on the SERVER (the
    *  `cvSections.educationTypes` namespace is not part of the auth client
    *  message allowlist, and must not be — the wizard ships ~31 KB, not the
@@ -139,7 +143,13 @@ export function OnboardingWizard({
   // MARKET PRIORITY ≠ ACCESS PERMISSION). Measured before this: the select
   // offered the 17 ACTIVE_MARKETS only, so a person in Vietnam, Ireland,
   // Saudi Arabia or the Philippines could not name their own country.
-  const countryOptions = useMemo(() => countryOptionsForLocale(locale), [locale]);
+  // Named on the server when the page passes them: the browser's ICU names a
+  // few countries differently from Node's and the markup must match (React
+  // #418). The local build stays as the fallback for a caller without them.
+  const countryOptions = useMemo(
+    () => serverCountryOptions ?? countryOptionsForLocale(locale),
+    [serverCountryOptions, locale],
+  );
   const [step, setStep] = useState<1 | 2>(skipRoleStep && defaultIntents.length > 0 ? 2 : 1);
   // Pre-ticked from the landing sentence when one travelled here; the person
   // still sees the tick, can remove it, and must press Continue.
@@ -153,6 +163,10 @@ export function OnboardingWizard({
     [intents],
   );
   const intentList = useMemo(() => [...intents], [intents]);
+  // The preview names the path the person actually chose: an agency, a
+  // company or an education provider with no personal work context was shown
+  // "import your CV, add your skills" (agency onboarding walk 2026-10-08).
+  const nextStepsKey = roles.has("worker") || roles.size === 0 ? "nextSteps" : "nextStepsOrganization";
   const [displayName, setDisplayName] = useState(defaultName);
   // No pre-selected country — the user chooses (placeholder until they do).
   const [country, setCountry] = useState<string>("");
@@ -823,7 +837,7 @@ export function OnboardingWizard({
         data-testid="onboarding-next-steps"
       >
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {t("nextSteps.eyebrow")}
+          {t(`${nextStepsKey}.eyebrow`)}
         </p>
         <ul className="flex flex-col gap-2">
           {(["s1", "s2", "s3", "s4"] as const).map((k, i) => (
@@ -834,12 +848,12 @@ export function OnboardingWizard({
               <span className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full border border-brand-blue/30 bg-brand-blue/10 font-mono text-meta font-semibold text-brand-blue">
                 {i + 1}
               </span>
-              {t(`nextSteps.${k}`)}
+              {t(`${nextStepsKey}.${k}`)}
             </li>
           ))}
         </ul>
         <p className="text-xs leading-relaxed text-text-muted">
-          {t("nextSteps.note")}
+          {t(`${nextStepsKey}.note`)}
         </p>
       </div>
 

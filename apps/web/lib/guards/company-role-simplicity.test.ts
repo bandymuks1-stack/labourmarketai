@@ -41,6 +41,7 @@ const roleChoice = read("components/app/setup-role-choice.tsx");
 const onboarding = read("components/app/onboarding-wizard.tsx");
 const rolesConfig = read("lib/config/roles.ts");
 const setupForm = read("components/app/company-setup-form.tsx");
+const setupPage = read("app/[locale]/dashboard/start/company/page.tsx");
 const setupService = read("lib/company/company-setup.ts");
 const sharedProfile = read("lib/company/company-profile-shared.ts");
 const setupAction = read("lib/company/setup-actions.ts");
@@ -113,7 +114,12 @@ describe("company country validation is human, never technical", () => {
     expect(setupForm).toMatch(/<select[\s\S]{0,200}name="country"/);
     // Global-access rule (2026-09-22): the SELECT offers EVERY ISO country, the priority
     // markets first — a market list orders the list, it never shortens it.
-    expect(setupForm).toMatch(/countryOptionsForLocale\(labels\.locale\)\.map/);
+    // 2026-10-08: the list is NAMED ON THE SERVER and handed to the client
+    // form. Built in the browser, its ICU named four countries differently
+    // from Node's and the page failed to hydrate (React #418).
+    expect(setupPage).toMatch(/countryList: countryOptionsForLocale\(locale\)/);
+    expect(setupForm).toMatch(/labels\.countryList\.map/);
+    expect(setupForm).not.toMatch(/countryOptionsForLocale\(/);
     expect(setupForm).not.toMatch(/COMPANY_COUNTRY_CODES\.map/);
     expect(setupForm).not.toMatch(/<input[\s\S]{0,200}name="country"/);
   });

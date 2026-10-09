@@ -4197,6 +4197,14 @@
         "s4": "Pridėkite darbo patirtį ir įrašus",
         "note": "Įgūdžiai pradžioje yra jūsų pačių nurodyti. Dokumentai, darbo žurnalas ir žmonių peržiūros laikui bėgant juos sustiprina."
       },
+      "nextStepsOrganization": {
+        "eyebrow": "Toliau — jūsų organizacija",
+        "s1": "Įvardykite organizaciją ir ką ji daro (įdarbina, tiekia žmones, atrenka, moko, vykdo projektus)",
+        "s2": "Pridėkite savo žmones, komandas ar tiekiamą darbo jėgą",
+        "s3": "Paskelbkite poreikį, pasiūlykite pajėgumus — arba abu",
+        "s4": "Susisiekite su tinkamais žmonėmis ir organizacijomis, tada vykdykite darbą kartu",
+        "note": "Organizacija naudojama iš karto. Patvirtinimas yra atskiras, stipresnis pasitikėjimo žingsnis."
+      },
       "display_name_label": "Rodomas vardas",
       "country_label": "Kur dabar gyveni?",
       "country_placeholder": "Pasirinkite šalį",
@@ -18862,5 +18870,30 @@
     "download": "Atsisiųsti",
     "openRegister": "Atidaryti dokumentų registrą",
     "more": "Registre yra dar {n} dokumentų."
+  },
+  "activitySetupHub": {
+    "eyebrow": "VEIKLOS PRADŽIA",
+    "title": "Nuo ko pradėti",
+    "subtitle": "Trys dalyvavimo kryptys. Kiekviena rodo, kur esate — jau pradėta ar laukia jūsų kito žingsnio.",
+    "agency": "Agentūra",
+    "started": "✓ Pradėta",
+    "agencyStarted": "Agentūros profilis pradėtas.",
+    "agencyIsCompanyType": "Nuo šiol agentūra yra įmonės tipas — naują agentūrą kurkite kaip įmonę, kurios tipas „Personalo agentūra“.",
+    "legalName": "Pavadinimas",
+    "country": "Šalis",
+    "company": "Įmonė",
+    "notStarted": "dar nepradėta",
+    "companyStarted": "Įmonės profilis pradėtas.",
+    "openCompanySetup": "Atidaryti įmonės nustatymą →",
+    "goToCompanyDashboard": "Eiti į įmonės darbo erdvę →",
+    "companyIntro": "Sukurkite įmonės profilį. Tipą (statyba, personalo agentūra, subrangovas, gamyba, paslaugos, klientas / užsakovas, kita) pasirinksite profilyje — vienas profilis visiems tipams.",
+    "startCompanySetup": "Pradėti įmonės nustatymą →",
+    "buyer": "Pirkėjas",
+    "buyerStarted": "Pirkėjo profilis pradėtas. Galite kurti darbo užklausas — jos lieka privačios, kol nenuspręsite kitaip.",
+    "nameContact": "Vardas / kontaktas",
+    "buyerIntro": "Ieškote žmogaus ar paslaugos sau? Susikurkite pirkėjo profilį ir aprašykite, ko reikia. Užklausos juodraštis išsaugomas ir lieka privatus. Jei perkate įmonės vardu — kurkite įmonės profilį su tipu „Klientas / užsakovas“.",
+    "openBuyerSetup": "Atidaryti pirkėjo nustatymą →",
+    "startBuyerProfile": "Pradėti pirkėjo profilį →",
+    "footer": "Čia niekas nesugalvota: kiekviena būsena nuskaityta iš jūsų paskyros."
   }
 }

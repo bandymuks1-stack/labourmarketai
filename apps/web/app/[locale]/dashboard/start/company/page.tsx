@@ -4,6 +4,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { COMPANY_TYPES, type CompanyType } from "@/lib/company/company-profile-shared";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 import {
   COMPANY_COUNTRY_CODES,
   getOwnedCompanyById,
@@ -225,10 +226,18 @@ export default async function CompanyStartPage({
     },
     country: t("country"),
     countryPlaceholder: t("countryPlaceholder"),
+    // Only codes the catalogue actually names: a missing key used to print
+    // "roleDashboards.company.setup.countryOptions.FI" in the select (agency
+    // onboarding walk 2026-10-08). Without an override the option keeps the
+    // canonical Intl country name from countryOptionsForLocale.
     countryOptions: Object.fromEntries(
-      COMPANY_COUNTRY_CODES.map((code) => [code, t(`countryOptions.${code}`)]),
+      COMPANY_COUNTRY_CODES.filter((code) => t.has(`countryOptions.${code}`)).map((code) => [
+        code,
+        t(`countryOptions.${code}`),
+      ]),
     ),
     locale,
+    countryList: countryOptionsForLocale(locale),
     statusInvalidCountry: t("statusInvalidCountry"),
     registrationCode: t("registrationCode"),
     registrationCodeHelp: t("registrationCodeHelp"),
