@@ -50,12 +50,10 @@ Raw enum leak confirmed: `components/app/agency-workers-section.tsx:374`
 Capability register: 34 usable, 69 partial, 16 human-UI-proven. Candidate
 actions, to be verified before work (some register notes pre-date merged work):
 
-1. DEM-4 ingestion scheduling — register note says "no scheduler"; #2215/#2216/#2226
-   made the NAV cadence self-rearming. **Verify current state before building.**
-2. MKT-2 universal marketplace — migration `20261003150300` is RED/unapplied:
-   owner gate.
-3. CAL-6 / COM-2 expiry RPCs have no machine caller (RED).
-4. DEM-6 team offers: migration `20261007150000` built, unapplied.
+1. DEM-4 ingestion scheduling — VERIFIED 2026-10-09: NAV self-rearms ~10 min (nav-supply-cadence.yml), Sweden 3-hourly + 4.5 h backstop; incident handling live. No infra change justified; #2227 watchdog stays a draft (re-evaluate only on a NAV gap >30 min or Sweden >4.5 h with backstop failing). Stale register note corrected.
+2. MKT-2 universal marketplace — APPLIED in production 2026-10-07 (ledger 20261007155109/155211/155215/160116). No approval needed; remaining work is UI + walk evidence.
+3. CAL-6 / COM-2 expiry — NOT scheduled. Both RPCs refuse a service-role caller. Package: new migration adding two service_role-only wrapper RPCs (sweep_expire_stale_booking_requests_v1, sweep_expire_contact_disclosure_requests_v1) + /api/cron/expiry-sweeps + daily workflow. RED (SECURITY DEFINER + GRANT). Pre-apply checks: booking_request_events.actor_id nullable; contact_disclosure_log_change accepts null actor. Owner approval required before apply.
+4. DEM-6 team offers — APPLIED in production 2026-10-08 (ledger 20261008050149), 0 rows; remaining work is UI + walk evidence.
 5. PER-2/PER-3 profile headline/bio editor mounted on the profile page?
 6. COM-3 notifications: prove all types end to end.
 7. PER-12 GDPR export completeness.
