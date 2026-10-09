@@ -35,6 +35,7 @@ import {
   MAX_IN_RUN_RETRIES,
   MAX_SESSIONS_PER_RUN,
   NO_NEW_SESSION_AFTER_MS,
+  SESSION_CHILD_TIMEOUT_MS,
   SESSION_HARD_DEADLINE_MS,
 } from "../../scripts/vacancy-cadence-outcome";
 
@@ -163,6 +164,34 @@ describe("NAV multi-session run budget (cadence loop)", () => {
       "utf8",
     );
     expect(/timeout-minutes:\s*20(?!\d)/.test(yml)).toBe(true);
+  });
+});
+
+describe("NAV slow-publisher tolerance (2026-10-09)", () => {
+  it("raises ONLY the per-request wait and bounds the detail phase; request counts, spacing and concurrency are untouched", () => {
+    expect(FAN.requestTimeoutMs).toBe(45_000);
+    expect(FAN.sessionDeadlineMs).toBe(150_000);
+    // A longer wait per request never adds a request: the ceilings above still hold.
+    expect(FAN.maxDetailFetchesPerSession).toBe(100);
+    expect(FAN.minRequestSpacingMs).toBeGreaterThanOrEqual(500);
+    expect(FAN.concurrency).toBeLessThanOrEqual(2);
+  });
+
+  it("the worst session (listing + detail phase + in-flight tail) fits the helper's child timeout", () => {
+    // listing: (1 + retries) x timeout; details: deadline + the requests still
+    // in flight at the deadline, each up to (1 + retries) x timeout.
+    const attempts = resolveProviderBounds(NAV).maxRetries + 1;
+    const listing = attempts * (FAN.requestTimeoutMs ?? 0);
+    const tail = attempts * (FAN.requestTimeoutMs ?? 0);
+    const worst = listing + (FAN.sessionDeadlineMs ?? 0) + tail;
+    expect(worst).toBeLessThanOrEqual(SESSION_CHILD_TIMEOUT_MS);
+  });
+
+  it("Sweden keeps the shared timeout and no deadline", () => {
+    for (const e of SE.endpoints) {
+      expect(e.detailFanOut?.requestTimeoutMs).toBeUndefined();
+      expect(e.detailFanOut?.sessionDeadlineMs).toBeUndefined();
+    }
   });
 });
 

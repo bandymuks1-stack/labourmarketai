@@ -358,6 +358,9 @@ async function fetchVacancyPageInner(
   }
 
   const spacingMs = endpoint.detailFanOut?.minRequestSpacingMs;
+  // A slow publisher may declare a longer PER-REQUEST wait for its own
+  // endpoint (never the shared bound, so no other provider is affected).
+  const requestTimeoutMs = endpoint.detailFanOut?.requestTimeoutMs ?? bounds.requestTimeoutMs;
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     if (attempt > 0) {
       req.onRetry?.();
@@ -368,7 +371,7 @@ async function fetchVacancyPageInner(
     const controller = new AbortController();
     const timer = setTimeout(
       () => controller.abort(),
-      bounds.requestTimeoutMs,
+      requestTimeoutMs,
     );
     const listingStart = Date.now();
     try {
@@ -454,11 +457,14 @@ async function fetchVacancyPageInner(
           body,
           detailBudget: req.detailBudget,
           skipEntries: pageClosed ? req.skipEntries : 0,
+          ...(endpoint.detailFanOut.sessionDeadlineMs !== undefined
+            ? { deadlineAtMs: Date.now() + endpoint.detailFanOut.sessionDeadlineMs }
+            : {}),
           fetchDetail: (url) =>
             fetchDetailJson(
               url,
               headers,
-              bounds,
+              { ...bounds, requestTimeoutMs },
               () => paceRequest(endpoint.host, spacingMs),
               () => {
                 detailRequestsSpent += 1;

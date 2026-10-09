@@ -41,14 +41,14 @@ import { pathToFileURL } from "node:url";
 export const MAX_SESSIONS_PER_RUN = 8;
 /** Most in-run retries of one transient failure before giving up. */
 export const MAX_IN_RUN_RETRIES = 2;
-/** Jittered wait before an in-run retry. */
+/** Jittered wait before the FIRST in-run retry; retry n waits n times this (30-60 s, then 60-120 s). */
 export const RETRY_DELAY_MIN_MS = 30_000;
 export const RETRY_DELAY_MAX_MS = 60_000;
 /** No NEW session is started once the run is this old (job timeout is 20 min). */
 export const NO_NEW_SESSION_AFTER_MS = 13 * 60_000;
 /** Hard ceiling for any child session; also clipped to the remaining job time. */
 export const SESSION_HARD_DEADLINE_MS = 18 * 60_000;
-export const SESSION_CHILD_TIMEOUT_MS = 6 * 60_000;
+export const SESSION_CHILD_TIMEOUT_MS = 8 * 60_000;
 /** Failed sessions one run can record on the cursor streak (1 + retries). */
 export const ATTEMPTS_PER_RUN = 1 + MAX_IN_RUN_RETRIES;
 /** Failed RUNS (not sessions) before a transient failure becomes an incident. */
@@ -255,7 +255,7 @@ export async function runCadenceLoop(
 
     if (c.kind === "transient_failure" || (c.kind === "hard_failure" && c.retryInRun)) {
       if (retriesThisEpisode >= limits.maxRetries || launched >= limits.maxSessions) return done("failure");
-      const delay = Math.round(limits.retryDelayMinMs + deps.random() * (limits.retryDelayMaxMs - limits.retryDelayMinMs));
+      const delay = Math.round((limits.retryDelayMinMs + deps.random() * (limits.retryDelayMaxMs - limits.retryDelayMinMs)) * (retriesThisEpisode + 1));
       if (deps.now() - startedAt + delay >= limits.noNewSessionAfterMs) return done("failure");
       retriesThisEpisode += 1;
       retries += 1;
@@ -329,6 +329,28 @@ export function incidentTitlePrefix(provider: string, channel: string): string {
 }
 
 // ── 4. CLI ──────────────────────────────────────────────────────────────────
+
+/** One-line evidence from a session's fetch diagnostics (numbers + public ad id). */
+export function describeDiagnostics(acc: unknown): string {
+  const session = isObj(acc) && isObj(acc.session) ? acc.session : null;
+  const list = session && Array.isArray(session.fetchDiagnostics) ? session.fetchDiagnostics : [];
+  const parts: string[] = [];
+  for (const d of list) {
+    if (!isObj(d)) continue;
+    const det = isObj(d.detail) ? d.detail : null;
+    const ff = det && isObj(det.firstFailure) ? det.firstFailure : null;
+    const el = det && isObj(det.elapsedMs) ? det.elapsedMs : null;
+    parts.push(
+      `listing ${String(d.listingElapsedMs)} ms` +
+        (det
+          ? `; details ${String(det.succeeded)}/${String(det.attempted)} ok` +
+            (el ? ` (${String(el.min)}/${String(el.median)}/${String(el.max)} ms min/median/max)` : "") +
+            (ff ? `; first failing entry ${String(ff.uuid)} at #${String(ff.position)} (${String(ff.cause)})` : "")
+          : ""),
+    );
+  }
+  return parts.join(" | ");
+}
 
 export function parseAccountingStdout(stdout: string): unknown {
   const text = stdout.trim();
@@ -471,7 +493,9 @@ async function main(): Promise<void> {
   }
 
   const action = decideIncident({ final, open, nowMs });
-  const detail = `Failed-run streak ${failedRunStreak(final.dbStreak)} (cursor consecutive_failures=${final.dbStreak}), last success: ${final.lastSuccessAt ?? "never"}.\nRun: ${runUrl()}`;
+  const evidence = describeDiagnostics(last.accounting);
+  const detail = `${evidence ? `Evidence: ${evidence}
+` : ""}Failed-run streak ${failedRunStreak(final.dbStreak)} (cursor consecutive_failures=${final.dbStreak}), last success: ${final.lastSuccessAt ?? "never"}.\nRun: ${runUrl()}`;
   switch (action.action) {
     case "none":
       summary(head);

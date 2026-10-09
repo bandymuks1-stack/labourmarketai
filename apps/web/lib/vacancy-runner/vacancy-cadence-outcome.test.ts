@@ -4,6 +4,7 @@ import {
   classifyAccounting,
   classifyErrorCode,
   decideIncident,
+  describeDiagnostics,
   DEFAULT_LIMITS,
   exitCodeFor,
   failedRunStreak,
@@ -241,6 +242,12 @@ describe("runCadenceLoop transient retry", () => {
     }
   });
 
+  it("backs off: retry 1 waits 30-60 s, retry 2 waits 60-120 s", async () => {
+    const h = harness([transient]);
+    await runCadenceLoop(h.deps, { multiSession: true });
+    expect(h.sleeps).toEqual([45_000, 90_000]);
+  });
+
   it("gives up after MAX_IN_RUN_RETRIES retries (3 attempts total)", async () => {
     const h = harness([transient]);
     const r = await runCadenceLoop(h.deps, { multiSession: true });
@@ -376,5 +383,29 @@ describe("incident titles", () => {
     expect(t).toBe("Ingestion incident: nav/stream: timeout");
     expect(incidentTitle("nav", "stream", "http_error:503").startsWith(incidentTitlePrefix("nav", "stream"))).toBe(true);
     expect(t.startsWith(incidentTitlePrefix("arbetsformedlingen", "stream"))).toBe(false);
+  });
+});
+
+describe("describeDiagnostics", () => {
+  it("renders listing time, detail spread and the first failing entry; empty for none", () => {
+    const text = describeDiagnostics({
+      session: {
+        fetchDiagnostics: [
+          {
+            listingElapsedMs: 8282,
+            detail: {
+              attempted: 8,
+              succeeded: 7,
+              elapsedMs: { min: 16846, median: 21110, max: 60000 },
+              firstFailure: { uuid: "abc", position: 170, cause: "timeout" },
+            },
+          },
+        ],
+      },
+    });
+    expect(text).toContain("listing 8282 ms");
+    expect(text).toContain("7/8 ok");
+    expect(text).toContain("first failing entry abc at #170 (timeout)");
+    expect(describeDiagnostics({ session: {} })).toBe("");
   });
 });

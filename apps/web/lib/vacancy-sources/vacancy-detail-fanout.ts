@@ -116,6 +116,13 @@ export async function expandDetailFanOut(args: {
   /** Leading entries of the page already consumed by an earlier session. A
    *  value larger than the page is ignored (re-read from the start). */
   readonly skipEntries?: number;
+  /**
+   * Epoch ms after which no further detail request STARTS (in-flight ones
+   * finish). The page then stops at an entry boundary like a spent budget.
+   * `now` is injected so this file keeps no clock of its own.
+   */
+  readonly deadlineAtMs?: number;
+  readonly now?: () => number;
 }): Promise<DetailFanOutOutcome> {
   const cfg = args.endpoint.detailFanOut;
   const empty: DetailFanOutStats = { entries: 0, duplicatesCollapsed: 0, detailFetched: 0, withdrawn: 0, goneAsWithdrawn: 0 };
@@ -200,9 +207,14 @@ export async function expandDetailFanOut(args: {
   };
 
   let cursor = 0;
+  let deadlineHit = false;
   const worker = async () => {
     for (;;) {
       if (failure !== null) return;
+      if (args.deadlineAtMs !== undefined && (args.now ?? Date.now)() >= args.deadlineAtMs) {
+        deadlineHit = true;
+        return;
+      }
       const at = cursor++;
       if (at >= live.length) return;
       const w = live[at];
@@ -235,11 +247,21 @@ export async function expandDetailFanOut(args: {
   };
   await Promise.all(Array.from({ length: Math.max(1, Math.min(cfg.concurrency, live.length || 1)) }, worker));
 
+  // WALL-CLOCK CUT. Workers take entries in order and never start one after
+  // the deadline, and every entry taken is finished, so the resolved entries
+  // are exactly live[0 .. cursor). Cut at the first live entry NOT started.
+  let liveInScope = live.length;
+  if (deadlineHit && failure === null && cursor < live.length) {
+    cutAt = live[cursor].index;
+    affordable = affordable.filter((w) => w.index < cutAt);
+    liveInScope = cursor;
+  }
+
   const stats: DetailFanOutStats = {
     entries: items.length,
     duplicatesCollapsed,
     detailFetched: fetched,
-    withdrawn: affordable.length - live.length + goneAsWithdrawn,
+    withdrawn: affordable.length - liveInScope + goneAsWithdrawn,
     goneAsWithdrawn,
   };
   const sorted = [...latencies].sort((a, b) => a - b);
