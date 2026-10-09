@@ -76,11 +76,25 @@ permissions:
   # `ingestion-incident` issue (and create that label once). Nothing else:
   # no contents, pull-requests, actions or packages write.
   issues: write
+  # actions: write lets the `rearm` job re-dispatch THIS workflow (the only
+  # workflow_dispatch the default token may create). Nothing else.
+  actions: write
+
+# SCHEDULER INDEPENDENCE (2026-10-09). GitHub's cron is best-effort: measured, the
+# */10 schedule above produced 2 events in 12 h. The cron is therefore only the
+# RESTARTER. After every gated-in run, the `rearm` job waits and dispatches this
+# same workflow again (mode=persist), so cadence continues without a cron event.
+# A Postgres watchdog (vacancy_scheduler_watchdog_v1, pg_cron every 5 min) detects
+# a run that is late beyond tolerance and re-dispatches it from outside GitHub.
+# All paths run the one canonical importer under the one concurrency group above;
+# the cursor makes repeated execution a no-op.
 
 jobs:
   import:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      gated: ${{ steps.gate.outputs.configuration_gated }}
     steps:
       - name: Kill switch / configuration gate
         id: gate
@@ -153,3 +167,62 @@ jobs:
             apps/web/run-sessions.json
           if-no-files-found: ignore
           retention-days: 30
+
+  rearm:
+    # Keeps the cadence alive between (unreliable) cron events. Honors the kill
+    # switch: a gated-out run never rearms, so unsetting the variables stops the
+    # chain within one run.
+    needs: import
+    if: always() && needs.import.outputs.gated == 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Wait, then dispatch the next run
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_STARTED_AT: ${{ github.run_started_at }}
+        run: |
+          # REQUEST BUDGET: starts are spaced >= 600 s apart (the documented
+          # 144 sessions/day ceiling in nav-request-budget.test.ts), measured from
+          # this run's START, never from its end.
+          start=$(date -d "$RUN_STARTED_AT" +%s)
+          wait=$(( start + 600 - $(date +%s) ))
+          if [ "$wait" -gt 0 ]; then sleep "$wait"; fi
+          # At most one successor: skip if another run is already queued.
+          queued=$(gh run list --workflow nav-supply-cadence.yml --status queued --json databaseId --jq 'length' || echo 0)
+          if [ "${queued:-0}" -gt 0 ]; then
+            echo "A run is already queued; not dispatching another."
+            exit 0
+          fi
+          gh workflow run nav-supply-cadence.yml -f mode=persist
+
+      - name: Sweden freshness backstop (independent of NAV's outcome)
+        # The Sweden cron (every 3 h) is dropped by GitHub for 6-9 h at a time. This
+        # job already runs every ~10 min, so it also checks Sweden's own durable
+        # cursor and re-dispatches the SAME sweden-supply-cadence.yml (stream,
+        # idempotent, own concurrency group, own cursor) when its last run is older
+        # than 3 h + 90 min. It reads one timestamp; it ingests nothing and never
+        # touches NAV state. Skipped (not failed) if the read is unavailable.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SE_ENABLED: ${{ vars.VACANCY_SOURCE_ARBETSFORMEDLINGEN_ENABLED }}
+        run: |
+          if [ "$SE_ENABLED" != "true" ]; then echo "Sweden provider disabled; nothing to do."; exit 0; fi
+          last=$(curl -sS --max-time 20 \
+            "$SUPABASE_URL/rest/v1/vacancy_import_cursors?provider_key=eq.arbetsformedlingen&channel=eq.stream&select=last_run_at" \
+            -H "apikey: $SUPABASE_KEY" -H "Authorization: Bearer $SUPABASE_KEY" \
+            | node -e 'try{const r=JSON.parse(require("fs").readFileSync(0,"utf8"));console.log(r[0]&&r[0].last_run_at||"")}catch{console.log("")}')
+          if [ -z "$last" ]; then echo "Sweden cursor unreadable; skipping."; exit 0; fi
+          age=$(( $(date +%s) - $(date -d "$last" +%s) ))
+          echo "Sweden last_run_at=$last age=${age}s"
+          if [ "$age" -le $(( 4*3600 + 1800 )) ]; then echo "Sweden within its contracted window."; exit 0; fi
+          busy=$(gh run list --workflow sweden-supply-cadence.yml --json status --jq '[.[]|select(.status=="queued" or .status=="in_progress")]|length' || echo 0)
+          if [ "${busy:-0}" -gt 0 ]; then echo "Sweden run already queued/running."; exit 0; fi
+          echo "::warning title=Sweden scheduler miss::last run ${age}s ago; dispatching fallback"
+          gh workflow run sweden-supply-cadence.yml -f channel=stream
