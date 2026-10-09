@@ -41,7 +41,7 @@ export default async function WorkHoursPage({
   const data = await getHoursPageData(workDate);
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 pb-16">
+    <div className="mx-auto flex w-full max-w-content flex-col gap-5 pb-16">
       <header className="flex flex-col gap-1">
         <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
