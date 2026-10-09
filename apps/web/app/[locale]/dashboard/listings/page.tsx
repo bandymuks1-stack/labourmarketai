@@ -75,7 +75,7 @@ export default async function ListingsPage({
       <Link
         href={"/dashboard/services" as "/dashboard"}
         data-testid="listings-to-services-link"
-        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-text-muted transition-colors hover:text-brand-blue"
+        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-text-muted transition-colors hover:text-text-primary"
       >
         {t("linkToServices")}
         <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />

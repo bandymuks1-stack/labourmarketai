@@ -357,7 +357,7 @@ export function MarketplaceListingsSection({
             <button
               type="button"
               onClick={openCreate}
-              className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md border border-brand-blue bg-brand-blue px-3 py-2 text-sm font-semibold text-text-on-brand transition-colors hover:bg-brand-champagne hover:bg-brand-blue/20"
+              className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md border border-brand-blue bg-brand-blue px-3 py-2 text-sm font-semibold text-text-on-brand transition-colors hover:bg-brand-champagne"
             >
               <Plus aria-hidden className="h-4 w-4" />
               {t("addButton")}
@@ -770,8 +770,8 @@ export function MarketplaceListingsSection({
                 onClick={() => setDomainTab(d)}
                 className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm transition-colors ${
                   domainTab === d
-                    ? "border-brand-blue bg-brand-blue/10 text-text-primary"
-                    : "border-ink-500 text-text-secondary hover:border-brand-blue"
+                    ? "border-text-primary bg-ink-700 text-text-primary"
+                    : "border-ink-500 text-text-secondary hover:border-text-secondary"
                 }`}
               >
                 {t(`domains.${d}`)}
@@ -795,8 +795,8 @@ export function MarketplaceListingsSection({
                 onClick={() => setActorTab(k)}
                 className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm transition-colors ${
                   actorTab === k
-                    ? "border-brand-blue bg-brand-blue/10 text-text-primary"
-                    : "border-ink-500 text-text-secondary hover:border-brand-blue"
+                    ? "border-text-primary bg-ink-700 text-text-primary"
+                    : "border-ink-500 text-text-secondary hover:border-text-secondary"
                 }`}
               >
                 {t(`actorKinds.${k}`)}
@@ -819,7 +819,7 @@ export function MarketplaceListingsSection({
           <Link
             href={"/jobs" as "/dashboard"}
             data-testid="marketplace-all-jobs-link"
-            className="inline-flex min-h-11 w-fit items-center gap-1.5 text-sm font-medium text-brand-blue"
+            className="inline-flex min-h-11 w-fit items-center gap-1.5 text-sm font-medium text-text-primary underline-offset-4 hover:underline"
           >
             {t("allJobsLink")}
             <ArrowRight aria-hidden className="h-4 w-4" />
@@ -895,7 +895,7 @@ export function MarketplaceListingsSection({
                     <input type="hidden" name="locale" value={locale} />
                     <button
                       type="submit"
-                      className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-brand-blue bg-brand-blue/10 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-brand-blue/20"
+                      className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:border-text-secondary"
                     >
                       <MessageSquare aria-hidden className="h-4 w-4" />
                       {t("enquire")}
@@ -904,7 +904,7 @@ export function MarketplaceListingsSection({
                 ) : (
                   <Link
                     href={row.destinationPath as "/dashboard"}
-                    className="mt-1 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-sm text-text-secondary transition-colors hover:border-brand-blue"
+                    className="mt-1 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-sm text-text-secondary transition-colors hover:border-text-secondary hover:text-text-primary"
                   >
                     {row.contactAction === "open_source" ? t("openInSource") : t("openInServices")}
                     <ArrowRight aria-hidden className="h-4 w-4" />

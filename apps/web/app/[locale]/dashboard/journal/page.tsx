@@ -1221,7 +1221,7 @@ export default async function JournalPage({
           <PageTitle>{t("navTitle")}</PageTitle>
           <Link
             href="/dashboard"
-            className="shrink-0 rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+            className="shrink-0 rounded-md border border-border-subtle px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-ink-500 hover:text-text-primary"
             data-testid="room-my-spaces-link"
           >
             {tSpaces("mySpaces")} →
@@ -1408,7 +1408,7 @@ export default async function JournalPage({
                   // `?intent=log-work` — the chat opens the work-log flow on
                   // arrival, never the generic greeting.
                   href={"/dashboard?intent=log-work" as "/dashboard"}
-                  className="inline-flex min-h-11 items-center font-medium text-brand-blue hover:underline"
+                  className="inline-flex min-h-11 items-center font-medium text-text-primary underline-offset-4 hover:underline"
                   data-testid="journal-log-via-chat-cta"
                 >
                   {t("logViaChatCta")} →
@@ -1416,14 +1416,14 @@ export default async function JournalPage({
                 {/* W5 slice 2: the voice surface keeps its door. */}
                 <Link
                   href="/dashboard/journal/voice"
-                  className="inline-flex min-h-11 items-center font-medium text-brand-blue hover:underline"
+                  className="inline-flex min-h-11 items-center font-medium text-text-primary underline-offset-4 hover:underline"
                   data-testid="journal-log-via-voice-cta"
                 >
                   {t("logViaVoiceCta")} →
                 </Link>
                 <Link
                   href={journalComposerHref(selectedDate, true) as "/dashboard"}
-                  className="inline-flex min-h-11 items-center font-medium text-brand-blue hover:underline"
+                  className="inline-flex min-h-11 items-center font-medium text-text-primary underline-offset-4 hover:underline"
                   data-testid="journal-compose-full-link"
                 >
                   {t("record.detailed")} →
@@ -2068,7 +2068,7 @@ export default async function JournalPage({
                                 className="flex items-start justify-between gap-3"
                                 data-testid={`journal-entry-head-${e.id}`}
                               >
-                                <span className="min-w-0 break-words pt-1 font-mono text-meta font-semibold uppercase tracking-label text-text-secondary">
+                                <span className="min-w-0 break-words pt-1 text-sm font-medium text-text-secondary">
                                   {where.join(" · ")}
                                 </span>
                                 {minutes > 0 ? (
@@ -2240,7 +2240,7 @@ export default async function JournalPage({
                           {hasUnderstood && (
                             <div className="flex flex-col gap-1 border-t border-border/40 pt-2">
                               <p
-                                className="font-mono text-meta uppercase tracking-label text-text-secondary"
+                                className="text-meta font-medium text-text-secondary"
                                 data-testid={`journal-entry-understood-${e.id}`}
                               >
                                 {t("entry.understoodLabel")}

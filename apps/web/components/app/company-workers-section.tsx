@@ -111,7 +111,7 @@ export interface CompanyWorkersTeamView {
 }
 
 const PRIMARY_ACTION =
-  "inline-flex min-h-11 items-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 py-2 text-xs font-semibold text-brand-blue transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan";
+  "inline-flex min-h-11 items-center rounded-control border border-ink-500 px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:border-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan";
 const QUIET_ACTION =
   "inline-flex min-h-11 items-center rounded-control px-2.5 py-2 text-xs font-medium text-text-secondary underline-offset-4 hover:text-text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan";
 
