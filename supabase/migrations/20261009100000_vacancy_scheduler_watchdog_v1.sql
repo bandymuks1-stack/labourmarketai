@@ -1,3 +1,4 @@
+-- @human-gate-approved (RED: SECURITY DEFINER, grants, CREATE EXTENSION pg_net, row DML in a function body) — held for DI approval; see PR.
 -- VACANCY SCHEDULER WATCHDOG v1 (2026-10-09)
 --
 -- PROBLEM (measured, not assumed): GitHub's cron is best-effort. In the 12 h to
