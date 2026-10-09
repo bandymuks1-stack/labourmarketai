@@ -7,7 +7,7 @@ vi.mock("@/lib/api/cron-auth", () => ({
     req.headers.get("authorization") === "Bearer secret" ? "ok" : "unauthorized",
 }));
 
-import { GET } from "./route";
+import { GET } from "@/app/api/cron/expiry-sweeps/route";
 
 const authed = () => new Request("http://x/api/cron/expiry-sweeps", { headers: { authorization: "Bearer secret" } });
 

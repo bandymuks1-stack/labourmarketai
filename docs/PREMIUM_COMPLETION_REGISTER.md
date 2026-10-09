@@ -52,7 +52,7 @@ actions, to be verified before work (some register notes pre-date merged work):
 
 1. DEM-4 ingestion scheduling — VERIFIED 2026-10-09: NAV self-rearms ~10 min (nav-supply-cadence.yml), Sweden 3-hourly + 4.5 h backstop; incident handling live. No infra change justified; #2227 watchdog stays a draft (re-evaluate only on a NAV gap >30 min or Sweden >4.5 h with backstop failing). Stale register note corrected.
 2. MKT-2 universal marketplace — APPLIED in production 2026-10-07 (ledger 20261007155109/155211/155215/160116). No approval needed; remaining work is UI + walk evidence.
-3. CAL-6 / COM-2 expiry — NOT scheduled. Both RPCs refuse a service-role caller. Package: new migration adding two service_role-only wrapper RPCs (sweep_expire_stale_booking_requests_v1, sweep_expire_contact_disclosure_requests_v1) + /api/cron/expiry-sweeps + daily workflow. RED (SECURITY DEFINER + GRANT). Pre-apply checks: booking_request_events.actor_id nullable; contact_disclosure_log_change accepts null actor. Owner approval required before apply.
+3. CAL-6 / COM-2 expiry — NOT scheduled; RED draft PR prepared (not applied, owner approval required). Pre-apply finding 2026-10-09: booking_request_events.actor_id and contact_disclosure_request_events.actor_profile_id are NOT NULL FKs to profiles, so the first draft (NULL system actor) would have failed; the wrappers now take an existing admin profile as p_actor (route env EXPIRY_SWEEP_ACTOR_PROFILE_ID; unset = nothing runs). OWNER DECISION: which admin profile acts as the system actor. Local evidence: execute granted to service_role only; past-deadline booking expired + audit event written; non-admin actor refused.
 4. DEM-6 team offers — APPLIED in production 2026-10-08 (ledger 20261008050149), 0 rows; remaining work is UI + walk evidence.
 5. PER-2/PER-3 profile headline/bio editor mounted on the profile page?
 6. COM-3 notifications: prove all types end to end.
@@ -85,3 +85,7 @@ ORG-2, EVID-2, MKT-7, COM-6, COM-8, GOV-1. RED drafts awaiting gate: #2227,
 | Slice | PR | State |
 |---|---|---|
 | register | this PR | open |
+
+## Investigated intermittent failures (2026-10-09)
+- Company HTTP 500 (local prod build, once, right after server start): server log shows PostgrestError `JWT issued at future` (PGRST303) then RoleSignalUnavailableError (fail-closed by design, 2 attempts / 120 ms). Class: clock skew between a just-minted session and PostgREST. NOT proven to occur in production and NOT fixed; behaviour pinned by lib/auth/role-signal-jwt-future.test.ts. Open owner decision: retry PGRST303 longer (bounded) in readRoleSignal.
+- React #418 on /dashboard/company at 1280 px (once, not reproduced in 3 repeats at 1280 and 375): no render-time Date/Intl/random in the page or company components; source UNKNOWN. Next step: non-minified dev build run to read the offending text node. Not resolved.
