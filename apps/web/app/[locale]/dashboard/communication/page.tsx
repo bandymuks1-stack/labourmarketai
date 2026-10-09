@@ -511,7 +511,12 @@ export default async function CommunicationListPage({
             conversations own the first place) and the one privacy line. No
             composer here: a composer needs a real conversation to send into,
             and a disabled one would pretend otherwise. */}
-        <section data-testid="communication-thread-pane" className="flex min-w-0 flex-col">
+        {/* With nothing to open, the pane is only a support card; on a phone it
+            stacked a second, unrelated call to action under the real one. */}
+        <section
+          data-testid="communication-thread-pane"
+          className={conversations.length === 0 ? "hidden min-w-0 flex-col lg:flex" : "flex min-w-0 flex-col"}
+        >
           {/* Card wraps its children in one block, so the pane's own column
               lives inside it: icon, the pick prompt, support, privacy. */}
           <Card className="flex flex-1 flex-col justify-center">

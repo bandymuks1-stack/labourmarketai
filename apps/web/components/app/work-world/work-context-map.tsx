@@ -59,10 +59,10 @@ const ORDER: readonly WorkContextKey[] = ["current", "records", "manager", "hist
 
 const TONE: Record<WorkContextKey, string> = {
   current: "border-state-live text-state-live",
-  records: "border-brand-cyan text-brand-cyan",
+  records: "border-ink-500 text-text-primary",
   manager: "border-trust-accent text-trust-accent",
   history: "border-brand-blue text-brand-blue",
-  skills: "border-brand-cyan text-brand-cyan",
+  skills: "border-ink-500 text-text-primary",
   next: "border-ink-500 text-text-primary",
 };
 

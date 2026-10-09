@@ -50,9 +50,9 @@ Raw enum leak confirmed: `components/app/agency-workers-section.tsx:374`
 Capability register: 34 usable, 69 partial, 16 human-UI-proven. Candidate
 actions, to be verified before work (some register notes pre-date merged work):
 
-1. DEM-4 ingestion scheduling — VERIFIED 2026-10-09: NAV self-rearms ~10 min (nav-supply-cadence.yml), Sweden 3-hourly + 4.5 h backstop; incident handling live. No infra change justified; #2227 watchdog stays a draft (re-evaluate only on a NAV gap >30 min or Sweden >4.5 h with backstop failing). Stale register note corrected.
+1. DEM-4 ingestion — OWNER POLICY 2026-10-09 (#2241): daily completeness is sufficient. NAV 4 scheduled runs/day + bounded self-rearming catch-up (>=600 s spacing, stops at feed head); Sweden 3 stream runs/day (+ transient invalid_json retry, #2239); ingestion-freshness.yml checks each source every 6 h, stale after 26 h, one incident per source, bounded recovery. NAV catch-up MEASURED (#2244 feedPositionAt = newest consumed sistEndret, source time): 2026-10-09 18:59Z wall = feed at 2026-09-01 12:41Z, i.e. ~38 days behind. Rate is source-density dependent: ~4 source-h per wall-h on weekday daytime, much faster overnight (Aug 31 13:09 -> Sep 1 12:41 in 1.5 wall-h). Rough head ETA 4-10 days of continuous chaining; refine from accumulating runs. Cursor token changes are NORMAL progression (UUID rotates after ~#900-1000, suffix monotonic, no UUID reused, 13:57Z-16:45Z), not resets. Throughput bound = 1 feed request (~117 entries) + 100 detail fetches per ~3 min session (NAV request budget). Withdrawals VERIFIED: non-ACTIVE/missing status -> removed, no contact data (17 inactive NAV rows 10-09). Track separately: last session / last verified head catch-up / backlog / new+updated / withdrawn / failures. Verify withdrawal handling against the source rules. #2227 watchdog stays unapplied (needs a new owner decision).
 2. MKT-2 universal marketplace — APPLIED in production 2026-10-07 (ledger 20261007155109/155211/155215/160116). No approval needed; remaining work is UI + walk evidence.
-3. CAL-6 / COM-2 expiry — NOT scheduled; RED draft PR #2235 (not applied). Owner decision 2026-10-09: the sweeps must NOT act as the owner admin profile. Design: a dedicated SYSTEM identity (fixed UUID, one banned credential-less auth user + role-less profile, no profile_roles, not admin, workers row removed), created by an owner-run Admin-API script (apps/web/scripts/provision-system-actor.ts, dry-run by default); the wrappers take no actor argument, execute for service_role only, and refuse unless the identity exists and holds no role. Local evidence: provisioned role-less/banned/0 workers; past-deadline booking expired with an audit event authored by the system id; auth/anon cannot execute; adding any role to the identity makes the sweep refuse. Pending owner approval: the migration AND the provisioning of the identity (production auth user).
+3. CAL-6 / COM-2 expiry — NOT scheduled. Both RPCs refuse a service-role caller. Package: new migration adding two service_role-only wrapper RPCs (sweep_expire_stale_booking_requests_v1, sweep_expire_contact_disclosure_requests_v1) + /api/cron/expiry-sweeps + daily workflow. RED (SECURITY DEFINER + GRANT). Pre-apply checks: booking_request_events.actor_id nullable; contact_disclosure_log_change accepts null actor. Owner approval required before apply.
 4. DEM-6 team offers — APPLIED in production 2026-10-08 (ledger 20261008050149), 0 rows; remaining work is UI + walk evidence.
 5. PER-2/PER-3 profile headline/bio editor mounted on the profile page?
 6. COM-3 notifications: prove all types end to end.
@@ -84,8 +84,12 @@ ORG-2, EVID-2, MKT-7, COM-6, COM-8, GOV-1. RED drafts awaiting gate: #2227,
 ## Slice log
 | Slice | PR | State |
 |---|---|---|
-| register | this PR | open |
-
-## Investigated intermittent failures (2026-10-09)
-- Company HTTP 500 (local prod build, once, right after server start): server log shows PostgrestError `JWT issued at future` (PGRST303) then RoleSignalUnavailableError (fail-closed by design, 2 attempts / 120 ms). Class: clock skew between a just-minted session and PostgREST. NOT proven to occur in production and NOT fixed; behaviour pinned by lib/auth/role-signal-jwt-future.test.ts. Open owner decision: retry PGRST303 longer (bounded) in readRoleSignal.
-- React #418 on /dashboard/company at 1280 px (once, not reproduced in 3 repeats at 1280 and 375): no render-time Date/Intl/random in the page or company components; source UNKNOWN. Next step: non-minified dev build run to read the offending text node. Not resolved.
+| register | #2229 | merged |
+| register reconcile 2026-10-09 | #2243 | merged |
+| NAV feed position (source time) | #2244 | merged |
+| Living CV once + profile gold restraint | #2245 | merged |
+| register 2026-10-09 b | this PR | open |
+| #2242 lane B pass | #2242 | merged 2026-10-09 |
+| #2240 PGRST303 bounded retry | #2240 | merged 2026-10-09 (owner-authorized); prod verification pending |
+| #2235 expiry RED | #2235 | UNAPPLIED. Pre-apply (read-only prod, 2026-10-09): sweeps would expire 0 booking + 0 disclosure rows today; actor user/profile absent (wrappers refuse, change nothing); provisioning script already neutralises triggers handle_new_user (role only from metadata) and ensure_worker_profile (deletes workers row). Still unproven until provisioned: banned user cannot log in, no privileges, audit attribution. Needs owner final approval |
+| React hydration #418 | #2246 | ROOT-CAUSED + FIXED: RSC slot props under host <main> in DashboardChrome suspended and the replayed host claim ran with an advanced hydration cursor. SlotBoundary fix; cold prod build before 2-4/12 (/opportunities), 3/6 (/inbox); after 0/48; 24-route signed-in sweep clean. Guard hydration-slot-boundary.test.ts |

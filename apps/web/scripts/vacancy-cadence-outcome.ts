@@ -345,7 +345,8 @@ export function describeDiagnostics(acc: unknown): string {
         (det
           ? `; details ${String(det.succeeded)}/${String(det.attempted)} ok` +
             (el ? ` (${String(el.min)}/${String(el.median)}/${String(el.max)} ms min/median/max)` : "") +
-            (ff ? `; first failing entry ${String(ff.uuid)} at #${String(ff.position)} (${String(ff.cause)})` : "")
+            (ff ? `; first failing entry ${String(ff.uuid)} at #${String(ff.position)} (${String(ff.cause)})` : "") +
+            (typeof det.feedPositionAt === "string" ? `; feed position ${det.feedPositionAt}` : "")
           : ""),
     );
   }

@@ -333,7 +333,7 @@ export function ExternalProfilesSection({
             {labels.importNote}{" "}
             <a
               href="#profile-edit"
-              className="font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
+              className="text-sm font-medium text-text-secondary underline-offset-4 hover:text-text-primary hover:underline"
               data-testid="external-profiles-import-link"
             >
               {labels.importLink} →

@@ -99,7 +99,7 @@ export async function LearningCompassSection({
                       ) : null}
                       {c.targetProfessionSlug ? (
                         <span
-                          className="mt-0.5 w-fit rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 text-text-primary"
+                          className="mt-0.5 w-fit rounded-full border border-border-subtle px-2 py-0.5 text-text-primary"
                           data-testid={`compass-cohort-demand-${c.cohortId}`}
                         >
                           {c.demandCount === null ? t("cohortDemandUnknown") : t("cohortDemand", { count: c.demandCount })}
@@ -108,7 +108,7 @@ export async function LearningCompassSection({
                       {c.targetProfessionSlug && c.demandCount !== null && c.demandCount > 0 ? (
                         <Link
                           href={importedJobsHref(c.targetProfessionSlug) as "/jobs"}
-                          className="w-fit text-brand-blue hover:underline"
+                          className="w-fit text-text-primary underline-offset-4 hover:underline"
                           data-testid={`compass-cohort-jobs-${c.cohortId}`}
                         >
                           {t("cohortDemandOpen")} →
@@ -133,7 +133,7 @@ export async function LearningCompassSection({
                 </li>
               ) : null}
               {evidence.skillsJournalSupported > 0 ? (
-                <li className="rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 text-text-primary">
+                <li className="rounded-full border border-border-subtle px-2 py-0.5 text-text-primary">
                   {t("journalSupported", { count: evidence.skillsJournalSupported })}
                 </li>
               ) : null}
@@ -164,7 +164,7 @@ export async function LearningCompassSection({
                     </span>
                     {o.opportunityType && o.opportunityType !== "employment" ? (
                       <span
-                        className="shrink-0 rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-primary"
+                        className="shrink-0 rounded-full border border-border-subtle px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-primary"
                         data-testid="compass-fit-type"
                       >
                         {tsd(`opportunityType.${o.opportunityType}` as never)}
@@ -178,7 +178,7 @@ export async function LearningCompassSection({
               ))}
             </ul>
           )}
-          <Link href="/dashboard/opportunities" className="text-xs text-brand-blue hover:underline" data-testid="compass-open-board">
+          <Link href="/dashboard/opportunities" className="text-xs font-medium text-text-primary underline-offset-4 hover:underline" data-testid="compass-open-board">
             {t("openBoard")} →
           </Link>
         </div>
@@ -248,7 +248,7 @@ export async function LearningCompassSection({
                                 ? "/dashboard/journal"
                                 : "/dashboard/profile#profile-edit") as "/dashboard/profile"
                           }
-                          className="mt-1 inline-block text-brand-blue hover:underline"
+                          className="mt-1 inline-block font-medium text-text-primary underline-offset-4 hover:underline"
                           data-testid="compass-recommendation-action"
                           data-action={action.kind}
                         >

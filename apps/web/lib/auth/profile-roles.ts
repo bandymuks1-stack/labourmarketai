@@ -68,13 +68,30 @@ export const KNOWN_HELD_ROLES = [
 export type HeldProfileRole = (typeof KNOWN_HELD_ROLES)[number] | (string & {});
 
 export const ROLE_SIGNAL_RETRY_DELAY_MS = 120;
+/**
+ * PostgREST answers PGRST303 "JWT issued at future" when a token's `iat` is
+ * ahead of ITS OWN clock — a sub-second-to-seconds step between the signer
+ * (GoTrue) and the validator (observed locally on Docker/WSL2 clock steps;
+ * zero occurrences in 24 h of production logs, 2026-10-09). The token is not
+ * wrong and is never altered: waiting lets the validator's clock catch up. The
+ * wait is BOUNDED (3 attempts, 250 ms then 500 ms), applies to this one error
+ * only, re-runs the SAME read with the SAME token, mints/refreshes nothing and
+ * falls back to nothing. After the cap the read is still "unknown" and throws.
+ */
+export const ROLE_SIGNAL_CLOCK_SKEW_DELAYS_MS = [250, 500] as const;
+
+function isJwtIssuedInFuture(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const e = error as { code?: unknown; message?: unknown };
+  return e.code === "PGRST303" && /issued at future/i.test(String(e.message ?? ""));
+}
 
 /** The read did NOT answer. Distinct from "the read said: no such role". */
 export class RoleSignalUnavailableError extends Error {
   readonly signal: string;
 
   constructor(signal: string, cause: unknown) {
-    super(`${signal} could not be read (two attempts); the answer is unknown`, {
+    super(`${signal} could not be read (bounded attempts); the answer is unknown`, {
       cause,
     });
     this.name = "RoleSignalUnavailableError";
@@ -117,11 +134,19 @@ export async function readRoleSignal<T>(
   read: () => PromiseLike<{ data: T; error: unknown }>,
 ): Promise<T> {
   let lastError: unknown = null;
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    if (attempt > 0) await sleep(ROLE_SIGNAL_RETRY_DELAY_MS);
+  let maxAttempts = 2;
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    if (attempt > 0) {
+      await sleep(
+        isJwtIssuedInFuture(lastError)
+          ? (ROLE_SIGNAL_CLOCK_SKEW_DELAYS_MS[attempt - 1] ?? ROLE_SIGNAL_CLOCK_SKEW_DELAYS_MS[1])
+          : ROLE_SIGNAL_RETRY_DELAY_MS,
+      );
+    }
     const { data, error } = await read();
     if (!error) return data;
     lastError = error;
+    if (isJwtIssuedInFuture(error)) maxAttempts = 3;
     console.error("[auth/profile-roles] read failed", {
       signal,
       attempt: attempt + 1,

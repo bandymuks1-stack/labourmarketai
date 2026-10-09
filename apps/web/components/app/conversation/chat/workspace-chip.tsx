@@ -47,7 +47,7 @@ export const WORKSPACE_ACCENT_DOT = [
   "bg-brand-cyan",
   "bg-brand-violet",
   "bg-brand-purple",
-  "bg-brand-orange",
+  "bg-brand-champagne",
 ] as const;
 const ACCENT_DOT = WORKSPACE_ACCENT_DOT;
 

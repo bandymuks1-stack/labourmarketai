@@ -51,7 +51,7 @@ export async function WorkDay({ day, locale }: { day: RhythmDay; locale: string 
         </div>
         {day.recordedMinutes > 0 ? (
           <span
-            className="font-display text-4xl font-bold leading-none tracking-tightest text-brand-cyan tabular-nums sm:text-5xl"
+            className="font-display text-4xl font-bold leading-none tracking-tightest text-text-primary tabular-nums sm:text-5xl"
             data-testid="planning-work-day-total"
           >
             {dur(day.recordedMinutes)}
