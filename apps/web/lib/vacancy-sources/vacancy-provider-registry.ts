@@ -198,6 +198,24 @@ export interface VacancyDetailFanOutV1 {
    * numeric rate limit.
    */
   readonly minRequestSpacingMs?: number;
+  /**
+   * Per-request timeout, in ms, for THIS endpoint's listing and detail
+   * requests, when the publisher's real latency needs more than the shared
+   * `requestTimeoutMs`. It changes how long ONE request may take, never how
+   * many are made (retries, spacing, concurrency and budgets are untouched),
+   * so a slow publisher yields fewer false failures and no extra load. Absent
+   * = the shared bound (every other provider, including Sweden).
+   */
+  readonly requestTimeoutMs?: number;
+  /**
+   * Wall-clock budget, in ms, for the DETAIL phase of one session. When it
+   * passes, no further detail request STARTS; requests already in flight
+   * finish, and the page stops at an entry boundary exactly as the request
+   * budget does (every earlier entry resolved, every later one untouched, the
+   * checkpoint says where). Lets a slow publisher make steady partial progress
+   * instead of failing the whole session. Absent = no wall-clock cap.
+   */
+  readonly sessionDeadlineMs?: number;
 }
 
 /**
@@ -492,6 +510,16 @@ const NAV: VacancyProviderDescriptorV1 = {
         concurrency: 2,
         maxDetailFetchesPerSession: 100,
         minRequestSpacingMs: 500,
+        // SLOW-PUBLISHER TOLERANCE (2026-10-09). Healthy NAV answers a detail
+        // in well under a second (a 100-detail session ran in ~55 s). On
+        // 2026-10-09 every request slowed to 8-21+ s (dry-run accounting: the
+        // listing 8.3 s, details 16.8-21.1 s with one at the 20 s cap), so the
+        // shared 20 s timeout failed whole pages. A longer per-request wait
+        // makes no extra request; the deadline makes a slow session stop at an
+        // entry boundary and resume, instead of failing. Pinned by
+        // nav-request-budget.test.ts.
+        requestTimeoutMs: 45_000,
+        sessionDeadlineMs: 150_000,
       },
       // RECORDED: a signed JWT, sent as `Authorization: Bearer <token>`.
       requiresApiKey: true,

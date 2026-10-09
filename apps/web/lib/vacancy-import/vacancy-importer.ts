@@ -77,7 +77,7 @@ import {
   type VacancyProviderDescriptorV1,
 } from "@/lib/vacancy-sources/vacancy-provider-registry";
 import { getVacancyParser } from "@/lib/vacancy-sources/providers";
-import { fetchVacancyJsonLines, fetchVacancyPage } from "./vacancy-adapter";
+import { fetchVacancyJsonLines, fetchVacancyPage, type VacancyFetchDiagnosticsV1 } from "./vacancy-adapter";
 import { vacancySwitchState } from "./vacancy-kill-switch";
 
 export type VacancyImportMode = "dry_run" | "persist";
@@ -179,6 +179,12 @@ export interface VacancyImportResultV1 {
   readonly session: ImportSessionV1 | null;
   readonly report: ImportReportV1 | null;
   readonly metrics: VacancyImportMetricsV1;
+  /**
+   * Timing evidence per page fetched this session (listing elapsed, detail
+   * request counts/latencies, the first failing entry). Numbers and a public
+   * ad id only; empty when no network fetch ran.
+   */
+  readonly fetchDiagnostics: readonly VacancyFetchDiagnosticsV1[];
   readonly logs: readonly VacancyImportLogEventV1[];
   readonly persistedInserted: number;
   readonly persistedUpdated: number;
@@ -207,6 +213,7 @@ export async function runVacancyImport(
   const logs: VacancyImportLogEventV1[] = [];
   const reasonCounts = new Map<string, number>();
   const errors: string[] = [];
+  const fetchDiagnostics: VacancyFetchDiagnosticsV1[] = [];
 
   const log = (
     level: VacancyImportLogEventV1["level"],
@@ -540,6 +547,7 @@ export async function runVacancyImport(
           : {}),
       });
 
+      if (fetched.diagnostics) fetchDiagnostics.push(fetched.diagnostics);
       if (!fetched.ok) {
         counters.pagesFailed += 1;
         tally(`fetch_${fetched.errorCode}`);
@@ -828,6 +836,7 @@ export async function runVacancyImport(
     session,
     report,
     metrics: counters,
+    fetchDiagnostics,
     logs,
     persistedInserted,
     persistedUpdated,

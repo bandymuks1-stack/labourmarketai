@@ -44,7 +44,11 @@ import {
   type VacancyJsonLinesStopReason,
 } from "@/lib/vacancy-sources/vacancy-json-lines";
 import { readContinuationToken } from "@/lib/vacancy-sources/vacancy-cursor";
-import { expandDetailFanOut, type DetailFetchResult } from "@/lib/vacancy-sources/vacancy-detail-fanout";
+import {
+  expandDetailFanOut,
+  type DetailFanOutDiagnostics,
+  type DetailFetchResult,
+} from "@/lib/vacancy-sources/vacancy-detail-fanout";
 import { assertVacancyProviderOperational } from "./vacancy-kill-switch";
 
 /**
@@ -119,8 +123,19 @@ export interface VacancyFetchRequestV1 {
 /** A continuation token that may be placed in a path: one identifier segment. */
 const PATH_TOKEN = /^[A-Za-z0-9_-]{8,100}$/;
 
+/**
+ * Timing evidence for one page fetch, reported on success AND failure (the
+ * accounting is how a stalled feed is diagnosed). Numbers and a public ad id
+ * only. `listingElapsedMs` is the network time of the last listing attempt.
+ */
+export interface VacancyFetchDiagnosticsV1 {
+  readonly listingElapsedMs: number | null;
+  readonly detail: DetailFanOutDiagnostics | null;
+}
+
 export type VacancyFetchResult =
   | {
+      readonly diagnostics?: VacancyFetchDiagnosticsV1;
       readonly ok: true;
       readonly requestRef: string;
       readonly httpStatus: number;
@@ -141,6 +156,7 @@ export type VacancyFetchResult =
       };
     }
   | {
+      readonly diagnostics?: VacancyFetchDiagnosticsV1;
       readonly ok: false;
       readonly requestRef: string;
       readonly errorCode: VacancyFetchErrorCode;
@@ -237,6 +253,7 @@ async function fetchDetailJson(
 ): Promise<DetailFetchResult> {
   const attempts = bounds.maxRetries + 1;
   let detail = "no_attempt";
+  let elapsedMs = 0;
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     if (attempt > 0) {
       onRetry?.();
@@ -246,29 +263,32 @@ async function fetchDetailJson(
     onRequest();
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), bounds.requestTimeoutMs);
+    const attemptStart = Date.now();
     try {
       const res = await fetch(url, { method: "GET", headers, signal: controller.signal, redirect: "error" });
-      if (res.status === 404 || res.status === 410) return { ok: false, gone: true, detail: String(res.status) };
+      if (res.status === 404 || res.status === 410) return { ok: false, gone: true, detail: String(res.status), elapsedMs: elapsedMs + (Date.now() - attemptStart) };
       if (!res.ok) {
         detail = `http_${res.status}`;
-        if (res.status >= 400 && res.status < 500) return { ok: false, gone: false, detail };
+        if (res.status >= 400 && res.status < 500) return { ok: false, gone: false, detail, elapsedMs: elapsedMs + (Date.now() - attemptStart) };
         continue;
       }
-      if (!/json/i.test(res.headers.get("content-type") ?? "")) return { ok: false, gone: false, detail: "content_type_invalid" };
+      if (!/json/i.test(res.headers.get("content-type") ?? "")) return { ok: false, gone: false, detail: "content_type_invalid", elapsedMs: elapsedMs + (Date.now() - attemptStart) };
       const raw = await res.arrayBuffer();
-      if (raw.byteLength > MAX_DETAIL_BYTES) return { ok: false, gone: false, detail: "detail_too_large" };
+      const total = elapsedMs + (Date.now() - attemptStart);
+      if (raw.byteLength > MAX_DETAIL_BYTES) return { ok: false, gone: false, detail: "detail_too_large", elapsedMs: total };
       try {
-        return { ok: true, body: JSON.parse(Buffer.from(raw).toString("utf8")) };
+        return { ok: true, body: JSON.parse(Buffer.from(raw).toString("utf8")), elapsedMs: total };
       } catch {
-        return { ok: false, gone: false, detail: "invalid_json" };
+        return { ok: false, gone: false, detail: "invalid_json", elapsedMs: total };
       }
     } catch (err) {
       detail = err instanceof Error && (err.name === "AbortError" || /abort/i.test(err.message)) ? "timeout" : "network_error";
     } finally {
       clearTimeout(timer);
+      elapsedMs += Date.now() - attemptStart;
     }
   }
-  return { ok: false, gone: false, detail };
+  return { ok: false, gone: false, detail, elapsedMs };
 }
 
 /**
@@ -277,6 +297,18 @@ async function fetchDetailJson(
  */
 export async function fetchVacancyPage(
   req: VacancyFetchRequestV1,
+): Promise<VacancyFetchResult> {
+  const probe: { listingElapsedMs: number | null; detail: DetailFanOutDiagnostics | null } = {
+    listingElapsedMs: null,
+    detail: null,
+  };
+  const result = await fetchVacancyPageInner(req, probe);
+  return { ...result, diagnostics: { listingElapsedMs: probe.listingElapsedMs, detail: probe.detail } };
+}
+
+async function fetchVacancyPageInner(
+  req: VacancyFetchRequestV1,
+  probe: { listingElapsedMs: number | null; detail: DetailFanOutDiagnostics | null },
 ): Promise<VacancyFetchResult> {
   assertVacancyProviderOperational(req.provider.key);
 
@@ -326,6 +358,9 @@ export async function fetchVacancyPage(
   }
 
   const spacingMs = endpoint.detailFanOut?.minRequestSpacingMs;
+  // A slow publisher may declare a longer PER-REQUEST wait for its own
+  // endpoint (never the shared bound, so no other provider is affected).
+  const requestTimeoutMs = endpoint.detailFanOut?.requestTimeoutMs ?? bounds.requestTimeoutMs;
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     if (attempt > 0) {
       req.onRetry?.();
@@ -336,8 +371,9 @@ export async function fetchVacancyPage(
     const controller = new AbortController();
     const timer = setTimeout(
       () => controller.abort(),
-      bounds.requestTimeoutMs,
+      requestTimeoutMs,
     );
+    const listingStart = Date.now();
     try {
       const res = await fetch(requestUrl, {
         method: "GET",
@@ -377,6 +413,7 @@ export async function fetchVacancyPage(
       }
 
       const raw = await res.arrayBuffer();
+      probe.listingElapsedMs = Date.now() - listingStart;
       const byteLength = raw.byteLength;
       if (byteLength > bounds.maxResponseBytes) {
         return {
@@ -420,11 +457,14 @@ export async function fetchVacancyPage(
           body,
           detailBudget: req.detailBudget,
           skipEntries: pageClosed ? req.skipEntries : 0,
+          ...(endpoint.detailFanOut.sessionDeadlineMs !== undefined
+            ? { deadlineAtMs: Date.now() + endpoint.detailFanOut.sessionDeadlineMs }
+            : {}),
           fetchDetail: (url) =>
             fetchDetailJson(
               url,
               headers,
-              bounds,
+              { ...bounds, requestTimeoutMs },
               () => paceRequest(endpoint.host, spacingMs),
               () => {
                 detailRequestsSpent += 1;
@@ -432,6 +472,7 @@ export async function fetchVacancyPage(
               req.onRetry,
             ),
         });
+        probe.detail = expanded.diagnostics;
         if (!expanded.ok) {
           return { ok: false, requestRef, errorCode: "detail_fetch_failed", detail: expanded.detail };
         }
@@ -470,6 +511,7 @@ export async function fetchVacancyPage(
         errorCode: aborted ? "timeout" : "network_error",
         detail: aborted ? "request_timeout" : "fetch_failed",
       };
+      probe.listingElapsedMs = Date.now() - listingStart;
       // fall through to retry
     } finally {
       clearTimeout(timer);
