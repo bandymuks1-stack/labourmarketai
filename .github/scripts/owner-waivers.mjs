@@ -612,6 +612,18 @@ export const SCOPED_OWNER_WAIVERS = [
       //         to the same slug filter (reader's own catalogue first, only
       //         an unambiguous slug); the count uses Intl.NumberFormat.
       2211,
+      // OWNER DIRECTIVE 2026-10-10, verbatim: "Darbo skelbimų pateikimo
+      // trūkumus taisyk naudodamas esamą architektūrą, išsaugodamas SEO,
+      // lokalizacijas ir faktinius skelbimų duomenis. Nepriskirk vertimų,
+      // kurių sistema negali patikimai pateikti." Bounded — not authority for
+      // any future waived change.
+      // #2253 — /jobs/[id] heads with the catalogue profession name in the
+      //         reader's language when the ad carries a known slug (the board
+      //         card's registry), else the publisher's words; metadata through
+      //         buildPageMetadata (brand suffix, share image, same hreflang
+      //         helper); the card's own fact chips. No route, projection, auth,
+      //         schema or data-source change; nothing machine-translated.
+      2253,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
