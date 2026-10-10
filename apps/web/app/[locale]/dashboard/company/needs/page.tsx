@@ -237,7 +237,17 @@ export default async function CompanyNeedsPage({
               data-testid="company-needs-not-verified-note"
               data-verification-status={companyRow.verificationStatus}
             >
-              {tReadback("notVerifiedYet")}
+              {tReadback("notVerifiedYet")}{" "}
+              {/* The way forward, not only the fact: the company setup screen
+                  holds the registration code and the optional review request
+                  an operator verifies against. Nothing is verified here. */}
+              <Link
+                href="/dashboard/start/company"
+                className="font-semibold text-text-primary underline underline-offset-4 hover:text-brand-blue"
+                data-testid="company-needs-not-verified-howto"
+              >
+                {tReadback("notVerifiedHowTo")}
+              </Link>
             </p>
           ) : null}
           {/* Static-stepper honesty note (guarded): the steps show progress,

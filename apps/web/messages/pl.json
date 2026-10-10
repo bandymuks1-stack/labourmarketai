@@ -1882,6 +1882,7 @@
   },
   "demandReadback": {
     "notVerifiedYet": "Twoja firma nie jest jeszcze zweryfikowana, dlatego zgłoszone tu zapytania nie są pokazywane pracownikom do czasu zakończenia weryfikacji.",
+    "notVerifiedHowTo": "Dodaj numer rejestrowy i poproś o weryfikację",
     "statusOther": "W trakcie przeglądu",
     "heading": "Twoje przesłane zapytania",
     "note": "Zapisane w Twojej prywatnej przestrzeni i sprawdzane ręcznie — nie proponujemy kandydatów automatycznie. Aktualizacje statusu pojawiają się tutaj.",
@@ -8448,6 +8449,7 @@
       "eyebrow": "Dzisiaj",
       "headerNoName": "Twój dzień",
       "professionUnknown": "Zawód nie ustawiony",
+      "visibilityAskBody": "Firmy nie widzą teraz Twojego profilu. To, czy będą mogły Cię znaleźć, zależy tylko od Ciebie i możesz to zmienić w każdej chwili.",
       "reading": "Wczytywanie…",
       "state": {
         "recorded": "{entries, plural, one {# zapis} few {# zapisy} many {# zapisów} other {# zapisu}} dzisiaj · {hours} h",

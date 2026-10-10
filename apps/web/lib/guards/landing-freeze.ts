@@ -697,6 +697,14 @@ export const FROZEN_LANDING_FILES = [
   // recomposed with safe space above the head (media), and a head-safety
   // rule in the camera so holding the face never pushes a head out of frame.
   // The regeneration touched EXACTLY ONE hash — living-worker-hero.tsx.
+  // 2026-10-10 (owner directive, verbatim: "Pradinio puslapio mobilųjį CTA
+  // sutvarkyk pagal jau patvirtintą vizualinę kryptį. Užšaldymo apsauga turi
+  // saugoti patvirtintą dizainą, o ne amžinai blokuoti jo funkcionalumo
+  // pataisymus. Keisk tik pagrįstai būtiną dalį."): on a phone the promise and
+  // the primary doors now come BEFORE the photograph (flex order; desktop
+  // untouched — the promise stays absolute over the picture). The first CTA
+  // had been at ~1,035 px on 375x812. The regeneration touched EXACTLY ONE
+  // hash — living-worker-hero.tsx; no copy, photograph or motion moved.
   "components/marketing/living-worker-hero.tsx",
   "lib/marketing/living-worker-hero.ts",
 ] as const;
