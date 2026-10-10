@@ -1,8 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
-import type { ComponentProps } from "react";
-
 import type { ActiveLocale } from "@/lib/i18n/config";
+import { NavLinkPending } from "@/components/app/nav-link-pending";
+import { Link } from "@/lib/i18n/navigation";
 import {
   WEEKDAY_ANCHOR_ISO,
   type JournalCalendarGrid,
@@ -16,30 +16,6 @@ import { formatDuration } from "@/lib/journal/format-duration";
 const REALITY_CLASS = { observed: "text-brand-cyan border-brand-cyan/40" } as const;
 
 /**
- * A calendar link is a DOCUMENT navigation — a plain `<a>` to the same
- * localized URL (`localePrefix: "always"`), never a client-router `<Link>`.
- *
- * WHY (measured 2026-10-10, local production build, desktop and 390 px):
- * on the Work Journal the client router's transition for a same-page
- * navigation often never commits — the RSC response arrives, React keeps the
- * transition suspended (`root.suspendedLanes` non-zero from page load), and
- * the tap does nothing. Day taps and ‹ › committed 0–1 of 4 times; leaving
- * the journal worked. The cause sits in the client transition, not in this
- * grid, and predates the one-day diary (#2256: same result with the old
- * 7-day limit). A document navigation cannot be held by a client transition:
- * the day is in the URL, the server renders it, and the tap always lands.
- * The browser's own loading indicator replaces the in-flight spinner, which
- * needed the client router; `active:` gives the press its instant answer.
- */
-function DayLink({
-  locale,
-  href,
-  ...rest
-}: Omit<ComponentProps<"a">, "href"> & { locale: string; href: string }) {
-  return <a href={`/${locale}${href}`} {...rest} />;
-}
-
-/**
  * THE WORK JOURNAL CALENDAR — the day navigator on `/dashboard/journal`
  * (owner direction 2026-09-13).
  *
@@ -49,7 +25,8 @@ function DayLink({
  * day, and the page below shows exactly that day's records and that day's
  * actions. Quick recording stays where it is, above.
  *
- * WHAT IT IS. Plain links and text — no client code at all. No client state, no store: the
+ * WHAT IT IS. Links and text (the only client leaf is the in-flight tap
+ * indicator). No client state, no store: the
  * selected day, the scale and the anchored period all live in the URL
  * (`?date=`, `?cal=`, `?month=`), so a day is shareable, survives a reload
  * and works with JS still loading. Every figure in a cell is the journal's
@@ -147,37 +124,34 @@ export async function JournalCalendar({
     >
       {/* Period header: back · the period · forward, then the scale switch. */}
       <div className="flex items-center justify-between gap-2">
-        <DayLink
-          locale={locale}
+        <Link
           href={href({ month: grid.prevAnchor, date: null })}
           data-testid="journal-calendar-prev"
           aria-label={t("prev")}
-          className="inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary active:bg-brand-blue/10"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
         >
           ‹
-        </DayLink>
+        </Link>
         <span
           className="min-w-0 flex-1 truncate text-center font-display text-sm font-semibold text-text-primary"
           data-testid="journal-calendar-period"
         >
           {grid.scale === "week" ? weekLabel : periodLabel}
         </span>
-        <DayLink
-          locale={locale}
+        <Link
           href={href({ month: grid.nextAnchor, date: null })}
           data-testid="journal-calendar-next"
           aria-label={t("next")}
-          className="inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary active:bg-brand-blue/10"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
         >
           ›
-        </DayLink>
+        </Link>
       </div>
 
       <div className="flex items-center justify-between gap-2">
         <nav aria-label={t("scaleLabel")} className="flex items-center gap-1">
           {(["month", "week"] as const).map((scale) => (
-            <DayLink
-              locale={locale}
+            <Link
               key={scale}
               href={scaleHref(scale)}
               data-testid={`journal-calendar-scale-${scale}`}
@@ -189,18 +163,17 @@ export async function JournalCalendar({
               }`}
             >
               {t(`scale.${scale}`)}
-            </DayLink>
+            </Link>
           ))}
         </nav>
         {selected && (
-          <DayLink
-            locale={locale}
+          <Link
             href={href({ date: null, month: grid.anchor })}
             data-testid="journal-calendar-clear"
             className="inline-flex min-h-11 items-center rounded-full border border-ink-500 px-3 text-xs text-text-secondary transition-colors hover:border-brand-blue"
           >
             {t("allDays")}
-          </DayLink>
+          </Link>
         )}
       </div>
 
@@ -218,7 +191,7 @@ export async function JournalCalendar({
         {grid.weeks.flat().map((cell) => {
           const dayTitle = dayTitleFmt.format(new Date(`${cell.iso}T00:00:00Z`));
           const shared = [
-            "relative flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-md border text-center tabular-nums transition-[color,background-color,border-color,transform] active:scale-95",
+            "relative flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-md border text-center tabular-nums transition-colors",
           ];
           if (cell.isFuture || !cell.inScope) {
             // Out of the period, or a day that has not happened: shown so the
@@ -250,8 +223,7 @@ export async function JournalCalendar({
               ? t("reported", { time: formatDuration(cell.reportedMinutes, "minutes", locale === "en" ? "en" : "lt") })
               : null;
           return (
-            <DayLink
-              locale={locale}
+            <Link
               key={cell.iso}
               href={href({ date: cell.iso, month: grid.anchor })}
               data-testid="journal-calendar-day"
@@ -286,6 +258,11 @@ export async function JournalCalendar({
                       : "border-transparent text-text-secondary hover:border-ink-500"
               } ${cell.isToday && !cell.isSelected ? "ring-1 ring-inset ring-ink-500" : ""}`}
             >
+              {/* The tap is acknowledged at once: the day re-reads on the
+                  server, and until it answers the cell says so (owner walk
+                  2026-09-28 — "the click seemed dead"). Honest: shown only
+                  while that navigation is actually in flight. */}
+              <NavLinkPending className="absolute right-1 top-1 h-2.5 w-2.5 text-brand-blue" />
               <span aria-hidden>{cell.dayOfMonth}</span>
               {/* WHAT THE DAY HOLDS, on the date itself: the recorded HOURS
                   when the day carries time, and the confirmation STATE as the
@@ -336,7 +313,7 @@ export async function JournalCalendar({
                   <span className="size-1.5 rounded-[1px] border border-brand-cyan/70 bg-brand-cyan/30" />
                 </span>
               )}
-            </DayLink>
+            </Link>
           );
         })}
       </div>
