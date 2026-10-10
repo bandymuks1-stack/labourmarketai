@@ -1935,7 +1935,7 @@ export default async function JournalPage({
                           standingSolid={spineNodeSolid(verification.state)}
                           chainSlot={
                             <EvidenceChain
-                              size="full"
+                              size="compact"
                               labels={chainLabels}
                               chain={deriveEvidenceChain({
                                 verification: verification.state,

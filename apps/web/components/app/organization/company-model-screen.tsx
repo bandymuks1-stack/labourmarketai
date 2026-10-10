@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
+import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 
 /**
  * THE COMPANY CONTEXT'S CENTRE (owner order 2026-10-01): the company home is
@@ -65,7 +66,7 @@ function Tile({ entry, label }: { entry: Entry; label: string }) {
     <Link
       href={entry.href as "/dashboard"}
       data-testid={`company-model-${entry.id}`}
-      className="flex min-h-11 items-center gap-2 rounded-lg border border-ink-500 bg-ink-800/40 px-3 py-2.5 text-sm font-medium text-text-primary transition-colors hover:border-brand-blue"
+      className="flex min-h-11 items-center gap-2 rounded-lg border border-ink-500 bg-ink-800/40 px-3 py-2.5 text-sm font-medium text-text-primary transition-colors hover:border-text-secondary"
     >
       <entry.Icon className="size-4 flex-none text-text-secondary" />
       <span className="min-w-0 truncate">{label}</span>
@@ -84,6 +85,10 @@ export async function CompanyModelScreen() {
       <h2 className="font-display text-card-title font-semibold text-text-primary">
         {t("title")}
       </h2>
+      {/* What needs the owner first: the real reviewable-entry queue (honest
+          unknown when unreadable, calm when empty) — the existing pulse the
+          project surfaces already use, not a second counter. */}
+      <ConfirmPulse />
       <Link
         href={"/dashboard/company/needs#demand-intake" as "/dashboard"}
         data-testid="company-model-primary"
@@ -97,7 +102,7 @@ export async function CompanyModelScreen() {
         ))}
       </div>
       <details className="group" data-testid="company-model-more">
-        <summary className="inline-flex min-h-11 cursor-pointer items-center text-sm font-medium text-text-secondary hover:text-brand-blue">
+        <summary className="inline-flex min-h-11 cursor-pointer items-center text-sm font-medium text-text-secondary hover:text-text-primary">
           {t("more")}
         </summary>
         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
