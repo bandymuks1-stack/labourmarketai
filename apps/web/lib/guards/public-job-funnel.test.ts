@@ -97,7 +97,11 @@ describe("the anonymous surface is unchanged by the unlock", () => {
     const sitemap = read("app/jobs-sitemap/[shard]/route.ts");
     // ONE helper for both sources — a job is one entity in every locale.
     expect(sitemap).toContain("hreflangAlternates(path)");
-    expect(meta).toContain("languages: hreflangAlternates(`/jobs/${id}`)");
+    // Through the ONE public-page builder (2026-10-10: it also brings the
+    // share image and brand suffix), which declares `hreflangAlternates(path)`.
+    expect(meta).toContain("buildPageMetadata({");
+    expect(meta).toContain("path: `/jobs/${id}`");
+    expect(read("lib/seo/metadata.ts")).toContain("languages: hreflangAlternates(path)");
   });
 
   it("the member reader is never called at module or metadata scope", () => {
