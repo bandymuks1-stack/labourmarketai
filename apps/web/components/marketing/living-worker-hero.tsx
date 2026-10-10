@@ -916,7 +916,7 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
 
   return (
     <section
-      className="relative isolate -mx-6 overflow-hidden bg-ink-900 sm:-mx-12"
+      className="relative isolate -mx-6 flex flex-col overflow-hidden bg-ink-900 sm:-mx-12 md:block"
       aria-roledescription="carousel"
       aria-label={capM.story.name}
       data-testid="living-worker-hero"
@@ -1075,8 +1075,11 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
         </div>
       </div>
 
-      {/* the promise and the doors: over the photograph on desktop, below it on a phone */}
-      <div className="relative z-10 px-6 pb-2 pt-6 sm:px-12 md:pointer-events-none md:absolute md:left-0 md:top-1/2 md:w-[40%] md:-translate-y-1/2 md:p-0 md:pl-12 [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
+      {/* the promise and the doors: over the photograph on desktop, ABOVE it on
+          a phone (owner 2026-10-10: below the 78svh photograph the first
+          primary action sat at ~1,035 px on a 375x812 screen — out of the
+          first view; the photograph and its motion are unchanged) */}
+      <div className="relative z-10 order-first px-6 pb-6 pt-2 sm:px-12 md:order-none md:pointer-events-none md:absolute md:left-0 md:top-1/2 md:w-[40%] md:-translate-y-1/2 md:p-0 md:pl-12 [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
         {children}
       </div>
     </section>

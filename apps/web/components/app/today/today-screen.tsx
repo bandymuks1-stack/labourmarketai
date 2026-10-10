@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
+import { EmployerVisibilityAsk } from "@/components/app/employer-visibility-ask";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { Link } from "@/lib/i18n/navigation";
@@ -159,6 +160,21 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
           </div>
         </Card>
       </section>
+
+      {/* 2b · THE EMPLOYER-VISIBILITY ASK — the SAME once-only door the
+          work-card save shows (never a consent of its own: it opens the
+          canonical consent screen; "not now" ends it on this device). On the
+          home too, because the save-only moment never reached the workers who
+          onboarded before the consent step existed (prod 2026-10-10: 0 of 18
+          real workers had ever been asked). Renders nothing once decided. */}
+      <EmployerVisibilityAsk
+        labels={{
+          title: tCard("visibilityAsk.title"),
+          body: t("visibilityAskBody"),
+          open: tCard("visibilityAsk.open"),
+          dismiss: tCard("visibilityAsk.dismiss"),
+        }}
+      />
 
       {/* 3 · TODAY'S WORK · OPEN ITEMS · ONE GROWTH SENTENCE — one journal
           read, streamed so a slow journal never holds the header back. */}

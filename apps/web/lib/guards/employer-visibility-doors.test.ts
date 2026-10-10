@@ -120,6 +120,14 @@ describe("every door opens the ONE existing consent — nothing else grants", ()
     expect(HUB).toContain("hasWorker ? getMyDiscoverabilityState() : Promise.resolve(null)");
   });
 
+  it("the worker home offers the SAME once-only ask (pre-consent workers were never reached)", () => {
+    const HOME = read("components/app/today/today-screen.tsx");
+    expect(HOME).toContain("<EmployerVisibilityAsk");
+    expect(HOME).toContain('body: t("visibilityAskBody")');
+    // The home never grants on its own — the ask component is the only door.
+    expect(HOME).not.toMatch(/grantProfileDiscoverability|withdrawProfileDiscoverability/);
+  });
+
   it("the work-card ask renders after a SUCCESSFUL save only, and is a door with 'not now'", () => {
     const EDITOR = read("components/app/work-card-editor.tsx");
     expect(EDITOR).toContain("{saveState?.ok ? <EmployerVisibilityAsk labels={labels.visibilityAsk} /> : null}");

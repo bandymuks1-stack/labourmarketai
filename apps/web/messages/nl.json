@@ -1882,6 +1882,7 @@
   },
   "demandReadback": {
     "notVerifiedYet": "Je bedrijf is nog niet geverifieerd; de aanvragen die je hier indient worden pas aan werknemers getoond zodra de verificatie is afgerond.",
+    "notVerifiedHowTo": "Registratienummer toevoegen en een controle aanvragen",
     "statusOther": "In beoordeling",
     "heading": "Je ingediende aanvragen",
     "note": "Opgeslagen in je privéruimte en handmatig beoordeeld — we stellen niet automatisch kandidaten voor. Statusupdates verschijnen hier.",
@@ -8448,6 +8449,7 @@
       "eyebrow": "Vandaag",
       "headerNoName": "Jouw dag",
       "professionUnknown": "Beroep nog niet ingevuld",
+      "visibilityAskBody": "Bedrijven kunnen uw profiel nu niet zien. Of ze u kunnen vinden, is alleen uw keuze, en u kunt dat altijd wijzigen.",
       "reading": "Bezig met lezen…",
       "state": {
         "recorded": "{entries, plural, one {# registratie} other {# registraties}} vandaag · {hours} u",

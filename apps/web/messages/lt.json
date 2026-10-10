@@ -1882,6 +1882,7 @@
   },
   "demandReadback": {
     "notVerifiedYet": "Jūsų įmonė dar neverifikuota, todėl čia pateiktos užklausos darbuotojams nerodomos, kol verifikacija nebaigta.",
+    "notVerifiedHowTo": "Pridėti registracijos kodą ir prašyti peržiūros",
     "statusOther": "Peržiūrima",
     "heading": "Jūsų pateiktos užklausos",
     "note": "Išsaugoma jūsų privačioje erdvėje ir peržiūrima rankiniu būdu — kandidatų nesiūlome automatiškai. Būsenos atnaujinimai matomi čia.",
@@ -8448,6 +8449,7 @@
       "eyebrow": "Šiandien",
       "headerNoName": "Jūsų diena",
       "professionUnknown": "Profesija dar nenurodyta",
+      "visibilityAskBody": "Šiuo metu įmonės jūsų profilio nemato. Ar jos galės jus rasti, sprendžiate tik jūs, ir pakeisti tai galite bet kada.",
       "reading": "Skaitoma…",
       "state": {
         "recorded": "{entries, plural, one {Šiandien užrašytas # įrašas} few {Šiandien užrašyti # įrašai} other {Šiandien užrašyta # įrašų}} · {hours} val.",

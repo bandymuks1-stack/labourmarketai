@@ -1882,6 +1882,7 @@
   },
   "demandReadback": {
     "notVerifiedYet": "Your company is not verified yet, so the inquiries you submit here are not shown to workers until verification is complete.",
+    "notVerifiedHowTo": "Add your registration code and request a review",
     "statusOther": "In review",
     "heading": "Your submitted inquiries",
     "note": "Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
@@ -8448,6 +8449,7 @@
       "eyebrow": "Today",
       "headerNoName": "Your day",
       "professionUnknown": "Profession not set yet",
+      "visibilityAskBody": "Right now companies cannot see your profile. Whether they can find you is only your choice, and you can change it at any time.",
       "reading": "Reading…",
       "state": {
         "recorded": "{entries, plural, one {# record} other {# records}} today · {hours} h",
