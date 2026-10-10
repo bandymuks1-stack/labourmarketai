@@ -3,9 +3,41 @@ import {
   groupProjectsByOrganization,
   parseProjectChoice,
   projectChoiceIsSatisfied,
+  projectNamedInText,
   projectPromptFor,
   rpcProjectParams,
 } from "./project-attribution";
+
+describe("projectNamedInText — the sentence names one assigned project", () => {
+  const P = [
+    { id: "p-oslo", label: "Oslo pamatai" },
+    { id: "p-kaunas", label: "Kaunas biurai" },
+    { id: "p-riga", label: "Riga" },
+  ];
+  it("owner scenario: 'Oslo projekte su Jonu armavome pamatus' → Oslo", () => {
+    expect(
+      projectNamedInText(
+        [P[1], P[2], { id: "p-oslo", label: "Oslo" }],
+        "Šiandien Oslo projekte su Jonu armavome pamatus, dirbome 8 valandas",
+      ),
+    ).toBe("p-oslo");
+  });
+  it("an inflected long word still matches (Kaunas → Kaune)", () => {
+    expect(projectNamedInText(P, "vakar Kaune montavome")).toBe("p-kaunas");
+  });
+  it("two projects named → no guess", () => {
+    expect(projectNamedInText(P, "Oslo ir Riga, po 4 val.")).toBeNull();
+  });
+  it("nothing named, or only generic words → no guess", () => {
+    expect(projectNamedInText(P, "dirbau 8 valandas")).toBeNull();
+    expect(
+      projectNamedInText([{ id: "x", label: "Projektas" }, P[2]], "projekte dirbau"),
+    ).toBeNull();
+  });
+  it("short title words must match whole words", () => {
+    expect(projectNamedInText([{ id: "r", label: "Riga" }], "rigas")).toBeNull();
+  });
+});
 
 const A = "11111111-1111-4111-8111-111111111111";
 const B = "22222222-2222-4222-8222-222222222222";

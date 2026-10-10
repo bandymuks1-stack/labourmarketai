@@ -576,7 +576,7 @@
     "openInCalendar": "Im Kalender öffnen",
     "recordOnDay": "Arbeit erfassen",
     "dayEmpty": "An diesem Tag gibt es keine Einträge.",
-    "moreDays": "Die neuesten Tage werden gezeigt. Noch {count, plural, one {# Tag} other {# Tage}} — im Kalender auswählen.",
+    "moreDays": "Der neueste Tag mit Einträgen wird gezeigt. Noch {count, plural, one {# Tag} other {# Tage}} mit Einträgen — Datum im Kalender wählen.",
     "periodEmpty": "In diesem Zeitraum gibt es keine Einträge."
   },
   "spreadsheet": {

@@ -90,6 +90,46 @@ export function projectChoiceIsSatisfied(
   return chosen === PROJECT_FIELD_NONE || projects.some((p) => p.id === chosen);
 }
 
+/** Words a project title shares with ordinary work sentences — never a name. */
+const PROJECT_NAME_STOPWORDS = new Set([
+  "projektas", "projekto", "projekte", "objektas", "objekto", "objekte",
+  "project", "projekt", "site", "uab", "the", "and", "ir",
+  "statyba", "statybos", "darbai", "works",
+]);
+
+function nameWords(s: string): string[] {
+  return s
+    .toLocaleLowerCase()
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((w) => w.length >= 3 && !PROJECT_NAME_STOPWORDS.has(w));
+}
+
+/**
+ * WHICH OF THE PERSON'S OWN PROJECTS DOES THE SENTENCE NAME? ("Šiandien Oslo
+ * projekte armavome pamatus" → the assigned project titled "Oslo ...").
+ *
+ * A PRESELECTION the person sees in the picker before confirming — never a
+ * silent write, and never a guess between projects: it answers only when
+ * EXACTLY ONE assigned project's distinctive title word appears in the text
+ * (a word of 5+ letters may be inflected — "Kaunas" / "Kaune" share "Kaun").
+ * Two candidates, or none, return null and the picker keeps asking (the
+ * 2+ rule above stays the database's and the person's).
+ */
+export function projectNamedInText(
+  projects: readonly AssignedProject[],
+  text: string,
+): string | null {
+  const said = nameWords(text);
+  if (said.length === 0) return null;
+  const hits = projects.filter((p) =>
+    nameWords(p.label).some((w) => {
+      const stem = w.length >= 5 ? w.slice(0, w.length - 2) : w;
+      return said.some((s) => (w.length >= 5 ? s.startsWith(stem) : s === w));
+    }),
+  );
+  return hits.length === 1 ? hits[0].id : null;
+}
+
 type AssignmentRow = {
   project_id: string;
   projects: {
