@@ -346,6 +346,177 @@ export function MarketplaceListingsSection({
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Browse first (premium structure pass 2026-10-10): the marketplace is
+          for finding work, services, goods and opportunities; managing one's
+          own listings follows. */}
+      {/* ── Browse active listings + enquire ───────────────────────────── */}
+      <section className="flex flex-col gap-3">
+        <div>
+          <h2 className="font-display text-lg font-semibold text-text-primary">{t("browseTitle")}</h2>
+          <p className="text-sm text-text-secondary">{t("browseIntro")}</p>
+        </div>
+
+        {extended && (
+          <div
+            role="tablist"
+            aria-label={t("domainFilterLabel")}
+            className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
+          >
+            {tabDomains.map((d) => (
+              <button
+                key={d}
+                type="button"
+                role="tab"
+                aria-selected={domainTab === d}
+                onClick={() => setDomainTab(d)}
+                className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm transition-colors ${
+                  domainTab === d
+                    ? "border-text-primary bg-ink-700 text-text-primary"
+                    : "border-ink-500 text-text-secondary hover:border-text-secondary"
+                }`}
+              >
+                {t(`domains.${d}`)}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {extended && actorKindsPresent.length > 1 && (
+          <div
+            role="group"
+            aria-label={t("actorFilterLabel")}
+            data-testid="market-actor-filter"
+            className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
+          >
+            {(["all", ...actorKindsPresent] as const).map((k) => (
+              <button
+                key={k}
+                type="button"
+                aria-pressed={actorTab === k}
+                onClick={() => setActorTab(k)}
+                className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm transition-colors ${
+                  actorTab === k
+                    ? "border-text-primary bg-ink-700 text-text-primary"
+                    : "border-ink-500 text-text-secondary hover:border-text-secondary"
+                }`}
+              >
+                {t(`actorKinds.${k}`)}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {unavailable.length > 0 && (
+          <p
+            role="status"
+            data-testid="federation-partial"
+            className="rounded-md border border-state-warning/40 bg-state-warning/5 p-3 text-sm text-text-secondary"
+          >
+            {t("federationPartial")}
+          </p>
+        )}
+
+        {extended && domainTab === "job" && (
+          <Link
+            href={"/jobs" as "/dashboard"}
+            data-testid="marketplace-all-jobs-link"
+            className="inline-flex min-h-11 w-fit items-center gap-1.5 text-sm font-medium text-text-primary underline-offset-4 hover:underline"
+          >
+            {t("allJobsLink")}
+            <ArrowRight aria-hidden className="h-4 w-4" />
+          </Link>
+        )}
+
+        {shownRows.length === 0 ? (
+          <p className="rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-muted">
+            {t("browseEmpty")}
+          </p>
+        ) : (
+          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {shownRows.map((row) => (
+              <li
+                key={`${row.sourceTable}:${row.id}`}
+                id={row.sourceTable === "marketplace_listings" ? `listing-${row.id}` : undefined}
+                className={`flex flex-col gap-2 rounded-lg border border-ink-500 bg-surface-1 p-3${
+                  row.sourceTable === "marketplace_listings" ? focusCls(row.id) : ""
+                }`}
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium text-text-primary">
+                    {row.title || t("titleNotStated")}
+                  </span>
+                  <span className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted">
+                    {t(`directions.${row.direction}`)}
+                  </span>
+                  <span
+                    data-testid="market-row-actor"
+                    data-actor-kind={row.actorKind}
+                    className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
+                  >
+                    {t(`actorKinds.${row.actorKind}`)}
+                  </span>
+                  {row.sourceTable === "public_vacancies" || row.sourceTable === "customer_requests" ? (
+                    <>
+                      <span
+                        data-testid="market-row-visibility"
+                        className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
+                      >
+                        {t(`visibility.${row.visibility}`)}
+                      </span>
+                      <span
+                        data-testid="market-row-provenance"
+                        className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
+                      >
+                        {t(`provenance.${row.provenance}`)}
+                      </span>
+                    </>
+                  ) : null}
+                </div>
+                {row.publisherName && (
+                  <p className="text-xs text-text-secondary">{row.publisherName}</p>
+                )}
+                <p className="text-xs text-text-muted">
+                  {subjectLabel(row.subject, row.domain)}
+                  {row.locationLabel ? ` · ${row.locationLabel}` : ""}
+                  {row.locationCountry ? ` (${row.locationCountry})` : ""}
+                  {row.priceAmount != null
+                    ? ` · ${formatAmount(row.priceAmount, row.currency, locale)}`
+                    : row.priceText
+                      ? ` · ${row.priceText}`
+                      : ""}
+                  {row.quantity != null ? ` · ${row.quantity}${row.unit ? ` ${row.unit}` : ""}` : ""}
+                  {row.expiresAt ? ` · ${t("expiresOn", { date: formatDate(row.expiresAt) })}` : ""}
+                </p>
+                {row.description && (
+                  <p className="line-clamp-3 text-sm text-text-secondary">{row.description}</p>
+                )}
+                {row.contactAction === "enquire" ? (
+                  <form action={enquireAboutListingAction} className="mt-1">
+                    <input type="hidden" name="listingId" value={row.id} />
+                    <input type="hidden" name="locale" value={locale} />
+                    <button
+                      type="submit"
+                      className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:border-text-secondary"
+                    >
+                      <MessageSquare aria-hidden className="h-4 w-4" />
+                      {t("enquire")}
+                    </button>
+                  </form>
+                ) : (
+                  <Link
+                    href={row.destinationPath as "/dashboard"}
+                    className="mt-1 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-sm text-text-secondary transition-colors hover:border-text-secondary hover:text-text-primary"
+                  >
+                    {row.contactAction === "open_source" ? t("openInSource") : t("openInServices")}
+                    <ArrowRight aria-hidden className="h-4 w-4" />
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
       {/* ── Manage my listings ─────────────────────────────────────────── */}
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
@@ -741,174 +912,6 @@ export function MarketplaceListingsSection({
                       {t("activate")}
                     </button>
                   </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {/* ── Browse active listings + enquire ───────────────────────────── */}
-      <section className="flex flex-col gap-3">
-        <div>
-          <h2 className="font-display text-lg font-semibold text-text-primary">{t("browseTitle")}</h2>
-          <p className="text-sm text-text-secondary">{t("browseIntro")}</p>
-        </div>
-
-        {extended && (
-          <div
-            role="tablist"
-            aria-label={t("domainFilterLabel")}
-            className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
-          >
-            {tabDomains.map((d) => (
-              <button
-                key={d}
-                type="button"
-                role="tab"
-                aria-selected={domainTab === d}
-                onClick={() => setDomainTab(d)}
-                className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm transition-colors ${
-                  domainTab === d
-                    ? "border-text-primary bg-ink-700 text-text-primary"
-                    : "border-ink-500 text-text-secondary hover:border-text-secondary"
-                }`}
-              >
-                {t(`domains.${d}`)}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {extended && actorKindsPresent.length > 1 && (
-          <div
-            role="group"
-            aria-label={t("actorFilterLabel")}
-            data-testid="market-actor-filter"
-            className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
-          >
-            {(["all", ...actorKindsPresent] as const).map((k) => (
-              <button
-                key={k}
-                type="button"
-                aria-pressed={actorTab === k}
-                onClick={() => setActorTab(k)}
-                className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm transition-colors ${
-                  actorTab === k
-                    ? "border-text-primary bg-ink-700 text-text-primary"
-                    : "border-ink-500 text-text-secondary hover:border-text-secondary"
-                }`}
-              >
-                {t(`actorKinds.${k}`)}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {unavailable.length > 0 && (
-          <p
-            role="status"
-            data-testid="federation-partial"
-            className="rounded-md border border-state-warning/40 bg-state-warning/5 p-3 text-sm text-text-secondary"
-          >
-            {t("federationPartial")}
-          </p>
-        )}
-
-        {extended && domainTab === "job" && (
-          <Link
-            href={"/jobs" as "/dashboard"}
-            data-testid="marketplace-all-jobs-link"
-            className="inline-flex min-h-11 w-fit items-center gap-1.5 text-sm font-medium text-text-primary underline-offset-4 hover:underline"
-          >
-            {t("allJobsLink")}
-            <ArrowRight aria-hidden className="h-4 w-4" />
-          </Link>
-        )}
-
-        {shownRows.length === 0 ? (
-          <p className="rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-muted">
-            {t("browseEmpty")}
-          </p>
-        ) : (
-          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {shownRows.map((row) => (
-              <li
-                key={`${row.sourceTable}:${row.id}`}
-                id={row.sourceTable === "marketplace_listings" ? `listing-${row.id}` : undefined}
-                className={`flex flex-col gap-2 rounded-lg border border-ink-500 bg-surface-1 p-3${
-                  row.sourceTable === "marketplace_listings" ? focusCls(row.id) : ""
-                }`}
-              >
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium text-text-primary">
-                    {row.title || t("titleNotStated")}
-                  </span>
-                  <span className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted">
-                    {t(`directions.${row.direction}`)}
-                  </span>
-                  <span
-                    data-testid="market-row-actor"
-                    data-actor-kind={row.actorKind}
-                    className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
-                  >
-                    {t(`actorKinds.${row.actorKind}`)}
-                  </span>
-                  {row.sourceTable === "public_vacancies" || row.sourceTable === "customer_requests" ? (
-                    <>
-                      <span
-                        data-testid="market-row-visibility"
-                        className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
-                      >
-                        {t(`visibility.${row.visibility}`)}
-                      </span>
-                      <span
-                        data-testid="market-row-provenance"
-                        className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
-                      >
-                        {t(`provenance.${row.provenance}`)}
-                      </span>
-                    </>
-                  ) : null}
-                </div>
-                {row.publisherName && (
-                  <p className="text-xs text-text-secondary">{row.publisherName}</p>
-                )}
-                <p className="text-xs text-text-muted">
-                  {subjectLabel(row.subject, row.domain)}
-                  {row.locationLabel ? ` · ${row.locationLabel}` : ""}
-                  {row.locationCountry ? ` (${row.locationCountry})` : ""}
-                  {row.priceAmount != null
-                    ? ` · ${formatAmount(row.priceAmount, row.currency, locale)}`
-                    : row.priceText
-                      ? ` · ${row.priceText}`
-                      : ""}
-                  {row.quantity != null ? ` · ${row.quantity}${row.unit ? ` ${row.unit}` : ""}` : ""}
-                  {row.expiresAt ? ` · ${t("expiresOn", { date: formatDate(row.expiresAt) })}` : ""}
-                </p>
-                {row.description && (
-                  <p className="line-clamp-3 text-sm text-text-secondary">{row.description}</p>
-                )}
-                {row.contactAction === "enquire" ? (
-                  <form action={enquireAboutListingAction} className="mt-1">
-                    <input type="hidden" name="listingId" value={row.id} />
-                    <input type="hidden" name="locale" value={locale} />
-                    <button
-                      type="submit"
-                      className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:border-text-secondary"
-                    >
-                      <MessageSquare aria-hidden className="h-4 w-4" />
-                      {t("enquire")}
-                    </button>
-                  </form>
-                ) : (
-                  <Link
-                    href={row.destinationPath as "/dashboard"}
-                    className="mt-1 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-sm text-text-secondary transition-colors hover:border-text-secondary hover:text-text-primary"
-                  >
-                    {row.contactAction === "open_source" ? t("openInSource") : t("openInServices")}
-                    <ArrowRight aria-hidden className="h-4 w-4" />
-                  </Link>
                 )}
               </li>
             ))}
