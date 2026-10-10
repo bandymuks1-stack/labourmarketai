@@ -2311,6 +2311,13 @@ const RULES: IntentRule[] = [
       p("\\bod\\s*\\d{1,2}\\D{0,4}do\\s*\\d{1,2}", 3), // pl "od 8 do 17"
       // "8 valandas / hours / часов / Stunden / uur / godzin"
       p("\\d{1,2}\\s*(val\\.?|valand|hour|hrs?|час|stunden|std|uur|uren|godz)", 2),
+      // A DAY + A DURATION is a report of work done, whatever the verb (owner
+      // launch order 2026-10-10 §5). "Šiandien Oslo projekte armavome
+      // pamatus, 8 valandas" scored 2 here and 3 on `projects` (the bare
+      // locative "projekte"), so the owner's own work-log sentence listed
+      // the projects instead of opening the record. Not when the sentence
+      // also seeks work or workers.
+      pNoSeek("\\b(šiandien|vakar|užvakar|today|yesterday|сегодня|вчера|heute|gestern|vandaag|gisteren|dzisiaj|wczoraj)\\b.{0,80}\\d{1,2}([.,]\\d)?\\s*(val\\.?|valand|hour|hrs?|час|stunden|std|uur|uren|godz)", 2),
       // break / lunch minutes
       p("(pertrauk|pietūs|pietus|break|lunch|обед|перерыв|przerw|obiad)", 1),
       // "objekte / site / на объекте" — a work site
