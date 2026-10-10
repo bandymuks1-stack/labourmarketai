@@ -260,7 +260,12 @@
     },
     "formChoose": "Wybierz…",
     "errorKindRequired": "Wybierz, czy sprzedajesz, wynajmujesz, czy szukasz.",
-    "errorCategoryRequired": "Wybierz, czego dotyczy ogłoszenie."
+    "errorCategoryRequired": "Wybierz, czego dotyczy ogłoszenie.",
+    "groups": {
+      "work": "Praca",
+      "services": "Usługi",
+      "goods": "Towary i zasoby"
+    }
   },
   "quality": {
     "title": "Usterki i jakość",

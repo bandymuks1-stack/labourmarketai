@@ -260,7 +260,12 @@
     },
     "formChoose": "Выберите…",
     "errorKindRequired": "Выберите: продаёте, сдаёте в аренду или ищете.",
-    "errorCategoryRequired": "Выберите, о чём объявление."
+    "errorCategoryRequired": "Выберите, о чём объявление.",
+    "groups": {
+      "work": "Работа",
+      "services": "Услуги",
+      "goods": "Товары и ресурсы"
+    }
   },
   "quality": {
     "title": "Дефекты и качество",

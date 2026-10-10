@@ -260,7 +260,12 @@
     },
     "formChoose": "Pasirinkite…",
     "errorKindRequired": "Pasirinkite, ar parduodate, nuomojate, ar ieškote.",
-    "errorCategoryRequired": "Pasirinkite, apie ką skelbimas."
+    "errorCategoryRequired": "Pasirinkite, apie ką skelbimas.",
+    "groups": {
+      "work": "Darbas",
+      "services": "Paslaugos",
+      "goods": "Prekės ir ištekliai"
+    }
   },
   "quality": {
     "title": "Defektai ir kokybė",

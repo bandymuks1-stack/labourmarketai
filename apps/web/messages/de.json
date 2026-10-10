@@ -260,7 +260,12 @@
     },
     "formChoose": "Bitte wählen…",
     "errorKindRequired": "Wählen Sie, ob Sie verkaufen, vermieten oder suchen.",
-    "errorCategoryRequired": "Wählen Sie, worum es in der Anzeige geht."
+    "errorCategoryRequired": "Wählen Sie, worum es in der Anzeige geht.",
+    "groups": {
+      "work": "Arbeit",
+      "services": "Dienstleistungen",
+      "goods": "Waren & Ressourcen"
+    }
   },
   "quality": {
     "title": "Mängel & Qualität",

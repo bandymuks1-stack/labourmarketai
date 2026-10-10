@@ -322,9 +322,28 @@ export function MarketplaceListingsSection({
   const otherRows = discoveryRows.filter((r) => !r.isMine);
   // `job` and `workforce` exist only through the federation adapters
   // (lib/marketplace/federation*.ts); `project_work` mixes listings + demand.
-  const tabDomains = ["all", ...LISTING_DOMAINS, "service", "job", "workforce"] as const;
+  // NAVIGATION GROUPS (premium structure pass 2026-10-10): nine flat domain
+  // tabs read as nine products. Four groups say what the market holds; the
+  // group's own domains stay one tap away as sub-chips, so no filter is lost.
+  const GROUPS = {
+    work: ["job", "workforce", "project_work"],
+    services: ["service", "service_need"],
+    goods: ["goods", "work_resource"],
+    personal: ["personal"],
+  } as const satisfies Record<string, readonly string[]>;
+  type GroupKey = keyof typeof GROUPS;
+  const groupKeys = Object.keys(GROUPS) as GroupKey[];
+  const groupOf = (d: string): GroupKey | null =>
+    groupKeys.find((g) => (GROUPS[g] as readonly string[]).includes(d)) ?? null;
+  const activeGroup: GroupKey | null =
+    domainTab === "all" ? null : ((groupKeys as string[]).includes(domainTab) ? (domainTab as GroupKey) : groupOf(domainTab));
+  const groupLabel = (g: GroupKey) => (g === "personal" ? t("domains.personal") : t(`groups.${g}`));
   const domainRows =
-    domainTab === "all" ? otherRows : otherRows.filter((r) => r.domain === domainTab);
+    domainTab === "all"
+      ? otherRows
+      : (groupKeys as string[]).includes(domainTab)
+        ? otherRows.filter((r) => (GROUPS[domainTab as GroupKey] as readonly string[]).includes(r.domain))
+        : otherRows.filter((r) => r.domain === domainTab);
   // Actor filter: only kinds that actually occur in the current rows, so no
   // chip promises rows that do not exist.
   const actorKindsPresent = ACTOR_KINDS.filter((k) => domainRows.some((r) => r.actorKind === k));
@@ -357,27 +376,59 @@ export function MarketplaceListingsSection({
         </div>
 
         {extended && (
-          <div
-            role="tablist"
-            aria-label={t("domainFilterLabel")}
-            className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
-          >
-            {tabDomains.map((d) => (
-              <button
-                key={d}
-                type="button"
-                role="tab"
-                aria-selected={domainTab === d}
-                onClick={() => setDomainTab(d)}
-                className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm transition-colors ${
-                  domainTab === d
-                    ? "border-text-primary bg-ink-700 text-text-primary"
-                    : "border-ink-500 text-text-secondary hover:border-text-secondary"
-                }`}
+          <div className="flex flex-col gap-2">
+            <div
+              role="tablist"
+              aria-label={t("domainFilterLabel")}
+              data-testid="market-group-tabs"
+              className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
+            >
+              {(["all", ...groupKeys] as const).map((g) => {
+                const selected = g === "all" ? domainTab === "all" : activeGroup === g;
+                return (
+                  <button
+                    key={g}
+                    type="button"
+                    role="tab"
+                    aria-selected={selected}
+                    data-testid={`market-group-${g}`}
+                    onClick={() => setDomainTab(g)}
+                    className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm transition-colors ${
+                      selected
+                        ? "border-text-primary bg-ink-700 text-text-primary"
+                        : "border-ink-500 text-text-secondary hover:border-text-secondary"
+                    }`}
+                  >
+                    {g === "all" ? t("domains.all") : groupLabel(g)}
+                  </button>
+                );
+              })}
+            </div>
+            {activeGroup && GROUPS[activeGroup].length > 1 ? (
+              <div
+                role="group"
+                aria-label={groupLabel(activeGroup)}
+                data-testid="market-domain-chips"
+                className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
               >
-                {t(`domains.${d}`)}
-              </button>
-            ))}
+                {[activeGroup, ...GROUPS[activeGroup]].map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    aria-pressed={domainTab === d}
+                    data-testid={`market-domain-${d}`}
+                    onClick={() => setDomainTab(d)}
+                    className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-1.5 text-meta transition-colors sm:min-h-9 ${
+                      domainTab === d
+                        ? "border-text-secondary text-text-primary"
+                        : "border-ink-600 text-text-secondary hover:border-text-secondary"
+                    }`}
+                  >
+                    {d === activeGroup ? t("domains.all") : t(`domains.${d}`)}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </div>
         )}
 
@@ -416,7 +467,7 @@ export function MarketplaceListingsSection({
           </p>
         )}
 
-        {extended && domainTab === "job" && (
+        {extended && (domainTab === "job" || domainTab === "work") && (
           <Link
             href={"/jobs" as "/dashboard"}
             data-testid="marketplace-all-jobs-link"

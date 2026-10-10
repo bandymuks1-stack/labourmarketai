@@ -618,13 +618,18 @@ export function ProjectAssignmentManager({
 
       {/* Per-object roster (WAGON 6 staffing view): REAL assignment rows only,
           rendered as player-card-style chips (shared identity monogram). */}
+      {/* ONE panel for every project's people (premium structure pass
+          2026-10-10): the project map above already gives each project its
+          card, so the rosters are rows of a single panel with the heading said
+          once — not a second card per project. Every row stays expanded: the
+          team and person assignment controls are used in place. */}
+      {projects.length > 0 ? (
+      <section className="card-border flex flex-col p-5" data-testid="project-assignments-panel">
+        <h2 className="text-sm font-semibold text-text-primary">{labels.assignmentsTitle}</h2>
       {projects.map((p) => (
-        <section key={p.id} className="card-border flex flex-col gap-2 p-5" data-testid="project-assignments">
+        <section key={p.id} className="flex flex-col gap-2 border-t border-ink-600 py-4 first-of-type:border-0 last:pb-0" data-testid="project-assignments">
           <p className="font-display text-sm font-semibold text-text-primary">
             {p.title ?? p.id.slice(0, 8)}{p.city ? ` · ${p.city}` : ""}
-          </p>
-          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-            {labels.assignmentsTitle}
           </p>
           {p.assignments.length === 0 ? (
             <p className="text-xs text-text-muted" data-testid="project-no-assignments">{labels.noAssignments}</p>
@@ -684,20 +689,22 @@ export function ProjectAssignmentManager({
             <a
               href="#assign-worker"
               data-testid="roster-assign-link"
-              className="inline-flex min-h-11 sm:min-h-8 items-center font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
+              className="inline-flex min-h-11 sm:min-h-8 items-center text-meta font-medium text-text-primary underline-offset-4 hover:underline"
             >
               {labels.assignFromRoster} ↑
             </a>
             <Link
               href={`/dashboard/projects/${p.id}/operations`}
               data-testid="roster-operations-link"
-              className="inline-flex min-h-11 sm:min-h-8 items-center font-mono text-meta uppercase tracking-label text-text-secondary hover:text-brand-blue hover:underline"
+              className="inline-flex min-h-11 sm:min-h-8 items-center text-meta font-medium text-text-secondary underline-offset-4 hover:text-text-primary hover:underline"
             >
               {labels.openBoard} →
             </Link>
           </div>
         </section>
       ))}
+      </section>
+      ) : null}
     </div>
   );
 }
