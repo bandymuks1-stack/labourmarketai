@@ -260,7 +260,12 @@
     },
     "formChoose": "Choose…",
     "errorKindRequired": "Choose whether you sell, rent out or are looking for it.",
-    "errorCategoryRequired": "Choose what the listing is about."
+    "errorCategoryRequired": "Choose what the listing is about.",
+    "groups": {
+      "work": "Work",
+      "services": "Services",
+      "goods": "Goods & resources"
+    }
   },
   "quality": {
     "title": "Defects & quality",

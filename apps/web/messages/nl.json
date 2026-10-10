@@ -260,7 +260,12 @@
     },
     "formChoose": "Kies…",
     "errorKindRequired": "Kies of je verkoopt, verhuurt of zoekt.",
-    "errorCategoryRequired": "Kies waar de advertentie over gaat."
+    "errorCategoryRequired": "Kies waar de advertentie over gaat.",
+    "groups": {
+      "work": "Werk",
+      "services": "Diensten",
+      "goods": "Goederen & middelen"
+    }
   },
   "quality": {
     "title": "Gebreken & kwaliteit",

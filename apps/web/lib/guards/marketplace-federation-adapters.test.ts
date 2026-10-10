@@ -104,7 +104,10 @@ describe("4. the SQL index view stays federated-by-table, not widened", () => {
 
 describe("5. the new domains are in the normal discovery UI", () => {
   it("tabs, provenance + visibility chips, source link and partial notice render", () => {
-    expect(SECTION).toMatch(/"service", "job", "workforce"/);
+    // The federated domains stay reachable filters. Since 2026-10-10 they sit
+    // inside the four navigation groups (one tap deeper), not a flat tab row.
+    expect(SECTION).toMatch(/work: \["job", "workforce", "project_work"\]/);
+    expect(SECTION).toMatch(/services: \["service", "service_need"\]/);
     expect(SECTION).toContain("market-row-visibility");
     expect(SECTION).toContain("market-row-provenance");
     expect(SECTION).toContain("federation-partial");
