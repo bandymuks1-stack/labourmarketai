@@ -293,6 +293,7 @@
     "delete": "Eintrag löschen",
     "deleting": "Wird gelöscht...",
     "deleteConfirm": "Diesen Eintrag aus dem Journal entfernen? Er wird nicht mehr in Ihrer Liste angezeigt. Direkt nach dem Entfernen können Sie ihn wiederherstellen.",
+    "more": "Mehr zu diesem Eintrag",
     "deleteBlocked": "Eintrag bereits überprüft — senden Sie eine Korrekturanfrage, statt zu löschen.",
     "deletedNotice": "Eintrag aus Ihrem Journal entfernt.",
     "restore": "Wiederherstellen",

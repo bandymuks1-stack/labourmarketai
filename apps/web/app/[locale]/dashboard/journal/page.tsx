@@ -1792,7 +1792,13 @@ export default async function JournalPage({
                       words — only the shape is shared with identity/history. */}
                   <div className="px-4 pb-4">
                   <WorkSpine>
-                    {group.entries.map((e) => {
+                    {(() => {
+                    // ONE explanation per state per day (owner 2026-10-10: the
+                    // same sentence was repeated on every card). The first entry
+                    // in a state carries the sentence + next step; later entries
+                    // in the SAME state show the state chip only.
+                    const explainedStates = new Set<string>();
+                    return group.entries.map((e) => {
                       // Evidence Decision Timeline v1 — the real, ordered human-decision
                       // history (append-only rows). Empty while still submitted → the
                       // timeline shows "created → waiting", never a fabricated step.
@@ -1819,6 +1825,8 @@ export default async function JournalPage({
                           ? (contextFacts.get(e.engagement_context_id) ?? null)
                           : null,
                       });
+                      const explainVerification = !explainedStates.has(verification.state);
+                      explainedStates.add(verification.state);
                       const metrics = e.journal_entry_metrics ?? [];
                       const area =
                         metrics.find((m) => m.metric_slug === "quantity") ??
@@ -1933,6 +1941,10 @@ export default async function JournalPage({
                             verification.state,
                           )}
                           standingSolid={spineNodeSolid(verification.state)}
+                          needsAttention={
+                            employerAskedChanges ||
+                            (!!reviewState && reviewPhase !== "none")
+                          }
                           chainSlot={
                             <EvidenceChain
                               size="compact"
@@ -2215,10 +2227,12 @@ export default async function JournalPage({
                                     `standing.${verification.state}`,
                                   )}
                                 />
+                                {explainVerification ? (
                                 <span className="text-text-secondary">
                                   {tVerify(`state.${verification.state}`)}
                                 </span>
-                                {verification.nextAction !== "none" &&
+                                ) : null}
+                                {explainVerification && verification.nextAction !== "none" &&
                                 (verification.nextAction ===
                                 "identify_verifier" ? (
                                   <Link
@@ -2277,7 +2291,8 @@ export default async function JournalPage({
                           )}
                         </JournalEntryRow>
                       );
-                    })}
+                    });
+                    })()}
                   </WorkSpine>
                   </div>
                 </details>

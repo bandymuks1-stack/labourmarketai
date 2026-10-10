@@ -9,6 +9,7 @@ import type { WorkTrend } from "@/lib/journal/work-intelligence";
 import type { SkillRowView } from "@/lib/journal/work-in-numbers-view";
 
 import { fmtHours, fmtPct, type Translate } from "./format";
+import { ExplainMore, RevealList } from "@/components/app/premium/disclosure";
 
 const TIER_CHIP: Record<EvidenceTier, string> = {
   manager_confirmed: "border-state-success/50 text-state-success",
@@ -87,6 +88,9 @@ export function SkillShareList({
       <h3 className="font-mono text-meta uppercase tracking-label text-text-secondary">
         {title ?? t("skillsTitle")}
       </h3>
+      {/* The base of every % stays in view; the HOW (hint + attribution) is one
+          tap away — owner 2026-10-10, no text walls. */}
+      <ExplainMore testId="wi-skills-explain">
       <p className="text-meta leading-relaxed text-text-muted">{tk("skillsHint")}</p>
       {attributionNote?.reason && (
         <p
@@ -98,6 +102,7 @@ export function SkillShareList({
           {t(`attribution.${attributionNote.reason}`)}
         </p>
       )}
+      </ExplainMore>
       {/* the base every % below is a share OF — stated in words, not only
           in an aria-label (re-audit F3) */}
       {periodHours > 0 && (
@@ -115,8 +120,10 @@ export function SkillShareList({
         </p>
       )}
       {rows.length > 0 && (
-        <ul className="flex flex-col gap-3">
-          {rows.map((s) => {
+        <RevealList
+          listAs="ul"
+          listClassName="flex flex-col gap-3"
+          items={rows.map((s) => {
             const name = s.name ?? s.slug;
             const first = dayLabel(s.firstWorkedDay);
             const last = dayLabel(s.lastWorkedDay);
@@ -243,7 +250,7 @@ export function SkillShareList({
               </li>
             );
           })}
-        </ul>
+        />
       )}
       {capNote}
     </div>

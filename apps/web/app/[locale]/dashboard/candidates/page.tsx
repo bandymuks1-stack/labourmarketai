@@ -60,6 +60,7 @@ export default async function CandidatesPage({
     title: t("title"),
     intro: t("intro"),
     honestyNote: t("honestyNote"),
+    howItWorks: (await getTranslations("common.disclosure"))("details"),
     labelNotRegistered: t("labels.notRegistered"),
     labelNotVerified: t("labels.notVerified"),
     labelDraft: t("labels.draft"),

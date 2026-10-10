@@ -1,6 +1,7 @@
 "use client";
 
 import { InlineConfirm } from "@/components/ui/InlineConfirm";
+import { Explain } from "@/components/app/premium/grammar";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
@@ -36,6 +37,7 @@ export function JournalEntryRow({
   standing = "UNKNOWN",
   standingSolid = false,
   chainSlot,
+  needsAttention = false,
 }: {
   entryId: string;
   canDelete: boolean;
@@ -80,6 +82,10 @@ export function JournalEntryRow({
    *  secondary to the entry text + understood signals, so the worker scans
    *  "what I wrote → what the system understood → what I can fix" first. */
   statusSlot?: React.ReactNode;
+  /** Something in the details asks the person for a decision (an employer
+   *  asked for a correction, a dispute is open): the details open by default
+   *  so a required action is never hidden. */
+  needsAttention?: boolean;
 }) {
   const t = useTranslations("journal");
   const locale = useLocale();
@@ -180,49 +186,66 @@ export function JournalEntryRow({
     <div className="card-border flex flex-col gap-3 p-4" data-testid={`journal-entry-card-${entryId}`}>
       {/* Sections: entry text + "Sistema suprato" come from `children`. */}
       {children}
-      {/* Linked skill signals + collapsed "Ankstesni ryšiai" (its own block). */}
-      {skillLinks && (
-        <JournalEntrySkillLinks
-          entryId={entryId}
-          availableSkills={skillLinks.availableSkills}
-          linkedSkillIds={skillLinks.linkedSkillIds}
-          skillSources={skillLinks.skillSources}
-          detected={skillLinks.detected}
-          candidates={skillLinks.candidates}
-        />
-      )}
-      {chainSlot ? (
-        <div className="border-t border-border/40 pt-3" data-testid={`journal-entry-chain-${entryId}`}>
-          {chainSlot}
-        </div>
-      ) : null}
-      {/* Status zone — secondary, below the signals. */}
-      {statusSlot && (
-        <div
-          className="flex flex-col gap-1 border-t border-border/40 pt-2"
-          data-testid={`journal-entry-status-${entryId}`}
-        >
-          {statusSlot}
-        </div>
-      )}
-      {/* Actions — the entry card holds interactive children (skill-link +
-          delete buttons), so the whole card can't be one link. Instead the
-          MAIN action (open/edit the entry) is a clear, mobile-safe (≥44px)
-          tappable control, with delete distinct beside it. Neither is hidden. */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/40 pt-2">
-        <div className="flex flex-wrap items-center gap-2">
-          {canDelete ? (
-            <>
-              {editSlot ?? (
-                <Link
-                  href={`/${locale}/dashboard/journal?editing=${entryId}#journal-composer`}
-                  onClick={() => recordEvent("journal_edit_clicked")}
-                  className="inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue active:border-brand-blue"
-                  data-testid={`journal-entry-edit-${entryId}`}
-                >
-                  {t("entry.edit")} →
-                </Link>
-              )}
+      {/* MAIN action in view — edit, or the correction an employer asked for. */}
+      <div className="flex flex-wrap items-center gap-2">
+        {canDelete ? (
+          (editSlot ?? (
+            <Link
+              href={`/${locale}/dashboard/journal?editing=${entryId}#journal-composer`}
+              onClick={() => recordEvent("journal_edit_clicked")}
+              className="inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue active:border-brand-blue"
+              data-testid={`journal-entry-edit-${entryId}`}
+            >
+              {t("entry.edit")} →
+            </Link>
+          ))
+        ) : (
+          <>
+            {correctionSlot}
+            <span className="inline-flex min-h-[2.75rem] items-center font-mono text-meta uppercase tracking-label text-text-muted">
+              {t("entry.deleteBlocked")}
+            </span>
+          </>
+        )}
+      </div>
+      {/* THE CALM CARD (owner 2026-10-10: no text walls). In view: what was
+          done, where, how long, its evidence standing with the next step, and
+          the main action. Skills, the evidence chain, the decision timeline
+          and the secondary actions live behind ONE disclosure per entry —
+          open by default when something inside asks for a decision. Nothing
+          removed; every control keeps its test id. */}
+      <Explain
+        summary={t("entry.more")}
+        defaultOpen={needsAttention}
+        testId={`journal-entry-more-${entryId}`}
+        className="border-t border-border/40 pt-1"
+      >
+        <div className="flex flex-col gap-3 text-support text-text-primary">
+          {skillLinks && (
+            <JournalEntrySkillLinks
+              entryId={entryId}
+              availableSkills={skillLinks.availableSkills}
+              linkedSkillIds={skillLinks.linkedSkillIds}
+              skillSources={skillLinks.skillSources}
+              detected={skillLinks.detected}
+              candidates={skillLinks.candidates}
+            />
+          )}
+          {chainSlot ? (
+            <div className="border-t border-border/40 pt-3" data-testid={`journal-entry-chain-${entryId}`}>
+              {chainSlot}
+            </div>
+          ) : null}
+          {statusSlot && (
+            <div
+              className="flex flex-col gap-1 border-t border-border/40 pt-2"
+              data-testid={`journal-entry-status-${entryId}`}
+            >
+              {statusSlot}
+            </div>
+          )}
+          <div className="flex flex-wrap items-center gap-2 border-t border-border/40 pt-2">
+            {canDelete ? (
               <InlineConfirm
                 label={pending ? t("entry.deleting") : t("entry.delete")}
                 question={t("entry.deleteConfirm")}
@@ -234,29 +257,23 @@ export function JournalEntryRow({
                 className="inline-flex min-h-[2.75rem] items-center rounded-md px-3 py-2 text-xs font-medium text-text-muted transition-colors hover:text-state-danger disabled:opacity-50 disabled:cursor-not-allowed"
                 testId={`journal-entry-delete-${entryId}`}
               />
-            </>
-          ) : (
-            <>
-              {correctionSlot}
-              <span className="inline-flex min-h-[2.75rem] items-center font-mono text-meta uppercase tracking-label text-text-muted">
-                {t("entry.deleteBlocked")}
-              </span>
-            </>
-          )}
-          {/* P0 Track B: unobtrusive idempotent re-run of the canonical
-              recognition pipeline for THIS entry (recovery path after a
-              failed save-time run; safe to repeat). */}
-          <button
-            type="button"
-            onClick={onReprocess}
-            disabled={reprocessing}
-            aria-busy={reprocessing || undefined}
-            className="inline-flex min-h-[2.75rem] items-center rounded-md px-3 py-2 text-xs font-medium text-text-muted transition-colors hover:text-brand-blue disabled:opacity-50 disabled:cursor-not-allowed"
-            data-testid={`journal-entry-reprocess-${entryId}`}
-          >
-            {t("reprocessEntry")}
-          </button>
+            ) : null}
+            {/* P0 Track B: idempotent re-run of the canonical recognition
+                pipeline for THIS entry (recovery path; safe to repeat). */}
+            <button
+              type="button"
+              onClick={onReprocess}
+              disabled={reprocessing}
+              aria-busy={reprocessing || undefined}
+              className="inline-flex min-h-[2.75rem] items-center rounded-md px-3 py-2 text-xs font-medium text-text-muted transition-colors hover:text-brand-blue disabled:opacity-50 disabled:cursor-not-allowed"
+              data-testid={`journal-entry-reprocess-${entryId}`}
+            >
+              {t("reprocessEntry")}
+            </button>
+          </div>
         </div>
+      </Explain>
+      <div className="flex flex-wrap items-center justify-between gap-2">
         {error && (
           <span
             role="alert"

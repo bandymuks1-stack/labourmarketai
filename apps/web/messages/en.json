@@ -6225,7 +6225,8 @@
       "archived": "Finished",
       "empty": "No finished projects yet.",
       "partial": "Showing the latest {shown} of {total}."
-    }
+    },
+    "moreToolsHint": "Sites and locations, photo gallery"
   },
   "projectOps": {
     "centre": {
@@ -7514,6 +7515,11 @@
     "menuLabel": "Report a problem"
   },
   "common": {
+    "disclosure": {
+      "showAll": "Show all ({count})",
+      "moreTools": "More tools",
+      "details": "How this works"
+    },
     "localeSwitch": "Language",
     "lt": "Lietuvių",
     "en": "English",
@@ -17917,7 +17923,8 @@
           "inviteExit": "Invite to join as an employee",
           "error": "The booked people could not be read right now. Nothing here is a claim that nobody is booked."
         },
-        "summaryInvitationsUnread": "{active} active · pending invitations could not be read · {members} members · {review} reviewing journals"
+        "summaryInvitationsUnread": "{active} active · pending invitations could not be read · {members} members · {review} reviewing journals",
+        "moreToolsHint": "People import, organisation records, member review, employment"
       },
       "needs": {
         "title": "Workforce needs",
@@ -17957,7 +17964,8 @@
       },
       "settings": {
         "title": "Organization settings",
-        "subtitle": "Identity, verification, what the organization does, public profile and help."
+        "subtitle": "Identity, verification, what the organization does, public profile and help.",
+        "moreToolsHint": "What you do, public business profile, help requests"
       },
       "work": {
         "objectsIntro": "Sites and objects that people, hours and photos are attached to."

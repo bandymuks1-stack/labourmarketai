@@ -6225,7 +6225,8 @@
       "archived": "Afgerond",
       "empty": "Nog geen afgeronde projecten.",
       "partial": "De nieuwste {shown} van {total} worden getoond."
-    }
+    },
+    "moreToolsHint": "Locaties en bouwplaatsen, fotogalerij"
   },
   "projectOps": {
     "centre": {
@@ -7514,6 +7515,11 @@
     "menuLabel": "Probleem melden"
   },
   "common": {
+    "disclosure": {
+      "showAll": "Alles tonen ({count})",
+      "moreTools": "Meer hulpmiddelen",
+      "details": "Hoe dit werkt"
+    },
     "localeSwitch": "Taal",
     "lt": "Lietuvių",
     "en": "English",
@@ -17917,7 +17923,8 @@
           "inviteExit": "Uitnodigen om als medewerker toe te treden",
           "error": "De geboekte mensen konden nu niet worden gelezen. Dit betekent niet dat niemand geboekt is."
         },
-        "summaryInvitationsUnread": "{active} actief · openstaande uitnodigingen konden niet worden gelezen · {members} leden · {review} beoordelen journalen"
+        "summaryInvitationsUnread": "{active} actief · openstaande uitnodigingen konden niet worden gelezen · {members} leden · {review} beoordelen journalen",
+        "moreToolsHint": "Personen importeren, organisatiegegevens, ledencontrole, dienstverband"
       },
       "needs": {
         "title": "Personeelsbehoeften",
@@ -17957,7 +17964,8 @@
       },
       "settings": {
         "title": "Organisatie-instellingen",
-        "subtitle": "Identiteit, verificatie, wat de organisatie doet, openbaar profiel en hulp."
+        "subtitle": "Identiteit, verificatie, wat de organisatie doet, openbaar profiel en hulp.",
+        "moreToolsHint": "Activiteiten, openbaar bedrijfsprofiel, hulpverzoeken"
       },
       "work": {
         "objectsIntro": "Locaties en objecten waaraan mensen, uren en foto's zijn gekoppeld."

@@ -54,6 +54,8 @@ import { OrgMembersPanel } from "@/components/app/org-members-panel";
 import { LifecycleSection } from "../lifecycle-section";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { Fold } from "@/components/app/premium/grammar";
+import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 
 /**
  * ŽMONĖS — the organization's people door (owner IA correction 2026-09-16,
@@ -87,6 +89,7 @@ export default async function CompanyPeoplePage({
 
   const t = await getTranslations("organizationDoors.pages.people");
   const tNetwork = await getTranslations("network");
+  const tDisclosure = await getTranslations("common.disclosure");
 
   const employerCtx = await resolveEmployerCompanyContext();
   // READ access (any governance role the resolver accepted) — a manager
@@ -334,6 +337,9 @@ export default async function CompanyPeoplePage({
         </Link>
       ) : null}
 
+      {/* WHO NEEDS ATTENTION — daily information, always open. */}
+      <WorkerReadinessSummary rows={readinessRows} />
+
       {/* Teams / brigades (§8.3): a brigade is an organizations row
           (organization_type='team'); membership arrives ONLY via an accepted
           join_team invitation; honest not-applied state otherwise. */}
@@ -352,62 +358,68 @@ export default async function CompanyPeoplePage({
         <TeamRosterEmptyState variant={isStaffingAgency ? "agency" : "company"} />
       )}
 
-      {/* BRINGING PEOPLE IN. The relationship that LEADS follows what the
-          workspace declared; every other truthful relationship stays
-          available, because an agency still employs people and a school
-          still hires. */}
-      {capabilityOrgId ? (
-        <div id="people-import-section" className="scroll-mt-20">
-          <PeopleImportPanel
-            organizationName={(companyRow.displayName || companyRow.legalName || "").trim()}
-            suggested={
-              declaredCapabilities.includes("training_provider")
-                ? "student"
-                : isStaffingAgency ||
-                    declaredCapabilities.includes("workforce_provider") ||
-                    declaredCapabilities.includes("recruitment_partner")
-                  ? "candidate"
-                  : "employee"
-            }
+      {/* ONE PAGE, ONE PRIMARY JOB (owner 2026-10-10: no walls of blocks):
+          the team, booked people, the invite, WHO NEEDS ATTENTION and the
+          brigades stay open; the secondary tools below are one tap away. Deep links into it (#org-members,
+          #people-import-section) open it via DetailsHashOpener. */}
+      <DetailsHashOpener targetId="people-more" />
+      <Fold id="people-more" title={tDisclosure("moreTools")} hint={t("moreToolsHint")} testId="people-more">
+        {/* BRINGING PEOPLE IN. The relationship that LEADS follows what the
+            workspace declared; every other truthful relationship stays
+            available, because an agency still employs people and a school
+            still hires. */}
+        {capabilityOrgId ? (
+          <div id="people-import-section" className="scroll-mt-20">
+            <PeopleImportPanel
+              organizationName={(companyRow.displayName || companyRow.legalName || "").trim()}
+              suggested={
+                declaredCapabilities.includes("training_provider")
+                  ? "student"
+                  : isStaffingAgency ||
+                      declaredCapabilities.includes("workforce_provider") ||
+                      declaredCapabilities.includes("recruitment_partner")
+                    ? "candidate"
+                    : "employee"
+              }
+            />
+          </div>
+        ) : null}
+
+        {/* THE ROSTER, READ BACK — directly under the panel that fills it. */}
+        {capabilityOrgId ? (
+          <OrganizationRosterSection
+            locale={locale}
+            linkCandidates={mergeRosterLinkCandidates(
+              activeWorkerRows
+                .filter((w) => w.status === "active")
+                .map((w) => ({ workerId: w.workerId, profileId: w.profileId, name: w.displayName ?? w.email ?? w.workerId })),
+              engagementCandidates,
+            )}
           />
-        </div>
-      ) : null}
+        ) : null}
 
-      {/* THE ROSTER, READ BACK — directly under the panel that fills it. */}
-      {capabilityOrgId ? (
-        <OrganizationRosterSection
-          locale={locale}
-          linkCandidates={mergeRosterLinkCandidates(
-            activeWorkerRows
-              .filter((w) => w.status === "active")
-              .map((w) => ({ workerId: w.workerId, profileId: w.profileId, name: w.displayName ?? w.email ?? w.workerId })),
-            engagementCandidates,
-          )}
-        />
-      ) : null}
 
-      <WorkerReadinessSummary rows={readinessRows} />
+        {managerEvidence && <ManagerEvidenceCard evidence={managerEvidence} />}
 
-      {managerEvidence && <ManagerEvidenceCard evidence={managerEvidence} />}
+        {orgMembers && (
+          <div id="org-members" className="scroll-mt-20">
+            <OrgMembersPanel
+            orgId={orgMembers.orgId}
+            members={orgMembers.members}
+            addable={orgMembers.addable}
+            labels={orgMembersLabels}
+            viewerIsRegisteredOwner={orgMembers.viewerIsRegisteredOwner}
+            governanceWithoutReviewer={orgMembers.governanceWithoutReviewer}
+            />
+          </div>
+        )}
 
-      {orgMembers && (
-        <div id="org-members" className="scroll-mt-20">
-          <OrgMembersPanel
-          orgId={orgMembers.orgId}
-          members={orgMembers.members}
-          addable={orgMembers.addable}
-          labels={orgMembersLabels}
-          viewerIsRegisteredOwner={orgMembers.viewerIsRegisteredOwner}
-          governanceWithoutReviewer={orgMembers.governanceWithoutReviewer}
-          />
-        </div>
-      )}
-
-      {/* Employment lifecycle on the SAME canonical engagement_contexts rows
-          the members panel above manages. Honest gated state until applied. */}
-      {orgMembers && (
-        <LifecycleSection locale={locale} orgId={orgMembers.orgId} notice={lifecycleNotice} />
-      )}
+        {/* Employment lifecycle on the SAME canonical engagement_contexts rows
+            the members panel above manages. Honest gated state until applied. */}
+        {orgMembers && (
+          <LifecycleSection locale={locale} orgId={orgMembers.orgId} notice={lifecycleNotice} />
+        )}
+      </Fold>
     </div>
   );
 }

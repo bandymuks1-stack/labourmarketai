@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/lib/i18n/navigation";
+import { ExplainMore } from "@/components/app/premium/disclosure";
 import {
   importedJobsHref,
   recommendationNextAction,
@@ -59,7 +60,10 @@ export async function LearningCompassSection({
           <h2 id="learning-compass-title" className="font-display text-base font-semibold text-text-primary">
             {t("title")}
           </h2>
-          <p className="text-xs leading-relaxed text-text-secondary">{t("subtitle")}</p>
+          <ExplainMore>
+            <p>{t("subtitle")}</p>
+            <p data-testid="compass-fits-source">{t("fitsSource")}</p>
+          </ExplainMore>
         </header>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -149,7 +153,6 @@ export async function LearningCompassSection({
 
         <div className="flex flex-col gap-1" data-testid="compass-fits">
           <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("fits")}</h3>
-          <p className="text-meta text-text-muted" data-testid="compass-fits-source">{t("fitsSource")}</p>
           {fitsNow.length === 0 ? (
             <p className="text-xs leading-relaxed text-text-muted">{t("fitsNone")}</p>
           ) : (
@@ -213,6 +216,68 @@ export async function LearningCompassSection({
         {recommendations.length > 0 ? (
           <div className="flex flex-col gap-1" data-testid="compass-recommendations">
             <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("recTitle")}</h3>
+            {(() => {
+              // ONE reason, ONE action when every recommendation shares them
+              // (owner 2026-10-10: the same sentence and button repeated on
+              // every box). Different reasons keep their own rows.
+              const reasonOf = (r: (typeof recommendations)[number]) => {
+                const first = r.sources[0];
+                const role = first?.roleSlug ? professionLabel(first.roleSlug) : null;
+                return r.basis === "profession_gap"
+                  ? t("recWhyProfession", { profession: r.professionSlug ? professionLabel(r.professionSlug) : "" })
+                  : r.basis === "demand_weak_evidence"
+                    ? t(role ? "recWhyWeakRole" : "recWhyWeak", { role: role ?? "" })
+                    : t(role ? "recWhyMissingRole" : "recWhyMissing", { role: role ?? "" });
+              };
+              const actionOf = (r: (typeof recommendations)[number]) => {
+                const action = recommendationNextAction(r);
+                const href =
+                  action.kind === "opportunities"
+                    ? action.professionSlug
+                      ? `/dashboard/opportunities?profession=${encodeURIComponent(action.professionSlug)}`
+                      : "/dashboard/opportunities"
+                    : action.kind === "journal"
+                      ? "/dashboard/journal"
+                      : "/dashboard/profile#profile-edit";
+                const label = t(
+                  action.kind === "opportunities"
+                    ? "recActionOpportunity"
+                    : action.kind === "journal"
+                      ? "recActionJournal"
+                      : "recActionProfile",
+                );
+                return { kind: action.kind, href, label };
+              };
+              const reasons = new Set(recommendations.map(reasonOf));
+              const hrefs = new Set(recommendations.map((r) => actionOf(r).href));
+              if (recommendations.length < 2 || reasons.size !== 1 || hrefs.size !== 1) return null;
+              const action = actionOf(recommendations[0]!);
+              return (
+                <div className="flex flex-col gap-2 text-xs" data-testid="compass-recommendations-grouped">
+                  <p className="leading-relaxed text-text-secondary">{[...reasons][0]}</p>
+                  <ul className="flex flex-wrap gap-1.5">
+                    {recommendations.map((r) => (
+                      <li
+                        key={`${r.basis}:${r.skillSlug}`}
+                        className="rounded-full border border-ink-500 px-2 py-0.5 text-text-primary"
+                        data-testid="compass-recommendation"
+                        data-basis={r.basis}
+                      >
+                        {skillLabel(r.skillSlug)}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href={action.href as "/dashboard/profile"}
+                    className="inline-block font-medium text-text-primary underline-offset-4 hover:underline"
+                    data-testid="compass-recommendation-action"
+                    data-action={action.kind}
+                  >
+                    {action.label} →
+                  </Link>
+                </div>
+              );
+            })() ?? (
             <ul className="flex flex-col gap-1.5 text-xs">
               {recommendations.map((r) => {
                 const first = r.sources[0];
@@ -267,6 +332,7 @@ export async function LearningCompassSection({
                 );
               })}
             </ul>
+            )}
           </div>
         ) : null}
 

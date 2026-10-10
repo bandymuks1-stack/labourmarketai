@@ -36,6 +36,7 @@ import { skillsForProfession } from "@/lib/taxonomy/profession-skills";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { formatUtcDate } from "@/lib/time/display";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { ExplainMore } from "@/components/app/premium/disclosure";
 
 /**
  * MANO VEIKLA SKAIČIAIS — the Work-in-Numbers station (target worker IA
@@ -209,9 +210,11 @@ export default async function WorkInNumbersPage({
           {wi ? (
             <>
               <PeriodNav wi={wi} locale={locale} t={t} href={periodHref} rangeHref={rangeHref} />
-              <p className="text-meta leading-relaxed text-text-muted" data-testid="wi-scope-note">
-                {t("numbers.scopeNote", { scope })}
-              </p>
+              <ExplainMore>
+                <p className="text-meta leading-relaxed text-text-muted" data-testid="wi-scope-note">
+                  {t("numbers.scopeNote", { scope })}
+                </p>
+              </ExplainMore>
               <CoverageNote coverage={wi.coverage} t={t} />
             </>
           ) : null}
@@ -258,7 +261,6 @@ export default async function WorkInNumbersPage({
                 <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
                   {t("growthTitle")}
                 </h2>
-                <p className="text-meta leading-relaxed text-text-muted">{t("growthDerivedHint")}</p>
               </div>
               <GrowthKinds
                 kinds={kinds}
@@ -268,6 +270,7 @@ export default async function WorkInNumbersPage({
                 dayLabel={dayLabel}
                 kindsCap={capLine("kinds", kinds.length, kindsAll.length)}
                 directionsCap={capLine("directions", directions.length, directionsAll.length)}
+                intro={t("growthDerivedHint")}
               />
             </Card>
           ) : null}

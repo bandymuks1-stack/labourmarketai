@@ -559,6 +559,11 @@
     }
   },
   "common": {
+    "disclosure": {
+      "showAll": "Vis alle ({count})",
+      "moreTools": "Flere værktøjer",
+      "details": "Sådan virker det"
+    },
     "backHome": "[EN] Back to home",
     "en": "[EN] English",
     "localeSwitch": "[EN] Language",
@@ -1977,7 +1982,8 @@
       "archived": "Afsluttede",
       "empty": "Ingen afsluttede projekter endnu.",
       "partial": "Viser de seneste {shown} af {total}."
-    }
+    },
+    "moreToolsHint": "Sites and locations, photo gallery"
   },
   "projectOps": {
     "stadium": {
@@ -6857,7 +6863,8 @@
   "organizationDoors": {
     "pages": {
       "people": {
-        "summaryWithoutInvitations": "{active} aktive · {members} medlemmer · {review} gennemgår journaler"
+        "summaryWithoutInvitations": "{active} aktive · {members} medlemmer · {review} gennemgår journaler",
+        "moreToolsHint": "People import, organisation records, member review, employment"
       }
     }
   },

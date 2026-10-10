@@ -559,6 +559,11 @@
     }
   },
   "common": {
+    "disclosure": {
+      "showAll": "Visa alla ({count})",
+      "moreTools": "Fler verktyg",
+      "details": "Så fungerar det"
+    },
     "backHome": "[EN] Back to home",
     "en": "[EN] English",
     "localeSwitch": "[EN] Language",
@@ -1977,7 +1982,8 @@
       "archived": "Avslutade",
       "empty": "Inga avslutade projekt ännu.",
       "partial": "Visar de senaste {shown} av {total}."
-    }
+    },
+    "moreToolsHint": "Sites and locations, photo gallery"
   },
   "projectOps": {
     "stadium": {
@@ -6857,7 +6863,8 @@
   "organizationDoors": {
     "pages": {
       "people": {
-        "summaryWithoutInvitations": "{active} aktiva · {members} medlemmar · {review} granskar journaler"
+        "summaryWithoutInvitations": "{active} aktiva · {members} medlemmar · {review} granskar journaler",
+        "moreToolsHint": "People import, organisation records, member review, employment"
       }
     }
   },

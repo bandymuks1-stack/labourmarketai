@@ -293,6 +293,7 @@
     "delete": "Item verwijderen",
     "deleting": "Verwijderen...",
     "deleteConfirm": "Dit item uit je logboek verwijderen? Het verschijnt niet meer in je lijst. Direct na het verwijderen kun je het herstellen.",
+    "more": "Meer over deze registratie",
     "deleteBlocked": "Item is al beoordeeld — stuur een correctieverzoek in plaats van te verwijderen.",
     "deletedNotice": "Item verwijderd uit je logboek.",
     "restore": "Herstellen",

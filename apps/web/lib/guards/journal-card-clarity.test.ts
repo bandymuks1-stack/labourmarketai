@@ -53,15 +53,22 @@ describe("Guard: entry card is text-first then understood signals", () => {
 });
 
 describe("Guard: card renders sections in the right order", () => {
-  it("children → linked skills → status → actions", () => {
+  // 2026-10-10 (owner: action first, details on demand): the entry, then
+  // its MAIN action, then ONE disclosure holding skills → status → the
+  // secondary actions.
+  it("children → main action → details (skills → status → secondary)", () => {
     const iChildren = row.indexOf("{children}");
+    const iEdit = row.indexOf("journal-entry-edit-");
+    const iMore = row.indexOf("<Explain");
     const iSkills = row.indexOf("<JournalEntrySkillLinks");
     const iStatus = row.indexOf("{statusSlot}");
-    const iActions = row.indexOf("journal-entry-edit-");
+    const iDelete = row.indexOf("journal-entry-delete-");
     expect(iChildren).toBeGreaterThan(-1);
-    expect(iChildren).toBeLessThan(iSkills);
+    expect(iChildren).toBeLessThan(iEdit);
+    expect(iEdit).toBeLessThan(iMore);
+    expect(iMore).toBeLessThan(iSkills);
     expect(iSkills).toBeLessThan(iStatus);
-    expect(iStatus).toBeLessThan(iActions);
+    expect(iStatus).toBeLessThan(iDelete);
   });
 });
 

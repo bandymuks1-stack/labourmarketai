@@ -626,7 +626,7 @@ export function ProjectAssignmentManager({
       {projects.length > 0 ? (
       <section className="card-border flex flex-col p-5" data-testid="project-assignments-panel">
         <h2 className="text-sm font-semibold text-text-primary">{labels.assignmentsTitle}</h2>
-      {projects.map((p) => (
+      {projects.map((p, projectIndex) => (
         <section key={p.id} className="flex flex-col gap-2 border-t border-ink-600 py-4 first-of-type:border-0 last:pb-0" data-testid="project-assignments">
           <p className="font-display text-sm font-semibold text-text-primary">
             {p.title ?? p.id.slice(0, 8)}{p.city ? ` · ${p.city}` : ""}
@@ -677,6 +677,7 @@ export function ProjectAssignmentManager({
           {teamWork ? (
             <ProjectTeamAssignments
               projectId={p.id}
+              showIntro={projectIndex === 0}
               assignments={teamWork.byProject[p.id] ?? []}
               teams={teamWork.teams}
               tasks={teamWork.tasks.filter((x) => x.projectId === p.id)}
