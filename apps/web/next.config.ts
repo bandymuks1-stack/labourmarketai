@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
+import { activeLocales } from "./lib/i18n/config";
+
 const withNextIntl = createNextIntlPlugin("./lib/i18n/request.ts");
 
 /**
@@ -92,7 +94,9 @@ function contentSecurityPolicyReportOnly(): string {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    "upgrade-insecure-requests",
+    // `upgrade-insecure-requests` is NOT listed: browsers ignore it in a
+    // Report-Only policy and log a console error on every page. HSTS below
+    // already forces https. Re-add it when this policy is enforced.
   ].join("; ");
 }
 
@@ -152,10 +156,19 @@ const W1_CANONICAL_REDIRECTS = [
  * at mobile width). The canonical pages live under `/auth/…`; these keep the
  * short, human-typed form working. 308 so the method and locale are kept.
  */
+// `:locale` is CONSTRAINED to the routed locales. Unconstrained, `/auth/signup`
+// (no locale — e-mails, OAuth consoles, old links) matched as locale="auth"
+// and was sent to `/auth/auth/signup` → 404 (public audit 2026-10-10).
+const LOCALE = `:locale(${activeLocales.join("|")})`;
+
 const ENTRY_SHORTCUT_REDIRECTS = [
-  { source: "/:locale/signup", destination: "/:locale/auth/signup", permanent: true },
-  { source: "/:locale/login", destination: "/:locale/auth/login", permanent: true },
-  { source: "/:locale/register", destination: "/:locale/auth/signup", permanent: true },
+  { source: `/${LOCALE}/signup`, destination: "/:locale/auth/signup", permanent: true },
+  { source: `/${LOCALE}/login`, destination: "/:locale/auth/login", permanent: true },
+  { source: `/${LOCALE}/register`, destination: "/:locale/auth/signup", permanent: true },
+  // Commonly guessed legal URLs (and what OAuth app consoles ask for). The
+  // canonical pages live under /legal/…; these 404'd before.
+  { source: `/${LOCALE}/privacy`, destination: "/:locale/legal/privacy", permanent: true },
+  { source: `/${LOCALE}/terms`, destination: "/:locale/legal/terms", permanent: true },
 ] as const;
 
 const nextConfig: NextConfig = {
