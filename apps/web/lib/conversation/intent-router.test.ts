@@ -49,6 +49,16 @@ describe("classifyIntent — brief example sentences", () => {
     // Seeking verb tips to find-work.
     expect(classifyIntent("noriu rasti darbą Vokietijoje").intent).toBe("find-work");
   });
+
+  it("a day + a duration in a project is recorded work, not the project list (owner 2026-10-10)", () => {
+    expect(
+      classifyIntent("Šiandien Oslo projekte armavome pamatus, 8 valandas").intent,
+    ).toBe("log-work");
+    expect(classifyIntent("Vakar projekte montavome langus 6 val.").intent).toBe("log-work");
+    // the list questions keep their own door
+    expect(classifyIntent("mano projektai").intent).toBe("projects");
+    expect(classifyIntent("parodyk projektus").intent).toBe("projects");
+  });
 });
 
 /**
