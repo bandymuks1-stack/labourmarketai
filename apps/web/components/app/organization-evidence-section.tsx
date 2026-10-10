@@ -414,7 +414,7 @@ export function OrganizationEvidenceSummary({
   const standingLabel = useStandingLabel();
   if (records.length === 0) {
     return (
-      <span className="text-xs normal-case tracking-normal text-text-secondary" data-testid="organization-history-summary-empty">
+      <span className="font-sans text-xs normal-case tracking-normal text-text-secondary" data-testid="organization-history-summary-empty">
         {t("summaryNoRecords")}
       </span>
     );
@@ -436,7 +436,7 @@ export function OrganizationEvidenceSummary({
   const range = first && last ? (first === last ? first : `${first} – ${last}`) : null;
   return (
     <span
-      className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs normal-case tracking-normal text-text-secondary"
+      className="flex flex-wrap items-center gap-x-2 gap-y-1 font-sans text-xs normal-case tracking-normal text-text-secondary"
       data-testid="organization-history-summary"
       data-records={records.length}
     >
