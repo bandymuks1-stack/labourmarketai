@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  next@15.5.24:
+    hash: 64fb010f8c02a9b7df85600c66509fbc9da697ac11b04f84e440505af3084f78
+    path: patches/next@15.5.24.patch
+
 importers:
 
   .:
@@ -116,10 +121,10 @@ importers:
         version: 1.12.0
       next:
         specifier: 15.5.24
-        version: 15.5.24(@babel/core@7.29.7)(@playwright/test@1.62.1)(@types/node@20.19.41)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        version: 15.5.24(patch_hash=64fb010f8c02a9b7df85600c66509fbc9da697ac11b04f84e440505af3084f78)(@babel/core@7.29.7)(@playwright/test@1.62.1)(@types/node@20.19.41)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       next-intl:
         specifier: ^4.14.1
-        version: 4.14.1(next@15.5.24(@babel/core@7.29.7)(@playwright/test@1.62.1)(@types/node@20.19.41)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
+        version: 4.14.1(next@15.5.24(patch_hash=64fb010f8c02a9b7df85600c66509fbc9da697ac11b04f84e440505af3084f78)(@babel/core@7.29.7)(@playwright/test@1.62.1)(@types/node@20.19.41)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
       react:
         specifier: 19.2.3
         version: 19.2.3
@@ -10749,7 +10754,7 @@ snapshots:
 
   next-intl-swc-plugin-extractor@4.14.1: {}
 
-  next-intl@4.14.1(next@15.5.24(@babel/core@7.29.7)(@playwright/test@1.62.1)(@types/node@20.19.41)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3):
+  next-intl@4.14.1(next@15.5.24(patch_hash=64fb010f8c02a9b7df85600c66509fbc9da697ac11b04f84e440505af3084f78)(@babel/core@7.29.7)(@playwright/test@1.62.1)(@types/node@20.19.41)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3):
     dependencies:
       '@eloqnt/config': 0.0.2
       '@eloqnt/format-json': 0.0.3
@@ -10759,14 +10764,14 @@ snapshots:
       '@swc/core': 1.16.1
       icu-minify: 4.14.1
       negotiator: 1.1.0
-      next: 15.5.24(@babel/core@7.29.7)(@playwright/test@1.62.1)(@types/node@20.19.41)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      next: 15.5.24(patch_hash=64fb010f8c02a9b7df85600c66509fbc9da697ac11b04f84e440505af3084f78)(@babel/core@7.29.7)(@playwright/test@1.62.1)(@types/node@20.19.41)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       next-intl-swc-plugin-extractor: 4.14.1
       react: 19.2.3
       use-intl: 4.14.1(react@19.2.3)
     transitivePeerDependencies:
       - '@swc/helpers'
 
-  next@15.5.24(@babel/core@7.29.7)(@playwright/test@1.62.1)(@types/node@20.19.41)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+  next@15.5.24(patch_hash=64fb010f8c02a9b7df85600c66509fbc9da697ac11b04f84e440505af3084f78)(@babel/core@7.29.7)(@playwright/test@1.62.1)(@types/node@20.19.41)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
     dependencies:
       '@next/env': 15.5.24
       '@swc/helpers': 0.5.15

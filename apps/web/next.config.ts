@@ -1,3 +1,6 @@
+import { existsSync, readdirSync } from "node:fs";
+import path from "node:path";
+
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
@@ -187,6 +190,27 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];
+  },
+  webpack(config) {
+    // `patches/next@*.patch` edits Next's vendored React (see the patch file).
+    // With `node-linker=hoisted`, webpack's persistent cache treats
+    // node_modules/next as immutable and keys it by package version only, so a
+    // restored `.next/cache` (local or Vercel) keeps bundling the UNPATCHED
+    // code. Listing the patch files as build dependencies hashes their content
+    // into the cache key: adding, changing or removing a patch invalidates it.
+    const patchDir = path.resolve(process.cwd(), "../../patches");
+    const patches = existsSync(patchDir)
+      ? readdirSync(patchDir)
+          .filter((f) => f.endsWith(".patch"))
+          .map((f) => path.join(patchDir, f))
+      : [];
+    if (patches.length > 0 && config.cache && typeof config.cache === "object") {
+      config.cache.buildDependencies = {
+        ...config.cache.buildDependencies,
+        pnpmPatches: patches,
+      };
+    }
+    return config;
   },
 };
 
