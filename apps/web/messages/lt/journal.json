@@ -293,6 +293,7 @@
     "delete": "Pašalinti įrašą",
     "deleting": "Šalinama...",
     "deleteConfirm": "Pašalinti šį įrašą iš žurnalo? Jis nebebus rodomas jūsų sąraše. Iškart po pašalinimo galėsite jį atkurti.",
+    "more": "Daugiau apie įrašą",
     "deleteBlocked": "Įrašas peržiūrėtas — vietoje pašalinimo siųskite pataisymo prašymą.",
     "deletedNotice": "Įrašas pašalintas iš jūsų žurnalo.",
     "restore": "Atkurti",

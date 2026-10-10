@@ -50,6 +50,8 @@ import { MapPin } from "lucide-react";
 import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
 import { type Role } from "@/lib/auth/actions";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { Fold } from "@/components/app/premium/grammar";
+import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 
 export const dynamic = "force-dynamic";
 
@@ -75,6 +77,7 @@ export default async function ProjectsPage({
   const showArchived = (await searchParams).archived === "1";
   const t = await getTranslations("projects");
   const tRooms = await getTranslations("companyActionRooms");
+  const tDisclosure = await getTranslations("common.disclosure");
 
   const supabase = await createClient();
   const {
@@ -413,20 +416,6 @@ export default async function ProjectsPage({
         <p className="text-sm leading-relaxed text-text-secondary">
           {t("intro")}
         </p>
-        {/* WAGON 6 — compact operating-model explainer: one honest line +
-            a link to the /about#evidence explanation. No game layer. */}
-        <p
-          className="mt-1 max-w-prose rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
-          data-testid="projects-model-note"
-        >
-          {t("model.note")}{" "}
-          <Link
-            href="/about#evidence"
-            className="whitespace-nowrap text-brand-blue hover:underline"
-          >
-            {t("model.link")} →
-          </Link>
-        </p>
       </header>
 
       {/* A manager's honest scope on the Work door: `projects_select` shows
@@ -438,6 +427,21 @@ export default async function ProjectsPage({
       <CompanyActionNextActions
         room="projects"
         primaryHref="/dashboard/company/projects/new"
+        extra={
+          /* WAGON 6 operating-model line, in the room's ONE disclosure. */
+            <p
+              className="max-w-prose"
+              data-testid="projects-model-note"
+            >
+              {t("model.note")}{" "}
+              <Link
+                href="/about#evidence"
+                className="whitespace-nowrap text-brand-blue hover:underline"
+              >
+                {t("model.link")} →
+              </Link>
+            </p>
+            }
       />
       {ownCompanyId ? (
         <div
@@ -542,44 +546,49 @@ export default async function ProjectsPage({
         />
       </section>
 
-      {/* OBJECTS / SITES — the canonical work_objects entity (membership-based
-          authority), where people, hours and photos are attached. Honest
-          gated state until applied. */}
-      <div id="company-locations" className="flex flex-col gap-2 scroll-mt-20">
-        <p className="text-xs text-text-secondary">{tDoors("pages.work.objectsIntro")}</p>
-        <WorkObjectsSection
-          state={
-            workObjectsRead.kind === "ok"
-              ? { kind: "ok", rows: workObjectsRead.rows }
-              : workObjectsRead.kind === "needs-migration"
-                ? { kind: "needs-migration" }
-                : workObjectsRead.kind === "no-company"
-                  ? { kind: "ok", rows: [] }
-                  : { kind: "error" }
-          }
-          projects={managedProjects.map((p) => ({
-            id: p.id,
-            title: p.title ?? p.id.slice(0, 8),
-          }))}
-          members={
-            orgMembersForObjects && orgMembersForObjects.kind === "ok"
-              ? orgMembersForObjects.members
-                  .filter((m) => m.status === "active")
-                  .map((m) => ({
-                    profileId: m.profileId,
-                    name: m.fullName ?? m.email ?? m.profileId.slice(0, 8),
-                  }))
-              : []
-          }
-          labels={workObjectsLabels}
-        />
-      </div>
+      {/* Sites and the gallery are secondary to the projects themselves —
+          one tap away; #company-locations / #company-gallery open the fold. */}
+      <DetailsHashOpener targetId="projects-more" />
+      <Fold id="projects-more" title={tDisclosure("moreTools")} hint={t("moreToolsHint")} testId="projects-more">
+        {/* OBJECTS / SITES — the canonical work_objects entity (membership-based
+            authority), where people, hours and photos are attached. Honest
+            gated state until applied. */}
+        <div id="company-locations" className="flex flex-col gap-2 scroll-mt-20">
+          <p className="text-xs text-text-secondary">{tDoors("pages.work.objectsIntro")}</p>
+          <WorkObjectsSection
+            state={
+              workObjectsRead.kind === "ok"
+                ? { kind: "ok", rows: workObjectsRead.rows }
+                : workObjectsRead.kind === "needs-migration"
+                  ? { kind: "needs-migration" }
+                  : workObjectsRead.kind === "no-company"
+                    ? { kind: "ok", rows: [] }
+                    : { kind: "error" }
+            }
+            projects={managedProjects.map((p) => ({
+              id: p.id,
+              title: p.title ?? p.id.slice(0, 8),
+            }))}
+            members={
+              orgMembersForObjects && orgMembersForObjects.kind === "ok"
+                ? orgMembersForObjects.members
+                    .filter((m) => m.status === "active")
+                    .map((m) => ({
+                      profileId: m.profileId,
+                      name: m.fullName ?? m.email ?? m.profileId.slice(0, 8),
+                    }))
+                : []
+            }
+            labels={workObjectsLabels}
+          />
+        </div>
 
-      {/* F13: company gallery — photo evidence across the company's own
-          projects (existing journal-photo projection; same RLS, read-only). */}
-      <div id="company-gallery" className="scroll-mt-20">
-        <CompanyGallerySection projects={companyGalleryProjects} labels={companyGalleryLabels} />
-      </div>
+        {/* F13: company gallery — photo evidence across the company's own
+            projects (existing journal-photo projection; same RLS, read-only). */}
+        <div id="company-gallery" className="scroll-mt-20">
+          <CompanyGallerySection projects={companyGalleryProjects} labels={companyGalleryLabels} />
+        </div>
+      </Fold>
     </div>
   );
 }

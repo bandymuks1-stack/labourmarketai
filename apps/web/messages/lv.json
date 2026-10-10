@@ -559,6 +559,11 @@
     }
   },
   "common": {
+    "disclosure": {
+      "showAll": "Rādīt visus ({count})",
+      "moreTools": "Vairāk rīku",
+      "details": "Kā tas darbojas"
+    },
     "backHome": "[EN] Back to home",
     "en": "[EN] English",
     "localeSwitch": "[EN] Language",
@@ -1977,7 +1982,8 @@
       "archived": "Pabeigtie",
       "empty": "Pabeigtu projektu vēl nav.",
       "partial": "Rāda jaunākos {shown} no {total}."
-    }
+    },
+    "moreToolsHint": "Sites and locations, photo gallery"
   },
   "projectOps": {
     "stadium": {
@@ -6857,7 +6863,8 @@
   "organizationDoors": {
     "pages": {
       "people": {
-        "summaryWithoutInvitations": "{active} aktīvi · {members} dalībnieki · {review} pārskata žurnālus"
+        "summaryWithoutInvitations": "{active} aktīvi · {members} dalībnieki · {review} pārskata žurnālus",
+        "moreToolsHint": "People import, organisation records, member review, employment"
       }
     }
   },

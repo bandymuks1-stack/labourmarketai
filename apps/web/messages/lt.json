@@ -6225,7 +6225,8 @@
       "archived": "Užbaigti",
       "empty": "Užbaigtų projektų dar nėra.",
       "partial": "Rodoma naujausių {shown} iš {total}."
-    }
+    },
+    "moreToolsHint": "Objektai ir aikštelės, nuotraukų galerija"
   },
   "projectOps": {
     "centre": {
@@ -7514,6 +7515,11 @@
     "menuLabel": "Pranešti apie problemą"
   },
   "common": {
+    "disclosure": {
+      "showAll": "Rodyti visus ({count})",
+      "moreTools": "Daugiau įrankių",
+      "details": "Kaip tai veikia"
+    },
     "localeSwitch": "Kalba",
     "lt": "Lietuvių",
     "en": "English",
@@ -17917,7 +17923,8 @@
           "inviteExit": "Pakviesti prisijungti kaip darbuotoją",
           "error": "Užsakytų žmonių dabar nepavyko nuskaityti. Tai nereiškia, kad niekas neužsakytas."
         },
-        "summaryInvitationsUnread": "{active} aktyvūs · laukiančių kvietimų nepavyko perskaityti · {members} nariai · {review} peržiūri žurnalus"
+        "summaryInvitationsUnread": "{active} aktyvūs · laukiančių kvietimų nepavyko perskaityti · {members} nariai · {review} peržiūri žurnalus",
+        "moreToolsHint": "Žmonių importas, organizacijos įrašai, narių peržiūra, darbo santykiai"
       },
       "needs": {
         "title": "Darbuotojų poreikiai",
@@ -17957,7 +17964,8 @@
       },
       "settings": {
         "title": "Organizacijos nustatymai",
-        "subtitle": "Tapatybė, patikra, ką organizacija daro, viešas profilis ir pagalba."
+        "subtitle": "Tapatybė, patikra, ką organizacija daro, viešas profilis ir pagalba.",
+        "moreToolsHint": "Veiklos sritys, viešas verslo profilis, pagalbos užklausos"
       },
       "work": {
         "objectsIntro": "Objektai ir statybvietės, prie kurių priskiriami žmonės, valandos ir nuotraukos."

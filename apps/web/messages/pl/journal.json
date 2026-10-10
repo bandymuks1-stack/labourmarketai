@@ -293,6 +293,7 @@
     "delete": "Usuń wpis",
     "deleting": "Usuwanie...",
     "deleteConfirm": "Usunąć ten wpis z dziennika? Nie będzie już widoczny na Twojej liście. Możesz go przywrócić zaraz po usunięciu.",
+    "more": "Więcej o wpisie",
     "deleteBlocked": "Wpis już zweryfikowany — zamiast usuwać, wyślij prośbę o korektę.",
     "deletedNotice": "Wpis usunięty z dziennika.",
     "restore": "Przywróć",

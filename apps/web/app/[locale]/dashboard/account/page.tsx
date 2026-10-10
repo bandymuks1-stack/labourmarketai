@@ -36,6 +36,7 @@ import {
 } from "@/lib/notifications/notification-preferences";
 import { isTransactionalEmailConfigured } from "@/lib/email/transactional";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { Fold } from "@/components/app/premium/grammar";
 
 /**
  * Account — SETTINGS ONLY (marketplace IA cleanup 2026-06-25).
@@ -158,61 +159,66 @@ export default async function AccountPage({
         </p>
       </header>
 
-      {/* Honest payment readiness — payments are not active yet (billing
-          disabled). No pay-now, no subscription-active, no paid unlock. */}
-      {!billingLive && (
-        <FeatureNote testId="account-payment-readiness">
-          {tRoot("featureNotes.paymentReadiness")}
-        </FeatureNote>
-      )}
-
-      {/* Your plan — billing readiness status (CR train WAGON 4). Settings-
-          appropriate honest section reusing the WAGON 2 pattern: free pilot,
-          paid plans prepared-not-purchasable, no payment method needed. The
-          readiness line reuses the guarded owner-editable state copy from
-          planBoundary (single source — no drifting duplicate). */}
-      <section
-        className="card-border p-5"
-        data-testid="account-plan-status"
-        data-state={PRICING_READINESS_STATE}
-      >
-        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {tRoot("accountPlan.title")}
-        </p>
-        <p className="mt-2 text-sm text-text-primary">
-          {tRoot("accountPlan.freePilot")}
-        </p>
+      {/* Plan, billing and balance are ONE question ("what am I on?") and
+          payments are not live — one line, open on demand (owner 2026-10-10). */}
+      <Fold title={tRoot("accountPlan.title")} testId="account-plan-fold">
+        {/* Honest payment readiness — payments are not active yet (billing
+            disabled). No pay-now, no subscription-active, no paid unlock. */}
         {!billingLive && (
-          <>
-            <p className="mt-2 text-xs leading-relaxed text-text-secondary">
-              {tRoot("accountPlan.prepared")}
-            </p>
-            <p className="mt-2 text-meta text-text-muted">
-              {tRoot(`planBoundary.readiness.${PRICING_READINESS_STATE}`)}
-            </p>
-          </>
+          <FeatureNote testId="account-payment-readiness">
+            {tRoot("featureNotes.paymentReadiness")}
+          </FeatureNote>
         )}
-        <Link
-          href="/pricing"
-          className="mt-3 flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+
+        {/* Your plan — billing readiness status (CR train WAGON 4). Settings-
+            appropriate honest section reusing the WAGON 2 pattern: free pilot,
+            paid plans prepared-not-purchasable, no payment method needed. The
+            readiness line reuses the guarded owner-editable state copy from
+            planBoundary (single source — no drifting duplicate). */}
+        <section
+          className="card-border p-5"
+          data-testid="account-plan-status"
+          data-state={PRICING_READINESS_STATE}
         >
-          <span>{tRoot("accountPlan.pricingLink")}</span>
-          <span aria-hidden className="text-text-muted">→</span>
-        </Link>
-      </section>
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {tRoot("accountPlan.title")}
+          </p>
+          <p className="mt-2 text-sm text-text-primary">
+            {tRoot("accountPlan.freePilot")}
+          </p>
+          {!billingLive && (
+            <>
+              <p className="mt-2 text-xs leading-relaxed text-text-secondary">
+                {tRoot("accountPlan.prepared")}
+              </p>
+              <p className="mt-2 text-meta text-text-muted">
+                {tRoot(`planBoundary.readiness.${PRICING_READINESS_STATE}`)}
+              </p>
+            </>
+          )}
+          <Link
+            href="/pricing"
+            className="mt-3 flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+          >
+            <span>{tRoot("accountPlan.pricingLink")}</span>
+            <span aria-hidden className="text-text-muted">→</span>
+          </Link>
+        </section>
 
-      {/* Billing/subscription state + billing-return feedback (commercial
-          safe-prep v1). Honest about the disabled state; the return notice
-          never activates anything — state syncs via the signature-verified
-          webhook only. */}
-      <AccountBillingSection billingReturn={billing ?? null} />
+        {/* Billing/subscription state + billing-return feedback (commercial
+            safe-prep v1). Honest about the disabled state; the return notice
+            never activates anything — state syncs via the signature-verified
+            webhook only. */}
+        <AccountBillingSection billingReturn={billing ?? null} />
 
-      {/* LMC — placed directly under the plan line because they answer the same
-          question at two depths: what this account is entitled to, and what it
-          actually holds. The ledger was proven correct on production months ago
-          and no screen showed a single number of it; this is that number, read
-          server-side under the caller's own RLS. */}
-      <LmcBalanceSection locale={locale} />
+        {/* LMC — placed directly under the plan line because they answer the same
+            question at two depths: what this account is entitled to, and what it
+            actually holds. The ledger was proven correct on production months ago
+            and no screen showed a single number of it; this is that number, read
+            server-side under the caller's own RLS. */}
+        <LmcBalanceSection locale={locale} />
+
+      </Fold>
 
       <section className="card-border p-5">
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
@@ -351,68 +357,71 @@ export default async function AccountPage({
         </Link>
       </section>
 
-      {/* Privacy & data explanations (CR train WAGON 2): settings-appropriate
-          LINKS ONLY (no catalogue/launcher grid — account stays settings-only).
-          Points at the public explanation pack so a signed-in user can find
-          what the platform is, what data it uses and who can see it. */}
-      <section className="card-border p-5" data-testid="account-privacy-data">
-        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {tRoot("legal.accountSection.title")}
-        </p>
-        <p className="mt-2 text-xs leading-relaxed text-text-secondary">
-          {tRoot("legal.accountSection.intro")}
-        </p>
-        <ul className="mt-3 flex flex-col gap-2">
-          {/* Privacy self-service (PR G): real export download + reviewed
-              deletion request live on /dashboard/privacy. */}
-          <li>
-            <Link
-              href="/dashboard/privacy"
-              data-testid="account-privacy-self-service-link"
-              className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
-            >
-              <span>{tRoot("privacySelfService.accountLink")}</span>
-              <span aria-hidden className="text-text-muted">→</span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/about"
-              className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
-            >
-              <span>{tRoot("about.navLabel")}</span>
-              <span aria-hidden className="text-text-muted">→</span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/legal/privacy"
-              className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
-            >
-              <span>{tRoot("legal.privacy.title")}</span>
-              <span aria-hidden className="text-text-muted">→</span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/legal/data-access"
-              className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
-            >
-              <span>{tRoot("legal.dataAccess.title")}</span>
-              <span aria-hidden className="text-text-muted">→</span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/legal/data-protection"
-              className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
-            >
-              <span>{tRoot("legal.dataProtection.title")}</span>
-              <span aria-hidden className="text-text-muted">→</span>
-            </Link>
-          </li>
-        </ul>
-      </section>
+      <Fold title={tRoot("legal.accountSection.title")} testId="account-privacy-fold">
+        {/* Privacy & data explanations (CR train WAGON 2): settings-appropriate
+            LINKS ONLY (no catalogue/launcher grid — account stays settings-only).
+            Points at the public explanation pack so a signed-in user can find
+            what the platform is, what data it uses and who can see it. */}
+        <section className="card-border p-5" data-testid="account-privacy-data">
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {tRoot("legal.accountSection.title")}
+          </p>
+          <p className="mt-2 text-xs leading-relaxed text-text-secondary">
+            {tRoot("legal.accountSection.intro")}
+          </p>
+          <ul className="mt-3 flex flex-col gap-2">
+            {/* Privacy self-service (PR G): real export download + reviewed
+                deletion request live on /dashboard/privacy. */}
+            <li>
+              <Link
+                href="/dashboard/privacy"
+                data-testid="account-privacy-self-service-link"
+                className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+              >
+                <span>{tRoot("privacySelfService.accountLink")}</span>
+                <span aria-hidden className="text-text-muted">→</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/about"
+                className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+              >
+                <span>{tRoot("about.navLabel")}</span>
+                <span aria-hidden className="text-text-muted">→</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/legal/privacy"
+                className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+              >
+                <span>{tRoot("legal.privacy.title")}</span>
+                <span aria-hidden className="text-text-muted">→</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/legal/data-access"
+                className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+              >
+                <span>{tRoot("legal.dataAccess.title")}</span>
+                <span aria-hidden className="text-text-muted">→</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/legal/data-protection"
+                className="flex items-center justify-between gap-3 text-sm text-text-primary hover:text-brand-blue"
+              >
+                <span>{tRoot("legal.dataProtection.title")}</span>
+                <span aria-hidden className="text-text-muted">→</span>
+              </Link>
+            </li>
+          </ul>
+        </section>
+
+      </Fold>
 
       {isAdmin && (
         <AdminUiToggle

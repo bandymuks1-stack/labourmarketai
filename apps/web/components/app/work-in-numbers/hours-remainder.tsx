@@ -1,6 +1,7 @@
 import type { WorkIntelligence, WorkPeriodTotals } from "@/lib/journal/work-intelligence";
 
 import { fmtHours, type Translate } from "./format";
+import { ExplainMore } from "@/components/app/premium/disclosure";
 
 /**
  * The honest remainder — what no skill can claim yet — and where every hour
@@ -24,8 +25,12 @@ export function HoursRemainder({
   tk?: Translate;
 }) {
   const hasAnyHours = wi.totalHours > 0 || period.dayUnits > 0;
+  if (!hasAnyHours && wi.sharedHours <= 0 && wi.multiActivityHours <= 0 && wi.unattributedHours <= 0) {
+    return null;
+  }
   return (
-    <div className="flex flex-col gap-1.5" data-testid="wi-remainder">
+    // Where every hour came from — provenance, not the answer: one tap away.
+    <ExplainMore testId="wi-remainder">
       {wi.sharedHours > 0 && (
         <p className="text-meta leading-relaxed text-text-muted" data-testid="wi-shared-hours">
           {t("sharedHours", { hours: fmtHours(wi.sharedHours, locale), count: wi.sharedEntries })}
@@ -61,6 +66,6 @@ export function HoursRemainder({
           ) : null}
         </p>
       )}
-    </div>
+    </ExplainMore>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { Explain } from "@/components/app/premium/grammar";
 import { useActionState, useState } from "react";
 import { Link } from "@/lib/i18n/navigation";
 
@@ -500,21 +501,13 @@ export function CompanyWorkersSection({
         </p>
       ) : null}
 
+      {/* A feature that is not on yet is a quiet line, not a block in the
+          team's way (owner 2026-10-10) — its explanation one tap away. */}
       {!roleCoordinationEnabled ? (
-        <div
-          className="rounded-md border border-ink-700 bg-surface-1 p-3"
-          data-testid="company-workers-coordination-note"
-        >
-          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-            {labels.coordinationHeading}
-          </p>
-          <p className="mt-1 text-xs text-text-secondary">
-            {labels.coordinationBody}
-          </p>
-          <p className="mt-1 text-meta text-text-muted">
-            {labels.coordinationNextAction}
-          </p>
-        </div>
+        <Explain summary={labels.coordinationHeading}>
+          <p data-testid="company-workers-coordination-note">{labels.coordinationBody}</p>
+          <p>{labels.coordinationNextAction}</p>
+        </Explain>
       ) : null}
 
       {/* INVITATIONS — `manage-invitations` only (owner direction 2026-09-24):

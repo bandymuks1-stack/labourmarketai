@@ -136,7 +136,8 @@ ORG-2, EVID-2, MKT-7, COM-6, COM-8, GOV-1. RED drafts awaiting gate: #2227,
 | public entry: bare /auth/signup + /auth/login no longer 404 (locale-constrained shortcuts), /privacy + /terms aliases, footer double full stop, report-only CSP console error | #2251 | merged, LIVE 7bfe38a9 (verified on prod) |
 | employer-visibility ask on worker home, company verification path, phone CTA before hero photo | #2252 | auto-merge |
 | /jobs/[id] catalogue profession heading, shared metadata (suffix, share image), card fact chips | #2253 | auto-merge |
-| profile organisation summary off the mono face + register 2026-10-10 b | this PR | open |
+| profile organisation summary off the mono face + register 2026-10-10 b | #2254 | merged |
+| CALM HIERARCHY (system level): grammar `Explain` / `Reveal` / `Fold` + server `ExplainMore` / `RevealList` + `common.disclosure`; applied to journal entry card (one details per entry, auto-open on a correction request; verification sentence once per state per day), work-in-numbers (shared with the journal summary), compass, company rooms lead, candidates, reports basis, planning panel, people/settings/projects/account folds with content hints. Daily actions, readiness and brigades stay open; deep links into folds open them (6/6 verified). Measured on real data at 390 px: work-in-numbers 998->403 words, journal 1,447->495, people 433->178, settings 202->88, reports 222->70 | this PR | open |
 | agency /talent + /opportunities redirects | - | INTENTIONAL: role-gated-routes.ts (talent = admin-only operator console; opportunities = worker role), refusal carries a reason notice; pinned by role-gated-routes.test.ts; no change |
 | #2242 lane B pass | #2242 | merged 2026-10-09 |
 | #2240 PGRST303 bounded retry | #2240 | merged 2026-10-09 (owner-authorized); prod verification pending |

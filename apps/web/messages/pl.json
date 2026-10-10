@@ -6225,7 +6225,8 @@
       "archived": "Zakończone",
       "empty": "Nie ma jeszcze zakończonych projektów.",
       "partial": "Wyświetlono najnowsze {shown} z {total}."
-    }
+    },
+    "moreToolsHint": "Obiekty i place budowy, galeria zdjęć"
   },
   "projectOps": {
     "centre": {
@@ -7514,6 +7515,11 @@
     "menuLabel": "Zgłoś problem"
   },
   "common": {
+    "disclosure": {
+      "showAll": "Pokaż wszystkie ({count})",
+      "moreTools": "Więcej narzędzi",
+      "details": "Jak to działa"
+    },
     "localeSwitch": "Język",
     "lt": "Litewski",
     "en": "Angielski",
@@ -17917,7 +17923,8 @@
           "inviteExit": "Zaproś do dołączenia jako pracownik",
           "error": "Nie udało się teraz odczytać zarezerwowanych osób. Nic tutaj nie oznacza, że nikt nie jest zarezerwowany."
         },
-        "summaryInvitationsUnread": "{active} aktywnych · oczekujących zaproszeń nie udało się odczytać · {members} członków · {review} przegląda dzienniki"
+        "summaryInvitationsUnread": "{active} aktywnych · oczekujących zaproszeń nie udało się odczytać · {members} członków · {review} przegląda dzienniki",
+        "moreToolsHint": "Import osób, rejestry organizacji, przegląd członków, zatrudnienie"
       },
       "needs": {
         "title": "Zapotrzebowanie na pracowników",
@@ -17957,7 +17964,8 @@
       },
       "settings": {
         "title": "Ustawienia organizacji",
-        "subtitle": "Tożsamość, weryfikacja, czym zajmuje się organizacja, profil publiczny i pomoc."
+        "subtitle": "Tożsamość, weryfikacja, czym zajmuje się organizacja, profil publiczny i pomoc.",
+        "moreToolsHint": "Zakres działalności, publiczny profil firmy, prośby o pomoc"
       },
       "work": {
         "objectsIntro": "Budowy i obiekty, do których przypisani są ludzie, godziny i zdjęcia."

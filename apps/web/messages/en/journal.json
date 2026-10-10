@@ -293,6 +293,7 @@
     "delete": "Delete entry",
     "deleting": "Deleting...",
     "deleteConfirm": "Remove this entry from your journal? It will no longer appear in your list. You can restore it right after removing.",
+    "more": "More about this entry",
     "deleteBlocked": "Entry already reviewed — send a correction request instead of deleting.",
     "deletedNotice": "Entry removed from your journal.",
     "restore": "Restore",

@@ -6225,7 +6225,8 @@
       "archived": "Abgeschlossen",
       "empty": "Noch keine abgeschlossenen Projekte.",
       "partial": "Angezeigt werden die neuesten {shown} von {total}."
-    }
+    },
+    "moreToolsHint": "Objekte und Baustellen, Fotogalerie"
   },
   "projectOps": {
     "centre": {
@@ -7514,6 +7515,11 @@
     "menuLabel": "Problem melden"
   },
   "common": {
+    "disclosure": {
+      "showAll": "Alle anzeigen ({count})",
+      "moreTools": "Weitere Werkzeuge",
+      "details": "So funktioniert es"
+    },
     "localeSwitch": "Sprache",
     "lt": "Lietuvių",
     "en": "English",
@@ -17917,7 +17923,8 @@
           "inviteExit": "Einladen, als Mitarbeiter beizutreten",
           "error": "Die gebuchten Personen konnten gerade nicht gelesen werden. Das ist keine Aussage, dass niemand gebucht ist."
         },
-        "summaryInvitationsUnread": "{active} aktiv · offene Einladungen konnten nicht gelesen werden · {members} Mitglieder · {review} prüfen Journale"
+        "summaryInvitationsUnread": "{active} aktiv · offene Einladungen konnten nicht gelesen werden · {members} Mitglieder · {review} prüfen Journale",
+        "moreToolsHint": "Personenimport, Organisationsdaten, Mitgliederprüfung, Beschäftigung"
       },
       "needs": {
         "title": "Personalbedarf",
@@ -17957,7 +17964,8 @@
       },
       "settings": {
         "title": "Organisationseinstellungen",
-        "subtitle": "Identität, Prüfung, was die Organisation tut, öffentliches Profil und Hilfe."
+        "subtitle": "Identität, Prüfung, was die Organisation tut, öffentliches Profil und Hilfe.",
+        "moreToolsHint": "Tätigkeiten, öffentliches Unternehmensprofil, Hilfeanfragen"
       },
       "work": {
         "objectsIntro": "Objekte und Baustellen, denen Personen, Stunden und Fotos zugeordnet sind."

@@ -1,5 +1,6 @@
 "use client";
 
+import { Explain } from "@/components/app/premium/grammar";
 import { useId, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -37,13 +38,18 @@ export function ProjectTeamAssignments({
   assignments,
   teams,
   tasks,
+  showIntro = true,
 }: {
   projectId: string;
+  /** The explanation is said ONCE per list (first project), not under
+   *  every project (owner 2026-10-10). */
+  showIntro?: boolean;
   assignments: readonly TeamAssignmentRow[];
   teams: readonly AssignableTeam[];
   tasks: readonly AssignableTask[];
 }) {
   const t = useTranslations("teamAssignment");
+  const tDisclosure = useTranslations("common.disclosure");
   const tRes = useTranslations("projects.assign.reservation");
   const router = useRouter();
   const uid = useId();
@@ -125,7 +131,12 @@ export function ProjectTeamAssignments({
   return (
     <div className="mt-2 flex flex-col gap-2 border-t border-ink-600 pt-3" data-testid="project-teams">
       <p className="font-mono text-meta uppercase tracking-label text-text-muted">{t("title")}</p>
-      <p className="text-xs text-text-muted">{t("intro")}</p>
+      {/* Same explanation under every project → one tap away (owner 2026-10-10). */}
+      {showIntro ? (
+        <Explain summary={tDisclosure("details")}>
+          <p>{t("intro")}</p>
+        </Explain>
+      ) : null}
 
       {assignments.length === 0 ? (
         <p className="text-xs text-text-muted" data-testid="project-teams-none">

@@ -19,6 +19,7 @@ import { OPEN_WORK_TASK_STATUSES } from "@/lib/tasks/task-model";
 import { createUtcFormatter } from "@/lib/time/display";
 import type { Role } from "@/lib/auth/actions";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { ExplainMore } from "@/components/app/premium/disclosure";
 
 /**
  * Reports hub (control room PR K, capability gap map §12) — the role-specific
@@ -88,16 +89,12 @@ function MetricTile({
 
 /** The per-figure calculation-basis label — every section renders one. */
 function BasisNote({ t, basisKey }: { t: Translate; basisKey: string }) {
+  // The basis is always one tap away, never a wall above the figures
+  // (owner 2026-10-10); the summary names it ("Calculation basis").
   return (
-    <p
-      className="rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2 text-meta leading-relaxed text-text-muted"
-      data-testid={`reports-basis-${basisKey}`}
-    >
-      <span className="font-mono uppercase tracking-label">
-        {t("basis.label")}:
-      </span>{" "}
-      {t(`basis.${basisKey}`)}
-    </p>
+    <ExplainMore summary={t("basis.label")}>
+      <p data-testid={`reports-basis-${basisKey}`}>{t(`basis.${basisKey}`)}</p>
+    </ExplainMore>
   );
 }
 
