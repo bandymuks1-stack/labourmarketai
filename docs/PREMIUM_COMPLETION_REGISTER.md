@@ -77,6 +77,36 @@ See Lane A item 1. `vercel.json` has two crons only.
 ## Lane E — human-like QA
 Inactive until Gates 2 and 3 pass.
 
+## Opening state (final agent team, 2026-10-10)
+
+Measured, not inferred:
+- Registration is PUBLIC: Supabase auth `disable_signup=false`; email, Google,
+  LinkedIn (OIDC) and Facebook enabled; email confirmation ON
+  (`mailer_autoconfirm=false`) through Resend SMTP. No invite/waitlist/beta gate
+  exists in code (searched). The 10-06 "Confirm email OFF" step remains an
+  optional owner dashboard action, not an opening blocker.
+- Production = main = 3fbf19c5; /api/health auth+db ok; vacancies current.
+- Public signed-out audit (GET only, 1280 + 375 px, 6 locales, 126 unique
+  header/footer/hero URLs): no P0. All 200, no 5xx, no #418, no overflow at
+  375, no banned/placeholder copy, no raw keys/enums, sitemaps 24/24 sampled 200.
+- Guard suite on main: 1,085 files / 18,725 tests passed.
+
+Open, owner-gated (agents may not change):
+- Mobile home: first primary CTA at ~1,035 px on 375x812 (hero photo first).
+  `focus-landing` + living worker hero are hash-frozen (`landing-freeze`) —
+  needs the owner's landing plan.
+- `/jobs/[id]`: title is the raw source-language occupation with no brand
+  suffix, no og:image, an empty market heading. Route is under the
+  `public-acquisition-route-jobs` product-gate waiver (per-PR owner sentence;
+  #1803 already carries part of it).
+- Signed-in production walks this session: QA session mint DENIED by the
+  session classifier (production reads). Not worked around. Prior walks
+  (PERSON/COMPANY/AGENCY chains, 09-28 .. 10-09) stand as evidence.
+- (as last read 2026-10-09; not re-read — Supabase MCP did not connect this
+  session) 4 real companies `active_unverified` (one submitted request hidden from
+  workers since 09-16) → operator verification at
+  /dashboard/admin/company-verification (owner/admin identity).
+
 ## Owner decisions open (agents may not resolve)
 ORG-2, EVID-2, MKT-7, COM-6, COM-8, GOV-1. RED drafts awaiting gate: #2227,
 #2209, #2203, #2165, #2150, #1816, #1813.
@@ -91,7 +121,9 @@ ORG-2, EVID-2, MKT-7, COM-6, COM-8, GOV-1. RED drafts awaiting gate: #2227,
 | register 2026-10-09 b | #2247 | merged |
 | one gold action per view (people, marketplace, journal) | #2248 | merged, deployed |
 | structure: people readiness table + recorded-work disclosure, compact journal evidence chain, owner home confirm queue, marketplace browse-first | #2249 | merged, deployed 2026-10-10 06:01Z |
-| structure: one assignments panel (no second card per project), marketplace 4 navigation groups + sub-chips | this PR | open |
+| structure: one assignments panel (no second card per project), marketplace 4 navigation groups + sub-chips | #2250 | merged, LIVE (prod build 3fbf19c5, 2026-10-10 06:39Z) |
+| decision 0021 documents = readiness, not a vault | #2200 | merged 2026-10-10 |
+| public entry: bare /auth/signup + /auth/login no longer 404 (locale-constrained shortcuts), /privacy + /terms aliases, footer double full stop, report-only CSP console error | this PR | open |
 | agency /talent + /opportunities redirects | - | INTENTIONAL: role-gated-routes.ts (talent = admin-only operator console; opportunities = worker role), refusal carries a reason notice; pinned by role-gated-routes.test.ts; no change |
 | #2242 lane B pass | #2242 | merged 2026-10-09 |
 | #2240 PGRST303 bounded retry | #2240 | merged 2026-10-09 (owner-authorized); prod verification pending |

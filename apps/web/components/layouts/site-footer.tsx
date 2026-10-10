@@ -159,7 +159,8 @@ export async function SiteFooter() {
           <p data-testid="footer-entity-disclosure">{t("operatedBy")}</p>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <span data-testid="footer-copyright">
-              {copyrightLine(new Date().getFullYear())}. {t("ipNotice")}
+              {/* The entity name already ends in "o.o." — no second full stop. */}
+              {copyrightLine(new Date().getFullYear())} {t("ipNotice")}
             </span>
             {/* Created by Rexora — owner-approved URL (2026-07-14):
                 https://aiprocessautomation.eu. External link, so a plain <a>
