@@ -91,21 +91,31 @@ Measured, not inferred:
   375, no banned/placeholder copy, no raw keys/enums, sitemaps 24/24 sampled 200.
 - Guard suite on main: 1,085 files / 18,725 tests passed.
 
-Open, owner-gated (agents may not change):
-- Mobile home: first primary CTA at ~1,035 px on 375x812 (hero photo first).
-  `focus-landing` + living worker hero are hash-frozen (`landing-freeze`) —
-  needs the owner's landing plan.
-- `/jobs/[id]`: title is the raw source-language occupation with no brand
-  suffix, no og:image, an empty market heading. Route is under the
-  `public-acquisition-route-jobs` product-gate waiver (per-PR owner sentence;
-  #1803 already carries part of it).
-- Signed-in production walks this session: QA session mint DENIED by the
-  session classifier (production reads). Not worked around. Prior walks
-  (PERSON/COMPANY/AGENCY chains, 09-28 .. 10-09) stand as evidence.
-- (as last read 2026-10-09; not re-read — Supabase MCP did not connect this
-  session) 4 real companies `active_unverified` (one submitted request hidden from
-  workers since 09-16) → operator verification at
-  /dashboard/admin/company-verification (owner/admin identity).
+Second pass 2026-10-10 (owner directive, same day):
+- #2251 LIVE (prod 7bfe38a9): /auth/signup, /auth/login → /lt/auth/* 200;
+  /lt/privacy, /en/terms → /legal/* 200; footer single stop; CSP clean.
+- Signed-in production walk (allowlisted synthetic cast minted via
+  prod-qa-mint-session; GET + load-time server actions only, no clicks/forms):
+  worker 9 core routes at 375 px; owner, manager, agency 49 routes each at
+  1280 px — all 200, 0 defects (raw keys, uuid, undefined, error boundary,
+  "demo", overflow), 0 console errors. Redirects are the intended role gates
+  with a notice (buyer, opportunities, talent, company/education, onboarding).
+- Design: the "LEGACY" rows in Lane B are stale — projects, company, hours,
+  communication, people, candidates render on the same tokens, PageTitle,
+  cards, chips and one gold action. One real break fixed (profile organisation
+  summary inherited the mono face).
+- Worker visibility (prod SQL): 18 real workers, 0 discoverable, 0 ever asked —
+  the once-only ask rendered only after a work-card save. #2252 mounts the SAME
+  ask on the worker home (door + "not now"; grants nothing).
+- Companies (prod SQL): 4 real `active_unverified` (379bd03c LT, 68577d2e EG,
+  9a6f4f33 NL, b368423e AE); none has a registration code or website, so there
+  is NO evidence to verify on — not verified. 379bd03c's request (2026-09-16)
+  is invisible to workers by design (`list_open_demand_for_workers` joins
+  verified companies only). #2252 links the not-verified note to company setup
+  (registration code + optional review request). 1 unclassified
+  `needs_checks` (bbe8d66b, DO) has a code + website → operator review.
+- Mobile CTA: #2252 (owner directive quoted in landing-freeze; one hash).
+- /jobs/[id]: #2253 (owner directive quoted in both waiver pins).
 
 ## Owner decisions open (agents may not resolve)
 ORG-2, EVID-2, MKT-7, COM-6, COM-8, GOV-1. RED drafts awaiting gate: #2227,
@@ -123,7 +133,10 @@ ORG-2, EVID-2, MKT-7, COM-6, COM-8, GOV-1. RED drafts awaiting gate: #2227,
 | structure: people readiness table + recorded-work disclosure, compact journal evidence chain, owner home confirm queue, marketplace browse-first | #2249 | merged, deployed 2026-10-10 06:01Z |
 | structure: one assignments panel (no second card per project), marketplace 4 navigation groups + sub-chips | #2250 | merged, LIVE (prod build 3fbf19c5, 2026-10-10 06:39Z) |
 | decision 0021 documents = readiness, not a vault | #2200 | merged 2026-10-10 |
-| public entry: bare /auth/signup + /auth/login no longer 404 (locale-constrained shortcuts), /privacy + /terms aliases, footer double full stop, report-only CSP console error | this PR | open |
+| public entry: bare /auth/signup + /auth/login no longer 404 (locale-constrained shortcuts), /privacy + /terms aliases, footer double full stop, report-only CSP console error | #2251 | merged, LIVE 7bfe38a9 (verified on prod) |
+| employer-visibility ask on worker home, company verification path, phone CTA before hero photo | #2252 | auto-merge |
+| /jobs/[id] catalogue profession heading, shared metadata (suffix, share image), card fact chips | #2253 | auto-merge |
+| profile organisation summary off the mono face + register 2026-10-10 b | this PR | open |
 | agency /talent + /opportunities redirects | - | INTENTIONAL: role-gated-routes.ts (talent = admin-only operator console; opportunities = worker role), refusal carries a reason notice; pinned by role-gated-routes.test.ts; no change |
 | #2242 lane B pass | #2242 | merged 2026-10-09 |
 | #2240 PGRST303 bounded retry | #2240 | merged 2026-10-09 (owner-authorized); prod verification pending |
