@@ -82,6 +82,33 @@ const POSITIONS: L = {
   pl: "miejsc",
 };
 
+/**
+ * The anonymous fact chips (employment form · working time · positions), in
+ * the reader's language from the fixed maps above. ONE builder for the card
+ * and `/jobs/[id]`, so the detail page never shows less than its own card.
+ */
+export function vacancyFactChips(
+  vacancy: Pick<PublicVacancyPreview, "employmentForm" | "workingTime" | "positions">,
+  locale: ActiveLocale,
+): string[] {
+  const chips: string[] = [];
+
+  const form = vacancy.employmentForm
+    ? EMPLOYMENT_FORM[vacancy.employmentForm]?.[locale]
+    : undefined;
+  if (form) chips.push(form);
+
+  const time = vacancy.workingTime
+    ? WORKING_TIME[vacancy.workingTime]?.[locale]
+    : undefined;
+  if (time) chips.push(time);
+
+  if (vacancy.positions && vacancy.positions > 1) {
+    chips.push(`${vacancy.positions} ${POSITIONS[locale]}`);
+  }
+  return chips;
+}
+
 export function PublicVacancyCard({
   vacancy,
   locale,
@@ -119,21 +146,7 @@ export function PublicVacancyCard({
    */
   readonly sourceLanguageLabel?: string;
 }) {
-  const chips: string[] = [];
-
-  const form = vacancy.employmentForm
-    ? EMPLOYMENT_FORM[vacancy.employmentForm]?.[locale]
-    : undefined;
-  if (form) chips.push(form);
-
-  const time = vacancy.workingTime
-    ? WORKING_TIME[vacancy.workingTime]?.[locale]
-    : undefined;
-  if (time) chips.push(time);
-
-  if (vacancy.positions && vacancy.positions > 1) {
-    chips.push(`${vacancy.positions} ${POSITIONS[locale]}`);
-  }
+  const chips = vacancyFactChips(vacancy, locale);
 
   const published = formatUtcDate(vacancy.publishedAt, locale);
   // Only a plausible language subtag is emitted: a malformed value in the data

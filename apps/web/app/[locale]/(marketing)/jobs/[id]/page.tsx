@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { PlacePrecision } from "@/components/app/work-world/primitives";
 import { notFound } from "next/navigation";
-import { hreflangAlternates } from "@/lib/seo/metadata";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+import { vacancyFactChips } from "@/components/marketing/public-vacancy-card";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { buttonLinkClassName } from "@/components/ui/Button";
@@ -100,22 +101,37 @@ export async function generateMetadata({
 
   // Owner directive 2026-08-24: the raw title is member-only (it embeds
   // employer and location wording), so shared metadata is built from the
-  // occupation label — the same anonymous projection every caller receives.
-  const title = preview.occupation ?? GENERIC_TITLE[active];
+  // occupation — the same anonymous projection every caller receives — named
+  // in the READER'S language when the catalogue knows the profession (the
+  // registry the board card heads with), else the publisher's own label.
+  // Nothing is machine-translated.
+  const title =
+    (await localizedProfessionName(active, preview.professionSlug)) ??
+    preview.occupation ??
+    GENERIC_TITLE[active];
 
-  return {
+  // The ONE public-page metadata builder: brand suffix, canonical, the SAME
+  // hreflang variants the jobs sitemap declares (`hreflangAlternates` inside
+  // it — GEO/AEO P0, 2026-09-29), the per-locale share image and Twitter card.
+  // Before this the job page alone had no share image and no brand suffix
+  // (public audit 2026-10-10).
+  return buildPageMetadata({
+    locale: active,
+    path: `/jobs/${id}`,
     title,
     description: DESCRIPTION[active],
-    // The page's head declares the SAME localized variants the jobs sitemap
-    // already declares for it (`hreflangAlternates`, one helper) — a crawler
-    // reading either source reads one entity in six languages, not six
-    // unrelated pages (GEO/AEO P0, 2026-09-29).
-    alternates: {
-      canonical: `/${active}/jobs/${id}`,
-      languages: hreflangAlternates(`/jobs/${id}`),
-    },
-    openGraph: { title, description: DESCRIPTION[active] },
-  };
+  });
+}
+
+/** The catalogue profession name in the reader's language, or null when the
+ *  ad carries no slug or the catalogue has no entry — never a guess. */
+async function localizedProfessionName(
+  locale: ActiveLocale,
+  slug: string | null,
+): Promise<string | null> {
+  if (!slug) return null;
+  const t = await getTranslations({ locale, namespace: "professions" });
+  return t.has(slug as never) ? t(slug as never) : null;
 }
 
 type L = Record<ActiveLocale, string>;
@@ -693,6 +709,8 @@ export default async function JobDetailPage({
   )
     ? (preview.sourceLanguage as string)
     : undefined;
+  const localizedProfession = await localizedProfessionName(active, preview.professionSlug);
+  const factChips = vacancyFactChips(preview, active);
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
@@ -770,19 +788,38 @@ export default async function JobDetailPage({
       ) : null}
 
       {/* Members see the publisher's own title; anonymous visitors see the
-          occupation label — the raw title embeds employer and location wording
-          (owner directive 2026-08-24). */}
+          occupation — the raw title embeds employer and location wording
+          (owner directive 2026-08-24) — named in the reader's language when
+          the catalogue knows the profession, exactly as the board card heads.
+          `lang` follows whose words the heading is. */}
       <h1
-        lang={sourceLang}
+        lang={member?.titleRaw || !localizedProfession ? sourceLang : undefined}
         className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl"
       >
-        {member?.titleRaw ?? preview.occupation ?? GENERIC_TITLE[active]}
+        {member?.titleRaw ?? localizedProfession ?? preview.occupation ?? GENERIC_TITLE[active]}
       </h1>
 
-      {member?.titleRaw && preview.occupation && (
-        <p lang={sourceLang} className="mt-2 text-base text-text-muted">
-          {preview.occupation}
-        </p>
+      {/* The publisher's own occupation words, kept and marked as theirs
+          whenever the heading is something else. */}
+      {preview.occupation &&
+        (member?.titleRaw || (localizedProfession && localizedProfession !== preview.occupation)) && (
+          <p lang={sourceLang} className="mt-2 text-base text-text-muted">
+            {preview.occupation}
+          </p>
+        )}
+
+      {/* The same anonymous facts the board card shows (one builder). */}
+      {factChips.length > 0 && (
+        <ul className="mt-4 flex flex-wrap gap-2" data-testid="public-job-facts">
+          {factChips.map((chip) => (
+            <li
+              key={chip}
+              className="rounded-full border border-ink-500 px-3 py-1 text-meta text-text-secondary"
+            >
+              {chip}
+            </li>
+          ))}
+        </ul>
       )}
 
       {published && (

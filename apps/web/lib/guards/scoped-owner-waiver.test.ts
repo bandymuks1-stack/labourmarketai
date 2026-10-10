@@ -601,8 +601,14 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // the job-page hreflang fix." Bounded — not general authority.
     expect(jobs.pullRequests).toEqual([
       1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809, 1810, 1838, 1837, 1890,
-      1892, 1991, 1993, 2045, 2101, 2211,
+      1892, 1991, 1993, 2045, 2101, 2211, 2253,
     ]);
+    // #2253 (2026-10-10) on the owner's verbatim directive: "Darbo skelbimų
+    // pateikimo trūkumus taisyk naudodamas esamą architektūrą, išsaugodamas
+    // SEO, lokalizacijas ir faktinius skelbimų duomenis. Nepriskirk vertimų,
+    // kurių sistema negali patikimai pateikti." Strictly the /jobs/[id]
+    // presentation fix (catalogue profession heading, shared metadata builder,
+    // the card's own fact chips). Bounded.
     // #2211 (2026-10-09) on the owner's verbatim approval, strictly for the three
     // /jobs fixes: out-of-range pagination recovery, cross-active-locale
     // profession filter mapping, locale-correct LT/RU number formatting. Bounded.
