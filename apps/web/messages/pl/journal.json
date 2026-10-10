@@ -576,7 +576,7 @@
     "openInCalendar": "Otwórz w kalendarzu",
     "recordOnDay": "Zarejestruj pracę",
     "dayEmpty": "Brak wpisów tego dnia.",
-    "moreDays": "Pokazywane są najnowsze dni. Pozostało jeszcze {count, plural, one {# dzień} few {# dni} many {# dni} other {# dnia}} — wybierz go w kalendarzu.",
+    "moreDays": "Pokazywany jest najnowszy dzień z wpisami. Jeszcze {count, plural, one {# dzień} few {# dni} many {# dni} other {# dnia}} z wpisami — wybierz datę w kalendarzu.",
     "periodEmpty": "Brak wpisów w tym okresie."
   },
   "spreadsheet": {

@@ -156,8 +156,13 @@ const HISTORY_RELATIONSHIPS = [...PROFESSIONAL_HISTORY_RELATIONSHIPS];
  * Bounded output with an honest "+n" (the same rule the calendar panel uses,
  * `lib/planning/calendar-result.ts`) — the phone opens on a readable page,
  * and the calendar above reaches every other day in one tap.
+ *
+ * ONE day (owner launch order 2026-10-10 §7): the main view is a day and its
+ * work, never a stack of collapsible past dates. History is the calendar —
+ * pick a date, see that date. Nothing is hidden: the count below names the
+ * other recorded days and every one of them is one tap away on the grid.
  */
-const DIARY_DAY_LIMIT = 7;
+const DIARY_DAY_LIMIT = 1;
 
 /** Worker "Mano dienoraštis" — the closed self-declare loop (M1). Logs work
  *  against an engagement context; entries stay private (visibility 'closed')

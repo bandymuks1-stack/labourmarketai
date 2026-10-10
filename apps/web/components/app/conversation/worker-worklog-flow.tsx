@@ -7,6 +7,7 @@ import {
   PROJECT_FIELD_NONE,
   projectChoiceIsSatisfied,
   projectDisplayLabel,
+  projectNamedInText,
   projectPromptFor,
   type AssignedProject,
 } from "@/lib/journal/project-attribution";
@@ -497,9 +498,18 @@ export function WorkerWorkLogFlow({
   const contextProjects: AssignedProject[] =
     engagements.find((e) => e.id === engagementId)?.projects ?? [];
   const projectPrompt = projectPromptFor(contextProjects);
+  // The project the sentence itself names ("Oslo projekte …") is PRESELECTED
+  // in the picker below — visible before the confirm, changeable, and only
+  // ever one of the person's own assigned projects (owner launch order
+  // 2026-10-10 §5). An explicit pick always wins.
+  const namedProjectId =
+    projectPrompt === "ask"
+      ? projectNamedInText(contextProjects, `${notes} ${site}`)
+      : null;
+  const projectAnswer = projectChoice || namedProjectId || "";
   // A choice made for another context's projects never carries over.
-  const projectChoiceValid = projectChoiceIsSatisfied(contextProjects, projectChoice)
-    ? projectChoice
+  const projectChoiceValid = projectChoiceIsSatisfied(contextProjects, projectAnswer)
+    ? projectAnswer
     : "";
 
   function input() {
