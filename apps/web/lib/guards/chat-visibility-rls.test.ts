@@ -471,6 +471,9 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       callers.sort(),
       `unexpected service-role caller(s) — update docs/audits/CHAT_VISIBILITY_AUDIT.md and justify: ${callers.join(", ")}`,
     ).toEqual([
+      // 2026-10-09 (#2235): the expiry-sweeps cron. CRON_SECRET-gated machine caller; it calls ONLY the two
+      // service_role-only sweep RPCs (no table access, no chat table, no actor argument) and answers counts.
+      "app/api/cron/expiry-sweeps/route.ts",
       "components/admin/vacancy-sources-section.tsx",
       "lib/admin/billing-actions.ts",
       "lib/admin/company-need-intakes.ts",

@@ -293,6 +293,16 @@ audit.
   Failures are logged and swallowed; the run outcome is unaffected. Pinned
   in the `chat-visibility-rls.test.ts` caller inventory.
 
+- **2026-10-09 — `app/api/cron/expiry-sweeps/route.ts`** (#2235, owner-approved RED). A
+  CRON_SECRET-gated machine caller with no user session, so service role is the
+  only identity that may execute the two sweep RPCs
+  (`sweep_expire_stale_booking_requests_v1`, `sweep_expire_contact_disclosure_requests_v1`),
+  which are granted to `service_role` ONLY. It passes no actor: the database attributes
+  every expiry to the dedicated, banned, role-less system identity. No table is read
+  or written by the route itself, no chat table is touched, nothing is sent; the
+  response is counts and a reason code. Pinned in the `chat-visibility-rls.test.ts`
+  caller inventory.
+
 - **2026-08-09 — `app/[locale]/dashboard/admin/vacancy-sources/page.tsx` +
   `lib/vacancy-runner/vacancy-admin-actions.ts`** (real-supply train: the
   vacancy-source operator console). Superadmin-gated twice — the admin layout
