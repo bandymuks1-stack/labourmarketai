@@ -168,6 +168,13 @@ export default async function WorkInNumbersPage({
     }))
     .filter((d): d is typeof d & { name: string } => d.name !== null);
   const directions = directionsAll.slice(0, MAX_STATION_DIRECTIONS);
+  const potential = (growth?.potential ?? [])
+    .map((p) => ({
+      slug: p.slug,
+      name: skillNameOf(p.slug),
+      fromNames: p.fromSlugs.map((f) => skillNameOf(f)).filter((n): n is string => n !== null),
+    }))
+    .filter((p): p is typeof p & { name: string } => p.name !== null);
   const capLine = (kind: string, shown: number, total: number) =>
     total > shown ? (
       <p
@@ -255,7 +262,7 @@ export default async function WorkInNumbersPage({
           ) : null}
 
           {/* 6 · growth kinds with their WHY — a reading, said to be one */}
-          {growth && (kinds.length > 0 || directions.length > 0) ? (
+          {growth && (kinds.length > 0 || directions.length > 0 || potential.length > 0) ? (
             <Card compact className="flex flex-col gap-3" data-testid="wi-growth-station">
               <div className="flex flex-col gap-1" data-kind={growth.kind} data-limitation={growth.limitation}>
                 <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
@@ -271,6 +278,7 @@ export default async function WorkInNumbersPage({
                 kindsCap={capLine("kinds", kinds.length, kindsAll.length)}
                 directionsCap={capLine("directions", directions.length, directionsAll.length)}
                 intro={t("growthDerivedHint")}
+                potential={potential}
               />
             </Card>
           ) : null}

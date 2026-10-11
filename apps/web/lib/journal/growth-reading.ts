@@ -46,6 +46,7 @@
  *     copy (guarded in `lib/guards/journal-work-intelligence.test.ts`).
  */
 
+import { derivePotentialSkills, type PotentialSkill } from "@/lib/skills/potential-skills";
 import {
   computeAdjacentDirections,
   type AdjacentDirection,
@@ -206,6 +207,10 @@ export type GrowthReading = {
    */
   readonly directions: readonly GrowthDirection[];
   readonly limitation: GrowthLimitation;
+  /** POTENTIAL capabilities (Living CV constitution, decision 0023): related
+   *  skills the person's evidenced work points at but they hold in no state.
+   *  A hypothesis with its sources — never stored, never a confirmation. */
+  readonly potential?: readonly PotentialSkill[];
 };
 
 function isoDayMinus(dayIso: string, days: number): string {
@@ -338,6 +343,12 @@ export function deriveGrowthReading(
     primaryProfessionSlug: input.primaryProfessionSlug,
   });
   const demandRead = input.demandBySkill ?? null;
+  // Computed before the two-skill floor: ONE evidenced skill (a welder's
+  // welding) is already enough to point at a related capability.
+  const potential = derivePotentialSkills(
+    evidencedSlugs,
+    wi.skills.map((s) => s.slug),
+  );
 
   if (evidenced.length < 2) {
     return {
@@ -350,6 +361,7 @@ export function deriveGrowthReading(
       demandTotal: demandRead === null ? null : 0,
       directions: [],
       limitation: "insufficient_skills",
+      potential,
     };
   }
 
@@ -391,5 +403,6 @@ export function deriveGrowthReading(
     demandTotal: demandAll === null ? null : demandAll.length,
     directions,
     limitation: adjacency.limitationState,
+    potential,
   };
 }
