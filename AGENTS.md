@@ -75,6 +75,13 @@ registry, production evidence, capability graph, strategy and security analysis
 Internal Brain, namespaced per project. Ask the owner for access; do not
 reconstruct it from guesses, and do not copy it back into this repo.
 
+**Living CV (binding, decision 0023):** any change to classifiers, skill
+taxonomy, evidence, CV display, review or matching must keep direct AND
+indirect/potential capability discovery and keep evidence states apart —
+fix a wrong label or a false certainty without disabling inference
+(`docs/DECISIONS/0023-living-cv-direct-indirect-potential-capabilities.md`,
+pinned by `apps/web/lib/guards/living-cv-potential-inference.test.ts`).
+
 Before you modify or create a material product capability:
 
 1. identify the affected capability (`FUNCTION_ID`) in the private registry;

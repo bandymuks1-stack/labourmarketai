@@ -223,6 +223,14 @@ chat apart; AI output never overwrites a confirmed fact. Every read/write is bou
 the server-resolved workspace and the object; one organization's context never shows in another.
 Confirmations are single-use. See `docs/DECISIONS/0024-memory-and-context-architecture.md`.
 
+## Living CV infers, never narrows (binding, decision 0023)
+
+Living CV is a model of a person's real work, learning and evidence — not a declared-skills list.
+Keep direct AND indirect/potential capability discovery, growth and reskilling paths across every
+sector; keep evidence states apart (recorded / declared / potential / confirmed / certified). Fix a
+wrong label or a false certainty without disabling inference. See
+`docs/DECISIONS/0023-living-cv-direct-indirect-potential-capabilities.md`.
+
 ## Policy overrides
 
 DI's explicit prompt instruction always wins. If a prompt says "do not commit" 

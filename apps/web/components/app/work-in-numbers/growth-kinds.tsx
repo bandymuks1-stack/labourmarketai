@@ -12,6 +12,14 @@ export type GrowthSkillDirection = Exclude<GrowthDirection, { kind: "adjacent_op
 
 export type GrowthKindRow = GrowthSkillDirection & { readonly name: string };
 
+/** A POTENTIAL capability (decision 0023): named with the evidenced skills
+ *  it comes from, labelled as possible — never confirmed, never stored. */
+export type GrowthPotentialRow = {
+  readonly slug: string;
+  readonly name: string;
+  readonly fromNames: readonly string[];
+};
+
 export type GrowthDirectionRow = {
   readonly professionId: string;
   readonly name: string;
@@ -67,6 +75,7 @@ export function GrowthKinds({
   kindsCap,
   directionsCap,
   intro,
+  potential = [],
 }: {
   kinds: readonly GrowthKindRow[];
   directions: readonly GrowthDirectionRow[];
@@ -79,8 +88,9 @@ export function GrowthKinds({
   /** The station's own "this is a reading" sentence — folded into the SAME
    *  single explanation as the hints, so a section never stacks disclosures. */
   intro?: string;
+  potential?: readonly GrowthPotentialRow[];
 }) {
-  if (kinds.length === 0 && directions.length === 0) return null;
+  if (kinds.length === 0 && directions.length === 0 && potential.length === 0) return null;
   return (
     <>
       {kinds.length > 0 && (
@@ -161,6 +171,26 @@ export function GrowthKinds({
           {t("openOpportunities")} →
         </Link>
       </p>
+      {potential.length > 0 && (
+        <div className="flex flex-col gap-1.5" data-testid="wi-potential" data-evidence-state="potential">
+          <h4 className="text-meta font-medium text-text-secondary">{t("potentialTitle")}</h4>
+          <ExplainMore>
+            <p className="text-meta leading-relaxed text-text-muted">{t("potentialHint")}</p>
+          </ExplainMore>
+          <ul className="flex flex-col gap-1.5">
+            {potential.map((p) => (
+              <li
+                key={p.slug}
+                className="flex flex-col gap-0.5 rounded-md border border-dashed border-border-subtle px-3 py-2"
+                data-testid={`wi-potential-${p.slug}`}
+              >
+                <span className="text-support font-medium text-text-primary">{p.name}</span>
+                <span className="text-meta text-text-muted">{t("potentialFrom", { skills: p.fromNames.join(", ") })}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </>
   );
 }
