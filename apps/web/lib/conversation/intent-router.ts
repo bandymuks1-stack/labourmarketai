@@ -1197,6 +1197,15 @@ const RULES: IntentRule[] = [
       // noun → verb (DE/NL word order, LT object-first): "Mitarbeiter
       // einladen", "medewerker uitnodigen", "darbuotoją pakviesti"
       p("(kandidat|darbuotoj|worker|employee|candidate|mitarbeiter|arbeiter|medewerker|werknemer|kandida|работник|сотрудник|pracownik|kandydat)\\w*\\s*.{0,20}(pakvies|kviest|prid[eė]t|invite|einlad|hinzuf|uitnodig|toevoeg|приглас|добав|zapro[sś]|zaprosi)", 8),
+      // NL / DE SEPARABLE verbs in the imperative — the verb splits around the
+      // person: "Nodig Mateusz uit in ons team", "Lade Anna ins Team ein".
+      // Measured 2026-10-11: the Dutch sentence routed to a staffing NEED
+      // ("nodig" = needed). Anchored at the sentence start, so a need that
+      // merely contains "nodig … uit Polen" never becomes an invitation.
+      p("^(nodig|lade)\\s+.{1,60}\\b(uit|ein)\\b", 9),
+      // "in ons team" / "in het team" / "ins Team" / "in unser Team" after an
+      // invite verb.
+      p("(uitnodig|einlad|invite|pakvies|zapro[sś])\\w*\\s*.{0,40}(in\\s+ons\\s+team|in\\s+het\\s+team|ins\\s+team|in\\s+unser\\s+team)", 9),
     ],
   },
   {

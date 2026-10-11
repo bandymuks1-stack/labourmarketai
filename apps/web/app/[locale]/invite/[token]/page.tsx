@@ -492,7 +492,30 @@ export default async function InvitePage({
         </p>
       )}
 
-      {closed ? (
+      {closed && myDecision === "accepted" ? (
+        // THE PERSON WHO JUST ACCEPTED (walk 2026-10-11): signing up through
+        // the link accepts on onboarding completion and lands here — "this
+        // invitation was already accepted" read as if someone else had taken
+        // it, with no way on. Their own acceptance is a success with a door.
+        <div
+          role="status"
+          className="flex flex-col gap-3 rounded-md border border-state-success/40 bg-state-success/10 p-4 text-sm text-text-secondary"
+          data-testid="invite-accepted-by-you"
+        >
+          <p>
+            {preview.organization_name
+              ? t("acceptedByYou.withOrganization", { name: preview.organization_name })
+              : t("acceptedByYou.plain")}
+          </p>
+          <Link
+            href="/dashboard"
+            className="inline-flex min-h-11 w-fit items-center rounded-md bg-gradient-cta px-5 py-2 text-sm font-semibold text-text-on-brand transition-opacity hover:opacity-90"
+            data-testid="invite-accepted-continue"
+          >
+            {t("acceptedByYou.continue")}
+          </Link>
+        </div>
+      ) : closed ? (
         <p
           className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-secondary"
           data-testid="invite-closed"

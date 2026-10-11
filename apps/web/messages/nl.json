@@ -12205,6 +12205,11 @@
         "body": "Deze uitnodiging is verstuurd naar {email}. Je bent ingelogd met een ander adres, dus ze kan vanuit dit account niet worden getoond of beantwoord. Log in met het uitgenodigde adres en open deze link opnieuw.",
         "bodyNoHint": "Deze uitnodiging is verstuurd naar een ander e-mailadres dan dat waarmee je bent ingelogd, dus ze kan vanuit dit account niet worden getoond of beantwoord. Log in met het uitgenodigde adres en open deze link opnieuw.",
         "untouched": "Er is niets geaccepteerd of gewijzigd. De uitnodiging wacht nog steeds op de persoon aan wie ze is gestuurd."
+      },
+      "acceptedByYou": {
+        "withOrganization": "Je hebt deze uitnodiging geaccepteerd — je bent nu verbonden met {name}.",
+        "plain": "Je hebt deze uitnodiging geaccepteerd — de verbinding is gemaakt.",
+        "continue": "Naar mijn ruimte →"
       }
     },
     "teamEnquiriesTitle": "Mijn aanvragen aan ploegen",
