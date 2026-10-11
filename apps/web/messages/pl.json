@@ -7201,8 +7201,8 @@
     },
     "inviteOutcome": {
       "sent": "Zaproszenie wysłane e-mailem. Członkostwo zaczyna się, gdy pracownik je zaakceptuje.",
-      "created": "Zaproszenie utworzone. Pracownik zobaczy je w sekcji Moja sieć i tam podejmie decyzję.",
-      "deliveryFailed": "Zaproszenie zapisane, ale nie udało się dostarczyć e-maila. Pracownik nadal może je zobaczyć w sekcji Moja sieć.",
+      "created": "Zaproszenie utworzone — e-mail nie został wysłany. Skopiuj link poniżej i wyślij go pracownikowi samodzielnie; otworzy go, zaloguje się i zaakceptuje.",
+      "deliveryFailed": "Zaproszenie zapisane, ale nie udało się dostarczyć e-maila. Skopiuj link poniżej i wyślij go samodzielnie.",
       "alreadyInvited": "Ten pracownik ma już otwarte zaproszenie do tej brygady.",
       "rateLimited": "Osiągnięto na razie limit zaproszeń. Spróbuj ponownie później.",
       "notAuthorized": "Tylko właściciel brygady może wysyłać zaproszenia.",
@@ -7276,7 +7276,10 @@
         "error": "Nie udało się zapisać odpowiedzi. Nic nie zostało zmienione."
       }
     },
-    "addableUnavailable": "Nie udało się wczytać listy powiązanych pracowników — dodawanie nie jest teraz możliwe."
+    "addableUnavailable": "Nie udało się wczytać listy powiązanych pracowników — dodawanie nie jest teraz możliwe.",
+    "inviteLinkNote": "Wyślij ten link pracownikowi (wiadomość, SMS, WhatsApp). Zaakceptować może tylko zaproszona osoba.",
+    "inviteLinkCopy": "Kopiuj link",
+    "inviteLinkCopied": "Skopiowano"
   },
   "teamEnquiries": {
     "enquireButton": "Zapytaj ten zespół o pracę",

@@ -7201,8 +7201,8 @@
     },
     "inviteOutcome": {
       "sent": "Einladung per E-Mail gesendet. Die Mitgliedschaft beginnt, sobald die Arbeitskraft sie annimmt.",
-      "created": "Einladung erstellt. Die Arbeitskraft sieht sie unter Mein Netzwerk und entscheidet dort selbst.",
-      "deliveryFailed": "Einladung gespeichert, aber die E-Mail konnte nicht zugestellt werden. Die Arbeitskraft sieht sie dennoch unter Mein Netzwerk.",
+      "created": "Einladung erstellt — es wurde keine E-Mail gesendet. Kopieren Sie den Link unten und schicken Sie ihn der Arbeitskraft selbst; sie öffnet ihn, meldet sich an und nimmt an.",
+      "deliveryFailed": "Einladung gespeichert, aber die E-Mail konnte nicht zugestellt werden. Kopieren Sie den Link unten und schicken Sie ihn selbst.",
       "alreadyInvited": "Diese Arbeitskraft hat bereits eine offene Einladung in diese Kolonne.",
       "rateLimited": "Einladungslimit vorerst erreicht. Versuchen Sie es später erneut.",
       "notAuthorized": "Nur der Kolonneninhaber kann Einladungen senden.",
@@ -7276,7 +7276,10 @@
         "error": "Die Antwort konnte nicht gespeichert werden. Es wurde nichts geändert."
       }
     },
-    "addableUnavailable": "Die Liste der verknüpften Arbeitskräfte konnte nicht geladen werden — Hinzufügen ist derzeit nicht möglich."
+    "addableUnavailable": "Die Liste der verknüpften Arbeitskräfte konnte nicht geladen werden — Hinzufügen ist derzeit nicht möglich.",
+    "inviteLinkNote": "Schicken Sie diesen Link an die Arbeitskraft (Nachricht, SMS, WhatsApp). Nur die eingeladene Person kann annehmen.",
+    "inviteLinkCopy": "Link kopieren",
+    "inviteLinkCopied": "Kopiert"
   },
   "teamEnquiries": {
     "enquireButton": "Dieser Kolonne eine Anfrage senden",

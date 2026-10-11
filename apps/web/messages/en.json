@@ -7201,8 +7201,8 @@
     },
     "inviteOutcome": {
       "sent": "Invitation emailed. Membership starts when the worker accepts it.",
-      "created": "Invitation created. The worker will see it under My network and decides there.",
-      "deliveryFailed": "Invitation saved, but the email could not be delivered. The worker can still see it under My network.",
+      "created": "Invitation created — no e-mail was sent. Copy the link below and send it to the worker yourself; they open it, sign in and accept.",
+      "deliveryFailed": "Invitation saved, but the e-mail could not be delivered. Copy the link below and send it to the worker yourself.",
       "alreadyInvited": "This worker already has an open invitation to this brigade.",
       "rateLimited": "Invitation limit reached for now. Try again later.",
       "notAuthorized": "Only the brigade owner can send invitations.",
@@ -7276,7 +7276,10 @@
         "error": "Could not save the answer. Nothing was changed."
       }
     },
-    "addableUnavailable": "The linked-worker list could not be loaded — adding is not possible right now."
+    "addableUnavailable": "The linked-worker list could not be loaded — adding is not possible right now.",
+    "inviteLinkNote": "Send this link to the worker (message, SMS, WhatsApp). Only the invited person can accept it.",
+    "inviteLinkCopy": "Copy link",
+    "inviteLinkCopied": "Copied"
   },
   "teamEnquiries": {
     "enquireButton": "Ask this team about work",

@@ -7201,8 +7201,8 @@
     },
     "inviteOutcome": {
       "sent": "Uitnodiging per e-mail verstuurd. Het lidmaatschap begint zodra de werknemer die accepteert.",
-      "created": "Uitnodiging aangemaakt. De werknemer ziet die onder Mijn netwerk en beslist daar zelf.",
-      "deliveryFailed": "Uitnodiging opgeslagen, maar de e-mail kon niet worden bezorgd. De werknemer ziet die alsnog onder Mijn netwerk.",
+      "created": "Uitnodiging aangemaakt — er is geen e-mail verstuurd. Kopieer de link hieronder en stuur hem zelf naar de medewerker; die opent hem, logt in en accepteert.",
+      "deliveryFailed": "Uitnodiging opgeslagen, maar de e-mail kon niet worden bezorgd. Kopieer de link hieronder en stuur hem zelf.",
       "alreadyInvited": "Deze werknemer heeft al een openstaande uitnodiging voor deze brigade.",
       "rateLimited": "Uitnodigingslimiet voorlopig bereikt. Probeer het later opnieuw.",
       "notAuthorized": "Alleen de brigade-eigenaar kan uitnodigingen versturen.",
@@ -7276,7 +7276,10 @@
         "error": "Het antwoord kon niet worden opgeslagen. Er is niets gewijzigd."
       }
     },
-    "addableUnavailable": "De lijst met gekoppelde werknemers kon niet worden geladen — toevoegen is nu niet mogelijk."
+    "addableUnavailable": "De lijst met gekoppelde werknemers kon niet worden geladen — toevoegen is nu niet mogelijk.",
+    "inviteLinkNote": "Stuur deze link naar de medewerker (bericht, sms, WhatsApp). Alleen de uitgenodigde persoon kan accepteren.",
+    "inviteLinkCopy": "Link kopiëren",
+    "inviteLinkCopied": "Gekopieerd"
   },
   "teamEnquiries": {
     "enquireButton": "Deze ploeg een aanvraag sturen",

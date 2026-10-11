@@ -264,10 +264,14 @@ describe("app surface — reuse of the existing spine, no parallel team system",
     expect(lib).not.toMatch(/\.delete\(/);
     expect(lib).not.toMatch(/add_team_member/);
     expect(panel).not.toMatch(/add_team_member/);
-    // The invitee's email / invite link never reach the client from this
-    // surface — the action returns only a closed outcome vocabulary.
-    expect(actions).not.toMatch(/inviteLink/);
+    // The invitee's email never reaches the client from this surface. The
+    // invite LINK does (2026-10-11): with no active e-mail provider it is the
+    // only delivery, exactly as on /dashboard/network, and acceptance is bound
+    // to the invited address (accept_invitation_apply_v2 ->
+    // invitation_session_email_matches_v1), so the link is not a bearer grant.
+    // It is the creation result's own link, never re-read from storage.
     expect(actions).not.toMatch(/first\?\.email/);
+    expect(actions).toMatch(/const inviteLink = first\?\.inviteLink;/);
   });
 
   it("membership provenance is derived from the real invitations ledger, never invented", () => {
