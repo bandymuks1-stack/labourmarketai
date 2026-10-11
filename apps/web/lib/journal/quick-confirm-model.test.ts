@@ -41,22 +41,22 @@ describe("scopeSkillsToConfirm", () => {
     expect(r.skills).toEqual([]);
   });
 
-  it("worker_declared: zero links keeps the previous behaviour — the worker's whole unverified list, disclosed", () => {
+  it("worker_declared: zero links confirms NO skill — the entry never showed the worker's other skills", () => {
     const r = scopeSkillsToConfirm({
       linkedSkillIds: new Set(),
       workerUnverified: [WELD, ROOF],
     });
     expect(r.scope).toBe("worker_declared");
-    expect(r.skills).toEqual([WELD, ROOF]);
+    expect(r.skills).toEqual([]);
   });
 
-  it("worker_declared: a FAILED link read means links unknown → same disclosed fallback, never a silent empty list", () => {
+  it("worker_declared: a FAILED link read means links unknown → no skill is confirmed, the tap approves the entry only", () => {
     const r = scopeSkillsToConfirm({
       linkedSkillIds: null,
       workerUnverified: [WELD],
     });
     expect(r.scope).toBe("worker_declared");
-    expect(r.skills).toEqual([WELD]);
+    expect(r.skills).toEqual([]);
   });
 
   it("skills_unavailable: a FAILED worker_skills read confirms nothing and is named (not 'no unconfirmed skills')", () => {

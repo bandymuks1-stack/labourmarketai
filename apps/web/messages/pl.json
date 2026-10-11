@@ -7575,7 +7575,7 @@
       "confirmNote": "Notatka (opcjonalnie)",
       "confirmSubmit": "Potwierdź i zweryfikuj",
       "alreadyVerified": "Już zweryfikowane",
-      "noSkillsToConfirm": "Ten pracownik nie ma już zadeklarowanych umiejętności do potwierdzenia.",
+      "noSkillsToConfirm": "Ten wpis nie ma powiązanych umiejętności do potwierdzenia. Zatwierdzenie wpisu potwierdza samą pracę.",
       "result": {
         "skillsVerified": "Zweryfikowano umiejętności: {count}.",
         "skillNotOwned": "Ta umiejętność nie jest zadeklarowana przez tego pracownika.",
