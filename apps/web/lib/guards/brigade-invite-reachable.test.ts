@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { parseEmailList } from "@/lib/invitations/model";
 
 /**
  * A crew can actually be formed (walk 2026-10-11): `profiles` is own-row-only,
@@ -18,6 +19,16 @@ describe("brigade invitations can reach a worker", () => {
     const a = read("lib/company/team-brigade-actions.ts");
     expect(a).toMatch(/\(await lookupLinkedWorkerEmail\(input\.workerId\)\) \?\?/);
     expect(a).toMatch(/invitationType: "join_team"/);
+  });
+
+  it("validates the typed address with the canonical invitation parser", () => {
+    const a = read("lib/company/team-brigade-actions.ts");
+    expect(a).toContain('parseEmailList(input.email ?? "").valid[0]');
+    expect(a).not.toContain("[^s@]");
+    for (const ok of ["oksana.k@lmtest.local.test", "mateusz.kowalski@lmtest.local.test", "Sanne@VanDijk.nl"]) {
+      expect(parseEmailList(ok).valid).toEqual([ok.toLowerCase()]);
+    }
+    expect(parseEmailList("not an email").valid).toEqual([]);
   });
 
   it("the panel asks for the address after no_email and resends with it", () => {
