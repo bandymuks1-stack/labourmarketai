@@ -145,8 +145,13 @@ function trimName(name: string): string {
   return name.replace(/[.,:;!?]+$/u, "").trim();
 }
 // "šiandien" today, "vakar" yesterday, explicit ISO, "liepos 24"/"24 d."
-const TODAY_RE = /(šiandien|today|сегодня|vandaag|heute)/iu;
-const YESTERDAY_RE = /(vakar|yesterday|вчера|gisteren|gestern)/iu;
+const TODAY_RE = /(šiandien|today|сегодня|vandaag|heute|dzisiaj|dziś)/iu;
+const YESTERDAY_RE = /(vakar|yesterday|вчера|gisteren|gestern|wczoraj)/iu;
+// Checked FIRST: every one of these CONTAINS its language's "yesterday"
+// (už-VAKAR, поза-ВЧЕРА, vor-GESTERN, eer-GISTEREN, przed-WCZORAJ), so a
+// day-before-yesterday sentence used to be filed one day late.
+const DAY_BEFORE_YESTERDAY_RE =
+  /(užvakar|uzvakar|day\s+before\s+yesterday|позавчера|vorgestern|eergisteren|przedwczoraj)/iu;
 const ISO_RE = /\b(\d{4})-(\d{2})-(\d{2})\b/;
 
 /** Add `deltaDays` to an ISO date string, staying pure (no Date.now). */
@@ -176,6 +181,9 @@ export function extractWorkLog(
   const iso = raw.match(ISO_RE);
   if (iso) {
     date = `${iso[1]}-${iso[2]}-${iso[3]}`;
+    dateSignal = true;
+  } else if (DAY_BEFORE_YESTERDAY_RE.test(q)) {
+    date = shiftIso(today, -2);
     dateSignal = true;
   } else if (YESTERDAY_RE.test(q)) {
     date = shiftIso(today, -1);
