@@ -70,7 +70,7 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261007210000_",
       // 2026-10-08 (RED by GRANT): SELECT on five RLS tables whose policies were unreachable.
       "20261008210000_",
-      // 2026-10-11 (RED by CREATE EXTENSION, needs-human-gate): pg_trgm + one trigram index for free-text job search.
+      // 2026-10-11 (RED by SECURITY DEFINER replace, needs-human-gate): free-text job search without the per-row ICU ilike.
       "20261011090000_",
     ];
     const before = names.filter(
