@@ -18768,7 +18768,12 @@
       "project_required": "Pasirinkite projektą.",
       "invalid_decision": "Nežinomas atsakymas.",
       "needs_migration": "Šiuo metu nepasiekiama.",
-      "error": "Nepavyko atlikti. Niekas nebuvo pakeista."
+      "error": "Nepavyko atlikti. Niekas nebuvo pakeista.",
+      "terms_empty": "Užpildykite bent vieną sąlygą.",
+      "terms_invalid": "Patikrinkite skaičius ir datas.",
+      "terms_limit_reached": "Šis pasiūlymas jau turi 50 sąlygų versijų.",
+      "terms_await_other_side": "Tai jūsų pačių sąlygos — atsako kita pusė.",
+      "organization_offer_not_a_unit": "Įmonės pasiūlymas nepriskiriamas kaip komanda; žmones suderinkite pokalbyje."
     },
     "received": {
       "title": "Šiam poreikiui pasiūlytos komandos",
@@ -18820,7 +18825,43 @@
         "already_assigned": "Ši komanda jau priskirta. Niekas nepasikeitė."
       },
       "createProject": "Sukurti projektą",
-      "message": "Rašyti komandai"
+      "message": "Rašyti komandai",
+      "kindOrganization": "Įmonės pasiūlymas",
+      "orgNext": "Sutarta iš esmės (ne sutartis). Detales ir dirbsiančius žmones suderinkite pokalbyje."
+    },
+    "orgHeading": "Pasiūlyti savo įmonę atviram poreikiui",
+    "orgIntro": "Pasiūlykite pačią įmonę — savo žmones, paslaugą ar kaip subrangovą — vienam atviram poreikiui. Brigados kurti nereikia.",
+    "orgNotYet": "Visos įmonės siūlymas dar įjungiamas. Kol kas pasiūlykite brigadą.",
+    "termsLegend": "Jūsų sąlygos (nebūtina — galėsite pakeisti vėliau)",
+    "terms": {
+      "heading": "Sąlygos ir derybos",
+      "loading": "Įkeliama…",
+      "notYet": "Sąlygų derybos dar įjungiamos. Kol kas naudokite pokalbį.",
+      "unavailable": "Nepavyko įkelti sąlygų.",
+      "none": "Sąlygų dar nepasiūlyta.",
+      "byYou": "Pasiūlėte jūs",
+      "byOther": "Pasiūlė kita pusė",
+      "status": {
+        "proposed": "Atvira",
+        "superseded": "Pakeista",
+        "accepted": "Sutarta",
+        "declined": "Atmesta"
+      },
+      "capacity": "Žmonių",
+      "rate": "Įkainis",
+      "ratePlaceholder": "pvz. 32 €/val. arba fiksuota kaina",
+      "period": "Laikotarpis",
+      "start": "Pradžia",
+      "end": "Pabaiga",
+      "scope": "Darbų apimtis",
+      "conditions": "Sąlygos",
+      "agree": "Sutikti su {version} versija",
+      "agreeNote": "Sutikimas reiškia sutarimą iš esmės — tai ne pasirašyta sutartis.",
+      "agreed": "Sutarta iš esmės.",
+      "proposeFirst": "Pasiūlyti sąlygas",
+      "proposeNext": "Pasiūlyti pakeistas sąlygas (nauja versija)",
+      "propose": "Siųsti sąlygas",
+      "proposed": "{version} versija išsiųsta."
     }
   },
   "teamAssignment": {

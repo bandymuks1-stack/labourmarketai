@@ -18768,7 +18768,12 @@
       "project_required": "Wählen Sie ein Projekt.",
       "invalid_decision": "Unbekannte Antwort.",
       "needs_migration": "Derzeit nicht verfügbar.",
-      "error": "Das ließ sich nicht abschließen. Nichts wurde geändert."
+      "error": "Das ließ sich nicht abschließen. Nichts wurde geändert.",
+      "terms_empty": "Füllen Sie mindestens eine Bedingung aus.",
+      "terms_invalid": "Prüfen Sie Zahlen und Daten.",
+      "terms_limit_reached": "Dieses Angebot hat bereits 50 Versionen.",
+      "terms_await_other_side": "Das sind Ihre eigenen Bedingungen — die andere Seite antwortet.",
+      "organization_offer_not_a_unit": "Ein Unternehmensangebot wird nicht als Team zugewiesen; klären Sie die Personen im Gespräch."
     },
     "received": {
       "title": "Für diesen Bedarf angebotene Teams",
@@ -18820,7 +18825,43 @@
         "already_assigned": "Dieses Team war bereits zugewiesen. Nichts wurde geändert."
       },
       "createProject": "Projekt anlegen",
-      "message": "Dem Team schreiben"
+      "message": "Dem Team schreiben",
+      "kindOrganization": "Unternehmensangebot",
+      "orgNext": "Grundsätzlich vereinbart (kein Vertrag). Details und die arbeitenden Personen klären Sie im Gespräch."
+    },
+    "orgHeading": "Unser Unternehmen für einen offenen Bedarf anbieten",
+    "orgIntro": "Bieten Sie Ihr Unternehmen selbst an — Ihre Leute, Ihre Leistung oder als Subunternehmer — für einen offenen Bedarf. Kein Team muss zuerst angelegt werden.",
+    "orgNotYet": "Das Anbieten des ganzen Unternehmens wird gerade freigeschaltet. Bieten Sie bis dahin ein Team an.",
+    "termsLegend": "Ihre Bedingungen (optional — später änderbar)",
+    "terms": {
+      "heading": "Bedingungen und Verhandlung",
+      "loading": "Wird geladen…",
+      "notYet": "Die Verhandlung von Bedingungen wird gerade freigeschaltet. Nutzen Sie bis dahin das Gespräch.",
+      "unavailable": "Bedingungen konnten nicht geladen werden.",
+      "none": "Noch keine Bedingungen vorgeschlagen.",
+      "byYou": "Von Ihnen vorgeschlagen",
+      "byOther": "Von der anderen Seite vorgeschlagen",
+      "status": {
+        "proposed": "Offen",
+        "superseded": "Ersetzt",
+        "accepted": "Vereinbart",
+        "declined": "Abgelehnt"
+      },
+      "capacity": "Personen",
+      "rate": "Preis",
+      "ratePlaceholder": "z. B. 32 €/Std. oder Festpreis",
+      "period": "Zeitraum",
+      "start": "Beginn",
+      "end": "Ende",
+      "scope": "Leistungsumfang",
+      "conditions": "Bedingungen",
+      "agree": "Version {version} zustimmen",
+      "agreeNote": "Zustimmung heißt grundsätzlich vereinbart — kein unterschriebener Vertrag.",
+      "agreed": "Grundsätzlich vereinbart.",
+      "proposeFirst": "Bedingungen vorschlagen",
+      "proposeNext": "Geänderte Bedingungen vorschlagen (neue Version)",
+      "propose": "Bedingungen senden",
+      "proposed": "Version {version} gesendet."
     }
   },
   "teamAssignment": {

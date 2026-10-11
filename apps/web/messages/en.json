@@ -18768,7 +18768,12 @@
       "project_required": "Choose a project.",
       "invalid_decision": "Unknown answer.",
       "needs_migration": "Not available right now.",
-      "error": "Could not complete this. Nothing was changed."
+      "error": "Could not complete this. Nothing was changed.",
+      "terms_empty": "Fill in at least one term.",
+      "terms_invalid": "Check the numbers and dates.",
+      "terms_limit_reached": "This offer already has 50 versions of terms.",
+      "terms_await_other_side": "These are your own terms — the other side answers them.",
+      "organization_offer_not_a_unit": "A company offer is not assigned as a team; agree the people in the conversation."
     },
     "received": {
       "title": "Teams offered for this need",
@@ -18820,7 +18825,43 @@
         "already_assigned": "This team was already assigned. Nothing changed."
       },
       "createProject": "Create a project",
-      "message": "Message the team"
+      "message": "Message the team",
+      "kindOrganization": "Company offer",
+      "orgNext": "Agreed in principle (not a contract). Settle the details and the people who will work in the conversation."
+    },
+    "orgHeading": "Offer our company to an open need",
+    "orgIntro": "Offer your company itself — your people, your service, or as a subcontractor — against one open need. No brigade to set up first.",
+    "orgNotYet": "Offering the whole company is not open yet. Until then, offer a brigade.",
+    "termsLegend": "Your terms (optional — you can change them later)",
+    "terms": {
+      "heading": "Terms and negotiation",
+      "loading": "Loading…",
+      "notYet": "Terms are not open here yet. Agree them in the conversation meanwhile.",
+      "unavailable": "Could not load the terms.",
+      "none": "No terms proposed yet.",
+      "byYou": "Proposed by you",
+      "byOther": "Proposed by the other side",
+      "status": {
+        "proposed": "Open",
+        "superseded": "Replaced",
+        "accepted": "Agreed",
+        "declined": "Declined"
+      },
+      "capacity": "People",
+      "rate": "Rate",
+      "ratePlaceholder": "e.g. 32 €/h, or fixed price",
+      "period": "Period",
+      "start": "Start",
+      "end": "End",
+      "scope": "Scope of work",
+      "conditions": "Conditions",
+      "agree": "Agree to version {version}",
+      "agreeNote": "Agreeing means agreed in principle — not a signed contract.",
+      "agreed": "Agreed in principle.",
+      "proposeFirst": "Propose terms",
+      "proposeNext": "Propose changed terms (a new version)",
+      "propose": "Send terms",
+      "proposed": "Version {version} sent."
     }
   },
   "teamAssignment": {

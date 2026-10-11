@@ -18768,7 +18768,12 @@
       "project_required": "Kies een project.",
       "invalid_decision": "Onbekend antwoord.",
       "needs_migration": "Nu niet beschikbaar.",
-      "error": "Dit kon niet worden voltooid. Er is niets gewijzigd."
+      "error": "Dit kon niet worden voltooid. Er is niets gewijzigd.",
+      "terms_empty": "Vul minstens één voorwaarde in.",
+      "terms_invalid": "Controleer de getallen en datums.",
+      "terms_limit_reached": "Dit aanbod heeft al 50 versies van voorwaarden.",
+      "terms_await_other_side": "Dit zijn uw eigen voorwaarden — de andere partij antwoordt.",
+      "organization_offer_not_a_unit": "Een bedrijfsaanbod wordt niet als ploeg toegewezen; spreek de mensen af in het gesprek."
     },
     "received": {
       "title": "Voor deze vraag aangeboden teams",
@@ -18820,7 +18825,43 @@
         "already_assigned": "Dit team was al toegewezen. Er is niets gewijzigd."
       },
       "createProject": "Project aanmaken",
-      "message": "Bericht aan het team"
+      "message": "Bericht aan het team",
+      "kindOrganization": "Bedrijfsaanbod",
+      "orgNext": "In principe akkoord (geen contract). Spreek de details en de mensen die het werk doen af in het gesprek."
+    },
+    "orgHeading": "Ons bedrijf aanbieden voor een open behoefte",
+    "orgIntro": "Bied uw bedrijf zelf aan — uw mensen, uw dienst of als onderaannemer — voor één open behoefte. Eerst een ploeg aanmaken is niet nodig.",
+    "orgNotYet": "Het hele bedrijf aanbieden wordt ingeschakeld. Bied tot dan een ploeg aan.",
+    "termsLegend": "Uw voorwaarden (optioneel — later te wijzigen)",
+    "terms": {
+      "heading": "Voorwaarden en onderhandeling",
+      "loading": "Laden…",
+      "notYet": "Onderhandelen over voorwaarden wordt ingeschakeld. Gebruik intussen het gesprek.",
+      "unavailable": "Voorwaarden konden niet worden geladen.",
+      "none": "Nog geen voorwaarden voorgesteld.",
+      "byYou": "Door u voorgesteld",
+      "byOther": "Door de andere partij voorgesteld",
+      "status": {
+        "proposed": "Openstaand",
+        "superseded": "Vervangen",
+        "accepted": "Akkoord",
+        "declined": "Afgewezen"
+      },
+      "capacity": "Mensen",
+      "rate": "Tarief",
+      "ratePlaceholder": "bijv. 32 €/u of vaste prijs",
+      "period": "Periode",
+      "start": "Begin",
+      "end": "Einde",
+      "scope": "Omvang van het werk",
+      "conditions": "Voorwaarden",
+      "agree": "Akkoord met versie {version}",
+      "agreeNote": "Akkoord betekent in principe akkoord — geen getekend contract.",
+      "agreed": "In principe akkoord.",
+      "proposeFirst": "Voorwaarden voorstellen",
+      "proposeNext": "Gewijzigde voorwaarden voorstellen (nieuwe versie)",
+      "propose": "Voorwaarden versturen",
+      "proposed": "Versie {version} verstuurd."
     }
   },
   "teamAssignment": {

@@ -18768,7 +18768,12 @@
       "project_required": "Wybierz projekt.",
       "invalid_decision": "Nieznana odpowiedź.",
       "needs_migration": "Obecnie niedostępne.",
-      "error": "Nie udało się tego wykonać. Nic nie zmieniono."
+      "error": "Nie udało się tego wykonać. Nic nie zmieniono.",
+      "terms_empty": "Uzupełnij co najmniej jeden warunek.",
+      "terms_invalid": "Sprawdź liczby i daty.",
+      "terms_limit_reached": "Ta oferta ma już 50 wersji warunków.",
+      "terms_await_other_side": "To twoje własne warunki — odpowiada druga strona.",
+      "organization_offer_not_a_unit": "Oferta firmy nie jest przypisywana jako zespół; ludzi ustalcie w rozmowie."
     },
     "received": {
       "title": "Zespoły zaproponowane do tego zapotrzebowania",
@@ -18820,7 +18825,43 @@
         "already_assigned": "Ten zespół był już przypisany. Nic nie zmieniono."
       },
       "createProject": "Utwórz projekt",
-      "message": "Napisz do zespołu"
+      "message": "Napisz do zespołu",
+      "kindOrganization": "Oferta firmy",
+      "orgNext": "Uzgodnione wstępnie (nie umowa). Szczegóły i ludzi, którzy będą pracować, ustalcie w rozmowie."
+    },
+    "orgHeading": "Zaoferuj naszą firmę do otwartej potrzeby",
+    "orgIntro": "Zaoferuj samą firmę — swoich ludzi, swoją usługę lub jako podwykonawca — do jednej otwartej potrzeby. Nie trzeba najpierw tworzyć brygady.",
+    "orgNotYet": "Oferowanie całej firmy jest właśnie włączane. Do tego czasu zaoferuj brygadę.",
+    "termsLegend": "Twoje warunki (opcjonalnie — można je później zmienić)",
+    "terms": {
+      "heading": "Warunki i negocjacje",
+      "loading": "Ładowanie…",
+      "notYet": "Negocjowanie warunków jest właśnie włączane. Do tego czasu użyj rozmowy.",
+      "unavailable": "Nie udało się wczytać warunków.",
+      "none": "Nie zaproponowano jeszcze warunków.",
+      "byYou": "Zaproponowane przez ciebie",
+      "byOther": "Zaproponowane przez drugą stronę",
+      "status": {
+        "proposed": "Otwarte",
+        "superseded": "Zastąpione",
+        "accepted": "Uzgodnione",
+        "declined": "Odrzucone"
+      },
+      "capacity": "Osób",
+      "rate": "Stawka",
+      "ratePlaceholder": "np. 32 €/h lub cena ryczałtowa",
+      "period": "Okres",
+      "start": "Początek",
+      "end": "Koniec",
+      "scope": "Zakres prac",
+      "conditions": "Warunki",
+      "agree": "Zgoda na wersję {version}",
+      "agreeNote": "Zgoda oznacza uzgodnienie wstępne — nie podpisaną umowę.",
+      "agreed": "Uzgodnione wstępnie.",
+      "proposeFirst": "Zaproponuj warunki",
+      "proposeNext": "Zaproponuj zmienione warunki (nowa wersja)",
+      "propose": "Wyślij warunki",
+      "proposed": "Wersja {version} wysłana."
     }
   },
   "teamAssignment": {

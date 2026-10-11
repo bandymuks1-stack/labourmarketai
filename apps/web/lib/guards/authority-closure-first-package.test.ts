@@ -70,6 +70,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261007210000_",
       // 2026-10-08 (RED by GRANT): SELECT on five RLS tables whose policies were unreachable.
       "20261008210000_",
+      // 2026-10-11 (RED by SECURITY DEFINER replace, needs-human-gate): supply offer negotiation: organization offers, versioned terms, need titles; RED by SECURITY DEFINER replace, needs-human-gate.
+      "20261011200000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
