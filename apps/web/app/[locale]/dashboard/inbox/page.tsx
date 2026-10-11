@@ -85,10 +85,15 @@ export default async function InboxPage({
 
   let pending: InboxEntry[] = [];
   if (!loadFailed && reviewableIds.length > 0) {
+    // LEFT join on workers, never !inner (walk 2026-10-11): a learner's
+    // workers row is hidden from their institution by least privilege
+    // (can_view_worker: student grants no worker visibility), so an inner join
+    // dropped every student entry the institution may read AND review. The
+    // name falls back to NO_READABLE_NAME; the entry itself stays reviewable.
     const { data: rows, error: rowsError } = await supabase
       .from("journal_entries")
       .select(
-        `id, original_text, created_at, worker_id, engagement_contexts(organization_id), journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), workers!inner(${WORKER_NAME_FIELDS})`,
+        `id, original_text, created_at, worker_id, engagement_contexts(organization_id), journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), workers(${WORKER_NAME_FIELDS})`,
       )
       .in("id", reviewableIds)
       .order("created_at", { ascending: true });
