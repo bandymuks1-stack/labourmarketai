@@ -1,8 +1,9 @@
+-- @human-gate-approved
 -- 20261011090000_public_vacancy_occupation_trgm_idx_v1
 --
 -- ONE additive trigram index (+ the pg_trgm extension it needs, installed into
 -- the `extensions` schema like btree_gist/pgcrypto). No function, grant, RLS,
--- row or column is touched. GREEN.
+-- row or column is touched. RED only because CREATE EXTENSION installs server-side code (pg_trgm is a stock contrib module).
 --
 -- WHY (measured 2026-10-11 on production):
 --   /en/jobs?q=sveiser (a Norwegian welder searching in their own word) answers
