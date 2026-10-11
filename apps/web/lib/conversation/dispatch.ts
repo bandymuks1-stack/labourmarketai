@@ -39,6 +39,7 @@ import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority
 import { resolveRenameTarget } from "@/lib/company/organization-rename";
 import { interestStateFingerprint } from "@/lib/opportunities/interest";
 import { journalChainFingerprint } from "@/lib/journal/journal-chain-fingerprint";
+import { demandStateFingerprint } from "@/lib/demand/demand-request";
 import { invitationStateFingerprint } from "@/lib/invitations/attention";
 import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
 import type { ExecWorkspace } from "@/lib/conversation/executor-contract";
@@ -265,6 +266,30 @@ async function stateFingerprint(
     const head = await journalChainFingerprint({ supabase, userId });
     if (head.ok) return head.fingerprint;
     return `journal-head:${head.result.ok ? "unavailable" : head.result.code}`;
+  }
+  if (actionId === "company.create-demand") {
+    /**
+     * ONE NEED PER CONFIRMATION (memory/action lifecycle, 2026-10-11). Demand
+     * creation is NOT idempotent and fell through to "n/a", so a token stayed
+     * spendable for its whole TTL — a double-tap or a retried request created
+     * a second need. THE shared fingerprint (`demandStateFingerprint`, the one
+     * the MCP capability path already binds to): the caller's newest own
+     * request. A submit adds a row, so a replay is `stale_confirmation`.
+     */
+    return demandStateFingerprint({ supabase, userId });
+  }
+  if (actionId === "company.create-project") {
+    /** Same rule for projects: the newest project the caller can see (RLS),
+     *  which a successful create replaces. Unreadable → a fixed marker (the
+     *  previous behaviour), never a fabricated success. */
+    const { data, error } = await supabase
+      .from("projects")
+      .select("id")
+      .order("created_at", { ascending: false })
+      .limit(1);
+    if (error) return "project:unreadable";
+    const rows = (data ?? []) as { id: string }[];
+    return rows.length === 0 ? "project:none" : `project:latest:${rows[0].id}`;
   }
   return "n/a";
 }
