@@ -900,7 +900,7 @@
     "directionCoverage": "Twoje wpisy potwierdzają {shared} z {total} umiejętności tego kierunku",
     "directionMissing": "jeszcze niepotwierdzone: {skills}",
     "potentialTitle": "Umiejętności, które Twoja praca może też obejmować",
-    "potentialHint": "Hipoteza na podstawie umiejętności potwierdzonych Twoimi wpisami — niepotwierdzona i nie jest kwalifikacją. Doprecyzuj własnymi słowami albo kierownik może ją poświadczyć — wtedy stanie się dowodem.",
+    "potentialHint": "Możliwość odczytana z umiejętności potwierdzonych Twoimi wpisami — niepotwierdzona i nie jest kwalifikacją. Powiedz własnymi słowami, czy to robisz, albo może to potwierdzić kierownik.",
     "potentialFrom": "możliwa · z: {skills}",
     "growthTitle": "Gdzie możesz się rozwijać",
     "growthBasis": "Na podstawie {count, plural, one {# umiejętności} few {# umiejętności} many {# umiejętności} other {# umiejętności}} potwierdzonych Twoimi wpisami — {hours} godz. z {entries, plural, one {# wpisu} few {# wpisów} many {# wpisów} other {# wpisu}} ({period}):",

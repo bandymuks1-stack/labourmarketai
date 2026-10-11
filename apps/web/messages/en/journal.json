@@ -900,7 +900,7 @@
     "directionCoverage": "your entries back {shared} of {total} skills of this direction",
     "directionMissing": "not evidenced yet: {skills}",
     "potentialTitle": "Capabilities your work may also involve",
-    "potentialHint": "A hypothesis from the skills your entries back — not confirmed, not a qualification. Add it in your own words, or a manager can attest it, and it becomes evidence.",
+    "potentialHint": "A possibility read from the skills your entries back — not confirmed, not a qualification. Say in your own words whether you do this, or a manager can confirm it.",
     "potentialFrom": "possible · from {skills}",
     "growthTitle": "Where you could grow",
     "growthBasis": "Based on {count, plural, one {# skill} other {# skills}} your entries back — {hours} h from {entries, plural, one {# entry} other {# entries}} ({period}):",
