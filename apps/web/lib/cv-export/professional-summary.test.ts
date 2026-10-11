@@ -99,3 +99,18 @@ describe("professional facts — derived only from the canonical reading", () =>
     expect(percentOf(0.62)).toBe(62);
   });
 });
+
+describe("the share is of ALL recorded hours, as the CV line says (walk 2026-10-11)", () => {
+  it("2 attributed hours of 16 recorded is 13 %, never 100 %", () => {
+    const f = deriveProfessionalFacts({
+      periods: [{ key: "all", hours: 16, entries: 4, confirmedHours: 0 }],
+      totalHours: 16,
+      totalEntries: 4,
+      months: [{ month: "2026-10" }],
+      contexts: [],
+      outputs: [],
+      skills: [{ slug: "painting", share: 1, attributedHours: 2 }],
+    } as never)!;
+    expect(f.topSkills).toEqual([{ slug: "painting", share: 0.13, hours: 2 }]);
+  });
+});

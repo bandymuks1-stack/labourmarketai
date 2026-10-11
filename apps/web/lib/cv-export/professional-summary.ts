@@ -59,7 +59,14 @@ export function deriveProfessionalFacts(
   if (!(hours > 0) && !(entries > 0)) return null;
 
   const months = wi.months;
+  // The CV line reads "most of the RECORDED work is …", so the share is of
+  // ALL recorded hours. `wi.skills[].share` is of ATTRIBUTED hours only —
+  // a multi-skill entry stays unattributed — and a 2 h single-skill entry
+  // printed "Painting (100 %)" over 16 recorded hours (walk 2026-10-11).
+  const shareOfRecorded = (attributed: number, share: number) =>
+    hours > 0 ? Math.round((attributed / hours) * 100) / 100 : share;
   const topSkills = wi.skills
+    .map((s) => ({ ...s, share: shareOfRecorded(s.attributedHours, s.share) }))
     .filter((s) => s.share >= TOP_SKILL_MIN_SHARE && s.attributedHours > 0)
     .slice()
     .sort((a, b) => b.share - a.share || b.attributedHours - a.attributedHours)
