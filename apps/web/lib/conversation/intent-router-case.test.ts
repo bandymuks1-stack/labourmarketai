@@ -33,7 +33,10 @@ describe("case never changes a route — the query is folded before any pattern 
   it("patterns are built from the folded source with the `u` flag only", () => {
     const src = readFileSync(path.join(__dirname, "intent-router.ts"), "utf8");
     // Built lazily (first `.re` read) since 2026-09-28 — same source, same flags.
-    expect(src).toContain('return (re ??= new RegExp(fold(source).replace(/\\\\b/g, UB), "u"));');
+    // Folded through `foldPatternSource` since 2026-10-11: the text is folded,
+    // the regex escapes are not (a lower-cased `\D` is `\d`).
+    expect(src).toContain('return (re ??= new RegExp(foldPatternSource(source).replace(/\\\\b/g, UB), "u"));');
+    expect(src).toMatch(/export function foldPatternSource[\s\S]{0,300}i % 2 === 1 \? part : fold\(part\)/);
     // NEGATIVE CONTROL: the query side is folded too — without it, dropping
     // `i` would change routes for capitalised sentences.
     expect(src).toMatch(/export function classifyIntent\(text: string\): IntentMatch \{[\s\S]{0,400}const q = fold\(text \?\? ""\);/);
