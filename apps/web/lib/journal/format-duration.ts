@@ -22,6 +22,14 @@ export type FormatDurationOpts = {
   splitFractions?: boolean;
 };
 
+/** The duration labels a UI locale reads. LT and RU have their own
+ *  abbreviations; every other locale (de / nl / pl and the inactive ones)
+ *  reads the neutral international "h / min" — never the LT "val." that a
+ *  Russian, Polish or German reader cannot parse. */
+export function durationLocale(locale: string): DurationFormatLocale {
+  return locale === "lt" || locale === "ru" ? locale : "en";
+}
+
 /** Format a duration value + canonical unit into a human-readable string.
  *
  *  Examples (locale = "lt"):

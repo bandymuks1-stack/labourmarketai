@@ -202,8 +202,6 @@ export default async function CompanyStartPage({
   // even though it technically edits an existing row.
   const firstSetup = company !== null && isShellRow(company);
 
-  const uiLocale: "lt" | "en" = locale === "lt" ? "lt" : "en";
-  const label = (lt: string, en: string) => (uiLocale === "lt" ? lt : en);
 
   const formLabels: CompanySetupFormLabels = {
     // Dead-UI rule C (owner smoke 2026-07-05): one route serves create AND
@@ -274,16 +272,16 @@ export default async function CompanyStartPage({
     <div className="flex flex-col gap-6" data-testid="company-start-page">
       <header className="flex flex-col gap-1">
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {label("ĮMONĖS NUSTATYMAS", "COMPANY SETUP")}
+          {t("eyebrow")}
         </p>
-        <PageTitle>{label("Įmonės profilis", "Company profile")}</PageTitle>
+        <PageTitle>{t("pageTitle")}</PageTitle>
       </header>
 
       <Link
         href={"/dashboard/start" as "/dashboard"}
         className="self-start text-sm text-text-secondary hover:underline"
       >
-        ← {label("Grįžti į veiklos pradžią", "Back to activity start")}
+        ← {t("backToStart")}
       </Link>
 
       {safeNotice === AGENCY_CONNECTION_PENDING_NOTICE ? (
@@ -303,7 +301,7 @@ export default async function CompanyStartPage({
         >
           <header className="flex items-center gap-2">
             <span className="rounded bg-state-warning/20 px-2 py-0.5 text-xs text-state-warning">
-              {label("blokuota", "blocked")}
+              {t("blockedBadge")}
             </span>
             <h2 className="font-display text-lg font-semibold text-text-primary">
               {t("migrationBlockerHeading")}
@@ -383,7 +381,7 @@ export default async function CompanyStartPage({
             className="self-start text-sm text-brand-blue hover:underline"
             data-testid="company-start-goto-dashboard"
           >
-            {label("Eiti į įmonės erdvę →", "Go to company space →")}
+            {t("goToCompanySpace")}
           </Link>
         </section>
       ) : null}
@@ -429,13 +427,10 @@ export default async function CompanyStartPage({
             data-testid="company-start-ambiguous-chooser"
           >
             <h2 className="font-display text-lg font-semibold text-text-primary">
-              {label("Kurią organizaciją tvarkyti?", "Which organization to manage?")}
+              {t("pickOrgHeading")}
             </h2>
             <p className="text-sm text-text-secondary">
-              {label(
-                "Turite kelias organizacijas. Pasirinkite aktyvią erdvę viršuje arba kurkite naują.",
-                "You own several organizations. Pick the active workspace in the switcher above, or create a new one.",
-              )}
+              {t("pickOrgBody")}
             </p>
             <ul className="flex flex-col gap-1 text-sm text-text-primary">
               {ownedRows.map((row) => (
@@ -449,7 +444,7 @@ export default async function CompanyStartPage({
               className="self-start text-sm text-brand-blue hover:underline"
               data-testid="company-start-create-new-link"
             >
-              {label("+ Kurti naują organizaciją", "+ Create a new organization")}
+              {t("createNewOrg")}
             </Link>
           </div>
         </Card>
@@ -468,7 +463,7 @@ export default async function CompanyStartPage({
               className="self-start text-sm text-brand-blue hover:underline"
               data-testid="company-start-create-another-link"
             >
-              {label("+ Kurti naują organizaciją", "+ Create a new organization")}
+              {t("createNewOrg")}
             </Link>
           )}
           <CompanySetupForm

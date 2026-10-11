@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
-import { formatDuration } from "@/lib/journal/format-duration";
+import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
 import { createUtcFormatter } from "@/lib/time/display";
 import {
   compactHours,
@@ -60,7 +60,7 @@ export async function WorkWeek({
   dayViewHref: (day: string) => string;
 }) {
   const t = await getTranslations("planning");
-  const durLocale = locale === "en" ? "en" : locale === "ru" ? "ru" : "lt";
+  const durLocale = durationLocale(locale);
   const dur = (minutes: number) => formatDuration(minutes, "minutes", durLocale);
   const weekdayFmt = createUtcFormatter(locale, { weekday: "short" });
   const dayLongFmt = createUtcFormatter(locale, {

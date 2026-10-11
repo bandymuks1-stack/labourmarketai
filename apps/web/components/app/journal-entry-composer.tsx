@@ -63,7 +63,7 @@ import {
   type JournalPhotoUploadResult,
 } from "@/lib/journal/photo-upload";
 import { compressImageFile } from "@/lib/browser/image-compress";
-import { formatDuration } from "@/lib/journal/format-duration";
+import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
 import { PLATFORM_OUTPUT_UNIT_SLUGS, WORK_TIME_UNIT_SLUGS } from "@/lib/journal/work-time";
 import {
   completeTask,
@@ -1965,7 +1965,7 @@ export function JournalEntryComposer({
                   {formatDuration(
                     Number(timeValue.replace(",", ".")) || 0,
                     timeUnit,
-                    locale === "en" || locale === "ru" ? locale : "lt",
+                    durationLocale(locale),
                   )}
                 </span>
               )}
@@ -2340,8 +2340,7 @@ export function JournalEntryComposer({
                 const timeLabel = f.time
                   ? formatDuration(
                       f.time.value,
-                      f.time.unitSlug,
-                      locale === "en" || locale === "ru" ? locale : "lt",
+                      f.time.unitSlug, durationLocale(locale),
                     )
                   : t("fragment.noTime");
                 // Label-only activity/capability labels are canonical LT — localize
@@ -2451,7 +2450,7 @@ export function JournalEntryComposer({
                 label={formatDuration(
                   Number(timeValue.replace(",", ".")) || 0,
                   timeUnit,
-                  locale === "en" || locale === "ru" ? locale : "lt",
+                  durationLocale(locale),
                 )}
                 status={timeStatus}
                 onConfirm={() => setTimeStatus("confirmed")}

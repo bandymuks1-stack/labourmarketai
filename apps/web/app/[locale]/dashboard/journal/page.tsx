@@ -36,7 +36,7 @@ import {
   EvidenceStatusStrip,
   type EvidenceStatus,
 } from "@/components/app/evidence-status-strip";
-import { formatDuration } from "@/lib/journal/format-duration";
+import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
 import { groupLinkedSkillIdsByEntry } from "@/lib/journal/journal-entry-skills";
 import { buildEntrySkillSources } from "@/lib/journal/entry-skill-source";
 import { readWorkerEntrySkillLinks } from "@/lib/journal/entry-skill-link-read";
@@ -1728,8 +1728,7 @@ export default async function JournalPage({
                 group.totalMinutes > 0
                   ? formatDuration(
                       group.totalMinutes,
-                      "minutes",
-                      locale === "en" ? "en" : "lt",
+                      "minutes", durationLocale(locale),
                     )
                   : null;
               return (
@@ -2093,7 +2092,7 @@ export default async function JournalPage({
                                     className="shrink-0 font-display text-2xl font-bold leading-none tracking-tightest text-text-primary tabular-nums"
                                     data-testid={`journal-entry-duration-${e.id}`}
                                   >
-                                    {formatDuration(minutes, "minutes", locale === "en" ? "en" : "lt")}
+                                    {formatDuration(minutes, "minutes", durationLocale(locale))}
                                   </span>
                                 ) : null}
                               </div>
@@ -2281,8 +2280,7 @@ export default async function JournalPage({
                                     area.unit_slug === "days"
                                       ? formatDuration(
                                           area.value_numeric,
-                                          area.unit_slug,
-                                          locale === "en" ? "en" : "lt",
+                                          area.unit_slug, durationLocale(locale),
                                         )
                                       : `${area.value_numeric} ${
                                           area.unit_slug

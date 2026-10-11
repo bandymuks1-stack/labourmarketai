@@ -138,8 +138,9 @@ const SEEK_RES: RegExp[] = [
   /\bneed(s|ed)?\b/u,
   /looking\s+for/u,
   /нужн|ищ(у|ем)|требу/u,
-  /\bbrauch|\bsuche\b/u, // de (opportunistic)
-  /\bzoek/u, // nl (opportunistic)
+  /\bbrauch|\bsuche\b|\bsuchen\b|benotig|gesucht/u, // de
+  /\bzoek|\bnodig\b|gezocht/u, // nl
+  /potrzeb|szuka(m|my)\b|poszukuj/u, // pl
 ];
 
 /** Goods-shaped units — a thing you weigh/count, not a surface you worked. */
@@ -156,6 +157,9 @@ const PERSON_NOUN_RES: RegExp[] = [
   /\bworkers?\b|\bpeople\b|\bmen\b/u,
   /работник|человек|сотрудник/u,
   /brigad/u,
+  /\bwerknemers?\b|\bmedewerkers?\b|\bmensen\b/u, // nl
+  /\bmitarbeiter|\barbeiter|\barbeitskraft|\bleute\b/u, // de
+  /pracownik|\bosob\b|\bludzi\b/u, // pl
 ];
 
 const SERVICE_RE = /paslaug|\bservices?\b|услуг|dienst(en)?\b/u;
@@ -265,7 +269,7 @@ function detectHeadcount(text: string, folded: string): number | null {
   }
   // "reikia 4" / "need 4" with the occupation elsewhere in the sentence.
   const m = folded.match(
-    /(?:reikia|truks(?:ta)?|need|нужн[\p{L}]*|требуется|ищем)\s+(\d{1,4})\b/u,
+    /(?:reikia|truks(?:ta)?|need|нужн[\p{L}]*|требуется|ищем|brauchen|suchen|zoeken|potrzebujemy|szukamy)\s+(\d{1,4})\b/u,
   );
   if (m) {
     const n = Number.parseInt(m[1], 10);
