@@ -57,6 +57,7 @@ export function PremiumLivingCv({
   emptyCapabilities,
   emptyExperience,
   leadership,
+  formatHours = (h) => `${Math.round(h)} h`,
 }: {
   readonly name: string;
   readonly eyebrow: string;
@@ -72,6 +73,8 @@ export function PremiumLivingCv({
   readonly emptyExperience: string;
   /** The page's "organizations you lead" region, when there is one. */
   readonly leadership?: ReactNode;
+  /** Whole hours in the reader's unit ("8 ч" in RU, "8 val." in LT). */
+  readonly formatHours?: (hours: number) => string;
 }) {
   // Exactly ONE accent word (the grammar's rule): the last word of the name.
   const parts = name.trim().split(/\s+/);
@@ -132,7 +135,7 @@ export function PremiumLivingCv({
                 </span>
                 <span className="text-meta text-text-muted max-sm:order-3 max-sm:col-span-2">{c.evidenceText}</span>
                 <span className="text-right font-display text-[1rem] font-semibold tabular-nums text-text-secondary">
-                  {c.hours !== null && c.hours > 0 ? `${Math.round(c.hours)} h` : "—"}
+                  {c.hours !== null && c.hours > 0 ? formatHours(c.hours) : "—"}
                 </span>
               </li>
             ))}
