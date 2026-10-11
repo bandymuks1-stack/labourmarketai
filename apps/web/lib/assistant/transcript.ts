@@ -3,6 +3,15 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
+
+/** The workspace a thread belongs to, resolved SERVER-SIDE (never a client
+ *  claim): the active organization, or null for the personal space. */
+async function threadWorkspaceId(): Promise<string | null> {
+  const ws = await getWorkspaceContext();
+  return ws.activeWorkspaceId && ws.activeWorkspaceId !== PERSONAL_WORKSPACE_ID ? ws.activeWorkspaceId : null;
+}
 
 /**
  * The assistant_* tables are NOT in the generated DB types until the owner
@@ -68,10 +77,14 @@ export async function loadAssistantThread(limit = 40): Promise<TranscriptLoad> {
   if (!user) return { available: false };
   const db = supabase as unknown as LooseDb;
 
-  const conv = await db
+  // ONE thread per (person, workspace): a switch never restores another
+  // organization's conversation (decision 0024).
+  const workspaceId = await threadWorkspaceId();
+  const scoped = db
     .from("assistant_conversations")
     .select("id")
-    .eq("owner_id", user.id)
+    .eq("owner_id", user.id);
+  const conv = await (workspaceId ? scoped.eq("organization_id", workspaceId) : scoped.is("organization_id", null))
     .is("hidden_at", null)
     .order("updated_at", { ascending: false })
     .limit(1)
@@ -131,7 +144,7 @@ export async function appendAssistantTurn(input: {
   if (!conversationId) {
     const created = await db
       .from("assistant_conversations")
-      .insert({ owner_id: user.id })
+      .insert({ owner_id: user.id, organization_id: await threadWorkspaceId() })
       .select("id")
       .single();
     if (created.error || !created.data?.id) {

@@ -900,7 +900,7 @@
     "directionCoverage": "jūsų įrašai remia {shared} iš {total} šios krypties įgūdžių",
     "directionMissing": "dar nepagrįsta: {skills}",
     "potentialTitle": "Gebėjimai, kuriuos jūsų darbas gali apimti",
-    "potentialHint": "Galimybė, išvesta iš įgūdžių, kuriuos remia jūsų įrašai — nepatvirtinta ir ne kvalifikacija. Savais žodžiais pasakykite, ar tai darote, arba tai gali patvirtinti vadovas.",
+    "potentialHint": "Galimybė, išvesta iš įgūdžių, kuriuos remia jūsų įrašai — nepatvirtinta ir ne kvalifikacija. Savais žodžiais pasakykite, ar tai darote, arba paprašykite vadovo.",
     "potentialFrom": "galimas · iš: {skills}",
     "growthTitle": "Kur galėtumėte augti",
     "growthBasis": "Remiasi {count, plural, one {# įgūdžiu} few {# įgūdžiais} other {# įgūdžių}}, {count, plural, one {kurį} other {kuriuos}} remia jūsų įrašai — {hours} val. iš {entries, plural, one {# įrašo} few {# įrašų} other {# įrašų}} ({period}):",
