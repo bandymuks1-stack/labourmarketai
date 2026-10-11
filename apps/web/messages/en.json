@@ -8875,6 +8875,13 @@
         "mobilisation": "mobilisation",
         "work_start": "work start"
       }
+    },
+    "autoMatchReceipt": {
+      "ran": "Last automatic search of relevant candidates in LabourMarket.ai: {when}. Candidates evaluated: {count}, relevant: {relevant}. Nobody was contacted.",
+      "none": "Last automatic search of relevant candidates in LabourMarket.ai: {when}. Candidates evaluated: {count}, none relevant yet. Nobody was contacted.",
+      "notStructured": "Automatic search {when}: the need has too little detail to match yet. Add skills or a profession to search.",
+      "failed": "Automatic search {when} could not finish. The list below is still computed live.",
+      "capped": "The candidate pool was capped."
     }
   },
   "planBoundary": {

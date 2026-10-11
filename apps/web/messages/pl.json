@@ -8875,6 +8875,13 @@
         "mobilisation": "mobilizacja",
         "work_start": "rozpoczęcie pracy"
       }
+    },
+    "autoMatchReceipt": {
+      "ran": "Ostatnie automatyczne wyszukiwanie pasujących kandydatów w LabourMarket.ai: {when}. Ocenionych kandydatów: {count}, pasujących: {relevant}. Nikt nie został powiadomiony.",
+      "none": "Ostatnie automatyczne wyszukiwanie pasujących kandydatów w LabourMarket.ai: {when}. Ocenionych kandydatów: {count}, na razie brak pasujących. Nikt nie został powiadomiony.",
+      "notStructured": "Automatyczne wyszukiwanie {when}: zapotrzebowanie jest opisane zbyt ogólnie. Dodaj umiejętności lub zawód.",
+      "failed": "Automatyczne wyszukiwanie {when} nie zostało ukończone. Lista poniżej jest nadal liczona na bieżąco.",
+      "capped": "Liczba kandydatów została ograniczona."
     }
   },
   "planBoundary": {
