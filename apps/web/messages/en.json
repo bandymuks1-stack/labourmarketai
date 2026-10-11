@@ -765,7 +765,8 @@
       "new_job_matches": "Clears when you open the opportunities board (or see the jobs on the overview card).",
       "pending_connection_invites": "Clears when you accept or decline the agency's connection request on the partners page.",
       "shared_requests_awaiting_offer": "Clears when you offer a roster worker for the shared request on the partners page.",
-      "open_candidate_offers": "Clears when you accept or decline the proposed candidate on your scouting page."
+      "open_candidate_offers": "Clears when you accept or decline the proposed candidate on your scouting page.",
+      "open_team_offers": "Clears when you accept or decline the team's offer on your scouting page."
     },
     "storedTitle": "Stored notifications",
     "storedIntro": "Recorded events about you — each row opens the page it is about. Read state is managed from the bell.",
@@ -4843,6 +4844,7 @@
         "pending_connection_invites": "A staffing agency wants to connect with your company",
         "shared_requests_awaiting_offer": "Client requests waiting for your candidate",
         "open_candidate_offers": "Agency candidates waiting for your decision",
+        "open_team_offers": "Teams offering themselves for your needs",
         "event_booking_proposed": "You received a booking proposal",
         "event_booking_accepted": "Your booking proposal was accepted",
         "event_booking_declined": "Your booking proposal was declined",
@@ -7177,6 +7179,7 @@
     "noAddable": "No linked workers left to add. Invite workers in the roster section first.",
     "addLabel": "Invite a linked worker",
     "addButton": "Send invitation",
+    "emailPlaceholder": "Worker's email",
     "createLabel": "New brigade name",
     "createPlaceholder": "e.g. Facade brigade A",
     "createButton": "Create brigade",
@@ -7204,6 +7207,7 @@
       "rateLimited": "Invitation limit reached for now. Try again later.",
       "notAuthorized": "Only the brigade owner can send invitations.",
       "noEmail": "This worker has no usable email address on file, so the invitation cannot be created.",
+      "askEmail": "Enter this worker's email — the invitation goes to their account and they accept it themselves.",
       "needsMigration": "Not available right now.",
       "error": "Could not send the invitation. Nothing was changed."
     },
@@ -8628,6 +8632,7 @@
     "pickDemand": "Pick a need",
     "noDemands": "You have no needs yet. Create a need from your dashboard — after review, the team structures its required skills.",
     "noDemandsCta": "Create a need",
+    "teamOffersWaiting": "{count, plural, one {# team offer waiting for your answer} other {# team offers waiting for your answer}}",
     "unstructuredTag": "requirements not confirmed",
     "notStructured": "This need's required skills aren't structured yet, so no match can be computed. New needs are reviewed and structured by the administrators — no action is needed from you.",
     "needsSetup": "Couldn’t load. Please try again.",

@@ -58,6 +58,7 @@ const ZERO: SpineCounts = {
   pendingConnectionInvites: 0,
   sharedRequestsAwaitingOffer: 0,
   openCandidateOffers: 0,
+  openTeamOffers: 0,
 };
 
 describe("1. the spine is the page's ONLY data source", () => {
@@ -119,6 +120,7 @@ describe("2. every rendered signal links its real clearing surface", () => {
       pendingConnectionInvites: 10,
       sharedRequestsAwaitingOffer: 11,
       openCandidateOffers: 12,
+      openTeamOffers: 12,
     };
     const rows = buildActivityRows(counts);
     for (const row of rows) {

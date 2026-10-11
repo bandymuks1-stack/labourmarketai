@@ -765,7 +765,8 @@
       "new_job_matches": "Išnyksta, kai atidarote skelbimų sąrašą (arba pamatote darbus apžvalgos kortelėje).",
       "pending_connection_invites": "Išnyksta, kai partnerių puslapyje priimate arba atmetate agentūros ryšio prašymą.",
       "shared_requests_awaiting_offer": "Išnyksta, kai partnerių puslapyje pasiūlote komandos darbuotoją pasidalintam poreikiui.",
-      "open_candidate_offers": "Išnyksta, kai kandidatų atrankos puslapyje priimate arba atmetate pasiūlytą kandidatą."
+      "open_candidate_offers": "Išnyksta, kai kandidatų atrankos puslapyje priimate arba atmetate pasiūlytą kandidatą.",
+      "open_team_offers": "Išnyksta, kai kandidatų atrankos puslapyje priimate arba atmetate komandos pasiūlymą."
     },
     "storedTitle": "Įrašyti pranešimai",
     "storedIntro": "Užfiksuoti įvykiai apie jus — kiekviena eilutė atidaro susijusį puslapį. Perskaitymo būsena tvarkoma per varpelį.",
@@ -4843,6 +4844,7 @@
         "pending_connection_invites": "Personalo agentūra nori užmegzti ryšį su jūsų įmone",
         "shared_requests_awaiting_offer": "Klientų poreikiai, laukiantys jūsų kandidato",
         "open_candidate_offers": "Agentūros kandidatai, laukiantys jūsų sprendimo",
+        "open_team_offers": "Komandos, pasiūliusios save jūsų poreikiams",
         "event_booking_proposed": "Gavai rezervacijos pasiūlymą",
         "event_booking_accepted": "Tavo rezervacijos pasiūlymas priimtas",
         "event_booking_declined": "Tavo rezervacijos pasiūlymas atmestas",
@@ -7177,6 +7179,7 @@
     "noAddable": "Nebeliko susietų darbuotojų, kuriuos būtų galima pridėti. Pirmiausia pakviesk darbuotojus sąrašo skiltyje.",
     "addLabel": "Pakviesti susietą darbuotoją",
     "addButton": "Siųsti kvietimą",
+    "emailPlaceholder": "Darbuotojo el. paštas",
     "createLabel": "Naujos brigados pavadinimas",
     "createPlaceholder": "pvz., Fasado brigada A",
     "createButton": "Sukurti brigadą",
@@ -7204,6 +7207,7 @@
       "rateLimited": "Kol kas pasiektas kvietimų limitas. Pabandyk vėliau.",
       "notAuthorized": "Kvietimus gali siųsti tik brigados savininkas.",
       "noEmail": "Šis darbuotojas neturi tinkamo el. pašto adreso, todėl kvietimo sukurti negalima.",
+      "askEmail": "Įveskite šio darbuotojo el. paštą — kvietimas nueis į jo paskyrą, ir jis pats jį priims.",
       "needsMigration": "Šiuo metu nepasiekiama.",
       "error": "Kvietimo išsiųsti nepavyko. Niekas nebuvo pakeista."
     },
@@ -8628,6 +8632,7 @@
     "pickDemand": "Pasirink poreikį",
     "noDemands": "Kol kas neturite poreikių. Sukurkite poreikį skydelyje — po peržiūros komanda sustruktūruos reikalingus gebėjimus.",
     "noDemandsCta": "Sukurti poreikį",
+    "teamOffersWaiting": "{count, plural, one {# komandos pasiūlymas laukia jūsų atsakymo} few {# komandų pasiūlymai laukia jūsų atsakymo} other {# komandų pasiūlymų laukia jūsų atsakymo}}",
     "unstructuredTag": "reikalavimai nepatvirtinti",
     "notStructured": "Šio poreikio reikalingi gebėjimai dar nesustruktūruoti, todėl atitiktis neskaičiuojama. Naujus poreikius peržiūri ir struktūruoja administratoriai — jums nieko daryti nereikia.",
     "needsSetup": "Nepavyko įkelti. Bandykite dar kartą.",
