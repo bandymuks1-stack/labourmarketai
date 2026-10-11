@@ -15,6 +15,8 @@ import {
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { refuseStaleWorkspace } from "@/lib/company/stale-workspace";
+import { switchActiveWorkspaceCore } from "@/lib/company/workspace-switch-core";
+import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
 
 /**
  * Server actions for the company-room team/brigade panel (§8.3 + Trust
@@ -49,6 +51,19 @@ export async function createTeamAction(
   // W14 mid-funnel: a team organization was really created (the org spine
   // gained a row). Entity type only — never the team name. Fire-and-forget.
   if (outcome === "created") {
+    // KEEP THE OWNER WHERE THEY ARE (walk 2026-10-11): a sole-company owner
+    // rode the "exactly one organization" default; the brigade is a second
+    // organization, the default stopped applying, and the owner landed in the
+    // personal space with every company page saying "no company profile".
+    // Pin the organization workspace the brigade was created FROM — the same
+    // membership-validated core the switcher uses. Best effort.
+    if (expectedWorkspaceId && expectedWorkspaceId !== PERSONAL_WORKSPACE_ID) {
+      const supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) await switchActiveWorkspaceCore({ supabase, userId: user.id }, expectedWorkspaceId);
+    }
     emitServerFunnelEvent(FUNNEL_EVENTS.organizationCreated, {
       source: "teams",
       metadata: { surface: "company_teams", entity_type: "team" },
