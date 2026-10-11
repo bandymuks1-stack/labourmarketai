@@ -1,4 +1,5 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { buildWorkTypeLabelMap, isWorkTypeSlug } from "@/lib/taxonomy/work-categories";
 
 import { Card } from "@/components/ui/Card";
 import type { EmployerSupplyState } from "@/lib/supply/employer-supply-discovery";
@@ -28,6 +29,19 @@ import type { EmployerSupplyState } from "@/lib/supply/employer-supply-discovery
  */
 export async function AvailableSupplySection({ state }: { state: EmployerSupplyState }) {
   const t = await getTranslations("scouting.availableSupply");
+  const tUrgency = await getTranslations("conversation.forms.urgency");
+  // The declared row carries canonical values (walk 2026-10-11: a Dutch owner
+  // read "welder · Vanaf: flexible"): a work-type SLUG becomes its name in
+  // the reader's language, and the timing enum its label. Anything else is
+  // the declarer's own words and stays as written.
+  const workTypeNames = buildWorkTypeLabelMap(await getLocale());
+  const roleName = (role: string) => (isWorkTypeSlug(role) ? (workTypeNames[role] ?? role) : role);
+  const URGENCY_KEY: Record<string, "flexible" | "thisWeek" | "urgent"> = {
+    flexible: "flexible",
+    this_week: "thisWeek",
+    urgent: "urgent",
+  };
+  const startName = (start: string) => (URGENCY_KEY[start] ? tUrgency(URGENCY_KEY[start]) : start);
 
   const body = () => {
     if (state.kind === "needs-migration") {
@@ -62,7 +76,7 @@ export async function AvailableSupplySection({ state }: { state: EmployerSupplyS
           >
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <span className="text-sm font-semibold text-text-primary">
-                {row.roleText ?? t("unstatedRole")}
+                {row.roleText ? roleName(row.roleText) : t("unstatedRole")}
               </span>
               {row.teamSize !== null && (
                 <span className="font-mono text-meta uppercase tracking-label text-text-muted">
@@ -76,7 +90,7 @@ export async function AvailableSupplySection({ state }: { state: EmployerSupplyS
             <p className="flex flex-wrap gap-x-4 gap-y-1 text-meta text-text-muted">
               {row.startPeriod && (
                 <span>
-                  {t("from")}: {row.startPeriod}
+                  {t("from")}: {startName(row.startPeriod)}
                 </span>
               )}
               {row.duration && (

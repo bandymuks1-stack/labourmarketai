@@ -10,6 +10,7 @@ import { WorkCardPlausibilityNote } from "@/components/app/work-card-plausibilit
 import { deriveWorkCardChecks } from "@/lib/worker/work-card-plausibility";
 import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import { percentOf, roundHours } from "@/lib/cv-export/professional-summary";
+import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
 import { buildVerifiedCv } from "@/lib/cv-export/verified-cv";
 import type { CvSkillTier } from "@/lib/cv-export/skill-tiers";
 import { presentSkills, type SkillMagnitude } from "@/lib/cv-export/skill-presentation";
@@ -546,7 +547,8 @@ export default async function VerifiedCvPage({
   // THE PREMIUM LIVING CV (frozen design class 4e695e261, ported as grammar):
   // built ONLY from the fields this page already read; the register below
   // stays the printable document.
-  const premiumHours = (h: number) => `${fmtNum.format(roundHours(h))} h`;
+  const premiumHours = (h: number) =>
+    formatDuration(roundHours(h), "hours", durationLocale(locale), { splitFractions: false });
   const professionNames = cv.professionSlugs
     .map((p) => professionDisplayName(p, (slug) => (tProf.has(slug) ? tProf(slug) : null)))
     .filter((v): v is string => !!v);
@@ -753,6 +755,7 @@ export default async function VerifiedCvPage({
         {/* Player-card style header — identity + honest counters. */}
         {template !== "eu" ? (
           <PremiumLivingCv
+            formatHours={premiumHours}
             name={cv.personName.trim() && cv.personName.trim() !== "—" ? cv.personName : t("nameNotProvided")}
             eyebrow={professionNames.length > 0 ? professionNames.join(" · ") : tPremium("eyebrowFallback")}
             /* The summary renders ONCE, in its own section below (which also

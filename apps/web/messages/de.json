@@ -2214,7 +2214,15 @@
           "verified": "Verifiziert — ein stärkerer Vertrauensstatus, der nur nach einer echten Prüfung vergeben wird."
         },
         "goToWorkspace": "Unternehmens-Arbeitsbereich öffnen",
-        "capabilityNotDeclared": "Die Rolle als Bildungsanbieter wurde noch nicht erfasst — geben Sie sie im Arbeitsbereich unter „Was macht Ihre Organisation?“ an."
+        "capabilityNotDeclared": "Die Rolle als Bildungsanbieter wurde noch nicht erfasst — geben Sie sie im Arbeitsbereich unter „Was macht Ihre Organisation?“ an.",
+        "eyebrow": "UNTERNEHMEN EINRICHTEN",
+        "pageTitle": "Unternehmensprofil",
+        "backToStart": "Zurück zum Start",
+        "blockedBadge": "blockiert",
+        "goToCompanySpace": "Zum Unternehmensbereich →",
+        "pickOrgHeading": "Welche Organisation verwalten?",
+        "pickOrgBody": "Sie haben mehrere Organisationen. Wählen Sie oben den aktiven Bereich oder legen Sie einen neuen an.",
+        "createNewOrg": "+ Neue Organisation anlegen"
       },
       "workersBlocker": {
         "title": "Etwas ist schiefgelaufen",
@@ -2646,7 +2654,13 @@
           "in_review": "In Prüfung",
           "approved": "Genehmigt",
           "needs_followup": "Nachverfolgung erforderlich"
-        }
+        },
+        "eyebrow": "AUFTRAGGEBER-STATUS",
+        "pageTitle": "Konto Auftraggeber / Kunde",
+        "backToStart": "Zurück zum Start",
+        "blockedBadge": "blockiert",
+        "started": "✓ Begonnen",
+        "openBuyerDashboard": "Auftraggeber-Dashboard öffnen →"
       },
       "requests": {
         "heading": "Käuferanfragen",
@@ -8875,6 +8889,13 @@
         "mobilisation": "Mobilisierung",
         "work_start": "Arbeitsbeginn"
       }
+    },
+    "autoMatchReceipt": {
+      "ran": "Letzte automatische Suche nach passenden Kandidaten in LabourMarket.ai: {when}. Geprüfte Kandidaten: {count}, passend: {relevant}. Niemand wurde kontaktiert.",
+      "none": "Letzte automatische Suche nach passenden Kandidaten in LabourMarket.ai: {when}. Geprüfte Kandidaten: {count}, noch keine passenden. Niemand wurde kontaktiert.",
+      "notStructured": "Automatische Suche {when}: Der Bedarf ist noch zu knapp beschrieben. Fügen Sie Fähigkeiten oder einen Beruf hinzu.",
+      "failed": "Automatische Suche {when} konnte nicht abgeschlossen werden. Die Liste unten wird weiterhin live berechnet.",
+      "capped": "Die Zahl der Kandidaten wurde begrenzt."
     }
   },
   "planBoundary": {
@@ -12205,6 +12226,11 @@
         "body": "Diese Einladung wurde an {email} gesendet. Sie sind mit einer anderen Adresse angemeldet, daher kann sie aus diesem Konto weder angezeigt noch beantwortet werden. Melden Sie sich mit der eingeladenen Adresse an und öffnen Sie diesen Link erneut.",
         "bodyNoHint": "Diese Einladung wurde an eine andere E-Mail-Adresse gesendet als die, mit der Sie angemeldet sind, daher kann sie aus diesem Konto weder angezeigt noch beantwortet werden. Melden Sie sich mit der eingeladenen Adresse an und öffnen Sie diesen Link erneut.",
         "untouched": "Es wurde nichts angenommen oder geändert. Die Einladung wartet weiterhin auf die Person, an die sie gesendet wurde."
+      },
+      "acceptedByYou": {
+        "withOrganization": "Sie haben diese Einladung angenommen — Sie sind jetzt mit {name} verbunden.",
+        "plain": "Sie haben diese Einladung angenommen — die Verbindung besteht.",
+        "continue": "Zu meinem Bereich →"
       }
     },
     "teamEnquiriesTitle": "Meine Anfragen an Kolonnen",
