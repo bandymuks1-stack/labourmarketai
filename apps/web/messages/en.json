@@ -13524,6 +13524,10 @@
         },
         "offerCapacity": {
           "label": "Record what you are offering"
+        },
+        "respondTeamOffer": {
+          "label": "Answer a brigade's or company's offer",
+          "description": "Agree in principle to, or decline, a brigade or company offered for your need."
         }
       },
       "education": {
@@ -14173,7 +14177,7 @@
       "projectCreateIntro": "A new project. Name and city — then you can assign people right here.",
       "projectCreatedNext": "Project created. Assign people right here — or come back to it later from “My projects”.",
       "clientOffersIntro": "Candidates agencies offered for your needs:",
-      "clientOffersNone": "No agency has offered candidates for your open needs yet.",
+      "clientOffersNone": "Nobody has offered candidates, a brigade or a company for your open needs yet.",
       "clientBridgeInvitesIntro": "Agencies inviting you to work together:",
       "clientBridgeShareIntro": "Needs you could share with a connected agency:",
       "clientBridgeNone": "No agency invitation is waiting and nothing is left to share. Manage partners on the partners page.",
@@ -14440,7 +14444,15 @@
       "visibilityUnavailable": "Could not check your visibility to employers. That does not mean it is off — open the settings.",
       "chipVisibility": "Visibility to employers",
       "voiceOpen": "Speak",
-      "voiceBareYes": "Spoken “yes” is not a confirmation. Press the button on the card to confirm, or say what you want to do."
+      "voiceBareYes": "Spoken “yes” is not a confirmation. Press the button on the card to confirm, or say what you want to do.",
+      "teamOffersIntro": "Brigades and companies offered for your needs:",
+      "teamOfferStatusAgreed": "agreed in principle",
+      "chipTeamOfferAgree": "Agree in principle",
+      "chipTeamOfferThread": "Write",
+      "chipOfferOurs": "Offer our brigade or company",
+      "teamOfferAgreed": "Agreed in principle — not a signed contract. Settle the terms in the conversation, then assign the team to a project.",
+      "teamOfferDeclined": "Declined. The offering company will see your answer.",
+      "teamOfferThreadFailed": "This conversation cannot be opened."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

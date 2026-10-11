@@ -3674,6 +3674,10 @@
         },
         "offerCapacity": {
           "label": "Registrér hvad I tilbyder"
+        },
+        "respondTeamOffer": {
+          "label": "Svar på et holds eller en virksomheds tilbud",
+          "description": "Aftal i princippet med, eller afvis, et hold eller en virksomhed tilbudt til dit behov."
         }
       },
       "education": {
@@ -4150,7 +4154,7 @@
       "projectCreateIntro": "Et nyt projekt. Navn og by — så kan du tildele folk lige her.",
       "projectCreatedNext": "Projekt oprettet. Tildel folk lige her — eller vend tilbage til det senere fra “Mine projekter”.",
       "clientOffersIntro": "Kandidater, som bureauer har tilbudt til jeres behov:",
-      "clientOffersNone": "Intet bureau har endnu tilbudt kandidater til jeres åbne behov.",
+      "clientOffersNone": "Ingen har endnu tilbudt kandidater, et hold eller en virksomhed til dine åbne behov.",
       "chipOfferAccept": "Accepter",
       "chipOfferDecline": "Afvis",
       "offerAccepted": "Accepteret. Kandidaten fik et bookingforslag — svaret ser du her.",
@@ -4304,7 +4308,15 @@
       "acceptOfferOne": "[EN] Here it is. The button below confirms it.",
       "acceptOfferWhich": "[EN] Which one? Choose below.",
       "visibilityUnavailable": "Synligheden for arbejdsgivere kunne ikke kontrolleres. Det betyder ikke, at den er slået fra — åbn indstillingerne.",
-      "chipVisibility": "Synlighed for arbejdsgivere"
+      "chipVisibility": "Synlighed for arbejdsgivere",
+      "teamOffersIntro": "Hold og virksomheder, der har tilbudt sig til dine behov:",
+      "teamOfferStatusAgreed": "aftalt i princippet",
+      "chipTeamOfferAgree": "Aftal i princippet",
+      "chipTeamOfferThread": "Skriv",
+      "chipOfferOurs": "Tilbyd vores hold eller virksomhed",
+      "teamOfferAgreed": "Aftalt i princippet — endnu ikke en underskrevet kontrakt. Aftal vilkårene i samtalen, og tildel derefter holdet et projekt.",
+      "teamOfferDeclined": "Afvist. Den tilbydende virksomhed ser dit svar.",
+      "teamOfferThreadFailed": "Denne samtale kan ikke åbnes."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

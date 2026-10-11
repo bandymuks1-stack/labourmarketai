@@ -13524,6 +13524,10 @@
         },
         "offerCapacity": {
           "label": "Vastleggen wat u aanbiedt"
+        },
+        "respondTeamOffer": {
+          "label": "Antwoorden op het aanbod van een ploeg of bedrijf",
+          "description": "In principe akkoord gaan met, of afwijzen van, een ploeg of bedrijf aangeboden voor uw behoefte."
         }
       },
       "education": {
@@ -14173,7 +14177,7 @@
       "projectCreateIntro": "Een nieuw project. Naam en stad — daarna wijst u hier meteen mensen toe.",
       "projectCreatedNext": "Project aangemaakt. Wijs hier meteen mensen toe — of kom er later op terug via “Mijn projecten”.",
       "clientOffersIntro": "Kandidaten die bureaus voor uw behoeften hebben aangeboden:",
-      "clientOffersNone": "Nog geen bureau heeft kandidaten voor uw open behoeften aangeboden.",
+      "clientOffersNone": "Nog niemand heeft kandidaten, een ploeg of een bedrijf aangeboden voor uw open behoeften.",
       "clientBridgeInvitesIntro": "Bureaus die u uitnodigen om samen te werken:",
       "clientBridgeShareIntro": "Behoeften die u met een gekoppeld bureau kunt delen:",
       "clientBridgeNone": "Er wacht geen uitnodiging van een bureau en er is niets meer te delen. Beheer partners op de partnerpagina.",
@@ -14440,7 +14444,15 @@
       "visibilityUnavailable": "Kon uw zichtbaarheid voor werkgevers niet controleren. Dat betekent niet dat die uit staat — open de instellingen.",
       "chipVisibility": "Zichtbaarheid voor werkgevers",
       "voiceOpen": "Spreken",
-      "voiceBareYes": "Een uitgesproken “ja” is geen bevestiging. Bevestig met de knop op de kaart, of zeg wat u wilt doen."
+      "voiceBareYes": "Een uitgesproken “ja” is geen bevestiging. Bevestig met de knop op de kaart, of zeg wat u wilt doen.",
+      "teamOffersIntro": "Ploegen en bedrijven die zich voor uw behoeften hebben aangeboden:",
+      "teamOfferStatusAgreed": "in principe akkoord",
+      "chipTeamOfferAgree": "In principe akkoord",
+      "chipTeamOfferThread": "Schrijven",
+      "chipOfferOurs": "Onze ploeg of ons bedrijf aanbieden",
+      "teamOfferAgreed": "In principe akkoord — nog geen getekend contract. Spreek de voorwaarden af in het gesprek en wijs het team daarna toe aan een project.",
+      "teamOfferDeclined": "Afgewezen. Het aanbiedende bedrijf ziet uw antwoord.",
+      "teamOfferThreadFailed": "Dit gesprek kan niet worden geopend."
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",

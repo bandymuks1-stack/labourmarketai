@@ -13524,6 +13524,10 @@
         },
         "offerCapacity": {
           "label": "Užrašyti, ką siūlote"
+        },
+        "respondTeamOffer": {
+          "label": "Atsakyti į brigados ar įmonės pasiūlymą",
+          "description": "Sutarti iš esmės arba atmesti brigadą ar įmonę, pasiūlytą jūsų poreikiui."
         }
       },
       "education": {
@@ -14173,7 +14177,7 @@
       "projectCreateIntro": "Naujas projektas. Pavadinimas ir miestas — ir žmones galėsite priskirti čia pat.",
       "projectCreatedNext": "Projektas sukurtas. Čia pat priskirkite žmones — arba grįžkite prie jo vėliau iš „Mano projektai“.",
       "clientOffersIntro": "Agentūrų pasiūlyti kandidatai jūsų poreikiams:",
-      "clientOffersNone": "Agentūros dar nepasiūlė kandidatų jūsų atviriems poreikiams.",
+      "clientOffersNone": "Jūsų atviriems poreikiams dar niekas nepasiūlė kandidatų, brigados ar įmonės.",
       "clientBridgeInvitesIntro": "Agentūros, kviečiančios bendradarbiauti:",
       "clientBridgeShareIntro": "Poreikiai, kuriais galite pasidalinti su prijungta agentūra:",
       "clientBridgeNone": "Laukiančių agentūrų kvietimų nėra ir nėra kuo pasidalinti. Partnerius tvarkykite partnerių puslapyje.",
@@ -14440,7 +14444,15 @@
       "visibilityUnavailable": "Nepavyko patikrinti matomumo darbdaviams. Tai nereiškia, kad jis išjungtas — atidarykite nustatymus.",
       "chipVisibility": "Matomumas darbdaviams",
       "voiceOpen": "Kalbėti",
-      "voiceBareYes": "Ištartas „taip“ nėra patvirtinimas. Patvirtinkite paspausdami kortelės mygtuką arba pasakykite, ką norite daryti."
+      "voiceBareYes": "Ištartas „taip“ nėra patvirtinimas. Patvirtinkite paspausdami kortelės mygtuką arba pasakykite, ką norite daryti.",
+      "teamOffersIntro": "Brigados ir įmonės, pasiūliusios save jūsų poreikiams:",
+      "teamOfferStatusAgreed": "sutarta iš esmės",
+      "chipTeamOfferAgree": "Sutarti iš esmės",
+      "chipTeamOfferThread": "Rašyti",
+      "chipOfferOurs": "Pasiūlyti savo brigadą ar įmonę",
+      "teamOfferAgreed": "Sutarta iš esmės — tai dar ne pasirašyta sutartis. Sąlygas suderinkite pokalbyje, tada priskirkite komandą projektui.",
+      "teamOfferDeclined": "Atmesta. Pasiūliusi įmonė matys jūsų atsakymą.",
+      "teamOfferThreadFailed": "Šio pokalbio atidaryti nepavyko."
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",

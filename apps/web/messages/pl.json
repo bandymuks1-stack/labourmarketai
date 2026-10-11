@@ -13524,6 +13524,10 @@
         },
         "offerCapacity": {
           "label": "Zapisz swoją ofertę"
+        },
+        "respondTeamOffer": {
+          "label": "Odpowiedz na ofertę brygady lub firmy",
+          "description": "Uzgodnij wstępnie lub odrzuć brygadę albo firmę zaoferowaną do twojej potrzeby."
         }
       },
       "education": {
@@ -14173,7 +14177,7 @@
       "projectCreateIntro": "Nowy projekt. Nazwa i miasto — potem od razu przypiszesz tu ludzi.",
       "projectCreatedNext": "Projekt utworzony. Przypisz ludzi od razu tutaj — albo wróć do niego później z „Moje projekty”.",
       "clientOffersIntro": "Kandydaci zaproponowani przez agencje do Twoich potrzeb:",
-      "clientOffersNone": "Żadna agencja nie zaproponowała jeszcze kandydatów do Twoich otwartych potrzeb.",
+      "clientOffersNone": "Nikt jeszcze nie zaoferował kandydatów, brygady ani firmy do twoich otwartych potrzeb.",
       "clientBridgeInvitesIntro": "Agencje zapraszające Cię do współpracy:",
       "clientBridgeShareIntro": "Potrzeby, które możesz udostępnić połączonej agencji:",
       "clientBridgeNone": "Nie czeka żadne zaproszenie od agencji i nie zostało nic do udostępnienia. Zarządzaj partnerami na stronie partnerów.",
@@ -14440,7 +14444,15 @@
       "visibilityUnavailable": "Nie udało się sprawdzić widoczności dla pracodawców. To nie znaczy, że jest wyłączona — otwórz ustawienia.",
       "chipVisibility": "Widoczność dla pracodawców",
       "voiceOpen": "Mów",
-      "voiceBareYes": "Wypowiedziane „tak” nie jest potwierdzeniem. Potwierdź przyciskiem na karcie albo powiedz, co chcesz zrobić."
+      "voiceBareYes": "Wypowiedziane „tak” nie jest potwierdzeniem. Potwierdź przyciskiem na karcie albo powiedz, co chcesz zrobić.",
+      "teamOffersIntro": "Brygady i firmy, które zaoferowały się do twoich potrzeb:",
+      "teamOfferStatusAgreed": "uzgodnione wstępnie",
+      "chipTeamOfferAgree": "Uzgodnij wstępnie",
+      "chipTeamOfferThread": "Napisz",
+      "chipOfferOurs": "Zaoferuj naszą brygadę lub firmę",
+      "teamOfferAgreed": "Uzgodnione wstępnie — to jeszcze nie podpisana umowa. Ustalcie warunki w rozmowie, a potem przypisz zespół do projektu.",
+      "teamOfferDeclined": "Odrzucono. Oferująca firma zobaczy twoją odpowiedź.",
+      "teamOfferThreadFailed": "Nie można otworzyć tej rozmowy."
     },
     "worklog": {
       "understood": "Oto, co zrozumiałem — zapisać?",

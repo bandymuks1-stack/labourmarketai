@@ -3674,6 +3674,10 @@
         },
         "offerCapacity": {
           "label": "Pierakstīt jūsu piedāvājumu"
+        },
+        "respondTeamOffer": {
+          "label": "Atbildēt uz brigādes vai uzņēmuma piedāvājumu",
+          "description": "Principā vienoties ar jūsu vajadzībai piedāvātu brigādi vai uzņēmumu vai to noraidīt."
         }
       },
       "education": {
@@ -4150,7 +4154,7 @@
       "projectCreateIntro": "Jauns projekts. Nosaukums un pilsēta — tad cilvēkus varēsiet piesaistīt tepat.",
       "projectCreatedNext": "Projekts izveidots. Piesaistiet cilvēkus tepat — vai atgriezieties pie tā vēlāk no “Mani projekti”.",
       "clientOffersIntro": "Aģentūru piedāvātie kandidāti jūsu vajadzībām:",
-      "clientOffersNone": "Neviena aģentūra vēl nav piedāvājusi kandidātus jūsu atvērtajām vajadzībām.",
+      "clientOffersNone": "Jūsu atvērtajām vajadzībām vēl neviens nav piedāvājis kandidātus, brigādi vai uzņēmumu.",
       "chipOfferAccept": "Pieņemt",
       "chipOfferDecline": "Noraidīt",
       "offerAccepted": "Pieņemts. Kandidātam nosūtīts rezervācijas piedāvājums — viņa atbildi redzēsiet šeit.",
@@ -4304,7 +4308,15 @@
       "acceptOfferOne": "[EN] Here it is. The button below confirms it.",
       "acceptOfferWhich": "[EN] Which one? Choose below.",
       "visibilityUnavailable": "Neizdevās pārbaudīt redzamību darba devējiem. Tas nenozīmē, ka tā ir izslēgta — atveriet iestatījumus.",
-      "chipVisibility": "Redzamība darba devējiem"
+      "chipVisibility": "Redzamība darba devējiem",
+      "teamOffersIntro": "Brigādes un uzņēmumi, kas piedāvājuši sevi jūsu vajadzībām:",
+      "teamOfferStatusAgreed": "principā vienojušies",
+      "chipTeamOfferAgree": "Vienoties principā",
+      "chipTeamOfferThread": "Rakstīt",
+      "chipOfferOurs": "Piedāvāt mūsu brigādi vai uzņēmumu",
+      "teamOfferAgreed": "Principā vienojušies — tas vēl nav parakstīts līgums. Saskaņojiet nosacījumus sarakstē un pēc tam piešķiriet komandu projektam.",
+      "teamOfferDeclined": "Noraidīts. Piedāvātājs uzņēmums redzēs jūsu atbildi.",
+      "teamOfferThreadFailed": "Šo saraksti nevar atvērt."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
