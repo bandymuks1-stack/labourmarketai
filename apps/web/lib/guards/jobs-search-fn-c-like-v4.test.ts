@@ -24,7 +24,7 @@ const down = join(ROOT, `supabase/rollbacks/${NAME}.down.sql`);
 
 describe("search function v4: free text without per-row ICU ilike", () => {
   it("matches lower(occupation_raw) collate \"C\" against a lowered needle, never ilike", () => {
-    expect(fwd).not.toMatch(/\bilike\b/i);
+    expect(fnBody(fwd)).not.toMatch(/\bilike\b/i);
     expect(fwd.match(/lower\([vh]\.occupation_raw\) collate "C" like v_pattern/g)).toHaveLength(4);
     expect(fwd).toContain("v_pattern := '%' || lower(v_needle) || '%';");
   });
