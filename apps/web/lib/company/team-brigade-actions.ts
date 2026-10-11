@@ -97,7 +97,7 @@ export async function inviteWorkerToTeamAction(input: {
   /** Typed by the owner when the worker's address cannot be read (profiles
    *  are own-row-only). The worker still has to accept with their account. */
   email?: string | null;
-}): Promise<{ outcome: TeamInviteOutcome }> {
+}): Promise<{ outcome: TeamInviteOutcome; inviteLink?: string }> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -121,13 +121,18 @@ export async function inviteWorkerToTeamAction(input: {
   if (result.status === "not-authed") return { outcome: "error" };
 
   const first = result.results[0];
+  // The token link is the delivery whenever e-mail is not (production has no
+  // active e-mail provider): the owner hands it to the worker themselves.
+  // Without it a worker whose mailbox is not yet proven never sees the
+  // invitation at all (walk 2026-10-11).
+  const inviteLink = first?.inviteLink;
   switch (first?.outcome) {
     case "sent":
-      return { outcome: "sent" };
+      return { outcome: "sent", inviteLink };
     case "created":
-      return { outcome: "created" };
+      return { outcome: "created", inviteLink };
     case "delivery_failed":
-      return { outcome: "delivery_failed" };
+      return { outcome: "delivery_failed", inviteLink };
     case "duplicate_pending":
       return { outcome: "already_invited" };
     case "rate_limited":

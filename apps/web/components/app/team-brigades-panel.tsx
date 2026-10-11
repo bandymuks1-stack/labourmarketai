@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { Check, Copy } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import {
@@ -64,6 +65,9 @@ export function TeamBrigadesPanel({
   // are own-row-only). Asked for only after the server said so.
   const [askEmail, setAskEmail] = useState<Record<string, boolean>>({});
   const [emails, setEmails] = useState<Record<string, string>>({});
+  // The invitation link of the last invite — the delivery while e-mail is off.
+  const [link, setLink] = useState<{ teamId: string; url: string } | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const skillLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
 
@@ -103,6 +107,8 @@ export function TeamBrigadesPanel({
         email: askEmail[teamId] ? (emails[teamId] ?? "") : null,
       });
       setAskEmail((a) => ({ ...a, [teamId]: res.outcome === "no_email" }));
+      setLink(res.inviteLink ? { teamId, url: res.inviteLink } : null);
+      setCopied(false);
       if (res.outcome === "sent") setMsg(t("inviteOutcome.sent"));
       else if (res.outcome === "created") setMsg(t("inviteOutcome.created"));
       else if (res.outcome === "delivery_failed")
@@ -468,6 +474,28 @@ export function TeamBrigadesPanel({
         >
           {msg}
         </p>
+      )}
+      {link && (
+        <div className="flex flex-col gap-1.5 rounded-md border border-brand-blue/40 bg-brand-blue/5 p-2" data-testid="team-invite-link">
+          <p className="text-xs text-text-secondary">{t("inviteLinkNote")}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <code className="max-w-full truncate rounded bg-ink-800 px-2 py-1 text-meta text-text-primary">{link.url}</code>
+            <button
+              type="button"
+              data-testid="team-invite-copy-link"
+              onClick={() => {
+                void navigator.clipboard?.writeText(link.url).then(
+                  () => setCopied(true),
+                  () => setCopied(false),
+                );
+              }}
+              className="inline-flex min-h-11 sm:min-h-9 items-center gap-1 rounded border border-ink-500 px-2 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary"
+            >
+              {copied ? <Check className="h-3 w-3" aria-hidden /> : <Copy className="h-3 w-3" aria-hidden />}
+              {copied ? t("inviteLinkCopied") : t("inviteLinkCopy")}
+            </button>
+          </div>
+        </div>
       )}
     </section>
   );

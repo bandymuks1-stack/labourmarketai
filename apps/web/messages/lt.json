@@ -7201,8 +7201,8 @@
     },
     "inviteOutcome": {
       "sent": "Kvietimas išsiųstas el. paštu. Narystė prasidės, kai darbuotojas jį priims.",
-      "created": "Kvietimas sukurtas. Darbuotojas jį matys skiltyje „Mano tinklas“ ir ten pats nuspręs.",
-      "deliveryFailed": "Kvietimas išsaugotas, bet el. laiško pristatyti nepavyko. Darbuotojas jį vis tiek matys skiltyje „Mano tinklas“.",
+      "created": "Kvietimas sukurtas — el. laiškas neišsiųstas. Nukopijuokite žemiau esančią nuorodą ir nusiųskite ją darbuotojui patys; jis ją atidaro, prisijungia ir priima.",
+      "deliveryFailed": "Kvietimas išsaugotas, bet el. laiško pristatyti nepavyko. Nukopijuokite žemiau esančią nuorodą ir nusiųskite ją darbuotojui patys.",
       "alreadyInvited": "Šis darbuotojas jau turi galiojantį kvietimą į šią brigadą.",
       "rateLimited": "Kol kas pasiektas kvietimų limitas. Pabandyk vėliau.",
       "notAuthorized": "Kvietimus gali siųsti tik brigados savininkas.",
@@ -7276,7 +7276,10 @@
         "error": "Atsakymo išsaugoti nepavyko. Niekas nebuvo pakeista."
       }
     },
-    "addableUnavailable": "Susietų darbuotojų sąrašo nepavyko nuskaityti — pridėti kol kas negalima."
+    "addableUnavailable": "Susietų darbuotojų sąrašo nepavyko nuskaityti — pridėti kol kas negalima.",
+    "inviteLinkNote": "Nusiųskite šią nuorodą darbuotojui (žinute, SMS, WhatsApp). Priimti gali tik pakviestas asmuo.",
+    "inviteLinkCopy": "Kopijuoti nuorodą",
+    "inviteLinkCopied": "Nukopijuota"
   },
   "teamEnquiries": {
     "enquireButton": "Pateikti užklausą šiai komandai",
