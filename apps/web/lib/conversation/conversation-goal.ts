@@ -55,6 +55,7 @@ import {
 import type { UnsupportedDimension } from "@/lib/ai-workspace/world-state-language";
 import { fold, UNICODE_WORD_BOUNDARY } from "@/lib/conversation/intent-router";
 import type { ConversationIntent } from "@/lib/conversation/intent-router";
+import { extractWorkLog } from "@/lib/conversation/worklog-extract";
 import {
   emptyEvidenceDraft,
   mergeEvidenceDraft,
@@ -390,6 +391,24 @@ export interface ClassifyTurnInput {
  *   6. a short continuation phrase refines the goal in flight;
  *   7. everything else is unrelated and routes normally.
  */
+/** Reference days for reading what a sentence STATES (never "now"). */
+const REF_TODAY = "2000-01-15";
+const NO_DAY = "1999-01-01";
+function statedFacts(text: string): { day: string | null; minutes: number | null } {
+  const p = extractWorkLog(text, REF_TODAY, NO_DAY);
+  return { day: p.date === NO_DAY ? null : p.date, minutes: p.workedMinutes };
+}
+
+/** The new sentence is its own work account when it states a duration the
+ *  goal already has, or a day that differs from the goal's stated day. */
+export function isSecondWorkAccount(said: readonly string[], text: string): boolean {
+  if (said.length === 0) return false;
+  const before = statedFacts(said.join(" "));
+  const now = statedFacts(text);
+  if (now.minutes != null && before.minutes != null) return true;
+  return now.day != null && before.day != null && now.day !== before.day;
+}
+
 export function classifyTurn(input: ClassifyTurnInput): TurnKind {
   const folded = fold((input.text ?? "").trim());
   if (folded === "") return "unrelated";
@@ -418,6 +437,21 @@ export function classifyTurn(input: ClassifyTurnInput): TurnKind {
 
   // (4) a different destination, actually asserted.
   if (opensGoal && routedIntent !== goal.intent && !weak) return "new-goal";
+
+  // (4b) a SECOND complete work account is a new entry, not more of the
+  //      first (walk 2026-10-11: "Wczoraj malowałem … 6 godzin." then
+  //      "Dzisiaj spawałem 8 godzin." became one card with 6 h, yesterday,
+  //      and both sentences — saving both cards counted the 6 h twice).
+  //      Answers and refinements ("Sienas.", "8 valandas" to a question with
+  //      no hours yet, "vakar" to a goal with no day) still follow up.
+  if (
+    opensGoal &&
+    routedIntent === goal.intent &&
+    goal.intent === "log-work" &&
+    isSecondWorkAccount(goal.said, input.text ?? "")
+  ) {
+    return "new-goal";
+  }
 
   // (5) the same goal said again, usually with more in it.
   if (opensGoal && routedIntent === goal.intent) return "follow-up";

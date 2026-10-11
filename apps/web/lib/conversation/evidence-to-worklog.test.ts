@@ -143,3 +143,11 @@ describe("evidenceAddsToDraft", () => {
     expect(evidenceAddsToDraft(draft, extractWorkLog("Montavau klojinius.", TODAY))).toBe(true);
   });
 });
+
+describe("the joined sentence handed in as latest is not appended again", () => {
+  it("A + B with latest 'A B' stays 'A B'", () => {
+    expect(composeEvidenceText(["Dažiau sienas.", "Sandėlyje."], "Dažiau sienas. Sandėlyje.")).toBe(
+      "Dažiau sienas. Sandėlyje.",
+    );
+  });
+});
