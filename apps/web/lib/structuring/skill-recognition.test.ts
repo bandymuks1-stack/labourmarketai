@@ -230,3 +230,23 @@ describe("extractJournalSuggestions exposes rich skillSuggestions", () => {
     expect(extractJournalSuggestions("").skillSuggestions).toHaveLength(0);
   });
 });
+
+describe("a warehouse as the PLACE of other work is not warehouse operations (walk 2026-10-11)", () => {
+  const s = (t: string) => recognizeSkills(t).map((r) => r.slug);
+  it.each([
+    "Wczoraj malowałem ściany w hali magazynowej przez 6 godzin.",
+    "Vakar dažiau sienas sandėlyje.",
+    "Yesterday I painted the walls in the warehouse.",
+  ])("painting in a warehouse → painting only: %s", (t) => {
+    expect(s(t)).toContain("painting");
+    expect(s(t)).not.toContain("warehouse-operations");
+  });
+  it.each([
+    "Vakar dirbau sandėlyje 7 valandas.",
+    "Kompletowałem zamówienia w magazynie.",
+    "Pracowałem jako magazynier.",
+    "Worked in the warehouse, picking orders.",
+  ])("real warehouse work keeps the skill: %s", (t) => {
+    expect(s(t)).toContain("warehouse-operations");
+  });
+});
