@@ -70,6 +70,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261007210000_",
       // 2026-10-08 (RED by GRANT): SELECT on five RLS tables whose policies were unreachable.
       "20261008210000_",
+      // 2026-10-09 (#2235, owner-approved RED): service_role-only expiry sweeps run as a dedicated system identity.
+      "20261009150000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

@@ -78,6 +78,10 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "Vercel cron delivers it (once the owner schedules it); identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. Inert a second time while NONSTOP_HANDOFF_ENDPOINT / NONSTOP_HANDOFF_TOKEN are unset (answers not_configured, calls nothing). Its only outbound target is the configured partner door; the body it returns is counts only.",
   },
+  "cron/expiry-sweeps/route.ts": {
+    class: "public",
+    why: "Triggered by the expiry-sweeps-cadence GitHub Actions workflow; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user - 401 while unset. It calls only the two service_role-only sweep RPCs, passes no actor (the database attributes every change to the dedicated non-login system identity) and answers counts and a reason code only.",
+  },
   "cron/job-alerts/route.ts": {
     class: "public",
     why: "Triggered by the job-alerts-cadence GitHub Actions workflow; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset, so never an open trigger. Answers counts and a reason code only.",
