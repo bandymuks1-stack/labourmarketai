@@ -1,6 +1,7 @@
 "use client";
 
 import { asksAboutAWeek } from "@/lib/planning/week-question";
+import { projectTitleFromSentence } from "@/lib/conversation/project-title-from-sentence";
 import { cardModeFromText } from "@/lib/player-card/card-mode-from-text";
 import type { PlayerCardMode } from "@/lib/player-card/card-modes";
 import {
@@ -3842,12 +3843,14 @@ export function ConversationChat({
         return;
       }
       const city = structureValueStatement(sentence).city ?? "";
+      const title = projectTitleFromSentence(sentence) ?? "";
+      const prefill = { ...(title ? { title } : {}), ...(city ? { city } : {}) };
       assistant(labels.projectCreateIntro);
       openForm(
         "company.create-project",
         undefined,
         undefined,
-        city ? { city } : undefined,
+        title || city ? prefill : undefined,
         // PROJECT AFTER CREATION (owner contract §11 seed): the new project
         // opens in the panel — its real (empty) roster and the assignment
         // controls — so people are assigned right where the project was
