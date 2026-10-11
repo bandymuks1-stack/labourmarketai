@@ -2214,7 +2214,15 @@
           "verified": "Verified — a stronger trust state, granted only after a real check."
         },
         "goToWorkspace": "Open the company workspace",
-        "capabilityNotDeclared": "The education-provider role was not recorded yet — declare it in the workspace under “What does your organisation do?”."
+        "capabilityNotDeclared": "The education-provider role was not recorded yet — declare it in the workspace under “What does your organisation do?”.",
+        "eyebrow": "COMPANY SETUP",
+        "pageTitle": "Company profile",
+        "backToStart": "Back to activity start",
+        "blockedBadge": "blocked",
+        "goToCompanySpace": "Go to company space →",
+        "pickOrgHeading": "Which organization to manage?",
+        "pickOrgBody": "You own several organizations. Pick the active workspace in the switcher above, or create a new one.",
+        "createNewOrg": "+ Create a new organization"
       },
       "workersBlocker": {
         "title": "Something went wrong",
@@ -2646,7 +2654,13 @@
           "in_review": "In review",
           "approved": "Approved",
           "needs_followup": "Needs follow-up"
-        }
+        },
+        "eyebrow": "BUYER STATE",
+        "pageTitle": "Buyer / client account",
+        "backToStart": "Back to activity start",
+        "blockedBadge": "blocked",
+        "started": "✓ Started",
+        "openBuyerDashboard": "Open buyer dashboard →"
       },
       "requests": {
         "heading": "Buyer requests",
