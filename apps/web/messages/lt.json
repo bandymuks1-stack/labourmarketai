@@ -18733,11 +18733,12 @@
     "sent": {
       "heading": "Jūsų pasiūlymai",
       "none": "Pasiūlymų dar nėra.",
-      "withdraw": "Atšaukti"
+      "withdraw": "Atšaukti",
+      "message": "Rašyti užsakovui"
     },
     "status": {
       "offered": "Laukiama atsakymo",
-      "accepted": "Priimta",
+      "accepted": "Sutarta iš esmės",
       "declined": "Atmesta",
       "withdrawn": "Atšaukta",
       "assigned": "Priskirta projektui"
@@ -18771,7 +18772,7 @@
     },
     "received": {
       "title": "Šiam poreikiui pasiūlytos komandos",
-      "subtitle": "Komanda pasiūlė save kaip vieną vienetą šiam poreikiui. Jūs sprendžiate, ar ją priimti ir kur priskirti.",
+      "subtitle": "Komanda pasiūlė save kaip vieną vienetą šiam poreikiui. Klauskite ir derėkitės pokalbyje; sutarimas čia dar nėra sutartis.",
       "privacy": "Rodomi tik komandos lygio faktai. Čia nėra nurodytas nė vienas narys. Kai priimsite komandą ir priskirsite projektui, jos nariai bus matomi tame projekte, kaip ir bet kurios kitos komandos atveju.",
       "members": "Narių: {count}",
       "deployable": "Išsiunčiamas dydis {min}-{max}",
@@ -18802,22 +18803,24 @@
       "missing": "Nenurodyta: {list}",
       "noNeedStructure": "Šis poreikis dar nesustruktūruotas, todėl komandos su juo palyginti negalima.",
       "note": "Komandos pastaba",
-      "accept": "Priimti komandą",
+      "accept": "Sutarti iš esmės",
       "decline": "Atmesti",
-      "noProjects": "Neturite atviro projekto, kuriam galėtumėte priskirti komandą. Pirmiausia sukurkite projektą.",
-      "assignIntro": "Priimta. Priskirkite komandą vienam iš savo projektų.",
+      "noProjects": "Dar neturite atviro projekto, kuriam galėtumėte priskirti komandą.",
+      "assignIntro": "Sutarta iš esmės (ne sutartis). Suderinę sąlygas priskirkite komandą vienam iš savo projektų.",
       "projectLabel": "Projektas",
       "projectPlaceholder": "Pasirinkite projektą",
       "assign": "Priskirti komandą projektui",
       "assignedNote": "Priskirta. Komandos nariai dabar matomi tame projekte.",
       "outcome": {
-        "accepted": "Komanda priimta.",
+        "accepted": "Sutarta iš esmės — tai dar ne pasirašyta sutartis. Sąlygas suderinkite pokalbyje, tada priskirkite komandą projektui.",
         "declined": "Pasiūlymas atmestas.",
-        "already_accepted": "Jau priimta.",
+        "already_accepted": "Jau sutarta iš esmės.",
         "already_declined": "Jau atmesta.",
         "assigned": "Komanda priskirta projektui.",
         "already_assigned": "Ši komanda jau priskirta. Niekas nepasikeitė."
-      }
+      },
+      "createProject": "Sukurti projektą",
+      "message": "Rašyti komandai"
     }
   },
   "teamAssignment": {

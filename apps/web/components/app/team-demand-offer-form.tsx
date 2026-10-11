@@ -2,7 +2,8 @@
 
 import { useId, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { MessageSquare } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import {
@@ -12,6 +13,8 @@ import {
   type TeamOfferPanelData,
 } from "@/lib/company/team-offer-actions";
 import type { TeamOfferRefusal } from "@/lib/market/team-offer-model";
+import { openTeamOfferConversationAction } from "@/lib/company/team-offer-conversation";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * E6 - offer this team / brigade as ONE unit against ONE open demand.
@@ -26,6 +29,7 @@ import type { TeamOfferRefusal } from "@/lib/market/team-offer-model";
  */
 export function TeamDemandOfferForm({ teamId, memberCount }: { teamId: string; memberCount: number }) {
   const t = useTranslations("teamDemandOffer");
+  const locale = useLocale();
   const router = useRouter();
   const uid = useId();
   const [pending, startTransition] = useTransition();
@@ -165,6 +169,22 @@ export function TeamDemandOfferForm({ teamId, memberCount }: { teamId: string; m
                       <span className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted">
                         {t(`status.${o.status}`)}
                       </span>
+                      {o.status === "offered" || o.status === "accepted" || o.status === "assigned" ? (
+                        // The negotiation thread with the need's owner — the action
+                        // re-proves this caller manages the offering team.
+                        <form action={openTeamOfferConversationAction}>
+                          <DisplayedWorkspaceField />
+                          <input type="hidden" name="offerId" value={o.offerId} />
+                          <input type="hidden" name="locale" value={locale} />
+                          <button
+                            type="submit"
+                            data-testid={`team-offer-sent-message-${o.offerId}`}
+                            className="inline-flex min-h-11 sm:min-h-9 items-center gap-1 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-2 text-xs font-semibold text-brand-blue transition-colors hover:border-brand-blue"
+                          >
+                            <MessageSquare className="h-3.5 w-3.5" aria-hidden /> {t("sent.message")}
+                          </button>
+                        </form>
+                      ) : null}
                       {o.status === "offered" || o.status === "accepted" ? (
                         <Button type="button" size="sm" variant="ghost" disabled={pending} onClick={() => withdraw(o.offerId)}>
                           {t("sent.withdraw")}

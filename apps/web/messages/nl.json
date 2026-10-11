@@ -18733,11 +18733,12 @@
     "sent": {
       "heading": "Uw aanbiedingen",
       "none": "Nog geen aanbiedingen.",
-      "withdraw": "Intrekken"
+      "withdraw": "Intrekken",
+      "message": "Bericht aan de opdrachtgever"
     },
     "status": {
       "offered": "Wacht op antwoord",
-      "accepted": "Geaccepteerd",
+      "accepted": "In principe akkoord",
       "declined": "Afgewezen",
       "withdrawn": "Ingetrokken",
       "assigned": "Aan een project toegewezen"
@@ -18771,7 +18772,7 @@
     },
     "received": {
       "title": "Voor deze vraag aangeboden teams",
-      "subtitle": "Een team heeft zich als één eenheid voor deze vraag aangeboden. U beslist of u het accepteert en waar u het inzet.",
+      "subtitle": "Een team heeft zich als één eenheid aangeboden voor deze behoefte. Stel vragen en onderhandel in het gesprek; akkoord hier is geen contract.",
       "privacy": "Alleen feiten op teamniveau worden getoond. Hier wordt geen enkel lid genoemd. Nadat u het team hebt geaccepteerd en aan een project hebt toegewezen, verschijnen de leden in dat project, zoals bij elk team.",
       "members": "{count} leden",
       "deployable": "Inzetbare omvang {min}-{max}",
@@ -18802,22 +18803,24 @@
       "missing": "Niet opgegeven: {list}",
       "noNeedStructure": "Deze vraag is nog niet gestructureerd, dus het team kan er niet mee worden vergeleken.",
       "note": "Bericht van het team",
-      "accept": "Team accepteren",
+      "accept": "In principe akkoord",
       "decline": "Afwijzen",
-      "noProjects": "U hebt geen openstaand project om het team aan toe te wijzen. Maak eerst een project aan.",
-      "assignIntro": "Geaccepteerd. Wijs het team toe aan een van uw projecten.",
+      "noProjects": "U heeft nog geen open project om het team aan toe te wijzen.",
+      "assignIntro": "In principe akkoord (geen contract). Wijs het team toe aan een van uw projecten zodra de voorwaarden rond zijn.",
       "projectLabel": "Project om aan toe te wijzen",
       "projectPlaceholder": "Kies een project",
       "assign": "Team aan project toewijzen",
       "assignedNote": "Toegewezen. De leden van het team verschijnen nu in dat project.",
       "outcome": {
-        "accepted": "Team geaccepteerd.",
+        "accepted": "In principe akkoord — nog geen getekend contract. Spreek de voorwaarden af in het gesprek en wijs het team daarna toe aan een project.",
         "declined": "Aanbod afgewezen.",
-        "already_accepted": "Al geaccepteerd.",
+        "already_accepted": "Al in principe akkoord.",
         "already_declined": "Al afgewezen.",
         "assigned": "Team aan het project toegewezen.",
         "already_assigned": "Dit team was al toegewezen. Er is niets gewijzigd."
-      }
+      },
+      "createProject": "Project aanmaken",
+      "message": "Bericht aan het team"
     }
   },
   "teamAssignment": {
