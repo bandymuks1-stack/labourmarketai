@@ -171,3 +171,21 @@ describe("extractWorkLog — the context slot (issue #1689, re-audit line 0): th
     expect(extractWorkLog("dirbau LabourMarket.ai", TODAY).site).toBe("LabourMarket.ai");
   });
 });
+
+describe("relative days in Polish, and the day before yesterday in every language", () => {
+  const TODAY = "2026-10-11";
+  it.each([
+    ["Wczoraj malowałem ściany w hali przez 6 godzin.", "2026-10-10"],
+    ["Dzisiaj spawałem 8 godzin.", "2026-10-11"],
+    ["Przedwczoraj pracowałem 7 godzin.", "2026-10-09"],
+    ["Užvakar dirbau 8 valandas.", "2026-10-09"],
+    ["Позавчера работал 8 часов.", "2026-10-09"],
+    ["Vorgestern habe ich 8 Stunden gearbeitet.", "2026-10-09"],
+    ["Eergisteren 8 uur gewerkt.", "2026-10-09"],
+    ["The day before yesterday I worked 8 hours.", "2026-10-09"],
+    ["Vakar dirbau 8 valandas.", "2026-10-10"],
+    ["Вчера работал 8 часов.", "2026-10-10"],
+  ])("%s → %s", (text, day) => {
+    expect(extractWorkLog(text, TODAY).date).toBe(day);
+  });
+});
