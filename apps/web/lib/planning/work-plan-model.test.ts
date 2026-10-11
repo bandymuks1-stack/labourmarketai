@@ -63,4 +63,16 @@ describe("projectWorkPlanItem — a plan is a calendar SOURCE, never a copy", ()
     expect(projectWorkPlanItem({ ...entry, projectTitle: null, workObjectName: "Sandėlis B" }, "assigned")?.label).toBe("Sandėlis B");
     expect(projectWorkPlanItem({ ...entry, projectTitle: null, workerName: null }, "assigned")?.label).toBeNull();
   });
+
+  it("the planned worker reads where and for whom — never their own name back", () => {
+    const unreadableProject = { ...entry, projectTitle: null, organizationName: "Van Dijk Bouw B.V." };
+    const mine = projectWorkPlanItem(unreadableProject, "assigned");
+    expect(mine?.label).toBe("Van Dijk Bouw B.V.");
+    expect(mine?.detail).toBe("Van Dijk Bouw B.V.");
+    expect(mine?.label).not.toBe(entry.workerName);
+    expect(projectWorkPlanItem({ ...entry, projectTitle: null, workObjectName: null }, "assigned")?.label).toBeNull();
+    const managed = projectWorkPlanItem(unreadableProject, "managed");
+    expect(managed?.label).toBe(entry.workerName);
+    expect(managed?.detail).toBe(entry.workerName);
+  });
 });

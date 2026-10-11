@@ -48,10 +48,11 @@ type Row = {
   workers: { display_name: string | null; profiles: { full_name: string | null } | null } | null;
   projects: { title: string | null } | null;
   work_objects: { name: string | null } | null;
+  organizations: { display_name: string | null } | null;
 };
 
 const SELECT =
-  "id, organization_id, worker_id, project_id, work_object_id, start_date, end_date, start_time, end_time, note, status, created_at, workers(display_name, profiles(full_name)), projects(title), work_objects(name)";
+  "id, organization_id, worker_id, project_id, work_object_id, start_date, end_date, start_time, end_time, note, status, created_at, workers(display_name, profiles(full_name)), projects(title), work_objects(name), organizations(display_name)";
 
 function toEntry(r: Row): WorkPlanEntry | null {
   if (r.status !== "planned" && r.status !== "cancelled") return null;
@@ -64,6 +65,7 @@ function toEntry(r: Row): WorkPlanEntry | null {
     projectTitle: r.projects?.title?.trim() || null,
     workObjectId: r.work_object_id,
     workObjectName: r.work_objects?.name?.trim() || null,
+    organizationName: r.organizations?.display_name?.trim() || null,
     startDate: r.start_date,
     endDate: r.end_date,
     startTime: r.start_time ? r.start_time.slice(0, 5) : null,
