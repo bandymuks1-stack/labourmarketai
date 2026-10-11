@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { JournalPhotoViewer } from "@/components/app/journal/journal-photo-viewer";
 import { EvidenceState } from "@/components/app/work-world/primitives";
 import { Link } from "@/lib/i18n/navigation";
-import { formatDuration } from "@/lib/journal/format-duration";
+import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
 import type { DayObject } from "@/lib/journal/day-object";
 import type { DayPhotoPreviews } from "@/lib/journal/day-photo-previews";
 import { formatUtcDate } from "@/lib/time/display";
@@ -36,7 +36,7 @@ export async function JournalDayObject({
 }) {
   const t = await getTranslations("journal.dayObject");
   const tEntry = await getTranslations("journal");
-  const lang = locale === "en" ? "en" : "lt";
+  const lang = durationLocale(locale);
   const dur = (m: number) => formatDuration(m, "minutes", lang);
 
   const photoTotal = photos.status === "ok" ? photos.total : day.photoCount;
