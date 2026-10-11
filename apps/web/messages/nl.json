@@ -8875,6 +8875,13 @@
         "mobilisation": "mobilisatie",
         "work_start": "start werk"
       }
+    },
+    "autoMatchReceipt": {
+      "ran": "Laatste automatische zoektocht naar passende kandidaten in LabourMarket.ai: {when}. Beoordeelde kandidaten: {count}, passend: {relevant}. Er is niemand benaderd.",
+      "none": "Laatste automatische zoektocht naar passende kandidaten in LabourMarket.ai: {when}. Beoordeelde kandidaten: {count}, nog geen passende. Er is niemand benaderd.",
+      "notStructured": "Automatische zoektocht {when}: de behoefte is nog te weinig beschreven om te matchen. Voeg vaardigheden of een beroep toe.",
+      "failed": "Automatische zoektocht {when} kon niet worden afgerond. De lijst hieronder wordt nog steeds live berekend.",
+      "capped": "Het aantal kandidaten is begrensd."
     }
   },
   "planBoundary": {

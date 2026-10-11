@@ -8875,6 +8875,13 @@
         "mobilisation": "Mobilisierung",
         "work_start": "Arbeitsbeginn"
       }
+    },
+    "autoMatchReceipt": {
+      "ran": "Letzte automatische Suche nach passenden Kandidaten in LabourMarket.ai: {when}. Geprüfte Kandidaten: {count}, passend: {relevant}. Niemand wurde kontaktiert.",
+      "none": "Letzte automatische Suche nach passenden Kandidaten in LabourMarket.ai: {when}. Geprüfte Kandidaten: {count}, noch keine passenden. Niemand wurde kontaktiert.",
+      "notStructured": "Automatische Suche {when}: Der Bedarf ist noch zu knapp beschrieben. Fügen Sie Fähigkeiten oder einen Beruf hinzu.",
+      "failed": "Automatische Suche {when} konnte nicht abgeschlossen werden. Die Liste unten wird weiterhin live berechnet.",
+      "capped": "Die Zahl der Kandidaten wurde begrenzt."
     }
   },
   "planBoundary": {
