@@ -146,26 +146,56 @@ export async function readWorkPlanItems(
 
 export type PlannableWorker = { readonly workerId: string; readonly name: string };
 
+/** Relationships `work_plan_worker_in_scope_v1` accepts as an engagement
+ *  (migration 20261007140000) — the picker offers exactly those people. */
+const PLANNABLE_ENGAGEMENT_SLUGS = ["employee", "collaborator", "freelancer"] as const;
+
 /** Workers the caller can plan for: the active roster of the companies /
- *  agencies the caller manages (the same three roster truths the RPC checks
- *  server-side). Names come from the worker's own display name. */
-export async function listPlannableWorkers(): Promise<readonly PlannableWorker[]> {
+ *  agencies the caller manages, plus — for the active organization — the
+ *  people engaged through it (a "join as employee" invitation writes
+ *  engagement_contexts only; walk 2026-10-11 found them unplannable although
+ *  the RPC already accepts them). Names come from the worker's own display name. */
+export async function listPlannableWorkers(
+  organizationId?: string | null,
+): Promise<readonly PlannableWorker[]> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return [];
   const select = "worker_id, workers(id, display_name, profiles(full_name))";
-  const [cw, aw] = await Promise.all([
+  const [cw, aw, ec] = await Promise.all([
     asAny(supabase).from("company_workers").select(select).eq("status", "active").limit(200),
     asAny(supabase).from("agency_workers").select(select).eq("status", "active").limit(200),
+    organizationId
+      ? asAny(supabase)
+          .from("engagement_contexts")
+          .select("profile_id")
+          .eq("organization_id", organizationId)
+          .eq("status", "active")
+          .in("relationship_slug", [...PLANNABLE_ENGAGEMENT_SLUGS])
+          .limit(200)
+      : Promise.resolve({ data: [] }),
   ]);
   type R = {
     worker_id: string;
     workers: { id: string; display_name: string | null; profiles: { full_name: string | null } | null } | null;
   };
+  const engagedProfiles = ((ec.data ?? []) as { profile_id: string | null }[])
+    .map((r) => r.profile_id)
+    .filter((p): p is string => Boolean(p));
+  let engaged: R[] = [];
+  if (engagedProfiles.length > 0) {
+    const { data } = await asAny(supabase)
+      .from("workers")
+      .select("id, display_name, profiles(full_name)")
+      .in("profile_id", engagedProfiles);
+    engaged = ((data ?? []) as { id: string; display_name: string | null; profiles: { full_name: string | null } | null }[]).map(
+      (w) => ({ worker_id: w.id, workers: w }),
+    );
+  }
   const out = new Map<string, PlannableWorker>();
-  for (const rows of [cw.data, aw.data]) {
+  for (const rows of [cw.data, aw.data, engaged]) {
     for (const r of (rows ?? []) as R[]) {
       if (!r.worker_id || out.has(r.worker_id)) continue;
       out.set(r.worker_id, {
