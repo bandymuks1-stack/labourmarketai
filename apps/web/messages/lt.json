@@ -12205,6 +12205,11 @@
         "body": "Šis kvietimas išsiųstas adresu {email}. Esate prisijungę kitu adresu, todėl iš šios paskyros jo parodyti ar į jį atsakyti negalima. Prisijunkite pakviestuoju adresu ir dar kartą atverkite šią nuorodą.",
         "bodyNoHint": "Šis kvietimas išsiųstas kitu el. pašto adresu nei tas, kuriuo esate prisijungę, todėl iš šios paskyros jo parodyti ar į jį atsakyti negalima. Prisijunkite pakviestuoju adresu ir dar kartą atverkite šią nuorodą.",
         "untouched": "Niekas nebuvo priimta ar pakeista. Kvietimas vis dar laukia to, kam jis buvo išsiųstas."
+      },
+      "acceptedByYou": {
+        "withOrganization": "Priėmėte šį kvietimą — dabar esate susieti su {name}.",
+        "plain": "Priėmėte šį kvietimą — ryšys sukurtas.",
+        "continue": "Eiti į mano erdvę →"
       }
     },
     "teamEnquiriesTitle": "Mano užklausos komandoms",

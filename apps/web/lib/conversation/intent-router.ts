@@ -1197,6 +1197,15 @@ const RULES: IntentRule[] = [
       // noun → verb (DE/NL word order, LT object-first): "Mitarbeiter
       // einladen", "medewerker uitnodigen", "darbuotoją pakviesti"
       p("(kandidat|darbuotoj|worker|employee|candidate|mitarbeiter|arbeiter|medewerker|werknemer|kandida|работник|сотрудник|pracownik|kandydat)\\w*\\s*.{0,20}(pakvies|kviest|prid[eė]t|invite|einlad|hinzuf|uitnodig|toevoeg|приглас|добав|zapro[sś]|zaprosi)", 8),
+      // NL / DE SEPARABLE verbs in the imperative — the verb splits around the
+      // person: "Nodig Mateusz uit in ons team", "Lade Anna ins Team ein".
+      // Measured 2026-10-11: the Dutch sentence routed to a staffing NEED
+      // ("nodig" = needed). Anchored at the sentence start, so a need that
+      // merely contains "nodig … uit Polen" never becomes an invitation.
+      p("^(nodig|lade)\\s+.{1,60}\\b(uit|ein)\\b", 9),
+      // "in ons team" / "in het team" / "ins Team" / "in unser Team" after an
+      // invite verb.
+      p("(uitnodig|einlad|invite|pakvies|zapro[sś])\\w*\\s*.{0,40}(in\\s+ons\\s+team|in\\s+het\\s+team|ins\\s+team|in\\s+unser\\s+team)", 9),
     ],
   },
   {
@@ -3586,6 +3595,11 @@ const RULES: IntentRule[] = [
       p("wat\\s+moet\\s+ik\\s+(nog|nu|hierna)", 3),
       // pl — "Co powinienem zrobić dalej?", "Co jeszcze muszę zrobić?"
       p("co\\s+(jeszcze|dalej|powinienem|powinnam|musz[eę])\\b", 3),
+      // ru "Что мне делать дальше?" / "Что мне теперь делать?" and pl "Co mam
+      // teraz zrobić?" — answered "the advanced assistant is not enabled" in a
+      // walk (2026-10-11). "Co mogę tu zrobić" stays `capabilities`.
+      p("что\\s+(мне\\s+)?(теперь\\s+|сейчас\\s+)?(делать|сделать)(\\s+(дальше|теперь|сейчас))?", 3),
+      p("co\\s+mam\\s+(teraz\\s+|dalej\\s+)?(zrobi[cć]|robi[cć])", 3),
       p("\\bnext\\s+step", 2),
       p("\\bkitas\\s+žingsn", 2),
       p("(nächste(r)?\\s+schritt|volgende\\s+stap)", 2),

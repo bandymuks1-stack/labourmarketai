@@ -12205,6 +12205,11 @@
         "body": "This invitation was sent to {email}. You are signed in with a different address, so it cannot be shown or answered from this account. Sign in with the invited address and open this link again.",
         "bodyNoHint": "This invitation was sent to a different e-mail address than the one you are signed in with, so it cannot be shown or answered from this account. Sign in with the invited address and open this link again.",
         "untouched": "Nothing was accepted or changed. The invitation is still waiting for the person it was sent to."
+      },
+      "acceptedByYou": {
+        "withOrganization": "You accepted this invitation — you are now connected with {name}.",
+        "plain": "You accepted this invitation — the connection is in place.",
+        "continue": "Continue to my space →"
       }
     },
     "teamEnquiriesTitle": "My enquiries to teams",

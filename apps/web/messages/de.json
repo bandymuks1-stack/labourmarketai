@@ -12205,6 +12205,11 @@
         "body": "Diese Einladung wurde an {email} gesendet. Sie sind mit einer anderen Adresse angemeldet, daher kann sie aus diesem Konto weder angezeigt noch beantwortet werden. Melden Sie sich mit der eingeladenen Adresse an und öffnen Sie diesen Link erneut.",
         "bodyNoHint": "Diese Einladung wurde an eine andere E-Mail-Adresse gesendet als die, mit der Sie angemeldet sind, daher kann sie aus diesem Konto weder angezeigt noch beantwortet werden. Melden Sie sich mit der eingeladenen Adresse an und öffnen Sie diesen Link erneut.",
         "untouched": "Es wurde nichts angenommen oder geändert. Die Einladung wartet weiterhin auf die Person, an die sie gesendet wurde."
+      },
+      "acceptedByYou": {
+        "withOrganization": "Sie haben diese Einladung angenommen — Sie sind jetzt mit {name} verbunden.",
+        "plain": "Sie haben diese Einladung angenommen — die Verbindung besteht.",
+        "continue": "Zu meinem Bereich →"
       }
     },
     "teamEnquiriesTitle": "Meine Anfragen an Kolonnen",
