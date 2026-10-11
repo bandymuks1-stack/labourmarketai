@@ -138,6 +138,27 @@ export default async function InboxPage({
       }
     }
 
+    // A manager confirms what THIS entry shows, never the worker's whole skill
+    // list (walk 2026-10-11: every unverified skill of the worker was offered,
+    // pre-ticked, so one submit verified skills detected in unrelated entries).
+    // Only skills linked to the entry are offered; unreadable links → none.
+    const linksByEntry = new Map<string, Set<string>>();
+    const entryIds = unconfirmed.map((r) => r.id);
+    if (entryIds.length > 0) {
+      const { data: links, error: linksError } = await supabase
+        .from("journal_entry_skills")
+        .select("journal_entry_id, skill_id")
+        .in("journal_entry_id", entryIds);
+      if (!linksError) {
+        for (const l of links ?? []) {
+          if (!l.journal_entry_id || !l.skill_id) continue;
+          const set = linksByEntry.get(l.journal_entry_id) ?? new Set<string>();
+          set.add(l.skill_id);
+          linksByEntry.set(l.journal_entry_id, set);
+        }
+      }
+    }
+
     pending = unconfirmed.map((r) => {
       const workerName = resolveWorkerName(r.workers as WorkerNameRow);
       // The reviewer sees only metrics that have a human label. The parser's
@@ -188,7 +209,11 @@ export default async function InboxPage({
                 .engagement_contexts?.organization_id ?? "") as string,
             ),
         metrics,
-        skills: r.worker_id ? (skillsByWorker.get(r.worker_id) ?? []) : [],
+        skills: r.worker_id
+          ? (skillsByWorker.get(r.worker_id) ?? []).filter((s) =>
+              linksByEntry.get(r.id)?.has(s.id),
+            )
+          : [],
         recognized,
         hours,
         certainty: depth.certainty,

@@ -7575,7 +7575,7 @@
       "confirmNote": "Pastaba (nebūtina)",
       "confirmSubmit": "Patvirtinti ir patikrinti",
       "alreadyVerified": "Jau patvirtinta",
-      "noSkillsToConfirm": "Šis darbuotojas neturi daugiau nurodytų įgūdžių patvirtinti.",
+      "noSkillsToConfirm": "Šis įrašas neturi susietų įgūdžių, kuriuos dar reikėtų patvirtinti. Patvirtinus įrašą patvirtinamas pats darbas.",
       "result": {
         "skillsVerified": "Patvirtinta įgūdžių: {count}.",
         "skillNotOwned": "Darbuotojas šio įgūdžio nenurodė.",

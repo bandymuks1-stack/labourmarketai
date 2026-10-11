@@ -158,9 +158,20 @@ export async function confirmEntryAndVerifySkills(
   if (skillIds.length === 0) return { ok: false, code: "no_skills" };
   const supabase = await createClient();
   const actorId = await requireUser(supabase);
+  // A confirmation of THIS entry verifies only the skills this entry is linked
+  // to — never another skill of the worker that the manager did not see proven
+  // here (the RPC checks ownership, not the link). Unreadable links → refuse.
+  const { data: links, error: linksError } = await supabase
+    .from("journal_entry_skills")
+    .select("skill_id")
+    .eq("journal_entry_id", entryId);
+  if (linksError) return { ok: false, code: "error", message: linksError.message };
+  const linked = new Set((links ?? []).map((l) => l.skill_id as string));
+  const entrySkillIds = skillIds.filter((id) => linked.has(id));
+  if (entrySkillIds.length === 0) return { ok: false, code: "no_skills" };
   const { data, error } = await rpc(supabase, "confirm_entry_and_verify_skills", {
     p_entry_id: entryId,
-    p_skill_ids: skillIds,
+    p_skill_ids: entrySkillIds,
     p_note: note,
   });
   // The confirmation guard trigger RAISES when the entry went stale between

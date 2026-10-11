@@ -11,10 +11,10 @@
  *                        linked skills already verified → nothing to
  *                        confirm; the tap approves the entry itself.
  *   worker_declared    — the entry has ZERO links (historic entries, or the
- *                        link read failed → links unknown) → the previous
- *                        behaviour: every declared-unverified skill of the
- *                        worker. Still listed in full on the card, so the
- *                        manager sees exactly what the tap does.
+ *                        link read failed → links unknown) → NO skill is
+ *                        confirmed; the tap approves the entry only. (It used
+ *                        to offer every declared-unverified skill of the
+ *                        worker — verifying what this entry never showed.)
  *   skills_unavailable — the worker_skills read itself failed → NOTHING can
  *                        be listed, so nothing is confirmed; the card names
  *                        the failure and the tap approves the entry only.
@@ -54,7 +54,10 @@ export function scopeSkillsToConfirm({
       skills: workerUnverified.filter((s) => linkedSkillIds.has(s.id)),
     };
   }
-  return { scope: "worker_declared", skills: [...workerUnverified] };
+  // No (readable) link: the entry proves no particular skill, so the tap
+  // approves the entry only. Offering the worker's other unverified skills
+  // here verified what this entry never showed (walk 2026-10-11).
+  return { scope: "worker_declared", skills: [] };
 }
 
 /** The receipt line's entry title: the entry's own first non-empty line,
