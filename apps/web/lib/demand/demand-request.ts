@@ -17,6 +17,7 @@
 import { runAutoMatchForDemand } from "@/lib/scouting/auto-match";
 import type { ScoutingEmployer } from "@/lib/scouting/scouting";
 import "server-only";
+import { demandWrittenLanguage } from "@/lib/demand/demand-written-language";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
@@ -344,11 +345,10 @@ export async function submitDemandRequestCore(
     p_kind: kind,
     p_title: title.slice(0, MAX_TITLE),
     // The real user-entered description is the need summary (no fabricated
-    // placeholder text). p_original_language stays "lt" — the saved request
-    // surfaces on the LT-first owner UI.
+    // placeholder text), recorded in the language it was written in.
     p_need_summary: description,
     p_payload: payload,
-    p_original_language: "lt",
+    p_original_language: await demandWrittenLanguage(),
   };
   // OPEN-NEEDS ENTITLEMENT SEAM (owner launch pricing 2026-09-05): FREE
   // organization = 1 concurrent active need, ORGANIZATION €99 = no fixed
