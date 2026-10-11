@@ -765,7 +765,8 @@
       "new_job_matches": "Verschwindet, sobald Sie die Stellenübersicht öffnen (oder die Jobs auf der Übersichtskarte sehen).",
       "pending_connection_invites": "Verschwindet, sobald Sie die Verbindungsanfrage der Agentur auf der Partnerseite annehmen oder ablehnen.",
       "shared_requests_awaiting_offer": "Verschwindet, sobald Sie auf der Partnerseite eine Fachkraft für die geteilte Anfrage anbieten.",
-      "open_candidate_offers": "Verschwindet, sobald Sie den vorgeschlagenen Kandidaten auf Ihrer Scouting-Seite annehmen oder ablehnen."
+      "open_candidate_offers": "Verschwindet, sobald Sie den vorgeschlagenen Kandidaten auf Ihrer Scouting-Seite annehmen oder ablehnen.",
+      "open_team_offers": "Verschwindet, sobald Sie das Angebot des Teams auf Ihrer Scouting-Seite annehmen oder ablehnen."
     },
     "storedTitle": "Gespeicherte Benachrichtigungen",
     "storedIntro": "Aufgezeichnete Ereignisse zu Ihnen — jede Zeile öffnet die zugehörige Seite. Der Lesestatus wird über die Glocke verwaltet.",
@@ -4843,6 +4844,7 @@
         "pending_connection_invites": "Eine Personalagentur möchte sich mit Ihrem Unternehmen verbinden",
         "shared_requests_awaiting_offer": "Kundenanfragen, die auf Ihren Kandidaten warten",
         "open_candidate_offers": "Agenturkandidaten, die auf Ihre Entscheidung warten",
+        "open_team_offers": "Teams, die sich für Ihren Bedarf anbieten",
         "event_booking_proposed": "Sie haben einen Buchungsvorschlag erhalten",
         "event_booking_accepted": "Ihr Buchungsvorschlag wurde angenommen",
         "event_booking_declined": "Ihr Buchungsvorschlag wurde abgelehnt",
@@ -8628,6 +8630,7 @@
     "pickDemand": "Bedarf wählen",
     "noDemands": "Du hast noch keine Bedarfe. Erstelle zuerst einen Bedarf und strukturiere dann die benötigten Fähigkeiten.",
     "noDemandsCta": "Bedarf erstellen",
+    "teamOffersWaiting": "{count, plural, one {# Teamangebot wartet auf Ihre Antwort} other {# Teamangebote warten auf Ihre Antwort}}",
     "unstructuredTag": "Anforderungen nicht bestätigt",
     "notStructured": "Dieser Bedarf hat noch keine strukturierten Fähigkeiten, daher kann kein Match berechnet werden. Strukturiere zuerst die benötigten Fähigkeiten.",
     "needsSetup": "Scouting ist in dieser Umgebung noch nicht verfügbar.",

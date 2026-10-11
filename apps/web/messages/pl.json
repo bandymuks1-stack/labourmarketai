@@ -765,7 +765,8 @@
       "new_job_matches": "Znika, gdy otworzysz tablicę możliwości (lub zobaczysz oferty na karcie przeglądu).",
       "pending_connection_invites": "Znika, gdy na stronie partnerów zaakceptujesz lub odrzucisz prośbę agencji o połączenie.",
       "shared_requests_awaiting_offer": "Znika, gdy na stronie partnerów zaproponujesz pracownika do udostępnionego zapytania.",
-      "open_candidate_offers": "Znika, gdy na stronie rekrutacji zaakceptujesz lub odrzucisz zaproponowanego kandydata."
+      "open_candidate_offers": "Znika, gdy na stronie rekrutacji zaakceptujesz lub odrzucisz zaproponowanego kandydata.",
+      "open_team_offers": "Znika, gdy na stronie rekrutacji zaakceptujesz lub odrzucisz ofertę zespołu."
     },
     "storedTitle": "Zapisane powiadomienia",
     "storedIntro": "Zarejestrowane zdarzenia dotyczące Ciebie — każdy wiersz otwiera stronę, której dotyczy. Stan przeczytania zarządzany jest z dzwonka.",
@@ -4843,6 +4844,7 @@
         "pending_connection_invites": "Agencja pracy chce nawiązać połączenie z Twoją firmą",
         "shared_requests_awaiting_offer": "Zapytania klientów czekające na Twojego kandydata",
         "open_candidate_offers": "Kandydaci agencji czekający na Twoją decyzję",
+        "open_team_offers": "Zespoły oferujące się do Twoich potrzeb",
         "event_booking_proposed": "Otrzymałeś propozycję rezerwacji",
         "event_booking_accepted": "Twoja propozycja rezerwacji została przyjęta",
         "event_booking_declined": "Twoja propozycja rezerwacji została odrzucona",
@@ -8628,6 +8630,7 @@
     "pickDemand": "Wybierz potrzebę",
     "noDemands": "Nie masz jeszcze żadnych potrzeb. Utwórz potrzebę z panelu — po przeglądzie zespół ustrukturyzuje jej wymagane umiejętności.",
     "noDemandsCta": "Utwórz potrzebę",
+    "teamOffersWaiting": "{count, plural, one {# oferta zespołu czeka na Twoją odpowiedź} few {# oferty zespołów czekają na Twoją odpowiedź} other {# ofert zespołów czeka na Twoją odpowiedź}}",
     "unstructuredTag": "wymagania niepotwierdzone",
     "notStructured": "Wymagane umiejętności tej potrzeby nie są jeszcze ustrukturyzowane, więc nie można obliczyć dopasowania. Nowe potrzeby są przeglądane i strukturyzowane przez administratorów — nie musisz nic robić.",
     "needsSetup": "Nie udało się wczytać. Spróbuj ponownie.",

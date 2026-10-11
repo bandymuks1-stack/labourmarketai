@@ -293,6 +293,7 @@ describe("spine: the membership-invitation signal is wired end to end", () => {
       pendingConnectionInvites: 0,
       sharedRequestsAwaitingOffer: 0,
       openCandidateOffers: 0,
+      openTeamOffers: 0,
     })).toBe(4);
   });
 });

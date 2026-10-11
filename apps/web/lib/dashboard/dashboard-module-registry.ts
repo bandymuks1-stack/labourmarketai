@@ -417,6 +417,7 @@ export const DASHBOARD_MODULES: readonly DashboardModule[] = [
       "pending-connection-invites",
       "shared-requests-awaiting-offer",
       "open-candidate-offers",
+      "open-team-offers",
       "pending-membership-invitations",
     ],
   },

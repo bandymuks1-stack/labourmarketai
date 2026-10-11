@@ -765,7 +765,8 @@
       "new_job_matches": "Verdwijnt zodra je het vacaturebord opent (of de banen op de overzichtskaart ziet).",
       "pending_connection_invites": "Verdwijnt zodra je het verbindingsverzoek van het bureau op de partnerpagina accepteert of afwijst.",
       "shared_requests_awaiting_offer": "Verdwijnt zodra je op de partnerpagina een medewerker voorstelt voor de gedeelde aanvraag.",
-      "open_candidate_offers": "Verdwijnt zodra je de voorgestelde kandidaat op je scoutingpagina accepteert of afwijst."
+      "open_candidate_offers": "Verdwijnt zodra je de voorgestelde kandidaat op je scoutingpagina accepteert of afwijst.",
+      "open_team_offers": "Verdwijnt zodra je het aanbod van het team op je scoutingpagina accepteert of afwijst."
     },
     "storedTitle": "Opgeslagen meldingen",
     "storedIntro": "Vastgelegde gebeurtenissen over u — elke rij opent de bijbehorende pagina. De leesstatus beheert u via de bel.",
@@ -4843,6 +4844,7 @@
         "pending_connection_invites": "Een uitzendbureau wil een verbinding met je bedrijf",
         "shared_requests_awaiting_offer": "Aanvragen van klanten die op je kandidaat wachten",
         "open_candidate_offers": "Kandidaten van bureaus die op je beslissing wachten",
+        "open_team_offers": "Teams die zich aanbieden voor je behoeften",
         "event_booking_proposed": "Je hebt een boekingsvoorstel ontvangen",
         "event_booking_accepted": "Je boekingsvoorstel is geaccepteerd",
         "event_booking_declined": "Je boekingsvoorstel is afgewezen",
@@ -8628,6 +8630,7 @@
     "pickDemand": "Kies een personeelsbehoefte",
     "noDemands": "Je hebt nog geen personeelsbehoeften. Maak een personeelsbehoefte aan vanaf je dashboard — na beoordeling structureert het team de vereiste vaardigheden.",
     "noDemandsCta": "Personeelsbehoefte aanmaken",
+    "teamOffersWaiting": "{count, plural, one {# teamaanbod wacht op je antwoord} other {# teamaanbiedingen wachten op je antwoord}}",
     "unstructuredTag": "vereisten niet bevestigd",
     "notStructured": "De vereiste vaardigheden van deze personeelsbehoefte zijn nog niet gestructureerd, dus er kan geen match worden berekend. Nieuwe personeelsbehoeften worden door de beheerders beoordeeld en gestructureerd — je hoeft niets te doen.",
     "needsSetup": "Laden is niet gelukt. Probeer het opnieuw.",
