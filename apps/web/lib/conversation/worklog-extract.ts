@@ -84,22 +84,30 @@ function durationLabel(mins: number): string {
 // "A-7-12" are none of them spans).
 const SPAN_RE =
   /(?<![\p{L}\p{N}_\-–—/.:])(?:nuo|from|с|von|van)?\s*(\d{1,2})(?:[:.](\d{2}))?\s*(?:iki|to|до|bis|tot|[-–—])\s*(\d{1,2})(?:[:.](\d{2}))?(?!\p{N}|[-–—/]\p{N})/iu;
+// Polish "od 7 do 16" — read ONLY as the od…do PAIR: a bare "2 do 3 godzin"
+// is a range of hours (2–3 h), never the clock span 02:00–03:00. Measured
+// 2026-10-11: without it a Polish welder's "od 7 do 16, 30 min przerwy"
+// saved the 30-minute break as the day's work.
+const PL_SPAN_RE =
+  /(?<![\p{L}\p{N}_])od\s*(\d{1,2})(?:[:.](\d{2}))?\s*do\s*(\d{1,2})(?:[:.](\d{2}))?(?!\p{N}|[-–—/]\p{N})/iu;
 // "45 min", "45 minučių", "45 мин", optionally near a break word.
 const BREAK_RE =
   /(\d{1,3})\s*(?:min|минут|мин)\w*/iu;
 // `\b` bounds the ASCII "break" only — "breakdown" is work, not a pause.
-const BREAK_CONTEXT_RE = /(pertrauk|piet[uū]|\bbreaks?\b|lunch|обед|перерыв|pauze|pause)/iu;
+const BREAK_CONTEXT_RE = /(pertrauk|piet[uū]|\bbreaks?\b|lunch|обед|перерыв|pauze|pause|przerw|mittag)/iu;
 // A break stated in HOURS — "1 h break", "1 val. pertrauka", "перерыв 1 час".
 // Read only when the hour figure stands BESIDE the break word, so the day's
 // own "9 valandas" is never taken for the break.
 const BREAK_HOUR_UNIT = String.raw`(\d{1,2})(?:[.,](\d))?\s*(?:h(?!\p{L})|hrs?(?!\p{L})|hour\w*|val\.?|valand\w*|ч(?!\p{L})|час\w*)`;
-const BREAK_WORD = String.raw`(?:pertrauk\w*|piet\w*|\bbreaks?\b|lunch|обед\w*|перерыв\w*|pauze|pause)`;
+const BREAK_WORD = String.raw`(?:pertrauk\w*|piet\w*|\bbreaks?\b|lunch|обед\w*|перерыв\w*|pauze|pause|przerw\w*|mittag\w*)`;
 const BREAK_HOURS_RE = new RegExp(
   `${BREAK_HOUR_UNIT}\\s*${BREAK_WORD}|${BREAK_WORD}\\s*(?:of\\s+|for\\s+|[:–—-]\\s*)?${BREAK_HOUR_UNIT}`,
   "iu",
 );
 // explicit "8 valandas / hours / часов"
-const EXPLICIT_HOURS_RE = /(\d{1,2})(?:[:.,](\d{1,2}))?\s*(?:val\.?|valand\w*|hour\w*|hrs?|час\w*|uur|stunden?)/iu;
+// pl "8,5 godziny" / "8 godz." and de "8 Std." were not read (walk 2026-10-11:
+// a Polish entry saved with no duration).
+const EXPLICIT_HOURS_RE = /(\d{1,2})(?:[:.,](\d{1,2}))?\s*(?:val\.?|valand\w*|hour\w*|hrs?|час\w*|uur|stunden?|godz\w*|std\.?(?!\p{L}))/iu;
 // site after "objekte X" / "statyboje X" / "site X" / "на объекте в X" —
 // the locative forms only: "Statyba" inside a company name is a NAME, not
 // a place word (the context rules below read it)
@@ -181,7 +189,7 @@ export function extractWorkLog(
   let start: string | null = null;
   let end: string | null = null;
   let spanMinutes: number | null = null;
-  const span = raw.match(SPAN_RE);
+  const span = raw.match(SPAN_RE) ?? raw.match(PL_SPAN_RE);
   if (span) {
     const s = toMinutes(span[1], span[2]);
     const e = toMinutes(span[3], span[4]);
@@ -245,6 +253,7 @@ export function extractWorkLog(
     parts.length > 1 &&
     /[A-Za-zÀ-ÿА-Яа-яĀ-ž]/.test(last) &&
     !SPAN_RE.test(last) &&
+    !PL_SPAN_RE.test(last) &&
     !BREAK_RE.test(last) &&
     !BREAK_HOURS_RE.test(last) &&
     last.length <= 80
