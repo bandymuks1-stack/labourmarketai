@@ -117,6 +117,10 @@ begin
 end;
 $function$;
 
+revoke all on function public.review_worker_absence_v1(uuid, text) from public;
+revoke all on function public.review_worker_absence_v1(uuid, text) from anon;
+grant execute on function public.review_worker_absence_v1(uuid, text) to authenticated;
+
 commit;
 
 -- ROLLBACK
