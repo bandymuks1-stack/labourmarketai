@@ -2214,7 +2214,15 @@
           "verified": "Geverifieerd — een sterkere vertrouwensstatus, alleen toegekend na een echte controle."
         },
         "goToWorkspace": "Bedrijfswerkruimte openen",
-        "capabilityNotDeclared": "De rol van onderwijsinstelling is nog niet vastgelegd — geef die op in de werkruimte onder “Wat doet je organisatie?”."
+        "capabilityNotDeclared": "De rol van onderwijsinstelling is nog niet vastgelegd — geef die op in de werkruimte onder “Wat doet je organisatie?”.",
+        "eyebrow": "BEDRIJF INSTELLEN",
+        "pageTitle": "Bedrijfsprofiel",
+        "backToStart": "Terug naar het begin",
+        "blockedBadge": "geblokkeerd",
+        "goToCompanySpace": "Naar de bedrijfsomgeving →",
+        "pickOrgHeading": "Welke organisatie wil je beheren?",
+        "pickOrgBody": "Je hebt meerdere organisaties. Kies de actieve omgeving hierboven of maak een nieuwe.",
+        "createNewOrg": "+ Nieuwe organisatie maken"
       },
       "workersBlocker": {
         "title": "Er is iets misgegaan",
@@ -2646,7 +2654,13 @@
           "in_review": "In beoordeling",
           "approved": "Goedgekeurd",
           "needs_followup": "Opvolging nodig"
-        }
+        },
+        "eyebrow": "STATUS OPDRACHTGEVER",
+        "pageTitle": "Account opdrachtgever / klant",
+        "backToStart": "Terug naar het begin",
+        "blockedBadge": "geblokkeerd",
+        "started": "✓ Gestart",
+        "openBuyerDashboard": "Dashboard opdrachtgever openen →"
       },
       "requests": {
         "heading": "Kopersaanvragen",

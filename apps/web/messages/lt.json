@@ -2214,7 +2214,15 @@
           "verified": "Patvirtinta — stipresnė pasitikėjimo būsena, suteikiama tik po realios patikros."
         },
         "goToWorkspace": "Atidaryti įmonės darbo erdvę",
-        "capabilityNotDeclared": "Švietimo įstaigos vaidmuo dar neužfiksuotas — nurodykite jį darbo erdvėje, skiltyje „Ką veikia jūsų organizacija?“."
+        "capabilityNotDeclared": "Švietimo įstaigos vaidmuo dar neužfiksuotas — nurodykite jį darbo erdvėje, skiltyje „Ką veikia jūsų organizacija?“.",
+        "eyebrow": "ĮMONĖS NUSTATYMAS",
+        "pageTitle": "Įmonės profilis",
+        "backToStart": "Grįžti į veiklos pradžią",
+        "blockedBadge": "blokuota",
+        "goToCompanySpace": "Eiti į įmonės erdvę →",
+        "pickOrgHeading": "Kurią organizaciją tvarkyti?",
+        "pickOrgBody": "Turite kelias organizacijas. Pasirinkite aktyvią erdvę viršuje arba kurkite naują.",
+        "createNewOrg": "+ Kurti naują organizaciją"
       },
       "workersBlocker": {
         "title": "Nepavyko",
@@ -2646,7 +2654,13 @@
           "in_review": "Peržiūrima",
           "approved": "Patvirtinta",
           "needs_followup": "Reikia tolesnių veiksmų"
-        }
+        },
+        "eyebrow": "PIRKĖJO BŪSENA",
+        "pageTitle": "Pirkėjo / kliento paskyra",
+        "backToStart": "Grįžti į veiklos pradžią",
+        "blockedBadge": "blokuota",
+        "started": "✓ Pradėta",
+        "openBuyerDashboard": "Atidaryti pirkėjo dashboardą →"
       },
       "requests": {
         "heading": "Pirkėjo užklausos",

@@ -2214,7 +2214,15 @@
           "verified": "Zweryfikowana — silniejszy stan zaufania, przyznawany wyłącznie po realnej kontroli."
         },
         "goToWorkspace": "Otwórz przestrzeń roboczą firmy",
-        "capabilityNotDeclared": "Rola dostawcy edukacji nie została jeszcze zapisana — zadeklaruj ją w przestrzeni roboczej w sekcji „Czym zajmuje się Twoja organizacja?”."
+        "capabilityNotDeclared": "Rola dostawcy edukacji nie została jeszcze zapisana — zadeklaruj ją w przestrzeni roboczej w sekcji „Czym zajmuje się Twoja organizacja?”.",
+        "eyebrow": "KONFIGURACJA FIRMY",
+        "pageTitle": "Profil firmy",
+        "backToStart": "Wróć do początku",
+        "blockedBadge": "zablokowane",
+        "goToCompanySpace": "Przejdź do przestrzeni firmy →",
+        "pickOrgHeading": "Którą organizacją zarządzać?",
+        "pickOrgBody": "Masz kilka organizacji. Wybierz aktywną przestrzeń w przełączniku powyżej albo utwórz nową.",
+        "createNewOrg": "+ Utwórz nową organizację"
       },
       "workersBlocker": {
         "title": "Coś poszło nie tak",
@@ -2646,7 +2654,13 @@
           "in_review": "W trakcie weryfikacji",
           "approved": "Zatwierdzone",
           "needs_followup": "Wymaga dalszego działania"
-        }
+        },
+        "eyebrow": "STATUS ZLECENIODAWCY",
+        "pageTitle": "Konto zleceniodawcy / klienta",
+        "backToStart": "Wróć do początku",
+        "blockedBadge": "zablokowane",
+        "started": "✓ Rozpoczęte",
+        "openBuyerDashboard": "Otwórz panel zleceniodawcy →"
       },
       "requests": {
         "heading": "Zapytania zleceniodawcy",
