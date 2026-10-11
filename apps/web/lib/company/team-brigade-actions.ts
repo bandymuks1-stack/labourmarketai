@@ -15,6 +15,7 @@ import {
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { refuseStaleWorkspace } from "@/lib/company/stale-workspace";
+import { parseEmailList } from "@/lib/invitations/model";
 
 /**
  * Server actions for the company-room team/brigade panel (§8.3 + Trust
@@ -88,10 +89,11 @@ export async function inviteWorkerToTeamAction(input: {
   } = await supabase.auth.getUser();
   if (!user) return { outcome: "error" };
 
-  const typed = (input.email ?? "").trim().toLowerCase();
-  const email =
-    (await lookupLinkedWorkerEmail(input.workerId)) ??
-    (/^[^s@]+@[^s@]+.[^s@]+$/.test(typed) ? typed : null);
+  // The canonical invitation parser — the same validation every invite form
+  // uses (a hand-rolled regex here lost its escapes and refused any address
+  // with an "s" in it; walk 2026-10-11).
+  const typed = parseEmailList(input.email ?? "").valid[0] ?? null;
+  const email = (await lookupLinkedWorkerEmail(input.workerId)) ?? typed;
   if (!email) return { outcome: "no_email" };
 
   const result = await createAndSendInvitations({
