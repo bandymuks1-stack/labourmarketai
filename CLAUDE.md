@@ -215,6 +215,14 @@ narrower task-local reading. Known technical defects within existing authority a
 without waiting for the owner to repeat the instruction. See
 `docs/DECISIONS/0022-task-local-instructions-are-not-permanent-restrictions.md`.
 
+## One memory, one context (binding, decision 0024)
+
+Long-term memory is the canonical tables under RLS — no second AI memory, vector store or
+external notebook. Keep facts, events, confirmations, derived readings, AI output and short-term
+chat apart; AI output never overwrites a confirmed fact. Every read/write is bound to the user,
+the server-resolved workspace and the object; one organization's context never shows in another.
+Confirmations are single-use. See `docs/DECISIONS/0024-memory-and-context-architecture.md`.
+
 ## Policy overrides
 
 DI's explicit prompt instruction always wins. If a prompt says "do not commit" 
