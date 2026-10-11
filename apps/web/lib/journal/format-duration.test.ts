@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDuration } from "./format-duration";
+import { durationLocale, formatDuration } from "./format-duration";
 
 describe("formatDuration — LT", () => {
   it("formats 195 minutes as '3 val. 15 min.'", () => {
@@ -71,5 +71,33 @@ describe("formatDuration — edge cases", () => {
 
   it("rejects NaN gracefully", () => {
     expect(formatDuration(NaN, "minutes", "lt")).toMatch(/NaN/);
+  });
+});
+
+describe("durationLocale — a reader never sees another language's unit", () => {
+  it("keeps LT and RU abbreviations, gives every other locale h/min", () => {
+    expect(formatDuration(480, "minutes", durationLocale("ru"))).toBe("8 ч");
+    expect(formatDuration(480, "minutes", durationLocale("lt"))).toBe("8 val.");
+    for (const l of ["en", "pl", "de", "nl", "sv", "no"]) {
+      expect(formatDuration(495, "minutes", durationLocale(l))).toBe("8 h 15 min");
+    }
+  });
+
+  it("no caller maps a non-LT locale onto the LT labels (found 2026-10-11: RU chat card read '8 val.')", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const root = join(__dirname, "..", "..");
+    for (const f of [
+      "components/app/journal/journal-calendar.tsx",
+      "components/app/journal/journal-day-object.tsx",
+      "components/app/journal-entry-composer.tsx",
+      "components/app/planning/work-day.tsx",
+      "components/app/planning/work-week.tsx",
+      "components/app/conversation/worker-worklog-flow.tsx",
+      "app/[locale]/dashboard/journal/page.tsx",
+    ]) {
+      const src = readFileSync(join(root, f), "utf8");
+      expect(src, f).not.toMatch(/\?\s*(?:"en"|"ru"|locale)\s*:\s*"lt"/);
+    }
   });
 });

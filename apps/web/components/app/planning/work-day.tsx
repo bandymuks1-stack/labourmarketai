@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
-import { formatDuration } from "@/lib/journal/format-duration";
+import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
 import { createUtcFormatter } from "@/lib/time/display";
 import type { RhythmDay } from "@/lib/planning/work-rhythm";
 
@@ -26,7 +26,7 @@ const SEGMENT_TONES = ["bg-brand-cyan/80", "bg-brand-cyan/55", "bg-brand-cyan/35
 
 export async function WorkDay({ day, locale }: { day: RhythmDay; locale: string }) {
   const t = await getTranslations("planning");
-  const durLocale = locale === "en" ? "en" : locale === "ru" ? "ru" : "lt";
+  const durLocale = durationLocale(locale);
   const dur = (m: number) => formatDuration(m, "minutes", durLocale);
   const weekday = createUtcFormatter(locale, { weekday: "long" })(day.day) ?? "";
   const dateLong = createUtcFormatter(locale, { day: "numeric", month: "long", year: "numeric" })(day.day) ?? day.day;

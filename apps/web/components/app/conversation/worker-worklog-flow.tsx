@@ -48,6 +48,7 @@ import {
 } from "@/lib/journal/skill-pipeline-actions";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { formatUtcDate } from "@/lib/time/display";
+import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { personCalendarDay } from "@/lib/time/person-calendar-day";
 
@@ -1047,7 +1048,14 @@ export function WorkerWorkLogFlow({
             v={`${draft.breakMinutes} ${labels.minutesUnit}`}
           />
         )}
-        {draft.hoursLabel && <Row k={labels.labelHours} v={draft.hoursLabel} />}
+        {draft.workedMinutes != null ? (
+          <Row
+            k={labels.labelHours}
+            v={formatDuration(draft.workedMinutes, "minutes", durationLocale(locale))}
+          />
+        ) : (
+          draft.hoursLabel && <Row k={labels.labelHours} v={draft.hoursLabel} />
+        )}
       </dl>
 
       <RecordedTimePreview notes={notes} workDate={workDate} labels={labels} />
