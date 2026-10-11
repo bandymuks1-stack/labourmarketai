@@ -3595,6 +3595,11 @@ const RULES: IntentRule[] = [
       p("wat\\s+moet\\s+ik\\s+(nog|nu|hierna)", 3),
       // pl — "Co powinienem zrobić dalej?", "Co jeszcze muszę zrobić?"
       p("co\\s+(jeszcze|dalej|powinienem|powinnam|musz[eę])\\b", 3),
+      // ru "Что мне делать дальше?" / "Что мне теперь делать?" and pl "Co mam
+      // teraz zrobić?" — answered "the advanced assistant is not enabled" in a
+      // walk (2026-10-11). "Co mogę tu zrobić" stays `capabilities`.
+      p("что\\s+(мне\\s+)?(теперь\\s+|сейчас\\s+)?(делать|сделать)(\\s+(дальше|теперь|сейчас))?", 3),
+      p("co\\s+mam\\s+(teraz\\s+|dalej\\s+)?(zrobi[cć]|robi[cć])", 3),
       p("\\bnext\\s+step", 2),
       p("\\bkitas\\s+žingsn", 2),
       p("(nächste(r)?\\s+schritt|volgende\\s+stap)", 2),

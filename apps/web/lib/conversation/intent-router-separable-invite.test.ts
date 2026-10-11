@@ -27,3 +27,15 @@ describe("separable NL/DE invite verbs route to the invitation", () => {
     expect(classifyIntent(text).intent).not.toBe("invite-candidate");
   });
 });
+
+describe("'what should I do next?' in Russian and Polish", () => {
+  it.each(["Что мне делать дальше?", "Что мне теперь делать?", "Что делать дальше?", "Co mam teraz zrobić?", "Co mam robić dalej?"])(
+    "%s",
+    (text) => {
+      expect(classifyIntent(text).intent).toBe("next-action");
+    },
+  );
+  it("'Co mogę tu zrobić?' stays the capabilities question", () => {
+    expect(classifyIntent("Co mogę tu zrobić?").intent).toBe("capabilities");
+  });
+});
