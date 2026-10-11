@@ -79,10 +79,10 @@ export async function openTeamOfferConversationAction(formData: FormData): Promi
     counterpart = (req as { profile_id: string | null } | null)?.profile_id ?? null;
     const { data: team } = await admin
       .from("organizations")
-      .select("name")
+      .select("display_name")
       .eq("id", (own as { team_org_id: string }).team_org_id)
       .maybeSingle();
-    subject = (team as { name: string | null } | null)?.name ?? null;
+    subject = (team as { display_name: string | null } | null)?.display_name?.trim() || null;
   } else if (UUID.test(requestId)) {
     // Receiver side — the receiver-gated listing must contain this offer.
     const received = await listReceivedOffers(requestId);
