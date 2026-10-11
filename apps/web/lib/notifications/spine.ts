@@ -17,6 +17,22 @@ import { getPendingAbsenceReviewCount } from "@/lib/leave/absences";
 import { getTaskAttentionCounts } from "@/lib/tasks/tasks";
 import { getNewMarketplaceMatchCount } from "@/lib/marketplace/worker-opportunities";
 import { getBridgeSpineCounts } from "@/lib/agency/bridge-read";
+import { listCompanyDemands } from "@/lib/scouting/scouting";
+import { countOpenTeamOffersByDemand } from "@/lib/company/team-offer";
+
+/** Team / brigade offers waiting on the active company's own OPEN needs —
+ *  the same receiver RPC the scouting section renders. 0 without a company
+ *  context and on any failure (the spine is defensive). */
+async function getOpenTeamOfferCount(): Promise<number> {
+  try {
+    const open = (await listCompanyDemands()).filter((d) => d.status !== "closed");
+    if (open.length === 0) return 0;
+    const byDemand = await countOpenTeamOffersByDemand(open.map((d) => d.id));
+    return [...byDemand.values()].reduce((a, b) => a + b, 0);
+  } catch {
+    return 0;
+  }
+}
 import type { FeatureKey } from "@/lib/config/feature-availability";
 import {
   SPINE_SIGNALS,
@@ -55,6 +71,7 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     newJobMatches,
     pendingAbsenceReviews,
     bridge,
+    openTeamOffers,
   ] = await Promise.all([
     getUnreadConversationCount(),
     getPendingIncomingRequestCount(),
@@ -86,6 +103,7 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     // from the SAME bridge reads the partners / scouting doors render, zeros
     // for everyone else and on any failure.
     getBridgeSpineCounts(),
+    getOpenTeamOfferCount(),
   ]);
   return {
     unreadConversations,
@@ -102,6 +120,7 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     pendingConnectionInvites: bridge.pendingConnectionInvites,
     sharedRequestsAwaitingOffer: bridge.sharedRequestsAwaitingOffer,
     openCandidateOffers: bridge.openCandidateOffers,
+    openTeamOffers,
   };
 });
 
