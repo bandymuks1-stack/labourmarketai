@@ -2365,6 +2365,13 @@
           "awayUntil": "Afwezig tot {date}",
           "assign": "Toewijzen aan project",
           "openCalendar": "Agenda openen"
+        },
+        "inviteLinked": {
+          "title": "{count, plural, one {# persoon kwam erbij via een uitnodiging} other {# personen kwamen erbij via een uitnodiging}}",
+          "body": "Zij hebben je uitnodiging geaccepteerd en werken met je organisatie. Hun werkjournaal kan worden beoordeeld zodra beoordeling aan staat.",
+          "reviewOn": "Beoordeling aan",
+          "reviewOff": "Beoordeling uit",
+          "manage": "Leden en beoordeling beheren →"
         }
       },
       "scoutingBridge": {
