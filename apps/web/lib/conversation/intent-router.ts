@@ -1957,6 +1957,13 @@ const RULES: IntentRule[] = [
       // "kandydatów zaproponowała agencja"
       p("(kandidat|candidate|кандидат|kandida|kandydat)\\w*\\s*.{0,28}(agent[uū]r|agency|agencies|агент|bureau|agentur|agencj)", 9),
       p("(pasi[uū]l|si[uū]l|offer|propos|предлож|aangebod|aanbied|vorschl|vorgeschlag|zaproponow|zaoferow)\\w*\\s*.{0,20}(agent[uū]r|agency|agencies|агент|bureau|agentur|agencj)", 9),
+      // The same answer lists BRIGADES and COMPANIES offered against the
+      // need (2026-10-11): "kokios brigados pasiūlė save?", "brigadų
+      // pasiūlymai", "which crews offered", "subcontractor offers",
+      // "какие бригады предложили", "welke ploegen boden zich aan",
+      // "Angebote von Subunternehmern", "jakie brygady zaoferowały się".
+      p("(brigad|subrang|subcontract|crew|бригад|субподряд|ploeg|onderaannem|subunternehm|brygad|podwykonaw)\\w*\\s*.{0,24}(pasi[uū]l|si[uū]lo|offer|propos|предлож|aanbod|aangebod|boden|angebot|angeboten|vorschl|ofert|propozycj|zaproponow|zaoferow|zg[lł]osi)", 9),
+      p("(pasi[uū]lym|offers?|предложени|aanbieding|angebot|ofert)\\w*\\s*.{0,24}(brigad|subrang|subcontract|crew|бригад|субподряд|ploeg|onderaannem|subunternehm|brygad|podwykonaw)", 9),
     ],
   },
   {

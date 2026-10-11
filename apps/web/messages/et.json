@@ -3674,6 +3674,10 @@
         },
         "offerCapacity": {
           "label": "Pane oma pakkumine kirja"
+        },
+        "respondTeamOffer": {
+          "label": "Vasta brigaadi või ettevõtte pakkumisele",
+          "description": "Lepi põhimõtteliselt kokku või lükka tagasi teie vajadusele pakutud brigaad või ettevõte."
         }
       },
       "education": {
@@ -4150,7 +4154,7 @@
       "projectCreateIntro": "Uus projekt. Nimi ja linn — seejärel saate siinsamas inimesi määrata.",
       "projectCreatedNext": "Projekt loodud. Määrake inimesed siinsamas — või tulge selle juurde hiljem tagasi „Minu projektid“ alt.",
       "clientOffersIntro": "Agentuuride pakutud kandidaadid teie vajadustele:",
-      "clientOffersNone": "Ükski agentuur pole veel teie avatud vajadustele kandidaate pakkunud.",
+      "clientOffersNone": "Teie avatud vajadustele pole veel keegi pakkunud kandidaate, brigaadi ega ettevõtet.",
       "chipOfferAccept": "Võta vastu",
       "chipOfferDecline": "Lükka tagasi",
       "offerAccepted": "Vastu võetud. Kandidaadile saadeti broneeringu ettepanek — tema vastust näete siin.",
@@ -4304,7 +4308,15 @@
       "acceptOfferOne": "[EN] Here it is. The button below confirms it.",
       "acceptOfferWhich": "[EN] Which one? Choose below.",
       "visibilityUnavailable": "Nähtavust tööandjatele ei õnnestunud kontrollida. See ei tähenda, et see on välja lülitatud — avage seaded.",
-      "chipVisibility": "Nähtavus tööandjatele"
+      "chipVisibility": "Nähtavus tööandjatele",
+      "teamOffersIntro": "Brigaadid ja ettevõtted, kes pakkusid end teie vajadustele:",
+      "teamOfferStatusAgreed": "põhimõtteliselt kokku lepitud",
+      "chipTeamOfferAgree": "Lepi põhimõtteliselt kokku",
+      "chipTeamOfferThread": "Kirjuta",
+      "chipOfferOurs": "Paku meie brigaadi või ettevõtet",
+      "teamOfferAgreed": "Põhimõtteliselt kokku lepitud — see pole veel allkirjastatud leping. Leppige tingimused vestluses kokku ja määrake seejärel meeskond projekti.",
+      "teamOfferDeclined": "Tagasi lükatud. Pakkuv ettevõte näeb teie vastust.",
+      "teamOfferThreadFailed": "Seda vestlust ei saa avada."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

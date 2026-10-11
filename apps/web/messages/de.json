@@ -13521,6 +13521,10 @@
         },
         "offerCapacity": {
           "label": "Ihr Angebot festhalten"
+        },
+        "respondTeamOffer": {
+          "label": "Auf das Angebot eines Teams oder Unternehmens antworten",
+          "description": "Einem für Ihren Bedarf angebotenen Team oder Unternehmen grundsätzlich zustimmen oder es ablehnen."
         }
       },
       "education": {
@@ -14170,7 +14174,7 @@
       "projectCreateIntro": "Ein neues Projekt. Name und Stadt — danach weisen Sie hier direkt Leute zu.",
       "projectCreatedNext": "Projekt angelegt. Weisen Sie hier direkt Leute zu — oder kommen Sie später über „Meine Projekte“ darauf zurück.",
       "clientOffersIntro": "Von Agenturen vorgeschlagene Kandidaten für Ihre Bedarfe:",
-      "clientOffersNone": "Noch keine Agentur hat Kandidaten für Ihre offenen Bedarfe vorgeschlagen.",
+      "clientOffersNone": "Für Ihren offenen Bedarf hat noch niemand Kandidaten, ein Team oder ein Unternehmen angeboten.",
       "clientBridgeInvitesIntro": "Agenturen, die Sie zur Zusammenarbeit einladen:",
       "clientBridgeShareIntro": "Bedarfe, die Sie mit einer verbundenen Agentur teilen können:",
       "clientBridgeNone": "Keine Agentureinladung wartet und nichts ist mehr zu teilen. Partner verwalten Sie auf der Partnerseite.",
@@ -14437,7 +14441,15 @@
       "visibilityUnavailable": "Ihre Sichtbarkeit für Arbeitgeber konnte nicht geprüft werden. Das heißt nicht, dass sie aus ist — öffnen Sie die Einstellungen.",
       "chipVisibility": "Sichtbarkeit für Arbeitgeber",
       "voiceOpen": "Sprechen",
-      "voiceBareYes": "Ein gesprochenes „Ja“ ist keine Bestätigung. Bestätigen Sie mit der Schaltfläche auf der Karte oder sagen Sie, was Sie tun möchten."
+      "voiceBareYes": "Ein gesprochenes „Ja“ ist keine Bestätigung. Bestätigen Sie mit der Schaltfläche auf der Karte oder sagen Sie, was Sie tun möchten.",
+      "teamOffersIntro": "Teams und Unternehmen, die sich für Ihren Bedarf angeboten haben:",
+      "teamOfferStatusAgreed": "grundsätzlich vereinbart",
+      "chipTeamOfferAgree": "Grundsätzlich zustimmen",
+      "chipTeamOfferThread": "Schreiben",
+      "chipOfferOurs": "Unser Team oder Unternehmen anbieten",
+      "teamOfferAgreed": "Grundsätzlich vereinbart — noch kein unterschriebener Vertrag. Klären Sie die Bedingungen im Gespräch und weisen Sie das Team dann einem Projekt zu.",
+      "teamOfferDeclined": "Abgelehnt. Das anbietende Unternehmen sieht Ihre Antwort.",
+      "teamOfferThreadFailed": "Dieses Gespräch kann nicht geöffnet werden."
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",

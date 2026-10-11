@@ -42,18 +42,37 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  */
 export async function openTeamOfferConversationAction(formData: FormData): Promise<void> {
   await refuseStaleWorkspace(displayedWorkspaceOf(formData));
-  const offerId = String(formData.get("offerId") ?? "");
-  const requestId = String(formData.get("requestId") ?? "");
   const locale = toActiveLocale(String(formData.get("locale") ?? ""));
-  const cannotOpen = `/${locale}/dashboard/communication?notice=cannot_open`;
+  const route = await resolveTeamOfferThread(
+    String(formData.get("offerId") ?? ""),
+    String(formData.get("requestId") ?? ""),
+    locale,
+  );
+  redirect(route ?? `/${locale}/dashboard/communication?notice=cannot_open`);
+}
 
-  if (!UUID.test(offerId)) redirect(cannotOpen);
+/**
+ * The chat door to the same thread ("rašyti komandai" from the offers answer):
+ * the SAME gate, returning the route instead of redirecting. null = the gate
+ * did not hold; the chat says so and opens nothing.
+ */
+export async function openTeamOfferThreadForChat(input: {
+  offerId: string;
+  requestId?: string | null;
+  locale: string;
+}): Promise<{ route: string | null }> {
+  const locale = toActiveLocale(input.locale);
+  return { route: await resolveTeamOfferThread(input.offerId, input.requestId ?? "", locale) };
+}
+
+async function resolveTeamOfferThread(offerId: string, requestId: string, locale: string): Promise<string | null> {
+  if (!UUID.test(offerId)) return null;
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(cannotOpen);
+  if (!user) return null;
 
   let side: "supplier" | "receiver" | null = null;
   let offerStatus: string | null = null;
@@ -101,8 +120,8 @@ export async function openTeamOfferConversationAction(formData: FormData): Promi
     }
   }
 
-  if (evaluateTeamOfferContact({ offerStatus, side }) !== "allowed") redirect(cannotOpen);
-  if (!counterpart || counterpart === user!.id) redirect(cannotOpen);
+  if (evaluateTeamOfferContact({ offerStatus, side }) !== "allowed") return null;
+  if (!counterpart || counterpart === user.id) return null;
 
   // Passed only AFTER the gate above held.
   const result = await getOrCreateDirectConversation(
@@ -111,6 +130,5 @@ export async function openTeamOfferConversationAction(formData: FormData): Promi
     subject,
     "allowed_team_demand_offer",
   );
-  if (!result.ok) redirect(cannotOpen);
-  redirect(`/${locale}/dashboard/communication/${result.data.id}`);
+  return result.ok ? `/${locale}/dashboard/communication/${result.data.id}` : null;
 }
