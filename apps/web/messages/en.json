@@ -2373,6 +2373,13 @@
           "awayUntil": "Away until {date}",
           "assign": "Assign to a project",
           "openCalendar": "Open calendar"
+        },
+        "inviteLinked": {
+          "title": "{count, plural, one {# person joined through an invitation} other {# people joined through an invitation}}",
+          "body": "They accepted your invitation and work with your organization. Their journal can be reviewed once review is on.",
+          "reviewOn": "Review on",
+          "reviewOff": "Review off",
+          "manage": "Manage members and review →"
         }
       },
       "scoutingBridge": {

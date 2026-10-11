@@ -2373,6 +2373,13 @@
           "awayUntil": "Nedirba iki {date}",
           "assign": "Priskirti objektui",
           "openCalendar": "Atidaryti kalendorių"
+        },
+        "inviteLinked": {
+          "title": "{count, plural, one {# žmogus prisijungė per kvietimą} few {# žmonės prisijungė per kvietimą} other {# žmonių prisijungė per kvietimą}}",
+          "body": "Jie priėmė jūsų kvietimą ir dirba su jūsų organizacija. Jų žurnalą galima peržiūrėti, kai įjungta peržiūra.",
+          "reviewOn": "Peržiūra įjungta",
+          "reviewOff": "Peržiūra išjungta",
+          "manage": "Tvarkyti narius ir peržiūrą →"
         }
       },
       "scoutingBridge": {

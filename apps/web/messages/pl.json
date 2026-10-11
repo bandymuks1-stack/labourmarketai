@@ -2373,6 +2373,13 @@
           "awayUntil": "Nieobecny do {date}",
           "assign": "Przypisz do projektu",
           "openCalendar": "Otwórz kalendarz"
+        },
+        "inviteLinked": {
+          "title": "{count, plural, one {# osoba dołączyła przez zaproszenie} few {# osoby dołączyły przez zaproszenie} many {# osób dołączyło przez zaproszenie} other {# osoby dołączyły przez zaproszenie}}",
+          "body": "Przyjęły Twoje zaproszenie i pracują z Twoją organizacją. Ich dziennik pracy można sprawdzać po włączeniu weryfikacji.",
+          "reviewOn": "Weryfikacja włączona",
+          "reviewOff": "Weryfikacja wyłączona",
+          "manage": "Zarządzaj członkami i weryfikacją →"
         }
       },
       "scoutingBridge": {

@@ -2373,6 +2373,13 @@
           "awayUntil": "Abwesend bis {date}",
           "assign": "Einem Projekt zuweisen",
           "openCalendar": "Kalender öffnen"
+        },
+        "inviteLinked": {
+          "title": "{count, plural, one {# Person kam über eine Einladung dazu} other {# Personen kamen über eine Einladung dazu}}",
+          "body": "Sie haben Ihre Einladung angenommen und arbeiten mit Ihrer Organisation. Ihr Arbeitsjournal kann geprüft werden, sobald die Prüfung eingeschaltet ist.",
+          "reviewOn": "Prüfung an",
+          "reviewOff": "Prüfung aus",
+          "manage": "Mitglieder und Prüfung verwalten →"
         }
       },
       "scoutingBridge": {
