@@ -78,6 +78,9 @@ export async function inviteWorkerToTeamAction(input: {
   teamId: string;
   workerId: string;
   locale: string;
+  /** Typed by the owner when the worker's address cannot be read (profiles
+   *  are own-row-only). The worker still has to accept with their account. */
+  email?: string | null;
 }): Promise<{ outcome: TeamInviteOutcome }> {
   const supabase = await createClient();
   const {
@@ -85,7 +88,10 @@ export async function inviteWorkerToTeamAction(input: {
   } = await supabase.auth.getUser();
   if (!user) return { outcome: "error" };
 
-  const email = await lookupLinkedWorkerEmail(input.workerId);
+  const typed = (input.email ?? "").trim().toLowerCase();
+  const email =
+    (await lookupLinkedWorkerEmail(input.workerId)) ??
+    (/^[^s@]+@[^s@]+.[^s@]+$/.test(typed) ? typed : null);
   if (!email) return { outcome: "no_email" };
 
   const result = await createAndSendInvitations({

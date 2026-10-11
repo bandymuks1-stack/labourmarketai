@@ -467,6 +467,37 @@ export async function getTeamBrigadesData(): Promise<TeamBrigadesData> {
     })
     .filter((x): x is { worker: AddableTeamWorker; email: string | null } => x !== null) ?? null;
 
+  // People who joined THIS organization through an invitation hold the
+  // canonical engagement only (no company_workers row) — the same split
+  // #2268/#2270 closed for People and the planner. They are the owner's own
+  // employees, so they belong in the invitable pool too (RLS: engagement
+  // reads need manages_organization; worker rows follow can_view_worker).
+  if (pool !== null && employer.kind === "ok") {
+    const { data: ecRows } = await asAny(supabase)
+      .from("engagement_contexts")
+      .select("profile_id")
+      .eq("organization_id", employer.organizationId)
+      .eq("status", "active")
+      .in("relationship_slug", [...TEAM_POOL_ENGAGEMENT_SLUGS])
+      .limit(POOL_READ_LIMIT);
+    const known = new Set(pool.map((x) => x.worker.profileId));
+    const profiles = ((ecRows ?? []) as { profile_id: string | null }[])
+      .map((r) => r.profile_id)
+      .filter((id): id is string => Boolean(id) && !known.has(id as string) && id !== user.id);
+    if (profiles.length > 0) {
+      const { data: wRows } = await asAny(supabase)
+        .from("workers")
+        .select("id, profile_id, display_name")
+        .in("profile_id", profiles);
+      for (const w of (wRows ?? []) as { id: string; profile_id: string; display_name: string | null }[]) {
+        pool.push({
+          worker: { workerId: w.id, profileId: w.profile_id, name: w.display_name?.trim() || "—", invitePending: false },
+          email: null,
+        });
+      }
+    }
+  }
+
   const teams: TeamBrigade[] = [];
   for (const t of teamRows) {
     const members = membersByTeam.get(t.id) ?? [];
@@ -566,8 +597,14 @@ export async function createTeamBrigade(
   return { outcome: "error", message: code || "unknown" };
 }
 
+/** Relationships whose people the owner may invite into a brigade. */
+const TEAM_POOL_ENGAGEMENT_SLUGS = ["employee", "collaborator", "freelancer"] as const;
+
 /** The worker's own email for a company-linked worker — server-side ONLY,
- *  used to address the consent invitation; never returned to the client. */
+ *  used to address the consent invitation; never returned to the client.
+ *  `profiles` is own-row-only under RLS, so this usually answers null —
+ *  the panel then asks the owner for the address (walk 2026-10-11: every
+ *  brigade invitation ended `no_email` and no crew could be formed). */
 export async function lookupLinkedWorkerEmail(
   workerId: string,
 ): Promise<string | null> {

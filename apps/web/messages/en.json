@@ -7177,6 +7177,7 @@
     "noAddable": "No linked workers left to add. Invite workers in the roster section first.",
     "addLabel": "Invite a linked worker",
     "addButton": "Send invitation",
+    "emailPlaceholder": "Worker's email",
     "createLabel": "New brigade name",
     "createPlaceholder": "e.g. Facade brigade A",
     "createButton": "Create brigade",
@@ -7204,6 +7205,7 @@
       "rateLimited": "Invitation limit reached for now. Try again later.",
       "notAuthorized": "Only the brigade owner can send invitations.",
       "noEmail": "This worker has no usable email address on file, so the invitation cannot be created.",
+      "askEmail": "Enter this worker's email — the invitation goes to their account and they accept it themselves.",
       "needsMigration": "Not available right now.",
       "error": "Could not send the invitation. Nothing was changed."
     },
