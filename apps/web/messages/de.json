@@ -18733,11 +18733,12 @@
     "sent": {
       "heading": "Ihre Angebote",
       "none": "Noch keine Angebote.",
-      "withdraw": "Zurückziehen"
+      "withdraw": "Zurückziehen",
+      "message": "Dem Auftraggeber schreiben"
     },
     "status": {
       "offered": "Wartet auf Antwort",
-      "accepted": "Angenommen",
+      "accepted": "Grundsätzlich vereinbart",
       "declined": "Abgelehnt",
       "withdrawn": "Zurückgezogen",
       "assigned": "Einem Projekt zugewiesen"
@@ -18771,7 +18772,7 @@
     },
     "received": {
       "title": "Für diesen Bedarf angebotene Teams",
-      "subtitle": "Ein Team hat sich als eine Einheit für diesen Bedarf angeboten. Sie entscheiden, ob Sie es annehmen und wo Sie es einsetzen.",
+      "subtitle": "Ein Team hat sich als Einheit für diesen Bedarf angeboten. Fragen und verhandeln Sie im Gespräch; eine Zustimmung hier ist kein Vertrag.",
       "privacy": "Es werden nur Fakten auf Teamebene gezeigt. Hier wird kein Mitglied genannt. Nachdem Sie das Team angenommen und einem Projekt zugewiesen haben, erscheinen seine Mitglieder in diesem Projekt, wie bei jedem Team.",
       "members": "{count} Mitglieder",
       "deployable": "Einsatzgröße {min}-{max}",
@@ -18802,22 +18803,24 @@
       "missing": "Nicht angegeben: {list}",
       "noNeedStructure": "Dieser Bedarf ist noch nicht strukturiert, daher kann das Team nicht damit abgeglichen werden.",
       "note": "Hinweis des Teams",
-      "accept": "Team annehmen",
+      "accept": "Grundsätzlich zustimmen",
       "decline": "Ablehnen",
-      "noProjects": "Sie haben kein offenes Projekt, dem Sie das Team zuweisen könnten. Legen Sie zuerst ein Projekt an.",
-      "assignIntro": "Angenommen. Weisen Sie das Team einem Ihrer Projekte zu.",
+      "noProjects": "Sie haben noch kein offenes Projekt, dem Sie das Team zuweisen können.",
+      "assignIntro": "Grundsätzlich vereinbart (kein Vertrag). Wenn die Bedingungen geklärt sind, weisen Sie das Team einem Ihrer Projekte zu.",
       "projectLabel": "Projekt",
       "projectPlaceholder": "Projekt wählen",
       "assign": "Team dem Projekt zuweisen",
       "assignedNote": "Zugewiesen. Die Mitglieder des Teams erscheinen jetzt in diesem Projekt.",
       "outcome": {
-        "accepted": "Team angenommen.",
+        "accepted": "Grundsätzlich vereinbart — noch kein unterschriebener Vertrag. Klären Sie die Bedingungen im Gespräch und weisen Sie das Team dann einem Projekt zu.",
         "declined": "Angebot abgelehnt.",
-        "already_accepted": "Bereits angenommen.",
+        "already_accepted": "Bereits grundsätzlich vereinbart.",
         "already_declined": "Bereits abgelehnt.",
         "assigned": "Team dem Projekt zugewiesen.",
         "already_assigned": "Dieses Team war bereits zugewiesen. Nichts wurde geändert."
-      }
+      },
+      "createProject": "Projekt anlegen",
+      "message": "Dem Team schreiben"
     }
   },
   "teamAssignment": {

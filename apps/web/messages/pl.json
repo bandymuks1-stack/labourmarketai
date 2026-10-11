@@ -18733,11 +18733,12 @@
     "sent": {
       "heading": "Twoje oferty",
       "none": "Brak ofert.",
-      "withdraw": "Wycofaj"
+      "withdraw": "Wycofaj",
+      "message": "Napisz do zleceniodawcy"
     },
     "status": {
       "offered": "Czeka na odpowiedź",
-      "accepted": "Przyjęta",
+      "accepted": "Uzgodnione wstępnie",
       "declined": "Odrzucona",
       "withdrawn": "Wycofana",
       "assigned": "Przypisana do projektu"
@@ -18771,7 +18772,7 @@
     },
     "received": {
       "title": "Zespoły zaproponowane do tego zapotrzebowania",
-      "subtitle": "Zespół zaproponował się jako jedna jednostka do tego zapotrzebowania. To Ty decydujesz, czy go przyjąć i gdzie przypisać.",
+      "subtitle": "Zespół zaoferował się jako jedna jednostka do tej potrzeby. Pytaj i negocjuj w rozmowie; zgoda tutaj nie jest umową.",
       "privacy": "Pokazywane są tylko fakty na poziomie zespołu. Żaden członek nie jest tu wskazany. Po przyjęciu zespołu i przypisaniu go do projektu jego członkowie pojawią się w tym projekcie, jak w przypadku każdego zespołu.",
       "members": "Członków: {count}",
       "deployable": "Wielkość do wysłania {min}-{max}",
@@ -18802,22 +18803,24 @@
       "missing": "Nie podano: {list}",
       "noNeedStructure": "To zapotrzebowanie nie jest jeszcze uporządkowane, więc zespołu nie można z nim porównać.",
       "note": "Wiadomość od zespołu",
-      "accept": "Przyjmij zespół",
+      "accept": "Uzgodnij wstępnie",
       "decline": "Odrzuć",
-      "noProjects": "Nie masz otwartego projektu, do którego można przypisać zespół. Najpierw utwórz projekt.",
-      "assignIntro": "Przyjęto. Przypisz zespół do jednego ze swoich projektów.",
+      "noProjects": "Nie masz jeszcze otwartego projektu, do którego można przypisać zespół.",
+      "assignIntro": "Uzgodnione wstępnie (nie umowa). Gdy warunki będą ustalone, przypisz zespół do jednego ze swoich projektów.",
       "projectLabel": "Projekt",
       "projectPlaceholder": "Wybierz projekt",
       "assign": "Przypisz zespół do projektu",
       "assignedNote": "Przypisano. Członkowie zespołu są teraz widoczni w tym projekcie.",
       "outcome": {
-        "accepted": "Zespół przyjęty.",
+        "accepted": "Uzgodnione wstępnie — to jeszcze nie podpisana umowa. Ustalcie warunki w rozmowie, a potem przypisz zespół do projektu.",
         "declined": "Oferta odrzucona.",
-        "already_accepted": "Już przyjęto.",
+        "already_accepted": "Już uzgodnione wstępnie.",
         "already_declined": "Już odrzucono.",
         "assigned": "Zespół przypisany do projektu.",
         "already_assigned": "Ten zespół był już przypisany. Nic nie zmieniono."
-      }
+      },
+      "createProject": "Utwórz projekt",
+      "message": "Napisz do zespołu"
     }
   },
   "teamAssignment": {

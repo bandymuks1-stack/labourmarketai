@@ -857,7 +857,7 @@ export default async function CompanyScoutingPage({
       ) : null}
 
       {teamOffers && teamOffers.offers.length > 0 ? (
-        <TeamOffersReceived offers={teamOffers.offers} projects={teamOfferProjects} needOpen={needOpen} />
+        <TeamOffersReceived requestId={selected!} offers={teamOffers.offers} projects={teamOfferProjects} needOpen={needOpen} />
       ) : null}
 
       {result?.kind === "ok" && result.candidates.length > 0 ? (

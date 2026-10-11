@@ -176,6 +176,20 @@ in CI: `chat-visibility-rls.test.ts` fails if a new runtime `createAdminClient()
 caller appears or if any chat path imports the admin client, forcing this doc to
 be updated and the new bypass justified.
 
+**Counterpart lookup for the brigade-offer negotiation thread (2026-10-11).**
+`lib/company/team-offer-conversation.ts` makes one READ-ONLY service-role
+lookup of three columns — the counterpart's profile id
+(`customer_requests.profile_id` for the supplier side,
+`team_demand_offers.offered_by` for the receiver side) and the offering team's
+name — and only AFTER the caller's side was proven by their own authorized
+read (the offer row under `team_demand_offers_select_v1`, or the
+receiver-gated `list_team_offers_for_request_v1`). It touches no chat table;
+the ids never reach the client and only become the other participant of a
+thread opened through `getOrCreateDirectConversation` with the
+`allowed_team_demand_offer` grant. Forward-fix: migration `20261011200000`
+(RED, owner-gated) can expose the counterpart via a party-gated RPC and retire
+this read.
+
 **The one exception (2026-10-06, authority closure F-1 — OWNER REVIEW
 REQUESTED).** `lib/communication/communication-core.ts` performs exactly one
 service-role write: inserting the OTHER participant(s) into a conversation the

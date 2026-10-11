@@ -18733,11 +18733,12 @@
     "sent": {
       "heading": "Your offers",
       "none": "No offers yet.",
-      "withdraw": "Withdraw"
+      "withdraw": "Withdraw",
+      "message": "Message the client"
     },
     "status": {
       "offered": "Waiting for an answer",
-      "accepted": "Accepted",
+      "accepted": "Agreed in principle",
       "declined": "Declined",
       "withdrawn": "Withdrawn",
       "assigned": "Assigned to a project"
@@ -18771,7 +18772,7 @@
     },
     "received": {
       "title": "Teams offered for this need",
-      "subtitle": "A team offered itself as one unit against this need. You decide whether to accept it and where to assign it.",
+      "subtitle": "A team offered itself as one unit against this need. Ask questions and negotiate in the conversation; agreeing here is not a contract.",
       "privacy": "Only team-level facts are shown. No member is named here. After you accept and assign the team to a project, its members appear on that project, as for any team.",
       "members": "{count} members",
       "deployable": "Deployable size {min}-{max}",
@@ -18802,22 +18803,24 @@
       "missing": "Not stated: {list}",
       "noNeedStructure": "This need is not structured yet, so the team cannot be matched against it.",
       "note": "Note from the team",
-      "accept": "Accept team",
+      "accept": "Agree in principle",
       "decline": "Decline",
-      "noProjects": "You have no open project to assign the team to. Create a project first.",
-      "assignIntro": "Accepted. Assign the team to one of your projects.",
+      "noProjects": "You have no open project to assign the team to yet.",
+      "assignIntro": "Agreed in principle (not a contract). When the terms are settled, assign the team to one of your projects.",
       "projectLabel": "Project",
       "projectPlaceholder": "Choose a project",
       "assign": "Assign team to project",
       "assignedNote": "Assigned. The team's members now appear on that project.",
       "outcome": {
-        "accepted": "Team accepted.",
+        "accepted": "Agreed in principle — not a signed contract. Settle the terms in the conversation, then assign the team to a project.",
         "declined": "Offer declined.",
-        "already_accepted": "Already accepted.",
+        "already_accepted": "Already agreed in principle.",
         "already_declined": "Already declined.",
         "assigned": "Team assigned to the project.",
         "already_assigned": "This team was already assigned. Nothing changed."
-      }
+      },
+      "createProject": "Create a project",
+      "message": "Message the team"
     }
   },
   "teamAssignment": {

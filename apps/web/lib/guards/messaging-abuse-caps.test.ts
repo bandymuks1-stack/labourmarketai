@@ -217,6 +217,11 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
     // resolved from the membership-validated employer context (pinned in
     // lib/guards/agency-client-invite-delivery.test.ts §5).
     "lib/agency/bridge-conversation.ts",
+    // Brigade offer negotiation (2026-10-11) — the subject is the offering
+    // TEAM's name read server-side from the row the caller's own authorized
+    // read proved (organizations.name / the receiver-gated listing), never a
+    // form field; the grant follows evaluateTeamOfferContact.
+    "lib/company/team-offer-conversation.ts",
   ].sort();
 
   it("direct-subject writers are ONLY the gated fact-verified actions (demand / offering title)", () => {
@@ -257,6 +262,13 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
     );
     expect(bridge.indexOf('evaluateAgencyConnectionContact(facts) !== "allowed"')).toBeLessThan(
       bridge.indexOf('"allowed_agency_connection"'),
+    );
+    // …the brigade-offer negotiation derives it from the REAL team row and
+    // passes its grant only after evaluateTeamOfferContact held…
+    const offer = read("lib/company/team-offer-conversation.ts");
+    expect(offer).toMatch(/offer\.teamName/);
+    expect(offer.indexOf('evaluateTeamOfferContact({ offerStatus, side }) !== "allowed"')).toBeLessThan(
+      offer.indexOf('"allowed_team_demand_offer"'),
     );
     // …and nobody else calls getOrCreateDirectConversation.
     const callers = walkSources().filter(
