@@ -7179,6 +7179,7 @@
     "noAddable": "Brak powiązanych pracowników do dodania. Najpierw zaproś pracowników w sekcji składu.",
     "addLabel": "Zaproś powiązanego pracownika",
     "addButton": "Wyślij zaproszenie",
+    "emailPlaceholder": "E-mail pracownika",
     "createLabel": "Nazwa nowej brygady",
     "createPlaceholder": "np. Brygada elewacyjna A",
     "createButton": "Utwórz brygadę",
@@ -7206,6 +7207,7 @@
       "rateLimited": "Osiągnięto na razie limit zaproszeń. Spróbuj ponownie później.",
       "notAuthorized": "Tylko właściciel brygady może wysyłać zaproszenia.",
       "noEmail": "Ten pracownik nie ma zapisanego użytecznego adresu e-mail, więc nie można utworzyć zaproszenia.",
+      "askEmail": "Podaj e-mail tego pracownika — zaproszenie trafi na jego konto, a on sam je zaakceptuje.",
       "needsMigration": "Chwilowo niedostępne.",
       "error": "Nie udało się wysłać zaproszenia. Nic nie zostało zmienione."
     },

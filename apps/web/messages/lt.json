@@ -7179,6 +7179,7 @@
     "noAddable": "Nebeliko susietų darbuotojų, kuriuos būtų galima pridėti. Pirmiausia pakviesk darbuotojus sąrašo skiltyje.",
     "addLabel": "Pakviesti susietą darbuotoją",
     "addButton": "Siųsti kvietimą",
+    "emailPlaceholder": "Darbuotojo el. paštas",
     "createLabel": "Naujos brigados pavadinimas",
     "createPlaceholder": "pvz., Fasado brigada A",
     "createButton": "Sukurti brigadą",
@@ -7206,6 +7207,7 @@
       "rateLimited": "Kol kas pasiektas kvietimų limitas. Pabandyk vėliau.",
       "notAuthorized": "Kvietimus gali siųsti tik brigados savininkas.",
       "noEmail": "Šis darbuotojas neturi tinkamo el. pašto adreso, todėl kvietimo sukurti negalima.",
+      "askEmail": "Įveskite šio darbuotojo el. paštą — kvietimas nueis į jo paskyrą, ir jis pats jį priims.",
       "needsMigration": "Šiuo metu nepasiekiama.",
       "error": "Kvietimo išsiųsti nepavyko. Niekas nebuvo pakeista."
     },

@@ -60,6 +60,10 @@ export function TeamBrigadesPanel({
   const [name, setName] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
   const [selected, setSelected] = useState<Record<string, string>>({});
+  // The worker's address, typed by the owner when it cannot be read (profiles
+  // are own-row-only). Asked for only after the server said so.
+  const [askEmail, setAskEmail] = useState<Record<string, boolean>>({});
+  const [emails, setEmails] = useState<Record<string, string>>({});
 
   const skillLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
 
@@ -92,7 +96,13 @@ export function TeamBrigadesPanel({
     if (!workerId) return;
     setMsg(null);
     startTransition(async () => {
-      const res = await inviteWorkerToTeamAction({ teamId, workerId, locale });
+      const res = await inviteWorkerToTeamAction({
+        teamId,
+        workerId,
+        locale,
+        email: askEmail[teamId] ? (emails[teamId] ?? "") : null,
+      });
+      setAskEmail((a) => ({ ...a, [teamId]: res.outcome === "no_email" }));
       if (res.outcome === "sent") setMsg(t("inviteOutcome.sent"));
       else if (res.outcome === "created") setMsg(t("inviteOutcome.created"));
       else if (res.outcome === "delivery_failed")
@@ -103,7 +113,7 @@ export function TeamBrigadesPanel({
         setMsg(t("inviteOutcome.rateLimited"));
       else if (res.outcome === "not_authorized")
         setMsg(t("inviteOutcome.notAuthorized"));
-      else if (res.outcome === "no_email") setMsg(t("inviteOutcome.noEmail"));
+      else if (res.outcome === "no_email") setMsg(t("inviteOutcome.askEmail"));
       else if (res.outcome === "needs_migration")
         setMsg(t("inviteOutcome.needsMigration"));
       else setMsg(t("inviteOutcome.error"));
@@ -390,6 +400,18 @@ export function TeamBrigadesPanel({
                         </option>
                       ))}
                     </select>
+                    {askEmail[team.id] ? (
+                      <input
+                        type="email"
+                        autoComplete="off"
+                        className="rounded-md border border-ink-500 bg-surface-1 px-2 py-1.5 text-sm text-text-primary"
+                        placeholder={t("emailPlaceholder")}
+                        aria-label={t("emailPlaceholder")}
+                        value={emails[team.id] ?? ""}
+                        onChange={(e) => setEmails((m) => ({ ...m, [team.id]: e.target.value }))}
+                        data-testid={`team-invite-email-${team.id}`}
+                      />
+                    ) : null}
                     <Button
                       type="button"
                       size="sm"

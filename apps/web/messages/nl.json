@@ -7179,6 +7179,7 @@
     "noAddable": "Geen gekoppelde werknemers meer om toe te voegen. Nodig eerst werknemers uit in het bestandsgedeelte.",
     "addLabel": "Een gekoppelde werknemer uitnodigen",
     "addButton": "Uitnodiging versturen",
+    "emailPlaceholder": "E-mailadres van de medewerker",
     "createLabel": "Naam nieuwe brigade",
     "createPlaceholder": "bijv. Gevelbrigade A",
     "createButton": "Brigade aanmaken",
@@ -7206,6 +7207,7 @@
       "rateLimited": "Uitnodigingslimiet voorlopig bereikt. Probeer het later opnieuw.",
       "notAuthorized": "Alleen de brigade-eigenaar kan uitnodigingen versturen.",
       "noEmail": "Deze werknemer heeft geen bruikbaar e-mailadres, dus de uitnodiging kan niet worden aangemaakt.",
+      "askEmail": "Vul het e-mailadres van deze medewerker in — de uitnodiging gaat naar diens account en die accepteert haar zelf.",
       "needsMigration": "Momenteel niet beschikbaar.",
       "error": "De uitnodiging kon niet worden verstuurd. Er is niets gewijzigd."
     },
