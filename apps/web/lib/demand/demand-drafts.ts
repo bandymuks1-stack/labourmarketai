@@ -15,6 +15,7 @@
  * boundary-cast pattern this file already used for the (now folded) table.
  */
 import "server-only";
+import { demandWrittenLanguage } from "@/lib/demand/demand-written-language";
 import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
@@ -287,7 +288,7 @@ export async function saveDemandDraft(
     p_kind: type,
     p_title: title,
     p_payload: payload,
-    p_original_language: "lt",
+    p_original_language: await demandWrittenLanguage(),
   };
   let { data, error } = await (supabase as unknown as DemandClient).rpc(
     "save_demand_draft_v2",

@@ -475,7 +475,7 @@
   },
   "unit": "Einheit",
   "photo": {
-    "label": "Work photo (optional)",
+    "label": "Foto hinzufügen / als Fotobericht festhalten (optional)",
     "freeTierNote": "You can attach 1 photo per entry for free. More photos and extended records will be a VIP feature.",
     "invalidFile": "The photo must be JPG, PNG or WebP, up to 5 MB.",
     "uploaded": "Photo attached to the entry.",

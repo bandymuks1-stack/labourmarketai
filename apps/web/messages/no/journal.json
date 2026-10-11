@@ -130,7 +130,7 @@
     "noActivity": "[EN] Work direction not detected"
   },
   "photo": {
-    "label": "Work photo (optional)",
+    "label": "Legg til et bilde / gjør det til en fotorapport (valgfritt)",
     "freeTierNote": "You can attach 1 photo per entry for free. More photos and extended records will be a VIP feature.",
     "invalidFile": "The photo must be JPG, PNG or WebP, up to 5 MB.",
     "uploaded": "Photo attached to the entry.",

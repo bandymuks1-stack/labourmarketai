@@ -2214,7 +2214,15 @@
           "verified": "Patvirtinta — stipresnė pasitikėjimo būsena, suteikiama tik po realios patikros."
         },
         "goToWorkspace": "Atidaryti įmonės darbo erdvę",
-        "capabilityNotDeclared": "Švietimo įstaigos vaidmuo dar neužfiksuotas — nurodykite jį darbo erdvėje, skiltyje „Ką veikia jūsų organizacija?“."
+        "capabilityNotDeclared": "Švietimo įstaigos vaidmuo dar neužfiksuotas — nurodykite jį darbo erdvėje, skiltyje „Ką veikia jūsų organizacija?“.",
+        "eyebrow": "ĮMONĖS NUSTATYMAS",
+        "pageTitle": "Įmonės profilis",
+        "backToStart": "Grįžti į veiklos pradžią",
+        "blockedBadge": "blokuota",
+        "goToCompanySpace": "Eiti į įmonės erdvę →",
+        "pickOrgHeading": "Kurią organizaciją tvarkyti?",
+        "pickOrgBody": "Turite kelias organizacijas. Pasirinkite aktyvią erdvę viršuje arba kurkite naują.",
+        "createNewOrg": "+ Kurti naują organizaciją"
       },
       "workersBlocker": {
         "title": "Nepavyko",
@@ -2653,7 +2661,13 @@
           "in_review": "Peržiūrima",
           "approved": "Patvirtinta",
           "needs_followup": "Reikia tolesnių veiksmų"
-        }
+        },
+        "eyebrow": "PIRKĖJO BŪSENA",
+        "pageTitle": "Pirkėjo / kliento paskyra",
+        "backToStart": "Grįžti į veiklos pradžią",
+        "blockedBadge": "blokuota",
+        "started": "✓ Pradėta",
+        "openBuyerDashboard": "Atidaryti pirkėjo dashboardą →"
       },
       "requests": {
         "heading": "Pirkėjo užklausos",
@@ -8882,6 +8896,13 @@
         "mobilisation": "mobilizacija",
         "work_start": "darbo pradžia"
       }
+    },
+    "autoMatchReceipt": {
+      "ran": "Paskutinė automatinė tinkamų kandidatų paieška LabourMarket.ai: {when}. Įvertinta kandidatų: {count}, tinkamų: {relevant}. Niekas nebuvo kontaktuotas.",
+      "none": "Paskutinė automatinė tinkamų kandidatų paieška LabourMarket.ai: {when}. Įvertinta kandidatų: {count}, tinkamų kol kas nėra. Niekas nebuvo kontaktuotas.",
+      "notStructured": "Automatinė paieška {when}: poreikis dar per menkai aprašytas. Pridėkite įgūdžių ar profesiją.",
+      "failed": "Automatinė paieška {when} nebaigta. Žemiau esantis sąrašas vis tiek skaičiuojamas gyvai.",
+      "capped": "Kandidatų kiekis buvo apribotas."
     }
   },
   "planBoundary": {
@@ -12212,6 +12233,11 @@
         "body": "Šis kvietimas išsiųstas adresu {email}. Esate prisijungę kitu adresu, todėl iš šios paskyros jo parodyti ar į jį atsakyti negalima. Prisijunkite pakviestuoju adresu ir dar kartą atverkite šią nuorodą.",
         "bodyNoHint": "Šis kvietimas išsiųstas kitu el. pašto adresu nei tas, kuriuo esate prisijungę, todėl iš šios paskyros jo parodyti ar į jį atsakyti negalima. Prisijunkite pakviestuoju adresu ir dar kartą atverkite šią nuorodą.",
         "untouched": "Niekas nebuvo priimta ar pakeista. Kvietimas vis dar laukia to, kam jis buvo išsiųstas."
+      },
+      "acceptedByYou": {
+        "withOrganization": "Priėmėte šį kvietimą — dabar esate susieti su {name}.",
+        "plain": "Priėmėte šį kvietimą — ryšys sukurtas.",
+        "continue": "Eiti į mano erdvę →"
       }
     },
     "teamEnquiriesTitle": "Mano užklausos komandoms",

@@ -2214,7 +2214,15 @@
           "verified": "Zweryfikowana — silniejszy stan zaufania, przyznawany wyłącznie po realnej kontroli."
         },
         "goToWorkspace": "Otwórz przestrzeń roboczą firmy",
-        "capabilityNotDeclared": "Rola dostawcy edukacji nie została jeszcze zapisana — zadeklaruj ją w przestrzeni roboczej w sekcji „Czym zajmuje się Twoja organizacja?”."
+        "capabilityNotDeclared": "Rola dostawcy edukacji nie została jeszcze zapisana — zadeklaruj ją w przestrzeni roboczej w sekcji „Czym zajmuje się Twoja organizacja?”.",
+        "eyebrow": "KONFIGURACJA FIRMY",
+        "pageTitle": "Profil firmy",
+        "backToStart": "Wróć do początku",
+        "blockedBadge": "zablokowane",
+        "goToCompanySpace": "Przejdź do przestrzeni firmy →",
+        "pickOrgHeading": "Którą organizacją zarządzać?",
+        "pickOrgBody": "Masz kilka organizacji. Wybierz aktywną przestrzeń w przełączniku powyżej albo utwórz nową.",
+        "createNewOrg": "+ Utwórz nową organizację"
       },
       "workersBlocker": {
         "title": "Coś poszło nie tak",
@@ -2653,7 +2661,13 @@
           "in_review": "W trakcie weryfikacji",
           "approved": "Zatwierdzone",
           "needs_followup": "Wymaga dalszego działania"
-        }
+        },
+        "eyebrow": "STATUS ZLECENIODAWCY",
+        "pageTitle": "Konto zleceniodawcy / klienta",
+        "backToStart": "Wróć do początku",
+        "blockedBadge": "zablokowane",
+        "started": "✓ Rozpoczęte",
+        "openBuyerDashboard": "Otwórz panel zleceniodawcy →"
       },
       "requests": {
         "heading": "Zapytania zleceniodawcy",
@@ -8882,6 +8896,13 @@
         "mobilisation": "mobilizacja",
         "work_start": "rozpoczęcie pracy"
       }
+    },
+    "autoMatchReceipt": {
+      "ran": "Ostatnie automatyczne wyszukiwanie pasujących kandydatów w LabourMarket.ai: {when}. Ocenionych kandydatów: {count}, pasujących: {relevant}. Nikt nie został powiadomiony.",
+      "none": "Ostatnie automatyczne wyszukiwanie pasujących kandydatów w LabourMarket.ai: {when}. Ocenionych kandydatów: {count}, na razie brak pasujących. Nikt nie został powiadomiony.",
+      "notStructured": "Automatyczne wyszukiwanie {when}: zapotrzebowanie jest opisane zbyt ogólnie. Dodaj umiejętności lub zawód.",
+      "failed": "Automatyczne wyszukiwanie {when} nie zostało ukończone. Lista poniżej jest nadal liczona na bieżąco.",
+      "capped": "Liczba kandydatów została ograniczona."
     }
   },
   "planBoundary": {
@@ -12212,6 +12233,11 @@
         "body": "To zaproszenie zostało wysłane na adres {email}. Jesteś zalogowany(a) innym adresem, więc z tego konta nie można go wyświetlić ani na nie odpowiedzieć. Zaloguj się zaproszonym adresem i otwórz ten link ponownie.",
         "bodyNoHint": "To zaproszenie zostało wysłane na inny adres e-mail niż ten, którym jesteś zalogowany(a), więc z tego konta nie można go wyświetlić ani na nie odpowiedzieć. Zaloguj się zaproszonym adresem i otwórz ten link ponownie.",
         "untouched": "Nic nie zostało przyjęte ani zmienione. Zaproszenie nadal czeka na osobę, do której je wysłano."
+      },
+      "acceptedByYou": {
+        "withOrganization": "Zaproszenie zostało przez Ciebie przyjęte — masz teraz połączenie z {name}.",
+        "plain": "Zaproszenie zostało przez Ciebie przyjęte — połączenie jest aktywne.",
+        "continue": "Przejdź do mojej przestrzeni →"
       }
     },
     "teamEnquiriesTitle": "Moje zapytania do zespołów",
