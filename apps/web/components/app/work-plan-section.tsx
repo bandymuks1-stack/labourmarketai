@@ -50,7 +50,7 @@ export async function WorkPlanSection({
   const [entries, workers, projects, availability] = organizationId
     ? await Promise.all([
         listWorkPlanEntries({ rangeStart: today, rangeEnd, organizationId }),
-        listPlannableWorkers(),
+        listPlannableWorkers(organizationId),
         listManagedProjects(),
         getEmployerWorkerAvailability(),
       ])
