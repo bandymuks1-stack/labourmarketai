@@ -96,7 +96,10 @@ for (const [slot, who, email] of [
       await page.getByTestId(`team-invite-member-${teamId}`).click();
     }
     const box = page.getByTestId("team-invite-link");
-    await expect(box).toBeVisible({ timeout: 20_000 });
+    if (!(await box.isVisible({ timeout: 20_000 }).catch(() => false))) {
+      const msg = await page.getByTestId("team-brigades-msg").innerText().catch(() => "(no message)");
+      throw new Error(`no invite link; the product said: ${msg}`);
+    }
     const url = (await box.locator("code").innerText()).trim();
     expect(url).toMatch(/^https:\/\/labourmarket\.ai\/[a-z]{2}\/invite\//);
     links[slot] = url;
