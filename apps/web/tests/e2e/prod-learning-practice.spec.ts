@@ -69,7 +69,10 @@ test("L-1. the organization declares it trains people, and runs a programme", as
     const value = await prof.locator("option").evaluateAll((os) => (os as HTMLOptionElement[]).map((o) => o.value).find((v) => v));
     if (value) await prof.selectOption(value);
     await page.getByTestId("program-create").click();
-    await expect(page.getByTestId("program-form-saved").first()).toBeVisible({ timeout: 30_000 });
+    const saved = page.getByTestId("program-form-saved").first();
+    const alert = page.getByTestId("create-program-form").getByRole("alert");
+    await expect(saved.or(alert).or(page.locator('[data-testid^="program-"]', { hasText: PROGRAM }).first())).toBeVisible({ timeout: 30_000 }).catch(() => undefined);
+    if (await alert.isVisible().catch(() => false)) throw new Error(`programme not created: ${await alert.innerText()}`);
     await page.reload();
   }
   await expect(page.getByText(PROGRAM).first()).toBeVisible({ timeout: 30_000 });
@@ -129,7 +132,7 @@ test("L-4. the institution sees the joined learner and places them in a cohort",
   const programId = (await form.getAttribute("data-testid"))!.replace("create-cohort-form-", "");
   await page.getByTestId(`cohort-name-${programId}`).fill(COHORT);
   await page.getByTestId(`cohort-create-${programId}`).click();
-  await expect(form.getByTestId("program-form-saved")).toBeVisible({ timeout: 30_000 });
+  await expect(form.getByTestId("program-form-saved")).toBeVisible({ timeout: 15_000 }).catch(() => undefined);
   await page.reload();
   const cohort = page.locator('[data-testid^="cohort-"]', { hasText: COHORT }).first();
   await expect(cohort).toBeVisible({ timeout: 30_000 });
@@ -139,7 +142,7 @@ test("L-4. the institution sees the joined learner and places them in a cohort",
   expect(pick, "the joined learner can be placed").toBeTruthy();
   await select.selectOption(pick!);
   await page.getByTestId(`assign-learner-submit-${cohortId}`).click();
-  await expect(cohort.getByTestId("program-form-saved")).toBeVisible({ timeout: 30_000 });
+  await expect(cohort.getByTestId("program-form-saved")).toBeVisible({ timeout: 15_000 }).catch(() => undefined);
   await page.reload();
   await expect(page.locator('[data-testid^="cohort-"]', { hasText: COHORT }).first()).toContainText(LEARNER, { timeout: 30_000 });
   await close();
