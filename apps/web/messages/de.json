@@ -18909,7 +18909,9 @@
       "proposeNext": "Geänderte Bedingungen vorschlagen (neue Version)",
       "propose": "Bedingungen senden",
       "proposed": "Version {version} gesendet."
-    }
+    },
+    "threadContext": "Zum Angebot: {subject}",
+    "threadContextShared": "Alle Angebote zwischen Ihnen werden in diesem einen Gespräch besprochen; es wurde für das obige geöffnet."
   },
   "teamAssignment": {
     "title": "Teams in diesem Projekt",

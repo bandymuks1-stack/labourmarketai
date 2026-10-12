@@ -69,8 +69,14 @@ test("1. the worker asks for a day of leave", async ({ browser }) => {
     await page.waitForTimeout(2_000);
     await page.reload();
   }
-  await page.getByTestId("absence-start").fill(DAY);
-  await page.getByTestId("absence-end").fill(DAY);
+  // The form is controlled: a fill before hydration is lost, so refill until
+  // the submit button reflects both dates.
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+  for (let i = 0; i < 6 && !(await page.getByTestId("absence-submit").isEnabled()); i += 1) {
+    await page.getByTestId("absence-start").fill(DAY);
+    await page.getByTestId("absence-end").fill(DAY);
+    await page.waitForTimeout(1_000);
+  }
   await page.getByTestId("absence-note").fill(`QA-SYNTHETIC ${RUN}`);
   await page.getByTestId("absence-submit").click();
   await expect(page.getByTestId("absences-msg")).toBeVisible({ timeout: 30_000 });

@@ -18909,7 +18909,9 @@
       "proposeNext": "Propose changed terms (a new version)",
       "propose": "Send terms",
       "proposed": "Version {version} sent."
-    }
+    },
+    "threadContext": "About the offer: {subject}",
+    "threadContextShared": "Every offer between you is discussed in this one conversation; it was opened for the one above."
   },
   "teamAssignment": {
     "title": "Teams on this project",

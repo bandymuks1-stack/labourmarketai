@@ -18909,7 +18909,9 @@
       "proposeNext": "Gewijzigde voorwaarden voorstellen (nieuwe versie)",
       "propose": "Voorwaarden versturen",
       "proposed": "Versie {version} verstuurd."
-    }
+    },
+    "threadContext": "Over het aanbod: {subject}",
+    "threadContextShared": "Alle aanbiedingen tussen jullie worden in dit ene gesprek besproken; het is geopend voor het aanbod hierboven."
   },
   "teamAssignment": {
     "title": "Teams in dit project",

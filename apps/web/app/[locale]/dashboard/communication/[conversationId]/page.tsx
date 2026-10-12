@@ -37,10 +37,13 @@ function asAny(supabase: SupabaseClient): any {
 
 export default async function ConversationDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; conversationId: string }>;
+  searchParams?: Promise<{ offer?: string }>;
 }) {
   const { locale, conversationId } = await params;
+  const offerParam = (await searchParams)?.offer;
   setRequestLocale(locale);
   const t = await getTranslations("communication");
 
@@ -74,6 +77,12 @@ export default async function ConversationDetailPage({
   // header) until the owner applies the migration or when the thread carries
   // no relation. The raw source id never reaches this page.
   const sourceContexts = await readConversationSourceContexts([conversationId]);
+  // B2B: one thread per pair carries every offer between them. Opened from a
+  // specific offer, the thread names it — read through the SAME party-gated
+  // RPC that opened it (a non-party gets zero rows, so a crafted ?offer=
+  // shows nothing).
+  const offerContext = await readOfferContext(supabase, offerParam);
+  const tOffer = offerContext ? await getTranslations("teamDemandOffer") : null;
   const card = describeConversationCard({
     kind: conversation.kind,
     createdBy: conversation.created_by,
@@ -247,6 +256,18 @@ export default async function ConversationDetailPage({
               participant-scoped RPC resolved a live source row (never guessed
               from the subject). With a route for this viewer it is a real
               link-back; without one it is a plain label — no dead ends. */}
+          {offerContext && tOffer && (
+            <p
+              className="text-meta text-text-secondary"
+              data-testid="thread-offer-context"
+              data-offer-status={offerContext.status}
+            >
+              {tOffer("threadContext", { subject: offerContext.subject ?? "—" })}
+              {" · "}
+              {tOffer.has(`status.${offerContext.status}`) ? tOffer(`status.${offerContext.status}`) : offerContext.status}
+              <span className="block text-text-muted">{tOffer("threadContextShared")}</span>
+            </p>
+          )}
           {card.sourceKey && (
             <div className="flex flex-wrap items-center gap-x-1.5 text-meta">
               {card.sourceHref ? (
@@ -461,4 +482,17 @@ function OriginalMessageText({ id, body }: { id: string; body: string }) {
       {body}
     </p>
   );
+}
+
+const OFFER_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+async function readOfferContext(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  offerId: string | undefined,
+): Promise<{ subject: string | null; status: string } | null> {
+  if (!offerId || !OFFER_UUID.test(offerId)) return null;
+  const { data, error } = await asAny(supabase).rpc("team_offer_thread_party_v1", { p_offer_id: offerId });
+  if (error) return null;
+  const row = ((data ?? []) as { offer_status: string; subject: string | null }[])[0];
+  return row ? { subject: row.subject?.trim() || null, status: row.offer_status } : null;
 }

@@ -18909,7 +18909,9 @@
       "proposeNext": "Pasiūlyti pakeistas sąlygas (nauja versija)",
       "propose": "Siųsti sąlygas",
       "proposed": "{version} versija išsiųsta."
-    }
+    },
+    "threadContext": "Pokalbis apie pasiūlymą: {subject}",
+    "threadContextShared": "Visi pasiūlymai tarp jūsų vyksta šiame viename pokalbyje; šis atidarytas apie aukščiau nurodytą."
   },
   "teamAssignment": {
     "title": "Komandos šiame projekte",
