@@ -459,7 +459,8 @@ export default async function CompanyWorkforcePlanningPage({
       </section>
     ) : (
       <section
-        className="flex flex-col gap-3 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+        id="roster-commitments"
+        className="flex scroll-mt-20 flex-col gap-3 rounded-md border border-ink-600 bg-ink-800/30 p-4"
         data-testid="roster-commitments"
       >
         <h2 className="font-display text-base font-semibold text-text-primary">

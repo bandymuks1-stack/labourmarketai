@@ -2408,6 +2408,7 @@
         "invitations": "Pending worker invitations",
         "claims": "Public need submissions you can claim",
         "reviewOff": "Workers with recorded work whose confirmation is switched off",
+        "conflicts": "People with overlapping commitments (planning conflict)",
         "unreadable": "could not be read",
         "clientReview": "Work waiting for your decision as the client"
       }
