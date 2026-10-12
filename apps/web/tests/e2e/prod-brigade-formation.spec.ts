@@ -27,7 +27,7 @@ const ALFA = "QA-SYNTHETIC Alfa";
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
 const ENABLED = process.env.PROD_QA_WALK === "1" && ["owner", "worker", "worker2", "manager"].every((s) => existsSync(state(s)));
 
-test.describe.configure({ mode: "serial" });
+test.describe.configure({ mode: "serial", timeout: 180_000, retries: 0 });
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
 
 async function as(browser: Browser, slot: string, mobile = false): Promise<{ ctx: BrowserContext; page: Page }> {
@@ -39,14 +39,16 @@ async function as(browser: Browser, slot: string, mobile = false): Promise<{ ctx
   return { ctx, page: await ctx.newPage() };
 }
 
-/** Make Alfa the owner's active workspace through the real switcher. */
+/** Make `orgName` the active workspace through the real header chip. */
 async function useWorkspace(page: Page, orgName: string): Promise<void> {
   await page.goto("/lt/dashboard/company/people");
-  const active = page.getByTestId("role-switcher-active-org");
-  if ((await active.count()) && (await active.innerText()).includes(orgName)) return;
-  await page.getByTestId("role-switcher-toggle").click();
-  await page.getByTestId("org-switcher-list").getByRole("button", { name: new RegExp(orgName) }).click();
-  await page.waitForLoadState("networkidle");
+  const chip = page.getByTestId("workspace-chip").first();
+  await expect(chip).toBeVisible({ timeout: 30_000 });
+  if ((await chip.innerText()).includes(orgName)) return;
+  await chip.getByRole("button").first().click();
+  const menu = page.getByTestId("workspace-chip-menu");
+  await menu.locator('[data-testid^="workspace-option-"]', { hasText: orgName }).first().click();
+  await expect(chip).toContainText(orgName, { timeout: 30_000 });
   await page.goto("/lt/dashboard/company/people");
 }
 
