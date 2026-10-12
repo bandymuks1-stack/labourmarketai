@@ -88,6 +88,31 @@ async function count(
   }
 }
 
+/**
+ * Production service_role holds no SELECT on companies / customer_requests /
+ * organizations (least privilege), so those head-counts were always null in
+ * production. They come from the aggregate-only ops_product_metrics_v1
+ * (numbers, service_role only) — one call shared by the three tiles, totals
+ * across REAL/TEST/INTERNAL exactly as the old raw counts were.
+ */
+let opsCache: Promise<Record<string, unknown> | null> | null = null;
+async function opsTotal(sb: SupabaseClient, key: string): Promise<number | null> {
+  opsCache ??= Promise.resolve(asAny(sb).rpc("ops_product_metrics_v1")).then(
+    (r: { data: unknown; error: unknown }) => (r.error || !r.data ? null : (r.data as Record<string, unknown>)),
+    () => null,
+  );
+  const data = await opsCache;
+  const v = data?.[key];
+  if (typeof v === "number") return v;
+  if (v && typeof v === "object") {
+    const o = v as Record<string, unknown>;
+    if (["REAL", "TEST", "INTERNAL"].every((k) => typeof o[k] === "number")) {
+      return (o.REAL as number) + (o.TEST as number) + (o.INTERNAL as number);
+    }
+  }
+  return null;
+}
+
 interface PrivacyCounts {
   consented: number | null;
   awaiting: number | null;
@@ -133,6 +158,7 @@ async function readPrivacyCounts(): Promise<PrivacyCounts> {
 export async function getLaunchReadiness(): Promise<LaunchReadinessResult> {
   if (!(await isSuperadmin())) return { kind: "not-admin" };
   const sb = createAdminClient();
+  opsCache = null; // one fresh read per request
 
   const privacy = await readPrivacyCounts();
 
@@ -168,7 +194,7 @@ export async function getLaunchReadiness(): Promise<LaunchReadinessResult> {
     count(sb, "workers", "id, worker_documents!inner(id)", (q) =>
       (q as any).eq("worker_documents.status", "ready"),
     ),
-    count(sb, "companies", "id"),
+    opsTotal(sb, "organizations_by_type_company"),
     count(sb, "company_need_public_intakes", "id", (q) =>
       (q as any).eq("status", "new"),
     ),
@@ -181,12 +207,8 @@ export async function getLaunchReadiness(): Promise<LaunchReadinessResult> {
     count(sb, "company_need_public_intakes", "id", (q) =>
       (q as any).eq("status", "rejected"),
     ),
-    count(sb, "customer_requests", "id", (q) =>
-      (q as any).eq("status", "submitted"),
-    ),
-    count(sb, "organizations", "id", (q) =>
-      (q as any).eq("organization_type", "team"),
-    ),
+    opsTotal(sb, "needs_open"),
+    opsTotal(sb, "teams_total"),
   ]);
   /* eslint-enable @typescript-eslint/no-explicit-any */
 
