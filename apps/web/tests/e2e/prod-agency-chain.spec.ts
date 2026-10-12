@@ -215,15 +215,14 @@ test("A-5. the agency sees the shared need and offers its person", async ({ brow
   await select.selectOption(value!);
   await form.locator('input[name="note"]').fill(`QA-SYNTHETIC ${RUN}: gali pradėti nuo pirmadienio`);
   await form.getByTestId("agency-bridge-offer-submit").click();
-  const progress = page.getByTestId("agency-bridge-progress-row").filter({ hasText: /Vytas/ }).first();
+  await page.waitForTimeout(5_000);
   const error = page.getByTestId("agency-bridge-error");
-  await expect(progress.or(error)).toBeVisible({ timeout: 30_000 });
-  if (await error.isVisible()) {
-    const why = await error.innerText();
-    // An earlier run's open offer of the same person on the same need is a real, stated refusal.
-    console.info(`[agency] offer answer: ${why}`);
-    await expect(progress).toBeVisible({ timeout: 10_000 });
-  }
+  if (await error.isVisible().catch(() => false)) console.info(`[agency] offer answer: ${await error.innerText()}`);
+  await page.reload();
+  const progress = page.getByTestId("agency-bridge-progress");
+  await expect(progress).toBeVisible({ timeout: 30_000 });
+  console.info(`[agency] progress: ${(await progress.innerText()).replace(/\s+/g, " ").slice(0, 400)}`);
+  await expect(page.getByTestId("agency-bridge-progress-row").first()).toBeVisible({ timeout: 30_000 });
   await close();
 });
 

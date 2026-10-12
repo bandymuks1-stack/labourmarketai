@@ -180,6 +180,10 @@ export function AgencyBridgeSection({
   const sharedRows = shared.kind === "ok" ? shared.rows : [];
   const progressRows = progress.kind === "ok" ? progress.rows : [];
   const stageByWorker = new Map(progressRows.map((p) => [`${p.requestId}:${p.workerId}`, p]));
+  // Each progress row names WHO was offered for WHICH need — several offers
+  // to the same client must never read as one (owner 2026-10-12 §4).
+  const workerLabel = new Map(roster.map((w) => [w.workerId, w.label]));
+  const needTitle = new Map(sharedRows.map((s) => [s.requestId, s.title]));
   // UNKNOWN is not "no invitation": only an ok read says whether a pending
   // connection has an invitation behind it.
   //
@@ -458,6 +462,12 @@ export function AgencyBridgeSection({
                         {labels.stageLabels[stage] ?? stage}
                       </span>
                       )}
+                      <span className="min-w-0 text-sm text-text-primary" data-testid="agency-bridge-progress-who">
+                        {workerLabel.get(p.workerId) ?? "—"}
+                        {needTitle.get(p.requestId) ? (
+                          <span className="text-text-muted"> · {needTitle.get(p.requestId)}</span>
+                        ) : null}
+                      </span>
                       {/* The CLIENT's explicit decision on this candidate
                           (migration 20260903101000): accepted → a booking was
                           proposed to the worker; declined → closed. Shown
