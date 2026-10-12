@@ -40,6 +40,7 @@ on:
           - sectors-languages
           - chat-confirm-once
           - living-cv-growth
+          - staff-review-notice
 
 concurrency:
   group: prod-qa-walk
@@ -92,6 +93,10 @@ jobs:
 
       - name: Walk
         shell: bash
+        env:
+          # The addressed invitee of staff-review-notice: the second synthetic
+          # worker minted above (same allowlisted identity, no new account).
+          PROD_QA_INVITEE_EMAIL: qa.worker+goal3@labourmarket.ai
         run: |
           set -uo pipefail
           cd apps/web
@@ -108,6 +113,7 @@ jobs:
             sectors-languages) SPEC=tests/e2e/prod-sectors-languages.spec.ts ;;
             chat-confirm-once) SPEC=tests/e2e/prod-chat-confirm-once.spec.ts ;;
             living-cv-growth) SPEC=tests/e2e/prod-living-cv-growth.spec.ts ;;
+            staff-review-notice) SPEC=tests/e2e/prod-staff-review-notice.spec.ts ;;
           esac
           pnpm exec playwright test "$SPEC" --project=chromium --trace=off --reporter=list,json \
             > ../../prod-qa-result.json

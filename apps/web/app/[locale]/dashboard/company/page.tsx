@@ -28,7 +28,6 @@ import {
 import { getTeamBrigadesData } from "@/lib/company/team-brigades";
 import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
 import { countCounterpartyToDecide } from "@/lib/journal/counterparty-to-decide-count";
-import { autoEnableReviewForAcceptedStaff } from "@/lib/operations/auto-review";
 import { countWorkersWithUnconfirmableWork } from "@/lib/operations/org-members";
 import { loadCompanyHomeField } from "@/lib/company/company-home-field";
 import { CompanyHomeFieldSection } from "@/components/app/company-home-field-section";
@@ -134,13 +133,6 @@ export default async function CompanyDashboardPage({
   // workforce role), never the company TYPE alone. A capability answer only —
   // `listAgencyClients` is still fenced by owns_company + the RPC/RLS.
   const isStaffingAgency = actsAsAgency(companyRow?.companyType, declaredCapabilities);
-
-  // OWNER DECISION 1 (2026-10-12): review of recorded work switches on by
-  // itself, but only for an employee who accepted a staff invitation after the
-  // accept screen said so (lib/operations/auto-review-model). Runs in the
-  // manager's own session through the audited RPC, BEFORE the batch below so
-  // the counts reflect it, and never blocks the page.
-  if (companyRow && capabilityOrgId) await autoEnableReviewForAcceptedStaff(capabilityOrgId);
 
   // ONE parallel batch. The roster read is shared with the home field's
   // who-is-free answer (QA Q-3), so it is created once and both subscribe.

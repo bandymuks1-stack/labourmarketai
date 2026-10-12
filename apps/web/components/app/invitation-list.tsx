@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { REVIEW_NOTICE_VERSION, showsStaffReviewNotice } from "@/lib/operations/auto-review-model";
+import { StaffReviewNotice } from "@/components/app/staff-review-notice";
 import { useRouter } from "@/lib/i18n/navigation";
 import { Check, Copy } from "lucide-react";
 
@@ -218,6 +220,15 @@ export function SentInvitationList({
   );
 }
 
+/** THE shared predicate (owner decision 1): the same rule the invite page uses. */
+function rowShowsReviewNotice(row: IncomingInvitationRow): boolean {
+  return showsStaffReviewNotice({
+    invitationType: row.invitationType,
+    relationshipSlug: row.relationshipSlug,
+    organizationName: row.organizationName,
+  });
+}
+
 export function IncomingInvitationList({
   items,
   locale,
@@ -234,11 +245,18 @@ export function IncomingInvitationList({
   const [busyId, setBusyId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  async function onAccept(id: string) {
+  async function onAccept(row: IncomingInvitationRow) {
+    const id = row.id;
     setBusyId(id);
     setNotice(null);
     try {
-      const r = await acceptInvitationByIdAction({ invitationId: id, locale });
+      const r = await acceptInvitationByIdAction({
+        invitationId: id,
+        locale,
+        noticeSurface: "network",
+        // Only when this row showed the review sentence (rendered below).
+        reviewNotice: rowShowsReviewNotice(row) ? REVIEW_NOTICE_VERSION : null,
+      });
       setNotice(
         r.status === "ok" ? t(`notices.${r.outcome}`) : t("notices.error"),
       );
@@ -308,10 +326,16 @@ export function IncomingInvitationList({
                 &ldquo;{row.personalMessage}&rdquo;
               </p>
             )}
+            {rowShowsReviewNotice(row) && (
+              <StaffReviewNotice
+                text={tPage("reviewNotice", { organization: row.organizationName ?? "" })}
+                testId={`incoming-invitation-review-notice-${row.id}`}
+              />
+            )}
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={() => onAccept(row.id)}
+                onClick={() => onAccept(row)}
                 disabled={busyId === row.id}
                 data-testid={`incoming-invitation-accept-${row.id}`}
                 className="inline-flex min-h-9 items-center rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90 disabled:opacity-50"

@@ -446,8 +446,9 @@ describe("F5: one shared post-accept helper for the token and by-id doors", () =
   });
 
   it("the invite page passes the locale so the network page refreshes after a token accept", () => {
-    expect(read("apps/web/lib/invitations/invite-page-actions.ts")).toContain(
-      "acceptInvitationAction({ token, locale })",
+    // The review-notice fields ride along (owner decision 1); the locale stays.
+    expect(read("apps/web/lib/invitations/invite-page-actions.ts")).toMatch(
+      /acceptInvitationAction\(\{ token, locale(, [^}]*)? \}\)/,
     );
   });
 });

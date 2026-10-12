@@ -174,3 +174,44 @@ test("L-6. the practice relationship is reviewable by the institution (journal r
   }
   await close();
 });
+
+test("L-7. the assessor picks the learner's signed-off practice from a list, never by typing ids (#2316)", async ({ browser }) => {
+  const { page, close } = await as(browser, "owner");
+  await page.goto("/lt/dashboard");
+  await workspace(page, ALFA);
+  await page.goto("/lt/dashboard/company/education");
+  const form = page.getByTestId("record-recognition");
+  await expect(form).toBeVisible({ timeout: 30_000 });
+  await form.locator("summary").click();
+  const subject = form.locator('select[name="subjectProfileId"]');
+  const pick = await subject.locator("option", { hasText: LEARNER }).first().getAttribute("value");
+  expect(pick, "the joined learner is offered as the subject").toBeTruthy();
+  await subject.selectOption(pick!);
+  const evidence = form.getByTestId("recognition-evidence");
+  // Read-only: an honest list or an honest "nothing signed off yet" — never the
+  // "could not read" alert, and never a uuid text box. Nothing is submitted.
+  await expect(evidence.getByTestId("recognition-evidence-option").first().or(evidence.getByTestId("recognition-evidence-none"))).toBeVisible({ timeout: 30_000 });
+  await expect(evidence.getByRole("alert")).toHaveCount(0);
+  await expect(form.locator('input[name="evidenceEntryIds"][type="hidden"]')).toHaveCount(1);
+  console.info(`[learning] signed-off practice offered: ${await evidence.getByTestId("recognition-evidence-option").count()}`);
+  await close();
+});
+
+test("L-8. a company can offer practice without being a school: the intern capacity is offered (#2318)", async ({ browser }) => {
+  const { page, close } = await as(browser, "owner");
+  await page.goto("/lt/dashboard");
+  await workspace(page, ALFA);
+  await page.goto("/lt/dashboard/network");
+  const open = page.getByTestId("invite-panel-open");
+  if (await open.isVisible().catch(() => false)) await open.click();
+  const type = page.getByTestId("invite-type");
+  await expect(type).toBeVisible({ timeout: 30_000 });
+  await type.selectOption("join_organization").catch(() => undefined);
+  const capacity = page.getByTestId("invite-capacity");
+  await expect(capacity).toBeVisible({ timeout: 30_000 });
+  const values = await capacity.locator("option").evaluateAll((os) => (os as HTMLOptionElement[]).map((o) => o.value));
+  console.info(`[learning] capacities offered: ${values.join(",")}`);
+  expect(values, "the practice-in-company relationship is offered").toContain("intern");
+  // Nothing is submitted.
+  await close();
+});

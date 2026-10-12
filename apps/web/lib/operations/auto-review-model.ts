@@ -1,139 +1,120 @@
 /**
- * Work-review auto-enable — which employee relationships qualify (pure half).
+ * Work-review on acceptance — which acceptances may carry it (pure half).
  *
  * OWNER DECISION (2026-10-12, decision 1): a manager's review of an employee's
  * recorded work may switch on by itself ONLY in a clear work relationship the
- * employee understands, keeping the audit trail and organization isolation.
+ * employee understands, with an auditable acceptance fact, organization
+ * isolation, and a manager's manual switch-off always preserved.
  *
- * "Clear and understood" is made concrete here, not left to taste. A context
- * qualifies only when ALL hold:
- *   1. it belongs to the organization being opened (isolation — never another
- *      organization's context);
- *   2. it is an ACTIVE `employee` relationship whose review is still OFF;
- *   3. the employee created it themselves by ACCEPTING an invitation (an
- *      `invitation_acceptances` row, decision `accepted`, by that same person,
- *      for an invitation of THIS organization of a staff type) — a context a
- *      manager added without the person doing anything never qualifies;
- *   4. that acceptance happened AFTER the accept screen began saying, in plain
- *      words, that a manager can read and sign off the recorded work
- *      (`REVIEW_DISCLOSURE_FROM`). Earlier acceptances never saw that sentence,
- *      so they stay manual — grandfathering a silent consent would not be a
- *      relationship the employee understood;
- *   5. nobody has touched the context since it was created (`updated_at` within
- *      seconds of `created_at`). A manager's manual switch-off updates the row,
- *      and since the first enable needs a later dashboard visit, a manual choice
- *      is not overridden. This is a heuristic, not an audit-trail proof.
+ * How that is made concrete (follow-up of #2317/#2320, which ran a heuristic on
+ * the manager's dashboard — "untouched since creation" and a date cut-off —
+ * and was held OFF because only one of the accept paths showed the notice):
  *
- * Students, collaborators and every other relationship keep the manual door.
- * The enabling itself is the existing audited RPC `set_engagement_journal_review`
- * (actor, organization, relationship in `audit_logs`) — never a direct UPDATE.
+ *   1. EVERY surface that accepts a staff invitation shows ONE plain sentence
+ *      before the person accepts: the invite page (signed in and signed out),
+ *      the addressed signup form, the onboarding finish, the network list and
+ *      the chat card. They all decide with `showsStaffReviewNotice` below, so
+ *      the sentence and the rule can never disagree.
+ *   2. A surface passes `REVIEW_NOTICE_VERSION` to the accept action ONLY when
+ *      it rendered the sentence. No version = the acceptance is not proof the
+ *      person saw it, and review stays on the manual door.
+ *   3. The acceptance fact is written by the PERSON's own session, right after
+ *      the accept, through ONE party-gated RPC (`record_staff_review_notice_v1`,
+ *      RED migration 20261012190000): it stamps the person's own acceptance row
+ *      (version, surface, time — readable by the person and the organization)
+ *      and writes an `audit_logs` row. Organization isolation and the
+ *      employee-only rule are re-checked in SQL; a manager's earlier manual
+ *      choice on that relationship is never overridden; it runs once per
+ *      acceptance and never later.
+ *   4. Switching review ON is a separate flag (`STAFF_REVIEW_AUTO_ENABLE`):
+ *      until every path is proven to record the fact, the RPC records it and
+ *      enables nothing.
  */
 
-/** Instant from which the accept screen carries the plain-language review notice. */
-export const REVIEW_DISCLOSURE_FROM = "2026-10-13T00:00:00Z";
+/** The version of the sentence a surface showed. Bump when the copy's meaning changes. */
+export const REVIEW_NOTICE_VERSION = "staff-review-notice-v1";
 
 /**
- * The notice is rendered on the invite page only. Acceptance also happens via
- * the addressed signup, the network list and the chat action, none of which
- * show it yet. Until EVERY acceptance path shows the sentence, an acceptance
- * is not proof the person saw it, so the automation stays OFF (fail-safe).
- * Flip to true only in the change that adds the notice to those paths.
+ * Owner sequence: prove every acceptance path records the fact, THEN switch
+ * review on. While false the RPC is asked to record only.
  */
-export const REVIEW_DISCLOSURE_ON_ALL_ACCEPT_PATHS = false;
+export const STAFF_REVIEW_AUTO_ENABLE = false;
+
+/** The surfaces that accept a staff invitation (closed set, mirrored in SQL). */
+export const REVIEW_NOTICE_SURFACES = [
+  "invite_page",
+  "addressed_signup",
+  "onboarding",
+  "network",
+  "conversation",
+] as const;
+export type ReviewNoticeSurface = (typeof REVIEW_NOTICE_SURFACES)[number];
 
 /** Invitation types whose acceptance creates an `employee` engagement. */
 export const STAFF_INVITATION_TYPES: readonly string[] = ["join_organization", "join_team", "join_as_employee"];
 
-/** An unchanged context: `updated_at` within this window of `created_at`. */
-export const UNTOUCHED_WINDOW_MS = 10_000;
-
-/** Most contexts enabled in one pass. */
-export const AUTO_REVIEW_BATCH = 50;
-
-export interface ReviewContextRow {
-  readonly id: string;
-  readonly profile_id: string;
-  readonly organization_id: string | null;
-  readonly relationship_slug: string;
-  readonly status: string;
-  readonly journal_review_enabled: boolean;
-  readonly created_at: string;
-  readonly updated_at: string;
-}
-
-export interface ReviewAcceptanceRow {
-  readonly invitation_id: string;
-  readonly profile_id: string;
-  readonly decision: string;
-  readonly relationship_id: string | null;
-  readonly created_at: string;
-  readonly decided_at: string | null;
-}
-
-export interface ReviewInvitationRow {
-  readonly id: string;
-  readonly organization_id: string | null;
-  readonly invitation_type: string;
-  readonly relationship_slug: string | null;
-}
-
 /**
- * Does accepting THIS invitation create an `employee` relationship? Used by the
- * accept screen to decide whether to say the review sentence, and by the
- * eligibility rule so the two can never disagree.
+ * Does accepting THIS invitation create an `employee` relationship?
  */
 export function acceptanceCreatesEmployeeRelationship(input: {
   readonly invitationType: string | null | undefined;
   readonly relationshipSlug: string | null | undefined;
 }): boolean {
   if (!input.invitationType || !STAFF_INVITATION_TYPES.includes(input.invitationType)) return false;
-  // `join_organization` + a relationship slug (student, volunteer, …) is a
-  // different relationship; only the slug-less or explicit employee form is staff.
+  // `join_organization` + a relationship slug (student, intern, volunteer, …)
+  // is a different relationship; only the slug-less or explicit employee form is staff.
   return input.relationshipSlug == null || input.relationshipSlug === "employee";
 }
 
-function ms(iso: string): number {
-  return Date.parse(iso);
+/**
+ * THE one predicate every accept surface uses to decide whether to show the
+ * sentence. It needs the organization's name: the sentence names who may read
+ * the work, and a sentence that cannot say who is not shown (the acceptance
+ * then carries no version and review stays manual — fail-safe).
+ */
+export function showsStaffReviewNotice(input: {
+  readonly invitationType: string | null | undefined;
+  readonly relationshipSlug: string | null | undefined;
+  readonly organizationName: string | null | undefined;
+}): boolean {
+  return Boolean(input.organizationName?.trim()) && acceptanceCreatesEmployeeRelationship(input);
 }
 
-export function eligibleForAutoReview(input: {
-  readonly organizationId: string;
-  readonly contexts: readonly ReviewContextRow[];
-  readonly acceptances: readonly ReviewAcceptanceRow[];
-  readonly invitations: readonly ReviewInvitationRow[];
-  readonly limit?: number;
-  /** Test seam; production uses REVIEW_DISCLOSURE_ON_ALL_ACCEPT_PATHS. */
-  readonly disclosureOnAllPaths?: boolean;
-}): readonly string[] {
-  const invitationById = new Map(input.invitations.map((i) => [i.id, i]));
-  const acceptanceByContext = new Map<string, ReviewAcceptanceRow[]>();
-  for (const a of input.acceptances) {
-    if (a.decision !== "accepted" || !a.relationship_id) continue;
-    const list = acceptanceByContext.get(a.relationship_id) ?? [];
-    list.push(a);
-    acceptanceByContext.set(a.relationship_id, list);
-  }
-  if (!(input.disclosureOnAllPaths ?? REVIEW_DISCLOSURE_ON_ALL_ACCEPT_PATHS)) return [];
-  const from = ms(REVIEW_DISCLOSURE_FROM);
-  const out: string[] = [];
-  for (const c of input.contexts) {
-    if (out.length >= (input.limit ?? AUTO_REVIEW_BATCH)) break;
-    if (c.organization_id !== input.organizationId) continue;
-    if (c.relationship_slug !== "employee" || c.status !== "active" || c.journal_review_enabled) continue;
-    // Fail closed: an unreadable timestamp is never "untouched".
-    const sinceCreated = ms(c.updated_at) - ms(c.created_at);
-    if (!Number.isFinite(sinceCreated) || sinceCreated > UNTOUCHED_WINDOW_MS) continue;
-    const accepted = (acceptanceByContext.get(c.id) ?? []).some((a) => {
-      if (a.profile_id !== c.profile_id) return false;
-      const inv = invitationById.get(a.invitation_id);
-      if (!inv || inv.organization_id !== input.organizationId) return false;
-      if (!acceptanceCreatesEmployeeRelationship({ invitationType: inv.invitation_type, relationshipSlug: inv.relationship_slug })) {
-        return false;
-      }
-      const when = ms(a.decided_at ?? a.created_at);
-      return !Number.isNaN(when) && when >= from;
-    });
-    if (accepted) out.push(c.id);
-  }
-  return out;
+/**
+ * The version an accept action may forward: only the exact current version,
+ * never whatever a client sent.
+ */
+export function acceptedReviewNotice(value: unknown): typeof REVIEW_NOTICE_VERSION | null {
+  return value === REVIEW_NOTICE_VERSION ? REVIEW_NOTICE_VERSION : null;
+}
+
+/** What the RPC answered, as the app reads it. */
+export type StaffReviewNoticeOutcome =
+  | "recorded"
+  | "review_enabled"
+  | "already_on"
+  | "manual_choice_kept"
+  | "already_recorded"
+  | "not_applicable"
+  | "too_late"
+  | "not_found"
+  | "invalid"
+  | "not_enabled"
+  | "error";
+
+const KNOWN_OUTCOMES: ReadonlySet<string> = new Set<StaffReviewNoticeOutcome>([
+  "recorded",
+  "review_enabled",
+  "already_on",
+  "manual_choice_kept",
+  "already_recorded",
+  "not_applicable",
+  "too_late",
+  "not_found",
+  "invalid",
+]);
+
+export function readStaffReviewNoticeOutcome(data: unknown): StaffReviewNoticeOutcome {
+  const outcome = (data as { outcome?: unknown } | null)?.outcome;
+  return typeof outcome === "string" && KNOWN_OUTCOMES.has(outcome) ? (outcome as StaffReviewNoticeOutcome) : "error";
 }
