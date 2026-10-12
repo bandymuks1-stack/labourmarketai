@@ -23,12 +23,21 @@ import { createClient } from "@/lib/supabase/server";
 export async function acceptInvitationAfterSignup(input: {
   token: string;
   locale: string;
+  /** The addressed signup form or the onboarding finish. */
+  surface?: "addressed_signup" | "onboarding";
+  /** `REVIEW_NOTICE_VERSION` only when that surface showed the review sentence. */
+  reviewNotice?: string | null;
 }): Promise<{ accepted: boolean; outcome: string }> {
   const token = String(input.token ?? "");
   if (!token || token.length > 128 || !/^[A-Za-z0-9_-]+$/.test(token)) {
     return { accepted: false, outcome: "invalid_token" };
   }
-  const result = await acceptInvitationAction({ token, locale: toActiveLocale(input.locale) });
+  const result = await acceptInvitationAction({
+    token,
+    locale: toActiveLocale(input.locale),
+    noticeSurface: input.surface ?? "onboarding",
+    reviewNotice: input.reviewNotice ?? null,
+  });
   if (result.status === "ok") {
     return { accepted: result.outcome === "accepted", outcome: result.outcome };
   }
@@ -59,6 +68,8 @@ export async function signUpAddressedInviteAction(input: {
   locale: string;
   emailRedirectTo: string;
   metadata?: Record<string, string>;
+  /** `REVIEW_NOTICE_VERSION` only when the form showed the review sentence. */
+  reviewNotice?: string | null;
 }): Promise<AddressedSignupResult> {
   const token = String(input.token ?? "");
   const context = await readInvitationSignupContext(token || null);
@@ -81,6 +92,11 @@ export async function signUpAddressedInviteAction(input: {
     };
   }
   if (!data.session) return { status: "check_email" };
-  const accepted = await acceptInvitationAfterSignup({ token, locale: input.locale });
+  const accepted = await acceptInvitationAfterSignup({
+    token,
+    locale: input.locale,
+    surface: "addressed_signup",
+    reviewNotice: input.reviewNotice ?? null,
+  });
   return { status: "session", accepted: accepted.accepted };
 }
