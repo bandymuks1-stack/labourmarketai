@@ -78,7 +78,7 @@ for (const [slot, who, email] of [
     await useWorkspace(page, ALFA);
     const card = page.getByTestId(teamTestId);
     const teamId = teamTestId.replace("team-brigade-", "");
-    const select = page.locator(`#team-add-${teamId}`);
+    const select = page.locator(`[id="team-add-${teamId}"]`);
     if (!(await select.count())) {
       throw new Error(`no addable-member picker on the brigade card; card ends: ${(await card.innerText()).slice(-700)}`);
     }
