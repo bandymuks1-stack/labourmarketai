@@ -92,7 +92,6 @@ export default async function AdminDashboardPage({
   const tNeed = await getTranslations("needStructuring");
   const tPool = await getTranslations("candidatePool");
   const tLaunchReadiness = await getTranslations("adminLaunchReadiness");
-  const tMetrics = await getTranslations("adminMetrics");
   const tPipeline = await getTranslations("crmPipeline");
   const tPilots = await getTranslations("adminPilots");
   const supabase = await createClient();
@@ -296,11 +295,6 @@ export default async function AdminDashboardPage({
           href: "/dashboard/admin/launch-readiness",
           label: tLaunchReadiness("title"),
           testId: "admin-tools-hub-launch-readiness",
-        },
-        {
-          href: "/dashboard/admin/metrics",
-          label: tMetrics("title"),
-          testId: "admin-tools-hub-metrics",
         },
         {
           href: "/dashboard/admin/readiness",

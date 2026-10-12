@@ -134,3 +134,28 @@ describe("monitor signals", () => {
     expect(res.find((r) => r.id === "metrics-unreadable")!.state).toBe("BREACH");
   });
 });
+
+describe("the service-role metrics section stays behind the superadmin gate", () => {
+  it("is rendered only by the launch-readiness page, which calls requireSuperadmin first", async () => {
+    const { readFileSync, readdirSync, statSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const web = join(__dirname, "..", "..");
+    const walk = (d: string, out: string[] = []): string[] => {
+      for (const e of readdirSync(d)) {
+        if (e === "node_modules" || e.startsWith(".")) continue;
+        const p = join(d, e);
+        if (statSync(p).isDirectory()) walk(p, out);
+        else if (/\.tsx?$/.test(e) && !/\.test\./.test(e)) out.push(p);
+      }
+      return out;
+    };
+    const importers = ["app", "components", "lib"]
+      .flatMap((d) => walk(join(web, d)))
+      .filter((f) => /from "@\/components\/admin\/product-metrics-section"/.test(readFileSync(f, "utf8")))
+      .map((f) => f.slice(web.length + 1).split("\\").join("/"));
+    expect(importers).toEqual(["app/[locale]/dashboard/admin/launch-readiness/page.tsx"]);
+    const page = readFileSync(join(web, importers[0]!), "utf8");
+    expect(page.indexOf("await requireSuperadmin(locale)")).toBeGreaterThan(-1);
+    expect(page.indexOf("await requireSuperadmin(locale)")).toBeLessThan(page.indexOf("<ProductMetricsSection />"));
+  });
+});

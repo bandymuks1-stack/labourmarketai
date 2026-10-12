@@ -1,26 +1,23 @@
-import { setRequestLocale, getTranslations } from "next-intl/server";
+import "server-only";
 
-import { requireSuperadmin } from "@/lib/auth/superadmin";
+import { getTranslations } from "next-intl/server";
+
 import { createAdminClient } from "@/lib/supabase/admin";
 import { computeProductMetrics, POPULATIONS, type Metric, type MetricGroup } from "@/lib/ops/product-metrics";
 import { SIGNALS } from "@/lib/ops/product-monitor";
-import { PageTitle } from "@/components/app/premium/page-title";
 import { Card } from "@/components/ui/Card";
 
-export const dynamic = "force-dynamic";
-
 /**
- * Operator metrics (owner programme 2026-10-12 §8). Every number is computed
- * now from canonical tables by `lib/ops/product-metrics.ts` — the same code the
- * hourly monitor runs — and split REAL / TEST / INTERNAL. "—" is UNKNOWN (the
- * read failed), never zero. Superadmin only; the service-role read happens
- * after the gate.
+ * Operator product metrics (owner programme 2026-10-12 §8), a section of the
+ * superadmin launch-readiness page — not a new screen. Every number is computed
+ * now from canonical tables by `lib/ops/product-metrics.ts` (the same code the
+ * hourly monitor runs) and split REAL / TEST / INTERNAL. "—" is UNKNOWN (the
+ * read failed), never zero.
+ *
+ * SERVER-ONLY and superadmin-only: the ONLY caller is the launch-readiness
+ * page, which runs requireSuperadmin() before rendering this.
  */
-export default async function AdminMetricsPage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-  await requireSuperadmin(locale);
-
+export async function ProductMetricsSection() {
   const t = await getTranslations("adminMetrics");
   const snapshot = await computeProductMetrics(createAdminClient());
   const groups: MetricGroup[] = ["users", "teams", "b2b", "work", "technical"];
@@ -31,8 +28,8 @@ export default async function AdminMetricsPage({ params }: { params: Promise<{ l
       : ["", "", "", cell(v as number | null)];
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-6 p-4 sm:p-6" data-testid="admin-metrics">
-      <PageTitle>{t("title")}</PageTitle>
+    <section className="flex flex-col gap-4" data-testid="admin-metrics">
+      <h2 className="font-display text-lg font-semibold text-text-primary">{t("title")}</h2>
       <p className="text-sm text-text-secondary">{t("intro")}</p>
       <p className="text-meta text-text-muted" data-testid="admin-metrics-computed-at">
         {t("computedAt", { at: snapshot.computedAt })}
@@ -48,7 +45,7 @@ export default async function AdminMetricsPage({ params }: { params: Promise<{ l
       {groups.map((g) => (
         <section key={g} data-testid={`admin-metrics-${g}`}>
           <Card compact className="flex flex-col gap-2">
-          <h2 className="font-display text-base font-semibold text-text-primary">{t(`groups.${g}`)}</h2>
+          <h3 className="font-display text-base font-semibold text-text-primary">{t(`groups.${g}`)}</h3>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] text-left text-sm">
               <thead className="text-meta text-text-muted">
@@ -87,7 +84,7 @@ export default async function AdminMetricsPage({ params }: { params: Promise<{ l
       ))}
       <section data-testid="admin-metrics-signals">
         <Card compact className="flex flex-col gap-2">
-        <h2 className="font-display text-base font-semibold text-text-primary">{t("signals.title")}</h2>
+        <h3 className="font-display text-base font-semibold text-text-primary">{t("signals.title")}</h3>
         <p className="text-sm text-text-secondary">{t("signals.intro")}</p>
         <ul className="flex flex-col gap-1 text-sm">
           {SIGNALS.map((s) => (
@@ -98,6 +95,6 @@ export default async function AdminMetricsPage({ params }: { params: Promise<{ l
         </ul>
         </Card>
       </section>
-    </main>
+    </section>
   );
 }
