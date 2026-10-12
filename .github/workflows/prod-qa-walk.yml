@@ -77,6 +77,8 @@ jobs:
           mint "qa.worker+multiw@labourmarket.ai"  worker
           mint "qa.worker+goal3@labourmarket.ai"   worker2
           mint "qa.agency+multiw@labourmarket.ai"  agency
+          # employee-beta-gate.spec.ts reads the original single-worker file.
+          cp tests/e2e/.storage-state.prod-qa.worker2.json tests/e2e/.storage-state.prod-qa.json
 
       - name: Walk
         shell: bash
