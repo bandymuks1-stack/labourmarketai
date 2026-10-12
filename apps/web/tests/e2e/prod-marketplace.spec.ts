@@ -137,6 +137,10 @@ test("M-6. the provider accepts; both sides can open the conversation", async ({
   await expect(incoming).toBeVisible({ timeout: 30_000 });
   await incoming.getByTestId("marketplace-incoming-note").fill("Tinka, susiderinkime laiką.");
   await incoming.getByTestId("marketplace-incoming-accept").click();
+  await provider.page.waitForTimeout(5_000);
+  const err = provider.page.getByTestId("marketplace-loop-error");
+  if (await err.isVisible().catch(() => false)) throw new Error(`accept refused: ${await err.innerText()}`);
+  console.info(`[market] incoming row after accept: ${(await incoming.innerText().catch(() => "(row gone)")).slice(0, 300)}`);
   await expect
     .poll(async () => { await provider.page.reload(); return provider.page.getByTestId("marketplace-incoming-message-cta").count(); }, { timeout: 30_000, intervals: [3_000] })
     .toBeGreaterThan(0);
