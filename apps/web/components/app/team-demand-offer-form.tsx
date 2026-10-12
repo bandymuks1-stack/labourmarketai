@@ -15,6 +15,7 @@ import {
 import type { TeamOfferRefusal } from "@/lib/market/team-offer-model";
 import { openTeamOfferConversationAction } from "@/lib/company/team-offer-conversation";
 import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
+import { TeamOfferTerms } from "@/components/app/team-offer-terms";
 
 /**
  * E6 - offer this team / brigade as ONE unit against ONE open demand.
@@ -27,7 +28,16 @@ import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-wo
  * No payment, no extra confirmation step: the manager's own offer IS the
  * authorization the database records. Opens lazily (a folded section).
  */
-export function TeamDemandOfferForm({ teamId, memberCount }: { teamId: string; memberCount: number }) {
+export function TeamDemandOfferForm({
+  teamId,
+  memberCount,
+  kind = "team",
+}: {
+  teamId: string;
+  memberCount: number;
+  /** "organization" = a company / agency offers ITSELF (no brigade needed). */
+  kind?: "team" | "organization";
+}) {
   const t = useTranslations("teamDemandOffer");
   const locale = useLocale();
   const router = useRouter();
@@ -36,12 +46,13 @@ export function TeamDemandOfferForm({ teamId, memberCount }: { teamId: string; m
   const [data, setData] = useState<TeamOfferPanelData | null>(null);
   const [requestId, setRequestId] = useState("");
   const [note, setNote] = useState("");
+  const [terms, setTerms] = useState({ capacity: "", rateText: "", startDate: "", scopeText: "" });
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   function load() {
     if (data) return;
     startTransition(async () => {
-      setData(await loadTeamOfferPanelAction({ teamId }));
+      setData(await loadTeamOfferPanelAction({ teamId, kind }));
     });
   }
 
@@ -53,12 +64,13 @@ export function TeamDemandOfferForm({ teamId, memberCount }: { teamId: string; m
     if (!requestId) return;
     setMsg(null);
     startTransition(async () => {
-      const r = await offerTeamToDemandAction({ teamId, requestId, note });
+      const r = await offerTeamToDemandAction({ teamId, requestId, note, terms });
       if (r.status === "ok") {
         setMsg({ ok: true, text: t(`outcome.${r.outcome}`) });
         setRequestId("");
         setNote("");
-        setData(await loadTeamOfferPanelAction({ teamId }));
+        setTerms({ capacity: "", rateText: "", startDate: "", scopeText: "" });
+        setData(await loadTeamOfferPanelAction({ teamId, kind }));
         router.refresh();
       } else {
         setMsg({ ok: false, text: refusalText(r.status) });
@@ -72,13 +84,15 @@ export function TeamDemandOfferForm({ teamId, memberCount }: { teamId: string; m
       const r = await withdrawTeamOfferAction({ offerId });
       if (r.status === "ok") {
         setMsg({ ok: true, text: t(`outcome.${r.outcome}`) });
-        setData(await loadTeamOfferPanelAction({ teamId }));
+        setData(await loadTeamOfferPanelAction({ teamId, kind }));
         router.refresh();
       } else {
         setMsg({ ok: false, text: refusalText(r.status) });
       }
     });
   }
+
+  const org = kind === "organization";
 
   return (
     <details
@@ -88,19 +102,23 @@ export function TeamDemandOfferForm({ teamId, memberCount }: { teamId: string; m
         if ((e.currentTarget as HTMLDetailsElement).open) load();
       }}
     >
-      <summary className="cursor-pointer text-xs font-medium text-text-secondary">{t("heading")}</summary>
+      <summary className="cursor-pointer text-xs font-medium text-text-secondary">
+        {org ? t("orgHeading") : t("heading")}
+      </summary>
       <div className="flex flex-col gap-3 pt-3">
-        <p className="text-xs text-text-secondary">{t("intro")}</p>
+        <p className="text-xs text-text-secondary">{org ? t("orgIntro") : t("intro")}</p>
         <p className="text-meta leading-relaxed text-text-muted">{t("privacy")}</p>
 
-        {memberCount < 2 ? (
+        {!org && memberCount < 2 ? (
           <p className="text-xs text-text-muted" data-testid={`team-offer-too-small-${teamId}`}>
             {t("tooSmall")}
           </p>
         ) : data === null ? (
           <p className="text-xs text-text-muted">{t("loading")}</p>
         ) : data.status === "needs_migration" ? (
-          <p className="text-xs text-text-muted">{t("refusal.needs_migration")}</p>
+          <p className="text-xs text-text-muted" data-testid={org ? `team-offer-org-not-yet-${teamId}` : undefined}>
+            {org ? t("orgNotYet") : t("refusal.needs_migration")}
+          </p>
         ) : data.status !== "ok" ? (
           <p className="text-xs text-text-muted">{t("unavailable")}</p>
         ) : (
@@ -143,6 +161,33 @@ export function TeamDemandOfferForm({ teamId, memberCount }: { teamId: string; m
                   className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary"
                   data-testid={`team-offer-note-${teamId}`}
                 />
+                <fieldset className="grid gap-2 sm:grid-cols-2">
+                  <legend className="text-xs text-text-secondary">{t("termsLegend")}</legend>
+                  <label className="flex flex-col gap-1 text-meta text-text-muted" htmlFor={`${uid}-cap`}>
+                    {t("terms.capacity")}
+                    <input id={`${uid}-cap`} type="number" min={1} max={500} inputMode="numeric" value={terms.capacity}
+                      onChange={(e) => setTerms((v) => ({ ...v, capacity: e.target.value }))}
+                      className="min-h-11 sm:min-h-9 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary" />
+                  </label>
+                  <label className="flex flex-col gap-1 text-meta text-text-muted" htmlFor={`${uid}-rate`}>
+                    {t("terms.rate")}
+                    <input id={`${uid}-rate`} type="text" maxLength={200} value={terms.rateText} placeholder={t("terms.ratePlaceholder")}
+                      onChange={(e) => setTerms((v) => ({ ...v, rateText: e.target.value }))}
+                      className="min-h-11 sm:min-h-9 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary" />
+                  </label>
+                  <label className="flex flex-col gap-1 text-meta text-text-muted" htmlFor={`${uid}-start`}>
+                    {t("terms.start")}
+                    <input id={`${uid}-start`} type="date" value={terms.startDate}
+                      onChange={(e) => setTerms((v) => ({ ...v, startDate: e.target.value }))}
+                      className="min-h-11 sm:min-h-9 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary" />
+                  </label>
+                  <label className="flex flex-col gap-1 text-meta text-text-muted sm:col-span-2" htmlFor={`${uid}-scope`}>
+                    {t("terms.scope")}
+                    <textarea id={`${uid}-scope`} rows={2} maxLength={2000} value={terms.scopeText}
+                      onChange={(e) => setTerms((v) => ({ ...v, scopeText: e.target.value }))}
+                      className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary" />
+                  </label>
+                </fieldset>
                 <div>
                   <Button
                     type="button"
@@ -164,7 +209,8 @@ export function TeamDemandOfferForm({ teamId, memberCount }: { teamId: string; m
               ) : (
                 <ul className="flex flex-col gap-1.5" data-testid={`team-offer-sent-${teamId}`}>
                   {data.sent.map((o) => (
-                    <li key={o.offerId} className="flex flex-wrap items-center gap-2 text-xs text-text-primary">
+                    <li key={o.offerId} className="flex flex-col gap-2 text-xs text-text-primary">
+                      <div className="flex flex-wrap items-center gap-2">
                       <span>{[o.roleText ?? "-", o.country ?? "-", o.companyName ?? "-"].join(" / ")}</span>
                       <span className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted">
                         {t(`status.${o.status}`)}
@@ -189,6 +235,10 @@ export function TeamDemandOfferForm({ teamId, memberCount }: { teamId: string; m
                         <Button type="button" size="sm" variant="ghost" disabled={pending} onClick={() => withdraw(o.offerId)}>
                           {t("sent.withdraw")}
                         </Button>
+                      ) : null}
+                      </div>
+                      {o.status === "offered" || o.status === "accepted" || o.status === "assigned" ? (
+                        <TeamOfferTerms offerId={o.offerId} offerOpen={o.status === "offered"} canAgree />
                       ) : null}
                     </li>
                   ))}

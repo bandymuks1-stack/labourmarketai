@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { handOffTeamOfferAction, respondToTeamOfferAction } from "@/lib/company/team-offer-actions";
 import { openTeamOfferConversationAction } from "@/lib/company/team-offer-conversation";
 import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
+import { TeamOfferTerms } from "@/components/app/team-offer-terms";
 import type { OfferMatchView, ReceivedTeamOffer, TeamOfferRefusal } from "@/lib/market/team-offer-model";
 
 /**
@@ -102,6 +103,11 @@ export function TeamOffersReceived({
                 <span className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted">
                   {t(`status.${offer.status}`)}
                 </span>
+                {offer.offerKind === "organization" ? (
+                  <span className="text-xs text-text-secondary" data-testid={`team-offer-kind-org-${offer.offerId}`}>
+                    {t("received.kindOrganization")}
+                  </span>
+                ) : null}
                 <span className="text-xs text-text-secondary">{t("received.members", { count: offer.memberCount })}</span>
                 {size ? <span className="text-xs text-text-secondary">{size}</span> : null}
               </div>
@@ -121,14 +127,16 @@ export function TeamOffersReceived({
                           : t("received.availabilityUnknown")}
                   </dd>
                 </div>
-                <div className="flex flex-col gap-0.5">
-                  <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
-                    {t("received.consent")}
-                  </dt>
-                  <dd className="text-text-primary">
-                    {t("received.consentValue", { consented: offer.consentedMembers, total: offer.memberCount })}
-                  </dd>
-                </div>
+                {offer.offerKind === "team" ? (
+                  <div className="flex flex-col gap-0.5">
+                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {t("received.consent")}
+                    </dt>
+                    <dd className="text-text-primary">
+                      {t("received.consentValue", { consented: offer.consentedMembers, total: offer.memberCount })}
+                    </dd>
+                  </div>
+                ) : null}
                 <div className="flex flex-col gap-0.5 sm:col-span-2">
                   <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {t("received.skills")}
@@ -215,6 +223,10 @@ export function TeamOffersReceived({
                 </form>
               ) : null}
 
+              {offer.status === "offered" || offer.status === "accepted" || offer.status === "assigned" ? (
+                <TeamOfferTerms offerId={offer.offerId} offerOpen={offer.status === "offered"} canAgree />
+              ) : null}
+
               {offer.status === "offered" ? (
                 <div className="flex flex-wrap gap-2">
                   <Button
@@ -239,7 +251,11 @@ export function TeamOffersReceived({
                 </div>
               ) : null}
 
-              {offer.status === "accepted" ? (
+              {offer.status === "accepted" && offer.offerKind === "organization" ? (
+                <p className="text-xs text-text-secondary" data-testid={`team-offer-org-next-${offer.offerId}`}>
+                  {t("received.orgNext")}
+                </p>
+              ) : offer.status === "accepted" ? (
                 projects.length === 0 ? (
                   <p className="text-xs text-text-muted">
                     {t("received.noProjects")}{" "}

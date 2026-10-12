@@ -725,6 +725,10 @@ export const ACTOR_ONLY_RELATIONS: readonly string[] = [
   // who offered it and the demand owner's staff who answered. No member of the
   // team is on the row.
   "team_demand_offers",
+  // 20261011200000: versioned terms of one offer; the person columns are the
+  // manager who proposed a version and the one who decided it. No member of
+  // the team is on the row; the terms are the two organizations' business.
+  "team_demand_offer_terms",
   "training_programs",
   "training_skill_links",
   "workflow_definition_versions",

@@ -1618,6 +1618,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261008210000_rls_tables_missing_select_grant_v1.sql",
       // 2026-10-11 (RED by SECURITY DEFINER + RLS policy, needs-human-gate): employers see/approve absences of invitation-joined employees - marker is the human-gate acknowledgement.
       "20261011160000_absence_authority_engagement_v1.sql",
+      // 2026-10-11 (supply offer negotiation: organization offers, versioned terms, need titles; RED by SECURITY DEFINER replace, needs-human-gate) - marker is the human-gate acknowledgement.
+      "20261011200000_supply_offer_negotiation_v1.sql",
 ]);
   });
 
