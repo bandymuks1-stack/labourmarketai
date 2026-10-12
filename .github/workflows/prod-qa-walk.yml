@@ -69,7 +69,7 @@ jobs:
           fi
           cd apps/web
           mint() {
-            PROD_QA_PROVISION_IDENTITY="$1" pnpm exec tsx scripts/prod-qa-provision.ts
+            PROD_QA_PROVISION_IDENTITY="$1" pnpm exec tsx scripts/prod-qa-provision.ts --i-understand-production
             PROD_QA_IDENTITY="$1" PROD_QA_STORAGE_SLOT="$2" pnpm exec tsx scripts/prod-qa-mint-session.ts
           }
           mint "qa.owner+multiw@labourmarket.ai"   owner
