@@ -91,7 +91,11 @@ for (const [slot, who, email] of [
     // The owner may not be able to read the worker's address (profiles are
     // own-row only); the product then asks for it and the owner types it.
     const typed = page.getByTestId(`team-invite-email-${teamId}`);
-    if (await typed.isVisible({ timeout: 8_000 }).catch(() => false)) {
+    const asked = await Promise.race([
+      typed.waitFor({ state: "visible", timeout: 20_000 }).then(() => true),
+      page.getByTestId("team-invite-link").waitFor({ state: "visible", timeout: 20_000 }).then(() => false),
+    ]).catch(() => false);
+    if (asked) {
       await typed.fill(email);
       await page.getByTestId(`team-invite-member-${teamId}`).click();
     }
