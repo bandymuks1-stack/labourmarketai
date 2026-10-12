@@ -6719,7 +6719,8 @@
       "listingsNote": "Lokale, sprzęt, pojazdy – oferuj lub szukaj",
       "needs": "Potrzeby i oferty",
       "needsNote": "Opublikuj, czego potrzebujesz lub co możesz zaoferować"
-    }
+    },
+    "loopReadFailed": "Nie udało się wczytać Twoich zapytań — lista może być niepełna. Odśwież stronę."
   },
   "learning": {
     "pageTitle": "Nauka i weryfikacja",

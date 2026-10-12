@@ -2860,7 +2860,8 @@
     "requestAgain": "[EN] Request again",
     "requestAgainNote": "[EN] This sends a new request for the same service. Your previous message is prefilled — edit it if you like. The provider decides again.",
     "cancel": "[EN] Cancel",
-    "offeringInactive": "[EN] This service is no longer active, so a new request can't be sent."
+    "offeringInactive": "[EN] This service is no longer active, so a new request can't be sent.",
+    "loopReadFailed": "Dina förfrågningar kunde inte laddas — listan kan vara ofullständig. Ladda om sidan."
   },
   "people": {
     "eyebrow": "Personprofil",

@@ -6719,7 +6719,8 @@
       "listingsNote": "Patalpos, įranga, transportas — siūlyk ar ieškok",
       "needs": "Poreikiai ir pasiūla",
       "needsNote": "Paskelbk, ko reikia ar ką gali pasiūlyti"
-    }
+    },
+    "loopReadFailed": "Nepavyko įkelti jūsų užklausų — sąrašas gali būti nepilnas. Atnaujinkite puslapį."
   },
   "learning": {
     "pageTitle": "Mokymasis ir peržiūra",
