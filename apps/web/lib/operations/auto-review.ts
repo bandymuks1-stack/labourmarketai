@@ -50,6 +50,7 @@ export async function autoEnableReviewForAcceptedStaff(organizationId: string): 
       .eq("relationship_slug", "employee")
       .eq("status", "active")
       .eq("journal_review_enabled", false)
+      .order("created_at", { ascending: false })
       .limit(200);
     if (ctxRes.error) return { status: "unavailable" };
     const contexts = (ctxRes.data ?? []) as ReviewContextRow[];

@@ -36,6 +36,8 @@ function asAny(c: SupabaseClient): any {
 }
 
 const ENTRY_LIMIT = 1000;
+const CONTEXT_LIMIT = 500;
+const CONFIRMATION_LIMIT = 5000;
 
 export async function readRecognitionEvidence(organizationId: string): Promise<RecognitionEvidenceRead> {
   const supabase = await createClient();
@@ -46,9 +48,11 @@ export async function readRecognitionEvidence(organizationId: string): Promise<R
     .eq("organization_id", organizationId)
     .eq("relationship_slug", "student")
     .in("status", ["active", "ended"])
-    .limit(500);
+    .limit(CONTEXT_LIMIT);
   if (ctxRes.error) return { status: "unavailable" };
   const contexts = (ctxRes.data ?? []) as StudentContextRow[];
+  // A capped read is not a complete read: "none yet" must never be inferred from it.
+  if (contexts.length >= CONTEXT_LIMIT) return { status: "unavailable" };
   if (contexts.length === 0) return { status: "ok", bySubject: {} };
 
   const entriesRes = await asAny(supabase)
@@ -64,17 +68,19 @@ export async function readRecognitionEvidence(organizationId: string): Promise<R
     .limit(ENTRY_LIMIT);
   if (entriesRes.error) return { status: "unavailable" };
   const entries = (entriesRes.data ?? []) as EvidenceEntryRow[];
+  if (entries.length >= ENTRY_LIMIT) return { status: "unavailable" };
   if (entries.length === 0) return { status: "ok", bySubject: {} };
 
   const confRes = await asAny(supabase)
     .from("journal_entry_confirmations")
-    .select("entry_id, confirmer_id, created_at")
+    .select("entry_id, confirmer_id, created_at, confirmation_scope")
     .in(
       "entry_id",
       entries.map((e) => e.id),
     )
-    .limit(5000);
+    .limit(CONFIRMATION_LIMIT);
   if (confRes.error) return { status: "unavailable" };
+  if ((confRes.data ?? []).length >= CONFIRMATION_LIMIT) return { status: "unavailable" };
 
   return {
     status: "ok",

@@ -19,9 +19,10 @@
  *      (`REVIEW_DISCLOSURE_FROM`). Earlier acceptances never saw that sentence,
  *      so they stay manual — grandfathering a silent consent would not be a
  *      relationship the employee understood;
- *   5. nobody has touched the context since it was created. A manager's manual
- *      switch-off updates the row (`updated_at`), so a manual choice is never
- *      overridden by the automation.
+ *   5. nobody has touched the context since it was created (`updated_at` within
+ *      seconds of `created_at`). A manager's manual switch-off updates the row,
+ *      and since the first enable needs a later dashboard visit, a manual choice
+ *      is not overridden. This is a heuristic, not an audit-trail proof.
  *
  * Students, collaborators and every other relationship keep the manual door.
  * The enabling itself is the existing audited RPC `set_engagement_journal_review`
@@ -31,11 +32,20 @@
 /** Instant from which the accept screen carries the plain-language review notice. */
 export const REVIEW_DISCLOSURE_FROM = "2026-10-13T00:00:00Z";
 
+/**
+ * The notice is rendered on the invite page only. Acceptance also happens via
+ * the addressed signup, the network list and the chat action, none of which
+ * show it yet. Until EVERY acceptance path shows the sentence, an acceptance
+ * is not proof the person saw it, so the automation stays OFF (fail-safe).
+ * Flip to true only in the change that adds the notice to those paths.
+ */
+export const REVIEW_DISCLOSURE_ON_ALL_ACCEPT_PATHS = false;
+
 /** Invitation types whose acceptance creates an `employee` engagement. */
 export const STAFF_INVITATION_TYPES: readonly string[] = ["join_organization", "join_team", "join_as_employee"];
 
 /** An unchanged context: `updated_at` within this window of `created_at`. */
-export const UNTOUCHED_WINDOW_MS = 5 * 60_000;
+export const UNTOUCHED_WINDOW_MS = 10_000;
 
 /** Most contexts enabled in one pass. */
 export const AUTO_REVIEW_BATCH = 50;
@@ -92,6 +102,8 @@ export function eligibleForAutoReview(input: {
   readonly acceptances: readonly ReviewAcceptanceRow[];
   readonly invitations: readonly ReviewInvitationRow[];
   readonly limit?: number;
+  /** Test seam; production uses REVIEW_DISCLOSURE_ON_ALL_ACCEPT_PATHS. */
+  readonly disclosureOnAllPaths?: boolean;
 }): readonly string[] {
   const invitationById = new Map(input.invitations.map((i) => [i.id, i]));
   const acceptanceByContext = new Map<string, ReviewAcceptanceRow[]>();
@@ -101,6 +113,7 @@ export function eligibleForAutoReview(input: {
     list.push(a);
     acceptanceByContext.set(a.relationship_id, list);
   }
+  if (!(input.disclosureOnAllPaths ?? REVIEW_DISCLOSURE_ON_ALL_ACCEPT_PATHS)) return [];
   const from = ms(REVIEW_DISCLOSURE_FROM);
   const out: string[] = [];
   for (const c of input.contexts) {

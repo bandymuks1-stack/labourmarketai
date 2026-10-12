@@ -18,6 +18,11 @@
  * recognition, a score or a qualification (SEP-3, SEP-6).
  */
 
+import {
+  deriveIndependentReviewResult,
+  withoutCounterpartyRows,
+} from "@/lib/journal/review-status";
+
 export interface StudentContextRow {
   readonly id: string;
   readonly profile_id: string;
@@ -35,6 +40,8 @@ export interface EvidenceConfirmationRow {
   readonly entry_id: string;
   readonly confirmer_id: string;
   readonly created_at: string;
+  /** jsonb `{ decision | action, authority? }` — the review verdict. */
+  readonly confirmation_scope: unknown;
 }
 
 export interface EvidenceOption {
@@ -73,18 +80,30 @@ export function buildEvidenceBySubject(
   const subjectByContext = new Map<string, string>();
   for (const c of contexts) subjectByContext.set(c.id, c.profile_id);
 
-  // Earliest confirmation per entry by a person who is NOT the entry's subject.
-  const confirmedOnByEntry = new Map<string, string>();
+  // An entry is citable only when its CURRENT review result, counting only
+  // decisions by someone other than the subject (employer path), is `approved`.
+  // A later rejection or change request withdraws it; a row that merely exists
+  // is not a sign-off.
   const subjectByEntry = new Map<string, string>();
   for (const e of entries) {
     const subject = subjectByContext.get(e.engagement_context_id);
     if (subject) subjectByEntry.set(e.id, subject);
   }
+  const rowsByEntry = new Map<string, EvidenceConfirmationRow[]>();
   for (const c of confirmations) {
-    const subject = subjectByEntry.get(c.entry_id);
-    if (!subject || c.confirmer_id === subject) continue;
-    const prev = confirmedOnByEntry.get(c.entry_id);
-    if (prev === undefined || c.created_at < prev) confirmedOnByEntry.set(c.entry_id, c.created_at);
+    if (!subjectByEntry.has(c.entry_id)) continue;
+    const list = rowsByEntry.get(c.entry_id) ?? [];
+    list.push(c);
+    rowsByEntry.set(c.entry_id, list);
+  }
+  const confirmedOnByEntry = new Map<string, string>();
+  for (const [entryId, rows] of rowsByEntry) {
+    const subject = subjectByEntry.get(entryId) as string;
+    const employerRows = withoutCounterpartyRows(rows);
+    if (deriveIndependentReviewResult(employerRows, subject) !== "approved") continue;
+    const independent = employerRows.filter((r) => r.confirmer_id !== subject);
+    const latest = independent.reduce((a, b) => (a.created_at >= b.created_at ? a : b));
+    confirmedOnByEntry.set(entryId, latest.created_at);
   }
 
   const out: Record<string, EvidenceOption[]> = {};
