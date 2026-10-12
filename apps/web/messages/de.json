@@ -2408,6 +2408,7 @@
         "invitations": "Ausstehende Einladungen an Arbeitskräfte",
         "claims": "Öffentliche Anfragen, die du übernehmen kannst",
         "reviewOff": "Mitarbeitende mit erfasster Arbeit, deren Bestätigung ausgeschaltet ist",
+        "conflicts": "Personen mit sich überschneidenden Einsätzen (Planungskonflikt)",
         "unreadable": "konnte nicht gelesen werden",
         "clientReview": "Arbeit, die auf Ihre Entscheidung als Auftraggeber wartet"
       }

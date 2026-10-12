@@ -2408,6 +2408,7 @@
         "invitations": "Oczekujące zaproszenia pracowników",
         "claims": "Publiczne zgłoszenia zapotrzebowania, które możesz przejąć",
         "reviewOff": "Pracownicy z zapisaną pracą, u których potwierdzanie jest wyłączone",
+        "conflicts": "Osoby z nakładającymi się zobowiązaniami (konflikt planowania)",
         "unreadable": "nie udało się odczytać",
         "clientReview": "Praca czekająca na Twoją decyzję jako zleceniodawcy"
       }
