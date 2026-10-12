@@ -7,7 +7,7 @@ import { Lock } from "lucide-react";
 import { AdminJoinConversation } from "@/components/app/admin-join-conversation";
 import { CommunicationComposer } from "@/components/app/communication-composer";
 import { MarkReadOnMount } from "@/components/app/mark-read-on-mount";
-import { readTeamOfferThreadContext } from "@/lib/company/team-offer-thread-context";
+import { readTeamOfferMessageLabels, readTeamOfferThreadContext } from "@/lib/company/team-offer-thread-context";
 import { RefreshOnFocus } from "@/components/app/refresh-on-focus";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { createClient } from "@/lib/supabase/server";
@@ -112,6 +112,12 @@ export default async function ConversationDetailPage({
   // instead of rendering "no messages yet" over a conversation that exists.
   const messagesFailed = Boolean(messagesRes.error);
   const messages: MessageRow[] = messagesFailed ? [] : ((messagesRes.data ?? []) as MessageRow[]);
+  // Per-message offer labels (20261012180000): one thread per pair, so each
+  // message names the offer it is about. Details only through the party gate.
+  const offerLabels = await readTeamOfferMessageLabels(
+    messages.map((m) => (m as { team_offer_id?: string | null }).team_offer_id ?? null),
+  );
+  const tOfferLabel = offerLabels.size > 0 ? (tOffer ?? (await getTranslations("teamDemandOffer"))) : null;
 
   // MULTILINGUAL WORK COMMUNICATION: each message rendered in the VIEWER's
   // language through the existing AI runtime (egress-gated, audited), the
@@ -338,6 +344,20 @@ export default async function ConversationDetailPage({
                     {formatUtcDateTime(m.created_at, locale)}
                   </PlaceTimeStamp>
                 </div>
+                {(() => {
+                  const offerId = (m as { team_offer_id?: string | null }).team_offer_id ?? null;
+                  const label = offerId ? offerLabels.get(offerId) : undefined;
+                  if (!label || !tOfferLabel) return null;
+                  return (
+                    <p
+                      className="text-meta text-text-muted"
+                      data-testid={`message-offer-label-${m.id}`}
+                      data-offer-id={offerId ?? undefined}
+                    >
+                      {tOfferLabel("messageAbout", { subject: label.subject ?? "—" })}
+                    </p>
+                  );
+                })()}
                 <Suspense fallback={<OriginalMessageText id={m.id} body={m.body} />}>
                   <ViewerMessageText m={m} viewerTexts={viewerTexts} t={t} />
                 </Suspense>
@@ -403,6 +423,7 @@ export default async function ConversationDetailPage({
       <CommunicationComposer
         conversationId={conversationId}
         locale={locale}
+        teamOfferId={offerContext ? (offerParam ?? null) : null}
       />
     </div>
   );

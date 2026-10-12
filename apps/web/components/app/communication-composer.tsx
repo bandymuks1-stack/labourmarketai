@@ -67,9 +67,13 @@ const WRITE_LANG_STORAGE_KEY = "lm.communication.writeLanguage";
 export function CommunicationComposer({
   conversationId,
   locale,
+  teamOfferId = null,
 }: {
   conversationId: string;
   locale: string;
+  /** The offer this thread was opened from (party-checked by the page); each
+   *  message sent here is labelled with it, the database guard deciding. */
+  teamOfferId?: string | null;
 }) {
   const t = useTranslations("communication");
   const router = useRouter();
@@ -261,6 +265,7 @@ export function CommunicationComposer({
         body: trimmed,
         locale,
         originalLanguage: writeLang || null,
+        teamOfferId,
         attachments: uploaded.map((a) => ({
           id: a.id,
           fileName: a.fileName,

@@ -62,6 +62,7 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261008120000_",
       // 2026-10-12 practice-in-company relationship row (data-only, GREEN).
       "20261012170000_",
+      "20261012180000_",
       "20261012190000_",
       // 2026-10-08 owner-approved work-plan scope extension (roster + engagement).
       "20261007140000_",
