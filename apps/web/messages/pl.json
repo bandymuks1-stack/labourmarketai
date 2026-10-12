@@ -2033,7 +2033,7 @@
           "key": "Klucz wymagania (slug)",
           "country": "Kraj (2 litery)",
           "evidence": "ID wpisów dowodowych",
-          "evidenceHint": "ID wpisów dziennika dotyczących pracy uczestnika, oddzielone przecinkami. Rejestr przyjmuje tylko wpisy zatwierdzone przez drugą osobę.",
+          "evidenceHint": "Wpisy praktyki tej osoby uczącej się, które potwierdziła inna osoba. Zaznacz te, które uzasadniają decyzję.",
           "decision": "Decyzja",
           "recognised": "Uznano",
           "notRecognised": "Nie uznano",
@@ -2046,7 +2046,12 @@
           "needsMigration": "Nie zapisano: rejestr uznań nie jest jeszcze dostępny.",
           "forbidden": "Ta instytucja nie może zapisać tego uznania dla tej osoby.",
           "invalid": "Sprawdź wartości.",
-          "error": "Coś poszło nie tak. Spróbuj ponownie."
+          "error": "Coś poszło nie tak. Spróbuj ponownie.",
+          "evidenceChooseLearner": "Wybierz osobę uczącą się, aby zobaczyć jej potwierdzoną praktykę.",
+          "evidenceNone": "Ta osoba nie ma jeszcze wpisu praktyki potwierdzonego przez kogoś innego. Najpierw potwierdź jej praktykę; dopiero wtedy uznanie może się na nią powołać.",
+          "evidenceUnavailable": "Nie udało się teraz odczytać wpisów praktyki. Nic nie zapisano.",
+          "evidenceRecorded": "Zapisano",
+          "evidenceConfirmed": "potwierdzono"
         }
       },
       "learners": {

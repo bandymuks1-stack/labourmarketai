@@ -2033,7 +2033,7 @@
           "key": "Requirement key (slug)",
           "country": "Country (2 letters)",
           "evidence": "Evidence entry IDs",
-          "evidenceHint": "Journal entry IDs of the learner's work, separated by commas. The register accepts only entries a second person has signed off.",
+          "evidenceHint": "Practice entries of this learner that someone other than the learner has signed off. Select the ones that support the decision.",
           "decision": "Decision",
           "recognised": "Recognised",
           "notRecognised": "Not recognised",
@@ -2046,7 +2046,12 @@
           "needsMigration": "Not recorded: the recognition register is not available yet.",
           "forbidden": "This institution cannot record this recognition for this person.",
           "invalid": "Please check the values.",
-          "error": "Something went wrong. Please try again."
+          "error": "Something went wrong. Please try again.",
+          "evidenceChooseLearner": "Choose a learner to see their signed-off practice.",
+          "evidenceNone": "This learner has no practice entry signed off by someone other than the learner yet. Have their practice signed off first; only then can a recognition cite it.",
+          "evidenceUnavailable": "The learner's practice entries could not be read right now. Nothing is recorded.",
+          "evidenceRecorded": "Recorded",
+          "evidenceConfirmed": "signed off"
         }
       },
       "learners": {

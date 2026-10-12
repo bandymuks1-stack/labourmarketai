@@ -2033,7 +2033,7 @@
           "key": "Eissleutel (slug)",
           "country": "Land (2 letters)",
           "evidence": "ID's van bewijsvermeldingen",
-          "evidenceHint": "ID's van journaalvermeldingen van het werk van de lerende, gescheiden door komma's. Het register accepteert alleen vermeldingen die een tweede persoon heeft afgetekend.",
+          "evidenceHint": "Praktijkvermeldingen van deze cursist die door iemand anders zijn bevestigd. Selecteer de vermeldingen die de beslissing onderbouwen.",
           "decision": "Besluit",
           "recognised": "Erkend",
           "notRecognised": "Niet erkend",
@@ -2046,7 +2046,12 @@
           "needsMigration": "Niet vastgelegd: het erkenningsregister is nog niet beschikbaar.",
           "forbidden": "Deze instelling kan deze erkenning niet voor deze persoon vastleggen.",
           "invalid": "Controleer de waarden.",
-          "error": "Er ging iets mis. Probeer het opnieuw."
+          "error": "Er ging iets mis. Probeer het opnieuw.",
+          "evidenceChooseLearner": "Kies een cursist om de bevestigde praktijk te zien.",
+          "evidenceNone": "Deze cursist heeft nog geen praktijkvermelding die door iemand anders is bevestigd. Bevestig eerst de praktijk; pas dan kan een erkenning ernaar verwijzen.",
+          "evidenceUnavailable": "De praktijkvermeldingen konden nu niet worden gelezen. Er is niets vastgelegd.",
+          "evidenceRecorded": "Vastgelegd",
+          "evidenceConfirmed": "bevestigd"
         }
       },
       "learners": {
