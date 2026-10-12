@@ -221,7 +221,7 @@ test("B2B-3. buyer sees the offer and writes in its thread", async ({ browser })
   await expect(received).toBeVisible({ timeout: 20_000 });
   offerId = (await received.getAttribute("data-testid"))!.replace("team-offer-received-", "");
   await page.getByTestId(`team-offer-message-${offerId}`).click();
-  await page.waitForURL(//dashboard/communication/, { timeout: 20_000 });
+  await page.waitForURL(/\/dashboard\/communication/, { timeout: 20_000 });
   await page.getByTestId("communication-composer-input").fill(MSG);
   await page.getByRole("button", { name: /siųsti|send/i }).click();
   await expect(page.locator("body")).toContainText(MSG, { timeout: 20_000 });
@@ -271,7 +271,7 @@ test("B2B-6. supplier agrees to v2: agreed in principle, history kept, message v
   await expect(history).toContainText("32 EUR/h");
   await expect(page.getByTestId(`team-offer-sent-${teamId}`)).toContainText(/iš esmės|in principle|priimt|sutart/i, { timeout: 20_000 });
   await page.getByTestId(`team-offer-sent-message-${offerId}`).click();
-  await page.waitForURL(//dashboard/communication/, { timeout: 20_000 });
+  await page.waitForURL(/\/dashboard\/communication/, { timeout: 20_000 });
   await expect(page.locator("body")).toContainText(MSG);
   await ctx.close();
 });
