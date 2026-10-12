@@ -48,11 +48,11 @@ export async function readRecognitionEvidence(organizationId: string): Promise<R
     .eq("organization_id", organizationId)
     .eq("relationship_slug", "student")
     .in("status", ["active", "ended"])
-    .limit(CONTEXT_LIMIT);
+    .limit(CONTEXT_LIMIT + 1);
   if (ctxRes.error) return { status: "unavailable" };
   const contexts = (ctxRes.data ?? []) as StudentContextRow[];
   // A capped read is not a complete read: "none yet" must never be inferred from it.
-  if (contexts.length >= CONTEXT_LIMIT) return { status: "unavailable" };
+  if (contexts.length > CONTEXT_LIMIT) return { status: "unavailable" };
   if (contexts.length === 0) return { status: "ok", bySubject: {} };
 
   const entriesRes = await asAny(supabase)
@@ -65,10 +65,10 @@ export async function readRecognitionEvidence(organizationId: string): Promise<R
     .is("deleted_at", null)
     .is("superseded_by", null)
     .order("created_at", { ascending: false })
-    .limit(ENTRY_LIMIT);
+    .limit(ENTRY_LIMIT + 1);
   if (entriesRes.error) return { status: "unavailable" };
   const entries = (entriesRes.data ?? []) as EvidenceEntryRow[];
-  if (entries.length >= ENTRY_LIMIT) return { status: "unavailable" };
+  if (entries.length > ENTRY_LIMIT) return { status: "unavailable" };
   if (entries.length === 0) return { status: "ok", bySubject: {} };
 
   const confRes = await asAny(supabase)
@@ -78,9 +78,9 @@ export async function readRecognitionEvidence(organizationId: string): Promise<R
       "entry_id",
       entries.map((e) => e.id),
     )
-    .limit(CONFIRMATION_LIMIT);
+    .limit(CONFIRMATION_LIMIT + 1);
   if (confRes.error) return { status: "unavailable" };
-  if ((confRes.data ?? []).length >= CONFIRMATION_LIMIT) return { status: "unavailable" };
+  if ((confRes.data ?? []).length > CONFIRMATION_LIMIT) return { status: "unavailable" };
 
   return {
     status: "ok",
