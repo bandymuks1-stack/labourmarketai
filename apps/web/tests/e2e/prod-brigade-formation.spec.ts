@@ -155,34 +155,34 @@ const GAMA = "QA-SYNTHETIC Gama";
 let needId = "";
 let offerId = "";
 
-test("B2B-1. buyer (Gama) posts a need", async ({ browser }) => {
+test("B2B-1. buyer (Gama) posts a need through the company demand intake", async ({ browser }) => {
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
-  await page.goto("/lt/dashboard/buyer");
-  const form = page.getByTestId("buyer-requests-form");
-  await form.getByTestId("buyer-requests-field-title").fill(`QA-SYNTHETIC ${RUN}`);
-  await form.getByTestId("buyer-requests-field-need-summary").fill("QA-SYNTHETIC: synthetic need for the production brigade walk.");
-  await form.getByTestId("buyer-requests-field-role").fill(NEED_ROLE);
-  await form.getByTestId("buyer-requests-field-team-size").fill("2");
-  await form.getByTestId("buyer-requests-status-submitted").check();
-  await form.getByTestId("buyer-requests-submit").click();
-  const row = page.locator('[data-testid^="buyer-request-row-"]', { hasText: `QA-SYNTHETIC ${RUN}` });
-  await expect(row).toBeVisible({ timeout: 20_000 });
-  needId = (await row.getAttribute("data-testid"))!.replace("buyer-request-row-", "");
+  await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
+  await page.getByTestId("demand-role").fill(NEED_ROLE);
+  await page.getByTestId("demand-description").fill(`QA-SYNTHETIC ${RUN}: synthetic need for the production brigade walk, 2 people.`);
+  await page.getByTestId("demand-next").click();
+  const size = page.getByTestId("demand-team-size");
+  if (await size.isVisible().catch(() => false)) await size.fill("2");
+  await page.getByTestId("demand-next").click();
+  await page.getByTestId("demand-create").click();
+  await expect(page.getByTestId("demand-done")).toBeVisible({ timeout: 30_000 });
   await ctx.close();
 });
 
-test("B2B-2. the brigade (2 members) offers itself against that need", async ({ browser }) => {
+test("B2B-2. the brigade (2 members) offers itself against exactly that need", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   const teamId = teamTestId.replace("team-brigade-", "");
   const select = page.getByTestId(`team-offer-demand-${teamId}`);
   await expect(select).toBeVisible({ timeout: 20_000 });
+  const option = select.locator("option", { hasText: NEED_ROLE }).first();
+  needId = (await option.getAttribute("value")) ?? "";
+  expect(needId, "the brigade sees the buyer need by its name").not.toBe("");
   await select.selectOption(needId);
   await page.getByTestId(`team-offer-note-${teamId}`).fill("QA-SYNTHETIC offer: 2 people, from next month.");
   await page.getByTestId(`team-offer-submit-${teamId}`).click();
-  const sent = page.getByTestId(`team-offer-sent-${teamId}`);
-  await expect(sent).toContainText(NEED_ROLE, { timeout: 20_000 });
+  await expect(page.getByTestId(`team-offer-sent-${teamId}`)).toContainText(NEED_ROLE, { timeout: 20_000 });
   await ctx.close();
 });
 
