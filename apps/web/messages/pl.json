@@ -9399,6 +9399,31 @@
       }
     }
   },
+  "adminMetrics": {
+    "title": "Metryki produktu",
+    "intro": "Bieżące liczby z kanonicznych tabel, podzielone na REAL, TEST (syntetyczne konta testowe, domeny testowe) i INTERNAL (zespół, administratorzy). — oznacza, że źródła nie udało się odczytać; to nigdy nie jest zero.",
+    "computedAt": "Obliczono {at}",
+    "unknown": "Nieczytelne źródła (pokazane jako —): {sources}",
+    "truncated": "Osiągnięto limit wierszy, liczby są dolną granicą: {sources}",
+    "groups": {
+      "users": "Ludzie i aktywność",
+      "teams": "Brygady i zaproszenia",
+      "b2b": "Rynek B2B",
+      "work": "Dziennik pracy i Living CV",
+      "technical": "Techniczne"
+    },
+    "col": {
+      "metric": "Metryka",
+      "total": "Razem",
+      "source": "Źródło",
+      "rule": "Reguła",
+      "window": "Okres"
+    },
+    "signals": {
+      "title": "Reguły alertów",
+      "intro": "Sprawdzane co godzinę przez workflow product-monitor. Naruszenie otwiera jedno zgłoszenie GitHub na sygnał i zamyka je po powrocie do normy."
+    }
+  },
   "billingStatus": {
     "badge": {
       "disabled": "PŁATNOŚCI WYŁĄCZONE",

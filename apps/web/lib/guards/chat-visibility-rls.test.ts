@@ -207,6 +207,12 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    the anon RPC, read-only via service role). Every entry point is
     //    fenced behind an explicit isSuperadmin() re-check; it touches no
     //    chat table and sends nothing outbound.
+    //  - components/admin/product-metrics-section.tsx — operator product
+    //    metrics (owner programme 2026-10-12 §8). READ-ONLY aggregate counts
+    //    via lib/ops/product-metrics.ts, rendered only by the launch-readiness
+    //    page AFTER requireSuperadmin(). From the
+    //    chat tables it reads only conversations.created_at/source_type to
+    //    COUNT threads — no subject, body, participant or id leaves the module.
     //  - lib/admin/launch-readiness.ts — operator launch-readiness view
     //    (launch repair Scope E). READ-ONLY head-counts over workers /
     //    profiles / companies / company_need_public_intakes /
@@ -483,6 +489,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       callers.sort(),
       `unexpected service-role caller(s) — update docs/audits/CHAT_VISIBILITY_AUDIT.md and justify: ${callers.join(", ")}`,
     ).toEqual([
+      "components/admin/product-metrics-section.tsx",
       "components/admin/vacancy-sources-section.tsx",
       "lib/admin/billing-actions.ts",
       "lib/admin/company-need-intakes.ts",

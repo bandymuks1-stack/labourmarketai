@@ -9399,6 +9399,31 @@
       }
     }
   },
+  "adminMetrics": {
+    "title": "Produktkennzahlen",
+    "intro": "Live-Zahlen aus den kanonischen Tabellen, getrennt in REAL, TEST (synthetische Testkonten, Testdomains) und INTERNAL (Team, Admins). — bedeutet, dass die Quelle nicht gelesen werden konnte; es ist nie null.",
+    "computedAt": "Berechnet {at}",
+    "unknown": "Nicht lesbare Quellen (als — angezeigt): {sources}",
+    "truncated": "Zeilenlimit erreicht, Zahlen sind eine Untergrenze: {sources}",
+    "groups": {
+      "users": "Personen und Aktivität",
+      "teams": "Brigaden und Einladungen",
+      "b2b": "B2B-Markt",
+      "work": "Arbeitsjournal und Living CV",
+      "technical": "Technik"
+    },
+    "col": {
+      "metric": "Kennzahl",
+      "total": "Gesamt",
+      "source": "Quelle",
+      "rule": "Regel",
+      "window": "Zeitraum"
+    },
+    "signals": {
+      "title": "Alarmregeln",
+      "intro": "Stündlich vom product-monitor-Workflow ausgewertet. Ein Verstoß öffnet ein GitHub-Issue pro Signal und schließt es nach der Erholung."
+    }
+  },
   "billingStatus": {
     "badge": {
       "disabled": "ZAHLUNGEN AUS",

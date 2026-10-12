@@ -9399,6 +9399,31 @@
       }
     }
   },
+  "adminMetrics": {
+    "title": "Product metrics",
+    "intro": "Live counts from the canonical tables, split into REAL, TEST (synthetic test accounts, test domains) and INTERNAL (staff, admins). — means the source could not be read; it is never zero.",
+    "computedAt": "Computed {at}",
+    "unknown": "Unreadable sources (shown as —): {sources}",
+    "truncated": "Row cap reached, counts are a lower bound: {sources}",
+    "groups": {
+      "users": "People and activity",
+      "teams": "Brigades and invitations",
+      "b2b": "B2B market",
+      "work": "Work journal and Living CV",
+      "technical": "Technical"
+    },
+    "col": {
+      "metric": "Metric",
+      "total": "Total",
+      "source": "Source",
+      "rule": "Rule",
+      "window": "Window"
+    },
+    "signals": {
+      "title": "Alert rules",
+      "intro": "Evaluated hourly by the product-monitor workflow. A breach opens one GitHub issue per signal and closes it on recovery."
+    }
+  },
   "billingStatus": {
     "badge": {
       "disabled": "PAYMENTS OFF",
