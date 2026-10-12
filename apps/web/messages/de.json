@@ -1807,11 +1807,11 @@
       }
     },
     "capacity": {
-      "heading": "Wer ist jetzt frei",
+      "heading": "Wer ist jetzt frei (laut Plan)",
       "free": "frei",
       "away": "abwesend",
       "awayUntil": "abwesend bis {date}",
-      "summary": "{free} frei · {committed} im Einsatz · {away} abwesend",
+      "summary": "Laut Plan: {free} frei · {committed} einem Einsatz zugeteilt · {away} abwesend",
       "onWork": "auf {project}",
       "booked": "gebucht",
       "until": "bis {date}",

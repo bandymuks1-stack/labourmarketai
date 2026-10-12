@@ -1807,11 +1807,11 @@
       }
     },
     "capacity": {
-      "heading": "Wie is nu vrij",
+      "heading": "Wie is nu vrij (volgens planning)",
       "free": "vrij",
       "away": "afwezig",
       "awayUntil": "afwezig tot {date}",
-      "summary": "{free} vrij · {committed} aan het werk · {away} afwezig",
+      "summary": "Volgens planning: {free} vrij · {committed} ingepland · {away} afwezig",
       "onWork": "op {project}",
       "booked": "geboekt",
       "until": "tot {date}",
