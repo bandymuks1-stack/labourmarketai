@@ -67,7 +67,8 @@ test("2. the employer finds it in the review queue and approves it", async ({ br
   await expect(item).toBeVisible({ timeout: 30_000 });
   await expect(item).toContainText(RUN);
   await page.getByTestId(`journal-approve-entry-${entryId}`).click();
-  await expect(page.getByTestId(`journal-review-result-${entryId}`).or(item)).toBeVisible({ timeout: 20_000 });
+  // The decision is stored before the card leaves: wait for the answer.
+  await expect(page.getByTestId(`journal-review-result-${entryId}`)).toBeVisible({ timeout: 30_000 });
   await page.goto("/lt/dashboard/inbox");
   await expect(page.getByTestId(`inbox-entry-${entryId}`)).toHaveCount(0, { timeout: 20_000 });
   await close();
