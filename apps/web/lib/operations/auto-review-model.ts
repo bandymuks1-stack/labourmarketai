@@ -36,9 +36,15 @@ export const REVIEW_NOTICE_VERSION = "staff-review-notice-v1";
 
 /**
  * Owner sequence: prove every acceptance path records the fact, THEN switch
- * review on. While false the RPC is asked to record only.
+ * review on. ON since 2026-10-12 (owner final approval of #2322): production
+ * walk run 38298792434 recorded the fact from the invite page, the network
+ * list and the chat card (one audit row each, actor = the person, same
+ * organization). The addressed-signup and onboarding accepts share the same
+ * server action and RPC but are not yet proven with a brand-new account
+ * (human check). The SQL door still refuses everything but a fresh, own,
+ * newly created employee relationship with no manager choice on record.
  */
-export const STAFF_REVIEW_AUTO_ENABLE = false;
+export const STAFF_REVIEW_AUTO_ENABLE = true;
 
 /** The surfaces that accept a staff invitation (closed set, mirrored in SQL). */
 export const REVIEW_NOTICE_SURFACES = [

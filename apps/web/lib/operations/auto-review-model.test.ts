@@ -62,8 +62,8 @@ describe("the RPC answer is read as a closed set", () => {
 });
 
 describe("owner sequence: prove the paths, then switch review on", () => {
-  it("automatic enabling is OFF until every path is proven to record the fact", () => {
-    expect(STAFF_REVIEW_AUTO_ENABLE).toBe(false);
+  it("automatic enabling is ON only after the paths recorded the fact in production (2026-10-12)", () => {
+    expect(STAFF_REVIEW_AUTO_ENABLE).toBe(true);
   });
   it("every accept surface is named (and mirrored by the SQL allowlist)", () => {
     expect([...REVIEW_NOTICE_SURFACES].sort()).toEqual(["addressed_signup", "conversation", "invite_page", "network", "onboarding"]);
