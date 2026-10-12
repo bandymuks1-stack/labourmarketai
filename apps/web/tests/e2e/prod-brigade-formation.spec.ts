@@ -100,7 +100,7 @@ for (const [slot, who, email] of [
       await page.getByTestId(`team-invite-member-${teamId}`).click();
     }
     const box = page.getByTestId("team-invite-link");
-    if (!(await box.isVisible({ timeout: 20_000 }).catch(() => false))) {
+    if (!(await box.waitFor({ state: "visible", timeout: 20_000 }).then(() => true).catch(() => false))) {
       const msg = await page.getByTestId("team-brigades-msg").innerText().catch(() => "(no message)");
       throw new Error(`no invite link; the product said: ${msg}`);
     }
