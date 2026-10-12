@@ -73,7 +73,7 @@ async function check(page: Page, route: string): Promise<string | null> {
   // A role redirect lands there too, with a ?notice= that explains why.
   if (new URL(page.url()).pathname.replace(//$/, "") === "/lt/dashboard") {
     const composer = page.getByTestId("composer-input");
-    return (await composer.isVisible({ timeout: 20_000 }).catch(() => false)) ? null : "chat composer missing";
+    return (await composer.waitFor({ state: "visible", timeout: 20_000 }).then(() => true).catch(() => false)) ? null : "chat composer missing";
   }
   const main = page.locator("main").first();
   if (!(await main.isVisible().catch(() => false))) return "no main content";

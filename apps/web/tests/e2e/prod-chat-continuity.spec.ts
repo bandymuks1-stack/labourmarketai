@@ -36,7 +36,7 @@ async function say(page: Page, text: string): Promise<void> {
 
 async function history(page: Page): Promise<string> {
   const block = page.getByTestId("chat-history-block");
-  if (!(await block.isVisible({ timeout: 20_000 }).catch(() => false))) return "";
+  if (!(await block.waitFor({ state: "visible", timeout: 20_000 }).then(() => true).catch(() => false))) return "";
   const show = block.getByRole("button").first();
   if (await show.isVisible().catch(() => false)) await show.click();
   return block.innerText();
