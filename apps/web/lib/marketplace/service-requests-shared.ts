@@ -175,12 +175,16 @@ export type DiscoveryListResult =
 export type OutgoingListResult =
   | { kind: "ok"; rows: OutgoingRequestRow[] }
   | { kind: "needs-migration" }
-  | { kind: "not-authed" };
+  | { kind: "not-authed" }
+  /** The read failed — UNKNOWN, never "no requests" (SEP-7). */
+  | { kind: "error" };
 
 export type IncomingListResult =
   | { kind: "ok"; rows: IncomingRequestRow[] }
   | { kind: "needs-migration" }
-  | { kind: "not-authed" };
+  | { kind: "not-authed" }
+  /** The read failed — UNKNOWN, never "no requests" (SEP-7). */
+  | { kind: "error" };
 
 export type RequestMutateResult =
   | { kind: "ok"; id?: string; detail?: string }

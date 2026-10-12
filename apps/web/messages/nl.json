@@ -6719,7 +6719,8 @@
       "listingsNote": "Ruimtes, uitrusting, voertuigen – aanbieden of zoeken",
       "needs": "Vraag & aanbod",
       "needsNote": "Publiceer wat je nodig hebt of kunt bieden"
-    }
+    },
+    "loopReadFailed": "Je aanvragen konden niet worden geladen — de lijst is mogelijk onvolledig. Vernieuw de pagina."
   },
   "learning": {
     "pageTitle": "Leren en beoordelen",

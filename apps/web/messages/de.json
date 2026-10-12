@@ -6719,7 +6719,8 @@
       "listingsNote": "Räume, Geräte, Fahrzeuge – anbieten oder suchen",
       "needs": "Bedarf & Angebot",
       "needsNote": "Veröffentliche, was du brauchst oder anbieten kannst"
-    }
+    },
+    "loopReadFailed": "Ihre Anfragen konnten nicht geladen werden — die Liste ist möglicherweise unvollständig. Laden Sie die Seite neu."
   },
   "learning": {
     "pageTitle": "Lernen & Überprüfung",

@@ -6719,7 +6719,8 @@
       "listingsNote": "Premises, equipment, vehicles — offer or look",
       "needs": "Needs & offers",
       "needsNote": "Publish what you need or what you can offer"
-    }
+    },
+    "loopReadFailed": "Your requests could not be loaded — the list may be incomplete. Refresh the page."
   },
   "learning": {
     "pageTitle": "Learning & review",

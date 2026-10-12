@@ -158,6 +158,11 @@ export default async function ServiceRequestsPage({
         <PageTitle>{t("pageTitle")}</PageTitle>
         <p className="text-sm leading-relaxed text-text-secondary">{t("pageLead")}</p>
       </header>
+      {out.kind === "error" || inc.kind === "error" ? (
+        <p role="alert" className="text-sm text-state-warning" data-testid="service-requests-read-failed">
+          {t("loopReadFailed")}
+        </p>
+      ) : null}
       <MarketplaceLoopSection
         discoverable={discoverable}
         outgoing={out.kind === "ok" ? out.rows : []}
