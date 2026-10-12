@@ -12284,7 +12284,8 @@
         "withOrganization": "You accepted this invitation — you are now connected with {name}.",
         "plain": "You accepted this invitation — the connection is in place.",
         "continue": "Continue to my space →"
-      }
+      },
+      "reviewNotice": "If you accept, a manager of {organization} can read the work you record for them and sign it off. Until they do, it stays your own entry."
     },
     "teamEnquiriesTitle": "My enquiries to teams",
     "admin": {

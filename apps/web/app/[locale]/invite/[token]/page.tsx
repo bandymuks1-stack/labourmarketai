@@ -22,6 +22,7 @@ import {
 } from "@/components/app/referral-context-review";
 import { formatUtcDate } from "@/lib/time/display";
 // The ONE list that says "this happened and it was a placement, not a job".
+import { acceptanceCreatesEmployeeRelationship } from "@/lib/operations/auto-review-model";
 import { PRACTICE_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import type { Metadata } from "next";
 
@@ -475,6 +476,26 @@ export default async function InvitePage({
             )}
           </p>
         )}
+        {/* WHAT A MANAGER MAY DO WITH THE WORK YOU RECORD. Accepting a staff
+            invitation makes a manager of that organization able to read the
+            work recorded in this relationship and sign it off — and, since the
+            2026-10-12 owner decision, review switches on by itself for exactly
+            these acceptances. The person must be told BEFORE they accept; the
+            automation (lib/operations/auto-review-model) qualifies only
+            acceptances made after this sentence shipped. */}
+        {!closed &&
+          preview.organization_name &&
+          acceptanceCreatesEmployeeRelationship({
+            invitationType: preview.invitation_type,
+            relationshipSlug,
+          }) && (
+            <p
+              className="rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2 text-xs text-text-secondary"
+              data-testid="invite-review-notice"
+            >
+              {t("reviewNotice", { organization: preview.organization_name })}
+            </p>
+          )}
         {preview.personal_message && (
           <p className="rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2 text-xs">
             &ldquo;{preview.personal_message}&rdquo;

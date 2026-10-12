@@ -12284,7 +12284,8 @@
         "withOrganization": "Zaproszenie zostało przez Ciebie przyjęte — masz teraz połączenie z {name}.",
         "plain": "Zaproszenie zostało przez Ciebie przyjęte — połączenie jest aktywne.",
         "continue": "Przejdź do mojej przestrzeni →"
-      }
+      },
+      "reviewNotice": "Jeśli zaakceptujesz, przełożony w {organization} będzie mógł czytać pracę, którą dla niego zapisujesz, i ją zatwierdzić. Do tego czasu pozostaje to Twój własny wpis."
     },
     "teamEnquiriesTitle": "Moje zapytania do zespołów",
     "admin": {

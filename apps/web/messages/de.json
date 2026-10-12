@@ -12284,7 +12284,8 @@
         "withOrganization": "Sie haben diese Einladung angenommen — Sie sind jetzt mit {name} verbunden.",
         "plain": "Sie haben diese Einladung angenommen — die Verbindung besteht.",
         "continue": "Zu meinem Bereich →"
-      }
+      },
+      "reviewNotice": "Wenn Sie annehmen, kann eine Führungskraft von {organization} die Arbeit lesen, die Sie für sie erfassen, und sie abzeichnen. Bis dahin bleibt es Ihr eigener Eintrag."
     },
     "teamEnquiriesTitle": "Meine Anfragen an Kolonnen",
     "admin": {
