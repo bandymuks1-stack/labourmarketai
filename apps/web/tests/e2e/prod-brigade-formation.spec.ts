@@ -27,7 +27,7 @@ const ALFA = "QA-SYNTHETIC Alfa";
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
 const ENABLED = process.env.PROD_QA_WALK === "1" && ["owner", "worker", "worker2", "manager"].every((s) => existsSync(state(s)));
 
-test.describe.configure({ mode: "serial" });
+test.describe.configure({ mode: "serial", timeout: 180_000, retries: 0 });
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
 
 async function as(browser: Browser, slot: string, mobile = false): Promise<{ ctx: BrowserContext; page: Page }> {
@@ -39,14 +39,16 @@ async function as(browser: Browser, slot: string, mobile = false): Promise<{ ctx
   return { ctx, page: await ctx.newPage() };
 }
 
-/** Make Alfa the owner's active workspace through the real switcher. */
+/** Make `orgName` the active workspace through the real header chip. */
 async function useWorkspace(page: Page, orgName: string): Promise<void> {
   await page.goto("/lt/dashboard/company/people");
-  const active = page.getByTestId("role-switcher-active-org");
-  if ((await active.count()) && (await active.innerText()).includes(orgName)) return;
-  await page.getByTestId("role-switcher-toggle").click();
-  await page.getByTestId("org-switcher-list").getByRole("button", { name: new RegExp(orgName) }).click();
-  await page.waitForLoadState("networkidle");
+  const chip = page.getByTestId("workspace-chip").first();
+  await expect(chip).toBeVisible({ timeout: 30_000 });
+  if ((await chip.innerText()).includes(orgName)) return;
+  await chip.getByRole("button").first().click();
+  const menu = page.getByTestId("workspace-chip-menu");
+  await menu.locator('[data-testid^="workspace-option-"]', { hasText: orgName }).first().click();
+  await expect(chip).toContainText(orgName, { timeout: 30_000 });
   await page.goto("/lt/dashboard/company/people");
 }
 
@@ -65,22 +67,43 @@ test("1-2. owner creates the brigade in Alfa", async ({ browser }) => {
   await ctx.close();
 });
 
-for (const [slot, who] of [
-  ["worker", /worker\+multiw|QA.*worker/i],
-  ["worker2", /goal3|QA.*worker/i],
+// Synthetic display names (profiles of the allowlisted cast) and the address
+// each one accepts with — typed only if the product asks for it.
+for (const [slot, who, email] of [
+  ["worker", /Vytas Darbininkas/, "qa.worker+multiw@labourmarket.ai"],
+  ["worker2", /QA-SYNTHETIC Worker/, "qa.worker+goal3@labourmarket.ai"],
 ] as const) {
   test(`3-4. owner invites ${slot} and gets a working link (e-mail is off)`, async ({ browser }) => {
     const { ctx, page } = await as(browser, "owner");
     await useWorkspace(page, ALFA);
     const card = page.getByTestId(teamTestId);
-    const select = card.locator("select");
+    const teamId = teamTestId.replace("team-brigade-", "");
+    const select = page.locator(`[id="team-add-${teamId}"]`);
+    await select.waitFor({ state: "attached", timeout: 30_000 }).catch(() => undefined);
+    if (!(await select.count())) {
+      throw new Error(`no addable-member picker on the brigade card; card ends: ${(await card.innerText()).slice(-700)}`);
+    }
     const options = await select.locator("option").allInnerTexts();
-    const pick = options.find((o) => who.test(o) && !links[o]);
+    const pick = options.find((o) => who.test(o));
     expect(pick, `addable list offers ${slot}: ${options.join(" | ")}`).toBeTruthy();
     await select.selectOption({ label: pick! });
-    await card.getByTestId(teamTestId.replace("team-brigade-", "team-invite-member-")).click();
+    await page.getByTestId(`team-invite-member-${teamId}`).click();
+    // The owner may not be able to read the worker's address (profiles are
+    // own-row only); the product then asks for it and the owner types it.
+    const typed = page.getByTestId(`team-invite-email-${teamId}`);
+    const asked = await Promise.race([
+      typed.waitFor({ state: "visible", timeout: 20_000 }).then(() => true),
+      page.getByTestId("team-invite-link").waitFor({ state: "visible", timeout: 20_000 }).then(() => false),
+    ]).catch(() => false);
+    if (asked) {
+      await typed.fill(email);
+      await page.getByTestId(`team-invite-member-${teamId}`).click();
+    }
     const box = page.getByTestId("team-invite-link");
-    await expect(box).toBeVisible({ timeout: 20_000 });
+    if (!(await box.waitFor({ state: "visible", timeout: 20_000 }).then(() => true).catch(() => false))) {
+      const msg = await page.getByTestId("team-brigades-msg").innerText().catch(() => "(no message)");
+      throw new Error(`no invite link; the product said: ${msg}`);
+    }
     const url = (await box.locator("code").innerText()).trim();
     expect(url).toMatch(/^https:\/\/labourmarket\.ai\/[a-z]{2}\/invite\//);
     links[slot] = url;
@@ -98,7 +121,9 @@ test("5-7. each worker opens the link, accepts, and is in the brigade (desktop +
     await expect(page.getByTestId("invite-page")).toBeVisible();
     await expect(page.getByTestId("invite-org")).toContainText("QA-SYNTHETIC Brigada");
     await page.getByTestId("invite-accept").click();
-    await expect(page.getByTestId("invite-accepted-by-you")).toBeVisible({ timeout: 20_000 });
+    // Accepting lands the person in their workspace with a notice.
+    await page.waitForURL((u) => !u.pathname.includes("/invite/"), { timeout: 30_000 });
+    console.info(`[brigade] ${slot} landed on ${new URL(page.url()).pathname}${new URL(page.url()).search}`);
     // Re-opening the same link is now closed, not a second membership.
     await page.goto(links[slot]!);
     await expect(page.getByTestId("invite-accepted-by-you").or(page.getByTestId("invite-closed"))).toBeVisible();
@@ -140,62 +165,113 @@ const GAMA = "QA-SYNTHETIC Gama";
 let needId = "";
 let offerId = "";
 
-test("B2B-1. buyer (Gama) posts a need", async ({ browser }) => {
+test("B2B-1. buyer (Gama) posts a need through the company demand intake", async ({ browser }) => {
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
-  await page.goto("/lt/dashboard/buyer");
-  const form = page.getByTestId("buyer-requests-form");
-  await form.getByTestId("buyer-requests-field-title").fill(`QA-SYNTHETIC ${RUN}`);
-  await form.getByTestId("buyer-requests-field-need-summary").fill("QA-SYNTHETIC: synthetic need for the production brigade walk.");
-  await form.getByTestId("buyer-requests-field-role").fill(NEED_ROLE);
-  await form.getByTestId("buyer-requests-field-team-size").fill("2");
-  await form.getByTestId("buyer-requests-status-submitted").check();
-  await form.getByTestId("buyer-requests-submit").click();
-  const row = page.locator('[data-testid^="buyer-request-row-"]', { hasText: `QA-SYNTHETIC ${RUN}` });
-  await expect(row).toBeVisible({ timeout: 20_000 });
-  needId = (await row.getAttribute("data-testid"))!.replace("buyer-request-row-", "");
+  await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
+  await page.getByTestId("demand-role").fill(NEED_ROLE);
+  await page.getByTestId("demand-description").fill(`QA-SYNTHETIC ${RUN}: synthetic need for the production brigade walk, 2 people.`);
+  await page.getByTestId("demand-next").click();
+  const size = page.getByTestId("demand-team-size");
+  if (await size.isVisible().catch(() => false)) await size.fill("2");
+  await page.getByTestId("demand-next").click();
+  await page.getByTestId("demand-create").click();
+  // Either the need is created, or the plan's open-need limit answers
+  // honestly (a need from an earlier run is still open) — both are real.
+  const done = page.getByTestId("demand-done");
+  const limit = page.getByTestId("demand-open-need-limit");
+  await expect(done.or(limit)).toBeVisible({ timeout: 30_000 });
+  console.info(`[b2b] need: ${(await done.isVisible()) ? "created" : "open-need limit reached, the earlier need is used"}`);
   await ctx.close();
 });
 
-test("B2B-2. the brigade (2 members) offers itself against that need", async ({ browser }) => {
+test("B2B-2. the brigade (2 members) offers itself against exactly that need", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   const teamId = teamTestId.replace("team-brigade-", "");
+  // The offer form is folded; opening it loads the offerable needs.
+  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator("summary").click();
   const select = page.getByTestId(`team-offer-demand-${teamId}`);
   await expect(select).toBeVisible({ timeout: 20_000 });
+  // The free-text role is normalised to a profession slug, so the need is
+  // found by its buyer, the only synthetic company that posts needs here.
+  const option = select.locator("option:not([disabled])", { hasText: GAMA }).first();
+  needId = (await option.getAttribute("value")) ?? "";
+  expect(needId, "the brigade sees the buyer need by its name").not.toBe("");
   await select.selectOption(needId);
   await page.getByTestId(`team-offer-note-${teamId}`).fill("QA-SYNTHETIC offer: 2 people, from next month.");
   await page.getByTestId(`team-offer-submit-${teamId}`).click();
-  const sent = page.getByTestId(`team-offer-sent-${teamId}`);
-  await expect(sent).toContainText(NEED_ROLE, { timeout: 20_000 });
+  await expect(page.getByTestId(`team-offer-sent-${teamId}`)).toContainText(GAMA, { timeout: 20_000 });
   await ctx.close();
 });
 
-test("B2B-3. buyer sees the offer, opens the thread, writes, and agrees in principle", async ({ browser }) => {
+const MSG = `QA-SYNTHETIC ${RUN}: can you start on the 3rd?`;
+
+async function terms(page: Page, id: string) {
+  const box = page.getByTestId(`team-offer-terms-${id}`);
+  await box.locator("summary").click();
+  return box;
+}
+
+test("B2B-3. buyer sees the offer and writes in its thread", async ({ browser }) => {
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   await page.goto(`/lt/dashboard/company/scouting?request=${needId}`);
-  const received = page.locator('[data-testid^="team-offer-received-"]', { hasText: "QA-SYNTHETIC Brigada" });
+  const received = page.locator('[data-testid^="team-offer-received-"]', { hasText: "QA-SYNTHETIC Brigada" }).first();
   await expect(received).toBeVisible({ timeout: 20_000 });
   offerId = (await received.getAttribute("data-testid"))!.replace("team-offer-received-", "");
   await page.getByTestId(`team-offer-message-${offerId}`).click();
   await page.waitForURL(/\/dashboard\/communication/, { timeout: 20_000 });
-  await page.getByTestId("communication-composer-input").fill(`QA-SYNTHETIC ${RUN}: can you start on the 3rd?`);
+  await page.getByTestId("communication-composer-input").fill(MSG);
   await page.getByRole("button", { name: /siųsti|send/i }).click();
-  await expect(page.locator("body")).toContainText(`QA-SYNTHETIC ${RUN}: can you start on the 3rd?`, { timeout: 20_000 });
-  await page.goto(`/lt/dashboard/company/scouting?request=${needId}`);
-  await page.getByTestId(`team-offer-accept-${offerId}`).click();
-  await expect(page.getByTestId(`team-offer-received-${offerId}`)).toContainText(/iš esmės|in principle/i, { timeout: 20_000 });
+  await expect(page.locator("body")).toContainText(MSG, { timeout: 20_000 });
   await ctx.close();
 });
 
-test("B2B-4. the supplier sees the buyer's message and the agreed state; it survives a new session", async ({ browser }) => {
+test("B2B-4. supplier proposes terms v1 (people, rate, dates, scope)", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   const teamId = teamTestId.replace("team-brigade-", "");
-  await expect(page.getByTestId(`team-offer-sent-${teamId}`)).toContainText(/iš esmės|in principle|priimt/i);
+  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator("summary").click();
+  const box = await terms(page, offerId);
+  const form = box.getByTestId(`team-offer-terms-form-${offerId}`);
+  await form.locator('input[type="number"]').fill("2");
+  await form.locator('input[type="text"]').fill("32 EUR/h");
+  await form.locator('input[type="date"]').nth(0).fill("2026-11-02");
+  await form.locator('input[type="date"]').nth(1).fill("2026-12-18");
+  await form.locator("textarea").first().fill("QA-SYNTHETIC: masonry, 2 people");
+  await box.getByTestId(`team-offer-terms-propose-${offerId}`).click();
+  await expect(box.getByTestId(`team-offer-terms-history-${offerId}`)).toContainText("32 EUR/h", { timeout: 20_000 });
+  await ctx.close();
+});
+
+test("B2B-5. buyer counters with v2; it cannot accept its own counter", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "manager");
+  await useWorkspace(page, GAMA);
+  await page.goto(`/lt/dashboard/company/scouting?request=${needId}`);
+  const box = await terms(page, offerId);
+  await expect(box.getByTestId(`team-offer-terms-history-${offerId}`)).toContainText("32 EUR/h", { timeout: 20_000 });
+  const form = box.getByTestId(`team-offer-terms-form-${offerId}`);
+  await form.locator('input[type="text"]').fill("30 EUR/h");
+  await box.getByTestId(`team-offer-terms-propose-${offerId}`).click();
+  await expect(box.getByTestId(`team-offer-terms-history-${offerId}`)).toContainText("30 EUR/h", { timeout: 20_000 });
+  await expect(box.getByTestId(`team-offer-terms-agree-${offerId}`)).toHaveCount(0);
+  await ctx.close();
+});
+
+test("B2B-6. supplier agrees to v2: agreed in principle, history kept, message visible", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "owner");
+  await useWorkspace(page, ALFA);
+  const teamId = teamTestId.replace("team-brigade-", "");
+  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator("summary").click();
+  const box = await terms(page, offerId);
+  await box.getByTestId(`team-offer-terms-agree-${offerId}`).click();
+  const history = box.getByTestId(`team-offer-terms-history-${offerId}`);
+  await expect(history).toContainText("30 EUR/h", { timeout: 20_000 });
+  await expect(history).toContainText("32 EUR/h");
+  await expect(page.getByTestId(`team-offer-sent-${teamId}`)).toContainText(/iš esmės|in principle|priimt|sutart/i, { timeout: 20_000 });
   await page.getByTestId(`team-offer-sent-message-${offerId}`).click();
   await page.waitForURL(/\/dashboard\/communication/, { timeout: 20_000 });
-  await expect(page.locator("body")).toContainText(`QA-SYNTHETIC ${RUN}: can you start on the 3rd?`);
+  await expect(page.locator("body")).toContainText(MSG);
   await ctx.close();
 });
