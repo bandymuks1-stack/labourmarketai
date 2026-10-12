@@ -71,7 +71,7 @@ async function check(page: Page, route: string): Promise<string | null> {
   if (await page.getByTestId("global-error-message").isVisible().catch(() => false)) return "global error rendered";
   // The home IS the chat: its proof is the composer, not a <main> text block.
   // A role redirect lands there too, with a ?notice= that explains why.
-  if (new URL(page.url()).pathname.replace(//$/, "") === "/lt/dashboard") {
+  if (new URL(page.url()).pathname.replace(/\/$/, "") === "/lt/dashboard") {
     const composer = page.getByTestId("composer-input");
     return (await composer.waitFor({ state: "visible", timeout: 20_000 }).then(() => true).catch(() => false)) ? null : "chat composer missing";
   }

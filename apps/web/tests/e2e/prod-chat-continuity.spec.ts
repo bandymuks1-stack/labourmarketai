@@ -31,7 +31,7 @@ async function say(page: Page, text: string): Promise<void> {
   await page.getByTestId("composer-send").click();
   await expect(page.locator("body")).toContainText(text, { timeout: 20_000 });
   // Give the fire-and-forget append time to land before the context closes.
-  await page.waitForTimeout(4_000);
+  await page.waitForTimeout(12_000);
 }
 
 async function history(page: Page): Promise<string> {
