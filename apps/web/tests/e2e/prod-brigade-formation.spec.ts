@@ -184,6 +184,8 @@ test("B2B-2. the brigade (2 members) offers itself against exactly that need", a
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   const teamId = teamTestId.replace("team-brigade-", "");
+  // The offer form is folded; opening it loads the offerable needs.
+  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator("summary").click();
   const select = page.getByTestId(`team-offer-demand-${teamId}`);
   await expect(select).toBeVisible({ timeout: 20_000 });
   const option = select.locator("option", { hasText: NEED_ROLE }).first();
