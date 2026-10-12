@@ -80,7 +80,7 @@ for (const [slot, who, email] of [
     const teamId = teamTestId.replace("team-brigade-", "");
     const select = page.locator(`#team-add-${teamId}`);
     if (!(await select.count())) {
-      throw new Error(`no addable-member picker on the brigade card; card says: ${(await card.innerText()).slice(0, 600)}`);
+      throw new Error(`no addable-member picker on the brigade card; card ends: ${(await card.innerText()).slice(-700)}`);
     }
     const options = await select.locator("option").allInnerTexts();
     const pick = options.find((o) => who.test(o));
