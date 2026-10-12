@@ -183,13 +183,8 @@ describe("e-mail reads under RLS (user-scoped client) stay DB-gated", () => {
 describe("accepted, documented residual: the synthetic-QA viewer address shape", () => {
   it("isSyntheticViewer (qa.*@labourmarket.ai) is used ONLY to reveal labelled fixtures, never to authorise or write", () => {
     const users = FILES.filter((f) => /isSyntheticViewer/.test(stripComments(readFileSync(f, "utf8")))).map(rel).sort();
-    expect(users).toEqual(["lib/marketplace/qa-marked.ts", "lib/ops/product-metrics.ts", "lib/qa/synthetic-fixture.ts"]);
+    expect(users).toEqual(["lib/marketplace/qa-marked.ts", "lib/qa/synthetic-fixture.ts"]);
     const qa = stripComments(read("lib/marketplace/qa-marked.ts"));
     expect(qa).not.toMatch(/createAdminClient|\.insert\(|\.update\(|\.rpc\(/);
-    // Operator metrics (owner programme 2026-10-12 §8): the shape only SORTS
-    // accounts into REAL / TEST / INTERNAL for counting. It reads; it never
-    // writes, gates or authorises.
-    const metrics = stripComments(read("lib/ops/product-metrics.ts"));
-    expect(metrics).not.toMatch(/createAdminClient|\.insert\(|\.update\(|\.upsert\(|\.delete\(|\.rpc\(/);
   });
 });

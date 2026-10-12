@@ -14,7 +14,7 @@
  */
 import { createClient } from "@supabase/supabase-js";
 
-import { computeProductMetrics, classifyOrganization, type Population } from "../lib/ops/product-metrics";
+import { computeProductMetrics } from "../lib/ops/product-metrics";
 import { SIGNALS, evaluateSignals, type MonitorProbes, type SignalResult } from "../lib/ops/product-monitor";
 
 const DAY = 86_400_000;
@@ -39,10 +39,6 @@ async function searchMedianMs(origin: string): Promise<number | null> {
   return times[1] ?? null;
 }
 
-async function count(client: any, table: string, build: (q: any) => any): Promise<number | null> {
-  const { count: n, error } = await build(client.from(table).select("*", { count: "exact", head: true }));
-  return error ? null : (n ?? 0);
-}
 
 async function gh(path: string, init: RequestInit = {}): Promise<any> {
   const res = await fetch(`https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}${path}`, {
@@ -113,37 +109,9 @@ async function main(): Promise<void> {
   const origin = process.env.MONITOR_SITE_ORIGIN ?? "https://labourmarket.ai";
 
   const snapshot = await computeProductMetrics(client);
+  const probes: MonitorProbes = { searchMedianMs: await searchMedianMs(origin) };
 
-  // Integrity probes — counts only.
-  const c = client as any;
-  const teamOrgIds = new Set<string>(((await c.from("organizations").select("id").eq("organization_type", "team")).data ?? []).map((o: { id: string }) => o.id));
-  const joinTeamAccepted = (await c.from("invitations").select("organization_id").eq("invitation_type", "join_team").eq("status", "accepted")).data as { organization_id: string | null }[] | null;
-  const needIds = new Set<string>(((await c.from("customer_requests").select("id")).data ?? []).map((r: { id: string }) => r.id));
-  const offerRows = (await c.from("team_demand_offers").select("request_id, status, offered_at, team_org_id")).data as { request_id: string; status: string; offered_at: string; team_org_id: string }[] | null;
-  const probes: MonitorProbes = {
-    searchMedianMs: await searchMedianMs(origin),
-    acceptedInvitesWithoutAcceptor: await count(c, "invitations", (q) => q.eq("status", "accepted").is("accepted_by_profile_id", null)),
-    offersOnMissingNeed: offerRows ? offerRows.filter((o) => !needIds.has(o.request_id)).length : null,
-    confirmationsOnDeletedEntries: await (async () => {
-      const conf = (await c.from("journal_entry_confirmations").select("entry_id")).data as { entry_id: string }[] | null;
-      if (!conf) return null;
-      if (conf.length === 0) return 0;
-      const ids = [...new Set(conf.map((x) => x.entry_id))];
-      const { data, error } = await c.from("journal_entries").select("id").in("id", ids.slice(0, 1000)).not("deleted_at", "is", null);
-      return error ? null : (data ?? []).length;
-    })(),
-    teamMembersOutsideTeam: joinTeamAccepted ? joinTeamAccepted.filter((i) => i.organization_id && !teamOrgIds.has(i.organization_id)).length : null,
-  };
-
-  // Stale offers count only REAL suppliers.
-  const people = new Map<string, Population>();
-  const orgs = (await c.from("organizations").select("id, owner_profile_id, legal_name, display_name")).data as any[] | null;
-  const orgPop = new Map<string, Population>((orgs ?? []).map((o) => [o.id, classifyOrganization(o, people)]));
-  const staleOfferCount = offerRows
-    ? offerRows.filter((o) => o.status === "offered" && Date.now() - Date.parse(o.offered_at) > 7 * DAY && orgPop.get(o.team_org_id) !== "TEST").length
-    : null;
-
-  let results = evaluateSignals(snapshot, probes, { staleOfferCount });
+  let results = evaluateSignals(snapshot, probes);
   const drill = process.env.MONITOR_FORCE_BREACH;
   if (drill) {
     if (!SIGNALS.some((s) => s.id === drill)) {
@@ -154,7 +122,6 @@ async function main(): Promise<void> {
   }
 
   for (const r of results) console.info(`[monitor] ${r.state.padEnd(7)} ${r.severity} ${r.id} — ${r.observed}`);
-  if (snapshot.truncated.length) console.info(`[monitor] truncated (lower bounds): ${snapshot.truncated.join(", ")}`);
 
   if (process.env.MONITOR_DRY_RUN === "1") return;
   if (!process.env.GITHUB_TOKEN || !process.env.GITHUB_REPOSITORY) {
