@@ -1196,9 +1196,16 @@ export function ConversationChat({
    * through the hash-chaining RPC. Fire-and-forget: a failed append never
    * blocks the visible conversation and never fabricates a success.
    */
-  const transcriptRef = useRef<{ conversationId: string | null; enabled: boolean }>({
+  // ONE ordered chain for every transcript write (production walk 2026-10-12):
+  // turns typed before the thread finished loading used to be dropped, and a
+  // question and its answer appended concurrently before the first
+  // conversation existed could open TWO threads. The chain starts with the
+  // load, so early turns wait for it, and each append waits for the previous
+  // one, so the first append creates the thread and the rest reuse it.
+  const transcriptRef = useRef<{ conversationId: string | null; enabled: boolean; chain: Promise<void> }>({
     conversationId: null,
     enabled: false,
+    chain: Promise.resolve(),
   });
   // The router compiles its patterns on first use; build them in idle slices
   // once the conversation is on screen so the first sentence finds them ready.
@@ -1206,10 +1213,18 @@ export function ConversationChat({
   useEffect(() => {
     if (script) return; // design preview: never touches real persistence
     let cancelled = false;
-    loadAssistantThread()
+    const loading = loadAssistantThread();
+    transcriptRef.current.chain = loading.then(
+      (res) => {
+        if (!res.available) return;
+        transcriptRef.current.conversationId = res.conversationId;
+        transcriptRef.current.enabled = true;
+      },
+      () => undefined,
+    );
+    loading
       .then((res) => {
         if (cancelled || !res.available) return;
-        transcriptRef.current = { conversationId: res.conversationId, enabled: true };
         if (res.messages.length > 0) {
           // ChatGPT-style history model: earlier turns arrive as ONE collapsed
           // block above the active conversation — never an unbounded dump.
@@ -1248,22 +1263,24 @@ export function ConversationChat({
 
   const persistTurn = useCallback(
     (role: "user" | "assistant", text: string) => {
-      const t = transcriptRef.current;
-      if (!t.enabled || !text.trim()) return;
-      appendAssistantTurn({
-        conversationId: t.conversationId,
-        role,
-        text,
-        language: locale,
-      })
-        .then((res) => {
-          if (res.available) transcriptRef.current.conversationId = res.conversationId;
+      if (script || !text.trim()) return;
+      const tr = transcriptRef.current;
+      tr.chain = tr.chain
+        .then(async () => {
+          if (!tr.enabled) return;
+          const res = await appendAssistantTurn({
+            conversationId: tr.conversationId,
+            role,
+            text,
+            language: locale,
+          });
+          if (res.available) tr.conversationId = res.conversationId;
         })
         .catch(() => {
           /* degraded — nothing claimed */
         });
     },
-    [locale],
+    [locale, script],
   );
 
   const pushMessage = useCallback((message: ChatMessage) => {
