@@ -26,6 +26,7 @@ const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slo
 const ENABLED = process.env.PROD_QA_WALK === "1" && ["worker", "owner"].every((s) => existsSync(state(s)));
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
 test.describe.configure({ mode: "serial", timeout: 180_000, retries: 0 });
+test.use({ actionTimeout: 30_000 });
 
 /** A weekday 14–40 days ahead, varied by run so reruns rarely meet old rows. */
 function walkDay(): string {
@@ -57,6 +58,11 @@ test("1. the worker asks for a day of leave", async ({ browser }) => {
   const { page, close } = await as(browser, "worker");
   await page.goto("/lt/dashboard/absences");
   await expect(page.getByTestId("my-absences-panel")).toBeVisible({ timeout: 30_000 });
+  for (const blocked of ["absences-no-worker", "absences-preapply"]) {
+    if (await page.getByTestId(blocked).isVisible().catch(() => false)) {
+      throw new Error(`leave form not offered (${blocked}): ${await page.getByTestId("my-absences-panel").innerText()}`);
+    }
+  }
   // A leftover from an interrupted earlier run on the same day is cancelled first.
   while ((await myRow(page).count()) > 0 && (await myRow(page).getByTestId("absence-cancel").count()) > 0) {
     await myRow(page).getByTestId("absence-cancel").click();

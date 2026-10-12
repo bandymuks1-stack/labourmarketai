@@ -28,6 +28,7 @@ const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slo
 const ENABLED = process.env.PROD_QA_WALK === "1" && ["agency", "worker", "owner"].every((s) => existsSync(state(s)));
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
 test.describe.configure({ mode: "serial", timeout: 240_000, retries: 0 });
+test.use({ actionTimeout: 30_000 });
 
 async function as(browser: Browser, slot: string): Promise<{ page: Page; close: () => Promise<void> }> {
   const ctx = await browser.newContext({ storageState: state(slot), locale: "lt-LT" });
