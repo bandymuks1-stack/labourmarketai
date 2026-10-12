@@ -69,6 +69,12 @@ async function check(page: Page, route: string): Promise<string | null> {
   if (/\/auth\/(login|sign-?in)/.test(page.url())) return `bounced to sign-in (${new URL(page.url()).pathname})`;
   if (await page.getByTestId("error-boundary-message").isVisible().catch(() => false)) return "error boundary rendered";
   if (await page.getByTestId("global-error-message").isVisible().catch(() => false)) return "global error rendered";
+  // The home IS the chat: its proof is the composer, not a <main> text block.
+  // A role redirect lands there too, with a ?notice= that explains why.
+  if (new URL(page.url()).pathname.replace(//$/, "") === "/lt/dashboard") {
+    const composer = page.getByTestId("composer-input");
+    return (await composer.isVisible({ timeout: 20_000 }).catch(() => false)) ? null : "chat composer missing";
+  }
   const main = page.locator("main").first();
   if (!(await main.isVisible().catch(() => false))) return "no main content";
   if ((await main.innerText().catch(() => "")).trim().length < 20) return "main content is empty";
