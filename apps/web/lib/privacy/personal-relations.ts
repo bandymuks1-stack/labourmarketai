@@ -627,6 +627,14 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
     reason:
       "conversation threads you created — they hold the other party's words as well as yours, so they need a route that can separate the two",
   },
+  // 2026-10-12 (20261012100000): the assistant transcript is the person's own
+  // conversation with the product, kept per workspace. It has its own
+  // owner-only export (export_assistant_transcript) and whole-thread erasure.
+  {
+    table: "assistant_conversations",
+    reason:
+      "your conversation with the assistant — it has its own complete export (export_assistant_transcript) and can be erased thread by thread",
+  },
   {
     table: "conversation_messages",
     reason:

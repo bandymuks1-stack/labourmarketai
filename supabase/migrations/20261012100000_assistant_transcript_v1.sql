@@ -108,6 +108,10 @@ create policy assistant_conversations_update on public.assistant_conversations
     and (organization_id is null or public.is_org_member_or_engaged_v1(organization_id))
   );
 
+-- Explicit, never inherited: start from nothing, then grant exactly what the
+-- policies above are written for (no TRUNCATE / REFERENCES / TRIGGER).
+revoke all on public.assistant_conversations, public.assistant_messages,
+  public.assistant_message_attachments from public, anon, authenticated;
 grant select, insert, update on public.assistant_conversations to authenticated;
 grant select on public.assistant_messages to authenticated;
 grant select on public.assistant_message_attachments to authenticated;
@@ -174,8 +178,8 @@ begin
   update public.assistant_conversations set updated_at = now() where id = p_conversation_id;
   return v_row;
 end $$;
-revoke all on function public.append_assistant_message from public, anon;
-grant execute on function public.append_assistant_message to authenticated;
+revoke all on function public.append_assistant_message(uuid, text, text, text, char, text, text, jsonb, text) from public, anon;
+grant execute on function public.append_assistant_message(uuid, text, text, text, char, text, text, jsonb, text) to authenticated;
 
 -- 6. GDPR export (§20) — owner exports own transcript as JSON. ────────────────
 create or replace function public.export_assistant_transcript()
@@ -188,8 +192,8 @@ returns jsonb language sql security definer set search_path = public as $$
     where c.owner_id = auth.uid()
   ) x;
 $$;
-revoke all on function public.export_assistant_transcript from public, anon;
-grant execute on function public.export_assistant_transcript to authenticated;
+revoke all on function public.export_assistant_transcript() from public, anon;
+grant execute on function public.export_assistant_transcript() to authenticated;
 
 -- 7. GDPR erasure — owner erases own transcript (whole-thread, all-or-nothing
 --    so the hash chain never fractures mid-thread). This is NOT the legal
@@ -204,7 +208,7 @@ begin
   end if;
   delete from public.assistant_conversations where id = p_conversation_id; -- cascades
 end $$;
-revoke all on function public.erase_assistant_transcript from public, anon;
-grant execute on function public.erase_assistant_transcript to authenticated;
+revoke all on function public.erase_assistant_transcript(uuid) from public, anon;
+grant execute on function public.erase_assistant_transcript(uuid) to authenticated;
 
 commit;
