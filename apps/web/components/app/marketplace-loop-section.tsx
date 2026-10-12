@@ -703,7 +703,7 @@ export function MarketplaceLoopSection({
       </section>
 
       {error && (
-        <p role="alert" className="text-sm text-state-warning">
+        <p role="alert" className="text-sm text-state-warning" data-testid="marketplace-loop-error">
           {error}
         </p>
       )}

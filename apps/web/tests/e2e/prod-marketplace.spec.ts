@@ -31,14 +31,6 @@ async function as(browser: Browser, slot: string): Promise<{ page: Page; close: 
   return { page: await ctx.newPage(), close: () => ctx.close() };
 }
 
-async function firstRealOption(page: Page, testid: string): Promise<void> {
-  const select = page.getByTestId(testid);
-  const value = await select.locator("option").evaluateAll((os) =>
-    (os as HTMLOptionElement[]).map((o) => o.value).find((v) => v !== ""),
-  );
-  if (value) await select.selectOption(value);
-}
-
 let listingId = "";
 
 test("M-1. the seller lists a handmade shelf and publishes it", async ({ browser }) => {
@@ -48,7 +40,8 @@ test("M-1. the seller lists a handmade shelf and publishes it", async ({ browser
   await page.getByTestId("listing-add").click();
   await page.getByTestId("listing-form-domain").selectOption("goods");
   await page.getByTestId("listing-form-kind").selectOption("sale");
-  await firstRealOption(page, "listing-form-category");
+  // Not a food subject: those correctly ask for a legal acknowledgement first.
+  await page.getByTestId("listing-form-category").selectOption("goods_handmade");
   await page.getByTestId("listing-form-title").fill(GOODS);
   await page.getByTestId("listing-form-description").fill("Ąžuolinė, 80 cm. Atsiimti Kaune.");
   await page.getByTestId("listing-form-country").fill("LT");
@@ -144,6 +137,10 @@ test("M-6. the provider accepts; both sides can open the conversation", async ({
   await expect(incoming).toBeVisible({ timeout: 30_000 });
   await incoming.getByTestId("marketplace-incoming-note").fill("Tinka, susiderinkime laiką.");
   await incoming.getByTestId("marketplace-incoming-accept").click();
+  await provider.page.waitForTimeout(5_000);
+  const err = provider.page.locator(`p[role="alert"]`).filter({ hasText: /\S/ }).first();
+  if (await err.isVisible().catch(() => false)) throw new Error(`accept refused: ${await err.innerText()}`);
+  console.info(`[market] incoming row after accept: ${(await incoming.innerText().catch(() => "(row gone)")).slice(0, 300)}`);
   await expect
     .poll(async () => { await provider.page.reload(); return provider.page.getByTestId("marketplace-incoming-message-cta").count(); }, { timeout: 30_000, intervals: [3_000] })
     .toBeGreaterThan(0);

@@ -37,6 +37,8 @@ on:
           - marketplace
           - agency-chain
           - learning-practice
+          - sectors-languages
+          - chat-confirm-once
 
 concurrency:
   group: prod-qa-walk
@@ -102,6 +104,8 @@ jobs:
             marketplace) SPEC=tests/e2e/prod-marketplace.spec.ts ;;
             agency-chain) SPEC=tests/e2e/prod-agency-chain.spec.ts ;;
             learning-practice) SPEC=tests/e2e/prod-learning-practice.spec.ts ;;
+            sectors-languages) SPEC=tests/e2e/prod-sectors-languages.spec.ts ;;
+            chat-confirm-once) SPEC=tests/e2e/prod-chat-confirm-once.spec.ts ;;
           esac
           pnpm exec playwright test "$SPEC" --project=chromium --trace=off --reporter=list,json \
             > ../../prod-qa-result.json
