@@ -149,7 +149,7 @@ describe("registry mirror", () => {
   });
   it("destination + contact action are derived from the source (existing routes only)", () => {
     expect(destinationPathFor("marketplace_listings", "abc")).toBe("/dashboard/listings?focus=abc");
-    expect(destinationPathFor("service_offerings", "abc")).toBe("/dashboard/services");
+    expect(destinationPathFor("service_offerings", "abc")).toBe("/dashboard/service-requests#offering-abc");
     expect(contactActionFor("marketplace_listings")).toBe("enquire");
     expect(contactActionFor("service_offerings")).toBe("request_service");
   });

@@ -6753,7 +6753,11 @@
           "awayUntil": "Borte til {date}",
           "assign": "Tildel prosjekt",
           "openCalendar": "Åpne kalender"
-        }
+        },
+        "inviteShareLinkLabel": "Lenke til den inviterte",
+        "inviteShareLinkHint": "Send denne lenken slik du vil (SMS, melding). Etter registrering med samme e-post finner personen invitasjonen i kontoen sin.",
+        "inviteShareCopy": "Kopier lenke",
+        "inviteShareCopied": "Kopiert"
       }
     }
   },

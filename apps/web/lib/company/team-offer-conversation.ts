@@ -102,5 +102,8 @@ async function resolveTeamOfferThread(offerId: string, requestId: string, locale
     subject,
     "allowed_team_demand_offer",
   );
-  return result.ok ? `/${locale}/dashboard/communication/${result.data.id}` : null;
+  // ONE thread per pair stays the rule (the shared dedupe); the offer the
+  // person opened it FROM travels with the route, so the thread names which
+  // need and which offer is being discussed (party-checked again there).
+  return result.ok ? `/${locale}/dashboard/communication/${result.data.id}?offer=${offerId}` : null;
 }

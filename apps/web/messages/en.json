@@ -225,7 +225,7 @@
     "pause": "Pause",
     "expired": "Expired",
     "expiresOn": "Until {date}",
-    "openInServices": "Open in Services",
+    "openInServices": "Request this service",
     "domains": {
       "all": "All",
       "work_resource": "Work resources",
@@ -2381,7 +2381,11 @@
           "reviewOn": "Review on",
           "reviewOff": "Review off",
           "manage": "Manage members and review →"
-        }
+        },
+        "inviteShareLinkLabel": "Link for the person you invited",
+        "inviteShareLinkHint": "Send this link any way you like (SMS, a message). After signing up with the same e-mail, they will find the invitation in their account.",
+        "inviteShareCopy": "Copy link",
+        "inviteShareCopied": "Copied"
       },
       "scoutingBridge": {
         "title": "Find workers for this need",
@@ -18905,7 +18909,9 @@
       "proposeNext": "Propose changed terms (a new version)",
       "propose": "Send terms",
       "proposed": "Version {version} sent."
-    }
+    },
+    "threadContext": "About the offer: {subject}",
+    "threadContextShared": "Every offer between you is discussed in this one conversation; it was opened for the one above."
   },
   "teamAssignment": {
     "title": "Teams on this project",

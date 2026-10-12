@@ -225,7 +225,7 @@
     "pause": "Pauzeren",
     "expired": "Verlopen",
     "expiresOn": "Tot {date}",
-    "openInServices": "Open Diensten",
+    "openInServices": "Dienst aanvragen",
     "domains": {
       "all": "Alles",
       "work_resource": "Werkmiddelen",
@@ -2381,7 +2381,11 @@
           "reviewOn": "Beoordeling aan",
           "reviewOff": "Beoordeling uit",
           "manage": "Leden en beoordeling beheren →"
-        }
+        },
+        "inviteShareLinkLabel": "Link voor de uitgenodigde persoon",
+        "inviteShareLinkHint": "Stuur deze link op elke manier (sms, bericht). Na aanmelding met hetzelfde e-mailadres vindt de persoon de uitnodiging in zijn account.",
+        "inviteShareCopy": "Link kopiëren",
+        "inviteShareCopied": "Gekopieerd"
       },
       "scoutingBridge": {
         "title": "Vind werknemers voor deze personeelsbehoefte",
@@ -18905,7 +18909,9 @@
       "proposeNext": "Gewijzigde voorwaarden voorstellen (nieuwe versie)",
       "propose": "Voorwaarden versturen",
       "proposed": "Versie {version} verstuurd."
-    }
+    },
+    "threadContext": "Over het aanbod: {subject}",
+    "threadContextShared": "Alle aanbiedingen tussen jullie worden in dit ene gesprek besproken; het is geopend voor het aanbod hierboven."
   },
   "teamAssignment": {
     "title": "Teams in dit project",

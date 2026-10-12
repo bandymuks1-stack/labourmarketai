@@ -225,7 +225,7 @@
     "pause": "Pristabdyti",
     "expired": "Pasibaigęs",
     "expiresOn": "Iki {date}",
-    "openInServices": "Atverti Paslaugas",
+    "openInServices": "Užsakyti paslaugą",
     "domains": {
       "all": "Visi",
       "work_resource": "Darbo ištekliai",
@@ -2381,7 +2381,11 @@
           "reviewOn": "Peržiūra įjungta",
           "reviewOff": "Peržiūra išjungta",
           "manage": "Tvarkyti narius ir peržiūrą →"
-        }
+        },
+        "inviteShareLinkLabel": "Nuoroda pakviestajam",
+        "inviteShareLinkHint": "Nusiųskite šią nuorodą bet kuriuo būdu (SMS, žinute). Užsiregistravęs tuo pačiu el. paštu, žmogus ras kvietimą savo paskyroje.",
+        "inviteShareCopy": "Kopijuoti nuorodą",
+        "inviteShareCopied": "Nukopijuota"
       },
       "scoutingBridge": {
         "title": "Raskite darbuotojų šiam poreikiui",
@@ -18905,7 +18909,9 @@
       "proposeNext": "Pasiūlyti pakeistas sąlygas (nauja versija)",
       "propose": "Siųsti sąlygas",
       "proposed": "{version} versija išsiųsta."
-    }
+    },
+    "threadContext": "Pokalbis apie pasiūlymą: {subject}",
+    "threadContextShared": "Visi pasiūlymai tarp jūsų vyksta šiame viename pokalbyje; šis atidarytas apie aukščiau nurodytą."
   },
   "teamAssignment": {
     "title": "Komandos šiame projekte",

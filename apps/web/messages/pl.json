@@ -225,7 +225,7 @@
     "pause": "Wstrzymaj",
     "expired": "Wygasło",
     "expiresOn": "Do {date}",
-    "openInServices": "Otwórz Usługi",
+    "openInServices": "Zamów usługę",
     "domains": {
       "all": "Wszystkie",
       "work_resource": "Zasoby pracy",
@@ -2381,7 +2381,11 @@
           "reviewOn": "Weryfikacja włączona",
           "reviewOff": "Weryfikacja wyłączona",
           "manage": "Zarządzaj członkami i weryfikacją →"
-        }
+        },
+        "inviteShareLinkLabel": "Link dla zaproszonej osoby",
+        "inviteShareLinkHint": "Wyślij ten link w dowolny sposób (SMS, wiadomość). Po rejestracji na ten sam e-mail osoba znajdzie zaproszenie na swoim koncie.",
+        "inviteShareCopy": "Kopiuj link",
+        "inviteShareCopied": "Skopiowano"
       },
       "scoutingBridge": {
         "title": "Znajdź pracowników do tego zapotrzebowania",
@@ -18905,7 +18909,9 @@
       "proposeNext": "Zaproponuj zmienione warunki (nowa wersja)",
       "propose": "Wyślij warunki",
       "proposed": "Wersja {version} wysłana."
-    }
+    },
+    "threadContext": "Dotyczy oferty: {subject}",
+    "threadContextShared": "Wszystkie oferty między wami są omawiane w tej jednej rozmowie; otwarto ją dla oferty powyżej."
   },
   "teamAssignment": {
     "title": "Zespoły w tym projekcie",

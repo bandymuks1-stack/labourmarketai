@@ -6753,7 +6753,11 @@
           "awayUntil": "Eemal kuni {date}",
           "assign": "Määra projektile",
           "openCalendar": "Ava kalender"
-        }
+        },
+        "inviteShareLinkLabel": "Link kutsutule",
+        "inviteShareLinkHint": "Saatke see link mis tahes viisil (SMS, sõnum). Sama e-postiga registreerudes leiab inimene kutse oma kontolt.",
+        "inviteShareCopy": "Kopeeri link",
+        "inviteShareCopied": "Kopeeritud"
       }
     }
   },

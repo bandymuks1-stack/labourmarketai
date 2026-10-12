@@ -878,6 +878,7 @@ export function OnboardingWizard({
         <Button
           type="submit"
           disabled={pending}
+          data-testid="onboarding-submit"
           className="w-full rounded-xl sm:w-auto"
         >
           {pending ? t("saving") : t("step2.continue")}
