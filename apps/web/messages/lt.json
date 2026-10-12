@@ -1807,11 +1807,11 @@
       }
     },
     "capacity": {
-      "heading": "Kas laisvas dabar",
+      "heading": "Kas laisvas dabar (pagal planą)",
       "free": "laisvas",
       "away": "nedirba",
       "awayUntil": "nedirba iki {date}",
-      "summary": "{free} laisvi · {committed} dirba · {away} nedirba",
+      "summary": "Pagal planą: {free} laisvi · {committed} paskirti darbui · {away} nedirba",
       "onWork": "projekte {project}",
       "booked": "užimtas",
       "until": "iki {date}",

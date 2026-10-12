@@ -1807,11 +1807,11 @@
       }
     },
     "capacity": {
-      "heading": "Кто свободен сейчас",
+      "heading": "Кто свободен сейчас (по плану)",
       "free": "свободен",
       "away": "отсутствует",
       "awayUntil": "отсутствует до {date}",
-      "summary": "{free} свободны · {committed} на работе · {away} отсутствуют",
+      "summary": "По плану: {free} свободны · {committed} назначены на работу · {away} отсутствуют",
       "onWork": "на {project}",
       "booked": "занят",
       "until": "до {date}",

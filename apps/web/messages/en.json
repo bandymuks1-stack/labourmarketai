@@ -1807,11 +1807,11 @@
       }
     },
     "capacity": {
-      "heading": "Who is free now",
+      "heading": "Who is free now (by plan)",
       "free": "free",
       "away": "away",
       "awayUntil": "away until {date}",
-      "summary": "{free} free · {committed} on work · {away} away",
+      "summary": "By plan: {free} free · {committed} assigned to work · {away} away",
       "onWork": "on {project}",
       "booked": "booked",
       "until": "until {date}",
