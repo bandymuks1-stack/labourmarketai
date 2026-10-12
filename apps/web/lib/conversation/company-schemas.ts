@@ -234,6 +234,14 @@ export const companyRespondOfferSchema = z.object({
   note: z.string().trim().max(1000).nullable().optional(),
 });
 
+/** The receiver's answer to a brigade / company offered against its need
+ *  (`respond_team_demand_offer_v1` re-checks the receiver and that the offer
+ *  is open). Agreeing is agreed IN PRINCIPLE — never a signed contract. */
+export const companyRespondTeamOfferSchema = z.object({
+  offerId: uuid,
+  decision: z.enum(["accepted", "declined"]),
+});
+
 /** A work package (task) on the company's project, by sentence — the shape
  *  gate only; `create_work_task_v2` validates project ownership and limits. */
 export const companyCreateTaskSchema = z.object({
@@ -354,6 +362,7 @@ export const COMPANY_ACTION_SCHEMAS = {
   "company.keep-assignment": companyKeepAssignmentSchema,
   "company.create-project": companyCreateProjectSchema,
   "company.respond-offer": companyRespondOfferSchema,
+  "company.respond-team-offer": companyRespondTeamOfferSchema,
   "company.accept-connection": companyAcceptConnectionSchema,
   "company.decline-connection": companyDeclineConnectionSchema,
   "company.share-request": companyShareRequestSchema,

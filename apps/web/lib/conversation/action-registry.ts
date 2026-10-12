@@ -742,6 +742,25 @@ export const CONVERSATION_ACTIONS: readonly ConversationActionDescriptor[] = [
     advancedRoute: "/dashboard/company/scouting",
     handler: { kind: "server_action", ref: "respondCandidateOfferAction" },
   },
+  {
+    /**
+     * The receiver's answer to a BRIGADE or COMPANY offered against its need
+     * (owner P0 2026-10-11: Chat First does what the scouting page does).
+     * Same canonical action, token-confirmed; agreeing is agreed in
+     * principle, never a contract.
+     */
+    id: "company.respond-team-offer",
+    subject: "company",
+    allowedRoles: ["company"],
+    labelKey: "conversation.actions.company.respondTeamOffer.label",
+    descriptionKey: "conversation.actions.company.respondTeamOffer.description",
+    confirmation: "important_write",
+    precondition: "has_company",
+    migrationSensitive: true,
+    telemetryEvent: E.companyDemandActionClicked,
+    advancedRoute: "/dashboard/company/scouting",
+    handler: { kind: "server_action", ref: "respondToTeamOfferAction" },
+  },
   // The CLIENT's other two bridge edges (2026-09-19). Same canonical actions
   // the partners page posts; same RPC authority (owns_company of the client
   // side + the invited e-mail = the caller's own for the accept).

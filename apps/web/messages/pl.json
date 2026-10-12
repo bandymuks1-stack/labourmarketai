@@ -7201,9 +7201,10 @@
     },
     "inviteOutcome": {
       "sent": "Zaproszenie wysłane e-mailem. Członkostwo zaczyna się, gdy pracownik je zaakceptuje.",
-      "created": "Zaproszenie utworzone. Pracownik zobaczy je w sekcji Moja sieć i tam podejmie decyzję.",
-      "deliveryFailed": "Zaproszenie zapisane, ale nie udało się dostarczyć e-maila. Pracownik nadal może je zobaczyć w sekcji Moja sieć.",
+      "created": "Zaproszenie utworzone — e-mail nie został wysłany. Skopiuj link poniżej i wyślij go pracownikowi samodzielnie; otworzy go, zaloguje się i zaakceptuje.",
+      "deliveryFailed": "Zaproszenie zapisane, ale nie udało się dostarczyć e-maila. Skopiuj link poniżej i wyślij go samodzielnie.",
       "alreadyInvited": "Ten pracownik ma już otwarte zaproszenie do tej brygady.",
+      "alreadyInvitedNewLink": "Ta osoba ma już otwarte zaproszenie. Oto nowy link — poprzedni link już nie działa.",
       "rateLimited": "Osiągnięto na razie limit zaproszeń. Spróbuj ponownie później.",
       "notAuthorized": "Tylko właściciel brygady może wysyłać zaproszenia.",
       "noEmail": "Ten pracownik nie ma zapisanego użytecznego adresu e-mail, więc nie można utworzyć zaproszenia.",
@@ -7276,7 +7277,10 @@
         "error": "Nie udało się zapisać odpowiedzi. Nic nie zostało zmienione."
       }
     },
-    "addableUnavailable": "Nie udało się wczytać listy powiązanych pracowników — dodawanie nie jest teraz możliwe."
+    "addableUnavailable": "Nie udało się wczytać listy powiązanych pracowników — dodawanie nie jest teraz możliwe.",
+    "inviteLinkNote": "Wyślij ten link pracownikowi (wiadomość, SMS, WhatsApp). Zaakceptować może tylko zaproszona osoba.",
+    "inviteLinkCopy": "Kopiuj link",
+    "inviteLinkCopied": "Skopiowano"
   },
   "teamEnquiries": {
     "enquireButton": "Zapytaj ten zespół o pracę",
@@ -9393,6 +9397,31 @@
         "rate_limits": "Aktywne ograniczenia liczby zapytań",
         "freshness_demotion": "Nieaktualne profile pozycjonowane niżej"
       }
+    }
+  },
+  "adminMetrics": {
+    "title": "Metryki produktu",
+    "intro": "Bieżące liczby z kanonicznych tabel, podzielone na REAL, TEST (syntetyczne konta testowe, domeny testowe) i INTERNAL (zespół, administratorzy). — oznacza, że źródła nie udało się odczytać; to nigdy nie jest zero.",
+    "computedAt": "Obliczono {at}",
+    "unknown": "Nieczytelne źródła (pokazane jako —): {sources}",
+    "truncated": "Osiągnięto limit wierszy, liczby są dolną granicą: {sources}",
+    "groups": {
+      "users": "Ludzie i aktywność",
+      "teams": "Brygady i zaproszenia",
+      "b2b": "Rynek B2B",
+      "work": "Dziennik pracy i Living CV",
+      "technical": "Techniczne"
+    },
+    "col": {
+      "metric": "Metryka",
+      "total": "Razem",
+      "source": "Źródło",
+      "rule": "Reguła",
+      "window": "Okres"
+    },
+    "signals": {
+      "title": "Reguły alertów",
+      "intro": "Sprawdzane co godzinę przez workflow product-monitor. Naruszenie otwiera jedno zgłoszenie GitHub na sygnał i zamyka je po powrocie do normy."
     }
   },
   "billingStatus": {
@@ -12037,6 +12066,8 @@
       "empty": "Nie wysłałeś jeszcze żadnych zaproszeń.",
       "error": "Nie udało się teraz wczytać zaproszeń.",
       "resend": "Wyślij ponownie",
+      "newLink": "Nowy link",
+      "newLinkHint": "Tworzy nowy link zaproszenia. Poprzedni link przestaje działać.",
       "revoke": "Cofnij",
       "copied": "Skopiowano",
       "copyNewLink": "Skopiuj nowy link",
@@ -13521,6 +13552,10 @@
         },
         "offerCapacity": {
           "label": "Zapisz swoją ofertę"
+        },
+        "respondTeamOffer": {
+          "label": "Odpowiedz na ofertę brygady lub firmy",
+          "description": "Uzgodnij wstępnie lub odrzuć brygadę albo firmę zaoferowaną do twojej potrzeby."
         }
       },
       "education": {
@@ -14170,7 +14205,7 @@
       "projectCreateIntro": "Nowy projekt. Nazwa i miasto — potem od razu przypiszesz tu ludzi.",
       "projectCreatedNext": "Projekt utworzony. Przypisz ludzi od razu tutaj — albo wróć do niego później z „Moje projekty”.",
       "clientOffersIntro": "Kandydaci zaproponowani przez agencje do Twoich potrzeb:",
-      "clientOffersNone": "Żadna agencja nie zaproponowała jeszcze kandydatów do Twoich otwartych potrzeb.",
+      "clientOffersNone": "Nikt jeszcze nie zaoferował kandydatów, brygady ani firmy do twoich otwartych potrzeb.",
       "clientBridgeInvitesIntro": "Agencje zapraszające Cię do współpracy:",
       "clientBridgeShareIntro": "Potrzeby, które możesz udostępnić połączonej agencji:",
       "clientBridgeNone": "Nie czeka żadne zaproszenie od agencji i nie zostało nic do udostępnienia. Zarządzaj partnerami na stronie partnerów.",
@@ -14437,7 +14472,15 @@
       "visibilityUnavailable": "Nie udało się sprawdzić widoczności dla pracodawców. To nie znaczy, że jest wyłączona — otwórz ustawienia.",
       "chipVisibility": "Widoczność dla pracodawców",
       "voiceOpen": "Mów",
-      "voiceBareYes": "Wypowiedziane „tak” nie jest potwierdzeniem. Potwierdź przyciskiem na karcie albo powiedz, co chcesz zrobić."
+      "voiceBareYes": "Wypowiedziane „tak” nie jest potwierdzeniem. Potwierdź przyciskiem na karcie albo powiedz, co chcesz zrobić.",
+      "teamOffersIntro": "Brygady i firmy, które zaoferowały się do twoich potrzeb:",
+      "teamOfferStatusAgreed": "uzgodnione wstępnie",
+      "chipTeamOfferAgree": "Uzgodnij wstępnie",
+      "chipTeamOfferThread": "Napisz",
+      "chipOfferOurs": "Zaoferuj naszą brygadę lub firmę",
+      "teamOfferAgreed": "Uzgodnione wstępnie — to jeszcze nie podpisana umowa. Ustalcie warunki w rozmowie, a potem przypisz zespół do projektu.",
+      "teamOfferDeclined": "Odrzucono. Oferująca firma zobaczy twoją odpowiedź.",
+      "teamOfferThreadFailed": "Nie można otworzyć tej rozmowy."
     },
     "worklog": {
       "understood": "Oto, co zrozumiałem — zapisać?",

@@ -7201,9 +7201,10 @@
     },
     "inviteOutcome": {
       "sent": "Einladung per E-Mail gesendet. Die Mitgliedschaft beginnt, sobald die Arbeitskraft sie annimmt.",
-      "created": "Einladung erstellt. Die Arbeitskraft sieht sie unter Mein Netzwerk und entscheidet dort selbst.",
-      "deliveryFailed": "Einladung gespeichert, aber die E-Mail konnte nicht zugestellt werden. Die Arbeitskraft sieht sie dennoch unter Mein Netzwerk.",
+      "created": "Einladung erstellt — es wurde keine E-Mail gesendet. Kopieren Sie den Link unten und schicken Sie ihn der Arbeitskraft selbst; sie öffnet ihn, meldet sich an und nimmt an.",
+      "deliveryFailed": "Einladung gespeichert, aber die E-Mail konnte nicht zugestellt werden. Kopieren Sie den Link unten und schicken Sie ihn selbst.",
       "alreadyInvited": "Diese Arbeitskraft hat bereits eine offene Einladung in diese Kolonne.",
+      "alreadyInvitedNewLink": "Diese Person hat bereits eine offene Einladung. Hier ist ein neuer Link — der vorherige Link funktioniert nicht mehr.",
       "rateLimited": "Einladungslimit vorerst erreicht. Versuchen Sie es später erneut.",
       "notAuthorized": "Nur der Kolonneninhaber kann Einladungen senden.",
       "noEmail": "Diese Arbeitskraft hat keine nutzbare E-Mail-Adresse, daher kann die Einladung nicht erstellt werden.",
@@ -7276,7 +7277,10 @@
         "error": "Die Antwort konnte nicht gespeichert werden. Es wurde nichts geändert."
       }
     },
-    "addableUnavailable": "Die Liste der verknüpften Arbeitskräfte konnte nicht geladen werden — Hinzufügen ist derzeit nicht möglich."
+    "addableUnavailable": "Die Liste der verknüpften Arbeitskräfte konnte nicht geladen werden — Hinzufügen ist derzeit nicht möglich.",
+    "inviteLinkNote": "Schicken Sie diesen Link an die Arbeitskraft (Nachricht, SMS, WhatsApp). Nur die eingeladene Person kann annehmen.",
+    "inviteLinkCopy": "Link kopieren",
+    "inviteLinkCopied": "Kopiert"
   },
   "teamEnquiries": {
     "enquireButton": "Dieser Kolonne eine Anfrage senden",
@@ -9393,6 +9397,31 @@
         "rate_limits": "Begrenzte Anfragelimits aktiv",
         "freshness_demotion": "Veraltete Profile niedriger eingestuft"
       }
+    }
+  },
+  "adminMetrics": {
+    "title": "Produktkennzahlen",
+    "intro": "Live-Zahlen aus den kanonischen Tabellen, getrennt in REAL, TEST (synthetische Testkonten, Testdomains) und INTERNAL (Team, Admins). — bedeutet, dass die Quelle nicht gelesen werden konnte; es ist nie null.",
+    "computedAt": "Berechnet {at}",
+    "unknown": "Nicht lesbare Quellen (als — angezeigt): {sources}",
+    "truncated": "Zeilenlimit erreicht, Zahlen sind eine Untergrenze: {sources}",
+    "groups": {
+      "users": "Personen und Aktivität",
+      "teams": "Brigaden und Einladungen",
+      "b2b": "B2B-Markt",
+      "work": "Arbeitsjournal und Living CV",
+      "technical": "Technik"
+    },
+    "col": {
+      "metric": "Kennzahl",
+      "total": "Gesamt",
+      "source": "Quelle",
+      "rule": "Regel",
+      "window": "Zeitraum"
+    },
+    "signals": {
+      "title": "Alarmregeln",
+      "intro": "Stündlich vom product-monitor-Workflow ausgewertet. Ein Verstoß öffnet ein GitHub-Issue pro Signal und schließt es nach der Erholung."
     }
   },
   "billingStatus": {
@@ -12037,6 +12066,8 @@
       "empty": "Sie haben noch keine Einladungen gesendet.",
       "error": "Einladungen konnten gerade nicht geladen werden.",
       "resend": "Erneut senden",
+      "newLink": "Neuer Link",
+      "newLinkHint": "Erstellt einen neuen Einladungslink. Der vorherige Link funktioniert dann nicht mehr.",
       "revoke": "Widerrufen",
       "copied": "Kopiert",
       "copyNewLink": "Neuen Link kopieren",
@@ -13521,6 +13552,10 @@
         },
         "offerCapacity": {
           "label": "Ihr Angebot festhalten"
+        },
+        "respondTeamOffer": {
+          "label": "Auf das Angebot eines Teams oder Unternehmens antworten",
+          "description": "Einem für Ihren Bedarf angebotenen Team oder Unternehmen grundsätzlich zustimmen oder es ablehnen."
         }
       },
       "education": {
@@ -14170,7 +14205,7 @@
       "projectCreateIntro": "Ein neues Projekt. Name und Stadt — danach weisen Sie hier direkt Leute zu.",
       "projectCreatedNext": "Projekt angelegt. Weisen Sie hier direkt Leute zu — oder kommen Sie später über „Meine Projekte“ darauf zurück.",
       "clientOffersIntro": "Von Agenturen vorgeschlagene Kandidaten für Ihre Bedarfe:",
-      "clientOffersNone": "Noch keine Agentur hat Kandidaten für Ihre offenen Bedarfe vorgeschlagen.",
+      "clientOffersNone": "Für Ihren offenen Bedarf hat noch niemand Kandidaten, ein Team oder ein Unternehmen angeboten.",
       "clientBridgeInvitesIntro": "Agenturen, die Sie zur Zusammenarbeit einladen:",
       "clientBridgeShareIntro": "Bedarfe, die Sie mit einer verbundenen Agentur teilen können:",
       "clientBridgeNone": "Keine Agentureinladung wartet und nichts ist mehr zu teilen. Partner verwalten Sie auf der Partnerseite.",
@@ -14437,7 +14472,15 @@
       "visibilityUnavailable": "Ihre Sichtbarkeit für Arbeitgeber konnte nicht geprüft werden. Das heißt nicht, dass sie aus ist — öffnen Sie die Einstellungen.",
       "chipVisibility": "Sichtbarkeit für Arbeitgeber",
       "voiceOpen": "Sprechen",
-      "voiceBareYes": "Ein gesprochenes „Ja“ ist keine Bestätigung. Bestätigen Sie mit der Schaltfläche auf der Karte oder sagen Sie, was Sie tun möchten."
+      "voiceBareYes": "Ein gesprochenes „Ja“ ist keine Bestätigung. Bestätigen Sie mit der Schaltfläche auf der Karte oder sagen Sie, was Sie tun möchten.",
+      "teamOffersIntro": "Teams und Unternehmen, die sich für Ihren Bedarf angeboten haben:",
+      "teamOfferStatusAgreed": "grundsätzlich vereinbart",
+      "chipTeamOfferAgree": "Grundsätzlich zustimmen",
+      "chipTeamOfferThread": "Schreiben",
+      "chipOfferOurs": "Unser Team oder Unternehmen anbieten",
+      "teamOfferAgreed": "Grundsätzlich vereinbart — noch kein unterschriebener Vertrag. Klären Sie die Bedingungen im Gespräch und weisen Sie das Team dann einem Projekt zu.",
+      "teamOfferDeclined": "Abgelehnt. Das anbietende Unternehmen sieht Ihre Antwort.",
+      "teamOfferThreadFailed": "Dieses Gespräch kann nicht geöffnet werden."
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",

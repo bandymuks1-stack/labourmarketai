@@ -5,11 +5,13 @@ import "server-only";
 import { listOfferedCandidatesForRequest } from "@/lib/agency/bridge-read";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
 import { listCompanyDemands } from "@/lib/scouting/scouting";
+import { listReceivedOffers } from "@/lib/company/team-offer";
 
 import {
   CLIENT_OFFERS_CHAT_LIMIT,
   CLIENT_OFFERS_DEMAND_SCAN_LIMIT,
   type ClientChatOffer,
+  type ClientChatTeamOffer,
   type ClientOffersChatResult,
 } from "@/lib/conversation/client-offers-contract";
 
@@ -57,7 +59,33 @@ export async function loadClientOffersForChat(): Promise<ClientOffersChatResult>
       .flat()
       .sort((a, b) => (a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0))
       .slice(0, CLIENT_OFFERS_CHAT_LIMIT);
-    return { kind: "ok", offers, openDemands: demands.length };
+    // Brigades / companies offered against the same needs — the receiver-gated
+    // RPC the scouting section renders (team-level aggregates only). A failed
+    // read lists nothing for that need; it never invents an offer.
+    const teamPerDemand = await Promise.all(
+      scanned.map(async (d) => {
+        const r = await listReceivedOffers(d.id);
+        if (r.status !== "ok") return [];
+        return r.rows.flatMap<ClientChatTeamOffer>((o) =>
+          o.status === "offered" || o.status === "accepted" || o.status === "assigned"
+            ? [{
+                offerId: o.offerId,
+                requestId: d.id,
+                demandTitle: d.title,
+                teamName: o.teamName,
+                status: o.status,
+                memberCount: o.memberCount,
+                offeredAt: o.offeredAt,
+              }]
+            : [],
+        );
+      }),
+    );
+    const teamOffers = teamPerDemand
+      .flat()
+      .sort((a, b) => (a.status === "offered" ? 0 : 1) - (b.status === "offered" ? 0 : 1) || (a.offeredAt < b.offeredAt ? 1 : -1))
+      .slice(0, CLIENT_OFFERS_CHAT_LIMIT);
+    return { kind: "ok", offers, teamOffers, openDemands: demands.length };
   } catch {
     return { kind: "error" };
   }

@@ -72,6 +72,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261008210000_",
       // 2026-10-11 (RED by SECURITY DEFINER replace, needs-human-gate): supply offer negotiation: organization offers, versioned terms, need titles; RED by SECURITY DEFINER replace, needs-human-gate.
       "20261011200000_",
+      // 2026-10-11 (RED by SECURITY DEFINER + RLS policy, needs-human-gate): absence authority for engagement employees.
+      "20261011160000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

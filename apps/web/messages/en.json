@@ -7201,9 +7201,10 @@
     },
     "inviteOutcome": {
       "sent": "Invitation emailed. Membership starts when the worker accepts it.",
-      "created": "Invitation created. The worker will see it under My network and decides there.",
-      "deliveryFailed": "Invitation saved, but the email could not be delivered. The worker can still see it under My network.",
+      "created": "Invitation created — no e-mail was sent. Copy the link below and send it to the worker yourself; they open it, sign in and accept.",
+      "deliveryFailed": "Invitation saved, but the e-mail could not be delivered. Copy the link below and send it to the worker yourself.",
       "alreadyInvited": "This worker already has an open invitation to this brigade.",
+      "alreadyInvitedNewLink": "This worker already has an open invitation. Here is a new link — the previous link no longer works.",
       "rateLimited": "Invitation limit reached for now. Try again later.",
       "notAuthorized": "Only the brigade owner can send invitations.",
       "noEmail": "This worker has no usable email address on file, so the invitation cannot be created.",
@@ -7276,7 +7277,10 @@
         "error": "Could not save the answer. Nothing was changed."
       }
     },
-    "addableUnavailable": "The linked-worker list could not be loaded — adding is not possible right now."
+    "addableUnavailable": "The linked-worker list could not be loaded — adding is not possible right now.",
+    "inviteLinkNote": "Send this link to the worker (message, SMS, WhatsApp). Only the invited person can accept it.",
+    "inviteLinkCopy": "Copy link",
+    "inviteLinkCopied": "Copied"
   },
   "teamEnquiries": {
     "enquireButton": "Ask this team about work",
@@ -9393,6 +9397,31 @@
         "rate_limits": "Bounded request limits active",
         "freshness_demotion": "Stale profiles ranked lower"
       }
+    }
+  },
+  "adminMetrics": {
+    "title": "Product metrics",
+    "intro": "Live counts from the canonical tables, split into REAL, TEST (synthetic test accounts, test domains) and INTERNAL (staff, admins). — means the source could not be read; it is never zero.",
+    "computedAt": "Computed {at}",
+    "unknown": "Unreadable sources (shown as —): {sources}",
+    "truncated": "Row cap reached, counts are a lower bound: {sources}",
+    "groups": {
+      "users": "People and activity",
+      "teams": "Brigades and invitations",
+      "b2b": "B2B market",
+      "work": "Work journal and Living CV",
+      "technical": "Technical"
+    },
+    "col": {
+      "metric": "Metric",
+      "total": "Total",
+      "source": "Source",
+      "rule": "Rule",
+      "window": "Window"
+    },
+    "signals": {
+      "title": "Alert rules",
+      "intro": "Evaluated hourly by the product-monitor workflow. A breach opens one GitHub issue per signal and closes it on recovery."
     }
   },
   "billingStatus": {
@@ -12037,6 +12066,8 @@
       "empty": "You have not sent any invitations yet.",
       "error": "Invitations could not be loaded right now.",
       "resend": "Send again",
+      "newLink": "New link",
+      "newLinkHint": "Creates a new invitation link. The previous link stops working.",
       "revoke": "Revoke",
       "copied": "Copied",
       "copyNewLink": "Copy new link",
@@ -13521,6 +13552,10 @@
         },
         "offerCapacity": {
           "label": "Record what you are offering"
+        },
+        "respondTeamOffer": {
+          "label": "Answer a brigade's or company's offer",
+          "description": "Agree in principle to, or decline, a brigade or company offered for your need."
         }
       },
       "education": {
@@ -14170,7 +14205,7 @@
       "projectCreateIntro": "A new project. Name and city — then you can assign people right here.",
       "projectCreatedNext": "Project created. Assign people right here — or come back to it later from “My projects”.",
       "clientOffersIntro": "Candidates agencies offered for your needs:",
-      "clientOffersNone": "No agency has offered candidates for your open needs yet.",
+      "clientOffersNone": "Nobody has offered candidates, a brigade or a company for your open needs yet.",
       "clientBridgeInvitesIntro": "Agencies inviting you to work together:",
       "clientBridgeShareIntro": "Needs you could share with a connected agency:",
       "clientBridgeNone": "No agency invitation is waiting and nothing is left to share. Manage partners on the partners page.",
@@ -14437,7 +14472,15 @@
       "visibilityUnavailable": "Could not check your visibility to employers. That does not mean it is off — open the settings.",
       "chipVisibility": "Visibility to employers",
       "voiceOpen": "Speak",
-      "voiceBareYes": "Spoken “yes” is not a confirmation. Press the button on the card to confirm, or say what you want to do."
+      "voiceBareYes": "Spoken “yes” is not a confirmation. Press the button on the card to confirm, or say what you want to do.",
+      "teamOffersIntro": "Brigades and companies offered for your needs:",
+      "teamOfferStatusAgreed": "agreed in principle",
+      "chipTeamOfferAgree": "Agree in principle",
+      "chipTeamOfferThread": "Write",
+      "chipOfferOurs": "Offer our brigade or company",
+      "teamOfferAgreed": "Agreed in principle — not a signed contract. Settle the terms in the conversation, then assign the team to a project.",
+      "teamOfferDeclined": "Declined. The offering company will see your answer.",
+      "teamOfferThreadFailed": "This conversation cannot be opened."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
