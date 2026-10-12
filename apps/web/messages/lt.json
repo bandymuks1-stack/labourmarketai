@@ -12284,7 +12284,8 @@
         "withOrganization": "Priėmėte šį kvietimą — dabar esate susieti su {name}.",
         "plain": "Priėmėte šį kvietimą — ryšys sukurtas.",
         "continue": "Eiti į mano erdvę →"
-      }
+      },
+      "reviewNotice": "Jei sutiksite, {organization} vadovas galės skaityti jūsų šiai įmonei užfiksuotą darbą, jį peržiūrėti ir pažymėti. Kol to nepadaro, tai lieka jūsų pačių įrašas."
     },
     "teamEnquiriesTitle": "Mano užklausos komandoms",
     "admin": {

@@ -12284,7 +12284,8 @@
         "withOrganization": "Je hebt deze uitnodiging geaccepteerd — je bent nu verbonden met {name}.",
         "plain": "Je hebt deze uitnodiging geaccepteerd — de verbinding is gemaakt.",
         "continue": "Naar mijn ruimte →"
-      }
+      },
+      "reviewNotice": "Als u accepteert, kan een leidinggevende van {organization} het werk lezen dat u voor hen vastlegt en het aftekenen. Tot die tijd blijft het uw eigen vermelding."
     },
     "teamEnquiriesTitle": "Mijn aanvragen aan ploegen",
     "admin": {
