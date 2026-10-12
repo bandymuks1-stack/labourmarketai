@@ -241,7 +241,7 @@ describe("the production mint proves its output path is ignored BEFORE it mints"
   };
 
   it("bare name -> production target -> ignored target -> mint -> write", () => {
-    const name = at("assertBareStorageFilename(OUT_FILENAME)");
+    const name = at("assertBareStorageFilename(OUT_NAME)");
     const prodTarget = at("assertProdQaTarget({");
     const ignored = at("assertIgnoredStorageTarget({");
     const mint = at("admin.auth.admin.generateLink");
@@ -270,6 +270,18 @@ describe("the production mint proves its output path is ignored BEFORE it mints"
       e2eDir: join(WEB, "tests", "e2e"),
     });
     expect(target.ignoreRule).toContain(".gitignore:");
+  });
+
+  it("a per-identity slot (multi-actor walks) stays a bare, ignored name", () => {
+    expect(src).toMatch(/\/\^\[a-z0-9-\]\{1,24\}\$\/\.test\(SLOT\)/);
+    expect(src).toMatch(/assertBareStorageFilename\(OUT_NAME\)/);
+    for (const slot of ["owner", "worker", "worker2", "manager", "agency"]) {
+      const target = assertIgnoredStorageTarget({
+        filename: assertBareStorageFilename(`.storage-state.prod-qa.${slot}.json`),
+        e2eDir: join(WEB, "tests", "e2e"),
+      });
+      expect(target.ignoreRule, slot).toContain(".gitignore:");
+    }
   });
 
   it("refuses by the #1842 code, before any session exists", () => {
