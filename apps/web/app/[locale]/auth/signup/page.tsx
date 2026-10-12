@@ -1,11 +1,13 @@
 import { authPageMetadata } from "@/lib/auth/auth-page-metadata";
 import { Suspense } from "react";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { SignupForm } from "@/components/app/signup-form";
 import { getEnabledProviders } from "@/lib/auth/enabled-providers";
 import { isSafeReturnPath } from "@/lib/auth/redirect";
 import { inviteTokenFromNextPath, maskEmail } from "@/lib/invitations/model";
 import { readInvitationSignupContext } from "@/lib/invitations/signup-bridge";
+import { readPublicInvitationPreview } from "@/lib/invitations/public-preview";
+import { showsStaffReviewNotice } from "@/lib/operations/auto-review-model";
 
 /** The provider surface can change without a deploy (owner flips a provider
  *  in the auth dashboard; the 300 s settings cache expires), so the page
@@ -45,6 +47,27 @@ export default async function SignupPage({
   // `next`; any failure / open link / used / expired invitation = no prefill.
   const inviteToken = isSafeReturnPath(next) ? inviteTokenFromNextPath(next) : null;
   const invite = await readInvitationSignupContext(inviteToken);
+  // Signing up through an addressed invitation ALSO accepts it, so when that
+  // makes the person an employee of a named organization the review sentence
+  // is shown here, on the form that accepts (owner decision 1). The same
+  // server-only public preview the onboarding page reads names the
+  // organization and the relationship; a failed read shows no sentence and the
+  // acceptance then carries no notice (review stays manual).
+  let reviewNoticeText: string | null = null;
+  if (invite.kind === "addressed" && inviteToken) {
+    const pub = await readPublicInvitationPreview(inviteToken, { emitOpened: false });
+    if (
+      pub.kind === "ok" &&
+      showsStaffReviewNotice({
+        invitationType: pub.preview.invitationType,
+        relationshipSlug: pub.preview.relationshipSlug,
+        organizationName: pub.preview.organizationName,
+      })
+    ) {
+      const t = await getTranslations({ locale, namespace: "network.invitePage" });
+      reviewNoticeText = t("reviewNotice", { organization: pub.preview.organizationName ?? "" });
+    }
+  }
   return (
     <Suspense fallback={null}>
       <SignupForm
@@ -52,7 +75,7 @@ export default async function SignupPage({
         facebookEnabled={providers.facebook}
         invitation={
           invite.kind === "addressed" && inviteToken
-            ? { token: inviteToken, maskedEmail: maskEmail(invite.email) ?? "" }
+            ? { token: inviteToken, maskedEmail: maskEmail(invite.email) ?? "", reviewNoticeText }
             : undefined
         }
       />

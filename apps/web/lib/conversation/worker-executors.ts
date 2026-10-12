@@ -204,7 +204,12 @@ export const WORKER_EXECUTORS: {
     // dispatcher's "persisted" event never counts an invitation that was
     // already answered, expired or not the caller's.
     if (input.source === "invitation") {
-      const r = await acceptInvitationByIdAction({ invitationId: input.invitationId, locale: ctx.locale });
+      const r = await acceptInvitationByIdAction({
+        invitationId: input.invitationId,
+        locale: ctx.locale,
+        noticeSurface: "conversation",
+        reviewNotice: input.reviewNotice ?? null,
+      });
       if (r.status === "needs-migration") return { ok: false, code: "needs_migration" };
       if (r.status === "not-authed") return { ok: false, code: "auth" };
       if (r.outcome !== "accepted") return { ok: false, code: r.outcome === "error" ? "error" : r.outcome };

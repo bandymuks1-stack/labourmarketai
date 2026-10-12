@@ -16,6 +16,8 @@ import { Link, useRouter } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
 import { signUpAddressedInviteAction } from "@/lib/invitations/signup-accept-action";
+import { REVIEW_NOTICE_VERSION } from "@/lib/operations/auto-review-model";
+import { StaffReviewNotice } from "@/components/app/staff-review-notice";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
 import {
   RESEND_COOLDOWN_SECONDS,
@@ -66,7 +68,14 @@ export function SignupForm({
    *  browser. A server action signs up with it (the e-mail binding still
    *  compares the session to exactly that address), no confirm-password field
    *  is asked, and the canonical acceptance continues once the session exists. */
-  invitation?: { token: string; maskedEmail: string };
+  invitation?: {
+    token: string;
+    maskedEmail: string;
+    /** The review sentence, already localized, when accepting this invitation
+     *  makes the person an employee of a named organization (owner decision 1).
+     *  Signing up here also accepts, so the person reads it HERE. */
+    reviewNoticeText?: string | null;
+  };
 } = {}) {
   const t = useTranslations("auth.signup");
   const tSocial = useTranslations("auth.social");
@@ -194,6 +203,8 @@ export function SignupForm({
           locale,
           emailRedirectTo: emailRedirectTo(),
           metadata: { ...getFirstTouchAttribution() },
+          // Only when the sentence was on screen (rendered below).
+          reviewNotice: invitation.reviewNoticeText ? REVIEW_NOTICE_VERSION : null,
         });
         if (res.status === "error") {
           throw { code: res.code, message: res.message, status: res.httpStatus };
@@ -416,6 +427,10 @@ export function SignupForm({
           </span>
         )}
       </label>
+
+      {invitation?.reviewNoticeText ? (
+        <StaffReviewNotice text={invitation.reviewNoticeText} testId="signup-review-notice" />
+      ) : null}
 
       <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
         {t("password_label")}

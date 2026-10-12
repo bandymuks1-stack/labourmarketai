@@ -183,6 +183,7 @@ import { DiscoverabilityConsent } from "@/components/app/discoverability-consent
 import { loadEmployerVisibilityForChat } from "@/lib/conversation/employer-visibility-chat";
 import { EMPLOYER_VISIBILITY_HREF } from "@/lib/privacy/employer-visibility";
 import { WorkerInvitationAction } from "@/components/app/conversation/worker-invitation-action";
+import { showsStaffReviewNotice } from "@/lib/operations/auto-review-model";
 import { loadCriteriaSummaryForChat, loadWorkCardPrefillForChat } from "@/lib/conversation/criteria-summary";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
 import {
@@ -1068,6 +1069,7 @@ export function ConversationChat({
   /** AI-workspace copy (W4) — explanations, workflow answers, chip labels. */
   const tAi = useTranslations("workspace.ai");
   const tRelationships = useTranslations("relationshipTypes");
+  const tInvitePage = useTranslations("network.invitePage");
   /** The AI's hand on World State, published by the bridge inside the provider. */
   const worldRef = useRef<AiWorldStateHandle | null>(null);
   const auth = useAuthOptional();
@@ -3289,6 +3291,9 @@ export function ConversationChat({
           locale={locale}
           title={role ? `${who} · ${role}` : who}
           subtitle={[inv.projectTitle, inv.personalMessage].filter(Boolean).join(" · ") || null}
+          reviewNoticeText={
+            showsStaffReviewNotice(inv) ? tInvitePage("reviewNotice", { organization: inv.organizationName ?? "" }) : null
+          }
           labels={{
             accept: labels.invAccept,
             later: labels.invLater,
@@ -3305,7 +3310,7 @@ export function ConversationChat({
         />,
       );
     },
-    [pushEmbed, locale, labels, tRelationships],
+    [pushEmbed, locale, labels, tRelationships, tInvitePage],
   );
 
   /**

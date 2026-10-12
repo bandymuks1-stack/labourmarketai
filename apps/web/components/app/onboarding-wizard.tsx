@@ -17,6 +17,8 @@ import {
 } from "@/lib/location/country-options";
 import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
 import { acceptInvitationAfterSignup } from "@/lib/invitations/signup-accept-action";
+import { REVIEW_NOTICE_VERSION } from "@/lib/operations/auto-review-model";
+import { StaffReviewNotice } from "@/components/app/staff-review-notice";
 import {
   SELF_DECLARED_PROFESSION_MAX_LENGTH,
   normalizeSelfDeclaredProfession,
@@ -82,6 +84,7 @@ export function OnboardingWizard({
   defaultIntents = [],
   skipRoleStep = false,
   invitationToken = null,
+  invitationReviewNotice = null,
   defaultProfessionSlug = null,
   doorIntents = [],
   doorWords = null,
@@ -108,6 +111,10 @@ export function OnboardingWizard({
    *  finish the profile - the e-mail binding still decides; nothing here grants
    *  a consent. Already accepted at signup -> `already_accepted`, harmless. */
   invitationToken?: string | null;
+  /** The review sentence, localized, when finishing here accepts a staff
+   *  invitation of a named organization (owner decision 1). Shown right above
+   *  the button that accepts; only then does the accept carry the notice. */
+  invitationReviewNotice?: string | null;
   /** Registry profession the sentence named (exactly one), else null. */
   defaultProfessionSlug?: string | null;
   /** The landing DOOR the person came through, when `returnTo` is exactly
@@ -390,7 +397,12 @@ export function OnboardingWizard({
       try {
         if (invitationToken) {
           try {
-            await acceptInvitationAfterSignup({ token: invitationToken, locale });
+            await acceptInvitationAfterSignup({
+              token: invitationToken,
+              locale,
+              surface: "onboarding",
+              reviewNotice: invitationReviewNotice ? REVIEW_NOTICE_VERSION : null,
+            });
           } catch (e) {
             console.error("[onboarding] invitation auto-accept failed:", e);
           }
@@ -873,6 +885,10 @@ export function OnboardingWizard({
           {error}
         </p>
       )}
+
+      {invitationToken && invitationReviewNotice ? (
+        <StaffReviewNotice text={invitationReviewNotice} testId="onboarding-review-notice" />
+      ) : null}
 
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
         <Button

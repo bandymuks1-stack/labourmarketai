@@ -87,7 +87,8 @@ describe("invitation attention journey — ONE backbone", () => {
 
   it("the executor delegates to the two EXISTING accept actions and reports ok only on a real accept", () => {
     const block = EXECUTORS.slice(EXECUTORS.indexOf('"worker.respond-invitation": async'), EXECUTORS.indexOf('"worker.express-interest": async'));
-    expect(block).toMatch(/acceptInvitationByIdAction\(\{ invitationId: input\.invitationId, locale: ctx\.locale \}\)/);
+    // The surface + review-notice fields ride along (owner decision 1).
+    expect(block).toMatch(/acceptInvitationByIdAction\(\{\s*invitationId: input\.invitationId,\s*locale: ctx\.locale,\s*noticeSurface: "conversation",\s*reviewNotice: input\.reviewNotice \?\? null,\s*\}\)/);
     expect(block).toMatch(/acceptWorkerInvitationAction\(/);
     expect(block).toMatch(/if \(r\.outcome !== "accepted"\) return \{ ok: false/);
     expect(block).toMatch(/if \(r\.outcome !== "linked"\) return \{ ok: false/);

@@ -68,7 +68,10 @@ export async function acceptInviteFormAction(formData: FormData): Promise<void> 
   const proposedRole = String(formData.get("proposedRole") ?? "") || null;
   if (!token) redirect(`/${locale}/dashboard`);
 
-  const result = await acceptInvitationAction({ token, locale });
+  // The page puts REVIEW_NOTICE_VERSION in the form only when it showed the
+  // review sentence; the action forwards nothing but that exact version.
+  const reviewNotice = String(formData.get("reviewNotice") ?? "") || null;
+  const result = await acceptInvitationAction({ token, locale, noticeSurface: "invite_page", reviewNotice });
   if (result.status === "not-authed") {
     redirect(loginNext(locale, token));
   }
