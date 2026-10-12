@@ -236,7 +236,12 @@ test("A-6. the client answers the offer", async ({ browser }) => {
   const accept = offers.locator('[data-testid^="offer-accept-"]').first();
   if (await accept.isVisible().catch(() => false)) {
     await accept.click();
-    await expect(page.getByTestId("offer-decision-done")).toBeVisible({ timeout: 30_000 });
+    await page.waitForTimeout(5_000);
+    const said = offers.locator('p[role="alert"], [data-testid="offer-decision-not-ready"]').filter({ hasText: /\S/ }).first();
+    if (await said.isVisible().catch(() => false)) throw new Error(`the client's answer was refused: ${await said.innerText()}`);
+    // The decision re-renders the list; the stored status is the proof.
+    await page.reload();
+    await expect(page.getByTestId("scouting-agency-offers").locator('[data-testid="scout-offer-status-accepted"]').first()).toBeVisible({ timeout: 30_000 });
   } else {
     console.info("[agency] no open offer to answer (decided in an earlier run)");
   }
