@@ -305,6 +305,7 @@ export const RELATIONSHIP_INVITE_CHOICES: readonly RelationshipInviteChoice[] = 
   { slug: "employee", requiresOrganizationRole: null },
   { slug: "student", requiresOrganizationRole: "training_provider" },
   { slug: "volunteer", requiresOrganizationRole: null },
+  { slug: "intern", requiresOrganizationRole: null },
   { slug: "collaborator", requiresOrganizationRole: null },
   { slug: "freelancer", requiresOrganizationRole: null },
   { slug: "consultant", requiresOrganizationRole: null },
