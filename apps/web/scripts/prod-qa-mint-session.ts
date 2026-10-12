@@ -52,7 +52,20 @@ import {
   assertIgnoredStorageTarget,
 } from "../lib/testing/e2e-storage-target";
 
+/**
+ * One file per identity when `PROD_QA_STORAGE_SLOT` is set (a multi-actor walk
+ * needs the owner AND the invited worker signed in at once). The slot is
+ * `[a-z0-9-]{1,24}` only, so the name stays a bare filename — and it still goes
+ * through the same bare-name + `git check-ignore` guards below, before any
+ * token exists. Unset: the original single file.
+ */
+const SLOT = process.env.PROD_QA_STORAGE_SLOT;
+if (SLOT !== undefined && !/^[a-z0-9-]{1,24}$/.test(SLOT)) {
+  console.error("[prod-qa-mint] REFUSED: PROD_QA_STORAGE_SLOT must match [a-z0-9-]{1,24}");
+  process.exit(1);
+}
 const OUT_FILENAME = ".storage-state.prod-qa.json";
+const OUT_NAME = SLOT ? `.storage-state.prod-qa.${SLOT}.json` : OUT_FILENAME;
 
 /**
  * The host the session cookie is scoped to — the CANONICAL apex.
@@ -67,7 +80,7 @@ const APP_HOST = process.env.PROD_QA_APP_HOST ?? CANONICAL_HOST;
 async function main(): Promise<void> {
   // STEP 1 — the output name, before anything else. A constant today; asserted
   // anyway so the guard, not review, is what keeps it a bare filename.
-  const requested = assertBareStorageFilename(OUT_FILENAME);
+  const requested = assertBareStorageFilename(OUT_NAME);
 
   const url = process.env.PROD_QA_SUPABASE_URL;
   const anonKey = process.env.PROD_QA_ANON_KEY;
