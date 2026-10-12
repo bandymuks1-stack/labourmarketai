@@ -431,8 +431,9 @@ export function MarketplaceLoopSection({
             {discoverable.map((o) => (
               <li
                 key={o.id}
+                id={`offering-${o.id}`}
                 data-testid="marketplace-offer-row"
-                className="flex items-start justify-between gap-3 rounded-lg border border-ink-500 bg-ink-800/30 p-3"
+                className="scroll-mt-20 flex items-start justify-between gap-3 rounded-lg border border-ink-500 bg-ink-800/30 p-3"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-text-primary">{o.title}</p>
@@ -470,6 +471,7 @@ export function MarketplaceLoopSection({
                   <button
                     type="button"
                     disabled={pending}
+                    data-testid="marketplace-offer-request"
                     onClick={() => {
                       trackFunnel(FUNNEL_EVENTS.serviceRequestStarted, {
                         surface: "marketplace",
@@ -668,6 +670,7 @@ export function MarketplaceLoopSection({
                       <button
                         type="button"
                         disabled={pending}
+                        data-testid="marketplace-incoming-accept"
                         onClick={() =>
                           run(() => respondToRequest(r.id, "accepted", noteById[r.id] ?? null))
                         }
@@ -678,6 +681,7 @@ export function MarketplaceLoopSection({
                       <button
                         type="button"
                         disabled={pending}
+                        data-testid="marketplace-incoming-decline"
                         onClick={() =>
                           run(() => respondToRequest(r.id, "declined", noteById[r.id] ?? null))
                         }

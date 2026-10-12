@@ -225,7 +225,7 @@
     "pause": "Pausieren",
     "expired": "Abgelaufen",
     "expiresOn": "Bis {date}",
-    "openInServices": "Dienstleistungen öffnen",
+    "openInServices": "Leistung anfragen",
     "domains": {
       "all": "Alle",
       "work_resource": "Arbeitsmittel",
@@ -2381,7 +2381,11 @@
           "reviewOn": "Prüfung an",
           "reviewOff": "Prüfung aus",
           "manage": "Mitglieder und Prüfung verwalten →"
-        }
+        },
+        "inviteShareLinkLabel": "Link für die eingeladene Person",
+        "inviteShareLinkHint": "Senden Sie diesen Link auf beliebigem Weg (SMS, Nachricht). Nach der Registrierung mit derselben E-Mail findet die Person die Einladung in ihrem Konto.",
+        "inviteShareCopy": "Link kopieren",
+        "inviteShareCopied": "Kopiert"
       },
       "scoutingBridge": {
         "title": "Arbeitskräfte für diesen Bedarf finden",

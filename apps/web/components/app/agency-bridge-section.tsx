@@ -422,7 +422,7 @@ export function AgencyBridgeSection({
                         </label>
                         <input type="text" name="note" maxLength={500} placeholder=""
                           className="min-w-40 flex-1 rounded-lg border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue" />
-                        <button type="submit" disabled={offerPending}
+                        <button type="submit" disabled={offerPending} data-testid="agency-bridge-offer-submit"
                           className="inline-flex h-10 items-center rounded-lg border border-brand-blue/50 bg-brand-blue/10 px-4 text-sm font-semibold text-brand-blue transition-colors hover:border-brand-blue disabled:opacity-60">
                           {labels.offerButton}
                         </button>

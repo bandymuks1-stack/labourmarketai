@@ -187,12 +187,47 @@ export async function getEmployerWorkerAvailability(
     end_date: string;
     status: string;
   };
+  const absenceRows = (absRes.data ?? []) as AbsenceRow[];
+
+  // The caller's OWN absences come back too (the worker-themselves branch of
+  // the same policy) — an employer who is also a worker should not appear in
+  // their own workforce availability list. That is the ONLY row dropped:
+  // RLS (`caller_manages_worker`) already decided every other row, and since
+  // 20261011160000 it admits people who joined by invitation (an engagement,
+  // no `company_workers` row). Filtering by the roster list hid exactly their
+  // approved leave from the employer's plan.
+  const ownRes = await (supabase as AnyClient)
+    .from("workers")
+    .select("id")
+    .eq("profile_id", userId)
+    .limit(5);
+  const ownWorkerIds = new Set<string>(
+    ((ownRes.data ?? []) as { id: string }[]).map((r) => r.id),
+  );
+  // Unknown own identity → the old roster-only rule, never a self row.
+  const rosterOnly = Boolean(ownRes.error);
+  const unnamed = rosterOnly ? [] : [
+    ...new Set(
+      absenceRows
+        .map((r) => r.worker_id)
+        .filter((id) => !nameByWorker.has(id) && !ownWorkerIds.has(id)),
+    ),
+  ];
+  if (unnamed.length > 0) {
+    const namesRes = await (supabase as AnyClient)
+      .from("workers")
+      .select("id, display_name")
+      .in("id", unnamed.slice(0, MANAGED_WORKER_LIMIT));
+    for (const w of (namesRes.data ?? []) as { id: string; display_name: string | null }[]) {
+      nameByWorker.set(w.id, w.display_name ?? null);
+    }
+    for (const id of unnamed) if (!nameByWorker.has(id)) nameByWorker.set(id, null);
+  }
+
   const unavailability: WorkerUnavailability[] = [];
-  for (const row of (absRes.data ?? []) as AbsenceRow[]) {
-    // The caller's OWN absences come back too (the worker-themselves branch of
-    // the same policy) — an employer who is also a worker should not appear in
-    // their own workforce availability list.
-    if (!nameByWorker.has(row.worker_id)) continue;
+  for (const row of absenceRows) {
+    if (ownWorkerIds.has(row.worker_id)) continue;
+    if (rosterOnly && !nameByWorker.has(row.worker_id)) continue;
     const item = projectAbsenceItem({
       id: row.id,
       startDate: row.start_date,

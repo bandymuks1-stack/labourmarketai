@@ -2,6 +2,7 @@
 
 import { Explain } from "@/components/app/premium/grammar";
 import { useActionState, useState } from "react";
+import { useLocale } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 
 import {
@@ -60,6 +61,12 @@ export interface CompanyWorkersSectionLabels {
    *  without `manage-invitations`. */
   readonly invitationsManagedElsewhere: string;
   readonly statusInvited: string;
+  /** No e-mail is sent for a roster invitation, so the owner gets a link to
+   *  hand over themselves (sign-up; the invitation waits for that address). */
+  readonly inviteShareLinkLabel?: string;
+  readonly inviteShareLinkHint?: string;
+  readonly inviteShareCopy?: string;
+  readonly inviteShareCopied?: string;
   readonly statusAlreadyPending: string;
   readonly statusAlreadyLinked: string;
   readonly statusWordActive: string;
@@ -193,6 +200,8 @@ export function CompanyWorkersSection({
     FormData
   >(inviteCompanyWorkerAction, null);
   const [shouldShowOutcome, setShouldShowOutcome] = useState(true);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const locale = useLocale();
 
   const migrationNeeded =
     workersResult.kind === "needs-migration" ||
@@ -578,6 +587,14 @@ export function CompanyWorkersSection({
                 {outcomeLabel}
               </p>
             ) : null}
+            {shouldShowOutcome && state?.ok && (state.outcome === "invited" || state.outcome === "already_pending") && labels.inviteShareLinkLabel && typeof window !== "undefined" ? (
+              <InviteShareLink
+                url={`${window.location.origin}/${locale}/auth/signup`}
+                labels={labels}
+                copied={linkCopied}
+                onCopied={setLinkCopied}
+              />
+            ) : null}
           </form>
 
           <section
@@ -628,5 +645,42 @@ export function CompanyWorkersSection({
         </section>
       )}
     </section>
+  );
+}
+
+/** The link the owner hands over when no e-mail goes out: sign-up, after
+ *  which the pending roster invitation is found by the same address. */
+function InviteShareLink({
+  url,
+  labels,
+  copied,
+  onCopied,
+}: {
+  url: string;
+  labels: CompanyWorkersSectionLabels;
+  copied: boolean;
+  onCopied: (v: boolean) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5 rounded-md border border-brand-blue/40 bg-brand-blue/5 p-2" data-testid="company-workers-invite-link">
+      <p className="text-xs font-semibold text-text-primary">{labels.inviteShareLinkLabel}</p>
+      <p className="text-xs text-text-secondary">{labels.inviteShareLinkHint}</p>
+      <div className="flex flex-wrap items-center gap-2">
+        <code className="max-w-full truncate rounded bg-ink-800 px-2 py-1 text-meta text-text-primary">{url}</code>
+        <button
+          type="button"
+          data-testid="company-workers-invite-copy-link"
+          onClick={() => {
+            void navigator.clipboard?.writeText(url).then(
+              () => onCopied(true),
+              () => onCopied(false),
+            );
+          }}
+          className="inline-flex min-h-11 sm:min-h-9 items-center rounded border border-ink-500 px-2 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary"
+        >
+          {copied ? labels.inviteShareCopied : labels.inviteShareCopy}
+        </button>
+      </div>
+    </div>
   );
 }

@@ -488,6 +488,8 @@ export function MarketplaceListingsSection({
               <li
                 key={`${row.sourceTable}:${row.id}`}
                 id={row.sourceTable === "marketplace_listings" ? `listing-${row.id}` : undefined}
+                data-testid="market-browse-row"
+                data-source={row.sourceTable}
                 className={`flex flex-col gap-2 rounded-lg border border-ink-500 bg-surface-1 p-3${
                   row.sourceTable === "marketplace_listings" ? focusCls(row.id) : ""
                 }`}
@@ -547,6 +549,7 @@ export function MarketplaceListingsSection({
                     <input type="hidden" name="locale" value={locale} />
                     <button
                       type="submit"
+                      data-testid={`listing-enquire-${row.id}`}
                       className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:border-text-secondary"
                     >
                       <MessageSquare aria-hidden className="h-4 w-4" />
@@ -579,6 +582,7 @@ export function MarketplaceListingsSection({
             <button
               type="button"
               onClick={openCreate}
+              data-testid="listing-add"
               className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md border border-brand-blue bg-brand-blue px-3 py-2 text-sm font-semibold text-text-on-brand transition-colors hover:bg-brand-champagne"
             >
               <Plus aria-hidden className="h-4 w-4" />
@@ -611,6 +615,7 @@ export function MarketplaceListingsSection({
                   <select
                     className={inputCls}
                     value={draft.domain}
+                    data-testid="listing-form-domain"
                     onChange={(e) => changeDomain(e.target.value as ListingDomain)}
                   >
                     {formDomains.map((d) => (
@@ -626,6 +631,7 @@ export function MarketplaceListingsSection({
                 <select
                   className={inputCls}
                   value={draft.listingKind}
+                  data-testid="listing-form-kind"
                   onChange={(e) => setDraft({ ...draft, listingKind: e.target.value as ListingKind })}
                 >
                   <option value="" disabled>
@@ -643,6 +649,7 @@ export function MarketplaceListingsSection({
                 <select
                   className={inputCls}
                   value={draft.category}
+                  data-testid="listing-form-category"
                   onChange={(e) => setDraft({ ...draft, category: e.target.value })}
                 >
                   <option value="" disabled>
@@ -665,6 +672,7 @@ export function MarketplaceListingsSection({
                 className={inputCls}
                 value={draft.title}
                 maxLength={160}
+                data-testid="listing-form-title"
                 placeholder={t("formTitlePlaceholder")}
                 onChange={(e) => setDraft({ ...draft, title: e.target.value })}
               />
@@ -675,6 +683,7 @@ export function MarketplaceListingsSection({
                 className={inputCls}
                 value={draft.description}
                 maxLength={2000}
+                data-testid="listing-form-description"
                 rows={3}
                 placeholder={t("formDescriptionPlaceholder")}
                 onChange={(e) => setDraft({ ...draft, description: e.target.value })}
@@ -686,6 +695,7 @@ export function MarketplaceListingsSection({
                 <input
                   className={inputCls}
                   value={draft.locationCountry}
+                  data-testid="listing-form-country"
                   maxLength={2}
                   placeholder={t("formCountryPlaceholder")}
                   onChange={(e) => setDraft({ ...draft, locationCountry: e.target.value.toUpperCase() })}
@@ -790,6 +800,7 @@ export function MarketplaceListingsSection({
                 type="button"
                 onClick={submit}
                 disabled={pending}
+                data-testid="listing-form-save"
                 className="inline-flex min-h-11 items-center rounded-md border border-brand-blue bg-brand-blue px-4 py-2 text-sm font-medium text-text-on-brand disabled:opacity-50"
               >
                 {pending ? t("saving") : t("save")}
@@ -816,6 +827,7 @@ export function MarketplaceListingsSection({
               <li
                 key={row.id}
                 id={`listing-${row.id}`}
+                data-testid="my-listing-row"
                 className={`flex flex-col gap-2 rounded-lg border border-ink-500 bg-surface-1 p-3${focusCls(row.id)}`}
               >
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -851,6 +863,7 @@ export function MarketplaceListingsSection({
                         title={t("activate")}
                         aria-label={t("activate")}
                         onClick={() => changeStatus(row.id, "active")}
+                        data-testid={`listing-activate-${row.id}`}
                         disabled={pending}
                         className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-state-success hover:border-state-success sm:h-8 sm:w-8"
                       >

@@ -6753,7 +6753,11 @@
           "awayUntil": "Prombūtnē līdz {date}",
           "assign": "Piešķirt projektam",
           "openCalendar": "Atvērt kalendāru"
-        }
+        },
+        "inviteShareLinkLabel": "Saite uzaicinātajam",
+        "inviteShareLinkHint": "Nosūtiet šo saiti jebkādā veidā (SMS, ziņa). Reģistrējoties ar to pašu e-pastu, cilvēks atradīs uzaicinājumu savā kontā.",
+        "inviteShareCopy": "Kopēt saiti",
+        "inviteShareCopied": "Nokopēts"
       }
     }
   },
