@@ -39,6 +39,7 @@ on:
           - learning-practice
           - sectors-languages
           - chat-confirm-once
+          - living-cv-growth
 
 concurrency:
   group: prod-qa-walk
@@ -106,6 +107,7 @@ jobs:
             learning-practice) SPEC=tests/e2e/prod-learning-practice.spec.ts ;;
             sectors-languages) SPEC=tests/e2e/prod-sectors-languages.spec.ts ;;
             chat-confirm-once) SPEC=tests/e2e/prod-chat-confirm-once.spec.ts ;;
+            living-cv-growth) SPEC=tests/e2e/prod-living-cv-growth.spec.ts ;;
           esac
           pnpm exec playwright test "$SPEC" --project=chromium --trace=off --reporter=list,json \
             > ../../prod-qa-result.json
