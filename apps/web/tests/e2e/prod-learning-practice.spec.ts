@@ -50,6 +50,9 @@ test("L-1. the organization declares it trains people, and runs a programme", as
   if (!/\/company\/education/.test(page.url())) {
     console.info("[learning] declaring the training_provider capability");
     await page.goto("/lt/dashboard/company/settings");
+    // The capability card lives in the folded "more tools" section.
+    const more = page.getByTestId("settings-more");
+    if ((await more.getAttribute("open")) === null) await more.locator("summary").first().click();
     const box = page.getByTestId("org-capability-checkbox-training_provider");
     await expect(box).toBeVisible({ timeout: 30_000 });
     if (!(await box.isChecked())) await box.check();
