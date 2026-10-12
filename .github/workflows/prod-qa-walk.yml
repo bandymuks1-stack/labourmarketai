@@ -36,6 +36,7 @@ on:
           - calendar-planning
           - marketplace
           - agency-chain
+          - learning-practice
 
 concurrency:
   group: prod-qa-walk
@@ -100,6 +101,7 @@ jobs:
             calendar-planning) SPEC=tests/e2e/prod-calendar-planning.spec.ts ;;
             marketplace) SPEC=tests/e2e/prod-marketplace.spec.ts ;;
             agency-chain) SPEC=tests/e2e/prod-agency-chain.spec.ts ;;
+            learning-practice) SPEC=tests/e2e/prod-learning-practice.spec.ts ;;
           esac
           pnpm exec playwright test "$SPEC" --project=chromium --trace=off --reporter=list,json \
             > ../../prod-qa-result.json

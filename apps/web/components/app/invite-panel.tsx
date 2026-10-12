@@ -657,6 +657,7 @@ function ResultRow({
             type="button"
             onClick={() => onCopy(r.inviteLink as string)}
             data-testid="invite-copy-link"
+            data-invite-link={r.inviteLink}
             className="inline-flex items-center gap-1 rounded border border-ink-500 px-2 py-1 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary"
           >
             {copiedLink === r.inviteLink ? (
