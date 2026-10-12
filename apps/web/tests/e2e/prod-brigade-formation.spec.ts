@@ -79,6 +79,7 @@ for (const [slot, who, email] of [
     const card = page.getByTestId(teamTestId);
     const teamId = teamTestId.replace("team-brigade-", "");
     const select = page.locator(`[id="team-add-${teamId}"]`);
+    await select.waitFor({ state: "attached", timeout: 30_000 }).catch(() => undefined);
     if (!(await select.count())) {
       throw new Error(`no addable-member picker on the brigade card; card ends: ${(await card.innerText()).slice(-700)}`);
     }
