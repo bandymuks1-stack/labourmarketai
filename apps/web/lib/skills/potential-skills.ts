@@ -43,6 +43,15 @@ export const POTENTIAL_SKILLS: Readonly<Record<string, readonly string[]>> = {
   "waiting-tables": ["customer-service"],
   bartending: ["customer-service"],
   "sales-assistant": ["customer-service"],
+  cashier: ["customer-service", "stock-taking"],
+  merchandising: ["stock-taking"],
+  // kitchens: prep grows into cooking; a cook keeps the stock
+  "kitchen-help": ["cooking"],
+  cooking: ["stock-taking"],
+  // production lines
+  "assembly-work": ["quality-control"],
+  // delivery
+  "delivery-driving": ["customer-service"],
   // office & accounting
   bookkeeping: ["data-entry", "office-software"],
   // education
