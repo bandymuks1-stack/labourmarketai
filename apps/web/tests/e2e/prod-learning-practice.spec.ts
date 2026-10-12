@@ -19,7 +19,9 @@ const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const ALFA = "QA-SYNTHETIC Alfa";
 const PROGRAM = "QA-SYNTHETIC praktikos programa";
 const COHORT = `QA-SYNTHETIC grupė ${RUN}`;
-const LEARNER = /QA-SYNTHETIC Worker/;
+// The institution sees the learner by the name IT typed on the invitation
+// (learner privacy), or by the profile name where membership shows it.
+const LEARNER = /QA-SYNTHETIC (Worker|mokinys)/;
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
 const ENABLED = process.env.PROD_QA_WALK === "1" && ["owner", "worker2"].every((s) => existsSync(state(s)));
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
