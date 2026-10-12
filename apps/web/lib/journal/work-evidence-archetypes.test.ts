@@ -45,6 +45,13 @@ describe("the archetype catalogue is complete and closed", () => {
   });
 });
 
+describe("practice hosted by a company", () => {
+  it("an intern gets the supervised-practice record, without the education-provider apprenticeship module", () => {
+    expect(archetypesForRelationship("intern")).toEqual(["supervised_practice"]);
+    expect(archetypesForRelationship("intern")).not.toContain("apprenticeship_training");
+  });
+});
+
 describe("ISCO-08 coverage — the full world of work", () => {
   it("every one of the 43 sub-major groups resolves to at least one archetype", () => {
     expect(ISCO_SUB_MAJOR_GROUPS).toHaveLength(43);

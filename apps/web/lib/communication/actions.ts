@@ -95,6 +95,9 @@ export async function sendMessage(input: {
    *  bucket under `<conversationId>/<uid>/…`). Registered via the
    *  SECURITY DEFINER RPC after the message insert. */
   attachments?: ConversationAttachmentInput[];
+  /** The offer the thread was opened from (`?offer=`), advisory — the
+   *  database guard decides (see sendMessageCore). */
+  teamOfferId?: string | null;
 }): Promise<CommunicationResult<{ id: string; attachmentsFailed: number }>> {
   const supabase = await createClient();
   const {

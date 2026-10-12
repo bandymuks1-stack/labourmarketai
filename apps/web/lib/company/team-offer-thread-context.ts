@@ -23,3 +23,25 @@ export async function readTeamOfferThreadContext(
   const row = ((data ?? []) as { offer_status: string; subject: string | null }[])[0];
   return row ? { subject: row.subject?.trim() || null, status: row.offer_status } : null;
 }
+
+/**
+ * WHICH OFFER EACH MESSAGE IS ABOUT (20261012180000). The thread stays one per
+ * pair; a message may carry `team_offer_id`, accepted by the database only when
+ * its author is a party and the other side is in the thread. What that offer is
+ * (the brigade / organization name, its status) is read through the SAME
+ * party-gated RPC, once per distinct offer: a participant who is not a party
+ * of an offer sees no label for it. Bounded: at most 20 distinct offers.
+ */
+export async function readTeamOfferMessageLabels(
+  offerIds: readonly (string | null | undefined)[],
+): Promise<ReadonlyMap<string, { subject: string | null; status: string }>> {
+  const ids = [...new Set(offerIds.filter((v): v is string => typeof v === "string" && OFFER_UUID.test(v)))].slice(0, 20);
+  const out = new Map<string, { subject: string | null; status: string }>();
+  await Promise.all(
+    ids.map(async (id) => {
+      const ctx = await readTeamOfferThreadContext(id);
+      if (ctx) out.set(id, ctx);
+    }),
+  );
+  return out;
+}

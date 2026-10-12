@@ -18918,6 +18918,7 @@
       "proposed": "Version {version} sent."
     },
     "threadContext": "About the offer: {subject}",
+    "messageAbout": "Re: {subject}",
     "threadContextShared": "Every offer between you is discussed in this one conversation; it was opened for the one above."
   },
   "teamAssignment": {

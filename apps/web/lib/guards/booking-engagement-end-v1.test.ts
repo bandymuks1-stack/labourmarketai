@@ -1628,8 +1628,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261012110000_team_offer_thread_party_v1.sql",
       // 2026-10-12 (owner-approved RED in chat, APPLIED): exact service_role reads for notifications and intakes.
       "20261012120000_service_role_notification_reads_v1.sql",
-      // 2026-10-12 (RED, needs-human-gate, NOT applied): widens conversations_source_type_check by team_offer (owner decision 3, variant A).
-      "20261012180000_team_offer_conversation_source_v1.sql",
+      // 2026-10-12 (RED, needs-human-gate, NOT applied): conversation_messages.team_offer_id + party guard trigger (owner decision 3, refined).
+      "20261012180000_conversation_message_team_offer_v1.sql",
 ]);
   });
 
