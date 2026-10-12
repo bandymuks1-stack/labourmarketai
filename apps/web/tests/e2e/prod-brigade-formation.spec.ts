@@ -129,3 +129,73 @@ test("14. persistence: a brand-new owner session still shows the brigade with bo
   await expect(page.getByTestId(teamTestId).locator("li .text-state-success")).toHaveCount(2);
   await ctx.close();
 });
+
+// ── §4 B2B: a buyer's need → the brigade offers → both talk → agreed in principle ──
+//
+// The buyer is QA-SYNTHETIC Gama (qa.manager, verified). Its need is labelled
+// with the run id so the brigade picks exactly this need and never a real
+// company's. "Accepted" is AGREED IN PRINCIPLE, not a contract.
+const NEED_ROLE = `QA-SYNTHETIC murininkai ${RUN}`;
+const GAMA = "QA-SYNTHETIC Gama";
+let needId = "";
+let offerId = "";
+
+test("B2B-1. buyer (Gama) posts a need", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "manager");
+  await useWorkspace(page, GAMA);
+  await page.goto("/lt/dashboard/buyer");
+  const form = page.getByTestId("buyer-requests-form");
+  await form.getByTestId("buyer-requests-field-title").fill(`QA-SYNTHETIC ${RUN}`);
+  await form.getByTestId("buyer-requests-field-need-summary").fill("QA-SYNTHETIC: synthetic need for the production brigade walk.");
+  await form.getByTestId("buyer-requests-field-role").fill(NEED_ROLE);
+  await form.getByTestId("buyer-requests-field-team-size").fill("2");
+  await form.getByTestId("buyer-requests-status-submitted").check();
+  await form.getByTestId("buyer-requests-submit").click();
+  const row = page.locator('[data-testid^="buyer-request-row-"]', { hasText: `QA-SYNTHETIC ${RUN}` });
+  await expect(row).toBeVisible({ timeout: 20_000 });
+  needId = (await row.getAttribute("data-testid"))!.replace("buyer-request-row-", "");
+  await ctx.close();
+});
+
+test("B2B-2. the brigade (2 members) offers itself against that need", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "owner");
+  await useWorkspace(page, ALFA);
+  const teamId = teamTestId.replace("team-brigade-", "");
+  const select = page.getByTestId(`team-offer-demand-${teamId}`);
+  await expect(select).toBeVisible({ timeout: 20_000 });
+  await select.selectOption(needId);
+  await page.getByTestId(`team-offer-note-${teamId}`).fill("QA-SYNTHETIC offer: 2 people, from next month.");
+  await page.getByTestId(`team-offer-submit-${teamId}`).click();
+  const sent = page.getByTestId(`team-offer-sent-${teamId}`);
+  await expect(sent).toContainText(NEED_ROLE, { timeout: 20_000 });
+  await ctx.close();
+});
+
+test("B2B-3. buyer sees the offer, opens the thread, writes, and agrees in principle", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "manager");
+  await useWorkspace(page, GAMA);
+  await page.goto(`/lt/dashboard/company/scouting?request=${needId}`);
+  const received = page.locator('[data-testid^="team-offer-received-"]', { hasText: "QA-SYNTHETIC Brigada" });
+  await expect(received).toBeVisible({ timeout: 20_000 });
+  offerId = (await received.getAttribute("data-testid"))!.replace("team-offer-received-", "");
+  await page.getByTestId(`team-offer-message-${offerId}`).click();
+  await page.waitForURL(/\/dashboard\/communication/, { timeout: 20_000 });
+  await page.getByTestId("communication-composer-input").fill(`QA-SYNTHETIC ${RUN}: can you start on the 3rd?`);
+  await page.getByRole("button", { name: /siųsti|send/i }).click();
+  await expect(page.locator("body")).toContainText(`QA-SYNTHETIC ${RUN}: can you start on the 3rd?`, { timeout: 20_000 });
+  await page.goto(`/lt/dashboard/company/scouting?request=${needId}`);
+  await page.getByTestId(`team-offer-accept-${offerId}`).click();
+  await expect(page.getByTestId(`team-offer-received-${offerId}`)).toContainText(/iš esmės|in principle/i, { timeout: 20_000 });
+  await ctx.close();
+});
+
+test("B2B-4. the supplier sees the buyer's message and the agreed state; it survives a new session", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "owner");
+  await useWorkspace(page, ALFA);
+  const teamId = teamTestId.replace("team-brigade-", "");
+  await expect(page.getByTestId(`team-offer-sent-${teamId}`)).toContainText(/iš esmės|in principle|priimt/i);
+  await page.getByTestId(`team-offer-sent-message-${offerId}`).click();
+  await page.waitForURL(/\/dashboard\/communication/, { timeout: 20_000 });
+  await expect(page.locator("body")).toContainText(`QA-SYNTHETIC ${RUN}: can you start on the 3rd?`);
+  await ctx.close();
+});
