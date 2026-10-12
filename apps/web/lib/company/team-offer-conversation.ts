@@ -4,10 +4,8 @@ import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { getOrCreateDirectConversation } from "@/lib/communication/direct-conversation";
 import { evaluateTeamOfferContact } from "@/lib/communication/communication-eligibility";
-import { listReceivedOffers } from "@/lib/company/team-offer";
 import { toActiveLocale } from "@/lib/i18n/config";
 import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
@@ -74,51 +72,25 @@ async function resolveTeamOfferThread(offerId: string, requestId: string, locale
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  let side: "supplier" | "receiver" | null = null;
-  let offerStatus: string | null = null;
-  let counterpart: string | null = null;
-  let subject: string | null = null;
-
-  // Supplier side — the raw row is visible ONLY to the offering team's managers.
-  const { data: own } = await asAny(supabase)
-    .from("team_demand_offers")
-    .select("id, status, request_id, team_org_id")
-    .eq("id", offerId)
-    .maybeSingle();
-
-  if (own) {
-    side = "supplier";
-    offerStatus = (own as { status: string }).status;
-    const admin = asAny(createAdminClient());
-    const { data: req } = await admin
-      .from("customer_requests")
-      .select("profile_id")
-      .eq("id", (own as { request_id: string }).request_id)
-      .maybeSingle();
-    counterpart = (req as { profile_id: string | null } | null)?.profile_id ?? null;
-    const { data: team } = await admin
-      .from("organizations")
-      .select("display_name")
-      .eq("id", (own as { team_org_id: string }).team_org_id)
-      .maybeSingle();
-    subject = (team as { display_name: string | null } | null)?.display_name?.trim() || null;
-  } else if (UUID.test(requestId)) {
-    // Receiver side — the receiver-gated listing must contain this offer.
-    const received = await listReceivedOffers(requestId);
-    const offer = received.status === "ok" ? received.rows.find((o) => o.offerId === offerId) : undefined;
-    if (offer) {
-      side = "receiver";
-      offerStatus = offer.status;
-      subject = offer.teamName;
-      const { data: row } = await asAny(createAdminClient())
-        .from("team_demand_offers")
-        .select("offered_by, request_id")
-        .eq("id", offerId)
-        .maybeSingle();
-      const r = row as { offered_by: string | null; request_id: string } | null;
-      counterpart = r && r.request_id === requestId ? r.offered_by : null;
-    }
-  }
+  // ONE party-gated read (20261012110000): the caller's side, the offer
+  // status, the counterpart and the thread subject — or zero rows for anyone
+  // who is not a party. The service-role reads this used to make were refused
+  // in production (service_role holds no privilege on these tables), so the
+  // thread never opened for either side.
+  void requestId;
+  const { data: rows, error } = await asAny(supabase).rpc("team_offer_thread_party_v1", { p_offer_id: offerId });
+  if (error) return null;
+  const party = ((rows ?? []) as {
+    side: "supplier" | "receiver";
+    offer_status: string;
+    counterpart_profile_id: string | null;
+    subject: string | null;
+  }[])[0];
+  if (!party) return null;
+  const side = party.side;
+  const offerStatus = party.offer_status;
+  const counterpart = party.counterpart_profile_id;
+  const subject = party.subject?.trim() || null;
 
   if (evaluateTeamOfferContact({ offerStatus, side }) !== "allowed") return null;
   if (!counterpart || counterpart === user.id) return null;

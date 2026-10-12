@@ -468,7 +468,10 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    and nothing is sent outbound. Pinned in
     //    lib/guards/authority-closure-first-package.test.ts (exactly one
     //    call, after the authority gate, only conversation_participants).
-    //  - lib/company/team-offer-conversation.ts — the brigade-offer
+    //  - (RETIRED 2026-10-12: lib/company/team-offer-conversation.ts now reads
+    //    through the party-gated team_offer_thread_party_v1 and holds no
+    //    service-role client; prod service_role could not read these tables.)
+    //    Former note — the brigade-offer
     //    negotiation thread (2026-10-11). READ-ONLY, three columns, AFTER the
     //    caller's side was proven by their OWN authorized read (the offer row
     //    under team_demand_offers_select_v1 for the supplier; the
@@ -503,7 +506,6 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/commercial/handoff-dispatch.ts",
       "lib/communication/communication-core.ts",
       "lib/company/claim-public-intake.ts",
-      "lib/company/team-offer-conversation.ts",
       "lib/email/send-ledger-store.ts",
       "lib/invitations/external-referral-receive.ts",
       "lib/invitations/public-preview.ts",
