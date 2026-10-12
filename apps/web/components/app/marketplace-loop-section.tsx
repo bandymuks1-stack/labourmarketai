@@ -284,13 +284,13 @@ export function MarketplaceLoopSection({
 
   // Next step for an ACCEPTED request — opens (or reopens) the buyer↔provider
   // conversation; the granting fact is re-verified server-side by the action.
-  const MessageCta = ({ requestId, testid }: { requestId: string; testid: string }) => (
+  const MessageCta = ({ requestId, testId }: { requestId: string; testId: string }) => (
     <form action={openServiceRequestConversationAction}>
       <input type="hidden" name="requestId" value={requestId} />
       <input type="hidden" name="locale" value={locale} />
       <button
         type="submit"
-        data-testid={testid}
+        data-testid={testId}
         className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs text-brand-blue transition-colors hover:border-brand-blue disabled:opacity-50"
       >
         <MessageSquare className="h-3 w-3" /> {labels.messageCta}
@@ -554,7 +554,7 @@ export function MarketplaceLoopSection({
                   </button>
                 )}
                 {r.status === "accepted" && (
-                  <MessageCta requestId={r.id} testid="marketplace-outgoing-message-cta" />
+                  <MessageCta requestId={r.id} testId="marketplace-outgoing-message-cta" />
                 )}
                 {/* Repeat action (PR 6b): a concluded request is not a dead
                     end — send a NEW request for the same offering (previous
@@ -693,7 +693,7 @@ export function MarketplaceLoopSection({
                   </div>
                 )}
                 {r.status === "accepted" && (
-                  <MessageCta requestId={r.id} testid="marketplace-incoming-message-cta" />
+                  <MessageCta requestId={r.id} testId="marketplace-incoming-message-cta" />
                 )}
               </li>
               );

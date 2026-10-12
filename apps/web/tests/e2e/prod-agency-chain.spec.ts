@@ -61,7 +61,7 @@ test("A-1. the agency has its own organization (set up once, through the product
     await page.getByTestId("onboarding-intent-agency").click();
     await page.getByTestId("onboarding-intents-continue").click();
     await page.getByTestId("onboarding-country").click();
-    await page.getByTestId("onboarding-country-search").fill("Lietuva");
+    await page.locator("[data-testid$='country-search']").first().fill("Lietuva");
     await page.getByRole("option", { name: /Lietuva/ }).first().click();
     await page.getByTestId("onboarding-submit").click();
     await page.waitForURL(/\/dashboard/, { timeout: 30_000 });
