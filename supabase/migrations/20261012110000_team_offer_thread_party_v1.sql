@@ -1,3 +1,4 @@
+-- @human-gate-approved  (owner-approved 2026-10-12 in chat; APPLIED)
 -- team_offer_thread_party_v1 — who the OTHER side of a brigade / organization
 -- offer is, for the offer's own parties only (production walk 2026-10-12).
 --

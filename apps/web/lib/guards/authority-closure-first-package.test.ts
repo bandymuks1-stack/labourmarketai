@@ -78,6 +78,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261012090000_",
       // 2026-10-12 (RED, needs-human-gate): Chat First transcript per person + workspace.
       "20261012100000_",
+      // 2026-10-12 (owner-approved RED): party-gated offer thread read + service_role notification reads.
+      "20261012110000_",
+      "20261012120000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
