@@ -1616,6 +1616,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261008120000_manager_approval_skill_confidence_v1.sql",
       // 2026-10-08 (RED by GRANT, needs-human-gate): SELECT to authenticated on five RLS tables whose policies were unreachable - marker is the human-gate acknowledgement.
       "20261008210000_rls_tables_missing_select_grant_v1.sql",
+      // 2026-10-12 (RED, needs-human-gate, NOT applied): service_role-only aggregate product metrics - marker is the human-gate acknowledgement.
+      "20261012090000_ops_product_metrics_v1.sql",
 ]);
   });
 
