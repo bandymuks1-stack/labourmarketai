@@ -2,7 +2,6 @@
 
 import { Explain } from "@/components/app/premium/grammar";
 import { useActionState, useState } from "react";
-import { useLocale } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 
 import {
@@ -201,7 +200,6 @@ export function CompanyWorkersSection({
   >(inviteCompanyWorkerAction, null);
   const [shouldShowOutcome, setShouldShowOutcome] = useState(true);
   const [linkCopied, setLinkCopied] = useState(false);
-  const locale = useLocale();
 
   const migrationNeeded =
     workersResult.kind === "needs-migration" ||
@@ -589,7 +587,7 @@ export function CompanyWorkersSection({
             ) : null}
             {shouldShowOutcome && state?.ok && (state.outcome === "invited" || state.outcome === "already_pending") && labels.inviteShareLinkLabel && typeof window !== "undefined" ? (
               <InviteShareLink
-                url={`${window.location.origin}/${locale}/auth/signup`}
+                url={`${window.location.origin}/${window.location.pathname.split("/")[1] || "lt"}/auth/signup`}
                 labels={labels}
                 copied={linkCopied}
                 onCopied={setLinkCopied}

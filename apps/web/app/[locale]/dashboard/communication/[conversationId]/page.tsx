@@ -7,6 +7,7 @@ import { Lock } from "lucide-react";
 import { AdminJoinConversation } from "@/components/app/admin-join-conversation";
 import { CommunicationComposer } from "@/components/app/communication-composer";
 import { MarkReadOnMount } from "@/components/app/mark-read-on-mount";
+import { readTeamOfferThreadContext } from "@/lib/company/team-offer-thread-context";
 import { RefreshOnFocus } from "@/components/app/refresh-on-focus";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { createClient } from "@/lib/supabase/server";
@@ -81,7 +82,7 @@ export default async function ConversationDetailPage({
   // specific offer, the thread names it — read through the SAME party-gated
   // RPC that opened it (a non-party gets zero rows, so a crafted ?offer=
   // shows nothing).
-  const offerContext = await readOfferContext(supabase, offerParam);
+  const offerContext = await readTeamOfferThreadContext(offerParam);
   const tOffer = offerContext ? await getTranslations("teamDemandOffer") : null;
   const card = describeConversationCard({
     kind: conversation.kind,
@@ -484,15 +485,3 @@ function OriginalMessageText({ id, body }: { id: string; body: string }) {
   );
 }
 
-const OFFER_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-async function readOfferContext(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  offerId: string | undefined,
-): Promise<{ subject: string | null; status: string } | null> {
-  if (!offerId || !OFFER_UUID.test(offerId)) return null;
-  const { data, error } = await asAny(supabase).rpc("team_offer_thread_party_v1", { p_offer_id: offerId });
-  if (error) return null;
-  const row = ((data ?? []) as { offer_status: string; subject: string | null }[])[0];
-  return row ? { subject: row.subject?.trim() || null, status: row.offer_status } : null;
-}
