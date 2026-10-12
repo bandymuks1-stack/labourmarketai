@@ -56,9 +56,12 @@ async function inviteWorker(browser: Browser, tag: string): Promise<string | nul
   await page.goto("/lt/dashboard");
   await workspace(page, ALFA);
   await page.goto("/lt/dashboard/network");
+  // The panel renders closed (its title is the trigger) or already open;
+  // wait for either before deciding — a not-yet-hydrated page shows neither.
   const open = page.getByTestId("invite-panel-open");
-  if (await open.isVisible().catch(() => false)) await open.click();
   const type = page.getByTestId("invite-type");
+  await expect(open.or(type).first()).toBeVisible({ timeout: 30_000 });
+  if (await open.isVisible().catch(() => false)) await open.click();
   await expect(type).toBeVisible({ timeout: 30_000 });
   await type.selectOption("join_team");
   const emailMode = page.getByTestId("invite-mode-email");
