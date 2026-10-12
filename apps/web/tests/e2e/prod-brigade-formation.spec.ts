@@ -222,6 +222,10 @@ test("B2B-3. buyer sees the offer and writes in its thread", async ({ browser })
   offerId = (await received.getAttribute("data-testid"))!.replace("team-offer-received-", "");
   await page.getByTestId(`team-offer-message-${offerId}`).click();
   await page.waitForURL(/\/dashboard\/communication/, { timeout: 20_000 });
+  // One thread per pair: opened from THIS offer, it names the need and the
+  // offer's live status, so offers between the same two never blur together.
+  await expect(page.getByTestId("thread-offer-context")).toBeVisible({ timeout: 20_000 });
+  console.info(`[b2b] thread context: ${await page.getByTestId("thread-offer-context").innerText()}`);
   const input = page.getByTestId("communication-composer-input");
   await input.fill(MSG);
   await input.locator("xpath=ancestor::form").locator('button[type="submit"]').click();
