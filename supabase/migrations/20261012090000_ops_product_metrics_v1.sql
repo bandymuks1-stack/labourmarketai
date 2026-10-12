@@ -1,3 +1,4 @@
+-- @human-gate-approved  (acknowledgement only: RED class, draft + needs-human-gate, owner applies)
 -- ops_product_metrics_v1 — aggregate product metrics for the operator view and
 -- the hourly monitor (owner programme 2026-10-12 §8–§9).
 --
