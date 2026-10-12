@@ -23,8 +23,13 @@ const contexts: StudentContextRow[] = [
 function entry(id: string, ctx: string, createdAt: string, text = "Laid tiles"): EvidenceEntryRow {
   return { id, engagement_context_id: ctx, entry_type_slug: "supervised_practice", created_at: createdAt, original_text: text };
 }
-function conf(entryId: string, confirmer: string, createdAt = "2026-10-02T10:00:00Z"): EvidenceConfirmationRow {
-  return { entry_id: entryId, confirmer_id: confirmer, created_at: createdAt };
+function conf(
+  entryId: string,
+  confirmer: string,
+  createdAt = "2026-10-02T10:00:00Z",
+  decision: "approved" | "rejected" | "changes_requested" = "approved",
+): EvidenceConfirmationRow {
+  return { entry_id: entryId, confirmer_id: confirmer, created_at: createdAt, confirmation_scope: { decision } };
 }
 
 describe("recognition evidence — exactly what the RPC will accept", () => {
@@ -59,14 +64,14 @@ describe("recognition evidence — exactly what the RPC will accept", () => {
     expect(Object.keys(r)).toHaveLength(0);
   });
 
-  it("uses the earliest confirmation by another person and lists the entry once", () => {
+  it("dates the entry by the latest approving decision of another person and lists it once", () => {
     const r = buildEvidenceBySubject(
       contexts,
       [entry("e1", CTX_A, "2026-10-01T08:00:00Z"), entry("e1", CTX_A, "2026-10-01T08:00:00Z")],
       [conf("e1", ASSESSOR, "2026-10-05T10:00:00Z"), conf("e1", "dddddddd-dddd-4ddd-8ddd-dddddddddddd", "2026-10-03T10:00:00Z"), conf("e1", LEARNER_A, "2026-10-01T09:00:00Z")],
     );
     expect(r[LEARNER_A]).toHaveLength(1);
-    expect(r[LEARNER_A]![0]!.confirmedOn).toBe("2026-10-03");
+    expect(r[LEARNER_A]![0]!.confirmedOn).toBe("2026-10-05");
   });
 
   it("orders newest first and never offers more than the RPC accepts", () => {
@@ -78,6 +83,24 @@ describe("recognition evidence — exactly what the RPC will accept", () => {
     expect(r[LEARNER_A]).toHaveLength(MAX_CITED_ENTRIES);
     const dates = r[LEARNER_A]!.map((o) => o.recordedOn);
     expect([...dates].sort().reverse()).toEqual(dates);
+  });
+});
+
+describe("a rejection is not a sign-off", () => {
+  it("never lists an entry another person rejected or asked to change", () => {
+    for (const d of ["rejected", "changes_requested"] as const) {
+      const r = buildEvidenceBySubject(contexts, [entry("e1", CTX_A, "2026-10-01T08:00:00Z")], [conf("e1", ASSESSOR, "2026-10-02T10:00:00Z", d)]);
+      expect(r[LEARNER_A]).toBeUndefined();
+    }
+  });
+
+  it("latest independent decision wins: approve then reject withdraws, reject then approve restores", () => {
+    const e = [entry("e1", CTX_A, "2026-10-01T08:00:00Z")];
+    const withdrawn = buildEvidenceBySubject(contexts, e, [conf("e1", ASSESSOR, "2026-10-02T10:00:00Z"), conf("e1", ASSESSOR, "2026-10-03T10:00:00Z", "rejected")]);
+    expect(withdrawn[LEARNER_A]).toBeUndefined();
+    const restored = buildEvidenceBySubject(contexts, e, [conf("e1", ASSESSOR, "2026-10-02T10:00:00Z", "rejected"), conf("e1", ASSESSOR, "2026-10-03T10:00:00Z")]);
+    expect(restored[LEARNER_A]).toHaveLength(1);
+    expect(restored[LEARNER_A]![0]!.confirmedOn).toBe("2026-10-03");
   });
 });
 

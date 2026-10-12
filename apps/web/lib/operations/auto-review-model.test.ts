@@ -37,7 +37,7 @@ function inv(over: Partial<ReviewInvitationRow> = {}): ReviewInvitationRow {
   return { id: "i1", organization_id: ORG, invitation_type: "join_team", relationship_slug: null, ...over };
 }
 function run(c: ReviewContextRow[], a: ReviewAcceptanceRow[], i: ReviewInvitationRow[], organizationId = ORG) {
-  return eligibleForAutoReview({ organizationId, contexts: c, acceptances: a, invitations: i });
+  return eligibleForAutoReview({ organizationId, contexts: c, acceptances: a, invitations: i, disclosureOnAllPaths: true });
 }
 
 describe("auto-review eligibility — only a relationship the employee accepted and understood", () => {
@@ -106,5 +106,17 @@ describe("the accept screen and the rule agree on what is an employee relationsh
     for (const t of ["collaborate_partner", "join_project", "join_platform", "invite_company", null, undefined]) {
       expect(acceptanceCreatesEmployeeRelationship({ invitationType: t as string | null, relationshipSlug: null })).toBe(false);
     }
+  });
+});
+
+import { eligibleForAutoReview as eligibleDefault, REVIEW_DISCLOSURE_ON_ALL_ACCEPT_PATHS, UNTOUCHED_WINDOW_MS } from "./auto-review-model";
+
+describe("fail-safe: the automation stays off until every acceptance path shows the notice", () => {
+  it("is off by default, whatever the rows say", () => {
+    expect(REVIEW_DISCLOSURE_ON_ALL_ACCEPT_PATHS).toBe(false);
+    expect(eligibleDefault({ organizationId: "x", contexts: [], acceptances: [], invitations: [] })).toEqual([]);
+  });
+  it("the untouched window is seconds, not minutes (a manual opt-out must survive)", () => {
+    expect(UNTOUCHED_WINDOW_MS).toBeLessThanOrEqual(10_000);
   });
 });
