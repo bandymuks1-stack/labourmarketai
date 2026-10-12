@@ -30,6 +30,7 @@ on:
         options:
           - brigade-formation
           - employee-beta-gate
+          - role-routes
 
 concurrency:
   group: prod-qa-walk
@@ -88,6 +89,7 @@ jobs:
           case "${{ inputs.spec }}" in
             brigade-formation) SPEC=tests/e2e/prod-brigade-formation.spec.ts ;;
             employee-beta-gate) SPEC=tests/e2e/employee-beta-gate.spec.ts ;;
+            role-routes) SPEC=tests/e2e/prod-role-routes.spec.ts ;;
           esac
           pnpm exec playwright test "$SPEC" --project=chromium --trace=off --reporter=list,json \
             > ../../prod-qa-result.json
