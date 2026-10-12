@@ -84,8 +84,8 @@ test("2. the employer finds it in the review queue and approves it", async ({ br
 test("3. the worker sees it confirmed, and the Living CV counts confirmed work", async ({ browser }) => {
   const { page, close } = await as(browser, "worker");
   await page.goto("/lt/dashboard/journal");
-  await page.getByTestId(`journal-entry-more-${entryId}`).click();
-  await expect(page.getByTestId(`journal-entry-status-${entryId}`).locator('li[data-step="approved"]')).toBeVisible({
+  // The decision timeline lives in the folded details of the entry card.
+  await expect(page.getByTestId(`journal-entry-status-${entryId}`).locator('li[data-step="approved"]')).toHaveCount(1, {
     timeout: 20_000,
   });
   await page.goto("/lt/cv");
