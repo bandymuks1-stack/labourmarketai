@@ -1628,6 +1628,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261012110000_team_offer_thread_party_v1.sql",
       // 2026-10-12 (owner-approved RED in chat, APPLIED): exact service_role reads for notifications and intakes.
       "20261012120000_service_role_notification_reads_v1.sql",
+      // 2026-10-12 (RED, needs-human-gate, NOT applied): staff review notice acceptance fact + record RPC (owner decision 1, step 2).
+      "20261012190000_staff_review_notice_on_acceptance_v1.sql",
 ]);
   });
 
