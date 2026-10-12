@@ -121,7 +121,9 @@ test("5-7. each worker opens the link, accepts, and is in the brigade (desktop +
     await expect(page.getByTestId("invite-page")).toBeVisible();
     await expect(page.getByTestId("invite-org")).toContainText("QA-SYNTHETIC Brigada");
     await page.getByTestId("invite-accept").click();
-    await expect(page.getByTestId("invite-accepted-by-you")).toBeVisible({ timeout: 20_000 });
+    // Accepting lands the person in their workspace with a notice.
+    await page.waitForURL((u) => !u.pathname.includes("/invite/"), { timeout: 30_000 });
+    console.info(`[brigade] ${slot} landed on ${new URL(page.url()).pathname}${new URL(page.url()).search}`);
     // Re-opening the same link is now closed, not a second membership.
     await page.goto(links[slot]!);
     await expect(page.getByTestId("invite-accepted-by-you").or(page.getByTestId("invite-closed"))).toBeVisible();
