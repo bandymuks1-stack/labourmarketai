@@ -498,6 +498,41 @@ export async function getTeamBrigadesData(): Promise<TeamBrigadesData> {
     }
   }
 
+  // NAMES. `profiles` is own-row under RLS, so the embedded full_name is null
+  // for every OTHER person and the picker and the member list printed "—" for
+  // everyone (production walk 2026-10-12: the owner could not tell who they
+  // were inviting). The worker card's display_name is readable to the
+  // manager through can_view_worker — the same predicate that lets the
+  // manager see the person at all — so it names them; nothing is widened.
+  const unnamed = new Set<string>();
+  for (const list of membersByTeam.values()) for (const m of list) if (m.name === "—") unnamed.add(m.profileId);
+  for (const p of pool ?? []) if (p.worker.name === "—") unnamed.add(p.worker.profileId);
+  if (unnamed.size > 0) {
+    const { data: named } = await asAny(supabase)
+      .from("workers")
+      .select("profile_id, display_name")
+      .in("profile_id", [...unnamed])
+      .limit(POOL_READ_LIMIT);
+    const byProfile = new Map<string, string>();
+    for (const w of (named ?? []) as { profile_id: string | null; display_name: string | null }[]) {
+      const n = w.display_name?.trim();
+      if (w.profile_id && n) byProfile.set(w.profile_id, n);
+    }
+    for (const [teamId, list] of membersByTeam) {
+      membersByTeam.set(
+        teamId,
+        list.map((m) => (m.name === "—" && byProfile.has(m.profileId) ? { ...m, name: byProfile.get(m.profileId)! } : m)),
+      );
+    }
+    if (pool) {
+      for (const p of pool) {
+        if (p.worker.name === "—" && byProfile.has(p.worker.profileId)) {
+          p.worker = { ...p.worker, name: byProfile.get(p.worker.profileId)! };
+        }
+      }
+    }
+  }
+
   const teams: TeamBrigade[] = [];
   for (const t of teamRows) {
     const members = membersByTeam.get(t.id) ?? [];
