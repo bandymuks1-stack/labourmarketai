@@ -222,9 +222,17 @@ test("B2B-3. buyer sees the offer and writes in its thread", async ({ browser })
   offerId = (await received.getAttribute("data-testid"))!.replace("team-offer-received-", "");
   await page.getByTestId(`team-offer-message-${offerId}`).click();
   await page.waitForURL(/\/dashboard\/communication/, { timeout: 20_000 });
-  await page.getByTestId("communication-composer-input").fill(MSG);
-  await page.getByRole("button", { name: /siųsti|send/i }).click();
-  await expect(page.locator("body")).toContainText(MSG, { timeout: 20_000 });
+  const input = page.getByTestId("communication-composer-input");
+  await input.fill(MSG);
+  await input.locator("xpath=ancestor::form").locator('button[type="submit"]').click();
+  // Sent = the composer is cleared; anything else is the product's answer.
+  const sent = await expect(input).toHaveValue("", { timeout: 20_000 }).then(() => true, () => false);
+  if (!sent) {
+    const why = await page.getByTestId("communication-composer-error").innerText().catch(() => "(no error shown)");
+    throw new Error(`the buyer's message was not sent: ${why}`);
+  }
+  await expect(page.locator("main")).toContainText(MSG, { timeout: 20_000 });
+  console.info(`[b2b] thread ${new URL(page.url()).pathname}`);
   await ctx.close();
 });
 
