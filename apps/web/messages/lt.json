@@ -2033,7 +2033,7 @@
           "key": "Reikalavimo raktas (slug)",
           "country": "Šalis (2 raidės)",
           "evidence": "Įrodymų įrašų ID",
-          "evidenceHint": "Besimokančiojo darbo žurnalo įrašų ID, atskirti kableliais. Registras priima tik įrašus, kuriuos yra pažymėjęs antras asmuo.",
+          "evidenceHint": "Šio besimokančiojo praktikos įrašai, kuriuos yra pažymėjęs kitas asmuo. Pažymėkite tuos, kurie pagrindžia sprendimą.",
           "decision": "Sprendimas",
           "recognised": "Pripažinta",
           "notRecognised": "Nepripažinta",
@@ -2046,7 +2046,12 @@
           "needsMigration": "Neįrašyta: pripažinimų registras dar nepasiekiamas.",
           "forbidden": "Ši įstaiga negali įrašyti šio pripažinimo šiam asmeniui.",
           "invalid": "Patikrinkite reikšmes.",
-          "error": "Kažkas nepavyko. Bandykite dar kartą."
+          "error": "Kažkas nepavyko. Bandykite dar kartą.",
+          "evidenceChooseLearner": "Pasirinkite besimokantįjį, kad matytumėte jo praktiką, kurią pažymėjo kitas asmuo.",
+          "evidenceNone": "Šis besimokantysis dar neturi praktikos įrašo, kurį būtų pažymėjęs kitas asmuo. Pirmiausia jo praktika turi būti pažymėta; tik tada pripažinime galima ją nurodyti.",
+          "evidenceUnavailable": "Besimokančiojo praktikos įrašų šiuo metu nepavyko nuskaityti. Nieko neįrašyta.",
+          "evidenceRecorded": "Įrašyta",
+          "evidenceConfirmed": "pažymėta"
         }
       },
       "learners": {

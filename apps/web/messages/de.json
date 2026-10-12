@@ -2033,7 +2033,7 @@
           "key": "Anforderungsschlüssel (Slug)",
           "country": "Land (2 Buchstaben)",
           "evidence": "IDs der Nachweiseinträge",
-          "evidenceHint": "IDs von Journaleinträgen der Arbeit der lernenden Person, durch Kommas getrennt. Das Register nimmt nur Einträge an, die eine zweite Person abgezeichnet hat.",
+          "evidenceHint": "Praxiseinträge dieser lernenden Person, die jemand anderes bestätigt hat. Wählen Sie die aus, die die Entscheidung stützen.",
           "decision": "Entscheidung",
           "recognised": "Anerkannt",
           "notRecognised": "Nicht anerkannt",
@@ -2046,7 +2046,12 @@
           "needsMigration": "Nicht erfasst: Das Anerkennungsregister ist noch nicht verfügbar.",
           "forbidden": "Diese Einrichtung kann diese Anerkennung für diese Person nicht erfassen.",
           "invalid": "Bitte prüfen Sie die Werte.",
-          "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+          "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+          "evidenceChooseLearner": "Wählen Sie eine lernende Person, um deren bestätigte Praxis zu sehen.",
+          "evidenceNone": "Diese Person hat noch keinen Praxiseintrag, den jemand anderes bestätigt hat. Bestätigen Sie zuerst die Praxis; erst dann kann eine Anerkennung sie nennen.",
+          "evidenceUnavailable": "Die Praxiseinträge konnten gerade nicht gelesen werden. Es wurde nichts erfasst.",
+          "evidenceRecorded": "Erfasst",
+          "evidenceConfirmed": "bestätigt"
         }
       },
       "learners": {
