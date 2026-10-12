@@ -67,20 +67,33 @@ test("1-2. owner creates the brigade in Alfa", async ({ browser }) => {
   await ctx.close();
 });
 
-for (const [slot, who] of [
-  ["worker", /worker\+multiw|QA.*worker/i],
-  ["worker2", /goal3|QA.*worker/i],
+// Synthetic display names (profiles of the allowlisted cast) and the address
+// each one accepts with — typed only if the product asks for it.
+for (const [slot, who, email] of [
+  ["worker", /Vytas Darbininkas/, "qa.worker+multiw@labourmarket.ai"],
+  ["worker2", /QA-SYNTHETIC Worker/, "qa.worker+goal3@labourmarket.ai"],
 ] as const) {
   test(`3-4. owner invites ${slot} and gets a working link (e-mail is off)`, async ({ browser }) => {
     const { ctx, page } = await as(browser, "owner");
     await useWorkspace(page, ALFA);
     const card = page.getByTestId(teamTestId);
-    const select = card.locator("select");
+    const teamId = teamTestId.replace("team-brigade-", "");
+    const select = page.locator(`#team-add-${teamId}`);
+    if (!(await select.count())) {
+      throw new Error(`no addable-member picker on the brigade card; card says: ${(await card.innerText()).slice(0, 600)}`);
+    }
     const options = await select.locator("option").allInnerTexts();
-    const pick = options.find((o) => who.test(o) && !links[o]);
+    const pick = options.find((o) => who.test(o));
     expect(pick, `addable list offers ${slot}: ${options.join(" | ")}`).toBeTruthy();
     await select.selectOption({ label: pick! });
-    await card.getByTestId(teamTestId.replace("team-brigade-", "team-invite-member-")).click();
+    await page.getByTestId(`team-invite-member-${teamId}`).click();
+    // The owner may not be able to read the worker's address (profiles are
+    // own-row only); the product then asks for it and the owner types it.
+    const typed = page.getByTestId(`team-invite-email-${teamId}`);
+    if (await typed.isVisible({ timeout: 8_000 }).catch(() => false)) {
+      await typed.fill(email);
+      await page.getByTestId(`team-invite-member-${teamId}`).click();
+    }
     const box = page.getByTestId("team-invite-link");
     await expect(box).toBeVisible({ timeout: 20_000 });
     const url = (await box.locator("code").innerText()).trim();
