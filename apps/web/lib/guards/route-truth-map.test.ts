@@ -161,6 +161,7 @@ const CLASSIFICATION: Record<string, string> = {
   "dashboard/admin/import-sandbox": "INTERNAL_ADMIN",
   "dashboard/admin/language-feedback": "INTERNAL_ADMIN",
   "dashboard/admin/launch-readiness": "INTERNAL_ADMIN",
+  "dashboard/admin/metrics": "INTERNAL_ADMIN",
   "dashboard/admin/league": "INTERNAL_ADMIN",
   "dashboard/admin/market": "INTERNAL_ADMIN",
   "dashboard/admin/matching": "INTERNAL_ADMIN",

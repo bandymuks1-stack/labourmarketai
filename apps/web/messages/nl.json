@@ -9398,6 +9398,31 @@
       }
     }
   },
+  "adminMetrics": {
+    "title": "Productcijfers",
+    "intro": "Live tellingen uit de canonieke tabellen, gesplitst in REAL, TEST (synthetische testaccounts, testdomeinen) en INTERNAL (team, beheerders). — betekent dat de bron niet gelezen kon worden; het is nooit nul.",
+    "computedAt": "Berekend {at}",
+    "unknown": "Onleesbare bronnen (getoond als —): {sources}",
+    "truncated": "Rijlimiet bereikt, tellingen zijn een ondergrens: {sources}",
+    "groups": {
+      "users": "Mensen en activiteit",
+      "teams": "Ploegen en uitnodigingen",
+      "b2b": "B2B-markt",
+      "work": "Werkjournaal en Living CV",
+      "technical": "Technisch"
+    },
+    "col": {
+      "metric": "Cijfer",
+      "total": "Totaal",
+      "source": "Bron",
+      "rule": "Regel",
+      "window": "Periode"
+    },
+    "signals": {
+      "title": "Alarmregels",
+      "intro": "Elk uur geëvalueerd door de product-monitor-workflow. Een overschrijding opent één GitHub-issue per signaal en sluit het bij herstel."
+    }
+  },
   "billingStatus": {
     "badge": {
       "disabled": "BETALINGEN UIT",

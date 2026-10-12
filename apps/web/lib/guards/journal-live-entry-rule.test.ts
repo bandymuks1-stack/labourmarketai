@@ -216,6 +216,10 @@ describe("player-card — one file may not hold two answers", () => {
  * behaviour. It claims only that no reader is unclassified.
  */
 const SEES_EVERY_ROW: Record<string, string> = {
+  // Monitor (owner programme 2026-10-12 §9): its integrity probe LOOKS FOR
+  // deleted entries that still carry a confirmation — it must see them.
+  "scripts/product-monitor.ts":
+    "integrity probe counts confirmations whose entry is deleted; counts only",
   // THE home of the rule itself.
   "lib/journal/journal-list-core.ts":
     "defines the rule; reads all rows because `correctedOriginals` needs the superseded ones",

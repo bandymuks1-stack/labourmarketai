@@ -9398,6 +9398,31 @@
       }
     }
   },
+  "adminMetrics": {
+    "title": "Produkto metrikos",
+    "intro": "Gyvi skaičiai iš kanoninių lentelių, atskirti į REAL, TEST (sintetinės testinės paskyros, testiniai domenai) ir INTERNAL (komanda, administratoriai). — reiškia, kad šaltinio nepavyko perskaityti; tai niekada nėra nulis.",
+    "computedAt": "Apskaičiuota {at}",
+    "unknown": "Neperskaityti šaltiniai (rodoma —): {sources}",
+    "truncated": "Pasiekta eilučių riba, skaičiai yra apatinė riba: {sources}",
+    "groups": {
+      "users": "Žmonės ir aktyvumas",
+      "teams": "Brigados ir kvietimai",
+      "b2b": "B2B rinka",
+      "work": "Darbo žurnalas ir Living CV",
+      "technical": "Techninės"
+    },
+    "col": {
+      "metric": "Metrika",
+      "total": "Iš viso",
+      "source": "Šaltinis",
+      "rule": "Taisyklė",
+      "window": "Laikotarpis"
+    },
+    "signals": {
+      "title": "Perspėjimų taisyklės",
+      "intro": "Kas valandą tikrina product-monitor eiga. Pažeidimas atidaro po vieną GitHub issue kiekvienam signalui ir uždaro jį, kai būsena atsistato."
+    }
+  },
   "billingStatus": {
     "badge": {
       "disabled": "MOKĖJIMAI IŠJUNGTI",

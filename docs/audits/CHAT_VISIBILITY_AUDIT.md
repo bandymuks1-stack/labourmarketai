@@ -464,3 +464,12 @@ audit.
   No chat table, no other table, no raw address/subject/body stored, nothing
   sent by this module's reserve step. Pinned in the
   `chat-visibility-rls.test.ts` caller inventory.
+
+- **2026-10-12 — `app/[locale]/dashboard/admin/metrics/page.tsx`** (owner programme
+  2026-10-12 §8, operator product metrics). READ-ONLY aggregate counts computed by
+  `lib/ops/product-metrics.ts` with the service-role client, created only AFTER
+  `requireSuperadmin()`. From the chat tables it reads `conversations.created_at` and
+  `source_type` solely to COUNT threads; no subject, body, participant or id is read
+  into or rendered by the page. It writes nothing and sends nothing outbound. The same
+  module runs hourly in `scripts/product-monitor.ts` (GitHub Actions, secret held by
+  GitHub), whose issue text is aggregate numbers only.
