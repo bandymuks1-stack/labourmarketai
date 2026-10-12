@@ -392,6 +392,7 @@ describe("i18n — teamBrigades + teamEnquiries namespaces present in every ACTI
         "created",
         "deliveryFailed",
         "alreadyInvited",
+        "alreadyInvitedNewLink",
         "rateLimited",
         "notAuthorized",
         "noEmail",

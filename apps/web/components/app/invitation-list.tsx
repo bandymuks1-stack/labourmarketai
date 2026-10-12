@@ -178,9 +178,12 @@ export function SentInvitationList({
                   onClick={() => onResend(row)}
                   disabled={busyId === row.id}
                   data-testid={`sent-invitation-resend-${row.id}`}
+                  // Nothing was ever e-mailed: the button does not "send again",
+                  // it issues a NEW link and kills the one already handed over.
+                  title={row.deliveryStatus === "sent" ? undefined : t("newLinkHint")}
                   className="inline-flex items-center rounded border border-ink-500 px-2 py-1 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
                 >
-                  {t("resend")}
+                  {row.deliveryStatus === "sent" ? t("resend") : t("newLink")}
                 </button>
                 <button
                   type="button"

@@ -114,7 +114,7 @@ export function TeamBrigadesPanel({
       else if (res.outcome === "delivery_failed")
         setMsg(t("inviteOutcome.deliveryFailed"));
       else if (res.outcome === "already_invited")
-        setMsg(t("inviteOutcome.alreadyInvited"));
+        setMsg(t(res.linkRenewed ? "inviteOutcome.alreadyInvitedNewLink" : "inviteOutcome.alreadyInvited"));
       else if (res.outcome === "rate_limited" || res.outcome === "limit_reached")
         setMsg(t("inviteOutcome.rateLimited"));
       else if (res.outcome === "not_authorized")

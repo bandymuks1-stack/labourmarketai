@@ -5,7 +5,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
-import { createAndSendInvitations } from "@/lib/invitations/actions";
+import { createAndSendInvitations, resendInvitationAction } from "@/lib/invitations/actions";
 import {
   createTeamBrigade,
   lookupLinkedWorkerEmail,
@@ -97,7 +97,7 @@ export async function inviteWorkerToTeamAction(input: {
   /** Typed by the owner when the worker's address cannot be read (profiles
    *  are own-row-only). The worker still has to accept with their account. */
   email?: string | null;
-}): Promise<{ outcome: TeamInviteOutcome; inviteLink?: string }> {
+}): Promise<{ outcome: TeamInviteOutcome; inviteLink?: string; linkRenewed?: boolean }> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -133,8 +133,17 @@ export async function inviteWorkerToTeamAction(input: {
       return { outcome: "created", inviteLink };
     case "delivery_failed":
       return { outcome: "delivery_failed", inviteLink };
-    case "duplicate_pending":
-      return { outcome: "already_invited" };
+    case "duplicate_pending": {
+      // The first link lived only in the owner's screen state (the raw token
+      // is never stored), so a second click used to end in "already invited"
+      // with no way to hand the worker anything. Re-issue the SAME invitation
+      // through the canonical resend (token rotated, cap and authority checked
+      // by resend_invitation_v1) and say plainly that the old link is dead.
+      const renewed = await renewPendingTeamInviteLink(supabase, input.teamId, email, input.locale);
+      return renewed
+        ? { outcome: "already_invited", inviteLink: renewed, linkRenewed: true }
+        : { outcome: "already_invited" };
+    }
     case "rate_limited":
       return { outcome: "rate_limited" };
     case "limit_reached":
@@ -144,6 +153,43 @@ export async function inviteWorkerToTeamAction(input: {
     default:
       return { outcome: "error" };
   }
+}
+
+/** The owner's own open join_team invitation to this address (RLS: inviter
+ *  or admin), re-issued with a fresh link. Null when there is none to renew
+ *  or the resend is refused (cap, authority) — the caller then reports the
+ *  plain "already invited". */
+async function renewPendingTeamInviteLink(
+  supabase: SupabaseClient,
+  teamId: string,
+  email: string,
+  locale: string,
+): Promise<string | null> {
+  const { data } = await asAny(supabase)
+    .from("invitations")
+    .select("id, invited_email, locale, personal_message")
+    .eq("invitation_type", "join_team")
+    .eq("organization_id", teamId)
+    .eq("status", "pending")
+    .eq("invited_email", email.trim().toLowerCase())
+    .order("created_at", { ascending: false })
+    .limit(1);
+  const row = ((data ?? []) as {
+    id: string;
+    invited_email: string;
+    locale: string | null;
+    personal_message: string | null;
+  }[])[0];
+  if (!row) return null;
+  const res = await resendInvitationAction({
+    invitationId: row.id,
+    email: row.invited_email,
+    locale,
+    recipientLocale: row.locale,
+    invitationType: "join_team",
+    personalMessage: row.personal_message,
+  });
+  return res.status === "ok" && res.inviteLink ? res.inviteLink : null;
 }
 
 export type SaveTeamDetailsOutcome =
