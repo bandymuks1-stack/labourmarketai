@@ -51,6 +51,7 @@ const ZERO: SpineCounts = {
   pendingConnectionInvites: 0,
   sharedRequestsAwaitingOffer: 0,
   openCandidateOffers: 0,
+  openTeamOffers: 0,
 };
 
 /* W3 row 5: the compact recommendation surface is no longer a card on the

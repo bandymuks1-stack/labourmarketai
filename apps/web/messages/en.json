@@ -765,7 +765,8 @@
       "new_job_matches": "Clears when you open the opportunities board (or see the jobs on the overview card).",
       "pending_connection_invites": "Clears when you accept or decline the agency's connection request on the partners page.",
       "shared_requests_awaiting_offer": "Clears when you offer a roster worker for the shared request on the partners page.",
-      "open_candidate_offers": "Clears when you accept or decline the proposed candidate on your scouting page."
+      "open_candidate_offers": "Clears when you accept or decline the proposed candidate on your scouting page.",
+      "open_team_offers": "Clears when you accept or decline the team's offer on your scouting page."
     },
     "storedTitle": "Stored notifications",
     "storedIntro": "Recorded events about you — each row opens the page it is about. Read state is managed from the bell.",
@@ -4843,6 +4844,7 @@
         "pending_connection_invites": "A staffing agency wants to connect with your company",
         "shared_requests_awaiting_offer": "Client requests waiting for your candidate",
         "open_candidate_offers": "Agency candidates waiting for your decision",
+        "open_team_offers": "Teams offering themselves for your needs",
         "event_booking_proposed": "You received a booking proposal",
         "event_booking_accepted": "Your booking proposal was accepted",
         "event_booking_declined": "Your booking proposal was declined",
@@ -7177,6 +7179,7 @@
     "noAddable": "No linked workers left to add. Invite workers in the roster section first.",
     "addLabel": "Invite a linked worker",
     "addButton": "Send invitation",
+    "emailPlaceholder": "Worker's email",
     "createLabel": "New brigade name",
     "createPlaceholder": "e.g. Facade brigade A",
     "createButton": "Create brigade",
@@ -7198,12 +7201,14 @@
     },
     "inviteOutcome": {
       "sent": "Invitation emailed. Membership starts when the worker accepts it.",
-      "created": "Invitation created. The worker will see it under My network and decides there.",
-      "deliveryFailed": "Invitation saved, but the email could not be delivered. The worker can still see it under My network.",
+      "created": "Invitation created — no e-mail was sent. Copy the link below and send it to the worker yourself; they open it, sign in and accept.",
+      "deliveryFailed": "Invitation saved, but the e-mail could not be delivered. Copy the link below and send it to the worker yourself.",
       "alreadyInvited": "This worker already has an open invitation to this brigade.",
+      "alreadyInvitedNewLink": "This worker already has an open invitation. Here is a new link — the previous link no longer works.",
       "rateLimited": "Invitation limit reached for now. Try again later.",
       "notAuthorized": "Only the brigade owner can send invitations.",
       "noEmail": "This worker has no usable email address on file, so the invitation cannot be created.",
+      "askEmail": "Enter this worker's email — the invitation goes to their account and they accept it themselves.",
       "needsMigration": "Not available right now.",
       "error": "Could not send the invitation. Nothing was changed."
     },
@@ -7272,7 +7277,10 @@
         "error": "Could not save the answer. Nothing was changed."
       }
     },
-    "addableUnavailable": "The linked-worker list could not be loaded — adding is not possible right now."
+    "addableUnavailable": "The linked-worker list could not be loaded — adding is not possible right now.",
+    "inviteLinkNote": "Send this link to the worker (message, SMS, WhatsApp). Only the invited person can accept it.",
+    "inviteLinkCopy": "Copy link",
+    "inviteLinkCopied": "Copied"
   },
   "teamEnquiries": {
     "enquireButton": "Ask this team about work",
@@ -8628,6 +8636,7 @@
     "pickDemand": "Pick a need",
     "noDemands": "You have no needs yet. Create a need from your dashboard — after review, the team structures its required skills.",
     "noDemandsCta": "Create a need",
+    "teamOffersWaiting": "{count, plural, one {# team offer waiting for your answer} other {# team offers waiting for your answer}}",
     "unstructuredTag": "requirements not confirmed",
     "notStructured": "This need's required skills aren't structured yet, so no match can be computed. New needs are reviewed and structured by the administrators — no action is needed from you.",
     "needsSetup": "Couldn’t load. Please try again.",
@@ -9388,6 +9397,31 @@
         "rate_limits": "Bounded request limits active",
         "freshness_demotion": "Stale profiles ranked lower"
       }
+    }
+  },
+  "adminMetrics": {
+    "title": "Product metrics",
+    "intro": "Live counts from the canonical tables, split into REAL, TEST (synthetic test accounts, test domains) and INTERNAL (staff, admins). — means the source could not be read; it is never zero.",
+    "computedAt": "Computed {at}",
+    "unknown": "Unreadable sources (shown as —): {sources}",
+    "truncated": "Row cap reached, counts are a lower bound: {sources}",
+    "groups": {
+      "users": "People and activity",
+      "teams": "Brigades and invitations",
+      "b2b": "B2B market",
+      "work": "Work journal and Living CV",
+      "technical": "Technical"
+    },
+    "col": {
+      "metric": "Metric",
+      "total": "Total",
+      "source": "Source",
+      "rule": "Rule",
+      "window": "Window"
+    },
+    "signals": {
+      "title": "Alert rules",
+      "intro": "Evaluated hourly by the product-monitor workflow. A breach opens one GitHub issue per signal and closes it on recovery."
     }
   },
   "billingStatus": {
@@ -12032,6 +12066,8 @@
       "empty": "You have not sent any invitations yet.",
       "error": "Invitations could not be loaded right now.",
       "resend": "Send again",
+      "newLink": "New link",
+      "newLinkHint": "Creates a new invitation link. The previous link stops working.",
       "revoke": "Revoke",
       "copied": "Copied",
       "copyNewLink": "Copy new link",
@@ -13516,6 +13552,10 @@
         },
         "offerCapacity": {
           "label": "Record what you are offering"
+        },
+        "respondTeamOffer": {
+          "label": "Answer a brigade's or company's offer",
+          "description": "Agree in principle to, or decline, a brigade or company offered for your need."
         }
       },
       "education": {
@@ -14165,7 +14205,7 @@
       "projectCreateIntro": "A new project. Name and city — then you can assign people right here.",
       "projectCreatedNext": "Project created. Assign people right here — or come back to it later from “My projects”.",
       "clientOffersIntro": "Candidates agencies offered for your needs:",
-      "clientOffersNone": "No agency has offered candidates for your open needs yet.",
+      "clientOffersNone": "Nobody has offered candidates, a brigade or a company for your open needs yet.",
       "clientBridgeInvitesIntro": "Agencies inviting you to work together:",
       "clientBridgeShareIntro": "Needs you could share with a connected agency:",
       "clientBridgeNone": "No agency invitation is waiting and nothing is left to share. Manage partners on the partners page.",
@@ -14432,7 +14472,15 @@
       "visibilityUnavailable": "Could not check your visibility to employers. That does not mean it is off — open the settings.",
       "chipVisibility": "Visibility to employers",
       "voiceOpen": "Speak",
-      "voiceBareYes": "Spoken “yes” is not a confirmation. Press the button on the card to confirm, or say what you want to do."
+      "voiceBareYes": "Spoken “yes” is not a confirmation. Press the button on the card to confirm, or say what you want to do.",
+      "teamOffersIntro": "Brigades and companies offered for your needs:",
+      "teamOfferStatusAgreed": "agreed in principle",
+      "chipTeamOfferAgree": "Agree in principle",
+      "chipTeamOfferThread": "Write",
+      "chipOfferOurs": "Offer our brigade or company",
+      "teamOfferAgreed": "Agreed in principle — not a signed contract. Settle the terms in the conversation, then assign the team to a project.",
+      "teamOfferDeclined": "Declined. The offering company will see your answer.",
+      "teamOfferThreadFailed": "This conversation cannot be opened."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
@@ -18728,11 +18776,12 @@
     "sent": {
       "heading": "Your offers",
       "none": "No offers yet.",
-      "withdraw": "Withdraw"
+      "withdraw": "Withdraw",
+      "message": "Message the client"
     },
     "status": {
       "offered": "Waiting for an answer",
-      "accepted": "Accepted",
+      "accepted": "Agreed in principle",
       "declined": "Declined",
       "withdrawn": "Withdrawn",
       "assigned": "Assigned to a project"
@@ -18766,7 +18815,7 @@
     },
     "received": {
       "title": "Teams offered for this need",
-      "subtitle": "A team offered itself as one unit against this need. You decide whether to accept it and where to assign it.",
+      "subtitle": "A team offered itself as one unit against this need. Ask questions and negotiate in the conversation; agreeing here is not a contract.",
       "privacy": "Only team-level facts are shown. No member is named here. After you accept and assign the team to a project, its members appear on that project, as for any team.",
       "members": "{count} members",
       "deployable": "Deployable size {min}-{max}",
@@ -18797,22 +18846,24 @@
       "missing": "Not stated: {list}",
       "noNeedStructure": "This need is not structured yet, so the team cannot be matched against it.",
       "note": "Note from the team",
-      "accept": "Accept team",
+      "accept": "Agree in principle",
       "decline": "Decline",
-      "noProjects": "You have no open project to assign the team to. Create a project first.",
-      "assignIntro": "Accepted. Assign the team to one of your projects.",
+      "noProjects": "You have no open project to assign the team to yet.",
+      "assignIntro": "Agreed in principle (not a contract). When the terms are settled, assign the team to one of your projects.",
       "projectLabel": "Project",
       "projectPlaceholder": "Choose a project",
       "assign": "Assign team to project",
       "assignedNote": "Assigned. The team's members now appear on that project.",
       "outcome": {
-        "accepted": "Team accepted.",
+        "accepted": "Agreed in principle — not a signed contract. Settle the terms in the conversation, then assign the team to a project.",
         "declined": "Offer declined.",
-        "already_accepted": "Already accepted.",
+        "already_accepted": "Already agreed in principle.",
         "already_declined": "Already declined.",
         "assigned": "Team assigned to the project.",
         "already_assigned": "This team was already assigned. Nothing changed."
-      }
+      },
+      "createProject": "Create a project",
+      "message": "Message the team"
     }
   },
   "teamAssignment": {

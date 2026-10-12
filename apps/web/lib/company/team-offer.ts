@@ -104,6 +104,30 @@ export function listReceivedOffers(requestId: string): Promise<ReadResult<Receiv
   return readRows("list_team_offers_for_request_v1", { p_request_id: requestId }, parseReceivedOffer);
 }
 
+/** Bound on how many of the caller's own needs are asked per read. */
+export const OPEN_TEAM_OFFER_SCAN_LIMIT = 20;
+
+/**
+ * RECEIVING side, across the caller's own needs: how many team / brigade
+ * offers on each are still `offered` — waiting for THIS company's answer
+ * (walk 2026-10-11: an offer reached no surface on its own; the scouting
+ * page opened another need and the bell never said a word). The SAME
+ * receiver RPC the section renders; a failed read counts nothing.
+ */
+export async function countOpenTeamOffersByDemand(
+  demandIds: readonly string[],
+): Promise<Map<string, number>> {
+  const ids = [...new Set(demandIds)].slice(0, OPEN_TEAM_OFFER_SCAN_LIMIT);
+  const reads = await Promise.all(ids.map((id) => listReceivedOffers(id)));
+  const out = new Map<string, number>();
+  reads.forEach((r, i) => {
+    if (r.status !== "ok") return;
+    const n = r.rows.filter((o) => o.status === "offered").length;
+    if (n > 0) out.set(ids[i]!, n);
+  });
+  return out;
+}
+
 /**
  * The employer-side section: each offer joined with how the offered team fits THIS
  * need. `matchTeamToNeed` is called WITHOUT member subjects, so it runs on the

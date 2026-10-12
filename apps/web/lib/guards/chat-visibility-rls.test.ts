@@ -207,6 +207,12 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    the anon RPC, read-only via service role). Every entry point is
     //    fenced behind an explicit isSuperadmin() re-check; it touches no
     //    chat table and sends nothing outbound.
+    //  - components/admin/product-metrics-section.tsx — operator product
+    //    metrics (owner programme 2026-10-12 §8). READ-ONLY aggregate counts
+    //    via lib/ops/product-metrics.ts, rendered only by the launch-readiness
+    //    page AFTER requireSuperadmin(). From the
+    //    chat tables it reads only conversations.created_at/source_type to
+    //    COUNT threads — no subject, body, participant or id leaves the module.
     //  - lib/admin/launch-readiness.ts — operator launch-readiness view
     //    (launch repair Scope E). READ-ONLY head-counts over workers /
     //    profiles / companies / company_need_public_intakes /
@@ -462,6 +468,18 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    and nothing is sent outbound. Pinned in
     //    lib/guards/authority-closure-first-package.test.ts (exactly one
     //    call, after the authority gate, only conversation_participants).
+    //  - lib/company/team-offer-conversation.ts — the brigade-offer
+    //    negotiation thread (2026-10-11). READ-ONLY, three columns, AFTER the
+    //    caller's side was proven by their OWN authorized read (the offer row
+    //    under team_demand_offers_select_v1 for the supplier; the
+    //    receiver-gated list_team_offers_for_request_v1 for the need's owner):
+    //    the counterpart's profile id (customer_requests.profile_id or
+    //    team_demand_offers.offered_by) and the offering team's name. The ids
+    //    never reach the client; they only become the other participant of
+    //    the gated thread. Service role is required because the two parties
+    //    deliberately cannot read each other's rows. Forward-fix: the supply
+    //    offer negotiation migration (20261011200000) can expose the
+    //    counterpart through a party-gated RPC and retire this read.
     //
     // None of the others touch a chat table; they write only billing_* /
     // payment_webhook_events / one intake status column / the append-only
@@ -471,6 +489,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       callers.sort(),
       `unexpected service-role caller(s) — update docs/audits/CHAT_VISIBILITY_AUDIT.md and justify: ${callers.join(", ")}`,
     ).toEqual([
+      "components/admin/product-metrics-section.tsx",
       "components/admin/vacancy-sources-section.tsx",
       "lib/admin/billing-actions.ts",
       "lib/admin/company-need-intakes.ts",
@@ -484,6 +503,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/commercial/handoff-dispatch.ts",
       "lib/communication/communication-core.ts",
       "lib/company/claim-public-intake.ts",
+      "lib/company/team-offer-conversation.ts",
       "lib/email/send-ledger-store.ts",
       "lib/invitations/external-referral-receive.ts",
       "lib/invitations/public-preview.ts",

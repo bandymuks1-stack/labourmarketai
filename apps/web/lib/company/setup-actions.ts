@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 
 import { saveCompanySetup } from "./company-setup";
 import { getActiveOrganizationContext } from "./active-organization";
+import { switchActiveWorkspaceCore } from "./workspace-switch-core";
+import { createClient } from "@/lib/supabase/server";
 import { declareOrganizationCapabilities } from "@/lib/organizations/capability-actions";
 
 /**
@@ -101,6 +103,29 @@ export async function saveCompanySetupAction(
         message: e instanceof Error ? e.message : String(e),
       });
     }
+  }
+
+  // THE NEW COMPANY IS WHERE THE PERSON NOW WORKS (memory/context 2026-10-11).
+  // With no stored pointer, the workspace resolver only defaults to an
+  // organization when there is exactly ONE; a worker employed elsewhere who
+  // sets up their own company already has two, so they landed in the personal
+  // space and the company pages said "no company profile yet" about the
+  // company they had just created. Pin it through the switcher's own
+  // membership-validated core. Best-effort: setup never fails on this.
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const ctx = await getActiveOrganizationContext();
+    const orgId = ctx.organizations.find((o) => o.legacyCompanyId === r.companyId)?.id ?? null;
+    if (user && orgId && ctx.activeOrganizationId !== orgId) {
+      await switchActiveWorkspaceCore({ supabase, userId: user.id }, orgId);
+    }
+  } catch (e) {
+    console.error("[saveCompanySetupAction] workspace pin failed", {
+      message: e instanceof Error ? e.message : String(e),
+    });
   }
 
   revalidatePath("/", "layout");

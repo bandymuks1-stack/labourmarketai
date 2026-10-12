@@ -3674,6 +3674,10 @@
         },
         "offerCapacity": {
           "label": "Registrer det dere tilbyr"
+        },
+        "respondTeamOffer": {
+          "label": "Svar på et lags eller en bedrifts tilbud",
+          "description": "Avtal i prinsippet med, eller avslå, et lag eller en bedrift tilbudt til ditt behov."
         }
       },
       "education": {
@@ -4150,7 +4154,7 @@
       "projectCreateIntro": "Et nytt prosjekt. Navn og by — så kan du tildele folk her.",
       "projectCreatedNext": "Prosjekt opprettet. Tildel folk her — eller kom tilbake til det senere fra «Mine prosjekter».",
       "clientOffersIntro": "Kandidater byråer har tilbudt til deres behov:",
-      "clientOffersNone": "Ingen byrå har tilbudt kandidater til deres åpne behov ennå.",
+      "clientOffersNone": "Ingen har ennå tilbudt kandidater, et lag eller en bedrift til dine åpne behov.",
       "chipOfferAccept": "Godta",
       "chipOfferDecline": "Avslå",
       "offerAccepted": "Godtatt. Kandidaten fikk et bookingforslag — svaret ser du her.",
@@ -4304,7 +4308,15 @@
       "acceptOfferOne": "[EN] Here it is. The button below confirms it.",
       "acceptOfferWhich": "[EN] Which one? Choose below.",
       "visibilityUnavailable": "Synligheten for arbeidsgivere kunne ikke kontrolleres. Det betyr ikke at den er slått av — åpne innstillingene.",
-      "chipVisibility": "Synlighet for arbeidsgivere"
+      "chipVisibility": "Synlighet for arbeidsgivere",
+      "teamOffersIntro": "Lag og bedrifter som har tilbudt seg til dine behov:",
+      "teamOfferStatusAgreed": "avtalt i prinsippet",
+      "chipTeamOfferAgree": "Avtal i prinsippet",
+      "chipTeamOfferThread": "Skriv",
+      "chipOfferOurs": "Tilby vårt lag eller vår bedrift",
+      "teamOfferAgreed": "Avtalt i prinsippet — ennå ikke en signert kontrakt. Avtal vilkårene i samtalen, og tildel deretter laget et prosjekt.",
+      "teamOfferDeclined": "Avslått. Bedriften som tilbød, ser svaret ditt.",
+      "teamOfferThreadFailed": "Denne samtalen kan ikke åpnes."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

@@ -765,7 +765,8 @@
       "new_job_matches": "Verschwindet, sobald Sie die Stellenübersicht öffnen (oder die Jobs auf der Übersichtskarte sehen).",
       "pending_connection_invites": "Verschwindet, sobald Sie die Verbindungsanfrage der Agentur auf der Partnerseite annehmen oder ablehnen.",
       "shared_requests_awaiting_offer": "Verschwindet, sobald Sie auf der Partnerseite eine Fachkraft für die geteilte Anfrage anbieten.",
-      "open_candidate_offers": "Verschwindet, sobald Sie den vorgeschlagenen Kandidaten auf Ihrer Scouting-Seite annehmen oder ablehnen."
+      "open_candidate_offers": "Verschwindet, sobald Sie den vorgeschlagenen Kandidaten auf Ihrer Scouting-Seite annehmen oder ablehnen.",
+      "open_team_offers": "Verschwindet, sobald Sie das Angebot des Teams auf Ihrer Scouting-Seite annehmen oder ablehnen."
     },
     "storedTitle": "Gespeicherte Benachrichtigungen",
     "storedIntro": "Aufgezeichnete Ereignisse zu Ihnen — jede Zeile öffnet die zugehörige Seite. Der Lesestatus wird über die Glocke verwaltet.",
@@ -4843,6 +4844,7 @@
         "pending_connection_invites": "Eine Personalagentur möchte sich mit Ihrem Unternehmen verbinden",
         "shared_requests_awaiting_offer": "Kundenanfragen, die auf Ihren Kandidaten warten",
         "open_candidate_offers": "Agenturkandidaten, die auf Ihre Entscheidung warten",
+        "open_team_offers": "Teams, die sich für Ihren Bedarf anbieten",
         "event_booking_proposed": "Sie haben einen Buchungsvorschlag erhalten",
         "event_booking_accepted": "Ihr Buchungsvorschlag wurde angenommen",
         "event_booking_declined": "Ihr Buchungsvorschlag wurde abgelehnt",
@@ -7177,6 +7179,7 @@
     "noAddable": "Keine verknüpften Arbeitskräfte mehr zum Hinzufügen. Laden Sie zuerst Arbeitskräfte im Bereich Belegschaftsliste ein.",
     "addLabel": "Verknüpfte Arbeitskraft einladen",
     "addButton": "Einladung senden",
+    "emailPlaceholder": "E-Mail der Fachkraft",
     "createLabel": "Name der neuen Kolonne",
     "createPlaceholder": "z. B. Fassadenkolonne A",
     "createButton": "Kolonne erstellen",
@@ -7198,12 +7201,14 @@
     },
     "inviteOutcome": {
       "sent": "Einladung per E-Mail gesendet. Die Mitgliedschaft beginnt, sobald die Arbeitskraft sie annimmt.",
-      "created": "Einladung erstellt. Die Arbeitskraft sieht sie unter Mein Netzwerk und entscheidet dort selbst.",
-      "deliveryFailed": "Einladung gespeichert, aber die E-Mail konnte nicht zugestellt werden. Die Arbeitskraft sieht sie dennoch unter Mein Netzwerk.",
+      "created": "Einladung erstellt — es wurde keine E-Mail gesendet. Kopieren Sie den Link unten und schicken Sie ihn der Arbeitskraft selbst; sie öffnet ihn, meldet sich an und nimmt an.",
+      "deliveryFailed": "Einladung gespeichert, aber die E-Mail konnte nicht zugestellt werden. Kopieren Sie den Link unten und schicken Sie ihn selbst.",
       "alreadyInvited": "Diese Arbeitskraft hat bereits eine offene Einladung in diese Kolonne.",
+      "alreadyInvitedNewLink": "Diese Person hat bereits eine offene Einladung. Hier ist ein neuer Link — der vorherige Link funktioniert nicht mehr.",
       "rateLimited": "Einladungslimit vorerst erreicht. Versuchen Sie es später erneut.",
       "notAuthorized": "Nur der Kolonneninhaber kann Einladungen senden.",
       "noEmail": "Diese Arbeitskraft hat keine nutzbare E-Mail-Adresse, daher kann die Einladung nicht erstellt werden.",
+      "askEmail": "Geben Sie die E-Mail dieser Fachkraft ein — die Einladung geht an ihr Konto, und sie nimmt sie selbst an.",
       "needsMigration": "Derzeit nicht verfügbar.",
       "error": "Die Einladung konnte nicht gesendet werden. Es wurde nichts geändert."
     },
@@ -7272,7 +7277,10 @@
         "error": "Die Antwort konnte nicht gespeichert werden. Es wurde nichts geändert."
       }
     },
-    "addableUnavailable": "Die Liste der verknüpften Arbeitskräfte konnte nicht geladen werden — Hinzufügen ist derzeit nicht möglich."
+    "addableUnavailable": "Die Liste der verknüpften Arbeitskräfte konnte nicht geladen werden — Hinzufügen ist derzeit nicht möglich.",
+    "inviteLinkNote": "Schicken Sie diesen Link an die Arbeitskraft (Nachricht, SMS, WhatsApp). Nur die eingeladene Person kann annehmen.",
+    "inviteLinkCopy": "Link kopieren",
+    "inviteLinkCopied": "Kopiert"
   },
   "teamEnquiries": {
     "enquireButton": "Dieser Kolonne eine Anfrage senden",
@@ -8628,6 +8636,7 @@
     "pickDemand": "Bedarf wählen",
     "noDemands": "Du hast noch keine Bedarfe. Erstelle zuerst einen Bedarf und strukturiere dann die benötigten Fähigkeiten.",
     "noDemandsCta": "Bedarf erstellen",
+    "teamOffersWaiting": "{count, plural, one {# Teamangebot wartet auf Ihre Antwort} other {# Teamangebote warten auf Ihre Antwort}}",
     "unstructuredTag": "Anforderungen nicht bestätigt",
     "notStructured": "Dieser Bedarf hat noch keine strukturierten Fähigkeiten, daher kann kein Match berechnet werden. Strukturiere zuerst die benötigten Fähigkeiten.",
     "needsSetup": "Scouting ist in dieser Umgebung noch nicht verfügbar.",
@@ -9388,6 +9397,31 @@
         "rate_limits": "Begrenzte Anfragelimits aktiv",
         "freshness_demotion": "Veraltete Profile niedriger eingestuft"
       }
+    }
+  },
+  "adminMetrics": {
+    "title": "Produktkennzahlen",
+    "intro": "Live-Zahlen aus den kanonischen Tabellen, getrennt in REAL, TEST (synthetische Testkonten, Testdomains) und INTERNAL (Team, Admins). — bedeutet, dass die Quelle nicht gelesen werden konnte; es ist nie null.",
+    "computedAt": "Berechnet {at}",
+    "unknown": "Nicht lesbare Quellen (als — angezeigt): {sources}",
+    "truncated": "Zeilenlimit erreicht, Zahlen sind eine Untergrenze: {sources}",
+    "groups": {
+      "users": "Personen und Aktivität",
+      "teams": "Brigaden und Einladungen",
+      "b2b": "B2B-Markt",
+      "work": "Arbeitsjournal und Living CV",
+      "technical": "Technik"
+    },
+    "col": {
+      "metric": "Kennzahl",
+      "total": "Gesamt",
+      "source": "Quelle",
+      "rule": "Regel",
+      "window": "Zeitraum"
+    },
+    "signals": {
+      "title": "Alarmregeln",
+      "intro": "Stündlich vom product-monitor-Workflow ausgewertet. Ein Verstoß öffnet ein GitHub-Issue pro Signal und schließt es nach der Erholung."
     }
   },
   "billingStatus": {
@@ -12032,6 +12066,8 @@
       "empty": "Sie haben noch keine Einladungen gesendet.",
       "error": "Einladungen konnten gerade nicht geladen werden.",
       "resend": "Erneut senden",
+      "newLink": "Neuer Link",
+      "newLinkHint": "Erstellt einen neuen Einladungslink. Der vorherige Link funktioniert dann nicht mehr.",
       "revoke": "Widerrufen",
       "copied": "Kopiert",
       "copyNewLink": "Neuen Link kopieren",
@@ -13516,6 +13552,10 @@
         },
         "offerCapacity": {
           "label": "Ihr Angebot festhalten"
+        },
+        "respondTeamOffer": {
+          "label": "Auf das Angebot eines Teams oder Unternehmens antworten",
+          "description": "Einem für Ihren Bedarf angebotenen Team oder Unternehmen grundsätzlich zustimmen oder es ablehnen."
         }
       },
       "education": {
@@ -14165,7 +14205,7 @@
       "projectCreateIntro": "Ein neues Projekt. Name und Stadt — danach weisen Sie hier direkt Leute zu.",
       "projectCreatedNext": "Projekt angelegt. Weisen Sie hier direkt Leute zu — oder kommen Sie später über „Meine Projekte“ darauf zurück.",
       "clientOffersIntro": "Von Agenturen vorgeschlagene Kandidaten für Ihre Bedarfe:",
-      "clientOffersNone": "Noch keine Agentur hat Kandidaten für Ihre offenen Bedarfe vorgeschlagen.",
+      "clientOffersNone": "Für Ihren offenen Bedarf hat noch niemand Kandidaten, ein Team oder ein Unternehmen angeboten.",
       "clientBridgeInvitesIntro": "Agenturen, die Sie zur Zusammenarbeit einladen:",
       "clientBridgeShareIntro": "Bedarfe, die Sie mit einer verbundenen Agentur teilen können:",
       "clientBridgeNone": "Keine Agentureinladung wartet und nichts ist mehr zu teilen. Partner verwalten Sie auf der Partnerseite.",
@@ -14432,7 +14472,15 @@
       "visibilityUnavailable": "Ihre Sichtbarkeit für Arbeitgeber konnte nicht geprüft werden. Das heißt nicht, dass sie aus ist — öffnen Sie die Einstellungen.",
       "chipVisibility": "Sichtbarkeit für Arbeitgeber",
       "voiceOpen": "Sprechen",
-      "voiceBareYes": "Ein gesprochenes „Ja“ ist keine Bestätigung. Bestätigen Sie mit der Schaltfläche auf der Karte oder sagen Sie, was Sie tun möchten."
+      "voiceBareYes": "Ein gesprochenes „Ja“ ist keine Bestätigung. Bestätigen Sie mit der Schaltfläche auf der Karte oder sagen Sie, was Sie tun möchten.",
+      "teamOffersIntro": "Teams und Unternehmen, die sich für Ihren Bedarf angeboten haben:",
+      "teamOfferStatusAgreed": "grundsätzlich vereinbart",
+      "chipTeamOfferAgree": "Grundsätzlich zustimmen",
+      "chipTeamOfferThread": "Schreiben",
+      "chipOfferOurs": "Unser Team oder Unternehmen anbieten",
+      "teamOfferAgreed": "Grundsätzlich vereinbart — noch kein unterschriebener Vertrag. Klären Sie die Bedingungen im Gespräch und weisen Sie das Team dann einem Projekt zu.",
+      "teamOfferDeclined": "Abgelehnt. Das anbietende Unternehmen sieht Ihre Antwort.",
+      "teamOfferThreadFailed": "Dieses Gespräch kann nicht geöffnet werden."
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
@@ -18728,11 +18776,12 @@
     "sent": {
       "heading": "Ihre Angebote",
       "none": "Noch keine Angebote.",
-      "withdraw": "Zurückziehen"
+      "withdraw": "Zurückziehen",
+      "message": "Dem Auftraggeber schreiben"
     },
     "status": {
       "offered": "Wartet auf Antwort",
-      "accepted": "Angenommen",
+      "accepted": "Grundsätzlich vereinbart",
       "declined": "Abgelehnt",
       "withdrawn": "Zurückgezogen",
       "assigned": "Einem Projekt zugewiesen"
@@ -18766,7 +18815,7 @@
     },
     "received": {
       "title": "Für diesen Bedarf angebotene Teams",
-      "subtitle": "Ein Team hat sich als eine Einheit für diesen Bedarf angeboten. Sie entscheiden, ob Sie es annehmen und wo Sie es einsetzen.",
+      "subtitle": "Ein Team hat sich als Einheit für diesen Bedarf angeboten. Fragen und verhandeln Sie im Gespräch; eine Zustimmung hier ist kein Vertrag.",
       "privacy": "Es werden nur Fakten auf Teamebene gezeigt. Hier wird kein Mitglied genannt. Nachdem Sie das Team angenommen und einem Projekt zugewiesen haben, erscheinen seine Mitglieder in diesem Projekt, wie bei jedem Team.",
       "members": "{count} Mitglieder",
       "deployable": "Einsatzgröße {min}-{max}",
@@ -18797,22 +18846,24 @@
       "missing": "Nicht angegeben: {list}",
       "noNeedStructure": "Dieser Bedarf ist noch nicht strukturiert, daher kann das Team nicht damit abgeglichen werden.",
       "note": "Hinweis des Teams",
-      "accept": "Team annehmen",
+      "accept": "Grundsätzlich zustimmen",
       "decline": "Ablehnen",
-      "noProjects": "Sie haben kein offenes Projekt, dem Sie das Team zuweisen könnten. Legen Sie zuerst ein Projekt an.",
-      "assignIntro": "Angenommen. Weisen Sie das Team einem Ihrer Projekte zu.",
+      "noProjects": "Sie haben noch kein offenes Projekt, dem Sie das Team zuweisen können.",
+      "assignIntro": "Grundsätzlich vereinbart (kein Vertrag). Wenn die Bedingungen geklärt sind, weisen Sie das Team einem Ihrer Projekte zu.",
       "projectLabel": "Projekt",
       "projectPlaceholder": "Projekt wählen",
       "assign": "Team dem Projekt zuweisen",
       "assignedNote": "Zugewiesen. Die Mitglieder des Teams erscheinen jetzt in diesem Projekt.",
       "outcome": {
-        "accepted": "Team angenommen.",
+        "accepted": "Grundsätzlich vereinbart — noch kein unterschriebener Vertrag. Klären Sie die Bedingungen im Gespräch und weisen Sie das Team dann einem Projekt zu.",
         "declined": "Angebot abgelehnt.",
-        "already_accepted": "Bereits angenommen.",
+        "already_accepted": "Bereits grundsätzlich vereinbart.",
         "already_declined": "Bereits abgelehnt.",
         "assigned": "Team dem Projekt zugewiesen.",
         "already_assigned": "Dieses Team war bereits zugewiesen. Nichts wurde geändert."
-      }
+      },
+      "createProject": "Projekt anlegen",
+      "message": "Dem Team schreiben"
     }
   },
   "teamAssignment": {

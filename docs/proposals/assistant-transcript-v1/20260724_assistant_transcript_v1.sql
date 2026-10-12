@@ -21,6 +21,11 @@ begin;
 create table if not exists public.assistant_conversations (
   id            uuid primary key default gen_random_uuid(),
   owner_id      uuid not null references public.profiles(id) on delete cascade,
+  -- THE WORKSPACE the thread belongs to (memory architecture, decision 0024):
+  -- null = the person's personal space. A thread is restored ONLY in the
+  -- workspace it was written in — organization A's turns never appear in
+  -- organization B or in the personal space after a switch.
+  organization_id uuid references public.organizations(id) on delete cascade,
   title         text,
   status        text not null default 'active'
                 check (status in ('active','archived','hidden')),
@@ -30,7 +35,7 @@ create table if not exists public.assistant_conversations (
   hidden_reason text
 );
 create index if not exists assistant_conversations_owner_idx
-  on public.assistant_conversations (owner_id, updated_at desc);
+  on public.assistant_conversations (owner_id, organization_id, updated_at desc);
 
 -- 2. Append-only, hash-chained messages. ─────────────────────────────────────
 create table if not exists public.assistant_messages (
