@@ -50,6 +50,8 @@ test("C-1. the day told to the chat is confirmed once and lands in the journal o
   if (settled && !(await done.isVisible())) throw new Error(`not saved: ${await failed.innerText()}`);
   if (!settled) console.info(`[chat] no done marker; chat tail: ${(await page.locator("main").innerText()).slice(-600)}`);
   expect(await entries(page), "exactly one journal entry after a double confirmation").toBe(1);
+  // The transcript append is fire-and-forget; let it land before the session ends.
+  await page.waitForTimeout(12_000);
   await ctx.close();
 });
 
@@ -58,7 +60,11 @@ test("C-2. a new session sees the same single fact, and the conversation remembe
   const page = await ctx.newPage();
   expect(await entries(page)).toBe(1);
   await page.goto("/lt/dashboard");
-  await expect(page.locator("body")).toContainText(TAG, { timeout: 30_000 });
+  // Earlier turns come back as ONE folded history block above the new chat.
+  const block = page.getByTestId("chat-history-block");
+  await expect(block).toBeVisible({ timeout: 30_000 });
+  await block.getByRole("button").first().click();
+  await expect(block).toContainText(TAG, { timeout: 30_000 });
   // Nothing re-executes on reload: still one entry.
   await page.reload();
   await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
