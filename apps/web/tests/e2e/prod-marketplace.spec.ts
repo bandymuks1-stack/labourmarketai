@@ -138,7 +138,7 @@ test("M-6. the provider accepts; both sides can open the conversation", async ({
   await incoming.getByTestId("marketplace-incoming-note").fill("Tinka, susiderinkime laiką.");
   await incoming.getByTestId("marketplace-incoming-accept").click();
   await provider.page.waitForTimeout(5_000);
-  const err = provider.page.getByTestId("marketplace-loop-error");
+  const err = provider.page.getByTestId("marketplace-loop-error").or(provider.page.getByRole("alert")).first();
   if (await err.isVisible().catch(() => false)) throw new Error(`accept refused: ${await err.innerText()}`);
   console.info(`[market] incoming row after accept: ${(await incoming.innerText().catch(() => "(row gone)")).slice(0, 300)}`);
   await expect
