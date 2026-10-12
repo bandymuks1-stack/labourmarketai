@@ -1,6 +1,8 @@
 # Proposal — Assistant (AI-control) transcript persistence v1
 
-> **Status: PROPOSAL / DESIGN-ONLY. NOT APPLIED.** Owner-gated RED migration.
+> **Status (2026-10-12): PROMOTED and APPLIED** as `supabase/migrations/20261012100000_assistant_transcript_v1.sql` after owner approval (#2301), with three production corrections (extensions.digest, explicit grants, workspace membership on insert). The files below are the historical proposal.
+>
+> Original status: PROPOSAL / DESIGN-ONLY. Owner-gated RED migration.
 > STOP before apply. Not placed in `supabase/migrations/` so `#864` CI stays
 > GREEN; applying it is a separate focused owner-gated PR (doctrine §13).
 

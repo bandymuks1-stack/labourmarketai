@@ -56,6 +56,7 @@ import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { Fold } from "@/components/app/premium/grammar";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
+import { TeamDemandOfferForm } from "@/components/app/team-demand-offer-form";
 
 /**
  * ŽMONĖS — the organization's people door (owner IA correction 2026-09-16,
@@ -398,6 +399,13 @@ export default async function CompanyPeoplePage({
       ) : (
         <TeamRosterEmptyState variant={isStaffingAgency ? "agency" : "company"} />
       )}
+
+      {/* The company / agency offers ITSELF against an open need — its people,
+          its service, as a subcontractor — with no brigade to create first
+          (owner P0 2026-10-11). Managers only; the database re-checks. */}
+      {canManageInvitations && employerCtx.kind === "ok" ? (
+        <TeamDemandOfferForm teamId={employerCtx.organizationId} memberCount={memberCount} kind="organization" />
+      ) : null}
 
       {/* ONE PAGE, ONE PRIMARY JOB (owner 2026-10-10: no walls of blocks):
           the team, booked people, the invite, WHO NEEDS ATTENTION and the

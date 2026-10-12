@@ -1,76 +1,91 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- a PostgREST-shaped fake client */
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { classifyAccount, classifyOrganization, computeProductMetrics, metricReal, metricTotal } from "./product-metrics";
-import { SIGNALS, evaluateSignals, type MonitorProbes } from "./product-monitor";
+import { RPC_CATALOGUE, computeProductMetrics, metricReal, metricTotal } from "./product-metrics";
+import { SIGNALS, evaluateSignals } from "./product-monitor";
 
 const NOW = Date.parse("2026-10-12T12:00:00Z");
-const ago = (days: number) => new Date(NOW - days * 86_400_000).toISOString();
+const WEB = join(__dirname, "..", "..");
+const SQL = readFileSync(join(WEB, "..", "..", "supabase/migrations/20261012090000_ops_product_metrics_v1.sql"), "utf8");
 
-/** A PostgREST-shaped fake: `from(t).select().range().<filters>` resolves to the table rows. */
-function fakeClient(tables: Record<string, Record<string, unknown>[] | "error">, users: Record<string, unknown>[]) {
-  const query = (rows: Record<string, unknown>[] | "error") => {
-    const q: any = {
-      select: () => q,
-      range: () => q,
-      gte: () => q,
-      eq: () => q,
-      is: () => q,
-      then: (resolve: (v: unknown) => void) =>
-        resolve(rows === "error" ? { data: null, error: { code: "42P01" } } : { data: rows, error: null }),
+const split = (REAL: number, TEST = 0, INTERNAL = 0) => ({ REAL, TEST, INTERNAL });
+
+function fakeClient(rpc: { data: unknown; error: unknown }, tables: Record<string, unknown[] | "error"> = {}) {
+  const q = (rows: unknown[] | "error") => {
+    const b: any = {
+      select: () => b,
+      gte: () => b,
+      limit: () => b,
+      then: (r: (v: unknown) => void) =>
+        r(rows === "error" ? { data: null, error: { code: "42501" } } : { data: rows, error: null }),
     };
-    return q;
+    return b;
   };
-  return {
-    from: (t: string) => query(tables[t] ?? []),
-    auth: { admin: { listUsers: async () => ({ data: { users }, error: null }) } },
-  } as any;
+  return { rpc: async () => rpc, from: (t: string) => q(tables[t] ?? []) } as any;
 }
 
-describe("population split", () => {
-  it("separates the QA cast, test domains and staff from real people", () => {
-    expect(classifyAccount({ email: "qa.owner+multiw@labourmarket.ai" })).toBe("TEST");
-    expect(classifyAccount({ email: "x@anything.com", app_metadata: { qa_synthetic: true } })).toBe("TEST");
-    expect(classifyAccount({ email: "probe@example.com" })).toBe("TEST");
-    expect(classifyAccount({ email: "ops@labourmarket.ai" })).toBe("INTERNAL");
-    expect(classifyAccount({ email: "someone@gmail.com", isAdmin: true })).toBe("INTERNAL");
-    expect(classifyAccount({ email: "someone@gmail.com" })).toBe("REAL");
+describe("the SQL function is the one computation", () => {
+  it("returns numbers only and is callable by service_role alone", () => {
+    expect(SQL).toMatch(/security definer/);
+    expect(SQL).toMatch(/set search_path = public, auth/);
+    for (const role of ["public", "anon", "authenticated"]) {
+      expect(SQL).toContain(`revoke all on function public.ops_product_metrics_v1() from ${role};`);
+    }
+    expect(SQL).toContain("grant execute on function public.ops_product_metrics_v1() to service_role;");
+    expect(SQL).not.toMatch(/grant execute[^;]*to (anon|authenticated|public)/i);
+    // No row-level field is ever a key of the result object.
+    const body = SQL.slice(SQL.indexOf("select jsonb_build_object("));
+    expect(body).not.toMatch(/'(email|full_name|legal_name|display_name|body|subject|title|id)'\s*,/);
   });
 
-  it("a fixture-labelled organization is TEST whoever owns it", () => {
-    const people = new Map([["p1", "REAL" as const]]);
-    expect(classifyOrganization({ owner_profile_id: "p1", legal_name: "QA-SYNTHETIC Alfa" }, people)).toBe("TEST");
-    expect(classifyOrganization({ owner_profile_id: "p1", legal_name: "Statyba UAB" }, people)).toBe("REAL");
+  it("produces every catalogue key", () => {
+    const produced = new Set([...SQL.matchAll(/^\s+'([a-z0-9_]+)',/gm)].map((m) => m[1]));
+    const nested: Record<string, RegExp> = {
+      invites: /^invites_/,
+      team_offers: /^team_offers_/,
+      service_requests: /^service_requests_/,
+    };
+    for (const d of RPC_CATALOGUE) {
+      const viaNest = Object.entries(nested).some(([k, rx]) => rx.test(d.key) && produced.has(k));
+      expect(produced.has(d.key) || viaNest, d.key).toBe(true);
+    }
+  });
+
+  it("uses the QA cast markers and the admin role to split populations", () => {
+    expect(SQL).toContain("qa_synthetic");
+    expect(SQL).toContain("labourmarket\\.ai$'");
+    expect(SQL).toContain("QA[-_ ]SYNTHETIC");
+    expect(SQL).toContain("p.active_role = 'admin'");
   });
 });
 
 describe("computeProductMetrics", () => {
-  const users = [
-    { id: "r1", email: "a@gmail.com", created_at: ago(2), last_sign_in_at: ago(0.5) },
-    { id: "r2", email: "b@gmail.com", created_at: ago(40), last_sign_in_at: ago(3) },
-    { id: "q1", email: "qa.worker+goal3@labourmarket.ai", created_at: ago(1), last_sign_in_at: ago(0.1) },
-  ];
-
-  it("counts by population and never mixes the QA cast into REAL", async () => {
+  it("maps the function's numbers onto the catalogue, nested groups flattened", async () => {
     const s = await computeProductMetrics(
-      fakeClient(
-        {
-          organizations: [
-            { id: "t1", organization_type: "team", owner_profile_id: "r1", legal_name: "Brigada", created_at: ago(1) },
-            { id: "t2", organization_type: "team", owner_profile_id: "q1", legal_name: "QA-SYNTHETIC brigade", created_at: ago(1) },
-          ],
-          engagement_contexts: [{ organization_id: "t1", profile_id: "r2", relationship_slug: "employee", status: "active" }],
+      fakeClient({
+        data: {
+          teams_total: split(1, 2),
+          invites: { team_created: split(3), all_opened: split(4, 1) },
+          team_offers: { accepted: split(0, 1) },
+          need_to_first_offer_hours_p50: "5.5",
+          integrity_offer_on_missing_need: 0,
+          stale_offers_real_7d: 2,
         },
-        users,
-      ),
+        error: null,
+      }),
       NOW,
     );
-    const v = (k: string) => s.metrics.find((m) => m.key === k)!.value as Record<string, number>;
-    expect(v("signin_dau")).toEqual({ REAL: 1, TEST: 1, INTERNAL: 0 });
-    expect(v("returning_7d")).toEqual({ REAL: 1, TEST: 0, INTERNAL: 0 });
-    expect(v("teams_total")).toEqual({ REAL: 1, TEST: 1, INTERNAL: 0 });
-    expect(v("teams_with_member")).toEqual({ REAL: 1, TEST: 0, INTERNAL: 0 });
-    expect(v("teams_offerable")).toEqual({ REAL: 0, TEST: 0, INTERNAL: 0 });
+    const v = (k: string) => s.metrics.find((m) => m.key === k)!.value;
+    expect(v("teams_total")).toEqual(split(1, 2));
+    expect(v("invites_team_created_90d")).toEqual(split(3));
+    expect(v("invites_all_opened_90d")).toEqual(split(4, 1));
+    expect(v("team_offers_accepted")).toEqual(split(0, 1));
+    expect(v("need_to_first_offer_hours_p50")).toBe(5.5);
+    expect(v("signin_dau")).toBeNull(); // absent from the payload → UNKNOWN, not 0
+    expect(s.integrity.stale_offers_real_7d).toBe(2);
+    expect(s.integrity.integrity_accepted_without_acceptor).toBeNull();
     for (const m of s.metrics) {
       expect(m.source.length, m.key).toBeGreaterThan(0);
       expect(m.rule.length, m.key).toBeGreaterThan(0);
@@ -78,25 +93,51 @@ describe("computeProductMetrics", () => {
     }
   });
 
-  it("an unreadable source is UNKNOWN (null) and reported — never 0", async () => {
-    const s = await computeProductMetrics(fakeClient({ team_demand_offers: "error" }, users), NOW);
-    expect(s.metrics.find((m) => m.key === "team_offers_offered")!.value).toBeNull();
-    expect(s.unknown.map((u) => u.source)).toContain("team_demand_offers");
+  it("without the function every population metric is UNKNOWN and the reason is listed", async () => {
+    const s = await computeProductMetrics(fakeClient({ data: null, error: { code: "PGRST202" } }), NOW);
+    expect(s.unknown).toContainEqual({ source: "ops_product_metrics_v1", reason: "PGRST202" });
+    expect(s.metrics.filter((m) => m.group !== "technical").every((m) => m.value === null)).toBe(true);
     expect(metricTotal(null)).toBeNull();
-    expect(metricReal({ REAL: 2, TEST: 5, INTERNAL: 1 })).toBe(2);
+    expect(metricReal(split(2, 5, 1))).toBe(2);
+  });
+
+  it("vacancy lag takes each provider's freshest cursor", async () => {
+    const s = await computeProductMetrics(
+      fakeClient(
+        { data: {}, error: null },
+        {
+          vacancy_import_cursors: [
+            { provider_key: "af", last_success_at: new Date(NOW - 58 * 86_400_000).toISOString() },
+            { provider_key: "af", last_success_at: new Date(NOW - 2 * 3_600_000).toISOString() },
+            { provider_key: "nav", last_success_at: new Date(NOW - 1 * 3_600_000).toISOString() },
+          ],
+        },
+      ),
+      NOW,
+    );
+    expect(s.metrics.find((m) => m.key === "vacancy_sync_lag_hours_max")!.value).toBe(2);
   });
 });
 
 describe("monitor signals", () => {
-  const probes: MonitorProbes = {
-    searchMedianMs: 800,
-    acceptedInvitesWithoutAcceptor: 0,
-    offersOnMissingNeed: 0,
-    confirmationsOnDeletedEntries: 0,
-    teamMembersOutsideTeam: 0,
-  };
-  const snap = (metrics: { key: string; value: unknown }[], unknown: { source: string; reason: string }[] = []) =>
-    ({ computedAt: ago(0), unknown, truncated: [], metrics: metrics.map((m) => ({ ...m, group: "users", source: "s", rule: "r", window: "w" })) }) as any;
+  const snap = (
+    values: Record<string, unknown>,
+    integrity: Record<string, number | null> = {},
+    unknown: { source: string; reason: string }[] = [],
+  ) =>
+    ({
+      computedAt: new Date(NOW).toISOString(),
+      unknown,
+      integrity: {
+        integrity_accepted_without_acceptor: 0,
+        integrity_offer_on_missing_need: 0,
+        integrity_confirmation_on_deleted_entry: 0,
+        integrity_join_team_into_non_team: 0,
+        stale_offers_real_7d: 0,
+        ...integrity,
+      },
+      metrics: Object.entries(values).map(([key, value]) => ({ key, value, group: "users", source: "s", rule: "r", window: "w" })),
+    }) as any;
 
   it("every signal has a severity, a condition, an interval and a responder", () => {
     for (const s of SIGNALS) {
@@ -109,37 +150,31 @@ describe("monitor signals", () => {
 
   it("fires on the condition, stays OK otherwise, and treats a missing input as UNKNOWN", () => {
     const res = evaluateSignals(
-      snap([
-        { key: "registration_started_7d", value: 5 },
-        { key: "signup_completed_7d", value: 0 },
-        { key: "teams_total", value: { REAL: 2, TEST: 0, INTERNAL: 0 } },
-        { key: "teams_with_member", value: { REAL: 0, TEST: 0, INTERNAL: 0 } },
-      ]),
-      { ...probes, searchMedianMs: 6900, offersOnMissingNeed: 1 },
-      { staleOfferCount: 0 },
+      snap(
+        { registration_started_7d: 5, signup_completed_7d: 0, teams_total: split(2), teams_with_member: split(0) },
+        { integrity_offer_on_missing_need: 1, stale_offers_real_7d: 1 },
+      ),
+      { searchMedianMs: 6900 },
     );
     const st = (id: string) => res.find((r) => r.id === id)!.state;
     expect(st("signup-broken")).toBe("BREACH");
     expect(st("team-formation-stalled")).toBe("BREACH");
     expect(st("search-slow")).toBe("BREACH");
     expect(st("data-integrity")).toBe("BREACH");
-    expect(st("b2b-offers-unanswered")).toBe("OK");
+    expect(st("b2b-offers-unanswered")).toBe("BREACH");
     expect(st("review-queue-stale")).toBe("UNKNOWN");
     expect(st("metrics-unreadable")).toBe("OK");
   });
 
-  it("observed text is aggregate numbers only", () => {
-    const res = evaluateSignals(snap([], [{ source: "invitations", reason: "42P01" }]), probes);
+  it("observed text is aggregate numbers only, and an unreadable source is itself a breach", () => {
+    const res = evaluateSignals(snap({}, {}, [{ source: "ops_product_metrics_v1", reason: "42501" }]), { searchMedianMs: 700 });
     for (const r of res) expect(r.observed).not.toMatch(/@|[0-9a-f]{8}-[0-9a-f]{4}/i);
     expect(res.find((r) => r.id === "metrics-unreadable")!.state).toBe("BREACH");
   });
 });
 
 describe("the service-role metrics section stays behind the superadmin gate", () => {
-  it("is rendered only by the launch-readiness page, which calls requireSuperadmin first", async () => {
-    const { readFileSync, readdirSync, statSync } = await import("node:fs");
-    const { join } = await import("node:path");
-    const web = join(__dirname, "..", "..");
+  it("is rendered only by the launch-readiness page, which calls requireSuperadmin first", () => {
     const walk = (d: string, out: string[] = []): string[] => {
       for (const e of readdirSync(d)) {
         if (e === "node_modules" || e.startsWith(".")) continue;
@@ -150,11 +185,11 @@ describe("the service-role metrics section stays behind the superadmin gate", ()
       return out;
     };
     const importers = ["app", "components", "lib"]
-      .flatMap((d) => walk(join(web, d)))
+      .flatMap((d) => walk(join(WEB, d)))
       .filter((f) => /from "@\/components\/admin\/product-metrics-section"/.test(readFileSync(f, "utf8")))
-      .map((f) => f.slice(web.length + 1).split("\\").join("/"));
+      .map((f) => f.slice(WEB.length + 1).split("\\").join("/"));
     expect(importers).toEqual(["app/[locale]/dashboard/admin/launch-readiness/page.tsx"]);
-    const page = readFileSync(join(web, importers[0]!), "utf8");
+    const page = readFileSync(join(WEB, importers[0]!), "utf8");
     expect(page.indexOf("await requireSuperadmin(locale)")).toBeGreaterThan(-1);
     expect(page.indexOf("await requireSuperadmin(locale)")).toBeLessThan(page.indexOf("<ProductMetricsSection />"));
   });

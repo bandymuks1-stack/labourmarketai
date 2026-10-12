@@ -16,6 +16,9 @@ import {
   parseOfferableDemand,
   parseReceivedOffer,
   parseSentOffer,
+  parseTermsVersion,
+  type OfferTermsInput,
+  type OfferTermsVersion,
   type OfferWriteOutcome,
   type OfferableDemand,
   type ReceivedTeamOffer,
@@ -35,6 +38,8 @@ import {
  *   list_team_offers_for_request_v1    demand receiver  -> team-level aggregates, NO member identity
  *   respond_team_demand_offer_v1       demand receiver  -> accept / decline
  *   hand_off_team_demand_offer_v1      demand receiver  -> ONE team_assignments row on its own project
+ *   propose_team_demand_offer_terms_v1 either party     -> the next VERSION of the terms (20261011200000)
+ *   list_team_demand_offer_terms_v1    either party     -> every version, side-labelled, no profile id
  *
  * Nothing here writes a table directly and nothing here reads a member.
  */
@@ -100,8 +105,23 @@ export function listSentOffers(teamId: string): Promise<ReadResult<SentTeamOffer
  * The RECEIVING side: team-level aggregates for one demand the caller owns.
  * Zero rows for anyone else (the database answers empty, never an error).
  */
-export function listReceivedOffers(requestId: string): Promise<ReadResult<ReceivedTeamOffer>> {
+export async function listReceivedOffers(requestId: string): Promise<ReadResult<ReceivedTeamOffer>> {
+  // v2 = v1 + offer_kind (20261011200000). Until it is applied, v1 answers and
+  // every offer is a brigade, which is exactly what v1 could hold.
+  const v2 = await readRows("list_team_offers_for_request_v2", { p_request_id: requestId }, parseReceivedOffer);
+  if (v2.status !== "needs_migration") return v2;
   return readRows("list_team_offers_for_request_v1", { p_request_id: requestId }, parseReceivedOffer);
+}
+
+/** Every terms version of one offer, for either party; zero rows for anyone else. */
+export function listOfferTerms(offerId: string): Promise<ReadResult<OfferTermsVersion>> {
+  return readRows("list_team_demand_offer_terms_v1", { p_offer_id: offerId }, parseTermsVersion);
+}
+
+/** Whether the negotiation migration is live (a nil-id read answers zero rows when it is). */
+export async function offerNegotiationAvailable(): Promise<boolean> {
+  const r = await listOfferTerms("00000000-0000-0000-0000-000000000000");
+  return r.status === "ok";
 }
 
 /** Bound on how many of the caller's own needs are asked per read. */
@@ -209,4 +229,24 @@ export async function handOffTeamOffer(input: {
   if (error) return { status: offerRefusalOf(error) };
   const parsed = parseHandOffResult(data);
   return parsed ? { status: "ok", ...parsed } : { status: "error" };
+}
+
+export async function proposeOfferTerms(
+  offerId: string,
+  terms: OfferTermsInput,
+): Promise<TeamOfferWriteResult<{ version: number }>> {
+  const ctx = await authed();
+  if (!ctx) return { status: "not_authed" };
+  const { data, error } = await asAny(ctx.supabase).rpc("propose_team_demand_offer_terms_v1", {
+    p_offer_id: offerId,
+    p_capacity: terms.capacity,
+    p_rate_text: terms.rateText,
+    p_start_date: terms.startDate,
+    p_end_date: terms.endDate,
+    p_scope_text: terms.scopeText,
+    p_conditions_text: terms.conditionsText,
+  });
+  if (error) return { status: offerRefusalOf(error) };
+  const version = data && typeof data === "object" ? (data as { version?: unknown }).version : null;
+  return typeof version === "number" ? { status: "ok", version } : { status: "error" };
 }
