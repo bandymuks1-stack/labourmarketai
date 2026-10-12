@@ -37,11 +37,6 @@ export interface SignalResult extends SignalDefinition {
 export interface MonitorProbes {
   /** Median ms of the public free-text job search, or null when unreachable. */
   readonly searchMedianMs: number | null;
-  /** Integrity counts read by the script; null = unreadable. */
-  readonly acceptedInvitesWithoutAcceptor: number | null;
-  readonly offersOnMissingNeed: number | null;
-  readonly confirmationsOnDeletedEntries: number | null;
-  readonly teamMembersOutsideTeam: number | null;
 }
 
 /** Interval the workflow runs at; every signal is evaluated every run. */
@@ -54,7 +49,7 @@ export const SIGNALS: readonly SignalDefinition[] = [
   { id: "invites-failing", severity: "P2", condition: "invitations with delivery_failed in 90 days ≥ 1", interval: MONITOR_INTERVAL, responder: RESPONDER },
   { id: "invites-expiring-unused", severity: "P3", condition: "REAL invitations still pending past expiry in 90 days ≥ 5", interval: MONITOR_INTERVAL, responder: RESPONDER },
   { id: "team-formation-stalled", severity: "P2", condition: "REAL brigades exist AND none has an active member", interval: MONITOR_INTERVAL, responder: RESPONDER },
-  { id: "b2b-offers-unanswered", severity: "P2", condition: "REAL brigade offers still 'offered' ≥ 1 (offer older than 7 days is checked by the script)", interval: MONITOR_INTERVAL, responder: RESPONDER },
+  { id: "b2b-offers-unanswered", severity: "P2", condition: "REAL brigade offers still 'offered' 7 days after they were made ≥ 1", interval: MONITOR_INTERVAL, responder: RESPONDER },
   { id: "review-queue-stale", severity: "P3", condition: "journal entries waiting > 14 days for confirmation ≥ 1", interval: MONITOR_INTERVAL, responder: RESPONDER },
   { id: "living-cv-not-refreshing", severity: "P2", condition: "journal entries in 7 days ≥ 3 AND no worker_skills row refreshed in 7 days", interval: MONITOR_INTERVAL, responder: RESPONDER },
   { id: "search-slow", severity: "P2", condition: "public free-text job search median of 3 > 3000 ms (or unreachable)", interval: MONITOR_INTERVAL, responder: RESPONDER },
@@ -68,11 +63,7 @@ function metric(s: MetricsSnapshot, key: string) {
   return s.metrics.find((m) => m.key === key)?.value ?? null;
 }
 
-export function evaluateSignals(
-  s: MetricsSnapshot,
-  p: MonitorProbes,
-  extra: { staleOfferCount: number | null } = { staleOfferCount: null },
-): SignalResult[] {
+export function evaluateSignals(s: MetricsSnapshot, p: MonitorProbes): SignalResult[] {
   const out: SignalResult[] = [];
   const set = (id: string, state: SignalState, observed: string) => {
     const def = SIGNALS.find((d) => d.id === id)!;
@@ -107,7 +98,10 @@ export function evaluateSignals(
     const withMember = metricReal(metric(s, "teams_with_member"));
     set("team-formation-stalled", teams === null || withMember === null ? "UNKNOWN" : teams > 0 && withMember === 0 ? "BREACH" : "OK", `${val(teams)} REAL brigades, ${val(withMember)} with a member`);
   }
-  set("b2b-offers-unanswered", extra.staleOfferCount === null ? "UNKNOWN" : extra.staleOfferCount >= 1 ? "BREACH" : "OK", `${val(extra.staleOfferCount)} REAL offers unanswered > 7 d`);
+  {
+    const n = s.integrity.stale_offers_real_7d;
+    set("b2b-offers-unanswered", n === null ? "UNKNOWN" : n >= 1 ? "BREACH" : "OK", `${val(n)} REAL offers unanswered > 7 d`);
+  }
   {
     const n = metricTotal(metric(s, "review_queue_older_14d"));
     set("review-queue-stale", n === null ? "UNKNOWN" : n >= 1 ? "BREACH" : "OK", `${val(n)} waiting > 14 d`);
@@ -128,10 +122,11 @@ export function evaluateSignals(
     set("vacancy-sync-lagging", lag === null ? "UNKNOWN" : lag > 30 ? "BREACH" : "OK", `oldest import ${val(lag)} h`);
   }
   {
-    const parts = [p.acceptedInvitesWithoutAcceptor, p.offersOnMissingNeed, p.confirmationsOnDeletedEntries, p.teamMembersOutsideTeam];
+    const i = s.integrity;
+    const parts = [i.integrity_accepted_without_acceptor, i.integrity_offer_on_missing_need, i.integrity_confirmation_on_deleted_entry, i.integrity_join_team_into_non_team];
     const anyUnknown = parts.some((x) => x === null);
     const sum = parts.reduce<number>((a, b) => a + (b ?? 0), 0);
-    set("data-integrity", sum > 0 ? "BREACH" : anyUnknown ? "UNKNOWN" : "OK", `accepted-without-acceptor ${val(p.acceptedInvitesWithoutAcceptor)}, offer-on-missing-need ${val(p.offersOnMissingNeed)}, confirmation-on-deleted ${val(p.confirmationsOnDeletedEntries)}, team-member-outside-team ${val(p.teamMembersOutsideTeam)}`);
+    set("data-integrity", sum > 0 ? "BREACH" : anyUnknown ? "UNKNOWN" : "OK", `accepted-without-acceptor ${val(parts[0]!)}, offer-on-missing-need ${val(parts[1]!)}, confirmation-on-deleted ${val(parts[2]!)}, join-team-into-non-team ${val(parts[3]!)}`);
   }
   set("metrics-unreadable", s.unknown.length > 0 ? "BREACH" : "OK", s.unknown.length ? `unreadable: ${s.unknown.map((u) => `${u.source}(${u.reason})`).join(", ")}` : "all sources read");
   return out;

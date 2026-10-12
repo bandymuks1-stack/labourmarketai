@@ -74,6 +74,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261011200000_",
       // 2026-10-11 (RED by SECURITY DEFINER + RLS policy, needs-human-gate): absence authority for engagement employees.
       "20261011160000_",
+      // 2026-10-12 (RED, needs-human-gate): service_role-only aggregate product metrics.
+      "20261012090000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

@@ -39,9 +39,6 @@ export async function ProductMetricsSection() {
           {t("unknown", { sources: snapshot.unknown.map((u) => u.source).join(", ") })}
         </p>
       )}
-      {snapshot.truncated.length > 0 && (
-        <p className="text-sm text-text-secondary">{t("truncated", { sources: snapshot.truncated.join(", ") })}</p>
-      )}
       {groups.map((g) => (
         <section key={g} data-testid={`admin-metrics-${g}`}>
           <Card compact className="flex flex-col gap-2">
