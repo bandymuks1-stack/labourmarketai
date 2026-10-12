@@ -1624,6 +1624,10 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261012090000_ops_product_metrics_v1.sql",
       // 2026-10-12 (RED, needs-human-gate, NOT applied): Chat First transcript per person + workspace - marker is the human-gate acknowledgement.
       "20261012100000_assistant_transcript_v1.sql",
+      // 2026-10-12 (owner-approved RED in chat, APPLIED): party-gated offer thread read.
+      "20261012110000_team_offer_thread_party_v1.sql",
+      // 2026-10-12 (owner-approved RED in chat, APPLIED): exact service_role reads for notifications and intakes.
+      "20261012120000_service_role_notification_reads_v1.sql",
 ]);
   });
 

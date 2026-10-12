@@ -236,6 +236,11 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
       // defines or calls no engine command (the assertions below apply
       // unchanged); its DOWN does not mention the engine at all.
       "20260923114500_nonstop_org_consolidation_v1",
+      // service_role notification reads (20261012120000, owner-approved 2026-10-12):
+      // GRANT SELECT on four engine tables to service_role so the existing
+      // notification emitters can read who to notify. It creates, drops,
+      // alters, triggers and writes no engine object.
+      "20261012120000_service_role_notification_reads_v1",
     ];
     /**
      * 20260820070000 — chain step B on-ramp. The ONE later migration that

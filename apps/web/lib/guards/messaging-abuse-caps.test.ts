@@ -266,7 +266,10 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
     // …the brigade-offer negotiation derives it from the REAL team row and
     // passes its grant only after evaluateTeamOfferContact held…
     const offer = read("lib/company/team-offer-conversation.ts");
-    expect(offer).toMatch(/offer\.teamName/);
+    // 2026-10-12: the subject is the offering organization's real name, read
+    // through the party-gated team_offer_thread_party_v1 (never a form field).
+    expect(offer).toMatch(/rpc\("team_offer_thread_party_v1"/);
+    expect(offer).toMatch(/const subject = party\.subject/);
     expect(offer.indexOf('evaluateTeamOfferContact({ offerStatus, side }) !== "allowed"')).toBeLessThan(
       offer.indexOf('"allowed_team_demand_offer"'),
     );
