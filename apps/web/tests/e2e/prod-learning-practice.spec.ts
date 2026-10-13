@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { inviteCapGate } from "./invite-cap";
 import { test, expect, type Browser, type Page } from "@playwright/test";
 
 /**
@@ -26,6 +27,7 @@ const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slo
 const ENABLED = process.env.PROD_QA_WALK === "1" && ["owner", "worker2"].every((s) => existsSync(state(s)));
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
 test.describe.configure({ mode: "serial", timeout: 180_000, retries: 0 });
+const cap = inviteCapGate();
 test.use({ actionTimeout: 30_000 });
 
 async function as(browser: Browser, slot: string): Promise<{ page: Page; close: () => Promise<void> }> {
@@ -99,7 +101,13 @@ test("L-2. the institution invites a learner with a link (no e-mail needed)", as
   if (await name.isVisible().catch(() => false)) await name.fill(`QA-SYNTHETIC mokinys ${RUN}`);
   await page.getByTestId("invite-submit").click();
   const copy = page.getByTestId("invite-copy-link").first();
-  await expect(copy).toBeVisible({ timeout: 30_000 });
+  const refused = page.getByTestId("invite-result-limit_reached");
+  await expect(copy.or(refused).first()).toBeVisible({ timeout: 30_000 });
+  if (!(await copy.isVisible())) {
+    const answer = await page.getByTestId("invite-link-result").or(page.getByTestId("invite-result")).first().innerText().catch(() => "limit_reached");
+    await close();
+    cap.check(`limit_reached ${answer}`);
+  }
   link = (await copy.getAttribute("data-invite-link")) ?? "";
   expect(link).toMatch(/\/invite\//);
   await close();
