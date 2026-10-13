@@ -40,6 +40,19 @@ function bearerOf(slot: string): string {
 }
 
 type ToolResult = { ok: boolean; code?: string; data?: Record<string, unknown>; message?: string };
+type JsonSchema = {
+  type?: string;
+  format?: string;
+  enum?: unknown[];
+  properties?: Record<string, JsonSchema>;
+  required?: string[];
+  allOf?: JsonSchema[];
+  anyOf?: JsonSchema[];
+  items?: JsonSchema;
+  minItems?: number;
+  minLength?: number;
+};
+type CatalogTool = { name: string; inputSchema: JsonSchema; annotations?: { readOnlyHint?: boolean } };
 let rpcId = 0;
 async function rpc(token: string | null, method: string, params: Record<string, unknown> = {}) {
   const res = await fetch(`${ORIGIN}/api/mcp`, {
@@ -52,7 +65,7 @@ async function rpc(token: string | null, method: string, params: Record<string, 
     body: JSON.stringify({ jsonrpc: "2.0", id: ++rpcId, method, params }),
   });
   const text = await res.text();
-  let body: { result?: { structuredContent?: ToolResult; tools?: { name: string }[] }; error?: unknown } | null = null;
+  let body: { result?: { structuredContent?: ToolResult; tools?: CatalogTool[] }; error?: unknown } | null = null;
   try {
     body = JSON.parse(text);
   } catch {
@@ -79,6 +92,7 @@ const own = async (token: string) => (await ownAll(token)).filter((o) => o.title
 let worker = "";
 let agency = "";
 let offeringId = "";
+let catalog: CatalogTool[] = [];
 
 /** Rows this walk creates — this run's, or an earlier run's that stopped
  *  before its own delete — removed through the same two steps a person uses. */
@@ -101,7 +115,8 @@ test("M-1. the published toolset is the universal one, and an anonymous caller i
   agency = bearerOf("agency");
   const list = await rpc(worker, "tools/list");
   expect(list.status).toBe(200);
-  const names = (list.body?.result?.tools ?? []).map((t) => t.name);
+  catalog = list.body?.result?.tools ?? [];
+  const names = catalog.map((t) => t.name);
   console.info(`[mcp] tools/list → ${names.length} tools`);
   expect(names.length).toBeGreaterThanOrEqual(229);
   for (const n of ["context_list", "service_offering_create", "service_offering_delete_draft", "service_offering_delete_confirm"]) {
@@ -186,4 +201,56 @@ test("M-6. concurrent confirms of one token: exactly one executes", async () => 
   });
   expect(done.ok, JSON.stringify(done)).toBe(true);
   expect(await own(worker)).toHaveLength(0);
+});
+
+/**
+ * A well-formed placeholder for one required argument: the shape is valid, the
+ * referent does not exist (nil-like UUID, `.invalid` e-mail, a future date), so
+ * a read answers "not found / not yours / invalid" — it never finds anything.
+ */
+function placeholder(schema: JsonSchema | undefined, key: string): unknown {
+  const s = schema?.anyOf?.find((b) => b.type && b.type !== "null") ?? schema ?? {};
+  if (s.enum?.length) return s.enum[0];
+  switch (s.type) {
+    case "number":
+    case "integer":
+      return 1;
+    case "boolean":
+      return false;
+    case "array":
+      return s.minItems ? Array.from({ length: s.minItems }, () => placeholder(s.items, key)) : [];
+    case "object":
+      return argsFor(s);
+    default:
+      if (s.format === "uuid" || /Id$/.test(key)) return "00000000-0000-4000-8000-000000000000";
+      if (s.format === "email" || /email/i.test(key)) return "qa.nobody@example.invalid";
+      if (s.format === "date" || /date/i.test(key)) return "2099-01-04";
+      return `QA-SYNTHETIC ${RUN} probe`.padEnd(s.minLength ?? 0, ".");
+  }
+}
+function argsFor(schema: JsonSchema): Record<string, unknown> {
+  const parts = [schema, ...(schema.allOf ?? [])];
+  const props = Object.assign({}, ...parts.map((p) => p.properties ?? {})) as Record<string, JsonSchema>;
+  const required = parts.flatMap((p) => p.required ?? []);
+  return Object.fromEntries(required.map((k) => [k, placeholder(props[k], k)]));
+}
+
+test("M-7. every read-only tool is callable: each answers a structured result, none errors", async () => {
+  test.setTimeout(600_000);
+  const reads = catalog.filter((t) => t.annotations?.readOnlyHint);
+  expect(reads.length, "the catalog was not captured in M-1").toBeGreaterThanOrEqual(100);
+  const broken: string[] = [];
+  const outcomes = new Map<string, number>();
+  for (const t of reads) {
+    const r = await rpc(worker, "tools/call", { name: t.name, arguments: argsFor(t.inputSchema) });
+    const out = r.body?.result?.structuredContent;
+    if (r.status !== 200 || !out || typeof out.ok !== "boolean") {
+      broken.push(`${t.name}: HTTP ${r.status} ${r.text.slice(0, 160)}`);
+      continue;
+    }
+    const k = out.ok ? "ok" : (out.code ?? "error");
+    outcomes.set(k, (outcomes.get(k) ?? 0) + 1);
+  }
+  console.info(`[mcp] read sweep: ${reads.length} read-only tools → ${JSON.stringify(Object.fromEntries(outcomes))}`);
+  expect(broken, "read-only tools that did not answer a structured result").toEqual([]);
 });
