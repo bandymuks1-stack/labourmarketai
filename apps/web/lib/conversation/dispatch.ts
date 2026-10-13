@@ -144,6 +144,12 @@ async function heldRolesOf(
   return set.size > 0 ? set : new Set<Role>(["worker"]);
 }
 
+/** The education tables are not in the generated types yet (lib/education/programs.ts uses the same cast). */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function untyped(c: unknown): any {
+  return c;
+}
+
 /** Opaque state fingerprint bound into a confirmation token so a card that was
  *  shown for one state can never execute against a changed state (replay /
  *  stale). Only the confirm-tier actions need one. Both callers wrap it in
@@ -290,6 +296,46 @@ async function stateFingerprint(
     if (error) return "project:unreadable";
     const rows = (data ?? []) as { id: string }[];
     return rows.length === 0 ? "project:none" : `project:latest:${rows[0].id}`;
+  }
+  if (actionId === "company.create-programme") {
+    /** Same rule for programmes (no unique key — a replay inserted a second
+     *  row within the TTL): the newest programme the caller can see (RLS). */
+    const { data, error } = await untyped(supabase)
+      .from("education_programs")
+      .select("id")
+      .order("created_at", { ascending: false })
+      .limit(1);
+    if (error) return "programme:unreadable";
+    const rows = (data ?? []) as { id: string }[];
+    return rows.length === 0 ? "programme:none" : `programme:latest:${rows[0].id}`;
+  }
+  if (actionId === "company.create-cohort") {
+    /** And for cohorts: the newest cohort of the programme it is created in. */
+    const { data, error } = await untyped(supabase)
+      .from("education_cohorts")
+      .select("id")
+      .eq("program_id", String(input.programId))
+      .order("created_at", { ascending: false })
+      .limit(1);
+    if (error) return "cohort:unreadable";
+    const rows = (data ?? []) as { id: string }[];
+    return rows.length === 0 ? "cohort:none" : `cohort:latest:${rows[0].id}`;
+  }
+  if (actionId === "company.request-readiness") {
+    /** ONE MESSAGE PER CONFIRMATION. The instruction insert is unconditional,
+     *  so a replayed token sent the person the same request again. Bound to
+     *  the caller's newest instruction (own messages are readable to their
+     *  author): a send adds one, so a replay is `stale_confirmation`. */
+    const { data, error } = await supabase
+      .from("conversation_messages")
+      .select("id")
+      .eq("author_id", userId)
+      .eq("is_instruction", true)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    if (error) return "instruction:unreadable";
+    const rows = (data ?? []) as { id: string }[];
+    return rows.length === 0 ? "instruction:none" : `instruction:latest:${rows[0].id}`;
   }
   return "n/a";
 }
