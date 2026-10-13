@@ -41,6 +41,7 @@ on:
           - chat-confirm-once
           - living-cv-growth
           - staff-review-notice
+          - manager-chat
           - mobile-surfaces
 
 concurrency:
@@ -115,6 +116,7 @@ jobs:
             chat-confirm-once) SPEC=tests/e2e/prod-chat-confirm-once.spec.ts ;;
             living-cv-growth) SPEC=tests/e2e/prod-living-cv-growth.spec.ts ;;
             staff-review-notice) SPEC=tests/e2e/prod-staff-review-notice.spec.ts ;;
+            manager-chat) SPEC=tests/e2e/prod-manager-chat.spec.ts ;;
             mobile-surfaces) SPEC=tests/e2e/prod-mobile-surfaces.spec.ts ;;
           esac
           pnpm exec playwright test "$SPEC" --project=chromium --trace=off --reporter=list,json \
