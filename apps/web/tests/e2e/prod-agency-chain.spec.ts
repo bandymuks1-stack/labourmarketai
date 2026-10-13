@@ -218,7 +218,27 @@ test("A-5. the agency sees the shared need and offers its person", async ({ brow
   await page.waitForTimeout(5_000);
   const error = page.getByTestId("agency-bridge-error");
   if (await error.isVisible().catch(() => false)) console.info(`[agency] offer answer: ${await error.innerText()}`);
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message.slice(0, 160)));
+  page.on("console", (m) => {
+    if (m.type() === "error") errors.push(m.text().slice(0, 160));
+  });
   await page.reload();
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+  // DIAGNOSTIC (structure only, no page text): where each copy of the
+  // progress block lives, and whether hydration failed on this load.
+  const where = await page.locator('[data-testid="agency-bridge-progress"]').evaluateAll((els) =>
+    els.map((el) => {
+      const chain: string[] = [];
+      for (let n: Element | null = el.parentElement; n && chain.length < 8; n = n.parentElement) {
+        const id = n.getAttribute("data-testid");
+        chain.push(id ? `${n.tagName.toLowerCase()}[${id}]` : n.tagName.toLowerCase());
+      }
+      return chain.join(" < ");
+    }),
+  );
+  console.info(`[agency] progress copies=${where.length}\n  ${where.join("\n  ")}`);
+  console.info(`[agency] page errors: ${errors.filter((e) => /418|hydrat|parentNode/i.test(e)).join(" | ") || "none"}`);
   const progress = page.getByTestId("agency-bridge-progress");
   await expect(progress).toBeVisible({ timeout: 30_000 });
   console.info(`[agency] progress: ${(await progress.innerText()).replace(/\s+/g, " ").slice(0, 400)}`);
