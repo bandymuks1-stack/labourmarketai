@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { inviteCapGate } from "./invite-cap";
 import { test, expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
 
 /**
@@ -28,6 +29,7 @@ const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slo
 const ENABLED = process.env.PROD_QA_WALK === "1" && ["owner", "worker", "worker2", "manager"].every((s) => existsSync(state(s)));
 
 test.describe.configure({ mode: "serial", timeout: 180_000, retries: 0 });
+const cap = inviteCapGate();
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
 
 async function as(browser: Browser, slot: string, mobile = false): Promise<{ ctx: BrowserContext; page: Page }> {
@@ -102,6 +104,8 @@ for (const [slot, who, email] of [
     const box = page.getByTestId("team-invite-link");
     if (!(await box.waitFor({ state: "visible", timeout: 20_000 }).then(() => true).catch(() => false))) {
       const msg = await page.getByTestId("team-brigades-msg").innerText().catch(() => "(no message)");
+      await ctx.close();
+      cap.check(msg);
       throw new Error(`no invite link; the product said: ${msg}`);
     }
     const url = (await box.locator("code").innerText()).trim();

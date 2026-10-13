@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { inviteCapGate } from "./invite-cap";
 import { test, expect, type Browser, type Page } from "@playwright/test";
 
 /**
@@ -29,6 +30,7 @@ const ENABLED =
   process.env.PROD_QA_WALK === "1" && INVITEE.length > 3 && ["owner", "worker2"].every((s) => existsSync(state(s)));
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
 test.describe.configure({ mode: "serial", timeout: 180_000, retries: 0 });
+const cap = inviteCapGate();
 test.use({ actionTimeout: 30_000 });
 
 async function as(browser: Browser, slot: string): Promise<{ page: Page; close: () => Promise<void> }> {
@@ -84,6 +86,9 @@ async function inviteWorker(browser: Browser, tag: string): Promise<string | nul
   if (await copy.isVisible().catch(() => false)) {
     link = new URL((await copy.getAttribute("data-invite-link")) ?? "").pathname;
   } else if (!(await duplicate.isVisible().catch(() => false))) {
+    const answer = await page.getByTestId("invite-result").innerText().catch(() => "?");
+    await close();
+    cap.check(answer);
     throw new Error(`invitation ${tag} not created: ${await page.getByTestId("invite-result").innerText().catch(() => "?")}`);
   }
   console.info(`[review-notice] ${tag}: ${link ? "created" : "one already pending"}`);
