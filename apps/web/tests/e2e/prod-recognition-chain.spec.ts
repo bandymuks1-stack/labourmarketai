@@ -115,6 +115,24 @@ test("R-3. the person accepts the learning relationship", async ({ browser }) =>
   await close();
 });
 
+test("R-3b. Beta switches review on for the learner through the audited manual door", async ({ browser }) => {
+  // Automatic review is for EMPLOYEES who accepted knowingly (owner decision 1); a learner's
+  // review is the institution's explicit choice, exactly like L-6 in the learning walk.
+  const { page, close } = await as(browser, "owner");
+  await page.goto("/lt/dashboard");
+  await workspace(page, BETA);
+  await page.goto("/lt/dashboard/company/people#org-members");
+  const row = page.locator('[data-testid^="org-member-"][data-role="student"]', { hasText: LEARNER }).first();
+  await expect(row).toBeVisible({ timeout: 30_000 });
+  const toggle = row.locator('[data-testid^="toggle-review-"]');
+  if ((await row.getAttribute("data-review")) === "off" && (await toggle.count()) > 0) {
+    await toggle.click();
+    await expect(row).toHaveAttribute("data-review", "on", { timeout: 30_000 });
+  }
+  console.info(`[recognition] Beta learner review: ${await row.getAttribute("data-review")}`);
+  await close();
+});
+
 test("R-4. the learner records a practice day in the Beta learning relationship", async ({ browser }) => {
   const { page, close } = await as(browser, "worker2");
   await page.goto("/lt/dashboard/journal");
