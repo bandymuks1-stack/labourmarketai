@@ -75,7 +75,8 @@ test("R-2. Beta connects the person as a learner (unless already connected)", as
   const form = page.getByTestId("record-recognition");
   if (await form.isVisible().catch(() => false)) {
     await form.locator("summary").click();
-    const known = await form.locator('select[name="subjectProfileId"] option', { hasText: LEARNER }).count();
+    // Any real learner option (the placeholder has an empty value): Beta has one learner.
+    const known = (await form.locator('select[name="subjectProfileId"] option').evaluateAll((os) => (os as HTMLOptionElement[]).filter((o) => o.value).length));
     if (known > 0) {
       console.info("[recognition] the learner is already connected to Beta");
       await close();
@@ -91,6 +92,8 @@ test("R-2. Beta connects the person as a learner (unless already connected)", as
   await expect(capacity).toHaveValue("student", { timeout: 30_000 });
   const linkMode = page.getByTestId("invite-mode-link");
   if (await linkMode.isVisible().catch(() => false)) await linkMode.click();
+  const name = page.getByTestId("invite-name");
+  if (await name.isVisible().catch(() => false)) await name.fill("QA-SYNTHETIC mokinys (Beta)");
   await page.getByTestId("invite-submit").click();
   const copy = page.getByTestId("invite-copy-link").first();
   const refused = page.getByTestId("invite-result-limit_reached");
@@ -200,8 +203,11 @@ test("R-6. Beta picks THAT signed-off practice from the list and records the rec
   await expect(form).toBeVisible({ timeout: 30_000 });
   await form.locator("summary").click();
   const subject = form.locator('select[name="subjectProfileId"]');
-  const pick = await subject.locator("option", { hasText: LEARNER }).first().getAttribute("value");
-  expect(pick, "the learner is offered as the subject").toBeTruthy();
+  const options = await subject.locator("option").evaluateAll((os) =>
+    (os as HTMLOptionElement[]).filter((o) => o.value).map((o) => ({ v: o.value, t: (o.textContent ?? "").trim() })),
+  );
+  const pick = (options.find((o) => LEARNER.test(o.t)) ?? (options.length === 1 ? options[0] : undefined))?.v;
+  expect(pick, `the learner is offered as the subject: ${options.map((o) => o.t).join(" | ")}`).toBeTruthy();
   await subject.selectOption(pick!);
   const ours = form.locator("label", { hasText: "pertvar" }).getByTestId("recognition-evidence-option").first();
   await expect(ours, "the signed-off practice is offered as evidence").toBeVisible({ timeout: 30_000 });
