@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-// @ts-expect-error — plain .mjs script, no type declarations
 import { evaluateCheck, normalize, LEDGER_SQL, checkSql, repoMigrations } from "../../../../.github/scripts/migration-ledger-parity.mjs";
 
 /**
