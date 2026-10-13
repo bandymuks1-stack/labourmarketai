@@ -1636,6 +1636,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261012190000_staff_review_notice_on_acceptance_v1.sql",
       // 2026-10-13 (RED, needs-human-gate, NOT applied): single-use confirmation tokens.
       "20261013120000_confirmation_spends_v1.sql",
+      // 2026-10-13 (RED, needs-human-gate, NOT applied): ops metrics org-acceptance integrity counter (issue #2327).
+      "20261013140000_ops_product_metrics_org_acceptance_integrity_v1.sql",
 ]);
   });
 

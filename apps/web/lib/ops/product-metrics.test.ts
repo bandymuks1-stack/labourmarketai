@@ -132,7 +132,7 @@ describe("monitor signals", () => {
         integrity_accepted_without_acceptor: 0,
         integrity_offer_on_missing_need: 0,
         integrity_confirmation_on_deleted_entry: 0,
-        integrity_join_team_into_non_team: 0,
+        integrity_org_acceptance_without_relationship: 0,
         stale_offers_real_7d: 0,
         ...integrity,
       },
@@ -164,6 +164,18 @@ describe("monitor signals", () => {
     expect(st("b2b-offers-unanswered")).toBe("BREACH");
     expect(st("review-queue-stale")).toBe("UNKNOWN");
     expect(st("metrics-unreadable")).toBe("OK");
+  });
+
+  // Issue #2327: join_team into a company is a legitimate staff invitation; the
+  // invariant is that an accepted org invitation produced the relationship.
+  it("data-integrity breaches on an org acceptance without a relationship, and is UNKNOWN before the counter exists", () => {
+    const state = (integrity: Record<string, number | null>) =>
+      evaluateSignals(snap({}, integrity), { searchMedianMs: 700 }).find((r) => r.id === "data-integrity")!;
+    expect(state({}).state).toBe("OK");
+    const broken = state({ integrity_org_acceptance_without_relationship: 2 });
+    expect(broken.state).toBe("BREACH");
+    expect(broken.observed).toContain("org-acceptance-without-relationship 2");
+    expect(state({ integrity_org_acceptance_without_relationship: null }).state).toBe("UNKNOWN");
   });
 
   it("observed text is aggregate numbers only, and an unreadable source is itself a breach", () => {

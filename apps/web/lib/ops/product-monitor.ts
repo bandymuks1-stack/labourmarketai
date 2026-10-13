@@ -55,7 +55,7 @@ export const SIGNALS: readonly SignalDefinition[] = [
   { id: "search-slow", severity: "P2", condition: "public free-text job search median of 3 > 3000 ms (or unreachable)", interval: MONITOR_INTERVAL, responder: RESPONDER },
   { id: "ai-failing", severity: "P2", condition: "AI runs in 7 days ≥ 10 AND (failed validation + blocked) / runs > 30 %", interval: MONITOR_INTERVAL, responder: RESPONDER },
   { id: "vacancy-sync-lagging", severity: "P2", condition: "oldest successful vacancy import > 30 h", interval: MONITOR_INTERVAL, responder: RESPONDER },
-  { id: "data-integrity", severity: "P1", condition: "any of: accepted invitation without acceptor, brigade offer on a missing need, confirmation on a deleted entry, team member engagement in a non-team org via join_team", interval: MONITOR_INTERVAL, responder: RESPONDER },
+  { id: "data-integrity", severity: "P1", condition: "any of: accepted invitation without acceptor, brigade offer on a missing need, confirmation on a deleted entry, accepted organization invitation whose acceptor holds no relationship in that org", interval: MONITOR_INTERVAL, responder: RESPONDER },
   { id: "metrics-unreadable", severity: "P2", condition: "any metric source failed to read", interval: MONITOR_INTERVAL, responder: RESPONDER },
 ];
 
@@ -123,10 +123,10 @@ export function evaluateSignals(s: MetricsSnapshot, p: MonitorProbes): SignalRes
   }
   {
     const i = s.integrity;
-    const parts = [i.integrity_accepted_without_acceptor, i.integrity_offer_on_missing_need, i.integrity_confirmation_on_deleted_entry, i.integrity_join_team_into_non_team];
+    const parts = [i.integrity_accepted_without_acceptor, i.integrity_offer_on_missing_need, i.integrity_confirmation_on_deleted_entry, i.integrity_org_acceptance_without_relationship];
     const anyUnknown = parts.some((x) => x === null);
     const sum = parts.reduce<number>((a, b) => a + (b ?? 0), 0);
-    set("data-integrity", sum > 0 ? "BREACH" : anyUnknown ? "UNKNOWN" : "OK", `accepted-without-acceptor ${val(parts[0]!)}, offer-on-missing-need ${val(parts[1]!)}, confirmation-on-deleted ${val(parts[2]!)}, join-team-into-non-team ${val(parts[3]!)}`);
+    set("data-integrity", sum > 0 ? "BREACH" : anyUnknown ? "UNKNOWN" : "OK", `accepted-without-acceptor ${val(parts[0]!)}, offer-on-missing-need ${val(parts[1]!)}, confirmation-on-deleted ${val(parts[2]!)}, org-acceptance-without-relationship ${val(parts[3]!)}`);
   }
   set("metrics-unreadable", s.unknown.length > 0 ? "BREACH" : "OK", s.unknown.length ? `unreadable: ${s.unknown.map((u) => `${u.source}(${u.reason})`).join(", ")}` : "all sources read");
   return out;
