@@ -307,7 +307,10 @@ async function discoverIndexRows(filters?: {
         expiresAt: r.expires_at ?? null,
         createdAt: r.created_at,
         updatedAt: r.updated_at,
-        destinationPath: r.destination_path,
+        destinationPath:
+          r.origin_table === "service_offerings"
+            ? destinationPathFor("service_offerings", r.origin_id)
+            : r.destination_path,
         contactAction: r.contact_action,
         isMine: r.owner_id === user.id,
         // Both view branches ride their own table's RLS for signed-in members.

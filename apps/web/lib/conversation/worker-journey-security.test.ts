@@ -100,6 +100,10 @@ describe("company executors delegate only — canonical modules, no DB access (P
       // does (M-P0-3). Reads only; the write stays in the canonical action.
       "@/lib/company/actions",
       "@/lib/company/employer-company-context",
+      // 2026-10-11 — the receiver's answer to a brigade / company offer: the
+      // SAME server action the scouting page's buttons call (thin; the RPC
+      // respond_team_demand_offer_v1 decides authority). No DB access here.
+      "@/lib/company/team-offer-actions",
       // Owner program 2026-09-23 (CASE 3/4/12) — added CONSCIOUSLY: the ONE
       // organization-rename domain core. It composes the canonical name writer
       // (`saveCompanySetup` → `save_company_setup_v3`, the settings form's own

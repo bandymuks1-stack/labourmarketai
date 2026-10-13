@@ -305,6 +305,7 @@ export const RELATIONSHIP_INVITE_CHOICES: readonly RelationshipInviteChoice[] = 
   { slug: "employee", requiresOrganizationRole: null },
   { slug: "student", requiresOrganizationRole: "training_provider" },
   { slug: "volunteer", requiresOrganizationRole: null },
+  { slug: "intern", requiresOrganizationRole: null },
   { slug: "collaborator", requiresOrganizationRole: null },
   { slug: "freelancer", requiresOrganizationRole: null },
   { slug: "consultant", requiresOrganizationRole: null },
@@ -365,7 +366,14 @@ export type DeclaredContextV1 = {
   readonly yearsClaimed?: number;
   readonly languages: readonly string[];
   readonly residenceCountry?: string;
+  /** The town or city — a separate fact from the country (2026-10-13). */
+  readonly city?: string;
+  /** READINESS to work, as the source declared it (e.g. AVAILABLE_NOW). */
   readonly availability?: string;
+  /** The person's declared work situation — never a verified right to work anywhere. */
+  readonly workStatus?: string;
+  /** Whether accommodation must be arranged. */
+  readonly accommodationNeed?: string;
   readonly destinations: readonly string[];
   readonly mobilityScope?: "LISTED" | "EU_WIDE";
   readonly freeText?: string;

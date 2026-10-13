@@ -45,7 +45,7 @@ export const WORKER_RELATIONSHIPS = [
  * was a placement" — never "this was a job". Every surface renders them under
  * their own heading.
  */
-export const PRACTICE_RELATIONSHIPS = ["student", "volunteer"] as const;
+export const PRACTICE_RELATIONSHIPS = ["student", "volunteer", "intern"] as const;
 
 /** The ONE list every history surface filters by. `manager` stays out. */
 export const PROFESSIONAL_HISTORY_RELATIONSHIPS = [

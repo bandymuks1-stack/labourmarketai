@@ -29,6 +29,7 @@ import { getTeamBrigadesData } from "@/lib/company/team-brigades";
 import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
 import { countCounterpartyToDecide } from "@/lib/journal/counterparty-to-decide-count";
 import { countWorkersWithUnconfirmableWork } from "@/lib/operations/org-members";
+import { countRosterConflicts } from "@/lib/planning/roster-conflicts";
 import { loadCompanyHomeField } from "@/lib/company/company-home-field";
 import { CompanyHomeFieldSection } from "@/components/app/company-home-field-section";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
@@ -148,6 +149,7 @@ export default async function CompanyDashboardPage({
     reviewOffWorkers,
     rHomeField,
     clientToDecide,
+    rosterConflicts,
   ] = await Promise.all([
     listOwnCustomerRequests(EMPLOYER_DEMAND_KINDS),
     listClaimablePublicIntakes(),
@@ -163,6 +165,10 @@ export default async function CompanyDashboardPage({
     // Entries submitted to THIS caller as a client (decision 0018) - a
     // different job from employer review, shown as its own labelled item.
     countCounterpartyToDecide(),
+    // People with a planning conflict (two commitments, or a commitment/plan
+    // against approved leave) — the SAME reads and rules the planning page's
+    // timeline flags, so the number matches what the link opens.
+    companyRow ? countRosterConflicts() : Promise.resolve<number | null>(0),
   ] as const);
 
   // UNKNOWN IS NOT ZERO (SEP-7): a failed invitations read is `null` and is
@@ -189,6 +195,13 @@ export default async function CompanyDashboardPage({
       key: "reviewOff",
       count: reviewOffWorkers,
       href: `/${locale}/dashboard/company/people#org-members`,
+    },
+    // Planning conflicts (owner programme 2026-10-12, manager clarity in three
+    // seconds): who is committed twice on the same days, straight to the list.
+    {
+      key: "conflicts",
+      count: rosterConflicts,
+      href: `/${locale}/dashboard/company/planning#roster-timeline`,
     },
     {
       key: "invitations",

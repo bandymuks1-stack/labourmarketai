@@ -99,6 +99,10 @@ export interface SpineCounts {
    *  count: a terminal state never clears by visiting and no seen marker
    *  exists — that fact belongs to the durable notification_events channel. */
   readonly openCandidateOffers: number;
+  /** CLIENT side: team / brigade offers on this company's own needs still
+   *  `offered` — accepting or declining on the need's scouting page clears
+   *  it (state-derived, like openCandidateOffers). 0 for everyone else. */
+  readonly openTeamOffers: number;
 }
 
 export interface SpineSignalDef {
@@ -220,6 +224,15 @@ export const SPINE_SIGNALS: readonly SpineSignalDef[] = [
     // company workspace.
     href: "/dashboard/company/scouting",
     count: (c) => c.openCandidateOffers,
+  },
+  {
+    id: "open-team-offers",
+    type: "open_team_offers",
+    // A brigade offered itself as one unit against one of this company's
+    // needs. The scouting page opens that need by default (most offers
+    // first), where accepting or declining clears it.
+    href: "/dashboard/company/scouting",
+    count: (c) => c.openTeamOffers,
   },
   {
     id: "open-task-attention",

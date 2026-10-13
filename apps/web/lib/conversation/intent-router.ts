@@ -360,11 +360,22 @@ export function fold(input: string): string {
  *  source and flags the first time `.re` is read, and keeps it; routing is
  *  unchanged. `prewarmIntentRouter` pays the rest in idle slices after Home
  *  is usable, so the first sentence does not inherit the cost either. */
+/** Fold a pattern SOURCE without touching its escapes: `fold` lower-cases,
+ *  and a lower-cased `\D` is `\d` — the opposite class. Every worked-time
+ *  span ("od 7 do 15", "nuo 8 iki 17", "from 8 to 5" …) carried `\D{0,4}`
+ *  and so could never match a real sentence (walk 2026-10-11). */
+export function foldPatternSource(source: string): string {
+  return source
+    .split(/(\\.)/)
+    .map((part, i) => (i % 2 === 1 ? part : fold(part)))
+    .join("");
+}
+
 function p(source: string, weight = 1): Pattern {
   let re: RegExp | undefined;
   return {
     get re() {
-      return (re ??= new RegExp(fold(source).replace(/\\b/g, UB), "u"));
+      return (re ??= new RegExp(foldPatternSource(source).replace(/\\b/g, UB), "u"));
     },
     weight,
   };
@@ -1946,6 +1957,13 @@ const RULES: IntentRule[] = [
       // "kandydatów zaproponowała agencja"
       p("(kandidat|candidate|кандидат|kandida|kandydat)\\w*\\s*.{0,28}(agent[uū]r|agency|agencies|агент|bureau|agentur|agencj)", 9),
       p("(pasi[uū]l|si[uū]l|offer|propos|предлож|aangebod|aanbied|vorschl|vorgeschlag|zaproponow|zaoferow)\\w*\\s*.{0,20}(agent[uū]r|agency|agencies|агент|bureau|agentur|agencj)", 9),
+      // The same answer lists BRIGADES and COMPANIES offered against the
+      // need (2026-10-11): "kokios brigados pasiūlė save?", "brigadų
+      // pasiūlymai", "which crews offered", "subcontractor offers",
+      // "какие бригады предложили", "welke ploegen boden zich aan",
+      // "Angebote von Subunternehmern", "jakie brygady zaoferowały się".
+      p("(brigad|subrang|subcontract|crew|бригад|субподряд|ploeg|onderaannem|subunternehm|brygad|podwykonaw)\\w*\\s*.{0,24}(pasi[uū]l|si[uū]lo|offer|propos|предлож|aanbod|aangebod|boden|angebot|angeboten|vorschl|ofert|propozycj|zaproponow|zaoferow|zg[lł]osi)", 9),
+      p("(pasi[uū]lym|offers?|предложени|aanbieding|angebot|ofert)\\w*\\s*.{0,24}(brigad|subrang|subcontract|crew|бригад|субподряд|ploeg|onderaannem|subunternehm|brygad|podwykonaw)", 9),
     ],
   },
   {
@@ -2311,13 +2329,14 @@ const RULES: IntentRule[] = [
       p("\\bgearbeitet\\b", 3), // de
       p("\\b(prze)?pracowa[lł](em|am|i|y|o|a)?\\b", 3), // pl — (prze)pracowałem
       p("\\b(prze)?pracowali[sś]my\\b", 3), // pl
-      // an explicit worked-time span "nuo 8 iki 17", "from 8 to 5", "с 8 до 17"
-      p("\\bnuo\\s*\\d{1,2}\\D{0,4}iki\\s*\\d{1,2}", 3),
-      p("\\bfrom\\s*\\d{1,2}\\D{0,4}to\\s*\\d{1,2}", 3),
-      p("с\\s*\\d{1,2}\\D{0,4}до\\s*\\d{1,2}", 3),
-      p("\\bvon\\s*\\d{1,2}\\D{0,4}bis\\s*\\d{1,2}", 3), // de "von 8 bis 17"
-      p("\\bvan\\s*\\d{1,2}\\D{0,4}tot\\s*\\d{1,2}", 3), // nl "van 8 tot 17"
-      p("\\bod\\s*\\d{1,2}\\D{0,4}do\\s*\\d{1,2}", 3), // pl "od 8 do 17"
+      // an explicit worked-time span "nuo 8 iki 17", "from 8 to 5", "с 8 до 17" —
+      // minutes allowed: "od 7:00 do 15:00" (walk 2026-10-11) did not route at all
+      p("\\bnuo\\s*\\d{1,2}(?:[:.]\\d{2})?\\D{0,4}iki\\s*\\d{1,2}", 3),
+      p("\\bfrom\\s*\\d{1,2}(?:[:.]\\d{2})?\\D{0,4}to\\s*\\d{1,2}", 3),
+      p("с\\s*\\d{1,2}(?:[:.]\\d{2})?\\D{0,4}до\\s*\\d{1,2}", 3),
+      p("\\bvon\\s*\\d{1,2}(?:[:.]\\d{2})?\\D{0,4}bis\\s*\\d{1,2}", 3), // de "von 8 bis 17"
+      p("\\bvan\\s*\\d{1,2}(?:[:.]\\d{2})?\\D{0,4}tot\\s*\\d{1,2}", 3), // nl "van 8 tot 17"
+      p("\\bod\\s*\\d{1,2}(?:[:.]\\d{2})?\\D{0,4}do\\s*\\d{1,2}", 3), // pl "od 8 do 17"
       // "8 valandas / hours / часов / Stunden / uur / godzin"
       p("\\d{1,2}\\s*(val\\.?|valand|hour|hrs?|час|stunden|std|uur|uren|godz)", 2),
       // A DAY + A DURATION is a report of work done, whatever the verb (owner

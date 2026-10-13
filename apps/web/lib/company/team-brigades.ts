@@ -467,6 +467,72 @@ export async function getTeamBrigadesData(): Promise<TeamBrigadesData> {
     })
     .filter((x): x is { worker: AddableTeamWorker; email: string | null } => x !== null) ?? null;
 
+  // People who joined THIS organization through an invitation hold the
+  // canonical engagement only (no company_workers row) — the same split
+  // #2268/#2270 closed for People and the planner. They are the owner's own
+  // employees, so they belong in the invitable pool too (RLS: engagement
+  // reads need manages_organization; worker rows follow can_view_worker).
+  if (pool !== null && employer.kind === "ok") {
+    const { data: ecRows } = await asAny(supabase)
+      .from("engagement_contexts")
+      .select("profile_id")
+      .eq("organization_id", employer.organizationId)
+      .eq("status", "active")
+      .in("relationship_slug", [...TEAM_POOL_ENGAGEMENT_SLUGS])
+      .limit(POOL_READ_LIMIT);
+    const known = new Set(pool.map((x) => x.worker.profileId));
+    const profiles = ((ecRows ?? []) as { profile_id: string | null }[])
+      .map((r) => r.profile_id)
+      .filter((id): id is string => Boolean(id) && !known.has(id as string) && id !== user.id);
+    if (profiles.length > 0) {
+      const { data: wRows } = await asAny(supabase)
+        .from("workers")
+        .select("id, profile_id, display_name")
+        .in("profile_id", profiles);
+      for (const w of (wRows ?? []) as { id: string; profile_id: string; display_name: string | null }[]) {
+        pool.push({
+          worker: { workerId: w.id, profileId: w.profile_id, name: w.display_name?.trim() || "—", invitePending: false },
+          email: null,
+        });
+      }
+    }
+  }
+
+  // NAMES. `profiles` is own-row under RLS, so the embedded full_name is null
+  // for every OTHER person and the picker and the member list printed "—" for
+  // everyone (production walk 2026-10-12: the owner could not tell who they
+  // were inviting). The worker card's display_name is readable to the
+  // manager through can_view_worker — the same predicate that lets the
+  // manager see the person at all — so it names them; nothing is widened.
+  const unnamed = new Set<string>();
+  for (const list of membersByTeam.values()) for (const m of list) if (m.name === "—") unnamed.add(m.profileId);
+  for (const p of pool ?? []) if (p.worker.name === "—") unnamed.add(p.worker.profileId);
+  if (unnamed.size > 0) {
+    const { data: named } = await asAny(supabase)
+      .from("workers")
+      .select("profile_id, display_name")
+      .in("profile_id", [...unnamed])
+      .limit(POOL_READ_LIMIT);
+    const byProfile = new Map<string, string>();
+    for (const w of (named ?? []) as { profile_id: string | null; display_name: string | null }[]) {
+      const n = w.display_name?.trim();
+      if (w.profile_id && n) byProfile.set(w.profile_id, n);
+    }
+    for (const [teamId, list] of membersByTeam) {
+      membersByTeam.set(
+        teamId,
+        list.map((m) => (m.name === "—" && byProfile.has(m.profileId) ? { ...m, name: byProfile.get(m.profileId)! } : m)),
+      );
+    }
+    if (pool) {
+      for (const p of pool) {
+        if (p.worker.name === "—" && byProfile.has(p.worker.profileId)) {
+          p.worker = { ...p.worker, name: byProfile.get(p.worker.profileId)! };
+        }
+      }
+    }
+  }
+
   const teams: TeamBrigade[] = [];
   for (const t of teamRows) {
     const members = membersByTeam.get(t.id) ?? [];
@@ -566,8 +632,14 @@ export async function createTeamBrigade(
   return { outcome: "error", message: code || "unknown" };
 }
 
+/** Relationships whose people the owner may invite into a brigade. */
+const TEAM_POOL_ENGAGEMENT_SLUGS = ["employee", "collaborator", "freelancer"] as const;
+
 /** The worker's own email for a company-linked worker — server-side ONLY,
- *  used to address the consent invitation; never returned to the client. */
+ *  used to address the consent invitation; never returned to the client.
+ *  `profiles` is own-row-only under RLS, so this usually answers null —
+ *  the panel then asks the owner for the address (walk 2026-10-11: every
+ *  brigade invitation ended `no_email` and no crew could be formed). */
 export async function lookupLinkedWorkerEmail(
   workerId: string,
 ): Promise<string | null> {

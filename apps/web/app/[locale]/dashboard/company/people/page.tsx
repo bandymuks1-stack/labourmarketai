@@ -56,6 +56,7 @@ import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { Fold } from "@/components/app/premium/grammar";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
+import { TeamDemandOfferForm } from "@/components/app/team-demand-offer-form";
 
 /**
  * ŽMONĖS — the organization's people door (owner IA correction 2026-09-16,
@@ -173,6 +174,21 @@ export default async function CompanyPeoplePage({
     ),
   );
   const tTeam = await getTranslations("roleDashboards.company.workers.team");
+  // JOINED THROUGH AN INVITATION (walk 2026-10-11): a worker who accepts a
+  // "join as employee" link gets the CANONICAL engagement_contexts relationship
+  // only; the roster above reads the legacy company_workers store, so the
+  // owner was told "no linked workers yet" about someone already working and
+  // already reviewable. They are named here from the same org-members read,
+  // with the review state and the one place that manages it.
+  const tInviteLinked = await getTranslations("roleDashboards.company.workers.inviteLinked");
+  const rosterProfileIds = new Set(activeWorkerRows.map((w) => w.profileId).filter(Boolean));
+  const inviteLinked = (orgMembers?.members ?? []).filter(
+    (m) =>
+      m.role === "employee" &&
+      !m.isRegisteredOwner &&
+      m.profileId !== null &&
+      !rosterProfileIds.has(m.profileId),
+  );
   const dayFmt = createUtcFormatter(locale, { day: "numeric", month: "short" });
   const teamView: CompanyWorkersTeamView = {
     counts: teamState.counts,
@@ -318,6 +334,32 @@ export default async function CompanyPeoplePage({
         />
       </div>
 
+      {inviteLinked.length > 0 ? (
+        <section
+          className="card-border flex flex-col gap-3 p-5"
+          data-testid="people-invite-linked"
+          aria-labelledby="people-invite-linked-title"
+        >
+          <h2 id="people-invite-linked-title" className="font-display text-lg font-semibold text-text-primary">
+            {tInviteLinked("title", { count: inviteLinked.length })}
+          </h2>
+          <p className="text-sm text-text-secondary">{tInviteLinked("body")}</p>
+          <ul className="flex flex-col gap-1.5 text-sm">
+            {inviteLinked.map((m) => (
+              <li key={m.engagementId} className="flex flex-wrap items-baseline justify-between gap-2">
+                <span className="text-text-primary">{m.name}</span>
+                <span className="text-meta text-text-muted">
+                  {m.reviewEnabled ? tInviteLinked("reviewOn") : tInviteLinked("reviewOff")}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <a href="#org-members" className="w-fit text-sm text-brand-blue hover:underline">
+            {tInviteLinked("manage")}
+          </a>
+        </section>
+      ) : null}
+
       {/* People the company BOOKED directly: a real work relationship that no
           roster section shows, with the truthful reason its journal is not
           reviewable and the one legitimate way to change that. */}
@@ -357,6 +399,13 @@ export default async function CompanyPeoplePage({
       ) : (
         <TeamRosterEmptyState variant={isStaffingAgency ? "agency" : "company"} />
       )}
+
+      {/* The company / agency offers ITSELF against an open need — its people,
+          its service, as a subcontractor — with no brigade to create first
+          (owner P0 2026-10-11). Managers only; the database re-checks. */}
+      {canManageInvitations && employerCtx.kind === "ok" ? (
+        <TeamDemandOfferForm teamId={employerCtx.organizationId} memberCount={memberCount} kind="organization" />
+      ) : null}
 
       {/* ONE PAGE, ONE PRIMARY JOB (owner 2026-10-10: no walls of blocks):
           the team, booked people, the invite, WHO NEEDS ATTENTION and the

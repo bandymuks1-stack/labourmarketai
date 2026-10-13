@@ -7,6 +7,7 @@ import { Lock } from "lucide-react";
 import { AdminJoinConversation } from "@/components/app/admin-join-conversation";
 import { CommunicationComposer } from "@/components/app/communication-composer";
 import { MarkReadOnMount } from "@/components/app/mark-read-on-mount";
+import { readTeamOfferMessageLabels, readTeamOfferThreadContext } from "@/lib/company/team-offer-thread-context";
 import { RefreshOnFocus } from "@/components/app/refresh-on-focus";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
 import { createClient } from "@/lib/supabase/server";
@@ -37,10 +38,13 @@ function asAny(supabase: SupabaseClient): any {
 
 export default async function ConversationDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; conversationId: string }>;
+  searchParams?: Promise<{ offer?: string }>;
 }) {
   const { locale, conversationId } = await params;
+  const offerParam = (await searchParams)?.offer;
   setRequestLocale(locale);
   const t = await getTranslations("communication");
 
@@ -74,6 +78,12 @@ export default async function ConversationDetailPage({
   // header) until the owner applies the migration or when the thread carries
   // no relation. The raw source id never reaches this page.
   const sourceContexts = await readConversationSourceContexts([conversationId]);
+  // B2B: one thread per pair carries every offer between them. Opened from a
+  // specific offer, the thread names it — read through the SAME party-gated
+  // RPC that opened it (a non-party gets zero rows, so a crafted ?offer=
+  // shows nothing).
+  const offerContext = await readTeamOfferThreadContext(offerParam);
+  const tOffer = offerContext ? await getTranslations("teamDemandOffer") : null;
   const card = describeConversationCard({
     kind: conversation.kind,
     createdBy: conversation.created_by,
@@ -102,6 +112,12 @@ export default async function ConversationDetailPage({
   // instead of rendering "no messages yet" over a conversation that exists.
   const messagesFailed = Boolean(messagesRes.error);
   const messages: MessageRow[] = messagesFailed ? [] : ((messagesRes.data ?? []) as MessageRow[]);
+  // Per-message offer labels (20261012180000): one thread per pair, so each
+  // message names the offer it is about. Details only through the party gate.
+  const offerLabels = await readTeamOfferMessageLabels(
+    messages.map((m) => (m as { team_offer_id?: string | null }).team_offer_id ?? null),
+  );
+  const tOfferLabel = offerLabels.size > 0 ? (tOffer ?? (await getTranslations("teamDemandOffer"))) : null;
 
   // MULTILINGUAL WORK COMMUNICATION: each message rendered in the VIEWER's
   // language through the existing AI runtime (egress-gated, audited), the
@@ -247,6 +263,18 @@ export default async function ConversationDetailPage({
               participant-scoped RPC resolved a live source row (never guessed
               from the subject). With a route for this viewer it is a real
               link-back; without one it is a plain label — no dead ends. */}
+          {offerContext && tOffer && (
+            <p
+              className="text-meta text-text-secondary"
+              data-testid="thread-offer-context"
+              data-offer-status={offerContext.status}
+            >
+              {tOffer("threadContext", { subject: offerContext.subject ?? "—" })}
+              {" · "}
+              {tOffer.has(`status.${offerContext.status}`) ? tOffer(`status.${offerContext.status}`) : offerContext.status}
+              <span className="block text-text-muted">{tOffer("threadContextShared")}</span>
+            </p>
+          )}
           {card.sourceKey && (
             <div className="flex flex-wrap items-center gap-x-1.5 text-meta">
               {card.sourceHref ? (
@@ -316,6 +344,20 @@ export default async function ConversationDetailPage({
                     {formatUtcDateTime(m.created_at, locale)}
                   </PlaceTimeStamp>
                 </div>
+                {(() => {
+                  const offerId = (m as { team_offer_id?: string | null }).team_offer_id ?? null;
+                  const label = offerId ? offerLabels.get(offerId) : undefined;
+                  if (!label || !tOfferLabel) return null;
+                  return (
+                    <p
+                      className="text-meta text-text-muted"
+                      data-testid={`message-offer-label-${m.id}`}
+                      data-offer-id={offerId ?? undefined}
+                    >
+                      {tOfferLabel("messageAbout", { subject: label.subject ?? "—" })}
+                    </p>
+                  );
+                })()}
                 <Suspense fallback={<OriginalMessageText id={m.id} body={m.body} />}>
                   <ViewerMessageText m={m} viewerTexts={viewerTexts} t={t} />
                 </Suspense>
@@ -381,6 +423,7 @@ export default async function ConversationDetailPage({
       <CommunicationComposer
         conversationId={conversationId}
         locale={locale}
+        teamOfferId={offerContext ? (offerParam ?? null) : null}
       />
     </div>
   );
@@ -462,3 +505,4 @@ function OriginalMessageText({ id, body }: { id: string; body: string }) {
     </p>
   );
 }
+

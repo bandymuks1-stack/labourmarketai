@@ -266,6 +266,7 @@ export function ServiceOfferingsSection({
                   <input
                     className={inputCls}
                     value={draft.categorySlug}
+                    data-testid="service-offering-category"
                     onChange={(e) => setDraft({ ...draft, categorySlug: e.target.value })}
                     placeholder={labels.formCategoryPlaceholder}
                     maxLength={80}
@@ -276,6 +277,7 @@ export function ServiceOfferingsSection({
                   <input
                     className={inputCls}
                     value={draft.locationCountry}
+                    data-testid="service-offering-country"
                     onChange={(e) => setDraft({ ...draft, locationCountry: e.target.value })}
                     placeholder={labels.formCountryPlaceholder}
                     maxLength={2}
@@ -287,6 +289,7 @@ export function ServiceOfferingsSection({
                 <input
                   className={inputCls}
                   value={draft.rateText}
+                  data-testid="service-offering-rate"
                   onChange={(e) => setDraft({ ...draft, rateText: e.target.value })}
                   placeholder={labels.formRatePlaceholder}
                   maxLength={120}

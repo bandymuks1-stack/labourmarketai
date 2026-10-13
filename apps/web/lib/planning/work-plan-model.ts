@@ -55,6 +55,10 @@ export type WorkPlanEntry = {
   readonly projectTitle: string | null;
   readonly workObjectId: string | null;
   readonly workObjectName: string | null;
+  /** The planning organization's name — what the planned WORKER needs to
+   *  know (they may not read the project row: projects RLS admits assigned
+   *  workers only, and a plan is not an assignment). */
+  readonly organizationName?: string | null;
   readonly startDate: string;
   readonly endDate: string;
   /** "HH:MM" or null. */
@@ -187,8 +191,15 @@ export function projectWorkPlanItem(
     id: `plan:${entry.id}`,
     sourceType: "plan",
     sourceId: entry.id,
-    label: entry.projectTitle ?? entry.workObjectName ?? entry.workerName ?? null,
-    detail: entry.workerName ?? null,
+    // The worker's own calendar never names the worker back to them (walk
+    // 2026-10-11: "Mateusz Kowalski → 16 paź" told Mateusz nothing); it names
+    // where and for whom. The managing side keeps the worker as the detail.
+    label:
+      roleContext === "assigned"
+        ? (entry.projectTitle ?? entry.workObjectName ?? entry.organizationName ?? null)
+        : (entry.projectTitle ?? entry.workObjectName ?? entry.workerName ?? null),
+    detail:
+      roleContext === "assigned" ? (entry.organizationName ?? null) : (entry.workerName ?? null),
     startDate: start,
     endDate: end,
     status: entry.status,
@@ -200,7 +211,8 @@ export function projectWorkPlanItem(
       duration: daySpanDays(start, end) ?? undefined,
       project: entry.projectTitle ?? undefined,
       place: entry.workObjectName ?? undefined,
-      counterpart: entry.workerName ?? undefined,
+      counterpart:
+        (roleContext === "assigned" ? entry.organizationName : entry.workerName) ?? undefined,
     }),
   };
 }

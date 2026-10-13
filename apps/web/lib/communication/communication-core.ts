@@ -40,6 +40,8 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
  * participant, no source stamp, no row.
  */
 
+const TEAM_OFFER_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /** The caller: its own RLS-scoped client and its authenticated id. */
 export type CommunicationCaller = {
   readonly supabase: SupabaseClient;
@@ -331,6 +333,12 @@ export async function sendMessageCore(
    *  bucket under `<conversationId>/<uid>/…`). Registered via the
    *  SECURITY DEFINER RPC after the message insert. */
   attachments?: ConversationAttachmentInput[];
+  /** The brigade / organization offer this message is about (B2B thread opened
+   *  from an offer). ADVISORY from the client: the database guard
+   *  (20261012180000) accepts it only when the author is a party of the offer
+   *  and the other side is in this thread; a refused label sends the message
+   *  without it, never drops the message. */
+  teamOfferId?: string | null;
 }): Promise<CommunicationResult<{ id: string; attachmentsFailed: number }>> {
   const supabase = caller.supabase;
   const user = { id: caller.userId };
@@ -419,6 +427,7 @@ export async function sendMessageCore(
     : (communicationLocales as readonly string[]).includes(input.locale)
       ? input.locale
       : null;
+  const teamOfferId = typeof input.teamOfferId === "string" && TEAM_OFFER_UUID.test(input.teamOfferId) ? input.teamOfferId : null;
   let result = await asAny(supabase)
     .from("conversation_messages")
     .insert({
@@ -426,9 +435,24 @@ export async function sendMessageCore(
       author_id: user.id,
       body,
       original_language: originalLanguage,
+      ...(teamOfferId ? { team_offer_id: teamOfferId } : {}),
     })
     .select("id")
     .single();
+  // The offer label is refused by the database guard (not a party / the offer
+  // is not between this thread's sides): the MESSAGE still goes out, unlabelled.
+  if (teamOfferId && /team_offer_label_refused/.test(result.error?.message ?? "")) {
+    result = await asAny(supabase)
+      .from("conversation_messages")
+      .insert({
+        conversation_id: input.conversationId,
+        author_id: user.id,
+        body,
+        original_language: originalLanguage,
+      })
+      .select("id")
+      .single();
+  }
   if (result.error?.code === "42703" || /original_language/.test(result.error?.message ?? "")) {
     result = await asAny(supabase)
       .from("conversation_messages")

@@ -1,0 +1,145 @@
+name: prod-qa-walk
+
+# PRODUCTION SIGNED-IN QA, without an agent ever holding a production key
+# (owner programme 2026-10-12 §10). Before this, a signed-in production walk
+# needed an agent to read the service-role key from a local env file, and the
+# security classifier rightly refused that. Here the keys stay in GitHub:
+# the run provisions/mints sessions ONLY for the hard-coded synthetic allowlist
+# in `apps/web/lib/testing/prod-qa-guard.ts` (marked app_metadata.qa_synthetic,
+# owning only QA-SYNTHETIC organizations), drives the real production site in a
+# real browser, and uploads a JSON result — never a screenshot (public repo),
+# a session file or a trace.
+#
+# Manual only (workflow_dispatch). The `production-qa` environment is where the
+# owner can add a required reviewer, so every run waits for an explicit click.
+#
+# Needs (names only):
+#   secrets.NEXT_PUBLIC_SUPABASE_URL      (exists)
+#   secrets.SUPABASE_SERVICE_ROLE_KEY     (exists)
+#   vars.PROD_QA_ANON_KEY                 the project's PUBLISHABLE anon key —
+#                                         the same value every browser receives;
+#                                         a variable, not a secret.
+
+on:
+  workflow_dispatch:
+    inputs:
+      spec:
+        description: "Walk to run"
+        type: choice
+        default: brigade-formation
+        options:
+          - brigade-formation
+          - employee-beta-gate
+          - role-routes
+          - chat-continuity
+          - journal-confirm
+          - calendar-planning
+          - marketplace
+          - agency-chain
+          - learning-practice
+          - sectors-languages
+          - chat-confirm-once
+          - living-cv-growth
+          - staff-review-notice
+          - manager-chat
+          - mobile-surfaces
+          - recognition-chain
+
+concurrency:
+  group: prod-qa-walk
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  walk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production-qa
+    env:
+      PROD_QA_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      PROD_QA_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      PROD_QA_ANON_KEY: ${{ vars.PROD_QA_ANON_KEY }}
+      E2E_NO_SERVER: "1"
+      E2E_BASE_URL: https://labourmarket.ai
+      PROD_QA_WALK: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -C apps/web exec playwright install --with-deps chromium
+
+      - name: Provision + mint the synthetic cast (allowlist only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${PROD_QA_ANON_KEY}" ]; then
+            echo "::error::vars.PROD_QA_ANON_KEY is not set (the publishable anon key)"; exit 1
+          fi
+          cd apps/web
+          mint() {
+            PROD_QA_PROVISION_IDENTITY="$1" pnpm exec tsx scripts/prod-qa-provision.ts --i-understand-production
+            PROD_QA_IDENTITY="$1" PROD_QA_STORAGE_SLOT="$2" pnpm exec tsx scripts/prod-qa-mint-session.ts
+          }
+          mint "qa.owner+multiw@labourmarket.ai"   owner
+          mint "qa.manager+multiw@labourmarket.ai" manager
+          mint "qa.worker+multiw@labourmarket.ai"  worker
+          mint "qa.worker+goal3@labourmarket.ai"   worker2
+          mint "qa.agency+multiw@labourmarket.ai"  agency
+          # employee-beta-gate.spec.ts reads the original single-worker file.
+          cp tests/e2e/.storage-state.prod-qa.worker2.json tests/e2e/.storage-state.prod-qa.json
+
+      - name: Walk
+        shell: bash
+        env:
+          # The addressed invitee of staff-review-notice: the second synthetic
+          # worker minted above (same allowlisted identity, no new account).
+          PROD_QA_INVITEE_EMAIL: qa.worker+goal3@labourmarket.ai
+        run: |
+          set -uo pipefail
+          cd apps/web
+          case "${{ inputs.spec }}" in
+            brigade-formation) SPEC=tests/e2e/prod-brigade-formation.spec.ts ;;
+            employee-beta-gate) SPEC=tests/e2e/employee-beta-gate.spec.ts ;;
+            role-routes) SPEC=tests/e2e/prod-role-routes.spec.ts ;;
+            chat-continuity) SPEC=tests/e2e/prod-chat-continuity.spec.ts ;;
+            journal-confirm) SPEC=tests/e2e/prod-journal-confirm.spec.ts ;;
+            calendar-planning) SPEC=tests/e2e/prod-calendar-planning.spec.ts ;;
+            marketplace) SPEC=tests/e2e/prod-marketplace.spec.ts ;;
+            agency-chain) SPEC=tests/e2e/prod-agency-chain.spec.ts ;;
+            learning-practice) SPEC=tests/e2e/prod-learning-practice.spec.ts ;;
+            sectors-languages) SPEC=tests/e2e/prod-sectors-languages.spec.ts ;;
+            chat-confirm-once) SPEC=tests/e2e/prod-chat-confirm-once.spec.ts ;;
+            living-cv-growth) SPEC=tests/e2e/prod-living-cv-growth.spec.ts ;;
+            staff-review-notice) SPEC=tests/e2e/prod-staff-review-notice.spec.ts ;;
+            manager-chat) SPEC=tests/e2e/prod-manager-chat.spec.ts ;;
+            mobile-surfaces) SPEC=tests/e2e/prod-mobile-surfaces.spec.ts ;;
+            recognition-chain) SPEC=tests/e2e/prod-recognition-chain.spec.ts ;;
+          esac
+          pnpm exec playwright test "$SPEC" --project=chromium --trace=off --reporter=list,json \
+            > ../../prod-qa-result.json
+          echo "exit=$?" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Destroy session files (always)
+        if: always()
+        shell: bash
+        run: rm -f apps/web/tests/e2e/.storage-state.prod-qa*.json
+
+      # The repository is PUBLIC, so its artifacts are readable by any signed-in
+      # GitHub user. Screenshots of production pages can show real companies'
+      # open needs next to the synthetic cast, so they are NOT published — only
+      # the step-level JSON result (titles, pass/fail, durations). A failing
+      # assertion message names the testid and the expected text, nothing more.
+      - name: Upload result (no screenshots, no traces, no sessions)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-qa-${{ inputs.spec }}-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: warn
+          path: prod-qa-result.json

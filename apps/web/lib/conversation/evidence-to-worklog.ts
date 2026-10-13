@@ -80,7 +80,10 @@ export function composeEvidenceText(
     if (t.length > 0 && parts[parts.length - 1] !== t) parts.push(t);
   }
   const l = (latest ?? "").trim();
-  if (l.length > 0 && parts[parts.length - 1] !== l) parts.push(l);
+  // The chat hands in `goalSentence()` — the said parts already joined — as
+  // `latest`; appending it again doubled every sentence ("A B A B").
+  const joined = parts.join(" ");
+  if (l.length > 0 && parts[parts.length - 1] !== l && joined !== l) parts.push(l);
   return parts.join(" ");
 }
 

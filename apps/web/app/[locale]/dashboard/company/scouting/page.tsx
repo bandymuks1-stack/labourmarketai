@@ -19,7 +19,7 @@ import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibilit
 // controls below, keyed on (requestId, workerId).
 import { listOfferedCandidatesForRequest, readOfferBookingStatuses } from "@/lib/agency/bridge-read";
 import { TeamOffersReceived } from "@/components/app/team-offers-received";
-import { loadTeamOffersForDemand } from "@/lib/company/team-offer";
+import { loadTeamOffersForDemand, countOpenTeamOffersByDemand } from "@/lib/company/team-offer";
 import { listManagedProjects } from "@/lib/projects/projects";
 import {
   hasActiveScoutFilters,
@@ -174,11 +174,17 @@ export default async function CompanyScoutingPage({
    * stays deterministic. When nothing is waiting — or the owner-gated table is
    * absent, which returns an empty map — the previous rule applies unchanged.
    */
+  // A brigade / team that OFFERED ITSELF waits for this company's own answer
+  // first — an organization's offer outranks a worker's interest signal.
+  const teamOffersWaiting = await countOpenTeamOffersByDemand(demands.map((d) => d.id));
+  const mostTeamOffered = [...teamOffersWaiting.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0];
   const mostAwaited = [...pendingInterest.entries()]
     .filter(([id]) => demands.some((d) => d.id === id))
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0];
   const selected =
     request ??
+    mostTeamOffered ??
     mostAwaited ??
     demands.find((d) => d.structured)?.id ??
     demands[0]?.id ??
@@ -436,6 +442,15 @@ export default async function CompanyScoutingPage({
                   the hands were — the count is a real row count from
                   demand_interest_signals (status `interested` only), never an
                   estimate, and the chip simply does not render at zero. */}
+              {(teamOffersWaiting.get(d.id) ?? 0) > 0 ? (
+                <span
+                  className="ml-1.5 rounded-full bg-brand-blue/15 px-1.5 font-mono text-meta text-brand-blue"
+                  data-testid={`scouting-demand-team-offers-${d.id}`}
+                  title={t("teamOffersWaiting", { count: teamOffersWaiting.get(d.id) ?? 0 })}
+                >
+                  {teamOffersWaiting.get(d.id)}
+                </span>
+              ) : null}
               {(pendingInterest.get(d.id) ?? 0) > 0 ? (
                 <span
                   className="ml-1.5 rounded-full bg-state-success/15 px-1.5 font-mono text-meta text-state-success"
@@ -842,7 +857,7 @@ export default async function CompanyScoutingPage({
       ) : null}
 
       {teamOffers && teamOffers.offers.length > 0 ? (
-        <TeamOffersReceived offers={teamOffers.offers} projects={teamOfferProjects} needOpen={needOpen} />
+        <TeamOffersReceived requestId={selected!} offers={teamOffers.offers} projects={teamOfferProjects} needOpen={needOpen} />
       ) : null}
 
       {result?.kind === "ok" && result.candidates.length > 0 ? (

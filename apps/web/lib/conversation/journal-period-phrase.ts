@@ -29,8 +29,8 @@ export type JournalPeriodPhrase = WorkPeriodKey | "yesterday";
 
 /** Order = precedence: the narrowest window a sentence names wins. */
 const PERIOD_WORDS: ReadonlyArray<readonly [JournalPeriodPhrase, string]> = [
-  ["today", "siandien|today|сегодня|heute|vandaag"],
-  ["yesterday", "vakar|yesterday|вчера|gestern|gisteren"],
+  ["today", "siandien|today|сегодня|heute|vandaag|dzisiaj|dzis"],
+  ["yesterday", "vakar|yesterday|вчера|gestern|gisteren|wczoraj"],
   ["week", "savait\\p{L}*|week(?!end)|недел\\p{L}*|woche\\p{L}*|weken"],
   ["month", "menes\\p{L}*|month\\p{L}*|месяц\\p{L}*|monat\\p{L}*|maand\\p{L}*"],
   // LT "metu" is deliberately absent: folded, it is both "metų" (of the year)

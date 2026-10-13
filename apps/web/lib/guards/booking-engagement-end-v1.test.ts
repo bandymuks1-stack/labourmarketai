@@ -1618,6 +1618,24 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261008210000_rls_tables_missing_select_grant_v1.sql",
       // 2026-10-11 (RED by SECURITY DEFINER replace, needs-human-gate): free-text job search matches lower() collate "C" instead of a per-row ICU ilike - marker is the human-gate acknowledgement.
       "20261011090000_search_public_vacancy_previews_c_like_v4.sql",
+      // 2026-10-11 (RED by SECURITY DEFINER + RLS policy, needs-human-gate): employers see/approve absences of invitation-joined employees - marker is the human-gate acknowledgement.
+      "20261011160000_absence_authority_engagement_v1.sql",
+      // 2026-10-11 (supply offer negotiation: organization offers, versioned terms, need titles; RED by SECURITY DEFINER replace, needs-human-gate) - marker is the human-gate acknowledgement.
+      "20261011200000_supply_offer_negotiation_v1.sql",
+      // 2026-10-12 (RED, needs-human-gate, NOT applied): service_role-only aggregate product metrics - marker is the human-gate acknowledgement.
+      "20261012090000_ops_product_metrics_v1.sql",
+      // 2026-10-12 (RED, needs-human-gate, NOT applied): Chat First transcript per person + workspace - marker is the human-gate acknowledgement.
+      "20261012100000_assistant_transcript_v1.sql",
+      // 2026-10-12 (owner-approved RED in chat, APPLIED): party-gated offer thread read.
+      "20261012110000_team_offer_thread_party_v1.sql",
+      // 2026-10-12 (owner-approved RED in chat, APPLIED): exact service_role reads for notifications and intakes.
+      "20261012120000_service_role_notification_reads_v1.sql",
+      // 2026-10-12 (owner-approved RED in chat): conversation_messages.team_offer_id + party guard trigger (owner decision 3, refined).
+      "20261012180000_conversation_message_team_offer_v1.sql",
+      // 2026-10-12 (owner-approved RED in chat, APPLIED): staff review notice acceptance fact + record RPC (owner decision 1, step 2).
+      "20261012190000_staff_review_notice_on_acceptance_v1.sql",
+      // 2026-10-13 (RED, needs-human-gate, NOT applied): single-use confirmation tokens.
+      "20261013120000_confirmation_spends_v1.sql",
 ]);
   });
 

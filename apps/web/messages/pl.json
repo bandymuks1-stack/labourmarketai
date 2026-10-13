@@ -225,7 +225,7 @@
     "pause": "Wstrzymaj",
     "expired": "Wygasło",
     "expiresOn": "Do {date}",
-    "openInServices": "Otwórz Usługi",
+    "openInServices": "Zamów usługę",
     "domains": {
       "all": "Wszystkie",
       "work_resource": "Zasoby pracy",
@@ -765,7 +765,8 @@
       "new_job_matches": "Znika, gdy otworzysz tablicę możliwości (lub zobaczysz oferty na karcie przeglądu).",
       "pending_connection_invites": "Znika, gdy na stronie partnerów zaakceptujesz lub odrzucisz prośbę agencji o połączenie.",
       "shared_requests_awaiting_offer": "Znika, gdy na stronie partnerów zaproponujesz pracownika do udostępnionego zapytania.",
-      "open_candidate_offers": "Znika, gdy na stronie rekrutacji zaakceptujesz lub odrzucisz zaproponowanego kandydata."
+      "open_candidate_offers": "Znika, gdy na stronie rekrutacji zaakceptujesz lub odrzucisz zaproponowanego kandydata.",
+      "open_team_offers": "Znika, gdy na stronie rekrutacji zaakceptujesz lub odrzucisz ofertę zespołu."
     },
     "storedTitle": "Zapisane powiadomienia",
     "storedIntro": "Zarejestrowane zdarzenia dotyczące Ciebie — każdy wiersz otwiera stronę, której dotyczy. Stan przeczytania zarządzany jest z dzwonka.",
@@ -1806,11 +1807,11 @@
       }
     },
     "capacity": {
-      "heading": "Kto jest teraz wolny",
+      "heading": "Kto jest teraz wolny (według planu)",
       "free": "wolny",
       "away": "nieobecny",
       "awayUntil": "nieobecny do {date}",
-      "summary": "{free} wolnych · {committed} przy pracy · {away} nieobecnych",
+      "summary": "Według planu: {free} wolnych · {committed} przydzielonych do pracy · {away} nieobecnych",
       "onWork": "przy {project}",
       "booked": "zarezerwowany",
       "until": "do {date}",
@@ -2032,7 +2033,7 @@
           "key": "Klucz wymagania (slug)",
           "country": "Kraj (2 litery)",
           "evidence": "ID wpisów dowodowych",
-          "evidenceHint": "ID wpisów dziennika dotyczących pracy uczestnika, oddzielone przecinkami. Rejestr przyjmuje tylko wpisy zatwierdzone przez drugą osobę.",
+          "evidenceHint": "Wpisy praktyki tej osoby uczącej się, które potwierdziła inna osoba. Zaznacz te, które uzasadniają decyzję.",
           "decision": "Decyzja",
           "recognised": "Uznano",
           "notRecognised": "Nie uznano",
@@ -2045,7 +2046,12 @@
           "needsMigration": "Nie zapisano: rejestr uznań nie jest jeszcze dostępny.",
           "forbidden": "Ta instytucja nie może zapisać tego uznania dla tej osoby.",
           "invalid": "Sprawdź wartości.",
-          "error": "Coś poszło nie tak. Spróbuj ponownie."
+          "error": "Coś poszło nie tak. Spróbuj ponownie.",
+          "evidenceChooseLearner": "Wybierz osobę uczącą się, aby zobaczyć jej potwierdzoną praktykę.",
+          "evidenceNone": "Ta osoba nie ma jeszcze wpisu praktyki potwierdzonego przez kogoś innego. Najpierw potwierdź jej praktykę; dopiero wtedy uznanie może się na nią powołać.",
+          "evidenceUnavailable": "Nie udało się teraz odczytać wpisów praktyki. Nic nie zapisano.",
+          "evidenceRecorded": "Zapisano",
+          "evidenceConfirmed": "potwierdzono"
         }
       },
       "learners": {
@@ -2373,7 +2379,18 @@
           "awayUntil": "Nieobecny do {date}",
           "assign": "Przypisz do projektu",
           "openCalendar": "Otwórz kalendarz"
-        }
+        },
+        "inviteLinked": {
+          "title": "{count, plural, one {# osoba dołączyła przez zaproszenie} few {# osoby dołączyły przez zaproszenie} many {# osób dołączyło przez zaproszenie} other {# osoby dołączyły przez zaproszenie}}",
+          "body": "Przyjęły Twoje zaproszenie i pracują z Twoją organizacją. Ich dziennik pracy można sprawdzać po włączeniu weryfikacji.",
+          "reviewOn": "Weryfikacja włączona",
+          "reviewOff": "Weryfikacja wyłączona",
+          "manage": "Zarządzaj członkami i weryfikacją →"
+        },
+        "inviteShareLinkLabel": "Link dla zaproszonej osoby",
+        "inviteShareLinkHint": "Wyślij ten link w dowolny sposób (SMS, wiadomość). Po rejestracji na ten sam e-mail osoba znajdzie zaproszenie na swoim koncie.",
+        "inviteShareCopy": "Kopiuj link",
+        "inviteShareCopied": "Skopiowano"
       },
       "scoutingBridge": {
         "title": "Znajdź pracowników do tego zapotrzebowania",
@@ -2391,6 +2408,7 @@
         "invitations": "Oczekujące zaproszenia pracowników",
         "claims": "Publiczne zgłoszenia zapotrzebowania, które możesz przejąć",
         "reviewOff": "Pracownicy z zapisaną pracą, u których potwierdzanie jest wyłączone",
+        "conflicts": "Osoby z konfliktem planowania (nakładająca się praca lub urlop)",
         "unreadable": "nie udało się odczytać",
         "clientReview": "Praca czekająca na Twoją decyzję jako zleceniodawcy"
       }
@@ -4836,6 +4854,7 @@
         "pending_connection_invites": "Agencja pracy chce nawiązać połączenie z Twoją firmą",
         "shared_requests_awaiting_offer": "Zapytania klientów czekające na Twojego kandydata",
         "open_candidate_offers": "Kandydaci agencji czekający na Twoją decyzję",
+        "open_team_offers": "Zespoły oferujące się do Twoich potrzeb",
         "event_booking_proposed": "Otrzymałeś propozycję rezerwacji",
         "event_booking_accepted": "Twoja propozycja rezerwacji została przyjęta",
         "event_booking_declined": "Twoja propozycja rezerwacji została odrzucona",
@@ -6706,7 +6725,8 @@
       "listingsNote": "Lokale, sprzęt, pojazdy – oferuj lub szukaj",
       "needs": "Potrzeby i oferty",
       "needsNote": "Opublikuj, czego potrzebujesz lub co możesz zaoferować"
-    }
+    },
+    "loopReadFailed": "Nie udało się wczytać Twoich zapytań — lista może być niepełna. Odśwież stronę."
   },
   "learning": {
     "pageTitle": "Nauka i weryfikacja",
@@ -7170,6 +7190,7 @@
     "noAddable": "Brak powiązanych pracowników do dodania. Najpierw zaproś pracowników w sekcji składu.",
     "addLabel": "Zaproś powiązanego pracownika",
     "addButton": "Wyślij zaproszenie",
+    "emailPlaceholder": "E-mail pracownika",
     "createLabel": "Nazwa nowej brygady",
     "createPlaceholder": "np. Brygada elewacyjna A",
     "createButton": "Utwórz brygadę",
@@ -7191,12 +7212,14 @@
     },
     "inviteOutcome": {
       "sent": "Zaproszenie wysłane e-mailem. Członkostwo zaczyna się, gdy pracownik je zaakceptuje.",
-      "created": "Zaproszenie utworzone. Pracownik zobaczy je w sekcji Moja sieć i tam podejmie decyzję.",
-      "deliveryFailed": "Zaproszenie zapisane, ale nie udało się dostarczyć e-maila. Pracownik nadal może je zobaczyć w sekcji Moja sieć.",
+      "created": "Zaproszenie utworzone — e-mail nie został wysłany. Skopiuj link poniżej i wyślij go pracownikowi samodzielnie; otworzy go, zaloguje się i zaakceptuje.",
+      "deliveryFailed": "Zaproszenie zapisane, ale nie udało się dostarczyć e-maila. Skopiuj link poniżej i wyślij go samodzielnie.",
       "alreadyInvited": "Ten pracownik ma już otwarte zaproszenie do tej brygady.",
+      "alreadyInvitedNewLink": "Ta osoba ma już otwarte zaproszenie. Oto nowy link — poprzedni link już nie działa.",
       "rateLimited": "Osiągnięto na razie limit zaproszeń. Spróbuj ponownie później.",
       "notAuthorized": "Tylko właściciel brygady może wysyłać zaproszenia.",
       "noEmail": "Ten pracownik nie ma zapisanego użytecznego adresu e-mail, więc nie można utworzyć zaproszenia.",
+      "askEmail": "Podaj e-mail tego pracownika — zaproszenie trafi na jego konto, a on sam je zaakceptuje.",
       "needsMigration": "Chwilowo niedostępne.",
       "error": "Nie udało się wysłać zaproszenia. Nic nie zostało zmienione."
     },
@@ -7265,7 +7288,10 @@
         "error": "Nie udało się zapisać odpowiedzi. Nic nie zostało zmienione."
       }
     },
-    "addableUnavailable": "Nie udało się wczytać listy powiązanych pracowników — dodawanie nie jest teraz możliwe."
+    "addableUnavailable": "Nie udało się wczytać listy powiązanych pracowników — dodawanie nie jest teraz możliwe.",
+    "inviteLinkNote": "Wyślij ten link pracownikowi (wiadomość, SMS, WhatsApp). Zaakceptować może tylko zaproszona osoba.",
+    "inviteLinkCopy": "Kopiuj link",
+    "inviteLinkCopied": "Skopiowano"
   },
   "teamEnquiries": {
     "enquireButton": "Zapytaj ten zespół o pracę",
@@ -7568,7 +7594,7 @@
       "confirmNote": "Notatka (opcjonalnie)",
       "confirmSubmit": "Potwierdź i zweryfikuj",
       "alreadyVerified": "Już zweryfikowane",
-      "noSkillsToConfirm": "Ten pracownik nie ma już zadeklarowanych umiejętności do potwierdzenia.",
+      "noSkillsToConfirm": "Ten wpis nie ma powiązanych umiejętności do potwierdzenia. Zatwierdzenie wpisu potwierdza samą pracę.",
       "result": {
         "skillsVerified": "Zweryfikowano umiejętności: {count}.",
         "skillNotOwned": "Ta umiejętność nie jest zadeklarowana przez tego pracownika.",
@@ -8621,6 +8647,7 @@
     "pickDemand": "Wybierz potrzebę",
     "noDemands": "Nie masz jeszcze żadnych potrzeb. Utwórz potrzebę z panelu — po przeglądzie zespół ustrukturyzuje jej wymagane umiejętności.",
     "noDemandsCta": "Utwórz potrzebę",
+    "teamOffersWaiting": "{count, plural, one {# oferta zespołu czeka na Twoją odpowiedź} few {# oferty zespołów czekają na Twoją odpowiedź} other {# ofert zespołów czeka na Twoją odpowiedź}}",
     "unstructuredTag": "wymagania niepotwierdzone",
     "notStructured": "Wymagane umiejętności tej potrzeby nie są jeszcze ustrukturyzowane, więc nie można obliczyć dopasowania. Nowe potrzeby są przeglądane i strukturyzowane przez administratorów — nie musisz nic robić.",
     "needsSetup": "Nie udało się wczytać. Spróbuj ponownie.",
@@ -9381,6 +9408,31 @@
         "rate_limits": "Aktywne ograniczenia liczby zapytań",
         "freshness_demotion": "Nieaktualne profile pozycjonowane niżej"
       }
+    }
+  },
+  "adminMetrics": {
+    "title": "Metryki produktu",
+    "intro": "Bieżące liczby z kanonicznych tabel, podzielone na REAL, TEST (syntetyczne konta testowe, domeny testowe) i INTERNAL (zespół, administratorzy). — oznacza, że źródła nie udało się odczytać; to nigdy nie jest zero.",
+    "computedAt": "Obliczono {at}",
+    "unknown": "Nieczytelne źródła (pokazane jako —): {sources}",
+    "truncated": "Osiągnięto limit wierszy, liczby są dolną granicą: {sources}",
+    "groups": {
+      "users": "Ludzie i aktywność",
+      "teams": "Brygady i zaproszenia",
+      "b2b": "Rynek B2B",
+      "work": "Dziennik pracy i Living CV",
+      "technical": "Techniczne"
+    },
+    "col": {
+      "metric": "Metryka",
+      "total": "Razem",
+      "source": "Źródło",
+      "rule": "Reguła",
+      "window": "Okres"
+    },
+    "signals": {
+      "title": "Reguły alertów",
+      "intro": "Sprawdzane co godzinę przez workflow product-monitor. Naruszenie otwiera jedno zgłoszenie GitHub na sygnał i zamyka je po powrocie do normy."
     }
   },
   "billingStatus": {
@@ -12025,6 +12077,8 @@
       "empty": "Nie wysłałeś jeszcze żadnych zaproszeń.",
       "error": "Nie udało się teraz wczytać zaproszeń.",
       "resend": "Wyślij ponownie",
+      "newLink": "Nowy link",
+      "newLinkHint": "Tworzy nowy link zaproszenia. Poprzedni link przestaje działać.",
       "revoke": "Cofnij",
       "copied": "Skopiowano",
       "copyNewLink": "Skopiuj nowy link",
@@ -12231,7 +12285,8 @@
         "withOrganization": "Zaproszenie zostało przez Ciebie przyjęte — masz teraz połączenie z {name}.",
         "plain": "Zaproszenie zostało przez Ciebie przyjęte — połączenie jest aktywne.",
         "continue": "Przejdź do mojej przestrzeni →"
-      }
+      },
+      "reviewNotice": "Jeśli zaakceptujesz, przełożony w {organization} będzie mógł czytać pracę, którą dla niego zapisujesz, i ją zatwierdzić. Do tego czasu pozostaje to Twój własny wpis."
     },
     "teamEnquiriesTitle": "Moje zapytania do zespołów",
     "admin": {
@@ -13509,6 +13564,10 @@
         },
         "offerCapacity": {
           "label": "Zapisz swoją ofertę"
+        },
+        "respondTeamOffer": {
+          "label": "Odpowiedz na ofertę brygady lub firmy",
+          "description": "Uzgodnij wstępnie lub odrzuć brygadę albo firmę zaoferowaną do twojej potrzeby."
         }
       },
       "education": {
@@ -14158,7 +14217,7 @@
       "projectCreateIntro": "Nowy projekt. Nazwa i miasto — potem od razu przypiszesz tu ludzi.",
       "projectCreatedNext": "Projekt utworzony. Przypisz ludzi od razu tutaj — albo wróć do niego później z „Moje projekty”.",
       "clientOffersIntro": "Kandydaci zaproponowani przez agencje do Twoich potrzeb:",
-      "clientOffersNone": "Żadna agencja nie zaproponowała jeszcze kandydatów do Twoich otwartych potrzeb.",
+      "clientOffersNone": "Nikt jeszcze nie zaoferował kandydatów, brygady ani firmy do twoich otwartych potrzeb.",
       "clientBridgeInvitesIntro": "Agencje zapraszające Cię do współpracy:",
       "clientBridgeShareIntro": "Potrzeby, które możesz udostępnić połączonej agencji:",
       "clientBridgeNone": "Nie czeka żadne zaproszenie od agencji i nie zostało nic do udostępnienia. Zarządzaj partnerami na stronie partnerów.",
@@ -14425,7 +14484,15 @@
       "visibilityUnavailable": "Nie udało się sprawdzić widoczności dla pracodawców. To nie znaczy, że jest wyłączona — otwórz ustawienia.",
       "chipVisibility": "Widoczność dla pracodawców",
       "voiceOpen": "Mów",
-      "voiceBareYes": "Wypowiedziane „tak” nie jest potwierdzeniem. Potwierdź przyciskiem na karcie albo powiedz, co chcesz zrobić."
+      "voiceBareYes": "Wypowiedziane „tak” nie jest potwierdzeniem. Potwierdź przyciskiem na karcie albo powiedz, co chcesz zrobić.",
+      "teamOffersIntro": "Brygady i firmy, które zaoferowały się do twoich potrzeb:",
+      "teamOfferStatusAgreed": "uzgodnione wstępnie",
+      "chipTeamOfferAgree": "Uzgodnij wstępnie",
+      "chipTeamOfferThread": "Napisz",
+      "chipOfferOurs": "Zaoferuj naszą brygadę lub firmę",
+      "teamOfferAgreed": "Uzgodnione wstępnie — to jeszcze nie podpisana umowa. Ustalcie warunki w rozmowie, a potem przypisz zespół do projektu.",
+      "teamOfferDeclined": "Odrzucono. Oferująca firma zobaczy twoją odpowiedź.",
+      "teamOfferThreadFailed": "Nie można otworzyć tej rozmowy."
     },
     "worklog": {
       "understood": "Oto, co zrozumiałem — zapisać?",
@@ -18721,11 +18788,12 @@
     "sent": {
       "heading": "Twoje oferty",
       "none": "Brak ofert.",
-      "withdraw": "Wycofaj"
+      "withdraw": "Wycofaj",
+      "message": "Napisz do zleceniodawcy"
     },
     "status": {
       "offered": "Czeka na odpowiedź",
-      "accepted": "Przyjęta",
+      "accepted": "Uzgodnione wstępnie",
       "declined": "Odrzucona",
       "withdrawn": "Wycofana",
       "assigned": "Przypisana do projektu"
@@ -18755,11 +18823,16 @@
       "project_required": "Wybierz projekt.",
       "invalid_decision": "Nieznana odpowiedź.",
       "needs_migration": "Obecnie niedostępne.",
-      "error": "Nie udało się tego wykonać. Nic nie zmieniono."
+      "error": "Nie udało się tego wykonać. Nic nie zmieniono.",
+      "terms_empty": "Uzupełnij co najmniej jeden warunek.",
+      "terms_invalid": "Sprawdź liczby i daty.",
+      "terms_limit_reached": "Ta oferta ma już 50 wersji warunków.",
+      "terms_await_other_side": "To twoje własne warunki — odpowiada druga strona.",
+      "organization_offer_not_a_unit": "Oferta firmy nie jest przypisywana jako zespół; ludzi ustalcie w rozmowie."
     },
     "received": {
       "title": "Zespoły zaproponowane do tego zapotrzebowania",
-      "subtitle": "Zespół zaproponował się jako jedna jednostka do tego zapotrzebowania. To Ty decydujesz, czy go przyjąć i gdzie przypisać.",
+      "subtitle": "Zespół zaoferował się jako jedna jednostka do tej potrzeby. Pytaj i negocjuj w rozmowie; zgoda tutaj nie jest umową.",
       "privacy": "Pokazywane są tylko fakty na poziomie zespołu. Żaden członek nie jest tu wskazany. Po przyjęciu zespołu i przypisaniu go do projektu jego członkowie pojawią się w tym projekcie, jak w przypadku każdego zespołu.",
       "members": "Członków: {count}",
       "deployable": "Wielkość do wysłania {min}-{max}",
@@ -18790,23 +18863,64 @@
       "missing": "Nie podano: {list}",
       "noNeedStructure": "To zapotrzebowanie nie jest jeszcze uporządkowane, więc zespołu nie można z nim porównać.",
       "note": "Wiadomość od zespołu",
-      "accept": "Przyjmij zespół",
+      "accept": "Uzgodnij wstępnie",
       "decline": "Odrzuć",
-      "noProjects": "Nie masz otwartego projektu, do którego można przypisać zespół. Najpierw utwórz projekt.",
-      "assignIntro": "Przyjęto. Przypisz zespół do jednego ze swoich projektów.",
+      "noProjects": "Nie masz jeszcze otwartego projektu, do którego można przypisać zespół.",
+      "assignIntro": "Uzgodnione wstępnie (nie umowa). Gdy warunki będą ustalone, przypisz zespół do jednego ze swoich projektów.",
       "projectLabel": "Projekt",
       "projectPlaceholder": "Wybierz projekt",
       "assign": "Przypisz zespół do projektu",
       "assignedNote": "Przypisano. Członkowie zespołu są teraz widoczni w tym projekcie.",
       "outcome": {
-        "accepted": "Zespół przyjęty.",
+        "accepted": "Uzgodnione wstępnie — to jeszcze nie podpisana umowa. Ustalcie warunki w rozmowie, a potem przypisz zespół do projektu.",
         "declined": "Oferta odrzucona.",
-        "already_accepted": "Już przyjęto.",
+        "already_accepted": "Już uzgodnione wstępnie.",
         "already_declined": "Już odrzucono.",
         "assigned": "Zespół przypisany do projektu.",
         "already_assigned": "Ten zespół był już przypisany. Nic nie zmieniono."
-      }
-    }
+      },
+      "createProject": "Utwórz projekt",
+      "message": "Napisz do zespołu",
+      "kindOrganization": "Oferta firmy",
+      "orgNext": "Uzgodnione wstępnie (nie umowa). Szczegóły i ludzi, którzy będą pracować, ustalcie w rozmowie."
+    },
+    "orgHeading": "Zaoferuj naszą firmę do otwartej potrzeby",
+    "orgIntro": "Zaoferuj samą firmę — swoich ludzi, swoją usługę lub jako podwykonawca — do jednej otwartej potrzeby. Nie trzeba najpierw tworzyć brygady.",
+    "orgNotYet": "Oferowanie całej firmy jest właśnie włączane. Do tego czasu zaoferuj brygadę.",
+    "termsLegend": "Twoje warunki (opcjonalnie — można je później zmienić)",
+    "terms": {
+      "heading": "Warunki i negocjacje",
+      "loading": "Ładowanie…",
+      "notYet": "Negocjowanie warunków jest właśnie włączane. Do tego czasu użyj rozmowy.",
+      "unavailable": "Nie udało się wczytać warunków.",
+      "none": "Nie zaproponowano jeszcze warunków.",
+      "byYou": "Zaproponowane przez ciebie",
+      "byOther": "Zaproponowane przez drugą stronę",
+      "status": {
+        "proposed": "Otwarte",
+        "superseded": "Zastąpione",
+        "accepted": "Uzgodnione",
+        "declined": "Odrzucone"
+      },
+      "capacity": "Osób",
+      "rate": "Stawka",
+      "ratePlaceholder": "np. 32 €/h lub cena ryczałtowa",
+      "period": "Okres",
+      "start": "Początek",
+      "end": "Koniec",
+      "scope": "Zakres prac",
+      "conditions": "Warunki",
+      "agree": "Zgoda na wersję {version}",
+      "agreeNote": "Zgoda oznacza uzgodnienie wstępne — nie podpisaną umowę.",
+      "agreed": "Uzgodnione wstępnie.",
+      "proposeFirst": "Zaproponuj warunki",
+      "proposeNext": "Zaproponuj zmienione warunki (nowa wersja)",
+      "propose": "Wyślij warunki",
+      "proposed": "Wersja {version} wysłana."
+    },
+    "threadContext": "Dotyczy oferty: {subject}",
+    "messageAbout": "Dotyczy oferty: {subject}",
+    "threadContextShared": "Wszystkie oferty między wami są omawiane w tej jednej rozmowie; otwarto ją dla oferty powyżej."
   },
   "teamAssignment": {
     "title": "Zespoły w tym projekcie",

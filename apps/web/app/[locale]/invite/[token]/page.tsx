@@ -22,6 +22,8 @@ import {
 } from "@/components/app/referral-context-review";
 import { formatUtcDate } from "@/lib/time/display";
 // The ONE list that says "this happened and it was a placement, not a job".
+import { REVIEW_NOTICE_VERSION, showsStaffReviewNotice } from "@/lib/operations/auto-review-model";
+import { StaffReviewNotice } from "@/components/app/staff-review-notice";
 import { PRACTICE_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import type { Metadata } from "next";
 
@@ -224,6 +226,19 @@ export default async function InvitePage({
             <p className="text-sm text-text-secondary" data-testid="invite-anon-explainer">
               {t("anonExplainer")}
             </p>
+            {/* Registering through an addressed invitation accepts it at
+                signup; the person reads the review sentence BEFORE choosing
+                to register (and again on the form that accepts). */}
+            {showsStaffReviewNotice({
+              invitationType: p.invitationType,
+              relationshipSlug: p.relationshipSlug,
+              organizationName: p.organizationName,
+            }) && (
+              <StaffReviewNotice
+                text={t("reviewNotice", { organization: p.organizationName ?? "" })}
+                testId="invite-anon-review-notice"
+              />
+            )}
             <div className="flex flex-wrap items-center gap-2">
               <Link
                 href={`/auth/signup?next=${encodeURIComponent(returnTo)}`}
@@ -352,6 +367,13 @@ export default async function InvitePage({
           ? "exhausted"
           : status;
   const relationshipSlug = preview.relationship_slug ?? null;
+  const showReviewNotice =
+    !closed &&
+    showsStaffReviewNotice({
+      invitationType: preview.invitation_type,
+      relationshipSlug,
+      organizationName: preview.organization_name,
+    });
   const source = findExternalReferralSource(preview.external_source_slug);
   const contextItems = declaredContextItems(preview.declared_context);
   const declaredFreeText = (preview.declared_context as { freeText?: unknown } | null)
@@ -475,6 +497,16 @@ export default async function InvitePage({
             )}
           </p>
         )}
+        {/* WHAT A MANAGER MAY DO WITH THE WORK YOU RECORD (owner decision 1).
+            The ONE sentence every accept surface shows (StaffReviewNotice);
+            the accept form below carries REVIEW_NOTICE_VERSION only when it
+            rendered here, so the acceptance fact records what was on screen. */}
+        {showReviewNotice && (
+          <StaffReviewNotice
+            text={t("reviewNotice", { organization: preview.organization_name ?? "" })}
+            testId="invite-review-notice"
+          />
+        )}
         {preview.personal_message && (
           <p className="rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2 text-xs">
             &ldquo;{preview.personal_message}&rdquo;
@@ -542,6 +574,7 @@ export default async function InvitePage({
           <form action={acceptInviteFormAction}>
             <input type="hidden" name="token" value={token} />
             <input type="hidden" name="locale" value={locale} />
+            {showReviewNotice && <input type="hidden" name="reviewNotice" value={REVIEW_NOTICE_VERSION} />}
             {agencyClient && (
               <input type="hidden" name="proposedRole" value={AGENCY_CLIENT_PROPOSED_ROLE} />
             )}

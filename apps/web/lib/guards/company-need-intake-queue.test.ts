@@ -147,6 +147,9 @@ describe("the feature sends nothing outbound and adds no DB weakening", () => {
       // and leaves every anon_write_bounds_v1 ceiling in place; the queue's
       // service-role-only read model is unchanged.
       "20260922130000_company_need_intake_country_registry_v1.sql",
+      // 2026-10-12 (owner-approved): UPDATE (status) to service_role only —
+      // production service_role could not mark a claimed intake converted.
+      "20261012120000_service_role_notification_reads_v1.sql",
     ]);
     const grants = readFileSync(
       join(migDir, "20260713190000_company_need_intake_service_grants.sql"),

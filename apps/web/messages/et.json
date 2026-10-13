@@ -1325,7 +1325,7 @@
       "confirmNote": "Optional note",
       "confirmSubmit": "Confirm & verify",
       "alreadyVerified": "Already verified",
-      "noSkillsToConfirm": "This worker has no declared skills left to confirm.",
+      "noSkillsToConfirm": "This entry has no linked skills left to confirm. Approving the entry confirms the work itself.",
       "result": {
         "skillsVerified": "Verified {count} skill(s).",
         "skillNotOwned": "That skill is not declared by this worker.",
@@ -2860,7 +2860,8 @@
     "requestAgain": "[EN] Request again",
     "requestAgainNote": "[EN] This sends a new request for the same service. Your previous message is prefilled — edit it if you like. The provider decides again.",
     "cancel": "[EN] Cancel",
-    "offeringInactive": "[EN] This service is no longer active, so a new request can't be sent."
+    "offeringInactive": "[EN] This service is no longer active, so a new request can't be sent.",
+    "loopReadFailed": "Teie päringuid ei õnnestunud laadida — loend võib olla puudulik. Värskendage lehte."
   },
   "people": {
     "eyebrow": "Isiku profiil",
@@ -3674,6 +3675,10 @@
         },
         "offerCapacity": {
           "label": "Pane oma pakkumine kirja"
+        },
+        "respondTeamOffer": {
+          "label": "Vasta brigaadi või ettevõtte pakkumisele",
+          "description": "Lepi põhimõtteliselt kokku või lükka tagasi teie vajadusele pakutud brigaad või ettevõte."
         }
       },
       "education": {
@@ -4150,7 +4155,7 @@
       "projectCreateIntro": "Uus projekt. Nimi ja linn — seejärel saate siinsamas inimesi määrata.",
       "projectCreatedNext": "Projekt loodud. Määrake inimesed siinsamas — või tulge selle juurde hiljem tagasi „Minu projektid“ alt.",
       "clientOffersIntro": "Agentuuride pakutud kandidaadid teie vajadustele:",
-      "clientOffersNone": "Ükski agentuur pole veel teie avatud vajadustele kandidaate pakkunud.",
+      "clientOffersNone": "Teie avatud vajadustele pole veel keegi pakkunud kandidaate, brigaadi ega ettevõtet.",
       "chipOfferAccept": "Võta vastu",
       "chipOfferDecline": "Lükka tagasi",
       "offerAccepted": "Vastu võetud. Kandidaadile saadeti broneeringu ettepanek — tema vastust näete siin.",
@@ -4304,7 +4309,15 @@
       "acceptOfferOne": "[EN] Here it is. The button below confirms it.",
       "acceptOfferWhich": "[EN] Which one? Choose below.",
       "visibilityUnavailable": "Nähtavust tööandjatele ei õnnestunud kontrollida. See ei tähenda, et see on välja lülitatud — avage seaded.",
-      "chipVisibility": "Nähtavus tööandjatele"
+      "chipVisibility": "Nähtavus tööandjatele",
+      "teamOffersIntro": "Brigaadid ja ettevõtted, kes pakkusid end teie vajadustele:",
+      "teamOfferStatusAgreed": "põhimõtteliselt kokku lepitud",
+      "chipTeamOfferAgree": "Lepi põhimõtteliselt kokku",
+      "chipTeamOfferThread": "Kirjuta",
+      "chipOfferOurs": "Paku meie brigaadi või ettevõtet",
+      "teamOfferAgreed": "Põhimõtteliselt kokku lepitud — see pole veel allkirjastatud leping. Leppige tingimused vestluses kokku ja määrake seejärel meeskond projekti.",
+      "teamOfferDeclined": "Tagasi lükatud. Pakkuv ettevõte näeb teie vastust.",
+      "teamOfferThreadFailed": "Seda vestlust ei saa avada."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -6741,7 +6754,11 @@
           "awayUntil": "Eemal kuni {date}",
           "assign": "Määra projektile",
           "openCalendar": "Ava kalender"
-        }
+        },
+        "inviteShareLinkLabel": "Link kutsutule",
+        "inviteShareLinkHint": "Saatke see link mis tahes viisil (SMS, sõnum). Sama e-postiga registreerudes leiab inimene kutse oma kontolt.",
+        "inviteShareCopy": "Kopeeri link",
+        "inviteShareCopied": "Kopeeritud"
       }
     }
   },

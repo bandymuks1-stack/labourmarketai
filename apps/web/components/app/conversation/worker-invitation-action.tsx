@@ -5,6 +5,8 @@ import { useRouter } from "@/lib/i18n/navigation";
 import { prepareConfirmationAction, dispatchWorkerAction } from "@/lib/conversation/dispatch";
 import type { InvitationRef } from "@/lib/invitations/model";
 import { ChatAction, ChatActionRow } from "@/components/app/conversation/chat/chat-action";
+import { StaffReviewNotice } from "@/components/app/staff-review-notice";
+import { REVIEW_NOTICE_VERSION } from "@/lib/operations/auto-review-model";
 
 /**
  * ACCEPT AN INVITATION FROM THE CHAT — the same shape as the booking decision
@@ -58,6 +60,7 @@ export function WorkerInvitationAction({
   title,
   subtitle,
   labels,
+  reviewNoticeText = null,
 }: {
   invitationRef: InvitationRef;
   locale: string;
@@ -66,13 +69,20 @@ export function WorkerInvitationAction({
   /** The inviter's own words, when any. */
   subtitle: string | null;
   labels: InvitationActionLabels;
+  /** The review sentence, localized, when accepting makes the person an
+   *  employee of a named organization (owner decision 1). Shown on the card
+   *  AND in the confirmation; only then does the accept carry the notice. */
+  reviewNoticeText?: string | null;
 }) {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const [pending, start] = useTransition();
   // The structured action + context the backbone receives (§1a): the shared
   // ref plus the one decision the canonical layer offers.
-  const input = { ...invitationRef, decision: "accepted" as const };
+  const input =
+    reviewNoticeText && invitationRef.source === "invitation"
+      ? { ...invitationRef, decision: "accepted" as const, reviewNotice: REVIEW_NOTICE_VERSION }
+      : { ...invitationRef, decision: "accepted" as const };
 
   function beginConfirm() {
     start(async () => {
@@ -124,6 +134,9 @@ export function WorkerInvitationAction({
     <div className="flex max-w-xl flex-col gap-2 rounded-card border border-ink-500 bg-ink-800/40 p-3" data-testid="conversation-invitation-action">
       <p className="text-basis font-semibold text-text-primary">{title}</p>
       {subtitle ? <p className="text-support text-text-secondary">{subtitle}</p> : null}
+      {reviewNoticeText && invitationRef.source === "invitation" ? (
+        <StaffReviewNotice text={reviewNoticeText} testId="conversation-invitation-review-notice" />
+      ) : null}
       {phase.kind === "confirm" ? (
         <div className="flex flex-col gap-2 rounded-md border border-state-amber/40 bg-state-amber/5 p-2.5">
           <p className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.confirmTitle}</p>

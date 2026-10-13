@@ -172,8 +172,9 @@ test.describe("desktop 1440x900", () => {
     // Chat is the control surface: a greeting, a composer, and starter actions.
     await expect(page.getByTestId("conversation-chat")).toBeVisible();
     await expect(page.getByTestId("composer-input")).toBeVisible();
-    await expect(page.getByTestId("context-panel")).toBeVisible();
-    settle("G2-first-experience", "desktop", c, "chat + composer + context panel present");
+    // The quiet home shows no context panel on purpose (context-panel.tsx
+    // quietHome); the panel appears with a result (G10 proves that path).
+    settle("G2-first-experience", "desktop", c, "chat + composer present; quiet home, no panel");
   });
 
   test("G2b onboarding — a returning identity is not sent back through a form maze", async ({

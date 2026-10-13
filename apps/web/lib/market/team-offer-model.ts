@@ -46,7 +46,13 @@ export interface ReceivedTeamOffer {
   readonly skills: ReadonlyArray<{ slug: string; declared: number; confirmed: number }>;
   readonly languages: ReadonlyArray<{ code: string; level: string | null; count: number }>;
   readonly consentedMembers: number;
+  /** 'team' = a brigade (a unit that can be assigned); 'organization' = a
+   *  company / agency offering itself (20261011200000). Pre-migration rows
+   *  are all 'team'. */
+  readonly offerKind: OfferKind;
 }
+
+export type OfferKind = "team" | "organization";
 
 /** One of the caller's OWN offers (the offering side). */
 export interface SentTeamOffer {
@@ -119,6 +125,7 @@ export function parseReceivedOffer(raw: unknown): ReceivedTeamOffer | null {
       isRow(l) && str(l.code) ? [{ code: l.code as string, level: str(l.level), count: num(l.count) ?? 0 }] : [],
     ),
     consentedMembers: num(raw.consented_members) ?? 0,
+    offerKind: raw.offer_kind === "organization" ? "organization" : "team",
   };
 }
 
@@ -220,6 +227,11 @@ export type TeamOfferRefusal =
   | "team_has_no_members"
   | "project_required"
   | "invalid_decision"
+  | "terms_empty"
+  | "terms_invalid"
+  | "terms_limit_reached"
+  | "terms_await_other_side"
+  | "organization_offer_not_a_unit"
   | "needs_migration"
   | "error";
 
@@ -239,6 +251,11 @@ const STABLE_WORDS: readonly TeamOfferRefusal[] = [
   "team_has_no_members",
   "project_required",
   "invalid_decision",
+  "terms_empty",
+  "terms_invalid",
+  "terms_limit_reached",
+  "terms_await_other_side",
+  "organization_offer_not_a_unit",
 ];
 
 const MISSING_CODES = new Set(["42P01", "42703", "42883", "PGRST202", "PGRST205"]);
@@ -302,4 +319,84 @@ export function summarizeTeamMatch(result: TeamMatchResultV1): OfferMatchView {
     missing: [...new Set(result.missingFacts.map((m) => m.criterion))],
     missingData: [...result.missingData],
   };
+}
+
+// ── Negotiated terms (20261011200000) ──────────────────────────────────────
+
+/** One version of the terms of an offer. No profile id: only which SIDE wrote
+ *  it, and whether that side is the reader's own. */
+export interface OfferTermsVersion {
+  readonly version: number;
+  readonly proposedSide: "supplier" | "receiver";
+  readonly mine: boolean;
+  readonly capacity: number | null;
+  readonly rateText: string | null;
+  readonly startDate: string | null;
+  readonly endDate: string | null;
+  readonly scopeText: string | null;
+  readonly conditionsText: string | null;
+  readonly status: "proposed" | "superseded" | "accepted" | "declined";
+  readonly createdAt: string;
+  readonly decidedAt: string | null;
+}
+
+const TERMS_STATUSES = new Set(["proposed", "superseded", "accepted", "declined"]);
+
+export function parseTermsVersion(raw: unknown): OfferTermsVersion | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  const version = typeof r.version === "number" ? r.version : null;
+  const side = r.proposed_side;
+  if (version === null || (side !== "supplier" && side !== "receiver")) return null;
+  if (typeof r.status !== "string" || !TERMS_STATUSES.has(r.status)) return null;
+  const s = (v: unknown) => (typeof v === "string" && v.trim() !== "" ? v : null);
+  return {
+    version,
+    proposedSide: side,
+    mine: r.mine === true,
+    capacity: typeof r.capacity === "number" ? r.capacity : null,
+    rateText: s(r.rate_text),
+    startDate: s(r.start_date),
+    endDate: s(r.end_date),
+    scopeText: s(r.scope_text),
+    conditionsText: s(r.conditions_text),
+    status: r.status as OfferTermsVersion["status"],
+    createdAt: s(r.created_at) ?? "",
+    decidedAt: s(r.decided_at),
+  };
+}
+
+/** The open version the READER may answer: proposed by the OTHER side. */
+export function answerableTerms(versions: readonly OfferTermsVersion[]): OfferTermsVersion | null {
+  const open = versions.find((v) => v.status === "proposed");
+  return open && !open.mine ? open : null;
+}
+
+export interface OfferTermsInput {
+  readonly capacity: number | null;
+  readonly rateText: string | null;
+  readonly startDate: string | null;
+  readonly endDate: string | null;
+  readonly scopeText: string | null;
+  readonly conditionsText: string | null;
+}
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Shape-check terms from a form; null = nothing usable (the RPC would say terms_empty). */
+export function normalizeTermsInput(raw: Partial<Record<keyof OfferTermsInput, unknown>>): OfferTermsInput | null {
+  const text = (v: unknown, max: number) =>
+    typeof v === "string" && v.trim() !== "" ? v.trim().slice(0, max) : null;
+  const date = (v: unknown) => (typeof v === "string" && ISO_DATE.test(v) ? v : null);
+  const capRaw = typeof raw.capacity === "number" ? raw.capacity : typeof raw.capacity === "string" ? Number(raw.capacity) : NaN;
+  const capacity = Number.isInteger(capRaw) && capRaw >= 1 && capRaw <= 500 ? capRaw : null;
+  const out: OfferTermsInput = {
+    capacity,
+    rateText: text(raw.rateText, 200),
+    startDate: date(raw.startDate),
+    endDate: date(raw.endDate),
+    scopeText: text(raw.scopeText, 2000),
+    conditionsText: text(raw.conditionsText, 2000),
+  };
+  return Object.values(out).some((v) => v !== null) ? out : null;
 }

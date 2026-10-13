@@ -22,6 +22,7 @@ import {
   type BridgeActionState,
 } from "@/lib/agency/bridge-actions";
 import { inviteCompanyWorkerAction } from "@/lib/company/actions";
+import { respondToTeamOfferAction } from "@/lib/company/team-offer-actions";
 import { renameActiveOrganization } from "@/lib/company/organization-rename";
 import { createWorkTaskForChatAction, setWorkTaskStatusForChatAction } from "@/lib/tasks/task-chat-actions";
 import { updateStageStatusAction } from "@/lib/projects/stages-actions";
@@ -530,6 +531,21 @@ export const COMPANY_EXECUTORS: {
     if (r.status === "forbidden") return { ok: false, code: "not_authorized" };
     if (r.status === "not-found" || r.status === "invalid") return { ok: false, code: "invalid" };
     return { ok: false, code: "error", message: r.status === "error" ? r.reason : undefined };
+  },
+
+  "company.respond-team-offer": async (input) => {
+    // The receiver's answer to a brigade / company offer — the SAME canonical
+    // action the scouting page's buttons call; the RPC re-checks that the
+    // caller receives this need and that the offer is still open.
+    const r = await respondToTeamOfferAction({
+      offerId: input.offerId,
+      decision: input.decision === "accepted" ? "accept" : "decline",
+    });
+    if (r.status === "ok") return { ok: true, data: { decision: input.decision, outcome: r.outcome } };
+    if (r.status === "needs_migration") return { ok: false, code: "needs_migration" };
+    if (r.status === "not_authorized" || r.status === "not_authed") return { ok: false, code: "not_authorized" };
+    if (r.status === "error") return { ok: false, code: "error" };
+    return { ok: false, code: "invalid", message: r.status };
   },
 
   "agency.invite-client": async (input) => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { asksAboutAWeek } from "@/lib/planning/week-question";
+import { projectTitleFromSentence } from "@/lib/conversation/project-title-from-sentence";
 import { cardModeFromText } from "@/lib/player-card/card-mode-from-text";
 import type { PlayerCardMode } from "@/lib/player-card/card-modes";
 import {
@@ -58,6 +59,7 @@ import {
 } from "@/lib/conversation/education-question";
 import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
 import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
+import { openTeamOfferThreadForChat } from "@/lib/company/team-offer-conversation";
 import { loadClientBridgeForChat } from "@/lib/conversation/client-bridge";
 import { loadDocumentFormOptionsForChat } from "@/lib/conversation/documents-form";
 import { guessDocumentType } from "@/lib/conversation/document-type-guess";
@@ -181,6 +183,7 @@ import { DiscoverabilityConsent } from "@/components/app/discoverability-consent
 import { loadEmployerVisibilityForChat } from "@/lib/conversation/employer-visibility-chat";
 import { EMPLOYER_VISIBILITY_HREF } from "@/lib/privacy/employer-visibility";
 import { WorkerInvitationAction } from "@/components/app/conversation/worker-invitation-action";
+import { showsStaffReviewNotice } from "@/lib/operations/auto-review-model";
 import { loadCriteriaSummaryForChat, loadWorkCardPrefillForChat } from "@/lib/conversation/criteria-summary";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
 import {
@@ -561,6 +564,14 @@ export type ChatLabels = {
   offerAccepted: string;
   offerDeclined: string;
   offerDecisionFailed: string;
+  teamOffersIntro: string;
+  teamOfferStatusAgreed: string;
+  chipTeamOfferAgree: string;
+  chipTeamOfferThread: string;
+  chipOfferOurs: string;
+  teamOfferAgreed: string;
+  teamOfferDeclined: string;
+  teamOfferThreadFailed: string;
   documentAddIntro: string;
   documentAddDone: string;
   documentAddUnavailable: string;
@@ -1058,6 +1069,7 @@ export function ConversationChat({
   /** AI-workspace copy (W4) — explanations, workflow answers, chip labels. */
   const tAi = useTranslations("workspace.ai");
   const tRelationships = useTranslations("relationshipTypes");
+  const tInvitePage = useTranslations("network.invitePage");
   /** The AI's hand on World State, published by the bridge inside the provider. */
   const worldRef = useRef<AiWorldStateHandle | null>(null);
   const auth = useAuthOptional();
@@ -1186,9 +1198,16 @@ export function ConversationChat({
    * through the hash-chaining RPC. Fire-and-forget: a failed append never
    * blocks the visible conversation and never fabricates a success.
    */
-  const transcriptRef = useRef<{ conversationId: string | null; enabled: boolean }>({
+  // ONE ordered chain for every transcript write (production walk 2026-10-12):
+  // turns typed before the thread finished loading used to be dropped, and a
+  // question and its answer appended concurrently before the first
+  // conversation existed could open TWO threads. The chain starts with the
+  // load, so early turns wait for it, and each append waits for the previous
+  // one, so the first append creates the thread and the rest reuse it.
+  const transcriptRef = useRef<{ conversationId: string | null; enabled: boolean; chain: Promise<void> }>({
     conversationId: null,
     enabled: false,
+    chain: Promise.resolve(),
   });
   // The router compiles its patterns on first use; build them in idle slices
   // once the conversation is on screen so the first sentence finds them ready.
@@ -1196,10 +1215,18 @@ export function ConversationChat({
   useEffect(() => {
     if (script) return; // design preview: never touches real persistence
     let cancelled = false;
-    loadAssistantThread()
+    const loading = loadAssistantThread();
+    transcriptRef.current.chain = loading.then(
+      (res) => {
+        if (!res.available) return;
+        transcriptRef.current.conversationId = res.conversationId;
+        transcriptRef.current.enabled = true;
+      },
+      () => undefined,
+    );
+    loading
       .then((res) => {
         if (cancelled || !res.available) return;
-        transcriptRef.current = { conversationId: res.conversationId, enabled: true };
         if (res.messages.length > 0) {
           // ChatGPT-style history model: earlier turns arrive as ONE collapsed
           // block above the active conversation — never an unbounded dump.
@@ -1238,22 +1265,24 @@ export function ConversationChat({
 
   const persistTurn = useCallback(
     (role: "user" | "assistant", text: string) => {
-      const t = transcriptRef.current;
-      if (!t.enabled || !text.trim()) return;
-      appendAssistantTurn({
-        conversationId: t.conversationId,
-        role,
-        text,
-        language: locale,
-      })
-        .then((res) => {
-          if (res.available) transcriptRef.current.conversationId = res.conversationId;
+      if (script || !text.trim()) return;
+      const tr = transcriptRef.current;
+      tr.chain = tr.chain
+        .then(async () => {
+          if (!tr.enabled) return;
+          const res = await appendAssistantTurn({
+            conversationId: tr.conversationId,
+            role,
+            text,
+            language: locale,
+          });
+          if (res.available) tr.conversationId = res.conversationId;
         })
         .catch(() => {
           /* degraded — nothing claimed */
         });
     },
-    [locale],
+    [locale, script],
   );
 
   const pushMessage = useCallback((message: ChatMessage) => {
@@ -3192,6 +3221,42 @@ export function ConversationChat({
     [assistant, locale, labels.offerAccepted, labels.offerDeclined, labels.offerDecisionFailed, labels.chipCandidates, expectedWorkspaceId, answeredStaleContext],
   );
 
+  /** The receiver's answer to a brigade / company offer — the same confirmed
+   *  canonical action as the scouting page's buttons (2026-10-11). */
+  const runTeamOfferDecision = useCallback(
+    (offerId: string, decision: "accepted" | "declined") => {
+      setTyping(true);
+      const input = { offerId, decision };
+      prepareConfirmationAction("company.respond-team-offer", input)
+        .then((prep) => {
+          if (!prep.ok) {
+            setTyping(false);
+            assistant(labels.offerDecisionFailed);
+            return;
+          }
+          return dispatchWorkerAction("company.respond-team-offer", input, {
+            locale,
+            confirmationToken: prep.token,
+            expectedWorkspaceId,
+          }).then((res) => {
+            if (answeredStaleContext(res)) return;
+            setTyping(false);
+            assistant(
+              res.ok ? (decision === "accepted" ? labels.teamOfferAgreed : labels.teamOfferDeclined) : labels.offerDecisionFailed,
+              res.ok && decision === "accepted"
+                ? [{ id: `team-offer-thread:${offerId}`, label: labels.chipTeamOfferThread }]
+                : [{ id: "candidates", label: labels.chipCandidates }],
+            );
+          });
+        })
+        .catch(() => {
+          setTyping(false);
+          assistant(labels.offerDecisionFailed);
+        });
+    },
+    [assistant, locale, labels.teamOfferAgreed, labels.teamOfferDeclined, labels.offerDecisionFailed, labels.chipTeamOfferThread, labels.chipCandidates, expectedWorkspaceId, answeredStaleContext],
+  );
+
   /**
    * MESSAGES IN THE CONVERSATION (owner audit §8.1). The chat reads the real
    * inbox (same RLS-scoped reads the messages page uses), shows only the
@@ -3226,6 +3291,9 @@ export function ConversationChat({
           locale={locale}
           title={role ? `${who} · ${role}` : who}
           subtitle={[inv.projectTitle, inv.personalMessage].filter(Boolean).join(" · ") || null}
+          reviewNoticeText={
+            showsStaffReviewNotice(inv) ? tInvitePage("reviewNotice", { organization: inv.organizationName ?? "" }) : null
+          }
           labels={{
             accept: labels.invAccept,
             later: labels.invLater,
@@ -3242,7 +3310,7 @@ export function ConversationChat({
         />,
       );
     },
-    [pushEmbed, locale, labels, tRelationships],
+    [pushEmbed, locale, labels, tRelationships, tInvitePage],
   );
 
   /**
@@ -3842,12 +3910,14 @@ export function ConversationChat({
         return;
       }
       const city = structureValueStatement(sentence).city ?? "";
+      const title = projectTitleFromSentence(sentence) ?? "";
+      const prefill = { ...(title ? { title } : {}), ...(city ? { city } : {}) };
       assistant(labels.projectCreateIntro);
       openForm(
         "company.create-project",
         undefined,
         undefined,
-        city ? { city } : undefined,
+        title || city ? prefill : undefined,
         // PROJECT AFTER CREATION (owner contract §11 seed): the new project
         // opens in the panel — its real (empty) roster and the assignment
         // controls — so people are assigned right where the project was
@@ -4147,18 +4217,40 @@ export function ConversationChat({
           assistant(labels.agencyUnavailable, [{ id: "candidates", label: labels.chipCandidates }]);
           return;
         }
-        if (res.offers.length === 0) {
-          assistant(labels.clientOffersNone, [{ id: "candidates", label: labels.chipCandidates }]);
+        if (res.offers.length === 0 && res.teamOffers.length === 0) {
+          assistant(labels.clientOffersNone, [
+            { id: "candidates", label: labels.chipCandidates },
+            { id: "team-offer-mine", label: labels.chipOfferOurs },
+          ]);
           return;
         }
         const lines = res.offers.map((o) => `• ${o.demandTitle} — ${o.agencyName}${o.note ? ` · ${o.note}` : ""}`);
-        assistant(
-          [labels.clientOffersIntro, ...lines].join("\n"),
-          res.offers.slice(0, 3).flatMap((o) => [
+        // Brigades / companies offered against the same needs (2026-10-11):
+        // team-level only. Agreeing is agreed in principle; "write" opens the
+        // negotiation thread with the person who made the offer.
+        const teamLines = res.teamOffers.map(
+          (o) =>
+            `• ${o.demandTitle} — ${o.teamName}${o.status === "offered" ? "" : ` · ${labels.teamOfferStatusAgreed}`}`,
+        );
+        const text = [
+          ...(lines.length > 0 ? [labels.clientOffersIntro, ...lines] : []),
+          ...(teamLines.length > 0 ? [labels.teamOffersIntro, ...teamLines] : []),
+        ].join("\n");
+        assistant(text, [
+          ...res.offers.slice(0, 3).flatMap((o) => [
             { id: `offer-accept:${o.offerId}`, label: `${labels.chipOfferAccept}: ${o.demandTitle}` },
             { id: `offer-decline:${o.offerId}`, label: `${labels.chipOfferDecline}: ${o.demandTitle}` },
           ]),
-        );
+          ...res.teamOffers.slice(0, 3).flatMap((o) => [
+            ...(o.status === "offered"
+              ? [
+                  { id: `team-offer-agree:${o.offerId}`, label: `${labels.chipTeamOfferAgree}: ${o.teamName}` },
+                  { id: `team-offer-decline:${o.offerId}`, label: `${labels.chipOfferDecline}: ${o.teamName}` },
+                ]
+              : []),
+            { id: `team-offer-thread:${o.offerId}:${o.requestId}`, label: `${labels.chipTeamOfferThread}: ${o.teamName}` },
+          ]),
+        ]);
       })
       .catch(() => {
         setTyping(false);
@@ -5712,6 +5804,39 @@ export function ConversationChat({
             const [, workerProfileId, fromProjectId, toProjectId] = chip.id.split(":");
             user(chip.label);
             runMoveCommit(workerProfileId, fromProjectId, toProjectId);
+          } else if (chip.id.startsWith("team-offer-agree:") || chip.id.startsWith("team-offer-decline:")) {
+            // A brigade / company offer: the chip carries the offer id only;
+            // the RPC re-checks that the caller receives the need.
+            user(chip.label);
+            runTeamOfferDecision(
+              chip.id.slice(chip.id.indexOf(":") + 1),
+              chip.id.startsWith("team-offer-agree:") ? "accepted" : "declined",
+            );
+          } else if (chip.id.startsWith("team-offer-thread:")) {
+            // The negotiation thread of one offer — the same server gate as
+            // the scouting page's "Message" button; null = nothing opens.
+            const [, offerId, requestId] = chip.id.split(":");
+            user(chip.label);
+            setTyping(true);
+            openTeamOfferThreadForChat({ offerId, requestId: requestId ?? null, locale })
+              .then(({ route }) => {
+                setTyping(false);
+                if (!route) {
+                  assistant(labels.teamOfferThreadFailed);
+                  return;
+                }
+                // `route` carries the locale; the localized router adds its own.
+                router.push(route.replace(/^\/[a-z]{2}(?=\/)/, "") as "/dashboard");
+              })
+              .catch(() => {
+                setTyping(false);
+                assistant(labels.teamOfferThreadFailed);
+              });
+          } else if (chip.id === "team-offer-mine") {
+            // Offering OUR brigade / company is done on the people page, where
+            // the offer form lives (the chat never grows a duplicate of it).
+            user(chip.label);
+            router.push("/dashboard/company/people" as "/dashboard");
           } else if (chip.id.startsWith("offer-accept:") || chip.id.startsWith("offer-decline:")) {
             // The client's decision: the chip carries the offer id and nothing
             // else; the RPC re-checks the demand is theirs and the offer open.

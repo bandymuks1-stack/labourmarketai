@@ -1,0 +1,71 @@
+name: product-monitor
+
+# Hourly product health beyond "is the site up" (owner programme 2026-10-12 §9):
+# registration, invitations, brigade formation, B2B offers, review queue,
+# Living CV refresh, search latency, AI failures, vacancy sync, data integrity.
+# Rules live in apps/web/lib/ops/product-monitor.ts; each BREACH opens ONE
+# `monitor:<signal>` issue (commented at most daily, closed on recovery). A P1
+# breach also turns the run red, so GitHub's failure e-mail fires as well.
+#
+# Reads only; writes nothing to the database. Uses the existing service-role
+# secret exactly like ingestion-freshness.yml. Issue text is aggregate numbers
+# only — the repository is public.
+#
+# Alert drill: Run workflow → force_breach=<signal id> proves the issue path
+# end to end; the next scheduled run closes it again when the real reading is OK.
+
+on:
+  schedule:
+    - cron: "27 * * * *"
+  workflow_dispatch:
+    inputs:
+      force_breach:
+        description: "Alert drill: signal id to report as BREACH (empty = real readings)"
+        required: false
+        default: ""
+      dry_run:
+        description: "Evaluate only, touch no issue"
+        type: boolean
+        default: false
+
+concurrency:
+  group: product-monitor
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --filter web...
+      - name: Ensure labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          for l in monitor sev:P1 sev:P2 sev:P3 monitor:signup-broken monitor:signup-unfinished monitor:invites-failing \
+                   monitor:invites-expiring-unused monitor:team-formation-stalled monitor:b2b-offers-unanswered \
+                   monitor:review-queue-stale monitor:living-cv-not-refreshing monitor:search-slow monitor:ai-failing \
+                   monitor:vacancy-sync-lagging monitor:data-integrity monitor:metrics-unreadable; do
+            gh label create "$l" --color BFD4F2 >/dev/null 2>&1 || true
+          done
+      - name: Evaluate + alert
+        env:
+          MONITOR_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          MONITOR_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          MONITOR_FORCE_BREACH: ${{ inputs.force_breach }}
+          MONITOR_DRY_RUN: ${{ inputs.dry_run && '1' || '' }}
+        run: pnpm -C apps/web exec tsx scripts/product-monitor.ts

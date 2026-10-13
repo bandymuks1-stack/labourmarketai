@@ -2,10 +2,15 @@
 
 import { useId, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
+import { MessageSquare } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import { handOffTeamOfferAction, respondToTeamOfferAction } from "@/lib/company/team-offer-actions";
+import { openTeamOfferConversationAction } from "@/lib/company/team-offer-conversation";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
+import { TeamOfferTerms } from "@/components/app/team-offer-terms";
 import type { OfferMatchView, ReceivedTeamOffer, TeamOfferRefusal } from "@/lib/market/team-offer-model";
 
 /**
@@ -17,20 +22,25 @@ import type { OfferMatchView, ReceivedTeamOffer, TeamOfferRefusal } from "@/lib/
  * only after the team is assigned to it, through the existing team-assignment
  * resolver, exactly as for any other team.
  *
- * accept / decline -> (accepted) assign to one of YOUR projects. No payment and
- * no extra confirmation step: the offer is the team's authorization, the
- * accept + assign are yours.
+ * message -> the negotiation thread with the person who made the offer (any
+ * live status: ask, clarify, settle terms). accept = agreed IN PRINCIPLE, never
+ * a signed contract; then assign to one of YOUR projects. No payment and no
+ * extra confirmation step: the offer is the team's authorization, the
+ * agreement + assignment are yours.
  */
 export function TeamOffersReceived({
+  requestId,
   offers,
   projects,
   needOpen,
 }: {
+  requestId: string;
   offers: readonly { offer: ReceivedTeamOffer; match: OfferMatchView | null }[];
   projects: readonly { id: string; title: string | null }[];
   needOpen: boolean;
 }) {
   const t = useTranslations("teamDemandOffer");
+  const locale = useLocale();
   const tSkill = useTranslations("skillNames");
   const router = useRouter();
   const uid = useId();
@@ -93,6 +103,11 @@ export function TeamOffersReceived({
                 <span className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted">
                   {t(`status.${offer.status}`)}
                 </span>
+                {offer.offerKind === "organization" ? (
+                  <span className="text-xs text-text-secondary" data-testid={`team-offer-kind-org-${offer.offerId}`}>
+                    {t("received.kindOrganization")}
+                  </span>
+                ) : null}
                 <span className="text-xs text-text-secondary">{t("received.members", { count: offer.memberCount })}</span>
                 {size ? <span className="text-xs text-text-secondary">{size}</span> : null}
               </div>
@@ -112,14 +127,16 @@ export function TeamOffersReceived({
                           : t("received.availabilityUnknown")}
                   </dd>
                 </div>
-                <div className="flex flex-col gap-0.5">
-                  <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
-                    {t("received.consent")}
-                  </dt>
-                  <dd className="text-text-primary">
-                    {t("received.consentValue", { consented: offer.consentedMembers, total: offer.memberCount })}
-                  </dd>
-                </div>
+                {offer.offerKind === "team" ? (
+                  <div className="flex flex-col gap-0.5">
+                    <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {t("received.consent")}
+                    </dt>
+                    <dd className="text-text-primary">
+                      {t("received.consentValue", { consented: offer.consentedMembers, total: offer.memberCount })}
+                    </dd>
+                  </div>
+                ) : null}
                 <div className="flex flex-col gap-0.5 sm:col-span-2">
                   <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {t("received.skills")}
@@ -188,6 +205,28 @@ export function TeamOffersReceived({
                 </p>
               ) : null}
 
+              {offer.status === "offered" || offer.status === "accepted" || offer.status === "assigned" ? (
+                // The negotiation thread with the person who made the offer — the
+                // action re-proves this caller is the need's receiver server-side.
+                <form action={openTeamOfferConversationAction}>
+                  <DisplayedWorkspaceField />
+                  <input type="hidden" name="offerId" value={offer.offerId} />
+                  <input type="hidden" name="requestId" value={requestId} />
+                  <input type="hidden" name="locale" value={locale} />
+                  <button
+                    type="submit"
+                    data-testid={`team-offer-message-${offer.offerId}`}
+                    className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-3 text-xs font-semibold text-brand-blue transition-colors hover:border-brand-blue"
+                  >
+                    <MessageSquare className="h-3.5 w-3.5" aria-hidden /> {t("received.message")}
+                  </button>
+                </form>
+              ) : null}
+
+              {offer.status === "offered" || offer.status === "accepted" || offer.status === "assigned" ? (
+                <TeamOfferTerms offerId={offer.offerId} offerOpen={offer.status === "offered"} canAgree />
+              ) : null}
+
               {offer.status === "offered" ? (
                 <div className="flex flex-wrap gap-2">
                   <Button
@@ -212,9 +251,18 @@ export function TeamOffersReceived({
                 </div>
               ) : null}
 
-              {offer.status === "accepted" ? (
+              {offer.status === "accepted" && offer.offerKind === "organization" ? (
+                <p className="text-xs text-text-secondary" data-testid={`team-offer-org-next-${offer.offerId}`}>
+                  {t("received.orgNext")}
+                </p>
+              ) : offer.status === "accepted" ? (
                 projects.length === 0 ? (
-                  <p className="text-xs text-text-muted">{t("received.noProjects")}</p>
+                  <p className="text-xs text-text-muted">
+                    {t("received.noProjects")}{" "}
+                    <Link href={`/${locale}/dashboard/projects`} className="font-semibold text-brand-blue underline-offset-2 hover:underline">
+                      {t("received.createProject")}
+                    </Link>
+                  </p>
                 ) : (
                   <div className="flex flex-col gap-2" data-testid={`team-offer-assign-${offer.offerId}`}>
                     <p className="text-xs text-text-secondary">{t("received.assignIntro")}</p>

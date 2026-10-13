@@ -211,7 +211,7 @@ export function ClientAgencyBridgeSection({
                             ))}
                           </select>
                         </label>
-                        <button type="submit" disabled={sharePending}
+                        <button type="submit" disabled={sharePending} data-testid="client-bridge-share-submit"
                           className="inline-flex h-10 items-center rounded-lg border border-brand-blue/50 bg-brand-blue/10 px-4 text-sm font-semibold text-brand-blue transition-colors hover:border-brand-blue disabled:opacity-60">
                           {labels.shareButton}
                         </button>

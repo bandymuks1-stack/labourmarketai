@@ -84,6 +84,11 @@ const GRANT_ONLY_CALLERS: ReadonlyArray<
   // the two consenting people. No stamp: the closed source-relation set has
   // no bridge member and widening it is owner-gated SQL (residue).
   ["lib/agency/bridge-conversation.ts", "allowed_agency_connection"],
+  // Brigade offer negotiation (2026-10-11): a LIVE team_demand_offers row, the
+  // caller's side proven by their own authorized read (offering-team RLS, or
+  // the receiver-gated listing). No stamp: the source set has no offer member
+  // yet (owner-gated CHECK widening, residue).
+  ["lib/company/team-offer-conversation.ts", "allowed_team_demand_offer"],
 ];
 
 /** Where getOrCreateDirectConversation is defined (not a caller). */

@@ -1325,7 +1325,7 @@
       "confirmNote": "Optional note",
       "confirmSubmit": "Confirm & verify",
       "alreadyVerified": "Already verified",
-      "noSkillsToConfirm": "This worker has no declared skills left to confirm.",
+      "noSkillsToConfirm": "This entry has no linked skills left to confirm. Approving the entry confirms the work itself.",
       "result": {
         "skillsVerified": "Verified {count} skill(s).",
         "skillNotOwned": "That skill is not declared by this worker.",
@@ -2860,7 +2860,8 @@
     "requestAgain": "[EN] Request again",
     "requestAgainNote": "[EN] This sends a new request for the same service. Your previous message is prefilled — edit it if you like. The provider decides again.",
     "cancel": "[EN] Cancel",
-    "offeringInactive": "[EN] This service is no longer active, so a new request can't be sent."
+    "offeringInactive": "[EN] This service is no longer active, so a new request can't be sent.",
+    "loopReadFailed": "Dina förfrågningar kunde inte laddas — listan kan vara ofullständig. Ladda om sidan."
   },
   "people": {
     "eyebrow": "Personprofil",
@@ -3674,6 +3675,10 @@
         },
         "offerCapacity": {
           "label": "Registrera vad ni erbjuder"
+        },
+        "respondTeamOffer": {
+          "label": "Svara på ett arbetslags eller företags erbjudande",
+          "description": "Kom överens i princip med, eller avböj, ett arbetslag eller företag som erbjudits för ditt behov."
         }
       },
       "education": {
@@ -4150,7 +4155,7 @@
       "projectCreateIntro": "Ett nytt projekt. Namn och stad — sedan tilldelar du folk direkt här.",
       "projectCreatedNext": "Projekt skapat. Tilldela folk direkt här — eller återkom till det senare från ”Mina projekt”.",
       "clientOffersIntro": "Kandidater som byråer erbjudit för era behov:",
-      "clientOffersNone": "Ingen byrå har ännu erbjudit kandidater för era öppna behov.",
+      "clientOffersNone": "Ingen har ännu erbjudit kandidater, ett arbetslag eller ett företag för dina öppna behov.",
       "chipOfferAccept": "Acceptera",
       "chipOfferDecline": "Avböj",
       "offerAccepted": "Accepterat. Kandidaten fick ett bokningsförslag — svaret ser du här.",
@@ -4304,7 +4309,15 @@
       "acceptOfferOne": "[EN] Here it is. The button below confirms it.",
       "acceptOfferWhich": "[EN] Which one? Choose below.",
       "visibilityUnavailable": "Synligheten för arbetsgivare kunde inte kontrolleras. Det betyder inte att den är avstängd — öppna inställningarna.",
-      "chipVisibility": "Synlighet för arbetsgivare"
+      "chipVisibility": "Synlighet för arbetsgivare",
+      "teamOffersIntro": "Arbetslag och företag som erbjudit sig för dina behov:",
+      "teamOfferStatusAgreed": "överenskommet i princip",
+      "chipTeamOfferAgree": "Kom överens i princip",
+      "chipTeamOfferThread": "Skriv",
+      "chipOfferOurs": "Erbjud vårt arbetslag eller företag",
+      "teamOfferAgreed": "Överenskommet i princip — ännu inte ett undertecknat avtal. Kom överens om villkoren i samtalet och tilldela sedan laget ett projekt.",
+      "teamOfferDeclined": "Avböjt. Det erbjudande företaget ser ditt svar.",
+      "teamOfferThreadFailed": "Det här samtalet kan inte öppnas."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -6741,7 +6754,11 @@
           "awayUntil": "Borta till {date}",
           "assign": "Tilldela projekt",
           "openCalendar": "Öppna kalender"
-        }
+        },
+        "inviteShareLinkLabel": "Länk till den inbjudna",
+        "inviteShareLinkHint": "Skicka länken som du vill (sms, meddelande). Efter registrering med samma e-post hittar personen inbjudan i sitt konto.",
+        "inviteShareCopy": "Kopiera länk",
+        "inviteShareCopied": "Kopierad"
       }
     }
   },

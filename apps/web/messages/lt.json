@@ -225,7 +225,7 @@
     "pause": "Pristabdyti",
     "expired": "Pasibaigęs",
     "expiresOn": "Iki {date}",
-    "openInServices": "Atverti Paslaugas",
+    "openInServices": "Užsakyti paslaugą",
     "domains": {
       "all": "Visi",
       "work_resource": "Darbo ištekliai",
@@ -765,7 +765,8 @@
       "new_job_matches": "Išnyksta, kai atidarote skelbimų sąrašą (arba pamatote darbus apžvalgos kortelėje).",
       "pending_connection_invites": "Išnyksta, kai partnerių puslapyje priimate arba atmetate agentūros ryšio prašymą.",
       "shared_requests_awaiting_offer": "Išnyksta, kai partnerių puslapyje pasiūlote komandos darbuotoją pasidalintam poreikiui.",
-      "open_candidate_offers": "Išnyksta, kai kandidatų atrankos puslapyje priimate arba atmetate pasiūlytą kandidatą."
+      "open_candidate_offers": "Išnyksta, kai kandidatų atrankos puslapyje priimate arba atmetate pasiūlytą kandidatą.",
+      "open_team_offers": "Išnyksta, kai kandidatų atrankos puslapyje priimate arba atmetate komandos pasiūlymą."
     },
     "storedTitle": "Įrašyti pranešimai",
     "storedIntro": "Užfiksuoti įvykiai apie jus — kiekviena eilutė atidaro susijusį puslapį. Perskaitymo būsena tvarkoma per varpelį.",
@@ -1806,11 +1807,11 @@
       }
     },
     "capacity": {
-      "heading": "Kas laisvas dabar",
+      "heading": "Kas laisvas dabar (pagal planą)",
       "free": "laisvas",
       "away": "nedirba",
       "awayUntil": "nedirba iki {date}",
-      "summary": "{free} laisvi · {committed} dirba · {away} nedirba",
+      "summary": "Pagal planą: {free} laisvi · {committed} paskirti darbui · {away} nedirba",
       "onWork": "projekte {project}",
       "booked": "užimtas",
       "until": "iki {date}",
@@ -2032,7 +2033,7 @@
           "key": "Reikalavimo raktas (slug)",
           "country": "Šalis (2 raidės)",
           "evidence": "Įrodymų įrašų ID",
-          "evidenceHint": "Besimokančiojo darbo žurnalo įrašų ID, atskirti kableliais. Registras priima tik įrašus, kuriuos yra pažymėjęs antras asmuo.",
+          "evidenceHint": "Šio besimokančiojo praktikos įrašai, kuriuos yra pažymėjęs kitas asmuo. Pažymėkite tuos, kurie pagrindžia sprendimą.",
           "decision": "Sprendimas",
           "recognised": "Pripažinta",
           "notRecognised": "Nepripažinta",
@@ -2045,7 +2046,12 @@
           "needsMigration": "Neįrašyta: pripažinimų registras dar nepasiekiamas.",
           "forbidden": "Ši įstaiga negali įrašyti šio pripažinimo šiam asmeniui.",
           "invalid": "Patikrinkite reikšmes.",
-          "error": "Kažkas nepavyko. Bandykite dar kartą."
+          "error": "Kažkas nepavyko. Bandykite dar kartą.",
+          "evidenceChooseLearner": "Pasirinkite besimokantįjį, kad matytumėte jo praktiką, kurią pažymėjo kitas asmuo.",
+          "evidenceNone": "Šis besimokantysis dar neturi praktikos įrašo, kurį būtų pažymėjęs kitas asmuo. Pirmiausia jo praktika turi būti pažymėta; tik tada pripažinime galima ją nurodyti.",
+          "evidenceUnavailable": "Besimokančiojo praktikos įrašų šiuo metu nepavyko nuskaityti. Nieko neįrašyta.",
+          "evidenceRecorded": "Įrašyta",
+          "evidenceConfirmed": "pažymėta"
         }
       },
       "learners": {
@@ -2373,7 +2379,18 @@
           "awayUntil": "Nedirba iki {date}",
           "assign": "Priskirti objektui",
           "openCalendar": "Atidaryti kalendorių"
-        }
+        },
+        "inviteLinked": {
+          "title": "{count, plural, one {# žmogus prisijungė per kvietimą} few {# žmonės prisijungė per kvietimą} other {# žmonių prisijungė per kvietimą}}",
+          "body": "Jie priėmė jūsų kvietimą ir dirba su jūsų organizacija. Jų žurnalą galima peržiūrėti, kai įjungta peržiūra.",
+          "reviewOn": "Peržiūra įjungta",
+          "reviewOff": "Peržiūra išjungta",
+          "manage": "Tvarkyti narius ir peržiūrą →"
+        },
+        "inviteShareLinkLabel": "Nuoroda pakviestajam",
+        "inviteShareLinkHint": "Nusiųskite šią nuorodą bet kuriuo būdu (SMS, žinute). Užsiregistravęs tuo pačiu el. paštu, žmogus ras kvietimą savo paskyroje.",
+        "inviteShareCopy": "Kopijuoti nuorodą",
+        "inviteShareCopied": "Nukopijuota"
       },
       "scoutingBridge": {
         "title": "Raskite darbuotojų šiam poreikiui",
@@ -2391,6 +2408,7 @@
         "invitations": "Laukiantys kvietimai darbuotojams",
         "claims": "Viešos užklausos, kurias galite perimti",
         "reviewOff": "Dirbantys darbuotojai, kurių darbo patvirtinimas neįjungtas",
+        "conflicts": "Darbuotojai su planavimo konfliktu (susikerta darbai ar atostogos)",
         "unreadable": "nepavyko perskaityti",
         "clientReview": "Darbas, laukiantis jūsų sprendimo kaip užsakovo"
       }
@@ -4836,6 +4854,7 @@
         "pending_connection_invites": "Personalo agentūra nori užmegzti ryšį su jūsų įmone",
         "shared_requests_awaiting_offer": "Klientų poreikiai, laukiantys jūsų kandidato",
         "open_candidate_offers": "Agentūros kandidatai, laukiantys jūsų sprendimo",
+        "open_team_offers": "Komandos, pasiūliusios save jūsų poreikiams",
         "event_booking_proposed": "Gavai rezervacijos pasiūlymą",
         "event_booking_accepted": "Tavo rezervacijos pasiūlymas priimtas",
         "event_booking_declined": "Tavo rezervacijos pasiūlymas atmestas",
@@ -6706,7 +6725,8 @@
       "listingsNote": "Patalpos, įranga, transportas — siūlyk ar ieškok",
       "needs": "Poreikiai ir pasiūla",
       "needsNote": "Paskelbk, ko reikia ar ką gali pasiūlyti"
-    }
+    },
+    "loopReadFailed": "Nepavyko įkelti jūsų užklausų — sąrašas gali būti nepilnas. Atnaujinkite puslapį."
   },
   "learning": {
     "pageTitle": "Mokymasis ir peržiūra",
@@ -7170,6 +7190,7 @@
     "noAddable": "Nebeliko susietų darbuotojų, kuriuos būtų galima pridėti. Pirmiausia pakviesk darbuotojus sąrašo skiltyje.",
     "addLabel": "Pakviesti susietą darbuotoją",
     "addButton": "Siųsti kvietimą",
+    "emailPlaceholder": "Darbuotojo el. paštas",
     "createLabel": "Naujos brigados pavadinimas",
     "createPlaceholder": "pvz., Fasado brigada A",
     "createButton": "Sukurti brigadą",
@@ -7191,12 +7212,14 @@
     },
     "inviteOutcome": {
       "sent": "Kvietimas išsiųstas el. paštu. Narystė prasidės, kai darbuotojas jį priims.",
-      "created": "Kvietimas sukurtas. Darbuotojas jį matys skiltyje „Mano tinklas“ ir ten pats nuspręs.",
-      "deliveryFailed": "Kvietimas išsaugotas, bet el. laiško pristatyti nepavyko. Darbuotojas jį vis tiek matys skiltyje „Mano tinklas“.",
+      "created": "Kvietimas sukurtas — el. laiškas neišsiųstas. Nukopijuokite žemiau esančią nuorodą ir nusiųskite ją darbuotojui patys; jis ją atidaro, prisijungia ir priima.",
+      "deliveryFailed": "Kvietimas išsaugotas, bet el. laiško pristatyti nepavyko. Nukopijuokite žemiau esančią nuorodą ir nusiųskite ją darbuotojui patys.",
       "alreadyInvited": "Šis darbuotojas jau turi galiojantį kvietimą į šią brigadą.",
+      "alreadyInvitedNewLink": "Šis darbuotojas jau turi atvirą kvietimą. Štai nauja nuoroda — ankstesnė nuoroda nebeveikia.",
       "rateLimited": "Kol kas pasiektas kvietimų limitas. Pabandyk vėliau.",
       "notAuthorized": "Kvietimus gali siųsti tik brigados savininkas.",
       "noEmail": "Šis darbuotojas neturi tinkamo el. pašto adreso, todėl kvietimo sukurti negalima.",
+      "askEmail": "Įveskite šio darbuotojo el. paštą — kvietimas nueis į jo paskyrą, ir jis pats jį priims.",
       "needsMigration": "Šiuo metu nepasiekiama.",
       "error": "Kvietimo išsiųsti nepavyko. Niekas nebuvo pakeista."
     },
@@ -7265,7 +7288,10 @@
         "error": "Atsakymo išsaugoti nepavyko. Niekas nebuvo pakeista."
       }
     },
-    "addableUnavailable": "Susietų darbuotojų sąrašo nepavyko nuskaityti — pridėti kol kas negalima."
+    "addableUnavailable": "Susietų darbuotojų sąrašo nepavyko nuskaityti — pridėti kol kas negalima.",
+    "inviteLinkNote": "Nusiųskite šią nuorodą darbuotojui (žinute, SMS, WhatsApp). Priimti gali tik pakviestas asmuo.",
+    "inviteLinkCopy": "Kopijuoti nuorodą",
+    "inviteLinkCopied": "Nukopijuota"
   },
   "teamEnquiries": {
     "enquireButton": "Pateikti užklausą šiai komandai",
@@ -7568,7 +7594,7 @@
       "confirmNote": "Pastaba (nebūtina)",
       "confirmSubmit": "Patvirtinti ir patikrinti",
       "alreadyVerified": "Jau patvirtinta",
-      "noSkillsToConfirm": "Šis darbuotojas neturi daugiau nurodytų įgūdžių patvirtinti.",
+      "noSkillsToConfirm": "Šis įrašas neturi susietų įgūdžių, kuriuos dar reikėtų patvirtinti. Patvirtinus įrašą patvirtinamas pats darbas.",
       "result": {
         "skillsVerified": "Patvirtinta įgūdžių: {count}.",
         "skillNotOwned": "Darbuotojas šio įgūdžio nenurodė.",
@@ -8621,6 +8647,7 @@
     "pickDemand": "Pasirink poreikį",
     "noDemands": "Kol kas neturite poreikių. Sukurkite poreikį skydelyje — po peržiūros komanda sustruktūruos reikalingus gebėjimus.",
     "noDemandsCta": "Sukurti poreikį",
+    "teamOffersWaiting": "{count, plural, one {# komandos pasiūlymas laukia jūsų atsakymo} few {# komandų pasiūlymai laukia jūsų atsakymo} other {# komandų pasiūlymų laukia jūsų atsakymo}}",
     "unstructuredTag": "reikalavimai nepatvirtinti",
     "notStructured": "Šio poreikio reikalingi gebėjimai dar nesustruktūruoti, todėl atitiktis neskaičiuojama. Naujus poreikius peržiūri ir struktūruoja administratoriai — jums nieko daryti nereikia.",
     "needsSetup": "Nepavyko įkelti. Bandykite dar kartą.",
@@ -9381,6 +9408,31 @@
         "rate_limits": "Riboti užklausų limitai aktyvūs",
         "freshness_demotion": "Seni profiliai reitinguojami žemiau"
       }
+    }
+  },
+  "adminMetrics": {
+    "title": "Produkto metrikos",
+    "intro": "Gyvi skaičiai iš kanoninių lentelių, atskirti į REAL, TEST (sintetinės testinės paskyros, testiniai domenai) ir INTERNAL (komanda, administratoriai). — reiškia, kad šaltinio nepavyko perskaityti; tai niekada nėra nulis.",
+    "computedAt": "Apskaičiuota {at}",
+    "unknown": "Neperskaityti šaltiniai (rodoma —): {sources}",
+    "truncated": "Pasiekta eilučių riba, skaičiai yra apatinė riba: {sources}",
+    "groups": {
+      "users": "Žmonės ir aktyvumas",
+      "teams": "Brigados ir kvietimai",
+      "b2b": "B2B rinka",
+      "work": "Darbo žurnalas ir Living CV",
+      "technical": "Techninės"
+    },
+    "col": {
+      "metric": "Metrika",
+      "total": "Iš viso",
+      "source": "Šaltinis",
+      "rule": "Taisyklė",
+      "window": "Laikotarpis"
+    },
+    "signals": {
+      "title": "Perspėjimų taisyklės",
+      "intro": "Kas valandą tikrina product-monitor eiga. Pažeidimas atidaro po vieną GitHub issue kiekvienam signalui ir uždaro jį, kai būsena atsistato."
     }
   },
   "billingStatus": {
@@ -12025,6 +12077,8 @@
       "empty": "Kol kas kvietimų neišsiuntėte.",
       "error": "Kvietimų šiuo metu nepavyko įkelti.",
       "resend": "Siųsti dar kartą",
+      "newLink": "Nauja nuoroda",
+      "newLinkHint": "Sukuria naują kvietimo nuorodą. Ankstesnė nuoroda nustoja veikti.",
       "revoke": "Atšaukti",
       "copied": "Nukopijuota",
       "copyNewLink": "Kopijuoti naują nuorodą",
@@ -12231,7 +12285,8 @@
         "withOrganization": "Priėmėte šį kvietimą — dabar esate susieti su {name}.",
         "plain": "Priėmėte šį kvietimą — ryšys sukurtas.",
         "continue": "Eiti į mano erdvę →"
-      }
+      },
+      "reviewNotice": "Jei sutiksite, {organization} vadovas galės skaityti jūsų šiai įmonei užfiksuotą darbą, jį peržiūrėti ir pažymėti. Kol to nepadaro, tai lieka jūsų pačių įrašas."
     },
     "teamEnquiriesTitle": "Mano užklausos komandoms",
     "admin": {
@@ -13509,6 +13564,10 @@
         },
         "offerCapacity": {
           "label": "Užrašyti, ką siūlote"
+        },
+        "respondTeamOffer": {
+          "label": "Atsakyti į brigados ar įmonės pasiūlymą",
+          "description": "Sutarti iš esmės arba atmesti brigadą ar įmonę, pasiūlytą jūsų poreikiui."
         }
       },
       "education": {
@@ -14158,7 +14217,7 @@
       "projectCreateIntro": "Naujas projektas. Pavadinimas ir miestas — ir žmones galėsite priskirti čia pat.",
       "projectCreatedNext": "Projektas sukurtas. Čia pat priskirkite žmones — arba grįžkite prie jo vėliau iš „Mano projektai“.",
       "clientOffersIntro": "Agentūrų pasiūlyti kandidatai jūsų poreikiams:",
-      "clientOffersNone": "Agentūros dar nepasiūlė kandidatų jūsų atviriems poreikiams.",
+      "clientOffersNone": "Jūsų atviriems poreikiams dar niekas nepasiūlė kandidatų, brigados ar įmonės.",
       "clientBridgeInvitesIntro": "Agentūros, kviečiančios bendradarbiauti:",
       "clientBridgeShareIntro": "Poreikiai, kuriais galite pasidalinti su prijungta agentūra:",
       "clientBridgeNone": "Laukiančių agentūrų kvietimų nėra ir nėra kuo pasidalinti. Partnerius tvarkykite partnerių puslapyje.",
@@ -14425,7 +14484,15 @@
       "visibilityUnavailable": "Nepavyko patikrinti matomumo darbdaviams. Tai nereiškia, kad jis išjungtas — atidarykite nustatymus.",
       "chipVisibility": "Matomumas darbdaviams",
       "voiceOpen": "Kalbėti",
-      "voiceBareYes": "Ištartas „taip“ nėra patvirtinimas. Patvirtinkite paspausdami kortelės mygtuką arba pasakykite, ką norite daryti."
+      "voiceBareYes": "Ištartas „taip“ nėra patvirtinimas. Patvirtinkite paspausdami kortelės mygtuką arba pasakykite, ką norite daryti.",
+      "teamOffersIntro": "Brigados ir įmonės, pasiūliusios save jūsų poreikiams:",
+      "teamOfferStatusAgreed": "sutarta iš esmės",
+      "chipTeamOfferAgree": "Sutarti iš esmės",
+      "chipTeamOfferThread": "Rašyti",
+      "chipOfferOurs": "Pasiūlyti savo brigadą ar įmonę",
+      "teamOfferAgreed": "Sutarta iš esmės — tai dar ne pasirašyta sutartis. Sąlygas suderinkite pokalbyje, tada priskirkite komandą projektui.",
+      "teamOfferDeclined": "Atmesta. Pasiūliusi įmonė matys jūsų atsakymą.",
+      "teamOfferThreadFailed": "Šio pokalbio atidaryti nepavyko."
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
@@ -18721,11 +18788,12 @@
     "sent": {
       "heading": "Jūsų pasiūlymai",
       "none": "Pasiūlymų dar nėra.",
-      "withdraw": "Atšaukti"
+      "withdraw": "Atšaukti",
+      "message": "Rašyti užsakovui"
     },
     "status": {
       "offered": "Laukiama atsakymo",
-      "accepted": "Priimta",
+      "accepted": "Sutarta iš esmės",
       "declined": "Atmesta",
       "withdrawn": "Atšaukta",
       "assigned": "Priskirta projektui"
@@ -18755,11 +18823,16 @@
       "project_required": "Pasirinkite projektą.",
       "invalid_decision": "Nežinomas atsakymas.",
       "needs_migration": "Šiuo metu nepasiekiama.",
-      "error": "Nepavyko atlikti. Niekas nebuvo pakeista."
+      "error": "Nepavyko atlikti. Niekas nebuvo pakeista.",
+      "terms_empty": "Užpildykite bent vieną sąlygą.",
+      "terms_invalid": "Patikrinkite skaičius ir datas.",
+      "terms_limit_reached": "Šis pasiūlymas jau turi 50 sąlygų versijų.",
+      "terms_await_other_side": "Tai jūsų pačių sąlygos — atsako kita pusė.",
+      "organization_offer_not_a_unit": "Įmonės pasiūlymas nepriskiriamas kaip komanda; žmones suderinkite pokalbyje."
     },
     "received": {
       "title": "Šiam poreikiui pasiūlytos komandos",
-      "subtitle": "Komanda pasiūlė save kaip vieną vienetą šiam poreikiui. Jūs sprendžiate, ar ją priimti ir kur priskirti.",
+      "subtitle": "Komanda pasiūlė save kaip vieną vienetą šiam poreikiui. Klauskite ir derėkitės pokalbyje; sutarimas čia dar nėra sutartis.",
       "privacy": "Rodomi tik komandos lygio faktai. Čia nėra nurodytas nė vienas narys. Kai priimsite komandą ir priskirsite projektui, jos nariai bus matomi tame projekte, kaip ir bet kurios kitos komandos atveju.",
       "members": "Narių: {count}",
       "deployable": "Išsiunčiamas dydis {min}-{max}",
@@ -18790,23 +18863,64 @@
       "missing": "Nenurodyta: {list}",
       "noNeedStructure": "Šis poreikis dar nesustruktūruotas, todėl komandos su juo palyginti negalima.",
       "note": "Komandos pastaba",
-      "accept": "Priimti komandą",
+      "accept": "Sutarti iš esmės",
       "decline": "Atmesti",
-      "noProjects": "Neturite atviro projekto, kuriam galėtumėte priskirti komandą. Pirmiausia sukurkite projektą.",
-      "assignIntro": "Priimta. Priskirkite komandą vienam iš savo projektų.",
+      "noProjects": "Dar neturite atviro projekto, kuriam galėtumėte priskirti komandą.",
+      "assignIntro": "Sutarta iš esmės (ne sutartis). Suderinę sąlygas priskirkite komandą vienam iš savo projektų.",
       "projectLabel": "Projektas",
       "projectPlaceholder": "Pasirinkite projektą",
       "assign": "Priskirti komandą projektui",
       "assignedNote": "Priskirta. Komandos nariai dabar matomi tame projekte.",
       "outcome": {
-        "accepted": "Komanda priimta.",
+        "accepted": "Sutarta iš esmės — tai dar ne pasirašyta sutartis. Sąlygas suderinkite pokalbyje, tada priskirkite komandą projektui.",
         "declined": "Pasiūlymas atmestas.",
-        "already_accepted": "Jau priimta.",
+        "already_accepted": "Jau sutarta iš esmės.",
         "already_declined": "Jau atmesta.",
         "assigned": "Komanda priskirta projektui.",
         "already_assigned": "Ši komanda jau priskirta. Niekas nepasikeitė."
-      }
-    }
+      },
+      "createProject": "Sukurti projektą",
+      "message": "Rašyti komandai",
+      "kindOrganization": "Įmonės pasiūlymas",
+      "orgNext": "Sutarta iš esmės (ne sutartis). Detales ir dirbsiančius žmones suderinkite pokalbyje."
+    },
+    "orgHeading": "Pasiūlyti savo įmonę atviram poreikiui",
+    "orgIntro": "Pasiūlykite pačią įmonę — savo žmones, paslaugą ar kaip subrangovą — vienam atviram poreikiui. Brigados kurti nereikia.",
+    "orgNotYet": "Visos įmonės siūlymas dar įjungiamas. Kol kas pasiūlykite brigadą.",
+    "termsLegend": "Jūsų sąlygos (nebūtina — galėsite pakeisti vėliau)",
+    "terms": {
+      "heading": "Sąlygos ir derybos",
+      "loading": "Įkeliama…",
+      "notYet": "Sąlygų derybos dar įjungiamos. Kol kas naudokite pokalbį.",
+      "unavailable": "Nepavyko įkelti sąlygų.",
+      "none": "Sąlygų dar nepasiūlyta.",
+      "byYou": "Pasiūlėte jūs",
+      "byOther": "Pasiūlė kita pusė",
+      "status": {
+        "proposed": "Atvira",
+        "superseded": "Pakeista",
+        "accepted": "Sutarta",
+        "declined": "Atmesta"
+      },
+      "capacity": "Žmonių",
+      "rate": "Įkainis",
+      "ratePlaceholder": "pvz. 32 €/val. arba fiksuota kaina",
+      "period": "Laikotarpis",
+      "start": "Pradžia",
+      "end": "Pabaiga",
+      "scope": "Darbų apimtis",
+      "conditions": "Sąlygos",
+      "agree": "Sutikti su {version} versija",
+      "agreeNote": "Sutikimas reiškia sutarimą iš esmės — tai ne pasirašyta sutartis.",
+      "agreed": "Sutarta iš esmės.",
+      "proposeFirst": "Pasiūlyti sąlygas",
+      "proposeNext": "Pasiūlyti pakeistas sąlygas (nauja versija)",
+      "propose": "Siųsti sąlygas",
+      "proposed": "{version} versija išsiųsta."
+    },
+    "threadContext": "Pokalbis apie pasiūlymą: {subject}",
+    "messageAbout": "Dėl pasiūlymo: {subject}",
+    "threadContextShared": "Visi pasiūlymai tarp jūsų vyksta šiame viename pokalbyje; šis atidarytas apie aukščiau nurodytą."
   },
   "teamAssignment": {
     "title": "Komandos šiame projekte",

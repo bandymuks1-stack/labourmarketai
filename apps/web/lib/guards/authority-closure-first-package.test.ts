@@ -60,6 +60,12 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261007130000_",
       "20261007180000_",
       "20261008120000_",
+      // 2026-10-12 practice-in-company relationship row (data-only, GREEN).
+      "20261012170000_",
+      "20261012180000_",
+      "20261012190000_",
+      // 2026-10-13 single-use confirmation tokens (RED by GRANT, needs-human-gate).
+      "20261013120000_",
       // 2026-10-08 owner-approved work-plan scope extension (roster + engagement).
       "20261007140000_",
       // 2026-10-08 E6 (brigade offer against a demand): owner-approved RED, separate hand-off RPC.
@@ -70,6 +76,17 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261007210000_",
       // 2026-10-08 (RED by GRANT): SELECT on five RLS tables whose policies were unreachable.
       "20261008210000_",
+      // 2026-10-11 (RED by SECURITY DEFINER replace, needs-human-gate): supply offer negotiation: organization offers, versioned terms, need titles; RED by SECURITY DEFINER replace, needs-human-gate.
+      "20261011200000_",
+      // 2026-10-11 (RED by SECURITY DEFINER + RLS policy, needs-human-gate): absence authority for engagement employees.
+      "20261011160000_",
+      // 2026-10-12 (RED, needs-human-gate): service_role-only aggregate product metrics.
+      "20261012090000_",
+      // 2026-10-12 (RED, needs-human-gate): Chat First transcript per person + workspace.
+      "20261012100000_",
+      // 2026-10-12 (owner-approved RED): party-gated offer thread read + service_role notification reads.
+      "20261012110000_",
+      "20261012120000_",
       // 2026-10-11 (RED by SECURITY DEFINER replace, needs-human-gate): free-text job search without the per-row ICU ilike.
       "20261011090000_",
     ];

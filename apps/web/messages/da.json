@@ -1325,7 +1325,7 @@
       "confirmNote": "Optional note",
       "confirmSubmit": "Confirm & verify",
       "alreadyVerified": "Already verified",
-      "noSkillsToConfirm": "This worker has no declared skills left to confirm.",
+      "noSkillsToConfirm": "This entry has no linked skills left to confirm. Approving the entry confirms the work itself.",
       "result": {
         "skillsVerified": "Verified {count} skill(s).",
         "skillNotOwned": "That skill is not declared by this worker.",
@@ -2860,7 +2860,8 @@
     "requestAgain": "Anmod igen",
     "requestAgainNote": "Dette sender en ny anmodning om den samme ydelse. Din tidligere besked er udfyldt på forhånd — ret den, hvis du vil. Udbyderen beslutter igen.",
     "cancel": "Annuller",
-    "offeringInactive": "Denne ydelse er ikke længere aktiv, så der kan ikke sendes en ny anmodning."
+    "offeringInactive": "Denne ydelse er ikke længere aktiv, så der kan ikke sendes en ny anmodning.",
+    "loopReadFailed": "Dine forespørgsler kunne ikke indlæses — listen kan være ufuldstændig. Genindlæs siden."
   },
   "people": {
     "eyebrow": "Personprofil",
@@ -3674,6 +3675,10 @@
         },
         "offerCapacity": {
           "label": "Registrér hvad I tilbyder"
+        },
+        "respondTeamOffer": {
+          "label": "Svar på et holds eller en virksomheds tilbud",
+          "description": "Aftal i princippet med, eller afvis, et hold eller en virksomhed tilbudt til dit behov."
         }
       },
       "education": {
@@ -4150,7 +4155,7 @@
       "projectCreateIntro": "Et nyt projekt. Navn og by — så kan du tildele folk lige her.",
       "projectCreatedNext": "Projekt oprettet. Tildel folk lige her — eller vend tilbage til det senere fra “Mine projekter”.",
       "clientOffersIntro": "Kandidater, som bureauer har tilbudt til jeres behov:",
-      "clientOffersNone": "Intet bureau har endnu tilbudt kandidater til jeres åbne behov.",
+      "clientOffersNone": "Ingen har endnu tilbudt kandidater, et hold eller en virksomhed til dine åbne behov.",
       "chipOfferAccept": "Accepter",
       "chipOfferDecline": "Afvis",
       "offerAccepted": "Accepteret. Kandidaten fik et bookingforslag — svaret ser du her.",
@@ -4304,7 +4309,15 @@
       "acceptOfferOne": "[EN] Here it is. The button below confirms it.",
       "acceptOfferWhich": "[EN] Which one? Choose below.",
       "visibilityUnavailable": "Synligheden for arbejdsgivere kunne ikke kontrolleres. Det betyder ikke, at den er slået fra — åbn indstillingerne.",
-      "chipVisibility": "Synlighed for arbejdsgivere"
+      "chipVisibility": "Synlighed for arbejdsgivere",
+      "teamOffersIntro": "Hold og virksomheder, der har tilbudt sig til dine behov:",
+      "teamOfferStatusAgreed": "aftalt i princippet",
+      "chipTeamOfferAgree": "Aftal i princippet",
+      "chipTeamOfferThread": "Skriv",
+      "chipOfferOurs": "Tilbyd vores hold eller virksomhed",
+      "teamOfferAgreed": "Aftalt i princippet — endnu ikke en underskrevet kontrakt. Aftal vilkårene i samtalen, og tildel derefter holdet et projekt.",
+      "teamOfferDeclined": "Afvist. Den tilbydende virksomhed ser dit svar.",
+      "teamOfferThreadFailed": "Denne samtale kan ikke åbnes."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -6741,7 +6754,11 @@
           "awayUntil": "Fraværende til {date}",
           "assign": "Tildel til projekt",
           "openCalendar": "Åbn kalender"
-        }
+        },
+        "inviteShareLinkLabel": "Link til den inviterede",
+        "inviteShareLinkHint": "Send dette link, som du vil (SMS, besked). Efter tilmelding med samme e-mail finder personen invitationen på sin konto.",
+        "inviteShareCopy": "Kopiér link",
+        "inviteShareCopied": "Kopieret"
       }
     }
   },

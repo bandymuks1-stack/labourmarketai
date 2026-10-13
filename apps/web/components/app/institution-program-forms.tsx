@@ -45,7 +45,7 @@ const btnCls =
 
 function StateLine({ state, labels }: { state: ProgramActionState; labels: ProgramFormLabels }) {
   if (state.status === "idle") return null;
-  if (state.status === "ok") return <p className="text-xs text-text-secondary">{labels.saved}</p>;
+  if (state.status === "ok") return <p className="text-xs text-text-secondary" data-testid="program-form-saved">{labels.saved}</p>;
   if (state.status === "forbidden") return <p className="text-xs text-state-danger" role="alert">{labels.forbidden}</p>;
   if (state.status === "invalid") return <p className="text-xs text-state-danger" role="alert">{labels.invalid}</p>;
   return <p className="text-xs text-state-danger" role="alert">{labels.error}</p>;
@@ -207,7 +207,7 @@ export function CreateCohortForm({ programId, labels }: { readonly programId: st
       <input type="hidden" name="programId" value={programId} readOnly />
       <label className="flex min-w-[10rem] flex-1 flex-col gap-1 text-xs text-text-secondary">
         {labels.cohortName}
-        <input name="name" required minLength={1} maxLength={120} className={inputCls} />
+        <input name="name" required minLength={1} maxLength={120} className={inputCls} data-testid={`cohort-name-${programId}`} />
       </label>
       <label className="flex flex-col gap-1 text-xs text-text-secondary">
         {labels.startsOn}
@@ -217,7 +217,7 @@ export function CreateCohortForm({ programId, labels }: { readonly programId: st
         {labels.endsOn}
         <input name="endsOn" type="date" className={inputCls} />
       </label>
-      <button type="submit" disabled={pending} className={btnCls}>
+      <button type="submit" disabled={pending} className={btnCls} data-testid={`cohort-create-${programId}`}>
         {pending ? labels.saving : labels.createCohort}
       </button>
       <StateLine state={state} labels={labels} />
@@ -242,14 +242,14 @@ export function AssignLearnerForm({
       <input type="hidden" name="status" value="active" readOnly />
       <label className="flex min-w-[12rem] flex-1 flex-col gap-1 text-xs text-text-secondary">
         {labels.assignLearner}
-        <select name="profileId" required className={inputCls} defaultValue="">
+        <select name="profileId" required className={inputCls} defaultValue="" data-testid={`assign-learner-select-${cohortId}`}>
           <option value="" disabled>{labels.chooseLearner}</option>
           {learners.map((l) => (
             <option key={l.profileId} value={l.profileId}>{l.label}</option>
           ))}
         </select>
       </label>
-      <button type="submit" disabled={pending} className={btnCls}>
+      <button type="submit" disabled={pending} className={btnCls} data-testid={`assign-learner-submit-${cohortId}`}>
         {pending ? labels.saving : labels.assign}
       </button>
       <StateLine state={state} labels={labels} />

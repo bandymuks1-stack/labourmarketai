@@ -85,10 +85,15 @@ export default async function InboxPage({
 
   let pending: InboxEntry[] = [];
   if (!loadFailed && reviewableIds.length > 0) {
+    // LEFT join on workers, never !inner (walk 2026-10-11): a learner's
+    // workers row is hidden from their institution by least privilege
+    // (can_view_worker: student grants no worker visibility), so an inner join
+    // dropped every student entry the institution may read AND review. The
+    // name falls back to NO_READABLE_NAME; the entry itself stays reviewable.
     const { data: rows, error: rowsError } = await supabase
       .from("journal_entries")
       .select(
-        `id, original_text, created_at, worker_id, engagement_contexts(organization_id), journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), workers!inner(${WORKER_NAME_FIELDS})`,
+        `id, original_text, created_at, worker_id, engagement_contexts(organization_id), journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), workers(${WORKER_NAME_FIELDS})`,
       )
       .in("id", reviewableIds)
       .order("created_at", { ascending: true });
@@ -135,6 +140,27 @@ export default async function InboxPage({
         const list = skillsByWorker.get(r.worker_id) ?? [];
         list.push({ id: r.skill_id, name: tSkill(slug), verified: r.verified === true });
         skillsByWorker.set(r.worker_id, list);
+      }
+    }
+
+    // A manager confirms what THIS entry shows, never the worker's whole skill
+    // list (walk 2026-10-11: every unverified skill of the worker was offered,
+    // pre-ticked, so one submit verified skills detected in unrelated entries).
+    // Only skills linked to the entry are offered; unreadable links → none.
+    const linksByEntry = new Map<string, Set<string>>();
+    const entryIds = unconfirmed.map((r) => r.id);
+    if (entryIds.length > 0) {
+      const { data: links, error: linksError } = await supabase
+        .from("journal_entry_skills")
+        .select("journal_entry_id, skill_id")
+        .in("journal_entry_id", entryIds);
+      if (!linksError) {
+        for (const l of links ?? []) {
+          if (!l.journal_entry_id || !l.skill_id) continue;
+          const set = linksByEntry.get(l.journal_entry_id) ?? new Set<string>();
+          set.add(l.skill_id);
+          linksByEntry.set(l.journal_entry_id, set);
+        }
       }
     }
 
@@ -188,7 +214,11 @@ export default async function InboxPage({
                 .engagement_contexts?.organization_id ?? "") as string,
             ),
         metrics,
-        skills: r.worker_id ? (skillsByWorker.get(r.worker_id) ?? []) : [],
+        skills: r.worker_id
+          ? (skillsByWorker.get(r.worker_id) ?? []).filter((s) =>
+              linksByEntry.get(r.id)?.has(s.id),
+            )
+          : [],
         recognized,
         hours,
         certainty: depth.certainty,

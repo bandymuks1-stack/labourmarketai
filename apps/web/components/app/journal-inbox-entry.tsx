@@ -395,7 +395,6 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
                     type="checkbox"
                     name="skill_id"
                     value={s.id}
-                    defaultChecked
                     data-testid={`confirm-skill-${entry.id}-${s.id}`}
                   />
                   {s.name}

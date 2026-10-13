@@ -225,7 +225,7 @@
     "pause": "Pauzeren",
     "expired": "Verlopen",
     "expiresOn": "Tot {date}",
-    "openInServices": "Open Diensten",
+    "openInServices": "Dienst aanvragen",
     "domains": {
       "all": "Alles",
       "work_resource": "Werkmiddelen",
@@ -765,7 +765,8 @@
       "new_job_matches": "Verdwijnt zodra je het vacaturebord opent (of de banen op de overzichtskaart ziet).",
       "pending_connection_invites": "Verdwijnt zodra je het verbindingsverzoek van het bureau op de partnerpagina accepteert of afwijst.",
       "shared_requests_awaiting_offer": "Verdwijnt zodra je op de partnerpagina een medewerker voorstelt voor de gedeelde aanvraag.",
-      "open_candidate_offers": "Verdwijnt zodra je de voorgestelde kandidaat op je scoutingpagina accepteert of afwijst."
+      "open_candidate_offers": "Verdwijnt zodra je de voorgestelde kandidaat op je scoutingpagina accepteert of afwijst.",
+      "open_team_offers": "Verdwijnt zodra je het aanbod van het team op je scoutingpagina accepteert of afwijst."
     },
     "storedTitle": "Opgeslagen meldingen",
     "storedIntro": "Vastgelegde gebeurtenissen over u — elke rij opent de bijbehorende pagina. De leesstatus beheert u via de bel.",
@@ -1806,11 +1807,11 @@
       }
     },
     "capacity": {
-      "heading": "Wie is nu vrij",
+      "heading": "Wie is nu vrij (volgens planning)",
       "free": "vrij",
       "away": "afwezig",
       "awayUntil": "afwezig tot {date}",
-      "summary": "{free} vrij · {committed} aan het werk · {away} afwezig",
+      "summary": "Volgens planning: {free} vrij · {committed} ingepland · {away} afwezig",
       "onWork": "op {project}",
       "booked": "geboekt",
       "until": "tot {date}",
@@ -2032,7 +2033,7 @@
           "key": "Eissleutel (slug)",
           "country": "Land (2 letters)",
           "evidence": "ID's van bewijsvermeldingen",
-          "evidenceHint": "ID's van journaalvermeldingen van het werk van de lerende, gescheiden door komma's. Het register accepteert alleen vermeldingen die een tweede persoon heeft afgetekend.",
+          "evidenceHint": "Praktijkvermeldingen van deze cursist die door iemand anders zijn bevestigd. Selecteer de vermeldingen die de beslissing onderbouwen.",
           "decision": "Besluit",
           "recognised": "Erkend",
           "notRecognised": "Niet erkend",
@@ -2045,7 +2046,12 @@
           "needsMigration": "Niet vastgelegd: het erkenningsregister is nog niet beschikbaar.",
           "forbidden": "Deze instelling kan deze erkenning niet voor deze persoon vastleggen.",
           "invalid": "Controleer de waarden.",
-          "error": "Er ging iets mis. Probeer het opnieuw."
+          "error": "Er ging iets mis. Probeer het opnieuw.",
+          "evidenceChooseLearner": "Kies een cursist om de bevestigde praktijk te zien.",
+          "evidenceNone": "Deze cursist heeft nog geen praktijkvermelding die door iemand anders is bevestigd. Bevestig eerst de praktijk; pas dan kan een erkenning ernaar verwijzen.",
+          "evidenceUnavailable": "De praktijkvermeldingen konden nu niet worden gelezen. Er is niets vastgelegd.",
+          "evidenceRecorded": "Vastgelegd",
+          "evidenceConfirmed": "bevestigd"
         }
       },
       "learners": {
@@ -2373,7 +2379,18 @@
           "awayUntil": "Afwezig tot {date}",
           "assign": "Toewijzen aan project",
           "openCalendar": "Agenda openen"
-        }
+        },
+        "inviteLinked": {
+          "title": "{count, plural, one {# persoon kwam erbij via een uitnodiging} other {# personen kwamen erbij via een uitnodiging}}",
+          "body": "Zij hebben je uitnodiging geaccepteerd en werken met je organisatie. Hun werkjournaal kan worden beoordeeld zodra beoordeling aan staat.",
+          "reviewOn": "Beoordeling aan",
+          "reviewOff": "Beoordeling uit",
+          "manage": "Leden en beoordeling beheren →"
+        },
+        "inviteShareLinkLabel": "Link voor de uitgenodigde persoon",
+        "inviteShareLinkHint": "Stuur deze link op elke manier (sms, bericht). Na aanmelding met hetzelfde e-mailadres vindt de persoon de uitnodiging in zijn account.",
+        "inviteShareCopy": "Link kopiëren",
+        "inviteShareCopied": "Gekopieerd"
       },
       "scoutingBridge": {
         "title": "Vind werknemers voor deze personeelsbehoefte",
@@ -2391,6 +2408,7 @@
         "invitations": "Openstaande uitnodigingen voor werknemers",
         "claims": "Openbare aanvragen die je kunt overnemen",
         "reviewOff": "Werknemers met vastgelegd werk waarvan bevestiging uitstaat",
+        "conflicts": "Mensen met een planningsconflict (overlappend werk of verlof)",
         "unreadable": "kon niet worden gelezen",
         "clientReview": "Werk dat wacht op uw beslissing als opdrachtgever"
       }
@@ -4836,6 +4854,7 @@
         "pending_connection_invites": "Een uitzendbureau wil een verbinding met je bedrijf",
         "shared_requests_awaiting_offer": "Aanvragen van klanten die op je kandidaat wachten",
         "open_candidate_offers": "Kandidaten van bureaus die op je beslissing wachten",
+        "open_team_offers": "Teams die zich aanbieden voor je behoeften",
         "event_booking_proposed": "Je hebt een boekingsvoorstel ontvangen",
         "event_booking_accepted": "Je boekingsvoorstel is geaccepteerd",
         "event_booking_declined": "Je boekingsvoorstel is afgewezen",
@@ -6706,7 +6725,8 @@
       "listingsNote": "Ruimtes, uitrusting, voertuigen – aanbieden of zoeken",
       "needs": "Vraag & aanbod",
       "needsNote": "Publiceer wat je nodig hebt of kunt bieden"
-    }
+    },
+    "loopReadFailed": "Je aanvragen konden niet worden geladen — de lijst is mogelijk onvolledig. Vernieuw de pagina."
   },
   "learning": {
     "pageTitle": "Leren en beoordelen",
@@ -7170,6 +7190,7 @@
     "noAddable": "Geen gekoppelde werknemers meer om toe te voegen. Nodig eerst werknemers uit in het bestandsgedeelte.",
     "addLabel": "Een gekoppelde werknemer uitnodigen",
     "addButton": "Uitnodiging versturen",
+    "emailPlaceholder": "E-mailadres van de medewerker",
     "createLabel": "Naam nieuwe brigade",
     "createPlaceholder": "bijv. Gevelbrigade A",
     "createButton": "Brigade aanmaken",
@@ -7191,12 +7212,14 @@
     },
     "inviteOutcome": {
       "sent": "Uitnodiging per e-mail verstuurd. Het lidmaatschap begint zodra de werknemer die accepteert.",
-      "created": "Uitnodiging aangemaakt. De werknemer ziet die onder Mijn netwerk en beslist daar zelf.",
-      "deliveryFailed": "Uitnodiging opgeslagen, maar de e-mail kon niet worden bezorgd. De werknemer ziet die alsnog onder Mijn netwerk.",
+      "created": "Uitnodiging aangemaakt — er is geen e-mail verstuurd. Kopieer de link hieronder en stuur hem zelf naar de medewerker; die opent hem, logt in en accepteert.",
+      "deliveryFailed": "Uitnodiging opgeslagen, maar de e-mail kon niet worden bezorgd. Kopieer de link hieronder en stuur hem zelf.",
       "alreadyInvited": "Deze werknemer heeft al een openstaande uitnodiging voor deze brigade.",
+      "alreadyInvitedNewLink": "Deze persoon heeft al een openstaande uitnodiging. Hier is een nieuwe link — de vorige link werkt niet meer.",
       "rateLimited": "Uitnodigingslimiet voorlopig bereikt. Probeer het later opnieuw.",
       "notAuthorized": "Alleen de brigade-eigenaar kan uitnodigingen versturen.",
       "noEmail": "Deze werknemer heeft geen bruikbaar e-mailadres, dus de uitnodiging kan niet worden aangemaakt.",
+      "askEmail": "Vul het e-mailadres van deze medewerker in — de uitnodiging gaat naar diens account en die accepteert haar zelf.",
       "needsMigration": "Momenteel niet beschikbaar.",
       "error": "De uitnodiging kon niet worden verstuurd. Er is niets gewijzigd."
     },
@@ -7265,7 +7288,10 @@
         "error": "Het antwoord kon niet worden opgeslagen. Er is niets gewijzigd."
       }
     },
-    "addableUnavailable": "De lijst met gekoppelde werknemers kon niet worden geladen — toevoegen is nu niet mogelijk."
+    "addableUnavailable": "De lijst met gekoppelde werknemers kon niet worden geladen — toevoegen is nu niet mogelijk.",
+    "inviteLinkNote": "Stuur deze link naar de medewerker (bericht, sms, WhatsApp). Alleen de uitgenodigde persoon kan accepteren.",
+    "inviteLinkCopy": "Link kopiëren",
+    "inviteLinkCopied": "Gekopieerd"
   },
   "teamEnquiries": {
     "enquireButton": "Deze ploeg een aanvraag sturen",
@@ -7568,7 +7594,7 @@
       "confirmNote": "Optional note",
       "confirmSubmit": "Confirm & verify",
       "alreadyVerified": "Already verified",
-      "noSkillsToConfirm": "This worker has no declared skills left to confirm.",
+      "noSkillsToConfirm": "Deze invoer heeft geen gekoppelde vaardigheden meer om te bevestigen. Goedkeuren bevestigt het werk zelf.",
       "result": {
         "skillsVerified": "Verified {count} skill(s).",
         "skillNotOwned": "That skill is not declared by this worker.",
@@ -8621,6 +8647,7 @@
     "pickDemand": "Kies een personeelsbehoefte",
     "noDemands": "Je hebt nog geen personeelsbehoeften. Maak een personeelsbehoefte aan vanaf je dashboard — na beoordeling structureert het team de vereiste vaardigheden.",
     "noDemandsCta": "Personeelsbehoefte aanmaken",
+    "teamOffersWaiting": "{count, plural, one {# teamaanbod wacht op je antwoord} other {# teamaanbiedingen wachten op je antwoord}}",
     "unstructuredTag": "vereisten niet bevestigd",
     "notStructured": "De vereiste vaardigheden van deze personeelsbehoefte zijn nog niet gestructureerd, dus er kan geen match worden berekend. Nieuwe personeelsbehoeften worden door de beheerders beoordeeld en gestructureerd — je hoeft niets te doen.",
     "needsSetup": "Laden is niet gelukt. Probeer het opnieuw.",
@@ -9381,6 +9408,31 @@
         "rate_limits": "Begrensde verzoeklimieten actief",
         "freshness_demotion": "Verouderde profielen lager gerangschikt"
       }
+    }
+  },
+  "adminMetrics": {
+    "title": "Productcijfers",
+    "intro": "Live tellingen uit de canonieke tabellen, gesplitst in REAL, TEST (synthetische testaccounts, testdomeinen) en INTERNAL (team, beheerders). — betekent dat de bron niet gelezen kon worden; het is nooit nul.",
+    "computedAt": "Berekend {at}",
+    "unknown": "Onleesbare bronnen (getoond als —): {sources}",
+    "truncated": "Rijlimiet bereikt, tellingen zijn een ondergrens: {sources}",
+    "groups": {
+      "users": "Mensen en activiteit",
+      "teams": "Ploegen en uitnodigingen",
+      "b2b": "B2B-markt",
+      "work": "Werkjournaal en Living CV",
+      "technical": "Technisch"
+    },
+    "col": {
+      "metric": "Cijfer",
+      "total": "Totaal",
+      "source": "Bron",
+      "rule": "Regel",
+      "window": "Periode"
+    },
+    "signals": {
+      "title": "Alarmregels",
+      "intro": "Elk uur geëvalueerd door de product-monitor-workflow. Een overschrijding opent één GitHub-issue per signaal en sluit het bij herstel."
     }
   },
   "billingStatus": {
@@ -12025,6 +12077,8 @@
       "empty": "U heeft nog geen uitnodigingen verzonden.",
       "error": "Uitnodigingen konden nu niet worden geladen.",
       "resend": "Opnieuw versturen",
+      "newLink": "Nieuwe link",
+      "newLinkHint": "Maakt een nieuwe uitnodigingslink. De vorige link werkt dan niet meer.",
       "revoke": "Intrekken",
       "copied": "Gekopieerd",
       "copyNewLink": "Nieuwe link kopiëren",
@@ -12231,7 +12285,8 @@
         "withOrganization": "Je hebt deze uitnodiging geaccepteerd — je bent nu verbonden met {name}.",
         "plain": "Je hebt deze uitnodiging geaccepteerd — de verbinding is gemaakt.",
         "continue": "Naar mijn ruimte →"
-      }
+      },
+      "reviewNotice": "Als u accepteert, kan een leidinggevende van {organization} het werk lezen dat u voor hen vastlegt en het aftekenen. Tot die tijd blijft het uw eigen vermelding."
     },
     "teamEnquiriesTitle": "Mijn aanvragen aan ploegen",
     "admin": {
@@ -13509,6 +13564,10 @@
         },
         "offerCapacity": {
           "label": "Vastleggen wat u aanbiedt"
+        },
+        "respondTeamOffer": {
+          "label": "Antwoorden op het aanbod van een ploeg of bedrijf",
+          "description": "In principe akkoord gaan met, of afwijzen van, een ploeg of bedrijf aangeboden voor uw behoefte."
         }
       },
       "education": {
@@ -14158,7 +14217,7 @@
       "projectCreateIntro": "Een nieuw project. Naam en stad — daarna wijst u hier meteen mensen toe.",
       "projectCreatedNext": "Project aangemaakt. Wijs hier meteen mensen toe — of kom er later op terug via “Mijn projecten”.",
       "clientOffersIntro": "Kandidaten die bureaus voor uw behoeften hebben aangeboden:",
-      "clientOffersNone": "Nog geen bureau heeft kandidaten voor uw open behoeften aangeboden.",
+      "clientOffersNone": "Nog niemand heeft kandidaten, een ploeg of een bedrijf aangeboden voor uw open behoeften.",
       "clientBridgeInvitesIntro": "Bureaus die u uitnodigen om samen te werken:",
       "clientBridgeShareIntro": "Behoeften die u met een gekoppeld bureau kunt delen:",
       "clientBridgeNone": "Er wacht geen uitnodiging van een bureau en er is niets meer te delen. Beheer partners op de partnerpagina.",
@@ -14425,7 +14484,15 @@
       "visibilityUnavailable": "Kon uw zichtbaarheid voor werkgevers niet controleren. Dat betekent niet dat die uit staat — open de instellingen.",
       "chipVisibility": "Zichtbaarheid voor werkgevers",
       "voiceOpen": "Spreken",
-      "voiceBareYes": "Een uitgesproken “ja” is geen bevestiging. Bevestig met de knop op de kaart, of zeg wat u wilt doen."
+      "voiceBareYes": "Een uitgesproken “ja” is geen bevestiging. Bevestig met de knop op de kaart, of zeg wat u wilt doen.",
+      "teamOffersIntro": "Ploegen en bedrijven die zich voor uw behoeften hebben aangeboden:",
+      "teamOfferStatusAgreed": "in principe akkoord",
+      "chipTeamOfferAgree": "In principe akkoord",
+      "chipTeamOfferThread": "Schrijven",
+      "chipOfferOurs": "Onze ploeg of ons bedrijf aanbieden",
+      "teamOfferAgreed": "In principe akkoord — nog geen getekend contract. Spreek de voorwaarden af in het gesprek en wijs het team daarna toe aan een project.",
+      "teamOfferDeclined": "Afgewezen. Het aanbiedende bedrijf ziet uw antwoord.",
+      "teamOfferThreadFailed": "Dit gesprek kan niet worden geopend."
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
@@ -18721,11 +18788,12 @@
     "sent": {
       "heading": "Uw aanbiedingen",
       "none": "Nog geen aanbiedingen.",
-      "withdraw": "Intrekken"
+      "withdraw": "Intrekken",
+      "message": "Bericht aan de opdrachtgever"
     },
     "status": {
       "offered": "Wacht op antwoord",
-      "accepted": "Geaccepteerd",
+      "accepted": "In principe akkoord",
       "declined": "Afgewezen",
       "withdrawn": "Ingetrokken",
       "assigned": "Aan een project toegewezen"
@@ -18755,11 +18823,16 @@
       "project_required": "Kies een project.",
       "invalid_decision": "Onbekend antwoord.",
       "needs_migration": "Nu niet beschikbaar.",
-      "error": "Dit kon niet worden voltooid. Er is niets gewijzigd."
+      "error": "Dit kon niet worden voltooid. Er is niets gewijzigd.",
+      "terms_empty": "Vul minstens één voorwaarde in.",
+      "terms_invalid": "Controleer de getallen en datums.",
+      "terms_limit_reached": "Dit aanbod heeft al 50 versies van voorwaarden.",
+      "terms_await_other_side": "Dit zijn uw eigen voorwaarden — de andere partij antwoordt.",
+      "organization_offer_not_a_unit": "Een bedrijfsaanbod wordt niet als ploeg toegewezen; spreek de mensen af in het gesprek."
     },
     "received": {
       "title": "Voor deze vraag aangeboden teams",
-      "subtitle": "Een team heeft zich als één eenheid voor deze vraag aangeboden. U beslist of u het accepteert en waar u het inzet.",
+      "subtitle": "Een team heeft zich als één eenheid aangeboden voor deze behoefte. Stel vragen en onderhandel in het gesprek; akkoord hier is geen contract.",
       "privacy": "Alleen feiten op teamniveau worden getoond. Hier wordt geen enkel lid genoemd. Nadat u het team hebt geaccepteerd en aan een project hebt toegewezen, verschijnen de leden in dat project, zoals bij elk team.",
       "members": "{count} leden",
       "deployable": "Inzetbare omvang {min}-{max}",
@@ -18790,23 +18863,64 @@
       "missing": "Niet opgegeven: {list}",
       "noNeedStructure": "Deze vraag is nog niet gestructureerd, dus het team kan er niet mee worden vergeleken.",
       "note": "Bericht van het team",
-      "accept": "Team accepteren",
+      "accept": "In principe akkoord",
       "decline": "Afwijzen",
-      "noProjects": "U hebt geen openstaand project om het team aan toe te wijzen. Maak eerst een project aan.",
-      "assignIntro": "Geaccepteerd. Wijs het team toe aan een van uw projecten.",
+      "noProjects": "U heeft nog geen open project om het team aan toe te wijzen.",
+      "assignIntro": "In principe akkoord (geen contract). Wijs het team toe aan een van uw projecten zodra de voorwaarden rond zijn.",
       "projectLabel": "Project om aan toe te wijzen",
       "projectPlaceholder": "Kies een project",
       "assign": "Team aan project toewijzen",
       "assignedNote": "Toegewezen. De leden van het team verschijnen nu in dat project.",
       "outcome": {
-        "accepted": "Team geaccepteerd.",
+        "accepted": "In principe akkoord — nog geen getekend contract. Spreek de voorwaarden af in het gesprek en wijs het team daarna toe aan een project.",
         "declined": "Aanbod afgewezen.",
-        "already_accepted": "Al geaccepteerd.",
+        "already_accepted": "Al in principe akkoord.",
         "already_declined": "Al afgewezen.",
         "assigned": "Team aan het project toegewezen.",
         "already_assigned": "Dit team was al toegewezen. Er is niets gewijzigd."
-      }
-    }
+      },
+      "createProject": "Project aanmaken",
+      "message": "Bericht aan het team",
+      "kindOrganization": "Bedrijfsaanbod",
+      "orgNext": "In principe akkoord (geen contract). Spreek de details en de mensen die het werk doen af in het gesprek."
+    },
+    "orgHeading": "Ons bedrijf aanbieden voor een open behoefte",
+    "orgIntro": "Bied uw bedrijf zelf aan — uw mensen, uw dienst of als onderaannemer — voor één open behoefte. Eerst een ploeg aanmaken is niet nodig.",
+    "orgNotYet": "Het hele bedrijf aanbieden wordt ingeschakeld. Bied tot dan een ploeg aan.",
+    "termsLegend": "Uw voorwaarden (optioneel — later te wijzigen)",
+    "terms": {
+      "heading": "Voorwaarden en onderhandeling",
+      "loading": "Laden…",
+      "notYet": "Onderhandelen over voorwaarden wordt ingeschakeld. Gebruik intussen het gesprek.",
+      "unavailable": "Voorwaarden konden niet worden geladen.",
+      "none": "Nog geen voorwaarden voorgesteld.",
+      "byYou": "Door u voorgesteld",
+      "byOther": "Door de andere partij voorgesteld",
+      "status": {
+        "proposed": "Openstaand",
+        "superseded": "Vervangen",
+        "accepted": "Akkoord",
+        "declined": "Afgewezen"
+      },
+      "capacity": "Mensen",
+      "rate": "Tarief",
+      "ratePlaceholder": "bijv. 32 €/u of vaste prijs",
+      "period": "Periode",
+      "start": "Begin",
+      "end": "Einde",
+      "scope": "Omvang van het werk",
+      "conditions": "Voorwaarden",
+      "agree": "Akkoord met versie {version}",
+      "agreeNote": "Akkoord betekent in principe akkoord — geen getekend contract.",
+      "agreed": "In principe akkoord.",
+      "proposeFirst": "Voorwaarden voorstellen",
+      "proposeNext": "Gewijzigde voorwaarden voorstellen (nieuwe versie)",
+      "propose": "Voorwaarden versturen",
+      "proposed": "Versie {version} verstuurd."
+    },
+    "threadContext": "Over het aanbod: {subject}",
+    "messageAbout": "Betreft aanbod: {subject}",
+    "threadContextShared": "Alle aanbiedingen tussen jullie worden in dit ene gesprek besproken; het is geopend voor het aanbod hierboven."
   },
   "teamAssignment": {
     "title": "Teams in dit project",

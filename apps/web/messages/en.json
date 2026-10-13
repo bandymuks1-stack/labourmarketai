@@ -225,7 +225,7 @@
     "pause": "Pause",
     "expired": "Expired",
     "expiresOn": "Until {date}",
-    "openInServices": "Open in Services",
+    "openInServices": "Request this service",
     "domains": {
       "all": "All",
       "work_resource": "Work resources",
@@ -765,7 +765,8 @@
       "new_job_matches": "Clears when you open the opportunities board (or see the jobs on the overview card).",
       "pending_connection_invites": "Clears when you accept or decline the agency's connection request on the partners page.",
       "shared_requests_awaiting_offer": "Clears when you offer a roster worker for the shared request on the partners page.",
-      "open_candidate_offers": "Clears when you accept or decline the proposed candidate on your scouting page."
+      "open_candidate_offers": "Clears when you accept or decline the proposed candidate on your scouting page.",
+      "open_team_offers": "Clears when you accept or decline the team's offer on your scouting page."
     },
     "storedTitle": "Stored notifications",
     "storedIntro": "Recorded events about you — each row opens the page it is about. Read state is managed from the bell.",
@@ -1806,11 +1807,11 @@
       }
     },
     "capacity": {
-      "heading": "Who is free now",
+      "heading": "Who is free now (by plan)",
       "free": "free",
       "away": "away",
       "awayUntil": "away until {date}",
-      "summary": "{free} free · {committed} on work · {away} away",
+      "summary": "By plan: {free} free · {committed} assigned to work · {away} away",
       "onWork": "on {project}",
       "booked": "booked",
       "until": "until {date}",
@@ -2032,7 +2033,7 @@
           "key": "Requirement key (slug)",
           "country": "Country (2 letters)",
           "evidence": "Evidence entry IDs",
-          "evidenceHint": "Journal entry IDs of the learner's work, separated by commas. The register accepts only entries a second person has signed off.",
+          "evidenceHint": "Practice entries of this learner that someone other than the learner has signed off. Select the ones that support the decision.",
           "decision": "Decision",
           "recognised": "Recognised",
           "notRecognised": "Not recognised",
@@ -2045,7 +2046,12 @@
           "needsMigration": "Not recorded: the recognition register is not available yet.",
           "forbidden": "This institution cannot record this recognition for this person.",
           "invalid": "Please check the values.",
-          "error": "Something went wrong. Please try again."
+          "error": "Something went wrong. Please try again.",
+          "evidenceChooseLearner": "Choose a learner to see their signed-off practice.",
+          "evidenceNone": "This learner has no practice entry signed off by someone other than the learner yet. Have their practice signed off first; only then can a recognition cite it.",
+          "evidenceUnavailable": "The learner's practice entries could not be read right now. Nothing is recorded.",
+          "evidenceRecorded": "Recorded",
+          "evidenceConfirmed": "signed off"
         }
       },
       "learners": {
@@ -2373,7 +2379,18 @@
           "awayUntil": "Away until {date}",
           "assign": "Assign to a project",
           "openCalendar": "Open calendar"
-        }
+        },
+        "inviteLinked": {
+          "title": "{count, plural, one {# person joined through an invitation} other {# people joined through an invitation}}",
+          "body": "They accepted your invitation and work with your organization. Their journal can be reviewed once review is on.",
+          "reviewOn": "Review on",
+          "reviewOff": "Review off",
+          "manage": "Manage members and review →"
+        },
+        "inviteShareLinkLabel": "Link for the person you invited",
+        "inviteShareLinkHint": "Send this link any way you like (SMS, a message). After signing up with the same e-mail, they will find the invitation in their account.",
+        "inviteShareCopy": "Copy link",
+        "inviteShareCopied": "Copied"
       },
       "scoutingBridge": {
         "title": "Find workers for this need",
@@ -2391,6 +2408,7 @@
         "invitations": "Pending worker invitations",
         "claims": "Public need submissions you can claim",
         "reviewOff": "Workers with recorded work whose confirmation is switched off",
+        "conflicts": "People with a planning conflict (overlapping work or leave)",
         "unreadable": "could not be read",
         "clientReview": "Work waiting for your decision as the client"
       }
@@ -4836,6 +4854,7 @@
         "pending_connection_invites": "A staffing agency wants to connect with your company",
         "shared_requests_awaiting_offer": "Client requests waiting for your candidate",
         "open_candidate_offers": "Agency candidates waiting for your decision",
+        "open_team_offers": "Teams offering themselves for your needs",
         "event_booking_proposed": "You received a booking proposal",
         "event_booking_accepted": "Your booking proposal was accepted",
         "event_booking_declined": "Your booking proposal was declined",
@@ -6706,7 +6725,8 @@
       "listingsNote": "Premises, equipment, vehicles — offer or look",
       "needs": "Needs & offers",
       "needsNote": "Publish what you need or what you can offer"
-    }
+    },
+    "loopReadFailed": "Your requests could not be loaded — the list may be incomplete. Refresh the page."
   },
   "learning": {
     "pageTitle": "Learning & review",
@@ -7170,6 +7190,7 @@
     "noAddable": "No linked workers left to add. Invite workers in the roster section first.",
     "addLabel": "Invite a linked worker",
     "addButton": "Send invitation",
+    "emailPlaceholder": "Worker's email",
     "createLabel": "New brigade name",
     "createPlaceholder": "e.g. Facade brigade A",
     "createButton": "Create brigade",
@@ -7191,12 +7212,14 @@
     },
     "inviteOutcome": {
       "sent": "Invitation emailed. Membership starts when the worker accepts it.",
-      "created": "Invitation created. The worker will see it under My network and decides there.",
-      "deliveryFailed": "Invitation saved, but the email could not be delivered. The worker can still see it under My network.",
+      "created": "Invitation created — no e-mail was sent. Copy the link below and send it to the worker yourself; they open it, sign in and accept.",
+      "deliveryFailed": "Invitation saved, but the e-mail could not be delivered. Copy the link below and send it to the worker yourself.",
       "alreadyInvited": "This worker already has an open invitation to this brigade.",
+      "alreadyInvitedNewLink": "This worker already has an open invitation. Here is a new link — the previous link no longer works.",
       "rateLimited": "Invitation limit reached for now. Try again later.",
       "notAuthorized": "Only the brigade owner can send invitations.",
       "noEmail": "This worker has no usable email address on file, so the invitation cannot be created.",
+      "askEmail": "Enter this worker's email — the invitation goes to their account and they accept it themselves.",
       "needsMigration": "Not available right now.",
       "error": "Could not send the invitation. Nothing was changed."
     },
@@ -7265,7 +7288,10 @@
         "error": "Could not save the answer. Nothing was changed."
       }
     },
-    "addableUnavailable": "The linked-worker list could not be loaded — adding is not possible right now."
+    "addableUnavailable": "The linked-worker list could not be loaded — adding is not possible right now.",
+    "inviteLinkNote": "Send this link to the worker (message, SMS, WhatsApp). Only the invited person can accept it.",
+    "inviteLinkCopy": "Copy link",
+    "inviteLinkCopied": "Copied"
   },
   "teamEnquiries": {
     "enquireButton": "Ask this team about work",
@@ -7568,7 +7594,7 @@
       "confirmNote": "Optional note",
       "confirmSubmit": "Confirm & verify",
       "alreadyVerified": "Already verified",
-      "noSkillsToConfirm": "This worker has no declared skills left to confirm.",
+      "noSkillsToConfirm": "This entry has no linked skills left to confirm. Approving the entry confirms the work itself.",
       "result": {
         "skillsVerified": "Verified {count} skill(s).",
         "skillNotOwned": "That skill is not declared by this worker.",
@@ -8621,6 +8647,7 @@
     "pickDemand": "Pick a need",
     "noDemands": "You have no needs yet. Create a need from your dashboard — after review, the team structures its required skills.",
     "noDemandsCta": "Create a need",
+    "teamOffersWaiting": "{count, plural, one {# team offer waiting for your answer} other {# team offers waiting for your answer}}",
     "unstructuredTag": "requirements not confirmed",
     "notStructured": "This need's required skills aren't structured yet, so no match can be computed. New needs are reviewed and structured by the administrators — no action is needed from you.",
     "needsSetup": "Couldn’t load. Please try again.",
@@ -9381,6 +9408,31 @@
         "rate_limits": "Bounded request limits active",
         "freshness_demotion": "Stale profiles ranked lower"
       }
+    }
+  },
+  "adminMetrics": {
+    "title": "Product metrics",
+    "intro": "Live counts from the canonical tables, split into REAL, TEST (synthetic test accounts, test domains) and INTERNAL (staff, admins). — means the source could not be read; it is never zero.",
+    "computedAt": "Computed {at}",
+    "unknown": "Unreadable sources (shown as —): {sources}",
+    "truncated": "Row cap reached, counts are a lower bound: {sources}",
+    "groups": {
+      "users": "People and activity",
+      "teams": "Brigades and invitations",
+      "b2b": "B2B market",
+      "work": "Work journal and Living CV",
+      "technical": "Technical"
+    },
+    "col": {
+      "metric": "Metric",
+      "total": "Total",
+      "source": "Source",
+      "rule": "Rule",
+      "window": "Window"
+    },
+    "signals": {
+      "title": "Alert rules",
+      "intro": "Evaluated hourly by the product-monitor workflow. A breach opens one GitHub issue per signal and closes it on recovery."
     }
   },
   "billingStatus": {
@@ -12025,6 +12077,8 @@
       "empty": "You have not sent any invitations yet.",
       "error": "Invitations could not be loaded right now.",
       "resend": "Send again",
+      "newLink": "New link",
+      "newLinkHint": "Creates a new invitation link. The previous link stops working.",
       "revoke": "Revoke",
       "copied": "Copied",
       "copyNewLink": "Copy new link",
@@ -12231,7 +12285,8 @@
         "withOrganization": "You accepted this invitation — you are now connected with {name}.",
         "plain": "You accepted this invitation — the connection is in place.",
         "continue": "Continue to my space →"
-      }
+      },
+      "reviewNotice": "If you accept, a manager of {organization} can read the work you record for them and sign it off. Until they do, it stays your own entry."
     },
     "teamEnquiriesTitle": "My enquiries to teams",
     "admin": {
@@ -13509,6 +13564,10 @@
         },
         "offerCapacity": {
           "label": "Record what you are offering"
+        },
+        "respondTeamOffer": {
+          "label": "Answer a brigade's or company's offer",
+          "description": "Agree in principle to, or decline, a brigade or company offered for your need."
         }
       },
       "education": {
@@ -14158,7 +14217,7 @@
       "projectCreateIntro": "A new project. Name and city — then you can assign people right here.",
       "projectCreatedNext": "Project created. Assign people right here — or come back to it later from “My projects”.",
       "clientOffersIntro": "Candidates agencies offered for your needs:",
-      "clientOffersNone": "No agency has offered candidates for your open needs yet.",
+      "clientOffersNone": "Nobody has offered candidates, a brigade or a company for your open needs yet.",
       "clientBridgeInvitesIntro": "Agencies inviting you to work together:",
       "clientBridgeShareIntro": "Needs you could share with a connected agency:",
       "clientBridgeNone": "No agency invitation is waiting and nothing is left to share. Manage partners on the partners page.",
@@ -14425,7 +14484,15 @@
       "visibilityUnavailable": "Could not check your visibility to employers. That does not mean it is off — open the settings.",
       "chipVisibility": "Visibility to employers",
       "voiceOpen": "Speak",
-      "voiceBareYes": "Spoken “yes” is not a confirmation. Press the button on the card to confirm, or say what you want to do."
+      "voiceBareYes": "Spoken “yes” is not a confirmation. Press the button on the card to confirm, or say what you want to do.",
+      "teamOffersIntro": "Brigades and companies offered for your needs:",
+      "teamOfferStatusAgreed": "agreed in principle",
+      "chipTeamOfferAgree": "Agree in principle",
+      "chipTeamOfferThread": "Write",
+      "chipOfferOurs": "Offer our brigade or company",
+      "teamOfferAgreed": "Agreed in principle — not a signed contract. Settle the terms in the conversation, then assign the team to a project.",
+      "teamOfferDeclined": "Declined. The offering company will see your answer.",
+      "teamOfferThreadFailed": "This conversation cannot be opened."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
@@ -18721,11 +18788,12 @@
     "sent": {
       "heading": "Your offers",
       "none": "No offers yet.",
-      "withdraw": "Withdraw"
+      "withdraw": "Withdraw",
+      "message": "Message the client"
     },
     "status": {
       "offered": "Waiting for an answer",
-      "accepted": "Accepted",
+      "accepted": "Agreed in principle",
       "declined": "Declined",
       "withdrawn": "Withdrawn",
       "assigned": "Assigned to a project"
@@ -18755,11 +18823,16 @@
       "project_required": "Choose a project.",
       "invalid_decision": "Unknown answer.",
       "needs_migration": "Not available right now.",
-      "error": "Could not complete this. Nothing was changed."
+      "error": "Could not complete this. Nothing was changed.",
+      "terms_empty": "Fill in at least one term.",
+      "terms_invalid": "Check the numbers and dates.",
+      "terms_limit_reached": "This offer already has 50 versions of terms.",
+      "terms_await_other_side": "These are your own terms — the other side answers them.",
+      "organization_offer_not_a_unit": "A company offer is not assigned as a team; agree the people in the conversation."
     },
     "received": {
       "title": "Teams offered for this need",
-      "subtitle": "A team offered itself as one unit against this need. You decide whether to accept it and where to assign it.",
+      "subtitle": "A team offered itself as one unit against this need. Ask questions and negotiate in the conversation; agreeing here is not a contract.",
       "privacy": "Only team-level facts are shown. No member is named here. After you accept and assign the team to a project, its members appear on that project, as for any team.",
       "members": "{count} members",
       "deployable": "Deployable size {min}-{max}",
@@ -18790,23 +18863,64 @@
       "missing": "Not stated: {list}",
       "noNeedStructure": "This need is not structured yet, so the team cannot be matched against it.",
       "note": "Note from the team",
-      "accept": "Accept team",
+      "accept": "Agree in principle",
       "decline": "Decline",
-      "noProjects": "You have no open project to assign the team to. Create a project first.",
-      "assignIntro": "Accepted. Assign the team to one of your projects.",
+      "noProjects": "You have no open project to assign the team to yet.",
+      "assignIntro": "Agreed in principle (not a contract). When the terms are settled, assign the team to one of your projects.",
       "projectLabel": "Project",
       "projectPlaceholder": "Choose a project",
       "assign": "Assign team to project",
       "assignedNote": "Assigned. The team's members now appear on that project.",
       "outcome": {
-        "accepted": "Team accepted.",
+        "accepted": "Agreed in principle — not a signed contract. Settle the terms in the conversation, then assign the team to a project.",
         "declined": "Offer declined.",
-        "already_accepted": "Already accepted.",
+        "already_accepted": "Already agreed in principle.",
         "already_declined": "Already declined.",
         "assigned": "Team assigned to the project.",
         "already_assigned": "This team was already assigned. Nothing changed."
-      }
-    }
+      },
+      "createProject": "Create a project",
+      "message": "Message the team",
+      "kindOrganization": "Company offer",
+      "orgNext": "Agreed in principle (not a contract). Settle the details and the people who will work in the conversation."
+    },
+    "orgHeading": "Offer our company to an open need",
+    "orgIntro": "Offer your company itself — your people, your service, or as a subcontractor — against one open need. No brigade to set up first.",
+    "orgNotYet": "Offering the whole company is not open yet. Until then, offer a brigade.",
+    "termsLegend": "Your terms (optional — you can change them later)",
+    "terms": {
+      "heading": "Terms and negotiation",
+      "loading": "Loading…",
+      "notYet": "Terms are not open here yet. Agree them in the conversation meanwhile.",
+      "unavailable": "Could not load the terms.",
+      "none": "No terms proposed yet.",
+      "byYou": "Proposed by you",
+      "byOther": "Proposed by the other side",
+      "status": {
+        "proposed": "Open",
+        "superseded": "Replaced",
+        "accepted": "Agreed",
+        "declined": "Declined"
+      },
+      "capacity": "People",
+      "rate": "Rate",
+      "ratePlaceholder": "e.g. 32 €/h, or fixed price",
+      "period": "Period",
+      "start": "Start",
+      "end": "End",
+      "scope": "Scope of work",
+      "conditions": "Conditions",
+      "agree": "Agree to version {version}",
+      "agreeNote": "Agreeing means agreed in principle — not a signed contract.",
+      "agreed": "Agreed in principle.",
+      "proposeFirst": "Propose terms",
+      "proposeNext": "Propose changed terms (a new version)",
+      "propose": "Send terms",
+      "proposed": "Version {version} sent."
+    },
+    "threadContext": "About the offer: {subject}",
+    "messageAbout": "Re: {subject}",
+    "threadContextShared": "Every offer between you is discussed in this one conversation; it was opened for the one above."
   },
   "teamAssignment": {
     "title": "Teams on this project",

@@ -144,6 +144,8 @@ export function OrgMembersPanel({
               key={m.engagementId}
               className="flex flex-col gap-2 rounded-md border border-ink-600 px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
               data-testid={`org-member-${m.engagementId}`}
+              data-role={m.role}
+              data-review={m.reviewEnabled ? "on" : "off"}
             >
               <span className="flex flex-wrap items-center gap-2 text-sm text-text-primary">
                 <span

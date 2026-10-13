@@ -8,6 +8,7 @@ import {
 } from "@/lib/admin/launch-readiness";
 import { getWorkerAdsReadiness } from "@/lib/ads/limited-worker-ads-readiness";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { ProductMetricsSection } from "@/components/admin/product-metrics-section";
 
 /**
  * Operator launch-readiness view (launch repair Scope E).
@@ -217,6 +218,8 @@ export default async function AdminLaunchReadinessPage({
       <p className="text-meta leading-relaxed text-text-muted">
         {t("gapNote")}
       </p>
+
+      <ProductMetricsSection />
     </div>
   );
 }

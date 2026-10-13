@@ -230,6 +230,13 @@ export async function JournalWorkIntelligence({
     }))
     .filter((d): d is typeof d & { name: string } => d.name !== null)
     .slice(0, MAX_DIRECTIONS);
+  const potential = (growth?.potential ?? [])
+    .map((p) => ({
+      slug: p.slug,
+      name: labels.skillName(p.slug),
+      fromNames: p.fromSlugs.map((f) => labels.skillName(f)).filter((n): n is string => n !== null),
+    }))
+    .filter((p): p is typeof p & { name: string } => p.name !== null);
 
   // Every list below is CAPPED for the page; the totals above them are not.
   // Where a cap cuts, the surface says so ("Rodoma 8 iš 12") — a silent cut
@@ -819,6 +826,7 @@ export async function JournalWorkIntelligence({
                     dayLabel={day}
                     kindsCap={capLine("kinds", kinds.length, kindsAll.length)}
                     directionsCap={capLine("directions", directions.length, directionsTotal)}
+                    potential={potential}
                   />
                 </div>
               </div>

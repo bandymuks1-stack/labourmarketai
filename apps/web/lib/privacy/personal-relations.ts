@@ -627,6 +627,14 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
     reason:
       "conversation threads you created — they hold the other party's words as well as yours, so they need a route that can separate the two",
   },
+  // 2026-10-12 (20261012100000): the assistant transcript is the person's own
+  // conversation with the product, kept per workspace. It has its own
+  // owner-only export (export_assistant_transcript) and whole-thread erasure.
+  {
+    table: "assistant_conversations",
+    reason:
+      "your conversation with the assistant — it has its own complete export (export_assistant_transcript) and can be erased thread by thread",
+  },
   {
     table: "conversation_messages",
     reason:
@@ -680,6 +688,9 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
  * them names a subject, the table must be exported or withheld instead.
  */
 export const ACTOR_ONLY_RELATIONS: readonly string[] = [
+  // Spent confirmation tokens: `spent_by` is who confirmed; a digest, no
+  // content, purged after a day (20261013120000).
+  "confirmation_spends",
   // Discovered-organization provenance: the person is only the recorder of a
   // fact or identifier about a COMPANY, never its subject.
   "organization_facts",
@@ -725,6 +736,10 @@ export const ACTOR_ONLY_RELATIONS: readonly string[] = [
   // who offered it and the demand owner's staff who answered. No member of the
   // team is on the row.
   "team_demand_offers",
+  // 20261011200000: versioned terms of one offer; the person columns are the
+  // manager who proposed a version and the one who decided it. No member of
+  // the team is on the row; the terms are the two organizations' business.
+  "team_demand_offer_terms",
   "training_programs",
   "training_skill_links",
   "workflow_definition_versions",

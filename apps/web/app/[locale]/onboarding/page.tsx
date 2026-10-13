@@ -18,6 +18,7 @@ import {
   invitationImpliesWorkerContext,
 } from "@/lib/invitations/model";
 import { readPublicInvitationPreview } from "@/lib/invitations/public-preview";
+import { showsStaffReviewNotice } from "@/lib/operations/auto-review-model";
 import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
 import { DOOR_WORDS_KEY, readLandingHandoff } from "@/lib/onboarding/landing-handoff";
 
@@ -63,14 +64,30 @@ export default async function OnboardingPage({
   // still shows the picker.
   const inviteToken = inviteTokenFromNextPath(safeNext);
   let impliedWorker = false;
+  // Finishing onboarding ALSO accepts the invitation (the wizard's finish), so
+  // a staff invitation of a named organization shows the review sentence right
+  // above that button (owner decision 1).
+  let invitationReviewNotice: string | null = null;
   if (inviteToken) {
-    const preview = await readPublicInvitationPreview(inviteToken);
+    const preview = await readPublicInvitationPreview(inviteToken, { emitOpened: false });
     impliedWorker =
       preview.kind === "ok" &&
       invitationImpliesWorkerContext({
         invitationType: preview.preview.invitationType,
         externalSourceSlug: preview.preview.externalSourceSlug,
       });
+    if (
+      preview.kind === "ok" &&
+      preview.preview.status === "pending" &&
+      showsStaffReviewNotice({
+        invitationType: preview.preview.invitationType,
+        relationshipSlug: preview.preview.relationshipSlug,
+        organizationName: preview.preview.organizationName,
+      })
+    ) {
+      const tInvite = await getTranslations({ locale, namespace: "network.invitePage" });
+      invitationReviewNotice = tInvite("reviewNotice", { organization: preview.preview.organizationName ?? "" });
+    }
   }
 
   const supabase = await createClient();
@@ -182,6 +199,7 @@ export default async function OnboardingPage({
           defaultIntents={impliedWorker ? ["work"] : handoff.intents}
           skipRoleStep={impliedWorker}
           invitationToken={inviteToken}
+          invitationReviewNotice={invitationReviewNotice}
           defaultProfessionSlug={handoff.professionSlug}
           doorIntents={handoff.door}
           doorWords={doorWords}

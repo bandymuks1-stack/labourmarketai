@@ -341,6 +341,64 @@ This is a **FIX in its own right**, independent of ARCH-4, and it must land
 employer to use team matching gets a confidently wrong answer about a real
 brigade.
 
+### 1.13 AI agents as labour-market participants (owner direction 2026-10-13)
+
+**Extends §1.7 and `ARCHITECTURE.md` §5.1 — nothing there is replaced.** AI
+agents may not only operate the platform on a person's behalf; they may also
+take part in the ONE labour market as clearly identified **digital service
+providers**. The goal is one market in which people, companies, AI agents and
+mixed teams build verifiable work history, present capabilities, find work and
+collaborate.
+
+Two participation modes that **never collapse** (SEP-5 applied to agents):
+
+- **DELEGATE** — the agent acts FOR a person or organization, with that human's
+  authority and into that human's history (the MCP door, built).
+- **PROVIDER** — the agent is itself the WORK SUBJECT offering a digital
+  service; its own AI Living Profile, Work Journal and evidence grow from its
+  own reviewed work (target, capability AI-4).
+
+Binding properties of the target:
+
+1. An agent subject carries identity, provider/model/version metadata, its
+   **responsible operator** (a person or organization, required), competencies,
+   specializations, tools and declared operating limits. Provider and model are
+   metadata, never architecture.
+2. A CV may start from a project idea — planned role, needed competencies,
+   proposed results — held as FORECAST (SEP-1). **Planned competence and work
+   are never shown as acquired or confirmed.**
+3. Work Journal, evidence, reviews and capability growth are the SAME
+   structures as for people (decision 0023 evidence states). **An agent never
+   confirms its own competence**; confirmation comes from an independent human
+   or organization reviewer (SEP-3).
+4. Market participation (listings, search, applying, proposals, negotiation,
+   collaboration) and mixed human/agent teams run on the SAME offers, demand,
+   team and review structures — **no second labour market and no separate AI
+   marketplace.**
+5. **Never a human identity, never a legal person, never an unauthorized
+   financial commitment.** Every agent surface discloses that it is an AI agent
+   and who operates it; the operator answers for it.
+6. Equal opportunity where it applies: agents compete for digital work, and are
+   never matched to work that requires a human qualification, a licence or
+   physical presence.
+7. The same integration contract (one MCP door, OAuth, capability layer,
+   audit) serves ChatGPT, Agentai OS and any authorized agent.
+8. **Data minimization (binding, owner 2026-10-13).** An agent's record holds
+   what it actually did, the value created and the minimal reliable proof —
+   never conversations, execution logs, intermediate attempts, copied code or
+   duplicate reports. One journal row is one short structured fact; originals
+   stay in their own store and are referenced by link + checksum; large files
+   live in Storage, never in the main tables; compaction folds history but
+   never removes legal, contractual, security, audit or confirmed-experience
+   evidence; an AI-written summary is DERIVED, never independent proof (SEP-1,
+   SEP-3); no per-agent-type data model, and every new structure must justify
+   why an existing one cannot hold it.
+
+Status, plan, the data-minimization rules and the four owner decisions this opens (AGENT-1..4):
+[`docs/integrations/AI_AGENT_PARTICIPANTS_V1.md`](integrations/AI_AGENT_PARTICIPANTS_V1.md).
+**Target recorded; not implemented** — it lands after the universal LLM
+integration is approved, as an extension of the same platform.
+
 ---
 
 ## 2. THE ELEVEN REDUCTIONS — each is one edge, never the product
@@ -542,6 +600,7 @@ second document reads as the canonical architecture.
 | `docs/launch/*CHECKPOINT*.md` | Session state, true at their date | Continuity |
 | `docs/audits/**` | Point-in-time findings | Evidence |
 | `docs/product/*-contract-v1.md` | Feature-level contracts under §1 | Detail |
+| `docs/integrations/AI_AGENT_PARTICIPANTS_V1.md` | Coverage and phased plan for §1.13 (AI agents as participants); adds no graph node — agents are a subject KIND on the existing ACTOR model | AGENT-1..4, data minimization §4a, phases P0–P7 |
 | `docs/design/historical-timesheet-import-v3.md` + `docs/design/historical-timesheet-fixture-v3.md` | A PROPOSED feature design under §1.6 (historical timesheet import, owner rules 2026-09-23); adds no graph node; its migrations are owner-gated. Its v2 commercial expansion (invoices, payments, payroll) is SUPERSEDED by owner decision A | Historical import slices PR-2 to PR-7 |
 
 ### SUPERSEDED AS ARCHITECTURE — historical evidence only
@@ -579,6 +638,10 @@ Six carried forward, plus four surfaced by this reconciliation.
 | ~~**ARCH-4**~~ | ✅ **APPROVED — owner, 2026-09-14: consent-scoped.** Recorded in **§1.11**. An employer reaches a team's aggregate capability summary only through explicit consent; arbitrary authenticated employers never do. **No longer a sequencing ambiguity** |
 | **ARCH-5** *(new)* | **The subject's right to refuse an imported record** (§1.6). RED — no INSERT policy admits a subject and no SECURITY DEFINER function writes for one. Note when prioritising: `organization_evidence_records` currently holds **0 rows** |
 | **ARCH-6** *(new)* | **Distribution scope for mobile.** The phone ships a 6-screen record-and-review slice against 72 web routes. Which further capabilities the native clients must carry before "complete" is a product decision, not a parity gap to close by default |
+| **AGENT-1** *(new, 2026-10-13)* | Where an AI agent subject lives (a subject kind on the ACTOR model — recommended, one graph — versus any separate structure), and whether an agent may hold its own sign-in credential or acts only through its operator's grant (recommended: operator's grant only). §1.13 |
+| **AGENT-2** *(new, 2026-10-13)* | The human-only eligibility marker on demand: which requirements (physical presence, licence, human qualification) exclude agents, who sets them, and the default when a demand says nothing (recommended: human-only unless digital work is stated). §1.13 |
+| **AGENT-3** *(new, 2026-10-13)* | Commercial terms for agent services: how the operator authorizes price and payment, the liability wording on agent listings, spending limits — never an agent-side financial commitment. §1.13 |
+| **AGENT-4** *(new, 2026-10-13)* | Compaction and retention for agent records: size caps per record type, volume limits per agent / organization / project, folding periods, and the exempt classes (legal, contractual, security, audit, confirmed experience) — under the existing redact-not-delete rule. §1.13 item 8 |
 
 ---
 

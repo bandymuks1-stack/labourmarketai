@@ -154,7 +154,8 @@ export async function listOutgoingRequests(): Promise<OutgoingListResult> {
     .order("created_at", { ascending: false });
   if (error) {
     if (isAbsent(error)) return { kind: "needs-migration" };
-    return { kind: "ok", rows: [] };
+    console.error("[service-requests] outgoing read failed:", error.code ?? "unknown");
+    return { kind: "error" };
   }
   const rows: OutgoingRequestRow[] = ((data ?? []) as Record<string, unknown>[]).map((r) => ({
     id: String(r.id),
@@ -182,7 +183,8 @@ export async function listIncomingRequests(): Promise<IncomingListResult> {
     .order("created_at", { ascending: false });
   if (error) {
     if (isAbsent(error)) return { kind: "needs-migration" };
-    return { kind: "ok", rows: [] };
+    console.error("[service-requests] incoming read failed:", error.code ?? "unknown");
+    return { kind: "error" };
   }
   const baseRows = ((data ?? []) as Record<string, unknown>[]).map((r) => ({
     id: String(r.id),
