@@ -343,7 +343,7 @@ export async function POST(req: Request) {
         ...(result.ok
           ? {}
           : {
-              code:
+              result_code:
                 typeof (result as { code?: unknown }).code === "string"
                   ? (result as { code: string }).code
                   : "error",
