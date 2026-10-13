@@ -66,6 +66,8 @@ export function normalizeActionResult(raw: unknown, okData?: Record<string, unkn
     case "not-owner":
     case "not-permitted":
       return { ok: false, code: "not_authorized", message: "The caller may not do this for that record. Nothing was changed." };
+    case "not-found":
+      return { ok: false, code: "not_found", message: "The caller has no such record (not theirs, or already gone). Nothing was changed." };
     case "no-company":
       return {
         ok: false,

@@ -213,6 +213,17 @@ export async function createServiceOffering(
   return { kind: "ok", id: data?.id as string | undefined };
 }
 
+/**
+ * A write filtered to the caller's own row that matched NO row changed
+ * nothing — someone else's offering, or one already gone. RLS keeps the row
+ * safe either way; this keeps the ANSWER honest, so neither the web nor an
+ * assistant is told "done" about a change nobody made (prod MCP walk
+ * 2026-10-13: a stranger's delete confirm answered ok while the row stayed).
+ */
+function touchedAny(rows: unknown): boolean {
+  return Array.isArray(rows) && rows.length > 0;
+}
+
 export async function updateServiceOffering(
   id: string,
   input: ServiceOfferingInput,
@@ -227,15 +238,17 @@ export async function updateServiceOffering(
   const v = validate(input);
   if (!v.ok) return { kind: "invalid", field: v.field };
 
-  const { error } = await asAny(supabase)
+  const { data: touched, error } = await asAny(supabase)
     .from("service_offerings")
     .update({ ...v.values, updated_at: new Date().toISOString() })
     .eq("id", id)
-    .eq("provider_id", user.id); // belt-and-suspenders alongside RLS.
+    .eq("provider_id", user.id) // belt-and-suspenders alongside RLS.
+    .select("id");
   if (error) {
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "error", message: error.message ?? "unknown" };
   }
+  if (!touchedAny(touched)) return { kind: "not-found" };
   revalidatePath("/[locale]/dashboard/services", "page");
   return { kind: "ok", id };
 }
@@ -268,15 +281,17 @@ export async function setServiceOfferingStatus(
     wasDraft = prior?.status === "draft";
   }
 
-  const { error } = await asAny(supabase)
+  const { data: touched, error } = await asAny(supabase)
     .from("service_offerings")
     .update({ status, updated_at: new Date().toISOString() })
     .eq("id", id)
-    .eq("provider_id", user.id);
+    .eq("provider_id", user.id)
+    .select("id");
   if (error) {
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "error", message: error.message ?? "unknown" };
   }
+  if (!touchedAny(touched)) return { kind: "not-found" };
   if (wasDraft) {
     emitServerFunnelEvent(FUNNEL_EVENTS.offerCreated, {
       source: "services",
@@ -297,15 +312,17 @@ export async function deleteServiceOffering(
   if (!user) return { kind: "not-authed" };
   if (!id) return { kind: "invalid", field: "id" };
 
-  const { error } = await asAny(supabase)
+  const { data: touched, error } = await asAny(supabase)
     .from("service_offerings")
     .delete()
     .eq("id", id)
-    .eq("provider_id", user.id);
+    .eq("provider_id", user.id)
+    .select("id");
   if (error) {
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "error", message: error.message ?? "unknown" };
   }
+  if (!touchedAny(touched)) return { kind: "not-found" };
   revalidatePath("/[locale]/dashboard/services", "page");
   return { kind: "ok", id };
 }
