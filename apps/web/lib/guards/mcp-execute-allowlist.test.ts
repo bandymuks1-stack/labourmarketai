@@ -9,6 +9,21 @@ vi.mock("next-intl/server", () => ({
 }));
 
 import { exposedCapabilities } from "@/lib/capabilities/registry";
+import { getConversationAction } from "@/lib/conversation/action-registry";
+
+/**
+ * THE BRIDGE RULE (2026-10-13). A conversation-action bridge tool
+ * (`lib/capabilities/conversation-action-bridge.ts`) may be single-step ONLY
+ * when the web chat itself runs that action without a confirmation card — its
+ * registry tier is `reversible_write`. The tier is read from the conversation
+ * registry, so an external client can never get a LIGHTER confirmation than
+ * the web chat; an important/strong action is always a prepare -> confirm
+ * pair. The MCP `instructions` name this rule.
+ */
+function bridgedReversible(id: string): boolean {
+  const action = getConversationAction(id);
+  return action?.id === id && action.confirmation === "reversible_write";
+}
 
 /**
  * THE WRITE CONTRACT, ENFORCED (lib/capabilities/contract.ts WRITE SEMANTICS):
@@ -35,6 +50,21 @@ const SINGLE_STEP_ALLOWLIST: readonly string[] = [
   "evidence.import.resolve_row",
   "evidence.import.resolve_label",
   "evidence.import.resolve_time_semantics",
+  // DOMAIN ACTIONS (lib/capabilities/domain-action-capabilities.ts, 2026-10-13):
+  // reversible changes to the caller's OWN data that the web also makes in one
+  // click. Anything that publishes, decides for someone else, sends, deletes
+  // or sets legal identity is a draft->confirm pair there, not on this list.
+  "organization.description.set",
+  "service_offering.create",
+  "service_offering.update",
+  "marketplace_listing.create",
+  "marketplace_listing.update",
+  "proposal.create",
+  "contract.create",
+  "booking.deadline_set",
+  "notification.mark_read",
+  "notification.mark_all_read",
+  "notification.preference_set",
 ];
 
 describe("every exposed single-step write is on an explicit allowlist", () => {
@@ -44,7 +74,7 @@ describe("every exposed single-step write is on an explicit allowlist", () => {
     .sort();
 
   it("no exposed `execute` capability is missing from the allowlist", () => {
-    const unlisted = executes.filter((id) => !SINGLE_STEP_ALLOWLIST.includes(id));
+    const unlisted = executes.filter((id) => !SINGLE_STEP_ALLOWLIST.includes(id) && !bridgedReversible(id));
     expect(
       unlisted,
       "a single-step write is exposed without being reviewed: make it a draft->confirm pair, or add it here AND to the MCP instructions",
@@ -54,6 +84,19 @@ describe("every exposed single-step write is on an explicit allowlist", () => {
   it("the allowlist holds no stale entry", () => {
     const stale = SINGLE_STEP_ALLOWLIST.filter((id) => !executes.includes(id));
     expect(stale, "remove entries that are no longer exposed `execute` capabilities").toEqual([]);
+  });
+
+  it("every bridged important/strong web action is a prepare -> confirm pair, never single-step", () => {
+    const byId = new Map(exposedCapabilities().map((c) => [c.id, c]));
+    for (const c of exposedCapabilities()) {
+      const action = c.conversationActionId ? getConversationAction(c.conversationActionId) : undefined;
+      if (!action || action.confirmation === "reversible_write") continue;
+      expect(c.kind, c.id).not.toBe("execute");
+      if (c.id === `${action.id}.prepare`) {
+        expect(c.kind).toBe("draft");
+        expect(byId.get(`${action.id}.confirm`)?.kind).toBe("confirm");
+      }
+    }
   });
 
   it("attest and withdraw are NOT single-step: each is a draft/confirm pair", () => {

@@ -1,5 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 
+// The one-time spend (lib/security/confirmation-spend) is proven on its own;
+// here every genuine token is spendable once.
+vi.mock("@/lib/security/confirmation-spend", () => ({
+  spendConfirmation: async () => "spent",
+  spendConfirmationForRequest: async () => "spent",
+}));
+
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/env", () => ({
   env: { CONVERSATION_TOKEN_SECRET: "unit-test-secret-with-enough-length", SUPABASE_SERVICE_ROLE_KEY: undefined },

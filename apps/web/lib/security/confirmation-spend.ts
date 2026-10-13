@@ -52,3 +52,11 @@ export async function spendConfirmation(
   console.error("[confirmation] spend failed:", error.code ?? "unknown");
   return "error";
 }
+
+/** Spend with the request's own client (`createClient()` — inside the MCP
+ *  door's scope that is the verified bearer caller, on the web the cookie
+ *  session), so the spend is RLS-bound to the person confirming. */
+export async function spendConfirmationForRequest(token: string, actionId: string): Promise<SpendOutcome> {
+  const { createClient } = await import("@/lib/supabase/server");
+  return spendConfirmation(await createClient(), token, actionId);
+}

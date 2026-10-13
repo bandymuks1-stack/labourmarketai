@@ -45,6 +45,20 @@ export type ReceiptState =
 
 const UNDEFINED_FN = new Set(["42883", "PGRST202"]);
 
+/**
+ * The receipt RPC accepts `^[a-z_]+(\.[a-z_]+)+$` (≤ 80). Conversation-action
+ * bridge ids keep the web registry's hyphens (`company.create-task`), which the
+ * RPC refuses — so those writes would run with NO receipt. The receipt names
+ * the capability with hyphens folded to underscores: still unique (guarded),
+ * still readable, and no migration is needed.
+ */
+export function receiptCapabilityId(capabilityId: string): string {
+  return capabilityId.replace(/-/g, "_");
+}
+
+/** The RPC's own acceptance rule, mirrored for the guard test. */
+export const RECEIPT_CAPABILITY_RX = /^[a-z_]+(\.[a-z_]+)+$/;
+
 /** Keys whose value names the object a write produced or touched, in the
  *  order a receipt prefers them. */
 const OBJECT_KEYS = ["entryId", "projectId", "requestId", "assignmentId", "sessionId", "id"] as const;
@@ -92,7 +106,7 @@ export async function recordExternalReceipt(
         : null;
     const outcome = result.ok ? "ok" : ((result as { code?: string }).code ?? "error");
     const { data: id, error } = await sb.rpc("record_external_action_receipt_v1", {
-      p_capability: capability.id,
+      p_capability: receiptCapabilityId(capability.id),
       p_organization_id: organizationId,
       p_entity_id: pickObjectId(args, data),
       p_confirmation_ref: confirmationRef(args.confirmationToken),

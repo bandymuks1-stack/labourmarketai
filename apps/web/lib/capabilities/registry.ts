@@ -44,6 +44,9 @@ import { MESSAGING_CAPABILITIES } from "./messaging-capabilities";
 import { COMPANY_INGEST_CAPABILITIES } from "./company-ingest-capabilities";
 import { EVIDENCE_IMPORT_CAPABILITIES } from "./evidence-import-capabilities";
 import { PEOPLE_INGEST_CAPABILITIES } from "./people-ingest-capabilities";
+import { CONVERSATION_ACTION_BRIDGE_CAPABILITIES } from "./conversation-action-bridge";
+import { WORKSPACE_READ_CAPABILITIES } from "./workspace-read-capabilities";
+import { DOMAIN_ACTION_CAPABILITIES } from "./domain-action-capabilities";
 import {
   workerExpressInterestSchema,
   workerLogWorkSchema,
@@ -735,7 +738,7 @@ const journalConfirm: CapabilityDescriptor = {
     const { confirmationToken, ...draft } = parsed;
     const state = await journalChainFingerprint(caller);
     if (!state.ok) return state.result;
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "journal.confirm",
       token: confirmationToken,
       // Same null-vs-absent normalization the draft hashed — see
@@ -970,7 +973,7 @@ const interestExpressConfirm: CapabilityDescriptor = {
     const parsed = interestConfirmInput.parse(input);
     const { confirmationToken, ...draft } = parsed;
     const fingerprint = await interestStateFingerprint(caller, draft.requestId);
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "interest.express_confirm",
       token: confirmationToken,
       input: normalizedInterestForHash(draft),
@@ -1394,7 +1397,7 @@ const workCardSaveConfirm: CapabilityDescriptor = {
     const parsed = workCardConfirmInput.parse(input);
     const { confirmationToken, ...draft } = parsed;
     const fingerprint = await workCardStateFingerprint(caller);
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "work_card.save_confirm",
       token: confirmationToken,
       input: normalizedWorkCardForHash(draft),
@@ -1560,7 +1563,7 @@ const demandCreateConfirm: CapabilityDescriptor = {
     const parsed = demandConfirmInput.parse(input);
     const { confirmationToken, ...draft } = parsed;
     const fingerprint = await demandStateFingerprint(caller);
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "demand.create_confirm",
       token: confirmationToken,
       input: normalizedDemandForHash(draft),
@@ -1780,6 +1783,20 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   // learners alike. One flow (preview → answer → commit), one domain service
   // shared with the web import panel.
   ...PEOPLE_INGEST_CAPABILITIES,
+  // The web chat's executable actions that had no capability yet, through the
+  // ONE conversation dispatcher (same schema, role gate, tier, token and
+  // executor as the web chat). Runs as the bearer caller via the bearer
+  // caller scope. See conversation-action-bridge.ts.
+  ...CONVERSATION_ACTION_BRIDGE_CAPABILITIES,
+  // What the web chat already ANSWERS (calendar, conflicts, capacity, tasks,
+  // stages, readiness, agency/client bridges, person reads), over the same
+  // loaders, through the same bearer caller scope. See
+  // workspace-read-capabilities.ts.
+  ...WORKSPACE_READ_CAPABILITIES,
+  // The web's typed canonical actions no earlier capability covered:
+  // organization legal data, marketplace, commercial, bookings, notifications,
+  // leave, hours review and reports. See domain-action-capabilities.ts.
+  ...DOMAIN_ACTION_CAPABILITIES,
 ];
 
 export function listCapabilities(): readonly CapabilityDescriptor[] {

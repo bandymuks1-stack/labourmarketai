@@ -39,21 +39,39 @@ export function countPeopleWithConflicts(
   return flagged.size;
 }
 
-export async function countRosterConflicts(): Promise<number | null> {
+/**
+ * The conflicts THEMSELVES — who, and which commitments collide — over the
+ * same reads and the same two rules as the count below (the count is a
+ * projection of this, not a sibling). An authorized assistant asking "check
+ * the calendar conflicts" gets the people the home counts, with the colliding
+ * items named, never a second rule set.
+ *
+ * `unknown` when any source failed: a failed read is never "no conflicts".
+ */
+export type RosterConflictsRead =
+  | {
+      readonly status: "ok";
+      readonly view: Extract<RosterCommitmentsView, { status: "ok" }>;
+      readonly timeline: RosterTimeline;
+    }
+  | { readonly status: "empty" }
+  | { readonly status: "unknown" };
+
+export async function readRosterConflicts(days: number = CONFLICT_WINDOW_DAYS): Promise<RosterConflictsRead> {
   try {
     const workforce = await getWorkforce();
-    if (workforce.status !== "ok") return null;
+    if (workforce.status !== "ok") return { status: "unknown" };
     // An unreadable roster source is not "nobody, so no conflicts".
     const { project, assignments, workers } = workforce.sources;
-    if ([project, assignments, workers].some((s) => s.status !== "ok")) return null;
+    if ([project, assignments, workers].some((s) => s.status !== "ok")) return { status: "unknown" };
     const ids = workforce.workers.map((w) => w.workerId);
-    if (ids.length === 0) return 0;
+    if (ids.length === 0) return { status: "empty" };
     const [view, availability, today] = await Promise.all([
       getRosterCommitments(ids),
       getEmployerWorkerAvailability(),
       viewerWorkToday(),
     ]);
-    if (view.status !== "ok" || availability.status !== "ok") return null;
+    if (view.status !== "ok" || availability.status !== "ok") return { status: "unknown" };
     const timeline = buildRosterTimeline({
       rows: view.rows,
       absences: availability.unavailability.map((u) => ({
@@ -64,11 +82,18 @@ export async function countRosterConflicts(): Promise<number | null> {
         endDate: u.item.endDate,
       })),
       from: mondayOf(today.todayIso),
-      days: CONFLICT_WINDOW_DAYS,
+      days,
       today: today.todayIso,
     });
-    return countPeopleWithConflicts(view, timeline);
+    return { status: "ok", view, timeline };
   } catch {
-    return null;
+    return { status: "unknown" };
   }
+}
+
+export async function countRosterConflicts(): Promise<number | null> {
+  const read = await readRosterConflicts();
+  if (read.status === "empty") return 0;
+  if (read.status !== "ok") return null;
+  return countPeopleWithConflicts(read.view, read.timeline);
 }

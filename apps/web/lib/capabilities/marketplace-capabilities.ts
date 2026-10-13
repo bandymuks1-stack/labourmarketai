@@ -380,7 +380,7 @@ function makeShortlistPair(op: ShortlistOp): [CapabilityDescriptor, CapabilityDe
       const pre = await precheck(caller, rest);
       if (!pre.ok) return pre.result;
       const n = normalized(rest);
-      const verdict = verifyCapabilityConfirmation({
+      const verdict = await verifyCapabilityConfirmation({
         actionId: confirmId,
         token: confirmationToken,
         input: n,

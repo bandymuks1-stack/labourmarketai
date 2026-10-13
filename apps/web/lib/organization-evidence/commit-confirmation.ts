@@ -62,12 +62,12 @@ export function mintCommitToken(opts: {
   });
 }
 
-export function verifyCommitToken(opts: {
+export async function verifyCommitToken(opts: {
   readonly token: string;
   readonly sessionId: string;
   readonly userId: string;
   readonly readyRows: readonly { readonly id: string }[];
-}): { readonly ok: true } | { readonly ok: false; readonly reason: string } {
+}): Promise<{ readonly ok: true } | { readonly ok: false; readonly reason: string }> {
   return verifyCapabilityConfirmation({
     actionId: COMMIT_ACTION_ID,
     token: opts.token,

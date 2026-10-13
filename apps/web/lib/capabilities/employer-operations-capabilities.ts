@@ -303,7 +303,7 @@ function makeDemandLifecyclePair(op: "close" | "reopen"): [CapabilityDescriptor,
       if (!employer.ok) return demandContextRefusal(employer.reason);
       const need = await readNeedForLifecycle(caller, employer.organizationId, requestId);
       if (!need) return { ok: false, code: "not_found", message: "No such need in the organization the caller is acting for." };
-      const verdict = verifyCapabilityConfirmation({
+      const verdict = await verifyCapabilityConfirmation({
         actionId: confirmId,
         token: confirmationToken,
         input: { requestId },
@@ -587,7 +587,7 @@ const projectCreateConfirm: CapabilityDescriptor = {
     const employer = await employerOrRefusal(caller);
     if (!employer.ok) return demandContextRefusal(employer.reason);
     if (!hasOrganizationCapability(employer.role, "manage-projects")) return manageProjectsRefusal();
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "project.create_confirm",
       token: confirmationToken,
       input: normalizedProject(draft),
@@ -746,7 +746,7 @@ const projectStatusConfirm: CapabilityDescriptor = {
     if (!hasOrganizationCapability(employer.role, "manage-projects")) return manageProjectsRefusal();
     const read = await readProjectForStatus(caller, employer, parsed.projectId);
     if (!read.ok) return read.result;
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "project.status_set_confirm",
       token: confirmationToken,
       input: parsed,
@@ -990,7 +990,7 @@ function makeAssignmentPair(op: "assign" | "end"): [CapabilityDescriptor, Capabi
       const resolved = await resolveAssignmentSubject(caller, employer, parsed);
       if (!resolved.ok) return resolved.result;
       const s = resolved.subject;
-      const verdict = verifyCapabilityConfirmation({
+      const verdict = await verifyCapabilityConfirmation({
         actionId: confirmId,
         token: confirmationToken,
         input: parsed,
@@ -1145,7 +1145,7 @@ const assignmentKeepConfirm: CapabilityDescriptor = {
     if (!current) {
       return { ok: false, code: "unavailable", message: "The calendar could not be checked. NOTHING was saved; the decision is not made." };
     }
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "assignment.keep_confirm",
       token: confirmationToken,
       input: parsed,

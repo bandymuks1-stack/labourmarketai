@@ -764,7 +764,7 @@ const importCommit: CapabilityDescriptor = {
     if (preview.kind !== "ok") return fail(preview);
     const committable = committableRows(preview.preview);
 
-    const verdict = verifyCommitToken({
+    const verdict = await verifyCommitToken({
       token: parsed.confirmationToken,
       sessionId: parsed.sessionId,
       userId: caller.userId,
@@ -943,7 +943,7 @@ const recordAttestConfirm: CapabilityDescriptor = {
     const parsed = attestConfirmInput.parse(input);
     const pre = await previewAttestation(caller, { recordId: parsed.recordId, actorRole: parsed.actorRole ?? null });
     if (pre.kind !== "ok") return fail(pre);
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: ATTEST_CONFIRM_ID,
       token: parsed.confirmationToken,
       input: attestTokenInput(parsed),
@@ -1060,7 +1060,7 @@ const importWithdrawConfirm: CapabilityDescriptor = {
     const parsed = withdrawConfirmInput.parse(input);
     const pre = await previewWithdrawal(caller, parsed.sessionId);
     if (pre.kind !== "ok") return fail(pre);
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: WITHDRAW_CONFIRM_ID,
       token: parsed.confirmationToken,
       input: withdrawTokenInput(parsed),
@@ -1184,7 +1184,7 @@ const recordCorrectConfirm: CapabilityDescriptor = {
     const parsed = correctionInputSchema.parse(rest);
     const pre = await correctRecord(caller, parsed, { dryRun: true });
     if (pre.kind !== "ok") return fail(pre);
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: CORRECT_CONFIRM_ID,
       token: confirmationToken,
       input: correctTokenInput(parsed),
@@ -1303,7 +1303,7 @@ const sessionDatesCorrectConfirm: CapabilityDescriptor = {
     const parsed = sessionDatesInput.parse(rest);
     const pre = await correctSessionDateProvenance(caller, { ...parsed, apply: false });
     if (pre.kind !== "ok") return fail(pre);
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: SESSION_DATES_CONFIRM_ID,
       token: confirmationToken,
       input: sessionDatesTokenInput(parsed),
