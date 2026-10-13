@@ -4884,7 +4884,8 @@
         "event_journal_review_decided_changes_requested": "Paprašyta pakeisti jūsų darbo žurnalo įrašą",
         "event_invitation_accepted": "Kažkas priėmė jūsų kvietimą",
         "event_weekly_digest_profile_completion": "Norint pamatyti tau tinkamus darbus, patvirtink, kokį darbą dirbi",
-        "event_weekly_digest_journal": "Paruošta tavo savaitės darbo žurnalo apžvalga"
+        "event_weekly_digest_journal": "Paruošta tavo savaitės darbo žurnalo apžvalga",
+        "event_history_link_offered": "Organizacija pasiūlė susieti jūsų užfiksuotą darbo istoriją su jūsų paskyra"
       },
       "label": "Mano pranešimai",
       "emptyTitle": "Šiuo metu nieko nereikia daryti.",

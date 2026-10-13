@@ -401,7 +401,8 @@
         "event_journal_review_decided_rejected": "Sinu töölogi kanne lükati tagasi",
         "event_journal_review_decided_changes_requested": "Sinu töölogi kande kohta on küsitud muudatusi",
         "event_weekly_digest_profile_completion": "Sobivate tööde näitamiseks kinnita, millist tööd sa teed",
-        "event_weekly_digest_journal": "Sinu nädala tööpäeviku kokkuvõte on valmis"
+        "event_weekly_digest_journal": "Sinu nädala tööpäeviku kokkuvõte on valmis",
+        "event_history_link_offered": "Organisatsioon pakub siduda teie registreeritud tööajaloo teie kontoga"
       },
       "email": {
         "open": "Ava LabourMarket.ai-s:",

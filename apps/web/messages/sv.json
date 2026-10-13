@@ -401,7 +401,8 @@
         "event_journal_review_decided_rejected": "Din journalpost har avvisats",
         "event_journal_review_decided_changes_requested": "Ändringar har begärts i din journalpost",
         "event_weekly_digest_profile_completion": "För att visa dig passande jobb, bekräfta vilket arbete du utför",
-        "event_weekly_digest_journal": "Veckans sammanfattning av din arbetsjournal är klar"
+        "event_weekly_digest_journal": "Veckans sammanfattning av din arbetsjournal är klar",
+        "event_history_link_offered": "En organisation erbjuder att koppla din registrerade arbetshistorik till ditt konto"
       },
       "email": {
         "open": "Öppna i LabourMarket.ai:",

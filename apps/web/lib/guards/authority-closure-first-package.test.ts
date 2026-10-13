@@ -68,6 +68,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261013120000_",
       // 2026-10-13 monitor integrity rule v2 (RED by SECURITY DEFINER replace, needs-human-gate).
       "20261013140000_",
+      // 2026-10-13 notification type for a roster history-link offer (strict CHECK superset).
+      "20261013200000_",
       // 2026-10-08 owner-approved work-plan scope extension (roster + engagement).
       "20261007140000_",
       // 2026-10-08 E6 (brigade offer against a demand): owner-approved RED, separate hand-off RPC.

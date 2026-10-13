@@ -4884,7 +4884,8 @@
         "event_journal_review_decided_changes_requested": "Poproszono o zmiany w Twoim wpisie w dzienniku",
         "event_invitation_accepted": "Ktoś przyjął Twoje zaproszenie",
         "event_weekly_digest_profile_completion": "Aby pokazać pasujące oferty, potwierdź, jaką pracę wykonujesz",
-        "event_weekly_digest_journal": "Podsumowanie Twojego dziennika pracy z tego tygodnia jest gotowe"
+        "event_weekly_digest_journal": "Podsumowanie Twojego dziennika pracy z tego tygodnia jest gotowe",
+        "event_history_link_offered": "Organizacja zaproponowała powiązanie zarejestrowanej historii Twojej pracy z Twoim kontem"
       },
       "label": "Moje powiadomienia",
       "emptyTitle": "Nic nie wymaga teraz Twojej uwagi.",

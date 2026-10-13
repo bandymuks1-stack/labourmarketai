@@ -1854,6 +1854,50 @@ export async function emitJournalReviewDecisionNotification(
   }
 }
 
+/**
+ * HISTORY LINK OFFERED (v11) - an organization offered to connect one of its
+ * roster records (`organization_people`, the person its recorded work
+ * history is about) to the recipient's account.
+ *
+ * RECIPIENT: the profile the offer names - the only person who may accept or
+ * refuse it. Never the manager who made the offer (offering a link to your
+ * own account needs no telling). The event carries no name, no hours, no
+ * organization: only that a decision waits on the profile page, where the
+ * offer itself is read under the recipient's own RLS.
+ */
+export interface HistoryLinkOfferFacts {
+  /** `organization_people.id` - the offered roster record. */
+  readonly personId: string;
+  /** The account the offer names. */
+  readonly profileId: string;
+  /** auth.uid() of the manager who made the offer. */
+  readonly actorProfileId: string;
+}
+
+export async function emitHistoryLinkOfferedNotification(
+  facts: HistoryLinkOfferFacts,
+): Promise<NotificationEmitResult> {
+  try {
+    if (facts.profileId === facts.actorProfileId) {
+      return { delivered: false, reason: "self_action" };
+    }
+    const admin = createAdminClient();
+    const d = await deliverDetailed(admin, {
+      recipientProfileId: facts.profileId,
+      eventType: "history_link_offered",
+      entityType: "organization_person",
+      entityId: facts.personId,
+    });
+    return resultFromOutcome(d.outcome, d.email?.kind ?? null);
+  } catch (err) {
+    return undeliveredResult(
+      "history_link_offered",
+      "threw",
+      err instanceof Error ? err.message.slice(0, 200) : undefined,
+    );
+  }
+}
+
 /* ═════════════════════════════════════════════════════════════════════════
  * JOB ALERTS (stream N, 2026-10-01) — a REAL active job that fits what the
  * worker said they want reaches them in the bell, once.

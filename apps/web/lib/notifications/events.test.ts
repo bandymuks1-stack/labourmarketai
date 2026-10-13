@@ -292,6 +292,8 @@ describe("NOTIFICATION_EVENT_TYPES (runtime list)", () => {
     // v10: a new message in a thread, and a journal review decision.
     expect(NOTIFICATION_EVENT_TYPES).toContain("message_received");
     expect(NOTIFICATION_EVENT_TYPES).toContain("journal_review_decided");
-    expect(NOTIFICATION_EVENT_TYPES.length).toBe(25);
+    // v11: an organization's offer to link its recorded history to the recipient.
+    expect(NOTIFICATION_EVENT_TYPES).toContain("history_link_offered");
+    expect(NOTIFICATION_EVENT_TYPES.length).toBe(26);
   });
 });

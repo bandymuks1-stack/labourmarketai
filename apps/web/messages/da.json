@@ -401,7 +401,8 @@
         "event_journal_review_decided_rejected": "Din journalpost er afvist",
         "event_journal_review_decided_changes_requested": "Der er anmodet om ændringer i din journalpost",
         "event_weekly_digest_profile_completion": "For at vise dig passende job, bekræft hvilket arbejde du udfører",
-        "event_weekly_digest_journal": "Ugens oversigt over din arbejdsjournal er klar"
+        "event_weekly_digest_journal": "Ugens oversigt over din arbejdsjournal er klar",
+        "event_history_link_offered": "En organisation tilbyder at forbinde din registrerede arbejdshistorik med din konto"
       },
       "email": {
         "open": "Åbn i LabourMarket.ai:",

@@ -401,7 +401,8 @@
         "event_journal_review_decided_rejected": "Tavs darba žurnāla ieraksts ir noraidīts",
         "event_journal_review_decided_changes_requested": "Tavā darba žurnāla ierakstā pieprasītas izmaiņas",
         "event_weekly_digest_profile_completion": "Lai parādītu tev piemērotus darbus, apstiprini, kādu darbu tu dari",
-        "event_weekly_digest_journal": "Sagatavots tavas nedēļas darba žurnāla pārskats"
+        "event_weekly_digest_journal": "Sagatavots tavas nedēļas darba žurnāla pārskats",
+        "event_history_link_offered": "Organizācija piedāvā sasaistīt jūsu reģistrēto darba vēsturi ar jūsu kontu"
       },
       "email": {
         "open": "Atvērt LabourMarket.ai:",

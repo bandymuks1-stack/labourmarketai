@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 import { offerRosterLink, respondToRosterLink } from "@/lib/organization-evidence/import-core";
+import { emitHistoryLinkOfferedNotification } from "@/lib/notifications/event-emitters";
 import { createAndSendInvitations } from "@/lib/invitations/actions";
 import { isRelationshipInviteSlug } from "@/lib/invitations/model";
 
@@ -123,6 +124,11 @@ export async function offerRosterLinkAction(
             : "error",
     };
   }
+  // The offer waits on ONE person, who otherwise only meets it by opening
+  // their own profile page (prod 2026-10-13: an offer holding 2,736 h of
+  // that person's documented work sat unanswered for 22 days). Tell them,
+  // after the write succeeded; the emitter never throws and never decides.
+  await emitHistoryLinkOfferedNotification({ personId, profileId, actorProfileId: user.id });
   revalidatePath("/[locale]/dashboard/company/people", "page");
   revalidatePath("/[locale]/dashboard/company/history", "page");
   return { ok: true };
