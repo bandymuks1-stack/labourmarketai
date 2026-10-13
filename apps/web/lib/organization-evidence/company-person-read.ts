@@ -8,6 +8,7 @@ import type { DomainCaller } from "@/lib/domain/caller";
 import { resolveEvidenceOrganization } from "./evidence-org-context";
 import { listAllEvidenceRecords } from "./evidence-pagination";
 import { untypedClient } from "./evidence-store";
+import { readProjectCanonicalMap } from "@/lib/projects/projects";
 import { readHistoryLookups } from "./history-context-read";
 import { readCompetencySignalsForPerson, type PersonCompetencySignalsRead } from "./competency-signals-read";
 import type { EvidenceRecordView } from "./import-core";
@@ -157,6 +158,15 @@ export async function readCompanyPerson(input: {
     for (const o of (res.data ?? []) as { id: string; project_id: string | null }[]) {
       projectOfObject.set(o.id, o.project_id);
     }
+  }
+  // A place on a fragment marked into a canonical project links to the
+  // canonical one — the project the organization now keeps.
+  const { canonicalOf } = await readProjectCanonicalMap(
+    supabase,
+    [...projectOfObject.values()].filter((v): v is string => !!v),
+  );
+  for (const [objectId, projectId] of projectOfObject) {
+    if (projectId && canonicalOf.has(projectId)) projectOfObject.set(objectId, canonicalOf.get(projectId)!);
   }
   const objects: PlaceObjectFacts[] = [...lookups.workObjects.entries()].map(([id, name]) => ({
     id,

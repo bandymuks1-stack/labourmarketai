@@ -15,6 +15,7 @@ import {
   type ProjectManagerLabels,
 } from "@/components/app/project-assignment-manager";
 import { ProjectMap } from "@/components/app/arena/project-map";
+import { HistoricalConsolidationPanel } from "@/components/app/historical-consolidation-panel";
 import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 import { listWorkerProjects } from "@/lib/projects/worker-project-access";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
@@ -541,6 +542,11 @@ export default async function ProjectsPage({
             </Link>
           ) : null}
         </nav>
+      ) : null}
+
+      {/* Imported rows that are one object — the owner decides, group by group. */}
+      {showArchived && employerCtx?.kind === "ok" && projectOrganizationAuthority({ role: employerCtx.role }).canGovern ? (
+        <HistoricalConsolidationPanel organizationId={employerCtx.organizationId} />
       ) : null}
 
       {/* MAP — projects → teams → people; one click into each ARENA. */}

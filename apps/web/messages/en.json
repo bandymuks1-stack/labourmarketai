@@ -6270,7 +6270,23 @@
       "prev": "Newer",
       "next": "Older"
     },
-    "moreToolsHint": "Sites and locations, photo gallery"
+    "moreToolsHint": "Sites and locations, photo gallery",
+    "consolidation": {
+      "title": "Imported rows that are one object",
+      "summary": "The import created {rows} project rows; {fragments} of them repeat an object another row already names. Merging the proposed groups leaves {after} projects.",
+      "safety": "Merging keeps every row, record, hour and person — the merged rows point to the kept project and their records count there. Each merge is recorded in the audit log.",
+      "counts": "{rows} rows · {records} records · {hours} h",
+      "caution": {
+        "two-numbers": "One row names two house numbers — merge only if it is the same object.",
+        "periods-apart": "The work periods are far apart — this may be a separate order. Merge only if it is the same object.",
+        "other": "Needs your decision."
+      },
+      "decide": "These rows are the same object",
+      "apply": "{rows, plural, one {Merge # row} other {Merge # rows}}",
+      "pending": "Merging…",
+      "done": "Merged. The rows and their records are kept; the project list now shows the kept project.",
+      "failed": "Not merged. Nothing was changed for the rows that did not go through — reload and try again."
+    }
   },
   "projectOps": {
     "centre": {
@@ -6525,6 +6541,11 @@
           "days": "{count, plural, one {# recorded day} other {# recorded days}}",
           "periodHours": "+ {hours} h in period summaries"
         }
+      },
+      "merged": {
+        "into": "This row was merged into",
+        "canonical": "the kept project",
+        "includes": "{count, plural, one {Includes # merged project row — its records are shown here.} other {Includes # merged project rows — their records are shown here.}}"
       }
     },
     "workerView": {

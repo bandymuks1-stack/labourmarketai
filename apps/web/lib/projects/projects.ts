@@ -85,6 +85,40 @@ export async function readDuplicateProjectIds(
 }
 
 /**
+ * The DUPLICATE ⇄ CANONICAL map for a set of projects (marker 20260930120000):
+ *   canonicalOf  duplicate id → the canonical project it was marked into
+ *   fragmentsOf  canonical id → the duplicates marked into it
+ * A consolidation keeps every duplicate row and every record on it; readers
+ * that show a project's history use this so the canonical project shows its
+ * fragments' work too, and a fragment points to its canonical. Unreadable
+ * marker (not applied / failed read) → empty maps: nothing is re-routed.
+ */
+export async function readProjectCanonicalMap(
+  supabase: SupabaseClient,
+  ids: readonly string[],
+): Promise<{ canonicalOf: Map<string, string>; fragmentsOf: Map<string, string[]> }> {
+  const canonicalOf = new Map<string, string>();
+  const fragmentsOf = new Map<string, string[]>();
+  if (ids.length === 0) return { canonicalOf, fragmentsOf };
+  const list = [...new Set(ids)];
+  const [asDuplicate, asCanonical] = await Promise.all([
+    asAny(supabase).from("projects").select("id, canonical_project_id").in("id", list).eq("record_state", "duplicate"),
+    asAny(supabase).from("projects").select("id, canonical_project_id").in("canonical_project_id", list).eq("record_state", "duplicate"),
+  ]);
+  for (const res of [asDuplicate, asCanonical]) {
+    if (res.error) continue;
+    for (const r of (res.data ?? []) as { id: string; canonical_project_id: string | null }[]) {
+      if (!r.canonical_project_id) continue;
+      canonicalOf.set(r.id, r.canonical_project_id);
+      const arr = fragmentsOf.get(r.canonical_project_id) ?? [];
+      if (!arr.includes(r.id)) arr.push(r.id);
+      fragmentsOf.set(r.canonical_project_id, arr);
+    }
+  }
+  return { canonicalOf, fragmentsOf };
+}
+
+/**
  * Per-bucket ceiling of the manager project list. ACTIVE (draft/live/paused,
  * or an unreadable status) and FINISHED (completed — including historical
  * projects promoted from imported sites) are read by SEPARATE queries, so a

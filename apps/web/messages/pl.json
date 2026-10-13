@@ -6270,7 +6270,23 @@
       "prev": "Nowsze",
       "next": "Starsze"
     },
-    "moreToolsHint": "Obiekty i place budowy, galeria zdjęć"
+    "moreToolsHint": "Obiekty i place budowy, galeria zdjęć",
+    "consolidation": {
+      "title": "Zaimportowane wiersze, które są jednym obiektem",
+      "summary": "Import utworzył {rows} wierszy projektów; {fragments} z nich powtarza obiekt, który podaje już inny wiersz. Po scaleniu proponowanych grup zostanie {after} projektów.",
+      "safety": "Scalenie zachowuje każdy wiersz, wpis, godzinę i osobę — scalone wiersze wskazują zachowany projekt, a ich wpisy liczą się tam. Każde scalenie trafia do dziennika audytu.",
+      "counts": "{rows} wierszy · {records} wpisów · {hours} godz.",
+      "caution": {
+        "two-numbers": "Jeden wiersz podaje dwa numery domu — scalaj tylko, jeśli to ten sam obiekt.",
+        "periods-apart": "Okresy prac są od siebie odległe — to może być osobne zlecenie. Scalaj tylko, jeśli to ten sam obiekt.",
+        "other": "Potrzebna Twoja decyzja."
+      },
+      "decide": "Te wiersze to ten sam obiekt",
+      "apply": "{rows, plural, one {Scal # wiersz} few {Scal # wiersze} many {Scal # wierszy} other {Scal # wiersza}}",
+      "pending": "Scalanie…",
+      "done": "Scalono. Wiersze i ich wpisy zostają; lista projektów pokazuje teraz zachowany projekt.",
+      "failed": "Nie scalono. Dla nieprzetworzonych wierszy nic nie zmieniono — odśwież i spróbuj ponownie."
+    }
   },
   "projectOps": {
     "centre": {
@@ -6525,6 +6541,11 @@
           "days": "{count, plural, one {# zarejestrowany dzień} few {# zarejestrowane dni} many {# zarejestrowanych dni} other {# zarejestrowanego dnia}}",
           "periodHours": "+ {hours} godz. w zestawieniach okresowych"
         }
+      },
+      "merged": {
+        "into": "Ten wiersz scalono z",
+        "canonical": "zachowanym projektem",
+        "includes": "{count, plural, one {Obejmuje # scalony wiersz projektu — jego wpisy są tutaj.} few {Obejmuje # scalone wiersze projektu — ich wpisy są tutaj.} many {Obejmuje # scalonych wierszy projektu — ich wpisy są tutaj.} other {Obejmuje # scalonego wiersza projektu — wpisy są tutaj.}}"
       }
     },
     "workerView": {
