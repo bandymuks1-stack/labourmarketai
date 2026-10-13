@@ -6270,7 +6270,23 @@
       "prev": "Neuere",
       "next": "Ältere"
     },
-    "moreToolsHint": "Objekte und Baustellen, Fotogalerie"
+    "moreToolsHint": "Objekte und Baustellen, Fotogalerie",
+    "consolidation": {
+      "title": "Importierte Zeilen, die ein Objekt sind",
+      "summary": "Der Import hat {rows} Projektzeilen angelegt; {fragments} davon wiederholen ein Objekt, das eine andere Zeile schon nennt. Nach dem Zusammenführen der vorgeschlagenen Gruppen bleiben {after} Projekte.",
+      "safety": "Beim Zusammenführen bleiben alle Zeilen, Nachweise, Stunden und Personen erhalten — die Zeilen verweisen auf das beibehaltene Projekt und ihre Nachweise zählen dort. Jede Zusammenführung steht im Audit-Protokoll.",
+      "counts": "{rows} Zeilen · {records} Nachweise · {hours} Std.",
+      "caution": {
+        "two-numbers": "Eine Zeile nennt zwei Hausnummern — nur zusammenführen, wenn es dasselbe Objekt ist.",
+        "periods-apart": "Die Arbeitszeiträume liegen weit auseinander — möglicherweise ein eigener Auftrag. Nur zusammenführen, wenn es dasselbe Objekt ist.",
+        "other": "Ihre Entscheidung ist nötig."
+      },
+      "decide": "Diese Zeilen sind dasselbe Objekt",
+      "apply": "{rows, plural, one {# Zeile zusammenführen} other {# Zeilen zusammenführen}}",
+      "pending": "Wird zusammengeführt…",
+      "done": "Zusammengeführt. Zeilen und Nachweise bleiben erhalten; die Projektliste zeigt jetzt das beibehaltene Projekt.",
+      "failed": "Nicht zusammengeführt. Für nicht verarbeitete Zeilen wurde nichts geändert — neu laden und erneut versuchen."
+    }
   },
   "projectOps": {
     "centre": {
@@ -6525,6 +6541,11 @@
           "days": "{count, plural, one {# erfasster Tag} other {# erfasste Tage}}",
           "periodHours": "+ {hours} Std. in Zeitraum-Summen"
         }
+      },
+      "merged": {
+        "into": "Diese Zeile wurde zusammengeführt in",
+        "canonical": "das beibehaltene Projekt",
+        "includes": "{count, plural, one {Enthält # zusammengeführte Projektzeile — ihre Nachweise stehen hier.} other {Enthält # zusammengeführte Projektzeilen — ihre Nachweise stehen hier.}}"
       }
     },
     "workerView": {

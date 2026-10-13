@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
+import { readProjectCanonicalMap } from "@/lib/projects/projects";
 import { getProjectStadium } from "@/lib/projects/stadium";
 import { getWorkerProjectView } from "@/lib/projects/worker-project-access";
 import { WorkerProjectPanel } from "@/components/app/worker-project-panel";
@@ -164,6 +165,16 @@ export default async function ProjectStadiumPage({
   const toneOf = (i: number, key: string) =>
     key === UNKNOWN_AREA ? "bg-ink-500" : AREA_TONES[i % AREA_TONES.length];
 
+  // CONSOLIDATION (marker 20260930120000): a fragment says where it was merged
+  // and links there; a canonical project says how many rows it now includes.
+  // Both rows and all their records are kept.
+  const { canonicalOf, fragmentsOf } = await readProjectCanonicalMap(supabase, [id]);
+  const mergedInto = canonicalOf.get(id) ?? null;
+  const mergedIntoTitle = mergedInto
+    ? (((await supabase.from("projects").select("title").eq("id", mergedInto).maybeSingle()).data?.title as string | null) ?? null)
+    : null;
+  const mergedFragments = fragmentsOf.get(id)?.length ?? 0;
+
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6" data-testid="project-stadium">
       {/* ── Arena header: real project facts only ── */}
@@ -173,6 +184,19 @@ export default async function ProjectStadiumPage({
           {t("eyebrow")}
         </span>
         <PageTitle>{ops.project.title ?? tOps("untitledProject")}</PageTitle>
+        {mergedInto ? (
+          <p className="text-sm text-text-secondary" data-testid="project-merged-into">
+            {t("merged.into")}{" "}
+            <Link href={`/${locale}/dashboard/projects/${mergedInto}`} className="font-medium text-brand-blue hover:underline">
+              {mergedIntoTitle ?? t("merged.canonical")} →
+            </Link>
+          </p>
+        ) : null}
+        {mergedFragments > 0 ? (
+          <p className="text-meta text-text-muted" data-testid="project-merged-fragments">
+            {t("merged.includes", { count: mergedFragments })}
+          </p>
+        ) : null}
         <div className="flex flex-wrap gap-2">
           {ops.project.city ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">

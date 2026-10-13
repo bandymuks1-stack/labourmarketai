@@ -6,6 +6,7 @@ import { untypedClient } from "./evidence-store";
 import { isPeriodRecord } from "./company-work-history";
 import type { EvidenceRecordView } from "./import-core";
 import { readEvidenceForWorkObject } from "./work-object-evidence-read";
+import { readProjectCanonicalMap } from "@/lib/projects/projects";
 
 /**
  * THE DOCUMENTED WORK PERIOD OF A PROJECT — derived on read, never stored.
@@ -109,17 +110,25 @@ export async function readProjectDocumentedPeriods(
   projectIds: readonly string[],
 ): Promise<ProjectDocumentedPeriodsRead> {
   if (projectIds.length === 0) return { kind: "ok", periods: new Map(), truncated: false };
+  // Fragments marked into a listed project count toward IT (consolidation
+  // keeps every fragment row and record; the period is the project's whole).
+  const { fragmentsOf } = await readProjectCanonicalMap(caller.supabase, projectIds);
+  const canonicalOfFragment = new Map<string, string>();
+  for (const [canonical, fragments] of fragmentsOf) for (const f of fragments) canonicalOfFragment.set(f, canonical);
+  const readIds = [...new Set([...projectIds, ...canonicalOfFragment.keys()])];
   const objs = await readAllPages<{ id: string; project_id: string }>(async (from, to) => {
     const res = await untypedClient(caller.supabase)
       .from("work_objects")
       .select("id, project_id")
-      .in("project_id", [...projectIds])
+      .in("project_id", readIds)
       .order("id", { ascending: true })
       .range(from, to);
     return { data: (res.data ?? null) as { id: string; project_id: string }[] | null, error: res.error };
   });
   if (!objs) return { kind: "unavailable" };
-  const projectOfObject = new Map(objs.rows.map((o) => [o.id, o.project_id]));
+  const projectOfObject = new Map(
+    objs.rows.map((o) => [o.id, canonicalOfFragment.get(o.project_id) ?? o.project_id]),
+  );
   if (projectOfObject.size === 0) return { kind: "ok", periods: new Map(), truncated: objs.truncated };
   const recs = await readEvidenceForWorkObject(caller, [...projectOfObject.keys()]);
   if (recs.kind === "unprovisioned") return { kind: "ok", periods: new Map(), truncated: false };

@@ -6270,7 +6270,23 @@
       "prev": "Naujesni",
       "next": "Senesni"
     },
-    "moreToolsHint": "Objektai ir aikštelės, nuotraukų galerija"
+    "moreToolsHint": "Objektai ir aikštelės, nuotraukų galerija",
+    "consolidation": {
+      "title": "Importuotos eilutės, kurios yra vienas objektas",
+      "summary": "Importas sukūrė {rows} projektų eilučių; {fragments} iš jų kartoja objektą, kurį jau įvardija kita eilutė. Sujungus siūlomas grupes liks {after} projektų.",
+      "safety": "Sujungus išlieka visos eilutės, įrašai, valandos ir žmonės — sujungtos eilutės rodo į išlaikomą projektą ir jų įrašai skaičiuojami ten. Kiekvienas sujungimas užfiksuojamas audito žurnale.",
+      "counts": "{rows} eil. · {records} įrašų · {hours} val.",
+      "caution": {
+        "two-numbers": "Viena eilutė nurodo du namo numerius — junkite tik jei tai tas pats objektas.",
+        "periods-apart": "Darbų laikotarpiai toli vienas nuo kito — gali būti atskiras užsakymas. Junkite tik jei tai tas pats objektas.",
+        "other": "Reikia jūsų sprendimo."
+      },
+      "decide": "Šios eilutės yra tas pats objektas",
+      "apply": "{rows, plural, one {Sujungti # eilutę} few {Sujungti # eilutes} other {Sujungti # eilučių}}",
+      "pending": "Jungiama…",
+      "done": "Sujungta. Eilutės ir jų įrašai išsaugoti; projektų sąraše dabar rodomas išlaikomas projektas.",
+      "failed": "Nesujungta. Nepavykusioms eilutėms niekas nepakeista — atnaujinkite ir bandykite dar kartą."
+    }
   },
   "projectOps": {
     "centre": {
@@ -6525,6 +6541,11 @@
           "days": "{count, plural, one {# užfiksuota diena} few {# užfiksuotos dienos} other {# užfiksuotų dienų}}",
           "periodHours": "+ {hours} val. laikotarpių suvestinėse"
         }
+      },
+      "merged": {
+        "into": "Ši eilutė sujungta į",
+        "canonical": "išlaikomą projektą",
+        "includes": "{count, plural, one {Apima # sujungtą projekto eilutę — jos įrašai rodomi čia.} few {Apima # sujungtas projekto eilutes — jų įrašai rodomi čia.} other {Apima # sujungtų projekto eilučių — jų įrašai rodomi čia.}}"
       }
     },
     "workerView": {

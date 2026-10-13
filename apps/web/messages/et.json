@@ -1994,7 +1994,23 @@
       "prev": "Uuemad",
       "next": "Vanemad"
     },
-    "moreToolsHint": "Sites and locations, photo gallery"
+    "moreToolsHint": "Sites and locations, photo gallery",
+    "consolidation": {
+      "title": "Imporditud read, mis on üks objekt",
+      "summary": "Import lõi {rows} projektirida; {fragments} neist kordab objekti, mille teine rida juba nimetab. Pärast pakutud gruppide liitmist jääb {after} projekti.",
+      "safety": "Liitmine säilitab iga rea, kirje, tunni ja inimese — liidetud read viitavad säilitatud projektile ja nende kirjed loetakse seal. Iga liitmine kantakse auditilogisse.",
+      "counts": "{rows} rida · {records} kirjet · {hours} h",
+      "caution": {
+        "two-numbers": "Üks rida nimetab kahte majanumbrit — liitke ainult siis, kui see on sama objekt.",
+        "periods-apart": "Tööperioodid on teineteisest kaugel — see võib olla eraldi tellimus. Liitke ainult siis, kui see on sama objekt.",
+        "other": "Vaja on teie otsust."
+      },
+      "decide": "Need read on sama objekt",
+      "apply": "{rows, plural, one {Liida # rida} other {Liida # rida}}",
+      "pending": "Liidan…",
+      "done": "Liidetud. Read ja nende kirjed säilivad; projektide loend näitab nüüd säilitatud projekti.",
+      "failed": "Ei liidetud. Läbi minemata ridade puhul ei muudetud midagi — laadige uuesti ja proovige veel."
+    }
   },
   "projectOps": {
     "stadium": {
@@ -2027,6 +2043,11 @@
           "days": "{count, plural, one {# registreeritud päev} other {# registreeritud päeva}}",
           "periodHours": "+ {hours} h perioodi kokkuvõtetes"
         }
+      },
+      "merged": {
+        "into": "See rida liideti projektiga",
+        "canonical": "säilitatud projekt",
+        "includes": "{count, plural, one {Sisaldab # liidetud projektirida — selle kirjed on siin.} other {Sisaldab # liidetud projektirida — nende kirjed on siin.}}"
       }
     },
     "workerView": {

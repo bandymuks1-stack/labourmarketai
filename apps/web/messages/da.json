@@ -1994,7 +1994,23 @@
       "prev": "Nyere",
       "next": "Ældre"
     },
-    "moreToolsHint": "Sites and locations, photo gallery"
+    "moreToolsHint": "Sites and locations, photo gallery",
+    "consolidation": {
+      "title": "Importerede rækker, der er ét objekt",
+      "summary": "Importen oprettede {rows} projektrækker; {fragments} af dem gentager et objekt, en anden række allerede nævner. Efter sammenlægning af de foreslåede grupper er der {after} projekter tilbage.",
+      "safety": "Sammenlægning bevarer hver række, post, time og person — rækkerne peger på det beholdte projekt, og deres poster tæller der. Hver sammenlægning logges i revisionsloggen.",
+      "counts": "{rows} rækker · {records} poster · {hours} t",
+      "caution": {
+        "two-numbers": "Én række nævner to husnumre — læg kun sammen, hvis det er samme objekt.",
+        "periods-apart": "Arbejdsperioderne ligger langt fra hinanden — det kan være en separat ordre. Læg kun sammen, hvis det er samme objekt.",
+        "other": "Din beslutning er nødvendig."
+      },
+      "decide": "Disse rækker er samme objekt",
+      "apply": "{rows, plural, one {Læg # række sammen} other {Læg # rækker sammen}}",
+      "pending": "Lægger sammen…",
+      "done": "Lagt sammen. Rækkerne og deres poster bevares; projektlisten viser nu det beholdte projekt.",
+      "failed": "Ikke lagt sammen. Intet blev ændret for rækker, der ikke gik igennem — genindlæs og prøv igen."
+    }
   },
   "projectOps": {
     "stadium": {
@@ -2027,6 +2043,11 @@
           "days": "{count, plural, one {# registreret dag} other {# registrerede dage}}",
           "periodHours": "+ {hours} t i periodeopsummeringer"
         }
+      },
+      "merged": {
+        "into": "Rækken er lagt sammen med",
+        "canonical": "det beholdte projekt",
+        "includes": "{count, plural, one {Omfatter # sammenlagt projektrække — dens poster vises her.} other {Omfatter # sammenlagte projektrækker — deres poster vises her.}}"
       }
     },
     "workerView": {

@@ -1994,7 +1994,23 @@
       "prev": "Jaunāki",
       "next": "Vecāki"
     },
-    "moreToolsHint": "Sites and locations, photo gallery"
+    "moreToolsHint": "Sites and locations, photo gallery",
+    "consolidation": {
+      "title": "Importētas rindas, kas ir viens objekts",
+      "summary": "Imports izveidoja {rows} projektu rindas; {fragments} no tām atkārto objektu, ko jau nosauc cita rinda. Pēc ieteikto grupu apvienošanas paliks {after} projekti.",
+      "safety": "Apvienojot saglabājas visas rindas, ieraksti, stundas un cilvēki — apvienotās rindas norāda uz saglabāto projektu, un to ieraksti tiek skaitīti tur. Katra apvienošana tiek ierakstīta audita žurnālā.",
+      "counts": "{rows} rindas · {records} ieraksti · {hours} st.",
+      "caution": {
+        "two-numbers": "Viena rinda nosauc divus mājas numurus — apvienojiet tikai, ja tas ir tas pats objekts.",
+        "periods-apart": "Darba periodi ir tālu viens no otra — tas var būt atsevišķs pasūtījums. Apvienojiet tikai, ja tas ir tas pats objekts.",
+        "other": "Nepieciešams jūsu lēmums."
+      },
+      "decide": "Šīs rindas ir tas pats objekts",
+      "apply": "{rows, plural, zero {Apvienot # rindu} one {Apvienot # rindu} other {Apvienot # rindas}}",
+      "pending": "Apvieno…",
+      "done": "Apvienots. Rindas un to ieraksti saglabāti; projektu sarakstā tagad redzams saglabātais projekts.",
+      "failed": "Nav apvienots. Neapstrādātajām rindām nekas nav mainīts — pārlādējiet un mēģiniet vēlreiz."
+    }
   },
   "projectOps": {
     "stadium": {
@@ -2027,6 +2043,11 @@
           "days": "{count, plural, zero {# reģistrētu dienu} one {# reģistrēta diena} other {# reģistrētas dienas}}",
           "periodHours": "+ {hours} st. perioda kopsavilkumos"
         }
+      },
+      "merged": {
+        "into": "Šī rinda apvienota ar",
+        "canonical": "saglabāto projektu",
+        "includes": "{count, plural, zero {Ietver # apvienotu projekta rindu — ieraksti redzami šeit.} one {Ietver # apvienotu projekta rindu — tās ieraksti redzami šeit.} other {Ietver # apvienotas projekta rindas — to ieraksti redzami šeit.}}"
       }
     },
     "workerView": {

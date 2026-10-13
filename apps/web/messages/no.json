@@ -1994,7 +1994,23 @@
       "prev": "Nyere",
       "next": "Eldre"
     },
-    "moreToolsHint": "Sites and locations, photo gallery"
+    "moreToolsHint": "Sites and locations, photo gallery",
+    "consolidation": {
+      "title": "Importerte rader som er ett objekt",
+      "summary": "Importen opprettet {rows} prosjektrader; {fragments} av dem gjentar et objekt en annen rad allerede nevner. Etter sammenslåing av de foreslåtte gruppene gjenstår {after} prosjekter.",
+      "safety": "Sammenslåing beholder hver rad, post, time og person — radene peker til det beholdte prosjektet og postene telles der. Hver sammenslåing logges i revisjonsloggen.",
+      "counts": "{rows} rader · {records} poster · {hours} t",
+      "caution": {
+        "two-numbers": "Én rad nevner to husnumre — slå bare sammen hvis det er samme objekt.",
+        "periods-apart": "Arbeidsperiodene ligger langt fra hverandre — det kan være en egen ordre. Slå bare sammen hvis det er samme objekt.",
+        "other": "Din beslutning trengs."
+      },
+      "decide": "Disse radene er samme objekt",
+      "apply": "{rows, plural, one {Slå sammen # rad} other {Slå sammen # rader}}",
+      "pending": "Slår sammen…",
+      "done": "Slått sammen. Radene og postene beholdes; prosjektlisten viser nå det beholdte prosjektet.",
+      "failed": "Ikke slått sammen. Ingenting ble endret for rader som ikke gikk gjennom — last inn på nytt og prøv igjen."
+    }
   },
   "projectOps": {
     "stadium": {
@@ -2027,6 +2043,11 @@
           "days": "{count, plural, one {# registrert dag} other {# registrerte dager}}",
           "periodHours": "+ {hours} t i periodesummer"
         }
+      },
+      "merged": {
+        "into": "Raden er slått sammen med",
+        "canonical": "det beholdte prosjektet",
+        "includes": "{count, plural, one {Omfatter # sammenslått prosjektrad — postene vises her.} other {Omfatter # sammenslåtte prosjektrader — postene vises her.}}"
       }
     },
     "workerView": {

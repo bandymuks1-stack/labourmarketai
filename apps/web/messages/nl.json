@@ -6270,7 +6270,23 @@
       "prev": "Nieuwer",
       "next": "Ouder"
     },
-    "moreToolsHint": "Locaties en bouwplaatsen, fotogalerij"
+    "moreToolsHint": "Locaties en bouwplaatsen, fotogalerij",
+    "consolidation": {
+      "title": "Geïmporteerde regels die één object zijn",
+      "summary": "De import maakte {rows} projectregels; {fragments} daarvan herhalen een object dat een andere regel al noemt. Na het samenvoegen van de voorgestelde groepen blijven {after} projecten over.",
+      "safety": "Samenvoegen behoudt elke regel, registratie, elk uur en elke persoon — de regels verwijzen naar het behouden project en hun registraties tellen daar. Elke samenvoeging staat in het auditlog.",
+      "counts": "{rows} regels · {records} registraties · {hours} u",
+      "caution": {
+        "two-numbers": "Eén regel noemt twee huisnummers — alleen samenvoegen als het hetzelfde object is.",
+        "periods-apart": "De werkperiodes liggen ver uit elkaar — mogelijk een aparte opdracht. Alleen samenvoegen als het hetzelfde object is.",
+        "other": "Uw beslissing is nodig."
+      },
+      "decide": "Deze regels zijn hetzelfde object",
+      "apply": "{rows, plural, one {# regel samenvoegen} other {# regels samenvoegen}}",
+      "pending": "Bezig met samenvoegen…",
+      "done": "Samengevoegd. De regels en registraties blijven bewaard; de projectlijst toont nu het behouden project.",
+      "failed": "Niet samengevoegd. Voor regels die niet zijn verwerkt is niets gewijzigd — herlaad en probeer opnieuw."
+    }
   },
   "projectOps": {
     "centre": {
@@ -6525,6 +6541,11 @@
           "days": "{count, plural, one {# geregistreerde dag} other {# geregistreerde dagen}}",
           "periodHours": "+ {hours} u in periodetotalen"
         }
+      },
+      "merged": {
+        "into": "Deze regel is samengevoegd met",
+        "canonical": "het behouden project",
+        "includes": "{count, plural, one {Bevat # samengevoegde projectregel — de registraties staan hier.} other {Bevat # samengevoegde projectregels — de registraties staan hier.}}"
       }
     },
     "workerView": {
