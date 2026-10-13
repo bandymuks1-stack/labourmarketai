@@ -84,11 +84,13 @@ describe("offer_created - marketplace listing", () => {
 
 describe("offer_created - service offering first publication", () => {
   beforeEach(() => vi.clearAllMocks());
-  function client(prior: unknown, updateError: unknown) {
+  function client(prior: unknown, updateError: unknown, touched: unknown[] = [{ id: "o1" }]) {
     const select = {
       eq: () => ({ eq: () => ({ maybeSingle: async () => ({ data: prior }) }) }),
     };
-    const update = { eq: () => ({ eq: async () => ({ error: updateError }) }) };
+    const update = {
+      eq: () => ({ eq: () => ({ select: async () => ({ data: updateError ? null : touched, error: updateError }) }) }),
+    };
     asMock(createClient).mockResolvedValue({
       auth: { getUser: async () => ({ data: { user: { id: "u1" } } }) },
       from: () => ({ select: () => select, update: () => update }),
@@ -111,6 +113,13 @@ describe("offer_created - service offering first publication", () => {
     await setServiceOfferingStatus("o1", "active");
     client({ status: "active" }, null);
     await setServiceOfferingStatus("o1", "paused");
+    expect(emit).not.toHaveBeenCalled();
+  });
+
+  it("does not fire, and says not-found, when no own row matched (not the caller's)", async () => {
+    client({ status: "draft" }, null, []);
+    const r = await setServiceOfferingStatus("o1", "active");
+    expect(r.kind).toBe("not-found");
     expect(emit).not.toHaveBeenCalled();
   });
 

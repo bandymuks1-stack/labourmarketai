@@ -121,6 +121,16 @@ describe("domain actions — execution", () => {
     expect(setStatus).toHaveBeenCalledWith(OFFER, "active");
   });
 
+  it("a confirm whose own-row write matched nothing is refused as not_found, never ok (prod walk 2026-10-13)", async () => {
+    const input = { offeringId: OFFER, status: "active" };
+    const draft = await inScope(() => runCapability("service_offering.status_set_draft", bearer, input));
+    const token = (draft as unknown as { data: { confirmationToken: string } }).data.confirmationToken;
+    setStatus.mockResolvedValueOnce({ kind: "not-found" });
+    const r = await inScope(() => runCapability("service_offering.status_set_confirm", bearer, { ...input, confirmationToken: token }));
+    expect(r).toMatchObject({ ok: false, code: "not_found" });
+    expect((r as { message?: string }).message).toMatch(/Nothing was changed/);
+  });
+
   it("a token minted for one state is refused once that state changed (a spent token is stale)", async () => {
     const input = { offeringId: OFFER, status: "active" };
     const draft = await inScope(() => runCapability("service_offering.status_set_draft", bearer, input));

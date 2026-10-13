@@ -42,6 +42,8 @@ export type ServiceOfferingMutateResult =
   | { kind: "needs-migration" }
   | { kind: "not-authed" }
   | { kind: "invalid"; field: string }
+  /** The caller has no such offering (not theirs, or already removed). Nothing changed. */
+  | { kind: "not-found" }
   | { kind: "error"; message: string };
 
 export interface ServiceOfferingInput {
