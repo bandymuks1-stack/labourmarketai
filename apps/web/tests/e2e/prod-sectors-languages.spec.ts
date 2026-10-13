@@ -18,7 +18,11 @@ const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
 const ENABLED = process.env.PROD_QA_WALK === "1" && existsSync(state("worker"));
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
-test.describe.configure({ timeout: 150_000, retries: 0 });
+// SERIAL: every save is bound to the worker's journal chain head (one record
+// per confirmation, lib/journal/journal-chain-fingerprint). Five days confirmed
+// by the SAME person in parallel make all but one token stale by design — the
+// 2026-10-13 run "failed" exactly that way. One day after another, as a person does.
+test.describe.configure({ mode: "serial", timeout: 150_000, retries: 0 });
 test.use({ actionTimeout: 30_000 });
 
 const DAYS: readonly { locale: string; browserLocale: string; sector: string; text: string }[] = [
